@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.Text;
 using KeyLoad.Core;
 using KeyLoad.Query.Features.QueryExecution;
@@ -73,18 +72,18 @@ public sealed class SqlParser
             : SqlJoinSyntax.BindProjection(p, alias, join)).ToList();
         var filter = cursor.Eat(SqlSyntax.Where) ? new SqlExpressionParser(cursor, operationLimitsOptions, execution.MaximumInValues, alias, join?.Alias).Parse() : null;
         var order = ReadOrder(join);
-        var limit = ReadLimit();
+        var (limit, offset) = SqlWindowSyntax.Read(cursor);
         cursor.Eat(SqlSyntax.Semicolon);
         if (cursor.Current.Kind != SqlTokenKind.End)
         {
             throw Errors.Fail(ErrorCode.UnsupportedCapability, SqlSyntax.UnsupportedSyntaxDetail);
         }
-        if (limit < MinimumPositiveCount || limit > limits.MaxResults || projection.Count > execution.MaximumProjection || order.Count > execution.MaximumOrdering
+        if (limit < MinimumPositiveCount || offset < default(int) || (long)limit + offset > limits.MaxResults || projection.Count > execution.MaximumProjection || order.Count > execution.MaximumOrdering
             || projection.Select(p => p.Alias).Distinct(StringComparer.Ordinal).Count() != projection.Count)
         {
             throw SqlSyntax.Invalid();
         }
-        return new(collection, alias, [.. projection], filter, [.. order], limit, explain, modelSource, join);
+        return new(collection, alias, [.. projection], filter, [.. order], limit, explain, modelSource, join, offset);
     }
 
     private List<Selection> ReadProjection()
@@ -113,10 +112,21 @@ public sealed class SqlParser
             alias = cursor.Identifier();
         }
         else if (cursor.Current.Kind == SqlTokenKind.Identifier && !cursor.Is(SqlSyntax.Where) && !cursor.Is(SqlSyntax.Order)
-            && !cursor.Is(SqlSyntax.Limit) && (!cursor.Is(SqlSyntax.Inner) || !cursor.IsNext(SqlSyntax.Join)))
+            && !cursor.Is(SqlSyntax.Limit) && !cursor.Is(SqlSyntax.Offset) && !cursor.Is(SqlSyntax.Fetch)
+            && (!cursor.Is(SqlSyntax.Inner) || !cursor.IsNext(SqlSyntax.Join)))
         {
             alias = cursor.Identifier();
         }
+    }
+
+    private bool? ReadNullPlacement()
+    {
+        if (!cursor.Eat(SqlSyntax.Nulls))
+        { return null; }
+        if (cursor.Eat(SqlSyntax.First))
+        { return true; }
+        cursor.Need(SqlSyntax.Last);
+        return false;
     }
 
     private List<Ordering> ReadOrder(InnerJoinClause? join)
@@ -135,24 +145,11 @@ public sealed class SqlParser
                 {
                     cursor.Eat(SqlSyntax.Asc);
                 }
-                order.Add(new(field, descending));
+                var nullsFirst = ReadNullPlacement();
+                order.Add(new(field, descending, nullsFirst));
             } while (cursor.Eat(SqlSyntax.Comma));
         }
         return order;
     }
 
-    private int ReadLimit()
-    {
-        var limit = SqlSyntax.DefaultLimit;
-        if (cursor.Eat(SqlSyntax.Limit))
-        {
-            if (cursor.Current.Kind != SqlTokenKind.Number
-                || !int.TryParse(cursor.Current.Text, NumberStyles.None, CultureInfo.InvariantCulture, out limit))
-            {
-                throw SqlSyntax.Invalid();
-            }
-            cursor.Advance();
-        }
-        return limit;
-    }
 }

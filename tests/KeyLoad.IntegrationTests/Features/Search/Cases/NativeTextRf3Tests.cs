@@ -59,12 +59,12 @@ internal sealed class NativeTextRf3Tests(ClusterFixture fixture)
         var sdk = new KeyLoadClient(http, identity.Secret, IntegrationClientOptions.Execution());
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node2,
             identity.Secret, deadline.Token);
-        var restricted = await McpCallerAssertions.SdkSuccessAsync(await sdk.SearchAsync(
+        var restricted = await NativeTextPublicOutcomeAssertions.SdkSuccessAsync(await sdk.SearchAsync(
             scenario.Text(Needle), deadline.Token));
         await Assert.That(restricted).HasSingleItem();
         await Assert.That(restricted[0].Document.Reference.Id).IsEqualTo(NativeTextRf3Scenario.FirstId);
         await AssertProjectedAsync(restricted[0].Document);
-        var official = await McpCallerAssertions.SuccessAsync<RankedDocument[]>(await mcp.CallAsync(
+        var official = await NativeTextPublicOutcomeAssertions.SuccessAsync<RankedDocument[]>(await mcp.CallAsync(
             McpCallerTools.SearchExecute, scenario.Text(Needle), deadline.Token));
         await Assert.That(JsonDefaults.Serialize(restricted).AsSpan()
             .SequenceEqual(JsonDefaults.Serialize(official.Value))).IsTrue();
@@ -113,15 +113,15 @@ internal sealed class NativeTextRf3Tests(ClusterFixture fixture)
                 NativeTextRf3Scenario.FirstRevision)
         ]);
         await McpCallerAssertions.SdkSuccessAsync(await administrator.CommitAsync(updateCommand, cancellationToken));
-        var sdkAfterDelete = await McpCallerAssertions.SdkSuccessAsync(await sdk.SearchAsync(
+        var sdkAfterDelete = await NativeTextPublicOutcomeAssertions.SdkSuccessAsync(await sdk.SearchAsync(
             scenario.Text(Needle), cancellationToken));
-        var mcpAfterDelete = await McpCallerAssertions.SuccessAsync<RankedDocument[]>(await mcp.CallAsync(
+        var mcpAfterDelete = await NativeTextPublicOutcomeAssertions.SuccessAsync<RankedDocument[]>(await mcp.CallAsync(
             McpCallerTools.SearchExecute, scenario.Text(Needle), cancellationToken));
         await Assert.That(sdkAfterDelete).IsEmpty();
         await Assert.That(mcpAfterDelete.Value).IsEmpty();
-        var sdkUpdated = await McpCallerAssertions.SdkSuccessAsync(await sdk.SearchAsync(
+        var sdkUpdated = await NativeTextPublicOutcomeAssertions.SdkSuccessAsync(await sdk.SearchAsync(
             scenario.Text("fresh"), cancellationToken));
-        var mcpUpdated = await McpCallerAssertions.SuccessAsync<RankedDocument[]>(await mcp.CallAsync(
+        var mcpUpdated = await NativeTextPublicOutcomeAssertions.SuccessAsync<RankedDocument[]>(await mcp.CallAsync(
             McpCallerTools.SearchExecute, scenario.Text("fresh"), cancellationToken));
         await Assert.That(sdkUpdated).HasSingleItem();
         await Assert.That(sdkUpdated[0].Document.Reference.Id).IsEqualTo(NativeTextRf3Scenario.FirstId);
@@ -132,8 +132,8 @@ internal sealed class NativeTextRf3Tests(ClusterFixture fixture)
     private static async Task VerifyRanksAsync(KeyLoadClient sdk, McpOfficialClient mcp, SearchRequest request,
         (string Id, double Score)[] expected, CancellationToken cancellationToken)
     {
-        var actual = await McpCallerAssertions.SdkSuccessAsync(await sdk.SearchAsync(request, cancellationToken));
-        var official = await McpCallerAssertions.SuccessAsync<RankedDocument[]>(await mcp.CallAsync(
+        var actual = await NativeTextPublicOutcomeAssertions.SdkSuccessAsync(await sdk.SearchAsync(request, cancellationToken));
+        var official = await NativeTextPublicOutcomeAssertions.SuccessAsync<RankedDocument[]>(await mcp.CallAsync(
             McpCallerTools.SearchExecute, request, cancellationToken));
         await Assert.That(actual.Length).IsEqualTo(expected.Length);
         for (var index = 0; index < expected.Length; index++)

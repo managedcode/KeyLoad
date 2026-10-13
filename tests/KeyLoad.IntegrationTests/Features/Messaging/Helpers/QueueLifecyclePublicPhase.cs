@@ -20,8 +20,9 @@ internal static partial class QueueLifecyclePublicPhase
              new PutDocument(QueueLifecyclePublicProtocol.Collection, "refused", QueueLifecyclePublicProtocol.Payload)]);
         await QueueLifecyclePublicRoutes.RefusedAsync(callers, state, state.FullRefusal, ErrorCode.ResourceExhausted, token);
         await QueueLifecyclePublicRoutes.RefusedAsync(callers, state, state.MixedRefusal, ErrorCode.RevisionConflict, token);
-        await Assert.That(await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.GetAsync(
-            new(state.Partition, QueueLifecyclePublicProtocol.Collection, "refused"), token))).IsNull();
+        var refused = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.GetAsync(
+            new(state.Partition, QueueLifecyclePublicProtocol.Collection, "refused"), token));
+        await Assert.That(refused).IsEqualTo(new DocumentReadResult(null));
         await QueueLifecyclePublicAssertions.InitialAsync(callers, state, token);
         await QueueLifecyclePublicRoutes.ReplayAsync(callers, state, token);
     }

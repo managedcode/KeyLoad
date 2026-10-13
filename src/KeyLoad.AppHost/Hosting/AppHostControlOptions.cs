@@ -16,6 +16,7 @@ internal sealed class AppHostControlOptions
     internal bool RemoteDocumentReads { get; set; }
     internal bool RemotePartitionQueries { get; set; }
     internal bool ProtectedDocumentMovement { get; set; }
+    internal bool TenantCapacityPlacement { get; set; }
     internal int? MovementMaxBatchBytes { get; set; }
     internal int? MovementMaxFrameBytes { get; set; }
     internal bool TwoRf3 { get; set; }

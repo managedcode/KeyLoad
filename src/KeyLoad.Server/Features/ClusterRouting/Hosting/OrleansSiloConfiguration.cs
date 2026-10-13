@@ -24,7 +24,7 @@ internal static class OrleansSiloConfiguration
         NativeDiscoveryOmissionOwner? discoveryOmission, IEventVectorParent? eventVectorParent,
         PhysicalOwnerProbeNativeRuntime? physicalProbe, NativeLocalhostClusteringOptions? localhostClustering,
         IRemoteAnnReadRouter? remoteAnnReads,
-        global::KeyLoad.Server.Features.GraphTraversal.RemoteGraphRuntime? remoteGraphs, CancellationToken startupCancellation)
+        global::KeyLoad.Server.Features.GraphTraversal.RemoteGraphRuntime? remoteGraphs, TenantPlacementNativeRuntime? tenantPlacement, CancellationToken startupCancellation)
     {
         startupCancellation.ThrowIfCancellationRequested();
         var builder = Host.CreateApplicationBuilder();
@@ -69,6 +69,7 @@ internal static class OrleansSiloConfiguration
         { builder.Services.AddSingleton(movementParent); }
         if (eventVectorParent is not null)
         { builder.Services.AddSingleton(eventVectorParent); }
+        tenantPlacement?.RegisterBorrowed(builder.Services);
         runtimeOptions.RegisterBorrowed(builder.Services);
         RegisterBorrowedServices(builder.Services, partition, administration, options, requestWork, runtimeOptions, clock);
         if (remoteAnnReads is not null)

@@ -14,3 +14,6 @@ flowchart LR
  D --> E[Epoch3 use-only repair and fresh publication]
  E --> F[Same-owner cold page and original replay]
 ```
+
+
+REQ-FTS-BM25-PAGE-FAILURE-EVIDENCE-001 / AC-FTS-BM25-PAGE-FAILURE-EVIDENCE-001 preserve the original complete native byte-equality predicate and independently literal complete RankedDocument pages, original receipt/entry/canonical/journal-cut and cold continuation. On failed equality the existing whole case retains only closed field-equality booleans (reference, revision, JSON, redaction and omitted fields, exact score bits, explanation), bounded expected/actual counts and encoded lengths, and first differing byte offset. Never print document JSON, identities, byte payloads, provider internals or credentials. The original R35 failures establish encoded inequality only; no scorer, authorization or serializer defect is inferred until actual retained evidence identifies the mismatch. This diagnostic successor does not change product serialization, expected values, case identities, shared byte validation or qualification. Fresh native/compile/original full-case execution remain OPEN.

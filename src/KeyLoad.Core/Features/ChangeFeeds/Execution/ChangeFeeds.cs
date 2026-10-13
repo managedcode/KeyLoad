@@ -180,7 +180,20 @@ public sealed partial class DatabaseEngine
             return null;
         }
 
+        if (after.Reference.Partition != partition || after.Reference.Collection != resource.Name
+            || after.Reference.Id != entry.Receipt.Id
+            || entry.Before is { } beforeIdentity && beforeIdentity.Reference != after.Reference)
+        {
+            const string HistoricalIdentityMismatch = "The committed document change does not match its canonical identity.";
+            throw Errors.Fail(ErrorCode.Corruption, HistoricalIdentityMismatch);
+        }
         var current = view.GetRecord<DocumentRecord>(DocumentKey(partition, resource.Name, after.Reference.Id));
+        if (current is not null && (current.Reference.Partition != partition
+            || current.Reference.Collection != resource.Name || current.Reference.Id != after.Reference.Id))
+        {
+            const string CurrentIdentityMismatch = "The change-feed current document does not match its canonical identity.";
+            throw Errors.Fail(ErrorCode.Corruption, CurrentIdentityMismatch);
+        }
         // Historical grants and current row visibility both constrain a historical projection.
         if (current is null || !Authorization.CanReadRow(principal, current.Access) || !Authorization.CanReadRow(principal, after.Access))
         {

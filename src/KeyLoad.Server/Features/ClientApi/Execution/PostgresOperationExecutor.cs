@@ -10,7 +10,9 @@ internal static class PostgresOperationExecutor
         PostgresSessionIdentity identity, PartitionRef partition, PostgresBoundPortal portal, int maximumRows, PostgresRetainedAdmission admission,
         CancellationToken token)
     {
-        if (maximumRows != PostgresProtocol.AllRows || portal.Completed)
+        if (maximumRows < PostgresProtocol.AllRows)
+        { throw Errors.Fail(ErrorCode.Validation, PostgresProtocol.Invalid); }
+        if (portal.Completed)
         { throw Errors.Fail(ErrorCode.UnsupportedCapability, PostgresProtocol.Unsupported); }
         PostgresEncodedReply? result = null;
         var failures = new List<Exception>();

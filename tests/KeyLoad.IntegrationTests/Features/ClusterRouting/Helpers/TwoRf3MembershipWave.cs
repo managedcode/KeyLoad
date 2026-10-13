@@ -28,6 +28,7 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
     internal bool nativeCanonicalCutsSelected;
     internal NativeCanonicalModelCutFixture? canonicalCutControls;
     internal readonly bool protectedDocuments;
+    internal bool TenantCapacityPlacement { get; init; }
     internal readonly bool activationIsolation;
     internal ReplicaIsolationOwner? IsolationOwner;
     internal string? remoteTransferPrincipalId;

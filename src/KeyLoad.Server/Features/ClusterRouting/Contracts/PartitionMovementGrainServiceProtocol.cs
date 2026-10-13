@@ -7,6 +7,7 @@ internal static class PartitionMovementGrainServiceProtocol
     internal const string ExchangeAlias = "exchange";
     internal const string DiscoverAlias = "discover";
     internal const string ProbeOwnerAlias = "probe-owner";
+    internal const string CapacityExchangeAlias = "keyload.cluster-routing.owner-capacity.exchange.v1";
     internal const string ChannelAlias = "keyload.partition-movement-grain-service-channel.v1";
     internal const string RequestAlias = "keyload.partition-movement-grain-service-request.v1";
     internal const string ReplyAlias = "keyload.partition-movement-grain-service-reply.v1";

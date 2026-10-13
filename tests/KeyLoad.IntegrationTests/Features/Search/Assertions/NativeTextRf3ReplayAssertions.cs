@@ -87,8 +87,8 @@ internal static class NativeTextRf3ReplayAssertions
     private static async Task SearchAsync(SearchRequest request, RankedDocument[] expected, KeyLoadClient sdk,
         McpOfficialClient mcp, CancellationToken token)
     {
-        var actual = await McpCallerAssertions.SdkSuccessAsync(await sdk.SearchAsync(request, token));
-        var official = await McpCallerAssertions.SuccessAsync<RankedDocument[]>(await mcp.CallAsync(
+        var actual = await NativeTextPublicOutcomeAssertions.SdkSuccessAsync(await sdk.SearchAsync(request, token));
+        var official = await NativeTextPublicOutcomeAssertions.SuccessAsync<RankedDocument[]>(await mcp.CallAsync(
             McpCallerTools.SearchExecute, request, token));
         await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue()
             .Because(NativeTextRf3ResultDiagnostic.Describe("SDK", actual, expected));

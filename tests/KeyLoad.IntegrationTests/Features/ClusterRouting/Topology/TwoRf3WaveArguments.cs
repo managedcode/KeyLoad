@@ -14,7 +14,7 @@ internal static class TwoRf3WaveArguments
     internal static string[] Create(string root, LocalRf3ImageSelection.Selection? selection,
         bool registerPhysicalOwners, bool remoteDocumentReads, bool remotePartitionQueries,
         RequestCqrsProbeFixture? controls = null, bool protectedDocuments = false, int? movementMaxBatchBytes = null, int? movementMaxFrameBytes = null, MovementFrameObservationFixture? frameObservation = null,
-        KeyLoad.IntegrationTests.Features.StorageRecovery.NativeCapabilityOmissionRf3Fixture? nativeDiscoveryOmission = null, bool eventVectorReservedProbe = false, NativeMembershipDiagnosticFixture? nativeMembershipControls = null)
+        KeyLoad.IntegrationTests.Features.StorageRecovery.NativeCapabilityOmissionRf3Fixture? nativeDiscoveryOmission = null, bool eventVectorReservedProbe = false, NativeMembershipDiagnosticFixture? nativeMembershipControls = null, bool tenantCapacityPlacement = false)
     {
         NativeMembershipDiagnosticWaveArguments.RequireSelection(nativeMembershipControls, controls,
             remoteDocumentReads, remotePartitionQueries, protectedDocuments, nativeDiscoveryOmission, eventVectorReservedProbe);
@@ -24,6 +24,12 @@ internal static class TwoRf3WaveArguments
             TwoRf3MembershipProtocol.EphemeralArgument,
             TwoRf3MembershipProtocol.ProfileArgument
         };
+        if (tenantCapacityPlacement)
+        {
+            if (!protectedDocuments || !registerPhysicalOwners || !remotePartitionQueries)
+            { throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState); }
+            args.Add("--KeyLoadTests:ClusterRouting:TenantCapacityPlacement=true");
+        }
         if (protectedDocuments)
         { args.Add("--KeyLoadTests:ClusterRouting:ProtectedDocumentMovement=true"); }
         if (movementMaxBatchBytes is { } maxBatchBytes)

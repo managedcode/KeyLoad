@@ -70,3 +70,12 @@ The first R27 native request timed out after600 seconds. Its successor reached R
 
 
 R27 runtime observations supersede the preceding preparation-only state without rewriting original failures. All 215 main cases pass, including the six independently derived abort-journal/cold continuations. The 11 additional failures comprise eight new Receive replay oracles conflicting with frozen current-lease authorization, two original local-profile missing-enrollment refusals bypassed by an introduced generic branch, and retained genuine BM25 server InvalidScope. Next N packets remain unapplied and receive no runtime credit. Preserve full original stored ReceiveResult bytes, successful matching replay while the lease is current, and exact post-settlement StaleLease/no-payload/no-effect behavior. Native lease validation and authorization remain unchanged.
+
+
+## R36 actual local development checkpoint
+
+The complete Release build and whole-solution formatter verification passed with zero errors or warnings. The source/image-bound native50 Unit cohort executed 125 original cases: **99 passed, 26 failed, 0 skipped**, in 87.374 seconds, with an actual TRX interval peak of 34. The exact RF3 selection bound 63 native cases across 38 whole classes but strict selector admission refused it before TUnit or resource acquisition: **0 RF3 cases executed**. Every process, reader and disposal joined, with no source/image/deployment closure drift.
+
+Native census is 3821 Unit and 481 Integration cases; the canonical Unit join contains 3287 functional cases and 534 required controls. Discovery is neither execution nor coverage. Coverage remains unmeasured; 19 of the original 104 tasks are fully closed and 85 remain in progress, with KL105 separate and open. Linux full-suite, recovery, RF3, fault, endurance, power-loss and comparable performance gates remain open.
+
+The old R35 generic “native coverage merge process failed” wrapper message was incorrectly interpreted as a merge failure. Exact invocation evidence shows both children were the canonical TUnit runner and returned exit2 after failed tests; it does not prove a merge was invoked or failed. Immutable original R35 records are preserved. The [R36 original development record](stage64-r36-development-20261013.json) binds the correction, all selected native identities, original failures, evidence hashes and independent owners.

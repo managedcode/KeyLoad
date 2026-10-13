@@ -13,17 +13,9 @@ internal sealed partial class OrleansNode
         var failures = new List<Exception>();
         var stopping = Volatile.Read(ref host);
         // Do not resolve services during cleanup: owners were captured by the original startup path.
-        await GraphResources.JoinAsync(failures).ConfigureAwait(false);
-        if (Volatile.Read(ref nativeModelReceiver) is { } nativeReceiver)
-        { await ServerFailureObserver.ObserveAsync(nativeReceiver.StopAsync, failures).ConfigureAwait(false); }
-        if (Volatile.Read(ref nativeModelClient) is { } nativeClient)
-        { await ServerFailureObserver.ObserveAsync(nativeClient.StopAsync, failures).ConfigureAwait(false); }
-        if (Volatile.Read(ref nativeBlobWireObserver) is { } blobObserver)
-        { await ServerFailureObserver.ObserveAsync(blobObserver.StopAsync, failures).ConfigureAwait(false); }
-        if (Movement is { } moving)
-        { await ServerFailureObserver.ObserveAsync(() => moving.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
-        if (RemoteDocuments is { } remote)
-        { await ServerFailureObserver.ObserveAsync(() => remote.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        await OrleansNodeNativeWorkShutdown.JoinAsync(tenantPlacementOwner, GraphResources,
+            Volatile.Read(ref nativeModelReceiver), Volatile.Read(ref nativeModelClient),
+            Volatile.Read(ref nativeBlobWireObserver), Movement, RemoteDocuments, failures).ConfigureAwait(false);
         await PhysicalOwnerRegistrationRuntime.StopAndJoinAsync(Volatile.Read(ref ownerRegistration),
             physicalOwnerWork, failures).ConfigureAwait(false);
         if (RemoteDocuments is { IsJoined: false } || Movement is { IsJoined: false } || !GraphResources.IsJoined)
@@ -47,4 +39,30 @@ internal sealed partial class OrleansNode
         => OrleansNodeHostShutdown.JoinAsync(stopping, partition, requestWork, runtimeOptions, runtimeClock,
             () => Volatile.Write(ref grains, null), () => Volatile.Write(ref host, null), failures);
 
+}
+
+internal static class OrleansNodeNativeWorkShutdown
+{
+    internal static async Task JoinAsync(TenantPlacementNodeOwner placement,
+        global::KeyLoad.Server.Features.GraphTraversal.RemoteGraphNodeResources graphs,
+        global::KeyLoad.Server.Features.DocumentStorage.RemoteModelNativeRuntime? receiver,
+        global::KeyLoad.Server.Features.DocumentStorage.RemoteModelNativeClient? client,
+        global::KeyLoad.Server.Features.BlobStorage.NativeBlobWireProbeObserver? blobObserver,
+        global::KeyLoad.Server.Features.ClusterRouting.PartitionMovementRuntime? movement,
+        global::KeyLoad.Server.Features.DocumentStorage.RemoteDocumentRuntime? documents, List<Exception> failures)
+    {
+        await ServerFailureObserver.ObserveAsync(placement.CloseAdmissionAsync, failures).ConfigureAwait(false);
+        await graphs.JoinAsync(failures).ConfigureAwait(false);
+        if (receiver is not null)
+        { await ServerFailureObserver.ObserveAsync(receiver.StopAsync, failures).ConfigureAwait(false); }
+        if (client is not null)
+        { await ServerFailureObserver.ObserveAsync(client.StopAsync, failures).ConfigureAwait(false); }
+        if (blobObserver is not null)
+        { await ServerFailureObserver.ObserveAsync(blobObserver.StopAsync, failures).ConfigureAwait(false); }
+        if (movement is not null)
+        { await ServerFailureObserver.ObserveAsync(() => movement.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        await ServerFailureObserver.ObserveAsync(placement.JoinAsync, failures).ConfigureAwait(false);
+        if (documents is not null)
+        { await ServerFailureObserver.ObserveAsync(() => documents.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+    }
 }

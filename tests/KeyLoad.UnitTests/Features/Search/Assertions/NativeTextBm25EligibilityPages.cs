@@ -20,7 +20,11 @@ internal static class NativeTextBm25EligibilityPages
         RankedDocument[] expected = mutated
             ? [new(first, 1d / 61d, null), new(second, 1d / 62d, null)]
             : [new(second, 1d / 61d, null), new(first, 1d / 62d, null)];
-        await ReplicaSubmissionOutcomeFlow.RequireBytesAsync(NativeSerialization.Serialize(expected), NativeSerialization.Serialize(result));
+        var expectedBytes = NativeSerialization.Serialize(expected);
+        var actualBytes = NativeSerialization.Serialize(result);
+        await Assert.That(actualBytes.SequenceEqual(expectedBytes)).IsTrue().Because(
+            NativeTextBm25PageEvidence.Describe(expected, result, expectedBytes, actualBytes));
+        await ReplicaSubmissionOutcomeFlow.RequireBytesAsync(expectedBytes, actualBytes);
         await before.RequireAsync(Bm25OriginalPhaseRecoveryState.Read(flow.Owner));
     }
 

@@ -104,29 +104,10 @@ internal static class RetainedReplicaSnapshotScenario
         return new(index, name, directory);
     }
 
-    internal static async Task<FinalCommand> ReplicateWhileStoppedAsync(ClusterFixture fixture, SnapshotState state,
+    internal static Task<FinalCommand> ReplicateWhileStoppedAsync(ClusterFixture fixture, SnapshotState state,
         int stoppedIndex, CancellationToken cancellationToken)
-    {
-        var availableNodes = Enumerable.Range(0, state.Clients.Length).Where(index => index != stoppedIndex).ToArray();
-        CommandRequest? last = null;
-        CommitReceipt? committed = null;
-        foreach (var index in Enumerable.Range(0, DocumentCount))
-        {
-            var command = new CommandRequest(Guid.NewGuid(), state.Partition,
-                [new PutDocument(SnapshotDirectory, "doc-" + index, "{\"n\":" + index + "}", 0)]);
-            last = command;
-            var client = state.Clients[availableNodes[index % availableNodes.Length]];
-            committed = Success(await RetryDuringElectionAsync(() => client.CommitAsync(command, cancellationToken), cancellationToken));
-        }
-
-        foreach (var number in Enumerable.Range(1, NodeCount).Where(number => number != stoppedIndex + 1))
-        {
-            await EventuallyAsync(() => Task.FromResult(Directory.EnumerateFiles(
-                Path.Combine(fixture.Root, NodeName(number), SnapshotDirectory), "*.snapshot").Any()), cancellationToken);
-        }
-
-        return new(last!, committed!);
-    }
+        => RetainedReplicaSnapshotProduction.ReplicateWhileStoppedAsync(fixture, state, stoppedIndex,
+            NodeCount, DocumentCount, SnapshotDirectory, cancellationToken);
 
     private static async Task RestartAndVerifyAsync(ClusterFixture fixture, SnapshotState state, StoppedReplica replica,
         FinalCommand final, Action onRestarted, CancellationToken cancellationToken)

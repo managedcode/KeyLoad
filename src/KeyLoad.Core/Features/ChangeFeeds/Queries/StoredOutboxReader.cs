@@ -13,6 +13,26 @@ internal static class StoredOutboxReader
 {
     private const string OutboxSpace = "outbox";
     private const string CorruptEntryMessage = "The committed outbox contains a sequence gap.";
+    private const string CorruptDocumentMutation = "The committed document mutation does not match its outbox receipt.";
+    private const string PutKind = "putDocument";
+    private const string PatchKind = "patchDocument";
+    private const string DeleteKind = "deleteDocument";
+
+    private static void RequireDocumentMutationReceipt(OutboxEntry entry)
+    {
+        (string Resource, string Id, string Kind)? expected = entry.Mutation switch
+        {
+            PutDocument put => (put.Collection, put.Id, PutKind),
+            PatchDocument patch => (patch.Collection, patch.Id, PatchKind),
+            DeleteDocument delete => (delete.Collection, delete.Id, DeleteKind),
+            _ => null
+        };
+        if (expected is { } document && (entry.Mutation.Resource != document.Resource
+            || entry.Receipt.Resource != document.Resource || entry.Receipt.Id != document.Id
+            || entry.Receipt.Kind != document.Kind || entry.After is not { } after
+            || entry.Receipt.Revision != after.Revision))
+        { throw Errors.Fail(ErrorCode.Corruption, CorruptDocumentMutation); }
+    }
 
     public static IEnumerable<StoredOutboxEntry> ReadRange(IKeyValueView view, PartitionRef partition,
         long after, long tail, int limit)
@@ -37,6 +57,7 @@ internal static class StoredOutboxReader
                 throw Errors.Fail(ErrorCode.Corruption, CorruptEntryMessage);
             }
 
+            RequireDocumentMutationReceipt(entry);
             yield return new(entry, key, storedBytes);
         }
     }

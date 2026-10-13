@@ -26,6 +26,11 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
         }
 
         var principal = await ReloadPrincipalAsync(request, requestId, cancellationToken).ConfigureAwait(true);
+        if (kind is GrainReadKind.PlacementPolicy or GrainReadKind.PlacementPlan or GrainReadKind.PlacementIntent)
+        {
+            return await TenantPlacementReadExecution.ExecuteAsync(localDatabase, services, runtimeClock,
+                principal, request, cancellationToken).ConfigureAwait(true);
+        }
         if (GrainControlledReadCapabilities.Handles(kind))
         {
             return kind == GrainReadKind.PartitionMovementParentState && codec.HasPhaseObserver
@@ -60,6 +65,13 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
             return await GrainNativeMaintenanceReadCapabilities.ExecuteAsync(services, principal,
                 kind, request, cancellationToken).ConfigureAwait(true);
         }
+        return await ReadRemoteOrNativeCapabilityAsync(kind, principal, request, requestId,
+            cancellationToken).ConfigureAwait(true);
+    }
+
+    private async Task<object?> ReadRemoteOrNativeCapabilityAsync(GrainReadKind kind,
+        PrincipalRecord principal, DecodedGrainRequest request, Guid requestId, CancellationToken cancellationToken)
+    {
         if (kind == GrainReadKind.Document
             && services.GetService<IRemoteDocumentReadRouter>() is { } remoteDocuments)
         {

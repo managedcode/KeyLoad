@@ -15,7 +15,8 @@ internal static class PostgresNativeComposition
             .Validate(value => { value.Validate(); return true; }).ValidateOnStart();
         services.AddSingleton<PostgresRetainedAdmission>();
         services.AddSingleton<PostgresCancellationRegistry>();
-        services.AddSingleton<PostgresServerCertificate>();
+        services.AddSingleton(provider => new PostgresServerCertificate(
+            provider.GetRequiredService<global::Microsoft.Extensions.Options.IOptions<PostgresSessionOptions>>()));
         services.AddSingleton<PostgresConnectionHandler>();
         services.AddSingleton<IConfigureOptions<KestrelServerOptions>, PostgresEndpointConfiguration>();
     }

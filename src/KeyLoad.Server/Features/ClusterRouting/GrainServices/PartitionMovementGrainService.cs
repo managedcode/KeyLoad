@@ -8,7 +8,7 @@ namespace KeyLoad.Server.Features.ClusterRouting;
 /// <param name="loggerFactory">Borrowed native diagnostic owner.</param>
 /// <param name="discovery">Actual local native generation and reader capability.</param>
 /// <param name="authentication">Existing local discovery signature owner.</param>
-internal sealed class PartitionMovementGrainService(GrainId id, Silo silo, ILoggerFactory loggerFactory,
+internal sealed partial class PartitionMovementGrainService(GrainId id, Silo silo, ILoggerFactory loggerFactory,
     ReplicaSiloDiscoveryState discovery, ReplicaEnvelopeAuthenticator authentication)
     : GrainService(id, silo, loggerFactory), IPartitionMovementGrainService
 {
@@ -26,6 +26,7 @@ internal sealed class PartitionMovementGrainService(GrainId id, Silo silo, ILogg
         await base.Init(serviceProvider).ConfigureAwait(true);
         receiver = serviceProvider.GetService<PartitionMovementNativeReceiver>();
         physicalProbe = serviceProvider.GetService<PhysicalOwnerProbeNativeRuntime>();
+        capacity = serviceProvider.GetService<OwnerCapacityNativeLifetime>();
     }
 
     /// <inheritdoc />
@@ -72,6 +73,13 @@ internal sealed class PartitionMovementGrainService(GrainId id, Silo silo, ILogg
     public override async Task Stop()
     {
         var failures = new List<Exception>();
+        try
+        {
+            if (capacity is { } owned)
+            { await owned.DisposeAsync().ConfigureAwait(true); }
+        }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         try
         {
             if (physicalProbe is { } active)

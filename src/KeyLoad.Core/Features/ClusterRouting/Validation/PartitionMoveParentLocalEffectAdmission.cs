@@ -31,13 +31,19 @@ public sealed partial class DatabaseEngine
         { throw Errors.Fail(ErrorCode.PermissionDenied, ClusterAdministrationRequiredMessage); }
         var first = PartitionMoveParentStorage.Phase(view, phase.Partition, phase.MoveId, commandId, Limits.MaxBatchBytes)
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
-        if (first.OriginalIssuancePolicyEpoch != principal.PolicyEpoch || first.OriginalPhase is null
-            || first.OriginalGrant is not null
-            || first.OriginalResult is null && (header.TerminalResult is not null
-                || header.PendingOriginalPhaseCommandId != commandId)
-            || !PhysicalOwnerEntryValidation.SameOwner(header.ControlOwner, phase.ControlOwner)
-            || !NativeSerialization.Serialize(first.OriginalPhase).AsSpan().SequenceEqual(NativeSerialization.Serialize(phase)))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        if (first.OriginalIssuancePolicyEpoch != principal.PolicyEpoch)
+        { throw PartitionMoveOwnerDiagnostic.Fail(PartitionMoveOwnerGuard.LocalIssuance); }
+        if (first.OriginalPhase is null)
+        { throw PartitionMoveOwnerDiagnostic.Fail(PartitionMoveOwnerGuard.LocalOriginalPhase); }
+        if (first.OriginalGrant is not null)
+        { throw PartitionMoveOwnerDiagnostic.Fail(PartitionMoveOwnerGuard.LocalGrant); }
+        if (first.OriginalResult is null && (header.TerminalResult is not null
+            || header.PendingOriginalPhaseCommandId != commandId))
+        { throw PartitionMoveOwnerDiagnostic.Fail(PartitionMoveOwnerGuard.LocalPending); }
+        if (!PhysicalOwnerEntryValidation.SameOwner(header.ControlOwner, phase.ControlOwner))
+        { throw PartitionMoveOwnerDiagnostic.Fail(PartitionMoveOwnerGuard.LocalControlOwner); }
+        if (!NativeSerialization.Serialize(first.OriginalPhase).AsSpan().SequenceEqual(NativeSerialization.Serialize(phase)))
+        { throw PartitionMoveOwnerDiagnostic.Fail(PartitionMoveOwnerGuard.LocalPhaseBytes); }
         RequireMoveParentOriginalIssuance(view, principal, first);
         if (first.OriginalResult is not null)
         { _ = RequireCheckpointLocalOutcome(view, principal, first, first.OriginalResult); }

@@ -39,7 +39,7 @@ public sealed partial class DatabaseEngine
     }
 
     private OperationResult ReadValidatedSubmissionOutcome(IKeyValueView view, ReplicatedOperation operation,
-        bool allowStoredDocumentDenial = false)
+        bool allowStoredDocumentDenial = false, CommandOutcomeSelection? verifiedSelection = null)
     {
         var principal = Principal(view, operation.PrincipalId, Clock.GetUtcNow());
         RetiredOriginalOutcomeReadScope? retired = null;
@@ -57,7 +57,7 @@ public sealed partial class DatabaseEngine
             denied = refusal;
         }
         var scope = CommandOutcomePartitionIdentity.Resolve(operation);
-        var selection = CommandOutcomeKeyResolver.Select(view, operation.PrincipalId, operation.Id, scope);
+        var selection = verifiedSelection ?? CommandOutcomeKeyResolver.Select(view, operation.PrincipalId, operation.Id, scope);
         var outcome = selection.Outcome;
         if (outcome is null)
         {
@@ -67,7 +67,7 @@ public sealed partial class DatabaseEngine
             { AuthorizeOperation(view, principal, operation); }
             throw Errors.Fail(ErrorCode.RecoveryRequired, MissingDurableOutcomeMessage);
         }
-        ValidateSubmissionOutcomeIdentity(view, principal, operation, selection, outcome);
+        ValidateSubmissionOutcomeIdentity(view, principal, operation, selection, outcome, verifiedSelection.HasValue);
         if (denied is not null && (outcome.Result.Error != denied.Code
             || !string.Equals(outcome.Result.SafeDetail, denied.Message, StringComparison.Ordinal)
             || outcome.Result.Json is not null || outcome.Result.NativeValue is not null
@@ -86,21 +86,12 @@ public sealed partial class DatabaseEngine
         return outcome.Result;
     }
     private void ValidateSubmissionOutcomeIdentity(IKeyValueView view, PrincipalRecord principal,
-        ReplicatedOperation operation, CommandOutcomeSelection selection, StoredOutcome outcome)
+        ReplicatedOperation operation, CommandOutcomeSelection selection, StoredOutcome outcome, bool originalIdentityVerified = false)
     {
         if (outcome.PolicyEpoch != principal.PolicyEpoch)
         { throw Errors.Fail(ErrorCode.PermissionDenied, ChangedOutcomePrincipalPolicyMessage); }
-        if (outcome.Incarnation != Store.Identity.Incarnation)
-        {
-            throw Errors.Fail(ErrorCode.TokenInvalidated, EarlierOutcomeIncarnationMessage);
-        }
-
-        if (outcome.Fingerprint != CommandFingerprint(operation))
-        {
-            throw Errors.Fail(ErrorCode.Conflict, CommandContentConflictMessage);
-        }
-
-        CommandOutcomeKeyResolver.ValidateSelectedScope(view, operation, selection);
+        if (!originalIdentityVerified)
+        { ValidateStoredSubmissionIdentity(view, operation, selection, outcome); }
     }
 
     private void ValidateCachedResult(IKeyValueView view, PrincipalRecord principal, ReplicatedOperation operation, StoredOutcome previous)

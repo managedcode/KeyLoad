@@ -933,3 +933,13 @@ flowchart LR
     Existing -->|no and dual interface| Borrowed[Register same borrowed object]
     Existing -->|no and unrelated| Absent[No purpose callback]
 ```
+
+## Owned local image for the six-voter query probe
+
+REQ-CR-LOCAL-SIX-PROBE-001 / AC-CR-LOCAL-SIX-PROBE-001: the ephemeral owned two-RF3 diagnostic profile admits exactly one existing image owner, either a verified RuntimeContainerImage or the fixture-owned LocalDevelopmentContainerImage. Both owners together and neither owner are refused. Remote document reads and remote partition queries must still be enabled together. ReadDiagnosticSix retains its exact six configured voters, non-benchmark ephemeral mode, confined probe roots, original owner files and session identity validation. Ordinary production and benchmark composition do not acquire this diagnostic profile.
+
+The original R35 OriginalCommittedFenceKillRollsBackThroughSdkMcpTwoColdCutsThenHealthyTransfer failure reached TwoRf3QueryProbe.Create before cluster startup: its final predicate rejected every non-null local image, although the existing ReadDiagnosticSix contract already validates that owner. The correction replaces only that inconsistent image-owner predicate. The original signed request, member readiness, move fencing, physical node-local ownership, rollback, original receipts, SDK/official MCP clients, two cold cuts, healthy continuation and full cleanup remain the regression flow. No retry/deadline/resource increase or acceptance credit follows from this source correction. Actual runtime and exact-source Linux qualification remain OPEN.
+
+## Capacity-aware whole-partition placement
+
+ADR-129 and [CapacityAwarePlacement](ClusterRouting/CapacityAwarePlacement.md) freeze the additive capacity policy/plan/intent contract. Original signed current-six-owner samples, Control RF3 outcomes, immutable native Move IDs/receipts and per-Control-silo admission (2 active, 16 pending; current RF3 aggregate 6/48) remain distinct authorities. Native activation movement does not move storage handles. This source proposal is not compiler, runtime, Linux or performance acceptance; whole KL070 future tenant-exclusive enrollment and automatic dispatch remain OPEN.

@@ -28,6 +28,7 @@ public sealed partial class DatabaseEngine
         payload = payload.ToArray();
         var identity = kind switch
         {
+            OperationKind.ConfigurePlacementPolicy => Identity<ConfigurePlacementPolicyRequest>(payload),
             OperationKind.Batch => Identity<CommandRequest>(payload),
             OperationKind.Receive => Identity<ReceiveRequest>(payload),
             OperationKind.Delivery => Identity<DeliveryCommand>(payload),

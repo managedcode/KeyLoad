@@ -98,7 +98,7 @@ internal sealed class ReplicaLeader(ReplicaState state, ReplicaFollowerSender fo
             await Task.Delay(state.Configuration.HeartbeatInterval, state.Clock, cancellationToken).ConfigureAwait(false);
         }
         await state.Materializer.WaitForApplyAsync(entry.Index, cancellationToken).ConfigureAwait(false);
-        var outcome = state.Materializer.Database.ResolveSubmissionOutcome(entry.Operation!);
+        var outcome = state.Materializer.Database.ResolveAppliedSubmissionOutcome(entry.Operation!);
         if (admission.SourcePhaseId != Guid.Empty && outcome.Error is null)
         {
             state.Materializer.Database.RequireEventVectorSourceAdmitOutcome(entry.Operation!,

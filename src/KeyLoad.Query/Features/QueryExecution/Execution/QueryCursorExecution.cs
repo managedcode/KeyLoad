@@ -7,7 +7,6 @@ namespace KeyLoad.Query;
 internal static class QueryCursorExecution
 {
     private const int InitialSequence = 0;
-    private const int FirstElementIndex = 0;
     private const string QueryCursorIsInvalidDetail = "The query cursor is invalid.";
     private const int InitialCursorOffset = 0;
     private const string QueryCursorNoLongerHasAValidAuthorizedReadCutDetail = "The query cursor no longer has a valid authorized read cut.";
@@ -18,7 +17,7 @@ internal static class QueryCursorExecution
     internal static State Resolve(DatabaseEngine database, IKeyValueView view, PrincipalRecord principal, ResourceDefinition resource,
         AstQueryRequest request, string hash, TimeProvider clock)
     {
-        var offset = FirstElementIndex;
+        var offset = request.Query.Offset;
         var cut = database.Store.Position;
         var sourceEpoch = database.DocumentEpoch(view, request.Partition, request.Query.Collection);
         if (request.Cursor is { } cursor)

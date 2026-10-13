@@ -14,6 +14,7 @@ internal static class PartitionQueryPlanFactory
     private const int Version = 1;
     private const string InvalidPartitionsMessage = "The partition query leaf set is invalid.";
     private const string GrantBudgetMessage = "The partition query grants exceed the configured budget.";
+    private const string UnsupportedWindowMessage = "Partition query windows are not supported.";
 
     internal static PartitionQueryPlanV1 Create(AstQueryRequest request, StoreIdentity owner,
         ImmutableArray<PartitionRef> partitions, DatabaseLimits limits, QueryExecutionOptions execution, int? maximumResultBytes = null)
@@ -21,6 +22,10 @@ internal static class PartitionQueryPlanFactory
         ArgumentNullException.ThrowIfNull(request);
         ArgumentNullException.ThrowIfNull(owner);
         ArgumentNullException.ThrowIfNull(limits);
+        if (request.Query.Offset != EmptyElementCount)
+        {
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, UnsupportedWindowMessage);
+        }
         var sorted = ValidateAndOrderPartitions(partitions, execution.MaximumPartitions);
 
         var maximumRetainedBytes = Math.Min(QueryResultBudgetPolicy.Resolve(limits, execution),

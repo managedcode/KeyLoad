@@ -38,7 +38,7 @@ internal static class TwoRf3MembershipWaveStartup
         NativeMembershipDiagnosticWaveLifecycle.PrepareControls(wave, root, cancellationToken);
         await NativeCanonicalModelCutWaveStartup.PrepareAsync(wave, root).ConfigureAwait(false);
         NativeBlobWireWaveLifecycle.Prepare(wave, root, cancellationToken);
-        var args = TwoRf3WaveArguments.Create(root, wave.localImageSelection, wave.registerPhysicalOwners, wave.remoteDocumentReads, wave.remotePartitionQueries, wave.queryControls, wave.protectedDocuments, wave.movementMaxBatchBytes, wave.movementMaxFrameBytes, wave.frameObservation, wave.nativeDiscoveryOmission, wave.EventVectorReservedProbe, wave.nativeMembershipControls);
+        var args = TwoRf3WaveArguments.Create(root, wave.localImageSelection, wave.registerPhysicalOwners, wave.remoteDocumentReads, wave.remotePartitionQueries, wave.queryControls, wave.protectedDocuments, wave.movementMaxBatchBytes, wave.movementMaxFrameBytes, wave.frameObservation, wave.nativeDiscoveryOmission, wave.EventVectorReservedProbe, wave.nativeMembershipControls, wave.TenantCapacityPlacement);
         args = NativeBlobWireWaveLifecycle.Arguments(wave, args);
         observe?.Invoke("BuilderCreate");
         var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_AppHost>(args,

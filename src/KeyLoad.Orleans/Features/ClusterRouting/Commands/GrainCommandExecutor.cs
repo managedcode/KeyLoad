@@ -6,7 +6,8 @@ namespace KeyLoad.Orleans;
 
 internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoordinator coordinator, TimeProvider clock,
     IOptions<GrainRoutingOptions> options, GrainRequestCodec? codec = null, NativeRequestWorkOwner? workOwner = null, IPhysicalRequestPlacement? physical = null,
-    IGrainPartitionMovementSealedOperationObserver? sealedObserver = null, INativeOnlineTextMaintenance? onlineText = null)
+    IGrainPartitionMovementSealedOperationObserver? sealedObserver = null, INativeOnlineTextMaintenance? onlineText = null,
+    IPlacementIntentPersistence? placementPersistence = null)
 {
     private readonly GrainRoutingOptions settings = options.Value;
     internal async Task<GrainOperationReply> ExecuteAsync(DecodedGrainRequest request, string actorKey,
@@ -69,9 +70,14 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
     {
         return kind switch
         {
+            OperationKind.PersistPlacementIntent => await GrainPlacementIntentPersistence.SubmitAsync(
+                placementPersistence ?? throw Errors.Fail(ErrorCode.UnsupportedCapability, GrainRoutingProtocol.InvalidRequest),
+                coordinator, request, operationToken).ConfigureAwait(true),
             OperationKind.RemoteGraphSource or OperationKind.RemoteGraphReceive or OperationKind.RemoteGraphComplete
                 => await GrainRemoteGraphCommand.SubmitAsync(database, coordinator, request, principal, operationToken).ConfigureAwait(true),
             OperationKind.EventFeedControl or OperationKind.EventFeedSourcePhase => await GrainEventVectorSourceCommand.SubmitAsync(
+                database, coordinator, request, principal, operationToken).ConfigureAwait(true),
+            OperationKind.PlacementIntentPhase => await GrainPlacementIntentCommand.SubmitAsync(
                 database, coordinator, request, principal, operationToken).ConfigureAwait(true),
             OperationKind.PartitionMovementPhase => await GrainPartitionMovementCommand.SubmitAsync(
                 database, coordinator, request, principal, codec, context, sealedObserver, operationToken).ConfigureAwait(true),

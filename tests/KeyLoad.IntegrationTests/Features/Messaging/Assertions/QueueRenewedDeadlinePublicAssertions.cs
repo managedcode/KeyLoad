@@ -19,10 +19,10 @@ internal static class QueueRenewedDeadlinePublicAssertions
     {
         await QueueLeaseRf3Assertions.EqualAsync(
             await QueueLeaseRf3Assertions.InspectAsync(callers.Sdk, seed.Lane, token), expected);
-        var reply = await McpCallerAssertions.SuccessAsync<MessageInspection>(
+        var reply = await McpCallerAssertions.SuccessAsync<MessageInspectionResult>(
             await callers.Mcp.CallAsync(McpCallerTools.MessagesInspect,
                 new InspectMessageRequest(seed.Lane, QueueLeaseRf3Protocol.Message), token));
-        await QueueLeaseRf3Assertions.EqualAsync(reply.Value, expected);
+        await QueueLeaseRf3Assertions.EqualAsync(reply.Value, new MessageInspectionResult(expected));
         await QueueLeaseRf3Future.RequireAsync(callers.Sdk, callers.Mcp, seed, token);
     }
 

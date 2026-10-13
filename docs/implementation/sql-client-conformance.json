@@ -82,9 +82,9 @@
     {
       "id": "SQLC-SET",
       "name": "set operations, distinct, order, offset, fetch, limit",
-      "syntax": "Q1 order and limit only",
-      "execution": "Q1 order and limit only",
-      "evidence": "AC-SQLC-006 pending"
+      "syntax": "Current Q1 order/limit; coherent source candidate explicit NULLS FIRST/LAST, bounded Q1/Q2 INNER JOIN OFFSET and separate FETCH FIRST/NEXT optional positive literal ROW/ROWS ONLY; DISTINCT/set/mixed FETCH-OFFSET/WITH TIES pending",
+      "execution": "Current Q1 order/limit; source candidate preserves original authorization/read view/read and output budgets, positive MaxResults windows, signed continuation, canonical identity/full-history validation and default-zero compatibility",
+      "evidence": "AC-SQLC-006 remains pending; complete independently authored Unit ZoneTree and Aspire RF3 SDK/MCP/Npgsql operation flows are source candidates only; native new-role compilation/UIDs/Linux/fault/resource/physical-owner gates OPEN"
     },
     {
       "id": "SQLC-DML",
@@ -126,7 +126,8 @@
       "name": "SET, RESET, SHOW, PREPARE, EXECUTE, DEALLOCATE, cursor lifecycle",
       "syntax": "pending",
       "execution": "pending",
-      "evidence": "AC-SQLC-007/008 pending"
+      "evidence": "AC-SQLC-007/008 pending",
+      "sourceContract": "Coherent native source candidate: exact statement-object dependent portal retirement, atomic existing byte grant, simple-query unnamed invalidation, safe Sync repair, positive Execute limit for the same one complete JSONB result and original failure-delivery ledger. Fresh persisted auth/native CQRS/deadline/disposal remain. General SQL session syntax/transactions/suspended portals/full PostgreSQL compatibility and deterministic ErrorResponse receiver-failure/Linux qualification remain OPEN."
     },
     {
       "id": "SQLC-AUTH",

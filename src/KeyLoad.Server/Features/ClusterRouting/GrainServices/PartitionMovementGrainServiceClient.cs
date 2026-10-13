@@ -6,7 +6,7 @@ using Orleans.Runtime.Services;
 namespace KeyLoad.Server.Features.ClusterRouting;
 
 /// <summary>Addresses the actual native silo and authenticates one bounded exact-byte exchange.</summary>
-internal sealed class PartitionMovementGrainServiceClient : GrainServiceClient<IPartitionMovementGrainService>
+internal sealed partial class PartitionMovementGrainServiceClient : GrainServiceClient<IPartitionMovementGrainService>
 {
     private const int EmptyErrorSignatureLength = 0;
     private readonly PartitionHost partition;

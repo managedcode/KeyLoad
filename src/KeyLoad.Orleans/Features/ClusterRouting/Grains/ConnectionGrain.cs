@@ -103,7 +103,7 @@ public sealed class ConnectionGrain(GrainRequestCodec codec, ILogger<ConnectionG
             if (controlledReply is not null)
             { return GrainReplyFactory.StreamResult(controlledReply, options); }
             if (request.Envelope.Purpose is RemoteGraphRequestScope.ParentPurpose or EventVectorRequestScope.ParentPurpose
-                || request.Envelope.CommandKind is OperationKind.ReceiveAcrossLanes or OperationKind.MaintainAnnIndex or OperationKind.MaintainTextIndex or OperationKind.MaintainOnlineTextIndex or OperationKind.MovePartition)
+                || request.Envelope.CommandKind is OperationKind.ReceiveAcrossLanes or OperationKind.MaintainAnnIndex or OperationKind.MaintainTextIndex or OperationKind.MaintainOnlineTextIndex or OperationKind.MovePartition or OperationKind.ApplyPlacementIntent)
             { reply = await ExecuteParentAsync(request, writer, purpose).ConfigureAwait(true); }
             else if (command)
             {
@@ -160,6 +160,11 @@ public sealed class ConnectionGrain(GrainRequestCodec codec, ILogger<ConnectionG
         { return await RemoteGraphParentExecution.ExecuteAsync(request, services, clock, codec, ((IGrainBase)this).GrainContext, writer).ConfigureAwait(true); }
         if (request.Envelope.Purpose == EventVectorRequestScope.ParentPurpose)
         { return await EventVectorParentExecution.ExecuteAdmitAsync(request, services, clock, codec, ((IGrainBase)this).GrainContext, writer).ConfigureAwait(true); }
+        if (request.Envelope.CommandKind == OperationKind.ApplyPlacementIntent)
+        {
+            var result = await PlacementIntentParentExecution.ExecuteAsync(request, services, clock, writer).ConfigureAwait(true);
+            return EncodeParent(result, writer.CancellationToken);
+        }
         if (request.Envelope.CommandKind == OperationKind.MovePartition)
         {
             var result = await PartitionMoveParentExecution.ExecuteAsync(request, services, clock, codec,

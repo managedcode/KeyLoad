@@ -7,7 +7,7 @@
       "total": 104
     },
     "additionalTask": "KL-105",
-    "qualification": "R35 final Release211.919s and whole-solution formatter verification145.581s passed with zero errors/warnings. Two source/image-bound native50 local Aspire groups executed119 unique cases:75 passed,44 failed,0 skipped (Unit60/68; real Docker RF3 SDK/MCP15/51). All process/readers/disposal joins completed with unchanged source/image/deployment closure. Nine six-voter profile refusals, two SQL certificate DI startup failures, five queue wrapper oracles, nineteen expected-domain-error versus UnknownWriteOutcome assertions, one blob safe-detail and eight movement/backup/BM25 unit failures remain open; source-confirmed corrections and hypotheses are distinguished in the original record. Actual census3784Unit/469Integration (3250 functionalUnit/534 required controls) is not execution or coverage. Configured50 and observed combined TRX interval peak30 are distinct. Both lane original coverage-merge failures are retained; coverage remains UNMEASURED. Original plan19/104 done,85 in progress; KL105 and exact-source Linux full-suite/recovery/fault/endurance/performance remain open.",
+    "qualification": "R36 local Release135.525s and whole-solution formatter verification155.181s passed with zero errors/warnings. The exact-source native50 Unit cohort executed125 original cases:99 passed,26 failed,0 skipped in87.374s; actual TRX interval peak34. RF3 planned63 cases in38 complete classes were refused by strict selector admission before TUnit or any resource acquisition; executed0. All process/readers/disposal joins completed with unchanged source/image/deployment closure. Actual census3821Unit/481Integration (3287 functionalUnit/534 required controls) is discovery only. The R35 generic child-process coverage-merge message was misattributed: actual failed children were TUnit test runners, with no proven merge invocation/failure. Original R35 bytes remain unchanged and coverage remains UNMEASURED. Original plan19/104 done,85 in progress; KL105 and exact-source Linux full-suite/recovery/fault/endurance/performance remain open.",
     "coverage": "unmeasured",
     "sourceIntegration": {
       "graph": {
@@ -336,11 +336,11 @@
       }
     },
     "remaining": [
-      "Qualify the coherent R26 complete operation packet on its actual fresh image and delivered Linux source; preserve every original runtime failure",
-      "Identify original unsigned bad64 issuer through bounded actual receiver observation; do not weaken authentication or reply verification",
-      "Deliver exact-source Linux full SDK/MCP RF3, process recovery, fault/endurance and functional coverage gates",
-      "Complete genuine Linux selected matrix transport regression and authenticated website producer evidence",
-      "Close original task-specific acceptance individually; code/build alone do not qualify tasks"
+      "Correct the exact38 RF3 selector in both strict consumers, then execute all63 original public operation cases on the next genuine Aspire-owned image.",
+      "Repair the source-proven Feed fixture timeline, remaining wholeflow assertions and genuine movement/replication failure causes without weakening original oracles.",
+      "Integrate independently reviewed SQL, Feed/graph, placement, blob/backup and full-text work while owners continue separate next directions.",
+      "Deliver exact-source Linux full SDK/MCP RF3, process recovery, fault/endurance and functional coverage gates.",
+      "Complete KL105 bounded actual profiling and Linux comparative performance/website provenance; close each original task only on its full acceptance evidence."
     ],
     "runtimePreparation": {
       "nativeMaximumParallelTests": 50,
@@ -1297,6 +1297,32 @@
       },
       "qualification": "Local macOS development only. Every original failure retained; no new complete task acceptance or Linux full-suite, process-recovery, fault, endurance or performance qualification claimed.",
       "coverage": "UNMEASURED; both original native coverage-merge failures retained"
+    },
+    "runtimeObservedR36": {
+      "record": "docs/implementation/stage64-r36-development-20261013.json",
+      "sha256": "0c6c23900d97e588c5880d07ee98fda5c8c74b2b614d2409c9ae4992339b6791",
+      "localDevelopmentOnly": true,
+      "unit": {
+        "executed": 125,
+        "passed": 99,
+        "failed": 26,
+        "skipped": 0,
+        "actualTrxIntervalPeak": 34
+      },
+      "rf3": {
+        "planned": 63,
+        "executed": 0,
+        "state": "REFUSED_BEFORE_RESOURCE_ACQUISITION",
+        "reason": "Invalid native local RF3 image selection."
+      },
+      "configuredNativeTUnitSlots": 50,
+      "sourceImageClosureDrift": false,
+      "allOriginalProcessReaderDisposalJoins": true,
+      "fullOriginalCasesPreserved": true,
+      "releaseBuildErrors": 0,
+      "releaseBuildWarnings": 0,
+      "coverage": "UNMEASURED",
+      "newCompleteTaskAcceptance": 0
     }
   },
   "STAGE63-NATIVE-COMPOSITION-001": {

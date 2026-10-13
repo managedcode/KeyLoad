@@ -1319,3 +1319,21 @@ flowchart LR
 ```
 
 Roles are BackupRestore Cases/SeriesPortableBackupTests, Helpers/SeriesPortableBackupSeed/Trial and Assertions/SeriesPortableBackupAssertions. This append depends on the complete corrective+identity+portable-blob document successor; no predecessor section is replaced. The factory uses actual DatabaseEngine.CreateNativeOperation plus NativeSerialization and current EvaluationClock; ApplyEmbedded is the existing kernel operation, not elected/RF3 admission. Existing bounds/configuration, native error identities, cleanup ledger and source cases remain unchanged. Inherited fixture constructor/nested-disposal limits remain unqualified. Compiler, current-image runtime, public SDK/MCP, process replication, Linux and Docker/Aspire RF3 remain OPEN; no UID, journal/ACK, performance, cancellation or power-loss proof is inferred.
+
+
+## Second-generation current-format checkpoint lineage
+
+REQ-BACKUP-SECOND-GENERATION-001 / AC-BACKUP-SECOND-GENERATION-001 refine BACKUP-002/003 under KL043. SecondGenerationBackupTests.RestoredOwnerWithoutNewCheckpointProducesVerifiedBackupThenConflictAndTwoColdReopens starts the original NativeBackupCutFixture with a genuine compacted checkpoint and retained tail, performs its original native restore, then a fresh current-owner Commit and CreateBackup without another Compact. The full original checkpoint metadata remains byte-identical and its incarnation belongs to the original source, while the verified second archive identity belongs to the new restored owner. A blanket equality between these incarnations would reject a legitimate archive: ordinary recovery/backup readers and formats are unchanged.
+
+REQ-BACKUP-SECOND-GENERATION-002 / AC-BACKUP-SECOND-GENERATION-002 require native and real CLI restore into the occupied original current owner to return Conflict with no canonical image/cut or archive byte change. The SAME second archive then restores through the actual CLI into a fresh owned target, preserving independently literal current-value and paused rows, a new node/incarnation/key, exact physical source-cut+1, complete genuine CLI receipt and two joined native cold opens. Original source and first/second archives remain exact. Native reader owners directly dispose before the following open; body, cleanup and fixture failures remain in their original ordered ledger.
+
+```mermaid
+flowchart LR
+ A[Original checkpoint and tail] --> B[Native restore and new current owner]
+ B --> C[Fresh commit then second backup without Compact]
+ C --> D[Original checkpoint lineage and current archive verification]
+ D --> E[Occupied native and CLI Conflict with full unchanged cut]
+ E --> F[Fresh target CLI restore and two joined cold opens]
+```
+
+Canonical roles: BackupRestore Cases/SecondGenerationBackupTests, Helpers/SecondGenerationBackupTrial, Assertions/SecondGenerationBackupAssertions. This is a native ZoneTree store and genuine CLI acceptance supplement, not domain-command receipt replay, RF3, roster/token fencing, fault injection, cancellation, Linux or power-loss qualification. Existing current-format aliases/IDs, checksums, verification rules, quotas, clocks and other cases remain unchanged. Source integration and the complete local R36 Release build passed; the original second-generation whole flow passed in the R36 local cohort. Linux recovery and fault qualification remain OPEN. The fixture's inherited constructor/nested cleanup limitations are not qualified by this source review.

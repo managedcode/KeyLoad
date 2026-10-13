@@ -18,6 +18,8 @@ internal static class PostgresRf3Flow
                 try
                 {
                     var state = await SeedAsync(fixture, dialect);
+                    using (var receiptDeadline = McpCallerDeadline.Create())
+                    { await PostgresRf3Assertions.MinimumTokenAsync(fixture, state, receiptDeadline.Token); }
                     await PostgresRf3StalledBootstrap.RunAsync(fixture, state);
                     var backpressure = await PostgresRf3BackpressureFlow.CreateAndRunAsync(fixture, selection);
                     using (var deadline = McpCallerDeadline.Create())
@@ -45,6 +47,7 @@ internal static class PostgresRf3Flow
                     {
                         using var deadline = McpCallerDeadline.Create();
                         await ModelSqlRf3Cold.RunAsync(fixture, deadline.Token);
+                        await PostgresRf3Assertions.MinimumTokenAsync(fixture, state, deadline.Token);
                         await PostgresRf3Parity.RunAsync(fixture, state, deadline.Token);
                         await PostgresRf3Receipts.RunAsync(fixture, state, deadline.Token);
                         await PostgresRf3BackpressureFlow.HealthyAsync(fixture, backpressure, deadline.Token);
@@ -56,7 +59,7 @@ internal static class PostgresRf3Flow
         global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private static async Task<PostgresRf3State> SeedAsync(ClusterFixture fixture, int dialect)
+    internal static async Task<PostgresRf3State> SeedAsync(ClusterFixture fixture, int dialect)
     {
         using var deadline = McpCallerDeadline.Create();
         return await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,

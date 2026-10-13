@@ -113,6 +113,8 @@ Native remote graph operations, ASP.NET authentication, Event JOIN and composed-
 
 Product functional coverage is **unmeasured**. Public performance figures require original GitHub measurements; process-kill tests do not prove power-loss durability.
 
+Latest [local development checkpoint](docs/implementation/stage64-r36-development-20261013.json): Release build passed; 99 of 125 selected Unit cases passed and 26 failed. The RF3 selection was refused before resource startup, so no RF3 case executed in this checkpoint. Full Linux qualification remains open.
+
 [Task tracker](docs/implementation/status.json) · [SQL conformance](docs/implementation/sql-client-conformance.json) · [Coverage](docs/Features/CodeQuality.md) · [Benchmark methodology](docs/Features/BenchmarkComparisons/Methodology.md) · [Published benchmarks](https://www.keyload.cloud/#benchmarks)
 
 ## One database, connected models

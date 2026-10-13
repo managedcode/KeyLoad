@@ -60,6 +60,14 @@ internal static class GraphIncomingReadScope
 
     internal static DocumentRecord? ReadDocument(IKeyValueView view,
         ReadExecutionBudgetReadGrant grant, EntityRef entity)
-        => GraphCrossPartitionRecords.Read<DocumentRecord>(view,
+    {
+        const string VertexMismatch = "A canonical graph vertex record is inconsistent.";
+        var document = GraphCrossPartitionRecords.Read<DocumentRecord>(view,
             DocumentStorageKeys.RecordKey(entity), grant);
+        if (document is not null && document.Reference != entity)
+        {
+            throw Errors.Fail(ErrorCode.Corruption, VertexMismatch);
+        }
+        return document;
+    }
 }

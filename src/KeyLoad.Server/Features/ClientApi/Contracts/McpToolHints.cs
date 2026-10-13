@@ -10,6 +10,7 @@ internal readonly record struct McpToolHints(bool ReadOnly, bool Idempotent, boo
 {
     internal static McpToolHints ForRead(GrainReadKind kind) => kind switch
     {
+        GrainReadKind.PlacementPolicy or GrainReadKind.PlacementPlan or GrainReadKind.PlacementIntent => new(true, true, false),
         GrainReadKind.FollowerDocument => new(true, true, false),
         GrainReadKind.Document => new(true, true, false),
         GrainReadKind.Stream => new(true, true, false),
@@ -55,6 +56,8 @@ internal readonly record struct McpToolHints(bool ReadOnly, bool Idempotent, boo
     internal static McpToolHints ForCommand(OperationKind kind) => kind switch
     {
         OperationKind.UpsertRemoteGraphEdge or OperationKind.DeleteRemoteGraphEdge or OperationKind.DeliverRemoteGraphEdge
+            => new(false, true, true),
+        OperationKind.ConfigurePlacementPolicy or OperationKind.PersistPlacementIntent or OperationKind.ApplyPlacementIntent
             => new(false, true, true),
         OperationKind.Batch => new(false, true, true),
         OperationKind.EventFeedControl => new(false, false, true),

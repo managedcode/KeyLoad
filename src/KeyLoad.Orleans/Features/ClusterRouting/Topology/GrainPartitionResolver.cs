@@ -13,6 +13,9 @@ internal static class GrainPartitionResolver
         OperationKind.PartitionMovementPhase => GrainPartitionMovementCommand.Resolve(request),
         OperationKind.OnlineTextPublicationPhase => GrainOnlineTextPublicationCommand.Resolve(request),
         OperationKind.Bm25CorpusPublicationPhase => GrainBm25CorpusPublicationCommand.Resolve(request),
+        OperationKind.PlacementIntentPhase => GrainPlacementIntentCommand.Resolve(request),
+        OperationKind.ConfigurePlacementPolicy => PlacementHeaderRoute<ConfigurePlacementPolicyRequest>(request, static value => value.ControlPartition),
+        OperationKind.PersistPlacementIntent => PlacementHeaderRoute<PersistPlacementIntentRequest>(request, static value => value.ControlPartition),
         OperationKind.Batch when request.Envelope.Purpose == RemoteTransferPeerProtocol.GrainPurpose
             => GrainRemoteTransferCommand.Resolve(request),
         OperationKind.Batch => Route<CommandRequest>(request, value => (value.CommandId, value.Partition)),
@@ -43,6 +46,15 @@ internal static class GrainPartitionResolver
         OperationKind.Membership => throw Errors.Fail(ErrorCode.PermissionDenied, GrainRoutingProtocol.AdministrationRequired),
         _ => throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest)
     };
+
+    private static string PlacementHeaderRoute<T>(DecodedGrainRequest request, Func<T, PartitionRef> select)
+    {
+        if (request.Envelope.CommandId == Guid.Empty)
+        { throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest); }
+        var partition = select(GrainNativePayload.ReadCommand<T>(request.Payload));
+        DatabaseEngine.ValidatePartition(partition);
+        return partition.AtomicPartitionId;
+    }
 
     private static string Route<T>(DecodedGrainRequest request, Func<T, (Guid CommandId, PartitionRef Partition)> identity)
     {

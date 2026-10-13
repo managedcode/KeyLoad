@@ -20,6 +20,7 @@ internal static class BlobRejectedContentPublicAssertions
     private const string ErrorDetailProperty = "detail";
     private const string InvalidDetail = "The blob request or policy is invalid.";
     private const string ConflictDetail = "The blob upload conflicts with its current state.";
+    private const string SafeMcpDetail = "The database operation could not be completed.";
 
     internal static string IndependentNext(string previous)
     {
@@ -40,7 +41,7 @@ internal static class BlobRejectedContentPublicAssertions
         var detail = code == ErrorCode.Validation ? InvalidDetail : ConflictDetail;
         await RefusedAsync(await callers.Sdk.WriteBlobPartAsync(request, token), code, detail);
         await healthy();
-        await RefusedAsync(await callers.Mcp.CallAsync("keyload_blobs_write_part", request, token), code, detail);
+        await RefusedAsync(await callers.Mcp.CallAsync("keyload_blobs_write_part", request, token), code, SafeMcpDetail);
         await healthy();
     }
 
@@ -50,7 +51,7 @@ internal static class BlobRejectedContentPublicAssertions
         await RefusedAsync(await callers.Sdk.CompleteBlobUploadAsync(request, token), ErrorCode.Validation, InvalidDetail);
         await healthy();
         await RefusedAsync(await callers.Mcp.CallAsync("keyload_blobs_complete_upload", request, token),
-            ErrorCode.Validation, InvalidDetail);
+            ErrorCode.Validation, SafeMcpDetail);
         await healthy();
     }
 

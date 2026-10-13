@@ -27,12 +27,14 @@ internal static class QueryAstDiscriminatorNames
 /// <param name="Explain">Whether to return query plan information.</param>
 /// <param name="ModelSource">Optional read-only event or queue source binding.</param>
 /// <param name="InnerJoin">Optional Q2 typed-row INNER JOIN.</param>
+/// <param name="Offset"></param>
 [Orleans.GenerateSerializer]
 [Orleans.Alias(NativeContractAliases.SelectQuery)]
 public sealed record SelectQuery([property: Orleans.Id(0)] string Collection, [property: Orleans.Id(1)] string? Alias, [property: Orleans.Id(2)] ImmutableArray<Selection> Projection, [property: Orleans.Id(3)] Predicate? Filter,
     [property: Orleans.Id(4)] ImmutableArray<Ordering> Order, [property: Orleans.Id(5)] int Limit, [property: Orleans.Id(6)] bool Explain = false,
     [property: Orleans.Id(7), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] ModelQuerySource? ModelSource = null,
-    [property: Orleans.Id(8), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] InnerJoinClause? InnerJoin = null);
+    [property: Orleans.Id(8), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] InnerJoinClause? InnerJoin = null,
+    [property: Orleans.Id(9), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] int Offset = default);
 
 /// <summary>Selects one field path and assigns it an output alias.</summary>
 /// <param name="Path">The field path to select.</param>
@@ -56,9 +58,11 @@ public sealed record InnerJoinClause([property: Orleans.Id(0)] string Collection
 /// <summary>Specifies the ordering of query rows by one field path.</summary>
 /// <param name="Path">The field path used for ordering.</param>
 /// <param name="Descending">Whether to order from greatest to least.</param>
+/// <param name="NullsFirst"></param>
 [Orleans.GenerateSerializer]
 [Orleans.Alias(NativeContractAliases.Ordering)]
-public sealed record Ordering([property: Orleans.Id(0)] string Path, [property: Orleans.Id(1)] bool Descending);
+public sealed record Ordering([property: Orleans.Id(0)] string Path, [property: Orleans.Id(1)] bool Descending,
+    [property: Orleans.Id(2), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] bool? NullsFirst = null);
 
 /// <summary>Represents a value or field reference used by a query predicate.</summary>
 [JsonPolymorphic(TypeDiscriminatorPropertyName = QueryAstDiscriminatorNames.Kind)]

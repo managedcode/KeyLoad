@@ -18,6 +18,7 @@ internal static class ServerRuntimeOptionsRegistration
         CoreRuntimeOptionsRegistration.AddCoreRuntimeOptions(services, configuration);
         RegisterClusterExecution(services, configuration);
         RegisterPartitionMovement(services, configuration);
+        RegisterTenantPlacement(services, configuration);
         RegisterStorageExecution(services, configuration);
         RegisterHostExecution(services, configuration);
         RegisterNodeProjections(services, configuration);
@@ -35,6 +36,19 @@ internal static class ServerRuntimeOptionsRegistration
         }
         services.AddOptions<PartitionMovementExecutionOptions>()
             .Bind(section, binding => binding.ErrorOnUnknownConfiguration = true).ValidateOnStart();
+    }
+
+    private static void RegisterTenantPlacement(IServiceCollection services, IConfiguration configuration)
+    {
+        var section = configuration.GetSection(TenantPlacementExecutionOptions.SectionName);
+        if (section.Value is not null)
+        {
+            throw new OptionsValidationException(Options.DefaultName, typeof(TenantPlacementExecutionOptions),
+            [TenantPlacementExecutionOptionsValidator.Invalid]);
+        }
+        services.AddOptions<TenantPlacementExecutionOptions>()
+            .Bind(section, binding => binding.ErrorOnUnknownConfiguration = true).ValidateOnStart();
+        services.AddSingleton<IValidateOptions<TenantPlacementExecutionOptions>, TenantPlacementExecutionOptionsValidator>();
     }
 
     private static void RegisterClusterExecution(IServiceCollection services, IConfiguration configuration)

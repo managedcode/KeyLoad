@@ -29,7 +29,7 @@ public sealed partial class DatabaseEngine
     private void RequireConfiguredMovementOwner()
     {
         if (configuredPhysicalOwner is null)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        { throw PartitionMoveOwnerDiagnostic.Fail(PartitionMoveOwnerGuard.ConfiguredReceiver); }
     }
 
     private void RequireUnconfiguredMovementAbsent(IKeyValueView view)

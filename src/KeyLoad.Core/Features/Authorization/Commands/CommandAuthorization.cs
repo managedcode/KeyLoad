@@ -33,8 +33,18 @@ public sealed partial class DatabaseEngine
             AuthorizeSubscriptionOperation(view, principal, operation);
             return null;
         }
+        return AuthorizeModelOperation(view, principal, operation);
+    }
+
+    private AtomicPartitionPlacementResolution? AuthorizeModelOperation(IKeyValueView view,
+        PrincipalRecord principal, ReplicatedOperation operation)
+    {
         switch (operation.Kind)
         {
+            case OperationKind.ConfigurePlacementPolicy:
+            case OperationKind.PersistPlacementIntent:
+            case OperationKind.PlacementIntentPhase:
+                return AuthorizePlacementCommand(view, principal, operation);
             case OperationKind.Bm25CorpusPublicationPhase:
                 AuthorizeBm25CorpusPublication(view, principal, operation);
                 return null;

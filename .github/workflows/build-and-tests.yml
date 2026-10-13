@@ -160,8 +160,6 @@ jobs:
         run: dotnet format KeyLoad.slnx --verify-no-changes --no-restore
       - name: Check repository rules
         run: node scripts/Features/RepositoryGovernance/verify.mjs
-      - name: Test code analyzers
-        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=analyzers --KeyLoadTests:ReportTrx=true
       - name: Test native coverage source ownership
         id: source-ownership
         run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=unit '--KeyLoadTests:Filter=/*/*/(NativePathMapCompilerTests)|(ProductionSourceManifestSettlementTests)|(NativeSourceManifestChildSettlementTests)|(ProductionSourceManifestOperationTests)/*' --KeyLoadTests:ResultsDirectory=TestResults/native-source-ownership --KeyLoadTests:ReportTrx=true

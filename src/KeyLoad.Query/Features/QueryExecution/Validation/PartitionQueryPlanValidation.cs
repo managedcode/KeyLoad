@@ -93,7 +93,7 @@ internal static class PartitionQueryPlanValidation
             || leaf.Request.Partition is null || leaf.Request.Query is null
             || leaf.MaxExaminedRecords < EmptyElementCount || leaf.MaxReadBytes < NoRetainedBytes || leaf.MaxRetainedBytes < NoRetainedBytes
             || leaf.MaxCandidates < NoRetainedBytes || leaf.Request.Partition != leaf.Partition
-            || leaf.Request.Query.Limit != plan.Limit || leaf.Request.Cursor is not null
+            || leaf.Request.Query.Limit != plan.Limit || leaf.Request.Query.Offset != EmptyElementCount || leaf.Request.Cursor is not null
             || leaf.Request.Query.Explain || leaf.Request.Query.ModelSource is not null)
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidPlanMessage);

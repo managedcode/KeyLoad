@@ -55,8 +55,10 @@ internal static class NativeTextBm25CapturedClosureTrial
                 work, null, FilteredSearchEligibility.Create(null, work));
             RankedDocument[] expected = [new(new(new(owner.Source.Partition, "orders", "first"),
                 1L, "{\"text\":\"needle\"}", false, []), 1d / 61d, null)];
-            await Assert.That(NativeSerialization.Serialize(result).SequenceEqual(
-                NativeSerialization.Serialize(expected))).IsTrue();
+            var expectedBytes = NativeSerialization.Serialize(expected);
+            var actualBytes = NativeSerialization.Serialize(result);
+            await Assert.That(actualBytes.SequenceEqual(expectedBytes)).IsTrue().Because(
+                NativeTextBm25PageEvidence.Describe(expected, result, expectedBytes, actualBytes));
         }, failures);
         ServerFailureObserver.Observe(() => captured?.Dispose(), failures);
         ServerFailureObserver.Observe(() => projection?.Dispose(), failures);

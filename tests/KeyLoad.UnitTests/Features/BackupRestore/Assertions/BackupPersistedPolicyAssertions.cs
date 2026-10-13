@@ -83,7 +83,9 @@ internal static class BackupPersistedPolicyAssertions
     {
         await Assert.That(receipt.CommandId).IsEqualTo(id);
         await Assert.That(receipt.Token.Position).IsEqualTo(database.Store.Position);
-        await Assert.That(receipt.Token.Incarnation).IsEqualTo(database.Store.Identity.Incarnation);
+        var owner = database.Store.Read(view => DatabaseEngine.ReadPlacementWitness(view, partition));
+        await SameAsync(new CommitToken(owner.Incarnation, partition.AtomicPartitionId,
+            database.Store.Position, owner.PlacementEpoch), receipt.Token);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(partition.AtomicPartitionId);
         await Assert.That(receipt.Durability).IsEqualTo(database.Store.Identity.Durability);
     }

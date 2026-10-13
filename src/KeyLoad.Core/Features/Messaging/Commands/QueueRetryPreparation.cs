@@ -27,8 +27,12 @@ public sealed partial class DatabaseEngine
             { return operation; }
         }
         var scope = CommandOutcomePartitionIdentity.Resolve(operation);
-        if (CommandOutcomeKeyResolver.Select(view, operation.PrincipalId, operation.Id, scope).Outcome is not null)
-        { return operation; }
+        var selection = CommandOutcomeKeyResolver.Select(view, operation.PrincipalId, operation.Id, scope);
+        if (selection.Outcome is { } outcome)
+        {
+            ValidateRetainedQueueRetryAdmission(view, operation, selection, outcome);
+            return operation;
+        }
         List<QueueRetryInput> inputs;
         try
         {

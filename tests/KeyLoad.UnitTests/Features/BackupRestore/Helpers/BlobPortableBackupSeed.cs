@@ -4,6 +4,7 @@ namespace KeyLoad.UnitTests.Features.BackupRestore;
 
 internal static class BlobPortableBackupSeed
 {
+    private const string MissingCommittedClock = "The original blob completion has no committed clock.";
     internal const string Root = "root";
     internal const string Resource = "backup_blobs";
     internal const string Published = "published";
@@ -42,8 +43,11 @@ internal static class BlobPortableBackupSeed
             new CompleteBlobUploadRequest(id, blob, upload, hash), token);
         var result = complete.Result.Get<BlobCommitResult<BlobMetadata>>();
         await BlobPortableBackupAssertions.ReceiptAsync(database, blob, result.Receipt, id);
+        var committedAt = database.Store.Read(view => NativeSerialization.Deserialize<DateTimeOffset>(
+            view.ReadOwnedValue(KeySpace.ClockBytes) ?? throw new InvalidOperationException(MissingCommittedClock)));
+        await Assert.That(committedAt).IsGreaterThanOrEqualTo(complete.Operation.EvaluatedAt);
         await BackupPersistedPolicyAssertions.SameAsync(new BlobMetadata(blob, 1L, upload, bytes.Length,
-            2, hash, new RowAccess(), complete.Operation.EvaluatedAt), result.Value);
+            2, hash, new RowAccess(), committedAt), result.Value);
         return (result.Value, [begin, first, second, complete]);
     }
 

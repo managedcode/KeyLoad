@@ -17,10 +17,10 @@ internal static class NativeTextWaitRf3Assertions
         WaitForIndexRequest request, long schemaVersion, long policyEpoch, CancellationToken token)
     {
         await NativeTextWaitRf3CutAssertions.RunAsync(NativeTextWaitRf3CutAssertions.Sdk,
-            async () => await McpCallerAssertions.SdkSuccessAsync(await sdk.WaitForIndexAsync(request, token)),
+            async () => await NativeTextPublicOutcomeAssertions.SdkSuccessAsync(await sdk.WaitForIndexAsync(request, token)),
             administrator, request, schemaVersion, policyEpoch, token);
         await NativeTextWaitRf3CutAssertions.RunAsync(NativeTextWaitRf3CutAssertions.Mcp,
-            async () => (await McpCallerAssertions.SuccessAsync<WaitForIndexResult>(
+            async () => (await NativeTextPublicOutcomeAssertions.SuccessAsync<WaitForIndexResult>(
                 await official.CallAsync(WaitForIndexProtocol.Tool, request, token))).Value,
             administrator, request, schemaVersion, policyEpoch, token);
         var call = SqlRf3Protocol.Call(request.Partition, WaitForIndexProtocol.Tool, request);
@@ -41,8 +41,8 @@ internal static class NativeTextWaitRf3Assertions
             NativeTextRf3Scenario.SecondId), Revision, SecondJson, true, [NativeTextRf3Scenario.TextField, NativeTextRf3Scenario.VectorField, NativeTextRf3Scenario.SecretField]), 1d / SecondDenominator);
         RankedDocument[] expected = deleted ? [first] : [first, second];
         var request = scenario.Text(Query);
-        var actual = await McpCallerAssertions.SdkSuccessAsync(await sdk.SearchAsync(request, token));
-        var mcp = await McpCallerAssertions.SuccessAsync<RankedDocument[]>(await official.CallAsync(McpCallerTools.SearchExecute, request, token));
+        var actual = await NativeTextPublicOutcomeAssertions.SdkSuccessAsync(await sdk.SearchAsync(request, token));
+        var mcp = await NativeTextPublicOutcomeAssertions.SuccessAsync<RankedDocument[]>(await official.CallAsync(McpCallerTools.SearchExecute, request, token));
         await SqlRf3Protocol.EqualAsync(expected, actual);
         await SqlRf3Protocol.EqualAsync(expected, mcp.Value);
         var sql = SqlRf3Protocol.Call(request.Partition, McpCallerTools.SearchExecute, request);

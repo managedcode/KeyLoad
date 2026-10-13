@@ -132,7 +132,7 @@ internal static class RelationalInnerJoinExecutor
                 }
                 using var rightJson = RelationalInnerJoinRetainedRows.ParseRetainedJson(right.Json);
                 RelationalInnerJoinRetainedRows.ValidatePrimaryIdentity(rightJson.RootElement, rightResource.RelationalSchema!.PrimaryKey, right.Reference.Id);
-                Retain(candidates, query.Limit, new(left, right), budget);
+                Retain(candidates, checked(query.Offset + query.Limit), new(left, right), budget);
                 return true;
             });
         if (scan.HasMore)
@@ -147,8 +147,8 @@ internal static class RelationalInnerJoinExecutor
         ResourceDefinition leftResource, ResourceDefinition rightResource, AstQueryRequest request,
         ReadExecutionBudget budget, InnerJoinClause join, CandidateSet candidateSet)
     {
-        var rows = ImmutableArray.CreateBuilder<QueryRow>(candidateSet.Rows.Count);
-        foreach (var candidate in candidateSet.Rows)
+        var rows = ImmutableArray.CreateBuilder<QueryRow>(Math.Max(EmptyCount, candidateSet.Rows.Count - request.Query.Offset));
+        foreach (var candidate in candidateSet.Rows.Skip(request.Query.Offset))
         {
             budget.Check();
             rows.Add(RelationalInnerJoinProjection.Project(database, principal, leftResource, rightResource, request.Query.Alias!, join.Alias,

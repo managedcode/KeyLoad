@@ -164,5 +164,13 @@ public enum GrainReadKind
     /// <summary>Privately finalizes a target projection against exact fresh source proofs.</summary>
     RemoteGraphIncomingFinalize = 79,
     /// <summary>Composes explicit remote incoming graph reads over distinct authorized owner cuts.</summary>
-    RemoteGraphIncomingParent = 80
+    RemoteGraphIncomingParent = 80,
+    /// <summary>Privately reads original signed current-cohort native capacity.</summary>
+    OwnerCapacity = 81,
+    /// <summary>Reads current persisted administrator placement policy.</summary>
+    PlacementPolicy = 82,
+    /// <summary>Plans complete supplied whole partitions from six genuine owner samples.</summary>
+    PlacementPlan = 83,
+    /// <summary>Reads an authorized durable placement intent.</summary>
+    PlacementIntent = 84
 }

@@ -31,6 +31,11 @@ internal static class TwoRf3RemoteReadResources
             foreach (var resource in resources)
             { resource.WithEnvironment(TwoRf3ProfileProtocol.MovementEnvironment, TwoRf3ProfileProtocol.Enabled); }
         }
+        if (control.Value.TenantCapacityPlacement)
+        {
+            foreach (var resource in resources)
+            { resource.WithEnvironment(TenantCapacityPlacementProfile.Environment, TwoRf3ProfileProtocol.Enabled); }
+        }
         if (control.Value.MovementMaxBatchBytes is { } maxBatchBytes)
         {
             foreach (var resource in resources)

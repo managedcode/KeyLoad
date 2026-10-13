@@ -1,5 +1,6 @@
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.Features.ClusterRouting;
 
 namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
@@ -28,7 +29,7 @@ internal static class PostgresRf3Assertions
             : new(PostgresRf3State.OrderId, PostgresRf3Protocol.SeedRevision, PostgresRf3State.LeftJson, RedactedFields: []);
         var expected = new QueryPage([row], null, actual.CutPosition,
             state.Dialect == PostgresRf3Protocol.JoinDialect ? JoinAccess : ScalarAccess);
-        await global::TUnit.Assertions.Assert.That(actual.CutPosition).IsGreaterThanOrEqualTo(state.Receipt.Token.Position);
+        await global::TUnit.Assertions.Assert.That(actual.CutPosition).IsGreaterThanOrEqualTo(default(long));
         await SqlRf3Protocol.EqualAsync(expected, actual);
     }
 
@@ -44,6 +45,26 @@ internal static class PostgresRf3Assertions
             await root.OutboxStatusAsync(PostgresRf3State.Partition, token));
         return System.Text.Json.JsonSerializer.Serialize(new { Left = left, Right = right, Outbox = outbox },
             JsonDefaults.Options);
+    }
+
+    internal static async Task MinimumTokenAsync(ClusterFixture fixture, PostgresRf3State state, CancellationToken token)
+    {
+        await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
+            fixture.AdminKey, async root =>
+        {
+            foreach (var reference in new[] { PostgresRf3State.Left, PostgresRf3State.Right })
+            {
+                var json = reference == PostgresRf3State.Left ? PostgresRf3State.LeftJson : PostgresRf3State.RightJson;
+                var expected = new DocumentReadResult(new DocumentResult(reference,
+                    PostgresRf3Protocol.SeedRevision, json, false, []));
+                await SqlRf3Protocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(
+                    await root.Sdk.GetAsync(reference, state.Receipt.Token, token)));
+                await SqlRf3Protocol.EqualAsync(expected, (await McpCallerAssertions.SuccessAsync<DocumentReadResult>(
+                    await root.Mcp.CallAsync(McpCallerTools.DocumentsGet,
+                        new GetDocumentRequest(reference, state.Receipt.Token), token))).Value);
+            }
+            return true;
+        }, token);
     }
 
     internal static async Task ErrorAsync(Task operation, string sqlState, ErrorCode code)

@@ -32,7 +32,7 @@ internal sealed class PartitionMovementReceiverReads(PartitionMovementReceiverCo
         var query = new PartitionMovementParentStateQuery(request, selectedPhaseId,
             grant.RemainingBytes, grant.RemainingRecords, work.MaximumResultBytes);
         var requestId = Guid.NewGuid();
-        var signed = context.Node.CatalogRequestCodec().CreatePartitionMovementParentState(requestId, principal.Id, query, expiry);
+        var signed = context.Node.CatalogRequestCodec().MovementTransfer.CreatePartitionMovementParentState(requestId, principal.Id, query, expiry);
         var reply = await context.ExecuteSignedAsync(principal, requestId, Guid.Empty, signed, command: false,
             cancellationToken).ConfigureAwait(false);
         if (reply.Error is { } code)
@@ -57,7 +57,7 @@ internal sealed class PartitionMovementReceiverReads(PartitionMovementReceiverCo
         var query = new PartitionMovementParentStateQuery(request, phaseId,
             grant.RemainingBytes, grant.RemainingRecords, work.MaximumResultBytes);
         var requestId = Guid.NewGuid();
-        var signed = context.Node.CatalogRequestCodec().CreatePartitionMovementParentState(requestId, principal.Id, query, expiry);
+        var signed = context.Node.CatalogRequestCodec().MovementTransfer.CreatePartitionMovementParentState(requestId, principal.Id, query, expiry);
         var terminal = await context.ExecuteSignedAsync(principal, requestId, Guid.Empty, signed, command: false,
             cancellationToken).ConfigureAwait(false);
         if (terminal.Error is { } code)
@@ -107,7 +107,7 @@ internal sealed class PartitionMovementReceiverReads(PartitionMovementReceiverCo
         if (bounded.MaximumReadBytes <= PartitionMovementProtocol.NoReadBytes || bounded.MaximumExaminedRecords <= PartitionMovementProtocol.NoExaminedRecords || bounded.MaximumResultBytes <= PartitionMovementProtocol.NoResultBytes)
         { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMovementProtocol.Unavailable); }
         var requestId = Guid.NewGuid();
-        var signed = context.Node.CatalogRequestCodec().CreatePartitionMovementTransferAuthority(requestId, principal.Id, bounded, expiry);
+        var signed = context.Node.CatalogRequestCodec().MovementTransfer.CreatePartitionMovementTransferAuthority(requestId, principal.Id, bounded, expiry);
         var terminal = await context.ExecuteSignedAsync(principal, requestId, Guid.Empty, signed, command: false,
             cancellationToken).ConfigureAwait(false);
         if (terminal.Error is { } code)
@@ -138,7 +138,7 @@ internal sealed class PartitionMovementReceiverReads(PartitionMovementReceiverCo
         CancellationToken cancellationToken)
     {
         var principal = context.Administrator(request.OperatorPrincipalId, cancellationToken);
-        var signed = context.Node.CatalogRequestCodec().CreatePartitionMovementTransferData(request.RequestId,
+        var signed = context.Node.CatalogRequestCodec().MovementTransfer.CreatePartitionMovementTransferData(request.RequestId,
             principal.Id, request.Capability, request.ExpiresAt);
         return context.ExecuteSignedAsync(principal, request.RequestId, Guid.Empty, signed, command: false, cancellationToken);
     }

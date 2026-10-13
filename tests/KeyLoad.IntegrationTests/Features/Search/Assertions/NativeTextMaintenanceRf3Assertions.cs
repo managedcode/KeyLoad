@@ -47,8 +47,8 @@ internal static class NativeTextMaintenanceRf3Assertions
         var search = new SearchRequest(scenario.Partition, NativeTextMaintenanceRf3Scenario.Collection,
             NativeTextMaintenanceRf3Scenario.Field, changed ? ChangedQuery : OriginalUkrainianQuery);
         RankedDocument[] literal = [new(expected, Score)];
-        var rows = await McpCallerAssertions.SdkSuccessAsync(await sdk.SearchAsync(search, token));
-        var officialRows = (await McpCallerAssertions.SuccessAsync<RankedDocument[]>(await mcp.CallAsync(
+        var rows = await NativeTextPublicOutcomeAssertions.SdkSuccessAsync(await sdk.SearchAsync(search, token));
+        var officialRows = (await NativeTextPublicOutcomeAssertions.SuccessAsync<RankedDocument[]>(await mcp.CallAsync(
             McpCallerTools.SearchExecute, search, token))).Value;
         await Assert.That(JsonDefaults.Serialize(rows).SequenceEqual(JsonDefaults.Serialize(literal))).IsTrue();
         await Assert.That(JsonDefaults.Serialize(officialRows).SequenceEqual(JsonDefaults.Serialize(literal))).IsTrue();
@@ -71,8 +71,8 @@ internal static class NativeTextMaintenanceRf3Assertions
     {
         var result = observation is null ? await sdk.SearchAsync(request, token)
             : await observation.FinalSearchAsync(phase, () => sdk.SearchAsync(request, token), token);
-        await Assert.That(await McpCallerAssertions.SdkSuccessAsync(result)).IsEmpty();
-        await Assert.That((await McpCallerAssertions.SuccessAsync<RankedDocument[]>(await mcp.CallAsync(
+        await Assert.That(await NativeTextPublicOutcomeAssertions.SdkSuccessAsync(result)).IsEmpty();
+        await Assert.That((await NativeTextPublicOutcomeAssertions.SuccessAsync<RankedDocument[]>(await mcp.CallAsync(
             McpCallerTools.SearchExecute, request, token))).Value).IsEmpty();
         observation?.CompleteFinalCall(phase);
     }

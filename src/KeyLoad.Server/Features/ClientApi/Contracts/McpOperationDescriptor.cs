@@ -16,7 +16,7 @@ internal sealed record McpOperationDescriptor
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         ArgumentException.ThrowIfNullOrWhiteSpace(route);
         ArgumentException.ThrowIfNullOrWhiteSpace(description);
-        if (commandKind == OperationKind.Bm25CorpusPublicationPhase)
+        if (commandKind is OperationKind.Bm25CorpusPublicationPhase or OperationKind.PlacementIntentPhase)
         { throw new ArgumentException(McpCatalogProtocol.InvalidOperation, nameof(commandKind)); }
         if (!adapter)
         { ArgumentNullException.ThrowIfNull(decoder); }

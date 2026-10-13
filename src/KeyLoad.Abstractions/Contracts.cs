@@ -320,7 +320,15 @@ public enum OperationKind
     /// <summary>Coordinates an explicit remote graph delivery through separate owner receipts.</summary>
     DeliverRemoteGraphEdge = 44,
     /// <summary>Commits a freshly verified private BM25 corpus publication; excluded from generic public factories.</summary>
-    Bm25CorpusPublicationPhase = 45
+    Bm25CorpusPublicationPhase = 45,
+    /// <summary>Persists an authorized capacity placement policy at Control RF3.</summary>
+    ConfigurePlacementPolicy = 46,
+    /// <summary>Persists one original signed complete placement plan.</summary>
+    PersistPlacementIntent = 47,
+    /// <summary>Applies an intent through its immutable original native Move requests.</summary>
+    ApplyPlacementIntent = 48,
+    /// <summary>Commits one private freshly authenticated placement phase.</summary>
+    PlacementIntentPhase = 49
 }
 
 /// <summary>Carries a trusted operation and its evaluated principal and time.</summary>

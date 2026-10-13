@@ -40,7 +40,7 @@ internal sealed class PostgresSessionLoop(IServiceProvider services, global::Mic
                         await PostgresControlFlush.RunAsync(services, writer, context.ConnectionClosed).ConfigureAwait(false);
                         break;
                     case PostgresMessageProtocol.SimpleQuery:
-                        catalog.Sync();
+                        catalog.BeginSimpleQuery();
                         await SimpleAsync(frame.Payload, owner, identity, partition, cancellation, context.ConnectionClosed).ConfigureAwait(false);
                         writer.Ready();
                         await PostgresControlFlush.RunAsync(services, writer, context.ConnectionClosed).ConfigureAwait(false);
@@ -56,13 +56,27 @@ internal sealed class PostgresSessionLoop(IServiceProvider services, global::Mic
             }
             catch (Exception error) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error) && !context.ConnectionClosed.IsCancellationRequested)
             {
-                PostgresErrorReply.Write(writer, error);
-                if (frame.Type == PostgresMessageProtocol.SimpleQuery)
-                { writer.Ready(); }
-                else
-                { draining = true; }
-                await PostgresControlFlush.RunAsync(services, writer, context.ConnectionClosed).ConfigureAwait(false);
+                var simple = frame.Type == PostgresMessageProtocol.SimpleQuery;
+                draining = !simple;
+                await FailureAsync(error, simple, context.ConnectionClosed).ConfigureAwait(false);
             }
+        }
+    }
+
+    private async Task FailureAsync(Exception original, bool simple, CancellationToken closed)
+    {
+        var failures = new List<Exception>();
+        await ServerFailureObserver.ObserveAsync(async () =>
+        {
+            PostgresErrorReply.Write(writer, original);
+            if (simple)
+            { writer.Ready(); }
+            await PostgresControlFlush.RunAsync(services, writer, closed).ConfigureAwait(false);
+        }, failures).ConfigureAwait(false);
+        if (failures.Count != PostgresProtocol.AllRows)
+        {
+            failures.Insert(PostgresProtocol.FirstField, original);
+            ServerFailureObserver.ThrowIfAny(failures);
         }
     }
 

@@ -31,11 +31,15 @@ internal static class QueryCapabilityCatalog
     private const string LeftPredicateJoinCapability = "Q2.InnerJoin.LeftPredicate.v1";
     private const string QueueEntityRefJoinCapability = "Q2.QueueEntityRefJoin.v1";
     private const string EventEntityRefJoinCapability = "Q2.EventEntityRefJoin.v1";
+    private const string Q1OffsetCapability = "Q1.Offset.v1";
+    private const string Q2OffsetCapability = "Q2.InnerJoin.Offset.v1";
+    private const string NullOrderingCapability = "Q1.NullOrdering.v1";
+    private const string FetchCountCapability = "SQL.FetchCount.v1";
     private static readonly ImmutableArray<int> SupportedVersions = [Q1DialectVersion, Q2DialectVersion];
     private static readonly ImmutableArray<int> SupportedDialects = [Q1DialectVersion, Q2DialectVersion];
 
     internal static QueryCapabilityManifest Create(DatabaseLimits limits) => new(ManifestVersion, ManifestVersion, QueryDialectVersion, AtomicPartitionScope, DecimalScalarType, MissingValueSemantics,
         [SqlCallerSurface, JsonCallerSurface, CSharpCallerSurface], [ComparisonCapability, AndCapability, OrCapability, NotCapability, InCapability, BetweenCapability, NotBetweenCapability, NullCapability, MissingCapability],
         limits.MaxResults, limits.MaxScanRecords, limits.MaxQueryBytes, limits.MaxQueryDepth, true, true,
-        limits.MaxQueryReadBytes, [QueryDialectVersion, DocumentChangeFeedCapability, ScalarLiveQueryCapability, ModelViewsCapability, SqlGraphSearchSyntax.ProfileName, SqlGraphPathSyntax.VersionProfile, InnerJoinCapability, LeftPredicateJoinCapability, QueueEntityRefJoinCapability, EventEntityRefJoinCapability], SupportedVersions, SupportedDialects);
+        limits.MaxQueryReadBytes, [QueryDialectVersion, DocumentChangeFeedCapability, ScalarLiveQueryCapability, ModelViewsCapability, SqlGraphSearchSyntax.ProfileName, SqlGraphPathSyntax.VersionProfile, InnerJoinCapability, LeftPredicateJoinCapability, QueueEntityRefJoinCapability, EventEntityRefJoinCapability, Q1OffsetCapability, Q2OffsetCapability, NullOrderingCapability, FetchCountCapability], SupportedVersions, SupportedDialects);
 }

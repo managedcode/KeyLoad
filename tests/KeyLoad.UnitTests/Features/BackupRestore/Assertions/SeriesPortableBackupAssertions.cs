@@ -25,7 +25,9 @@ internal static class SeriesPortableBackupAssertions
         await Assert.That(result.Error).IsNull();
         var receipt = result.Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(operation.Id);
-        await Assert.That(receipt.Token.Incarnation).IsEqualTo(database.Store.Identity.Incarnation);
+        var owner = database.Store.Read(view => DatabaseEngine.ReadPlacementWitness(view, partition));
+        await BackupPersistedPolicyAssertions.SameAsync(new CommitToken(owner.Incarnation,
+            partition.AtomicPartitionId, database.Store.Position, owner.PlacementEpoch), receipt.Token);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(partition.AtomicPartitionId);
         await Assert.That(receipt.Token.Position).IsGreaterThan(0L);
         await Assert.That(receipt.Token.Position).IsEqualTo(database.Store.Position);
@@ -41,9 +43,11 @@ internal static class SeriesPortableBackupAssertions
                 new(SeriesPortableBackupSeed.Series, SeriesPortableBackupSeed.Data(5, 4, 5), 5L, "{}")]
             : [new(SeriesPortableBackupSeed.Series, SeriesPortableBackupSeed.Data(3, 2, 3), 3L, "{}"),
                 new(SeriesPortableBackupSeed.Series, SeriesPortableBackupSeed.Data(4, 3, 4), 4L, "{}")];
-        await BackupPersistedPolicyAssertions.SameAsync(expected, database.ReadSamples(SeriesPortableBackupSeed.Root,
+        var actual = database.ReadSamples(SeriesPortableBackupSeed.Root,
             partition, SeriesPortableBackupSeed.Set, SeriesPortableBackupSeed.Series,
-            SeriesPortableBackupSeed.Start, SeriesPortableBackupSeed.Start.AddSeconds(5), cancellationToken: token));
+            SeriesPortableBackupSeed.Start, SeriesPortableBackupSeed.Start.AddSeconds(5), cancellationToken: token);
+        await Assert.That(actual).IsEquivalentTo(expected, CollectionOrdering.Matching);
+        await BackupPersistedPolicyAssertions.SameAsync(expected, actual);
         var expectedAggregate = complete ? new SampleAggregate(3L, 12d, 3d, 5d, 4d)
             : new SampleAggregate(2L, 7d, 3d, 4d, 3.5d);
         await BackupPersistedPolicyAssertions.SameAsync(expectedAggregate,

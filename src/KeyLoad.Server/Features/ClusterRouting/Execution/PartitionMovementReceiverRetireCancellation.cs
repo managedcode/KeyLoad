@@ -40,7 +40,7 @@ internal sealed class PartitionMovementReceiverRetireCancellation(PartitionMovem
         var query = new PartitionMovementRetireCancellationOutcomeQuery(body, grant.RemainingBytes,
             grant.RemainingRecords, Math.Min(requested.MaximumResultBytes, work.MaximumResultBytes));
         var requestId = Guid.NewGuid();
-        var signed = context.Node.CatalogRequestCodec().CreatePartitionMovementRetireCancellationOutcome(requestId, principal.Id,
+        var signed = context.Node.CatalogRequestCodec().MovementTransfer.CreatePartitionMovementRetireCancellationOutcome(requestId, principal.Id,
             query, requested.QueryExpiresAt);
         var terminal = await context.ExecuteSignedAsync(principal, requestId, Guid.Empty, signed, command: false,
             cancellationToken).ConfigureAwait(false);

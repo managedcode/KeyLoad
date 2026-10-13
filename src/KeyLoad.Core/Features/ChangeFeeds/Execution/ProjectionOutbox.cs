@@ -31,12 +31,6 @@ public sealed partial class DatabaseEngine
 
     private static byte[] OutboxKey(PartitionRef partition, long sequence) => KeySpace.Partition(OutboxEntrySpace, partition, sequence);
     private static byte[] ConsumerKey(ProjectionConsumerRef consumer) => KeySpace.Partition(ProjectionConsumerSpace, consumer.Partition, consumer.Name);
-    /// <summary>Reads persisted outbox head metadata from the current storage cut.</summary>
-    /// <param name="view">Current gated storage view.</param>
-    /// <param name="partition">Owning atomic partition.</param>
-    /// <returns>The persisted head, or its initial value.</returns>
-    public OutboxHead ReadOutboxHead(IKeyValueView view, PartitionRef partition)
-        => view.GetRecord<OutboxHead>(KeySpace.Partition(OutboxHeadSpace, partition)) ?? new(ReadOutboxHeadTailEmptyCount, ReadOutboxHeadFirstAvailableSingleItemCount, ReadOutboxHeadStoredRecordsEmptyCount, ReadOutboxHeadStoredBytesEmptyCount);
     private void AppendOutbox(IAtomicTransaction tx, PartitionRef partition, OutboxEntry entry, bool allowProgressReserve)
     {
         const int TailStep = 1;
@@ -59,28 +53,7 @@ public sealed partial class DatabaseEngine
         tx.PutRecord(KeySpace.Partition(AppendOutboxSpaceText, partition), head with
         { Tail = entry.Sequence, StoredRecords = head.StoredRecords + AppendedRecordCount, StoredBytes = head.StoredBytes + payload.Length });
     }
-    private static ProjectionConsumerInfo ProjectionConsumer(IKeyValueView view, ProjectionConsumerRef consumer)
-    {
-        const string ProjectionConsumerDetailText = "The projection consumer is unavailable.";
 
-        ValidatePartition(consumer.Partition);
-        JsonData.Identifier(consumer.Name);
-        return view.GetRecord<ProjectionConsumerInfo>(ConsumerKey(consumer))
-            ?? throw Errors.Fail(ErrorCode.NotFound, ProjectionConsumerDetailText);
-    }
-    private ImmutableArray<ProjectionConsumerInfo> ProjectionConsumers(IKeyValueView view, PartitionRef partition)
-    {
-        const string ProjectionConsumersSpaceText = "projection-consumer";
-        const string ProjectionConsumersDetailText = "The projection consumer limit is inconsistent.";
-
-        var page = view.Scan(KeySpace.Partition(ProjectionConsumersSpaceText, partition), Limits.MaxProjectionConsumers);
-        if (page.HasMore)
-        {
-            throw Errors.Fail(ErrorCode.Corruption, ProjectionConsumersDetailText);
-        }
-
-        return page.Records.Select(record => NativeSerialization.Deserialize<ProjectionConsumerInfo>(record.Value.Span)).ToImmutableArray();
-    }
     private ProjectionConsumerInfo ConfigureProjectionConsumer(IAtomicTransaction tx, ConfigureProjectionConsumerRequest request,
         ProjectionMaintenanceAuthority? authority)
     {
@@ -116,6 +89,7 @@ public sealed partial class DatabaseEngine
         var key = ConsumerKey(request.Consumer);
         if (tx.GetRecord<ProjectionConsumerInfo>(key) is { } previous)
         {
+            RequireProjectionConsumerIdentity(previous, request.Consumer);
             if (JsonData.Fingerprint(previous.Definition) != JsonData.Fingerprint(definition) || previous.Released
                 || request.StartAfter is { } start && start != previous.Checkpoint)
             {
@@ -375,6 +349,7 @@ public sealed partial class DatabaseEngine
         foreach (var stored in StoredOutboxReader.ReadRange(tx, request.Partition,
                      head.FirstAvailable - AfterSingleItemCount, requestedTail, request.Limit))
         {
+            RequireOutboxReclaimAccounting(head, stored.StoredBytes);
             tx.Delete(stored.Key);
             head = head with
             {

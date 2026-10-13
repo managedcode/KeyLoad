@@ -50,12 +50,12 @@ internal static class TwoRf3Profile
 
     internal static bool ValidateAndRead(IConfiguration configuration)
     {
-        const int MaximumSettings = 7;
+        const int MaximumSettings = 8;
 
         ArgumentNullException.ThrowIfNull(configuration);
         var section = configuration.GetSection(TwoRf3ProfileProtocol.Section);
         var children = section.GetChildren().ToArray();
-        if (children.Any(child => (child.Key is not ProfileSetting and not RegistrationKey and not RemoteDocumentKey and not RemoteQueryKey and not ProtectedDocumentMovementKey and not MovementMaxBatchBytesKey and not MovementMaxFrameBytesKey) || child.GetChildren().Any()) || children.Length > MaximumSettings)
+        if (children.Any(child => (child.Key is not ProfileSetting and not RegistrationKey and not RemoteDocumentKey and not RemoteQueryKey and not ProtectedDocumentMovementKey and not MovementMaxBatchBytesKey and not MovementMaxFrameBytesKey and not TenantCapacityPlacementProfile.Key) || child.GetChildren().Any()) || children.Length > MaximumSettings)
         { throw new InvalidOperationException(TwoRf3ProfileProtocol.Invalid); }
         var registration = configuration[TwoRf3ProfileProtocol.RegistrationSetting];
         if (registration is not null and not TwoRf3ProfileProtocol.Enabled and not TwoRf3ProfileProtocol.Disabled)
@@ -78,10 +78,12 @@ internal static class TwoRf3Profile
         var maxFrameBytes = configuration[TwoRf3ProfileProtocol.MovementMaxFrameBytesSetting];
         if (maxFrameBytes is not null)
         { _ = ReadMovementMaxFrameBytes(configuration); }
+        _ = TenantCapacityPlacementProfile.Validate(configuration[TenantCapacityPlacementProfile.Setting],
+            configuration[TwoRf3ProfileProtocol.Setting], movement, query, registration);
         var selected = configuration[TwoRf3ProfileProtocol.Setting];
         if (selected is null)
         {
-            if (registration is not null || remote is not null || query is not null || movement is not null || maxBatchBytes is not null || maxFrameBytes is not null)
+            if (registration is not null || remote is not null || query is not null || movement is not null || maxBatchBytes is not null || maxFrameBytes is not null || configuration[TenantCapacityPlacementProfile.Setting] is not null)
             { throw new InvalidOperationException(TwoRf3ProfileProtocol.Invalid); }
             return false;
         }

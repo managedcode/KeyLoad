@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using KeyLoad.Storage;
 
 namespace KeyLoad.Query.Features.QueryExecution;
 
@@ -6,6 +7,9 @@ internal static class PartitionQueryOrder
 {
     private const int EqualOrder = 0;
     private const int FirstElementIndex = 0;
+    private const int BeforeOrder = -1;
+    private const int AfterOrder = 1;
+    private static readonly byte[] NullKey = KeyCodec.Encode((object?)null);
 
     internal static int ComparePartition(PartitionRef left, PartitionRef right)
     {
@@ -49,10 +53,10 @@ internal static class PartitionQueryOrder
     {
         for (var index = FirstElementIndex; index < order.Count; index++)
         {
-            var result = left.OrderKeys[index].AsSpan().SequenceCompareTo(right.OrderKeys[index].AsSpan());
+            var result = CompareKey(left.OrderKeys[index].AsSpan(), right.OrderKeys[index].AsSpan(), order[index]);
             if (result != EqualOrder)
             {
-                return order[index].Descending ? -Math.Sign(result) : Math.Sign(result);
+                return result;
             }
         }
         return CompareReference(left.Reference, right.Reference);
@@ -63,10 +67,10 @@ internal static class PartitionQueryOrder
     {
         for (var index = FirstElementIndex; index < order.Length; index++)
         {
-            var result = GetOrderKey(left, index).SequenceCompareTo(GetOrderKey(right, index));
+            var result = CompareKey(GetOrderKey(left, index), GetOrderKey(right, index), order[index]);
             if (result != EqualOrder)
             {
-                return order[index].Descending ? -Math.Sign(result) : Math.Sign(result);
+                return result;
             }
         }
         if (ordinalFullReferenceOrder)
@@ -75,6 +79,19 @@ internal static class PartitionQueryOrder
         }
 
         return left.IdKey!.AsSpan().SequenceCompareTo(right.IdKey!);
+    }
+
+    private static int CompareKey(ReadOnlySpan<byte> left, ReadOnlySpan<byte> right, Ordering order)
+    {
+        if (order.NullsFirst is { } first)
+        {
+            var leftNull = left.SequenceEqual(NullKey);
+            var rightNull = right.SequenceEqual(NullKey);
+            if (leftNull != rightNull)
+            { return leftNull == first ? BeforeOrder : AfterOrder; }
+        }
+        var comparison = left.SequenceCompareTo(right);
+        return order.Descending ? -Math.Sign(comparison) : Math.Sign(comparison);
     }
 
     private static ReadOnlySpan<byte> GetOrderKey(PreparedRow row, int index) =>

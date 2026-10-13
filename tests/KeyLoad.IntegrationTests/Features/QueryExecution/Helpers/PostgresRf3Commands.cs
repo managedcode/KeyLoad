@@ -16,6 +16,19 @@ internal static class PostgresRf3Commands
             PostgresRf3Protocol.CommitSql => new(PostgresRf3Protocol.CommitSql, connection),
             PostgresRf3BackpressureProtocol.Sql => new(PostgresRf3BackpressureProtocol.Sql, connection),
             UnsupportedSql => new(UnsupportedSql, connection),
+            SqlNullOrderingRf3Protocol.AscFirst => new(SqlNullOrderingRf3Protocol.AscFirst, connection),
+            SqlNullOrderingRf3Protocol.AscLast => new(SqlNullOrderingRf3Protocol.AscLast, connection),
+            SqlNullOrderingRf3Protocol.DescFirst => new(SqlNullOrderingRf3Protocol.DescFirst, connection),
+            SqlNullOrderingRf3Protocol.DescLast => new(SqlNullOrderingRf3Protocol.DescLast, connection),
+            SqlNullOrderingRf3Protocol.BadSql => new(SqlNullOrderingRf3Protocol.BadSql, connection),
+            SqlFetchCountRf3Protocol.UnorderedOne => new(SqlFetchCountRf3Protocol.UnorderedOne, connection),
+            SqlFetchCountRf3Protocol.FirstOne => new(SqlFetchCountRf3Protocol.FirstOne, connection),
+            SqlFetchCountRf3Protocol.NextOne => new(SqlFetchCountRf3Protocol.NextOne, connection),
+            SqlFetchCountRf3Protocol.FirstTwo => new(SqlFetchCountRf3Protocol.FirstTwo, connection),
+            SqlFetchCountRf3Protocol.NextThree => new(SqlFetchCountRf3Protocol.NextThree, connection),
+            SqlFetchCountRf3Protocol.SingularTwo => new(SqlFetchCountRf3Protocol.SingularTwo, connection),
+            SqlFetchCountRf3Protocol.BadSql => new(SqlFetchCountRf3Protocol.BadSql, connection),
+            SqlFetchCountRf3Protocol.TiesSql => new(SqlFetchCountRf3Protocol.TiesSql, connection),
             _ => throw new InvalidOperationException(InvalidCommand)
         };
 

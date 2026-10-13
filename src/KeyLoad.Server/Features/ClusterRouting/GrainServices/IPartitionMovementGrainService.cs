@@ -17,6 +17,11 @@ internal interface IPartitionMovementGrainService : IGrainService
     Task<PartitionMovementGrainServiceReply> ProbeOwnerAsync(PartitionMovementGrainServiceRequest request,
         CancellationToken cancellationToken);
 
+    /// <summary>Reads original bounded authenticated capacity from this actual silo generation.</summary>
+    [Alias(PartitionMovementGrainServiceProtocol.CapacityExchangeAlias)]
+    Task<OwnerCapacityNativeReply> ReadCapacityAsync(OwnerCapacityNativeRequest request,
+        CancellationToken cancellationToken);
+
     /// <summary>Returns this actual silo generation bound to a fresh discovery nonce.</summary>
     [Alias(PartitionMovementGrainServiceProtocol.DiscoverAlias)]
     Task<PartitionMovementGrainServiceDiscovery> DiscoverAsync(Guid nonce, CancellationToken cancellationToken);

@@ -19,6 +19,16 @@ internal static class SqlSyntax
     internal const string Desc = "DESC";
     internal const string Asc = "ASC";
     internal const string Limit = "LIMIT";
+    internal const string Offset = "OFFSET";
+    internal const string Row = "ROW";
+    internal const string Rows = "ROWS";
+    internal const string Fetch = "FETCH";
+    internal const string First = "FIRST";
+    internal const string Next = "NEXT";
+    internal const string Only = "ONLY";
+    internal const string With = "WITH";
+    internal const string Nulls = "NULLS";
+    internal const string Last = "LAST";
     internal const string Not = "NOT";
     internal const string Is = "IS";
     internal const string Missing = "MISSING";

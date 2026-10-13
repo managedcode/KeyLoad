@@ -21,7 +21,7 @@ internal sealed class PartitionMovementReceiverIssuance(PartitionMovementReceive
             requested.OriginalEnvelope, requested.OriginalAuthorization, grant.RemainingBytes,
             grant.RemainingRecords, Math.Min(requested.MaximumResultBytes, work.MaximumResultBytes));
         var requestId = Guid.NewGuid();
-        var signed = context.Node.CatalogRequestCodec().CreatePartitionMovementReceiverIssuance(requestId, principal.Id,
+        var signed = context.Node.CatalogRequestCodec().MovementTransfer.CreatePartitionMovementReceiverIssuance(requestId, principal.Id,
             query, requested.QueryExpiresAt);
         var terminal = await context.ExecuteSignedAsync(principal, requestId, Guid.Empty, signed, command: false,
             cancellationToken).ConfigureAwait(false);

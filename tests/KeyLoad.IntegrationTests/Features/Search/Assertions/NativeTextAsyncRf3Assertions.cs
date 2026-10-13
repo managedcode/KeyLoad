@@ -12,8 +12,8 @@ internal static class NativeTextAsyncRf3Assertions
         SearchRequest request, (string Id, double Score)[] expected, bool verifyRedaction,
         CancellationToken cancellationToken)
     {
-        var actual = await McpCallerAssertions.SdkSuccessAsync(await sdk.SearchAsync(request, cancellationToken));
-        var official = await McpCallerAssertions.SuccessAsync<RankedDocument[]>(await mcp.CallAsync(
+        var actual = await NativeTextPublicOutcomeAssertions.SdkSuccessAsync(await sdk.SearchAsync(request, cancellationToken));
+        var official = await NativeTextPublicOutcomeAssertions.SuccessAsync<RankedDocument[]>(await mcp.CallAsync(
             McpCallerTools.SearchExecute, request, cancellationToken));
         await Assert.That(actual.Length).IsEqualTo(expected.Length);
         for (var index = 0; index < expected.Length; index++)

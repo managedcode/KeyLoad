@@ -41,9 +41,10 @@ public sealed partial class DatabaseEngine
         DateTimeOffset evaluatedAt, PartitionMovePeerEnvelope verified, PartitionMoveReceiverEffectAdmission? admission = null)
     {
         PartitionMovePeerEnvelopeValidation.RequireStructure(verified, Limits.MaxBatchBytes);
-        if (commandId == Guid.Empty || string.IsNullOrWhiteSpace(localPrincipalId)
-            || verified.ExpiresAt <= EvaluationClock.GetUtcNow())
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        if (commandId == Guid.Empty || string.IsNullOrWhiteSpace(localPrincipalId))
+        { throw PartitionMoveOwnerDiagnostic.Fail(PartitionMoveOwnerGuard.DispatchIdentity); }
+        if (verified.ExpiresAt <= EvaluationClock.GetUtcNow())
+        { throw PartitionMoveOwnerDiagnostic.Fail(PartitionMoveOwnerGuard.DispatchExpiry); }
         RequireMovementReceiver(verified);
         RequireControlledCommandPhaseIdentity(commandId, verified);
         if (!PartitionMoveGrantValidation.IsLocalControl(verified.Stage))
@@ -131,9 +132,14 @@ public sealed partial class DatabaseEngine
                 ? request.SourcePlacement.PhysicalShardId : request.DestinationOwner.PhysicalShardId,
             _ => request.DestinationOwner.PhysicalShardId
         };
-        if (catalog.DefaultShard.PhysicalShardId != physicalId || expected != Store.Identity.Incarnation || catalog.DefaultShard.Incarnation != expected
-            || request.Stage == PartitionMovePeerStage.Abort
-                && expected != request.SourcePlacement.Incarnation && expected != request.DestinationOwner.Incarnation)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        if (catalog.DefaultShard.PhysicalShardId != physicalId)
+        { throw PartitionMoveOwnerDiagnostic.Fail(PartitionMoveOwnerGuard.ReceiverPhysicalShard); }
+        if (expected != Store.Identity.Incarnation)
+        { throw PartitionMoveOwnerDiagnostic.Fail(PartitionMoveOwnerGuard.ReceiverStoreIncarnation); }
+        if (catalog.DefaultShard.Incarnation != expected)
+        { throw PartitionMoveOwnerDiagnostic.Fail(PartitionMoveOwnerGuard.ReceiverCatalogIncarnation); }
+        if (request.Stage == PartitionMovePeerStage.Abort
+            && expected != request.SourcePlacement.Incarnation && expected != request.DestinationOwner.Incarnation)
+        { throw PartitionMoveOwnerDiagnostic.Fail(PartitionMoveOwnerGuard.ReceiverAbortScope); }
     }
 }

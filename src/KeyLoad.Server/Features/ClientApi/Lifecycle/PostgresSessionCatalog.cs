@@ -22,10 +22,7 @@ internal sealed class PostgresSessionCatalog(global::Microsoft.Extensions.Option
         { throw Errors.Fail(ErrorCode.Validation, PostgresProtocol.Duplicate); }
         if (previous is null && statements.Count >= Options.MaximumStatements)
         { throw Errors.Fail(ErrorCode.ResourceExhausted, Capacity); }
-        Resize(previous?.RetainedBytes ?? PostgresProtocol.EmptyBytes, value.RetainedBytes);
-        statements[name] = value;
-        if (name.Length == PostgresProtocol.AllRows)
-        { ClosePortal(string.Empty); }
+        ReplaceStatement(name, previous, value);
     }
 
     internal void PutPortal(string name, PostgresBoundPortal value)
@@ -41,8 +38,31 @@ internal sealed class PostgresSessionCatalog(global::Microsoft.Extensions.Option
 
     internal void CloseStatement(string name)
     {
-        if (statements.Remove(name, out var value))
-        { Resize(value.RetainedBytes, PostgresProtocol.EmptyBytes); }
+        if (statements.TryGetValue(name, out var value))
+        { ReplaceStatement(name, value, null); }
+    }
+
+    private void ReplaceStatement(string name, PostgresPreparedStatement? previous, PostgresPreparedStatement? next)
+    {
+        var dependent = portals.Where(pair => ReferenceEquals(pair.Value.Statement, previous))
+            .Select(pair => pair.Key).ToArray();
+        var released = previous?.RetainedBytes ?? PostgresProtocol.EmptyBytes;
+        foreach (var key in dependent)
+        { released = checked(released + portals[key].RetainedBytes); }
+        // Admit the complete replacement before changing any catalog ownership.
+        Resize(released, next?.RetainedBytes ?? PostgresProtocol.EmptyBytes);
+        foreach (var key in dependent)
+        { portals.Remove(key); }
+        if (next is null)
+        { statements.Remove(name); }
+        else
+        { statements[name] = next; }
+    }
+
+    internal void BeginSimpleQuery()
+    {
+        Sync();
+        CloseStatement(string.Empty);
     }
 
     internal void ClosePortal(string name)

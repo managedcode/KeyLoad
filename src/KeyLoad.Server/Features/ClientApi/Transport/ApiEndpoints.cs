@@ -27,6 +27,7 @@ internal static class ApiEndpoints
         AuthorizationApi.Map(app);
         AtomicPartitionPlacementApi.Map(app);
         PartitionMovementPublicApi.Map(app);
+        TenantPlacementPublicApi.Map(app);
         AdminDashboardApi.Map(app);
         ClusterBackupApi.Map(app);
         app.MapGet(AdmissionPath, (Func<HttpContext, Task<IResult>>)(context =>

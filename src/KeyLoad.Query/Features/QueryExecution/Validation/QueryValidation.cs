@@ -47,7 +47,8 @@ internal static class QueryValidation
         ValidateModelSource(request, query);
         if (query.Projection.IsDefault || query.Order.IsDefault
             || query.Projection.Length < MinimumPositiveCount || query.Projection.Length > execution.MaximumProjection
-            || query.Order.Length > execution.MaximumOrdering || query.Limit < MinimumPositiveCount || query.Limit > limits.MaxResults
+            || query.Order.Length > execution.MaximumOrdering || query.Limit < MinimumPositiveCount
+            || query.Offset < EmptyElementCount || (long)query.Offset + query.Limit > limits.MaxResults
             || request.Parameters?.Count > execution.MaximumParameters)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, QueryStructureExceedsItsBudgetDetail);
@@ -150,7 +151,7 @@ internal static class QueryValidation
         {
             throw Errors.Fail(ErrorCode.UnsupportedCapability, ModelQueryRequiresExplicitFullScanConsentDetail);
         }
-        if (request.Cursor is not null)
+        if (request.Cursor is not null || query.Offset != EmptyElementCount)
         {
             throw Errors.Fail(ErrorCode.UnsupportedCapability, ModelQueryContinuationIsNotSupportedDetail);
         }
