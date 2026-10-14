@@ -17,8 +17,8 @@ internal static class ChunkMultiblockCrashOperations
     internal static Mutation Intended(bool merge) => merge
         ? new MergeSampleChunkWindow(SampleChunkCrashContract.Set, SampleChunkCrashContract.Series,
             SampleChunkCrashContract.WindowId, ChunkMultiblockCrashProtocol.PreparedMergeRevision)
-        : new SealSampleChunkWindow(SampleChunkCrashContract.Set, SampleChunkCrashContract.Series,
-            SampleChunkCrashContract.WindowId, ChunkMultiblockCrashProtocol.PreparedSealRevision);
+        : new AppendSamples(SampleChunkCrashContract.Set, SampleChunkCrashContract.Series,
+            [.. ChunkMultiblockCrashData.AutomaticSealTail], SampleChunkCrashContract.Tags);
 
     internal static OperationResult Fresh(DatabaseEngine database)
         => SampleChunkCrashOperations.Commit(database, ChunkMultiblockCrashData.FreshCommandId,

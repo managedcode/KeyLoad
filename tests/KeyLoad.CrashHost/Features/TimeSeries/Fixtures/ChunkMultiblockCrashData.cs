@@ -5,6 +5,7 @@ namespace KeyLoad.CrashHost;
 internal static class ChunkMultiblockCrashData
 {
     private const int AdditionalCount = 254;
+    private const int PreparedAdditionalCount = 252;
     private const int FirstOrdinal = 0;
     private const int TimestampParityPeriod = 2;
     private const int FirstTimestampParity = 0;
@@ -29,9 +30,11 @@ internal static class ChunkMultiblockCrashData
         new SampleData(Prefix + index.ToString(NumberFormat, CultureInfo.InvariantCulture), index % TimestampParityPeriod == FirstTimestampParity
             ? SampleChunkCrashContract.From : SampleChunkCrashContract.Equal.Timestamp, AdditionalValue))];
 
-    internal static SampleData[] AdditionalFor(bool merge) => merge ? Additional : [SampleChunkCrashContract.Late, .. Additional];
+    internal static SampleData[] AdditionalFor(bool merge) => merge ? Additional : [SampleChunkCrashContract.Late, .. Additional.Take(PreparedAdditionalCount)];
 
-    internal static SampleRecord[] Expected(bool healthy)
+    internal static SampleData[] AutomaticSealTail => [.. Additional.Skip(PreparedAdditionalCount)];
+
+    internal static SampleRecord[] Expected(bool healthy, bool prepared = false, bool merge = true)
     {
         SampleRecord[] original = [new(SampleChunkCrashContract.Series, SampleChunkCrashContract.First, FirstSequence, SampleChunkCrashContract.Tags),
             new(SampleChunkCrashContract.Series, SampleChunkCrashContract.Equal, EqualSequence, SampleChunkCrashContract.Tags),
@@ -43,6 +46,8 @@ internal static class ChunkMultiblockCrashData
             rows = rows.Append(new(SampleChunkCrashContract.Series, Fresh,
             ChunkMultiblockCrashProtocol.HealthySequence, SampleChunkCrashContract.Tags));
         }
+        if (prepared && !merge)
+        { rows = rows.Where(record => record.Sequence <= ChunkMultiblockCrashProtocol.PreparedAutomaticSealSequence); }
         return rows.OrderBy(record => record.Sample.Timestamp.UtcTicks).ThenBy(record => record.Sequence).ToArray();
     }
 }

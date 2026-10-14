@@ -22,7 +22,7 @@ internal static class QueryCursorRequestIdentityR47Seed
         await SqlRf3Protocol.EqualAsync(original.Partition, changedRequest.Partition);
         await Assert.That(changedRequest.Cursor).IsNull();
         var complete = SqlOffsetRf3Protocol.ScalarRequest(original.Partition) with
-        { Sql = "SELECT title FROM offsetleft ORDER BY order_id LIMIT 4" };
+        { Sql = "SELECT TOP(4) title FROM offsetleft ORDER BY order_id" };
         var resources = await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.ListResourcesAsync(
             new(original.Partition.TenantId, original.Partition.DatabaseId), token));
         return new(original.Identity.Secret, original.Partition,

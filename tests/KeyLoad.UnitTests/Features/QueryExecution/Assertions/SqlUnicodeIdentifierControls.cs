@@ -22,11 +22,11 @@ internal static class SqlUnicodeIdentifierControls
             code, image, position, identity);
         }
         foreach (var (window, code) in new[]
-        { ("LIMIT U&\"1\"", ErrorCode.UnsupportedCapability),
-            ("OFFSET U&\"1\" LIMIT 1", ErrorCode.UnsupportedCapability),
-            ("FETCH FIRST U&\"1\" ROW ONLY", ErrorCode.Validation) })
+        { ("OFFSET \"1\" ROWS FETCH NEXT 1 ROWS ONLY", ErrorCode.UnsupportedCapability),
+            ("OFFSET 0 ROWS FETCH NEXT \"1\" ROW ONLY", ErrorCode.UnsupportedCapability),
+            ("OFFSET 0 ROWS FETCH NEXT N'1' ROW ONLY", ErrorCode.Validation) })
         {
-            await RefuseAsync(database, engine, SqlNullDistinctCases.Prefix + SqlUnicodeIdentifierCases.Clause
+            await RefuseAsync(database, engine, SqlNullDistinctCases.WindowPrefix + SqlUnicodeIdentifierCases.Clause
             + OrderBy + window, code, image, position, identity);
         }
 

@@ -15,7 +15,7 @@ internal static class SqlTypedInsertPrincipalPolicy
         await Assert.That(refused.Result.Error).IsEqualTo(ErrorCode.PermissionDenied);
         var image = QueueWholeFlowStorage.Bytes(fixture.Store);
         var cut = fixture.Store.Position;
-        await FenceAsync(fixture, state);
+        await FenceAsync(fixture, state, SqlTypedInsertLiteral.ScopeDenied);
         await SqlTypedInsertAssertions.UnchangedAsync(fixture.Store, image, cut);
         await SqlTypedInsertResourcePolicy.BytesAsync(fixture, state);
         var repaired = state.Principal with { PolicyEpoch = RepairedEpoch };
@@ -33,9 +33,10 @@ internal static class SqlTypedInsertPrincipalPolicy
         await SqlTypedInsertResourcePolicy.BytesAsync(fixture, state);
         return state with { Principal = repaired, Repaired = healthy, EpochFenced = true };
     }
-    internal static async Task FenceAsync(TestDatabase fixture, SqlTypedInsertState state)
+    internal static async Task FenceAsync(TestDatabase fixture, SqlTypedInsertState state,
+        string safeDetail = SqlTypedInsertLiteral.EpochChanged)
     {
-        var expected = new OperationResult(null, ErrorCode.PermissionDenied, SqlTypedInsertLiteral.EpochChanged);
+        var expected = new OperationResult(null, ErrorCode.PermissionDenied, safeDetail);
         await SqlTypedInsertAssertions.SameAsync(expected, SqlTypedInsertLiteral.Apply(fixture.Database, state.Created.Command, state.Created.At));
         await SqlTypedInsertAssertions.SameAsync(expected, SqlTypedInsertLiteral.Apply(fixture.Database, state.Failed.Command, state.Failed.At));
     }

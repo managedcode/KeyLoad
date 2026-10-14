@@ -17,41 +17,49 @@ internal sealed class SampleChunkCorrectionBoundTests
     [Test]
     public async Task AcChunk008012ExactCorrectionCapRejectsOneOverThenActualMergeFreesCapacity()
     {
-        using var fixture = new SampleChunkCanonicalFixture();
-        fixture.Open();
-        fixture.AppendInitial();
-        fixture.Commit(new SealSampleChunkWindow(SampleChunkCanonicalFixture.Set,
-            SampleChunkCanonicalFixture.Series, fixture.WindowId, AppendedRevision));
-        var corrections = Enumerable.Range(FirstOrdinal, CorrectionBound).Select(ordinal =>
-            new SampleData(IdPrefix + ordinal.ToString(System.Globalization.CultureInfo.InvariantCulture),
-                SampleChunkCanonicalFixture.Start.AddTicks(ordinal), ordinal)).ToImmutableArray();
-        fixture.Commit(new AppendSamples(SampleChunkCanonicalFixture.Set,
-            SampleChunkCanonicalFixture.Series, corrections, SampleChunkCanonicalFixture.Tags));
-        var revision = SealedRevision + CorrectionBound;
-        var rows = SampleChunkCanonicalFixture.Expected().Concat(corrections.Select((sample, index) => new SampleRecord(
-            SampleChunkCanonicalFixture.Series, sample, InitialSequence + FirstOrdinal + index,
-            SampleChunkCanonicalFixture.Tags))).ToImmutableArray();
-        await LiteralAsync(fixture, revision, SealedGeneration, rows);
-        var overflow = new AppendSamples(SampleChunkCanonicalFixture.Set, SampleChunkCanonicalFixture.Series,
-            [new(ExtraId, SampleChunkCanonicalFixture.Start.AddTicks(CorrectionBound + FirstOrdinal), FirstOrdinal)],
-            SampleChunkCanonicalFixture.Tags);
-        var raw = fixture.Raw();
-        var originalId = Guid.NewGuid();
-        var rejected = fixture.Commit(originalId, overflow);
-        await Assert.That(rejected.Error).IsEqualTo(ErrorCode.ResourceExhausted);
-        await Assert.That(rejected.Json).IsNull();
-        await Assert.That(fixture.Raw()).IsEqualTo(raw);
-        await LiteralAsync(fixture, revision, SealedGeneration, rows);
-        await SampleChunkCanonicalAssertions.Replay(fixture, originalId, overflow, rejected);
-        fixture.Commit(new MergeSampleChunkWindow(SampleChunkCanonicalFixture.Set,
-            SampleChunkCanonicalFixture.Series, fixture.WindowId, revision));
-        await LiteralAsync(fixture, revision + FirstOrdinal, MergedGeneration, rows);
-        fixture.Commit(overflow);
-        var expected = rows.Add(new(SampleChunkCanonicalFixture.Series, overflow.Samples[0],
-            InitialSequence + CorrectionBound + FirstOrdinal, SampleChunkCanonicalFixture.Tags));
-        await LiteralAsync(fixture, revision + FirstOrdinal + FirstOrdinal, MergedGeneration, expected);
-        await SampleChunkCanonicalAssertions.Replay(fixture, originalId, overflow, rejected);
-        await LiteralAsync(fixture, revision + FirstOrdinal + FirstOrdinal, MergedGeneration, expected);
+        await SampleChunkCorrectionBoundLifetime.RunAsync(async fixture =>
+        {
+            var originals = new List<(ReplicatedOperation Operation, OperationResult Result)>();
+            fixture.Open();
+            fixture.AppendInitial();
+            fixture.Commit(new SealSampleChunkWindow(SampleChunkCanonicalFixture.Set,
+                SampleChunkCanonicalFixture.Series, fixture.WindowId, AppendedRevision));
+            var corrections = Enumerable.Range(FirstOrdinal, CorrectionBound).Select(ordinal =>
+                new SampleData(IdPrefix + ordinal.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    SampleChunkCanonicalFixture.Start.AddTicks(ordinal), ordinal)).ToImmutableArray();
+            fixture.Commit(new AppendSamples(SampleChunkCanonicalFixture.Set,
+                SampleChunkCanonicalFixture.Series, corrections, SampleChunkCanonicalFixture.Tags));
+            var revision = SealedRevision + CorrectionBound;
+            var rows = SampleChunkCanonicalFixture.Expected().Concat(corrections.Select((sample, index) => new SampleRecord(
+                SampleChunkCanonicalFixture.Series, sample, InitialSequence + FirstOrdinal + index,
+                SampleChunkCanonicalFixture.Tags))).ToImmutableArray();
+            await LiteralAsync(fixture, revision, SealedGeneration, rows);
+            var overflow = new AppendSamples(SampleChunkCanonicalFixture.Set, SampleChunkCanonicalFixture.Series,
+                [new(ExtraId, SampleChunkCanonicalFixture.Start.AddTicks(CorrectionBound + FirstOrdinal), FirstOrdinal)],
+                SampleChunkCanonicalFixture.Tags);
+            var raw = fixture.Raw();
+            var originalId = Guid.NewGuid();
+            var rejected = fixture.Commit(originalId, overflow);
+            await Assert.That(rejected.Error).IsEqualTo(ErrorCode.ResourceExhausted);
+            await Assert.That(rejected.Json).IsNull();
+            await Assert.That(fixture.Raw()).IsEqualTo(raw);
+            await LiteralAsync(fixture, revision, SealedGeneration, rows);
+            await SampleChunkCanonicalAssertions.Replay(fixture, originalId, overflow, rejected);
+            await SampleChunkCorrectionBoundReceipts.CommitAsync(fixture,
+                new MergeSampleChunkWindow(SampleChunkCanonicalFixture.Set,
+                    SampleChunkCanonicalFixture.Series, fixture.WindowId, revision),
+                "mergeSampleChunkWindow", revision + FirstOrdinal, originals);
+            await LiteralAsync(fixture, revision + FirstOrdinal, MergedGeneration, rows);
+            await SampleChunkCorrectionBoundReceipts.CommitAsync(fixture, overflow, "appendSamples",
+                InitialSequence + CorrectionBound + FirstOrdinal, originals);
+            var expected = rows.Add(new(SampleChunkCanonicalFixture.Series, overflow.Samples[0],
+                InitialSequence + CorrectionBound + FirstOrdinal, SampleChunkCanonicalFixture.Tags));
+            await LiteralAsync(fixture, revision + FirstOrdinal + FirstOrdinal, MergedGeneration, expected);
+            await SampleChunkCanonicalAssertions.Replay(fixture, originalId, overflow, rejected);
+            await LiteralAsync(fixture, revision + FirstOrdinal + FirstOrdinal, MergedGeneration, expected);
+            await SampleChunkCorrectionBoundCold.RunAsync(fixture, originalId, overflow, rejected,
+                revision + FirstOrdinal + FirstOrdinal, expected, originals);
+        });
     }
 
     private static async Task LiteralAsync(SampleChunkCanonicalFixture fixture, long revision,

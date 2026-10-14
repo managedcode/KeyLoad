@@ -31,6 +31,7 @@ internal sealed class ControlledPartitionMovementNode : IDisposable
     internal PhysicalShardRecord PhysicalOwner { get; }
     internal long MaximumFixtureEntries { get; }
     internal bool RetainRoot { get; set; }
+    internal long AdditionalSeedEntries { get; set; }
 
     internal void JoinForChild()
     {

@@ -9,10 +9,10 @@ internal static class NativeCanonicalModelCutOriginalArm
     {
         RequestCqrsProbeFileValidation.ValidateDirectory(controls.Root);
         var entries = Directory.EnumerateFileSystemEntries(controls.Root)
-            .Take(RequestCqrsRf3Protocol.NodeCount + ExtraInventoryEntry).ToArray();
-        if (entries.Length != RequestCqrsRf3Protocol.NodeCount)
+            .Take(TwoRf3MembershipProtocol.NodeCount + ExtraInventoryEntry).ToArray();
+        if (entries.Length != TwoRf3MembershipProtocol.NodeCount)
         { throw Invalid(); }
-        foreach (var node in RequestCqrsProbeFixtureProtocol.Nodes)
+        foreach (var node in TwoRf3MembershipProtocol.Nodes)
         {
             var original = controls.NodeFor(node);
             if (original.Directory != Path.Combine(controls.Root, node)

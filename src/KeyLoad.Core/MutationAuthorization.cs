@@ -24,7 +24,8 @@ public sealed partial class DatabaseEngine
         }
     }
 
-    private void ReauthorizeEffect(IKeyValueView view, PrincipalRecord principal, PartitionRef partition, Mutation effect)
+    private void ReauthorizeEffect(IKeyValueView view, PrincipalRecord principal, PartitionRef partition, Mutation effect,
+        BatchResourceAdmission admission = BatchResourceAdmission.CurrentPhysicalOwner)
     {
         if (effect is AdvanceQueueDeadline deadline)
         {
@@ -57,7 +58,7 @@ public sealed partial class DatabaseEngine
             return;
         }
         AuthorizeComposition(view, principal, partition, effect);
-        var resource = Resource(view, partition, effect.Resource);
+        var resource = ReauthorizeEffectResource(view, partition, effect, admission);
         var documentId = effect switch
         {
             InsertTypedRow insert => Features.RelationalStorage.RelationalRowValidation.InsertIdentity(resource, insert.Json, OperationLimitsOptions),
@@ -87,6 +88,11 @@ public sealed partial class DatabaseEngine
         ReauthorizeEffectIndexes(principal, resource, effect);
         ReauthorizeEffectVertices(view, principal, partition, effect);
     }
+
+    private ResourceDefinition ReauthorizeEffectResource(IKeyValueView view, PartitionRef partition, Mutation effect,
+        BatchResourceAdmission admission)
+        => effect is InsertTypedRow ? BatchResource(view, partition, effect.Resource, admission)
+            : Resource(view, partition, effect.Resource);
 
     private void ReauthorizeEffectFields(PrincipalRecord principal, ResourceDefinition resource, Mutation effect)
     {

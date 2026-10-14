@@ -7,7 +7,7 @@ internal sealed class AnalyticalAdmissionTests
 {
     private const string Collection = "orders";
     private const string Principal = "root";
-    private const string Sql = "SELECT * FROM orders LIMIT 1";
+    private const string Sql = "SELECT TOP (1) * FROM orders";
     private const string InvalidSql = "invalid SQL";
     private const string SearchTerm = "needle";
     private const string SearchField = "/text";

@@ -41,8 +41,8 @@ internal static class ControlledPartitionMovementTerminalOperation
         await ControlledPartitionMovementRetirementComplete.ExecuteAsync(source, sourceRuntime, sourceAdmission,
             corpus, finalized, retired.Terminal, retired.GrantId, retired.OriginalBody,
             callerAddress, wholeExpiresAt, cancellationToken);
-        var sourceIndex = checked(FixedControlEntries + ControlEntriesPerPage * installed.Handle.PageCount);
-        var targetIndex = checked(FixedTargetEntries + TargetEntriesPerPage * installed.Handle.PageCount);
+        var sourceIndex = checked(source.AdditionalSeedEntries + FixedControlEntries + ControlEntriesPerPage * installed.Handle.PageCount);
+        var targetIndex = checked(target.AdditionalSeedEntries + FixedTargetEntries + TargetEntriesPerPage * installed.Handle.PageCount);
         await Assert.That(source.Journal.Log.State.LastIndex).IsEqualTo(sourceIndex);
         await Assert.That(source.Store.Position).IsEqualTo(checked(initialPosition + sourceIndex));
         await Assert.That(target.Journal.Log.State.LastIndex).IsEqualTo(targetIndex);

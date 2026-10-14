@@ -2590,6 +2590,155 @@
           "sha256": "62406b560a50c90a527e027703517833120a2ed8920420816f61f0a0756d00f6"
         }
       ]
+    },
+    "currentStageR52": {
+      "classification": "Completed current source-matched local development checkpoint; failures retained; full Linux/RF3/coverage/endurance/performance acceptance remains open",
+      "parentSourceRevision": "319c719e6f6fa2c0fa1f8d14627a14004c5160c2",
+      "implemented": [
+        "Retired-original typed INSERT reauthorization uses verified original placement admission in the existing authorization path; genuine native movement/full replay case authored, its earlier full transfer-grant assertion remains failed",
+        "Original ANN complete checkpoint receipt accounting and signed principal policy ordering corrected without reducing original operation assertions",
+        "Same original builder case now executes independent SQL/AST branch pages, refusal/cancellation, receipt replay and two native cold owners",
+        "Selected T-SQL OFFSET/NULL controls and original SDK/MCP SQL fixture callers, current MCP catalog and complete 39-mutation native schema corpus corrected",
+        "Genuine automatic-seal process recipe prepares255 acknowledged records before the original two-record append; all four real fault/kill merge/seal variants now pass",
+        "Same correction-cap case now validates complete receipts/refusal, genuine two-block raw/chunk models, replay and two cold owners",
+        "New public257-record SDK/official MCP/native SQL flow and exact six-owner readiness inventory authored; public RF3 qualification remains open",
+        "Original strict prepare no-effect assertions retain error-first bounded delta evidence; existing KeyLoad.Server namespace import repairs the diagnostic helper without generated public APIs"
+      ],
+      "fullRelease": {
+        "exitCode": 0,
+        "errors": 0,
+        "warnings": 0,
+        "seconds": 320.195914916927,
+        "gitVisibleFiles": 11500,
+        "sourceDrift": []
+      },
+      "canonicalFormat": {
+        "verifyExitCode": 0,
+        "verifySeconds": 484.3581120830495,
+        "sourceDrift": []
+      },
+      "governance": {
+        "exitCode": 0,
+        "projects": 27,
+        "modules": 4
+      },
+      "nativeDiscovery": {
+        "unitEntries": 3889,
+        "recoveryEntries": 355,
+        "integrationEntries": 545,
+        "focusedWholeClasses": 24,
+        "focusedActualResults": 61,
+        "validFullExecutableUniverseProven": false,
+        "boundary": "Native data-generation placeholders and dynamic cases are not a complete executable-universe or PASS claim"
+      },
+      "focusedUnit": {
+        "total": 61,
+        "passed": 56,
+        "failed": 5,
+        "skipped": 0,
+        "nativeSeconds": 94.121,
+        "wrapperSeconds": 98.27649191697128,
+        "maximumParallelTests": 50,
+        "peakTrxIntervals": 39,
+        "sourceDrift": [],
+        "compiledDrift": [],
+        "trxSha256": "8bc163ece34b64f04f1d4f0253b3a6ed52ee21ca9748974a6418c0614ebd1bc1"
+      },
+      "focusedRecovery": {
+        "total": 6,
+        "passed": 6,
+        "failed": 0,
+        "skipped": 0,
+        "nativeSeconds": 14.658,
+        "wrapperSeconds": 18.332183041027747,
+        "maximumParallelTests": 50,
+        "peakTrxIntervals": 6,
+        "sourceDrift": [],
+        "compiledDrift": [],
+        "trxSha256": "5fd8b0030d2c2b4f8c86bb4863219ca1de7da86d37f9d34d9ac2f7b9f6ddbd87"
+      },
+      "passedChangedWholeFlows": [
+        "All original selected ANN enrollment/checkpoint and text-maintenance classes (13 results)",
+        "Ordinary typed SQL INSERT and persisted policy refusal/repair",
+        "Original independent builder whole operation and all five adapter contract cases",
+        "MCP canonical39 mutation roundtrip/schema and complete catalog controls",
+        "Original analytical admission operations",
+        "Correction-cap original refusal/repair/full-receipt/replay/two-cold operation",
+        "Two-block read-budget, boundary and paged-retention operations",
+        "All six original/new actual process-recovery cases"
+      ],
+      "remainingCaseOwners": {
+        "sqlNull": "Original SqlNullDistinctRefusals.InvalidAsync expectedValidation, actualUnsupportedCapability; this is a deeper distinct original control, not the repaired foreign-Unicode classification",
+        "nativePrepare": "Original genuine cold join cancelled; the diagnostic-witness stage is not asserted reached, previous local20-to21 observation is not this initiating cause",
+        "nativeRetireAndBm25": "Original write outcome unknown with joined cancellations; no timeout enlargement or CPU cause claimed",
+        "retiredInsert": "Full ControlledPartitionMovementGrantAssertions grant comparison failed before target replay; new seeded table resource inventory under exact source audit, not a completed retained-outcome gate"
+      },
+      "publicRf3": "New/changed public real SDK/MCP/Npgsql source compiled; current image/source-bound Linux RF3 remains open; no selector whitelist bypass or stale image used",
+      "lastDeliveredLinux": {
+        "sourceRevision": "319c719e6f6fa2c0fa1f8d14627a14004c5160c2",
+        "runId": 38578269537,
+        "unit": {
+          "totalReportedRows": 3791,
+          "passed": 3779,
+          "failed": 12,
+          "sessionAborted": true,
+          "testHostPid": 5004,
+          "sessionAbortedAt": "2026-10-14T14:58:12.984756",
+          "completeSuiteProven": false
+        },
+        "recovery": {
+          "total": 355,
+          "passed": 351,
+          "failed": 4
+        },
+        "rf3": {
+          "jobId": 115901040040,
+          "conclusion": "failure",
+          "testStep": "cancelled",
+          "completeStructuredCensusAvailable": false
+        },
+        "classification": "Separate preceding delivered R51 cohort; authentic 8 ZIP/66 TRX/65 TUnit JSON,37 failed report rows across24 predicate groups retained; no current R52 acceptance"
+      },
+      "sourceClosure": {
+        "gitVisibleFiles": 11500,
+        "sourceManifestSha256": "cd990eb3251778948d4793a8f73ab14a92c288d996ba8c7fd82191b03db99e44",
+        "allFocusedProcessAndReadersJoined": true,
+        "runtimeSourceAndKeyLoadDllPdbDrift": [],
+        "qualificationMetadataWrittenOnlyAfterEveryOwnedRuntimeAndCensusJoined": true
+      },
+      "functionalCoverage": "UNMEASURED for current source; no load/comparison credit or stale R38 full-coverage claim",
+      "profiling": "No fresh current matched profile or speed claim; KL105 additional and open",
+      "nextOwnerScope": "Owner selected KeyLoad.Clustering project/path/namespace rename and Prostir editorconfig baseline with multiline executable brace blocks. Source N only during this checkpoint; rename/style not yet applied or qualified.",
+      "artifacts": [
+        {
+          "path": "TestResults/stage61-native-join/stage64-r52-full-release-qualified.completion.original.json",
+          "sha256": "1bf561579fb45666f14b6600d689618900ffe04eb508633a2e159c9aba226942"
+        },
+        {
+          "path": "TestResults/stage61-native-join/stage64-r52-canonical-format-qualified-verify.completion.original.json",
+          "sha256": "32fcbce9d31b0c96a616fdf7df2a5daad1d9d97ef37427ac95514b7624528483"
+        },
+        {
+          "path": "TestResults/stage61-native-join/stage64-r52-focused-unit.completion.original.json",
+          "sha256": "1ad2fc587b58d45d62186ccbc8053476e571c636401d8465ab6959327643e935"
+        },
+        {
+          "path": "TestResults/stage61-native-join/stage64-r52-focused-unit-complete-native-failures.original.json",
+          "sha256": "6afe08d9e5f7f508a6250266dd7d20bad9d42507f6bd32b29981fdd007f6cd70"
+        },
+        {
+          "path": "TestResults/stage61-native-join/stage64-r52-focused-recovery.completion.original.json",
+          "sha256": "e3953f6719e5607252487442b00f0e4a3b204a29aa25b729c40c4b3bbb2553ae"
+        },
+        {
+          "path": "TestResults/stage61-native-join/stage64-r52-focused-recovery-complete-native-failures.original.json",
+          "sha256": "42f223dd3ce4414c0955656534d0374b55d6c013a29b5b41d7e6ccf0c3190313"
+        },
+        {
+          "path": "TestResults/stage61-native-join/r56-b-319c719e-run38578269537-full-assigned-failure-census.receipt.json",
+          "sha256": "1345b1a52fd0870e3e41b739a134bff79f313c91d088ea962ad060720f36d919"
+        }
+      ]
     }
   },
   "STAGE63-NATIVE-COMPOSITION-001": {

@@ -26,7 +26,7 @@ internal static class ControlledPartitionMovementCaptureScenario
         var capture = await ControlledPartitionMovementCaptureFlow.ExecuteAsync(source, runtime, admission, corpus,
             accepted, originalCallerAddress, observed.ExpiresAt, cancellationToken);
         await ControlledPartitionMovementCaptureReceiptAssertions.AssertAsync(corpus, accepted,
-            capture.Handle, capture.Settlement);
+            capture.Handle, capture.Settlement, source.AdditionalSeedEntries);
         await ControlledPartitionMovementCaptureAcknowledgement.ExecuteAsync(source, runtime, admission, corpus,
             accepted, capture.Settlement, originalCallerAddress, observed.ExpiresAt, cancellationToken);
         var captured = await ControlledPartitionMovementCapturedAdvance.ExecuteAsync(source, runtime, admission, corpus,

@@ -8,20 +8,22 @@ internal static class SqlOffsetRf3Refusals
     internal static async Task InvalidAsync(RequestCqrsRf3Callers callers, SqlOffsetRf3State state, CancellationToken token)
     {
         var original = SqlOffsetRf3Protocol.JoinRequest(state.Partition);
-        foreach (var (tail, code) in new[]
+        await Assert.That(original.Sql.EndsWith(NativeWindow, StringComparison.Ordinal)).IsTrue();
+        var ordered = original.Sql[..^NativeWindow.Length];
+        foreach (var (sql, code) in new[]
         {
-            ("LIMIT 1 OFFSET -1", ErrorCode.Validation),
-            ("LIMIT 1 OFFSET 2147483647", ErrorCode.Validation),
-            ("LIMIT 1 OFFSET 1 OFFSET 1", ErrorCode.UnsupportedCapability),
-            ("LIMIT 1 OFFSET @skip", ErrorCode.Validation),
-            ("OFFSET -1 ROWS FETCH FIRST ROW ONLY", ErrorCode.Validation),
-            ("OFFSET 2147483647 ROWS FETCH NEXT ROW ONLY", ErrorCode.Validation),
-            ("OFFSET 1 ROWS FETCH NEXT 0 ROWS ONLY", ErrorCode.Validation),
-            ("OFFSET 1 ROWS FETCH FIRST ROW ONLY FETCH NEXT ROW ONLY", ErrorCode.UnsupportedCapability),
-            ("OFFSET 1 ROWS FETCH NEXT ROW WITH TIES", ErrorCode.UnsupportedCapability)
+            (ordered + "OFFSET -1 ROWS FETCH NEXT 1 ROWS ONLY", ErrorCode.Validation),
+            (ordered + "OFFSET 2147483647 ROWS FETCH NEXT 1 ROWS ONLY", ErrorCode.Validation),
+            (ordered.Replace("SELECT ", "SELECT TOP (1) PERCENT ", StringComparison.Ordinal), ErrorCode.UnsupportedCapability),
+            (ordered + "OFFSET @skip ROWS FETCH NEXT 1 ROWS ONLY", ErrorCode.Validation),
+            (ordered + "OFFSET -1 ROWS FETCH FIRST 1 ROW ONLY", ErrorCode.Validation),
+            (ordered + "OFFSET 2147483647 ROWS FETCH NEXT 1 ROW ONLY", ErrorCode.Validation),
+            (ordered + "OFFSET 1 ROWS FETCH NEXT 0 ROWS ONLY", ErrorCode.Validation),
+            (ordered + "OFFSET (1 + 0) ROWS FETCH NEXT 1 ROWS ONLY", ErrorCode.UnsupportedCapability),
+            (ordered.Replace("SELECT ", "SELECT TOP (1) WITH TIES ", StringComparison.Ordinal), ErrorCode.UnsupportedCapability)
         })
         {
-            var bad = original with { Sql = original.Sql.Replace("LIMIT 1 OFFSET 1", tail, StringComparison.Ordinal) };
+            var bad = original with { Sql = sql };
             var failure = await callers.Sdk.QueryAsync(bad, token);
             await Assert.That(failure.IsSuccess).IsFalse();
             await Assert.That(failure.Problem?.ErrorCode).IsEqualTo(code.ToString());
@@ -60,4 +62,6 @@ internal static class SqlOffsetRf3Refusals
                 ErrorCode.PermissionDenied, dispatched: true);
         }
     }
+    private const string NativeWindow = "OFFSET 1 ROWS FETCH NEXT 1 ROWS ONLY";
+
 }

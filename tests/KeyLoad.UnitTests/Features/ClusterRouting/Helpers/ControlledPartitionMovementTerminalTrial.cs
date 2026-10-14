@@ -25,9 +25,15 @@ internal static class ControlledPartitionMovementTerminalTrial
         ControlledPartitionMovementLoopbackCorpus corpus)
         => ExecuteCoreAsync(source, target, listeners, corpus, naturalExpiry: false, new());
 
+    internal static Task ExecuteWithAdditionalSeedAsync(ControlledPartitionMovementNode source,
+        ControlledPartitionMovementNode target, ControlledPartitionMovementLoopbackListeners listeners,
+        ControlledPartitionMovementLoopbackCorpus corpus, Func<CancellationToken, Task> additionalSeed)
+        => ExecuteCoreAsync(source, target, listeners, corpus, naturalExpiry: false, additionalSeed: additionalSeed);
+
     private static async Task ExecuteCoreAsync(ControlledPartitionMovementNode source,
         ControlledPartitionMovementNode target, ControlledPartitionMovementLoopbackListeners listeners,
-        ControlledPartitionMovementLoopbackCorpus corpus, bool naturalExpiry, ControlledPartitionMovementRetainedOutcomeAudit? audit = null)
+        ControlledPartitionMovementLoopbackCorpus corpus, bool naturalExpiry, ControlledPartitionMovementRetainedOutcomeAudit? audit = null,
+        Func<CancellationToken, Task>? additionalSeed = null)
     {
         var options = UnitExecutionOptions.NativeMovementProcess().Value;
         var wholeExpiresAt = source.Database.EvaluationClock.GetUtcNow() + options.OperationTimeout;
@@ -37,6 +43,8 @@ internal static class ControlledPartitionMovementTerminalTrial
         var token = original.Token;
         var initialPosition = source.Store.Position;
         var seeded = await ControlledPartitionMovementPrepareSeed.ExecuteAsync(source, target, corpus, token);
+        if (additionalSeed is not null)
+        { await additionalSeed(token); }
         if (audit is not null)
         { await audit.CaptureAsync(source, target, token); }
         var controlSecret = Convert.ToBase64String(RandomNumberGenerator.GetBytes(PeerKeyBytes));

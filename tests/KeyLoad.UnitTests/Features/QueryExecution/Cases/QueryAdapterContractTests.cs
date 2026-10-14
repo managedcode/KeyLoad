@@ -101,6 +101,7 @@ internal sealed class QueryAdapterContractTests
         await Assert.That(b.ToRequest().Query.Limit).IsEqualTo(2);
         await Assert.That(System.Linq.Enumerable.Single(a.ToRequest().Query.Order).Path).IsEqualTo("/number");
         await Assert.That(System.Linq.Enumerable.Single(b.ToRequest().Query.Order).Path).IsEqualTo("/status");
+        await QueryAdapterBranchFlow.RunAsync();
     }
 
 }

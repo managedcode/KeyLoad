@@ -19,19 +19,20 @@ internal static class ControlledPartitionMovementPrepareAssertions
             EmptyRevision, true);
 
     internal static async Task<PartitionMovePhaseResult> PreparedAsync(OperationResult result,
-        ControlledPartitionMovementLoopbackCorpus corpus)
+        ControlledPartitionMovementLoopbackCorpus corpus, long additionalSeedEntries = 0)
     {
+        var expectedIndex = checked(PreparedReplicaIndex + additionalSeedEntries);
         var expectedControl = new PartitionMoveControlRecord(Version, ControlledPartitionMovementPrepareRequest.MoveId,
             ControlledPartitionMovementCorpus.Partition, PhysicalShardCatalogFixture.RootPrincipalId, InitialEpoch,
             Placement(corpus), corpus.Destination.Owner, PartitionMovePhase.Prepared, EmptyCut,
-            PreparedReplicaIndex, null, null, null);
+            expectedIndex, null, null, null);
         var digest = Convert.ToHexStringLower(SHA256.HashData(NativeSerialization.Serialize(new PartitionMoveIntent(Version,
             ControlledPartitionMovementPrepareRequest.MoveId, ControlledPartitionMovementCorpus.Partition,
             PhysicalShardCatalogFixture.RootPrincipalId, InitialEpoch, Placement(corpus),
-            corpus.Destination.Owner, PreparedReplicaIndex))));
+            corpus.Destination.Owner, expectedIndex))));
         var expected = new PartitionMovePhaseResult(ControlledPartitionMovementPrepareRequest.MoveId,
             PartitionMovePeerStage.ControlPrepare, new(ControlledPartitionMovementPrepareRequest.CommandId,
-                corpus.Control.Owner, PreparedReplicaIndex, digest), expectedControl, null, null, null);
+                corpus.Control.Owner, expectedIndex, digest), expectedControl, null, null, null);
         await Assert.That(result.Error).IsNull();
         var actual = result.Get<PartitionMovePhaseResult>();
         await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();

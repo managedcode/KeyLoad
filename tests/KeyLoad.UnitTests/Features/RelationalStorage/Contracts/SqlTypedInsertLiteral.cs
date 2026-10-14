@@ -34,6 +34,7 @@ internal static class SqlTypedInsertLiteral
     internal const string OneJson = "{\"id\":\"one\",\"title\":\"alpha\",\"amount\":7,\"active\":true,\"price\":12.5,\"at\":\"2026-10-14T00:00:00Z\"}";
     internal const string TwoJson = "{\"id\":\"two\",\"title\":\"beta\",\"amount\":null,\"active\":null,\"price\":null,\"at\":null}";
     internal const string ThreeJson = "{\"id\":\"three\",\"title\":\"gamma\"}";
+    internal const string ScopeDenied = "The principal cannot perform this operation in this scope.";
     internal const string EpochChanged = "The principal policy changed since this command was evaluated.";
     internal static ResourceDefinition Definition(PartitionRef partition) => new(Table, ResourceKind.Collection, partition.TransactionDomainId)
     {

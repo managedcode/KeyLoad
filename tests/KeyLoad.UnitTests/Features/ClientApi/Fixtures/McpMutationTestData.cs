@@ -5,6 +5,7 @@ namespace KeyLoad.UnitTests.Features.ClientApi;
 /// <summary>Canonical real public mutation DTOs, independent of catalog discovery.</summary>
 internal static class McpMutationTestData
 {
+    private const string InsertKind = "insertTypedRow";
     private const string RefreshRollupKind = "refreshSampleRollup";
     private const string DropRollupKind = "dropSampleRollup";
     private const string EventId = "mcp-event";
@@ -58,7 +59,7 @@ internal static class McpMutationTestData
     private const string DropChunkKind = "dropSampleChunkWindow";
     private const string AdvanceRepairKind = "advanceQueueTransferRepair";
     internal static readonly ImmutableArray<string> Discriminators =
-        [PutKind, PatchKindName, DeleteKind, AppendKind, PublishKind, PurgeKind,
+        [InsertKind, PutKind, PatchKindName, DeleteKind, AppendKind, PublishKind, PurgeKind,
          EnqueueKind, RedriveKind, CancelKind, ParkKind, UpsertEdgeKind, DeleteEdgeKind, ApplyReverseEdgeKind, CompleteReverseEdgeKind, SamplesKind, VectorKind,
          QueueToGraphKind, GraphToQueueKind, ExpireSamplesKind, RefreshRollupKind, DropRollupKind, StoreAggregateSnapshotKind,
          VectorProjectionKind, CreateTransferKind, AcceptTransferKind, CompleteTransferKind,
@@ -67,6 +68,7 @@ internal static class McpMutationTestData
 
     internal static ImmutableArray<Mutation> Create() =>
     [
+        new InsertTypedRow(McpCanonicalTestData.Resource, McpCanonicalTestData.EmptyJson),
         new PutDocument(McpCanonicalTestData.Resource, McpCanonicalTestData.Entity, McpCanonicalTestData.EmptyJson),
         new PatchDocument(McpCanonicalTestData.Resource, McpCanonicalTestData.Entity,
             [new FieldPatch(McpCanonicalTestData.Field, PatchKind.Remove)], Revision),

@@ -42,7 +42,7 @@ public sealed partial class DatabaseEngine
         if (previous.Fingerprint != CommandFingerprint(original))
         { throw Errors.Fail(ErrorCode.Conflict, CommandContentConflictMessage); }
         CommandOutcomeKeyResolver.ValidateSelectedScope(view, original, selected);
-        ValidateCachedResult(view, principal, original, previous);
+        ValidateCachedResult(view, principal, original, previous, BatchResourceAdmission.RetiredOutcomeMetadata);
         return previous.Result;
     }
 }

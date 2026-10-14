@@ -21,7 +21,7 @@ internal static class ChunkMultiblockCrashProtocol
     internal const int ModeArgument = 3;
     internal const int SampleLimit = 258;
     internal const int PublishedBlocks = 2;
-    internal const long PreparedSealRevision = 258;
+    internal const long PreparedSealRevision = 256;
     internal const long PreparedMergeRevision = 259;
     internal const long RecoveredSealRevision = 259;
     internal const long RecoveredMergeRevision = 260;
@@ -33,6 +33,7 @@ internal static class ChunkMultiblockCrashProtocol
     internal const long HealthySealGeneration = 2;
     internal const long HealthyMergeGeneration = 3;
     internal const long PreparedSequence = 257;
+    internal const long PreparedAutomaticSealSequence = 255;
     internal const long HealthySequence = 258;
     internal const long HealthyCommits = 2;
 

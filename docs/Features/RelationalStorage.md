@@ -170,3 +170,11 @@ REQ-SQLC-006 / AC-SQLC-006, REQ-REL-001/003 and AC-TSQL-003/006 use the [canonic
 ## TASK-KL046-ORDINARY-TYPED-INSERT-001
 
 REQ-SQLC-006 / AC-SQLC-006, REQ-REL-001/003 and AC-TSQL-003/006 use the [canonical ordinary typed INSERT contract](RelationalStorage/OrdinarySqlInsert.md). It defines bounded VALUES/parameter lowering, original command identity, current atomic create-only authority and complete native/public cold operation gates. General DML/full SQL and Linux/client qualification remain open.
+
+## Original public Q2 admission cancellation on selected T-SQL
+
+AC-REL-004-JOIN-005/006 and AC-QUERY-007-JOIN-001 retain all four original SDK/official MCP and SQL/AST variants of `RelationalSqlRf3JoinAdmittedCancellationTests.SdkAndOfficialMcpQ2CancellationAfterActualAdmissionSettlesAndContinuesAtTheOriginalCut`. The shared admission seed still used retired `LIMIT 10`. Translate only its complete Q2 join SQL to native `TOP(10)` and quote the same `key` identifier; preserve all projected aliases, join keys, ordering, the independently constructed AST, data, current permissions, original GUID/receipt and literal pages.
+
+The public SQL route uses `SqlOperationCompiler.Compile` with null positional parameter count. Its accepted SELECT is decoded through QueryExecute, whose canonical descriptor retains GrainReadKind.Query; both HTTP SDK and MCP forward that kind through the canonical signed request construction. Explicit public AST still uses AstQuery. The original conditional hold arm therefore remains `ast ? AstQuery : Query`. Native-session SELECT has its separately frozen AstQuery lowering and must not be substituted for this public route.
+
+Original actual AuthorizationReload observation, uncompleted original caller, full no-effects source/outbox checks, original-token cancellation, Cancelled marker, ProducerDisposed marker, original task join, arm retirement and healthy continuation at the original cut are unchanged. Preserve all existing primary/cleanup failures, fixed deadlines and fixture ownership. This caller correction does not prove a current runtime initiating cause or qualification. Actual source adoption, compiler, all four original RF3 variants and exact-source Linux evidence remain required. No cold or physical-memory acceptance is newly claimed by this literal change.

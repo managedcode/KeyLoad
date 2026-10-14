@@ -1,6 +1,7 @@
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.CrashHost.Features.ClusterRouting;
 using KeyLoad.Orleans;
+using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
@@ -9,6 +10,7 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting;
 internal static class ControlledPartitionMovementNativePrepareFlow
 {
     private const int Version = 1;
+    private const int NoRefusalFailures = 0;
     private const int FirstVoter = 0;
     private const long InitialEpoch = 1;
     private const long InitialRevision = 0;
@@ -47,12 +49,23 @@ internal static class ControlledPartitionMovementNativePrepareFlow
         var conflict = await ControlledPartitionMovementNativeSend.PhaseAsync(transport, FirstVoter, owners.Control,
             changed, local: true, cancellationToken);
         await ControlledPartitionMovementNativeReplyAssertions.RefusedAsync(conflict, ErrorCode.Conflict);
-        await Assert.That(source.Store.Position).IsEqualTo(sourcePosition);
-        await Assert.That(owners.Target.Store.Position).IsEqualTo(targetPosition);
-        await Assert.That(source.Log.State.LastIndex).IsEqualTo(sourceIndex);
-        await Assert.That(owners.Target.Log.State.LastIndex).IsEqualTo(targetIndex);
-        await Assert.That(ControlledPartitionMovementRawImage.Bytes(source.Store).SequenceEqual(sourceImage)).IsTrue();
-        await Assert.That(ControlledPartitionMovementRawImage.Bytes(owners.Target.Store).SequenceEqual(targetImage)).IsTrue();
+        var refusalFailures = new List<Exception>();
+        await ServerFailureObserver.ObserveAsync(async () =>
+        {
+            await Assert.That(source.Store.Position).IsEqualTo(sourcePosition);
+            await Assert.That(owners.Target.Store.Position).IsEqualTo(targetPosition);
+            await Assert.That(source.Log.State.LastIndex).IsEqualTo(sourceIndex);
+            await Assert.That(owners.Target.Log.State.LastIndex).IsEqualTo(targetIndex);
+            await Assert.That(ControlledPartitionMovementRawImage.Bytes(source.Store).SequenceEqual(sourceImage)).IsTrue();
+            await Assert.That(ControlledPartitionMovementRawImage.Bytes(owners.Target.Store).SequenceEqual(targetImage)).IsTrue();
+        }, refusalFailures);
+        if (refusalFailures.Count != NoRefusalFailures)
+        {
+            await ServerFailureObserver.ObserveAsync(() => ControlledPartitionMovementNativePrepareDeltaWitness.ObserveAsync(
+                source, sourcePosition, sourceIndex, request.CommandId, changed.CommandId, refusalFailures,
+                cancellationToken), refusalFailures);
+            ServerFailureObserver.ThrowIfAny(refusalFailures);
+        }
         await ReplayAsync(owners, request, expected, cancellationToken);
         return (request, expected);
     }

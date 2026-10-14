@@ -1642,3 +1642,34 @@ REQ-SQLC-006 / AC-SQLC-006, REQ-REL-001/003 and AC-TSQL-003/006 use the [canonic
 ## Selected T-SQL native backpressure caller
 
 REQ/AC-SQLC-005/007/008 and ADR065/125/130 preserve the original bounded TLS RF3 interrupted-row/backpressure operation, its four independently authored full rows, original signed write receipt/replay, backend Cancel request, same-owner healthy SDK/official MCP/prepared-wire continuation, original deadline, stream/readers/disposal joins and existing cold continuation. The caller uses selected `SELECT TOP (4) * ... ORDER BY id ASC`, with no retired LIMIT spelling. The native session SELECT is the existing `AstQuery` operation, so its real AuthorizationReload hold must target that precise read kind; this adds no whitelist, protocol, product scheduling or trusted roles. Source correction is not runtime, retained-memory saturation, Linux/native interoperability or full SQL qualification.
+
+## Current selected T-SQL operation-tool guidance
+
+REQ/AC-MCP-001/006/007 and REQ/AC-SQLC-006 require canonical discovery guidance to match the current selected T-SQL compiler. The SQL adapter description retires obsolete CALL/Q1-only/joins-unsupported text and identifies only current bounded SELECT, supported INSERT, CREATE TABLE and EXEC of exact public operations. Values remain bound request parameters and mutations retain caller-original stable command identity. Full vendor SQL and complete client compatibility are not advertised by this description.
+
+The metadata-only change preserves the exact operation name/route, closed request/result schema, adapter classification, conservative possible-write hints, actual decoder/internal options/cancellation and fresh persisted permissions. The existing whole McpCatalogTests and real official-client McpDiscoveryTests retain their complete frozen inventories, exclusive capabilities, initial meta tools, on-demand canonical discovery, schemas, effect hints, privacy and refusal/cancellation/healthy operations. No new command or broad read whitelist is added. Native N and independent source review do not qualify compilation, current SDK/MCP/RF3 behavior or Linux delivery; those gates require original exact-source evidence.
+
+
+## Canonical INSERT mutation schema corpus
+
+TASK-MCP-CANONICAL-INSERT-CORPUS-001 / REQ/AC-CLIENT-006 and AC-MCP-001:
+the canonical Mutation union declares 39 discriminators, including the existing
+internal InsertTypedRow with discriminator `insertTypedRow` and its complete
+Collection/Json fields. The independent fixture must include one literal typed
+InsertTypedRow specimen alongside every original 38 specimen and discriminator.
+The existing AcMcp001EveryCanonicalMutationIsRepresentedAndRoundTripsThroughTypedDecoder
+retains full schema-set equality, full native typed public-payload roundtrip,
+exact decoded count39 and all concrete runtime types. Unknown discriminator and
+other original schema/privacy controls remain unchanged. This schema specimen
+exercises serialization and decoding, not an INSERT database execution or full
+SQL qualification. No canonical product schema, decoder or mutation contract
+changes. Compiler, focused original Case and exact-source Linux suites remain
+pending until their authentic results.
+
+```mermaid
+flowchart LR
+    A[Canonical union including InsertTypedRow] --> B[Independent literal corpus39]
+    B --> C[Full generated schema equality]
+    C --> D[Complete typed public-payload roundtrip]
+    D --> E[Compiler and exact-source Linux gates]
+```

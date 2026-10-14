@@ -82,7 +82,8 @@ public sealed partial class DatabaseEngine
             RequireRetiredOriginalOutcomeIdentity(retained.Command, operation.Id, outcome.Result.Get<CommitReceipt>(),
                 retained.Fence, retained.Control, retained.Placement, retained.ControlOwner, retained.LocalOwner);
         }
-        ValidateCachedResult(view, principal, operation with { EvaluatedAt = Clock.GetUtcNow() }, outcome);
+        ValidateCachedResult(view, principal, operation with { EvaluatedAt = Clock.GetUtcNow() }, outcome,
+            retired is null ? BatchResourceAdmission.CurrentPhysicalOwner : BatchResourceAdmission.RetiredOutcomeMetadata);
         return outcome.Result;
     }
     private void ValidateSubmissionOutcomeIdentity(IKeyValueView view, PrincipalRecord principal,
@@ -94,7 +95,8 @@ public sealed partial class DatabaseEngine
         { ValidateStoredSubmissionIdentity(view, operation, selection, outcome); }
     }
 
-    private void ValidateCachedResult(IKeyValueView view, PrincipalRecord principal, ReplicatedOperation operation, StoredOutcome previous)
+    private void ValidateCachedResult(IKeyValueView view, PrincipalRecord principal, ReplicatedOperation operation, StoredOutcome previous,
+        BatchResourceAdmission admission = BatchResourceAdmission.CurrentPhysicalOwner)
     {
         if (previous.PolicyEpoch != principal.PolicyEpoch)
         {
@@ -111,7 +113,7 @@ public sealed partial class DatabaseEngine
         ValidateOnlineTextCachedOutcome(view, principal, operation, previous);
         ValidateCompositionOutcome(view, principal, operation, previous);
         if (!ValidateRemoteTransferCachedOutcome(view, principal, operation, previous))
-        { ReauthorizeExtendedOutcome(view, principal, operation, previous); }
+        { ReauthorizeExtendedOutcome(view, principal, operation, previous, admission); }
 
         if (operation.Kind == OperationKind.Receive && previous.Result.Error is null)
         {
@@ -137,7 +139,7 @@ public sealed partial class DatabaseEngine
     }
 
     private void ReauthorizeExtendedOutcome(IKeyValueView view, PrincipalRecord principal, ReplicatedOperation operation,
-        StoredOutcome previous)
+        StoredOutcome previous, BatchResourceAdmission admission)
     {
         if (previous.Result.Error is not null)
         {
@@ -146,7 +148,7 @@ public sealed partial class DatabaseEngine
         if (operation.Kind == OperationKind.Batch)
         {
             var command = Payload<CommandRequest>(operation);
-            ReauthorizeExtendedEffects(view, principal, command.Partition, command.Mutations);
+            ReauthorizeExtendedEffects(view, principal, command.Partition, command.Mutations, admission);
         }
         else if (operation.Kind == OperationKind.CommitInbox)
         {
@@ -161,7 +163,8 @@ public sealed partial class DatabaseEngine
     }
 
     private void ReauthorizeExtendedEffects(IKeyValueView view, PrincipalRecord principal, PartitionRef partition,
-        System.Collections.Immutable.ImmutableArray<Mutation> effects)
+        System.Collections.Immutable.ImmutableArray<Mutation> effects,
+        BatchResourceAdmission admission = BatchResourceAdmission.CurrentPhysicalOwner)
     {
         foreach (var effect in effects)
         {
@@ -169,7 +172,7 @@ public sealed partial class DatabaseEngine
                 or global::KeyLoad.ApplyVectorProjection or CreateQueueTransfer or AcceptQueueTransfer or CompleteQueueTransfer or AdvanceQueueTransferAttempt or AdvanceQueueTransferRepair
                 or ConfigureRecurringSchedule or EmitRecurringOccurrences or CancelRecurringSchedule or CompareExchangeSaga or ExpireSaga)
             {
-                ReauthorizeEffect(view, principal, partition, effect);
+                ReauthorizeEffect(view, principal, partition, effect, admission);
             }
         }
     }

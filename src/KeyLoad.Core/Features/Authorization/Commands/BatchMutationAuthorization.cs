@@ -28,7 +28,7 @@ public sealed partial class DatabaseEngine
                 Authorization.RequireReplayInput(principal, resource);
             }
             AuthorizeComposition(view, principal, request.Partition, mutation, admission);
-            AuthorizeExtendedMutation(view, principal, request.Partition, mutation);
+            AuthorizeExtendedMutation(view, principal, request.Partition, mutation, admission);
         }
     }
 

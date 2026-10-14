@@ -20,7 +20,7 @@ internal static class ControlledPartitionMovementPrepareFlow
             runtime, admission, request, cancellationToken);
         var result = await ControlledPartitionMovementVerifiedSubmit.SubmitAsync(source, runtime, admission,
             request, cancellationToken);
-        var prepared = await ControlledPartitionMovementPrepareAssertions.PreparedAsync(result, corpus);
+        var prepared = await ControlledPartitionMovementPrepareAssertions.PreparedAsync(result, corpus, source.AdditionalSeedEntries);
         await ControlledMovementOwnerAdmissionAssertions.RejectRetainedReadAsync(unconfigured, source);
         await ControlledMovementOwnerAdmissionAssertions.RejectRestorationAsync(source);
         var receipt = NativeSerialization.Serialize(result);

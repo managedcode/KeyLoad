@@ -10,7 +10,7 @@ internal static class ChunkMultiblockProcessRows
 
     internal static async Task RequireAsync(ChunkMultiblockCrashSnapshot actual, bool merge, bool prepared, bool healthy)
     {
-        var rows = ChunkMultiblockCrashData.Expected(healthy);
+        var rows = ChunkMultiblockCrashData.Expected(healthy, prepared, merge);
         var revision = prepared ? (merge ? ChunkMultiblockCrashProtocol.PreparedMergeRevision : ChunkMultiblockCrashProtocol.PreparedSealRevision)
             : healthy ? (merge ? ChunkMultiblockCrashProtocol.HealthyMergeRevision : ChunkMultiblockCrashProtocol.HealthySealRevision)
             : merge ? ChunkMultiblockCrashProtocol.RecoveredMergeRevision : ChunkMultiblockCrashProtocol.RecoveredSealRevision;
@@ -19,10 +19,11 @@ internal static class ChunkMultiblockProcessRows
             : merge ? ChunkMultiblockCrashProtocol.RecoveredMergeGeneration : ChunkMultiblockCrashProtocol.RecoveredSealGeneration;
         var model = new SampleChunkWindowResult(SampleChunkCrashContract.WindowId, SampleChunkCrashContract.From,
             SampleChunkCrashContract.Until, generation, revision, healthy ? ChunkMultiblockCrashProtocol.HealthySequence
+                : prepared && !merge ? ChunkMultiblockCrashProtocol.PreparedAutomaticSealSequence
                 : ChunkMultiblockCrashProtocol.PreparedSequence, null, [.. rows], actual.Position);
         await Assert.That(JsonSerializer.Serialize(actual.Window, JsonDefaults.Options)).IsEqualTo(JsonSerializer.Serialize(model, JsonDefaults.Options));
         await Assert.That(JsonSerializer.Serialize(actual.RawRows, JsonDefaults.Options)).IsEqualTo(JsonSerializer.Serialize(rows, JsonDefaults.Options));
-        await Assert.That(actual.EncodedBlocks.Length).IsEqualTo(prepared ? (merge ? OneBlock : NoBlocks) : ChunkMultiblockCrashProtocol.PublishedBlocks);
+        await Assert.That(actual.EncodedBlocks.Length).IsEqualTo(prepared ? (merge ? OneBlock : NoBlocks) : !healthy && !merge ? OneBlock : ChunkMultiblockCrashProtocol.PublishedBlocks);
         for (var index = 0; index < rows.Length; index++)
         {
             await Assert.That(actual.RawRows[index].Sample.Timestamp.Ticks).IsEqualTo(rows[index].Sample.Timestamp.Ticks);

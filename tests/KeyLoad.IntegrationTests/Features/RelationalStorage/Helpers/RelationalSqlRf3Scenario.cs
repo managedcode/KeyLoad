@@ -99,8 +99,8 @@ internal static class RelationalSqlRf3JoinAdmissionSeed
     internal const string Customer = "cancelled-join-customer";
     internal const string LeftJson = "{\"key\":\"cancelled-join-order\",\"title\":\"cancelled-join-customer\",\"count\":1}";
     internal const string RightJson = "{\"id\":\"cancelled-join-customer\",\"name\":\"Ada\"}";
-    internal const string SqlText = "SELECT l.key AS order_key, r.name AS customer_name, l.title AS customer_id "
-        + "FROM agentrows AS l INNER JOIN joincustomers AS r ON l.title = r.id ORDER BY l.key ASC LIMIT 10";
+    internal const string SqlText = "SELECT TOP(10) l.[key] AS order_key, r.name AS customer_name, l.title AS customer_id "
+        + "FROM agentrows AS l INNER JOIN joincustomers AS r ON l.title = r.id ORDER BY l.[key] ASC";
 
     internal static async Task<RelationalQ2AdmissionSeed> CreateAsync(KeyLoadClient admin, CancellationToken token)
     {

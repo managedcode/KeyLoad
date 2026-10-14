@@ -15,7 +15,7 @@ internal static class ControlledPartitionMovementTargetInstallReceipt
         ControlledPartitionMovementLoopbackCorpus corpus, PartitionMovePhaseResult terminal, int pageCount)
     {
         await Assert.That(pageCount <= MaximumTransferFamilies).IsTrue();
-        var expectedIndex = checked(TargetBootstrapEntries + PageStages * pageCount + TerminalEntries);
+        var expectedIndex = checked(target.AdditionalSeedEntries + TargetBootstrapEntries + PageStages * pageCount + TerminalEntries);
         var expected = new CommitReceipt(ControlledPartitionMovementTargetPhaseIds.InstallCommand(pageCount),
             new(corpus.Destination.Owner.Incarnation, ControlledPartitionMovementCorpus.Partition.AtomicPartitionId,
                 expectedIndex, OriginalEpoch), [], DurabilityProfile.ProcessDurable);

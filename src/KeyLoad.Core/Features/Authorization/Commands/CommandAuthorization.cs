@@ -137,11 +137,12 @@ public sealed partial class DatabaseEngine
         return placement;
     }
 
-    private void AuthorizeExtendedMutation(IKeyValueView view, PrincipalRecord principal, PartitionRef partition, Mutation mutation)
+    private void AuthorizeExtendedMutation(IKeyValueView view, PrincipalRecord principal, PartitionRef partition, Mutation mutation,
+        BatchResourceAdmission admission)
     {
         if (mutation is InsertTypedRow insert)
         {
-            RequireTypedInsertPermissions(principal, partition, Resource(view, partition, insert.Collection, ResourceKind.Collection));
+            RequireTypedInsertPermissions(principal, partition, BatchResource(view, partition, insert.Collection, admission, ResourceKind.Collection));
             return;
         }
         if (mutation is AdvanceQueueDeadline deadline)
