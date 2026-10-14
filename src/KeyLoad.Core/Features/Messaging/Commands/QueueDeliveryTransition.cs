@@ -5,6 +5,8 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
+    private const string QueueDeliveryVersionExhausted = "The queue delivery state version is exhausted.";
+
     private const int QueueDeliveryTransitionMinimumPositiveCount = 1;
     private const int QueueDeliveryTransitionVersionOne = 1;
 
@@ -19,6 +21,10 @@ public sealed partial class DatabaseEngine
             throw Errors.Fail(ErrorCode.Validation, InvalidQueueDeliveryAction);
         }
         var metadata = lease.Metadata;
+        if (metadata.StateVersion == long.MaxValue)
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, QueueDeliveryVersionExhausted);
+        }
         var counters = Counters(tx, command.Lane);
         tx.Delete(QueueKey(LeasedQueueSpace, command.Lane, metadata.LeaseUntil!.Value, metadata.Id));
         MessageMetadata updated;

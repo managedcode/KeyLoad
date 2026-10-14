@@ -31,11 +31,19 @@ internal static class SampleChunkRetentionRf3Full
                 SampleChunkRetentionRf3Protocol.FirstRevision)),
             [SampleChunkRetentionRf3Seed.Mutation(SampleRollupProtocol.DropKind,
                 SampleChunkRetentionRf3Protocol.DroppedRevision)], false, token);
-        return await FreshAsync(original, sdk, mcp, token).ConfigureAwait(false);
+        var refused = await SampleChunkRetainedIdentityRf3Flow.RefuseAsync(scenario, sdk, mcp, token);
+        var healthy = await FreshAsync(original, sdk, mcp, refused, token).ConfigureAwait(false);
+        var retained = await SampleChunkRetainedIdentityRf3Flow.CaptureAsync(refused.Request, sdk, mcp, token);
+        var complete = healthy with
+        {
+            RetainedIdentity = retained
+        };
+        await SampleChunkRetainedIdentityRf3Flow.HealthyAsync(complete, sdk, mcp, token);
+        return complete;
     }
 
     private static async Task<SampleChunkRetentionRf3Continuation> FreshAsync(SampleChunkRetentionRf3Original original,
-        KeyLoadClient sdk, McpOfficialClient mcp, CancellationToken token)
+        KeyLoadClient sdk, McpOfficialClient mcp, SampleChunkRetainedIdentityRf3State retained, CancellationToken token)
     {
         var scenario = original.Scenario;
         var id = Guid.NewGuid();
@@ -59,7 +67,7 @@ internal static class SampleChunkRetentionRf3Full
             [SampleChunkRetentionRf3Seed.Mutation(SampleRollupProtocol.RefreshKind,
                 SampleChunkRetentionRf3Protocol.FirstRevision)], false, token);
         var continuation = new SampleChunkRetentionRf3Continuation(scenario, original.Append,
-            original.Receipt, id, sample, append, receipt);
+            original.Receipt, id, sample, append, receipt, retained);
         await SampleChunkRetentionRf3Healthy.RequireAsync(continuation, sdk, mcp, token);
         return continuation;
     }

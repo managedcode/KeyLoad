@@ -59,15 +59,19 @@ internal static class CurrentOwnershipTokenAfterMovementRf3ReadControls
             await Assert.That(waiting.IsSuccess).IsFalse();
             await Assert.That(waiting.Value).IsNull();
             await Assert.That(waiting.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.TokenInvalidated));
+            await PartitionMovementPublicRefusalRf3Oracle.SdkAsync(waiting.Problem, ErrorCode.TokenInvalidated,
+                PartitionMovementPublicRefusalRf3Oracle.IndexMinimumDetail);
             var reading = await sdk.ReadChangesAsync(feed, token).ConfigureAwait(false);
             await Assert.That(reading.IsSuccess).IsFalse();
             await Assert.That(reading.Value).IsNull();
             await Assert.That(reading.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.TokenInvalidated));
+            await PartitionMovementPublicRefusalRf3Oracle.SdkAsync(reading.Problem, ErrorCode.TokenInvalidated,
+                PartitionMovementPublicRefusalRf3Oracle.FeedCursorDetail);
         }
-        await McpCallerAssertions.ErrorAsync(await seed.Official.CallAsync(
-            WaitForIndexProtocol.Tool, wait, token), ErrorCode.TokenInvalidated, dispatched: true);
-        await McpCallerAssertions.ErrorAsync(await seed.Official.CallAsync(
-            McpCallerTools.ChangesRead, feed, token), ErrorCode.TokenInvalidated, dispatched: true);
+        await PartitionMovementPublicRefusalRf3Oracle.McpAsync(await seed.Official.CallAsync(
+            WaitForIndexProtocol.Tool, wait, token), ErrorCode.TokenInvalidated, PartitionMovementPublicRefusalRf3Oracle.SafeGenericDetail);
+        await PartitionMovementPublicRefusalRf3Oracle.McpAsync(await seed.Official.CallAsync(
+            McpCallerTools.ChangesRead, feed, token), ErrorCode.TokenInvalidated, PartitionMovementPublicRefusalRf3Oracle.SafeGenericDetail);
     }
 
     internal static async Task HealthyAsync(PartitionMovementPublicParentRf3Seed seed, CommitToken current,

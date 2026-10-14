@@ -25,7 +25,7 @@ internal static class ControlledPartitionMovementFenceSettlementFlow
         var grant = authorization.Grant ?? throw new InvalidOperationException("The actual original A grant is absent.");
         var expectedAck = new PartitionMovePhaseResult(ControlledPartitionMovementPrepareRequest.MoveId,
             PartitionMovePeerStage.ControlAcknowledge, new(ControlledPartitionMovementFenceSettlementRequest.AcknowledgeId,
-                corpus.Control.Owner, AcknowledgeReplicaIndex, prepared.Journal.ControlIntentDigest),
+                corpus.Control.Owner, checked(AcknowledgeReplicaIndex + source.AdditionalSeedEntries), prepared.Journal.ControlIntentDigest),
             null, null, null, null, grant with
             {
                 Settlement = fence.Journal
@@ -39,11 +39,11 @@ internal static class ControlledPartitionMovementFenceSettlementFlow
         var control = prepared.Control ?? throw new InvalidOperationException("The actual Prepared control is absent.");
         var expectedAccepted = new PartitionMovePhaseResult(ControlledPartitionMovementPrepareRequest.MoveId,
             PartitionMovePeerStage.ControlAcceptFence, new(ControlledPartitionMovementFenceSettlementRequest.AcceptFenceId,
-                corpus.Control.Owner, AcceptedFenceReplicaIndex, prepared.Journal.ControlIntentDigest),
+                corpus.Control.Owner, checked(AcceptedFenceReplicaIndex + source.AdditionalSeedEntries), prepared.Journal.ControlIntentDigest),
             control with
             {
                 Phase = PartitionMovePhase.Fenced,
-                SourceCut = SourceFenceReplicaIndex
+                SourceCut = checked(SourceFenceReplicaIndex + source.AdditionalSeedEntries)
             },
             fence.Fence, null, null);
         var accepted = acceptedOutcome.Get<PartitionMovePhaseResult>();

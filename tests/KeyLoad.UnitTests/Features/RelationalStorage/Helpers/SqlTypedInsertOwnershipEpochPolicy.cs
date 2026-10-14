@@ -7,14 +7,20 @@ internal static class SqlTypedInsertOwnershipEpochPolicy
         ControlledPartitionMovementNode target, SqlTypedInsertRetiredState state, CancellationToken token)
     {
         var partition = ControlledPartitionMovementCorpus.Partition;
-        var denied = state.Principal with { PolicyEpoch = DeniedEpoch,
-            Grants = [new(partition.DatabaseId, SqlTypedInsertRetiredLiteral.Table, Capability.DocumentsRead | Capability.Query)] };
+        var denied = state.Principal with
+        {
+            PolicyEpoch = DeniedEpoch,
+            Grants = [new(partition.DatabaseId, SqlTypedInsertRetiredLiteral.Table, Capability.DocumentsRead | Capability.Query)]
+        };
         await ConfigureAsync(source, target, denied, token);
         await SqlTypedInsertRetiredImage.ObserveAsync(source, target,
             () => SqlTypedInsertRetiredAssertions.FencedAsync(source, state, SqlTypedInsertLiteral.ScopeDenied, token),
             () => state.Authority.RemainsControlOwnedAsync(source, target),
             () => state.FailedAuthority.RemainsControlOwnedAsync(source, target));
-        var repaired = state.Principal with { PolicyEpoch = RepairedEpoch };
+        var repaired = state.Principal with
+        {
+            PolicyEpoch = RepairedEpoch
+        };
         await ConfigureAsync(source, target, repaired, token);
         await SqlTypedInsertRetiredImage.ObserveAsync(source, target,
             () => SqlTypedInsertRetiredAssertions.FencedAsync(source, state, SqlTypedInsertLiteral.EpochChanged, token),
@@ -31,7 +37,13 @@ internal static class SqlTypedInsertOwnershipEpochPolicy
             [new(SqlTypedInsertRetiredLiteral.PutKind, SqlTypedInsertRetiredLiteral.Table, SqlTypedInsertRetiredLiteral.Two,
                 SqlTypedInsertRetiredLiteral.Revision)], DurabilityProfile.ProcessDurable);
         await SqlTypedInsertAssertions.SameAsync(expected, target.Journal.Submit(original, token).Get<CommitReceipt>());
-        return state with { Principal = repaired, EpochFenced = true, Healthy = original, HealthyReceipt = expected };
+        return state with
+        {
+            Principal = repaired,
+            EpochFenced = true,
+            Healthy = original,
+            HealthyReceipt = expected
+        };
     }
     private static async Task ConfigureAsync(ControlledPartitionMovementNode source, ControlledPartitionMovementNode target,
         PrincipalRecord expected, CancellationToken token)

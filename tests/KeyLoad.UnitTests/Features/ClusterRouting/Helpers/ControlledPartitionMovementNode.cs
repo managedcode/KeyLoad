@@ -43,7 +43,6 @@ internal sealed class ControlledPartitionMovementNode : IDisposable
         get; set;
     }
 
-    
     internal global::System.Collections.Immutable.ImmutableArray<ResourceDefinition> AdditionalSeedResources { get; set; } = [];
     internal void JoinForChild()
     {

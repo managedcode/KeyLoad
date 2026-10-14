@@ -9,7 +9,7 @@ internal sealed class PostgresSessionCatalog(global::Microsoft.Extensions.Option
     private readonly Dictionary<string, PostgresBoundPortal> portals = new(StringComparer.Ordinal);
     private int retained;
     private Guid? mutationIdentity;
-    private  long? mutationOwnershipEpoch;
+    private long? mutationOwnershipEpoch;
     private const int MutationIdentityBytes = 16;
     private const int MutationOwnershipEpochBytes = sizeof(long);
     internal PostgresPreparedStatement Statement(string name)
@@ -97,7 +97,7 @@ internal sealed class PostgresSessionCatalog(global::Microsoft.Extensions.Option
         portals.Clear();
     }
     internal void ArmMutationIdentity(Guid identity)
-    
+
         => ArmMutationIdentity(identity, null);
     internal void ArmMutationIdentity(Guid identity, long? ownershipEpoch)
     {
@@ -110,7 +110,7 @@ internal sealed class PostgresSessionCatalog(global::Microsoft.Extensions.Option
         {
             throw ScriptDomOperationErrors.Invalid();
         }
-        Resize(PostgresProtocol.EmptyBytes,  checked(MutationIdentityBytes
+        Resize(PostgresProtocol.EmptyBytes, checked(MutationIdentityBytes
             + (ownershipEpoch.HasValue ? MutationOwnershipEpochBytes : PostgresProtocol.EmptyBytes)));
         mutationIdentity = identity;
         mutationOwnershipEpoch = ownershipEpoch;
@@ -130,7 +130,7 @@ internal sealed class PostgresSessionCatalog(global::Microsoft.Extensions.Option
         {
             Resize(checked(MutationIdentityBytes
                 + (mutationOwnershipEpoch.HasValue ? MutationOwnershipEpochBytes : PostgresProtocol.EmptyBytes)), PostgresProtocol.EmptyBytes);
-            mutationIdentity  = null;
+            mutationIdentity = null;
             mutationOwnershipEpoch = null;
         }
     }

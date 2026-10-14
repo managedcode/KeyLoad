@@ -34,6 +34,7 @@ internal sealed class SampleChunkRetentionRollupRf3Tests(ClusterFixture fixture)
                 http.Dispose();
                 http = null;
                 await SampleChunkRetentionRf3Cold.RunAsync(fixture, continuation, deadline.Token).ConfigureAwait(false);
+                await SampleChunkRetentionRf3Cold.RunAsync(fixture, continuation, deadline.Token).ConfigureAwait(false);
             }, failures);
         }
         finally

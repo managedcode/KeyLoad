@@ -12,8 +12,7 @@ internal static class QueueLeaseAuthorityRefusals
         QueueLeaseAuthorityState state, QueueLeaseAuthorityFault fault, string[] image)
     {
         var position = store.Position;
-        var detail = fault is QueueLeaseAuthorityFault.ForeignBodyIdentity or QueueLeaseAuthorityFault.ForeignMetadataIdentity
-            ? QueueLeaseAuthorityProtocol.MissingBodyDetail : QueueLifecycleProtocol.MissingReference;
+        var detail = Detail(fault);
         var settlement = Assert.ThrowsExactly<KeyLoadException>(() => database.Apply(state.Original));
         await Assert.That(settlement.Code).IsEqualTo(ErrorCode.Corruption);
         await Assert.That(settlement.Message).IsEqualTo(detail);
@@ -36,6 +35,19 @@ internal static class QueueLeaseAuthorityRefusals
         var inbox = store.Read(view => view.GetRecord<InboxRecord>(KeySpace.Partition(QueueLeaseAuthorityProtocol.InboxSpace,
             state.Lane.Partition, state.Lane.Queue, state.Message.MessageId, QueueLeaseAuthorityProtocol.Handler, QueueLeaseAuthorityProtocol.One)));
         await Assert.That(inbox).IsNull();
+    }
+
+    private static string Detail(QueueLeaseAuthorityFault fault)
+    {
+        if (fault is QueueLeaseAuthorityFault.NegativeAttempts or QueueLeaseAuthorityFault.ZeroAttempts
+            or QueueLeaseAuthorityFault.NegativeStateVersion or QueueLeaseAuthorityFault.ZeroStateVersion
+            or QueueLeaseAuthorityFault.UnclaimedStateVersion or QueueLeaseAuthorityFault.NegativeReadySequence
+            or QueueLeaseAuthorityFault.ZeroReadySequence)
+        {
+            return QueueLeaseAuthorityProtocol.InvalidMetadataDetail;
+        }
+        return fault is QueueLeaseAuthorityFault.ForeignBodyIdentity or QueueLeaseAuthorityFault.ForeignMetadataIdentity
+            ? QueueLeaseAuthorityProtocol.MissingBodyDetail : QueueLifecycleProtocol.MissingReference;
     }
 
     private static async Task UnchangedAsync(ZoneTreeStore store, long position, string[] image)

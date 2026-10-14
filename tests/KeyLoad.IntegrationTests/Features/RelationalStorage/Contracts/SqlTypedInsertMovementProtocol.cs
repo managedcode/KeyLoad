@@ -1,5 +1,6 @@
 using System.Globalization;
 namespace KeyLoad.IntegrationTests.Features.RelationalStorage;
+
 internal static class SqlTypedInsertMovementProtocol
 {
     internal const string Table = "moved-sql-rows";
@@ -30,11 +31,14 @@ internal static class SqlTypedInsertMovementProtocol
     internal static readonly Guid HealthyId = new("db01af02-9d7f-4395-a4f5-c3e949f08adf");
     internal static readonly Guid StaleId = new("74f5b6e8-3052-48e6-99e2-42ec3402429d");
     internal static readonly Guid FutureId = new("e775d954-95f9-4ee5-96b3-289460a7f2a8");
-    internal static string Arm(Guid id,long epoch) => "SET CONTEXT_INFO 0x" + id.ToString("N")
-        + epoch.ToString("X16",CultureInfo.InvariantCulture);
-    internal static ResourceDefinition Definition(PartitionRef partition) => new(Table,ResourceKind.Collection,
-        partition.TransactionDomainId) { RelationalSchema = new(Id,[new(Id,RelationalColumnType.Text),new(Title,RelationalColumnType.Text)]) };
-    internal static SqlOperationRequest Request(PartitionRef partition,Guid id,string sql,long epoch)
-        => new(partition,sql,CommandId:id,OwnershipEpoch:epoch);
+    internal static string Arm(Guid id, long epoch) => "SET CONTEXT_INFO 0x" + id.ToString("N")
+        + epoch.ToString("X16", CultureInfo.InvariantCulture);
+    internal static ResourceDefinition Definition(PartitionRef partition) => new(Table, ResourceKind.Collection,
+        partition.TransactionDomainId)
+    {
+        RelationalSchema = new(Id, [new(Id, RelationalColumnType.Text), new(Title, RelationalColumnType.Text)])
+    };
+    internal static SqlOperationRequest Request(PartitionRef partition, Guid id, string sql, long epoch)
+        => new(partition, sql, CommandId: id, OwnershipEpoch: epoch);
 }
 

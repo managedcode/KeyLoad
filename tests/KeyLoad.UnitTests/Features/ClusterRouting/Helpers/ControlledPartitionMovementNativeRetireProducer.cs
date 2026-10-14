@@ -21,7 +21,7 @@ internal static class ControlledPartitionMovementNativeRetireProducer
         var first = await Task.WhenAny(capture, original).WaitAsync(cancellationToken).ConfigureAwait(false);
         if (first == original)
         {
-            _ = await original.ConfigureAwait(false);
+            await ObserveOriginalFirstAsync(capture, original, cancellationToken).ConfigureAwait(false);
             throw new InvalidOperationException("The original movement finished before its genuine Retire receiver borrow.");
         }
         return await capture.ConfigureAwait(false);
@@ -63,4 +63,23 @@ internal static class ControlledPartitionMovementNativeRetireProducer
         var actual = GrainNativePayload.Read<GrainValue>(reply.Payload).Value as PartitionMoveResult;
         await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
     }
+    private static async Task ObserveOriginalFirstAsync(Task<ControlledPartitionMovementNativeRetireCaptured> capture,
+        Task<GrainOperationReply> original, CancellationToken cancellationToken)
+    {
+        var failures = new List<Exception>();
+        await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(
+            () => original, failures).ConfigureAwait(false);
+        if (failures.Count != 0)
+        {
+            var message = $"NativeRetireOriginalFirst selected=original originalTask={original.Id} captureTask={capture.Id}"
+                + $" originalCompleted={original.IsCompleted} originalCanceled={original.IsCanceled}"
+                + $" originalFaulted={original.IsFaulted} captureCompleted={capture.IsCompleted}"
+                + $" captureSucceeded={capture.IsCompletedSuccessfully} captureCanceled={capture.IsCanceled}"
+                + $" captureFaulted={capture.IsFaulted} captureWaitCanceled={cancellationToken.IsCancellationRequested}";
+            await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(
+                () => Console.Error.WriteLineAsync(message), failures).ConfigureAwait(false);
+        }
+        global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
+    }
+
 }

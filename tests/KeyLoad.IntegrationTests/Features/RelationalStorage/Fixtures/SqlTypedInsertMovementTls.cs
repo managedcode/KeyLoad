@@ -14,7 +14,7 @@ internal sealed class SqlTypedInsertMovementTls(PartitionRef partition)
     internal void Configure(IDistributedApplicationTestingBuilder builder, string root)
     {
         certificate ??= PostgresRf3Certificate.Create(root, TwoRf3MembershipProtocol.Nodes);
-        selection.Configure(builder, certificate, partition, TwoRf3MembershipProtocol.Nodes);
+        selection.Configure(builder, certificate, Partition, TwoRf3MembershipProtocol.Nodes);
     }
     private const string MissingCertificate = "The owned movement TLS certificate is absent.";
 }

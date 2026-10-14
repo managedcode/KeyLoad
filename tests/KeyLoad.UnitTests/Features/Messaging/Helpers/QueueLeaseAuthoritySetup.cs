@@ -74,14 +74,47 @@ internal static class QueueLeaseAuthoritySetup
             });
         }
         var metadata = NativeSerialization.Deserialize<MessageMetadata>(state.OriginalBytes);
-        return NativeSerialization.Serialize(fault == QueueLeaseAuthorityFault.ForeignMetadataIdentity
-            ? metadata with
+        var damaged = fault switch
+        {
+            QueueLeaseAuthorityFault.ForeignMetadataIdentity => metadata with
             {
                 Id = QueueLeaseAuthorityProtocol.Foreign
-            } : metadata with
+            },
+            QueueLeaseAuthorityFault.MissingMetadataDeadline => metadata with
             {
                 LeaseUntil = null
-            });
+            },
+            QueueLeaseAuthorityFault.NegativeAttempts => metadata with
+            {
+                Attempts = -1
+            },
+            QueueLeaseAuthorityFault.ZeroAttempts => metadata with
+            {
+                Attempts = 0
+            },
+            QueueLeaseAuthorityFault.NegativeStateVersion => metadata with
+            {
+                StateVersion = -1
+            },
+            QueueLeaseAuthorityFault.ZeroStateVersion => metadata with
+            {
+                StateVersion = 0
+            },
+            QueueLeaseAuthorityFault.UnclaimedStateVersion => metadata with
+            {
+                StateVersion = 1
+            },
+            QueueLeaseAuthorityFault.NegativeReadySequence => metadata with
+            {
+                ReadySequence = -1
+            },
+            QueueLeaseAuthorityFault.ZeroReadySequence => metadata with
+            {
+                ReadySequence = 0
+            },
+            _ => throw new ArgumentOutOfRangeException(nameof(fault))
+        };
+        return NativeSerialization.Serialize(damaged);
     }
 
     internal static ReplicatedOperation Create<T>(OperationKind kind, T value, Guid id, DateTimeOffset time)
@@ -92,6 +125,10 @@ internal static class QueueLeaseAuthoritySetup
         {
             QueueLeaseAuthorityFault.ForeignBodyIdentity => bodyKey,
             QueueLeaseAuthorityFault.ForeignMetadataIdentity or QueueLeaseAuthorityFault.MissingMetadataDeadline
+                or QueueLeaseAuthorityFault.NegativeAttempts or QueueLeaseAuthorityFault.ZeroAttempts
+                or QueueLeaseAuthorityFault.NegativeStateVersion or QueueLeaseAuthorityFault.ZeroStateVersion
+                or QueueLeaseAuthorityFault.UnclaimedStateVersion or QueueLeaseAuthorityFault.NegativeReadySequence
+                or QueueLeaseAuthorityFault.ZeroReadySequence
                 => KeySpace.Partition(QueueLeaseAuthorityProtocol.MetadataSpace, lane.Partition, lane.Queue, QueueLeaseAuthorityProtocol.Message),
             _ => KeySpace.Partition(QueueLeaseAuthorityProtocol.LeaseSpace, lane.Partition, lane.Queue, deadline, QueueLeaseAuthorityProtocol.Message)
         };

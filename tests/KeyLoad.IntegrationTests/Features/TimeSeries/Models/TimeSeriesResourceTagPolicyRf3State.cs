@@ -3,7 +3,8 @@ namespace KeyLoad.IntegrationTests.Features.TimeSeries;
 
 internal sealed class TimeSeriesResourceTagPolicyRf3State(TimeSeriesRf3Scenario scenario,
     McpPersistedIdentity reader, ResourceDefinition definition, AtomicPartitionPlacementResolution placement,
-    CommandRequest append, CommitReceipt receipt, Guid createId)
+    CommandRequest append, CommitReceipt receipt, Guid createId, Guid windowId,
+    List<(CommandRequest Request, CommitReceipt Receipt)> chunkCommands)
 {
     internal TimeSeriesRf3Scenario Scenario { get; } = scenario;
     internal McpPersistedIdentity Reader { get; } = reader;
@@ -16,6 +17,8 @@ internal sealed class TimeSeriesResourceTagPolicyRf3State(TimeSeriesRf3Scenario 
         get;
     } =
         [(createId, new(scenario.Partition.TenantId, scenario.Partition.DatabaseId, definition), definition)];
+    internal Guid WindowId { get; } = windowId;
+    internal List<(CommandRequest Request, CommitReceipt Receipt)> ChunkCommands { get; } = chunkCommands;
     internal Guid StaleId { get; } = Guid.NewGuid();
     internal ConfigureResourceRequest? Stale
     {

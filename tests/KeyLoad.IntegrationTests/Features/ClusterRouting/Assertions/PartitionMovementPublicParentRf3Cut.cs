@@ -53,6 +53,7 @@ internal static partial class PartitionMovementPublicParentRf3Cut
         var actual = await CaptureAsync(seed, cancellationToken).ConfigureAwait(false);
         await SqlRf3Protocol.EqualAsync(seed.OriginalModels, actual);
         await LiteralAsync(seed, actual);
+        await PartitionMovementPublicParentRf3OfficialCut.RequireAsync(seed, cancellationToken).ConfigureAwait(false);
     }
 
     internal static async Task RequireModelsAsync(PartitionMovementPublicParentRf3Seed seed,

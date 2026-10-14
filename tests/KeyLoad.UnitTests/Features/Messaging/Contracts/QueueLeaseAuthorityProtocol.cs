@@ -14,7 +14,14 @@ internal enum QueueLeaseAuthorityFault
     ForeignReference,
     ForeignBodyIdentity,
     ForeignMetadataIdentity,
-    MissingMetadataDeadline
+    MissingMetadataDeadline,
+    NegativeAttempts,
+    ZeroAttempts,
+    NegativeStateVersion,
+    ZeroStateVersion,
+    UnclaimedStateVersion,
+    NegativeReadySequence,
+    ZeroReadySequence
 }
 
 internal static class QueueLeaseAuthorityProtocol
@@ -40,6 +47,7 @@ internal static class QueueLeaseAuthorityProtocol
     internal const string InboxSpace = "inbox";
     internal const string PutKind = "putDocument";
     internal const string RetryReason = "RetryRequested";
+    internal const string InvalidMetadataDetail = "The retained queue lease metadata is invalid.";
     internal const string MissingBodyDetail = "A leased message body is absent.";
     internal const string RowSeparator = ":";
     internal const int Zero = 0;

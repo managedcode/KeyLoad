@@ -6,7 +6,7 @@ internal static class ScriptDomContextIdentity
     private const int FirstCommand = 0;
     private const int PrefixLength = 2;
     private const int HexGuidLength = 32;
-    private const  int HexEpochLength = 16;
+    private const int HexEpochLength = 16;
     private const string BinaryPrefix = "0x";
     private const string GuidFormat = "N";
     internal static Guid Read(global::Microsoft.SqlServer.TransactSql.ScriptDom.SetCommandStatement statement,
@@ -35,7 +35,7 @@ internal static class ScriptDomContextIdentity
         {
             throw ScriptDomOperationErrors.Invalid();
         }
-        if ( !value.Value.StartsWith(BinaryPrefix, StringComparison.OrdinalIgnoreCase)
+        if (!value.Value.StartsWith(BinaryPrefix, StringComparison.OrdinalIgnoreCase)
             || !Guid.TryParseExact(value.Value.AsSpan(PrefixLength, HexGuidLength), GuidFormat, out var identity)
             || identity == Guid.Empty)
         {
@@ -55,7 +55,7 @@ internal static class ScriptDomContextIdentity
         }
         checkBudget();
         token.ThrowIfCancellationRequested();
-        return  (identity, ownershipEpoch);
+        return (identity, ownershipEpoch);
     }
 }
 

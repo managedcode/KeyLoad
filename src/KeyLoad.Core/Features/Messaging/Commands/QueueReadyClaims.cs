@@ -7,6 +7,7 @@ namespace KeyLoad.Core;
 public sealed partial class DatabaseEngine
 {
     private const int QueueReadyClaimsVersionOne = 1;
+    private const string QueueClaimVersionExhausted = "The queue claim counters are exhausted.";
     private const int QueueReadyClaimsAdjacentElementOffset = 1;
 
     private const string MissingReadyMetadata = "Queue metadata is absent.";
@@ -102,6 +103,7 @@ public sealed partial class DatabaseEngine
         ResourceDefinition resource, DateTimeOffset now, ReadOnlySpan<byte> key, byte[] metadataKey,
         MessageMetadata metadata, StoredMessageBody body, ReadyClaimState state)
     {
+        RequireQueueClaimVersionSpace(metadata);
         var deadline = now.AddSeconds(request.LeaseSeconds);
         var version = checked(metadata.LeaseVersion + QueueReadyClaimsVersionOne);
         var updated = metadata with
@@ -130,6 +132,15 @@ public sealed partial class DatabaseEngine
             Authorization.Project(principal, resource.HeaderPolicies, body.Body.HeadersJson, out _),
             token, version, deadline, updated.Attempts, updated.DeliveryGeneration));
         state.ReceivedBytes += body.Bytes;
+    }
+
+    private static void RequireQueueClaimVersionSpace(MessageMetadata metadata)
+    {
+        if (metadata.Attempts == int.MaxValue || metadata.StateVersion == long.MaxValue
+            || metadata.LeaseVersion == long.MaxValue)
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, QueueClaimVersionExhausted);
+        }
     }
 
     private static void ApplyReadyInputs(IAtomicTransaction tx, List<ReadyClaimInput> inputs)

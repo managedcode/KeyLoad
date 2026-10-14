@@ -21,7 +21,7 @@ internal static class TimeSeriesResourceTagPolicyRf3Seed
             partition.TransactionDomainId)
         {
             FieldPolicies = [new(TimeSeriesRf3Scenario.SecretField, TimeSeriesRf3Scenario.SecretClassification,
-            TimeSeriesRf3Scenario.SecretGrant)]
+            TimeSeriesRf3Scenario.SecretGrant, TimeSeriesRf3Scenario.SecretGrant)]
         };
         var createId = Guid.NewGuid();
         await SqlRf3Protocol.EqualAsync(definition, await McpCallerAssertions.SdkSuccessAsync(
@@ -29,6 +29,7 @@ internal static class TimeSeriesResourceTagPolicyRf3Seed
                 new(partition.TenantId, partition.DatabaseId, definition), token)));
         var placement = await McpCallerAssertions.SdkSuccessAsync(
             await administrator.Sdk.ReadAtomicPartitionPlacementAsync(new(1, partition), token));
+        var opened = await TimeSeriesResourceChunkPolicyRf3Enrollment.OpenAsync(administrator, partition, token);
         var append = new CommandRequest(Guid.NewGuid(), partition,
             [new AppendSamples(TimeSeriesRf3Scenario.Set, TimeSeriesRf3Scenario.Series,
                 [TimeSeriesRf3Scenario.Data(FirstId, TimeSeriesRf3Scenario.Start, 3d),
@@ -43,12 +44,14 @@ internal static class TimeSeriesResourceTagPolicyRf3Seed
         await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
         await SqlRf3Protocol.EqualAsync(new[] { new MutationReceipt("appendSamples", TimeSeriesRf3Scenario.Set,
             TimeSeriesRf3Scenario.Series, 2L) }, receipt.Mutations.ToArray());
+        var sealedWindow = await TimeSeriesResourceChunkPolicyRf3Enrollment.SealAsync(administrator, partition, opened.WindowId, token);
         var principal = new PrincipalRecord("series-resource-reader-" + Guid.NewGuid().ToString("N"),
             partition.TenantId, [new(partition.DatabaseId, TimeSeriesRf3Scenario.Set, Capability.SeriesRead)],
             [TimeSeriesRf3Scenario.SecretGrant]);
         var identity = await NativeTextRf3Scenario.ConfigureIdentityAsync(fixture, principal, token);
         await SqlRf3Protocol.EqualAsync(principal, identity.Principal);
-        var state = new TimeSeriesResourceTagPolicyRf3State(scenario, identity, definition, placement, append, receipt, createId)
+        var state = new TimeSeriesResourceTagPolicyRf3State(scenario, identity, definition, placement, append, receipt, createId, opened.WindowId,
+            [(opened.Request, opened.Receipt), sealedWindow])
         {
             Outbox = await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.OutboxStatusAsync(partition, token))
         };

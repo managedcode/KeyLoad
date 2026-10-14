@@ -18,14 +18,18 @@ internal static class PartitionMovementPublicCallerReplay
         var sdkDenied = await sdk.MovePartitionAsync(changed, cancellationToken).ConfigureAwait(false);
         await Assert.That(sdkDenied.IsSuccess).IsFalse();
         await Assert.That(sdkDenied.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.Conflict));
-        await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(PartitionMovePublicProtocol.ToolName,
-            changed, cancellationToken).ConfigureAwait(false), ErrorCode.Conflict, dispatched: true);
+        await PartitionMovementPublicRefusalRf3Oracle.SdkAsync(sdkDenied.Problem, ErrorCode.Conflict,
+            PartitionMovementPublicRefusalRf3Oracle.MovementConflictDetail);
+        await PartitionMovementPublicRefusalRf3Oracle.McpAsync(await mcp.CallAsync(PartitionMovePublicProtocol.ToolName,
+            changed, cancellationToken).ConfigureAwait(false), ErrorCode.Conflict, PartitionMovementPublicRefusalRf3Oracle.SafeGenericDetail);
         var sql = SqlRf3Protocol.Call(original.Partition, PartitionMovePublicProtocol.ToolName, changed);
         var sqlDenied = await sdk.ExecuteSqlAsync(sql, cancellationToken).ConfigureAwait(false);
         await Assert.That(sqlDenied.IsSuccess).IsFalse();
         await Assert.That(sqlDenied.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.Conflict));
-        await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(SqlOperationProtocol.ToolName, sql,
-            cancellationToken).ConfigureAwait(false), ErrorCode.Conflict, dispatched: true);
+        await PartitionMovementPublicRefusalRf3Oracle.SdkAsync(sqlDenied.Problem, ErrorCode.Conflict,
+            PartitionMovementPublicRefusalRf3Oracle.MovementConflictDetail);
+        await PartitionMovementPublicRefusalRf3Oracle.McpAsync(await mcp.CallAsync(SqlOperationProtocol.ToolName, sql,
+            cancellationToken).ConfigureAwait(false), ErrorCode.Conflict, PartitionMovementPublicRefusalRf3Oracle.SafeGenericDetail);
         await RequireHealthyAsync(sdk, mcp, original with
         {
             Mode = PartitionMoveMode.Resume
@@ -39,14 +43,18 @@ internal static class PartitionMovementPublicCallerReplay
         var denied = await sdk.MovePartitionAsync(original, cancellationToken).ConfigureAwait(false);
         await Assert.That(denied.IsSuccess).IsFalse();
         await Assert.That(denied.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
-        await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(PartitionMovePublicProtocol.ToolName,
-            original, cancellationToken).ConfigureAwait(false), ErrorCode.PermissionDenied, dispatched: true);
+        await PartitionMovementPublicRefusalRf3Oracle.SdkAsync(denied.Problem, ErrorCode.PermissionDenied,
+            PartitionMovementPublicRefusalRf3Oracle.AdministrationDetail);
+        await PartitionMovementPublicRefusalRf3Oracle.McpAsync(await mcp.CallAsync(PartitionMovePublicProtocol.ToolName,
+            original, cancellationToken).ConfigureAwait(false), ErrorCode.PermissionDenied, PartitionMovementPublicRefusalRf3Oracle.SafePermissionDetail);
         var sql = SqlRf3Protocol.Call(original.Partition, PartitionMovePublicProtocol.ToolName, original);
         var deniedSql = await sdk.ExecuteSqlAsync(sql, cancellationToken).ConfigureAwait(false);
         await Assert.That(deniedSql.IsSuccess).IsFalse();
         await Assert.That(deniedSql.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
-        await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(SqlOperationProtocol.ToolName, sql,
-            cancellationToken).ConfigureAwait(false), ErrorCode.PermissionDenied, dispatched: true);
+        await PartitionMovementPublicRefusalRf3Oracle.SdkAsync(deniedSql.Problem, ErrorCode.PermissionDenied,
+            PartitionMovementPublicRefusalRf3Oracle.AdministrationDetail);
+        await PartitionMovementPublicRefusalRf3Oracle.McpAsync(await mcp.CallAsync(SqlOperationProtocol.ToolName, sql,
+            cancellationToken).ConfigureAwait(false), ErrorCode.PermissionDenied, PartitionMovementPublicRefusalRf3Oracle.SafePermissionDetail);
     }
 
     private static async Task RequireHealthyAsync(KeyLoadClient sdk, McpOfficialClient mcp,

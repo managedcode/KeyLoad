@@ -42,6 +42,8 @@ internal sealed class NativeSixSiloMembershipReadinessFixture : IAsyncDisposable
         bounds.Validate();
         var initial = Read(options, original.SiloAddress, bounds, token);
         await NativeSixSiloMembershipReadinessAssertions.CompleteAsync(initial, handles).ConfigureAwait(false);
+        var providerRows = await NativeMembershipProviderRows.ReadAsync(Cluster, original.SiloAddress, token).ConfigureAwait(false);
+        await NativeMembershipProviderRows.RequireAsync(Cluster, handles, null, token).ConfigureAwait(false);
         var wrong = options with
         {
             PhysicalGroupTrust = options.PhysicalGroupTrust with
@@ -50,11 +52,15 @@ internal sealed class NativeSixSiloMembershipReadinessFixture : IAsyncDisposable
             }
         };
         await Assert.That(Read(wrong, original.SiloAddress, bounds, token)).IsNull();
+        await NativeMembershipProviderRows.RequireAsync(Cluster, handles, providerRows, token).ConfigureAwait(false);
         await Assert.That(Read(options, original.SiloAddress, new OrleansMembershipOptions { MaximumRows = Silos - 1 }, token)).IsNull();
+        await NativeMembershipProviderRows.RequireAsync(Cluster, handles, providerRows, token).ConfigureAwait(false);
         await Assert.That(Read(options, original.SiloAddress, new OrleansMembershipOptions { MaximumAddressBytes = 1 }, token)).IsNull();
+        await NativeMembershipProviderRows.RequireAsync(Cluster, handles, providerRows, token).ConfigureAwait(false);
         await NativeSixSiloMembershipReadinessAssertions.CompleteAsync(Read(options, original.SiloAddress, bounds, token), handles).ConfigureAwait(false);
         await NativeSixSiloMembershipReadinessAssertions.CancelledAsync(
             cancelled => Read(options, original.SiloAddress, bounds, cancelled)).ConfigureAwait(false);
+        await NativeMembershipProviderRows.RequireAsync(Cluster, handles, providerRows, token).ConfigureAwait(false);
         await NativeSixSiloMembershipReadinessAssertions.CompleteAsync(Read(options, original.SiloAddress, bounds, token), handles).ConfigureAwait(false);
         var oldAddress = original.SiloAddress;
         var restarted = await Cluster.RestartSiloAsync(original).ConfigureAwait(false)
@@ -68,6 +74,7 @@ internal sealed class NativeSixSiloMembershipReadinessFixture : IAsyncDisposable
         await Assert.That(Read(options, oldAddress, bounds, token)).IsNull();
         await NativeSixSiloMembershipReadinessAssertions.CompleteAsync(current, Cluster.Silos.ToArray()).ConfigureAwait(false);
         await Assert.That(current!.ActiveFingerprint).IsNotEqualTo(initial!.ActiveFingerprint);
+        await NativeMembershipProviderRows.RestartedAsync(Cluster, Cluster.Silos.ToArray(), oldAddress, token).ConfigureAwait(false);
     }
 
     internal async Task DeployAsync(CancellationToken token)

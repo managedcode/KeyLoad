@@ -64,10 +64,12 @@ internal static class CurrentOwnershipTokenAfterMovementRf3Flow
             await Assert.That(refusal.IsSuccess).IsFalse();
             await Assert.That(refusal.Value).IsNull();
             await Assert.That(refusal.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.TokenInvalidated));
+            await PartitionMovementPublicRefusalRf3Oracle.SdkAsync(refusal.Problem, ErrorCode.TokenInvalidated,
+                PartitionMovementPublicRefusalRf3Oracle.DocumentMinimumDetail);
         }
-        await McpCallerAssertions.ErrorAsync(await seed.Official.CallAsync(McpCallerTools.DocumentsGet,
+        await PartitionMovementPublicRefusalRf3Oracle.McpAsync(await seed.Official.CallAsync(McpCallerTools.DocumentsGet,
             new GetDocumentRequest(seed.Models.First, original), token).ConfigureAwait(false),
-            ErrorCode.TokenInvalidated, dispatched: true);
+            ErrorCode.TokenInvalidated, PartitionMovementPublicRefusalRf3Oracle.DocumentMinimumDetail);
     }
 
     private static async Task RequireReadAsync(PartitionMovementPublicParentRf3Seed seed, EntityRef reference,

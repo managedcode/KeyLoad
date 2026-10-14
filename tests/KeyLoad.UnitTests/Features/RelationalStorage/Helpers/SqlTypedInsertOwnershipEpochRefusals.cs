@@ -20,10 +20,10 @@ internal static class SqlTypedInsertOwnershipEpochRefusals
     {
         var error = Assert.ThrowsExactly<KeyLoadException>(() => SqlTypedInsertOwnershipEpochCommands.Compile(target,
                 SqlTypedInsertRetiredLiteral.HealthyId, epoch, native: false, token));
-            await Assert.That(error.Code).IsEqualTo(ErrorCode.Validation);
-            error = Assert.ThrowsExactly<KeyLoadException>(() => SqlTypedInsertOwnershipEpochCommands.Compile(target,
-                SqlTypedInsertRetiredLiteral.HealthyId, epoch, native: true, token));
-            await Assert.That(error.Code).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(error.Code).IsEqualTo(ErrorCode.Validation);
+        error = Assert.ThrowsExactly<KeyLoadException>(() => SqlTypedInsertOwnershipEpochCommands.Compile(target,
+            SqlTypedInsertRetiredLiteral.HealthyId, epoch, native: true, token));
+        await Assert.That(error.Code).IsEqualTo(ErrorCode.Validation);
     }, () => state.Authority.RemainsControlOwnedAsync(source, target),
             () => state.FailedAuthority.RemainsControlOwnedAsync(source, target));
     private static async Task StaleAsync(ControlledPartitionMovementNode source, ControlledPartitionMovementNode target,

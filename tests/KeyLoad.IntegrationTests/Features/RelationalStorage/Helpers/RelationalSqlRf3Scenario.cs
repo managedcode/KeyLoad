@@ -13,7 +13,7 @@ internal sealed record RelationalSqlRf3Scenario(PartitionRef Partition, Resource
     private static VectorSpace Space => new(RelationalSqlRf3Tokens.VectorSpace, RelationalSqlRf3Tokens.Dimension,
         DistanceMetric.DotProduct, RelationalSqlRf3Tokens.VectorModel, RelationalSqlRf3Tokens.VectorVersion);
     internal static async Task<RelationalSqlRf3Scenario> CreateAsync(KeyLoadClient administrator, CancellationToken cancellationToken)
-     = > await CreateAsync(administrator, new PartitionRef(RelationalSqlRf3Tokens.TenantPrefix + Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat),
+        => await CreateAsync(administrator, new PartitionRef(RelationalSqlRf3Tokens.TenantPrefix + Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat),
             RelationalSqlRf3Tokens.Database, RelationalSqlRf3Tokens.Domain, Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat)), cancellationToken);
     internal static async Task<RelationalSqlRf3Scenario> CreateAsync(KeyLoadClient administrator,
         PartitionRef partition, CancellationToken cancellationToken)
@@ -67,7 +67,6 @@ internal sealed record RelationalSqlRf3Scenario(PartitionRef Partition, Resource
             McpCallerTools.ResourcesConfigure, new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId, definition),
             Guid.NewGuid()), cancellationToken);
 }
-
 
 internal sealed record RelationalQ2AdmissionSeed(RelationalSqlRf3Scenario Scenario,
     McpPersistedIdentity Identity, CommandRequest Command, CommitReceipt Receipt)

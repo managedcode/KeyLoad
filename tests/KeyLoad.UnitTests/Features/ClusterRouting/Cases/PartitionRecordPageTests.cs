@@ -53,6 +53,8 @@ internal sealed class PartitionRecordPageTests
         await Assert.That(pages.first.RetainedBytes + pages.second.RetainedBytes)
             .IsEqualTo(firstRecordBytes + continuationBytes + secondRecordBytes);
         await Assert.That(pages.second.RetainedBytes).IsEqualTo(c.Key.Length + c.Value.Length);
+        await PartitionRecordOwnedCutContinuation.RunAsync(fixture, Partition, Family, [a, b, c],
+            TestContext.Current!.Execution.CancellationToken);
 
     }
 

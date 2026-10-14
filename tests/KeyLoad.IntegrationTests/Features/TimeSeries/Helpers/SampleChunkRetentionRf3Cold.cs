@@ -1,5 +1,4 @@
 using Aspire.Hosting.ApplicationModel;
-using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.ClusterReplication;
 
@@ -28,10 +27,13 @@ internal static class SampleChunkRetentionRf3Cold
         {
             await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(node, WaitBehavior.WaitOnResourceUnavailable, token).ConfigureAwait(false);
         }
-        using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var sdk = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
-        await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node1,
-            fixture.AdminKey, token).ConfigureAwait(false);
-        await SampleChunkRetentionRf3Healthy.RequireAsync(original, sdk, mcp, token);
+        await global::KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsRf3Callers.RunOwnedAsync(
+            fixture.App, McpCallerProtocol.Node1, fixture.AdminKey, async callers =>
+            {
+                var sdk = callers.Sdk;
+                await SampleChunkRetentionRf3Healthy.RequireAsync(original, sdk, callers.Mcp, token);
+                await SampleChunkRetainedIdentityRf3Flow.HealthyAsync(original, sdk, callers.Mcp, token);
+                return true;
+            }, token);
     }
 }

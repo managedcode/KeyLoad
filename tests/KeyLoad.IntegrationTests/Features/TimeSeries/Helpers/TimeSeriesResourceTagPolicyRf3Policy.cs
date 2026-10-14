@@ -23,7 +23,7 @@ internal static class TimeSeriesResourceTagPolicyRf3Policy
         var next = current with
         {
             SchemaVersion = checked(current.SchemaVersion + 1),
-            FieldPolicies = [current.FieldPolicies[0] with { RawReadGrant = grant }]
+            FieldPolicies = [current.FieldPolicies[0] with { RawReadGrant = grant, RawUseGrant = grant }]
         };
         var request = Request(state, next, current.SchemaVersion);
         var id = Guid.NewGuid();
@@ -73,6 +73,7 @@ internal static class TimeSeriesResourceTagPolicyRf3Policy
         await SqlRf3Protocol.EqualAsync(state.Receipt, (await McpCallerAssertions.SuccessAsync<CommitReceipt>(
             await administrator.Mcp.CallAsync(McpCallerTools.DocumentsCommit, state.Append, token))).Value);
         await AfterAsync(reader, administrator, state, token);
+        await TimeSeriesResourceChunkPolicyRf3Enrollment.ReplayAsync(reader, administrator, state, token);
     }
 
     internal static async Task StaleAsync(RequestCqrsRf3Callers reader, RequestCqrsRf3Callers administrator,
