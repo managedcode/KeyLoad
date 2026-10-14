@@ -18,7 +18,9 @@ internal static class PackedAnnStorageFrames
         var measured = NativeSerialization.Measure(value);
         budget.Charge(measured);
         if (measured > MaximumChunkBytes || checked(destination.Position + sizeof(int) + measured) > options.MaxFileBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, SnapshotExceeded); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, SnapshotExceeded);
+        }
         var payload = NativeSerialization.Serialize(value);
         if (payload.Length != measured || payload.Length > MaximumChunkBytes
             || checked(destination.Position + sizeof(int) + payload.Length) > options.MaxFileBytes)

@@ -10,10 +10,15 @@ internal static class TargetInboxNativeSetup
         fixture.Configure(TargetInboxUnitProtocol.Collection, ResourceKind.Collection);
         fixture.Configure(TargetInboxUnitProtocol.Events, ResourceKind.StreamSet);
         var resource = new ResourceDefinition(TargetInboxUnitProtocol.Target, ResourceKind.WorkQueue, fixture.Partition.TransactionDomainId)
-        { InboxPolicy = new(TargetInboxUnitProtocol.ReceiptCapacity, TargetInboxUnitProtocol.ByteCapacity) };
+        {
+            InboxPolicy = new(TargetInboxUnitProtocol.ReceiptCapacity, TargetInboxUnitProtocol.ByteCapacity)
+        };
         _ = fixture.Submit(OperationKind.ConfigureResource,
             new ConfigureResourceRequest(fixture.Partition.TenantId, fixture.Partition.DatabaseId, resource)).Get<ResourceDefinition>();
-        var source = new QueueLaneRef(fixture.Partition with { PartitionKey = TargetInboxUnitProtocol.SourcePartition }, TargetInboxUnitProtocol.Input);
+        var source = new QueueLaneRef(fixture.Partition with
+        {
+            PartitionKey = TargetInboxUnitProtocol.SourcePartition
+        }, TargetInboxUnitProtocol.Input);
         var producer = new CommandRequest(Guid.NewGuid(), source.Partition,
             [new EnqueueMessage(source.Queue, TargetInboxUnitProtocol.Message, TargetInboxUnitProtocol.Payload)]);
         _ = fixture.Submit(OperationKind.Batch, producer, id: producer.CommandId).Get<CommitReceipt>();

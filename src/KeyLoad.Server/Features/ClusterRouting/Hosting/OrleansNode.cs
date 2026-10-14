@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server.Features.BlobStorage;
 using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.Server.Features.DocumentStorage;
@@ -65,7 +65,7 @@ internal sealed partial class OrleansNode(PartitionHost partition, IOptions<Node
     /// <summary>Early runtime discovery remains available during membership bootstrap.</summary>
     public ReplicaSiloDiscoveryState? Discovery => Volatile.Read(ref host)?.Services.GetRequiredService<ReplicaSiloDiscoveryState>();
 
-    internal Task<KeyLoad.Orleans.ReplicaCohortAdmissionStatus> AcquireCohortAdmissionAsync(CancellationToken token)
+    internal Task<KeyLoad.Clustering.ReplicaCohortAdmissionStatus> AcquireCohortAdmissionAsync(CancellationToken token)
         => RuntimeServices.GetRequiredService<ReplicaSiloDiscoveryClient>().AcquireCompatibleCohortAsync(token);
 
     internal bool CatalogReady => Grains is not null && Volatile.Read(ref physicalShardCatalog)?.IsReady == true;
@@ -105,7 +105,9 @@ internal sealed partial class OrleansNode(PartitionHost partition, IOptions<Node
         lock (lifecycle)
         {
             if (startup is not null || shutdown is not null)
-            { throw new InvalidOperationException(OrleansNodeProtocol.SiloAlreadyStarted); }
+            {
+                throw new InvalidOperationException(OrleansNodeProtocol.SiloAlreadyStarted);
+            }
             return startup = Features.Messaging.RemoteTransferNativeStartup.Start(
                 partition.TransferVerification, requestWork, StartCoreAsync, cancellationToken);
         }
@@ -139,7 +141,9 @@ internal sealed partial class OrleansNode(PartitionHost partition, IOptions<Node
         GraphResources.Attach();
         if (Options.PhysicalGroupTrust.Role == PhysicalGroupTrustRole.Destination
             && !Options.PhysicalGroupTrust.RemoteDocumentReads)
-        { return; }
+        {
+            return;
+        }
         var catalog = new PhysicalShardCatalogStartup(this, partition, nodeOptions,
             built.Services.GetRequiredService<TimeProvider>(), runtimeOptions.GrainRouting, runtimeOptions.McpExecution,
             loggerFactory.CreateLogger<PhysicalShardCatalogStartup>());

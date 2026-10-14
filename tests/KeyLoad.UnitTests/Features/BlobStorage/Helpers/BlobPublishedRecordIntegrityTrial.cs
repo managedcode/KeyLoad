@@ -41,9 +41,13 @@ internal static class BlobPublishedRecordIntegrityTrial
             await BlobWholeFlowAssertions.Unchanged(cold, repairedPosition, repairedImage);
         }, failures);
         if (cold is not null)
-        { ServerFailureObserver.Observe(cold.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(cold.Dispose, failures);
+        }
         if (fixture is not null)
-        { ServerFailureObserver.Observe(fixture.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(fixture.Dispose, failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 

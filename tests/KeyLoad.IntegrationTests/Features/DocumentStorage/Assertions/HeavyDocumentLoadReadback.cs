@@ -62,7 +62,9 @@ internal static class HeavyDocumentLoadReadback
             {
                 token.ThrowIfCancellationRequested();
                 if (count >= HeavyDocumentLoadProtocol.Records)
-                { throw new InvalidOperationException(ExtraRecordFailure); }
+                {
+                    throw new InvalidOperationException(ExtraRecordFailure);
+                }
                 var id = HeavyDocumentLoadProtocol.Id(count);
                 var json = HeavyDocumentLoadProtocol.Json(count);
                 await Assert.That(row.EntityId).IsEqualTo(id);
@@ -73,7 +75,9 @@ internal static class HeavyDocumentLoadReadback
                 count++;
             }
             if (page.Cursor is not null && (page.Rows.IsEmpty || string.Equals(cursor, page.Cursor, StringComparison.Ordinal)))
-            { throw new InvalidOperationException(CursorFailure); }
+            {
+                throw new InvalidOperationException(CursorFailure);
+            }
             cursor = page.Cursor;
         } while (cursor is not null);
         await Assert.That(count).IsEqualTo(HeavyDocumentLoadProtocol.Records);

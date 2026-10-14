@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
@@ -26,10 +26,22 @@ internal sealed class TenantPlacementNativeRuntime : IAsyncDisposable
         IsControl = isControl;
     }
 
-    private bool IsControl { get; }
-    internal ITenantPlacementPlanner Planner { get; }
-    internal IPlacementIntentExecutor Executor { get; }
-    internal IPlacementIntentPersistence Persistence { get; }
+    private bool IsControl
+    {
+        get;
+    }
+    internal ITenantPlacementPlanner Planner
+    {
+        get;
+    }
+    internal IPlacementIntentExecutor Executor
+    {
+        get;
+    }
+    internal IPlacementIntentPersistence Persistence
+    {
+        get;
+    }
     internal OwnerCapacityNativeLifetime Capacity => capacity;
     internal void Start() => capacity.Start();
 
@@ -56,7 +68,9 @@ internal sealed class TenantPlacementNativeRuntime : IAsyncDisposable
     public ValueTask DisposeAsync()
     {
         lock (closing)
-        { return new(shutdown ??= StopCoreAsync()); }
+        {
+            return new(shutdown ??= StopCoreAsync());
+        }
     }
 
     private async Task StopCoreAsync()
@@ -65,7 +79,9 @@ internal sealed class TenantPlacementNativeRuntime : IAsyncDisposable
         await ServerFailureObserver.ObserveAsync(CloseAdmissionAsync, failures).ConfigureAwait(false);
         // The node joins the original movement owner before retiring this borrowed bundle.
         if (!movement.IsJoined)
-        { failures.Add(Errors.Fail(ErrorCode.OwnershipLost, OrleansNodeProtocol.RequestWorkNotJoined)); }
+        {
+            failures.Add(Errors.Fail(ErrorCode.OwnershipLost, OrleansNodeProtocol.RequestWorkNotJoined));
+        }
         else
         {
             await ServerFailureObserver.ObserveAsync(() => admissions.DisposeAsync().AsTask(), failures)

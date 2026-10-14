@@ -57,7 +57,10 @@ internal static class DocumentCrudFixture
         Capability capability, string[] fieldGrants, string? ownerId = null, bool restrictRows = false)
         => database.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(
             new(id, database.Partition.TenantId, [new("database", resource, capability)], [.. fieldGrants])
-            { OwnerId = ownerId, RestrictRows = restrictRows })).Get<PrincipalRecord>();
+            {
+                OwnerId = ownerId,
+                RestrictRows = restrictRows
+            })).Get<PrincipalRecord>();
 
     internal static async Task AssertIndexedIds(TestDatabase database, string field, string indexName,
         string value, string[] expected, PartitionRef? partition = null)

@@ -23,7 +23,10 @@ internal static class TenantCapacityPlacementRf3OccupiedProvisioning
                 var definition = new PrincipalRecord(identity.PrincipalId, identity.Partition.TenantId,
                     [new(identity.Partition.DatabaseId, RequestCqrsRf3Protocol.AdminCollection,
                         Capability.DocumentsRead | Capability.DocumentsWrite)], [])
-                { PolicyEpoch = OriginalPrincipalEpoch, ClusterAdministrator = false };
+                {
+                    PolicyEpoch = OriginalPrincipalEpoch,
+                    ClusterAdministrator = false
+                };
                 _ = await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.ConfigureResourceAsync(Guid.NewGuid(),
                     new(identity.Partition.TenantId, identity.Partition.DatabaseId,
                         new(RequestCqrsRf3Protocol.AdminCollection, ResourceKind.Collection,
@@ -43,7 +46,11 @@ internal static class TenantCapacityPlacementRf3OccupiedProvisioning
         await Assert.That(await McpCallerAssertions.SdkSuccessAsync(
             await seed.Source.BindAtomicPartitionPlacementAsync(bindId, bind, token))).IsTrue();
         await Assert.That((await McpCallerAssertions.SuccessAsync<bool>(await seed.Official.CallAsync(
-            McpCallerTools.AdminPartitionPlacementBind, new { commandId = bindId, request = bind }, token))).Value).IsTrue();
+            McpCallerTools.AdminPartitionPlacementBind, new
+            {
+                commandId = bindId,
+                request = bind
+            }, token))).Value).IsTrue();
         var configure = new ConfigurePlacementPolicyRequest(capacity.OriginalPolicy.Policy.Revision,
             capacity.HealthyPolicy, capacity.Control);
         var configureId = Guid.NewGuid();
@@ -51,7 +58,11 @@ internal static class TenantCapacityPlacementRf3OccupiedProvisioning
             await seed.Source.ConfigurePlacementPolicyAsync(configureId, configure, token)));
         await SqlRf3Protocol.EqualAsync(capacity.HealthyPolicy,
             (await McpCallerAssertions.SuccessAsync<TenantPlacementPolicyV1>(await seed.Official.CallAsync(
-                TenantPlacementPublicProtocol.ConfigureTool, new { commandId = configureId, request = configure }, token))).Value);
+                TenantPlacementPublicProtocol.ConfigureTool, new
+                {
+                    commandId = configureId,
+                    request = configure
+                }, token))).Value);
         return packed;
     }
 }

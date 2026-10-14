@@ -12,9 +12,13 @@ internal static class BlobLaterPartDamage
         store.Commit((tx, _) =>
         {
             if (fault == BlobLaterPartFault.MissingSecondRaw)
-            { tx.Delete(key); }
+            {
+                tx.Delete(key);
+            }
             else
-            { tx.Put(key, [250, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66]); }
+            {
+                tx.Put(key, [250, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66]);
+            }
             return true;
         });
         return new(key, original);

@@ -12,16 +12,22 @@ internal static class NativeWorkloadTestReports
     {
         var source = Path.Combine(output, ReportsDirectory);
         if (!Directory.Exists(source))
-        { return; }
+        {
+            return;
+        }
         var reports = Directory.EnumerateFiles(source, ReportPattern).Take(MaximumReports + 1).ToArray();
         if (reports.Length > MaximumReports)
-        { throw new InvalidDataException(InvalidReport); }
+        {
+            throw new InvalidDataException(InvalidReport);
+        }
         var destination = Path.Combine(Path.GetDirectoryName(ComparisonProgressLine.PathForEvidenceDirectory(evidence))!, ReportsDirectory);
         foreach (var report in reports)
         {
             var file = new FileInfo(report);
             if (file.Length > MaximumReportBytes || file.LinkTarget is not null)
-            { throw new InvalidDataException(InvalidReport); }
+            {
+                throw new InvalidDataException(InvalidReport);
+            }
             Directory.CreateDirectory(destination);
             File.Copy(report, Path.Combine(destination, file.Name), overwrite: false);
         }

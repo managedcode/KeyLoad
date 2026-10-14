@@ -52,8 +52,16 @@ internal sealed record SiteIsolatedFixture(SiteIsolatedInputs Inputs, string Roo
             measuredSourceRevision = manifest[SiteIsolatedFields.Cohort]![SiteIsolatedFields.SourceRevision]!.GetValue<string>(),
             evidenceUrl = SiteTokens.EvidenceBase + manifest[SiteIsolatedFields.Cohort]![SiteIsolatedFields.RunId]!.GetValue<long>(),
             cohort = manifest[SiteIsolatedFields.Cohort],
-            aggregate = new { path = "isolated/aggregate.json", sha256 = Hash(aggregate) },
-            projection = new { path = "isolated/projection.json", sha256 = Hash(projection) },
+            aggregate = new
+            {
+                path = "isolated/aggregate.json",
+                sha256 = Hash(aggregate)
+            },
+            projection = new
+            {
+                path = "isolated/projection.json",
+                sha256 = Hash(projection)
+            },
             rawLocation = "githubActionsArtifacts",
         };
 

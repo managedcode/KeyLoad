@@ -16,7 +16,9 @@ internal static class ZoneTreeCatalogRestoreEntry
         ArgumentNullException.ThrowIfNull(verifyCatalog);
         ArgumentNullException.ThrowIfNull(newSigningKey);
         if (newIncarnation == Guid.Empty || newSigningKey.Length != SigningKeyBytes)
-        { throw Errors.Fail(ErrorCode.Validation, InvalidIdentity); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, InvalidIdentity);
+        }
         return ZoneTreeBackupRestoreRestore.Restore(backup, destination, executionOptions,
             newIncarnation, newSigningKey, verifyCatalog, cancellationToken);
     }
@@ -26,6 +28,8 @@ internal static class ZoneTreeCatalogRestoreEntry
         if (incarnation is null || incarnation == Guid.Empty || incarnation == original.Incarnation
             || signingKey is null || signingKey.Length != SigningKeyBytes
             || CryptographicOperations.FixedTimeEquals(original.SigningKey.Span, signingKey))
-        { throw Errors.Fail(ErrorCode.Validation, InvalidIdentity); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, InvalidIdentity);
+        }
     }
 }

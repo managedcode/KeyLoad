@@ -16,7 +16,9 @@ public sealed partial class DatabaseEngine
             if (grant.Partition != partition || grant.MoveId != moveId || grant.GrantId != grantId
                 || !PhysicalOwnerEntryValidation.SameOwner(catalog.DefaultShard, grant.ControlOwner)
                 || string.IsNullOrWhiteSpace(grant.OperatorPrincipalId))
-            { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+            }
             return grant.OperatorPrincipalId;
         });
 }

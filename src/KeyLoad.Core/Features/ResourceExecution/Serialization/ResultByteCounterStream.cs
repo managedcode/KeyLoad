@@ -5,6 +5,15 @@ internal sealed class ResultByteCounterStream(long maximumBytes, Action check) :
     private const string ResultBytesExceeded = "The read result byte budget is exceeded.";
     private long bytes;
 
+    internal static long Measure<T>(ReadExecutionBudget budget, T result)
+    {
+        budget.Check();
+        using var counter = new ResultByteCounterStream(budget.MaximumResultBytes, budget.Check);
+        System.Text.Json.JsonSerializer.Serialize(counter, result, JsonDefaults.Options);
+        budget.Check();
+        return counter.Length;
+    }
+
     public override bool CanRead => false;
     public override bool CanSeek => false;
     public override bool CanWrite => true;

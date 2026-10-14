@@ -23,7 +23,9 @@ internal static class DistributedSearchPhaseBatch
         var policy = options.Value;
         policy.Validate();
         if (work.IsDefaultOrEmpty || work.Length > policy.MaximumPartitions)
-        { throw Errors.Fail(ErrorCode.Corruption, DistributedSearchPhaseErrors.InvalidBatch); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, DistributedSearchPhaseErrors.InvalidBatch);
+        }
         budget.ChargeBytes(checked(PartitionQueryRetention.ArrayDescriptorBytes
             + (long)work.Length * PartitionQueryRetention.LeafDescriptorBytes));
         var prepared = new DistributedSearchPreparedLeaf[work.Length];

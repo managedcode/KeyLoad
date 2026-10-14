@@ -35,5 +35,9 @@ internal static class NativeDomProjection
     }
 
     private static JsonTreeProperty ProjectProperty(JsonProperty property, int depth)
-        => new() { Name = property.Name, Value = Project(property.Value, depth) };
+        => new()
+        {
+            Name = property.Name,
+            Value = Project(property.Value, depth)
+        };
 }

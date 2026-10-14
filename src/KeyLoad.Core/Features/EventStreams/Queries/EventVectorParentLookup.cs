@@ -35,7 +35,9 @@ internal static class EventVectorParentLookup
             index = NativeSerialization.Deserialize<EventVectorParentOutcomeIndex>(bytes);
         }, budget.Observe);
         if (index is null)
-        { return null; }
+        {
+            return null;
+        }
         RequireIndex(index, principal, request, admission);
         EventVectorParentScopes.Authorize(authorization, principal, index.OriginalAuthorizedSourceScopes, admission);
         var fresh = freshSourceAuthorizationWitness.IsEmpty ? null : EventVectorCurrentSourceAuthorization.Require(view,
@@ -46,11 +48,15 @@ internal static class EventVectorParentLookup
         if (!CryptographicOperations.FixedTimeEquals(
             EventVectorControlBodyProjection.RequestDigest(phase.OriginalRequest, admission).Span,
             index.OriginalPublicRequestDigest.Span))
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidLookup); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidLookup);
+        }
         EventVectorParentScopes.RequireExact(index.OriginalAuthorizedSourceScopes,
             EventVectorParentScopes.Derive(phase, null, admission));
         if (fresh is not null)
-        { EventVectorCurrentSourceAuthorization.RequireOriginalFences(phase, fresh, admission); }
+        {
+            EventVectorCurrentSourceAuthorization.RequireOriginalFences(phase, fresh, admission);
+        }
         var outcome = EventVectorParentOutcome.Require(view, principal, phase, index.ActualTerminalControlPhaseId,
             index.ActualTerminalOutcomeFingerprint, incarnation, admission);
         return (outcome, index.OriginalNativeTerminalPhaseBytes, index.ActualTerminalControlPhaseId);
@@ -65,10 +71,14 @@ internal static class EventVectorParentLookup
             || index.OriginalNativeTerminalPhaseBytes.IsEmpty || string.IsNullOrWhiteSpace(index.ActualTerminalOutcomeFingerprint)
             || index.OriginalAuthorizedSourceScopes.IsDefault
             || index.OriginalPublicRequestDigest.Length != SHA256.HashSizeInBytes)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidLookup); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidLookup);
+        }
         if (index.MapId != request.MapId || !CryptographicOperations.FixedTimeEquals(
             EventVectorControlBodyProjection.RequestDigest(request, admission).Span,
             index.OriginalPublicRequestDigest.Span))
-        { throw Errors.Fail(ErrorCode.Conflict, InvalidLookup); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, InvalidLookup);
+        }
     }
 }

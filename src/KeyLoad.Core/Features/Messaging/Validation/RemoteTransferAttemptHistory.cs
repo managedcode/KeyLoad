@@ -7,7 +7,9 @@ public sealed partial class DatabaseEngine
     private void RequireRemoteTransferAttemptHistory(RemoteTransferIntentRecord record, RemoteTransferIntentClaims original)
     {
         if (record.Attempts is not { } state)
-        { return; }
+        {
+            return;
+        }
         RemoteTransferAttemptStateValidation.Require(state);
         var intentDigest = RemoteTransferCoordinationIdentity.IntentDigest(record.IntentToken);
         foreach (var reference in state.History)
@@ -28,7 +30,9 @@ public sealed partial class DatabaseEngine
                 || reference.AcceptCommandId != RemoteTransferAttemptIdentity.AcceptId(record.Source, record.Destination,
                     record.TransferId, record.PrincipalId, record.Fingerprint, intentDigest, original.Incarnation, reference.Generation)
                 || !RemoteTransferCapacityRepair.Improved(witness))
-            { throw Errors.Fail(ErrorCode.Corruption, RemoteTransferAttemptProtocol.Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, RemoteTransferAttemptProtocol.Invalid);
+            }
         }
     }
 }

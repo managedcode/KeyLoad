@@ -47,7 +47,10 @@ internal static class RequestCqrsPhaseFaultProvisioning
         var principal = new PrincipalRecord(principalId, partition.TenantId,
             [new(partition.DatabaseId, RequestCqrsRf3Protocol.AdminCollection,
                 Capability.DocumentsRead | Capability.DocumentsWrite)], [])
-        { ClusterAdministrator = false, PolicyEpoch = InitialPolicyEpoch };
+        {
+            ClusterAdministrator = false,
+            PolicyEpoch = InitialPolicyEpoch
+        };
         var credential = new ApiKeyRecord(credentialId, principalId,
             Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(secret))));
         var definition = new ResourceDefinition(RequestCqrsRf3Protocol.AdminCollection, ResourceKind.Collection,
@@ -88,11 +91,15 @@ internal static class RequestCqrsPhaseFaultProvisioning
         ArgumentNullException.ThrowIfNull(root);
         ArgumentNullException.ThrowIfNull(markOwned);
         if (Directory.Exists(root) || File.Exists(root))
-        { throw new IOException("The isolated C1 test root already exists."); }
+        {
+            throw new IOException("The isolated C1 test root already exists.");
+        }
         Directory.CreateDirectory(root);
         markOwned();
         if (!OperatingSystem.IsWindows())
-        { File.SetUnixFileMode(root, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute); }
+        {
+            File.SetUnixFileMode(root, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+        }
     }
 
     internal static Dictionary<string, string> CurrentImages(string currentImage)

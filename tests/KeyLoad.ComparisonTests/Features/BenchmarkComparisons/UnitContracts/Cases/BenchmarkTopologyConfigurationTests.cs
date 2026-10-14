@@ -32,8 +32,14 @@ internal sealed class BenchmarkTopologyConfigurationTests
     [Arguments(3, 2)]
     public async Task AcIso004ExplicitBenchmarkUsesTheSameComputedMajority(int nodes, int majority)
     {
-        var configuration = BenchmarkTopologyConfigurationFixture.Replica(nodes) with { BenchmarkTopology = true };
-        var options = BenchmarkTopologyConfigurationFixture.Node(nodes) with { BenchmarkTopology = true };
+        var configuration = BenchmarkTopologyConfigurationFixture.Replica(nodes) with
+        {
+            BenchmarkTopology = true
+        };
+        var options = BenchmarkTopologyConfigurationFixture.Node(nodes) with
+        {
+            BenchmarkTopology = true
+        };
         configuration.Validate();
         options.Validate();
         var startupConfiguration = options.CreateReplicaConfiguration(options.DataDirectory);
@@ -64,8 +70,14 @@ internal sealed class BenchmarkTopologyConfigurationTests
     [Arguments(5)]
     public void AcIso004BenchmarkOptInDoesNotAdmitOtherCounts(int nodes)
     {
-        var configuration = BenchmarkTopologyConfigurationFixture.Replica(nodes) with { BenchmarkTopology = true };
-        var options = BenchmarkTopologyConfigurationFixture.Node(nodes) with { BenchmarkTopology = true };
+        var configuration = BenchmarkTopologyConfigurationFixture.Replica(nodes) with
+        {
+            BenchmarkTopology = true
+        };
+        var options = BenchmarkTopologyConfigurationFixture.Node(nodes) with
+        {
+            BenchmarkTopology = true
+        };
         Assert.ThrowsExactly<InvalidOperationException>(configuration.Validate);
         Assert.ThrowsExactly<InvalidOperationException>(options.Validate);
     }
@@ -73,7 +85,10 @@ internal sealed class BenchmarkTopologyConfigurationTests
     [Test]
     public void AcIso004BenchmarkOptInDoesNotAdmitMalformedAuthorities()
     {
-        var configuration = BenchmarkTopologyConfigurationFixture.Replica(3) with { BenchmarkTopology = true };
+        var configuration = BenchmarkTopologyConfigurationFixture.Replica(3) with
+        {
+            BenchmarkTopology = true
+        };
         ReplicaConfiguration[] invalid =
         [
             configuration with { VoterIds = default },
@@ -93,7 +108,10 @@ internal sealed class BenchmarkTopologyConfigurationTests
     [Test]
     public void AcIso004BenchmarkOptInPreservesTransportAndCredentialValidation()
     {
-        var options = BenchmarkTopologyConfigurationFixture.Node(3) with { BenchmarkTopology = true };
+        var options = BenchmarkTopologyConfigurationFixture.Node(3) with
+        {
+            BenchmarkTopology = true
+        };
         NodeOptions[] invalid =
         [
             options with { Peers = [options.PublicEndpoint, options.PublicEndpoint] },

@@ -24,11 +24,17 @@ public sealed partial class DatabaseEngine
         var operation = new ReplicatedOperation(call.OriginalCommandId, OperationKind.Batch, principal.Id,
             Clock.GetUtcNow(), Identity<CommandRequest>(NativeSerialization.Serialize(command)));
         if (outcome.PolicyEpoch != principal.PolicyEpoch)
-        { throw Errors.Fail(ErrorCode.PermissionDenied, ChangedOutcomePrincipalPolicyMessage); }
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, ChangedOutcomePrincipalPolicyMessage);
+        }
         if (outcome.Incarnation != Store.Identity.Incarnation)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, EarlierOutcomeIncarnationMessage); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, EarlierOutcomeIncarnationMessage);
+        }
         if (outcome.Fingerprint != CommandFingerprint(operation))
-        { throw Errors.Fail(ErrorCode.Conflict, CommandContentConflictMessage); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, CommandContentConflictMessage);
+        }
         CommandOutcomeKeyResolver.ValidateSelectedScope(view, operation, selection);
         RequireRemoteTransferObservedStamp(outcome, call, principal);
         if (outcome.Result.Error is null)
@@ -46,7 +52,9 @@ public sealed partial class DatabaseEngine
         if (outcome.Result.Error is not null)
         {
             if (stamp is not null)
-            { throw Errors.Fail(ErrorCode.Corruption, RemoteTransferPeerProtocol.Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, RemoteTransferPeerProtocol.Invalid);
+            }
             return;
         }
         if (stamp is null || stamp.LogicalPrincipalId != call.LogicalPrincipalId
@@ -56,6 +64,8 @@ public sealed partial class DatabaseEngine
             || !RemoteTransferDependencyShape.Digest(stamp.ProofDigest)
             || !PhysicalOwnerEntryValidation.Same(stamp.SourceOwner, call.SourceOwner)
             || !PhysicalOwnerEntryValidation.Same(stamp.DestinationOwner, call.DestinationOwner))
-        { throw Errors.Fail(ErrorCode.Corruption, RemoteTransferPeerProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, RemoteTransferPeerProtocol.Invalid);
+        }
     }
 }

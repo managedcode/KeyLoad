@@ -21,12 +21,16 @@ internal static class AdminStorageObserver
         {
             var root = new DirectoryInfo(directory);
             if (!root.Exists || (root.Attributes & FileAttributes.ReparsePoint) != EmptyRootAttributesFileAttributesReparsePoint)
-            { return Missing(); }
+            {
+                return Missing();
+            }
             scan.Run(root);
             return scan.Snapshot();
         }
         catch (Exception error) when (FileFailure(error))
-        { return Missing(); }
+        {
+            return Missing();
+        }
     }
 
     internal static bool FileFailure(Exception error) => error is IOException or UnauthorizedAccessException or SecurityException;
@@ -73,7 +77,9 @@ internal sealed class AdminStorageScan
 
         directories.Push(root);
         while (directories.Count > DirectoriesCountValidationBoundary && WithinBudget())
-        { VisitDirectory(directories.Pop()); }
+        {
+            VisitDirectory(directories.Pop());
+        }
         _ = WithinBudget();
     }
 
@@ -82,7 +88,9 @@ internal sealed class AdminStorageScan
         cancellationToken.ThrowIfCancellationRequested();
         if (entries < settings.MaximumEntries
             && time.GetElapsedTime(started) < settings.ScanDeadline)
-        { return true; }
+        {
+            return true;
+        }
         complete = false;
         return false;
     }
@@ -94,7 +102,10 @@ internal sealed class AdminStorageScan
         try
         {
             if ((directory.Attributes & FileAttributes.ReparsePoint) != EmptyDirectoryAttributesFileAttributesReparsePoint)
-            { complete = false; return; }
+            {
+                complete = false;
+                return;
+            }
             using var iterator = directory.EnumerateFileSystemInfos().GetEnumerator();
             while (WithinBudget() && iterator.MoveNext())
             {
@@ -103,7 +114,9 @@ internal sealed class AdminStorageScan
             }
         }
         catch (Exception error) when (AdminStorageObserver.FileFailure(error))
-        { complete = false; }
+        {
+            complete = false;
+        }
     }
 
     private void VisitEntry(FileSystemInfo entry)
@@ -113,14 +126,24 @@ internal sealed class AdminStorageScan
         try
         {
             if ((entry.Attributes & FileAttributes.ReparsePoint) != EmptyEntryAttributesFileAttributesReparsePoint)
-            { complete = false; return; }
+            {
+                complete = false;
+                return;
+            }
             if (entry is DirectoryInfo directory)
-            { directories.Push(directory); return; }
+            {
+                directories.Push(directory);
+                return;
+            }
             if (entry is FileInfo file)
-            { ObserveFile(file); }
+            {
+                ObserveFile(file);
+            }
         }
         catch (Exception error) when (AdminStorageObserver.FileFailure(error))
-        { complete = false; }
+        {
+            complete = false;
+        }
     }
 
     private void ObserveFile(FileInfo file)
@@ -146,7 +169,9 @@ internal sealed class AdminStorageScan
                 break;
         }
         if (files.Count < settings.MaximumRetainedFiles)
-        { files.Add(new(relative, category, length)); }
+        {
+            files.Add(new(relative, category, length));
+        }
     }
 
     private static string Category(string relative)

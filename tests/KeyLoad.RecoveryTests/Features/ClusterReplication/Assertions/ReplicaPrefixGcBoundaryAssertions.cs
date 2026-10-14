@@ -25,9 +25,14 @@ internal static class ReplicaPrefixGcBoundaryAssertions
             using var canceled = new CancellationTokenSource();
             await canceled.CancelAsync();
             try
-            { _ = node.Snapshots.ReclaimCheckpointPrefix(canceled.Token); throw new InvalidOperationException("Canceled GC was admitted."); }
+            {
+                _ = node.Snapshots.ReclaimCheckpointPrefix(canceled.Token);
+                throw new InvalidOperationException("Canceled GC was admitted.");
+            }
             catch (OperationCanceledException failure)
-            { await Assert.That(failure.CancellationToken).IsEqualTo(canceled.Token); }
+            {
+                await Assert.That(failure.CancellationToken).IsEqualTo(canceled.Token);
+            }
             await UnchangedAsync(node, before, canonical, position);
             await InvalidImageAsync(node, image, before, canonical, position, cancellationToken);
             await Assert.That(node.Snapshots.ReclaimCheckpointPrefix(cancellationToken)).IsEqualTo(ReplicaPrefixGcCrashContract.SnapshotCut);
@@ -58,7 +63,10 @@ internal static class ReplicaPrefixGcBoundaryAssertions
             File.Move(path, saved);
             moved = true;
             try
-            { _ = node.Snapshots.ReclaimCheckpointPrefix(cancellationToken); throw new InvalidOperationException("Missing recovery image admitted GC."); }
+            {
+                _ = node.Snapshots.ReclaimCheckpointPrefix(cancellationToken);
+                throw new InvalidOperationException("Missing recovery image admitted GC.");
+            }
             catch (FileNotFoundException) { }
             await UnchangedAsync(node, before, canonical, position);
             File.Copy(saved, path);
@@ -70,9 +78,14 @@ internal static class ReplicaPrefixGcBoundaryAssertions
                 RandomAccess.FlushToDisk(corrupt.SafeFileHandle);
             }
             try
-            { _ = node.Snapshots.ReclaimCheckpointPrefix(cancellationToken); throw new InvalidOperationException("Corrupt recovery image admitted GC."); }
+            {
+                _ = node.Snapshots.ReclaimCheckpointPrefix(cancellationToken);
+                throw new InvalidOperationException("Corrupt recovery image admitted GC.");
+            }
             catch (KeyLoadException failure)
-            { await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption); }
+            {
+                await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
+            }
             await UnchangedAsync(node, before, canonical, position);
         }, failures);
         if (moved)
@@ -95,7 +108,9 @@ internal static class ReplicaPrefixGcBoundaryAssertions
     {
         var page = store.Read(view => view.Scan([], CompleteInventoryRecords));
         if (page.HasMore)
-        { throw new InvalidOperationException("The native GC boundary fixture inventory is incomplete."); }
+        {
+            throw new InvalidOperationException("The native GC boundary fixture inventory is incomplete.");
+        }
         return page.Records.Select(record => Convert.ToHexString(record.Key.Span) + ":" + Convert.ToHexString(record.Value.Span)).ToArray();
     }
 }

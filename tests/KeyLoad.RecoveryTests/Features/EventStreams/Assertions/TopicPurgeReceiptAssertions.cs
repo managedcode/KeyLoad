@@ -15,7 +15,10 @@ internal static class TopicPurgeReceiptAssertions
         await Assert.That(store.Position).IsEqualTo(position);
         await Assert.That(outcome.Error).IsEqualTo(pinned ? ErrorCode.ResourceExhausted : (ErrorCode?)null);
         if (pinned)
-        { await Assert.That(outcome.SafeDetail).IsEqualTo(PinnedDetail); await Assert.That(outcome.NativeValue).IsNull(); }
+        {
+            await Assert.That(outcome.SafeDetail).IsEqualTo(PinnedDetail);
+            await Assert.That(outcome.NativeValue).IsNull();
+        }
         else
         {
             var receipt = outcome.Get<CommitReceipt>();

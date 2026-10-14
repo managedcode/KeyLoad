@@ -17,7 +17,9 @@ internal static class ReplicaIsolationAuthorityReadiness
         var failures = new List<Exception>();
         (string Leader, NodeStatus Status)? authority = null;
         await ServerFailureObserver.ObserveAsync(async () =>
-        { authority = await ProbeAsync(fixture, survivors, originalTerm, observations, cancellationToken); }, failures);
+        {
+            authority = await ProbeAsync(fixture, survivors, originalTerm, observations, cancellationToken);
+        }, failures);
         await ServerFailureObserver.ObserveAsync(() => owner.RecordAuthorityAsync(observations, CancellationToken.None), failures);
         ServerFailureObserver.ThrowIfAny(failures);
         return authority ?? throw new InvalidOperationException("The original authority observation returned no outcome.");
@@ -37,20 +39,26 @@ internal static class ReplicaIsolationAuthorityReadiness
             var client = new KeyLoadClient(clientHttp, fixture.AdminKey, IntegrationClientOptions.Execution());
             var actual = await client.StatusAsync(cancellationToken);
             if (observations.Count == MaximumRetainedStatusObservations)
-            { observations.RemoveAt(Zero); }
+            {
+                observations.RemoveAt(Zero);
+            }
             observations.Add(new(resource, actual.Value, actual.Problem?.ErrorCode,
                 actual.Problem?.StatusCode, actual.Problem?.Detail));
             if (!actual.IsSuccess)
             {
                 if (actual.Problem?.ErrorCode != nameof(ErrorCode.OwnershipLost)
                     || actual.Problem?.StatusCode != ServiceUnavailable || actual.Problem?.Detail != NoLeader)
-                { _ = await McpCallerAssertions.SdkSuccessAsync(actual); }
+                {
+                    _ = await McpCallerAssertions.SdkSuccessAsync(actual);
+                }
                 continue;
             }
             var status = actual.Value ?? throw new InvalidOperationException("The native status observation is empty.");
             var leader = status.Leader is null ? null : new Uri(status.Leader).Host;
             if (leader is not null && survivors.Contains(leader, StringComparer.Ordinal) && status.ConsensusTerm > originalTerm)
-            { return (leader, status); }
+            {
+                return (leader, status);
+            }
         }
     }
 }

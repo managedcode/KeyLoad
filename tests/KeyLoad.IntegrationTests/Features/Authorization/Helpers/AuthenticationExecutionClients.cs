@@ -19,7 +19,10 @@ internal static class AuthenticationExecutionClients
             using var inner = new HttpClientHandler();
             using var handler = new AuthenticationExecutionHttpHandler(inner);
             using var http = new HttpClient(handler, disposeHandler: false)
-            { BaseAddress = new(host.Runtime.Node.Value.PublicEndpoint), Timeout = Timeout.InfiniteTimeSpan };
+            {
+                BaseAddress = new(host.Runtime.Node.Value.PublicEndpoint),
+                Timeout = Timeout.InfiniteTimeSpan
+            };
             StandardAspNetAuthorityTrial.AddHeaders(http);
             await ServerFailureObserver.ObserveAsync(async () =>
             {
@@ -29,7 +32,9 @@ internal static class AuthenticationExecutionClients
                     TransportMode = HttpTransportMode.StreamableHttp,
                     EnableStandaloneGetStream = false,
                     AdditionalHeaders = new Dictionary<string, string>(StringComparer.Ordinal)
-                    { [McpCallerProtocol.AuthorizationHeader] = McpCallerProtocol.BearerPrefix + state.Secret }
+                    {
+                        [McpCallerProtocol.AuthorizationHeader] = McpCallerProtocol.BearerPrefix + state.Secret
+                    }
                 }, http);
                 await ServerFailureObserver.ObserveAsync(async () =>
                 {
@@ -55,5 +60,7 @@ internal static class AuthenticationExecutionClients
     internal static ValueTask<ModelContextProtocol.Protocol.CallToolResult> ReadAsync(
         McpClient client, AuthenticationExecutionState state, CancellationToken token)
         => client.InvokeKeyLoadToolAsync(McpCallerTools.DocumentsGet, new Dictionary<string, object?>
-        { [McpCallerProtocol.Request] = JsonSerializer.SerializeToElement(new GetDocumentRequest(state.Document.Reference), JsonDefaults.Options) }, token);
+        {
+            [McpCallerProtocol.Request] = JsonSerializer.SerializeToElement(new GetDocumentRequest(state.Document.Reference), JsonDefaults.Options)
+        }, token);
 }

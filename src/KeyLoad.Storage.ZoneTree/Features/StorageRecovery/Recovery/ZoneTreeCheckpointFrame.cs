@@ -15,10 +15,22 @@ internal readonly struct ZoneTreeCheckpointFrame
         Payload = payload;
     }
 
-    internal ulong Magic { get; }
-    internal long Position { get; }
-    internal byte[] Header { get; }
-    internal byte[] Payload { get; }
+    internal ulong Magic
+    {
+        get;
+    }
+    internal long Position
+    {
+        get;
+    }
+    internal byte[] Header
+    {
+        get;
+    }
+    internal byte[] Payload
+    {
+        get;
+    }
 
     internal static ZoneTreeCheckpointFrame Read(FileStream input, ZoneTreeStoreOptions options,
         long maximumPosition = long.MaxValue)

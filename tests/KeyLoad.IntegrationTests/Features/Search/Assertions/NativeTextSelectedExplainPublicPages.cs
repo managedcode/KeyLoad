@@ -48,7 +48,9 @@ internal static class NativeTextSelectedExplainPublicPages
         var partition = maintenance.Consumer.Partition;
         var first = new DocumentResult(new(partition, maintenance.Collection, "a"), 1L, FirstJson, false, []);
         if (deleted)
-        { return [new(first, 2d / 11d, explain ? new(10, [new(SearchBranchKind.Text, 1, 2d, 2d / 11d)]) : null)]; }
+        {
+            return [new(first, 2d / 11d, explain ? new(10, [new(SearchBranchKind.Text, 1, 2d, 2d / 11d)]) : null)];
+        }
         var second = new DocumentResult(new(partition, maintenance.Collection, "b"), 1L, SecondJson, false, []);
         return [new(second, 2d / 11d, explain ? new(10, [new(SearchBranchKind.Text, 1, 2d, 2d / 11d)]) : null),
             new(first, 2d / 12d, explain ? new(10, [new(SearchBranchKind.Text, 2, 2d, 2d / 12d)]) : null)];

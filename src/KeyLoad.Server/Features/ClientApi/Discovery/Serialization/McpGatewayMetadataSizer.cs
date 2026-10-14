@@ -102,7 +102,10 @@ internal static class McpGatewayMetadataSizer
         public override bool CanSeek => false;
         public override bool CanWrite => true;
         public override long Length => _written;
-        public override long Position { get => _written; set => throw new NotSupportedException(); }
+        public override long Position
+        {
+            get => _written; set => throw new NotSupportedException();
+        }
 
         public override void Flush()
         {

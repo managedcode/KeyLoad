@@ -17,11 +17,15 @@ public sealed partial class DatabaseEngine
         var actual = RequireEventVectorControlView(transaction, current, phase);
         RequireEventVectorControlPlacement(placement, actual);
         if (EventVectorFirstControlFields.IsIssuance(phase.Action))
-        { return ExecuteEventVectorFirstIssuance(transaction, current, phase, operation, position, actual); }
+        {
+            return ExecuteEventVectorFirstIssuance(transaction, current, phase, operation, position, actual);
+        }
         EventVectorParentCommit.RequirePrevious(transaction, current, phase, Store.Identity.Incarnation,
             Authorization, OperationLimitsOptions);
         if (!phase.OriginalCleanupFrontierBytes.IsEmpty)
-        { EventVectorCleanupParentCommit.Prepare(transaction, current, phase, operation, Authorization, OperationLimitsOptions); }
+        {
+            EventVectorCleanupParentCommit.Prepare(transaction, current, phase, operation, Authorization, OperationLimitsOptions);
+        }
         var retained = EventVectorMapInventory.Read(transaction, phase.OriginalRequest.ControlPartition,
             phase.OriginalRequest.MapId, OperationLimitsOptions, CancellationToken.None);
         var admission = new EventVectorAdmissionPolicy(OperationLimitsOptions);
@@ -44,7 +48,9 @@ public sealed partial class DatabaseEngine
             ImmutableArray<MutationReceipt>.Empty, Durability);
         var result = new EventVectorControlResult(EventVectorControlResultVersion, operation.Id,
             value as EventVectorMap, value as EventVectorOffer, value as EventVectorSourcePhase, receipt)
-        { OriginalSourcePageBytes = phase.OriginalSourcePageBytes };
+        {
+            OriginalSourcePageBytes = phase.OriginalSourcePageBytes
+        };
         return Result(RetainEventVectorPublicResult(phase, result, retained.Header, admission));
     }
 
@@ -80,7 +86,9 @@ public sealed partial class DatabaseEngine
             || supplied.PlacementEpoch != actual.PlacementEpoch || supplied.DirectoryRevision != actual.DirectoryRevision
             || supplied.Revision != actual.Revision || supplied.IsFallback != actual.IsFallback
             || !supplied.VoterIds.SequenceEqual(actual.VoterIds, StringComparer.Ordinal))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, InvalidEventVectorControlPlacement); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, InvalidEventVectorControlPlacement);
+        }
     }
 }
 

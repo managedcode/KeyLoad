@@ -46,7 +46,13 @@ internal static class ComposedProjectionLineageFlow
             new("/payload/to/id", "forged", "d")
         })
         {
-            var invalid = ast with { Query = ast.Query with { Projection = [selection] } };
+            var invalid = ast with
+            {
+                Query = ast.Query with
+                {
+                    Projection = [selection]
+                }
+            };
             var failure = Assert.ThrowsExactly<KeyLoadException>(() => engine.ExecuteAst(Reader, invalid, cancellationToken: token));
             await Assert.That(failure.Code).IsEqualTo(ErrorCode.UnsupportedCapability);
             await Assert.That(store.Position).IsEqualTo(position);

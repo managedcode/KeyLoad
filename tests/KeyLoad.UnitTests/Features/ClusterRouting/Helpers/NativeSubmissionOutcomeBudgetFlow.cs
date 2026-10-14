@@ -49,7 +49,9 @@ internal static class NativeSubmissionOutcomeBudgetFlow
                 var actual = view.ReadOwnedValue(key);
                 exact &= actual is not null && actual.AsSpan().SequenceEqual(original);
                 if (actual is not null)
-                { reads++; }
+                {
+                    reads++;
+                }
             }
             else
             {
@@ -98,7 +100,10 @@ internal static class NativeSubmissionOutcomeBudgetFlow
         var returned = false;
         ServerFailureObserver.Observe(() =>
         {
-            var opened = ZoneTreeExistingStore.Open(new(fixture.DirectoryPath) { Incarnation = fixture.Incarnation },
+            var opened = ZoneTreeExistingStore.Open(new(fixture.DirectoryPath)
+            {
+                Incarnation = fixture.Incarnation
+            },
                 fixture.Identity.NodeId, UnitExecutionOptions.StorageExecution());
             store = opened;
             result = opened.Read(read);

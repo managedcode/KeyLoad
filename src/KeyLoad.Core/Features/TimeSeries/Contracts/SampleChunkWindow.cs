@@ -13,4 +13,7 @@ internal sealed record SampleChunkWindow([property: Orleans.Id(0)] int Version,
     [property: Orleans.Id(11)] Guid MaintenanceCommandId,
     [property: Orleans.Id(12)] long? RetentionBeforeUtcTicks);
 
-internal enum SampleChunkWindowState { Open = 0, Sealed = 1, Dropped = 2 }
+internal enum SampleChunkWindowState
+{
+    Open = 0, Sealed = 1, Dropped = 2
+}

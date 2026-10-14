@@ -20,16 +20,22 @@ internal static class MovementFrameObservationSettingsReader
         var section = configuration.GetSection(MovementFrameObservationProfileProtocol.Section);
         var fields = section.GetChildren().Take(MaximumSettings + ExcessSetting).ToArray();
         if (fields.Length == NoSettings && section.Value is null)
-        { return null; }
+        {
+            return null;
+        }
         if (section.Value is not null || fields.Length > MaximumSettings
             || fields.Any(field => field.Key is not (Enabled or Root or SessionId)
                 || field.Value is null || field.GetChildren().Take(FirstNestedSetting).Any())
             || !bool.TryParse(section[Enabled], out var enabled))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         if (!enabled)
         {
             if (fields.Any(field => field.Key != Enabled))
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             return null;
         }
         var root = section[Root];
@@ -41,7 +47,9 @@ internal static class MovementFrameObservationSettingsReader
             || control.Tests is not null || control.BenchmarksEnabled || control.ComparisonSelectorsPresent
             || control.TargetSelected || control.ScaleSelected || control.ProtocolCohortEnabled
             || control.ProtocolCohortConfigured || control.LoggerModelControl)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         return new(root, session!);
     }
     private static InvalidOperationException Invalid() => new(MovementFrameObservationProfileProtocol.Invalid);

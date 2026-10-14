@@ -30,12 +30,16 @@ internal static class EventVectorFirstOpenStageResult
             || result.Receipt.Token.Incarnation != originalIncarnation
             || !result.Receipt.Mutations.IsEmpty || result.Receipt.Token.Position < FirstPosition
             || result.Receipt.Token.AtomicPartitionId != request.ControlPartition.AtomicPartitionId)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         EventVectorFirstIssuanceValidation.RequireRequest(row, request, admission);
         var expectedId = EventVectorControlOperationIdentity.Create(actualStage, row.PrincipalId, admission).CommandId;
         if (expectedId != result.NativeCommandId || !CryptographicOperations.FixedTimeEquals(
             row.OriginalPublicRequestDigest.Span,
             EventVectorControlBodyProjection.RequestDigest(request, admission).Span))
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
     }
 }

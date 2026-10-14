@@ -13,7 +13,10 @@ internal static class SampleChunkRetentionRf3Healthy
         var rows = new SampleRecord[] { new(TimeSeriesRf3Scenario.Series, original.FreshSample,
             SampleChunkRetentionRf3Protocol.FreshSequence, TimeSeriesRf3Scenario.PrivateTags) };
         await SampleChunkRetentionRf3ReadOracle.WindowAsync(sdk, mcp,
-            scenario.Request with { WindowId = original.FreshWindowId },
+            scenario.Request with
+            {
+                WindowId = original.FreshWindowId
+            },
             new(original.FreshWindowId, scenario.Until, until, SampleChunkRetentionRf3Protocol.OpenGeneration,
                 SampleChunkRetentionRf3Protocol.FreshWindowRevision, SampleChunkRetentionRf3Protocol.FreshSequence,
                 scenario.Until.UtcTicks, [.. rows], original.OriginalAppendReceipt.Token.Position),

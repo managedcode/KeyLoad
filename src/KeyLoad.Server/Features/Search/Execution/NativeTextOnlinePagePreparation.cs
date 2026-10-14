@@ -22,7 +22,9 @@ internal static class NativeTextOnlinePagePreparation
             || page.ThroughSequence < checkpoint || page.ThroughSequence > fresh.UpperSequence
             || command.CommandId == Guid.Empty || command.Consumer != session.Request.Consumer
             || command.Token != page.Token || command.Effects.IsDefault || !command.Effects.IsEmpty)
-        { throw NativeTextErrors.Corrupt(); }
+        {
+            throw NativeTextErrors.Corrupt();
+        }
         var filtered = FilterCoveredSeed(page, manifest.ThroughSequence, budget);
         var plan = NativeTextIncrementalPagePlanner.Plan(filtered, manifest.Records, manifest.NextRecord,
             session.Request.Collection, session.Request.Field, database.Limits.MaxScanRecords,
@@ -61,13 +63,18 @@ internal static class NativeTextOnlinePagePreparation
         {
             budget.Check();
             if (entry.Sequence <= covered)
-            { continue; }
+            {
+                continue;
+            }
             budget.ChargeBytes(NativeTextIncrementalSourceProtocol.MapSlotBytes);
             entries.Add(entry);
         }
         return actual with
         {
-            Consumer = actual.Consumer with { Checkpoint = Math.Max(actual.Consumer.Checkpoint, covered) },
+            Consumer = actual.Consumer with
+            {
+                Checkpoint = Math.Max(actual.Consumer.Checkpoint, covered)
+            },
             Entries = entries.ToImmutable(),
             ThroughSequence = Math.Max(actual.ThroughSequence, covered)
         };

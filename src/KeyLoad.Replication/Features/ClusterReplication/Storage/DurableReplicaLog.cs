@@ -10,9 +10,7 @@ public sealed class DurableReplicaLog : IDurableReplicaLog
 {
     private const int ExclusiveProtocolPermit = 1;
     private const int BeforeFirstLogPosition = 0;
-    private const int UnelectedTerm = 0;
     private const int EmptyEntryCount = 0;
-    private const int FirstEntryIndex = 0;
 
     private readonly IAtomicStore store;
     private readonly ReplicaConfiguration configuration;
@@ -42,11 +40,21 @@ public sealed class DurableReplicaLog : IDurableReplicaLog
     /// <inheritdoc />
     public SemaphoreSlim ProtocolGate { get; } = new(ExclusiveProtocolPermit, ExclusiveProtocolPermit);
     /// <summary>Gets the externally owned canonical engine used to validate operation authority and semantic retries.</summary>
-    public DatabaseEngine? CanonicalDatabase { get; }
+    public DatabaseEngine? CanonicalDatabase
+    {
+        get;
+    }
     /// <inheritdoc />
     public ReplicaHardState State
     {
-        get { lock (gate) { Check(); return state; } }
+        get
+        {
+            lock (gate)
+            {
+                Check();
+                return state;
+            }
+        }
     }
 
     /// <inheritdoc />
@@ -83,27 +91,10 @@ public sealed class DurableReplicaLog : IDurableReplicaLog
     }
 
     private long Term(long index)
-    {
-        if (index == BeforeFirstLogPosition)
-        { return UnelectedTerm; }
-        if (state.Snapshot is { } snapshot && index == snapshot.Index)
-        { return snapshot.Term; }
-        if (index < (state.Snapshot?.Index ?? BeforeFirstLogPosition) || index > state.LastIndex || index < BeforeFirstLogPosition)
-        {
-            throw Errors.Fail(ErrorCode.NotFound, ReplicaPersistence.MissingEntry);
-        }
-        var result = ReplicaTermObservationReader.Read(store, index, state.Term, configuration.MaxAppendEntries, termObservation);
-        termObservation = result.Observation;
-        return result.Term;
-    }
+        => ReplicaLogRecordAccess.Term(store, index, state, configuration, ref termObservation);
 
     private ReplicaEntry Load(long index)
-    {
-        var bytes = store.Read(view => view.ReadOwnedValue(ReplicaProtocol.EntryStorageKey(index)))
-            ?? throw Errors.Fail(ErrorCode.Corruption, ReplicaProtocol.CorruptLog);
-        return ReplicaAdmittedEntryRead.Decode(bytes, index, state.Term, configuration.MaxAppendEntries,
-            CanonicalDatabase);
-    }
+        => ReplicaLogRecordAccess.Load(store, index, ref state, configuration, CanonicalDatabase);
 
     /// <inheritdoc />
     public ImmutableArray<ReplicaEntry> Read(long firstIndex, int maxEntries, int maxBytes)
@@ -138,19 +129,13 @@ public sealed class DurableReplicaLog : IDurableReplicaLog
         {
             Check();
             if (entries.Count == EmptyEntryCount)
-            { return; }
+            {
+                return;
+            }
             var batch = ReplicaAppendCompiler.Validate(entries, state, configuration, Term, CanonicalDatabase);
             var next = ReplicaAppendCompiler.NextState(batch.Entries, state, Load, CanonicalDatabase);
             boundary?.Begin(cancellationToken);
-            store.Commit((tx, _) =>
-            {
-                for (var position = FirstEntryIndex; position < batch.Entries.Length; position++)
-                {
-                    tx.Put(ReplicaProtocol.EntryStorageKey(batch.Entries[position].Index), batch.Encoded[position]);
-                }
-                tx.Put(ReplicaProtocol.StateStorageKey, ReplicaProtocolCodec.Serialize(next));
-                return true;
-            });
+            ReplicaLogRecordAccess.Append(store, batch, next);
             state = next;
             faultObserver?.Invoke(ReplicaCrashBoundary.EntryAcknowledged);
         }
@@ -166,7 +151,10 @@ public sealed class DurableReplicaLog : IDurableReplicaLog
             {
                 throw Errors.Fail(ErrorCode.Conflict, ReplicaPersistence.InvalidCommit);
             }
-            Save(state with { CommittedIndex = index });
+            Save(state with
+            {
+                CommittedIndex = index
+            });
             faultObserver?.Invoke(ReplicaCrashBoundary.CommitAcknowledged);
         }
     }
@@ -184,7 +172,10 @@ public sealed class DurableReplicaLog : IDurableReplicaLog
                 Save(ReplicaCheckpointPublication.Next(snapshot, state, configuration, Term));
             }
         }
-        finally { ProtocolGate.Release(); }
+        finally
+        {
+            ProtocolGate.Release();
+        }
     }
 
     /// <inheritdoc />
@@ -211,16 +202,21 @@ public sealed class DurableReplicaLog : IDurableReplicaLog
             {
                 Check();
                 if (state.Snapshot != verifiedSnapshot || verifiedSnapshot.Index > state.CommittedIndex)
-                { throw Errors.Fail(ErrorCode.Conflict, ReplicaProtocol.InvalidSnapshot); }
+                {
+                    throw Errors.Fail(ErrorCode.Conflict, ReplicaProtocol.InvalidSnapshot);
+                }
                 return ReplicaPrefixReclaimer.Reclaim(store, verifiedSnapshot, configuration, CanonicalDatabase, cancellationToken);
             }
         }
-        finally { ProtocolGate.Release(); }
+        finally
+        {
+            ProtocolGate.Release();
+        }
     }
 
     private void Save(ReplicaHardState next)
     {
-        store.Commit((tx, _) => { tx.Put(ReplicaProtocol.StateStorageKey, ReplicaProtocolCodec.Serialize(next)); return true; });
+        ReplicaLogRecordAccess.Save(store, next);
         state = next;
     }
 

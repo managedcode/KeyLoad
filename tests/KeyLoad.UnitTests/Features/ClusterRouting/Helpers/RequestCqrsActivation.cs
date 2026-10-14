@@ -1,5 +1,5 @@
 using System.Security.Claims;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;

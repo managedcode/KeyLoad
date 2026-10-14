@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Replication;
 
 namespace KeyLoad.UnitTests.Features.ClusterReplication;
@@ -59,7 +59,10 @@ internal sealed class RequestCqrsColdStartupAcquisitionTests(RequestCqrsCohortRu
         await Assert.That(majority.Ready).IsEqualTo(2);
         await scenario.RestartUnavailablePeerAsync(RequestCqrsCohortScenario.SecondRemote, token);
         var second = scenario.Discovery(RequestCqrsCohortScenario.SecondRemote, 2);
-        scenario.PublishRemoteTwoRecord(second with { ApplicationRpcVersion = GrainRoutingProtocol.RequestInterfaceVersion - 1 });
+        scenario.PublishRemoteTwoRecord(second with
+        {
+            ApplicationRpcVersion = GrainRoutingProtocol.RequestInterfaceVersion - 1
+        });
         var original = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => scenario.Client.AcquireCompatibleCohortAsync(token));
         var refused = original ?? throw new InvalidOperationException("The original incompatible cohort was admitted.");
         await Assert.That(refused.Code).IsEqualTo(ErrorCode.OwnershipLost);

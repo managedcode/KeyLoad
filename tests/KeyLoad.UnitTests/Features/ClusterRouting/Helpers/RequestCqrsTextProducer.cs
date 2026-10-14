@@ -1,5 +1,5 @@
 using System.Runtime.CompilerServices;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using ManagedCode.Communication;
 using ManagedCode.Communication.CQRS;
 
@@ -14,7 +14,9 @@ internal static class RequestCqrsTextProducer
         var original = CqrsStream.Create<GrainRequestProgress, GrainOperationReply>(
             writer => ProduceAsync(writer, id, payload, fault, observed, maximumFrames), token);
         await foreach (var chunk in original.WithCancellation(token))
-        { yield return chunk; }
+        {
+            yield return chunk;
+        }
         if (fault == RequestCqrsTextFault.AfterFinal)
         {
             const int AfterFinalSequence = 9;
@@ -38,10 +40,14 @@ internal static class RequestCqrsTextProducer
             await TextMaintenanceProgress.WriteAsync(writer, id, TextIndexMaintenancePhase.Publish);
             await TextMaintenanceProgress.WriteAsync(writer, id, TextIndexMaintenancePhase.Checkpoint);
             if (fault == RequestCqrsTextFault.FrameBudget)
-            { await ExhaustFramesAsync(writer, id, maximumFrames); }
+            {
+                await ExhaustFramesAsync(writer, id, maximumFrames);
+            }
             await TextMaintenanceProgress.WriteAsync(writer, id, TextIndexMaintenancePhase.Completed);
             if (fault == RequestCqrsTextFault.ExtraCompleted)
-            { await TextMaintenanceProgress.WriteAsync(writer, id, TextIndexMaintenancePhase.Completed); }
+            {
+                await TextMaintenanceProgress.WriteAsync(writer, id, TextIndexMaintenancePhase.Completed);
+            }
             return Result<GrainOperationReply>.Succeed(new GrainOperationReply { Payload = payload });
         }
         finally { observed.MarkProducerSettled(writer.CancellationToken.IsCancellationRequested); }
@@ -66,7 +72,10 @@ internal static class RequestCqrsTextProducer
             RequestCqrsTextFault.WrongIdentity => TextMaintenanceProgress.WriteAsync(writer, Guid.NewGuid(), TextIndexMaintenancePhase.Configure),
             RequestCqrsTextFault.UnexpectedPhase => TextMaintenanceProgress.WriteAsync(writer, id, TextIndexMaintenancePhase.Intent),
             RequestCqrsTextFault.MixedPhase => writer.ProgressAsync(new(id)
-            { TextPhase = TextIndexMaintenancePhase.Configure, AnnPhase = AnnMaintenancePhase.Completed }, TextMaintenanceProgress.PhaseCompleted),
+            {
+                TextPhase = TextIndexMaintenancePhase.Configure,
+                AnnPhase = AnnMaintenancePhase.Completed
+            }, TextMaintenanceProgress.PhaseCompleted),
             _ => TextMaintenanceProgress.WriteAsync(writer, id, TextIndexMaintenancePhase.Configure)
         };
 }

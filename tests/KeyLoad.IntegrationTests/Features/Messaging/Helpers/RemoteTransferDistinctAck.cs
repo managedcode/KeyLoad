@@ -37,7 +37,10 @@ internal static class RemoteTransferDistinctAck
             await RemoteTransferColdAssertions.ReceiptAsync(source, official, seed, target.Proof, token);
             await RemoteTransferColdAssertions.MessageAsync(source, official, seed, expected, token);
             await RemoteTransferColdAssertions.SourceAsync(source, official, seed, intent with
-            { State = QueueTransferState.Delivered, ReceiptToken = target.Proof.ReceiptToken }, token);
+            {
+                State = QueueTransferState.Delivered,
+                ReceiptToken = target.Proof.ReceiptToken
+            }, token);
         }, token);
         var empty = await McpCallerAssertions.SdkSuccessAsync(await sdk.ReceiveAsync(
             new(Guid.NewGuid(), seed.Scenario.DestinationQueue), token));

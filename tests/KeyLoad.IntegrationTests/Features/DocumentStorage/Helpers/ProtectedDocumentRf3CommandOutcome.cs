@@ -38,7 +38,12 @@ internal static class ProtectedDocumentRf3CommandOutcome
         var denied = finalQuery with
         {
             Envelope = finalQuery.Envelope with
-            { Body = NativeSerialization.Serialize(finalBody with { OperatorPrincipalId = seed.DeniedId }) }
+            {
+                Body = NativeSerialization.Serialize(finalBody with
+                {
+                    OperatorPrincipalId = seed.DeniedId
+                })
+            }
         };
         _ = await endpoint.QueryAsync(denied, false, token, expectedError: ErrorCode.PermissionDenied).ConfigureAwait(false);
         await UnchangedAsync(source, target, beforeA.Applied, beforeB.Applied, command, originalReceipt, token);
@@ -52,7 +57,9 @@ internal static class ProtectedDocumentRf3CommandOutcome
         var targetEffect = record.TargetEffect ?? throw new InvalidDataException(PartitionMovementProtocol.InvalidProof);
         var delegated = record.Delegation ?? throw new InvalidDataException(PartitionMovementProtocol.InvalidProof);
         if (record.TargetBody.IsEmpty)
-        { throw new InvalidDataException(PartitionMovementProtocol.InvalidProof); }
+        {
+            throw new InvalidDataException(PartitionMovementProtocol.InvalidProof);
+        }
         var authorized = await AuthorizationAsync(endpoint, seed, storedOriginal, record, delegated, token);
         var targetQuery = Proposal(seed, effectId, PartitionMovePeerStage.ControlApplyCommand, record.TargetBody,
             authorized.Grant!, authorized.Journal, delegated.ExpiresAt);
@@ -87,7 +94,10 @@ internal static class ProtectedDocumentRf3CommandOutcome
         var target = record.TargetEffect ?? throw new InvalidDataException(PartitionMovementProtocol.InvalidProof);
         await Assert.That(target.CommandId).IsEqualTo(effectId);
         await Assert.That(target.CommandId).IsNotEqualTo(original.Id);
-        await EqualAsync(target with { CommandId = original.Id }, receipt);
+        await EqualAsync(target with
+        {
+            CommandId = original.Id
+        }, receipt);
         return record;
     }
 

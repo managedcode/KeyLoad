@@ -31,7 +31,11 @@ internal static class GraphCrossAuthorityR41Commands
     internal static async Task HealthyAsync(RequestCqrsRf3Callers administrator,
         GraphCrossAuthorityR41State state, CancellationToken token)
     {
-        var next = state.Local with { AttributesJson = GraphCrossAuthorityR41State.HealthyJson, Revision = 2L };
+        var next = state.Local with
+        {
+            AttributesJson = GraphCrossAuthorityR41State.HealthyJson,
+            Revision = 2L
+        };
         await CommitAsync(administrator, state, new(Guid.NewGuid(), state.Seed.TargetPartition, [Upsert(state, next, 1L)]),
             [new(EdgeKind, state.Seed.Graph, GraphCrossAuthorityR41State.LocalId, 2L)], token);
         state.LocalRevision = 2L;

@@ -28,7 +28,9 @@ internal sealed class PostgresRf3FixtureOwnership(PostgresRf3Selection? selectio
             cleanupIncomplete |= selection.RetainRoot || failures.Count > PostgresRf3Protocol.FirstColumn || !appStopped;
         }
         if (!localIncomplete && !isolationIncomplete && !cleanupIncomplete)
-        { await deleteOwnedRoot().ConfigureAwait(false); }
+        {
+            await deleteOwnedRoot().ConfigureAwait(false);
+        }
         return localIncomplete;
     }
 }

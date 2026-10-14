@@ -19,7 +19,9 @@ internal static class OwnerCapacityNativeFile
         {
             var read = await stream.ReadAsync(bytes.AsMemory(count), token).ConfigureAwait(false);
             if (read == EmptyRead)
-            { return Encoding.UTF8.GetString(bytes.AsSpan(EmptyRead, count)); }
+            {
+                return Encoding.UTF8.GetString(bytes.AsSpan(EmptyRead, count));
+            }
             count = checked(count + read);
         }
         return null;

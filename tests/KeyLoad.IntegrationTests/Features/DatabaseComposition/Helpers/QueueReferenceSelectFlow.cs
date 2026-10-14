@@ -26,7 +26,10 @@ internal static class QueueReferenceSelectFlow
                 await RelationalSqlRf3JoinPageAssertions.SameRowsAsync(empty,
                     await SqlRf3Protocol.McpAsync<QueryPage>(callers.Mcp,
                         QueueReferenceSelectProtocol.Operation(state.Partition, QueueReferenceSelectProtocol.EmptyQueue), token));
-                await FailureAsync(callers, QueueReferenceSelectProtocol.Operation(state.Partition) with { Parameters = null }, ErrorCode.Validation, token);
+                await FailureAsync(callers, QueueReferenceSelectProtocol.Operation(state.Partition) with
+                {
+                    Parameters = null
+                }, ErrorCode.Validation, token);
                 await QueueReferenceSelectAssertions.PageAsync(callers, state, masked, token);
             }
         }, token);

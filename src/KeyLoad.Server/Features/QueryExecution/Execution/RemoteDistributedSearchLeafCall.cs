@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
-using KeyLoad.Orleans;
 using KeyLoad.Query.Features.QueryExecution;
 using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.Server.Features.DocumentStorage;
@@ -17,10 +17,14 @@ internal sealed class RemoteDistributedSearchLeafCall(OrleansNode node, Partitio
     {
         var local = PhysicalOwnerConfiguredTuples.Local(nodeOptions.Value, partition);
         if (fence.Destination.Owner.PhysicalShardId == local.Owner.PhysicalShardId)
-        { return null; }
+        {
+            return null;
+        }
         if (!PhysicalOwnerEntryValidation.Same(fence.Destination,
             PhysicalOwnerConfiguredTuples.Destination(nodeOptions.Value, partition)))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDistributedSearchSourceFence.Changed); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDistributedSearchSourceFence.Changed);
+        }
         var discovery = node.Discovery?.Read()
             ?? throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDistributedSearchSourceFence.Changed);
         return new(RemoteDocumentProtocol.Version, Guid.NewGuid(), Guid.NewGuid().ToString(NonceFormat),

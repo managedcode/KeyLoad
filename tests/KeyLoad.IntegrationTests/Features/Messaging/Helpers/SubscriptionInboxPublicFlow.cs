@@ -10,7 +10,9 @@ internal static class SubscriptionInboxPublicFlow
     {
         SubscriptionInboxPublicState? state = null;
         await SubscriptionPhasePublicTrial.WithCallersAsync(fixture, seed, async (sdk, mcp) =>
-        { state = await StartAsync(sdk, mcp, seed, token); }, token);
+        {
+            state = await StartAsync(sdk, mcp, seed, token);
+        }, token);
         var original = state ?? throw new InvalidOperationException("The original subscription flow did not finish.");
         await SubscriptionFilterRf3Cold.RestartAsync(fixture, token);
         await SubscriptionPhasePublicTrial.WithCallersAsync(fixture, seed,
@@ -45,7 +47,9 @@ internal static class SubscriptionInboxPublicFlow
         var current = SubscriptionPhasePublicAssertions.Receive(seed.Group);
         var claimed = await SubscriptionPhasePublicAssertions.ClaimAsync(sdk, mcp, current, source, [1L, 2L, 3L], token);
         for (var i = 0; i < claimed.Deliveries.Length; i++)
-        { await Assert.That(claimed.Deliveries[i].Token).IsNotEqualTo(initial.Deliveries[i].Token); }
+        {
+            await Assert.That(claimed.Deliveries[i].Token).IsNotEqualTo(initial.Deliveries[i].Token);
+        }
         var conflict = process with
         {
             CommandId = Guid.NewGuid(),
@@ -65,7 +69,11 @@ internal static class SubscriptionInboxPublicFlow
         await SubscriptionInboxPublicAssertions.OriginalFencedAsync(sdk, mcp, state, token);
         await Assert.That(await SubscriptionInboxPublicAssertions.ConflictAsync(sdk, mcp, state.Conflict, token))
             .IsEqualTo(state.ConflictProblem);
-        var request = state.Processing with { CommandId = Guid.NewGuid(), Token = state.CurrentResult.Deliveries[0].Token };
+        var request = state.Processing with
+        {
+            CommandId = Guid.NewGuid(),
+            Token = state.CurrentResult.Deliveries[0].Token
+        };
         var repaired = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitSubscriptionProcessingAsync(request, token));
         await SubscriptionFilterRf3Assertions.EqualAsync((await McpCallerAssertions.SuccessAsync<SubscriptionProcessingResult>(
             await mcp.CallAsync(McpCallerTools.SubscriptionsProcess, request, token))).Value, repaired);

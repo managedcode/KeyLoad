@@ -56,7 +56,10 @@ internal sealed class PostgresTopology(IOptions<ComparisonLifecycleOptions> life
         if (topology == ComparisonTopology.Standalone)
         {
             await VerifySingleNodeAsync(connection, cancellationToken);
-            return profile with { Cluster = new(SingleNodeTopology, SingleNodeTopology, SingleState, [profile.WriteAcknowledgement]) };
+            return profile with
+            {
+                Cluster = new(SingleNodeTopology, SingleNodeTopology, SingleState, [profile.WriteAcknowledgement])
+            };
         }
 
         return await ObserveReplicatedCopiesAsync(connection, topology, profile, cancellationToken);
@@ -215,7 +218,10 @@ internal sealed class PostgresTopology(IOptions<ComparisonLifecycleOptions> life
 
     private sealed class ReplicaMembers
     {
-        internal int Observed { get; set; }
+        internal int Observed
+        {
+            get; set;
+        }
         internal List<ReplicaMember> Members { get; } = [];
 
         internal void Add(ReplicaMember member)

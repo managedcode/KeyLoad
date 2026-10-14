@@ -10,7 +10,11 @@ internal sealed class CacheMemoryBudgetCapacityTests
     [Test]
     public async Task ExactByteAndEntryCeilingsAdmitWhileOneOverLeavesAccountingUnchanged()
     {
-        using var budget = new CacheMemoryBudget(UnitAdmissionOptions.Cache(new() { MaxRetainedBytes = 10, MaxRetainedEntries = 2 }));
+        using var budget = new CacheMemoryBudget(UnitAdmissionOptions.Cache(new()
+        {
+            MaxRetainedBytes = 10,
+            MaxRetainedEntries = 2
+        }));
         using var bytes = Reserve(budget, 10, 1);
         await Assert.That(budget.GetSnapshot()).IsEqualTo(new CacheMemorySnapshot(10, 1, 1, false, 10, 2));
 
@@ -35,7 +39,11 @@ internal sealed class CacheMemoryBudgetCapacityTests
     [Test]
     public async Task PositiveByteIndexBaselineCanReserveZeroEntries()
     {
-        using var budget = new CacheMemoryBudget(UnitAdmissionOptions.Cache(new() { MaxRetainedBytes = 4, MaxRetainedEntries = 1 }));
+        using var budget = new CacheMemoryBudget(UnitAdmissionOptions.Cache(new()
+        {
+            MaxRetainedBytes = 4,
+            MaxRetainedEntries = 1
+        }));
         using var index = Reserve(budget, 4, 0);
 
         await Assert.That(index.Bytes).IsEqualTo(4);
@@ -48,19 +56,41 @@ internal sealed class CacheMemoryBudgetCapacityTests
     {
         Assert.ThrowsExactly<ArgumentNullException>(() => CreateAndUseBudget(null!));
         Assert.ThrowsExactly<InvalidOperationException>(() =>
-            CreateAndUseBudget(new() { MaxRetainedBytes = 0 }));
+            CreateAndUseBudget(new()
+            {
+                MaxRetainedBytes = 0
+            }));
         Assert.ThrowsExactly<InvalidOperationException>(() =>
-            CreateAndUseBudget(new() { MaxRetainedBytes = -1 }));
+            CreateAndUseBudget(new()
+            {
+                MaxRetainedBytes = -1
+            }));
         Assert.ThrowsExactly<InvalidOperationException>(() =>
-            CreateAndUseBudget(new() { MaxRetainedEntries = 0 }));
+            CreateAndUseBudget(new()
+            {
+                MaxRetainedEntries = 0
+            }));
         Assert.ThrowsExactly<InvalidOperationException>(() =>
-            CreateAndUseBudget(new() { MaxRetainedEntries = -1 }));
+            CreateAndUseBudget(new()
+            {
+                MaxRetainedEntries = -1
+            }));
         Assert.ThrowsExactly<InvalidOperationException>(() =>
-            CreateAndUseBudget(new() { MaxRetainedBytes = BytesAboveMaximum }));
+            CreateAndUseBudget(new()
+            {
+                MaxRetainedBytes = BytesAboveMaximum
+            }));
         Assert.ThrowsExactly<InvalidOperationException>(() =>
-            CreateAndUseBudget(new() { MaxRetainedEntries = EntriesAboveMaximum }));
+            CreateAndUseBudget(new()
+            {
+                MaxRetainedEntries = EntriesAboveMaximum
+            }));
 
-        using var budget = new CacheMemoryBudget(UnitAdmissionOptions.Cache(new() { MaxRetainedBytes = 8, MaxRetainedEntries = 2 }));
+        using var budget = new CacheMemoryBudget(UnitAdmissionOptions.Cache(new()
+        {
+            MaxRetainedBytes = 8,
+            MaxRetainedEntries = 2
+        }));
         var before = budget.GetSnapshot();
         Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => ReserveInvalidRequest(budget, 0, 0));
         Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => ReserveInvalidRequest(budget, -1, 0));
@@ -71,7 +101,11 @@ internal sealed class CacheMemoryBudgetCapacityTests
     [Test]
     public async Task OverflowSizedPositiveRequestsFailWithoutWrappingAccounting()
     {
-        using var budget = new CacheMemoryBudget(UnitAdmissionOptions.Cache(new() { MaxRetainedBytes = 8, MaxRetainedEntries = 4 }));
+        using var budget = new CacheMemoryBudget(UnitAdmissionOptions.Cache(new()
+        {
+            MaxRetainedBytes = 8,
+            MaxRetainedEntries = 4
+        }));
         using var first = Reserve(budget, 7, 1);
         var before = budget.GetSnapshot();
 

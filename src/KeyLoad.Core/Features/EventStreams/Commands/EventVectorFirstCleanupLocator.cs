@@ -18,7 +18,9 @@ internal static class EventVectorFirstCleanupLocator
             || phase.OriginalRequest.CommandId == original.OriginalPublicCommandId
             || phase.OriginalFirstIssuancePublicCommandId != original.OriginalPublicCommandId
             || phase.OriginalRequest.OriginalFirstIssuancePublicCommandId != original.OriginalPublicCommandId)
-        { throw Errors.Fail(ErrorCode.Conflict, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, Invalid);
+        }
         var native = NativeSerialization.Deserialize<NativeCommandPayload>(operation.NativePayload.Span);
         admission.RequireEncodedBytes(native.Value.Length);
         var firstId = original.OriginalCapturedFirstOpenPhaseBytes.IsEmpty ? Guid.Empty

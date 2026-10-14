@@ -33,9 +33,14 @@ internal static class SqlJoinAliasCollisionFlow
             await Assert.That(failure.Code).IsEqualTo(ErrorCode.UnsupportedCapability);
             await Assert.That(store.Position).IsEqualTo(position);
             await Assert.That(QueueWholeFlowStorage.Bytes(store)).IsEquivalentTo(before, global::TUnit.Assertions.Enums.CollectionOrdering.Matching);
-            await PageAsync(engine.Execute("root", original with { Sql = leftSql }), position, repaired);
             await PageAsync(engine.Execute("root", original with
-            { Sql = leftSql.Replace("e.payload.score >=", "payload.score >=", StringComparison.Ordinal) }), position, repaired);
+            {
+                Sql = leftSql
+            }), position, repaired);
+            await PageAsync(engine.Execute("root", original with
+            {
+                Sql = leftSql.Replace("e.payload.score >=", "payload.score >=", StringComparison.Ordinal)
+            }), position, repaired);
         }
         await Assert.That(store.Position).IsEqualTo(position);
         await Assert.That(QueueWholeFlowStorage.Bytes(store)).IsEquivalentTo(before, global::TUnit.Assertions.Enums.CollectionOrdering.Matching);

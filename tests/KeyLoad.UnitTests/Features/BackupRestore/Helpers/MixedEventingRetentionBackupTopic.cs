@@ -32,7 +32,10 @@ internal static class MixedEventingRetentionBackupTopic
         var sought = owner.Submit(OperationKind.SeekSubscription, seek, id: seek.CommandId).Get<SubscriptionInfo>();
         await Assert.That(sought.Checkpoint).IsEqualTo(MixedEventingRetentionBackupProtocol.LastPosition);
         await Assert.That(sought.Paused).IsTrue();
-        state.Purge = refused with { CommandId = Guid.NewGuid() };
+        state.Purge = refused with
+        {
+            CommandId = Guid.NewGuid()
+        };
         var physicalBefore = owner.Store.Position;
         var journalBefore = owner.ReadJournalCut();
         state.PurgeReceipt = owner.Submit(OperationKind.Batch, state.Purge, id: state.Purge.CommandId).Get<CommitReceipt>();

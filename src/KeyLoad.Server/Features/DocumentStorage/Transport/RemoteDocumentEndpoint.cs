@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.BlobStorage;
 using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.Server.Features.Messaging;
@@ -47,7 +47,9 @@ internal sealed class RemoteDocumentEndpoint : IAsyncDisposable
     {
         if (!options.PhysicalGroupTrust.RemoteDocumentReads
             || options.PhysicalGroupTrust.Role != PhysicalGroupTrustRole.Destination)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentProtocol.Unavailable);
+        }
         var failures = new List<Exception>();
         RemoteDocumentWorkOwner.Operation? operation = null;
         (ReadOnlyMemory<byte> Payload, string Signature)? result = null;
@@ -62,7 +64,9 @@ internal sealed class RemoteDocumentEndpoint : IAsyncDisposable
         finally
         {
             if (operation is not null)
-            { ServerFailureObserver.Observe(operation.Dispose, failures); }
+            {
+                ServerFailureObserver.Observe(operation.Dispose, failures);
+            }
         }
         ServerFailureObserver.ThrowIfAny(failures);
         return result ?? throw Errors.Fail(ErrorCode.Corruption, RemoteDocumentProtocol.InvalidProof);
@@ -77,7 +81,9 @@ internal sealed class RemoteDocumentEndpoint : IAsyncDisposable
         var token = linked.Token;
         using var mac = RemoteDocumentMac.FromConfiguredSecret(options.PhysicalGroupTrust.ForeignPeerSecret);
         if (!mac.Verify(request.Payload.Span, request.Signature, reply: false))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof);
+        }
         var transport = RemoteDocumentWire.DecodeCall(request.Payload.Span);
         RequireEnvelope(request, transport);
         if (transport.QueueTransfer is { } transfer)
@@ -87,9 +93,13 @@ internal sealed class RemoteDocumentEndpoint : IAsyncDisposable
                 actual, options, replay, clock, effectBoundary, token).ConfigureAwait(false);
         }
         if (transport.ControlledBlob is { } blob)
-        { return await RemoteControlledBlobEndpointExecution.ExecuteAsync(blob, controlledBlob, options, replay, clock, effectBoundary, token).ConfigureAwait(false); }
+        {
+            return await RemoteControlledBlobEndpointExecution.ExecuteAsync(blob, controlledBlob, options, replay, clock, effectBoundary, token).ConfigureAwait(false);
+        }
         if (transport.Controlled is { } document)
-        { return await RemoteControlledDocumentEndpointExecution.ExecuteAsync(document, controlled, options, replay, clock, effectBoundary, token).ConfigureAwait(false); }
+        {
+            return await RemoteControlledDocumentEndpointExecution.ExecuteAsync(document, controlled, options, replay, clock, effectBoundary, token).ConfigureAwait(false);
+        }
         return await ExecuteDocumentCallAsync(transport.Document!, token).ConfigureAwait(false);
     }
 
@@ -98,7 +108,9 @@ internal sealed class RemoteDocumentEndpoint : IAsyncDisposable
         var count = (transport.Document is null ? AbsentEnvelopeCount : PresentEnvelopeCount) + (transport.Controlled is null ? AbsentEnvelopeCount : PresentEnvelopeCount)
             + (transport.ControlledBlob is null ? AbsentEnvelopeCount : PresentEnvelopeCount) + (transport.QueueTransfer is null ? AbsentEnvelopeCount : PresentEnvelopeCount);
         if (count != RequiredEnvelopeCount)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof);
+        }
         var source = transport.Document?.Source ?? transport.Controlled?.Source ?? transport.ControlledBlob?.Source
             ?? transport.QueueTransfer!.SourceOwner.Owner;
         var destination = transport.Document?.Fence.Destination.Owner ?? transport.Controlled?.Destination.Owner
@@ -107,17 +119,23 @@ internal sealed class RemoteDocumentEndpoint : IAsyncDisposable
             ?? transport.ControlledBlob?.Request.Frame.ExpiresAt ?? transport.QueueTransfer!.ExpiresAt;
         if (!PhysicalOwnerEntryValidation.SameOwner(source, request.SourceOwner)
             || !PhysicalOwnerEntryValidation.SameOwner(destination, request.DestinationOwner) || expiry != request.ExpiresAt)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof);
+        }
     }
 
     private async Task<(ReadOnlyMemory<byte> Payload, string Signature)> ExecuteDocumentCallAsync(RemoteDocumentCallV1 call, CancellationToken token)
     {
         receiver.Validate(call, token);
         if (!replay.TryUse(call.Nonce))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof);
+        }
         var remaining = call.ExpiresAt - clock.GetUtcNow();
         if (remaining <= TimeSpan.Zero)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteDocumentProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteDocumentProtocol.Unavailable);
+        }
         using var originalExpiry = new CancellationTokenSource(remaining, clock);
         using var original = CancellationTokenSource.CreateLinkedTokenSource(token, originalExpiry.Token);
         RemoteDocumentReplyV1 reply;
@@ -140,7 +158,9 @@ internal sealed class RemoteDocumentEndpoint : IAsyncDisposable
             }
         }
         catch (KeyLoadException error) when (error.Code != ErrorCode.Corruption)
-        { reply = new(call.RequestId, call.Nonce, null, error.Code, error.Message, receiver.Discovery()); }
+        {
+            reply = new(call.RequestId, call.Nonce, null, error.Code, error.Message, receiver.Discovery());
+        }
         var encoded = RemoteDocumentWire.Encode(reply, RemoteDocumentWire.ReplyMaximum(call));
         using var replyMac = RemoteDocumentMac.FromConfiguredSecret(options.PeerSecret);
         original.Token.ThrowIfCancellationRequested();

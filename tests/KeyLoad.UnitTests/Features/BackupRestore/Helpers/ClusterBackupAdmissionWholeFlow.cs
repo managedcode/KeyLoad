@@ -28,7 +28,9 @@ internal static class ClusterBackupAdmissionWholeFlow
             release.Set();
             await ServerFailureObserver.ObserveAsync(() => nativeGate, failures);
             foreach (var producer in accepted)
-            { await ObserveSettledOriginalAsync(producer, failures); }
+            {
+                await ObserveSettledOriginalAsync(producer, failures);
+            }
 
         }
         ServerFailureObserver.ThrowIfAny(failures);
@@ -41,7 +43,9 @@ internal static class ClusterBackupAdmissionWholeFlow
         Task? stopping = null;
         await entered.Task.WaitAsync(ct);
         for (var index = 0; index < ClusterBackupAdmissionNativeFixture.AcceptedCaptures; index++)
-        { accepted.Add(fixture.Capture(ct)); }
+        {
+            accepted.Add(fixture.Capture(ct));
+        }
         var overload = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Capture(ct));
         await Assert.That(overload.Code).IsEqualTo(ErrorCode.ResourceExhausted);
         var ordinary = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Administration.BackupAsync(ct));
@@ -64,7 +68,9 @@ internal static class ClusterBackupAdmissionWholeFlow
         }
         await Assert.That(fixture.ReadCompleteImage()).IsEquivalentTo(original);
         if (stopping is null)
-        { await fixture.RequireHealthyOrdinaryBackupAsync(original, ct); }
+        {
+            await fixture.RequireHealthyOrdinaryBackupAsync(original, ct);
+        }
         stopping ??= fixture.Administration.DisposeAsync().AsTask();
         var shutdownFailures = await Assert.ThrowsExactlyAsync<AggregateException>(() => stopping);
         ArgumentNullException.ThrowIfNull(shutdownFailures);
@@ -89,11 +95,15 @@ internal static class ClusterBackupAdmissionWholeFlow
             foreach (var failure in faults.InnerExceptions)
             {
                 if (failure is KeyLoadException original && original.Code == ErrorCode.OwnershipLost)
-                { continue; }
+                {
+                    continue;
+                }
                 cleanup.Add(failure);
             }
         }
         else if (producer.IsCanceled)
-        { cleanup.Add(new TaskCanceledException(producer)); }
+        {
+            cleanup.Add(new TaskCanceledException(producer));
+        }
     }
 }

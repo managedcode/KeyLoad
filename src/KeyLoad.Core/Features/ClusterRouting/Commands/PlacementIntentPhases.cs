@@ -26,19 +26,26 @@ public sealed partial class DatabaseEngine
             || request.ControlPartition != original.Plan.ControlPartition || request.Version != TenantPlacementPolicyProtocol.Version || request.ExpectedRevision != original.Revision
             || original.PrincipalId != principal.Id || original.PolicyEpoch != principal.PolicyEpoch || request.OriginalApplyCommandId == Guid.Empty
             || original.OriginalApplyCommandId is { } retained && retained != request.OriginalApplyCommandId)
-        { throw Errors.Fail(ErrorCode.Conflict, TenantPlacementPolicyProtocol.Stale); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, TenantPlacementPolicyProtocol.Stale);
+        }
         var catalog = PhysicalShardCatalogRecordSerialization.Read(transaction)
             ?? throw Errors.Fail(ErrorCode.NotFound, TenantPlacementPolicyProtocol.Missing);
         if (!PhysicalOwnerEntryValidation.SameOwner(catalog.DefaultShard, original.ControlOwner)
             || original.ControlOwner.Incarnation != Store.Identity.Incarnation
             || !original.ControlOwner.VoterIds.Contains(request.Claim.VoterId, StringComparer.Ordinal))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, TenantPlacementPolicyProtocol.ScopeMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, TenantPlacementPolicyProtocol.ScopeMismatch);
+        }
         RequirePlacementControlPartition(transaction, original.Plan.ControlPartition,
             original.Plan.TenantId, original.Plan.DatabaseId, catalog.DefaultShard);
         var next = request.TargetStatus == PlacementIntentStatus.Applying
             ? ClaimPlacementIntent(original, request, operation.EvaluatedAt)
             : SettlePlacementIntent(transaction, original, request);
-        next = next with { Revision = checked(original.Revision + TenantPlacementPolicyProtocol.RevisionStep) };
+        next = next with
+        {
+            Revision = checked(original.Revision + TenantPlacementPolicyProtocol.RevisionStep)
+        };
         PlacementIntentValidation.Require(next, ErrorCode.Corruption);
         PlacementIntentStorage.Write(transaction, next, Limits.MaxBatchBytes);
         return Result(next);
@@ -52,7 +59,9 @@ public sealed partial class DatabaseEngine
             || request.Claim.ExpiresAt <= evaluatedAt
             || original.Status == PlacementIntentStatus.Applying && original.Claim is { } live
                 && evaluatedAt < live.ExpiresAt && !request.PreviousClaimOwnerAbsent)
-        { throw Errors.Fail(ErrorCode.Conflict, TenantPlacementPolicyProtocol.Stale); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, TenantPlacementPolicyProtocol.Stale);
+        }
         return original with
         {
             Status = PlacementIntentStatus.Applying,
@@ -67,12 +76,19 @@ public sealed partial class DatabaseEngine
     {
         if (original.Status != PlacementIntentStatus.Applying || original.Claim != request.Claim
             || request.TargetStatus is not (PlacementIntentStatus.Paused or PlacementIntentStatus.Completed))
-        { throw Errors.Fail(ErrorCode.Conflict, TenantPlacementPolicyProtocol.Stale); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, TenantPlacementPolicyProtocol.Stale);
+        }
         if (request.OriginalMoveReceipt is null)
         {
             if (request.TargetStatus != PlacementIntentStatus.Paused)
-            { throw Errors.Fail(ErrorCode.Validation, TenantPlacementPolicyProtocol.Invalid); }
-            return original with { Status = PlacementIntentStatus.Paused };
+            {
+                throw Errors.Fail(ErrorCode.Validation, TenantPlacementPolicyProtocol.Invalid);
+            }
+            return original with
+            {
+                Status = PlacementIntentStatus.Paused
+            };
         }
         return AcceptPlacementIntentReceipt(view, original, request);
     }

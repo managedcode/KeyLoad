@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Features.InternalSerialization;
-using KeyLoad.Orleans;
 using Microsoft.Extensions.Options;
 using Orleans.Serialization;
 using Orleans.Serialization.Buffers;
@@ -57,7 +57,9 @@ internal static class McpNativeAuthentication
         cancellationToken.ThrowIfCancellationRequested();
         options.Value.Validate();
         if (bytes > options.Value.MaximumAuthenticationBytes)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, McpFramingProtocol.FrameBudgetExceeded); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, McpFramingProtocol.FrameBudgetExceeded);
+        }
     }
 
     private static bool Malformed(Exception error) => error is SerializerException or ArgumentException

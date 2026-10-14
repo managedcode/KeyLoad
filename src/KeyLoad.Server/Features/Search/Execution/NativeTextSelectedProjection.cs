@@ -12,11 +12,15 @@ internal sealed class NativeTextSelectedProjection(ITextProjection bootstrap,
     {
         var admission = sharedAdmission.EnterBootstrapRead();
         try
-        { return new NativeTextSharedProjectionLease(bootstrap.Acquire(scope, budget), admission); }
+        {
+            return new NativeTextSharedProjectionLease(bootstrap.Acquire(scope, budget), admission);
+        }
         catch (Exception primary)
         {
             try
-            { admission.Dispose(); }
+            {
+                admission.Dispose();
+            }
             catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
             throw;
         }

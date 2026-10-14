@@ -19,7 +19,10 @@ internal static class ChunkCorrectionIdentityTrial
         await ChunkCorrectionIdentityAssertions.OnlyOwnedRowChanged(fixture, originalCut, damaged);
         await ChunkSelectedIntegrityDamage.Refuse(fixture);
         Put(fixture, original);
-        await SampleRawIntegrityAssertions.UnchangedAsync(fixture.Store, originalCut with { Position = originalCut.Position + 2 });
+        await SampleRawIntegrityAssertions.UnchangedAsync(fixture.Store, originalCut with
+        {
+            Position = originalCut.Position + 2
+        });
         await ChunkSelectedIntegrityAssertions.Healthy(fixture, final: false);
         await ChunkSelectedIntegrityAssertions.Replay(fixture);
         fixture.Apply(fixture.Merge);
@@ -46,7 +49,12 @@ internal static class ChunkCorrectionIdentityTrial
         await Assert.That(record.Sequence).IsEqualTo(3);
         await Assert.That(record.Sample.EventId).IsEqualTo("late");
         Put(fixture, NativeSerialization.Serialize(record with
-        { Sample = record.Sample with { EventId = "first" } }));
+        {
+            Sample = record.Sample with
+            {
+                EventId = "first"
+            }
+        }));
         return original;
     }
 

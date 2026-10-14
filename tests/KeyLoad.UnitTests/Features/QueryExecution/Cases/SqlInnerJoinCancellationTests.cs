@@ -146,7 +146,10 @@ internal sealed class SqlInnerJoinCancellationTests
     {
         private long timestamp;
 
-        internal bool ExpiredAfterNativeProgress { get; private set; }
+        internal bool ExpiredAfterNativeProgress
+        {
+            get; private set;
+        }
         public override long TimestampFrequency => TimeSpan.TicksPerSecond;
 
         public override long GetTimestamp()
@@ -166,7 +169,12 @@ internal sealed class SqlInnerJoinCancellationTests
         for (var offset = 0; offset < SeedRows; offset += WriteBatchSize)
         {
             var mutations = Enumerable.Range(offset, WriteBatchSize).Select(index => (Mutation)new PutDocument(
-                Left, OrderId(index), JsonSerializer.Serialize(new { order_id = OrderId(index), customer_id = CustomerId, padding }, JsonDefaults.Options))).ToArray();
+                Left, OrderId(index), JsonSerializer.Serialize(new
+                {
+                    order_id = OrderId(index),
+                    customer_id = CustomerId,
+                    padding
+                }, JsonDefaults.Options))).ToArray();
             database.Commit(mutations);
         }
         database.Commit(new PutDocument(Right, CustomerId, "{\"id\":\"customer\",\"name\":\"Ada\"}"));
@@ -178,9 +186,13 @@ internal sealed class SqlInnerJoinCancellationTests
     {
         database.Submit(OperationKind.ConfigureResource, new ConfigureResourceRequest(database.Partition.TenantId,
             database.Partition.DatabaseId, new ResourceDefinition(Left, ResourceKind.Collection, database.Partition.TransactionDomainId)
-            { RelationalSchema = new(OrderIdField, [new(OrderIdField, RelationalColumnType.Text), new("customer_id", RelationalColumnType.Text), new("padding", RelationalColumnType.Text)]) }));
+            {
+                RelationalSchema = new(OrderIdField, [new(OrderIdField, RelationalColumnType.Text), new("customer_id", RelationalColumnType.Text), new("padding", RelationalColumnType.Text)])
+            }));
         database.Submit(OperationKind.ConfigureResource, new ConfigureResourceRequest(database.Partition.TenantId,
             database.Partition.DatabaseId, new ResourceDefinition(Right, ResourceKind.Collection, database.Partition.TransactionDomainId)
-            { RelationalSchema = new(CustomerPrimaryKeyColumn, [new(CustomerPrimaryKeyColumn, RelationalColumnType.Text), new("name", RelationalColumnType.Text)]) }));
+            {
+                RelationalSchema = new(CustomerPrimaryKeyColumn, [new(CustomerPrimaryKeyColumn, RelationalColumnType.Text), new("name", RelationalColumnType.Text)])
+            }));
     }
 }

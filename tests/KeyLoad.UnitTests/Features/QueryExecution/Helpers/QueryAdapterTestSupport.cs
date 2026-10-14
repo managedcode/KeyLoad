@@ -20,10 +20,16 @@ internal static class QueryAdapterTestTokens
 internal sealed record QueryAdapterOrder(decimal Number, string Status)
 {
     [JsonPropertyName(QueryAdapterTestTokens.OddName)]
-    public string? Secret { get; init; }
+    public string? Secret
+    {
+        get; init;
+    }
 
     [JsonPropertyName(QueryAdapterTestTokens.OptionalNumber)]
-    public decimal? Optional { get; init; }
+    public decimal? Optional
+    {
+        get; init;
+    }
 }
 
 internal sealed class QueryAdapterUnsafeConstant

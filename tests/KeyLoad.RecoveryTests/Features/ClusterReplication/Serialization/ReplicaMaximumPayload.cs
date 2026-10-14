@@ -78,19 +78,25 @@ internal sealed class ReplicaMaximumOperationCodec(string shape) : IFieldCodec<R
         [AllowNull] ReplicatedOperation value) where TWriter : IBufferWriter<byte>
     {
         if (ReferenceCodec.TryWriteReferenceField(ref writer, delta, expectedType, value))
-        { return; }
+        {
+            return;
+        }
         writer.WriteFieldHeader(delta, expectedType, typeof(ReplicatedOperation), WireType.TagDelimited);
         writer.WriteEndBase();
         Write(ref writer, 0, value.Id);
         Write(ref writer, 1, value.Kind);
         if (shape == ReplicaMaximumPayload.DuplicateField)
-        { Write(ref writer, 0, value.Kind); }
+        {
+            Write(ref writer, 0, value.Kind);
+        }
         Write(ref writer, 1, value.PrincipalId);
         Write(ref writer, 1, value.EvaluatedAt);
         Write(ref writer, 1, value.PayloadJson);
         bytesCodec.WriteField(ref writer, 1, typeof(ReadOnlyMemory<byte>), value.NativePayload);
         if (shape == ReplicaMaximumPayload.UnknownField)
-        { Write(ref writer, 1, true); }
+        {
+            Write(ref writer, 1, true);
+        }
         writer.WriteEndObject();
     }
 

@@ -30,15 +30,30 @@ internal sealed class ZoneTreePointCacheEntry : IDisposable
 
     internal ReadOnlySpan<byte> KeySpan => _key;
 
-    internal long Generation { get; }
+    internal long Generation
+    {
+        get;
+    }
 
-    internal ICacheMemoryReservation Reservation { get; }
+    internal ICacheMemoryReservation Reservation
+    {
+        get;
+    }
 
-    internal LinkedListNode<ZoneTreePointCacheEntry>? Node { get; set; }
+    internal LinkedListNode<ZoneTreePointCacheEntry>? Node
+    {
+        get; set;
+    }
 
-    internal int PinCount { get; set; }
+    internal int PinCount
+    {
+        get; set;
+    }
 
-    internal bool Retired { get; set; }
+    internal bool Retired
+    {
+        get; set;
+    }
 
     internal bool IsOwnedBy(IZoneTreePointCacheCandidateOwner owner)
     {
@@ -109,11 +124,20 @@ internal sealed class ZoneTreePointCacheCandidate : IDisposable
         _reservation = reservation;
     }
 
-    internal int ValueLength { get; }
+    internal int ValueLength
+    {
+        get;
+    }
 
-    internal long Generation { get; }
+    internal long Generation
+    {
+        get;
+    }
 
-    internal long Revision { get; }
+    internal long Revision
+    {
+        get;
+    }
 
     internal ReadOnlySpan<byte> KeySpan => _key ?? Array.Empty<byte>();
 

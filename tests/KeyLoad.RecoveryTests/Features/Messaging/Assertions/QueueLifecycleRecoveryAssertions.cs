@@ -16,11 +16,15 @@ internal static class QueueLifecycleRecoveryAssertions
         var outcome = OutcomeStoreOracle.Read(store, operation);
         var committed = outcome is not null;
         if (stage >= CommitStage.JournalFlushed)
-        { await Assert.That(committed).IsTrue(); }
+        {
+            await Assert.That(committed).IsTrue();
+        }
         await QueueLifecycleRecoveryImage.AssertAsync(database, store, committed);
         var receipt = database.Apply(operation).Get<CommitReceipt>();
         if (committed)
-        { await MessagingRecoveryReceiptAssertions.AssertSameNativeValueAsync(outcome!.Get<CommitReceipt>(), receipt); }
+        {
+            await MessagingRecoveryReceiptAssertions.AssertSameNativeValueAsync(outcome!.Get<CommitReceipt>(), receipt);
+        }
         await QueueLifecycleRecoveryImage.AssertAsync(database, store, true);
         await MessagingRecoveryReceiptAssertions.AssertSameNativeValueAsync(receipt, database.Apply(operation).Get<CommitReceipt>());
         await MessagingRecoveryReceiptAssertions.AssertSameNativeValueAsync(receipt, database.ResolveOutcome(operation).Get<CommitReceipt>());

@@ -29,11 +29,15 @@ internal static class ControlledPartitionMovementNativePrepareDeltaWitness
         await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(
             () => source.Partition.Coordinator.ReadBarrierAsync(token), failures);
         if (failures.Count != beforeObservation)
-        { return; }
+        {
+            return;
+        }
         var work = new global::KeyLoad.Core.ReadExecutionBudget(source.Runtime.Core.DatabaseLimits, source.Clock, token);
         work.Check();
         if (source.Database.Limits.MaxScanRecords < MaximumCandidateRecords)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, ScanExceeded); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, ScanExceeded);
+        }
         var entry = source.Log.ReadEntry(index, work.ChargeBytes);
         work.Check();
         var operation = entry?.Operation;

@@ -22,7 +22,10 @@ internal static class TenantCapacityPlacementRf3DemotionPolicy
         var query = new TenantPlacementPlanRequest(seed.Partition.TenantId,
             seed.Partition.DatabaseId, [seed.Partition], state.Control);
         var official = (await McpCallerAssertions.SuccessAsync<TenantPlacementPlanResultV1>(
-            await seed.Official.CallAsync(TenantPlacementPublicProtocol.PlanTool, new { request = query }, token))).Value;
+            await seed.Official.CallAsync(TenantPlacementPublicProtocol.PlanTool, new
+            {
+                request = query
+            }, token))).Value;
         await TenantCapacityPlacementRf3DemotionAssertions.PlanAsync(seed, state, middle, official, moveExpected: false, token);
         var sdk = await McpCallerAssertions.SdkSuccessAsync(await seed.Source.PlanTenantPlacementAsync(query, token));
         await TenantCapacityPlacementRf3DemotionAssertions.PlanAsync(seed, state, middle, sdk, moveExpected: false, token);
@@ -37,7 +40,11 @@ internal static class TenantCapacityPlacementRf3DemotionPolicy
         TenantCapacityPlacementRf3Provisioning.State state, TenantPlacementPolicyV1 middle,
         long bytes, CancellationToken token)
     {
-        var equality = middle with { Revision = checked(middle.Revision + RevisionStep), DemotionBytes = bytes };
+        var equality = middle with
+        {
+            Revision = checked(middle.Revision + RevisionStep),
+            DemotionBytes = bytes
+        };
         await ConfigureAsync(seed, state.Control, equality, token);
         return equality;
     }
@@ -51,6 +58,10 @@ internal static class TenantCapacityPlacementRf3DemotionPolicy
             await McpCallerAssertions.SdkSuccessAsync(await seed.Source.ConfigurePlacementPolicyAsync(id, request, token)));
         await SqlRf3Protocol.EqualAsync(policy,
             (await McpCallerAssertions.SuccessAsync<TenantPlacementPolicyV1>(await seed.Official.CallAsync(
-                TenantPlacementPublicProtocol.ConfigureTool, new { commandId = id, request }, token))).Value);
+                TenantPlacementPublicProtocol.ConfigureTool, new
+                {
+                    commandId = id,
+                    request
+                }, token))).Value);
     }
 }

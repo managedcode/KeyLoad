@@ -29,10 +29,22 @@ internal sealed class IsolatedTimeSeriesResourceContext
         Root = Path.GetFullPath(root);
     }
 
-    internal IDistributedApplicationBuilder Builder { get; }
-    internal int NodeCount { get; }
-    internal IResourceBuilder<ContainerResource> Runner { get; }
-    internal string Root { get; }
+    internal IDistributedApplicationBuilder Builder
+    {
+        get;
+    }
+    internal int NodeCount
+    {
+        get;
+    }
+    internal IResourceBuilder<ContainerResource> Runner
+    {
+        get;
+    }
+    internal string Root
+    {
+        get;
+    }
 
     internal string DataDirectory(string name)
     {

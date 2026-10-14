@@ -24,7 +24,10 @@ internal sealed class CurrentWalRejectionTests
         var token = TestContext.Current!.Execution.CancellationToken;
         var identityBytes = await File.ReadAllBytesAsync(files.IdentityPath, token);
         var originalJournal = await files.ReadJournalAsync();
-        await files.WriteIdentityAsync(originalIdentity with { FormatVersion = UnsupportedIdentityVersion });
+        await files.WriteIdentityAsync(originalIdentity with
+        {
+            FormatVersion = UnsupportedIdentityVersion
+        });
         var before = await files.CaptureFilesAsync();
         await files.AssertRejectedUnchanged(originalJournal, await File.ReadAllBytesAsync(files.IdentityPath), ErrorCode.FormatUnsupported);
         await files.AssertFilesUnchangedAsync(before);

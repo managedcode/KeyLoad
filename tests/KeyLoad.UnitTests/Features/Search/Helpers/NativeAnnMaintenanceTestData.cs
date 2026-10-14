@@ -32,7 +32,9 @@ internal static class NativeAnnMaintenanceTestData
     {
         var page = view.Scan([], SnapshotBound);
         if (page.HasMore)
-        { throw new InvalidOperationException("The native ANN lifecycle fixture exceeds its complete state bound."); }
+        {
+            throw new InvalidOperationException("The native ANN lifecycle fixture exceeds its complete state bound.");
+        }
         return page.Records.Select(row => (Convert.ToHexString(row.Key.Span), Convert.ToHexString(row.Value.Span))).ToArray();
     });
 }

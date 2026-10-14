@@ -26,7 +26,9 @@ internal static class NativeCoverageTUnitSession
     {
         var json = Environment.GetEnvironmentVariable(ArgumentsEnvironment);
         if (json is null)
-        { return; }
+        {
+            return;
+        }
         var arguments = JsonSerializer.Deserialize<string[]>(json)
             ?? throw new InvalidOperationException("Native TUnit coverage preparation selection is missing.");
         using var timeout = new CancellationTokenSource(TimeSpan.FromMinutes(60), TimeProvider.System);
@@ -43,7 +45,9 @@ internal static class NativeCoverageTUnitSession
                 .BuildAsync(new DistributedApplicationExecutionContext(DistributedApplicationOperation.Publish),
                     NullLogger.Instance, deadline.Token).ConfigureAwait(false);
             if (configuration.Exception is not null)
-            { throw configuration.Exception; }
+            {
+                throw configuration.Exception;
+            }
             builder.Resources.Remove(runner);
             application = await builder.BuildAsync(deadline.Token).ConfigureAwait(false);
             outputLifetime = new();
@@ -51,7 +55,9 @@ internal static class NativeCoverageTUnitSession
             var exit = await AspireResourceCompletion.RunToExitAsync(application, NativeCoverageRf3Prerequisite.ResourceName,
                 deadline.Token).ConfigureAwait(false);
             if (exit != 0)
-            { throw new InvalidOperationException("Original RF3 coverage image preparation failed."); }
+            {
+                throw new InvalidOperationException("Original RF3 coverage image preparation failed.");
+            }
             foreach (var (key, value) in configuration.EnvironmentVariables)
             {
                 previousEnvironment.Add(key, Environment.GetEnvironmentVariable(key));
@@ -61,7 +67,9 @@ internal static class NativeCoverageTUnitSession
         catch (Exception primary)
         {
             try
-            { await CleanupAsync().ConfigureAwait(false); }
+            {
+                await CleanupAsync().ConfigureAwait(false);
+            }
             catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
             throw;
         }
@@ -84,12 +92,16 @@ internal static class NativeCoverageTUnitSession
                     await CollectAsync(outputLifetime.CancelAsync, failures).ConfigureAwait(false);
                 }
                 if (output is not null)
-                { await CollectAsync(() => output, failures).ConfigureAwait(false); }
+                {
+                    await CollectAsync(() => output, failures).ConfigureAwait(false);
+                }
                 NativeCoverageRf3Cleanup? imageCleanup = null;
                 ServerFailureObserver.Observe(() => imageCleanup = owned.Services.GetRequiredService<NativeCoverageRf3Cleanup>(), failures);
                 await DisposeBuilderAsync(failures).ConfigureAwait(false);
                 if (imageCleanup is not null)
-                { await CollectAsync(() => imageCleanup.CleanupAsync(deadline.Token), failures).ConfigureAwait(false); }
+                {
+                    await CollectAsync(() => imageCleanup.CleanupAsync(deadline.Token), failures).ConfigureAwait(false);
+                }
             }
             else
             {
@@ -102,11 +114,15 @@ internal static class NativeCoverageTUnitSession
             outputLifetime = null;
             output = null;
             foreach (var (key, value) in previousEnvironment)
-            { ServerFailureObserver.Observe(() => Environment.SetEnvironmentVariable(key, value), failures); }
+            {
+                ServerFailureObserver.Observe(() => Environment.SetEnvironmentVariable(key, value), failures);
+            }
             previousEnvironment.Clear();
         }
         if (failures.Count > 0)
-        { throw new AggregateException("Native TUnit coverage prerequisite cleanup failed.", failures); }
+        {
+            throw new AggregateException("Native TUnit coverage prerequisite cleanup failed.", failures);
+        }
     }
 
     private static async Task DisposeBuilderAsync(List<Exception> failures)

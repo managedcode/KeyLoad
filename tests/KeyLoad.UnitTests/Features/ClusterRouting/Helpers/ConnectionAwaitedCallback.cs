@@ -12,10 +12,14 @@ internal sealed class ConnectionAwaitedCallback(Exception? failure)
     internal async ValueTask NotifyAsync()
     {
         if (Interlocked.Increment(ref invocations) != FirstInvocation)
-        { throw new InvalidOperationException(ConnectionNativeProtocol.DuplicateObservation); }
+        {
+            throw new InvalidOperationException(ConnectionNativeProtocol.DuplicateObservation);
+        }
         Arrived.SetResult();
         await Release.Task.ConfigureAwait(true);
         if (failure is not null)
-        { ExceptionDispatchInfo.Capture(failure).Throw(); }
+        {
+            ExceptionDispatchInfo.Capture(failure).Throw();
+        }
     }
 }

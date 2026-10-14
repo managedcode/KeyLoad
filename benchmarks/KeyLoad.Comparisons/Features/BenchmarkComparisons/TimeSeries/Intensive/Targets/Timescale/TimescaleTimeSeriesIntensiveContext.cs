@@ -17,10 +17,22 @@ internal sealed class TimescaleTimeSeriesIntensiveContext
     private int activeOperations;
     private bool closing;
 
-    internal string RunId { get; }
-    internal string SchemaName { get; }
-    internal string SeriesSet { get; }
-    internal Guid OwnerId { get; }
+    internal string RunId
+    {
+        get;
+    }
+    internal string SchemaName
+    {
+        get;
+    }
+    internal string SeriesSet
+    {
+        get;
+    }
+    internal Guid OwnerId
+    {
+        get;
+    }
 
     internal IAsyncDisposable EnterOperation()
     {

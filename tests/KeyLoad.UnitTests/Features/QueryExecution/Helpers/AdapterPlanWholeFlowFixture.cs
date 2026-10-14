@@ -10,12 +10,17 @@ internal static class AdapterPlanWholeFlowFixture
     private const string MinimumParameter = "minimum";
     internal const string Sql = "SELECT TOP (10) d.id, d.number, d.status FROM orders d WHERE d.status = @status AND d.number >= @minimum ORDER BY d.id";
     internal static Dictionary<string, JsonElement> Parameters() => new(StringComparer.Ordinal)
-    { [StatusParameter] = JsonSerializer.SerializeToElement("open"), [MinimumParameter] = JsonSerializer.SerializeToElement(2m) };
+    {
+        [StatusParameter] = JsonSerializer.SerializeToElement("open"),
+        [MinimumParameter] = JsonSerializer.SerializeToElement(2m)
+    };
     internal static AstQueryRequest Ast(TestDatabase database, bool explain)
     {
         var query = new SqlParser(Sql,
             UnitExecutionOptions.DatabaseLimits(new()), UnitExecutionOptions.QueryExecution()).Parse() with
-        { Explain = explain };
+        {
+            Explain = explain
+        };
         return QueryAdapterTestSupport.RoundTrip(new(database.Partition, query, Parameters()));
     }
     internal static AstQueryRequest CSharp(TestDatabase database, bool explain)

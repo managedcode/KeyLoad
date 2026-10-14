@@ -6,7 +6,10 @@ namespace KeyLoad.IntegrationTests.Features.BackupRestore;
 internal sealed class ClusterRestoreMixedRetentionRf3State(QueueLifecyclePublicState queue,
     PrincipalRecord principal, PrincipalRecord inspector, PhysicalShardRecord sourceOwner, PhysicalShardRecord targetOwner)
 {
-    internal global::KeyLoad.IntegrationTests.Features.EventStreams.RetentionAckArchiveR53State? AcknowledgedRetention { get; set; }
+    internal global::KeyLoad.IntegrationTests.Features.EventStreams.RetentionAckArchiveR53State? AcknowledgedRetention
+    {
+        get; set;
+    }
     internal QueueLifecyclePublicState OriginalQueue { get; } = queue;
     internal QueueLifecyclePublicState CurrentQueue { get; } = new(queue.Partition, queue.OperatorKey, queue.DeniedKey, queue.Route);
     internal PrincipalRecord Principal { get; } = principal;
@@ -18,7 +21,10 @@ internal sealed class ClusterRestoreMixedRetentionRf3State(QueueLifecyclePublicS
     internal PartitionRef Partition => OriginalQueue.Partition;
     internal PhysicalShardRecord SourceOwner { get; } = sourceOwner;
     internal PhysicalShardRecord TargetOwner { get; } = targetOwner;
-    internal QueueLaneRef Source => new(Partition with { PartitionKey = ClusterRestoreMixedRetentionRf3Protocol.SourceKey },
+    internal QueueLaneRef Source => new(Partition with
+    {
+        PartitionKey = ClusterRestoreMixedRetentionRf3Protocol.SourceKey
+    },
         ClusterRestoreMixedRetentionRf3Protocol.Input);
     internal QueueLaneRef Target => new(Partition, ClusterRestoreMixedRetentionRf3Protocol.Inbox);
     internal EventSourceRef FilteredSource => new(Partition, ClusterRestoreMixedRetentionRf3Protocol.Filtered, EventSourceKind.Topic);
@@ -46,7 +52,10 @@ internal sealed class ClusterRestoreMixedRetentionRf3State(QueueLifecyclePublicS
     internal MessageInspection InputImage { get; set; } = null!;
     internal MessageInspection OutputImage { get; set; } = null!;
     internal DocumentResult DocumentImage { get; set; } = null!;
-    internal ImmutableArray<EventRecord> InboxEvents { get; set; }
+    internal ImmutableArray<EventRecord> InboxEvents
+    {
+        get; set;
+    }
     internal CommitInboxRequest FreshInbox { get; set; } = null!;
     internal CommitInboxResult FreshInboxResult { get; set; } = null!;
     internal DeliveryCommand FreshAck { get; set; } = null!;
@@ -57,10 +66,16 @@ internal sealed class ClusterRestoreMixedRetentionRf3State(QueueLifecyclePublicS
     internal CommandRequest FreshEnqueue { get; set; } = null!;
     internal CommitReceipt FreshEnqueueReceipt { get; set; } = null!;
     internal MessageInspection FreshInputImage { get; set; } = null!;
-    internal ImmutableArray<EventRecord> FreshInboxEvents { get; set; }
+    internal ImmutableArray<EventRecord> FreshInboxEvents
+    {
+        get; set;
+    }
     internal SubscriptionInfo CurrentFilteredInfo { get; set; } = null!;
     internal List<(SubscriptionDeliveryCommand Command, CommitReceipt Receipt)> CurrentSubscriptionAcks { get; } = [];
     internal Dictionary<Guid, byte[]> OriginalOutcomeBytes { get; } = [];
-    internal bool Continued { get; set; }
+    internal bool Continued
+    {
+        get; set;
+    }
     public override string ToString() => nameof(ClusterRestoreMixedRetentionRf3State);
 }

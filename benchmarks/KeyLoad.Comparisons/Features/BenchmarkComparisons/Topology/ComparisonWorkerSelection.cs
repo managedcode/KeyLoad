@@ -29,16 +29,28 @@ public sealed record ComparisonWorkerSelection(string Target, int NodeCount, Sce
     private const string TimeSeriesAppHostProfile = "timeseries";
     internal const string InvalidSelection = "IsolatedComparisonSelectionInvalid";
     /// <summary>Gets the exact typed scaled profile when the isolated worker selects one.</summary>
-    public ScaledComparisonProfile? ScaledProfile { get; init; }
+    public ScaledComparisonProfile? ScaledProfile
+    {
+        get; init;
+    }
 
     /// <summary>Gets the exact vector profile selected by the isolated worker.</summary>
-    public VectorComparisonProfile? VectorProfile { get; init; }
+    public VectorComparisonProfile? VectorProfile
+    {
+        get; init;
+    }
 
     /// <summary>Gets the canonical document workload selected on this isolated native topology.</summary>
-    public DocumentComparisonSelection? DocumentWorkload { get; init; }
+    public DocumentComparisonSelection? DocumentWorkload
+    {
+        get; init;
+    }
 
     /// <summary>Gets the exact offered rate for an independently selected open-loop workload.</summary>
-    public int? OpenLoopRate { get; init; }
+    public int? OpenLoopRate
+    {
+        get; init;
+    }
 
     /// <summary>Gets the legacy control options with the selected native topology.</summary>
     public ComparisonOptions Options => CreateExecutionOptions().Value;
@@ -47,7 +59,10 @@ public sealed record ComparisonWorkerSelection(string Target, int NodeCount, Sce
     private ComparisonOptions CreateSelectedSnapshot()
     {
         Validate();
-        return IsolatedComparisonContract.Current.Options with { Topology = ComparisonTopologies.FromNodeCount(NodeCount) };
+        return IsolatedComparisonContract.Current.Options with
+        {
+            Topology = ComparisonTopologies.FromNodeCount(NodeCount)
+        };
     }
 
     /// <summary>Creates validated native execution options from the authenticated immutable manifest.</summary>
@@ -156,7 +171,9 @@ public sealed record ComparisonWorkerSelection(string Target, int NodeCount, Sce
     private static VectorComparisonProfile ParseVectorProfile(string id)
     {
         try
-        { return VectorComparisonProfile.Parse(id); }
+        {
+            return VectorComparisonProfile.Parse(id);
+        }
         catch (ArgumentOutOfRangeException) { throw new InvalidOperationException(InvalidSelection); }
     }
 

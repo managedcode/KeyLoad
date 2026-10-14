@@ -14,7 +14,9 @@ internal static class NativeChecksumProfileCorpus
         store.Commit((transaction, _) =>
         {
             for (var index = NativeChecksumProfileProtocol.NoAppends; index < NativeChecksumProfileProtocol.SeedRecords; index++)
-            { transaction.Put(Key(index), Value(index)); }
+            {
+                transaction.Put(Key(index), Value(index));
+            }
             return true;
         });
         Require(store, NativeChecksumProfileProtocol.NoAppends);
@@ -33,7 +35,9 @@ internal static class NativeChecksumProfileCorpus
     internal static void Require(ZoneTreeStore store, int appends) => store.Read(view =>
     {
         for (var index = NativeChecksumProfileProtocol.NoAppends; index < NativeChecksumProfileProtocol.SeedRecords; index++)
-        { RequireValue(view.ReadOwnedValue(Key(index)), Value(index)); }
+        {
+            RequireValue(view.ReadOwnedValue(Key(index)), Value(index));
+        }
         RequireAppend(view.ReadOwnedValue(Encoding.UTF8.GetBytes(NativeChecksumProfileProtocol.FirstCorpusKey)),
             NativeChecksumProfileProtocol.FirstCorpusValue, appends >= NativeChecksumProfileProtocol.OneAppend);
         RequireAppend(view.ReadOwnedValue(Encoding.UTF8.GetBytes(NativeChecksumProfileProtocol.SecondCorpusKey)),
@@ -44,15 +48,21 @@ internal static class NativeChecksumProfileCorpus
     private static void RequireAppend(byte[]? actual, string expected, bool present)
     {
         if (present)
-        { RequireValue(actual, Encoding.UTF8.GetBytes(expected)); }
+        {
+            RequireValue(actual, Encoding.UTF8.GetBytes(expected));
+        }
         else if (actual is not null)
-        { throw new InvalidOperationException(NativeChecksumProfileProtocol.Invalid); }
+        {
+            throw new InvalidOperationException(NativeChecksumProfileProtocol.Invalid);
+        }
     }
 
     private static void RequireValue(byte[]? actual, byte[] expected)
     {
         if (actual is null || !actual.AsSpan().SequenceEqual(expected))
-        { throw new InvalidOperationException(NativeChecksumProfileProtocol.Invalid); }
+        {
+            throw new InvalidOperationException(NativeChecksumProfileProtocol.Invalid);
+        }
     }
 
     private static byte[] Key(int index)

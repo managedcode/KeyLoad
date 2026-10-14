@@ -1,7 +1,7 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
@@ -15,11 +15,15 @@ internal static class PartitionMovementClientOutcomeOperations
         cancellationToken.ThrowIfCancellationRequested();
         if (owner.options.Value.PhysicalGroupTrust.Role != PhysicalGroupTrustRole.Control
             || !owner.options.Value.PhysicalGroupTrust.RegisterPhysicalOwners || requestExpiry <= owner.clock.GetUtcNow())
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMovementProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMovementProtocol.Unavailable);
+        }
         var remaining = requestExpiry - owner.clock.GetUtcNow();
         var bounded = remaining < work.RemainingLifetime ? remaining : work.RemainingLifetime;
         if (bounded <= TimeSpan.Zero)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMovementProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMovementProtocol.Unavailable);
+        }
         using var deadline = new CancellationTokenSource(bounded, owner.clock);
         using var caller = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadline.Token);
         var originalToken = caller.Token;
@@ -34,7 +38,9 @@ internal static class PartitionMovementClientOutcomeOperations
         var selected = local ? control : destination;
         var index = selected.Owner.VoterIds.IndexOf(originalVoter);
         if (index < PartitionMovementClient.FirstVoter || !PhysicalOwnerEntryValidation.SameOwner(receiver, selected.Owner))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMovementProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMovementProtocol.Unavailable);
+        }
         var failures = new List<Exception>();
         for (var attempt = PartitionMovementClient.FirstVoter; attempt < selected.Owner.VoterIds.Length; attempt++)
         {
@@ -48,7 +54,9 @@ internal static class PartitionMovementClientOutcomeOperations
                     originalToken).ConfigureAwait(false);
             }
             catch (PartitionMovementOutcomeNetworkException failure)
-            { failures.Add(failure.InnerException ?? failure); }
+            {
+                failures.Add(failure.InnerException ?? failure);
+            }
             catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure))
             {
                 failures.Add(failure);

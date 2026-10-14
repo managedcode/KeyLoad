@@ -24,7 +24,9 @@ internal static class BlobGlobalQuotaR49Seed
         for (var index = 0; index < names.Length; index++)
         {
             var definition = new ResourceDefinition(names[index], ResourceKind.BlobStore, partition.TransactionDomainId)
-            { BlobPolicy = new() { MaxBlobBytes = limits[index], MaxReservedBytes = limits[index] } };
+            {
+                BlobPolicy = new() { MaxBlobBytes = limits[index], MaxReservedBytes = limits[index] }
+            };
             await SqlRf3Protocol.EqualAsync(definition, await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.ConfigureResourceAsync(Guid.NewGuid(), new(partition.TenantId, partition.DatabaseId, definition), token)));
             state.ConfiguredResources.Add(definition.Name);
             await BlobGlobalQuotaR49Current.RunAsync(callers, state, token);

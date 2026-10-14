@@ -20,9 +20,13 @@ internal static class EventAppendStateAssertions
         var page = database.ReadStream(EventAppendCrashContract.Principal, EventAppendCrashContract.Stream);
         var ids = new List<string> { EventAppendCrashContract.SeedId };
         if (committed)
-        { ids.Add(EventAppendCrashContract.EventId); }
+        {
+            ids.Add(EventAppendCrashContract.EventId);
+        }
         if (healthy)
-        { ids.Add(EventAppendCrashContract.Healthy); }
+        {
+            ids.Add(EventAppendCrashContract.Healthy);
+        }
         await Assert.That(page.Stream).IsEqualTo(EventAppendCrashContract.Stream);
         await Assert.That(page.Head).IsEqualTo(new StreamHead(ids.Count, 1, 1));
         await Assert.That(page.CutPosition).IsEqualTo(database.Store.Position);
@@ -46,7 +50,11 @@ internal static class EventAppendStateAssertions
         var document = database.GetDocument(EventAppendCrashContract.Principal, reference);
         var message = database.InspectMessage(EventAppendCrashContract.Principal, EventAppendCrashContract.Lane, id);
         if (!present)
-        { await Assert.That(document).IsNull(); await Assert.That(message).IsNull(); return; }
+        {
+            await Assert.That(document).IsNull();
+            await Assert.That(message).IsNull();
+            return;
+        }
         await Assert.That(document!.Reference).IsEqualTo(reference);
         await Assert.That(document.Revision).IsEqualTo(1L);
         await Assert.That(document.Json).IsEqualTo(EventAppendCrashContract.DocumentJson);
@@ -69,7 +77,9 @@ internal static class EventAppendStateAssertions
     {
         var page = view.Scan([], MaximumFixtureRecords);
         if (page.HasMore)
-        { throw new InvalidOperationException(FixtureOverflow); }
+        {
+            throw new InvalidOperationException(FixtureOverflow);
+        }
         return page.Records.Select(record => Convert.ToHexString(record.Key.Span) + ByteSeparator +
             Convert.ToHexString(record.Value.Span)).ToArray();
     });

@@ -12,7 +12,10 @@ internal static class NativeAnnStorageOptionsFactory
     {
         var original = configured.Value;
         original.Validate();
-        var bounded = original with { MaxFileBytes = Math.Min(original.MaxFileBytes, available) };
+        var bounded = original with
+        {
+            MaxFileBytes = Math.Min(original.MaxFileBytes, available)
+        };
         bounded.Validate();
         return Options.Create(bounded);
     }
@@ -22,7 +25,10 @@ internal static class NativeAnnStorageOptionsFactory
     {
         var original = configured.Value;
         original.Validate();
-        var bounded = original with { MaxPeakBytes = Math.Min(original.MaxPeakBytes, available) };
+        var bounded = original with
+        {
+            MaxPeakBytes = Math.Min(original.MaxPeakBytes, available)
+        };
         bounded.Validate();
         return Options.Create(bounded);
     }

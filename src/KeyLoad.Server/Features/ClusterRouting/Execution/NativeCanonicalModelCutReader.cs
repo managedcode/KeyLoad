@@ -1,9 +1,9 @@
 using System.Collections.Immutable;
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Execution;
 using KeyLoad.Core.Features.Messaging;
-using KeyLoad.Orleans;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
@@ -42,7 +42,9 @@ internal sealed class NativeCanonicalModelCutReader(global::Microsoft.Extensions
             var result = view.VisitRange(KeySpace.Partition(family, partition), limits.MaxScanRecords,
                 CopyRow, observer: Charge, cancellationToken: token);
             if (result.HasMore || result.StoppedByVisitor)
-            { throw NativeCanonicalModelCutCodec.Exhausted(); }
+            {
+                throw NativeCanonicalModelCutCodec.Exhausted();
+            }
         }
     }
 
@@ -59,7 +61,9 @@ internal sealed class NativeCanonicalModelCutReader(global::Microsoft.Extensions
         var bytes = CopyValue(view, CommandOutcomeKeyResolver.ForNew(principal, request.AcceptCommandId, scope).Key);
         var selected = CommandOutcomeKeyResolver.Select(view, principal, request.AcceptCommandId, scope, Charge);
         if ((selected.Outcome is null) != (bytes is null))
-        { throw NativeCanonicalModelCutCodec.Invalid(); }
+        {
+            throw NativeCanonicalModelCutCodec.Invalid();
+        }
         return bytes;
     }
 
@@ -67,7 +71,10 @@ internal sealed class NativeCanonicalModelCutReader(global::Microsoft.Extensions
     {
         ReadOnlyMemory<byte>? result = null;
         view.ReadValue(key, value =>
-        { RequireCopy(value.Length); result = value.ToArray(); }, Charge);
+        {
+            RequireCopy(value.Length);
+            result = value.ToArray();
+        }, Charge);
         return result;
     }
 
@@ -77,7 +84,9 @@ internal sealed class NativeCanonicalModelCutReader(global::Microsoft.Extensions
         examined = checked(examined + ExaminedRecordStep);
         readBytes = checked(readBytes + actual);
         if (actual < MinimumReadBytes || examined > limits.MaxScanRecords || readBytes > limits.MaxQueryReadBytes)
-        { throw NativeCanonicalModelCutCodec.Exhausted(); }
+        {
+            throw NativeCanonicalModelCutCodec.Exhausted();
+        }
     }
 
     private void RequireCopy(int bytes)
@@ -85,6 +94,8 @@ internal sealed class NativeCanonicalModelCutReader(global::Microsoft.Extensions
         token.ThrowIfCancellationRequested();
         copiedBytes = checked(copiedBytes + bytes);
         if (copiedBytes > NativeCanonicalModelCutCodec.MaximumRecordBytes)
-        { throw NativeCanonicalModelCutCodec.Exhausted(); }
+        {
+            throw NativeCanonicalModelCutCodec.Exhausted();
+        }
     }
 }

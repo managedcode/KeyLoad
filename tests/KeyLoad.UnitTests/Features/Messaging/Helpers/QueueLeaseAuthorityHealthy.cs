@@ -32,7 +32,10 @@ internal static class QueueLeaseAuthorityHealthy
         await Assert.That(receipt.CommandId).IsEqualTo(command.CommandId);
         await Assert.That(receipt.Mutations).IsEquivalentTo([new MutationReceipt(nameof(DeliveryAction.Ack),
             state.Lane.Queue, QueueLeaseAuthorityProtocol.Healthy, QueueLeaseAuthorityProtocol.Three)], CollectionOrdering.Matching);
-        var counters = before with { NextReadySequence = QueueLeaseAuthorityProtocol.Two };
+        var counters = before with
+        {
+            NextReadySequence = QueueLeaseAuthorityProtocol.Two
+        };
         var metadata = new MessageMetadata(QueueLeaseAuthorityProtocol.Healthy, MessageState.Acked,
             QueueLeaseAuthorityProtocol.One, QueueLeaseAuthorityProtocol.Three, QueueLeaseAuthorityProtocol.Two,
             null, null, LeaseVersion: QueueLeaseAuthorityProtocol.One);

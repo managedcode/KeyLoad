@@ -20,21 +20,31 @@ internal sealed class RequestCqrsProbeProfile
     private readonly IReadOnlyDictionary<string, string> nodeRoots;
 
     private RequestCqrsProbeProfile(string sessionId, IReadOnlyDictionary<string, string> nodeRoots)
-    { SessionId = sessionId; this.nodeRoots = nodeRoots; }
+    {
+        SessionId = sessionId;
+        this.nodeRoots = nodeRoots;
+    }
 
-    internal string SessionId { get; }
+    internal string SessionId
+    {
+        get;
+    }
 
     internal int MemberCount => nodeRoots.Count;
 
     internal static void ValidateMode(IConfiguration configuration)
-    { _ = RequestCqrsProbeProfileSettingsReader.Read(configuration); }
+    {
+        _ = RequestCqrsProbeProfileSettingsReader.Read(configuration);
+    }
 
     internal static RequestCqrsProbeProfile? Read(IDistributedApplicationBuilder builder, string dataRoot,
         bool ephemeral, int? benchmarkNodeCount, IReadOnlyDictionary<string, RuntimeContainerImage> images)
     {
         var settings = ReadSettings(builder, dataRoot, ephemeral, benchmarkNodeCount);
         if (settings is null)
-        { return null; }
+        {
+            return null;
+        }
         ArgumentNullException.ThrowIfNull(images);
         ValidateImages(images);
         return Create(builder, dataRoot, settings);
@@ -61,12 +71,16 @@ internal sealed class RequestCqrsProbeProfile
     {
         var settings = ReadSettings(builder, dataRoot, ephemeral: true, benchmarkNodeCount: null);
         if (settings is null)
-        { return null; }
+        {
+            return null;
+        }
         var control = AppHostOptionsRegistration.Get(builder).Control.Value;
         if (!control.TwoRf3 || control.RemoteDocumentReads != control.RemotePartitionQueries
             || (image is null) == (local is null)
             || (image is not null && string.IsNullOrWhiteSpace(image.Reference)))
-        { throw new InvalidOperationException(InvalidConfiguration); }
+        {
+            throw new InvalidOperationException(InvalidConfiguration);
+        }
         string[] voters = [TwoRf3ProfileProtocol.FirstVoterName, TwoRf3ProfileProtocol.SecondVoterName,
             TwoRf3ProfileProtocol.ThirdVoterName, TwoRf3ProfileProtocol.FourthVoterName,
             TwoRf3ProfileProtocol.FifthVoterName, TwoRf3ProfileProtocol.SixthVoterName];
@@ -82,9 +96,13 @@ internal sealed class RequestCqrsProbeProfile
         ArgumentNullException.ThrowIfNull(builder);
         var settings = AppHostOptionsRegistration.Get(builder).Control.Value.RequestProbe;
         if (settings is null)
-        { return null; }
+        {
+            return null;
+        }
         if (!ephemeral || benchmarkNodeCount is not null)
-        { throw new InvalidOperationException(InvalidConfiguration); }
+        {
+            throw new InvalidOperationException(InvalidConfiguration);
+        }
         ArgumentException.ThrowIfNullOrWhiteSpace(dataRoot);
         return settings;
     }
@@ -100,7 +118,9 @@ internal sealed class RequestCqrsProbeProfile
     {
         ArgumentNullException.ThrowIfNull(resource);
         if (!nodeRoots.TryGetValue(node, out var nodeRoot))
-        { throw new InvalidOperationException(InvalidConfiguration); }
+        {
+            throw new InvalidOperationException(InvalidConfiguration);
+        }
         resource.WithBindMount(nodeRoot, MountRoot)
             .WithEnvironment(EnabledEnvironment, EnabledValue)
             .WithEnvironment(RootEnvironment, MountRoot)
@@ -114,15 +134,21 @@ internal sealed class RequestCqrsProbeProfile
 
         if (images.Count != RequestCqrsProbeProfileSettingsReader.VoterNames.Count
             || RequestCqrsProbeProfileSettingsReader.VoterNames.Any(node => !images.TryGetValue(node, out var image) || image is null))
-        { throw new InvalidOperationException(InvalidConfiguration); }
+        {
+            throw new InvalidOperationException(InvalidConfiguration);
+        }
         var voters = RequestCqrsProbeProfileSettingsReader.VoterNames;
         var reference = images[voters[IndexValue]].Reference;
         if (string.IsNullOrWhiteSpace(reference))
-        { throw new InvalidOperationException(InvalidConfiguration); }
+        {
+            throw new InvalidOperationException(InvalidConfiguration);
+        }
         var second = images[voters[ValidateImagesIndexValue]].Reference;
         var third = images[voters[ThirdVoterIndex]].Reference;
         if (!string.Equals(second, reference, StringComparison.Ordinal)
             || !string.Equals(third, reference, StringComparison.Ordinal))
-        { throw new InvalidOperationException(InvalidConfiguration); }
+        {
+            throw new InvalidOperationException(InvalidConfiguration);
+        }
     }
 }

@@ -21,12 +21,27 @@ internal sealed class FollowerDocumentFixture : IDisposable
 
     internal TestDatabase Db { get; } = new();
     internal EntityRef Reference => new(Db.Partition, Collection, DocumentId);
-    internal PrincipalRecord Principal { get; }
-    internal ApiKeyRecord Credential { get; }
-    internal ResourceDefinition Resource { get; private set; }
-    internal PhysicalShardRecord Owner { get; }
+    internal PrincipalRecord Principal
+    {
+        get;
+    }
+    internal ApiKeyRecord Credential
+    {
+        get;
+    }
+    internal ResourceDefinition Resource
+    {
+        get; private set;
+    }
+    internal PhysicalShardRecord Owner
+    {
+        get;
+    }
     internal string ReplicaId => Owner.VoterIds[0];
-    internal long Position { get; private set; }
+    internal long Position
+    {
+        get; private set;
+    }
 
     internal FollowerDocumentFixture()
     {
@@ -37,7 +52,10 @@ internal sealed class FollowerDocumentFixture : IDisposable
                 Db.Partition.DatabaseId, Resource)).Get<ResourceDefinition>();
             Principal = new(Reader, Db.Partition.TenantId,
                 [new(Db.Partition.DatabaseId, Collection, Capability.DocumentsRead | Capability.DocumentsWrite)], [])
-            { ClusterAdministrator = false, PolicyEpoch = FirstRevision };
+            {
+                ClusterAdministrator = false,
+                PolicyEpoch = FirstRevision
+            };
             Apply(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(Principal)).Get<PrincipalRecord>();
             Credential = DatabaseEngine.Credential(KeyId, Reader, Secret);
             Apply(OperationKind.ConfigureApiKey, new ConfigureApiKeyRequest(Credential)).Get<bool>();
@@ -99,7 +117,9 @@ internal sealed class FollowerDocumentFixture : IDisposable
         };
         Resource = Apply(OperationKind.ConfigureResource, new ConfigureResourceRequest(Db.Partition.TenantId,
             Db.Partition.DatabaseId, replacement)
-        { ExpectedSchemaVersion = Resource.SchemaVersion }).Get<ResourceDefinition>();
+        {
+            ExpectedSchemaVersion = Resource.SchemaVersion
+        }).Get<ResourceDefinition>();
     }
 
     internal byte[] CredentialBytes() => Db.Store.Read(view => view.ReadOwnedValue(KeySpace.ApiKey(KeyId)))
@@ -112,7 +132,9 @@ internal sealed class FollowerDocumentFixture : IDisposable
     {
         var page = view.Scan([], SnapshotLimit);
         if (page.HasMore)
-        { throw new InvalidOperationException("The complete follower fixture exceeds its native bound."); }
+        {
+            throw new InvalidOperationException("The complete follower fixture exceeds its native bound.");
+        }
         return page.Records.Select(record => (Convert.ToHexString(record.Key.Span),
             Convert.ToHexString(record.Value.Span))).ToArray();
     });

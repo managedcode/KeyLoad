@@ -21,7 +21,9 @@ internal static class ProjectionPublicSetup
         var principal = new PrincipalRecord(ProjectionPublicProtocol.IdentityPrefix + Guid.NewGuid().ToString(ProjectionPublicProtocol.GuidFormat),
             partition.TenantId, [new(partition.DatabaseId, ProjectionPublicProtocol.Source, Capability.All),
                 new(partition.DatabaseId, ProjectionPublicProtocol.Target, Capability.All)], [])
-        { ClusterAdministrator = true };
+        {
+            ClusterAdministrator = true
+        };
         await ProjectionPublicAssertions.ExactAsync(principal, await McpCallerAssertions.SdkSuccessAsync(
             await root.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), principal, token)));
         var key = ProjectionPublicProtocol.KeyPrefix + Guid.NewGuid().ToString(ProjectionPublicProtocol.GuidFormat);

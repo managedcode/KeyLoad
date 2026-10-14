@@ -23,9 +23,13 @@ internal sealed class DistributedSearchRf3Tests
             await scenario.RunAsync(caller.Token).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
         if (scenario is { } calls)
-        { await ServerFailureObserver.ObserveAsync(() => calls.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => calls.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         if (wave is { } nodes)
-        { await ServerFailureObserver.ObserveAsync(() => nodes.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => nodes.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

@@ -28,7 +28,10 @@ internal static class DistributedSearchPublicMapper
         {
             budget.Check();
             var hit = Find(candidate, projected, budget);
-            hits.Add(hit with { Explanation = explain ? fusion.Explain(candidate.Reference) : null });
+            hits.Add(hit with
+            {
+                Explanation = explain ? fusion.Explain(candidate.Reference) : null
+            });
         }
         var leaves = ImmutableArray.CreateBuilder<PartitionQueryLeafWitnessV1>(witnesses.Length);
         foreach (var witness in witnesses)
@@ -49,15 +52,21 @@ internal static class DistributedSearchPublicMapper
         foreach (var leaf in leaves)
         {
             if (leaf.Projection is not { } projection)
-            { throw Errors.Fail(ErrorCode.Corruption, InvalidProjection); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, InvalidProjection);
+            }
             foreach (var hit in projection.Hits)
             {
                 budget.Check();
                 if (hit.Document.Reference != candidate.Reference)
-                { continue; }
+                {
+                    continue;
+                }
                 if (hit.Document.Revision != candidate.Revision
                     || BitConverter.DoubleToInt64Bits(hit.Score) != BitConverter.DoubleToInt64Bits(candidate.Score))
-                { throw Errors.Fail(ErrorCode.Corruption, InvalidProjection); }
+                {
+                    throw Errors.Fail(ErrorCode.Corruption, InvalidProjection);
+                }
                 selected = hit;
                 matches++;
             }

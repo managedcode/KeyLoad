@@ -14,7 +14,10 @@ internal static class JsonSurrogateAliases
 internal readonly struct JsonElementSurrogate
 {
     [Orleans.Id(0)]
-    public JsonTreeNode? Root { get; init; }
+    public JsonTreeNode? Root
+    {
+        get; init;
+    }
 }
 
 [Orleans.GenerateSerializer]
@@ -22,16 +25,28 @@ internal readonly struct JsonElementSurrogate
 internal sealed class JsonTreeNode
 {
     [Orleans.Id(0)]
-    public JsonValueKind Kind { get; init; }
+    public JsonValueKind Kind
+    {
+        get; init;
+    }
 
     [Orleans.Id(1)]
-    public string? Text { get; init; }
+    public string? Text
+    {
+        get; init;
+    }
 
     [Orleans.Id(2)]
-    public JsonTreeProperty[]? Properties { get; init; }
+    public JsonTreeProperty[]? Properties
+    {
+        get; init;
+    }
 
     [Orleans.Id(3)]
-    public JsonTreeNode[]? Items { get; init; }
+    public JsonTreeNode[]? Items
+    {
+        get; init;
+    }
 }
 
 [Orleans.GenerateSerializer]

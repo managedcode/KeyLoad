@@ -33,7 +33,9 @@ internal static class EmptyReplicaSnapshotPolicyAssertions
             await EmptyReplicaSnapshotAssertions.ExactAsync(healthy, new DocumentResult(reference, Revision, Json, false, []));
         }, failures);
         if (deniedMcp is not null)
-        { await ServerFailureObserver.ObserveAsync(() => deniedMcp.DisposeAsync().AsTask(), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => deniedMcp.DisposeAsync().AsTask(), failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

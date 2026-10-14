@@ -20,7 +20,9 @@ internal static class PostgresPureReadRf3Protocol
     internal static NpgsqlParameter[] Parameters<T>(T request)
     {
         var envelope = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
-        { [McpCallerProtocol.Request] = JsonSerializer.SerializeToElement(request, JsonDefaults.Options) };
+        {
+            [McpCallerProtocol.Request] = JsonSerializer.SerializeToElement(request, JsonDefaults.Options)
+        };
         return [new() { NpgsqlDbType = NpgsqlDbType.Jsonb, Value = JsonSerializer.Serialize(envelope, JsonDefaults.Options) }];
     }
 

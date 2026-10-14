@@ -25,11 +25,26 @@ internal sealed class CommandIdempotencyProcessOutputReader
     }
 
     internal Task<bool> Acknowledgement => acknowledgement.Task;
-    internal int WitnessLimit { get; }
-    internal int WitnessTotal { get; private set; }
-    internal int WitnessFirstCrossing { get; private set; }
-    internal Exception? WitnessEarlyFailure { get; private set; }
-    internal Exception? WitnessTerminalFailure { get; private set; }
+    internal int WitnessLimit
+    {
+        get;
+    }
+    internal int WitnessTotal
+    {
+        get; private set;
+    }
+    internal int WitnessFirstCrossing
+    {
+        get; private set;
+    }
+    internal Exception? WitnessEarlyFailure
+    {
+        get; private set;
+    }
+    internal Exception? WitnessTerminalFailure
+    {
+        get; private set;
+    }
     internal bool TryMarkWitnessReported() => Interlocked.Exchange(ref witnessReported, WitnessReported) == WitnessUnreported;
 
     internal async Task ReadAsync(StreamReader reader)

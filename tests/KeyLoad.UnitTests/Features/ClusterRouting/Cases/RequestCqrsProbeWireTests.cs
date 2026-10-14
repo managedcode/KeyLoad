@@ -31,9 +31,15 @@ internal sealed class RequestCqrsProbeWireTests
         using var fixture = new ReplicaSecurityFixture();
         using var mac = new PartitionMovementMac(fixture.Options.Secret.Span, PhysicalOwnerProbeProtocol.MaximumBodyBytes);
         var request = RequestCqrsProbeNativeWireValues.Request(fixture);
-        request = request with { Signature = mac.SignProbeRequest(request) };
+        request = request with
+        {
+            Signature = mac.SignProbeRequest(request)
+        };
         var reply = RequestCqrsProbeNativeWireValues.Reply(request);
-        reply = reply with { Signature = mac.SignProbeReply(reply) };
+        reply = reply with
+        {
+            Signature = mac.SignProbeReply(reply)
+        };
         await RequestCqrsProbeNativeWireValues.AssertExactRoundTrip(request.Identity);
         await RequestCqrsProbeNativeWireValues.AssertExactRoundTrip(request.Claim!);
         await RequestCqrsProbeNativeWireValues.AssertExactRoundTrip(request);

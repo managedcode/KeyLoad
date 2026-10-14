@@ -58,7 +58,9 @@ internal static class NativeBlobWholeColdAssertions
             token.ThrowIfCancellationRequested();
             await Assert.That(right.Entries[index].Index).IsEqualTo((long)index + 1);
             if (index < left.Entries.Length)
-            { await Assert.That(left.Entries[index].Index).IsEqualTo((long)index + 1); }
+            {
+                await Assert.That(left.Entries[index].Index).IsEqualTo((long)index + 1);
+            }
         }
     }
 
@@ -86,9 +88,13 @@ internal static class NativeBlobWholeColdAssertions
         {
             token.ThrowIfCancellationRequested();
             if (allowed.Contains(key))
-            { continue; }
+            {
+                continue;
+            }
             if (!left.TryGetValue(key, out var original) || !right.TryGetValue(key, out var actual) || original != actual)
-            { throw new InvalidOperationException("The complete original Blob journal changed outside native membership authority."); }
+            {
+                throw new InvalidOperationException("The complete original Blob journal changed outside native membership authority.");
+            }
         }
     }
 

@@ -14,11 +14,15 @@ internal static class SampleRollupReader
             request.From, request.UntilExclusive);
         budget.Check();
         if (state is null || state.Dropped)
-        { return new(state?.Revision ?? AbsentRevision, null); }
+        {
+            return new(state?.Revision ?? AbsentRevision, null);
+        }
         var watermark = SampleRollupRecords.Watermark(view, request.Partition, request.Set, request.SeriesId);
         if (state.SourceSequence != watermark.Sequence || state.RetentionBeforeUtcTicks != watermark.Floor
             || watermark.Floor is { } floor && state.FromUtcTicks < floor)
-        { throw Errors.Fail(ErrorCode.HistoryUnavailable, SampleRollupProtocol.Stale); }
+        {
+            throw Errors.Fail(ErrorCode.HistoryUnavailable, SampleRollupProtocol.Stale);
+        }
         var aggregate = SampleAggregateAccumulator.Reconstruct(state.Count, state.Sum, state.Minimum, state.Maximum);
         budget.Check();
         return new(state.Revision, new(new(state.FromUtcTicks, TimeSpan.Zero), new(state.UntilUtcTicks, TimeSpan.Zero),

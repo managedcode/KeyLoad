@@ -12,7 +12,9 @@ public sealed partial class DatabaseEngine
         RequireOnlineTextOriginalAuthority(view, principal, request);
         var current = view.GetRecord<OnlineTextCurrentPublication>(OnlineTextPublicationKeys.Current(request));
         if (current is null)
-        { return null; }
+        {
+            return null;
+        }
         budget.ChargeBytes(NativeSerialization.Measure(current));
         if (current.FormatVersion != OnlineTextPublicationProtocol.CurrentFormat
             || current.CommandId == Guid.Empty || current.Consumer != request.Consumer
@@ -20,7 +22,9 @@ public sealed partial class DatabaseEngine
             || current.Authority.Collection != request.Collection || current.Authority.Field != request.Field
             || current.Authority.DataEpoch != Store.Identity.FormatVersion
             || current.PublishedCut.Incarnation != Store.Identity.Incarnation)
-        { throw Errors.Fail(ErrorCode.Corruption, OnlineTextPublicationProtocol.InvalidPublication); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, OnlineTextPublicationProtocol.InvalidPublication);
+        }
         budget.Check();
         return current.CommandId;
     }

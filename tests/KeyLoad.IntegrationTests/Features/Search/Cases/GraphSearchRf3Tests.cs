@@ -25,7 +25,9 @@ internal sealed class GraphSearchRf3Tests(ClusterFixture fixture)
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3,
             identity.Secret, deadline.Token);
         var request = GraphSearchRf3Scenario.Request(scenario.Partition, limit: 2) with
-        { Expansion = new(GraphSearchRf3Scenario.Graph, MaxDepth: 1, MaxVertices: 10, MaxEdges: 20) };
+        {
+            Expansion = new(GraphSearchRf3Scenario.Graph, MaxDepth: 1, MaxVertices: 10, MaxEdges: 20)
+        };
 
         var sdkResult = await McpCallerAssertions.SdkSuccessAsync(await sdk.GraphSearchAsync(request, deadline.Token));
         var mcpResult = await McpCallerAssertions.SuccessAsync<GraphSearchResult>(await mcp.CallAsync(
@@ -48,12 +50,22 @@ internal sealed class GraphSearchRf3Tests(ClusterFixture fixture)
             identity.Secret, deadline.Token);
         var baseRequest = GraphSearchRf3Scenario.Request(scenario.Partition);
         var labeled = baseRequest with
-        { Retriever = new(baseRequest.Retriever!.Walk with { Labels = [GraphSearchRf3Scenario.Label] }) };
+        {
+            Retriever = new(baseRequest.Retriever!.Walk with
+            {
+                Labels = [GraphSearchRf3Scenario.Label]
+            })
+        };
 
         await AssertLabelDeniedAsync(sdk, mcp, labeled, deadline.Token);
         identity = await GraphSearchRf3Scenario.GrantLabelUseAsync(fixture, identity, deadline.Token);
         var emptyLabels = labeled with
-        { Retriever = new(labeled.Retriever!.Walk with { Labels = ImmutableArray<string>.Empty }) };
+        {
+            Retriever = new(labeled.Retriever!.Walk with
+            {
+                Labels = ImmutableArray<string>.Empty
+            })
+        };
         var emptyAllowed = GraphSearchRf3Scenario.Request(scenario.Partition, allowedIds: ImmutableArray<string>.Empty);
         await AssertEmptyAsync(sdk, mcp, emptyLabels, deadline.Token);
         await AssertEmptyAsync(sdk, mcp, emptyAllowed, deadline.Token);
@@ -95,7 +107,10 @@ internal sealed class GraphSearchRf3Tests(ClusterFixture fixture)
         CancellationToken cancellationToken)
     {
         var revoked = identity.Principal with
-        { Revoked = true, PolicyEpoch = identity.Principal.PolicyEpoch + 1 };
+        {
+            Revoked = true,
+            PolicyEpoch = identity.Principal.PolicyEpoch + 1
+        };
         await McpCallerAssertions.SdkSuccessAsync(await admin.ConfigurePrincipalAsync(Guid.NewGuid(), revoked,
             cancellationToken));
         var sdkResult = await sdk.GraphSearchAsync(request, cancellationToken);

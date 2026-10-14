@@ -20,7 +20,9 @@ internal static class PartitionMovementGrantProof
             || receipt.CommandId != grant.GrantId || receipt.AppliedPosition != grant.AdmissionPosition
             || receipt.ControlIntentDigest != grant.ControlIntentDigest
             || !PhysicalOwnerEntryValidation.SameOwner(receipt.PhysicalOwner, control))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, InvalidProof);
+        }
         JsonData.Identifier(grant.OperatorPrincipalId);
     }
 }

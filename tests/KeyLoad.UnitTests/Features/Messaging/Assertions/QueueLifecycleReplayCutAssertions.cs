@@ -11,7 +11,9 @@ internal static class QueueLifecycleReplayCutAssertions
         {
             var page = view.Scan([], 4096);
             if (page.HasMore)
-            { throw new InvalidOperationException("Whole store state exceeded the fixture bound."); }
+            {
+                throw new InvalidOperationException("Whole store state exceeded the fixture bound.");
+            }
             return page.Records.Select(row => Convert.ToHexString(row.Key.Span) + ":" +
                 Convert.ToHexString(row.Value.Span)).ToArray();
         });

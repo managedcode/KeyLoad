@@ -25,7 +25,9 @@ internal sealed class IsolatedResourceTopologyApplication : IAsyncDisposable
     internal static string ResolveTemporaryDirectory(DirectoryInfo directory)
     {
         if (directory.Parent is null)
-        { return directory.FullName; }
+        {
+            return directory.FullName;
+        }
         var entry = new DirectoryInfo(Path.Combine(ResolveTemporaryDirectory(directory.Parent), directory.Name));
         return entry.ResolveLinkTarget(returnFinalTarget: true)?.FullName ?? entry.FullName;
     }

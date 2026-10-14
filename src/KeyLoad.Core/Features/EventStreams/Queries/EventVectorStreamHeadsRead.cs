@@ -27,12 +27,16 @@ internal static class EventVectorStreamHeadsRead
                 if (parts.Length != HeadComponents || parts[StreamComponent] is not string streamId
                     || !key.SequenceEqual(KeySpace.Partition(PartitionRecordFamilies.StreamHead,
                         partition, streamSet, streamId)))
-                { throw Errors.Fail(ErrorCode.Corruption, InvalidHead); }
+                {
+                    throw Errors.Fail(ErrorCode.Corruption, InvalidHead);
+                }
                 budget.RequireSourceCount(checked(heads.Count + IncludedSource));
                 var head = NativeSerialization.Deserialize<StreamHead>(value);
                 if (head is null || !heads.TryAdd(streamId, new(streamId, head,
                         new EventVectorCoverageRow { Key = key.ToArray(), Value = value.ToArray() })))
-                { throw Errors.Fail(ErrorCode.Corruption, InvalidHead); }
+                {
+                    throw Errors.Fail(ErrorCode.Corruption, InvalidHead);
+                }
                 return true;
             }, observer: budget.Observe, cancellationToken: cancellationToken);
         RequireComplete(scan.HasMore, scan.StoppedByVisitor);
@@ -53,7 +57,9 @@ internal static class EventVectorStreamHeadsRead
                 var parts = KeyCodec.Decode(key);
                 if (parts.Length <= StreamComponent || parts[StreamComponent] is not string streamId
                     || !heads.ContainsKey(streamId))
-                { throw Errors.Fail(ErrorCode.Corruption, InvalidHead); }
+                {
+                    throw Errors.Fail(ErrorCode.Corruption, InvalidHead);
+                }
                 return true;
             }, observer: budget.Observe, cancellationToken: cancellationToken);
         RequireComplete(scan.HasMore, scan.StoppedByVisitor);
@@ -62,6 +68,8 @@ internal static class EventVectorStreamHeadsRead
     private static void RequireComplete(bool hasMore, bool stopped)
     {
         if (hasMore || stopped)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, InvalidHead); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, InvalidHead);
+        }
     }
 }

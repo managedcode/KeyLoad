@@ -29,9 +29,18 @@ internal sealed class SiteQualificationStartupFixture : IAsyncDisposable
         Prepare(scenario);
     }
 
-    internal string Workspace { get; }
-    internal string EnvironmentFile { get; }
-    internal string Target { get; }
+    internal string Workspace
+    {
+        get;
+    }
+    internal string EnvironmentFile
+    {
+        get;
+    }
+    internal string Target
+    {
+        get;
+    }
     internal string Parent => Path.Combine(Workspace, "artifacts");
     internal string Base => Path.Combine(Parent, "site-evidence");
     internal string Envelope => Path.Combine(Base, "isolated-capture-envelope.json");

@@ -24,7 +24,12 @@ internal static class BlobCompleteCasPublicPublication
         upload.Part = new(Guid.NewGuid(), upload.Begin.Blob, upload.Begin.UploadId, 0, upload.Bytes, upload.Sha256);
         upload.Written = (await McpCallerAssertions.SuccessAsync<BlobCommitResult<BlobUploadInfo>>(await callers.Mcp.CallAsync("keyload_blobs_write_part", upload.Part, token))).Value;
         var chain = BlobIntegrity.NextHash(upload.Begun.Value.IntegrityHash, 0, upload.Bytes.Length, upload.Sha256);
-        upload.Current = upload.Begun.Value with { StoredBytes = upload.Bytes.Length, NextOrdinal = 1, IntegrityHash = chain };
+        upload.Current = upload.Begun.Value with
+        {
+            StoredBytes = upload.Bytes.Length,
+            NextOrdinal = 1,
+            IntegrityHash = chain
+        };
         await SqlRf3Protocol.EqualAsync(upload.Current, upload.Written.Value);
         await BlobCompleteCasPublicAssertions.ReceiptAsync(callers, upload.Written.Receipt, upload.Part.CommandId, upload.Begin.Blob, token);
         await BlobCompleteCasPublicAssertions.CurrentAsync(callers, uploads, head, token);
@@ -37,7 +42,10 @@ internal static class BlobCompleteCasPublicPublication
         upload.Completed = official
             ? (await McpCallerAssertions.SuccessAsync<BlobCommitResult<BlobMetadata>>(await callers.Mcp.CallAsync("keyload_blobs_complete_upload", upload.Complete, token))).Value
             : await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.CompleteBlobUploadAsync(upload.Complete, token));
-        upload.Current = upload.Written.Value with { Status = BlobUploadStatus.Complete };
+        upload.Current = upload.Written.Value with
+        {
+            Status = BlobUploadStatus.Complete
+        };
         await Assert.That(upload.Completed.Value.Blob).IsEqualTo(upload.Begin.Blob);
         await Assert.That(upload.Completed.Value.VersionId).IsEqualTo(upload.Begin.UploadId);
         await Assert.That(upload.Completed.Value.Revision).IsEqualTo(upload.Begin.ExpectedRevision + 1L);

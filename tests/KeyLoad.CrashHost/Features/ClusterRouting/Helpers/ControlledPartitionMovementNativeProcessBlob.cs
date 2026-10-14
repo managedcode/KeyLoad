@@ -1,5 +1,5 @@
 using System.Collections.Immutable;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.CrashHost.Features.ClusterRouting;
 
@@ -27,19 +27,25 @@ internal static class ControlledPartitionMovementNativeProcessBlob
                 new(ControlledPartitionMovementProcessBlobSeed.Resource, ResourceKind.BlobStore,
                     partition.TransactionDomainId)), replies, cancellationToken);
         if (replies[^LatestReplyOffset].Error is not null)
-        { return (null, replies.ToImmutable()); }
+        {
+            return (null, replies.ToImmutable());
+        }
         var bytes = ControlledPartitionMovementProcessBlobSeed.Bytes();
         await SubmitAsync(source, OperationKind.BeginBlobUpload, BeginId,
             new BeginBlobUploadRequest(BeginId, ControlledPartitionMovementProcessBlobSeed.Blob,
                 ControlledPartitionMovementProcessBlobSeed.UploadId, bytes.Length, InitialRevision), replies, cancellationToken);
         if (replies[^LatestReplyOffset].Error is not null)
-        { return (null, replies.ToImmutable()); }
+        {
+            return (null, replies.ToImmutable());
+        }
         await SubmitAsync(source, OperationKind.WriteBlobPart, PartId,
             new WriteBlobPartRequest(PartId, ControlledPartitionMovementProcessBlobSeed.Blob,
                 ControlledPartitionMovementProcessBlobSeed.UploadId, FirstOrdinal, bytes,
                 ControlledPartitionMovementProcessBlobSeed.PartSha256), replies, cancellationToken);
         if (replies[^LatestReplyOffset].Error is not null)
-        { return (null, replies.ToImmutable()); }
+        {
+            return (null, replies.ToImmutable());
+        }
         var initial = BlobIntegrity.InitialHash(source.Store.Identity.Incarnation,
             ControlledPartitionMovementProcessBlobSeed.Blob, ControlledPartitionMovementProcessBlobSeed.UploadId, bytes.Length);
         var integrity = BlobIntegrity.NextHash(initial, FirstOrdinal, bytes.Length,

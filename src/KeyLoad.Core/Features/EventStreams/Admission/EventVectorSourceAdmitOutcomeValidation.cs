@@ -33,7 +33,9 @@ public sealed partial class DatabaseEngine
         if (phase.Action != EventVectorControlAction.AdmitSource || phase.OriginalParentRequestId != originalParentRequestId
             || identity.CommandId != verified.Id || identity.Metadata != verified.PayloadJson
             || phase.IntendedSourcePhase is not { } intended || intended.PhaseCommandId != originalSourcePhaseCommandId)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidEventVectorControlAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidEventVectorControlAuthority);
+        }
         var original = EventVectorControlReplay.ReadOutcome(bounded, principal, phase, admission, Store.Identity.Incarnation);
         if (original is null || original.Error is not null || original.NativeValue is not EventVectorControlResult result
             || result.CommandId != verified.Id || result.SourcePhase is not { } actual
@@ -41,7 +43,9 @@ public sealed partial class DatabaseEngine
             || actual.PhaseCommandId != intended.PhaseCommandId
             || !actual.OriginalNativeBody.Span.SequenceEqual(intended.OriginalNativeBody.Span)
             || !actual.OriginalBodyDigest.Span.SequenceEqual(intended.OriginalBodyDigest.Span))
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidEventVectorControlAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidEventVectorControlAuthority);
+        }
         _ = EventVectorSourceMutationValidation.ReadOriginal(actual, admission);
         _ = EventVectorSourceMutationValidation.ReadOriginal(intended, admission);
         work.Check();

@@ -1,6 +1,9 @@
 namespace KeyLoad.RecoveryTests.Features.BlobStorage;
 
-internal enum BlobRetiredPartFaultKind { MissingRaw, MissingManifest, WrongManifestHash }
+internal enum BlobRetiredPartFaultKind
+{
+    MissingRaw, MissingManifest, WrongManifestHash
+}
 
 internal sealed record BlobRetiredPartState(BlobPriorPublicationState Publication,
     BlobPriorPublicationCommand Deletion, BlobMetadata Tombstone);

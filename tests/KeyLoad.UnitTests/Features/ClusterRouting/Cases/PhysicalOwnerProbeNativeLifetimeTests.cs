@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
 using Microsoft.Extensions.Options;
@@ -48,6 +48,8 @@ internal sealed class PhysicalOwnerProbeNativeLifetimeTests
 
     private static PhysicalOwnerProbeWorkOwner Create(bool enabled)
         => new(Options.Create(new GrainRoutingOptions()), Options.Create(new NodeOptions
-        { PhysicalGroupTrust = new() { RegisterPhysicalOwners = enabled } }),
+        {
+            PhysicalGroupTrust = new() { RegisterPhysicalOwners = enabled }
+        }),
             Options.Create(new PhysicalOwnerExecutionOptions { MaximumAdmissions = 1 }));
 }

@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
@@ -48,7 +48,9 @@ internal sealed class RequestCqrsProbeHeldCallback
                 var releases = snapshot.Releases.Where(record => record.ArmId == claim.Arm.Record.ArmId).ToArray();
                 if (releases.Length > ReleasesLengthValidationBoundary || releases.Length == EmptyReleasesLength
                     && (releases[ReleasesFirstIndex].RequestId != claim.Identity.RequestId || releases[ReleasesFirstIndex].SessionId != claim.Arm.Record.SessionId))
-                { throw Invalid(); }
+                {
+                    throw Invalid();
+                }
                 if (releases.Length == EmptyReleasesLength)
                 {
                     files.WriteMarker(createMarker(claim, phase, RequestCqrsProbeOutcome.Released));
@@ -60,9 +62,13 @@ internal sealed class RequestCqrsProbeHeldCallback
         catch (OperationCanceledException cancellation) when (linked.IsCancellationRequested)
         {
             try
-            { files.WriteMarker(createMarker(claim, phase, RequestCqrsProbeOutcome.Cancelled)); }
+            {
+                files.WriteMarker(createMarker(claim, phase, RequestCqrsProbeOutcome.Cancelled));
+            }
             catch (Exception cleanup) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
-            { throw new AggregateException(cancellation, cleanup); }
+            {
+                throw new AggregateException(cancellation, cleanup);
+            }
             throw;
         }
     }

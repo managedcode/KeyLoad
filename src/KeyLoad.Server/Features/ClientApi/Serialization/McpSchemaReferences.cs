@@ -26,7 +26,9 @@ internal static class McpSchemaReferences
         ArgumentNullException.ThrowIfNull(schema);
         ArgumentException.ThrowIfNullOrWhiteSpace(prefix);
         if (schema is not JsonObject node)
-        { return; }
+        {
+            return;
+        }
         RewriteReference(node, prefix);
         foreach (var property in node)
         {
@@ -37,17 +39,27 @@ internal static class McpSchemaReferences
     private static void RewriteKeyword(string keyword, JsonNode? value, string prefix)
     {
         if (Maps.Contains(keyword))
-        { RewriteMap(value, prefix); return; }
+        {
+            RewriteMap(value, prefix);
+            return;
+        }
         if (Arrays.Contains(keyword))
-        { RewriteArray(value, prefix); return; }
+        {
+            RewriteArray(value, prefix);
+            return;
+        }
         if (Singles.Contains(keyword) && value is { } child)
-        { Rebase(child, prefix); }
+        {
+            Rebase(child, prefix);
+        }
     }
 
     private static void RewriteReference(JsonObject node, string prefix)
     {
         if (node[McpSchemaKeywords.Reference] is not { } reference)
-        { return; }
+        {
+            return;
+        }
         var pointer = reference.GetValue<string>();
         if (pointer == McpSchemaKeywords.ReferenceRoot)
         {
@@ -58,28 +70,38 @@ internal static class McpSchemaReferences
             node[McpSchemaKeywords.Reference] = string.Concat(prefix.AsSpan(), pointer.AsSpan(McpSchemaKeywords.ReferenceRoot.Length));
         }
         else
-        { throw new InvalidOperationException(McpCatalogProtocol.InvalidSchemaReference); }
+        {
+            throw new InvalidOperationException(McpCatalogProtocol.InvalidSchemaReference);
+        }
     }
 
     private static void RewriteMap(JsonNode? value, string prefix)
     {
         if (value is not JsonObject map)
-        { return; }
+        {
+            return;
+        }
         foreach (var property in map)
         {
             if (property.Value is { } child)
-            { Rebase(child, prefix); }
+            {
+                Rebase(child, prefix);
+            }
         }
     }
 
     private static void RewriteArray(JsonNode? value, string prefix)
     {
         if (value is not JsonArray array)
-        { return; }
+        {
+            return;
+        }
         foreach (var child in array)
         {
             if (child is not null)
-            { Rebase(child, prefix); }
+            {
+                Rebase(child, prefix);
+            }
         }
     }
 }

@@ -14,15 +14,21 @@ internal sealed class NativeTextSharedProjectionLease(ITextProjectionLease origi
     public void Dispose()
     {
         if (disposed)
-        { return; }
+        {
+            return;
+        }
         disposed = true;
         try
-        { original.Dispose(); }
+        {
+            original.Dispose();
+        }
         catch (Exception primary)
         {
             admission.RetainFailure(primary);
             try
-            { admission.Dispose(); }
+            {
+                admission.Dispose();
+            }
             catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
             throw;
         }

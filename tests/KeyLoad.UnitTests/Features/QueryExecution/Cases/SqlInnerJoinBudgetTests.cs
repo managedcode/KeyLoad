@@ -76,7 +76,10 @@ internal sealed class SqlInnerJoinBudgetTests
         var measured = SqlInnerJoinNativeReadMeasurement.Measure(database, Left, Right,
             FirstCustomer, MissingCustomer, LastCustomer);
         var exactReadBytes = checked(measured.LeftScanBytes + measured.RightProbeBytes);
-        var exact = Engine(database, database.Database.Limits with { MaxQueryReadBytes = exactReadBytes });
+        var exact = Engine(database, database.Database.Limits with
+        {
+            MaxQueryReadBytes = exactReadBytes
+        });
         var position = database.Store.Position;
 
         var accepted = exact.Execute("root", new(database.Partition, Sql, AllowFullScan: true, QueryDialectVersion: Dialect));
@@ -87,14 +90,19 @@ internal sealed class SqlInnerJoinBudgetTests
         await Assert.That(measured.HasMore).IsFalse();
         await Assert.That(accepted.Rows.Length).IsEqualTo(2);
         var probeBytesOmitted = Engine(database, database.Database.Limits with
-        { MaxQueryReadBytes = measured.LeftScanBytes });
+        {
+            MaxQueryReadBytes = measured.LeftScanBytes
+        });
         var rejectedProbeBytes = Assert.ThrowsExactly<KeyLoadException>(() => probeBytesOmitted.Execute("root",
             new(database.Partition, Sql, AllowFullScan: true, QueryDialectVersion: Dialect)));
         await Assert.That(rejectedProbeBytes.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(database.Store.Position).IsEqualTo(position);
         await Assert.That(exact.Execute("root", new(database.Partition, Sql, AllowFullScan: true,
             QueryDialectVersion: Dialect)).Rows.Length).IsEqualTo(2);
-        var oneByteShort = Engine(database, database.Database.Limits with { MaxQueryReadBytes = exactReadBytes - 1 });
+        var oneByteShort = Engine(database, database.Database.Limits with
+        {
+            MaxQueryReadBytes = exactReadBytes - 1
+        });
         var rejected = Assert.ThrowsExactly<KeyLoadException>(() => oneByteShort.Execute("root",
             new(database.Partition, Sql, AllowFullScan: true, QueryDialectVersion: Dialect)));
         await Assert.That(rejected.Code).IsEqualTo(ErrorCode.BudgetExceeded);
@@ -115,7 +123,10 @@ internal sealed class SqlInnerJoinBudgetTests
         var request = new QueryRequest(database.Partition, TwoRowSql, AllowFullScan: true, QueryDialectVersion: Dialect);
         var measured = Engine(database, database.Database.Limits).Execute("root", request);
         var exactPageBytes = JsonDefaults.Serialize(measured).Length;
-        var exact = Engine(database, database.Database.Limits with { MaxBatchBytes = exactPageBytes });
+        var exact = Engine(database, database.Database.Limits with
+        {
+            MaxBatchBytes = exactPageBytes
+        });
 
         var accepted = exact.Execute("root", request);
 
@@ -123,7 +134,10 @@ internal sealed class SqlInnerJoinBudgetTests
         await Assert.That(accepted.Rows.All(row => row.Sources?.Length == 2)).IsTrue();
         await Assert.That(JsonDefaults.Serialize(accepted).Length).IsEqualTo(exactPageBytes);
         var position = database.Store.Position;
-        var oneByteShort = Engine(database, database.Database.Limits with { MaxBatchBytes = exactPageBytes - 1 });
+        var oneByteShort = Engine(database, database.Database.Limits with
+        {
+            MaxBatchBytes = exactPageBytes - 1
+        });
         var rejected = Assert.ThrowsExactly<KeyLoadException>(() => oneByteShort.Execute("root", request));
         await Assert.That(rejected.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(database.Store.Position).IsEqualTo(position);
@@ -140,7 +154,10 @@ internal sealed class SqlInnerJoinBudgetTests
             new PutDocument(Left, "z", "{\"order_id\":\"z\",\"customer_id\":\"z\"}"),
             new PutDocument(Right, "a", "{\"id\":\"a\",\"name\":\"Ada\"}"),
             new PutDocument(Right, "z", "{\"id\":\"z\",\"name\":\"Lin\"}"));
-        var limits = database.Database.Limits with { MaxResults = 2 };
+        var limits = database.Database.Limits with
+        {
+            MaxResults = 2
+        };
         var engine = Engine(database, limits);
 
         var accepted = engine.Execute("root", new(database.Partition, TwoRowSql, AllowFullScan: true, QueryDialectVersion: Dialect));
@@ -168,7 +185,10 @@ internal sealed class SqlInnerJoinBudgetTests
             AllowFullScan: true, AstVersion: Dialect);
 
     private static QueryEngine Engine(TestDatabase database, int maximumWork)
-        => Engine(database, database.Database.Limits with { MaxScanRecords = maximumWork });
+        => Engine(database, database.Database.Limits with
+        {
+            MaxScanRecords = maximumWork
+        });
 
     private static QueryEngine Engine(TestDatabase database, DatabaseLimits limits)
     {
@@ -183,12 +203,18 @@ internal sealed class SqlInnerJoinBudgetTests
     {
         database.Submit(OperationKind.ConfigureResource, new ConfigureResourceRequest(database.Partition.TenantId,
             database.Partition.DatabaseId, new ResourceDefinition(Left, ResourceKind.Collection, database.Partition.TransactionDomainId)
-            { RelationalSchema = new(OrderIdColumn, [new(OrderIdColumn, RelationalColumnType.Text), new(CustomerIdColumn, RelationalColumnType.Text, Nullable: true)]) }));
+            {
+                RelationalSchema = new(OrderIdColumn, [new(OrderIdColumn, RelationalColumnType.Text), new(CustomerIdColumn, RelationalColumnType.Text, Nullable: true)])
+            }));
         database.Submit(OperationKind.ConfigureResource, new ConfigureResourceRequest(database.Partition.TenantId,
             database.Partition.DatabaseId, new ResourceDefinition(HealthyLeft, ResourceKind.Collection, database.Partition.TransactionDomainId)
-            { RelationalSchema = new(OrderIdColumn, [new(OrderIdColumn, RelationalColumnType.Text), new(CustomerIdColumn, RelationalColumnType.Text, Nullable: true)]) }));
+            {
+                RelationalSchema = new(OrderIdColumn, [new(OrderIdColumn, RelationalColumnType.Text), new(CustomerIdColumn, RelationalColumnType.Text, Nullable: true)])
+            }));
         database.Submit(OperationKind.ConfigureResource, new ConfigureResourceRequest(database.Partition.TenantId,
             database.Partition.DatabaseId, new ResourceDefinition(Right, ResourceKind.Collection, database.Partition.TransactionDomainId)
-            { RelationalSchema = new(CustomerPrimaryKeyColumn, [new(CustomerPrimaryKeyColumn, RelationalColumnType.Text), new("name", RelationalColumnType.Text)]) }));
+            {
+                RelationalSchema = new(CustomerPrimaryKeyColumn, [new(CustomerPrimaryKeyColumn, RelationalColumnType.Text), new("name", RelationalColumnType.Text)])
+            }));
     }
 }

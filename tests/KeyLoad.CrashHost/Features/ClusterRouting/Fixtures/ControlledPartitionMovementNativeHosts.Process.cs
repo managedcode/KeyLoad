@@ -14,7 +14,9 @@ internal sealed partial class ControlledPartitionMovementNativeHosts
     {
         var snapshots = ImmutableArray.CreateBuilder<ControlledPartitionMovementNativeProcessSnapshot>();
         foreach (var node in nodes)
-        { snapshots.Add(await ControlledPartitionMovementNativeProcessCapture.ReadAsync(node, cancellationToken).ConfigureAwait(false)); }
+        {
+            snapshots.Add(await ControlledPartitionMovementNativeProcessCapture.ReadAsync(node, cancellationToken).ConfigureAwait(false));
+        }
         return snapshots.ToImmutable();
     }
 
@@ -31,7 +33,9 @@ internal sealed partial class ControlledPartitionMovementNativeHosts
             var root = settings.DirectoryPath(index);
             if (!Directory.Exists(Path.Combine(root, PartitionStoreProtocol.CanonicalDirectory))
                 || !Directory.Exists(Path.Combine(root, ReplicaProtocol.ReplicaDirectory)))
-            { throw ControlledPartitionMovementNativeHostInputValidation.Invalid(); }
+            {
+                throw ControlledPartitionMovementNativeHostInputValidation.Invalid();
+            }
         }
         var owner = new ControlledPartitionMovementNativeHosts(settings,
             new(new IPEndPoint(IPAddress.Loopback, input.PrimarySiloPort)));

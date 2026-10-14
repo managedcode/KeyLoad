@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using ManagedCode.Orleans.Graph.Extensions;
 using Microsoft.Extensions.Options;
 

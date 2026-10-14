@@ -7,7 +7,9 @@ internal static class SqlNumericSeparatorRf3Parameters
         PostgresRf3Caller wire, long revision, CancellationToken token)
     {
         var parameters = new Dictionary<string, global::System.Text.Json.JsonElement>
-        { [Argument] = global::System.Text.Json.JsonSerializer.SerializeToElement(UnitValue) };
+        {
+            [Argument] = global::System.Text.Json.JsonSerializer.SerializeToElement(UnitValue)
+        };
         var item = new SqlNullDistinctRf3Case(Clause, new global::KeyLoad.Query.Logical(
             new global::KeyLoad.Query.Comparison(SqlNullDistinctRf3Cases.Score, "=", global::KeyLoad.Query.ValueOperand.Create(UnitValue)), "AND",
             new global::KeyLoad.Query.Comparison(new global::KeyLoad.Query.ParameterOperand(Argument), "=", global::KeyLoad.Query.ValueOperand.Create(UnitValue))), [Low]);
@@ -17,7 +19,10 @@ internal static class SqlNumericSeparatorRf3Parameters
             await caller.Sdk.QueryAsync(request, token)), item, revision);
         await SqlNullDistinctRf3Image.PageAsync((await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.SuccessAsync<global::KeyLoad.QueryPage>(
             await caller.Mcp.CallAsync(global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerTools.QueryExecute, request, token))).Value, item, revision);
-        var ast = SqlNullDistinctRf3Cases.Ast(PostgresRf3State.Partition, item) with { Parameters = parameters };
+        var ast = SqlNullDistinctRf3Cases.Ast(PostgresRf3State.Partition, item) with
+        {
+            Parameters = parameters
+        };
         await SqlNullDistinctRf3Image.PageAsync(await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.SdkSuccessAsync(
             await caller.Sdk.QueryAstAsync(ast, token)), item, revision);
         await SqlNullDistinctRf3Image.PageAsync((await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.SuccessAsync<global::KeyLoad.QueryPage>(
@@ -25,7 +30,10 @@ internal static class SqlNumericSeparatorRf3Parameters
         foreach (var prepared in new[] { false, true })
         {
             var argument = new global::Npgsql.NpgsqlParameter
-            { NpgsqlDbType = global::NpgsqlTypes.NpgsqlDbType.Numeric, Value = UnitValue };
+            {
+                NpgsqlDbType = global::NpgsqlTypes.NpgsqlDbType.Numeric,
+                Value = UnitValue
+            };
             await SqlNullDistinctRf3Image.PageAsync(await wire.ExecuteAsync<global::KeyLoad.QueryPage>(
                 SqlNullDistinctRf3Cases.Prefix + WireClause + SqlNullDistinctRf3Cases.Tail, [argument], prepared, token), item, revision);
         }

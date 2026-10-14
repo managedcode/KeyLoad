@@ -14,7 +14,11 @@ public sealed class ReplicaMaterializer : IAsyncDisposable
     private readonly Func<ReplicaEntry, IDisposable?>? canonicalObservation;
     private const int CoalescedApplyWakeCapacity = 1;
     private readonly Channel<bool> work = Channel.CreateBounded<bool>(new BoundedChannelOptions(CoalescedApplyWakeCapacity)
-    { SingleReader = true, SingleWriter = false, FullMode = BoundedChannelFullMode.DropWrite });
+    {
+        SingleReader = true,
+        SingleWriter = false,
+        FullMode = BoundedChannelFullMode.DropWrite
+    });
     private readonly SemaphoreSlim applyGate = new(ExclusiveApplyPermit, ExclusiveApplyPermit);
     private readonly Lock signals = new();
     private readonly CancellationTokenSource lifetime = new();
@@ -50,11 +54,20 @@ public sealed class ReplicaMaterializer : IAsyncDisposable
     }
 
     /// <summary>The canonical engine stays owned by the physical node.</summary>
-    public DatabaseEngine Database { get; }
+    public DatabaseEngine Database
+    {
+        get;
+    }
     /// <summary>The node's durable replica metadata and entries.</summary>
-    public IDurableReplicaLog Log { get; }
+    public IDurableReplicaLog Log
+    {
+        get;
+    }
     /// <summary>The node's verified checkpoint transfer store.</summary>
-    public IReplicaSnapshotStore Snapshots { get; }
+    public IReplicaSnapshotStore Snapshots
+    {
+        get;
+    }
     internal SemaphoreSlim ProtocolGate => Log.ProtocolGate;
 
     /// <summary>Returns the current canonical cut under the same registration lock used by applied-position waiters.</summary>
@@ -135,18 +148,19 @@ public sealed class ReplicaMaterializer : IAsyncDisposable
         catch (OperationCanceledException) when (lifetime.IsCancellationRequested) { }
         catch (Exception error) when (error is KeyLoadException or IOException or UnauthorizedAccessException or System.Text.Json.JsonException)
         {
-            lock (signals)
-            { failure = error; }
+            RecordFailure(error);
             throw;
         }
         catch (Exception error)
         {
-            lock (signals)
-            { failure = error; }
+            RecordFailure(error);
             throw;
         }
         finally { appliedPosition.WakeWaiters(); }
     }
+
+    private void RecordFailure(Exception error)
+        => ReplicaMaterializerFailure.Record(signals, ref failure, error);
 
     /// <summary>Fences any verified recovery during replacement of an old leader's incomplete upload.</summary>
     /// <param name="snapshot">Authenticated leader descriptor for the incoming verified checkpoint.</param>
@@ -171,9 +185,13 @@ public sealed class ReplicaMaterializer : IAsyncDisposable
         {
             applyGate.Release();
             if (completed)
-            { appliedPosition.PublishCompletedCut(completedCut); }
+            {
+                appliedPosition.PublishCompletedCut(completedCut);
+            }
             else
-            { appliedPosition.WakeWaiters(); }
+            {
+                appliedPosition.WakeWaiters();
+            }
         }
     }
 
@@ -262,7 +280,9 @@ internal sealed class ReplicaMaterializerAppliedPositionSignals
             {
                 check();
                 if (database.LastApplied >= index)
-                { return; }
+                {
+                    return;
+                }
                 signal = changed.Task;
             }
             await signal.WaitAsync(cancellationToken).ConfigureAwait(false);
@@ -278,7 +298,9 @@ internal sealed class ReplicaMaterializerAppliedPositionSignals
             {
                 check();
                 if (publishedAppliedPosition > observedPosition)
-                { return publishedAppliedPosition; }
+                {
+                    return publishedAppliedPosition;
+                }
                 signal = changed.Task;
             }
             await signal.WaitAsync(cancellationToken).ConfigureAwait(false);
@@ -290,7 +312,9 @@ internal sealed class ReplicaMaterializerAppliedPositionSignals
         lock (signals)
         {
             if (completedCut <= publishedAppliedPosition)
-            { return; }
+            {
+                return;
+            }
             publishedAppliedPosition = completedCut;
             RotateSignal();
         }
@@ -299,7 +323,9 @@ internal sealed class ReplicaMaterializerAppliedPositionSignals
     internal void WakeWaiters()
     {
         lock (signals)
-        { RotateSignal(); }
+        {
+            RotateSignal();
+        }
     }
 
     private void RotateSignal()

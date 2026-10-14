@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.IntegrationTests.Features.QueryExecution;
@@ -9,7 +9,10 @@ internal sealed class DistributedSearchRf3DeadlineProbe(RequestCqrsProbeFixture 
 {
     private Guid parentArm;
     private Guid childArm;
-    internal Guid ParentRequest { get; private set; }
+    internal Guid ParentRequest
+    {
+        get; private set;
+    }
 
     internal void Arm(string principal)
     {

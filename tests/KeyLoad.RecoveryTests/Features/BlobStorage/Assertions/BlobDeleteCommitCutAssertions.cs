@@ -38,7 +38,9 @@ internal static class BlobDeleteCommitCutAssertions
             await Assert.That(missing.Code).IsEqualTo(ErrorCode.NotFound);
         }
         else
-        { await BlobDeleteCommitCutOracle.ExactAsync(operations.Read(BlobCommitCutProtocol.Principal, new(blob, 1, 0, 4)), new BlobReadResult(metadata, 0, bytes)); }
+        {
+            await BlobDeleteCommitCutOracle.ExactAsync(operations.Read(BlobCommitCutProtocol.Principal, new(blob, 1, 0, 4)), new BlobReadResult(metadata, 0, bytes));
+        }
         await BlobCommitCutNativeProof.AssertAuthorityAsync((ZoneTreeStore)owner.Store, owner, proof);
     }
 

@@ -17,11 +17,17 @@ internal sealed class SearchExplanationCapture(ReadExecutionBudget budget, int c
         budget.Check();
         var bytes = budget.MeasureResult(contribution);
         if (bytes > budget.MaximumResultBytes - retainedBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, CaptureExceeded); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, CaptureExceeded);
+        }
         if (!contributions.TryGetValue(reference, out var entries))
-        { contributions.Add(reference, entries = []); }
+        {
+            contributions.Add(reference, entries = []);
+        }
         if (entries.Count >= MaximumContributions || entries.Any(item => item.Branch == contribution.Branch))
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidCapture); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidCapture);
+        }
         retainedBytes += bytes;
         entries.Add(contribution);
     }

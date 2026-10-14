@@ -10,11 +10,17 @@ internal static class CommandIdempotencyProcessCleanup
             CommandIdempotencyProcessRecoveryTests.CleanupTimeoutSeconds), TimeProvider.System);
         var failures = new List<Exception>();
         if (active is not null)
-        { await CommandIdempotencyProcess.SettleActiveAsync(active, failures, cleanup.Token); }
+        {
+            await CommandIdempotencyProcess.SettleActiveAsync(active, failures, cleanup.Token);
+        }
         if (active is null || active.IsSettled)
-        { await CommandIdempotencyProcess.CleanTrialAsync(root, failures, cleanup.Token); }
+        {
+            await CommandIdempotencyProcess.CleanTrialAsync(root, failures, cleanup.Token);
+        }
         else
-        { failures.Add(new IOException(UnsettledChildMessage)); }
+        {
+            failures.Add(new IOException(UnsettledChildMessage));
+        }
         CommandIdempotencyProcess.ThrowFailures(primary, failures);
     }
 }

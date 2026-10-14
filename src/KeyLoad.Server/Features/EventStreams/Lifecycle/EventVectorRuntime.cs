@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server.Features.DocumentStorage;
 
 namespace KeyLoad.Server.Features.EventStreams;
@@ -10,8 +10,14 @@ internal sealed class EventVectorRuntime : IDisposable
     private EventVectorReplayCache? replay;
     private bool disposed;
 
-    internal EventVectorLocalExchange? Local { get; private set; }
-    internal EventVectorEndpointExecution? Endpoint { get; private set; }
+    internal EventVectorLocalExchange? Local
+    {
+        get; private set;
+    }
+    internal EventVectorEndpointExecution? Endpoint
+    {
+        get; private set;
+    }
 
     internal static EventVectorRuntime Create(OrleansNode node, PartitionHost partition,
         ServerRuntimeOptions options, RemoteDocumentWorkOwner originalWork, TimeProvider clock)
@@ -36,7 +42,9 @@ internal sealed class EventVectorRuntime : IDisposable
     {
         var settings = options.Node.Value.PhysicalGroupTrust;
         if (!settings.RemoteDocumentReads || settings.Role is not (global::KeyLoad.Server.Features.ClusterRouting.PhysicalGroupTrustRole.Control or global::KeyLoad.Server.Features.ClusterRouting.PhysicalGroupTrustRole.Destination))
-        { throw Errors.Fail(ErrorCode.UnsupportedCapability, EventVectorRemoteProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, EventVectorRemoteProtocol.Unavailable);
+        }
         var authority = new EventVectorRemoteCallValidation(partition, options.Node,
             options.GrainRouting, options.Membership, clock);
         var encoding = new EventVectorRemoteEncoding(options.Core.DatabaseLimits);
@@ -45,7 +53,9 @@ internal sealed class EventVectorRuntime : IDisposable
         localMac = RemoteDocumentMac.FromConfiguredSecret(options.Node.Value.PeerSecret);
         replay = new(clock, options.Membership);
         if (settings.Role == global::KeyLoad.Server.Features.ClusterRouting.PhysicalGroupTrustRole.Control)
-        { Local = new(node, receiver, authority, encoding, localMac, replay); }
+        {
+            Local = new(node, receiver, authority, encoding, localMac, replay);
+        }
         else
         {
             callerMac = RemoteDocumentMac.FromConfiguredSecret(settings.ForeignPeerSecret);
@@ -57,15 +67,23 @@ internal sealed class EventVectorRuntime : IDisposable
     public void Dispose()
     {
         if (disposed)
-        { return; }
+        {
+            return;
+        }
         disposed = true;
         var failures = new List<Exception>();
         if (replay is not null)
-        { DisposeReplay(failures); }
+        {
+            DisposeReplay(failures);
+        }
         if (callerMac is not null)
-        { DisposeCallerMac(failures); }
+        {
+            DisposeCallerMac(failures);
+        }
         if (localMac is not null)
-        { DisposeLocalMac(failures); }
+        {
+            DisposeLocalMac(failures);
+        }
         Local = null;
         Endpoint = null;
         replay = null;
@@ -77,30 +95,48 @@ internal sealed class EventVectorRuntime : IDisposable
     private void DisposeReplay(List<Exception> failures)
     {
         try
-        { replay!.Dispose(); }
+        {
+            replay!.Dispose();
+        }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
     }
 
     private void DisposeCallerMac(List<Exception> failures)
     {
         try
-        { callerMac!.Dispose(); }
+        {
+            callerMac!.Dispose();
+        }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
     }
 
     private void DisposeLocalMac(List<Exception> failures)
     {
         try
-        { localMac!.Dispose(); }
+        {
+            localMac!.Dispose();
+        }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
     }
 }

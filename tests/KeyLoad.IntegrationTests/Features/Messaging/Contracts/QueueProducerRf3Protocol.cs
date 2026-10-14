@@ -47,6 +47,9 @@ internal static class QueueProducerRf3Protocol
     internal const long ScheduledReadySequence = 0;
     internal const Capability Publisher = Capability.QueuePublish | Capability.QueueInspect
         | Capability.QueueConsume | Capability.QueueAck | Capability.Query;
-    internal static IReadOnlyList<string> Nodes { get; } =
+    internal static IReadOnlyList<string> Nodes
+    {
+        get;
+    } =
         [McpCallerProtocol.Node1, McpCallerProtocol.Node2, McpCallerProtocol.Node3];
 }

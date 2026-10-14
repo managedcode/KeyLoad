@@ -15,9 +15,13 @@ internal static class UnitBenchmarkOptions
     {
         var root = new DirectoryInfo(AppContext.BaseDirectory);
         while (root is not null && !File.Exists(Path.Combine(root.FullName, SolutionFile)))
-        { root = root.Parent; }
+        {
+            root = root.Parent;
+        }
         if (root is null)
-        { throw new DirectoryNotFoundException(MissingCheckout); }
+        {
+            throw new DirectoryNotFoundException(MissingCheckout);
+        }
         var configuration = new ConfigurationBuilder().SetBasePath(root.FullName)
             .AddJsonFile(NativePolicyFile, optional: false).Build();
         using var configurationLifetime = configuration as IDisposable;
@@ -62,9 +66,13 @@ internal static class UnitBenchmarkOptions
     {
         var root = new DirectoryInfo(AppContext.BaseDirectory);
         while (root is not null && !File.Exists(Path.Combine(root.FullName, "KeyLoad.slnx")))
-        { root = root.Parent; }
+        {
+            root = root.Parent;
+        }
         if (root is null)
-        { throw new DirectoryNotFoundException("The native comparison policy requires the actual KeyLoad checkout."); }
+        {
+            throw new DirectoryNotFoundException("The native comparison policy requires the actual KeyLoad checkout.");
+        }
         var configuration = new ConfigurationBuilder().SetBasePath(root.FullName)
             .AddJsonFile("benchmarks/KeyLoad.ComparisonHost/Features/BenchmarkComparisons/Configuration/native-execution.json", optional: false).Build();
         using var configurationLifetime = configuration as IDisposable;

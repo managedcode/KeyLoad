@@ -1,5 +1,5 @@
 using System.Text.Json;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Query;
 using KeyLoad.Server.Features.EventStreams;
 using Microsoft.Extensions.Options;
@@ -25,7 +25,9 @@ internal sealed class McpToolDispatcher(HttpContext context, McpRequestState sta
             var parameters = request.Params;
             if (parameters is null || !string.Equals(McpGatewayMetaProtocol.NameFor(state.MetaOperation),
                 parameters.Name, StringComparison.Ordinal))
-            { throw Errors.Fail(ErrorCode.Validation, McpGatewayMetaProtocol.InvalidArguments); }
+            {
+                throw Errors.Fail(ErrorCode.Validation, McpGatewayMetaProtocol.InvalidArguments);
+            }
             var meta = McpGatewayMetaArgumentReader.Read(state.MetaOperation, parameters.Arguments, state.ExecutionOptions);
             using var progress = EventFeedTailMcpProgressOwner.Acquire(context, request, state);
             return state.MetaOperation switch
@@ -37,9 +39,13 @@ internal sealed class McpToolDispatcher(HttpContext context, McpRequestState sta
             };
         }
         catch (KeyLoadException error)
-        { return state.Failure(error.Code, CanonicalOperationGateway.RequestId(context), error.Message); }
+        {
+            return state.Failure(error.Code, CanonicalOperationGateway.RequestId(context), error.Message);
+        }
         catch (JsonException)
-        { return state.Failure(ErrorCode.Validation, CanonicalOperationGateway.RequestId(context)); }
+        {
+            return state.Failure(ErrorCode.Validation, CanonicalOperationGateway.RequestId(context));
+        }
         catch (Exception error) when ((error is not OperationCanceledException || !cancellationToken.IsCancellationRequested)
             && NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
@@ -57,22 +63,30 @@ internal sealed class McpToolDispatcher(HttpContext context, McpRequestState sta
         {
             var descriptor = state.Operation;
             if (state.MetaOperation != McpGatewayMetaOperation.Invoke || descriptor is null)
-            { throw Errors.Fail(ErrorCode.UnsupportedCapability, McpCatalogProtocol.InvalidOperation); }
+            {
+                throw Errors.Fail(ErrorCode.UnsupportedCapability, McpCatalogProtocol.InvalidOperation);
+            }
             var operation = descriptor.IsAdapter
                 ? SqlMcpCatalog.Decode(arguments, state.MaximumPayloadBytes,
                     context.RequestServices.GetRequiredService<IOptions<DatabaseLimits>>(),
                     context.RequestServices.GetRequiredService<IOptions<QueryExecutionOptions>>(), cancellationToken)
                 : descriptor.Decode(arguments, state.MaximumPayloadBytes);
             if (descriptor.Name == EventFeedTailPublicProtocol.Tool)
-            { return await EventFeedTailMcpOperation.ExecuteAsync(context, state, operation, cancellationToken).ConfigureAwait(false); }
+            {
+                return await EventFeedTailMcpOperation.ExecuteAsync(context, state, operation, cancellationToken).ConfigureAwait(false);
+            }
             var reply = await CanonicalOperationGateway.ExecuteAsync(context, operation.ReadKind,
                 operation.CommandKind, operation.CommandId, operation.Payload, cancellationToken).ConfigureAwait(false);
             return state.Success(reply, cancellationToken);
         }
         catch (KeyLoadException error)
-        { return state.Failure(error.Code, CanonicalOperationGateway.RequestId(context), error.Message); }
+        {
+            return state.Failure(error.Code, CanonicalOperationGateway.RequestId(context), error.Message);
+        }
         catch (JsonException)
-        { return state.Failure(ErrorCode.Validation, CanonicalOperationGateway.RequestId(context)); }
+        {
+            return state.Failure(ErrorCode.Validation, CanonicalOperationGateway.RequestId(context));
+        }
         catch (Exception error) when ((error is not OperationCanceledException || !cancellationToken.IsCancellationRequested)
             && NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
@@ -112,11 +126,15 @@ internal sealed class McpToolDispatcher(HttpContext context, McpRequestState sta
     private async ValueTask<CallToolResult> InvokeAsync(McpGatewayMetaRequest request, CancellationToken cancellationToken)
     {
         if (state.Operation is not { } descriptor || !string.Equals(descriptor.Name, request.ToolId, StringComparison.Ordinal))
-        { throw Errors.Fail(ErrorCode.Validation, McpGatewayMetaProtocol.InvalidArguments); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, McpGatewayMetaProtocol.InvalidArguments);
+        }
         var gateway = context.RequestServices.GetRequiredService<McpGatewayCatalogOwner>();
         var result = await gateway.InvokeAsync(request.ToolId!, request.Arguments!, cancellationToken).ConfigureAwait(false);
         if (McpGatewayNativeResult.GetOriginal(result) is { } native)
-        { return native; }
+        {
+            return native;
+        }
         return state.Failure(ErrorCode.RecoveryRequired, CanonicalOperationGateway.RequestId(context));
     }
 }

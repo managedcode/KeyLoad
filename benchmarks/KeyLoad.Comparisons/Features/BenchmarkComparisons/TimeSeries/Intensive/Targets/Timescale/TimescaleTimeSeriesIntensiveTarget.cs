@@ -33,7 +33,10 @@ internal sealed partial class TimescaleTimeSeriesIntensiveTarget : ITimeSeriesIn
 
     internal TimescaleTimeSeriesIntensiveContext Context => context;
     internal TimescaleTimeSeriesIntensiveSession Session => session;
-    internal bool OwnsSchema { get => ownsSchema; set => ownsSchema = value; }
+    internal bool OwnsSchema
+    {
+        get => ownsSchema; set => ownsSchema = value;
+    }
     internal int ReadSeedOrdinal() => Volatile.Read(ref seedOrdinal);
     internal bool TryReserveSeedOrdinal(int batch) =>
         Interlocked.CompareExchange(ref seedOrdinal, -(batch + SingleItemCount), batch) == batch;

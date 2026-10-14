@@ -37,6 +37,8 @@ internal static class ChunkMultiblockPagedRetentionRepresentation
         }
         await Assert.That(JsonSerializer.Serialize(records, JsonDefaults.Options)).IsEqualTo(JsonSerializer.Serialize(expected, JsonDefaults.Options));
         for (var index = 0; index < expected.Length; index++)
-        { await Assert.That(BitConverter.DoubleToInt64Bits(records[index].Sample.Value)).IsEqualTo(BitConverter.DoubleToInt64Bits(expected[index].Sample.Value)); }
+        {
+            await Assert.That(BitConverter.DoubleToInt64Bits(records[index].Sample.Value)).IsEqualTo(BitConverter.DoubleToInt64Bits(expected[index].Sample.Value));
+        }
     }
 }

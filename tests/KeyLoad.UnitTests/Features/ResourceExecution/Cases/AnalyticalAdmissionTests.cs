@@ -16,7 +16,10 @@ internal sealed class AnalyticalAdmissionTests
     [Test]
     public async Task AcMp004_ReservationIsSharedExactlyOnceAndRejectsInvalidLimits()
     {
-        using var db = new TestDatabase(new() { MaxConcurrentQueries = 1 });
+        using var db = new TestDatabase(new()
+        {
+            MaxConcurrentQueries = 1
+        });
         var zero = Assert.ThrowsExactly<InvalidOperationException>(() => _ = new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxConcurrentQueries = 0 }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance));
         var negative = Assert.ThrowsExactly<InvalidOperationException>(() => _ = new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxConcurrentQueries = -1 }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance));
         await Assert.That(zero.Message).IsEqualTo(DatabaseLimits.ValidationMessage);
@@ -35,8 +38,14 @@ internal sealed class AnalyticalAdmissionTests
     [Test]
     public async Task AcMp004_RealStoreWaitSharesOneAdmissionAcrossAllAnalyticalEntries()
     {
-        using var db = new TestDatabase(new() { MaxConcurrentQueries = 1 });
-        using var independent = new TestDatabase(new() { MaxConcurrentQueries = 1 });
+        using var db = new TestDatabase(new()
+        {
+            MaxConcurrentQueries = 1
+        });
+        using var independent = new TestDatabase(new()
+        {
+            MaxConcurrentQueries = 1
+        });
         db.Configure(Collection, ResourceKind.Collection);
         independent.Configure(Collection, ResourceKind.Collection);
         var search = new SearchEngine(db.Database, UnitExecutionOptions.QueryExecution());
@@ -61,7 +70,10 @@ internal sealed class AnalyticalAdmissionTests
     [Test]
     public async Task AcMp012_CancellationAndValidationFailuresReleaseAdmission()
     {
-        using var db = new TestDatabase(new() { MaxConcurrentQueries = 1 });
+        using var db = new TestDatabase(new()
+        {
+            MaxConcurrentQueries = 1
+        });
         db.Configure(Collection, ResourceKind.Collection);
         var query = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
         var search = new SearchEngine(db.Database, UnitExecutionOptions.QueryExecution());
@@ -81,7 +93,10 @@ internal sealed class AnalyticalAdmissionTests
     [Test]
     public async Task AcMp012_InFlightCancellationAtRealStoreGateReleasesAdmission()
     {
-        using var db = new TestDatabase(new() { MaxConcurrentQueries = 1 });
+        using var db = new TestDatabase(new()
+        {
+            MaxConcurrentQueries = 1
+        });
         db.Configure(Collection, ResourceKind.Collection);
         var search = new SearchEngine(db.Database, UnitExecutionOptions.QueryExecution());
         var request = new SearchRequest(db.Partition, Collection, SearchField, SearchTerm);

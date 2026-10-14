@@ -15,7 +15,9 @@ internal sealed record SqlTypedInsertRetiredImage(string[] Source, string[] Targ
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(operation, failures);
         foreach (var check in conservation)
-        { await ServerFailureObserver.ObserveAsync(check, failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(check, failures);
+        }
         await ServerFailureObserver.ObserveAsync(() => image.UnchangedAsync(source, target), failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }

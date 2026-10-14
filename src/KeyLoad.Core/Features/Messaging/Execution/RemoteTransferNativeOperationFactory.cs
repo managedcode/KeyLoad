@@ -14,7 +14,9 @@ public sealed partial class DatabaseEngine
         var proof = admitted.Proof;
         var call = proof.Call;
         if (call.Stage != RemoteQueueTransferPeerStage.Accept || call.ExpiresAt <= Clock.GetUtcNow())
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteTransferPeerProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteTransferPeerProtocol.Invalid);
+        }
         var placement = Store.Read(view =>
         {
             var charged = work.CreateView(view);

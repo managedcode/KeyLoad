@@ -19,7 +19,10 @@ public sealed partial class DatabaseEngine
             var admitted = RequireControlledDocumentTarget(transaction, phase, body, effectId, evaluatedAt);
             var controlled = new PartitionControlEffectTransaction(transaction, phase.Partition,
                 body.Delegation.Resources, Limits.MaxBatchBytes);
-            var original = admitted.Original with { EvaluatedAt = evaluatedAt };
+            var original = admitted.Original with
+            {
+                EvaluatedAt = evaluatedAt
+            };
             if (admitted.Command is { } command)
             {
                 var authorized = AuthorizeBatch(controlled, body.Delegation.Principal, command);

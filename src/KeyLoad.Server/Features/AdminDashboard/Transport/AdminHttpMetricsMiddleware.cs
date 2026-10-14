@@ -20,7 +20,10 @@ internal sealed class AdminHttpMetricsMiddleware(RequestDelegate next, TimeProvi
     public async Task InvokeAsync(HttpContext context, AdminHttpMetrics metrics)
     {
         if (!Included(context.Request.Path))
-        { await next(context).ConfigureAwait(false); return; }
+        {
+            await next(context).ConfigureAwait(false);
+            return;
+        }
         var started = time.GetTimestamp();
         var faulted = true;
         try
@@ -29,7 +32,9 @@ internal sealed class AdminHttpMetricsMiddleware(RequestDelegate next, TimeProvi
             faulted = false;
         }
         finally
-        { metrics.Record(time.GetElapsedTime(started), Describe(context, faulted)); }
+        {
+            metrics.Record(time.GetElapsedTime(started), Describe(context, faulted));
+        }
     }
 
     internal static bool Included(PathString path) =>
@@ -54,7 +59,9 @@ internal sealed class AdminHttpMetricsMiddleware(RequestDelegate next, TimeProvi
         foreach (var recognized in RecognizedMethods)
         {
             if (HttpMethods.Equals(method, recognized))
-            { return recognized; }
+            {
+                return recognized;
+            }
         }
 
         return AdminDashboardProtocol.OtherMethod;

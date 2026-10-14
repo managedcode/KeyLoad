@@ -10,7 +10,10 @@ internal static class FeedGapRf3Assertions
     internal static async Task<ChangeFeedPage> AdvanceAsync(RequestCqrsRf3Callers reader,
         FeedLiveRf3Scenario scenario, string cursor, CancellationToken token)
     {
-        var request = scenario.Feed with { Cursor = cursor };
+        var request = scenario.Feed with
+        {
+            Cursor = cursor
+        };
         var sdk = await McpCallerAssertions.SdkSuccessAsync(await reader.Sdk.ReadChangesAsync(request, token));
         var official = (await McpCallerAssertions.SuccessAsync<ChangeFeedPage>(await reader.Mcp.CallAsync(
             FeedLiveRf3Protocol.Feed, request, token))).Value;

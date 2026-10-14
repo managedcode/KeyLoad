@@ -27,7 +27,11 @@ internal static class TenantCapacityPlacementRf3FailureDomainsAssertions
             TwoRf3MembershipFingerprintAssertions.Fingerprint(discovery.Select(value => value.SiloAddress)));
         await Assert.That(claim.ExpiresAt).IsGreaterThan(TimeProvider.System.GetUtcNow());
         var mcp = await seed.Official.CallAsync(TenantPlacementPublicProtocol.ApplyTool,
-            new { commandId = original.ApplyId, request = original.Apply }, token);
+            new
+            {
+                commandId = original.ApplyId,
+                request = original.Apply
+            }, token);
         await McpCallerAssertions.ErrorAsync(mcp, ErrorCode.Conflict, dispatched: true);
         await Assert.That(mcp.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
             .GetProperty(McpCallerProtocol.ProblemDetail).GetString()).IsEqualTo(McpStaleDetail);
@@ -61,7 +65,10 @@ internal static class TenantCapacityPlacementRf3FailureDomainsAssertions
             original.Apply.DatabaseId, original.Apply.ControlPartition), original.Pending.IntentId);
         var sdk = await McpCallerAssertions.SdkSuccessAsync(await seed.Source.ReadPlacementIntentAsync(request, token));
         await SqlRf3Protocol.EqualAsync(sdk, (await McpCallerAssertions.SuccessAsync<PlacementIntentV1>(
-            await seed.Official.CallAsync(TenantPlacementPublicProtocol.IntentTool, new { request }, token))).Value);
+            await seed.Official.CallAsync(TenantPlacementPublicProtocol.IntentTool, new
+            {
+                request
+            }, token))).Value);
         return sdk;
     }
 }

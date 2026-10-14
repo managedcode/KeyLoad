@@ -20,7 +20,10 @@ internal static class CurrentOwnershipTokenAfterMovementRf3ReadControls
     internal static async Task RefuseRepeatedPartitionAsync(PartitionMovementPublicParentRf3Seed seed,
         CancellationToken token)
     {
-        var repeated = seed.FirstRequest with { MoveId = Guid.NewGuid() };
+        var repeated = seed.FirstRequest with
+        {
+            MoveId = Guid.NewGuid()
+        };
         Assert.ThrowsExactly<ArgumentException>(() =>
             seed.Source.MoveWholePartitionsAsync([seed.FirstRequest, repeated], token));
         var current = await McpCallerAssertions.SdkSuccessAsync(await seed.Source.ReadAtomicPartitionPlacementAsync(

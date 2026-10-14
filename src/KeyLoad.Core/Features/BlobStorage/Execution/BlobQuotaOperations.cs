@@ -19,7 +19,9 @@ internal static class BlobQuotaOperations
         if (definition.Kind != ResourceKind.BlobStore)
         {
             if (definition.BlobPolicy is not null)
-            { throw BlobErrors.Validation(); }
+            {
+                throw BlobErrors.Validation();
+            }
             return;
         }
         var policy = definition.BlobPolicy ?? new BlobPolicy();
@@ -29,7 +31,9 @@ internal static class BlobQuotaOperations
             || policy.MaxReservedBytes > BlobLimits.StoreMaxReservedBytes || policy.MaxObjectKeys is < MaxObjectKeysFirstCount or > BlobLimits.StoreMaxObjectKeys
             || policy.MaxVersions is < MaxVersionsFirstCount or > BlobLimits.StoreMaxVersions || policy.MaxUploads is < MaxUploadsFirstCount or > BlobLimits.StoreMaxUploads
             || policy.UploadTtlSeconds is < BlobLimits.MinimumUploadTtlSeconds or > BlobLimits.MaximumUploadTtlSeconds)
-        { throw BlobErrors.Validation(); }
+        {
+            throw BlobErrors.Validation();
+        }
     }
 
     internal static void Configure(IAtomicTransaction tx, ConfigureResourceRequest request, bool isNew, Guid incarnation,
@@ -37,7 +41,9 @@ internal static class BlobQuotaOperations
     {
         ValidatePolicy(request.Definition);
         if (request.Definition.Kind != ResourceKind.BlobStore)
-        { return; }
+        {
+            return;
+        }
         BlobRestoreFence.RequireOpen(tx);
         var global = BlobRecordReader.Get<BlobQuota>(tx, BlobKeys.Global);
         if (global is null)
@@ -50,11 +56,17 @@ internal static class BlobQuotaOperations
         var key = BlobKeys.Quota(request.TenantId, request.DatabaseId, request.Definition.TransactionDomainId, request.Definition.Name);
         var quota = BlobRecordReader.Get<BlobQuota>(tx, key);
         if (isNew && quota is null)
-        { tx.PutRecord(key, BlobQuota.Empty(incarnation)); }
+        {
+            tx.PutRecord(key, BlobQuota.Empty(incarnation));
+        }
         else if (quota is null || isNew)
-        { throw BlobErrors.Corruption(); }
+        {
+            throw BlobErrors.Corruption();
+        }
         else
-        { Validate(quota, incarnation); }
+        {
+            Validate(quota, incarnation);
+        }
     }
 
     internal static void ProveEmpty(IKeyValueView view, int maximumCatalogProofRecords)
@@ -65,19 +77,28 @@ internal static class BlobQuotaOperations
         foreach (var space in FeatureSpaces)
         {
             if (view.VisitRange(KeyCodec.Encode(space), MaxRecordsSingleItemCount, static (_, _) => false).Records != EmptyRecords)
-            { throw BlobErrors.Corruption(); }
+            {
+                throw BlobErrors.Corruption();
+            }
         }
         var existing = false;
         var scan = view.VisitRange(KeyCodec.Encode(CatalogSpace), maximumCatalogProofRecords, (_, value) =>
         {
             if (BlobRecordReader.Decode<ResourceDefinition>(value).Kind == ResourceKind.BlobStore)
-            { existing = true; return false; }
+            {
+                existing = true;
+                return false;
+            }
             return true;
         });
         if (existing)
-        { throw BlobErrors.Corruption(); }
+        {
+            throw BlobErrors.Corruption();
+        }
         if (scan.HasMore)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, BlobErrors.CatalogProofBudget); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, BlobErrors.CatalogProofBudget);
+        }
     }
 
     internal static BlobQuota Read(IKeyValueView view, byte[] key, Guid incarnation)
@@ -99,13 +120,17 @@ internal static class BlobQuotaOperations
 
         BlobRecordReader.Version(quota.FormatVersion);
         if (quota.Incarnation != incarnation)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, BlobErrors.Fenced); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, BlobErrors.Fenced);
+        }
         if (quota.ReservedBytes is < ReservedBytesEmptyCount or > BlobLimits.StoreMaxReservedBytes
             || quota.ObjectKeys is < ObjectKeysEmptyCount or > BlobLimits.StoreMaxObjectKeys
             || quota.Versions is < VersionsEmptyCount or > BlobLimits.StoreMaxVersions
             || quota.Uploads < UploadsValidationBoundary || quota.Uploads > quota.Versions || quota.Uploads > BlobLimits.StoreMaxUploads
             || quota.ObjectKeys == EmptyObjectKeys && quota.Versions != EmptyVersions || quota.Versions == EmptyVersions && quota.ReservedBytes != EmptyReservedBytes)
-        { throw BlobErrors.Corruption(); }
+        {
+            throw BlobErrors.Corruption();
+        }
     }
 
     internal static void Change(IAtomicTransaction tx, BlobRef blob, Guid incarnation, BlobPolicy policy,
@@ -115,12 +140,16 @@ internal static class BlobQuotaOperations
         var global = Read(tx, BlobKeys.Global, incarnation);
         if (resource.ReservedBytes > global.ReservedBytes || resource.ObjectKeys > global.ObjectKeys
             || resource.Versions > global.Versions || resource.Uploads > global.Uploads)
-        { throw BlobErrors.Corruption(); }
+        {
+            throw BlobErrors.Corruption();
+        }
         resource = Adjust(resource, bytes, keys, versions, uploads);
         global = Adjust(global, bytes, keys, versions, uploads);
         if (resource.ReservedBytes > policy.MaxReservedBytes || resource.ObjectKeys > policy.MaxObjectKeys
             || resource.Versions > policy.MaxVersions || resource.Uploads > policy.MaxUploads)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, BlobErrors.Capacity); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, BlobErrors.Capacity);
+        }
         Validate(global, incarnation);
         tx.PutRecord(BlobKeys.Quota(blob), resource);
         tx.PutRecord(BlobKeys.Global, global);
@@ -141,10 +170,14 @@ internal static class BlobQuotaOperations
             Uploads = checked(quota.Uploads + uploads)
         };
         if (updated.ReservedBytes < ReservedBytesValidationBoundary || updated.ObjectKeys < ObjectKeysValidationBoundary || updated.Versions < VersionsValidationBoundary || updated.Uploads < UploadsValidationBoundary)
-        { throw BlobErrors.Corruption(); }
+        {
+            throw BlobErrors.Corruption();
+        }
         if (updated.ReservedBytes > BlobLimits.StoreMaxReservedBytes || updated.ObjectKeys > BlobLimits.StoreMaxObjectKeys
             || updated.Versions > BlobLimits.StoreMaxVersions || updated.Uploads > BlobLimits.StoreMaxUploads)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, BlobErrors.Capacity); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, BlobErrors.Capacity);
+        }
         return updated;
     }
 }

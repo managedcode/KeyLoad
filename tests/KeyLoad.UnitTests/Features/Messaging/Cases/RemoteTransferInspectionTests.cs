@@ -80,6 +80,9 @@ internal sealed class RemoteTransferInspectionTests
             grants.Add(new(RemoteTransferDatabase.DatabaseId, RemoteTransferDatabase.DestinationQueueName,
                 Capability.QueueInspect));
         }
-        return new(id, RemoteTransferDatabase.TenantId, [.. grants], [.. fields]) { ClusterAdministrator = true };
+        return new(id, RemoteTransferDatabase.TenantId, [.. grants], [.. fields])
+        {
+            ClusterAdministrator = true
+        };
     }
 }

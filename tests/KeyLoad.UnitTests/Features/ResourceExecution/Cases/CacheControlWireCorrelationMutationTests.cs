@@ -1,5 +1,5 @@
 using System.Net;
-using KeyLoad.Orleans.Features.ResourceExecution;
+using KeyLoad.Clustering.Features.ResourceExecution;
 using static KeyLoad.UnitTests.Features.ResourceExecution.CacheControlWireAuthenticatorSupport;
 
 namespace KeyLoad.UnitTests.Features.ResourceExecution;
@@ -33,7 +33,10 @@ internal sealed class CacheControlWireCorrelationMutationTests
     private static async Task AssertHeaderMismatchAsync(CachePrepareRequest request,
         CacheReplyCorrelation correlation, CacheControlHeader header)
     {
-        var busy = new CachePrepareReply(correlation with { Header = header }, CacheControlStatus.Busy,
+        var busy = new CachePrepareReply(correlation with
+        {
+            Header = header
+        }, CacheControlStatus.Busy,
             null, CacheControlWireTestData.NondefaultMac);
         var shapeRemainsValid = CacheControlWire.TryEncodeSigned(busy, out var bytes);
 
@@ -50,7 +53,10 @@ internal sealed class CacheControlWireCorrelationMutationTests
         var accepted = new CacheGrantReply(correlation, CacheControlStatus.AcceptedActive,
             request.GrantId, request.TargetBinding, request.Slot2Proof.ChallengeSequence,
             CacheControlWireTestData.NondefaultMac);
-        var acceptedCold = accepted with { Status = CacheControlStatus.AcceptedCold };
+        var acceptedCold = accepted with
+        {
+            Status = CacheControlStatus.AcceptedCold
+        };
         var binding = request.TargetBinding;
         var wrong = SameSlotBindingMismatches(accepted, binding);
 
@@ -64,11 +70,17 @@ internal sealed class CacheControlWireCorrelationMutationTests
             await Assert.That(CacheControlCorrelation.TryMatch(request, changed)).IsFalse();
         }
 
-        var changedGrant = accepted with { GrantId = DifferentGrantId };
+        var changedGrant = accepted with
+        {
+            GrantId = DifferentGrantId
+        };
         var revoke = CacheControlWireTestData.RevokeRequest();
         var revokeReply = new CacheRevokeReply(Correlation(revoke), CacheControlStatus.Revoked,
             revoke.GrantId, CacheRevokeEffect.Both, CacheControlWireTestData.NondefaultMac);
-        var changedRevoke = revokeReply with { GrantId = DifferentGrantId };
+        var changedRevoke = revokeReply with
+        {
+            GrantId = DifferentGrantId
+        };
         var changedProof = new CachePrepareReply(Correlation(CacheControlWireTestData.PrepareRequest()),
             CacheControlStatus.Ready,
             CacheControlWireTestData.Proof(CacheVoterSlot.Slot0, CacheVoterSlot.Slot1) with

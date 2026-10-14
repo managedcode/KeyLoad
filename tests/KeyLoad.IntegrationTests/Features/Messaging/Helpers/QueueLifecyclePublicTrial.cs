@@ -22,7 +22,9 @@ internal static class QueueLifecyclePublicTrial
             before = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.StatusAsync(deadline.Token));
         }, failures);
         if (callers is not null)
-        { await ServerFailureObserver.ObserveAsync(() => callers.DisposeAsync().AsTask(), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => callers.DisposeAsync().AsTask(), failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
         var after = await QueueLifecyclePublicCold.RunAsync(fixture, state, before!, continueOperation: true, deadline.Token);
         _ = await QueueLifecyclePublicCold.RunAsync(fixture, state, after, continueOperation: false, deadline.Token);
@@ -39,7 +41,9 @@ internal static class QueueLifecyclePublicTrial
             state = await QueueLifecyclePublicSeed.RunAsync(root, route, token);
         }, failures);
         if (root is not null)
-        { await ServerFailureObserver.ObserveAsync(() => root.DisposeAsync().AsTask(), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => root.DisposeAsync().AsTask(), failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
         return state!;
     }
@@ -56,7 +60,9 @@ internal static class QueueLifecyclePublicTrial
             await QueueLifecyclePublicRoutes.RefusedAsync(denied, state, command, ErrorCode.PermissionDenied, token);
         }, failures);
         if (denied is not null)
-        { await ServerFailureObserver.ObserveAsync(() => denied.DisposeAsync().AsTask(), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => denied.DisposeAsync().AsTask(), failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

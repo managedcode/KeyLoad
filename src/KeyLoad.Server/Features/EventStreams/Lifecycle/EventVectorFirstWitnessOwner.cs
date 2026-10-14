@@ -52,7 +52,11 @@ internal sealed class EventVectorFirstWitnessOwner : IDisposable
             packets[ordinal] = packet;
         }
         var semantic = new EventVectorCoverageSemanticIdentity
-        { Version = Version, OriginalEncodedEntries = entries, OriginalCaptureBytes = captureBytes };
+        {
+            Version = Version,
+            OriginalEncodedEntries = entries,
+            OriginalCaptureBytes = captureBytes
+        };
         admission.RequireEncodedBytes(NativeSerialization.Measure(semantic));
         projection = EventVectorWorkEncoding.Encode(semantic, encoding, work);
         work.ChargeBytes(SHA256.HashSizeInBytes);
@@ -76,7 +80,12 @@ internal sealed class EventVectorFirstWitnessOwner : IDisposable
         CryptographicOperations.ZeroMemory(digest);
         CryptographicOperations.ZeroMemory(witness);
         foreach (var capture in captures)
-        { if (capture is not null) { CryptographicOperations.ZeroMemory(capture); } }
+        {
+            if (capture is not null)
+            {
+                CryptographicOperations.ZeroMemory(capture);
+            }
+        }
         entries = [];
         projection = [];
         digest = [];

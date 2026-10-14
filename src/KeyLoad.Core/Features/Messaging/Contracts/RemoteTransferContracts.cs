@@ -85,13 +85,22 @@ internal sealed record RemoteTransferIntentRecord(
     [property: global::Orleans.Id(RemoteTransferFields.ReceiptReservationBytes)] int ReceiptReservationBytes)
 {
     [global::Orleans.Id(RemoteTransferFields.AcceptAttempts)]
-    public RemoteTransferAcceptAttemptState? Attempts { get; init; }
+    public RemoteTransferAcceptAttemptState? Attempts
+    {
+        get; init;
+    }
 
     [global::Orleans.Id(RemoteTransferFields.Repairs)]
-    public RemoteTransferRepairState? Repairs { get; init; }
+    public RemoteTransferRepairState? Repairs
+    {
+        get; init;
+    }
 
     [global::Orleans.Id(RemoteTransferFields.RemoteTarget)]
-    public RemoteTransferRemoteTarget? RemoteTarget { get; init; }
+    public RemoteTransferRemoteTarget? RemoteTarget
+    {
+        get; init;
+    }
 }
 
 [global::Orleans.GenerateSerializer]
@@ -106,7 +115,10 @@ internal sealed record RemoteTransferTargetReceiptRecord(
     [property: global::Orleans.Id(RemoteTransferFields.TargetCommit)] CommitToken TargetCommit)
 {
     [global::Orleans.Id(RemoteTransferFields.RemoteOrigin)]
-    public RemoteTransferRemoteOrigin? RemoteOrigin { get; init; }
+    public RemoteTransferRemoteOrigin? RemoteOrigin
+    {
+        get; init;
+    }
 }
 
 [global::Orleans.GenerateSerializer]

@@ -28,7 +28,10 @@ internal sealed class NativeTextProjectionScopeTests
         var canonical = await search.SearchAsync("root", request, TestContext.Current!.Execution.CancellationToken);
         var canonicalGeneration = CurrentGeneration(database);
         var scope = CaptureScope(database);
-        var alteredSchemaScope = scope with { SchemaVersion = checked(scope.SchemaVersion + 1) };
+        var alteredSchemaScope = scope with
+        {
+            SchemaVersion = checked(scope.SchemaVersion + 1)
+        };
         var documents = ReadCanonicalDocuments(database);
         var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits));
         using (var lease = projection.Acquire(alteredSchemaScope, budget))

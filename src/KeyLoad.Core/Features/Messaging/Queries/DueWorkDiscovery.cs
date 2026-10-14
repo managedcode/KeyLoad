@@ -30,7 +30,10 @@ internal static class DueWorkDiscovery
             return DuePrefixScanner.Read(database, view, cursor, state, Prefix(cursor.NextPrefix));
         });
         state.Check();
-        return page with { ExaminedBytes = state.ExaminedBytes };
+        return page with
+        {
+            ExaminedBytes = state.ExaminedBytes
+        };
     }
 
     internal static DueWorkPage EmptyPage(DueSweepCursor? supplied, StoreIdentity identity)

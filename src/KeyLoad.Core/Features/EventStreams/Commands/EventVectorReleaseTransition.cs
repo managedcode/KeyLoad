@@ -17,7 +17,9 @@ internal static class EventVectorReleaseTransition
         admission.RequireEncodedBytes(request.OriginalPinNativeBody.Length);
         if (request.Role != EventVectorSourcePhaseRole.Release || request.OriginalPinCommandId == Guid.Empty
             || request.OriginalPinNativeBody.IsEmpty)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidRelease); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidRelease);
+        }
         var original = NativeSerialization.Deserialize<EventVectorSourceMutation>(request.OriginalPinNativeBody.Span);
         RequireOriginal(request, original);
         var digest = SHA256.HashData(request.OriginalPinNativeBody.Span);
@@ -27,7 +29,9 @@ internal static class EventVectorReleaseTransition
                 || request.Position != original.Position
                 || request.ExpectedCoverageGeneration != original.CoverageGeneration
                 || request.CoverageGeneration != original.CoverageGeneration)
-            { throw Errors.Fail(ErrorCode.Conflict, InvalidRelease); }
+            {
+                throw Errors.Fail(ErrorCode.Conflict, InvalidRelease);
+            }
             return new EventVectorSourcePin
             {
                 Version = Version,
@@ -48,7 +52,11 @@ internal static class EventVectorReleaseTransition
             };
         }
         RequireCurrent(request, original, current, digest);
-        return current with { Released = true, PinRevision = checked(current.PinRevision + RevisionStep) };
+        return current with
+        {
+            Released = true,
+            PinRevision = checked(current.PinRevision + RevisionStep)
+        };
     }
 
     private static void RequireOriginal(EventVectorSourceMutation request, EventVectorSourceMutation original)
@@ -60,7 +68,9 @@ internal static class EventVectorReleaseTransition
             || original.OriginalPinCommandId != Guid.Empty || !original.OriginalPinNativeBody.IsEmpty
             || original.ExpectedPinRevision != InitialRevision
             || original.ExpectedCoverageGeneration != InitialRevision)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidRelease); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidRelease);
+        }
     }
 
     private static void RequireCurrent(EventVectorSourceMutation request, EventVectorSourceMutation original,
@@ -76,8 +86,12 @@ internal static class EventVectorReleaseTransition
             || current.OriginalPinCommandId != request.OriginalPinCommandId
             || current.OriginalPinExpiresAt != original.FirstExpiresAt
             || !CryptographicOperations.FixedTimeEquals(current.OriginalPinBodyDigest.Span, digest))
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidRelease); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidRelease);
+        }
         if (current.PinRevision != request.ExpectedPinRevision || current.Position != request.Position)
-        { throw Errors.Fail(ErrorCode.Conflict, InvalidRelease); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, InvalidRelease);
+        }
     }
 }

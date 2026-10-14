@@ -22,7 +22,9 @@ internal sealed class EventVectorTopicRetentionRf3Tests
                 image = await LocalRf3ImageTestSession.StartIfSelectedAsync(deadline.Token);
                 wave = await TwoRf3MembershipWave.StartOwnedAsync(new TwoRf3MembershipWave(image?.Selection,
                     register: true, remote: true, query: true, probe: true, protectedDocument: true)
-                { EventVectorReservedProbe = true }, deadline.Token);
+                {
+                    EventVectorReservedProbe = true
+                }, deadline.Token);
                 await EventVectorTopicRetentionRf3Flow.RunAsync(wave, deadline.Token);
             }, failures);
         }
@@ -30,7 +32,9 @@ internal sealed class EventVectorTopicRetentionRf3Tests
         {
             var initial = failures.Count;
             if (wave is not null)
-            { await ServerFailureObserver.ObserveAsync(() => wave.DisposeAsync().AsTask(), failures); }
+            {
+                await ServerFailureObserver.ObserveAsync(() => wave.DisposeAsync().AsTask(), failures);
+            }
             if (image is not null)
             {
                 await ServerFailureObserver.ObserveAsync(() => image.DisposeAsync(removeImage: wave is not null

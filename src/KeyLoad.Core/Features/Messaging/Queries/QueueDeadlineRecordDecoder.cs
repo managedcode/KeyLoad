@@ -32,23 +32,31 @@ internal static class QueueDeadlineRecordDecoder
             || parts[TenantField] is not string tenant || parts[DatabaseField] is not string db
             || parts[DomainField] is not string domain || parts[PartitionField] is not string partition
             || parts[QueueField] is not string queue || parts[^LastField] is not string id)
-        { throw Errors.Fail(ErrorCode.Corruption, DueWorkProtocol.InvalidRecord); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, DueWorkProtocol.InvalidRecord);
+        }
         var lane = new QueueLaneRef(new(tenant, db, domain, partition), queue);
         DatabaseEngine.ValidatePartition(lane.Partition);
         JsonData.Identifier(queue);
         JsonData.Identifier(id);
         var metadata = ReadMetadata(database, view, lane, id, space, value, page);
         if (metadata.Id != id || metadata.StateVersion <= Initial || metadata.LeaseVersion < Initial)
-        { throw Errors.Fail(ErrorCode.Corruption, DueWorkProtocol.InvalidRecord); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, DueWorkProtocol.InvalidRecord);
+        }
         if (space == Metadata && parts.Length != MetadataFields
             || space != Metadata && (parts.Length != IndexFields || parts[DeadlineField] is not DateTimeOffset))
-        { throw Errors.Fail(ErrorCode.Corruption, DueWorkProtocol.InvalidRecord); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, DueWorkProtocol.InvalidRecord);
+        }
         if (space != Metadata)
         {
             var expected = space == Leased ? metadata.LeaseUntil : metadata.NotBefore;
             if (expected is null || parts[DeadlineField] is not DateTimeOffset indexed
                 || indexed != expected)
-            { throw Errors.Fail(ErrorCode.Corruption, DueWorkProtocol.InvalidRecord); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, DueWorkProtocol.InvalidRecord);
+            }
         }
         return Select(lane, metadata, space, page.WakeAt,
             page.MaximumRecordsPerPage < IndexedReadWithLookahead);
@@ -58,9 +66,13 @@ internal static class QueueDeadlineRecordDecoder
         string id, string space, ReadOnlySpan<byte> value, DuePageState page)
     {
         if (space == Metadata)
-        { return NativeSerialization.Deserialize<MessageMetadata>(value); }
+        {
+            return NativeSerialization.Deserialize<MessageMetadata>(value);
+        }
         if (NativeSerialization.Deserialize<string>(value) != id)
-        { throw Errors.Fail(ErrorCode.Corruption, DueWorkProtocol.InvalidRecord); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, DueWorkProtocol.InvalidRecord);
+        }
         var key = KeySpace.Partition(Metadata, lane.Partition, lane.Queue, id);
         page.Check();
         page.ExamineRecord();
@@ -69,9 +81,13 @@ internal static class QueueDeadlineRecordDecoder
         {
             page.Check();
             if (!actualKey.SequenceEqual(key))
-            { throw Errors.Fail(ErrorCode.Corruption, DueWorkProtocol.InvalidRecord); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, DueWorkProtocol.InvalidRecord);
+            }
             if (bytes.Length > database.Limits.MaxBatchBytes)
-            { throw Errors.Fail(ErrorCode.ResourceExhausted, DueWorkProtocol.RangeBytesExceeded); }
+            {
+                throw Errors.Fail(ErrorCode.ResourceExhausted, DueWorkProtocol.RangeBytesExceeded);
+            }
             metadata = NativeSerialization.Deserialize<MessageMetadata>(bytes);
             return false;
         }, observer: page.ObserveBytes, cancellationToken: page.CancellationToken);
@@ -87,15 +103,23 @@ internal static class QueueDeadlineRecordDecoder
         DateTimeOffset now, bool metadataDeadlineFallback)
     {
         if (metadata.State is not (MessageState.Scheduled or MessageState.Ready or MessageState.Leased))
-        { return null; }
+        {
+            return null;
+        }
         if (space == Metadata)
         {
             if (metadata.ExpiresAt is { } expires && expires <= now)
-            { return Create(lane, metadata, QueueDeadlineKind.ExpireMessage, expires); }
+            {
+                return Create(lane, metadata, QueueDeadlineKind.ExpireMessage, expires);
+            }
             if (!metadataDeadlineFallback)
-            { return null; }
+            {
+                return null;
+            }
             if (metadata.State == MessageState.Scheduled && metadata.NotBefore is { } scheduled && scheduled <= now)
-            { return Create(lane, metadata, QueueDeadlineKind.PromoteScheduled, scheduled); }
+            {
+                return Create(lane, metadata, QueueDeadlineKind.PromoteScheduled, scheduled);
+            }
             return metadata.State == MessageState.Leased && metadata.LeaseUntil is { } lease && lease <= now
                 ? Create(lane, metadata, QueueDeadlineKind.ExpireLease, lease) : null;
         }
@@ -103,7 +127,9 @@ internal static class QueueDeadlineRecordDecoder
         var state = leased ? MessageState.Leased : MessageState.Scheduled;
         var due = leased ? metadata.LeaseUntil : metadata.NotBefore;
         if (metadata.State != state || due is null)
-        { throw Errors.Fail(ErrorCode.Corruption, DueWorkProtocol.InvalidRecord); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, DueWorkProtocol.InvalidRecord);
+        }
         return due <= now ? Create(lane, metadata,
             leased ? QueueDeadlineKind.ExpireLease : QueueDeadlineKind.PromoteScheduled, due.Value) : null;
     }

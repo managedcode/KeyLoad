@@ -43,7 +43,12 @@ internal static class PostgresRf3Assertions
             PostgresRf3Protocol.SeedRevision, PostgresRf3State.RightJson, false, []), right);
         var outbox = await McpCallerAssertions.SdkSuccessAsync(
             await root.OutboxStatusAsync(PostgresRf3State.Partition, token));
-        return System.Text.Json.JsonSerializer.Serialize(new { Left = left, Right = right, Outbox = outbox },
+        return System.Text.Json.JsonSerializer.Serialize(new
+        {
+            Left = left,
+            Right = right,
+            Outbox = outbox
+        },
             JsonDefaults.Options);
     }
 

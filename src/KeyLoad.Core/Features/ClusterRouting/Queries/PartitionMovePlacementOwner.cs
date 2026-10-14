@@ -12,7 +12,9 @@ public sealed partial class DatabaseEngine
         ReadExecutionBudgetReadGrant? grant = null)
     {
         if (row is null || row.PlacementEpoch == registered.PlacementEpoch)
-        { return registered; }
+        {
+            return registered;
+        }
         var key = PartitionMovePublishedPlacementStorage.Key(partition);
         var lineage = grant is null
             ? AtomicPartitionPlacementSerialization.Read<PartitionMovePublishedPlacement>(view, key)
@@ -38,7 +40,12 @@ public sealed partial class DatabaseEngine
             || lineage.ControlFinalize.AppliedPosition <= PartitionMoveProtocol.EmptyCount
             || row.PlacementEpoch != checked(Math.Max(lineage.Source.PlacementEpoch,
                 registered.PlacementEpoch) + PartitionMoveProtocol.SequenceStep))
-        { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid); }
-        return registered with { PlacementEpoch = row.PlacementEpoch };
+        {
+            throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid);
+        }
+        return registered with
+        {
+            PlacementEpoch = row.PlacementEpoch
+        };
     }
 }

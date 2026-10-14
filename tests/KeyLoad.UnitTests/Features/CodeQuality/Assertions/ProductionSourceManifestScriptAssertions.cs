@@ -45,17 +45,23 @@ internal static class ProductionSourceManifestScriptAssertions
     {
         var directoryInfo = new DirectoryInfo(directory);
         if (directoryInfo.LinkTarget is not null)
-        { throw new InvalidOperationException(); }
+        {
+            throw new InvalidOperationException();
+        }
         var names = new List<string>();
         var entries = 0;
         foreach (var path in Directory.EnumerateFileSystemEntries(directory))
         {
             if (entries >= MaximumInventoryEntries)
-            { throw new InvalidOperationException(); }
+            {
+                throw new InvalidOperationException();
+            }
             entries++;
             var item = new FileInfo(path);
             if (item.LinkTarget is not null || Directory.Exists(path))
-            { throw new InvalidOperationException(); }
+            {
+                throw new InvalidOperationException();
+            }
             if ((item.Name.StartsWith(ScriptPrefix, StringComparison.Ordinal)
                 || item.Name.StartsWith(TaskScriptPrefix, StringComparison.Ordinal)) && !IsIncludedScript(item.Name))
             {

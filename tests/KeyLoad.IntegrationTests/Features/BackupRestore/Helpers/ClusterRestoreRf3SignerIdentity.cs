@@ -8,7 +8,9 @@ internal static class ClusterRestoreRf3SignerIdentity
     {
         var original = Convert.FromBase64String(signingKey);
         try
-        { return Convert.ToHexStringLower(SHA256.HashData(original)); }
+        {
+            return Convert.ToHexStringLower(SHA256.HashData(original));
+        }
         finally { CryptographicOperations.ZeroMemory(original); }
     }
 }

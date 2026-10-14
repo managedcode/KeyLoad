@@ -31,14 +31,38 @@ internal sealed class PackedAnnLayerBuffers
         WorstHeapSlots = new int[capacity];
     }
 
-    internal int[] Nodes { get; }
-    internal double[] Scores { get; }
-    internal int[] BestHeapSlots { get; }
-    internal int[] BestHeapPositions { get; }
-    internal int[] WorstHeapSlots { get; }
-    internal int Epoch { get; private set; }
-    internal int BestHeapCount { get; set; }
-    internal int WorstHeapCount { get; set; }
+    internal int[] Nodes
+    {
+        get;
+    }
+    internal double[] Scores
+    {
+        get;
+    }
+    internal int[] BestHeapSlots
+    {
+        get;
+    }
+    internal int[] BestHeapPositions
+    {
+        get;
+    }
+    internal int[] WorstHeapSlots
+    {
+        get;
+    }
+    internal int Epoch
+    {
+        get; private set;
+    }
+    internal int BestHeapCount
+    {
+        get; set;
+    }
+    internal int WorstHeapCount
+    {
+        get; set;
+    }
 
     internal void BeginVisitPass(AnnWorkBudget budget)
     {

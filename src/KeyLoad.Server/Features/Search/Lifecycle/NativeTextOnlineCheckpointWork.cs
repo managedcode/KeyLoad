@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.Server.Features.Search;
 
@@ -17,7 +17,9 @@ internal sealed class NativeTextOnlineCheckpointWork
         budget.Check();
         if (command.CommandId == Guid.Empty || through < InitialProjectionSequence || command.Effects.IsDefault
             || !command.Effects.IsEmpty)
-        { throw NativeTextErrors.Mismatch(); }
+        {
+            throw NativeTextErrors.Mismatch();
+        }
         budget.ChargeBytes(NativeSerialization.Measure(command));
         commandBytes = NativeSerialization.Serialize(command);
         this.principalId = principalId;
@@ -26,19 +28,28 @@ internal sealed class NativeTextOnlineCheckpointWork
         Work = new(sessionId, command.CommandId);
     }
 
-    internal OnlineTextPublicationWork Work { get; }
+    internal OnlineTextPublicationWork Work
+    {
+        get;
+    }
 
     internal OnlineTextPublicationWork? TryMatch(CommitProjectionBatchRequest command,
         string actualPrincipal, DateTimeOffset actualExpiry, ReadExecutionBudget budget)
     {
         if (command.CommandId != Work.CommandId)
-        { return null; }
+        {
+            return null;
+        }
         budget.Check();
         if (actualPrincipal != principalId || actualExpiry != expiry)
-        { throw NativeTextErrors.Mismatch(); }
+        {
+            throw NativeTextErrors.Mismatch();
+        }
         budget.ChargeBytes(NativeSerialization.Measure(command));
         if (!commandBytes.AsSpan().SequenceEqual(NativeSerialization.Serialize(command)))
-        { throw NativeTextErrors.Mismatch(); }
+        {
+            throw NativeTextErrors.Mismatch();
+        }
         return Work;
     }
 
@@ -51,7 +62,9 @@ internal sealed class NativeTextOnlineCheckpointWork
         budget.ChargeBytes(NativeSerialization.Measure(actual));
         budget.ChargeBytes(NativeSerialization.Measure(acknowledged));
         if (!NativeSerialization.Serialize(actual).AsSpan().SequenceEqual(NativeSerialization.Serialize(acknowledged)))
-        { throw NativeTextErrors.Corrupt(); }
+        {
+            throw NativeTextErrors.Corrupt();
+        }
         return actual;
     }
 
@@ -61,7 +74,9 @@ internal sealed class NativeTextOnlineCheckpointWork
         if (actual.Receipt is null || actual.Receipt.CommandId != Work.CommandId
             || actual.Checkpoint != through || actual.Receipt.Token is null
             || actual.Receipt.Mutations.IsDefault || !actual.Receipt.Mutations.IsEmpty)
-        { throw NativeTextErrors.Corrupt(); }
+        {
+            throw NativeTextErrors.Corrupt();
+        }
         return actual;
     }
 }

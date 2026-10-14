@@ -12,7 +12,9 @@ internal sealed class NativeBlobWireProbeObserver(NativeBlobWireSelection select
     {
         lifetime.Enter();
         try
-        { return selection.Select(original, originalCancellationToken); }
+        {
+            return selection.Select(original, originalCancellationToken);
+        }
         finally { lifetime.Leave(); }
     }
 
@@ -28,7 +30,9 @@ internal sealed class NativeBlobWireProbeObserver(NativeBlobWireSelection select
             if (signedOriginal.CallerVoter != selected.Claim.CallerVoter
                 || signedOriginal.CallerSiloAddress != selected.Claim.CallerSiloAddress
                 || signedOriginal.ExpiresAt != selected.Claim.ExpiresAt)
-            { throw new InvalidOperationException(NativeBlobWireProbeProtocol.InvalidEvidence); }
+            {
+                throw new InvalidOperationException(NativeBlobWireProbeProtocol.InvalidEvidence);
+            }
             reservation = reservations.Enter(selected.Snapshot.Owner, selected.Snapshot.OwnerDigest, selected.Claim, selected.Digest);
             var count = original.Request.Frame.Original is null
                 ? NativeBlobWireProbeProtocol.CommonFaultCount : NativeBlobWireProbeProtocol.MaximumFaultCount;
@@ -47,7 +51,9 @@ internal sealed class NativeBlobWireProbeObserver(NativeBlobWireSelection select
         finally
         {
             if (reservation is not null)
-            { ServerFailureObserver.Observe(() => reservations.Leave(reservation), failures); }
+            {
+                ServerFailureObserver.Observe(() => reservations.Leave(reservation), failures);
+            }
             ServerFailureObserver.Observe(lifetime.Leave, failures);
             ServerFailureObserver.ThrowIfAny(failures);
         }

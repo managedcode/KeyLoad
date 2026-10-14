@@ -1,5 +1,5 @@
 using System.Collections.Immutable;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.UnitTests.Features.BlobStorage;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
@@ -125,7 +125,10 @@ internal static class McpCatalogExpectations
     private const string OutboxPurgeRoute = "/v1/admin/outbox/purge";
 
     internal const int Count = 99;
-    internal static ImmutableArray<(string Name, string Route, GrainReadKind? ReadKind, OperationKind? CommandKind)> Entries { get; } =
+    internal static ImmutableArray<(string Name, string Route, GrainReadKind? ReadKind, OperationKind? CommandKind)> Entries
+    {
+        get;
+    } =
     [
         .. McpRemoteGraphCatalogExpectations.Entries,
         .. McpPlacementCatalogExpectations.Entries,

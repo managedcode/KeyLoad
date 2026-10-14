@@ -20,19 +20,31 @@ internal sealed class McpFrameBody : IDisposable
     /// <summary>Gets the exact full wire byte count, including whitespace and protocol metadata.</summary>
     internal int WireBytes
     {
-        get { ThrowIfDisposed(); return checked((int)buffer.Length); }
+        get
+        {
+            ThrowIfDisposed();
+            return checked((int)buffer.Length);
+        }
     }
 
     /// <summary>Gets the full private wire buffer capacity retained by this owner.</summary>
     internal int RetainedCapacity
     {
-        get { ThrowIfDisposed(); return buffer.Capacity; }
+        get
+        {
+            ThrowIfDisposed();
+            return buffer.Capacity;
+        }
     }
 
     /// <summary>Gets the checked structural counts before native SDK parsing allocates its DOM.</summary>
     internal McpFrameShape Shape
     {
-        get { ThrowIfDisposed(); return shape; }
+        get
+        {
+            ThrowIfDisposed();
+            return shape;
+        }
     }
 
     /// <summary>Gets borrowed checked bytes that must not survive this owner's disposal.</summary>
@@ -62,7 +74,9 @@ internal sealed class McpFrameBody : IDisposable
         ArgumentNullException.ThrowIfNull(source);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maximumBytes);
         if (declaredLength is < DeclaredLengthEmptyCount || declaredLength > maximumBytes)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, McpFramingProtocol.FrameBudgetExceeded); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, McpFramingProtocol.FrameBudgetExceeded);
+        }
         cancellationToken.ThrowIfCancellationRequested();
         var settings = options.Value;
         settings.Validate();
@@ -76,7 +90,9 @@ internal sealed class McpFrameBody : IDisposable
             await ReadBoundedAsync(source, retained, checked((int)(declaredLength ?? maximumBytes)),
                 maximumBytes, !declaredLength.HasValue, settings.IngressScratchBytes, cancellationToken).ConfigureAwait(false);
             if (declaredLength.HasValue && declaredLength.Value != retained.Length)
-            { throw Errors.Fail(ErrorCode.Validation, McpFramingProtocol.InvalidFrame); }
+            {
+                throw Errors.Fail(ErrorCode.Validation, McpFramingProtocol.InvalidFrame);
+            }
             var checkedShape = McpFrameBounds.Inspect(retained.GetBuffer().AsSpan(StartEmptyCount, checked((int)retained.Length)), maximumBytes, options);
             var body = new McpFrameBody(retained, checkedShape);
             transferred = true;
@@ -85,7 +101,9 @@ internal sealed class McpFrameBody : IDisposable
         finally
         {
             if (!transferred)
-            { ClearAndClose(retained); }
+            {
+                ClearAndClose(retained);
+            }
         }
     }
 
@@ -105,7 +123,9 @@ internal sealed class McpFrameBody : IDisposable
     public void Dispose()
     {
         if (disposed)
-        { return; }
+        {
+            return;
+        }
         disposed = true;
         reader?.Dispose();
         ClearAndClose(buffer);
@@ -128,7 +148,9 @@ internal sealed class McpFrameBody : IDisposable
                 var count = checked((int)Math.Min(scratch.Length, remaining + RemainingStep));
                 var read = await source.ReadAsync(scratch.AsMemory(StartEmptyCount, count), cancellationToken).ConfigureAwait(false);
                 if (read == EmptyRead)
-                { return; }
+                {
+                    return;
+                }
                 AppendWithinDeclaration(retained, scratch.AsSpan(StartEmptyCount, read), remaining,
                     maximumBytes, mayGrow);
             }
@@ -152,7 +174,9 @@ internal sealed class McpFrameBody : IDisposable
         if (retained.Capacity < requiredCapacity)
         {
             if (!mayGrow)
-            { throw new InvalidOperationException(McpCatalogProtocol.InvalidOperation); }
+            {
+                throw new InvalidOperationException(McpCatalogProtocol.InvalidOperation);
+            }
             const int CapacityDoublingFactor = 2;
             var doubledCapacity = (long)retained.Capacity * CapacityDoublingFactor;
             var precedingBuffer = retained.GetBuffer();

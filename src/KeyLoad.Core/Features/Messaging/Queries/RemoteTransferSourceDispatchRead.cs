@@ -17,7 +17,9 @@ public sealed partial class DatabaseEngine
         work.Check();
         if (request.Mutations.Length != RemoteTransferPeerProtocol.SingleMutation
             || request.Mutations[RemoteTransferPeerProtocol.FirstMutation] is not AcceptQueueTransfer accept)
-        { return null; }
+        {
+            return null;
+        }
         work.ChargeBytes(NativeSerialization.Measure(request));
         return Store.Read(view => ReadRemoteTransferDispatch(work.CreateView(view), principalId, request, accept, work));
     }
@@ -29,12 +31,16 @@ public sealed partial class DatabaseEngine
         ValidateTransferDestination(accept.DestinationQueue, request.Partition);
         RequireTransferAdministrator(principal);
         if (accept.IntentToken is null)
-        { throw Errors.Fail(ErrorCode.Validation, TransferInvalidMessage); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, TransferInvalidMessage);
+        }
         var claims = Verify<RemoteTransferIntentClaims>(accept.IntentToken, Limits.MaxBatchBytes);
         ValidateIntentClaims(claims, accept.DestinationQueue, principal.Id);
         var current = CaptureRemoteTransferTarget(view, claims.Destination);
         if (current is null)
-        { return null; }
+        {
+            return null;
+        }
         RequireLocalResourceOwner(view, claims.Source.Partition);
         var intent = view.GetRecord<RemoteTransferIntentRecord>(RemoteTransferStorage.IntentKey(claims.Source, claims.TransferId))
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, RemoteTransferPeerProtocol.Unavailable);
@@ -42,7 +48,9 @@ public sealed partial class DatabaseEngine
         if (intent.IntentToken != accept.IntentToken || intent.PrincipalId != principal.Id
             || intent.RemoteTarget is null
             || !PhysicalOwnerEntryValidation.Same(intent.RemoteTarget.DestinationOwner, current.DestinationOwner))
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteTransferPeerProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteTransferPeerProtocol.Invalid);
+        }
         ValidateRemoteTransferOriginalSourceCommit(view, intent);
         var source = Resource(view, claims.Source.Partition, claims.Source.Queue, ResourceKind.WorkQueue);
         var destination = RemoteTransferDestinationResource(view, claims.Destination);

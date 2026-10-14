@@ -10,7 +10,7 @@ internal sealed class AnnSeedBuffer
     private const int ReferenceSlotBytes = 8;
     private const int FirstRecordIndex = 0;
 
-    private const string CorruptSource = "The canonical ANN seed source is inconsistent.";
+    internal const string CorruptSource = "The canonical ANN seed source is inconsistent.";
     private readonly int maximumRecords;
     private readonly long maximumOwnedBytes;
     private readonly long maximumPeakBytes;
@@ -44,9 +44,18 @@ internal sealed class AnnSeedBuffer
         records = Array.Empty<VectorRecord>();
     }
 
-    internal byte[] HashScratch { get; }
-    internal string? DependencySha256 { get; set; }
-    internal long? ProjectionCheckpoint { get; set; }
+    internal byte[] HashScratch
+    {
+        get;
+    }
+    internal string? DependencySha256
+    {
+        get; set;
+    }
+    internal long? ProjectionCheckpoint
+    {
+        get; set;
+    }
     private AnnSeedScope Scope => scope ?? throw Errors.Fail(ErrorCode.Corruption, CorruptSource);
 
     internal void InitializeScope(PrincipalRecord principal, PartitionRef partition, string collection,
@@ -84,17 +93,7 @@ internal sealed class AnnSeedBuffer
         EnsureCapacity();
         ReserveOwned(rowBytes);
         var id = CopyString(vector.DocumentId);
-        var values = new float[vector.Values.Length];
-        for (var index = FirstRecordIndex; index < values.Length; index++)
-        {
-            work.Charge();
-            var value = vector.Values[index];
-            if (!float.IsFinite(value))
-            {
-                throw Errors.Fail(ErrorCode.Corruption, CorruptSource);
-            }
-            values[index] = value;
-        }
+        var values = AnnSeedValueCopy.Copy(vector, work);
         records[count++] = new(id, Scope.Field, Scope.Space,
             ImmutableCollectionsMarshal.AsImmutableArray(values), vector.DocumentRevision);
     }
@@ -108,7 +107,10 @@ internal sealed class AnnSeedBuffer
         var immutableRecords = FinishRecords();
         work.Check();
         return new(scope, cut, immutableRecords, HashScratch, maximumOwned, peak, work)
-        { DependencySha256 = DependencySha256, ProjectionCheckpoint = ProjectionCheckpoint };
+        {
+            DependencySha256 = DependencySha256,
+            ProjectionCheckpoint = ProjectionCheckpoint
+        };
     }
 
     internal ImmutableArray<VectorRecord> FinishRecords()

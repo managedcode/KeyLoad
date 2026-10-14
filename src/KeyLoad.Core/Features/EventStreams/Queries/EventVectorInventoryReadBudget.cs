@@ -18,7 +18,9 @@ internal sealed class EventVectorInventoryReadBudget(IOptions<DatabaseLimits> op
         ArgumentNullException.ThrowIfNull(options);
         options.Value.Validate();
         if (count < EmptyRecords || count > options.Value.MaxResults)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, Exhausted); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, Exhausted);
+        }
     }
 
     internal void Observe(long byteCount)
@@ -27,10 +29,14 @@ internal sealed class EventVectorInventoryReadBudget(IOptions<DatabaseLimits> op
         var limits = options.Value;
         limits.Validate();
         if (byteCount < EmptyBytes)
-        { throw Errors.Fail(ErrorCode.Corruption, Exhausted); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Exhausted);
+        }
         records = checked(records + IncludedRecord);
         bytes = checked(bytes + byteCount);
         if (records > limits.MaxScanRecords || bytes > limits.MaxBatchBytes || bytes > limits.MaxQueryReadBytes)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, Exhausted); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, Exhausted);
+        }
     }
 }

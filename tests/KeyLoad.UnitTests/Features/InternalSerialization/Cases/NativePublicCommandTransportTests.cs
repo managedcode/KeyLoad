@@ -1,6 +1,6 @@
 using System.Text.Json;
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 using KeyLoad.UnitTests.Features.ClusterRouting;
 
@@ -42,7 +42,9 @@ internal sealed class NativePublicCommandTransportTests
     {
         using var document = JsonDocument.Parse(operation.PayloadJson);
         var arguments = new Dictionary<string, JsonElement>
-        { [McpCatalogProtocol.Request] = document.RootElement.Clone() };
+        {
+            [McpCatalogProtocol.Request] = document.RootElement.Clone()
+        };
         if (operation.Kind == OperationKind.Batch)
         {
             return McpArgumentDecoder.Command<CommandRequest>(arguments, operation.Kind, value => value.CommandId,

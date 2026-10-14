@@ -13,12 +13,21 @@ internal sealed class SqlOperationCommentBudgetTests
             + SqlOperationCommentTestData.PlainCall);
         var bytes = Encoding.UTF8.GetByteCount(request.Sql);
         await SqlOperationTestData.Same(SqlOperationTestData.Compile(request,
-                SqlOperationTestData.Limits with { MaxQueryBytes = bytes }),
+                SqlOperationTestData.Limits with
+                {
+                    MaxQueryBytes = bytes
+                }),
             SqlOperationTestData.Find(McpCatalogExpectations.QueryCapabilities).Decode(null));
         await SqlOperationTestData.Reject(request, ErrorCode.BudgetExceeded,
-            SqlOperationTestData.Limits with { MaxQueryBytes = bytes - SqlOperationCommentTestData.BoundaryStep });
+            SqlOperationTestData.Limits with
+            {
+                MaxQueryBytes = bytes - SqlOperationCommentTestData.BoundaryStep
+            });
         await SqlOperationTestData.Reject(request, ErrorCode.BudgetExceeded,
-            SqlOperationTestData.Limits with { MaxQueryBytes = request.Sql.Length });
+            SqlOperationTestData.Limits with
+            {
+                MaxQueryBytes = request.Sql.Length
+            });
     }
 
     [Test]
@@ -38,7 +47,10 @@ internal sealed class SqlOperationCommentBudgetTests
     {
         var request = SqlOperationCommentTestData.Request(SqlOperationCommentTestData.Block
             + SqlOperationCommentTestData.PlainCall + SqlOperationCommentTestData.Block);
-        var limits = SqlOperationTestData.Limits with { MaxQueryTokens = SqlOperationCommentTestData.CallTokens };
+        var limits = SqlOperationTestData.Limits with
+        {
+            MaxQueryTokens = SqlOperationCommentTestData.CallTokens
+        };
         var budget = new global::KeyLoad.Core.ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(SqlOperationTestData.Limits));
         using var reader = new global::KeyLoad.Features.QueryExecution.ScriptDomBoundedReader(request.Sql, budget.Check);
         var parser = new global::Microsoft.SqlServer.TransactSql.ScriptDom.TSql180Parser(true,
@@ -48,7 +60,10 @@ internal sealed class SqlOperationCommentBudgetTests
         global::KeyLoad.Features.QueryExecution.ScriptDomTokenBounds.Require(tokens, limits, budget.Check);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() =>
             global::KeyLoad.Features.QueryExecution.ScriptDomTokenBounds.Require(tokens,
-                limits with { MaxQueryTokens = SqlOperationCommentTestData.CallTokens - SqlOperationCommentTestData.BoundaryStep }, budget.Check)).Code)
+                limits with
+                {
+                    MaxQueryTokens = SqlOperationCommentTestData.CallTokens - SqlOperationCommentTestData.BoundaryStep
+                }, budget.Check)).Code)
             .IsEqualTo(ErrorCode.BudgetExceeded);
         using var terminated = new global::KeyLoad.Features.QueryExecution.ScriptDomBoundedReader(
             request.Sql + SqlOperationCommentTestData.Semicolon, budget.Check);

@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Replication;
 
 namespace KeyLoad.UnitTests;
@@ -28,7 +28,11 @@ internal sealed class ReplicaControlBarrierSecurityTests
     [Test]
     public async Task FullControlPoolRejectsControlReadsButAdmitsApplicationRead()
     {
-        using var fixture = new ReplicaSecurityFixture(new() { CriticalPerVoter = 1, ReadBarrierPerVoter = 1 });
+        using var fixture = new ReplicaSecurityFixture(new()
+        {
+            CriticalPerVoter = 1,
+            ReadBarrierPerVoter = 1
+        });
         fixture.Receiver.VerifyRequest(fixture.Vote());
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => fixture.Receiver.VerifyRequest(
             fixture.Request(ReplicaRpc.ControlReadBarrier, string.Empty))).Code).IsEqualTo(ErrorCode.ResourceExhausted);
@@ -42,9 +46,15 @@ internal sealed class ReplicaControlBarrierSecurityTests
     [Arguments(DuplicateStrings)]
     public async Task MalformedControlPayloadCannotConsumeReserve(string payload)
     {
-        using var fixture = new ReplicaSecurityFixture(new() { CriticalPerVoter = 1 });
+        using var fixture = new ReplicaSecurityFixture(new()
+        {
+            CriticalPerVoter = 1
+        });
         var request = fixture.Request(ReplicaRpc.ControlReadBarrier, string.Empty);
-        request = fixture.Resign(request with { Payload = ReplicaTransportProtocol.Utf8.GetBytes(payload) });
+        request = fixture.Resign(request with
+        {
+            Payload = ReplicaTransportProtocol.Utf8.GetBytes(payload)
+        });
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => fixture.Receiver.VerifyRequest(request)).Code)
             .IsEqualTo(ErrorCode.Validation);
         fixture.Receiver.VerifyRequest(fixture.Vote());

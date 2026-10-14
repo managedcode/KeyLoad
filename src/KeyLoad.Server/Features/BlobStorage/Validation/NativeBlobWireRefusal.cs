@@ -16,16 +16,22 @@ internal static class NativeBlobWireRefusal
             || request.DestinationVoter != original.DestinationVoter
             || request.DestinationSiloAddress != original.DestinationSiloAddress || reply.Nonce != request.Nonce
             || !Exact(request.SourceOwner, original.SourceOwner) || !Exact(request.DestinationOwner, original.DestinationOwner))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         if (reply.Error is not null)
         {
             if (reply.Error != ErrorCode.Unauthenticated || reply.SafeDetail != RemoteModelNativeProtocol.Unavailable
                 || !reply.Payload.IsEmpty || reply.Signature is not { Length: EmptySignatureLength })
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             return;
         }
         if (reply.SafeDetail is not null || reply.Payload.IsEmpty)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         var changed = NativeSerialization.Deserialize<RemoteDocumentTransportEnvelope>(request.Payload.Span).ControlledBlob
             ?? throw Invalid();
         var inner = NativeSerialization.Deserialize<RemoteDocumentReplyV1>(reply.Payload.Span);
@@ -33,7 +39,9 @@ internal static class NativeBlobWireRefusal
             || inner.Error != ErrorCode.Unauthenticated || inner.SafeDetail != RemoteDocumentProtocol.InvalidProof
             || inner.Result is not null || inner.QueryLeaf is not null || inner.Controlled is not null
             || inner.ControlledBlob is not null || inner.SearchLeaf is not null || inner.QueueTransfer is not null)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
     }
     private static bool Exact<T>(T first, T second)
         => NativeSerialization.Serialize(first).AsSpan().SequenceEqual(NativeSerialization.Serialize(second));

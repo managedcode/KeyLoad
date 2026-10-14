@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 using KeyLoad.Query;
 using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.Server.Features.DocumentStorage;
@@ -17,7 +17,9 @@ internal sealed class RemoteAnnReadRouter(OrleansNode node, PartitionHost partit
     {
         var execution = configured.Value;
         if (!execution.EnableApproximateSearch)
-        { throw Errors.Fail(ErrorCode.UnsupportedCapability, AnnSearchProtocol.Disabled); }
+        {
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, AnnSearchProtocol.Disabled);
+        }
         var selected = RemoteAnnReadSelection.Decode(kind, payload);
         var work = new ReadExecutionBudget(limits, clock, cancellationToken);
         QueryResultBudgetPolicy.Constrain(work, execution);
@@ -41,7 +43,9 @@ internal sealed class RemoteAnnReadRouter(OrleansNode node, PartitionHost partit
             {
                 var remaining = envelope.ExpiresAt - clock.GetUtcNow();
                 if (remaining <= TimeSpan.Zero)
-                { throw Errors.Fail(ErrorCode.TokenInvalidated, AnnProjectionObservationProtocol.Invalid); }
+                {
+                    throw Errors.Fail(ErrorCode.TokenInvalidated, AnnProjectionObservationProtocol.Invalid);
+                }
                 using var deadline = new CancellationTokenSource(remaining, clock);
                 using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken,
                     operation.ShutdownToken, deadline.Token);

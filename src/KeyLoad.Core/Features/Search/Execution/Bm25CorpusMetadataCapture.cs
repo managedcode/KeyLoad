@@ -25,7 +25,10 @@ public sealed partial class DatabaseEngine
             ReadOutboxHead(view, request.Partition).Tail, Store.Position,
             NativeSerialization.Deserialize<long>(appliedBytes), identity.ReadGeneration,
             identity.Incarnation, statistics, commandId, string.Empty);
-        current = current with { PayloadDigest = Bm25CorpusDigest.Compute(current, placement, work) };
+        current = current with
+        {
+            PayloadDigest = Bm25CorpusDigest.Compute(current, placement, work)
+        };
         var phase = new Bm25CorpusPublicationPhaseCommand(commandId, current, expectedGeneration,
             originalExpiry, placement);
         Bm25CorpusShape.RequirePhase(phase, Limits);

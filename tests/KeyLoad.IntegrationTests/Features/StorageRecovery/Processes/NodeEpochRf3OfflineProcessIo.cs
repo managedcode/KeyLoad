@@ -16,7 +16,9 @@ internal static class NodeEpochRf3OfflineProcessIo
         while ((read = await stream.ReadAsync(buffer, CancellationToken.None).ConfigureAwait(false)) != 0)
         {
             if (output.Length + read > NodeEpochRf3OfflineProtocol.MaximumOutputBytes)
-            { throw new InvalidOperationException(NodeEpochRf3OfflineProtocol.OutputExceeded); }
+            {
+                throw new InvalidOperationException(NodeEpochRf3OfflineProtocol.OutputExceeded);
+            }
             await output.WriteAsync(buffer.AsMemory(0, read), CancellationToken.None).ConfigureAwait(false);
         }
         return OutputEncoding.GetString(output.GetBuffer().AsSpan(0, checked((int)output.Length)));
@@ -28,14 +30,22 @@ internal static class NodeEpochRf3OfflineProcessIo
         while (!exit.IsCompleted)
         {
             if (output.IsFaulted || output.IsCanceled)
-            { _ = await output.ConfigureAwait(false); }
+            {
+                _ = await output.ConfigureAwait(false);
+            }
             if (error.IsFaulted || error.IsCanceled)
-            { _ = await error.ConfigureAwait(false); }
+            {
+                _ = await error.ConfigureAwait(false);
+            }
             var pending = new List<Task> { exit };
             if (!output.IsCompleted)
-            { pending.Add(output); }
+            {
+                pending.Add(output);
+            }
             if (!error.IsCompleted)
-            { pending.Add(error); }
+            {
+                pending.Add(error);
+            }
             _ = await Task.WhenAny(pending).WaitAsync(cancellationToken).ConfigureAwait(false);
         }
         await exit.WaitAsync(cancellationToken).ConfigureAwait(false);
@@ -49,7 +59,9 @@ internal static class NodeEpochRf3OfflineProcessIo
         try
         {
             if (!process.HasExited)
-            { process.Kill(entireProcessTree: true); }
+            {
+                process.Kill(entireProcessTree: true);
+            }
         }
         catch (Exception failure) when (failure is InvalidOperationException or System.ComponentModel.Win32Exception)
         {

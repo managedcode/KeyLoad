@@ -29,7 +29,10 @@ internal sealed class DistributedSearchOperation(DatabaseEngine database, Distri
         var statistics = Statistics(witnesses);
         var windows = DistributedSearchWorkFactory.WindowIds(partitions, budget);
         if (statisticsCaptured is not null)
-        { await statisticsCaptured(execution.Token).ConfigureAwait(false); budget.Check(); }
+        {
+            await statisticsCaptured(execution.Token).ConfigureAwait(false);
+            budget.Check();
+        }
         var candidateWork = DistributedSearchWorkFactory.Create(DistributedSearchPhase.Candidates, partitions,
             request.Search, witnesses, statistics, scope, windows, default, budget);
         var candidates = await RunAsync(DistributedSearchPhase.Candidates, candidateWork).ConfigureAwait(false);
@@ -59,7 +62,10 @@ internal sealed class DistributedSearchOperation(DatabaseEngine database, Distri
         budget.ChargeBytes(PartitionQueryRetention.CandidateArrayBytes(results.Length));
         var witnesses = ImmutableArray.CreateBuilder<DistributedTextWitnessV1>(results.Length);
         foreach (var result in results)
-        { budget.Check(); witnesses.Add(result.Witness); }
+        {
+            budget.Check();
+            witnesses.Add(result.Witness);
+        }
         return witnesses.MoveToImmutable();
     }
 
@@ -68,14 +74,19 @@ internal sealed class DistributedSearchOperation(DatabaseEngine database, Distri
         budget.ChargeBytes(PartitionQueryRetention.CandidateArrayBytes(witnesses.Length));
         var summaries = ImmutableArray.CreateBuilder<DistributedTextStatisticsV1>(witnesses.Length);
         foreach (var witness in witnesses)
-        { budget.Check(); summaries.Add(witness.Statistics); }
+        {
+            budget.Check();
+            summaries.Add(witness.Statistics);
+        }
         return DistributedTextStatisticsMerge.Combine(summaries.MoveToImmutable(), options, budget);
     }
 
     private ImmutableArray<GlobalBranchWindow> Branches(ImmutableArray<DistributedSearchLeafResultV1> results, bool text)
     {
         if (text ? request.Search.Text is null : request.Search.Vector is null)
-        { return []; }
+        {
+            return [];
+        }
         budget.ChargeBytes(PartitionQueryRetention.CandidateArrayBytes(results.Length));
         var windows = ImmutableArray.CreateBuilder<GlobalBranchWindow>(results.Length);
         foreach (var result in results)

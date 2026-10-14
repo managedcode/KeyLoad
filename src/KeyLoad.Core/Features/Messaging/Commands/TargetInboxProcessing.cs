@@ -10,7 +10,9 @@ public sealed partial class DatabaseEngine
     {
         var request = Payload<CommitInboxRequest>(operation);
         if (request.CommandId != operation.Id)
-        { throw Errors.Fail(ErrorCode.Validation, TargetInboxProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, TargetInboxProtocol.Invalid);
+        }
         return Result(CompleteTargetInbox(transaction, principal, request, operation.EvaluatedAt, position));
     }
 
@@ -26,9 +28,13 @@ public sealed partial class DatabaseEngine
         {
             _ = TargetInboxStorage.Capacity(transaction, request.Target, required: true);
             if (existing.IdentityFingerprint != identity || existing.Receipt is null || string.IsNullOrEmpty(existing.EffectsFingerprint))
-            { throw Errors.Fail(ErrorCode.Corruption, TargetInboxProtocol.Corrupt); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, TargetInboxProtocol.Corrupt);
+            }
             if (existing.EffectsFingerprint != fingerprint)
-            { throw Errors.Fail(ErrorCode.Conflict, TargetInboxProtocol.Conflict); }
+            {
+                throw Errors.Fail(ErrorCode.Conflict, TargetInboxProtocol.Conflict);
+            }
             ReauthorizeEffects(transaction, principal, request.Target.Partition, request.Effects);
             return new(existing.Receipt, true, existing.Receipt.Token);
         }

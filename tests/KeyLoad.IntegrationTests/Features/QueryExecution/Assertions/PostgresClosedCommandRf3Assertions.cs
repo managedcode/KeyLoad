@@ -24,7 +24,9 @@ internal static class PostgresClosedCommandRf3Assertions
                 var expected = reference == PostgresRf3State.Left ? state.Image.Left : state.Image.Right;
                 var sdk = await target.Sdk.GetAsync(reference, token);
                 if (allowed)
-                { await SqlRf3Protocol.EqualAsync(expected, await PublicReadAssertions.DocumentAsync(sdk)); }
+                {
+                    await SqlRf3Protocol.EqualAsync(expected, await PublicReadAssertions.DocumentAsync(sdk));
+                }
                 else
                 {
                     await Assert.That(sdk.IsFailed).IsTrue();
@@ -33,9 +35,13 @@ internal static class PostgresClosedCommandRf3Assertions
                 await afterRead();
                 var official = await target.Mcp.CallAsync(McpCallerTools.DocumentsGet, request, token);
                 if (allowed)
-                { await SqlRf3Protocol.EqualAsync(expected, (await PublicReadAssertions.DocumentAsync(official)).Value); }
+                {
+                    await SqlRf3Protocol.EqualAsync(expected, (await PublicReadAssertions.DocumentAsync(official)).Value);
+                }
                 else
-                { await McpCallerAssertions.ErrorAsync(official, ErrorCode.PermissionDenied, dispatched: true); }
+                {
+                    await McpCallerAssertions.ErrorAsync(official, ErrorCode.PermissionDenied, dispatched: true);
+                }
                 await afterRead();
             }
             return true;

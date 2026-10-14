@@ -27,7 +27,9 @@ internal static class EventVectorLocalReply
             replyBytes = EventVectorWorkEncoding.Encode(actualReply, encoding, work);
             var signature = originalLocalMac.Sign(replyBytes, reply: true);
             if (!originalLocalMac.Verify(replyBytes, signature, reply: true))
-            { throw Errors.Fail(ErrorCode.Unauthenticated, EventVectorRemoteProtocol.Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Unauthenticated, EventVectorRemoteProtocol.Invalid);
+            }
             decoded = encoding.DecodeAuthenticatedReply(replyBytes, call);
             EventVectorLocalCallAuthority.Require(call, authority, node, originalCancellationToken);
             work.Check();
@@ -41,9 +43,13 @@ internal static class EventVectorLocalReply
             if (!transferred)
             {
                 if (replyBytes is not null)
-                { CryptographicOperations.ZeroMemory(replyBytes); }
+                {
+                    CryptographicOperations.ZeroMemory(replyBytes);
+                }
                 if (decoded is not null)
-                { CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(decoded.OriginalNativeReply).Span); }
+                {
+                    CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(decoded.OriginalNativeReply).Span);
+                }
             }
         }
     }

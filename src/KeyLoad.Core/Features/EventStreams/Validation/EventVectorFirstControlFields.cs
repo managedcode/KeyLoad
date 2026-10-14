@@ -16,7 +16,9 @@ internal static class EventVectorFirstControlFields
         var firstOwner = phase.Action is EventVectorControlAction.Open or EventVectorControlAction.AdmitFirstIntent
             or EventVectorControlAction.CaptureFirstPhase or EventVectorControlAction.ReserveFirstDispatch;
         if (firstOwner != (phase.OriginalParentRequestId != Guid.Empty))
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
         var cleanup = phase.Action is EventVectorControlAction.AbandonFirstIssuance
             or EventVectorControlAction.CleanupAbandonedIssuance;
         if (cleanup != (request.OriginalFirstIssuancePublicCommandId != Guid.Empty)
@@ -26,7 +28,9 @@ internal static class EventVectorFirstControlFields
                 || request.ExpectedRevision != InitialRevision
                 || request.ExpectedCoverageGeneration != InitialRevision
                 || phase.OriginalFirstIssuancePublicCommandId != request.OriginalFirstIssuancePublicCommandId))
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
         if (IsIssuance(phase.Action)
             && (phase.ExpectedMapRevision != InitialRevision
                 || phase.ExpectedCoverageGeneration != InitialRevision
@@ -35,9 +39,13 @@ internal static class EventVectorFirstControlFields
                 || phase.ExpectedPendingSourcePhaseId is not null
                 || !phase.OriginalEncodedEntries.IsEmpty || !phase.OriginalEntryChecksum.IsEmpty
                 || !phase.OriginalCleanupFrontierBytes.IsEmpty))
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
         if (!cleanup)
-        { EventVectorFirstPhaseCarrier.Require(phase, admission); }
+        {
+            EventVectorFirstPhaseCarrier.Require(phase, admission);
+        }
     }
 }
 

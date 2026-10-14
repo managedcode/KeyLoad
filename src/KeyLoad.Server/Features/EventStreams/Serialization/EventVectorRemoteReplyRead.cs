@@ -18,14 +18,18 @@ internal static class EventVectorRemoteReplyRead
         originalCancellationToken.ThrowIfCancellationRequested();
         if (payload.IsEmpty || payload.Length > encoding.MaximumBytes
             || signature is not { Length: RemoteDocumentProtocol.SignatureCharacters })
-        { throw Errors.Fail(ErrorCode.Unauthenticated, EventVectorRemoteProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, EventVectorRemoteProtocol.Invalid);
+        }
         work.ChargeBytes(checked(payload.Length + Encoding.UTF8.GetByteCount(signature)));
         var originalBytes = payload.ToArray();
         var transferred = false;
         try
         {
             if (!actualReceiverMac.Verify(originalBytes, signature, reply: true))
-            { throw Errors.Fail(ErrorCode.Unauthenticated, EventVectorRemoteProtocol.Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Unauthenticated, EventVectorRemoteProtocol.Invalid);
+            }
             var reply = encoding.DecodeAuthenticatedReply(originalBytes, originalCall);
             originalCancellationToken.ThrowIfCancellationRequested();
             var result = new EventVectorMacCheckedReply(reply, originalBytes, signature);
@@ -35,7 +39,9 @@ internal static class EventVectorRemoteReplyRead
         finally
         {
             if (!transferred)
-            { CryptographicOperations.ZeroMemory(originalBytes); }
+            {
+                CryptographicOperations.ZeroMemory(originalBytes);
+            }
         }
     }
 }

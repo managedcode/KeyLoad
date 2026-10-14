@@ -27,10 +27,14 @@ internal static class SampleChunkWorkDiscovery
                         var hint = SampleChunkWorkEligibility.Read(database, owned, scope.Partition, scope.Set,
                             scope.Series, scope.Id, database.EvaluationClock.GetUtcNow(), budget);
                         if (hint is not null)
-                        { hints.Add(hint); }
+                        {
+                            hints.Add(hint);
+                        }
                     }
                     catch (KeyLoadException failure) when (failure.Code is ErrorCode.Unauthenticated or ErrorCode.PermissionDenied)
-                    { return true; }
+                    {
+                        return true;
+                    }
                     return true;
                 }, afterKey: afterKey, cancellationToken: cancellationToken);
             budget.Check();

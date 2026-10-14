@@ -23,11 +23,15 @@ internal static class NativeTextOnlineCrashScenario
     internal static async Task<bool> TryRunAsync(string[] args)
     {
         if (args.Length != ExpectedArgumentCount || args[ModeArgument] is not (Prepare or Fault or Recover or Verify))
-        { return false; }
+        {
+            return false;
+        }
         var stage = Enum.Parse<NativeTextFaultStage>(args[StageArgument], ignoreCase: false);
         if (stage is not (NativeTextFaultStage.CanonicalOnlinePublicationAcknowledged
             or NativeTextFaultStage.OnlineCatalogPendingFlushed))
-        { throw new InvalidOperationException(NativeTextIncrementalCrashProtocol.Invalid); }
+        {
+            throw new InvalidOperationException(NativeTextIncrementalCrashProtocol.Invalid);
+        }
         var boundary = new NativeTextCrashBoundary(stage) { Armed = args[ModeArgument] == Fault };
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>

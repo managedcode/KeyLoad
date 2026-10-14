@@ -35,7 +35,9 @@ internal sealed class TwoRf3MembershipEnvironmentTests
             var builder = CreateBuilder();
             var resources = TwoRf3ClusterResources.Add(builder, CreateProfile(), fixture.DataRoot);
             TwoRf3RemoteReadResources.Configure(Options.Create(new AppHostControlOptions
-            { RemoteDocumentReads = true }), resources, registerOwners: true);
+            {
+                RemoteDocumentReads = true
+            }), resources, registerOwners: true);
             for (var index = 0; index < resources.Length; index++)
             {
                 var checks = resources[index].Resource.Annotations.OfType<HealthCheckAnnotation>()
@@ -63,7 +65,9 @@ internal sealed class TwoRf3MembershipEnvironmentTests
                     new DistributedApplicationExecutionContext(DistributedApplicationOperation.Run),
                     NullLogger.Instance, TestContext.Current!.Execution.CancellationToken);
             if (configuration.Exception is not null)
-            { throw configuration.Exception; }
+            {
+                throw configuration.Exception;
+            }
             await VerifyBoundResourceAsync(configuration.EnvironmentVariables
                 .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.Ordinal), index);
         }
@@ -173,7 +177,9 @@ internal sealed class TwoRf3MembershipEnvironmentTests
     {
         var bytes = RandomNumberGenerator.GetBytes(PhysicalGroupTrustProtocol.SecretBytes);
         try
-        { return Convert.ToBase64String(bytes); }
+        {
+            return Convert.ToBase64String(bytes);
+        }
         finally { CryptographicOperations.ZeroMemory(bytes); }
     }
 }

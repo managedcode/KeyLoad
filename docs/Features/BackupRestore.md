@@ -520,10 +520,10 @@ The source implementation uses ADR-123 stages above and the following exact resp
 - `src/KeyLoad.Core/Features/BackupRestore/Validation/ClusterBackupRequestValidation.cs`
 - `src/KeyLoad.Core/Features/BackupRestore/Validation/ClusterRestoreMappingValidation.cs`
 - `src/KeyLoad.Core/Features/BackupRestore/Validation/ClusterRestoreOperatorValidation.cs`
-- `src/KeyLoad.Orleans/Features/BackupRestore/Queries/ClusterBackupOwnerReadExecution.cs`
-- `src/KeyLoad.Orleans/Features/ClusterRouting/Contracts/INodeAdministration.cs`
+- `src/KeyLoad.Clustering/Features/BackupRestore/Queries/ClusterBackupOwnerReadExecution.cs`
+- `src/KeyLoad.Clustering/Features/ClusterRouting/Contracts/INodeAdministration.cs`
 - `src/KeyLoad.Orleans/Features/ClusterRouting/Grains/DatabaseReadGrain.cs`
-- `src/KeyLoad.Orleans/Features/ClusterRouting/Models/GrainReadKind.cs`
+- `src/KeyLoad.Clustering/Features/ClusterRouting/Models/GrainReadKind.cs`
 - `src/KeyLoad.Server/Features/BackupRestore/Authentication/ClusterBackupCredentialCapability.cs`
 - `src/KeyLoad.Server/Features/BackupRestore/Execution/ClusterBackupOwnerArchive.cs`
 - `src/KeyLoad.Server/Features/BackupRestore/Transport/ClusterBackupApi.cs`
@@ -1469,3 +1469,7 @@ The whole RestorePublicationRaceTests operation retains a genuine verified catal
 Close and join the same original file descriptor before removing only that fixture-owned file. Preserve every primary/repair/disposal error; no healthy work follows a failed ledger. Repair at the SAME target/archive path reuses the exact frozen mapping, incarnation and signing tuple, source-owned validated options and evaluation clock. Restore full independently literal seed models and paused fresh identity/position, add the existing real healthy storage mutation and preserve complete target identity/raw bytes/original outcomes through two joined cold owners. Native absent/empty declaration Args remain literal; no runtime UID/count is inferred. This covers the original clean-publication branch, not an adversarial OS race capability, new production behavior, CLI/RF3/Linux qualification or a complete backup acceptance claim.
 
 The authentic mixed-cut regression preserves each captured eventing phase independently: the original three-entry outbox precedes the separate acknowledged document mutation, and the later cut has four entries. Replaying either retained command must preserve its whole original outcome, source position and raw image. Earlier and later restores retain their respective complete document/outbox phase through healthy native writes and both cold owners.
+
+### Numeric responsibility extraction source candidate
+
+Native restore-slot source-prefix preparation remains before opening any store, with the same published-prefix refusal and source identity write; extraction does not change callback, cancellation, joined store disposal, terminal cut or publication ordering. Compiler and full existing operation qualification remain required.

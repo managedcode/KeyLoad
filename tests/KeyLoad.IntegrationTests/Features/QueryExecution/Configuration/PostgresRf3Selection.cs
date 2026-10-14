@@ -16,37 +16,66 @@ internal sealed record PostgresRf3Selection(int QueryDialect, bool ObserveCancel
     private const string Tcp = "tcp";
     private const string True = "true";
 
-    internal RequestCqrsProbeFixture? Controls { get; private set; }
-    internal PostgresErrorReceiverControl? ErrorDelivery { get; private set; }
-    internal bool RetainRoot { get; private set; }
+    internal RequestCqrsProbeFixture? Controls
+    {
+        get; private set;
+    }
+    internal PostgresErrorReceiverControl? ErrorDelivery
+    {
+        get; private set;
+    }
+    internal bool RetainRoot
+    {
+        get; private set;
+    }
 
     internal void RetainEvidence()
-    { RetainRoot = true; Controls?.RetainEvidence(); ErrorDelivery?.RetainEvidence(); }
+    {
+        RetainRoot = true;
+        Controls?.RetainEvidence();
+        ErrorDelivery?.RetainEvidence();
+    }
 
     internal string[] Prepare(string root, string[] arguments)
     {
         if (ObserveErrorDelivery && !ObserveCancellation)
-        { throw new InvalidOperationException(PostgresErrorReceiverProtocol.Invalid); }
+        {
+            throw new InvalidOperationException(PostgresErrorReceiverProtocol.Invalid);
+        }
         if (!ObserveCancellation)
-        { return arguments; }
+        {
+            return arguments;
+        }
         Controls = RequestCqrsProbeFixture.Create(root, Guid.NewGuid());
         if (ObserveErrorDelivery)
-        { ErrorDelivery = new PostgresErrorReceiverControl(root, Guid.ParseExact(Controls.SessionId, "N")); }
+        {
+            ErrorDelivery = new PostgresErrorReceiverControl(root, Guid.ParseExact(Controls.SessionId, "N"));
+        }
         return [.. arguments, ProbeEnabled, ProbeRoot + Controls.Root, ProbeSession + Controls.SessionId];
     }
 
     internal async Task JoinAfterResourcesAsync(bool resourcesJoined, List<Exception> failures)
     {
         if (Controls is null && ErrorDelivery is null)
-        { return; }
+        {
+            return;
+        }
         if (!resourcesJoined || failures.Count != PostgresRf3Protocol.FirstColumn)
-        { RetainEvidence(); }
+        {
+            RetainEvidence();
+        }
         if (Controls is not null)
-        { await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(Controls.DisposeAfterResourcesJoinedAsync, failures); }
+        {
+            await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(Controls.DisposeAfterResourcesJoinedAsync, failures);
+        }
         if (failures.Count != PostgresRf3Protocol.FirstColumn)
-        { RetainEvidence(); }
+        {
+            RetainEvidence();
+        }
         if (ErrorDelivery is not null)
-        { await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => ErrorDelivery.JoinAfterResourcesAsync(resourcesJoined), failures); }
+        {
+            await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => ErrorDelivery.JoinAfterResourcesAsync(resourcesJoined), failures);
+        }
     }
 
     private const string ProbeEnabled = "--KeyLoadTests:RequestCqrsProbe:Enabled=true";

@@ -49,9 +49,18 @@ internal sealed class BackupIndexedDocumentDedupFixture : IDisposable
     internal const long NoPriorRevision = 0;
     internal static readonly Guid MembershipCommandId = Guid.Parse("c21ccfc6-6aac-4539-bd0f-c2d4e4fd9c1c");
 
-    internal string BackupDirectory { get; }
-    internal string TargetDirectory { get; }
-    internal TestDatabase Source { get; }
+    internal string BackupDirectory
+    {
+        get;
+    }
+    internal string TargetDirectory
+    {
+        get;
+    }
+    internal TestDatabase Source
+    {
+        get;
+    }
     internal DatabaseEngine RestoredDatabase { get; private set; } = null!;
     internal ZoneTreeStore TargetStore => restoredStore ?? throw new InvalidOperationException("The restored store is closed.");
     internal PartitionRef Partition => Source.Partition;
@@ -157,7 +166,9 @@ internal sealed class BackupIndexedDocumentDedupFixture : IDisposable
             finally
             {
                 if (Directory.Exists(root))
-                { Directory.Delete(root, recursive: true); }
+                {
+                    Directory.Delete(root, recursive: true);
+                }
             }
         }
     }

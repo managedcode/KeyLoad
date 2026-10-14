@@ -36,10 +36,14 @@ internal static class PostgresRf3Capacity
                         }, failures);
                     }, failures);
                     if (failures.Count != PostgresRf3Protocol.FirstColumn)
-                    { return; }
+                    {
+                        return;
+                    }
                     await global::TUnit.Assertions.Assert.That(await PostgresRf3Assertions.ImageAsync(root, token)).IsEqualTo(image);
                     foreach (var command in commands)
-                    { await command.UnprepareAsync(token); }
+                    {
+                        await command.UnprepareAsync(token);
+                    }
                     await PostgresRf3Assertions.PageAsync(state,
                         await wire.ExecuteAsync<QueryPage>(state.Sql, [], prepared: true, token));
                     await global::TUnit.Assertions.Assert.That(await PostgresRf3Assertions.ImageAsync(root, token)).IsEqualTo(image);

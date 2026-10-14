@@ -49,12 +49,6 @@ public sealed partial class DatabaseEngine
 
     private const string SubscriptionDeliveryTokenPurpose = "subscription-delivery";
 
-    private static byte[] GroupKey(string space, SubscriptionRef subscription, params object?[] suffix)
-    {
-        var source = subscription.Source;
-        return KeySpace.Partition(space, source.Partition, new object?[] { source.Resource, source.Kind.ToString(), source.StreamId,
-            source.Generation, subscription.GroupId }.Concat(suffix).ToArray());
-    }
     private static GroupState Group(IKeyValueView view, SubscriptionRef subscription)
         => view.GetRecord<GroupState>(GroupKey(SubscriptionGroupsSubscriptionKeySpace, subscription)) ?? throw Errors.Fail(ErrorCode.NotFound, SubscriptionGroupsSubscriptionGroupIsUnavailableDetail);
     private ResourceDefinition AuthorizeSubscription(IKeyValueView view, PrincipalRecord principal, SubscriptionRef subscription,
@@ -123,7 +117,9 @@ public sealed partial class DatabaseEngine
         Authorization.RequireWorkerInput(dataPrincipal, resource);
         var key = GroupKey(SubscriptionGroupsSubscriptionKeySpace, request.Subscription);
         if (request.ExpectedGeneration is not null)
-        { return UpdateSubscriptionDefinition(tx, request, definition, key); }
+        {
+            return UpdateSubscriptionDefinition(tx, request, definition, key);
+        }
         if (tx.GetRecord<GroupState>(key) is { } existing)
         {
             if (JsonData.Fingerprint(existing.Definition) != JsonData.Fingerprint(definition))
@@ -177,7 +173,10 @@ public sealed partial class DatabaseEngine
             throw Errors.Fail(ErrorCode.Conflict, SubscriptionGroupsParkedSubscriptionRequiresAnExplicitSeekOrNewGroupBeforeResumingDetail);
         }
 
-        state = state with { Paused = request.Paused };
+        state = state with
+        {
+            Paused = request.Paused
+        };
         tx.PutRecord(GroupKey(SubscriptionGroupsSubscriptionKeySpace, request.Subscription), state);
         return GroupInfo(tx, request.Subscription, state);
     }
@@ -200,7 +199,10 @@ public sealed partial class DatabaseEngine
             checkpoint++;
             tx.Delete(key);
         }
-        return state with { Checkpoint = checkpoint };
+        return state with
+        {
+            Checkpoint = checkpoint
+        };
     }
     private ReceiveSubscriptionResult ReceiveSubscription(IAtomicTransaction tx, PrincipalRecord principal, ReceiveSubscriptionRequest request,
         DateTimeOffset now, long position)
@@ -260,7 +262,10 @@ public sealed partial class DatabaseEngine
             AvailableAt = null
         };
         tx.PutRecord(key, delivery);
-        issuedState = state with { IssuedPosition = long.Max(state.IssuedPosition, sequence) };
+        issuedState = state with
+        {
+            IssuedPosition = long.Max(state.IssuedPosition, sequence)
+        };
         var subscription = request.Subscription;
         var token = Sign(new GroupClaims(SubscriptionDeliveryTokenPurpose, Store.Identity.Incarnation, subscription, state.Generation, state.OwnershipEpoch,
             sequence, delivery.LeaseVersion, principal.Id, principal.PolicyEpoch, dataPrincipal.PolicyEpoch));
@@ -322,16 +327,30 @@ public sealed partial class DatabaseEngine
                     throw Errors.Fail(ErrorCode.Validation, SubscriptionGroupsSubscriptionRenewalLeaseIsInvalidDetail);
                 }
 
-                delivery = delivery with { LeaseUntil = now.AddSeconds(seconds) };
+                delivery = delivery with
+                {
+                    LeaseUntil = now.AddSeconds(seconds)
+                };
                 break;
             case DeliveryAction.Ack:
-                delivery = delivery with { State = GroupDeliveryState.Acked, LeaseUntil = null, PrincipalId = null };
+                delivery = delivery with
+                {
+                    State = GroupDeliveryState.Acked,
+                    LeaseUntil = null,
+                    PrincipalId = null
+                };
                 tx.PutRecord(GroupKey(SubscriptionGroupsSubscriptionCompletionKeySpace, request.Subscription, state.Generation, delivery.Position),
                     new SubscriptionCompletion(state.Generation, delivery.Position, SubscriptionGroupsAckedCompletion, principal.PolicyEpoch));
                 break;
             case DeliveryAction.Nack:
                 var delay = Math.Min(policy.RetryMaxMilliseconds, policy.RetryBaseMilliseconds * Math.Pow(SubscriptionGroupsSubscriptionRetryExponentialBase, Math.Min(delivery.Attempts - SubscriptionGroupsAdjacentElementOffset, messagingExecution.MaximumRetryExponent)));
-                delivery = delivery with { State = GroupDeliveryState.Pending, AvailableAt = now.AddMilliseconds(delay), LeaseUntil = null, PrincipalId = null };
+                delivery = delivery with
+                {
+                    State = GroupDeliveryState.Pending,
+                    AvailableAt = now.AddMilliseconds(delay),
+                    LeaseUntil = null,
+                    PrincipalId = null
+                };
                 break;
             default:
                 throw Errors.Fail(ErrorCode.Validation, SubscriptionGroupsSubscriptionDeliveryActionIsInvalidDetail);
@@ -353,7 +372,14 @@ public sealed partial class DatabaseEngine
 
         var claims = ValidateGroupClaims(tx, principal, request.Subscription, request.Token, now);
         var inboxKey = GroupKey(SubscriptionGroupsSubscriptionInboxKeySpace, request.Subscription, claims.Position, request.HandlerScope, request.ExecutionGeneration);
-        var fingerprint = JsonData.Fingerprint(new { request.Subscription, claims.Position, request.HandlerScope, request.ExecutionGeneration, request.Effects });
+        var fingerprint = JsonData.Fingerprint(new
+        {
+            request.Subscription,
+            claims.Position,
+            request.HandlerScope,
+            request.ExecutionGeneration,
+            request.Effects
+        });
         if (tx.GetRecord<InboxRecord>(inboxKey) is { } completed)
         {
             if (completed.Fingerprint != fingerprint)
@@ -370,7 +396,10 @@ public sealed partial class DatabaseEngine
         }
         var ack = CompleteSubscriptionDelivery(tx, principal, new(request.CommandId, request.Subscription, request.Token, DeliveryAction.Ack), now, position);
         var effects = ApplyMutations(tx, principal, request.Subscription.Source.Partition, request.Effects, now, position);
-        var receipt = ack with { Mutations = effects.Concat(ack.Mutations).ToImmutableArray() };
+        var receipt = ack with
+        {
+            Mutations = effects.Concat(ack.Mutations).ToImmutableArray()
+        };
         tx.PutRecord(inboxKey, new InboxRecord(fingerprint, receipt));
         return new(receipt, false, receipt.Token);
     }
@@ -383,9 +412,13 @@ public sealed partial class DatabaseEngine
         var now = Clock.GetUtcNow();
         var principal = Principal(view, principalId, now);
         try
-        { AuthorizeSubscription(view, principal, subscription, Capability.SubscriptionsManage, now); }
+        {
+            AuthorizeSubscription(view, principal, subscription, Capability.SubscriptionsManage, now);
+        }
         catch (KeyLoadException exception) when (exception.Code == ErrorCode.PermissionDenied)
-        { AuthorizeSubscription(view, principal, subscription, Capability.SubscriptionsConsume, now); }
+        {
+            AuthorizeSubscription(view, principal, subscription, Capability.SubscriptionsConsume, now);
+        }
         return GroupInfo(view, subscription, Group(view, subscription));
     });
 }

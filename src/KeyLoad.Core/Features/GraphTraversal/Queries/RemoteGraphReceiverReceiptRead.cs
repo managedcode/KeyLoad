@@ -15,7 +15,9 @@ public sealed partial class DatabaseEngine
         ArgumentNullException.ThrowIfNull(work);
         work.Check();
         if (request.Intent?.Content is null || request.OriginalReceiveCommandId == Guid.Empty)
-        { throw Errors.Fail(ErrorCode.Validation, RemoteGraphProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, RemoteGraphProtocol.Invalid);
+        }
         var result = Store.Read(view => CaptureRemoteGraphReceiverReceipt(work.CreateView(view), principalId, request));
         work.CheckResult(result);
         return result;
@@ -29,29 +31,43 @@ public sealed partial class DatabaseEngine
         Authorization.Require(principal, content.Destination.Partition, content.Graph, Capability.GraphWrite);
         _ = Resource(view, content.Destination.Partition, content.Graph, ResourceKind.Graph);
         if (!content.Deleted)
-        { _ = VisibleVertex(view, principal, content.Destination); }
+        {
+            _ = VisibleVertex(view, principal, content.Destination);
+        }
         var scope = new CommandOutcomePartitionScope(CommandOutcomeScopeKind.Partition, content.Destination.Partition);
         var selected = CommandOutcomeKeyResolver.Select(view, principal.Id, request.OriginalReceiveCommandId, scope);
         var outcome = selected.Outcome ?? throw Errors.Fail(ErrorCode.RecoveryRequired, RemoteGraphProtocol.Invalid);
         if (outcome.PolicyEpoch != principal.PolicyEpoch)
-        { throw Errors.Fail(ErrorCode.PermissionDenied, ChangedOutcomePrincipalPolicyMessage); }
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, ChangedOutcomePrincipalPolicyMessage);
+        }
         if (outcome.Incarnation != Store.Identity.Incarnation)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, EarlierOutcomeIncarnationMessage); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, EarlierOutcomeIncarnationMessage);
+        }
         if (outcome.Result is null)
-        { throw Errors.Fail(ErrorCode.Corruption, RemoteGraphProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, RemoteGraphProtocol.Invalid);
+        }
         if (outcome.Result.Error is not null)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, RemoteGraphProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, RemoteGraphProtocol.Invalid);
+        }
         var retained = outcome.Result.Get<RemoteGraphReceiverResultV1>();
         if (retained?.Receipt is null || retained.Original?.SourceProof?.Intent is null
             || retained.Original.CommandId != request.OriginalReceiveCommandId
             || retained.Receipt.TargetReceipt?.CommandId != request.OriginalReceiveCommandId
             || !NativeSerialization.Serialize(retained.Original.SourceProof.Intent).AsSpan().SequenceEqual(
                 NativeSerialization.Serialize(request.Intent)))
-        { throw Errors.Fail(ErrorCode.Corruption, RemoteGraphProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, RemoteGraphProtocol.Invalid);
+        }
         RequireRemoteGraphReceiptShape(retained.Receipt, ErrorCode.Corruption);
         if (!NativeSerialization.Serialize(retained.Receipt.Intent).AsSpan().SequenceEqual(
             NativeSerialization.Serialize(request.Intent)))
-        { throw Errors.Fail(ErrorCode.Corruption, RemoteGraphProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, RemoteGraphProtocol.Invalid);
+        }
         _ = RequireRemoteGraphReceiver(view, principal, retained.Original.SourceProof);
         var identity = Identity<RemoteGraphReceiverIdentityV1>(NativeSerialization.Serialize(
             new RemoteGraphReceiverIdentityV1(request.OriginalReceiveCommandId, request.Intent)));

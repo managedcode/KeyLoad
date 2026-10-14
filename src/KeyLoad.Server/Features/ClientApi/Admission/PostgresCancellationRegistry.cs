@@ -1,6 +1,6 @@
 using System.Buffers.Binary;
 using System.Security.Cryptography;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
@@ -16,10 +16,14 @@ internal sealed class PostgresCancellationRegistry(IOptions<GrainRoutingOptions>
         lock (gate)
         {
             if (registrations.Count >= limits.Value.MaximumConnections)
-            { throw Errors.Fail(ErrorCode.ResourceExhausted, ServerConnectionProtocol.Capacity); }
+            {
+                throw Errors.Fail(ErrorCode.ResourceExhausted, ServerConnectionProtocol.Capacity);
+            }
             var id = unchecked(++nextId);
             if (id == PostgresProtocol.AllRows || registrations.ContainsKey(id))
-            { throw Errors.Fail(ErrorCode.ResourceExhausted, ServerConnectionProtocol.Capacity); }
+            {
+                throw Errors.Fail(ErrorCode.ResourceExhausted, ServerConnectionProtocol.Capacity);
+            }
             var secret = RandomNumberGenerator.GetBytes(sizeof(int));
             var registration = new Registration(id, secret, new PostgresCancellationSession());
             registrations.Add(id, registration);
@@ -42,9 +46,13 @@ internal sealed class PostgresCancellationRegistry(IOptions<GrainRoutingOptions>
     internal async Task RemoveAsync(Registration registration)
     {
         lock (gate)
-        { registrations.Remove(registration.Id); }
+        {
+            registrations.Remove(registration.Id);
+        }
         try
-        { await registration.Session.CloseAsync().ConfigureAwait(false); }
+        {
+            await registration.Session.CloseAsync().ConfigureAwait(false);
+        }
         finally { CryptographicOperations.ZeroMemory(registration.Secret); }
     }
 

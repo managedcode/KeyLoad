@@ -19,7 +19,11 @@ internal static class ReadGrantFailureSettlementFlow
         var failures = new List<Exception>();
         try
         {
-            using var fixture = ReadExecutionBudgetGrantSeed.CreateDatabase(new() { MaxQueryReadBytes = maximum, MaxScanRecords = NativeRecords });
+            using var fixture = ReadExecutionBudgetGrantSeed.CreateDatabase(new()
+            {
+                MaxQueryReadBytes = maximum,
+                MaxScanRecords = NativeRecords
+            });
             ZoneTreeStore? cold = null;
             await ServerFailureObserver.ObserveAsync(async () =>
             {
@@ -41,8 +45,8 @@ internal static class ReadGrantFailureSettlementFlow
             }, failures);
             ServerFailureObserver.Observe(() => cold?.Dispose(), failures);
         }
-        catch (Exception failure) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
-        catch (Exception failure) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
+        catch (Exception failure) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
+        catch (Exception failure) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
@@ -105,7 +109,11 @@ internal static class ReadGrantFailureSettlementFlow
     {
         var actual = store.Read(view =>
         {
-            var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new() { MaxQueryReadBytes = maximum, MaxScanRecords = NativeRecords }));
+            var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new()
+            {
+                MaxQueryReadBytes = maximum,
+                MaxScanRecords = NativeRecords
+            }));
             var grant = budget.CreateReadGrant(maximum, NativeRecords);
             byte[]? first = null;
             byte[]? second = null;

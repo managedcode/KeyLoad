@@ -44,7 +44,10 @@ internal sealed class BlobReclaimWholeFlowTests
         database.Store.Commit((tx, _) => { tx.Put(secondKey, damaged); return true; });
         await RejectedReclaimPreservesEntireStore(database, fixture);
         database.Store.Commit((tx, _) =>
-        { tx.Put(secondKey, BlobReclaimWholeFlowFixture.Payload.AsSpan(BlobLimits.RawPartBytes).ToArray()); return true; });
+        {
+            tx.Put(secondKey, BlobReclaimWholeFlowFixture.Payload.AsSpan(BlobLimits.RawPartBytes).ToArray());
+            return true;
+        });
         await BlobWholeFlowAssertions.Parts(database.Database, fixture, true, true);
         var first = await BlobReclaimWholeFlow.First(database.Database, database.Store, fixture);
         var position = database.Store.Position;

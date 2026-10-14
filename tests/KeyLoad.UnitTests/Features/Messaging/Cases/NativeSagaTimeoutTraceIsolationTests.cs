@@ -1,6 +1,6 @@
 using System.Diagnostics;
+using KeyLoad.Clustering;
 using KeyLoad.Core.Features.Messaging;
-using KeyLoad.Orleans;
 using Orleans.DurableJobs;
 
 namespace KeyLoad.UnitTests.Features.Messaging;

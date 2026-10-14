@@ -47,7 +47,9 @@ internal static class PartitionMovementFencedAbortRf3Assertions
             await Assert.That(cut.OutstandingMoveGrants).IsEqualTo(NoOutstandingGrants);
             await Assert.That(cut.OutstandingDatabaseGrants).IsEqualTo(NoOutstandingGrants);
             if (cut.Header is not { } header)
-            { continue; }
+            {
+                continue;
+            }
             await Assert.That(header.PendingOriginalPhaseCommandId).IsNull();
             await Assert.That(cut.Pending).IsNull();
             await SqlRf3Protocol.EqualAsync(expected, header.TerminalResult);

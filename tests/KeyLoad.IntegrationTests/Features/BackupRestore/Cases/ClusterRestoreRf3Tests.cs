@@ -39,10 +39,14 @@ internal sealed class ClusterRestoreRf3Tests
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             if (Directory.Exists(ownedRoot) || File.Exists(ownedRoot))
-            { throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid); }
+            {
+                throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid);
+            }
             Directory.CreateDirectory(ownedRoot);
             if (!OperatingSystem.IsWindows())
-            { File.SetUnixFileMode(ownedRoot, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute); }
+            {
+                File.SetUnixFileMode(ownedRoot, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+            }
             source = await TwoRf3MembershipWave.StartProtectedDocumentsAsync(phase.Startup, caller.Token).ConfigureAwait(false);
             await source.QueryControls.VerifyDestinationOwnerOnlyAsync(caller.Token).ConfigureAwait(false);
             phase.Set(ClusterRestoreRf3Phase.SeedCreate);
@@ -67,7 +71,9 @@ internal sealed class ClusterRestoreRf3Tests
             await ServerFailureObserver.ObserveAsync(() => topology.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         }
         if (failures.Count == 0 && Directory.Exists(ownedRoot))
-        { ServerFailureObserver.Observe(() => Directory.Delete(ownedRoot, recursive: true), failures); }
+        {
+            ServerFailureObserver.Observe(() => Directory.Delete(ownedRoot, recursive: true), failures);
+        }
         await ServerFailureObserver.ObserveAsync(() => phase.WriteAsync(bodyPhase, failures.Count,
             callerCanceled, deadlineCanceled), failures).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny(failures);

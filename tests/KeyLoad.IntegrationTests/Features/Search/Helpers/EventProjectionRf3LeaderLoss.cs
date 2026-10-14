@@ -38,7 +38,9 @@ internal sealed class EventProjectionRf3LeaderLoss(ClusterFixture fixture)
         finally
         {
             if (stoppedNode is not null && !restarted)
-            { await RestoreStoppedNodeAsync(stoppedNode, nodes, clients.Administrators, primaryFailure); }
+            {
+                await RestoreStoppedNodeAsync(stoppedNode, nodes, clients.Administrators, primaryFailure);
+            }
         }
     }
 
@@ -67,7 +69,9 @@ internal sealed class EventProjectionRf3LeaderLoss(ClusterFixture fixture)
         EventProjectionRf3Clients clients, string[] nodes, CancellationToken cancellationToken)
     {
         foreach (var index in Enumerable.Range(0, nodes.Length))
-        { await VerifySurvivorBothAsync(scenario, clients.Readers[index], nodes[index], cancellationToken); }
+        {
+            await VerifySurvivorBothAsync(scenario, clients.Readers[index], nodes[index], cancellationToken);
+        }
     }
 
     private async Task VerifySurvivorBothAsync(EventProjectionRf3Scenario scenario, KeyLoadClient reader,
@@ -127,7 +131,9 @@ internal sealed class EventProjectionRf3LeaderLoss(ClusterFixture fixture)
         catch (Exception failure) when (ClusterReplicationTestSupport.IsNonFatalCleanupFailure(failure))
         {
             if (primaryFailure is null)
-            { throw; }
+            {
+                throw;
+            }
             primaryFailure.Data[EventProjectionRf3Scenario.RestartFailureKey] = failure;
         }
     }
@@ -135,8 +141,12 @@ internal sealed class EventProjectionRf3LeaderLoss(ClusterFixture fixture)
     private async Task CaptureDiagnosticsAsync(Exception failure)
     {
         try
-        { await fixture.SaveFailureDiagnosticsAsync(); }
+        {
+            await fixture.SaveFailureDiagnosticsAsync();
+        }
         catch (Exception diagnostic) when (ClusterReplicationTestSupport.IsNonFatalCleanupFailure(diagnostic))
-        { failure.Data[EventProjectionRf3Scenario.DiagnosticsFailureKey] = diagnostic; }
+        {
+            failure.Data[EventProjectionRf3Scenario.DiagnosticsFailureKey] = diagnostic;
+        }
     }
 }

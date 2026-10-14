@@ -73,13 +73,19 @@ internal sealed class ScopedReadTests
         var expectedKey = callerKey.ToArray();
         try
         {
-            using (var store = new ZoneTreeStore(new(directory) { SigningKey = callerKey.AsMemory() }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
+            using (var store = new ZoneTreeStore(new(directory)
+            {
+                SigningKey = callerKey.AsMemory()
+            }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
             {
                 Array.Fill(callerKey, (byte)0);
                 await Assert.That(store.Identity.SigningKey.Span.SequenceEqual(expectedKey)).IsTrue();
             }
 
-            using var reopened = new ZoneTreeStore(new(directory) { SigningKey = expectedKey }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+            using var reopened = new ZoneTreeStore(new(directory)
+            {
+                SigningKey = expectedKey
+            }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
             await Assert.That(reopened.Identity.SigningKey.Span.SequenceEqual(expectedKey)).IsTrue();
         }
         finally
@@ -110,7 +116,9 @@ internal sealed class ScopedReadTests
 
     private sealed class BudgetRejectedException : Exception
     {
-        public BudgetRejectedException() { }
+        public BudgetRejectedException()
+        {
+        }
         public BudgetRejectedException(string message) : base(message) { }
         public BudgetRejectedException(string message, Exception innerException) : base(message, innerException) { }
     }

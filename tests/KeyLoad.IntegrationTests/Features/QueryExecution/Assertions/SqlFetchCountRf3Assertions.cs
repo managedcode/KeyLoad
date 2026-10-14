@@ -10,9 +10,13 @@ internal static class SqlFetchCountRf3Assertions
     {
         string[] ids = ["a", "b", "c"];
         if (count < SqlFetchCountRf3Protocol.RowCount)
-        { await global::TUnit.Assertions.Assert.That(actual.Cursor).IsNotNull(); }
+        {
+            await global::TUnit.Assertions.Assert.That(actual.Cursor).IsNotNull();
+        }
         else
-        { await global::TUnit.Assertions.Assert.That(actual.Cursor).IsNull(); }
+        {
+            await global::TUnit.Assertions.Assert.That(actual.Cursor).IsNull();
+        }
         var expected = new QueryPage([.. ids.Take(count).Select(id => new QueryRow(id,
             SqlFetchCountRf3Protocol.SeedRevision, "{\"label\":\"" + id + "\"}", RedactedFields: []))],
             actual.Cursor, actual.CutPosition, AccessPath);
@@ -41,6 +45,10 @@ internal static class SqlFetchCountRf3Assertions
             documents.Add(actual);
         }
         var outbox = await McpCallerAssertions.SdkSuccessAsync(await root.OutboxStatusAsync(PostgresRf3State.Partition, token));
-        return global::System.Text.Json.JsonSerializer.Serialize(new { Documents = documents, Outbox = outbox }, JsonDefaults.Options);
+        return global::System.Text.Json.JsonSerializer.Serialize(new
+        {
+            Documents = documents,
+            Outbox = outbox
+        }, JsonDefaults.Options);
     }
 }

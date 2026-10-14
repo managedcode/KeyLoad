@@ -11,13 +11,17 @@ internal static class TenantCapacityPlacementProfile
     internal static bool Validate(string? original, string? topology, string? movement, string? query, string? registration)
     {
         if (original is null || original == Disabled)
-        { return false; }
+        {
+            return false;
+        }
         if (original != Enabled
             || topology != TwoRf3ProfileProtocol.Profile
             || movement != Enabled
             || query != Enabled
             || registration != Enabled)
-        { throw new InvalidOperationException(TwoRf3ProfileProtocol.Invalid); }
+        {
+            throw new InvalidOperationException(TwoRf3ProfileProtocol.Invalid);
+        }
         return true;
     }
 }

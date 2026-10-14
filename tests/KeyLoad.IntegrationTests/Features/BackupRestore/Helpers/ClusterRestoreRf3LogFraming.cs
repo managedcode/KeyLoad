@@ -16,11 +16,15 @@ internal static class ClusterRestoreRf3LogFraming
     {
         var content = original.Content;
         if (content.StartsWith(JsonObjectStart))
-        { return JsonDefaults.Deserialize<T>(content); }
+        {
+            return JsonDefaults.Deserialize<T>(content);
+        }
         var separator = content.IndexOf(TimestampSeparator, StringComparison.Ordinal);
         if (separator == MissingSeparator || !DateTime.TryParseExact(content.AsSpan(0, separator),
             NativeTimestampFormat, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out _))
-        { throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid); }
+        {
+            throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid);
+        }
         return JsonDefaults.Deserialize<T>(content[(separator + SeparatorCharacters)..]);
     }
 }

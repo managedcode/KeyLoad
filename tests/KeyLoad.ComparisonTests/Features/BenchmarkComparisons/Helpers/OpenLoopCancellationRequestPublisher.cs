@@ -26,11 +26,15 @@ internal static class OpenLoopCancellationRequestPublisher
             await IsolatedNativeTeardownNativeSupport.CollectFailureAsync(() =>
             {
                 if (ownsPending && File.Exists(pending))
-                { File.Delete(pending); }
+                {
+                    File.Delete(pending);
+                }
                 return Task.CompletedTask;
             }, cleanup);
             foreach (var cleanupFailure in cleanup)
-            { failures.Record(PublishFailureCode, cleanupFailure); }
+            {
+                failures.Record(PublishFailureCode, cleanupFailure);
+            }
             failures.ThrowIfAny();
         }
     }
@@ -71,10 +75,14 @@ internal static class OpenLoopCancellationRequestPublisher
     private static void ThrowWriteFailures(List<Exception> failures)
     {
         if (failures.Count == 0)
-        { return; }
+        {
+            return;
+        }
         var observed = new IsolatedNativeTeardownFailures(failures[0]);
         for (var index = 1; index < failures.Count; index++)
-        { observed.Record(PublishFailureCode, failures[index]); }
+        {
+            observed.Record(PublishFailureCode, failures[index]);
+        }
         observed.ThrowIfAny();
     }
 

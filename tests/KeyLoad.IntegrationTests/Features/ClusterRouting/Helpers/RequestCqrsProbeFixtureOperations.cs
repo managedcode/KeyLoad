@@ -14,7 +14,9 @@ internal static class RequestCqrsProbeFixtureOperations
         if (owner.Version != RequestCqrsProbeFixtureProtocol.Version
             || owner.Kind != RequestCqrsProbeFixtureProtocol.OwnerKind || owner.SessionId != sessionId
             || owner.Voter != voter)
-        { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.InvalidArm); }
+        {
+            throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.InvalidArm);
+        }
         var directory = CreateNodeDirectory(root, node);
         return (directory, bytes);
     }
@@ -22,18 +24,26 @@ internal static class RequestCqrsProbeFixtureOperations
     private static string CreateNodeDirectory(string root, string node)
     {
         if (OperatingSystem.IsWindows())
-        { throw new PlatformNotSupportedException(RequestCqrsProbeFixtureProtocol.PrivatePermissionsUnsupported); }
+        {
+            throw new PlatformNotSupportedException(RequestCqrsProbeFixtureProtocol.PrivatePermissionsUnsupported);
+        }
         if (!TwoRf3MembershipProtocol.Nodes.Contains(node, StringComparer.Ordinal))
-        { throw new IOException(RequestCqrsProbeFixtureProtocol.InvalidControlEntry); }
+        {
+            throw new IOException(RequestCqrsProbeFixtureProtocol.InvalidControlEntry);
+        }
         var path = Path.Combine(root, node);
         if (Directory.Exists(path) || File.Exists(path))
-        { throw new IOException(RequestCqrsProbeFixtureProtocol.OwnershipConflict); }
+        {
+            throw new IOException(RequestCqrsProbeFixtureProtocol.OwnershipConflict);
+        }
         RequestCqrsProbeFileValidation.EnsureUnixPermissions();
         Directory.CreateDirectory(path, RequestCqrsProbeFileValidation.PrivateDirectoryMode);
         var failures = new List<Exception>();
         ServerFailureObserver.Observe(() => RequestCqrsProbeFileValidation.ValidateDirectory(path), failures);
         if (failures.Count == 0)
-        { return path; }
+        {
+            return path;
+        }
         ServerFailureObserver.Observe(() => Directory.Delete(path, recursive: false), failures);
         ServerFailureObserver.ThrowIfAny(failures);
         throw new IOException(RequestCqrsProbeFixtureProtocol.InvalidControlEntry);
@@ -48,14 +58,18 @@ internal static class RequestCqrsProbeFixtureOperations
             RequestCqrsProbeFileStore.VerifyExactFile(directory, RequestCqrsProbeFileNames.Arm(armId), bytes);
         }
         foreach (var voter in RequestCqrsProbeFixtureProtocol.Nodes)
-        { RequestCqrsProbeFileStore.DeleteExactFile(nodeDirectories[voter], RequestCqrsProbeFileNames.Arm(armId), bytes); }
+        {
+            RequestCqrsProbeFileStore.DeleteExactFile(nodeDirectories[voter], RequestCqrsProbeFileNames.Arm(armId), bytes);
+        }
     }
 
     internal static async Task VerifyDestinationOwnerOnlyAsync(RequestCqrsProbeFixture fixture,
         bool includeDestination, CancellationToken token)
     {
         if (!includeDestination)
-        { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.InvalidControlEntry); }
+        {
+            throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.InvalidControlEntry);
+        }
         foreach (var node in TwoRf3MembershipProtocol.Nodes.Skip(TwoRf3MembershipProtocol.MembersPerGroup))
         {
             token.ThrowIfCancellationRequested();

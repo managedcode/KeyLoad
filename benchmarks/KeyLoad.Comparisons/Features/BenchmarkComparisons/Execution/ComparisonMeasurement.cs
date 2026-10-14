@@ -25,7 +25,11 @@ internal sealed class ComparisonMeasurer(IOptions<ComparisonOptions> workloadOpt
         {
             closed = await ComparisonSessionCleanup.CloseAsync(sessions, options.TimeoutSeconds, timeProvider: timeProvider);
         }
-        return closed ? result : result with { Status = ComparisonStatuses.Failed, Detail = ComparisonSessionCleanup.Failure };
+        return closed ? result : result with
+        {
+            Status = ComparisonStatuses.Failed,
+            Detail = ComparisonSessionCleanup.Failure
+        };
     }
 
     private async Task<ComparisonCase> MeasureOwnedAsync(IComparisonTarget target, BenchmarkDataset dataset,
@@ -63,7 +67,10 @@ internal sealed class ComparisonMeasurer(IOptions<ComparisonOptions> workloadOpt
         {
             await ComparisonValidation.ValidateBatchAsync(sessions[FirstElementIndex], dataset, scenario, inputs, samples, outputs, cancellationToken: cancellationToken, timeProvider: timeProvider);
         }
-        var measurement = ComparisonStatistics.Summarize(samples, clock.Elapsed.TotalSeconds) with { ClientResources = clientResources };
+        var measurement = ComparisonStatistics.Summarize(samples, clock.Elapsed.TotalSeconds) with
+        {
+            ClientResources = clientResources
+        };
         observer.Begin(ComparisonProgressPhase.Complete, repetition + SingleItemCount, measurement.Attempts, measurement.Attempts, measurement.Failures);
         return new(target.Profile.Name, scenario, repetition, measurement.Failures == NoObservedItems ? ComparisonStatuses.Measured : ComparisonStatuses.Failed,
             measurement.Failures == NoObservedItems ? null : FailedAttemptDetail, measurement,
@@ -131,7 +138,9 @@ internal sealed class ComparisonMeasurer(IOptions<ComparisonOptions> workloadOpt
         {
             string? failure = null;
             try
-            { outputs[operation] = await session.ExecuteAsync(scenario, inputs[operation], deadline.Token); }
+            {
+                outputs[operation] = await session.ExecuteAsync(scenario, inputs[operation], deadline.Token);
+            }
             catch (Exception error) when (!cancellationToken.IsCancellationRequested) { failure = ComparisonErrors.Safe(error); }
             samples[operation] = new(operation, worker, started, clock.Elapsed.TotalMilliseconds, failure is null, failure,
                 Encoding.UTF8.GetByteCount(inputs[operation].Json), outputs[operation]?.Message?.Id, outputs[operation]?.Queue);

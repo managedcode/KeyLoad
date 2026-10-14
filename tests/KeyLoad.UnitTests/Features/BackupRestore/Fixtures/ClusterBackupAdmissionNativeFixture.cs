@@ -16,9 +16,18 @@ internal sealed class ClusterBackupAdmissionNativeFixture : IAsyncDisposable
     private const string CaptureDirectory = "cluster-backups";
     private readonly PartitionHostRecoveryFixture files = new();
     private readonly ServiceProvider services = new ServiceCollection().BuildServiceProvider();
-    internal PartitionHost Host { get; }
-    internal NodeAdministration Administration { get; }
-    internal AggregateException? ObservedShutdownFailure { get; set; }
+    internal PartitionHost Host
+    {
+        get;
+    }
+    internal NodeAdministration Administration
+    {
+        get;
+    }
+    internal AggregateException? ObservedShutdownFailure
+    {
+        get; set;
+    }
     private readonly ReadOnlyMemory<byte> capability;
     private readonly string principal;
     private readonly IOptions<DatabaseLimits> limits = UnitExecutionOptions.DatabaseLimits();
@@ -44,7 +53,9 @@ internal sealed class ClusterBackupAdmissionNativeFixture : IAsyncDisposable
         {
             var failures = new List<Exception> { primary };
             if (opened is not null)
-            { ServerFailureObserver.Observe(() => opened.DisposeAsync().AsTask().GetAwaiter().GetResult(), failures); }
+            {
+                ServerFailureObserver.Observe(() => opened.DisposeAsync().AsTask().GetAwaiter().GetResult(), failures);
+            }
             ServerFailureObserver.Observe(services.Dispose, failures);
             ServerFailureObserver.Observe(files.Dispose, failures);
             ServerFailureObserver.ThrowIfAny(failures);
@@ -60,7 +71,9 @@ internal sealed class ClusterBackupAdmissionNativeFixture : IAsyncDisposable
     {
         var image = view.Scan([], limits.Value.MaxScanRecords);
         if (image.HasMore)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, "The supporting native image exceeded its actual scan bound."); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, "The supporting native image exceeded its actual scan bound.");
+        }
         return NativeSerialization.Serialize(image.Records);
     });
 
@@ -85,7 +98,9 @@ internal sealed class ClusterBackupAdmissionNativeFixture : IAsyncDisposable
         {
             var page = view.Scan([], limits.Value.MaxScanRecords);
             if (page.HasMore)
-            { throw Errors.Fail(ErrorCode.BudgetExceeded, "The cold native image exceeded its actual scan bound."); }
+            {
+                throw Errors.Fail(ErrorCode.BudgetExceeded, "The cold native image exceeded its actual scan bound.");
+            }
             return NativeSerialization.Serialize(page.Records);
         });
         await Assert.That(actual).IsEquivalentTo(originalImage);
@@ -99,7 +114,9 @@ internal sealed class ClusterBackupAdmissionNativeFixture : IAsyncDisposable
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             try
-            { await Administration.DisposeAsync(); }
+            {
+                await Administration.DisposeAsync();
+            }
             catch (AggregateException original) when (ReferenceEquals(original, ObservedShutdownFailure)) { }
         }, failures);
         await ServerFailureObserver.ObserveAsync(() => Host.DisposeAsync().AsTask(), failures);
@@ -108,7 +125,9 @@ internal sealed class ClusterBackupAdmissionNativeFixture : IAsyncDisposable
         try
         {
             try
-            { services.Dispose(); }
+            {
+                services.Dispose();
+            }
             catch (Exception original)
             {
                 infrastructureFailure = original;
@@ -119,9 +138,13 @@ internal sealed class ClusterBackupAdmissionNativeFixture : IAsyncDisposable
         catch (Exception terminal)
         {
             if (infrastructureFailure is not null)
-            { failures.Add(infrastructureFailure); }
+            {
+                failures.Add(infrastructureFailure);
+            }
             if (infrastructureFailure is null || !filesJoined)
-            { failures.Add(terminal); }
+            {
+                failures.Add(terminal);
+            }
             // Earlier owner failures and both genuinely joined native cleanup failures retain order.
             throw new AggregateException(failures);
         }

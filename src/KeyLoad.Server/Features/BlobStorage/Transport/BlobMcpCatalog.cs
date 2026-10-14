@@ -1,12 +1,15 @@
 using System.Collections.Immutable;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.Server;
 
 /// <summary>Typed native MCP bindings that share the canonical DTOs, routes and operation dispatch.</summary>
 internal static class BlobMcpCatalog
 {
-    internal static ImmutableArray<McpOperationDescriptor> Entries { get; } =
+    internal static ImmutableArray<McpOperationDescriptor> Entries
+    {
+        get;
+    } =
     [
         McpOperationFactory.Command<BeginBlobUploadRequest, BlobCommitResult<BlobUploadInfo>>(BlobToolNames.BeginUpload, BlobToolRoutes.BeginUpload, OperationKind.BeginBlobUpload, static request => request.CommandId),
         McpOperationFactory.Command<WriteBlobPartRequest, BlobCommitResult<BlobUploadInfo>>(BlobToolNames.WritePart, BlobToolRoutes.WritePart, OperationKind.WriteBlobPart, static request => request.CommandId),

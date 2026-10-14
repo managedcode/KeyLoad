@@ -26,11 +26,20 @@ internal sealed class TimeSeriesIntensiveAppendOracleTests
         var receipts = Receipts();
         Assert.ThrowsExactly<ComparisonFailureException>(() => TimeSeriesIntensiveAppendOracle.ValidateReceipts("run", 0, true, receipts[..^1]));
         var duplicate = receipts.ToArray();
-        duplicate[1] = duplicate[1] with { Sequence = duplicate[0].Sequence };
+        duplicate[1] = duplicate[1] with
+        {
+            Sequence = duplicate[0].Sequence
+        };
         Assert.ThrowsExactly<ComparisonFailureException>(() => TimeSeriesIntensiveAppendOracle.ValidateReceipts("run", 0, true, duplicate));
-        duplicate[1] = receipts[1] with { Sequence = 257 };
+        duplicate[1] = receipts[1] with
+        {
+            Sequence = 257
+        };
         Assert.ThrowsExactly<ComparisonFailureException>(() => TimeSeriesIntensiveAppendOracle.ValidateReceipts("run", 0, true, duplicate));
-        duplicate[1] = receipts[1] with { CommandId = Guid.Empty };
+        duplicate[1] = receipts[1] with
+        {
+            CommandId = Guid.Empty
+        };
         Assert.ThrowsExactly<ComparisonFailureException>(() => TimeSeriesIntensiveAppendOracle.ValidateReceipts("run", 0, true, duplicate));
         await Assert.That(receipts.Select(row => row.Sequence).Distinct().Count()).IsEqualTo(256);
     }
@@ -53,7 +62,10 @@ internal sealed class TimeSeriesIntensiveAppendOracleTests
         }
 
         await Assert.That(total).IsEqualTo(10000);
-        var invalid = TimeSeriesIntensivePlans.AppendReadbacks(4, false).First() with { ExpectedCount = 1001 };
+        var invalid = TimeSeriesIntensivePlans.AppendReadbacks(4, false).First() with
+        {
+            ExpectedCount = 1001
+        };
         Assert.ThrowsExactly<ArgumentException>(() => TimeSeriesIntensiveAppendOracle.Readback(invalid, receipts));
     }
 

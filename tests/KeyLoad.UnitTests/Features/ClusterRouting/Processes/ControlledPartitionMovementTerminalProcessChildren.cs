@@ -19,16 +19,24 @@ internal static class ControlledPartitionMovementTerminalProcessChildren
         options.Validate();
         using var cleanup = new ControlledPartitionMovementCleanupDeadline(options, clock);
         foreach (var mode in Modes)
-        { await RunChildAsync(root, mode, options, cleanup, token); }
+        {
+            await RunChildAsync(root, mode, options, cleanup, token);
+        }
     }
 
     private static async Task RunChildAsync(string root, string mode, NativeMovementProcessOptions options,
         ControlledPartitionMovementCleanupDeadline cleanup, CancellationToken token)
     {
         var start = new ProcessStartInfo(Dotnet)
-        { RedirectStandardOutput = true, RedirectStandardError = true, UseShellExecute = false };
+        {
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false
+        };
         foreach (var argument in new[] { typeof(CrashHostMarker).Assembly.Location, root, mode })
-        { start.ArgumentList.Add(argument); }
+        {
+            start.ArgumentList.Add(argument);
+        }
         var signal = mode == ControlledPartitionMovementProcessProtocol.Prepare ? CrashFixtureValues.Acknowledgement
             : mode == ControlledPartitionMovementProcessProtocol.Fault ? CrashFixtureValues.CrashMarker : null;
         var failures = new List<Exception>();
@@ -54,6 +62,8 @@ internal static class ControlledPartitionMovementTerminalProcessChildren
             await ServerFailureObserver.ObserveAsync(() => child.JoinCleanupAsync(failures, cleanup.Token), failures);
         }
         if (!child.Settled)
-        { ControlledPartitionMovementRetainedChild.Retain(child, root, failures); }
+        {
+            ControlledPartitionMovementRetainedChild.Retain(child, root, failures);
+        }
     }
 }

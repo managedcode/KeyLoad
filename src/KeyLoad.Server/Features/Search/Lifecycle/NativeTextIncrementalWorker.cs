@@ -15,18 +15,24 @@ internal sealed class NativeTextIncrementalWorker : IAsyncDisposable
         {
             ObjectDisposedException.ThrowIf(closed, this);
             if (active is not null)
-            { throw NativeTextErrors.BoundExceeded(); }
+            {
+                throw NativeTextErrors.BoundExceeded();
+            }
             original = Task.Run(operation, CancellationToken.None);
             active = original;
         }
         try
-        { return await original.ConfigureAwait(false); }
+        {
+            return await original.ConfigureAwait(false);
+        }
         finally
         {
             lock (gate)
             {
                 if (ReferenceEquals(active, original))
-                { active = null; }
+                {
+                    active = null;
+                }
             }
         }
     }
@@ -38,7 +44,9 @@ internal sealed class NativeTextIncrementalWorker : IAsyncDisposable
         lock (gate)
         {
             if (disposal is not null)
-            { return new(disposal); }
+            {
+                return new(disposal);
+            }
             closed = true;
             start = new(TaskCreationOptions.RunContinuationsAsynchronously);
             actual = JoinAsync(start.Task, active ?? Task.CompletedTask);

@@ -15,7 +15,9 @@ internal static class ProjectionPartitionIsolationHealthy
             ProjectionPartitionIsolationFixture.HealthySource, ProjectionPartitionIsolationFixture.HealthyJson, 0L);
         var operation = ProjectionConsumerIdentityFixture.Operation(OperationKind.Batch, id,
             new CommandRequest(id, source.Partition, [mutation])) with
-        { EvaluatedAt = source.Time };
+        {
+            EvaluatedAt = source.Time
+        };
         token.ThrowIfCancellationRequested();
         var produced = FeedNativeHealthyAdmission.Submit(owner, store, directory, operation, explicitTime: true, token);
         var receipt = produced.Get<CommitReceipt>();
@@ -42,8 +44,16 @@ internal static class ProjectionPartitionIsolationHealthy
         outcomes.Add(new(effect, completed));
         await ProjectionPartitionIsolationSettlement.FilterAsync(owner, source.Consumer, source.Definition, 4L, 5L, outcomes, token);
         var continued = original with
-        { Outcomes = [.. outcomes], HealthySourceReceipt = receipt, HealthyEffectReceipt = result.Receipt };
+        {
+            Outcomes = [.. outcomes],
+            HealthySourceReceipt = receipt,
+            HealthyEffectReceipt = result.Receipt
+        };
         await ProjectionPartitionIsolationAssertions.VerifyAsync(owner, store, continued, token);
-        return continued with { Image = ProjectionConsumerIdentityAssertions.Image(store), Position = store.Position };
+        return continued with
+        {
+            Image = ProjectionConsumerIdentityAssertions.Image(store),
+            Position = store.Position
+        };
     }
 }

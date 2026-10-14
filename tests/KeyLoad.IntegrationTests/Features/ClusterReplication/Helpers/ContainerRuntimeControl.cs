@@ -27,7 +27,9 @@ internal sealed class ContainerRuntimeControl(
     public async Task KillAsync(string resourceName, string scenario, CancellationToken cancellationToken)
     {
         if (pendingReceipts.ContainsKey(resourceName))
-        { throw new InvalidOperationException(ContainerRestartOwnership.PendingFailure); }
+        {
+            throw new InvalidOperationException(ContainerRestartOwnership.PendingFailure);
+        }
         var containerName = GetContainerName(resourceName);
         var before = await ContainerRuntimeDocker.InspectAsync(containerName, cancellationToken);
         if (before.State != ContainerRuntimeProtocol.RunningState)
@@ -123,11 +125,15 @@ internal sealed class ContainerRuntimeControl(
         CancellationToken cancellationToken)
     {
         if (!pendingReceipts.TryGetValue(resourceName, out var receipt))
-        { throw new InvalidOperationException(ContainerRestartOwnership.PendingFailure); }
+        {
+            throw new InvalidOperationException(ContainerRestartOwnership.PendingFailure);
+        }
         var capture = new ContainerRestartFailureCapture(app, receipt, repositoryRoot, restartFailureReceipts);
         var owner = RequireRestartOwner(resourceName);
         try
-        { return await owner.AcceptAsync(app, receipt, capture, cancellationToken); }
+        {
+            return await owner.AcceptAsync(app, receipt, capture, cancellationToken);
+        }
         catch (Exception failure) when (IsNonFatalCleanupFailure(failure))
         {
             var stage = owner.StartAccepted ? ContainerRestartStage.RuntimeInspection : ContainerRestartStage.StartCommand;
@@ -150,9 +156,13 @@ internal sealed class ContainerRuntimeControl(
         ContainerRestartStage stage, Exception failure)
     {
         try
-        { await capture.SaveAsync(stage, failure); }
+        {
+            await capture.SaveAsync(stage, failure);
+        }
         catch (Exception diagnosticFailure) when (IsNonFatalCleanupFailure(diagnosticFailure))
-        { failure.Data[RestartDiagnosticsFailureKey] = diagnosticFailure; }
+        {
+            failure.Data[RestartDiagnosticsFailureKey] = diagnosticFailure;
+        }
     }
 
     internal IReadOnlyDictionary<string, ContainerRuntimeKillReceipt> RequireKilledOwners(DistributedApplication originalOwner)

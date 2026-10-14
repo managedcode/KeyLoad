@@ -9,10 +9,14 @@ internal static class RemoteTransferCoordinatorRf3Setup
         bool fullTarget, CancellationToken token)
     {
         QueuePolicy? policy = fullTarget ? new()
-        { MaxStoredMessages = RemoteTransferCoordinatorRf3Protocol.SingleStoredMessage } : null;
+        {
+            MaxStoredMessages = RemoteTransferCoordinatorRf3Protocol.SingleStoredMessage
+        } : null;
         var scenario = await MessagingRf3Scenario.CreateAsync(fixture, policy, token);
         if (fullTarget)
-        { await FillTargetAsync(fixture, scenario, token); }
+        {
+            await FillTargetAsync(fixture, scenario, token);
+        }
         var identity = await MessagingRf3Identity.CreateSelectedAsync(fixture, subject, scenario.SourcePartition.TenantId,
             [new(scenario.SourcePartition.DatabaseId, scenario.SourceQueue.Queue, RemoteTransferColdProtocol.Source),
              new(scenario.DestinationPartition.DatabaseId, scenario.DestinationQueue.Queue, RemoteTransferColdProtocol.Target)],

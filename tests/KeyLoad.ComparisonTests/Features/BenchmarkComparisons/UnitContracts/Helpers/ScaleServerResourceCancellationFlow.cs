@@ -103,13 +103,31 @@ internal static class ScaleServerResourceCancellationFlow
 
     private sealed class State
     {
-        internal string Directory { get; }
+        internal string Directory
+        {
+            get;
+        }
         internal string MarkerPath => Path.Combine(Directory, ScaleServerResourceCancellationNativeFixture.StartMarkerName);
-        internal CancellationTokenSource Cancellation { get; }
-        internal CancellationTokenSource HealthyCancellation { get; }
-        internal Task<string?>? Original { get; set; }
-        internal Task<string?>? Healthy { get; set; }
-        internal OperationCanceledException? OriginalCancellation { get; set; }
+        internal CancellationTokenSource Cancellation
+        {
+            get;
+        }
+        internal CancellationTokenSource HealthyCancellation
+        {
+            get;
+        }
+        internal Task<string?>? Original
+        {
+            get; set;
+        }
+        internal Task<string?>? Healthy
+        {
+            get; set;
+        }
+        internal OperationCanceledException? OriginalCancellation
+        {
+            get; set;
+        }
 
         internal State(CancellationToken testToken)
         {

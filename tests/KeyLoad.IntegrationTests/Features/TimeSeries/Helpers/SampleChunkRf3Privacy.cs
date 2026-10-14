@@ -19,13 +19,23 @@ internal static class SampleChunkRf3Privacy
             identity.Secret, token).ConfigureAwait(false);
         await ProjectedAsync(scenario, sdk, mcp, minimum, token);
         var privatePredicate = scenario.Request with
-        { TagPointer = TimeSeriesRf3Scenario.SecretField, TagValue = PrivateTagValue };
+        {
+            TagPointer = TimeSeriesRf3Scenario.SecretField,
+            TagValue = PrivateTagValue
+        };
         await DeniedAsync(scenario, sdk, mcp, privatePredicate, token);
-        var revoked = identity.Principal with { Grants = [], PolicyEpoch = identity.Principal.PolicyEpoch + NextPolicy };
+        var revoked = identity.Principal with
+        {
+            Grants = [],
+            PolicyEpoch = identity.Principal.PolicyEpoch + NextPolicy
+        };
         await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigurePrincipalAsync(
             Guid.NewGuid(), revoked, token).ConfigureAwait(false));
         await DeniedAsync(scenario, sdk, mcp, scenario.Request, token);
-        var restored = identity.Principal with { PolicyEpoch = revoked.PolicyEpoch + NextPolicy };
+        var restored = identity.Principal with
+        {
+            PolicyEpoch = revoked.PolicyEpoch + NextPolicy
+        };
         await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigurePrincipalAsync(
             Guid.NewGuid(), restored, token).ConfigureAwait(false));
         await ProjectedAsync(scenario, sdk, mcp, minimum, token);
@@ -49,7 +59,10 @@ internal static class SampleChunkRf3Privacy
             await mcp.CallAsync(SampleChunkProtocol.ReadTool, scenario.Request, token).ConfigureAwait(false))).Value;
         await Assert.That(official.CutPosition >= minimum.Token.Position).IsTrue();
         await Assert.That(Convert.ToHexString(JsonDefaults.Serialize(official)))
-            .IsEqualTo(Convert.ToHexString(JsonDefaults.Serialize(expected with { CutPosition = official.CutPosition })));
+            .IsEqualTo(Convert.ToHexString(JsonDefaults.Serialize(expected with
+            {
+                CutPosition = official.CutPosition
+            })));
         var call = SqlRf3Protocol.Call(scenario.Native.Partition, SampleChunkProtocol.ReadTool, scenario.Request);
         var sql = await SqlRf3Protocol.SdkAsync<SampleChunkWindowResult>(sdk, call, token).ConfigureAwait(false);
         var sqlOfficial = await SqlRf3Protocol.McpAsync<SampleChunkWindowResult>(mcp, call, token).ConfigureAwait(false);
@@ -57,7 +70,10 @@ internal static class SampleChunkRf3Privacy
         {
             await Assert.That(row.CutPosition >= minimum.Token.Position).IsTrue();
             await Assert.That(Convert.ToHexString(JsonDefaults.Serialize(row)))
-                .IsEqualTo(Convert.ToHexString(JsonDefaults.Serialize(expected with { CutPosition = row.CutPosition })));
+                .IsEqualTo(Convert.ToHexString(JsonDefaults.Serialize(expected with
+                {
+                    CutPosition = row.CutPosition
+                })));
         }
 
     }

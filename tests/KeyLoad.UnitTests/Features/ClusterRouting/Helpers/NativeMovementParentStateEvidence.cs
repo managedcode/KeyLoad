@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
@@ -19,7 +19,9 @@ internal sealed class NativeMovementParentStateEvidence(int configuredObserverOw
         commands.Observe(identity, phase, cancellationToken);
         if (identity.ReadKind != GrainReadKind.PartitionMovementParentState
             || phase is not (GrainRequestPhase.MovementParentStateExecuting or GrainRequestPhase.MovementParentStateReturned))
-        { return ValueTask.CompletedTask; }
+        {
+            return ValueTask.CompletedTask;
+        }
         lock (gate)
         {
             if (phase == GrainRequestPhase.MovementParentStateExecuting)
@@ -33,9 +35,13 @@ internal sealed class NativeMovementParentStateEvidence(int configuredObserverOw
             {
                 var snapshot = Read(identity, context);
                 if (returned is null && executing?.RequestId == identity.RequestId)
-                { returned = snapshot; }
+                {
+                    returned = snapshot;
+                }
                 if (lastExecuting?.RequestId == identity.RequestId)
-                { lastReturned = snapshot; }
+                {
+                    lastReturned = snapshot;
+                }
             }
         }
         return ValueTask.CompletedTask;
@@ -51,7 +57,12 @@ internal sealed class NativeMovementParentStateEvidence(int configuredObserverOw
         Stage? latestBefore;
         Stage? latestAfter;
         lock (gate)
-        { before = executing; after = returned; latestBefore = lastExecuting; latestAfter = lastReturned; }
+        {
+            before = executing;
+            after = returned;
+            latestBefore = lastExecuting;
+            latestAfter = lastReturned;
+        }
         commands.Write(output, configuredObserverOwnerIndex);
         output.WriteLine($"Native movement configuredObserverOwnerIndex={configuredObserverOwnerIndex}; Executing={before}; Returned={after}; LastExecuting={latestBefore}; LastReturned={latestAfter}");
     }

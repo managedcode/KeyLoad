@@ -13,7 +13,11 @@ internal sealed partial class DocumentComparisonExecution(IOptions<NativeCompari
         var start = clock.GetTimestamp();
         run.Target = await factory(run.Repetition * DocumentMeasurementValues.NamespacesPerRepetition + DocumentMeasurementValues.SingleItemCount, token).ConfigureAwait(false);
         if (run.Target is not IDocumentComparisonTarget native || !DocumentComparisonRunner.RequiredOperations(run.Selection.Scenario).All(run.Target.Supports))
-        { run.Unsupported = true; run.Observe(DocumentProtocolText.NativeDocumentLifecycleOrOperationUnavailable); return; }
+        {
+            run.Unsupported = true;
+            run.Observe(DocumentProtocolText.NativeDocumentLifecycleOrOperationUnavailable);
+            return;
+        }
         await native.InitializeDocumentsAsync(new(run.Corpus, run.Schedule.Initial != DocumentMeasurementValues.NoObservedItems, run.Schedule.MaximumIdentityExclusive), token).ConfigureAwait(false);
         run.Profile = run.Target.Profile;
         for (var index = DocumentMeasurementValues.NoObservedItems; index < run.Selection.Clients; index++)
@@ -40,7 +44,9 @@ internal sealed partial class DocumentComparisonExecution(IOptions<NativeCompari
         await using var resources = new ClientResourceSampler(executionOptions, provider: clock);
         using var calls = CancellationTokenSource.CreateLinkedTokenSource(token);
         try
-        { await RunWorkersAsync(run, timer, calls).ConfigureAwait(false); }
+        {
+            await RunWorkersAsync(run, timer, calls).ConfigureAwait(false);
+        }
         finally
         {
             timer.Stop();
@@ -67,7 +73,9 @@ internal sealed partial class DocumentComparisonExecution(IOptions<NativeCompari
         barrier.SetResult();
         var joined = Task.WhenAll(workers);
         try
-        { await joined.ConfigureAwait(false); }
+        {
+            await joined.ConfigureAwait(false);
+        }
         catch (Exception error)
         {
             if (joined.Exception is not null)

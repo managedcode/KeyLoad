@@ -23,7 +23,10 @@ internal static class SqlOffsetRf3Refusals
             (ordered.Replace("SELECT ", "SELECT TOP (1) WITH TIES ", StringComparison.Ordinal), ErrorCode.UnsupportedCapability)
         })
         {
-            var bad = original with { Sql = sql };
+            var bad = original with
+            {
+                Sql = sql
+            };
             var failure = await callers.Sdk.QueryAsync(bad, token);
             await Assert.That(failure.IsSuccess).IsFalse();
             await Assert.That(failure.Problem?.ErrorCode).IsEqualTo(code.ToString());
@@ -33,7 +36,13 @@ internal static class SqlOffsetRf3Refusals
         var ast = SqlOffsetRf3Protocol.Join(state.Partition);
         foreach (var offset in new[] { -1, int.MaxValue })
         {
-            var bad = ast with { Query = ast.Query with { Offset = offset } };
+            var bad = ast with
+            {
+                Query = ast.Query with
+                {
+                    Offset = offset
+                }
+            };
             var failure = await callers.Sdk.QueryAstAsync(bad, token);
             await Assert.That(failure.IsSuccess).IsFalse();
             await Assert.That(failure.Problem?.ErrorCode).IsEqualTo(ErrorCode.BudgetExceeded.ToString());

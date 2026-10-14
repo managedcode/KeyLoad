@@ -26,9 +26,15 @@ internal static class NativeTextSelectedRf3Assertions
         if (changed)
         {
             await Assert.That(await NativeTextSelectedRf3Call.ExecuteAsync(sdk, mcp,
-                request with { Text = OriginalQuery }, path, token)).IsEmpty();
+                request with
+                {
+                    Text = OriginalQuery
+                }, path, token)).IsEmpty();
             await Assert.That(await NativeTextSelectedRf3Call.ExecuteAsync(sdk, mcp,
-                request with { Text = MissingEnglish }, path, token)).IsEmpty();
+                request with
+                {
+                    Text = MissingEnglish
+                }, path, token)).IsEmpty();
         }
     }
 

@@ -18,9 +18,15 @@ internal static class NativeAnnPendingCodec
     {
         RequireHeader(pending, pending.Records.Length);
         PackedAnnStorageCodec.RequirePeak(checked(TransientChunks * PackedAnnStorageFrames.MaximumChunkBytes), storage);
-        PackedAnnStorageFrames.Write(file, pending with { Records = [] }, storage, budget);
+        PackedAnnStorageFrames.Write(file, pending with
+        {
+            Records = []
+        }, storage, budget);
         foreach (var row in pending.Records)
-        { budget.Check(); PackedAnnStorageFrames.Write(file, row, storage, budget); }
+        {
+            budget.Check();
+            PackedAnnStorageFrames.Write(file, row, storage, budget);
+        }
         return PackedAnnStorageFrames.Digest(file, storage, budget);
     }
 
@@ -34,11 +40,15 @@ internal static class NativeAnnPendingCodec
         RequireManifestFields(header, manifest);
         var rows = ReadRows(file, manifest, storage, options, indexBudget, out var owned);
         if (file.Position != file.Length)
-        { throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Corrupt); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Corrupt);
+        }
         var work = new AnnSeedWork(readBudget, options.MaxWorkUnits);
         var digest = AnnSeedFingerprint.Compute(current.Scope, rows, work, new byte[options.HashScratchBytes]);
         if (digest != header.CorpusSha256 || digest != manifest.ReplayCorpusSha256)
-        { throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Corrupt); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Corrupt);
+        }
         PackedAnnStorageFrames.RequireDigest(file, manifest.IndexSha256, storage, indexBudget);
         return new(current.Scope, current.DependencySha256!, rows, owned, header.ThroughSequence);
     }
@@ -47,7 +57,9 @@ internal static class NativeAnnPendingCodec
         PackedAnnStorageOptions storage, AnnSeedOptions options, AnnWorkBudget budget, out long owned)
     {
         if (manifest.Count < Empty || manifest.Count > options.MaxRecords)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, NativeAnnProtocol.Bound); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, NativeAnnProtocol.Bound);
+        }
         owned = AnnSeedAccounting.ArrayAllowance(ReferenceBytes, manifest.Count);
         RequirePeak(owned, storage, options);
         var rows = new VectorRecord[manifest.Count];
@@ -70,7 +82,9 @@ internal static class NativeAnnPendingCodec
     {
         var peak = checked(owned + options.HashScratchBytes + TransientChunks * PackedAnnStorageFrames.MaximumChunkBytes);
         if (owned > options.MaxOwnedBytes || peak > options.MaxPeakBytes || peak > storage.MaxPeakBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, NativeAnnProtocol.Bound); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, NativeAnnProtocol.Bound);
+        }
     }
 
     private static void RequireRow(VectorRecord row, string? previous, NativeAnnManifest manifest)
@@ -79,7 +93,9 @@ internal static class NativeAnnPendingCodec
             || row.Space != manifest.Space || row.Values.IsDefault || row.Values.Length != manifest.Space.Dimension
             || row.DocumentRevision <= Empty || previous is not null && StringComparer.Ordinal.Compare(previous, row.DocumentId) >= Empty
             || row.Values.Any(value => !float.IsFinite(value)))
-        { throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Corrupt); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Corrupt);
+        }
     }
 
     private static void RequireHeader(NativeAnnPendingReplay header, int count)
@@ -90,7 +106,9 @@ internal static class NativeAnnPendingCodec
             || header.CheckpointIntent is null || header.CheckpointIntent.CommandId == Guid.Empty
             || header.CheckpointIntent.Consumer != header.AdmittedUpper.Consumer || header.CheckpointIntent.Effects.IsDefault
             || !header.CheckpointIntent.Effects.IsEmpty)
-        { throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Corrupt); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Corrupt);
+        }
     }
 
     private static void RequireManifestFields(NativeAnnPendingReplay header, NativeAnnManifest manifest)
@@ -105,6 +123,8 @@ internal static class NativeAnnPendingCodec
             || header.AfterSequence != manifest.ReplayAfter || header.ThroughSequence != manifest.ReplayThrough
             || NativeSerialization.Serialize(header.CheckpointIntent).AsSpan().SequenceEqual(
                 NativeSerialization.Serialize(manifest.CheckpointIntent)) is false)
-        { throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Corrupt); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Corrupt);
+        }
     }
 }

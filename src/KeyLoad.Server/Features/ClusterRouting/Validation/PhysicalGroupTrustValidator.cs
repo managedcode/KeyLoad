@@ -18,9 +18,14 @@ internal static class PhysicalGroupTrustValidator
         ArgumentNullException.ThrowIfNull(trust);
         ArgumentNullException.ThrowIfNull(node);
         if (trust.ForeignVoterIds is null)
-        { throw new InvalidOperationException(PhysicalGroupTrustProtocol.Invalid); }
+        {
+            throw new InvalidOperationException(PhysicalGroupTrustProtocol.Invalid);
+        }
         if (trust.Role == PhysicalGroupTrustRole.Disabled)
-        { RequireDisabled(trust); return; }
+        {
+            RequireDisabled(trust);
+            return;
+        }
         if (trust.Role is not (PhysicalGroupTrustRole.Control or PhysicalGroupTrustRole.Destination)
             || trust.RemotePartitionQueries && !trust.RemoteDocumentReads
             || trust.RemoteDocumentReads && !trust.RegisterPhysicalOwners
@@ -35,7 +40,9 @@ internal static class PhysicalGroupTrustValidator
             || trust.ForeignVoterIds.Intersect(node.Peers, StringComparer.Ordinal).Any()
             || !ValidSecret(trust.ForeignPeerSecret)
             || string.Equals(trust.ForeignPeerSecret, node.PeerSecret, StringComparison.Ordinal))
-        { throw new InvalidOperationException(PhysicalGroupTrustProtocol.Invalid); }
+        {
+            throw new InvalidOperationException(PhysicalGroupTrustProtocol.Invalid);
+        }
     }
 
     internal static void ValidateConfiguration(IConfigurationSection nodeSection, PhysicalGroupTrustOptions trust)
@@ -62,14 +69,18 @@ internal static class PhysicalGroupTrustValidator
                 nameof(PhysicalGroupTrustOptions.ForeignPeerSecret), nameof(PhysicalGroupTrustOptions.ForeignVoterIds) };
         if (section.Value is not null || section.GetChildren().Any(child => !allowed.Contains(child.Key, StringComparer.Ordinal)
                 || child.Key != nameof(PhysicalGroupTrustOptions.ForeignVoterIds) && child.GetChildren().Any()))
-        { throw new InvalidOperationException(PhysicalGroupTrustProtocol.Invalid); }
+        {
+            throw new InvalidOperationException(PhysicalGroupTrustProtocol.Invalid);
+        }
         var array = section.GetSection(nameof(PhysicalGroupTrustOptions.ForeignVoterIds));
         var values = array.GetChildren().Take(PhysicalGroupTrustProtocol.RequiredMembers + LookaheadCount).ToArray();
         if (array.Value is not null
             || trust.Role == PhysicalGroupTrustRole.Disabled && values.Length != EmptyCount
             || trust.Role != PhysicalGroupTrustRole.Disabled && !values.Select(value => value.Key).SequenceEqual(ArrayIndices, StringComparer.Ordinal)
             || values.Any(value => value.Value is null || value.GetChildren().Any()))
-        { throw new InvalidOperationException(PhysicalGroupTrustProtocol.Invalid); }
+        {
+            throw new InvalidOperationException(PhysicalGroupTrustProtocol.Invalid);
+        }
     }
 
     private static void RequireDisabled(PhysicalGroupTrustOptions trust)
@@ -77,7 +88,9 @@ internal static class PhysicalGroupTrustValidator
         if (trust.RemoteDocumentReads || trust.RemotePartitionQueries || trust.RegisterPhysicalOwners
             || trust.ForeignPhysicalShardId != Guid.Empty || trust.ForeignIncarnation != Guid.Empty
             || trust.ForeignVoterIds.Length != EmptyCount || trust.ForeignPeerSecret is not null)
-        { throw new InvalidOperationException(PhysicalGroupTrustProtocol.Invalid); }
+        {
+            throw new InvalidOperationException(PhysicalGroupTrustProtocol.Invalid);
+        }
     }
 
     private static bool ValidOrigin(string value)

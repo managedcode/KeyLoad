@@ -12,7 +12,10 @@ internal static class RemoteTransferAttemptColdRefusals
         var state = RemoteTransferAttemptColdNative.State(fixture, transfer.TransferId);
         var source = fixture.SourceCapacity(fixture.SourceQueue);
         var target = fixture.TargetCapacity(fixture.DestinationQueue);
-        var unknown = request with { AcceptCommandId = Guid.NewGuid() };
+        var unknown = request with
+        {
+            AcceptCommandId = Guid.NewGuid()
+        };
         var position = fixture.Store.Position;
         var missing = Assert.ThrowsExactly<KeyLoadException>(() => RemoteTransferAttemptColdNative.Read(fixture, unknown));
         await Assert.That(missing.Code).IsEqualTo(ErrorCode.RecoveryRequired);

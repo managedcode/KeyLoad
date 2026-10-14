@@ -37,18 +37,24 @@ public sealed partial class DatabaseEngine
         ConfigureProjectionConsumerRequest configure, ReplicatedOperation operation)
     {
         if (configure.InitialAnnMaintenance is not { } original)
-        { return; }
+        {
+            return;
+        }
         var profile = configure.Definition.AnnMaintenance;
         if (profile is null || original.CommandId == Guid.Empty || original.Mode != AnnMaintenanceMode.Build
             || original.Consumer != configure.Consumer || original.IndexGeneration != configure.Definition.IndexGeneration
             || original.MaintenanceProfile != profile || original.Collection != profile.Collection
             || original.Field != profile.Field || original.Space != profile.Space)
-        { throw Errors.Fail(ErrorCode.Validation, InvalidMaintenanceProfile); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, InvalidMaintenanceProfile);
+        }
         var principal = Principal(view, operation.PrincipalId, operation.EvaluatedAt);
         Features.Search.AnnProjectionPinValidation.RequireOwner(this, view, principal,
             configure.Consumer.Partition, original);
         if (NativeSerialization.Measure(original) > Limits.MaxBatchBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidMaintenanceProfile); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidMaintenanceProfile);
+        }
     }
 
     internal static void RequireInitialMaintenanceReservation(ProjectionConsumerInfo previous,
@@ -56,12 +62,18 @@ public sealed partial class DatabaseEngine
     {
         if (previous.InitialAnnMaintenance is not null && !previous.InitialAnnMaintenanceSettled
             && configure.CommandId != previous.MaintenanceAuthority?.ConfigureCommandId)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidMaintenanceAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidMaintenanceAuthority);
+        }
         if (configure.InitialAnnMaintenance is not { } supplied)
-        { return; }
+        {
+            return;
+        }
         if (previous.InitialAnnMaintenance is not { } original
             || !global::KeyLoad.AnnMaintenanceRequestIdentity.Same(original, supplied))
-        { throw Errors.Fail(ErrorCode.Conflict, InvalidMaintenanceProfile); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, InvalidMaintenanceProfile);
+        }
     }
 
     private static void RequireProjectionMaintenanceProfile(ProjectionConsumerDefinition definition,

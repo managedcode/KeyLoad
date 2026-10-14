@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Security.Cryptography;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using Microsoft.Extensions.DependencyInjection;
 using Orleans.TestingHost;
 using TUnit.Core.Interfaces;
@@ -49,10 +49,14 @@ internal sealed class PeerDiscoveryNativeCluster : IAsyncInitializer, IAsyncDisp
     internal PeerDiscoveryNativeNode CreateNode(string voter, ILocalSiloDetails local)
     {
         if (!Voters.Contains(voter, StringComparer.Ordinal))
-        { throw new InvalidOperationException("The real silo name is outside the configured recovery cohort."); }
+        {
+            throw new InvalidOperationException("The real silo name is outside the configured recovery cohort.");
+        }
         var node = new PeerDiscoveryNativeNode(new(voter, Voters, Path.GetTempPath(), Incarnation), local, secret);
         if (nodes.TryAdd(voter, node))
-        { return node; }
+        {
+            return node;
+        }
         node.DisposeAsync().AsTask().GetAwaiter().GetResult();
         throw new InvalidOperationException("Duplicate recovery native silo.");
     }
@@ -65,17 +69,23 @@ internal sealed class PeerDiscoveryNativeCluster : IAsyncInitializer, IAsyncDisp
             await cluster.DeployAsync(deadline.Token);
             var silos = cluster.Silos.OfType<InProcessSiloHandle>().ToArray();
             if (silos.Length != Voters.Length)
-            { throw new InvalidOperationException("Exactly three real silos are required."); }
+            {
+                throw new InvalidOperationException("Exactly three real silos are required.");
+            }
             SenderServices = FindServices(silos, SenderVoter);
             ReceiverServices = FindServices(silos, ReceiverVoter);
             var entries = SenderServices.GetRequiredService<ReplicaNativeDiscoveryRuntime>().ReadActiveMembership();
             if (!entries.Select(row => row.SiloName).SequenceEqual(Voters.Order(StringComparer.Ordinal)))
-            { throw new InvalidOperationException("Actual native membership differs from the configured cohort."); }
+            {
+                throw new InvalidOperationException("Actual native membership differs from the configured cohort.");
+            }
         }
         catch (Exception primary)
         {
             try
-            { await DisposeAsync(); }
+            {
+                await DisposeAsync();
+            }
             catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
             throw;
         }
@@ -87,7 +97,9 @@ internal sealed class PeerDiscoveryNativeCluster : IAsyncInitializer, IAsyncDisp
     public ValueTask DisposeAsync()
     {
         lock (lifecycle)
-        { return new(disposal ??= DisposeCoreAsync()); }
+        {
+            return new(disposal ??= DisposeCoreAsync());
+        }
     }
 
     private async Task DisposeCoreAsync()
@@ -97,16 +109,22 @@ internal sealed class PeerDiscoveryNativeCluster : IAsyncInitializer, IAsyncDisp
         foreach (var node in nodes.Values)
         {
             if (node.Runtime is { } runtime)
-            { await ReplicaMaterializerLifecycleErrors.AttemptAsync(runtime.StopAsync, failures); }
+            {
+                await ReplicaMaterializerLifecycleErrors.AttemptAsync(runtime.StopAsync, failures);
+            }
             await ReplicaMaterializerLifecycleErrors.AttemptAsync(() => node.Consensus.StopAsync(deadline.Token), failures);
         }
         await ReplicaMaterializerLifecycleErrors.AttemptAsync(() => cluster.StopAllSilosAsync(deadline.Token), failures);
         try
-        { await cluster.DisposeAsync(); }
+        {
+            await cluster.DisposeAsync();
+        }
         catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
         catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
         foreach (var node in nodes.Values)
-        { await ReplicaMaterializerLifecycleErrors.AttemptAsync(() => node.DisposeAsync().AsTask(), failures); }
+        {
+            await ReplicaMaterializerLifecycleErrors.AttemptAsync(() => node.DisposeAsync().AsTask(), failures);
+        }
         PeerDiscoveryNativeOwners.Release(id);
         CryptographicOperations.ZeroMemory(secret);
         ReplicaMaterializerLifecycleErrors.Throw(failures);

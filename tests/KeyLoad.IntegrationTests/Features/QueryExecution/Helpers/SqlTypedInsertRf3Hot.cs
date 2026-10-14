@@ -21,7 +21,10 @@ internal static class SqlTypedInsertRf3Hot
             };
             await SqlRf3Protocol.EqualAsync(principal, await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), principal, token)));
             await Assert.That(principal.ClusterAdministrator).IsFalse();
-            identity = identity with { Principal = principal };
+            identity = identity with
+            {
+                Principal = principal
+            };
             var owner = await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.ReadAtomicPartitionPlacementAsync(
                 new(PlacementVersion, SqlTypedInsertRf3Literal.Partition), token));
             return await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, identity.Secret, async caller =>

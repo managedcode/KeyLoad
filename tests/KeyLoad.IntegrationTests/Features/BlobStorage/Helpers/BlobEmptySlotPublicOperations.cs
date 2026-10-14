@@ -10,7 +10,10 @@ internal static class BlobEmptySlotPublicOperations
 {
     internal static async Task PublishAsync(RequestCqrsRf3Callers callers, BlobEmptySlotPublicState state, CancellationToken token)
     {
-        state.Healthy = state.RetainedRefused with { CommandId = Guid.NewGuid() };
+        state.Healthy = state.RetainedRefused with
+        {
+            CommandId = Guid.NewGuid()
+        };
         state.HealthyBegun = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.BeginBlobUploadAsync(state.Healthy, token));
         state.HealthyCurrent = state.HealthyBegun.Value;
         await Assert.That(state.HealthyBegun.Value.DeclaredLength).IsEqualTo(0L);
@@ -20,7 +23,10 @@ internal static class BlobEmptySlotPublicOperations
         await BlobEmptySlotPublicAssertions.CurrentAsync(callers, state, token);
         state.Complete = new(Guid.NewGuid(), state.Blob, state.Healthy.UploadId, state.HealthyBegun.Value.IntegrityHash);
         state.Published = (await McpCallerAssertions.SuccessAsync<BlobCommitResult<BlobMetadata>>(await callers.Mcp.CallAsync("keyload_blobs_complete_upload", state.Complete, token))).Value;
-        state.HealthyCurrent = state.HealthyBegun.Value with { Status = BlobUploadStatus.Complete };
+        state.HealthyCurrent = state.HealthyBegun.Value with
+        {
+            Status = BlobUploadStatus.Complete
+        };
         await Assert.That(state.Published.Value.Blob).IsEqualTo(state.Blob);
         await Assert.That(state.Published.Value.VersionId).IsEqualTo(state.Healthy.UploadId);
         await Assert.That(state.Published.Value.Revision).IsEqualTo(1L);

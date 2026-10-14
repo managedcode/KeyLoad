@@ -66,7 +66,10 @@ internal sealed class PhysicalShardCatalogVoterIdentityTests
         var stored = fixture.Database.ReadPhysicalShardCatalog(PhysicalShardCatalogFixture.RootPrincipalId);
         await Assert.That(stored.DefaultShard.VoterIds.SequenceEqual(voters, StringComparer.Ordinal)).IsTrue();
         var originalBytes = fixture.ReadCatalogBytes();
-        var reordered = request with { VoterIds = [voters[1], voters[0], voters[2]] };
+        var reordered = request with
+        {
+            VoterIds = [voters[1], voters[0], voters[2]]
+        };
 
         await Assert.That(fixture.Bootstrap(reordered, Guid.NewGuid()).Error).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(fixture.ReadCatalogBytes().SequenceEqual(originalBytes)).IsTrue();
@@ -94,7 +97,12 @@ internal sealed class PhysicalShardCatalogVoterIdentityTests
         foreach (var voters in badLists)
         {
             fixture.ReplaceCatalog(catalog with
-            { DefaultShard = catalog.DefaultShard with { VoterIds = voters } });
+            {
+                DefaultShard = catalog.DefaultShard with
+                {
+                    VoterIds = voters
+                }
+            });
             var before = fixture.ReadCatalogBytes();
             var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
                 fixture.Database.ReadPhysicalShardCatalog(PhysicalShardCatalogFixture.RootPrincipalId));

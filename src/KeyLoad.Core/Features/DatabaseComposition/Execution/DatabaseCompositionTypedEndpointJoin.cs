@@ -14,10 +14,14 @@ public partial class DatabaseEngine
         PartitionRef partition, QueueToGraph command, BatchResourceAdmission admission)
     {
         if (command.FromCollection is null && command.ToCollection is null)
-        { return null; }
+        {
+            return null;
+        }
         if (command.FromCollection is null || command.ToCollection is null
             || StringComparer.Ordinal.Equals(command.FromCollection, command.ToCollection))
-        { throw Errors.Fail(ErrorCode.Validation, TypedJoinRequiresRelationalCollections); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, TypedJoinRequiresRelationalCollections);
+        }
         var fromPrimaryKey = AuthorizeTypedEndpointResource(view, principal, partition, command.FromCollection, admission);
         var toPrimaryKey = AuthorizeTypedEndpointResource(view, principal, partition, command.ToCollection, admission);
         return (fromPrimaryKey, toPrimaryKey);
@@ -30,7 +34,9 @@ public partial class DatabaseEngine
         Authorization.Require(principal, partition, collection, Capability.DocumentsRead);
         var resource = BatchResource(view, partition, collection, admission, ResourceKind.Collection);
         if (resource.RelationalSchema is not { } schema)
-        { throw Errors.Fail(ErrorCode.UnsupportedCapability, TypedJoinRequiresRelationalCollections); }
+        {
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, TypedJoinRequiresRelationalCollections);
+        }
         RelationalRowValidation.ValidateSchema(resource);
         Authorization.RequireFieldUse(principal, resource, JsonData.Path([schema.PrimaryKey]));
         return schema.PrimaryKey;
@@ -42,7 +48,9 @@ public partial class DatabaseEngine
     {
         if (!StringComparer.Ordinal.Equals(link.From.Collection, command.FromCollection)
             || !StringComparer.Ordinal.Equals(link.To.Collection, command.ToCollection))
-        { throw Errors.Fail(ErrorCode.Validation, TypedJoinReferenceMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, TypedJoinReferenceMismatch);
+        }
         // Both genuine probes are charged, including absent and row-denied endpoints.
         var from = ReadTypedEndpoint(view, principal, link.From, budget, fromPrimaryKey);
         var to = ReadTypedEndpoint(view, principal, link.To, budget, toPrimaryKey);
@@ -55,11 +63,17 @@ public partial class DatabaseEngine
         var record = budget.ReadRecord<DocumentRecord>(view,
             DocumentKey(reference.Partition, reference.Collection, reference.Id));
         if (record is null)
-        { return null; }
+        {
+            return null;
+        }
         if (record.Reference != reference)
-        { throw Errors.Fail(ErrorCode.Corruption, TypedJoinRecordMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, TypedJoinRecordMismatch);
+        }
         if (record.Deleted || !Authorization.CanReadRow(principal, record.Access))
-        { return null; }
+        {
+            return null;
+        }
         RequireTypedEndpointPrimaryIdentity(record, primaryKey);
         return record;
     }
@@ -68,7 +82,9 @@ public partial class DatabaseEngine
         PartitionRef partition, QueueToGraph command, DateTimeOffset now, ReadExecutionBudget budget)
     {
         if (command.FromCollection is null && command.ToCollection is null)
-        { return ExpandQueueToGraphSelection(transaction, principal, partition, command, now, budget, transaction); }
+        {
+            return ExpandQueueToGraphSelection(transaction, principal, partition, command, now, budget, transaction);
+        }
         var grant = budget.CreateReadGrant(budget.RemainingReadGrantBytes, budget.RemainingReadGrantRecords);
         try
         {
@@ -97,10 +113,14 @@ public partial class DatabaseEngine
                 // The budgeted view charges the resource and document once; no second source scan.
                 var document = VisibleVertex(chargedView, principal, reference);
                 if (document.Reference != reference)
-                { throw Errors.Fail(ErrorCode.Corruption, TypedJoinRecordMismatch); }
+                {
+                    throw Errors.Fail(ErrorCode.Corruption, TypedJoinRecordMismatch);
+                }
             }
         }
         finally
-        { budget.CompleteSettledReadGrant(grant); }
+        {
+            budget.CompleteSettledReadGrant(grant);
+        }
     }
 }

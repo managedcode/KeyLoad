@@ -23,7 +23,9 @@ public sealed partial class DatabaseEngine
         var bounded = work.CreateView(view);
         var principal = Principal(bounded, principalId, EvaluationClock.GetUtcNow());
         if (originalPhase.Source is null || originalPhase.SourceOwner is null)
-        { throw Errors.Fail(ErrorCode.Validation, ChangedEventVectorObservation); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, ChangedEventVectorObservation);
+        }
         Authorization.Require(principal, originalPhase.Source.Partition, originalPhase.Source.Resource,
             Capability.SubscriptionsManage);
         Authorization.Require(principal, originalPhase.Source.Partition, originalPhase.Source.Resource,
@@ -34,12 +36,18 @@ public sealed partial class DatabaseEngine
         if (principal.Id != mutation.PrincipalId || principal.PolicyEpoch != mutation.SourcePolicyEpoch
             || placement.Revision != mutation.LogicalPlacementRevision
             || placement.DirectoryRevision != mutation.DirectoryFence)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, ChangedEventVectorObservation); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, ChangedEventVectorObservation);
+        }
         var resource = SourceResource(bounded, mutation.Source);
         if (resource.SchemaVersion != mutation.SourceSchemaVersion)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, ChangedEventVectorObservation); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, ChangedEventVectorObservation);
+        }
         if (mutation.Role != EventVectorSourcePhaseRole.Release)
-        { _ = EventVectorStoredSourceHead(bounded, mutation.Source); }
+        {
+            _ = EventVectorStoredSourceHead(bounded, mutation.Source);
+        }
         var outcome = EventVectorSourceOutcomeBytes.Read(bounded, originalPhase, admission);
         var applied = EventVectorNoAppliedCommands;
         bounded.ReadValue(KeySpace.AppliedBytes, bytes => applied = NativeSerialization.Deserialize<long>(bytes));
@@ -48,7 +56,9 @@ public sealed partial class DatabaseEngine
             originalPhase.OriginalBodyDigest.ToArray(), originalPhase.Source, originalPhase.SourceOwner,
             identity.NodeId, identity.ReadGeneration, Store.Position, applied, principal.Id, principal.PolicyEpoch,
             placement, outcome)
-        { CurrentPinRowBytes = EventVectorCurrentPinBytes.Read(bounded, originalPhase, mutation, admission) };
+        {
+            CurrentPinRowBytes = EventVectorCurrentPinBytes.Read(bounded, originalPhase, mutation, admission)
+        };
         work.CheckResult(result);
         return result;
     }

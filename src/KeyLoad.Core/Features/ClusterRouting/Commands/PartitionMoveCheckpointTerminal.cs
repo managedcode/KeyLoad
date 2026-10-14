@@ -23,7 +23,9 @@ public sealed partial class DatabaseEngine
             || body.NextOriginalRequestNonce != Guid.Empty || body.NextOriginalCaptureReleaseNonce != Guid.Empty
             || body.OriginalDescriptor is not null || body.OriginalFence is not null
             || body.OriginalCaptureWitness is not null || body.OriginalOutcomeWitness is not null)
-        { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict);
+        }
         var actual = last.OriginalResult.Get<PartitionMovePhaseResult>();
         var control = PartitionMoveControlStorage.ReadHistory(transaction, header.Partition, header.MoveId, Limits.MaxBatchBytes)
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
@@ -33,7 +35,9 @@ public sealed partial class DatabaseEngine
             || last.Stage != expectedStage || actual.Control is null
             || !NativeSerialization.Serialize(actual.Control).AsSpan().SequenceEqual(NativeSerialization.Serialize(control))
             || !NativeSerialization.Serialize(last.OriginalResult).AsSpan().SequenceEqual(NativeSerialization.Serialize(body.ObservedOriginalResult)))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.MissingAuthority);
+        }
         RequireNoUnsettledMoveGrants(transaction, control);
         RequireMoveParentInterruptedTerminal(transaction, principal, header, control);
         var result = new PartitionMoveResult(header.MoveId, header.Partition, control.Phase,
@@ -57,7 +61,9 @@ public sealed partial class DatabaseEngine
         updated = MeasureMoveParentHeader(updated,
             checked(header.RetainedMetadataBytes - NativeSerialization.Measure(header)));
         if (updated.RetainedMetadataBytes > movementCheckpoints.MaxRetainedMetadataBytesPerMove)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
+        }
         PartitionMoveParentStorage.ChangeCounter(transaction, PartitionMoveParentKeys.DatabaseTerminalCount(header.Partition),
             PartitionMoveProtocol.SequenceStep, movementCheckpoints.MaxRetainedTerminalMovesPerDatabase);
         PartitionMoveParentStorage.ChangeCounter(transaction, PartitionMoveParentKeys.DatabaseTerminalBytes(header.Partition),

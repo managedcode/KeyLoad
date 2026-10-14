@@ -12,10 +12,20 @@ internal sealed class RequestCqrsRf3Callers : IAsyncDisposable
     private readonly HttpClient sdkHttp;
 
     private RequestCqrsRf3Callers(HttpClient sdkHttp, KeyLoadClient sdk, McpOfficialClient mcp)
-    { this.sdkHttp = sdkHttp; Sdk = sdk; Mcp = mcp; }
+    {
+        this.sdkHttp = sdkHttp;
+        Sdk = sdk;
+        Mcp = mcp;
+    }
 
-    internal KeyLoadClient Sdk { get; }
-    internal McpOfficialClient Mcp { get; }
+    internal KeyLoadClient Sdk
+    {
+        get;
+    }
+    internal McpOfficialClient Mcp
+    {
+        get;
+    }
 
     internal async Task AssertFreshRoutingReadyAsync(CancellationToken cancellationToken)
     {
@@ -29,7 +39,9 @@ internal sealed class RequestCqrsRf3Callers : IAsyncDisposable
         {
             var read = await body.ReadAsync(buffer.AsMemory(length), cancellationToken).ConfigureAwait(false);
             if (read == 0)
-            { break; }
+            {
+                break;
+            }
             length += read;
         }
         await Assert.That(length).IsLessThanOrEqualTo(RequestCqrsRf3Protocol.ReadyReplyMaximumBytes);
@@ -78,7 +90,9 @@ internal sealed class RequestCqrsRf3Callers : IAsyncDisposable
         {
             await using var callers = await ConnectAsync(app, node, adminKey, cancellationToken);
             await ServerFailureObserver.ObserveAsync(async () =>
-            { result = await operation(callers); }, failures);
+            {
+                result = await operation(callers);
+            }, failures);
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
         return result;

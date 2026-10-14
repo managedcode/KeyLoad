@@ -27,7 +27,10 @@ internal static class CompositeSparseUniqueAssertions
     {
         var document = db.Database.GetDocument(Principal, new(db.Partition, Collection, id));
         if (json is null)
-        { await Assert.That(document).IsNull(); return; }
+        {
+            await Assert.That(document).IsNull();
+            return;
+        }
         await Assert.That(document).IsNotNull();
         var value = document!;
         await Assert.That(value.Reference).IsEqualTo(new EntityRef(db.Partition, Collection, id));
@@ -47,7 +50,9 @@ internal static class CompositeSparseUniqueAssertions
             await DocumentAsync(db, id, null, 0);
         }
         else
-        { await DocumentAsync(db, id, json, 1); }
+        {
+            await DocumentAsync(db, id, json, 1);
+        }
     }
 
     internal static async Task ImagesAsync(TestDatabase db, (string Id, object? Rank)[] rows)
@@ -72,7 +77,9 @@ internal static class CompositeSparseUniqueAssertions
     {
         var page = view.Scan(prefix, MaximumRecords);
         if (page.HasMore)
-        { throw new InvalidOperationException("The complete sparse-index native domain exceeded its fixture bound."); }
+        {
+            throw new InvalidOperationException("The complete sparse-index native domain exceeded its fixture bound.");
+        }
         return page.Records.Select(row => new KeyValuePair<string, string>(Convert.ToHexString(row.Key.Span),
             Convert.ToHexString(row.Value.Span))).ToArray();
     }

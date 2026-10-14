@@ -24,16 +24,22 @@ internal static class NativeBlobWireIdentityRules
     {
         if (arm.ArmId == Guid.Empty || !Enum.IsDefined(arm.Identity)
             || Identity(arm.Purpose, arm.OperationKind) != arm.Identity || string.IsNullOrEmpty(arm.BlobId))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         var outcome = arm.Purpose == ControlledBlobReadPurpose.Outcome;
         if (outcome != arm.OriginalCommandId.HasValue || arm.OriginalCommandId == Guid.Empty
             || outcome && arm.NativeRequestDigest is not null
             || !outcome && !NativeBlobWireShape.IsDigest(arm.NativeRequestDigest))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         if (arm.Identity == NativeBlobWireIdentity.Delete && arm.UploadId is not null
             || outcome && arm.Identity != NativeBlobWireIdentity.Delete && !arm.UploadId.HasValue
             || arm.UploadId == Guid.Empty)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
     }
 
     private static InvalidOperationException Invalid() => new(NativeBlobWireProbeProtocol.InvalidEvidence);

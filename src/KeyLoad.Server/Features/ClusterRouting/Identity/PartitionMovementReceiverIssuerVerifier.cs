@@ -16,7 +16,9 @@ internal sealed class PartitionMovementReceiverIssuerVerifier(IOptions<NodeOptio
     {
         var raw = body.OriginalIssuerRequestBytes;
         if (raw.IsEmpty || raw.Length > database.Limits.MaxBatchBytes)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof);
+        }
         RequireIssuerPacketMac(database, body.OriginalEnvelope, raw, body.OriginalIssuerRequestSignature);
         var actual = NativeSerialization.Deserialize<PartitionMovementReceiverIssueRequest>(raw.Span);
         if (actual.Version != PartitionMoveProtocol.Version || actual.OriginalPhaseCommandId != body.OriginalPhaseCommandId
@@ -34,7 +36,9 @@ internal sealed class PartitionMovementReceiverIssuerVerifier(IOptions<NodeOptio
             || actual.SourceWitness.QueryNonce == Guid.Empty || actual.SourceWitness.QueryNonce == body.OriginalEnvelope.Nonce
             || !actual.SourceWitness.OriginalReplyBytes.Span.SequenceEqual(body.SourcePendingProof.Span)
             || actual.SourceWitness.OriginalReplySignature != body.SourcePendingSignature)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof);
+        }
         work.Check();
     }
 
@@ -48,7 +52,9 @@ internal sealed class PartitionMovementReceiverIssuerVerifier(IOptions<NodeOptio
         {
             using var mac = new PartitionMovementMac(key, database.Limits.MaxBatchBytes);
             if (!mac.VerifyReceiverIssueRequest(raw.Span, signature, query: false))
-            { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof); }
+            {
+                throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof);
+            }
         }
         finally { CryptographicOperations.ZeroMemory(key); }
     }
@@ -58,10 +64,14 @@ internal sealed class PartitionMovementReceiverIssuerVerifier(IOptions<NodeOptio
     {
         RequireReceiverAdministrator(database, principalId, work);
         if (ownedBody.IsEmpty || ownedBody.Length > database.Limits.MaxBatchBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMovementProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMovementProtocol.InvalidProof);
+        }
         var body = NativeSerialization.Deserialize<PartitionMoveReceiverIssueBody>(ownedBody.Span);
         if (body.ActualReceiverPrincipalId != principalId || body.ActualReceiverPolicyEpoch <= PartitionMovementProtocol.UnissuedPolicyEpoch)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof);
+        }
         RequireNativeIssuerPacket(database, body, work);
         PartitionMovementReceiverSourceProofVerifier.Require(database, body, work, options.Value, replicaConfiguration.Value);
         work.Check();
@@ -72,12 +82,16 @@ internal sealed class PartitionMovementReceiverIssuerVerifier(IOptions<NodeOptio
     {
         work.Check();
         if (principalId != PartitionStoreProtocol.AdministratorId)
-        { throw Errors.Fail(ErrorCode.PermissionDenied, PartitionMovementProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, PartitionMovementProtocol.InvalidProof);
+        }
         database.Store.Read(view =>
         {
             var principal = database.Principal(work.CreateView(view), principalId, database.EvaluationClock.GetUtcNow());
             if (!principal.ClusterAdministrator)
-            { throw Errors.Fail(ErrorCode.PermissionDenied, PartitionMovementProtocol.InvalidProof); }
+            {
+                throw Errors.Fail(ErrorCode.PermissionDenied, PartitionMovementProtocol.InvalidProof);
+            }
             return true;
         });
         work.Check();

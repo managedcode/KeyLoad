@@ -15,7 +15,9 @@ internal static class ChunkSelectedBlockIntegrityDamage
         fixture.Store.Commit((tx, _) =>
         {
             if (fault == SampleChunkCorruptionCut.MissingBlock)
-            { tx.Delete(key); }
+            {
+                tx.Delete(key);
+            }
             else if (fault == SampleChunkCorruptionCut.BlockDigest)
             {
                 var changed = original.ToArray();
@@ -23,7 +25,9 @@ internal static class ChunkSelectedBlockIntegrityDamage
                 tx.Put(key, changed);
             }
             else
-            { throw new ArgumentOutOfRangeException(nameof(fault)); }
+            {
+                throw new ArgumentOutOfRangeException(nameof(fault));
+            }
             return true;
         });
         return original;

@@ -16,9 +16,13 @@ internal static class FollowerDocumentRf3FailureObservation
                 + $"callerCancelled={state.CallLifetime?.IsCancellationRequested} exceptionType={original.GetType().FullName}");
             using var frames = new StringReader(original.StackTrace ?? string.Empty);
             for (var frame = FirstStackFrame; frame < MaximumStackFrames && frames.ReadLine() is { } line; frame++)
-            { Console.Error.WriteLine(line); }
+            {
+                Console.Error.WriteLine(line);
+            }
         }
         catch (Exception diagnostic)
-        { throw new AggregateException(original, diagnostic); }
+        {
+            throw new AggregateException(original, diagnostic);
+        }
     }
 }

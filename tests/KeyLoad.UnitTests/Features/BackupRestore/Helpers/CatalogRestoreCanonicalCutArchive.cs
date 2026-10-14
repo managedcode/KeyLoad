@@ -14,8 +14,14 @@ internal static class CatalogRestoreCanonicalCutArchive
         var cut = global::KeyLoad.NativeSerialization.Deserialize<global::KeyLoad.ClusterBackupOwnerCut>(
             envelope.Metadata.Span);
         await Assert.That(cut.CanonicalDigest).IsNotEqualTo(InvalidDigest);
-        var invalid = cut with { CanonicalDigest = InvalidDigest };
-        var replacement = envelope with { Metadata = global::KeyLoad.NativeSerialization.Serialize(invalid) };
+        var invalid = cut with
+        {
+            CanonicalDigest = InvalidDigest
+        };
+        var replacement = envelope with
+        {
+            Metadata = global::KeyLoad.NativeSerialization.Serialize(invalid)
+        };
         await File.WriteAllBytesAsync(path, global::KeyLoad.NativeSerialization.Serialize(replacement), token);
     }
 

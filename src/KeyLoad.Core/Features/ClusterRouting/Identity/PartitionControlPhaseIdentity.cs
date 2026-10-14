@@ -19,6 +19,8 @@ public sealed partial class DatabaseEngine
             _ => Guid.Empty
         };
         if (identity != Guid.Empty && identity == phaseCommandId)
-        { throw Errors.Fail(ErrorCode.Validation, PartitionMoveProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, PartitionMoveProtocol.Invalid);
+        }
     }
 }

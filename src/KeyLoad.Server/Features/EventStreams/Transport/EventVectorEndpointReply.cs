@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server.Features.DocumentStorage;
 
 namespace KeyLoad.Server.Features.EventStreams;
@@ -28,11 +28,17 @@ internal static class EventVectorEndpointReply
         var result = ReadOnlyMemory<byte>.Empty;
         ErrorCode? errorCode = null;
         try
-        { result = await receiver.ExecuteAsync(admitted, work, boundary, originalCancellationToken).ConfigureAwait(false); }
+        {
+            result = await receiver.ExecuteAsync(admitted, work, boundary, originalCancellationToken).ConfigureAwait(false);
+        }
         catch (KeyLoadException error) when (boundary?.IsStarted == true)
-        { throw Errors.Fail(ErrorCode.UnknownWriteOutcome, EventVectorRemoteProtocol.Unavailable, error); }
+        {
+            throw Errors.Fail(ErrorCode.UnknownWriteOutcome, EventVectorRemoteProtocol.Unavailable, error);
+        }
         catch (KeyLoadException error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { errorCode = error.Code; }
+        {
+            errorCode = error.Code;
+        }
         byte[]? originalBytes = null;
         var transferred = false;
         try
@@ -51,7 +57,9 @@ internal static class EventVectorEndpointReply
         finally
         {
             if (!transferred && originalBytes is not null)
-            { CryptographicOperations.ZeroMemory(originalBytes); }
+            {
+                CryptographicOperations.ZeroMemory(originalBytes);
+            }
             CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(result).Span);
         }
     }

@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 using Microsoft.Extensions.Options;
 
@@ -45,9 +45,15 @@ internal sealed class RemoteGraphNativeRuntime : IAsyncDisposable
             lifetime = new(resources.Stopping, resources.Dispose);
         }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { ReleaseFailedCreation(error); throw; }
+        {
+            ReleaseFailedCreation(error);
+            throw;
+        }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { ReleaseFailedCreation(error); throw; }
+        {
+            ReleaseFailedCreation(error);
+            throw;
+        }
     }
 
     internal bool IsJoined => Volatile.Read(ref joined) == Joined;
@@ -56,7 +62,9 @@ internal sealed class RemoteGraphNativeRuntime : IAsyncDisposable
     {
         ArgumentNullException.ThrowIfNull(owner);
         if (Interlocked.CompareExchange(ref runtime, owner, null) is not null)
-        { throw new InvalidOperationException(Attached); }
+        {
+            throw new InvalidOperationException(Attached);
+        }
     }
 
     internal async Task<RemoteGraphNativeReplyV1> ExchangeAsync(RemoteGraphNativeRequestV1 original,
@@ -67,28 +75,39 @@ internal sealed class RemoteGraphNativeRuntime : IAsyncDisposable
         caller.ThrowIfCancellationRequested();
         operation.ShutdownToken.ThrowIfCancellationRequested();
         if (!await resources.Admission.WaitAsync(NoWaitMilliseconds, caller).ConfigureAwait(false))
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, RemoteGraphNativeProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, RemoteGraphNativeProtocol.Unavailable);
+        }
         try
         {
             RemoteGraphNativeIdentity.RequireShape(original, partition.Database.Limits.MaxBatchBytes, membershipOptions);
             identity.RequireCurrent(original);
             var remaining = original.ExpiresAt - clock.GetUtcNow();
             if (remaining > routing.RequestLifetime)
-            { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteGraphNativeProtocol.InvalidProof); }
+            {
+                throw Errors.Fail(ErrorCode.Unauthenticated, RemoteGraphNativeProtocol.InvalidProof);
+            }
             var bound = remaining < routing.ExecutionLifetime ? remaining : routing.ExecutionLifetime;
             using var deadline = new CancellationTokenSource(bound, clock);
             using var linked = CancellationTokenSource.CreateLinkedTokenSource(caller, operation.ShutdownToken, deadline.Token);
             var work = partition.Database.CreateRemoteGraphReadWork(original.ExpiresAt, linked.Token);
             work.ChargeBytes(original.Payload.Length);
-            var request = original with { Payload = original.Payload.ToArray() };
+            var request = original with
+            {
+                Payload = original.Payload.ToArray()
+            };
             using var sourceMac = RemoteGraphNativeMac.Create(options, partition, request.SourceOwner);
             if (!sourceMac.VerifyRemoteGraphRequest(request))
-            { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteGraphNativeProtocol.InvalidProof); }
+            {
+                throw Errors.Fail(ErrorCode.Unauthenticated, RemoteGraphNativeProtocol.InvalidProof);
+            }
             using var targetMac = RemoteGraphNativeMac.Create(options, partition, request.DestinationOwner);
             return await ExecuteAdmittedAsync(request, targetMac, work, linked.Token).ConfigureAwait(false);
         }
         finally
-        { resources.Admission.Release(); }
+        {
+            resources.Admission.Release();
+        }
     }
 
     private async Task<RemoteGraphNativeReplyV1> ExecuteAdmittedAsync(RemoteGraphNativeRequestV1 request,
@@ -101,7 +120,9 @@ internal sealed class RemoteGraphNativeRuntime : IAsyncDisposable
             identity.RequireCurrent(request);
             token.ThrowIfCancellationRequested();
             if (!resources.Replay.TryUse(request.Nonce.ToString(NonceFormat)))
-            { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteGraphNativeProtocol.InvalidProof); }
+            {
+                throw Errors.Fail(ErrorCode.Unauthenticated, RemoteGraphNativeProtocol.InvalidProof);
+            }
             var owner = Volatile.Read(ref runtime)
                 ?? throw Errors.Fail(ErrorCode.OwnershipLost, RemoteGraphNativeProtocol.Unavailable);
             var payload = await owner.ExecuteNativeAsync(request, boundary, work, token).ConfigureAwait(false);
@@ -109,22 +130,31 @@ internal sealed class RemoteGraphNativeRuntime : IAsyncDisposable
             identity.RequireCurrent(request);
             work.Check();
             if (payload.IsEmpty || payload.Length > partition.Database.Limits.MaxBatchBytes)
-            { throw Errors.Fail(ErrorCode.Corruption, RemoteGraphNativeProtocol.InvalidProof); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, RemoteGraphNativeProtocol.InvalidProof);
+            }
             work.ChargeBytes(payload.Length);
             reply = new(RemoteGraphNativeProtocol.Version, request.RequestId, request.Nonce,
                 payload.ToArray(), null, null, local.Read(), string.Empty);
         }
         catch (KeyLoadException error)
-        { reply = Failure(request, boundary.IsStarted ? ErrorCode.UnknownWriteOutcome : error.Code); }
+        {
+            reply = Failure(request, boundary.IsStarted ? ErrorCode.UnknownWriteOutcome : error.Code);
+        }
         catch (OperationCanceledException)
-        { reply = Failure(request, boundary.IsStarted ? ErrorCode.UnknownWriteOutcome : ErrorCode.Cancelled); }
+        {
+            reply = Failure(request, boundary.IsStarted ? ErrorCode.UnknownWriteOutcome : ErrorCode.Cancelled);
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
             var code = boundary.IsStarted ? ErrorCode.UnknownWriteOutcome : ErrorCode.OwnershipLost;
             GrainFailureDiagnostics.Log(logger, error, request.RequestId, GrainFailureStage.CapabilityExecution, code);
             reply = Failure(request, code);
         }
-        return reply with { Signature = targetMac.SignRemoteGraphReply(reply) };
+        return reply with
+        {
+            Signature = targetMac.SignRemoteGraphReply(reply)
+        };
     }
 
     private RemoteGraphNativeReplyV1 Failure(RemoteGraphNativeRequestV1 request, ErrorCode error)

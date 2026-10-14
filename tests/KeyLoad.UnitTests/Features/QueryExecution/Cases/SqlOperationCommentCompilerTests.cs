@@ -15,7 +15,10 @@ internal sealed class SqlOperationCommentCompilerTests
             var arguments = item.Arguments();
             var before = JsonSerializer.Serialize(arguments, JsonDefaults.Options);
             var plain = SqlOperationTestData.Call(item.Name, arguments);
-            var commented = plain with { Sql = SqlOperationCommentTestData.Call(item.Name) };
+            var commented = plain with
+            {
+                Sql = SqlOperationCommentTestData.Call(item.Name)
+            };
             var expected = SqlOperationTestData.Find(item.Name).Decode(arguments);
             var actual = SqlOperationTestData.Compile(commented);
             await SqlOperationTestData.Same(actual, expected);
@@ -59,7 +62,9 @@ internal sealed class SqlOperationCommentCompilerTests
         foreach (var sql in new[] { SqlOperationCommentTestData.Select, SqlOperationCommentTestData.Top })
         {
             var parameters = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
-            { [SqlOperationTestData.Status] = JsonSerializer.SerializeToElement(SqlOperationTestData.Open) };
+            {
+                [SqlOperationTestData.Status] = JsonSerializer.SerializeToElement(SqlOperationTestData.Open)
+            };
             var request = new SqlOperationRequest(McpCanonicalTestData.Partition, sql, parameters,
                 AllowFullScan: true, Cursor: SqlOperationTestData.Cursor);
             var expected = SqlOperationTestData.Find(McpCatalogExpectations.QueryExecute).Decode(
@@ -78,10 +83,14 @@ internal sealed class SqlOperationCommentCompilerTests
         var command = new CommandRequest(McpCanonicalTestData.StableId, McpCanonicalTestData.Partition,
             [new PutDocument(McpCanonicalTestData.Resource, McpCanonicalTestData.Entity, SqlOperationCommentTestData.Document)]);
         var arguments = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
-        { [McpCatalogProtocol.Request] = JsonSerializer.SerializeToElement(command, JsonDefaults.Options) };
+        {
+            [McpCatalogProtocol.Request] = JsonSerializer.SerializeToElement(command, JsonDefaults.Options)
+        };
         var request = SqlOperationTestData.Call(McpCatalogExpectations.DocumentsCommit, arguments)
             with
-        { Sql = SqlOperationCommentTestData.Call(McpCatalogExpectations.DocumentsCommit) };
+        {
+            Sql = SqlOperationCommentTestData.Call(McpCatalogExpectations.DocumentsCommit)
+        };
         var actual = SqlOperationTestData.Compile(request);
         await Assert.That(actual.CommandId).IsEqualTo(McpCanonicalTestData.StableId);
         await SqlOperationTestData.Same(actual, SqlOperationTestData.Find(McpCatalogExpectations.DocumentsCommit).Decode(arguments));

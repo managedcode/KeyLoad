@@ -39,7 +39,9 @@ internal static class SampleChunkPendingRf3Flow
             creator.Sdk, administrator.Sdk, token).ConfigureAwait(false);
         await SampleChunkPendingRf3Admission.CorrectThenRefusedAsync(wave, candidate, administrator.Sdk, token).ConfigureAwait(false);
         foreach (var item in admitted)
-        { await SampleChunkPendingRf3Assertions.PendingAsync(item, creator.Sdk, token).ConfigureAwait(false); }
+        {
+            await SampleChunkPendingRf3Assertions.PendingAsync(item, creator.Sdk, token).ConfigureAwait(false);
+        }
         await SampleChunkPendingRf3Assertions.CompleteAsync(candidate, creator.Sdk, creator.Mcp, merged: false, token).ConfigureAwait(false);
         return new(scope, admitted.ToImmutable(), candidate);
     }

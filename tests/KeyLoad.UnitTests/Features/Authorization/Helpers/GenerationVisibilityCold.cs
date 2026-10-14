@@ -45,21 +45,33 @@ internal static class GenerationVisibilityCold
                     TeamRowPolicyFlow.HealthyRevision, TeamRowPolicyFlow.HealthyJson, token);
             }
             catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
-            { primary = error; throw; }
+            {
+                primary = error;
+                throw;
+            }
             catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null)
-            { primary = error; throw; }
+            {
+                primary = error;
+                throw;
+            }
         }
         catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
-        { Retain(primary, error, failures); }
+        {
+            Retain(primary, error, failures);
+        }
         catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null)
-        { Retain(primary, error, failures); }
+        {
+            Retain(primary, error, failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
     private static void Retain(Exception? primary, Exception terminal, List<Exception> failures)
     {
         if (primary is not null && !ReferenceEquals(primary, terminal))
-        { failures.Add(primary); }
+        {
+            failures.Add(primary);
+        }
         failures.Add(terminal);
     }
 }

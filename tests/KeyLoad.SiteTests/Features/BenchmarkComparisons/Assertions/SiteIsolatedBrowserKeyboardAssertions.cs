@@ -31,7 +31,9 @@ internal static class SiteIsolatedBrowserKeyboardAssertions
         const string selected = "document.querySelector('#isolated-node-count').value==='2'";
         var selectedExpectedValue = await cdp.WaitForExpressionAsync(selected, token);
         if (!selectedExpectedValue)
-        { TestContext.Current!.Output.WriteLine(FailureEvidence(arrowUp, enter, popupArrowUp)); }
+        {
+            TestContext.Current!.Output.WriteLine(FailureEvidence(arrowUp, enter, popupArrowUp));
+        }
         await Assert.That(selectedExpectedValue).IsTrue();
         await SiteIsolatedBrowserAssertions.AssertRowsAsync(cdp, projection, new("PointRead", 2, "all", "throughput", "all"), token);
         await SiteIsolatedBrowserAssertions.SelectAsync(cdp, "node-count", 3, token);

@@ -4,7 +4,10 @@ namespace KeyLoad.IntegrationTests.Features.ClientApi;
 
 internal static class McpAdditionalDiscoveryExpectations
 {
-    internal static ImmutableArray<McpToolExpectation> Entries { get; } =
+    internal static ImmutableArray<McpToolExpectation> Entries
+    {
+        get;
+    } =
     [
         new("keyload_admin_partition_move", false, true, true, McpExpectedBody.Object, false,
             ["moveId", "partition", "destinationPhysicalShardId", "expectedPlacementRevision", "mode"],

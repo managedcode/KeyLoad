@@ -27,7 +27,11 @@ internal static class RemoteTransferAttemptRecoveryContinuation
             source.Partition, [new CompleteQueueTransfer(source, mutation.TransferId, proof.ReceiptToken)]);
         var completed = database.ApplyEmbedded(CrashDatabase.Operation(OperationKind.Batch, complete, complete.CommandId), token).Get<CommitReceipt>();
         var delivered = database.InspectQueueTransfer(CrashFixtureValues.Principal, source, mutation.TransferId, token)!;
-        await EqualAsync(delivered, original with { State = QueueTransferState.Delivered, ReceiptToken = proof.ReceiptToken });
+        await EqualAsync(delivered, original with
+        {
+            State = QueueTransferState.Delivered,
+            ReceiptToken = proof.ReceiptToken
+        });
         var message = database.InspectMessage(CrashFixtureValues.Principal, destination, RemoteTransferAttemptCrashProtocol.OriginalMessage)!;
         await EqualAsync(message, new MessageInspection(new(RemoteTransferAttemptCrashProtocol.OriginalMessage,
             MessageState.Ready, RemoteTransferAttemptCrashProtocol.InitialAttempts,

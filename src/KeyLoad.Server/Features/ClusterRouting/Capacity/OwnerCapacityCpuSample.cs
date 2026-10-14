@@ -15,14 +15,20 @@ internal static class OwnerCapacityCpuSample
         if (before.CpuQuotaMicroseconds != current.CpuQuotaMicroseconds
             || before.CpuPeriodMicroseconds != current.CpuPeriodMicroseconds
             || current.Timestamp <= before.Timestamp || current.CpuUsageMicroseconds < before.CpuUsageMicroseconds)
-        { return null; }
+        {
+            return null;
+        }
         var elapsed = clock.GetElapsedTime(before.Timestamp, current.Timestamp);
         var microseconds = (decimal)elapsed.Ticks * MicrosecondsPerSecond / TimeSpan.TicksPerSecond;
         if (microseconds <= MinimumElapsedMicroseconds)
-        { return null; }
+        {
+            return null;
+        }
         var delta = checked(current.CpuUsageMicroseconds - before.CpuUsageMicroseconds);
         if (delta < MinimumUsageDelta)
-        { return null; }
+        {
+            return null;
+        }
         var basis = delta * (decimal)current.CpuPeriodMicroseconds * TenantPlacementPolicyProtocol.BasisPoints
             / (microseconds * current.CpuQuotaMicroseconds);
         return basis > MaximumIntBasisPoints ? null : checked((int)decimal.Ceiling(basis));

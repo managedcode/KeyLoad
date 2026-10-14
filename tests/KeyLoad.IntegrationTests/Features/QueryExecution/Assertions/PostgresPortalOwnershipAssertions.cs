@@ -25,7 +25,12 @@ internal static class PostgresPortalOwnershipAssertions
         await SqlRf3Protocol.EqualAsync(new DocumentReadResult(new(PostgresRf3State.Right,
             PostgresRf3Protocol.SeedRevision, PostgresRf3State.RightJson, false, [])), right);
         var outbox = await McpCallerAssertions.SdkSuccessAsync(await root.OutboxStatusAsync(PostgresRf3State.Partition, token));
-        return global::System.Text.Json.JsonSerializer.Serialize(new { Left = left, Right = right, Outbox = outbox }, JsonDefaults.Options);
+        return global::System.Text.Json.JsonSerializer.Serialize(new
+        {
+            Left = left,
+            Right = right,
+            Outbox = outbox
+        }, JsonDefaults.Options);
     }
 
     private const string JoinAccess = "bounded-primary-key-inner-join";

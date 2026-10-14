@@ -12,7 +12,10 @@ internal sealed class AuthorizationCaptureBank<T>(IOptions<AuthorizationTelemetr
         lock (gate)
         {
             if (records.Count == options.Value.MaximumRecords)
-            { truncated = true; return; }
+            {
+                truncated = true;
+                return;
+            }
             records.Add(record);
         }
     }
@@ -21,7 +24,9 @@ internal sealed class AuthorizationCaptureBank<T>(IOptions<AuthorizationTelemetr
         lock (gate)
         {
             if (truncated)
-            { throw new InvalidOperationException(AuthorizationTelemetryTestProtocol.CaptureFailure); }
+            {
+                throw new InvalidOperationException(AuthorizationTelemetryTestProtocol.CaptureFailure);
+            }
             return [.. records];
         }
     }

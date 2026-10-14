@@ -1,6 +1,6 @@
 using KeyLoad.Client;
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.Authorization;
@@ -40,7 +40,9 @@ internal static class CredentialAuthorityClients
                 var root = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
                 var reader = new KeyLoadClient(http, state.Document.Identity.Secret, IntegrationClientOptions.Execution());
                 if (changeCredential)
-                { await CredentialAuthorityFlow.WarmAsync(fixture, root, reader, session, state, expire, token); }
+                {
+                    await CredentialAuthorityFlow.WarmAsync(fixture, root, reader, session, state, expire, token);
+                }
                 else
                 {
                     await DiscoveryAuthorityValues.HealthyAsync(root, reader, session, state.Document, token);

@@ -48,9 +48,13 @@ internal static class PartitionMovementControlledBlobFailedCutRf3Assertions
         {
             allowed.Add(Convert.ToHexString(KeySpace.AppliedBytes));
             if (entry.Operation is not { } operation)
-            { continue; }
+            {
+                continue;
+            }
             if (await membership.TryApplyAsync(operation).ConfigureAwait(false))
-            { continue; }
+            {
+                continue;
+            }
             membership.ObserveClock(operation);
             await Assert.That(operation.Kind).IsEqualTo(OperationKind.PartitionMovementPhase);
             await Assert.That(operation.PrincipalId).IsEqualTo(source ? grant.OperatorPrincipalId : PartitionStoreProtocol.AdministratorId);
@@ -68,7 +72,9 @@ internal static class PartitionMovementControlledBlobFailedCutRf3Assertions
         await Assert.That(seen.SetEquals(expected.Keys)).IsTrue();
         await membership.RequireCompleteAsync().ConfigureAwait(false);
         if (source)
-        { AddSourceKeys(allowed, seed, identity, grant); }
+        {
+            AddSourceKeys(allowed, seed, identity, grant);
+        }
         await PartitionMovementCapturePointerRf3Cut.RequireExactRemainingRowsAsync(before, after, allowed);
         await Assert.That(after.StorePosition - before.StorePosition).IsEqualTo((long)entries.Length);
         await SqlRf3Protocol.EqualAsync(before.Header, after.Header);
@@ -86,6 +92,8 @@ internal static class PartitionMovementControlledBlobFailedCutRf3Assertions
             CommandOutcomePartitionLocatorSerialization.ScopedKey(seed.Partition, identity.PrincipalId, identity.CommandId),
             PartitionMoveGrantStorage.Key(seed.Partition, grant.GrantId),
             PartitionMoveGrantStorage.MoveKey(seed.Partition, seed.FirstRequest.MoveId, grant.GrantId) })
-        { allowed.Add(Convert.ToHexString(key)); }
+        {
+            allowed.Add(Convert.ToHexString(key));
+        }
     }
 }

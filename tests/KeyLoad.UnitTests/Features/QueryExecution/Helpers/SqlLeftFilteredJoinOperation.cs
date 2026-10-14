@@ -20,7 +20,11 @@ internal static class SqlLeftFilteredJoinOperation
         await SqlLeftFilteredJoinAssertions.PageAsync(sql, position);
         await Assert.That(JsonDefaults.Serialize(ast)).IsEquivalentTo(JsonDefaults.Serialize(sql), CollectionOrdering.Matching);
         await SqlLeftFilteredJoinAssertions.PageAsync(engine.Execute("root",
-            request with { Sql = SqlLeftFilteredJoinFixture.LiteralSql, Parameters = null }), position);
+            request with
+            {
+                Sql = SqlLeftFilteredJoinFixture.LiteralSql,
+                Parameters = null
+            }), position);
         var combination = request with
         {
             Sql = SqlLeftFilteredJoinFixture.Prefix
@@ -53,7 +57,12 @@ internal static class SqlLeftFilteredJoinOperation
             () => engine.Execute("root", request with { Parameters = null }), ErrorCode.Validation);
         await SqlLeftFilteredJoinAssertions.RejectAsync(database,
             () => engine.Execute("root", request with
-            { Parameters = new() { [MinimumParameter] = JsonSerializer.SerializeToElement("wrong") } }), ErrorCode.Validation);
+            {
+                Parameters = new()
+                {
+                    [MinimumParameter] = JsonSerializer.SerializeToElement("wrong")
+                }
+            }), ErrorCode.Validation);
         await SqlLeftFilteredJoinAssertions.RejectAsync(database,
             () => engine.Execute("root", request with
             {
@@ -90,11 +99,17 @@ internal static class SqlLeftFilteredJoinOperation
             () => engine.Execute(principal.Id, request), ErrorCode.PermissionDenied);
         var repaired = database.Submit(OperationKind.ConfigurePrincipal,
             new ConfigurePrincipalRequest(principal with
-            { PolicyEpoch = persisted.PolicyEpoch + 1, FieldGrants = [SqlLeftFilteredJoinFixture.UseGrant, SqlLeftFilteredJoinFixture.FilterReadGrant] }))
+            {
+                PolicyEpoch = persisted.PolicyEpoch + 1,
+                FieldGrants = [SqlLeftFilteredJoinFixture.UseGrant, SqlLeftFilteredJoinFixture.FilterReadGrant]
+            }))
             .Get<PrincipalRecord>();
         await SqlLeftFilteredJoinAssertions.PageAsync(engine.Execute(principal.Id, request), database.Store.Position, masked: true);
         database.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(repaired with
-        { PolicyEpoch = repaired.PolicyEpoch + 1, FieldGrants = [SqlLeftFilteredJoinFixture.FilterReadGrant] }));
+        {
+            PolicyEpoch = repaired.PolicyEpoch + 1,
+            FieldGrants = [SqlLeftFilteredJoinFixture.FilterReadGrant]
+        }));
         await SqlLeftFilteredJoinAssertions.RejectAsync(database,
             () => engine.Execute(principal.Id, request), ErrorCode.PermissionDenied);
         await VerifyAsync(database);

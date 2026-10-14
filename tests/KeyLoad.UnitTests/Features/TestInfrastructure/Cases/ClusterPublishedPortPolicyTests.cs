@@ -80,7 +80,10 @@ internal sealed class ClusterPublishedPortPolicyTests
     private static IDistributedApplicationBuilder CreateBuilder()
     {
         var builder = DistributedApplication.CreateBuilder(new DistributedApplicationOptions
-        { DisableDashboard = true, Args = [] });
+        {
+            DisableDashboard = true,
+            Args = []
+        });
         builder.Configuration[ContainerImageOptions.ServerKey] = ImageReference;
         builder.Configuration[ContainerUserSetting] = "1000:1000";
         return builder;

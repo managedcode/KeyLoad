@@ -20,6 +20,8 @@ internal static class PartitionControlEffectGrantAdmission
             || JsonData.Fingerprint(body.Control) != JsonData.Fingerprint(control)
             || record.EffectId != delegation.EffectId
             || !record.TargetBody.Span.SequenceEqual(phase.Body.Span))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
     }
 }

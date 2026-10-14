@@ -15,7 +15,10 @@ internal sealed class NativeCapabilityOmissionRf3Fixture
     private bool disarmed;
     private bool retained;
     private NativeCapabilityOmissionRf3Fixture(RequestCqrsProbeFixture owners, CancellationToken originalToken)
-    { this.owners = owners; this.originalToken = originalToken; }
+    {
+        this.owners = owners;
+        this.originalToken = originalToken;
+    }
     internal string Root => owners.Root;
     internal string SessionId => owners.SessionId;
     internal static NativeCapabilityOmissionRf3Fixture Create(string dataRoot, CancellationToken originalToken)
@@ -61,7 +64,10 @@ internal sealed class NativeCapabilityOmissionRf3Fixture
         await Assert.That(refused.ReceiverVoter is RequestCqrsProbeFixtureProtocol.Node1Origin
             or RequestCqrsProbeFixtureProtocol.Node2Origin or RequestCqrsProbeFixtureProtocol.Node3Origin).IsTrue();
         await Assert.That(refused).IsEqualTo(issued with
-        { Stage = NativeSignedPurposeProtocol.Rejected, ReceiverVoter = refused.ReceiverVoter });
+        {
+            Stage = NativeSignedPurposeProtocol.Rejected,
+            ReceiverVoter = refused.ReceiverVoter
+        });
     }
     private NativeSignedPurposeWitness ReadPurpose(NativeSignedPurposeJson purposeJson, string name)
     {
@@ -95,9 +101,17 @@ internal sealed class NativeCapabilityOmissionRf3Fixture
         await Assert.That(source.RuntimeJournalReaderContract).IsNull();
         await Assert.That(source.ProducerVoter).IsNull();
         await Assert.That(omitted).IsEqualTo(source with
-        { Stage = NativeDiscoveryOmissionProtocol.OmittedStage, ProducerVoter = arm.TargetVoter, RuntimeJournalReaderContract = KeyLoad.Storage.StoreReaderContract.Unspecified });
+        {
+            Stage = NativeDiscoveryOmissionProtocol.OmittedStage,
+            ProducerVoter = arm.TargetVoter,
+            RuntimeJournalReaderContract = KeyLoad.Storage.StoreReaderContract.Unspecified
+        });
         await Assert.That(verified).IsEqualTo(source with
-        { Stage = NativeDiscoveryOmissionProtocol.VerifiedStage, ProducerVoter = arm.TargetVoter, RuntimeJournalReaderContract = KeyLoad.Storage.StoreReaderContract.Unspecified });
+        {
+            Stage = NativeDiscoveryOmissionProtocol.VerifiedStage,
+            ProducerVoter = arm.TargetVoter,
+            RuntimeJournalReaderContract = KeyLoad.Storage.StoreReaderContract.Unspecified
+        });
     }
     private NativeDiscoveryOmissionWitness Read(string name)
     {
@@ -110,13 +124,17 @@ internal sealed class NativeCapabilityOmissionRf3Fixture
         RequireStopped(wave);
         await PreserveEvidenceAsync(token).ConfigureAwait(false);
         foreach (var (name, bytes) in originals)
-        { RequestCqrsProbeFileStore.DeleteExactFile(Root, name, bytes); }
+        {
+            RequestCqrsProbeFileStore.DeleteExactFile(Root, name, bytes);
+        }
         var publication = Path.Combine(Root, NativeDiscoveryOmissionProtocol.LockFile);
         if (File.Exists(publication))
         {
             NodeEpochRf3OfflineFiles.AssertExclusive(publication);
             if (KeyLoad.Storage.IO.OfflineRegularFile.Inspect(publication).Length != NativeDiscoveryOmissionProtocol.EmptyCount)
-            { throw new InvalidOperationException(NativeDiscoveryOmissionProtocol.Invalid); }
+            {
+                throw new InvalidOperationException(NativeDiscoveryOmissionProtocol.Invalid);
+            }
             File.Delete(publication);
         }
         disarmed = true;
@@ -132,7 +150,9 @@ internal sealed class NativeCapabilityOmissionRf3Fixture
             await PreserveEvidenceAsync(originalToken).ConfigureAwait(false);
         }
         if (!retained)
-        { await owners.DisposeAfterResourcesJoinedAsync().ConfigureAwait(false); }
+        {
+            await owners.DisposeAfterResourcesJoinedAsync().ConfigureAwait(false);
+        }
     }
     private async Task PreserveEvidenceAsync(CancellationToken token)
     {

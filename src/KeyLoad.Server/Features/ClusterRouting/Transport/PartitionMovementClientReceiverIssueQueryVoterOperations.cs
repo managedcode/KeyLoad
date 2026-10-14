@@ -1,7 +1,7 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
@@ -20,7 +20,9 @@ internal static class PartitionMovementClientReceiverIssueQueryVoterOperations
             Math.Min(owner.partition.Database.Limits.MaxQueryReadBytes, owner.partition.Database.Limits.MaxBatchBytes));
         var maximumRecords = Math.Min(work.RemainingReadGrantRecords / remainingAttempts, owner.partition.Database.Limits.MaxScanRecords);
         if (maximumBytes <= PartitionMovementProtocol.NoReadBytes || maximumRecords <= PartitionMovementProtocol.NoExaminedRecords)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMovementProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMovementProtocol.Unavailable);
+        }
         var read = work.CreateReadGrant(maximumBytes, maximumRecords);
         var query = new PartitionMovementReceiverIssueQuery(PartitionMoveProtocol.Version,
             original.OriginalPhaseCommandId, envelope, authorization, Guid.NewGuid(), expiry,
@@ -28,9 +30,15 @@ internal static class PartitionMovementClientReceiverIssueQueryVoterOperations
             Math.Min(work.MaximumResultBytes, owner.partition.Database.Limits.MaxBatchBytes));
         var bytes = NativeSerialization.Serialize(query);
         if (bytes.Length > owner.partition.Database.Limits.MaxBatchBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMovementProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMovementProtocol.Unavailable);
+        }
         var scope = new PartitionMovementTransportRequest(original.OriginalPhaseCommandId,
-            envelope with { Nonce = query.QueryNonce, ExpiresAt = expiry }, authorization,
+            envelope with
+            {
+                Nonce = query.QueryNonce,
+                ExpiresAt = expiry
+            }, authorization,
             query.CallerVoter, query.CallerSiloAddress, PartitionMovementTransportAction.Apply, Guid.Empty, PartitionMovementClient.FirstVoter);
         var exchange = new PartitionMovementReceiverExchange(scope, original.OriginalPhaseIdentityDigest,
             PartitionMovementClientReceiverIssueOperations.SignReceiverIssueQuery(owner, bytes), Query: true);
@@ -38,7 +46,9 @@ internal static class PartitionMovementClientReceiverIssueQueryVoterOperations
         var reply = await owner.transport.ExchangeReceiverIssueAsync(voter, selected, exchange,
             bytes, local, cancellationToken).ConfigureAwait(false);
         if (reply.Value.Reply.Error is { } code)
-        { throw Errors.Fail(code, reply.Value.Reply.SafeDetail ?? PartitionMovementProtocol.Unavailable); }
+        {
+            throw Errors.Fail(code, reply.Value.Reply.SafeDetail ?? PartitionMovementProtocol.Unavailable);
+        }
         var actual = GrainNativePayload.Read<GrainValue>(reply.Value.Reply.Payload).Value as PartitionMovementReceiverIssuanceResult
             ?? throw Errors.Fail(ErrorCode.Corruption, PartitionMovementProtocol.InvalidProof);
         work.ImportReadGrant(read, actual.ReadBytes, actual.ExaminedRecords);

@@ -18,7 +18,9 @@ internal static class GenerationVisibilityAdmissionFlow
     {
         var before = memory.GetSnapshot();
         if (!memory.TryReserve(before.MaxRetainedBytes - before.RetainedBytes, MetadataEntries, out var competing))
-        { throw new InvalidOperationException(AdmissionRequired); }
+        {
+            throw new InvalidOperationException(AdmissionRequired);
+        }
         using (competing)
         {
             var occupied = memory.GetSnapshot();

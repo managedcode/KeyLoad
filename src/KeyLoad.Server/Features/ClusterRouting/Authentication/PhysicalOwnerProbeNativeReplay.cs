@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
@@ -17,12 +17,22 @@ internal sealed class PhysicalOwnerProbeNativeReplay(TimeProvider clock, IOption
             foreach (var key in entries.Where(pair => pair.Value.Expires <= now
                 && clock.GetElapsedTime(pair.Value.Timestamp, stamp) >= options.Value.ReplayLifetime)
                 .Select(pair => pair.Key).ToArray())
-            { entries.Remove(key); }
+            {
+                entries.Remove(key);
+            }
             if (entries.Count >= options.Value.ReplayNonceCapacity || entries.ContainsKey(nonce))
-            { return false; }
+            {
+                return false;
+            }
             entries.Add(nonce, (stamp, expires));
             return true;
         }
     }
-    public void Dispose() { lock (gate) { entries.Clear(); } }
+    public void Dispose()
+    {
+        lock (gate)
+        {
+            entries.Clear();
+        }
+    }
 }

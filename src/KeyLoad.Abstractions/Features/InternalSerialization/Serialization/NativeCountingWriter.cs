@@ -8,7 +8,10 @@ internal sealed class NativeCountingWriter : IBufferWriter<byte>, IDisposable
     private const int UnspecifiedSizeHint = 0;
     private const int MinimumLoanBytes = 1;
     private byte[]? buffer;
-    internal long Length { get; private set; }
+    internal long Length
+    {
+        get; private set;
+    }
 
     public void Advance(int count)
     {

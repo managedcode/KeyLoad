@@ -13,7 +13,9 @@ internal static class QueueOrderedRetryRecoveryContinuation
         token.ThrowIfCancellationRequested();
         var outcomes = new List<(ReplicatedOperation Operation, CommitReceipt Receipt)> { (original, receipt) };
         foreach (var id in new[] { QueueOrderedRetryCrashProtocol.First, QueueOrderedRetryCrashProtocol.Second })
-        { await CompleteAsync(database, retryAt, id, outcomes); }
+        {
+            await CompleteAsync(database, retryAt, id, outcomes);
+        }
         await QueueOrderedRetryRecoveryTerminal.AssertAsync(database, healthy: false);
         await ReplayAsync(database, outcomes);
         var image = Capture(store);
@@ -26,7 +28,9 @@ internal static class QueueOrderedRetryRecoveryContinuation
         var operation = cold.NormalizeOperation(CrashDatabase.Operation(OperationKind.Batch,
             new CommandRequest(commandId, QueueOrderedRetryCrashProtocol.Partition,
                 [QueueOrderedRetryCrashSeed.Enqueue(QueueOrderedRetryCrashProtocol.Healthy)]), commandId) with
-        { EvaluatedAt = retryAt });
+        {
+            EvaluatedAt = retryAt
+        });
         outcomes.Add((operation, cold.Apply(operation).Get<CommitReceipt>()));
         await CompleteAsync(cold, retryAt, QueueOrderedRetryCrashProtocol.Healthy, outcomes);
         await QueueOrderedRetryRecoveryTerminal.AssertAsync(cold, healthy: true);
@@ -39,26 +43,36 @@ internal static class QueueOrderedRetryRecoveryContinuation
         var request = new ReceiveRequest(Guid.NewGuid(), new(QueueOrderedRetryCrashProtocol.Partition, QueueOrderedRetryCrashProtocol.Queue),
             MaxMessages: QueueOrderedRetryCrashProtocol.One);
         var operation = database.PrepareQueueRetryOperation(database.NormalizeOperation(
-            CrashDatabase.Operation(OperationKind.Receive, request, request.RequestId) with { EvaluatedAt = at }));
+            CrashDatabase.Operation(OperationKind.Receive, request, request.RequestId) with
+            {
+                EvaluatedAt = at
+            }));
         var delivery = await Assert.That(database.Apply(operation).Get<ReceiveResult>().Deliveries).HasSingleItem();
         await Assert.That(delivery.Id).IsEqualTo(id);
         await Assert.That(delivery.PayloadJson).IsEqualTo(QueueOrderedRetryCrashProtocol.Payload);
         await Assert.That(delivery.HeadersJson).IsEqualTo(QueueOrderedRetryCrashProtocol.Headers);
         var command = new DeliveryCommand(Guid.NewGuid(), request.Lane, delivery.Token, DeliveryAction.Ack);
-        var acknowledged = database.NormalizeOperation(CrashDatabase.Operation(OperationKind.Delivery, command, command.CommandId) with { EvaluatedAt = at });
+        var acknowledged = database.NormalizeOperation(CrashDatabase.Operation(OperationKind.Delivery, command, command.CommandId) with
+        {
+            EvaluatedAt = at
+        });
         outcomes.Add((acknowledged, database.Apply(acknowledged).Get<CommitReceipt>()));
     }
     private static async Task ReplayAsync(DatabaseEngine database, List<(ReplicatedOperation Operation, CommitReceipt Receipt)> outcomes)
     {
         foreach (var item in outcomes)
-        { await MessagingRecoveryReceiptAssertions.AssertSameNativeValueAsync(item.Receipt, database.Apply(item.Operation).Get<CommitReceipt>()); }
+        {
+            await MessagingRecoveryReceiptAssertions.AssertSameNativeValueAsync(item.Receipt, database.Apply(item.Operation).Get<CommitReceipt>());
+        }
     }
     private static string[] Capture(ZoneTreeStore store) => store.Read(view => QueueOrderedRetryCrashProtocol.Families.SelectMany(family =>
     {
         var page = view.Scan(KeySpace.Partition(family, QueueOrderedRetryCrashProtocol.Partition, QueueOrderedRetryCrashProtocol.Queue),
             QueueOrderedRetryCrashProtocol.ImageRecords);
         if (page.HasMore)
-        { throw new InvalidOperationException("The ordered retry image exceeded its original bound."); }
+        {
+            throw new InvalidOperationException("The ordered retry image exceeded its original bound.");
+        }
         return page.Records.Select(row => Convert.ToHexString(row.Key.Span) + ":" + Convert.ToHexString(row.Value.Span));
     }).ToArray());
 }

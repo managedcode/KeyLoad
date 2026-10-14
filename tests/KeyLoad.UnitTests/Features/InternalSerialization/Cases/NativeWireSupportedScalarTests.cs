@@ -62,7 +62,10 @@ internal sealed class NativeWireSupportedScalarTests
         await Assert.That(sourceBytes[1]).IsEqualTo((byte)5);
 
         sourceBytes[0] = 3;
-        var nullableTwin = value with { Identifier = null };
+        var nullableTwin = value with
+        {
+            Identifier = null
+        };
         var nullableBytes = NativeSerialization.Serialize(nullableTwin);
         var restoredNullableTwin = NativeSerialization.Deserialize<NativeWireSupportedScalarRecord>(nullableBytes);
         await Assert.That(restoredNullableTwin.Identifier).IsNull();

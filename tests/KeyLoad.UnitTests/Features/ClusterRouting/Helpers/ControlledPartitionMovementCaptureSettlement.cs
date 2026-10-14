@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
@@ -19,18 +19,28 @@ internal sealed class ControlledPartitionMovementCaptureSettlement
             || actuallyVerified.Envelope.Stage != PartitionMovePeerStage.Capture
             || actuallyVerified.Envelope.Grant is not { } grant
             || grant.PhaseCommandId != actuallyVerified.CommandId)
-        { throw new InvalidOperationException("The actual originally admitted Capture identity is required."); }
+        {
+            throw new InvalidOperationException("The actual originally admitted Capture identity is required.");
+        }
         this.source = source;
         original = actuallyVerified;
-        originalEnvelopeIdentity = JsonData.Fingerprint(actuallyVerified.Envelope with { Nonce = Guid.Empty });
+        originalEnvelopeIdentity = JsonData.Fingerprint(actuallyVerified.Envelope with
+        {
+            Nonce = Guid.Empty
+        });
     }
 
     internal Task<PartitionMovePhaseResult> SettleAsync(PartitionMovePeerEnvelope verified,
         CancellationToken cancellationToken)
     {
         if (!verified.Body.Span.SequenceEqual(original.Envelope.Body.Span)
-            || JsonData.Fingerprint(verified with { Nonce = Guid.Empty }) != originalEnvelopeIdentity)
-        { throw new InvalidOperationException("The original admitted Capture envelope must remain immutable."); }
+            || JsonData.Fingerprint(verified with
+            {
+                Nonce = Guid.Empty
+            }) != originalEnvelopeIdentity)
+        {
+            throw new InvalidOperationException("The original admitted Capture envelope must remain immutable.");
+        }
         var principalId = PartitionMovementControlPrincipal.Resolve(source.Database, original.Envelope);
         var principal = source.Store.Read(view => source.Database.Principal(view, principalId,
             source.Database.EvaluationClock.GetUtcNow()));

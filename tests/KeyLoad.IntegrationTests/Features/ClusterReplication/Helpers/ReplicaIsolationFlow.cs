@@ -72,7 +72,9 @@ internal static class ReplicaIsolationFlow
         McpPersistedIdentity identity, IReadOnlyDictionary<string, NodeStatus> identities, CancellationToken cancellationToken)
     {
         foreach (var node in owner.Resources)
-        { await VerifyNodeAsync(fixture, node, reference, original, originalCommand, next, nextCommand, identity, cancellationToken); }
+        {
+            await VerifyNodeAsync(fixture, node, reference, original, originalCommand, next, nextCommand, identity, cancellationToken);
+        }
         await ReplicaIsolationStatusIdentity.VerifyRestoredAsync(fixture, identities, next.Token.Incarnation, cancellationToken);
         await owner.VerifyRestoredNodesAsync(cancellationToken);
     }

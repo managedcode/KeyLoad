@@ -17,7 +17,9 @@ public sealed partial class DatabaseEngine
             ?? throw Errors.Fail(ErrorCode.OwnershipLost, RemoteGraphProtocol.MissingAuthority);
         var targets = RemoteGraphSourceDestinations(previous, next, revision);
         if (targets.Length != command.Preparations.Length)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteGraphProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, RemoteGraphProtocol.Invalid);
+        }
         var graph = command.Original.Upsert?.Graph ?? command.Original.Delete!.Graph;
         var edgeId = command.Original.Upsert?.EdgeId ?? command.Original.Delete!.EdgeId;
         var result = ImmutableArray.CreateBuilder<RemoteGraphIntentV1>(targets.Length);
@@ -26,7 +28,9 @@ public sealed partial class DatabaseEngine
             var prepared = command.Preparations.Where(value => value.Preparation.Request.Destination == target
                 && value.Preparation.Request.Deleted == deleted).ToArray();
             if (prepared.Length != RemoteGraphSinglePreparation)
-            { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteGraphProtocol.Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Unauthenticated, RemoteGraphProtocol.Invalid);
+            }
             var placement = ResolveRegisteredPlacement(view, target.Partition, catalog.DefaultShard);
             var directory = PhysicalOwnerDirectorySerialization.Read(view)
                 ?? throw Errors.Fail(ErrorCode.OwnershipLost, RemoteGraphProtocol.MissingAuthority);
@@ -39,7 +43,9 @@ public sealed partial class DatabaseEngine
                 || !NativeSerialization.Serialize(placement).AsSpan().SequenceEqual(
                     NativeSerialization.Serialize(prepared[RemoteGraphFirstPreparation].Preparation.Cut.Placement))
                 || !PhysicalOwnerEntryValidation.Same(destination, prepared[RemoteGraphFirstPreparation].Preparation.Request.DestinationOwner))
-            { throw Errors.Fail(ErrorCode.OwnershipLost, RemoteGraphProtocol.MissingAuthority); }
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, RemoteGraphProtocol.MissingAuthority);
+            }
             var content = new GraphCrossPartitionDeliveryIntentV1(GraphCrossPartitionProtocol.CurrentVersion,
                 command.Original.SourcePartition, graph, edgeId, target, revision, deleted, image,
                 principal.Id, principal.PolicyEpoch, GraphCrossPartitionRecords.Fingerprint(
@@ -55,9 +61,16 @@ public sealed partial class DatabaseEngine
     {
         var result = ImmutableArray.CreateBuilder<(EntityRef, EdgeRecord, bool)>();
         if (previous is not null && (next is null || previous.To != next.To))
-        { result.Add((previous.To, previous with { Revision = revision }, true)); }
+        {
+            result.Add((previous.To, previous with
+            {
+                Revision = revision
+            }, true));
+        }
         if (next is not null)
-        { result.Add((next.To, next, false)); }
+        {
+            result.Add((next.To, next, false));
+        }
         return result.ToImmutable();
     }
 

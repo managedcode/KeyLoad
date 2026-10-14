@@ -17,7 +17,9 @@ internal static class PartitionMoveSourceFenceValidation
             || record.DestinationOwner.Incarnation == Guid.Empty
             || record.SourcePlacement.Incarnation == record.DestinationOwner.Incarnation
             || !ValidDigest(record.ControlIntentDigest))
-        { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid);
+        }
         DatabaseEngine.ValidatePartition(partition);
     }
 

@@ -17,7 +17,9 @@ internal static class QueueLifecycleImage
     {
         var page = view.Scan(KeySpace.Partition(family, lane.Partition, lane.Queue), QueueLifecycleTestProtocol.ImageRecords);
         if (page.HasMore)
-        { throw new InvalidOperationException("The native lifecycle fixture image exceeded its bound."); }
+        {
+            throw new InvalidOperationException("The native lifecycle fixture image exceeded its bound.");
+        }
         return page.Records.Select(row => Convert.ToHexString(row.Key.Span) + ":" + Convert.ToHexString(row.Value.Span));
     }).ToArray());
 
@@ -55,11 +57,17 @@ internal static class QueueLifecycleImage
     private static long Sequence(string id, bool redriven, bool healthy, bool pending)
     {
         if (redriven)
-        { return QueueLifecycleTestProtocol.Four; }
+        {
+            return QueueLifecycleTestProtocol.Four;
+        }
         if (healthy)
-        { return QueueLifecycleTestProtocol.Five; }
+        {
+            return QueueLifecycleTestProtocol.Five;
+        }
         if (pending)
-        { return QueueLifecycleTestProtocol.Two; }
+        {
+            return QueueLifecycleTestProtocol.Two;
+        }
         return id == QueueLifecycleTestProtocol.Held ? QueueLifecycleTestProtocol.Three : QueueLifecycleTestProtocol.One;
     }
 }

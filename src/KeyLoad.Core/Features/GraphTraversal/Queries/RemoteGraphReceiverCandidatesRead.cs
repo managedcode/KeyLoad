@@ -44,16 +44,22 @@ public sealed partial class DatabaseEngine
             RequireRemoteGraphIncomingState(view, request, state, work);
             if (!key.SequenceEqual(RemoteGraphKeys.Receiver(request.Target, request.Graph,
                 state.Content.SourcePartition, state.Content.EdgeId)))
-            { throw Errors.Fail(ErrorCode.Corruption, RemoteGraphProtocol.Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, RemoteGraphProtocol.Invalid);
+            }
             var addition = checked(work.MeasureResult(state) + (states.Count == RemoteGraphProtocol.EmptyCount ? RemoteGraphProtocol.EmptyCount : RemoteGraphProtocol.ItemSeparatorBytes));
             retainedBytes = checked(retainedBytes + addition);
             if (retainedBytes > Limits.MaxBatchBytes || retainedBytes > work.MaximumResultBytes)
-            { throw Errors.Fail(ErrorCode.BudgetExceeded, RemoteGraphProtocol.Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.BudgetExceeded, RemoteGraphProtocol.Invalid);
+            }
             states.Add(state);
             return true;
         });
         if (scan.HasMore)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, RemoteGraphProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, RemoteGraphProtocol.Invalid);
+        }
         return new(RemoteGraphProtocol.Version, request, states.ToImmutable(), cut);
     }
 }

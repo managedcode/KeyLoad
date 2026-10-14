@@ -1,8 +1,8 @@
 using System.Net;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
 
@@ -25,7 +25,9 @@ internal static class NativeCanonicalModelCutClient
         NativeCanonicalModelCutCodec.ValidateRequest(originalScope);
         RequireInventory(retainedSignedOwners, configuredPeerSecrets);
         if (originalScope.SessionId != wave.QueryControls.SessionId)
-        { throw new InvalidDataException(Invalid); }
+        {
+            throw new InvalidDataException(Invalid);
+        }
         var controls = wave.canonicalCutControls ?? throw new InvalidDataException(Invalid);
         controls.MirrorArm(originalScope.ArmId);
         var cuts = new Dictionary<string, NativeCanonicalModelCutWitness>(StringComparer.Ordinal);
@@ -33,9 +35,14 @@ internal static class NativeCanonicalModelCutClient
         foreach (var node in TwoRf3MembershipProtocol.Nodes)
         {
             token.ThrowIfCancellationRequested();
-            var request = originalScope with { Nonce = Guid.NewGuid() };
+            var request = originalScope with
+            {
+                Nonce = Guid.NewGuid()
+            };
             if (!nonces.Add(request.Nonce))
-            { throw new InvalidDataException(Invalid); }
+            {
+                throw new InvalidDataException(Invalid);
+            }
             cuts.Add(node, await ReadAsync(wave.Application, node, adminCredential, request, retainedSignedOwners[node],
                 configuredPeerSecrets[node], token).ConfigureAwait(false));
         }
@@ -48,7 +55,9 @@ internal static class NativeCanonicalModelCutClient
         ArgumentNullException.ThrowIfNull(owners);
         ArgumentNullException.ThrowIfNull(secrets);
         if (owners.Count != TwoRf3MembershipProtocol.NodeCount || secrets.Count != TwoRf3MembershipProtocol.NodeCount)
-        { throw new InvalidDataException(Invalid); }
+        {
+            throw new InvalidDataException(Invalid);
+        }
         var voters = new HashSet<string>(StringComparer.Ordinal);
         var addresses = new HashSet<string>(StringComparer.Ordinal);
         foreach (var node in TwoRf3MembershipProtocol.Nodes)
@@ -56,7 +65,9 @@ internal static class NativeCanonicalModelCutClient
             if (!owners.TryGetValue(node, out var owner) || owner is null || !owner.TransportReady
                 || !voters.Add(owner.VoterId) || !addresses.Add(owner.SiloAddress)
                 || !secrets.TryGetValue(node, out var secret) || secret.Length != ReplicaTransportProtocol.SecretBytes)
-            { throw new InvalidDataException(Invalid); }
+            {
+                throw new InvalidDataException(Invalid);
+            }
         }
     }
 
@@ -77,14 +88,18 @@ internal static class NativeCanonicalModelCutClient
             using var response = await http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, token).ConfigureAwait(false);
             if (response.StatusCode != HttpStatusCode.OK
                 || response.Content.Headers.ContentType?.MediaType != NativeCanonicalModelCutDiagnosticProtocol.ContentType)
-            { throw new InvalidDataException(Invalid); }
+            {
+                throw new InvalidDataException(Invalid);
+            }
             var payload = await PayloadAsync(response, token).ConfigureAwait(false);
             Verify(response, owner, original.Nonce, secret, payload);
             witness = NativeCanonicalModelCutCodec.Decode(payload, token);
             NativeCanonicalModelCutAssertions.Require(original, owner, witness, token);
         }, failures).ConfigureAwait(false);
         if (http is { } owned)
-        { ServerFailureObserver.Observe(owned.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(owned.Dispose, failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
         return witness ?? throw new InvalidDataException(Invalid);
     }
@@ -93,7 +108,9 @@ internal static class NativeCanonicalModelCutClient
     {
         var maximum = NativeCanonicalModelCutCodec.MaximumRecordBytes;
         if (response.Content.Headers.ContentLength is { } length && length > maximum)
-        { throw new InvalidDataException(Invalid); }
+        {
+            throw new InvalidDataException(Invalid);
+        }
         await using var stream = await response.Content.ReadAsStreamAsync(token).ConfigureAwait(false);
         var payload = new byte[maximum + OverflowByte];
         var count = 0;
@@ -101,11 +118,15 @@ internal static class NativeCanonicalModelCutClient
         {
             var read = await stream.ReadAsync(payload.AsMemory(count), token).ConfigureAwait(false);
             if (read == 0)
-            { break; }
+            {
+                break;
+            }
             count += read;
         }
         if (count > maximum || response.Content.Headers.ContentLength is { } expected && expected != count)
-        { throw new InvalidDataException(Invalid); }
+        {
+            throw new InvalidDataException(Invalid);
+        }
         return payload.AsSpan(0, count).ToArray();
     }
 
@@ -113,16 +134,24 @@ internal static class NativeCanonicalModelCutClient
         ReadOnlyMemory<byte> secret, byte[] payload)
     {
         if (!response.Headers.TryGetValues(NativeCanonicalModelCutDiagnosticProtocol.SignatureHeader, out var values))
-        { throw new InvalidDataException(Invalid); }
+        {
+            throw new InvalidDataException(Invalid);
+        }
         using var iterator = values.GetEnumerator();
         if (!iterator.MoveNext())
-        { throw new InvalidDataException(Invalid); }
+        {
+            throw new InvalidDataException(Invalid);
+        }
         var signature = iterator.Current;
         if (iterator.MoveNext() || signature.Length != SignatureCharacters)
-        { throw new InvalidDataException(Invalid); }
+        {
+            throw new InvalidDataException(Invalid);
+        }
         byte[] supplied;
         try
-        { supplied = Convert.FromHexString(signature); }
+        {
+            supplied = Convert.FromHexString(signature);
+        }
         catch (FormatException) { throw new InvalidDataException(Invalid); }
         using var mac = new ReplicaMessageMac(secret, owner.ClusterId);
         var expected = mac.Discovery(owner.Incarnation, owner.VoterId, nonce,
@@ -130,7 +159,9 @@ internal static class NativeCanonicalModelCutClient
         try
         {
             if (!CryptographicOperations.FixedTimeEquals(expected, supplied))
-            { throw new InvalidDataException(Invalid); }
+            {
+                throw new InvalidDataException(Invalid);
+            }
         }
         finally
         {

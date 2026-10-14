@@ -12,7 +12,9 @@ internal static class EventAppendRf3Calls
     {
         var result = await sdk.CommitAsync(command, token).ConfigureAwait(false);
         if (result.IsSuccess)
-        { return new(await McpCallerAssertions.SdkSuccessAsync(result), null, null, null); }
+        {
+            return new(await McpCallerAssertions.SdkSuccessAsync(result), null, null, null);
+        }
         var problem = JsonSerializer.SerializeToElement(result.Problem, JsonDefaults.Options);
         var code = ReadCode(problem);
         await McpCallerAssertions.VerifyProblemAsync(problem, code);
@@ -25,7 +27,9 @@ internal static class EventAppendRf3Calls
     {
         var result = await official.CallAsync(McpCallerTools.DocumentsCommit, command, token).ConfigureAwait(false);
         if (result.IsError is not true)
-        { return new((await McpCallerAssertions.SuccessAsync<CommitReceipt>(result)).Value, null, null, null); }
+        {
+            return new((await McpCallerAssertions.SuccessAsync<CommitReceipt>(result)).Value, null, null, null);
+        }
         var problem = (result.StructuredContent ?? throw new InvalidOperationException(EventAppendRf3Protocol.MissingProblem))
             .GetProperty(McpCallerProtocol.Error);
         var code = ReadCode(problem);
@@ -50,7 +54,9 @@ internal static class EventAppendRf3Calls
         var text = problem.GetProperty(McpCallerProtocol.ProblemCode).GetString();
         if (!Enum.TryParse<ErrorCode>(text, out var code) || !Enum.IsDefined(code)
             || !string.Equals(text, code.ToString(), StringComparison.Ordinal))
-        { throw new InvalidOperationException(EventAppendRf3Protocol.MissingProblem); }
+        {
+            throw new InvalidOperationException(EventAppendRf3Protocol.MissingProblem);
+        }
         return code;
     }
 }

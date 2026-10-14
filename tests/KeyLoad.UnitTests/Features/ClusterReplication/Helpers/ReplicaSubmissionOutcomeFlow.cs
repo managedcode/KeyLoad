@@ -9,7 +9,10 @@ internal sealed class ReplicaSubmissionOutcomeFlow : IDisposable
     internal const string Resource = "strict-documents";
     internal const string Writer = "strict-submission-writer";
     internal TestDatabase Database { get; } = new(nativeReplicaAdmission: true);
-    internal PrincipalRecord Principal { get; }
+    internal PrincipalRecord Principal
+    {
+        get;
+    }
 
     internal ReplicaSubmissionOutcomeFlow()
     {
@@ -23,7 +26,9 @@ internal sealed class ReplicaSubmissionOutcomeFlow : IDisposable
         catch (Exception primary)
         {
             try
-            { Database.Dispose(); }
+            {
+                Database.Dispose();
+            }
             catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
             throw;
         }
@@ -70,10 +75,14 @@ internal sealed class ReplicaSubmissionOutcomeFlow : IDisposable
             using var flow = new ReplicaSubmissionOutcomeFlow();
             await KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => body(flow), failures);
         }
-        catch (Exception error) when (KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
-        catch (Exception error) when (!KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
+        catch (Exception error) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
+        catch (Exception error) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
         KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }
 

@@ -12,7 +12,13 @@ internal static class PhysicalOwnerProbeNativeTestValues
     {
         var control = new RegisteredPhysicalOwnerV1(new(Guid.NewGuid(), fixture.Configuration.Incarnation,
             fixture.Configuration.VoterIds, 1), fixture.Configuration.VoterIds);
-        var destination = control with { Owner = control.Owner with { PhysicalShardId = Guid.NewGuid() } };
+        var destination = control with
+        {
+            Owner = control.Owner with
+            {
+                PhysicalShardId = Guid.NewGuid()
+            }
+        };
         return new(PhysicalOwnerProbeProtocol.Version, Guid.NewGuid(), control, destination,
             ReplicaSecurityFixture.VoterA, fixture.Discovery.RuntimeAddress, InnerNonce(), Now, Now + Retention);
     }

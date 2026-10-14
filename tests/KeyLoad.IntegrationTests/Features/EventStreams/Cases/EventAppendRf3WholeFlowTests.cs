@@ -27,7 +27,9 @@ internal sealed class EventAppendRf3WholeFlowTests(ClusterFixture fixture)
                 await EventAppendRf3Flow.RunAsync(sdk, official, fixture, deadline.Token);
             }, failures).ConfigureAwait(false);
             if (official is { } owned)
-            { await ServerFailureObserver.ObserveAsync(() => owned.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+            {
+                await ServerFailureObserver.ObserveAsync(() => owned.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+            }
         }, failures).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny(failures);
     }

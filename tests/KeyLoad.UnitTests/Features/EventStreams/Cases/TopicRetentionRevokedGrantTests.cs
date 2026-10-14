@@ -21,7 +21,11 @@ internal sealed class TopicRetentionRevokedGrantTests
         var receipt = fixture.Submit(command, "manager").Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(command.CommandId);
         var revoked = fixture.Owner.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(
-            manager with { Grants = [new("database", "topic", Capability.TopicsRead)], PolicyEpoch = RevokedPolicyEpoch }))
+            manager with
+            {
+                Grants = [new("database", "topic", Capability.TopicsRead)],
+                PolicyEpoch = RevokedPolicyEpoch
+            }))
             .Get<PrincipalRecord>();
         await Assert.That(revoked.PolicyEpoch).IsEqualTo(RevokedPolicyEpoch);
         var cut = fixture.Store.Position;

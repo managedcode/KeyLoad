@@ -31,7 +31,9 @@ internal sealed class PartitionQueryLeafExecutor(QueryEngine engine, DatabaseEng
     {
         budget.Check();
         if (expectedTenant is not null && principal.TenantId != expectedTenant)
-        { throw Errors.Fail(ErrorCode.PermissionDenied, ReceivingIdentityChangedDetail); }
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, ReceivingIdentityChangedDetail);
+        }
         engine.Bind(principal, resource, request);
         ValidatePlacement(view, plan.Partition, grant);
         PreparedQuery? prepared = null;

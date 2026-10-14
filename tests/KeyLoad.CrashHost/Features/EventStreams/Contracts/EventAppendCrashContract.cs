@@ -29,7 +29,10 @@ internal static class EventAppendCrashContract
     internal static Guid CommandId { get; } = Guid.Parse(CommandText);
     internal static Guid SeedCommandId { get; } = Guid.Parse(SeedText);
     internal static Guid HealthyCommandId { get; } = Guid.Parse(HealthyText);
-    internal static PartitionRef Partition { get; } = new(CrashFixtureValues.Tenant,
+    internal static PartitionRef Partition
+    {
+        get;
+    } = new(CrashFixtureValues.Tenant,
         CrashFixtureValues.Database, CrashFixtureValues.Orders, Mode);
     internal static StreamRef Stream { get; } = new(Partition, Streams, StreamId);
     internal static QueueLaneRef Lane { get; } = new(Partition, Queue);

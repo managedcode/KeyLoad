@@ -32,10 +32,19 @@ internal sealed class TestDatabase : IDisposable
     private readonly TestDatabaseReplicaAdmission? replicaAdmission;
     private readonly Func<ZoneTreeStore, PhysicalShardRecord?, DatabaseEngine> createDatabase;
     private readonly IOptions<DatabaseLimits> limits;
-    public string Directory { get; }
-    public ZoneTreeStore Store { get; }
+    public string Directory
+    {
+        get;
+    }
+    public ZoneTreeStore Store
+    {
+        get;
+    }
     internal IOptions<ZoneTreeStorageExecutionOptions> StorageExecution { get; } = UnitExecutionOptions.StorageExecution();
-    public DatabaseEngine Database { get; }
+    public DatabaseEngine Database
+    {
+        get;
+    }
     internal IOptions<PartitionMovementCheckpointOptions> MovementCheckpoints { get; } = UnitExecutionOptions.MovementCheckpoints();
     public PartitionRef Partition { get; } = new(TenantId, DatabaseId, TransactionDomainId, PartitionKey);
     public TestDatabase(DatabaseLimits? limits = null, string? directory = null,
@@ -50,7 +59,9 @@ internal sealed class TestDatabase : IDisposable
             throw new ArgumentException(FreshDirectoryRequired, nameof(directory));
         }
         if (!nativeReplicaAdmission && nativeReplicaDirectory is not null)
-        { throw new ArgumentException(UnexpectedReplicaDirectory, nameof(nativeReplicaDirectory)); }
+        {
+            throw new ArgumentException(UnexpectedReplicaDirectory, nameof(nativeReplicaDirectory));
+        }
         ZoneTreeStore? acquired = null;
         var blobOptions = UnitExecutionOptions.BlobExecution(blobExecution);
         var claimsOptions = UnitExecutionOptions.NativeClaimsExecution(claimsExecution);
@@ -62,7 +73,10 @@ internal sealed class TestDatabase : IDisposable
             createDatabase = TestDatabaseEngineFactory.Capture(this.limits, blobOptions, claimsOptions,
                 timeSeriesExecution, MovementCheckpoints, clock);
             Database = createDatabase(Store, null);
-            Database.Bootstrap(new(RootPrincipalId, SystemTenantId, [new(Wildcard, Wildcard, Capability.All)], [Wildcard]) { ClusterAdministrator = true },
+            Database.Bootstrap(new(RootPrincipalId, SystemTenantId, [new(Wildcard, Wildcard, Capability.All)], [Wildcard])
+            {
+                ClusterAdministrator = true
+            },
                 DatabaseEngine.Credential(RootPrincipalId, RootPrincipalId, RootCredential));
             if (bootstrapPhysicalShardCatalog)
             {
@@ -92,7 +106,9 @@ internal sealed class TestDatabase : IDisposable
         var operation = new ReplicatedOperation(id ?? Guid.NewGuid(), kind, principal,
             time ?? default, JsonSerializer.Serialize(payload, JsonDefaults.Options));
         if (replicaAdmission is { } native)
-        { return native.Submit(operation, time.HasValue); }
+        {
+            return native.Submit(operation, time.HasValue);
+        }
         return time.HasValue ? Database.Apply(operation) : Database.ApplyEmbedded(operation, cancellationToken: default);
     }
 
@@ -103,7 +119,9 @@ internal sealed class TestDatabase : IDisposable
     internal void JoinNativeReadBarrier(CancellationToken cancellationToken)
     {
         if (replicaAdmission is not { } native)
-        { throw new InvalidOperationException(NativeOperationRequired); }
+        {
+            throw new InvalidOperationException(NativeOperationRequired);
+        }
         native.ReadBarrier(cancellationToken);
     }
 
@@ -158,7 +176,11 @@ internal sealed class TestDatabase : IDisposable
         SensitiveFieldPolicy[]? fields = null, QueuePolicy? queuePolicy = null)
     {
         var resource = new ResourceDefinition(name, kind, domain ?? Partition.TransactionDomainId)
-        { Indexes = [.. indexes ?? []], FieldPolicies = [.. fields ?? []], QueuePolicy = queuePolicy ?? new() };
+        {
+            Indexes = [.. indexes ?? []],
+            FieldPolicies = [.. fields ?? []],
+            QueuePolicy = queuePolicy ?? new()
+        };
         return Submit(OperationKind.ConfigureResource, new ConfigureResourceRequest(Partition.TenantId, Partition.DatabaseId, resource)).Get<ResourceDefinition>();
     }
     public CommitReceipt Commit(params Mutation[] mutations)
@@ -184,16 +206,8 @@ internal sealed class TestDatabase : IDisposable
     }
 
     private void DisposeNative()
-    {
-        var failures = new List<Exception>();
-        try
-        { replicaAdmission?.Dispose(); }
-        catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null) { failures.Add(error); }
-        catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null) { failures.Add(error); }
-        KeyLoad.Server.ServerFailureObserver.Observe(Store.Dispose, failures);
-        KeyLoad.Server.ServerFailureObserver.Observe(DeleteOwnedDirectory, failures);
-        KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
-    }
+        => TestDatabaseNativeDisposal.Run(() => replicaAdmission?.Dispose(),
+            () => Store.Dispose(), DeleteOwnedDirectory);
 
     private void DeleteOwnedDirectory()
     {

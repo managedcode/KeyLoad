@@ -15,10 +15,14 @@ internal sealed class AnnSeedReadBudgetTests
         var measured = AnnSeedTestSupport.Capture(database);
         var position = database.Store.Position;
         var exactBudget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits with
-        { MaxQueryReadBytes = measured.ReadBytes }));
+        {
+            MaxQueryReadBytes = measured.ReadBytes
+        }));
         var exact = AnnSeedTestSupport.Capture(database, budget: exactBudget);
         var shortBudget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits with
-        { MaxQueryReadBytes = measured.ReadBytes - 1 }));
+        {
+            MaxQueryReadBytes = measured.ReadBytes - 1
+        }));
         var failure = AnnSeedTestSupport.CaptureFailure(database, AnnSeedTestSupport.Principal, budget: shortBudget);
 
         await Assert.That(measured.ReadBytes).IsGreaterThan(0L);
@@ -44,7 +48,10 @@ internal sealed class AnnSeedReadBudgetTests
     [Test]
     public async Task ScanLookaheadFailureNeverReturnsPartialSeed()
     {
-        using var database = AnnSeedTestSupport.Create(3, new() { MaxScanRecords = 2 });
+        using var database = AnnSeedTestSupport.Create(3, new()
+        {
+            MaxScanRecords = 2
+        });
         var position = database.Store.Position;
         var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits));
         var expectedBytes = MeasureSourceBytes(database, maxScanRecords: 2);
@@ -136,7 +143,10 @@ internal sealed class AnnSeedReadBudgetTests
 
     private sealed class AnnSeedReadByteCounter
     {
-        internal long Total { get; private set; }
+        internal long Total
+        {
+            get; private set;
+        }
         internal void Add(long value) => Total = checked(Total + value);
     }
 
@@ -182,7 +192,10 @@ internal sealed class AnnSeedReadBudgetTests
         await Assert.That(calls).IsLessThan(MaxCaptureCalls);
         await Assert.That(budget.ReadBytes).IsLessThanOrEqualTo(MaxCumulativeSourceBytes);
         await Assert.That(TimeProvider.System.GetElapsedTime(started)).IsGreaterThanOrEqualTo(TimeSpan.FromSeconds(1));
-        var healthyBudget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(limits with { QueryDeadlineSeconds = 30 }));
+        var healthyBudget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(limits with
+        {
+            QueryDeadlineSeconds = 30
+        }));
         var healthy = AnnSeedTestSupport.Capture(database, budget: healthyBudget);
         await Assert.That(healthy.Records.Length).IsEqualTo(10_000);
     }

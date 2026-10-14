@@ -23,8 +23,12 @@ internal static class GraphTraversalForeignFrontierAssertions
             .ThenBy(vertex => vertex.Id, StringComparer.Ordinal))).IsTrue();
         await GraphTraversalIntegrityAssertions.Image(store, image, position);
         foreach (var (command, receipt) in state.History)
-        { await GraphTraversalIntegrityAssertions.Replay(owner, store, command, receipt); }
+        {
+            await GraphTraversalIntegrityAssertions.Replay(owner, store, command, receipt);
+        }
         if (continuation is not null)
-        { await GraphTraversalIntegrityAssertions.Replay(owner, store, continuation.Command, continuation.Receipt); }
+        {
+            await GraphTraversalIntegrityAssertions.Replay(owner, store, continuation.Command, continuation.Receipt);
+        }
     }
 }

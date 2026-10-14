@@ -1,7 +1,7 @@
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -140,7 +140,9 @@ internal sealed class RequestCqrsRf3DiagnosticsTestScope(Guid waveId, RequestCqr
         var artifactFailureCount = failures.Count;
         RequestCqrsRf3DiagnosticsArtifactFiles.DeleteOwned(artifactPath, failures);
         if (failures.Count > artifactFailureCount)
-        { lifecycle.RecordOwnerFailure(RequestCqrsLifecycleStage.ArtifactWrite); }
+        {
+            lifecycle.RecordOwnerFailure(RequestCqrsLifecycleStage.ArtifactWrite);
+        }
         cleanupJoinFailed |= failures.Count != 0;
         lifecycle.SetStage(RequestCqrsLifecycleStage.OwnedRootCleanup);
         if (RequestCqrsRf3DiagnosticsRootGuard.CanDelete(dataRootOwned, dataRoot,
@@ -163,15 +165,21 @@ internal sealed class RequestCqrsRf3DiagnosticsTestScope(Guid waveId, RequestCqr
     private async Task DisposeIndependentConsumerAsync(List<Exception> failures)
     {
         if (independentConsumer is null)
-        { return; }
+        {
+            return;
+        }
         var ownedConsumer = independentConsumer;
         try
-        { await ownedConsumer.DisposeAsync().ConfigureAwait(false); }
+        {
+            await ownedConsumer.DisposeAsync().ConfigureAwait(false);
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { RequestCqrsLifecycleFailureObserver.Append(failures, error, lifecycle.RecordOwnerFailure, RequestCqrsLifecycleStage.IndependentJoin); }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { RequestCqrsLifecycleFailureObserver.Append(failures, error, lifecycle.RecordOwnerFailure, RequestCqrsLifecycleStage.IndependentJoin); }
         await ownedConsumer.RetryFailedCloseAsync(failures, lifecycle.RecordOwnerFailure).ConfigureAwait(false);
         if (ownedConsumer.IsJoined)
-        { independentConsumer = null; }
+        {
+            independentConsumer = null;
+        }
         else
         {
             RequestCqrsLifecycleFailureObserver.Append(failures,
@@ -183,7 +191,9 @@ internal sealed class RequestCqrsRf3DiagnosticsTestScope(Guid waveId, RequestCqr
     private async Task DisposeDiagnosticsAsync(List<Exception> failures)
     {
         if (diagnosticsJoined || diagnostics is null)
-        { return; }
+        {
+            return;
+        }
         var before = failures.Count;
         var original = DisposeOwnedDiagnosticsAsync();
         await RequestCqrsLifecycleFailureObserver.ObserveAsync(
@@ -197,13 +207,17 @@ internal sealed class RequestCqrsRf3DiagnosticsTestScope(Guid waveId, RequestCqr
     }
 
     private async Task DisposeOwnedDiagnosticsAsync()
-    { await diagnostics!.DisposeAsync().ConfigureAwait(false); }
+    {
+        await diagnostics!.DisposeAsync().ConfigureAwait(false);
+    }
 
     private async Task DisposeApplicationAsync(List<Exception> failures)
     {
         var ownedApplication = application;
         if (ownedApplication is null)
-        { return; }
+        {
+            return;
+        }
         var before = failures.Count;
         await RequestCqrsLifecycleFailureObserver.ObserveAsync(
             () => ownedApplication.DisposeAsync().AsTask(), failures, lifecycle.RecordOwnerFailure,
@@ -214,7 +228,9 @@ internal sealed class RequestCqrsRf3DiagnosticsTestScope(Guid waveId, RequestCqr
             applicationDisposedSuccessfully = true;
         }
         else
-        { cleanupJoinFailed = true; }
+        {
+            cleanupJoinFailed = true;
+        }
     }
 
 }

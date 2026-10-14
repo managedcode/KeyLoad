@@ -15,12 +15,19 @@ internal static class ClusterRestoreMixedRetentionRf3Privacy
             {
                 await InspectorOwnedAsync(caller, state, token);
                 _ = await McpCallerAssertions.SdkSuccessAsync(await root.ConfigurePrincipalAsync(Guid.NewGuid(),
-                    state.Inspector with { Revoked = true, PolicyEpoch = ClusterRestoreMixedRetentionRf3Protocol.RevokedEpoch }, token));
+                    state.Inspector with
+                    {
+                        Revoked = true,
+                        PolicyEpoch = ClusterRestoreMixedRetentionRf3Protocol.RevokedEpoch
+                    }, token));
                 var inspect = new InspectMessageRequest(state.OriginalQueue.Lane, QueueLifecyclePublicProtocol.Pending);
                 await ClusterRestoreMixedRetentionRf3Restore.RefusedAsync(caller, state, McpCallerTools.MessagesInspect,
                     inspect, () => caller.Sdk.InspectAsync(inspect, token), ErrorCode.Unauthenticated, token);
                 _ = await McpCallerAssertions.SdkSuccessAsync(await root.ConfigurePrincipalAsync(Guid.NewGuid(),
-                    state.Inspector with { PolicyEpoch = ClusterRestoreMixedRetentionRf3Protocol.RepairedEpoch }, token));
+                    state.Inspector with
+                    {
+                        PolicyEpoch = ClusterRestoreMixedRetentionRf3Protocol.RepairedEpoch
+                    }, token));
                 await InspectorOwnedAsync(caller, state, token);
                 return true;
             }, token);
@@ -28,12 +35,22 @@ internal static class ClusterRestoreMixedRetentionRf3Privacy
             async caller =>
             {
                 _ = await McpCallerAssertions.SdkSuccessAsync(await root.ConfigurePrincipalAsync(Guid.NewGuid(),
-                    state.Principal with { Revoked = true, PolicyEpoch = ClusterRestoreMixedRetentionRf3Protocol.RevokedEpoch }, token));
-                var denied = state.Inbox with { CommandId = Guid.NewGuid() };
+                    state.Principal with
+                    {
+                        Revoked = true,
+                        PolicyEpoch = ClusterRestoreMixedRetentionRf3Protocol.RevokedEpoch
+                    }, token));
+                var denied = state.Inbox with
+                {
+                    CommandId = Guid.NewGuid()
+                };
                 await ClusterRestoreMixedRetentionRf3Restore.RefusedAsync(caller, state, TargetInboxRf3Protocol.Tool, denied,
                     () => caller.Sdk.CommitInboxAsync(denied, token), ErrorCode.Unauthenticated, token);
                 _ = await McpCallerAssertions.SdkSuccessAsync(await root.ConfigurePrincipalAsync(Guid.NewGuid(),
-                    state.Principal with { PolicyEpoch = ClusterRestoreMixedRetentionRf3Protocol.RepairedEpoch }, token));
+                    state.Principal with
+                    {
+                        PolicyEpoch = ClusterRestoreMixedRetentionRf3Protocol.RepairedEpoch
+                    }, token));
                 await OldCommandsAsync(caller, state, token);
                 await ClusterRestoreMixedRetentionRf3Literal.OriginalAsync(caller, state, token);
                 return true;

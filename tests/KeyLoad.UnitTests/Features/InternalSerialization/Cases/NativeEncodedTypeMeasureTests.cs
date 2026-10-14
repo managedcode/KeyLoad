@@ -36,7 +36,9 @@ internal sealed class NativeEncodedTypeMeasureTests
             async (_, cancellationToken) =>
             {
                 if (Interlocked.Increment(ref admitted) == ConcurrentOperations)
-                { started.SetResult(); }
+                {
+                    started.SetResult();
+                }
                 await started.Task.WaitAsync(cancellationToken);
                 cancellationToken.ThrowIfCancellationRequested();
                 await NativeEncodedTypeFrameFixture.RequireAsync(NativeEncodedTypeFrameFixture.Command());

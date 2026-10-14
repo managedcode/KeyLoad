@@ -24,21 +24,27 @@ internal static class NativeTextOnlineCatalogSource
             || manifest.ResourceSha256 != result.PublishedCut.ResourceSha256
             || manifest.ThroughSequence != result.PublishedCut.ThroughSequence
             || manifest.AppliedPosition != result.PublishedCut.AppliedPosition)
-        { throw NativeTextErrors.Mismatch(); }
+        {
+            throw NativeTextErrors.Mismatch();
+        }
         NativeTextIncrementalValidation.Manifest(manifest, manifest.Scope, current.Consumer,
             current.ConsumerGeneration, current.Authority.Placement, maximumRecords, budget, options);
         var path = Path.Combine(generation.Root, current.Authority.Leaf);
         NativeTextOnlineStagingFiles.RequireCommitted(path, current, result, budget, options);
         var envelope = Path.Combine(path, NativeTextIncrementalProtocol.ManifestFile);
         if (NativeTextOnlineManifestDigest.Calculate(envelope, budget, options) != current.Authority.ManifestSha256)
-        { throw NativeTextErrors.Corrupt(); }
+        {
+            throw NativeTextErrors.Corrupt();
+        }
         using var actual = new NativeTextIncrementalNativeOwner(generation.Root, current.Authority.Leaf,
             current.PublishedCut.NodeId, options);
         NativeTextIncrementalPublishedInventory.Require(actual, manifest, budget, options, retained);
         budget.ChargeBytes(NativeSerialization.Measure(manifest.Files));
         if (Convert.ToHexStringLower(SHA256.HashData(NativeSerialization.Serialize(manifest.Files))) != result.IndexSha256
             || manifest.Records.Length != result.TrackedRecords)
-        { throw NativeTextErrors.Corrupt(); }
+        {
+            throw NativeTextErrors.Corrupt();
+        }
         budget.Check();
     }
 
@@ -52,7 +58,9 @@ internal static class NativeTextOnlineCatalogSource
             || fresh.SchemaVersion != original.SchemaVersion || fresh.ResourceSha256 != original.ResourceSha256
             || fresh.Position < original.Position || fresh.AppliedPosition < original.AppliedPosition
             || fresh.ReadGeneration < original.ReadGeneration || fresh.UpperSequence != original.ThroughSequence)
-        { throw NativeTextErrors.Mismatch(); }
+        {
+            throw NativeTextErrors.Mismatch();
+        }
         NativeTextIncrementalSourceValidation.CompleteCorpus(manifest, fresh, budget);
         budget.Check();
     }

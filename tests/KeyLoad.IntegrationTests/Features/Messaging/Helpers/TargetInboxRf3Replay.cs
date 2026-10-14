@@ -22,13 +22,21 @@ internal static class TargetInboxRf3Replay
             await TargetInboxRf3Assertions.DeniedAsync(await client.CommitInboxAsync(state.Original, token), ErrorCode.PermissionDenied);
             _ = await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(TargetInboxRf3Protocol.Tool, state.Original, token), ErrorCode.PermissionDenied, true);
         }
-        var duplicate = state.Original with { CommandId = Guid.NewGuid() };
-        var expected = state.Result with { AlreadyProcessed = true };
+        var duplicate = state.Original with
+        {
+            CommandId = Guid.NewGuid()
+        };
+        var expected = state.Result with
+        {
+            AlreadyProcessed = true
+        };
         await TargetInboxRf3Assertions.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(await client.CommitInboxAsync(duplicate, token)), expected);
         await TargetInboxRf3Assertions.EqualAsync((await McpCallerAssertions.SuccessAsync<CommitInboxResult>(await mcp.CallAsync(
             TargetInboxRf3Protocol.Tool, duplicate, token))).Value, expected);
         var sql = new SqlOperationRequest(state.Target.Partition, TargetInboxRf3Protocol.Sql, new(StringComparer.Ordinal)
-        { [TargetInboxRf3Protocol.Arguments] = JsonSerializer.SerializeToElement(McpOfficialClient.Arguments(duplicate), JsonDefaults.Options) });
+        {
+            [TargetInboxRf3Protocol.Arguments] = JsonSerializer.SerializeToElement(McpOfficialClient.Arguments(duplicate), JsonDefaults.Options)
+        });
         await TargetInboxRf3Assertions.EqualAsync((await McpCallerAssertions.SdkSuccessAsync(await client.ExecuteSqlAsync(sql, token)))
             .Deserialize<CommitInboxResult>(JsonDefaults.Options)!, expected);
         await TargetInboxRf3Assertions.EqualAsync((await McpCallerAssertions.SuccessAsync<CommitInboxResult>(await mcp.CallAsync(

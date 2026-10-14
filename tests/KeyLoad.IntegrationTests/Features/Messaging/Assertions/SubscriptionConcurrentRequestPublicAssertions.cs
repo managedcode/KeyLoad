@@ -13,7 +13,9 @@ internal static class SubscriptionConcurrentRequestPublicAssertions
         ReceiveSubscriptionResult? first = null;
         ReceiveSubscriptionResult? second = null;
         var sdkCall = global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
-        { first = await McpCallerAssertions.SdkSuccessAsync(await sdk.ReceiveSubscriptionAsync(request, token)); }, sdkFailures);
+        {
+            first = await McpCallerAssertions.SdkSuccessAsync(await sdk.ReceiveSubscriptionAsync(request, token));
+        }, sdkFailures);
         var mcpCall = global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
         {
             second = (await McpCallerAssertions.SuccessAsync<ReceiveSubscriptionResult>(
@@ -45,7 +47,9 @@ internal static class SubscriptionConcurrentRequestPublicAssertions
                 await mcp.CallAsync(McpCallerTools.SubscriptionsReceive, state.First, token))).Value, state.FirstResult);
         }
         else
-        { await SubscriptionPhasePublicAssertions.ReceiveFailureAsync(sdk, mcp, state.First, ErrorCode.StaleLease, token); }
+        {
+            await SubscriptionPhasePublicAssertions.ReceiveFailureAsync(sdk, mcp, state.First, ErrorCode.StaleLease, token);
+        }
         await SubscriptionPhasePublicAssertions.ReceiveFailureAsync(sdk, mcp, state.Remaining, ErrorCode.StaleLease, token);
         await SubscriptionFilterRf3Assertions.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(
             await sdk.ReceiveSubscriptionAsync(state.Empty, token)), state.EmptyResult);

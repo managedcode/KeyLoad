@@ -25,7 +25,11 @@ internal sealed class McpReplyOwner : IDisposable
     /// <summary>Gets borrowed complete wrapper bytes whose lifetime and clearing remain owned here.</summary>
     internal ReadOnlyMemory<byte> Bytes
     {
-        get { ThrowIfDisposed(); return bytes; }
+        get
+        {
+            ThrowIfDisposed();
+            return bytes;
+        }
     }
 
     /// <summary>Checks and wraps the exact canonical result after the caller reserves the complete output allocation.</summary>
@@ -70,9 +74,13 @@ internal sealed class McpReplyOwner : IDisposable
         const int EmptyExchange = 0;
 
         if (Interlocked.Exchange(ref disposed, ValueSingleItemCount) != EmptyExchange)
-        { return; }
+        {
+            return;
+        }
         try
-        { document.Dispose(); }
+        {
+            document.Dispose();
+        }
         finally { CryptographicOperations.ZeroMemory(bytes); }
     }
 
@@ -88,7 +96,9 @@ internal sealed class McpReplyOwner : IDisposable
         finally
         {
             if (!transferred)
-            { CryptographicOperations.ZeroMemory(bytes); }
+            {
+                CryptographicOperations.ZeroMemory(bytes);
+            }
         }
     }
 

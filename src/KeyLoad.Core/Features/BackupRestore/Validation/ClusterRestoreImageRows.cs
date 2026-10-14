@@ -13,7 +13,9 @@ internal static class ClusterRestoreImageRows
             {
                 var actual = state.Target.ReadOwnedValue(key.ToArray());
                 if (actual is null || !value.SequenceEqual(actual))
-                { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+                {
+                    throw Errors.Fail(ErrorCode.Corruption, Invalid);
+                }
             }
             return true;
         }, cancellationToken: state.Work.Cancellation);
@@ -24,18 +26,27 @@ internal static class ClusterRestoreImageRows
             {
                 var expected = state.Source.ReadOwnedValue(key.ToArray());
                 if (expected is null || !value.SequenceEqual(expected))
-                { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+                {
+                    throw Errors.Fail(ErrorCode.Corruption, Invalid);
+                }
             }
             return true;
         }, cancellationToken: state.Work.Cancellation);
         if (original.HasMore || original.StoppedByVisitor || recovered.HasMore || recovered.StoppedByVisitor)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, Invalid);
+        }
     }
 
     private static bool Changed(List<byte[]> changed, ReadOnlySpan<byte> key)
     {
         foreach (var candidate in changed)
-        { if (key.SequenceEqual(candidate)) { return true; } }
+        {
+            if (key.SequenceEqual(candidate))
+            {
+                return true;
+            }
+        }
         return false;
     }
 }

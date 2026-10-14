@@ -4,7 +4,10 @@ namespace KeyLoad.Server.Features.Search;
 
 internal static class OnlineTextMcpCatalog
 {
-    internal static ImmutableArray<McpOperationDescriptor> Entries { get; } =
+    internal static ImmutableArray<McpOperationDescriptor> Entries
+    {
+        get;
+    } =
     [
         McpOperationFactory.Command<OnlineTextIndexMaintenanceRequest, OnlineTextIndexMaintenanceResult>(
             OnlineTextIndexMaintenanceProtocol.Tool, OnlineTextIndexMaintenanceProtocol.Route,

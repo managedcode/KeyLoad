@@ -15,7 +15,10 @@ internal static class SqlNullDistinctCold
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {
                 using var store = global::KeyLoad.Storage.ZoneTree.ZoneTreeExistingStore.Open(
-                    new(database.Directory) { Incarnation = storeIdentity.Incarnation }, storeIdentity.NodeId, database.StorageExecution);
+                    new(database.Directory)
+                    {
+                        Incarnation = storeIdentity.Incarnation
+                    }, storeIdentity.NodeId, database.StorageExecution);
                 await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
                 {
                     var owner = database.CreateConfiguredDatabase(store);

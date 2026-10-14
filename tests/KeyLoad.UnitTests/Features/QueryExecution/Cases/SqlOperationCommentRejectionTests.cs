@@ -32,7 +32,10 @@ internal sealed class SqlOperationCommentRejectionTests
     [Test]
     public async Task AcSqlc002ConfiguredCommentDepthAcceptsEqualityAndRejectsOneMore()
     {
-        var limits = SqlOperationTestData.Limits with { MaxQueryDepth = SqlOperationCommentTestData.ShallowDepth };
+        var limits = SqlOperationTestData.Limits with
+        {
+            MaxQueryDepth = SqlOperationCommentTestData.ShallowDepth
+        };
         var accepted = SqlOperationCommentTestData.Request(
             SqlOperationCommentTestData.Nested(SqlOperationCommentTestData.ShallowDepth) + SqlOperationCommentTestData.PlainCall);
         var budget = new global::KeyLoad.Core.ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(SqlOperationTestData.Limits));
@@ -88,15 +91,23 @@ internal sealed class SqlOperationCommentRejectionTests
     {
         var request = SqlOperationCommentTestData.Request(SqlOperationCommentTestData.Call(McpCatalogExpectations.QueryCapabilities));
         var parameters = new Dictionary<string, JsonElement>(StringComparer.OrdinalIgnoreCase)
-        { [SqlOperationCommentTestData.WrongCaseParameter] = request.Parameters![SqlOperationTestData.Parameter] };
-        await SqlOperationTestData.Reject(request with { Parameters = parameters }, ErrorCode.Validation);
+        {
+            [SqlOperationCommentTestData.WrongCaseParameter] = request.Parameters![SqlOperationTestData.Parameter]
+        };
+        await SqlOperationTestData.Reject(request with
+        {
+            Parameters = parameters
+        }, ErrorCode.Validation);
         var duplicate = SqlOperationTestData.Request(SqlOperationCommentTestData.Call(McpCatalogExpectations.AdminDispatch),
             JsonSerializer.Deserialize<JsonElement>(SqlOperationCommentTestData.DuplicateArguments));
         await SqlOperationTestData.Reject(duplicate, ErrorCode.Validation);
         var header = McpCanonicalTestData.Commands().First(item => item.IdMember is null);
         var arguments = header.Arguments();
         arguments.Remove(McpCatalogProtocol.CommandId);
-        var missingId = SqlOperationTestData.Call(header.Name, arguments) with { Sql = SqlOperationCommentTestData.Call(header.Name) };
+        var missingId = SqlOperationTestData.Call(header.Name, arguments) with
+        {
+            Sql = SqlOperationCommentTestData.Call(header.Name)
+        };
         await SqlOperationTestData.Reject(missingId, ErrorCode.Validation);
     }
 }

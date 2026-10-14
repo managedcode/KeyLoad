@@ -19,9 +19,13 @@ internal sealed class BudgetedReadView : IKeyValueView, IPartitionMovementReadSc
         set
         {
             if (view is IPartitionMovementReadScope scope)
-            { scope.MovementAuthorityAbsent = value; }
+            {
+                scope.MovementAuthorityAbsent = value;
+            }
             else if (view is not IAtomicTransaction)
-            { movementAuthorityAbsent = value; }
+            {
+                movementAuthorityAbsent = value;
+            }
         }
     }
     bool IPartitionMovementReadScope.CanReuseCommittedMovementAbsence
@@ -126,9 +130,13 @@ internal sealed class BudgetedReadView : IKeyValueView, IPartitionMovementReadSc
     private void Charge(long bytes)
     {
         if (grant is null)
-        { budget.ChargeNativeReadRecord(bytes); }
+        {
+            budget.ChargeNativeReadRecord(bytes);
+        }
         else
-        { budget.ChargeReadGrant(grant, bytes); }
+        {
+            budget.ChargeReadGrant(grant, bytes);
+        }
     }
 
     private CancellationTokenSource? CreateLinkedToken(CancellationToken viewToken, out CancellationToken effectiveToken)

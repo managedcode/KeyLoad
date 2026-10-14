@@ -1,8 +1,8 @@
 using System.Collections.Immutable;
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.GraphTraversal;
 using KeyLoad.Core.Features.GraphTraversal.Serialization;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.Server.Features.GraphTraversal;
 
@@ -17,7 +17,9 @@ internal static class RemoteGraphParentMutation
         {
             var delivery = GrainNativePayload.ReadCommand<DeliverRemoteGraphEdgeRequestV1>(payload);
             if (delivery.CommandId != trusted.CommandId)
-            { throw Errors.Fail(ErrorCode.Validation, RemoteGraphNativeProtocol.InvalidProof); }
+            {
+                throw Errors.Fail(ErrorCode.Validation, RemoteGraphNativeProtocol.InvalidProof);
+            }
             var route = RemoteGraphParentRouting.Resolve(node, partition, principal, delivery.SourcePartition,
                 delivery.Destination, delivery.Graph, work);
             var read = new RemoteGraphSourceReadRequestV1(Guid.Empty, delivery.SourcePartition,
@@ -28,14 +30,21 @@ internal static class RemoteGraphParentMutation
             var selected = source.Intents.Where(value => value.Content.Destination == delivery.Destination
                 && value.Content.Revision == delivery.ExpectedRevision).ToImmutableArray();
             if (selected.Length != RequiredDeliveryIntentCount)
-            { throw Errors.Fail(ErrorCode.RecoveryRequired, RemoteGraphNativeProtocol.InvalidProof); }
+            {
+                throw Errors.Fail(ErrorCode.RecoveryRequired, RemoteGraphNativeProtocol.InvalidProof);
+            }
             effects.Begin(token);
             return await RemoteGraphParentDelivery.ExecuteAsync(node, partition, principal, trusted,
-                delivery.CommandId, snapshot.Cut, source with { Intents = selected }, effects, work, token).ConfigureAwait(false);
+                delivery.CommandId, snapshot.Cut, source with
+                {
+                    Intents = selected
+                }, effects, work, token).ConfigureAwait(false);
         }
         var original = Original(kind, payload);
         if (original.CommandId != trusted.CommandId)
-        { throw Errors.Fail(ErrorCode.Validation, RemoteGraphNativeProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, RemoteGraphNativeProtocol.InvalidProof);
+        }
         var graph = original.Upsert?.Graph ?? original.Delete!.Graph;
         var edgeId = original.Upsert?.EdgeId ?? original.Delete!.EdgeId;
         var initial = RemoteGraphParentRouting.Resolve(node, partition, principal,
@@ -98,9 +107,13 @@ internal static class RemoteGraphParentMutation
     {
         var targets = new List<EntityRef>();
         if (current.Edge?.To is { } previous && previous.Partition != original.SourcePartition)
-        { targets.Add(previous); }
+        {
+            targets.Add(previous);
+        }
         if (original.Upsert?.To is { } next && !targets.Contains(next))
-        { targets.Add(next); }
+        {
+            targets.Add(next);
+        }
         var values = ImmutableArray.CreateBuilder<RemoteGraphVerifiedPreparationV1>(targets.Count);
         foreach (var destination in targets)
         {

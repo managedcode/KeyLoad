@@ -40,17 +40,27 @@ internal static class NativeCapabilityOmissionRf3Trial
             wave?.RetainRoots();
         }
         if (seed is { } ownedSeed)
-        { await ServerFailureObserver.ObserveAsync(() => ownedSeed.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => ownedSeed.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         var beforeWaveCleanup = failures.Count;
         if (wave is { } ownedWave)
-        { await ServerFailureObserver.ObserveAsync(() => ownedWave.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => ownedWave.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         if (startupCapture is { } ownedCapture)
-        { await ServerFailureObserver.ObserveAsync(() => ownedCapture.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => ownedCapture.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         var waveCleanupSucceeded = wave is not null && failures.Count == beforeWaveCleanup;
         if (localImage is { } ownedImage)
-        { await ServerFailureObserver.ObserveAsync(() => ownedImage.DisposeAsync(removeImage: waveCleanupSucceeded).AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => ownedImage.DisposeAsync(removeImage: waveCleanupSucceeded).AsTask(), failures).ConfigureAwait(false);
+        }
         if (failures.Count > 0)
-        { ServerFailureObserver.Observe(() => evidence.Terminal(phase, official, failures, timeout.Token, lifetime.Token, callerCancellation), failures); }
+        {
+            ServerFailureObserver.Observe(() => evidence.Terminal(phase, official, failures, timeout.Token, lifetime.Token, callerCancellation), failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
     private static async Task ExecuteAsync(TwoRf3MembershipWave wave, PartitionMovementPublicParentRf3Seed seed,
@@ -63,24 +73,40 @@ internal static class NativeCapabilityOmissionRf3Trial
         var before = await PartitionMovementPublicParentRf3Cut.StopAndReadAsync(wave, seed.FirstRequest, token).ConfigureAwait(false);
         enter("Arm");
         if (purpose)
-        { controls.ArmPurpose(official, command.CommandId); }
+        {
+            controls.ArmPurpose(official, command.CommandId);
+        }
         else
-        { controls.Arm(official); }
+        {
+            controls.Arm(official);
+        }
         enter("RestartArmed");
         if (purpose)
-        { await NativePurposeEnrollmentRestart.RestartAsync(wave, controls, token).ConfigureAwait(false); }
+        {
+            await NativePurposeEnrollmentRestart.RestartAsync(wave, controls, token).ConfigureAwait(false);
+        }
         else
-        { await PartitionMovementPublicParentRf3Cut.RestartAsync(wave, token).ConfigureAwait(false); }
+        {
+            await PartitionMovementPublicParentRf3Cut.RestartAsync(wave, token).ConfigureAwait(false);
+        }
         enter("PublicCaller");
         if (purpose)
-        { await NativeSignedPurposeRf3Callers.RequireRefusedAsync(seed, command, official, token).ConfigureAwait(false); }
+        {
+            await NativeSignedPurposeRf3Callers.RequireRefusedAsync(seed, command, official, token).ConfigureAwait(false);
+        }
         else
-        { await NativeCapabilityOmissionRf3Callers.RequireRefusedAsync(seed, command, official, token).ConfigureAwait(false); }
+        {
+            await NativeCapabilityOmissionRf3Callers.RequireRefusedAsync(seed, command, official, token).ConfigureAwait(false);
+        }
         enter("CausalWitness");
         if (purpose)
-        { await controls.RequirePurposeCausalRefusalAsync().ConfigureAwait(false); }
+        {
+            await controls.RequirePurposeCausalRefusalAsync().ConfigureAwait(false);
+        }
         else
-        { await controls.RequireCausalRefusalAsync().ConfigureAwait(false); }
+        {
+            await controls.RequireCausalRefusalAsync().ConfigureAwait(false);
+        }
         enter("RefusedCut");
         var refused = await PartitionMovementPublicParentRf3Cut.StopAndReadAsync(wave, seed.FirstRequest, token).ConfigureAwait(false);
         enter("NoEffects");

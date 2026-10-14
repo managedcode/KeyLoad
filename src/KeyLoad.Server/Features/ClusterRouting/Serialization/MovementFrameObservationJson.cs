@@ -40,7 +40,9 @@ internal sealed class MovementFrameObservationJson
         if (value.SelectionId == Guid.Empty || value.MoveId == Guid.Empty
             || value.PhysicalShardId == Guid.Empty || value.Incarnation == Guid.Empty
             || !value.OperatorPrincipalId.StartsWith(RequestCqrsProbeProtocol.PrincipalPrefix, StringComparison.Ordinal))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         RequireText(value.OperatorPrincipalId);
         return value;
     }
@@ -56,7 +58,9 @@ internal sealed class MovementFrameObservationJson
             || value.EntryTerm <= MovementFrameObservationFields.AbsentTerm || value.MaximumFrameBytes <= MovementFrameObservationFields.AbsentCap
             || value.RejectedPrefixBytes != checked((long)value.MaximumFrameBytes + MovementFrameObservationProtocol.PrefixStep)
             || !value.OperatorPrincipalId.StartsWith(RequestCqrsProbeProtocol.PrincipalPrefix, StringComparison.Ordinal))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         RequireText(value.OperatorPrincipalId);
         RequireText(value.ReceiverPrincipalId);
         RequireText(value.Voter);
@@ -88,20 +92,28 @@ internal sealed class MovementFrameObservationJson
     {
         if (version != MovementFrameObservationProtocol.Version || kind != expectedKind
             || !RequestCqrsProbeOptionsReader.IsSessionId(session))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
     }
 
     private void RequireText(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         try
         {
             if (StrictUtf8.GetByteCount(value) > options.Value.MaximumPrincipalBytes)
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
         }
         catch (EncoderFallbackException)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
     }
     private static InvalidOperationException Invalid() => new(MovementFrameObservationProtocol.Invalid);
 }

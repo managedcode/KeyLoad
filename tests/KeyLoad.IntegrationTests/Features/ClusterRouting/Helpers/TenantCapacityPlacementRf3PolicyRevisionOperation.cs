@@ -20,7 +20,11 @@ internal static class TenantCapacityPlacementRf3PolicyRevisionOperation
         await TenantCapacityPlacementRf3Assertions.RequirePendingAsync(pending, repair.Plan.Plan, request.IntentId);
         await SqlRf3Protocol.EqualAsync(pending, (await McpCallerAssertions.SuccessAsync<PlacementIntentV1>(
             await seed.Official.CallAsync(TenantPlacementPublicProtocol.PersistTool,
-                new { commandId = id, request }, token))).Value);
+                new
+                {
+                    commandId = id,
+                    request
+                }, token))).Value);
         await TenantCapacityPlacementRf3Apply.RunAsync(wave, seed, state, repair.Plan, pending, token);
         var completed = await McpCallerAssertions.SdkSuccessAsync(await seed.Source.ReadPlacementIntentAsync(
             new(new(seed.Partition.TenantId, seed.Partition.DatabaseId, state.Control), pending.IntentId), token));

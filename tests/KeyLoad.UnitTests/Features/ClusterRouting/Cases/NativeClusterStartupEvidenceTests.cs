@@ -17,7 +17,9 @@ internal sealed class NativeClusterStartupEvidenceTests
         await cancelled.CancelAsync();
         Exception? original = null;
         try
-        { await failed.InitializeAsync(cancelled.Token); }
+        {
+            await failed.InitializeAsync(cancelled.Token);
+        }
         catch (OperationCanceledException observed) { original = observed; }
         await Assert.That(original).IsNotNull();
         using var evidence = JsonDocument.Parse(await File.ReadAllBytesAsync(
@@ -48,9 +50,13 @@ internal sealed class NativeClusterStartupEvidenceTests
                 using var cancelled = new CancellationTokenSource();
                 await cancelled.CancelAsync();
                 try
-                { await scenario.CommandAsync(principal, Guid.NewGuid(), scenario.Command(Document), cancelled.Token); }
+                {
+                    await scenario.CommandAsync(principal, Guid.NewGuid(), scenario.Command(Document), cancelled.Token);
+                }
                 catch (OperationCanceledException failure)
-                { initiating = failure; }
+                {
+                    initiating = failure;
+                }
                 await Assert.That(initiating).IsNotNull();
                 await Assert.That(scenario.Stored(Document)).IsNull();
                 System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(

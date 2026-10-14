@@ -17,9 +17,13 @@ internal static class EventMessageSensitiveSafeR52Refusals
             : state.Model.Subscription && state.Model.DataAuthority ? EventMessageSensitiveSafeR52Protocol.SubscriptionChangedDetail
                 : EventMessageSensitiveSafeR52Protocol.ChangedPolicyDetail;
         if (request is ReceiveSubscriptionRequest subscription)
-        { await SdkAsync(await caller.Sdk.ReceiveSubscriptionAsync(subscription, token), code, detail, state); }
+        {
+            await SdkAsync(await caller.Sdk.ReceiveSubscriptionAsync(subscription, token), code, detail, state);
+        }
         else
-        { await SdkAsync(await caller.Sdk.ReceiveAsync((ReceiveRequest)request, token), code, detail, state); }
+        {
+            await SdkAsync(await caller.Sdk.ReceiveAsync((ReceiveRequest)request, token), code, detail, state);
+        }
         await EventMessageSensitiveSafeR52Current.RequireAsync(root, state, token);
         var reply = await caller.Mcp.CallAsync(tool, request, token);
         await McpCallerAssertions.ErrorAsync(reply, code, dispatched: code != ErrorCode.Unauthenticated || state.Model.DataAuthority);

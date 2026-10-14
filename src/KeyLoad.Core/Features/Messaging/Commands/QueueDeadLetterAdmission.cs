@@ -11,7 +11,9 @@ public sealed partial class DatabaseEngine
         var bytes = policy.MaxDeadLetterBytes ?? policy.MaxStoredBytes;
         if (bodyBytes <= QueueLifecycleProtocol.Initial || counters.DeadLetterMessages < QueueLifecycleProtocol.Initial
             || counters.DeadLetterBytes < QueueLifecycleProtocol.Initial || counters.NextParkedSequence < QueueLifecycleProtocol.Initial)
-        { throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.InvalidCounter); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.InvalidCounter);
+        }
         return counters.DeadLetterMessages < messages && counters.DeadLetterBytes <= bytes
             && bodyBytes <= bytes - counters.DeadLetterBytes;
     }
@@ -24,7 +26,9 @@ public sealed partial class DatabaseEngine
         if (metadata.State == MessageState.PendingDeadLetter && policy.OrderingProfile == QueueOrderingProfile.StrictPerKey
             && policy.ParkedHeadPolicy == QueueParkedHeadPolicy.Continue
             && (metadata.EnqueueSequence <= QueueOrderProtocol.Initial || metadata.ActiveOrderSequence != QueueOrderProtocol.Initial))
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, QueueOrderProtocol.InvalidAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, QueueOrderProtocol.InvalidAuthority);
+        }
         var ordered = metadata.State == MessageState.PendingDeadLetter
             && policy.ParkedHeadPolicy == QueueParkedHeadPolicy.Continue
             ? metadata : ParkQueueOrder(tx, lane, policy, body.Body, metadata);
@@ -40,7 +44,11 @@ public sealed partial class DatabaseEngine
         {
             tx.PutRecord(QueueKey(QueueLifecycleProtocol.PendingSpace, lane, metadata.Id),
                 new QueuePendingDeadLetterReference(metadata.Id, metadata.DeliveryGeneration, AttemptsExhausted));
-            return updated with { State = MessageState.PendingDeadLetter, ParkedSequence = QueueLifecycleProtocol.Initial };
+            return updated with
+            {
+                State = MessageState.PendingDeadLetter,
+                ParkedSequence = QueueLifecycleProtocol.Initial
+            };
         }
         var sequence = checked(counters.NextParkedSequence + QueueLifecycleProtocol.Increment);
         var admitted = counters with
@@ -53,6 +61,10 @@ public sealed partial class DatabaseEngine
         tx.PutRecord(QueueKey(QueueLifecycleProtocol.ParkedSpace, lane, sequence, metadata.Id),
             new QueueDeadLetterReference(metadata.Id, sequence, metadata.DeliveryGeneration, AttemptsExhausted));
         counters = admitted;
-        return updated with { State = MessageState.DeadLettered, ParkedSequence = sequence };
+        return updated with
+        {
+            State = MessageState.DeadLettered,
+            ParkedSequence = sequence
+        };
     }
 }

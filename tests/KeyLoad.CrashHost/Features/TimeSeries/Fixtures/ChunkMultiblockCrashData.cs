@@ -47,7 +47,9 @@ internal static class ChunkMultiblockCrashData
             ChunkMultiblockCrashProtocol.HealthySequence, SampleChunkCrashContract.Tags));
         }
         if (prepared && !merge)
-        { rows = rows.Where(record => record.Sequence <= ChunkMultiblockCrashProtocol.PreparedAutomaticSealSequence); }
+        {
+            rows = rows.Where(record => record.Sequence <= ChunkMultiblockCrashProtocol.PreparedAutomaticSealSequence);
+        }
         return rows.OrderBy(record => record.Sample.Timestamp.UtcTicks).ThenBy(record => record.Sequence).ToArray();
     }
 }

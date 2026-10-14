@@ -27,7 +27,9 @@ internal sealed class NativeTextPostingObservation : IDisposable
     {
         var original = Current.Value;
         if (original is null)
-        { return null; }
+        {
+            return null;
+        }
         ObjectDisposedException.ThrowIf(original.disposed, original);
         return original.callback;
     }
@@ -35,9 +37,13 @@ internal sealed class NativeTextPostingObservation : IDisposable
     public void Dispose()
     {
         if (disposed)
-        { return; }
+        {
+            return;
+        }
         if (!ReferenceEquals(Current.Value, this))
-        { throw new InvalidOperationException(NonCurrentScope); }
+        {
+            throw new InvalidOperationException(NonCurrentScope);
+        }
         Current.Value = previous;
         disposed = true;
     }

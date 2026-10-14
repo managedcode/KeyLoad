@@ -26,12 +26,19 @@ internal static class AuthenticationExecutionHttpRefusal
             using var inner = new HttpClientHandler();
             using var handler = new AuthenticationExecutionHttpHandler(inner);
             using var http = new HttpClient(handler, disposeHandler: false)
-            { BaseAddress = rootHttp.BaseAddress, Timeout = Timeout.InfiniteTimeSpan };
+            {
+                BaseAddress = rootHttp.BaseAddress,
+                Timeout = Timeout.InfiniteTimeSpan
+            };
             StandardAspNetAuthorityTrial.AddHeaders(http);
             using var request = new HttpRequestMessage(HttpMethod.Post, AuthenticationExecutionProtocol.DocumentsRoute)
-            { Content = JsonContent.Create(new GetDocumentRequest(state.Document.Reference), options: JsonDefaults.Options) };
+            {
+                Content = JsonContent.Create(new GetDocumentRequest(state.Document.Reference), options: JsonDefaults.Options)
+            };
             if (header is not null)
-            { request.Headers.TryAddWithoutValidation(McpCallerProtocol.AuthorizationHeader, header); }
+            {
+                request.Headers.TryAddWithoutValidation(McpCallerProtocol.AuthorizationHeader, header);
+            }
             var position = collector.Position;
             using var response = await http.SendAsync(request, token);
             await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.Unauthorized);

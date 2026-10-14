@@ -138,7 +138,7 @@ internal sealed class RelationalSqlRf3JoinAdmissionFlow(bool officialMcp, bool a
     private Q2AdmissionRouting.RequestCqrsRf3Wave? wave;
     private Q2AdmissionRouting.RequestCqrsRf3Callers? administrator;
     private Q2AdmissionRouting.RequestCqrsRf3Callers? caller;
-    private IReadOnlyList<global::KeyLoad.Orleans.ReplicaSiloDiscovery>? discovery;
+    private IReadOnlyList<global::KeyLoad.Clustering.ReplicaSiloDiscovery>? discovery;
     private CancellationTokenSource? callerCancellation;
     private Task<RelationalQ2CancellationOutcome>? original;
     private Guid armId;
@@ -156,9 +156,13 @@ internal sealed class RelationalSqlRf3JoinAdmissionFlow(bool officialMcp, bool a
             flow.controls, flow.wave, flow.waveStartupAttempted, flow.caller, flow.administrator,
             flow.discovery, flow.callerCancellation, null, flow.original, null, flow.armId, flow.failures);
         if (flow.failures.Count == 1)
-        { global::System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(flow.failures[0]).Throw(); }
+        {
+            global::System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(flow.failures[0]).Throw();
+        }
         if (flow.failures.Count > 1)
-        { throw new AggregateException(flow.failures); }
+        {
+            throw new AggregateException(flow.failures);
+        }
     }
 
     private async Task ExecuteAsync(CancellationToken parent)
@@ -206,7 +210,7 @@ internal sealed class RelationalSqlRf3JoinAdmissionFlow(bool officialMcp, bool a
         var activeControls = controls ?? throw new InvalidOperationException(MissingOwner);
         var actualDiscovery = discovery ?? throw new InvalidOperationException(MissingOwner);
         var activeCaller = caller ?? throw new InvalidOperationException(MissingOwner);
-        var kind = ast ? global::KeyLoad.Orleans.GrainReadKind.AstQuery : global::KeyLoad.Orleans.GrainReadKind.Query;
+        var kind = ast ? global::KeyLoad.Clustering.GrainReadKind.AstQuery : global::KeyLoad.Clustering.GrainReadKind.Query;
         armId = activeControls.WriteArm(seed.Identity.Principal.Id, Guid.Empty, kind,
             global::KeyLoad.Server.Features.ClusterRouting.RequestCqrsProbePhase.AuthorizationReload,
             global::KeyLoad.Server.Features.ClusterRouting.RequestCqrsProbeAction.Hold);
@@ -229,12 +233,16 @@ internal sealed class RelationalSqlRf3JoinAdmissionFlow(bool officialMcp, bool a
             global::KeyLoad.Server.Features.ClusterRouting.RequestCqrsProbePhase.AuthorizationReload,
             global::KeyLoad.Server.Features.ClusterRouting.RequestCqrsProbeOutcome.Cancelled, actualDiscovery, token);
         await SqlRf3Protocol.EqualAsync(observed with
-        { Outcome = global::KeyLoad.Server.Features.ClusterRouting.RequestCqrsProbeOutcome.Cancelled }, cancelled);
+        {
+            Outcome = global::KeyLoad.Server.Features.ClusterRouting.RequestCqrsProbeOutcome.Cancelled
+        }, cancelled);
         var disposed = await activeControls.WaitForMarkerAsync(armId,
             global::KeyLoad.Server.Features.ClusterRouting.RequestCqrsProbePhase.ProducerDisposed,
             global::KeyLoad.Server.Features.ClusterRouting.RequestCqrsProbeOutcome.Observed, actualDiscovery, token);
         await SqlRf3Protocol.EqualAsync(observed with
-        { Phase = global::KeyLoad.Server.Features.ClusterRouting.RequestCqrsProbePhase.ProducerDisposed }, disposed);
+        {
+            Phase = global::KeyLoad.Server.Features.ClusterRouting.RequestCqrsProbePhase.ProducerDisposed
+        }, disposed);
         await Assert.That(activeControls.ArmFor(armId).Settled).IsTrue();
         await Assert.That(activeControls.ArmFor(armId).ProducerDisposedSeen).IsTrue();
         var outcome = await original;
@@ -258,9 +266,13 @@ internal static class RelationalSqlRf3JoinAdmissionOperation
             if (officialMcp)
             {
                 if (ast)
-                { await caller.Mcp.CallAsync(McpCallerTools.QueryAst, seed.Ast, token); }
+                {
+                    await caller.Mcp.CallAsync(McpCallerTools.QueryAst, seed.Ast, token);
+                }
                 else
-                { await caller.Mcp.CallAsync(SqlOperationProtocol.ToolName, seed.Sql, token); }
+                {
+                    await caller.Mcp.CallAsync(SqlOperationProtocol.ToolName, seed.Sql, token);
+                }
                 return new(true, null, null);
             }
             if (ast)
@@ -274,6 +286,8 @@ internal static class RelationalSqlRf3JoinAdmissionOperation
             return new(sql.IsSuccess, sql.Problem?.ErrorCode, null);
         }
         catch (OperationCanceledException cancellation) when (token.IsCancellationRequested)
-        { return new(false, null, cancellation); }
+        {
+            return new(false, null, cancellation);
+        }
     }
 }

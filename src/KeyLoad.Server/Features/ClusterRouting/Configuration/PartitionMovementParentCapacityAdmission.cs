@@ -15,12 +15,16 @@ internal static class PartitionMovementParentCapacityAdmission
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
         if (context.Version != PartitionMoveProtocol.Version || context.MaxBatchBytes <= PartitionMovementProtocol.NoResultBytes
             || header.RetainedPhaseCount >= context.MaxPhaseRecordsPerMove)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
+        }
         var pending = RequireFutureCapacity(context.ActualState, context.IntendedPhase,
             context.CandidateGrant.ReceiverOwner, context.CandidateGrant.Resources,
             actualClusterId, context.MaxBatchBytes);
         if (pending > context.MaxRetainedMetadataBytesPerMove - header.RetainedMetadataBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
+        }
     }
 
     internal static void RequirePlannedStageCapacity(PartitionMoveParentState state,
@@ -33,11 +37,17 @@ internal static class PartitionMovementParentCapacityAdmission
     {
         if (state.Header is null || state.Control is null || resources.IsDefault
             || string.IsNullOrWhiteSpace(cluster) || maximumBytes <= PartitionMovementProtocol.NoResultBytes)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+        }
         try
-        { return FutureCapacity(state, phase, receiver, resources, cluster, maximumBytes); }
+        {
+            return FutureCapacity(state, phase, receiver, resources, cluster, maximumBytes);
+        }
         catch (OverflowException)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
+        }
     }
 
     private static long FutureCapacity(PartitionMoveParentState state, PartitionMovePhaseCommand phase,
@@ -63,10 +73,12 @@ internal static class PartitionMovementParentCapacityAdmission
         var issuedResult = FuturePhaseResult(state, journal, ReferenceFieldBytes, issued, ReferenceFieldBytes);
         var snapshot = checked(ReferenceFieldBytes + issued + FutureOutcome(issuedResult) + ScalarFieldBytes);
         var query = checked(ReferenceFieldBytes + snapshot + ScalarFieldBytes * FutureCapacityScalarOccurrences2);
-        var proof = FutureWitness(TransportReply<KeyLoad.Orleans.PartitionMovementReceiverIssuanceResult>(receiver, cluster, query));
+        var proof = FutureWitness(TransportReply<KeyLoad.Clustering.PartitionMovementReceiverIssuanceResult>(receiver, cluster, query));
         pending = checked(pending + source + packet + proof);
         if (phase.Stage == PartitionMovePeerStage.Capture)
-        { pending = checked(pending + CaptureFields(state, receiver, resources, cluster)); }
+        {
+            pending = checked(pending + CaptureFields(state, receiver, resources, cluster));
+        }
         var dispatch = FutureWitness(SourceReply(state, pending, cluster, stateCapacity, pendingSlots));
         var finalEnvelope = FutureEnvelope(phase, grant, proof, dispatch);
         var transport = Root<PartitionMovementTransportRequest>(checked(ReferenceFieldBytes + GuidFieldBytes * FutureCapacityGuidOccurrences2
@@ -78,12 +90,14 @@ internal static class PartitionMovementParentCapacityAdmission
         var outcome = PartitionMovementParentCapacityFinalInstall.OutcomeCapacity(state, phase,
             FutureOutcome(FuturePhaseResult(state, journal, grant, issued, ReferenceFieldBytes)));
         var nativeOutcomeWitness = FutureOutcomeWitness(outcome, ReferenceFieldBytes);
-        var outcomeReply = TransportReply<KeyLoad.Orleans.PartitionMovementOutcomeWitness>(receiver, cluster, nativeOutcomeWitness);
+        var outcomeReply = TransportReply<KeyLoad.Clustering.PartitionMovementOutcomeWitness>(receiver, cluster, nativeOutcomeWitness);
         var outcomeProof = FutureOutcomeProof(outcomeReply);
-        var completedOutcomeWitness = Root<KeyLoad.Orleans.PartitionMovementOutcomeWitness>(FutureOutcomeWitness(outcome, outcomeProof));
+        var completedOutcomeWitness = Root<KeyLoad.Clustering.PartitionMovementOutcomeWitness>(FutureOutcomeWitness(outcome, outcomeProof));
         var retained = checked(pending + outcome + outcomeProof);
         if (phase.Stage == PartitionMovePeerStage.Retire)
-        { retained = checked(retained + CancellationFields(state, phase, receiver, cluster, grant, journal, dispatch)); }
+        {
+            retained = checked(retained + CancellationFields(state, phase, receiver, cluster, grant, journal, dispatch));
+        }
         var parent = Root<PartitionMoveParentPhase>(retained);
         var checkpoint = Root<PartitionMoveCheckpointBody>(checked(ReferenceFieldBytes
             + PartitionMovementParentCapacityBounds.Bound(state.Header.OriginalTransferRequest) + PartitionMovementParentCapacityBounds.Bound(state.Header.OperatorPrincipalId)
@@ -104,7 +118,9 @@ internal static class PartitionMovementParentCapacityAdmission
         foreach (var value in values)
         {
             if (value > maximum)
-            { throw Errors.Fail(ErrorCode.BudgetExceeded, detail); }
+            {
+                throw Errors.Fail(ErrorCode.BudgetExceeded, detail);
+            }
         }
     }
 }

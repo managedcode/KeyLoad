@@ -31,11 +31,17 @@ internal static class QueueOrderedRetryPublicSeed
         var principal = new PrincipalRecord(id, partition.TenantId,
             [new(partition.DatabaseId, queue.Name, Capability.QueuePublish | Capability.QueueConsume | Capability.QueueAck
                 | Capability.QueueInspect | Capability.DeadLettersRead | Capability.DeadLettersRedrive | Capability.QueueCancel | Capability.Query)], ["*"])
-        { ClusterAdministrator = true };
+        {
+            ClusterAdministrator = true
+        };
         await ConfigureAsync(root, principal, key, token);
         var deniedId = "ordered-denied-" + suffix;
         var deniedKey = deniedId + ".keyload-native-lifecycle-credential";
-        await ConfigureAsync(root, principal with { Id = deniedId, FieldGrants = [] }, deniedKey, token);
+        await ConfigureAsync(root, principal with
+        {
+            Id = deniedId,
+            FieldGrants = []
+        }, deniedKey, token);
         return new(new(partition, key, deniedKey, route), parkedHead);
     }
     private static async Task ConfigureAsync(RequestCqrsRf3Callers root, PrincipalRecord principal, string key, CancellationToken token)

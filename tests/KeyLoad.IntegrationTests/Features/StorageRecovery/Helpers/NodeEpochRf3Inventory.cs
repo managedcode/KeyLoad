@@ -44,7 +44,9 @@ internal sealed record NodeEpochRf3Inventory(ImmutableArray<NodeEpochRf3FileEntr
     {
         var attributes = File.GetAttributes(entry);
         if ((attributes & FileAttributes.ReparsePoint) != 0)
-        { throw new InvalidDataException("Node inventory contains a link or reparse point."); }
+        {
+            throw new InvalidDataException("Node inventory contains a link or reparse point.");
+        }
         var relative = Path.GetRelativePath(root, entry);
         ValidateRelativePath(relative, totalPathCharacters);
         totalPathCharacters += relative.Length;
@@ -56,7 +58,9 @@ internal sealed record NodeEpochRf3Inventory(ImmutableArray<NodeEpochRf3FileEntr
         var file = new FileInfo(entry);
         if (files.Count >= NodeEpochRf3Protocol.MaximumFiles
             || file.Length < 0 || file.Length > NodeEpochRf3Protocol.MaximumInventoryBytes - totalBytes)
-        { throw new InvalidDataException("Node inventory exceeds its file or byte bound."); }
+        {
+            throw new InvalidDataException("Node inventory exceeds its file or byte bound.");
+        }
         var digest = await HashStableAsync(entry, file.Length, cancellationToken).ConfigureAwait(false);
         files.Add(new(relative, file.Length, digest, ReadMode(entry)));
         return (totalBytes + file.Length, totalPathCharacters);
@@ -65,9 +69,13 @@ internal sealed record NodeEpochRf3Inventory(ImmutableArray<NodeEpochRf3FileEntr
     private static void ValidateRelativePath(string relative, int totalPathCharacters)
     {
         if (relative.Length is < 1 or > NodeEpochRf3Protocol.MaximumPathCharacters || Path.IsPathRooted(relative))
-        { throw new InvalidDataException("Node inventory contains an invalid relative path."); }
+        {
+            throw new InvalidDataException("Node inventory contains an invalid relative path.");
+        }
         if (relative.Length > NodeEpochRf3Protocol.MaximumTotalPathCharacters - totalPathCharacters)
-        { throw new InvalidDataException("Node inventory exceeds its aggregate path bound."); }
+        {
+            throw new InvalidDataException("Node inventory exceeds its aggregate path bound.");
+        }
     }
 
     private static void AddDirectoryPath(string entry, string relative, int parentDepth,
@@ -75,7 +83,9 @@ internal sealed record NodeEpochRf3Inventory(ImmutableArray<NodeEpochRf3FileEntr
     {
         if (parentDepth >= NodeEpochRf3Protocol.MaximumDepth
             || directories.Count >= NodeEpochRf3Protocol.MaximumDirectories)
-        { throw new InvalidDataException("Node inventory exceeds its directory or depth bound."); }
+        {
+            throw new InvalidDataException("Node inventory exceeds its directory or depth bound.");
+        }
         directories.Add(relative);
         pending.Push((entry, parentDepth + 1));
     }
@@ -101,7 +111,9 @@ internal sealed record NodeEpochRf3Inventory(ImmutableArray<NodeEpochRf3FileEntr
         }
         var copied = await CaptureAsync(destination, cancellationToken).ConfigureAwait(false);
         if (!inventory.Equivalent(copied))
-        { throw new IOException("The private node copy does not match its source inventory."); }
+        {
+            throw new IOException("The private node copy does not match its source inventory.");
+        }
         return inventory;
     }
 
@@ -124,11 +136,15 @@ internal sealed record NodeEpochRf3Inventory(ImmutableArray<NodeEpochRf3FileEntr
         var path = Path.Combine(directory, NodeEpochRf3Protocol.UnknownEntry);
         await using var input = NodeEpochRf3OfflineFiles.OpenRead(path);
         if (input.Length is < 1 or > 256)
-        { throw new IOException("The owned unknown marker changed its bounded size."); }
+        {
+            throw new IOException("The owned unknown marker changed its bounded size.");
+        }
         var bytes = new byte[checked((int)input.Length)];
         await input.ReadExactlyAsync(bytes, cancellationToken).ConfigureAwait(false);
         if (!bytes.AsSpan().SequenceEqual(System.Text.Encoding.UTF8.GetBytes(UnknownMarker)))
-        { throw new IOException("The unknown node entry is no longer owned by this test."); }
+        {
+            throw new IOException("The unknown node entry is no longer owned by this test.");
+        }
         File.Delete(path);
     }
 
@@ -137,7 +153,9 @@ internal sealed record NodeEpochRf3Inventory(ImmutableArray<NodeEpochRf3FileEntr
     {
         await using var input = NodeEpochRf3OfflineFiles.OpenRead(source);
         if (input.Length != expected.Length)
-        { throw new IOException("A node file changed after its inventory was captured."); }
+        {
+            throw new IOException("A node file changed after its inventory was captured.");
+        }
         await using var output = new FileStream(destination, FileMode.CreateNew, FileAccess.Write, FileShare.None,
             NodeEpochRf3Protocol.BufferBytes, FileOptions.Asynchronous | FileOptions.WriteThrough);
         using var digest = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
@@ -148,18 +166,24 @@ internal sealed record NodeEpochRf3Inventory(ImmutableArray<NodeEpochRf3FileEntr
             cancellationToken.ThrowIfCancellationRequested();
             var count = await input.ReadAsync(buffer.AsMemory(), cancellationToken).ConfigureAwait(false);
             if (count == 0 || count > expected.Length - copied)
-            { throw new IOException("A node file changed while being privately copied."); }
+            {
+                throw new IOException("A node file changed while being privately copied.");
+            }
             digest.AppendData(buffer, 0, count);
             await output.WriteAsync(buffer.AsMemory(0, count), cancellationToken).ConfigureAwait(false);
             copied += count;
         }
         if (await input.ReadAsync(buffer.AsMemory(0, 1), cancellationToken).ConfigureAwait(false) != 0
             || Convert.ToHexStringLower(digest.GetHashAndReset()) != expected.Sha256)
-        { throw new IOException("A node file changed while being privately copied."); }
+        {
+            throw new IOException("A node file changed while being privately copied.");
+        }
         await output.FlushAsync(cancellationToken).ConfigureAwait(false);
         NodeEpochRf3OfflineFiles.FlushToDisk(output);
         if (!OperatingSystem.IsWindows())
-        { File.SetUnixFileMode(destination, (UnixFileMode)expected.Mode); }
+        {
+            File.SetUnixFileMode(destination, (UnixFileMode)expected.Mode);
+        }
     }
 
     private static async Task<string> HashStableAsync(string path, long expectedLength,
@@ -167,7 +191,9 @@ internal sealed record NodeEpochRf3Inventory(ImmutableArray<NodeEpochRf3FileEntr
     {
         await using var input = NodeEpochRf3OfflineFiles.OpenRead(path);
         if (input.Length != expectedLength)
-        { throw new IOException("A node file changed during inventory capture."); }
+        {
+            throw new IOException("A node file changed during inventory capture.");
+        }
         using var digest = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         var buffer = new byte[NodeEpochRf3Protocol.BufferBytes];
         long read = 0;
@@ -176,12 +202,16 @@ internal sealed record NodeEpochRf3Inventory(ImmutableArray<NodeEpochRf3FileEntr
             cancellationToken.ThrowIfCancellationRequested();
             var count = await input.ReadAsync(buffer.AsMemory(), cancellationToken).ConfigureAwait(false);
             if (count == 0 || count > expectedLength - read)
-            { throw new IOException("A node file changed during inventory capture."); }
+            {
+                throw new IOException("A node file changed during inventory capture.");
+            }
             digest.AppendData(buffer, 0, count);
             read += count;
         }
         if (await input.ReadAsync(buffer.AsMemory(0, 1), cancellationToken).ConfigureAwait(false) != 0)
-        { throw new IOException("A node file grew during inventory capture."); }
+        {
+            throw new IOException("A node file grew during inventory capture.");
+        }
         return Convert.ToHexStringLower(digest.GetHashAndReset());
     }
 
@@ -189,12 +219,16 @@ internal sealed record NodeEpochRf3Inventory(ImmutableArray<NodeEpochRf3FileEntr
     {
         if (Path.IsPathRooted(relative) || relative.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
             .Any(static segment => segment is ".." or "." or ""))
-        { throw new InvalidDataException("Node inventory path escaped its owned root."); }
+        {
+            throw new InvalidDataException("Node inventory path escaped its owned root.");
+        }
         var path = Path.GetFullPath(Path.Combine(root, relative));
         var prefix = Path.TrimEndingDirectorySeparator(Path.GetFullPath(root)) + Path.DirectorySeparatorChar;
         if (!path.StartsWith(prefix, OperatingSystem.IsWindows() || OperatingSystem.IsMacOS()
             ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
-        { throw new InvalidDataException("Node inventory path escaped its owned root."); }
+        {
+            throw new InvalidDataException("Node inventory path escaped its owned root.");
+        }
         return path;
     }
 
@@ -204,13 +238,17 @@ internal sealed record NodeEpochRf3Inventory(ImmutableArray<NodeEpochRf3FileEntr
     private static void MakePrivateDirectory(string path)
     {
         if (!OperatingSystem.IsWindows())
-        { File.SetUnixFileMode(path, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute); }
+        {
+            File.SetUnixFileMode(path, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+        }
     }
 
     private static void RequireDirectory(string path)
     {
         var info = new DirectoryInfo(path);
         if (!info.Exists || info.LinkTarget is not null || (info.Attributes & FileAttributes.ReparsePoint) != 0)
-        { throw new InvalidDataException("Node inventory root is not a regular directory."); }
+        {
+            throw new InvalidDataException("Node inventory root is not a regular directory.");
+        }
     }
 }

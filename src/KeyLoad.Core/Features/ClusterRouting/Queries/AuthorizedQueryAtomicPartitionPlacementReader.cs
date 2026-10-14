@@ -12,7 +12,9 @@ public sealed partial class DatabaseEngine
     {
         var (local, placement) = ReadAuthorizedQueryPlacement(view, partition, grant);
         if (placement.PhysicalShardId != local.PhysicalShardId)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, ForeignPlacementExecution); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, ForeignPlacementExecution);
+        }
         return placement;
     }
 
@@ -35,10 +37,14 @@ public sealed partial class DatabaseEngine
         PhysicalShardCatalogValidation.ValidateCatalog(catalog);
         var directory = AtomicPartitionPlacementSerialization.ReadDirectory(view, grant);
         if (directory is not null)
-        { AtomicPartitionPlacementValidation.ValidateDirectory(directory); }
+        {
+            AtomicPartitionPlacementValidation.ValidateDirectory(directory);
+        }
         var row = AtomicPartitionPlacementSerialization.ReadRow(view, partition, grant);
         if (row is not null)
-        { AtomicPartitionPlacementValidation.ValidateRowShape(row, partition); }
+        {
+            AtomicPartitionPlacementValidation.ValidateRowShape(row, partition);
+        }
         var owner = row is null ? catalog.DefaultShard
             : ResolveRegisteredPlacementOwner(view, catalog.DefaultShard, row.PhysicalShardId,
                 ErrorCode.Corruption, grant);

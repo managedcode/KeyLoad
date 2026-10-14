@@ -13,17 +13,27 @@ internal static class LocalProcessingLateR53Replay
             state.OriginalAllowed ? LocalProcessingLateR53Protocol.RevisionDetail : LocalProcessingLateR53Protocol.ChangedDetail,
             sdk, mcp, admin, official, token);
         if (state.OriginalAllowed)
-        { await SuccessAsync(state, state.Success, state.Receipt!, sdk, mcp, admin, official, token); }
+        {
+            await SuccessAsync(state, state.Success, state.Receipt!, sdk, mcp, admin, official, token);
+        }
         else
         {
             await LocalProcessingLateR53Failures.MixedAsync(state, state.Success, ErrorCode.PermissionDenied,
             LocalProcessingLateR53Protocol.ChangedDetail, sdk, mcp, admin, official, token);
         }
-        await SuccessAsync(state, state.Success with { CommandId = Guid.NewGuid() }, state.Receipt!, sdk, mcp, admin, official, token);
-        await LocalProcessingLateR53Failures.MixedAsync(state, state.Failed with { CommandId = Guid.NewGuid() },
+        await SuccessAsync(state, state.Success with
+        {
+            CommandId = Guid.NewGuid()
+        }, state.Receipt!, sdk, mcp, admin, official, token);
+        await LocalProcessingLateR53Failures.MixedAsync(state, state.Failed with
+        {
+            CommandId = Guid.NewGuid()
+        },
             ErrorCode.Conflict, LocalProcessingLateR53Protocol.EffectDetail, sdk, mcp, admin, official, token);
         if (state.OutputProcessing is { } output)
-        { await SuccessAsync(state, output, state.OutputReceipt!, sdk, mcp, admin, official, token); }
+        {
+            await SuccessAsync(state, output, state.OutputReceipt!, sdk, mcp, admin, official, token);
+        }
     }
 
     private static async Task SuccessAsync(LocalProcessingLateR53State state, ProcessingRequest request,

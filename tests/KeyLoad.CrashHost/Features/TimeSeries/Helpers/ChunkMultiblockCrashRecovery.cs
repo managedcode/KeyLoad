@@ -32,9 +32,13 @@ internal static class ChunkMultiblockCrashRecovery
         var acknowledged = Convert.ToHexString(NativeSerialization.Serialize(SampleChunkCrashOperations.OriginalAcknowledged(database)));
         var path = Path.Combine(root, SampleChunkCrashContract.OriginalReceiptFile);
         if (new FileInfo(path).Length > database.Limits.MaxBatchBytes)
-        { throw new InvalidOperationException(SampleChunkCrashContract.Invalid); }
+        {
+            throw new InvalidOperationException(SampleChunkCrashContract.Invalid);
+        }
         var saved = await File.ReadAllBytesAsync(path).ConfigureAwait(false);
         if (acknowledged != Convert.ToHexString(saved) || SampleChunkCrashState.Complete(database) != before || database.Store.Position != position)
-        { throw new InvalidOperationException(SampleChunkCrashContract.Invalid); }
+        {
+            throw new InvalidOperationException(SampleChunkCrashContract.Invalid);
+        }
     }
 }

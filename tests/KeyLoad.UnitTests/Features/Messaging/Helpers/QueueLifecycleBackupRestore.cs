@@ -50,9 +50,13 @@ internal static class QueueLifecycleBackupRestore
             await QueueLifecycleImage.SameAsync(source, original.Lane, image);
         }, failures);
         if (restored is not null)
-        { ServerFailureObserver.Observe(restored.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(restored.Dispose, failures);
+        }
         if (failures.Count == QueueLifecycleTestProtocol.None)
-        { ServerFailureObserver.Observe(() => Directory.Delete(root, true), failures); }
+        {
+            ServerFailureObserver.Observe(() => Directory.Delete(root, true), failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

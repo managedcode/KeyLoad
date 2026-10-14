@@ -22,7 +22,9 @@ internal static class ReplicaAdmittedEntryRead
     {
         var entry = ReplicaProtocolCodec.DeserializeStored<ReplicaEntry>(originalBytes, maximumEntries);
         if (entry.Index != index || entry.Term <= UnelectedTerm || entry.Term > currentTerm)
-        { throw Errors.Fail(ErrorCode.Corruption, ReplicaProtocol.CorruptLog); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, ReplicaProtocol.CorruptLog);
+        }
         return ReplicaOperationAuthority.Own(entry, canonicalDatabase);
     }
 }

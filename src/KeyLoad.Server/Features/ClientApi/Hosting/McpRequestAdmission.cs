@@ -30,7 +30,10 @@ internal sealed class McpRequestAdmission : IDisposable
     internal int MaximumPayloadBytes => execution?.MaxBodyBytes
         ?? throw new InvalidOperationException(McpCatalogProtocol.InvalidOperation);
     /// <summary>Gets the classified reply ceiling; unclassified failures use the bounded control ceiling.</summary>
-    internal int MaximumReplyBytes { get; private set; }
+    internal int MaximumReplyBytes
+    {
+        get; private set;
+    }
 
     /// <summary>Covers actual persisted principal decoding before allocation.</summary>
     internal void CoverAuthentication(int capacity, int bytes, McpFrameShape shape, CancellationToken cancellationToken)
@@ -46,7 +49,9 @@ internal sealed class McpRequestAdmission : IDisposable
     {
         ObjectDisposedException.ThrowIf(disposed, this);
         if (execution is not null)
-        { throw new InvalidOperationException(McpCatalogProtocol.InvalidOperation); }
+        {
+            throw new InvalidOperationException(McpCatalogProtocol.InvalidOperation);
+        }
         var route = descriptor?.Route ?? McpToolRoutes.AdminDispatch;
         var control = IsControlRoute(route);
         var replyBytes = control ? settings.MaximumControlReplyBytes : settings.MaximumDataReplyBytes;
@@ -57,7 +62,10 @@ internal sealed class McpRequestAdmission : IDisposable
         {
             candidate = governor.Begin(route, input.WireBytes, cancellationToken);
             candidate.Bind(principal, cancellationToken);
-            input = input with { MaximumPayloadBytes = candidate.MaxBodyBytes };
+            input = input with
+            {
+                MaximumPayloadBytes = candidate.MaxBodyBytes
+            };
             supplement = memory.Reserve(control ? McpMemoryLane.Control : McpMemoryLane.Data,
                 projection.BeforeOperation(input, replyBytes, descriptor is null), cancellationToken);
             execution = candidate;
@@ -69,7 +77,10 @@ internal sealed class McpRequestAdmission : IDisposable
         finally
         {
             if (!accepted)
-            { supplement?.Dispose(); candidate?.Dispose(); }
+            {
+                supplement?.Dispose();
+                candidate?.Dispose();
+            }
         }
     }
 
@@ -86,7 +97,9 @@ internal sealed class McpRequestAdmission : IDisposable
     {
         ObjectDisposedException.ThrowIf(disposed, this);
         if (bytes > MaximumReplyBytes)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, McpFramingProtocol.FrameBudgetExceeded); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, McpFramingProtocol.FrameBudgetExceeded);
+        }
         var owner = operation ?? ingress;
         owner.GrowTo(projection.ReplyScan(owner.RetainedBytes, bytes), cancellationToken);
     }
@@ -95,7 +108,9 @@ internal sealed class McpRequestAdmission : IDisposable
     {
         ObjectDisposedException.ThrowIf(disposed, this);
         if (execution is null)
-        { throw new InvalidOperationException(McpCatalogProtocol.InvalidOperation); }
+        {
+            throw new InvalidOperationException(McpCatalogProtocol.InvalidOperation);
+        }
         return memory.Reserve(McpMemoryLane.Data, projection.ProgressNotification(bytes), cancellationToken);
     }
 
@@ -103,7 +118,9 @@ internal sealed class McpRequestAdmission : IDisposable
     public void Dispose()
     {
         if (disposed)
-        { return; }
+        {
+            return;
+        }
         disposed = true;
         operation?.Dispose();
         execution?.Dispose();

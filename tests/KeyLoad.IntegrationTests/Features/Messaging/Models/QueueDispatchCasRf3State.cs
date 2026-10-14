@@ -11,5 +11,9 @@ internal sealed record QueueDispatchCasRf3State(QueueLaneRef Lane, ResourceDefin
     internal QueueDispatchControlRequest Request(long version, bool paused)
         => new(Lane.Partition.TenantId, Lane.Partition.DatabaseId, Lane.Queue, version, paused);
     internal ResourceDefinition Expected(long version, bool paused)
-        => Definition with { SchemaVersion = version, Paused = paused };
+        => Definition with
+        {
+            SchemaVersion = version,
+            Paused = paused
+        };
 }

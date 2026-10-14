@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.UnitTests.Features.Search;
 
@@ -45,7 +45,11 @@ internal sealed class NativeAnnWaitGenerationTests
 
     private static async Task RestoreAsync(TestDatabase database, NativeAnnMaintenanceTestRuntime runtime, AnnMaintenanceRequest pin)
     {
-        var restore = pin with { CommandId = Guid.NewGuid(), Mode = AnnMaintenanceMode.Restore };
+        var restore = pin with
+        {
+            CommandId = Guid.NewGuid(),
+            Mode = AnnMaintenanceMode.Restore
+        };
         var began = await runtime.PhaseAsync(database, restore, AnnMaintenanceCapabilityKind.Begin);
         _ = await runtime.PhaseAsync(database, restore, AnnMaintenanceCapabilityKind.Load);
         _ = await NativeAnnMaintenancePhaseAssertions.FinishAsync(database, runtime, restore, began.Source!.ThroughSequence);

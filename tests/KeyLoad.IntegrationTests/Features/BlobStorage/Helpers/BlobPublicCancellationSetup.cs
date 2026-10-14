@@ -1,7 +1,7 @@
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
 using KeyLoad.IntegrationTests.Features.StorageRecovery;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.IntegrationTests.Features.BlobStorage;
 
@@ -54,7 +54,9 @@ internal static class BlobPublicCancellationSetup
             [new(partition.DatabaseId, RequestCqrsRf3Protocol.AdminCollection,
                 Capability.DocumentsRead | Capability.DocumentsWrite),
              new(partition.DatabaseId, Resource, Capability.BlobRead | Capability.BlobWrite)], [])
-        { PolicyEpoch = RequestCqrsPhaseFaultProvisioning.InitialPolicyEpoch + 1 };
+        {
+            PolicyEpoch = RequestCqrsPhaseFaultProvisioning.InitialPolicyEpoch + 1
+        };
         var actual = await McpCallerAssertions.SdkSuccessAsync(await owner.Administrator.Sdk.ConfigurePrincipalAsync(
             Guid.NewGuid(), principal, token));
         await KeyLoad.IntegrationTests.Features.QueryExecution.SqlRf3Protocol.EqualAsync(principal, actual);

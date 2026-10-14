@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
-    <InternalsVisibleTo Include="KeyLoad.Orleans" />
+    <InternalsVisibleTo Include="KeyLoad.Clustering" />
     <InternalsVisibleTo Include="KeyLoad.Server" />
     <InternalsVisibleTo Include="KeyLoad.Query" />
     <InternalsVisibleTo Include="KeyLoad.Replication" />

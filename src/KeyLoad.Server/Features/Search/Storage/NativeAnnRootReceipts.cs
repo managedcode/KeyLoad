@@ -20,7 +20,9 @@ internal static class NativeAnnRootReceipts
             return receipt;
         }
         if (Directory.EnumerateFileSystemEntries(root).Any(path => Path.GetFileName(path) != NativeAnnProtocol.RootLock))
-        { throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Ownership); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Ownership);
+        }
         var created = new NativeAnnRootReceipt(NativeAnnProtocol.Version, root, nodeId, incarnation, [], [], [], []);
         NativeAnnReceiptFiles.Write(receiptPath, created, options);
         return created;
@@ -32,10 +34,17 @@ internal static class NativeAnnRootReceipts
         NativeAnnRootInventory.Require(root, receipt, receipt.NodeId, receipt.Incarnation, options);
         NativeAnnPaths.Generation(root, leaf);
         if (receipt.OwnedGenerations.Contains(leaf, StringComparer.Ordinal))
-        { throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Ownership); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Ownership);
+        }
         if (receipt.OwnedGenerations.Length == options.MaximumOwnedGenerations)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, NativeAnnProtocol.Bound); }
-        var next = receipt with { OwnedGenerations = [.. receipt.OwnedGenerations, leaf] };
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, NativeAnnProtocol.Bound);
+        }
+        var next = receipt with
+        {
+            OwnedGenerations = [.. receipt.OwnedGenerations, leaf]
+        };
         Replace(root, next, options);
         return next;
     }
@@ -44,7 +53,9 @@ internal static class NativeAnnRootReceipts
     {
         var pending = Path.Combine(root, NativeAnnProtocol.RootPending);
         if (global::KeyLoad.NativeSerialization.Measure(receipt) > options.MaximumManifestBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, NativeAnnProtocol.Bound); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, NativeAnnProtocol.Bound);
+        }
         NativeAnnReceiptFiles.Write(pending, receipt, options);
         File.Move(pending, Path.Combine(root, NativeAnnProtocol.RootReceipt), overwrite: true);
     }

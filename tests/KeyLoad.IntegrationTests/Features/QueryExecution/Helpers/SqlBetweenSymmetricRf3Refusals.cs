@@ -55,7 +55,9 @@ internal static class SqlBetweenSymmetricRf3Refusals
             "score BETWEEN ASYMMETRIC 2 1", "score NOT BETWEEN ASYMMETRIC 2 OR 1",
             "score BETWEEN ASYMMETRIC ASYMMETRIC 1 AND 2",
             "score BETWEEN SYMMETRIC ASYMMETRIC 1 AND 2" })
-        { await RejectAsync(fixture, state, clause, ErrorCode.Validation, token, healthy: true); }
+        {
+            await RejectAsync(fixture, state, clause, ErrorCode.Validation, token, healthy: true);
+        }
         await global::TUnit.Assertions.Assert.That(await SqlBetweenSymmetricRf3Image.ReadAsync(root, state, token)).IsEqualTo(before);
         await SqlBetweenSymmetricRf3Pages.HealthyAsync(fixture, state, token);
     }

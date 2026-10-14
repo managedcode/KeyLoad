@@ -16,7 +16,9 @@ internal sealed class RequestCqrsQueryReadCutFiles(string root, string sessionId
             RequestCqrsQueryReadCutInventory.Require(value);
             RequestCqrsQueryReadCutInventory.RequireArm(value, claim.Arm.Record);
             if (value.SessionId != sessionId)
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             RequestCqrsQueryReadCutInventory.RequireSource(value, snapshot.Markers);
             var marker = new RequestCqrsProbeMarkerRecord(RequestCqrsProbeProtocol.Version,
                 RequestCqrsProbeProtocol.MarkerKind, value.SessionId, value.ArmId, value.RequestId,
@@ -26,7 +28,9 @@ internal sealed class RequestCqrsQueryReadCutFiles(string root, string sessionId
             var name = RequestCqrsQueryReadCutInventory.Name(value.ArmId, value.RequestId);
             var bytes = JsonSerializer.SerializeToUtf8Bytes(value, json.QueryCutTypeInfo);
             if (bytes.Length > options.Value.MaximumRecordBytes)
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             var markerName = RequestCqrsProbeFiles.MarkerName(marker);
             RequestCqrsProbeBatchPublication.Write(root, [(name, bytes), (markerName, json.WriteMarker(marker))],
                 options, readSnapshot);
@@ -42,7 +46,9 @@ internal sealed class RequestCqrsQueryReadCutFiles(string root, string sessionId
         var value = json.Read(bytes, RequestCqrsQueryReadCutInventory.Fields, json.QueryCutTypeInfo);
         RequestCqrsQueryReadCutInventory.Require(value);
         if (value.SessionId != sessionId || RequestCqrsQueryReadCutInventory.Name(value.ArmId, value.RequestId) != name)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         records.RegisterImmutable(name, bytes);
         presentControls.Add(name);
         values.Add(value);

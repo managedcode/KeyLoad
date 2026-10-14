@@ -23,13 +23,20 @@ internal static class TenantCapacityPlacementRf3PendingPolicyOperation
         var baseline = await TenantCapacityPlacementRf3PendingPolicyCold.RequireAsync(
             wave, seed, state, state.HealthyPolicy, original, pending, null,
             pending.Plan.Moves.Single(), true, token);
-        var disabled = state.HealthyPolicy with { Revision = 3, Enabled = false };
+        var disabled = state.HealthyPolicy with
+        {
+            Revision = 3,
+            Enabled = false
+        };
         await TenantCapacityPlacementRf3PendingPolicyAuthority.ConfigureAsync(seed, state.Control, disabled, token);
         var applying = await TenantCapacityPlacementRf3PendingPolicyAssertions.RefuseAsync(
             wave, seed, original, expectedRevision: 2, token);
         var rows = await TenantCapacityPlacementRf3PendingPolicyCold.RequireAsync(
             wave, seed, state, disabled, original, applying, baseline.Persist, pending.Plan.Moves.Single(), true, token);
-        var repaired = state.HealthyPolicy with { Revision = 4 };
+        var repaired = state.HealthyPolicy with
+        {
+            Revision = 4
+        };
         await TenantCapacityPlacementRf3PendingPolicyAuthority.ConfigureAsync(seed, state.Control, repaired, token);
         var renewed = await TenantCapacityPlacementRf3PendingPolicyAssertions.RefuseAsync(
             wave, seed, original, expectedRevision: 3, token);

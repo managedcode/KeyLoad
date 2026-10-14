@@ -18,7 +18,11 @@ internal static class NativeDomFixtures
         var node = Null();
         for (var level = 0; level < depth; level++)
         {
-            node = new() { Kind = JsonValueKind.Array, Items = [node] };
+            node = new()
+            {
+                Kind = JsonValueKind.Array,
+                Items = [node]
+            };
         }
         return node;
     }

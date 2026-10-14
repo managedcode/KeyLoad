@@ -44,10 +44,14 @@ public sealed partial class DatabaseEngine
             || cancelled.CancellationReceipt.CommandId != cancelled.CancellationCommandId
             || cancelled.CancellationReceipt.AppliedPosition <= PartitionMoveProtocol.EmptyCount
             || !PhysicalOwnerEntryValidation.SameOwner(cancelled.CancellationReceipt.PhysicalOwner, pending.OriginalReceiverOwner))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.MissingAuthority);
+        }
         var cleanup = NativeSerialization.Deserialize<PartitionMoveCleanupBody>(pending.OriginalPhase.Body.Span);
         if (cancelled.FamilyOrdinal != cleanup.FamilyOrdinal || cancelled.BatchOrdinal != pending.PageOrdinal)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.MissingAuthority);
+        }
         return SaveMoveParentRetireCancellation(transaction, header, pending, witness, receipt);
     }
 
@@ -58,9 +62,15 @@ public sealed partial class DatabaseEngine
         var retainedGrant = pending.OriginalGrant
             ?? throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.MissingAuthority);
         var disposedGrant = retainedGrant with
-        { RetireCancellationDisposition = CreateRetireGrantCancellationDisposition(pending, witness) };
+        {
+            RetireCancellationDisposition = CreateRetireGrantCancellationDisposition(pending, witness)
+        };
         var grantBytes = checked(NativeSerialization.Measure(disposedGrant) - NativeSerialization.Measure(retainedGrant));
-        var observed = pending with { RetireCancellation = witness, ObservationCheckpointReceipt = receipt };
+        var observed = pending with
+        {
+            RetireCancellation = witness,
+            ObservationCheckpointReceipt = receipt
+        };
         var baseBytes = checked(header.RetainedMetadataBytes + grantBytes + NativeSerialization.Measure(observed)
             - NativeSerialization.Measure(pending) - NativeSerialization.Measure(header));
         var updated = header with
@@ -71,13 +81,17 @@ public sealed partial class DatabaseEngine
         };
         updated = MeasureMoveParentHeader(updated, baseBytes);
         if (updated.RetainedMetadataBytes > movementCheckpoints.MaxRetainedMetadataBytesPerMove)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
+        }
         var bytes = checked((long)PartitionMoveGrantStorage.Key(header.Partition, retainedGrant.GrantId).Length
             + NativeSerialization.Measure(disposedGrant) + PartitionMoveParentKeys.Phase(header.Partition, header.MoveId,
             pending.OriginalPhaseCommandId).Length + NativeSerialization.Measure(observed)
             + PartitionMoveParentKeys.Header(header.Partition, header.MoveId).Length + NativeSerialization.Measure(updated));
         if (bytes > Limits.MaxBatchBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
+        }
         DisposeRetireGrantByCancellation(transaction, pending, witness);
         PartitionMoveParentStorage.WritePhase(transaction, observed, Limits.MaxBatchBytes);
         PartitionMoveParentStorage.WriteHeader(transaction, updated, Limits.MaxBatchBytes);
@@ -112,9 +126,14 @@ public sealed partial class DatabaseEngine
             || attempt.CancellationCommandId == pending.OriginalPhaseCommandId || attempt.CancellationNonce == Guid.Empty
             || attempt.CancellationNonce == pending.OriginalRequestNonce || attempt.OriginalRequestBytes.IsEmpty
             || attempt.OriginalRequestBytes.Length > Limits.MaxBatchBytes)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.MissingAuthority);
+        }
         return SaveMoveParentPhaseObservation(transaction, header, pending,
-            pending with { RetireCancellationAttempt = attempt }, clearPending: false);
+            pending with
+            {
+                RetireCancellationAttempt = attempt
+            }, clearPending: false);
     }
 
     private void RequireMoveParentRetireCheckpointProof(IKeyValueView view, PartitionMoveCheckpointBody body,
@@ -144,7 +163,9 @@ public sealed partial class DatabaseEngine
                 && (pending.RetireCancellationAttempt is not null || body.RetireCancellationAttempt is null || body.RetireCancellation is not null)
             || body.Action == PartitionMoveCheckpointAction.ObserveRetireCancellation
                 && (pending.RetireCancellationAttempt is null || body.RetireCancellationAttempt is not null || body.RetireCancellation is null))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.MissingAuthority);
+        }
     }
 
 }

@@ -18,21 +18,29 @@ public sealed partial class DatabaseEngine
         if (requiresCursor || request.Cursor is not null)
         {
             if (request.Cursor is null)
-            { throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidEventVectorToken); }
+            {
+                throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidEventVectorToken);
+            }
             var cursor = Verify<EventVectorToken>(request.Cursor);
             RequireEventVectorToken(map, cursor, EventVectorMapTokenPurpose, map.SourceManifestDigest);
         }
         if (request.Action != EventFeedControlAction.Acknowledge)
-        { return; }
+        {
+            return;
+        }
         if (request.OfferDigest is null)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidEventVectorToken); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidEventVectorToken);
+        }
         var offer = ReadEventVectorOffer(map, inventory);
         var token = Verify<EventVectorToken>(request.OfferDigest);
         RequireEventVectorToken(map, token, EventVectorOfferTokenPurpose, offer.PageDigest);
         if (offer.MapRevision != map.Revision || offer.ExpiresAt != map.ExpiresAt
             || !offer.Entries.Span.SequenceEqual(phase.OriginalEncodedEntries.Span)
                 && phase.Action == EventVectorControlAction.PublishAcknowledgement)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidEventVectorToken); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidEventVectorToken);
+        }
     }
 
     private void RequireEventVectorToken(EventVectorMap map, EventVectorToken token,
@@ -44,9 +52,13 @@ public sealed partial class DatabaseEngine
             || token.PrincipalId != map.PrincipalId || token.ControlPolicyEpoch != map.ControlPolicyEpoch
             || token.ControlIncarnation != map.ControlIncarnation || token.ExpiresAt != map.ExpiresAt
             || !CryptographicOperations.FixedTimeEquals(token.ManifestDigest.Span, digest.Span))
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidEventVectorToken); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidEventVectorToken);
+        }
         if (token.ExpiresAt <= EvaluationClock.GetUtcNow())
-        { throw Errors.Fail(ErrorCode.CursorExpired, InvalidEventVectorToken); }
+        {
+            throw Errors.Fail(ErrorCode.CursorExpired, InvalidEventVectorToken);
+        }
     }
 
     private static EventVectorOffer ReadEventVectorOffer(EventVectorMap map, EventVectorOwnedInventory inventory)
@@ -55,7 +67,9 @@ public sealed partial class DatabaseEngine
         foreach (var row in inventory.PayloadRows)
         {
             if (row.Key.Span.SequenceEqual(key))
-            { return NativeSerialization.Deserialize<EventVectorOffer>(row.Value.Span); }
+            {
+                return NativeSerialization.Deserialize<EventVectorOffer>(row.Value.Span);
+            }
         }
         throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidEventVectorToken);
     }

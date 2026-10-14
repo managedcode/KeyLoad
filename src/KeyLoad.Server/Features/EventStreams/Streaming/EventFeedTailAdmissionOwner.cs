@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using ManagedCode.Communication.CQRS;
 
 namespace KeyLoad.Server.Features.EventStreams;
@@ -12,7 +12,10 @@ internal sealed class EventFeedTailAdmissionOwner : IAsyncDisposable
     private readonly EventFeedTailJsonGrant grant;
     private readonly List<Exception> failures = [];
     private readonly IAsyncEnumerator<CqrsStreamChunk<EventFeedTailProgress, EventFeedControlResult>>? reader;
-    internal KeyLoadException? Quota { get; private set; }
+    internal KeyLoadException? Quota
+    {
+        get; private set;
+    }
     internal CqrsStreamChunk<EventFeedTailProgress, EventFeedControlResult> Current => reader!.Current;
 
     internal EventFeedTailAdmissionOwner(
@@ -29,23 +32,31 @@ internal sealed class EventFeedTailAdmissionOwner : IAsyncDisposable
     internal async ValueTask<bool> MoveNextAsync()
     {
         if (failures.Count != NoFailures || reader is null)
-        { return false; }
+        {
+            return false;
+        }
         var available = false;
         await ServerFailureObserver.ObserveAsync(ReadOriginalAsync, failures).ConfigureAwait(false);
         if (!available || failures.Count != NoFailures)
-        { return false; }
+        {
+            return false;
+        }
         ServerFailureObserver.Observe(() => grant.Admit(reader.Current), failures);
         if (failures.Count != NoFailures)
         {
             Quota = failures[NoFailures] as KeyLoadException;
             if (Quota?.Code != ErrorCode.ResourceExhausted)
-            { Quota = null; }
+            {
+                Quota = null;
+            }
             return false;
         }
         return true;
 
         async Task ReadOriginalAsync()
-        { available = await reader.MoveNextAsync().ConfigureAwait(false); }
+        {
+            available = await reader.MoveNextAsync().ConfigureAwait(false);
+        }
     }
 
     public async ValueTask DisposeAsync()
@@ -56,7 +67,9 @@ internal sealed class EventFeedTailAdmissionOwner : IAsyncDisposable
             await ServerFailureObserver.ObserveAsync(() => reader.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         }
         try
-        { cancellation.Dispose(); }
+        {
+            cancellation.Dispose();
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
@@ -64,6 +77,8 @@ internal sealed class EventFeedTailAdmissionOwner : IAsyncDisposable
             throw new AggregateException(failures);
         }
         if (Quota is null || failures.Count != SingleRefusal)
-        { ServerFailureObserver.ThrowIfAny(failures); }
+        {
+            ServerFailureObserver.ThrowIfAny(failures);
+        }
     }
 }

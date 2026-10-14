@@ -58,7 +58,9 @@ internal sealed class McpResponseReplacementTests
     public async Task ReplacementWithoutMetadataMatchesNativeToolResult(bool nullResult)
     {
         var oldResult = nullResult ? null : new JsonObject
-        { [McpNativeBoundaryTestData.OldPayloadField] = McpNativeBoundaryTestData.OldPayload };
+        {
+            [McpNativeBoundaryTestData.OldPayloadField] = McpNativeBoundaryTestData.OldPayload
+        };
         var response = new JsonRpcResponse { Id = new RequestId(McpOutputTestData.NativeIdentifier), Result = oldResult };
         using var owner = McpNativeBoundaryTestData.Reply(failure: true);
         var tool = owner.ToolResult();

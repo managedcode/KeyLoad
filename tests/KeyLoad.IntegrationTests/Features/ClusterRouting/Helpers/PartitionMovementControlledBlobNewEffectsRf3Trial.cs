@@ -26,7 +26,11 @@ internal static class PartitionMovementControlledBlobNewEffectsRf3Trial
         var firstBytes = new byte[BlobLimits.RawPartBytes];
         Array.Fill(firstBytes, FirstByte);
         var first = new WriteBlobPartRequest(Guid.NewGuid(), blob, upload, FirstOrdinal, firstBytes, BlobIntegrity.PartHash(firstBytes));
-        var failedPart = first with { CommandId = Guid.NewGuid(), Ordinal = TailOrdinal };
+        var failedPart = first with
+        {
+            CommandId = Guid.NewGuid(),
+            Ordinal = TailOrdinal
+        };
         await RequireFailedPartAsync(seed, failedPart, begun.Value, token).ConfigureAwait(false);
         var firstReceipt = await McpCallerAssertions.SdkSuccessAsync(await seed.Source.WriteBlobPartAsync(first, token).ConfigureAwait(false));
         await RequireReceiptAsync(seed, terminal, first.CommandId, firstReceipt.Receipt);

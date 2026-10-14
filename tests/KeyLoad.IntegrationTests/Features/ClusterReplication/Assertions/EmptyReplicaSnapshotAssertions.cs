@@ -111,7 +111,9 @@ internal static class EmptyReplicaSnapshotAssertions
             await DocumentAsync(sdk, mcp, new(state.Partition, Collection, TailDocument), "{\"tail\":2}", NextRevision, committed.Token, token);
         }, failures);
         if (mcp is not null)
-        { await ServerFailureObserver.ObserveAsync(() => mcp.DisposeAsync().AsTask(), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => mcp.DisposeAsync().AsTask(), failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 

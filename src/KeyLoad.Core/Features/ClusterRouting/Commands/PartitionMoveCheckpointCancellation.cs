@@ -16,7 +16,10 @@ public sealed partial class DatabaseEngine
         var cancellation = new PartitionMoveParentCancellation(PartitionMoveProtocol.Version,
             original, phase, receipt, principal.PolicyEpoch);
         return SaveMoveParentPhaseObservation(transaction, header, pending,
-            pending with { Cancellation = cancellation }, clearPending: false);
+            pending with
+            {
+                Cancellation = cancellation
+            }, clearPending: false);
     }
 
     private PartitionMoveParentPhase RequireUnpreparedMoveParentCancellation(IKeyValueView transaction,
@@ -29,18 +32,26 @@ public sealed partial class DatabaseEngine
         RequireMoveParentCancellationOriginal(body, pending);
         if (pending.Cancellation is not null
             || PartitionMoveControlStorage.ReadHistory(transaction, header.Partition, header.MoveId, Limits.MaxBatchBytes) is not null)
-        { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict);
+        }
         var selected = CommandOutcomeKeyResolver.Select(transaction, principal.Id, original,
             new CommandOutcomePartitionScope(CommandOutcomeScopeKind.Partition, header.Partition));
         if (selected.Outcome is not null)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+        }
         var directory = RequireMoveDirectory(transaction);
         var placement = ResolveRegisteredPlacement(transaction, header.Partition, directory.ControlOwner);
         if (!NativeSerialization.Serialize(placement).AsSpan().SequenceEqual(NativeSerialization.Serialize(header.SourcePlacement)))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
         var active = transaction.ReadOwnedValue(PartitionMoveParentKeys.Active(header.Partition));
         if (active is null || NativeSerialization.Deserialize<Guid>(active) != header.MoveId)
-        { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority);
+        }
         return pending;
     }
 
@@ -67,12 +78,16 @@ public sealed partial class DatabaseEngine
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
         RequireMoveParentCancellationBinding(header, pending, cancellation);
         if (PartitionMoveControlStorage.ReadHistory(transaction, header.Partition, header.MoveId, Limits.MaxBatchBytes) is not null)
-        { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict);
+        }
         var actual = ReadMoveParentCancellationOutcome(transaction, principal, header, pending)
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
         if (body.ObservedOriginalResult is null
             || !NativeSerialization.Serialize(actual).AsSpan().SequenceEqual(NativeSerialization.Serialize(body.ObservedOriginalResult)))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.MissingAuthority);
+        }
     }
 
     private OperationResult? ReadMoveParentCancellationOutcome(IKeyValueView transaction,
@@ -80,25 +95,33 @@ public sealed partial class DatabaseEngine
     {
         var cancellation = pending.Cancellation;
         if (cancellation is null)
-        { return null; }
+        {
+            return null;
+        }
         RequireMoveParentCancellationBinding(header, pending, cancellation);
         RequireMoveParentOriginalIssuance(transaction, principal, pending);
         var stored = CommandOutcomeKeyResolver.Select(transaction, principal.Id, cancellation.CancellationReceipt.CommandId,
             new CommandOutcomePartitionScope(CommandOutcomeScopeKind.Partition, header.Partition)).Outcome;
         if (stored is null)
-        { return null; }
+        {
+            return null;
+        }
         var identity = MovementPhaseIdentityJson(cancellation.CancellationPhase);
         var fingerprint = CommandFingerprint(new(cancellation.CancellationReceipt.CommandId,
             OperationKind.PartitionMovementPhase, principal.Id, default, identity));
         if (stored.Incarnation != Store.Identity.Incarnation || stored.PolicyEpoch != cancellation.CancellationPolicyEpoch
             || stored.Fingerprint != fingerprint
             || stored.Result.Error is not null)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.MissingAuthority);
+        }
         var actual = stored.Result.Get<PartitionMovePhaseResult>();
         if (actual.MoveId != header.MoveId || actual.Stage != PartitionMovePeerStage.ControlCheckpoint
             || actual.Control is not null
             || !NativeSerialization.Serialize(actual.Journal).AsSpan().SequenceEqual(NativeSerialization.Serialize(cancellation.CancellationReceipt)))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.MissingAuthority);
+        }
         return stored.Result;
     }
 
@@ -114,7 +137,9 @@ public sealed partial class DatabaseEngine
             || body.NextOriginalAuthorization is not null || body.NextOriginalExpiresAt != default
             || body.NextOriginalRequestNonce != Guid.Empty || body.NextOriginalCaptureReleaseNonce != Guid.Empty
             || (body.Action == PartitionMoveCheckpointAction.CancelUnprepared) != (body.ObservedOriginalResult is null))
-        { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict);
+        }
         return original;
     }
 
@@ -126,6 +151,8 @@ public sealed partial class DatabaseEngine
             || body.OriginalExpiresAt != pending.OriginalExpiresAt || body.OriginalRequestNonce != pending.OriginalRequestNonce
             || body.OriginalCaptureReleaseNonce != pending.OriginalCaptureReleaseNonce
             || !NativeSerialization.Serialize(body.OriginalPhase).AsSpan().SequenceEqual(NativeSerialization.Serialize(pending.OriginalPhase)))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.MissingAuthority);
+        }
     }
 }

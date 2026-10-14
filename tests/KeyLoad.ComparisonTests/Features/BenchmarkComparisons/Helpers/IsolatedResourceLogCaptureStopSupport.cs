@@ -19,9 +19,13 @@ internal static class IsolatedResourceLogCaptureStopSupport
     private static async Task WrapFailureAsync(Func<Task> action)
     {
         try
-        { await action(); }
+        {
+            await action();
+        }
         catch (Exception failure)
-        { throw new AggregateException(failure); }
+        {
+            throw new AggregateException(failure);
+        }
     }
 
     private static void AddDistinctFailures(List<Exception> failures, IEnumerable<Exception> additions)

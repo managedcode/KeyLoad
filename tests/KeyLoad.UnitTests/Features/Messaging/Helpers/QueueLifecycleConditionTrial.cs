@@ -24,7 +24,10 @@ internal static class QueueLifecycleConditionTrial
             await QueueLifecycleConditionAssertions.Same(cold, damaged);
             await QueueLifecycleConditionAssertions.Corrupt(owner, cold, state, cancel);
             QueueLifecycleConditionOperations.Restore(cold, QueueLifecycleConditionOperations.Key(state, fault), original);
-            await QueueLifecycleConditionAssertions.Same(cold, originalCut with { Position = originalCut.Position + 2 });
+            await QueueLifecycleConditionAssertions.Same(cold, originalCut with
+            {
+                Position = originalCut.Position + 2
+            });
             var result = owner.Apply(cancel);
             result.Get<CommitReceipt>();
             state.Successes.Add((cancel, result));

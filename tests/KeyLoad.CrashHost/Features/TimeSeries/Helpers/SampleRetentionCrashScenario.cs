@@ -42,7 +42,10 @@ internal static class SampleRetentionCrashScenario
     internal const int FirstPageDeletes = 2;
     internal const int RepeatPageDeletes = 2;
 
-    internal static PartitionRef Partition { get; } = new(CrashFixtureValues.Tenant,
+    internal static PartitionRef Partition
+    {
+        get;
+    } = new(CrashFixtureValues.Tenant,
         CrashFixtureValues.Database, CrashFixtureValues.Orders, CrashFixtureValues.Partition);
 
     internal static DateTimeOffset Start { get; } = new(CorpusStartYear, CorpusStartMonth, CorpusStartDay, CorpusStartHour, CorpusStartMinute, CorpusStartSecond, TimeSpan.Zero);

@@ -24,9 +24,13 @@ internal static class TargetInboxRecoveryCut
         await Assert.That(source!.Metadata.State).IsEqualTo(MessageState.Leased);
         await Assert.That(source.PayloadJson).IsEqualTo(TargetInboxCrashProtocol.Payload);
         if (stage >= CommitStage.JournalFlushed)
-        { await Assert.That(committed).IsTrue(); }
+        {
+            await Assert.That(committed).IsTrue();
+        }
         if (!committed)
-        { return; }
+        {
+            return;
+        }
         await Assert.That(document!.Revision).IsEqualTo(TargetInboxCrashProtocol.Generation);
         await Assert.That(document.Json).IsEqualTo(TargetInboxCrashProtocol.Payload);
         await Assert.That(output!.Metadata.State).IsEqualTo(MessageState.Ready);

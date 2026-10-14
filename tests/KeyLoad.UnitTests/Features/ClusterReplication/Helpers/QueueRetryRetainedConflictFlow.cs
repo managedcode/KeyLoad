@@ -21,7 +21,13 @@ internal static class QueueRetryRetainedConflictFlow
             [new EnqueueMessage(Queue, Message, Payload)]);
         var producer = owner.Submit(Issue(owner, OperationKind.Batch, publish, publish.CommandId));
         await Assert.That(producer.Get<CommitReceipt>().CommandId).IsEqualTo(publish.CommandId);
-        var changedRequest = byteLimit ? request with { MaxBytes = 512 } : request with { MaxMessages = 2 };
+        var changedRequest = byteLimit ? request with
+        {
+            MaxBytes = 512
+        } : request with
+        {
+            MaxMessages = 2
+        };
         var changed = Issue(owner, OperationKind.Receive, changedRequest, request.RequestId);
         var before = ReplicaSubmissionOutcomeState.Read(owner.Database);
         var refusal = Assert.ThrowsExactly<KeyLoadException>(() =>
@@ -47,7 +53,10 @@ internal static class QueueRetryRetainedConflictFlow
 
     private static async Task HealthyAsync(ReplicaSubmissionOutcomeFlow owner, QueueLaneRef lane, ReceiveRequest first)
     {
-        var fresh = first with { RequestId = Guid.NewGuid() };
+        var fresh = first with
+        {
+            RequestId = Guid.NewGuid()
+        };
         var receive = Issue(owner, OperationKind.Receive, fresh, fresh.RequestId);
         var actual = owner.Submit(receive);
         var deliveries = actual.Get<ReceiveResult>();
@@ -63,7 +72,10 @@ internal static class QueueRetryRetainedConflictFlow
         var acknowledged = owner.Submit(acknowledge);
         await Assert.That(acknowledged.Get<CommitReceipt>().CommandId).IsEqualTo(ack.CommandId);
         await ReplicaSubmissionOutcomeFlow.RequireResultAsync(acknowledged, owner.Submit(acknowledge));
-        var healthy = first with { RequestId = Guid.NewGuid() };
+        var healthy = first with
+        {
+            RequestId = Guid.NewGuid()
+        };
         var final = owner.Submit(Issue(owner, OperationKind.Receive, healthy, healthy.RequestId)).Get<ReceiveResult>();
         await Assert.That(final.RequestId).IsEqualTo(healthy.RequestId);
         await Assert.That(final.Deliveries.IsEmpty).IsTrue();

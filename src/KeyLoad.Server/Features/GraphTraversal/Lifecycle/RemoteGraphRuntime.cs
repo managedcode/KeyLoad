@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.Server.Features.GraphTraversal;
@@ -35,7 +35,9 @@ internal sealed class RemoteGraphRuntime : IAsyncDisposable
         ArgumentNullException.ThrowIfNull(options);
         ArgumentNullException.ThrowIfNull(clock);
         if (options.Node.Value.PhysicalGroupTrust.Role == PhysicalGroupTrustRole.Disabled)
-        { return null; }
+        {
+            return null;
+        }
         _ = options.GrainRouting.Value;
         var original = new RemoteGraphRuntime(node, partition, clock, options.GrainRouting);
         try
@@ -47,11 +49,17 @@ internal sealed class RemoteGraphRuntime : IAsyncDisposable
         {
             var failures = new List<Exception> { primary };
             try
-            { await original.DisposeAsync().ConfigureAwait(false); }
+            {
+                await original.DisposeAsync().ConfigureAwait(false);
+            }
             catch (Exception cleanup) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
-            { failures.Add(cleanup); }
+            {
+                failures.Add(cleanup);
+            }
             catch (Exception cleanup) when (!NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
-            { failures.Add(cleanup); }
+            {
+                failures.Add(cleanup);
+            }
             ServerFailureObserver.ThrowIfAny(failures);
             throw;
         }
@@ -59,11 +67,17 @@ internal sealed class RemoteGraphRuntime : IAsyncDisposable
         {
             var failures = new List<Exception> { primary };
             try
-            { await original.DisposeAsync().ConfigureAwait(false); }
+            {
+                await original.DisposeAsync().ConfigureAwait(false);
+            }
             catch (Exception cleanup) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
-            { failures.Add(cleanup); }
+            {
+                failures.Add(cleanup);
+            }
             catch (Exception cleanup) when (!NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
-            { failures.Add(cleanup); }
+            {
+                failures.Add(cleanup);
+            }
             ServerFailureObserver.ThrowIfAny(failures);
             throw;
         }
@@ -73,7 +87,9 @@ internal sealed class RemoteGraphRuntime : IAsyncDisposable
     {
         ArgumentNullException.ThrowIfNull(original);
         if (Interlocked.CompareExchange(ref receiver, original, null) is not null)
-        { throw new InvalidOperationException(AttachedReceiver); }
+        {
+            throw new InvalidOperationException(AttachedReceiver);
+        }
         original.Attach(this);
     }
 

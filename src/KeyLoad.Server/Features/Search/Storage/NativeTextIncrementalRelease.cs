@@ -13,22 +13,30 @@ internal static class NativeTextIncrementalRelease
     {
         budget.Check();
         if (request.Mode != TextIndexMaintenanceMode.Release)
-        { throw NativeTextErrors.Mismatch(); }
+        {
+            throw NativeTextErrors.Mismatch();
+        }
         NativeTextSeedCollector.RequireReleased(database, principal,
             new(request.Consumer, request.IndexGeneration, request.Collection, request.Field,
                 request.NodeId, request.Placement), budget);
         var leaf = NativeTextIncrementalEnrollmentFiles.Find(root, request, budget, options);
         if (leaf is null)
-        { return; }
+        {
+            return;
+        }
         sessions.RetireGeneration(leaf);
         _ = NativeTextIncrementalRoot.CheckRoot(root, request.NodeId, options, budget);
         var path = Path.Combine(root, leaf);
         NativeTextFileIO.VerifyDirectory(path);
         budget.Check();
         if (resources is null)
-        { Directory.Delete(path, recursive: true); }
+        {
+            Directory.Delete(path, recursive: true);
+        }
         else
-        { resources.DeleteOwnedDirectory(path, () => Directory.Delete(path, recursive: true)); }
+        {
+            resources.DeleteOwnedDirectory(path, () => Directory.Delete(path, recursive: true));
+        }
         releaseGeneration?.Invoke(leaf);
         budget.Check();
         _ = NativeTextIncrementalRoot.CheckRoot(root, request.NodeId, options, budget);

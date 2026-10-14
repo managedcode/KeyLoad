@@ -26,7 +26,10 @@ internal sealed class NativePathMapFixture : IDisposable
         """;
     private const string SourceChange = "\n// Changed owned source after native compilation.\n";
 
-    internal IOptions<TestExecutionOptions> ExecutionOptions { get; } =
+    internal IOptions<TestExecutionOptions> ExecutionOptions
+    {
+        get;
+    } =
         ProductionSourceManifestProcess.CaptureExecutionOptions();
     internal string Root { get; } = CreateRootPath();
     internal string SourcePath => Path.Combine(Root, SourceFileName);

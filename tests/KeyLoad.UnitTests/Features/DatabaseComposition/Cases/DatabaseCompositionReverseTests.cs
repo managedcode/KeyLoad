@@ -35,7 +35,10 @@ internal sealed class DatabaseCompositionReverseTests
     [Test]
     public async Task AcComp003QueueQuotaFailureRollsBackAllDerivedMessages()
     {
-        using var db = NewDatabase(new() { MaxStoredMessages = SingleStoredMessage });
+        using var db = NewDatabase(new()
+        {
+            MaxStoredMessages = SingleStoredMessage
+        });
         SeedEdges(db);
 
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => db.Commit(

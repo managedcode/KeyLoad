@@ -42,7 +42,9 @@ internal sealed record NodeEpochRf3Profile(LocalProfile Value)
         RequirePrivateRegularFile(path);
         var info = new FileInfo(path);
         if (info.Length is < 1 or > NodeEpochRf3Protocol.MaximumProfileBytes)
-        { throw new InvalidDataException("The prior local profile exceeds its bounded size."); }
+        {
+            throw new InvalidDataException("The prior local profile exceeds its bounded size.");
+        }
         var bytes = await ReadBoundedAsync(path, cancellationToken).ConfigureAwait(false);
         var profile = new NodeEpochRf3Profile(ClusterProfileStore.DeserializeCurrent(bytes, IntegrationProfileOptions.Execution()));
         Validate(profile);
@@ -55,9 +57,13 @@ internal sealed record NodeEpochRf3Profile(LocalProfile Value)
         Validate(this);
         ArgumentNullException.ThrowIfNull(expectedBytes);
         if (expectedBytes.Length is < 1 or > NodeEpochRf3Protocol.MaximumProfileBytes)
-        { throw new InvalidDataException("The exact local profile copy exceeds its bounded size."); }
+        {
+            throw new InvalidDataException("The exact local profile copy exceeds its bounded size.");
+        }
         if (!Directory.Exists(destinationRoot))
-        { Directory.CreateDirectory(destinationRoot); }
+        {
+            Directory.CreateDirectory(destinationRoot);
+        }
         MakePrivateDirectory(destinationRoot);
         var path = Path.Combine(destinationRoot, NodeEpochRf3Protocol.ProfileFile);
         await using (var output = new FileStream(path, FileMode.CreateNew, FileAccess.Write, FileShare.None,
@@ -70,7 +76,9 @@ internal sealed record NodeEpochRf3Profile(LocalProfile Value)
         }
         var copied = await ReadBoundedAsync(path, cancellationToken).ConfigureAwait(false);
         if (!copied.AsSpan().SequenceEqual(expectedBytes))
-        { throw new IOException("The private profile copy changed its source bytes."); }
+        {
+            throw new IOException("The private profile copy changed its source bytes.");
+        }
         return Convert.ToHexStringLower(SHA256.HashData(copied));
     }
 
@@ -81,7 +89,9 @@ internal sealed record NodeEpochRf3Profile(LocalProfile Value)
     {
         await using var input = NodeEpochRf3OfflineFiles.OpenRead(path);
         if (input.Length is < 1 or > NodeEpochRf3Protocol.MaximumProfileBytes)
-        { throw new InvalidDataException("The local profile exceeds its bounded size."); }
+        {
+            throw new InvalidDataException("The local profile exceeds its bounded size.");
+        }
         var bytes = new byte[NodeEpochRf3Protocol.MaximumProfileBytes + 1];
         var total = 0;
         while (total < bytes.Length)
@@ -89,12 +99,16 @@ internal sealed record NodeEpochRf3Profile(LocalProfile Value)
             cancellationToken.ThrowIfCancellationRequested();
             var count = await input.ReadAsync(bytes.AsMemory(total), cancellationToken).ConfigureAwait(false);
             if (count == 0)
-            { break; }
+            {
+                break;
+            }
             total += count;
         }
         if (total is < 1 or > NodeEpochRf3Protocol.MaximumProfileBytes
             || input.Length != total || await input.ReadAsync(bytes.AsMemory(0, 1), cancellationToken).ConfigureAwait(false) != 0)
-        { throw new InvalidDataException("The local profile changed or exceeds its bounded size."); }
+        {
+            throw new InvalidDataException("The local profile changed or exceeds its bounded size.");
+        }
         return bytes[..total];
     }
 
@@ -107,19 +121,25 @@ internal sealed record NodeEpochRf3Profile(LocalProfile Value)
             var mode = File.GetUnixFileMode(path);
             if ((mode & (UnixFileMode.GroupRead | UnixFileMode.GroupWrite | UnixFileMode.GroupExecute
                     | UnixFileMode.OtherRead | UnixFileMode.OtherWrite | UnixFileMode.OtherExecute)) != 0)
-            { throw new InvalidDataException("The local profile permissions are not private."); }
+            {
+                throw new InvalidDataException("The local profile permissions are not private.");
+            }
         }
     }
 
     private static void MakePrivate(string path)
     {
         if (!OperatingSystem.IsWindows())
-        { File.SetUnixFileMode(path, UnixFileMode.UserRead | UnixFileMode.UserWrite); }
+        {
+            File.SetUnixFileMode(path, UnixFileMode.UserRead | UnixFileMode.UserWrite);
+        }
     }
 
     private static void MakePrivateDirectory(string path)
     {
         if (!OperatingSystem.IsWindows())
-        { File.SetUnixFileMode(path, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute); }
+        {
+            File.SetUnixFileMode(path, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+        }
     }
 }

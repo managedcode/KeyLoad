@@ -17,7 +17,16 @@ internal sealed class ChunkMultiblockRf3State(SampleChunkRf3Scenario scenario, M
     internal bool Healthy => Phase is ChunkMultiblockRf3Phase.HealthyPending or ChunkMultiblockRf3Phase.HealthyStable;
     internal long Purged => Phase == ChunkMultiblockRf3Phase.FirstExpired ? FirstPurge : Expired ? CompletePurge : NoPurge;
     internal bool HasMore => Phase == ChunkMultiblockRf3Phase.FirstExpired;
-    internal OutboxStatus? Outbox { get; set; }
-    internal bool MaintenanceOutboxAdvanced { get; set; }
-    internal CommandRequest? Conflict { get; set; }
+    internal OutboxStatus? Outbox
+    {
+        get; set;
+    }
+    internal bool MaintenanceOutboxAdvanced
+    {
+        get; set;
+    }
+    internal CommandRequest? Conflict
+    {
+        get; set;
+    }
 }

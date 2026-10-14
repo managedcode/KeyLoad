@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.Server.Features.GraphTraversal;
 
@@ -24,13 +24,17 @@ internal static class RemoteGraphGatewaySigning
         if (readKind == GrainReadKind.RemoteGraphIncomingParent)
         {
             if (commandKind is not null || commandId != Guid.Empty)
-            { throw Errors.Fail(ErrorCode.Validation, GrainRoutingProtocol.InvalidRequest); }
+            {
+                throw Errors.Fail(ErrorCode.Validation, GrainRoutingProtocol.InvalidRequest);
+            }
             _ = GrainNativePayload.ReadPublicInput<ReadRemoteIncomingGraphEdgesRequestV1>(payload);
             return codec.RemoteGraph.CreateRemoteGraphParentRead(requestId, principalId, payload, expiry);
         }
         if (readKind is not null || !HandlesCommand(commandKind) || commandId == Guid.Empty
             || OriginalCommandId(commandKind!.Value, payload) != commandId)
-        { throw Errors.Fail(ErrorCode.Validation, GrainRoutingProtocol.InvalidRequest); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, GrainRoutingProtocol.InvalidRequest);
+        }
         return codec.RemoteGraph.CreateRemoteGraphParentCommand(requestId, principalId, commandKind.Value,
             commandId, payload, expiry);
     }

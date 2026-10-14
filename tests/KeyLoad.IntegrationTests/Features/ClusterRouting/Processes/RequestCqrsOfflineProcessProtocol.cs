@@ -53,7 +53,9 @@ internal static class RequestCqrsOfflineProcessProtocol
         start.ArgumentList.Add(Eval);
         start.ArgumentList.Add(script);
         foreach (var argument in arguments)
-        { start.ArgumentList.Add(argument); }
+        {
+            start.ArgumentList.Add(argument);
+        }
         return start;
     }
 }

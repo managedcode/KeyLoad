@@ -19,7 +19,10 @@ internal static class PartitionMovementBlobWireEffects
     internal static async Task RequireAsync(PartitionMovementBlobWireCallers callers, PartitionMovementBlobWireSeed seed,
         CancellationToken token)
     {
-        var blob = seed.Metadata.Blob with { Id = SecondaryId };
+        var blob = seed.Metadata.Blob with
+        {
+            Id = SecondaryId
+        };
         var aborted = await UploadAsync(callers, seed.Partition, blob, false, token);
         var reclaim = new ReclaimBlobRequest(Guid.NewGuid(), blob, aborted, OnePart);
         var reclaimed = await McpCallerAssertions.SdkSuccessAsync(await callers.Source.ReclaimBlobAsync(reclaim, token));

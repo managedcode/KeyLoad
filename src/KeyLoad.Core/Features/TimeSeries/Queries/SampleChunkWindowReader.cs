@@ -12,7 +12,9 @@ internal static class SampleChunkWindowReader
     {
         SampleChunkWindowValidation.Identity(request.SeriesId, request.WindowId);
         if (request.Limit < SampleChunkLifecycleProtocol.First || request.Limit > database.Limits.MaxResults)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, SampleChunkLifecycleProtocol.Exhausted); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, SampleChunkLifecycleProtocol.Exhausted);
+        }
         var principal = database.Principal(view, principalId, database.EvaluationClock.GetUtcNow());
         database.Authorization.Require(principal, request.Partition, request.Set, Capability.SeriesRead);
         var resource = database.Resource(view, request.Partition, request.Set, ResourceKind.TimeSeries);
@@ -25,9 +27,13 @@ internal static class SampleChunkWindowReader
             options.Value.MaximumChunkCorrections);
         var watermark = SampleRollupRecords.Watermark(view, request.Partition, request.Set, request.SeriesId, charge.Charge);
         if (window.SourceSequence > watermark.Sequence)
-        { throw Errors.Fail(ErrorCode.Corruption, SampleChunkLifecycleProtocol.Corrupt); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, SampleChunkLifecycleProtocol.Corrupt);
+        }
         if (window.State == SampleChunkWindowState.Dropped)
-        { throw Errors.Fail(ErrorCode.HistoryUnavailable, SampleChunkLifecycleProtocol.Missing); }
+        {
+            throw Errors.Fail(ErrorCode.HistoryUnavailable, SampleChunkLifecycleProtocol.Missing);
+        }
         var records = Records(view, request, window, options, charge, budget, tag);
         var selected = ImmutableArray.CreateBuilder<SampleRecord>();
         foreach (var record in records)
@@ -36,9 +42,13 @@ internal static class SampleChunkWindowReader
             SampleChunkWindowValidation.Record(record, window, request.SeriesId);
             if (watermark.Floor is { } floor && record.Sample.Timestamp.UtcTicks < floor
                 || !SampleChunkTagPredicate.Matches(record.TagsJson, tag, request.TagValue))
-            { continue; }
+            {
+                continue;
+            }
             if (selected.Count >= request.Limit)
-            { throw Errors.Fail(ErrorCode.BudgetExceeded, SampleChunkLifecycleProtocol.Exhausted); }
+            {
+                throw Errors.Fail(ErrorCode.BudgetExceeded, SampleChunkLifecycleProtocol.Exhausted);
+            }
             var projected = record with
             {
                 TagsJson = database.Authorization.Project(principal,
@@ -60,13 +70,17 @@ internal static class SampleChunkWindowReader
         ReadExecutionBudget budget, string[]? tag)
     {
         if (window.State == SampleChunkWindowState.Open)
-        { return window.OpenRecords.OrderBy(record => record.Sample.Timestamp.UtcTicks).ThenBy(record => record.Sequence).ToArray(); }
+        {
+            return window.OpenRecords.OrderBy(record => record.Sample.Timestamp.UtcTicks).ThenBy(record => record.Sequence).ToArray();
+        }
         var work = SampleChunkWork.Observe(budget);
         var manifest = SampleChunkManifestReader.Read(view, request.Partition, request.Set, request.SeriesId,
             window, options.Value.MaximumChunkWindowRecords, charge, options, work);
         if (window.CorrectionSequences.IsEmpty && !manifest.TagJsonValues.Any(json =>
             SampleChunkTagPredicate.Matches(json, tag, request.TagValue)))
-        { return []; }
+        {
+            return [];
+        }
         return SampleChunkGenerationReader.Read(view, request.Partition, request.Set, request.SeriesId,
             window, manifest, options, charge, work);
     }

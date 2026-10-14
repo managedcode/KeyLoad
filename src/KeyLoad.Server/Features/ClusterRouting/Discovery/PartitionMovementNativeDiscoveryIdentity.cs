@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
+using KeyLoad.Clustering;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
-using KeyLoad.Orleans;
 using KeyLoad.Replication;
 using KeyLoad.Storage;
 using Microsoft.Extensions.Options;
@@ -15,7 +15,9 @@ internal static class PartitionMovementNativeDiscoveryIdentity
         if (reply is null || reply.Payload.IsEmpty || reply.Payload.Length > ReplicaTransportProtocol.MaximumDiscoveryBytes
             || string.IsNullOrEmpty(reply.Signature) || reply.Signature.Length != ReplicaTransportProtocol.HashHexCharacters
             || !reply.Signature.All(Uri.IsHexDigit))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof);
+        }
         return NativeSerialization.Deserialize<ReplicaSiloDiscovery>(reply.Payload.Span);
     }
 
@@ -33,7 +35,9 @@ internal static class PartitionMovementNativeDiscoveryIdentity
             using var mac = new ReplicaMessageMac(key, options.ClusterId);
             if (!CryptographicOperations.FixedTimeEquals(Convert.FromHexString(reply.Signature),
                 mac.Discovery(expected.Owner.Incarnation, discovery.VoterId, nonce, owned)))
-            { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof); }
+            {
+                throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof);
+            }
         }
         finally { CryptographicOperations.ZeroMemory(key); }
         observeStage?.Invoke(PartitionMovementNativeObservationStage.DiscoveryContract);
@@ -46,7 +50,9 @@ internal static class PartitionMovementNativeDiscoveryIdentity
             || actual.RuntimeJournalReaderContract != StoreReaderContract.RuntimeJournal
             || actual.SiloAddress != address.ToParsableString()
             || !PhysicalGroupAddress.CanonicalAddress(actual.SiloAddress, membership))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof);
+        }
     }
 
     internal static string Secret(NodeOptions options, ReplicaConfiguration configuration, RegisteredPhysicalOwnerV1 owner)
@@ -55,10 +61,14 @@ internal static class PartitionMovementNativeDiscoveryIdentity
         var destination = PhysicalOwnerConfiguredTuples.Destination(options, configuration);
         if (!PhysicalOwnerEntryValidation.SameOwner(owner.Owner, control.Owner)
             && !PhysicalOwnerEntryValidation.SameOwner(owner.Owner, destination.Owner))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof);
+        }
         var local = PhysicalOwnerConfiguredTuples.Local(options, configuration);
         if (PhysicalOwnerEntryValidation.SameOwner(owner.Owner, local.Owner))
-        { return options.PeerSecret; }
+        {
+            return options.PeerSecret;
+        }
         return options.PhysicalGroupTrust.ForeignPeerSecret
             ?? throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof);
     }

@@ -36,7 +36,9 @@ internal static class SqlOffsetFixture
         => new(SqlOffsetProtocol.Reader, database.Partition.TenantId, allow
             ? [new(database.Partition.DatabaseId, SqlOffsetProtocol.Left, Capability.Query | Capability.DocumentsRead),
                new(database.Partition.DatabaseId, SqlOffsetProtocol.Right, Capability.Query | Capability.DocumentsRead)] : [], [])
-        { PolicyEpoch = epoch };
+        {
+            PolicyEpoch = epoch
+        };
 
     internal static async Task PolicyAsync(TestDatabase database, long epoch, bool allow)
     {

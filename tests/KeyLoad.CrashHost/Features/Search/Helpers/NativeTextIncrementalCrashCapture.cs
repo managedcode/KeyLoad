@@ -1,5 +1,5 @@
 using System.Text.Json;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.CrashHost.Features.Search;
 
@@ -14,7 +14,9 @@ internal static class NativeTextIncrementalCrashCapture
             JsonSerializer.Serialize(original.Mutation, JsonDefaults.Options)));
         var replay = runtime.Database.ResolveOutcome(operation).Get<CommitReceipt>();
         if (!NativeSerialization.Serialize(replay).AsSpan().SequenceEqual(NativeSerialization.Serialize(original.Receipt)))
-        { throw new InvalidOperationException(NativeTextIncrementalCrashProtocol.Invalid); }
+        {
+            throw new InvalidOperationException(NativeTextIncrementalCrashProtocol.Invalid);
+        }
         var ukrainian = runtime.Database.GetDocument(CrashFixtureValues.Principal,
             new EntityRef(NativeTextIncrementalCrashProtocol.Partition, NativeTextIncrementalCrashProtocol.Collection,
                 NativeTextIncrementalCrashProtocol.Ukrainian))
@@ -44,7 +46,11 @@ internal static class NativeTextIncrementalCrashCapture
                 ExpectedRevision: NativeTextIncrementalCrashProtocol.ChangedRevision)]);
         var receipt = await runtime.CommitAsync<CommitReceipt>(OperationKind.Batch, command, command.CommandId,
             CancellationToken.None);
-        var request = original.Request with { CommandId = Guid.NewGuid(), Mode = TextIndexMaintenanceMode.Restore };
+        var request = original.Request with
+        {
+            CommandId = Guid.NewGuid(),
+            Mode = TextIndexMaintenanceMode.Restore
+        };
         var completed = await NativeTextIncrementalCrashReplay.FinishAsync(runtime, request, CancellationToken.None);
         await WriteAsync(root, NativeTextIncrementalCrashProtocol.HealthyFile, runtime,
             new(request, command, receipt), completed);

@@ -36,10 +36,22 @@ internal sealed class GraphCrossPartitionFingerprintTests
     public async Task FullTargetIdentityAndCanonicalAttributesChangeTheFingerprint()
     {
         var edge = Edge();
-        var otherTarget = edge.To with { Partition = edge.To.Partition with { PartitionKey = OtherTargetKey } };
-        var movedEdge = edge with { To = otherTarget };
+        var otherTarget = edge.To with
+        {
+            Partition = edge.To.Partition with
+            {
+                PartitionKey = OtherTargetKey
+            }
+        };
+        var movedEdge = edge with
+        {
+            To = otherTarget
+        };
         await Assert.That(Fingerprint(movedEdge, movedEdge)).IsNotEqualTo(Fingerprint(edge, edge));
-        await Assert.That(Fingerprint(edge, edge with { AttributesJson = ChangedAttributes }))
+        await Assert.That(Fingerprint(edge, edge with
+        {
+            AttributesJson = ChangedAttributes
+        }))
             .IsNotEqualTo(Fingerprint(edge, edge));
     }
 

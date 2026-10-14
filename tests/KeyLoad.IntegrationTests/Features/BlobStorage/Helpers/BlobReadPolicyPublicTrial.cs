@@ -20,10 +20,19 @@ internal static class BlobReadPolicyPublicTrial
                     identity.Secret, async reader =>
                     {
                         await BlobReadPolicyPublicAssertions.HealthyAsync(reader, published, token);
-                        await PersistAsync(administrator, identity.Principal with { Grants = [], PolicyEpoch = 2L }, token);
+                        await PersistAsync(administrator, identity.Principal with
+                        {
+                            Grants = [],
+                            PolicyEpoch = 2L
+                        }, token);
                         for (var repeat = 0; repeat < 2; repeat++)
-                        { await BlobReadPolicyPublicAssertions.DeniedAsync(reader, administrator, published, identity.Secret, token); }
-                        await PersistAsync(administrator, identity.Principal with { PolicyEpoch = 3L }, token);
+                        {
+                            await BlobReadPolicyPublicAssertions.DeniedAsync(reader, administrator, published, identity.Secret, token);
+                        }
+                        await PersistAsync(administrator, identity.Principal with
+                        {
+                            PolicyEpoch = 3L
+                        }, token);
                         await BlobReadPolicyPublicAssertions.HealthyAsync(reader, published, token);
                         await BlobSupersessionPublicAssertions.ReplayAsync(administrator, published, token);
                         await BlobReadPolicyPublicAssertions.HealthyAsync(reader, published, token);

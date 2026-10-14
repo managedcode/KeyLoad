@@ -40,14 +40,22 @@ internal static class GraphTraversalRowContinuation
         await GraphTraversalRowAssertions.ReadAsync(db.Database, db.Store, db.Partition, true, token);
         var principal = new PrincipalRecord(Reader, Tenant,
             [new(DatabaseScope, Collection, Capability.DocumentsRead), new(DatabaseScope, Graph, Capability.GraphRead)], [])
-        { OwnerId = Reader, RestrictRows = true, PolicyEpoch = RepairedEpoch };
+        {
+            OwnerId = Reader,
+            RestrictRows = true,
+            PolicyEpoch = RepairedEpoch
+        };
         await ConfigureAsync(db, principal with
         {
             PolicyEpoch = ReducedEpoch,
             Grants = [new(DatabaseScope, Collection, Capability.DocumentsRead)]
         });
         await GraphTraversalRowAssertions.RefusedAsync(db.Database, db.Store, db.Partition, ErrorCode.PermissionDenied, token);
-        await ConfigureAsync(db, principal with { PolicyEpoch = RevokedEpoch, Revoked = true });
+        await ConfigureAsync(db, principal with
+        {
+            PolicyEpoch = RevokedEpoch,
+            Revoked = true
+        });
         await GraphTraversalRowAssertions.RefusedAsync(db.Database, db.Store, db.Partition, ErrorCode.Unauthenticated, token);
         await ConfigureAsync(db, principal);
         await GraphTraversalRowAssertions.ReadAsync(db.Database, db.Store, db.Partition, true, token);

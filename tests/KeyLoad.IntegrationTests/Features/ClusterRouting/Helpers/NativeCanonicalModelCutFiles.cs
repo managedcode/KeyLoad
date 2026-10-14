@@ -8,7 +8,10 @@ internal sealed class NativeCanonicalModelCutFiles(string root)
 {
     private const string Prefix = "keyload-canonical-cut-extra-";
     private const int ExtraInventoryEntry = 1;
-    internal static IReadOnlyList<string> Nodes { get; } = Array.AsReadOnly(new[]
+    internal static IReadOnlyList<string> Nodes
+    {
+        get;
+    } = Array.AsReadOnly(new[]
         { TwoRf3MembershipProtocol.Node4, TwoRf3MembershipProtocol.Node5, TwoRf3MembershipProtocol.Node6 });
     internal string Root { get; } = root;
     internal Dictionary<string, string> Directories { get; } = new(StringComparer.Ordinal);
@@ -24,7 +27,9 @@ internal sealed class NativeCanonicalModelCutFiles(string root)
             || RequestCqrsProbeFileValidation.IsWithin(data, path)
             || RequestCqrsProbeFileValidation.IsWithin(path, original.Root)
             || RequestCqrsProbeFileValidation.IsWithin(original.Root, path))
-        { throw new IOException(RequestCqrsProbeFixtureProtocol.OwnershipConflict); }
+        {
+            throw new IOException(RequestCqrsProbeFixtureProtocol.OwnershipConflict);
+        }
         CreatePrivateDirectory(path);
         var files = new NativeCanonicalModelCutFiles(path);
         var failures = new List<Exception>();
@@ -47,9 +52,13 @@ internal sealed class NativeCanonicalModelCutFiles(string root)
             var bytes = RequestCqrsProbeJsonWriter.Owner(original.SessionId, voter);
             var owner = original.Json.ReadOwner(bytes);
             if (owner.SessionId != original.SessionId || owner.Voter != voter)
-            { throw new IOException(RequestCqrsProbeFixtureProtocol.OwnerChanged); }
+            {
+                throw new IOException(RequestCqrsProbeFixtureProtocol.OwnerChanged);
+            }
             if (Directory.Exists(directory) || File.Exists(directory))
-            { throw new IOException(RequestCqrsProbeFixtureProtocol.OwnershipConflict); }
+            {
+                throw new IOException(RequestCqrsProbeFixtureProtocol.OwnershipConflict);
+            }
             CreatePrivateDirectory(directory);
             Directories.Add(node, directory);
             Owners.Add(node, bytes);
@@ -62,26 +71,38 @@ internal sealed class NativeCanonicalModelCutFiles(string root)
     {
         RequestCqrsProbeFileValidation.ValidateDirectory(Root);
         if (requireAll && Directories.Count != TwoRf3MembershipProtocol.MembersPerGroup)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         var entries = Directory.EnumerateFileSystemEntries(Root)
             .Take(TwoRf3MembershipProtocol.MembersPerGroup + ExtraInventoryEntry).ToArray();
         if (entries.Length != Directories.Count
             || entries.Any(path => !Directories.Values.Contains(path, StringComparer.Ordinal)))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         foreach (var (node, directory) in Directories)
         {
             if (!Nodes.Contains(node, StringComparer.Ordinal) || directory != Path.Combine(Root, node))
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             var expected = arms.ToDictionary(pair => RequestCqrsProbeFileNames.Arm(pair.Key), pair => pair.Value,
                 StringComparer.Ordinal);
             var ownerName = RequestCqrsProbeFixtureProtocol.OwnerFileName;
             if (requireAll || File.Exists(Path.Combine(directory, ownerName)))
-            { expected.Add(ownerName, Owners[node]); }
+            {
+                expected.Add(ownerName, Owners[node]);
+            }
             var actual = RequestCqrsProbeFileValidation.ValidateContents(directory);
             if (actual.Length != expected.Count || actual.Any(path => !expected.ContainsKey(Path.GetFileName(path))))
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             foreach (var (name, bytes) in expected)
-            { RequestCqrsProbeFileStore.VerifyExactFile(directory, name, bytes); }
+            {
+                RequestCqrsProbeFileStore.VerifyExactFile(directory, name, bytes);
+            }
         }
     }
 
@@ -91,10 +112,14 @@ internal sealed class NativeCanonicalModelCutFiles(string root)
         foreach (var (node, directory) in Directories)
         {
             foreach (var (arm, bytes) in arms)
-            { RequestCqrsProbeFileStore.DeleteExactFile(directory, RequestCqrsProbeFileNames.Arm(arm), bytes); }
+            {
+                RequestCqrsProbeFileStore.DeleteExactFile(directory, RequestCqrsProbeFileNames.Arm(arm), bytes);
+            }
             var owner = RequestCqrsProbeFixtureProtocol.OwnerFileName;
             if (File.Exists(Path.Combine(directory, owner)))
-            { RequestCqrsProbeFileStore.DeleteExactFile(directory, owner, Owners[node]); }
+            {
+                RequestCqrsProbeFileStore.DeleteExactFile(directory, owner, Owners[node]);
+            }
             Directory.Delete(directory, recursive: false);
         }
         Directory.Delete(Root, recursive: false);
@@ -103,7 +128,9 @@ internal sealed class NativeCanonicalModelCutFiles(string root)
     internal static void RequireJoinedOwners(TwoRf3MembershipWave wave)
     {
         if (!wave.applicationDisposed || !wave.nodeLocksReleased)
-        { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.UnsettledGates); }
+        {
+            throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.UnsettledGates);
+        }
         foreach (var node in TwoRf3MembershipProtocol.Nodes)
         {
             var directory = Path.Combine(wave.OwnedDataRoot, node);
@@ -116,9 +143,13 @@ internal sealed class NativeCanonicalModelCutFiles(string root)
     private static void CreatePrivateDirectory(string path)
     {
         if (!OperatingSystem.IsWindows())
-        { Directory.CreateDirectory(path, RequestCqrsProbeFileValidation.PrivateDirectoryMode); }
+        {
+            Directory.CreateDirectory(path, RequestCqrsProbeFileValidation.PrivateDirectoryMode);
+        }
         else
-        { RequestCqrsProbeFileValidation.EnsureUnixPermissions(); }
+        {
+            RequestCqrsProbeFileValidation.EnsureUnixPermissions();
+        }
     }
 
     private static IOException Invalid() => new(RequestCqrsProbeFixtureProtocol.InvalidControlEntry);

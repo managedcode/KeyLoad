@@ -1,5 +1,5 @@
 using System.Security.Cryptography;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server.Features.ClusterRouting;
 using Microsoft.Extensions.Options;
 
@@ -10,26 +10,38 @@ internal sealed class NativeSignedPurposeObserver(NativeDiscoveryOmissionFiles f
     : IGrainRequestPurposeObserver
 {
     private readonly NativeSignedPurposeJson json = new(options);
-    internal void RequireEnrollment() { _ = Arm(); files.RequirePurposeReceiver(localVoter); }
+    internal void RequireEnrollment()
+    {
+        _ = Arm();
+        files.RequirePurposeReceiver(localVoter);
+    }
     public string? BeforeSign(GrainRequestEnvelope original)
     {
         var context = accessor.HttpContext;
         if (context is null || original.CommandKind != OperationKind.Batch
             || context.Items[ServerProtocol.PrincipalItem] is not PrincipalRecord principal
             || principal.Id != original.PrincipalId || context.Features.Get<ServerConnectionFeature>() is not { } connection)
-        { return null; }
+        {
+            return null;
+        }
         return files.Locked(() => BeforeSignLocked(original, context, connection));
     }
     private string? BeforeSignLocked(GrainRequestEnvelope original, HttpContext context, ServerConnectionFeature connection)
     {
         var arm = Arm();
         if (arm.SourceVoter != localVoter || arm.CommandId != original.CommandId || !Route(context.Request.Path, arm.Route))
-        { return null; }
+        {
+            return null;
+        }
         context.RequestAborted.ThrowIfCancellationRequested();
         if (GrainNativePayload.Read<CommandRequest>(original.Payload).CommandId != original.CommandId)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         if (files.PurposeRecord(NativeSignedPurposeProtocol.IssuedFile) is not null)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         var issued = new NativeSignedPurposeWitness(arm.Version, arm.SessionId, arm.ArmId, arm.SourceVoter,
             arm.Route, connection.Id, original.RequestId, original.CommandId, original.Incarnation,
             original.PrincipalId!, original.ExpiresAt, original.Purpose, Digest(original), NativeSignedPurposeProtocol.Issued, null);
@@ -51,12 +63,23 @@ internal sealed class NativeSignedPurposeObserver(NativeDiscoveryOmissionFiles f
                 || actual.Incarnation != issued.Incarnation || actual.PrincipalId != issued.PrincipalId
                 || actual.ExpiresAt != issued.ExpiresAt || actual.ReadKind is not null || actual.CommandKind != OperationKind.Batch
                 || Digest(actual) != issued.PayloadDigest || files.PurposeRecord(NativeSignedPurposeProtocol.RejectedFile) is not null)
-            { throw Invalid(); }
-            GrainRequestScope.Validate(actual with { Purpose = issued.OriginalPurpose }, cut.Incarnation, cut.EvaluatedAt, cut.MaximumFuture);
+            {
+                throw Invalid();
+            }
+            GrainRequestScope.Validate(actual with
+            {
+                Purpose = issued.OriginalPurpose
+            }, cut.Incarnation, cut.EvaluatedAt, cut.MaximumFuture);
             if (GrainNativePayload.Read<CommandRequest>(actual.Payload).CommandId != issued.CommandId)
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             files.WritePurpose(NativeSignedPurposeProtocol.RejectedFile,
-                json.Write(issued with { Stage = NativeSignedPurposeProtocol.Rejected, ReceiverVoter = localVoter }));
+                json.Write(issued with
+                {
+                    Stage = NativeSignedPurposeProtocol.Rejected,
+                    ReceiverVoter = localVoter
+                }));
             return true;
         });
     }

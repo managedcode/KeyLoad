@@ -44,7 +44,11 @@ internal static class RemoteTransferLateTargetBatchColdAssertions
         await Assert.That(counters.StoredBytes).IsEqualTo(bodyBytes);
         await Assert.That(fixture.TargetCapacity(fixture.DestinationQueue).StoredRecords).IsEqualTo(InitialVersion);
         await RemoteTransferCoordinationColdAssertions.EqualAsync(fixture.Database.InspectQueueTransfer(RemoteTransferDatabase.RootPrincipal,
-            fixture.SourceQueue, state.Transfer.TransferId), state.Pending with { State = QueueTransferState.Delivered, ReceiptToken = receipt.ReceiptToken });
+            fixture.SourceQueue, state.Transfer.TransferId), state.Pending with
+            {
+                State = QueueTransferState.Delivered,
+                ReceiptToken = receipt.ReceiptToken
+            });
         await RemoteTransferCoordinationColdAssertions.EqualAsync(fixture.Database.InspectQueueTransferReceipt(RemoteTransferDatabase.RootPrincipal,
             fixture.DestinationQueue, fixture.SourceQueue, state.Transfer.TransferId), receipt);
         await MessageAsync(fixture, RemoteTransferLateTargetBatchColdTrial.Occupied, RemoteTransferLateTargetBatchColdTrial.OriginalPayload, FirstSequence);

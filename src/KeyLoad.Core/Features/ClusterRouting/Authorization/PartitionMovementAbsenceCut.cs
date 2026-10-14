@@ -10,12 +10,16 @@ public sealed partial class DatabaseEngine
     private bool HasMovementAbsence(MovementAuthorityCut cut)
     {
         lock (movementAbsenceGate)
-        { return movementAbsenceCut == cut; }
+        {
+            return movementAbsenceCut == cut;
+        }
     }
 
     private void PublishMovementAbsence(MovementAuthorityCut cut)
     {
         lock (movementAbsenceGate)
-        { movementAbsenceCut = cut; }
+        {
+            movementAbsenceCut = cut;
+        }
     }
 }

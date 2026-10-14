@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 using KeyLoad.UnitTests.Features.ClusterRouting;
 
 namespace KeyLoad.UnitTests;
@@ -30,7 +30,11 @@ internal sealed class GrainRoutingAuthorizationTests
         var principal = GrainRequestAuthority.Authenticate(fixture.Database, NativeSerialization.Serialize(Credential), TimeProvider.System);
         await Assert.That(principal.Id).IsEqualTo(Root);
         await Assert.That(principal.ClusterAdministrator).IsTrue();
-        fixture.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(principal with { Revoked = true, PolicyEpoch = principal.PolicyEpoch + PolicyEpochIncrement }));
+        fixture.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(principal with
+        {
+            Revoked = true,
+            PolicyEpoch = principal.PolicyEpoch + PolicyEpochIncrement
+        }));
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => GrainRequestAuthority.Authenticate(fixture.Database,
             NativeSerialization.Serialize(Credential), TimeProvider.System)).Code).IsEqualTo(ErrorCode.Unauthenticated);
     }
@@ -66,7 +70,10 @@ internal sealed class GrainRoutingAuthorizationTests
         var replay = await SignedGrainRequestTestContext.ExecuteAsync(executor, second, key, CancellationToken.None);
         await Assert.That(initial.Payload.Span.SequenceEqual(replay.Payload.Span)).IsTrue();
         await Assert.That(fixture.Database.GetDocument(Root, new(fixture.Partition, Collection, DocumentId))!.Revision).IsEqualTo(FirstRevision);
-        var wrongKey = (fixture.Partition with { TransactionDomainId = OtherDomain }).AtomicPartitionId;
+        var wrongKey = (fixture.Partition with
+        {
+            TransactionDomainId = OtherDomain
+        }).AtomicPartitionId;
         var failure = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => SignedGrainRequestTestContext.ExecuteAsync(executor, second, wrongKey, CancellationToken.None))
             ?? throw new InvalidOperationException();
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.TokenInvalidated);

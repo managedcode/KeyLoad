@@ -11,7 +11,9 @@ internal static class PartitionMovementParentPrepare
     {
         if (request.Mode != PartitionMoveMode.Transfer || state.Header is not null || state.Control is not null
             || state.Placement.Revision != request.ExpectedPlacementRevision)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+        }
         var destination = state.Directory.Owners.SingleOrDefault(owner =>
             owner.Owner.PhysicalShardId == request.DestinationPhysicalShardId)?.Owner
             ?? throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);

@@ -22,12 +22,16 @@ public sealed partial class DatabaseEngine
             var row = EventVectorCoverageRows.Optional(bounded,
                 AtomicPartitionPlacementSerialization.RowKey(partition), inventory);
             if (row is not null)
-            { placements.Add(row); }
+            {
+                placements.Add(row);
+            }
             if (placement.PhysicalShardId != sourceOwner.PhysicalShardId
                 || placement.Incarnation != sourceOwner.Incarnation
                 || placement.PlacementEpoch != sourceOwner.PlacementEpoch
                 || !placement.VoterIds.SequenceEqual(sourceOwner.VoterIds, StringComparer.Ordinal))
-            { continue; }
+            {
+                continue;
+            }
             EventVectorCoveragePartition(bounded, principal, request, partition, sourceOwner,
                 work, appliedCut, entries, heads, cancellationToken);
         }

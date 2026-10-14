@@ -20,7 +20,9 @@ internal static class OpenLoopResourceSelectionBinding
         if (selection.OpenLoopRate is not { } rate)
         {
             if (proofText is not null)
-            { throw new InvalidOperationException(InvalidSelection); }
+            {
+                throw new InvalidOperationException(InvalidSelection);
+            }
             return null;
         }
         if (proofText is not null && proofText != SelectedProof

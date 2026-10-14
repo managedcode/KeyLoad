@@ -113,7 +113,12 @@ internal sealed class EventProjectionRf3Tests(ClusterFixture fixture)
         CancellationToken cancellationToken)
     {
         var changed = scenario.Projection with
-        { Target = scenario.Projection.Target with { Values = [0, 1] } };
+        {
+            Target = scenario.Projection.Target with
+            {
+                Values = [0, 1]
+            }
+        };
         var command = scenario.ApplyCommand(Guid.NewGuid(), changed);
         await EventProjectionRf3Assertions.AssertSdkFailureAsync(
             await clients.Callers[1].CommitAsync(command, cancellationToken), ErrorCode.Conflict);

@@ -90,7 +90,10 @@ internal sealed class SiteUnsupportedProducerSelectionTests
         var response = await SiteIsolatedGitHubNodeProcess.RunAsync(site.Repository, new
         {
             operation = "latest-selection",
-            arguments = new { input = scope.Capture },
+            arguments = new
+            {
+                input = scope.Capture
+            },
         }, token);
         await Assert.That(response.GetProperty(SiteIsolatedGitHubFields.Ok).GetBoolean()).IsTrue();
         var result = response.GetProperty(SiteIsolatedGitHubFields.Result);

@@ -38,6 +38,8 @@ internal static class ControlledPartitionMovementProcessSetup
     internal static void Require(OperationResult result)
     {
         if (result.Error is not null)
-        { throw new InvalidOperationException(Failed); }
+        {
+            throw new InvalidOperationException(Failed);
+        }
     }
 }

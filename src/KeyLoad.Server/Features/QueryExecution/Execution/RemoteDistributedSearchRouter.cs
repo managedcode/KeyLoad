@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Query;
 using KeyLoad.Query.Features.QueryExecution;
 using KeyLoad.Server.Features.DocumentStorage;
@@ -23,7 +23,9 @@ internal sealed class RemoteDistributedSearchRouter(OrleansNode node, PartitionH
             {
                 var remaining = envelope.ExpiresAt - clock.GetUtcNow();
                 if (remaining <= TimeSpan.Zero)
-                { throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteDocumentProtocol.InvalidProof); }
+                {
+                    throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteDocumentProtocol.InvalidProof);
+                }
                 using var expiry = new CancellationTokenSource(remaining, clock);
                 using var original = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken,
                     operation.ShutdownToken, expiry.Token);

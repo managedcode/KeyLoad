@@ -30,7 +30,9 @@ internal static class DeclarativeReverseQuotaFlow
             ?? throw new InvalidOperationException(MissingSeed);
         var source = await DeclarativeCompositionBudgetFlow.RunAsync(callers.Sdk, callers.Mcp, scenario, link, token);
         var expected = new ResourceDefinition(Target, ResourceKind.WorkQueue, scenario.Partition.TransactionDomainId)
-        { QueuePolicy = new() { MaxStoredMessages = FixedQuota } };
+        {
+            QueuePolicy = new() { MaxStoredMessages = FixedQuota }
+        };
         var configureId = Guid.NewGuid();
         var actual = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.ConfigureResourceAsync(configureId,
             new(scenario.Partition.TenantId, scenario.Partition.DatabaseId, expected), token));
@@ -52,10 +54,17 @@ internal static class DeclarativeReverseQuotaFlow
         await OriginalAsync(callers, state, token);
         state = await DeclarativeReverseQuotaTrial.ReleaseAsync(callers, state, token);
         await OriginalAsync(callers, state, token);
-        var healthy = state.Refused with { CommandId = Guid.NewGuid() };
+        var healthy = state.Refused with
+        {
+            CommandId = Guid.NewGuid()
+        };
         var sql = DeclarativeCompositionSql.Reverse(healthy, (GraphToQueueMutation)healthy.Mutations[0]);
         var receipt = await SqlRf3Protocol.McpAsync<CommitReceipt>(callers.Mcp, sql, token);
-        state = state with { Healthy = healthy, Receipt = receipt };
+        state = state with
+        {
+            Healthy = healthy,
+            Receipt = receipt
+        };
         await OriginalAsync(callers, state, token);
         return state;
     }
@@ -67,7 +76,9 @@ internal static class DeclarativeReverseQuotaFlow
         await DeclarativeReverseQuotaAssertions.ModelsAsync(callers, state, token);
         await DeclarativeReverseQuotaTrial.HistoryAsync(callers, state, token);
         if (state.Healthy is not { } healthy || state.Receipt is not { } receipt)
-        { return; }
+        {
+            return;
+        }
         await DeclarativeReverseQuotaAssertions.ReceiptAsync(healthy, receipt);
         var sql = DeclarativeCompositionSql.Reverse(healthy, (GraphToQueueMutation)healthy.Mutations[0]);
         await SqlRf3Protocol.EqualAsync(receipt, await SqlRf3Protocol.SdkAsync<CommitReceipt>(callers.Sdk, sql, token));

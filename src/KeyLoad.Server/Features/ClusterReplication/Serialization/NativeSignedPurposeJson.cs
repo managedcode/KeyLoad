@@ -39,14 +39,16 @@ internal sealed class NativeSignedPurposeJson
         if (value.ConnectionId == Guid.Empty || value.RequestId == Guid.Empty || value.Incarnation == Guid.Empty
             || string.IsNullOrWhiteSpace(value.PrincipalId)
             || Encoding.UTF8.GetByteCount(value.PrincipalId) > options.Value.MaximumPrincipalBytes
-            || value.OriginalPurpose != KeyLoad.Orleans.GrainNativeContracts.RequestPurpose
+            || value.OriginalPurpose != KeyLoad.Clustering.GrainNativeContracts.RequestPurpose
             || value.PayloadDigest.Length != NativeSignedPurposeProtocol.DigestHexCharacters
             || !value.PayloadDigest.All(Uri.IsHexDigit)
             || value.Stage is not (NativeSignedPurposeProtocol.Issued or NativeSignedPurposeProtocol.Rejected)
             || (value.Stage == NativeSignedPurposeProtocol.Issued ? value.ReceiverVoter is not null
                 : string.IsNullOrWhiteSpace(value.ReceiverVoter)
                     || Encoding.UTF8.GetByteCount(value.ReceiverVoter) > options.Value.MaximumPrincipalBytes))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         return value;
     }
     internal byte[] Write(NativeSignedPurposeWitness value)
@@ -62,7 +64,9 @@ internal sealed class NativeSignedPurposeJson
             || value.Route is not (NativeDiscoveryOmissionProtocol.SdkRoute or NativeDiscoveryOmissionProtocol.McpRoute)
             || string.IsNullOrWhiteSpace(value.SourceVoter)
             || Encoding.UTF8.GetByteCount(value.SourceVoter) > options.Value.MaximumPrincipalBytes)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
     }
     private static InvalidOperationException Invalid() => new(NativeSignedPurposeProtocol.Invalid);
 }

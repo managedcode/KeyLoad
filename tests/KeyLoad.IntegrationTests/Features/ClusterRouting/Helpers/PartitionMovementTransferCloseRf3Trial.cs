@@ -19,9 +19,13 @@ internal static class PartitionMovementTransferCloseRf3Trial
             await ExecuteAsync(wave, seed, caller.Token).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
         if (seed is { } clients)
-        { await ServerFailureObserver.ObserveAsync(() => clients.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => clients.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         if (wave is { } resources)
-        { await ServerFailureObserver.ObserveAsync(() => resources.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => resources.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 

@@ -77,7 +77,11 @@ internal static class ClusterRestoreMixedRetentionRf3Literal
                 request, () => callers.Sdk.ReadEventSourceAsync(request, token), token);
             await Assert.That(actual.Cursor).IsNotEmpty();
             await Assert.That(actual.CutPosition).IsGreaterThanOrEqualTo(expected.CutPosition);
-            await SqlRf3Protocol.EqualAsync(expected with { Cursor = actual.Cursor, CutPosition = actual.CutPosition }, actual);
+            await SqlRf3Protocol.EqualAsync(expected with
+            {
+                Cursor = actual.Cursor,
+                CutPosition = actual.CutPosition
+            }, actual);
         }
     }
 

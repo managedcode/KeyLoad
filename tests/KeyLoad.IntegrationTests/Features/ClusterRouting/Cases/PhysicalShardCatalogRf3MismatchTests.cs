@@ -24,11 +24,15 @@ internal sealed class PhysicalShardCatalogRf3MismatchTests
         await ServerFailureObserver.ObserveAsync(() => RunWavesAsync(root, lifecycle, deadline.Token), failures)
             .ConfigureAwait(false);
         if (failures.Count == 0)
-        { ServerFailureObserver.Observe(() => Directory.Delete(root, recursive: true), failures); }
+        {
+            ServerFailureObserver.Observe(() => Directory.Delete(root, recursive: true), failures);
+        }
         if (failures.Count > 0)
         {
             foreach (var failure in failures)
-            { failure.Data[RetainedRootKey] = root; }
+            {
+                failure.Data[RetainedRootKey] = root;
+            }
             ServerFailureObserver.ThrowIfAny(failures);
         }
     }
@@ -100,7 +104,9 @@ internal sealed class PhysicalShardCatalogRf3MismatchTests
     {
         Guid candidate;
         do
-        { candidate = Guid.NewGuid(); }
+        {
+            candidate = Guid.NewGuid();
+        }
         while (candidate == Guid.Empty || candidate == configured);
         return candidate;
     }
@@ -114,7 +120,9 @@ internal sealed class PhysicalShardCatalogRf3MismatchTests
             "artifacts", "qualification", "physical-shard-catalog-rf3-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(root);
         if (!OperatingSystem.IsWindows())
-        { File.SetUnixFileMode(root, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute); }
+        {
+            File.SetUnixFileMode(root, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+        }
         return root;
     }
 }

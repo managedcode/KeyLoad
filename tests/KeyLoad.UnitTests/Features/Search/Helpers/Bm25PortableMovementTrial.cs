@@ -11,7 +11,7 @@ internal sealed class Bm25PortableMovementTrial
     private readonly Bm25PortableMovementBorrow borrow = new();
     private readonly List<Bm25PortableMovementPurposeEvidence> purposeEvidence = [];
     private ControlledPartitionMovementNativeHosts? owners;
-    private Task<KeyLoad.Orleans.GrainOperationReply>? original;
+    private Task<KeyLoad.Clustering.GrainOperationReply>? original;
 
     internal static async Task RunAsync(CancellationToken token)
     {
@@ -20,7 +20,9 @@ internal sealed class Bm25PortableMovementTrial
         await ServerFailureObserver.ObserveAsync(() => trial.ExecuteAsync(token), failures);
         await trial.CloseAsync(failures);
         if (failures.Count != 0)
-        { ServerFailureObserver.Observe(() => trial.WriteEvidence(failures[0]), failures); }
+        {
+            ServerFailureObserver.Observe(() => trial.WriteEvidence(failures[0]), failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
@@ -68,19 +70,27 @@ internal sealed class Bm25PortableMovementTrial
     private void WriteEvidence(Exception primary)
     {
         foreach (var evidence in purposeEvidence)
-        { evidence.Write(Console.Error, primary); }
+        {
+            evidence.Write(Console.Error, primary);
+        }
     }
 
     private async Task CloseAsync(List<Exception> failures)
     {
         borrow.Release();
         if (owners is not { } owned)
-        { return; }
+        {
+            return;
+        }
         if (failures.Count != 0)
-        { owned.RetainRoots(); }
+        {
+            owned.RetainRoots();
+        }
         await ServerFailureObserver.ObserveAsync(() => owned.StopAsync(CancellationToken.None), failures);
         if (original is { } producer)
-        { await ServerFailureObserver.ObserveAsync(async () => { _ = await producer.ConfigureAwait(false); }, failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(async () => { _ = await producer.ConfigureAwait(false); }, failures);
+        }
         await ServerFailureObserver.ObserveAsync(borrow.JoinAsync, failures);
         await ServerFailureObserver.ObserveAsync(() => owned.DisposeAsync().AsTask(), failures);
     }

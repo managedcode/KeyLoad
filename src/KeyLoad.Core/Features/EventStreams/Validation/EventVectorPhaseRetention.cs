@@ -17,15 +17,21 @@ internal static class EventVectorPhaseRetention
         foreach (var row in original)
         {
             if (!row.Key.Span.StartsWith(prefix))
-            { continue; }
+            {
+                continue;
+            }
             if (!retained.TryGetValue(Convert.ToHexString(row.Key.Span), out var replacement))
-            { throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidRetention); }
+            {
+                throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidRetention);
+            }
             var before = EventVectorInventoryPhaseValidation.Read(header, row, admission,
                 EventVectorInventoryCoverageBound.Read(header, proposed, admission));
             if (before.Disposition == EventVectorSourcePhaseDisposition.Observed)
             {
                 if (!row.Value.Span.SequenceEqual(replacement.Value.Span))
-                { throw Errors.Fail(ErrorCode.Conflict, InvalidRetention); }
+                {
+                    throw Errors.Fail(ErrorCode.Conflict, InvalidRetention);
+                }
                 continue;
             }
             var after = EventVectorInventoryPhaseValidation.Read(header, replacement, admission,
@@ -34,7 +40,9 @@ internal static class EventVectorPhaseRetention
                 || before.ControlPolicyEpoch != after.ControlPolicyEpoch
                 || before.OriginalPosition != after.OriginalPosition
                 || before.ControlIncarnation != after.ControlIncarnation)
-            { throw Errors.Fail(ErrorCode.Conflict, InvalidRetention); }
+            {
+                throw Errors.Fail(ErrorCode.Conflict, InvalidRetention);
+            }
         }
     }
 }

@@ -74,7 +74,9 @@ internal static class StreamCatchupColdRf3Flow
         var joined = Task.WhenAll(read, write);
         await joined.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
         if (joined.Exception is { } failures)
-        { throw failures; }
+        {
+            throw failures;
+        }
         await joined;
         var raced = await McpCallerAssertions.SdkSuccessAsync(await read);
         var tail = await McpCallerAssertions.SdkSuccessAsync(await write);

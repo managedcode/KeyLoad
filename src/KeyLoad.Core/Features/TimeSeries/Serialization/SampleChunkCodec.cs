@@ -31,7 +31,10 @@ internal static class SampleChunkCodec
         }
         var unsealed = SampleChunkColumnEncoder.CreatePayload(records, plan, budget, execution.HashChunkBytes,
             execution.TextCancellationCheckIntervalCodeUnits);
-        var payload = unsealed with { Checksum = SampleChunkChecksum.Compute(unsealed, budget, execution.HashChunkBytes) };
+        var payload = unsealed with
+        {
+            Checksum = SampleChunkChecksum.Compute(unsealed, budget, execution.HashChunkBytes)
+        };
         budget.Check();
         var measured = NativeSerialization.Measure(payload);
         budget.Check();

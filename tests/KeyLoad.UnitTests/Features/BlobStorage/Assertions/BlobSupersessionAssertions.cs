@@ -47,7 +47,10 @@ internal static class BlobSupersessionAssertions
     {
         var retained = owner.Store.Read(view => BlobRecordReader.Get<BlobState>(view,
             BlobKeys.State(first.Blob, first.UploadId)));
-        await BlobWholeFlowAssertions.Exact(retained, original with { Retired = true });
+        await BlobWholeFlowAssertions.Exact(retained, original with
+        {
+            Retired = true
+        });
         for (var ordinal = 0; ordinal < BlobRangeIntegrityFixture.Parts; ordinal++)
         {
             var key = BlobRangeIntegrityOracle.Key(BlobRangeIntegrityFixture.PartSpace, first, ordinal);

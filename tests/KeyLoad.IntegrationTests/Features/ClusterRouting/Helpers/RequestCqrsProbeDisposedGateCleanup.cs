@@ -11,11 +11,17 @@ internal static class RequestCqrsProbeDisposedGateCleanup
         if (!originalProducer.IsCompleted || arm.RequestId is null || !arm.ProducerDisposedSeen
             || arm.Phase == RequestCqrsProbePhase.CanonicalJournalFlushed || arm.Action != RequestCqrsProbeAction.Hold
             || arm.GateVoter is not { } voter || arm.Settled || arm.Retired)
-        { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.UnsettledGates); }
+        {
+            throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.UnsettledGates);
+        }
         if (arm.DisposedGateJoined)
-        { return; }
+        {
+            return;
+        }
         if (gates[voter] < OneGate)
-        { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.UnsettledGates); }
+        {
+            throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.UnsettledGates);
+        }
         gates[voter] -= OneGate;
         arm.DisposedGateJoined = true;
     }

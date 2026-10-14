@@ -1,13 +1,16 @@
 using System.Buffers;
+using KeyLoad.Clustering;
 using KeyLoad.Features.InternalSerialization;
-using KeyLoad.Orleans;
 using Orleans.Serialization.Buffers;
 using Orleans.Serialization.Codecs;
 using Orleans.Serialization.WireProtocol;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
 
-internal enum McpAuthenticationArrayFault { TooManyItems, TooManyGrantProperties, Underfilled, Overfilled, WrongType, WrongReferenceType, NullElement }
+internal enum McpAuthenticationArrayFault
+{
+    TooManyItems, TooManyGrantProperties, Underfilled, Overfilled, WrongType, WrongReferenceType, NullElement
+}
 
 // Author real array boundaries because generated surrogate Values bypasses provider overrides.
 internal static class McpAuthenticationMalformedFixture

@@ -24,7 +24,9 @@ internal static class EventVectorPhasePreparation
             || mutation.CleanupGeneration != (mutation.Role == EventVectorSourcePhaseRole.Release
                 ? map.CleanupGeneration : EventVectorSourcePhaseIds.InitialCleanupGeneration)
             || !ValidCoverage(map, mutation))
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidPhase); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidPhase);
+        }
         admission.RequireEntryCount(checked(sourceOrdinal + IncludedOrdinal));
         var phase = new EventVectorSourcePhase
         {

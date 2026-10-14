@@ -18,12 +18,16 @@ internal static class ReplicaPrefixGcCrashScenario
     internal static Task<bool> TryRunAsync(string[] args)
     {
         if (args.Length <= ModeArgument || args[ModeArgument] != ReplicaPrefixGcCrashContract.Mode)
-        { return Task.FromResult(false); }
+        {
+            return Task.FromResult(false);
+        }
         if (args.Length != ArgumentCount || !Enum.TryParse<CommitStage>(args[StageArgument], out var stage)
             || !Enum.IsDefined(stage) || !int.TryParse(args[IndexArgument], NumberStyles.None, CultureInfo.InvariantCulture, out var index)
             || index != ReplicaPrefixGcCrashContract.NoMutationIndex && (stage != CommitStage.MutationApplied || index != ReplicaPrefixGcCrashContract.LastPrefixMutationIndex)
             || !Guid.TryParse(args[IncarnationArgument], out var incarnation) || incarnation == Guid.Empty)
-        { throw new ArgumentException(InvalidArguments, nameof(args)); }
+        {
+            throw new ArgumentException(InvalidArguments, nameof(args));
+        }
         var boundary = new CanonicalCrashBoundary(stage, index, initiallyArmed: false);
         using var node = ReplicaCrashNode.OpenTarget(args[RootArgument], incarnation, replicaObserver: boundary.Observe);
         node.Populate(ReplicaPrefixGcCrashContract.SnapshotCut);

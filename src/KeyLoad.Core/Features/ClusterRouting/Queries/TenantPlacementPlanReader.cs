@@ -24,9 +24,13 @@ public sealed partial class DatabaseEngine
                 ?? throw Errors.Fail(ErrorCode.NotFound, TenantPlacementPolicyProtocol.Missing);
             TenantPlacementPolicyValidation.Require(policy, ErrorCode.Corruption);
             if (!policy.Enabled)
-            { throw Errors.Fail(ErrorCode.ResourceExhausted, TenantPlacementPolicyProtocol.ExpiredPlan); }
+            {
+                throw Errors.Fail(ErrorCode.ResourceExhausted, TenantPlacementPolicyProtocol.ExpiredPlan);
+            }
             if (originalExpiry <= now)
-            { throw Errors.Fail(ErrorCode.TokenInvalidated, TenantPlacementPolicyProtocol.ExpiredPlan); }
+            {
+                throw Errors.Fail(ErrorCode.TokenInvalidated, TenantPlacementPolicyProtocol.ExpiredPlan);
+            }
             var cohort = PlacementCapacityCohort.Require(verifiedCapacity, currentCohort, now);
             var catalog = PhysicalShardCatalogRecordSerialization.Read(charged)
                 ?? throw Errors.Fail(ErrorCode.NotFound, TenantPlacementPolicyProtocol.Missing);
@@ -69,7 +73,9 @@ public sealed partial class DatabaseEngine
         {
             token.ThrowIfCancellationRequested();
             if (part.Owner == target)
-            { continue; }
+            {
+                continue;
+            }
             moves.Add(new(Guid.NewGuid(), part.Partition, target, part.RowRevision, PartitionMoveMode.Transfer));
         }
         return new(TenantPlacementPolicyProtocol.Version, Guid.NewGuid(), request.TenantId, request.DatabaseId,

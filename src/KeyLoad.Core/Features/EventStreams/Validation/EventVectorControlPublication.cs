@@ -12,7 +12,9 @@ internal static class EventVectorControlPublication
         foreach (var row in inventory.PayloadRows)
         {
             if (row.Key.Span.SequenceEqual(key))
-            { return EventVectorCoverageProofValidation.Read(row, map, admission); }
+            {
+                return EventVectorCoverageProofValidation.Read(row, map, admission);
+            }
         }
         throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidPublication);
     }
@@ -26,15 +28,21 @@ internal static class EventVectorControlPublication
         foreach (var row in inventory.PayloadRows)
         {
             if (!row.Key.Span.StartsWith(prefix))
-            { continue; }
+            {
+                continue;
+            }
             var phase = EventVectorInventoryPhaseValidation.Read(map, row, admission,
                 EventVectorInventoryCoverageBound.Read(map, inventory.PayloadRows, admission));
             if (phase.Role != role || phase.MapRevision != map.Revision
                 || phase.CoverageGeneration != (coverageGeneration ?? map.CoverageGeneration)
                 || phase.CleanupGeneration != map.CleanupGeneration)
-            { continue; }
+            {
+                continue;
+            }
             if (!result.TryAdd(phase.SourceOrdinal, phase))
-            { throw Errors.Fail(ErrorCode.Corruption, InvalidPublication); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, InvalidPublication);
+            }
         }
         return result;
     }

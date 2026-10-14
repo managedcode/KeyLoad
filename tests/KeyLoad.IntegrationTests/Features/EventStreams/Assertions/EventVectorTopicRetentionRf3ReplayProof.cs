@@ -33,9 +33,13 @@ internal static class EventVectorTopicRetentionRf3ReplayProof
         await Assert.That(current.Error).IsEqualTo(prior.Error);
         await Assert.That(current.SafeDetail).IsEqualTo(prior.SafeDetail);
         if (current.Error is null)
-        { await SqlRf3Protocol.EqualAsync(choice.Request, NativeCommandPayload.Read<CommandRequest>(operation)); }
+        {
+            await SqlRf3Protocol.EqualAsync(choice.Request, NativeCommandPayload.Read<CommandRequest>(operation));
+        }
         else
-        { await Assert.That(current.Error).IsEqualTo(choice.Error); }
+        {
+            await Assert.That(current.Error).IsEqualTo(choice.Error);
+        }
         var key = Convert.ToHexString(KeySpace.PartitionOutcome(choice.Seed.Source.Partition, operation.PrincipalId, operation.Id));
         var row = before.CanonicalRows.Single(value => value.StartsWith(key + ":", StringComparison.Ordinal));
         var retained = NativeSerialization.Deserialize<StoredOutcome>(Convert.FromHexString(row[(key.Length + 1)..]));
@@ -46,6 +50,8 @@ internal static class EventVectorTopicRetentionRf3ReplayProof
         await Assert.That(retained.PolicyEpoch).IsEqualTo(PartitionMovementPublicParentRf3Administrator.InitialDefinition().PolicyEpoch);
         await Assert.That(retained.Result.Error).IsEqualTo(choice.Error);
         if (choice.Receipt is { } receipt)
-        { await SqlRf3Protocol.EqualAsync(receipt, retained.Result.Get<CommitReceipt>()); }
+        {
+            await SqlRf3Protocol.EqualAsync(receipt, retained.Result.Get<CommitReceipt>());
+        }
     }
 }

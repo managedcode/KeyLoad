@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
+using KeyLoad.Clustering;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
-using KeyLoad.Orleans;
 using KeyLoad.Storage;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
@@ -18,7 +18,10 @@ internal sealed class PhysicalOwnerProbeClient(IOptions<NodeOptions> nodeOptions
     private const long EmptyApplied = 0;
     private readonly NodeOptions options = nodeOptions.Value;
     private int disposed;
-    internal ErrorCode? LastNativeError { get; private set; }
+    internal ErrorCode? LastNativeError
+    {
+        get; private set;
+    }
 
     internal async Task<string> VerifyAllAsync(DateTimeOffset expiresAt, CancellationToken cancellationToken)
     {
@@ -28,7 +31,9 @@ internal sealed class PhysicalOwnerProbeClient(IOptions<NodeOptions> nodeOptions
         {
             if (!options.PhysicalGroupTrust.RegisterPhysicalOwners
                 || options.PhysicalGroupTrust.Role != PhysicalGroupTrustRole.Control)
-            { throw Errors.Fail(ErrorCode.UnsupportedCapability, PhysicalOwnerProbeProtocol.Unavailable); }
+            {
+                throw Errors.Fail(ErrorCode.UnsupportedCapability, PhysicalOwnerProbeProtocol.Unavailable);
+            }
             var control = PhysicalOwnerConfiguredTuples.Control(options, partition);
             var destination = PhysicalOwnerConfiguredTuples.Destination(options, partition);
             var discovery = node.Discovery?.Read()
@@ -43,7 +48,9 @@ internal sealed class PhysicalOwnerProbeClient(IOptions<NodeOptions> nodeOptions
                     clock.GetUtcNow(), expiresAt);
                 var observed = await ReadAsync(index, call, cancellationToken).ConfigureAwait(false);
                 if (fingerprint is not null && fingerprint != observed)
-                { throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalOwnerProbeProtocol.Unavailable); }
+                {
+                    throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalOwnerProbeProtocol.Unavailable);
+                }
                 fingerprint = observed;
             }
             return fingerprint ?? throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalOwnerProbeProtocol.Unavailable);
@@ -62,36 +69,54 @@ internal sealed class PhysicalOwnerProbeClient(IOptions<NodeOptions> nodeOptions
             true, body, sourceMac.Sign(body, reply: false), call.CallerVoter, call.CallerSiloAddress,
             voter, address.ToParsableString(), Guid.NewGuid(), call.ExpiresAt, string.Empty);
         using var outer = CreateOuterMac();
-        request = request with { SenderSignature = outer.SignNativeRequest(request) };
+        request = request with
+        {
+            SenderSignature = outer.SignNativeRequest(request)
+        };
         PhysicalOwnerProbeNativeIdentity.RequireCurrent(node, voter, request.DestinationSiloAddress, membershipOptions, token);
         var received = await node.BorrowPhysicalOwnerProbeTransport().ProbeOwnerAsync(address, request, token).ConfigureAwait(false);
         token.ThrowIfCancellationRequested();
         if (received is null || received.Nonce != request.Nonce
             || received.Payload.Length > PhysicalOwnerProbeProtocol.MaximumBodyBytes
             || received.SenderSignature is not { Length: PhysicalOwnerProbeProtocol.SignatureCharacters })
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PhysicalOwnerProbeProtocol.InvalidProof); }
-        var reply = received with { Payload = received.Payload.ToArray() };
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, PhysicalOwnerProbeProtocol.InvalidProof);
+        }
+        var reply = received with
+        {
+            Payload = received.Payload.ToArray()
+        };
         if (!outer.VerifyNativeReply(reply))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PhysicalOwnerProbeProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, PhysicalOwnerProbeProtocol.InvalidProof);
+        }
         PhysicalOwnerProbeNativeIdentity.RequireCurrent(node, call.CallerVoter, call.CallerSiloAddress, membershipOptions, token);
         PhysicalOwnerProbeNativeIdentity.RequireCurrent(node, voter, request.DestinationSiloAddress, membershipOptions, token);
         if (call.ExpiresAt <= clock.GetUtcNow())
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalOwnerProbeProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalOwnerProbeProtocol.Unavailable);
+        }
         if (reply.Error is { } error)
         {
             if (!Enum.IsDefined(error) || !reply.Payload.IsEmpty || reply.Signature is not { Length: EmptyErrorSignatureLength }
                 || reply.SafeDetail != PartitionMovementProtocol.Unavailable)
-            { throw Errors.Fail(ErrorCode.Unauthenticated, PhysicalOwnerProbeProtocol.InvalidProof); }
+            {
+                throw Errors.Fail(ErrorCode.Unauthenticated, PhysicalOwnerProbeProtocol.InvalidProof);
+            }
             throw Errors.Fail(error, PhysicalOwnerProbeProtocol.Unavailable);
         }
         using var targetMac = PhysicalOwnerProbeMac.FromConfiguredSecret(options.PhysicalGroupTrust.ForeignPeerSecret);
         if (reply.Payload.IsEmpty || reply.SafeDetail is not null || reply.Signature is null
             || !targetMac.Verify(reply.Payload.Span, reply.Signature, reply: true))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PhysicalOwnerProbeProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, PhysicalOwnerProbeProtocol.InvalidProof);
+        }
         var original = NativeSerialization.Deserialize<PhysicalOwnerProbeReplyV1>(reply.Payload.Span);
         Verify(index, call, original, token);
         if (original.EndpointDiscovery.SiloAddress != request.DestinationSiloAddress)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PhysicalOwnerProbeProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, PhysicalOwnerProbeProtocol.InvalidProof);
+        }
         return original.MembershipFingerprint;
     }
 
@@ -101,7 +126,9 @@ internal sealed class PhysicalOwnerProbeClient(IOptions<NodeOptions> nodeOptions
         var secret = PartitionMovementNativeDiscoveryIdentity.Secret(options, partition.Configuration, control);
         var key = Convert.FromBase64String(secret);
         try
-        { return new(key, partition.Database.Limits.MaxBatchBytes); }
+        {
+            return new(key, partition.Database.Limits.MaxBatchBytes);
+        }
         finally { CryptographicOperations.ZeroMemory(key); }
     }
 
@@ -122,7 +149,9 @@ internal sealed class PhysicalOwnerProbeClient(IOptions<NodeOptions> nodeOptions
             || !PhysicalGroupAddress.CanonicalAddress(discovery.SiloAddress, membershipOptions)
             || reply.MembershipFingerprint is not { Length: PhysicalOwnerProbeProtocol.SignatureCharacters }
             || reply.MembershipFingerprint.Any(character => !char.IsAsciiHexDigitLower(character)))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PhysicalOwnerProbeProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, PhysicalOwnerProbeProtocol.InvalidProof);
+        }
     }
 
     public void Dispose() => Interlocked.Exchange(ref disposed, DisposedResource);

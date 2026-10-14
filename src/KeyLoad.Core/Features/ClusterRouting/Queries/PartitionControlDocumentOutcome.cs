@@ -13,10 +13,14 @@ public sealed partial class DatabaseEngine
         work.Check();
         var original = VerifyOperationAuthority(originalOperation);
         if (original.PrincipalId != authenticatedPrincipalId)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, ClusterAdministrationRequiredMessage); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, ClusterAdministrationRequiredMessage);
+        }
         var scope = CommandOutcomePartitionIdentity.Resolve(original);
         if (scope.Partition is null)
-        { throw Errors.Fail(ErrorCode.UnsupportedCapability, UnsupportedOperationMessage); }
+        {
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, UnsupportedOperationMessage);
+        }
         var command = RequireControlledDocumentBatch(original, scope.Partition);
         var result = Store.Read(view => ResolveControlledDocumentOutcomeView(work.CreateView(view), original, command));
         work.MeasureResult(result);
@@ -29,7 +33,9 @@ public sealed partial class DatabaseEngine
     {
         var directory = RequireMoveDirectory(view);
         if (directory.ControlOwner.Incarnation != Store.Identity.Incarnation)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, Features.ClusterRouting.Contracts.PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, Features.ClusterRouting.Contracts.PartitionMoveProtocol.OwnerMismatch);
+        }
         var principal = Principal(view, original.PrincipalId, EvaluationClock.GetUtcNow());
         var resources = PartitionMoveResources.Capture(view, command.Partition, Limits);
         RequireControlledDocumentPolicies(principal, command, resources);
@@ -38,9 +44,13 @@ public sealed partial class DatabaseEngine
         var previous = selected.Outcome
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, MissingDurableOutcomeMessage);
         if (previous.Incarnation != Store.Identity.Incarnation)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, EarlierOutcomeIncarnationMessage); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, EarlierOutcomeIncarnationMessage);
+        }
         if (previous.Fingerprint != CommandFingerprint(original))
-        { throw Errors.Fail(ErrorCode.Conflict, CommandContentConflictMessage); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, CommandContentConflictMessage);
+        }
         CommandOutcomeKeyResolver.ValidateSelectedScope(view, original, selected);
         ValidateCachedResult(view, principal, original, previous, BatchResourceAdmission.RetiredOutcomeMetadata);
         return previous.Result;

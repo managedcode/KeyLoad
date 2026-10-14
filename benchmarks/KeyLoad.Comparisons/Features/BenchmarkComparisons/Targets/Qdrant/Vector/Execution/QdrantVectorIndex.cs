@@ -17,12 +17,24 @@ internal static class QdrantVectorIndex
             foreach (var field in new[] { QdrantVectorProtocol.Filtered, QdrantVectorProtocol.Mixed })
             {
                 using var payload = await QdrantVectorHttp.SendAsync(client, HttpMethod.Put, path + QdrantVectorProtocol.PayloadIndexPath,
-                    new { field_name = field, field_schema = QdrantVectorProtocol.BooleanIndexType }, executionOptions, token: token, timeProvider: timeProvider);
+                    new
+                    {
+                        field_name = field,
+                        field_schema = QdrantVectorProtocol.BooleanIndexType
+                    }, executionOptions, token: token, timeProvider: timeProvider);
             }
             using var start = await QdrantVectorHttp.SendAsync(client, HttpMethod.Patch, path, new
             {
-                hnsw_config = new { m = QdrantVectorProtocol.HnswConnections, ef_construct = QdrantVectorProtocol.HnswBreadth, full_scan_threshold = QdrantVectorProtocol.DisabledIndex },
-                optimizers_config = new { indexing_threshold = QdrantVectorProtocol.MinimumIndexThreshold }
+                hnsw_config = new
+                {
+                    m = QdrantVectorProtocol.HnswConnections,
+                    ef_construct = QdrantVectorProtocol.HnswBreadth,
+                    full_scan_threshold = QdrantVectorProtocol.DisabledIndex
+                },
+                optimizers_config = new
+                {
+                    indexing_threshold = QdrantVectorProtocol.MinimumIndexThreshold
+                }
             }, executionOptions, token: token, timeProvider: timeProvider);
         }
         var definition = await AwaitReadyAsync(nodes, path, profile, executionOptions, token: token, timeProvider: timeProvider);

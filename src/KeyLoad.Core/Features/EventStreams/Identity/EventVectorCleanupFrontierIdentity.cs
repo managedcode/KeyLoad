@@ -12,18 +12,24 @@ internal static class EventVectorCleanupFrontierIdentity
         EventVectorAdmissionPolicy admission)
     {
         if (originalBytes.IsEmpty)
-        { return ReadOnlyMemory<byte>.Empty; }
+        {
+            return ReadOnlyMemory<byte>.Empty;
+        }
         admission.RequireEncodedBytes(originalBytes.Length);
         var pins = NativeSerialization.Deserialize<ImmutableArray<EventVectorCleanupPin>>(originalBytes.Span);
         if (pins.IsDefault)
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
         admission.RequireEntryCount(pins.Length);
         var identities = ImmutableArray.CreateBuilder<EventVectorCleanupPinIdentity>(pins.Length);
         foreach (var pin in pins)
         {
             if (pin is null || pin.Version != Version || pin.OriginalPinPhaseBytes.IsEmpty
                 || pin.AuthenticatedSourceObservationBytes.IsEmpty)
-            { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, Invalid);
+            }
             var original = NativeSerialization.Deserialize<EventVectorSourcePhase>(pin.OriginalPinPhaseBytes.Span);
             var observation = NativeSerialization.Deserialize<EventVectorSourceObservation>(
                 pin.AuthenticatedSourceObservationBytes.Span);
@@ -32,7 +38,9 @@ internal static class EventVectorCleanupFrontierIdentity
                 || observation.Source != original.Source || observation.PrincipalId != original.PrincipalId
                 || !CryptographicOperations.FixedTimeEquals(observation.OriginalBodyDigest.Span,
                     original.OriginalBodyDigest.Span))
-            { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, Invalid);
+            }
             RequireCurrent(pin, observation);
             identities.Add(new(EventVectorIdentityInputs.Digest(pin.OriginalPinPhaseBytes),
                 EventVectorIdentityInputs.Digest(pin.LastAdmittedAdvancePhaseBytes),
@@ -51,11 +59,15 @@ internal static class EventVectorCleanupFrontierIdentity
         if (observation.CurrentPinRowBytes.IsEmpty)
         {
             if (pin.CurrentCoverageGeneration is not null || pin.CurrentPinRevision is not null)
-            { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, Invalid);
+            }
             return;
         }
         var current = NativeSerialization.Deserialize<EventVectorSourcePin>(observation.CurrentPinRowBytes.Span);
         if (current.CoverageGeneration != pin.CurrentCoverageGeneration || current.PinRevision != pin.CurrentPinRevision)
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
     }
 }

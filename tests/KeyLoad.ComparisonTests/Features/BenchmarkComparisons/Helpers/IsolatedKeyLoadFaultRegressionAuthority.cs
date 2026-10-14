@@ -17,7 +17,10 @@ internal static class IsolatedKeyLoadFaultRegressionAuthority
             await IsolatedKeyLoadFaultRegressionCalls.RunAsync(
                 attempt => mcp.SuccessAsync<CommitReceipt>(IsolatedKeyLoadPublicRegressionProtocol.Complete, seed.Ack, attempt), token));
         await IsolatedKeyLoadFaultRegressionCalls.RunAsync(attempt => mcp.ErrorAsync(IsolatedKeyLoadPublicRegressionProtocol.Complete,
-            seed.Ack with { CommandId = Guid.NewGuid() }, ErrorCode.StaleLease, attempt), token);
+            seed.Ack with
+            {
+                CommandId = Guid.NewGuid()
+            }, ErrorCode.StaleLease, attempt), token);
         await ReaderAsync(app, node, seed, token);
     }
 

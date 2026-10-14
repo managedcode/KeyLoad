@@ -30,7 +30,8 @@ internal sealed class ClusterNodeHttpEvidence(DistributedApplication app)
             readiness = await ReadReadyAsync(name, deadline.Token).ConfigureAwait(false);
         }
         catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
-        { }
+        {
+        }
         return (readiness, discovery);
     }
 
@@ -48,14 +49,16 @@ internal sealed class ClusterNodeHttpEvidence(DistributedApplication app)
                 (int)response.StatusCode) + " branch Unobserved.";
         }
         catch (Exception error) when (error is HttpRequestException or IOException or InvalidOperationException)
-        { return ReadyUnavailable; }
+        {
+            return ReadyUnavailable;
+        }
     }
 
     private async Task<string> ReadDiscoveryAsync(string name, ReadOnlyMemory<byte> peerSecret,
         string adminCredential, Guid incarnation, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(adminCredential) || incarnation == Guid.Empty
-            || peerSecret.Length != KeyLoad.Orleans.ReplicaTransportProtocol.SecretBytes)
+            || peerSecret.Length != KeyLoad.Clustering.ReplicaTransportProtocol.SecretBytes)
         {
             return "Native discovery Unobserved: authenticated fixture context is unavailable.";
         }
@@ -69,7 +72,9 @@ internal sealed class ClusterNodeHttpEvidence(DistributedApplication app)
         }
         catch (Exception error) when (error is HttpRequestException or IOException
             or InvalidOperationException or KeyLoad.KeyLoadException)
-        { return DiscoveryUnavailable; }
+        {
+            return DiscoveryUnavailable;
+        }
     }
 
     private static async Task<string> ReadBoundedTextAsync(HttpContent content, CancellationToken cancellationToken)

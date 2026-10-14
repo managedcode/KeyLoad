@@ -39,7 +39,9 @@ internal static class ReplicaSnapshotInstallBoundaryAssertions
     {
         var page = store.Read(view => view.Scan([], CompleteNativeRecordLimit));
         if (page.HasMore)
-        { throw new InvalidOperationException(); }
+        {
+            throw new InvalidOperationException();
+        }
         return page.Records.Select(record => Convert.ToHexString(record.Key.Span) + ":" +
             Convert.ToHexString(record.Value.Span)).ToArray();
     }

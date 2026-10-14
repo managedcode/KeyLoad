@@ -53,7 +53,11 @@ internal static class RemoteTransferColdStages
             seed.TransferId, RemoteTransferColdProtocol.CompleteKind, RemoteTransferColdProtocol.CompleteRevision);
         await QueueProducerRf3Assertions.ReplayAsync(sdk, mcp, command, receipt, token);
         await RemoteTransferColdAssertions.SourceAsync(sdk, mcp, seed,
-            intent with { State = QueueTransferState.Delivered, ReceiptToken = proof.ReceiptToken }, token);
+            intent with
+            {
+                State = QueueTransferState.Delivered,
+                ReceiptToken = proof.ReceiptToken
+            }, token);
         return receipt;
     }
 }

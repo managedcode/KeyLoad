@@ -18,7 +18,10 @@ internal sealed record FilteredSearchRf3Scenario(PartitionRef Partition)
     internal const int FusionConstant = 60;
     internal const int FirstRevision = 1;
     internal const int SecondRevision = 2;
-    internal static VectorSpace Space { get; } = new("filtered-rf3-space", 2,
+    internal static VectorSpace Space
+    {
+        get;
+    } = new("filtered-rf3-space", 2,
         DistanceMetric.Cosine, "filtered-rf3-model", "1");
 
     internal static async Task<FilteredSearchRf3Scenario> CreateAsync(ClusterFixture fixture,
@@ -60,9 +63,13 @@ internal sealed record FilteredSearchRf3Scenario(PartitionRef Partition)
     {
         var grants = ImmutableArray.CreateBuilder<string>();
         if (textGrant)
-        { grants.Add(TextGrant); }
+        {
+            grants.Add(TextGrant);
+        }
         if (vectorGrant)
-        { grants.Add(VectorGrant); }
+        {
+            grants.Add(VectorGrant);
+        }
         var principal = new PrincipalRecord("filtered-rf3-principal-" + Guid.NewGuid().ToString("N"),
             Partition.TenantId,
             [new(Partition.DatabaseId, Collection,

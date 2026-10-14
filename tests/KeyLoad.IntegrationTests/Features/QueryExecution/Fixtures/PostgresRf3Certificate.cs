@@ -46,7 +46,9 @@ internal sealed record PostgresRf3Certificate(string Directory, string RootCerti
                         names.AddIpAddress(IPAddress.Loopback);
                         names.AddIpAddress(IPAddress.IPv6Loopback);
                         foreach (var number in Enumerable.Range(ClusterFixtureProtocol.FirstNodeNumber, ClusterFixtureProtocol.NodeCount))
-                        { names.AddDnsName(ClusterFixtureProtocol.NodeName(number)); }
+                        {
+                            names.AddDnsName(ClusterFixtureProtocol.NodeName(number));
+                        }
                         server.CertificateExtensions.Add(names.Build());
                         using var issued = server.Create(authority, now.AddMinutes(-1), now.AddDays(1),
                             RandomNumberGenerator.GetBytes(SerialBytes));
@@ -58,7 +60,9 @@ internal sealed record PostgresRf3Certificate(string Directory, string RootCerti
                                 File.WriteAllText(rootPath, authority.ExportCertificatePem(), Encoding.ASCII);
                                 var encoded = withKey.Export(X509ContentType.Pfx);
                                 try
-                                { File.WriteAllBytes(Path.Combine(directory, ServerName), encoded); }
+                                {
+                                    File.WriteAllBytes(Path.Combine(directory, ServerName), encoded);
+                                }
                                 finally { CryptographicOperations.ZeroMemory(encoded); }
                             }, failures);
                         }, failures);

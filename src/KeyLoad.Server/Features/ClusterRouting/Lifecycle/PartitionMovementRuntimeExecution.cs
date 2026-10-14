@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
@@ -13,7 +13,9 @@ internal sealed class PartitionMovementRuntimeExecution(Lock gate, CancellationT
         lock (gate)
         {
             if (isClosed())
-            { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMovementProtocol.Unavailable); }
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMovementProtocol.Unavailable);
+            }
             active.Add(id, completion);
         }
         var failures = new List<Exception>();

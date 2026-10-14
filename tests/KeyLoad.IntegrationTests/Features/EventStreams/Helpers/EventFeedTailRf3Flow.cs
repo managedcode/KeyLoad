@@ -36,11 +36,16 @@ internal static class EventFeedTailRf3Flow
                 await CompletedAsync(frame, original);
             }
             else
-            { await Assert.That(frame.Kind).IsEqualTo(CqrsStreamChunkKind.Started); }
+            {
+                await Assert.That(frame.Kind).IsEqualTo(CqrsStreamChunkKind.Started);
+            }
         }
         await Assert.That(progress).IsEqualTo(OneDelivery);
         await Assert.That(completed).IsEqualTo(OneDelivery);
-        await OfficialAsync(wave, credential, request with { CommandId = Guid.NewGuid() }, original, policy, token);
+        await OfficialAsync(wave, credential, request with
+        {
+            CommandId = Guid.NewGuid()
+        }, original, policy, token);
         await SqlRf3Protocol.EqualAsync(original, await EventFeedOfferRf3Flow.RoutesAsync(wave, credential, offered, token));
     }
 
@@ -60,7 +65,9 @@ internal static class EventFeedTailRf3Flow
         EventFeedControlResult original)
     {
         if (frame.ProgressResult is not { IsSuccess: true, Value: { } value })
-        { throw new InvalidOperationException(Invalid); }
+        {
+            throw new InvalidOperationException(Invalid);
+        }
         await SqlRf3Protocol.EqualAsync(original, value.OriginalOfferResult);
     }
 
@@ -68,7 +75,9 @@ internal static class EventFeedTailRf3Flow
         EventFeedControlResult original)
     {
         if (frame.Final is not { IsSuccess: true, Value: { } value })
-        { throw new InvalidOperationException(Invalid); }
+        {
+            throw new InvalidOperationException(Invalid);
+        }
         await SqlRf3Protocol.EqualAsync(original, value);
     }
 

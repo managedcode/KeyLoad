@@ -26,7 +26,10 @@ internal static class NativeTextOwnerFiles
             .OrderBy(item => item.RelativePath, StringComparer.Ordinal).ToArray();
         NativeTextValidation.ValidateOwnedPaths(paths, executionOptions: executionOptions);
         var pending = Path.Combine(generation, NativeTextProtocol.OwnerPendingFile);
-        NativeTextFileIO.WriteEnvelope(pending, owner with { OwnedPaths = paths }, executionOptions.Value.MaximumOwnerReceiptBytes, executionOptions: executionOptions, resources: resources);
+        NativeTextFileIO.WriteEnvelope(pending, owner with
+        {
+            OwnedPaths = paths
+        }, executionOptions.Value.MaximumOwnerReceiptBytes, executionOptions: executionOptions, resources: resources);
         File.Move(pending, ownerPath, true);
     }
 

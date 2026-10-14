@@ -23,7 +23,11 @@ internal sealed class EventVectorAuthenticatedExchange : IDisposable
 
     internal ReadOnlyMemory<byte> OriginalRequestBytes
     {
-        get { ObjectDisposedException.ThrowIf(disposed, this); return originalRequest; }
+        get
+        {
+            ObjectDisposedException.ThrowIf(disposed, this);
+            return originalRequest;
+        }
     }
 
     internal string OriginalRequestSignature
@@ -47,7 +51,9 @@ internal sealed class EventVectorAuthenticatedExchange : IDisposable
     public void Dispose()
     {
         if (disposed)
-        { return; }
+        {
+            return;
+        }
         disposed = true;
         CryptographicOperations.ZeroMemory(originalRequest);
         if (reply is { } owned)

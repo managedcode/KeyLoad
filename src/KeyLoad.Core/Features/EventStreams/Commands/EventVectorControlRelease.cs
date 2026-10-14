@@ -13,7 +13,9 @@ internal static class EventVectorControlRelease
         IOptions<DatabaseLimits> options, CancellationToken cancellationToken)
     {
         if (!phase.OriginalCleanupFrontierBytes.IsEmpty)
-        { return EventVectorAbandonmentComplete.Execute(transaction, phase, options, cancellationToken); }
+        {
+            return EventVectorAbandonmentComplete.Execute(transaction, phase, options, cancellationToken);
+        }
         var admission = new EventVectorAdmissionPolicy(options);
         var request = phase.OriginalRequest;
         var inventory = EventVectorMapInventory.Read(transaction, request.ControlPartition,
@@ -23,26 +25,39 @@ internal static class EventVectorControlRelease
         var entries = EventVectorControlPages.Entries(inventory, admission);
         var supplied = EventVectorEntryEncoding.Decode(phase.OriginalEncodedEntries, phase.OriginalEntryChecksum, admission);
         if (phase.Action != EventVectorControlAction.CompleteRelease || entries.Length != supplied.Length)
-        { throw Errors.Fail(ErrorCode.Corruption, IncompleteRelease); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, IncompleteRelease);
+        }
         RequireEntries(entries, supplied);
         var observed = EventVectorControlPublication.Phases(inventory, EventVectorSourcePhaseRole.Release, admission);
         if (observed.Count != entries.Length)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, IncompleteRelease); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, IncompleteRelease);
+        }
         if (entries.IsEmpty && map.PendingPhaseId is null
             && map.State is EventVectorMapState.Active or EventVectorMapState.Opening)
-        { map = map with { State = EventVectorMapState.Releasing }; }
+        {
+            map = map with
+            {
+                State = EventVectorMapState.Releasing
+            };
+        }
         var complete = ImmutableArray.CreateBuilder<EventVectorSourcePhase>(entries.Length);
         for (var ordinal = EventVectorControlPages.FirstOrdinal; ordinal < entries.Length; ordinal++)
         {
             if (!observed.TryGetValue(ordinal, out var current))
-            { throw Errors.Fail(ErrorCode.RecoveryRequired, IncompleteRelease); }
+            {
+                throw Errors.Fail(ErrorCode.RecoveryRequired, IncompleteRelease);
+            }
             complete.Add(current);
         }
         var key = EventVectorKeys.Proof(map.ControlPartition, map.MapId, map.CoverageGeneration);
         var proof = inventory.PayloadRows.Single(row => row.Key.Span.SequenceEqual(key));
         var changed = EventVectorReleasePass.Complete(map, entries, complete.MoveToImmutable(), proof, admission);
         if (!changed.Released)
-        { return EventVectorMapWriter.Write(transaction, changed, inventory.PayloadRows, options, cancellationToken); }
+        {
+            return EventVectorMapWriter.Write(transaction, changed, inventory.PayloadRows, options, cancellationToken);
+        }
         DeleteSettled(transaction, inventory, changed, admission, cancellationToken);
         return changed;
     }
@@ -52,7 +67,9 @@ internal static class EventVectorControlRelease
         for (var ordinal = EventVectorControlPages.FirstOrdinal; ordinal < original.Length; ordinal++)
         {
             if (original[ordinal] != supplied[ordinal])
-            { throw Errors.Fail(ErrorCode.Conflict, IncompleteRelease); }
+            {
+                throw Errors.Fail(ErrorCode.Conflict, IncompleteRelease);
+            }
         }
     }
 
@@ -64,7 +81,9 @@ internal static class EventVectorControlRelease
         var capacity = EventVectorCapacityLedger.Prepare(transaction, released.ControlPartition, ReleasedSlot, -bytes, admission);
         cancellationToken.ThrowIfCancellationRequested();
         foreach (var row in inventory.PayloadRows)
-        { transaction.Delete(row.Key.ToArray()); }
+        {
+            transaction.Delete(row.Key.ToArray());
+        }
         transaction.Delete(header.Key.ToArray());
         EventVectorRowStorage.Write(transaction, capacity);
     }

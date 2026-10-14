@@ -24,7 +24,9 @@ internal static class EventVectorOfferSourcePages
         _ = EventVectorSourceMutationValidation.ReadOriginal(originalPin, admission);
         if (originalPin.Source != acknowledged.Source || originalPin.PrincipalId != principalId
             || !PhysicalOwnerEntryValidation.SameOwner(originalPin.SourceOwner, destination.Owner))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, EventVectorRemoteProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, EventVectorRemoteProtocol.Invalid);
+        }
         using var observationCall = EventVectorOutgoingCall.Create(node, partition, options,
             EventVectorRemoteAction.OriginalOutcome, originalPin, parentExpiry, work, encoding);
         using var original = await SendAsync(runtime, partition, options, destination,
@@ -41,7 +43,9 @@ internal static class EventVectorOfferSourcePages
         work.ChargeBytes(actual.Reply.Reply.OriginalNativeReply.Length);
         var pages = EventVectorAuthenticatedSourcePages.Read(actual.Reply, readCall.OriginalCall, encoding, admission);
         if (pages.Length != SinglePage)
-        { throw Errors.Fail(ErrorCode.Corruption, EventVectorRemoteProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, EventVectorRemoteProtocol.Invalid);
+        }
         work.Check();
         return pages[FirstOrdinal];
     }

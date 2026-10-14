@@ -20,11 +20,15 @@ internal static class TenantCapacityPlacementRf3Scenario
             await TenantCapacityPlacementRf3Flow.RunAsync(wave, seed, state, committedOwnerLoss, token).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
         if (seed is not null)
-        { await ServerFailureObserver.ObserveAsync(() => seed.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => seed.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         if (wave is not null)
         {
             if (failures.Count != 0)
-            { wave.RetainRoots(); }
+            {
+                wave.RetainRoots();
+            }
             await ServerFailureObserver.ObserveAsync(() => wave.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         }
         ServerFailureObserver.ThrowIfAny(failures);

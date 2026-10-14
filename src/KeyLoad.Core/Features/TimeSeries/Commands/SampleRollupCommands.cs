@@ -19,10 +19,14 @@ internal static class SampleRollupCommands
             request.From, request.UntilExclusive, charge.Charge);
         Revision(previous, request.ExpectedRevision);
         if (previous is null)
-        { AdmitBucket(tx, partition, request, bucketLimit, charge); }
+        {
+            AdmitBucket(tx, partition, request, bucketLimit, charge);
+        }
         var watermark = SampleRollupRecords.Watermark(tx, partition, request.SeriesSet, request.SeriesId, charge.Charge);
         if (watermark.Floor is { } floor && request.From.UtcTicks < floor)
-        { throw Errors.Fail(ErrorCode.HistoryUnavailable, SampleRollupProtocol.Stale); }
+        {
+            throw Errors.Fail(ErrorCode.HistoryUnavailable, SampleRollupProtocol.Stale);
+        }
         var aggregate = SampleRollupFold.Read(tx, partition, request, watermark.Sequence, charge);
         var next = new SampleRollupState(SampleRollupNative.Version, request.From.UtcTicks, request.UntilExclusive.UtcTicks,
             checked(request.ExpectedRevision + NextRevision), watermark.Sequence, watermark.Floor, false,
@@ -42,7 +46,9 @@ internal static class SampleRollupCommands
             request.From, request.UntilExclusive, charge.Charge);
         Revision(previous, request.ExpectedRevision);
         if (previous is null || previous.Dropped)
-        { throw Errors.Fail(ErrorCode.NotFound, SampleRollupProtocol.Missing); }
+        {
+            throw Errors.Fail(ErrorCode.NotFound, SampleRollupProtocol.Missing);
+        }
         var next = previous with
         {
             Revision = checked(previous.Revision + NextRevision),
@@ -68,7 +74,9 @@ internal static class SampleRollupCommands
     private static void Revision(SampleRollupState? previous, long expected)
     {
         if ((previous?.Revision ?? AbsentRevision) != expected)
-        { throw Errors.Fail(ErrorCode.RevisionConflict, SampleRollupProtocol.WrongRevision); }
+        {
+            throw Errors.Fail(ErrorCode.RevisionConflict, SampleRollupProtocol.WrongRevision);
+        }
     }
     private static void AdmitBucket(IKeyValueView view, PartitionRef partition, RefreshSampleRollup request,
         int limit, SampleRollupReadCharge charge)
@@ -76,6 +84,8 @@ internal static class SampleRollupCommands
         var scan = view.VisitRange(SampleRollupKeys.Prefix(partition, request.SeriesSet, request.SeriesId), limit,
             static (_, _) => true, observer: charge.Charge);
         if (scan.HasMore || scan.Records >= limit)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, SampleRollupProtocol.BucketBudget); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, SampleRollupProtocol.BucketBudget);
+        }
     }
 }

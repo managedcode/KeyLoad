@@ -30,7 +30,10 @@ internal static class SampleChunkRetentionRf3Seed
     }
 
     internal static SampleData Late(SampleChunkRf3Scenario scenario)
-        => scenario.Late with { Value = SampleChunkRetentionRf3Protocol.LateValue };
+        => scenario.Late with
+        {
+            Value = SampleChunkRetentionRf3Protocol.LateValue
+        };
     internal static MutationReceipt Mutation(string kind, long revision)
         => new(kind, TimeSeriesRf3Scenario.Set, TimeSeriesRf3Scenario.Series, revision);
     internal static CommandRequest Request(SampleChunkRf3Scenario scenario, Mutation mutation)

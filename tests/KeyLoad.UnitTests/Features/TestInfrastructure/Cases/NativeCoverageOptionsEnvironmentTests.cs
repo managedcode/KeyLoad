@@ -24,7 +24,10 @@ internal sealed class NativeCoverageOptionsEnvironmentTests
         configuration.AddInMemoryCollection(ConfiguredValues());
         var original = AppHostOptionsRegistration.BindNativeCoverage(configuration);
         var builder = DistributedApplication.CreateBuilder(new DistributedApplicationOptions
-        { DisableDashboard = true, Args = [] });
+        {
+            DisableDashboard = true,
+            Args = []
+        });
         var runner = builder.AddExecutable("coverage-options-handoff", "dotnet", ".");
         NativeCoverageRf3ExecutionEnvironment.Apply(runner, original, SourceManifestPath);
         var environment = new Dictionary<string, object>(StringComparer.Ordinal);

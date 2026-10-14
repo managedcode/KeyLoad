@@ -4,7 +4,7 @@ namespace KeyLoad.Analyzers.Features.CodeQuality;
 
 internal static class CodeQualityAssemblyNames
 {
-    public const string OrleansContracts = "KeyLoad.Orleans";
+    public const string OrleansContracts = "KeyLoad.Clustering";
     public const string Analyzer = "KeyLoad.Analyzers";
     private const string ProductionAssemblyPrefix = "KeyLoad.";
     private const string TestAssemblyMarker = "Tests";

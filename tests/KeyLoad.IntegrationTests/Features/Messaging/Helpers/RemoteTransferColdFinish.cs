@@ -47,7 +47,12 @@ internal static class RemoteTransferColdFinish
         };
         var create = new CommandRequest(Guid.NewGuid(), seed.Scenario.SourcePartition,
             [new CreateQueueTransfer(seed.Scenario.SourceQueue, transferId, seed.Scenario.DestinationQueue, message)]);
-        var healthy = seed with { TransferId = transferId, Message = message, Create = create };
+        var healthy = seed with
+        {
+            TransferId = transferId,
+            Message = message,
+            Create = create
+        };
         var original = await RemoteTransferColdStages.CreateAsync(sdk, mcp, healthy, token);
         var command = healthy.Accept(original.Intent);
         var accepted = await RemoteTransferColdStages.AcceptAsync(sdk, mcp, healthy, original.Intent, command, RemoteTransferColdProtocol.HealthyReadySequence, token);

@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 
 namespace KeyLoad.CrashHost.Features.ClusterRouting;
@@ -64,13 +64,17 @@ internal sealed partial class ControlledPartitionMovementNativeHosts : IAsyncDis
         {
             sealedObservers = new IGrainPartitionMovementSealedOperationObserver[ControlledPartitionMovementNativeHostEndpoints.OwnerCount];
             for (var index = SourceIndex; index < sealedObservers.Length; index++)
-            { sealedObservers[index] = observerFactory(index) ?? throw new InvalidOperationException(nameof(observerFactory)); }
+            {
+                sealedObservers[index] = observerFactory(index) ?? throw new InvalidOperationException(nameof(observerFactory));
+            }
         }
         if (authenticationObserverFactory is not null && authenticationObservers is null)
         {
             authenticationObservers = new IDatabaseAuthenticationExecutionObserver[ControlledPartitionMovementNativeHostEndpoints.OwnerCount];
             for (var index = SourceIndex; index < authenticationObservers.Length; index++)
-            { authenticationObservers[index] = authenticationObserverFactory(index) ?? throw new InvalidOperationException(nameof(authenticationObserverFactory)); }
+            {
+                authenticationObservers[index] = authenticationObserverFactory(index) ?? throw new InvalidOperationException(nameof(authenticationObserverFactory));
+            }
         }
         for (var index = SourceIndex; index < ControlledPartitionMovementNativeHostEndpoints.OwnerCount; index++)
         {
@@ -82,8 +86,12 @@ internal sealed partial class ControlledPartitionMovementNativeHosts : IAsyncDis
     internal static async Task JoinOriginalAsync(Task original)
     {
         try
-        { await original.ConfigureAwait(false); }
+        {
+            await original.ConfigureAwait(false);
+        }
         catch (Exception primary)
-        { throw original.Exception ?? new AggregateException(primary); }
+        {
+            throw original.Exception ?? new AggregateException(primary);
+        }
     }
 }

@@ -9,7 +9,9 @@ internal static class SubscriptionPausePublicFlow
     {
         SubscriptionPausePublicState? state = null;
         await SubscriptionPhasePublicTrial.WithCallersAsync(fixture, seed, async (sdk, mcp) =>
-        { state = await StartAsync(sdk, mcp, seed, token); }, token);
+        {
+            state = await StartAsync(sdk, mcp, seed, token);
+        }, token);
         var original = state ?? throw new InvalidOperationException("The paused original flow did not finish.");
         await SubscriptionFilterRf3Cold.RestartAsync(fixture, token);
         await SubscriptionPhasePublicTrial.WithCallersAsync(fixture, seed,

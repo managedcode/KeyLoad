@@ -11,7 +11,9 @@ internal static class EventFeedReservedExpiryRf3Read
     {
         if (marker.Phase != RequestCqrsProbePhase.EventVectorFirstDispatchReserved
             || marker.Outcome != RequestCqrsProbeOutcome.Observed)
-        { throw new InvalidOperationException(Invalid); }
+        {
+            throw new InvalidOperationException(Invalid);
+        }
         var node = RequestCqrsProbeFixtureProtocol.Nodes.Single(candidate
             => fixture.Json.ReadOwner(fixture.NodeFor(candidate).OwnerBytes).Voter == marker.Voter);
         var owned = fixture.NodeFor(node);
@@ -24,7 +26,9 @@ internal static class EventFeedReservedExpiryRf3Read
         var bytes = RequestCqrsProbeFileStore.ReadRecord(path);
         var actual = RequestCqrsEventVectorExpiryJson.Read(fixture.Json, bytes);
         if (actual.RequestId != marker.RequestId || actual.CommandId != marker.CommandId)
-        { throw new InvalidOperationException(Invalid); }
+        {
+            throw new InvalidOperationException(Invalid);
+        }
         return actual.OriginalExpiresAt;
     }
 }

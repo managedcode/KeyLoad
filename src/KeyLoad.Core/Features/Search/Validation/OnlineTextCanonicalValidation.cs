@@ -18,7 +18,9 @@ public sealed partial class DatabaseEngine
             || !consumer.Definition.MutationKinds.SequenceEqual([
                 MutationDiscriminatorNames.PutDocument, MutationDiscriminatorNames.PatchDocument,
                 MutationDiscriminatorNames.DeleteDocument], StringComparer.Ordinal))
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, OnlineTextPublicationProtocol.InvalidPublication); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, OnlineTextPublicationProtocol.InvalidPublication);
+        }
         Authorization.Require(principal, request.Consumer.Partition, request.Collection,
             Capability.Query | Capability.DocumentsRead);
         var resource = Resource(view, request.Consumer.Partition, request.Collection, ResourceKind.Collection);
@@ -40,6 +42,8 @@ public sealed partial class DatabaseEngine
             || placement.Incarnation != request.Placement.Incarnation
             || placement.PlacementEpoch != request.Placement.PlacementEpoch
             || !placement.VoterIds.SequenceEqual(request.Placement.VoterIds, StringComparer.Ordinal))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, OnlineTextPublicationProtocol.InvalidPublication); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, OnlineTextPublicationProtocol.InvalidPublication);
+        }
     }
 }

@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;

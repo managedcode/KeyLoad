@@ -30,7 +30,9 @@ internal static class PartitionMovementCleanupMatrixRf3Assertions
         {
             var marker = fixture.Json.ReadMarker(RequestCqrsProbeFileStore.ReadRecord(path));
             if (marker.ArmId != primary.ArmId)
-            { continue; }
+            {
+                continue;
+            }
             await Assert.That(marker.Phase == RequestCqrsProbePhase.ProducerDisposed).IsFalse();
             await Assert.That(marker.Outcome is RequestCqrsProbeOutcome.Released or RequestCqrsProbeOutcome.Cancelled).IsFalse();
         }

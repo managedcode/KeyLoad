@@ -30,7 +30,9 @@ internal static class McpGraphPathSchemaAssertions
     {
         var request = Resolve(input, input.GetProperty(McpDiscoveryProtocol.Definitions).GetProperty(McpCallerProtocol.Request));
         if (toolName != DirectTool && toolName != SqlTool)
-        { throw new InvalidOperationException(InvalidTool); }
+        {
+            throw new InvalidOperationException(InvalidTool);
+        }
         await McpGraphPathInputSchemaAssertions.VerifyAsync(toolName, request, input);
         var result = Resolve(output, output.GetProperty(McpDiscoveryProtocol.Definitions).GetProperty(McpCallerProtocol.Result));
         await VerifyFieldsAsync(result, ResultProperties, requiredResult);
@@ -75,7 +77,9 @@ internal static class McpGraphPathSchemaAssertions
         var partition = Resolve(root, properties.GetProperty(McpDiscoveryProtocol.Partition));
         await VerifyFieldsAsync(partition, PartitionProperties, PartitionRequired);
         foreach (var field in PartitionRequired)
-        { await VerifyPrimitiveAsync(partition, field, McpDiscoveryProtocol.String, root); }
+        {
+            await VerifyPrimitiveAsync(partition, field, McpDiscoveryProtocol.String, root);
+        }
         var computed = Resolve(root, partition.GetProperty(McpDiscoveryProtocol.Properties)
             .GetProperty(McpDiscoveryProtocol.AtomicPartitionId));
         await VerifyExactTypeSetAsync(computed.GetProperty(McpDiscoveryProtocol.Type),
@@ -133,7 +137,9 @@ internal static class McpGraphPathSchemaAssertions
         await Assert.That(actual.Length).IsEqualTo(expected.Length);
         await Assert.That(actual.All(item => item.ValueKind == JsonValueKind.String)).IsTrue();
         foreach (var item in expected)
-        { await Assert.That(actual.Count(value => value.GetString() == item)).IsEqualTo(1); }
+        {
+            await Assert.That(actual.Count(value => value.GetString() == item)).IsEqualTo(1);
+        }
     }
 
     private static JsonElement Resolve(JsonElement root, JsonElement schema)
@@ -143,7 +149,9 @@ internal static class McpGraphPathSchemaAssertions
         {
             var pointer = reference.GetString();
             if (pointer is null || !pointer.StartsWith("#/", StringComparison.Ordinal))
-            { throw new InvalidOperationException(InvalidReference); }
+            {
+                throw new InvalidOperationException(InvalidReference);
+            }
             schema = root;
             foreach (var segment in pointer[2..].Split('/'))
             {
@@ -153,7 +161,9 @@ internal static class McpGraphPathSchemaAssertions
             }
         }
         if (schema.TryGetProperty(McpDiscoveryProtocol.ReferenceKeyword, out _))
-        { throw new InvalidOperationException(ExcessReferenceDepth); }
+        {
+            throw new InvalidOperationException(ExcessReferenceDepth);
+        }
         return schema;
     }
 }

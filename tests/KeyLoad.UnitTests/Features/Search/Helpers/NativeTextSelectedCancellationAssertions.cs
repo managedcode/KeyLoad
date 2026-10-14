@@ -33,7 +33,10 @@ internal static class NativeTextSelectedCancellationAssertions
         CancellationToken token)
     {
         var selection = new TextIndexSelectionV1(maintenance.Consumer, maintenance.IndexGeneration);
-        var request = NativeTextBilingualAudit.Request(database.Partition, "hello") with { TextIndex = selection };
+        var request = NativeTextBilingualAudit.Request(database.Partition, "hello") with
+        {
+            TextIndex = selection
+        };
         var image = QueueWholeFlowStorage.Bytes(database.Store);
         var position = database.Store.Position;
         var originalReads = runtime.Owner.SelectedPostingReads(selection);

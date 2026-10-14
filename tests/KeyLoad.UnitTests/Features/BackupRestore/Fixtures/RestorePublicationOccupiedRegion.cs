@@ -42,7 +42,9 @@ internal sealed class RestorePublicationOccupiedRegion(string target) : IAsyncDi
     {
         await DisposeAsync().ConfigureAwait(false);
         if (created && released)
-        { File.Delete(Path.Combine(target, FileName)); }
+        {
+            File.Delete(Path.Combine(target, FileName));
+        }
     }
 
     public ValueTask DisposeAsync()
@@ -57,7 +59,9 @@ internal sealed class RestorePublicationOccupiedRegion(string target) : IAsyncDi
     private async Task CloseOriginalAsync()
     {
         if (owned is not null)
-        { await owned.DisposeAsync().ConfigureAwait(false); }
+        {
+            await owned.DisposeAsync().ConfigureAwait(false);
+        }
         owned = null;
         released = true;
     }

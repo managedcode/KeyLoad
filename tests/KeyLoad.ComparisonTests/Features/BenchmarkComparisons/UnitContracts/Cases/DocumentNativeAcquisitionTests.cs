@@ -38,7 +38,10 @@ internal sealed class DocumentNativeAcquisitionTests
     }
     private sealed class AdmissionClient(Exception? cleanup) : IAsyncDisposable
     {
-        internal int Disposals { get; private set; }
+        internal int Disposals
+        {
+            get; private set;
+        }
         public ValueTask DisposeAsync()
         {
             if (Disposals > 0)

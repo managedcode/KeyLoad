@@ -32,7 +32,9 @@ internal static class CredentialVerifierR53Replay
         Func<Task> afterResult, CancellationToken token)
     {
         if (original is not { IsSuccess: true, Problem: null })
-        { throw new InvalidOperationException(CredentialVerifierR53Protocol.MissingState); }
+        {
+            throw new InvalidOperationException(CredentialVerifierR53Protocol.MissingState);
+        }
         var sdk = await McpCallerAssertions.SdkStatusAsync(await root.ConfigureApiKeyAsync(id, credential, token));
         await SqlRf3Protocol.EqualAsync(original, sdk);
         await afterResult();

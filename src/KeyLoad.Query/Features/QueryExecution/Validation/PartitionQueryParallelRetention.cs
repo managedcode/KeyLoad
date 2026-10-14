@@ -14,8 +14,13 @@ internal static class PartitionQueryParallelRetention
         var retained = RetainedBytes(original.MaxRetainedBytes, requestBytes);
         if (retained < checked(PartitionQueryRetention.LeafHeapReserve(original.MaxCandidates)
             + PartitionQueryRetention.CandidateArrayBytes(original.MaxCandidates)))
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, Bound); }
-        return original with { MaxRetainedBytes = retained };
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, Bound);
+        }
+        return original with
+        {
+            MaxRetainedBytes = retained
+        };
     }
 
     internal static long ReplyBytes(PartitionQueryLeafPlanV1 child)
@@ -25,7 +30,9 @@ internal static class PartitionQueryParallelRetention
     {
         var retained = RetainedBytes(originalBytes, requestBytes);
         if (retained < minimumRetainedBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, Bound); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, Bound);
+        }
         return retained;
     }
 

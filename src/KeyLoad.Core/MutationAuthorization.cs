@@ -59,6 +59,15 @@ public sealed partial class DatabaseEngine
         }
         AuthorizeComposition(view, principal, partition, effect);
         var resource = ReauthorizeEffectResource(view, partition, effect, admission);
+        ReauthorizeEffectDocument(view, principal, partition, effect, resource);
+        ReauthorizeEffectFields(principal, resource, effect);
+        ReauthorizeEffectHeaders(principal, resource, effect);
+        ReauthorizeEffectIndexes(principal, resource, effect);
+        ReauthorizeEffectVertices(view, principal, partition, effect);
+    }
+
+    private void ReauthorizeEffectDocument(IKeyValueView view, PrincipalRecord principal, PartitionRef partition, Mutation effect, ResourceDefinition resource)
+    {
         var documentId = effect switch
         {
             InsertTypedRow insert => Features.RelationalStorage.RelationalRowValidation.InsertIdentity(resource, insert.Json, OperationLimitsOptions),
@@ -82,11 +91,9 @@ public sealed partial class DatabaseEngine
             }
         }
         if (effect is InsertTypedRow)
-        { Authorization.RequireWriteRow(principal, document?.Access ?? new RowAccess()); }
-        ReauthorizeEffectFields(principal, resource, effect);
-        ReauthorizeEffectHeaders(principal, resource, effect);
-        ReauthorizeEffectIndexes(principal, resource, effect);
-        ReauthorizeEffectVertices(view, principal, partition, effect);
+        {
+            Authorization.RequireWriteRow(principal, document?.Access ?? new RowAccess());
+        }
     }
 
     private ResourceDefinition ReauthorizeEffectResource(IKeyValueView view, PartitionRef partition, Mutation effect,
@@ -125,7 +132,10 @@ public sealed partial class DatabaseEngine
         {
             foreach (var policy in resource.HeaderPolicies)
             {
-                Authorization.RequireFieldWrite(principal, resource with { FieldPolicies = resource.HeaderPolicies }, policy.Path);
+                Authorization.RequireFieldWrite(principal, resource with
+                {
+                    FieldPolicies = resource.HeaderPolicies
+                }, policy.Path);
             }
         }
     }

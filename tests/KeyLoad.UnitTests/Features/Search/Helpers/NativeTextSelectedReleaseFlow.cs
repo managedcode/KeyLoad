@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Query;
 using KeyLoad.UnitTests.Features.Messaging;
 using TUnit.Assertions.Enums;
@@ -20,14 +20,21 @@ internal static class NativeTextSelectedReleaseFlow
         _ = await NativeTextMaintenanceCommit.ExecuteAsync<ProjectionConsumerInfo>(database,
             OperationKind.ReleaseProjectionConsumer,
             new ReleaseProjectionConsumerRequest(id, maintenance.Consumer, maintenance.IndexGeneration), id, token);
-        _ = await runtime.PhaseAsync(database, maintenance with { CommandId = Guid.NewGuid(), Mode = TextIndexMaintenanceMode.Release },
+        _ = await runtime.PhaseAsync(database, maintenance with
+        {
+            CommandId = Guid.NewGuid(),
+            Mode = TextIndexMaintenanceMode.Release
+        },
             TextMaintenanceCapabilityKind.Release, token: token);
         var image = QueueWholeFlowStorage.Bytes(database.Store);
         var cut = database.Store.Position;
         var request = NativeTextBilingualAudit.Request(database.Partition, ChangedTerm);
         RankedDocument[]? partial = null;
         var failure = await Assert.ThrowsExactlyAsync<KeyLoadException>(async () => partial =
-            await search.SearchAsync(Root, request with { TextIndex = new(maintenance.Consumer, maintenance.IndexGeneration) }, token))
+            await search.SearchAsync(Root, request with
+            {
+                TextIndex = new(maintenance.Consumer, maintenance.IndexGeneration)
+            }, token))
             ?? throw new InvalidOperationException();
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.HistoryUnavailable);
         await Assert.That(failure.Message).IsEqualTo(NativeTextSelectedCallerFlow.Mismatch);

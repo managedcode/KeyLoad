@@ -71,7 +71,10 @@ internal sealed class AnnSeedFingerprintTests
             AnnSeedTestSupport.Field, alternateSpace, UnitAnnSeedOptions.Execution(new()), new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits)));
         var firstExpected = new VectorRecord(AnnSeedTestSupport.Id(0), AnnSeedTestSupport.Field,
             AnnSeedTestSupport.Space(), ImmutableArray.Create(0.25f, 1f, -0.5f), 1);
-        var secondExpected = firstExpected with { Space = alternateSpace };
+        var secondExpected = firstExpected with
+        {
+            Space = alternateSpace
+        };
 
         await Assert.That(first.Records).HasSingleItem();
         await Assert.That(second.Records).HasSingleItem();

@@ -54,7 +54,10 @@ internal sealed class KurrentGossipVersionTests
     public async Task AForeignBuildOnOneOtherwiseMatchingMemberRejectsTheWholeGroup(int count)
     {
         var views = NativeDocumentTopologyKurrentTests.Views(count, PinnedGossipVersion);
-        ReplaceMember(views, 1, views[0].Members[1] with { Version = RejectedVersions[1] });
+        ReplaceMember(views, 1, views[0].Members[1] with
+        {
+            Version = RejectedVersions[1]
+        });
         await Assert.That(KurrentClusterMembers.IsReady(views, ComparisonTopologies.FromNodeCount(count))).IsFalse();
     }
 
@@ -104,7 +107,11 @@ internal sealed class KurrentGossipVersionTests
             var original = views[view].Members[index];
             var members = views[view].Members.ToArray();
             members[index] = replacement;
-            views[view] = views[view] with { Members = members, LocalMember = views[view].LocalMember.Id == original.Id ? replacement : views[view].LocalMember };
+            views[view] = views[view] with
+            {
+                Members = members,
+                LocalMember = views[view].LocalMember.Id == original.Id ? replacement : views[view].LocalMember
+            };
         }
     }
 }

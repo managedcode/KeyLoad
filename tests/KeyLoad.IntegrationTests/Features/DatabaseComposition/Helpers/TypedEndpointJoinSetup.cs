@@ -79,7 +79,9 @@ internal static class TypedEndpointJoinSetup
     internal static Task<ResourceDefinition> ConfigureAsync(RequestCqrsRf3Callers admin,
         PartitionRef partition, ResourceDefinition definition, CancellationToken token, long? expectedVersion = null)
         => ConfigureCoreAsync(admin, new(partition.TenantId, partition.DatabaseId, definition)
-        { ExpectedSchemaVersion = expectedVersion }, token);
+        {
+            ExpectedSchemaVersion = expectedVersion
+        }, token);
 
     private static async Task<ResourceDefinition> ConfigureCoreAsync(RequestCqrsRf3Callers admin,
         ConfigureResourceRequest request, CancellationToken token)

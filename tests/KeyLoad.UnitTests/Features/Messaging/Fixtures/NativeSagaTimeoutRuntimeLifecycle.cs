@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 using Microsoft.Extensions.DependencyInjection;
 using Orleans.TestingHost;
 

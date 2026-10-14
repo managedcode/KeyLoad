@@ -80,7 +80,9 @@ internal sealed class ConfiguredVectorProfileTests
         var original = database.Store.Read(view => view.GetRecord<ResourceDefinition>(key))!;
         var rejected = database.Submit(OperationKind.ConfigureResource, new ConfigureResourceRequest(database.Partition.TenantId,
             database.Partition.DatabaseId, original with
-            { VectorProfiles = [new(ConfiguredVectorProfileFlow.Field, ConfiguredVectorProfileFlow.Space with { Model = ChangedModel })] }));
+            {
+                VectorProfiles = [new(ConfiguredVectorProfileFlow.Field, ConfiguredVectorProfileFlow.Space with { Model = ChangedModel })]
+            }));
         await Assert.That(rejected.Error).IsEqualTo(ErrorCode.UnsupportedCapability);
         await Assert.That(rejected.SafeDetail).IsEqualTo(UnsupportedDefinition);
         var restored = database.Store.Read(view => view.GetRecord<ResourceDefinition>(key))!;

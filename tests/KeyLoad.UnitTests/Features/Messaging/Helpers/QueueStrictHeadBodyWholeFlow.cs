@@ -18,24 +18,35 @@ internal static class QueueStrictHeadBodyWholeFlow
                 await QueueStrictHeadBodyContinuation.RunAsync(fixture, state, failures, token);
             }, failures);
         }
-        catch (Exception error) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
-        catch (Exception error) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
+        catch (Exception error) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
+        catch (Exception error) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
         KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }
 
     private static async Task<QueueStrictHeadBodyState> SeedAsync(TestDatabase fixture, MessageState headState)
     {
         if (headState is not (MessageState.Scheduled or MessageState.Leased))
-        { throw new ArgumentOutOfRangeException(nameof(headState)); }
+        {
+            throw new ArgumentOutOfRangeException(nameof(headState));
+        }
         fixture.Configure(QueueOrderedRetryProtocol.Queue, ResourceKind.WorkQueue,
-            queuePolicy: new() { OrderingProfile = QueueOrderingProfile.StrictPerKey });
+            queuePolicy: new()
+            {
+                OrderingProfile = QueueOrderingProfile.StrictPerKey
+            });
         var state = new QueueOrderedRetryState(fixture.Partition,
             QueueWholeFlowStorage.Clock(fixture.Store), QueueParkedHeadPolicy.Block);
         var scheduledAt = state.Time.AddSeconds(60);
         var literal = QueueOrderedRetryOperations.Literal(QueueOrderedRetryProtocol.First) with
-        { NotBefore = headState == MessageState.Scheduled ? scheduledAt : null };
+        {
+            NotBefore = headState == MessageState.Scheduled ? scheduledAt : null
+        };
         state.Batch(fixture.Database, literal, QueueOrderedRetryOperations.Literal(QueueOrderedRetryProtocol.Second),
             QueueOrderedRetryOperations.Literal(QueueOrderedRetryProtocol.Other, QueueOrderedRetryProtocol.OtherKey)).Get<CommitReceipt>();
         if (headState == MessageState.Leased)
@@ -55,7 +66,10 @@ internal static class QueueStrictHeadBodyWholeFlow
         operation = fixture.Database.PrepareQueueRetryOperation(operation);
         var original = QueueLifecycleConditionAssertions.Capture(fixture.Store);
         QueueLifecycleConditionOperations.Restore(fixture.Store, key,
-            NativeSerialization.Serialize(expectedBody with { Id = "foreign-strict-head" }));
+            NativeSerialization.Serialize(expectedBody with
+            {
+                Id = "foreign-strict-head"
+            }));
         var damaged = QueueLifecycleConditionAssertions.Capture(fixture.Store);
         await Assert.That(damaged.Position).IsEqualTo(original.Position + 1);
         var result = new QueueStrictHeadBodyState(state, headState, scheduledAt, key, row, operation, original, damaged);

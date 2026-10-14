@@ -7,7 +7,9 @@ public sealed class UnavailablePartitionMovementCheckpointVerifier : IPartitionM
     /// <summary>Gets the immutable rejecting authority used by standalone execution compositions.</summary>
     public static UnavailablePartitionMovementCheckpointVerifier Instance { get; } = new();
 
-    private UnavailablePartitionMovementCheckpointVerifier() { }
+    private UnavailablePartitionMovementCheckpointVerifier()
+    {
+    }
 
     /// <inheritdoc />
     public string Verify(DatabaseEngine database, string principalId, ReadOnlyMemory<byte> ownedBody,

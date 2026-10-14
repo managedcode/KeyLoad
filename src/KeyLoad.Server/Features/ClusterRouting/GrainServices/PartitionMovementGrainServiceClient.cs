@@ -1,5 +1,5 @@
 using System.Security.Cryptography;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using Microsoft.Extensions.Options;
 using Orleans.Runtime.Services;
 
@@ -46,16 +46,23 @@ internal sealed partial class PartitionMovementGrainServiceClient : GrainService
         bool query, ReadOnlyMemory<byte> payload, string signature, string destination, SiloAddress address)
     {
         if (payload.IsEmpty || payload.Length > partition.Database.Limits.MaxBatchBytes)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, PartitionMovementProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, PartitionMovementProtocol.InvalidProof);
+        }
         _ = discovery.RequireDestination(destination);
         var current = local.Read();
         if (!current.TransportReady)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMovementProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMovementProtocol.Unavailable);
+        }
         var request = new PartitionMovementGrainServiceRequest(channel, query, payload.ToArray(), signature,
             current.VoterId, current.SiloAddress, destination, address.ToParsableString(), Guid.NewGuid(),
             clock.GetUtcNow() + routing.RequestLifetime, string.Empty);
         using var mac = CreateMac(ControlSecret());
-        return request with { SenderSignature = mac.SignNativeRequest(request) };
+        return request with
+        {
+            SenderSignature = mac.SignNativeRequest(request)
+        };
     }
 
     internal async Task<PartitionMovementGrainServiceReply> ExchangeAsync(SiloAddress address,
@@ -64,26 +71,43 @@ internal sealed partial class PartitionMovementGrainServiceClient : GrainService
         token.ThrowIfCancellationRequested();
         var reply = await GetGrainService(address).ExchangeAsync(request, token).ConfigureAwait(false) ?? throw InvalidReply(ReplyNullStage);
         if (!HasBoundedShape(reply))
-        { throw InvalidReply(ReplyBodyStage); }
+        {
+            throw InvalidReply(ReplyBodyStage);
+        }
         if (reply.Payload.Length > partition.Database.Limits.MaxBatchBytes)
-        { throw InvalidReply(ReplyPayloadStage); }
+        {
+            throw InvalidReply(ReplyPayloadStage);
+        }
         if (string.IsNullOrEmpty(reply.SenderSignature) || reply.SenderSignature.Length != ReplicaTransportProtocol.HashHexCharacters)
-        { throw InvalidReply(ReplyOuterSignatureLengthStage); }
-        reply = reply with { Payload = reply.Payload.ToArray() };
+        {
+            throw InvalidReply(ReplyOuterSignatureLengthStage);
+        }
+        reply = reply with
+        {
+            Payload = reply.Payload.ToArray()
+        };
         using var mac = CreateMac(ControlSecret());
         if (reply.Nonce != request.Nonce)
-        { throw InvalidReply(ReplyNonceStage); }
+        {
+            throw InvalidReply(ReplyNonceStage);
+        }
         if (!mac.VerifyNativeReply(reply))
-        { throw InvalidReply(ReplySignatureStage); }
+        {
+            throw InvalidReply(ReplySignatureStage);
+        }
         if (reply.Error is { } error)
         {
             if (!Enum.IsDefined(error) || !reply.Payload.IsEmpty || reply.Signature is not { Length: EmptyErrorSignatureLength }
                 || reply.SafeDetail != PartitionMovementProtocol.Unavailable)
-            { throw InvalidReply(ReplyErrorStage); }
+            {
+                throw InvalidReply(ReplyErrorStage);
+            }
             throw Errors.Fail(error, PartitionMovementProtocol.Unavailable);
         }
         if (reply.Payload.IsEmpty || reply.SafeDetail is not null || string.IsNullOrEmpty(reply.Signature))
-        { throw InvalidReply(ReplySuccessStage); }
+        {
+            throw InvalidReply(ReplySuccessStage);
+        }
         return reply;
     }
 
@@ -119,7 +143,9 @@ internal sealed partial class PartitionMovementGrainServiceClient : GrainService
     {
         var key = Convert.FromBase64String(configured);
         try
-        { return new(key, partition.Database.Limits.MaxBatchBytes); }
+        {
+            return new(key, partition.Database.Limits.MaxBatchBytes);
+        }
         finally { CryptographicOperations.ZeroMemory(key); }
     }
 }

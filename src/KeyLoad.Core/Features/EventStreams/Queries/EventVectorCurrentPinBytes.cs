@@ -18,7 +18,9 @@ internal static class EventVectorCurrentPinBytes
             admission.RequireEncodedBytes(checked(key.Length + bytes.Length));
             var pin = NativeSerialization.Deserialize<EventVectorSourcePin>(bytes);
             if (phase.Role == EventVectorSourcePhaseRole.Pin)
-            { RequirePin(pin, phase, request); }
+            {
+                RequirePin(pin, phase, request);
+            }
             else
             {
                 var first = EventVectorOriginalPinBinding.Read(request, admission);
@@ -38,6 +40,8 @@ internal static class EventVectorCurrentPinBytes
             || pin.SourceSchemaVersion != request.SourceSchemaVersion
             || pin.OriginalPinCommandId != phase.PhaseCommandId || pin.OriginalPinExpiresAt != phase.FirstExpiresAt
             || !CryptographicOperations.FixedTimeEquals(pin.OriginalPinBodyDigest.Span, phase.OriginalBodyDigest.Span))
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
     }
 }

@@ -10,7 +10,9 @@ internal sealed class RequestCqrsProbeActivationInventory(string sessionId, Requ
         var bytes = RequestCqrsProbeFiles.ReadRecord(path, options);
         var value = json.ReadActivation(bytes);
         if (value.SessionId != sessionId || RequestCqrsProbeActivationValidation.Name(value) != name)
-        { throw new InvalidOperationException(RequestCqrsProbeProtocol.InvalidFiles); }
+        {
+            throw new InvalidOperationException(RequestCqrsProbeProtocol.InvalidFiles);
+        }
         records.RegisterImmutable(name, bytes);
         present.Add(name);
         witnesses.Add(value);
@@ -20,6 +22,8 @@ internal sealed class RequestCqrsProbeActivationInventory(string sessionId, Requ
         List<RequestCqrsProbeMarkerRecord> markers)
     {
         foreach (var value in witnesses)
-        { RequestCqrsProbeActivationValidation.RequireMarker(value, markers); }
+        {
+            RequestCqrsProbeActivationValidation.RequireMarker(value, markers);
+        }
     }
 }

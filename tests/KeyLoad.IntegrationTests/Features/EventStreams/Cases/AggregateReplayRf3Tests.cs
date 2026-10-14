@@ -35,16 +35,31 @@ internal sealed class AggregateReplayRf3Tests(ClusterFixture fixture)
             expectedSnapshotState: AggregateReplayRf3Tokens.InitialState);
 
         await AggregateReplayRf3Assertions.ErrorAsync(sdk, mcp,
-            request with { ReducerVersion = AggregateReplayRf3Tokens.UnknownReducer },
+            request with
+            {
+                ReducerVersion = AggregateReplayRf3Tokens.UnknownReducer
+            },
             ErrorCode.FormatUnsupported, deadline.Token);
         await AggregateReplayRf3Assertions.ErrorAsync(sdk, mcp,
-            request with { StateSchemaVersion = AggregateReplayRf3Tokens.UnknownStateSchema },
+            request with
+            {
+                StateSchemaVersion = AggregateReplayRf3Tokens.UnknownStateSchema
+            },
             ErrorCode.FormatUnsupported, deadline.Token);
         await AggregateReplayRf3Assertions.ErrorAsync(sdk, mcp,
-            request with { Stream = request.Stream with { Generation = AggregateReplayRf3Tokens.Generation + 1 } },
+            request with
+            {
+                Stream = request.Stream with
+                {
+                    Generation = AggregateReplayRf3Tokens.Generation + 1
+                }
+            },
             ErrorCode.TokenInvalidated, deadline.Token);
         await AggregateReplayRf3Assertions.ErrorAsync(sdk, mcp,
-            request with { MaximumEvents = AggregateReplayRf3Tokens.TooSmallTail },
+            request with
+            {
+                MaximumEvents = AggregateReplayRf3Tokens.TooSmallTail
+            },
             ErrorCode.BudgetExceeded, deadline.Token);
     }
 

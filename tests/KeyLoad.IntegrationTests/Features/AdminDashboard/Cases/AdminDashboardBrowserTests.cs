@@ -28,7 +28,10 @@ internal sealed class AdminDashboardBrowserTests(ClusterFixture fixture)
         var url = new Uri(http.BaseAddress!, AdminPath).AbsoluteUri;
         await using var browser = await AdminBrowserProcess.StartAsync(deadline.Token);
         await AdminBrowserLifecycleAssertions.BeginNetworkAsync(browser.Cdp, deadline.Token);
-        await browser.Cdp.CommandAsync(AdminBrowserProtocol.PageNavigate, new { url }, deadline.Token);
+        await browser.Cdp.CommandAsync(AdminBrowserProtocol.PageNavigate, new
+        {
+            url
+        }, deadline.Token);
         await browser.Cdp.WaitAsync(Ready, deadline.Token);
         await AdminBrowserAssertions.ConnectAsync(browser.Cdp, fixture, scenario, deadline.Token);
         await AdminBrowserLifecycleAssertions.VerifyRefreshAndMotionAsync(browser.Cdp, deadline.Token);

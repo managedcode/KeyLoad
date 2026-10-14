@@ -12,7 +12,9 @@ internal sealed record ReplicaSubmissionOutcomeState(long Position, long Applied
         {
             var page = view.Scan([], MaximumRows, null);
             if (page.HasMore)
-            { throw new InvalidOperationException("The complete genuine fixture exceeded its bounded inventory."); }
+            {
+                throw new InvalidOperationException("The complete genuine fixture exceeded its bounded inventory.");
+            }
             return NativeSerialization.Serialize(page);
         });
         return new(database.Store.Position, database.Database.LastApplied, journal.LastIndex,

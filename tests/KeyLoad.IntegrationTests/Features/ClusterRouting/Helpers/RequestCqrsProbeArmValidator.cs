@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
@@ -21,7 +21,9 @@ internal static class RequestCqrsProbeArmValidator
             || (readKind is { } read && !Enum.IsDefined(read))
             || phase is (RequestCqrsProbePhase.NativeModelBeforeDispatch or RequestCqrsProbePhase.NativeModelAfterDispatch or RequestCqrsProbePhase.NativeModelReplayBeforeDispatch)
                 && (readKind is not null || commandId == Guid.Empty || action != RequestCqrsProbeAction.Hold))
-        { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.InvalidArm); }
+        {
+            throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.InvalidArm);
+        }
     }
 
     internal static void ValidateDecoded(RequestCqrsProbeArmRecord decoded, Guid armId, string principalId,
@@ -31,6 +33,8 @@ internal static class RequestCqrsProbeArmValidator
             || decoded.Kind != RequestCqrsProbeFixtureProtocol.ArmKind || decoded.ArmId != armId
             || decoded.PrincipalId != principalId || decoded.CommandId != commandId || decoded.ReadKind != readKind
             || decoded.Phase != phase || decoded.Action != action)
-        { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.InvalidArm); }
+        {
+            throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.InvalidArm);
+        }
     }
 }

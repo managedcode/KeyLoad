@@ -65,6 +65,8 @@ internal static class DueFaultRf3SeedWriter
     internal static void AssertSetupLead(DateTimeOffset dueAt)
     {
         if (dueAt - TimeProvider.System.GetUtcNow() < TimeSpan.FromSeconds(DueFaultRf3Protocol.MinimumSetupLeadSeconds))
-        { throw new TimeoutException(DueFaultRf3Protocol.SetupLeadFailure); }
+        {
+            throw new TimeoutException(DueFaultRf3Protocol.SetupLeadFailure);
+        }
     }
 }

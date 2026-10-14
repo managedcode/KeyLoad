@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.IntegrationTests.Features.Search;

@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server.Features.Search;
 using KeyLoad.UnitTests.Features.Messaging;
 using KeyLoad.UnitTests.Features.Search;
@@ -23,9 +23,14 @@ internal static class RequestCqrsAnnSettlementReplayFlow
         var expected = OutcomeStoreOracle.ReadPartition(fixture.Database.Store, original.Consumer.Partition,
             RequestCqrsAnnTestData.Principal, intent.CommandId)?.Get<ProjectionBatchResult>() ?? throw new InvalidOperationException();
         await ReplayAsync(fixture, intent, expected, token);
-        await RefuseAsync(fixture, intent with { InitialAnnMaintenanceSettlement = null }, token);
         await RefuseAsync(fixture, intent with
-        { InitialAnnMaintenanceSettlement = intent.InitialAnnMaintenanceSettlement + AlteredProofSuffix }, token);
+        {
+            InitialAnnMaintenanceSettlement = null
+        }, token);
+        await RefuseAsync(fixture, intent with
+        {
+            InitialAnnMaintenanceSettlement = intent.InitialAnnMaintenanceSettlement + AlteredProofSuffix
+        }, token);
         await ReplayAsync(fixture, intent, expected, token);
         await RequestCqrsAnnOriginalReplay.RequireAsync(fixture, original, result, token);
     }

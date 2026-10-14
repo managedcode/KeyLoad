@@ -24,29 +24,41 @@ internal static class McpGatewayMetaArgumentReader
         if (request.Params is not JsonObject parameters
             || parameters[McpTransportProtocol.Name] is not JsonValue nameNode
             || !nameNode.TryGetValue<string>(out var name))
-        { throw Errors.Fail(ErrorCode.UnsupportedCapability, McpCatalogProtocol.InvalidOperation); }
+        {
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, McpCatalogProtocol.InvalidOperation);
+        }
         return Select(name, parameters[McpGatewayMetaProtocol.Arguments]);
     }
 
     internal static McpGatewayMetaSelection Select(string? name, JsonNode? arguments)
     {
         if (string.IsNullOrWhiteSpace(name) || !McpGatewayMetaProtocol.TryGetOperation(name, out var operation))
-        { throw Errors.Fail(ErrorCode.UnsupportedCapability, McpCatalogProtocol.InvalidOperation); }
+        {
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, McpCatalogProtocol.InvalidOperation);
+        }
         if (operation != McpGatewayMetaOperation.Invoke)
-        { return new(operation, null); }
+        {
+            return new(operation, null);
+        }
         if (arguments is not JsonObject invokeArguments
             || invokeArguments[McpGatewayMetaProtocol.ToolId] is not JsonValue toolNode
             || !toolNode.TryGetValue<string>(out var toolId) || string.IsNullOrWhiteSpace(toolId))
-        { throw InvalidArguments(); }
+        {
+            throw InvalidArguments();
+        }
         if (!McpOperationCatalog.TryGetTool(toolId, out var descriptor))
-        { throw Errors.Fail(ErrorCode.UnsupportedCapability, McpCatalogProtocol.InvalidOperation); }
+        {
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, McpCatalogProtocol.InvalidOperation);
+        }
         return new(operation, descriptor);
     }
 
     internal static McpGatewayMetaRequest Read(McpGatewayMetaOperation operation, IDictionary<string, JsonElement>? arguments, IOptions<McpExecutionOptions> executionOptions)
     {
         if (arguments is null || !HasExactKeys(operation, arguments))
-        { throw InvalidArguments(); }
+        {
+            throw InvalidArguments();
+        }
         return operation switch
         {
             McpGatewayMetaOperation.Search => ReadSearch(arguments: arguments, executionOptions: executionOptions),
@@ -93,12 +105,18 @@ internal static class McpGatewayMetaArgumentReader
     {
         if (!arguments.TryGetValue(McpGatewayMetaProtocol.ToolId, out var toolValue)
             || toolValue.ValueKind != JsonValueKind.String)
-        { throw InvalidArguments(); }
+        {
+            throw InvalidArguments();
+        }
         var toolId = toolValue.GetString();
         if (string.IsNullOrWhiteSpace(toolId))
-        { throw InvalidArguments(); }
+        {
+            throw InvalidArguments();
+        }
         if (!McpOperationCatalog.TryGetTool(toolId, out _))
-        { throw Errors.Fail(ErrorCode.UnsupportedCapability, McpCatalogProtocol.InvalidOperation); }
+        {
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, McpCatalogProtocol.InvalidOperation);
+        }
         var values = arguments.TryGetValue(McpGatewayMetaProtocol.Arguments, out var nested)
             ? ReadObject(nested) : new Dictionary<string, object?>(StringComparer.Ordinal);
         return new(McpGatewayMetaOperation.Invoke, ToolId: toolId, Arguments: values);
@@ -108,17 +126,25 @@ internal static class McpGatewayMetaArgumentReader
     {
         if (!arguments.TryGetValue(McpGatewayMetaProtocol.Query, out var value)
             || value.ValueKind != JsonValueKind.String)
-        { throw InvalidArguments(); }
+        {
+            throw InvalidArguments();
+        }
         var query = value.GetString();
         if (string.IsNullOrWhiteSpace(query))
-        { throw InvalidArguments(); }
+        {
+            throw InvalidArguments();
+        }
         try
         {
             if (StrictUtf8.GetByteCount(query) > executionOptions.Value.MaximumDiscoveryQueryBytes)
-            { throw InvalidArguments(); }
+            {
+                throw InvalidArguments();
+            }
         }
         catch (EncoderFallbackException)
-        { throw InvalidArguments(); }
+        {
+            throw InvalidArguments();
+        }
         return query;
     }
 
@@ -127,28 +153,38 @@ internal static class McpGatewayMetaArgumentReader
         const int ParsedValidationBoundary = 1;
 
         if (!arguments.TryGetValue(key, out var value))
-        { return fallback; }
+        {
+            return fallback;
+        }
         if (value.ValueKind != JsonValueKind.Number || !value.TryGetInt32(out var parsed) || parsed < ParsedValidationBoundary || parsed > maximum)
-        { throw InvalidArguments(); }
+        {
+            throw InvalidArguments();
+        }
         return parsed;
     }
 
     private static bool ReadBoolean(JsonElement value)
     {
         if (value.ValueKind is JsonValueKind.True or JsonValueKind.False)
-        { return value.GetBoolean(); }
+        {
+            return value.GetBoolean();
+        }
         throw InvalidArguments();
     }
 
     private static Dictionary<string, object?> ReadObject(JsonElement value)
     {
         if (value.ValueKind != JsonValueKind.Object)
-        { throw InvalidArguments(); }
+        {
+            throw InvalidArguments();
+        }
         var result = new Dictionary<string, object?>(StringComparer.Ordinal);
         foreach (var property in value.EnumerateObject())
         {
             if (!result.TryAdd(property.Name, property.Value.Clone()))
-            { throw InvalidArguments(); }
+            {
+                throw InvalidArguments();
+            }
         }
         return result;
     }

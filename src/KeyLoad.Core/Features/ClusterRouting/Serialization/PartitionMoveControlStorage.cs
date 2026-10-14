@@ -29,7 +29,9 @@ internal static class PartitionMoveControlStorage
         Guid moveId, int maximumEncodedBytes)
     {
         if (moveId == Guid.Empty)
-        { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid);
+        }
         PartitionMoveControlRecord? record = null;
         view.ReadValue(RecordKey(partition, moveId), bytes =>
         {
@@ -37,7 +39,9 @@ internal static class PartitionMoveControlStorage
             record = NativeSerialization.Deserialize<PartitionMoveControlRecord>(bytes);
             PartitionMoveControlValidation.Require(record, partition);
             if (record.MoveId != moveId)
-            { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid);
+            }
         });
         return record;
     }
@@ -47,7 +51,9 @@ internal static class PartitionMoveControlStorage
     {
         PartitionMoveControlValidation.Require(record, record.Partition);
         if (NativeSerialization.Measure(record) > maximumEncodedBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
+        }
         transaction.Put(RecordKey(record.Partition, record.MoveId), NativeSerialization.Serialize(record));
         transaction.Put(ActiveKey(record.Partition), NativeSerialization.Serialize(record.MoveId));
     }
@@ -55,6 +61,8 @@ internal static class PartitionMoveControlStorage
     private static void RequireLength(int length, int maximumEncodedBytes)
     {
         if (length > maximumEncodedBytes)
-        { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid);
+        }
     }
 }

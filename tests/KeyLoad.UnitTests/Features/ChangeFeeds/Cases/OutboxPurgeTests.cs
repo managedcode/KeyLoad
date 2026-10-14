@@ -55,7 +55,13 @@ internal sealed class OutboxPurgeTests
         var entryKey = EntryKey(database.Partition, 1);
         var bytes = database.Store.Read(view => view.ReadOwnedValue(entryKey)!);
         var entry = NativeSerialization.Deserialize<OutboxEntry>(bytes);
-        var wrongPartition = entry with { Commit = entry.Commit with { AtomicPartitionId = ForeignPartitionId } };
+        var wrongPartition = entry with
+        {
+            Commit = entry.Commit with
+            {
+                AtomicPartitionId = ForeignPartitionId
+            }
+        };
         database.Store.Commit((transaction, _) =>
         {
             transaction.Put(entryKey, NativeSerialization.Serialize(wrongPartition));
@@ -186,7 +192,10 @@ internal sealed class OutboxPurgeTests
         else
         {
             var bytes = database.Store.Read(view => view.ReadOwnedValue(key)!);
-            var entry = NativeSerialization.Deserialize<OutboxEntry>(bytes) with { Sequence = 3 };
+            var entry = NativeSerialization.Deserialize<OutboxEntry>(bytes) with
+            {
+                Sequence = 3
+            };
             database.Store.Commit((transaction, _) =>
             {
                 transaction.Put(key, NativeSerialization.Serialize(entry));

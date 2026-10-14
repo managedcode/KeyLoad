@@ -20,10 +20,22 @@ internal sealed class ComparisonProgressNativeFixture : IAsyncDisposable
         Capture = new ComparisonTestLogCapture(application, NativeExecutionPolicyFixture.Harness(), [NodeName], progressPath);
     }
 
-    internal DistributedApplication Application { get; }
-    internal ContainerResource Runner { get; }
-    internal ContainerResource Node { get; }
-    internal ComparisonTestLogCapture Capture { get; }
+    internal DistributedApplication Application
+    {
+        get;
+    }
+    internal ContainerResource Runner
+    {
+        get;
+    }
+    internal ContainerResource Node
+    {
+        get;
+    }
+    internal ComparisonTestLogCapture Capture
+    {
+        get;
+    }
 
     internal static async Task<ComparisonProgressNativeFixture> CreateAsync(string progressPath)
     {

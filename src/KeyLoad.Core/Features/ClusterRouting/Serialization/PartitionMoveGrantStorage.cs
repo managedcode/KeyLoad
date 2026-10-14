@@ -45,7 +45,9 @@ internal static class PartitionMoveGrantStorage
         long count = PartitionMoveProtocol.EmptyCount;
         view.ReadValue(key, bytes => count = NativeSerialization.Deserialize<long>(bytes));
         if (count < PartitionMoveProtocol.EmptyCount)
-        { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority);
+        }
         return count;
     }
 
@@ -60,7 +62,9 @@ internal static class PartitionMoveGrantStorage
     {
         var count = Outstanding(transaction, key);
         if (admit && count >= maximumCount || !admit && count == PartitionMoveProtocol.EmptyCount)
-        { throw Errors.Fail(admit ? ErrorCode.BudgetExceeded : ErrorCode.Corruption, PartitionMoveProtocol.Capacity); }
+        {
+            throw Errors.Fail(admit ? ErrorCode.BudgetExceeded : ErrorCode.Corruption, PartitionMoveProtocol.Capacity);
+        }
         transaction.Put(key, NativeSerialization.Serialize(admit
             ? count + PartitionMoveProtocol.SequenceStep : count - PartitionMoveProtocol.SequenceStep));
     }

@@ -16,7 +16,11 @@ internal static class NativeAnnPublicColdFlow
             {
                 var actual = await NativeAnnPublicColdSeed.CreateAsync(fixture, caller.Sdk, caller.Mcp, token);
                 await NativeAnnPublicColdAssertions.StateAsync(caller, actual, token);
-                var restore = actual.Pin with { CommandId = Guid.NewGuid(), Mode = AnnMaintenanceMode.Restore };
+                var restore = actual.Pin with
+                {
+                    CommandId = Guid.NewGuid(),
+                    Mode = AnnMaintenanceMode.Restore
+                };
                 await NativeAnnPublicColdAssertions.RefuseWrongOwnerAsync(caller, actual, restore, token);
                 await NativeAnnPublicColdAssertions.RestoreAsync(caller, actual, restore, token);
                 return await NativeAnnPublicColdReader.RunAsync(fixture, caller, actual, restore, token);
@@ -28,7 +32,10 @@ internal static class NativeAnnPublicColdFlow
                 fixture.AdminKey, async caller =>
                 {
                     var fresh = await seed.Scenario.RequestAsync(caller.Sdk, caller.Mcp, token);
-                    var restore = fresh with { Mode = AnnMaintenanceMode.Restore };
+                    var restore = fresh with
+                    {
+                        Mode = AnnMaintenanceMode.Restore
+                    };
                     await NativeAnnPublicColdAssertions.RefuseWrongOwnerAsync(caller, seed, restore, token);
                     await NativeAnnPublicColdAssertions.RestoreAsync(caller, seed, restore, token);
                     await NativeAnnPublicColdAssertions.StateAsync(caller, seed, token);
@@ -41,7 +48,11 @@ internal static class NativeAnnPublicColdFlow
                 var fresh = await seed.Scenario.RequestAsync(caller.Sdk, caller.Mcp, token);
                 await NativeAnnMaintenanceReleaseAssertions.AssertAsync(caller.Sdk, caller.Mcp,
                     seed.Scenario, fresh, token);
-                var denied = fresh with { CommandId = Guid.NewGuid(), Mode = AnnMaintenanceMode.Restore };
+                var denied = fresh with
+                {
+                    CommandId = Guid.NewGuid(),
+                    Mode = AnnMaintenanceMode.Restore
+                };
                 _ = await McpCallerAssertions.ErrorAsync(await caller.Mcp.CallAsync(
                     NativeAnnMaintenanceRf3Scenario.Tool, denied, token), ErrorCode.Conflict, dispatched: true);
                 await NativeAnnPublicColdAssertions.StateAsync(caller, seed, token);

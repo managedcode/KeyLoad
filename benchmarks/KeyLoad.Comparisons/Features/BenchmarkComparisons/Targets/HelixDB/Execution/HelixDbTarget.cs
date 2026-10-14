@@ -28,7 +28,10 @@ public sealed partial class HelixDbTarget(HttpClient http, string runId, string 
     private bool ownsEqualityIndex;
     private bool ownsRangeIndex;
     /// <inheritdoc/>
-    public TargetProfile Profile { get; } = new(HelixDbNativeTokens.TokenHelixDB, V0PinnedNativeServerImage, OnePersistentNativeLocalWriter, XHelixAwaitDurableTrueNativeDiskFlush, CommittedNativeReadsAndDirectedGraphTraversal, POSTV2QueryOperationTree, IsolatedLocalServerNoAuthentication, image)
+    public TargetProfile Profile
+    {
+        get;
+    } = new(HelixDbNativeTokens.TokenHelixDB, V0PinnedNativeServerImage, OnePersistentNativeLocalWriter, XHelixAwaitDurableTrueNativeDiskFlush, CommittedNativeReadsAndDirectedGraphTraversal, POSTV2QueryOperationTree, IsolatedLocalServerNoAuthentication, image)
     {
         Cluster = new(SingleResultCardinality, SingleResultCardinality, SingleLocalWriterNoReplicationConfigured, [HELIXDATADIRPersistentDirectory])
     };
@@ -81,7 +84,10 @@ public sealed partial class HelixDbTarget(HttpClient http, string runId, string 
                 {
                     await HelixDbIndexLifecycle.ExecuteAsync(http, HelixDbDocumentAst.DropIndex(label, HelixDbNativeTokens.TokenNumber, range: true), Policy, token: timeout.Token, timeProvider: timeProvider).ConfigureAwait(false);
                 }
-                using var response = await HelixDbProtocol.QueryAsync(http, HelixDbProtocol.Batch(HelixDbProtocol.Node(HelixDbNativeTokens.TokenDrop, new() { [HelixDbNativeTokens.TokenInput] = HelixDbProtocol.Nodes(label) }), true), true, Policy, token: timeout.Token, timeProvider: timeProvider).ConfigureAwait(false);
+                using var response = await HelixDbProtocol.QueryAsync(http, HelixDbProtocol.Batch(HelixDbProtocol.Node(HelixDbNativeTokens.TokenDrop, new()
+                {
+                    [HelixDbNativeTokens.TokenInput] = HelixDbProtocol.Nodes(label)
+                }), true), true, Policy, token: timeout.Token, timeProvider: timeProvider).ConfigureAwait(false);
             }
         }
         finally

@@ -29,7 +29,9 @@ internal static class ChunkMultiblockRf3Data
         var original = Original.Select((sample, index) => new SampleRecord(TimeSeriesRf3Scenario.Series,
             sample, index + FirstSequence, TimeSeriesRf3Scenario.PublicTags));
         if (healthy)
-        { original = original.Append(new(TimeSeriesRf3Scenario.Series, Fresh, HealthyCount, TimeSeriesRf3Scenario.PublicTags)); }
+        {
+            original = original.Append(new(TimeSeriesRf3Scenario.Series, Fresh, HealthyCount, TimeSeriesRf3Scenario.PublicTags));
+        }
         return original.OrderBy(row => row.Sample.Timestamp.UtcTicks).ThenBy(row => row.Sequence).ToArray();
     }
 }

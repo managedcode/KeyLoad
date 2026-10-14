@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.EventStreams;
 using ManagedCode.Communication;
@@ -36,7 +36,9 @@ internal sealed class EventFeedTailJsonAdmissionTests
         var original = CqrsStream.Create<EventFeedTailProgress, EventFeedControlResult>(_ =>
         {
             try
-            { return ValueTask.FromResult(Result<EventFeedControlResult>.Fail(Errors.Problem(ErrorCode.Validation, oversized))); }
+            {
+                return ValueTask.FromResult(Result<EventFeedControlResult>.Fail(Errors.Problem(ErrorCode.Validation, oversized)));
+            }
             finally { settled = true; }
         });
         var frames = NoFrames;
@@ -68,7 +70,9 @@ internal sealed class EventFeedTailJsonAdmissionTests
             return ValueTask.FromResult(Result<EventFeedControlResult>.Fail(Errors.Problem(ErrorCode.Validation, HealthyDetail)));
         });
         try
-        { _ = EventFeedTailPublicStream.AdmitAsync(context, source); }
+        {
+            _ = EventFeedTailPublicStream.AdmitAsync(context, source);
+        }
         catch (KeyLoadException refusal) when (refusal.Code == ErrorCode.ResourceExhausted)
         {
             await Assert.That(invoked).IsFalse();
@@ -92,7 +96,10 @@ internal sealed class EventFeedTailJsonAdmissionTests
             var stopped = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
             using var registration = writer.CancellationToken.Register(() => stopped.TrySetCanceled(writer.CancellationToken));
             try
-            { entered.SetResult(); await stopped.Task.ConfigureAwait(false); }
+            {
+                entered.SetResult();
+                await stopped.Task.ConfigureAwait(false);
+            }
             finally { settled = true; }
             return Result<EventFeedControlResult>.Fail(Errors.Problem(ErrorCode.Validation, HealthyDetail));
         });
@@ -101,10 +108,15 @@ internal sealed class EventFeedTailJsonAdmissionTests
         var originalMove = reader.MoveNextAsync().AsTask();
         var first = await Task.WhenAny(originalMove, entered.Task);
         if (first == originalMove)
-        { await originalMove; throw new InvalidOperationException(HealthyDetail); }
+        {
+            await originalMove;
+            throw new InvalidOperationException(HealthyDetail);
+        }
         await cancellation.CancelAsync();
         try
-        { await originalMove; }
+        {
+            await originalMove;
+        }
         catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
         {
             await Assert.That(settled).IsTrue();

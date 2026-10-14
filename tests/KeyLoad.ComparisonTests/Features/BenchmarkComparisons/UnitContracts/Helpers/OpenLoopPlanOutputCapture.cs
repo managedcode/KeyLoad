@@ -17,7 +17,10 @@ internal sealed class OpenLoopPlanOutputCapture
     }
 
     internal string CapturedOutput => output.ToString();
-    internal bool ExceededBound { get; private set; }
+    internal bool ExceededBound
+    {
+        get; private set;
+    }
 
     internal async Task<string> ReadAsync(StreamReader reader, TaskCompletionSource? ready)
     {

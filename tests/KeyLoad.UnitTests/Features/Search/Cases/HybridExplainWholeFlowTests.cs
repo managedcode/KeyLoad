@@ -23,7 +23,13 @@ internal sealed class HybridExplainWholeFlowTests
         var actual = await engine.GraphSearchAsync(ThreeWayHybridTestSupport.Reader, request, token);
         await HybridExplainWholeFlow.LiteralAsync(actual, db.Partition, restricted);
         var plain = await engine.GraphSearchAsync(ThreeWayHybridTestSupport.Reader,
-            request with { Search = request.Search with { Explain = false } }, token);
+            request with
+            {
+                Search = request.Search with
+                {
+                    Explain = false
+                }
+            }, token);
         await Assert.That(JsonDefaults.Serialize(plain.Hits).AsSpan().SequenceEqual(JsonDefaults.Serialize(
             actual.Hits.Select(hit => hit with { Explanation = null }).ToArray()))).IsTrue();
         await Assert.That(HybridExplainWholeFlow.Snapshot(db)).IsEquivalentTo(before, CollectionOrdering.Matching);
@@ -76,7 +82,10 @@ internal sealed class HybridExplainWholeFlowTests
         var position = db.Store.Position;
         var request = HybridExplainWholeFlow.Request(db, false);
         var limited = new SearchEngine(db.Database,
-            UnitExecutionOptions.QueryExecution(new() { MaximumResultBytes = WorkingBytes }));
+            UnitExecutionOptions.QueryExecution(new()
+            {
+                MaximumResultBytes = WorkingBytes
+            }));
         GraphSearchResult? partial = null;
         var token = TestContext.Current!.Execution.CancellationToken;
         var error = await Assert.ThrowsExactlyAsync<KeyLoadException>(async () =>

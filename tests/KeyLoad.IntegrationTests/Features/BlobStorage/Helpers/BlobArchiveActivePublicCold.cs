@@ -9,7 +9,11 @@ internal static class BlobArchiveActivePublicCold
         => Array.FindIndex(target.Mappings.ToArray(), mapping => mapping.Source.PhysicalShardId == state.SourceOwner);
     internal static string Node(ClusterRestoreRf3Fixture target, BlobArchiveActivePublicState state)
         => Group(target, state) switch
-        { 0 => TwoRf3MembershipProtocol.Node1, 1 => TwoRf3MembershipProtocol.Node4, _ => throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid) };
+        {
+            0 => TwoRf3MembershipProtocol.Node1,
+            1 => TwoRf3MembershipProtocol.Node4,
+            _ => throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid)
+        };
     internal static async Task RunAsync(ClusterRestoreRf3Fixture target, PartitionMovementPublicParentRf3Seed seed,
         BlobArchiveActivePublicState state, System.Collections.Immutable.ImmutableArray<ClusterBackupOwnerReceipt> originals,
         CancellationToken token)

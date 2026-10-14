@@ -29,7 +29,10 @@ internal static class EventFeedTailRf3PairFlow
         var sdk = new KeyLoadClient(http, credential, IntegrationClientOptions.Execution(), Options.Create(policy));
         using var owned = CancellationTokenSource.CreateLinkedTokenSource(token);
         var progress = new EventFeedTailRf3Pair(policy.MaximumFrameBytes);
-        var request = EventFeedTailRf3Flow.Request(offered, original) with { Limit = TwoDeliveries };
+        var request = EventFeedTailRf3Flow.Request(offered, original) with
+        {
+            Limit = TwoDeliveries
+        };
         var resumeConsumer = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var actualOperation = EventFeedTailRf3PairOperations.SdkAsync(sdk, request, progress, resumeConsumer.Task, owned.Token);
         return await EventFeedTailRf3PairJoin.RunAsync(actualOperation, static value => ValueTask.FromResult(value), progress, original,
@@ -54,10 +57,16 @@ internal static class EventFeedTailRf3PairFlow
             TwoRf3MembershipProtocol.Node1, credential, token).ConfigureAwait(false);
         using var owned = CancellationTokenSource.CreateLinkedTokenSource(token);
         var progress = new EventFeedTailRf3Pair(policy.MaximumFrameBytes);
-        var request = EventFeedTailRf3Flow.Request(offered, original) with { Limit = TwoDeliveries };
+        var request = EventFeedTailRf3Flow.Request(offered, original) with
+        {
+            Limit = TwoDeliveries
+        };
         var actualCall = caller.Client.CallToolAsync(McpCallerProtocol.GatewayInvoke,
             new Dictionary<string, object?>(StringComparer.Ordinal)
-            { [McpCallerProtocol.ToolId] = Tool, [McpCallerProtocol.Arguments] = McpOfficialClient.Arguments(request) },
+            {
+                [McpCallerProtocol.ToolId] = Tool,
+                [McpCallerProtocol.Arguments] = McpOfficialClient.Arguments(request)
+            },
             progress: progress, cancellationToken: owned.Token).AsTask();
         try
         {

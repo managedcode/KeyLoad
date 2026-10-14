@@ -11,7 +11,10 @@ internal static class QueueDeadLetterSelectedSetup
         QueueDeadLetterSelectedOperation kind, QueueDeadLetterSelectedFault fault)
     {
         fixture.Configure(QueueDeadLetterSelectedProtocol.Queue, ResourceKind.WorkQueue,
-            queuePolicy: new() { MaxAttempts = QueueDeadLetterSelectedProtocol.One });
+            queuePolicy: new()
+            {
+                MaxAttempts = QueueDeadLetterSelectedProtocol.One
+            });
         fixture.Configure(QueueDeadLetterSelectedProtocol.Collection, ResourceKind.Collection);
         fixture.Configure(QueueDeadLetterSelectedProtocol.HistoryQueue, ResourceKind.WorkQueue);
         fixture.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(new PrincipalRecord(
@@ -19,7 +22,9 @@ internal static class QueueDeadLetterSelectedSetup
             [new(fixture.Partition.DatabaseId, QueueDeadLetterSelectedProtocol.HistoryQueue, Capability.All),
              new(fixture.Partition.DatabaseId, QueueDeadLetterSelectedProtocol.Queue, Capability.All),
              new(fixture.Partition.DatabaseId, QueueDeadLetterSelectedProtocol.Collection, Capability.All)], [])
-        { ClusterAdministrator = true })).Get<PrincipalRecord>();
+        {
+            ClusterAdministrator = true
+        })).Get<PrincipalRecord>();
         var lane = new QueueLaneRef(fixture.Partition, QueueDeadLetterSelectedProtocol.Queue);
         var time = QueueWholeFlowStorage.Clock(fixture.Store);
         var history = new List<QueueDeadLetterSelectedSaved>();
@@ -61,7 +66,9 @@ internal static class QueueDeadLetterSelectedSetup
         => store.Commit((tx, _) =>
         {
             if (state.Fault == QueueDeadLetterSelectedFault.IndexAlias)
-            { tx.PutRecord(state.Repairs[QueueDeadLetterSelectedProtocol.Zero].Key, QueueDeadLetterSelectedProtocol.Foreign); }
+            {
+                tx.PutRecord(state.Repairs[QueueDeadLetterSelectedProtocol.Zero].Key, QueueDeadLetterSelectedProtocol.Foreign);
+            }
             else if (state.Fault is QueueDeadLetterSelectedFault.MetadataAlias or QueueDeadLetterSelectedFault.WitnessMetadataAlias)
             {
                 tx.Put(state.Repairs[QueueDeadLetterSelectedProtocol.Zero].Key,
@@ -70,9 +77,13 @@ internal static class QueueDeadLetterSelectedSetup
                     tx.ReadOwnedValue(Key(state.Lane, QueueDeadLetterSelectedProtocol.Body, QueueDeadLetterSelectedProtocol.Foreign))!);
             }
             else if (state.Fault == QueueDeadLetterSelectedFault.MissingBody)
-            { tx.Delete(state.Repairs[QueueDeadLetterSelectedProtocol.Zero].Key); }
+            {
+                tx.Delete(state.Repairs[QueueDeadLetterSelectedProtocol.Zero].Key);
+            }
             else
-            { tx.PutRecord(state.Repairs[QueueDeadLetterSelectedProtocol.Zero].Key, state.SecondBody); }
+            {
+                tx.PutRecord(state.Repairs[QueueDeadLetterSelectedProtocol.Zero].Key, state.SecondBody);
+            }
             return true;
         });
 

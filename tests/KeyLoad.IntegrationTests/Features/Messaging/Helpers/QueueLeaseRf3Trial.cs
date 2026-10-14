@@ -28,12 +28,16 @@ internal static class QueueLeaseRf3Trial
         var original = await QueueLeaseRf3Renew.ExecuteAsync(fixture, seed, failures, token).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny(failures);
         if (original is null)
-        { throw new InvalidOperationException(QueueLeaseRf3Protocol.MissingSetup); }
+        {
+            throw new InvalidOperationException(QueueLeaseRf3Protocol.MissingSetup);
+        }
         await QueueLeaseRf3Cold.RestartAsync(fixture, token).ConfigureAwait(false);
         var acknowledged = await QueueLeaseRf3Reclaim.ExecuteAsync(fixture, original, failures, token).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny(failures);
         if (acknowledged is null)
-        { throw new InvalidOperationException(QueueLeaseRf3Protocol.MissingSetup); }
+        {
+            throw new InvalidOperationException(QueueLeaseRf3Protocol.MissingSetup);
+        }
         await QueueLeaseRf3Cold.RestartAsync(fixture, token).ConfigureAwait(false);
         await QueueLeaseRf3Healthy.ExecuteAsync(fixture, acknowledged, failures, token).ConfigureAwait(false);
     }

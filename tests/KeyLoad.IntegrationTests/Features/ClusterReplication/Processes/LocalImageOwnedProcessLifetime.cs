@@ -142,7 +142,9 @@ internal static partial class LocalImageOwnedProcessLifetime
         {
             observations.Clear();
             if (HasExited(process, observations))
-            { return; }
+            {
+                return;
+            }
             if (!observationFailureRecorded && observations.Count != 0)
             {
                 failures.AddRange(observations);
@@ -163,7 +165,9 @@ internal static partial class LocalImageOwnedProcessLifetime
         OwnedProcessFailureObserver.Observe(() =>
         {
             if (process.HasExited || OperatingSystem.IsWindows())
-            { return; }
+            {
+                return;
+            }
             if (SendSignal(process.Id, SignalTerminate) != 0 && !process.HasExited)
             {
                 failures.Add(new Win32Exception(Marshal.GetLastPInvokeError()));
@@ -176,21 +180,27 @@ internal static partial class LocalImageOwnedProcessLifetime
         OwnedProcessFailureObserver.Observe(() =>
         {
             if (!process.HasExited)
-            { process.Kill(entireProcessTree: true); }
+            {
+                process.Kill(entireProcessTree: true);
+            }
         }, failures);
     }
 
     private static async Task CollectFailureAsync(Task? task, List<Exception> failures)
     {
         if (task is null)
-        { return; }
+        {
+            return;
+        }
         var captured = await OwnedProcessFailureObserver.CaptureAsync(task).ConfigureAwait(false);
         IEnumerable<Exception> errors = captured is AggregateException aggregate
             ? aggregate.InnerExceptions : captured is null ? [] : new[] { captured };
         foreach (var error in errors)
         {
             if (!failures.Any(failure => ReferenceEquals(failure, error)))
-            { failures.Add(error); }
+            {
+                failures.Add(error);
+            }
         }
     }
 

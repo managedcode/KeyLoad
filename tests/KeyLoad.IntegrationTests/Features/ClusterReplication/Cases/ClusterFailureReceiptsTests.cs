@@ -108,7 +108,9 @@ internal sealed class ClusterFailureReceiptsTests
         var token = TestContext.Current!.Execution.CancellationToken;
         foreach (var path in new[] { ReceiptPath(output, 1),
             System.IO.Path.Combine(output, ClusterFixtureProtocol.DiagnosticsFileName) })
-        { await Assert.That((await File.ReadAllBytesAsync(path, token)).SequenceEqual(expected)).IsTrue(); }
+        {
+            await Assert.That((await File.ReadAllBytesAsync(path, token)).SequenceEqual(expected)).IsTrue();
+        }
     }
 
     private static string ReceiptPath(string directory, int number)

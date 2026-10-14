@@ -58,7 +58,10 @@ internal sealed record ComparisonHostSettings(
     internal ComparisonOptions Options => WorkloadOptions.Value;
 
     /// <summary>Gets the optional validated GitHub identity for container-backed execution.</summary>
-    internal ComparisonExecutionIdentity? ExecutionIdentity { get; init; }
+    internal ComparisonExecutionIdentity? ExecutionIdentity
+    {
+        get; init;
+    }
 
     /// <summary>Reads configuration using the established environment then command-line precedence.</summary>
     /// <param name="configuration">Comparison host configuration.</param>

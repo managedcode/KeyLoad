@@ -26,11 +26,15 @@ internal sealed record IsolatedOpenLoopSettings(ScaledComparisonProfile Profile,
         if (selection.OpenLoopRate is not { } rate)
         {
             if (proofText is not null)
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             return null;
         }
         if (proofText is not null && proofText != ProofSelected)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         var profile = selection.ScaledProfile ?? throw Invalid();
         var proof = proofText is not null;
         if (proof && (selection.Target != IsolatedHostConstants.KeyLoad

@@ -35,7 +35,11 @@ internal static class TenantCapacityPlacementRf3MultiAssertions
             await seed.Source.BindAtomicPartitionPlacementAsync(id, request, token))).IsTrue();
         await Assert.That((await McpCallerAssertions.SuccessAsync<bool>(
             await seed.Official.CallAsync(McpCallerTools.AdminPartitionPlacementBind,
-                new { commandId = id, request }, token))).Value).IsTrue();
+                new
+                {
+                    commandId = id,
+                    request
+                }, token))).Value).IsTrue();
     }
 
     internal static async Task PlanAsync(PartitionMovementPublicParentRf3Seed[] seeds,

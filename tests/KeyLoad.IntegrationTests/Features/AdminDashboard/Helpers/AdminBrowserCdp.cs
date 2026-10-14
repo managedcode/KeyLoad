@@ -15,15 +15,25 @@ internal sealed class AdminBrowserCdp : IAsyncDisposable
     internal async Task<JsonElement> CommandAsync(string method, object arguments, CancellationToken cancellationToken)
     {
         var id = ++requestId;
-        var request = JsonSerializer.SerializeToUtf8Bytes(new { id, method, @params = arguments });
+        var request = JsonSerializer.SerializeToUtf8Bytes(new
+        {
+            id,
+            method,
+            @params = arguments
+        });
         await socket.SendAsync(request.AsMemory(), WebSocketMessageType.Text, true, cancellationToken);
         while (true)
         {
             using var response = JsonDocument.Parse(await ReceiveAsync(cancellationToken));
             if (!response.RootElement.TryGetProperty(AdminBrowserProtocol.IdProperty, out var actual) || actual.GetInt32() != id)
-            { Network.Observe(response.RootElement); continue; }
+            {
+                Network.Observe(response.RootElement);
+                continue;
+            }
             if (response.RootElement.TryGetProperty(AdminBrowserProtocol.ErrorProperty, out _))
-            { throw new InvalidOperationException(AdminBrowserProtocol.BrowserFailure); }
+            {
+                throw new InvalidOperationException(AdminBrowserProtocol.BrowserFailure);
+            }
             return response.RootElement.GetProperty(AdminBrowserProtocol.ResultProperty).Clone();
         }
     }
@@ -31,16 +41,25 @@ internal sealed class AdminBrowserCdp : IAsyncDisposable
     internal async Task<JsonElement> EvaluateAsync(string expression, CancellationToken cancellationToken)
     {
         var response = await CommandAsync(AdminBrowserProtocol.RuntimeEvaluate,
-            new { expression, returnByValue = true, awaitPromise = true }, cancellationToken);
+            new
+            {
+                expression,
+                returnByValue = true,
+                awaitPromise = true
+            }, cancellationToken);
         if (response.TryGetProperty(AdminBrowserProtocol.ExceptionProperty, out _))
-        { throw new InvalidOperationException(AdminBrowserProtocol.BrowserFailure); }
+        {
+            throw new InvalidOperationException(AdminBrowserProtocol.BrowserFailure);
+        }
         return response.GetProperty(AdminBrowserProtocol.ResultProperty).GetProperty(AdminBrowserProtocol.ValueProperty).Clone();
     }
 
     internal async Task WaitAsync(string expression, CancellationToken cancellationToken)
     {
         while (!(await EvaluateAsync(expression, cancellationToken)).GetBoolean())
-        { await Task.Delay(TimeSpan.FromMilliseconds(AdminBrowserProtocol.PollMilliseconds), TimeProvider.System, cancellationToken); }
+        {
+            await Task.Delay(TimeSpan.FromMilliseconds(AdminBrowserProtocol.PollMilliseconds), TimeProvider.System, cancellationToken);
+        }
     }
 
     internal async Task WaitForNetworkIdleAsync(CancellationToken cancellationToken)
@@ -50,7 +69,9 @@ internal sealed class AdminBrowserCdp : IAsyncDisposable
         {
             await EvaluateAsync(Probe, cancellationToken);
             if (Network.ActiveRequests == 0)
-            { return; }
+            {
+                return;
+            }
             await Task.Delay(TimeSpan.FromMilliseconds(AdminBrowserProtocol.PollMilliseconds), TimeProvider.System, cancellationToken);
         } while (true);
     }
@@ -64,7 +85,9 @@ internal sealed class AdminBrowserCdp : IAsyncDisposable
         {
             result = await socket.ReceiveAsync(buffer.AsMemory(), cancellationToken);
             if (result.MessageType == WebSocketMessageType.Close || output.Length + result.Count > AdminBrowserProtocol.MaximumReplyBytes)
-            { throw new InvalidOperationException(AdminBrowserProtocol.BrowserFailure); }
+            {
+                throw new InvalidOperationException(AdminBrowserProtocol.BrowserFailure);
+            }
             await output.WriteAsync(buffer.AsMemory(0, result.Count), cancellationToken);
         } while (!result.EndOfMessage);
         return output.ToArray();

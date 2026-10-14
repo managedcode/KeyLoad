@@ -23,7 +23,10 @@ internal sealed class ReplicaTermMetadataSnapshotTests
             {
                 Incarnation = fixture.Configuration.Incarnation
             }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution()));
-            var sourceLog = fixture.Own(new DurableReplicaLog(sourceStore, RecoveryExecutionOptions.Configuration(fixture.Configuration with { Directory = sourceDirectory })));
+            var sourceLog = fixture.Own(new DurableReplicaLog(sourceStore, RecoveryExecutionOptions.Configuration(fixture.Configuration with
+            {
+                Directory = sourceDirectory
+            })));
             ReplicaTermMetadataFixture.PrepareLog(fixture.Log, OldEntryTerm, LogTerm);
             ReplicaTermMetadataFixture.PrepareLog(sourceLog, NewEntryTerm, LogTerm);
             ReplicaTermMetadataFixture.WriteAppliedCut(fixture.Store, AppliedCut);
@@ -93,7 +96,10 @@ internal sealed class ReplicaTermMetadataSnapshotTests
                 Incarnation = fixture.Configuration.Incarnation
             }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution()));
             var verified = ReplicaTermMetadataFixture.CreateVerifiedSnapshot(fixture, sourceStore,
-                fixture.Configuration with { Directory = sourceDirectory });
+                fixture.Configuration with
+                {
+                    Directory = sourceDirectory
+                });
             var imagePath = Path.Combine(sourceDirectory, ReplicaProtocol.SnapshotDirectory, verified.FileName);
 
             await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => fixture.Store.InstallSnapshot(imagePath, AppliedCut)).Code)

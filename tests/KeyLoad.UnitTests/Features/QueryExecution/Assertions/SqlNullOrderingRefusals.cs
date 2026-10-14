@@ -16,13 +16,19 @@ internal static class SqlNullOrderingRefusals
         foreach (var tail in new[] { "NULLS", "NULLS MIDDLE", "NULLS @placement", "NULLS 'FIRST'" })
         {
             await ErrorAsync(() => engine.Execute(SqlNullOrderingProtocol.Root,
-                good with { Sql = good.Sql.Replace("NULLS FIRST", tail, StringComparison.Ordinal) }), ErrorCode.Validation);
+                good with
+                {
+                    Sql = good.Sql.Replace("NULLS FIRST", tail, StringComparison.Ordinal)
+                }), ErrorCode.Validation);
             await UnchangedAsync(database.Store, image, position, identity);
             await SqlNullOrderingPages.HealthyAsync(database.Database, database.Store, database.Partition, SqlNullOrderingProtocol.Root);
         }
         var first = engine.ExecuteAst(SqlNullOrderingProtocol.Root, SqlNullOrderingProtocol.Ast(database.Partition, false, true, 2));
         await Assert.That(first.Cursor).IsNotNull();
-        var changed = SqlNullOrderingProtocol.Ast(database.Partition, false, false, 2) with { Cursor = first.Cursor };
+        var changed = SqlNullOrderingProtocol.Ast(database.Partition, false, false, 2) with
+        {
+            Cursor = first.Cursor
+        };
         await ErrorAsync(() => engine.ExecuteAst(SqlNullOrderingProtocol.Root, changed), ErrorCode.CursorExpired);
         using var cancelled = new CancellationTokenSource();
         await cancelled.CancelAsync();
@@ -80,7 +86,10 @@ internal static class SqlNullOrderingRefusals
         })
         {
             await ErrorAsync(() => engine.Execute(SqlNullOrderingProtocol.Root,
-                good with { Sql = good.Sql.Replace(SqlNullOrderingProtocol.NativeAscending, direction, StringComparison.Ordinal) }), code);
+                good with
+                {
+                    Sql = good.Sql.Replace(SqlNullOrderingProtocol.NativeAscending, direction, StringComparison.Ordinal)
+                }), code);
             await UnchangedAsync(database.Store, image, cut, identity);
             await SqlNullOrderingPages.HealthyAsync(database.Database, database.Store,
                 database.Partition, SqlNullOrderingProtocol.Root);

@@ -17,7 +17,9 @@ internal static class DocumentCommandPrincipalColdReplayAssertions
         await Assert.That(owner.Database.GetOutboxStatus("root", owner.Source.Partition).Head.Tail).IsEqualTo(tail);
         Exception? ambiguous = null;
         try
-        { owner.Entry(first.Entry.Operation!.Id); }
+        {
+            owner.Entry(first.Entry.Operation!.Id);
+        }
         catch (InvalidOperationException error) { ambiguous = error; }
         await Assert.That(ambiguous).IsNotNull();
         await Assert.That(ambiguous!.Message)

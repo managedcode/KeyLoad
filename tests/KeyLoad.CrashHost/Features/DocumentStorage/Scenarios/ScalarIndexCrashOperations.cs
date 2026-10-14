@@ -27,7 +27,9 @@ internal static class ScalarIndexCrashOperations
     {
         var definition = new ResourceDefinition(ScalarIndexCrashContract.Collection, ResourceKind.Collection,
             ScalarIndexCrashContract.Partition.TransactionDomainId)
-        { Indexes = [new(ScalarIndexCrashContract.IndexName, [ScalarIndexCrashContract.LabelPath], Unique: true)] };
+        {
+            Indexes = [new(ScalarIndexCrashContract.IndexName, [ScalarIndexCrashContract.LabelPath], Unique: true)]
+        };
         var request = new ConfigureResourceRequest(ScalarIndexCrashContract.Partition.TenantId,
             ScalarIndexCrashContract.Partition.DatabaseId, definition);
         _ = CrashDatabase.Submit(database, OperationKind.ConfigureResource, request,
@@ -76,7 +78,9 @@ internal static class ScalarIndexCrashOperations
 
     internal static void InsertEqualValueInOtherPartition(DatabaseEngine database)
         => _ = Apply(database, ScalarIndexCrashContract.Partition with
-        { PartitionKey = ScalarIndexCrashContract.OtherPartitionKey }, ScalarIndexCrashContract.OtherPartitionCommandText,
+        {
+            PartitionKey = ScalarIndexCrashContract.OtherPartitionKey
+        }, ScalarIndexCrashContract.OtherPartitionCommandText,
             new PutDocument(ScalarIndexCrashContract.Collection, ScalarIndexCrashContract.OtherPartitionId,
                 ScalarIndexCrashContract.ReplacedJson, EmptyRevision));
 

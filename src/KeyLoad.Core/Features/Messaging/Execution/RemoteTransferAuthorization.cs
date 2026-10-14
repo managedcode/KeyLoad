@@ -26,7 +26,10 @@ public sealed partial class DatabaseEngine
     }
 
     private static PrincipalRecord TransferDataPrincipal(PrincipalRecord principal)
-        => principal with { ClusterAdministrator = false };
+        => principal with
+        {
+            ClusterAdministrator = false
+        };
 
     private void RequireTransferFieldWrites(PrincipalRecord principal, ResourceDefinition resource)
     {
@@ -41,7 +44,10 @@ public sealed partial class DatabaseEngine
     {
         foreach (var policy in resource.HeaderPolicies)
         {
-            Authorization.RequireFieldWrite(principal, resource with { FieldPolicies = resource.HeaderPolicies }, policy.Path);
+            Authorization.RequireFieldWrite(principal, resource with
+            {
+                FieldPolicies = resource.HeaderPolicies
+            }, policy.Path);
         }
     }
 
@@ -58,7 +64,10 @@ public sealed partial class DatabaseEngine
     {
         foreach (var policy in resource.HeaderPolicies)
         {
-            Authorization.RequireFieldUse(principal, resource with { FieldPolicies = resource.HeaderPolicies }, policy.Path);
+            Authorization.RequireFieldUse(principal, resource with
+            {
+                FieldPolicies = resource.HeaderPolicies
+            }, policy.Path);
         }
     }
 }

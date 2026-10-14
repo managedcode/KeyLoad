@@ -23,7 +23,10 @@ internal static class BlobObjectKeyLifetimePublicOperations
     {
         state.Abort = new(Guid.NewGuid(), state.Blob, state.Original.UploadId);
         state.Aborted = (await McpCallerAssertions.SuccessAsync<BlobCommitResult<BlobUploadInfo>>(await callers.Mcp.CallAsync("keyload_blobs_abort_upload", state.Abort, token))).Value;
-        state.Current = state.Begun.Value with { Status = BlobUploadStatus.Aborted };
+        state.Current = state.Begun.Value with
+        {
+            Status = BlobUploadStatus.Aborted
+        };
         await SqlRf3Protocol.EqualAsync(state.Current, state.Aborted.Value);
         await BlobObjectKeyLifetimePublicAssertions.ReceiptAsync(callers, state.Aborted.Receipt, state.Abort.CommandId, state.Blob, token);
         await BlobObjectKeyLifetimePublicAssertions.CurrentAsync(callers, states, token);
@@ -37,11 +40,17 @@ internal static class BlobObjectKeyLifetimePublicOperations
     internal static async Task PublishAsync(RequestCqrsRf3Callers callers, BlobObjectKeyLifetimePublicState state,
         BlobObjectKeyLifetimePublicState[] states, CancellationToken token)
     {
-        state.Admitted = state.Original with { CommandId = Guid.NewGuid() };
+        state.Admitted = state.Original with
+        {
+            CommandId = Guid.NewGuid()
+        };
         await BeginAsync(callers, state, states, false, token);
         state.Complete = new(Guid.NewGuid(), state.Blob, state.Original.UploadId, state.Begun.Value.IntegrityHash);
         state.Published = (await McpCallerAssertions.SuccessAsync<BlobCommitResult<BlobMetadata>>(await callers.Mcp.CallAsync("keyload_blobs_complete_upload", state.Complete, token))).Value;
-        state.Current = state.Begun.Value with { Status = BlobUploadStatus.Complete };
+        state.Current = state.Begun.Value with
+        {
+            Status = BlobUploadStatus.Complete
+        };
         await Assert.That(state.Published.Value.Blob).IsEqualTo(state.Blob);
         await Assert.That(state.Published.Value.VersionId).IsEqualTo(state.Original.UploadId);
         await Assert.That(state.Published.Value.Revision).IsEqualTo(1L);

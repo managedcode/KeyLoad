@@ -45,14 +45,17 @@ internal static class QueueInvalidDeliveryActionTrial
                 await CompleteAsync(fixture, lane, delivery, now, before);
             }, owningFailures);
         }
-        catch (Exception error) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error)) { owningFailures.Add(error); }
-        catch (Exception error) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error)) { owningFailures.Add(error); }
+        catch (Exception error) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error)) { owningFailures.Add(error); }
+        catch (Exception error) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error)) { owningFailures.Add(error); }
         KeyLoad.Server.ServerFailureObserver.ThrowIfAny(owningFailures);
     }
 
     private static async Task<(QueueLaneRef, Delivery, DateTimeOffset)> SeedAsync(TestDatabase fixture, QueueRetryJitter jitter)
     {
-        fixture.Configure(Queue, ResourceKind.WorkQueue, queuePolicy: new() { RetryJitter = jitter });
+        fixture.Configure(Queue, ResourceKind.WorkQueue, queuePolicy: new()
+        {
+            RetryJitter = jitter
+        });
         fixture.Configure(Collection, ResourceKind.Collection);
         fixture.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(new(Worker, "tenant",
             [new("database", Queue, Capability.QueueConsume | Capability.QueueAck | Capability.QueueRenew),
@@ -109,7 +112,10 @@ internal static class QueueInvalidDeliveryActionTrial
         await Assert.That(QueueWholeFlowStorage.Bytes(fixture.Store)).IsEquivalentTo(image, TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await Assert.That(fixture.ReadJournalCut()).IsEqualTo(cut);
         var next = Guid.NewGuid();
-        var sameHandler = fixture.Submit(OperationKind.Processing, processing with { CommandId = next },
+        var sameHandler = fixture.Submit(OperationKind.Processing, processing with
+        {
+            CommandId = next
+        },
             principal: Worker, id: next, time: now).Get<CommitReceipt>();
         await Assert.That(Convert.ToHexString(NativeSerialization.Serialize(sameHandler)))
             .IsEqualTo(Convert.ToHexString(NativeSerialization.Serialize(completed)));

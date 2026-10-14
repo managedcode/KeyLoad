@@ -8,7 +8,10 @@ internal sealed record EventVectorFirstIssuanceResult(
     [property: Orleans.Id(3)] CommitReceipt Receipt)
 {
     [Orleans.Id(4)]
-    public ReadOnlyMemory<byte> OriginalPublicResultBytes { get; init; }
+    public ReadOnlyMemory<byte> OriginalPublicResultBytes
+    {
+        get; init;
+    }
 
     internal const string SerializerAlias = "keyload.core.event-vector-first-issuance-result.v1";
 }

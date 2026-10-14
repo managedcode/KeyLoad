@@ -20,7 +20,10 @@ internal static class EventByteBoundPublicFlow
             await FeedLiveRf3Cold.RestartAsync(fixture, token);
             _ = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
                 fixture.AdminKey, async admin =>
-                { await WithReaderAsync(fixture, admin, state, false, token); return true; }, token);
+                {
+                    await WithReaderAsync(fixture, admin, state, false, token);
+                    return true;
+                }, token);
         }
     }
 
@@ -38,7 +41,10 @@ internal static class EventByteBoundPublicFlow
                     var first = await EventByteBoundPublicCalls.ReadAsync(admin, reader, state,
                         EventByteBoundPublicExpected.First(state, direction, 0), indices, true, null, token);
                     if (capture)
-                    { state.Captures.Add((direction, first.Sdk)); state.Captures.Add((direction, first.Mcp)); }
+                    {
+                        state.Captures.Add((direction, first.Sdk));
+                        state.Captures.Add((direction, first.Mcp));
+                    }
                 }
                 foreach (var captured in state.Captures)
                 {

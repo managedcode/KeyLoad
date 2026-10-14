@@ -15,9 +15,13 @@ public sealed partial class DatabaseEngine
             var fence = PartitionMoveSourceFenceStorage.Read(view, phase.Partition, Limits.MaxBatchBytes);
             if (fence is not null && (fence.MoveId != phase.MoveId
                 || fence.ControlIntentDigest != phase.ControlIntentDigest))
-            { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+            }
             if (phase.Stage == PartitionMovePeerStage.Retire && fence is null)
-            { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.Fenced); }
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.Fenced);
+            }
             return;
         }
         var target = PartitionMoveTargetStorage.Read<PartitionMoveTargetStage>(view,
@@ -26,14 +30,18 @@ public sealed partial class DatabaseEngine
         {
             if (target.Control.MoveId != phase.MoveId || target.Published
                 || JsonData.Fingerprint(target.Descriptor.Resources) != JsonData.Fingerprint(phase.Resources))
-            { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+            }
             return;
         }
         foreach (var family in PartitionRecordFamilies.All)
         {
             if (!PartitionMoveFamilyCapture.ControlOwned(family)
                 && !view.Scan(KeySpace.Partition(family, phase.Partition), PartitionMoveProtocol.SequenceStep).Records.IsEmpty)
-            { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+            }
         }
     }
 }

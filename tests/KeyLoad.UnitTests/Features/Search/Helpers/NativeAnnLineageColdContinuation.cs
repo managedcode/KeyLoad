@@ -14,7 +14,7 @@ internal static class NativeAnnLineageColdContinuation
     private const int MaximumReaders = 1;
 
     internal static async Task RunAsync(TestDatabase database, AnnMaintenanceRequest request,
-        global::KeyLoad.Orleans.AnnMaintenanceCapabilityResult publication)
+        global::KeyLoad.Clustering.AnnMaintenanceCapabilityResult publication)
     {
         var source = publication.Source
             ?? throw new InvalidOperationException("The original native lineage source cut is absent.");
@@ -50,8 +50,8 @@ internal static class NativeAnnLineageColdContinuation
                 await UnchangedAsync(store, image);
             }, failures);
         }
-        catch (Exception cleanup) when (KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
-        catch (Exception cleanup) when (!KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
+        catch (Exception cleanup) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
+        catch (Exception cleanup) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
@@ -88,8 +88,8 @@ internal static class NativeAnnLineageColdContinuation
                     new AnnWorkBudget(read, seeds.MaxWorkUnits));
             }, failures);
         }
-        catch (Exception cleanup) when (KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
-        catch (Exception cleanup) when (!KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
+        catch (Exception cleanup) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
+        catch (Exception cleanup) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
@@ -98,7 +98,9 @@ internal static class NativeAnnLineageColdContinuation
         {
             var page = view.Scan([], NativeAnnMaintenanceTestData.SnapshotBound);
             if (page.HasMore)
-            { throw new InvalidOperationException("The native lineage fixture exceeds its complete state bound."); }
+            {
+                throw new InvalidOperationException("The native lineage fixture exceeds its complete state bound.");
+            }
             return (store.Position, page.Records.ToArray());
         });
 

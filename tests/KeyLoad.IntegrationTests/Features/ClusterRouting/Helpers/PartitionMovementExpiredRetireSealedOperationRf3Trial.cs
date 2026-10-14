@@ -1,8 +1,8 @@
 using KeyLoad.Client;
+using KeyLoad.Clustering;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
 using ManagedCode.Communication;
@@ -27,13 +27,21 @@ internal sealed class PartitionMovementExpiredRetireSealedOperationRf3Trial
         await ServerFailureObserver.ObserveAsync(() => trial.ExecuteAsync(parent.Token), trial.failures);
         using var cleanup = new CancellationTokenSource(TwoRf3MembershipProtocol.CleanupDeadline, TimeProvider.System);
         if (trial.wave is { } owned && trial.discovery is { } signed)
-        { await ServerFailureObserver.ObserveAsync(() => owned.QueryControls.ReleaseOpenArmsAsync(signed, cleanup.Token), trial.failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => owned.QueryControls.ReleaseOpenArmsAsync(signed, cleanup.Token), trial.failures);
+        }
         if (trial.producer is { } operation)
-        { await ServerFailureObserver.ObserveAsync(async () => { _ = await operation; }, trial.failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(async () => { _ = await operation; }, trial.failures);
+        }
         if (trial.seed is { } clients)
-        { await ServerFailureObserver.ObserveAsync(() => clients.DisposeAsync().AsTask(), trial.failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => clients.DisposeAsync().AsTask(), trial.failures);
+        }
         if (trial.wave is { } resources)
-        { await ServerFailureObserver.ObserveAsync(() => resources.DisposeAsync().AsTask(), trial.failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => resources.DisposeAsync().AsTask(), trial.failures);
+        }
         ServerFailureObserver.ThrowIfAny(trial.failures);
     }
 
@@ -86,7 +94,9 @@ internal sealed class PartitionMovementExpiredRetireSealedOperationRf3Trial
     {
         var result = new List<ReplicaSiloDiscovery>();
         foreach (var node in TwoRf3MembershipProtocol.Nodes.Take(TwoRf3MembershipProtocol.MembersPerGroup))
-        { result.Add(await RequestCqrsRf3SignedDiscovery.ReadForProfileAsync(owned.Application, node, owned.Profile, cancellationToken)); }
+        {
+            result.Add(await RequestCqrsRf3SignedDiscovery.ReadForProfileAsync(owned.Application, node, owned.Profile, cancellationToken));
+        }
         return result.ToArray();
     }
 }

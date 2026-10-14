@@ -24,7 +24,9 @@ public sealed partial class DatabaseEngine
             };
             var originalEpoch = RequireMoveReceiverOriginalObservationEpoch(bounded, principal, original, originalId);
             if (principal.PolicyEpoch != originalEpoch)
-            { throw Errors.Fail(ErrorCode.PermissionDenied, ChangedOutcomePrincipalPolicyMessage); }
+            {
+                throw Errors.Fail(ErrorCode.PermissionDenied, ChangedOutcomePrincipalPolicyMessage);
+            }
             work.Check();
             return issued.OriginalRequestNonce;
         });

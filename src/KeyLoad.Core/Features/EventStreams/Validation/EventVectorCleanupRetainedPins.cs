@@ -15,7 +15,9 @@ internal static class EventVectorCleanupRetainedPins
         foreach (var row in inventory.PayloadRows)
         {
             if (!row.Key.Span.StartsWith(prefix))
-            { continue; }
+            {
+                continue;
+            }
             phases.Add((row, EventVectorInventoryPhaseValidation.Read(map, row, admission,
                 EventVectorInventoryCoverageBound.Read(map, inventory.PayloadRows, admission))));
         }
@@ -24,7 +26,9 @@ internal static class EventVectorCleanupRetainedPins
         {
             if (retained.Phase.Role != EventVectorSourcePhaseRole.Pin
                 || IsReleased(retained.Phase, phases, admission))
-            { continue; }
+            {
+                continue;
+            }
             pins.Add(retained.Row);
         }
         admission.RequireEntryCount(pins.Count);
@@ -43,21 +47,31 @@ internal static class EventVectorCleanupRetainedPins
         foreach (var row in inventory.PayloadRows)
         {
             if (!row.Key.Span.StartsWith(prefix))
-            { continue; }
+            {
+                continue;
+            }
             var phase = EventVectorInventoryPhaseValidation.Read(map, row, admission,
                 EventVectorInventoryCoverageBound.Read(map, inventory.PayloadRows, admission));
             if (phase.Role != EventVectorSourcePhaseRole.Advance)
-            { continue; }
+            {
+                continue;
+            }
             var body = ReadBody(phase, admission);
             if (body.OriginalPinCommandId != pin.PhaseCommandId)
-            { continue; }
+            {
+                continue;
+            }
             RequireOriginal(pin, phase, body);
             if (latest is not null && phase.MapRevision == latest.MapRevision
                 && phase.CoverageGeneration == latest.CoverageGeneration)
-            { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, Invalid);
+            }
             if (latest is not null && (phase.MapRevision < latest.MapRevision
                 || phase.MapRevision == latest.MapRevision && phase.CoverageGeneration < latest.CoverageGeneration))
-            { continue; }
+            {
+                continue;
+            }
             latest = phase;
             bytes = row.Value;
         }
@@ -74,15 +88,21 @@ internal static class EventVectorCleanupRetainedPins
             if (phase.Role != EventVectorSourcePhaseRole.Release
                 || phase.Disposition != EventVectorSourcePhaseDisposition.Observed
                 || phase.SourceOriginalResult is not { Error: null } result)
-            { continue; }
+            {
+                continue;
+            }
             var body = EventVectorSourceMutationValidation.ReadObserved(phase, admission);
             if (body.OriginalPinCommandId != pin.PhaseCommandId)
-            { continue; }
+            {
+                continue;
+            }
             RequireOriginal(pin, phase, body);
             var release = result.Get<EventVectorSourceReleaseResult>();
             EventVectorReleaseResultValidation.Require(phase, body, release, admission);
             if (release.Disposition == EventVectorReleaseDisposition.Released)
-            { return true; }
+            {
+                return true;
+            }
         }
         return false;
     }
@@ -100,6 +120,8 @@ internal static class EventVectorCleanupRetainedPins
             || phase.ControlIncarnation != pin.ControlIncarnation || phase.Source != pin.Source
             || phase.PrincipalId != pin.PrincipalId
             || !body.OriginalPinNativeBody.Span.SequenceEqual(pin.OriginalNativeBody.Span))
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
     }
 }

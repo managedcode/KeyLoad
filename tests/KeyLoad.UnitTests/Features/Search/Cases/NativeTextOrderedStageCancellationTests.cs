@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Query;
 using KeyLoad.Server;
 using KeyLoad.UnitTests.Features.QueryExecution;
@@ -40,9 +40,13 @@ internal sealed class NativeTextOrderedStageCancellationTests
         finally
         {
             if (runtime is not null)
-            { await ServerFailureObserver.ObserveAsync(() => runtime.DisposeAsync().AsTask(), failures); }
+            {
+                await ServerFailureObserver.ObserveAsync(() => runtime.DisposeAsync().AsTask(), failures);
+            }
             if (database is not null)
-            { ServerFailureObserver.Observe(database.Dispose, failures); }
+            {
+                ServerFailureObserver.Observe(database.Dispose, failures);
+            }
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }

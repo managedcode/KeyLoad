@@ -21,9 +21,13 @@ internal sealed class CurrentOwnershipTokenAfterMovementRf3Tests
             await CurrentOwnershipTokenAfterMovementRf3Flow.RunAsync(wave, seed, caller.Token).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
         if (seed is { } ownedSeed)
-        { await ServerFailureObserver.ObserveAsync(() => ownedSeed.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => ownedSeed.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         if (wave is { } resources)
-        { await ServerFailureObserver.ObserveAsync(() => resources.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => resources.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

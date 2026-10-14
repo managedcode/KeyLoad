@@ -46,7 +46,11 @@ internal static class EventFeedFirstOpenRf3Flow
         var retiredOpen = original;
         var retiredOffer = offer;
         var retiredRelease = await EventFeedRepairedSourceRf3Settlement.ReleaseAsync(wave, credential, offer, token).ConfigureAwait(false);
-        request = request with { CommandId = Guid.NewGuid(), MapId = Guid.NewGuid() };
+        request = request with
+        {
+            CommandId = Guid.NewGuid(),
+            MapId = Guid.NewGuid()
+        };
         original = await RoutesAsync(wave, credential, request, token).ConfigureAwait(false);
         await EventFeedFirstOpenRf3Assertions.OpenAsync(request, original).ConfigureAwait(false);
         offer = await EventFeedOfferRf3Flow.RunAsync(wave, credential, request, original,

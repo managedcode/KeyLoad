@@ -63,10 +63,14 @@ public sealed partial class DatabaseEngine
         var admitted = work.CreateView(view);
         var actual = ResolveMovePhaseOutcome(admitted, envelope, phase.OriginalPhaseCommandId, localPrincipalId, identity);
         if (!NativeSerialization.Serialize(actual).AsSpan().SequenceEqual(NativeSerialization.Serialize(phase.OriginalResult)))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.MissingAuthority);
+        }
         PartitionMoveCleanupStorage.RequireOpen(admitted, envelope.Partition, envelope.MoveId, Limits.MaxBatchBytes);
         if (!NativeSerialization.Serialize(capture.Fence).AsSpan().SequenceEqual(NativeSerialization.Serialize(phase.OriginalFence)))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
     }
 
     internal PartitionMoveTransferReadAuthority VerifyPartitionMovementTransferReadAuthority(string principalId,
@@ -74,7 +78,9 @@ public sealed partial class DatabaseEngine
     {
         work.Check();
         if (originalControlReply.IsEmpty || originalControlReply.Length > Limits.MaxBatchBytes)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMoveProtocol.MissingAuthority);
+        }
         var originalBytes = originalControlReply.ToArray();
         var authorityBytes = movementCheckpointVerifier.VerifyTransferRead(this, principalId, originalBytes, signature, work);
         var verified = NativeSerialization.Deserialize<PartitionMoveTransferReadAuthority>(authorityBytes.Span);
@@ -88,7 +94,9 @@ public sealed partial class DatabaseEngine
     {
         work.Check();
         if (originalControlReply.IsEmpty || originalControlReply.Length > Limits.MaxBatchBytes)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMoveProtocol.MissingAuthority);
+        }
         var originalBytes = originalControlReply.ToArray();
         var authorityBytes = movementCheckpointVerifier.VerifyTransferCleanup(this, principalId, originalBytes, signature, work);
         var verified = NativeSerialization.Deserialize<PartitionMoveTransferReadAuthority>(authorityBytes.Span);
@@ -102,6 +110,8 @@ public sealed partial class DatabaseEngine
         if (capture.MaximumPageBytes <= PartitionMoveProtocol.EmptyCount
             || capture.MaximumImageBytes <= PartitionMoveProtocol.EmptyCount || capture.MaximumImageBytes > Limits.MaxQueryReadBytes
             || capture.MaximumRecords <= PartitionMoveProtocol.EmptyCount || capture.MaximumRecords > Limits.MaxScanRecords)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
+        }
     }
 }

@@ -63,7 +63,10 @@ internal static class FeedVertexAuthorityAssertions
             tail = 3L;
         }
         if (continuation is not null)
-        { tail++; changes.Add(Change(state, tail, "c", "{\"n\":3}", continuation, state.CommittedAt)); }
+        {
+            tail++;
+            changes.Add(Change(state, tail, "c", "{\"n\":3}", continuation, state.CommittedAt));
+        }
         var feed = owner.ReadChangeFeed(FeedVertexAuthorityFixture.Root,
             new(state.Seed.Partition, FeedVertexAuthorityFixture.Collection, state.FeedCursor), token);
         await Assert.That(feed.Cursor).IsNotNull();

@@ -35,7 +35,10 @@ internal static class PostgresPositiveExecutePolicy
             return true;
         }, token);
         await global::TUnit.Assertions.Assert.That(await PostgresPortalOwnershipAssertions.ImageAsync(root, state, token)).IsEqualTo(before);
-        await PersistAsync(root, original with { PolicyEpoch = original.PolicyEpoch + RepairAdvance }, token);
+        await PersistAsync(root, original with
+        {
+            PolicyEpoch = original.PolicyEpoch + RepairAdvance
+        }, token);
         before = await PostgresPortalOwnershipAssertions.ImageAsync(root, state, token);
         await PostgresPortalOwnershipCommands.BindAsync(stream, portal, statement, token);
         await PostgresPositiveExecuteTrial.ExecuteAsync(stream, state, portal, PostgresPositiveExecuteProtocol.OneRow, token);

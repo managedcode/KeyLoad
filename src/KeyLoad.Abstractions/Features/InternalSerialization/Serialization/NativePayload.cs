@@ -18,8 +18,14 @@ internal static class NativePayloadVersion
 internal sealed class NativePayload
 {
     [Orleans.Id(0)]
-    public uint Version { get; init; }
+    public uint Version
+    {
+        get; init;
+    }
 
     [Orleans.Id(1)]
-    public object? Value { get; init; }
+    public object? Value
+    {
+        get; init;
+    }
 }

@@ -13,11 +13,15 @@ internal static class NativeTextIncrementalDigest
     internal static bool IsCanonical(string? value)
     {
         if (value is null || value.Length != SHA256.HashSizeInBytes * HexCharactersPerByte)
-        { return false; }
+        {
+            return false;
+        }
         foreach (var character in value)
         {
             if (character is not (>= FirstDecimalDigit and <= LastDecimalDigit) and not (>= FirstLowerHexLetter and <= LastLowerHexLetter))
-            { return false; }
+            {
+                return false;
+            }
         }
         return true;
     }

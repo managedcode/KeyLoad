@@ -10,11 +10,18 @@ internal static class EventMessageSensitivePublicContinuation
         RequestCqrsRf3Callers caller, EventMessageSensitivePublicState state, CancellationToken token)
     {
         await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(),
-            state.Worker with { Revoked = true, PolicyEpoch = EventMessageSensitivePublicProtocol.RevokedEpoch }, token));
+            state.Worker with
+            {
+                Revoked = true,
+                PolicyEpoch = EventMessageSensitivePublicProtocol.RevokedEpoch
+            }, token));
         var request = EventMessageSensitivePublicOperations.Receive(state, Guid.NewGuid(), true);
         await EventMessageSensitivePublicRefusals.ReceiveAsync(caller, state, request, ErrorCode.Unauthenticated, token);
         await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), state.Worker with
-        { PolicyEpoch = EventMessageSensitivePublicProtocol.RepairedEpoch, FieldGrants = [EventMessageSensitivePublicProtocol.GrantAfter] }, token));
+        {
+            PolicyEpoch = EventMessageSensitivePublicProtocol.RepairedEpoch,
+            FieldGrants = [EventMessageSensitivePublicProtocol.GrantAfter]
+        }, token));
     }
 
     internal static async Task HealthyAsync(RequestCqrsRf3Callers root, RequestCqrsRf3Callers worker,
@@ -48,9 +55,13 @@ internal static class EventMessageSensitivePublicContinuation
             var request = EventMessageSensitivePublicOperations.Receive(state, Guid.NewGuid(), true);
             var empty = await EventMessageSensitivePublicOperations.ReceiveAsync(caller, state, request, route, token);
             if (empty is ReceiveSubscriptionResult subscription)
-            { await Assert.That(subscription.Deliveries).IsEmpty(); }
+            {
+                await Assert.That(subscription.Deliveries).IsEmpty();
+            }
             else
-            { await Assert.That(((ReceiveResult)empty).Deliveries).IsEmpty(); }
+            {
+                await Assert.That(((ReceiveResult)empty).Deliveries).IsEmpty();
+            }
         }
     }
 }

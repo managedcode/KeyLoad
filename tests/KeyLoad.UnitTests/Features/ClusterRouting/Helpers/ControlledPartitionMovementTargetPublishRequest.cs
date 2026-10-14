@@ -34,10 +34,14 @@ internal static class ControlledPartitionMovementTargetPublishRequest
             ?? throw new InvalidOperationException("The actual original A target-publish grant is absent.");
         if (grant.GrantId != ControlledPartitionMovementTargetPhaseIds.PublishGrant()
             || grant.PhaseCommandId != ControlledPartitionMovementTargetPhaseIds.PublishCommand())
-        { throw new InvalidOperationException("The original target-publish grant identity does not match."); }
+        {
+            throw new InvalidOperationException("The original target-publish grant identity does not match.");
+        }
         var envelope = Envelope(phase, phase.Stage, phase.PageOrdinal, originalExpiry, phase.Body)
             with
-        { Grant = grant };
+        {
+            Grant = grant
+        };
         return new(grant.PhaseCommandId, envelope, actualAuthorization.Journal,
             corpus.Control.Owner.VoterIds.First(), callerAddress, PartitionMovementTransportAction.Apply,
             Guid.Empty, ControlOrdinal);

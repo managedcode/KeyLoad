@@ -112,7 +112,10 @@ internal sealed class RelationalSqlRf3JoinAuthorizationTests(ClusterFixture fixt
         var persisted = await McpCallerAssertions.SdkSuccessAsync(await admin.ConfigurePrincipalAsync(Guid.NewGuid(), principal, cancellationToken));
         await Assert.That(persisted.PolicyEpoch).IsEqualTo(UpdatedPolicyEpoch);
         await SqlRf3Protocol.EqualAsync(principal, persisted);
-        return identity with { Principal = persisted };
+        return identity with
+        {
+            Principal = persisted
+        };
     }
 
     private static async Task AssertDeniedAsync(KeyLoadClient sdk, McpOfficialClient mcp, QueryRequest query,

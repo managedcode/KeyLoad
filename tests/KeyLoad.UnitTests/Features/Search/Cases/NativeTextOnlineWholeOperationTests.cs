@@ -1,5 +1,5 @@
 using System.Collections.Immutable;
-using KeyLoad.Orleans.Features.Search;
+using KeyLoad.Clustering.Features.Search;
 
 namespace KeyLoad.UnitTests.Features.Search;
 
@@ -60,10 +60,15 @@ internal sealed class NativeTextOnlineWholeOperationTests
             {
                 var id = Guid.NewGuid();
                 owners.Add(id);
-                var competing = request with { CommandId = Guid.NewGuid() };
+                var competing = request with
+                {
+                    CommandId = Guid.NewGuid()
+                };
                 _ = await runtime.PhaseAsync(fixture, id, competing, OnlineTextCapabilityKind.ResolveOriginal, expiry, token);
                 if (index == FirstCapturedOwner)
-                { _ = await runtime.PhaseAsync(fixture, id, competing, OnlineTextCapabilityKind.Capture, expiry, token); }
+                {
+                    _ = await runtime.PhaseAsync(fixture, id, competing, OnlineTextCapabilityKind.Capture, expiry, token);
+                }
                 else
                 {
                     var refused = await Assert.ThrowsAsync<KeyLoadException>(() => runtime.PhaseAsync(fixture,
@@ -76,7 +81,9 @@ internal sealed class NativeTextOnlineWholeOperationTests
             await Assert.That((error ?? throw new InvalidOperationException()).Code).IsEqualTo(ErrorCode.BudgetExceeded);
         }, failures);
         foreach (var id in owners)
-        { await KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => runtime.Owner.AbortAsync(id), failures); }
+        {
+            await KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => runtime.Owner.AbortAsync(id), failures);
+        }
         KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
         var result = await NativeTextOnlineWholeFlow.RunAsync(fixture, runtime, request, token);
         await Assert.That(result.CommandId).IsEqualTo(request.CommandId);
@@ -98,7 +105,10 @@ internal sealed class NativeTextOnlineWholeOperationTests
         await NativeTextBilingualAudit.VerifyAsync(runtime.Search, fixture.Partition, token);
         var deleted = fixture.Commit(new DeleteDocument(NativeTextBilingualAudit.Collection, NativeTextBilingualAudit.UkrainianId));
         await Assert.That(deleted.Mutations).HasSingleItem();
-        var successor = first with { CommandId = Guid.NewGuid() };
+        var successor = first with
+        {
+            CommandId = Guid.NewGuid()
+        };
         var published = await NativeTextOnlineWholeFlow.RunAsync(fixture, runtime, successor, token);
         await Assert.That(published.TrackedRecords).IsEqualTo(TrackedBilingualRecords);
         await NativeTextBilingualAudit.VerifyDeletedAsync(runtime.Search, fixture.Partition, token);
@@ -125,7 +135,9 @@ internal sealed class NativeTextOnlineWholeOperationTests
                 new("deleteDocument", NativeTextBilingualAudit.Collection, NativeTextBilingualAudit.EnglishId, 2)];
             await Assert.That(JsonDefaults.Serialize(receipt.Mutations).SequenceEqual(JsonDefaults.Serialize(literal.ToImmutableArray()))).IsTrue();
             foreach (var mutation in receipt.Mutations)
-            { await Assert.That(mutation.CompositionReferences).IsEmpty(); }
+            {
+                await Assert.That(mutation.CompositionReferences).IsEmpty();
+            }
         });
         await Assert.That(result.PublishedCut.ThroughSequence).IsGreaterThan(result.BaseCut.ThroughSequence);
         await Assert.That(result.TrackedRecords).IsEqualTo(TrackedBilingualRecords);
@@ -163,7 +175,10 @@ internal sealed class NativeTextOnlineWholeOperationTests
             held.ObserveToken("привіт");
             held.ObserveToken("світ");
             fixture.Commit(new DeleteDocument(NativeTextBilingualAudit.Collection, NativeTextBilingualAudit.UkrainianId));
-            _ = await NativeTextOnlineWholeFlow.RunAsync(fixture, runtime, request with { CommandId = Guid.NewGuid() }, token);
+            _ = await NativeTextOnlineWholeFlow.RunAsync(fixture, runtime, request with
+            {
+                CommandId = Guid.NewGuid()
+            }, token);
             held.VerifyCandidates(["привіт"], [seed.Expected[1].Reference], budget);
             await Assert.That(Directory.Exists(path)).IsTrue();
             await NativeTextBilingualAudit.VerifyDeletedAsync(runtime.Search, fixture.Partition, token);

@@ -72,14 +72,20 @@ internal sealed class SqlParserContractTests
             global::Microsoft.SqlServer.TransactSql.ScriptDom.SqlEngineType.Standalone);
         var tokens = parser.GetTokenStream(reader, out var errors);
         await Assert.That(errors.Count).IsEqualTo(0);
-        global::KeyLoad.Features.QueryExecution.ScriptDomTokenBounds.Require(tokens, exact with { MaxQueryTokens = 4 }, budget.Check);
+        global::KeyLoad.Features.QueryExecution.ScriptDomTokenBounds.Require(tokens, exact with
+        {
+            MaxQueryTokens = 4
+        }, budget.Check);
         await Assert.That(new SqlParser(SmallSql, UnitExecutionOptions.DatabaseLimits(exact), UnitExecutionOptions.QueryExecution()).Parse().Collection).IsEqualTo("orders");
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => _ = new SqlParser(SmallSql, UnitExecutionOptions.DatabaseLimits(exact with
         {
             MaxQueryBytes = bytes - 1
         }), UnitExecutionOptions.QueryExecution())).Code).IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => global::KeyLoad.Features.QueryExecution.ScriptDomTokenBounds.Require(tokens,
-            exact with { MaxQueryTokens = 3 }, budget.Check)).Code).IsEqualTo(ErrorCode.BudgetExceeded);
+            exact with
+            {
+                MaxQueryTokens = 3
+            }, budget.Check)).Code).IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => _ = new SqlParser("SELECT \"unterminated FROM orders", UnitExecutionOptions.DatabaseLimits(new()), UnitExecutionOptions.QueryExecution())).Code).IsEqualTo(ErrorCode.Validation);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => new SqlParser("SELECT TOP (1) PERCENT * FROM orders", UnitExecutionOptions.DatabaseLimits(new()), UnitExecutionOptions.QueryExecution()).Parse()).Code).IsEqualTo(ErrorCode.UnsupportedCapability);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => new SqlParser("SELECT * FROM orders WHERE (((status = 'x')))", UnitExecutionOptions.DatabaseLimits(new() { MaxQueryDepth = 2 }), UnitExecutionOptions.QueryExecution()).Parse()).Code)

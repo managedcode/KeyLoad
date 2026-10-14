@@ -8,11 +8,23 @@ internal sealed class SampleRawIntegrityFixture : IDisposable
 {
     private readonly TestDatabase original = new();
     private readonly List<ZoneTreeStore> opened = [];
-    internal ZoneTreeStore Store { get; private set; }
-    internal DatabaseEngine Owner { get; private set; }
+    internal ZoneTreeStore Store
+    {
+        get; private set;
+    }
+    internal DatabaseEngine Owner
+    {
+        get; private set;
+    }
     internal PartitionRef Partition => original.Partition;
-    internal ReplicatedOperation SeedOperation { get; }
-    internal CommitReceipt SeedReceipt { get; }
+    internal ReplicatedOperation SeedOperation
+    {
+        get;
+    }
+    internal CommitReceipt SeedReceipt
+    {
+        get;
+    }
 
     internal SampleRawIntegrityFixture()
     {
@@ -69,9 +81,13 @@ internal sealed class SampleRawIntegrityFixture : IDisposable
         if (failures.Count == 0)
         {
             try
-            { original.Dispose(); }
+            {
+                original.Dispose();
+            }
             catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
-            { failures.Add(error); }
+            {
+                failures.Add(error);
+            }
         }
         KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }

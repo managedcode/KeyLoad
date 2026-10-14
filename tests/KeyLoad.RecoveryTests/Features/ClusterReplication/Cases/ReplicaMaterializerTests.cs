@@ -65,16 +65,34 @@ internal sealed class ReplicaMaterializerTests
         private readonly string directory = KeyLoad.CrashHost.ReplicaFixturePaths.NewDirectory(TestDirectoryPrefix);
         private readonly ZoneTreeStore canonical;
         private readonly ZoneTreeStore replica;
-        public ReplicaConfiguration Configuration { get; }
-        public DatabaseEngine Database { get; }
-        public DurableReplicaLog Log { get; }
-        public ReplicaMaterializer Materializer { get; }
+        public ReplicaConfiguration Configuration
+        {
+            get;
+        }
+        public DatabaseEngine Database
+        {
+            get;
+        }
+        public DurableReplicaLog Log
+        {
+            get;
+        }
+        public ReplicaMaterializer Materializer
+        {
+            get;
+        }
 
         public Fixture()
         {
             Configuration = new(VoterA, [VoterA, VoterB, VoterC], directory, Guid.NewGuid());
-            canonical = new(new(Path.Combine(directory, CanonicalDirectory)) { Incarnation = Configuration.Incarnation }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
-            replica = new(new(Path.Combine(directory, LogDirectory)) { Incarnation = Configuration.Incarnation }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
+            canonical = new(new(Path.Combine(directory, CanonicalDirectory))
+            {
+                Incarnation = Configuration.Incarnation
+            }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
+            replica = new(new(Path.Combine(directory, LogDirectory))
+            {
+                Incarnation = Configuration.Incarnation
+            }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
             Log = new(replica, RecoveryExecutionOptions.Configuration(Configuration));
             Database = new(canonical, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource(), RecoveryExecutionOptions.Messaging(), RecoveryExecutionOptions.GraphExecution(), RecoveryExecutionOptions.ChangeFeedExecution(), RecoveryExecutionOptions.BlobExecution(), RecoveryExecutionOptions.NativeClaimsExecution(), RecoveryExecutionOptions.TimeSeriesExecution(), RecoveryExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
             Materializer = new(Database, Log, new ReplicaSnapshotStore(canonical, Log, RecoveryExecutionOptions.Configuration(Configuration), RecoveryExecutionOptions.Replica()), RecoveryExecutionOptions.Replica());

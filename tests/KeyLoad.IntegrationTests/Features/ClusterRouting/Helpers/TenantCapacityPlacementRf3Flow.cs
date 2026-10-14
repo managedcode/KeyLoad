@@ -52,21 +52,33 @@ internal static class TenantCapacityPlacementRf3Flow
         var intentId = Guid.NewGuid();
         var persistId = Guid.NewGuid();
         if (originalPlanExpiry)
-        { plan = await TenantCapacityPlacementRf3Expiry.RequireAsync(wave, seed, state, persistId, intentId, token); }
+        {
+            plan = await TenantCapacityPlacementRf3Expiry.RequireAsync(wave, seed, state, persistId, intentId, token);
+        }
         var persist = new PersistPlacementIntentRequest(intentId, 0, plan.SignedPlan, state.Control);
         var pending = await McpCallerAssertions.SdkSuccessAsync(
             await seed.Source.PersistPlacementIntentAsync(persistId, persist, token));
         await TenantCapacityPlacementRf3Assertions.RequirePendingAsync(pending, plan.Plan, intentId);
         await SqlRf3Protocol.EqualAsync(pending, (await McpCallerAssertions.SuccessAsync<PlacementIntentV1>(
             await seed.Official.CallAsync(TenantPlacementPublicProtocol.PersistTool,
-                new { commandId = persistId, request = persist }, token))).Value);
+                new
+                {
+                    commandId = persistId,
+                    request = persist
+                }, token))).Value);
         if (committedOwnerLoss)
-        { await TenantCapacityPlacementRf3OwnerLoss.RunAsync(wave, seed, state, plan, pending, persistId, persist, token); }
+        {
+            await TenantCapacityPlacementRf3OwnerLoss.RunAsync(wave, seed, state, plan, pending, persistId, persist, token);
+        }
         else
-        { await TenantCapacityPlacementRf3Apply.RunAsync(wave, seed, state, plan, pending, token); }
+        {
+            await TenantCapacityPlacementRf3Apply.RunAsync(wave, seed, state, plan, pending, token);
+        }
         await RequireBindReplayAsync(seed, binding.Id, binding.Request, token);
         if (originalPlanExpiry)
-        { await TenantCapacityPlacementRf3ExpiryAssertions.PersistReplayAsync(seed, persistId, persist, pending, token); }
+        {
+            await TenantCapacityPlacementRf3ExpiryAssertions.PersistReplayAsync(seed, persistId, persist, pending, token);
+        }
     }
 
     private static async Task<(Guid Id, BindAtomicPartitionPlacementRequest Request)> RequireRevisionSeparationAsync(PartitionMovementPublicParentRf3Seed seed,
@@ -82,10 +94,17 @@ internal static class TenantCapacityPlacementRf3Flow
             await seed.Source.BindAtomicPartitionPlacementAsync(id, request, token))).IsTrue();
         await Assert.That((await McpCallerAssertions.SuccessAsync<bool>(
             await seed.Official.CallAsync(McpCallerTools.AdminPartitionPlacementBind,
-                new { commandId = id, request }, token))).Value).IsTrue();
+                new
+                {
+                    commandId = id,
+                    request
+                }, token))).Value).IsTrue();
         var current = await McpCallerAssertions.SdkSuccessAsync(await seed.Source.ReadAtomicPartitionPlacementAsync(
             new(1, seed.Partition), token));
-        await SqlRf3Protocol.EqualAsync(seed.OriginalPlacement with { DirectoryRevision = 1 }, current);
+        await SqlRf3Protocol.EqualAsync(seed.OriginalPlacement with
+        {
+            DirectoryRevision = 1
+        }, current);
         var control = await McpCallerAssertions.SdkSuccessAsync(await seed.Source.ReadAtomicPartitionPlacementAsync(
             new(1, state.Control), token));
         await Assert.That(control.IsFallback).IsFalse();
@@ -103,6 +122,10 @@ internal static class TenantCapacityPlacementRf3Flow
             await seed.Source.BindAtomicPartitionPlacementAsync(id, request, token))).IsTrue();
         await Assert.That((await McpCallerAssertions.SuccessAsync<bool>(
             await seed.Official.CallAsync(McpCallerTools.AdminPartitionPlacementBind,
-                new { commandId = id, request }, token))).Value).IsTrue();
+                new
+                {
+                    commandId = id,
+                    request
+                }, token))).Value).IsTrue();
     }
 }

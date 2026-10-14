@@ -98,7 +98,9 @@ internal static class SiteAnalyzerCoverageThresholdOracle
             await Assert.That(row.GetProperty(SiteAnalyzerCoverageTokens.JsonLinesValid).GetInt64()).IsEqualTo(total);
             await Assert.That(row.GetProperty(SiteAnalyzerCoverageTokens.JsonPassed).GetBoolean()).IsEqualTo(passed);
             if (!passed)
-            { failures.Add(Pipelines[index].Diagnostic); }
+            {
+                failures.Add(Pipelines[index].Diagnostic);
+            }
         }
 
         return failures.ToArray();

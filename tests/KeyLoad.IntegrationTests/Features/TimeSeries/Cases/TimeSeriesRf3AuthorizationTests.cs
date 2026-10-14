@@ -53,7 +53,11 @@ internal sealed class TimeSeriesRf3AuthorizationTests(ClusterFixture fixture)
             deadline.Token));
         await Assert.That(healthy.Count).IsEqualTo(2L);
 
-        var revoked = identity.Principal with { Revoked = true, PolicyEpoch = identity.Principal.PolicyEpoch + 1 };
+        var revoked = identity.Principal with
+        {
+            Revoked = true,
+            PolicyEpoch = identity.Principal.PolicyEpoch + 1
+        };
         await McpCallerAssertions.SdkSuccessAsync(await new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution())
             .ConfigurePrincipalAsync(Guid.NewGuid(), revoked, deadline.Token));
         await VerifyRevokedOperationsAsync(sdk, mcp, scenario, identity.Secret, deadline.Token);

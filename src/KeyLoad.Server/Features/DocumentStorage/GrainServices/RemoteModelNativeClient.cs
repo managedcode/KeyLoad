@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server.Features.BlobStorage;
 using KeyLoad.Server.Features.ClusterRouting;
 using Microsoft.Extensions.Options;
@@ -65,9 +65,13 @@ internal sealed class RemoteModelNativeClient : GrainServiceClient<IRemoteModelG
         using var operation = lifetime.TryEnter()
             ?? throw new ObjectDisposedException(nameof(RemoteModelNativeClient));
         if (maximumReplyBytes is <= EmptyReplyBytes or > RemoteDocumentProtocol.MaximumBodyBytes || expiry <= clock.GetUtcNow())
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteModelNativeProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteModelNativeProtocol.Unavailable);
+        }
         if (payload.IsEmpty || payload.Length > RemoteDocumentProtocol.MaximumBodyBytes)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, RemoteModelNativeProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, RemoteModelNativeProtocol.InvalidProof);
+        }
         var remaining = expiry - clock.GetUtcNow();
         var bound = remaining < routing.ExecutionLifetime ? remaining : routing.ExecutionLifetime;
         using var deadline = new CancellationTokenSource(bound, clock);
@@ -80,33 +84,47 @@ internal sealed class RemoteModelNativeClient : GrainServiceClient<IRemoteModelG
         token.ThrowIfCancellationRequested();
         var current = local.Read();
         if (!current.TransportReady || !source.VoterIds.Contains(current.VoterId, StringComparer.Ordinal))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, RemoteModelNativeProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, RemoteModelNativeProtocol.Unavailable);
+        }
         await movement.RequireCallerAsync(current.VoterId, current.SiloAddress, token).ConfigureAwait(false);
         var request = new RemoteModelNativeRequest(channel, payload.ToArray(), signature, source, destination.Owner,
             current.VoterId, current.SiloAddress, destination.Owner.VoterIds[voterIndex], address.ToParsableString(),
             Guid.NewGuid(), expiry, string.Empty);
         using var sourceMac = RemoteDocumentMac.FromConfiguredSecret(RemoteModelNativeIdentity.Secret(options, partition, source));
-        request = request with { SenderSignature = sourceMac.SignNativeRequest(request) };
+        request = request with
+        {
+            SenderSignature = sourceMac.SignNativeRequest(request)
+        };
         var effects = RemoteModelNativeEffects.MayHaveEffects(request.Channel, request.Payload);
         var (received, priorReplayEffects) = await DispatchObservedAsync(destination, address, request, sourceMac, maximumReplyBytes, token).ConfigureAwait(false);
         RemoteModelNativeReply reply;
         try
         {
             if (faultObserver is not null)
-            { await faultObserver.AfterDispatchAsync(request, received, token).ConfigureAwait(false); }
+            {
+                await faultObserver.AfterDispatchAsync(request, received, token).ConfigureAwait(false);
+            }
             reply = await VerifyReplyAsync(destination, request, received, maximumReplyBytes, token).ConfigureAwait(false);
         }
         catch (Exception error) when ((effects || priorReplayEffects) && NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { throw Errors.Fail(ErrorCode.UnknownWriteOutcome, RemoteModelNativeProtocol.Unavailable, error); }
+        {
+            throw Errors.Fail(ErrorCode.UnknownWriteOutcome, RemoteModelNativeProtocol.Unavailable, error);
+        }
         // A correctly authenticated receiver refusal is interpreted only after exact dispatch identity checks.
         if (reply.Error is { } failure)
         {
             var originalFailure = Errors.Fail(failure, RemoteModelNativeProtocol.Unavailable);
             if (priorReplayEffects)
-            { throw Errors.Fail(ErrorCode.UnknownWriteOutcome, RemoteModelNativeProtocol.Unavailable, originalFailure); }
+            {
+                throw Errors.Fail(ErrorCode.UnknownWriteOutcome, RemoteModelNativeProtocol.Unavailable, originalFailure);
+            }
             throw originalFailure;
         }
-        return new(reply.Payload, reply.Signature, request.DestinationSiloAddress) { MayHaveEffects = effects };
+        return new(reply.Payload, reply.Signature, request.DestinationSiloAddress)
+        {
+            MayHaveEffects = effects
+        };
     }
 
     private async Task<(RemoteModelNativeReply Reply, bool PriorReplayEffects)> DispatchObservedAsync(RegisteredPhysicalOwnerV1 destination,
@@ -137,7 +155,9 @@ internal sealed class RemoteModelNativeClient : GrainServiceClient<IRemoteModelG
             return (await DispatchAsync(address, request, token).ConfigureAwait(false), replayEffects);
         }
         catch (Exception error) when (replayEffects && NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { throw Errors.Fail(ErrorCode.UnknownWriteOutcome, RemoteModelNativeProtocol.Unavailable, error); }
+        {
+            throw Errors.Fail(ErrorCode.UnknownWriteOutcome, RemoteModelNativeProtocol.Unavailable, error);
+        }
     }
 
     internal Task<RemoteModelNativeReply> VerifyReplyAsync(RegisteredPhysicalOwnerV1 destination,
@@ -150,11 +170,17 @@ internal sealed class RemoteModelNativeClient : GrainServiceClient<IRemoteModelG
     {
         var effects = RemoteModelNativeEffects.MayHaveEffects(request.Channel, request.Payload);
         try
-        { return await GetGrainService(address).ExchangeAsync(request, token).ConfigureAwait(false); }
+        {
+            return await GetGrainService(address).ExchangeAsync(request, token).ConfigureAwait(false);
+        }
         catch (Exception error) when (effects && NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { throw Errors.Fail(ErrorCode.UnknownWriteOutcome, RemoteModelNativeProtocol.Unavailable, error); }
+        {
+            throw Errors.Fail(ErrorCode.UnknownWriteOutcome, RemoteModelNativeProtocol.Unavailable, error);
+        }
         catch (Exception error) when (error is OrleansException or TimeoutException or ObjectDisposedException)
-        { throw Errors.Fail(effects ? ErrorCode.UnknownWriteOutcome : ErrorCode.OwnershipLost, RemoteModelNativeProtocol.Unavailable, error); }
+        {
+            throw Errors.Fail(effects ? ErrorCode.UnknownWriteOutcome : ErrorCode.OwnershipLost, RemoteModelNativeProtocol.Unavailable, error);
+        }
     }
 
     internal async Task RequireBeforeDispatchAsync(RegisteredPhysicalOwnerV1 destination,
@@ -165,9 +191,13 @@ internal sealed class RemoteModelNativeClient : GrainServiceClient<IRemoteModelG
         await movement.RequireCallerAsync(request.CallerVoter, request.CallerSiloAddress, token).ConfigureAwait(false);
         token.ThrowIfCancellationRequested();
         if (!sourceMac.VerifyNativeRequest(request))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteModelNativeProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, RemoteModelNativeProtocol.InvalidProof);
+        }
         if (request.ExpiresAt <= clock.GetUtcNow() || local.Read().SiloAddress != request.CallerSiloAddress)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteModelNativeProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteModelNativeProtocol.Unavailable);
+        }
     }
 
     internal Task<RemoteModelNativeReplayResult> ReplayCapturedAsync(RegisteredPhysicalOwnerV1 destination,
@@ -186,15 +216,21 @@ internal sealed class RemoteModelNativeClient : GrainServiceClient<IRemoteModelG
         var actual = await movement.ResolveAsync(destination, index, token).ConfigureAwait(false);
         token.ThrowIfCancellationRequested();
         if (!string.Equals(actual.ToParsableString(), address, StringComparison.Ordinal))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, RemoteModelNativeProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, RemoteModelNativeProtocol.Unavailable);
+        }
     }
     internal Task StopAsync() => lifetime.StopAsync();
     public async ValueTask DisposeAsync()
     {
         try
-        { await lifetime.DisposeAsync().ConfigureAwait(false); }
+        {
+            await lifetime.DisposeAsync().ConfigureAwait(false);
+        }
         finally
-        { DisposeOwnedResources(); }
+        {
+            DisposeOwnedResources();
+        }
     }
 
     private void DisposeOwnedResources()
@@ -202,6 +238,8 @@ internal sealed class RemoteModelNativeClient : GrainServiceClient<IRemoteModelG
         const int DisposedResources = 1;
         const int LiveResources = 0;
         if (Interlocked.Exchange(ref resourcesDisposed, DisposedResources) == LiveResources)
-        { stopping.Dispose(); }
+        {
+            stopping.Dispose();
+        }
     }
 }

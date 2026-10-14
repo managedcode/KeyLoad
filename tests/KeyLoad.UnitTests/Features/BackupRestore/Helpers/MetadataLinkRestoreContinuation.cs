@@ -53,14 +53,18 @@ internal static class MetadataLinkRestoreContinuation
     {
         if ((File.GetAttributes(path) & FileAttributes.ReparsePoint) == NoAttributes
             || !string.Equals(new FileInfo(path).LinkTarget, MetadataTestContract.JournalFileName, StringComparison.Ordinal))
-        { throw new InvalidOperationException(ChangedOwnedLink); }
+        {
+            throw new InvalidOperationException(ChangedOwnedLink);
+        }
         File.Delete(path);
         await using var file = new FileStream(path, FileMode.CreateNew, FileAccess.Write, FileShare.None,
             UnitExecutionOptions.StorageExecution().Value.StreamBufferBytes, FileOptions.Asynchronous);
         await file.WriteAsync(original, cancellationToken).ConfigureAwait(false);
         FlushDurably(file);
         if (!OperatingSystem.IsWindows() && mode is { } originalMode)
-        { File.SetUnixFileMode(path, originalMode); }
+        {
+            File.SetUnixFileMode(path, originalMode);
+        }
     }
 
     private static void FlushDurably(FileStream file) => file.Flush(true);

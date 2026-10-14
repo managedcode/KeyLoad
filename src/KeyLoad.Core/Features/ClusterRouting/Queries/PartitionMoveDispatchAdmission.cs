@@ -15,19 +15,27 @@ public sealed partial class DatabaseEngine
         work.Check();
         PartitionMovePeerEnvelopeValidation.RequireStructure(original, Limits.MaxBatchBytes);
         if (phaseCommandId == Guid.Empty || original.ExpiresAt <= EvaluationClock.GetUtcNow())
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
         Store.Read(view =>
         {
             var admitted = work.CreateView(view);
             var directory = RequireMoveDirectory(admitted);
             if (!PhysicalOwnerEntryValidation.SameOwner(directory.ControlOwner, original.ControlOwner))
-            { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+            }
             var control = PartitionMoveControlStorage.ReadHistory(admitted, original.Partition,
                 original.MoveId, Limits.MaxBatchBytes);
             if (PartitionMoveGrantValidation.IsLocalControl(original.Stage))
-            { RequireLocalMoveDispatch(admitted, original, authorization, control); }
+            {
+                RequireLocalMoveDispatch(admitted, original, authorization, control);
+            }
             else
-            { RequireGrantedMoveDispatch(admitted, original, authorization, phaseCommandId, control, directory); }
+            {
+                RequireGrantedMoveDispatch(admitted, original, authorization, phaseCommandId, control, directory);
+            }
             return true;
         });
         work.Check();
@@ -48,17 +56,23 @@ public sealed partial class DatabaseEngine
             || authorization.ControlIntentDigest != grant.ControlIntentDigest
             || !PhysicalOwnerEntryValidation.SameOwner(authorization.PhysicalOwner, grant.ControlOwner)
             || PartitionMoveIntentIdentity.Digest(control) != original.ControlIntentDigest)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
         if (!directory.Owners.Any(entry => PhysicalOwnerEntryValidation.SameOwner(entry.Owner, grant.ReceiverOwner))
             || !directory.Owners.Any(entry => PhysicalOwnerEntryValidation.SameOwner(entry.Owner, original.DestinationOwner))
             || !directory.Owners.Any(entry => entry.Owner.PhysicalShardId == original.SourcePlacement.PhysicalShardId
                 && entry.Owner.Incarnation == original.SourcePlacement.Incarnation
                 && entry.Owner.VoterIds.SequenceEqual(original.SourcePlacement.VoterIds, StringComparer.Ordinal)))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
         var now = EvaluationClock.GetUtcNow();
         var principal = RequireMoveDispatchPrincipal(view, grant.OperatorPrincipalId, now);
         if (principal.PolicyEpoch != grant.OperatorPolicyEpoch || control.PrincipalId != principal.Id)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
         PartitionMoveGrantValidation.Require(original, commandId, grant.ReceiverOwner, now);
         var phase = new PartitionMovePhaseCommand(original.Version, original.MoveId, original.Partition,
             original.ControlOwner, original.SourcePlacement, original.DestinationOwner,
@@ -72,7 +86,9 @@ public sealed partial class DatabaseEngine
     {
         var principal = Principal(view, principalId, now);
         if (!principal.ClusterAdministrator)
-        { throw Errors.Fail(ErrorCode.PermissionDenied, ClusterAdministrationRequiredMessage); }
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, ClusterAdministrationRequiredMessage);
+        }
         return principal;
     }
 }

@@ -27,12 +27,16 @@ internal static class EventVectorParentOutcome
         if (actualId != commandId || outcome is null || outcome.Incarnation != incarnation
             || outcome.PolicyEpoch != principal.PolicyEpoch || outcome.Fingerprint != fingerprint
             || expectedFingerprint is not null && expectedFingerprint != fingerprint)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, MissingOutcome); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, MissingOutcome);
+        }
         if (outcome.Result.Error is null && EventVectorFirstCleanupResultValidation.Handles(phase.Action))
         {
             var first = outcome.Result.Get<EventVectorFirstIssuanceResult>();
             if (first.NativeCommandId != commandId)
-            { throw Errors.Fail(ErrorCode.RecoveryRequired, MissingOutcome); }
+            {
+                throw Errors.Fail(ErrorCode.RecoveryRequired, MissingOutcome);
+            }
             _ = EventVectorFirstCleanupResultValidation.Read(first, phase, principal.Id, incarnation, admission);
         }
         else if (outcome.Result.Error is null)
@@ -44,7 +48,9 @@ internal static class EventVectorParentOutcome
         }
         else if (phase.Action != EventVectorControlAction.Open
             && !EventVectorFirstCleanupResultValidation.Handles(phase.Action) || outcome.Result.NativeValue is not null)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, MissingOutcome); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, MissingOutcome);
+        }
         return outcome;
     }
 
@@ -73,6 +79,8 @@ internal static class EventVectorParentOutcome
             || result.Map is { } map && (map.MapId != phase.OriginalRequest.MapId || map.ControlPartition != phase.OriginalRequest.ControlPartition)
             || result.Offer is { } offer && offer.MapId != phase.OriginalRequest.MapId
             || result.SourcePhase is { } source && source.MapId != phase.OriginalRequest.MapId)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, MissingOutcome); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, MissingOutcome);
+        }
     }
 }

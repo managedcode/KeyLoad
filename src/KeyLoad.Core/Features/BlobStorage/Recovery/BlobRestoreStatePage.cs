@@ -15,11 +15,15 @@ internal sealed class BlobRestoreStatePage(DatabaseEngine database, BlobRestoreM
         var blob = BlobKeys.DecodeScope(record.Key.Span, BlobKeys.StateSpace, BlobKeys.StateComponents);
         var state = BlobRecordReader.Decode<BlobState>(record.Value.Span);
         if (!record.Key.Span.SequenceEqual(BlobKeys.State(blob, state.UploadId)))
-        { throw BlobErrors.Corruption(); }
+        {
+            throw BlobErrors.Corruption();
+        }
         BlobRecordReader.ValidateState(state, blob, state.UploadId, verify ? marker.TargetIncarnation : marker.SourceIncarnation);
         ValidatePair(tx, state, verify);
         if (verify)
-        { return marker; }
+        {
+            return marker;
+        }
         var accounting = new BlobRestoreAccounting(database, marker);
         accounting.AbortReservation(tx, state);
         var rebound = state with
@@ -30,7 +34,11 @@ internal sealed class BlobRestoreStatePage(DatabaseEngine database, BlobRestoreM
         };
         accounting.Add(tx, blob, rebound.ChargedBytes, KeysEmptyCount, VersionsSingleItemCount, UploadsEmptyCount);
         BlobMetadataRules.Put(tx, record.Key.ToArray(), rebound);
-        return marker with { ReservedBytes = checked(marker.ReservedBytes + rebound.ChargedBytes), Versions = checked(marker.Versions + VersionsStep) };
+        return marker with
+        {
+            ReservedBytes = checked(marker.ReservedBytes + rebound.ChargedBytes),
+            Versions = checked(marker.Versions + VersionsStep)
+        };
     }
 
     internal void ValidatePair(IKeyValueView view, BlobState state, bool verify)
@@ -43,12 +51,18 @@ internal sealed class BlobRestoreStatePage(DatabaseEngine database, BlobRestoreM
         BlobRecordReader.ValidateHead(head, state.Blob, verify ? marker.TargetIncarnation : marker.SourceIncarnation);
         var current = head.Metadata.VersionId == state.UploadId;
         if (current != (state.Status == BlobUploadStatus.Complete && !state.Retired))
-        { throw BlobErrors.Corruption(); }
+        {
+            throw BlobErrors.Corruption();
+        }
         if (!current)
-        { return; }
+        {
+            return;
+        }
         if (state.ReclaimCursor != EmptyReclaimCursor || state.DeclaredLength != head.Metadata.Length || state.NextOrdinal != head.Metadata.PartCount
             || state.IntegrityHash != head.Metadata.IntegrityHash || state.Access != head.Metadata.Access
             || state.ExpectedRevision != head.Metadata.Revision - RevisionStep)
-        { throw BlobErrors.Corruption(); }
+        {
+            throw BlobErrors.Corruption();
+        }
     }
 }

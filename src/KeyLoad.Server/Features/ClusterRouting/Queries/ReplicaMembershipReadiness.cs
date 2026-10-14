@@ -1,5 +1,5 @@
 using System.Text;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
@@ -14,16 +14,22 @@ internal static class ReplicaMembershipReadiness
         IOptions<NodeOptions> nodeOptions, IOptions<OrleansMembershipOptions> membershipOptions, CancellationToken token)
     {
         if (!siloJoined || host is null)
-        { return null; }
+        {
+            return null;
+        }
         try
         {
             return await ReadAsync(host.Services.GetRequiredService<ReplicaNativeDiscoveryRuntime>(), nodeOptions,
                 host.Services.GetRequiredService<ILocalSiloDetails>().SiloAddress, membershipOptions, token).ConfigureAwait(false);
         }
         catch (OperationCanceledException) when (token.IsCancellationRequested)
-        { throw; }
+        {
+            throw;
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { return null; }
+        {
+            return null;
+        }
     }
 
     private static Task<MembershipReadinessSnapshot?> ReadAsync(ReplicaNativeDiscoveryRuntime runtime,
@@ -42,10 +48,14 @@ internal static class ReplicaMembershipReadiness
         token.ThrowIfCancellationRequested();
         bounds.Validate();
         if (view.IsDefault || view.Length != ExpectedActiveSilos || view.Length > bounds.MaximumRows)
-        { return null; }
+        {
+            return null;
+        }
         var expected = ExpectedNames(options, bounds);
         if (expected is null)
-        { return null; }
+        {
+            return null;
+        }
         var names = new HashSet<string>(StringComparer.Ordinal);
         var addresses = new HashSet<string>(StringComparer.Ordinal);
         var local = localAddress.ToParsableString();
@@ -56,11 +66,15 @@ internal static class ReplicaMembershipReadiness
                 || !expected.Contains(entry.SiloName) || !names.Add(entry.SiloName)
                 || !addresses.Add(entry.SiloAddress)
                 || SiloAddress.FromParsableString(entry.SiloAddress).ToParsableString() != entry.SiloAddress)
-            { return null; }
+            {
+                return null;
+            }
         }
         token.ThrowIfCancellationRequested();
         if (!names.SetEquals(expected) || !addresses.Contains(local))
-        { return null; }
+        {
+            return null;
+        }
         return new(SnapshotVersion, view.Length, view.Length, ReplicaMembershipFingerprint.Compute(addresses));
     }
 
@@ -68,12 +82,16 @@ internal static class ReplicaMembershipReadiness
     {
         const int GroupVoters = 3;
         if (options.Peers.Count != GroupVoters || options.PhysicalGroupTrust.ForeignVoterIds.Length != GroupVoters)
-        { return null; }
+        {
+            return null;
+        }
         var expected = new HashSet<string>(StringComparer.Ordinal);
         foreach (var name in options.Peers.Concat(options.PhysicalGroupTrust.ForeignVoterIds))
         {
             if (!Bounded(name, bounds) || !expected.Add(name))
-            { return null; }
+            {
+                return null;
+            }
         }
         return expected;
     }
@@ -81,10 +99,16 @@ internal static class ReplicaMembershipReadiness
     private static bool Bounded(string value, OrleansMembershipOptions bounds)
     {
         if (string.IsNullOrWhiteSpace(value))
-        { return false; }
+        {
+            return false;
+        }
         try
-        { return StrictUtf8.GetByteCount(value) <= bounds.MaximumAddressBytes; }
+        {
+            return StrictUtf8.GetByteCount(value) <= bounds.MaximumAddressBytes;
+        }
         catch (EncoderFallbackException)
-        { return false; }
+        {
+            return false;
+        }
     }
 }

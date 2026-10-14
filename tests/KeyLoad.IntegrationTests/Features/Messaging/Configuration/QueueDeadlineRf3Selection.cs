@@ -1,8 +1,8 @@
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClusterReplication;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.IntegrationTests.Features.Messaging;
 
@@ -14,7 +14,9 @@ internal sealed record QueueDeadlineRf3Selection(string PrincipalId)
     {
         var validated = new DueCoordinationOptions { QueueDeadlinePrincipalId = PrincipalId };
         if (!validated.IsValid())
-        { throw new InvalidOperationException(DueCoordinationOptions.ValidationMessage); }
+        {
+            throw new InvalidOperationException(DueCoordinationOptions.ValidationMessage);
+        }
         foreach (var number in Enumerable.Range(ClusterFixtureProtocol.FirstNodeNumber, ClusterFixtureProtocol.NodeCount))
         {
             var node = builder.CreateResourceBuilder(builder.Resources.OfType<ContainerResource>()

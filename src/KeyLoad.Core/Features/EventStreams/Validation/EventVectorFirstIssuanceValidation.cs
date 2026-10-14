@@ -25,7 +25,9 @@ internal static class EventVectorFirstIssuanceValidation
             || row.OriginalCoverageWitnessBytes.IsEmpty || row.OriginalAuthorizedSourceScopes.IsDefault
             || row.OriginalPublicRequestDigest.Length != SHA256.HashSizeInBytes || !Enum.IsDefined(row.State)
             || terminal != (row.State == EventVectorFirstIssuanceState.Released))
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         admission.RequireEntryCount(row.OriginalAuthorizedSourceScopes.Length);
         RequireCleanup(row);
         return row;
@@ -45,7 +47,9 @@ internal static class EventVectorFirstIssuanceValidation
             || !CryptographicOperations.FixedTimeEquals(
                 EventVectorControlBodyProjection.RequestDigest(requested, admission).Span,
                 row.OriginalPublicRequestDigest.Span))
-        { throw Errors.Fail(ErrorCode.Conflict, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, Invalid);
+        }
         return original;
     }
 
@@ -59,6 +63,8 @@ internal static class EventVectorFirstIssuanceValidation
                 && !row.OriginalCapturedFirstOpenPhaseBytes.IsEmpty
             || row.State is EventVectorFirstIssuanceState.Captured or EventVectorFirstIssuanceState.DispatchReserved
                 && row.OriginalCapturedFirstOpenPhaseBytes.IsEmpty)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
     }
 }

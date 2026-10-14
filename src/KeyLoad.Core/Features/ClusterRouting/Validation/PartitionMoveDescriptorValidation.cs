@@ -17,7 +17,9 @@ internal static class PartitionMoveDescriptorValidation
             || descriptor.Resources.Any(resource => resource is null)
             || !descriptor.Families.Select(family => family.Family)
                 .SequenceEqual(PartitionRecordFamilies.All, StringComparer.Ordinal))
-        { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.InvalidImage); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.InvalidImage);
+        }
         long records = PartitionMoveProtocol.EmptyCount;
         long bytes = PartitionMoveProtocol.EmptyCount;
         foreach (var family in descriptor.Families)
@@ -26,16 +28,24 @@ internal static class PartitionMoveDescriptorValidation
                 || family.RawBytes < PartitionMoveProtocol.EmptyCount
                 || family.PageCount < PartitionMoveProtocol.EmptyCount
                 || !PartitionMoveSourceFenceValidation.ValidDigest(family.Digest))
-            { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.InvalidImage); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.InvalidImage);
+            }
             if (family.RecordCount > limits.MaxScanRecords - records
                 || family.RawBytes > limits.MaxQueryReadBytes - bytes)
-            { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity); }
+            {
+                throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
+            }
             records += family.RecordCount;
             bytes += family.RawBytes;
         }
         if (descriptor.Digest != PartitionMoveImageDigest.Image(descriptor.Families, descriptor.Resources))
-        { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.InvalidImage); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.InvalidImage);
+        }
         if (NativeSerialization.Measure(descriptor) > limits.MaxBatchBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
+        }
     }
 }

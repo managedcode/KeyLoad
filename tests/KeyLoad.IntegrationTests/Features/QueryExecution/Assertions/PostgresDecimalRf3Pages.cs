@@ -40,7 +40,9 @@ internal static class PostgresDecimalRf3Pages
                         {
                             var parameter = new global::Npgsql.NpgsqlParameter(PostgresDecimalRf3Protocol.Parameter,
                                 global::NpgsqlTypes.NpgsqlDbType.Numeric)
-                            { Value = value };
+                            {
+                                Value = value
+                            };
                             await PageAsync(await wire.ExecuteAsync<QueryPage>(PostgresDecimalRf3Protocol.DriverSql,
                                 [parameter], prepared, token), value);
                         }

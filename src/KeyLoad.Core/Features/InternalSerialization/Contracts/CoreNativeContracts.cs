@@ -3,7 +3,10 @@ using KeyLoad.Core.Features.BlobStorage;
 
 namespace KeyLoad.Core;
 
-internal enum GroupDeliveryState { Pending, Leased, Acked, Filtered, Parked }
+internal enum GroupDeliveryState
+{
+    Pending, Leased, Acked, Filtered, Parked
+}
 
 [global::Orleans.GenerateSerializer]
 [global::Orleans.Alias(global::KeyLoad.Core.Features.InternalSerialization.CoreNativeAliases.EventIdentity)]
@@ -110,31 +113,52 @@ internal sealed record StoredOutcome(
 {
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     [global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.StoredOutcomeFields.BlobAuthority)]
-    public BlobOutcomeAuthority? BlobAuthority { get; init; }
+    public BlobOutcomeAuthority? BlobAuthority
+    {
+        get; init;
+    }
 
     [JsonIgnore]
     [global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.StoredOutcomeFields.CompositionAuthority)]
-    public global::KeyLoad.Core.Features.DatabaseComposition.CompositionOutcomeAuthority? CompositionAuthority { get; init; }
+    public global::KeyLoad.Core.Features.DatabaseComposition.CompositionOutcomeAuthority? CompositionAuthority
+    {
+        get; init;
+    }
 
     [JsonIgnore]
     [global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.StoredOutcomeFields.ScopeKind)]
-    public global::KeyLoad.Core.Features.ClusterRouting.Contracts.CommandOutcomeScopeKind ScopeKind { get; init; }
+    public global::KeyLoad.Core.Features.ClusterRouting.Contracts.CommandOutcomeScopeKind ScopeKind
+    {
+        get; init;
+    }
 
     [JsonIgnore]
     [global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.StoredOutcomeFields.Partition)]
-    public PartitionRef? Partition { get; init; }
+    public PartitionRef? Partition
+    {
+        get; init;
+    }
 
     [JsonIgnore]
     [global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.StoredOutcomeFields.OnlineTextAuthority)]
-    public global::KeyLoad.Core.Features.Search.OnlineTextOutcomeAuthority? OnlineTextAuthority { get; init; }
+    public global::KeyLoad.Core.Features.Search.OnlineTextOutcomeAuthority? OnlineTextAuthority
+    {
+        get; init;
+    }
 
     [JsonIgnore]
     [global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.StoredOutcomeFields.RemoteTransferFailureAuthority)]
-    public global::KeyLoad.Core.Features.Messaging.RemoteTransferAcceptFailureAuthority? RemoteTransferFailureAuthority { get; init; }
+    public global::KeyLoad.Core.Features.Messaging.RemoteTransferAcceptFailureAuthority? RemoteTransferFailureAuthority
+    {
+        get; init;
+    }
 
     [JsonIgnore]
     [global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.StoredOutcomeFields.RemoteTransferAuthority)]
-    public global::KeyLoad.Core.Features.Messaging.RemoteTransferOutcomeAuthority? RemoteTransferAuthority { get; init; }
+    public global::KeyLoad.Core.Features.Messaging.RemoteTransferOutcomeAuthority? RemoteTransferAuthority
+    {
+        get; init;
+    }
 }
 
 [global::Orleans.GenerateSerializer]

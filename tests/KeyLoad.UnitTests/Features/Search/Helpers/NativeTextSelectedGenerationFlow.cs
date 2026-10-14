@@ -49,12 +49,19 @@ internal static class NativeTextSelectedGenerationFlow
         _ = await NativeTextMaintenanceCommit.ExecuteAsync<CommitReceipt>(database, OperationKind.Batch, write, id, token);
         await RejectAsync(database, search, selection, token);
         await runtime.Owner.AbortAsync(runtime.SessionId);
-        var restore = maintenance with { CommandId = Guid.NewGuid(), Mode = TextIndexMaintenanceMode.Restore };
+        var restore = maintenance with
+        {
+            CommandId = Guid.NewGuid(),
+            Mode = TextIndexMaintenanceMode.Restore
+        };
         _ = await NativeTextMaintenancePhaseFlow.FinishAsync(database, runtime, restore, token);
         await LiteralAsync(search, database.Partition, selection, ChangedQuery, NativeTextBilingualAudit.UkrainianId,
             ChangedJson, ChangedRevision, token);
         await Assert.That(await search.SearchAsync(Root,
-            NativeTextBilingualAudit.Request(database.Partition, "hello") with { TextIndex = selection }, token)).IsEmpty();
+            NativeTextBilingualAudit.Request(database.Partition, "hello") with
+            {
+                TextIndex = selection
+            }, token)).IsEmpty();
         await NativeTextSelectedReleaseFlow.ExecuteAsync(database, runtime, restore, search, token);
     }
 
@@ -67,7 +74,9 @@ internal static class NativeTextSelectedGenerationFlow
         var error = await Assert.ThrowsExactlyAsync<KeyLoadException>(async () => partial =
             await search.SearchAsync(Root, NativeTextBilingualAudit.Request(database.Partition, ChangedQuery)
                 with
-            { TextIndex = selection }, token)) ?? throw new InvalidOperationException();
+            {
+                TextIndex = selection
+            }, token)) ?? throw new InvalidOperationException();
         await Assert.That(error.Code).IsEqualTo(ErrorCode.HistoryUnavailable);
         await Assert.That(error.Message).IsEqualTo(NativeTextSelectedCallerFlow.Mismatch);
         await Assert.That(partial).IsNull();
@@ -80,7 +89,9 @@ internal static class NativeTextSelectedGenerationFlow
     {
         var actual = await search.SearchAsync(Root, NativeTextBilingualAudit.Request(partition, query)
             with
-        { TextIndex = selection }, token);
+        {
+            TextIndex = selection
+        }, token);
         var expected = new RankedDocument(new(new(partition, NativeTextBilingualAudit.Collection, id), revision, json, false, []), Score);
         await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(new[] { expected }))).IsTrue();
     }

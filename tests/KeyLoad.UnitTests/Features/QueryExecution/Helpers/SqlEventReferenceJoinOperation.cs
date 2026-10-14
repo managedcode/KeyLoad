@@ -57,7 +57,9 @@ internal static class SqlEventReferenceJoinOperation
             () => engine.ExecuteAst("root", SqlEventReferenceJoinFixture.Ast(database.Partition) with
             {
                 Query = SqlEventReferenceJoinFixture.Ast(database.Partition).Query with
-                { InnerJoin = new("missingcustomers", "d", "/payload/to", "/entity_ref") }
+                {
+                    InnerJoin = new("missingcustomers", "d", "/payload/to", "/entity_ref")
+                }
             }), ErrorCode.NotFound);
         await SqlEventReferenceJoinAssertions.RejectAsync(database,
             () => engine.Execute("root", SqlEventReferenceJoinFixture.Request(database.Partition, generation: 2)),
@@ -117,8 +119,8 @@ internal static class SqlModelEventRecordIntegrityFlow
             await Assert.That(JsonDefaults.Serialize(database.Store.Identity)).IsEquivalentTo(identity, CollectionOrdering.Matching);
             await QueriesAsync(database.Store, database.Database, database.Partition, expected, checked(position + 1));
         }
-        catch (Exception error) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        catch (Exception error) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
+        catch (Exception error) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
+        catch (Exception error) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         try
         {
             database.Store.Commit((transaction, _) => { transaction.Put(key, original); return true; });
@@ -126,8 +128,8 @@ internal static class SqlModelEventRecordIntegrityFlow
             await Assert.That(JsonDefaults.Serialize(database.Store.Identity)).IsEquivalentTo(identity, CollectionOrdering.Matching);
             await SqlEventReferenceJoinOperation.VerifyAsync(database, repaired: true);
         }
-        catch (Exception error) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        catch (Exception error) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
+        catch (Exception error) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
+        catch (Exception error) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }
 

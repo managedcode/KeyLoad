@@ -21,10 +21,17 @@ internal static class EventVectorCapacityLedger
         {
             RequireNoOwnedRows(transaction, partition);
             current = new EventVectorCapacity
-            { Version = Version, ControlPartition = partition, OpenMaps = EmptyCount, RetainedBytes = EmptyCount };
+            {
+                Version = Version,
+                ControlPartition = partition,
+                OpenMaps = EmptyCount,
+                RetainedBytes = EmptyCount
+            };
         }
         if (current.Version != Version || current.ControlPartition != partition)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidCapacity); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidCapacity);
+        }
         admission.Require(current.OpenMaps, current.RetainedBytes, slotDelta, byteDelta);
         var changed = current with
         {
@@ -44,7 +51,9 @@ internal static class EventVectorCapacityLedger
             var found = false;
             view.VisitRange(prefix, ExistenceProbeRecords, (_, _) => { found = true; return false; });
             if (found)
-            { throw Errors.Fail(ErrorCode.Corruption, InvalidCapacity); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, InvalidCapacity);
+            }
         }
     }
 }

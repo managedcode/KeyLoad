@@ -65,8 +65,18 @@ internal static class ResourcePolicyUpdates
     {
         const int SchemaVersionEmptyCount = 0;
 
-        var previousShape = previous with { FieldPolicies = [], HeaderPolicies = [], SchemaVersion = SchemaVersionEmptyCount };
-        var replacementShape = replacement with { FieldPolicies = [], HeaderPolicies = [], SchemaVersion = SchemaVersionEmptyCount };
+        var previousShape = previous with
+        {
+            FieldPolicies = [],
+            HeaderPolicies = [],
+            SchemaVersion = SchemaVersionEmptyCount
+        };
+        var replacementShape = replacement with
+        {
+            FieldPolicies = [],
+            HeaderPolicies = [],
+            SchemaVersion = SchemaVersionEmptyCount
+        };
         if (previous.Kind == ResourceKind.WorkQueue)
         {
             replacementShape = replacementShape with

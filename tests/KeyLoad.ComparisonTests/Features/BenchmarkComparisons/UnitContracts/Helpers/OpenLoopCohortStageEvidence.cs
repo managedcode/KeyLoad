@@ -29,7 +29,10 @@ internal sealed class OpenLoopCohortStageEvidence
         Directory.CreateDirectory(directory);
     }
 
-    internal IOptions<OpenLoopPlanProcessOptions> ExecutionOptions { get; }
+    internal IOptions<OpenLoopPlanProcessOptions> ExecutionOptions
+    {
+        get;
+    }
 
     internal async Task RecordAsync(OpenLoopCohortStage stage, OpenLoopPlanStageObservation actual)
     {

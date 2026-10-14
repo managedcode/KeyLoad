@@ -26,7 +26,9 @@ internal sealed class RequestCqrsProbeJson
         var value = Read(bytes, RequestCqrsProbeRecordFields.Owner, Context.RequestCqrsProbeOwnerRecord);
         if (value.Version != RequestCqrsProbeProtocol.Version || value.Kind != RequestCqrsProbeProtocol.OwnerKind
             || !RequestCqrsProbeOptionsReader.IsSessionId(value.SessionId) || string.IsNullOrWhiteSpace(value.Voter))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         return value;
     }
 
@@ -42,7 +44,9 @@ internal sealed class RequestCqrsProbeJson
         var value = Read(bytes, RequestCqrsProbeRecordFields.Release, Context.RequestCqrsProbeReleaseRecord);
         if (value.Version != RequestCqrsProbeProtocol.Version || value.Kind != RequestCqrsProbeProtocol.ReleaseKind
             || !RequestCqrsProbeOptionsReader.IsSessionId(value.SessionId) || value.ArmId == Guid.Empty || value.RequestId == Guid.Empty)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         return value;
     }
 
@@ -54,7 +58,9 @@ internal sealed class RequestCqrsProbeJson
             || !Enum.IsDefined(value.Phase) || !Enum.IsDefined(value.Outcome)
             || string.IsNullOrWhiteSpace(value.Voter) || string.IsNullOrWhiteSpace(value.SiloAddress)
             || !RequestCqrsCanonicalMarkerValidation.Valid(value))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         return value;
     }
 
@@ -62,7 +68,9 @@ internal sealed class RequestCqrsProbeJson
     {
         var bytes = JsonSerializer.SerializeToUtf8Bytes(value, Context.RequestCqrsProbeMarkerRecord);
         if (bytes.Length > executionOptions.Value.MaximumRecordBytes)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         return bytes;
     }
 
@@ -78,7 +86,9 @@ internal sealed class RequestCqrsProbeJson
         RequestCqrsProbeActivationValidation.Require(value);
         var bytes = JsonSerializer.SerializeToUtf8Bytes(value, Context.RequestCqrsProbeActivationRecord);
         if (bytes.Length > executionOptions.Value.MaximumRecordBytes)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         return bytes;
     }
 
@@ -93,7 +103,9 @@ internal sealed class RequestCqrsProbeJson
         RequestCqrsProbeLiveValidation.Require(value);
         var bytes = JsonSerializer.SerializeToUtf8Bytes(value, Context.RequestCqrsProbeLiveRecord);
         if (bytes.Length > executionOptions.Value.MaximumRecordBytes)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         return bytes;
     }
 
@@ -110,7 +122,7 @@ internal sealed class RequestCqrsProbeJson
         options.Converters.Add(new JsonStringEnumConverter<RequestCqrsProbePhase>(null, false));
         options.Converters.Add(new JsonStringEnumConverter<RequestCqrsProbeAction>(null, false));
         options.Converters.Add(new JsonStringEnumConverter<RequestCqrsProbeOutcome>(null, false));
-        options.Converters.Add(new JsonStringEnumConverter<KeyLoad.Orleans.GrainReadKind>(null, false));
+        options.Converters.Add(new JsonStringEnumConverter<KeyLoad.Clustering.GrainReadKind>(null, false));
         return new RequestCqrsProbeJsonContext(options);
     }
 
@@ -128,11 +140,17 @@ internal sealed class RequestCqrsProbeJson
             return JsonSerializer.Deserialize(bytes, typeInfo);
         }
         catch (JsonException)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         catch (EncoderFallbackException)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         catch (DecoderFallbackException)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
     }
 
     internal JsonTypeInfo<RequestCqrsWaitForIndexReadCutWitness> WaitCutTypeInfo

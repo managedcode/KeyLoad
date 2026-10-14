@@ -110,7 +110,7 @@ The coordinator additionally receives the existing Server-registered PhysicalSha
 
 Status: frozen private owning contract; implementation and runtime OPEN. No Parent/Execution source replacement in this packet.
 
-Existing owner: KeyLoad.Orleans.INativeAnnMaintenance; Server implementation NativeAnnMaintenanceService under the original admitted operation, SAME NativeAnnGenerationOwner worker/root and memory admission. All identities are original native values, never caller roles.
+Existing owner: KeyLoad.Clustering.INativeAnnMaintenance; Server implementation NativeAnnMaintenanceService under the original admitted operation, SAME NativeAnnGenerationOwner worker/root and memory admission. All identities are original native values, never caller roles.
 
 Exact internal signatures to compose in the owning interface:
 

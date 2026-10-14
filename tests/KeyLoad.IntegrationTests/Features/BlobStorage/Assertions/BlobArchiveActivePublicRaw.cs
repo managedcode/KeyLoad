@@ -17,7 +17,9 @@ internal static class BlobArchiveActivePublicRaw
         var failures = new List<Exception>();
         var group = BlobArchiveActivePublicCold.Group(target, state);
         if (group is < 0 or > 1)
-        { throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid); }
+        {
+            throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid);
+        }
         for (var index = group * 3; index < group * 3 + 3; index++)
         {
             RequireVoter(target, state, index, failures, token);
@@ -42,7 +44,9 @@ internal static class BlobArchiveActivePublicRaw
             });
         }, failures);
         if (store is not null)
-        { ServerFailureObserver.Observe(store.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(store.Dispose, failures);
+        }
     }
 
     private static void RequirePart(IKeyValueView view, ReadExecutionBudget work, WriteBlobPartRequest part)
@@ -53,7 +57,9 @@ internal static class BlobArchiveActivePublicRaw
             part.UploadId.ToString(UploadFormat), (long)part.Ordinal);
         var actual = work.Read(view, key) ?? throw Errors.Fail(ErrorCode.Corruption, MissingPart);
         if (!actual.AsSpan().SequenceEqual(BlobArchiveActivePublicPublication.Bytes(part.Ordinal, 65536)))
-        { throw Errors.Fail(ErrorCode.Corruption, ChangedPart); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, ChangedPart);
+        }
     }
 
 }

@@ -2,7 +2,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server.Features.ClusterRouting;
 using Microsoft.Extensions.Options;
 
@@ -13,8 +13,14 @@ internal sealed class RequestCqrsWaitForIndexValidationInput
     private const string FixturePartitionKey = "partition";
 
     internal RequestProbeExecutionOptions Settings { get; } = new();
-    internal RequestCqrsProbeJson Json { get; }
-    internal RequestCqrsWaitForIndexReadCutWitness Value { get; }
+    internal RequestCqrsProbeJson Json
+    {
+        get;
+    }
+    internal RequestCqrsWaitForIndexReadCutWitness Value
+    {
+        get;
+    }
 
     internal RequestCqrsWaitForIndexValidationInput()
     {

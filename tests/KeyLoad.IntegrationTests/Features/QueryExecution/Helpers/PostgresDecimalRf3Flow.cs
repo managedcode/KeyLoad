@@ -18,7 +18,9 @@ internal static class PostgresDecimalRf3Flow
                 {
                     SqlNullOrderingRf3State state;
                     using (var setup = McpCallerDeadline.Create())
-                    { state = await SqlNullOrderingRf3Setup.CreateAsync(fixture, setup.Token); }
+                    {
+                        state = await SqlNullOrderingRf3Setup.CreateAsync(fixture, setup.Token);
+                    }
                     await WaveAsync(fixture, state, controls: true);
                     for (var cold = 0; cold < SqlNullOrderingRf3Protocol.ColdCuts; cold++)
                     {

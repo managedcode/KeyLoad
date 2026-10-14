@@ -24,9 +24,13 @@ internal static class PartitionMovementFinalOutcomeCapacityRf3Boundary
             cancellationToken.ThrowIfCancellationRequested();
             var middle = lower + (upper - lower) / MidpointDivisor;
             if (Accepts(state, phase, cluster, middle))
-            { upper = middle; }
+            {
+                upper = middle;
+            }
             else
-            { lower = checked(middle + OneByte); }
+            {
+                lower = checked(middle + OneByte);
+            }
         }
         Require(state, phase, cluster, lower);
         var error = await Assert.ThrowsAsync<KeyLoadException>(() =>
@@ -51,9 +55,14 @@ internal static class PartitionMovementFinalOutcomeCapacityRf3Boundary
         string cluster, long maximum)
     {
         try
-        { Require(state, phase, cluster, maximum); return true; }
+        {
+            Require(state, phase, cluster, maximum);
+            return true;
+        }
         catch (KeyLoadException error) when (error.Code == ErrorCode.BudgetExceeded
             && error.Message == PartitionMovementFinalOutcomeCapacityProtocol.Exceeded)
-        { return false; }
+        {
+            return false;
+        }
     }
 }

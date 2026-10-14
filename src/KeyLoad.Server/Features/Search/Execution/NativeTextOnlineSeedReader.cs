@@ -52,7 +52,9 @@ internal sealed class NativeTextOnlineSeedReader(ZoneTreeReadCutLease native,
         if (document.Reference.Partition != scope.Consumer.Partition
             || document.Reference.Collection != scope.Collection || document.Revision <= UnissuedDocumentRevision
             || !key.SequenceEqual(DocumentStorageKeys.RecordKey(document.Reference)))
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidSeed); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidSeed);
+        }
         documents.Add(document);
         return true;
     }
@@ -60,11 +62,15 @@ internal sealed class NativeTextOnlineSeedReader(ZoneTreeReadCutLease native,
     private void ReserveArray()
     {
         if (documents.Count < documents.Capacity)
-        { return; }
+        {
+            return;
+        }
         var capacity = documents.Capacity == EmptyDocumentCapacity ? FirstDocumentCapacity
             : (int)Math.Min(maximumRecords, checked((long)documents.Capacity * DocumentCapacityGrowthFactor));
         if (capacity <= documents.Count)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidAccounting); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidAccounting);
+        }
         budget.ImportReadGrant(grant, checked((long)capacity * IntPtr.Size), AllocationOnlyRecords);
         documents.Capacity = capacity;
     }
@@ -75,6 +81,8 @@ internal sealed class NativeTextOnlineSeedReader(ZoneTreeReadCutLease native,
         if (observed.ExaminedBytes < admittedNativeBytes || observed.Records < admittedNativeRecords
             || (completed && (observed.ExaminedBytes != admittedNativeBytes
                 || observed.Records != admittedNativeRecords)))
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidAccounting); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidAccounting);
+        }
     }
 }

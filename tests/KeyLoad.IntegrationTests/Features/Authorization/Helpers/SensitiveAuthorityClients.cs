@@ -1,6 +1,6 @@
 using KeyLoad.Client;
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.Authorization;

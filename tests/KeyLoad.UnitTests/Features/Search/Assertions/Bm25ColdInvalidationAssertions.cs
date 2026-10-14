@@ -13,7 +13,9 @@ internal static class Bm25ColdInvalidationAssertions
         {
             byte[]? raw = null;
             if (!view.ReadValue(Bm25CorpusKeys.Current(head), bytes => raw = bytes.ToArray(), work.ChargeBytes))
-            { throw new InvalidOperationException("The original native BM25 head is missing."); }
+            {
+                throw new InvalidOperationException("The original native BM25 head is missing.");
+            }
             return raw ?? throw new InvalidOperationException("The original native BM25 head was not read.");
         });
     }

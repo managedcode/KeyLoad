@@ -20,7 +20,7 @@ One cluster foundation avoids split-brain membership and duplicate routing layer
 
 1. Freeze voter identity/bootstrap, term/log/cut, read barrier, forwarding, membership changes, and recovery contracts with ADR-036; use Orleans only.
 2. Add real TUnit protocol/state tests and process recovery for interrupted vote/append/snapshot; add Aspire Docker RF3 SDK and MCP tests for quorum, minority denial, failover, and activation movement.
-3. Target owners are `src/KeyLoad.Orleans/Features/ClusterReplication/` for Orleans transport, `src/KeyLoad.Orleans/Features/ClusterRouting/` for routing, `src/KeyLoad.Replication/Features/ClusterReplication/` for consensus, and `src/KeyLoad.Server/Features/StorageRecovery/` for node-local `PartitionHost` lifecycle. Shared membership/contracts have one root integration owner.
+3. Target owners are `src/KeyLoad.Clustering/Features/ClusterReplication/` for Orleans transport, `src/KeyLoad.Clustering/Features/ClusterRouting/` for routing, `src/KeyLoad.Replication/Features/ClusterReplication/` for consensus, and `src/KeyLoad.Server/Features/StorageRecovery/` for node-local `PartitionHost` lifecycle. Shared membership/contracts have one root integration owner.
 4. Bootstrap must verify the complete current fixed-voter identity before serving. Rollout must not advertise readiness before quorum/read barrier; rollback fences the newer ownership epoch and restores only a complete cut.
 5. The canonical Aspire-owned entry runs the TUnit, process-recovery and Docker/Aspire RF3 suites; RF3 exercises the real .NET and official MCP clients. Local runs are development evidence only. Only exact-source Linux GitHub jobs qualify delivered behavior. Root reviews membership/source changes and joins original artifacts.
 

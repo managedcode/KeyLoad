@@ -30,7 +30,10 @@ internal static class DocumentHostApplication
             cancellation.ThrowIfCancellationRequested();
             await using var owner = new IsolatedHostTargetOwner(execution, diagnostics, serialization, admission,
                 lifecycle, client, translation, clock);
-            _ = owner.Create(settings with { RunId = Guid.NewGuid().ToString(GuidFormat) });
+            _ = owner.Create(settings with
+            {
+                RunId = Guid.NewGuid().ToString(GuidFormat)
+            });
             return owner.TransferTarget();
         }
         var progress = new DocumentHostProgress(execution, clock);

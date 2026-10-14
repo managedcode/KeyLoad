@@ -73,16 +73,24 @@ internal static class NativeTextOnlineProcessTrial
         }
         await active.WaitAndJoinAsync(token);
         if (active.ExitCode != SuccessExit)
-        { throw new InvalidOperationException(FailedChild); }
+        {
+            throw new InvalidOperationException(FailedChild);
+        }
     }
 
     private static ProcessStartInfo CreateStart(string root, NativeTextFaultStage stage, string mode)
     {
         var start = new ProcessStartInfo(Dotnet)
-        { RedirectStandardOutput = true, RedirectStandardError = true, UseShellExecute = false };
+        {
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false
+        };
         foreach (var argument in new[] { typeof(CrashHostMarker).Assembly.Location, root,
             Incarnation.ToString("D"), stage.ToString(), mode })
-        { start.ArgumentList.Add(argument); }
+        {
+            start.ArgumentList.Add(argument);
+        }
         return start;
     }
 
@@ -92,19 +100,27 @@ internal static class NativeTextOnlineProcessTrial
             CommandIdempotencyProcessRecoveryTests.CleanupTimeoutSeconds), TimeProvider.System);
         var failures = new List<Exception>();
         if (active is not null)
-        { await CommandIdempotencyProcess.SettleActiveAsync(active, failures, cleanup.Token); }
+        {
+            await CommandIdempotencyProcess.SettleActiveAsync(active, failures, cleanup.Token);
+        }
         if (active is { IsSettled: false })
-        { failures.Add(new IOException(Unsettled)); }
+        {
+            failures.Add(new IOException(Unsettled));
+        }
         if (primary is null && failures.Count == SuccessExit)
         {
             await ServerFailureObserver.ObserveAsync(
                 () => ReplicaProcessFiles.WaitForOwnershipAsync(root, cleanup.Token), failures);
             if (failures.Count == SuccessExit)
-            { await ServerFailureObserver.ObserveAsync(() => ReplicaProcessFiles.DeleteAsync(root, cleanup.Token), failures); }
+            {
+                await ServerFailureObserver.ObserveAsync(() => ReplicaProcessFiles.DeleteAsync(root, cleanup.Token), failures);
+            }
         }
         primary?.Data[RetainedRoot] = root;
         foreach (var error in failures)
-        { error.Data[RetainedRoot] = root; }
+        {
+            error.Data[RetainedRoot] = root;
+        }
         CommandIdempotencyProcess.ThrowFailures(primary, failures);
     }
 }

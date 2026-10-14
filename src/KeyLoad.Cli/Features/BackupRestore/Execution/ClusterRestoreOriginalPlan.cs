@@ -16,13 +16,19 @@ internal static class ClusterRestoreOriginalPlan
         if (File.Exists(path))
         {
             if (File.Exists(path + PendingSuffix))
-            { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, Invalid);
+            }
             return ClusterRestoreStateFile.Read<ClusterRestorePlan>(path, policy);
         }
         if (File.Exists(path + PendingSuffix))
-        { return ClusterRestoreStateFile.Read<ClusterRestorePlan>(path + PendingSuffix, policy); }
+        {
+            return ClusterRestoreStateFile.Read<ClusterRestorePlan>(path + PendingSuffix, policy);
+        }
         if (Directory.Exists(operationRoot) && Directory.EnumerateFileSystemEntries(operationRoot).Any())
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         return null;
     }
 
@@ -35,10 +41,14 @@ internal static class ClusterRestoreOriginalPlan
         {
             ClusterRestorePlanComparison.Require(original.Value, candidate);
             if (File.Exists(path))
-            { return original; }
+            {
+                return original;
+            }
             // A first plan write cannot have admitted ANY native slot before its own checked rename.
             if (Directory.EnumerateFileSystemEntries(operationRoot).Any(value => value != path + PendingSuffix))
-            { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+            }
             var recovered = ClusterRestoreStateFile.RecoverPending<ClusterRestorePlan>(path, policy,
                 retained => ClusterRestorePlanComparison.Require(retained, candidate));
             observer?.Invoke(NativeClusterRestoreStage.PlanPublished);

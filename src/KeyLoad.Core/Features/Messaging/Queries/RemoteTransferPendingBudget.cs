@@ -30,14 +30,24 @@ internal sealed class RemoteTransferPendingBudget : IDisposable
         lease = budget.EnterReadGrant(grant);
     }
     internal int Remaining => grant.RemainingRecords;
-    internal void Observe(long bytes) { Check(); budget.ChargeReadGrant(grant, bytes); }
+    internal void Observe(long bytes)
+    {
+        Check();
+        budget.ChargeReadGrant(grant, bytes);
+    }
     internal void Check()
     {
         budget.Check();
         if (clock.GetElapsedTime(started) > deadline)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, DueWorkProtocol.DeadlineExceeded); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, DueWorkProtocol.DeadlineExceeded);
+        }
     }
     internal IKeyValueView View(IKeyValueView view) => budget.CreateView(view);
     internal void Result(object? value) => budget.CheckResult(value);
-    public void Dispose() { lease.Dispose(); budget.CompleteReadGrant(grant); }
+    public void Dispose()
+    {
+        lease.Dispose();
+        budget.CompleteReadGrant(grant);
+    }
 }

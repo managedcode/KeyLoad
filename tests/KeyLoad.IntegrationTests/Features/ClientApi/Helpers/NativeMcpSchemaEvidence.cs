@@ -53,16 +53,22 @@ internal static class NativeMcpSchemaEvidence
         var schema = output ? tool.OutputSchema
             ?? throw new InvalidDataException("The native MCP output schema is missing.") : tool.InputSchema;
         if (schema.ValueKind != JsonValueKind.Object)
-        { throw new InvalidDataException("The native MCP schema is not a JSON object."); }
+        {
+            throw new InvalidDataException("The native MCP schema is not a JSON object.");
+        }
         var schemaText = schema.GetRawText();
         if (schemaText.Length > MaximumSchemaBytes
             || Encoding.UTF8.GetByteCount(schemaText) > MaximumSchemaBytes)
-        { throw new InvalidDataException("The native MCP schema exceeds its evidence bound."); }
+        {
+            throw new InvalidDataException("The native MCP schema exceeds its evidence bound.");
+        }
         var schemaBytes = Encoding.UTF8.GetBytes(schemaText);
 
         var repository = ClusterFixtureDiagnostics.FindRepositoryRoot();
         if (!File.Exists(Path.Combine(repository.FullName, SolutionFileName)))
-        { throw new InvalidOperationException("The repository root for MCP schema evidence was not found."); }
+        {
+            throw new InvalidOperationException("The repository root for MCP schema evidence was not found.");
+        }
         var directory = Path.Combine(repository.FullName, ArtifactDirectory, QualificationDirectory, EvidenceDirectory);
         Directory.CreateDirectory(directory);
         var name = filenamePrefix + (output ? "output-" : string.Empty) + Guid.NewGuid().ToString("N");
@@ -74,7 +80,9 @@ internal static class NativeMcpSchemaEvidence
             Convert.ToHexStringLower(SHA256.HashData(schemaBytes)));
         var metadataBytes = JsonSerializer.SerializeToUtf8Bytes(metadata, SidecarOptions);
         if (metadataBytes.Length > MaximumSidecarBytes)
-        { throw new InvalidDataException("The native MCP schema evidence sidecar exceeds its bound."); }
+        {
+            throw new InvalidDataException("The native MCP schema evidence sidecar exceeds its bound.");
+        }
 
         await WriteNewAsync(schemaPath, schemaBytes, token).ConfigureAwait(false);
         await WriteNewAsync(metadataPath, metadataBytes, token).ConfigureAwait(false);

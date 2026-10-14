@@ -50,7 +50,9 @@ internal static class RestoreIdentityOverrideAssertions
                 RestoreIdentityOverrideState.HealthyJson);
         }
         else
-        { await BackupIndexedDocumentDedupAssertions.AssertMissing(database, fixture.Partition, RestoreIdentityOverrideState.HealthyId); }
+        {
+            await BackupIndexedDocumentDedupAssertions.AssertMissing(database, fixture.Partition, RestoreIdentityOverrideState.HealthyId);
+        }
     }
 
     private static async Task DocumentAsync(DatabaseEngine database, PartitionRef partition, string id, string json)

@@ -17,7 +17,9 @@ internal static class MixedEventingRetentionBackupOracle
         {
             var page = view.Scan(KeySpace.Partition(family, partition), QueueLifecycleTestProtocol.ImageRecords);
             if (page.HasMore)
-            { throw new InvalidOperationException("The mixed retained-state image exceeded its original fixture bound."); }
+            {
+                throw new InvalidOperationException("The mixed retained-state image exceeded its original fixture bound.");
+            }
             return page.Records.Select(row => Convert.ToHexString(row.Key.Span) + ":" + Convert.ToHexString(row.Value.Span));
         }).ToArray());
 

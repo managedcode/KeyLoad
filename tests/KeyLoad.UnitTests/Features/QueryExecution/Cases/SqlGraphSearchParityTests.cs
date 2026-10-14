@@ -122,7 +122,10 @@ internal sealed class SqlGraphSearchParityTests
                 "needle", SqlGraphSearchTestSupport.VectorField, [1, 0], space,
                 Limit: SqlGraphSearchTestSupport.Limit, FusionConstant: SqlGraphSearchTestSupport.Fusion,
                 AllowedIds: [GraphSearchTestSupport.FirstHit]),
-            Scope: new(walk with { Labels = [GraphSearchTestSupport.Label] }), Retriever: new(walk, 0.5),
+            Scope: new(walk with
+            {
+                Labels = [GraphSearchTestSupport.Label]
+            }), Retriever: new(walk, 0.5),
             Expansion: new(SqlGraphSearchTestSupport.Graph, SqlGraphSearchTestSupport.Depth,
                 SqlGraphSearchTestSupport.Vertices, SqlGraphSearchTestSupport.Edges,
                 System.Collections.Immutable.ImmutableArray<string>.Empty));

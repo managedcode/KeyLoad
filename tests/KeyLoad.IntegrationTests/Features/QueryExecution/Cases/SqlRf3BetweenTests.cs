@@ -14,7 +14,10 @@ internal sealed class SqlRf3BetweenTests(ClusterFixture fixture)
     private const string Between = "BETWEEN";
     private const string NotBetween = "NOT BETWEEN";
     private const string Dialect = "Q1";
-    private static ImmutableArray<string> ExpectedPredicates { get; } =
+    private static ImmutableArray<string> ExpectedPredicates
+    {
+        get;
+    } =
         ["comparison", "AND", "OR", "NOT", "IN", Between, NotBetween, "IS NULL", "IS MISSING"];
 
     [Test]

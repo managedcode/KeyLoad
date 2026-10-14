@@ -12,7 +12,9 @@ internal static class SubscriptionIndependentCheckpointR52Current
         var placement = new AtomicPartitionPlacementReadRequest(1, partition);
         var current = await McpCallerAssertions.SdkSuccessAsync(await admin.ReadAtomicPartitionPlacementAsync(placement, token));
         if (state.Placement is not null)
-        { await SubscriptionFilterRf3Assertions.EqualAsync(current, state.Placement); }
+        {
+            await SubscriptionFilterRf3Assertions.EqualAsync(current, state.Placement);
+        }
         state.Placement = current;
         await SubscriptionFilterRf3Assertions.EqualAsync((await McpCallerAssertions.SuccessAsync<AtomicPartitionPlacementResolution>(
             await official.CallAsync(McpCallerTools.AdminPartitionPlacementRead, placement, token))).Value, current);
@@ -21,7 +23,9 @@ internal static class SubscriptionIndependentCheckpointR52Current
             await official.CallAsync(McpCallerTools.OutboxStatus, new GetOutboxStatusRequest(partition), token))).Value, state.Outbox);
         var source = await McpCallerAssertions.SdkSuccessAsync(await admin.ReadEventSourceAsync(new(state.Seed.Group.Source), token));
         if (state.Source is not null)
-        { await SubscriptionFilterRf3Assertions.EqualAsync(source.Events.Take(state.Source.Events.Length).ToArray(), state.Source.Events.ToArray()); }
+        {
+            await SubscriptionFilterRf3Assertions.EqualAsync(source.Events.Take(state.Source.Events.Length).ToArray(), state.Source.Events.ToArray());
+        }
         state.Source = source;
         await SourceAsync(source, state);
         await SourceAsync((await McpCallerAssertions.SuccessAsync<EventSourcePage>(
@@ -32,7 +36,9 @@ internal static class SubscriptionIndependentCheckpointR52Current
         KeyLoadClient sdk, McpOfficialClient mcp, KeyLoadClient admin, McpOfficialClient official, CancellationToken token)
     {
         var plain = new SubscriptionDefinition(state.Seed.Manager.Principal.Id)
-        { Policy = new() { MaxWindow = SubscriptionFilterRf3Protocol.Window } };
+        {
+            Policy = new() { MaxWindow = SubscriptionFilterRf3Protocol.Window }
+        };
         var primaryDefinition = state.PrimaryGeneration == 1 ? plain : state.Seed.Replacement.Definition;
         var primary = new SubscriptionInfo(state.Seed.Group, primaryDefinition, state.PrimaryGeneration,
             state.PrimaryGeneration, state.PrimaryCheckpoint, state.PrimaryIssued, state.Tail, state.PrimaryPaused, null);
@@ -57,7 +63,9 @@ internal static class SubscriptionIndependentCheckpointR52Current
     internal static SubscriptionInfo Expected(SubscriptionIndependentCheckpointR52State state, SubscriptionRef group)
     {
         var plain = new SubscriptionDefinition(state.Seed.Manager.Principal.Id)
-        { Policy = new() { MaxWindow = SubscriptionFilterRf3Protocol.Window } };
+        {
+            Policy = new() { MaxWindow = SubscriptionFilterRf3Protocol.Window }
+        };
         return group == state.Seed.Independent
             ? new(group, state.IndependentDefinition, state.Generation, state.Generation,
                 state.Checkpoint, state.Issued, state.Tail, state.Paused, null)

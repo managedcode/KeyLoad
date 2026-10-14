@@ -39,9 +39,14 @@ internal static class ControlledPartitionMovementAbortRequest
             ?? throw new InvalidOperationException("The genuine A abort phase grant is absent.");
         if (grant.GrantId != ControlledPartitionMovementAbortPhaseIds.Grant(stage, role, batchOrdinal)
             || grant.PhaseCommandId != ControlledPartitionMovementAbortPhaseIds.Command(stage, role, batchOrdinal))
-        { throw new InvalidOperationException("The original abort grant/command identity does not match."); }
+        {
+            throw new InvalidOperationException("The original abort grant/command identity does not match.");
+        }
         return new(grant.PhaseCommandId,
-            Envelope(phase, stage, batchOrdinal, originalExpiry, phase.Body) with { Grant = grant },
+            Envelope(phase, stage, batchOrdinal, originalExpiry, phase.Body) with
+            {
+                Grant = grant
+            },
             actualAuthorization.Journal, corpus.Control.Owner.VoterIds.First(), originalCallerAddress,
             PartitionMovementTransportAction.Apply, Guid.Empty, ControlOrdinal);
     }

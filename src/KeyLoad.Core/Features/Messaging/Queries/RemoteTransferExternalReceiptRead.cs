@@ -39,7 +39,9 @@ public sealed partial class DatabaseEngine
             || receipt.TargetCommit.Incarnation != current.Target.DestinationOwner.Owner.Incarnation
             || receipt.TargetCommit.AtomicPartitionId != current.Claims.Destination.Partition.AtomicPartitionId
             || receipt.TargetCommit.Position < RemoteTransferAttemptProtocol.MinimumNativePosition)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteTransferPeerProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteTransferPeerProtocol.Invalid);
+        }
         var wrapper = new RemoteTransferExternalReceipt(RemoteTransferPeerProtocol.ExternalReceiptPurpose,
             sourceOwner, current.Target.DestinationOwner, current.Claims.Source, current.Claims.Destination,
             current.Claims.TransferId, principalId, current.Claims.Fingerprint, receipt.ReceiptToken,
@@ -48,8 +50,13 @@ public sealed partial class DatabaseEngine
         var token = Sign(wrapper);
         RequireTokenBound(token);
         if (Encoding.UTF8.GetByteCount(token) > current.Target.MaximumReservedReceiptBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, RemoteTransferPeerProtocol.Unavailable); }
-        var result = receipt with { ReceiptToken = token };
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, RemoteTransferPeerProtocol.Unavailable);
+        }
+        var result = receipt with
+        {
+            ReceiptToken = token
+        };
         work.ChargeBytes(NativeSerialization.Measure(result));
         work.Check();
         return result;
@@ -62,6 +69,8 @@ public sealed partial class DatabaseEngine
             || original.Intent.IntentToken != current.Intent.IntentToken
             || original.Target.OriginalSourceCommit != current.Target.OriginalSourceCommit
             || !PhysicalOwnerEntryValidation.Same(original.Target.DestinationOwner, current.Target.DestinationOwner))
-        { throw Errors.Fail(ErrorCode.PermissionDenied, RemoteTransferPeerProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, RemoteTransferPeerProtocol.Unavailable);
+        }
     }
 }

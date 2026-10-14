@@ -41,11 +41,15 @@ internal static class RequestCqrsActualTextAssertions
                 await Assert.That(await search.SearchAsync(Principal,
                     NativeTextBilingualAudit.Request(database.Partition, NativeTextBilingualAudit.EnglishQuery)
                         with
-                    { TextIndex = selection }, token)).IsEmpty();
+                    {
+                        TextIndex = selection
+                    }, token)).IsEmpty();
                 await Assert.That(await search.SearchAsync(Principal,
                     NativeTextBilingualAudit.Request(database.Partition, UkrainianQuery)
                         with
-                    { TextIndex = selection }, token)).IsEmpty();
+                    {
+                        TextIndex = selection
+                    }, token)).IsEmpty();
             }
             else
             {
@@ -64,7 +68,10 @@ internal static class RequestCqrsActualTextAssertions
         TextIndexSelectionV1 selection, string query, string id, string json, long revision, CancellationToken token)
     {
         var actual = await search.SearchAsync(Principal,
-            NativeTextBilingualAudit.Request(partition, query) with { TextIndex = selection }, token);
+            NativeTextBilingualAudit.Request(partition, query) with
+            {
+                TextIndex = selection
+            }, token);
         RankedDocument[] expected = [new(new(new(partition, NativeTextBilingualAudit.Collection, id),
             revision, json, false, []), Score)];
         await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();

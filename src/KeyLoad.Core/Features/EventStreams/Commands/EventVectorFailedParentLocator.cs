@@ -20,7 +20,9 @@ internal static class EventVectorFailedParentLocator
         StoredOutcome actualOutcome, IOptions<DatabaseLimits> options)
     {
         if (eligible is null)
-        { return; }
+        {
+            return;
+        }
         EventVectorFailedOpenLocator.Write(transaction, eligible.Open, actualOutcome, options);
         EventVectorFailedCleanupLocator.Write(transaction, eligible.Cleanup, actualOutcome, options);
     }

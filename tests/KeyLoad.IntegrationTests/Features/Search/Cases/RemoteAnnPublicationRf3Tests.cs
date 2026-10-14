@@ -23,14 +23,18 @@ internal sealed class RemoteAnnPublicationRf3Tests
                 protectedDocument: true)
             {
                 AnnReadExecution = IntegrationExecutionOptions.QueryExecution(new QueryExecutionOptions
-                { EnableApproximateSearch = true })
+                {
+                    EnableApproximateSearch = true
+                })
             }, caller.Token).ConfigureAwait(false);
             await RemoteAnnPublicationRf3Flow.RunAsync(wave, caller.Token).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
         if (wave is { } owned)
         {
             if (failures.Count > RemoteAnnPublicationRf3Protocol.EmptyCount)
-            { owned.RetainRoots(); }
+            {
+                owned.RetainRoots();
+            }
             await ServerFailureObserver.ObserveAsync(() => owned.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         }
         ServerFailureObserver.ThrowIfAny(failures);

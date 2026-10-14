@@ -19,7 +19,9 @@ internal static class EventVectorAuthenticatedSourcePages
         if (originalCall.OriginalNativeRequest.IsEmpty
             || originalCall.OriginalNativeRequest.Length > encoding.MaximumBytes
             || authenticatedReply.OriginalReplyBytes.Length > encoding.MaximumBytes)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, EventVectorRemoteProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, EventVectorRemoteProtocol.Invalid);
+        }
         var originalRequest = NativeSerialization.Deserialize<EventVectorSourceReadCall>(
             originalCall.OriginalNativeRequest.Span);
         var actual = authenticatedReply.Reply;
@@ -29,14 +31,20 @@ internal static class EventVectorAuthenticatedSourcePages
             || actual.OriginalNativeReply.IsEmpty || originalRequest is null || originalRequest.OriginalReadRequest is not { } reads
             || reads.Requests.IsDefault || authenticatedReply.OriginalReplyBytes.IsEmpty
             || string.IsNullOrWhiteSpace(authenticatedReply.OriginalSignature))
-        { throw Errors.Fail(ErrorCode.Corruption, EventVectorRemoteProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, EventVectorRemoteProtocol.Invalid);
+        }
         admission.RequireEncodedBytes(actual.OriginalNativeReply.Length);
         var pages = NativeSerialization.Deserialize<ImmutableArray<EventSourcePage>>(actual.OriginalNativeReply.Span);
         if (pages.IsDefault || pages.Length != reads.Requests.Length)
-        { throw Errors.Fail(ErrorCode.Corruption, EventVectorRemoteProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, EventVectorRemoteProtocol.Invalid);
+        }
         admission.RequireEntryCount(pages.Length);
         for (var ordinal = FirstOrdinal; ordinal < pages.Length; ordinal++)
-        { Require(reads.Requests[ordinal], pages[ordinal]); }
+        {
+            Require(reads.Requests[ordinal], pages[ordinal]);
+        }
         return pages;
     }
 
@@ -47,13 +55,17 @@ internal static class EventVectorAuthenticatedSourcePages
             || page.Head is null || page.Events.IsDefault || page.Events.Length > original.Limit
             || page.Head.Generation != original.Source.Generation || page.CutPosition < InitialPosition
             || page.Head.TailPosition < original.AfterPosition || string.IsNullOrEmpty(page.Cursor))
-        { throw Errors.Fail(ErrorCode.Corruption, EventVectorRemoteProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, EventVectorRemoteProtocol.Invalid);
+        }
         var position = original.AfterPosition;
         foreach (var value in page.Events)
         {
             if (value is null || value.Source != original.Source || value.Position <= position
                 || value.Position > page.Head.TailPosition || value.Data is null)
-            { throw Errors.Fail(ErrorCode.Corruption, EventVectorRemoteProtocol.Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, EventVectorRemoteProtocol.Invalid);
+            }
             position = value.Position;
         }
     }

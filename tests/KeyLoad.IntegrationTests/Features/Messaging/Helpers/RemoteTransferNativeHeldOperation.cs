@@ -62,7 +62,9 @@ internal static class RemoteTransferNativeHeldOperation
         }, failures);
         await JoinOriginalAsync(wave, membership, hold, original, operation, observedArm, failures);
         if (failures.Count != 0)
-        { wave.RetainRoots(); }
+        {
+            wave.RetainRoots();
+        }
         ServerFailureObserver.ThrowIfAny(failures);
         var actual = result ?? throw new InvalidOperationException(RemoteTransferDistinctProtocol.Missing);
         await calls.ReplayAsync(accept, actual.Committed.OriginalReceipt, token);
@@ -76,13 +78,19 @@ internal static class RemoteTransferNativeHeldOperation
         var beforeRelease = failures.Count;
         ServerFailureObserver.Observe(hold.Release, failures);
         if (failures.Count != beforeRelease)
-        { ServerFailureObserver.Observe(operation.Cancel, failures); }
+        {
+            ServerFailureObserver.Observe(operation.Cancel, failures);
+        }
         await ServerFailureObserver.ObserveAsync(async () => { await original; }, failures);
         using var cleanup = new CancellationTokenSource(RequestCqrsRf3Protocol.CleanupDeadline, TimeProvider.System);
         if (observedArm is { } arm)
-        { await ServerFailureObserver.ObserveAsync(() => wave.QueryControls.WaitForSettlementAsync(arm, membership.Source, cleanup.Token), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => wave.QueryControls.WaitForSettlementAsync(arm, membership.Source, cleanup.Token), failures);
+        }
         else
-        { await ServerFailureObserver.ObserveAsync(() => hold.JoinAsync(membership.Source, cleanup.Token), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => hold.JoinAsync(membership.Source, cleanup.Token), failures);
+        }
     }
 
     private static NativeCanonicalModelCutRequest Scope(RemoteTransferColdSeed seed, CommandRequest accept,
@@ -99,7 +107,9 @@ internal static class RemoteTransferNativeHeldOperation
         var after = await NativeCanonicalModelCutClient.ReadSixAsync(wave, wave.Profile.AdminKey,
             scope, membership.Owners, membership.Secrets, token);
         foreach (var node in TwoRf3MembershipProtocol.Nodes)
-        { NativeCanonicalModelCutAssertions.RequireUnchanged(before[node], after[node], token); }
+        {
+            NativeCanonicalModelCutAssertions.RequireUnchanged(before[node], after[node], token);
+        }
         return after;
     }
 }

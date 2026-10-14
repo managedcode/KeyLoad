@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.Messaging;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
@@ -13,7 +13,9 @@ internal static class NativeBlobWholeCold
         {
             var root = await wave.StopForDirectoryReadAsync().ConfigureAwait(false);
             if (!wave.applicationDisposed || !wave.nodeLocksReleased || signedOwners.Count != 6)
-            { throw new InvalidOperationException("The six original native Blob owners have not joined."); }
+            {
+                throw new InvalidOperationException("The six original native Blob owners have not joined.");
+            }
             wave.AssertAllNodeLocksReleased();
             var cuts = new Dictionary<string, NativeBlobWholeOwnerCut>(StringComparer.Ordinal);
             foreach (var node in TwoRf3MembershipProtocol.Nodes)

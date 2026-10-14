@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using System.Text.Json;
+using KeyLoad.Clustering;
 using KeyLoad.Features.InternalSerialization;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.UnitTests.Features.GraphTraversal;
 

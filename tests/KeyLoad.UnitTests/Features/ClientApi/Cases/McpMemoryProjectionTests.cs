@@ -123,7 +123,10 @@ internal sealed class McpMemoryProjectionOperationTests
     {
         var input = CreateInput();
         var baseline = new KeyLoad.Server.McpMemoryProjection(UnitMcpOptions.Execution()).BeforeOperation(input, MaximumReplyBytes, protocolReply: false);
-        var largerPayload = new KeyLoad.Server.McpMemoryProjection(UnitMcpOptions.Execution()).BeforeOperation(input with { MaximumPayloadBytes = MaximumPayloadBytes * 2 },
+        var largerPayload = new KeyLoad.Server.McpMemoryProjection(UnitMcpOptions.Execution()).BeforeOperation(input with
+        {
+            MaximumPayloadBytes = MaximumPayloadBytes * 2
+        },
             MaximumReplyBytes, protocolReply: false);
         var largerFrame = new KeyLoad.Server.McpMemoryProjection(UnitMcpOptions.Execution()).BeforeOperation(input with
         {
@@ -190,7 +193,10 @@ internal sealed class McpMemoryProjectionOperationTests
         await Assert.That(maximumRequestCharge > 0).IsTrue();
         Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => new KeyLoad.Server.McpMemoryProjection(UnitMcpOptions.Execution()).Ingress(MaximumRequestCapacityBytes + 1));
         Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => new KeyLoad.Server.McpMemoryProjection(UnitMcpOptions.Execution()).BeforeOperation(
-            request with { MaximumPayloadBytes = MaximumRequestCapacityBytes + 1 }, MaximumReplyBytes, false));
+            request with
+            {
+                MaximumPayloadBytes = MaximumRequestCapacityBytes + 1
+            }, MaximumReplyBytes, false));
     }
 
     /// <summary>All pre-operation size inputs reject negative values before computing component sums.</summary>
@@ -199,15 +205,30 @@ internal sealed class McpMemoryProjectionOperationTests
     {
         var input = CreateInput();
         Assert.ThrowsExactly<ArgumentOutOfRangeException>(() =>
-new KeyLoad.Server.McpMemoryProjection(UnitMcpOptions.Execution()).BeforeOperation(input with { Capacity = -1 }, MaximumReplyBytes, false));
+new KeyLoad.Server.McpMemoryProjection(UnitMcpOptions.Execution()).BeforeOperation(input with
+{
+    Capacity = -1
+}, MaximumReplyBytes, false));
         Assert.ThrowsExactly<ArgumentOutOfRangeException>(() =>
-new KeyLoad.Server.McpMemoryProjection(UnitMcpOptions.Execution()).BeforeOperation(input with { WireBytes = -1 }, MaximumReplyBytes, false));
+new KeyLoad.Server.McpMemoryProjection(UnitMcpOptions.Execution()).BeforeOperation(input with
+{
+    WireBytes = -1
+}, MaximumReplyBytes, false));
         Assert.ThrowsExactly<ArgumentOutOfRangeException>(() =>
-new KeyLoad.Server.McpMemoryProjection(UnitMcpOptions.Execution()).BeforeOperation(input with { MaximumPayloadBytes = -1 }, MaximumReplyBytes, false));
+new KeyLoad.Server.McpMemoryProjection(UnitMcpOptions.Execution()).BeforeOperation(input with
+{
+    MaximumPayloadBytes = -1
+}, MaximumReplyBytes, false));
         Assert.ThrowsExactly<ArgumentOutOfRangeException>(() =>
-new KeyLoad.Server.McpMemoryProjection(UnitMcpOptions.Execution()).BeforeOperation(input with { WireBytes = FrameCapacity + 1 }, MaximumReplyBytes, false));
+new KeyLoad.Server.McpMemoryProjection(UnitMcpOptions.Execution()).BeforeOperation(input with
+{
+    WireBytes = FrameCapacity + 1
+}, MaximumReplyBytes, false));
         Assert.ThrowsExactly<ArgumentOutOfRangeException>(() =>
-new KeyLoad.Server.McpMemoryProjection(UnitMcpOptions.Execution()).BeforeOperation(input with { AuthenticationShape = new McpFrameShape(1, 2) }, MaximumReplyBytes, false));
+new KeyLoad.Server.McpMemoryProjection(UnitMcpOptions.Execution()).BeforeOperation(input with
+{
+    AuthenticationShape = new McpFrameShape(1, 2)
+}, MaximumReplyBytes, false));
         Assert.ThrowsExactly<ArgumentOutOfRangeException>(() =>
 new KeyLoad.Server.McpMemoryProjection(UnitMcpOptions.Execution()).BeforeOperation(input, -1, false));
     }

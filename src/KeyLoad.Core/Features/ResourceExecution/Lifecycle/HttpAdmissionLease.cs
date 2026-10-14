@@ -15,7 +15,10 @@ public sealed class HttpAdmissionLease : IDisposable
     private bool disposed;
 
     /// <summary>Gets the maximum request-body length accepted by this lease.</summary>
-    public int MaxBodyBytes { get; }
+    public int MaxBodyBytes
+    {
+        get;
+    }
 
     internal HttpAdmissionLease(CommandAdmissionLease nodeLease, CommandAdmissionGovernor scopes, OperationKind kind, int maxBody)
     {

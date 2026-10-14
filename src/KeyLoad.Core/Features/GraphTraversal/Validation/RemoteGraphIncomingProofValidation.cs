@@ -17,7 +17,9 @@ public sealed partial class DatabaseEngine
             if (proof?.Intent?.Content is null || proof.Version != RemoteGraphProtocol.Version
                 || proof.SourceCut?.Placement is null || proof.SourceCut.Owner is null
                 || !result.TryAdd((proof.Intent.Content.SourcePartition, proof.Intent.Content.EdgeId), proof))
-            { throw Errors.Fail(ErrorCode.Validation, RemoteGraphProtocol.Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Validation, RemoteGraphProtocol.Invalid);
+            }
         }
         return result;
     }
@@ -37,12 +39,18 @@ public sealed partial class DatabaseEngine
             || proof.SourceCut.StorePosition < state.Intent.SourceCommit.Position
             || proof.SourceCut.AppliedPosition < state.Intent.SourceCommit.Position
             || proof.SourceCut.Placement.PlacementEpoch != state.Intent.SourceCommit.OwnershipEpoch)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteGraphProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, RemoteGraphProtocol.Invalid);
+        }
         if (proof.Edge is not { } edge)
-        { return; }
+        {
+            return;
+        }
         GraphCrossPartitionValidation.ValidateEdge(edge, Limits);
         if (edge.Id != state.Content.EdgeId || edge.From.Partition != state.Content.SourcePartition
             || edge.To != state.Content.Destination || edge.Revision != state.Content.Revision)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteGraphProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, RemoteGraphProtocol.Invalid);
+        }
     }
 }

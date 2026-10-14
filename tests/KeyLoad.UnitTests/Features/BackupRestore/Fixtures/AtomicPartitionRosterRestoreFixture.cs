@@ -43,13 +43,21 @@ internal sealed class AtomicPartitionRosterRestoreFixture
         var failures = new List<Exception>();
         ServerFailureObserver.Observe(fixture.Initialize, failures);
         if (failures.Count == 0)
-        { await ServerFailureObserver.ObserveAsync(() => operation(fixture), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => operation(fixture), failures);
+        }
         if (fixture.Target is { } target)
-        { ServerFailureObserver.Observe(target.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(target.Dispose, failures);
+        }
         if (fixture.Source is { } source)
-        { ServerFailureObserver.Observe(source.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(source.Dispose, failures);
+        }
         if (failures.Count == 0)
-        { ServerFailureObserver.Observe(() => Directory.Delete(fixture.Root, true), failures); }
+        {
+            ServerFailureObserver.Observe(() => Directory.Delete(fixture.Root, true), failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
@@ -82,7 +90,11 @@ internal sealed class AtomicPartitionRosterRestoreFixture
     }
 
     internal void Reopen()
-    { Target.Dispose(); Target = null!; Open(); }
+    {
+        Target.Dispose();
+        Target = null!;
+        Open();
+    }
 
     internal void RestoreAgain()
     {
@@ -125,7 +137,9 @@ internal sealed class AtomicPartitionRosterRestoreFixture
         var after = ArchiveDigests(backup);
         await Assert.That(after.Count).IsEqualTo(archive.Count);
         foreach (var entry in archive)
-        { await Assert.That(after[entry.Key]).IsEqualTo(entry.Value); }
+        {
+            await Assert.That(after[entry.Key]).IsEqualTo(entry.Value);
+        }
     }
 
     internal async Task AssertArchiveUnchangedAsync()
@@ -133,7 +147,9 @@ internal sealed class AtomicPartitionRosterRestoreFixture
         var after = ArchiveDigests(Path.Combine(Root, FirstBackup));
         await Assert.That(after.Count).IsEqualTo(firstArchive.Count);
         foreach (var entry in firstArchive)
-        { await Assert.That(after[entry.Key]).IsEqualTo(entry.Value); }
+        {
+            await Assert.That(after[entry.Key]).IsEqualTo(entry.Value);
+        }
         await Assert.That(Source.Store.Position).IsEqualTo(sourceCut);
     }
 

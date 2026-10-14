@@ -24,10 +24,22 @@ internal sealed class NativeCoverageImageFixture : IAsyncDisposable
         Directory.CreateDirectory(Contexts);
     }
 
-    internal NativeCoverageImageTestOptions Options { get; }
-    internal NativeCoverageToolPackage Tool { get; }
-    internal string Inputs { get; }
-    internal string Contexts { get; }
+    internal NativeCoverageImageTestOptions Options
+    {
+        get;
+    }
+    internal NativeCoverageToolPackage Tool
+    {
+        get;
+    }
+    internal string Inputs
+    {
+        get;
+    }
+    internal string Contexts
+    {
+        get;
+    }
     internal static string ServerOutput => Path.Combine(RepositoryRoot, ServerOutputPath);
     internal static string CliOutput => Path.Combine(RepositoryRoot, CliOutputRelativePath);
     internal static string RepositoryRoot { get; } = FindRepositoryRoot();

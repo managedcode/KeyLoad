@@ -15,7 +15,9 @@ internal static class EventVectorCurrentSourceAuthorization
         ReadOnlyMemory<byte> encoded, EventVectorAdmissionPolicy admission)
     {
         if (originalScopes.IsDefault)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         admission.RequireEntryCount(originalScopes.Length);
         var fresh = EventVectorCoverageWitnessEncoding.Read(encoded, request, admission);
         var directory = PhysicalOwnerDirectorySerialization.Read(bounded)
@@ -23,7 +25,9 @@ internal static class EventVectorCurrentSourceAuthorization
         PhysicalOwnerDirectoryValidation.Validate(directory);
         if (fresh.OriginalPackets.Length != directory.Owners.Length
             || fresh.FreshPackets.Length != directory.Owners.Length)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, Invalid);
+        }
         var covered = new SortedDictionary<string, EventVectorAuthorizationScope>(StringComparer.Ordinal);
         var semantic = NativeSerialization.Deserialize<EventVectorCoverageSemanticIdentity>(
             fresh.OriginalSemanticProjectionBytes.Span);
@@ -34,19 +38,25 @@ internal static class EventVectorCurrentSourceAuthorization
                 fresh.FreshPackets[ordinal].OriginalCaptureBytes.Span);
             if (capture.PrincipalId != principal.Id || capture.GroupOrdinal != ordinal
                 || !PhysicalOwnerEntryValidation.SameOwner(capture.SourceOwner, directory.Owners[ordinal].Owner))
-            { throw Errors.Fail(ErrorCode.PermissionDenied, Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.PermissionDenied, Invalid);
+            }
             EventVectorCurrentCaptureDirectory.Require(directory, capture, admission);
             foreach (var entry in EventVectorEntryEncoding.Decode(capture.OriginalEncodedEntries, capture.EntryChecksum, admission))
             {
                 if (entry.PrincipalId != capture.PrincipalId || entry.PolicyEpoch != capture.PolicyEpoch)
-                { throw Errors.Fail(ErrorCode.PermissionDenied, Invalid); }
+                {
+                    throw Errors.Fail(ErrorCode.PermissionDenied, Invalid);
+                }
             }
         }
         EventVectorParentCaptureScopes.Add(covered, semantic, request.Scope, admission);
         foreach (var scope in originalScopes)
         {
             if (!covered.ContainsValue(scope))
-            { throw Errors.Fail(ErrorCode.PermissionDenied, Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.PermissionDenied, Invalid);
+            }
         }
         return fresh;
     }
@@ -58,7 +68,9 @@ internal static class EventVectorCurrentSourceAuthorization
             || !original.ReplyBytes.Span.SequenceEqual(fresh.ReplyBytes.Span)
             || !original.ReplySignature.Span.SequenceEqual(fresh.ReplySignature.Span)
             || !original.OriginalCaptureBytes.Span.SequenceEqual(fresh.OriginalCaptureBytes.Span))
-        { throw Errors.Fail(ErrorCode.PermissionDenied, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, Invalid);
+        }
     }
 
     internal static void RequireOriginalFences(EventVectorControlPhase original, EventVectorCoverageWitness fresh,
@@ -76,7 +88,9 @@ internal static class EventVectorCurrentSourceAuthorization
             if (found is null || found.PrincipalId != entry.PrincipalId || found.Incarnation != entry.Incarnation
                 || found.PlacementEpoch != entry.PlacementEpoch || found.SchemaVersion != entry.SchemaVersion
                 || found.LogicalPlacementRevision != entry.LogicalPlacementRevision || found.DirectoryFence != entry.DirectoryFence)
-            { throw Errors.Fail(ErrorCode.TokenInvalidated, Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.TokenInvalidated, Invalid);
+            }
         }
     }
 }

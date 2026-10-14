@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.CrashHost.Features.Search;
 
@@ -12,9 +12,13 @@ internal static class NativeAnnCrashReplay
     {
         ProjectionBatchResult? receipt = null;
         if (began.OriginalCheckpointIntent is { } old)
-        { receipt = NativeAnnCrashState.CommitReplay(commands, old); }
+        {
+            receipt = NativeAnnCrashState.CommitReplay(commands, old);
+        }
         if (request.Mode == AnnMaintenanceMode.Restore)
-        { _ = await NativeAnnCrashState.PhaseAsync(database, runtime, request, AnnMaintenanceCapabilityKind.Load); }
+        {
+            _ = await NativeAnnCrashState.PhaseAsync(database, runtime, request, AnnMaintenanceCapabilityKind.Load);
+        }
         var upper = began.Source!.ThroughSequence;
         var finished = false;
         for (var number = FirstPage; number < NativeAnnCrashContract.MaximumPages; number++)
@@ -23,7 +27,9 @@ internal static class NativeAnnCrashReplay
             if (page.ThroughSequence == page.Consumer.Checkpoint)
             {
                 if (page.HasMore || page.ThroughSequence != upper || !page.Entries.IsEmpty)
-                { throw new InvalidOperationException(NativeAnnCrashContract.Invalid); }
+                {
+                    throw new InvalidOperationException(NativeAnnCrashContract.Invalid);
+                }
                 finished = true;
                 break;
             }
@@ -32,14 +38,21 @@ internal static class NativeAnnCrashReplay
             _ = await NativeAnnCrashState.PhaseAsync(database, runtime, request, AnnMaintenanceCapabilityKind.StagePage, intent: intent);
             receipt = NativeAnnCrashState.CommitReplay(commands, intent);
             if (!page.HasMore)
-            { finished = true; break; }
+            {
+                finished = true;
+                break;
+            }
         }
         if (!finished || receipt is null)
-        { throw new InvalidOperationException(NativeAnnCrashContract.Invalid); }
+        {
+            throw new InvalidOperationException(NativeAnnCrashContract.Invalid);
+        }
         _ = await NativeAnnCrashState.PhaseAsync(database, runtime, request, AnnMaintenanceCapabilityKind.Verify);
         var result = await NativeAnnCrashState.PhaseAsync(database, runtime, request, AnnMaintenanceCapabilityKind.Publish);
         if (result.Pending || result.Count != NativeAnnCrashContract.Count || string.IsNullOrEmpty(result.IndexSha256))
-        { throw new InvalidOperationException(NativeAnnCrashContract.Invalid); }
+        {
+            throw new InvalidOperationException(NativeAnnCrashContract.Invalid);
+        }
         return (result, receipt);
     }
 }

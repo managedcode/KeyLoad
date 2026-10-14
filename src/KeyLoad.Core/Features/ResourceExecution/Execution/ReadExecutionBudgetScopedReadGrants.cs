@@ -29,7 +29,9 @@ internal sealed class ReadExecutionBudgetScopedReadGrants(ReadExecutionBudget bu
         budget.Check();
         ArgumentNullException.ThrowIfNull(grant);
         if (!grant.BelongsTo(budget) || grant.IsCompleted)
-        { throw new ArgumentException(GrantOwnerMismatch, nameof(grant)); }
+        {
+            throw new ArgumentException(GrantOwnerMismatch, nameof(grant));
+        }
         reservedReadGrantBytes -= grant.RemainingBytes;
         reservedGrantRecords -= grant.RemainingRecords;
         grant.Complete();
@@ -39,7 +41,9 @@ internal sealed class ReadExecutionBudgetScopedReadGrants(ReadExecutionBudget bu
     {
         ArgumentNullException.ThrowIfNull(grant);
         if (!grant.BelongsTo(budget) || grant.IsCompleted || ReferenceEquals(scopedReadGrant, grant))
-        { throw new ArgumentException(GrantOwnerMismatch, nameof(grant)); }
+        {
+            throw new ArgumentException(GrantOwnerMismatch, nameof(grant));
+        }
         reservedReadGrantBytes -= grant.RemainingBytes;
         reservedGrantRecords -= grant.RemainingRecords;
         grant.Complete();
@@ -50,7 +54,9 @@ internal sealed class ReadExecutionBudgetScopedReadGrants(ReadExecutionBudget bu
         ArgumentNullException.ThrowIfNull(grant);
         budget.Check();
         if (!grant.BelongsTo(budget) || grant.IsCompleted || scopedReadGrant is not null)
-        { throw new ArgumentException(GrantOwnerMismatch, nameof(grant)); }
+        {
+            throw new ArgumentException(GrantOwnerMismatch, nameof(grant));
+        }
         scopedReadGrant = grant;
         return new(budget, grant);
     }
@@ -58,16 +64,22 @@ internal sealed class ReadExecutionBudgetScopedReadGrants(ReadExecutionBudget bu
     internal void ExitReadGrant(ReadExecutionBudgetReadGrant grant)
     {
         if (!ReferenceEquals(scopedReadGrant, grant))
-        { throw new ArgumentException(GrantOwnerMismatch, nameof(grant)); }
+        {
+            throw new ArgumentException(GrantOwnerMismatch, nameof(grant));
+        }
         scopedReadGrant = null;
     }
 
     internal void ChargeNativeReadRecord(long count)
     {
         if (scopedReadGrant is { } grant)
-        { ChargeReadGrant(grant, count); }
+        {
+            ChargeReadGrant(grant, count);
+        }
         else
-        { budget.ChargeUnscopedNativeRecord(count); }
+        {
+            budget.ChargeUnscopedNativeRecord(count);
+        }
     }
 
     internal IKeyValueView CreateView(IKeyValueView view, ReadExecutionBudgetReadGrant grant)
@@ -77,7 +89,9 @@ internal sealed class ReadExecutionBudgetScopedReadGrants(ReadExecutionBudget bu
         budget.Check();
         if (!grant.BelongsTo(budget) || grant.IsCompleted
             || scopedReadGrant is not null && !ReferenceEquals(scopedReadGrant, grant))
-        { throw new ArgumentException(GrantOwnerMismatch, nameof(grant)); }
+        {
+            throw new ArgumentException(GrantOwnerMismatch, nameof(grant));
+        }
         return new BudgetedReadView(view, budget, grant);
     }
 
@@ -141,13 +155,19 @@ internal sealed class ReadExecutionBudgetScopedReadGrants(ReadExecutionBudget bu
         ArgumentOutOfRangeException.ThrowIfNegative(count);
         ArgumentOutOfRangeException.ThrowIfNegative(records);
         if (!grant.BelongsTo(budget) || grant.IsCompleted)
-        { throw new ArgumentException(GrantOwnerMismatch, nameof(grant)); }
+        {
+            throw new ArgumentException(GrantOwnerMismatch, nameof(grant));
+        }
         if (count > grant.RemainingBytes || count > reservedReadGrantBytes
             || count > budget.MaximumNativeReadBytes - budget.ReadBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, ReadExecutionBudget.ReadBytesExceeded); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, ReadExecutionBudget.ReadBytesExceeded);
+        }
         if (records > grant.RemainingRecords || records > reservedGrantRecords
             || records > budget.MaximumNativeScanRecords - examinedGrantRecords)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, ExaminedRecordsExceeded); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, ExaminedRecordsExceeded);
+        }
         budget.AcceptReadGrantBytes(count);
         reservedReadGrantBytes -= count;
         examinedGrantRecords += records;

@@ -13,7 +13,9 @@ internal static class McpGatewayMetaProjector
     {
         ArgumentNullException.ThrowIfNull(result);
         if (result.Matches is null || result.Matches.Count > maximumMatches)
-        { throw InvalidNativeResult(); }
+        {
+            throw InvalidNativeResult();
+        }
         var seen = new HashSet<string>(StringComparer.Ordinal);
         var matches = ImmutableArray.CreateBuilder<McpGatewayScoredTool>(maximumMatches);
         foreach (var match in result.Matches)
@@ -21,7 +23,9 @@ internal static class McpGatewayMetaProjector
             var tool = CanonicalTool(match.ToolName);
             ValidateScore(match.Score);
             if (seen.Add(tool.Name))
-            { matches.Add(new(tool, match.Score)); }
+            {
+                matches.Add(new(tool, match.Score));
+            }
         }
         return new(matches.ToImmutable());
     }
@@ -33,7 +37,9 @@ internal static class McpGatewayMetaProjector
 
         ArgumentNullException.ThrowIfNull(result);
         if (result.Categories is null || result.Categories.Count > maximumCategories)
-        { throw InvalidNativeResult(); }
+        {
+            throw InvalidNativeResult();
+        }
         var seen = new HashSet<string>(StringComparer.Ordinal);
         var categories = ImmutableArray.CreateBuilder<McpGatewayRouteCategoryProjection>(maximumCategories);
         foreach (var category in result.Categories)
@@ -45,13 +51,19 @@ internal static class McpGatewayMetaProjector
                 var tool = CanonicalTool(match.ToolName);
                 ValidateScore(match.Score);
                 if (seen.Add(tool.Name))
-                { tools.Add(new(tool, match.Score)); }
+                {
+                    tools.Add(new(tool, match.Score));
+                }
             }
             if (tools.Count > ToolsCountValidationBoundary)
-            { categories.Add(new(category.Category, category.Score, tools.ToImmutable())); }
+            {
+                categories.Add(new(category.Category, category.Score, tools.ToImmutable()));
+            }
         }
         if (seen.Count > checked(maximumCategories * maximumPerCategory))
-        { throw InvalidNativeResult(); }
+        {
+            throw InvalidNativeResult();
+        }
         return new(categories.ToImmutable());
     }
 
@@ -59,7 +71,9 @@ internal static class McpGatewayMetaProjector
     {
         if (string.IsNullOrWhiteSpace(name) || !McpOperationCatalog.TryGetTool(name, out var descriptor)
             || McpGatewayMetaProtocol.TryGetOperation(name, out _))
-        { throw InvalidNativeResult(); }
+        {
+            throw InvalidNativeResult();
+        }
         return descriptor!.CreateTool();
     }
 
@@ -68,13 +82,17 @@ internal static class McpGatewayMetaProjector
         if (category is null || string.IsNullOrWhiteSpace(category.Category)
             || !double.IsFinite(category.Score)
             || category.Tools is null || category.Tools.Count > maximumPerCategory)
-        { throw InvalidNativeResult(); }
+        {
+            throw InvalidNativeResult();
+        }
     }
 
     private static void ValidateScore(double score)
     {
         if (!double.IsFinite(score))
-        { throw InvalidNativeResult(); }
+        {
+            throw InvalidNativeResult();
+        }
     }
 
     private static KeyLoadException InvalidNativeResult()

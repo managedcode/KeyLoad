@@ -20,7 +20,9 @@ public sealed partial class DatabaseEngine
             || body.OperatorPrincipalId != principal.Id || body.TargetGrantId is null || body.TargetSettlement is null
             || JsonData.Fingerprint(current) != JsonData.Fingerprint(body.Control)
             || phase.ControlIntentDigest != PartitionMoveIntentIdentity.Digest(current))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
         PartitionMoveCleanupSettlement.Require(transaction, current, PartitionMovePeerStage.Abort,
             PartitionMoveCleanupRole.Source, body.SourceGrantId, body.SourceSettlement, body.SourceBody, Limits.MaxBatchBytes);
         PartitionMoveCleanupSettlement.Require(transaction, current, PartitionMovePeerStage.Abort,
@@ -29,7 +31,9 @@ public sealed partial class DatabaseEngine
         var next = PartitionMoveProtocol.EmptyCount;
         transaction.ReadValue(key, bytes => next = NativeSerialization.Deserialize<int>(bytes));
         if (phase.PageOrdinal != next || next < PartitionMoveProtocol.EmptyCount || next >= Limits.MaxScanRecords)
-        { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict);
+        }
         var complete = DisposeAbortedMoveGrants(transaction, current, body.SourceSettlement, body.TargetSettlement);
         var journal = MoveJournalReceipt(transaction, commandId, position, phase.ControlIntentDigest);
         transaction.Put(key, NativeSerialization.Serialize(checked(next + PartitionMoveProtocol.SequenceStep)));

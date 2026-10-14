@@ -208,7 +208,10 @@ internal sealed class TemporaryFrameFile : IDisposable
     }
 
     /// <summary>Gets the unique temporary file path.</summary>
-    public string Path { get; }
+    public string Path
+    {
+        get;
+    }
 
     /// <summary>Opens the temporary bytes through a real asynchronous FileStream.</summary>
     /// <returns>The open file stream positioned at its beginning.</returns>

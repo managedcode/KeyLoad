@@ -8,5 +8,8 @@ internal sealed class PartitionMovementExecutionOptions
     internal const string ValidationMessage = "Partition movement requires a typed execution configuration.";
 
     /// <summary>Enables configured movement receivers; default RF3 admission remains closed.</summary>
-    public bool Enabled { get; set; }
+    public bool Enabled
+    {
+        get; set;
+    }
 }

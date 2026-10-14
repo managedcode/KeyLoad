@@ -271,9 +271,14 @@ internal sealed class StoragePublicationRecoveryTests
         while (true)
         {
             try
-            { Directory.Delete(root, true); return; }
+            {
+                Directory.Delete(root, true);
+                return;
+            }
             catch (IOException) when (clock.GetElapsedTime(started) < TimeSpan.FromSeconds(5))
-            { await Task.Delay(TimeSpan.FromMilliseconds(25), clock, cancellationToken); }
+            {
+                await Task.Delay(TimeSpan.FromMilliseconds(25), clock, cancellationToken);
+            }
         }
     }
     [Test]

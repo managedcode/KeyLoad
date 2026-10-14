@@ -22,7 +22,9 @@ internal sealed class ZoneTreeMaintenanceLifetime : IDisposable
         ArgumentNullException.ThrowIfNull(tree);
         ArgumentNullException.ThrowIfNull(options);
         ArgumentNullException.ThrowIfNull(clock);
-        execution = options.Value with { };
+        execution = options.Value with
+        {
+        };
         execution.Validate();
         this.clock = clock;
         stop = new();
@@ -31,7 +33,9 @@ internal sealed class ZoneTreeMaintenanceLifetime : IDisposable
         {
             created = new ZoneTreeMaintainer<Memory<byte>, Memory<byte>>(tree,
                 startJobForCleaningInactiveBlockCaches: false)
-            { BlockCacheLifeTime = execution.NativeBlockCacheLifetime };
+            {
+                BlockCacheLifeTime = execution.NativeBlockCacheLifetime
+            };
             Maintainer = created;
             using var flow = ExecutionContext.IsFlowSuppressed() ? default : ExecutionContext.SuppressFlow();
             worker = Task.Run(() => SweepAsync(tree.Maintenance, swept), CancellationToken.None);
@@ -55,7 +59,10 @@ internal sealed class ZoneTreeMaintenanceLifetime : IDisposable
         }
     }
 
-    internal IMaintainer Maintainer { get; }
+    internal IMaintainer Maintainer
+    {
+        get;
+    }
     internal Task Worker => worker;
 
     public void Dispose()

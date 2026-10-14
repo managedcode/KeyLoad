@@ -43,7 +43,10 @@ internal static class LeftFilteredJoinAssertions
         await RelationalSqlRf3JoinPageAssertions.SameRowsAsync(direct, official);
         await RelationalSqlRf3JoinPageAssertions.SameRowsAsync(direct, queryReply);
         var literal = LeftFilteredJoinProtocol.Query(state.Partition) with
-        { Sql = LeftFilteredJoinProtocol.Prefix + "WHERE l.total = 7 " + LeftFilteredJoinProtocol.Order, Parameters = null };
+        {
+            Sql = LeftFilteredJoinProtocol.Prefix + "WHERE l.total = 7 " + LeftFilteredJoinProtocol.Order,
+            Parameters = null
+        };
         await RelationalSqlRf3JoinPageAssertions.SameRowsAsync(direct,
             await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.QueryAsync(literal, token)));
     }

@@ -14,13 +14,17 @@ internal static class McpEnumSchema
         var underlying = Nullable.GetUnderlyingType(context.TypeInfo.Type);
         var type = underlying ?? context.TypeInfo.Type;
         if (!type.IsEnum || schema is not JsonObject native)
-        { return schema; }
+        {
+            return schema;
+        }
         var outer = new JsonObject();
         MoveAnnotations(native, outer);
         var strings = input ? InputStrings(native) : native;
         var branches = new JsonArray(strings, Integer(Enum.GetUnderlyingType(type)));
         if (underlying is not null)
-        { branches.Add(new JsonObject { [McpSchemaKeywords.Type] = McpSchemaKeywords.Null }); }
+        {
+            branches.Add(new JsonObject { [McpSchemaKeywords.Type] = McpSchemaKeywords.Null });
+        }
         outer[McpSchemaKeywords.AnyOf] = branches;
         return outer;
     }
@@ -41,7 +45,9 @@ internal static class McpEnumSchema
         foreach (var key in Annotations)
         {
             if (!native.TryGetPropertyValue(key, out var value))
-            { continue; }
+            {
+                continue;
+            }
             native.Remove(key);
             outer[key] = value;
         }

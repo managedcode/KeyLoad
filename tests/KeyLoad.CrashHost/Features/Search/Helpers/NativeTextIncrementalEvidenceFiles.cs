@@ -10,7 +10,9 @@ internal static class NativeTextIncrementalEvidenceFiles
         await using var input = new FileStream(Path.Combine(root, file), FileMode.Open, FileAccess.Read,
             FileShare.Read, CrashExecutionOptions.Child().Value.AuthorityReadBufferBytes, FileOptions.Asynchronous);
         if (input.Length is <= EmptyLength or > MaximumEvidenceBytes)
-        { throw new InvalidOperationException(NativeTextIncrementalCrashProtocol.Invalid); }
+        {
+            throw new InvalidOperationException(NativeTextIncrementalCrashProtocol.Invalid);
+        }
         var bytes = new byte[checked((int)input.Length)];
         await input.ReadExactlyAsync(bytes, token);
         return NativeSerialization.Deserialize<T>(bytes);
@@ -19,7 +21,9 @@ internal static class NativeTextIncrementalEvidenceFiles
     internal static async Task WriteAsync<T>(string root, string file, T value, CancellationToken token)
     {
         if (NativeSerialization.Measure(value) is <= EmptyLength or > MaximumEvidenceBytes)
-        { throw new InvalidOperationException(NativeTextIncrementalCrashProtocol.Invalid); }
+        {
+            throw new InvalidOperationException(NativeTextIncrementalCrashProtocol.Invalid);
+        }
         var bytes = NativeSerialization.Serialize(value);
         await File.WriteAllBytesAsync(Path.Combine(root, file), bytes, token);
     }

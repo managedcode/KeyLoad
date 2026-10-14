@@ -79,7 +79,9 @@ public sealed record ZoneTreePointCacheOptions(ICacheMemoryBudget MemoryBudget)
 
     internal ZoneTreePointCacheOptions WithExecutionSnapshot(ZoneTreePointCacheExecutionOptions configured)
     {
-        var resolved = this with { };
+        var resolved = this with
+        {
+        };
         resolved.effectiveMaxEntries = maxEntriesOverride ?? configured.MaxEntries;
         resolved.effectiveMaxRetainedBytes = maxRetainedBytesOverride ?? configured.MaxRetainedBytes;
         resolved.effectiveMaxKeyBytes = maxKeyBytesOverride ?? configured.MaxKeyBytes;

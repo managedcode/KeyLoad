@@ -22,7 +22,10 @@ internal static class NativeTextSelectedCallerFlow
     {
         var principal = new PrincipalRecord(Reader, database.Partition.TenantId,
             [new(database.Partition.DatabaseId, NativeTextBilingualAudit.Collection, Capability.Query | Capability.DocumentsRead)], [])
-        { Revoked = revoked, PolicyEpoch = epoch };
+        {
+            Revoked = revoked,
+            PolicyEpoch = epoch
+        };
         _ = await NativeTextMaintenanceCommit.ExecuteAsync<PrincipalRecord>(database, OperationKind.ConfigurePrincipal,
             new ConfigurePrincipalRequest(principal), Guid.NewGuid(), token);
     }
@@ -32,7 +35,9 @@ internal static class NativeTextSelectedCallerFlow
     {
         var request = NativeTextBilingualAudit.Request(database.Partition, NativeTextBilingualAudit.EnglishQuery)
             with
-        { TextIndex = selection };
+        {
+            TextIndex = selection
+        };
         RankedDocument[] expected = [new(new(new(database.Partition, NativeTextBilingualAudit.Collection,
             NativeTextBilingualAudit.EnglishId), Revision, NativeTextBilingualAudit.EnglishJson, false, []), Score)];
         await Assert.That(JsonDefaults.Serialize(await search.SearchAsync(Reader, request, token)).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
@@ -41,13 +46,22 @@ internal static class NativeTextSelectedCallerFlow
         var cut = database.Store.Position;
         RankedDocument[]? partial = null;
         var failure = await Assert.ThrowsExactlyAsync<KeyLoadException>(async () => partial =
-            await search.SearchAsync(Reader, request with { TextIndex = selection with { Generation = MissingGeneration } }, token))
+            await search.SearchAsync(Reader, request with
+            {
+                TextIndex = selection with
+                {
+                    Generation = MissingGeneration
+                }
+            }, token))
             ?? throw new InvalidOperationException();
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.Unauthenticated);
         await Assert.That(partial).IsNull();
         await Assert.That(database.Store.Position).IsEqualTo(cut);
         await Assert.That(QueueWholeFlowStorage.Bytes(database.Store)).IsEquivalentTo(image, CollectionOrdering.Matching);
-        await Assert.That(JsonDefaults.Serialize(await search.SearchAsync(Root, request with { TextIndex = null }, token)).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
+        await Assert.That(JsonDefaults.Serialize(await search.SearchAsync(Root, request with
+        {
+            TextIndex = null
+        }, token)).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
         await Assert.That(database.Store.Position).IsEqualTo(cut);
         await Assert.That(QueueWholeFlowStorage.Bytes(database.Store)).IsEquivalentTo(image, CollectionOrdering.Matching);
     }

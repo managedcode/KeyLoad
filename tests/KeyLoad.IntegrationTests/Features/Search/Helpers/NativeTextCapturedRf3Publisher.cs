@@ -14,7 +14,9 @@ internal static class NativeTextCapturedRf3Publisher
         var principal = new PrincipalRecord(id, partition.TenantId,
             [new(partition.DatabaseId, NativeTextMaintenanceRf3Scenario.Collection,
                 Capability.Query | Capability.DocumentsRead | Capability.DocumentsWrite)], [])
-        { ClusterAdministrator = true };
+        {
+            ClusterAdministrator = true
+        };
         var key = id + "-online-text";
         var secret = key + "." + Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(32));
         var credential = new ApiKeyRecord(key, id, Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(secret))));

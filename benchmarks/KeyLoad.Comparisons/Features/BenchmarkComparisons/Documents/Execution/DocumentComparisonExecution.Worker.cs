@@ -31,13 +31,19 @@ internal sealed partial class DocumentComparisonExecution
                 state.End(timer.Elapsed.TotalMilliseconds - started, success: true, wasCanceled: false);
             }
             catch (OperationCanceledException) when (token.IsCancellationRequested)
-            { state.End(timer.Elapsed.TotalMilliseconds - started, false, true); return; }
+            {
+                state.End(timer.Elapsed.TotalMilliseconds - started, false, true);
+                return;
+            }
             catch (Exception error)
             {
                 state.End(timer.Elapsed.TotalMilliseconds - started, false, false);
                 state.RecordFailure(error);
                 if (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null)
-                { await lifetime.CancelAsync().ConfigureAwait(false); throw; }
+                {
+                    await lifetime.CancelAsync().ConfigureAwait(false);
+                    throw;
+                }
             }
             try
             {

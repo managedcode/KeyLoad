@@ -27,15 +27,22 @@ internal sealed class GraphStorageMutationReferenceTests
             var receipt = GraphStorageReferenceFixture.Submit(database.Database, command).Get<CommitReceipt>();
             revisions[id] = previousRevision + 1;
             if (delete)
-            { reference.Remove(id); }
+            {
+                reference.Remove(id);
+            }
             else
-            { reference[id] = new(id, from, to, label, json, previousRevision + 1); }
+            {
+                reference[id] = new(id, from, to, label, json, previousRevision + 1);
+            }
             await GraphStorageReferenceAssertions.VerifyAsync(database.Database, database.Partition, reference);
             var position = database.Store.Position;
             var retry = GraphStorageReferenceFixture.Submit(database.Database, command).Get<CommitReceipt>();
             await Assert.That(retry.Token).IsEqualTo(receipt.Token);
             await Assert.That(database.Store.Position).IsEqualTo(position);
-            var changed = command with { Mutations = [new PutDocument(GraphStorageReferenceFixture.Nodes, "forbidden", "{}")] };
+            var changed = command with
+            {
+                Mutations = [new PutDocument(GraphStorageReferenceFixture.Nodes, "forbidden", "{}")]
+            };
             await Assert.That(GraphStorageReferenceFixture.Submit(database.Database, changed).Error).IsEqualTo(ErrorCode.Conflict);
             await Assert.That(database.Database.GetDocument(GraphStorageReferenceFixture.Root,
                 new(database.Partition, GraphStorageReferenceFixture.Nodes, "forbidden"))).IsNull();

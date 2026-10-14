@@ -23,9 +23,15 @@ internal sealed class NativeAnnPublicProfileTests
             var request = AnnPublicWholeFlow.Request(database, pin);
             var token = TestContext.Current!.Execution.CancellationToken;
             await FailureAsync(() => engine.ApproximateSearchAsync(NativeAnnWaitWholeFlow.Root,
-                request with { IndexGeneration = MissingGeneration }, token), ErrorCode.HistoryUnavailable);
+                request with
+                {
+                    IndexGeneration = MissingGeneration
+                }, token), ErrorCode.HistoryUnavailable);
             await FailureAsync(() => engine.ApproximateSearchAsync(DeniedPrincipal,
-                request with { IndexGeneration = MissingGeneration }, token), ErrorCode.PermissionDenied);
+                request with
+                {
+                    IndexGeneration = MissingGeneration
+                }, token), ErrorCode.PermissionDenied);
             await AnnPublicWholeFlow.UnchangedAsync(database, image, cut);
             await NativeAnnPublicProfileFlow.HealthyAsync(database, runtime, pin, receipt);
             await AnnPublicWholeFlow.UnchangedAsync(database, image, cut);

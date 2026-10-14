@@ -17,12 +17,18 @@ internal static class InboxProcessingRf3Policy
              new(state.Lane.Partition.DatabaseId, InboxProcessingRf3Protocol.Collection, Capability.DocumentsRead)]
         };
         await MessagingRf3Identity.UpdateAsync(fixture, demoted, token);
-        var current = state.Original with { CommandId = Guid.NewGuid() };
+        var current = state.Original with
+        {
+            CommandId = Guid.NewGuid()
+        };
         await InboxProcessingRf3Assertions.DeniedAsync(await client.CommitProcessingAsync(current, token), ErrorCode.PermissionDenied);
         _ = await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.MessagesProcess,
             current, token), ErrorCode.PermissionDenied, true);
         await InboxProcessingRf3Assertions.UnchangedAsync(client, state, token);
-        await MessagingRf3Identity.UpdateAsync(fixture, principal with { PolicyEpoch = InboxProcessingRf3Protocol.RestoredEpoch }, token);
+        await MessagingRf3Identity.UpdateAsync(fixture, principal with
+        {
+            PolicyEpoch = InboxProcessingRf3Protocol.RestoredEpoch
+        }, token);
         await InboxProcessingRf3Replay.ExecuteAsync(client, mcp, state, false, token);
     }
 }

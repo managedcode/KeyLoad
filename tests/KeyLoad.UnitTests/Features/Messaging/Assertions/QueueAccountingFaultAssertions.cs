@@ -70,7 +70,10 @@ internal static class QueueAccountingFaultAssertions
             var received = result.Get<ReceiveResult>();
             await Assert.That(received.RequestId).IsEqualTo(state.Operation.Id);
             if (state.Kind != QueueAccountingOperation.Reclaim)
-            { await Assert.That(received.Deliveries).IsEmpty(); return; }
+            {
+                await Assert.That(received.Deliveries).IsEmpty();
+                return;
+            }
             var delivery = await Assert.That(received.Deliveries).HasSingleItem();
             await Assert.That(delivery).IsEqualTo(new Delivery(state.Message.MessageId, QueueAccountingFaultProtocol.Payload,
                 QueueAccountingFaultProtocol.Headers, delivery.Token, expected.LeaseVersion, expected.LeaseUntil!.Value,
@@ -100,7 +103,12 @@ internal static class QueueAccountingFaultAssertions
     private static MessageMetadata ExpectedMetadata(QueueAccountingFaultState state) => state.Kind switch
     {
         QueueAccountingOperation.Ack or QueueAccountingOperation.Processing => state.Metadata with
-        { State = MessageState.Acked, StateVersion = QueueAccountingFaultProtocol.Three, LeaseOwner = null, LeaseUntil = null },
+        {
+            State = MessageState.Acked,
+            StateVersion = QueueAccountingFaultProtocol.Three,
+            LeaseOwner = null,
+            LeaseUntil = null
+        },
         QueueAccountingOperation.Nack => state.Metadata with
         {
             State = MessageState.Scheduled,
@@ -119,7 +127,10 @@ internal static class QueueAccountingFaultAssertions
             LeaseUntil = state.Operation.EvaluatedAt.AddSeconds(QueueAccountingFaultProtocol.LeaseSeconds)
         },
         QueueAccountingOperation.ReadyExpiry or QueueAccountingOperation.ScheduledExpiry => state.Metadata with
-        { State = MessageState.Expired, StateVersion = QueueAccountingFaultProtocol.Two },
+        {
+            State = MessageState.Expired,
+            StateVersion = QueueAccountingFaultProtocol.Two
+        },
         _ => throw new ArgumentOutOfRangeException(nameof(state))
     };
 }

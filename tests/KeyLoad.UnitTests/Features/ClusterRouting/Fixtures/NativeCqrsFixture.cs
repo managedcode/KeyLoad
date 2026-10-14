@@ -24,7 +24,10 @@ internal sealed class NativeCqrsClusterFixture : IAsyncInitializer, IAsyncDispos
         Cluster = builder.Build();
     }
 
-    public TestCluster Cluster { get; }
+    public TestCluster Cluster
+    {
+        get;
+    }
 
     public IGrainFactory GrainFactory => Cluster.Client;
 

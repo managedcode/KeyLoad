@@ -60,7 +60,10 @@ internal sealed class SampleChunkCanonicalRollbackTests
         };
         fixture.Commit(next);
         var actual = fixture.Owner.Database.ReadSampleChunkWindow(SampleChunkCanonicalFixture.Principal,
-            fixture.Request with { WindowId = next.WindowId });
+            fixture.Request with
+            {
+                WindowId = next.WindowId
+            });
         var expected = new SampleChunkWindowResult(next.WindowId, next.From, next.Until, SampleChunkCanonicalFixture.NoGeneration, SampleChunkCanonicalFixture.FirstRevision, SampleChunkCanonicalFixture.InitialSequence, null,
             [], fixture.Owner.Store.Position);
         await Assert.That(Convert.ToHexString(JsonDefaults.Serialize(actual)))

@@ -1,5 +1,5 @@
 using System.Runtime.CompilerServices;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.DependencyInjection;
 using Orleans.Serialization;
@@ -63,7 +63,10 @@ internal static class RequestCqrsMalformedTextFlow
         [EnumeratorCancellation] CancellationToken token)
     {
         await foreach (var chunk in original.WithCancellation(token))
-        { frames.Add(chunk); yield return chunk; }
+        {
+            frames.Add(chunk);
+            yield return chunk;
+        }
     }
 
 }

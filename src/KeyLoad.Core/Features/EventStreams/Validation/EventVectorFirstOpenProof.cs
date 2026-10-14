@@ -12,7 +12,9 @@ internal static class EventVectorFirstOpenProof
         IAuthorizationPolicy authorization, EventVectorAdmissionPolicy admission)
     {
         if (phase.Action != EventVectorControlAction.Open)
-        { return (ReadOnlyMemory<byte>.Empty, Guid.Empty); }
+        {
+            return (ReadOnlyMemory<byte>.Empty, Guid.Empty);
+        }
         var request = phase.OriginalRequest;
         var issuance = EventVectorFirstIssuanceValidation.Read(view, request.ControlPartition,
             principal.Id, request.CommandId, terminal: false, admission);
@@ -26,7 +28,9 @@ internal static class EventVectorFirstOpenProof
             || !actualRawPhase.Span.SequenceEqual(issuance.OriginalCapturedFirstOpenPhaseBytes.Span)
             || EventVectorControlPhaseIds.For(phase, principal.Id,
                 EventVectorControlBodyProjection.Digest(phase, admission), admission) != operation.Id)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         return (actualRawPhase, operation.Id);
     }
 
@@ -35,20 +39,29 @@ internal static class EventVectorFirstOpenProof
         (ReadOnlyMemory<byte> Bytes, Guid CommandId) actualFirst)
     {
         if (previous is null)
-        { RequirePair(actualFirst.Bytes, actualFirst.CommandId); return actualFirst; }
+        {
+            RequirePair(actualFirst.Bytes, actualFirst.CommandId);
+            return actualFirst;
+        }
         if (previous.OriginalPublicCommandId != phase.OriginalRequest.CommandId)
-        { throw Errors.Fail(ErrorCode.Conflict, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, Invalid);
+        }
         RequirePair(previous.OriginalFirstOpenPhaseBytes, previous.OriginalFirstOpenNativeCommandId);
         if (!actualFirst.Bytes.IsEmpty
             && (!actualFirst.Bytes.Span.SequenceEqual(previous.OriginalFirstOpenPhaseBytes.Span)
                 || actualFirst.CommandId != previous.OriginalFirstOpenNativeCommandId))
-        { throw Errors.Fail(ErrorCode.Conflict, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, Invalid);
+        }
         return (previous.OriginalFirstOpenPhaseBytes, previous.OriginalFirstOpenNativeCommandId);
     }
 
     internal static void RequirePair(ReadOnlyMemory<byte> bytes, Guid commandId)
     {
         if (bytes.IsEmpty != (commandId == Guid.Empty))
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
     }
 }

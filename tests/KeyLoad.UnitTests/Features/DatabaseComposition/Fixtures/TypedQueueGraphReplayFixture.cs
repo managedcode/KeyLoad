@@ -45,7 +45,10 @@ internal static class TypedQueueGraphReplayFixture
         var command = global::System.Text.Json.JsonSerializer.Deserialize<CommandRequest>(
             failed.PayloadJson, JsonDefaults.Options)!;
         var healthy = await QueueGraphIdentityFlow.CompileAsync(
-            command with { CommandId = Guid.NewGuid() }, at.AddSeconds(HealthyOffsetSeconds));
+            command with
+            {
+                CommandId = Guid.NewGuid()
+            }, at.AddSeconds(HealthyOffsetSeconds));
         var key = global::KeyLoad.Core.Features.DocumentStorage.DocumentStorageKeys.RecordKey(from ? first : second);
         var original = db.Store.Read(view => view.ReadOwnedValue(key))!;
         var state = new QueueGraphIdentityState(db, first, second, at,
@@ -66,7 +69,9 @@ internal static class TypedQueueGraphReplayFixture
         var actual = db.Submit(OperationKind.ConfigureResource,
             new ConfigureResourceRequest(db.Partition.TenantId, db.Partition.DatabaseId, resource)).Get<ResourceDefinition>();
         if (!JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(resource)))
-        { throw new InvalidOperationException(InvalidFixtureResource); }
+        {
+            throw new InvalidOperationException(InvalidFixtureResource);
+        }
     }
 
     private static async Task SeedReceiptAsync(TestDatabase db, ReplicatedOperation operation, CommitReceipt actual)

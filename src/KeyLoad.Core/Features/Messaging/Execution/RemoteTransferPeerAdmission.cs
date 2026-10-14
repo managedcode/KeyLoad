@@ -15,7 +15,9 @@ public sealed partial class DatabaseEngine
         RemoteTransferPeerShape.Require(call);
         var evaluatedAt = Clock.GetUtcNow();
         if (call.ExpiresAt <= evaluatedAt || call.MaximumReplyBytes > Limits.MaxBatchBytes)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteTransferPeerProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteTransferPeerProtocol.Invalid);
+        }
         var owner = RequireRemoteTransferPeerOwner();
         var proof = Store.Read(view =>
         {
@@ -41,17 +43,25 @@ public sealed partial class DatabaseEngine
         if (proof.TechnicalPrincipalId != principal.Id || proof.TechnicalPolicyEpoch != principal.PolicyEpoch
             || configuredPhysicalOwner is null || !PhysicalOwnerEntryValidation.SameOwner(configuredPhysicalOwner, call.DestinationOwner.Owner)
             || Store.Identity.Incarnation != call.DestinationOwner.Owner.Incarnation)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, RemoteTransferPeerProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, RemoteTransferPeerProtocol.Invalid);
+        }
         var destination = call.IntentClaims.Destination;
         ValidateTransferPair(call.IntentClaims.Source, destination);
         var placement = ReadPlacementWitness(view, destination.Partition);
         if (placement.PhysicalShardId != call.DestinationOwner.Owner.PhysicalShardId
             || placement.Incarnation != call.DestinationOwner.Owner.Incarnation)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, RemoteTransferPeerProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, RemoteTransferPeerProtocol.Invalid);
+        }
         var resource = Resource(view, destination.Partition, destination.Queue, ResourceKind.WorkQueue);
         if (call.Stage == RemoteQueueTransferPeerStage.Accept)
-        { RequireTransferPublisher(principal, destination, resource); }
+        {
+            RequireTransferPublisher(principal, destination, resource);
+        }
         else
-        { RequireTransferInspector(principal, destination, resource); }
+        {
+            RequireTransferInspector(principal, destination, resource);
+        }
     }
 }

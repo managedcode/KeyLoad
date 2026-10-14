@@ -83,7 +83,10 @@ internal sealed class ComparisonArgumentTests
     public async Task AcCq007MissingTargetsRejectBeforeCorpusAndInvalidOptionsRejectAtComposition()
     {
         var invalid = Assert.ThrowsExactly<ArgumentOutOfRangeException>(() =>
-            _ = new ComparisonRunner(Options.Create(SmallOptions() with { Dimensions = InvalidDimensions }), UnitBenchmarkOptions.Native()));
+            _ = new ComparisonRunner(Options.Create(SmallOptions() with
+            {
+                Dimensions = InvalidDimensions
+            }), UnitBenchmarkOptions.Native()));
         await Assert.That(invalid.ParamName).IsEqualTo(nameof(ComparisonOptions));
         var runner = new ComparisonRunner(Options.Create(SmallOptions()), UnitBenchmarkOptions.Native());
         var error = await Assert.ThrowsExactlyAsync<ArgumentNullException>(() =>
@@ -95,7 +98,10 @@ internal sealed class ComparisonArgumentTests
     public async Task AcCq007EmptyTargetsRejectBeforeCorpusAndInvalidOptionsRejectAtComposition()
     {
         var invalid = Assert.ThrowsExactly<ArgumentOutOfRangeException>(() =>
-            _ = new ComparisonRunner(Options.Create(SmallOptions() with { Dimensions = InvalidDimensions }), UnitBenchmarkOptions.Native()));
+            _ = new ComparisonRunner(Options.Create(SmallOptions() with
+            {
+                Dimensions = InvalidDimensions
+            }), UnitBenchmarkOptions.Native()));
         await Assert.That(invalid.ParamName).IsEqualTo(nameof(ComparisonOptions));
         var runner = new ComparisonRunner(Options.Create(SmallOptions()), UnitBenchmarkOptions.Native());
         var error = await Assert.ThrowsExactlyAsync<ArgumentException>(() =>

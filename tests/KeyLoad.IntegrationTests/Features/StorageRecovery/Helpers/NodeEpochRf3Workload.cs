@@ -59,7 +59,9 @@ internal sealed record NodeEpochRf3Workload(PartitionRef Partition, string Colle
     {
         var timestamp = NodeEpochRf3Protocol.SampleStart.AddMinutes(index);
         if (index == 11)
-        { timestamp = NodeEpochRf3Protocol.SampleStart.AddMinutes(10).ToOffset(TimeSpan.FromHours(2)); }
+        {
+            timestamp = NodeEpochRf3Protocol.SampleStart.AddMinutes(10).ToOffset(TimeSpan.FromHours(2));
+        }
         return new(PriorEventPrefix + index.ToString("D2", System.Globalization.CultureInfo.InvariantCulture),
             timestamp, index + 1);
     }

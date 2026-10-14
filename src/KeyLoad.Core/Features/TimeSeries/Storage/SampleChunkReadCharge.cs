@@ -6,7 +6,9 @@ internal sealed class SampleChunkReadCharge(long maximum)
     internal void Charge(long bytes)
     {
         if (bytes < SampleChunkLifecycleProtocol.Absent || bytes > maximum - used)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, SampleChunkLifecycleProtocol.Exhausted); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, SampleChunkLifecycleProtocol.Exhausted);
+        }
         used = checked(used + bytes);
     }
 }

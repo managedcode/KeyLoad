@@ -19,7 +19,9 @@ public static class PhysicalShardCatalogIdentity
     public static Guid CreateBootstrapCommandId(Guid physicalShardId)
     {
         if (physicalShardId == Guid.Empty)
-        { throw new ArgumentException(EmptyIdentity, nameof(physicalShardId)); }
+        {
+            throw new ArgumentException(EmptyIdentity, nameof(physicalShardId));
+        }
         Span<byte> input = stackalloc byte[DomainBytes.Length + GuidBytes];
         DomainBytes.AsSpan().CopyTo(input);
         physicalShardId.TryWriteBytes(input[DomainBytes.Length..], bigEndian: true, out _);

@@ -9,7 +9,9 @@ internal static class RequestCqrsRf3BuilderCleanup
         List<Exception> failures, Action<RequestCqrsLifecycleStage>? observer)
     {
         if (builder is null)
-        { return true; }
+        {
+            return true;
+        }
         var previous = failures.Count;
         await RequestCqrsLifecycleFailureObserver.ObserveAsync(() => builder.DisposeAsync().AsTask(), failures,
             observer, RequestCqrsLifecycleStage.AuthorityWaveBuilderDispose).ConfigureAwait(false);

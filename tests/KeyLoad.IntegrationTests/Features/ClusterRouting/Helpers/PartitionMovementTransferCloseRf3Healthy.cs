@@ -12,7 +12,11 @@ internal static class PartitionMovementTransferCloseRf3Healthy
         await PartitionMovementPublicCallerReplay.RequireAsync(seed.Source, seed.Official, seed.FirstRequest,
             aborted, cancellationToken).ConfigureAwait(false);
         await seed.VerifyAsync(cancellationToken).ConfigureAwait(false);
-        var fresh = seed.FirstRequest with { MoveId = Guid.NewGuid(), Mode = PartitionMoveMode.Transfer };
+        var fresh = seed.FirstRequest with
+        {
+            MoveId = Guid.NewGuid(),
+            Mode = PartitionMoveMode.Transfer
+        };
         var healthy = await McpCallerAssertions.SdkSuccessAsync(await seed.Source.MovePartitionAsync(fresh,
             cancellationToken).ConfigureAwait(false));
         await PartitionMovementPublicParentRf3Scenario.RequireTerminalAsync(seed, fresh, seed.OriginalPlacement,

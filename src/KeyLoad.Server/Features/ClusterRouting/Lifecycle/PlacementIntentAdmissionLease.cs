@@ -17,7 +17,9 @@ internal sealed class PlacementIntentAdmissionLease : IDisposable
     {
         var owned = Interlocked.Exchange(ref native, null);
         if (owned is null)
-        { return; }
+        {
+            return;
+        }
         var failures = new List<Exception>();
         ServerFailureObserver.Observe(owned.Dispose, failures);
         ServerFailureObserver.Observe(owner.Release, failures);

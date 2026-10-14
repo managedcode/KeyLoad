@@ -13,6 +13,8 @@ public static class ClusterRestorePlanVerification
         ArgumentNullException.ThrowIfNull(expected);
         ArgumentNullException.ThrowIfNull(actual);
         if (!ClusterBackupMetadataEquality.OwnerCut(expected, actual))
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
     }
 }

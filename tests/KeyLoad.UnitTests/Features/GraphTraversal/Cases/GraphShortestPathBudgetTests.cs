@@ -65,7 +65,10 @@ internal sealed class GraphShortestPathBudgetTests
             cancellationToken: token);
         await Assert.That(exact.Found).IsTrue();
         await Assert.That(exact.Edges.Select(edge => edge.Id).SequenceEqual(["z-visible"])).IsTrue();
-        var shortRequest = request with { MaxEdges = 2 };
+        var shortRequest = request with
+        {
+            MaxEdges = 2
+        };
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => database.Database.ShortestPath(
             GraphShortestPathTestSupport.Alice, shortRequest, cancellationToken: token));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
@@ -79,7 +82,10 @@ internal sealed class GraphShortestPathBudgetTests
         var source = GraphShortestPathTestSupport.Ref(Nodes, "bytes-source");
         var target = GraphShortestPathTestSupport.Ref(Nodes, "bytes-target");
         GraphShortestPathTestSupport.PersistVertices(database, [source, target]);
-        var attributes = JsonSerializer.Serialize(new { payload = new string('p', 8_192) });
+        var attributes = JsonSerializer.Serialize(new
+        {
+            payload = new string('p', 8_192)
+        });
         GraphShortestPathTestSupport.PersistEdges(database,
             [new("bytes-edge", source, target, GraphShortestPathTestSupport.Walk, attributes)]);
         var position = database.Store.Position;
@@ -92,8 +98,17 @@ internal sealed class GraphShortestPathBudgetTests
         await Assert.That(expected.Edges.Single().AttributesJson).IsEqualTo(attributes);
         var readBytes = measuredBudget.ReadBytes;
         var responseBytes = JsonDefaults.Serialize(expected).Length;
-        var predecessorMetadata = new { Vertex = targetEntity, Previous = sourceEntity, EdgeId = "bytes-edge" };
-        var collectionMetadata = new { Partition = sourceEntity.Partition, Collection = sourceEntity.Collection };
+        var predecessorMetadata = new
+        {
+            Vertex = targetEntity,
+            Previous = sourceEntity,
+            EdgeId = "bytes-edge"
+        };
+        var collectionMetadata = new
+        {
+            Partition = sourceEntity.Partition,
+            Collection = sourceEntity.Collection
+        };
         var retainedMetadataBytes = MetadataCharge(JsonDefaults.Serialize(sourceEntity).Length)
             + MetadataCharge(JsonDefaults.Serialize(targetEntity).Length)
             + MetadataCharge(JsonDefaults.Serialize(predecessorMetadata).Length)
@@ -128,25 +143,67 @@ internal sealed class GraphShortestPathBudgetTests
         var request = GraphShortestPathTestSupport.Request(database, source, target);
         var token = TestContext.Current!.Execution.CancellationToken;
 
-        await AssertCode(database, request with { Version = 2 }, ErrorCode.Validation, token);
+        await AssertCode(database, request with
+        {
+            Version = 2
+        }, ErrorCode.Validation, token);
         var defaultLabels = (ImmutableArray<string>?)default(ImmutableArray<string>);
-        await AssertCode(database, request with { Labels = defaultLabels }, ErrorCode.Validation, token);
-        await AssertCode(database, request with { Labels = [GraphShortestPathTestSupport.Walk, GraphShortestPathTestSupport.Walk] },
+        await AssertCode(database, request with
+        {
+            Labels = defaultLabels
+        }, ErrorCode.Validation, token);
+        await AssertCode(database, request with
+        {
+            Labels = [GraphShortestPathTestSupport.Walk, GraphShortestPathTestSupport.Walk]
+        },
             ErrorCode.Validation, token);
-        await AssertCode(database, request with { Graph = string.Empty }, ErrorCode.Validation, token);
-        await AssertCode(database, request with { From = request.From with { Id = string.Empty } }, ErrorCode.Validation, token);
-        await AssertCode(database, request with { Labels = ImmutableArray.Create(string.Empty) }, ErrorCode.Validation, token);
-        await AssertCode(database, request with { MaxDepth = 17 }, ErrorCode.BudgetExceeded, token);
-        await AssertCode(database, request with { MaxVertices = 0 }, ErrorCode.BudgetExceeded, token);
-        await AssertCode(database, request with { MaxVertices = 10_001 }, ErrorCode.BudgetExceeded, token);
-        await AssertCode(database, request with { MaxEdges = 0 }, ErrorCode.BudgetExceeded, token);
-        await AssertCode(database, request with { MaxEdges = 50_001 }, ErrorCode.BudgetExceeded, token);
+        await AssertCode(database, request with
+        {
+            Graph = string.Empty
+        }, ErrorCode.Validation, token);
+        await AssertCode(database, request with
+        {
+            From = request.From with
+            {
+                Id = string.Empty
+            }
+        }, ErrorCode.Validation, token);
+        await AssertCode(database, request with
+        {
+            Labels = ImmutableArray.Create(string.Empty)
+        }, ErrorCode.Validation, token);
+        await AssertCode(database, request with
+        {
+            MaxDepth = 17
+        }, ErrorCode.BudgetExceeded, token);
+        await AssertCode(database, request with
+        {
+            MaxVertices = 0
+        }, ErrorCode.BudgetExceeded, token);
+        await AssertCode(database, request with
+        {
+            MaxVertices = 10_001
+        }, ErrorCode.BudgetExceeded, token);
+        await AssertCode(database, request with
+        {
+            MaxEdges = 0
+        }, ErrorCode.BudgetExceeded, token);
+        await AssertCode(database, request with
+        {
+            MaxEdges = 50_001
+        }, ErrorCode.BudgetExceeded, token);
         await AssertCode(database, request with
         {
             Labels = ImmutableArray.CreateRange(Enumerable.Range(0, 65).Select(index => $"label-{index}"))
         }, ErrorCode.Validation, token);
         var foreignPartition = new PartitionRef("other-tenant", "other-database", "other-domain", ForeignPartitionKey);
-        await AssertCode(database, request with { To = request.To with { Partition = foreignPartition } },
+        await AssertCode(database, request with
+        {
+            To = request.To with
+            {
+                Partition = foreignPartition
+            }
+        },
             ErrorCode.UnsupportedCapability, token);
         var exactLabels = request with
         {

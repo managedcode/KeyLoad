@@ -10,10 +10,24 @@ internal sealed class BlobPartIdentityR40State(BeginBlobUploadRequest begin,
     internal WriteBlobPartRequest First { get; set; } = null!;
     internal WriteBlobPartRequest Changed { get; set; } = null!;
     internal BlobCommitResult<BlobUploadInfo> WrittenFirst { get; set; } = null!;
-    internal WriteBlobPartRequest? Tail { get; set; }
-    internal BlobCommitResult<BlobUploadInfo>? WrittenTail { get; set; }
-    internal CompleteBlobUploadRequest? Complete { get; set; }
-    internal BlobCommitResult<BlobMetadata>? Completed { get; set; }
+    internal WriteBlobPartRequest? Tail
+    {
+        get; set;
+    }
+    internal BlobCommitResult<BlobUploadInfo>? WrittenTail
+    {
+        get; set;
+    }
+    internal CompleteBlobUploadRequest? Complete
+    {
+        get; set;
+    }
+    internal BlobCommitResult<BlobMetadata>? Completed
+    {
+        get; set;
+    }
     internal BlobUploadInfo Current => (WrittenTail ?? WrittenFirst).Value with
-    { Status = Completed is null ? BlobUploadStatus.Active : BlobUploadStatus.Complete };
+    {
+        Status = Completed is null ? BlobUploadStatus.Active : BlobUploadStatus.Complete
+    };
 }

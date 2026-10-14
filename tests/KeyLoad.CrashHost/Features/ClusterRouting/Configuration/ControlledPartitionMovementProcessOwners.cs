@@ -23,9 +23,18 @@ internal sealed class ControlledPartitionMovementProcessOwners
             listeners.DestinationOrigins.Length).Select(index => listeners.NativeEndpoint(index).ToString()).ToArray();
     }
 
-    internal RegisteredPhysicalOwnerV1 Control { get; }
-    internal RegisteredPhysicalOwnerV1 Destination { get; }
-    internal string[] DestinationSiloEndpoints { get; }
+    internal RegisteredPhysicalOwnerV1 Control
+    {
+        get;
+    }
+    internal RegisteredPhysicalOwnerV1 Destination
+    {
+        get;
+    }
+    internal string[] DestinationSiloEndpoints
+    {
+        get;
+    }
 
     private static RegisteredPhysicalOwnerV1 Entry(Guid physicalId, Guid incarnation,
         ImmutableArray<string> actualOrigins)

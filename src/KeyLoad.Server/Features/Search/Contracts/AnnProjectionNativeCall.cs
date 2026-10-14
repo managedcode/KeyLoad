@@ -1,13 +1,13 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.Server.Features.Search;
 
-[global::Orleans.GenerateSerializer, global::Orleans.Alias(AnnProjectionNativeProtocol.CallAlias)]
+[Orleans.GenerateSerializer, Orleans.Alias(AnnProjectionNativeProtocol.CallAlias)]
 internal sealed record AnnProjectionNativeCall(
-    [property: global::Orleans.Id(0)] int Version,
-    [property: global::Orleans.Id(1)] string PrincipalId,
-    [property: global::Orleans.Id(2)] AnnProjectionObservationRequest Observation,
-    [property: global::Orleans.Id(3)] DateTimeOffset ExpiresAt);
+    [property: Orleans.Id(0)] int Version,
+    [property: Orleans.Id(1)] string PrincipalId,
+    [property: Orleans.Id(2)] AnnProjectionObservationRequest Observation,
+    [property: Orleans.Id(3)] DateTimeOffset ExpiresAt);
 
 internal static class AnnProjectionNativeProtocol
 {

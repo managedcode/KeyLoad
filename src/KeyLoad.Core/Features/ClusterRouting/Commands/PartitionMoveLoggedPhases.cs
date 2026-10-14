@@ -14,20 +14,38 @@ public sealed partial class DatabaseEngine
     {
         var phase = Payload<PartitionMovePhaseCommand>(operation);
         if (!principal.ClusterAdministrator || appliedPosition <= PartitionMoveProtocol.EmptyCount)
-        { throw Errors.Fail(ErrorCode.PermissionDenied, ClusterAdministrationRequiredMessage); }
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, ClusterAdministrationRequiredMessage);
+        }
         if (phase.Stage == PartitionMovePeerStage.RetireCancel)
-        { return Result(ExecuteExpiredRetireCancellation(transaction, principal, operation, phase, appliedPosition)); }
+        {
+            return Result(ExecuteExpiredRetireCancellation(transaction, principal, operation, phase, appliedPosition));
+        }
         if (phase.Stage == PartitionMovePeerStage.ReceiverIssue)
-        { return Result(ExecuteMoveReceiverIssue(transaction, principal, operation, phase, appliedPosition)); }
+        {
+            return Result(ExecuteMoveReceiverIssue(transaction, principal, operation, phase, appliedPosition));
+        }
         RequireMoveParentLocalEffectAdmission(transaction, principal, operation.Id, phase);
         if (!PartitionMoveGrantValidation.IsLocalControl(phase.Stage))
-        { RequireMoveReceiverEffectAdmission(transaction, principal, operation.Id, phase, operation.EvaluatedAt); }
+        {
+            RequireMoveReceiverEffectAdmission(transaction, principal, operation.Id, phase, operation.EvaluatedAt);
+        }
         if (phase.Stage is not (PartitionMovePeerStage.Abort or PartitionMovePeerStage.Retire or PartitionMovePeerStage.SourceBeginAbort)
             && !PartitionMoveGrantValidation.IsLocalControl(phase.Stage))
-        { PartitionMoveCleanupStorage.RequireOpen(transaction, phase.Partition, phase.MoveId, Limits.MaxBatchBytes); }
+        {
+            PartitionMoveCleanupStorage.RequireOpen(transaction, phase.Partition, phase.MoveId, Limits.MaxBatchBytes);
+        }
         if (phase.Stage is PartitionMovePeerStage.ControlAdmitCommand or PartitionMovePeerStage.ControlAcknowledgeCommand
             or PartitionMovePeerStage.ControlFinalizeCommand or PartitionMovePeerStage.ControlApplyCommand)
-        { return Result(ExecuteControlledDocumentPhase(transaction, principal, operation, phase, appliedPosition)); }
+        {
+            return Result(ExecuteControlledDocumentPhase(transaction, principal, operation, phase, appliedPosition));
+        }
+        return ExecuteAdmittedPartitionMovePhase(transaction, principal, operation, phase, appliedPosition);
+    }
+
+    private OperationResult ExecuteAdmittedPartitionMovePhase(IAtomicTransaction transaction,
+        PrincipalRecord principal, ReplicatedOperation operation, PartitionMovePhaseCommand phase, long appliedPosition)
+    {
         return phase.Stage switch
         {
             PartitionMovePeerStage.ControlCheckpoint => Result(ExecuteMoveCheckpoint(transaction,
@@ -75,11 +93,15 @@ public sealed partial class DatabaseEngine
         if (body.OperatorPrincipalId != principal.Id || body.Request.MoveId != phase.MoveId
             || body.Request.Partition != phase.Partition
             || phase.ControlIntentDigest != Convert.ToHexStringLower(SHA256.HashData(phase.Body.Span)))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
         RequireMovePrepareNotCancelled(transaction, principal, commandId, phase);
         var parentRequired = RequireMoveParentLocalEffectAdmission(transaction, principal, commandId, phase);
         if (body.RequireParentCheckpoint != parentRequired)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.MissingAuthority);
+        }
         var record = PreparePartitionMove(transaction, principal, body.Request, position, parentRequired);
         RequireMovePhaseIdentity(phase, record);
         return new(record.MoveId, phase.Stage, MoveJournalReceipt(transaction, commandId, position,
@@ -93,7 +115,9 @@ public sealed partial class DatabaseEngine
         if (phase.MoveId != record.MoveId
             || !PartitionMoveControlValidation.SameSource(phase.SourcePlacement, record.SourcePlacement)
             || !PhysicalOwnerEntryValidation.SameOwner(phase.DestinationOwner, record.DestinationOwner))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
     }
 
     private static PartitionMoveJournalReceipt MoveJournalReceipt(IKeyValueView view,

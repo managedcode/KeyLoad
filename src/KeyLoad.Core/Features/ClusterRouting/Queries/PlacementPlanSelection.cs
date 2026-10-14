@@ -17,21 +17,29 @@ public sealed partial class DatabaseEngine
     {
         if (request.Partitions.IsDefaultOrEmpty || request.Partitions.Length > TenantPlacementPolicyProtocol.MaximumMoves
             || request.Partitions.Distinct().Count() != request.Partitions.Length)
-        { throw Errors.Fail(ErrorCode.Validation, TenantPlacementPolicyProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, TenantPlacementPolicyProtocol.Invalid);
+        }
         foreach (var partition in request.Partitions)
         {
             ValidatePartition(partition);
             if (partition.TenantId != request.TenantId || partition.DatabaseId != request.DatabaseId)
-            { throw Errors.Fail(ErrorCode.PermissionDenied, TenantPlacementPolicyProtocol.ScopeMismatch); }
+            {
+                throw Errors.Fail(ErrorCode.PermissionDenied, TenantPlacementPolicyProtocol.ScopeMismatch);
+            }
         }
         RequirePlacementControlPartition(view, request.ControlPartition, request.TenantId, request.DatabaseId, control);
         if (request.Partitions.Contains(request.ControlPartition))
-        { throw Errors.Fail(ErrorCode.Validation, TenantPlacementPolicyProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, TenantPlacementPolicyProtocol.Invalid);
+        }
         var roster = cohort.SelectMany(item => item.CompleteRoster).Select(item => item.Partition)
             .Where(part => part.TenantId == request.TenantId && part.DatabaseId == request.DatabaseId
                 && part != request.ControlPartition).Distinct().ToArray();
         if (roster.Length != request.Partitions.Length || roster.Except(request.Partitions).Any())
-        { throw Errors.Fail(ErrorCode.OwnershipLost, TenantPlacementPolicyProtocol.ScopeMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, TenantPlacementPolicyProtocol.ScopeMismatch);
+        }
         var result = ImmutableArray.CreateBuilder<CapacitySelection>(request.Partitions.Length);
         foreach (var part in request.Partitions)
         {
@@ -43,11 +51,15 @@ public sealed partial class DatabaseEngine
             var bytes = owner.Partitions.SingleOrDefault(item => item.Partition == part)
                 ?? throw Errors.Fail(ErrorCode.OwnershipLost, TenantPlacementPolicyProtocol.ScopeMismatch);
             if (bytes.Bytes < EmptyPartitionBytes)
-            { throw Errors.Fail(ErrorCode.Corruption, TenantPlacementPolicyProtocol.Malformed); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, TenantPlacementPolicyProtocol.Malformed);
+            }
             result.Add(new(part, current.PhysicalShardId, current.DirectoryRevision, current.Revision, bytes.Bytes));
         }
         if (result.Select(item => item.DirectoryRevision).Distinct().Count() != SingleDirectoryRevision)
-        { throw Errors.Fail(ErrorCode.Conflict, TenantPlacementPolicyProtocol.Stale); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, TenantPlacementPolicyProtocol.Stale);
+        }
         return result.MoveToImmutable();
     }
 
@@ -61,7 +73,9 @@ public sealed partial class DatabaseEngine
             var current = ResolveRegisteredPlacement(view, part, control);
             if (current.PhysicalShardId == owner.PhysicalShardId
                 && (part.TenantId != request.TenantId || part.DatabaseId != request.DatabaseId))
-            { return false; }
+            {
+                return false;
+            }
         }
         return true;
     }

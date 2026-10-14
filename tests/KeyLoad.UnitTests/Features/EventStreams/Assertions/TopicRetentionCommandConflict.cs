@@ -9,7 +9,10 @@ internal static class TopicRetentionCommandConflict
     {
         var cut = fixture.Store.Position;
         var state = QueueWholeFlowStorage.Bytes(fixture.Store);
-        var reused = command with { Mutations = [new PurgeTopic("topic", 1)] };
+        var reused = command with
+        {
+            Mutations = [new PurgeTopic("topic", 1)]
+        };
         var conflict = fixture.Submit(reused);
         await Assert.That(conflict.Error).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(fixture.Store.Position).IsEqualTo(cut);

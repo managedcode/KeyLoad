@@ -34,11 +34,15 @@ internal sealed class SqlCommentTests
         var plainExplain = engine.ExecuteAst(SqlCommentTestData.Principal,
             new(db.Partition, new SqlParser(SqlCommentTestData.PlainExplain,
                 UnitExecutionOptions.DatabaseLimits(db.Database.Limits), UnitExecutionOptions.QueryExecution()).Parse() with
-            { Explain = true }));
+            {
+                Explain = true
+            }));
         var commentedExplain = engine.ExecuteAst(SqlCommentTestData.Principal,
             new(db.Partition, new SqlParser(SqlCommentTestData.CommentedExplain,
                 UnitExecutionOptions.DatabaseLimits(db.Database.Limits), UnitExecutionOptions.QueryExecution()).Parse() with
-            { Explain = true }));
+            {
+                Explain = true
+            }));
         await Assert.That(JsonDefaults.Serialize(plainExplain.Rows).SequenceEqual(JsonDefaults.Serialize(commentedExplain.Rows))).IsTrue();
         await Assert.That(commentedExplain.AccessPath).IsEqualTo(plainExplain.AccessPath);
     }
@@ -86,7 +90,10 @@ internal sealed class SqlCommentTests
     public async Task AcSqlc002_UnclosedDeepSplicedAndSecondStatementCommentsAreRejected()
     {
         var limits = new DatabaseLimits { MaxQueryDepth = SqlCommentTestData.OverDepth };
-        await Assert.That(new SqlParser(SqlCommentTestData.DeepComment, UnitExecutionOptions.DatabaseLimits(new() { MaxQueryDepth = SqlCommentTestData.MaximumCommentDepth }), UnitExecutionOptions.QueryExecution()).Parse().Collection)
+        await Assert.That(new SqlParser(SqlCommentTestData.DeepComment, UnitExecutionOptions.DatabaseLimits(new()
+        {
+            MaxQueryDepth = SqlCommentTestData.MaximumCommentDepth
+        }), UnitExecutionOptions.QueryExecution()).Parse().Collection)
             .IsEqualTo(SqlCommentTestData.Collection);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => new SqlParser(SqlCommentTestData.UnclosedComment, UnitExecutionOptions.DatabaseLimits(new()), UnitExecutionOptions.QueryExecution()).Parse()).Code).IsEqualTo(ErrorCode.Validation);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => new SqlParser(SqlCommentTestData.DeepPredicate, UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.QueryExecution()).Parse()).Code).IsEqualTo(ErrorCode.BudgetExceeded);
@@ -110,13 +117,19 @@ internal sealed class SqlCommentTests
         var tokens = parser.GetTokenStream(reader, out var errors);
         await Assert.That(errors.Count).IsEqualTo(0);
         global::KeyLoad.Features.QueryExecution.ScriptDomTokenBounds.Require(tokens,
-            exactLimits with { MaxQueryTokens = SqlCommentTestData.ExactTokenCount }, budget.Check);
+            exactLimits with
+            {
+                MaxQueryTokens = SqlCommentTestData.ExactTokenCount
+            }, budget.Check);
         await Assert.That(new SqlParser(SqlCommentTestData.ExactBoundedQuery, UnitExecutionOptions.DatabaseLimits(exactLimits), UnitExecutionOptions.QueryExecution()).Parse().Collection)
             .IsEqualTo(SqlCommentTestData.Collection);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => _ = new SqlParser(SqlCommentTestData.ExactBoundedQuery, UnitExecutionOptions.DatabaseLimits(exactLimits with { MaxQueryBytes = byteCount - 1 }), UnitExecutionOptions.QueryExecution()).Parse()).Code)
             .IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => global::KeyLoad.Features.QueryExecution.ScriptDomTokenBounds.Require(tokens,
-            exactLimits with { MaxQueryTokens = SqlCommentTestData.ExcessTokenCount }, budget.Check)).Code)
+            exactLimits with
+            {
+                MaxQueryTokens = SqlCommentTestData.ExcessTokenCount
+            }, budget.Check)).Code)
             .IsEqualTo(ErrorCode.BudgetExceeded);
     }
 

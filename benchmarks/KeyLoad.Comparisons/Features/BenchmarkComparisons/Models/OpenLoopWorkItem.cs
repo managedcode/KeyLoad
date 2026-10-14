@@ -11,11 +11,20 @@ internal sealed class OpenLoopWorkItem(int index, int sampleSlot, long dueTimest
     internal long DueOffsetNanoseconds { get; } = dueOffsetNanoseconds;
     internal long DeadlineTimestamp { get; } = deadlineTimestamp;
     internal long DecisionTimestamp { get; } = decisionTimestamp;
-    internal long OfferedTimestamp { get; set; }
+    internal long OfferedTimestamp
+    {
+        get; set;
+    }
     internal int PayloadBytes { get; } = payloadBytes;
-    internal long StartedTimestamp { get; set; }
+    internal long StartedTimestamp
+    {
+        get; set;
+    }
     internal int Session { get; set; } = UnassignedSession;
-    internal OpenLoopItemPhase Phase { get; set; }
+    internal OpenLoopItemPhase Phase
+    {
+        get; set;
+    }
 }
 
 internal enum OpenLoopItemPhase

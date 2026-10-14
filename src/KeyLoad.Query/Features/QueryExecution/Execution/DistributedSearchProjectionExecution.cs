@@ -24,7 +24,9 @@ internal static class DistributedSearchProjectionExecution
         ArgumentNullException.ThrowIfNull(grant);
         budget.Check();
         if (selected.IsDefault || selected.Length > request.Limit)
-        { throw Errors.Fail(ErrorCode.Corruption, ChangedSelectedDocument); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, ChangedSelectedDocument);
+        }
         using var admission = database.AdmitQuery(budget.Cancellation);
         using var charged = budget.EnterReadGrant(grant);
         return database.WithPartitionQueryFenceView(principalId, request.Partition, request.Collection, grant,
@@ -39,7 +41,9 @@ internal static class DistributedSearchProjectionExecution
     {
         budget.Check();
         if (!string.Equals(principal.TenantId, tenant, StringComparison.Ordinal))
-        { throw Errors.Fail(ErrorCode.PermissionDenied, ReceivingPrincipalChanged); }
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, ReceivingPrincipalChanged);
+        }
         DistributedTextWitnessValidation.Require(database, view, principal, resource, digest,
             witness, request.Partition, grant, budget);
         DistributedSearchFieldAuthorization.Require(database, principal, resource, request);
@@ -52,15 +56,21 @@ internal static class DistributedSearchProjectionExecution
             budget.Check();
             GlobalBranchValidation.ValidateCandidate(candidate);
             if (candidate.Reference.Partition != request.Partition || candidate.Reference.Collection != request.Collection)
-            { throw Errors.Fail(ErrorCode.Corruption, ChangedSelectedDocument); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, ChangedSelectedDocument);
+            }
             var document = budget.ReadRecord<DocumentRecord>(view, DocumentStorageKeys.RecordKey(candidate.Reference));
             if (document is null || document.Deleted || document.Reference != candidate.Reference
                 || document.Revision != candidate.Revision)
-            { throw Errors.Fail(ErrorCode.OwnershipLost, ChangedSelectedDocument); }
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, ChangedSelectedDocument);
+            }
             var hit = new RankedDocument(database.Project(principal, resource, document), candidate.Score);
             var bytes = budget.MeasureResult(hit);
             if (bytes > budget.MaximumResultBytes - projectedBytes)
-            { throw Errors.Fail(ErrorCode.BudgetExceeded, ChangedSelectedDocument); }
+            {
+                throw Errors.Fail(ErrorCode.BudgetExceeded, ChangedSelectedDocument);
+            }
             projectedBytes += bytes;
             hits.Add(hit);
         }

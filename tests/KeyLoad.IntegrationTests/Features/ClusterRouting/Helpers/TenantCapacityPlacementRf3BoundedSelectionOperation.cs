@@ -24,7 +24,10 @@ internal static class TenantCapacityPlacementRf3BoundedSelectionOperation
             seed.Partition.DatabaseId, [seed.Partition], capacity.Control);
         var sdk = await McpCallerAssertions.SdkSuccessAsync(await seed.Source.PlanTenantPlacementAsync(query, token));
         var mcp = (await McpCallerAssertions.SuccessAsync<TenantPlacementPlanResultV1>(
-            await seed.Official.CallAsync(TenantPlacementPublicProtocol.PlanTool, new { request = query }, token))).Value;
+            await seed.Official.CallAsync(TenantPlacementPublicProtocol.PlanTool, new
+            {
+                request = query
+            }, token))).Value;
         await TenantCapacityPlacementRf3Assertions.RequirePlanAsync(seed, capacity, sdk, token);
         await TenantCapacityPlacementRf3Assertions.RequirePlanAsync(seed, capacity, mcp, token);
         var persistId = Guid.NewGuid();
@@ -33,7 +36,11 @@ internal static class TenantCapacityPlacementRf3BoundedSelectionOperation
         await TenantCapacityPlacementRf3Assertions.RequirePendingAsync(pending, sdk.Plan, persist.IntentId);
         await SqlRf3Protocol.EqualAsync(pending, (await McpCallerAssertions.SuccessAsync<PlacementIntentV1>(
             await seed.Official.CallAsync(TenantPlacementPublicProtocol.PersistTool,
-                new { commandId = persistId, request = persist }, token))).Value);
+                new
+                {
+                    commandId = persistId,
+                    request = persist
+                }, token))).Value);
         await TenantCapacityPlacementRf3Apply.RunAsync(wave, seed, capacity, sdk, pending, token);
         await TenantCapacityPlacementRf3ExpiryAssertions.PersistReplayAsync(seed, persistId, persist, pending, token);
     }

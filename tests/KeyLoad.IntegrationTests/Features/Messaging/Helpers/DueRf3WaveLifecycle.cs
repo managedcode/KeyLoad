@@ -28,7 +28,9 @@ internal static class DueRf3WaveLifecycle
         {
             lifecycle?.RecordFirstFailureIfAny(failures);
             if (wave is not null)
-            { await CompleteWaveAsync(wave, failures).ConfigureAwait(false); }
+            {
+                await CompleteWaveAsync(wave, failures).ConfigureAwait(false);
+            }
         }
         ServerFailureObserver.ThrowIfAny(failures);
         return result!;

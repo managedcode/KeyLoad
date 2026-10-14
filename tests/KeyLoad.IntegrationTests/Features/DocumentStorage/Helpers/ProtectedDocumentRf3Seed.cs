@@ -22,7 +22,9 @@ internal sealed record ProtectedDocumentRf3Seed(PartitionRef Partition, EntityRe
         var partition = new PartitionRef("protected-tenant", "protected-database", "protected-domain",
             "protected-" + Guid.NewGuid().ToString("N"));
         var resource = new ResourceDefinition(Collection, ResourceKind.Collection, partition.TransactionDomainId)
-        { FieldPolicies = [new("/secret", "private")] };
+        {
+            FieldPolicies = [new("/secret", "private")]
+        };
         _ = await McpCallerAssertions.SdkSuccessAsync(await source.ConfigureResourceAsync(Guid.NewGuid(),
             new(partition.TenantId, partition.DatabaseId, resource), token));
         var reader = await PersistAsync(source, partition, Capability.DocumentsRead | Capability.Query, ["title"], token).ConfigureAwait(false);
@@ -46,7 +48,12 @@ internal sealed record ProtectedDocumentRf3Seed(PartitionRef Partition, EntityRe
         var targetAfter = await McpCallerAssertions.SdkSuccessAsync(await target.StatusAsync(token));
         await Assert.That(sourceAfter.Applied).IsGreaterThanOrEqualTo(sourceBefore.Applied);
         await Assert.That(targetAfter.Applied).IsGreaterThanOrEqualTo(targetBefore.Applied);
-        return new(partition, new(partition, Collection, Entity), reader.Id, reader.Secret, denied.Secret, receipt) { Peer = peer, Control = retired.Control!, DeniedId = denied.Id };
+        return new(partition, new(partition, Collection, Entity), reader.Id, reader.Secret, denied.Secret, receipt)
+        {
+            Peer = peer,
+            Control = retired.Control!,
+            DeniedId = denied.Id
+        };
     }
 
     private static async Task<(string Id, string Secret)> PersistAsync(KeyLoadClient source,

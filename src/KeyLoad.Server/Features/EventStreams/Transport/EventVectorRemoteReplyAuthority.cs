@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Storage;
 using Microsoft.Extensions.Options;
 
@@ -20,7 +20,9 @@ internal static class EventVectorRemoteReplyAuthority
             || !destination.Owner.VoterIds.SequenceEqual(configured.ForeignVoterIds, StringComparer.Ordinal)
             || !destination.Endpoints.SequenceEqual(configured.ForeignVoterIds.Select(
                 static voter => new Uri(voter, UriKind.Absolute).AbsoluteUri), StringComparer.Ordinal))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, EventVectorRemoteProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, EventVectorRemoteProtocol.Unavailable);
+        }
     }
 
     internal static SiloAddress Require(EventVectorRemoteReply reply, EventVectorRemoteCall originalCall,
@@ -39,7 +41,9 @@ internal static class EventVectorRemoteReplyAuthority
             || discovery.PeerEnvelopeVersion != ReplicaTransportProtocol.Version
             || discovery.RuntimeJournalReaderContract != StoreReaderContract.RuntimeJournal
             || !global::KeyLoad.Server.Features.ClusterRouting.PhysicalGroupAddress.CanonicalAddress(discovery.SiloAddress, membership))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, EventVectorRemoteProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, EventVectorRemoteProtocol.Invalid);
+        }
         return SiloAddress.FromParsableString(discovery.SiloAddress);
     }
 }

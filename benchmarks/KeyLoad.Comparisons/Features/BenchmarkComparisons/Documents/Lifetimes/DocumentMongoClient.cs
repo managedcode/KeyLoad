@@ -14,7 +14,9 @@ internal sealed class DocumentMongoClient : IAsyncDisposable
     {
         await using var owner = new DocumentMongoClient();
         try
-        { return await owner.AcquireAsync(target, settings, databaseName, graphDepth, options, token).ConfigureAwait(false); }
+        {
+            return await owner.AcquireAsync(target, settings, databaseName, graphDepth, options, token).ConfigureAwait(false);
+        }
         catch (Exception failure) { owner.primary = failure; throw; }
     }
     private async Task<IDocumentComparisonSession> AcquireAsync(MongoTarget target, MongoClientSettings settings,
@@ -51,7 +53,11 @@ internal sealed class DocumentMongoClient : IAsyncDisposable
         }
     }
     private async Task DisposeSessionAsync() => await session!.DisposeAsync().ConfigureAwait(false);
-    private async Task DisposeClientAsync() { await Task.CompletedTask.ConfigureAwait(false); actual!.Dispose(); }
+    private async Task DisposeClientAsync()
+    {
+        await Task.CompletedTask.ConfigureAwait(false);
+        actual!.Dispose();
+    }
     internal static async Task VerifyCopiesAsync(MongoTarget target, IEnumerable<IMongoClient> clients,
         string databaseName, int graphDepth, IOptions<NativeComparisonExecutionOptions> options,
         DocumentComparisonSchedule schedule, CancellationToken token)

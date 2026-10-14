@@ -19,14 +19,20 @@ internal sealed class PostgresRf3WireOwner : IAsyncDisposable
     internal void AbortReceiver()
     {
         if (Interlocked.Exchange(ref receiverAborted, PostgresRf3Protocol.OneColumn) != PostgresRf3Protocol.FirstColumn)
-        { return; }
+        {
+            return;
+        }
         socket.LingerState = new LingerOption(true, PostgresRf3Protocol.FirstColumn);
         if (Interlocked.Exchange(ref socketDisposed, PostgresRf3Protocol.OneColumn) == PostgresRf3Protocol.FirstColumn)
-        { socket.Dispose(); }
+        {
+            socket.Dispose();
+        }
     }
     internal SslStream Stream => tls ?? throw new InvalidOperationException(PostgresRf3Protocol.InvalidResult);
 
-    private PostgresRf3WireOwner() { }
+    private PostgresRf3WireOwner()
+    {
+    }
 
     internal static async Task<PostgresRf3WireOwner> OpenAsync(ClusterFixture fixture, CancellationToken token)
     {
@@ -63,7 +69,9 @@ internal sealed class PostgresRf3WireOwner : IAsyncDisposable
     public async ValueTask DisposeAsync()
     {
         if (Interlocked.Exchange(ref disposed, PostgresRf3Protocol.OneColumn) != PostgresRf3Protocol.FirstColumn)
-        { return; }
+        {
+            return;
+        }
         var failures = new List<Exception>();
         if (tls is not null)
         {
@@ -72,10 +80,14 @@ internal sealed class PostgresRf3WireOwner : IAsyncDisposable
                 var terminal = tls.DisposeAsync().AsTask();
                 await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => terminal, failures);
             }
-            catch (Exception error) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-            { failures.Add(error); }
-            catch (Exception error) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-            { failures.Add(error); }
+            catch (Exception error) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+            {
+                failures.Add(error);
+            }
+            catch (Exception error) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+            {
+                failures.Add(error);
+            }
         }
         if (network is not null)
         {
@@ -84,20 +96,30 @@ internal sealed class PostgresRf3WireOwner : IAsyncDisposable
                 var terminal = network.DisposeAsync().AsTask();
                 await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => terminal, failures);
             }
-            catch (Exception error) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-            { failures.Add(error); }
-            catch (Exception error) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-            { failures.Add(error); }
+            catch (Exception error) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+            {
+                failures.Add(error);
+            }
+            catch (Exception error) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+            {
+                failures.Add(error);
+            }
         }
         try
         {
             if (Interlocked.Exchange(ref socketDisposed, PostgresRf3Protocol.OneColumn) == PostgresRf3Protocol.FirstColumn)
-            { socket.Dispose(); }
+            {
+                socket.Dispose();
+            }
         }
-        catch (Exception error) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
-        catch (Exception error) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
+        catch (Exception error) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
+        catch (Exception error) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
         global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }
 }

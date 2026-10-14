@@ -38,7 +38,9 @@ internal static class NativeSearchTerminalPrivacy
             {
                 RequireCurrentRow(database, raw, principal, reference, budget);
                 if (vectorField is not null)
-                { RequireSourcePrivacy(database, raw, captured, principal, reference, vectorField, budget); }
+                {
+                    RequireSourcePrivacy(database, raw, captured, principal, reference, vectorField, budget);
+                }
             }
             return true;
         });
@@ -58,7 +60,9 @@ internal static class NativeSearchTerminalPrivacy
             || placement.Incarnation != original.Placement.Incarnation
             || placement.PlacementEpoch != original.Placement.PlacementEpoch
             || !placement.VoterIds.SequenceEqual(original.Placement.VoterIds, StringComparer.Ordinal))
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, Changed); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, Changed);
+        }
         budget.Check();
     }
 
@@ -69,11 +73,15 @@ internal static class NativeSearchTerminalPrivacy
             KeySpace.Partition(VisibleVectorReads.VectorKeySpace, target.Partition, target.Collection, field, target.Id));
         var document = budget.ReadRecord<DocumentRecord>(captured, DocumentStorageKeys.RecordKey(target));
         if (vector is null || document is null || document.Revision != vector.DocumentRevision)
-        { return; }
+        {
+            return;
+        }
         var lineage = budget.ReadRecord<VectorProjectionLineage>(captured,
             VectorProjectionKeys.Lineage(target.Partition, target.Collection, field, target.Id));
         if (lineage is null)
-        { return; }
+        {
+            return;
+        }
         VectorProjectionEligibility.ValidateLineage(lineage, target.Partition, document, vector);
         var sourceResource = database.Resource(current, target.Partition, lineage.SourceDocument.Collection, ResourceKind.Collection);
         database.Authorization.Require(principal, target.Partition, sourceResource.Name, Capability.DocumentsRead);
@@ -82,7 +90,9 @@ internal static class NativeSearchTerminalPrivacy
             KeySpace.Resource(target.Partition.TenantId, target.Partition.DatabaseId, lineage.SourceDocument.Collection))
             ?? throw Errors.Fail(ErrorCode.HistoryUnavailable, Missing);
         if (ResourceHash(sourceResource, budget) != ResourceHash(originalResource, budget))
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, Changed); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, Changed);
+        }
         RequireCurrentRow(database, current, principal, lineage.SourceDocument, budget);
     }
 
@@ -92,7 +102,9 @@ internal static class NativeSearchTerminalPrivacy
         var row = budget.ReadRecord<DocumentRecord>(current, DocumentStorageKeys.RecordKey(reference))
             ?? throw Errors.Fail(ErrorCode.HistoryUnavailable, Missing);
         if (!database.Authorization.CanReadRow(principal, row.Access))
-        { throw Errors.Fail(ErrorCode.PermissionDenied, Changed); }
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, Changed);
+        }
     }
 
     private static string ResourceHash(ResourceDefinition resource, ReadExecutionBudget budget)

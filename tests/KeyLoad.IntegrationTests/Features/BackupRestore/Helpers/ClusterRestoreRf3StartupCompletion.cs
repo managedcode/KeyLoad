@@ -44,7 +44,9 @@ internal static class ClusterRestoreRf3StartupCompletion
             return;
         }
         foreach (var node in ClusterRestoreRf3Protocol.Nodes)
-        { await owner.Application.ResourceNotifications.WaitForResourceHealthyAsync(node, cancellationToken).ConfigureAwait(false); }
+        {
+            await owner.Application.ResourceNotifications.WaitForResourceHealthyAsync(node, cancellationToken).ConfigureAwait(false);
+        }
         await TwoRf3MembershipDataReadiness.WaitAsync(owner.Application,
             owner.Application.Services.GetRequiredService<IOptions<TestExecutionOptions>>(), TimeProvider.System,
             cancellationToken).ConfigureAwait(false);

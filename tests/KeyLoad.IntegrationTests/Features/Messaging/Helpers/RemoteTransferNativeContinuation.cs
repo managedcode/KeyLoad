@@ -71,14 +71,21 @@ internal static class RemoteTransferNativeContinuation
     private static Task RequireDeliveredAsync(RemoteTransferNativeCallers calls, RemoteTransferColdSeed seed,
         QueueTransferInspection intent, QueueTransferReceiptInspection proof, CancellationToken token)
         => RemoteTransferNativeStateAssertions.StateAsync(calls, seed,
-            intent with { State = QueueTransferState.Delivered, ReceiptToken = proof.ReceiptToken }, proof,
+            intent with
+            {
+                State = QueueTransferState.Delivered,
+                ReceiptToken = proof.ReceiptToken
+            }, proof,
             RemoteTransferColdAssertions.Ready(seed, RemoteTransferColdProtocol.OriginalReadySequence), token);
 
     private static async Task HealthyAsync(RemoteTransferNativeCallers calls, RemoteTransferColdSeed original,
         CancellationToken token)
     {
         var message = original.Message with
-        { MessageId = RemoteTransferColdProtocol.Healthy, PayloadJson = RemoteTransferColdProtocol.HealthyPayload };
+        {
+            MessageId = RemoteTransferColdProtocol.Healthy,
+            PayloadJson = RemoteTransferColdProtocol.HealthyPayload
+        };
         var id = Guid.NewGuid();
         var seed = original with
         {
@@ -99,7 +106,11 @@ internal static class RemoteTransferNativeContinuation
         var completed = await McpCallerAssertions.SdkSuccessAsync(await calls.Sdk.CommitAsync(complete, token));
         await calls.ReplayAsync(complete, completed, token);
         await RemoteTransferNativeStateAssertions.StateAsync(calls, seed,
-            intent with { State = QueueTransferState.Delivered, ReceiptToken = proof.ReceiptToken }, proof,
+            intent with
+            {
+                State = QueueTransferState.Delivered,
+                ReceiptToken = proof.ReceiptToken
+            }, proof,
             RemoteTransferColdAssertions.Ready(seed, RemoteTransferColdProtocol.HealthyReadySequence), token);
     }
 }

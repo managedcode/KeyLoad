@@ -14,7 +14,10 @@ internal static class SqlFetchCountCold
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {
                 using var store = global::KeyLoad.Storage.ZoneTree.ZoneTreeExistingStore.Open(
-                    new(database.Directory) { Incarnation = database.Store.Identity.Incarnation },
+                    new(database.Directory)
+                    {
+                        Incarnation = database.Store.Identity.Incarnation
+                    },
                     database.Store.Identity.NodeId, database.StorageExecution);
                 await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
                 {

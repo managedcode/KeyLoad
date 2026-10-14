@@ -29,8 +29,12 @@ internal static class QueueOrderedRetryInitial
         QueueOrderedRetryOperations.Complete(database, state, retried, DeliveryAction.Nack).Get<CommitReceipt>();
         await QueueOrderedRetryAssertions.ParkedAsync(database, state);
         if (state.ParkedHead == QueueParkedHeadPolicy.Continue)
-        { state.SecondLease = await QueueOrderedRetryOperations.ClaimAsync(database, state, QueueOrderedRetryProtocol.Second); }
+        {
+            state.SecondLease = await QueueOrderedRetryOperations.ClaimAsync(database, state, QueueOrderedRetryProtocol.Second);
+        }
         else
-        { await Assert.That(QueueOrderedRetryOperations.Receive(database, state).Deliveries).IsEmpty(); }
+        {
+            await Assert.That(QueueOrderedRetryOperations.Receive(database, state).Deliveries).IsEmpty();
+        }
     }
 }

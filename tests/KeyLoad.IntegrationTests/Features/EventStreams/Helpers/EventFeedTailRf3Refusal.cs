@@ -29,7 +29,9 @@ internal static class EventFeedTailRf3Refusal
         {
             await Assert.That(frame.Kind).IsEqualTo(CqrsStreamChunkKind.Failed);
             if (frame.Final is not { IsSuccess: false, Problem: { } problem })
-            { throw new InvalidOperationException(Invalid); }
+            {
+                throw new InvalidOperationException(Invalid);
+            }
             await Assert.That(problem.ErrorCode).IsEqualTo(expected.ToString());
             await Assert.That(problem.StatusCode).IsEqualTo(Errors.Status(expected));
             await Assert.That(frame.ProgressResult.HasValue).IsFalse();

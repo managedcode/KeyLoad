@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 using KeyLoad.Query;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.Search;
@@ -34,7 +34,10 @@ internal static class NativeTextMissingSettledAuthorityFlow
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 NativeTextIncrementalMetadata.Publish(directory,
-                    manifest with { LastSettledCheckpointRequest = null },
+                    manifest with
+                    {
+                        LastSettledCheckpointRequest = null
+                    },
                     options.Value.MaximumDiskBytes, budget, options);
                 var missing = await File.ReadAllBytesAsync(path, token);
                 await RejectAsync(database, restore, path, missing, image, position, failures, token);
@@ -89,7 +92,10 @@ internal static class NativeTextMissingSettledAuthorityFlow
         TextIndexSelectionV1 selection, string query, string id, string json, CancellationToken token)
     {
         var rows = await search.SearchAsync(Principal,
-            NativeTextBilingualAudit.Request(partition, query) with { TextIndex = selection }, token);
+            NativeTextBilingualAudit.Request(partition, query) with
+            {
+                TextIndex = selection
+            }, token);
         var row = await Assert.That(rows).HasSingleItem();
         var expected = new DocumentResult(new(partition, NativeTextBilingualAudit.Collection, id), Revision, json, false, []);
         await Assert.That(JsonDefaults.Serialize(row.Document).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();

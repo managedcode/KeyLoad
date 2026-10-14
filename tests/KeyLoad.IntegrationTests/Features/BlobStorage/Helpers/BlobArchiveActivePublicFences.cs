@@ -14,9 +14,13 @@ internal static class BlobArchiveActivePublicFences
         {
             await RejectAsync(async () => await ClusterRestoreRf3AuthorityTrial.ErrorAsync(await sdk.BeginBlobUploadAsync(version.Begin, token), ErrorCode.TokenInvalidated), official, "keyload_blobs_begin_upload", version.Begin, state, sdk, token);
             foreach (var part in version.Parts)
-            { await RejectAsync(async () => await ClusterRestoreRf3AuthorityTrial.ErrorAsync(await sdk.WriteBlobPartAsync(part, token), ErrorCode.TokenInvalidated), official, "keyload_blobs_write_part", part, state, sdk, token); }
+            {
+                await RejectAsync(async () => await ClusterRestoreRf3AuthorityTrial.ErrorAsync(await sdk.WriteBlobPartAsync(part, token), ErrorCode.TokenInvalidated), official, "keyload_blobs_write_part", part, state, sdk, token);
+            }
             if (version.Complete is { } complete)
-            { await RejectAsync(async () => await ClusterRestoreRf3AuthorityTrial.ErrorAsync(await sdk.CompleteBlobUploadAsync(complete, token), ErrorCode.TokenInvalidated), official, "keyload_blobs_complete_upload", complete, state, sdk, token); }
+            {
+                await RejectAsync(async () => await ClusterRestoreRf3AuthorityTrial.ErrorAsync(await sdk.CompleteBlobUploadAsync(complete, token), ErrorCode.TokenInvalidated), official, "keyload_blobs_complete_upload", complete, state, sdk, token);
+            }
         }
         await RejectAsync(async () => await ClusterRestoreRf3AuthorityTrial.ErrorAsync(await sdk.WriteBlobPartAsync(state.RefusedPart, token), ErrorCode.TokenInvalidated), official, "keyload_blobs_write_part", state.RefusedPart, state, sdk, token);
     }

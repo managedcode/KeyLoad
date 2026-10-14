@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server.Features.ClusterRouting;
 using Microsoft.Extensions.Options;
 
@@ -13,12 +13,16 @@ internal static class NativeBlobWireProbeFactory
     {
         var selected = options.NativeBlobWireProbe;
         if (selected.Root is null && selected.SessionId is null)
-        { return null; }
+        {
+            return null;
+        }
         if (!options.RequestCqrsProbe.Enabled || selected.Root != FixedRoot
             || selected.SessionId != options.RequestCqrsProbe.SessionId
             || !RequestCqrsProbeOptionsReader.IsSessionId(selected.SessionId)
             || options.PhysicalGroupTrust.Role != PhysicalGroupTrustRole.Control)
-        { throw new InvalidOperationException(NativeBlobWireProbeProtocol.InvalidOwner); }
+        {
+            throw new InvalidOperationException(NativeBlobWireProbeProtocol.InvalidOwner);
+        }
         RequestCqrsProbePaths.RequireDirectory(selected.Root, FixedRoot);
         var limits = services.GetRequiredService<IOptions<RequestProbeExecutionOptions>>();
         limits.Value.Validate();

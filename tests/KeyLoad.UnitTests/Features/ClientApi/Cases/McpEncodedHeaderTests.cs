@@ -19,7 +19,10 @@ internal sealed class McpEncodedHeaderTests
         await Assert.That(encoded).IsNotEqualTo(McpNativeBoundaryTestData.UnicodeName);
         await Assert.That(McpHeaderEncoder.DecodeValue(encoded)).IsEqualTo(McpNativeBoundaryTestData.UnicodeName);
         var headers = McpTransportGuard.ReadHeaders(McpTransportGuardTestData.Headers(method, encoded), UnitMcpOptions.Execution());
-        var wire = McpTransportGuardTestData.Frame(method, new() { [field] = McpNativeBoundaryTestData.UnicodeName });
+        var wire = McpTransportGuardTestData.Frame(method, new()
+        {
+            [field] = McpNativeBoundaryTestData.UnicodeName
+        });
         var original = wire.ToArray();
         McpTransportGuard.Inspect(wire, headers);
         await Assert.That(headers.Name).IsEqualTo(McpNativeBoundaryTestData.UnicodeName);
@@ -33,7 +36,10 @@ internal sealed class McpEncodedHeaderTests
         var encoded = McpNativeBoundaryTestData.Encode(McpNativeBoundaryTestData.UnicodeName);
         var headers = McpTransportGuard.ReadHeaders(McpTransportGuardTestData.Headers(name: encoded), UnitMcpOptions.Execution());
         var wire = McpTransportGuardTestData.Frame(RequestMethods.ToolsCall,
-            new() { [McpTransportGuardTestData.NameField] = encoded });
+            new()
+            {
+                [McpTransportGuardTestData.NameField] = encoded
+            });
         var error = Assert.ThrowsExactly<KeyLoadException>(() => McpTransportGuard.Inspect(wire, headers));
         await Assert.That(error.Code).IsEqualTo(ErrorCode.Validation);
         await Assert.That(error.Message).IsEqualTo(McpNativeBoundaryTestData.InvalidTransport);
@@ -106,7 +112,10 @@ internal sealed class McpEncodedHeaderTests
         await Assert.That(McpHeaderEncoder.DecodeValue(encoded)).IsEqualTo(McpTransportGuardTestData.TabbedName);
         var headers = McpTransportGuard.ReadHeaders(McpTransportGuardTestData.Headers(name: encoded), UnitMcpOptions.Execution());
         McpTransportGuard.Inspect(McpTransportGuardTestData.Frame(RequestMethods.ToolsCall,
-            new() { [McpTransportGuardTestData.NameField] = McpTransportGuardTestData.TabbedName }), headers);
+            new()
+            {
+                [McpTransportGuardTestData.NameField] = McpTransportGuardTestData.TabbedName
+            }), headers);
         await Assert.That(headers.Name).IsEqualTo(McpTransportGuardTestData.TabbedName);
     }
 
@@ -134,7 +143,10 @@ internal sealed class McpEncodedHeaderTests
         await Assert.That(encoded).IsEqualTo(McpTransportGuardTestData.Target);
         var headers = McpTransportGuard.ReadHeaders(McpTransportGuardTestData.Headers(name: encoded), UnitMcpOptions.Execution());
         McpTransportGuard.Inspect(McpTransportGuardTestData.Frame(RequestMethods.ToolsCall,
-            new() { [McpTransportGuardTestData.NameField] = McpTransportGuardTestData.Target }), headers);
+            new()
+            {
+                [McpTransportGuardTestData.NameField] = McpTransportGuardTestData.Target
+            }), headers);
         await Assert.That(headers.Name).IsEqualTo(McpTransportGuardTestData.Target);
     }
 }

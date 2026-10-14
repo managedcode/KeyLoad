@@ -25,7 +25,9 @@ internal sealed class Bm25OriginalPhaseRecoveryFlow(Bm25OriginalPhaseRecoveryOwn
         owner.Source.Configure(Collection, ResourceKind.Collection);
         owner.Source.Commit(new PutDocument(Collection, "first", "{\"text\":\"needle\"}"));
         Administrator = Configure(new(Publisher, owner.Source.Partition.TenantId, [], [])
-        { ClusterAdministrator = true });
+        {
+            ClusterAdministrator = true
+        });
         Reader = Configure(new(Subject, owner.Source.Partition.TenantId,
             [new(owner.Source.Partition.DatabaseId, Collection, Capability.Query | Capability.DocumentsRead)], []));
     }
@@ -52,16 +54,28 @@ internal sealed class Bm25OriginalPhaseRecoveryFlow(Bm25OriginalPhaseRecoveryOwn
     }
 
     internal void RevokeAdministrator() => Administrator = Configure(Administrator with
-    { PolicyEpoch = 2, ClusterAdministrator = false });
+    {
+        PolicyEpoch = 2,
+        ClusterAdministrator = false
+    });
 
     internal void RepairAdministrator() => Administrator = Configure(Administrator with
-    { PolicyEpoch = 3, ClusterAdministrator = true });
+    {
+        PolicyEpoch = 3,
+        ClusterAdministrator = true
+    });
 
     internal void RevokeSubject() => Reader = Configure(Reader with
-    { PolicyEpoch = 2, Grants = [new(owner.Source.Partition.DatabaseId, Collection, Capability.DocumentsRead)] });
+    {
+        PolicyEpoch = 2,
+        Grants = [new(owner.Source.Partition.DatabaseId, Collection, Capability.DocumentsRead)]
+    });
 
     internal void RepairSubject() => Reader = Configure(Reader with
-    { PolicyEpoch = 3, Grants = [new(owner.Source.Partition.DatabaseId, Collection, Capability.Query | Capability.DocumentsRead)] });
+    {
+        PolicyEpoch = 3,
+        Grants = [new(owner.Source.Partition.DatabaseId, Collection, Capability.Query | Capability.DocumentsRead)]
+    });
 
     internal async Task RequireDeniedAsync(ReplicatedOperation original, bool issuerMustDeny)
     {

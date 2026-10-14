@@ -60,7 +60,9 @@ internal static class BlobActivePolicyPublicAssertions
     {
         Task Observe() => CurrentAsync(administrator, creator, state, token);
         if (begin)
-        { await RefusedAsync(creator, "keyload_blobs_begin_upload", state.Begin, ct => creator.Sdk.BeginBlobUploadAsync(state.Begin, ct), Observe, token); }
+        {
+            await RefusedAsync(creator, "keyload_blobs_begin_upload", state.Begin, ct => creator.Sdk.BeginBlobUploadAsync(state.Begin, ct), Observe, token);
+        }
         await RefusedAsync(creator, "keyload_blobs_write_part", state.DeniedPart, ct => creator.Sdk.WriteBlobPartAsync(state.DeniedPart, ct), Observe, token);
         await RefusedAsync(creator, "keyload_blobs_complete_upload", state.DeniedComplete, ct => creator.Sdk.CompleteBlobUploadAsync(state.DeniedComplete, ct), Observe, token);
         await RefusedAsync(creator, "keyload_blobs_abort_upload", state.DeniedAbort, ct => creator.Sdk.AbortBlobUploadAsync(state.DeniedAbort, ct), Observe, token);

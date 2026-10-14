@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Search;
-using KeyLoad.Orleans;
 using KeyLoad.Query.Features.Search;
 
 namespace KeyLoad.Server.Features.Search;
@@ -53,9 +53,13 @@ internal static class NativeAnnOriginalOperationExecution
                 var read = new ReadExecutionBudget(configured.Core.DatabaseLimits, clock, token);
                 var fresh = database.Store.Read(view => database.Principal(view, principal.Id, clock.GetUtcNow()));
                 if (!fresh.ClusterAdministrator || fresh.Revoked || fresh.PolicyEpoch != principal.PolicyEpoch)
-                { throw Errors.Fail(ErrorCode.PermissionDenied, NativeAnnProtocol.InvalidSource); }
+                {
+                    throw Errors.Fail(ErrorCode.PermissionDenied, NativeAnnProtocol.InvalidSource);
+                }
                 if (originalSession is not null)
-                { owner.MaintenanceMemory.Expand(originalSession.Memory); }
+                {
+                    owner.MaintenanceMemory.Expand(originalSession.Memory);
+                }
                 var retained = originalSession?.RetainedBytes ?? EmptyBytes;
                 var available = owner.MaintenanceMemory.Remaining(retained);
                 var seeds = NativeAnnMaintenanceAdmission.Seeds(configured.Core.AnnSeed, available / CaptureFrames);
@@ -65,13 +69,19 @@ internal static class NativeAnnOriginalOperationExecution
                 if (!final.ClusterAdministrator || final.Revoked || final.PolicyEpoch != fresh.PolicyEpoch
                     || current.Scope.PolicyEpoch != fresh.PolicyEpoch
                     || originalSession is not null && originalSession.PrincipalId != fresh.Id)
-                { throw Errors.Fail(ErrorCode.PermissionDenied, NativeAnnProtocol.InvalidSource); }
+                {
+                    throw Errors.Fail(ErrorCode.PermissionDenied, NativeAnnProtocol.InvalidSource);
+                }
                 (result, settlement) = ApplyOriginal(database, fresh, request, originalConfigure, originalResult,
                     stages, owner, current, seeds.Value, retained, read);
                 if (result is not null)
-                { read.ChargeBytes(global::KeyLoad.NativeSerialization.Measure(result)); }
+                {
+                    read.ChargeBytes(global::KeyLoad.NativeSerialization.Measure(result));
+                }
                 if (settlement is not null)
-                { read.ChargeBytes(global::KeyLoad.NativeSerialization.Measure(settlement)); }
+                {
+                    read.ChargeBytes(global::KeyLoad.NativeSerialization.Measure(settlement));
+                }
                 read.Check();
             }
             catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
@@ -96,11 +106,16 @@ internal static class NativeAnnOriginalOperationExecution
             || !global::KeyLoad.NativeSerialization.Serialize(originalConfigure.Definition).AsSpan()
                 .SequenceEqual(global::KeyLoad.NativeSerialization.Serialize(configuredCurrent.Definition))
             || originalConfigure.MaintenanceAuthority != configuredCurrent.MaintenanceAuthority))
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, NativeAnnProtocol.InvalidSource); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, NativeAnnProtocol.InvalidSource);
+        }
         if (originalResult is null)
         {
             var admittedConfigure = originalConfigure is null ? configuredCurrent
-                : configuredCurrent with { Checkpoint = originalConfigure.Checkpoint };
+                : configuredCurrent with
+                {
+                    Checkpoint = originalConfigure.Checkpoint
+                };
             result = stages.AdmitOriginal(fresh, request, admittedConfigure, current);
             if (result is not null)
             {
@@ -108,7 +123,9 @@ internal static class NativeAnnOriginalOperationExecution
                 settlement = stages.OriginalSettlementIntent(request);
                 if (configuredCurrent.InitialAnnMaintenance is { } initial
                     && NativeAnnOriginalResults.SameRequest(initial, request) && settlement is null)
-                { throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Corrupt); }
+                {
+                    throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Corrupt);
+                }
             }
         }
         else
@@ -135,7 +152,9 @@ internal static class NativeAnnOriginalOperationExecution
         var publication = stages.ReadPublished(request, current, seeds,
             owner.MaintenanceMemory.Remaining(checked(retained + current.OwnedBytesUpperBound)), work, read);
         if (publication.Count != result.Count || Convert.ToHexStringLower(publication.IndexSha256) != result.IndexSha256)
-        { throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Corrupt); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Corrupt);
+        }
         NativeAnnOriginalResults.RequirePublication(result, publication, current);
     }
 

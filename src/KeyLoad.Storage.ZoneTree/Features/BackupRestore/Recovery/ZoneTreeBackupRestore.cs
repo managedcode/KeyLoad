@@ -9,7 +9,10 @@ internal sealed class ZoneTreeBackupRestore(ZoneTreeStoreRuntime runtime)
     {
         runtime.Gate.EnterWriteLock();
         try
-        { runtime.Check(); return ZoneTreeBackupRestoreFiles.Create(runtime, directory); }
+        {
+            runtime.Check();
+            return ZoneTreeBackupRestoreFiles.Create(runtime, directory);
+        }
         finally { runtime.Gate.ExitWriteLock(); }
     }
 
@@ -62,9 +65,13 @@ internal sealed class ZoneTreeBackupRestore(ZoneTreeStoreRuntime runtime)
         cancellationToken.ThrowIfCancellationRequested();
         var metadata = capture(runtime.View, runtime.Position, runtime.Identity);
         if (metadata is null || metadata.Length == ZoneTreeCatalogBackupPublication.EmptyMetadata)
-        { throw Errors.Fail(ErrorCode.Validation, ZoneTreeCatalogBackupPublication.MissingMetadata); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, ZoneTreeCatalogBackupPublication.MissingMetadata);
+        }
         if (metadata.Length > runtime.Options.MaximumBackupManifestBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, ZoneTreeCatalogBackupPublication.MetadataExceeded); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, ZoneTreeCatalogBackupPublication.MetadataExceeded);
+        }
         var owned = metadata.ToArray();
         cancellationToken.ThrowIfCancellationRequested();
         return ZoneTreeCatalogBackupPublication.Create(runtime, directory, owned, requireCaptured, cancellationToken);

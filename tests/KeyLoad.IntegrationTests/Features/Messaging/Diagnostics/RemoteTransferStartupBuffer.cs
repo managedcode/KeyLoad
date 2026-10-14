@@ -27,7 +27,11 @@ internal sealed class RemoteTransferStartupBuffer(string name)
     internal void State(string? value, int? code, string? status)
     {
         lock (gate)
-        { state = value ?? Unobserved; exit = code; health = status ?? Unobserved; }
+        {
+            state = value ?? Unobserved;
+            exit = code;
+            health = status ?? Unobserved;
+        }
     }
 
     internal void Record(string original)
@@ -43,14 +47,24 @@ internal sealed class RemoteTransferStartupBuffer(string name)
                 || original.Contains(RegistrationFailurePrefix, StringComparison.Ordinal)
                 || original.Contains(ReceiverFailurePrefix, StringComparison.Ordinal);
             if (startedFailure && first.Count < FirstFailureRecords)
-            { first.Add((observed, bounded)); }
+            {
+                first.Add((observed, bounded));
+            }
             tail.Enqueue((observed, bounded));
             while (tail.Count > TailRecords)
-            { tail.Dequeue(); }
+            {
+                tail.Dequeue();
+            }
         }
     }
 
-    internal void Terminal(string value) { lock (gate) { terminal = value; } }
+    internal void Terminal(string value)
+    {
+        lock (gate)
+        {
+            terminal = value;
+        }
+    }
 
     internal string[] Snapshot(string boundary, string primary, ErrorCode? code, bool cancelled)
     {

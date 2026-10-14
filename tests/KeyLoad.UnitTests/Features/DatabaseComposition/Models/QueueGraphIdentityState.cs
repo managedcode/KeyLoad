@@ -17,10 +17,16 @@ internal sealed record QueueGraphIdentityState(
 {
     internal ErrorCode FailureCode { get; init; } = ErrorCode.Corruption;
     internal string FailureDetail { get; init; } = "The typed endpoint record has a different canonical identity.";
-    internal MessageInspection? FaultSource { get; init; }
+    internal MessageInspection? FaultSource
+    {
+        get; init;
+    }
 
     internal string[] ColdImage { get; set; } = [];
-    internal long ColdPosition { get; set; }
+    internal long ColdPosition
+    {
+        get; set;
+    }
     internal byte[] HealthyReceipt { get; set; } = [];
 
     internal const string Collection = "entities";

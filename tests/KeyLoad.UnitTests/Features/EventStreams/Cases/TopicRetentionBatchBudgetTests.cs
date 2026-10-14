@@ -10,7 +10,10 @@ internal sealed class TopicRetentionBatchBudgetTests
     {
         using var fixture = new TopicRetentionFixture();
         fixture.ReleasePins();
-        fixture.SetLimits(new() { MaxScanRecords = scanLimit });
+        fixture.SetLimits(new()
+        {
+            MaxScanRecords = scanLimit
+        });
         var command = new CommandRequest(Guid.NewGuid(), fixture.Owner.Partition,
             [new PurgeTopic("topic", 1), new PurgeTopic("topic", 2)]);
         await TopicRetentionAssertions.Reject(fixture, command, ErrorCode.ResourceExhausted);

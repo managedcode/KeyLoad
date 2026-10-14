@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.Storage;
 
@@ -15,9 +15,14 @@ internal static class RemoteGraphNativeReplyVerification
         work.Check();
         if (request.ExpiresAt <= clock.GetUtcNow()
             || !RemoteGraphNativeIdentity.ReplyShape(received, Math.Min(partition.Database.Limits.MaxBatchBytes, work.MaximumResultBytes)))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteGraphNativeProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, RemoteGraphNativeProtocol.InvalidProof);
+        }
         work.ChargeBytes(received.Payload.Length);
-        var reply = received with { Payload = received.Payload.ToArray() };
+        var reply = received with
+        {
+            Payload = received.Payload.ToArray()
+        };
         using var mac = RemoteGraphNativeMac.Create(options, partition, request.DestinationOwner);
         var discovery = reply.ReceiverDiscovery;
         if (reply.RequestId != request.RequestId || reply.Nonce != request.Nonce || !mac.VerifyRemoteGraphReply(reply)
@@ -27,7 +32,9 @@ internal static class RemoteGraphNativeReplyVerification
             || discovery.ApplicationRpcVersion != GrainRoutingProtocol.RequestInterfaceVersion
             || discovery.PeerEnvelopeVersion != ReplicaTransportProtocol.Version
             || discovery.RuntimeJournalReaderContract != StoreReaderContract.RuntimeJournal)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteGraphNativeProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, RemoteGraphNativeProtocol.InvalidProof);
+        }
         await client.RequireCurrentAsync(request, token).ConfigureAwait(false);
         work.Check();
         token.ThrowIfCancellationRequested();

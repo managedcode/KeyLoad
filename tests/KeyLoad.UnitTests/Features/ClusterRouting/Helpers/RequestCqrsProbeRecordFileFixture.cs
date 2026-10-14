@@ -12,12 +12,17 @@ internal sealed class RequestCqrsProbeRecordFileFixture : IDisposable
     internal const UnixFileMode PrivateFileMode = UnixFileMode.UserRead | UnixFileMode.UserWrite;
     private RequestCqrsProbeRecordFileFixture(string root) => Root = root;
 
-    internal string Root { get; }
+    internal string Root
+    {
+        get;
+    }
 
     internal static RequestCqrsProbeRecordFileFixture Create()
     {
         if (OperatingSystem.IsWindows())
-        { throw new PlatformNotSupportedException("Private mode fixtures require a Unix host."); }
+        {
+            throw new PlatformNotSupportedException("Private mode fixtures require a Unix host.");
+        }
         var root = Path.Combine(Path.GetTempPath(), $"keyload-c1-probe-unit-{Guid.NewGuid():N}");
         Directory.CreateDirectory(root, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
         return new RequestCqrsProbeRecordFileFixture(root);
@@ -26,7 +31,9 @@ internal sealed class RequestCqrsProbeRecordFileFixture : IDisposable
     internal string CreateRegular(string name, ReadOnlySpan<byte> bytes)
     {
         if (OperatingSystem.IsWindows())
-        { throw new PlatformNotSupportedException("Private mode fixtures require a Unix host."); }
+        {
+            throw new PlatformNotSupportedException("Private mode fixtures require a Unix host.");
+        }
         var path = Path.Combine(Root, name);
         using var stream = new FileStream(path, new FileStreamOptions
         {

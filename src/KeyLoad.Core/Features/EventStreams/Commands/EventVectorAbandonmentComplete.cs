@@ -21,25 +21,35 @@ internal static class EventVectorAbandonmentComplete
         EventVectorInventoryValidation.Require(map, inventory.PayloadRows, admission);
         if (control.Action != EventVectorControlAction.CompleteRelease || map.State != EventVectorMapState.Releasing
             || map.PendingPhaseId is not null || map.CleanupGeneration != control.ExpectedCleanupGeneration)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         var originalEntries = EventVectorControlPages.Entries(inventory, admission);
         var suppliedEntries = EventVectorEntryEncoding.Decode(control.OriginalEncodedEntries,
             control.OriginalEntryChecksum, admission);
         if (!originalEntries.SequenceEqual(suppliedEntries))
-        { throw Errors.Fail(ErrorCode.Conflict, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, Invalid);
+        }
         var frontier = NativeSerialization.Deserialize<ImmutableArray<EventVectorCleanupPin>>(
             control.OriginalCleanupFrontierBytes.Span);
         if (frontier.IsDefault)
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
         admission.RequireEntryCount(frontier.Length);
         var releases = ReadPass(inventory, map, admission);
         if (releases.Count != frontier.Length)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         var retained = false;
         for (var ordinal = FirstOrdinal; ordinal < frontier.Length; ordinal++)
         {
             if (!releases.TryGetValue(ordinal, out var release))
-            { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+            }
             EventVectorCleanupSourceBinding.Require(control, release, admission);
             var mutation = EventVectorSourceMutationValidation.ReadObserved(release, admission);
             var result = release.SourceOriginalResult!.Get<EventVectorSourceReleaseResult>();
@@ -54,7 +64,9 @@ internal static class EventVectorAbandonmentComplete
                 : map.CleanupGeneration
         };
         if (retained)
-        { return EventVectorMapWriter.Write(transaction, changed, inventory.PayloadRows, options, cancellationToken); }
+        {
+            return EventVectorMapWriter.Write(transaction, changed, inventory.PayloadRows, options, cancellationToken);
+        }
         EventVectorControlRelease.DeleteSettled(transaction, inventory, changed, admission, cancellationToken);
         return changed;
     }
@@ -68,15 +80,21 @@ internal static class EventVectorAbandonmentComplete
         foreach (var row in inventory.PayloadRows)
         {
             if (!row.Key.Span.StartsWith(prefix))
-            { continue; }
+            {
+                continue;
+            }
             var phase = EventVectorInventoryPhaseValidation.Read(map, row, admission, coverage);
             if (phase.Role != EventVectorSourcePhaseRole.Release || phase.MapRevision != map.Revision
                 || phase.CleanupGeneration != map.CleanupGeneration)
-            { continue; }
+            {
+                continue;
+            }
             if (phase.Disposition != EventVectorSourcePhaseDisposition.Observed
                 || phase.SourceOriginalResult is not { Error: null }
                 || !releases.TryAdd(phase.SourceOrdinal, phase))
-            { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+            }
         }
         return releases;
     }

@@ -10,13 +10,17 @@ internal static class EventVectorRowAccounting
     internal static long PayloadBytes(ImmutableArray<EventVectorEncodedRow> rows)
     {
         if (rows.IsDefault)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidRows); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidRows);
+        }
         var bytes = EmptyBytes;
         var keys = new HashSet<string>(StringComparer.Ordinal);
         foreach (var row in rows)
         {
             if (row.Key.IsEmpty || row.Value.IsEmpty || !keys.Add(Convert.ToHexString(row.Key.Span)))
-            { throw Errors.Fail(ErrorCode.Corruption, InvalidRows); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, InvalidRows);
+            }
             bytes = checked(bytes + row.EncodedBytes);
         }
         return bytes;
@@ -27,7 +31,10 @@ internal static class EventVectorRowAccounting
     {
         ArgumentNullException.ThrowIfNull(header);
         var payloadBytes = PayloadBytes(payloadRows);
-        var ownedHeader = header with { RetainedPayloadBytes = payloadBytes };
+        var ownedHeader = header with
+        {
+            RetainedPayloadBytes = payloadBytes
+        };
         var encoded = EventVectorEncodedRow.Create(EventVectorKeys.Map(header.ControlPartition, header.MapId),
             ownedHeader, admission);
         admission.RequireEncodedBytes(checked(payloadBytes + encoded.EncodedBytes));

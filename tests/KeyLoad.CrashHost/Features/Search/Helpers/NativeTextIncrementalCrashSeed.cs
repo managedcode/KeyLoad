@@ -40,6 +40,9 @@ internal static class NativeTextIncrementalCrashSeed
                 new DeleteDocument(NativeTextIncrementalCrashProtocol.Collection, NativeTextIncrementalCrashProtocol.English,
                     ExpectedRevision: NativeTextIncrementalCrashProtocol.Revision)]);
         var receipt = await runtime.CommitAsync<CommitReceipt>(OperationKind.Batch, mutation, mutation.CommandId, token);
-        return new(request with { Mode = TextIndexMaintenanceMode.Restore }, mutation, receipt);
+        return new(request with
+        {
+            Mode = TextIndexMaintenanceMode.Restore
+        }, mutation, receipt);
     }
 }

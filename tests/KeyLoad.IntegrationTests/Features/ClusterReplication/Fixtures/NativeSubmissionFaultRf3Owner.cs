@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
 using KeyLoad.IntegrationTests.Features.StorageRecovery;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterReplication;
@@ -14,18 +14,51 @@ internal sealed class NativeSubmissionFaultRf3Owner
     private LocalRf3ImageTestSession? localImage;
     private CancellationTokenSource? operationCancellation;
     internal List<Exception> Failures { get; } = [];
-    internal RequestCqrsProbeFixture? Controls { get; private set; }
-    internal RequestCqrsRf3Wave? Wave { get; private set; }
-    internal RequestCqrsRf3Callers? Administrator { get; private set; }
-    internal RequestCqrsRf3Callers? Caller { get; private set; }
-    internal NodeEpochRf3Profile? Profile { get; private set; }
-    internal RequestCqrsPhaseFaultIdentity? Identity { get; private set; }
+    internal RequestCqrsProbeFixture? Controls
+    {
+        get; private set;
+    }
+    internal RequestCqrsRf3Wave? Wave
+    {
+        get; private set;
+    }
+    internal RequestCqrsRf3Callers? Administrator
+    {
+        get; private set;
+    }
+    internal RequestCqrsRf3Callers? Caller
+    {
+        get; private set;
+    }
+    internal NodeEpochRf3Profile? Profile
+    {
+        get; private set;
+    }
+    internal RequestCqrsPhaseFaultIdentity? Identity
+    {
+        get; private set;
+    }
     internal ReplicaSiloDiscovery[] Discovery { get; set; } = [];
-    internal Task? SdkCall { get; set; }
-    internal Task<RequestCqrsFaultMcpObservation>? McpCall { get; set; }
-    internal Func<Task>? AssertOriginal { get; set; }
-    internal Guid SourceArm { get; set; }
-    internal Guid DescendantArm { get; set; }
+    internal Task? SdkCall
+    {
+        get; set;
+    }
+    internal Task<RequestCqrsFaultMcpObservation>? McpCall
+    {
+        get; set;
+    }
+    internal Func<Task>? AssertOriginal
+    {
+        get; set;
+    }
+    internal Guid SourceArm
+    {
+        get; set;
+    }
+    internal Guid DescendantArm
+    {
+        get; set;
+    }
     internal Task Original => SdkCall ?? (Task?)McpCall ?? throw Missing();
     internal CancellationToken OperationToken => operationCancellation?.Token ?? throw Missing();
 
@@ -42,7 +75,9 @@ internal sealed class NativeSubmissionFaultRf3Owner
             await NativeSubmissionFaultRf3Flow.ExecuteAsync(owner, officialMcp, bounded.Token).ConfigureAwait(false);
         }, owner.Failures).ConfigureAwait(false);
         if (owner.Failures.Count > 0)
-        { owner.Controls?.RetainEvidence(); }
+        {
+            owner.Controls?.RetainEvidence();
+        }
         await ServerFailureObserver.ObserveAsync(owner.CleanupAsync, owner.Failures).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny(owner.Failures);
     }

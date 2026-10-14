@@ -29,12 +29,18 @@ public sealed partial class DatabaseEngine
             head = new(stream.TailRevision, stream.FirstAvailableRevision, stream.Generation);
         }
         else
-        { throw Errors.Fail(ErrorCode.Validation, MissingVectorSourceHead); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, MissingVectorSourceHead);
+        }
         if (head.Generation != source.Generation)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, MissingVectorSourceHead); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, MissingVectorSourceHead);
+        }
         if (head.TailPosition < EmptyVectorSourceTail || head.FirstAvailablePosition < FirstVectorSourcePosition
             || head.FirstAvailablePosition - FirstVectorSourcePosition > head.TailPosition)
-        { throw Errors.Fail(ErrorCode.Corruption, MissingVectorSourceHead); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, MissingVectorSourceHead);
+        }
         return head;
     }
 }

@@ -9,9 +9,13 @@ public sealed partial class DatabaseEngine
         string messageId, MessageMetadata metadata, MessageBody body)
     {
         if (metadata.Id != messageId || body.Id != messageId)
-        { throw Errors.Fail(ErrorCode.Corruption, MissingLeasedBody); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, MissingLeasedBody);
+        }
         if (metadata.LeaseUntil is not { } deadline
             || view.GetRecord<string>(QueueKey(LeasedQueueSpace, lane, deadline, messageId)) != messageId)
-        { throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.MissingReference); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.MissingReference);
+        }
     }
 }

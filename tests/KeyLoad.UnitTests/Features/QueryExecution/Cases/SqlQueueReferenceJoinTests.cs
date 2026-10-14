@@ -18,15 +18,23 @@ internal sealed class SqlQueueReferenceJoinTests
                 await SqlQueueReferenceJoinPolicy.RunAsync(database);
                 await SqlQueueReferenceJoinCold.RunAsync(database, seed.Command, seed.Receipt);
             }
-            catch (Exception failure) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(failure))
-            { failures.Add(failure); }
-            catch (Exception failure) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(failure))
-            { failures.Add(failure); }
+            catch (Exception failure) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+            {
+                failures.Add(failure);
+            }
+            catch (Exception failure) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+            {
+                failures.Add(failure);
+            }
         }
-        catch (Exception failure) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(failure))
-        { failures.Add(failure); }
-        catch (Exception failure) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(failure))
-        { failures.Add(failure); }
+        catch (Exception failure) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            failures.Add(failure);
+        }
+        catch (Exception failure) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            failures.Add(failure);
+        }
         global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }
 }

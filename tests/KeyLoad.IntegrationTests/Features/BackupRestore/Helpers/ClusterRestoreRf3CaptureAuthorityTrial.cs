@@ -31,7 +31,10 @@ internal static class ClusterRestoreRf3CaptureAuthorityTrial
                     Guid.ParseExact(status.NodeId, ClusterRestoreRf3Protocol.IdentityFormat));
                 var original = await McpCallerAssertions.SdkSuccessAsync(await sdk.CaptureClusterBackupOwnerAsync(request,
                     cancellationToken).ConfigureAwait(false));
-                await ConfigureAsync(source, credential with { Revoked = true }, cancellationToken).ConfigureAwait(false);
+                await ConfigureAsync(source, credential with
+                {
+                    Revoked = true
+                }, cancellationToken).ConfigureAwait(false);
                 await DeniedAsync(sdk, official, seed.Partition, request, cancellationToken).ConfigureAwait(false);
                 await ConfigureAsync(source, credential, cancellationToken).ConfigureAwait(false);
                 await ClusterRestoreRf3EventingReadOracle.FourAsync(original,

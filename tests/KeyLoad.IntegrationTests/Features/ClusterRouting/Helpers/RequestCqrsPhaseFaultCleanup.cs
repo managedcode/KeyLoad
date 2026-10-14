@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
 
@@ -21,16 +21,22 @@ internal static class RequestCqrsPhaseFaultCleanup
         await JoinOriginalCallsAsync(sdkCall, mcpCall, cleanup).ConfigureAwait(false);
         await JoinProducerDisposalAsync(controls, discovery, armId, cleanup, deadline.Token).ConfigureAwait(false);
         foreach (var additional in additionalArms ?? [])
-        { await JoinProducerDisposalAsync(controls, discovery, additional, cleanup, deadline.Token).ConfigureAwait(false); }
+        {
+            await JoinProducerDisposalAsync(controls, discovery, additional, cleanup, deadline.Token).ConfigureAwait(false);
+        }
         await DisposeClientsAsync(caller, administrator, cleanup).ConfigureAwait(false);
         var waveStopped = await StopWaveAsync(wave, waveStartupAttempted, cleanup).ConfigureAwait(false);
         if (waveStopped && wave is not null && failures.Count > 0)
-        { ServerFailureObserver.Observe(() => wave.SaveFailureEvidence(failures[0]), cleanup); }
+        {
+            ServerFailureObserver.Observe(() => wave.SaveFailureEvidence(failures[0]), cleanup);
+        }
         await DisposeControlsAsync(controls, waveStopped, cleanup).ConfigureAwait(false);
         ServerFailureObserver.Observe(() => callerCancellation?.Dispose(), cleanup);
         ServerFailureObserver.Observe(() => scenarioDeadline?.Dispose(), cleanup);
         if (rootOwned && waveStopped && cleanup.Count == 0)
-        { ServerFailureObserver.Observe(() => Directory.Delete(root, recursive: true), cleanup); }
+        {
+            ServerFailureObserver.Observe(() => Directory.Delete(root, recursive: true), cleanup);
+        }
         failures.AddRange(cleanup);
     }
 
@@ -40,7 +46,9 @@ internal static class RequestCqrsPhaseFaultCleanup
     {
         ServerFailureObserver.Observe(() => controls?.StopAdmission(), failures);
         if (callerCancellation is not null)
-        { await ServerFailureObserver.ObserveAsync(callerCancellation.CancelAsync, failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(callerCancellation.CancelAsync, failures).ConfigureAwait(false);
+        }
         if (controls is not null && discovery is not null)
         {
             await ServerFailureObserver.ObserveAsync(() => controls.ReleaseOpenArmsAsync(discovery, cancellationToken),
@@ -52,9 +60,13 @@ internal static class RequestCqrsPhaseFaultCleanup
         Task<RequestCqrsFaultMcpObservation>? mcpCall, List<Exception> failures)
     {
         if (sdkCall is not null)
-        { await ServerFailureObserver.ObserveAsync(() => sdkCall, failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => sdkCall, failures).ConfigureAwait(false);
+        }
         if (mcpCall is not null)
-        { await ServerFailureObserver.ObserveAsync(() => mcpCall, failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => mcpCall, failures).ConfigureAwait(false);
+        }
     }
 
     private static async Task JoinProducerDisposalAsync(RequestCqrsProbeFixture? controls,
@@ -62,12 +74,16 @@ internal static class RequestCqrsPhaseFaultCleanup
         CancellationToken cancellationToken)
     {
         if (controls is null || discovery is null || armId == Guid.Empty)
-        { return; }
+        {
+            return;
+        }
         var state = controls.ArmFor(armId);
         var replicaCallback = state.Phase == RequestCqrsProbePhase.ReplicaEntryAcknowledged;
         if (state.RequestId is null || (replicaCallback
             ? state.ReplicaEntryObserverDisposedSeen : state.ProducerDisposedSeen))
-        { return; }
+        {
+            return;
+        }
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             await controls.WaitForMarkerAsync(armId, replicaCallback
@@ -80,16 +96,22 @@ internal static class RequestCqrsPhaseFaultCleanup
         RequestCqrsRf3Callers? administrator, List<Exception> failures)
     {
         if (caller is not null)
-        { await ServerFailureObserver.ObserveAsync(() => caller.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => caller.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         if (administrator is not null)
-        { await ServerFailureObserver.ObserveAsync(() => administrator.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => administrator.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
     }
 
     private static async Task<bool> StopWaveAsync(RequestCqrsRf3Wave? wave, bool startupAttempted,
         List<Exception> failures)
     {
         if (wave is null)
-        { return !startupAttempted; }
+        {
+            return !startupAttempted;
+        }
         var previous = failures.Count;
         await ServerFailureObserver.ObserveAsync(wave.StopAsync, failures).ConfigureAwait(false);
         return failures.Count == previous;
@@ -99,6 +121,8 @@ internal static class RequestCqrsPhaseFaultCleanup
         List<Exception> failures)
     {
         if (controls is not null && waveStopped)
-        { await ServerFailureObserver.ObserveAsync(controls.DisposeAfterResourcesJoinedAsync, failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(controls.DisposeAfterResourcesJoinedAsync, failures).ConfigureAwait(false);
+        }
     }
 }

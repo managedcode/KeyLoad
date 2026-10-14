@@ -30,8 +30,13 @@ internal static class LiveReadCancellationR49Pages
         await LiteralPageAsync((await McpCallerAssertions.SuccessAsync<LiveQueryPage>(reply)).Value, owner, empty);
         await LiveReadCancellationR49Current.RunAsync(owner, token);
         if (empty)
-        { return; }
-        var next = request with { Cursor = sdk.Cursor };
+        {
+            return;
+        }
+        var next = request with
+        {
+            Cursor = sdk.Cursor
+        };
         var consumed = await McpCallerAssertions.SdkSuccessAsync(await owner.Caller.Sdk.ReadLiveQueryAsync(next, token));
         await LiteralPageAsync(consumed, owner, true);
         await LiveReadCancellationR49Current.RunAsync(owner, token);

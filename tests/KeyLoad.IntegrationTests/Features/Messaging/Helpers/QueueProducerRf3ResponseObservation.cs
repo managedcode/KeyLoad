@@ -6,7 +6,10 @@ namespace KeyLoad.IntegrationTests.Features.Messaging;
 internal sealed class QueueProducerRf3ResponseObservation(HttpMessageHandler inner, Guid command,
     Func<Task> cancelCaller) : DelegatingHandler(inner)
 {
-    internal bool Observed { get; private set; }
+    internal bool Observed
+    {
+        get; private set;
+    }
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken token)
     {
         var selected = request.RequestUri?.AbsolutePath == QueueProducerRf3Protocol.CommandPath

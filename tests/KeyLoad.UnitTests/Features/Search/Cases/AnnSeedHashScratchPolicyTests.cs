@@ -49,7 +49,10 @@ internal sealed class AnnSeedHashScratchPolicyTests
         exact.Validate();
         var admitted = Capture(database, space, Options.Create(exact));
         await Assert.That(admitted.CorpusSha256).IsEqualTo(expectedDigest);
-        var oneUnder = exact with { MaxOwnedBytes = exact.MaxOwnedBytes - 1 };
+        var oneUnder = exact with
+        {
+            MaxOwnedBytes = exact.MaxOwnedBytes - 1
+        };
         oneUnder.Validate();
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => Capture(database, space, Options.Create(oneUnder)));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);

@@ -53,7 +53,9 @@ internal sealed class ControlledPartitionMovementNativeHostEndpoints : IDisposab
     {
         var failures = new List<Exception>();
         foreach (var original in reservations)
-        { ServerFailureObserver.Observe(original.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(original.Dispose, failures);
+        }
         reservations.Clear();
         ServerFailureObserver.ThrowIfAny(failures);
     }

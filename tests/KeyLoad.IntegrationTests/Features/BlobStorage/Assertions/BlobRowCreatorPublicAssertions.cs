@@ -80,10 +80,16 @@ internal static class BlobRowCreatorPublicAssertions
         var info = new BlobUploadInfoRequest(publication.Begin.Blob, publication.Begin.UploadId);
         await RefusedAsync(() => other.Sdk.GetBlobUploadInfoAsync(info, token),
             () => other.Mcp.CallAsync("keyload_blobs_upload_info", info, token), credential, privateValue, healthy);
-        var part = publication.Part with { CommandId = Guid.NewGuid() };
+        var part = publication.Part with
+        {
+            CommandId = Guid.NewGuid()
+        };
         await RefusedAsync(() => other.Sdk.WriteBlobPartAsync(part, token),
             () => other.Mcp.CallAsync("keyload_blobs_write_part", part, token), credential, privateValue, healthy);
-        var complete = publication.Complete with { CommandId = Guid.NewGuid() };
+        var complete = publication.Complete with
+        {
+            CommandId = Guid.NewGuid()
+        };
         await RefusedAsync(() => other.Sdk.CompleteBlobUploadAsync(complete, token),
             () => other.Mcp.CallAsync("keyload_blobs_complete_upload", complete, token), credential, privateValue, healthy);
     }

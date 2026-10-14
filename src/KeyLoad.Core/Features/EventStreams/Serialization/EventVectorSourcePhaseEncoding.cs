@@ -18,8 +18,14 @@ internal static class EventVectorSourcePhaseEncoding
             admission.RequireEncodedBytes(body.Length);
             digest = SHA256.HashData(body);
             var phase = original with
-            { OriginalNativeBody = body, OriginalBodyDigest = digest };
-            phase = phase with { PhaseCommandId = EventVectorSourcePhaseIds.For(phase, admission) };
+            {
+                OriginalNativeBody = body,
+                OriginalBodyDigest = digest
+            };
+            phase = phase with
+            {
+                PhaseCommandId = EventVectorSourcePhaseIds.For(phase, admission)
+            };
             EventVectorSourceMutationValidation.ReadOriginal(phase, admission);
             return phase;
         }
@@ -27,7 +33,9 @@ internal static class EventVectorSourcePhaseEncoding
         {
             CryptographicOperations.ZeroMemory(body);
             if (digest is not null)
-            { CryptographicOperations.ZeroMemory(digest); }
+            {
+                CryptographicOperations.ZeroMemory(digest);
+            }
             throw;
         }
     }

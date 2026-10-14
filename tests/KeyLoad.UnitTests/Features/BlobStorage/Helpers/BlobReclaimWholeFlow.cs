@@ -27,11 +27,18 @@ internal static class BlobReclaimWholeFlow
         chain = BlobIntegrity.NextHash(chain, BlobReclaimWholeFlowFixture.SecondOrdinal,
             BlobLimits.RawPartBytes, BlobIntegrity.PartHash(BlobReclaimWholeFlowFixture.Payload.AsSpan(BlobLimits.RawPartBytes)));
         await BlobWholeFlowAssertions.Exact(second.Value, begin.Value with
-        { NextOrdinal = BlobReclaimWholeFlowFixture.AcceptedParts, StoredBytes = BlobReclaimWholeFlowFixture.StoredBytes, IntegrityHash = chain });
+        {
+            NextOrdinal = BlobReclaimWholeFlowFixture.AcceptedParts,
+            StoredBytes = BlobReclaimWholeFlowFixture.StoredBytes,
+            IntegrityHash = chain
+        });
         var abort = new AbortBlobUploadRequest(Guid.NewGuid(), blob, upload);
         var result = Apply(database.Database, OperationKind.AbortBlobUpload, abort, abort.CommandId);
         var aborted = result.Get<BlobCommitResult<BlobUploadInfo>>();
-        await BlobWholeFlowAssertions.Exact(aborted.Value, second.Value with { Status = BlobUploadStatus.Aborted });
+        await BlobWholeFlowAssertions.Exact(aborted.Value, second.Value with
+        {
+            Status = BlobUploadStatus.Aborted
+        });
         await BlobWholeFlowAssertions.Receipt(database.Database, aborted.Receipt, abort.CommandId, blob);
         await BlobWholeFlowAssertions.Quotas(database.Database, blob, BlobReclaimWholeFlowFixture.StoredBytes,
             BlobReclaimWholeFlowFixture.SingleCount, BlobReclaimWholeFlowFixture.EmptyCount);
@@ -77,7 +84,10 @@ internal static class BlobReclaimWholeFlow
         var state = database.Store.Read(view => BlobRecordReader.Get<BlobState>(view, BlobKeys.State(fixture.Blob, fixture.UploadId)))!;
         await Assert.That(state.ReclaimCursor).IsEqualTo(BlobReclaimWholeFlowFixture.SecondOrdinal);
         await Assert.That(state.RemainingReservation).IsEqualTo(BlobReclaimWholeFlowFixture.EmptyCount);
-        await BlobWholeFlowAssertions.Exact(state.Info, fixture.Aborted with { StoredBytes = BlobLimits.RawPartBytes });
+        await BlobWholeFlowAssertions.Exact(state.Info, fixture.Aborted with
+        {
+            StoredBytes = BlobLimits.RawPartBytes
+        });
         await BlobWholeFlowAssertions.Exact(new BlobStorageOperations(database).UploadInfo(BlobReclaimWholeFlowFixture.Principal,
             new(fixture.Blob, fixture.UploadId)), state.Info);
     }

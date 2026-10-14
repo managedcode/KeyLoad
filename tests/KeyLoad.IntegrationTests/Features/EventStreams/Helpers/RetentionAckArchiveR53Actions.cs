@@ -48,9 +48,13 @@ internal static class RetentionAckArchiveR53Actions
         await SqlRf3Protocol.EqualAsync(Errors.Problem(ErrorCode.ResourceExhausted,
             RetentionAckArchiveR53Protocol.PinDetail), failure.Problem);
         if (capture)
-        { state.Refusal = failure; }
+        {
+            state.Refusal = failure;
+        }
         else
-        { await SqlRf3Protocol.EqualAsync(state.Refusal, failure); }
+        {
+            await SqlRf3Protocol.EqualAsync(state.Refusal, failure);
+        }
         await RetentionAckArchiveR53Current.RunAsync(callers, state, token);
         var reply = await callers.Mcp.CallAsync(McpCallerTools.DocumentsCommit, state.Refused, token);
         await McpCallerAssertions.ErrorAsync(reply, ErrorCode.ResourceExhausted, dispatched: true);

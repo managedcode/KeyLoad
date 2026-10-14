@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.DocumentStorage;
@@ -19,18 +19,28 @@ internal sealed class RemoteDocumentWorkOwner(IOptions<GrainRoutingOptions> rout
         lock (gate)
         {
             if (work is null || admissions is null)
-            { throw Errors.Fail(ErrorCode.UnsupportedCapability, RemoteDocumentProtocol.Unavailable); }
+            {
+                throw Errors.Fail(ErrorCode.UnsupportedCapability, RemoteDocumentProtocol.Unavailable);
+            }
             if (closed)
-            { throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentProtocol.Unavailable); }
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentProtocol.Unavailable);
+            }
             if (!admissions.Wait(TimeSpan.Zero))
-            { throw Errors.Fail(ErrorCode.ResourceExhausted, RemoteDocumentProtocol.Unavailable); }
+            {
+                throw Errors.Fail(ErrorCode.ResourceExhausted, RemoteDocumentProtocol.Unavailable);
+            }
             try
-            { return new(ReleaseAdmission, work.Acquire(requestId, NativeRequestWorkKind.ReadCapability), work.ShutdownToken); }
+            {
+                return new(ReleaseAdmission, work.Acquire(requestId, NativeRequestWorkKind.ReadCapability), work.ShutdownToken);
+            }
             catch (Exception error)
             {
                 var failures = new List<Exception> { error };
                 try
-                { admissions.Release(); }
+                {
+                    admissions.Release();
+                }
                 catch (Exception cleanup) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
                 catch (Exception cleanup) when (!NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
                 ServerFailureObserver.ThrowIfAny(failures);
@@ -42,13 +52,19 @@ internal sealed class RemoteDocumentWorkOwner(IOptions<GrainRoutingOptions> rout
     internal Task StopAsync()
     {
         lock (gate)
-        { closed = true; return work?.DrainAsync() ?? Task.CompletedTask; }
+        {
+            closed = true;
+            return work?.DrainAsync() ?? Task.CompletedTask;
+        }
     }
 
     public ValueTask DisposeAsync()
     {
         lock (gate)
-        { disposal ??= DisposeCoreAsync(); return new ValueTask(disposal); }
+        {
+            disposal ??= DisposeCoreAsync();
+            return new ValueTask(disposal);
+        }
     }
 
     private async Task DisposeCoreAsync()
@@ -58,14 +74,18 @@ internal sealed class RemoteDocumentWorkOwner(IOptions<GrainRoutingOptions> rout
         if (work is not null)
         {
             try
-            { await work.DisposeAsync().ConfigureAwait(false); }
+            {
+                await work.DisposeAsync().ConfigureAwait(false);
+            }
             catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
             catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         }
         if (admissions is not null)
         {
             try
-            { admissions.Dispose(); }
+            {
+                admissions.Dispose();
+            }
             catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
             catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         }
@@ -84,11 +104,15 @@ internal sealed class RemoteDocumentWorkOwner(IOptions<GrainRoutingOptions> rout
         {
             var returnPermit = Interlocked.Exchange(ref release, null);
             if (returnPermit is null)
-            { return; }
+            {
+                return;
+            }
             var failures = new List<Exception>();
             ServerFailureObserver.Observe(returnPermit, failures);
             try
-            { workLease?.Dispose(); }
+            {
+                workLease?.Dispose();
+            }
             catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
             catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
             finally { workLease = null; }

@@ -26,13 +26,23 @@ internal static class EventReferenceSelectProtocol
         => Prefix + "EVENTS('" + streamSet + "','" + Stream + "'," + generation.ToString(System.Globalization.CultureInfo.InvariantCulture) + ")" + Suffix;
 
     internal static QueryRequest Request(PartitionRef partition, string streamSet = StreamSet, long generation = 1)
-        => new(partition, Sql(streamSet, generation), new() { [MinimumParameter] = JsonSerializer.SerializeToElement(7) },
+        => new(partition, Sql(streamSet, generation), new()
+        {
+            [MinimumParameter] = JsonSerializer.SerializeToElement(7)
+        },
             AllowFullScan: true, QueryDialectVersion: 2);
 
     internal static string Payload(PartitionRef partition, string id, int score)
-        => JsonSerializer.Serialize(new { to = new EntityRef(partition, Target, id), score }, JsonDefaults.Options);
+        => JsonSerializer.Serialize(new
+        {
+            to = new EntityRef(partition, Target, id),
+            score
+        }, JsonDefaults.Options);
 
     internal static SqlOperationRequest Operation(PartitionRef partition, string streamSet = StreamSet, long generation = 1)
-        => new(partition, Sql(streamSet, generation), new() { [MinimumParameter] = JsonSerializer.SerializeToElement(7) },
+        => new(partition, Sql(streamSet, generation), new()
+        {
+            [MinimumParameter] = JsonSerializer.SerializeToElement(7)
+        },
             AllowFullScan: true, QueryDialectVersion: 2);
 }

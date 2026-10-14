@@ -107,5 +107,13 @@ public sealed class DocumentComparisonSchedule(DocumentComparisonScenario scenar
         return checked((int)(((long)ordinal * stride + DocumentComparisonContract.Current.Seed) % count));
     }
     private static int GreatestCommonDivisor(int left, int right)
-    { while (right != DocumentMeasurementValues.NoObservedItems) { var remainder = left % right; left = right; right = remainder; } return left; }
+    {
+        while (right != DocumentMeasurementValues.NoObservedItems)
+        {
+            var remainder = left % right;
+            left = right;
+            right = remainder;
+        }
+        return left;
+    }
 }

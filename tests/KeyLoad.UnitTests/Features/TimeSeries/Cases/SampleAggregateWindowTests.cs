@@ -69,9 +69,15 @@ internal sealed class SampleAggregateWindowTests
 
         var empty = db.Database.AggregateSampleWindows(SampleAggregateTestData.RootPrincipal, request);
         var invalidWidth = SampleAggregateTestData.Failure(() => db.Database.AggregateSampleWindows(
-            SampleAggregateTestData.RootPrincipal, request with { Width = TimeSpan.Zero }), ErrorCode.Validation);
+            SampleAggregateTestData.RootPrincipal, request with
+            {
+                Width = TimeSpan.Zero
+            }), ErrorCode.Validation);
         var inverted = SampleAggregateTestData.Failure(() => db.Database.AggregateSampleWindows(
-            SampleAggregateTestData.RootPrincipal, request with { From = request.UntilExclusive!.Value.AddTicks(1) }),
+            SampleAggregateTestData.RootPrincipal, request with
+            {
+                From = request.UntilExclusive!.Value.AddTicks(1)
+            }),
             ErrorCode.Validation);
 
         await Assert.That(empty.Windows.Length).IsEqualTo(SampleAggregateTestData.ExactWindowCount);
@@ -93,10 +99,16 @@ internal sealed class SampleAggregateWindowTests
 
         var exact = db.Database.AggregateSampleWindows(SampleAggregateTestData.RootPrincipal, request);
         var oneOverCaller = SampleAggregateTestData.Failure(() => db.Database.AggregateSampleWindows(
-            SampleAggregateTestData.RootPrincipal, request with { MaxWindows = SampleAggregateTestData.ServerWindowLimit - 1 }),
+            SampleAggregateTestData.RootPrincipal, request with
+            {
+                MaxWindows = SampleAggregateTestData.ServerWindowLimit - 1
+            }),
             ErrorCode.BudgetExceeded);
         var overServer = SampleAggregateTestData.Failure(() => db.Database.AggregateSampleWindows(
-            SampleAggregateTestData.RootPrincipal, request with { MaxWindows = SampleAggregateTestData.ServerWindowLimit + 1 }),
+            SampleAggregateTestData.RootPrincipal, request with
+            {
+                MaxWindows = SampleAggregateTestData.ServerWindowLimit + 1
+            }),
             ErrorCode.BudgetExceeded);
 
         await Assert.That(exact.Windows.Length).IsEqualTo(SampleAggregateTestData.ExactWindowCount);

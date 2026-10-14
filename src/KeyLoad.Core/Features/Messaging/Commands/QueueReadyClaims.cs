@@ -16,9 +16,18 @@ public sealed partial class DatabaseEngine
     {
         public List<Delivery> Deliveries { get; } = [];
         public List<ReadyClaimInput> TransitionInputs { get; } = [];
-        public QueueCounters? Counters { get; set; }
-        public long ReceivedBytes { get; set; }
-        public bool CountersChanged { get; set; }
+        public QueueCounters? Counters
+        {
+            get; set;
+        }
+        public long ReceivedBytes
+        {
+            get; set;
+        }
+        public bool CountersChanged
+        {
+            get; set;
+        }
     }
 
     private ReceiveResult ClaimReadyMessages(IAtomicTransaction tx, PrincipalRecord principal,
@@ -55,7 +64,9 @@ public sealed partial class DatabaseEngine
         }
 
         if (!RequireStrictQueueHead(tx, request.Lane, resource.QueuePolicy, body.Body, metadata))
-        { return state.TransitionInputs.Count < messagingExecution.QueueScanPageSize; }
+        {
+            return state.TransitionInputs.Count < messagingExecution.QueueScanPageSize;
+        }
 
         if (state.ReceivedBytes + body.Bytes > request.MaxBytes
             || state.Counters.InFlightMessages >= resource.QueuePolicy.MaxInFlightMessages
@@ -130,7 +141,9 @@ public sealed partial class DatabaseEngine
             {
                 tx.Delete(input.TransitionKey);
                 if (input.StrictOrderKey is not null)
-                { tx.Delete(input.StrictOrderKey); }
+                {
+                    tx.Delete(input.StrictOrderKey);
+                }
                 tx.PutRecord(input.MetadataKey, input.Metadata);
             }
             else

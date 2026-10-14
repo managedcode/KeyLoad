@@ -10,7 +10,9 @@ internal static class RequestCqrsProbeActivationValidation
             || string.IsNullOrWhiteSpace(value.Voter) || string.IsNullOrWhiteSpace(value.SiloAddress)
             || value.GrainDigest.Length != RequestCqrsProbeActivationProtocol.DigestCharacters
             || value.GrainDigest.Any(character => !char.IsAsciiHexDigitLower(character)))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         RequireActivationId(value.ActivationId);
     }
 
@@ -20,10 +22,14 @@ internal static class RequestCqrsProbeActivationValidation
         {
             var identity = ActivationId.FromParsableString(activationId);
             if (identity.IsDefault || identity.ToParsableString() != activationId)
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
         }
         catch (Exception error) when (error is FormatException or ArgumentException)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
     }
 
     internal static string Name(RequestCqrsProbeActivationRecord value) => Name(value.ArmId, value.RequestId);
@@ -37,7 +43,9 @@ internal static class RequestCqrsProbeActivationValidation
     {
         if (!name.StartsWith(RequestCqrsProbeActivationProtocol.Prefix, StringComparison.Ordinal)
             || !name.EndsWith(RequestCqrsProbeProtocol.JsonFileSuffix, StringComparison.Ordinal))
-        { return false; }
+        {
+            return false;
+        }
         var parts = name[RequestCqrsProbeActivationProtocol.Prefix.Length..^RequestCqrsProbeProtocol.JsonFileSuffix.Length]
             .Split(RequestCqrsProbeActivationProtocol.Separator, StringSplitOptions.None);
         return parts.Length == RequestCqrsProbeActivationProtocol.IdentityParts
@@ -55,7 +63,9 @@ internal static class RequestCqrsProbeActivationValidation
             || matches[RequestCqrsProbeActivationProtocol.FirstPart].CommandId != value.CommandId
             || matches[RequestCqrsProbeActivationProtocol.FirstPart].Voter != value.Voter
             || matches[RequestCqrsProbeActivationProtocol.FirstPart].SiloAddress != value.SiloAddress)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
     }
 
     private static bool CanonicalGuid(string text)

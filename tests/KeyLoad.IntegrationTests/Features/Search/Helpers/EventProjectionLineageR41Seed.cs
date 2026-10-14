@@ -29,11 +29,15 @@ internal static class EventProjectionLineageR41Seed
         var worker = await NativeTextRf3Scenario.ConfigureIdentityAsync(fixture, new("lineage-worker-" + Guid.NewGuid().ToString("N"), p.TenantId,
          [new(p.DatabaseId, resource.Name, Capability.DocumentsRead | Capability.DocumentsWrite), new(p.DatabaseId, events.Name, Capability.EventsRead)],
          [EventProjectionLineageR41Protocol.InputUse, EventProjectionLineageR41Protocol.VectorUse, EventProjectionLineageR41Protocol.VectorWrite])
-        { PolicyEpoch = 1L }, token);
+        {
+            PolicyEpoch = 1L
+        }, token);
         var reader = await NativeTextRf3Scenario.ConfigureIdentityAsync(fixture, new("lineage-reader-" + Guid.NewGuid().ToString("N"), p.TenantId,
          [new(p.DatabaseId, resource.Name, Capability.Query | Capability.DocumentsRead | Capability.VectorSearch)],
          [EventProjectionLineageR41Protocol.InputUse, EventProjectionLineageR41Protocol.VectorUse])
-        { PolicyEpoch = 1L }, token);
+        {
+            PolicyEpoch = 1L
+        }, token);
         var state = new EventProjectionLineageR41State(p, placement, worker, reader);
         var seed = Seed(p);
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.CommitAsync(seed, token));
@@ -49,7 +53,10 @@ internal static class EventProjectionLineageR41Seed
          "lineage-r41-reducer", "v1", 1L, new(resource.Name, EventProjectionLineageR41Protocol.Target,
           EventProjectionLineageR41Protocol.Vector, [1f, 0f], EventProjectionLineageR41Protocol.Space, 1L));
         state.Projection = new(Guid.NewGuid(), p, [effect]);
-        state.FreshProjection = state.Projection with { CommandId = Guid.NewGuid() };
+        state.FreshProjection = state.Projection with
+        {
+            CommandId = Guid.NewGuid()
+        };
         await EventProjectionLineageR41Canonical.CaptureEventAsync(admin, state, token);
         return state;
     }

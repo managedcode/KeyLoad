@@ -9,7 +9,11 @@ internal sealed class NativeDocumentRefusalAdmissionTests
         {
             await Assert.That(flow.Submit(flow.Create("retained-denial", "{\"value\":1}")).Error).IsNull();
             var document = flow.Document("retained-denial");
-            var denied = flow.Principal with { Grants = [], PolicyEpoch = checked(flow.Principal.PolicyEpoch + 1) };
+            var denied = flow.Principal with
+            {
+                Grants = [],
+                PolicyEpoch = checked(flow.Principal.PolicyEpoch + 1)
+            };
             flow.Database.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(denied));
             var original = flow.Create("retained-denial", "{\"value\":2}", expectedRevision: 1);
             flow.Database.Database.ValidateSubmissionAdmission(original);
@@ -33,7 +37,10 @@ internal sealed class NativeDocumentRefusalAdmissionTests
                 NativeSerialization.Serialize(flow.Database.ReadRetainedEntry(original.Id)));
             await ReplicaSubmissionOutcomeFlow.RequireResultAsync(refusal,
                 flow.Database.Database.ResolveSubmissionOutcome(original));
-            var restored = flow.Principal with { PolicyEpoch = checked(denied.PolicyEpoch + 1) };
+            var restored = flow.Principal with
+            {
+                PolicyEpoch = checked(denied.PolicyEpoch + 1)
+            };
             flow.Database.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(restored));
             var healthy = flow.Create("retained-denial", "{\"value\":4}", expectedRevision: 1);
             await Assert.That(flow.Submit(healthy).Error).IsNull();
@@ -54,7 +61,11 @@ internal sealed class NativeDocumentRefusalAdmissionTests
             await Assert.That(flow.Submit(flow.Create("revoked-target", "{\"value\":1}")).Error).IsNull();
             var document = flow.Document("revoked-target");
             var issued = flow.Create("revoked-target", "{\"value\":2}", expectedRevision: 1);
-            var revoked = flow.Principal with { Revoked = true, PolicyEpoch = checked(flow.Principal.PolicyEpoch + 1) };
+            var revoked = flow.Principal with
+            {
+                Revoked = true,
+                PolicyEpoch = checked(flow.Principal.PolicyEpoch + 1)
+            };
             flow.Database.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(revoked));
             var before = ReplicaSubmissionOutcomeState.Read(flow.Database);
             var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
@@ -72,7 +83,10 @@ internal sealed class NativeDocumentRefusalAdmissionTests
             await Assert.That(repeated.Code).IsEqualTo(failure.Code);
             await Assert.That(repeated.Message).IsEqualTo(failure.Message);
             await before.RequireAsync(ReplicaSubmissionOutcomeState.Read(flow.Database));
-            var restored = flow.Principal with { PolicyEpoch = checked(revoked.PolicyEpoch + 1) };
+            var restored = flow.Principal with
+            {
+                PolicyEpoch = checked(revoked.PolicyEpoch + 1)
+            };
             flow.Database.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(restored));
             var healthy = flow.Create("revoked-target", "{\"value\":3}", expectedRevision: 1);
             flow.Database.Database.ValidateSubmissionAdmission(healthy);

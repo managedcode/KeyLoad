@@ -10,7 +10,9 @@ internal static class OrleansNodeCatalogAdmission
         {
             cancellationToken.ThrowIfCancellationRequested();
             if (shutdown is not null || !ReferenceEquals(Volatile.Read(ref current), catalog))
-            { throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalShardCatalogFence.NotReady); }
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalShardCatalogFence.NotReady);
+            }
             catalog.OpenAdmission(principalId);
         }
     }

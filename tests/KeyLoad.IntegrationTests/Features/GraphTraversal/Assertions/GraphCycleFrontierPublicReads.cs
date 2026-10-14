@@ -32,16 +32,22 @@ internal static class GraphCycleFrontierPublicReads
     private static int VertexLimit(int depth, bool hidden)
     {
         if (depth == 1)
-        { return hidden ? 2 : 3; }
+        {
+            return hidden ? 2 : 3;
+        }
         return hidden ? 3 : 4;
     }
 
     private static int EdgeLimit(int depth, bool hidden)
     {
         if (depth == 1)
-        { return 3; }
+        {
+            return 3;
+        }
         if (depth == 2)
-        { return hidden ? 4 : 6; }
+        {
+            return hidden ? 4 : 6;
+        }
         return hidden ? 5 : 7;
     }
 

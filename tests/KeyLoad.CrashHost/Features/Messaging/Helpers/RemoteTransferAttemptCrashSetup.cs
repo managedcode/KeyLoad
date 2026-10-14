@@ -9,7 +9,15 @@ internal static class RemoteTransferAttemptCrashSetup
         {
             var resource = new ResourceDefinition(lane.Queue, ResourceKind.WorkQueue, lane.Partition.TransactionDomainId);
             if (lane == RemoteTransferAttemptCrashScenario.Destination)
-            { resource = resource with { QueuePolicy = new() { MaxStoredMessages = RemoteTransferAttemptCrashProtocol.SingleStoredMessage } }; }
+            {
+                resource = resource with
+                {
+                    QueuePolicy = new()
+                    {
+                        MaxStoredMessages = RemoteTransferAttemptCrashProtocol.SingleStoredMessage
+                    }
+                };
+            }
             _ = CrashDatabase.Submit(database, OperationKind.ConfigureResource,
                 new ConfigureResourceRequest(lane.Partition.TenantId, lane.Partition.DatabaseId, resource), Guid.NewGuid()).Get<ResourceDefinition>();
         }
@@ -25,7 +33,9 @@ internal static class RemoteTransferAttemptCrashSetup
         var receive = new ReceiveRequest(Guid.NewGuid(), RemoteTransferAttemptCrashScenario.Destination);
         var delivery = CrashDatabase.Submit(database, OperationKind.Receive, receive, receive.RequestId).Get<ReceiveResult>().Deliveries.Single();
         if (delivery.Id != RemoteTransferAttemptCrashProtocol.FillerMessage)
-        { throw new InvalidOperationException(RemoteTransferAttemptCrashProtocol.Missing); }
+        {
+            throw new InvalidOperationException(RemoteTransferAttemptCrashProtocol.Missing);
+        }
         var ack = new DeliveryCommand(Guid.NewGuid(), RemoteTransferAttemptCrashScenario.Destination, delivery.Token, DeliveryAction.Ack);
         _ = CrashDatabase.Submit(database, OperationKind.Delivery, ack, ack.CommandId).Get<CommitReceipt>();
     }

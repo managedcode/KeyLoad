@@ -20,7 +20,9 @@ public sealed partial class DatabaseEngine
             source, transferId, destination, subject, fingerprint, targetCut);
         var originalMaximum = CoreNativeClaims.MeasureCharacters(receipt);
         var sourceCut = Token(view, source.Partition, RemoteTransferPeerProtocol.MaximumPosition) with
-        { OwnershipEpoch = RemoteTransferPeerProtocol.MaximumPosition };
+        {
+            OwnershipEpoch = RemoteTransferPeerProtocol.MaximumPosition
+        };
         const char NativeAsciiSizingCharacter = 'A';
         var wrapper = new RemoteTransferExternalReceipt(RemoteTransferPeerProtocol.ExternalReceiptPurpose,
             sourceOwner, target.DestinationOwner, source, destination, transferId, subject, fingerprint,

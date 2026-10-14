@@ -14,8 +14,13 @@ public sealed partial class DatabaseEngine
         ArgumentNullException.ThrowIfNull(operation);
         RequireNativeBudget(operation.NativePayload.Length);
         if (operation.NativePayload.IsEmpty)
-        { throw Errors.Fail(ErrorCode.Corruption, NativeCommandContract.MissingAuthority); }
-        var owned = operation with { NativePayload = operation.NativePayload.ToArray() };
+        {
+            throw Errors.Fail(ErrorCode.Corruption, NativeCommandContract.MissingAuthority);
+        }
+        var owned = operation with
+        {
+            NativePayload = operation.NativePayload.ToArray()
+        };
         var payload = NativeSerialization.Deserialize<NativeCommandPayload>(owned.NativePayload.Span);
         var identity = Store.Identity;
         var claims = ReadNativeAuthority(identity, payload);
@@ -49,23 +54,31 @@ public sealed partial class DatabaseEngine
             || !MatchesQueueRetryHash(payload.RetryDecisions.Span, claims.RetryDecisionHash.Span)
             || !MatchesRemoteTransferProofHash(payload.TransferProof.Span, claims.TransferProofHash.Span)
             || !ValidNativeMarker(payload))
-        { throw Errors.Fail(ErrorCode.Corruption, NativeCommandContract.MismatchedAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, NativeCommandContract.MismatchedAuthority);
+        }
     }
 
     private void RequireNativeBudget(long byteCount)
     {
         if (byteCount > Limits.MaxBatchBytes)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, InvalidCommandBudgetMessage); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, InvalidCommandBudgetMessage);
+        }
     }
 
     private static NativeCommandAuthority ReadNativeAuthority(StoreIdentity identity, NativeCommandPayload payload)
     {
         if (payload.Authority.IsEmpty || payload.Signature.Length != NativeAuthorityContract.DigestBytes)
-        { throw Errors.Fail(ErrorCode.Corruption, NativeCommandContract.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, NativeCommandContract.MissingAuthority);
+        }
         Span<byte> expected = stackalloc byte[NativeAuthorityContract.DigestBytes];
         _ = HMACSHA256.HashData(identity.SigningKey.Span, payload.Authority.Span, expected);
         if (!CryptographicOperations.FixedTimeEquals(expected, payload.Signature.Span))
-        { throw Errors.Fail(ErrorCode.Corruption, NativeCommandContract.InvalidSignature); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, NativeCommandContract.InvalidSignature);
+        }
         return NativeSerialization.Deserialize<NativeCommandAuthority>(payload.Authority.Span);
     }
 
@@ -78,10 +91,17 @@ public sealed partial class DatabaseEngine
             payload.RetryDecisions.IsEmpty ? ReadOnlyMemory<byte>.Empty : SHA256.HashData(payload.RetryDecisions.Span),
             payload.TransferProof.IsEmpty ? ReadOnlyMemory<byte>.Empty : SHA256.HashData(payload.TransferProof.Span));
         var authority = NativeSerialization.Serialize(claims);
-        var signed = payload with { Authority = authority, Signature = HMACSHA256.HashData(identity.SigningKey.Span, authority) };
+        var signed = payload with
+        {
+            Authority = authority,
+            Signature = HMACSHA256.HashData(identity.SigningKey.Span, authority)
+        };
         var native = NativeSerialization.Serialize(signed);
         RequireNativeBudget(native.Length);
-        return operation with { NativePayload = native };
+        return operation with
+        {
+            NativePayload = native
+        };
     }
 
     private static bool ValidNativeMarker(NativeCommandPayload payload) => payload.Error is null

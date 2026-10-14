@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.Server.Features.Search;
 
@@ -8,7 +8,9 @@ internal sealed partial class NativeTextOnlineSession
     {
         Budget.Check();
         if (expectedPublication is not null || expected.CommandId != Request.CommandId)
-        { throw NativeTextErrors.Mismatch(); }
+        {
+            throw NativeTextErrors.Mismatch();
+        }
         Budget.ChargeBytes(NativeSerialization.Measure(expected));
         expectedPublication = NativeSerialization.Serialize(expected);
     }
@@ -16,7 +18,9 @@ internal sealed partial class NativeTextOnlineSession
     internal OnlineTextPublicationWork RequirePreparedPublication()
     {
         if (expectedPublication is null || Issued is null)
-        { throw NativeTextErrors.Ownership(); }
+        {
+            throw NativeTextErrors.Ownership();
+        }
         return Publication;
     }
 
@@ -51,7 +55,9 @@ internal sealed partial class NativeTextOnlineSession
         var actual = original.Get<OnlineTextIndexMaintenanceResult>();
         if (expectedPublication is null || actual.CommandId != Request.CommandId
             || !expectedPublication.AsSpan().SequenceEqual(NativeSerialization.Serialize(actual)))
-        { throw NativeTextErrors.Corrupt(); }
+        {
+            throw NativeTextErrors.Corrupt();
+        }
         JoinedPublicationReceipt = actual;
     }
 }

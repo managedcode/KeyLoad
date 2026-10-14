@@ -58,9 +58,15 @@ internal sealed class StreamCommandIdentityTests
         {
             CompositionReferences = original.CompositionReferences.Add(new(fixture.Partition, StreamSetName, StreamId))
         };
-        var changed = receipt with { Mutations = [mutation] };
+        var changed = receipt with
+        {
+            Mutations = [mutation]
+        };
         await Assert.ThrowsExactlyAsync<AssertionException>(() => NativeReplayResultAssertions.Same<CommitReceipt>(
-            committed with { NativeValue = changed }, committed));
+            committed with
+            {
+                NativeValue = changed
+            }, committed));
     }
 
     private static ReplicatedOperation Operation(Guid envelopeId, CommandRequest command)

@@ -10,7 +10,10 @@ internal sealed class SiteHeavyChildAdmission(int capacity, int maximumQueued, T
     private int _active;
     private InvalidOperationException? _failure;
 
-    internal static SiteHeavyChildAdmission Shared { get; } = new(SiteHeavyChildTokens.ActiveCapacity,
+    internal static SiteHeavyChildAdmission Shared
+    {
+        get;
+    } = new(SiteHeavyChildTokens.ActiveCapacity,
         SiteHeavyChildTokens.MaximumQueued, TimeSpan.FromMinutes(SiteHeavyChildTokens.AdmissionMinutes));
 
     internal int PendingCount
@@ -176,6 +179,9 @@ internal sealed class SiteHeavyChildAdmission(int capacity, int maximumQueued, T
     {
         internal CancellationToken Token { get; } = token;
         internal TaskCompletionSource Completion { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
-        internal LinkedListNode<Waiter>? Node { get; set; }
+        internal LinkedListNode<Waiter>? Node
+        {
+            get; set;
+        }
     }
 }

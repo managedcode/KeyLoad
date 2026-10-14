@@ -9,7 +9,9 @@ internal static class ScriptDomGraphSearch
     internal static GraphSearchRequest Read(IList<Dom.ScalarExpression> arguments, ScriptDomGraphContext context)
     {
         if (arguments.Count != ArgumentCount)
-        { throw ScriptDomErrors.Invalid(); }
+        {
+            throw ScriptDomErrors.Invalid();
+        }
         var collection = ScriptDomGraphScalar.String(arguments[CollectionIndex], context, ValueDepth);
         var text = ScriptDomGraphChannels.Text(arguments[TextIndex], context, ValueDepth);
         var vector = ScriptDomGraphChannels.Vector(arguments[VectorIndex], context, ValueDepth);
@@ -20,7 +22,9 @@ internal static class ScriptDomGraphSearch
         var limit = ScriptDomGraphScalar.Integer(arguments[LimitIndex], context, ValueDepth);
         var fusion = ScriptDomGraphScalar.Integer(arguments[FusionIndex], context, ValueDepth);
         if (scope is null && retriever is null && expansion is null)
-        { throw ScriptDomErrors.Invalid(); }
+        {
+            throw ScriptDomErrors.Invalid();
+        }
         var search = new SearchRequest(context.Query.Partition, collection, text.Field, text.Text,
             vector.Field, vector.Values, vector.Space, limit, text.Weight, vector.Weight, fusion, allowed);
         return new(SqlGraphSearchSyntax.Version, search, scope, retriever, expansion);

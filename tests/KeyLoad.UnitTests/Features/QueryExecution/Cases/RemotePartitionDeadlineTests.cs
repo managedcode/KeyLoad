@@ -33,7 +33,9 @@ internal sealed class RemotePartitionDeadlineTests
                     page = await flow.ExecuteAsync(token)) ?? throw new InvalidOperationException(Missing);
             }
             finally
-            { clock.Disarm(); }
+            {
+                clock.Disarm();
+            }
             await Assert.That(clock.Triggered).IsTrue();
             await Assert.That(error.Code).IsEqualTo(ErrorCode.BudgetExceeded);
             await Assert.That(error.Message).IsEqualTo(DeadlineDetail);

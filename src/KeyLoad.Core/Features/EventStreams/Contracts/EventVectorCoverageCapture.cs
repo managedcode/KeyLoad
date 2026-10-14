@@ -7,10 +7,16 @@ internal sealed record EventVectorCoverageCapture
     internal const string SerializerAlias = "keyload.core.event-vector-coverage-capture.v1";
 
     [Orleans.Id(0)]
-    public int Version { get; init; }
+    public int Version
+    {
+        get; init;
+    }
 
     [Orleans.Id(1)]
-    public Guid MapId { get; init; }
+    public Guid MapId
+    {
+        get; init;
+    }
 
     [Orleans.Id(2)]
     public PartitionRef ControlPartition { get; init; } = null!;
@@ -22,31 +28,55 @@ internal sealed record EventVectorCoverageCapture
     public EventFeedScope Scope { get; init; } = null!;
 
     [Orleans.Id(5)]
-    public int GroupOrdinal { get; init; }
+    public int GroupOrdinal
+    {
+        get; init;
+    }
 
     [Orleans.Id(6)]
     public PhysicalShardRecord SourceOwner { get; init; } = null!;
 
     [Orleans.Id(7)]
-    public Guid NodeId { get; init; }
+    public Guid NodeId
+    {
+        get; init;
+    }
 
     [Orleans.Id(8)]
-    public long ReadGeneration { get; init; }
+    public long ReadGeneration
+    {
+        get; init;
+    }
 
     [Orleans.Id(9)]
-    public long StoreCutPosition { get; init; }
+    public long StoreCutPosition
+    {
+        get; init;
+    }
 
     [Orleans.Id(10)]
-    public long AppliedCutPosition { get; init; }
+    public long AppliedCutPosition
+    {
+        get; init;
+    }
 
     [Orleans.Id(11)]
-    public long PolicyEpoch { get; init; }
+    public long PolicyEpoch
+    {
+        get; init;
+    }
 
     [Orleans.Id(12)]
-    public ReadOnlyMemory<byte> OriginalEncodedEntries { get; init; }
+    public ReadOnlyMemory<byte> OriginalEncodedEntries
+    {
+        get; init;
+    }
 
     [Orleans.Id(13)]
-    public ReadOnlyMemory<byte> EntryChecksum { get; init; }
+    public ReadOnlyMemory<byte> EntryChecksum
+    {
+        get; init;
+    }
 
     [Orleans.Id(14)]
     public EventVectorCoverageRow PhysicalCatalog { get; init; } = null!;
@@ -58,10 +88,16 @@ internal sealed record EventVectorCoverageCapture
     public EventVectorCoverageRow[] PlacementRows { get; init; } = [];
 
     [Orleans.Id(17)]
-    public EventVectorCoverageRow? LogicalDirectory { get; init; }
+    public EventVectorCoverageRow? LogicalDirectory
+    {
+        get; init;
+    }
 
     [Orleans.Id(18)]
-    public bool HasMore { get; init; }
+    public bool HasMore
+    {
+        get; init;
+    }
 
     [Orleans.Id(19)]
     public EventVectorCoverageRow[] AtomicPartitionRosterRows { get; init; } = [];
@@ -73,6 +109,9 @@ internal sealed record EventVectorCoverageCapture
     public EventVectorCoverageRow[] RosterOriginRows { get; init; } = [];
 
     [Orleans.Id(22)]
-    public EventVectorCoverageRow? RosterRestoreIdentity { get; init; }
+    public EventVectorCoverageRow? RosterRestoreIdentity
+    {
+        get; init;
+    }
 
 }

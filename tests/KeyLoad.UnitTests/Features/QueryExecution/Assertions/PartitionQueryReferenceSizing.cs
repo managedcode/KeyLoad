@@ -16,11 +16,15 @@ internal static class PartitionQueryReferenceSizing
     internal static long MinimumSingleLeafBatchBytes(PartitionQueryResultV1 result, int limit)
     {
         if (result.Leaves.Length != 1)
-        { throw new InvalidOperationException(); }
+        {
+            throw new InvalidOperationException();
+        }
         var leaf = result.Leaves[0];
         var leafBytes = ArrayBytes(leaf.Candidates.Length);
         foreach (var candidate in leaf.Candidates)
-        { leafBytes = checked(leafBytes + CandidateBytes(candidate)); }
+        {
+            leafBytes = checked(leafBytes + CandidateBytes(candidate));
+        }
         var mergeReserve = checked(RootHeader + LeafHeader + ReferenceSlot * limit + HeapSlot + ArrayBytes(limit));
         var leafPeak = checked(ArrayBytes(limit + 1) + leafBytes);
         return checked(mergeReserve + leafPeak);

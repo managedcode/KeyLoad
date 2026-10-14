@@ -17,7 +17,11 @@ internal static class TenantCapacityPlacementRf3RevocationAssertions
         await TenantCapacityPlacementRf3Assertions.RefusalAsync(sdk, code);
         await SqlRf3Protocol.EqualAsync(Errors.Problem(code, detail), sdk.Problem!);
         var official = await caller.Official.CallAsync(TenantPlacementPublicProtocol.ApplyTool,
-            new { commandId = id, request }, token);
+            new
+            {
+                commandId = id,
+                request
+            }, token);
         await McpCallerAssertions.ErrorAsync(official, code, dispatched: true);
         await Assert.That(official.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
             .GetProperty(McpCallerProtocol.ProblemDetail).GetString()).IsEqualTo(mcpDetail);
@@ -46,7 +50,11 @@ internal static class TenantCapacityPlacementRf3RevocationAssertions
             await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.ApplyPlacementIntentAsync(id, request, token)));
         await SqlRf3Protocol.EqualAsync(original, (await McpCallerAssertions.SuccessAsync<PlacementIntentV1>(
             await caller.Official.CallAsync(TenantPlacementPublicProtocol.ApplyTool,
-                new { commandId = id, request }, token))).Value);
+                new
+                {
+                    commandId = id,
+                    request
+                }, token))).Value);
         await SqlRf3Protocol.EqualAsync(original,
             await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.ReadPlacementIntentAsync(
                 new(new(request.TenantId, request.DatabaseId, request.ControlPartition), original.IntentId), token)));

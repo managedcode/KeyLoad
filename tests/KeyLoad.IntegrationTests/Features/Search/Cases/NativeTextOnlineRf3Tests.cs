@@ -29,11 +29,17 @@ internal sealed class NativeTextOnlineRf3Tests(ClusterFixture fixture)
             await NativeTextOnlineRf3Flow.RunAsync(fixture, sdk, mcp, path, deadline.Token);
         }, failures);
         if (mcp is not null)
-        { await ServerFailureObserver.ObserveAsync(() => mcp.DisposeAsync().AsTask(), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => mcp.DisposeAsync().AsTask(), failures);
+        }
         if (http is not null)
-        { ServerFailureObserver.Observe(http.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(http.Dispose, failures);
+        }
         if (deadline is not null)
-        { ServerFailureObserver.Observe(deadline.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(deadline.Dispose, failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

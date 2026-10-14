@@ -38,7 +38,10 @@ internal sealed class HttpAdmissionGovernorTests
     [Test]
     public async Task QuerySearchAndGraphRequestsShareOneWorkingSetReservationBudget()
     {
-        var governor = new HttpAdmissionGovernor(UnitAdmissionOptions.Http(Small() with { MaxReservedBytes = 25_000 }));
+        var governor = new HttpAdmissionGovernor(UnitAdmissionOptions.Http(Small() with
+        {
+            MaxReservedBytes = 25_000
+        }));
         var query = Begin(governor, "/V1/QUERY/AST/");
         await Assert.That(governor.Status().Node.RetainedBytes).IsEqualTo(20_480);
         foreach (var path in new[] { "/v1/search", "/v1/graph/traverse", "/v1/changes/read" })
@@ -53,7 +56,11 @@ internal sealed class HttpAdmissionGovernorTests
     [Test]
     public async Task OnlyVerifiedBindingsConsumeTenantAndPrincipalScopes()
     {
-        var governor = new HttpAdmissionGovernor(UnitAdmissionOptions.Http(Small() with { MaxPrincipalRequests = 1, MaxTenantRequests = 2 }));
+        var governor = new HttpAdmissionGovernor(UnitAdmissionOptions.Http(Small() with
+        {
+            MaxPrincipalRequests = 1,
+            MaxTenantRequests = 2
+        }));
         using var first = Begin(governor, "/v1/documents/get");
         Bind(first, Principal());
         using var unverified = Begin(governor, "/v1/documents/get");
@@ -76,7 +83,11 @@ internal sealed class HttpAdmissionGovernorTests
     [Test]
     public async Task ControlBodiesHaveAnIndependentBoundWhileProcessingStillUsesDataAdmission()
     {
-        var governor = new HttpAdmissionGovernor(UnitAdmissionOptions.Http(Small() with { MaxRequests = 1, MaxPrincipalRequests = 1 }));
+        var governor = new HttpAdmissionGovernor(UnitAdmissionOptions.Http(Small() with
+        {
+            MaxRequests = 1,
+            MaxPrincipalRequests = 1
+        }));
         using var data = Begin(governor, "/v1/queues/process");
         Bind(data, Principal());
         using var control = Begin(governor, "/V1/QUEUES/DELIVERY/", 256);

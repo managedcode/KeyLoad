@@ -42,7 +42,9 @@ internal static class ClusterRestoreRf3Graph
             var actual = await builder.Resources.OfType<ParameterResource>().Single(value => value.Name == name)
                 .GetValueAsync(cancellationToken).ConfigureAwait(false);
             if (!string.Equals(actual, parameter.Value, StringComparison.Ordinal))
-            { throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid); }
+            {
+                throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid);
+            }
         }
     }
 

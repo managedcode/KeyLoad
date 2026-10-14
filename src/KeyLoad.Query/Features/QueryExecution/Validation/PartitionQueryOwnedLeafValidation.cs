@@ -20,7 +20,9 @@ internal static class PartitionQueryOwnedLeafValidation
             || string.IsNullOrEmpty(request.Tenant) || leaf.Partition.TenantId != request.Tenant
             || leaf.Request.Cursor is not null || leaf.Request.Query.Explain
             || leaf.Request.Query.ModelSource is not null || leaf.MaxCandidates != leaf.Request.Query.Limit)
-        { throw Errors.Fail(ErrorCode.Validation, InvalidDetail); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, InvalidDetail);
+        }
         DatabaseEngine.ValidatePartition(leaf.Partition);
         if (leaf.MaxCandidates < MinimumCount || leaf.MaxCandidates > limits.MaxResults
             || leaf.MaxExaminedRecords < EmptyRecords || leaf.MaxExaminedRecords > limits.MaxScanRecords
@@ -28,6 +30,8 @@ internal static class PartitionQueryOwnedLeafValidation
             || leaf.MaxRetainedBytes < checked(PartitionQueryRetention.LeafHeapReserve(leaf.MaxCandidates)
                 + PartitionQueryRetention.CandidateArrayBytes(leaf.MaxCandidates))
             || leaf.MaxRetainedBytes > QueryResultBudgetPolicy.Resolve(limits, execution))
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, BudgetDetail); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, BudgetDetail);
+        }
     }
 }

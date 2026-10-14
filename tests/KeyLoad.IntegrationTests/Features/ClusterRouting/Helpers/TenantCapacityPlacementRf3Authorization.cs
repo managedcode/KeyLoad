@@ -43,12 +43,19 @@ internal static class TenantCapacityPlacementRf3Authorization
         await TenantCapacityPlacementRf3Assertions.RefusalAsync(
             await caller.PersistPlacementIntentAsync(deniedId, original, token), ErrorCode.PermissionDenied);
         await McpCallerAssertions.ErrorAsync(await official.CallAsync(TenantPlacementPublicProtocol.PersistTool,
-            new { commandId = deniedId, request = original }, token), ErrorCode.PermissionDenied, dispatched: true);
+            new
+            {
+                commandId = deniedId,
+                request = original
+            }, token), ErrorCode.PermissionDenied, dispatched: true);
         await ConfigureAsync(sourceRoot, targetRoot, seed.Partition.TenantId, true, 2, credential, token);
         await TenantCapacityPlacementRf3Assertions.RefusalAsync(
             await caller.PersistPlacementIntentAsync(deniedId, original, token), ErrorCode.PermissionDenied);
         var officialPlan = (await McpCallerAssertions.SuccessAsync<TenantPlacementPlanResultV1>(
-            await official.CallAsync(TenantPlacementPublicProtocol.PlanTool, new { request = query }, token))).Value;
+            await official.CallAsync(TenantPlacementPublicProtocol.PlanTool, new
+            {
+                request = query
+            }, token))).Value;
         await TenantCapacityPlacementRf3Assertions.RequirePlanAsync(seed, state, officialPlan, token);
         var plan = await McpCallerAssertions.SdkSuccessAsync(await caller.PlanTenantPlacementAsync(
             new(seed.Partition.TenantId, seed.Partition.DatabaseId, [seed.Partition], state.Control), token));
@@ -59,7 +66,11 @@ internal static class TenantCapacityPlacementRf3Authorization
         await TenantCapacityPlacementRf3Assertions.RequirePendingAsync(healthy, plan.Plan, repair.IntentId);
         await SqlRf3Protocol.EqualAsync(healthy, (await McpCallerAssertions.SuccessAsync<PlacementIntentV1>(
             await official.CallAsync(TenantPlacementPublicProtocol.PersistTool,
-                new { commandId = healthyId, request = repair }, token))).Value);
+                new
+                {
+                    commandId = healthyId,
+                    request = repair
+                }, token))).Value);
         await TenantCapacityPlacementRf3Assertions.RequireOriginalModelsAsync(seed, state, token);
         if (pendingIntentRevocation)
         {
@@ -75,8 +86,11 @@ internal static class TenantCapacityPlacementRf3Authorization
         var sdk = await caller.PlanTenantPlacementAsync(query, token);
         await TenantCapacityPlacementRf3Assertions.RefusalAsync(sdk, ErrorCode.PermissionDenied);
         await SqlRf3Protocol.EqualAsync(Errors.Problem(ErrorCode.PermissionDenied,
-            KeyLoad.Orleans.GrainRoutingProtocol.AdministrationRequired), sdk.Problem!);
-        var mcp = await official.CallAsync(TenantPlacementPublicProtocol.PlanTool, new { request = query }, token);
+            KeyLoad.Clustering.GrainRoutingProtocol.AdministrationRequired), sdk.Problem!);
+        var mcp = await official.CallAsync(TenantPlacementPublicProtocol.PlanTool, new
+        {
+            request = query
+        }, token);
         await McpCallerAssertions.ErrorAsync(mcp, ErrorCode.PermissionDenied, dispatched: true);
         await Assert.That(mcp.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
             .GetProperty(McpCallerProtocol.ProblemDetail).GetString())
@@ -87,7 +101,10 @@ internal static class TenantCapacityPlacementRf3Authorization
         bool administrator, long epoch, ApiKeyRecord key, CancellationToken token)
     {
         var principal = new PrincipalRecord(PrincipalId, tenant, [], [])
-        { ClusterAdministrator = administrator, PolicyEpoch = epoch };
+        {
+            ClusterAdministrator = administrator,
+            PolicyEpoch = epoch
+        };
         foreach (var root in new[] { source, target })
         {
             var persisted = await McpCallerAssertions.SdkSuccessAsync(

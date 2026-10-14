@@ -13,13 +13,17 @@ internal static class PhysicalOwnerEntryValidation
     internal static bool Valid(RegisteredPhysicalOwnerV1? entry)
     {
         if (entry is null)
-        { return false; }
+        {
+            return false;
+        }
         var owner = entry.Owner;
         if (owner is null || owner.PhysicalShardId == Guid.Empty || owner.Incarnation == Guid.Empty
             || owner.PlacementEpoch != PhysicalOwnerDirectoryProtocol.InitialEpoch
             || owner.VoterIds.IsDefault || owner.VoterIds.Length != PhysicalOwnerDirectoryProtocol.VoterCount
             || entry.Endpoints.IsDefault || entry.Endpoints.Length != PhysicalOwnerDirectoryProtocol.VoterCount)
-        { return false; }
+        {
+            return false;
+        }
         return owner.VoterIds.All(ValidVoter)
             && owner.VoterIds.Distinct(StringComparer.Ordinal).Count() == owner.VoterIds.Length
             && entry.Endpoints.All(ValidEndpoint)
@@ -35,7 +39,9 @@ internal static class PhysicalOwnerEntryValidation
         if (string.IsNullOrWhiteSpace(value)
             || Encoding.UTF8.GetByteCount(value) > PhysicalOwnerDirectoryProtocol.MaximumEndpointBytes
             || !Uri.TryCreate(value, UriKind.Absolute, out var uri))
-        { return false; }
+        {
+            return false;
+        }
         return uri.Scheme is HttpScheme or HttpsScheme && uri.UserInfo.Length == EmptyLength
             && uri.Query.Length == EmptyLength && uri.Fragment.Length == EmptyLength
             && uri.AbsolutePath == RootPath && uri.AbsoluteUri == value;

@@ -15,11 +15,18 @@ internal static class QueueDispatchCasFlow
         await RefusalsAsync(fixture);
         var pause = fixture.Command(Guid.NewGuid(), Initial, true);
         var firstPause = fixture.Apply(pause);
-        var paused = fixture.Definition with { Paused = true, SchemaVersion = Initial + Step };
+        var paused = fixture.Definition with
+        {
+            Paused = true,
+            SchemaVersion = Initial + Step
+        };
         await QueueDispatchCasAssertions.SuccessAsync(firstPause, paused);
         await QueueDispatchCasAssertions.CurrentAsync(fixture, true, Initial + Step);
         await QueueDispatchCasAssertions.SuccessAsync(fixture.Apply(pause), fixture.Definition with
-        { Paused = true, SchemaVersion = Initial + Step });
+        {
+            Paused = true,
+            SchemaVersion = Initial + Step
+        });
         await QueueDispatchCasAssertions.CurrentAsync(fixture, true, Initial + Step);
         var pauseOutcome = fixture.Outcome(pause.Id) ?? throw new InvalidOperationException();
         await QueueDispatchCasAssertions.FailureAsync(fixture,
@@ -30,11 +37,18 @@ internal static class QueueDispatchCasFlow
             ErrorCode.RevisionConflict, true, Initial + Step);
         var resume = fixture.Command(Guid.NewGuid(), Initial + Step, false);
         var firstResume = fixture.Apply(resume);
-        var resumed = fixture.Definition with { Paused = false, SchemaVersion = Initial + Step + Step };
+        var resumed = fixture.Definition with
+        {
+            Paused = false,
+            SchemaVersion = Initial + Step + Step
+        };
         await QueueDispatchCasAssertions.SuccessAsync(firstResume, resumed);
         await QueueDispatchCasAssertions.CurrentAsync(fixture, false, Initial + Step + Step);
         await QueueDispatchCasAssertions.SuccessAsync(fixture.Apply(resume), fixture.Definition with
-        { Paused = false, SchemaVersion = Initial + Step + Step });
+        {
+            Paused = false,
+            SchemaVersion = Initial + Step + Step
+        });
         await QueueDispatchCasAssertions.CurrentAsync(fixture, false, Initial + Step + Step);
         var resumeOutcome = fixture.Outcome(resume.Id) ?? throw new InvalidOperationException();
         var staleOutcome = fixture.Outcome(stale.Id) ?? throw new InvalidOperationException();
@@ -81,17 +95,29 @@ internal static class QueueDispatchCasFlow
         var version = Initial + Step + Step;
         var pause = fixture.Command(Guid.NewGuid(), version, true);
         await QueueDispatchCasAssertions.SuccessAsync(fixture.Apply(pause), fixture.Definition with
-        { Paused = true, SchemaVersion = version + Step });
+        {
+            Paused = true,
+            SchemaVersion = version + Step
+        });
         await QueueDispatchCasAssertions.CurrentAsync(fixture, true, version + Step);
         var resume = fixture.Command(Guid.NewGuid(), version + Step, false);
         await QueueDispatchCasAssertions.SuccessAsync(fixture.Apply(resume), fixture.Definition with
-        { Paused = false, SchemaVersion = version + Step + Step });
+        {
+            Paused = false,
+            SchemaVersion = version + Step + Step
+        });
         await QueueDispatchCasAssertions.CurrentAsync(fixture, false, version + Step + Step);
         await QueueDispatchCasAssertions.SuccessAsync(fixture.Apply(pause), fixture.Definition with
-        { Paused = true, SchemaVersion = version + Step });
+        {
+            Paused = true,
+            SchemaVersion = version + Step
+        });
         await QueueDispatchCasAssertions.CurrentAsync(fixture, false, version + Step + Step);
         await QueueDispatchCasAssertions.SuccessAsync(fixture.Apply(resume), fixture.Definition with
-        { Paused = false, SchemaVersion = version + Step + Step });
+        {
+            Paused = false,
+            SchemaVersion = version + Step + Step
+        });
         await QueueDispatchCasAssertions.CurrentAsync(fixture, false, version + Step + Step);
     }
 }

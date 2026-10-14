@@ -25,8 +25,14 @@ internal sealed class SiteBrowserChrome : IAsyncDisposable
         Endpoint = endpoint;
     }
 
-    public string Version { get; }
-    public Uri Endpoint { get; }
+    public string Version
+    {
+        get;
+    }
+    public Uri Endpoint
+    {
+        get;
+    }
     internal bool OriginalProcessExitObserved => processOwner.OriginalProcessExitObserved;
     internal bool CdpDisposed => Volatile.Read(ref cdpDisposed) == SiteBrowserTokens.One;
     internal bool CoverageStopped => Volatile.Read(ref coverageStopped) == SiteBrowserTokens.One;

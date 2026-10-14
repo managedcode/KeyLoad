@@ -51,7 +51,10 @@ public sealed partial class MongoTarget(string connectionString, string runId, s
         graphDepth = dataset.Settings.GraphDepth;
         if ((dataset.Settings is ScaledComparisonProfile || dataset is DocumentComparisonCorpus))
         {
-            Profile = Profile with { ReadContract = DocumentOnlyMajorityReadContract };
+            Profile = Profile with
+            {
+                ReadContract = DocumentOnlyMajorityReadContract
+            };
         }
         corpusCount = dataset.Documents.Count;
         var settings = CreateSettings(connectionString, dataset.Settings.Concurrency, executionOptions);
@@ -78,7 +81,10 @@ public sealed partial class MongoTarget(string connectionString, string runId, s
             await VerifyUniqueStreamInsertionAsync(cancellationToken);
         }
         var version = await ReadPrimaryVersionAsync(cancellationToken);
-        var profile = Profile with { Version = version };
+        var profile = Profile with
+        {
+            Version = version
+        };
         if (ComparisonTopologies.NodeCount(topology) > SingleItemCount)
         {
             var proof = await MongoReplicaVerifier.VerifyAsync(connectionString: connectionString,
@@ -86,7 +92,11 @@ public sealed partial class MongoTarget(string connectionString, string runId, s
                 topology: topology, dataset: dataset, cancellationToken: cancellationToken, lifecycleOptions: lifecycleOptions,
                 executionOptions: executionOptions, timeProvider: timeProvider);
             ownedClients.AddRange(proof.SecondaryClients);
-            profile = profile with { Cluster = proof.Evidence, Version = proof.Version };
+            profile = profile with
+            {
+                Cluster = proof.Evidence,
+                Version = proof.Version
+            };
         }
         else
         {

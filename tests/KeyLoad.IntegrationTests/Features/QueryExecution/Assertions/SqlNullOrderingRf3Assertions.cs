@@ -37,6 +37,10 @@ internal static class SqlNullOrderingRf3Assertions
             documents.Add(actual);
         }
         var outbox = await McpCallerAssertions.SdkSuccessAsync(await root.OutboxStatusAsync(PostgresRf3State.Partition, token));
-        return global::System.Text.Json.JsonSerializer.Serialize(new { Documents = documents, Outbox = outbox }, JsonDefaults.Options);
+        return global::System.Text.Json.JsonSerializer.Serialize(new
+        {
+            Documents = documents,
+            Outbox = outbox
+        }, JsonDefaults.Options);
     }
 }

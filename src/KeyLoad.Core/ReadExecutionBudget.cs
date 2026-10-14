@@ -1,4 +1,3 @@
-using System.Text.Json;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Core.Features.ResourceExecution.Execution;
 using KeyLoad.Storage;
@@ -53,7 +52,9 @@ public sealed class ReadExecutionBudget
             Check();
             var remaining = lifetimeBound - clock.GetElapsedTime(started);
             if (remaining <= TimeSpan.Zero)
-            { throw Errors.Fail(ErrorCode.BudgetExceeded, DeadlineExceeded); }
+            {
+                throw Errors.Fail(ErrorCode.BudgetExceeded, DeadlineExceeded);
+            }
             return remaining;
         }
     }
@@ -63,10 +64,14 @@ public sealed class ReadExecutionBudget
         Check();
         var remaining = absoluteExpiry - clock.GetUtcNow();
         if (remaining <= TimeSpan.Zero)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, DeadlineExceeded); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, DeadlineExceeded);
+        }
         var bounded = clock.GetElapsedTime(started) + remaining;
         if (bounded < lifetimeBound)
-        { lifetimeBound = bounded; }
+        {
+            lifetimeBound = bounded;
+        }
     }
 
     internal CancellationToken Cancellation => cancellationToken;
@@ -225,13 +230,7 @@ public sealed class ReadExecutionBudget
     /// <param name="result">Value whose complete serialized bytes must fit the response limit.</param>
     /// <returns>The exact serialized UTF-8 byte count.</returns>
     public long MeasureResult<T>(T result)
-    {
-        Check();
-        using var counter = new ResultByteCounterStream(resultBytesLimit, Check);
-        JsonSerializer.Serialize(counter, result, JsonDefaults.Options);
-        Check();
-        return counter.Length;
-    }
+        => ResultByteCounterStream.Measure(this, result);
     private ReadExecutionBudgetScopedReadGrants ReadGrants => readGrants ??= new(this);
     internal long RemainingReadGrantBytes => nativeWork.MaximumBytes - bytes - (readGrants?.ReservedBytes ?? NoReservedReadBytes);
     internal int RemainingReadGrantRecords => nativeWork.MaximumRecords - nativeWork.ExaminedRecords - (readGrants?.ClaimedRecords ?? EmptyClaimedRecords);
@@ -253,9 +252,13 @@ public sealed class ReadExecutionBudget
     internal void ChargeNativeReadRecord(long count)
     {
         if (readGrants is { } grants)
-        { grants.ChargeNativeReadRecord(count); }
+        {
+            grants.ChargeNativeReadRecord(count);
+        }
         else
-        { ChargeUnscopedNativeRecord(count); }
+        {
+            ChargeUnscopedNativeRecord(count);
+        }
     }
 
     internal void ChargeUnscopedNativeRecord(long count)

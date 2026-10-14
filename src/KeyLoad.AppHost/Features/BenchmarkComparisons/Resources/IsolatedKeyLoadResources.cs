@@ -24,7 +24,9 @@ internal static class IsolatedKeyLoadResources
         }
         var runtime = KeyLoad.AppHost.Hosting.AppHostOptionsRegistration.Get(context.Builder);
         if (runtime.IsolatedAdmission.Value.DocumentWorkload)
-        { throw new InvalidOperationException(InvalidTarget); }
+        {
+            throw new InvalidOperationException(InvalidTarget);
+        }
         var image = RuntimeContainerImage.Read(context.Builder, RuntimeContainerImage.ServerConfiguration);
         var directory = context.DataDirectory(DataDirectory);
         var profile = ClusterProfileStore.Open(directory, runtime.Profile);
@@ -42,7 +44,9 @@ internal static class IsolatedKeyLoadResources
         {
             IsolatedKeyLoadAdmission.Apply(nodes[index], admission, runtime.IsolatedReplayAdmission);
             if (context.Selection.DocumentWorkload is not null)
-            { DocumentResourceBounds.ApplyKeyLoad(nodes[index], context.Runner, runtime.Deployment.Value); }
+            {
+                DocumentResourceBounds.ApplyKeyLoad(nodes[index], context.Runner, runtime.Deployment.Value);
+            }
             context.BindEndpoint(index, nodes[index], HttpEndpoint);
         }
     }

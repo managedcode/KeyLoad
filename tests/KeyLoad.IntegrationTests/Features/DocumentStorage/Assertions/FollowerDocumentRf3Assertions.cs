@@ -39,7 +39,9 @@ internal static class FollowerDocumentRf3Assertions
         await Assert.That(actual.AuthorizationToken.Position).IsGreaterThanOrEqualTo(authorityLower.Applied);
         await Assert.That(actual.DataToken.Position).IsLessThanOrEqualTo(actual.AuthorizationToken.Position);
         if (upper is null)
-        { await Assert.That(actual.DataToken.Position).IsLessThan(authorityLower.Applied); }
+        {
+            await Assert.That(actual.DataToken.Position).IsLessThan(authorityLower.Applied);
+        }
         else
         {
             await Assert.That(actual.AuthorizationToken.Position).IsLessThanOrEqualTo(upper.Applied);
@@ -51,7 +53,10 @@ internal static class FollowerDocumentRf3Assertions
         await Assert.That(actual.DataToken.Position).IsGreaterThanOrEqualTo(request.MinimumToken!.Position);
         var data = new CommitToken(owner.Incarnation, request.Reference.Partition.AtomicPartitionId,
             actual.DataToken.Position, owner.PlacementEpoch);
-        var authority = data with { Position = actual.AuthorizationToken.Position };
+        var authority = data with
+        {
+            Position = actual.AuthorizationToken.Position
+        };
         var expected = new FollowerDocumentReadResultV1(FollowerDocumentRf3Protocol.Version,
             DocumentFollowerReadMode.FollowerCommittedSnapshot, request.ReplicaId, dataLower.ConsensusTerm,
             authorityLower.ConsensusTerm, data, authority, authority.Position - data.Position, policyEpoch,
@@ -66,7 +71,9 @@ internal static class FollowerDocumentRf3Assertions
         await Assert.That(observation.Value).IsNull();
         await Assert.That(observation.Failure).IsNull();
         if (observation.SqlValueKind is { } kind)
-        { await Assert.That(kind).IsEqualTo(System.Text.Json.JsonValueKind.Undefined); }
+        {
+            await Assert.That(kind).IsEqualTo(System.Text.Json.JsonValueKind.Undefined);
+        }
         if (observation.Official is { } official)
         {
             await McpCallerAssertions.ErrorAsync(official, code, dispatched: true);

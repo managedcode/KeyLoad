@@ -24,11 +24,17 @@ internal static class ClusterFixtureComposition
             [$"{ClusterFixtureProtocol.DataRootArgument}{root}", ClusterFixtureProtocol.EphemeralArgument,
                 ClusterFixtureProtocol.SnapshotThresholdArgument];
         if (coverage is not null)
-        { root = coverage.Root; }
+        {
+            root = coverage.Root;
+        }
         if (localImage is not null)
-        { arguments = [.. arguments, .. localImage.CreateWaveArguments()]; }
+        {
+            arguments = [.. arguments, .. localImage.CreateWaveArguments()];
+        }
         if (isolateReplicaNamespace && (localImage is not null || coverage is not null))
-        { throw new InvalidOperationException(NamespaceProfileConflict); }
+        {
+            throw new InvalidOperationException(NamespaceProfileConflict);
+        }
         arguments = ApplySnapshotThreshold(arguments, snapshotThreshold,
             coverage is not null || localImage is not null || isolateReplicaNamespace);
         var readiness = ClusterFixtureSnapshotReadiness.Create(key, root, isolateReplicaNamespace);

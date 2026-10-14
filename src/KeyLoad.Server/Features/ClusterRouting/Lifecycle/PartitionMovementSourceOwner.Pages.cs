@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.Server;
 
@@ -25,7 +25,9 @@ internal sealed partial class PartitionMovementSourceOwner
         lock (gate)
         {
             if (closedMoves.Values.SelectMany(value => value).Any(value => value.HandleId == handleId))
-            { throw Errors.Fail(ErrorCode.OwnershipLost, ClosedDetail); }
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, ClosedDetail);
+            }
             entry.ReleaseWork();
             sessions.Remove(handleId);
         }

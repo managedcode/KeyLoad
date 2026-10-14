@@ -20,16 +20,22 @@ internal static class ClusterRestoreStateFile
         RequireRegular(path);
         using var file = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, policy.StreamBufferBytes);
         if (file.Length <= HeaderBytes || file.Length > policy.MaximumBackupManifestBytes)
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
         var bytes = new byte[checked((int)file.Length)];
         file.ReadExactly(bytes);
         if (BinaryPrimitives.ReadUInt64LittleEndian(bytes) != Magic)
-        { throw Errors.Fail(ErrorCode.FormatUnsupported, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.FormatUnsupported, Invalid);
+        }
         var envelope = NativeSerialization.Deserialize<ClusterRestoreStateEnvelope>(bytes.AsSpan(HeaderBytes));
         if (envelope is null || envelope.Version != ClusterRestoreStateEnvelope.CurrentVersion
             || envelope.Payload.IsEmpty || !CryptographicOperations.FixedTimeEquals(
                 SHA256.HashData(envelope.Payload.Span), envelope.Checksum.Span))
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
         var value = NativeSerialization.Deserialize<T>(envelope.Payload.Span) ?? throw Errors.Fail(ErrorCode.Corruption, Invalid);
         return new(value, Convert.ToHexStringLower(envelope.Checksum.Span));
     }
@@ -42,12 +48,18 @@ internal static class ClusterRestoreStateFile
             ClusterRestoreStateEnvelope.CurrentVersion, payload, checksum));
         var size = checked(HeaderBytes + envelope.Length);
         if (size > policy.MaximumBackupManifestBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, Invalid);
+        }
         var temporary = path + PendingSuffix;
         if (File.Exists(temporary))
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         if (File.Exists(path))
-        { RequireRegular(path); }
+        {
+            RequireRegular(path);
+        }
         using (var file = new FileStream(temporary, FileMode.CreateNew, FileAccess.Write, FileShare.None,
             policy.StreamBufferBytes, FileOptions.WriteThrough))
         {
@@ -61,7 +73,9 @@ internal static class ClusterRestoreStateFile
         File.Move(temporary, path, replace);
         var original = Read<T>(path, policy);
         if (!string.Equals(original.Digest, Convert.ToHexStringLower(checksum), StringComparison.Ordinal))
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
         return original.Digest;
     }
 
@@ -73,17 +87,23 @@ internal static class ClusterRestoreStateFile
         // Owning plan/progress validation re-reads REAL original slots before this checked rename.
         verifyActualNativeState(original.Value);
         if (File.Exists(path))
-        { RequireRegular(path); }
+        {
+            RequireRegular(path);
+        }
         File.Move(temporary, path, overwrite: true);
         var published = Read<T>(path, policy);
         if (!string.Equals(published.Digest, original.Digest, StringComparison.Ordinal))
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
         return published;
     }
 
     private static void RequireRegular(string path)
     {
         if ((File.GetAttributes(path) & (FileAttributes.Directory | FileAttributes.ReparsePoint)) != NoBytes)
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
     }
 }

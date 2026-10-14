@@ -106,7 +106,9 @@ internal sealed class McpExecutionOptions
     internal void Validate()
     {
         if (!IsValid())
-        { throw new OptionsValidationException(SectionName, typeof(McpExecutionOptions), [ValidationMessage]); }
+        {
+            throw new OptionsValidationException(SectionName, typeof(McpExecutionOptions), [ValidationMessage]);
+        }
     }
 
     private static bool Bounded(int value, int maximum) => value >= MinimumPositiveBudget && value <= maximum;

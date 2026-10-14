@@ -13,7 +13,9 @@ internal static class GraphStorageReferenceAssertions
             var scan = view.VisitRange(KeySpace.Partition("edge", partition, GraphStorageReferenceFixture.Graph), 100,
                 (_, bytes) => { records.Add(NativeSerialization.Deserialize<EdgeRecord>(bytes)!); return true; });
             if (scan.HasMore)
-            { throw new InvalidOperationException("The graph oracle range is incomplete."); }
+            {
+                throw new InvalidOperationException("The graph oracle range is incomplete.");
+            }
             return records;
         });
         await CompareAsync(canonical, expected.Values, partition);
@@ -42,7 +44,9 @@ internal static class GraphStorageReferenceAssertions
             var scan = view.VisitRange(KeySpace.Partition("adjacency", partition, GraphStorageReferenceFixture.Graph, direction), 100,
                 (_, _) => { found++; return true; });
             if (scan.HasMore)
-            { throw new InvalidOperationException("The graph adjacency oracle range is incomplete."); }
+            {
+                throw new InvalidOperationException("The graph adjacency oracle range is incomplete.");
+            }
             return found;
         });
         await Assert.That(count).IsEqualTo(expected);

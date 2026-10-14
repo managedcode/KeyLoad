@@ -50,7 +50,12 @@ internal static class PartitionQueryTestSupport
     {
         var commandId = Guid.NewGuid();
         var mutations = rows.Select(row => (Mutation)new PutDocument(Collection, row.Id,
-            JsonSerializer.Serialize(new { score = row.Score, label = row.Label, secret = row.Secret }, JsonDefaults.Options))).ToImmutableArray();
+            JsonSerializer.Serialize(new
+            {
+                score = row.Score,
+                label = row.Label,
+                secret = row.Secret
+            }, JsonDefaults.Options))).ToImmutableArray();
         _ = database.Submit(OperationKind.Batch, new CommandRequest(commandId, partition, mutations), id: commandId)
             .Get<CommitReceipt>();
     }

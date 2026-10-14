@@ -16,9 +16,13 @@ internal static class ClusterContainerUser
     {
         var options = AppHostOptionsRegistration.Get(builder).Startup;
         if (options.Value.ContainerUser is { } configured && !string.IsNullOrWhiteSpace(configured))
-        { return configured; }
+        {
+            return configured;
+        }
         if (OperatingSystem.IsWindows())
-        { return null; }
+        {
+            return null;
+        }
         return Task.Run(() => ReadUnixIdentityAsync(options, timeProvider)).GetAwaiter().GetResult();
     }
 
@@ -37,21 +41,32 @@ internal static class ClusterContainerUser
         using var process = new Process
         {
             StartInfo = new(IdExecutable)
-            { RedirectStandardOutput = true, RedirectStandardError = true, UseShellExecute = false, CreateNoWindow = true }
+            {
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            }
         };
         process.StartInfo.ArgumentList.Add(argument);
         try
         {
             if (!process.Start())
-            { throw new InvalidOperationException(LookupError); }
+            {
+                throw new InvalidOperationException(LookupError);
+            }
             var output = await ReadOutputAsync(process.StandardOutput, policy.ContainerIdentityOutputCharacters, deadline.Token);
             await process.WaitForExitAsync(deadline.Token);
             if (process.ExitCode != EmptyValue || !uint.TryParse(output.Trim(), NumberStyles.None, CultureInfo.InvariantCulture, out var id))
-            { throw new InvalidOperationException(LookupError); }
+            {
+                throw new InvalidOperationException(LookupError);
+            }
             return id.ToString(CultureInfo.InvariantCulture);
         }
         catch (Exception error) when (error is Win32Exception or IOException or InvalidOperationException or OperationCanceledException)
-        { throw new InvalidOperationException(LookupError); }
+        {
+            throw new InvalidOperationException(LookupError);
+        }
         finally { KillRemaining(process); }
     }
 
@@ -67,7 +82,9 @@ internal static class ClusterContainerUser
         {
             var count = await reader.ReadAsync(output.AsMemory(length), cancellationToken);
             if (count == EmptyValue)
-            { return new(output, StartIndexValue, length); }
+            {
+                return new(output, StartIndexValue, length);
+            }
             length += count;
         }
         throw new InvalidOperationException(LookupError);
@@ -78,7 +95,9 @@ internal static class ClusterContainerUser
         try
         {
             if (!process.HasExited)
-            { process.Kill(entireProcessTree: true); }
+            {
+                process.Kill(entireProcessTree: true);
+            }
         }
         catch (InvalidOperationException) { }
     }

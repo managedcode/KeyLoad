@@ -23,7 +23,9 @@ internal static class QueueTerminalInspectionAssertions
     internal static async Task OriginalBodyAsync(byte[] row, MessageState terminalState, QueueLifecycleTestState state)
     {
         var literal = QueueLifecycleHealthy.Enqueue(QueueLifecycleConditionOperations.Source) with
-        { ExpiresAt = terminalState == MessageState.Expired ? state.Time.AddSeconds(-1) : null };
+        {
+            ExpiresAt = terminalState == MessageState.Expired ? state.Time.AddSeconds(-1) : null
+        };
         var expected = new MessageBody(literal.MessageId, literal.PayloadJson, literal.HeadersJson,
             literal.OrderingKey, JsonData.Fingerprint(literal));
         await Assert.That(NativeSerialization.Deserialize<MessageBody>(row)).IsEqualTo(expected);
@@ -56,7 +58,9 @@ internal static class QueueTerminalInspectionAssertions
                     () => owner.Apply(operation));
             }
             else
-            { await NativeReplayResultAssertions.Same<CommitReceipt>(owner.Apply(operation), result); }
+            {
+                await NativeReplayResultAssertions.Same<CommitReceipt>(owner.Apply(operation), result);
+            }
             await QueueLifecycleConditionAssertions.Same(store, before);
         }
     }

@@ -96,9 +96,18 @@ internal static class RelationalSqlRf3JoinBudgetData
             references.Add(new(partition, LeftCollection, orderId));
             references.Add(new(partition, RightCollection, customerId));
             await PutAsync(sdk, partition, LeftCollection, orderId,
-                JsonSerializer.Serialize(new { order_id = orderId, customer_id = customerId, detail }), token);
+                JsonSerializer.Serialize(new
+                {
+                    order_id = orderId,
+                    customer_id = customerId,
+                    detail
+                }), token);
             position = await PutAsync(sdk, partition, RightCollection, customerId,
-                JsonSerializer.Serialize(new { id = customerId, name }), token);
+                JsonSerializer.Serialize(new
+                {
+                    id = customerId,
+                    name
+                }), token);
         }
         return new(partition, references.MoveToImmutable(), position, expectedOrderId, expectedCustomerId, expectedDetail, expectedName);
     }

@@ -48,7 +48,9 @@ internal static class OpenLoopResourceEvidenceWriter
         return value with
         {
             Containers = value.Containers.Select(container => container with
-            { WritableMounts = container.WritableMounts.ToArray() }).ToArray(),
+            {
+                WritableMounts = container.WritableMounts.ToArray()
+            }).ToArray(),
             MissingEvidence = value.MissingEvidence.ToArray()
         };
     }

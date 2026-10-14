@@ -73,7 +73,9 @@ internal static class PostgresRf3StalledBootstrap
     private static async Task WithholdAsync(Stream tls, PostgresRf3State state, Phase phase, CancellationToken token)
     {
         if (phase == Phase.Startup)
-        { await tls.WriteAsync(PostgresRf3WireFrames.StalledStartup(), token).ConfigureAwait(false); }
+        {
+            await tls.WriteAsync(PostgresRf3WireFrames.StalledStartup(), token).ConfigureAwait(false);
+        }
         else
         {
             await tls.WriteAsync(PostgresRf3WireFrames.Startup(state.Reader.Principal.Id), token).ConfigureAwait(false);
@@ -83,6 +85,9 @@ internal static class PostgresRf3StalledBootstrap
         await PostgresRf3TransportClosed.RequireAsync(tls, token).ConfigureAwait(false);
     }
 
-    private enum Phase { SslHeader, Startup, Password }
+    private enum Phase
+    {
+        SslHeader, Startup, Password
+    }
     private static readonly byte[] PartialHeader = [default(byte)];
 }

@@ -20,7 +20,9 @@ internal sealed class NativeBlobWireShape(IOptions<RequestProbeExecutionOptions>
     {
         Version(owner.Version);
         if (!RequestCqrsProbeOptionsReader.IsSessionId(owner.SessionId))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         Text(owner.ClusterId);
         Tuple(owner.ControlOwner);
         Tuple(owner.SourceOwner);
@@ -29,7 +31,9 @@ internal sealed class NativeBlobWireShape(IOptions<RequestProbeExecutionOptions>
             || owner.SourceOwner.PhysicalShardId == owner.DestinationOwner.PhysicalShardId
             || owner.SourceOwner.Incarnation == owner.DestinationOwner.Incarnation
             || owner.SourceOwner.VoterIds.Intersect(owner.DestinationOwner.VoterIds, StringComparer.Ordinal).Any())
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
     }
 
     internal void RequireArms(NativeBlobWireOwner owner, string ownerDigest, NativeBlobWireArms arms)
@@ -41,7 +45,9 @@ internal sealed class NativeBlobWireShape(IOptions<RequestProbeExecutionOptions>
             || arms.TenantId != arms.Partition.TenantId || arms.Arms is null
             || arms.Arms.Length != NativeBlobWireProbeProtocol.IdentityCount
             || arms.Arms.Length > limits.Value.MaximumArms)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         Text(arms.PrincipalId);
         Text(arms.TenantId);
         Text(arms.ResourceName);
@@ -53,19 +59,25 @@ internal sealed class NativeBlobWireShape(IOptions<RequestProbeExecutionOptions>
             var arm = arms.Arms[index] ?? throw Invalid();
             NativeBlobWireIdentityRules.Require(arm);
             if ((int)arm.Identity != index)
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             Text(arm.BlobId);
         }
         if (arms.Arms.Select(arm => arm.ArmId).Distinct().Count() != arms.Arms.Length
             || arms.Arms.Where(arm => arm.OriginalCommandId.HasValue)
                 .Select(arm => arm.OriginalCommandId).Distinct().Count() != (int)NativeBlobWireIdentity.Metadata)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
     }
 
     internal void Text(string? value)
     {
         if (string.IsNullOrWhiteSpace(value) || Utf8.GetByteCount(value) > limits.Value.MaximumPrincipalBytes)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
     }
 
     internal static bool IsDigest(string? value)
@@ -84,12 +96,21 @@ internal sealed class NativeBlobWireShape(IOptions<RequestProbeExecutionOptions>
     {
         if (tuple is null || tuple.PhysicalShardId == Guid.Empty || tuple.Incarnation == Guid.Empty
             || tuple.VoterIds is not { Length: Rf3VoterCount } || tuple.VoterIds.Distinct(StringComparer.Ordinal).Count() != Rf3VoterCount)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         foreach (var voter in tuple.VoterIds)
-        { Text(voter); }
+        {
+            Text(voter);
+        }
     }
 
     private static void Version(int version)
-    { if (version != NativeBlobWireProbeProtocol.Version) { throw Invalid(); } }
+    {
+        if (version != NativeBlobWireProbeProtocol.Version)
+        {
+            throw Invalid();
+        }
+    }
     private static InvalidOperationException Invalid() => new(NativeBlobWireProbeProtocol.InvalidOwner);
 }

@@ -67,7 +67,9 @@ internal static class GraphIncomingMcpSchemaAssertions
         await VerifyObjectAsync(schema, EdgeFields);
         var properties = schema.GetProperty(GraphIncomingMcpProtocol.Properties);
         foreach (var field in new[] { GraphIncomingMcpProtocol.EntityId, GraphIncomingMcpProtocol.Label, GraphIncomingMcpProtocol.AttributesJson })
-        { await VerifyPrimitiveAsync(root, properties.GetProperty(field), GraphIncomingMcpProtocol.String); }
+        {
+            await VerifyPrimitiveAsync(root, properties.GetProperty(field), GraphIncomingMcpProtocol.String);
+        }
         await VerifyPrimitiveAsync(root, properties.GetProperty(GraphIncomingMcpProtocol.Revision), GraphIncomingMcpProtocol.Integer);
         await VerifyEntityAsync(root, properties.GetProperty(GraphIncomingMcpProtocol.From));
         await VerifyEntityAsync(root, properties.GetProperty(GraphIncomingMcpProtocol.To));
@@ -92,9 +94,13 @@ internal static class GraphIncomingMcpSchemaAssertions
         {
             var property = properties.GetProperty(field);
             if (field == GraphIncomingMcpProtocol.AtomicPartitionId)
-            { await VerifyExactTypeSetAsync(root, property, GraphIncomingMcpProtocol.String, NullType); }
+            {
+                await VerifyExactTypeSetAsync(root, property, GraphIncomingMcpProtocol.String, NullType);
+            }
             else
-            { await VerifyPrimitiveAsync(root, property, GraphIncomingMcpProtocol.String); }
+            {
+                await VerifyPrimitiveAsync(root, property, GraphIncomingMcpProtocol.String);
+            }
         }
     }
 
@@ -155,13 +161,19 @@ internal static class GraphIncomingMcpSchemaAssertions
         {
             var pointer = reference.GetString();
             if (pointer is null || !pointer.StartsWith("#/", StringComparison.Ordinal))
-            { throw new InvalidOperationException(InvalidReferenceMessage); }
+            {
+                throw new InvalidOperationException(InvalidReferenceMessage);
+            }
             schema = root;
             foreach (var segment in pointer[2..].Split('/'))
-            { schema = schema.GetProperty(segment.Replace("~1", "/", StringComparison.Ordinal).Replace("~0", "~", StringComparison.Ordinal)); }
+            {
+                schema = schema.GetProperty(segment.Replace("~1", "/", StringComparison.Ordinal).Replace("~0", "~", StringComparison.Ordinal));
+            }
         }
         if (schema.TryGetProperty(GraphIncomingMcpProtocol.Reference, out _))
-        { throw new InvalidOperationException(ExcessReferenceMessage); }
+        {
+            throw new InvalidOperationException(ExcessReferenceMessage);
+        }
         return schema;
     }
 }

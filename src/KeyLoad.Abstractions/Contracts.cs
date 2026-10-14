@@ -349,7 +349,10 @@ public sealed record ReplicatedOperation([property: Orleans.Id(0)] Guid Id, [pro
     /// <summary>Gets the native internal operation body after authorized public-ingress normalization.</summary>
     [Orleans.Id(5)]
     [JsonIgnore]
-    public ReadOnlyMemory<byte> NativePayload { get; init; }
+    public ReadOnlyMemory<byte> NativePayload
+    {
+        get; init;
+    }
 }
 
 /// <summary>Carries a serialized operation result or a safe domain failure.</summary>
@@ -363,7 +366,10 @@ public sealed record OperationResult([property: Orleans.Id(0)] string? Json, [pr
     /// <summary>Gets the owned typed result for native internal dispatch.</summary>
     [Orleans.Id(3)]
     [JsonIgnore]
-    public object? NativeValue { get; init; }
+    public object? NativeValue
+    {
+        get; init;
+    }
 
     private const string WrongNativeResultMessage = "The internal operation result type is invalid.";
     private const string RejectedOperationMessage = "The operation was rejected.";

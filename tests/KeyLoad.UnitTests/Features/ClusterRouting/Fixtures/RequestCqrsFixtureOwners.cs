@@ -13,7 +13,9 @@ internal static class RequestCqrsFixtureOwners
     internal static void Register(string id, RequestCqrsClusterFixture fixture)
     {
         if (!Owners.TryAdd(id, fixture))
-        { throw new InvalidOperationException(Missing); }
+        {
+            throw new InvalidOperationException(Missing);
+        }
     }
 
     internal static RequestCqrsClusterFixture Resolve(IConfiguration configuration)

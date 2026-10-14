@@ -14,7 +14,9 @@ internal sealed class RequestCqrsProbeMigrationFiles(string root, string session
         var bytes = RequestCqrsProbeFiles.ReadRecord(path, options);
         var value = json.Read(bytes);
         if (value.SessionId != session || RequestCqrsProbeMigrationValidation.Name(value) != name)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         records.RegisterImmutable(name, bytes);
         present.Add(name);
         values.Add(value);
@@ -28,7 +30,9 @@ internal sealed class RequestCqrsProbeMigrationFiles(string root, string session
             var requests = current.Where(value => value.Kind == RequestCqrsProbeMigrationProtocol.RequestKind
                     && RequestCqrsProbeMigrationValidation.Witness(value) == witness).ToArray();
             if (requests.Length > RequestCqrsProbeMigrationProtocol.SingleRequest)
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             return requests.Length == RequestCqrsProbeMigrationProtocol.SingleRequest
                 ? requests[RequestCqrsProbeMigrationProtocol.FirstRequest] : null;
         }
@@ -39,7 +43,10 @@ internal sealed class RequestCqrsProbeMigrationFiles(string root, string session
         lock (sync)
         {
             _ = snapshot();
-            var value = request with { Kind = RequestCqrsProbeMigrationProtocol.RequestedKind };
+            var value = request with
+            {
+                Kind = RequestCqrsProbeMigrationProtocol.RequestedKind
+            };
             var name = RequestCqrsProbeMigrationValidation.Name(value);
             var bytes = json.Write(value);
             write(Path.Combine(root, name), bytes);
@@ -56,11 +63,18 @@ internal sealed class RequestCqrsProbeMigrationFiles(string root, string session
         {
             var witness = RequestCqrsProbeMigrationValidation.Witness(value);
             if (!witnesses.Contains(witness))
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             RequestCqrsProbeActivationValidation.RequireMarker(witness, markers);
             if (value.Kind == RequestCqrsProbeMigrationProtocol.RequestedKind
-                && !values.Contains(value with { Kind = RequestCqrsProbeMigrationProtocol.RequestKind }))
-            { throw Invalid(); }
+                && !values.Contains(value with
+                {
+                    Kind = RequestCqrsProbeMigrationProtocol.RequestKind
+                }))
+            {
+                throw Invalid();
+            }
         }
     }
     private static InvalidOperationException Invalid() => new(RequestCqrsProbeProtocol.InvalidFiles);

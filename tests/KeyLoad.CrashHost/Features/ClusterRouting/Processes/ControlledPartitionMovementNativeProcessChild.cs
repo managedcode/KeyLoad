@@ -9,7 +9,9 @@ internal static class ControlledPartitionMovementNativeProcessChild
     {
         if (mode is not (ControlledPartitionMovementNativeProcessProtocol.Hold
             or ControlledPartitionMovementNativeProcessProtocol.Observe))
-        { throw new InvalidOperationException(ControlledPartitionMovementNativeProcessProtocol.Invalid); }
+        {
+            throw new InvalidOperationException(ControlledPartitionMovementNativeProcessProtocol.Invalid);
+        }
         ControlledPartitionMovementNativeHosts? owners = null;
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
@@ -28,7 +30,9 @@ internal static class ControlledPartitionMovementNativeProcessChild
                 new ControlledPartitionMovementNativeProcessResult(before, after, reply.OriginalBytes, reply.Signature), cancellationToken);
         }, failures);
         if (owners is not null)
-        { await ServerFailureObserver.ObserveAsync(() => owners.CloseRetainingRootAsync().AsTask(), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => owners.CloseRetainingRootAsync().AsTask(), failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

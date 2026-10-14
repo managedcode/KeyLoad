@@ -31,14 +31,22 @@ internal static class SqlBetweenAuthorityCold
                 await SqlBetweenAuthorityResults.PageAsync(db, database, cold, raw: true);
             }
             catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
-            { failures.Add(error); }
+            {
+                failures.Add(error);
+            }
             catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null)
-            { failures.Add(error); }
+            {
+                failures.Add(error);
+            }
         }
         catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null)
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

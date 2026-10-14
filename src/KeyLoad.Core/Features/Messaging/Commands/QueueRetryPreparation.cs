@@ -16,15 +16,21 @@ public sealed partial class DatabaseEngine
     private ReplicatedOperation PrepareQueueRetryInView(IKeyValueView view, ReplicatedOperation operation)
     {
         if (operation.Kind is not (OperationKind.Delivery or OperationKind.Receive or OperationKind.Batch))
-        { return operation; }
+        {
+            return operation;
+        }
         var original = NativeSerialization.Deserialize<NativeCommandPayload>(operation.NativePayload.Span);
         if (!original.RetryDecisions.IsEmpty)
-        { return operation; }
+        {
+            return operation;
+        }
         if (operation.Kind == OperationKind.Batch && original.Error is null)
         {
             var batch = Payload<CommandRequest>(operation);
             if (!batch.Mutations.IsDefault && !batch.Mutations.Any(static mutation => mutation is AdvanceQueueDeadline))
-            { return operation; }
+            {
+                return operation;
+            }
         }
         var scope = CommandOutcomePartitionIdentity.Resolve(operation);
         var selection = CommandOutcomeKeyResolver.Select(view, operation.PrincipalId, operation.Id, scope);
@@ -42,9 +48,13 @@ public sealed partial class DatabaseEngine
         }
         catch (KeyLoadException failure) when (failure.Code is not (ErrorCode.Corruption or ErrorCode.FormatUnsupported
             or ErrorCode.RecoveryRequired or ErrorCode.UnknownWriteOutcome))
-        { return operation; }
+        {
+            return operation;
+        }
         if (inputs.Count == QueueRetryProtocol.Initial)
-        { return operation; }
+        {
+            return operation;
+        }
         var choices = ImmutableArray.CreateBuilder<QueueRetryDecision>(inputs.Count);
         foreach (var input in inputs)
         {
@@ -57,6 +67,9 @@ public sealed partial class DatabaseEngine
             operation.EvaluatedAt, choices.MoveToImmutable()));
         RequireNativeBudget(decisions.Length);
         var payload = NativeSerialization.Deserialize<NativeCommandPayload>(operation.NativePayload.Span);
-        return IssueNativeOperation(operation, payload with { RetryDecisions = decisions });
+        return IssueNativeOperation(operation, payload with
+        {
+            RetryDecisions = decisions
+        });
     }
 }

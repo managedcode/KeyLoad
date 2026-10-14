@@ -16,11 +16,17 @@ internal static class SensitiveAuthorityCold
         var before = await StatusAsync(fixture, token);
         var failures = new List<Exception>();
         foreach (var node in Nodes)
-        { await ServerFailureObserver.ObserveAsync(() => fixture.KillContainerAsync(node, SensitiveAuthorityProtocol.ColdScenario, token), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => fixture.KillContainerAsync(node, SensitiveAuthorityProtocol.ColdScenario, token), failures);
+        }
         foreach (var node in Nodes)
-        { await ServerFailureObserver.ObserveAsync(async () => await fixture.BeginContainerRestartAsync(node, token), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(async () => await fixture.BeginContainerRestartAsync(node, token), failures);
+        }
         foreach (var node in Nodes)
-        { await ServerFailureObserver.ObserveAsync(() => fixture.RestartContainerAsync(node, token), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => fixture.RestartContainerAsync(node, token), failures);
+        }
         foreach (var node in Nodes)
         {
             await ServerFailureObserver.ObserveAsync(async () => await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(

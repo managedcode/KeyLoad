@@ -29,7 +29,12 @@ internal static class NativeWireMemberScopes
 
     private static void AddMember(MemberInfo member, ParameterInfo[] parameters, Dictionary<uint, Type> primary, Dictionary<uint, Type> body)
     {
-        var memberType = member switch { PropertyInfo property => property.PropertyType, FieldInfo field => field.FieldType, _ => null };
+        var memberType = member switch
+        {
+            PropertyInfo property => property.PropertyType,
+            FieldInfo field => field.FieldType,
+            _ => null
+        };
         if (memberType is null)
         {
             return;

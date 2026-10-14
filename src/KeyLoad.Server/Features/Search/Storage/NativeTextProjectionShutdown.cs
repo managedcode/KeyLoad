@@ -56,7 +56,9 @@ internal sealed class NativeTextProjectionShutdown(string root, IOptions<Databas
             ServerFailureObserver.Observe(() => physicalGate.Run(() => NativeTextFiles.DeleteBuildingGeneration(
                 root, generation.Leaf, sourceNodeId, limits, executionOptions: executionOptions, resources: resources)), failures);
             if (failures.Count == FailureEmptyCount)
-            { slot.SharedReservation?.CompleteAfterJoinedCleanup(); }
+            {
+                slot.SharedReservation?.CompleteAfterJoinedCleanup();
+            }
         }
         return Failure(failures);
     }
@@ -71,10 +73,17 @@ internal sealed class NativeTextProjectionShutdown(string root, IOptions<Databas
         ServerFailureObserver.Observe(() => physicalGate.Run(() => NativeTextFiles.DeleteBuildingGeneration(
             root, slot.Leaf, sourceNodeId, limits, executionOptions: executionOptions, resources: resources)), failures);
         if (failures.Count == FailureEmptyCount)
-        { slot.SharedReservation?.CompleteAfterJoinedCleanup(); }
+        {
+            slot.SharedReservation?.CompleteAfterJoinedCleanup();
+        }
         return Failure(failures);
     }
 
     private static Exception? Failure(List<Exception> failures)
-        => failures.Count switch { FailureEmptyCount => null, FailureSingleItemCount => failures[FailureIndexEmptyCount], _ => new AggregateException(failures) };
+        => failures.Count switch
+        {
+            FailureEmptyCount => null,
+            FailureSingleItemCount => failures[FailureIndexEmptyCount],
+            _ => new AggregateException(failures)
+        };
 }

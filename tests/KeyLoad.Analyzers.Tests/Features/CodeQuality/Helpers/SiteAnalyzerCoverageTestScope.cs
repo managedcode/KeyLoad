@@ -27,12 +27,21 @@ internal sealed class SiteAnalyzerCoverageTestScope : IDisposable
         }
     }
 
-    internal string Repository { get; }
+    internal string Repository
+    {
+        get;
+    }
     internal string ManifestPath => Path.Combine(evidenceRoot, SiteAnalyzerCoverageTokens.ManifestName);
     internal string SummaryPath => Path.Combine(evidenceRoot, SiteAnalyzerCoverageTokens.SummaryName);
     internal string SettingsCopyPath => Path.Combine(evidenceRoot, SiteAnalyzerCoverageTokens.SettingsCopyName);
-    private string ScriptPath { get; }
-    private string ContractPath { get; }
+    private string ScriptPath
+    {
+        get;
+    }
+    private string ContractPath
+    {
+        get;
+    }
 
     internal async Task PrepareAsync()
     {

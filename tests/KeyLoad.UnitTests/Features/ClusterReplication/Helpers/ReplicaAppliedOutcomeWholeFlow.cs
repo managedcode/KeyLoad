@@ -26,7 +26,10 @@ internal static class ReplicaAppliedOutcomeWholeFlow
         if (scenario == 2)
         {
             await Assert.That(original.Error).IsNull();
-            var changed = configured with { PolicyEpoch = checked(configured.PolicyEpoch + 1) };
+            var changed = configured with
+            {
+                PolicyEpoch = checked(configured.PolicyEpoch + 1)
+            };
             owner.Database.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(changed));
         }
         else
@@ -115,7 +118,10 @@ internal static class ReplicaAppliedOutcomeWholeFlow
             owner.Database.Database.ResolveAppliedSubmissionOutcome(completeOperation));
         await ReplicaSubmissionOutcomeFlow.RequireResultAsync(original, owner.Submit(completeOperation));
         var changed = Issue(owner, OperationKind.CompleteBlobUpload,
-            complete with { ExpectedIntegrityHash = new string('0', 64) }, complete.CommandId);
+            complete with
+            {
+                ExpectedIntegrityHash = new string('0', 64)
+            }, complete.CommandId);
         var refused = Assert.ThrowsExactly<KeyLoadException>(() => owner.Database.Database.ResolveAppliedSubmissionOutcome(changed));
         await Assert.That(refused.Code).IsEqualTo(ErrorCode.Conflict);
         await state.RequireAsync(ReplicaSubmissionOutcomeState.Read(owner.Database));

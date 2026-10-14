@@ -9,7 +9,10 @@ internal sealed class NativeMaintenanceBarrier : IDisposable
     private readonly ManualResetEventSlim release = new();
     internal TaskCompletionSource<Thread> Created { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
     internal TaskCompletionSource<MergeResult> Ended { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
-    internal Exception? Failure { get; private set; }
+    internal Exception? Failure
+    {
+        get; private set;
+    }
 
     internal void DiskCreated(IZoneTreeMaintenance<Memory<byte>, Memory<byte>> _,
         IDiskSegment<Memory<byte>, Memory<byte>> segment, bool bottom)

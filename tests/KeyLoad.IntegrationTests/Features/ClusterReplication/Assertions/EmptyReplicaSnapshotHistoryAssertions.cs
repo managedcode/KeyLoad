@@ -34,16 +34,42 @@ internal static class EmptyReplicaSnapshotHistoryAssertions
 
     private static async Task EventFieldsAsync(EventSourcePage actual, EventSourcePage expected)
     {
-        await ExactAsync(new { actual.Source, actual.Head, actual.Events, actual.HasMore },
-            new { expected.Source, expected.Head, expected.Events, expected.HasMore });
+        await ExactAsync(new
+        {
+            actual.Source,
+            actual.Head,
+            actual.Events,
+            actual.HasMore
+        },
+            new
+            {
+                expected.Source,
+                expected.Head,
+                expected.Events,
+                expected.HasMore
+            });
         await Assert.That(actual.Cursor).IsNotNullOrEmpty();
         await Assert.That(actual.CutPosition).IsGreaterThanOrEqualTo(expected.CutPosition);
     }
 
     private static async Task ChangeFieldsAsync(ChangeFeedPage actual, ChangeFeedPage expected)
     {
-        await ExactAsync(new { actual.Changes, actual.ThroughSequence, actual.Tail, actual.FirstAvailable, actual.HasMore },
-            new { expected.Changes, expected.ThroughSequence, expected.Tail, expected.FirstAvailable, expected.HasMore });
+        await ExactAsync(new
+        {
+            actual.Changes,
+            actual.ThroughSequence,
+            actual.Tail,
+            actual.FirstAvailable,
+            actual.HasMore
+        },
+            new
+            {
+                expected.Changes,
+                expected.ThroughSequence,
+                expected.Tail,
+                expected.FirstAvailable,
+                expected.HasMore
+            });
         await Assert.That(actual.Cursor).IsNotNullOrEmpty();
         await Assert.That(actual.CutPosition).IsGreaterThanOrEqualTo(expected.CutPosition);
     }

@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
@@ -31,7 +31,9 @@ internal sealed class PostgresSessionIdentity(string subject, byte[] credential,
                 principal = McpNativeAuthentication.ReadPrincipal(reply.Payload.Span,
                     services.GetRequiredService<IOptions<McpExecutionOptions>>(), connection.Token);
                 if (!StringComparer.Ordinal.Equals(principal.Id, Subject))
-                { throw Errors.Fail(ErrorCode.Unauthenticated, ServerProtocol.MissingCredential); }
+                {
+                    throw Errors.Fail(ErrorCode.Unauthenticated, ServerProtocol.MissingCredential);
+                }
             }, failures).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny(failures);
@@ -45,11 +47,15 @@ internal sealed class PostgresSessionIdentity(string subject, byte[] credential,
         var value = reader.Text(maximumBytes);
         reader.Complete();
         if (value.Length == PostgresProtocol.AllRows)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, ServerProtocol.MissingCredential); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, ServerProtocol.MissingCredential);
+        }
         var size = Utf8.GetByteCount(value);
         admission.Resize(PostgresProtocol.AllRows, size);
         try
-        { return new(subject, Utf8.GetBytes(value), admission); }
+        {
+            return new(subject, Utf8.GetBytes(value), admission);
+        }
         catch (Exception primary)
         {
             var failures = new List<Exception> { primary };
@@ -62,7 +68,9 @@ internal sealed class PostgresSessionIdentity(string subject, byte[] credential,
     public void Dispose()
     {
         if (Interlocked.Exchange(ref disposed, sizeof(byte)) != PostgresProtocol.AllRows)
-        { return; }
+        {
+            return;
+        }
         CryptographicOperations.ZeroMemory(credential);
         admission.Resize(credential.Length, PostgresProtocol.AllRows);
     }

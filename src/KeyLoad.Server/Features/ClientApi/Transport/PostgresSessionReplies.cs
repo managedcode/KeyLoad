@@ -22,7 +22,9 @@ internal static class PostgresSessionReplies
         var bytes = new byte[sizeof(short) + statement.ParameterOids.Length * sizeof(int)];
         BinaryPrimitives.WriteInt16BigEndian(bytes, checked((short)statement.ParameterOids.Length));
         for (var index = PostgresProtocol.AllRows; index < statement.ParameterOids.Length; index++)
-        { BinaryPrimitives.WriteInt32BigEndian(bytes.AsSpan(sizeof(short) + index * sizeof(int)), statement.ParameterOids[index]); }
+        {
+            BinaryPrimitives.WriteInt32BigEndian(bytes.AsSpan(sizeof(short) + index * sizeof(int)), statement.ParameterOids[index]);
+        }
         writer.Write(ParameterDescription, bytes);
     }
 
@@ -37,9 +39,13 @@ internal static class PostgresSessionReplies
                 await ServerFailureObserver.ObserveAsync(async () =>
                 {
                     try
-                    { await WriteResultAsync(writer, reply.Payload, format, options, chunkBytes, describe, closed).ConfigureAwait(false); }
-                    catch (Exception failure) when (reply.PossibleWrite && global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(failure))
-                    { throw Errors.Fail(ErrorCode.UnknownWriteOutcome, PostgresProtocol.InterruptedReply, failure); }
+                    {
+                        await WriteResultAsync(writer, reply.Payload, format, options, chunkBytes, describe, closed).ConfigureAwait(false);
+                    }
+                    catch (Exception failure) when (reply.PossibleWrite && global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+                    {
+                        throw Errors.Fail(ErrorCode.UnknownWriteOutcome, PostgresProtocol.InterruptedReply, failure);
+                    }
                 }, failures).ConfigureAwait(false);
             }
         }, failures).ConfigureAwait(false);
@@ -53,15 +59,21 @@ internal static class PostgresSessionReplies
         var payloadBytes = checked(RowHeaderBytes + json.Length
             + (format == PostgresProtocol.BinaryFormat ? sizeof(byte) : PostgresProtocol.AllRows));
         if (payloadBytes + sizeof(int) > options.MaximumFrameBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PostgresProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PostgresProtocol.Invalid);
+        }
         if (describe)
-        { writer.Describe(ResultColumn, format); }
+        {
+            writer.Describe(ResultColumn, format);
+        }
         writer.Header(PostgresWireWriter.DataRow, payloadBytes);
         var header = new byte[RowHeaderBytes + (format == PostgresProtocol.BinaryFormat ? sizeof(byte) : PostgresProtocol.AllRows)];
         BinaryPrimitives.WriteInt16BigEndian(header, OneColumn);
         BinaryPrimitives.WriteInt32BigEndian(header.AsSpan(sizeof(short)), payloadBytes - RowHeaderBytes);
         if (format == PostgresProtocol.BinaryFormat)
-        { header[RowHeaderBytes] = PostgresProtocol.JsonbVersion; }
+        {
+            header[RowHeaderBytes] = PostgresProtocol.JsonbVersion;
+        }
         writer.Raw(header);
         for (var offset = PostgresProtocol.AllRows; offset < json.Length;)
         {

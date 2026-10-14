@@ -35,14 +35,20 @@ internal sealed class OwnerCapacityReceiver(OrleansNode node, PartitionHost part
             var value = await reads.ReadAsync(read, request.PrincipalId, token).ConfigureAwait(false);
             await RequireCohortAsync(request, token).ConfigureAwait(false);
             if (request.ExpiresAt <= movement.Clock.GetUtcNow())
-            { throw Errors.Fail(ErrorCode.TokenInvalidated, TenantPlacementCapacityProtocol.InvalidProof); }
+            {
+                throw Errors.Fail(ErrorCode.TokenInvalidated, TenantPlacementCapacityProtocol.InvalidProof);
+            }
             return Sign(new(TenantPlacementPolicyProtocol.Version, request.RequestId, request.Nonce,
                 value, null, null, string.Empty));
         }
         catch (KeyLoadException error)
-        { return Failure(request, authenticated, error.Code); }
+        {
+            return Failure(request, authenticated, error.Code);
+        }
         catch (OperationCanceledException) when (token.IsCancellationRequested)
-        { throw; }
+        {
+            throw;
+        }
     }
 
     private async Task RequireCohortAsync(OwnerCapacityNativeRequest request, CancellationToken token)
@@ -54,7 +60,9 @@ internal sealed class OwnerCapacityReceiver(OrleansNode node, PartitionHost part
             || !local.TransportReady || local.VoterId != request.DestinationVoter
             || local.SiloAddress != request.DestinationSiloAddress
             || local.Incarnation != request.Destination.Owner.Incarnation)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, TenantPlacementCapacityProtocol.WrongCohort); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, TenantPlacementCapacityProtocol.WrongCohort);
+        }
     }
 
     private OwnerCapacityNativeReply Failure(OwnerCapacityNativeRequest? request, bool authenticated, ErrorCode code)
@@ -68,6 +76,9 @@ internal sealed class OwnerCapacityReceiver(OrleansNode node, PartitionHost part
     private OwnerCapacityNativeReply Sign(OwnerCapacityNativeReply reply)
     {
         using var mac = movement.CreateControlMac();
-        return reply with { Signature = OwnerCapacityMac.SignCapacityReply(mac, reply) };
+        return reply with
+        {
+            Signature = OwnerCapacityMac.SignCapacityReply(mac, reply)
+        };
     }
 }

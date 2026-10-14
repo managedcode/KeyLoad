@@ -35,7 +35,9 @@ internal static class RemoteAnnPublicationRf3Round
         await RemoteAnnPublicationRf3Assertions.EqualAsync(cancelBefore,
             await McpCallerAssertions.SdkSuccessAsync(await owner.OutboxStatusAsync(state.Scenario.Partition, token)));
         if (!repairPolicy)
-        { return; }
+        {
+            return;
+        }
         var changed = await McpCallerAssertions.SdkStatusAsync(await owner.ConfigurePrincipalAsync(
             Guid.NewGuid(), reader.Denied(), token));
         await Assert.That(changed.IsSuccess).IsTrue();
@@ -77,7 +79,11 @@ internal static class RemoteAnnPublicationRf3Round
         var sdk = new KeyLoadClient(http, administrator, IntegrationClientOptions.Execution());
         await RemoteAnnPublicationRf3Assertions.EqualAsync(state.SeedReceipt,
             await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(state.Seed, token)));
-        var request = state.Original with { CommandId = Guid.NewGuid(), Mode = AnnMaintenanceMode.Restore };
+        var request = state.Original with
+        {
+            CommandId = Guid.NewGuid(),
+            Mode = AnnMaintenanceMode.Restore
+        };
         var restored = await McpCallerAssertions.SdkSuccessAsync(await sdk.MaintainAnnIndexAsync(request, token));
         await NativeAnnMaintenanceRf3Assertions.ResultAsync(restored, request);
         await Assert.That(restored.IndexSha256).IsEqualTo(state.Completed.IndexSha256);

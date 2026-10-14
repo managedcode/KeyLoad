@@ -77,10 +77,16 @@ internal sealed class McpGatewayProtocolTests
     {
         var exactQuery = new string('é', 1024);
         var accepted = McpGatewayMetaArgumentReader.Read(McpGatewayMetaOperation.Search,
-            McpGatewayProtocolInputs.Read(JsonSerializer.Serialize(new { query = exactQuery })), UnitMcpOptions.Execution());
+            McpGatewayProtocolInputs.Read(JsonSerializer.Serialize(new
+            {
+                query = exactQuery
+            })), UnitMcpOptions.Execution());
         await Assert.That(accepted.SearchLimit).IsEqualTo(3);
         var tooLong = Assert.ThrowsExactly<KeyLoadException>(() => McpGatewayMetaArgumentReader.Read(
-            McpGatewayMetaOperation.Search, McpGatewayProtocolInputs.Read(JsonSerializer.Serialize(new { query = exactQuery + "é" })), UnitMcpOptions.Execution()));
+            McpGatewayMetaOperation.Search, McpGatewayProtocolInputs.Read(JsonSerializer.Serialize(new
+            {
+                query = exactQuery + "é"
+            })), UnitMcpOptions.Execution()));
         await Assert.That(tooLong.Code).IsEqualTo(ErrorCode.Validation);
         await Assert.That(accepted.Query).IsEqualTo(exactQuery);
     }

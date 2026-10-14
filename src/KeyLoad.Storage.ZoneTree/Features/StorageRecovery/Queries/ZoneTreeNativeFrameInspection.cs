@@ -26,7 +26,9 @@ internal static class ZoneTreeNativeFrameInspection
             || !string.Equals(ownership.Name, Path.Combine(options.Directory, OwnerLockFileName), StringComparison.Ordinal)
             || outcomeKey.IsEmpty || options.Incarnation is null || options.EmbeddedPointCache is not null
             || options.FaultObserver is not null)
-        { throw new ArgumentException(InvalidLease, nameof(ownership)); }
+        {
+            throw new ArgumentException(InvalidLease, nameof(ownership));
+        }
         OfflineRegularFile.RequireRegular(ownership.Name);
         var identity = ZoneTreeIdentityFile.OpenExisting(options, expectedNodeId);
         var failures = new List<Exception>();
@@ -57,18 +59,24 @@ internal static class ZoneTreeNativeFrameInspection
             cancellationToken.ThrowIfCancellationRequested();
             if (clock.GetElapsedTime(started) > options.MaximumReadCutElapsed
                 || HeaderLength > options.MaximumReadCutExaminedBytes - journal.Position)
-            { throw Errors.Fail(ErrorCode.BudgetExceeded, ExhaustedScan); }
+            {
+                throw Errors.Fail(ErrorCode.BudgetExceeded, ExhaustedScan);
+            }
             var fields = ZoneTreeJournalFrameReader.ReadHeader(journal, header, sequence,
                 options.MaxFrameBytes, identity.FormatVersion)
                 ?? throw Errors.Fail(ErrorCode.RecoveryRequired, MissingFrame);
             if (fields.Length > options.MaximumReadCutExaminedBytes - journal.Position)
-            { throw Errors.Fail(ErrorCode.BudgetExceeded, ExhaustedScan); }
+            {
+                throw Errors.Fail(ErrorCode.BudgetExceeded, ExhaustedScan);
+            }
             var frame = ZoneTreeJournalFrameReader.ReadPayload(journal, header, fields.Length, fields.Sequence)
                 ?? throw Errors.Fail(ErrorCode.RecoveryRequired, MissingFrame);
             maximumPayload = Math.Max(maximumPayload, frame.Payload.Length);
             var mutations = ZoneTreeJournalCodec.Deserialize(frame.Payload);
             if (mutations.Length > options.MaximumReadCutRecords - examinedRecords)
-            { throw Errors.Fail(ErrorCode.BudgetExceeded, ExhaustedScan); }
+            {
+                throw Errors.Fail(ErrorCode.BudgetExceeded, ExhaustedScan);
+            }
             var rawMutationBytes = mutations.Sum(mutation => checked((long)mutation.Key.Length + (mutation.Value?.Length ?? NoValueBytes)));
             examinedRecords += mutations.Length;
             examinedFrames += NextFrame;
@@ -76,14 +84,23 @@ internal static class ZoneTreeNativeFrameInspection
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 if (clock.GetElapsedTime(started) > options.MaximumReadCutElapsed)
-                { throw Errors.Fail(ErrorCode.BudgetExceeded, ExhaustedScan); }
+                {
+                    throw Errors.Fail(ErrorCode.BudgetExceeded, ExhaustedScan);
+                }
                 if (mutation.Key.Span.SequenceEqual(outcomeKey.Span))
-                { selected = Select(selected, mutation, frame, identity, examinedFrames, journal.Position, mutations.Length, rawMutationBytes); }
+                {
+                    selected = Select(selected, mutation, frame, identity, examinedFrames, journal.Position, mutations.Length, rawMutationBytes);
+                }
             }
             sequence = frame.Sequence;
         }
         return selected is { } actual
-            ? actual with { ExaminedFrames = examinedFrames, ExaminedBytes = journal.Position, MaximumObservedPayloadBytes = maximumPayload }
+            ? actual with
+            {
+                ExaminedFrames = examinedFrames,
+                ExaminedBytes = journal.Position,
+                MaximumObservedPayloadBytes = maximumPayload
+            }
             : throw Errors.Fail(ErrorCode.RecoveryRequired, MissingFrame);
     }
 
@@ -92,7 +109,9 @@ internal static class ZoneTreeNativeFrameInspection
         long frames, long bytes, int records, long rawMutationBytes)
     {
         if (selected is not null || mutation.Value is not { } outcome)
-        { throw Errors.Fail(ErrorCode.Corruption, AmbiguousFrame); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, AmbiguousFrame);
+        }
         return new(identity.NodeId, identity.Incarnation, identity.FormatVersion, frame.Sequence, frame.Payload.Length,
             Convert.ToHexString(frame.Checksum), records, rawMutationBytes, frames, bytes, frame.Payload.Length, outcome);
     }

@@ -23,7 +23,9 @@ internal static class WaitForIndexReadCutObservationDispatch
         ReadExecutionBudget budget)
     {
         if (observer is null || observation is not { } captured)
-        { return; }
+        {
+            return;
+        }
         budget.Check();
         observer.Observe(captured, budget.Cancellation);
         budget.Check();

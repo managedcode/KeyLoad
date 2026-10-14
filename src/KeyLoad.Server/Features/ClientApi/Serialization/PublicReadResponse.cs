@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.Server;
 
@@ -7,7 +7,9 @@ internal static class PublicReadResponse
     internal static object? Create(GrainReadKind? kind, OperationKind? commandKind, object? value)
     {
         if (commandKind != OperationKind.ConfigureApiKey)
-        { return Create(kind, value); }
+        {
+            return Create(kind, value);
+        }
         return value is true ? null : throw Errors.Fail(ErrorCode.RecoveryRequired, GrainRoutingProtocol.InvalidRequest);
     }
 

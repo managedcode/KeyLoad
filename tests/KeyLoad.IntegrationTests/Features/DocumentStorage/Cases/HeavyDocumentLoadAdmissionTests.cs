@@ -19,7 +19,9 @@ internal sealed class HeavyDocumentLoadAdmissionTests
     {
         using var configuration = new ConfigurationManager();
         if (present)
-        { configuration[HeavyDocumentLoadExecutionOptions.EnabledSetting] = bool.FalseString; }
+        {
+            configuration[HeavyDocumentLoadExecutionOptions.EnabledSetting] = bool.FalseString;
+        }
         Assert.ThrowsExactly<OptionsValidationException>(() => HeavyDocumentLoadAdmission.Validate(configuration, HealthyArguments()));
         configuration[HeavyDocumentLoadExecutionOptions.EnabledSetting] = bool.TrueString;
         HeavyDocumentLoadAdmission.Validate(configuration, HealthyArguments());

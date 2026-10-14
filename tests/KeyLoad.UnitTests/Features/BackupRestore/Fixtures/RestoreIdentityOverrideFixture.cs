@@ -5,9 +5,18 @@ namespace KeyLoad.UnitTests.Features.BackupRestore;
 
 internal sealed class RestoreIdentityOverrideFixture
 {
-    internal TestDatabase Source { get; }
-    internal string BackupDirectory { get; }
-    internal string TargetDirectory { get; }
+    internal TestDatabase Source
+    {
+        get;
+    }
+    internal string BackupDirectory
+    {
+        get;
+    }
+    internal string TargetDirectory
+    {
+        get;
+    }
     internal PartitionRef Partition => Source.Partition;
 
     internal RestoreIdentityOverrideFixture(string root)
@@ -27,7 +36,9 @@ internal sealed class RestoreIdentityOverrideFixture
     {
         var result = new Dictionary<string, byte[]>(StringComparer.Ordinal);
         foreach (var file in Directory.EnumerateFiles(BackupDirectory, "*", SearchOption.AllDirectories))
-        { result.Add(Path.GetRelativePath(BackupDirectory, file), await File.ReadAllBytesAsync(file)); }
+        {
+            result.Add(Path.GetRelativePath(BackupDirectory, file), await File.ReadAllBytesAsync(file));
+        }
         return result;
     }
 }

@@ -49,7 +49,9 @@ internal static class TopicPurgeCrashScenario
         boundary.Armed = true;
         var result = database.Apply(operation);
         if (pinned ? result.Error != ErrorCode.ResourceExhausted : result.Error is not null)
-        { throw new InvalidOperationException(InvalidOutcome); }
+        {
+            throw new InvalidOperationException(InvalidOutcome);
+        }
         await CrashHostPause.WaitForKillAsync();
     }
     private static void Configure(DatabaseEngine database)
@@ -92,7 +94,9 @@ internal static class TopicPurgeCrashScenario
         {
             var page = view.Scan(KeySpace.Partition(prefix, TopicPurgeCrashContract.Partition), TopicPurgeCrashContract.FixtureRecordLimit);
             if (page.HasMore)
-            { throw new InvalidOperationException(TruncatedInventory); }
+            {
+                throw new InvalidOperationException(TruncatedInventory);
+            }
             return page.Records.Select(record => Convert.ToHexString(record.Key.Span) + RecordSeparator + Convert.ToHexString(record.Value.Span));
         }).ToArray();
     });

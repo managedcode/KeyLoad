@@ -13,7 +13,10 @@ internal sealed class Neo4jHarnessReportFiles : IAsyncDisposable
 
     public Neo4jHarnessReportFiles() => DirectoryPath = Path.Combine(Path.GetTempPath(), ReportDirectoryPrefix + Guid.NewGuid().ToString("N"));
 
-    public string DirectoryPath { get; }
+    public string DirectoryPath
+    {
+        get;
+    }
 
     public async Task VerifyAsync(ComparisonReport report, int expectedCsvLines, CancellationToken cancellationToken)
     {

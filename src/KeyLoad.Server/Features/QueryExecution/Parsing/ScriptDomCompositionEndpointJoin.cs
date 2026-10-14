@@ -20,7 +20,9 @@ internal static class ScriptDomCompositionEndpointJoin
     {
         if (table is not Dom.QualifiedJoin join || join.QualifiedJoinType != Dom.QualifiedJoinType.Inner
             || join.JoinHint != Dom.JoinHint.None || join.JoinHintColumnsCount is not null)
-        { throw ScriptDomOperationErrors.Unsupported(); }
+        {
+            throw ScriptDomOperationErrors.Unsupported();
+        }
         return join;
     }
     private static void Link(Dom.BooleanExpression expression, string queueField, string entityAlias)
@@ -28,7 +30,9 @@ internal static class ScriptDomCompositionEndpointJoin
         if (expression is not Dom.BooleanComparisonExpression { ComparisonType: Dom.BooleanComparisonType.Equals } comparison
             || !Column(comparison.FirstExpression, QueueAlias, queueField)
             || !Column(comparison.SecondExpression, entityAlias, EntityReference))
-        { throw ScriptDomOperationErrors.Unsupported(); }
+        {
+            throw ScriptDomOperationErrors.Unsupported();
+        }
     }
     private static bool Column(Dom.ScalarExpression expression, string alias, string field)
         => expression is Dom.ColumnReferenceExpression { Collation: null, MultiPartIdentifier: { } name }

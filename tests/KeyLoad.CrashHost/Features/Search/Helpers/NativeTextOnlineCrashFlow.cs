@@ -1,5 +1,5 @@
-using KeyLoad.Orleans;
-using KeyLoad.Orleans.Features.Search;
+using KeyLoad.Clustering;
+using KeyLoad.Clustering.Features.Search;
 
 namespace KeyLoad.CrashHost.Features.Search;
 
@@ -16,7 +16,9 @@ internal static class NativeTextOnlineCrashFlow
             runtime.Canonical.Options.Core.DatabaseLimits.Value.QueryDeadlineSeconds);
         var original = await runtime.PhaseAsync(session, request, OnlineTextCapabilityKind.ResolveOriginal, expiry, token);
         if (original.OriginalResult is { } replay)
-        { return replay; }
+        {
+            return replay;
+        }
         _ = await runtime.PhaseAsync(session, request, OnlineTextCapabilityKind.Capture, expiry, token);
         var state = await runtime.PhaseAsync(session, request, OnlineTextCapabilityKind.Seed, expiry, token);
         await ReplayAsync(runtime, session, request, state, expiry, token);
@@ -27,7 +29,9 @@ internal static class NativeTextOnlineCrashFlow
         var committed = await work.AdmitOriginal(() => runtime.Canonical.CommitIssuedAsync(operation, token));
         var result = committed.Get<OnlineTextIndexMaintenanceResult>();
         if (afterOriginalCommit is not null)
-        { await afterOriginalCommit(result); }
+        {
+            await afterOriginalCommit(result);
+        }
         var reconciled = await runtime.PhaseAsync(session, request, OnlineTextCapabilityKind.ReconcileCommitted, expiry, token);
         RequireEqual(result, reconciled.OriginalResult);
         await runtime.Online.AbortAsync(session);
@@ -58,7 +62,9 @@ internal static class NativeTextOnlineCrashFlow
             state = await runtime.PhaseAsync(session, request, OnlineTextCapabilityKind.SettleCheckpoint,
                 expiry, token, receipt: original.Get<ProjectionBatchResult>());
             if (!page.HasMore)
-            { return; }
+            {
+                return;
+            }
         }
         throw new InvalidOperationException(NativeTextIncrementalCrashProtocol.Invalid);
     }
@@ -66,6 +72,8 @@ internal static class NativeTextOnlineCrashFlow
     internal static void RequireEqual<T>(T expected, T actual)
     {
         if (!NativeSerialization.Serialize(expected).AsSpan().SequenceEqual(NativeSerialization.Serialize(actual)))
-        { throw new InvalidOperationException(NativeTextIncrementalCrashProtocol.Invalid); }
+        {
+            throw new InvalidOperationException(NativeTextIncrementalCrashProtocol.Invalid);
+        }
     }
 }

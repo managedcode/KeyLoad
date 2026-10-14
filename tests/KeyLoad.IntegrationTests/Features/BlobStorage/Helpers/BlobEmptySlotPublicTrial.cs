@@ -13,7 +13,9 @@ internal static class BlobEmptySlotPublicTrial
         {
             var partition = new PartitionRef("blob-empty-" + Guid.NewGuid().ToString("N"), "public-empty", "domain", Guid.NewGuid().ToString("N"));
             var definition = new ResourceDefinition("bounded-empty", ResourceKind.BlobStore, partition.TransactionDomainId)
-            { BlobPolicy = new() { MaxBlobBytes = 1L, MaxReservedBytes = 1L, MaxObjectKeys = 1, MaxVersions = 1, MaxUploads = 1 } };
+            {
+                BlobPolicy = new() { MaxBlobBytes = 1L, MaxReservedBytes = 1L, MaxObjectKeys = 1, MaxVersions = 1, MaxUploads = 1 }
+            };
             await SqlRf3Protocol.EqualAsync(definition, await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.ConfigureResourceAsync(Guid.NewGuid(),
                 new(partition.TenantId, partition.DatabaseId, definition), token)));
             var state = new BlobEmptySlotPublicState(new(partition, definition.Name, "same-empty-blob"));
@@ -40,7 +42,10 @@ internal static class BlobEmptySlotPublicTrial
     {
         state.Abort = new(Guid.NewGuid(), state.Blob, state.First.UploadId);
         state.Aborted = (await McpCallerAssertions.SuccessAsync<BlobCommitResult<BlobUploadInfo>>(await callers.Mcp.CallAsync("keyload_blobs_abort_upload", state.Abort, token))).Value;
-        state.OriginalCurrent = state.Begun.Value with { Status = BlobUploadStatus.Aborted };
+        state.OriginalCurrent = state.Begun.Value with
+        {
+            Status = BlobUploadStatus.Aborted
+        };
         await SqlRf3Protocol.EqualAsync(state.OriginalCurrent, state.Aborted.Value);
         await BlobEmptySlotPublicAssertions.ReceiptAsync(callers, state.Aborted.Receipt, state.Abort.CommandId, state.Blob, token);
         await BlobEmptySlotPublicAssertions.CurrentAsync(callers, state, token);

@@ -56,7 +56,11 @@ internal sealed class OrleansWalLifecycleTests
         using var targetFiles = new WalFileFixture();
         var incarnation = Guid.NewGuid();
         var signingKey = RandomNumberGenerator.GetBytes(SigningKeyBytes);
-        using var source = new ZoneTreeStore(new(sourceFiles.DirectoryPath) { Incarnation = incarnation, SigningKey = signingKey }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var source = new ZoneTreeStore(new(sourceFiles.DirectoryPath)
+        {
+            Incarnation = incarnation,
+            SigningKey = signingKey
+        }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         source.Commit((transaction, _) =>
         {
             transaction.PutRecord(KeyCodec.Encode(SystemNamespace, LastAppliedKey), AppliedPosition);
@@ -66,13 +70,20 @@ internal sealed class OrleansWalLifecycleTests
         var snapshot = Path.Combine(sourceFiles.DirectoryPath, SnapshotFileName);
         source.CreateSnapshot(snapshot, AppliedPosition);
         StoreIdentity installedIdentity;
-        using (var target = new ZoneTreeStore(new(targetFiles.DirectoryPath) { Incarnation = incarnation, SigningKey = signingKey }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
+        using (var target = new ZoneTreeStore(new(targetFiles.DirectoryPath)
+        {
+            Incarnation = incarnation,
+            SigningKey = signingKey
+        }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
         {
             target.Commit((transaction, _) => { transaction.Put([0x20], [0x40]); return true; });
             var original = target.Identity;
             var installed = target.InstallSnapshot(snapshot, AppliedPosition);
             await Assert.That(installed.AppliedPosition).IsEqualTo(AppliedPosition);
-            installedIdentity = original with { ReadGeneration = original.ReadGeneration + 1 };
+            installedIdentity = original with
+            {
+                ReadGeneration = original.ReadGeneration + 1
+            };
             await WalFileFixture.AssertPreservedIdentity(installedIdentity, target.Identity);
             await WalFileFixture.AssertPreservedIdentity(installedIdentity, await targetFiles.ReadIdentityAsync());
             await Assert.That(target.Read(view => view.ReadOwnedValue([0x20]))).IsNull();

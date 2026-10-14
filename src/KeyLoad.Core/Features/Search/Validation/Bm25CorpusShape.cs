@@ -28,7 +28,9 @@ internal static class Bm25CorpusShape
             || current.CaptureReadGeneration < MinimumNativeCut || string.IsNullOrWhiteSpace(current.Field)
             || string.IsNullOrWhiteSpace(current.TokenizerVersion) || !Digest(current.ResourcePolicyDigest)
             || !Digest(current.PayloadDigest))
-        { throw Errors.Fail(ErrorCode.Corruption, Bm25CorpusProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Bm25CorpusProtocol.Invalid);
+        }
         DatabaseEngine.ValidatePartition(current.Partition);
         JsonData.Identifier(current.Collection);
         JsonData.Identifier(current.PrincipalId);
@@ -37,18 +39,24 @@ internal static class Bm25CorpusShape
             || statistics.Terms.Length != statistics.DocumentFrequencies.Length
             || statistics.DocumentCount < MinimumDocumentCount || statistics.DocumentCount > limits.MaxScanRecords
             || statistics.TotalLength < MinimumCorpusLength || statistics.Terms.Length > limits.MaxScanRecords)
-        { throw Errors.Fail(ErrorCode.Corruption, Bm25CorpusProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Bm25CorpusProtocol.Invalid);
+        }
         var terms = new HashSet<string>(StringComparer.Ordinal);
         for (var index = FirstTermIndex; index < statistics.Terms.Length; index++)
         {
             if (string.IsNullOrEmpty(statistics.Terms[index]) || !terms.Add(statistics.Terms[index])
                 || statistics.DocumentFrequencies[index] < MinimumDocumentFrequency
                 || statistics.DocumentFrequencies[index] > statistics.DocumentCount)
-            { throw Errors.Fail(ErrorCode.Corruption, Bm25CorpusProtocol.Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, Bm25CorpusProtocol.Invalid);
+            }
         }
         if (statistics.DocumentCount == MinimumDocumentCount && (statistics.TotalLength != MinimumCorpusLength
             || statistics.DocumentFrequencies.Any(frequency => frequency != MinimumDocumentFrequency)))
-        { throw Errors.Fail(ErrorCode.Corruption, Bm25CorpusProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Bm25CorpusProtocol.Invalid);
+        }
     }
 
     internal static void RequirePhase(Bm25CorpusPublicationPhaseCommand phase, DatabaseLimits limits)
@@ -60,22 +68,30 @@ internal static class Bm25CorpusShape
             || phase.SourcePlacement.Incarnation != phase.Current.Incarnation
             || phase.SourcePlacement.PlacementEpoch <= UninitializedPublicationVersion || phase.SourcePlacement.VoterIds.IsDefaultOrEmpty
             || phase.ExpectedGeneration == Guid.Empty)
-        { throw Errors.Fail(ErrorCode.Corruption, Bm25CorpusProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Bm25CorpusProtocol.Invalid);
+        }
         Require(phase.Current, limits);
         if (phase.Current.PayloadDigest != Bm25CorpusDigest.Compute(phase.Current, phase.SourcePlacement,
             limits.MaxBatchBytes))
-        { throw Errors.Fail(ErrorCode.Corruption, Bm25CorpusProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Bm25CorpusProtocol.Invalid);
+        }
     }
 
     internal static Bm25CorpusCurrentV1 RequireRecord(ReadOnlySpan<byte> key, ReadOnlySpan<byte> value,
         PartitionRef partition, DatabaseLimits limits)
     {
         if (checked((long)key.Length + value.Length) > limits.MaxBatchBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, Bm25CorpusProtocol.Capacity); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, Bm25CorpusProtocol.Capacity);
+        }
         var current = NativeSerialization.Deserialize<Bm25CorpusCurrentV1>(value);
         Require(current, limits);
         if (current.Partition != partition || !key.SequenceEqual(Bm25CorpusKeys.Current(current)))
-        { throw Errors.Fail(ErrorCode.Corruption, Bm25CorpusProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Bm25CorpusProtocol.Invalid);
+        }
         return current;
     }
 

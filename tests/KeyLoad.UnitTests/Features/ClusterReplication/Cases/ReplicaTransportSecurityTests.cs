@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Replication;
 
 namespace KeyLoad.UnitTests;
@@ -92,9 +92,15 @@ internal sealed class ReplicaTransportSecurityTests
         using var fixture = new ReplicaSecurityFixture();
         var request = fixture.Vote();
         var credential = RandomNumberGenerator.GetBytes(ReplicaTransportProtocol.SecretBytes);
-        var options = fixture.Options with { Secret = credential };
+        var options = fixture.Options with
+        {
+            Secret = credential
+        };
         using var wrongCredential = new ReplicaEnvelopeAuthenticator(UnitExecutionOptions.ReplicaConfiguration(fixture.Configuration), UnitRoutingOptions.Peers(fixture.Configuration, options), fixture.Discovery, TimeProvider.System, UnitRoutingOptions.Transport(), UnitRoutingOptions.Replay(fixture.Options.ReplayLimits), canonicalDatabase: fixture.Database);
-        using var wrongCluster = new ReplicaEnvelopeAuthenticator(UnitExecutionOptions.ReplicaConfiguration(fixture.Configuration), UnitRoutingOptions.Peers(fixture.Configuration, fixture.Options with { ClusterId = ReplicaSecurityFixture.OtherClusterId }), fixture.Discovery, TimeProvider.System, UnitRoutingOptions.Transport(), UnitRoutingOptions.Replay(fixture.Options.ReplayLimits), canonicalDatabase: fixture.Database);
+        using var wrongCluster = new ReplicaEnvelopeAuthenticator(UnitExecutionOptions.ReplicaConfiguration(fixture.Configuration), UnitRoutingOptions.Peers(fixture.Configuration, fixture.Options with
+        {
+            ClusterId = ReplicaSecurityFixture.OtherClusterId
+        }), fixture.Discovery, TimeProvider.System, UnitRoutingOptions.Transport(), UnitRoutingOptions.Replay(fixture.Options.ReplayLimits), canonicalDatabase: fixture.Database);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => wrongCredential.VerifyRequest(request)).Code).IsEqualTo(ErrorCode.Unauthenticated);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => wrongCluster.VerifyRequest(request)).Code).IsEqualTo(ErrorCode.Unauthenticated);
         CryptographicOperations.ZeroMemory(credential);
@@ -113,7 +119,10 @@ internal sealed class ReplicaReplayCapacityTests
         {
             fixture.Receiver.VerifyRequest(request);
             await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => fixture.Receiver.VerifyRequest(
-                fixture.Resign(request with { Nonce = Guid.NewGuid() }))).Code).IsEqualTo(ErrorCode.ResourceExhausted);
+                fixture.Resign(request with
+                {
+                    Nonce = Guid.NewGuid()
+                }))).Code).IsEqualTo(ErrorCode.ResourceExhausted);
         }
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => fixture.Receiver.VerifyRequest(
             fixture.Append(OperationKind.Membership, OperationKind.Batch))).Code).IsEqualTo(ErrorCode.ResourceExhausted);
@@ -143,8 +152,14 @@ internal sealed class ReplicaReplayCapacityTests
         using var fixture = new ReplicaSecurityFixture();
         var original = fixture.Forward(OperationKind.Batch);
         fixture.Receiver.VerifyRequest(original);
-        var read = fixture.Resign(fixture.Read() with { Nonce = original.Nonce });
-        var vote = fixture.Resign(fixture.Vote() with { Nonce = original.Nonce });
+        var read = fixture.Resign(fixture.Read() with
+        {
+            Nonce = original.Nonce
+        });
+        var vote = fixture.Resign(fixture.Vote() with
+        {
+            Nonce = original.Nonce
+        });
         var malformed = fixture.Resign(original with
         {
             Payload = ReplicaSecurityWireFixture.Operation(
@@ -160,9 +175,18 @@ internal sealed class ReplicaReplayCapacityTests
     [Test]
     public async Task FixedVoterCapacityIsIsolatedAndEveryCriticalPoolIsBounded()
     {
-        using var fixture = new ReplicaSecurityFixture(new() { CriticalPerVoter = 1, ForwardPerVoter = 1, ReadBarrierPerVoter = 1, DataAppendPerVoter = 1 });
+        using var fixture = new ReplicaSecurityFixture(new()
+        {
+            CriticalPerVoter = 1,
+            ForwardPerVoter = 1,
+            ReadBarrierPerVoter = 1,
+            DataAppendPerVoter = 1
+        });
         fixture.Receiver.VerifyRequest(fixture.Forward(OperationKind.Batch));
-        fixture.Receiver.VerifyRequest(fixture.Resign(fixture.Forward(OperationKind.Batch) with { Sender = ReplicaSecurityFixture.VoterC }));
+        fixture.Receiver.VerifyRequest(fixture.Resign(fixture.Forward(OperationKind.Batch) with
+        {
+            Sender = ReplicaSecurityFixture.VoterC
+        }));
         fixture.Receiver.VerifyRequest(fixture.Vote());
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => fixture.Receiver.VerifyRequest(fixture.Vote())).Code).IsEqualTo(ErrorCode.ResourceExhausted);
         fixture.Receiver.VerifyRequest(fixture.Request(ReplicaRpc.RequestVote, new VoteRequest(ReplicaSecurityFixture.VoterC, 1, 0, 0), ReplicaSecurityFixture.VoterC));
@@ -177,7 +201,10 @@ internal sealed class ReplicaReplayCapacityTests
     [Arguments(ReplicaSecurityFixture.UnknownField)]
     public async Task MalformedSignedControlPayloadDoesNotConsumeReserve(string scenario)
     {
-        using var fixture = new ReplicaSecurityFixture(new() { CriticalPerVoter = 1 });
+        using var fixture = new ReplicaSecurityFixture(new()
+        {
+            CriticalPerVoter = 1
+        });
         var invalid = fixture.InvalidControl(scenario);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => fixture.Receiver.VerifyRequest(invalid)).Code).IsEqualTo(ErrorCode.Validation);
         fixture.Receiver.VerifyRequest(fixture.Vote());
@@ -189,7 +216,10 @@ internal sealed class ReplicaReplayCapacityTests
     [Arguments(false)]
     public async Task DuplicateAppendFieldsCannotConsumeCriticalCapacity(bool operation)
     {
-        using var fixture = new ReplicaSecurityFixture(new() { CriticalPerVoter = 1 });
+        using var fixture = new ReplicaSecurityFixture(new()
+        {
+            CriticalPerVoter = 1
+        });
         var invalid = fixture.DuplicateAppend(operation);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => fixture.Receiver.VerifyRequest(invalid)).Code).IsEqualTo(ErrorCode.Validation);
         fixture.Receiver.VerifyRequest(fixture.Vote());
@@ -204,7 +234,10 @@ internal sealed class ReplicaReplayCapacityTests
         var results = await Task.WhenAll(Enumerable.Range(0, ReplicaSecurityFixture.ReservedCapacity).Select(_ => Task.Run(() =>
         {
             try
-            { fixture.Receiver.VerifyRequest(request); return (ErrorCode?)null; }
+            {
+                fixture.Receiver.VerifyRequest(request);
+                return (ErrorCode?)null;
+            }
             catch (KeyLoadException error) { return error.Code; }
         })));
         await Assert.That(results.Count(result => result is null)).IsEqualTo(1);
@@ -218,7 +251,10 @@ internal sealed class ReplicaReplayCapacityTests
         using var fixture = new ReplicaSecurityFixture();
         var request = fixture.Forward(OperationKind.Membership);
         var operation = ReplicaProtocolCodec.Deserialize<ReplicatedOperation>(request.Payload.Span);
-        request = fixture.Resign(request with { Payload = ReplicaProtocolCodec.Serialize(operation) });
+        request = fixture.Resign(request with
+        {
+            Payload = ReplicaProtocolCodec.Serialize(operation)
+        });
         fixture.Receiver.VerifyRequest(request);
         await Assert.That(ReplicaProtocolCodec.Deserialize<ReplicatedOperation>(request.Payload.Span).PayloadJson).IsEqualTo(ReplicaSecurityFixture.OperationPayload);
     }
@@ -270,11 +306,20 @@ internal sealed class ReplicaReplayLifetimeTests
         var now = TimeProvider.System.GetUtcNow().ToUnixTimeMilliseconds();
         var lifetime = checked((long)UnitRoutingOptions.Transport().Value.EnvelopeLifetime.TotalMilliseconds);
         var request = fixture.Vote();
-        var expired = fixture.Resign(request with { Timestamp = now - lifetime - ReplicaSecurityFixture.TimeMarginMilliseconds });
-        var future = fixture.Resign(request with { Timestamp = now + lifetime + ReplicaSecurityFixture.TimeMarginMilliseconds });
+        var expired = fixture.Resign(request with
+        {
+            Timestamp = now - lifetime - ReplicaSecurityFixture.TimeMarginMilliseconds
+        });
+        var future = fixture.Resign(request with
+        {
+            Timestamp = now + lifetime + ReplicaSecurityFixture.TimeMarginMilliseconds
+        });
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => fixture.Receiver.VerifyRequest(expired)).Code).IsEqualTo(ErrorCode.Unauthenticated);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => fixture.Receiver.VerifyRequest(future)).Code).IsEqualTo(ErrorCode.Unauthenticated);
-        var accepted = fixture.Resign(request with { Timestamp = now + lifetime / 2 });
+        var accepted = fixture.Resign(request with
+        {
+            Timestamp = now + lifetime / 2
+        });
         fixture.Receiver.VerifyRequest(accepted);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => fixture.Receiver.VerifyRequest(accepted)).Code).IsEqualTo(ErrorCode.Unauthenticated);
         var window = new ReplicaReplayWindow(fixture.Configuration.VoterIds, UnitRoutingOptions.Replay(fixture.Options.ReplayLimits), UnitRoutingOptions.Transport());
@@ -290,8 +335,20 @@ internal sealed class ReplicaReplayLifetimeTests
     public async Task ReplayConfigurationRejectsNonpositiveAndUnboundedMemoryBudgets()
     {
         using var fixture = new ReplicaSecurityFixture();
-        var zero = fixture.Options with { ReplayLimits = new() { CriticalPerVoter = 0 } };
-        var oversized = fixture.Options with { ReplayLimits = new() { ForwardPerVoter = int.MaxValue } };
+        var zero = fixture.Options with
+        {
+            ReplayLimits = new()
+            {
+                CriticalPerVoter = 0
+            }
+        };
+        var oversized = fixture.Options with
+        {
+            ReplayLimits = new()
+            {
+                ForwardPerVoter = int.MaxValue
+            }
+        };
         Assert.ThrowsExactly<InvalidOperationException>(() => zero.Validate(fixture.Configuration));
         Assert.ThrowsExactly<InvalidOperationException>(() => oversized.Validate(fixture.Configuration));
         await Assert.That(fixture.Options.ReplayLimits.MaximumRetainedNonces(fixture.Configuration.VoterIds.Length))

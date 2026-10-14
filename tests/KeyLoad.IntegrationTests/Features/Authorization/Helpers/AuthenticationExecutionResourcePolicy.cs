@@ -31,9 +31,14 @@ internal static class AuthenticationExecutionResourcePolicy
                 SchemaVersion = checked(current.SchemaVersion + 1),
                 FieldPolicies = [new(McpDocumentProtocol.ProtectedPath, McpDocumentProtocol.ProtectedClassification)]
             })
-            { ExpectedSchemaVersion = current.SchemaVersion }, token));
+            {
+                ExpectedSchemaVersion = current.SchemaVersion
+            }, token));
         await SqlRf3Protocol.EqualAsync(definition with
-        { SchemaVersion = RestrictedVersion, FieldPolicies = [new(McpDocumentProtocol.ProtectedPath, McpDocumentProtocol.ProtectedClassification)] }, protectedDefinition);
+        {
+            SchemaVersion = RestrictedVersion,
+            FieldPolicies = [new(McpDocumentProtocol.ProtectedPath, McpDocumentProtocol.ProtectedClassification)]
+        }, protectedDefinition);
         var before = await AuthenticationExecutionValues.ImageAsync(root, state, token);
         var position = collector.Position;
         var sent = http.Requests;
@@ -47,16 +52,27 @@ internal static class AuthenticationExecutionResourcePolicy
         await Assert.That(await AuthenticationExecutionValues.ImageAsync(root, state, token)).IsEqualTo(before);
         var repaired = await McpCallerAssertions.SdkSuccessAsync(await root.ConfigureResourceAsync(Guid.NewGuid(),
             new(partition.TenantId, partition.DatabaseId, definition with
-            { SchemaVersion = checked(protectedDefinition.SchemaVersion + 1) })
-            { ExpectedSchemaVersion = protectedDefinition.SchemaVersion }, token));
-        await SqlRf3Protocol.EqualAsync(definition with { SchemaVersion = RepairedVersion }, repaired);
+            {
+                SchemaVersion = checked(protectedDefinition.SchemaVersion + 1)
+            })
+            {
+                ExpectedSchemaVersion = protectedDefinition.SchemaVersion
+            }, token));
+        await SqlRf3Protocol.EqualAsync(definition with
+        {
+            SchemaVersion = RepairedVersion
+        }, repaired);
         await AuthenticationExecutionValues.HealthyAsync(reader, mcp, http, collector, state, state.Expected, token);
     }
 
     private static async Task RedactedAsync(DocumentResult? actual, AuthenticationExecutionState state)
     {
         await Assert.That(actual).IsNotNull();
-        var expected = state.Expected with { Redacted = true, RedactedFields = [McpDocumentProtocol.ProtectedPath] };
+        var expected = state.Expected with
+        {
+            Redacted = true,
+            RedactedFields = [McpDocumentProtocol.ProtectedPath]
+        };
         await SqlRf3Protocol.EqualAsync(expected.Reference, actual!.Reference);
         await Assert.That(actual.Revision).IsEqualTo(expected.Revision);
         await Assert.That(actual.Redacted).IsEqualTo(expected.Redacted);

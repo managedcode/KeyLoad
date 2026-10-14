@@ -24,7 +24,9 @@ internal static class ReplicaPrefixGcReceiptAssertions
     internal static async Task AllOriginalAsync(ReplicaCrashNode node, int lastCut)
     {
         for (var cut = FirstDocumentCut; cut <= lastCut; cut++)
-        { await VerifyAsync(node, cut); }
+        {
+            await VerifyAsync(node, cut);
+        }
     }
 
     internal static async Task VerifyAsync(ReplicaCrashNode node, int cut)

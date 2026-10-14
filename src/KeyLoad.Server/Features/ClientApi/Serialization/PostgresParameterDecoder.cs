@@ -17,42 +17,66 @@ internal static class PostgresParameterDecoder
     internal static JsonElement Read(int oid, short format, ReadOnlySpan<byte> bytes, IOptions<McpExecutionOptions> framing)
     {
         if (format is not (PostgresProtocol.TextFormat or PostgresProtocol.BinaryFormat))
-        { throw Errors.Fail(ErrorCode.UnsupportedCapability, PostgresProtocol.Unsupported); }
+        {
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, PostgresProtocol.Unsupported);
+        }
         try
         {
             return format == PostgresProtocol.BinaryFormat
                 ? Binary(oid, bytes, framing) : Text(oid, Utf8.GetString(bytes), framing);
         }
         catch (Exception error) when (error is DecoderFallbackException or JsonException or FormatException or OverflowException)
-        { throw Errors.Fail(ErrorCode.Validation, PostgresProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, PostgresProtocol.Invalid);
+        }
     }
 
     private static JsonElement Binary(int oid, ReadOnlySpan<byte> bytes, IOptions<McpExecutionOptions> framing)
     {
         if (oid == PostgresNumericProtocol.Oid)
-        { return Value(PostgresNumericDecimal.Binary(bytes)); }
+        {
+            return Value(PostgresNumericDecimal.Binary(bytes));
+        }
         if (oid == PostgresProtocol.Int16Oid && bytes.Length == sizeof(short))
-        { return Value(BinaryPrimitives.ReadInt16BigEndian(bytes)); }
+        {
+            return Value(BinaryPrimitives.ReadInt16BigEndian(bytes));
+        }
         if (oid == PostgresProtocol.Int32Oid && bytes.Length == sizeof(int))
-        { return Value(BinaryPrimitives.ReadInt32BigEndian(bytes)); }
+        {
+            return Value(BinaryPrimitives.ReadInt32BigEndian(bytes));
+        }
         if (oid == PostgresProtocol.Int64Oid && bytes.Length == sizeof(long))
-        { return Value(BinaryPrimitives.ReadInt64BigEndian(bytes)); }
+        {
+            return Value(BinaryPrimitives.ReadInt64BigEndian(bytes));
+        }
         if (oid == PostgresProtocol.BooleanOid && bytes.Length == sizeof(byte))
         {
             if (bytes[PostgresProtocol.FirstField] > PostgresProtocol.JsonbVersion)
-            { throw Errors.Fail(ErrorCode.Validation, PostgresProtocol.Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Validation, PostgresProtocol.Invalid);
+            }
             return Value(bytes[PostgresProtocol.FirstField] == PostgresProtocol.JsonbVersion);
         }
         if (oid is PostgresProtocol.Int16Oid or PostgresProtocol.Int32Oid or PostgresProtocol.Int64Oid or PostgresProtocol.BooleanOid)
-        { throw Errors.Fail(ErrorCode.Validation, PostgresProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, PostgresProtocol.Invalid);
+        }
         if (oid == PostgresProtocol.TextOid)
-        { return Value(Utf8.GetString(bytes)); }
+        {
+            return Value(Utf8.GetString(bytes));
+        }
         if (oid == PostgresProtocol.JsonOid)
-        { return Json(bytes, framing); }
+        {
+            return Json(bytes, framing);
+        }
         if (oid == PostgresProtocol.JsonbOid && !bytes.IsEmpty && bytes[PostgresProtocol.FirstField] == PostgresProtocol.JsonbVersion)
-        { return Json(bytes[sizeof(byte)..], framing); }
+        {
+            return Json(bytes[sizeof(byte)..], framing);
+        }
         if (oid == PostgresProtocol.JsonbOid)
-        { throw Errors.Fail(ErrorCode.Validation, PostgresProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, PostgresProtocol.Invalid);
+        }
         throw Errors.Fail(ErrorCode.UnsupportedCapability, PostgresProtocol.Unsupported);
     }
 

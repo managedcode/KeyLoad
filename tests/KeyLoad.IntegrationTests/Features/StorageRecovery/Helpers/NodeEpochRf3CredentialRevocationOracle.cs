@@ -17,13 +17,18 @@ internal static class NodeEpochRf3CredentialRevocationOracle
         await McpCallerAssertions.SdkStatusAsync(await admin.Sdk.ConfigureApiKeyAsync(Guid.NewGuid(), credential,
             cancellationToken).ConfigureAwait(false)).ConfigureAwait(false);
         var independent = workload with
-        { Reader = new(workload.Reader.PrincipalId, secret, workload.Reader.Principal, credential) };
+        {
+            Reader = new(workload.Reader.PrincipalId, secret, workload.Reader.Principal, credential)
+        };
         await using var callers = await NodeEpochRf3Callers.ConnectAsync(app, NodeEpochRf3Protocol.Node1,
             NodeEpochRf3Protocol.Node2, secret, cancellationToken).ConfigureAwait(false);
         await NodeEpochRf3ReadOracle.VerifyDocumentAsync(callers, independent, expectedCurrent: true, cancellationToken)
             .ConfigureAwait(false);
         await McpCallerAssertions.SdkStatusAsync(await admin.Sdk.ConfigureApiKeyAsync(Guid.NewGuid(),
-            credential with { Revoked = true }, cancellationToken).ConfigureAwait(false)).ConfigureAwait(false);
+            credential with
+            {
+                Revoked = true
+            }, cancellationToken).ConfigureAwait(false)).ConfigureAwait(false);
         await NodeEpochRf3AuthorizationOracle.AssertDeniedAsync(callers, independent, cancellationToken)
             .ConfigureAwait(false);
     }

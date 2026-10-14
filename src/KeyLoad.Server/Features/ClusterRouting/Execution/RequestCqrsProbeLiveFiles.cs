@@ -13,7 +13,9 @@ internal sealed class RequestCqrsProbeLiveFiles(string root, string session, Req
         var bytes = RequestCqrsProbeFiles.ReadRecord(path, options);
         var value = json.ReadLive(bytes);
         if (value.SessionId != session || RequestCqrsProbeLiveValidation.Name(value) != name)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         records.RegisterImmutable(name, bytes);
         present.Add(name);
         values.Add(value);
@@ -31,7 +33,9 @@ internal sealed class RequestCqrsProbeLiveFiles(string root, string session, Req
             {
                 if (values.Any(value => value.Kind == RequestCqrsProbeLiveProtocol.AckKind
                     && value.ArmId == challenge.ArmId && value.RequestId == challenge.RequestId && value.Step == challenge.Step))
-                { continue; }
+                {
+                    continue;
+                }
                 cancellationToken.ThrowIfCancellationRequested();
                 var ack = challenge with
                 {
@@ -54,21 +58,29 @@ internal sealed class RequestCqrsProbeLiveFiles(string root, string session, Req
         {
             var witness = RequestCqrsProbeLiveValidation.Witness(value);
             if (!witnesses.Contains(witness))
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             RequestCqrsProbeActivationValidation.RequireMarker(witness, markers);
             if (value.Step == RequestCqrsProbeLiveProtocol.AfterReplacement
                 && !values.Any(candidate => candidate.ArmId == value.ArmId && candidate.RequestId == value.RequestId
                     && candidate.Step == RequestCqrsProbeLiveProtocol.BeforeReplacement && candidate.Kind == RequestCqrsProbeLiveProtocol.AckKind))
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             if (value.Kind != RequestCqrsProbeLiveProtocol.AckKind)
-            { continue; }
+            {
+                continue;
+            }
             var expected = value with
             {
                 Kind = RequestCqrsProbeLiveProtocol.ChallengeKind,
                 ChallengeSha256 = RequestCqrsProbeLiveProtocol.EmptyDigest
             };
             if (!values.Contains(expected) || value.ChallengeSha256 != Hash(RequestCqrsProbeFiles.ReadRecord(Path.Combine(root, RequestCqrsProbeLiveValidation.Name(expected)), options)))
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
         }
     }
 

@@ -29,11 +29,17 @@ internal static class RetainedReplicaSnapshotScenario
         catch (Exception failure) when (IsNonFatalCleanupFailure(failure))
         {
             try
-            { await fixture.SaveFailureDiagnosticsAsync(); }
+            {
+                await fixture.SaveFailureDiagnosticsAsync();
+            }
             catch (Exception diagnosticsFailure) when (IsNonFatalCleanupFailure(diagnosticsFailure))
-            { failure.Data[Rf3DiagnosticsFailureKey] = diagnosticsFailure; }
+            {
+                failure.Data[Rf3DiagnosticsFailureKey] = diagnosticsFailure;
+            }
             if (replica is not null && !replicaRestarted)
-            { await RestoreFailedReplicaAsync(fixture, state, replica, failure); }
+            {
+                await RestoreFailedReplicaAsync(fixture, state, replica, failure);
+            }
             throw;
         }
     }
@@ -128,11 +134,17 @@ internal static class RetainedReplicaSnapshotScenario
     {
         using var recoveryTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(45), TimeProvider.System);
         try
-        { await fixture.RestartContainerAsync(replica.Name, recoveryTimeout.Token); }
+        {
+            await fixture.RestartContainerAsync(replica.Name, recoveryTimeout.Token);
+        }
         catch (Exception restartFailure) when (IsNonFatalCleanupFailure(restartFailure))
-        { failure.Data[Rf3RestartFailureKeyPrefix + replica.Name] = restartFailure; }
+        {
+            failure.Data[Rf3RestartFailureKeyPrefix + replica.Name] = restartFailure;
+        }
         if (state is null)
-        { return; }
+        {
+            return;
+        }
         try
         {
             await EventuallyAsync(async () =>
@@ -142,7 +154,9 @@ internal static class RetainedReplicaSnapshotScenario
             }, recoveryTimeout.Token);
         }
         catch (Exception readinessFailure) when (IsNonFatalCleanupFailure(readinessFailure))
-        { failure.Data[Rf3ReadinessFailureKey] = readinessFailure; }
+        {
+            failure.Data[Rf3ReadinessFailureKey] = readinessFailure;
+        }
     }
 
     private static async Task VerifyRecoveredReplicaAsync(SnapshotState state, int index, FinalCommand final,
@@ -168,14 +182,20 @@ internal static class RetainedReplicaSnapshotScenario
         CancellationToken cancellationToken)
     {
         var outboxReplay = Success(await client.CommitProjectionAsync(
-            state.ProjectionRequest with { CommandId = Guid.NewGuid() }, cancellationToken));
+            state.ProjectionRequest with
+            {
+                CommandId = Guid.NewGuid()
+            }, cancellationToken));
         await Assert.That(outboxReplay.AlreadyProcessed).IsTrue();
         await Assert.That(outboxReplay.Receipt.Token).IsEqualTo(state.OutboxEffect.Receipt.Token);
         await Assert.That(Success(await client.ReadChangesAsync(new(state.Partition, SnapshotDirectory), cancellationToken)).Changes.Length)
             .IsEqualTo(DocumentCount + 1);
         await Assert.That(Success(await client.ReadEventSourceAsync(new(state.Subscription.Source), cancellationToken)).Events)
             .HasSingleItem();
-        var replay = state.Processing with { CommandId = Guid.NewGuid() };
+        var replay = state.Processing with
+        {
+            CommandId = Guid.NewGuid()
+        };
         var replayed = Success(await RetryDuringElectionAsync(() => client.CommitSubscriptionProcessingAsync(replay, cancellationToken),
             cancellationToken));
         await Assert.That(replayed.AlreadyProcessed).IsTrue();

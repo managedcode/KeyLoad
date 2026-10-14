@@ -29,7 +29,9 @@ public sealed partial class DatabaseEngine
         if (request.ControlPartition is null || request.Scope is null || request.Action != EventFeedControlAction.Release
             || request.OriginalFirstIssuancePublicCommandId == Guid.Empty
             || request.CommandId == request.OriginalFirstIssuancePublicCommandId)
-        { throw Errors.Fail(ErrorCode.Validation, InvalidEventVectorFirstCleanup); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, InvalidEventVectorFirstCleanup);
+        }
         Authorization.Require(principal, request.ControlPartition, request.Scope.Resource, Capability.SubscriptionsManage);
         _ = StreamTraversalPlacement(bounded, request.ControlPartition, controlOwner);
         var admission = new EventVectorAdmissionPolicy(OperationLimitsOptions);
@@ -42,7 +44,9 @@ public sealed partial class DatabaseEngine
             row.OriginalAuthorizedSourceScopes, freshSourceWitness, admission);
         if (EventVectorRowStorage.Read<EventVectorMap>(bounded,
             EventVectorKeys.Map(request.ControlPartition, request.MapId), admission) is not null)
-        { throw Errors.Fail(ErrorCode.Conflict, InvalidEventVectorFirstCleanup); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, InvalidEventVectorFirstCleanup);
+        }
         var action = row.State == EventVectorFirstIssuanceState.Abandoned
             ? EventVectorControlAction.CleanupAbandonedIssuance : EventVectorControlAction.AbandonFirstIssuance;
         var phase = new EventVectorControlPhase(EventVectorFirstCleanupVersion, request, action,

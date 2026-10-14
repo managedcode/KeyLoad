@@ -20,7 +20,9 @@ internal static class NativeTextIncrementalPagePlanner
         if (batch.Entries.IsDefault || batch.Consumer.Released || records is null
             || nextRecord < InitialRecord || records.Length > maximumRecords
             || batch.ThroughSequence < batch.Consumer.Checkpoint)
-        { throw NativeTextErrors.Corrupt(); }
+        {
+            throw NativeTextErrors.Corrupt();
+        }
         budget.ChargeBytes(checked((long)records.Length * NativeTextIncrementalSourceProtocol.MapSlotBytes));
         var map = new Dictionary<EntityRef, NativeTextIncrementalRecord>();
         var ids = new HashSet<ulong>();
@@ -32,7 +34,9 @@ internal static class NativeTextIncrementalPagePlanner
                 || record.Revision <= InitialRevisionBoundary || record.CanonicalSha256.Length != SHA256.HashSizeInBytes
                 || record.Reference.Partition != batch.Consumer.Consumer.Partition
                 || record.Reference.Collection != collection || !map.TryAdd(record.Reference, record))
-            { throw NativeTextErrors.Corrupt(); }
+            {
+                throw NativeTextErrors.Corrupt();
+            }
         }
         var changes = new List<NativeTextIncrementalChange>();
         var previousSequence = batch.Consumer.Checkpoint;
@@ -41,7 +45,9 @@ internal static class NativeTextIncrementalPagePlanner
             budget.Check();
             if (previousSequence == long.MaxValue || entry.Sequence < previousSequence + SequenceStep
                 || entry.Sequence > batch.ThroughSequence || entry.Commit.AtomicPartitionId != batch.Consumer.Consumer.Partition.AtomicPartitionId)
-            { throw NativeTextErrors.Corrupt(); }
+            {
+                throw NativeTextErrors.Corrupt();
+            }
             var after = entry.After ?? throw NativeTextErrors.Corrupt();
             map.TryGetValue(after.Reference, out var current);
             NativeTextIncrementalRevision.Require(entry, current, batch.Consumer.Consumer.Partition, collection, budget);
@@ -61,7 +67,9 @@ internal static class NativeTextIncrementalPagePlanner
     private static ulong Allocate(int count, int maximumRecords, ref ulong nextRecord)
     {
         if (count >= maximumRecords || nextRecord == ulong.MaxValue)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, MapExceeded); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, MapExceeded);
+        }
         var result = nextRecord;
         nextRecord += RecordStep;
         return result;

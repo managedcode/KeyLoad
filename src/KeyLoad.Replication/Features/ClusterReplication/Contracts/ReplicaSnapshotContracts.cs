@@ -69,7 +69,10 @@ public sealed record SnapshotReply(
 public interface IReplicaSnapshotStore
 {
     /// <summary>Gets the published verified checkpoint, or null before checkpointing.</summary>
-    ReplicaSnapshot? Current { get; }
+    ReplicaSnapshot? Current
+    {
+        get;
+    }
     /// <summary>Reverifies the published recovery image before reclaiming one actual replica-prefix batch.</summary>
     /// <param name="cancellationToken">Original node-owner cancellation.</param>
     /// <returns>The actual number of reclaimed entry keys.</returns>

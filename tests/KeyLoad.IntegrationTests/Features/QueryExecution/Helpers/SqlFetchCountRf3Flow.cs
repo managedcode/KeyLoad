@@ -18,7 +18,9 @@ internal static class SqlFetchCountRf3Flow
                 {
                     SqlFetchCountRf3State state;
                     using (var setupDeadline = McpCallerDeadline.Create())
-                    { state = await SqlFetchCountRf3Setup.CreateAsync(fixture, setupDeadline.Token); }
+                    {
+                        state = await SqlFetchCountRf3Setup.CreateAsync(fixture, setupDeadline.Token);
+                    }
                     await WaveAsync(fixture, state, faultControls: true);
                     for (var cold = 0; cold < SqlFetchCountRf3Protocol.ColdCuts; cold++)
                     {

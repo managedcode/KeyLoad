@@ -19,7 +19,9 @@ internal static class NativeCoverageProductEvidenceFiles
         var inventory = NativeCoverageMergeEvidenceInventory.Read(evidenceRoot, limits, out entryCount);
         var originals = new Dictionary<string, OriginalFile>(StringComparer.Ordinal);
         foreach (var file in inventory)
-        { originals.Add(Path.GetFullPath(file.SourcePath), CaptureFile(file.SourcePath, limits)); }
+        {
+            originals.Add(Path.GetFullPath(file.SourcePath), CaptureFile(file.SourcePath, limits));
+        }
         return originals;
     }
 
@@ -31,7 +33,9 @@ internal static class NativeCoverageProductEvidenceFiles
             var current = CaptureFile(original.Path, limits);
             if (current.Length != original.Length || current.LastWriteTimeUtc != original.LastWriteTimeUtc
                 || !string.Equals(current.Sha256, original.Sha256, StringComparison.Ordinal))
-            { throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure); }
+            {
+                throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure);
+            }
         }
     }
     internal static string SelectOwnedDirectory(string evidenceRoot)
@@ -39,10 +43,14 @@ internal static class NativeCoverageProductEvidenceFiles
         var root = Path.GetFullPath(evidenceRoot);
         var parent = new DirectoryInfo(root);
         if (!parent.Exists || IsReparsePoint(parent))
-        { throw new IOException(NativeCoverageMergeProcess.OutputFailure); }
+        {
+            throw new IOException(NativeCoverageMergeProcess.OutputFailure);
+        }
         var path = Path.Combine(root, "unit-admission-" + Guid.NewGuid().ToString("N"));
         if (Directory.Exists(path) || File.Exists(path))
-        { throw new IOException(NativeCoverageMergeProcess.OutputFailure); }
+        {
+            throw new IOException(NativeCoverageMergeProcess.OutputFailure);
+        }
         return path;
     }
     internal static void CreateOwnedDirectory(string path)
@@ -50,23 +58,33 @@ internal static class NativeCoverageProductEvidenceFiles
         Directory.CreateDirectory(path);
         var directory = new DirectoryInfo(path);
         if (!directory.Exists || IsReparsePoint(directory))
-        { throw new IOException(NativeCoverageMergeProcess.OutputFailure); }
+        {
+            throw new IOException(NativeCoverageMergeProcess.OutputFailure);
+        }
 
     }
     internal static void DeleteOwnedDirectory(string path)
     {
         var directory = new DirectoryInfo(path);
         if (!directory.Exists)
-        { return; }
+        {
+            return;
+        }
         if (IsReparsePoint(directory))
-        { throw new IOException(NativeCoverageMergeProcess.OutputFailure); }
+        {
+            throw new IOException(NativeCoverageMergeProcess.OutputFailure);
+        }
         var files = Directory.GetFiles(path);
         if (Directory.GetDirectories(path).Length != 0 || files.Any(file =>
                 Path.GetFileName(file) is not (ModifiedTrxName or ModifiedDescriptorName)
                 || IsReparsePoint(new FileInfo(file))))
-        { throw new IOException(NativeCoverageMergeProcess.OutputFailure); }
+        {
+            throw new IOException(NativeCoverageMergeProcess.OutputFailure);
+        }
         foreach (var file in files)
-        { File.Delete(file); }
+        {
+            File.Delete(file);
+        }
         Directory.Delete(path);
     }
     internal static string WriteRejectedCopies(string evidenceRoot, string descriptorPath,
@@ -94,7 +112,9 @@ internal static class NativeCoverageProductEvidenceFiles
             || rejectedDescriptorBytes.LongLength > limits.MaximumDescriptorBytes
             || rejectedDescriptorBytes.LongLength > limits.MaximumFileBytes
             || originalBytes > limits.MaximumTotalBytes - rejectedTrx.LongLength - rejectedDescriptorBytes.LongLength)
-        { throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure); }
+        {
+            throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure);
+        }
         WriteCreateOnly(trxPath, rejectedTrx);
         var rejectedDescriptorPath = WriteDescriptorCopy(temporaryRoot, rejectedDescriptorBytes);
         _ = NativeCoverageMergeEvidenceInventory.Read(evidenceRoot, limits, out _);
@@ -119,13 +139,18 @@ internal static class NativeCoverageProductEvidenceFiles
     {
         using var input = new MemoryStream(original, writable: false);
         using var reader = XmlReader.Create(input, new XmlReaderSettings
-        { DtdProcessing = DtdProcessing.Prohibit, XmlResolver = null });
+        {
+            DtdProcessing = DtdProcessing.Prohibit,
+            XmlResolver = null
+        });
         var document = new XmlDocument { XmlResolver = null };
         document.Load(reader);
         var results = document.GetElementsByTagName("UnitTestResult");
         if (results.Count == 0 || results[0] is not XmlElement result
             || !string.Equals(result.GetAttribute("outcome"), "Passed", StringComparison.Ordinal))
-        { throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure); }
+        {
+            throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure);
+        }
         result.SetAttribute("outcome", "Failed");
         using var output = new MemoryStream();
         document.Save(output);
@@ -134,18 +159,24 @@ internal static class NativeCoverageProductEvidenceFiles
     private static string ResolveEvidenceReference(string evidenceRoot, string? relativePath)
     {
         if (string.IsNullOrWhiteSpace(relativePath) || Path.IsPathRooted(relativePath))
-        { throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure); }
+        {
+            throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure);
+        }
         var root = Path.TrimEndingDirectorySeparator(Path.GetFullPath(evidenceRoot));
         var path = Path.GetFullPath(Path.Combine(root, relativePath.Replace('/', Path.DirectorySeparatorChar)));
         if (!path.StartsWith(root + Path.DirectorySeparatorChar, PathComparison))
-        { throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure); }
+        {
+            throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure);
+        }
         return path;
     }
     private static byte[] ReadBoundedBytes(string path, long maximumBytes, int readBufferBytes)
     {
         var info = new FileInfo(path);
         if (!info.Exists || info.Length <= 0 || info.Length > maximumBytes || IsReparsePoint(info))
-        { throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure); }
+        {
+            throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure);
+        }
         var beforeLength = info.Length;
         var beforeWrite = info.LastWriteTimeUtc;
         using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
@@ -155,20 +186,26 @@ internal static class NativeCoverageProductEvidenceFiles
         while ((read = stream.Read(buffer, 0, buffer.Length)) > 0)
         {
             if (output.Length > maximumBytes - read)
-            { throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure); }
+            {
+                throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure);
+            }
             output.Write(buffer, 0, read);
         }
         info.Refresh();
         if (output.Length != beforeLength || info.Length != beforeLength || info.LastWriteTimeUtc != beforeWrite
             || IsReparsePoint(info))
-        { throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure); }
+        {
+            throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure);
+        }
         return output.ToArray();
     }
     private static OriginalFile CaptureFile(string path, NativeCoverageExecutionOptions limits)
     {
         var before = new FileInfo(path);
         if (!before.Exists || before.Length < 0 || before.Length > limits.MaximumFileBytes || IsReparsePoint(before))
-        { throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure); }
+        {
+            throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure);
+        }
         using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
         using var digest = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         var buffer = new byte[limits.ReadBufferBytes];
@@ -178,20 +215,26 @@ internal static class NativeCoverageProductEvidenceFiles
         {
             length += read;
             if (length > limits.MaximumFileBytes)
-            { throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure); }
+            {
+                throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure);
+            }
             digest.AppendData(buffer, 0, read);
         }
         var after = new FileInfo(path);
         if (length != before.Length || after.Length != before.Length || after.LastWriteTimeUtc != before.LastWriteTimeUtc
             || IsReparsePoint(after))
-        { throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure); }
+        {
+            throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure);
+        }
         return new(path, length, before.LastWriteTimeUtc, Convert.ToHexStringLower(digest.GetHashAndReset()));
     }
     private static long SumBytes(IReadOnlyDictionary<string, OriginalFile> originals)
     {
         long total = 0;
         foreach (var file in originals.Values)
-        { total = checked(total + file.Length); }
+        {
+            total = checked(total + file.Length);
+        }
         return total;
     }
     private static void WriteCreateOnly(string path, byte[] contents)

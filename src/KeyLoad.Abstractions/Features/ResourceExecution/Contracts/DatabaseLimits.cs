@@ -99,11 +99,17 @@ public sealed record DatabaseLimits
 
     /// <summary>Optional finite source transfer Accept ceiling, including its original attempt; null disables advancement.</summary>
     [Orleans.Id(QueueTransferAttemptCeilingField)]
-    public int? MaxQueueTransferAcceptAttempts { get; init; }
+    public int? MaxQueueTransferAcceptAttempts
+    {
+        get; init;
+    }
 
     /// <summary>Optional bounded transfer policy-repair attempts; null disables automatic repair.</summary>
     [Orleans.Id(QueueTransferRepairCeilingField)]
-    public int? MaxQueueTransferRepairAttempts { get; init; }
+    public int? MaxQueueTransferRepairAttempts
+    {
+        get; init;
+    }
 
     /// <summary>Checks that execution budgets are positive and optional reserved budgets are nonnegative.</summary>
     /// <returns>Whether the configured budgets are valid.</returns>

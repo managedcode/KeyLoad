@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.UnitTests.Features.Search;
 
@@ -49,7 +49,9 @@ internal sealed class AnnSettledStreamShapeTests
         var id = Guid.NewGuid();
         var phases = new List<AnnMaintenancePhase> { AnnMaintenancePhase.Configure, AnnMaintenancePhase.Capture };
         for (var page = FirstOffset; page < replayPages; page++)
-        { phases.Add(AnnMaintenancePhase.Replay); }
+        {
+            phases.Add(AnnMaintenancePhase.Replay);
+        }
         phases.AddRange([AnnMaintenancePhase.Verify, AnnMaintenancePhase.NativeIndex,
             AnnMaintenancePhase.Publish, AnnMaintenancePhase.Checkpoint, AnnMaintenancePhase.Completed]);
         var frames = await NativeAnnSettledProgressFrames.CreateAsync(id, phases.ToArray());
@@ -95,7 +97,9 @@ internal sealed class AnnSettledStreamShapeTests
                 await Assert.That(shape.Completed).IsFalse();
             }
             else
-            { shape.Admit(frames[index], FirstProgressSequence + index); }
+            {
+                shape.Admit(frames[index], FirstProgressSequence + index);
+            }
         }
         await Assert.That(shape.Completed).IsTrue();
     }

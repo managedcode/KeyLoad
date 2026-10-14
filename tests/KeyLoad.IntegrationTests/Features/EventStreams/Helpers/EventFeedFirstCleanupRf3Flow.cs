@@ -11,7 +11,11 @@ internal static class EventFeedFirstCleanupRf3Flow
     internal static async Task RunAsync(TwoRf3MembershipWave wave, string credential,
         EventFeedControlRequest healthy, CancellationToken token)
     {
-        var original = healthy with { CommandId = Guid.NewGuid(), MapId = Guid.NewGuid() };
+        var original = healthy with
+        {
+            CommandId = Guid.NewGuid(),
+            MapId = Guid.NewGuid()
+        };
         using var http = McpCallerHttp.Create(wave.Application, TwoRf3MembershipProtocol.Node1);
         var sdk = new KeyLoadClient(http, credential, IntegrationClientOptions.Execution());
         var signed = await PartitionMovementExpiredRetireSealedOperationRf3Trial.ReadDiscoveryAsync(wave, token).ConfigureAwait(false);

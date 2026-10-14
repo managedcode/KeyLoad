@@ -31,7 +31,9 @@ internal static class PartitionMoveParentReadDiagnostic
     internal static KeyLoadException Propagated(KeyLoadException error)
     {
         if (error.Code == ErrorCode.OwnershipLost)
-        { error.Data[MetadataKey] = new Witness(ParentReply, Unknown, Unknown, Unknown); }
+        {
+            error.Data[MetadataKey] = new Witness(ParentReply, Unknown, Unknown, Unknown);
+        }
         return error;
     }
 
@@ -39,7 +41,9 @@ internal static class PartitionMoveParentReadDiagnostic
     {
         if (error is not KeyLoadException domain || domain.Code != ErrorCode.OwnershipLost
             || error.Data[MetadataKey] is not Witness witness || !Valid(witness))
-        { return Unobserved; }
+        {
+            return Unobserved;
+        }
         var compared = witness.Route == LocalPhase;
         return FormattableString.Invariant($"{RouteField}{witness.Route}{ComparisonField}{compared}{EqualField}{false}{CanonicalField}{witness.CanonicalLength}{OriginalField}{witness.OriginalLength}{DifferenceField}{witness.FirstDifference}");
     }
@@ -63,7 +67,9 @@ internal static class PartitionMoveParentReadDiagnostic
         for (var index = InitialOffset; index < length; index++)
         {
             if (canonical[index] != original[index])
-            { return index; }
+            {
+                return index;
+            }
         }
         return canonical.Length == original.Length ? Unknown : length;
     }

@@ -15,23 +15,31 @@ internal static class NativeCancelledSqlInspection
         var limits = limitsOptions.Value;
         limits.Validate();
         if (prefixLimit <= EmptyPrefixLength || sql.Length > limits.MaxQueryBytes)
-        { return true; }
+        {
+            return true;
+        }
         var length = Math.Min(sql.Length, prefixLimit);
         var prefix = sql[..length];
         if (Encoding.UTF8.GetByteCount(prefix) > limits.MaxQueryBytes)
-        { return true; }
+        {
+            return true;
+        }
         try
         {
             var parser = new Dom.TSql180Parser(initialQuotedIdentifiers: true, Dom.SqlEngineType.Standalone);
             using var reader = new StringReader(prefix);
             var tokens = parser.GetTokenStream(reader, out var errors);
             if (errors.Count != NoParserErrors)
-            { return true; }
+            {
+                return true;
+            }
             ScriptDomTokenBounds.Require(tokens, limits, static () => { });
             return FirstMayWrite(tokens, length, sql.Length);
         }
         catch (KeyLoadException)
-        { return true; }
+        {
+            return true;
+        }
     }
 
     private static bool FirstMayWrite(IList<Dom.TSqlParserToken> tokens, int prefixLength, int sourceLength)
@@ -40,9 +48,13 @@ internal static class NativeCancelledSqlInspection
         {
             if (token.TokenType is Dom.TSqlTokenType.WhiteSpace or Dom.TSqlTokenType.SingleLineComment
                 or Dom.TSqlTokenType.MultilineComment)
-            { continue; }
+            {
+                continue;
+            }
             if (token.TokenType != Dom.TSqlTokenType.Select)
-            { return true; }
+            {
+                return true;
+            }
             var end = checked(token.Offset + token.Text.Length);
             // EOF of a truncated prefix is not the original keyword boundary.
             return end >= prefixLength && end != sourceLength;

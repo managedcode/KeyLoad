@@ -12,13 +12,17 @@ internal static class QueueLeaseAuthorityProcessHealthy
         var outcomes = new List<(ReplicatedOperation Operation, CommitReceipt Receipt)> { (original, receipt) };
         await ReplayAsync(database, outcomes);
         foreach (var id in new[] { QueueOrderedRetryCrashProtocol.First, QueueOrderedRetryCrashProtocol.Second })
-        { await CompleteAsync(database, retryAt, id, outcomes); }
+        {
+            await CompleteAsync(database, retryAt, id, outcomes);
+        }
         await QueueOrderedRetryRecoveryTerminal.AssertAsync(database, healthy: false);
         var commandId = Guid.NewGuid();
         var producer = database.NormalizeOperation(CrashDatabase.Operation(OperationKind.Batch,
             new CommandRequest(commandId, QueueOrderedRetryCrashProtocol.Partition,
                 [QueueOrderedRetryCrashSeed.Enqueue(QueueOrderedRetryCrashProtocol.Healthy)]), commandId) with
-        { EvaluatedAt = retryAt });
+        {
+            EvaluatedAt = retryAt
+        });
         outcomes.Add((producer, database.Apply(producer).Get<CommitReceipt>()));
         await QueueOrderedRetryRecoveryImage.MessageAsync(database,
             new(QueueOrderedRetryCrashProtocol.Partition, QueueOrderedRetryCrashProtocol.Queue),
@@ -45,13 +49,19 @@ internal static class QueueLeaseAuthorityProcessHealthy
     {
         var request = new ReceiveRequest(Guid.NewGuid(), new(QueueOrderedRetryCrashProtocol.Partition, QueueOrderedRetryCrashProtocol.Queue), MaxMessages: 1);
         var operation = database.PrepareQueueRetryOperation(database.NormalizeOperation(
-            CrashDatabase.Operation(OperationKind.Receive, request, request.RequestId) with { EvaluatedAt = at }));
+            CrashDatabase.Operation(OperationKind.Receive, request, request.RequestId) with
+            {
+                EvaluatedAt = at
+            }));
         var delivery = await Assert.That(database.Apply(operation).Get<ReceiveResult>().Deliveries).HasSingleItem();
         await Assert.That(delivery.Id).IsEqualTo(id);
         await Assert.That(delivery.PayloadJson).IsEqualTo(QueueOrderedRetryCrashProtocol.Payload);
         await Assert.That(delivery.HeadersJson).IsEqualTo(QueueOrderedRetryCrashProtocol.Headers);
         var command = new DeliveryCommand(Guid.NewGuid(), request.Lane, delivery.Token, DeliveryAction.Ack);
-        var acknowledged = database.NormalizeOperation(CrashDatabase.Operation(OperationKind.Delivery, command, command.CommandId) with { EvaluatedAt = at });
+        var acknowledged = database.NormalizeOperation(CrashDatabase.Operation(OperationKind.Delivery, command, command.CommandId) with
+        {
+            EvaluatedAt = at
+        });
         outcomes.Add((acknowledged, database.Apply(acknowledged).Get<CommitReceipt>()));
     }
 }

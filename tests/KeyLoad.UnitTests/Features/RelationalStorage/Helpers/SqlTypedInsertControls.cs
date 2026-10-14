@@ -9,7 +9,9 @@ internal static class SqlTypedInsertControls
         var image = QueueWholeFlowStorage.Bytes(fixture.Store);
         var cut = fixture.Store.Position;
         foreach (var sql in Unsupported)
-        { await RefusalAsync(() => SqlTypedInsertLiteral.Compile(fixture.Partition, Guid.NewGuid(), sql, token), ErrorCode.UnsupportedCapability); }
+        {
+            await RefusalAsync(() => SqlTypedInsertLiteral.Compile(fixture.Partition, Guid.NewGuid(), sql, token), ErrorCode.UnsupportedCapability);
+        }
         await RefusalAsync(() => SqlTypedInsertLiteral.Compile(fixture.Partition, Guid.NewGuid(), DuplicateColumns, token), ErrorCode.Validation);
         var options = UnitExecutionOptions.DatabaseLimits();
         await RefusalAsync(() => SqlOperationCompiler.Compile(new(fixture.Partition, SqlTypedInsertLiteral.Repair), options,

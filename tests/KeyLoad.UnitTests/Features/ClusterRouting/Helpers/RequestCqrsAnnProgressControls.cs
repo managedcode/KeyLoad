@@ -1,5 +1,5 @@
 using System.Runtime.CompilerServices;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.UnitTests.Features.Messaging;
 using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.DependencyInjection;
@@ -66,6 +66,9 @@ internal static class RequestCqrsAnnProgressControls
         [EnumeratorCancellation] CancellationToken token)
     {
         await foreach (var frame in stream.WithCancellation(token))
-        { frames.Add(frame); yield return frame; }
+        {
+            frames.Add(frame);
+            yield return frame;
+        }
     }
 }

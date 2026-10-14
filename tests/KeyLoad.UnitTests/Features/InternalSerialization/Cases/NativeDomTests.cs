@@ -15,7 +15,11 @@ internal sealed class NativeDomTests
         var root = new JsonTreeNode { Kind = JsonValueKind.Array, Items = [shared, shared] };
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => NativeDomFixtures.Convert(root)).Code)
             .IsEqualTo(ErrorCode.Corruption);
-        var actual = NativeDomFixtures.Convert(new() { Kind = JsonValueKind.Array, Items = [NativeDomFixtures.Null(), NativeDomFixtures.Null()] });
+        var actual = NativeDomFixtures.Convert(new()
+        {
+            Kind = JsonValueKind.Array,
+            Items = [NativeDomFixtures.Null(), NativeDomFixtures.Null()]
+        });
         await Assert.That(actual.GetArrayLength()).IsEqualTo(2);
     }
 
@@ -48,7 +52,10 @@ internal sealed class NativeDomTests
     {
         var shared = new string('x', NativeSerializationLimits.MaximumDomBytes / StringDivisor);
         var properties = Enumerable.Range(0, Repetitions).Select(_ => new JsonTreeProperty
-        { Name = shared, Value = NativeDomFixtures.Null() }).ToArray();
+        {
+            Name = shared,
+            Value = NativeDomFixtures.Null()
+        }).ToArray();
         var root = new JsonTreeNode { Kind = JsonValueKind.Object, Properties = properties };
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => NativeDomFixtures.Convert(root)).Code)
             .IsEqualTo(ErrorCode.Corruption);

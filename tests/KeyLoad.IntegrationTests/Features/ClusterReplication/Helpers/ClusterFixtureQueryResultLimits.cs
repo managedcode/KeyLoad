@@ -32,7 +32,9 @@ internal static class ClusterFixtureQueryResultLimits
                 .Single(resource => resource.Name == ClusterFixtureProtocol.NodeName(number)));
             node.WithEnvironment(ApproximateSearchSetting, options.EnableApproximateSearch.ToString());
             if (options.MaximumResultBytes is { } maximum)
-            { node.WithEnvironment(MaximumResultBytesSetting, maximum.ToString(System.Globalization.CultureInfo.InvariantCulture)); }
+            {
+                node.WithEnvironment(MaximumResultBytesSetting, maximum.ToString(System.Globalization.CultureInfo.InvariantCulture));
+            }
         }
     }
 }

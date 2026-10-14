@@ -48,7 +48,9 @@ internal static class QueueScheduledAuthorityHistory
                 await Assert.That(replay.NativeValue).IsNull();
             }
             else
-            { await Assert.That(NativeSerialization.Serialize(replay).SequenceEqual(NativeSerialization.Serialize(result))).IsTrue(); }
+            {
+                await Assert.That(NativeSerialization.Serialize(replay).SequenceEqual(NativeSerialization.Serialize(result))).IsTrue();
+            }
         }
         await QueuePendingAuthorityHistory.SameAsync(store, before);
     }

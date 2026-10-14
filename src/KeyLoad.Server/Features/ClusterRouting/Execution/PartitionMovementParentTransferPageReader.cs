@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Orleans;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
@@ -44,17 +44,23 @@ internal sealed class PartitionMovementParentTransferPageReader
                     .SequenceEqual(NativeSerialization.Serialize(capture.OriginalDescriptor))
                 || handle.PageCount != capture.OriginalDescriptor!.Families.Sum(static family => family.PageCount)
                 || ordinal < PartitionMoveProtocol.EmptyCount || ordinal >= handle.PageCount)
-            { throw Errors.Fail(ErrorCode.Corruption, PartitionMovementProtocol.InvalidProof); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, PartitionMovementProtocol.InvalidProof);
+            }
             var reply = await client.ReadTransferDataAsync(principalId, authority,
                 PartitionMovementTransferDataAction.Page, handle.HandleId, ordinal, expiry, work,
                 cancellationToken).ConfigureAwait(false);
             var actual = ReadTransferResult(reply).Page
                 ?? throw Errors.Fail(ErrorCode.Corruption, PartitionMovementProtocol.InvalidProof);
             if (actual.HandleId != handle.HandleId || actual.Ordinal != ordinal)
-            { throw Errors.Fail(ErrorCode.Corruption, PartitionMovementProtocol.InvalidProof); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, PartitionMovementProtocol.InvalidProof);
+            }
             page = NativeSerialization.Deserialize<PartitionMoveImagePage>(actual.NativePage.Span);
             if (page.MoveId != request.MoveId || page.Partition != request.Partition || page.Ordinal != ordinal)
-            { throw Errors.Fail(ErrorCode.Corruption, PartitionMovementProtocol.InvalidProof); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, PartitionMovementProtocol.InvalidProof);
+            }
         }, failures).ConfigureAwait(false);
         var beforeCloseFailures = failures.Count;
         await ServerFailureObserver.ObserveAsync(() => CloseOriginalAsync(principalId, authority,
@@ -79,13 +85,17 @@ internal sealed class PartitionMovementParentTransferPageReader
         var actual = ReadTransferResult(closed).Closed;
         if (actual?.HandleId != handle.HandleId
             || actual.Disposition != PartitionMovementTransferCloseDisposition.Joined)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMovementProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMovementProtocol.InvalidProof);
+        }
     }
 
     private static PartitionMovementTransferDataResult ReadTransferResult(GrainOperationReply reply)
     {
         if (reply.Error is { } code)
-        { throw Errors.Fail(code, reply.SafeDetail ?? PartitionMovementProtocol.Unavailable); }
+        {
+            throw Errors.Fail(code, reply.SafeDetail ?? PartitionMovementProtocol.Unavailable);
+        }
         return GrainNativePayload.Read<GrainValue>(reply.Payload).Value as PartitionMovementTransferDataResult
             ?? throw Errors.Fail(ErrorCode.Corruption, PartitionMovementProtocol.InvalidProof);
     }

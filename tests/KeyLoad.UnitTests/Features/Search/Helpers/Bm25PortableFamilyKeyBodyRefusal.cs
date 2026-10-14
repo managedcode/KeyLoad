@@ -32,7 +32,10 @@ internal static class Bm25PortableFamilyKeyBodyRefusal
         if (repairRequired)
         {
             ServerFailureObserver.Observe(() => fixture.Source.Store.Commit((transaction, _) =>
-                { transaction.Put(key, bytes[0]); return true; }), failures);
+                {
+                    transaction.Put(key, bytes[0]);
+                    return true;
+                }), failures);
         }
         ServerFailureObserver.ThrowIfAny(failures);
         await Bm25PortableFamilyBytes.SameAsync(originalRows, Bm25PortableFamilyBytes.Complete(
@@ -82,6 +85,8 @@ internal static class Bm25PortableFamilyKeyBodyRefusal
     {
         await Assert.That(actual.Length).IsEqualTo(expected.Length);
         for (var index = 0; index < expected.Length; index++)
-        { await Assert.That(actual[index].AsSpan().SequenceEqual(expected[index])).IsTrue(); }
+        {
+            await Assert.That(actual[index].AsSpan().SequenceEqual(expected[index])).IsTrue();
+        }
     }
 }

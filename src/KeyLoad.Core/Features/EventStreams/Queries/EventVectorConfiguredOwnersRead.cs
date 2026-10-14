@@ -19,7 +19,9 @@ public sealed partial class DatabaseEngine
             var bounded = work.CreateView(view);
             var principal = Principal(bounded, principalId, EvaluationClock.GetUtcNow());
             if (request.ControlPartition is null || request.Scope is null)
-            { throw Errors.Fail(ErrorCode.Validation, InvalidEventVectorConfiguredOwners); }
+            {
+                throw Errors.Fail(ErrorCode.Validation, InvalidEventVectorConfiguredOwners);
+            }
             ValidatePartition(request.ControlPartition);
             Authorization.Require(principal, request.ControlPartition, request.Scope.Resource,
                 Capability.SubscriptionsManage);
@@ -33,7 +35,9 @@ public sealed partial class DatabaseEngine
                 ?? throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidEventVectorConfiguredOwners);
             if (!PhysicalOwnerEntryValidation.SameOwner(directory.ControlOwner, owner)
                 || owner.Incarnation != Store.Identity.Incarnation)
-            { throw Errors.Fail(ErrorCode.OwnershipLost, InvalidEventVectorConfiguredOwners); }
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, InvalidEventVectorConfiguredOwners);
+            }
             cancellationToken.ThrowIfCancellationRequested();
             work.CheckResult(directory);
             return directory;

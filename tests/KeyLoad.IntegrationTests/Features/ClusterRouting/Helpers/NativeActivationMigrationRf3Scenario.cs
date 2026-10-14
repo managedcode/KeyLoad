@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.DocumentStorage;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
@@ -27,13 +27,19 @@ internal static class NativeActivationMigrationRf3Scenario
             await ExecuteAsync(wave, administrator, callers, identity, cancellationToken).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
         if (callers is { } originalCallers)
-        { await ServerFailureObserver.ObserveAsync(() => originalCallers.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => originalCallers.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         if (administrator is { } admin)
-        { await ServerFailureObserver.ObserveAsync(() => admin.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => admin.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         if (wave is { } owners)
         {
             if (failures.Count != EmptyFailureCount)
-            { owners.RetainRoots(); }
+            {
+                owners.RetainRoots();
+            }
             await ServerFailureObserver.ObserveAsync(() => owners.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         }
         ServerFailureObserver.ThrowIfAny(failures);

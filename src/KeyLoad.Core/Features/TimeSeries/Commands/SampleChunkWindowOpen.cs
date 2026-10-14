@@ -13,17 +13,25 @@ internal static class SampleChunkWindowOpen
         SampleChunkWindowScope.Require(database, tx, principal, partition, request.SeriesSet, request.SeriesId, request.WindowId);
         SampleRollupValidation.Range(request.From, request.Until);
         if (options.Value.MaximumChunkWindowRecords > database.Limits.MaxScanRecords)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, SampleChunkLifecycleProtocol.Exhausted); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, SampleChunkLifecycleProtocol.Exhausted);
+        }
         var charge = new SampleChunkReadCharge(database.Limits.MaxQueryReadBytes);
         var watermark = SampleRollupRecords.Watermark(tx, partition, request.SeriesSet, request.SeriesId, charge.Charge);
         if (watermark.Floor is { } floor && request.From.UtcTicks < floor)
-        { throw Errors.Fail(ErrorCode.HistoryUnavailable, SampleChunkLifecycleProtocol.Missing); }
+        {
+            throw Errors.Fail(ErrorCode.HistoryUnavailable, SampleChunkLifecycleProtocol.Missing);
+        }
         var windows = SampleChunkStorage.Windows(tx, partition, request.SeriesSet, request.SeriesId, options.Value, charge);
         if (windows.Count >= options.Value.MaximumChunkWindows)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, SampleChunkLifecycleProtocol.Exhausted); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, SampleChunkLifecycleProtocol.Exhausted);
+        }
         if (windows.Any(window => window.WindowId == request.WindowId || window.State != SampleChunkWindowState.Dropped
             && window.FromUtcTicks < request.Until.UtcTicks && window.UntilUtcTicks > request.From.UtcTicks))
-        { throw Errors.Fail(ErrorCode.Conflict, SampleChunkLifecycleProtocol.Existing); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, SampleChunkLifecycleProtocol.Existing);
+        }
         RequireEmpty(tx, partition, request, charge);
         var window = new SampleChunkWindow(SampleChunkLifecycleProtocol.Version, request.WindowId,
             request.From.UtcTicks, request.Until.UtcTicks, SampleChunkLifecycleProtocol.First,
@@ -43,6 +51,8 @@ internal static class SampleChunkWindowOpen
             SampleReadKeys.FromInclusive(partition, request.SeriesSet, request.SeriesId, request.From),
             SampleReadKeys.UntilExclusive(partition, request.SeriesSet, request.SeriesId, request.Until), charge.Charge);
         if (found)
-        { throw Errors.Fail(ErrorCode.Conflict, SampleChunkLifecycleProtocol.Existing); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, SampleChunkLifecycleProtocol.Existing);
+        }
     }
 }

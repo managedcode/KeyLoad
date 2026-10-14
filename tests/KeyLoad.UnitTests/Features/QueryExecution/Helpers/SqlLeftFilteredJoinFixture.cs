@@ -50,7 +50,10 @@ internal static class SqlLeftFilteredJoinFixture
 
     internal static QueryRequest Request(PartitionRef partition, string? sql = null)
         => new(partition, sql ?? ParameterSql,
-            Parameters: new() { [MinimumParameter] = System.Text.Json.JsonSerializer.SerializeToElement(7) },
+            Parameters: new()
+            {
+                [MinimumParameter] = System.Text.Json.JsonSerializer.SerializeToElement(7)
+            },
             AllowFullScan: true, QueryDialectVersion: 2);
 
     internal static AstQueryRequest Ast(PartitionRef partition)
@@ -59,6 +62,9 @@ internal static class SqlLeftFilteredJoinFixture
             new Logical(new Comparison(new FieldOperand("/total"), ">=", new ParameterOperand(MinimumParameter)),
                 "AND", new Negation(new NullTest(new FieldOperand("/total"), false, false))),
             [new("/order_id", false)], 10, InnerJoin: new(Right, "r", "/customer_id", "/id")),
-            Parameters: new() { [MinimumParameter] = System.Text.Json.JsonSerializer.SerializeToElement(7) },
+            Parameters: new()
+            {
+                [MinimumParameter] = System.Text.Json.JsonSerializer.SerializeToElement(7)
+            },
             AllowFullScan: true, AstVersion: 2);
 }

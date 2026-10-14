@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using Microsoft.Extensions.Logging;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
@@ -14,37 +14,76 @@ internal sealed class MultiLaneReceiveFailureCapture(int maximumRecords) : ILogg
     private bool exhausted;
     private bool disposed;
     private string Summary { get; set; } = string.Empty;
-    internal string LatestSummary { get { lock (gate) { return Summary; } } }
-    internal int Count { get { lock (gate) { return records.Count; } } }
+    internal string LatestSummary
+    {
+        get
+        {
+            lock (gate)
+            {
+                return Summary;
+            }
+        }
+    }
+    internal int Count
+    {
+        get
+        {
+            lock (gate)
+            {
+                return records.Count;
+            }
+        }
+    }
     public ILogger CreateLogger(string categoryName)
         => new CaptureLogger(this, categoryName == typeof(ConnectionGrain).FullName);
-    public void Dispose() { lock (gate) { disposed = true; } }
+    public void Dispose()
+    {
+        lock (gate)
+        {
+            disposed = true;
+        }
+    }
 
     private void Capture<TState>(EventId id, TState state)
     {
         if (id.Id != NativeFailureEventId
             || state is not IEnumerable<KeyValuePair<string, object?>> fields)
-        { return; }
+        {
+            return;
+        }
         GrainFailureStage? stage = null;
         GrainFailureCategory? category = null;
         ErrorCode? errorCode = null;
         foreach (var field in fields)
         {
             if (field.Key == StageKey && field.Value is GrainFailureStage actualStage && Enum.IsDefined(actualStage))
-            { stage = actualStage; }
+            {
+                stage = actualStage;
+            }
             if (field.Key == CategoryKey && field.Value is GrainFailureCategory actualCategory && Enum.IsDefined(actualCategory))
-            { category = actualCategory; }
+            {
+                category = actualCategory;
+            }
             if (field.Key == ErrorCodeKey && field.Value is ErrorCode actualCode && Enum.IsDefined(actualCode))
-            { errorCode = actualCode; }
+            {
+                errorCode = actualCode;
+            }
         }
         if (stage is not { } validStage || category is not { } validCategory || errorCode is not { } validCode)
-        { return; }
+        {
+            return;
+        }
         lock (gate)
         {
             if (disposed)
-            { return; }
+            {
+                return;
+            }
             if (records.Count >= maximumRecords)
-            { exhausted = true; return; }
+            {
+                exhausted = true;
+                return;
+            }
             records.Add(new(validStage, validCategory, validCode));
         }
     }
@@ -70,6 +109,11 @@ internal sealed class MultiLaneReceiveFailureCapture(int maximumRecords) : ILogg
         public bool IsEnabled(LogLevel logLevel) => enabled;
         public void Log<TState>(LogLevel level, EventId eventId, TState state, Exception? exception,
             Func<TState, Exception?, string> formatter)
-        { if (enabled) { owner.Capture(eventId, state); } }
+        {
+            if (enabled)
+            {
+                owner.Capture(eventId, state);
+            }
+        }
     }
 }

@@ -15,7 +15,9 @@ internal static class RemoteTransferNativeReplayOperation
         RemoteTransferNativeReplayHold hold, RemoteModelNativeReplayVariation mode, CancellationToken token)
     {
         if (mode is not (RemoteModelNativeReplayVariation.Original2 or RemoteModelNativeReplayVariation.AllWireFaults6))
-        { throw Missing(); }
+        {
+            throw Missing();
+        }
         using var membership = await RemoteTransferNativeMembership.ReadAsync(wave, token);
         var scope = Scope(wave, seed, accept, hold.ArmId);
         var before = await ReadAsync(wave, membership, scope, token);
@@ -47,22 +49,32 @@ internal static class RemoteTransferNativeReplayOperation
             }
             hold.Release();
             if (mode == RemoteModelNativeReplayVariation.Original2)
-            { await QueueProducerRf3Assertions.DeniedAsync(await original, ErrorCode.UnknownWriteOutcome); }
+            {
+                await QueueProducerRf3Assertions.DeniedAsync(await original, ErrorCode.UnknownWriteOutcome);
+            }
             else
-            { foregroundReceipt = await McpCallerAssertions.SdkSuccessAsync(await original); }
+            {
+                foregroundReceipt = await McpCallerAssertions.SdkSuccessAsync(await original);
+            }
             var released = await ReadAsync(wave, membership, scope, token);
             if (mode == RemoteModelNativeReplayVariation.Original2)
-            { RemoteTransferNativeCutLifecycle.RequireUnchanged(after, released, token); }
+            {
+                RemoteTransferNativeCutLifecycle.RequireUnchanged(after, released, token);
+            }
             committed ??= RemoteTransferNativeCommittedCut.Read(released[TwoRf3MembershipProtocol.Nodes[3]], seed, accept, captured);
             await RemoteTransferNativeCutLifecycle.RequireTargetAsync(released, seed, accept, captured, committed);
             if (foregroundReceipt is { } actualReceipt)
-            { await SqlRf3Protocol.EqualAsync(committed.OriginalReceipt, actualReceipt); }
+            {
+                await SqlRf3Protocol.EqualAsync(committed.OriginalReceipt, actualReceipt);
+            }
             await RemoteTransferColdAssertions.ReceiptLiteralAsync(committed.OriginalReceipt, accept,
                 seed.Scenario.DestinationQueue, seed.TransferId, RemoteTransferColdProtocol.AcceptKind, committed.OriginalReceipt.Token.Position);
         }, failures);
         await JoinAsync(wave, membership, hold, original, operation, failures);
         if (failures.Count != 0)
-        { wave.RetainRoots(); }
+        {
+            wave.RetainRoots();
+        }
         ServerFailureObserver.ThrowIfAny(failures);
         var result = committed ?? throw Missing();
         await RequireReconciledAsync(wave, calls, membership, scope, accept, result.OriginalReceipt, token);
@@ -77,7 +89,9 @@ internal static class RemoteTransferNativeReplayOperation
         await calls.ReplayAsync(accept, receipt, token);
         var after = await ReadAsync(wave, membership, scope, token);
         foreach (var node in TwoRf3MembershipProtocol.Nodes.Skip(3))
-        { NativeCanonicalModelCutAssertions.RequireUnchanged(before[node], after[node], token); }
+        {
+            NativeCanonicalModelCutAssertions.RequireUnchanged(before[node], after[node], token);
+        }
     }
 
     private static async Task RequireWireFaultsAsync(IReadOnlyList<RequestCqrsNativeReplayWitness> witnesses,
@@ -88,7 +102,9 @@ internal static class RemoteTransferNativeReplayOperation
             RemoteModelNativeReplayVariation.EmptyNonce, RemoteModelNativeReplayVariation.EmptyCommandId,
             RemoteModelNativeReplayVariation.EmptyDestinationIncarnation];
         if (witnesses.Count != modes.Length)
-        { throw Missing(); }
+        {
+            throw Missing();
+        }
         var nonces = new HashSet<Guid>();
         for (var index = 0; index < modes.Length; index++)
         {
@@ -98,7 +114,9 @@ internal static class RemoteTransferNativeReplayOperation
                 || !witnesses[0].OriginalNativeRequest.AsSpan().SequenceEqual(witnesses[index].OriginalNativeRequest)
                 || witnesses[0].RequestId != witnesses[index].RequestId
                 || witnesses[0].ConnectionId != witnesses[index].ConnectionId)
-            { throw Missing(); }
+            {
+                throw Missing();
+            }
         }
     }
 
@@ -107,7 +125,9 @@ internal static class RemoteTransferNativeReplayOperation
     {
         ServerFailureObserver.Observe(hold.Release, failures);
         if (failures.Count != 0)
-        { ServerFailureObserver.Observe(operation.Cancel, failures); }
+        {
+            ServerFailureObserver.Observe(operation.Cancel, failures);
+        }
         await ServerFailureObserver.ObserveAsync(async () => { await original; }, failures);
         using var cleanup = new CancellationTokenSource(RequestCqrsRf3Protocol.CleanupDeadline, TimeProvider.System);
         await ServerFailureObserver.ObserveAsync(() => wave.QueryControls.WaitForSettlementAsync(
@@ -118,7 +138,9 @@ internal static class RemoteTransferNativeReplayOperation
         IReadOnlyDictionary<string, NativeCanonicalModelCutWitness> after, CancellationToken token)
     {
         foreach (var node in TwoRf3MembershipProtocol.Nodes.Take(3))
-        { NativeCanonicalModelCutAssertions.RequireUnchanged(before[node], after[node], token); }
+        {
+            NativeCanonicalModelCutAssertions.RequireUnchanged(before[node], after[node], token);
+        }
     }
 
     private static NativeCanonicalModelCutRequest Scope(TwoRf3MembershipWave wave, RemoteTransferColdSeed seed,

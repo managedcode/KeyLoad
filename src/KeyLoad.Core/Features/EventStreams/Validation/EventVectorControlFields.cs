@@ -21,12 +21,16 @@ internal static class EventVectorControlFields
             || !Enum.IsDefined(request.Action) || !Enum.IsDefined(request.Start)
             || !Enum.IsDefined(phase.Action) || phase.ExpectedCleanupGeneration < Initial
             || phase.ExpectedCleanupGeneration != Initial && request.Action != EventFeedControlAction.Release)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidPhase); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidPhase);
+        }
         admission.RequireEncodedBytes(NativeSerialization.Measure(phase));
         _ = EventVectorCoverageWitnessEncoding.Read(phase.OriginalCoverageWitness, request, admission);
         if (!phase.OriginalCleanupFrontierBytes.IsEmpty
             && request.Action != EventFeedControlAction.Release)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidPhase); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidPhase);
+        }
         EventVectorFirstControlFields.Require(phase, admission);
         RequireRevision(phase);
         RequireAction(phase);
@@ -41,7 +45,9 @@ internal static class EventVectorControlFields
                 || phase.ExpectedCleanupGeneration != Initial)
             || !initial && (phase.ExpectedMapRevision < FirstRevision
                 || phase.ExpectedCoverageGeneration < FirstRevision))
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidPhase); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidPhase);
+        }
     }
 
     private static void RequireAction(EventVectorControlPhase phase)
@@ -65,13 +71,17 @@ internal static class EventVectorControlFields
             _ => false
         };
         if (!matches)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidPhase); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidPhase);
+        }
     }
 
     private static void RequireSlots(EventVectorControlPhase phase, EventVectorAdmissionPolicy admission)
     {
         if ((phase.Action == EventVectorControlAction.Offer) != !phase.OriginalSourcePageBytes.IsEmpty)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidPhase); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidPhase);
+        }
         admission.RequireEncodedBytes(phase.OriginalSourcePageBytes.Length);
         var initial = phase.Action == EventVectorControlAction.Open;
         var intended = phase.Action == EventVectorControlAction.AdmitSource;
@@ -85,14 +95,20 @@ internal static class EventVectorControlFields
             || observed != phase.ExpectedPendingSourcePhaseId.HasValue
             || entries != !phase.OriginalEncodedEntries.IsEmpty
             || entries != !phase.OriginalEntryChecksum.IsEmpty)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidPhase); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidPhase);
+        }
         if (entries)
         {
             if (phase.OriginalEntryChecksum.Length != SHA256.HashSizeInBytes)
-            { throw Errors.Fail(ErrorCode.Corruption, InvalidPhase); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, InvalidPhase);
+            }
             var original = EventVectorEntryEncoding.Decode(phase.OriginalEncodedEntries, phase.OriginalEntryChecksum, admission);
             if (initial && original.IsEmpty != (phase.IntendedSourcePhase is null))
-            { throw Errors.Fail(ErrorCode.Corruption, InvalidPhase); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, InvalidPhase);
+            }
         }
         EventVectorControlSourceFields.Require(phase, admission);
     }

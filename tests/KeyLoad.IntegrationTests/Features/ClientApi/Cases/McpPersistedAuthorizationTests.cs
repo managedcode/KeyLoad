@@ -18,7 +18,9 @@ internal sealed class McpPersistedAuthorizationTests(ClusterFixture fixture)
         await scenario.SeedAsync(fixture, deadline.Token);
         var identity = await McpPersistedIdentity.CreateAsync(fixture, scenario.Partition, Capability.DocumentsRead, deadline.Token);
         var state = new DiscoveryAuthorityState(scenario, identity, Guid.NewGuid(), identity.Principal with
-        { PolicyEpoch = DiscoveryAuthorityProtocol.FinalEpoch });
+        {
+            PolicyEpoch = DiscoveryAuthorityProtocol.FinalEpoch
+        });
         await DiscoveryAuthorityFlow.RunAsync(fixture, state, deadline.Token);
     }
 

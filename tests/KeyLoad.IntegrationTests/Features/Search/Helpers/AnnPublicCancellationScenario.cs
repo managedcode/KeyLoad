@@ -1,8 +1,8 @@
 using KeyLoad.Client;
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
 using KeyLoad.IntegrationTests.Features.StorageRecovery;
-using KeyLoad.Orleans;
 using KeyLoad.Query;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
@@ -83,9 +83,13 @@ internal sealed class AnnPublicCancellationScenario(bool useMcp)
             RequestCqrsProbePhase.AuthorizationReload, RequestCqrsProbeAction.Hold);
         callerCancellation = CancellationTokenSource.CreateLinkedTokenSource(token);
         if (useMcp)
-        { mcpCall = AnnPublicCancellationAssertions.CallMcpAsync(activeCaller.Mcp, request, callerCancellation.Token); }
+        {
+            mcpCall = AnnPublicCancellationAssertions.CallMcpAsync(activeCaller.Mcp, request, callerCancellation.Token);
+        }
         else
-        { sdkCall = activeCaller.Sdk.ApproximateSearchAsync(request, callerCancellation.Token); }
+        {
+            sdkCall = activeCaller.Sdk.ApproximateSearchAsync(request, callerCancellation.Token);
+        }
         var marker = await activeControls.WaitForMarkerAsync(armId, RequestCqrsProbePhase.AuthorizationReload,
             RequestCqrsProbeOutcome.Observed, actualDiscovery, token);
         await RequestCqrsPhaseFaultAssertions.VerifyMarkerAsync(marker, armId, Guid.Empty,

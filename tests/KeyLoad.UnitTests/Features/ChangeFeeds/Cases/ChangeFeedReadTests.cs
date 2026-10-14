@@ -15,7 +15,10 @@ internal sealed class ChangeFeedReadTests
     {
         using var db = new TestDatabase();
         db.Configure("orders", ResourceKind.Collection);
-        var engine = new DatabaseEngine(db.Store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(new() { MaxOutboxRecords = 1 }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
+        var engine = new DatabaseEngine(db.Store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(new()
+        {
+            MaxOutboxRecords = 1
+        }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
         OperationResult Write(params Mutation[] mutations)
         {
             var id = Guid.NewGuid();
@@ -88,7 +91,11 @@ internal sealed class ChangeFeedReadTests
         var current = db.Database.ReadChangeFeed("reader", new(db.Partition, "orders"));
         Reader(db, epoch: 2);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => db.Database.ReadChangeFeed("reader", new(db.Partition, "orders", current.Cursor))).Code).IsEqualTo(ErrorCode.TokenInvalidated);
-        db.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(new("reader", "tenant", [], []) { Revoked = true, PolicyEpoch = 3 })).Get<PrincipalRecord>();
+        db.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(new("reader", "tenant", [], [])
+        {
+            Revoked = true,
+            PolicyEpoch = 3
+        })).Get<PrincipalRecord>();
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => db.Database.ReadChangeFeed("reader", new(db.Partition, "orders", current.Cursor))).Code).IsEqualTo(ErrorCode.Unauthenticated);
     }
     [Test]

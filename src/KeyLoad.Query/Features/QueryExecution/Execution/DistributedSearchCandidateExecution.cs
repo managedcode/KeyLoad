@@ -44,7 +44,9 @@ internal static class DistributedSearchCandidateExecution
     {
         budget.Check();
         if (!string.Equals(principal.TenantId, tenant, StringComparison.Ordinal))
-        { throw Errors.Fail(ErrorCode.PermissionDenied, ReceivingPrincipalChanged); }
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, ReceivingPrincipalChanged);
+        }
         DistributedTextWitnessValidation.Require(database, view, principal, resource, digest,
             witness, request.Partition, grant, budget);
         GlobalBranchWindow? text = null;

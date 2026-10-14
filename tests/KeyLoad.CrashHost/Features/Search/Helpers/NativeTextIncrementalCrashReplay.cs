@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.CrashHost.Features.Search;
 
@@ -22,7 +22,9 @@ internal static class NativeTextIncrementalCrashReplay
             if (page.Entries.IsEmpty && state.ThroughSequence == state.ReplayUpperSequence && state.IndexSha256 is not null)
             {
                 if (page.HasMore)
-                { throw new InvalidOperationException(NativeTextIncrementalCrashProtocol.Invalid); }
+                {
+                    throw new InvalidOperationException(NativeTextIncrementalCrashProtocol.Invalid);
+                }
                 var complete = await runtime.PhaseAsync(request, TextMaintenanceCapabilityKind.Verify, token: token);
                 await runtime.RetireSessionAsync();
                 return (complete, receipt);

@@ -17,7 +17,9 @@ internal static class PartitionMovementCleanupMatrixUnfamiliarFault
         var unfamiliar = Guid.NewGuid();
         if (unfamiliar == Guid.Empty || unfamiliar == retiredOther
             || unfamiliar == primary.ArmId || unfamiliar == adjunct.ArmId)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         var names = Names(primary, role, unfamiliar);
         var bytes = RequestCqrsProbeFileStore.ReadRecord(Path.Combine(owned.Directory, names.Original));
         RequireActual(controls, primary, released, role, bytes);
@@ -39,13 +41,17 @@ internal static class PartitionMovementCleanupMatrixUnfamiliarFault
             RequestCqrsProbeFileNames.Release(unfamiliar, primary.RequestId));
         }
         if (role != PartitionMovementCleanupMatrixFaultRole.UnfamiliarMarker)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         var original = RequestCqrsProbeFileNames.Marker(primary);
         var prefix = RequestCqrsProbeFixtureProtocol.MarkerFilePrefix;
         var copy = prefix + unfamiliar.ToString(RequestCqrsProbeProtocol.SessionIdFormat)
             + original[(prefix.Length + PartitionMovementCleanupMatrixProtocol.CanonicalGuidDigits)..];
         if (!RequestCqrsProbeFileNames.IsMarkerName(copy))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         return (original, copy);
     }
 
@@ -55,7 +61,9 @@ internal static class PartitionMovementCleanupMatrixUnfamiliarFault
         if (role == PartitionMovementCleanupMatrixFaultRole.UnfamiliarMarker)
         {
             if (controls.Json.ReadMarker(bytes) != primary)
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             return;
         }
         var release = controls.Json.ReadRelease(bytes);
@@ -63,7 +71,9 @@ internal static class PartitionMovementCleanupMatrixUnfamiliarFault
             || release.SessionId != primary.SessionId || release.ArmId != primary.ArmId
             || release.RequestId != primary.RequestId || released.ArmId != primary.ArmId
             || released.RequestId != primary.RequestId || released.Outcome != RequestCqrsProbeOutcome.Released)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
     }
 
     private static InvalidOperationException Invalid() => new(PartitionMovementCleanupMatrixProtocol.FaultMismatch);

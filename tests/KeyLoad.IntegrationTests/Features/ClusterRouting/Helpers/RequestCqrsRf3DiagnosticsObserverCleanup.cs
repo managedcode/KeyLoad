@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting.Helpers;
 
@@ -8,7 +8,9 @@ internal static class RequestCqrsRf3DiagnosticsObserverCleanup
         List<Exception> failures, Action<RequestCqrsLifecycleStage>? failureObserver = null)
     {
         try
-        { await observer.DisposeAsync().ConfigureAwait(false); }
+        {
+            await observer.DisposeAsync().ConfigureAwait(false);
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
             RequestCqrsLifecycleFailureObserver.Append(failures, error, failureObserver,

@@ -35,9 +35,14 @@ internal static class PartitionAuthorityRefusals
         {
             var refused = false;
             try
-            { await operation(); }
+            {
+                await operation();
+            }
             catch (HttpRequestException original) when (original.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-            { refused = true; await SafeAsync(original.Message, key); }
+            {
+                refused = true;
+                await SafeAsync(original.Message, key);
+            }
             await Assert.That(refused).IsTrue();
             return;
         }
@@ -50,6 +55,8 @@ internal static class PartitionAuthorityRefusals
     {
         foreach (var canary in new[] { key, PartitionAuthorityProtocol.FirstId, PartitionAuthorityProtocol.SecondId,
             PartitionAuthorityProtocol.FirstProjection, PartitionAuthorityProtocol.SecondProjection })
-        { await Assert.That(text.Contains(canary, StringComparison.Ordinal)).IsFalse(); }
+        {
+            await Assert.That(text.Contains(canary, StringComparison.Ordinal)).IsFalse();
+        }
     }
 }

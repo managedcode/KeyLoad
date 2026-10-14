@@ -13,14 +13,18 @@ public sealed partial class DatabaseEngine
         PrincipalRecord principal, PartitionRef partition, string collection, ReadExecutionBudgetReadGrant grant)
     {
         if (!principal.ClusterAdministrator && principal.TenantId != partition.TenantId)
-        { throw Errors.Fail(ErrorCode.PermissionDenied, RemoteQueryFenceInvalid); }
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, RemoteQueryFenceInvalid);
+        }
         Authorization.Require(principal, partition, collection, Capability.Query | Capability.DocumentsRead);
         var catalog = PhysicalShardCatalogRecordSerialization.Read(view, grant)
             ?? throw Errors.Fail(ErrorCode.OwnershipLost, RemoteQueryFenceInvalid);
         PhysicalShardCatalogValidation.ValidateCatalog(catalog);
         if (configuredPhysicalOwner is not null
             && !PhysicalOwnerEntryValidation.SameOwner(catalog.DefaultShard, configuredPhysicalOwner))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, RemoteQueryFenceInvalid); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, RemoteQueryFenceInvalid);
+        }
         var resolution = ReadAtomicPartitionPlacementForAuthorizedRouting(view, partition, grant);
         var directory = PhysicalOwnerDirectorySerialization.Read(view, grant)
             ?? throw Errors.Fail(ErrorCode.OwnershipLost, RemoteQueryFenceInvalid);
@@ -29,7 +33,9 @@ public sealed partial class DatabaseEngine
         if (destination.Owner.Incarnation != resolution.Incarnation
             || destination.Owner.PlacementEpoch != resolution.PlacementEpoch
             || !destination.Owner.VoterIds.SequenceEqual(resolution.VoterIds, StringComparer.Ordinal))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, RemoteQueryFenceInvalid); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, RemoteQueryFenceInvalid);
+        }
         return new(principal.Id, principal.TenantId, principal.PolicyEpoch, resolution, directory.Revision, destination);
     }
 }

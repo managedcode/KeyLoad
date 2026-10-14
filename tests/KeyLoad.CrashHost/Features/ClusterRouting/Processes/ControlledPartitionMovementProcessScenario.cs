@@ -21,7 +21,9 @@ internal static class ControlledPartitionMovementProcessScenario
         if (args.Length != ArgumentCount || args[ModeArgument] is not
             (ControlledPartitionMovementProcessProtocol.Prepare or ControlledPartitionMovementProcessProtocol.Fault
             or ControlledPartitionMovementProcessProtocol.Recover or ControlledPartitionMovementProcessProtocol.Verify))
-        { return false; }
+        {
+            return false;
+        }
         var root = Path.GetFullPath(args[RootArgument]);
         var input = await ControlledPartitionMovementProcessFiles.ReadAsync<ControlledPartitionMovementProcessInput>(
             root, ControlledPartitionMovementProcessProtocol.InputFile, CancellationToken.None);

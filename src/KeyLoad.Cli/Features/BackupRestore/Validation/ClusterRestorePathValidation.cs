@@ -12,7 +12,9 @@ internal static class ClusterRestorePathValidation
         var root = Path.TrimEndingDirectorySeparator(Path.GetFullPath(destination));
         if (root == Path.GetPathRoot(root) || File.Exists(root)
             || Directory.Exists(root) && Directory.EnumerateFileSystemEntries(root).Any())
-        { throw Errors.Fail(ErrorCode.Conflict, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, Invalid);
+        }
         RequireAncestors(root);
         return root;
     }
@@ -21,11 +23,15 @@ internal static class ClusterRestorePathValidation
     {
         if (string.IsNullOrWhiteSpace(relative) || Path.IsPathRooted(relative)
             || relative.Split([Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar]).Contains(ParentSegment))
-        { throw Errors.Fail(ErrorCode.Validation, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, Invalid);
+        }
         var full = Path.TrimEndingDirectorySeparator(Path.GetFullPath(Path.Combine(root, relative)));
         var prefix = root + Path.DirectorySeparatorChar;
         if (!full.StartsWith(prefix, StringComparison.Ordinal) || full == root)
-        { throw Errors.Fail(ErrorCode.Validation, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, Invalid);
+        }
         RequireAncestors(full);
         return full;
     }
@@ -33,12 +39,16 @@ internal static class ClusterRestorePathValidation
     internal static void RequireDistinct(IReadOnlyCollection<string> nodes)
     {
         if (nodes.Distinct(StringComparer.Ordinal).Count() != nodes.Count)
-        { throw Errors.Fail(ErrorCode.Validation, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, Invalid);
+        }
         foreach (var node in nodes)
         {
             if (nodes.Any(other => node != other
                 && node.StartsWith(other + Path.DirectorySeparatorChar, StringComparison.Ordinal)))
-            { throw Errors.Fail(ErrorCode.Validation, Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Validation, Invalid);
+            }
         }
     }
 
@@ -49,7 +59,9 @@ internal static class ClusterRestorePathValidation
         {
             if (File.Exists(current.FullName) || current.Exists
                 && (current.Attributes & FileAttributes.ReparsePoint) != default)
-            { throw Errors.Fail(ErrorCode.Validation, Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Validation, Invalid);
+            }
             current = current.Parent;
         }
     }

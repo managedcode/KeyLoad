@@ -14,7 +14,9 @@ internal static class PartitionMovementParentOmissionTrial
     {
         var changed = NativeSerialization.Deserialize<PartitionMovePrepareBody>(prepare.Body.Span)
             with
-        { RequireParentCheckpoint = false };
+        {
+            RequireParentCheckpoint = false
+        };
         var bytes = NativeSerialization.Serialize(changed);
         await DeniedAsync(source, target, fixture, phaseId, prepare with
         {
@@ -53,11 +55,15 @@ internal static class PartitionMovementParentOmissionTrial
                 PartitionMoveParentKeys.Active(request.Partition)];
         var originals = source.Store.Read(view => keys.Select(view.ReadOwnedValue).ToArray());
         if (originals.Any(static value => value is null))
-        { throw new InvalidOperationException("The actual parent omission fixture has no original authority."); }
+        {
+            throw new InvalidOperationException("The actual parent omission fixture has no original authority.");
+        }
         source.Store.Commit((transaction, _) =>
         {
             foreach (var key in keys)
-            { transaction.Delete(key); }
+            {
+                transaction.Delete(key);
+            }
             return true;
         });
         var failures = new List<Exception>();
@@ -67,7 +73,9 @@ internal static class PartitionMovementParentOmissionTrial
             await DeniedAsync(source, target, fixture, phaseId, prepare, expiry);
             var changed = NativeSerialization.Deserialize<PartitionMovePrepareBody>(prepare.Body.Span)
                 with
-            { RequireParentCheckpoint = false };
+            {
+                RequireParentCheckpoint = false
+            };
             var bytes = NativeSerialization.Serialize(changed);
             await DeniedAsync(source, target, fixture, phaseId, prepare with
             {
@@ -80,7 +88,9 @@ internal static class PartitionMovementParentOmissionTrial
             source.Store.Commit((transaction, _) =>
             {
                 for (var index = 0; index < keys.Length; index++)
-                { transaction.Put(keys[index], originals[index]!); }
+                {
+                    transaction.Put(keys[index], originals[index]!);
+                }
                 return true;
             });
         }, failures);

@@ -8,7 +8,9 @@ internal static class NativeTextOnlineProcessAssertions
     internal static async Task VerifyAsync(string root, string mode, CancellationToken token)
     {
         if (mode is NativeTextOnlineCrashScenario.Prepare or NativeTextOnlineCrashScenario.Fault)
-        { return; }
+        {
+            return;
+        }
         var original = await NativeTextIncrementalEvidenceFiles.ReadAsync<NativeTextOnlineCrashOriginal>(root,
             NativeTextOnlineCrashScenario.OriginalFile, token);
         var receipt = await NativeTextIncrementalEvidenceFiles.ReadAsync<OnlineTextIndexMaintenanceResult>(root,

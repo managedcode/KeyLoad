@@ -101,7 +101,10 @@ public sealed record TargetProfile(string Name, string Version, string Topology,
     string ReadContract, string Transport, string Authorization, string? Image)
 {
     /// <summary>Gets or initializes evidence describing the observed target cluster, when available.</summary>
-    public ClusterEvidence? Cluster { get; init; }
+    public ClusterEvidence? Cluster
+    {
+        get; init;
+    }
 }
 
 /// <summary>Defines the lifecycle and capabilities of a comparison database target.</summary>
@@ -110,7 +113,10 @@ public interface IComparisonTarget : IAsyncDisposable
     private const string OutsideThisTargetSSharedContractDetail = "Outside this target's shared contract.";
 
     /// <summary>Gets the target's descriptive profile.</summary>
-    TargetProfile Profile { get; }
+    TargetProfile Profile
+    {
+        get;
+    }
     /// <summary>Determines whether the target supports the specified workload scenario.</summary>
     /// <param name="scenario">The workload scenario to check.</param>
     /// <returns><see langword="true"/> when the target supports the scenario; otherwise, <see langword="false"/>.</returns>
@@ -211,11 +217,17 @@ public sealed record ComparisonCase(string Target, Scenario Scenario, int Repeti
 {
     /// <summary>Gets exact scaled-run request accounting, omitted for existing control cases.</summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public ScaledOperationAccounting? Scaled { get; init; }
+    public ScaledOperationAccounting? Scaled
+    {
+        get; init;
+    }
 
     /// <summary>Gets actual native vector qualification metrics for a vector profile case.</summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public VectorMetrics? VectorMetrics { get; init; }
+    public VectorMetrics? VectorMetrics
+    {
+        get; init;
+    }
 }
 
 /// <summary>Contains the configuration, environment, targets, and cases for one comparison run.</summary>
@@ -240,9 +252,15 @@ public sealed record ComparisonReport(int SchemaVersion, Guid RunId, DateTimeOff
     [property: JsonRequired] ImmutableArray<ComparisonCase> Cases)
 {
     /// <summary>Gets or initializes GitHub Actions provenance for the comparison run.</summary>
-    public GitHubProvenance? Provenance { get; init; }
+    public GitHubProvenance? Provenance
+    {
+        get; init;
+    }
     /// <summary>Gets or initializes the load-generator container image reference, when used.</summary>
-    public string? LoadGeneratorImage { get; init; }
+    public string? LoadGeneratorImage
+    {
+        get; init;
+    }
     private const int AbsentConfigurationCount = 0;
     private const int PresentConfigurationCount = 1;
     private const string ExclusiveConfigurationRequired = "A comparison report must carry exactly one configuration.";
@@ -259,11 +277,17 @@ public sealed record ComparisonReport(int SchemaVersion, Guid RunId, DateTimeOff
     }
     /// <summary>Gets the exact scaled profile when this report is not a materialized control run.</summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public ScaledComparisonProfile? ScaledProfile { get; init; }
+    public ScaledComparisonProfile? ScaledProfile
+    {
+        get; init;
+    }
 
     /// <summary>Gets the exact vector qualification profile when this is a vector run.</summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public VectorComparisonProfile? VectorProfile { get; init; }
+    public VectorComparisonProfile? VectorProfile
+    {
+        get; init;
+    }
 }
 
 /// <summary>Identifies the GitHub Actions workflow run and selected comparison profile.</summary>

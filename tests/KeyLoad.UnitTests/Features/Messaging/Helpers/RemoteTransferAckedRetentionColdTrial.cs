@@ -9,7 +9,10 @@ internal static class RemoteTransferAckedRetentionColdTrial
 
     internal static async Task RunAsync()
     {
-        using var fixture = new RemoteTransferDatabase(new() { MaxScanRecords = Ceiling });
+        using var fixture = new RemoteTransferDatabase(new()
+        {
+            MaxScanRecords = Ceiling
+        });
         var other = new QueueLaneRef(new(RemoteTransferDatabase.TenantId, RemoteTransferDatabase.DatabaseId,
             RemoteTransferDatabase.Domain, RemoteTransferDatabase.OtherSourcePartitionId), RemoteTransferDatabase.OtherSourceQueueName);
         fixture.ConfigureQueue(other);
@@ -52,7 +55,11 @@ internal static class RemoteTransferAckedRetentionColdTrial
         var completed = fixture.Apply(OperationKind.Batch, complete).Get<CommitReceipt>();
         fixture.Reopen();
         await RemoteTransferAckedRetentionColdAssertions.RequireAsync(fixture, transfer, second,
-            original with { State = QueueTransferState.Delivered, ReceiptToken = proof.ReceiptToken }, pending,
+            original with
+            {
+                State = QueueTransferState.Delivered,
+                ReceiptToken = proof.ReceiptToken
+            }, pending,
             proof, message, capacity, accept, accepted, refused, failure, originalBytes, failureBytes);
         await RemoteTransferCoordinationColdAssertions.EqualAsync(fixture.Apply(OperationKind.Batch, complete).Get<CommitReceipt>(), completed);
     }

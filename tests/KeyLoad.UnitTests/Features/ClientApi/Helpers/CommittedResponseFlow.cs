@@ -30,7 +30,9 @@ internal static class CommittedResponseFlow
             await ServerFailureObserver.ObserveAsync(() => ExecuteAsync(scenario, server, endpoint, command, expected, callerCancellation, token), failures);
         }, failures);
         if (endpoint.Failure.Task.IsCompletedSuccessfully)
-        { failures.Add(await endpoint.Failure.Task); }
+        {
+            failures.Add(await endpoint.Failure.Task);
+        }
         await ServerFailureObserver.ObserveAsync(() => scenario.CloseAsync(token), failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -47,14 +49,20 @@ internal static class CommittedResponseFlow
         {
             var observed = await Task.WhenAny(endpoint.FirstChunk.Task, endpoint.Failure.Task, original).WaitAsync(token);
             if (observed != endpoint.FirstChunk.Task)
-            { throw new InvalidOperationException(CommittedResponseProtocol.UnexpectedRequest, endpoint.Failure.Task.IsCompletedSuccessfully ? await endpoint.Failure.Task : null); }
+            {
+                throw new InvalidOperationException(CommittedResponseProtocol.UnexpectedRequest, endpoint.Failure.Task.IsCompletedSuccessfully ? await endpoint.Failure.Task : null);
+            }
             await Assert.That(original.IsCompleted).IsFalse();
             await CommittedResponseAssertions.ReceiptAsync(endpoint.Original, expected);
             await CommittedResponseAssertions.StoredAsync(scenario, CommittedResponseProtocol.FirstRevision, CommittedResponseProtocol.OriginalJson);
             if (callerCancellation)
-            { await caller.CancelAsync(); }
+            {
+                await caller.CancelAsync();
+            }
             else
-            { endpoint.Release.TrySetResult(); }
+            {
+                endpoint.Release.TrySetResult();
+            }
             var interrupted = await original.WaitAsync(token);
             await Assert.That(interrupted.IsFailed).IsTrue();
             await Assert.That(interrupted.Value).IsNull();
@@ -120,6 +128,8 @@ internal static class CommittedResponseFlow
         CommandRequest[] expectedRequests = [command, command, changed, healthy, healthy];
         var actualRequests = endpoint.Requests.ToArray();
         for (var index = CommittedResponseProtocol.InitialIndex; index < expectedRequests.Length; index++)
-        { await Assert.That(JsonDefaults.Serialize(actualRequests[index]).SequenceEqual(JsonDefaults.Serialize(expectedRequests[index]))).IsTrue(); }
+        {
+            await Assert.That(JsonDefaults.Serialize(actualRequests[index]).SequenceEqual(JsonDefaults.Serialize(expectedRequests[index]))).IsTrue();
+        }
     }
 }

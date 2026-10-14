@@ -14,17 +14,29 @@ internal static class SqlTablePages
             var request = new QueryRequest(partition, sql, AllowFullScan: true);
             var page = engine.Execute(principal, request);
             await PageAsync(page, SecondId, SecondJson, position, final: false);
-            page = engine.Execute(principal, request with { Cursor = page.Cursor });
+            page = engine.Execute(principal, request with
+            {
+                Cursor = page.Cursor
+            });
             await PageAsync(page, ThirdId, ThirdJson, position, final: false);
-            page = engine.Execute(principal, request with { Cursor = page.Cursor });
+            page = engine.Execute(principal, request with
+            {
+                Cursor = page.Cursor
+            });
             await PageAsync(page, FourthId, FourthJson, position, final: true);
         }
         var ast = Ast(partition);
         var astPage = engine.ExecuteAst(principal, ast);
         await PageAsync(astPage, SecondId, SecondJson, position, final: false);
-        astPage = engine.ExecuteAst(principal, ast with { Cursor = astPage.Cursor });
+        astPage = engine.ExecuteAst(principal, ast with
+        {
+            Cursor = astPage.Cursor
+        });
         await PageAsync(astPage, ThirdId, ThirdJson, position, final: false);
-        astPage = engine.ExecuteAst(principal, ast with { Cursor = astPage.Cursor });
+        astPage = engine.ExecuteAst(principal, ast with
+        {
+            Cursor = astPage.Cursor
+        });
         await PageAsync(astPage, FourthId, FourthJson, position, final: true);
         await SqlNullOrderingRefusals.UnchangedAsync(store, image, position, identity);
     }
@@ -37,9 +49,13 @@ internal static class SqlTablePages
     private static async Task PageAsync(QueryPage page, string id, string json, long cut, bool final)
     {
         if (final)
-        { await Assert.That(page.Cursor).IsNull(); }
+        {
+            await Assert.That(page.Cursor).IsNull();
+        }
         else
-        { await Assert.That(page.Cursor).IsNotNull(); }
+        {
+            await Assert.That(page.Cursor).IsNotNull();
+        }
         await SqlOffsetPages.ExactAsync(page, new([new(id, SqlOffsetProtocol.InitialRevision, json, false, [])],
             page.Cursor, cut, FullScan));
     }

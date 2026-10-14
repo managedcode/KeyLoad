@@ -24,12 +24,16 @@ internal static class IsolatedDatabaseMatrixAssertions
         foreach (var profile in scaledPlans)
         {
             foreach (var cell in profile![IsolatedPlanFields.Cells]!.AsArray())
-            { allCells.Add(cell!.DeepClone()); }
+            {
+                allCells.Add(cell!.DeepClone());
+            }
         }
         foreach (var profile in vectorPlans)
         {
             foreach (var cell in profile![IsolatedPlanFields.Cells]!.AsArray())
-            { allCells.Add(cell!.DeepClone()); }
+            {
+                allCells.Add(cell!.DeepClone());
+            }
         }
         var rows = new List<JsonNode>();
         foreach (var (key, target) in WorkflowDatabaseGroups.Entries)

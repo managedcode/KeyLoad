@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 using KeyLoad.Replication;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
@@ -28,7 +28,10 @@ internal sealed partial class ControlledPartitionMovementNativeHost : IAsyncDisp
         Silo = application.Services.GetRequiredService<OrleansNode>();
     }
 
-    internal ControlledPartitionMovementNativeObservationWitness NativeObservation { get; }
+    internal ControlledPartitionMovementNativeObservationWitness NativeObservation
+    {
+        get;
+    }
 
     internal static async Task<ControlledPartitionMovementNativeHost> CreateAsync(string[] arguments,
         NativeLocalhostClusteringOptions localhostClustering,
@@ -39,7 +42,9 @@ internal sealed partial class ControlledPartitionMovementNativeHost : IAsyncDisp
         var application = ServerConfiguration.Build(arguments, sealedObserver: sealedObserver, localhostClustering: localhostClustering,
             authenticationExecutionObserver: authenticationObserver, partitionMovementNativeObserver: nativeObservation);
         try
-        { return new(application, nativeObservation); }
+        {
+            return new(application, nativeObservation);
+        }
         catch (Exception primary)
         {
             var failures = new List<Exception> { primary };
@@ -49,10 +54,22 @@ internal sealed partial class ControlledPartitionMovementNativeHost : IAsyncDisp
         }
     }
 
-    internal ServerRuntimeOptions Runtime { get; }
-    internal TimeProvider Clock { get; }
-    internal PartitionHost Partition { get; }
-    internal OrleansNode Silo { get; }
+    internal ServerRuntimeOptions Runtime
+    {
+        get;
+    }
+    internal TimeProvider Clock
+    {
+        get;
+    }
+    internal PartitionHost Partition
+    {
+        get;
+    }
+    internal OrleansNode Silo
+    {
+        get;
+    }
     internal DatabaseEngine Database => Partition.Database;
     internal IAtomicStore Store => Database.Store;
     internal IDurableReplicaLog Log => Partition.Materializer.Log;
@@ -72,6 +89,8 @@ internal sealed partial class ControlledPartitionMovementNativeHost : IAsyncDisp
         await Silo.WaitForPhysicalOwnerRegistrationAsync(cancellationToken).ConfigureAwait(false);
         cancellationToken.ThrowIfCancellationRequested();
         if (!Silo.DatabaseReady)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalShardCatalogFence.NotReady); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalShardCatalogFence.NotReady);
+        }
     }
 }

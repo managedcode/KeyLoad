@@ -20,7 +20,9 @@ internal static class TopicSqlRf3Seed
         foreach (var definition in new[] { resource,
             new ResourceDefinition(TopicSqlRf3Protocol.Empty, ResourceKind.Topic, partition.TransactionDomainId),
             new ResourceDefinition(TopicSqlRf3Protocol.Queue, ResourceKind.WorkQueue, partition.TransactionDomainId) })
-        { await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.ConfigureResourceAsync(Guid.NewGuid(), new(partition.TenantId, partition.DatabaseId, definition), token)); }
+        {
+            await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.ConfigureResourceAsync(Guid.NewGuid(), new(partition.TenantId, partition.DatabaseId, definition), token));
+        }
         var command = new CommandRequest(Guid.NewGuid(), partition,
             [new PublishTopic(TopicSqlRf3Protocol.Topic, TopicSqlRf3State.Data),
              new EnqueueMessage(TopicSqlRf3Protocol.Queue, TopicSqlRf3Protocol.Message, TopicSqlRf3Protocol.QueuePayload)]);

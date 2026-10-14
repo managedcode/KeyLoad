@@ -1,7 +1,7 @@
 using KeyLoad.Client;
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
@@ -19,8 +19,14 @@ internal sealed class PartitionMovementLateNativeSeed : IDisposable
     private const string HealthyJson = "{\"value\":2,\"flow\":\"native-late-retire\"}";
     private readonly PartitionMovementLateNativeHttp sourceHttp;
     private readonly PartitionMovementLateNativeHttp targetHttp;
-    internal KeyLoadClient Source { get; }
-    internal KeyLoadClient Target { get; }
+    internal KeyLoadClient Source
+    {
+        get;
+    }
+    internal KeyLoadClient Target
+    {
+        get;
+    }
     internal PartitionRef Partition { get; } = new("tenant", "database", "late-native", PartitionMovementLateNativeProtocol.AtomicPartitionId);
     internal PartitionMoveRequest Request { get; private set; } = null!;
     private CommandRequest original = null!;
@@ -43,9 +49,13 @@ internal sealed class PartitionMovementLateNativeSeed : IDisposable
         if (failures.Count != 0)
         {
             if (target is not null)
-            { ServerFailureObserver.Observe(() => target.Dispose(), failures); }
+            {
+                ServerFailureObserver.Observe(() => target.Dispose(), failures);
+            }
             if (source is not null)
-            { ServerFailureObserver.Observe(() => source.Dispose(), failures); }
+            {
+                ServerFailureObserver.Observe(() => source.Dispose(), failures);
+            }
             ServerFailureObserver.ThrowIfAny(failures);
         }
         Source = sourceClient ?? throw new InvalidOperationException("The actual source SDK was not created.");
@@ -91,11 +101,15 @@ internal sealed class PartitionMovementLateNativeSeed : IDisposable
     {
         var failures = new List<Exception>();
         try
-        { targetHttp.Dispose(); }
+        {
+            targetHttp.Dispose();
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         try
-        { sourceHttp.Dispose(); }
+        {
+            sourceHttp.Dispose();
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         ServerFailureObserver.ThrowIfAny(failures);

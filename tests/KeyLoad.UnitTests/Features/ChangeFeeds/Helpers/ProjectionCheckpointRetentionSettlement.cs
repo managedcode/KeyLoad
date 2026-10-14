@@ -36,7 +36,9 @@ internal static class ProjectionCheckpointRetentionSettlement
             ProjectionCheckpointRetentionAssertions.HealthyJson, 0L);
         var healthy = ProjectionConsumerIdentityFixture.Operation(OperationKind.Batch, healthyId,
             new CommandRequest(healthyId, source.Partition, [mutation])) with
-        { EvaluatedAt = source.Time };
+        {
+            EvaluatedAt = source.Time
+        };
         token.ThrowIfCancellationRequested();
         var produced = FeedNativeHealthyAdmission.Submit(owner, store, directory, healthy, explicitTime: true, token);
         await ProjectionConsumerIdentityAssertions.ReceiptAsync(healthy, produced.Get<CommitReceipt>(),
@@ -45,7 +47,11 @@ internal static class ProjectionCheckpointRetentionSettlement
             purge, purged, healthy, produced, [], 0L);
         await ProjectionCheckpointRetentionHealthy.AssertAsync(owner, store, provisional, token);
         await ReplayAsync(owner, store, provisional, token);
-        return provisional with { Image = ProjectionConsumerIdentityAssertions.Image(store), Position = store.Position };
+        return provisional with
+        {
+            Image = ProjectionConsumerIdentityAssertions.Image(store),
+            Position = store.Position
+        };
     }
 
     internal static async Task ReplayAsync(DatabaseEngine owner, ZoneTreeStore store,

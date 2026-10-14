@@ -34,7 +34,9 @@ internal sealed class TwoRf3MembershipCapacity
     {
         if (!wave.protectedDocuments || originalParameters.Count != CapacityRetainedParameters.Length
             || originalPorts.Count != TwoRf3MembershipProtocol.NodeCount)
-        { throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState); }
+        {
+            throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState);
+        }
         _ = await wave.StopForDirectoryReadAsync().ConfigureAwait(false);
         applySelection?.Invoke();
         var failures = new List<Exception>();
@@ -43,7 +45,9 @@ internal sealed class TwoRf3MembershipCapacity
         {
             await wave.DisposeApplicationAsync(failures).ConfigureAwait(false);
             if (wave.CanCheckLocks)
-            { ServerFailureObserver.Observe(wave.AssertAllNodeLocksReleased, failures); }
+            {
+                ServerFailureObserver.Observe(wave.AssertAllNodeLocksReleased, failures);
+            }
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -66,10 +70,14 @@ internal sealed class TwoRf3MembershipCapacity
             if (originalParameters.TryGetValue(name, out var original))
             {
                 if (!string.Equals(original, actual, StringComparison.Ordinal))
-                { throw new InvalidOperationException(TwoRf3MembershipProtocol.ImageMismatch); }
+                {
+                    throw new InvalidOperationException(TwoRf3MembershipProtocol.ImageMismatch);
+                }
             }
             else
-            { originalParameters.Add(name, actual); }
+            {
+                originalParameters.Add(name, actual);
+            }
         }
     }
 
@@ -81,10 +89,14 @@ internal sealed class TwoRf3MembershipCapacity
             if (originalPorts.TryGetValue(node, out var original))
             {
                 if (original != port)
-                { throw new InvalidOperationException(TwoRf3MembershipProtocol.ImageMismatch); }
+                {
+                    throw new InvalidOperationException(TwoRf3MembershipProtocol.ImageMismatch);
+                }
             }
             else
-            { originalPorts.Add(node, port); }
+            {
+                originalPorts.Add(node, port);
+            }
         }
     }
 

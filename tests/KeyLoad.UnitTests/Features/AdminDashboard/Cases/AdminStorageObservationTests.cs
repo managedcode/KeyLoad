@@ -39,7 +39,9 @@ internal sealed class AdminStorageObservationTests
         {
             Directory.CreateDirectory(root);
             for (var index = 0; index < BoundExceededFiles; index++)
-            { await File.WriteAllBytesAsync(Path.Combine(root, index.ToString(System.Globalization.CultureInfo.InvariantCulture)), [1]); }
+            {
+                await File.WriteAllBytesAsync(Path.Combine(root, index.ToString(System.Globalization.CultureInfo.InvariantCulture)), [1]);
+            }
             var snapshot = AdminStorageObserver.Read(root, UnitAdminObservationOptions.Execution(), CancellationToken.None);
             await Assert.That(snapshot.Complete).IsFalse();
             await Assert.That(snapshot.Files.Length).IsLessThanOrEqualTo(200);
@@ -73,9 +75,13 @@ internal sealed class AdminStorageObservationTests
         finally
         {
             if (Directory.Exists(root))
-            { Directory.Delete(root, recursive: true); }
+            {
+                Directory.Delete(root, recursive: true);
+            }
             if (Directory.Exists(external))
-            { Directory.Delete(external, recursive: true); }
+            {
+                Directory.Delete(external, recursive: true);
+            }
         }
     }
 }

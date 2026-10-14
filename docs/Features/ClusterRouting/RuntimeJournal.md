@@ -157,7 +157,7 @@ restart/adoption, no-quorum, creator revocation, schedule-ACK uncertainty and
 single timeout effect must pass through Aspire RF3 and real SDK/official MCP.
 No source or native local fixture closes those gates.
 
-The root join owns [RuntimeJournalStartupRequests](../../../src/KeyLoad.Orleans/Features/ClusterRouting/Hosting/RuntimeJournalStartupRequests.cs),
+The root join owns [RuntimeJournalStartupRequests](../../../src/KeyLoad.Clustering/Features/ClusterRouting/Hosting/RuntimeJournalStartupRequests.cs),
 [RuntimeJournalStartup](../../../src/KeyLoad.Server/Features/ClusterRouting/Hosting/RuntimeJournalStartup.cs),
 [OrleansNodeRequestExecutor](../../../src/KeyLoad.Server/Features/ClusterRouting/Execution/OrleansNodeRequestExecutor.cs),
 the exact native lifecycle registration/observer, and both store reader fences.

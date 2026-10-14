@@ -11,7 +11,10 @@ internal static class NativeCanonicalModelCutWaveStartup
         JsonData.Identifier(technicalPrincipalId);
         var wave = new TwoRf3MembershipWave(selection, register: true, remote: true,
             query: true, probe: true, protectedDocument: true)
-        { nativeCanonicalCutsSelected = true, remoteTransferPrincipalId = technicalPrincipalId };
+        {
+            nativeCanonicalCutsSelected = true,
+            remoteTransferPrincipalId = technicalPrincipalId
+        };
         return TwoRf3MembershipWaveStartup.StartOwnedAsync(wave, token, observe);
     }
 
@@ -20,12 +23,18 @@ internal static class NativeCanonicalModelCutWaveStartup
         if (!wave.nativeCanonicalCutsSelected)
         {
             if (wave.canonicalCutControls is not null)
-            { throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState); }
+            {
+                throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState);
+            }
             return;
         }
         if (wave.canonicalCutControls is null)
-        { wave.canonicalCutControls = NativeCanonicalModelCutFixture.Create(wave, root); }
+        {
+            wave.canonicalCutControls = NativeCanonicalModelCutFixture.Create(wave, root);
+        }
         else
-        { await wave.canonicalCutControls.ReopenAfterOwnersJoinedAsync(wave).ConfigureAwait(false); }
+        {
+            await wave.canonicalCutControls.ReopenAfterOwnersJoinedAsync(wave).ConfigureAwait(false);
+        }
     }
 }

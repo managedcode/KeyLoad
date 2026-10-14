@@ -35,7 +35,9 @@ internal static class McpMovementCatalogSchema
         await ObjectAsync(value, fields, fields, allowNull: true);
         await McpMovementCatalogScalarSchema.RequireReceiptOrPlacementAsync(root, value, fields);
         if (fields.Contains(McpMovementCatalogProtocol.Partition, StringComparer.Ordinal))
-        { await PartitionAsync(root, value.GetProperty(McpMovementCatalogProtocol.Properties).GetProperty(McpMovementCatalogProtocol.Partition)); }
+        {
+            await PartitionAsync(root, value.GetProperty(McpMovementCatalogProtocol.Properties).GetProperty(McpMovementCatalogProtocol.Partition));
+        }
     }
 
     private static async Task PartitionAsync(JsonElement root, JsonElement schema)
@@ -54,7 +56,9 @@ internal static class McpMovementCatalogSchema
     {
         await Assert.That(McpSchemaInspector.HasType(schema, McpMovementCatalogProtocol.Object)).IsTrue();
         if (!allowNull)
-        { await Assert.That(McpSchemaInspector.HasType(schema, McpSchemaInspector.Null)).IsFalse(); }
+        {
+            await Assert.That(McpSchemaInspector.HasType(schema, McpSchemaInspector.Null)).IsFalse();
+        }
         await Assert.That(schema.GetProperty(McpMovementCatalogProtocol.Closed).GetBoolean()).IsFalse();
         await Assert.That(schema.GetProperty(McpMovementCatalogProtocol.Properties).EnumerateObject().Select(value => value.Name)
             .ToHashSet(StringComparer.Ordinal).SetEquals(fields)).IsTrue();
@@ -65,9 +69,13 @@ internal static class McpMovementCatalogSchema
     private static JsonElement Shape(JsonElement root, JsonElement schema)
     {
         if (schema.TryGetProperty(McpSchemaInspector.Ref, out var reference))
-        { return Shape(root, McpSchemaInspector.Resolve(root, reference.GetString()!)); }
+        {
+            return Shape(root, McpSchemaInspector.Resolve(root, reference.GetString()!));
+        }
         if (schema.TryGetProperty(McpSchemaInspector.AnyOf, out var branches))
-        { return Shape(root, branches.EnumerateArray().First(value => !McpSchemaInspector.HasType(value, McpSchemaInspector.Null))); }
+        {
+            return Shape(root, branches.EnumerateArray().First(value => !McpSchemaInspector.HasType(value, McpSchemaInspector.Null)));
+        }
         return schema;
     }
 }

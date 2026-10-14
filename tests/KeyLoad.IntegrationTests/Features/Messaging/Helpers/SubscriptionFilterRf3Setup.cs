@@ -38,7 +38,10 @@ internal static class SubscriptionFilterRf3Setup
                  new(SubscriptionFilterRf3Protocol.FourthEvent, SubscriptionFilterRf3Protocol.Changed, SubscriptionFilterRf3Protocol.Payload)])]);
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await client.CommitAsync(publish, token));
         return new(group, independent, manager, first, second, publish, receipt,
-            new(Guid.NewGuid(), group, definition with { EventTypes = [SubscriptionFilterRf3Protocol.Changed] },
+            new(Guid.NewGuid(), group, definition with
+            {
+                EventTypes = [SubscriptionFilterRf3Protocol.Changed]
+            },
                 ExpectedGeneration: SubscriptionFilterRf3Protocol.Initial));
     }
 }

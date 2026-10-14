@@ -21,7 +21,10 @@ internal sealed class FollowerDocumentRf3Continuation(FollowerDocumentRf3State s
         foreach (var transport in Enum.GetValues<FollowerDocumentCaller>())
         {
             var wrongReplica = await FollowerDocumentPublicObservation.InvokeAsync(transport, currentCaller.Sdk,
-                currentCaller.Mcp, healthy with { ReplicaId = status.Leader! }, token).ConfigureAwait(false);
+                currentCaller.Mcp, healthy with
+                {
+                    ReplicaId = status.Leader!
+                }, token).ConfigureAwait(false);
             await FollowerDocumentRf3Assertions.RejectedAsync(wrongReplica, ErrorCode.OwnershipLost, state.Identity.Secret);
             var observation = await FollowerDocumentPublicObservation.InvokeAsync(transport, currentCaller.Sdk,
                 currentCaller.Mcp, healthy, token).ConfigureAwait(false);

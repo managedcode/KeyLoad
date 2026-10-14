@@ -11,5 +11,9 @@ public sealed record EventFeedScope
     /// <summary>Gets the exact source resource authorization scope.</summary>
     [Orleans.Id(1)] public string Resource { get; init; } = null!;
     /// <summary>Gets the selected canonical event source kind.</summary>
-    [Orleans.Id(2)] public EventSourceKind Kind { get; init; }
+    [Orleans.Id(2)]
+    public EventSourceKind Kind
+    {
+        get; init;
+    }
 }

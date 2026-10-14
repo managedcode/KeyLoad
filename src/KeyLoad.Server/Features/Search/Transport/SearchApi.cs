@@ -14,14 +14,14 @@ internal static class SearchApi
         app.MapPost(OnlineTextIndexMaintenanceProtocol.Route, (OnlineTextIndexMaintenanceRequest request, HttpContext context) =>
             ApiGrainDispatch.SubmitAsync(context, OperationKind.MaintainOnlineTextIndex, request.CommandId, request));
         app.MapPost(AnnSearchProtocol.Route, (ApproximateSearchRequest request, HttpContext context) =>
-            ApiGrainDispatch.ReadAsync(context, KeyLoad.Orleans.GrainReadKind.ApproximateSearch, request));
+            ApiGrainDispatch.ReadAsync(context, KeyLoad.Clustering.GrainReadKind.ApproximateSearch, request));
         app.MapPost(WaitForAnnIndexProtocol.Route, (WaitForAnnIndexRequest request, HttpContext context) =>
-            ApiGrainDispatch.ReadAsync(context, KeyLoad.Orleans.GrainReadKind.WaitForAnnIndex, request));
+            ApiGrainDispatch.ReadAsync(context, KeyLoad.Clustering.GrainReadKind.WaitForAnnIndex, request));
         app.MapPost(WaitForIndexProtocol.Route, (HttpContext context, WaitForIndexRequest request) =>
-            ApiGrainDispatch.ReadAsync(context, KeyLoad.Orleans.GrainReadKind.WaitForIndex, request));
+            ApiGrainDispatch.ReadAsync(context, KeyLoad.Clustering.GrainReadKind.WaitForIndex, request));
         app.MapPost(SearchPath, (SearchRequest request, HttpContext context) =>
-            ApiGrainDispatch.ReadAsync(context, KeyLoad.Orleans.GrainReadKind.Search, request));
+            ApiGrainDispatch.ReadAsync(context, KeyLoad.Clustering.GrainReadKind.Search, request));
         app.MapPost(GraphSearchPath, (GraphSearchRequest request, HttpContext context) =>
-            ApiGrainDispatch.ReadAsync(context, KeyLoad.Orleans.GrainReadKind.GraphSearch, request));
+            ApiGrainDispatch.ReadAsync(context, KeyLoad.Clustering.GrainReadKind.GraphSearch, request));
     }
 }

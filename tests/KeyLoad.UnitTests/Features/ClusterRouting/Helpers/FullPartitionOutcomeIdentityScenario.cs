@@ -59,7 +59,10 @@ internal static class FullPartitionOutcomeIdentityScenario
         string resource, string json)
     {
         var request = new CommandRequest(original.Id, partition, [new PutDocument(resource, DocumentId, json)]);
-        return original with { PayloadJson = JsonSerializer.Serialize(request, JsonDefaults.Options) };
+        return original with
+        {
+            PayloadJson = JsonSerializer.Serialize(request, JsonDefaults.Options)
+        };
     }
 
     private static async Task<(ReplicatedOperation First, ReplicatedOperation Second, byte[] FirstReceipt,

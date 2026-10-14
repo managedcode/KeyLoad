@@ -29,7 +29,9 @@ internal sealed class ConnectionProbeFilePublication(string root, string session
         var bytes = RequestCqrsProbeFiles.ReadRecord(path, options);
         var value = ConnectionProbeInventory.Read(bytes);
         if (value.SessionId != sessionId || ConnectionProbeInventory.Name(value) != name)
-        { throw new InvalidOperationException(ConnectionProbeProtocol.Invalid); }
+        {
+            throw new InvalidOperationException(ConnectionProbeProtocol.Invalid);
+        }
         records.RegisterImmutable(name, bytes);
         presentControls.Add(name);
         witnesses.Add(value);

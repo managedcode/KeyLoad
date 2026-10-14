@@ -33,7 +33,11 @@ internal static class QueueLeaseRf3Renew
             var renewed = await QueueLeaseRf3Assertions.InspectAsync(sdk, seed.Lane, token);
             await RequireRenewedAsync(renewed, before, receipt);
             await QueueLeaseRf3Assertions.ReplayedAsync(sdk, mcp, renew, receipt, token);
-            var invalid = renew with { CommandId = Guid.NewGuid(), LeaseSeconds = checked(seed.Resource.QueuePolicy.MaxLeaseSeconds + QueueLeaseRf3Protocol.NextClaim) };
+            var invalid = renew with
+            {
+                CommandId = Guid.NewGuid(),
+                LeaseSeconds = checked(seed.Resource.QueuePolicy.MaxLeaseSeconds + QueueLeaseRf3Protocol.NextClaim)
+            };
             await QueueLeaseRf3Assertions.DeniedAsync(await sdk.CompleteAsync(invalid, token), ErrorCode.Validation);
             await QueueLeaseRf3Assertions.EqualAsync(await QueueLeaseRf3Assertions.InspectAsync(sdk, seed.Lane, token), renewed);
             await QueueLeaseRf3Refusal.ForeignAsync(fixture, seed, delivery, sdk, renewed, failures, token);
@@ -59,7 +63,10 @@ internal static class QueueLeaseRf3Renew
         await QueueLeaseRf3Assertions.EqualAsync(actual, before with
         {
             Metadata = before.Metadata with
-            { LeaseUntil = actual.Metadata.LeaseUntil, StateVersion = checked(before.Metadata.StateVersion + QueueLeaseRf3Protocol.NextClaim) }
+            {
+                LeaseUntil = actual.Metadata.LeaseUntil,
+                StateVersion = checked(before.Metadata.StateVersion + QueueLeaseRf3Protocol.NextClaim)
+            }
         });
         var mutation = await Assert.That(receipt.Mutations).HasSingleItem();
         await Assert.That(mutation.Revision).IsEqualTo(actual.Metadata.StateVersion);

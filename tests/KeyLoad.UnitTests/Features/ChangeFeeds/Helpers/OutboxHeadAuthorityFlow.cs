@@ -12,7 +12,10 @@ internal static class OutboxHeadAuthorityFlow
         var failures = new List<Exception>();
         await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
         {
-            using var database = new TestDatabase(limits: new() { MaxOutboxRecords = 2 }, timeProvider: new FeedAuthorityClock());
+            using var database = new TestDatabase(limits: new()
+            {
+                MaxOutboxRecords = 2
+            }, timeProvider: new FeedAuthorityClock());
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => ExecuteAsync(database, fault), failures);
         }, failures);
         global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
@@ -89,9 +92,13 @@ internal static class OutboxHeadAuthorityFlow
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () => { result = await action(cold); }, failures);
         }
         catch (Exception error) when (global::ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         catch (Exception error) when (global::ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null)
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
         return result ?? throw new InvalidOperationException(MissingResult);
     }

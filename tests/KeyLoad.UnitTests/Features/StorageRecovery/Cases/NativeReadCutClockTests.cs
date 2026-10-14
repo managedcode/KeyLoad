@@ -36,7 +36,9 @@ internal sealed class NativeReadCutClockTests
         finally
         {
             try
-            { lease.Dispose(); }
+            {
+                lease.Dispose();
+            }
             catch (KeyLoadException error) when (error.Code == ErrorCode.BudgetExceeded) { disposalError = error; }
         }
         await Assert.That(disposalError).IsNotNull();

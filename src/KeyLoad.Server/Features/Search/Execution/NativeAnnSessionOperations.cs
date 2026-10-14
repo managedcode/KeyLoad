@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Search;
-using KeyLoad.Orleans;
 using KeyLoad.Query.Features.Search;
 using Microsoft.Extensions.Options;
 
@@ -61,13 +61,17 @@ internal static class NativeAnnSessionOperations
         AnnSeed current, IOptions<AnnSeedOptions> seeds, AnnWorkBudget indexBudget, ReadExecutionBudget read)
     {
         if (session.Replay is not null)
-        { throw Errors.Fail(ErrorCode.Conflict, NativeAnnProtocol.Stale); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, NativeAnnProtocol.Stale);
+        }
         var available = owner.MaintenanceMemory.Remaining(checked(session.RetainedBytes + current.PeakBytesUpperBound));
         seeds = NativeAnnMaintenanceAdmission.Seeds(seeds, available / LoadRetentionFrames);
         var manifest = stages.Describe(session.Request, current);
         NativeAnnReplaySource source;
         if (manifest.IsPending)
-        { source = stages.LoadPending(session.Request, current, seeds.Value, indexBudget, read); }
+        {
+            source = stages.LoadPending(session.Request, current, seeds.Value, indexBudget, read);
+        }
         else
         {
             var loaded = stages.LoadCompleted(session.Request, current, seeds.Value,
@@ -85,7 +89,9 @@ internal static class NativeAnnSessionOperations
     {
         var page = request.Page ?? throw Errors.Fail(ErrorCode.Validation, NativeAnnProtocol.InvalidSource);
         if (current.ProjectionCheckpoint != page.Consumer.Checkpoint)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, NativeAnnProtocol.Stale); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, NativeAnnProtocol.Stale);
+        }
         RequireReplay(session).Apply(page, session.Upper.Cut.OutboxTail);
         session.LastPage = page;
     }
@@ -96,10 +102,14 @@ internal static class NativeAnnSessionOperations
         var page = session.LastPage ?? throw Errors.Fail(ErrorCode.Validation, NativeAnnProtocol.InvalidSource);
         var intent = request.CheckpointIntent ?? throw Errors.Fail(ErrorCode.Validation, NativeAnnProtocol.InvalidSource);
         if (intent.Token != page.Token || intent.Consumer != page.Consumer.Consumer || !intent.Effects.IsEmpty)
-        { throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Corrupt); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Corrupt);
+        }
         var admitted = NativeAnnCanonicalSource.Manifest(session.Request, session.Upper, string.Empty, configured.Core.PackedAnn.Value)
             with
-        { ExplicitBuildStage = session.ExplicitBuild };
+        {
+            ExplicitBuildStage = session.ExplicitBuild
+        };
         var pending = RequireReplay(session).Pending(admitted, page.Consumer.Checkpoint, intent);
         session.Manifest = stages.SavePending(pending, budget);
     }
@@ -111,10 +121,16 @@ internal static class NativeAnnSessionOperations
         session.RequireUpper(current);
         NativeAnnCanonicalSource.RequireExactUpper(current, verified);
         if (session.LoadedIndex is not null && session.LastPage is null && session.Manifest is { IsPending: false } existing)
-        { session.Manifest = owner.AdmitLoaded(session.LoadedIndex, existing, current); session.LoadedIndex = null; return; }
+        {
+            session.Manifest = owner.AdmitLoaded(session.LoadedIndex, existing, current);
+            session.LoadedIndex = null;
+            return;
+        }
         intent ??= session.Manifest?.CheckpointIntent;
         if (intent is null)
-        { throw Errors.Fail(ErrorCode.Validation, NativeAnnProtocol.InvalidSource); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, NativeAnnProtocol.InvalidSource);
+        }
         session.Manifest = owner.BuildAndPublish(session.Request, verified, intent, budget,
             session.LastPage?.Consumer.Checkpoint ?? session.Manifest?.ReplayAfter,
             checked(session.RetainedBytes + current.PeakBytesUpperBound));
@@ -125,7 +141,9 @@ internal static class NativeAnnSessionOperations
         CommitProjectionBatchRequest? intent)
     {
         if (session.Manifest is { } observed && observed.ReplayAfter == observed.ReplayThrough)
-        { intent = null; }
+        {
+            intent = null;
+        }
         var source = NativeAnnCanonicalSource.Source(current);
         return new(session.Id, source, session.Replay?.Through
             ?? session.Manifest?.ReplayThrough ?? current.ProjectionCheckpoint ?? Empty,

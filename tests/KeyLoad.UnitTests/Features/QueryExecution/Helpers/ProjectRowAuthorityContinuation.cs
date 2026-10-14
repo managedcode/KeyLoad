@@ -45,14 +45,30 @@ internal static class ProjectRowAuthorityContinuation
         var outcome = Outcome(db.Store, command);
         var principal = new PrincipalRecord(Reader, Tenant,
             [new(DatabaseScope, Collection, Capability.DocumentsRead | Capability.Query)], [])
-        { OwnerId = Reader, RestrictRows = true, Projects = [Project], PolicyEpoch = ProjectEpoch };
+        {
+            OwnerId = Reader,
+            RestrictRows = true,
+            Projects = [Project],
+            PolicyEpoch = ProjectEpoch
+        };
         await ConfigureAsync(db, principal);
         await ProjectRowAuthorityAssertions.ReadAsync(db, engine, db.Store, true, token);
-        await ConfigureAsync(db, principal with { Projects = [], PolicyEpoch = RemovedEpoch });
+        await ConfigureAsync(db, principal with
+        {
+            Projects = [],
+            PolicyEpoch = RemovedEpoch
+        });
         await ProjectRowAuthorityAssertions.ReadAsync(db, engine, db.Store, false, token);
-        await ConfigureAsync(db, principal with { Revoked = true, PolicyEpoch = RevokedEpoch });
+        await ConfigureAsync(db, principal with
+        {
+            Revoked = true,
+            PolicyEpoch = RevokedEpoch
+        });
         await ProjectRowAuthorityAssertions.RefusedAsync(db, engine, db.Store, token);
-        await ConfigureAsync(db, principal with { PolicyEpoch = RepairedEpoch });
+        await ConfigureAsync(db, principal with
+        {
+            PolicyEpoch = RepairedEpoch
+        });
         await ProjectRowAuthorityAssertions.ReadAsync(db, engine, db.Store, true, token);
         await ReplayAsync(db.Database, db.Store, command, receipt, outcome, token);
         await ProjectRowAuthorityCold.RunAsync(db, command, receipt, outcome, token);

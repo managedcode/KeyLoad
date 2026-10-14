@@ -100,7 +100,9 @@ internal sealed class NativeCanonicalModelCutBodyTests
         {
             await ((Task)original).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
             if (original.Exception is { } fault)
-            { failures.AddRange(fault.InnerExceptions); }
+            {
+                failures.AddRange(fault.InnerExceptions);
+            }
         }
         await ServerFailureObserver.ObserveAsync(() => pipe.Writer.CompleteAsync().AsTask(), failures);
         await ServerFailureObserver.ObserveAsync(() => pipe.Reader.CompleteAsync().AsTask(), failures);

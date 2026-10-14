@@ -55,7 +55,9 @@ internal sealed class SampleRollupObservedWorkTests
         SampleRollupResult? result = null;
         KeyLoadException error;
         try
-        { error = Assert.ThrowsExactly<KeyLoadException>(() => result = SampleRollupWholeFlow.Read(db)); }
+        {
+            error = Assert.ThrowsExactly<KeyLoadException>(() => result = SampleRollupWholeFlow.Read(db));
+        }
         finally { clock.Disarm(); }
         var after = db.Store.GetReadDiagnostics();
         await Assert.That(clock.Triggered).IsTrue();

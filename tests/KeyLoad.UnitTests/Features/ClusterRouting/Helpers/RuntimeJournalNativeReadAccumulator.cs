@@ -7,8 +7,14 @@ internal sealed class RuntimeJournalNativeReadAccumulator : IJournalStorageConsu
 {
     private readonly MemoryStream bytes = new();
 
-    internal bool IsCompleted { get; private set; }
-    internal IJournalMetadata? Metadata { get; private set; }
+    internal bool IsCompleted
+    {
+        get; private set;
+    }
+    internal IJournalMetadata? Metadata
+    {
+        get; private set;
+    }
     internal byte[] ToArray() => bytes.ToArray();
 
     public void Read(JournalBufferReader buffer, IJournalMetadata? metadata)

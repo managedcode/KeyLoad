@@ -50,6 +50,8 @@ public sealed record MessagingExecutionOptions
     public void Validate()
     {
         if (!IsValid())
-        { throw new InvalidOperationException(ValidationMessage); }
+        {
+            throw new InvalidOperationException(ValidationMessage);
+        }
     }
 }

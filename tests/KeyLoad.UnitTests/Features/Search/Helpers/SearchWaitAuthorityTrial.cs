@@ -17,7 +17,10 @@ internal static class SearchWaitAuthorityTrial
         => RunAsync(async (fixture, search, request) =>
         {
             await SearchWaitAuthorityState.DeniedAsync(fixture.Canonical, search,
-                request with { MinimumToken = damage(request.MinimumToken) }, ErrorCode.TokenInvalidated, TokenDetail, cancellationToken);
+                request with
+                {
+                    MinimumToken = damage(request.MinimumToken)
+                }, ErrorCode.TokenInvalidated, TokenDetail, cancellationToken);
             await SearchWaitAuthorityState.HealthyAsync(fixture.Canonical, search, request, cancellationToken);
         }, cancellationToken);
 
@@ -39,9 +42,13 @@ internal static class SearchWaitAuthorityTrial
             database.Store.Commit((transaction, _) =>
             {
                 if (missing)
-                { transaction.Delete(KeySpace.AppliedBytes); }
+                {
+                    transaction.Delete(KeySpace.AppliedBytes);
+                }
                 else
-                { transaction.Put(KeySpace.AppliedBytes, NativeSerialization.Serialize(NegativeAppliedPosition)); }
+                {
+                    transaction.Put(KeySpace.AppliedBytes, NativeSerialization.Serialize(NegativeAppliedPosition));
+                }
                 return true;
             });
             var failures = new List<Exception>();
@@ -53,7 +60,10 @@ internal static class SearchWaitAuthorityTrial
             finally
             {
                 ServerFailureObserver.Observe(() => database.Store.Commit((transaction, _) =>
-                { transaction.Put(KeySpace.AppliedBytes, original); return true; }), failures);
+                {
+                    transaction.Put(KeySpace.AppliedBytes, original);
+                    return true;
+                }), failures);
             }
             ServerFailureObserver.ThrowIfAny(failures);
             await SearchWaitAuthorityState.HealthyAsync(database, search, request, cancellationToken);
@@ -83,9 +93,13 @@ internal static class SearchWaitAuthorityTrial
         finally
         {
             if (projection is not null)
-            { ServerFailureObserver.Observe(projection.Dispose, failures); }
+            {
+                ServerFailureObserver.Observe(projection.Dispose, failures);
+            }
             if (fixture is not null)
-            { await ServerFailureObserver.ObserveAsync(() => fixture.DisposeAsync().AsTask(), failures); }
+            {
+                await ServerFailureObserver.ObserveAsync(() => fixture.DisposeAsync().AsTask(), failures);
+            }
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }

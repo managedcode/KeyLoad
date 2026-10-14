@@ -37,7 +37,9 @@ internal static class RequestCqrsAnnResultAssertions
         var index = Path.Combine(fixture.Database.Directory, NativeAnnProtocol.RootDirectory,
             manifest.GenerationLeaf, NativeAnnProtocol.IndexFile);
         await using (var file = File.OpenRead(index))
-        { await Assert.That(Convert.ToHexStringLower(await SHA256.HashDataAsync(file, token))).IsEqualTo(result.IndexSha256); }
+        {
+            await Assert.That(Convert.ToHexStringLower(await SHA256.HashDataAsync(file, token))).IsEqualTo(result.IndexSha256);
+        }
         await SearchAsync(fixture, request, changed, token);
     }
 

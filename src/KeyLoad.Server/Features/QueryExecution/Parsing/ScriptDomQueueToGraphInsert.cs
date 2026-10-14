@@ -17,9 +17,13 @@ internal static class ScriptDomQueueToGraphInsert
         string? from = null;
         string? to = null;
         if (version == SqlCompositionInsert.JoinedVersion)
-        { (queue, from, to) = ScriptDomCompositionEndpointJoin.Read(table, parameters); }
+        {
+            (queue, from, to) = ScriptDomCompositionEndpointJoin.Read(table, parameters);
+        }
         else
-        { queue = parameters.Read<string>(ScriptDomInsertShape.Source(table, ScriptDomInsertShape.QueueMessages, One).Parameters[FirstIndex]); }
+        {
+            queue = parameters.Read<string>(ScriptDomInsertShape.Source(table, ScriptDomInsertShape.QueueMessages, One).Parameters[FirstIndex]);
+        }
         return (id, new QueueToGraph(graph, queue, prefix, maximum, from, to));
     }
     private const int ValueCount = 4;

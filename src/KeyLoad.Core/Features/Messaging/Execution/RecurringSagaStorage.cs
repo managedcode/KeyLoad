@@ -54,7 +54,10 @@ internal static class RecurringSagaStorage
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, RecurringSagaProtocol.CapacityExhausted);
         }
-        return current with { Bytes = totalBytes };
+        return current with
+        {
+            Bytes = totalBytes
+        };
     }
 
     private static RecurringSagaCapacity Require(RecurringSagaCapacity? capacity)

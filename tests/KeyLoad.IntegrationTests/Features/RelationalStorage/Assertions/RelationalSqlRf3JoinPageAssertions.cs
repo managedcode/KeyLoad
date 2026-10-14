@@ -26,7 +26,10 @@ internal static class RelationalSqlRf3JoinPageAssertions
     internal static async Task SameRowsAsync(QueryPage expected, QueryPage actual)
     {
         await Assert.That(actual.CutPosition).IsGreaterThanOrEqualTo(expected.CutPosition);
-        await SqlRf3Protocol.EqualAsync(expected with { CutPosition = actual.CutPosition }, actual);
+        await SqlRf3Protocol.EqualAsync(expected with
+        {
+            CutPosition = actual.CutPosition
+        }, actual);
         await VerifySourcesAsync(actual);
     }
 

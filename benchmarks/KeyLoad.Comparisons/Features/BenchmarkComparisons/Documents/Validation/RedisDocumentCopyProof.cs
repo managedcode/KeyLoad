@@ -60,7 +60,10 @@ internal static class RedisDocumentCopyProof
             await VerifyReplicaReadbacksAsync(replicas, identities, primaryEndpoint, schedule, readReplica, observations, token).ConfigureAwait(false);
             await JoinAsync(RedisReplicaProof.VerifyWorkerPrimaryAsync(primary, topology, CancellationToken.None), token).ConfigureAwait(false);
             RedisNodeIdentity.RequireUnchanged(await JoinAsync(RedisNodeIdentity.ReadAsync(primaryServer, CommandFlags.DemandMaster, CancellationToken.None), token).ConfigureAwait(false), primaryIdentity);
-            return evidence with { Observations = observations.Append(string.Format(System.Globalization.CultureInfo.InvariantCulture, FinalFsyncObservationFormat, schedule.Final, copies - PrimaryCopyCount)).ToImmutableArray() };
+            return evidence with
+            {
+                Observations = observations.Append(string.Format(System.Globalization.CultureInfo.InvariantCulture, FinalFsyncObservationFormat, schedule.Final, copies - PrimaryCopyCount)).ToImmutableArray()
+            };
         }
         finally
         {

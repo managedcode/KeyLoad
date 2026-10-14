@@ -88,7 +88,10 @@ internal sealed class PartitionQueryMcpContractTests
         await Assert.That(fixture.Store.Position).IsEqualTo(position);
         var allowed = item with
         {
-            Request = JsonSerializer.SerializeToElement(request with { AllowFullScan = true }, JsonDefaults.Options)
+            Request = JsonSerializer.SerializeToElement(request with
+            {
+                AllowFullScan = true
+            }, JsonDefaults.Options)
         };
         var allowedRequest = (PartitionQueryRequestV1)await McpNativePayloadAssertions.DecodeCanonical(allowed);
         _ = await PartitionQueryMcpTestData.ExecuteAsync(fixture, allowedRequest, McpCanonicalTestData.Entity);
@@ -101,7 +104,10 @@ internal sealed class PartitionQueryMcpContractTests
         var valid = PartitionQueryMcpTestData.Request();
         var position = fixture.Position;
         var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
-            new QueryEngine(fixture.Database, UnitExecutionOptions.QueryExecution()).QueryPartitions("root", valid with { Version = 2 }, PartitionQueryPublicTestSupport.ExpectedOwner));
+            new QueryEngine(fixture.Database, UnitExecutionOptions.QueryExecution()).QueryPartitions("root", valid with
+            {
+                Version = 2
+            }, PartitionQueryPublicTestSupport.ExpectedOwner));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.Validation);
         await Assert.That(fixture.ReadCalls).IsEqualTo(0);
         await Assert.That(fixture.Position).IsEqualTo(position);
@@ -114,7 +120,10 @@ internal sealed class PartitionQueryMcpContractTests
         var valid = PartitionQueryMcpTestData.Request();
         var position = fixture.Position;
         var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
-            new QueryEngine(fixture.Database, UnitExecutionOptions.QueryExecution()).QueryPartitions("root", valid with { AstVersion = 3 }, PartitionQueryPublicTestSupport.ExpectedOwner));
+            new QueryEngine(fixture.Database, UnitExecutionOptions.QueryExecution()).QueryPartitions("root", valid with
+            {
+                AstVersion = 3
+            }, PartitionQueryPublicTestSupport.ExpectedOwner));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.UnsupportedCapability);
         await Assert.That(fixture.ReadCalls).IsEqualTo(0);
         await Assert.That(fixture.Position).IsEqualTo(position);

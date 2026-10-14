@@ -22,7 +22,9 @@ internal static class TargetInboxRf3ResponseCall
         {
             var options = fixture.App.Services.GetRequiredService<IOptionsMonitor<HttpClientFactoryOptions>>().Get(string.Empty);
             foreach (var configure in options.HttpClientActions)
-            { configure(http); }
+            {
+                configure(http);
+            }
             http.BaseAddress = fixture.App.GetEndpoint(McpCallerProtocol.Node1, McpCallerProtocol.HttpEndpoint);
             http.Timeout = Timeout.InfiniteTimeSpan;
             var sdk = new KeyLoadClient(http, identity.Secret, IntegrationClientOptions.Execution());
@@ -30,9 +32,13 @@ internal static class TargetInboxRf3ResponseCall
             await Assert.That(observer.Observed).IsTrue();
             await Assert.That(caller.IsCancellationRequested).IsTrue();
             if (actual.IsSuccess)
-            { receipt = actual.Value; }
+            {
+                receipt = actual.Value;
+            }
             else
-            { await TargetInboxRf3Assertions.DeniedAsync(actual, ErrorCode.UnknownWriteOutcome); }
+            {
+                await TargetInboxRf3Assertions.DeniedAsync(actual, ErrorCode.UnknownWriteOutcome);
+            }
         }, failures).ConfigureAwait(false);
         return receipt;
     }

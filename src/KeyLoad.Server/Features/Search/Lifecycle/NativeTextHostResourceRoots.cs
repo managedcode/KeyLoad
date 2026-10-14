@@ -21,13 +21,17 @@ internal static class NativeTextHostResourceRoots
             NativeTextFileIO.SetPrivateDirectoryMode(root);
             var originalReceipt = File.Exists(Path.Combine(root, NativeTextProtocol.RootReceiptFile));
             if (!originalReceipt && Directory.EnumerateFileSystemEntries(root).Any())
-            { throw NativeTextErrors.Ownership(); }
+            {
+                throw NativeTextErrors.Ownership();
+            }
             owner.RegisterRoot(root, budget =>
             {
                 budget?.Check();
                 NativeTextFileIO.VerifyDirectory(root);
                 if (originalReceipt)
-                { NativeTextRootFiles.VerifyReceipt(root, node, options); }
+                {
+                    NativeTextRootFiles.VerifyReceipt(root, node, options);
+                }
             });
         }
         return owner;

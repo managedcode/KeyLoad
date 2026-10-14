@@ -147,7 +147,10 @@ internal static class ScaleServerCgroupOracle
         for (var index = 0; index < value.Length; index++)
         {
             if (value[index] != '\\')
-            { result.Append(value[index]); continue; }
+            {
+                result.Append(value[index]);
+                continue;
+            }
             if (index + 3 >= value.Length)
             {
                 return null;
@@ -173,7 +176,11 @@ internal static class ScaleServerCgroupOracle
     private static string ReadRootLimit(string path)
     {
         try
-        { using (File.OpenRead(path)) { } }
+        {
+            using (File.OpenRead(path))
+            {
+            }
+        }
         catch (FileNotFoundException) { return Unlimited; }
         throw new InvalidDataException("Kernel cgroup root unexpectedly exposed a child limit file.");
     }

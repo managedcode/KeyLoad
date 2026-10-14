@@ -30,9 +30,13 @@ internal static class PartitionMovementReceiverIssueFailoverRf3Trial
             }
         }, failures).ConfigureAwait(false);
         if (seed is { } clients)
-        { await ServerFailureObserver.ObserveAsync(() => clients.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => clients.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         if (wave is { } resources)
-        { await ServerFailureObserver.ObserveAsync(() => resources.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => resources.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

@@ -45,7 +45,9 @@ internal static class ControlledPartitionMovementProcessFenceRequest
         var grant = actualAuthorization.Grant
             ?? throw new InvalidOperationException(AuthorizationGrantRequired);
         if (grant.GrantId != GrantId || grant.PhaseCommandId != FenceCommandId)
-        { throw new InvalidOperationException(GrantIdentityMismatch); }
+        {
+            throw new InvalidOperationException(GrantIdentityMismatch);
+        }
         var envelope = new PartitionMovePeerEnvelope(Version, control.MoveId, control.Partition,
             corpus.Control.Owner, control.SourcePlacement, control.DestinationOwner,
             actualPrepared.Journal.ControlIntentDigest, PartitionMovePeerStage.Fence, InitialOrdinal,

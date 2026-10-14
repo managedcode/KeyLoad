@@ -18,7 +18,9 @@ internal static class NativeIdentityCapabilityOmission
     internal static byte[] SerializeWithoutCapability(StoreIdentity identity, int maximumPayloadBytes)
     {
         var generated = NativeSerialization.Serialize(identity with
-        { MinimumReaderContract = CapabilityUnspecified });
+        {
+            MinimumReaderContract = CapabilityUnspecified
+        });
         if (generated.Length > maximumPayloadBytes)
         {
             throw new InvalidDataException(InvalidNativeIdentityPayload);

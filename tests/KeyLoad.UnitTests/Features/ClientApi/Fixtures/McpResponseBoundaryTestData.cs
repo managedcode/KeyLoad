@@ -42,13 +42,19 @@ internal static class McpResponseBoundaryTestData
     internal static string EncodedIdentifier(McpIdentifierEncoding encoding, int bytes)
     {
         if (encoding == McpIdentifierEncoding.Ascii)
-        { return new string(Padding, bytes); }
+        {
+            return new string(Padding, bytes);
+        }
         if (encoding == McpIdentifierEncoding.Utf8)
-        { return new string(Utf8Character, bytes / Utf8CharacterBytes) + new string(Padding, bytes % Utf8CharacterBytes); }
+        {
+            return new string(Utf8Character, bytes / Utf8CharacterBytes) + new string(Padding, bytes % Utf8CharacterBytes);
+        }
         var escape = encoding == McpIdentifierEncoding.UnicodeEscape ? UnicodeEscape : QuoteEscape;
         var builder = new StringBuilder();
         for (var index = 0; index < bytes / escape.Length; index++)
-        { builder.Append(escape); }
+        {
+            builder.Append(escape);
+        }
         return builder.Append(Padding, bytes % escape.Length).ToString();
     }
 
@@ -68,9 +74,13 @@ internal static class McpResponseBoundaryTestData
     {
         var envelope = new Dictionary<string, object?>();
         if (method is not null)
-        { envelope[McpTransportGuardTestData.MethodField] = method; }
+        {
+            envelope[McpTransportGuardTestData.MethodField] = method;
+        }
         if (!omitParameters)
-        { envelope[ParametersField] = parameters; }
+        {
+            envelope[ParametersField] = parameters;
+        }
         var wire = JsonDefaults.Serialize(envelope);
         _ = McpFrameBounds.Inspect(wire, MaximumWireBytes, UnitMcpOptions.Execution());
         return wire;
@@ -97,7 +107,10 @@ internal static class McpResponseBoundaryTestData
 }
 
 /// <summary>Names real encoded JSON string representations with different byte and character counts.</summary>
-internal enum McpIdentifierEncoding { Ascii, Utf8, UnicodeEscape, QuoteEscape }
+internal enum McpIdentifierEncoding
+{
+    Ascii, Utf8, UnicodeEscape, QuoteEscape
+}
 
 /// <summary>Names native target omissions and concrete JSON type failures.</summary>
 internal enum McpMissingTargetFault

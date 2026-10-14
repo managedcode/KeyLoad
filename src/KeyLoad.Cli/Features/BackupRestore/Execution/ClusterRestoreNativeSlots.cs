@@ -35,7 +35,9 @@ internal static class ClusterRestoreNativeSlots
     {
         var directory = Path.Combine(ClusterRestorePathValidation.Relative(nodesRoot, slot.StageName), DatabaseDirectory);
         if (!Directory.Exists(directory))
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         // A remembered completion never authorizes recreating an absent slot from its source archive.
         var source = runtime.Plan.SourceArchives.Single(value => value.OriginalCut.Owner.PhysicalShardId == slot.SourceOwnerId);
         var secret = runtime.Configuration.Value.Credentials.Single(value => value.SourceOwnerId == slot.SourceOwnerId).Credential;
@@ -58,7 +60,9 @@ internal static class ClusterRestoreNativeSlots
             (originalView, originalIdentity, originalPosition, metadata) =>
             {
                 if (originalPosition != admitted.SourcePosition)
-                { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+                {
+                    throw Errors.Fail(ErrorCode.Corruption, Invalid);
+                }
                 ClusterRestoreImageComparison.Require(originalView, originalIdentity, metadata,
                     view, identity, position, secret, runtime.Cuts, runtime.Plan.Mappings, admitted,
                     runtime.Limits, runtime.Clock, runtime.Work);
@@ -70,13 +74,17 @@ internal static class ClusterRestoreNativeSlots
     {
         var results = ImmutableArray.CreateBuilder<NativeCatalogRestoreSlotCompletion>(runtime.Plan.Slots.Length);
         foreach (var slot in runtime.Plan.Slots)
-        { results.Add(RequireExisting(runtime, slot, root)); }
+        {
+            results.Add(RequireExisting(runtime, slot, root));
+        }
         return results.ToImmutable();
     }
 
     internal static void RequireSame(NativeCatalogRestoreSlotCompletion expected, NativeCatalogRestoreSlotCompletion actual)
     {
         if (expected != actual || expected.Context != actual.Context)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
     }
 }

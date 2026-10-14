@@ -48,7 +48,10 @@ internal static class NullQueueDeadlineRf3Operation
             var future = scheduled with
             {
                 Metadata = scheduled.Metadata with
-                { Id = QueueDeadlineRf3Protocol.Future, NotBefore = ((EnqueueMessage)original.Mutations[1]).NotBefore }
+                {
+                    Id = QueueDeadlineRf3Protocol.Future,
+                    NotBefore = ((EnqueueMessage)original.Mutations[1]).NotBefore
+                }
             };
             await QueueDeadlineRf3Assertions.RequireAsync(admin, lane, scheduled, token);
             await QueueDeadlineRf3Assertions.RequireAsync(admin, lane, future, token);

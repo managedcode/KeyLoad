@@ -19,20 +19,35 @@ internal sealed class ScriptDomCheckedTokens(IList<Dom.TSqlParserToken> tokens, 
         }
         set => throw new NotSupportedException();
     }
-    public int Count { get { check(); return tokens.Count; } }
+    public int Count
+    {
+        get
+        {
+            check();
+            return tokens.Count;
+        }
+    }
     public bool IsReadOnly => true;
     public IEnumerator<Dom.TSqlParserToken> GetEnumerator()
     {
         for (var index = FirstIndex; index < Count; index++)
-        { yield return this[index]; }
+        {
+            yield return this[index];
+        }
     }
     System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
-    public int IndexOf(Dom.TSqlParserToken item) { check(); return tokens.IndexOf(item); }
+    public int IndexOf(Dom.TSqlParserToken item)
+    {
+        check();
+        return tokens.IndexOf(item);
+    }
     public bool Contains(Dom.TSqlParserToken item) => IndexOf(item) >= FirstIndex;
     public void CopyTo(Dom.TSqlParserToken[] array, int arrayIndex)
     {
         foreach (var token in this)
-        { array[arrayIndex++] = token; }
+        {
+            array[arrayIndex++] = token;
+        }
     }
     public void Add(Dom.TSqlParserToken item) => throw new NotSupportedException();
     public void Clear() => throw new NotSupportedException();

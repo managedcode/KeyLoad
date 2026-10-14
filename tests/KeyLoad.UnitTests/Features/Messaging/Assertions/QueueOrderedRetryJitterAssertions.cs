@@ -44,12 +44,17 @@ internal static class QueueOrderedRetryJitterAssertions
         var modified = original with
         {
             Items = original.Items.SetItem(QueueOrderedRetryProtocol.Initial,
-            original.Items[QueueOrderedRetryProtocol.Initial] with { DelayMilliseconds = original.Items[QueueOrderedRetryProtocol.Initial].DelayMilliseconds + QueueOrderedRetryProtocol.One })
+            original.Items[QueueOrderedRetryProtocol.Initial] with
+            {
+                DelayMilliseconds = original.Items[QueueOrderedRetryProtocol.Initial].DelayMilliseconds + QueueOrderedRetryProtocol.One
+            })
         };
         var forged = operation with
         {
             NativePayload = NativeSerialization.Serialize(wrapper with
-            { RetryDecisions = NativeSerialization.Serialize(modified) })
+            {
+                RetryDecisions = NativeSerialization.Serialize(modified)
+            })
         };
         var before = QueueOrderedRetryImage.Capture(database.Store, state.Lane);
         var position = database.Store.Position;

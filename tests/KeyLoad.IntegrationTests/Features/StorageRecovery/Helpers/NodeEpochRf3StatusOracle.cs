@@ -97,7 +97,9 @@ internal static class NodeEpochRf3StatusOracle
                 allReady &= status.IsSuccess && status.Value!.RoutingReady && status.Value.Applied >= minimumApplied;
             }
             if (allReady)
-            { return; }
+            {
+                return;
+            }
             await Task.Delay(TimeSpan.FromMilliseconds(250), TimeProvider.System, cancellationToken).ConfigureAwait(false);
         }
     }

@@ -3,13 +3,18 @@ using KeyLoad.ServiceDefaults.Features.Authorization.Configuration;
 
 namespace KeyLoad.UnitTests.Features.Authorization;
 
-internal enum AuthorizationUnsafeSpanState { None, Event, Link, ExcessTags, ExcessBaggage, InheritedParentBaggage, ExcessParentLinks, ClientEvent, ClientTaggedLink, ClientTraceStateLink, ClientExtraLink, ClientRemoteLink }
+internal enum AuthorizationUnsafeSpanState
+{
+    None, Event, Link, ExcessTags, ExcessBaggage, InheritedParentBaggage, ExcessParentLinks, ClientEvent, ClientTaggedLink, ClientTraceStateLink, ClientExtraLink, ClientRemoteLink
+}
 internal static class AuthorizationTelemetryUnsafeState
 {
     internal static void Apply(Activity? activity, AuthorizationUnsafeSpanState state)
     {
         if (activity is null)
-        { return; }
+        {
+            return;
+        }
         var limits = new HttpTelemetryPrivacyOptions();
         switch (state)
         {
@@ -23,11 +28,15 @@ internal static class AuthorizationTelemetryUnsafeState
                 break;
             case AuthorizationUnsafeSpanState.ExcessTags:
                 for (var index = AuthorizationTelemetryTestProtocol.IndexCount; index <= limits.MaximumTags; index++)
-                { activity.SetTag(AuthorizationTelemetryTestProtocol.CanaryTag + index, AuthorizationTelemetryTestProtocol.TagCanary); }
+                {
+                    activity.SetTag(AuthorizationTelemetryTestProtocol.CanaryTag + index, AuthorizationTelemetryTestProtocol.TagCanary);
+                }
                 break;
             case AuthorizationUnsafeSpanState.ExcessBaggage:
                 for (var index = AuthorizationTelemetryTestProtocol.IndexCount; index <= limits.MaximumBaggageItems; index++)
-                { activity.AddBaggage(AuthorizationTelemetryTestProtocol.BaggageKey + index, AuthorizationTelemetryTestProtocol.BaggageCanary); }
+                {
+                    activity.AddBaggage(AuthorizationTelemetryTestProtocol.BaggageKey + index, AuthorizationTelemetryTestProtocol.BaggageCanary);
+                }
                 break;
         }
     }

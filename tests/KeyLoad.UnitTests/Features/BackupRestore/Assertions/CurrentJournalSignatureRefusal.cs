@@ -37,7 +37,9 @@ internal static class CurrentJournalSignatureRefusal
         await Assert.That(JsonElement.DeepEquals(actual.RootElement,
             JsonSerializer.SerializeToElement(expected, JsonDefaults.Options))).IsTrue();
         foreach (var path in new[] { fixture.Destination, cliTarget })
-        { await Assert.That(File.Exists(path) || Directory.Exists(path)).IsFalse(); }
+        {
+            await Assert.That(File.Exists(path) || Directory.Exists(path)).IsFalse();
+        }
         var root = Path.GetDirectoryName(fixture.Source)!;
         await Assert.That(Directory.EnumerateDirectories(root, Staging, SearchOption.AllDirectories).Any()).IsFalse();
     }

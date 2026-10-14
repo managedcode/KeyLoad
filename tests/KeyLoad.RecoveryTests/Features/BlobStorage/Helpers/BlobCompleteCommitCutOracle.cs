@@ -24,7 +24,9 @@ internal static class BlobCompleteCommitCutOracle
     {
         var hash = Initial(incarnation, blob, upload, bytes.Length);
         for (var offset = 0; offset < bytes.Length; offset += ChunkBytes)
-        { hash = Next(hash, offset / ChunkBytes, bytes.AsSpan(offset, Math.Min(ChunkBytes, bytes.Length - offset))); }
+        {
+            hash = Next(hash, offset / ChunkBytes, bytes.AsSpan(offset, Math.Min(ChunkBytes, bytes.Length - offset)));
+        }
         return hash;
     }
 

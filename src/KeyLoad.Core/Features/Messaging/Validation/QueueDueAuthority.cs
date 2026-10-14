@@ -12,6 +12,8 @@ public sealed partial class DatabaseEngine
         if (metadata.State != expectedState || deadline is null || deadline > now
             || !actualKey.SequenceEqual(QueueKey(leased ? LeasedQueueSpace : ScheduledQueueSpace,
                 lane, deadline.Value, metadata.Id)))
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, QueueRetryProtocol.StaleDecision); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, QueueRetryProtocol.StaleDecision);
+        }
     }
 }

@@ -31,10 +31,18 @@ internal static class BlobScopedUploadIdentityPublicTrial
     private static async Task<BlobScopedUploadIdentityPublicState[]> ConfigureAsync(RequestCqrsRf3Callers callers, CancellationToken token)
     {
         var first = new PartitionRef("blob-scoped-upload-" + Guid.NewGuid().ToString("N"), "public-scoped-upload", "domain", FirstPartitionKey);
-        var second = first with { PartitionKey = "second" };
+        var second = first with
+        {
+            PartitionKey = "second"
+        };
         var a = new ResourceDefinition("resource-a", ResourceKind.BlobStore, first.TransactionDomainId)
-        { BlobPolicy = new() { MaxBlobBytes = 1L, MaxReservedBytes = 1L, MaxObjectKeys = 4, MaxVersions = 4, MaxUploads = 4 } };
-        var b = a with { Name = "resource-b" };
+        {
+            BlobPolicy = new() { MaxBlobBytes = 1L, MaxReservedBytes = 1L, MaxObjectKeys = 4, MaxVersions = 4, MaxUploads = 4 }
+        };
+        var b = a with
+        {
+            Name = "resource-b"
+        };
         await SqlRf3Protocol.EqualAsync(a, await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.ConfigureResourceAsync(Guid.NewGuid(), new(first.TenantId, first.DatabaseId, a), token)));
         await SqlRf3Protocol.EqualAsync(b, await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.ConfigureResourceAsync(Guid.NewGuid(), new(first.TenantId, first.DatabaseId, b), token)));
         var uploadId = Guid.NewGuid();

@@ -29,15 +29,28 @@ internal static class AtomicPartitionPlacementAuthorityFlow
         var row = fixture.Store.Read(view => view.GetRecord<AtomicPartitionPlacementV1>(
             AtomicPartitionPlacementTestSupport.RowKey(partition)))!;
         await AtomicPartitionPlacementDirectoryAuthorityFlow.RunAsync(fixture, row,
-            Operation(fixture, first with { ExpectedRevision = InitialDirectoryRevision }, Guid.NewGuid()));
-        var original = Operation(fixture, first with { ExpectedRevision = InitialDirectoryRevision }, OriginalCommand);
-        await RefuseAndRepairAsync(fixture, row with { Version = MalformedVersion, PhysicalShardId = ForeignOwner }, row, original);
+            Operation(fixture, first with
+            {
+                ExpectedRevision = InitialDirectoryRevision
+            }, Guid.NewGuid()));
+        var original = Operation(fixture, first with
+        {
+            ExpectedRevision = InitialDirectoryRevision
+        }, OriginalCommand);
+        await RefuseAndRepairAsync(fixture, row with
+        {
+            Version = MalformedVersion,
+            PhysicalShardId = ForeignOwner
+        }, row, original);
         await RefuseAndRepairAsync(fixture, row with
         {
             Partition = AtomicPartitionPlacementTestSupport.SameSuffixOtherTenant,
             PhysicalShardId = ForeignOwner
         }, row, original);
-        await RefuseAndRepairAsync(fixture, row with { PlacementEpoch = StalePlacementEpoch }, row, original, requiresLineage: true);
+        await RefuseAndRepairAsync(fixture, row with
+        {
+            PlacementEpoch = StalePlacementEpoch
+        }, row, original, requiresLineage: true);
         await CompleteAndReplayAsync(fixture, original);
         await ContinueHealthyAsync(fixture);
     }
@@ -63,7 +76,9 @@ internal static class AtomicPartitionPlacementAuthorityFlow
         await Assert.That(grant.ExaminedRecords).IsEqualTo(MetadataPointReads);
         await Assert.That(grant.ReadBytes).IsEqualTo(AtomicPartitionPlacementAuthorityAssertions.ExpectedReadBytes(fixture));
         if (!requiresLineage)
-        { return; }
+        {
+            return;
+        }
         await Assert.That(AtomicPartitionPlacementAuthorityAssertions.LineageBytes(fixture)).IsNull();
         var lineageGrant = AtomicPartitionPlacementAuthorityAssertions.CreateLineageGrant(fixture);
         var lineageRefusal = Assert.ThrowsExactly<KeyLoadException>(() =>

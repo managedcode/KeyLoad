@@ -41,7 +41,9 @@ internal sealed class ReplicaIsolationOwner
         string root, string repository, IReadOnlyDictionary<string, string> names, CancellationToken cancellationToken)
     {
         if (!OperatingSystem.IsLinux())
-        { throw new PlatformNotSupportedException("The owned namespace fault cohort requires genuine Linux containers and native control."); }
+        {
+            throw new PlatformNotSupportedException("The owned namespace fault cohort requires genuine Linux containers and native control.");
+        }
         var source = await ClusterFixtureImageIdentity.ReadVerifiedImageAsync(cancellationToken).ConfigureAwait(false);
         var profile = ClusterFixturePhysicalShardIdentity.ReadProfile(root);
         var plan = await ReplicaIsolationComposition.ApplyAsync(builder, repository, source.Reference,
@@ -54,7 +56,9 @@ internal sealed class ReplicaIsolationOwner
         CancellationToken cancellationToken)
     {
         if (!OperatingSystem.IsLinux() || wave.localImageSelection is not null)
-        { throw new PlatformNotSupportedException(TwoRf3MembershipProtocol.ImageMismatch); }
+        {
+            throw new PlatformNotSupportedException(TwoRf3MembershipProtocol.ImageMismatch);
+        }
         var source = await ClusterFixtureImageIdentity.ReadVerifiedImageAsync(cancellationToken);
         var plan = await KeyLoad.AppHost.Features.ClusterRouting.NativeActivationIsolationComposition.ApplyAsync(
             builder, repository, source.Reference, wave.Profile.Incarnation, cancellationToken);
@@ -83,14 +87,18 @@ internal sealed class ReplicaIsolationOwner
                 Environment.GetEnvironmentVariable(SourceRevision) ?? throw new InvalidOperationException("The authenticated source revision is absent."));
             var current = await ReadNodeAsync(target, cancellationToken);
             if (current.Container.Image != derived.Id)
-            { throw new InvalidOperationException("The started container does not use the actual owned derived image."); }
+            {
+                throw new InvalidOperationException("The started container does not use the actual owned derived image.");
+            }
             nodes.Add(target.ResourceName, current);
             var artifacts = await ReplicaIsolationNativeArtifacts.ReadAsync(current.Container.Id, cancellationToken);
             await ReplicaIsolationEvidence.WriteStartedAsync(root, source, plan, current, original, derived,
                 artifacts.Tools, artifacts.Modules, cancellationToken);
         }
         if (nodes.Values.Select(node => node.Container.IpAddress).Distinct(StringComparer.Ordinal).Count() != plan.Targets.Count)
-        { throw new InvalidOperationException("The owned voter namespaces must have distinct native IPv4 endpoints."); }
+        {
+            throw new InvalidOperationException("The owned voter namespaces must have distinct native IPv4 endpoints.");
+        }
     }
 
     internal IReadOnlyList<string> Resources => plan.Targets.Select(target => target.ResourceName).ToArray();
@@ -119,21 +127,29 @@ internal sealed class ReplicaIsolationOwner
     internal async Task IsolateAsync(string resource, CancellationToken cancellationToken)
     {
         if (isolated is not null || !nodes.ContainsKey(resource))
-        { throw new InvalidOperationException("One inspected owned former-leader namespace may be isolated once."); }
+        {
+            throw new InvalidOperationException("One inspected owned former-leader namespace may be isolated once.");
+        }
         isolated = resource;
         var peers = nodes.Values.Where(node => node.Resource != resource).Select(node => node.Container.IpAddress).ToArray();
         rules = six ? new NativeActivationIsolationRules(Guid.NewGuid(), peers) : new ReplicaIsolationRules(Guid.NewGuid(), peers);
         foreach (var rule in rules.Installation())
-        { await MutateAsync(resource, rule, cancellationToken); }
+        {
+            await MutateAsync(resource, rule, cancellationToken);
+        }
         await VerifyInstalledAsync(cancellationToken);
     }
 
     internal async Task RestoreAsync(CancellationToken cancellationToken)
     {
         if (isolated is null || restored)
-        { return; }
+        {
+            return;
+        }
         if (execution.RequiresStoppedNamespace)
-        { throw new InvalidOperationException("Remote completion is unobserved; the owned namespace must be stopped before retirement."); }
+        {
+            throw new InvalidOperationException("Remote completion is unobserved; the owned namespace must be stopped before retirement.");
+        }
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(() => RestoreRulesAsync(cancellationToken), failures);
         await ServerFailureObserver.ObserveAsync(() => ReplicaIsolationEvidence.WriteMutationsAsync(root, execution.Mutations,
@@ -145,15 +161,21 @@ internal sealed class ReplicaIsolationOwner
     internal async Task SettleAfterStopAsync(bool stopped, CancellationToken cancellationToken)
     {
         if (!stopped)
-        { throw new InvalidOperationException("The actual fault topology did not settle; its root and images remain owned."); }
+        {
+            throw new InvalidOperationException("The actual fault topology did not settle; its root and images remain owned.");
+        }
         var evidence = new List<ReplicaIsolationRetirementObservation>();
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(() => ReplicaIsolationRetirement.VerifyNodesStoppedAsync(
             names, nodes.Values.ToArray(), evidence, cancellationToken), failures);
         if (failures.Count == ReplicaIsolationFlowProtocol.Zero)
-        { ServerFailureObserver.Observe(() => ReplicaIsolationRetirement.AssertNamedLocks(root, plan.Targets.Select(target => target.ResourceName), evidence), failures); }
+        {
+            ServerFailureObserver.Observe(() => ReplicaIsolationRetirement.AssertNamedLocks(root, plan.Targets.Select(target => target.ResourceName), evidence), failures);
+        }
         if (failures.Count == ReplicaIsolationFlowProtocol.Zero)
-        { await ServerFailureObserver.ObserveAsync(() => ReplicaIsolationRetirement.RemoveImagesAsync(plan, evidence, cancellationToken), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => ReplicaIsolationRetirement.RemoveImagesAsync(plan, evidence, cancellationToken), failures);
+        }
         await ServerFailureObserver.ObserveAsync(() => ReplicaIsolationEvidence.WriteRetirementAsync(root, evidence,
             failures.Count, CancellationToken.None), failures);
         await ServerFailureObserver.ObserveAsync(() => ReplicaIsolationEvidence.WriteMutationsAsync(root, execution.Mutations,
@@ -177,11 +199,15 @@ internal sealed class ReplicaIsolationOwner
         if (!Directory.EnumerateFiles(plan.ContextPath, "*", SearchOption.AllDirectories).SequenceEqual([file])
             || Convert.ToHexStringLower(SHA256.HashData(await File.ReadAllBytesAsync(file, cancellationToken)
                 .ConfigureAwait(false))) != plan.DockerfileSha256)
-        { throw new InvalidOperationException("The original native fault build context changed."); }
+        {
+            throw new InvalidOperationException("The original native fault build context changed.");
+        }
         foreach (var target in plan.Targets)
         {
             if (await ReadNodeAsync(target, cancellationToken) != nodes[target.ResourceName])
-            { throw new InvalidOperationException("An owned container/image/config/namespace or signed silo generation changed."); }
+            {
+                throw new InvalidOperationException("An owned container/image/config/namespace or signed silo generation changed.");
+            }
         }
     }
 
@@ -203,11 +229,15 @@ internal sealed class ReplicaIsolationOwner
         await VerifyAllAsync(cancellationToken);
         var snapshot = await ReplicaIsolationExecution.ReadAsync(nodes[isolated!].Container.Id, [ListRules], cancellationToken);
         foreach (var rule in ReplicaIsolationRuleState.Removal(snapshot.StandardOutput, rules!))
-        { await MutateAsync(isolated!, rule, cancellationToken); }
+        {
+            await MutateAsync(isolated!, rule, cancellationToken);
+        }
         var after = await ReplicaIsolationExecution.ReadAsync(nodes[isolated!].Container.Id, [ListRules], cancellationToken);
         if (after.StandardOutput.Split('\n').Any(line => line.StartsWith(NativeChain + rules!.InputChain, StringComparison.Ordinal)
             || line.StartsWith(NativeChain + rules!.OutputChain, StringComparison.Ordinal)
             || line.StartsWith(RulePrefix, StringComparison.Ordinal) && line.Split(' ').Any(word => word == rules!.InputChain || word == rules.OutputChain)))
-        { throw new InvalidOperationException("An original owned namespace rule remains after restoration."); }
+        {
+            throw new InvalidOperationException("An original owned namespace rule remains after restoration.");
+        }
     }
 }

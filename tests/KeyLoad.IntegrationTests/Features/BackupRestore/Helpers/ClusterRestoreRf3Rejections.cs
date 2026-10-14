@@ -18,9 +18,13 @@ internal static class ClusterRestoreRf3Rejections
             await Assert.That(waiting.Snapshot.State?.Text).IsEqualTo(KnownResourceStates.FailedToStart);
         }
         if (retainPublishedTarget)
-        { await Assert.That(Directory.Exists(owner.DataRoot)).IsTrue(); }
+        {
+            await Assert.That(Directory.Exists(owner.DataRoot)).IsTrue();
+        }
         else
-        { await Assert.That(Directory.Exists(owner.DataRoot)).IsFalse(); }
+        {
+            await Assert.That(Directory.Exists(owner.DataRoot)).IsFalse();
+        }
         await Assert.That(File.Exists(owner.DataRoot)).IsFalse();
         await owner.StopAsync().ConfigureAwait(false);
         await originalReader.RequireFailureAsync(expected, exactDetail).ConfigureAwait(false);

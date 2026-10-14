@@ -22,7 +22,9 @@ internal static class PlacementCapacityAdmissionFlow
                 await PlacementCapacityAdmissionAssertions.ClosedAsync(original.Admission);
                 await Assert.That(shutdown.IsCompleted).IsFalse();
                 foreach (var lease in original.Leases)
-                { lease.Dispose(); }
+                {
+                    lease.Dispose();
+                }
                 await shutdown;
             }, failures);
         }, failures);

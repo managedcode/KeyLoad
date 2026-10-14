@@ -1,5 +1,5 @@
 using Aspire.Hosting.ApplicationModel;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -34,7 +34,10 @@ internal sealed class RequestCqrsRf3NativeStartupAdmission : IAsyncDisposable
     }
 
     internal int AdmittedNodeCount => nodes.Count(node => node.IsAdmitted);
-    internal RequestCqrsRf3Diagnostics? Diagnostics { get; private set; }
+    internal RequestCqrsRf3Diagnostics? Diagnostics
+    {
+        get; private set;
+    }
     internal bool IsJoined => disposal is { IsCompletedSuccessfully: true }
         && nodes.All(node => node.OriginalCallback is null or { IsCompleted: true });
 
@@ -42,7 +45,9 @@ internal sealed class RequestCqrsRf3NativeStartupAdmission : IAsyncDisposable
     {
         var node = nodes.SingleOrDefault(candidate => ReferenceEquals(candidate.Resource, actual.Resource));
         if (node is null)
-        { return Task.CompletedTask; }
+        {
+            return Task.CompletedTask;
+        }
         lock (gate)
         {
             ObjectDisposedException.ThrowIf(disposal is not null, this);
@@ -50,7 +55,9 @@ internal sealed class RequestCqrsRf3NativeStartupAdmission : IAsyncDisposable
             var notifications = actual.Services.GetRequiredService<ResourceNotificationService>();
             if (!notifications.TryGetCurrentState(node.Resource.Name, out var state)
                 || !ReferenceEquals(state.Resource, node.Resource) || string.IsNullOrWhiteSpace(state.ResourceId))
-            { throw new InvalidOperationException(InvalidResourceMessage); }
+            {
+                throw new InvalidOperationException(InvalidResourceMessage);
+            }
             var logger = actual.Services.GetRequiredService<ResourceLoggerService>();
             return node.StartAsync(logger, state.ResourceId, modelProof.Task,
                 () => StartCapture(logger), lifecycle, failureObserver, lifetimeToken, nativeToken);
@@ -62,7 +69,9 @@ internal sealed class RequestCqrsRf3NativeStartupAdmission : IAsyncDisposable
         lock (gate)
         {
             if (Diagnostics is not null)
-            { return; }
+            {
+                return;
+            }
             Diagnostics = RequestCqrsRf3Diagnostics.Start(waveId, resources, logger, failureObserver);
             lifecycle?.BindDiagnostics(Diagnostics);
         }
@@ -73,7 +82,9 @@ internal sealed class RequestCqrsRf3NativeStartupAdmission : IAsyncDisposable
     public ValueTask DisposeAsync()
     {
         lock (gate)
-        { return new(disposal ??= DisposeCoreAsync()); }
+        {
+            return new(disposal ??= DisposeCoreAsync());
+        }
     }
 
     private async Task DisposeCoreAsync()
@@ -93,7 +104,9 @@ internal sealed class RequestCqrsRf3NativeStartupAdmission : IAsyncDisposable
             await node.RetryFailedCloseAsync(failures, failureObserver).ConfigureAwait(false);
         }
         try
-        { lifetime.Dispose(); }
+        {
+            lifetime.Dispose();
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
             RequestCqrsLifecycleFailureObserver.Append(failures, error, failureObserver,

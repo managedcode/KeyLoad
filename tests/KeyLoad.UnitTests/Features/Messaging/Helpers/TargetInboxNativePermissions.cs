@@ -15,7 +15,10 @@ internal static class TargetInboxNativePermissions
              new(partition.DatabaseId, TargetInboxUnitProtocol.Output, Capability.QueuePublish)], []);
         _ = database.ApplyEmbedded(new(Guid.NewGuid(), OperationKind.ConfigurePrincipal, TargetInboxUnitProtocol.Root, default,
             System.Text.Json.JsonSerializer.Serialize(new ConfigurePrincipalRequest(worker), JsonDefaults.Options)), token).Get<PrincipalRecord>();
-        var duplicate = request with { CommandId = Guid.NewGuid() };
+        var duplicate = request with
+        {
+            CommandId = Guid.NewGuid()
+        };
         var replay = TargetInboxNativeSetup.Apply(database, duplicate, token, worker.Id).Get<CommitInboxResult>();
         await Assert.That(replay.AlreadyProcessed).IsTrue();
         await Assert.That(replay.OriginalEffectsToken).IsEqualTo(original.OriginalEffectsToken);
@@ -27,13 +30,22 @@ internal static class TargetInboxNativePermissions
         };
         _ = database.ApplyEmbedded(new(Guid.NewGuid(), OperationKind.ConfigurePrincipal, TargetInboxUnitProtocol.Root, default,
             System.Text.Json.JsonSerializer.Serialize(new ConfigurePrincipalRequest(demoted), JsonDefaults.Options)), token).Get<PrincipalRecord>();
-        await TargetInboxNativeAssertions.RefusedAsync(database, store, request with { CommandId = Guid.NewGuid() },
+        await TargetInboxNativeAssertions.RefusedAsync(database, store, request with
+        {
+            CommandId = Guid.NewGuid()
+        },
             ErrorCode.PermissionDenied, token, worker.Id);
-        var restored = worker with { PolicyEpoch = TargetInboxUnitProtocol.RestoredEpoch };
+        var restored = worker with
+        {
+            PolicyEpoch = TargetInboxUnitProtocol.RestoredEpoch
+        };
         _ = database.ApplyEmbedded(new(Guid.NewGuid(), OperationKind.ConfigurePrincipal, TargetInboxUnitProtocol.Root, default,
             System.Text.Json.JsonSerializer.Serialize(new ConfigurePrincipalRequest(restored), JsonDefaults.Options)), token).Get<PrincipalRecord>();
         await TargetInboxNativeAssertions.RefusedAsync(database, store, duplicate, ErrorCode.PermissionDenied, token, worker.Id);
-        var current = TargetInboxNativeSetup.Apply(database, request with { CommandId = Guid.NewGuid() }, token, worker.Id).Get<CommitInboxResult>();
+        var current = TargetInboxNativeSetup.Apply(database, request with
+        {
+            CommandId = Guid.NewGuid()
+        }, token, worker.Id).Get<CommitInboxResult>();
         await Assert.That(current.AlreadyProcessed).IsTrue();
         await Assert.That(current.OriginalEffectsToken).IsEqualTo(original.OriginalEffectsToken);
         await TargetInboxNativeAssertions.CapacityAsync(store, request, TargetInboxUnitProtocol.FirstRevision);

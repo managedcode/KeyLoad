@@ -23,7 +23,9 @@ internal static class BlobCommitCutNativeProof
     {
         var page = view.Scan([], BlobCommitCutProtocol.MaximumRecords);
         if (page.HasMore)
-        { throw new InvalidOperationException("The bounded recovered blob image is incomplete."); }
+        {
+            throw new InvalidOperationException("The bounded recovered blob image is incomplete.");
+        }
         return Convert.ToHexString(JsonDefaults.Serialize(page.Records));
     });
 

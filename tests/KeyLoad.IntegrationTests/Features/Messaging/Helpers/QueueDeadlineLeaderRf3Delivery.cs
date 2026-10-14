@@ -56,8 +56,12 @@ internal static class QueueDeadlineLeaderRf3Delivery
     private static void Set(QueueDeadlineLeaderRf3State state, MessageInspection value, bool healthy)
     {
         if (healthy)
-        { state.Healthy = value; }
+        {
+            state.Healthy = value;
+        }
         else
-        { state.Original = value; }
+        {
+            state.Original = value;
+        }
     }
 }

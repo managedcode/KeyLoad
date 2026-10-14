@@ -15,11 +15,15 @@ internal static class EventVectorOriginalPublicResult
         if (!EventVectorPublicTerminalResult.IsTerminal(phase.Action))
         {
             if (!result.OriginalPublicResultBytes.IsEmpty)
-            { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+            }
             return null;
         }
         if (result.OriginalPublicResultBytes.IsEmpty)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         var value = NativeSerialization.Deserialize<EventFeedControlResult>(result.OriginalPublicResultBytes.Span);
         if (value is null || value.Version != Version || value.PublicCommandId != phase.OriginalRequest.CommandId
             || value.MapId != phase.OriginalRequest.MapId || value.Pages.IsDefault || value.Receipt is null
@@ -32,7 +36,9 @@ internal static class EventVectorOriginalPublicResult
                 || value.CoverageGeneration != map.CoverageGeneration || value.Released != map.Released)
             || result.Offer is { } offer && (value.Revision != offer.MapRevision
                 || value.CoverageGeneration != phase.ExpectedCoverageGeneration || value.Released))
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         var pages = phase.Action == EventVectorControlAction.Offer
             ? NativeSerialization.Deserialize<ImmutableArray<EventSourcePage>>(result.OriginalSourcePageBytes.Span)
             : ImmutableArray<EventSourcePage>.Empty;
@@ -43,7 +49,9 @@ internal static class EventVectorOriginalPublicResult
     private static void RequirePages(ImmutableArray<EventSourcePage> actual, ImmutableArray<EventSourcePage> original)
     {
         if (original.IsDefault || actual.Length != original.Length)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         for (var index = FirstElement; index < original.Length; index++)
         {
             var left = actual[index];
@@ -51,7 +59,9 @@ internal static class EventVectorOriginalPublicResult
             if (left is null || right is null || left.Source != right.Source || left.Head != right.Head
                 || left.Cursor != right.Cursor || left.CutPosition != right.CutPosition || left.HasMore != right.HasMore
                 || left.Events.IsDefault || right.Events.IsDefault || !left.Events.SequenceEqual(right.Events))
-            { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+            }
         }
     }
 }

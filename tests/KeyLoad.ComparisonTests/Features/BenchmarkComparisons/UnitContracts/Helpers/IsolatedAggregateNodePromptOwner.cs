@@ -25,7 +25,10 @@ internal sealed class IsolatedAggregateNodePromptOwner : IAsyncDisposable
     }
 
     internal CancellationTokenSource Prompt => prompt ?? throw new ObjectDisposedException(nameof(IsolatedAggregateNodePromptOwner));
-    internal OperationCanceledException? ExpectedCancellation { get; set; }
+    internal OperationCanceledException? ExpectedCancellation
+    {
+        get; set;
+    }
 
     internal void RegisterOriginal(Task<IsolatedAggregateNodeResult> task) => original = task;
     internal void RegisterCancellation(Task task) => cancellation = task;

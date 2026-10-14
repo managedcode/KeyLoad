@@ -9,7 +9,9 @@ internal static class ChunkMultiblockProcessAssertions
     internal static async Task VerifyAsync(string root, string mode, bool merge, CancellationToken token)
     {
         if (ChunkMultiblockCrashProtocol.IsFault(mode))
-        { return; }
+        {
+            return;
+        }
         var prepared = await ReadAsync(root, SampleChunkCrashContract.PreparedFile, token);
         await ChunkMultiblockProcessRows.RequireAsync(prepared, merge, prepared: true, healthy: false);
         await Assert.That(prepared.OriginalInflightResult).IsNull();
@@ -20,14 +22,20 @@ internal static class ChunkMultiblockProcessAssertions
                 prepared.Position, "appendSamples", ChunkMultiblockCrashProtocol.PreparedAutomaticSealSequence);
         }
         if (ChunkMultiblockCrashProtocol.IsPrepare(mode))
-        { return; }
+        {
+            return;
+        }
         var recovered = await ReadAsync(root, SampleChunkCrashContract.RecoveredFile, token);
         await ChunkMultiblockProcessRows.RequireAsync(recovered, merge, prepared: false, healthy: false);
         await Assert.That(recovered.Position).IsEqualTo(checked(prepared.Position + SampleChunkCrashContract.PositionStep));
         if (merge)
-        { await Assert.That(recovered.RawImage).IsEqualTo(prepared.RawImage); }
+        {
+            await Assert.That(recovered.RawImage).IsEqualTo(prepared.RawImage);
+        }
         else
-        { await ChunkMultiblockProcessRaw.RequireAsync(recovered, prepared: false, healthy: false); }
+        {
+            await ChunkMultiblockProcessRaw.RequireAsync(recovered, prepared: false, healthy: false);
+        }
         await Assert.That(recovered.OriginalAcknowledgedReceipt).IsEqualTo(prepared.OriginalAcknowledgedReceipt);
         await Assert.That(recovered.OriginalAdditionalResult).IsEqualTo(prepared.OriginalAdditionalResult);
         await Assert.That(recovered.OriginalInflightResult).IsNotNull();
@@ -41,16 +49,22 @@ internal static class ChunkMultiblockProcessAssertions
         await Assert.That(healthy.OriginalAdditionalResult).IsEqualTo(prepared.OriginalAdditionalResult);
         await Assert.That(healthy.OriginalInflightResult).IsEqualTo(recovered.OriginalInflightResult);
         if (!merge)
-        { await ChunkMultiblockProcessRaw.RequireAsync(healthy, prepared: false, healthy: true); }
+        {
+            await ChunkMultiblockProcessRaw.RequireAsync(healthy, prepared: false, healthy: true);
+        }
         await HealthyReceiptsAsync(healthy, prepared, recovered.Position, merge);
         if (!ChunkMultiblockCrashProtocol.IsVerify(mode))
-        { return; }
+        {
+            return;
+        }
         var name = ChunkMultiblockCrashProtocol.IsFirstCold(mode) ? ChunkMultiblockCrashProtocol.FirstColdFile : ChunkMultiblockCrashProtocol.SecondColdFile;
         var cold = await ReadAsync(root, name, token);
         await Assert.That(JsonSerializer.Serialize(cold, JsonDefaults.Options)).IsEqualTo(JsonSerializer.Serialize(healthy, JsonDefaults.Options));
         await ChunkMultiblockProcessRows.RequireAsync(cold, merge, prepared: false, healthy: true);
         if (!merge)
-        { await ChunkMultiblockProcessRaw.RequireAsync(cold, prepared: false, healthy: true); }
+        {
+            await ChunkMultiblockProcessRaw.RequireAsync(cold, prepared: false, healthy: true);
+        }
         await HealthyReceiptsAsync(cold, prepared, recovered.Position, merge);
     }
 

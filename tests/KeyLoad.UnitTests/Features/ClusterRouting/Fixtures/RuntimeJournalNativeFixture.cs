@@ -1,7 +1,7 @@
 #pragma warning disable ORLEANSEXP005
 using System.Diagnostics.CodeAnalysis;
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 using ManagedCode.Communication.CQRS;
 using ManagedCode.Communication.Orleans.Converters;
@@ -74,12 +74,21 @@ internal sealed class RuntimeJournalNativeFixture : IAsyncInitializer, IAsyncDis
         }
     }
 
-    internal TestCluster Cluster { get; }
-    internal GrainRequestCodec Codec { get; }
+    internal TestCluster Cluster
+    {
+        get;
+    }
+    internal GrainRequestCodec Codec
+    {
+        get;
+    }
     internal NativeRequestWorkOwner RequestWork => requestWork ??= new(UnitRoutingOptions.Routing());
 
     [AllowNull]
-    internal static RuntimeJournalNativeFixture Current { get => field ?? throw new InvalidOperationException("The native runtime journal fixture is not active."); private set; }
+    internal static RuntimeJournalNativeFixture Current
+    {
+        get => field ?? throw new InvalidOperationException("The native runtime journal fixture is not active."); private set;
+    }
 
     internal IServiceProvider SiloServices => Cluster.GetSiloServiceProvider();
     internal IJournalStorageProvider Provider => SiloServices.GetRequiredService<IJournalStorageProvider>();
@@ -160,7 +169,9 @@ internal sealed class RuntimeJournalNativeFixture : IAsyncInitializer, IAsyncDis
     private static async Task ObserveAsync(Func<Task> operation, List<Exception> failures)
     {
         try
-        { await operation().ConfigureAwait(false); }
+        {
+            await operation().ConfigureAwait(false);
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
     }
@@ -168,7 +179,9 @@ internal sealed class RuntimeJournalNativeFixture : IAsyncInitializer, IAsyncDis
 
 internal sealed class RuntimeJournalNativeSiloConfigurator : ISiloConfigurator
 {
-    public RuntimeJournalNativeSiloConfigurator() { }
+    public RuntimeJournalNativeSiloConfigurator()
+    {
+    }
 
     public void Configure(ISiloBuilder siloBuilder)
     {
@@ -231,7 +244,9 @@ internal sealed class RuntimeJournalNativeSiloConfigurator : ISiloConfigurator
 
 internal sealed class RuntimeJournalNativeClientConfigurator : IClientBuilderConfigurator
 {
-    public RuntimeJournalNativeClientConfigurator() { }
+    public RuntimeJournalNativeClientConfigurator()
+    {
+    }
 
     public void Configure(IConfiguration configuration, IClientBuilder clientBuilder)
     {

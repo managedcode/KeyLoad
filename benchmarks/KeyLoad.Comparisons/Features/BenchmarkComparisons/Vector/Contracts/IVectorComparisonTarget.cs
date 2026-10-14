@@ -34,9 +34,15 @@ public sealed record VectorReadback(int Number, string Id, int Dimensions, strin
 public interface IVectorComparisonTarget : IAsyncDisposable
 {
     /// <summary>Gets the canonical target name.</summary>
-    string Name { get; }
+    string Name
+    {
+        get;
+    }
     /// <summary>Gets the actual native target profile and topology evidence.</summary>
-    TargetProfile Profile { get; }
+    TargetProfile Profile
+    {
+        get;
+    }
     /// <summary>Returns whether this target natively implements the requested method and workload.</summary>
     /// <param name="indexKind">The native index algorithm.</param>
     /// <param name="queryMode">The native query predicate and update schedule.</param>

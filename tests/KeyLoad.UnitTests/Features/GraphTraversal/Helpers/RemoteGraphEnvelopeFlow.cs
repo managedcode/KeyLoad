@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 using KeyLoad.UnitTests.Features.ClusterRouting;
 
 namespace KeyLoad.UnitTests.Features.GraphTraversal;

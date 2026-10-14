@@ -51,7 +51,10 @@ internal sealed class TimeSeriesIntensiveOracleTests
         var expected = TimeSeriesIntensiveOracle.Raw(TimeSeriesIntensivePlans.Read(0));
         var equivalent = expected.SetItem(0, expected[0] with
         {
-            Sample = expected[0].Sample with { Timestamp = expected[0].Sample.Timestamp.ToOffset(TimeSpan.FromHours(2)) },
+            Sample = expected[0].Sample with
+            {
+                Timestamp = expected[0].Sample.Timestamp.ToOffset(TimeSpan.FromHours(2))
+            },
             TagsJson = "{ \"revision\": 1, \"kind\": \"intensive\" }"
         });
         TimeSeriesIntensiveOracle.ValidateRaw(expected, equivalent);
@@ -70,7 +73,10 @@ internal sealed class TimeSeriesIntensiveOracleTests
     public async Task AcTsi005FiniteStatisticsPrecedeAbsoluteAverageTolerance()
     {
         var expected = new SampleAggregate(3, 1, -1, 1, 1d / 3);
-        TimeSeriesIntensiveOracle.ValidateAggregate(expected, expected with { Average = expected.Average + 5e-13 });
+        TimeSeriesIntensiveOracle.ValidateAggregate(expected, expected with
+        {
+            Average = expected.Average + 5e-13
+        });
         foreach (var invalid in new[] { double.NaN, double.PositiveInfinity, double.NegativeInfinity })
         {
             Assert.ThrowsExactly<ComparisonFailureException>(() => TimeSeriesIntensiveOracle.ValidateAggregate(expected, expected with { Average = invalid }));

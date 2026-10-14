@@ -67,7 +67,10 @@ internal sealed class ReplicaAppendReceiver(ReplicaState state)
             }
             owned.Add(ReplicaOperationAuthority.Own(entry, state.Materializer.Database));
         }
-        return request with { Entries = owned.MoveToImmutable() };
+        return request with
+        {
+            Entries = owned.MoveToImmutable()
+        };
     }
 
     private void ValidateEntries(AppendRequest request)

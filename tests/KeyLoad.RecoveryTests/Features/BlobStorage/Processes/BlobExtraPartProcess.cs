@@ -31,19 +31,29 @@ internal static class BlobExtraPartProcess
             await BlobExtraPartTrial.RunAsync(root, seed, fault, timeout.Token);
         }
         catch (Exception failure) when (CommandIdempotencyProcessFailureHandling.IsNonFatal(failure))
-        { primary = failure; }
+        {
+            primary = failure;
+        }
         catch (Exception failure) when (!CommandIdempotencyProcessFailureHandling.IsNonFatal(failure))
-        { primary = failure; }
+        {
+            primary = failure;
+        }
         await CleanupAsync(root, child, primary);
     }
 
     private static ProcessStartInfo StartInfo(string root)
     {
         var start = new ProcessStartInfo("dotnet")
-        { RedirectStandardOutput = true, RedirectStandardError = true, UseShellExecute = false };
+        {
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false
+        };
         foreach (var argument in new[] { typeof(CrashHostMarker).Assembly.Location, root,
             CommitStage.HeaderWritten.ToString(), "0", QueueLifecycleCrashProtocol.Mode })
-        { start.ArgumentList.Add(argument); }
+        {
+            start.ArgumentList.Add(argument);
+        }
         return start;
     }
 
@@ -52,11 +62,17 @@ internal static class BlobExtraPartProcess
         using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(30), TimeProvider.System);
         var failures = new List<Exception>();
         if (child is not null)
-        { await CommandIdempotencyProcess.SettleActiveAsync(child, failures, timeout.Token); }
+        {
+            await CommandIdempotencyProcess.SettleActiveAsync(child, failures, timeout.Token);
+        }
         if (child is null || child.IsSettled)
-        { await CommandIdempotencyProcess.CleanTrialAsync(root, failures, timeout.Token); }
+        {
+            await CommandIdempotencyProcess.CleanTrialAsync(root, failures, timeout.Token);
+        }
         else
-        { failures.Add(new InvalidOperationException("The extra part process trial retained its root because its child did not settle.")); }
+        {
+            failures.Add(new InvalidOperationException("The extra part process trial retained its root because its child did not settle."));
+        }
         CommandIdempotencyProcess.ThrowFailures(primary, failures);
     }
 }

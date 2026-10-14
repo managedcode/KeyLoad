@@ -14,7 +14,10 @@ internal sealed class TimescaleTimeSeriesIntensiveSchemaFailureFixture : IAsyncD
     private const string CreateDatabaseSql = "CREATE DATABASE keyload_tsi_ddl_fixture OWNER keyload_tsi_role_fixture TEMPLATE template0";
     private const string DropDatabaseSql = "DROP DATABASE keyload_tsi_ddl_fixture WITH (FORCE)";
     private const string DropRoleSql = "DROP ROLE keyload_tsi_role_fixture";
-    private enum CleanupStage { Database, Role }
+    private enum CleanupStage
+    {
+        Database, Role
+    }
     private static readonly TimeSpan CleanupTimeout = TimeSpan.FromSeconds(30);
     private readonly NpgsqlDataSource admin;
     private bool ownsDatabase;
@@ -32,11 +35,23 @@ internal sealed class TimescaleTimeSeriesIntensiveSchemaFailureFixture : IAsyncD
         RestrictedConnectionString = settings.ConnectionString;
     }
 
-    internal string RunId { get; }
-    internal string PrivilegedConnectionString { get; }
-    internal string RestrictedConnectionString { get; }
+    internal string RunId
+    {
+        get;
+    }
+    internal string PrivilegedConnectionString
+    {
+        get;
+    }
+    internal string RestrictedConnectionString
+    {
+        get;
+    }
     internal static string RestrictedRole => RoleName;
-    internal ExceptionDispatchInfo? Primary { get; set; }
+    internal ExceptionDispatchInfo? Primary
+    {
+        get; set;
+    }
 
     internal static async Task<TimescaleTimeSeriesIntensiveSchemaFailureFixture> CreateAsync(
         string connectionString, CancellationToken token)

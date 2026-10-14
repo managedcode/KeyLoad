@@ -41,7 +41,10 @@ internal sealed class ZoneTreeStorageExecutionOptionsTests
         {
             delivered = 0;
             var exhausted = Assert.ThrowsExactly<KeyLoadException>(() => cut.VisitPrefix([], (_, _) =>
-            { delivered++; return true; }));
+            {
+                delivered++;
+                return true;
+            }));
             await Assert.That(exhausted.Code).IsEqualTo(ErrorCode.BudgetExceeded);
             await Assert.That(delivered).IsEqualTo(2);
         }
@@ -54,7 +57,11 @@ internal sealed class ZoneTreeStorageExecutionOptionsTests
     [Test]
     public async Task ExplicitCanonicalDefaultOverridesRemainExactAgainstDifferentCentralPolicy()
     {
-        var options = UnitExecutionOptions.StorageExecution(new() { MaxFrameBytes = 1, MaxSnapshotBytes = 1 });
+        var options = UnitExecutionOptions.StorageExecution(new()
+        {
+            MaxFrameBytes = 1,
+            MaxSnapshotBytes = 1
+        });
         var path = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString("N"));
         var descriptor = new ZoneTreeStoreOptions(path)
         {
@@ -80,14 +87,20 @@ internal sealed class ZoneTreeStorageExecutionOptionsTests
         finally
         {
             if (Directory.Exists(path))
-            { Directory.Delete(path, recursive: true); }
+            {
+                Directory.Delete(path, recursive: true);
+            }
         }
     }
 
     [Test]
     public async Task ConfiguredCheckpointBatchingChangesNativeFramesAndPreservesReopenedData()
     {
-        using var fixture = new StorageExecutionFixture(new() { CheckpointBatchRecords = 1, StreamBufferBytes = 1 });
+        using var fixture = new StorageExecutionFixture(new()
+        {
+            CheckpointBatchRecords = 1,
+            StreamBufferBytes = 1
+        });
         Seed(fixture.Store);
         var configured = Path.Combine(fixture.DirectoryPath, ConfiguredSnapshot);
         fixture.Store.CreateSnapshot(configured);
@@ -128,7 +141,9 @@ internal sealed class ZoneTreeStorageExecutionOptionsTests
     private static void Seed(ZoneTreeStore store) => store.Commit((tx, _) =>
     {
         foreach (var name in new[] { "a", "b", "c" })
-        { tx.Put(Encoding.UTF8.GetBytes(name), Value); }
+        {
+            tx.Put(Encoding.UTF8.GetBytes(name), Value);
+        }
         return true;
     });
 
@@ -141,7 +156,9 @@ internal sealed class ZoneTreeStorageExecutionOptionsTests
         {
             input.ReadExactly(header);
             if (BinaryPrimitives.ReadUInt64LittleEndian(header) == ZoneTreePersistenceFormat.CheckpointDataMagic)
-            { frames++; }
+            {
+                frames++;
+            }
             input.Position += BinaryPrimitives.ReadInt32LittleEndian(header.AsSpan(ZoneTreePersistenceFormat.PayloadLengthOffset));
         }
         return frames;
@@ -151,7 +168,10 @@ internal sealed class ZoneTreeStorageExecutionOptionsTests
     {
         private readonly TimeProvider clock;
         internal string DirectoryPath { get; } = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString("N"));
-        internal ZoneTreeStore Store { get; private set; }
+        internal ZoneTreeStore Store
+        {
+            get; private set;
+        }
 
         internal StorageExecutionFixture(ZoneTreeStorageExecutionOptions settings, TimeProvider? timeProvider = null)
         {

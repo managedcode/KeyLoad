@@ -43,7 +43,9 @@ internal sealed class ControlledPartitionMovementSeedTests
                 await Assert.That(source.Store.Position).IsEqualTo(blobPosition);
                 var metadata = await ControlledPartitionMovementBlobAssertions.PublishedAsync(blob.Result,
                     blob.Request, blob.EvaluatedAt, expectedToken with
-                    { Position = SourceSeedCommands + BlobSeedCommands }, DurabilityProfile.ProcessDurable);
+                    {
+                        Position = SourceSeedCommands + BlobSeedCommands
+                    }, DurabilityProfile.ProcessDurable);
                 await ControlledPartitionMovementBlobAssertions.ReadAsync(source, metadata, token);
                 var blobImage = ControlledPartitionMovementRawImage.Bytes(source.Store);
                 var blobOperation = source.Database.CreateNativeOperation(OperationKind.CompleteBlobUpload,

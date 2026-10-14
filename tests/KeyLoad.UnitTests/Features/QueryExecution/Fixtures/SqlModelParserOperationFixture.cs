@@ -19,8 +19,14 @@ internal sealed class SqlModelParserOperationFixture : IDisposable
     private const string SecretRead = "secret.read";
     private const string SecretUse = "secret.use";
     private readonly List<ZoneTreeStore> opened = [];
-    internal ZoneTreeStore Store { get; private set; }
-    internal DatabaseEngine Owner { get; private set; }
+    internal ZoneTreeStore Store
+    {
+        get; private set;
+    }
+    internal DatabaseEngine Owner
+    {
+        get; private set;
+    }
     internal PartitionRef Partition => original.Partition;
     internal ReplicatedOperation Seed => seed?.Operation ?? throw new InvalidOperationException(SeedRequired);
     internal CommitReceipt Original => seed?.Receipt ?? throw new InvalidOperationException(SeedRequired);
@@ -58,7 +64,9 @@ internal sealed class SqlModelParserOperationFixture : IDisposable
         var record = new PrincipalRecord(SqlModelParserOperationData.Reader, Partition.TenantId,
             [new(Partition.DatabaseId, SqlModelViewTestSupport.StreamSet, Capability.Query | (repaired ? Capability.EventsRead : Capability.None)),
              new(Partition.DatabaseId, SqlModelViewTestSupport.Queue, Capability.Query | (repaired ? Capability.QueueInspect : Capability.None))], [SecretRead, SecretUse, HeaderRead, HeaderUse])
-        { PolicyEpoch = repaired ? RepairedPolicyEpoch : DeniedPolicyEpoch };
+        {
+            PolicyEpoch = repaired ? RepairedPolicyEpoch : DeniedPolicyEpoch
+        };
         return Owner.Apply(Operation(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(record), Guid.NewGuid()))
             .Get<PrincipalRecord>();
     }
@@ -81,16 +89,24 @@ internal sealed class SqlModelParserOperationFixture : IDisposable
     {
         var failures = new List<Exception>();
         foreach (var store in opened.AsEnumerable().Reverse())
-        { ServerFailureObserver.Observe(store.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(store.Dispose, failures);
+        }
         ServerFailureObserver.Observe(original.Store.Dispose, failures);
         if (failures.Count == 0)
         {
             try
-            { original.Dispose(); }
+            {
+                original.Dispose();
+            }
             catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
-            { failures.Add(error); }
+            {
+                failures.Add(error);
+            }
             catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null)
-            { failures.Add(error); }
+            {
+                failures.Add(error);
+            }
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }

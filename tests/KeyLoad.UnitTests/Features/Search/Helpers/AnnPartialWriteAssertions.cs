@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.Search;
@@ -18,16 +18,23 @@ internal static class AnnPartialWriteAssertions
         {
             var page = NativeAnnMaintenanceTestData.Read(database, request, through);
             if (page.Entries.IsEmpty)
-            { throw new InvalidOperationException("The actual partial-write fixture requires a nonempty durable checkpoint."); }
+            {
+                throw new InvalidOperationException("The actual partial-write fixture requires a nonempty durable checkpoint.");
+            }
             var intent = NativeAnnMaintenanceTestData.Intent(page);
             _ = await runtime.PhaseAsync(database, request, AnnMaintenanceCapabilityKind.ApplyPage, page);
             _ = await runtime.PhaseAsync(database, request, AnnMaintenanceCapabilityKind.StagePage, intent: intent);
             _ = await NativeAnnMaintenancePhaseAssertions.CommitReplayAsync(database, intent);
             if (!page.HasMore)
-            { completed = true; break; }
+            {
+                completed = true;
+                break;
+            }
         }
         if (!completed)
-        { throw new InvalidOperationException("The actual partial-write fixture exceeds its original page bound."); }
+        {
+            throw new InvalidOperationException("The actual partial-write fixture exceeds its original page bound.");
+        }
         _ = await runtime.PhaseAsync(database, request, AnnMaintenanceCapabilityKind.Verify);
     }
 

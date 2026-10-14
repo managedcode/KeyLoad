@@ -54,10 +54,22 @@ internal sealed class ReplicaMaterializerLifecycleFixture : IAsyncDisposable, ID
         }
     }
 
-    internal ReplicaConfiguration Configuration { get; }
-    internal DurableReplicaLog Log { get; }
-    internal DatabaseEngine Database { get; }
-    internal ReplicaMaterializer Materializer { get; }
+    internal ReplicaConfiguration Configuration
+    {
+        get;
+    }
+    internal DurableReplicaLog Log
+    {
+        get;
+    }
+    internal DatabaseEngine Database
+    {
+        get;
+    }
+    internal ReplicaMaterializer Materializer
+    {
+        get;
+    }
     internal Task Entered => entered.Task;
     private string CanonicalPath => Path.Combine(directory, CanonicalDirectory);
     private string ReplicaPath => Path.Combine(directory, ReplicaDirectory);
@@ -133,7 +145,9 @@ internal sealed class ReplicaMaterializerLifecycleFixture : IAsyncDisposable, ID
             ownersClosed = true;
             ReplicaMaterializerLifecycleErrors.Attempt(Log.Dispose, failures);
             try
-            { storeOwners.Dispose(); }
+            {
+                storeOwners.Dispose();
+            }
             catch (AggregateException error) { ReplicaMaterializerLifecycleErrors.Add(error, failures); }
             catch (IOException error) { ReplicaMaterializerLifecycleErrors.Add(error, failures); }
         }
@@ -163,7 +177,9 @@ internal sealed class ReplicaMaterializerLifecycleFixture : IAsyncDisposable, ID
             ownersClosed = true;
             ReplicaMaterializerLifecycleErrors.Attempt(Log.Dispose, failures);
             try
-            { storeOwners.Dispose(); }
+            {
+                storeOwners.Dispose();
+            }
             catch (AggregateException error) { ReplicaMaterializerLifecycleErrors.Add(error, failures); }
             catch (IOException error) { ReplicaMaterializerLifecycleErrors.Add(error, failures); }
         }
@@ -183,13 +199,20 @@ internal sealed class ReplicaMaterializerLifecycleFixture : IAsyncDisposable, ID
     private async Task DisposeMaterializerAsync()
     {
         try
-        { await Materializer.DisposeAsync().AsTask(); }
+        {
+            await Materializer.DisposeAsync().AsTask();
+        }
         catch (KeyLoadException error) when (ReferenceEquals(error, acknowledgedTerminalFailure))
-        { acknowledgedTerminalFailure = null; }
+        {
+            acknowledgedTerminalFailure = null;
+        }
     }
 
     private ZoneTreeStore OpenCanonicalStore() => new(new(CanonicalPath)
-    { Incarnation = Configuration.Incarnation, FaultObserver = Observe }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
+    {
+        Incarnation = Configuration.Incarnation,
+        FaultObserver = Observe
+    }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
 
     private ZoneTreeStore OpenReplicaStore() => new(new(ReplicaPath) { Incarnation = Configuration.Incarnation }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
 
@@ -199,8 +222,14 @@ internal sealed class ReplicaMaterializerLifecycleFixture : IAsyncDisposable, ID
         var failures = new List<Exception>();
         CloseOwners(failures);
         ReplicaMaterializerLifecycleErrors.Throw(failures);
-        using var reopenedCanonical = new ZoneTreeStore(new(CanonicalPath) { Incarnation = Configuration.Incarnation }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
-        using var reopenedReplica = new ZoneTreeStore(new(ReplicaPath) { Incarnation = Configuration.Incarnation }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
+        using var reopenedCanonical = new ZoneTreeStore(new(CanonicalPath)
+        {
+            Incarnation = Configuration.Incarnation
+        }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
+        using var reopenedReplica = new ZoneTreeStore(new(ReplicaPath)
+        {
+            Incarnation = Configuration.Incarnation
+        }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
         using var reopenedLog = new DurableReplicaLog(reopenedReplica, RecoveryExecutionOptions.Configuration(Configuration));
         var database = new DatabaseEngine(reopenedCanonical, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource(), RecoveryExecutionOptions.Messaging(), RecoveryExecutionOptions.GraphExecution(), RecoveryExecutionOptions.ChangeFeedExecution(), RecoveryExecutionOptions.BlobExecution(), RecoveryExecutionOptions.NativeClaimsExecution(), RecoveryExecutionOptions.TimeSeriesExecution(), RecoveryExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
         await Assert.That(database.LastApplied).IsEqualTo(cut);

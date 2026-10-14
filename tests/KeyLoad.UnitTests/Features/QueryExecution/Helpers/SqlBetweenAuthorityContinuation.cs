@@ -35,7 +35,10 @@ internal static class SqlBetweenAuthorityContinuation
         PrincipalRecord principal = new(Reader, Tenant,
             [new(Database, SqlBetweenTestData.Collection, Capability.DocumentsRead | Capability.Query)],
             raw ? [Use, Read] : [Use])
-        { Revoked = revoked, PolicyEpoch = epoch };
+        {
+            Revoked = revoked,
+            PolicyEpoch = epoch
+        };
         var request = new ConfigurePrincipalRequest(principal);
         var operation = new ReplicatedOperation(Guid.NewGuid(), OperationKind.ConfigurePrincipal,
             SqlBetweenTestData.Root, database.EvaluationClock.GetUtcNow(), JsonSerializer.Serialize(request, JsonDefaults.Options));

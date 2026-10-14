@@ -25,7 +25,9 @@ internal static class QueuePolicyEpochRf3ReplayProof
         await Assert.That(current.Error).IsEqualTo(prior.Error);
         await Assert.That(current.SafeDetail).IsEqualTo(prior.SafeDetail);
         if (current.Error is null)
-        { await SqlRf3Protocol.EqualAsync(choice.Command, NativeCommandPayload.Read<DeliveryCommand>(operation)); }
+        {
+            await SqlRf3Protocol.EqualAsync(choice.Command, NativeCommandPayload.Read<DeliveryCommand>(operation));
+        }
         var key = Convert.ToHexString(KeySpace.PartitionOutcome(seed.Lane.Partition, operation.PrincipalId, operation.Id));
         var row = before.CanonicalRows.Single(value => value.StartsWith(key + ":", StringComparison.Ordinal));
         var retained = NativeSerialization.Deserialize<StoredOutcome>(Convert.FromHexString(row[(key.Length + 1)..]));
@@ -36,6 +38,8 @@ internal static class QueuePolicyEpochRf3ReplayProof
         await Assert.That(retained.PolicyEpoch).IsEqualTo(choice.PolicyEpoch);
         await Assert.That(retained.Result.Error).IsEqualTo(choice.Error);
         if (choice.Receipt is { } receipt)
-        { await SqlRf3Protocol.EqualAsync(receipt, retained.Result.Get<CommitReceipt>()); }
+        {
+            await SqlRf3Protocol.EqualAsync(receipt, retained.Result.Get<CommitReceipt>());
+        }
     }
 }

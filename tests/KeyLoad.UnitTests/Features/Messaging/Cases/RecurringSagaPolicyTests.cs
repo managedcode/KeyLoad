@@ -28,7 +28,9 @@ internal sealed class RecurringSagaPolicyTests
         fixture.AddPrincipal(Principal(NoPublish, Capability.SchedulerManage, [FieldWrite]));
         fixture.AddPrincipal(Principal(NoWrite, Capability.SchedulerManage | Capability.QueuePublish, []));
         fixture.AddPrincipal(new(AdminWithoutScheduler, RecurringSagaDatabase.TenantId, [], [])
-        { ClusterAdministrator = true });
+        {
+            ClusterAdministrator = true
+        });
         var id = Guid.NewGuid();
         var definition = Definition(fixture, id);
 

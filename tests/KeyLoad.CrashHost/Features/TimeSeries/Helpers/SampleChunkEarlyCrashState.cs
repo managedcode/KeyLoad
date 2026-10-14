@@ -9,7 +9,9 @@ internal static class SampleChunkEarlyCrashState
     {
         var path = Path.Combine(root, SampleChunkCrashContract.OriginalReceiptFile);
         if (new FileInfo(path).Length > database.Limits.MaxBatchBytes)
-        { throw new InvalidOperationException(SampleChunkCrashContract.Invalid); }
+        {
+            throw new InvalidOperationException(SampleChunkCrashContract.Invalid);
+        }
         var acknowledged = await File.ReadAllBytesAsync(path).ConfigureAwait(false);
         var exists = database.Store.Read(view => view.ReadValue(SampleChunkKeys.Window(SampleChunkCrashContract.Partition,
             SampleChunkCrashContract.Set, SampleChunkCrashContract.Series, SampleChunkCrashContract.WindowId), static _ => { }));
@@ -29,7 +31,9 @@ internal static class SampleChunkEarlyCrashState
     {
         var path = Path.Combine(root, SampleChunkCrashContract.OriginalOperationFile);
         if (new FileInfo(path).Length > database.Limits.MaxBatchBytes)
-        { throw new InvalidOperationException(SampleChunkCrashContract.Invalid); }
+        {
+            throw new InvalidOperationException(SampleChunkCrashContract.Invalid);
+        }
         var operation = NativeSerialization.Deserialize<ReplicatedOperation>(
             await File.ReadAllBytesAsync(path).ConfigureAwait(false));
         var before = SampleChunkCrashState.Complete(database);
@@ -37,14 +41,20 @@ internal static class SampleChunkEarlyCrashState
         var result = database.ApplyEmbedded(operation, cancellationToken: default);
         result.Get<CommitReceipt>();
         if (before != SampleChunkCrashState.Complete(database) || position != database.Store.Position)
-        { throw new InvalidOperationException(SampleChunkCrashContract.Invalid); }
+        {
+            throw new InvalidOperationException(SampleChunkCrashContract.Invalid);
+        }
         var original = Convert.ToHexString(NativeSerialization.Serialize(SampleChunkEarlyCrashOperations.Configure(database)));
         var receiptPath = Path.Combine(root, SampleChunkCrashContract.OriginalReceiptFile);
         if (new FileInfo(receiptPath).Length > database.Limits.MaxBatchBytes)
-        { throw new InvalidOperationException(SampleChunkCrashContract.Invalid); }
+        {
+            throw new InvalidOperationException(SampleChunkCrashContract.Invalid);
+        }
         if (original != Convert.ToHexString(await File.ReadAllBytesAsync(receiptPath).ConfigureAwait(false))
             || before != SampleChunkCrashState.Complete(database) || position != database.Store.Position)
-        { throw new InvalidOperationException(SampleChunkCrashContract.Invalid); }
+        {
+            throw new InvalidOperationException(SampleChunkCrashContract.Invalid);
+        }
         return Convert.ToHexString(NativeSerialization.Serialize(result));
     }
 }

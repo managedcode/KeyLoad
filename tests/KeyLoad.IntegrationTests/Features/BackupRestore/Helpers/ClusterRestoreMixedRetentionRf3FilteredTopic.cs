@@ -14,7 +14,10 @@ internal static class ClusterRestoreMixedRetentionRf3FilteredTopic
          new("filtered-fourth", ClusterRestoreMixedRetentionRf3Protocol.AcceptedType, ClusterRestoreMixedRetentionRf3Protocol.EventPayload)];
 
     internal static SubscriptionDefinition Definition(ClusterRestoreMixedRetentionRf3State state)
-        => new(state.Principal.Id) { EventTypes = [ClusterRestoreMixedRetentionRf3Protocol.AcceptedType] };
+        => new(state.Principal.Id)
+        {
+            EventTypes = [ClusterRestoreMixedRetentionRf3Protocol.AcceptedType]
+        };
 
     internal static async Task SeedAsync(RequestCqrsRf3Callers callers, ClusterRestoreMixedRetentionRf3State state, CancellationToken token)
     {
@@ -62,7 +65,10 @@ internal static class ClusterRestoreMixedRetentionRf3FilteredTopic
         await SqlRf3Protocol.EqualAsync(expected, await QueueLifecyclePublicRoutes.CallAsync(callers, state.CurrentQueue.Route, state.Partition,
             McpCallerTools.SubscriptionsSeek, seek, () => callers.Sdk.SeekSubscriptionAsync(seek, token), token));
         var unpause = new SetSubscriptionPausedRequest(Guid.NewGuid(), state.FilteredGroup, expected.Generation, false);
-        await SqlRf3Protocol.EqualAsync(expected with { Paused = false }, await QueueLifecyclePublicRoutes.CallAsync(callers,
+        await SqlRf3Protocol.EqualAsync(expected with
+        {
+            Paused = false
+        }, await QueueLifecyclePublicRoutes.CallAsync(callers,
             state.CurrentQueue.Route, state.Partition, McpCallerTools.SubscriptionsPause, unpause,
             () => callers.Sdk.SetSubscriptionPausedAsync(unpause, token), token));
         var request = new ReceiveSubscriptionRequest(Guid.NewGuid(), state.FilteredGroup, MaxEvents: ClusterRestoreMixedRetentionRf3Protocol.MatchingEvents);

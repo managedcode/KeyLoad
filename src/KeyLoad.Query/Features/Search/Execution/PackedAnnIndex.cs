@@ -52,17 +52,47 @@ internal sealed class PackedAnnState
         BuildScratchBytesUpperBound = buildScratchBytesUpperBound;
     }
 
-    internal VectorSpace Space { get; }
-    internal string[] Ids { get; }
-    internal long[] Revisions { get; }
-    internal byte[] Levels { get; }
-    internal PackedAnnGraph Graph { get; }
-    internal PackedAnnVectors Vectors { get; }
-    internal int EntryPoint { get; }
-    internal int MaximumLevel { get; }
+    internal VectorSpace Space
+    {
+        get;
+    }
+    internal string[] Ids
+    {
+        get;
+    }
+    internal long[] Revisions
+    {
+        get;
+    }
+    internal byte[] Levels
+    {
+        get;
+    }
+    internal PackedAnnGraph Graph
+    {
+        get;
+    }
+    internal PackedAnnVectors Vectors
+    {
+        get;
+    }
+    internal int EntryPoint
+    {
+        get;
+    }
+    internal int MaximumLevel
+    {
+        get;
+    }
     private readonly PackedAnnOptions policy;
     internal PackedAnnOptions Options => policy;
     internal int Count => Ids.Length;
-    internal long RetainedBytesUpperBound { get; }
-    internal long BuildScratchBytesUpperBound { get; }
+    internal long RetainedBytesUpperBound
+    {
+        get;
+    }
+    internal long BuildScratchBytesUpperBound
+    {
+        get;
+    }
 }

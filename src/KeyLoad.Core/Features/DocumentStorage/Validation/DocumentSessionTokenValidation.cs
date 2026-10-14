@@ -15,17 +15,27 @@ public sealed partial class DatabaseEngine
     {
         var owner = ReadPlacementWitness(view, partition);
         if (token.Incarnation != owner.Incarnation)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, DocumentTokenWrongIncarnation); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, DocumentTokenWrongIncarnation);
+        }
         if (token.AtomicPartitionId != partition.AtomicPartitionId || token.OwnershipEpoch != owner.PlacementEpoch)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, DocumentTokenOutOfScope); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, DocumentTokenOutOfScope);
+        }
         if (token.Position <= DocumentTokenInitialPosition)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, DocumentTokenInvalidPosition); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, DocumentTokenInvalidPosition);
+        }
         var bytes = view.ReadOwnedValue(KeySpace.AppliedBytes)
             ?? throw Errors.Fail(ErrorCode.Corruption, DocumentTokenCorruptPosition);
         var applied = NativeSerialization.Deserialize<long>(bytes);
         if (applied < DocumentTokenInitialPosition)
-        { throw Errors.Fail(ErrorCode.Corruption, DocumentTokenCorruptPosition); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, DocumentTokenCorruptPosition);
+        }
         if (token.Position > applied)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, DocumentTokenFuturePosition); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, DocumentTokenFuturePosition);
+        }
     }
 }

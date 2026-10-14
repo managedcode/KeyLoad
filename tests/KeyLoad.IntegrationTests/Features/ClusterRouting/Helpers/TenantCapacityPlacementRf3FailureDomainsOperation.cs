@@ -23,7 +23,11 @@ internal static class TenantCapacityPlacementRf3FailureDomainsOperation
         var baseline = await TenantCapacityPlacementRf3FailureDomainsCold.RequireAsync(
             wave, seed, state, state.HealthyPolicy, original, pending, null,
             pending.Plan.Moves.Single(), true, token);
-        var constrained = state.HealthyPolicy with { Revision = 3, RequireDistinctHosts = true };
+        var constrained = state.HealthyPolicy with
+        {
+            Revision = 3,
+            RequireDistinctHosts = true
+        };
         var constrainedReceipt = await TenantCapacityPlacementRf3FailureDomainsAuthority.ConfigureAsync(seed, state.Control, constrained, token);
         await TenantCapacityPlacementRf3FailureDomainsCandidates.RefuseAsync(seed, state, original, pending, token);
         await TenantCapacityPlacementRf3FailureDomainsAuthority.PersistReplayAsync(seed, persistId, persist, pending, token);
@@ -32,7 +36,11 @@ internal static class TenantCapacityPlacementRf3FailureDomainsOperation
         var rows = await TenantCapacityPlacementRf3FailureDomainsCold.RequireAsync(
             wave, seed, state, constrained, original, applying, baseline.Persist, pending.Plan.Moves.Single(), true, token);
         await TenantCapacityPlacementRf3FailureDomainsCandidates.RefuseAsync(seed, state, original, applying, token);
-        var repaired = state.HealthyPolicy with { Revision = 4, RequireDistinctHosts = false };
+        var repaired = state.HealthyPolicy with
+        {
+            Revision = 4,
+            RequireDistinctHosts = false
+        };
         var repairedReceipt = await TenantCapacityPlacementRf3FailureDomainsAuthority.ConfigureAsync(seed, state.Control, repaired, token);
         var renewed = await TenantCapacityPlacementRf3FailureDomainsAssertions.RefuseAsync(
             wave, seed, original, expectedRevision: 3, token);

@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.BlobStorage;
 using Microsoft.AspNetCore.Builder;
@@ -10,14 +10,26 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 /// <summary>Owns one real production application, silo and physical stores; borrowed operation never owns them.</summary>
 internal sealed class PartitionMovementLateNativeNode : IAsyncDisposable
 {
-    internal WebApplication Application { get; }
-    internal TimeSpan ShutdownTimeout { get; }
-    internal TimeProvider Clock { get; }
+    internal WebApplication Application
+    {
+        get;
+    }
+    internal TimeSpan ShutdownTimeout
+    {
+        get;
+    }
+    internal TimeProvider Clock
+    {
+        get;
+    }
     private PartitionHost? partition;
     private OrleansNode? silo;
     internal PartitionHost Partition => partition ??= Application.Services.GetRequiredService<PartitionHost>();
     internal OrleansNode Silo => silo ??= Application.Services.GetRequiredService<OrleansNode>();
-    internal bool IsDisposed { get; private set; }
+    internal bool IsDisposed
+    {
+        get; private set;
+    }
     private Task? shutdown;
     private Task? applicationDisposal;
     private Task? partitionDisposal;
@@ -33,9 +45,14 @@ internal sealed class PartitionMovementLateNativeNode : IAsyncDisposable
     public async ValueTask DisposeAsync()
     {
         if (IsDisposed)
-        { return; }
+        {
+            return;
+        }
         if (shutdown is { } original)
-        { await original.ConfigureAwait(false); return; }
+        {
+            await original.ConfigureAwait(false);
+            return;
+        }
         using var deadline = new CancellationTokenSource(ShutdownTimeout, Clock);
         await StopAsync(deadline.Token).ConfigureAwait(false);
     }
@@ -53,11 +70,16 @@ internal sealed class PartitionMovementLateNativeNode : IAsyncDisposable
     private async Task StopCoreAsync(CancellationToken cancellationToken)
     {
         if (IsDisposed)
-        { return; }
+        {
+            return;
+        }
         var failures = new List<Exception>();
         ServerFailureObserver.Observe(Application.Lifetime.StopApplication, failures);
         if (!await JoinSiloAsync(failures, cancellationToken).ConfigureAwait(false))
-        { ServerFailureObserver.ThrowIfAny(failures); return; }
+        {
+            ServerFailureObserver.ThrowIfAny(failures);
+            return;
+        }
         await CloseApplicationAndStorageAsync(failures, cancellationToken).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny(failures);
         IsDisposed = true;
@@ -66,7 +88,9 @@ internal sealed class PartitionMovementLateNativeNode : IAsyncDisposable
     private async Task<bool> JoinSiloAsync(List<Exception> failures, CancellationToken cancellationToken)
     {
         if (silo is not { } actualSilo)
-        { return true; }
+        {
+            return true;
+        }
         Task? stopped = null;
         await ServerFailureObserver.ObserveAsync(async () =>
         {
@@ -74,7 +98,9 @@ internal sealed class PartitionMovementLateNativeNode : IAsyncDisposable
             await stopped.ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
         if (stopped is { IsCompletedSuccessfully: true } && actualSilo.HasJoinedRequestWork)
-        { return true; }
+        {
+            return true;
+        }
         failures.Add(new InvalidOperationException("The native silo host and request owners have not both joined; retain storage."));
         return false;
     }

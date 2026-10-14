@@ -28,7 +28,9 @@ internal static class PhysicalShardCatalogRf3Assertions
         EntityRef reference, CancellationToken cancellationToken)
     {
         foreach (var node in Nodes)
-        { await VerifyAbsentOnVoterAsync(app, adminKey, node, reference, cancellationToken).ConfigureAwait(false); }
+        {
+            await VerifyAbsentOnVoterAsync(app, adminKey, node, reference, cancellationToken).ConfigureAwait(false);
+        }
     }
 
     private static async Task VerifyAbsentOnVoterAsync(Aspire.Hosting.DistributedApplication app,

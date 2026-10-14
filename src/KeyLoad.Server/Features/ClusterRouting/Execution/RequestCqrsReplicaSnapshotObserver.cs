@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Replication;
 using Microsoft.Extensions.Options;
 
@@ -23,10 +23,14 @@ internal sealed class RequestCqrsReplicaSnapshotObserver(RequestCqrsProbeFiles f
     {
         if (global::Orleans.Runtime.RequestContext.Get(GrainRequestStreamProtocol.ContextKey)
             is not GrainRequestContextState context)
-        { return state; }
+        {
+            return state;
+        }
         var claim = lifecycle.FindClaim(context.RequestId);
         if (claim is null || claim.Arm.Record.Phase != RequestCqrsProbePhase.ReplicaSnapshotReadiness)
-        { return state; }
+        {
+            return state;
+        }
         RequireClaim(claim, context, state);
         lifecycle.EnterClaimedCallback();
         var gate = false;
@@ -56,7 +60,9 @@ internal sealed class RequestCqrsReplicaSnapshotObserver(RequestCqrsProbeFiles f
         finally
         {
             if (gate)
-            { lifecycle.ExitGate(); }
+            {
+                lifecycle.ExitGate();
+            }
             lifecycle.ExitCallback();
         }
     }
@@ -67,7 +73,9 @@ internal sealed class RequestCqrsReplicaSnapshotObserver(RequestCqrsProbeFiles f
             || context.ConnectionId == Guid.Empty || claim.Identity.CommandId != Guid.Empty
             || claim.Arm.Record.ReadKind != GrainReadKind.NodeStatus || claim.Arm.Record.Action != RequestCqrsProbeAction.Hold
             || claim.Arm.Record.TargetVoter != replicaOptions.Value.LocalId || state.VoterId != replicaOptions.Value.LocalId)
-        { throw RequestCqrsReplicaSnapshotJson.Invalid(); }
+        {
+            throw RequestCqrsReplicaSnapshotJson.Invalid();
+        }
     }
 
     private bool Qualifies(ReplicaNodeState state) => state.SnapshotIndex > NoSnapshot

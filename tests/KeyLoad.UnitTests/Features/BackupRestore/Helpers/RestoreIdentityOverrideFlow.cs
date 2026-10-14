@@ -14,7 +14,9 @@ internal static class RestoreIdentityOverrideFlow
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             if (Directory.Exists(root))
-            { throw new InvalidOperationException("The restore flow requires a fresh owned root."); }
+            {
+                throw new InvalidOperationException("The restore flow requires a fresh owned root.");
+            }
             Directory.CreateDirectory(root);
             ownsRoot = true;
             var fixture = new RestoreIdentityOverrideFixture(root);
@@ -23,7 +25,9 @@ internal static class RestoreIdentityOverrideFlow
                 token.ThrowIfCancellationRequested();
                 var state = await SeedAsync(fixture);
                 if (emptyDestination)
-                { Directory.CreateDirectory(fixture.TargetDirectory); }
+                {
+                    Directory.CreateDirectory(fixture.TargetDirectory);
+                }
                 var freshIncarnation = Guid.NewGuid();
                 var freshKey = state.SourceIdentity.SigningKey.ToArray();
                 freshKey[0] ^= 1;
@@ -37,13 +41,17 @@ internal static class RestoreIdentityOverrideFlow
                 await Assert.That(identity.DispatchPaused).IsTrue();
                 var saved = await RestoreIdentityOverrideCold.WarmAsync(fixture, state, identity, token);
                 for (var cold = 0; cold < 2; cold++)
-                { await RestoreIdentityOverrideCold.ReopenAsync(fixture, state, identity, saved, token); }
+                {
+                    await RestoreIdentityOverrideCold.ReopenAsync(fixture, state, identity, saved, token);
+                }
                 await RestoreIdentityOverrideAssertions.SourceAsync(fixture, state);
             }, failures);
             ServerFailureObserver.Observe(fixture.Source.JoinOwnedResources, failures);
         }, failures);
         if (ownsRoot)
-        { ServerFailureObserver.Observe(() => Directory.Delete(root, recursive: true), failures); }
+        {
+            ServerFailureObserver.Observe(() => Directory.Delete(root, recursive: true), failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 

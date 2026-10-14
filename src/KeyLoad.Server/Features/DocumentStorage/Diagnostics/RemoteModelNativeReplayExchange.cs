@@ -11,7 +11,10 @@ internal sealed class RemoteModelNativeReplayExchange(RemoteModelNativeClient cl
     private Task? shutdown;
     private int count;
     private bool active;
-    internal bool InvokedEffects { get; private set; }
+    internal bool InvokedEffects
+    {
+        get; private set;
+    }
 
     internal Task<RemoteModelNativeReplayResult> ExecuteAsync(RemoteModelNativeReplayVariation variation,
         CancellationToken caller)
@@ -22,7 +25,9 @@ internal sealed class RemoteModelNativeReplayExchange(RemoteModelNativeClient cl
         {
             var limit = RemoteModelNativeReplayCatalog.Count(permitted);
             if (shutdown is not null || active || count >= limit || variation != RemoteModelNativeReplayCatalog.At(permitted, count + NextWitnessOrdinal))
-            { throw new InvalidOperationException(RemoteModelNativeProtocol.InvalidProof); }
+            {
+                throw new InvalidOperationException(RemoteModelNativeProtocol.InvalidProof);
+            }
             originalToken.ThrowIfCancellationRequested();
             caller.ThrowIfCancellationRequested();
             count++;
@@ -41,9 +46,16 @@ internal sealed class RemoteModelNativeReplayExchange(RemoteModelNativeClient cl
         await start.ConfigureAwait(false);
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(originalToken, caller, closed.Token);
         try
-        { return await client.ReplayCapturedAsync(destination, original, maximumReplyBytes, variation, this, linked.Token).ConfigureAwait(false); }
+        {
+            return await client.ReplayCapturedAsync(destination, original, maximumReplyBytes, variation, this, linked.Token).ConfigureAwait(false);
+        }
         finally
-        { lock (sync) { active = false; } }
+        {
+            lock (sync)
+            {
+                active = false;
+            }
+        }
     }
 
     internal void MarkInvoked(RemoteModelNativeReplayVariation variation)
@@ -59,7 +71,9 @@ internal sealed class RemoteModelNativeReplayExchange(RemoteModelNativeClient cl
     public ValueTask DisposeAsync()
     {
         lock (sync)
-        { return new(shutdown ??= JoinAsync(running)); }
+        {
+            return new(shutdown ??= JoinAsync(running));
+        }
     }
 
     private async Task JoinAsync(Task? admitted)
@@ -68,9 +82,13 @@ internal sealed class RemoteModelNativeReplayExchange(RemoteModelNativeClient cl
         {
             await closed.CancelAsync().ConfigureAwait(false);
             if (admitted is not null)
-            { await admitted.ConfigureAwait(false); }
+            {
+                await admitted.ConfigureAwait(false);
+            }
         }
         finally
-        { closed.Dispose(); }
+        {
+            closed.Dispose();
+        }
     }
 }

@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 using KeyLoad.Security;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
@@ -33,10 +33,15 @@ internal static class NativeAnnCrashScenario
         CanonicalCrashBoundary boundary, string mode, NativeAnnCrashCommandOwner commands)
     {
         if (mode == NativeAnnCrashContract.Prepare)
-        { await PrepareAsync(directory, database, commands); return; }
+        {
+            await PrepareAsync(directory, database, commands);
+            return;
+        }
         var request = NativeSerialization.Deserialize<AnnMaintenanceRequest>(await File.ReadAllBytesAsync(Path.Combine(directory, NativeAnnCrashContract.RequestFile)))
             with
-        { Mode = AnnMaintenanceMode.Restore };
+        {
+            Mode = AnnMaintenanceMode.Restore
+        };
         var intent = NativeSerialization.Deserialize<CommitProjectionBatchRequest>(await File.ReadAllBytesAsync(Path.Combine(directory, NativeAnnCrashContract.IntentFile)));
         if (mode == NativeAnnCrashContract.Fault)
         {
@@ -55,7 +60,10 @@ internal static class NativeAnnCrashScenario
             return;
         }
         if (mode == NativeAnnCrashContract.Verify)
-        { await CompleteAsync(directory, NativeAnnCrashContract.VerifiedFile, database, request, commands); return; }
+        {
+            await CompleteAsync(directory, NativeAnnCrashContract.VerifiedFile, database, request, commands);
+            return;
+        }
         throw new InvalidOperationException(NativeAnnCrashContract.Invalid);
     }
 
@@ -73,12 +81,16 @@ internal static class NativeAnnCrashScenario
                 var began = await NativeAnnCrashState.PhaseAsync(database, actual, request, AnnMaintenanceCapabilityKind.Begin);
                 var page = NativeAnnCrashOperations.Read(database, request, began.Source!.ThroughSequence);
                 if (!page.HasMore || page.Entries.Length != NativeAnnCrashContract.PageLimit)
-                { throw new InvalidOperationException(NativeAnnCrashContract.Invalid); }
+                {
+                    throw new InvalidOperationException(NativeAnnCrashContract.Invalid);
+                }
                 var intent = new CommitProjectionBatchRequest(Guid.NewGuid(), request.Consumer, page.Token, []);
                 _ = await NativeAnnCrashState.PhaseAsync(database, actual, request, AnnMaintenanceCapabilityKind.ApplyPage, page);
                 var pending = await NativeAnnCrashState.PhaseAsync(database, actual, request, AnnMaintenanceCapabilityKind.StagePage, intent: intent);
                 if (!pending.Pending || pending.ThroughSequence != page.ThroughSequence)
-                { throw new InvalidOperationException(NativeAnnCrashContract.Invalid); }
+                {
+                    throw new InvalidOperationException(NativeAnnCrashContract.Invalid);
+                }
                 await File.WriteAllBytesAsync(Path.Combine(directory, NativeAnnCrashContract.IntentFile), NativeSerialization.Serialize(intent));
                 await CrashHostPause.WaitForKillAsync();
             }, failures);

@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Replication;
 
 namespace KeyLoad.UnitTests;
@@ -31,8 +31,15 @@ internal sealed class ReplicaReadProbeSecurityTests
     [Arguments(null)]
     public async Task NonemptyProbeFailsBeforeEitherPoolIsConsumed(OperationKind? kind)
     {
-        using var fixture = new ReplicaSecurityFixture(new() { CriticalPerVoter = 1, ReadBarrierPerVoter = 1 });
-        var invalid = fixture.Resign(fixture.Append(kind) with { Method = ReplicaRpc.ReadProbe });
+        using var fixture = new ReplicaSecurityFixture(new()
+        {
+            CriticalPerVoter = 1,
+            ReadBarrierPerVoter = 1
+        });
+        var invalid = fixture.Resign(fixture.Append(kind) with
+        {
+            Method = ReplicaRpc.ReadProbe
+        });
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => fixture.Receiver.VerifyRequest(invalid)).Code)
             .IsEqualTo(ErrorCode.Validation);
         fixture.Receiver.VerifyRequest(Request(fixture, ReplicaRpc.ReadProbe));
@@ -48,10 +55,17 @@ internal sealed class ReplicaReadProbeSecurityTests
     [Arguments(NativeReadProbeFault.TrailingObject)]
     public async Task MalformedSignedProbePreservesCapacity(NativeReadProbeFault fault)
     {
-        using var fixture = new ReplicaSecurityFixture(new() { CriticalPerVoter = 1, ReadBarrierPerVoter = 1 });
+        using var fixture = new ReplicaSecurityFixture(new()
+        {
+            CriticalPerVoter = 1,
+            ReadBarrierPerVoter = 1
+        });
         var value = new AppendRequest(ReplicaSecurityFixture.VoterA, 1, 0, 0, 0, []);
         var request = fixture.Request(ReplicaRpc.ReadProbe, value);
-        request = fixture.Resign(request with { Payload = NativeReadProbeProducer.Encode(value, fault) });
+        request = fixture.Resign(request with
+        {
+            Payload = NativeReadProbeProducer.Encode(value, fault)
+        });
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => fixture.Receiver.VerifyRequest(request)).Code)
             .IsEqualTo(ErrorCode.Validation);
         fixture.Receiver.VerifyRequest(Request(fixture, ReplicaRpc.ReadProbe));
@@ -63,7 +77,10 @@ internal sealed class ReplicaReadProbeSecurityTests
     public async Task ProbeRetainsExactMethodMacAndDeclaredLeaderBinding()
     {
         using var fixture = new ReplicaSecurityFixture();
-        var retagged = fixture.Append() with { Method = ReplicaRpc.ReadProbe };
+        var retagged = fixture.Append() with
+        {
+            Method = ReplicaRpc.ReadProbe
+        };
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => fixture.Receiver.VerifyRequest(retagged)).Code)
             .IsEqualTo(ErrorCode.Unauthenticated);
         var mismatch = fixture.Request(ReplicaRpc.ReadProbe,
@@ -82,7 +99,10 @@ internal sealed class ReplicaReadProbeSecurityTests
         fixture.Receiver.VerifyRequest(original);
         foreach (var method in new[] { ReplicaRpc.ReadBarrier, ReplicaRpc.ControlReadBarrier, ReplicaRpc.Append })
         {
-            var replay = fixture.Resign(Request(fixture, method) with { Nonce = original.Nonce });
+            var replay = fixture.Resign(Request(fixture, method) with
+            {
+                Nonce = original.Nonce
+            });
             await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => fixture.Receiver.VerifyRequest(replay)).Code)
                 .IsEqualTo(ErrorCode.Unauthenticated);
         }

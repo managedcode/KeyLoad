@@ -30,7 +30,9 @@ internal static class ClusterRestoreCoordinator
         var started = clock.GetTimestamp();
         var destination = Path.TrimEndingDirectorySeparator(Path.GetFullPath(options.DestinationRoot));
         if (destination == Path.GetPathRoot(destination) || File.Exists(destination))
-        { throw Errors.Fail(ErrorCode.Validation, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, Invalid);
+        }
         var work = new ReadExecutionBudget(limits, clock, cancellationToken);
         var source = ClusterRestoreSourceReader.Read(options, storage, limits, clock, work, cancellationToken);
         var operationRoot = ClusterRestoreDestinationOwner.OperationRoot(destination, options.OperationId);
@@ -50,7 +52,9 @@ internal static class ClusterRestoreCoordinator
         catch (Exception terminal)
         {
             if (primary is not null && !cleanupCompleted)
-            { throw new AggregateException(primary, terminal); }
+            {
+                throw new AggregateException(primary, terminal);
+            }
             throw;
         }
     }
@@ -63,7 +67,9 @@ internal static class ClusterRestoreCoordinator
     {
         var previous = ClusterRestoreOriginalPlan.Read(operationRoot, storage.Value);
         if (previous is null)
-        { _ = ClusterRestorePathValidation.Root(destination); }
+        {
+            _ = ClusterRestorePathValidation.Root(destination);
+        }
         var signing = ReadSigningIdentities(options, options.Mappings.Select(value => value.ToNative()).ToImmutableArray());
         try
         {
@@ -81,7 +87,9 @@ internal static class ClusterRestoreCoordinator
         ImmutableArray<ClusterRestoreOwnerMapping> mappings)
     {
         if (options.Nodes.Length != checked(mappings.Length * RequiredVoters))
-        { throw Errors.Fail(ErrorCode.Validation, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, Invalid);
+        }
         var paths = new List<string>();
         foreach (var mapping in mappings)
         {
@@ -89,9 +97,13 @@ internal static class ClusterRestoreCoordinator
             if (nodes.Length != RequiredVoters
                 || !nodes.Select(node => node.VoterId).Order(StringComparer.Ordinal)
                     .SequenceEqual(mapping.Target.VoterIds.Order(StringComparer.Ordinal), StringComparer.Ordinal))
-            { throw Errors.Fail(ErrorCode.Validation, Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Validation, Invalid);
+            }
             foreach (var node in nodes)
-            { paths.Add(ClusterRestorePathValidation.Relative(root, node.RelativeDataDirectory)); }
+            {
+                paths.Add(ClusterRestorePathValidation.Relative(root, node.RelativeDataDirectory));
+            }
         }
         ClusterRestorePathValidation.RequireDistinct(paths);
     }
@@ -100,7 +112,9 @@ internal static class ClusterRestoreCoordinator
         ImmutableArray<ClusterRestoreOwnerMapping> mappings)
     {
         if (options.SigningIdentities.Length != mappings.Length)
-        { throw Errors.Fail(ErrorCode.Validation, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, Invalid);
+        }
         var keys = new Dictionary<Guid, byte[]>();
         try
         {
@@ -108,10 +122,14 @@ internal static class ClusterRestoreCoordinator
             {
                 var candidates = options.SigningIdentities.Where(value => value.SourceOwnerId == mapping.Source.PhysicalShardId).ToArray();
                 if (candidates.Length != SingletonCount || candidates.First().SigningKey.Length > MaximumSigningKeyCharacters)
-                { throw Errors.Fail(ErrorCode.Validation, Invalid); }
+                {
+                    throw Errors.Fail(ErrorCode.Validation, Invalid);
+                }
                 byte[] decoded;
                 try
-                { decoded = Convert.FromBase64String(candidates.First().SigningKey); }
+                {
+                    decoded = Convert.FromBase64String(candidates.First().SigningKey);
+                }
                 catch (FormatException) { throw Errors.Fail(ErrorCode.Validation, Invalid); }
                 keys.Add(mapping.Source.PhysicalShardId, decoded);
             }
@@ -120,7 +138,9 @@ internal static class ClusterRestoreCoordinator
         catch (Exception)
         {
             foreach (var key in keys.Values)
-            { CryptographicOperations.ZeroMemory(key); }
+            {
+                CryptographicOperations.ZeroMemory(key);
+            }
             throw;
         }
     }
@@ -129,12 +149,16 @@ internal static class ClusterRestoreCoordinator
         ImmutableArray<ClusterRestoreOwnerMapping> mappings)
     {
         if (options.Credentials.Length != mappings.Length)
-        { throw Errors.Fail(ErrorCode.Validation, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, Invalid);
+        }
         foreach (var mapping in mappings)
         {
             var candidates = options.Credentials.Where(value => value.SourceOwnerId == mapping.Source.PhysicalShardId).ToArray();
             if (candidates.Length != SingletonCount || string.IsNullOrWhiteSpace(candidates.First().Credential))
-            { throw Errors.Fail(ErrorCode.Validation, Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Validation, Invalid);
+            }
         }
     }
 

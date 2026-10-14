@@ -5,8 +5,14 @@ namespace KeyLoad.Server;
 internal sealed class PostgresAdmissionLifetime
 {
     private CancellationTokenRegistration expiry;
-    internal CancellationToken Token { get; private init; }
-    internal bool Completed { get; private set; }
+    internal CancellationToken Token
+    {
+        get; private init;
+    }
+    internal bool Completed
+    {
+        get; private set;
+    }
 
     internal static async Task RunAsync(ConnectionContext context, ConnectionDelegate next,
         TimeSpan duration, TimeProvider clock)

@@ -13,10 +13,14 @@ internal static class ScriptDomCreateTableSyntax
         var context = new ScriptDomTableLoweringContext(configured, checkBudget, token);
         ScriptDomCreateTableShape.Require(statement, context);
         if (statement.SchemaObjectName.Identifiers.Count != SingleName)
-        { throw ScriptDomOperationErrors.Unsupported(); }
+        {
+            throw ScriptDomOperationErrors.Unsupported();
+        }
         var name = statement.SchemaObjectName.Identifiers[FirstName].Value;
         if (name.StartsWith(TemporaryPrefix, StringComparison.Ordinal))
-        { throw ScriptDomOperationErrors.Unsupported(); }
+        {
+            throw ScriptDomOperationErrors.Unsupported();
+        }
         global::KeyLoad.Core.JsonData.Identifier(name);
         var columns = new List<RelationalColumn>();
         var names = new HashSet<string>(StringComparer.Ordinal);
@@ -27,19 +31,25 @@ internal static class ScriptDomCreateTableSyntax
             var columnName = column.ColumnIdentifier.Value;
             global::KeyLoad.Core.JsonData.Identifier(columnName);
             if (!names.Add(columnName))
-            { throw ScriptDomOperationErrors.Invalid(); }
+            {
+                throw ScriptDomOperationErrors.Invalid();
+            }
             var type = ScriptDomTableScalarType.Read(column.DataType, context);
             var constraint = ScriptDomTableColumnConstraints.Read(column, context);
             if (constraint.Primary)
             {
                 if (primary is not null || type != RelationalColumnType.Text)
-                { throw ScriptDomOperationErrors.Invalid(); }
+                {
+                    throw ScriptDomOperationErrors.Invalid();
+                }
                 primary = columnName;
             }
             columns.Add(new(columnName, type, constraint.Nullable));
         }
         if (primary is null)
-        { throw ScriptDomOperationErrors.Invalid(); }
+        {
+            throw ScriptDomOperationErrors.Invalid();
+        }
         context.Check();
         return (name, new(primary, [.. columns]));
     }

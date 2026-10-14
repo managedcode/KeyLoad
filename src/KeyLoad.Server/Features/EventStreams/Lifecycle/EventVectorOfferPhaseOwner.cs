@@ -1,15 +1,18 @@
 using System.Collections.Immutable;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.Server.Features.EventStreams;
 
 internal sealed class EventVectorOfferPhaseOwner : IDisposable
 {
     private const int Version = 1;
-    internal EventVectorControlPhase Phase { get; }
+    internal EventVectorControlPhase Phase
+    {
+        get;
+    }
 
     private EventVectorOfferPhaseOwner(EventVectorControlPhase phase) => Phase = phase;
 
@@ -47,7 +50,11 @@ internal sealed class EventVectorOfferPhaseOwner : IDisposable
         finally
         {
             if (!transferred)
-            { Clear(encodedEntries); Clear(encodedPages); Clear(checksum); }
+            {
+                Clear(encodedEntries);
+                Clear(encodedPages);
+                Clear(checksum);
+            }
         }
     }
 
@@ -58,7 +65,9 @@ internal sealed class EventVectorOfferPhaseOwner : IDisposable
         work.ChargeBytes(length);
         var bytes = NativeSerialization.Serialize(value);
         if (bytes.Length == length)
-        { return bytes; }
+        {
+            return bytes;
+        }
         CryptographicOperations.ZeroMemory(bytes);
         throw Errors.Fail(ErrorCode.Corruption, EventVectorRemoteProtocol.Invalid);
     }

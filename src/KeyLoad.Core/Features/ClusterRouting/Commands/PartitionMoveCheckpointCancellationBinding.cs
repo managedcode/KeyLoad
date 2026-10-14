@@ -25,14 +25,18 @@ public sealed partial class DatabaseEngine
             || !PhysicalOwnerEntryValidation.SameOwner(phase.ControlOwner, header.ControlOwner)
             || !PhysicalOwnerEntryValidation.SameOwner(phase.DestinationOwner, header.DestinationOwner)
             || !NativeSerialization.Serialize(phase.SourcePlacement).AsSpan().SequenceEqual(NativeSerialization.Serialize(header.SourcePlacement)))
-        { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority);
+        }
         var body = NativeSerialization.Deserialize<PartitionMoveCheckpointBody>(phase.Body.Span);
         PartitionMoveParentValidation.RequireReplayScope(header, header.OperatorPrincipalId, body.OriginalTransferRequest);
         if (body.Action != PartitionMoveCheckpointAction.CancelUnprepared
             || body.OperatorPrincipalId != header.OperatorPrincipalId || body.OriginalTransferRequest.Mode != PartitionMoveMode.Abort
             || body.ExpectedGeneration <= PartitionMoveProtocol.EmptyCount || body.ExpectedGeneration >= header.Generation
             || body.OriginalPhaseCommandId != original.OriginalPhaseCommandId || body.ObservedOriginalResult is not null)
-        { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority);
+        }
         RequireMoveParentCancellationOriginal(body, original);
     }
 
@@ -44,14 +48,18 @@ public sealed partial class DatabaseEngine
         if (header is null)
         {
             if (requested.RequireParentCheckpoint)
-            { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
+            {
+                throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+            }
             return;
         }
         PartitionMoveParentValidation.RequireReplayScope(header, principal.Id,
             requested.Request);
         if (header.ControlOwner.Incarnation != Store.Identity.Incarnation
             || !PhysicalOwnerEntryValidation.SameOwner(incoming.ControlOwner, header.ControlOwner))
-        { throw PartitionMoveOwnerDiagnostic.Fail(PartitionMoveOwnerGuard.PrepareControlOwner); }
+        {
+            throw PartitionMoveOwnerDiagnostic.Fail(PartitionMoveOwnerGuard.PrepareControlOwner);
+        }
         var first = PartitionMoveParentStorage.Phase(view, header.Partition, header.MoveId,
             header.InterruptedOriginalPhaseCommandId ?? header.PendingOriginalPhaseCommandId ?? header.LastOriginalPhaseCommandId,
             Limits.MaxBatchBytes)
@@ -59,24 +67,40 @@ public sealed partial class DatabaseEngine
         if (requested.RequireParentCheckpoint)
         {
             if (first.Stage != PartitionMovePeerStage.ControlPrepare)
-            { throw PartitionMoveOwnerDiagnostic.Fail(PartitionMoveOwnerGuard.PrepareStage); }
+            {
+                throw PartitionMoveOwnerDiagnostic.Fail(PartitionMoveOwnerGuard.PrepareStage);
+            }
             if (first.OriginalPhase is null)
-            { throw PartitionMoveOwnerDiagnostic.Fail(PartitionMoveOwnerGuard.PrepareOriginalPhase); }
+            {
+                throw PartitionMoveOwnerDiagnostic.Fail(PartitionMoveOwnerGuard.PrepareOriginalPhase);
+            }
             if (first.OriginalIssuancePolicyEpoch != principal.PolicyEpoch)
-            { throw PartitionMoveOwnerDiagnostic.Fail(PartitionMoveOwnerGuard.PrepareIssuance); }
+            {
+                throw PartitionMoveOwnerDiagnostic.Fail(PartitionMoveOwnerGuard.PrepareIssuance);
+            }
             if (commandId != first.OriginalPhaseCommandId)
-            { throw PartitionMoveOwnerDiagnostic.Fail(PartitionMoveOwnerGuard.PrepareCommand); }
+            {
+                throw PartitionMoveOwnerDiagnostic.Fail(PartitionMoveOwnerGuard.PrepareCommand);
+            }
             if (!NativeSerialization.Serialize(incoming).AsSpan().SequenceEqual(NativeSerialization.Serialize(first.OriginalPhase)))
-            { throw PartitionMoveOwnerDiagnostic.Fail(PartitionMoveOwnerGuard.PreparePhaseBytes); }
+            {
+                throw PartitionMoveOwnerDiagnostic.Fail(PartitionMoveOwnerGuard.PreparePhaseBytes);
+            }
         }
         if (requested.RequireParentCheckpoint)
-        { RequireMoveParentOriginalIssuance(view, principal, first); }
+        {
+            RequireMoveParentOriginalIssuance(view, principal, first);
+        }
         if (first.Cancellation is not { } cancellation)
-        { return; }
+        {
+            return;
+        }
         RequireMoveParentCancellationBinding(header, first, cancellation);
         if (commandId != first.OriginalPhaseCommandId || first.OriginalPhase is null
             || !NativeSerialization.Serialize(incoming).AsSpan().SequenceEqual(NativeSerialization.Serialize(first.OriginalPhase)))
-        { throw PartitionMoveOwnerDiagnostic.Fail(PartitionMoveOwnerGuard.CancellationPhase); }
+        {
+            throw PartitionMoveOwnerDiagnostic.Fail(PartitionMoveOwnerGuard.CancellationPhase);
+        }
         throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict);
     }
 }

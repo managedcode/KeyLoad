@@ -40,7 +40,9 @@ internal sealed class HeavyDocumentLoadRf3Tests : IAsyncDisposable
     public async ValueTask DisposeAsync()
     {
         if (Interlocked.Exchange(ref disposed, 1) != 0)
-        { return; }
+        {
+            return;
+        }
         var failures = new List<Exception>();
         var scenarioDisposal = scenario.DisposeAsync().AsTask();
         await ServerFailureObserver.ObserveAsync(() => scenarioDisposal, failures).ConfigureAwait(false);

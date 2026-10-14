@@ -12,9 +12,14 @@ internal static class BlobMaintenancePolicyPublicAssertions
     {
         await BlobBoundedRetirementPublicAssertions.CurrentAsync(callers, published, token);
         foreach (var receipt in new[] { published.Begun.Receipt, published.Written[0].Receipt, published.Completed.Receipt })
-        { await ReceiptAsync(published.Begin.Blob, placement, receipt); }
+        {
+            await ReceiptAsync(published.Begin.Blob, placement, receipt);
+        }
         await BlobBoundedRetirementPublicAssertions.UploadAsync(callers, published.Begin.Blob,
-            published.Begin.UploadId, published.Written[0].Value with { Status = BlobUploadStatus.Complete }, token);
+            published.Begin.UploadId, published.Written[0].Value with
+            {
+                Status = BlobUploadStatus.Complete
+            }, token);
         var eof = new BlobReadRequest(published.Begin.Blob, published.Completed.Value.Revision, published.Bytes.LongLength, 0);
         var expected = new BlobReadResult(published.Completed.Value, published.Bytes.LongLength, Array.Empty<byte>());
         await SqlRf3Protocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.ReadBlobRangeAsync(eof, token)));
@@ -36,7 +41,10 @@ internal static class BlobMaintenancePolicyPublicAssertions
     {
         await BlobBoundedRetirementPublicAssertions.HeadAsync(callers, state.Tombstone, token);
         await BlobBoundedRetirementPublicAssertions.UploadAsync(callers, state.Blob, state.Original.Begin.UploadId,
-            state.Original.Written[0].Value with { Status = BlobUploadStatus.Complete }, token);
+            state.Original.Written[0].Value with
+            {
+                Status = BlobUploadStatus.Complete
+            }, token);
         var read = new BlobReadRequest(state.Blob, 2L, 0L, 1);
         await BlobBoundedRetirementPublicAssertions.FailedAsync(await callers.Sdk.ReadBlobRangeAsync(read, token), ErrorCode.NotFound);
         await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync("keyload_blobs_read_range", read, token), ErrorCode.NotFound, dispatched: true);

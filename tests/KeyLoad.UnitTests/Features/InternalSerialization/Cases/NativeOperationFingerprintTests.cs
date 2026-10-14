@@ -41,7 +41,13 @@ internal sealed class NativeOperationFingerprintTests
     private static async Task Check(OperationKind kind, string payload)
     {
         var operation = new ReplicatedOperation(Id, kind, Principal, DateTimeOffset.UnixEpoch, payload);
-        var expected = JsonData.Fingerprint(new { operation.Id, operation.Kind, operation.PrincipalId, operation.PayloadJson });
+        var expected = JsonData.Fingerprint(new
+        {
+            operation.Id,
+            operation.Kind,
+            operation.PrincipalId,
+            operation.PayloadJson
+        });
         await Assert.That(NativeOperationFingerprint.Compute(operation)).IsEqualTo(expected);
         await Assert.That(NativeOperationFingerprint.Compute(Id, kind, Principal, Encoding.UTF8.GetBytes(payload))).IsEqualTo(expected);
     }

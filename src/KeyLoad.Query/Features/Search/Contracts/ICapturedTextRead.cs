@@ -13,9 +13,18 @@ internal interface ICapturedTextProjection
 /// <summary>Owns bounded original-cut records and the same reader through complete off-gate work and settlement.</summary>
 internal interface ICapturedTextRead : IDisposable
 {
-    PrincipalRecord Principal { get; }
-    ResourceDefinition Resource { get; }
-    ITextProjectionLease OriginalProjection { get; }
+    PrincipalRecord Principal
+    {
+        get;
+    }
+    ResourceDefinition Resource
+    {
+        get;
+    }
+    ITextProjectionLease OriginalProjection
+    {
+        get;
+    }
     IKeyValueView CompleteSource();
     void VerifyTerminal(IReadOnlyList<EntityRef> selected);
 }

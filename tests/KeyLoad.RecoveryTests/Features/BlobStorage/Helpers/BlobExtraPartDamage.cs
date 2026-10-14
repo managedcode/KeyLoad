@@ -11,13 +11,19 @@ internal static class BlobExtraPartDamage
         var key = BlobLaterPartOracle.Key(fault == BlobExtraPartFault.ExtraRaw
             ? "blob-part-v1" : "blob-partmeta-v1", seed, 2);
         if (store.Read(view => view.ReadOwnedValue(key)) is not null)
-        { throw new InvalidOperationException("The acknowledged two-part upload must not already own ordinal2."); }
+        {
+            throw new InvalidOperationException("The acknowledged two-part upload must not already own ordinal2.");
+        }
         store.Commit((tx, _) =>
         {
             if (fault == BlobExtraPartFault.ExtraRaw)
-            { tx.Put(key, [77, 78, 79]); }
+            {
+                tx.Put(key, [77, 78, 79]);
+            }
             else
-            { tx.PutRecord(key, new BlobPartMetadata(1, 3, BlobPriorPublicationOracle.Hash(new byte[] { 77, 78, 79 }))); }
+            {
+                tx.PutRecord(key, new BlobPartMetadata(1, 3, BlobPriorPublicationOracle.Hash(new byte[] { 77, 78, 79 })));
+            }
             return true;
         });
         return key;

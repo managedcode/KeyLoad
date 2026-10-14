@@ -31,7 +31,9 @@ internal static class RequestCqrsAuthorityFaultLifecycleRunner
         RequestCqrsLifecycleEvidence lifecycle, CancellationToken parentToken)
     {
         try
-        { await scenario.ExecuteAsync(parentToken).ConfigureAwait(false); }
+        {
+            await scenario.ExecuteAsync(parentToken).ConfigureAwait(false);
+        }
         catch (Exception)
         {
             lifecycle.RecordFirstFailure();

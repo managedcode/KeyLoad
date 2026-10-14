@@ -7,18 +7,18 @@ internal static class TimeSeriesApi
     internal static void Map(WebApplication app)
     {
         app.MapPost(ReadPath, (ReadSamplesRequest request, HttpContext context) =>
-            ApiGrainDispatch.ReadAsync(context, KeyLoad.Orleans.GrainReadKind.Samples, request));
+            ApiGrainDispatch.ReadAsync(context, KeyLoad.Clustering.GrainReadKind.Samples, request));
         app.MapPost(TimeSeriesReadProtocol.LatestRoute, (ReadLatestSampleRequest request, HttpContext context) =>
-            ApiGrainDispatch.ReadAsync(context, KeyLoad.Orleans.GrainReadKind.LatestSample, request));
+            ApiGrainDispatch.ReadAsync(context, KeyLoad.Clustering.GrainReadKind.LatestSample, request));
         app.MapPost(TimeSeriesReadProtocol.AggregateRoute, (AggregateSamplesRequest request, HttpContext context) =>
-            ApiGrainDispatch.ReadAsync(context, KeyLoad.Orleans.GrainReadKind.AggregateSamples, request));
+            ApiGrainDispatch.ReadAsync(context, KeyLoad.Clustering.GrainReadKind.AggregateSamples, request));
         app.MapPost(TimeSeriesReadProtocol.WindowsRoute, (AggregateSampleWindowsRequest request, HttpContext context) =>
-            ApiGrainDispatch.ReadAsync(context, KeyLoad.Orleans.GrainReadKind.AggregateSampleWindows, request));
+            ApiGrainDispatch.ReadAsync(context, KeyLoad.Clustering.GrainReadKind.AggregateSampleWindows, request));
         app.MapPost(SampleChunkProtocol.ReadRoute, (ReadSampleChunkWindowRequest request, HttpContext context) =>
-            ApiGrainDispatch.ReadAsync(context, KeyLoad.Orleans.GrainReadKind.SampleChunkWindow, request));
+            ApiGrainDispatch.ReadAsync(context, KeyLoad.Clustering.GrainReadKind.SampleChunkWindow, request));
         app.MapPost(SampleRollupProtocol.ReadRoute, (ReadSampleRollupRequest request, HttpContext context) =>
-            ApiGrainDispatch.ReadAsync(context, KeyLoad.Orleans.GrainReadKind.SampleRollup, request));
+            ApiGrainDispatch.ReadAsync(context, KeyLoad.Clustering.GrainReadKind.SampleRollup, request));
         app.MapPost(TimeSeriesReadProtocol.RetentionRoute, (ReadSampleRetentionRequest request, HttpContext context) =>
-            ApiGrainDispatch.ReadAsync(context, KeyLoad.Orleans.GrainReadKind.SampleRetention, request));
+            ApiGrainDispatch.ReadAsync(context, KeyLoad.Clustering.GrainReadKind.SampleRetention, request));
     }
 }

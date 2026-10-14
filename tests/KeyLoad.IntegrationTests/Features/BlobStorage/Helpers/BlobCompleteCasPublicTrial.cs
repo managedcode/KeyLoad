@@ -19,7 +19,10 @@ internal static class BlobCompleteCasPublicTrial
             await BlobCompleteCasPublicPublication.StageAsync(callers, loser, initial, null, token);
             await BlobCompleteCasPublicPublication.CompleteAsync(callers, winner, initial, false, token);
             await BlobCompleteCasPublicAssertions.RefusedAsync(callers, loser.Complete, initial, winner, token);
-            loser.FreshRefused = loser.Complete with { CommandId = Guid.NewGuid() };
+            loser.FreshRefused = loser.Complete with
+            {
+                CommandId = Guid.NewGuid()
+            };
             await BlobCompleteCasPublicAssertions.RefusedAsync(callers, loser.FreshRefused, initial, winner, token);
             await BlobCompleteCasPublicReplay.UploadAsync(callers, winner, initial, winner, token);
             await BlobCompleteCasPublicReplay.UploadAsync(callers, loser, initial, winner, token);

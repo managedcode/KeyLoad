@@ -10,13 +10,19 @@ internal static class PartitionMovementOutcomePeerAdmission
         cancellationToken.ThrowIfCancellationRequested();
         if (!peer.Execution.Enabled || !peer.Options.PhysicalGroupTrust.RegisterPhysicalOwners
             || peer.Options.PhysicalGroupTrust.Role == PhysicalGroupTrustRole.Disabled)
-        { throw Errors.Fail(ErrorCode.UnsupportedCapability, PartitionMovementPeerAdmission.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, PartitionMovementPeerAdmission.InvalidProof);
+        }
         if (originalBody.Length <= PartitionMovementPeerAdmission.EmptyBodyBytes || originalBody.Length > peer.Database.Limits.MaxBatchBytes)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementPeerAdmission.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementPeerAdmission.InvalidProof);
+        }
         var ownedBody = originalBody.ToArray();
         using var mac = peer.CreateControlMac();
         if (!mac.VerifyOutcome(ownedBody, signature, reply: false))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementPeerAdmission.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementPeerAdmission.InvalidProof);
+        }
         var query = NativeSerialization.Deserialize<PartitionMovementOutcomeTransportRequest>(ownedBody);
         var now = peer.Clock.GetUtcNow();
         PartitionMovementOutcomeAdmission.Require(query, peer.Database.Limits, now, peer.Routing.RequestLifetime);
@@ -30,10 +36,14 @@ internal static class PartitionMovementOutcomePeerAdmission
             || !PartitionMovementConfiguredOwners.RequirePair(envelope, control.Owner, destination.Owner)
             || !control.Owner.VoterIds.Contains(request.CallerVoter, StringComparer.Ordinal)
             || !PhysicalGroupAddress.CanonicalAddress(request.CallerSiloAddress, peer.Membership))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementPeerAdmission.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementPeerAdmission.InvalidProof);
+        }
         RequireOutcomeJournal(request, control.Owner, local.Owner);
         if (!peer.Replay.TryUse(query.Nonce.ToString(PartitionMovementPeerAdmission.NonceFormat)))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementPeerAdmission.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementPeerAdmission.InvalidProof);
+        }
         peer.Database.VerifyPhysicalCommandOwner(local.Owner, false, cancellationToken);
         return Task.FromResult(query);
     }
@@ -45,7 +55,9 @@ internal static class PartitionMovementOutcomePeerAdmission
         {
             if (request.Envelope.Grant is not null || request.ControlGrantJournal is not null
                 || !PhysicalOwnerEntryValidation.SameOwner(control, local))
-            { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementPeerAdmission.InvalidProof); }
+            {
+                throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementPeerAdmission.InvalidProof);
+            }
             return;
         }
         var grant = request.Envelope.Grant;
@@ -55,6 +67,8 @@ internal static class PartitionMovementOutcomePeerAdmission
             || journal.ControlIntentDigest != grant.ControlIntentDigest
             || !PhysicalOwnerEntryValidation.SameOwner(journal.PhysicalOwner, control)
             || !PhysicalOwnerEntryValidation.SameOwner(grant.ReceiverOwner, local))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementPeerAdmission.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementPeerAdmission.InvalidProof);
+        }
     }
 }

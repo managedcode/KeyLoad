@@ -43,7 +43,12 @@ internal static class DistributedSearchRf3PublicFlow
         var request = original with
         {
             Search = original.Search with
-            { Text = "unmatched", Vector = null, VectorField = null, Space = null }
+            {
+                Text = "unmatched",
+                Vector = null,
+                VectorField = null,
+                Space = null
+            }
         };
         var sdk = await McpCallerAssertions.SdkSuccessAsync(await reader.DistributedSearchAsync(request, token));
         var mcp = (await McpCallerAssertions.SuccessAsync<DistributedSearchPageV1>(await official.CallAsync(

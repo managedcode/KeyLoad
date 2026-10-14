@@ -26,7 +26,9 @@ internal static class ControlledPartitionMovementTerminalOperation
             corpus, sourceRuntime, targetRuntime, sourceAdmission, targetAdmission, callerAddress,
             originalReceipt, initialPosition, wholeExpiresAt, cancellationToken);
         if (audit is not null)
-        { await audit.CheckAsync(source, target); }
+        {
+            await audit.CheckAsync(source, target);
+        }
         var finalized = await ControlledPartitionMovementFinalizeFlow.ExecuteAsync(source, sourceRuntime,
             sourceAdmission, corpus, installed.Installed, callerAddress,
             ControlledPartitionMovementFirstPhaseExpiry.Create(source, sourceRuntime, wholeExpiresAt, cancellationToken),
@@ -52,7 +54,9 @@ internal static class ControlledPartitionMovementTerminalOperation
         await ControlledPartitionMovementRetiredSourceAssertions.AssertAsync(source, target,
             originalAuthority, originalReceipt, originalRecordedAt, cancellationToken);
         if (audit is not null)
-        { await audit.ReplayAsync(source, target, cancellationToken); }
+        {
+            await audit.ReplayAsync(source, target, cancellationToken);
+        }
         var sourceImage = ControlledPartitionMovementRawImage.Bytes(source.Store);
         var sourcePosition = source.Store.Position;
         source.Reopen();
@@ -65,6 +69,8 @@ internal static class ControlledPartitionMovementTerminalOperation
         await ControlledPartitionMovementRetiredSourceAssertions.AssertAsync(source, target,
             originalAuthority, originalReceipt, originalRecordedAt, cancellationToken);
         if (audit is not null)
-        { await audit.CheckAsync(source, target); }
+        {
+            await audit.CheckAsync(source, target);
+        }
     }
 }

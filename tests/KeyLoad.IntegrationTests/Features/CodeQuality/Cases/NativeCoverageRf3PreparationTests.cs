@@ -27,7 +27,10 @@ internal sealed class NativeCoverageRf3PreparationTests
             var arguments = NativeCoverageRf3FixtureArguments.Create(context, root,
                 NativeCoverageRf3PreparationControl.StartupPoll);
             var builder = DistributedApplication.CreateBuilder(new DistributedApplicationOptions
-            { DisableDashboard = true, Args = arguments });
+            {
+                DisableDashboard = true,
+                Args = arguments
+            });
             KeyLoadAppHostApplication.AddKeyLoad(builder);
             await using var application = builder.Build();
             var resources = application.Services.GetRequiredService<DistributedApplicationModel>()

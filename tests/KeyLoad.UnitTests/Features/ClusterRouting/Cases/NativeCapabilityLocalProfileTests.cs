@@ -97,9 +97,15 @@ internal sealed class NativeCapabilityLocalProfileTests
             [LocalReceiptKey] = "TestResults/rf3/local-images/image-0123456789abcdef0123456789abcdef.json"
         };
         if (changed == Omission)
-        { values.Remove(Omission + "Enabled"); values.Remove(Omission + "Root"); values.Remove(Omission + "SessionId"); }
+        {
+            values.Remove(Omission + "Enabled");
+            values.Remove(Omission + "Root");
+            values.Remove(Omission + "SessionId");
+        }
         else if (changed is not null)
-        { values[changed] = value; }
+        {
+            values[changed] = value;
+        }
         builder.Configuration.AddInMemoryCollection(values);
         return builder;
     }
@@ -108,10 +114,14 @@ internal sealed class NativeCapabilityLocalProfileTests
         CancellationToken token)
     {
         if (OperatingSystem.IsWindows())
-        { throw new PlatformNotSupportedException("Private mode fixtures require a Unix host."); }
+        {
+            throw new PlatformNotSupportedException("Private mode fixtures require a Unix host.");
+        }
         var result = new Dictionary<string, (byte[] Bytes, UnixFileMode Mode)>(StringComparer.Ordinal);
         foreach (var path in Directory.EnumerateFiles(fixture.Parent, "*", SearchOption.AllDirectories))
-        { result.Add(path, (await File.ReadAllBytesAsync(path, token).ConfigureAwait(false), File.GetUnixFileMode(path))); }
+        {
+            result.Add(path, (await File.ReadAllBytesAsync(path, token).ConfigureAwait(false), File.GetUnixFileMode(path)));
+        }
         return result;
     }
 

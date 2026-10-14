@@ -32,7 +32,9 @@ internal static class PhysicalOwnerDirectoryReadAuthorityFlow
         byte[] directory, byte[] catalog)
     {
         var corrupt = PhysicalOwnerDirectoryWholeFlow.Expected() with
-        { ControlOwner = PhysicalOwnerDirectoryWholeFlow.Destination.Owner };
+        {
+            ControlOwner = PhysicalOwnerDirectoryWholeFlow.Destination.Owner
+        };
         ReplaceDirectory(fixture, NativeSerialization.Serialize(corrupt));
         var image = PhysicalShardCatalogPolicyOutcomeAssertions.Image(fixture);
         var position = fixture.Store.Position;
@@ -77,7 +79,10 @@ internal static class PhysicalOwnerDirectoryReadAuthorityFlow
     private static async Task SetAdministratorAsync(PhysicalShardCatalogFixture fixture, bool allowed, long epoch)
     {
         var principal = new PrincipalRecord(Administrator, PhysicalOwnerDirectoryWholeFlow.TenantId, [], [])
-        { ClusterAdministrator = allowed, PolicyEpoch = epoch };
+        {
+            ClusterAdministrator = allowed,
+            PolicyEpoch = epoch
+        };
         var result = fixture.Database.Apply(new(Guid.NewGuid(), OperationKind.ConfigurePrincipal,
             PhysicalShardCatalogFixture.RootPrincipalId, fixture.Database.EvaluationClock.GetUtcNow(),
             JsonSerializer.Serialize(new ConfigurePrincipalRequest(principal), JsonDefaults.Options)));

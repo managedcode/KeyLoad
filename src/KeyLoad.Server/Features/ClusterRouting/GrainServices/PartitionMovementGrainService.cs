@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
@@ -39,7 +39,9 @@ internal sealed partial class PartitionMovementGrainService(GrainId id, Silo sil
                 ErrorCode.UnsupportedCapability, PartitionMovementProtocol.Unavailable, request?.Nonce ?? Guid.Empty, string.Empty);
         }
         try
-        { return await active.ExchangeAsync(request, error => LogFailure(diagnostics, error), cancellationToken).ConfigureAwait(true); }
+        {
+            return await active.ExchangeAsync(request, error => LogFailure(diagnostics, error), cancellationToken).ConfigureAwait(true);
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
             LogFailure(diagnostics, error);
@@ -61,10 +63,14 @@ internal sealed partial class PartitionMovementGrainService(GrainId id, Silo sil
     {
         cancellationToken.ThrowIfCancellationRequested();
         if (nonce == Guid.Empty)
-        { throw new ArgumentException(PartitionMovementProtocol.Unavailable, nameof(nonce)); }
+        {
+            throw new ArgumentException(PartitionMovementProtocol.Unavailable, nameof(nonce));
+        }
         var actual = discovery.Read();
         if (NativeSerialization.Measure(actual) > ReplicaTransportProtocol.MaximumDiscoveryBytes)
-        { throw new InvalidOperationException(PartitionMovementProtocol.Unavailable); }
+        {
+            throw new InvalidOperationException(PartitionMovementProtocol.Unavailable);
+        }
         var bytes = NativeSerialization.Serialize(actual);
         return Task.FromResult(new PartitionMovementGrainServiceDiscovery(bytes, authentication.SignDiscovery(bytes, nonce)));
     }
@@ -76,22 +82,30 @@ internal sealed partial class PartitionMovementGrainService(GrainId id, Silo sil
         try
         {
             if (capacity is { } owned)
-            { await owned.DisposeAsync().ConfigureAwait(true); }
+            {
+                await owned.DisposeAsync().ConfigureAwait(true);
+            }
         }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         try
         {
             if (physicalProbe is { } active)
-            { await active.StopAsync().ConfigureAwait(true); }
+            {
+                await active.StopAsync().ConfigureAwait(true);
+            }
         }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         try
-        { await base.Stop().ConfigureAwait(true); }
+        {
+            await base.Stop().ConfigureAwait(true);
+        }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         if (failures.Count != NoShutdownFailures)
-        { throw new AggregateException(failures); }
+        {
+            throw new AggregateException(failures);
+        }
     }
 }

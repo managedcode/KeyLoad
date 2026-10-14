@@ -1,6 +1,6 @@
 using KeyLoad.Client;
+using KeyLoad.Clustering;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
 
@@ -68,9 +68,13 @@ internal static class PhysicalShardPartitionMovementRf3FaultFlow
             }
         }
         catch (Exception cleanup) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(cleanup) is null)
-        { failures.Add(cleanup); }
+        {
+            failures.Add(cleanup);
+        }
         catch (Exception cleanup) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(cleanup) is not null)
-        { failures.Add(cleanup); }
+        {
+            failures.Add(cleanup);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
         await RecoverAsync(wave, seeds, requests, proof, arm, expectedStage, recovery, token);
     }
@@ -85,9 +89,13 @@ internal static class PhysicalShardPartitionMovementRf3FaultFlow
         await PhysicalShardPartitionMovementRf3JournalAssertions.ColdAsync(wave, seeds, retained,
             wave.QueryControls.ArmFor(arm).GateVoter!, expectedStage);
         if (recovery is null)
-        { await PhysicalShardPartitionMovementRf3FaultOwner.ResumeAsync(wave, seeds, requests, token); }
+        {
+            await PhysicalShardPartitionMovementRf3FaultOwner.ResumeAsync(wave, seeds, requests, token);
+        }
         else
-        { await recovery(wave, seeds, requests, retained, token); }
+        {
+            await recovery(wave, seeds, requests, retained, token);
+        }
         await wave.QueryControls.RetireArmAsync(arm, token);
     }
 
@@ -108,7 +116,9 @@ internal static class PhysicalShardPartitionMovementRf3FaultFlow
         await ServerFailureObserver.ObserveAsync(async () => await original, failures);
         var state = controls.ArmFor(arm);
         if (state.RequestId is null)
-        { return; }
+        {
+            return;
+        }
         await ServerFailureObserver.ObserveAsync(() => controls.ReleaseOpenArmsAsync(discovery, token), failures);
         await ServerFailureObserver.ObserveAsync(async () => await controls.WaitForMarkerAsync(arm,
             RequestCqrsProbePhase.ProducerDisposed, RequestCqrsProbeOutcome.Observed, discovery, token), failures);

@@ -2,8 +2,8 @@ using System.Globalization;
 using System.Net;
 using System.Security.Cryptography;
 using Aspire.Hosting;
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 using KeyLoad.Storage;
 
@@ -25,9 +25,13 @@ internal static class TwoRf3MembershipSignedDiscovery
         request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", adminCredential);
         using var response = await http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, token).ConfigureAwait(false);
         if (response.StatusCode != HttpStatusCode.OK)
-        { throw new InvalidOperationException(Invalid); }
+        {
+            throw new InvalidOperationException(Invalid);
+        }
         if (response.Content.Headers.ContentType?.MediaType != NativeSiloDiscoveryDiagnosticProtocol.ContentType)
-        { throw new InvalidOperationException(Invalid); }
+        {
+            throw new InvalidOperationException(Invalid);
+        }
         var payload = await ReadPayloadAsync(response, token).ConfigureAwait(false);
         VerifyMac(response, node, clusterId, incarnation, nonce, secret, payload);
         return ReadNative(clusterId, incarnation, node, payload);
@@ -37,7 +41,9 @@ internal static class TwoRf3MembershipSignedDiscovery
     {
         var maximum = ReplicaTransportProtocol.MaximumDiscoveryBytes;
         if (response.Content.Headers.ContentLength is { } length && length > maximum)
-        { throw new InvalidDataException(Invalid); }
+        {
+            throw new InvalidDataException(Invalid);
+        }
         await using var stream = await response.Content.ReadAsStreamAsync(token).ConfigureAwait(false);
         var payload = new byte[maximum + 1];
         var count = 0;
@@ -46,11 +52,15 @@ internal static class TwoRf3MembershipSignedDiscovery
             token.ThrowIfCancellationRequested();
             var read = await stream.ReadAsync(payload.AsMemory(count), token).ConfigureAwait(false);
             if (read == 0)
-            { break; }
+            {
+                break;
+            }
             count += read;
         }
         if (count > maximum || response.Content.Headers.ContentLength is { } expected && expected != count)
-        { throw new InvalidDataException(Invalid); }
+        {
+            throw new InvalidDataException(Invalid);
+        }
         return payload.AsSpan(0, count).ToArray();
     }
 
@@ -58,23 +68,33 @@ internal static class TwoRf3MembershipSignedDiscovery
         Guid nonce, ReadOnlyMemory<byte> secret, byte[] payload)
     {
         if (!response.Headers.TryGetValues(NativeSiloDiscoveryDiagnosticProtocol.SignatureHeader, out var values))
-        { throw new InvalidOperationException(Invalid); }
+        {
+            throw new InvalidOperationException(Invalid);
+        }
         using var iterator = values.GetEnumerator();
         if (!iterator.MoveNext())
-        { throw new InvalidOperationException(Invalid); }
+        {
+            throw new InvalidOperationException(Invalid);
+        }
         var text = iterator.Current;
         if (iterator.MoveNext() || text.Length != SignatureLength)
-        { throw new InvalidOperationException(Invalid); }
+        {
+            throw new InvalidOperationException(Invalid);
+        }
         byte[] supplied;
         try
-        { supplied = Convert.FromHexString(text); }
+        {
+            supplied = Convert.FromHexString(text);
+        }
         catch (FormatException) { throw new InvalidOperationException(Invalid); }
         using var mac = new ReplicaMessageMac(secret, clusterId);
         var expected = mac.Discovery(incarnation, Voter(node), nonce, payload);
         try
         {
             if (!CryptographicOperations.FixedTimeEquals(expected, supplied))
-            { throw new InvalidOperationException(Invalid); }
+            {
+                throw new InvalidOperationException(Invalid);
+            }
         }
         finally
         {
@@ -90,10 +110,14 @@ internal static class TwoRf3MembershipSignedDiscovery
         if (discovery.VoterId != Voter(node) || discovery.ClusterId != clusterId || discovery.Incarnation != incarnation
             || !discovery.TransportReady || discovery.RuntimeJournalReaderContract != StoreReaderContract.RuntimeJournal
             || discovery.SiloAddress.Length is 0 or > ReplicaTransportProtocol.MaximumAddressCharacters)
-        { throw new InvalidOperationException(Invalid); }
+        {
+            throw new InvalidOperationException(Invalid);
+        }
         var address = SiloAddress.FromParsableString(discovery.SiloAddress);
         if (address.Endpoint.Port <= 0 || address.ToParsableString() != discovery.SiloAddress)
-        { throw new InvalidOperationException(Invalid); }
+        {
+            throw new InvalidOperationException(Invalid);
+        }
         return discovery;
     }
 

@@ -16,7 +16,9 @@ public sealed partial class DatabaseEngine
         var actual = catalog.DefaultShard;
         if (position <= PartitionMoveProtocol.EmptyCount || actual.Incarnation != Store.Identity.Incarnation
             || !PhysicalOwnerEntryValidation.SameOwner(actual, phase.DestinationOwner))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
         return new(actual.Incarnation, phase.Partition.AtomicPartitionId, position, actual.PlacementEpoch);
     }
 }

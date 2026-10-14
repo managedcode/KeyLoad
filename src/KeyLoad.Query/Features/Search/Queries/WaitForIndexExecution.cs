@@ -36,7 +36,9 @@ public sealed partial class SearchEngine
         {
             FilteredSearchRequestSizer.EnsureBounded(request, database.Limits.MaxQueryBytes, budget);
             if (string.IsNullOrEmpty(request.TextField) || request.MinimumToken is null)
-            { throw Errors.Fail(ErrorCode.Validation, WaitInvalidRequest); }
+            {
+                throw Errors.Fail(ErrorCode.Validation, WaitInvalidRequest);
+            }
             database.Authorization.RequireFieldUse(principal, resource, request.TextField);
             var path = JsonData.PathSegments(request.TextField);
             var authority = new BudgetedReadView(view, budget);
@@ -44,9 +46,13 @@ public sealed partial class SearchEngine
             var bytes = authority.ReadOwnedValue(KeySpace.AppliedBytes) ?? throw Errors.Fail(ErrorCode.Corruption, WaitAppliedCorrupt);
             var applied = NativeSerialization.Deserialize<long>(bytes);
             if (applied < WaitInitialPosition)
-            { throw Errors.Fail(ErrorCode.Corruption, WaitAppliedCorrupt); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, WaitAppliedCorrupt);
+            }
             if (request.MinimumToken.Position > applied)
-            { throw Errors.Fail(ErrorCode.TokenInvalidated, WaitTokenFuture); }
+            {
+                throw Errors.Fail(ErrorCode.TokenInvalidated, WaitTokenFuture);
+            }
             var provider = textProjection ?? throw Errors.Fail(ErrorCode.UnsupportedCapability, WaitProviderUnavailable);
             var search = new SearchRequest(request.Partition, request.Collection, TextField: request.TextField);
             var lease = SelectedTextProjectionAdmission.Acquire(database, provider, view, principal, resource, search, budget)
@@ -62,9 +68,14 @@ public sealed partial class SearchEngine
                 budget.CheckResult(result);
             }
             catch (Exception error)
-            { primaryFailure = error; throw; }
+            {
+                primaryFailure = error;
+                throw;
+            }
             finally
-            { TextProjectionLifecycle.Dispose(lease, primaryFailure); }
+            {
+                TextProjectionLifecycle.Dispose(lease, primaryFailure);
+            }
             budget.CheckResult(result);
             observation = CaptureWaitForIndexReadCut(principal, resource, request, result, budget);
             return result;

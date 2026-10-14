@@ -15,12 +15,18 @@ internal static class NativeTextIncrementalTokens
     {
         budget.Check();
         if (record == InvalidRecord)
-        { throw NativeTextErrors.Corrupt(); }
+        {
+            throw NativeTextErrors.Corrupt();
+        }
         if (document is null || document.Deleted)
-        { return []; }
+        {
+            return [];
+        }
         using var json = JsonDocument.Parse(document.Json);
         if (JsonData.Scalar(json.RootElement, JsonData.PathSegments(field)) is not string content)
-        { return []; }
+        {
+            return [];
+        }
         var postings = new List<NativeTextIncrementalPosting>();
         var previous = EmptyToken;
         foreach (var term in CanonicalTextTerms.Enumerate(content, budget, execution.TextBudgetCheckInterval,

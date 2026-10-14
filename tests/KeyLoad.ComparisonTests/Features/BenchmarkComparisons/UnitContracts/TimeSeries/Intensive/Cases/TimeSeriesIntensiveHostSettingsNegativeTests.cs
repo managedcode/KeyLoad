@@ -258,7 +258,10 @@ internal sealed class TimeSeriesIntensiveHostNativeSettingsNegativeTests
     }
 }
 
-internal enum InvalidArrayShape { Missing, Scalar, Alias, Sparse, Extra, Nested, Empty, Duplicate }
+internal enum InvalidArrayShape
+{
+    Missing, Scalar, Alias, Sparse, Extra, Nested, Empty, Duplicate
+}
 
 internal static class TimeSeriesIntensiveHostSettingsInvalidValues
 {

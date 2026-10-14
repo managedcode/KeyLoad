@@ -40,7 +40,9 @@ internal static class ClusterProfileStore
         var path = Path.Combine(root, ProfileName);
         RejectLinks(path);
         if (File.Exists(path))
-        { return Read(path, executionOptions); }
+        {
+            return Read(path, executionOptions);
+        }
         var profile = new LocalProfile(CurrentVersion, Guid.NewGuid(), Guid.NewGuid(),
             Convert.ToBase64String(RandomNumberGenerator.GetBytes(SecretBytes)),
             Convert.ToBase64String(RandomNumberGenerator.GetBytes(SecretBytes)),
@@ -77,23 +79,31 @@ internal static class ClusterProfileStore
         ClusterProfileInputBounds.Bytes(bytes, executionOptions);
         using var document = JsonDocument.Parse(bytes, new JsonDocumentOptions { MaxDepth = executionOptions.Value.MaximumJsonDepth });
         if (document.RootElement.ValueKind != JsonValueKind.Object)
-        { throw new InvalidOperationException(InvalidProfile); }
+        {
+            throw new InvalidOperationException(InvalidProfile);
+        }
         var allowed = new HashSet<string>(allowedFields, StringComparer.Ordinal);
         var seen = new HashSet<string>(StringComparer.Ordinal);
         foreach (var field in document.RootElement.EnumerateObject())
         {
             if (!allowed.Contains(field.Name) || !seen.Add(field.Name))
-            { throw new InvalidOperationException(InvalidProfile); }
+            {
+                throw new InvalidOperationException(InvalidProfile);
+            }
         }
         if (seen.Count != requiredCount)
-        { throw new InvalidOperationException(InvalidProfile); }
+        {
+            throw new InvalidOperationException(InvalidProfile);
+        }
     }
 
     internal static void Validate(LocalProfile profile)
     {
         ArgumentNullException.ThrowIfNull(profile);
         if (profile.Version != CurrentVersion || profile.PhysicalShardId == Guid.Empty)
-        { throw new InvalidOperationException(InvalidProfile); }
+        {
+            throw new InvalidOperationException(InvalidProfile);
+        }
         ValidateCredentials(profile.Incarnation, profile.SigningKey, profile.PeerSecret, profile.AdminKey);
     }
 
@@ -103,7 +113,9 @@ internal static class ClusterProfileStore
         if (incarnation == Guid.Empty || !ValidSecret(signingKey) || !ValidSecret(peerSecret)
             || adminKey is null || adminKey.Length is < MinimumAdminCharacters or > MaximumAdminCharacters
             || !adminKey.StartsWith(AdminPrefix, StringComparison.Ordinal))
-        { throw new InvalidOperationException(InvalidProfile); }
+        {
+            throw new InvalidOperationException(InvalidProfile);
+        }
     }
 
     private static bool ValidSecret(string? value)
@@ -136,19 +148,25 @@ internal static class ClusterProfileStore
             executionOptions.Value.FileBufferBytes);
         var initialLength = input.Length;
         if (initialLength < StructuralValue || initialLength > executionOptions.Value.MaximumProfileBytes)
-        { throw new InvalidOperationException(InvalidProfile); }
+        {
+            throw new InvalidOperationException(InvalidProfile);
+        }
         var buffer = new byte[executionOptions.Value.MaximumProfileBytes + Step];
         var total = TotalInitialValue;
         while (total < buffer.Length)
         {
             var read = input.Read(buffer.AsSpan(total));
             if (read == EmptyValue)
-            { break; }
+            {
+                break;
+            }
             total += read;
         }
         if (total < StructuralValue || total > executionOptions.Value.MaximumProfileBytes || initialLength != total || input.Length != total
             || input.ReadByte() != MissingValue || input.Length != total)
-        { throw new InvalidOperationException(InvalidProfile); }
+        {
+            throw new InvalidOperationException(InvalidProfile);
+        }
         return buffer.AsSpan(StartValue, total).ToArray();
     }
 
@@ -168,7 +186,9 @@ internal static class ClusterProfileStore
     internal static void DeleteStage(string path)
     {
         if (File.Exists(path))
-        { File.Delete(path); }
+        {
+            File.Delete(path);
+        }
     }
 
     internal static void RejectLinks(string path)
@@ -180,7 +200,9 @@ internal static class ClusterProfileStore
             try
             {
                 if ((File.GetAttributes(current) & FileAttributes.ReparsePoint) != EmptyValue)
-                { throw new InvalidOperationException(UnsafeProfilePath); }
+                {
+                    throw new InvalidOperationException(UnsafeProfilePath);
+                }
             }
             catch (FileNotFoundException) { }
             catch (DirectoryNotFoundException) { }

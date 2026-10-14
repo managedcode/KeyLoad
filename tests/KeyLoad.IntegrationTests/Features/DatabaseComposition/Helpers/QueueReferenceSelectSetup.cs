@@ -13,7 +13,9 @@ internal static class QueueReferenceSelectSetup
         foreach (var queue in new[] { QueueReferenceSelectProtocol.Queue, QueueReferenceSelectProtocol.InvalidQueue, QueueReferenceSelectProtocol.EmptyQueue })
         {
             await ConfigureAsync(admin, partition, new(queue, ResourceKind.WorkQueue, partition.TransactionDomainId)
-            { FieldPolicies = [new("/to", "reference", RawReadGrant: QueueReferenceSelectProtocol.RefRead, RawUseGrant: QueueReferenceSelectProtocol.RefUse)] }, token);
+            {
+                FieldPolicies = [new("/to", "reference", RawReadGrant: QueueReferenceSelectProtocol.RefRead, RawUseGrant: QueueReferenceSelectProtocol.RefUse)]
+            }, token);
         }
         await ConfigureAsync(admin, partition, new(QueueReferenceSelectProtocol.Target, ResourceKind.Collection, partition.TransactionDomainId)
         {
@@ -46,9 +48,13 @@ internal static class QueueReferenceSelectSetup
     {
         var fields = new List<string> { QueueReferenceSelectProtocol.RefRead };
         if (allow)
-        { fields.Add(QueueReferenceSelectProtocol.RefUse); }
+        {
+            fields.Add(QueueReferenceSelectProtocol.RefUse);
+        }
         if (names)
-        { fields.Add(QueueReferenceSelectProtocol.NameRead); }
+        {
+            fields.Add(QueueReferenceSelectProtocol.NameRead);
+        }
         var principal = state.Identity.Principal with
         {
             PolicyEpoch = epoch,

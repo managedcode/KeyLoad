@@ -150,9 +150,13 @@ internal static class BenchmarkResources
         }
         runner.WithEnvironment(EnvironmentPrefix + Profile, options.Startup.Value.BenchmarkProfile);
         if (options.BenchmarkRelay.Value.EvidenceProfile is { } evidenceProfile)
-        { runner.WithEnvironment(EnvironmentPrefix + nameof(BenchmarkRelayOptions.EvidenceProfile), evidenceProfile); }
+        {
+            runner.WithEnvironment(EnvironmentPrefix + nameof(BenchmarkRelayOptions.EvidenceProfile), evidenceProfile);
+        }
         if (options.BenchmarkRelay.Value.SourceRevision is { } sourceRevision)
-        { runner.WithEnvironment(EnvironmentPrefix + nameof(BenchmarkRelayOptions.SourceRevision), sourceRevision); }
+        {
+            runner.WithEnvironment(EnvironmentPrefix + nameof(BenchmarkRelayOptions.SourceRevision), sourceRevision);
+        }
     }
     private const string Profile = "Profile";
 }

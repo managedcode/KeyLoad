@@ -12,12 +12,18 @@ internal static class SampleChunkSubnormalRf3Replay
         async Task ObserveAsync()
         {
             if (healthy)
-            { await SampleChunkSubnormalRf3Results.HealthyAsync(original, sdk, mcp, minimum, token); }
+            {
+                await SampleChunkSubnormalRf3Results.HealthyAsync(original, sdk, mcp, minimum, token);
+            }
             else
-            { await SampleChunkSubnormalRf3Results.CurrentAsync(original, sdk, mcp, minimum, token); }
+            {
+                await SampleChunkSubnormalRf3Results.CurrentAsync(original, sdk, mcp, minimum, token);
+            }
         }
         await ObserveAsync();
         foreach (var (command, receipt) in original.Originals)
-        { await SampleChunkSubnormalRf3Receipts.ReplayAsync(sdk, mcp, command, receipt, ObserveAsync, token); }
+        {
+            await SampleChunkSubnormalRf3Receipts.ReplayAsync(sdk, mcp, command, receipt, ObserveAsync, token);
+        }
     }
 }

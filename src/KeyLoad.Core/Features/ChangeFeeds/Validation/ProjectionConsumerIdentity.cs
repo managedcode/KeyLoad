@@ -21,7 +21,9 @@ public sealed partial class DatabaseEngine
     private static void RequireProjectionConsumerIdentity(ProjectionConsumerInfo state, ProjectionConsumerRef consumer)
     {
         if (state.Consumer != consumer)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidConsumerIdentity); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidConsumerIdentity);
+        }
     }
 
     private ImmutableArray<ProjectionConsumerInfo> ProjectionConsumers(IKeyValueView view, PartitionRef partition)
@@ -30,7 +32,9 @@ public sealed partial class DatabaseEngine
         const string ProjectionConsumersDetailText = "The projection consumer limit is inconsistent.";
         var page = view.Scan(KeySpace.Partition(ProjectionConsumersSpaceText, partition), Limits.MaxProjectionConsumers);
         if (page.HasMore)
-        { throw Errors.Fail(ErrorCode.Corruption, ProjectionConsumersDetailText); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, ProjectionConsumersDetailText);
+        }
         return page.Records.Select(record => RequireProjectionConsumerRecord(record, partition)).ToImmutableArray();
     }
 
@@ -39,7 +43,9 @@ public sealed partial class DatabaseEngine
         var state = NativeSerialization.Deserialize<ProjectionConsumerInfo>(record.Value.Span)
             ?? throw Errors.Fail(ErrorCode.Corruption, InvalidConsumerIdentity);
         if (state.Consumer is null || state.Consumer.Partition != partition || !record.Key.Span.SequenceEqual(ConsumerKey(state.Consumer)))
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidConsumerIdentity); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidConsumerIdentity);
+        }
         return state;
     }
 
@@ -50,6 +56,8 @@ public sealed partial class DatabaseEngine
         const string InvalidCheckpointDetail = "The committed projection checkpoint is outside its retained outbox range.";
         if (state.Checkpoint < InitialCheckpoint || state.Checkpoint > head.Tail
             || !state.Released && state.Checkpoint < head.FirstAvailable - RetainedPredecessorStep)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidCheckpointDetail); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidCheckpointDetail);
+        }
     }
 }

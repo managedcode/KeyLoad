@@ -16,7 +16,9 @@ internal static class EventVectorFirstCaptureSet
         ArgumentNullException.ThrowIfNull(captures);
         admission.RequireEntryCount(captures.Length);
         if (directory.Owners.IsDefaultOrEmpty || captures.Length != directory.Owners.Length)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, EventVectorRemoteProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, EventVectorRemoteProtocol.Invalid);
+        }
         var entries = ImmutableArray.CreateBuilder<EventVectorEntry>();
         var sources = new HashSet<EventSourceRef>();
         for (var ordinal = FirstOrdinal; ordinal < captures.Length; ordinal++)
@@ -46,7 +48,9 @@ internal static class EventVectorFirstCaptureSet
         foreach (var entry in original)
         {
             if (!sources.Add(entry.Source))
-            { throw Errors.Fail(ErrorCode.Corruption, EventVectorRemoteProtocol.Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, EventVectorRemoteProtocol.Invalid);
+            }
             work.ChargeBytes(NativeSerialization.Measure(entry));
             var source = entry.Source;
             entries.Add(entry with

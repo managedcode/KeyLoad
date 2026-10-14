@@ -13,7 +13,9 @@ internal sealed class ReadExecutionBudgetStageCancellation
         lock (gate)
         {
             if (current is not null)
-            { throw new InvalidOperationException(StageAlreadyOwned); }
+            {
+                throw new InvalidOperationException(StageAlreadyOwned);
+            }
             var lease = new ReadExecutionBudgetStageCancellationLease(this, token);
             Volatile.Write(ref current, lease);
             return lease;
@@ -27,7 +29,9 @@ internal sealed class ReadExecutionBudgetStageCancellation
         lock (gate)
         {
             if (!ReferenceEquals(current, lease))
-            { throw new InvalidOperationException(StageOwnerMismatch); }
+            {
+                throw new InvalidOperationException(StageOwnerMismatch);
+            }
             Volatile.Write(ref current, null);
         }
     }

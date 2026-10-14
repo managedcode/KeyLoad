@@ -19,7 +19,10 @@ internal static class QueuePolicyEpochRf3Flow
             Capability.QueueConsume | Capability.QueueInspect, token);
         await Assert.That(revoked.PolicyEpoch).IsEqualTo(2L);
         var denied = original.Select(value => new QueuePolicyEpochRf3Known(
-            value.Command with { CommandId = Guid.NewGuid() }, revoked.PolicyEpoch, null, ErrorCode.PermissionDenied)).ToArray();
+            value.Command with
+            {
+                CommandId = Guid.NewGuid()
+            }, revoked.PolicyEpoch, null, ErrorCode.PermissionDenied)).ToArray();
         var forbidden = original.Concat(denied).Select(value => value.Command).ToArray();
         _ = await QueuePolicyEpochRf3Routes.RefuseAsync(wave, seed, forbidden, token);
         var known = original.Concat(denied).ToArray();

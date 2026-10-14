@@ -26,11 +26,15 @@ internal static class ClusterRestoreMixedRetentionRf3NativeCut
                 if (identity.NodeId != target.Cut.SourceNodeId || identity.Incarnation != target.Cut.Owner.Incarnation
                     || position != target.Cut.StorePosition
                     || !NativeSerialization.Serialize(target.Cut).AsSpan().SequenceEqual(metadata.Span))
-                { throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid); }
+                {
+                    throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid);
+                }
                 return OriginalOutcomes(view, state, token);
             }, token);
         foreach (var (id, bytes) in outcomes)
-        { state.OriginalOutcomeBytes.Add(id, bytes); }
+        {
+            state.OriginalOutcomeBytes.Add(id, bytes);
+        }
     }
 
     internal static void RequireRetained(ClusterRestoreRf3Fixture target, ClusterRestoreMixedRetentionRf3State state, CancellationToken token)
@@ -39,7 +43,9 @@ internal static class ClusterRestoreMixedRetentionRf3NativeCut
         const int ReplicaCount = 3;
         var ownerIndex = target.Mappings.ToList().FindIndex(mapping => mapping.Source.PhysicalShardId == state.TargetOwner.PhysicalShardId);
         if (ownerIndex < FirstIndex)
-        { throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid); }
+        {
+            throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid);
+        }
         var failures = new List<Exception>();
         foreach (var node in ClusterRestoreRf3Protocol.Nodes.Skip(ownerIndex * ReplicaCount).Take(ReplicaCount))
         {
@@ -52,7 +58,9 @@ internal static class ClusterRestoreMixedRetentionRf3NativeCut
                 store.Read(view => RetainedView(view, state));
             }, failures);
             if (store is { } owned)
-            { ServerFailureObserver.Observe(owned.Dispose, failures); }
+            {
+                ServerFailureObserver.Observe(owned.Dispose, failures);
+            }
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -63,7 +71,9 @@ internal static class ClusterRestoreMixedRetentionRf3NativeCut
         {
             var retained = view.ReadOwnedValue(KeySpace.PartitionOutcome(state.Partition, state.Principal.Id, id));
             if (retained is null || !original.AsSpan().SequenceEqual(retained))
-            { throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid); }
+            {
+                throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid);
+            }
         }
         return true;
     }
@@ -92,12 +102,16 @@ internal static class ClusterRestoreMixedRetentionRf3NativeCut
             var key = KeySpace.PartitionOutcome(state.Partition, state.Principal.Id, id);
             var bytes = view.ReadOwnedValue(key) ?? throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid);
             if (bytes.Length > remaining)
-            { throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid); }
+            {
+                throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid);
+            }
             remaining -= bytes.Length;
             var outcome = NativeSerialization.Deserialize<StoredOutcome>(bytes);
             if (outcome.Partition != state.Partition || outcome.ScopeKind != CommandOutcomeScopeKind.Partition
                 || outcome.PolicyEpoch != ClusterRestoreMixedRetentionRf3Protocol.InitialEpoch || outcome.Result.Error is not null)
-            { throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid); }
+            {
+                throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid);
+            }
             RequireOutcomeResult(outcome, id, state);
             results.Add(id, bytes);
         }
@@ -116,7 +130,9 @@ internal static class ClusterRestoreMixedRetentionRf3NativeCut
             ClusterRestoreMixedRetentionRf3Protocol.NoRevision, ClusterRestoreMixedRetentionRf3Protocol.NoRevision,
             QueueLifecyclePublicProtocol.Two, QueueLifecyclePublicProtocol.One, sizes[ClusterRestoreMixedRetentionRf3Protocol.FirstIndex],
             QueueLifecyclePublicProtocol.One, ClusterRestoreMixedRetentionRf3Protocol.NoRevision))
-        { throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid); }
+        {
+            throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid);
+        }
         return results;
     }
     private static void RequireOutcomeResult(StoredOutcome outcome, Guid id, ClusterRestoreMixedRetentionRf3State state)
@@ -125,7 +141,9 @@ internal static class ClusterRestoreMixedRetentionRf3NativeCut
         {
             if (!NativeSerialization.Serialize(outcome.Result.Get<CommitInboxResult>()).AsSpan()
                 .SequenceEqual(NativeSerialization.Serialize(state.InboxResult)))
-            { throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid); }
+            {
+                throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid);
+            }
             return;
         }
         var expected = state.OriginalQueue.Commands.SingleOrDefault(original => original.Command.CommandId == id).Receipt
@@ -133,7 +151,9 @@ internal static class ClusterRestoreMixedRetentionRf3NativeCut
                 : id == state.FilteredPublish.CommandId ? state.FilteredPublishReceipt : state.PurgedPublishReceipt);
         if (!NativeSerialization.Serialize(outcome.Result.Get<CommitReceipt>()).AsSpan()
             .SequenceEqual(NativeSerialization.Serialize(expected)))
-        { throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid); }
+        {
+            throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid);
+        }
     }
 
     private static void InboxAndRetention(IKeyValueView view, ClusterRestoreMixedRetentionRf3State state)
@@ -142,12 +162,16 @@ internal static class ClusterRestoreMixedRetentionRf3NativeCut
             ?? throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid);
         var expected = new TargetInboxRecord(TargetInboxStorage.Identity(state.Inbox), JsonData.Fingerprint(state.Inbox.Effects), state.InboxResult.Receipt);
         if (!NativeSerialization.Serialize(record).AsSpan().SequenceEqual(NativeSerialization.Serialize(expected)))
-        { throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid); }
+        {
+            throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid);
+        }
         var capacity = TargetInboxStorage.Capacity(view, state.Target, required: true);
         var keyBytes = TargetInboxStorage.Key(state.Inbox).LongLength;
         var recordBytes = NativeSerialization.Serialize(expected).LongLength;
         if (capacity != new TargetInboxCapacity(ClusterRestoreMixedRetentionRf3Protocol.FirstRevision, checked(keyBytes + recordBytes)))
-        { throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid); }
+        {
+            throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid);
+        }
         foreach (var (data, index) in ClusterRestoreMixedRetentionRf3PurgeTopic.Events()
             .Take((int)ClusterRestoreMixedRetentionRf3Protocol.PurgePosition).Select((data, index) => (data, index)))
         {
@@ -158,7 +182,9 @@ internal static class ClusterRestoreMixedRetentionRf3NativeCut
                 state.PurgedSource.Generation, data.EventId, ClusterRestoreMixedRetentionRf3Protocol.RetainedDigest));
             if (view.ReadOwnedValue(key) is not null || retained != new RetainedTopicEventIdentity(JsonData.Fingerprint(data),
                 index + ClusterRestoreMixedRetentionRf3Protocol.FirstRevision, state.PurgedSource.Generation))
-            { throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid); }
+            {
+                throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid);
+            }
         }
     }
 

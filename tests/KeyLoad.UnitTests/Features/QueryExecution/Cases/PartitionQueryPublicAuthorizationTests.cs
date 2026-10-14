@@ -11,7 +11,10 @@ internal sealed class PartitionQueryPublicAuthorizationTests
     public async Task LaterPartitionDenialReturnsNoPartialPageAndDoesNotMutateStore()
     {
         using var fixture = new PartitionQueryPublicTestSupport();
-        var denied = fixture.Second with { TenantId = DeniedTenant };
+        var denied = fixture.Second with
+        {
+            TenantId = DeniedTenant
+        };
         fixture.ConfigureForeign(denied);
         fixture.AddRows(fixture.First, new PartitionQueryPublicSeed("allowed", 2, "allowed"));
         fixture.AddRows(denied, new PartitionQueryPublicSeed("denied", 1, "denied"));
@@ -34,7 +37,10 @@ internal sealed class PartitionQueryPublicAuthorizationTests
         using var ownerFixture = new PartitionQueryPublicTestSupport();
         ownerFixture.AddRows(ownerFixture.First, new PartitionQueryPublicSeed("one", 1, "visible"));
         var ownerPosition = ownerFixture.Position;
-        var wrongOwner = PartitionQueryPublicTestSupport.ExpectedOwner with { PhysicalShardId = Guid.NewGuid() };
+        var wrongOwner = PartitionQueryPublicTestSupport.ExpectedOwner with
+        {
+            PhysicalShardId = Guid.NewGuid()
+        };
         var ownerFailure = Assert.ThrowsExactly<KeyLoadException>(() => new QueryEngine(ownerFixture.Database, UnitExecutionOptions.QueryExecution())
             .QueryPartitions("root", PartitionQueryPublicTestSupport.Request([ownerFixture.First]), wrongOwner));
         await Assert.That(ownerFailure.Code).IsEqualTo(ErrorCode.OwnershipLost);
@@ -48,7 +54,10 @@ internal sealed class PartitionQueryPublicAuthorizationTests
             [new(RestrictedPath, "sensitive")]);
         protectedFixture.AddRows(protectedFixture.First, new PartitionQueryPublicSeed("secret-row", 1, "visible", "private"));
         protectedFixture.AddReader(protectedFixture.First);
-        var query = PartitionQueryPublicTestSupport.Query(1) with { Order = [new(RestrictedPath, false)] };
+        var query = PartitionQueryPublicTestSupport.Query(1) with
+        {
+            Order = [new(RestrictedPath, false)]
+        };
         var request = PartitionQueryPublicTestSupport.Request([protectedFixture.First], 1, query);
         var fieldPosition = protectedFixture.Position;
         var fieldFailure = Assert.ThrowsExactly<KeyLoadException>(() => new QueryEngine(protectedFixture.Database, UnitExecutionOptions.QueryExecution())

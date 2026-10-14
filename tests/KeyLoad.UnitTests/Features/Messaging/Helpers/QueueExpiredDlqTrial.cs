@@ -39,7 +39,9 @@ internal static class QueueExpiredDlqTrial
             }, failures);
         }, failures);
         if (failures.Count != 0)
-        { return; }
+        {
+            return;
+        }
         await SecondColdAsync(fixture, state, afterCancel
             ?? throw new InvalidOperationException("The first cold DLQ cancellation did not finish."), failures, token);
     }

@@ -30,12 +30,18 @@ internal sealed class ClusterRestoreRf3Fixture : IAsyncDisposable
     private DistributedApplication? application;
     private bool started;
     private bool joined;
-    internal bool ServersAdmitted { get; private set; }
+    internal bool ServersAdmitted
+    {
+        get; private set;
+    }
     private bool operatorOnly;
     private bool retainPublishedTarget;
     private string? changedSigner;
     private ImmutableArray<ClusterRestoreOwnerMapping>? changedMappings;
-    internal ClusterRestoreRf3StageObservation? HeldObservation { get; private set; }
+    internal ClusterRestoreRf3StageObservation? HeldObservation
+    {
+        get; private set;
+    }
     private ClusterRestoreRf3OperatorObservation? operatorObservation;
 
     internal ClusterRestoreRf3Fixture(string ownedRoot, string credential,
@@ -62,12 +68,25 @@ internal sealed class ClusterRestoreRf3Fixture : IAsyncDisposable
     private readonly List<ClusterRestoreRf3OperatorObservation> originalOperatorObservations = [];
 
     internal IReadOnlyList<int> OriginalOperatorExits => originalOperatorExits;
-    internal int? OriginalOperatorExitCode { get; private set; }
-    internal void RecordOperatorExit(int value) { OriginalOperatorExitCode = value; originalOperatorExits.Add(value); }
+    internal int? OriginalOperatorExitCode
+    {
+        get; private set;
+    }
+    internal void RecordOperatorExit(int value)
+    {
+        OriginalOperatorExitCode = value;
+        originalOperatorExits.Add(value);
+    }
     internal void AdmitServers(bool value) => ServersAdmitted = value;
-    internal string DataRoot { get; }
+    internal string DataRoot
+    {
+        get;
+    }
     internal string ExpectedSignerFingerprint => ClusterRestoreRf3SignerIdentity.Fingerprint(profile.SigningKey);
-    internal ImmutableArray<ClusterRestoreOwnerMapping> Mappings { get; }
+    internal ImmutableArray<ClusterRestoreOwnerMapping> Mappings
+    {
+        get;
+    }
     internal ImmutableArray<ClusterRestoreRf3OperatorNode> OriginalTargetNodes { get; set; } = [];
     internal DistributedApplication Application => application
         ?? throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid);
@@ -85,7 +104,9 @@ internal sealed class ClusterRestoreRf3Fixture : IAsyncDisposable
     {
         operatorOnly = true;
         try
-        { await StartCoreAsync(restore: true, null, null, wrongDigest: false, null, null, cut, cancellationToken).ConfigureAwait(false); }
+        {
+            await StartCoreAsync(restore: true, null, null, wrongDigest: false, null, null, cut, cancellationToken).ConfigureAwait(false);
+        }
         finally { operatorOnly = false; }
     }
 
@@ -149,7 +170,9 @@ internal sealed class ClusterRestoreRf3Fixture : IAsyncDisposable
         ImmutableArray<string>? sourceArchives, string? exactFailureDetail, NativeClusterRestoreStage? cut, CancellationToken cancellationToken)
     {
         if (application is not null || (!restore && (!joined || !ServersAdmitted)))
-        { throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid); }
+        {
+            throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid);
+        }
         if (restore)
         {
             var bytes = JsonSerializer.SerializeToUtf8Bytes(profile.Value,
@@ -171,7 +194,9 @@ internal sealed class ClusterRestoreRf3Fixture : IAsyncDisposable
             {
                 foreach (var node in builder.Resources.OfType<ContainerResource>().Where(value =>
                     ClusterRestoreRf3Protocol.Nodes.Contains(value.Name, StringComparer.Ordinal)))
-                { builder.CreateResourceBuilder(node).WithExplicitStart(); }
+                {
+                    builder.CreateResourceBuilder(node).WithExplicitStart();
+                }
             }
             return builder.BuildAsync(cancellationToken);
         }).ConfigureAwait(false);
@@ -192,7 +217,9 @@ internal sealed class ClusterRestoreRf3Fixture : IAsyncDisposable
         started = true;
         joined = false;
         if (!restore)
-        { ServersAdmitted = true; }
+        {
+            ServersAdmitted = true;
+        }
         await application.StartAsync(cancellationToken).ConfigureAwait(false);
         await ClusterRestoreRf3StartupCompletion.WaitAsync(this, cli, cut, operatorOnly,
             expectedFailure, exactFailureDetail, cancellationToken).ConfigureAwait(false);
@@ -205,7 +232,9 @@ internal sealed class ClusterRestoreRf3Fixture : IAsyncDisposable
     internal async Task StopAsync()
     {
         if (application is not { } owned)
-        { return; }
+        {
+            return;
+        }
         await ClusterRestoreRf3Shutdown.JoinAsync(this, owned, operatorObservation, HeldObservation,
             started, ServersAdmitted).ConfigureAwait(false);
         application = null;
@@ -230,7 +259,9 @@ internal sealed class ClusterRestoreRf3Fixture : IAsyncDisposable
     {
         var bytes = RandomNumberGenerator.GetBytes(SecretBytes);
         try
-        { return Convert.ToBase64String(bytes); }
+        {
+            return Convert.ToBase64String(bytes);
+        }
         finally { CryptographicOperations.ZeroMemory(bytes); }
     }
 }

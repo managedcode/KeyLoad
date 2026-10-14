@@ -10,15 +10,21 @@ internal static class ScriptDomParameterLowering
         if (expression is Dom.VariableReference variable)
         {
             if (context.PositionalParameterCount.HasValue)
-            { throw ScriptDomErrors.Invalid(); }
+            {
+                throw ScriptDomErrors.Invalid();
+            }
             var namedParameter = variable.Name.TrimStart(ParameterPrefix);
             global::KeyLoad.Core.JsonData.Identifier(namedParameter);
             return namedParameter;
         }
         if (expression is not Dom.MoneyLiteral literal || context.PositionalParameterCount is not { } count)
-        { throw ScriptDomErrors.Unsupported(); }
+        {
+            throw ScriptDomErrors.Unsupported();
+        }
         if (!ScriptDomSyntax.TryGetNativeSessionSlot(literal, count, out var canonicalName))
-        { throw ScriptDomErrors.Invalid(); }
+        {
+            throw ScriptDomErrors.Invalid();
+        }
         return canonicalName;
     }
     internal static int Count(Dom.ScalarExpression expression, ScriptDomLoweringContext context)
@@ -26,7 +32,9 @@ internal static class ScriptDomParameterLowering
         var name = Name(expression, context);
         if (context.Parameters is null || !context.Parameters.TryGetValue(name, out var value)
             || value.ValueKind != global::System.Text.Json.JsonValueKind.Number || !value.TryGetInt32(out var count))
-        { throw ScriptDomErrors.Invalid(); }
+        {
+            throw ScriptDomErrors.Invalid();
+        }
         return count;
     }
     private const char ParameterPrefix = '@';

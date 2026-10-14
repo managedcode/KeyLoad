@@ -26,7 +26,10 @@ internal sealed class CommandOutcomePartitionScopeFailureTests
         var firstResult = database.Database.Apply(first);
         var secondResult = database.Database.Apply(second);
         var unknownReplay = database.Database.Apply(malformed);
-        var changedMalformed = database.Database.Apply(malformed with { PayloadJson = "[" });
+        var changedMalformed = database.Database.Apply(malformed with
+        {
+            PayloadJson = "["
+        });
 
         await Assert.That(malformedResult.Error).IsEqualTo(ErrorCode.Validation);
         await Assert.That(firstResult.Error).IsNull();
@@ -79,7 +82,10 @@ internal sealed class CommandOutcomePartitionScopeFailureTests
         {
             var outcome = transaction.GetRecord<StoredOutcome>(KeySpace.PartitionOutcome(database.Partition, "root", commandId))!;
             transaction.PutRecord(KeySpace.PartitionOutcome(database.Partition, "root", commandId), outcome with
-            { ScopeKind = (CommandOutcomeScopeKind)999, Partition = null });
+            {
+                ScopeKind = (CommandOutcomeScopeKind)999,
+                Partition = null
+            });
             return true;
         });
         await CommandOutcomePartitionScopeTestData.AssertCorruptionWithoutMutationAsync(database, operation);

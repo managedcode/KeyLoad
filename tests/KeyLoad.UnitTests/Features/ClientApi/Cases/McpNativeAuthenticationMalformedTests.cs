@@ -1,6 +1,6 @@
 using System.Text;
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
@@ -71,11 +71,16 @@ internal sealed class McpNativeAuthenticationMalformedTests
     public async Task InvalidNativeStringUtf8IsRejectedBeforeReplacementDecoderCanCreatePrincipal()
     {
         using var database = new TestDatabase();
-        var principal = McpNativeAuthenticationTests.Principal(database) with { Id = Utf8Marker };
+        var principal = McpNativeAuthenticationTests.Principal(database) with
+        {
+            Id = Utf8Marker
+        };
         var payload = NativeSerialization.Serialize(new GrainValue(principal));
         var offset = payload.AsSpan().IndexOf(Encoding.UTF8.GetBytes(Utf8Marker));
         if (offset < 0)
-        { throw new InvalidOperationException(MarkerMissing); }
+        {
+            throw new InvalidOperationException(MarkerMissing);
+        }
         payload[offset] = InvalidUtf8;
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => McpNativeAuthentication.Inspect(payload, UnitMcpOptions.Execution(), CancellationToken.None)).Code)
             .IsEqualTo(ErrorCode.Validation);

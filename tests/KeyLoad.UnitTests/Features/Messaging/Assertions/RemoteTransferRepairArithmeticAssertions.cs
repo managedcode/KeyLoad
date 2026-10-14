@@ -70,7 +70,11 @@ internal static class RemoteTransferRepairArithmeticAssertions
             original.Complete).Get<CommitReceipt>(), receipt);
         await RemoteTransferCoordinationColdAssertions.EqualAsync(fixture.Database.InspectQueueTransfer(
             RemoteTransferRepairColdProtocol.Subject, fixture.SourceQueue, original.Transfer.TransferId),
-            original.Intent with { State = QueueTransferState.Delivered, ReceiptToken = original.Proof.ReceiptToken });
+            original.Intent with
+            {
+                State = QueueTransferState.Delivered,
+                ReceiptToken = original.Proof.ReceiptToken
+            });
         await OriginalsAsync(fixture, original);
     }
 

@@ -28,7 +28,9 @@ internal static class SampleRollupRecords
         view.ReadValue(SampleRetentionStateReader.Key(partition, set, series),
             value => floor = SampleRetentionStateReader.Decode(value).BeforeUtcTicks, observer);
         if (sequence < EmptySequence)
-        { throw Errors.Fail(ErrorCode.Corruption, SampleRollupProtocol.Corrupt); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, SampleRollupProtocol.Corrupt);
+        }
         return (sequence, floor);
     }
 }

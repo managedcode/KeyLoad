@@ -22,7 +22,10 @@ internal sealed class GraphIncomingRf3LeaderLossTests(ClusterFixture fixture)
         {
             Reader = await GraphPathRf3Scenario.GrantLabelUseAsync(fixture, seed, deadline.Token)
         };
-        var sourcePartition = seed.Partition with { PartitionKey = Guid.NewGuid().ToString(GuidFormat) };
+        var sourcePartition = seed.Partition with
+        {
+            PartitionKey = Guid.NewGuid().ToString(GuidFormat)
+        };
         var source = new EntityRef(sourcePartition, SourceCollection, "remote-source");
         using var adminHttp = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
         var admin = new KeyLoadClient(adminHttp, fixture.AdminKey, IntegrationClientOptions.Execution());

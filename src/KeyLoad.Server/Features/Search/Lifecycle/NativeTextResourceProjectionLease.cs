@@ -24,7 +24,9 @@ internal sealed class NativeTextResourceProjectionLease : ITextProjectionLease, 
     public void ObserveOriginalPosting(Func<CancellationToken, ValueTask> callback)
     {
         if (original is IOriginalTextPostingObservation observed)
-        { observed.ObserveOriginalPosting(callback); }
+        {
+            observed.ObserveOriginalPosting(callback);
+        }
     }
 
     public void BeginRecord(EntityRef reference, long revision) => original.BeginRecord(reference, revision);
@@ -34,7 +36,9 @@ internal sealed class NativeTextResourceProjectionLease : ITextProjectionLease, 
     public void Dispose()
     {
         if (disposed)
-        { return; }
+        {
+            return;
+        }
         original.Dispose();
         reservation.CompleteAfterJoinedCleanup();
         disposed = true;

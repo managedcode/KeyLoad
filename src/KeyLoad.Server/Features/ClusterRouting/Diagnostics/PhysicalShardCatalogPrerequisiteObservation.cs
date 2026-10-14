@@ -14,7 +14,7 @@ internal sealed partial class PhysicalShardCatalogPrerequisiteObservation
         + "FreshRemote={FreshRemote} MissingRemote={MissingRemote} ExpiredRemote={ExpiredRemote} Ready={Ready}.";
     private ReplicaNodeState? state;
     private bool? compatibleCohort;
-    private KeyLoad.Orleans.ReplicaCohortAdmissionStatus cohortAdmission;
+    private KeyLoad.Clustering.ReplicaCohortAdmissionStatus cohortAdmission;
     private bool? leaderConfirmed;
 
     internal void Capture(ReplicaNodeState actual)
@@ -25,11 +25,18 @@ internal sealed partial class PhysicalShardCatalogPrerequisiteObservation
         leaderConfirmed = null;
     }
 
-    internal bool Cohort(KeyLoad.Orleans.ReplicaCohortAdmissionStatus actual)
-    { cohortAdmission = actual; compatibleCohort = actual.Compatible; return actual.Compatible; }
+    internal bool Cohort(KeyLoad.Clustering.ReplicaCohortAdmissionStatus actual)
+    {
+        cohortAdmission = actual;
+        compatibleCohort = actual.Compatible;
+        return actual.Compatible;
+    }
 
     internal bool Leader(bool actual)
-    { leaderConfirmed = actual; return actual; }
+    {
+        leaderConfirmed = actual;
+        return actual;
+    }
 
     internal void Failed(ILogger logger, Exception original)
     {
@@ -48,7 +55,7 @@ internal sealed partial class PhysicalShardCatalogPrerequisiteObservation
     private static partial void WriteFailure(ILogger logger, bool cancelled, ErrorCode code,
         bool? transportReady, bool? leaderPresent, ReplicaRole? role, long? term, long? committedIndex,
         long? materializedPosition, bool? compatibleCohort, bool? leaderConfirmed,
-        KeyLoad.Orleans.ReplicaCohortAdmissionCode cohortCode, int requiredMajority, int evaluatedRemote, int freshRemote,
+        KeyLoad.Clustering.ReplicaCohortAdmissionCode cohortCode, int requiredMajority, int evaluatedRemote, int freshRemote,
         int missingRemote, int expiredRemote, int ready);
 }
 

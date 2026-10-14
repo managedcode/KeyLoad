@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.UnitTests.Features.Search;
 using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.DependencyInjection;
@@ -52,9 +52,13 @@ internal static class RequestCqrsTextMaintenanceFlow
             {
                 kinds.Add(chunk.Kind);
                 if (chunk.ProgressResult?.Value?.TextPhase is { } phase)
-                { phases.Add(phase); }
+                {
+                    phases.Add(phase);
+                }
                 if (chunk.Final?.Value is { } result)
-                { final = result.Payload; }
+                {
+                    final = result.Payload;
+                }
             }
         }
         catch (KeyLoadException error) { failure = error; }

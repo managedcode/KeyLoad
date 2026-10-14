@@ -17,14 +17,18 @@ internal static class ClusterRestorePlanComparison
             || original.SourceArchives.IsDefault || candidate.SourceArchives.IsDefault
             || original.SourceArchives.Length != candidate.SourceArchives.Length
             || ClusterRestoreMappingDigest.Compute(original.Mappings) != ClusterRestoreMappingDigest.Compute(candidate.Mappings))
-        { throw Errors.Fail(ErrorCode.Conflict, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, Invalid);
+        }
         original.DatabasePolicy.Validate();
         foreach (var pair in original.SourceArchives.Zip(candidate.SourceArchives))
         {
             if (pair.First.Version != ClusterRestoreSource.CurrentVersion || pair.First.CanonicalPath != pair.Second.CanonicalPath
                 || pair.First.EnvelopeDigest != pair.Second.EnvelopeDigest || pair.First.Files.IsDefault
                 || pair.Second.Files.IsDefault || !pair.First.Files.SequenceEqual(pair.Second.Files))
-            { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, Invalid);
+            }
             ClusterRestorePlanVerification.RequireOriginalCut(pair.First.OriginalCut, pair.Second.OriginalCut);
         }
         ClusterRestoreOperatorSubjects.Require(original.OperatorSubjects, candidate.OperatorSubjects,

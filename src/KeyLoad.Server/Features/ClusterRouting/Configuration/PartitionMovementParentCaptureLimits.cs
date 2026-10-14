@@ -18,7 +18,9 @@ internal static class PartitionMovementParentCaptureLimits
         var pageBytes = Math.Min(limits.MaxBatchBytes, work.MaximumResultBytes);
         if (bytes <= PartitionMoveProtocol.EmptyCount || records <= PartitionMoveProtocol.EmptyCount
             || pageBytes <= PartitionMoveProtocol.EmptyCount)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
+        }
         return new(principalId, fence, pageBytes, bytes, records);
     }
 

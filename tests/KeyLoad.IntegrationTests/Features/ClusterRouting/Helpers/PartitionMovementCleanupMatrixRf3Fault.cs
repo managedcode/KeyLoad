@@ -13,9 +13,13 @@ internal sealed record PartitionMovementCleanupMatrixRf3Fault(string Node, strin
     {
         if (!RequestCqrsProbeFixtureProtocol.Nodes.Any(name =>
             RequestCqrsProbeFileNames.OriginForNode(name) == actualPrimary.Voter))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         foreach (var node in RequestCqrsProbeFixtureProtocol.Nodes)
-        { RenameOne(controls, admittedArm, actualPrimary, node, ownedFaults); }
+        {
+            RenameOne(controls, admittedArm, actualPrimary, node, ownedFaults);
+        }
     }
 
     private static void RenameOne(RequestCqrsProbeFixture controls,
@@ -29,12 +33,16 @@ internal sealed record PartitionMovementCleanupMatrixRf3Fault(string Node, strin
             || (admittedArm == actualPrimary.ArmId
                 ? state.RequestId != actualPrimary.RequestId
                 : state.RequestId is not null))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         var original = RequestCqrsProbeFileNames.Arm(admittedArm);
         RequestCqrsProbeFileStore.VerifyExactFile(owned.Directory, original, state.Bytes);
         var faultId = Guid.NewGuid();
         if (faultId == admittedArm)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         var changed = RequestCqrsProbeFileNames.Arm(faultId);
         RequestCqrsProbeFileStore.EnsureCanWrite(owned.Directory, changed, state.Bytes.Length);
         ownedFaults.Add(new(node, original, changed, state.Bytes.ToArray()));
@@ -52,15 +60,21 @@ internal sealed record PartitionMovementCleanupMatrixRf3Fault(string Node, strin
         var original = RequestCqrsProbeFileNames.Marker(primary);
         var bytes = RequestCqrsProbeFileStore.ReadRecord(Path.Combine(owned.Directory, original));
         if (controls.Json.ReadMarker(bytes) != primary)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         var prefix = RequestCqrsProbeFixtureProtocol.MarkerFilePrefix;
         var newId = Guid.NewGuid();
         if (newId == primary.ArmId)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         var changed = prefix + newId.ToString(RequestCqrsProbeProtocol.SessionIdFormat)
             + original[(prefix.Length + PartitionMovementCleanupMatrixProtocol.CanonicalGuidDigits)..];
         if (!RequestCqrsProbeFileNames.IsMarkerName(changed))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         RequestCqrsProbeFileStore.EnsureCanWrite(owned.Directory, changed, bytes.Length);
         ownedFaults.Add(new(node, original, changed, bytes.ToArray()));
         File.Move(Path.Combine(owned.Directory, original), Path.Combine(owned.Directory, changed), overwrite: false);
@@ -76,7 +90,9 @@ internal sealed record PartitionMovementCleanupMatrixRf3Fault(string Node, strin
         RequestCqrsProbeFileStore.VerifyOwnerFile(owned.Directory, owned.OwnerBytes);
         var retired = controls.ArmFor(retiredOther);
         if (!retired.Retired || retired.RequestId is not null)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         var name = RequestCqrsProbeFileNames.Arm(retiredOther);
         RequestCqrsProbeFileStore.EnsureCanWrite(owned.Directory, name, retired.Bytes.Length);
         ownedFaults.Add(new(node, name, name, retired.Bytes.ToArray(),
@@ -88,7 +104,9 @@ internal sealed record PartitionMovementCleanupMatrixRf3Fault(string Node, strin
     internal void RestoreAfterJoin(TwoRf3MembershipWave wave, RequestCqrsProbeFixture controls)
     {
         if (!wave.applicationDisposed || !wave.nodeLocksReleased)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         wave.AssertAllNodeLocksReleased();
         var owned = controls.NodeFor(Node);
         RequestCqrsProbeFileStore.VerifyOwnerFile(owned.Directory, owned.OwnerBytes);
@@ -96,14 +114,18 @@ internal sealed record PartitionMovementCleanupMatrixRf3Fault(string Node, strin
         if (Repair == PartitionMovementCleanupMatrixFaultRepair.RestoreExactBytes)
         {
             if (OriginalName != FaultName || OriginalBytes is null)
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             RequestCqrsProbeFileStore.ReplaceExactArm(owned.Directory, OriginalName, ExactBytes, OriginalBytes);
             return;
         }
         if (Repair == PartitionMovementCleanupMatrixFaultRepair.RemoveUnfamiliarCopy)
         {
             if (OriginalName == FaultName)
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             RequestCqrsProbeFileStore.VerifyExactFile(owned.Directory, OriginalName, ExactBytes);
             RequestCqrsProbeFileStore.DeleteExactFile(owned.Directory, FaultName, ExactBytes);
             RequestCqrsProbeFileStore.VerifyExactFile(owned.Directory, OriginalName, ExactBytes);
@@ -112,12 +134,16 @@ internal sealed record PartitionMovementCleanupMatrixRf3Fault(string Node, strin
         if (Repair == PartitionMovementCleanupMatrixFaultRepair.RemoveResurrection)
         {
             if (OriginalName != FaultName)
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             RequestCqrsProbeFileStore.DeleteExactFile(owned.Directory, FaultName, ExactBytes);
             return;
         }
         if (Repair != PartitionMovementCleanupMatrixFaultRepair.RenameBack)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         RequestCqrsProbeFileStore.EnsureCanWrite(owned.Directory, OriginalName, ExactBytes.Length);
         File.Move(Path.Combine(owned.Directory, FaultName), Path.Combine(owned.Directory, OriginalName), overwrite: false);
         RequestCqrsProbeFileStore.VerifyExactFile(owned.Directory, OriginalName, ExactBytes);

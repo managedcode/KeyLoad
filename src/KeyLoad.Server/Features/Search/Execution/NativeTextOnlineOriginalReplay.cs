@@ -1,5 +1,5 @@
+using KeyLoad.Clustering.Features.Search;
 using KeyLoad.Core;
-using KeyLoad.Orleans.Features.Search;
 
 namespace KeyLoad.Server.Features.Search;
 
@@ -16,13 +16,17 @@ internal sealed class NativeTextOnlineOriginalReplay(DatabaseEngine database, Se
         budget.ConstrainLifetime(expiry);
         var original = database.ReadOnlineTextOriginalOutcome(principal.Id, request.Request, budget);
         if (original is null)
-        { return null; }
+        {
+            return null;
+        }
         var result = original.Get<OnlineTextIndexMaintenanceResult>();
         var publication = database.ReadOnlineTextOriginalPublication(principal.Id, request.Request, budget)
             ?? throw NativeTextErrors.Ownership();
         var retained = sessions.CaptureOriginals(principal.Id, request.Request, budget);
         foreach (var session in retained)
-        { await session.CloseCommandAdmissionAndJoinAsync().ConfigureAwait(false); }
+        {
+            await session.CloseCommandAdmissionAndJoinAsync().ConfigureAwait(false);
+        }
         var current = catalog.ReadCommittedCurrent(principal.Id, request.Request, budget);
         var currentRequest = new OnlineTextIndexMaintenanceRequest(current.CommandId, current.Consumer,
             current.Authority.Collection, current.Authority.Field, current.ConsumerGeneration,
@@ -32,7 +36,9 @@ internal sealed class NativeTextOnlineOriginalReplay(DatabaseEngine database, Se
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             if (retained.Length == NoRetainedSessions)
-            { admitted = resources.ReserveLease(budget); }
+            {
+                admitted = resources.ReserveLease(budget);
+            }
             var active = catalog.PublishCurrentCatalog(current, currentRequest, budget, null);
             foreach (var session in retained)
             {
@@ -43,7 +49,9 @@ internal sealed class NativeTextOnlineOriginalReplay(DatabaseEngine database, Se
                     continue;
                 }
                 if (session.Leaf != publication.Authority.Leaf)
-                { throw NativeTextErrors.Mismatch(); }
+                {
+                    throw NativeTextErrors.Mismatch();
+                }
                 var generation = catalog.RequireGeneration(publication, budget);
                 if (!session.CatalogCommitted)
                 {
@@ -52,13 +60,23 @@ internal sealed class NativeTextOnlineOriginalReplay(DatabaseEngine database, Se
                     session.CatalogCommitted = true;
                 }
                 if (!ReferenceEquals(active, generation))
-                { catalog.BeginRetirement(generation); }
+                {
+                    catalog.BeginRetirement(generation);
+                }
                 await cleanupSession(session).ConfigureAwait(false);
             }
         }, failures).ConfigureAwait(false);
         if (admitted is not null)
-        { ServerFailureObserver.Observe(admitted.CompleteAfterJoinedCleanup, failures); }
+        {
+            ServerFailureObserver.Observe(admitted.CompleteAfterJoinedCleanup, failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
+        return CreateReply(request, result, budget);
+    }
+
+    private static OnlineTextCapabilityResult CreateReply(OnlineTextCapabilityRequest request,
+        OnlineTextIndexMaintenanceResult result, ReadExecutionBudget budget)
+    {
         var reply = new OnlineTextCapabilityResult(request.SessionId, null, null,
             result.PublishedCut.ThroughSequence, result.TrackedRecords, result.IndexSha256,
             result, null, null, null);

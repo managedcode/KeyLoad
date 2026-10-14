@@ -16,7 +16,9 @@ internal static class TenantCapacityPlacementRf3IntentCollisionCold
         await TenantCapacityPlacementRf3Assertions.RequireOriginalModelsAsync(seed, capacity, token);
         await TenantCapacityPlacementRf3IntentCollisionAssertions.PendingAsync(seed, original, token);
         if (original.CollisionId != Guid.Empty)
-        { await TenantCapacityPlacementRf3IntentCollisionAssertions.RefuseAsync(seed, original, token); }
+        {
+            await TenantCapacityPlacementRf3IntentCollisionAssertions.RefuseAsync(seed, original, token);
+        }
         return rows;
     }
 }

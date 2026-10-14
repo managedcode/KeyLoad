@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Search;
-using KeyLoad.Orleans;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.Search;
@@ -46,7 +46,9 @@ internal static class NativeAnnMaintenanceBeginning
         catch (Exception primary)
         {
             try
-            { memory?.Dispose(); }
+            {
+                memory?.Dispose();
+            }
             catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
             throw;
         }

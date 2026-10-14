@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.Search;
 
@@ -24,9 +24,15 @@ internal sealed class NativeAnnPendingIntegrityTests
         var token = TestContext.Current!.Execution.CancellationToken;
         var original = await File.ReadAllBytesAsync(file, token);
         await File.WriteAllBytesAsync(file, original.AsSpan(0, original.Length - One).ToArray(), token);
-        await RejectLoadAsync(database, request with { Mode = AnnMaintenanceMode.Restore });
+        await RejectLoadAsync(database, request with
+        {
+            Mode = AnnMaintenanceMode.Restore
+        });
         await File.WriteAllBytesAsync(file, original, token);
-        var restore = request with { Mode = AnnMaintenanceMode.Restore };
+        var restore = request with
+        {
+            Mode = AnnMaintenanceMode.Restore
+        };
         await NativeAnnPendingIntegrityAssertions.ResumeAsync(database, restore, upper);
     }
 
@@ -49,8 +55,8 @@ internal sealed class NativeAnnPendingIntegrityTests
                 _ = await NativeAnnMaintenancePhaseAssertions.CommitReplayAsync(database, intent);
             }, failures);
         }
-        catch (Exception cleanup) when (KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
-        catch (Exception cleanup) when (!KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
+        catch (Exception cleanup) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
+        catch (Exception cleanup) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
         ServerFailureObserver.ThrowIfAny(failures);
         return upper;
     }

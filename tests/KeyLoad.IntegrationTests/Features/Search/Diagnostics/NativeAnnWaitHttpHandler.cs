@@ -21,7 +21,9 @@ internal sealed class NativeAnnWaitHttpHandler(HttpMessageHandler inner,
                 events.Failed(error, cancellationToken);
             }
             catch (Exception observation)
-            { throw new AggregateException(error, observation); }
+            {
+                throw new AggregateException(error, observation);
+            }
             throw;
         }
         try

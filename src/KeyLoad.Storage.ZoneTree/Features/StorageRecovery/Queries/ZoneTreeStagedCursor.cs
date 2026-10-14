@@ -13,7 +13,10 @@ internal sealed class ZoneTreeStagedCursor(SortedSet<ZoneTreeStagedEntry>? chang
     private readonly ZoneTreeRangeWork work = work;
 
     internal byte[] Key { get; private set; } = [];
-    internal byte[]? Value { get; private set; }
+    internal byte[]? Value
+    {
+        get; private set;
+    }
 
     internal bool MoveNext()
     {

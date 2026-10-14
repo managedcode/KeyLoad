@@ -1,5 +1,5 @@
 using System.Collections.Immutable;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Replication;
 
 namespace KeyLoad.UnitTests;
@@ -26,7 +26,10 @@ internal sealed class ReplicaApplicationPayloadBoundsTests
     public async Task OversizedSignedApplicationPayloadDoesNotConsumeItsReplaySlot(ReplicaRpc method)
     {
         using var fixture = new ReplicaSecurityFixture();
-        var configuration = fixture.Configuration with { MaxAppendBytes = ReceiverAppendBytes };
+        var configuration = fixture.Configuration with
+        {
+            MaxAppendBytes = ReceiverAppendBytes
+        };
         var options = Options(fixture.Options);
         using var receiver = new ReplicaEnvelopeAuthenticator(UnitExecutionOptions.ReplicaConfiguration(configuration), UnitRoutingOptions.Peers(configuration, options), fixture.Discovery, TimeProvider.System, UnitRoutingOptions.Transport(), UnitRoutingOptions.Replay(options.ReplayLimits), canonicalDatabase: fixture.Database);
         using var sender = Sender(fixture, configuration, options);
@@ -66,7 +69,10 @@ internal sealed class ReplicaApplicationPayloadBoundsTests
     private static ReplicaEnvelopeAuthenticator Sender(ReplicaSecurityFixture fixture, ReplicaConfiguration receiverConfiguration,
         ReplicaPeerOptions options)
     {
-        var senderConfiguration = receiverConfiguration with { LocalId = ReplicaSecurityFixture.VoterA };
+        var senderConfiguration = receiverConfiguration with
+        {
+            LocalId = ReplicaSecurityFixture.VoterA
+        };
         return new(UnitExecutionOptions.ReplicaConfiguration(senderConfiguration), UnitRoutingOptions.Peers(senderConfiguration, options), fixture.Discovery, TimeProvider.System, UnitRoutingOptions.Transport(), UnitRoutingOptions.Replay(options.ReplayLimits), canonicalDatabase: fixture.Database);
     }
 
@@ -92,7 +98,10 @@ internal sealed class ReplicaApplicationPayloadBoundsTests
     {
         var template = ApplicationEnvelope(fixture, method);
         var payload = PayloadWithOperationSize(fixture, template, method, maximumPayloadBytes);
-        return fixture.Resign(template with { Payload = payload });
+        return fixture.Resign(template with
+        {
+            Payload = payload
+        });
     }
 
     private static ReplicaPeerEnvelope WithinMetadataEnvelope(ReplicaSecurityFixture fixture, ReplicaRpc method, Guid nonce,
@@ -106,7 +115,11 @@ internal sealed class ReplicaApplicationPayloadBoundsTests
         {
             throw new InvalidOperationException(MetadataAllowanceFailure);
         }
-        return fixture.Resign(template with { Nonce = nonce, Payload = payload });
+        return fixture.Resign(template with
+        {
+            Nonce = nonce,
+            Payload = payload
+        });
     }
 
     private static byte[] PayloadWithOperationSize(ReplicaSecurityFixture fixture, ReplicaPeerEnvelope template, ReplicaRpc method, int payloadLength)
@@ -137,7 +150,10 @@ internal sealed class ReplicaApplicationPayloadBoundsTests
         while (minimum <= maximum)
         {
             var payloadLength = (minimum + (maximum - minimum) / 2) * PayloadLengthStepBytes;
-            var candidate = append with { Entries = AppendEntries(fixture, append, payloadLength) };
+            var candidate = append with
+            {
+                Entries = AppendEntries(fixture, append, payloadLength)
+            };
             var encodedEntries = ReplicaProtocolCodec.SerializeEntries(candidate.Entries);
             if (encodedEntries.Length <= maximumAppendBytes)
             {
@@ -158,7 +174,10 @@ internal sealed class ReplicaApplicationPayloadBoundsTests
     }
 
     private static byte[] SerializeAppend(ReplicaSecurityFixture fixture, AppendRequest append, string payloadJson) =>
-        ReplicaProtocolCodec.Serialize(append with { Entries = AppendEntries(fixture, append, payloadJson.Length, payloadJson) });
+        ReplicaProtocolCodec.Serialize(append with
+        {
+            Entries = AppendEntries(fixture, append, payloadJson.Length, payloadJson)
+        });
 
     private static ImmutableArray<ReplicaEntry> AppendEntries(ReplicaSecurityFixture fixture, AppendRequest append, int payloadLength, string? payloadJson = null)
     {
@@ -172,7 +191,11 @@ internal sealed class ReplicaApplicationPayloadBoundsTests
     }
 
     private static ReplicatedOperation WithPayload(ReplicaSecurityFixture fixture, ReplicatedOperation operation, string payloadJson)
-        => fixture.Database.NormalizeOperation(operation with { PayloadJson = payloadJson, NativePayload = ReadOnlyMemory<byte>.Empty });
+        => fixture.Database.NormalizeOperation(operation with
+        {
+            PayloadJson = payloadJson,
+            NativePayload = ReadOnlyMemory<byte>.Empty
+        });
 
     private static ReplicaPeerEnvelope ApplicationEnvelope(ReplicaSecurityFixture fixture, ReplicaRpc method) => method switch
     {

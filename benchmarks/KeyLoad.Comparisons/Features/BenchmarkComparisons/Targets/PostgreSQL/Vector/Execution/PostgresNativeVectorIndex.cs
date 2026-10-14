@@ -103,7 +103,12 @@ internal static class PostgresNativeVectorIndex
     {
         if (profile.IndexKind == VectorIndexKind.Hnsw)
         {
-            return new() { [VectorParamM] = PostgresNativeVectorIndexValues.HnswNeighborsSetting, [VectorParamEfConstruction] = PostgresNativeVectorIndexValues.HnswEffortSetting, [VectorParamEfSearch] = PostgresNativeVectorIndexValues.HnswEffortSetting };
+            return new()
+            {
+                [VectorParamM] = PostgresNativeVectorIndexValues.HnswNeighborsSetting,
+                [VectorParamEfConstruction] = PostgresNativeVectorIndexValues.HnswEffortSetting,
+                [VectorParamEfSearch] = PostgresNativeVectorIndexValues.HnswEffortSetting
+            };
         }
         var lists = Math.Max(PostgresNativeVectorIndexValues.SingleElementOffset, (int)Math.Sqrt(profile.RecordCount));
         var probes = Math.Min(lists, (int)Math.Ceiling(Math.Sqrt(lists)) * PostgresNativeVectorIndexValues.IvfProbeExpansionFactor);

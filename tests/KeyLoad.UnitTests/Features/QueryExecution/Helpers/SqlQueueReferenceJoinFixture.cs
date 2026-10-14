@@ -25,7 +25,10 @@ internal static class SqlQueueReferenceJoinFixture
     internal static string Sql(string queue = Queue) => Prefix + "QUEUE_MESSAGES('" + queue + "')" + Suffix;
 
     internal static QueryRequest Request(PartitionRef partition, string queue = Queue)
-        => new(partition, Sql(queue), new() { [MinimumParameter] = JsonSerializer.SerializeToElement(7) },
+        => new(partition, Sql(queue), new()
+        {
+            [MinimumParameter] = JsonSerializer.SerializeToElement(7)
+        },
             AllowFullScan: true, QueryDialectVersion: 2);
 
     internal static AstQueryRequest Ast(PartitionRef partition)
@@ -34,11 +37,19 @@ internal static class SqlQueueReferenceJoinFixture
             new Comparison(new FieldOperand("/payload/score"), ">=", new ParameterOperand(MinimumParameter)),
             [new("/id", false)], 10, ModelSource: new(ModelQuerySourceKind.QueueMessages, Queue, 1),
             InnerJoin: new(Target, "d", "/payload/to", "/entity_ref")),
-            new() { [MinimumParameter] = JsonSerializer.SerializeToElement(7) }, AllowFullScan: true, AstVersion: 2);
+            new()
+            {
+                [MinimumParameter] = JsonSerializer.SerializeToElement(7)
+            }, AllowFullScan: true, AstVersion: 2);
 
     internal static QueryRequest FilteredInvalidRequest(PartitionRef partition)
         => Request(partition, InvalidQueue) with
-        { Parameters = new() { [MinimumParameter] = global::System.Text.Json.JsonSerializer.SerializeToElement(100) } };
+        {
+            Parameters = new()
+            {
+                [MinimumParameter] = global::System.Text.Json.JsonSerializer.SerializeToElement(100)
+            }
+        };
 
     internal static AstQueryRequest FilteredInvalidAst(PartitionRef partition)
     {
@@ -46,13 +57,23 @@ internal static class SqlQueueReferenceJoinFixture
         return request with
         {
             Query = request.Query with
-            { Collection = InvalidQueue, ModelSource = new(ModelQuerySourceKind.QueueMessages, InvalidQueue, 1) },
-            Parameters = new() { [MinimumParameter] = global::System.Text.Json.JsonSerializer.SerializeToElement(100) }
+            {
+                Collection = InvalidQueue,
+                ModelSource = new(ModelQuerySourceKind.QueueMessages, InvalidQueue, 1)
+            },
+            Parameters = new()
+            {
+                [MinimumParameter] = global::System.Text.Json.JsonSerializer.SerializeToElement(100)
+            }
         };
     }
 
     internal static string Payload(PartitionRef partition, string id, int score)
-        => JsonSerializer.Serialize(new { to = new EntityRef(partition, Target, id), score }, JsonDefaults.Options);
+        => JsonSerializer.Serialize(new
+        {
+            to = new EntityRef(partition, Target, id),
+            score
+        }, JsonDefaults.Options);
 
     internal static (CommandRequest Command, CommitReceipt Receipt) Seed(TestDatabase database)
     {
@@ -61,7 +82,9 @@ internal static class SqlQueueReferenceJoinFixture
             database.Submit(OperationKind.ConfigureResource, new ConfigureResourceRequest(database.Partition.TenantId,
                 database.Partition.DatabaseId, new ResourceDefinition(queue, ResourceKind.WorkQueue,
                     database.Partition.TransactionDomainId)
-                { FieldPolicies = [new("/to", "reference", RawReadGrant: RefRead, RawUseGrant: RefUse)] }));
+                {
+                    FieldPolicies = [new("/to", "reference", RawReadGrant: RefRead, RawUseGrant: RefUse)]
+                }));
         }
         database.Submit(OperationKind.ConfigureResource, new ConfigureResourceRequest(database.Partition.TenantId,
             database.Partition.DatabaseId, new ResourceDefinition(Target, ResourceKind.Collection, database.Partition.TransactionDomainId)

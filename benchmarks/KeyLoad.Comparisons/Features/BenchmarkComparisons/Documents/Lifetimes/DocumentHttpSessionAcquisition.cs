@@ -59,5 +59,9 @@ internal sealed class DocumentHttpSessionAcquisition : IAsyncDisposable
         }
     }
     private async Task DisposeSessionAsync() => await session!.DisposeAsync().ConfigureAwait(false);
-    private async Task DisposeConnectionAsync() { await Task.CompletedTask.ConfigureAwait(false); connection!.Dispose(); }
+    private async Task DisposeConnectionAsync()
+    {
+        await Task.CompletedTask.ConfigureAwait(false);
+        connection!.Dispose();
+    }
 }

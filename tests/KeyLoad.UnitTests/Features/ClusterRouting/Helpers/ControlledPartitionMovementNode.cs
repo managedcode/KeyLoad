@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.CrashHost.Features.ClusterRouting;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
 
@@ -28,10 +28,22 @@ internal sealed class ControlledPartitionMovementNode : IDisposable
     internal ZoneTreeStore Store => native.Store;
     internal ControlledPartitionMovementNativeJournal Journal => native.Journal;
     internal string Root => native.Root;
-    internal PhysicalShardRecord PhysicalOwner { get; }
-    internal long MaximumFixtureEntries { get; }
-    internal bool RetainRoot { get; set; }
-    internal long AdditionalSeedEntries { get; set; }
+    internal PhysicalShardRecord PhysicalOwner
+    {
+        get;
+    }
+    internal long MaximumFixtureEntries
+    {
+        get;
+    }
+    internal bool RetainRoot
+    {
+        get; set;
+    }
+    internal long AdditionalSeedEntries
+    {
+        get; set;
+    }
 
     internal void JoinForChild()
     {
@@ -66,12 +78,18 @@ internal sealed class ControlledPartitionMovementNode : IDisposable
         ObjectDisposedException.ThrowIf(closed, this);
         KeyLoadException? original = null;
         try
-        { native.Dispose(); }
+        {
+            native.Dispose();
+        }
         catch (KeyLoadException failure) when (failure.Code == ErrorCode.Corruption
             && failure.Message == KeyLoad.Core.Features.ClusterRouting.Contracts.PartitionMoveProtocol.Invalid)
-        { original = failure; }
+        {
+            original = failure;
+        }
         if (original is null)
-        { throw new InvalidOperationException("The original faulted apply worker did not retain its corruption."); }
+        {
+            throw new InvalidOperationException("The original faulted apply worker did not retain its corruption.");
+        }
         native = new(root, PhysicalOwner, checkpointVerifier, maximumFixtureEntries: MaximumFixtureEntries);
         return original;
     }
@@ -79,17 +97,23 @@ internal sealed class ControlledPartitionMovementNode : IDisposable
     public void Dispose()
     {
         if (closed)
-        { return; }
+        {
+            return;
+        }
         closed = true;
         var failures = new List<Exception>();
         try
-        { native.Dispose(); }
+        {
+            native.Dispose();
+        }
         catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
         catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
         if (!RetainRoot && failures.Count == 0 && Directory.Exists(root))
         {
             try
-            { Directory.Delete(root, recursive: true); }
+            {
+                Directory.Delete(root, recursive: true);
+            }
             catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
             catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
         }

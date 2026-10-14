@@ -16,7 +16,10 @@ internal sealed class KurrentStreamOwnership
             + KurrentConstants.OwnershipProbeCount);
     }
 
-    internal int Capacity { get; }
+    internal int Capacity
+    {
+        get;
+    }
     internal int Count
     {
         get
@@ -71,7 +74,10 @@ internal sealed class KurrentStreamOwnership
             {
                 throw new ComparisonFailureException(KurrentConstants.OwnershipTransitionRejected);
             }
-            entries[stream] = entry with { State = state };
+            entries[stream] = entry with
+            {
+                State = state
+            };
         }
     }
 }

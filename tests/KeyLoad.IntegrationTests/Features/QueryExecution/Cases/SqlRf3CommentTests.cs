@@ -27,7 +27,10 @@ internal sealed class SqlRf3CommentTests(ClusterFixture fixture)
         var scenario = await RelationalSqlRf3Scenario.CreateAsync(sdk, deadline.Token);
         var command = scenario.LinkedModelsCommand();
         var plain = SqlRf3Protocol.Call(scenario.Partition, McpCallerTools.DocumentsCommit, command);
-        var sql = plain with { Sql = Prefix + Call + McpCallerTools.DocumentsCommit + Arguments + Suffix };
+        var sql = plain with
+        {
+            Sql = Prefix + Call + McpCallerTools.DocumentsCommit + Arguments + Suffix
+        };
         var receipt = await SqlRf3Protocol.SdkAsync<CommitReceipt>(sdk, sql, deadline.Token);
         await Assert.That(receipt.CommandId).IsEqualTo(command.CommandId);
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3,
@@ -49,7 +52,10 @@ internal sealed class SqlRf3CommentTests(ClusterFixture fixture)
         var request = SqlRf3Protocol.Call(scenario.Partition, McpCallerTools.DocumentsCommit, command);
         foreach (var sql in new[] { Unclosed + request.Sql, request.Sql + SecondStatement })
         {
-            var rejected = await sdk.ExecuteSqlAsync(request with { Sql = sql }, deadline.Token);
+            var rejected = await sdk.ExecuteSqlAsync(request with
+            {
+                Sql = sql
+            }, deadline.Token);
             await Assert.That(rejected.IsFailed).IsTrue();
             await Assert.That(rejected.Problem!.ErrorCode).IsEqualTo(nameof(ErrorCode.Validation));
         }

@@ -14,16 +14,25 @@ internal sealed class NativeTextOnlineWorker : IAsyncDisposable
         {
             ObjectDisposedException.ThrowIf(closed, this);
             if (active is not null)
-            { throw NativeTextErrors.Busy(); }
+            {
+                throw NativeTextErrors.Busy();
+            }
             original = Task.Run(operation, CancellationToken.None);
             active = original;
         }
         try
-        { return await original.ConfigureAwait(false); }
+        {
+            return await original.ConfigureAwait(false);
+        }
         finally
         {
             lock (gate)
-            { if (ReferenceEquals(active, original)) { active = null; } }
+            {
+                if (ReferenceEquals(active, original))
+                {
+                    active = null;
+                }
+            }
         }
     }
 

@@ -5,10 +5,22 @@ namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive
 internal sealed class TimeSeriesIntensiveSelectionOptions
 {
     internal const string SectionName = "Benchmarks";
-    public string? Profile { get; set; }
-    public string? Target { get; set; }
-    public string? NodeCount { get; set; }
-    public string? Scenario { get; set; }
+    public string? Profile
+    {
+        get; set;
+    }
+    public string? Target
+    {
+        get; set;
+    }
+    public string? NodeCount
+    {
+        get; set;
+    }
+    public string? Scenario
+    {
+        get; set;
+    }
     public TimeSeriesIntensiveCellOptions TimeSeries { get; set; } = new();
 }
 
@@ -16,9 +28,24 @@ internal sealed class TimeSeriesIntensiveSelectionOptions
 [ConfigurationOptions]
 internal sealed class TimeSeriesIntensiveCellOptions
 {
-    public string? Target { get; set; }
-    public string? NodeCount { get; set; }
-    public string? Phase { get; set; }
-    public string? Scenario { get; set; }
-    public string? EvidenceProfile { get; set; }
+    public string? Target
+    {
+        get; set;
+    }
+    public string? NodeCount
+    {
+        get; set;
+    }
+    public string? Phase
+    {
+        get; set;
+    }
+    public string? Scenario
+    {
+        get; set;
+    }
+    public string? EvidenceProfile
+    {
+        get; set;
+    }
 }

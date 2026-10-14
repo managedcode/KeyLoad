@@ -61,7 +61,10 @@ internal sealed class GenerationVisibilityWriteFlow
         var cut = store.Position;
         foreach (var item in original)
         {
-            var operation = TeamRowPolicyFlow.Operation(item.Command) with { PrincipalId = TeamRowPolicyFlow.Root };
+            var operation = TeamRowPolicyFlow.Operation(item.Command) with
+            {
+                PrincipalId = TeamRowPolicyFlow.Root
+            };
             var replay = database.ApplyEmbedded(operation, cancellationToken: token).Get<CommitReceipt>();
             await Assert.That(JsonDefaults.Serialize(replay).AsSpan().SequenceEqual(JsonDefaults.Serialize(item.Receipt))).IsTrue();
             await Assert.That(store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(item.Command.Partition,

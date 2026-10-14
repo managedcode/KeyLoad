@@ -11,7 +11,10 @@ internal static class PartitionMovementPublicCallerReplay
         PartitionMoveRequest original, PartitionMoveResult expected, CancellationToken cancellationToken)
     {
         await RequireHealthyAsync(sdk, mcp, original, expected, cancellationToken);
-        var changed = original with { ExpectedPlacementRevision = checked(original.ExpectedPlacementRevision + 1) };
+        var changed = original with
+        {
+            ExpectedPlacementRevision = checked(original.ExpectedPlacementRevision + 1)
+        };
         var sdkDenied = await sdk.MovePartitionAsync(changed, cancellationToken).ConfigureAwait(false);
         await Assert.That(sdkDenied.IsSuccess).IsFalse();
         await Assert.That(sdkDenied.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.Conflict));
@@ -23,7 +26,10 @@ internal static class PartitionMovementPublicCallerReplay
         await Assert.That(sqlDenied.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.Conflict));
         await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(SqlOperationProtocol.ToolName, sql,
             cancellationToken).ConfigureAwait(false), ErrorCode.Conflict, dispatched: true);
-        await RequireHealthyAsync(sdk, mcp, original with { Mode = PartitionMoveMode.Resume }, expected,
+        await RequireHealthyAsync(sdk, mcp, original with
+        {
+            Mode = PartitionMoveMode.Resume
+        }, expected,
             cancellationToken);
     }
 

@@ -27,6 +27,12 @@ internal sealed class KeyLoadTimeSeriesIntensiveProblemException : InvalidOperat
         HttpStatus = httpStatus;
     }
 
-    internal ErrorCode? Code { get; }
-    internal int? HttpStatus { get; }
+    internal ErrorCode? Code
+    {
+        get;
+    }
+    internal int? HttpStatus
+    {
+        get;
+    }
 }

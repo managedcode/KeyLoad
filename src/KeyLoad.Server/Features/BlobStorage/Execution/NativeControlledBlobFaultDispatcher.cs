@@ -13,9 +13,19 @@ internal sealed class NativeControlledBlobFaultDispatcher(RemoteModelNativeClien
         if (!string.Equals(fault.Signature, original.Signature, StringComparison.Ordinal)
             || !borrowedSourceMac.Verify(original.Payload.Span, original.Signature, reply: false)
             || fault.Payload.IsEmpty || fault.Payload.Length > RemoteDocumentProtocol.MaximumBodyBytes)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteModelNativeProtocol.InvalidProof); }
-        var request = original with { Payload = fault.Payload, Nonce = Guid.NewGuid(), SenderSignature = string.Empty };
-        request = request with { SenderSignature = borrowedSourceMac.SignNativeRequest(request) };
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, RemoteModelNativeProtocol.InvalidProof);
+        }
+        var request = original with
+        {
+            Payload = fault.Payload,
+            Nonce = Guid.NewGuid(),
+            SenderSignature = string.Empty
+        };
+        request = request with
+        {
+            SenderSignature = borrowedSourceMac.SignNativeRequest(request)
+        };
         await client.RequireBeforeDispatchAsync(destination, request, borrowedSourceMac, originalToken).ConfigureAwait(false);
         var actual = await client.DispatchAsync(actualAddress, request, originalToken).ConfigureAwait(false);
         var verified = await client.VerifyReplyAsync(destination, request, actual, maximumReplyBytes, originalToken).ConfigureAwait(false);

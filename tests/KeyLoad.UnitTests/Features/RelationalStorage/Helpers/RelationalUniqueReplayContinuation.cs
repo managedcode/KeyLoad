@@ -125,7 +125,9 @@ internal static class RelationalUniqueReplayContinuation
             third ? [second, extra] : [second], cut, FullPath);
         await Assert.That(database.GetDocument(Root, new(db.Partition, RelationalTestData.Table, RelationalTestData.First))).IsNull();
         if (!third)
-        { await Assert.That(database.GetDocument(Root, new(db.Partition, RelationalTestData.Table, Third))).IsNull(); }
+        {
+            await Assert.That(database.GetDocument(Root, new(db.Partition, RelationalTestData.Table, Third))).IsNull();
+        }
         await UnchangedAsync(store, image, cut);
     }
 

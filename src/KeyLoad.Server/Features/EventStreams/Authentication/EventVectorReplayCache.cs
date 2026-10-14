@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.EventStreams;
@@ -30,9 +30,13 @@ internal sealed class EventVectorReplayCache : IDisposable
             foreach (var key in entries.Where(pair => pair.Value.Expires <= now
                 && clock.GetElapsedTime(pair.Value.Timestamp, stamp) >= options.ReplayLifetime)
                 .Select(pair => pair.Key).ToArray())
-            { entries.Remove(key); }
+            {
+                entries.Remove(key);
+            }
             if (expires <= now || entries.Count >= options.ReplayNonceCapacity || entries.ContainsKey(nonce))
-            { return false; }
+            {
+                return false;
+            }
             entries.Add(nonce, (stamp, expires));
             return true;
         }
@@ -41,6 +45,9 @@ internal sealed class EventVectorReplayCache : IDisposable
     public void Dispose()
     {
         lock (gate)
-        { disposed = true; entries.Clear(); }
+        {
+            disposed = true;
+            entries.Clear();
+        }
     }
 }

@@ -16,7 +16,9 @@ internal static class ModelSqlRf3Cold
             () => fixture.RestartContainerAsync(node, token))));
         ServerFailureObserver.ThrowIfAny([.. stopped.SelectMany(value => value), .. started.SelectMany(value => value)]);
         foreach (var node in TopicSqlRf3Protocol.Nodes)
-        { await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(node, WaitBehavior.WaitOnResourceUnavailable, token); }
+        {
+            await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(node, WaitBehavior.WaitOnResourceUnavailable, token);
+        }
         await owner.CaptureAsync(scenario, token);
     }
 

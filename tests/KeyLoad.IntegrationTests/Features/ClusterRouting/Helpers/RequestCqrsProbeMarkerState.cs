@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
@@ -34,32 +34,52 @@ internal static class RequestCqrsProbeMarkerState
             || (marker.Phase == RequestCqrsProbePhase.ProducerDisposed
                 && marker.Outcome != RequestCqrsProbeOutcome.Observed)
             || marker.Voter != RequestCqrsProbeFileNames.OriginForNode(node))
-        { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch); }
+        {
+            throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch);
+        }
         if (arm.RequestId is { } claimed && claimed != marker.RequestId)
-        { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch); }
+        {
+            throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch);
+        }
         if (arm.Phase is RequestCqrsProbePhase.CanonicalJournalFlushed or RequestCqrsProbePhase.ReplicaEntryAcknowledged)
         {
             var canonical = json.ReadArm(arm.Bytes);
             if (!RequestCqrsCanonicalScopeValidation.Matches(canonical, marker))
-            { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch); }
+            {
+                throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch);
+            }
             if (arm.MarkerRecords.Take(arm.MarkerRecordCount).Any(previous => previous is { } retained
                 && (retained.EntryIndex != marker.EntryIndex || retained.EntryTerm != marker.EntryTerm)))
-            { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch); }
+            {
+                throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch);
+            }
         }
         var matching = MatchDiscovery(marker, signedDiscovery);
         if (!matching.TransportReady || matching.SiloAddress != marker.SiloAddress)
-        { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch); }
+        {
+            throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch);
+        }
         if (!RememberExactMarker(arm, marker, node, activeGates))
-        { return; }
+        {
+            return;
+        }
         arm.RequestId = marker.RequestId;
         if (marker.Phase == RequestCqrsProbePhase.ProducerDisposed)
-        { arm.ProducerDisposedSeen = true; }
+        {
+            arm.ProducerDisposedSeen = true;
+        }
         if (marker.Phase == RequestCqrsProbePhase.CanonicalOwnerDisposed)
-        { arm.CanonicalOwnerDisposedSeen = true; }
+        {
+            arm.CanonicalOwnerDisposedSeen = true;
+        }
         if (marker.Phase == RequestCqrsProbePhase.ReplicaEntryObserverDisposed)
-        { arm.ReplicaEntryObserverDisposedSeen = true; }
+        {
+            arm.ReplicaEntryObserverDisposedSeen = true;
+        }
         if (arm.Action == RequestCqrsProbeAction.Hold && marker.Phase == arm.Phase)
-        { ApplyGateOutcome(arm, marker, node, activeGates); }
+        {
+            ApplyGateOutcome(arm, marker, node, activeGates);
+        }
     }
 
     private static bool RememberExactMarker(RequestCqrsProbeArmState arm, RequestCqrsProbeMarkerRecord marker,
@@ -73,13 +93,17 @@ internal static class RequestCqrsProbeMarkerState
                 && previous.Phase == marker.Phase && previous.Outcome == marker.Outcome && previous.Voter == marker.Voter)
             {
                 if (!SameMarker(previous, marker))
-                { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch); }
+                {
+                    throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch);
+                }
                 return false;
             }
         }
         ValidateGateTransition(arm, marker, node, activeGates);
         if (arm.MarkerRecordCount == arm.MarkerRecords.Length)
-        { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerLimitExceeded); }
+        {
+            throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerLimitExceeded);
+        }
         arm.MarkerRecords[arm.MarkerRecordCount++] = marker;
         return true;
     }
@@ -88,7 +112,9 @@ internal static class RequestCqrsProbeMarkerState
         string node, IDictionary<string, int> activeGates)
     {
         if (arm.Action != RequestCqrsProbeAction.Hold || marker.Phase != arm.Phase)
-        { return; }
+        {
+            return;
+        }
         if (marker.Outcome == RequestCqrsProbeOutcome.Observed
             && (arm.GateVoter is not null || activeGates[node] >= RequestCqrsProbeFixtureProtocol.MaximumActiveGatesPerVoter))
         {
@@ -97,7 +123,9 @@ internal static class RequestCqrsProbeMarkerState
         }
         if ((marker.Outcome is RequestCqrsProbeOutcome.Released or RequestCqrsProbeOutcome.Cancelled)
             && (arm.Settled || arm.GateVoter != node))
-        { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch); }
+        {
+            throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch);
+        }
     }
 
     private static bool SameMarker(RequestCqrsProbeMarkerRecord left, RequestCqrsProbeMarkerRecord right)
@@ -112,9 +140,13 @@ internal static class RequestCqrsProbeMarkerState
         if (marker.Outcome == RequestCqrsProbeOutcome.Observed)
         {
             if (arm.GateVoter is not null)
-            { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch); }
+            {
+                throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch);
+            }
             if (activeGates[node] >= RequestCqrsProbeFixtureProtocol.MaximumActiveGatesPerVoter)
-            { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.GateLimitExceeded); }
+            {
+                throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.GateLimitExceeded);
+            }
             arm.GateVoter = node;
             activeGates[node]++;
             return;
@@ -122,7 +154,9 @@ internal static class RequestCqrsProbeMarkerState
         if (marker.Outcome is RequestCqrsProbeOutcome.Released or RequestCqrsProbeOutcome.Cancelled)
         {
             if (arm.Settled && arm.GateVoter == node)
-            { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch); }
+            {
+                throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch);
+            }
             Settle(arm, node, activeGates);
         }
     }
@@ -136,7 +170,9 @@ internal static class RequestCqrsProbeMarkerState
             if (item.VoterId == marker.Voter)
             {
                 if (matching is not null)
-                { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch); }
+                {
+                    throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch);
+                }
                 matching = item;
             }
         }
@@ -146,7 +182,9 @@ internal static class RequestCqrsProbeMarkerState
     private static void Settle(RequestCqrsProbeArmState arm, string node, IDictionary<string, int> activeGates)
     {
         if (arm.Settled || arm.GateVoter != node)
-        { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch); }
+        {
+            throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch);
+        }
         arm.Settled = true;
         activeGates[node]--;
     }

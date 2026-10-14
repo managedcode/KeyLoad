@@ -48,7 +48,9 @@ internal static class QueueLeaseAuthorityPostimage
     private static async Task ProcessingAsync(DatabaseEngine database, QueueLeaseAuthorityState state, OperationResult result)
     {
         if (state.Kind != QueueLeaseAuthorityOperation.Processing)
-        { return; }
+        {
+            return;
+        }
         var request = JsonSerializer.Deserialize<ProcessingRequest>(state.Original.PayloadJson, JsonDefaults.Options)!;
         var document = database.GetDocument(QueueLeaseAuthorityProtocol.Root,
             new(state.Lane.Partition, QueueLeaseAuthorityProtocol.Collection, QueueLeaseAuthorityProtocol.Document))!;
@@ -78,9 +80,17 @@ internal static class QueueLeaseAuthorityPostimage
     internal static MessageMetadata Expected(QueueLeaseAuthorityState state) => state.Kind switch
     {
         QueueLeaseAuthorityOperation.Ack or QueueLeaseAuthorityOperation.Processing => state.Metadata with
-        { State = MessageState.Acked, StateVersion = QueueLeaseAuthorityProtocol.Three, LeaseOwner = null, LeaseUntil = null },
+        {
+            State = MessageState.Acked,
+            StateVersion = QueueLeaseAuthorityProtocol.Three,
+            LeaseOwner = null,
+            LeaseUntil = null
+        },
         QueueLeaseAuthorityOperation.Renew => state.Metadata with
-        { StateVersion = QueueLeaseAuthorityProtocol.Three, LeaseUntil = state.Original.EvaluatedAt.AddSeconds(QueueLeaseAuthorityProtocol.LeaseSeconds) },
+        {
+            StateVersion = QueueLeaseAuthorityProtocol.Three,
+            LeaseUntil = state.Original.EvaluatedAt.AddSeconds(QueueLeaseAuthorityProtocol.LeaseSeconds)
+        },
         QueueLeaseAuthorityOperation.Nack => state.Metadata with
         {
             State = MessageState.Scheduled,

@@ -16,13 +16,17 @@ internal static class NativeAnnFixtureFileSnapshot
         var files = Directory.EnumerateFiles(root, Pattern, SearchOption.AllDirectories)
             .Take(MaximumFiles + Excess).Order(StringComparer.Ordinal).ToArray();
         if (files.Length > MaximumFiles)
-        { throw new InvalidOperationException(Invalid); }
+        {
+            throw new InvalidOperationException(Invalid);
+        }
         long bytes = 0;
         return files.Select(file =>
         {
             bytes = checked(bytes + new FileInfo(file).Length);
             if (bytes > MaximumBytes)
-            { throw new InvalidOperationException(Invalid); }
+            {
+                throw new InvalidOperationException(Invalid);
+            }
             return (Path.GetRelativePath(root, file), Convert.ToHexString(File.ReadAllBytes(file)));
         }).ToArray();
     }

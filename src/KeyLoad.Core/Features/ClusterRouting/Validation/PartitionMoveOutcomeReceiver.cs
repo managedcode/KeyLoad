@@ -12,7 +12,9 @@ public sealed partial class DatabaseEngine
         {
             if (original.Grant is not null
                 || !PhysicalOwnerEntryValidation.SameOwner(original.ControlOwner, receiver))
-            { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+            }
             return;
         }
         var grant = original.Grant
@@ -24,6 +26,8 @@ public sealed partial class DatabaseEngine
             || !PhysicalOwnerEntryValidation.SameOwner(grant.ControlOwner, original.ControlOwner)
             || !PhysicalOwnerEntryValidation.SameOwner(grant.ReceiverOwner, receiver)
             || grant.BodyDigest != Convert.ToHexStringLower(System.Security.Cryptography.SHA256.HashData(original.Body.Span)))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
     }
 }

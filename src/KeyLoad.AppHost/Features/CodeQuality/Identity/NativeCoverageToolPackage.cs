@@ -38,7 +38,9 @@ internal sealed record NativeCoverageToolPackage(string Version, string PackageR
         foreach (var attribute in attributes)
         {
             if (!string.Equals(attribute.Key, key, StringComparison.Ordinal))
-            { continue; }
+            {
+                continue;
+            }
             if (value is not null || string.IsNullOrWhiteSpace(attribute.Value))
             {
                 throw new InvalidOperationException(NativeCoverageProtocol.InvalidToolMetadata);

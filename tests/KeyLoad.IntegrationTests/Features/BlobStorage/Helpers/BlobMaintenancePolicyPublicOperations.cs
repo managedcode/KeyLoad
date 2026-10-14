@@ -11,7 +11,10 @@ internal static class BlobMaintenancePolicyPublicOperations
         Capability excluded, long epoch, CancellationToken token)
     {
         var expected = original with
-        { Grants = [.. original.Grants.Select(grant => grant with { Capabilities = grant.Capabilities & ~excluded })], PolicyEpoch = epoch };
+        {
+            Grants = [.. original.Grants.Select(grant => grant with { Capabilities = grant.Capabilities & ~excluded })],
+            PolicyEpoch = epoch
+        };
         await SqlRf3Protocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(
             await administrator.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), expected, token)));
     }
@@ -22,7 +25,15 @@ internal static class BlobMaintenancePolicyPublicOperations
         state.Deleted = (await McpCallerAssertions.SuccessAsync<BlobCommitResult<BlobMetadata>>(
             await creator.Mcp.CallAsync("keyload_blobs_delete", state.Delete, token))).Value;
         state.Tombstone = state.Original.Completed.Value with
-        { Revision = 2L, VersionId = null, Length = 0L, PartCount = 0, IntegrityHash = null, Deleted = true, UpdatedAt = state.Deleted.Value.UpdatedAt };
+        {
+            Revision = 2L,
+            VersionId = null,
+            Length = 0L,
+            PartCount = 0,
+            IntegrityHash = null,
+            Deleted = true,
+            UpdatedAt = state.Deleted.Value.UpdatedAt
+        };
         await SqlRf3Protocol.EqualAsync(state.Tombstone, state.Deleted.Value);
         await Assert.That(state.Deleted.Receipt.CommandId).IsEqualTo(state.Delete.CommandId);
         await BlobMaintenancePolicyPublicAssertions.ReceiptAsync(state.Blob, state.Placement, state.Deleted.Receipt);

@@ -122,6 +122,9 @@ internal sealed record ComparisonHostOutputCaptureSnapshot(ComparisonHostCapture
 {
     internal bool IsCompleted => State == ComparisonHostCaptureState.Completed;
 
-    internal static ComparisonHostOutputCaptureSnapshot Unavailable { get; } =
+    internal static ComparisonHostOutputCaptureSnapshot Unavailable
+    {
+        get;
+    } =
         new(ComparisonHostCaptureState.Unavailable, 0, false, false, false);
 }

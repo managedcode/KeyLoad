@@ -23,7 +23,10 @@ internal static class PartitionMovementHistoricalAcknowledgementTrial
         await PartitionMovementPublicParentRf3Cut.RestartAsync(wave, cancellationToken);
         var current = await PartitionMovementExpiredRetireSealedOperationRf3Trial.ReadDiscoveryAsync(wave, cancellationToken);
         await PartitionMovementHistoricalPacketAssertions.RestartedAsync(discovery, current, original);
-        var refusal = await seed.Source.MovePartitionAsync(seed.FirstRequest with { Mode = PartitionMoveMode.Resume },
+        var refusal = await seed.Source.MovePartitionAsync(seed.FirstRequest with
+        {
+            Mode = PartitionMoveMode.Resume
+        },
             cancellationToken);
         await Assert.That(refusal.IsFailed).IsTrue();
         await Assert.That(refusal.Value).IsNull();
@@ -43,7 +46,7 @@ internal static class PartitionMovementHistoricalAcknowledgementTrial
     }
 
     private static async Task InterruptAsync(TwoRf3MembershipWave wave, PartitionMovementPublicParentRf3Seed seed,
-        IReadOnlyList<KeyLoad.Orleans.ReplicaSiloDiscovery> discovery, CancellationToken cancellationToken)
+        IReadOnlyList<KeyLoad.Clustering.ReplicaSiloDiscovery> discovery, CancellationToken cancellationToken)
     {
         using var caller = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         var phase = RequestCqrsProbePhase.ParentReceiverIssueAcknowledged;

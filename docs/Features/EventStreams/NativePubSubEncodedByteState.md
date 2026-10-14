@@ -1,6 +1,6 @@
 # Constructible native state for the encoded-byte refusal control
 
-This EventStreams correction preserves the original ActualNativePubSubEncodedByteRefusalPreservesOriginalStateThenHealthyReplacementAndRestart case. Its canonical source is tests/KeyLoad.UnitTests/Features/EventStreams/Cases/EventFeedPubSubStorageTests.cs. The disposable advisory provider remains src/KeyLoad.Orleans/Features/EventStreams/Streaming/EventFeedPubSubStorage.cs. Public SDK/MCP/aliases/persistence formats and UI are N/A; no new test declaration is introduced.
+This EventStreams correction preserves the original ActualNativePubSubEncodedByteRefusalPreservesOriginalStateThenHealthyReplacementAndRestart case. Its canonical source is tests/KeyLoad.UnitTests/Features/EventStreams/Cases/EventFeedPubSubStorageTests.cs. The disposable advisory provider remains src/KeyLoad.Clustering/Features/EventStreams/Streaming/EventFeedPubSubStorage.cs. Public SDK/MCP/aliases/persistence formats and UI are N/A; no new test declaration is introduced.
 
 ## Source-proven cause and bounded contract
 

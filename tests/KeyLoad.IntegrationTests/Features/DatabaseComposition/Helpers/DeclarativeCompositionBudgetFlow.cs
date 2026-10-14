@@ -45,7 +45,10 @@ internal static class DeclarativeCompositionBudgetFlow
             await SqlRf3Protocol.EqualAsync(beforeFirst, await MessageAsync(sdk, scenario.Partition, First, token));
             await SqlRf3Protocol.EqualAsync(beforeSecond, await MessageAsync(sdk, scenario.Partition, Second, token));
         }
-        var exactMutation = limitedMutation with { MaxMessages = ExactMaximum };
+        var exactMutation = limitedMutation with
+        {
+            MaxMessages = ExactMaximum
+        };
         var exact = scenario.Command(exactMutation);
         var healthySql = DeclarativeCompositionSql.Forward(exact, exactMutation);
         var receipt = await SqlRf3Protocol.SdkAsync<CommitReceipt>(sdk, healthySql, token);

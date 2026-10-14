@@ -22,7 +22,9 @@ internal static class RequestCqrsProbeOptionsReader
         ArgumentNullException.ThrowIfNull(replica);
         var section = configuration.GetSection(RequestCqrsProbeProtocol.ConfigurationSection);
         if (section.Value is not null)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         var children = section.GetChildren().Take(MaximumConfigurationKeys + MaximumConfigurationKeysStep).ToArray();
         if (children.Length == EmptyChildrenLength)
         {
@@ -35,10 +37,14 @@ internal static class RequestCqrsProbeOptionsReader
             !keys.Add(child.Key) || child.Key is not (RequestCqrsProbeProtocol.EnabledSetting
                 or RequestCqrsProbeProtocol.RootSetting or RequestCqrsProbeProtocol.SessionSetting)
                 || child.Value is null || child.GetChildren().Take(CountSingleItemCount).Any()))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         var enabledValue = section[RequestCqrsProbeProtocol.EnabledSetting];
         if (!bool.TryParse(enabledValue, out var enabled))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         var rootConfigured = children.Any(child => child.Key == RequestCqrsProbeProtocol.RootSetting);
         var options = new RequestCqrsProbeOptions(enabled, section[RequestCqrsProbeProtocol.RootSetting],
             section[RequestCqrsProbeProtocol.SessionSetting] ?? string.Empty);
@@ -57,7 +63,9 @@ internal static class RequestCqrsProbeOptionsReader
         if (!options.Enabled)
         {
             if (rootConfigured || options.Root is not null || options.SessionId.Length != EmptySessionIdLength)
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             return;
         }
         replica.Validate();
@@ -65,7 +73,9 @@ internal static class RequestCqrsProbeOptionsReader
             || !IsSessionId(options.SessionId)
             || replica.BenchmarkTopology || replica.VoterIds.Length != EmptyVoterIdsLength
             || !allowPrivateNetworkHttp || replica.VoterIds.Any(voter => !IsPrivateNetworkOrigin(voter)))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
     }
 
     internal static bool IsSessionId(string? value)

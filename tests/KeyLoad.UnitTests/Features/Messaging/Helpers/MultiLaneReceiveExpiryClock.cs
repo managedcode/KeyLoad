@@ -6,7 +6,10 @@ internal sealed class MultiLaneReceiveExpiryClock : TimeProvider
     private readonly DateTimeOffset initial = TimeProvider.System.GetUtcNow();
     private Func<long>? position;
     private long armed;
-    internal long ObservedPosition { get; private set; }
+    internal long ObservedPosition
+    {
+        get; private set;
+    }
     private bool advanced;
 
     internal void Arm(Func<long> nativePosition, long committedCut)

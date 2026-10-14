@@ -105,9 +105,13 @@ internal sealed class NativeCoverageCleanupDeadline : IDisposable
     private static void FailStop()
     {
         try
-        { Console.Error.WriteLine(UnsettledMessage); }
+        {
+            Console.Error.WriteLine(UnsettledMessage);
+        }
         finally
-        { Environment.Exit(FailStopExitCode); }
+        {
+            Environment.Exit(FailStopExitCode);
+        }
         throw new InvalidOperationException(UnsettledMessage);
     }
 

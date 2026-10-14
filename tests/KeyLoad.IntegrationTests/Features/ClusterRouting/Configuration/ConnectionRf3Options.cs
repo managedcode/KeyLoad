@@ -10,5 +10,5 @@ internal sealed record ConnectionRf3Options
     internal TimeSpan ConnectTimeout { get; init; } = TimeSpan.FromSeconds(ConnectionSeconds);
     internal TimeSpan ClosedObservationTimeout { get; init; } = TimeSpan.FromSeconds(ClosedObservationSeconds);
     internal TimeSpan IdleObservationTimeout
-        => new KeyLoad.Orleans.GrainRoutingOptions().ConnectionIdleTimeout + ClosedObservationTimeout;
+        => new KeyLoad.Clustering.GrainRoutingOptions().ConnectionIdleTimeout + ClosedObservationTimeout;
 }

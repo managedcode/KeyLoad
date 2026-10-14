@@ -13,7 +13,9 @@ internal sealed class SiteBrowserCdpClient : IAsyncDisposable
     private readonly ConcurrentQueue<JsonElement> events = new();
     private int nextCommandId;
 
-    private SiteBrowserCdpClient() { }
+    private SiteBrowserCdpClient()
+    {
+    }
 
     public static async Task<SiteBrowserCdpClient> ConnectAsync(Uri endpoint, CancellationToken cancellationToken)
     {

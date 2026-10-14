@@ -26,11 +26,16 @@ internal static class TenantCapacityPlacementRf3PendingPolicyHealthy
         await TenantCapacityPlacementRf3RevocationAssertions.CompletedAsync(pending, completed, id, request);
         var move = plan.Plan.Moves.Single();
         await PhysicalShardPartitionMovementRf3Placement.RequireAsync(seed, move, seed.OriginalPlacement with
-        { DirectoryRevision = 1 }, seed.Directory.ControlOwner, completed.Receipts.Single(), 2, 2, token);
+        {
+            DirectoryRevision = 1
+        }, seed.Directory.ControlOwner, completed.Receipts.Single(), 2, 2, token);
         await PartitionMovementPublicCallerReplay.RequireAsync(seed.Source, seed.Official, move, completed.Receipts.Single(), token);
         await TenantCapacityPlacementRf3Apply.RequireReplayAsync(seed, state, id, request, completed, token);
         await TenantCapacityPlacementRf3Assertions.RefusalAsync(await seed.Source.ApplyPlacementIntentAsync(
-            id, request with { ExpectedRevision = completed.Revision }, token), ErrorCode.Conflict);
+            id, request with
+            {
+                ExpectedRevision = completed.Revision
+            }, token), ErrorCode.Conflict);
         for (var cold = 0; cold < RequiredColdCuts; cold++)
         {
             var rows = await TenantCapacityPlacementRf3PendingPolicyCold.RequireAsync(wave, seed, state, policy,

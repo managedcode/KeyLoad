@@ -15,7 +15,9 @@ internal static class SqlModelViewRf3DenialAssertions
         await Assert.That(result.Value).IsNull();
         await Assert.That(result.Problem!.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
         if (foreignScope)
-        { await Assert.That(result.Problem.Detail).IsEqualTo(ForeignScopeDetail); }
+        {
+            await Assert.That(result.Problem.Detail).IsEqualTo(ForeignScopeDetail);
+        }
         await PrivateAsync(JsonSerializer.Serialize(result, JsonDefaults.Options), secret);
     }
 
@@ -35,6 +37,8 @@ internal static class SqlModelViewRf3DenialAssertions
         foreach (var canary in new[] { secret, SqlModelViewRf3Scenario.EventCanary,
             SqlModelViewRf3Scenario.EventHeaderCanary, SqlModelViewRf3Scenario.QueueCanary,
             SqlModelViewRf3Scenario.QueueHeaderCanary })
-        { await Assert.That(actual.Contains(canary, StringComparison.Ordinal)).IsFalse(); }
+        {
+            await Assert.That(actual.Contains(canary, StringComparison.Ordinal)).IsFalse();
+        }
     }
 }

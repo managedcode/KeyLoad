@@ -9,7 +9,10 @@ internal sealed class ZoneTreeRangeWork(ZoneTreeReadCounters counters, StorageRe
 
     private long providerBytes;
     private int examinedEntries;
-    internal long ReadBytes { get; private set; }
+    internal long ReadBytes
+    {
+        get; private set;
+    }
     internal void Check() => cancellationToken.ThrowIfCancellationRequested();
     internal void CountLookahead() => counters.Lookahead();
     internal void ChargeBaseline(long bytes) => Charge(bytes, true, false);

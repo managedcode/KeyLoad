@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.Server.Features.GraphTraversal;
 
@@ -39,20 +39,30 @@ internal static class RemoteGraphNativeChild
         finally
         {
             if (identity is not null)
-            { ServerFailureObserver.Observe(identity.Dispose, failures); }
+            {
+                ServerFailureObserver.Observe(identity.Dispose, failures);
+            }
         }
         ServerFailureObserver.ThrowIfAny(failures);
         work.Check();
         token.ThrowIfCancellationRequested();
         if (reply is null)
-        { throw Errors.Fail(ErrorCode.Corruption, RemoteGraphNativeProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, RemoteGraphNativeProtocol.InvalidProof);
+        }
         if (reply.Error is { } failure)
-        { throw Errors.Fail(failure, reply.SafeDetail ?? RemoteGraphNativeProtocol.Unavailable); }
+        {
+            throw Errors.Fail(failure, reply.SafeDetail ?? RemoteGraphNativeProtocol.Unavailable);
+        }
         if (reply.Payload.Length > partition.Database.Limits.MaxBatchBytes || reply.Payload.Length > work.MaximumResultBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, ReadExecutionBudget.ReadBytesExceeded); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, ReadExecutionBudget.ReadBytesExceeded);
+        }
         work.ChargeBytes(reply.Payload.Length);
         if (GrainNativePayload.Read<GrainValue>(reply.Payload).Value is not T actual)
-        { throw Errors.Fail(ErrorCode.Corruption, RemoteGraphNativeProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, RemoteGraphNativeProtocol.InvalidProof);
+        }
         return RemoteGraphNativeResultEncoding.Encode(actual, partition.Database.Limits.MaxBatchBytes, work);
     }
 }

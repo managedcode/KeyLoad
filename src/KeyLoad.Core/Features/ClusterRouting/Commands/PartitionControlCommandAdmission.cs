@@ -25,14 +25,20 @@ public sealed partial class DatabaseEngine
         if (previous is not null)
         {
             if (previous.Fingerprint != fingerprint || previous.EffectId != body.EffectId)
-            { throw Errors.Fail(ErrorCode.Conflict, CommandContentConflictMessage); }
+            {
+                throw Errors.Fail(ErrorCode.Conflict, CommandContentConflictMessage);
+            }
             return previous;
         }
         if (body.EffectId == Guid.Empty || body.EffectId == original.Id || body.ExpiresAt <= now)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
         var selected = CommandOutcomeKeyResolver.Select(transaction, original.PrincipalId, original.Id, scope);
         if (selected.Outcome is not null)
-        { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict);
+        }
         var owner = RequireMoveDirectory(transaction).ControlOwner;
         var delegation = new PartitionControlDelegation(PartitionMoveProtocol.Version, identity, fingerprint,
             body.EffectId, control.MoveId, destination, principal, body.ExpiresAt, position,
@@ -54,27 +60,35 @@ public sealed partial class DatabaseEngine
     private void RequireEncodedControlBody(PartitionControlApplyBody body)
     {
         if (NativeSerialization.Measure(body) > Limits.MaxBatchBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
+        }
     }
 
     private PartitionMoveControlRecord RequireRetiredCommandControl(IKeyValueView view,
         PrincipalRecord operatorPrincipal, PartitionMoveControlRecord expected, out AtomicPartitionPlacementResolution placement)
     {
         if (!operatorPrincipal.ClusterAdministrator)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
         var control = PartitionMoveControlStorage.ReadHistory(view, expected.Partition, expected.MoveId, Limits.MaxBatchBytes)
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
         if (control.PrincipalId != operatorPrincipal.Id
             || control.Phase != PartitionMovePhase.Retired || control.PublishedPlacement is null
             || JsonData.Fingerprint(control) != JsonData.Fingerprint(expected))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
         var directory = RequireMoveDirectory(view);
         placement = ResolveRegisteredPlacement(view, control.Partition, directory.ControlOwner);
         if (placement.PhysicalShardId != control.DestinationOwner.PhysicalShardId
             || placement.Incarnation != control.DestinationOwner.Incarnation
             || placement.PlacementEpoch != control.PublishedPlacement.PlacementEpoch
             || placement.Revision != control.PublishedPlacement.Revision)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
         return control;
     }
 }

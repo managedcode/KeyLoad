@@ -40,7 +40,9 @@ internal static class TypedEndpointJoinReverseAssertions
             await ReplayAsync(callers, current, currentReceipt, repaired: true, token);
         }
         else
-        { await ReplayAsync(callers, reverse.Command, reverse.Receipt, repaired: false, token); }
+        {
+            await ReplayAsync(callers, reverse.Command, reverse.Receipt, repaired: false, token);
+        }
         await ReceiptAsync(reverse.Command, reverse.Receipt);
         await UnchangedAsync(admin, state, reverse, token);
         return true;
@@ -80,7 +82,11 @@ internal static class TypedEndpointJoinReverseAssertions
         var official = (await PublicReadAssertions.MessageAsync(
             await admin.Mcp.CallAsync(McpCallerTools.MessagesInspect, request, token))).Value;
         if (!exists)
-        { await Assert.That(actual).IsNull(); await Assert.That(official).IsNull(); return; }
+        {
+            await Assert.That(actual).IsNull();
+            await Assert.That(official).IsNull();
+            return;
+        }
         var link = new QueueGraphLink(TypedEndpointJoinProtocol.From(state.Seed.Partition),
             TypedEndpointJoinProtocol.To(state.Seed.Partition), TypedEndpointJoinProtocol.Label, TypedEndpointJoinProtocol.Attributes);
         var expected = new MessageInspection(new MessageMetadata(id, MessageState.Ready, NoAttempts,

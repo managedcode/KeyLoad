@@ -67,13 +67,21 @@ internal sealed class PackedAnnNeighborCountTests
                 var degree = state.Graph.Degree(layer);
                 await Assert.That(neighbors.Length).IsLessThanOrEqualTo(degree);
                 if (layer == 0 && neighbors.Length == degree)
-                { fullBase++; }
+                {
+                    fullBase++;
+                }
                 if (layer == 0 && neighbors.Length is > 0 && neighbors.Length < degree)
-                { partialBase++; }
+                {
+                    partialBase++;
+                }
                 if (layer > 0 && neighbors.Length == degree)
-                { fullUpper++; }
+                {
+                    fullUpper++;
+                }
                 if (layer > 0 && neighbors.Length is > 0 && neighbors.Length < degree)
-                { partialUpper++; }
+                {
+                    partialUpper++;
+                }
                 var seen = new HashSet<int>();
                 foreach (var neighbor in neighbors)
                 {
@@ -111,14 +119,18 @@ internal sealed class PackedAnnNeighborCountTests
         graph.ReplaceNeighbors(source, layer, shortened, budget);
         await Assert.That(graph.NeighborCount(source, layer, budget)).IsEqualTo(shortened.Length);
         for (var index = 0; index < shortened.Length; index++)
-        { await Assert.That(graph.Neighbor(source, layer, index)).IsEqualTo(shortened[index]); }
+        {
+            await Assert.That(graph.Neighbor(source, layer, index)).IsEqualTo(shortened[index]);
+        }
         graph.ReplaceNeighbors(source, layer, ReadOnlySpan<int>.Empty, budget);
         await Assert.That(graph.NeighborCount(source, layer, budget)).IsZero();
         await Assert.That(graph.Neighbor(source, layer, 0)).IsEqualTo(-1);
         graph.ReplaceNeighbors(source, layer, original, budget);
         await Assert.That(graph.NeighborCount(source, layer, budget)).IsEqualTo(original.Length);
         for (var index = 0; index < original.Length; index++)
-        { await Assert.That(graph.Neighbor(source, layer, index)).IsEqualTo(original[index]); }
+        {
+            await Assert.That(graph.Neighbor(source, layer, index)).IsEqualTo(original[index]);
+        }
     }
 
     private static async Task AssertCountBudgetAndCancellationAsync(PackedAnnState state,
@@ -181,7 +193,9 @@ internal sealed class PackedAnnNeighborCountTests
             {
                 var count = adjacency[source][candidateLayer].Length;
                 if (MatchesDegree(count, state.Graph.Degree(candidateLayer), requireFull))
-                { return (source, candidateLayer); }
+                {
+                    return (source, candidateLayer);
+                }
             }
         }
         throw new InvalidOperationException("The seeded real ANN graph does not include the required adjacency shape.");

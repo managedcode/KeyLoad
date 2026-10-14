@@ -36,7 +36,9 @@ internal static class HeavyDocumentLoadAdmission
             || configuration[CoveragePreparationEnvironment] is not null
             || configuration[NativeCoverageRf3FixtureProtocol.ModeEnvironment] is not null
             || configuration.GetSection(CoverageSection).GetChildren().Any())
-        { throw new InvalidOperationException(HeavyDocumentLoadExecutionOptions.ValidationMessage); }
+        {
+            throw new InvalidOperationException(HeavyDocumentLoadExecutionOptions.ValidationMessage);
+        }
     }
 
     private static bool ExactlyOne(IReadOnlyList<string> arguments, string name, string expected)

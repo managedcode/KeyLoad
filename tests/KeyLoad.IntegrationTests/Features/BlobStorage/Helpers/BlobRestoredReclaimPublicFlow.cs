@@ -8,7 +8,11 @@ internal static class BlobRestoredReclaimPublicFlow
 {
     internal static int Group(ClusterRestoreRf3Fixture target, BlobRestoredReclaimPublicState state)
         => Array.FindIndex(target.Mappings.ToArray(), mapping => mapping.Source.PhysicalShardId == state.Owner) switch
-        { 0 => 0, 1 => 1, _ => throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid) };
+        {
+            0 => 0,
+            1 => 1,
+            _ => throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid)
+        };
     private static string Node(ClusterRestoreRf3Fixture target, BlobRestoredReclaimPublicState state)
         => Group(target, state) == 0 ? TwoRf3MembershipProtocol.Node1 : TwoRf3MembershipProtocol.Node4;
     internal static async Task RunAsync(ClusterRestoreRf3Fixture target, PartitionMovementPublicParentRf3Seed seed,

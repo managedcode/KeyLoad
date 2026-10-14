@@ -26,7 +26,9 @@ internal static class NativeTextIncrementalProcessAssertions
     internal static async Task VerifyAsync(string root, string mode, CancellationToken token)
     {
         if (mode is NativeTextIncrementalCrashProtocol.Prepare or NativeTextIncrementalCrashProtocol.Fault)
-        { return; }
+        {
+            return;
+        }
         var original = await NativeTextIncrementalEvidenceFiles.ReadAsync<NativeTextIncrementalCrashOriginal>(root,
             NativeTextIncrementalCrashProtocol.OriginalFile, token);
         var recovered = await ReadAsync(root, NativeTextIncrementalCrashProtocol.RecoveredFile, token);
@@ -56,7 +58,9 @@ internal static class NativeTextIncrementalProcessAssertions
         await Assert.That(healthy.Complete.ThroughSequence).IsGreaterThan(recovered.Complete.ThroughSequence);
         await Assert.That(healthy.Complete.IndexSha256).IsNotEqualTo(recovered.Complete.IndexSha256);
         if (mode != NativeTextIncrementalCrashProtocol.Verify)
-        { return; }
+        {
+            return;
+        }
         var verified = await ReadAsync(root, NativeTextIncrementalCrashProtocol.VerifiedFile, token);
         await LiteralAsync(verified, healthy: true);
         await NativeTextIncrementalCheckpointAssertions.RequireAsync(root, healthyOriginal.Request, verified, token);

@@ -6,11 +6,15 @@ internal sealed class NativeMembershipDiagnosticFixtureTests
     public async Task ExactSixPrivateOwnersAreAccepted()
     {
         if (OperatingSystem.IsWindows())
-        { throw new PlatformNotSupportedException(RequestCqrsProbeFixtureProtocol.PrivatePermissionsUnsupported); }
+        {
+            throw new PlatformNotSupportedException(RequestCqrsProbeFixtureProtocol.PrivatePermissionsUnsupported);
+        }
         await NativeMembershipDiagnosticFileScope.WithAsync(async scope =>
         {
             if (OperatingSystem.IsWindows())
-            { throw new PlatformNotSupportedException(RequestCqrsProbeFixtureProtocol.PrivatePermissionsUnsupported); }
+            {
+                throw new PlatformNotSupportedException(RequestCqrsProbeFixtureProtocol.PrivatePermissionsUnsupported);
+            }
             var admitted = scope.Validate();
             await Assert.That(admitted.Count).IsEqualTo(TwoRf3MembershipProtocol.NodeCount);
             foreach (var node in TwoRf3MembershipProtocol.Nodes)
@@ -68,11 +72,15 @@ internal sealed class NativeMembershipDiagnosticFixtureTests
     public async Task ExtraAndMissingNodesAreRejected()
     {
         if (OperatingSystem.IsWindows())
-        { throw new PlatformNotSupportedException(RequestCqrsProbeFixtureProtocol.PrivatePermissionsUnsupported); }
+        {
+            throw new PlatformNotSupportedException(RequestCqrsProbeFixtureProtocol.PrivatePermissionsUnsupported);
+        }
         await NativeMembershipDiagnosticFileScope.WithAsync(async scope =>
         {
             if (OperatingSystem.IsWindows())
-            { throw new PlatformNotSupportedException(RequestCqrsProbeFixtureProtocol.PrivatePermissionsUnsupported); }
+            {
+                throw new PlatformNotSupportedException(RequestCqrsProbeFixtureProtocol.PrivatePermissionsUnsupported);
+            }
             var extra = Path.Combine(scope.Fixture.Root, "node7");
             Directory.CreateDirectory(extra, RequestCqrsProbeFileValidation.PrivateDirectoryMode);
             await scope.RequireRejectedAsync();
@@ -99,11 +107,15 @@ internal sealed class NativeMembershipDiagnosticFixtureTests
     public async Task NonPrivateModesAreRejected()
     {
         if (OperatingSystem.IsWindows())
-        { throw new PlatformNotSupportedException(RequestCqrsProbeFixtureProtocol.PrivatePermissionsUnsupported); }
+        {
+            throw new PlatformNotSupportedException(RequestCqrsProbeFixtureProtocol.PrivatePermissionsUnsupported);
+        }
         await NativeMembershipDiagnosticFileScope.WithAsync(async scope =>
         {
             if (OperatingSystem.IsWindows())
-            { throw new PlatformNotSupportedException(RequestCqrsProbeFixtureProtocol.PrivatePermissionsUnsupported); }
+            {
+                throw new PlatformNotSupportedException(RequestCqrsProbeFixtureProtocol.PrivatePermissionsUnsupported);
+            }
             var node = scope.Node(TwoRf3MembershipProtocol.Node4);
             File.SetUnixFileMode(node, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute | UnixFileMode.GroupRead);
             await scope.RequireRejectedAsync();
@@ -121,12 +133,16 @@ internal sealed class NativeMembershipDiagnosticFixtureTests
             var wave = new TwoRf3MembershipWave(null);
             var original = new Dictionary<string, byte[]>(StringComparer.Ordinal);
             foreach (var node in TwoRf3MembershipProtocol.Nodes)
-            { original.Add(node, await File.ReadAllBytesAsync(scope.Owner(node))); }
+            {
+                original.Add(node, await File.ReadAllBytesAsync(scope.Owner(node)));
+            }
             await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => scope.Fixture.DisposeAfterOwnersJoinedAsync(wave));
             scope.Fixture.StopAdmission();
             await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => scope.Fixture.DisposeAfterOwnersJoinedAsync(wave));
             foreach (var (node, bytes) in original)
-            { await Assert.That((await File.ReadAllBytesAsync(scope.Owner(node))).SequenceEqual(bytes)).IsTrue(); }
+            {
+                await Assert.That((await File.ReadAllBytesAsync(scope.Owner(node))).SequenceEqual(bytes)).IsTrue();
+            }
         });
     }
 }

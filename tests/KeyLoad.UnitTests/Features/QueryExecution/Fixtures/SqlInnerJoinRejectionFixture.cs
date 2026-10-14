@@ -52,5 +52,7 @@ internal static class SqlInnerJoinRejectionFixture
         => database.Submit(OperationKind.ConfigureResource, new ConfigureResourceRequest(database.Partition.TenantId,
             database.Partition.DatabaseId, new ResourceDefinition(name, ResourceKind.Collection,
                 database.Partition.TransactionDomainId)
-            { RelationalSchema = schema })).Get<ResourceDefinition>();
+            {
+                RelationalSchema = schema
+            })).Get<ResourceDefinition>();
 }

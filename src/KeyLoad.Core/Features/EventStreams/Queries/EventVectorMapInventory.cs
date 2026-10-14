@@ -50,7 +50,9 @@ internal static class EventVectorMapInventory
             return true;
         }, observer: budget.Observe, cancellationToken: cancellationToken);
         if (scan.HasMore)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, InvalidInventory); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, InvalidInventory);
+        }
     }
 
     private static void ReadOffer(IKeyValueView view, PartitionRef partition, Guid mapId,
@@ -95,12 +97,16 @@ internal static class EventVectorMapInventory
         if (header is null)
         {
             if (!rows.IsEmpty)
-            { throw Errors.Fail(ErrorCode.Corruption, InvalidInventory); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, InvalidInventory);
+            }
             return;
         }
         if (header.Version != Version || header.ControlPartition != partition || header.MapId != mapId
             || header.RetainedPayloadBytes < EmptyBytes
             || header.RetainedPayloadBytes != EventVectorRowAccounting.PayloadBytes(rows))
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidInventory); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidInventory);
+        }
     }
 }

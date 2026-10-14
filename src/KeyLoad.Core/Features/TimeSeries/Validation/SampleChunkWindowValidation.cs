@@ -6,13 +6,17 @@ internal static class SampleChunkWindowValidation
     {
         JsonData.Identifier(series);
         if (id == Guid.Empty)
-        { throw Errors.Fail(ErrorCode.Validation, SampleChunkLifecycleProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, SampleChunkLifecycleProtocol.Invalid);
+        }
     }
 
     internal static void State(SampleChunkWindow window, Guid id, int recordLimit, int correctionLimit)
     {
         if (window.Version != SampleChunkLifecycleProtocol.Version)
-        { throw Errors.Fail(ErrorCode.FormatUnsupported, SampleChunkLifecycleProtocol.Unsupported); }
+        {
+            throw Errors.Fail(ErrorCode.FormatUnsupported, SampleChunkLifecycleProtocol.Unsupported);
+        }
         if (window.WindowId != id || id == Guid.Empty || window.FromUtcTicks < DateTimeOffset.MinValue.UtcTicks
             || window.UntilUtcTicks > DateTimeOffset.MaxValue.UtcTicks || window.FromUtcTicks >= window.UntilUtcTicks
             || window.Revision < SampleChunkLifecycleProtocol.First || window.SourceSequence < SampleChunkLifecycleProtocol.Absent
@@ -36,7 +40,9 @@ internal static class SampleChunkWindowValidation
             || window.OpenRecords.Any(record => record is null || record.Sample is null)
             || window.OpenRecords.Select(record => record.Sequence).Distinct().Count() != window.OpenRecords.Length
             || window.OpenRecords.Select(record => record.Sample.EventId).Distinct(StringComparer.Ordinal).Count() != window.OpenRecords.Length)
-        { throw Errors.Fail(ErrorCode.Corruption, SampleChunkLifecycleProtocol.Corrupt); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, SampleChunkLifecycleProtocol.Corrupt);
+        }
     }
 
     internal static void Record(SampleRecord record, SampleChunkWindow window, string series)
@@ -45,6 +51,8 @@ internal static class SampleChunkWindowValidation
             || record.Sequence > window.SourceSequence || string.IsNullOrEmpty(record.Sample.EventId)
             || record.TagsJson is null || !double.IsFinite(record.Sample.Value)
             || record.Sample.Timestamp.UtcTicks < window.FromUtcTicks || record.Sample.Timestamp.UtcTicks >= window.UntilUtcTicks)
-        { throw Errors.Fail(ErrorCode.Corruption, SampleChunkLifecycleProtocol.Corrupt); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, SampleChunkLifecycleProtocol.Corrupt);
+        }
     }
 }

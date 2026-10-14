@@ -39,11 +39,17 @@ internal sealed class PostgresProtocolSession(IServiceProvider services, global:
                 owner, identity, startup.Partition, backend.Session).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
         if (backend is not null)
-        { await ServerFailureObserver.ObserveAsync(() => cancellations.RemoveAsync(backend), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => cancellations.RemoveAsync(backend), failures).ConfigureAwait(false);
+        }
         if (catalog is not null)
-        { ServerFailureObserver.Observe(catalog.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(catalog.Dispose, failures);
+        }
         if (identity is not null)
-        { ServerFailureObserver.Observe(identity.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(identity.Dispose, failures);
+        }
         ServerFailureObserver.Observe(() => errorProbe?.Session(owner.Id, failures), failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -58,7 +64,9 @@ internal sealed class PostgresProtocolSession(IServiceProvider services, global:
             await ServerFailureObserver.ObserveAsync(() =>
             {
                 if (password?.Type != PostgresMessageProtocol.Password)
-                { throw Errors.Fail(ErrorCode.Unauthenticated, ServerProtocol.MissingCredential); }
+                {
+                    throw Errors.Fail(ErrorCode.Unauthenticated, ServerProtocol.MissingCredential);
+                }
                 result = PostgresSessionIdentity.Create(subject, password.Payload, admission, Options.MaximumStartupBytes);
                 return Task.CompletedTask;
             }, failures).ConfigureAwait(false);
@@ -66,7 +74,9 @@ internal sealed class PostgresProtocolSession(IServiceProvider services, global:
         if (failures.Count != PostgresProtocol.AllRows)
         {
             if (result is not null)
-            { ServerFailureObserver.Observe(result.Dispose, failures); }
+            {
+                ServerFailureObserver.Observe(result.Dispose, failures);
+            }
             ServerFailureObserver.ThrowIfAny(failures);
         }
         return result ?? throw Errors.Fail(ErrorCode.Unauthenticated, ServerProtocol.MissingCredential);

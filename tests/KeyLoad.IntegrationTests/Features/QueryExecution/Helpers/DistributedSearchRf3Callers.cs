@@ -28,9 +28,13 @@ internal sealed class DistributedSearchRf3Callers(TwoRf3MembershipWave wave) : I
     {
         var failures = new List<Exception>();
         foreach (var session in sessions)
-        { await ServerFailureObserver.ObserveAsync(() => session.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => session.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         foreach (var http in connections)
-        { ServerFailureObserver.Observe(http.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(http.Dispose, failures);
+        }
         sessions.Clear();
         connections.Clear();
         ServerFailureObserver.ThrowIfAny(failures);

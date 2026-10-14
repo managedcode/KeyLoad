@@ -28,7 +28,9 @@ internal static class ClusterRestoreRf3ArchiveOmissionTrial
     {
         Directory.CreateDirectory(root);
         if (!OperatingSystem.IsWindows())
-        { File.SetUnixFileMode(root, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute); }
+        {
+            File.SetUnixFileMode(root, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+        }
         var copies = ImmutableArray.CreateBuilder<string>(originals.Length);
         foreach (var (original, archive) in originals.Zip(archives))
         {

@@ -11,7 +11,9 @@ internal static class ControlledPartitionMovementFirstPhaseExpiry
         cancellationToken.ThrowIfCancellationRequested();
         var now = owner.Database.EvaluationClock.GetUtcNow();
         if (wholeExpiresAt <= now)
-        { throw new TimeoutException("The original movement wholeflow deadline elapsed."); }
+        {
+            throw new TimeoutException("The original movement wholeflow deadline elapsed.");
+        }
         var first = now + runtime.GrainRouting.Value.RequestLifetime;
         return first < wholeExpiresAt ? first : wholeExpiresAt;
     }

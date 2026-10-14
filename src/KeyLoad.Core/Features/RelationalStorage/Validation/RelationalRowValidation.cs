@@ -100,13 +100,17 @@ public static class RelationalRowValidation
     internal static string InsertIdentity(ResourceDefinition definition, string json, global::Microsoft.Extensions.Options.IOptions<DatabaseLimits> limitsOptions)
     {
         if (definition.RelationalSchema is null)
-        { throw Errors.Fail(ErrorCode.UnsupportedCapability, UntypedInsert); }
+        {
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, UntypedInsert);
+        }
         _ = RelationalSchemaRules.Columns(definition);
         using var document = Parse(json, limitsOptions.Value);
         if (document.RootElement.ValueKind != JsonValueKind.Object
             || !document.RootElement.TryGetProperty(definition.RelationalSchema.PrimaryKey, out var primary)
             || primary.ValueKind != JsonValueKind.String || primary.GetString() is not { } id)
-        { throw Errors.Fail(ErrorCode.Validation, InvalidPrimaryKey); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, InvalidPrimaryKey);
+        }
         JsonData.Identifier(id);
         return id;
     }

@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 using KeyLoad.Query.Features.Search;
 using KeyLoad.Storage;
 
@@ -55,7 +55,9 @@ internal sealed class NativeAnnMaintenanceService(string directory, DatabaseEngi
             ObjectDisposedException.ThrowIf(closed, this);
             var current = session ?? throw Errors.Fail(ErrorCode.OwnershipLost, NativeAnnProtocol.Ownership);
             if (!NativeAnnOriginalResults.SameRequest(current.Request, request))
-            { throw Errors.Fail(ErrorCode.Conflict, NativeAnnProtocol.InvalidSource); }
+            {
+                throw Errors.Fail(ErrorCode.Conflict, NativeAnnProtocol.InvalidSource);
+            }
             return current;
         }
     }
@@ -65,16 +67,24 @@ internal sealed class NativeAnnMaintenanceService(string directory, DatabaseEngi
     {
         NativeAnnOriginalCapabilityExecution.Require(request);
         if (request.Kind is AnnMaintenanceCapabilityKind.AdmitOriginal or AnnMaintenanceCapabilityKind.SettleOriginalResult)
-        { return await NativeAnnOriginalCapabilityExecution.ExecuteAsync(this, principal, request, cancellationToken).ConfigureAwait(false); }
+        {
+            return await NativeAnnOriginalCapabilityExecution.ExecuteAsync(this, principal, request, cancellationToken).ConfigureAwait(false);
+        }
         using var originalOperation = admitted.Enter(configured.GrainRouting.Value.MaximumRequestProducers);
         cancellationToken.ThrowIfCancellationRequested();
         if (!principal.ClusterAdministrator || principal.Revoked)
-        { throw Errors.Fail(ErrorCode.PermissionDenied, NativeAnnProtocol.InvalidSource); }
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, NativeAnnProtocol.InvalidSource);
+        }
         NativeAnnMaintenanceAdmission.Request(request.Maintenance, request.SessionId, database.Store.Identity.NodeId);
         if (request.Kind == AnnMaintenanceCapabilityKind.Release)
-        { return await ReleaseAsync(principal, request, cancellationToken).ConfigureAwait(false); }
+        {
+            return await ReleaseAsync(principal, request, cancellationToken).ConfigureAwait(false);
+        }
         if (request.Kind == AnnMaintenanceCapabilityKind.Begin)
-        { return await BeginAsync(principal, request, cancellationToken).ConfigureAwait(false); }
+        {
+            return await BeginAsync(principal, request, cancellationToken).ConfigureAwait(false);
+        }
         NativeAnnGenerationOwner currentOwner;
         NativeAnnMaintenanceSession currentSession;
         lock (gate)
@@ -128,7 +138,9 @@ internal sealed class NativeAnnMaintenanceService(string directory, DatabaseEngi
         {
             ObjectDisposedException.ThrowIf(closed, this);
             if (beginning || session is not null)
-            { throw Errors.Fail(ErrorCode.ResourceExhausted, NativeAnnProtocol.Bound); }
+            {
+                throw Errors.Fail(ErrorCode.ResourceExhausted, NativeAnnProtocol.Bound);
+            }
             beginning = true;
         }
         try
@@ -156,7 +168,9 @@ internal sealed class NativeAnnMaintenanceService(string directory, DatabaseEngi
         lock (gate)
         {
             if (closed || session?.Id != id || session.Replay is null)
-            { return null; }
+            {
+                return null;
+            }
             var observed = session.Observation;
             return new(id, session.Replay.WorkUnits, observed?.Kind, observed?.Budget.WrittenBytes ?? NativeAnnMaintenanceWork.NoWrittenBytes);
         }
@@ -166,13 +180,23 @@ internal sealed class NativeAnnMaintenanceService(string directory, DatabaseEngi
     {
         NativeAnnGenerationOwner? actual;
         lock (gate)
-        { actual = owner; }
+        {
+            actual = owner;
+        }
         if (actual is null)
-        { return; }
+        {
+            return;
+        }
         await actual.RunAsync(_ =>
         {
             lock (gate)
-            { if (session?.Id == id) { session.Memory.Dispose(); session = null; } }
+            {
+                if (session?.Id == id)
+                {
+                    session.Memory.Dispose();
+                    session = null;
+                }
+            }
             return true;
         }).ConfigureAwait(false);
     }
@@ -191,6 +215,8 @@ internal sealed class NativeAnnMaintenanceService(string directory, DatabaseEngi
     private NativeAnnGenerationOwner? GetDisposingOwner()
     {
         lock (gate)
-        { return owner; }
+        {
+            return owner;
+        }
     }
 }

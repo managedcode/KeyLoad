@@ -15,30 +15,40 @@ internal static class RequestCqrsRpcFailureParser
     {
         record = null!;
         if (line.Length > RequestCqrsRf3McpRejectionNodeCapture.MaximumLineCharacters)
-        { return false; }
+        {
+            return false;
+        }
         var start = line.IndexOf(Prefix, StringComparison.Ordinal);
         if (start < 0 || line.IndexOf(Prefix, start + Prefix.Length, StringComparison.Ordinal) >= 0)
-        { return false; }
+        {
+            return false;
+        }
         var text = line.AsSpan(start + Prefix.Length).TrimEnd("\r\n");
         var category = text.IndexOf(CategoryStart, StringComparison.Ordinal);
         var error = text.IndexOf(ErrorStart, StringComparison.Ordinal);
         if (category <= 0 || error <= category || text[^1] != Terminator
             || !Guid.TryParseExact(text[..category], GuidFormat, out var requestId) || requestId == Guid.Empty)
-        { return false; }
+        {
+            return false;
+        }
         var categoryText = text[(category + CategoryStart.Length)..error];
         var tail = text[(error + ErrorStart.Length)..^1];
         var stageMarker = tail.IndexOf(StageStart, StringComparison.Ordinal);
         var kindMarker = tail.IndexOf(KindStart, StringComparison.Ordinal);
         if (stageMarker <= 0 || kindMarker <= stageMarker + StageStart.Length
             || !TryReadOrigin(tail, stageMarker, kindMarker, out var stage, out var failureKind))
-        { return false; }
+        {
+            return false;
+        }
         var errorText = tail[..stageMarker];
         if (!Enum.TryParse<OrleansRpcFailureCategory>(categoryText, false, out var kind) || !Enum.IsDefined(kind)
             || !categoryText.SequenceEqual(kind.ToString())
             || !Enum.TryParse<ErrorCode>(errorText, false, out var code)
             || code is not (ErrorCode.OwnershipLost or ErrorCode.UnknownWriteOutcome)
             || !errorText.SequenceEqual(code.ToString()))
-        { return false; }
+        {
+            return false;
+        }
         record = new(waveId, node, requestId, kind, code, stage, failureKind);
         return true;
     }

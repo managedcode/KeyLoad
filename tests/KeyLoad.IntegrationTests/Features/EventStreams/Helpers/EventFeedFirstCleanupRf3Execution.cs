@@ -1,7 +1,7 @@
 using KeyLoad.Client;
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 using ManagedCode.Communication;
 
@@ -38,14 +38,23 @@ internal static class EventFeedFirstCleanupRf3Execution
         await RequestCqrsPhaseFaultAssertions.VerifySettledAsync(controls, arm, marker.RequestId,
             original.CommandId, signed, token).ConfigureAwait(false);
         await controls.RetireArmAsync(arm, token).ConfigureAwait(false);
-        var premature = abandon with { CommandId = Guid.NewGuid(), ExpectedRevision = InitialRevision };
+        var premature = abandon with
+        {
+            CommandId = Guid.NewGuid(),
+            ExpectedRevision = InitialRevision
+        };
         await EventFeedFirstCleanupRf3Assertions.DeniedAsync(wave, credential, premature, token).ConfigureAwait(false);
         var remaining = expiry - TimeProvider.System.GetUtcNow();
         if (remaining > TimeSpan.Zero)
-        { await Task.Delay(remaining, TimeProvider.System, token).ConfigureAwait(false); }
+        {
+            await Task.Delay(remaining, TimeProvider.System, token).ConfigureAwait(false);
+        }
         await Assert.That(TimeProvider.System.GetUtcNow() >= expiry).IsTrue();
         await EventFeedFirstCleanupRf3Assertions.DeniedAsync(wave, credential, premature, token).ConfigureAwait(false);
-        var cleanup = premature with { CommandId = Guid.NewGuid() };
+        var cleanup = premature with
+        {
+            CommandId = Guid.NewGuid()
+        };
         var released = await EventFeedSettlementRf3Flow.RoutesAsync(wave, credential, cleanup, token).ConfigureAwait(false);
         await EventFeedFirstCleanupRf3Assertions.ResultAsync(cleanup, released, released: true).ConfigureAwait(false);
         await SqlRf3Protocol.EqualAsync(abandoned, await EventFeedSettlementRf3Flow.RoutesAsync(

@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.Messaging;
@@ -15,7 +15,9 @@ internal static class QueueDeadlineRf3Callers
         {
             await using var callers = await RequestCqrsRf3Callers.ConnectAsync(fixture.App, node, credential, token);
             try
-            { result = await operation(callers); }
+            {
+                result = await operation(callers);
+            }
             catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
             catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         }

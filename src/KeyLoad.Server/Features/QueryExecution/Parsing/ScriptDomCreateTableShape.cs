@@ -14,7 +14,9 @@ internal static class ScriptDomCreateTableShape
             || table.Options.Count != EmptyCount || table.SelectStatement is not null
             || table.Definition is null || table.Definition.Indexes.Count != EmptyCount
             || table.Definition.SystemTimePeriod is not null || table.Definition.TableConstraints.Count != EmptyCount)
-        { throw ScriptDomOperationErrors.Unsupported(); }
+        {
+            throw ScriptDomOperationErrors.Unsupported();
+        }
     }
     internal static void Require(Dom.ColumnDefinition column, ScriptDomTableLoweringContext context)
     {
@@ -24,6 +26,8 @@ internal static class ScriptDomCreateTableShape
             || column.GeneratedAlways is not null || column.IdentityOptions is not null
             || column.Index is not null || column.IsHidden || column.IsMasked || column.IsPersisted
             || column.IsRowGuidCol || column.MaskingFunction is not null || column.StorageOptions is not null)
-        { throw ScriptDomOperationErrors.Unsupported(); }
+        {
+            throw ScriptDomOperationErrors.Unsupported();
+        }
     }
 }

@@ -11,7 +11,9 @@ internal static class EventVectorWorkEncoding
         work.ChargeBytes(measured);
         var bytes = encoding.Encode(value);
         if (bytes.Length == measured)
-        { return bytes; }
+        {
+            return bytes;
+        }
         CryptographicOperations.ZeroMemory(bytes);
         throw Errors.Fail(ErrorCode.Corruption, EventVectorRemoteProtocol.Invalid);
     }

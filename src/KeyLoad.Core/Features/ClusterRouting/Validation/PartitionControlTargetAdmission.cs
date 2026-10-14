@@ -35,15 +35,21 @@ public sealed partial class DatabaseEngine
             || body.OperatorPrincipalId != body.Control.PrincipalId
             || PartitionMoveIntentIdentity.Digest(body.Control) != phase.ControlIntentDigest
             || PartitionMoveIntentIdentity.Digest(stage.Control) != phase.ControlIntentDigest)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
         var placement = ReadPlacementWitness(view, phase.Partition);
         if (JsonData.Fingerprint(placement) != JsonData.Fingerprint(delegation.TargetPlacement)
             || placement.Incarnation != Store.Identity.Incarnation)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
         RequireControlEffectResources(phase, delegation, stage);
         var command = RequireControlledCommandBody(original, phase.Partition);
         if (JsonData.Fingerprint(command) != JsonData.Fingerprint(body.Command))
-        { throw Errors.Fail(ErrorCode.Conflict, CommandContentConflictMessage); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, CommandContentConflictMessage);
+        }
         return (original, command);
     }
 
@@ -52,12 +58,16 @@ public sealed partial class DatabaseEngine
     {
         if (delegation.Resources.IsDefault || phase.Resources.IsDefault || stage.Descriptor.Resources.IsDefault
             || JsonData.Fingerprint(delegation.Resources) != JsonData.Fingerprint(phase.Resources))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
         foreach (var resource in delegation.Resources)
         {
             var original = stage.Descriptor.Resources.SingleOrDefault(value => value.Name == resource.Name);
             if (original is null || !ResourcePolicyUpdates.SameNonPolicyDefinition(original, resource))
-            { throw Errors.Fail(ErrorCode.UnsupportedCapability, PartitionMoveProtocol.InvalidImage); }
+            {
+                throw Errors.Fail(ErrorCode.UnsupportedCapability, PartitionMoveProtocol.InvalidImage);
+            }
         }
     }
 }

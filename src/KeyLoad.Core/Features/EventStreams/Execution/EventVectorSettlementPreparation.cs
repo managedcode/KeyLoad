@@ -22,7 +22,9 @@ public sealed partial class DatabaseEngine
             if (request.ControlPartition is null || request.Scope is null
                 || request.Action is not (EventFeedControlAction.Acknowledge or EventFeedControlAction.Release)
                 || request.OriginalFirstIssuancePublicCommandId != Guid.Empty)
-            { throw Errors.Fail(ErrorCode.Validation, InvalidEventVectorSettlement); }
+            {
+                throw Errors.Fail(ErrorCode.Validation, InvalidEventVectorSettlement);
+            }
             Authorization.Require(principal, request.ControlPartition, request.Scope.Resource, Capability.SubscriptionsManage);
             _ = StreamTraversalPlacement(bounded, request.ControlPartition, controlOwner);
             var admission = new EventVectorAdmissionPolicy(OperationLimitsOptions);
@@ -48,7 +50,9 @@ public sealed partial class DatabaseEngine
             || map.PrincipalId != principal.Id || map.ControlPolicyEpoch != principal.PolicyEpoch
             || map.ControlIncarnation != Store.Identity.Incarnation || map.Revision != request.ExpectedRevision
             || map.CoverageGeneration != request.ExpectedCoverageGeneration)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidEventVectorSettlement); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidEventVectorSettlement);
+        }
         EventVectorParentInventoryAuthorization.Require(Authorization, principal, inventory, admission);
         EventVectorInventoryValidation.Require(map, inventory.PayloadRows, admission);
         var tokenPhase = new EventVectorControlPhase(EventVectorTokenVersion, request,
@@ -108,7 +112,9 @@ public sealed partial class DatabaseEngine
         EventVectorAdmissionPolicy admission)
     {
         if (request.Action == EventFeedControlAction.Release)
-        { return entries; }
+        {
+            return entries;
+        }
         var offer = ReadEventVectorOffer(map, inventory);
         return EventVectorEntryEncoding.Decode(offer.Entries, offer.PageDigest, admission);
     }

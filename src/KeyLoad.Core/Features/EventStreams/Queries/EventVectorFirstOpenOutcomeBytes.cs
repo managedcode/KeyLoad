@@ -16,7 +16,9 @@ internal static class EventVectorFirstOpenOutcomeBytes
     {
         EventVectorFirstOpenProof.RequirePair(originalPhaseBytes, originalCommandId);
         if (originalPhaseBytes.IsEmpty)
-        { return ReadOnlyMemory<byte>.Empty; }
+        {
+            return ReadOnlyMemory<byte>.Empty;
+        }
         EventVectorParentScopes.Authorize(authorization, principal, originalScopes, admission);
         admission.RequireEncodedBytes(originalPhaseBytes.Length);
         var phase = EventVectorFirstPhaseCarrier.Read(originalPhaseBytes, admission);
@@ -25,17 +27,23 @@ internal static class EventVectorFirstOpenOutcomeBytes
         var actualId = EventVectorControlPhaseIds.For(phase, principal.Id,
             EventVectorControlBodyProjection.Digest(phase, admission), admission);
         if (actualId != originalCommandId)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         var selected = CommandOutcomeKeyResolver.Select(view, principal.Id, originalCommandId,
             new CommandOutcomePartitionScope(CommandOutcomeScopeKind.Partition,
                 phase.OriginalRequest.ControlPartition));
         if (selected.Outcome is null)
-        { return ReadOnlyMemory<byte>.Empty; }
+        {
+            return ReadOnlyMemory<byte>.Empty;
+        }
         _ = EventVectorParentOutcome.Require(view, principal, phase, originalCommandId,
             null, incarnation, admission);
         var raw = EventVectorFirstLookupRows.Read(view, selected.Key, admission);
         if (raw.IsEmpty)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         return raw;
     }
 }

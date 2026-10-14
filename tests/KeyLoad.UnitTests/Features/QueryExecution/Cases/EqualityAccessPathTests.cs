@@ -73,10 +73,18 @@ internal sealed class EqualityAccessPathTests
         {
             var request = parameterized
                 ? EqualityAccessPathSupport.Request(db, indexed: true, parameterized: true, reversed) with
-                { Parameters = new() { [EqualityAccessPathSupport.ParameterName] = JsonSerializer.SerializeToElement<object?>(null) } }
+                {
+                    Parameters = new()
+                    {
+                        [EqualityAccessPathSupport.ParameterName] = JsonSerializer.SerializeToElement<object?>(null)
+                    }
+                }
                 : new QueryRequest(db.Partition, reversed ? ReversedNullIndex : NullIndex);
             await Assert.That(EqualityAccessPathSupport.Failure(engine, request).Code).IsEqualTo(ErrorCode.UnsupportedCapability);
-            var page = engine.Execute(EqualityAccessPathSupport.Root, request with { AllowFullScan = true });
+            var page = engine.Execute(EqualityAccessPathSupport.Root, request with
+            {
+                AllowFullScan = true
+            });
             await Assert.That(page.AccessPath).IsEqualTo(EqualityAccessPathSupport.FullScanPath);
             await Assert.That(page.Rows).IsEmpty();
         }
@@ -89,7 +97,10 @@ internal sealed class EqualityAccessPathTests
         var engine = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
         var request = new QueryRequest(db.Partition, Disjunction);
         await Assert.That(EqualityAccessPathSupport.Failure(engine, request).Code).IsEqualTo(ErrorCode.UnsupportedCapability);
-        var page = engine.Execute(EqualityAccessPathSupport.Root, request with { AllowFullScan = true });
+        var page = engine.Execute(EqualityAccessPathSupport.Root, request with
+        {
+            AllowFullScan = true
+        });
         await Assert.That(page.AccessPath).IsEqualTo(EqualityAccessPathSupport.FullScanPath);
         await Assert.That(string.Join(EqualityAccessPathSupport.Separator, page.Rows.Select(row => row.EntityId)))
             .IsEqualTo(EqualityAccessPathSupport.IndexedIds);

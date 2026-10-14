@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Search;
-using KeyLoad.Orleans;
 using KeyLoad.Query.Features.Search;
 using KeyLoad.Storage;
 using Microsoft.Extensions.Options;
@@ -39,7 +39,9 @@ internal sealed class NativeAnnPublicReadLease : IAnnProjectionLease
         {
             var failures = new List<Exception> { primary };
             try
-            { Dispose(); }
+            {
+                Dispose();
+            }
             catch (Exception cleanup) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
             catch (Exception cleanup) when (!NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
             ServerFailureObserver.ThrowIfAny(failures);
@@ -49,11 +51,25 @@ internal sealed class NativeAnnPublicReadLease : IAnnProjectionLease
 
     public long IndexedAppliedPosition
     {
-        get { lock (gate) { ObjectDisposedException.ThrowIf(disposed, this); return current.Manifest.Source.AppliedPosition; } }
+        get
+        {
+            lock (gate)
+            {
+                ObjectDisposedException.ThrowIf(disposed, this);
+                return current.Manifest.Source.AppliedPosition;
+            }
+        }
     }
     public long IndexGeneration
     {
-        get { lock (gate) { ObjectDisposedException.ThrowIf(disposed, this); return current.Manifest.IndexGeneration; } }
+        get
+        {
+            lock (gate)
+            {
+                ObjectDisposedException.ThrowIf(disposed, this);
+                return current.Manifest.IndexGeneration;
+            }
+        }
     }
     public ImmutableArray<VectorRecord> Records => source.Records;
     public IOptions<AnnSeedOptions> CallerSeedOptions => callerOptions;
@@ -74,15 +90,21 @@ internal sealed class NativeAnnPublicReadLease : IAnnProjectionLease
         lock (gate)
         {
             if (disposed)
-            { return; }
+            {
+                return;
+            }
             disposed = true;
             var failures = new List<Exception>();
             try
-            { current?.Dispose(); }
+            {
+                current?.Dispose();
+            }
             catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
             catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
             try
-            { memory?.Dispose(); }
+            {
+                memory?.Dispose();
+            }
             catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
             catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
             ServerFailureObserver.ThrowIfAny(failures);

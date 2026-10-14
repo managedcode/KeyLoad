@@ -37,6 +37,8 @@ internal static class ControlledPartitionMovementProcessSeed
         var operation = node.Database.CreateNativeOperation(OperationKind.ConfigureResource, commandId,
             PrincipalId, node.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request));
         if (node.Journal.Submit(operation, cancellationToken).Error is not null)
-        { throw new InvalidOperationException(ConfigureFailure); }
+        {
+            throw new InvalidOperationException(ConfigureFailure);
+        }
     }
 }

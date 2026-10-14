@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
 using Microsoft.Extensions.DependencyInjection;
@@ -43,7 +43,12 @@ internal sealed class NativeSixSiloMembershipReadinessFixture : IAsyncDisposable
         var initial = Read(options, original.SiloAddress, bounds, token);
         await NativeSixSiloMembershipReadinessAssertions.CompleteAsync(initial, handles).ConfigureAwait(false);
         var wrong = options with
-        { PhysicalGroupTrust = options.PhysicalGroupTrust with { ForeignVoterIds = ["unconfigured-native-silo", .. names.Skip(GroupVoters + 1)] } };
+        {
+            PhysicalGroupTrust = options.PhysicalGroupTrust with
+            {
+                ForeignVoterIds = ["unconfigured-native-silo", .. names.Skip(GroupVoters + 1)]
+            }
+        };
         await Assert.That(Read(wrong, original.SiloAddress, bounds, token)).IsNull();
         await Assert.That(Read(options, original.SiloAddress, new OrleansMembershipOptions { MaximumRows = Silos - 1 }, token)).IsNull();
         await Assert.That(Read(options, original.SiloAddress, new OrleansMembershipOptions { MaximumAddressBytes = 1 }, token)).IsNull();
@@ -99,7 +104,9 @@ internal sealed class NativeSixSiloMembershipReadinessFixture : IAsyncDisposable
             while (true)
             {
                 if (Read(options, address, bounds, execution.Token) is { } current)
-                { return current; }
+                {
+                    return current;
+                }
                 await Task.Delay(bounds.StartupRetryDelay, clock, execution.Token).ConfigureAwait(false);
             }
         }
@@ -120,7 +127,9 @@ internal sealed class NativeSixSiloMembershipReadinessFixture : IAsyncDisposable
         Console.Error.WriteLine($"NativeSixSiloMembership expectedNames={string.Join(",", options.Peers.Concat(options.PhysicalGroupTrust.ForeignVoterIds))}");
         var native = new ReplicaNativeDiscoveryMembership(oracle, membershipOptions);
         foreach (var entry in native.ReadActive())
-        { Console.Error.WriteLine($"NativeSixSiloMembership activeName={entry.SiloName} activeAddress={entry.SiloAddress}"); }
+        {
+            Console.Error.WriteLine($"NativeSixSiloMembership activeName={entry.SiloName} activeAddress={entry.SiloAddress}");
+        }
     }
 
     public ValueTask DisposeAsync()
@@ -136,20 +145,32 @@ internal sealed class NativeSixSiloMembershipReadinessFixture : IAsyncDisposable
         {
             await ServerFailureObserver.ObserveAsync(cluster.StopAllSilosAsync, failures).ConfigureAwait(false);
             try
-            { await cluster.DisposeAsync().ConfigureAwait(false); }
-            catch (Exception error) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-            { failures.Add(error); }
-            catch (Exception error) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-            { failures.Add(error); }
+            {
+                await cluster.DisposeAsync().ConfigureAwait(false);
+            }
+            catch (Exception error) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+            {
+                failures.Add(error);
+            }
+            catch (Exception error) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+            {
+                failures.Add(error);
+            }
         }
         if (infrastructure is not null)
         {
             try
-            { await infrastructure.DisposeAsync().ConfigureAwait(false); }
-            catch (Exception error) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-            { failures.Add(error); }
-            catch (Exception error) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-            { failures.Add(error); }
+            {
+                await infrastructure.DisposeAsync().ConfigureAwait(false);
+            }
+            catch (Exception error) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+            {
+                failures.Add(error);
+            }
+            catch (Exception error) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+            {
+                failures.Add(error);
+            }
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }

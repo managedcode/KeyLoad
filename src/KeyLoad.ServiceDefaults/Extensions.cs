@@ -83,7 +83,10 @@ public static class KeyLoadServiceDefaultsExtensions
     public static WebApplication MapDefaultEndpoints(this WebApplication app)
     {
         ArgumentNullException.ThrowIfNull(app);
-        app.MapHealthChecks(LiveHealthRoute, new() { Predicate = check => check.Tags.Contains(LiveHealthTag) });
+        app.MapHealthChecks(LiveHealthRoute, new()
+        {
+            Predicate = check => check.Tags.Contains(LiveHealthTag)
+        });
         return app;
     }
 }

@@ -17,7 +17,9 @@ internal sealed class PartitionMovementBlobWireBorrow : IControlledBlobWireBorro
     internal void Attach(PartitionMovementLateNativeOwners value)
     {
         if (owners is not null)
-        { throw new InvalidOperationException("The native wire owner was already attached."); }
+        {
+            throw new InvalidOperationException("The native wire owner was already attached.");
+        }
         transport = PartitionMovementLateNativeHttp.Create(new(value.Settings.Origin(PartitionMovementLateNativeSettings.GroupSize)));
         owners = value;
     }
@@ -28,7 +30,12 @@ internal sealed class PartitionMovementBlobWireBorrow : IControlledBlobWireBorro
         var identity = (call.Request.Frame.Purpose, call.Request.Frame.Original?.Kind);
         await Assert.That(Supported(identity)).IsTrue();
         lock (gate)
-        { if (!observed.Add(identity)) { return; } }
+        {
+            if (!observed.Add(identity))
+            {
+                return;
+            }
+        }
         var actual = owners ?? throw new InvalidOperationException("The native wire owners are not attached.");
         var digest = SHA256.HashData(envelope.Span);
         foreach (var fault in PartitionMovementBlobWireFaults.Create(call))
@@ -56,10 +63,14 @@ internal sealed class PartitionMovementBlobWireBorrow : IControlledBlobWireBorro
     {
         foreach (var kind in new[] { OperationKind.BeginBlobUpload, OperationKind.WriteBlobPart,
             OperationKind.CompleteBlobUpload, OperationKind.AbortBlobUpload, OperationKind.DeleteBlob, OperationKind.ReclaimBlob })
-        { await Assert.That(observed.Contains((ControlledBlobReadPurpose.Outcome, kind))).IsTrue(); }
+        {
+            await Assert.That(observed.Contains((ControlledBlobReadPurpose.Outcome, kind))).IsTrue();
+        }
         foreach (var purpose in new[] { ControlledBlobReadPurpose.Metadata, ControlledBlobReadPurpose.UploadInfo,
             ControlledBlobReadPurpose.Range, ControlledBlobReadPurpose.List })
-        { await Assert.That(observed.Contains((purpose, null))).IsTrue(); }
+        {
+            await Assert.That(observed.Contains((purpose, null))).IsTrue();
+        }
     }
 
     private static bool Supported((ControlledBlobReadPurpose Purpose, OperationKind? Kind) identity)

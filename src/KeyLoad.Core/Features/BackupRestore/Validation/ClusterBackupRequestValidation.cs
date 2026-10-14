@@ -9,6 +9,8 @@ internal static class ClusterBackupRequestValidation
         if (request is null || request.Version != ClusterBackupOwnerRequest.CurrentVersion
             || request.CaptureId == Guid.Empty || request.ExpectedNodeId == Guid.Empty || request.ExpectedOwner is null
             || request.ExpectedOwner.VoterIds.IsDefault)
-        { throw Errors.Fail(ErrorCode.Validation, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, Invalid);
+        }
     }
 }

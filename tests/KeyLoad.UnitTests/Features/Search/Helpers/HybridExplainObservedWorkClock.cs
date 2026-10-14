@@ -5,7 +5,10 @@ internal sealed class HybridExplainObservedWorkClock : TimeProvider
     private readonly DateTimeOffset now = TimeProvider.System.GetUtcNow();
     private Func<bool>? observed;
     private Action? cancel;
-    internal bool Triggered { get; private set; }
+    internal bool Triggered
+    {
+        get; private set;
+    }
     public override long TimestampFrequency => TimeSpan.TicksPerSecond;
     public override DateTimeOffset GetUtcNow() => now;
     public override long GetTimestamp()
@@ -25,5 +28,9 @@ internal sealed class HybridExplainObservedWorkClock : TimeProvider
         observed = predicate;
         cancel = action;
     }
-    internal void Disarm() { observed = null; cancel = null; }
+    internal void Disarm()
+    {
+        observed = null;
+        cancel = null;
+    }
 }

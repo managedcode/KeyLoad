@@ -1,9 +1,9 @@
 using Aspire.Hosting;
 using KeyLoad.Client;
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
 using KeyLoad.IntegrationTests.Features.StorageRecovery;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.DocumentStorage;
@@ -28,7 +28,9 @@ internal sealed class FollowerDocumentRf3Scenario(FollowerDocumentCaller mode, F
     private async Task RunOwnedAsync(CancellationToken token)
     {
         try
-        { await ExecuteOwnedAsync(token).ConfigureAwait(false); }
+        {
+            await ExecuteOwnedAsync(token).ConfigureAwait(false);
+        }
         catch (Exception original)
         {
             FollowerDocumentRf3FailureObservation.Write(original, state, token);
@@ -78,7 +80,9 @@ internal sealed class FollowerDocumentRf3Scenario(FollowerDocumentCaller mode, F
         var status = await McpCallerAssertions.SdkSuccessAsync(await initial.StatusAsync(token).ConfigureAwait(false)).ConfigureAwait(false);
         var index = Array.FindIndex(records, item => item.VoterId != status.Leader);
         if (index < 0)
-        { throw new InvalidOperationException(FollowerDocumentRf3Protocol.MissingOwner); }
+        {
+            throw new InvalidOperationException(FollowerDocumentRf3Protocol.MissingOwner);
+        }
         state.SelectedIndex = index;
         state.ReplicaId = records[index].VoterId;
         var node = RequestCqrsRf3Protocol.NodeName(index);
@@ -87,7 +91,9 @@ internal sealed class FollowerDocumentRf3Scenario(FollowerDocumentCaller mode, F
         state.Principal = new(state.Identity.PrincipalId, state.Identity.Partition.TenantId,
             [new(state.Identity.Partition.DatabaseId, RequestCqrsRf3Protocol.AdminCollection,
                 Capability.DocumentsRead | Capability.DocumentsWrite)], [])
-        { ClusterAdministrator = false };
+        {
+            ClusterAdministrator = false
+        };
         state.Credential = KeyLoad.Core.DatabaseEngine.Credential(state.Identity.PrincipalId + FollowerDocumentRf3Protocol.KeySuffix,
             state.Identity.PrincipalId, state.Identity.Secret);
     }

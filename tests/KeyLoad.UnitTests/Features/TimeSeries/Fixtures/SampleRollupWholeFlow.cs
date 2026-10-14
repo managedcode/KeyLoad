@@ -27,7 +27,9 @@ internal static class SampleRollupWholeFlow
         {
             var scan = view.Scan(prefix ?? [], MaximumRecords);
             if (scan.HasMore)
-            { throw new InvalidOperationException(StateBound); }
+            {
+                throw new InvalidOperationException(StateBound);
+            }
             return JsonSerializer.Serialize(scan.Records.Select(record =>
                 new[] { Convert.ToHexString(record.Key.Span), Convert.ToHexString(record.Value.Span) }).ToArray());
         });

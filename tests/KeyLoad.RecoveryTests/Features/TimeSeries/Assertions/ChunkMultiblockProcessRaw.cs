@@ -17,7 +17,11 @@ internal static class ChunkMultiblockProcessRaw
             NativeSerialization.Serialize(record))).OrderBy(row => row[0], StringComparer.Ordinal);
         var identities = records.Select(record => Pair(KeySpace.Partition(Identities, SampleChunkCrashContract.Partition,
             SampleChunkCrashContract.Set, SampleChunkCrashContract.Series, record.Sample.EventId),
-            NativeSerialization.Serialize(JsonData.Fingerprint(new { sample = record.Sample, Tags = SampleChunkCrashContract.Tags }))))
+            NativeSerialization.Serialize(JsonData.Fingerprint(new
+            {
+                sample = record.Sample,
+                Tags = SampleChunkCrashContract.Tags
+            }))))
             .OrderBy(row => row[0], StringComparer.Ordinal);
         var sequence = prepared ? ChunkMultiblockCrashProtocol.PreparedAutomaticSealSequence
             : healthy ? ChunkMultiblockCrashProtocol.HealthySequence : ChunkMultiblockCrashProtocol.PreparedSequence;

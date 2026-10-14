@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Replication;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
@@ -22,9 +22,13 @@ internal sealed class RequestCqrsCanonicalApplyObserver(RequestCqrsProbeFiles fi
             && arm.Record.CommandId == operation.Id && arm.Record.Partition?.ToPartition() == partition)
             .Take(MatchCeiling).ToArray();
         if (arms.Length > SingleMatch)
-        { throw new InvalidOperationException(RequestCqrsProbeProtocol.InvalidFiles); }
+        {
+            throw new InvalidOperationException(RequestCqrsProbeProtocol.InvalidFiles);
+        }
         if (arms.Length == NoMatchingArm)
-        { return null; }
+        {
+            return null;
+        }
         var arm = arms[FirstMatchingArmIndex];
         RequestCqrsCanonicalSourceArmValidation.Require(snapshot, arm.Record);
         var identity = new GrainRequestProbeIdentity(arm.Record.SourceRequestId!.Value, operation.Id,
@@ -33,20 +37,28 @@ internal sealed class RequestCqrsCanonicalApplyObserver(RequestCqrsProbeFiles fi
         files.RequireActiveArm(arm);
         lifecycle.EnterCallback();
         try
-        { return new(this, claim, restore, holding); }
+        {
+            return new(this, claim, restore, holding);
+        }
         catch (Exception primary)
         {
             try
-            { lifecycle.ExitCallback(); }
+            {
+                lifecycle.ExitCallback();
+            }
             catch (Exception cleanup)
-            { throw new AggregateException(primary, cleanup); }
+            {
+                throw new AggregateException(primary, cleanup);
+            }
             throw;
         }
     }
     internal void ExitCanonical(RequestCqrsProbeClaim claim)
     {
         try
-        { files.WriteMarker(createMarker(claim, RequestCqrsProbePhase.CanonicalOwnerDisposed, RequestCqrsProbeOutcome.Observed), claim.Arm); }
+        {
+            files.WriteMarker(createMarker(claim, RequestCqrsProbePhase.CanonicalOwnerDisposed, RequestCqrsProbeOutcome.Observed), claim.Arm);
+        }
         finally { lifecycle.ExitCallback(); }
     }
     internal void HoldCanonical(RequestCqrsProbeClaim claim)

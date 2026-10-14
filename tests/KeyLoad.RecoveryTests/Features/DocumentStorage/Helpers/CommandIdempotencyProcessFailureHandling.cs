@@ -50,12 +50,16 @@ internal static class CommandIdempotencyProcessFailureHandling
     {
         var fatalIndex = FindFatalIndex(failures);
         if (fatalIndex <= 0)
-        { return failures; }
+        {
+            return failures;
+        }
         var ordered = new List<Exception>(failures.Count) { failures[fatalIndex] };
         for (var index = 0; index < failures.Count; index++)
         {
             if (index != fatalIndex)
-            { ordered.Add(failures[index]); }
+            {
+                ordered.Add(failures[index]);
+            }
         }
         return ordered;
     }

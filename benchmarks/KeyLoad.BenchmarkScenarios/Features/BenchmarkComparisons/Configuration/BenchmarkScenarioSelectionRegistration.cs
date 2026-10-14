@@ -21,10 +21,14 @@ internal static class BenchmarkScenarioSelectionRegistration
     internal static int RecordCount(BenchmarkScenarioSelectionOptions snapshot)
     {
         if (snapshot.RecordCount is null)
-        { return BenchmarkScenarioSelectionOptions.HundredThousandRecords; }
+        {
+            return BenchmarkScenarioSelectionOptions.HundredThousandRecords;
+        }
         if (int.TryParse(snapshot.RecordCount, NumberStyles.None, CultureInfo.InvariantCulture, out var count)
             && count is BenchmarkScenarioSelectionOptions.HundredThousandRecords or BenchmarkScenarioSelectionOptions.OneMillionRecords)
-        { return count; }
+        {
+            return count;
+        }
         throw new InvalidOperationException(RecordCountFailure);
     }
 
@@ -48,13 +52,17 @@ internal static class BenchmarkScenarioSelectionRegistration
     {
         ValidateEngine(snapshot.Engine, scaled);
         if (scaled)
-        { _ = RecordCount(snapshot); }
+        {
+            _ = RecordCount(snapshot);
+        }
         return true;
     }
 
     private static void ValidateEngine(string label, bool scaled)
     {
         if (label != BenchmarkScenarioSelectionOptions.ZoneTree)
-        { throw new ArgumentException(scaled ? ScaledEngineFailure : RawEngineFailure, nameof(label)); }
+        {
+            throw new ArgumentException(scaled ? ScaledEngineFailure : RawEngineFailure, nameof(label));
+        }
     }
 }

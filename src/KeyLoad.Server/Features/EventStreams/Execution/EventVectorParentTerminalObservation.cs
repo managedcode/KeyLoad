@@ -1,8 +1,8 @@
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.DocumentStorage;
 using Microsoft.Extensions.Options;
 
@@ -44,14 +44,18 @@ internal static class EventVectorParentTerminalObservation
         IOptions<GrainRoutingOptions> routing, ReadExecutionBudget work, CancellationToken cancellationToken)
     {
         var input = new EventVectorParentLookupCall(Version, principalId, request)
-        { FreshSourceAuthorizationWitness = witness };
+        {
+            FreshSourceAuthorizationWitness = witness
+        };
         using var call = EventVectorOutgoingCall.Create(node, partition, options,
             EventVectorRemoteAction.ParentOutcome, input, originalExpiry, work, encoding);
         using var exchange = await runtime.SendLocalEventVectorAsync(call.OriginalCall,
             work, cancellationToken).ConfigureAwait(false);
         var reply = exchange.Reply.Reply;
         if (reply.Error is { } error)
-        { throw Errors.Fail(error, EventVectorRemoteProtocol.Unavailable); }
+        {
+            throw Errors.Fail(error, EventVectorRemoteProtocol.Unavailable);
+        }
         admission.RequireEncodedBytes(reply.OriginalNativeReply.Length);
         work.ChargeBytes(reply.OriginalNativeReply.Length);
         var observed = NativeSerialization.Deserialize<EventVectorParentObservation>(reply.OriginalNativeReply.Span);
@@ -76,15 +80,24 @@ internal static class EventVectorParentTerminalObservation
         if (observed.Version != Version || observed.PrincipalId != principalId
             || observed.OriginalPublicCommandId != request.CommandId || !PhysicalOwnerEntryValidation.SameOwner(observed.ControlOwner, actualControl)
             || observed.NodeId != identity.NodeId || observed.ReadGeneration != identity.ReadGeneration)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, EventVectorRemoteProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, EventVectorRemoteProtocol.Invalid);
+        }
         if (observed.OriginalNativeControlPhaseBytes.IsEmpty && observed.OriginalNativeOutcomeBytes.IsEmpty)
-        { work.Check(); return null; }
+        {
+            work.Check();
+            return null;
+        }
         if (observed.OriginalNativeControlPhaseBytes.IsEmpty || observed.OriginalNativeOutcomeBytes.IsEmpty)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, EventVectorRemoteProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, EventVectorRemoteProtocol.Invalid);
+        }
         var phase = NativeSerialization.Deserialize<EventVectorControlPhase>(observed.OriginalNativeControlPhaseBytes.Span);
         var outcome = NativeSerialization.Deserialize<StoredOutcome>(observed.OriginalNativeOutcomeBytes.Span);
         if (outcome.Result.Error is not null)
-        { return GrainReplyFactory.Operation(outcome.Result, routing, cancellationToken); }
+        {
+            return GrainReplyFactory.Operation(outcome.Result, routing, cancellationToken);
+        }
         var value = EventVectorFirstCleanupResultValidation.Handles(phase.Action)
             ? EventVectorFirstCleanupResultValidation.Read(outcome.Result.Get<EventVectorFirstIssuanceResult>(),
                 phase, principalId, identity.Incarnation, admission)

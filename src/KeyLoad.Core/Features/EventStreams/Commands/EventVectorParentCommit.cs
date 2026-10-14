@@ -17,12 +17,16 @@ internal static class EventVectorParentCommit
         var request = phase.OriginalRequest;
         if (EventVectorParentLookup.ReadTerminal(transaction, authorization, principal, request, incarnation, options,
             CancellationToken.None) is not null)
-        { throw Errors.Fail(ErrorCode.Conflict, InvalidParent); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, InvalidParent);
+        }
         var admission = new EventVectorAdmissionPolicy(options);
         var inventory = EventVectorMapInventory.Read(transaction, request.ControlPartition, request.MapId,
             options, CancellationToken.None);
         if (inventory.Header is not { } map)
-        { return; }
+        {
+            return;
+        }
         if (!phase.OriginalCleanupFrontierBytes.IsEmpty)
         {
             var original = EventVectorCleanupParentCommit.RequirePrevious(transaction, inventory, principal, phase, authorization, admission);
@@ -44,10 +48,14 @@ internal static class EventVectorParentCommit
         foreach (var row in inventory.PayloadRows)
         {
             if (!row.Key.Span.SequenceEqual(key))
-            { continue; }
+            {
+                continue;
+            }
             var call = EventVectorParentValidation.Read(map, row, admission);
             if (call.PrincipalId != principal.Id)
-            { throw Errors.Fail(ErrorCode.PermissionDenied, InvalidParent); }
+            {
+                throw Errors.Fail(ErrorCode.PermissionDenied, InvalidParent);
+            }
             EventVectorParentValidation.RequireRequest(call, request, admission);
             EventVectorParentScopes.Authorize(authorization, principal, call.OriginalAuthorizedSourceScopes, admission);
             var original = EventVectorParentValidation.ReadPhase(call, admission);
@@ -55,7 +63,9 @@ internal static class EventVectorParentCommit
                 EventVectorParentScopes.Derive(original, inventory, admission));
             if (call.OriginalParentExpiresAt != phase.OriginalParentExpiresAt
                 || original.OriginalParentRequestId != phase.OriginalParentRequestId)
-            { throw Errors.Fail(ErrorCode.Conflict, InvalidParent); }
+            {
+                throw Errors.Fail(ErrorCode.Conflict, InvalidParent);
+            }
             _ = EventVectorParentOutcome.Require(transaction, principal, original, call.LastAdmittedControlPhaseId,
                 null, incarnation, admission);
             return;
@@ -86,7 +96,9 @@ internal static class EventVectorParentCommit
                 options, CancellationToken.None).Header!;
             }
             if (!terminal)
-            { return value; }
+            {
+                return value;
+            }
         }
         else if (inventory.Header is { } map)
         {
@@ -108,10 +120,14 @@ internal static class EventVectorParentCommit
             }
             var changed = EventVectorMapWriter.Write(transaction, map, payload, options, CancellationToken.None);
             if (value is EventVectorMap)
-            { value = changed; }
+            {
+                value = changed;
+            }
         }
         else if (!terminal)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidParent); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidParent);
+        }
         if (terminal)
         {
             WriteTerminal(transaction, principal, request, operation, originalAuthorizedScopes, raw, first, digest, admission);
@@ -147,7 +163,9 @@ internal static class EventVectorParentCommit
             : NativeSerialization.Deserialize<EventVectorParentCall>(rows.Single().Value.Span);
         if (previous is not null && previous.OriginalPublicCommandId != phase.OriginalRequest.CommandId
             && !phase.OriginalCleanupFrontierBytes.IsEmpty)
-        { return (ReadOnlyMemory<byte>.Empty, Guid.Empty); }
+        {
+            return (ReadOnlyMemory<byte>.Empty, Guid.Empty);
+        }
         return EventVectorFirstOpenProof.Preserve(previous, phase, actualFirst);
     }
 
@@ -155,7 +173,9 @@ internal static class EventVectorParentCommit
         EventFeedControlRequest request, EventVectorAdmissionPolicy admission)
     {
         if (prior.Length != NoPriorCall)
-        { return NativeSerialization.Deserialize<EventVectorParentCall>(prior.Single().Value.Span).OriginalPublicRequestBytes; }
+        {
+            return NativeSerialization.Deserialize<EventVectorParentCall>(prior.Single().Value.Span).OriginalPublicRequestBytes;
+        }
         admission.RequireEncodedBytes(NativeSerialization.Measure(request));
         var bytes = NativeSerialization.Serialize(request);
         admission.RequireEncodedBytes(bytes.Length);

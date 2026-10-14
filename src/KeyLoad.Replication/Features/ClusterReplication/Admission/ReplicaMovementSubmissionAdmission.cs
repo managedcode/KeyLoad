@@ -6,9 +6,14 @@ internal static class ReplicaMovementSubmissionAdmission
         CancellationToken cancellationToken)
     {
         await state.LockedAsync(() =>
-        { state.RequireReadyLeader(); return true; }, cancellationToken).ConfigureAwait(false);
+        {
+            state.RequireReadyLeader();
+            return true;
+        }, cancellationToken).ConfigureAwait(false);
         try
-        { state.Materializer.Database.ValidatePartitionMovementSubmissionAdmission(operation); }
+        {
+            state.Materializer.Database.ValidatePartitionMovementSubmissionAdmission(operation);
+        }
         catch (KeyLoadException refusal) when (refusal.Code == ErrorCode.Conflict)
         {
             await state.LockedAsync(() =>

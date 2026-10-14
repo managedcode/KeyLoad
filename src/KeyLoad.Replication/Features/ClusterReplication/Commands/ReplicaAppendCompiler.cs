@@ -84,7 +84,10 @@ internal static class ReplicaAppendCompiler
                 conflict = true;
             }
         }
-        return state with { LastIndex = conflict ? entries[^LastEntryFromEnd].Index : state.LastIndex };
+        return state with
+        {
+            LastIndex = conflict ? entries[^LastEntryFromEnd].Index : state.LastIndex
+        };
     }
 }
 

@@ -31,7 +31,9 @@ public static class PhysicalShardPartitionMovement
             var actual = await client.MovePartitionAsync(request, cancellationToken).ConfigureAwait(false);
             yield return actual;
             if (!actual.IsSuccess || actual.Value?.Phase != PartitionMovePhase.Retired)
-            { yield break; }
+            {
+                yield break;
+            }
         }
     }
 }

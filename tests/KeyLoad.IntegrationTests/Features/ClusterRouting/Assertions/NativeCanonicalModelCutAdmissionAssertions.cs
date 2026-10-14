@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
@@ -19,12 +19,19 @@ internal static class NativeCanonicalModelCutAdmissionAssertions
         if (!token.CanBeCanceled || before.Count != TwoRf3MembershipProtocol.NodeCount
             || originalScope.SessionId != wave.QueryControls.SessionId
             || !TwoRf3MembershipProtocol.Nodes.All(before.ContainsKey))
-        { throw new InvalidDataException(Invalid); }
+        {
+            throw new InvalidDataException(Invalid);
+        }
         foreach (var node in TwoRf3MembershipProtocol.Nodes)
         {
             NativeCanonicalModelCutAssertions.Require(before[node].Request, owners[node], before[node], token);
-            if ((before[node].Request with { Nonce = originalScope.Nonce }) != originalScope)
-            { throw new InvalidDataException(Invalid); }
+            if ((before[node].Request with
+            {
+                Nonce = originalScope.Nonce
+            }) != originalScope)
+            {
+                throw new InvalidDataException(Invalid);
+            }
         }
         foreach (var mutation in Mutations(originalScope))
         {
@@ -33,12 +40,17 @@ internal static class NativeCanonicalModelCutAdmissionAssertions
             {
                 token.ThrowIfCancellationRequested();
                 await NativeCanonicalModelCutHttpRefusal.RequireValidationAsync(wave, node,
-                    adminCredential, mutation with { Nonce = Guid.NewGuid() }, token).ConfigureAwait(false);
+                    adminCredential, mutation with
+                    {
+                        Nonce = Guid.NewGuid()
+                    }, token).ConfigureAwait(false);
             }
             var healthy = await NativeCanonicalModelCutClient.ReadSixAsync(wave, adminCredential,
                 originalScope, owners, secrets, token).ConfigureAwait(false);
             foreach (var node in TwoRf3MembershipProtocol.Nodes)
-            { NativeCanonicalModelCutAssertions.RequireUnchanged(before[node], healthy[node], token); }
+            {
+                NativeCanonicalModelCutAssertions.RequireUnchanged(before[node], healthy[node], token);
+            }
         }
     }
 
@@ -48,7 +60,9 @@ internal static class NativeCanonicalModelCutAdmissionAssertions
     {
         token.ThrowIfCancellationRequested();
         if (!token.CanBeCanceled || originalScope.SessionId != wave.QueryControls.SessionId)
-        { throw new InvalidDataException(Invalid); }
+        {
+            throw new InvalidDataException(Invalid);
+        }
         var bytes = NativeCanonicalModelCutOriginalArm.Read(wave.QueryControls, originalScope.ArmId);
         NativeCanonicalModelCutRetainedArmAssertions.RequireSettledOriginal(wave.QueryControls,
             originalScope.ArmId, bytes);
@@ -56,7 +70,10 @@ internal static class NativeCanonicalModelCutAdmissionAssertions
         foreach (var node in RequestCqrsProbeFixtureProtocol.Nodes)
         {
             await NativeCanonicalModelCutHttpRefusal.RequireValidationAsync(wave, node, adminCredential,
-                originalScope with { Nonce = Guid.NewGuid() }, token).ConfigureAwait(false);
+                originalScope with
+                {
+                    Nonce = Guid.NewGuid()
+                }, token).ConfigureAwait(false);
         }
         foreach (var node in TwoRf3MembershipProtocol.Nodes)
         {
@@ -72,9 +89,18 @@ internal static class NativeCanonicalModelCutAdmissionAssertions
 
     private static IEnumerable<NativeCanonicalModelCutRequest> Mutations(NativeCanonicalModelCutRequest original)
     {
-        yield return original with { ArmId = Different(original.ArmId) };
-        yield return original with { SessionId = Different(Guid.ParseExact(original.SessionId, "N")).ToString("N") };
-        yield return original with { AcceptCommandId = Different(original.AcceptCommandId) };
+        yield return original with
+        {
+            ArmId = Different(original.ArmId)
+        };
+        yield return original with
+        {
+            SessionId = Different(Guid.ParseExact(original.SessionId, "N")).ToString("N")
+        };
+        yield return original with
+        {
+            AcceptCommandId = Different(original.AcceptCommandId)
+        };
         yield return original with
         {
             LogicalPrincipalId = original.LogicalPrincipalId == WrongPrincipal
@@ -86,7 +112,9 @@ internal static class NativeCanonicalModelCutAdmissionAssertions
     {
         Guid changed;
         do
-        { changed = Guid.NewGuid(); } while (changed == original || changed == Guid.Empty);
+        {
+            changed = Guid.NewGuid();
+        } while (changed == original || changed == Guid.Empty);
         return changed;
     }
 }

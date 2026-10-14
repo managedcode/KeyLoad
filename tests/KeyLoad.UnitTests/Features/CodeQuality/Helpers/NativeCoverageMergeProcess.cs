@@ -40,7 +40,9 @@ internal static class NativeCoverageMergeProcess
         configuration.AddEnvironmentVariables();
         var coverage = AppHostOptionsRegistration.BindNativeCoverage(configuration).Value;
         if (!coverage.IsValid())
-        { throw new InvalidOperationException(NativeCoverageExecutionOptions.ValidationMessage); }
+        {
+            throw new InvalidOperationException(NativeCoverageExecutionOptions.ValidationMessage);
+        }
         var testOptions = AppHostOptionsRegistration.BindTestExecution(configuration).Value;
         var repositoryRoot = FindRepositoryRoot();
         var settings = NativeCoverageSettingsSnapshot.Capture(repositoryRoot, coverage);
@@ -135,10 +137,14 @@ internal static class NativeCoverageMergeProcess
     {
         var before = new FileInfo(path);
         if (!before.Exists || before.Length <= 0 || before.Length > options.MaximumReportBytes || before.LinkTarget is not null)
-        { throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure); }
+        {
+            throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure);
+        }
         using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
         if (stream.Length != before.Length)
-        { throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure); }
+        {
+            throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure);
+        }
         using var digest = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         var buffer = new byte[options.ReadBufferBytes];
         long length = 0;
@@ -147,12 +153,16 @@ internal static class NativeCoverageMergeProcess
         {
             length += read;
             if (length > options.MaximumReportBytes)
-            { throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure); }
+            {
+                throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure);
+            }
             digest.AppendData(buffer, 0, read);
         }
         var after = new FileInfo(path);
         if (length != before.Length || after.Length != before.Length || after.LastWriteTimeUtc != before.LastWriteTimeUtc)
-        { throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure); }
+        {
+            throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure);
+        }
         return Convert.ToHexStringLower(digest.GetHashAndReset());
     }
 
@@ -182,7 +192,9 @@ internal static class NativeCoverageMergeProcess
             if (File.Exists(Path.Combine(directory.FullName, SolutionFile))
                 && File.Exists(Path.Combine(directory.FullName, NativeCoverageImageFixture.CliOutputRelativePath,
                     CliAssemblyName)))
-            { return directory.FullName; }
+            {
+                return directory.FullName;
+            }
         }
         throw new DirectoryNotFoundException(StartFailure);
     }
@@ -251,7 +263,9 @@ internal static class NativeCoverageCliCollector
         List<Exception> failures)
     {
         if (processResult is null)
-        { return; }
+        {
+            return;
+        }
         var result = NativeCoverageMergeProcess.ConvertResult(processResult);
         await ServerFailureObserver.ObserveAsync(
             () => NativeCoverageMergeProcess.AssertSuccessfulChildAsync(result), failures).ConfigureAwait(false);
@@ -265,12 +279,16 @@ internal static class NativeCoverageCliCollector
             limits.MaximumFileBytes, limits.MaximumTotalBytes, limits.MaximumPathCharacters,
             limits.ReadBufferBytes), failures);
         if (failures.Count != 0)
-        { return null; }
+        {
+            return null;
+        }
         string? copied = null;
         ServerFailureObserver.Observe(() => copied = NativeCoverageImageFixture.CopyCliClosure(
             ownedRoot, imageName, limits), failures);
         if (copied is null || failures.Count != 0)
-        { return null; }
+        {
+            return null;
+        }
         ServerFailureObserver.Observe(() => originalSource.VerifyCopyMatches(copied, limits.MaximumFiles,
             limits.MaximumFileBytes, limits.MaximumTotalBytes, limits.MaximumPathCharacters,
             limits.ReadBufferBytes), failures);
@@ -297,7 +315,9 @@ internal static class NativeCoverageCliCollector
         var start = CreateCollectStart(options, copiedDirectory, cli, cliArguments, reportPath);
         ServerFailureObserver.Observe(() => options.Settings.VerifyUnchanged(limits), failures);
         if (failures.Count != 0)
-        { return null; }
+        {
+            return null;
+        }
         NativeCoverageMergeChildProcess.Result? result = null;
         await ServerFailureObserver.ObserveAsync(async () =>
         {
@@ -344,7 +364,9 @@ internal static class NativeCoverageCliCollector
         start.ArgumentList.Add(NativeCoverageMergeProcess.DotnetCommand);
         start.ArgumentList.Add(cli);
         foreach (var argument in cliArguments)
-        { start.ArgumentList.Add(argument); }
+        {
+            start.ArgumentList.Add(argument);
+        }
         return start;
     }
 }

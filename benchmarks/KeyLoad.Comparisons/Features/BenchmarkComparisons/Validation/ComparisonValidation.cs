@@ -37,7 +37,13 @@ internal static class ComparisonValidation
                 }
             }
             catch (Exception error) when (!cancellationToken.IsCancellationRequested)
-            { samples[operation] = samples[operation] with { Success = false, Error = ComparisonErrors.Safe(error) }; }
+            {
+                samples[operation] = samples[operation] with
+                {
+                    Success = false,
+                    Error = ComparisonErrors.Safe(error)
+                };
+            }
         }
     }
 

@@ -29,7 +29,10 @@ internal sealed class ServerExecutionOptions
     public int MaximumJsonDepth { get; set; } = MaximumSupportedJsonDepth;
 
     /// <summary>Gets or sets whether a dedicated native HTTP/2 listener is explicitly enabled.</summary>
-    public bool EnableHttp2 { get; set; }
+    public bool EnableHttp2
+    {
+        get; set;
+    }
     /// <summary>Gets or sets the dedicated HTTP/2 listener port without changing existing listener addresses.</summary>
     public int Http2Port { get; set; } = DefaultHttp2Port;
 

@@ -45,8 +45,12 @@ internal static class McpReplyWriter
     private static void WriteRequestId(Utf8JsonWriter writer, Guid? requestId)
     {
         if (requestId is { } id)
-        { writer.WriteString(McpReplyProtocol.RequestId, id); }
+        {
+            writer.WriteString(McpReplyProtocol.RequestId, id);
+        }
         else
-        { writer.WriteNull(McpReplyProtocol.RequestId); }
+        {
+            writer.WriteNull(McpReplyProtocol.RequestId);
+        }
     }
 }

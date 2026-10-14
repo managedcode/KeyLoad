@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Features.InternalSerialization;
-using KeyLoad.Orleans;
 using Orleans.Serialization.Buffers;
 using Orleans.Serialization.Codecs;
 using Orleans.Serialization.Session;
@@ -26,28 +26,45 @@ internal static class NativeDiscoveryCapabilityField
             if (field.IsEndObject)
             {
                 if (!enteredMembers)
-                { throw Invalid(); }
+                {
+                    throw Invalid();
+                }
                 break;
             }
             if (field.IsEndBaseFields && !enteredMembers)
-            { enteredMembers = true; continue; }
+            {
+                enteredMembers = true;
+                continue;
+            }
             if (!enteredMembers || !field.HasFieldId)
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             id = checked(id + field.FieldIdDelta);
             if (id > CapabilityId)
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             reader.SkipField(field);
             if (id != CapabilityId)
-            { continue; }
+            {
+                continue;
+            }
             if (field.WireType != WireType.VarInt || field.IsReference)
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             result = new(start, checked((int)reader.Position));
             if (!reader.ReadFieldHeader().IsEndObject)
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             break;
         }
         if (!reader.ReadFieldHeader().IsEndObject || reader.Remaining != NativeWireIdentities.EmptyRemainingBytes)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         return result;
     }
 
@@ -57,15 +74,21 @@ internal static class NativeDiscoveryCapabilityField
         var version = reader.ReadFieldHeader();
         if (!version.HasFieldId || version.FieldIdDelta != NativeWireIdentities.VersionFieldDelta
             || UInt32Codec.ReadValue(ref reader, version) != NativePayloadVersion.Current)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         var value = reader.ReadFieldHeader();
         if (!value.HasFieldId || value.FieldIdDelta != NativeWireIdentities.ValueFieldDelta
             || value.FieldType != typeof(ReplicaSiloDiscovery) || value.WireType != WireType.TagDelimited
             || value.IsReference)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
     }
 
     internal static InvalidDataException Invalid() => new(InvalidCurrentDiscovery);
     internal readonly record struct Span(int Start, int End)
-    { internal int Length => checked(End - Start); }
+    {
+        internal int Length => checked(End - Start);
+    }
 }

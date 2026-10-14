@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.Messaging;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.BlobStorage;
 using KeyLoad.Server.Features.DocumentStorage;
 
@@ -17,15 +17,24 @@ internal static class PartitionMovementNativeBlobFaultAssertions
             || !fault.Payload.Span.SequenceEqual(actual.Payload.Span) || fault.Signature != original.Signature
             || actual.Signature != original.Signature || actual.Nonce == Guid.Empty || actual.Nonce == original.Nonce
             || reply.Nonce != actual.Nonce || actual.ExpiresAt != original.ExpiresAt
-            || !Exact(original, actual with { Payload = original.Payload, Nonce = original.Nonce, SenderSignature = original.SenderSignature }))
-        { throw Missing(); }
+            || !Exact(original, actual with
+            {
+                Payload = original.Payload,
+                Nonce = original.Nonce,
+                SenderSignature = original.SenderSignature
+            }))
+        {
+            throw Missing();
+        }
         var envelope = NativeSerialization.Deserialize<RemoteDocumentTransportEnvelope>(original.Payload.Span);
         var call = envelope.ControlledBlob ?? throw Missing();
         if (envelope.Document is not null || envelope.Controlled is not null || envelope.QueueTransfer is not null
             || call.CallerVoter != original.CallerVoter || call.CallerSiloAddress != original.CallerSiloAddress
             || !Exact(call.Source, original.SourceOwner) || !Exact(call.Destination.Owner, original.DestinationOwner)
             || call.Request.Frame.ExpiresAt != original.ExpiresAt || reply.Payload.Length > call.MaximumReplyBytes)
-        { throw Missing(); }
+        {
+            throw Missing();
+        }
         PartitionMovementNativeBlobMutationAssertions.Require(call, fault);
         RemoteTransferNativeGenerationAssertions.Require(original, source, destination);
         RemoteTransferNativeGenerationAssertions.Require(actual, source, destination);
@@ -47,11 +56,15 @@ internal static class PartitionMovementNativeBlobFaultAssertions
         {
             if (reply.Error != ErrorCode.Unauthenticated || reply.SafeDetail != RemoteModelNativeProtocol.Unavailable
                 || !reply.Payload.IsEmpty || reply.Signature is not { Length: 0 })
-            { throw Missing(); }
+            {
+                throw Missing();
+            }
             return;
         }
         if (reply.SafeDetail is not null || reply.Payload.IsEmpty || !receiver.Verify(reply.Payload.Span, reply.Signature, reply: true))
-        { throw Missing(); }
+        {
+            throw Missing();
+        }
         var changed = NativeSerialization.Deserialize<RemoteDocumentTransportEnvelope>(fault.Payload.Span).ControlledBlob
             ?? throw Missing();
         var inner = NativeSerialization.Deserialize<RemoteDocumentReplyV1>(reply.Payload.Span);
@@ -60,7 +73,9 @@ internal static class PartitionMovementNativeBlobFaultAssertions
             || inner.SafeDetail != RemoteDocumentProtocol.InvalidProof || !Exact(inner.EndpointDiscovery, current)
             || inner.Result is not null || inner.QueryLeaf is not null || inner.Controlled is not null
             || inner.ControlledBlob is not null || inner.SearchLeaf is not null || inner.QueueTransfer is not null)
-        { throw Missing(); }
+        {
+            throw Missing();
+        }
     }
 
     private static bool Exact<T>(T expected, T actual)

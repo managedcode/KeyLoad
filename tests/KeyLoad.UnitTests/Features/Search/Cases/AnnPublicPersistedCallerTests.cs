@@ -25,7 +25,10 @@ internal sealed class AnnPublicPersistedCallerTests
             var engine = AnnPublicWholeFlow.Engine(database, runtime);
             AnnSearchPage? partial = null;
             var rejection = await Assert.ThrowsExactlyAsync<KeyLoadException>(async () => partial =
-                await engine.ApproximateSearchAsync(Denied, request with { IndexGeneration = MissingGeneration }))
+                await engine.ApproximateSearchAsync(Denied, request with
+                {
+                    IndexGeneration = MissingGeneration
+                }))
                 ?? throw new InvalidOperationException("The actual no-grant caller was not rejected before generation lookup.");
             await Assert.That(rejection.Code).IsEqualTo(ErrorCode.PermissionDenied);
             await Assert.That(rejection.Message).IsEqualTo(DeniedDetail);

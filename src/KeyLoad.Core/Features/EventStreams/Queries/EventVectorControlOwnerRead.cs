@@ -19,7 +19,9 @@ public sealed partial class DatabaseEngine
             var bounded = work.CreateView(view);
             var principal = Principal(bounded, principalId, EvaluationClock.GetUtcNow());
             if (request.ControlPartition is null || request.Scope is null)
-            { throw Errors.Fail(ErrorCode.Validation, MissingEventVectorControlOwner); }
+            {
+                throw Errors.Fail(ErrorCode.Validation, MissingEventVectorControlOwner);
+            }
             ValidatePartition(request.ControlPartition);
             Authorization.Require(principal, request.ControlPartition, request.Scope.Resource,
                 Capability.SubscriptionsManage);

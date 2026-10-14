@@ -7,11 +7,15 @@ internal static class RequestCqrsProbeLiveCapture
         IGrainContext? context, CancellationToken cancellationToken)
     {
         if (context is null || marker.Phase != RequestCqrsProbePhase.BeforeSubmit
-            || context.GrainInstance is not KeyLoad.Orleans.CommandPartitionGrain)
-        { return; }
+            || context.GrainInstance is not KeyLoad.Clustering.CommandPartitionGrain)
+        {
+            return;
+        }
         cancellationToken.ThrowIfCancellationRequested();
         if (context.Deactivated.IsCompleted)
-        { throw new InvalidOperationException(RequestCqrsProbeProtocol.InvalidRecord); }
+        {
+            throw new InvalidOperationException(RequestCqrsProbeProtocol.InvalidRecord);
+        }
         var witness = RequestCqrsProbeActivationCapture.Create(marker, context);
         files.Live.Acknowledge(witness, cancellationToken);
         cancellationToken.ThrowIfCancellationRequested();

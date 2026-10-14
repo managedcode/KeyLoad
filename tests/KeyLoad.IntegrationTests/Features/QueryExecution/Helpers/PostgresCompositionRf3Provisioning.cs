@@ -38,7 +38,10 @@ internal static class PostgresCompositionRf3Provisioning
         var persisted = await McpCallerAssertions.SdkSuccessAsync(
             await root.ConfigurePrincipalAsync(Guid.NewGuid(), principal, token));
         await SqlRf3Protocol.EqualAsync(principal, persisted);
-        identity = identity with { Principal = persisted };
+        identity = identity with
+        {
+            Principal = persisted
+        };
         var payload = DatabaseCompositionRf3Payload.OrdinalGolden(new QueueGraphLink(PostgresRf3State.Left,
             PostgresRf3State.Right, PostgresCompositionRf3Protocol.Label, PostgresCompositionRf3Protocol.Attributes));
         var seed = new CommandRequest(Guid.NewGuid(), partition,

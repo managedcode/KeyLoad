@@ -12,12 +12,18 @@ internal sealed class RecurringSagaBudgetTests
     [Test]
     public async Task RetainedRecordCapCountsSchedulesAndSagasAndReplacementPreservesCount()
     {
-        using var fixture = new RecurringSagaDatabase(new() { MaxScanRecords = OneRetainedRecord });
+        using var fixture = new RecurringSagaDatabase(new()
+        {
+            MaxScanRecords = OneRetainedRecord
+        });
         var scheduleId = Guid.NewGuid();
         var definition = Definition(fixture, scheduleId, EmptyJson);
         _ = fixture.Commit(fixture.Partition, new ConfigureRecurringSchedule(definition, 0));
         _ = fixture.Commit(fixture.Partition,
-            new ConfigureRecurringSchedule(definition with { PayloadJson = "{\"v\":2}" }, 1));
+            new ConfigureRecurringSchedule(definition with
+            {
+                PayloadJson = "{\"v\":2}"
+            }, 1));
         var before = Capacity(fixture);
         await Assert.That(before.Records).IsEqualTo(OneRetainedRecord);
 
@@ -35,7 +41,10 @@ internal sealed class RecurringSagaBudgetTests
     [Test]
     public async Task RetainedNativeBytesAreAdmittedAtomicallyAgainstCombinedLaneLimit()
     {
-        using var fixture = new RecurringSagaDatabase(new() { MaxBatchBytes = RetainedByteLimit });
+        using var fixture = new RecurringSagaDatabase(new()
+        {
+            MaxBatchBytes = RetainedByteLimit
+        });
         var scheduleId = Guid.NewGuid();
         var largeJson = LargeJson();
         _ = fixture.Commit(fixture.Partition,

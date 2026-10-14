@@ -19,11 +19,15 @@ internal static class EventVectorReleaseResultValidation
             || result.Token.OwnershipEpoch != phase.SourceOwner.PlacementEpoch || result.Token.Position <= EmptyPosition
             || !Enum.IsDefined(result.Durability)
             || !result.OriginalOutcomeDigest.IsEmpty && result.OriginalOutcomeDigest.Length != SHA256.HashSizeInBytes)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidPass); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidPass);
+        }
         if (result.Disposition == EventVectorReleaseDisposition.Released)
         {
             if (result.RetainedPin is not null)
-            { throw Errors.Fail(ErrorCode.Corruption, InvalidPass); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, InvalidPass);
+            }
             return;
         }
         var pin = result.RetainedPin ?? throw Errors.Fail(ErrorCode.Corruption, InvalidPass);
@@ -33,6 +37,8 @@ internal static class EventVectorReleaseResultValidation
             || pin.CoverageGeneration != request.CoverageGeneration || pin.Position != request.Position
             || pin.PinRevision != checked(request.ExpectedPinRevision + NextGeneration)
             || !result.OriginalOutcomeDigest.IsEmpty)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidPass); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidPass);
+        }
     }
 }

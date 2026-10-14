@@ -18,7 +18,9 @@ internal static class AnnPublicRequestValidation
             || request.IndexGeneration <= Empty || request.Consumer.Partition != search.Partition
             || search.Text is not null || search.TextField is not null || search.Explain
             || search.Vector is null || search.Space is null || search.VectorField is null)
-        { throw Errors.Fail(ErrorCode.Validation, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, Invalid);
+        }
         JsonData.Identifier(request.Consumer.Name);
         SearchRequestValidation.Validate(search, limits, false, execution);
         FilteredSearchEligibility.ValidateRequest(search.AllowedIds, limits, budget);

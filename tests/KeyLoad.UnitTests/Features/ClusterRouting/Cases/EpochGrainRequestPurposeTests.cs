@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
@@ -27,7 +27,10 @@ internal sealed class EpochGrainRequestPurposeTests
         await Assert.That(GrainNativeContracts.SignedTokenPrefix).IsEqualTo("KLT2.");
         await Assert.That(GrainNativeContracts.EnvelopeAlias).IsEqualTo("keyload.request.envelope.v2");
 
-        var stale = fixture.Database.Sign(envelope with { Purpose = rejectedPurpose });
+        var stale = fixture.Database.Sign(envelope with
+        {
+            Purpose = rejectedPurpose
+        });
         var rejected = Assert.ThrowsExactly<KeyLoadException>(() => codec.VerifyRead(stale, requestId));
         await Assert.That(rejected.Code).IsEqualTo(ErrorCode.TokenInvalidated);
         await Assert.That(GrainNativeContracts.RequestPurpose).IsEqualTo(CurrentPurpose);

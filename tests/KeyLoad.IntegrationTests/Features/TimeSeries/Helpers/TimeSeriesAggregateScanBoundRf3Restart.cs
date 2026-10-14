@@ -12,11 +12,17 @@ internal static class TimeSeriesAggregateScanBoundRf3Restart
         string[] nodes = [McpCallerProtocol.Node1, McpCallerProtocol.Node2, McpCallerProtocol.Node3];
         var failures = new List<Exception>();
         foreach (var node in nodes)
-        { await ServerFailureObserver.ObserveAsync(() => fixture.KillContainerAsync(node, Scenario, token), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => fixture.KillContainerAsync(node, Scenario, token), failures);
+        }
         foreach (var node in nodes)
-        { await ServerFailureObserver.ObserveAsync(async () => await fixture.BeginContainerRestartAsync(node, token), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(async () => await fixture.BeginContainerRestartAsync(node, token), failures);
+        }
         foreach (var node in nodes)
-        { await ServerFailureObserver.ObserveAsync(() => fixture.RestartContainerAsync(node, token), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => fixture.RestartContainerAsync(node, token), failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

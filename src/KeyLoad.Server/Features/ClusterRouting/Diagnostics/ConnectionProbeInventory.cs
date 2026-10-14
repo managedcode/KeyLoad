@@ -1,5 +1,5 @@
 using System.Text.Json;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
@@ -18,7 +18,9 @@ internal static class ConnectionProbeInventory
     {
         if (!name.StartsWith(ConnectionProbeProtocol.Prefix, StringComparison.Ordinal)
             || !name.EndsWith(RequestCqrsProbeProtocol.JsonFileSuffix, StringComparison.Ordinal))
-        { return false; }
+        {
+            return false;
+        }
         var parts = name[ConnectionProbeProtocol.Prefix.Length..^RequestCqrsProbeProtocol.JsonFileSuffix.Length]
             .Split(ConnectionProbeProtocol.Separator, StringSplitOptions.None);
         return parts.Length == ConnectionProbeProtocol.NameParts
@@ -53,7 +55,9 @@ internal static class ConnectionProbeInventory
             || GrainId.Parse(value.GrainId, System.Globalization.CultureInfo.InvariantCulture).Type
                 != GrainType.Create(value.ConnectionGrainType)
             || ActivationId.FromParsableString(value.ActivationId).IsDefault)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
     }
 
     internal static void RequireMarkers(IReadOnlyList<ConnectionProbeWitness> witnesses,
@@ -66,14 +70,18 @@ internal static class ConnectionProbeInventory
                 && candidate.Outcome == RequestCqrsProbeOutcome.Observed);
             if (marker.SessionId != value.SessionId || marker.CommandId != value.CommandId
                 || marker.Voter != value.Voter || marker.SiloAddress != value.SiloAddress)
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             if (value.Closed)
             {
                 var active = witnesses.SingleOrDefault(candidate => candidate.ArmId == value.ArmId
                     && candidate.RequestId == value.RequestId && !candidate.Closed) ?? throw Invalid();
                 if (active.ConnectionId != value.ConnectionId || active.GrainId != value.GrainId
                     || active.ActivationId != value.ActivationId)
-                { throw Invalid(); }
+                {
+                    throw Invalid();
+                }
             }
         }
     }

@@ -15,9 +15,13 @@ internal static class NativeTextVectorFusionR40Pages
             foreach (var explain in new[] { false, true })
             {
                 if (epoch is 2L or 4L)
-                { await NativeTextVectorFusionR40Refusal.BothAsync(admin, reader, state, Request(state, query, true, true, explain), token); }
+                {
+                    await NativeTextVectorFusionR40Refusal.BothAsync(admin, reader, state, Request(state, query, true, true, explain), token);
+                }
                 else
-                { await BothAsync(admin, reader, state, query, restricted, false, true, true, explain, token); }
+                {
+                    await BothAsync(admin, reader, state, query, restricted, false, true, true, explain, token);
+                }
             }
         }
         if (epoch is 2L or 4L)
@@ -27,9 +31,13 @@ internal static class NativeTextVectorFusionR40Pages
         }
         await BothAsync(admin, reader, state, "needle", restricted, false, epoch != 4L, epoch == 4L, false, token);
         if (exhaustiveAdministrator)
-        { await AdminAsync(admin, state, token); }
+        {
+            await AdminAsync(admin, state, token);
+        }
         else
-        { await CurrentAsync(admin, state, token); }
+        {
+            await CurrentAsync(admin, state, token);
+        }
     }
 
     internal static Task CurrentAsync(RequestCqrsRf3Callers admin,
@@ -41,7 +49,9 @@ internal static class NativeTextVectorFusionR40Pages
         foreach (var query in new[] { "needle", "plain", "КИЇВ" })
         {
             foreach (var explain in new[] { false, true })
-            { await BothAsync(admin, admin, state, query, false, true, true, true, explain, token); }
+            {
+                await BothAsync(admin, admin, state, query, false, true, true, true, explain, token);
+            }
         }
     }
 
@@ -56,9 +66,13 @@ internal static class NativeTextVectorFusionR40Pages
         {
             await SqlRf3Protocol.EqualAsync(expected, await NativeTextSelectedRf3Call.ExecuteAsync(caller.Sdk, caller.Mcp, request, path, token));
             if (administrator)
-            { await OutboxAsync(admin, state, token); }
+            {
+                await OutboxAsync(admin, state, token);
+            }
             else
-            { await CurrentAsync(admin, state, token); }
+            {
+                await CurrentAsync(admin, state, token);
+            }
         }
     }
 

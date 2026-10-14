@@ -11,10 +11,16 @@ internal sealed class TimeSeriesResourceTagPolicyRf3State(TimeSeriesRf3Scenario 
     internal AtomicPartitionPlacementResolution Placement { get; } = placement;
     internal CommandRequest Append { get; } = append;
     internal CommitReceipt Receipt { get; } = receipt;
-    internal List<(Guid Id, ConfigureResourceRequest Request, ResourceDefinition Result)> Configurations { get; } =
+    internal List<(Guid Id, ConfigureResourceRequest Request, ResourceDefinition Result)> Configurations
+    {
+        get;
+    } =
         [(createId, new(scenario.Partition.TenantId, scenario.Partition.DatabaseId, definition), definition)];
     internal Guid StaleId { get; } = Guid.NewGuid();
-    internal ConfigureResourceRequest? Stale { get; set; }
+    internal ConfigureResourceRequest? Stale
+    {
+        get; set;
+    }
     internal OutboxStatus Outbox { get; set; } = null!;
 
     internal ReadSamplesRequest Range() => new(Scenario.Partition, TimeSeriesRf3Scenario.Set,

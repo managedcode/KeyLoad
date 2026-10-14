@@ -1,9 +1,9 @@
 using System.Net;
 using System.Security.Cryptography;
+using KeyLoad.Clustering;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.IntegrationTests.Features.DocumentStorage;
@@ -21,7 +21,9 @@ internal sealed class ProtectedDocumentRf3OutcomePeer(TwoRf3MembershipWave wave,
             peer.Timing.OutcomeExpiry, Guid.NewGuid(), MaximumBytes, 256, MaximumBytes);
         var body = NativeSerialization.Serialize(query);
         if (body.Length > MaximumBytes)
-        { throw new InvalidDataException(PartitionMovementProtocol.InvalidProof); }
+        {
+            throw new InvalidDataException(PartitionMovementProtocol.InvalidProof);
+        }
         using var http = McpCallerHttp.Create(wave.Application,
             target ? TwoRf3MembershipProtocol.Node4 : TwoRf3MembershipProtocol.Node1);
         using var request = new HttpRequestMessage(HttpMethod.Post,
@@ -38,7 +40,9 @@ internal sealed class ProtectedDocumentRf3OutcomePeer(TwoRf3MembershipWave wave,
         await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
         if (response.Content.Headers.ContentType?.ToString() != PartitionMovementProtocol.ContentType
             || response.Content.Headers.ContentLength is not > 0 or > MaximumBytes)
-        { throw new InvalidDataException(PartitionMovementProtocol.InvalidProof); }
+        {
+            throw new InvalidDataException(PartitionMovementProtocol.InvalidProof);
+        }
         var bytes = new byte[checked((int)response.Content.Headers.ContentLength.Value)];
         await using var stream = await response.Content.ReadAsStreamAsync(token).ConfigureAwait(false);
         await stream.ReadExactlyAsync(bytes, token).ConfigureAwait(false);
@@ -49,7 +53,9 @@ internal sealed class ProtectedDocumentRf3OutcomePeer(TwoRf3MembershipWave wave,
             || !PhysicalOwnerEntryValidation.SameOwner(reply.Receiver, receiver)
             || reply.Discovery.VoterId != receiver.VoterIds[0]
             || reply.Discovery.Incarnation != receiver.Incarnation || !reply.Discovery.TransportReady)
-        { throw new InvalidDataException(PartitionMovementProtocol.InvalidProof); }
+        {
+            throw new InvalidDataException(PartitionMovementProtocol.InvalidProof);
+        }
         if (expectedError is { } denied)
         {
             await Assert.That(reply.Reply.Error).IsEqualTo(denied);
@@ -57,7 +63,9 @@ internal sealed class ProtectedDocumentRf3OutcomePeer(TwoRf3MembershipWave wave,
             return null;
         }
         if (reply.Reply.Error is { } code)
-        { throw Errors.Fail(code, reply.Reply.SafeDetail ?? PartitionMovementProtocol.Unavailable); }
+        {
+            throw Errors.Fail(code, reply.Reply.SafeDetail ?? PartitionMovementProtocol.Unavailable);
+        }
         var witness = (PartitionMovementOutcomeWitness)GrainNativePayload.Read<GrainValue>(reply.Reply.Payload).Value!;
         await Assert.That(witness.Result.Error).IsNull();
         await Assert.That(witness.Result.SafeDetail).IsNull();
@@ -74,7 +82,9 @@ internal sealed class ProtectedDocumentRf3OutcomePeer(TwoRf3MembershipWave wave,
             using var mac = new PartitionMovementMac(key, MaximumBytes);
             var signature = mac.SignOutcome(body, reply: false);
             if (badMac)
-            { signature = (signature[0] == '0' ? "1" : "0") + signature[1..]; }
+            {
+                signature = (signature[0] == '0' ? "1" : "0") + signature[1..];
+            }
             request.Headers.Add(PartitionMovementProtocol.SignatureHeader, signature);
         }
         finally { CryptographicOperations.ZeroMemory(key); }
@@ -89,7 +99,9 @@ internal sealed class ProtectedDocumentRf3OutcomePeer(TwoRf3MembershipWave wave,
         {
             using var mac = new PartitionMovementMac(key, MaximumBytes);
             if (signatures.Length != 1 || !mac.VerifyOutcome(bytes, signatures[0], reply: true))
-            { throw new InvalidDataException(PartitionMovementProtocol.InvalidProof); }
+            {
+                throw new InvalidDataException(PartitionMovementProtocol.InvalidProof);
+            }
         }
         finally { CryptographicOperations.ZeroMemory(key); }
     }

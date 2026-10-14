@@ -35,7 +35,9 @@ internal sealed class BlobRestoreNormalizer(DatabaseEngine database)
             {
                 BlobRestoreFence.Validate(current);
                 if (current.TargetIncarnation != database.Store.Identity.Incarnation)
-                { throw Errors.Fail(ErrorCode.RecoveryRequired, BlobErrors.Fenced); }
+                {
+                    throw Errors.Fail(ErrorCode.RecoveryRequired, BlobErrors.Fenced);
+                }
                 return current;
             }
             BlobRestoreFence.RequireOpen(tx);
@@ -46,10 +48,14 @@ internal sealed class BlobRestoreNormalizer(DatabaseEngine database)
                 return null;
             }
             if (global.Incarnation == Guid.Empty)
-            { throw BlobErrors.Corruption(); }
+            {
+                throw BlobErrors.Corruption();
+            }
             BlobQuotaOperations.Validate(global, global.Incarnation);
             if (global.Incarnation == database.Store.Identity.Incarnation)
-            { return null; }
+            {
+                return null;
+            }
             var marker = new BlobRestoreMarker(BlobKeys.FormatVersion, global.Incarnation,
                 database.Store.Identity.Incarnation, BlobRestorePhase.States, null, ReservedBytesEmptyCount, ObjectKeysEmptyCount, VersionsEmptyCount, ActiveUploadsEmptyCount, ResourcesEmptyCount);
             tx.PutRecord(BlobRestoreFence.MarkerKey, marker);
@@ -70,12 +76,18 @@ internal sealed class BlobRestoreNormalizer(DatabaseEngine database)
         {
             if (marker.Phase is BlobRestorePhase.States or BlobRestorePhase.Heads
                 or BlobRestorePhase.VerifyStates or BlobRestorePhase.VerifyHeads)
-            { BlobMetadataRules.EncodedLength(value.Length); }
+            {
+                BlobMetadataRules.EncodedLength(value.Length);
+            }
             var candidate = checked((long)key.Length + value.Length);
             if (candidate > policy.RestorePageBytes - bytes && records.Count > EmptyCollectedRecordCount)
-            { return false; }
+            {
+                return false;
+            }
             if (candidate > policy.RestorePageBytes)
-            { throw Errors.Fail(ErrorCode.BudgetExceeded, BlobErrors.RestoreWorkBudget); }
+            {
+                throw Errors.Fail(ErrorCode.BudgetExceeded, BlobErrors.RestoreWorkBudget);
+            }
             records.Add(new(key.ToArray(), value.ToArray()));
             bytes = checked(bytes + candidate);
             return records.Count < policy.MetadataPageSize && bytes < policy.RestorePageBytes;
@@ -97,16 +109,29 @@ internal sealed class BlobRestoreNormalizer(DatabaseEngine database)
             {
                 if (marker.Phase is BlobRestorePhase.States or BlobRestorePhase.Heads
                     or BlobRestorePhase.VerifyStates or BlobRestorePhase.VerifyHeads)
-                { BlobMetadataRules.EncodedLength(current.Length); }
+                {
+                    BlobMetadataRules.EncodedLength(current.Length);
+                }
                 matches = current.SequenceEqual(record.Value.Span);
             });
             if (!found || !matches)
-            { throw BlobErrors.Corruption(); }
+            {
+                throw BlobErrors.Corruption();
+            }
             marker = ApplyRecord(tx, marker, record);
-            marker = marker with { ExclusiveCursor = record.Key };
+            marker = marker with
+            {
+                ExclusiveCursor = record.Key
+            };
         }
         if (page.Count == EmptyPageCount)
-        { marker = marker with { Phase = Next(marker.Phase), ExclusiveCursor = null }; }
+        {
+            marker = marker with
+            {
+                Phase = BlobRestorePageValidation.Next(marker.Phase),
+                ExclusiveCursor = null
+            };
+        }
         BlobRestoreFence.Validate(marker);
         tx.PutRecord(BlobRestoreFence.MarkerKey, marker);
         return marker;
@@ -124,50 +149,19 @@ internal sealed class BlobRestoreNormalizer(DatabaseEngine database)
                 return new BlobRestoreHeadPage(database, marker).Process(tx, record, false);
             case BlobRestorePhase.Quotas:
                 new BlobRestoreAccounting(database, marker).VerifyQuota(tx, record);
-                return marker with { Resources = checked(marker.Resources + ResourcesStep) };
+                return marker with
+                {
+                    Resources = checked(marker.Resources + ResourcesStep)
+                };
             case BlobRestorePhase.VerifyStates:
                 return new BlobRestoreStatePage(database, marker).Process(tx, record, true);
             case BlobRestorePhase.VerifyHeads:
                 return new BlobRestoreHeadPage(database, marker).Process(tx, record, true);
             case BlobRestorePhase.VerifyResources:
-                return VerifyResource(tx, marker, record);
+                return BlobRestorePageValidation.Verify(tx, marker, record);
             default:
                 throw BlobErrors.Corruption();
         }
-    }
-
-    private static BlobRestorePhase Next(BlobRestorePhase phase) => phase switch
-    {
-        BlobRestorePhase.States => BlobRestorePhase.Heads,
-        BlobRestorePhase.Heads => BlobRestorePhase.Quotas,
-        BlobRestorePhase.Quotas => BlobRestorePhase.VerifyStates,
-        BlobRestorePhase.VerifyStates => BlobRestorePhase.VerifyHeads,
-        BlobRestorePhase.VerifyHeads => BlobRestorePhase.VerifyResources,
-        BlobRestorePhase.VerifyResources => BlobRestorePhase.Complete,
-        _ => throw BlobErrors.Corruption()
-    };
-
-    private static BlobRestoreMarker VerifyResource(IKeyValueView view, BlobRestoreMarker marker, KeyValueRecord record)
-    {
-        const int QuotaAccountSuffixComponents = 1;
-        const int TenantComponentIndex = 1;
-        const int DatabaseComponentIndex = 2;
-        const int ResourceComponentIndex = 3;
-        const int ResourcesValidationBoundary = 1;
-        const int ResourcesStep = 1;
-
-        var definition = BlobRecordReader.Decode<ResourceDefinition>(record.Value.Span);
-        if (definition.Kind != ResourceKind.BlobStore)
-        { return marker; }
-        var parts = KeyCodec.Decode(record.Key.Span);
-        if (parts.Length != BlobRestoreFence.QuotaComponents - QuotaAccountSuffixComponents || parts[TenantComponentIndex] is not string tenant
-            || parts[DatabaseComponentIndex] is not string database || parts[ResourceComponentIndex] is not string resource || resource != definition.Name)
-        { throw BlobErrors.Corruption(); }
-        BlobQuotaOperations.ValidatePolicy(definition);
-        _ = BlobQuotaOperations.Read(view, BlobKeys.Quota(tenant, database, definition.TransactionDomainId, resource), marker.TargetIncarnation);
-        if (marker.Resources < ResourcesValidationBoundary)
-        { throw BlobErrors.Corruption(); }
-        return marker with { Resources = marker.Resources - ResourcesStep };
     }
 
     private void Finish(BlobRestoreMarker marker)
@@ -180,14 +174,21 @@ internal sealed class BlobRestoreNormalizer(DatabaseEngine database)
             RequireMarker(tx, marker);
             if (marker.Resources != EmptyRestoreAccountingCount || marker.ActiveUploads != EmptyRestoreAccountingCount
                 || tx.VisitRange(BlobRestoreFence.Accounts, MaxRecordsSingleItemCount, static (_, _) => false).Records != EmptyRestoreAccountingCount)
-            { throw BlobErrors.Corruption(); }
+            {
+                throw BlobErrors.Corruption();
+            }
             var global = new BlobRestoreAccounting(database, marker).SourceQuota(tx, BlobKeys.Global);
             var aggregate = new BlobQuota(BlobKeys.FormatVersion, marker.TargetIncarnation,
                 marker.ReservedBytes, marker.ObjectKeys, marker.Versions, marker.ActiveUploads);
             BlobQuotaOperations.Validate(aggregate, marker.TargetIncarnation);
             if (!BlobRestoreAccounting.EqualCounters(global, aggregate))
-            { throw BlobErrors.Corruption(); }
-            tx.PutRecord(BlobKeys.Global, global with { Incarnation = marker.TargetIncarnation });
+            {
+                throw BlobErrors.Corruption();
+            }
+            tx.PutRecord(BlobKeys.Global, global with
+            {
+                Incarnation = marker.TargetIncarnation
+            });
             tx.Delete(BlobRestoreFence.MarkerKey);
             return true;
         });
@@ -199,6 +200,8 @@ internal sealed class BlobRestoreNormalizer(DatabaseEngine database)
             ?? throw BlobErrors.Corruption();
         BlobRestoreFence.Validate(current);
         if (!NativeSerialization.Serialize(current).AsSpan().SequenceEqual(NativeSerialization.Serialize(expected)))
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, BlobErrors.Fenced); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, BlobErrors.Fenced);
+        }
     }
 }

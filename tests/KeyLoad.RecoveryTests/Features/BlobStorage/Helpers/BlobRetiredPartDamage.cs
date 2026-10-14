@@ -15,9 +15,13 @@ internal static class BlobRetiredPartDamage
         store.Commit((tx, _) =>
         {
             if (fault == BlobRetiredPartFaultKind.WrongManifestHash)
-            { tx.PutRecord(key, new BlobPartMetadata(1, 4, BlobPriorPublicationOracle.Hash(new byte[] { 5, 6, 7, 8 }))); }
+            {
+                tx.PutRecord(key, new BlobPartMetadata(1, 4, BlobPriorPublicationOracle.Hash(new byte[] { 5, 6, 7, 8 })));
+            }
             else
-            { tx.Delete(key); }
+            {
+                tx.Delete(key);
+            }
             return true;
         });
         return new(key, original);

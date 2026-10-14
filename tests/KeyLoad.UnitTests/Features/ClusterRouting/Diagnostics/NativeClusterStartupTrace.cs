@@ -8,12 +8,17 @@ internal sealed class NativeClusterStartupTrace
     private readonly List<NativeClusterStartupEvent> events = [];
     private int continuationIndex = -1;
     internal IReadOnlyList<NativeClusterStartupEvent> Events => events;
-    internal bool Saturated { get; private set; }
+    internal bool Saturated
+    {
+        get; private set;
+    }
 
     internal NativeClusterStartupFile Read(string path, string role)
     {
         if ((File.GetAttributes(path) & FileAttributes.ReparsePoint) != 0)
-        { throw new IOException("The native startup trace cannot be a link."); }
+        {
+            throw new IOException("The native startup trace cannot be a link.");
+        }
         var failures = new List<Exception>();
         NativeClusterStartupFile? result = null;
         try
@@ -25,11 +30,11 @@ internal sealed class NativeClusterStartupTrace
                 KeyLoad.Server.ServerFailureObserver.Observe(
                     () => result = ReadContents(stream, digest, role), failures);
             }
-            catch (Exception digestFailure) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(digestFailure)) { failures.Add(digestFailure); }
-            catch (Exception digestFailure) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(digestFailure)) { failures.Add(digestFailure); }
+            catch (Exception digestFailure) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(digestFailure)) { failures.Add(digestFailure); }
+            catch (Exception digestFailure) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(digestFailure)) { failures.Add(digestFailure); }
         }
-        catch (Exception openOrCloseFailure) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(openOrCloseFailure)) { failures.Add(openOrCloseFailure); }
-        catch (Exception openOrCloseFailure) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(openOrCloseFailure)) { failures.Add(openOrCloseFailure); }
+        catch (Exception openOrCloseFailure) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(openOrCloseFailure)) { failures.Add(openOrCloseFailure); }
+        catch (Exception openOrCloseFailure) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(openOrCloseFailure)) { failures.Add(openOrCloseFailure); }
         KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
         return result ?? throw new IOException("The native startup trace did not settle.");
     }
@@ -51,7 +56,9 @@ internal sealed class NativeClusterStartupTrace
             consumed += read;
         }
         if (lineLength != 0)
-        { Observe(Encoding.UTF8.GetString(line, 0, lineLength), role, lineOffset); }
+        {
+            Observe(Encoding.UTF8.GetString(line, 0, lineLength), role, lineOffset);
+        }
         return new(role, consumed, stream.Length > consumed,
             Convert.ToHexString(digest.GetHashAndReset()));
     }
@@ -64,7 +71,9 @@ internal sealed class NativeClusterStartupTrace
             if (buffer[index] != (byte)'\n')
             {
                 if (lineLength < line.Length)
-                { line[lineLength++] = buffer[index]; }
+                {
+                    line[lineLength++] = buffer[index];
+                }
                 continue;
             }
             Observe(Encoding.UTF8.GetString(line, 0, lineLength), role, lineOffset);
@@ -78,14 +87,23 @@ internal sealed class NativeClusterStartupTrace
         var start = line.IndexOf('[', StringComparison.Ordinal);
         var end = line.IndexOf(']', StringComparison.Ordinal);
         if (start is 0 or 1)
-        { continuationIndex = -1; }
+        {
+            continuationIndex = -1;
+        }
         if (start >= 0 && start < end && start <= 1)
-        { Header(line[(start + 1)..end], role, offset); return; }
+        {
+            Header(line[(start + 1)..end], role, offset);
+            return;
+        }
         if (continuationIndex < 0)
-        { return; }
+        {
+            return;
+        }
         var current = events[continuationIndex];
         if (current.Role != role || current.Level is not ("Warning" or "Error" or "Critical"))
-        { return; }
+        {
+            return;
+        }
         var words = line.Split([' ', ':', '\t', ',', '(', ')'], StringSplitOptions.RemoveEmptyEntries);
         var type = words.FirstOrDefault(static word => word.EndsWith("Exception", StringComparison.Ordinal)
             && NativeClusterStartupProtocol.Identifier(word)
@@ -93,7 +111,13 @@ internal sealed class NativeClusterStartupTrace
                 || word.StartsWith("Orleans.", StringComparison.Ordinal)
                 || word.StartsWith("Microsoft.", StringComparison.Ordinal)));
         if (type is not null && current.ExceptionType is null)
-        { events[continuationIndex] = current with { ExceptionType = type, Reason = Reason(line) }; }
+        {
+            events[continuationIndex] = current with
+            {
+                ExceptionType = type,
+                Reason = Reason(line)
+            };
+        }
     }
 
     private void Header(string header, string role, long offset)
@@ -103,13 +127,19 @@ internal sealed class NativeClusterStartupTrace
         if (fields.Length != 4 || !NativeClusterStartupProtocol.Identifier(fields[2])
             || !NativeClusterStartupProtocol.Identifier(fields[3])
             || fields[1] is not ("Information" or "Warning" or "Error" or "Critical"))
-        { return; }
+        {
+            return;
+        }
         var category = fields[3];
         if (!category.StartsWith("Orleans.", StringComparison.Ordinal)
             && !category.StartsWith("Microsoft.Extensions.Hosting.", StringComparison.Ordinal))
-        { return; }
+        {
+            return;
+        }
         if (!AdmitHeader(fields[1]))
-        { return; }
+        {
+            return;
+        }
         events.Add(new(role, offset, fields[1], fields[2], category));
         continuationIndex = events.Count - 1;
     }
@@ -117,13 +147,19 @@ internal sealed class NativeClusterStartupTrace
     private bool AdmitHeader(string level)
     {
         if (events.Count < NativeClusterStartupProtocol.MaximumEvents)
-        { return true; }
+        {
+            return true;
+        }
         Saturated = true;
         if (level == "Information")
-        { return false; }
+        {
+            return false;
+        }
         var informational = events.FindLastIndex(static item => item.Level == "Information");
         if (informational < 0)
-        { return false; }
+        {
+            return false;
+        }
         events.RemoveAt(informational);
         return true;
     }
@@ -131,15 +167,25 @@ internal sealed class NativeClusterStartupTrace
     private static string? Reason(string line)
     {
         if (line.Contains("Address already in use", StringComparison.OrdinalIgnoreCase))
-        { return "AddressInUse"; }
+        {
+            return "AddressInUse";
+        }
         if (line.Contains("Connection refused", StringComparison.OrdinalIgnoreCase))
-        { return "ConnectionRefused"; }
+        {
+            return "ConnectionRefused";
+        }
         if (line.Contains("Permission denied", StringComparison.OrdinalIgnoreCase))
-        { return "PermissionDenied"; }
+        {
+            return "PermissionDenied";
+        }
         if (line.Contains("timed out", StringComparison.OrdinalIgnoreCase))
-        { return "TimedOut"; }
+        {
+            return "TimedOut";
+        }
         if (line.Contains("canceled", StringComparison.OrdinalIgnoreCase))
-        { return "Cancelled"; }
+        {
+            return "Cancelled";
+        }
         return null;
     }
 }

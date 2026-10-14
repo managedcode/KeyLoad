@@ -47,7 +47,9 @@ internal static class CliBackupRestoreUnsafeDestinationTrial
         ServerFailureObserver.Observe(() => RemoveOwnedLink(link, fixture.ExistingDestination), failures);
         ServerFailureObserver.ThrowIfAny(failures);
         if (ancestor)
-        { Directory.CreateDirectory(link); }
+        {
+            Directory.CreateDirectory(link);
+        }
         var healthy = await CliBackupRestoreProcess.RunAsync(options,
             [RestoreCommand, fixture.BackupDirectory, destination], cancellationToken).ConfigureAwait(false);
         await CliBackupRestoreAssertions.SuccessfulProcessAsync(healthy).ConfigureAwait(false);
@@ -71,7 +73,9 @@ internal static class CliBackupRestoreUnsafeDestinationTrial
     {
         if ((File.GetAttributes(link) & FileAttributes.ReparsePoint) == NoAttributes
             || !string.Equals(new DirectoryInfo(link).LinkTarget, target, StringComparison.Ordinal))
-        { throw new InvalidOperationException(ChangedLink); }
+        {
+            throw new InvalidOperationException(ChangedLink);
+        }
         Directory.Delete(link, recursive: false);
     }
 

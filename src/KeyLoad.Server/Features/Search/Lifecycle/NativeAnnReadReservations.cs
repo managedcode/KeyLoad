@@ -8,13 +8,21 @@ internal sealed class NativeAnnReadReservations
 
     internal long Bytes
     {
-        get { lock (gate) { return reserved; } }
+        get
+        {
+            lock (gate)
+            {
+                return reserved;
+            }
+        }
     }
 
     internal NativeAnnReadReservation Reserve(long bytes)
     {
         if (bytes <= Empty)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, NativeAnnProtocol.Bound); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, NativeAnnProtocol.Bound);
+        }
         lock (gate)
         {
             var next = checked(reserved + bytes);
@@ -29,7 +37,9 @@ internal sealed class NativeAnnReadReservations
         lock (gate)
         {
             if (bytes <= Empty || bytes > reserved)
-            { throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Ownership); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Ownership);
+            }
             reserved -= bytes;
         }
     }

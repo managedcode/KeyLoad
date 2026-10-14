@@ -34,7 +34,10 @@ internal sealed class AggregateReplaySequenceTests
         {
             var key = fixture.EventKey(revision);
             var record = transaction.GetRecord<EventRecord>(key) ?? throw new InvalidOperationException();
-            transaction.PutRecord(key, record with { EventSequence = sequence });
+            transaction.PutRecord(key, record with
+            {
+                EventSequence = sequence
+            });
             return true;
         });
 }

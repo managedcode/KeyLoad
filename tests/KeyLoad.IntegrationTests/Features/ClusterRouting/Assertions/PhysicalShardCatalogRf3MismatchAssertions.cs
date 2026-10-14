@@ -71,7 +71,9 @@ internal static class PhysicalShardCatalogRf3MismatchAssertions
                 .ConfigureAwait(false);
         }
         catch (HttpRequestException failure) when (failure.StatusCode == HttpStatusCode.ServiceUnavailable)
-        { await Assert.That(failure.StatusCode).IsEqualTo(HttpStatusCode.ServiceUnavailable); }
+        {
+            await Assert.That(failure.StatusCode).IsEqualTo(HttpStatusCode.ServiceUnavailable);
+        }
     }
 
     private static async Task VerifyStoppedProcessDenialAsync(Aspire.Hosting.DistributedApplication app,
@@ -86,7 +88,9 @@ internal static class PhysicalShardCatalogRf3MismatchAssertions
         }, cancellationToken).ConfigureAwait(false);
         if (!app.ResourceNotifications.TryGetCurrentState(node, out var snapshot)
             || !IsTerminalState(snapshot?.Snapshot.State?.Text))
-        { throw new InvalidOperationException("The Aspire node did not report a terminal state after its HTTP endpoint stopped."); }
+        {
+            throw new InvalidOperationException("The Aspire node did not report a terminal state after its HTTP endpoint stopped.");
+        }
         using var http = McpCallerHttp.Create(app, node);
         var sdk = new KeyLoadClient(http, profile.AdminKey, IntegrationClientOptions.Execution());
         var unknown = await sdk.CommitAsync(denied.Command, cancellationToken).ConfigureAwait(false);

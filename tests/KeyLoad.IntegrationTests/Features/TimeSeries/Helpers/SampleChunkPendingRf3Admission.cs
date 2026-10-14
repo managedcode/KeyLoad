@@ -7,7 +7,7 @@ namespace KeyLoad.IntegrationTests.Features.TimeSeries;
 internal static class SampleChunkPendingRf3Admission
 {
     internal static async Task AdmitUnscheduledAsync(TwoRf3MembershipWave wave, SampleChunkPendingRf3Item item,
-        KeyLoadClient administrator, IReadOnlyList<KeyLoad.Orleans.ReplicaSiloDiscovery> discovery, CancellationToken token)
+        KeyLoadClient administrator, IReadOnlyList<KeyLoad.Clustering.ReplicaSiloDiscovery> discovery, CancellationToken token)
     {
         var controls = wave.QueryControls;
         var arm = controls.WriteArm(item.Scope.Creator.Id, item.CommandId, null,

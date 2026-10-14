@@ -16,7 +16,9 @@ public static class EventFeedOfferClient
         ArgumentNullException.ThrowIfNull(client);
         ArgumentNullException.ThrowIfNull(request);
         if (request.Action != EventFeedControlAction.Offer)
-        { throw new ArgumentException(EventFeedOfferProtocol.Description, nameof(request)); }
+        {
+            throw new ArgumentException(EventFeedOfferProtocol.Description, nameof(request));
+        }
         return client.Send<EventFeedControlResult>(EventFeedOfferProtocol.Route, request, true, request.CommandId, cancellationToken);
     }
 }

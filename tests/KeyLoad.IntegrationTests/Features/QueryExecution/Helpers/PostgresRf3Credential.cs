@@ -11,7 +11,10 @@ internal static class PostgresRf3Credential
     {
         var original = state.Reader.Credential;
         await McpCallerAssertions.SdkStatusAsync(
-            await root.ConfigureApiKeyAsync(Guid.NewGuid(), original with { Revoked = true }, token));
+            await root.ConfigureApiKeyAsync(Guid.NewGuid(), original with
+            {
+                Revoked = true
+            }, token));
         var before = await PostgresRf3Assertions.ImageAsync(root, token);
         await PostgresRf3Assertions.ErrorAsync(wire.ExecuteAsync<QueryPage>(state.Sql, [], prepared: false, token),
             PostgresRf3Protocol.UnauthenticatedSqlState, ErrorCode.Unauthenticated);

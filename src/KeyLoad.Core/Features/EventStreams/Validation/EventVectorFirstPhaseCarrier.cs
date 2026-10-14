@@ -8,7 +8,9 @@ internal static class EventVectorFirstPhaseCarrier
         EventVectorAdmissionPolicy admission)
     {
         if (originalBytes.IsEmpty)
-        { return ReadOnlyMemory<byte>.Empty; }
+        {
+            return ReadOnlyMemory<byte>.Empty;
+        }
         var first = Read(originalBytes, admission);
         return EventVectorControlBodyProjection.Digest(first, admission);
     }
@@ -19,13 +21,17 @@ internal static class EventVectorFirstPhaseCarrier
         ArgumentNullException.ThrowIfNull(admission);
         admission.RequireEncodedBytes(originalBytes.Length);
         if (originalBytes.IsEmpty)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         var first = NativeSerialization.Deserialize<EventVectorControlPhase>(originalBytes.Span);
         if (first is null || first.Action != EventVectorControlAction.Open
             || first.OriginalRequest is null || first.OriginalRequest.Action != EventFeedControlAction.Open
             || !first.OriginalCapturedFirstOpenPhaseBytes.IsEmpty
             || first.OriginalFirstIssuancePublicCommandId != Guid.Empty)
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
         EventVectorControlFields.Require(first, admission);
         return first;
     }
@@ -41,9 +47,13 @@ internal static class EventVectorFirstPhaseCarrier
         if (carries && phase.OriginalCapturedFirstOpenPhaseBytes.IsEmpty
             || !carries && !optional && !phase.OriginalCapturedFirstOpenPhaseBytes.IsEmpty
             || freshRelease != (phase.OriginalFirstIssuancePublicCommandId != Guid.Empty))
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
         if (phase.OriginalCapturedFirstOpenPhaseBytes.IsEmpty)
-        { return; }
+        {
+            return;
+        }
         var first = Read(phase.OriginalCapturedFirstOpenPhaseBytes, admission);
         var request = phase.OriginalRequest;
         var originalId = freshRelease ? phase.OriginalFirstIssuancePublicCommandId : request.CommandId;
@@ -52,6 +62,8 @@ internal static class EventVectorFirstPhaseCarrier
             || first.OriginalRequest.Scope != request.Scope
             || !freshRelease && (first.OriginalParentExpiresAt != phase.OriginalParentExpiresAt
                 || first.OriginalParentRequestId != phase.OriginalParentRequestId))
-        { throw Errors.Fail(ErrorCode.Conflict, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, Invalid);
+        }
     }
 }

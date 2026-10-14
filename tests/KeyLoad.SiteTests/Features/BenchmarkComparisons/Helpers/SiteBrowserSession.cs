@@ -9,7 +9,10 @@ internal sealed class SiteBrowserSession : IAsyncDisposable
 {
     private readonly SiteTempDirectory temporary;
     private readonly SiteStaticFileHost host;
-    public SiteBrowserChrome Chrome { get; }
+    public SiteBrowserChrome Chrome
+    {
+        get;
+    }
     private readonly string sessionDirectory;
     private readonly SiteBrowserCoverageMetadata metadata;
     private bool completed;
@@ -33,24 +36,33 @@ internal sealed class SiteBrowserSession : IAsyncDisposable
         if (chrome is not null)
         {
             try
-            { await chrome.DisposeAsync(); }
+            {
+                await chrome.DisposeAsync();
+            }
             catch (Exception cleanupException) when (cleanupException is WebSocketException or
                 OperationCanceledException or InvalidOperationException or Win32Exception or TimeoutException or
                 ObjectDisposedException or IOException)
-            { /* Preserve the startup failure. */ }
+            { /* Preserve the startup failure. */
+            }
         }
         if (host is not null)
         {
             try
-            { await host.DisposeAsync(); }
+            {
+                await host.DisposeAsync();
+            }
             catch (Exception cleanupException) when (cleanupException is OperationCanceledException or
                 HttpListenerException or ObjectDisposedException or IOException)
-            { /* Preserve the startup failure. */ }
+            { /* Preserve the startup failure. */
+            }
         }
         try
-        { await temporary.DisposeAsync(); }
+        {
+            await temporary.DisposeAsync();
+        }
         catch (Exception cleanupException) when (cleanupException is IOException or UnauthorizedAccessException)
-        { /* Preserve the startup failure. */ }
+        { /* Preserve the startup failure. */
+        }
     }
 
     public async Task CompleteAsync(CancellationToken cancellationToken)
@@ -77,7 +89,10 @@ internal sealed class SiteBrowserSession : IAsyncDisposable
                 JsonSerializer.SerializeToUtf8Bytes(snapshot), cancellationToken);
             coverageNames.Add(coverageName);
         }
-        var completedMetadata = metadata with { CoverageFiles = coverageNames.ToArray() };
+        var completedMetadata = metadata with
+        {
+            CoverageFiles = coverageNames.ToArray()
+        };
         var bytes = JsonSerializer.SerializeToUtf8Bytes(completedMetadata, SiteCoverageTokens.JsonOptions);
         await File.WriteAllBytesAsync(Path.Combine(sessionDirectory, SiteBrowserTokens.MetadataFile), bytes, cancellationToken);
         completed = true;
@@ -88,15 +103,21 @@ internal sealed class SiteBrowserSession : IAsyncDisposable
         if (!completed)
         {
             try
-            { await Chrome.DisposeAsync(); }
+            {
+                await Chrome.DisposeAsync();
+            }
             catch (Exception exception) when (exception is WebSocketException or OperationCanceledException or
                 InvalidOperationException or Win32Exception or TimeoutException or ObjectDisposedException or IOException)
-            { /* Preserve the test failure. */ }
+            { /* Preserve the test failure. */
+            }
             try
-            { await host.DisposeAsync(); }
+            {
+                await host.DisposeAsync();
+            }
             catch (Exception exception) when (exception is OperationCanceledException or HttpListenerException or
                 ObjectDisposedException or IOException)
-            { /* Preserve the test failure. */ }
+            { /* Preserve the test failure. */
+            }
             try
             {
                 if (Directory.Exists(sessionDirectory))
@@ -105,12 +126,16 @@ internal sealed class SiteBrowserSession : IAsyncDisposable
                 }
             }
             catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or ArgumentException)
-            { /* Preserve the test failure. */ }
+            { /* Preserve the test failure. */
+            }
         }
         try
-        { await temporary.DisposeAsync(); }
+        {
+            await temporary.DisposeAsync();
+        }
         catch (Exception exception) when (!completed && exception is IOException or UnauthorizedAccessException)
-        { /* Preserve the test failure. */ }
+        { /* Preserve the test failure. */
+        }
     }
 
     internal static async Task<SiteCoverageSourceManifest> ReadManifest(SiteTestInputs inputs, string coverageRoot,
@@ -151,7 +176,9 @@ internal sealed class SiteBrowserStartupResources : IAsyncDisposable
     private SiteStaticFileHost? host;
     private SiteBrowserChrome? chrome;
 
-    private SiteBrowserStartupResources() { }
+    private SiteBrowserStartupResources()
+    {
+    }
 
     public string Path => RequiredTemporary.Path;
     public string Output => RequiredTemporary.Output;

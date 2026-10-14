@@ -58,7 +58,13 @@ internal static class NativePublicNormalizationFixture
         => OutcomeStoreOracle.ReadStored(database.Store, operation)!;
 
     internal static string Fingerprint(ReplicatedOperation operation)
-        => JsonData.Fingerprint(new { operation.Id, operation.Kind, operation.PrincipalId, operation.PayloadJson });
+        => JsonData.Fingerprint(new
+        {
+            operation.Id,
+            operation.Kind,
+            operation.PrincipalId,
+            operation.PayloadJson
+        });
 
     internal static PrincipalRecord OrdinaryPrincipal(TestDatabase database)
         => new(NonAdministrator, database.Partition.TenantId, [new(Wildcard, Wildcard, Capability.All)], []);

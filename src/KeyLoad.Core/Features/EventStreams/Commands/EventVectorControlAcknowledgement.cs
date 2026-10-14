@@ -24,15 +24,21 @@ internal static class EventVectorControlAcknowledgement
         if (phase.Action != EventVectorControlAction.PublishAcknowledgement
             || map.State is not (EventVectorMapState.Acknowledging or EventVectorMapState.Active)
             || map.PendingPhaseId is not null)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, IncompleteAcknowledgement); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, IncompleteAcknowledgement);
+        }
         var offerKey = EventVectorKeys.Offer(map.ControlPartition, map.MapId);
         var offer = ReadOffer(inventory, offerKey);
         if (!offer.Entries.Span.SequenceEqual(phase.OriginalEncodedEntries.Span)
             || !offer.PageDigest.Span.SequenceEqual(phase.OriginalEntryChecksum.Span))
-        { throw Errors.Fail(ErrorCode.Corruption, IncompleteAcknowledgement); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, IncompleteAcknowledgement);
+        }
         var entries = EventVectorEntryEncoding.Decode(offer.Entries, offer.PageDigest, admission);
         if (map.State == EventVectorMapState.Active && !entries.IsEmpty)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, IncompleteAcknowledgement); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, IncompleteAcknowledgement);
+        }
         var observed = EventVectorControlPublication.Phases(inventory, EventVectorSourcePhaseRole.Advance, admission);
         RequireComplete(map, entries, observed, admission);
         var page = new EventVectorPage
@@ -62,7 +68,9 @@ internal static class EventVectorControlAcknowledgement
         foreach (var row in inventory.PayloadRows)
         {
             if (row.Key.Span.SequenceEqual(key))
-            { return NativeSerialization.Deserialize<EventVectorOffer>(row.Value.Span); }
+            {
+                return NativeSerialization.Deserialize<EventVectorOffer>(row.Value.Span);
+            }
         }
         throw Errors.Fail(ErrorCode.RecoveryRequired, IncompleteAcknowledgement);
     }
@@ -71,19 +79,25 @@ internal static class EventVectorControlAcknowledgement
         Dictionary<int, EventVectorSourcePhase> observed, EventVectorAdmissionPolicy admission)
     {
         if (observed.Count != entries.Length)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, IncompleteAcknowledgement); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, IncompleteAcknowledgement);
+        }
         for (var ordinal = FirstOrdinal; ordinal < entries.Length; ordinal++)
         {
             if (!observed.TryGetValue(ordinal, out var phase)
                 || phase.Source != entries[ordinal].Source || phase.TargetPosition != entries[ordinal].Position
                 || phase.Disposition != EventVectorSourcePhaseDisposition.Observed
                 || phase.SourceOriginalResult?.Error is not null || phase.SourceOriginalResult is null)
-            { throw Errors.Fail(ErrorCode.RecoveryRequired, IncompleteAcknowledgement); }
+            {
+                throw Errors.Fail(ErrorCode.RecoveryRequired, IncompleteAcknowledgement);
+            }
             var original = EventVectorSourceMutationValidation.ReadObserved(phase, admission);
             EventVectorObservedPinValidation.Require(phase, original,
                 phase.SourceOriginalResult.Get<EventVectorSourceResult>(), admission);
             if (original.CoverageGeneration != map.CoverageGeneration)
-            { throw Errors.Fail(ErrorCode.Corruption, IncompleteAcknowledgement); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, IncompleteAcknowledgement);
+            }
         }
     }
 }

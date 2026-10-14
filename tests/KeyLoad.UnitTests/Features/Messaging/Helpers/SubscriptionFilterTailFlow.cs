@@ -24,7 +24,10 @@ internal static class SubscriptionFilterTailFlow
             CommandId = Guid.NewGuid(),
             Start = SubscriptionStart.FromBeginning,
             ExpectedGeneration = SubscriptionFilterProtocol.FirstGeneration,
-            Definition = configure.Definition with { EventTypes = [SubscriptionFilterProtocol.OldType] }
+            Definition = configure.Definition with
+            {
+                EventTypes = [SubscriptionFilterProtocol.OldType]
+            }
         };
         var updated = SubscriptionFilterColdTrial.Apply(db, OperationKind.ConfigureSubscription, change, change.CommandId, token).Get<SubscriptionInfo>();
         await Assert.That(updated.Checkpoint).IsEqualTo(OriginalTail);

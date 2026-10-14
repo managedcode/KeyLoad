@@ -15,7 +15,9 @@ internal static class LiveTailRf3Assertions
     {
         var rows = snapshot.Rows.ToDictionary(row => row.EntityId, StringComparer.Ordinal);
         foreach (var change in tail.Changes)
-        { rows[change.Reference.Id] = change.Row!; }
+        {
+            rows[change.Reference.Id] = change.Row!;
+        }
         await SqlRf3Protocol.EqualAsync(new[] { UpdatedRow }, rows.Values.ToArray());
         await Assert.That(snapshot.Rows.Length).IsEqualTo(FeedLiveRf3Protocol.PageLimit);
         if (snapshot.ThroughSequence < FeedLiveRf3Protocol.UpdatedSequence)

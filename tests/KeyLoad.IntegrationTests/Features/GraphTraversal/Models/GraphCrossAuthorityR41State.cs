@@ -7,7 +7,10 @@ internal sealed class GraphCrossAuthorityR41State(GraphIncomingRf3Seed seed)
     internal AtomicPartitionPlacementResolution Placement { get; set; } = null!;
     internal OutboxStatus[] Outbox { get; set; } = [];
     internal List<(CommandRequest Command, CommitReceipt Receipt)> Originals { get; } = [];
-    internal bool Hidden { get; set; }
+    internal bool Hidden
+    {
+        get; set;
+    }
     internal long LocalRevision { get; set; } = 1L;
     internal const string ForeignId = "a-foreign";
     internal const string LocalId = "b-local";
@@ -27,9 +30,13 @@ internal sealed class GraphCrossAuthorityR41State(GraphIncomingRf3Seed seed)
     {
         var edges = new List<EdgeRecord>();
         if (!hidden)
-        { edges.Add(Foreign); }
+        {
+            edges.Add(Foreign);
+        }
         if (!filtered)
-        { edges.Add(Local); }
+        {
+            edges.Add(Local);
+        }
         var vertices = edges.Select(edge => edge.To).Append(Seed.LocalSource).Distinct()
             .OrderBy(vertex => vertex.Collection, StringComparer.Ordinal).ThenBy(vertex => vertex.Id, StringComparer.Ordinal);
         return new([.. vertices], [.. edges]);

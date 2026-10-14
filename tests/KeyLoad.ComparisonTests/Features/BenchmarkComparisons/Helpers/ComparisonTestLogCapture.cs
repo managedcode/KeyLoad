@@ -132,7 +132,9 @@ internal sealed class ComparisonTestLogCapture : IAsyncDisposable
     private static void AddDistinct(List<Exception> failures, Exception failure)
     {
         if (!failures.Any(existing => ReferenceEquals(existing, failure)))
-        { failures.Add(failure); }
+        {
+            failures.Add(failure);
+        }
     }
 
     private static Task CollectFailureAsync(Func<Task> operation, List<Exception> failures)
@@ -142,20 +144,30 @@ internal sealed class ComparisonTestLogCapture : IAsyncDisposable
     {
         var fatal = failures.Select(CqrsRuntimeFailures.FindFatal).FirstOrDefault(error => error is not null);
         if (fatal is not null)
-        { ThrowFatalFirst(fatal, failures); }
+        {
+            ThrowFatalFirst(fatal, failures);
+        }
         if (failures.Count == 1)
-        { ExceptionDispatchInfo.Capture(failures[0]).Throw(); }
+        {
+            ExceptionDispatchInfo.Capture(failures[0]).Throw();
+        }
         if (failures.Count > 1)
-        { throw new AggregateException(StopFailureMessage, failures); }
+        {
+            throw new AggregateException(StopFailureMessage, failures);
+        }
     }
 
     private static void ThrowFatalFirst(Exception fatal, List<Exception> failures)
     {
         var ordered = new List<Exception> { fatal };
         foreach (var failure in failures)
-        { AddDistinct(ordered, failure); }
+        {
+            AddDistinct(ordered, failure);
+        }
         if (ordered.Count == 1)
-        { ExceptionDispatchInfo.Capture(fatal).Throw(); }
+        {
+            ExceptionDispatchInfo.Capture(fatal).Throw();
+        }
         throw new AggregateException(StopFailureMessage, ordered);
     }
 

@@ -6,10 +6,18 @@ namespace KeyLoad.CrashHost.Features.Messaging;
 
 internal static class RemoteTransferAttemptCrashScenario
 {
-    internal static QueueLaneRef Source { get; } = new(new(CrashFixtureValues.Tenant, CrashFixtureValues.Database,
+    internal static QueueLaneRef Source
+    {
+        get;
+    } = new(new(CrashFixtureValues.Tenant, CrashFixtureValues.Database,
         CrashFixtureValues.Orders, RemoteTransferAttemptCrashProtocol.SourceKey), RemoteTransferAttemptCrashProtocol.SourceQueue);
-    internal static QueueLaneRef Destination { get; } = new(Source.Partition with
-    { PartitionKey = RemoteTransferAttemptCrashProtocol.DestinationKey }, RemoteTransferAttemptCrashProtocol.DestinationQueue);
+    internal static QueueLaneRef Destination
+    {
+        get;
+    } = new(Source.Partition with
+    {
+        PartitionKey = RemoteTransferAttemptCrashProtocol.DestinationKey
+    }, RemoteTransferAttemptCrashProtocol.DestinationQueue);
 
     internal static async Task RunAsync(string directory, ZoneTreeStore store, CanonicalCrashBoundary boundary)
     {
@@ -27,7 +35,9 @@ internal static class RemoteTransferAttemptCrashScenario
             Destination.Partition, [new AcceptQueueTransfer(Destination, original.IntentToken)]);
         var failed = CrashDatabase.Submit(database, OperationKind.Batch, accept, accept.CommandId);
         if (failed.Error != ErrorCode.ResourceExhausted)
-        { throw new InvalidOperationException(RemoteTransferAttemptCrashProtocol.Missing); }
+        {
+            throw new InvalidOperationException(RemoteTransferAttemptCrashProtocol.Missing);
+        }
         var failureBytes = store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(Destination.Partition,
             CrashFixtureValues.Principal, accept.CommandId))) ?? throw new InvalidOperationException(RemoteTransferAttemptCrashProtocol.Missing);
         RemoteTransferAttemptCrashSetup.AckFiller(database);

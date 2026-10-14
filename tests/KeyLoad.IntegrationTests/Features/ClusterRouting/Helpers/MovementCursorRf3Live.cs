@@ -13,7 +13,9 @@ internal static class MovementCursorRf3Live
         var official = (await McpCallerAssertions.SuccessAsync<LiveQuerySnapshot>(
             await seed.Official.CallAsync(McpCallerTools.QueryLiveStart, request, token))).Value;
         foreach (var snapshot in new[] { source, target, official })
-        { await MovementCursorRf3Assertions.LiveSnapshotAsync(snapshot); }
+        {
+            await MovementCursorRf3Assertions.LiveSnapshotAsync(snapshot);
+        }
         var lives = new MovementCursorRf3Lives(source, target, official);
         await ContinueAsync(seed, lives, token);
         return lives;

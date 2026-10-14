@@ -35,7 +35,9 @@ internal static class PlacementCapacityAdmissionQueue
         owner.Leases.Add(await promoted);
         owner.Observed.Add(promoted);
         foreach (var queued in owner.Waiting.Skip(Next + Next))
-        { await Assert.That(queued.IsCompleted).IsFalse(); }
+        {
+            await Assert.That(queued.IsCompleted).IsFalse();
+        }
     }
 
     internal static async Task JoinRefusedAsync(PlacementCapacityAdmissionOwner owner)

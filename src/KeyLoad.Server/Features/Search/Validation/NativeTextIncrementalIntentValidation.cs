@@ -27,7 +27,9 @@ internal static class NativeTextIncrementalIntentValidation
             || string.IsNullOrEmpty(intent.CheckpointCommand.Token)
             || intent.CheckpointCommand.Effects.IsDefault || !intent.CheckpointCommand.Effects.IsEmpty
             || intent.Changes is null || intent.Changes.Length > maximumChanges)
-        { throw NativeTextErrors.Corrupt(); }
+        {
+            throw NativeTextErrors.Corrupt();
+        }
         NativeTextIncrementalValidation.Records(intent.Records, intent.NextRecord, scope,
             maximumRecords, budget);
         var retained = intent.Records.ToDictionary(record => record.Id);
@@ -42,7 +44,9 @@ internal static class NativeTextIncrementalIntentValidation
                 || change.Before is not null && (change.Before.Id != change.After.Id
                     || change.Before.Reference != change.After.Reference
                     || change.Before.Revision >= change.After.Revision))
-            { throw NativeTextErrors.Corrupt(); }
+            {
+                throw NativeTextErrors.Corrupt();
+            }
             RequirePostings(change.Removals, change.After.Id, budget);
             RequirePostings(change.Additions, change.After.Id, budget);
         }
@@ -58,12 +62,16 @@ internal static class NativeTextIncrementalIntentValidation
         ReadExecutionBudget budget)
     {
         if (postings is null)
-        { throw NativeTextErrors.Corrupt(); }
+        {
+            throw NativeTextErrors.Corrupt();
+        }
         foreach (var posting in postings)
         {
             budget.ChargeBytes(NativeTextProtocol.PostingBytes);
             if (posting is null || posting.Record != record)
-            { throw NativeTextErrors.Corrupt(); }
+            {
+                throw NativeTextErrors.Corrupt();
+            }
         }
         budget.Check();
     }

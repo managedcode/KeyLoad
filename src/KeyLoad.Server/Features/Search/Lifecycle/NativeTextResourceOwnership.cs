@@ -30,7 +30,9 @@ internal sealed partial class NativeTextResourceOwnership(IOptions<NativeTextExe
             }
             if (roots.Keys.Any(existing => root.StartsWith(existing + Path.DirectorySeparatorChar, StringComparison.Ordinal)
                 || existing.StartsWith(root + Path.DirectorySeparatorChar, StringComparison.Ordinal)))
-            { throw NativeTextErrors.Ownership(); }
+            {
+                throw NativeTextErrors.Ownership();
+            }
             verify(null);
             roots.Add(root, verify);
             var failures = new List<Exception>();
@@ -50,7 +52,9 @@ internal sealed partial class NativeTextResourceOwnership(IOptions<NativeTextExe
             budget?.Check();
             Check(budget);
             if (leases >= options.Value.MaximumActiveLeases)
-            { throw NativeTextErrors.Busy(); }
+            {
+                throw NativeTextErrors.Busy();
+            }
             leases++;
             return new(this, null);
         }
@@ -64,11 +68,15 @@ internal sealed partial class NativeTextResourceOwnership(IOptions<NativeTextExe
         {
             budget.Check();
             if (!roots.ContainsKey(root) || !NativeTextValidation.IsGenerationLeaf(leaf))
-            { throw NativeTextErrors.Ownership(); }
+            {
+                throw NativeTextErrors.Ownership();
+            }
             Check(budget);
             var path = Path.Combine(root, leaf);
             if (Directory.Exists(path) || File.Exists(path) || !generations.Add(path))
-            { throw NativeTextErrors.Ownership(); }
+            {
+                throw NativeTextErrors.Ownership();
+            }
             var failures = new List<Exception>();
             ServerFailureObserver.Observe(() => Check(budget), failures);
             if (failures.Count != NoFailures)
@@ -89,7 +97,9 @@ internal sealed partial class NativeTextResourceOwnership(IOptions<NativeTextExe
         {
             if (targetLength < EmptyFileLength || fileReservations.ContainsKey(key)
                 || !roots.Keys.Any(root => full.StartsWith(root + Path.DirectorySeparatorChar, StringComparison.Ordinal)))
-            { throw NativeTextErrors.Ownership(); }
+            {
+                throw NativeTextErrors.Ownership();
+            }
             var reservation = new NativeTextResourceFileReservation(this, key, full, targetLength, observeLength);
             fileReservations.Add(key, reservation);
             var failures = new List<Exception>();
@@ -109,7 +119,9 @@ internal sealed partial class NativeTextResourceOwnership(IOptions<NativeTextExe
         {
             if (!fileReservations.TryGetValue(reservation.Key, out var original)
                 || !ReferenceEquals(original, reservation))
-            { throw NativeTextErrors.Ownership(); }
+            {
+                throw NativeTextErrors.Ownership();
+            }
             Check(null);
             fileReservations.Remove(reservation.Key);
         }
@@ -140,11 +152,15 @@ internal sealed partial class NativeTextResourceOwnership(IOptions<NativeTextExe
             if (generation is null)
             {
                 if (leases <= EmptyLeaseCount)
-                { throw NativeTextErrors.Ownership(); }
+                {
+                    throw NativeTextErrors.Ownership();
+                }
                 leases--;
             }
             else if (!generations.Remove(generation))
-            { throw NativeTextErrors.Ownership(); }
+            {
+                throw NativeTextErrors.Ownership();
+            }
         }
     }
 

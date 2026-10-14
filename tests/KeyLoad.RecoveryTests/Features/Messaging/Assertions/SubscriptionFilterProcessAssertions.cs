@@ -32,7 +32,9 @@ internal static class SubscriptionFilterProcessAssertions
         var retained = store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(group.Source.Partition, Root, SubscriptionFilterCrashScenario.CommandId)));
         await Assert.That(retained is not null).IsEqualTo(actual.Generation == UpdatedGeneration);
         if (stage >= CommitStage.JournalFlushed)
-        { await Assert.That(actual.Generation).IsEqualTo(UpdatedGeneration); }
+        {
+            await Assert.That(actual.Generation).IsEqualTo(UpdatedGeneration);
+        }
         var operation = JsonDefaults.Deserialize<ReplicatedOperation>(await File.ReadAllBytesAsync(Path.Combine(path, SubscriptionFilterCrashScenario.OperationFile), token));
         var first = db.ApplyEmbedded(operation, token).Get<SubscriptionInfo>();
         await Assert.That(first.Generation).IsEqualTo(UpdatedGeneration);

@@ -14,6 +14,8 @@ internal static class NativeAnnMaintenanceAdmission
     {
         if (request.CommandId == Guid.Empty || sessionId == Guid.Empty || request.NodeId != nodeId
             || !Enum.IsDefined(request.Mode) || request.IndexGeneration <= EmptyGeneration)
-        { throw Errors.Fail(ErrorCode.Validation, NativeAnnProtocol.InvalidSource); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, NativeAnnProtocol.InvalidSource);
+        }
     }
 }

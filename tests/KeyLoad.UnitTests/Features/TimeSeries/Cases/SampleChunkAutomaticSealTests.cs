@@ -18,7 +18,10 @@ internal sealed class SampleChunkAutomaticSealTests
                 SampleChunkCanonicalFixture.Start.AddTicks(index), Value)).ToImmutableArray();
         var receipt = fixture.Commit(new AppendSamples(SampleChunkCanonicalFixture.Set,
             SampleChunkCanonicalFixture.Series, samples, SampleChunkCanonicalFixture.Tags));
-        var request = fixture.Request with { Limit = SampleChunkTestData.MaximumRecords + One };
+        var request = fixture.Request with
+        {
+            Limit = SampleChunkTestData.MaximumRecords + One
+        };
         var actual = fixture.Owner.Database.ReadSampleChunkWindow(SampleChunkCanonicalFixture.Principal, request);
         var revision = checked(SampleChunkCanonicalFixture.FirstRevision + samples.Length + One);
         var expected = new SampleChunkWindowResult(fixture.WindowId, SampleChunkCanonicalFixture.Start,

@@ -25,7 +25,9 @@ internal static class C1OutcomeInspectionOperation
         {
             evidence?.SetPhase(C1OutcomeInspectionFailurePhase.OpenStore);
             store = ZoneTreeExistingStore.Open(new(request.Directory)
-            { Incarnation = request.Incarnation }, request.ExpectedNodeId, CrashExecutionOptions.StorageExecution());
+            {
+                Incarnation = request.Incarnation
+            }, request.ExpectedNodeId, CrashExecutionOptions.StorageExecution());
             evidence?.SetPhase(C1OutcomeInspectionFailurePhase.ReadOutcome);
             nodeId = store.Identity.NodeId;
             incarnation = store.Identity.Incarnation;
@@ -44,6 +46,8 @@ internal static class C1OutcomeInspectionOperation
     private static void CaptureFirstFailure(C1OutcomeInspectionFailureEvidence? evidence, List<Exception> failures)
     {
         if (failures.Count > NoFailures)
-        { evidence?.Capture(failures[FirstFailureIndex]); }
+        {
+            evidence?.Capture(failures[FirstFailureIndex]);
+        }
     }
 }

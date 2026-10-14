@@ -44,10 +44,14 @@ internal static class SecondGenerationBackupAssertions
     {
         if (journal.Length < ZoneTreePersistenceFormat.HeaderLength
             || BinaryPrimitives.ReadUInt64LittleEndian(journal) != ZoneTreePersistenceFormat.CheckpointMagic)
-        { throw new InvalidOperationException("The original current-format archive has no checkpoint metadata."); }
+        {
+            throw new InvalidOperationException("The original current-format archive has no checkpoint metadata.");
+        }
         var length = BinaryPrimitives.ReadInt32LittleEndian(journal.AsSpan(ZoneTreePersistenceFormat.PayloadLengthOffset));
         if (length <= 0 || length > journal.Length - ZoneTreePersistenceFormat.HeaderLength)
-        { throw new InvalidOperationException("The original checkpoint metadata exceeds its retained frame."); }
+        {
+            throw new InvalidOperationException("The original checkpoint metadata exceeds its retained frame.");
+        }
         return NativeSerialization.Deserialize<ZoneTreeCheckpointMetadata>(journal.AsSpan(
             ZoneTreePersistenceFormat.HeaderLength, length));
     }

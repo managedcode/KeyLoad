@@ -21,7 +21,9 @@ internal static class AdminShellAssertions
     {
         using var handler = new HttpClientHandler { AllowAutoRedirect = false, CheckCertificateRevocationList = true };
         using var client = new HttpClient(handler)
-        { BaseAddress = fixture.App.GetEndpoint(McpCallerProtocol.Node1, McpCallerProtocol.HttpEndpoint) };
+        {
+            BaseAddress = fixture.App.GetEndpoint(McpCallerProtocol.Node1, McpCallerProtocol.HttpEndpoint)
+        };
         using var redirect = await client.GetAsync(new Uri(EntryPath, UriKind.Relative), cancellationToken);
         await Assert.That(redirect.StatusCode).IsEqualTo(HttpStatusCode.Redirect);
         await Assert.That(redirect.Headers.Location?.OriginalString).IsEqualTo(RootPath);

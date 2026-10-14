@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.DocumentStorage;
 
 namespace KeyLoad.Server.Features.EventStreams;
@@ -39,7 +39,9 @@ internal static class EventVectorFirstOpenPins
             || published.State != EventVectorMapState.Active || published.PendingPhaseId is not null
             || published.MapId != map.MapId || published.OriginalOpenCommandId != parent.Envelope.CommandId
             || actual.OriginalPublicResultBytes.IsEmpty)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         return actual;
     }
 
@@ -52,7 +54,9 @@ internal static class EventVectorFirstOpenPins
             || map.ControlIncarnation != incarnation || map.OriginalOpenCommandId != original.OriginalRequest.CommandId
             || map.PendingPhaseId != original.IntendedSourcePhase?.PhaseCommandId
             || result.Receipt.CommandId != result.CommandId)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         return map;
     }
 

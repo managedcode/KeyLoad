@@ -26,6 +26,8 @@ internal static class PhysicalShardProfileTestData
     internal static void SetPrivateFileMode(string path)
     {
         if (!OperatingSystem.IsWindows())
-        { File.SetUnixFileMode(path, UnixFileMode.UserRead | UnixFileMode.UserWrite); }
+        {
+            File.SetUnixFileMode(path, UnixFileMode.UserRead | UnixFileMode.UserWrite);
+        }
     }
 }

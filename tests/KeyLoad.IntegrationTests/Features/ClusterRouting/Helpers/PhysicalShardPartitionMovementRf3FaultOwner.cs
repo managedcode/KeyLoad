@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
@@ -15,10 +15,14 @@ internal static class PhysicalShardPartitionMovementRf3FaultOwner
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(() => wave.RemoteRuntime.KillAsync(observedNode, Scenario, token), failures);
         foreach (var node in TwoRf3MembershipProtocol.Nodes.Where(node => node != observedNode))
-        { await ServerFailureObserver.ObserveAsync(() => wave.RemoteRuntime.KillAsync(node, Scenario, token), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => wave.RemoteRuntime.KillAsync(node, Scenario, token), failures);
+        }
         await wave.DisposeApplicationAsync(failures);
         if (wave.CanCheckLocks)
-        { ServerFailureObserver.Observe(wave.AssertAllNodeLocksReleased, failures); }
+        {
+            ServerFailureObserver.Observe(wave.AssertAllNodeLocksReleased, failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
@@ -41,7 +45,9 @@ internal static class PhysicalShardPartitionMovementRf3FaultOwner
         await wave.RestartJoinedAsync(token);
         await wave.WaitForSixHealthyAsync(token);
         foreach (var seed in seeds)
-        { await seed.ReconnectAsync(wave, token); }
+        {
+            await seed.ReconnectAsync(wave, token);
+        }
         await PhysicalShardPartitionMovementRf3Flow.VerifyAsync(seeds, token);
         var settled = await PhysicalShardPartitionMovementRf3Flow.ExecuteAsync(seeds, requests, token);
         for (var index = FirstEntry; index < seeds.Length; index++)

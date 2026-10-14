@@ -24,7 +24,9 @@ internal static class AnnPublicCandidateValidation
             ValidateSource(candidate, source, eligible, candidates.AsSpan(Empty, index), work);
             var actual = Find(caller, candidate.DocumentId, work);
             if (candidate.DocumentRevision != actual.DocumentRevision || !double.IsFinite(candidate.Score))
-            { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, Invalid);
+            }
             scores[index] = new(new(request.Partition, request.Collection, actual.DocumentId), candidate.Score);
         }
         work.Check();
@@ -37,17 +39,23 @@ internal static class AnnPublicCandidateValidation
         var ordinal = candidate.SourceOrdinal;
         if (ordinal < Empty || ordinal >= source.Length
             || (eligible[ordinal / BitmapWordBits] & (SetBitmapBit << (ordinal & BitmapRemainder))) == Empty)
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
         var expected = source[ordinal];
         work.Charge(checked((long)expected.DocumentId.Length + candidate.DocumentId.Length + Step));
         if (!StringComparer.Ordinal.Equals(expected.DocumentId, candidate.DocumentId)
             || expected.DocumentRevision != candidate.DocumentRevision)
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
         foreach (var earlier in preceding)
         {
             work.Charge(Step);
             if (earlier.SourceOrdinal == ordinal)
-            { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, Invalid);
+            }
         }
     }
 
@@ -62,11 +70,17 @@ internal static class AnnPublicCandidateValidation
             work.Charge(checked((long)actual.DocumentId.Length + id.Length + Step));
             var order = StringComparer.Ordinal.Compare(actual.DocumentId, id);
             if (order == Empty)
-            { return actual; }
+            {
+                return actual;
+            }
             if (order < Empty)
-            { first = middle + Step; }
+            {
+                first = middle + Step;
+            }
             else
-            { after = middle; }
+            {
+                after = middle;
+            }
         }
         throw Errors.Fail(ErrorCode.Corruption, Invalid);
     }

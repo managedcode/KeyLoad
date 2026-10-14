@@ -21,14 +21,19 @@ internal static class PartitionMovementObservedFailureColdRf3Continuation
     {
         wave.frameObservation!.RetireAfterJoinedStop(wave);
         if (originalBatchCap is { } batch)
-        { await wave.ReconfigureMovementCapacityAsync(batch, cancellationToken).ConfigureAwait(false); }
+        {
+            await wave.ReconfigureMovementCapacityAsync(batch, cancellationToken).ConfigureAwait(false);
+        }
         await wave.ReconfigureMovementFrameAsync(originalFrameCap, cancellationToken).ConfigureAwait(false);
         if (requirePolicyFence)
         {
             refused = await PartitionMovementPolicyBusyColdRf3Trial.RequireAsync(wave, seed, precut, refused,
                 cancellationToken).ConfigureAwait(false);
         }
-        var resume = await seed.Source.MovePartitionAsync(seed.FirstRequest with { Mode = PartitionMoveMode.Resume },
+        var resume = await seed.Source.MovePartitionAsync(seed.FirstRequest with
+        {
+            Mode = PartitionMoveMode.Resume
+        },
             cancellationToken).ConfigureAwait(false);
         await Assert.That(resume.IsFailed).IsTrue();
         await Assert.That(resume.Value).IsNull();

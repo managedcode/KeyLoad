@@ -19,7 +19,10 @@ internal static class QueryOnlyEpochR46Pages
             await Assert.That(string.IsNullOrEmpty(first.Cursor)).IsFalse();
             firstPages[route] = first;
             await QueryOnlyEpochR46Current.RequireAsync(root, reader, state, token);
-            var second = await ReadAsync(reader, request with { Cursor = first.Cursor }, 1 - route, token);
+            var second = await ReadAsync(reader, request with
+            {
+                Cursor = first.Cursor
+            }, 1 - route, token);
             await RowAsync(second, PolicyEpochPublicProtocol.SecondId, PolicyEpochPublicProtocol.SecondJson);
             await Assert.That(second.Cursor).IsNull();
             await Assert.That(second.CutPosition).IsEqualTo(first.CutPosition);

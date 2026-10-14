@@ -11,7 +11,9 @@ public sealed partial class DatabaseEngine
         lock (remoteTransferPeerGate)
         {
             if (remoteTransferPeerOwner is not null)
-            { throw Errors.Fail(ErrorCode.Conflict, Features.Messaging.RemoteTransferPeerProtocol.Unavailable); }
+            {
+                throw Errors.Fail(ErrorCode.Conflict, Features.Messaging.RemoteTransferPeerProtocol.Unavailable);
+            }
             remoteTransferPeerOwner = owner;
         }
     }
@@ -21,7 +23,9 @@ public sealed partial class DatabaseEngine
         lock (remoteTransferPeerGate)
         {
             if (!ReferenceEquals(remoteTransferPeerOwner, owner))
-            { throw Errors.Fail(ErrorCode.OwnershipLost, Features.Messaging.RemoteTransferPeerProtocol.Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, Features.Messaging.RemoteTransferPeerProtocol.Invalid);
+            }
             owner.Close();
             remoteTransferPeerOwner = null;
         }

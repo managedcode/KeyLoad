@@ -14,7 +14,9 @@ internal static class SqlCreateTablePolicy
     {
         var principal = new PrincipalRecord(Administrator, fixture.Partition.TenantId,
             [new(fixture.Partition.DatabaseId, "*", Capability.All)], ["*"])
-        { ClusterAdministrator = true };
+        {
+            ClusterAdministrator = true
+        };
         await ConfigureAsync(fixture, principal);
         return principal;
     }
@@ -25,7 +27,11 @@ internal static class SqlCreateTablePolicy
     }
     internal static async Task<SqlCreateTableState> RunAsync(TestDatabase fixture, SqlCreateTableState state, CancellationToken token)
     {
-        await ConfigureAsync(fixture, state.Principal with { ClusterAdministrator = false, PolicyEpoch = DeniedEpoch });
+        await ConfigureAsync(fixture, state.Principal with
+        {
+            ClusterAdministrator = false,
+            PolicyEpoch = DeniedEpoch
+        });
         var denied = SqlCreateTableLiteral.Compile(fixture.Partition, Guid.NewGuid(), RepairSql, token);
         var issued = fixture.Database.EvaluationClock.GetUtcNow();
         var before = fixture.Database.GetOutboxStatus(SqlCreateTableLiteral.Root, fixture.Partition);
@@ -40,8 +46,14 @@ internal static class SqlCreateTablePolicy
             .IsEqualTo(ErrorCode.PermissionDenied);
         await SqlCreateTableAssertions.UnchangedAsync(fixture.Store, image, cut);
         await SqlCreateTableOutcomeBytes.RequireAsync(fixture.Store, state);
-        await ConfigureAsync(fixture, state.Principal with { PolicyEpoch = RepairedEpoch });
-        state = state with { EpochChanged = true };
+        await ConfigureAsync(fixture, state.Principal with
+        {
+            PolicyEpoch = RepairedEpoch
+        });
+        state = state with
+        {
+            EpochChanged = true
+        };
         image = QueueWholeFlowStorage.Bytes(fixture.Store);
         cut = fixture.Store.Position;
         await ReplayAsync(fixture.Database, state);
@@ -52,11 +64,19 @@ internal static class SqlCreateTablePolicy
         var healthyAt = fixture.Database.EvaluationClock.GetUtcNow();
         var result = SqlCreateTableLiteral.Apply(fixture.Database, healthy, healthyAt, state.Principal.Id);
         await Assert.That(result.Error).IsNull();
-        await SqlCreateTableAssertions.SameAsync(SqlCreateTableLiteral.Definition(fixture.Partition) with { Name = RepairTable },
+        await SqlCreateTableAssertions.SameAsync(SqlCreateTableLiteral.Definition(fixture.Partition) with
+        {
+            Name = RepairTable
+        },
             result.Get<ResourceDefinition>());
         await SqlCreateTableAssertions.RowsAsync(fixture, fixture.Store, fixture.Database);
         await SqlCreateTableOutcomeBytes.RequireAsync(fixture.Store, state);
-        state = state with { Repaired = healthy, RepairedAt = healthyAt, RepairedOutcome = result };
+        state = state with
+        {
+            Repaired = healthy,
+            RepairedAt = healthyAt,
+            RepairedOutcome = result
+        };
         image = QueueWholeFlowStorage.Bytes(fixture.Store);
         cut = fixture.Store.Position;
         await ReplayAsync(fixture.Database, state);

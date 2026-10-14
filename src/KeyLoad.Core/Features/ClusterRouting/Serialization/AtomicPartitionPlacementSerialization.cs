@@ -36,7 +36,9 @@ internal static class AtomicPartitionPlacementSerialization
         PartitionRef partition)
     {
         if (row is not null)
-        { AtomicPartitionPlacementValidation.ValidateRowShape(row, partition); }
+        {
+            AtomicPartitionPlacementValidation.ValidateRowShape(row, partition);
+        }
         return row;
     }
 

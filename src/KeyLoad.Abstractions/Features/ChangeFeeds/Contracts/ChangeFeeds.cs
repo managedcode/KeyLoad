@@ -43,7 +43,10 @@ public sealed record ProjectionConsumerDefinition([property: Orleans.Id(0)] long
 {
     /// <summary>Gets the explicit native committed-vector maintenance selector.</summary>
     [Orleans.Id(3), System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public AnnProjectionMaintenanceProfile? AnnMaintenance { get; init; }
+    public AnnProjectionMaintenanceProfile? AnnMaintenance
+    {
+        get; init;
+    }
 }
 
 /// <summary>Reports a projection consumer's definition and progress.</summary>
@@ -64,14 +67,23 @@ public sealed record ProjectionConsumerInfo([property: Orleans.Id(0)] Projection
 
     /// <summary>Gets the authenticated immutable original maintenance configuration authority.</summary>
     [Orleans.Id(5), System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public ProjectionMaintenanceAuthority? MaintenanceAuthority { get; init; }
+    public ProjectionMaintenanceAuthority? MaintenanceAuthority
+    {
+        get; init;
+    }
 
     /// <summary>Gets the immutable initial manual ANN reservation for this generation.</summary>
     [Orleans.Id(6), System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public AnnMaintenanceRequest? InitialAnnMaintenance { get; init; }
+    public AnnMaintenanceRequest? InitialAnnMaintenance
+    {
+        get; init;
+    }
     /// <summary>Gets whether the exact initial native full result was acknowledged by canonical settlement.</summary>
     [Orleans.Id(7), System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
-    public bool InitialAnnMaintenanceSettled { get; init; }
+    public bool InitialAnnMaintenanceSettled
+    {
+        get; init;
+    }
 
 }
 
@@ -87,7 +99,10 @@ public sealed record ConfigureProjectionConsumerRequest([property: Orleans.Id(0)
 {
     /// <summary>Gets the original manual Build reserved atomically with initial configuration.</summary>
     [Orleans.Id(4), System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public AnnMaintenanceRequest? InitialAnnMaintenance { get; init; }
+    public AnnMaintenanceRequest? InitialAnnMaintenance
+    {
+        get; init;
+    }
 }
 
 /// <summary>Requests a bounded projection batch.</summary>
@@ -126,7 +141,10 @@ public sealed record CommitProjectionBatchRequest([property: Orleans.Id(0)] Guid
 {
     /// <summary>Gets the signed proof binding the original full ANN result to this canonical settlement.</summary>
     [Orleans.Id(4), System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public string? InitialAnnMaintenanceSettlement { get; init; }
+    public string? InitialAnnMaintenanceSettlement
+    {
+        get; init;
+    }
 }
 
 /// <summary>Reports the commit result and updated projection checkpoint.</summary>

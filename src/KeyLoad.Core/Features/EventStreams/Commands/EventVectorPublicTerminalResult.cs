@@ -11,18 +11,24 @@ public sealed partial class DatabaseEngine
         EventVectorControlResult result, EventVectorMap? originalMap, EventVectorAdmissionPolicy admission)
     {
         if (!EventVectorPublicTerminalResult.IsTerminal(phase.Action))
-        { return result; }
+        {
+            return result;
+        }
         var map = result.Map ?? originalMap
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidEventFeedPublicTerminal);
         if (map.MapId != phase.OriginalRequest.MapId || map.ControlPartition != phase.OriginalRequest.ControlPartition
             || result.Receipt.CommandId != result.CommandId
             || result.Offer is { } offer && (offer.MapId != map.MapId || offer.MapRevision != map.Revision))
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidEventFeedPublicTerminal); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidEventFeedPublicTerminal);
+        }
         var pages = phase.Action == EventVectorControlAction.Offer
             ? NativeSerialization.Deserialize<ImmutableArray<EventSourcePage>>(result.OriginalSourcePageBytes.Span)
             : ImmutableArray<EventSourcePage>.Empty;
         if (pages.IsDefault)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidEventFeedPublicTerminal); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidEventFeedPublicTerminal);
+        }
         var publicResult = new EventFeedControlResult
         {
             Version = EventFeedPublicResultVersion,
@@ -41,7 +47,10 @@ public sealed partial class DatabaseEngine
         admission.RequireEncodedBytes(NativeSerialization.Measure(publicResult));
         var original = NativeSerialization.Serialize(publicResult);
         admission.RequireEncodedBytes(original.Length);
-        return result with { OriginalPublicResultBytes = original };
+        return result with
+        {
+            OriginalPublicResultBytes = original
+        };
     }
 }
 

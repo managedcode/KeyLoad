@@ -18,7 +18,9 @@ public sealed partial class DatabaseEngine
         RequireEventVectorSourceApply(transaction, currentPrincipal, request, placement);
         var resource = SourceResource(transaction, request.Source);
         if (resource.SchemaVersion != request.SourceSchemaVersion)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, EventVectorApplyAuthorityChanged); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, EventVectorApplyAuthorityChanged);
+        }
         var admission = new EventVectorAdmissionPolicy(OperationLimitsOptions);
         var head = EventVectorStoredSourceHead(transaction, request.Source);
         var retained = ReadEventVectorPinRow(transaction, request.Source, request.MapId, admission);
@@ -52,7 +54,9 @@ public sealed partial class DatabaseEngine
             || authority.DirectoryRevision != request.DirectoryFence
             || principal.Id != request.PrincipalId || principal.PolicyEpoch != request.SourcePolicyEpoch
             || request.FirstExpiresAt <= EvaluationClock.GetUtcNow())
-        { throw Errors.Fail(ErrorCode.OwnershipLost, EventVectorApplyAuthorityChanged); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, EventVectorApplyAuthorityChanged);
+        }
     }
 
     private static EventVectorEncodedRow? ReadEventVectorPinRow(IKeyValueView view,

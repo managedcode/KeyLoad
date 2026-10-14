@@ -1,7 +1,7 @@
 using KeyLoad.Client;
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.QueryExecution;
@@ -39,7 +39,9 @@ internal static class DistributedSearchRf3DeadlineFlow
         }
         await call.JoinAsync(failures).ConfigureAwait(false);
         if (probe is { ParentRequest: var id } owned && id != Guid.Empty)
-        { await ServerFailureObserver.ObserveAsync(() => owned.ParentDisposedAsync(cleanup.Token), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => owned.ParentDisposedAsync(cleanup.Token), failures).ConfigureAwait(false);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

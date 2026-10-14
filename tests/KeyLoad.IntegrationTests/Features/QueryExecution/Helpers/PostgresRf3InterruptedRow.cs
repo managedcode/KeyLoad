@@ -44,13 +44,16 @@ internal static class PostgresRf3InterruptedRow
                 var count = await stream.ReadAsync(buffer.AsMemory(PostgresRf3Protocol.FirstColumn,
                     Math.Min(buffer.Length, declaredBytes - copied)), token).ConfigureAwait(false);
                 if (count == default(int))
-                { break; }
+                {
+                    break;
+                }
                 copied += count;
             }
         }
         catch (IOException failure) when (failure.InnerException is SocketException socket
             && socket.SocketErrorCode is SocketError.ConnectionReset or SocketError.ConnectionAborted)
-        { }
+        {
+        }
         return copied;
     }
 }

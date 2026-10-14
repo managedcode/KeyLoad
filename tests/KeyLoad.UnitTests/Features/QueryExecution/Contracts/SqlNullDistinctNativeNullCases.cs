@@ -4,7 +4,10 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 
 internal static class SqlNullDistinctNativeNullCases
 {
-    internal static IReadOnlyList<SqlNullDistinctCase> All { get; } =
+    internal static IReadOnlyList<SqlNullDistinctCase> All
+    {
+        get;
+    } =
     [
         new("score IS /* native DISTINCT origin */ DISTINCT FROM NULL",
             SqlNullDistinctCases.And(new NullTest(SqlNullDistinctCases.Score, true, false),

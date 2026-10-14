@@ -24,4 +24,7 @@ internal sealed class RequestCqrsTextMaintenanceTests(RequestCqrsClusterFixture 
         => RequestCqrsTextMaintenanceFlow.RunAsync(fixture, TextIndexMaintenanceMode.Build, fault);
 }
 
-internal enum RequestCqrsTextFault { WrongIdentity, UnexpectedPhase, MixedPhase, ExtraCompleted, AfterFinal, FrameBudget }
+internal enum RequestCqrsTextFault
+{
+    WrongIdentity, UnexpectedPhase, MixedPhase, ExtraCompleted, AfterFinal, FrameBudget
+}

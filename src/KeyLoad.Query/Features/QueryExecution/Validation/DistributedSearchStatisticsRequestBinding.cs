@@ -19,7 +19,9 @@ internal static class DistributedSearchStatisticsRequestBinding
             {
                 budget.Check();
                 if (!witness.Statistics.Terms.IsEmpty)
-                { throw Errors.Fail(ErrorCode.Corruption, InvalidTerms); }
+                {
+                    throw Errors.Fail(ErrorCode.Corruption, InvalidTerms);
+                }
             }
             return;
         }
@@ -31,12 +33,16 @@ internal static class DistributedSearchStatisticsRequestBinding
         {
             budget.Check();
             if (witness.Statistics.Terms.Length != original.Terms.Count)
-            { throw Errors.Fail(ErrorCode.Corruption, InvalidTerms); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, InvalidTerms);
+            }
             for (var index = FirstTerm; index < original.Terms.Count; index++)
             {
                 budget.Check();
                 if (!string.Equals(witness.Statistics.Terms[index], original.Terms[index], StringComparison.Ordinal))
-                { throw Errors.Fail(ErrorCode.Corruption, InvalidTerms); }
+                {
+                    throw Errors.Fail(ErrorCode.Corruption, InvalidTerms);
+                }
             }
         }
     }

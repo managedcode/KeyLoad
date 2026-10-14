@@ -16,7 +16,9 @@ internal sealed record NativeSubmissionOutcomeProcessSeed(CommandRequest Command
         var principal = new PrincipalRecord(principalId, fixture.Partition.TenantId,
             [new(fixture.Partition.DatabaseId, C1OutcomeInspectionFixture.ResourceName,
                 Capability.DocumentsRead | Capability.DocumentsWrite)], [])
-        { PolicyEpoch = 1 };
+        {
+            PolicyEpoch = 1
+        };
         var configure = fixture.Database.CreateNativeOperation(OperationKind.ConfigurePrincipal, Guid.NewGuid(),
             C1OutcomeInspectionAssertions.AdminId, fixture.Database.EvaluationClock.GetUtcNow(),
             NativeSerialization.Serialize(new ConfigurePrincipalRequest(principal)));

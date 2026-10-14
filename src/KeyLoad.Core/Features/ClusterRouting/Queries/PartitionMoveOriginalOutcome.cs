@@ -16,12 +16,18 @@ public sealed partial class DatabaseEngine
         ArgumentNullException.ThrowIfNull(grant);
         work.Check();
         if (original.Grant is { RequireReceiverIssuance: true })
-        { movementCheckpointVerifier.RequireReceiverAdministrator(this, localPrincipalId, work); }
+        {
+            movementCheckpointVerifier.RequireReceiverAdministrator(this, localPrincipalId, work);
+        }
         PartitionMovePeerEnvelopeValidation.RequireStructure(original, Limits.MaxBatchBytes);
         if (phaseCommandId == Guid.Empty || string.IsNullOrWhiteSpace(localPrincipalId))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
         if (original.Grant is { } originalGrant && originalGrant.PhaseCommandId != phaseCommandId)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
         var expectedIdentity = OriginalMovePhaseIdentity(original, phaseCommandId, localPrincipalId);
         var result = Store.Read(view => ResolveMovePhaseOutcome(work.CreateView(view, grant), original,
             phaseCommandId, localPrincipalId, expectedIdentity));
@@ -46,11 +52,17 @@ public sealed partial class DatabaseEngine
         var outcome = selected.Outcome
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, MissingDurableOutcomeMessage);
         if (outcome.Incarnation != Store.Identity.Incarnation)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, EarlierOutcomeIncarnationMessage); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, EarlierOutcomeIncarnationMessage);
+        }
         if (outcome.Fingerprint != expectedIdentity)
-        { throw Errors.Fail(ErrorCode.Conflict, CommandContentConflictMessage); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, CommandContentConflictMessage);
+        }
         if (outcome.PolicyEpoch != originalEpoch)
-        { throw Errors.Fail(ErrorCode.PermissionDenied, ChangedOutcomePrincipalPolicyMessage); }
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, ChangedOutcomePrincipalPolicyMessage);
+        }
         return outcome.Result;
     }
 

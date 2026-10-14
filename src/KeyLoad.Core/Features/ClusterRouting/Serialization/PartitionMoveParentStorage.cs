@@ -13,7 +13,9 @@ internal static class PartitionMoveParentStorage
         var value = PartitionMoveTargetStorage.Read<PartitionMoveParentHeader>(view,
             PartitionMoveParentKeys.Header(partition, moveId), maximumBytes);
         if (value is not null)
-        { PartitionMoveParentValidation.RequireHeader(value, partition, moveId); }
+        {
+            PartitionMoveParentValidation.RequireHeader(value, partition, moveId);
+        }
         return value;
     }
 
@@ -23,7 +25,9 @@ internal static class PartitionMoveParentStorage
         var value = PartitionMoveTargetStorage.Read<PartitionMoveParentPhase>(view,
             PartitionMoveParentKeys.Phase(partition, moveId, originalPhaseId), maximumBytes);
         if (value is not null)
-        { PartitionMoveParentValidation.RequirePhase(value, partition, moveId, originalPhaseId); }
+        {
+            PartitionMoveParentValidation.RequirePhase(value, partition, moveId, originalPhaseId);
+        }
         return value;
     }
 
@@ -56,7 +60,9 @@ internal static class PartitionMoveParentStorage
         long value = PartitionMoveProtocol.EmptyCount;
         view.ReadValue(key, bytes => value = NativeSerialization.Deserialize<long>(bytes));
         if (value < PartitionMoveProtocol.EmptyCount)
-        { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority);
+        }
         return value;
     }
 
@@ -64,9 +70,13 @@ internal static class PartitionMoveParentStorage
     {
         var changed = checked(Counter(transaction, key) + change);
         if (changed < PartitionMoveProtocol.EmptyCount)
-        { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority);
+        }
         if (changed > maximum)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
+        }
         transaction.Put(key, NativeSerialization.Serialize(changed));
     }
 }

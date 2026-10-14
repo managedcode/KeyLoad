@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.DependencyInjection;
 using Orleans.Serialization;
@@ -10,7 +10,10 @@ internal sealed class ConnectionNativeScenario : IAsyncDisposable
     private readonly ConnectionNativeCalls calls = new();
     private bool closed;
     private bool initialized;
-    internal RequestCqrsClusterFixture Fixture { get; }
+    internal RequestCqrsClusterFixture Fixture
+    {
+        get;
+    }
     internal ConnectionOperationObservation Observation { get; } = new();
     internal NativeRuntimeTestOptions Timing { get; } = new();
     internal IConnectionGrain Connection => Fixture.Cluster.Client.GetGrain<IConnectionGrain>(Fixture.ConnectionId);
@@ -117,7 +120,9 @@ internal sealed class ConnectionNativeScenario : IAsyncDisposable
             cancellationToken);
         await Assert.That(actual.Count).IsEqualTo(expected);
         if (expected == ConnectionNativeProtocol.OneConnection)
-        { await Assert.That(actual.Contains(((GrainReference)Connection).GrainId)).IsTrue(); }
+        {
+            await Assert.That(actual.Contains(((GrainReference)Connection).GrainId)).IsTrue();
+        }
     }
 
     internal async Task CloseAsync(CancellationToken cancellationToken)
@@ -139,7 +144,9 @@ internal sealed class ConnectionNativeScenario : IAsyncDisposable
         var management = Fixture.Cluster.Client.GetGrain<IManagementGrain>(0);
         while ((await management.GetActiveGrains(GrainType.Create(GrainRoutingProtocol.RequestAlias),
             cancellationToken)).Count != ConnectionNativeProtocol.AbsentActivations)
-        { await Task.Delay(Timing.PollInterval, cancellationToken); }
+        {
+            await Task.Delay(Timing.PollInterval, cancellationToken);
+        }
         await AssertActivationCountAsync(ConnectionNativeProtocol.AbsentActivations, cancellationToken);
     }
 
@@ -153,10 +160,14 @@ internal sealed class ConnectionNativeScenario : IAsyncDisposable
         await KeyLoad.Server.ServerFailureObserver.ObserveAsync(
             () => Observation.JoinAsync(failures, timeout.Token), failures);
         if (!closed && initialized)
-        { await KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => CloseAsync(timeout.Token), failures); }
+        {
+            await KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => CloseAsync(timeout.Token), failures);
+        }
         await KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => Fixture.DisposeAsync().AsTask(), failures);
         try
-        { calls.Dispose(); }
+        {
+            calls.Dispose();
+        }
         catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
         catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
         if (failures.Count > ConnectionNativeProtocol.EmptyFailures)

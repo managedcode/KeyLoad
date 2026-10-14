@@ -15,9 +15,13 @@ internal static class QueueDeadLetterSelectedRefusal
         var error = Assert.ThrowsExactly<KeyLoadException>(() =>
         {
             if (state.Kind == QueueDeadLetterSelectedOperation.Read)
-            { _ = database.InspectMessage(QueueDeadLetterSelectedProtocol.Administrator, state.Lane, state.Target); }
+            {
+                _ = database.InspectMessage(QueueDeadLetterSelectedProtocol.Administrator, state.Lane, state.Target);
+            }
             else
-            { _ = database.Apply(state.Original); }
+            {
+                _ = database.Apply(state.Original);
+            }
             throw new InvalidOperationException(QueueDeadLetterSelectedProtocol.ReturnedRefusal);
         });
         await Assert.That(error.Code).IsEqualTo(state.Fault is QueueDeadLetterSelectedFault.IndexAlias or QueueDeadLetterSelectedFault.WitnessMetadataAlias

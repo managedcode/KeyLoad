@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.Server;
@@ -17,7 +17,9 @@ internal static class NativeCanonicalModelCutDiagnosticRead
         var state = discovery?.Read();
         if (discovery is null || state is null || authentication is null
             || !ReferenceEquals(observer, node.CanonicalCutObserver))
-        { throw Unavailable(); }
+        {
+            throw Unavailable();
+        }
         NativeSiloDiscoveryDiagnosticEndpoints.RequireCurrent(node, state);
         var witness = NativeCanonicalModelCutCapture.Capture(partition.Database, state, request, lease.Token);
         var payload = NativeCanonicalModelCutCodec.Encode(witness, lease.Token);
@@ -26,11 +28,15 @@ internal static class NativeCanonicalModelCutDiagnosticRead
         NativeSiloDiscoveryDiagnosticEndpoints.RequireCurrent(node, state);
         if (!ReferenceEquals(observer, node.CanonicalCutObserver) || !ReferenceEquals(discovery, node.Discovery)
             || !ReferenceEquals(authentication, node.Authentication) || discovery.Read() != state)
-        { throw Unavailable(); }
+        {
+            throw Unavailable();
+        }
         var current = GrainRequestAuthority.Reload(partition.Database, principal.Id, clock);
         GrainRequestAuthority.RequireAdministrator(current);
         if (current.Id != principal.Id || current.PolicyEpoch != principal.PolicyEpoch)
-        { throw Errors.Fail(ErrorCode.PermissionDenied, NativeCanonicalModelCutDiagnosticProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, NativeCanonicalModelCutDiagnosticProtocol.Unavailable);
+        }
         lease.RequireCurrent();
         return (payload, signature);
     }

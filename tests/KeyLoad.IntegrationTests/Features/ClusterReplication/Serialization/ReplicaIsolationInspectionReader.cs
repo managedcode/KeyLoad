@@ -20,7 +20,9 @@ internal static class ReplicaIsolationInspectionReader
         var capabilities = value.GetProperty(CapAdd).EnumerateArray().Select(item => item.GetString()).ToArray();
         var mismatch = ReplicaIsolationContainerAdmission.Observe(value, networks, capabilities, name, plan, target);
         if (mismatch != ReplicaIsolationAdmissionMismatch.None)
-        { ReplicaIsolationAdmissionDiagnostics.Throw(mismatch, value, networks); }
+        {
+            ReplicaIsolationAdmissionDiagnostics.Throw(mismatch, value, networks);
+        }
         var id = Text(value, Id);
         _ = ReplicaIsolationRules.NativeArguments(id, []);
         return new(id, Text(value, Name), Text(value, Image), Text(value, ConfigImage), Text(value, User),
@@ -48,7 +50,9 @@ internal static class ReplicaIsolationInspectionReader
             || derived.User != original.User || derived.FaultSource != plan.DockerfileSha256
             || original.Layers.Length == FirstIndex || derived.Layers.Length <= original.Layers.Length
             || !derived.Layers.Take(original.Layers.Length).SequenceEqual(original.Layers, StringComparer.Ordinal))
-        { throw new InvalidOperationException("The actual fault image does not inherit the authenticated native server image."); }
+        {
+            throw new InvalidOperationException("The actual fault image does not inherit the authenticated native server image.");
+        }
     }
 
     private static string Text(JsonElement value, string key) => value.GetProperty(key).GetString()

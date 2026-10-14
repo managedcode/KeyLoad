@@ -41,7 +41,9 @@ internal static class PhysicalShardPartitionMovementRf3FailureFlow
     {
         var changed = original.ToArray();
         changed[SecondEntry] = changed[SecondEntry] with
-        { ExpectedPlacementRevision = checked(changed[SecondEntry].ExpectedPlacementRevision + RevisionIncrement) };
+        {
+            ExpectedPlacementRevision = checked(changed[SecondEntry].ExpectedPlacementRevision + RevisionIncrement)
+        };
         await using var iterator = seeds[FirstEntry].Source.MoveWholePartitionsAsync(changed, token)
             .GetAsyncEnumerator(CancellationToken.None);
         await Assert.That(await iterator.MoveNextAsync()).IsTrue();
@@ -69,7 +71,10 @@ internal static class PhysicalShardPartitionMovementRf3FailureFlow
             checked(revision + RevisionIncrement), directory, token);
         var untouched = await McpCallerAssertions.SdkSuccessAsync(await seeds[ThirdEntry].Source.ReadAtomicPartitionPlacementAsync(
             new(PlacementVersion, seeds[ThirdEntry].Partition), token).ConfigureAwait(false));
-        await SqlRf3Protocol.EqualAsync(seeds[ThirdEntry].OriginalPlacement with { DirectoryRevision = directory }, untouched);
+        await SqlRf3Protocol.EqualAsync(seeds[ThirdEntry].OriginalPlacement with
+        {
+            DirectoryRevision = directory
+        }, untouched);
     }
 
     private static async Task RequireStoppedAsync(PartitionMovementPublicParentRf3NativeCut[][] cuts)

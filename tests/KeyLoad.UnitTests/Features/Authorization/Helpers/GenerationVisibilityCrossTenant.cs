@@ -14,7 +14,10 @@ internal static class GenerationVisibilityCrossTenant
 
     internal static async Task RunAsync(TestDatabase db, QueryEngine queries, CancellationToken token)
     {
-        var partition = db.Partition with { TenantId = Tenant };
+        var partition = db.Partition with
+        {
+            TenantId = Tenant
+        };
         var resource = new ResourceDefinition(TeamRowPolicyFlow.Collection, ResourceKind.Collection, partition.TransactionDomainId);
         var configured = db.Submit(OperationKind.ConfigureResource,
             new ConfigureResourceRequest(Tenant, DatabaseScope, resource)).Get<ResourceDefinition>();
@@ -26,7 +29,11 @@ internal static class GenerationVisibilityCrossTenant
         await Assert.That(JsonDefaults.Serialize(receipt.Mutations).AsSpan().SequenceEqual(JsonDefaults.Serialize(expectedReceipt))).IsTrue();
         await GenerationVisibilityFlow.ConfigureAsync(db, new(Reader, Tenant,
             [new(DatabaseScope, TeamRowPolicyFlow.Collection, Capability.DocumentsRead | Capability.Query)], [])
-        { OwnerId = Reader, RestrictRows = true, PolicyEpoch = InitialEpoch });
+        {
+            OwnerId = Reader,
+            RestrictRows = true,
+            PolicyEpoch = InitialEpoch
+        });
         var image = TeamRowPolicyAssertions.Image(db.Store);
         var cut = db.Store.Position;
         QueryRow[] expected = [new(TeamRowPolicyFlow.Row, InitialRevision, ForeignJson, false, [])];

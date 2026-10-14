@@ -47,7 +47,11 @@ internal static class PartitionQueryPlanFactory
         var leaves = ImmutableArray.CreateBuilder<PartitionQueryLeafPlanV1>(sorted.Length);
         for (var index = FirstElementIndex; index < sorted.Length; index++)
         {
-            var leafRequest = request with { Partition = sorted[index], Cursor = null };
+            var leafRequest = request with
+            {
+                Partition = sorted[index],
+                Cursor = null
+            };
             leaves.Add(new(Version, sorted[index], leafRequest, examined[index], readBytes[index],
                 retained[index], limit));
         }

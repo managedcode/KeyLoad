@@ -29,7 +29,10 @@ internal static class ControlledPartitionMovementBeginAbortFlow
                 PartitionMovementTransportAction.Apply, Guid.Empty, InitialOrdinal), cancellationToken);
         await Assert.That(outcome.Error).IsNull();
         var actual = outcome.Get<PartitionMovePhaseResult>();
-        var expected = originalControl with { Phase = PartitionMovePhase.Aborting };
+        var expected = originalControl with
+        {
+            Phase = PartitionMovePhase.Aborting
+        };
         await Assert.That(JsonDefaults.Serialize(actual.Control)
             .SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
         await Assert.That(actual.Journal.CommandId).IsEqualTo(CommandId);

@@ -24,7 +24,9 @@ internal static class SqlNullOrderingRf3Pages
                     foreach (var descending in new[] { false, true })
                     {
                         foreach (var first in new[] { false, true })
-                        { await CaseAsync(caller, wire, descending, first, token); }
+                        {
+                            await CaseAsync(caller, wire, descending, first, token);
+                        }
                     }
                     await SqlAllRf3Pages.DuplicatesAsync(caller, wire, token);
                     await SqlImplicitAliasRf3Pages.HealthyAsync(caller, wire, token);
@@ -40,7 +42,9 @@ internal static class SqlNullOrderingRf3Pages
     {
         var sdk = await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.QueryCapabilitiesAsync(token));
         var mcp = (await McpCallerAssertions.SuccessAsync<QueryCapabilityManifest>(
-            await caller.Mcp.CallAsync(McpCallerTools.QueryCapabilities, new { }, token))).Value;
+            await caller.Mcp.CallAsync(McpCallerTools.QueryCapabilities, new
+            {
+            }, token))).Value;
         await global::TUnit.Assertions.Assert.That(sdk.ReadProfiles.Contains(SqlNullOrderingRf3Protocol.Profile)).IsTrue();
         await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlNullOrderingRf3Protocol.Profile)).IsTrue();
         await global::TUnit.Assertions.Assert.That(sdk.ReadProfiles.Contains(SqlNullOrderingRf3Protocol.UsingProfile)).IsTrue();

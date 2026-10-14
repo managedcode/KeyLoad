@@ -49,26 +49,38 @@ internal static class McpSchemaInspector
         if (node.ValueKind == JsonValueKind.Array)
         {
             foreach (var item in node.EnumerateArray())
-            { Collect(item, result); }
+            {
+                Collect(item, result);
+            }
             return;
         }
         if (node.ValueKind != JsonValueKind.Object)
-        { return; }
+        {
+            return;
+        }
         foreach (var property in node.EnumerateObject())
         {
             if (property.Name is Default or Examples)
-            { continue; }
+            {
+                continue;
+            }
             if (property.Name == Ref)
-            { result.Add(property.Value.GetString()!); }
+            {
+                result.Add(property.Value.GetString()!);
+            }
             else
-            { Collect(property.Value, result); }
+            {
+                Collect(property.Value, result);
+            }
         }
     }
 
     internal static JsonElement Resolve(JsonElement root, string pointer)
     {
         if (!pointer.StartsWith(PointerRoot, StringComparison.Ordinal))
-        { throw new InvalidOperationException(pointer); }
+        {
+            throw new InvalidOperationException(pointer);
+        }
         var current = root;
         foreach (var segment in pointer.AsSpan(PointerRoot.Length).ToString().Split(PointerSeparator, StringSplitOptions.RemoveEmptyEntries))
         {

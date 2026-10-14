@@ -16,7 +16,10 @@ internal sealed class NativeBlobWireReservations(NativeBlobWireFiles files, Nati
         {
             var name = NativeBlobWireNames.Slot(slot);
             if (files.Exists(name))
-            { Require(codec.Read<NativeBlobWireReservation>(files.Read(name)), owner, ownerDigest, slot); continue; }
+            {
+                Require(codec.Read<NativeBlobWireReservation>(files.Read(name)), owner, ownerDigest, slot);
+                continue;
+            }
             var reservation = new NativeBlobWireReservation(NativeBlobWireProbeProtocol.Version,
                 owner.SessionId, ownerDigest, claimDigest, claim.Identity, slot, Guid.NewGuid());
             files.WriteLocked(name, codec.Encode(reservation));
@@ -34,12 +37,16 @@ internal sealed class NativeBlobWireReservations(NativeBlobWireFiles files, Nati
         if (value.Version != NativeBlobWireProbeProtocol.Version || value.SessionId != owner.SessionId
             || value.OwnerDigest != ownerDigest || value.Slot != slot || value.CallbackId == Guid.Empty
             || !Enum.IsDefined(value.Identity) || !NativeBlobWireShape.IsDigest(value.ClaimDigest))
-        { throw new InvalidOperationException(NativeBlobWireProbeProtocol.InvalidEvidence); }
+        {
+            throw new InvalidOperationException(NativeBlobWireProbeProtocol.InvalidEvidence);
+        }
         var bytes = files.Read(NativeBlobWireNames.Claim(value.Identity));
         var claim = codec.Read<NativeBlobWireClaim>(bytes);
         if (NativeBlobWireCodec.Digest(bytes) != value.ClaimDigest || claim.Identity != value.Identity
             || claim.SessionId != owner.SessionId || claim.OwnerDigest != ownerDigest
             || claim.Version != NativeBlobWireProbeProtocol.Version)
-        { throw new InvalidOperationException(NativeBlobWireProbeProtocol.InvalidEvidence); }
+        {
+            throw new InvalidOperationException(NativeBlobWireProbeProtocol.InvalidEvidence);
+        }
     }
 }

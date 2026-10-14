@@ -35,7 +35,9 @@ internal static class PartitionQueryRf3Leadership
         finally
         {
             if (stopped)
-            { await RestoreLeaderAsync(fixture, leader, primary).ConfigureAwait(false); }
+            {
+                await RestoreLeaderAsync(fixture, leader, primary).ConfigureAwait(false);
+            }
         }
     }
 
@@ -77,7 +79,10 @@ internal static class PartitionQueryRf3Leadership
             () => sdk.CommitAsync(command, cancellationToken), cancellationToken).ConfigureAwait(false);
         var receipt = await McpCallerAssertions.SdkSuccessAsync(committed).ConfigureAwait(false);
         await Assert.That(receipt!.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
-        var updated = scenario with { Inputs = scenario.Inputs.Add(row) };
+        var updated = scenario with
+        {
+            Inputs = scenario.Inputs.Add(row)
+        };
         var request = scenario.Request();
         var page = await McpCallerAssertions.SdkSuccessAsync(await sdk.PartitionQueryAsync(request, cancellationToken)
             .ConfigureAwait(false)).ConfigureAwait(false);
@@ -100,9 +105,14 @@ internal static class PartitionQueryRf3Leadership
             }, failures).ConfigureAwait(false);
         }
         if (failures.Count == 0)
-        { return; }
+        {
+            return;
+        }
         if (primary is not null)
-        { primary.Data[CleanupFailureKey] = new AggregateException(failures); return; }
+        {
+            primary.Data[CleanupFailureKey] = new AggregateException(failures);
+            return;
+        }
         throw new AggregateException("Partition query leader-loss cleanup failed.", failures);
     }
 

@@ -68,7 +68,10 @@ internal sealed class SqlModelViewAuthorityTests
     {
         using var database = new TestDatabase();
         database.Configure(SqlModelViewTestSupport.Queue, ResourceKind.WorkQueue,
-            queuePolicy: new() { MaxAttempts = 1 });
+            queuePolicy: new()
+            {
+                MaxAttempts = 1
+            });
         database.Commit(new EnqueueMessage(SqlModelViewTestSupport.Queue, SqlModelViewTestSupport.MessageId,
             SqlModelViewTestSupport.Payload(SqlModelViewTestSupport.Secret, "queue-visible"),
             SqlModelViewTestSupport.Headers(SqlModelViewTestSupport.HeaderSecret)));

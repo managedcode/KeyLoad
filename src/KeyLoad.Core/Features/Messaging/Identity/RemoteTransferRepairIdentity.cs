@@ -15,7 +15,9 @@ internal static class RemoteTransferRepairIdentity
                 : Hash(hint, RemoteTransferRepairProtocol.AcceptDomain, hint.AcceptGeneration, hint.AcceptPolicyGeneration);
         }
         if (stage != QueueTransferRepairStage.Complete)
-        { throw Errors.Fail(ErrorCode.Validation, RemoteTransferRepairProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, RemoteTransferRepairProtocol.Invalid);
+        }
         return hint.CompleteGeneration == RemoteTransferRepairProtocol.InitialGeneration
             ? RemoteTransferCoordinationIdentity.CommandId(hint, RemoteTransferCoordinationProtocol.CompleteStage)
             : Hash(hint, RemoteTransferRepairProtocol.CompleteDomain, hint.CompleteGeneration);
@@ -25,7 +27,9 @@ internal static class RemoteTransferRepairIdentity
     {
         RequireGenerations(hint.AcceptGeneration, hint.AcceptPolicyGeneration, hint.CompleteGeneration);
         if (!Enum.IsDefined(stage) || !RemoteTransferDependencyShape.Digest(outcomeDigest))
-        { throw Errors.Fail(ErrorCode.Validation, RemoteTransferRepairProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, RemoteTransferRepairProtocol.Invalid);
+        }
         return Hash(hint, RemoteTransferRepairProtocol.AdvanceDomain, (int)stage, hint.AcceptGeneration,
             hint.AcceptPolicyGeneration, hint.CompleteGeneration, outcomeDigest);
     }
@@ -46,6 +50,8 @@ internal static class RemoteTransferRepairIdentity
     {
         var first = RemoteTransferRepairProtocol.InitialGeneration;
         if (capacity < first || policy < first || complete < first)
-        { throw Errors.Fail(ErrorCode.Validation, RemoteTransferRepairProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, RemoteTransferRepairProtocol.Invalid);
+        }
     }
 }

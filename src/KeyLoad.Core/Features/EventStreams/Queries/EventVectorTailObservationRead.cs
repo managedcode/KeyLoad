@@ -22,7 +22,9 @@ public sealed partial class DatabaseEngine
             var principal = Principal(bounded, principalId, EvaluationClock.GetUtcNow());
             if (request.Action != EventFeedControlAction.Tail || request.ControlPartition is null
                 || request.Scope is null || request.Cursor is null || freshSourceWitness.IsEmpty)
-            { throw Errors.Fail(ErrorCode.Validation, InvalidEventVectorTail); }
+            {
+                throw Errors.Fail(ErrorCode.Validation, InvalidEventVectorTail);
+            }
             Authorization.Require(principal, request.ControlPartition, request.Scope.Resource, Capability.SubscriptionsManage);
             _ = StreamTraversalPlacement(bounded, request.ControlPartition, controlOwner);
             var admission = new EventVectorAdmissionPolicy(OperationLimitsOptions);
@@ -58,12 +60,16 @@ public sealed partial class DatabaseEngine
         var key = EventVectorKeys.Offer(map.ControlPartition, map.MapId);
         var row = inventory.PayloadRows.FirstOrDefault(item => item.Key.Span.SequenceEqual(key));
         if (row.Key.IsEmpty)
-        { return (request.CommandId, ReadOnlyMemory<byte>.Empty, ReadOnlyMemory<byte>.Empty); }
+        {
+            return (request.CommandId, ReadOnlyMemory<byte>.Empty, ReadOnlyMemory<byte>.Empty);
+        }
         var offer = NativeSerialization.Deserialize<EventVectorOffer>(row.Value.Span);
         if (offer.Version != EventVectorTailVersion || offer.MapId != map.MapId
             || offer.MapRevision != map.Revision || offer.ExpiresAt != map.ExpiresAt
             || offer.OriginalReadCommandId == Guid.Empty)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidEventVectorTail); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidEventVectorTail);
+        }
         var indexKey = EventVectorKeys.ParentOutcome(map.ControlPartition, principal.Id, offer.OriginalReadCommandId);
         EventVectorParentOutcomeIndex? index = null;
         view.ReadValue(indexKey, bytes =>
@@ -74,7 +80,9 @@ public sealed partial class DatabaseEngine
         if (index is null || index.OriginalPublicCommandId != offer.OriginalReadCommandId
             || index.PrincipalId != principal.Id || index.MapId != map.MapId
             || index.ControlPartition != map.ControlPartition || index.OriginalNativeTerminalPhaseBytes.IsEmpty)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidEventVectorTail); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidEventVectorTail);
+        }
         EventVectorParentScopes.Authorize(Authorization, principal, index.OriginalAuthorizedSourceScopes, admission);
         _ = EventVectorCurrentSourceAuthorization.Require(view, principal, request,
             index.OriginalAuthorizedSourceScopes, freshSourceWitness, admission);
@@ -83,17 +91,23 @@ public sealed partial class DatabaseEngine
         if (phase.Action != EventVectorControlAction.Offer || phase.OriginalRequest.CommandId != offer.OriginalReadCommandId
             || phase.OriginalRequest.MapId != map.MapId || phase.ExpectedMapRevision != map.Revision
             || phase.ExpectedCoverageGeneration != map.CoverageGeneration)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidEventVectorTail); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidEventVectorTail);
+        }
         var original = EventVectorParentObservationRead.Read(view, Authorization, principal, phase.OriginalRequest,
             Store.Identity.Incarnation, freshSourceWitness, OperationLimitsOptions, cancellationToken);
         if (original.Phase.IsEmpty || original.Outcome.IsEmpty)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidEventVectorTail); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidEventVectorTail);
+        }
         var outcome = NativeSerialization.Deserialize<StoredOutcome>(original.Outcome.Span);
         var actual = outcome.Result.Get<EventVectorControlResult>().Offer;
         if (actual is null || actual.OriginalReadCommandId != offer.OriginalReadCommandId
             || actual.MapRevision != offer.MapRevision || !actual.PageDigest.Span.SequenceEqual(offer.PageDigest.Span)
             || !actual.Entries.Span.SequenceEqual(offer.Entries.Span))
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidEventVectorTail); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidEventVectorTail);
+        }
         return (offer.OriginalReadCommandId, original.Phase, original.Outcome);
     }
 
@@ -110,8 +124,12 @@ public sealed partial class DatabaseEngine
             || map.ControlPolicyEpoch != principal.PolicyEpoch || token.ControlIncarnation != Store.Identity.Incarnation
             || map.ControlIncarnation != Store.Identity.Incarnation || token.ExpiresAt != map.ExpiresAt
             || !token.ManifestDigest.Span.SequenceEqual(map.SourceManifestDigest.Span))
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidEventVectorTail); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidEventVectorTail);
+        }
         if (token.ExpiresAt <= EvaluationClock.GetUtcNow())
-        { throw Errors.Fail(ErrorCode.CursorExpired, InvalidEventVectorTail); }
+        {
+            throw Errors.Fail(ErrorCode.CursorExpired, InvalidEventVectorTail);
+        }
     }
 }

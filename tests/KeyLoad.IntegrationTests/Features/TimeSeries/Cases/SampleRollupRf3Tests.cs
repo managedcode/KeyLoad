@@ -60,7 +60,10 @@ internal sealed class SampleRollupRf3Tests(ClusterFixture fixture)
         var official = await McpCallerAssertions.SuccessAsync<SampleRollupResult>(
             await mcp.CallAsync(SampleRollupProtocol.ReadTool, request, cancellation));
         var sql = new SqlOperationRequest(request.Partition, ReadSql,
-            new() { [Arguments] = JsonSerializer.SerializeToElement(McpOfficialClient.Arguments(request), JsonDefaults.Options) });
+            new()
+            {
+                [Arguments] = JsonSerializer.SerializeToElement(McpOfficialClient.Arguments(request), JsonDefaults.Options)
+            });
         var sdkSql = await McpCallerAssertions.SdkSuccessAsync(await sdk.ExecuteSqlAsync(sql, cancellation));
         var mcpSql = await McpCallerAssertions.SuccessAsync<SampleRollupResult>(
             await mcp.CallAsync(SqlOperationProtocol.ToolName, sql, cancellation));

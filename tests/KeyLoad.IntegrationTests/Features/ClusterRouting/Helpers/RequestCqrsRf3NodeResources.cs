@@ -10,7 +10,9 @@ internal static class RequestCqrsRf3NodeResources
         var selected = builder.Resources.OfType<ContainerResource>().Where(resource => IsNode(resource.Name))
             .OrderBy(resource => resource.Name, StringComparer.Ordinal).ToArray();
         if (selected.Length != RequestCqrsRf3Protocol.NodeCount)
-        { throw new InvalidOperationException("The actual Aspire model did not contain three C1 node containers."); }
+        {
+            throw new InvalidOperationException("The actual Aspire model did not contain three C1 node containers.");
+        }
         return selected;
     }
 

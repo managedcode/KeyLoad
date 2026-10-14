@@ -113,8 +113,14 @@ internal sealed class SearchResourceTests
         var request = new SearchRequest(db.Partition, Collection, TextPath, SearchTerm);
         var expected = await new SearchEngine(db.Database, UnitExecutionOptions.QueryExecution()).SearchAsync("root", request);
         var exactBytes = JsonDefaults.Serialize(expected).Length;
-        var exact = new SearchEngine(new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxBatchBytes = exactBytes }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance), UnitExecutionOptions.QueryExecution());
-        var shortBudget = new SearchEngine(new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxBatchBytes = exactBytes - 1 }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance), UnitExecutionOptions.QueryExecution());
+        var exact = new SearchEngine(new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new()
+        {
+            MaxBatchBytes = exactBytes
+        }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance), UnitExecutionOptions.QueryExecution());
+        var shortBudget = new SearchEngine(new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new()
+        {
+            MaxBatchBytes = exactBytes - 1
+        }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance), UnitExecutionOptions.QueryExecution());
         var position = db.Store.Position;
 
         var accepted = await exact.SearchAsync("root", request, TestContext.Current!.Execution.CancellationToken);
@@ -131,7 +137,10 @@ internal sealed class SearchResourceTests
     [Test]
     public async Task AcMp004MidScanTextWorkRejectionReleasesReadGate()
     {
-        using var db = new TestDatabase(new() { MaxSearchTextTokens = 2 });
+        using var db = new TestDatabase(new()
+        {
+            MaxSearchTextTokens = 2
+        });
         db.Configure(Collection, ResourceKind.Collection);
         db.Commit(new PutDocument(Collection, HitId, "{\"text\":\"needle other\"}"),
             new PutVector(Collection, HitId, VectorPath, [1, 0], Space, 1));

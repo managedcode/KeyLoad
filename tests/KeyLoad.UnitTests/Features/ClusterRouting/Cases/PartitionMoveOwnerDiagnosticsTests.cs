@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 using KeyLoad.UnitTests.Features.TestInfrastructure;
 using Microsoft.Extensions.Logging;
 

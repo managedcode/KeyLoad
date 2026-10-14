@@ -1,7 +1,7 @@
 using KeyLoad.Client;
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
@@ -20,7 +20,9 @@ internal static class SqlTypedInsertRf3Cancellation
             await using var wire = await PostgresRf3Caller.ConnectAsync(fixture.App, McpCallerProtocol.Node2,
                 state.Identity.Principal.Id, state.Identity.Secret, PostgresRf3Certificate.RootPath(fixture), token);
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
-            { next = await OriginalAsync(selection, state, root, wire, controls, discovery, token); }, failures);
+            {
+                next = await OriginalAsync(selection, state, root, wire, controls, discovery, token);
+            }, failures);
         }, failures);
         global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
         return next ?? throw new InvalidOperationException(PostgresRf3Protocol.InvalidResult);
@@ -55,12 +57,20 @@ internal static class SqlTypedInsertRf3Cancellation
                     var request = SqlTypedInsertRf3Literal.Request(id, SqlTypedInsertRf3Literal.CancelSql);
                     await SqlTypedInsertRf3Hot.ReceiptAsync(request, receipt, state.Owner,
                         new MutationReceipt(SqlTypedInsertRf3Literal.PutKind, SqlTypedInsertRf3Literal.Table, SqlTypedInsertRf3Literal.Cancelled, SqlTypedInsertRf3Literal.InitialRevision));
-                    next = state with { Cancelled = request, CancelledReceipt = receipt };
+                    next = state with
+                    {
+                        Cancelled = request,
+                        CancelledReceipt = receipt
+                    };
                 }, operationFailures);
                 if (operationFailures.Count != PostgresRf3Protocol.FirstColumn && !controls.ArmFor(arm).Retired)
-                { await PostgresRf3Cancellation.CleanupAsync(controls, arm, discovery, originalCancellation, original, joined, operationFailures); }
+                {
+                    await PostgresRf3Cancellation.CleanupAsync(controls, arm, discovery, originalCancellation, original, joined, operationFailures);
+                }
                 if (operationFailures.Count != PostgresRf3Protocol.FirstColumn)
-                { selection.RetainEvidence(); }
+                {
+                    selection.RetainEvidence();
+                }
                 global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(operationFailures);
             }, failures);
         }, failures);
@@ -82,7 +92,13 @@ internal static class SqlTypedInsertRf3Cancellation
         await Assert.That(error.CancellationToken).IsEqualTo(cancellation.Token);
         var cancelled = await controls.WaitForMarkerAsync(arm, RequestCqrsProbePhase.AuthorizationReload, RequestCqrsProbeOutcome.Cancelled, discovery, token);
         var disposed = await controls.WaitForMarkerAsync(arm, RequestCqrsProbePhase.ProducerDisposed, RequestCqrsProbeOutcome.Observed, discovery, token);
-        await SqlRf3Protocol.EqualAsync(held with { Outcome = cancelled.Outcome }, cancelled);
-        await SqlRf3Protocol.EqualAsync(held with { Phase = RequestCqrsProbePhase.ProducerDisposed }, disposed);
+        await SqlRf3Protocol.EqualAsync(held with
+        {
+            Outcome = cancelled.Outcome
+        }, cancelled);
+        await SqlRf3Protocol.EqualAsync(held with
+        {
+            Phase = RequestCqrsProbePhase.ProducerDisposed
+        }, disposed);
     }
 }

@@ -1,5 +1,5 @@
 using System.Security.Cryptography;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Replication;
 
 namespace KeyLoad.UnitTests.Features.ClusterReplication;
@@ -36,12 +36,18 @@ internal sealed class EpochReplicaPurposeTests
     {
         using var fixture = new ReplicaSecurityFixture();
         var request = CurrentRequest(fixture, method);
-        var unsupported = request with { Signature = EpochReplicaMac.Request(fixture.Options, request, rejectedPurpose) };
+        var unsupported = request with
+        {
+            Signature = EpochReplicaMac.Request(fixture.Options, request, rejectedPurpose)
+        };
         var rejected = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Receiver.VerifyRequest(unsupported));
         await Assert.That(rejected.Code).IsEqualTo(ErrorCode.Unauthenticated);
 
         using var currentMac = new ReplicaMessageMac(fixture.Options.Secret, fixture.Options.ClusterId);
-        var accepted = unsupported with { Signature = currentMac.Request(unsupported) };
+        var accepted = unsupported with
+        {
+            Signature = currentMac.Request(unsupported)
+        };
         fixture.Receiver.VerifyRequest(accepted);
         await AssertCurrentReplicaContractAsync(accepted, fixture);
     }
@@ -54,7 +60,10 @@ internal sealed class EpochReplicaPurposeTests
         using var fixture = new ReplicaSecurityFixture();
         var request = fixture.Vote();
         var current = fixture.Receiver.CreateReply(request, ReadOnlyMemory<byte>.Empty);
-        var unsupported = current with { Signature = EpochReplicaMac.Reply(fixture.Options, current, rejectedPurpose) };
+        var unsupported = current with
+        {
+            Signature = EpochReplicaMac.Reply(fixture.Options, current, rejectedPurpose)
+        };
         var rejected = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Sender.VerifyReply(request, unsupported));
         await Assert.That(rejected.Code).IsEqualTo(ErrorCode.Unauthenticated);
         fixture.Sender.VerifyReply(request, current);
@@ -66,7 +75,10 @@ internal sealed class EpochReplicaPurposeTests
     {
         using var fixture = new ReplicaSecurityFixture();
         var currentRequest = fixture.Vote();
-        var unsupportedRequest = currentRequest with { Version = UnsupportedPeerVersion };
+        var unsupportedRequest = currentRequest with
+        {
+            Version = UnsupportedPeerVersion
+        };
         unsupportedRequest = unsupportedRequest with
         {
             Signature = EpochReplicaMac.Request(fixture.Options, unsupportedRequest,
@@ -76,7 +88,10 @@ internal sealed class EpochReplicaPurposeTests
         await Assert.That(rejectedRequest.Code).IsEqualTo(ErrorCode.Unauthenticated);
 
         var currentReply = fixture.Receiver.CreateReply(currentRequest, ReadOnlyMemory<byte>.Empty);
-        var unsupportedReply = currentReply with { Version = UnsupportedPeerVersion };
+        var unsupportedReply = currentReply with
+        {
+            Version = UnsupportedPeerVersion
+        };
         unsupportedReply = unsupportedReply with
         {
             Signature = EpochReplicaMac.Reply(fixture.Options, unsupportedReply,

@@ -16,11 +16,15 @@ internal static class RequestCqrsProbeSnapshotFiles
         var currentOwner = RequestCqrsProbeFiles.ReadRecord(
             Path.Combine(root, RequestCqrsProbeProtocol.OwnerFile), executionOptions);
         if (!CryptographicOperations.FixedTimeEquals(ownerBytes, currentOwner))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         var entries = Directory.EnumerateFileSystemEntries(root)
             .Take(executionOptions.Value.MaximumFiles + OverflowFileCount).ToArray();
         if (entries.Length > executionOptions.Value.MaximumFiles)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         return entries;
     }
 
@@ -29,7 +33,9 @@ internal static class RequestCqrsProbeSnapshotFiles
     {
         var observed = checked(aggregateBytes + ValidateEntry(path, name, executionOptions));
         if (observed > executionOptions.Value.MaximumAggregateBytes)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         return observed;
     }
 
@@ -40,7 +46,9 @@ internal static class RequestCqrsProbeSnapshotFiles
         RequestCqrsProbePaths.RequirePrivateMode(path, RequestCqrsProbeProtocol.PrivateFileMode);
         var length = identity.Length;
         if (length > executionOptions.Value.MaximumRecordBytes || !RequestCqrsProbeKnownNames.KnownName(name))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         return length;
     }
 

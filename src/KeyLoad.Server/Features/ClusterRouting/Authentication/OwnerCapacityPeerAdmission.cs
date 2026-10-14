@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
-using KeyLoad.Orleans;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
@@ -36,10 +36,14 @@ internal sealed class OwnerCapacityPeerAdmission(PartitionMovementPeerAdmission 
             || request.Destination.Owner.Incarnation != local.Incarnation || !local.TransportReady
             || string.IsNullOrWhiteSpace(request.CohortFingerprint)
             || NativeSerialization.Measure(request) > movement.Database.Limits.MaxBatchBytes)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, TenantPlacementCapacityProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, TenantPlacementCapacityProtocol.InvalidProof);
+        }
         using var mac = movement.CreateControlMac();
         if (!OwnerCapacityMac.VerifyCapacityRequest(mac, request))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, TenantPlacementCapacityProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, TenantPlacementCapacityProtocol.InvalidProof);
+        }
         await requireCaller(request.CallerVoter, request.CallerSiloAddress, token).ConfigureAwait(false);
         token.ThrowIfCancellationRequested();
     }
@@ -51,7 +55,9 @@ internal sealed class OwnerCapacityPeerAdmission(PartitionMovementPeerAdmission 
         if (request.IssuedAt > now || request.ExpiresAt <= now
             || request.ExpiresAt > request.IssuedAt + movement.Routing.RequestLifetime
             || !replay.TryUse(request.Nonce.ToString(PartitionMovementPeerAdmission.NonceFormat)))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, TenantPlacementCapacityProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, TenantPlacementCapacityProtocol.InvalidProof);
+        }
     }
 
     public void Dispose() => replay.Dispose();

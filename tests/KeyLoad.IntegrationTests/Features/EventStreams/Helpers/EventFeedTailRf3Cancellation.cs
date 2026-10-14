@@ -18,10 +18,16 @@ internal static class EventFeedTailRf3Cancellation
     internal static async Task RunAsync(TwoRf3MembershipWave wave, string credential,
         EventFeedControlRequest offered, EventFeedControlResult original, CancellationToken token)
     {
-        var request = EventFeedTailRf3Flow.Request(offered, original) with { Limit = TwoDeliveries };
+        var request = EventFeedTailRf3Flow.Request(offered, original) with
+        {
+            Limit = TwoDeliveries
+        };
         var policy = new CqrsStreamClientOptions { MaximumStreamBytes = new DatabaseLimits().MaxQueryReadBytes };
         await SdkAsync(wave, credential, request, original, policy, token).ConfigureAwait(false);
-        await OfficialAsync(wave, credential, request with { CommandId = Guid.NewGuid() }, original, policy, token)
+        await OfficialAsync(wave, credential, request with
+        {
+            CommandId = Guid.NewGuid()
+        }, original, policy, token)
             .ConfigureAwait(false);
         await SqlRf3Protocol.EqualAsync(original, await EventFeedOfferRf3Flow.RoutesAsync(wave, credential, offered, token));
     }
@@ -40,14 +46,18 @@ internal static class EventFeedTailRf3Cancellation
             {
                 await Assert.That(frame.Kind).IsEqualTo(CqrsStreamChunkKind.Progress);
                 if (frame.ProgressResult is not { IsSuccess: true, Value: { } value })
-                { throw new InvalidOperationException(Invalid); }
+                {
+                    throw new InvalidOperationException(Invalid);
+                }
                 await SqlRf3Protocol.EqualAsync(original, value.OriginalOfferResult);
                 ++deliveries;
                 await owned.CancelAsync().ConfigureAwait(false);
             }
         }
         catch (OperationCanceledException) when (owned.IsCancellationRequested && !token.IsCancellationRequested)
-        { cancelled = true; }
+        {
+            cancelled = true;
+        }
         await Assert.That(deliveries).IsEqualTo(OneDelivery);
         await Assert.That(cancelled).IsTrue();
     }

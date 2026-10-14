@@ -31,11 +31,15 @@ public sealed partial class DatabaseEngine
             || settlement.EffectDigest != digest || settlement.AppliedPosition != body.TargetReceipt.Token.Position
             || settlement.PhysicalOwner.Incarnation != record.Destination.Incarnation
             || settlement.PhysicalOwner.PhysicalShardId != record.Destination.PhysicalShardId)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
         if (record.Phase != PartitionControlCommandPhase.Admitted)
         {
             if (record.TargetEffectDigest != digest)
-            { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict); }
+            {
+                throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict);
+            }
             return record;
         }
         var acknowledged = record with
@@ -58,7 +62,9 @@ public sealed partial class DatabaseEngine
         if (!principal.ClusterAdministrator || record.EffectId != effectId || record.Delegation is null
             || record.OriginalOperation is null || record.Delegation.ControlOwner is null
             || record.ControlOwner.Incarnation != Store.Identity.Incarnation)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
         var control = PartitionMoveControlStorage.ReadHistory(view, identity.Partition!, record.Delegation.MoveId,
             Limits.MaxBatchBytes) ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
         _ = RequireRetiredCommandControl(view, principal, control, out _);

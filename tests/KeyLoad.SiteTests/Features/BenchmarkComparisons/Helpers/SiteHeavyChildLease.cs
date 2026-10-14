@@ -62,7 +62,9 @@ internal sealed class SiteHeavyChildLease(SiteHeavyChildAdmission admission) : I
     public void Dispose()
     {
         if (Interlocked.Exchange(ref transferredToCaller, SiteBrowserTokens.Zero) == SiteBrowserTokens.One)
-        { return; }
+        {
+            return;
+        }
         var owner = Interlocked.Exchange(ref _admission, null);
         owner?.Finish(_process is null || _settled);
     }

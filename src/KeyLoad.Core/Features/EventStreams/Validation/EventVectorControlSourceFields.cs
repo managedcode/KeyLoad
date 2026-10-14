@@ -13,7 +13,9 @@ internal static class EventVectorControlSourceFields
         ArgumentNullException.ThrowIfNull(admission);
         var source = phase.IntendedSourcePhase ?? phase.ObservedSourcePhase;
         if (source is null)
-        { return; }
+        {
+            return;
+        }
         var request = phase.OriginalRequest;
         var initial = phase.Action == EventVectorControlAction.Open;
         var coverageMatches = initial && source.CoverageGeneration == InitialCoverage
@@ -37,13 +39,19 @@ internal static class EventVectorControlSourceFields
         if (source.MapId != request.MapId || source.ControlPartition != request.ControlPartition
             || source.MapRevision != (initial ? InitialMapRevision : phase.ExpectedMapRevision) || !coverageMatches || !roleMatches
             || source.CleanupGeneration != phase.ExpectedCleanupGeneration)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidSource); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidSource);
+        }
         if (phase.IntendedSourcePhase is not null)
-        { _ = EventVectorSourceMutationValidation.ReadOriginal(source, admission); }
+        {
+            _ = EventVectorSourceMutationValidation.ReadOriginal(source, admission);
+        }
         else
         {
             if (phase.ExpectedPendingSourcePhaseId != source.PhaseCommandId)
-            { throw Errors.Fail(ErrorCode.Corruption, InvalidSource); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, InvalidSource);
+            }
             _ = EventVectorSourceMutationValidation.ReadObserved(source, admission);
         }
     }

@@ -10,7 +10,9 @@ internal static class SqlOrdinalRf3Owned
         => RunAsync(fixture, state, async (callers, wire) =>
         {
             if (healthy)
-            { await SqlOrdinalRf3Pages.HealthyAsync(callers, state, wire, token); }
+            {
+                await SqlOrdinalRf3Pages.HealthyAsync(callers, state, wire, token);
+            }
             else
             {
                 await SqlOrdinalRf3Controls.InvalidAsync(fixture, callers, state, wire, token);
@@ -43,5 +45,8 @@ internal static class SqlOrdinalRf3Owned
     internal static async Task SourcesAsync(ClusterFixture fixture, SqlOffsetRf3State state, CancellationToken token)
         => _ = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
             fixture.AdminKey, async caller =>
-            { await SqlOffsetRf3Sources.UnchangedAsync(caller, state, token); return true; }, token);
+            {
+                await SqlOffsetRf3Sources.UnchangedAsync(caller, state, token);
+                return true;
+            }, token);
 }

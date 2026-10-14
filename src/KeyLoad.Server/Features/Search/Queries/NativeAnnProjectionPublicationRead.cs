@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Search;
-using KeyLoad.Orleans;
 using KeyLoad.Query.Features.Search;
 
 namespace KeyLoad.Server.Features.Search;
@@ -67,7 +67,9 @@ internal static class NativeAnnProjectionPublicationRead
                 if (current.MaintenanceAuthority != eligible.MaintenanceAuthority
                     || current.Checkpoint != eligible.Checkpoint
                     || current.LastProgressReservationCut != eligible.LastProgressReservationCut)
-                { throw Errors.Fail(ErrorCode.TokenInvalidated, NativeAnnProtocol.InvalidSource); }
+                {
+                    throw Errors.Fail(ErrorCode.TokenInvalidated, NativeAnnProtocol.InvalidSource);
+                }
                 result = new(published.Consumer, published.IndexGeneration, published.Source, published.Count,
                     Convert.ToHexStringLower(published.IndexSha256));
                 read.ChargeBytes(global::KeyLoad.NativeSerialization.Measure(result));
@@ -87,6 +89,8 @@ internal static class NativeAnnProjectionPublicationRead
     {
         if (state.MaintenanceAuthority?.PrincipalId != principal.Id
             || state.Definition.AnnMaintenance != request.MaintenanceProfile)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, NativeAnnProtocol.InvalidSource); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, NativeAnnProtocol.InvalidSource);
+        }
     }
 }

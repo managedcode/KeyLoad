@@ -31,11 +31,15 @@ internal static class EventVectorPinTransition
         ReadOnlyMemory<byte> originalBody, EventVectorSourcePin? current)
     {
         if (current is not null)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, LostPin); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, LostPin);
+        }
         if (request.ExpectedPinRevision != InitialExpectedRevision
             || request.ExpectedCoverageGeneration != InitialExpectedRevision || commandId == Guid.Empty
             || request.OriginalPinCommandId != Guid.Empty || !request.OriginalPinNativeBody.IsEmpty)
-        { throw Errors.Fail(ErrorCode.Validation, InvalidTransition); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, InvalidTransition);
+        }
         var digest = SHA256.HashData(originalBody.Span);
         return new EventVectorSourcePin
         {
@@ -62,7 +66,9 @@ internal static class EventVectorPinTransition
         ReadOnlyMemory<byte> originalBody, EventVectorSourcePin? current, EventVectorAdmissionPolicy admission)
     {
         if (current is null || current.Released)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, LostPin); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, LostPin);
+        }
         var original = EventVectorOriginalPinBinding.Read(request, admission);
         EventVectorOriginalPinBinding.RequireRetained(request, original, current);
         if (current.Version != Version || current.MapId != request.MapId
@@ -74,7 +80,9 @@ internal static class EventVectorPinTransition
             || request.CoverageGeneration < current.CoverageGeneration
             || request.CoverageGeneration > checked(current.CoverageGeneration + RevisionStep)
             || current.PinRevision != request.ExpectedPinRevision || request.Position < current.Position)
-        { throw Errors.Fail(ErrorCode.Conflict, InvalidTransition); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, InvalidTransition);
+        }
         return current with
         {
             Position = request.Position,
@@ -87,10 +95,16 @@ internal static class EventVectorPinTransition
     private static void RequirePosition(EventVectorSourceMutation request, EventSourceHead head)
     {
         if (head.Generation != request.Source.Generation)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidTransition); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidTransition);
+        }
         if (request.Position < checked(head.FirstAvailablePosition - FirstRevision))
-        { throw Errors.Fail(ErrorCode.HistoryUnavailable, InvalidTransition); }
+        {
+            throw Errors.Fail(ErrorCode.HistoryUnavailable, InvalidTransition);
+        }
         if (request.Position > head.TailPosition)
-        { throw Errors.Fail(ErrorCode.Validation, InvalidTransition); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, InvalidTransition);
+        }
     }
 }

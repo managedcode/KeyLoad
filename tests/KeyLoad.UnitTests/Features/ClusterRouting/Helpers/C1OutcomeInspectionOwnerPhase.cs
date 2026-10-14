@@ -77,9 +77,13 @@ internal static class C1OutcomeInspectionOwnerPhase
     private static int? SafeCode(Exception error)
     {
         if (error is KeyLoadException keyLoad)
-        { return (int)keyLoad.Code; }
+        {
+            return (int)keyLoad.Code;
+        }
         if (error.InnerException is Win32Exception native && AllowedNativeError(native.NativeErrorCode))
-        { return native.NativeErrorCode; }
+        {
+            return native.NativeErrorCode;
+        }
         return null;
     }
 

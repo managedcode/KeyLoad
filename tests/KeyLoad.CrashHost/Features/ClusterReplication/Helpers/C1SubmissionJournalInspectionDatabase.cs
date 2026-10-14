@@ -14,7 +14,10 @@ internal sealed class C1SubmissionJournalInspectionDatabase : IDisposable
         Database = database;
     }
 
-    internal DatabaseEngine Database { get; }
+    internal DatabaseEngine Database
+    {
+        get;
+    }
 
     internal static C1SubmissionJournalInspectionDatabase Open(ZoneTreeStore canonical,
         C1SubmissionJournalInspectionReadBudget budget, CancellationToken cancellationToken)

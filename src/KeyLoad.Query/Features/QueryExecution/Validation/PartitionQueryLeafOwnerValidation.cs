@@ -14,7 +14,9 @@ internal static class PartitionQueryLeafOwnerValidation
         {
             if (result is null || result.Partition != partition || result.NodeId == Guid.Empty
                 || result.Incarnation != physicalOwner.Incarnation || result.ReadGeneration < InitialGeneration)
-            { throw Errors.Fail(ErrorCode.OwnershipLost, InvalidOwnerDetail); }
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, InvalidOwnerDetail);
+            }
             return;
         }
         if (result is null || result.Partition != partition || result.NodeId != owner.NodeId

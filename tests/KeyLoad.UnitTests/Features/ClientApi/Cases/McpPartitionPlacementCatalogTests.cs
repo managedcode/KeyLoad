@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using System.Reflection;
 using System.Text.Json;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
@@ -141,7 +141,9 @@ internal sealed class McpPartitionPlacementCatalogTests
             McpPartitionPlacementCatalogProtocol.PartitionKey);
         await VerifyObjectAsync(schema, fields.Add(McpPartitionPlacementCatalogProtocol.AtomicPartitionId), fields);
         foreach (var field in fields.Add(McpPartitionPlacementCatalogProtocol.AtomicPartitionId))
-        { await VerifyTypeAsync(root, schema.GetProperty(Properties).GetProperty(field), String); }
+        {
+            await VerifyTypeAsync(root, schema.GetProperty(Properties).GetProperty(field), String);
+        }
     }
 
     private static async Task VerifyObjectAsync(JsonElement schema, ImmutableArray<string> properties,
@@ -184,7 +186,9 @@ internal sealed class McpPartitionPlacementCatalogTests
     private static McpOperationDescriptor Find(string name)
     {
         if (!McpOperationCatalog.TryGetTool(name, out var descriptor))
-        { throw new InvalidOperationException(name); }
+        {
+            throw new InvalidOperationException(name);
+        }
         return descriptor!;
     }
 }

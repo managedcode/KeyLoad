@@ -182,11 +182,17 @@ internal static class MongoDiagnosticProcess
         }
         finally { Observe(output); Observe(error); }
         if (failures.Count == 0)
-        { return; }
+        {
+            return;
+        }
         if (primaryFailure is not null)
-        { failures.Insert(0, primaryFailure); }
+        {
+            failures.Insert(0, primaryFailure);
+        }
         if (failures.Count == 1)
-        { ExceptionDispatchInfo.Capture(failures[0]).Throw(); }
+        {
+            ExceptionDispatchInfo.Capture(failures[0]).Throw();
+        }
         throw new AggregateException(failures);
     }
 
@@ -194,9 +200,13 @@ internal static class MongoDiagnosticProcess
     {
         await task.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
         if (task.IsFaulted)
-        { failures.AddRange(task.Exception!.InnerExceptions); }
+        {
+            failures.AddRange(task.Exception!.InnerExceptions);
+        }
         else if (task.IsCanceled)
-        { failures.Add(new TaskCanceledException(task)); }
+        {
+            failures.Add(new TaskCanceledException(task));
+        }
     }
 
     private static async Task<string> ReadAsync(StreamReader reader, CancellationToken token)

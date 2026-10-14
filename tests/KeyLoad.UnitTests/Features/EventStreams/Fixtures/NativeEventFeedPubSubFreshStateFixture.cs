@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -28,7 +28,10 @@ internal sealed class NativeEventFeedPubSubFreshStateFixture : IDisposable
             var actualServices = registrations.BuildServiceProvider();
             acquiredServices = actualServices;
             var routing = Options.Create(new GrainRoutingOptions
-            { MinimumScratchBytes = MinimumScratchBytes, MaximumScratchBytes = MaximumScratchBytes });
+            {
+                MinimumScratchBytes = MinimumScratchBytes,
+                MaximumScratchBytes = MaximumScratchBytes
+            });
             var limits = Options.Create(new DatabaseLimits { MaxResults = MaximumRows });
             var actualStorage = new EventFeedPubSubStorage(actualServices, limits, routing);
             acquiredStorage = actualStorage;
@@ -38,17 +41,27 @@ internal sealed class NativeEventFeedPubSubFreshStateFixture : IDisposable
             Id = actualId;
         }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { FailHandoff(error); throw; }
+        {
+            FailHandoff(error);
+            throw;
+        }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { FailHandoff(error); throw; }
+        {
+            FailHandoff(error);
+            throw;
+        }
 
         void FailHandoff(Exception original)
         {
             var failures = new List<Exception> { original };
             if (acquiredStorage is not null)
-            { ServerFailureObserver.Observe(acquiredStorage.Dispose, failures); }
+            {
+                ServerFailureObserver.Observe(acquiredStorage.Dispose, failures);
+            }
             if (acquiredServices is not null)
-            { ServerFailureObserver.Observe(acquiredServices.Dispose, failures); }
+            {
+                ServerFailureObserver.Observe(acquiredServices.Dispose, failures);
+            }
             ServerFailureObserver.ThrowIfAny(failures);
         }
     }
@@ -67,8 +80,14 @@ internal sealed class NativeEventFeedPubSubFreshStateFixture : IDisposable
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    internal EventFeedPubSubStorage Storage { get; }
-    internal GrainId Id { get; }
+    internal EventFeedPubSubStorage Storage
+    {
+        get;
+    }
+    internal GrainId Id
+    {
+        get;
+    }
 
     internal T CreateNativeState<T>()
         => services.GetRequiredService<IActivatorProvider>().GetActivator<T>().Create();
@@ -102,7 +121,9 @@ internal sealed class NativeEventFeedPubSubFreshStateFixture : IDisposable
         var failures = new List<Exception>();
         ServerFailureObserver.Observe(Storage.Dispose, failures);
         try
-        { services.Dispose(); }
+        {
+            services.Dispose();
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         ServerFailureObserver.ThrowIfAny(failures);

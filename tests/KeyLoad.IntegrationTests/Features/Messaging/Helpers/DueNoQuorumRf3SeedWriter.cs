@@ -44,7 +44,9 @@ internal static class DueNoQuorumRf3SeedWriter
     private static void AssertSetupLead(DateTimeOffset dueAt)
     {
         if (dueAt - TimeProvider.System.GetUtcNow() < TimeSpan.FromSeconds(DueNoQuorumRf3Protocol.MinimumSetupLeadSeconds))
-        { throw new TimeoutException(DueNoQuorumRf3Protocol.SetupFailure); }
+        {
+            throw new TimeoutException(DueNoQuorumRf3Protocol.SetupFailure);
+        }
     }
 
     private static string OccurrenceId(Guid schedule, long generation, long ordinal)

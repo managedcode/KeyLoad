@@ -24,11 +24,17 @@ internal static class ProjectionPublicTrial
             await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node3, fixture.AdminKey,
                 async root => await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
                     settled.Original.Identity.Secret, async caller =>
-                    { await ProjectionPublicCold.VerifyAsync(root, caller, settled, token); return true; }, token), token);
+                    {
+                        await ProjectionPublicCold.VerifyAsync(root, caller, settled, token);
+                        return true;
+                    }, token), token);
         }
         await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, fixture.AdminKey,
             async root => await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node3,
                 settled.Original.Identity.Secret, async caller =>
-                { await ProjectionPublicHealthy.RunAsync(root, caller, settled, token); return true; }, token), token);
+                {
+                    await ProjectionPublicHealthy.RunAsync(root, caller, settled, token);
+                    return true;
+                }, token), token);
     }
 }

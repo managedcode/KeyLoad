@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.Server.Features.Search;
 
@@ -10,7 +10,10 @@ internal static class AnnProjectionNativeEncoding
         ReadExecutionBudget work, long maximum)
     {
         var admitted = Admit(original, work, maximum);
-        var call = original with { Observation = Remaining(original.Observation, work) };
+        var call = original with
+        {
+            Observation = Remaining(original.Observation, work)
+        };
         return (call, EncodeAdmitted(call, admitted));
     }
 
@@ -18,7 +21,10 @@ internal static class AnnProjectionNativeEncoding
         ReadExecutionBudget work, long maximum)
     {
         var admitted = Admit(original.Observation, work, maximum);
-        var call = original with { Observation = Remaining(original.Observation, work) };
+        var call = original with
+        {
+            Observation = Remaining(original.Observation, work)
+        };
         return (call, EncodeAdmitted(call.Observation, admitted));
     }
 
@@ -28,8 +34,14 @@ internal static class AnnProjectionNativeEncoding
         var bytes = Math.Min(original.MaximumReadBytes, work.RemainingReadGrantBytes);
         var records = Math.Min(original.MaximumRecords, work.RemainingReadGrantRecords);
         if (bytes <= AnnProjectionObservationProtocol.NoReadWork || records <= AnnProjectionObservationProtocol.NoReadWork)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, AnnProjectionObservationProtocol.Invalid); }
-        return original with { MaximumReadBytes = bytes, MaximumRecords = records };
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, AnnProjectionObservationProtocol.Invalid);
+        }
+        return original with
+        {
+            MaximumReadBytes = bytes,
+            MaximumRecords = records
+        };
     }
 
     private static long Admit<T>(T value, ReadExecutionBudget work, long maximum)
@@ -37,7 +49,9 @@ internal static class AnnProjectionNativeEncoding
         work.Check();
         var measured = NativeSerialization.Measure(value);
         if (measured > maximum)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, AnnProjectionObservationProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, AnnProjectionObservationProtocol.Invalid);
+        }
         work.ChargeBytes(measured);
         return measured;
     }
@@ -46,10 +60,14 @@ internal static class AnnProjectionNativeEncoding
     {
         var measured = NativeSerialization.Measure(value);
         if (measured > admission)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, AnnProjectionObservationProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, AnnProjectionObservationProtocol.Invalid);
+        }
         var bytes = NativeSerialization.Serialize(value);
         if (bytes.Length == measured)
-        { return bytes; }
+        {
+            return bytes;
+        }
         CryptographicOperations.ZeroMemory(bytes);
         throw Errors.Fail(ErrorCode.Corruption, AnnProjectionObservationProtocol.Invalid);
     }
@@ -59,11 +77,15 @@ internal static class AnnProjectionNativeEncoding
         work.Check();
         var measured = NativeSerialization.Measure(value);
         if (measured > maximum)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, AnnProjectionObservationProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, AnnProjectionObservationProtocol.Invalid);
+        }
         work.ChargeBytes(measured);
         var bytes = NativeSerialization.Serialize(value);
         if (bytes.Length == measured)
-        { return bytes; }
+        {
+            return bytes;
+        }
         CryptographicOperations.ZeroMemory(bytes);
         throw Errors.Fail(ErrorCode.Corruption, AnnProjectionObservationProtocol.Invalid);
     }

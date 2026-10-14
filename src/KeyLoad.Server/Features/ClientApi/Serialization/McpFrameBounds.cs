@@ -34,7 +34,9 @@ internal static class McpFrameBounds
     {
         var shape = InspectValue(payload, maximumBytes, options);
         if (shape.Depth > options.Value.MaximumReplyDepth)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, McpFramingProtocol.FrameBudgetExceeded); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, McpFramingProtocol.FrameBudgetExceeded);
+        }
         return shape;
     }
 
@@ -80,7 +82,9 @@ internal static class McpFrameBounds
         }
         var inspection = new McpFrameInspection(requireObject, options);
         do
-        { inspection.Visit(ref reader); }
+        {
+            inspection.Visit(ref reader);
+        }
         while (reader.Read());
         return inspection.Shape;
     }

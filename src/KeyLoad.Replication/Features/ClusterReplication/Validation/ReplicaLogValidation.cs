@@ -20,7 +20,11 @@ internal static class ReplicaLogValidation
             throw Errors.Fail(ErrorCode.Conflict, ReplicaPersistence.InvalidVote);
         }
         var vote = term == state.Term ? state.VotedFor ?? votedFor : votedFor;
-        return state with { Term = term, VotedFor = vote };
+        return state with
+        {
+            Term = term,
+            VotedFor = vote
+        };
     }
 
     internal static ReplicaHardState Open(IAtomicStore store, ReplicaConfiguration configuration, DatabaseEngine? canonicalDatabase)
@@ -73,7 +77,9 @@ internal static class ReplicaLogValidation
         if (state.Snapshot is { } snapshot)
         {
             try
-            { ReplicaPersistence.ValidateSnapshot(snapshot, configuration); }
+            {
+                ReplicaPersistence.ValidateSnapshot(snapshot, configuration);
+            }
             catch (KeyLoadException error) when (error.Code == ErrorCode.Validation)
             {
                 throw Errors.Fail(ErrorCode.Corruption, ReplicaProtocol.CorruptLog);

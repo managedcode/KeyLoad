@@ -13,7 +13,9 @@ internal static class AdminReadAuthority
     {
         var principal = database.Principal(view, principalId, database.EvaluationClock.GetUtcNow());
         if (!principal.ClusterAdministrator)
-        { throw Errors.Fail(ErrorCode.PermissionDenied, AdministratorRequired); }
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, AdministratorRequired);
+        }
     }
 
     internal static void ValidatePage(int limit, string? cursor)
@@ -21,9 +23,13 @@ internal static class AdminReadAuthority
         const int MinimumAdminPageRecords = 1;
 
         if (limit is < MinimumAdminPageRecords or > AdminDashboardProtocol.MaximumPageSize)
-        { throw Errors.Fail(ErrorCode.Validation, InvalidPageLimit); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, InvalidPageLimit);
+        }
         if (cursor is not null)
-        { JsonData.Identifier(cursor); }
+        {
+            JsonData.Identifier(cursor);
+        }
     }
 
     internal static long Position(IKeyValueView view) => view.ReadOwnedValue(KeySpace.Applied.ToArray()) is { } value

@@ -57,7 +57,10 @@ internal static class EventMessageSensitiveSafeR52Current
                     McpCallerTools.EventsRead, request, () => root.Sdk.ReadEventSourceAsync(request, token), token);
                 await LiteralPageAsync(actual, state);
                 await Assert.That(actual.CutPosition).IsGreaterThan((long)EventMessageSensitiveSafeR52Protocol.EmptyCount);
-                await SqlRf3Protocol.EqualAsync(state.Page! with { CutPosition = actual.CutPosition }, actual);
+                await SqlRf3Protocol.EqualAsync(state.Page! with
+                {
+                    CutPosition = actual.CutPosition
+                }, actual);
             }
             else
             {

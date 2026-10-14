@@ -33,7 +33,9 @@ internal static class SqlModelParserRefusals
         var error = Assert.ThrowsExactly<KeyLoadException>(action);
         await Assert.That(error.Code).IsEqualTo(code);
         if (detail is not null)
-        { await Assert.That(error.Message).IsEqualTo(detail); }
+        {
+            await Assert.That(error.Message).IsEqualTo(detail);
+        }
         await Assert.That(error.InnerException).IsNull();
         await SqlModelParserConservation.SameAsync(fixture, before);
         await SqlModelParserConservation.ReplayAsync(fixture);

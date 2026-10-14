@@ -21,7 +21,9 @@ internal static class RequestCqrsProbeFileNames
             || !Enum.TryParse<RequestCqrsProbePhase>(parts[3], false, out var phase) || !Enum.IsDefined(phase)
             || phase.ToString() != parts[3]
             || !Enum.TryParse<RequestCqrsProbeOutcome>(parts[4], false, out var outcome) || !Enum.IsDefined(outcome))
-        { return false; }
+        {
+            return false;
+        }
         return outcome.ToString() == parts[4];
     }
 

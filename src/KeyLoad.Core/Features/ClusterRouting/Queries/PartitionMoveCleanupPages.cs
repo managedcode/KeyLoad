@@ -12,11 +12,15 @@ public sealed partial class DatabaseEngine
         var stage = PartitionMoveTargetStorage.Read<PartitionMoveTargetStage>(view,
             PartitionMoveTargetStorage.Key(phase.Partition), Limits.MaxBatchBytes);
         if (stage is null)
-        { return KeySpace.Partition(PartitionMoveProtocol.TargetPageSpace, phase.Partition, phase.MoveId); }
+        {
+            return KeySpace.Partition(PartitionMoveProtocol.TargetPageSpace, phase.Partition, phase.MoveId);
+        }
         if (stage.Control.Partition != phase.Partition || state.Role == PartitionMoveCleanupRole.Target
                 && (stage.Control.MoveId != phase.MoveId || stage.Published)
             || state.Role == PartitionMoveCleanupRole.Source && !stage.Published)
-        { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid);
+        }
         return KeySpace.Partition(PartitionMoveProtocol.TargetPageSpace, phase.Partition, stage.Control.MoveId);
     }
 
@@ -24,12 +28,16 @@ public sealed partial class DatabaseEngine
     {
         var fence = PartitionMoveSourceFenceStorage.Read(transaction, partition, Limits.MaxBatchBytes);
         if (fence is null)
-        { return; }
+        {
+            return;
+        }
         var retired = PartitionMoveCleanupStorage.Read(transaction, partition, fence.MoveId, Limits.MaxBatchBytes);
         if (fence.MoveId == moveId || retired is null || retired.Stage != PartitionMovePeerStage.Retire
             || retired.Role != PartitionMoveCleanupRole.Source || retired.Completion is null
             || retired.ControlIntentDigest != fence.ControlIntentDigest)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.Fenced); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.Fenced);
+        }
         transaction.Delete(PartitionMoveSourceFenceStorage.Key(partition));
     }
 }

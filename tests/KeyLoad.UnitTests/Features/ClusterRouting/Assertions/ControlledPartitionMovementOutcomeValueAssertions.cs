@@ -27,7 +27,10 @@ internal static class ControlledPartitionMovementOutcomeValueAssertions
             ImmutableArray<MutationReceipt>.Empty, DurabilityProfile.ProcessDurable);
         if (record.Index == ControlledPartitionMovementOutcomeInventory.BatchIndex)
         {
-            await EqualAsync(result.Get<CommitReceipt>(), receipt with { Mutations = ControlledPartitionMovementCorpus.ExpectedMutations() });
+            await EqualAsync(result.Get<CommitReceipt>(), receipt with
+            {
+                Mutations = ControlledPartitionMovementCorpus.ExpectedMutations()
+            });
             return;
         }
         if (record.Index == ControlledPartitionMovementOutcomeInventory.CompleteIndex)

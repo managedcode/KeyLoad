@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
@@ -18,18 +18,28 @@ internal sealed class PhysicalOwnerProbeWorkOwner(IOptions<GrainRoutingOptions> 
         lock (gate)
         {
             if (work is null || admissions is null)
-            { throw Errors.Fail(ErrorCode.UnsupportedCapability, PhysicalOwnerProbeProtocol.Unavailable); }
+            {
+                throw Errors.Fail(ErrorCode.UnsupportedCapability, PhysicalOwnerProbeProtocol.Unavailable);
+            }
             if (closed)
-            { throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalOwnerProbeProtocol.Unavailable); }
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalOwnerProbeProtocol.Unavailable);
+            }
             if (!admissions.Wait(TimeSpan.Zero))
-            { throw Errors.Fail(ErrorCode.ResourceExhausted, PhysicalOwnerProbeProtocol.Unavailable); }
+            {
+                throw Errors.Fail(ErrorCode.ResourceExhausted, PhysicalOwnerProbeProtocol.Unavailable);
+            }
             try
-            { return new(ReleaseAdmission, work.Acquire(requestId, NativeRequestWorkKind.ReadCapability), work.ShutdownToken); }
+            {
+                return new(ReleaseAdmission, work.Acquire(requestId, NativeRequestWorkKind.ReadCapability), work.ShutdownToken);
+            }
             catch (Exception error)
             {
                 var failures = new List<Exception> { error };
                 try
-                { admissions.Release(); }
+                {
+                    admissions.Release();
+                }
                 catch (Exception cleanup) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
                 catch (Exception cleanup) when (!NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
                 ServerFailureObserver.ThrowIfAny(failures);
@@ -41,13 +51,19 @@ internal sealed class PhysicalOwnerProbeWorkOwner(IOptions<GrainRoutingOptions> 
     internal Task StopAsync()
     {
         lock (gate)
-        { closed = true; return work?.DrainAsync() ?? Task.CompletedTask; }
+        {
+            closed = true;
+            return work?.DrainAsync() ?? Task.CompletedTask;
+        }
     }
 
     public ValueTask DisposeAsync()
     {
         lock (gate)
-        { disposal ??= DisposeCoreAsync(); return new ValueTask(disposal); }
+        {
+            disposal ??= DisposeCoreAsync();
+            return new ValueTask(disposal);
+        }
     }
 
     private async Task DisposeCoreAsync()
@@ -57,14 +73,18 @@ internal sealed class PhysicalOwnerProbeWorkOwner(IOptions<GrainRoutingOptions> 
         if (work is not null)
         {
             try
-            { await work.DisposeAsync().ConfigureAwait(false); }
+            {
+                await work.DisposeAsync().ConfigureAwait(false);
+            }
             catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
             catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         }
         if (admissions is not null)
         {
             try
-            { admissions.Dispose(); }
+            {
+                admissions.Dispose();
+            }
             catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
             catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         }
@@ -83,11 +103,15 @@ internal sealed class PhysicalOwnerProbeWorkOwner(IOptions<GrainRoutingOptions> 
         {
             var returnPermit = Interlocked.Exchange(ref release, null);
             if (returnPermit is null)
-            { return; }
+            {
+                return;
+            }
             var failures = new List<Exception>();
             ServerFailureObserver.Observe(returnPermit, failures);
             try
-            { workLease?.Dispose(); }
+            {
+                workLease?.Dispose();
+            }
             catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
             catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
             finally { workLease = null; }

@@ -1,7 +1,7 @@
 using KeyLoad.Client;
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
 using ManagedCode.Communication;
@@ -29,9 +29,14 @@ internal static class TenantCapacityPlacementRf3ClaimRace
         var failures = new List<Exception>();
         PlacementIntentV1? completed = null;
         await ServerFailureObserver.ObserveAsync(async () =>
-        { completed = await ObserveHeldAsync(seed, pending, move, id, request, controls, discovery, original, marker, token); }, failures);
+        {
+            completed = await ObserveHeldAsync(seed, pending, move, id, request, controls, discovery, original, marker, token);
+        }, failures);
         if (failures.Count != 0)
-        { wave.RetainRoots(); controls.RetainEvidence(); }
+        {
+            wave.RetainRoots();
+            controls.RetainEvidence();
+        }
         using var cleanup = new CancellationTokenSource(TwoRf3MembershipProtocol.CleanupDeadline, TimeProvider.System);
         await TenantCapacityPlacementRf3ClaimLifetime.JoinAsync(controls, arm, discovery,
             original, marker, cancellation, markerCancellation, failures, cleanup.Token);
@@ -56,7 +61,11 @@ internal static class TenantCapacityPlacementRf3ClaimRace
             pending, applying, move, id, request, marker, proof, discovery);
         await Assert.That(original.IsCompleted).IsFalse();
         var refusal = await seed.Official.CallAsync(TenantPlacementPublicProtocol.ApplyTool,
-            new { commandId = id, request }, token);
+            new
+            {
+                commandId = id,
+                request
+            }, token);
         await McpCallerAssertions.ErrorAsync(refusal, ErrorCode.Conflict, dispatched: true);
         await Assert.That(refusal.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
             .GetProperty(McpCallerProtocol.ProblemDetail).GetString()).IsEqualTo(

@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
@@ -25,7 +25,9 @@ internal sealed class PhysicalOwnerRegistrationRuntime : IAsyncDisposable
         {
             var failures = new List<Exception> { exception };
             try
-            { probes.Dispose(); }
+            {
+                probes.Dispose();
+            }
             catch (Exception cleanup) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
             catch (Exception cleanup) when (!NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
             ServerFailureObserver.ThrowIfAny(failures);
@@ -36,7 +38,9 @@ internal sealed class PhysicalOwnerRegistrationRuntime : IAsyncDisposable
     internal static void RequireProbeWork(NodeOptions options, PhysicalOwnerProbeWorkOwner? work)
     {
         if (options.PhysicalGroupTrust.RegisterPhysicalOwners && work is null)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalOwnerProbeProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalOwnerProbeProtocol.Unavailable);
+        }
     }
 
     internal static void Attach(ref PhysicalOwnerRegistrationRuntime? slot, OrleansNode node,
@@ -44,7 +48,9 @@ internal sealed class PhysicalOwnerRegistrationRuntime : IAsyncDisposable
     {
         if (!options.Node.Value.PhysicalGroupTrust.RegisterPhysicalOwners
             || options.Node.Value.PhysicalGroupTrust.Role != PhysicalGroupTrustRole.Control)
-        { return; }
+        {
+            return;
+        }
         slot = new PhysicalOwnerRegistrationRuntime(node, partition, options,
             services.GetRequiredService<ISiloStatusOracle>(), clock,
             services.GetRequiredService<ILoggerFactory>().CreateLogger<PhysicalOwnerRegistrationWorker>());
@@ -55,15 +61,21 @@ internal sealed class PhysicalOwnerRegistrationRuntime : IAsyncDisposable
         PhysicalOwnerProbeWorkOwner? probes, List<Exception> failures)
     {
         if (registration is not null)
-        { await ServerFailureObserver.ObserveAsync(() => registration.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => registration.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         if (probes is not null)
-        { await ServerFailureObserver.ObserveAsync(probes.StopAsync, failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(probes.StopAsync, failures).ConfigureAwait(false);
+        }
     }
 
     internal void Start()
     {
         lock (gate)
-        { registration = worker.Start(); }
+        {
+            registration = worker.Start();
+        }
     }
 
     internal static Task WaitForRegistrationAsync(PhysicalOwnerRegistrationRuntime? registration,
@@ -71,7 +83,9 @@ internal sealed class PhysicalOwnerRegistrationRuntime : IAsyncDisposable
     {
         if (!options.PhysicalGroupTrust.RegisterPhysicalOwners
             || options.PhysicalGroupTrust.Role != PhysicalGroupTrustRole.Control)
-        { return Task.CompletedTask; }
+        {
+            return Task.CompletedTask;
+        }
         return (registration ?? throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalOwnerProbeProtocol.Unavailable))
             .WaitForRegistrationAsync(cancellationToken);
     }
@@ -91,18 +105,25 @@ internal sealed class PhysicalOwnerRegistrationRuntime : IAsyncDisposable
     public ValueTask DisposeAsync()
     {
         lock (gate)
-        { disposal ??= DisposeCoreAsync(); return new ValueTask(disposal); }
+        {
+            disposal ??= DisposeCoreAsync();
+            return new ValueTask(disposal);
+        }
     }
 
     private async Task DisposeCoreAsync()
     {
         var failures = new List<Exception>();
         try
-        { await worker.DisposeAsync().ConfigureAwait(false); }
+        {
+            await worker.DisposeAsync().ConfigureAwait(false);
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         try
-        { probes.Dispose(); }
+        {
+            probes.Dispose();
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         ServerFailureObserver.ThrowIfAny(failures);

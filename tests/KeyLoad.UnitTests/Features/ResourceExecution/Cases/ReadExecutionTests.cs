@@ -29,7 +29,10 @@ internal sealed class ReadExecutionTests
         database.Configure(Orders, ResourceKind.Collection);
         database.Configure(Links, ResourceKind.Graph);
         database.Commit(new PutDocument(Orders, "a", "{\"text\":\"alpha\"}"));
-        var bounded = new DatabaseEngine(database.Store, database.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxBatchBytes = MaximumBatchBytes }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
+        var bounded = new DatabaseEngine(database.Store, database.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new()
+        {
+            MaxBatchBytes = MaximumBatchBytes
+        }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => new SearchEngine(bounded, UnitExecutionOptions.QueryExecution())
             .Search(RootIdentity, new(database.Partition, Orders, FieldTextPath, "alpha"), TestContext.Current!.Execution.CancellationToken)).Code)
             .IsEqualTo(ErrorCode.BudgetExceeded);
@@ -57,7 +60,10 @@ internal sealed class ReadExecutionTests
     {
         var cancellationToken = TestContext.Current!.Execution.CancellationToken;
         var clock = new ControlledReadClock(new DateTimeOffset(2040, 1, 1, 0, 0, 0, TimeSpan.Zero));
-        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new() { QueryDeadlineSeconds = QueryDeadlineSeconds }), clock, cancellationToken);
+        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new()
+        {
+            QueryDeadlineSeconds = QueryDeadlineSeconds
+        }), clock, cancellationToken);
         budget.ChargeBytes(InitialReadBytes);
         clock.Advance(TimeSpan.FromSeconds(DeadlineWaitSeconds));
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => budget.ChargeBytes(AdditionalReadByte)).Code)

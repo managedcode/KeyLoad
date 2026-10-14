@@ -16,7 +16,10 @@ internal sealed class RemoteTransferRetentionTests
     [Test]
     public async Task PerLaneRecordCapsRejectExcessSourceAndDestinationStateAtomically()
     {
-        using var fixture = new RemoteTransferDatabase(new() { MaxScanRecords = MaxRetainedRecords });
+        using var fixture = new RemoteTransferDatabase(new()
+        {
+            MaxScanRecords = MaxRetainedRecords
+        });
         var otherSource = OtherSource(fixture);
         var first = Create(fixture, fixture.SourceQueue, FirstId);
         var second = Create(fixture, otherSource, SecondId);
@@ -69,7 +72,10 @@ internal sealed class RemoteTransferRetentionTests
         await Assert.That(accountedBytes).IsGreaterThan(byteLimit);
         await Assert.That(requestBytes).IsLessThan(byteLimit);
 
-        using var limited = new RemoteTransferDatabase(measured.Database.Limits with { MaxBatchBytes = byteLimit });
+        using var limited = new RemoteTransferDatabase(measured.Database.Limits with
+        {
+            MaxBatchBytes = byteLimit
+        });
         var limitedIntent = Create(limited, limited.SourceQueue, SecondId);
         var failure = limited.Apply(OperationKind.Batch,
             new CommandRequest(Guid.NewGuid(), limited.SourcePartition, [limitedIntent]));
@@ -96,7 +102,10 @@ internal sealed class RemoteTransferRetentionTests
         await Assert.That((long)Encoding.UTF8.GetByteCount(firstIntent.IntentToken)).IsLessThan(retainedBytes);
         await Assert.That((long)requestBytes).IsLessThan(retainedBytes);
 
-        fixture.Reopen(fixture.Database.Limits with { MaxBatchBytes = checked((int)retainedBytes) });
+        fixture.Reopen(fixture.Database.Limits with
+        {
+            MaxBatchBytes = checked((int)retainedBytes)
+        });
         fixture.Commit(fixture.SourcePartition, first);
         var rejected = fixture.Apply(OperationKind.Batch,
             new CommandRequest(Guid.NewGuid(), fixture.SourcePartition, [next]));
@@ -134,7 +143,10 @@ internal sealed class RemoteTransferRetentionTests
         await Assert.That(commandBytes).IsLessThanOrEqualTo(byteLimit);
         await Assert.That(retainedBytes + nextReceiptBytes).IsGreaterThan((long)byteLimit);
 
-        fixture.Reopen(fixture.Database.Limits with { MaxBatchBytes = byteLimit });
+        fixture.Reopen(fixture.Database.Limits with
+        {
+            MaxBatchBytes = byteLimit
+        });
         var rejected = fixture.Apply(OperationKind.Batch,
             new CommandRequest(Guid.NewGuid(), fixture.DestinationPartition,
                 [new AcceptQueueTransfer(fixture.DestinationQueue, secondIntent.IntentToken)]));

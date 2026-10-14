@@ -9,13 +9,19 @@ internal sealed record ClusterRestoreOwnerSource(Guid OwnerId, string ArchiveDir
 /// <summary>Secret configuration remains operator memory and is never serialized or printed.</summary>
 internal sealed class ClusterRestoreSigningIdentity
 {
-    public Guid SourceOwnerId { get; set; }
+    public Guid SourceOwnerId
+    {
+        get; set;
+    }
     public string SigningKey { get; set; } = string.Empty;
 }
 
 /// <summary>Explicit per-owner operator credential, never snapshot authority or diagnostic output.</summary>
 internal sealed class ClusterRestoreOperatorCredential
 {
-    public Guid SourceOwnerId { get; set; }
+    public Guid SourceOwnerId
+    {
+        get; set;
+    }
     public string Credential { get; set; } = string.Empty;
 }

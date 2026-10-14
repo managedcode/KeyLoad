@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
@@ -50,7 +50,9 @@ internal static class RequestCqrsQueryReadCutInventory
     {
         if (name.Length != Prefix.Length + IdentifierPairCharacters + Suffix.Length
             || !name.StartsWith(Prefix, StringComparison.Ordinal) || !name.EndsWith(Suffix, StringComparison.Ordinal))
-        { return false; }
+        {
+            return false;
+        }
         var ids = name.AsSpan(Prefix.Length, IdentifierPairCharacters);
         return ids[IdentifierHexCharacters] == IdentifierSeparator && Guid.TryParseExact(ids[..IdentifierHexCharacters], IdentifierFormat, out var arm)
             && Guid.TryParseExact(ids[RequestIdentifierOffset..], IdentifierFormat, out var request) && arm != Guid.Empty && request != Guid.Empty
@@ -67,7 +69,9 @@ internal static class RequestCqrsQueryReadCutInventory
             || string.IsNullOrWhiteSpace(value.PrincipalId) || string.IsNullOrWhiteSpace(value.Voter)
             || string.IsNullOrWhiteSpace(value.SiloAddress) || string.IsNullOrWhiteSpace(value.ActivationId)
             || !Digest(value.GrainDigest) || !Digest(value.QueryHash) || string.IsNullOrWhiteSpace(value.AccessPath))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         RequestCqrsProbeActivationValidation.RequireActivationId(value.ActivationId);
     }
     internal static void RequireInventory(IEnumerable<RequestCqrsQueryReadCutWitness> values,
@@ -83,10 +87,14 @@ internal static class RequestCqrsQueryReadCutInventory
                 && marker.CommandId == value.CommandId && marker.Voter == value.Voter
                 && marker.SiloAddress == value.SiloAddress && marker.Phase == RequestCqrsProbePhase.QueryReadCutCaptured
                 && marker.Outcome == RequestCqrsProbeOutcome.Observed) != ExactWitnessCount)
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
         }
         if (markers.Count(marker => marker.Phase == RequestCqrsProbePhase.QueryReadCutCaptured) != witnesses.Length)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
     }
     internal static void RequireSource(RequestCqrsQueryReadCutWitness value,
         IReadOnlyList<RequestCqrsProbeMarkerRecord> markers)
@@ -97,7 +105,9 @@ internal static class RequestCqrsQueryReadCutInventory
                 && marker.RequestId == value.RequestId && marker.CommandId == value.CommandId
                 && marker.Voter == value.Voter && marker.SiloAddress == value.SiloAddress
                 && marker.Phase == RequestCqrsProbePhase.RequestStarted && marker.Outcome == outcome) != ExactWitnessCount)
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
         }
     }
     internal static void RequireArm(RequestCqrsQueryReadCutWitness value, RequestCqrsProbeArmRecord arm)
@@ -106,7 +116,9 @@ internal static class RequestCqrsQueryReadCutInventory
             || arm.PrincipalId != value.PrincipalId || arm.ReadKind != GrainReadKind.AstQuery
             || arm.Phase != RequestCqrsProbePhase.RequestStarted || arm.Action != RequestCqrsProbeAction.Hold
             || arm.TargetVoter is { } target && target != value.Voter)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
     }
     private static bool Digest(string value) => value is { Length: Sha256HexCharacters } && value.All(Uri.IsHexDigit);
     private static InvalidOperationException Invalid() => new(RequestCqrsProbeProtocol.InvalidRecord);

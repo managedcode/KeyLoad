@@ -41,21 +41,36 @@ internal sealed class ImageToolingContractTests
     [Test]
     public async Task AC_IMAGE_001_ContextRejectsUnsafeInputsWithoutEchoingSecrets()
     {
-        var valid = await RunAsync(new { operation = ContextOperation, environment = ValidEnvironment(), platform = Linux });
+        var valid = await RunAsync(new
+        {
+            operation = ContextOperation,
+            environment = ValidEnvironment(),
+            platform = Linux
+        });
         await Assert.That(valid.Succeeded).IsTrue();
         await Assert.That(valid.Value.GetProperty(RunIdProperty).GetString()).IsEqualTo(RunId);
         await Assert.That(valid.Value.GetProperty(RunAttemptProperty).GetString()).IsEqualTo(RunAttempt);
 
         var unsafeEnvironment = ValidEnvironment();
         unsafeEnvironment[ValidEnvironmentSha] = SecretSentinel;
-        var rejected = await RunAsync(new { operation = ContextOperation, environment = unsafeEnvironment, platform = Linux });
+        var rejected = await RunAsync(new
+        {
+            operation = ContextOperation,
+            environment = unsafeEnvironment,
+            platform = Linux
+        });
         await Assert.That(rejected.Succeeded).IsFalse();
         await Assert.That(rejected.Message).IsEqualTo(RejectedContextMessage);
         await Assert.That(rejected.Message.Contains(SecretSentinel, StringComparison.Ordinal)).IsFalse();
 
         var unsafeRunId = ValidEnvironment();
         unsafeRunId[ValidEnvironmentRunId] = SecretSentinel;
-        var rejectedRunId = await RunAsync(new { operation = ContextOperation, environment = unsafeRunId, platform = Linux });
+        var rejectedRunId = await RunAsync(new
+        {
+            operation = ContextOperation,
+            environment = unsafeRunId,
+            platform = Linux
+        });
         await Assert.That(rejectedRunId.Succeeded).IsFalse();
         await Assert.That(rejectedRunId.Message).IsEqualTo(RejectedContextMessage);
         await Assert.That(rejectedRunId.Message.Contains(SecretSentinel, StringComparison.Ordinal)).IsFalse();
@@ -124,10 +139,20 @@ internal sealed class ImageToolingContractTests
     [Test]
     public async Task AC_IMAGE_001_OnlyMatchingLocalUnixEngineEndpointIsAccepted()
     {
-        var local = await RunAsync(new { operation = EndpointOperation, endpoint = UnixEndpoint, dockerHost = string.Empty });
+        var local = await RunAsync(new
+        {
+            operation = EndpointOperation,
+            endpoint = UnixEndpoint,
+            dockerHost = string.Empty
+        });
         await Assert.That(local.Succeeded).IsTrue();
 
-        var remote = await RunAsync(new { operation = EndpointOperation, endpoint = RemoteEndpoint, dockerHost = string.Empty });
+        var remote = await RunAsync(new
+        {
+            operation = EndpointOperation,
+            endpoint = RemoteEndpoint,
+            dockerHost = string.Empty
+        });
         await Assert.That(remote.Succeeded).IsFalse();
         await Assert.That(remote.Message).IsEqualTo(RejectedEndpointMessage);
 
@@ -284,7 +309,12 @@ internal sealed class ImageToolingEvidenceContractTests
         {
             schemaVersion = ManifestVersion,
             mediaType = OciManifestContentType,
-            config = new { mediaType = OciConfigContentType, size = DescriptorSize, digest = configId },
+            config = new
+            {
+                mediaType = OciConfigContentType,
+                size = DescriptorSize,
+                digest = configId
+            },
             layers = Array.Empty<object>(),
         });
 

@@ -24,8 +24,14 @@ internal sealed class RemoteDocumentNativeFixture : IDisposable
     internal static readonly EntityRef Reference = new(Partition, Collection, DocumentId);
     internal static readonly Guid WriteId = Guid.Parse("102b95e5-2657-40bb-9d1a-efc39b18877d");
     internal static readonly Guid BindId = Guid.Parse("651fa2f2-67e0-4193-b880-94a3a3f8cf41");
-    internal PhysicalShardCatalogFixture Source { get; }
-    internal PhysicalShardCatalogFixture Destination { get; }
+    internal PhysicalShardCatalogFixture Source
+    {
+        get;
+    }
+    internal PhysicalShardCatalogFixture Destination
+    {
+        get;
+    }
     internal ReplicatedOperation Write { get; private set; } = null!;
     internal CommitReceipt Receipt { get; private set; } = null!;
 
@@ -72,13 +78,17 @@ internal sealed class RemoteDocumentNativeFixture : IDisposable
 
     internal void GrantDestination() => Destination.AddPrincipal(new(Reader, Tenant,
         [new(Partition.DatabaseId, Collection, Capability.DocumentsRead)], [Title])
-    { PolicyEpoch = Second });
+    {
+        PolicyEpoch = Second
+    });
 
     private static void Configure(PhysicalShardCatalogFixture fixture)
         => Require(fixture.Database.Apply(Operation(fixture, OperationKind.ConfigureResource, Guid.NewGuid(),
             new ConfigureResourceRequest(Partition.TenantId, Partition.DatabaseId,
                 new(Collection, ResourceKind.Collection, Partition.TransactionDomainId)
-                { FieldPolicies = [new(Secret, Classification)] }))));
+                {
+                    FieldPolicies = [new(Secret, Classification)]
+                }))));
 
     private static OperationResult Require(OperationResult result)
         => result.Error is null ? result : throw new InvalidOperationException(result.SafeDetail);

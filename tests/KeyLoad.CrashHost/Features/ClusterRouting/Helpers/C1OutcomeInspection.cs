@@ -23,7 +23,9 @@ internal static class C1OutcomeInspection
         {
             evidence.SetPhase(C1OutcomeInspectionFailurePhase.ValidateRequest);
             if (args.Length != TryRunAsyncEmptyArgsLength)
-            { throw new InvalidDataException(C1OutcomeInspectionProtocol.InvalidRequest); }
+            {
+                throw new InvalidDataException(C1OutcomeInspectionProtocol.InvalidRequest);
+            }
             evidence.SetPhase(C1OutcomeInspectionFailurePhase.ReadInput);
             var requestBytes = await ReadRequestBytesAsync().ConfigureAwait(false);
             evidence.SetPhase(C1OutcomeInspectionFailurePhase.ValidateRequest);
@@ -41,7 +43,9 @@ internal static class C1OutcomeInspection
             await ServerFailureObserver.ObserveAsync(() => WriteBytesAsync(evidence.Bytes(), standardError: true),
                 failures).ConfigureAwait(false);
             if (failures.Any(C1OutcomeInspectionFailures.ContainsFatal))
-            { ServerFailureObserver.ThrowIfAny(failures); }
+            {
+                ServerFailureObserver.ThrowIfAny(failures);
+            }
             Environment.ExitCode = C1OutcomeInspectionProtocol.FailureExitCode;
             GC.KeepAlive(failures);
         }
@@ -90,7 +94,9 @@ internal static class C1OutcomeInspection
             length += kept;
         }
         if (length > C1OutcomeInspectionProtocol.MaximumRequestBytes)
-        { throw new InvalidDataException(C1OutcomeInspectionProtocol.InvalidRequest); }
+        {
+            throw new InvalidDataException(C1OutcomeInspectionProtocol.InvalidRequest);
+        }
         return retained.AsSpan(StartEmptyCount, length).ToArray();
     }
 

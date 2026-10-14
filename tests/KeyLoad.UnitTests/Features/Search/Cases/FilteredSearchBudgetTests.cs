@@ -11,7 +11,10 @@ internal sealed class FilteredSearchBudgetTests
     [Test]
     public async Task AllowlistShapeAndCountFailBeforeStorageReads()
     {
-        using var database = FilteredSearchTestSupport.Create(new() { MaxScanRecords = 1 });
+        using var database = FilteredSearchTestSupport.Create(new()
+        {
+            MaxScanRecords = 1
+        });
         FilteredSearchTestSupport.AddCorpus(database);
         var engine = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var position = database.Store.Position;
@@ -31,13 +34,19 @@ internal sealed class FilteredSearchBudgetTests
     {
         var request = VectorRequest(ImmutableArray.Create("a"));
         var serializedBytes = JsonDefaults.Serialize(request).Length;
-        using var exact = FilteredSearchTestSupport.Create(new() { MaxQueryBytes = serializedBytes });
+        using var exact = FilteredSearchTestSupport.Create(new()
+        {
+            MaxQueryBytes = serializedBytes
+        });
         FilteredSearchTestSupport.AddCorpus(exact);
         var accepted = await new SearchEngine(exact.Database, UnitExecutionOptions.QueryExecution()).SearchAsync(Root, request, Token());
         await Assert.That(accepted.Select(result => result.Document.Reference.Id).ToArray())
             .IsEquivalentTo(new[] { "a" }, CollectionOrdering.Matching);
 
-        using var excess = FilteredSearchTestSupport.Create(new() { MaxQueryBytes = serializedBytes - 1 });
+        using var excess = FilteredSearchTestSupport.Create(new()
+        {
+            MaxQueryBytes = serializedBytes - 1
+        });
         FilteredSearchTestSupport.AddCorpus(excess);
         var failure = await Failure(new SearchEngine(excess.Database, UnitExecutionOptions.QueryExecution()), request);
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);

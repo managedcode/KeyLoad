@@ -38,7 +38,9 @@ internal sealed class RemoteTransferNativeAdministrator : IAsyncDisposable
     internal async Task ReopenAsync(TwoRf3MembershipWave wave, CancellationToken token)
     {
         if (source is not null || target is not null || credential is null)
-        { throw new InvalidOperationException(RemoteTransferDistinctProtocol.Missing); }
+        {
+            throw new InvalidOperationException(RemoteTransferDistinctProtocol.Missing);
+        }
         source = await RemoteTransferNativeCallers.ConnectAsync(wave, TwoRf3MembershipProtocol.Nodes[0], credential, token);
         target = await RemoteTransferNativeCallers.ConnectAsync(wave, TwoRf3MembershipProtocol.Nodes[3], credential, token);
     }
@@ -56,9 +58,13 @@ internal sealed class RemoteTransferNativeAdministrator : IAsyncDisposable
         target = null;
         source = null;
         if (destination is not null)
-        { await ServerFailureObserver.ObserveAsync(() => destination.DisposeAsync().AsTask(), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => destination.DisposeAsync().AsTask(), failures);
+        }
         if (origin is not null)
-        { await ServerFailureObserver.ObserveAsync(() => origin.DisposeAsync().AsTask(), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => origin.DisposeAsync().AsTask(), failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

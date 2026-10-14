@@ -19,11 +19,16 @@ internal static class MixedEventingRetentionBackupContinuation
         await MixedEventingRetentionBackupPrivacy.RunAsync(fixture, state, token);
         await MixedEventingRetentionBackupHeldLease.RequireNaturalExpiryAsync(fixture, state, token);
         state.RestoredQueue = new(state.Queue.Partition, state.Queue.Time)
-        { NativeSubmit = operation => fixture.SubmitIssued(fixture.Database, operation, explicitTime: false, token) };
+        {
+            NativeSubmit = operation => fixture.SubmitIssued(fixture.Database, operation, explicitTime: false, token)
+        };
         await QueueLifecycleRestoredContinuation.RunAsync(fixture.Database, fixture.Target, state.RestoredQueue, token);
         await GroupsAsync(fixture);
         var current = fixture.ApplyInbox(fixture.Database,
-            state.Inbox with { CommandId = Guid.NewGuid() }, token).Get<CommitInboxResult>();
+            state.Inbox with
+            {
+                CommandId = Guid.NewGuid()
+            }, token).Get<CommitInboxResult>();
         await Assert.That(current.AlreadyProcessed).IsTrue();
         await Assert.That(current.OriginalEffectsToken).IsEqualTo(state.InboxResult.OriginalEffectsToken);
         await TargetInboxNativeAssertions.CapacityAsync(fixture.Target, state.Inbox, TargetInboxUnitProtocol.FirstRevision);

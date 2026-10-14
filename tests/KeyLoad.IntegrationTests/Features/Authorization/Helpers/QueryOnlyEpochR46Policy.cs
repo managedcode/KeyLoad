@@ -16,7 +16,9 @@ internal static class QueryOnlyEpochR46Policy
         await Assert.That(baseline.Grants.Any(grant =>
             (grant.Capabilities & Capability.Query) != 0)).IsTrue();
         var grants = allowed ? baseline.Grants : baseline.Grants.Select(grant => grant with
-        { Capabilities = grant.Capabilities & ~Capability.Query }).ToImmutableArray();
+        {
+            Capabilities = grant.Capabilities & ~Capability.Query
+        }).ToImmutableArray();
         var expected = baseline with
         {
             Grants = grants,
@@ -27,6 +29,9 @@ internal static class QueryOnlyEpochR46Policy
         var persisted = await McpCallerAssertions.SdkSuccessAsync(
             await administrator.ConfigurePrincipalAsync(Guid.NewGuid(), expected, token));
         await SqlRf3Protocol.EqualAsync(expected, persisted);
-        return current with { Principal = persisted };
+        return current with
+        {
+            Principal = persisted
+        };
     }
 }

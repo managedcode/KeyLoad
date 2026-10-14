@@ -13,13 +13,17 @@ internal static class NativeAnnRootInventory
             || receipt.Published is null || receipt.Pending is null || receipt.OriginalOperations is null
             || receipt.OriginalOperations.Length > options.MaximumOwnedGenerations
             || receipt.Published.Length + receipt.Pending.Length > options.MaximumOwnedGenerations)
-        { throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Ownership); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Ownership);
+        }
         var leaves = new HashSet<string>(StringComparer.Ordinal);
         foreach (var leaf in receipt.OwnedGenerations)
         {
             NativeAnnPaths.Generation(root, leaf);
             if (!leaves.Add(leaf))
-            { throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Ownership); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Ownership);
+            }
         }
         RequirePublished(root, receipt.Published, leaves);
         RequirePublished(root, receipt.Pending, leaves);
@@ -30,19 +34,28 @@ internal static class NativeAnnRootInventory
             foreach (var request in new[] { original.PendingRequest, original.LastRequest })
             {
                 if (request is not null && (request.NodeId != nodeId || request.Placement.Incarnation != incarnation))
-                { throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Ownership); }
+                {
+                    throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Ownership);
+                }
             }
             if (!originalKeys.Add(original.Key))
-            { throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Corrupt); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Corrupt);
+            }
         }
         long bytes = NativeAnnFileBounds.Initial;
         foreach (var entry in Directory.EnumerateFileSystemEntries(root))
         {
             var leaf = Path.GetFileName(entry);
             if (leaf is NativeAnnProtocol.RootReceipt or NativeAnnProtocol.RootPending or NativeAnnProtocol.RootLock)
-            { OfflineRegularFile.RequireRegular(entry); continue; }
+            {
+                OfflineRegularFile.RequireRegular(entry);
+                continue;
+            }
             if (!leaves.Contains(leaf))
-            { throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Ownership); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Ownership);
+            }
             RequireStage(root, leaf, options, ref bytes);
         }
     }
@@ -57,7 +70,9 @@ internal static class NativeAnnRootInventory
                 || published.Pointer.Version != NativeAnnProtocol.Version
                 || published.Pointer.ManifestSha256 is null
                 || published.Pointer.ManifestSha256.Length != NativeAnnDigest.Bytes)
-            { throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Corrupt); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Corrupt);
+            }
             NativeAnnPaths.RequireClosedGeneration(root, published.Pointer.GenerationLeaf);
         }
     }
@@ -71,10 +86,14 @@ internal static class NativeAnnRootInventory
         {
             NativeAnnPaths.ExistingFile(root, leaf, Path.GetFileName(entry));
             if (++files > NativeAnnFileBounds.FilesPerGeneration)
-            { throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Ownership); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Ownership);
+            }
             var length = new FileInfo(entry).Length;
             if (length > options.MaximumDiskBytes - bytes)
-            { throw Errors.Fail(ErrorCode.BudgetExceeded, NativeAnnProtocol.Bound); }
+            {
+                throw Errors.Fail(ErrorCode.BudgetExceeded, NativeAnnProtocol.Bound);
+            }
             bytes += length;
         }
     }

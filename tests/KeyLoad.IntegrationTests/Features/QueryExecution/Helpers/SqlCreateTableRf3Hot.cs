@@ -10,10 +10,17 @@ internal static class SqlCreateTableRf3Hot
             await PostgresRf3Seed.ConfigureAsync(root.Sdk, token);
             var identity = await PostgresRf3Seed.IdentityAsync(root.Sdk, "ddl-",
                 Capability.DocumentsRead | Capability.DocumentsWrite | Capability.Query, token, SqlCreateTableRf3Literal.Table);
-            var principal = identity.Principal with { ClusterAdministrator = true, PolicyEpoch = SqlCreateTableRf3Literal.AdministratorEpoch };
+            var principal = identity.Principal with
+            {
+                ClusterAdministrator = true,
+                PolicyEpoch = SqlCreateTableRf3Literal.AdministratorEpoch
+            };
             await SqlRf3Protocol.EqualAsync(principal, await McpCallerAssertions.SdkSuccessAsync(
                 await root.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), principal, token)));
-            identity = identity with { Principal = principal };
+            identity = identity with
+            {
+                Principal = principal
+            };
             return await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, identity.Secret, async caller =>
             {
                 var createdId = Guid.NewGuid();

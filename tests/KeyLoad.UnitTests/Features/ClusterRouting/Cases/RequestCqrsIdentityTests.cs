@@ -1,6 +1,6 @@
 using System.Security.Claims;
 using System.Text;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using ManagedCode.Communication;
 using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.DependencyInjection;

@@ -37,7 +37,10 @@ internal sealed class ReadExecutionBudgetScopedGrantTests
     public async Task FailedNativeReaderRetainsAllowanceAndFreshIndependentReaderContinues()
     {
         var bytes = ReadExecutionBudgetGrantSeed.FirstKey.Length + ReadExecutionBudgetGrantSeed.FirstValue.Length;
-        using var database = ReadExecutionBudgetGrantSeed.CreateDatabase(new() { MaxQueryReadBytes = bytes });
+        using var database = ReadExecutionBudgetGrantSeed.CreateDatabase(new()
+        {
+            MaxQueryReadBytes = bytes
+        });
         var actual = database.Store.Read(view =>
         {
             var work = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits));
@@ -54,7 +57,9 @@ internal sealed class ReadExecutionBudgetScopedGrantTests
             var freshGrant = fresh.CreateReadGrant(bytes, 1);
             bool found;
             using (fresh.EnterReadGrant(freshGrant))
-            { found = fresh.CreateView(view).ReadValue(ReadExecutionBudgetGrantSeed.FirstKey, static _ => { }); }
+            {
+                found = fresh.CreateView(view).ReadValue(ReadExecutionBudgetGrantSeed.FirstKey, static _ => { });
+            }
             fresh.CompleteReadGrant(freshGrant);
             return (failure.Code, Reserve: reserve.Code, consumed, found, grant.IsCompleted,
                 Remaining: work.RemainingReadGrantBytes, FreshBytes: fresh.ReadBytes);

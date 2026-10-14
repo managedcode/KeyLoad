@@ -37,7 +37,9 @@ internal static class CurrentJournalSignatureConservation
     internal static async Task RepairAsync(string backup, Dictionary<string, byte[]> original)
     {
         foreach (var row in original)
-        { await File.WriteAllBytesAsync(Path.Combine(backup, row.Key), row.Value, CancellationToken.None); }
+        {
+            await File.WriteAllBytesAsync(Path.Combine(backup, row.Key), row.Value, CancellationToken.None);
+        }
         await NativeBackupJournalRepairAssertions.SameArchiveAsync(original, backup, CancellationToken.None);
     }
 }

@@ -23,9 +23,15 @@ internal sealed class PartitionQueryPublicValidationTests(ClusterFixture fixture
         var sdk = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node2,
             fixture.AdminKey, deadline.Token).ConfigureAwait(false);
-        await AssertFailureAsync(sdk, mcp, scenario.Request() with { Version = InvalidVersion },
+        await AssertFailureAsync(sdk, mcp, scenario.Request() with
+        {
+            Version = InvalidVersion
+        },
             ErrorCode.Validation, deadline.Token).ConfigureAwait(false);
-        await AssertFailureAsync(sdk, mcp, scenario.Request() with { AstVersion = InvalidVersion },
+        await AssertFailureAsync(sdk, mcp, scenario.Request() with
+        {
+            AstVersion = InvalidVersion
+        },
             ErrorCode.UnsupportedCapability, deadline.Token).ConfigureAwait(false);
         await AssertFailureAsync(sdk, mcp, scenario.Request([]), ErrorCode.Validation, deadline.Token)
             .ConfigureAwait(false);
@@ -35,7 +41,9 @@ internal sealed class PartitionQueryPublicValidationTests(ClusterFixture fixture
         var overflow = scenario.Request(CreateTooManyPartitions(scenario.Partitions));
         await AssertFailureAsync(sdk, mcp, overflow, ErrorCode.Validation, deadline.Token).ConfigureAwait(false);
         var resultLimit = scenario.Request(query: scenario.Query with
-        { Limit = PartitionQueryRf3Protocol.MaxResults + 1 });
+        {
+            Limit = PartitionQueryRf3Protocol.MaxResults + 1
+        });
         await AssertFailureAsync(sdk, mcp, resultLimit, ErrorCode.BudgetExceeded, deadline.Token)
             .ConfigureAwait(false);
         var valid = scenario.Request([scenario.Partitions[0]]);
@@ -91,13 +99,18 @@ internal sealed class PartitionQueryPublicValidationTests(ClusterFixture fixture
     {
         var largeText = new string('x', OversizedValueChars);
         var parameters = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
-        { [PartitionQueryRf3Protocol.ValueAlias] = JsonSerializer.SerializeToElement(largeText, JsonDefaults.Options) };
+        {
+            [PartitionQueryRf3Protocol.ValueAlias] = JsonSerializer.SerializeToElement(largeText, JsonDefaults.Options)
+        };
         var query = scenario.Query with
         {
             Filter = new Comparison(new FieldOperand(PartitionQueryRf3Protocol.ValueField), "=",
                 new ParameterOperand(PartitionQueryRf3Protocol.ValueAlias))
         };
-        return scenario.Request([scenario.Partitions[0]], query) with { Parameters = parameters };
+        return scenario.Request([scenario.Partitions[0]], query) with
+        {
+            Parameters = parameters
+        };
     }
 
     private static async Task AssertHealthySdkAsync(KeyLoadClient sdk, PartitionQueryRf3Scenario scenario,

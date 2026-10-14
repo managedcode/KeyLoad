@@ -19,22 +19,36 @@ internal static class ScriptDomTokenBounds
             check();
             if (token.TokenType == Dom.TSqlTokenType.Go
                 || token.TokenType == Dom.TSqlTokenType.Semicolon && ++terminators > SingleTerminator)
-            { unsupportedStructure = true; }
+            {
+                unsupportedStructure = true;
+            }
             if (token.TokenType == Dom.TSqlTokenType.MultilineComment)
-            { RequireCommentDepth(token.Text, limits.MaxQueryDepth, check); }
+            {
+                RequireCommentDepth(token.Text, limits.MaxQueryDepth, check);
+            }
             if (token.TokenType is Dom.TSqlTokenType.WhiteSpace or Dom.TSqlTokenType.SingleLineComment
                 or Dom.TSqlTokenType.MultilineComment or Dom.TSqlTokenType.EndOfFile)
-            { continue; }
+            {
+                continue;
+            }
             if (++meaningful > limits.MaxQueryTokens)
-            { throw Errors.Fail(ErrorCode.BudgetExceeded, ScriptDomErrors.TokensDetail); }
+            {
+                throw Errors.Fail(ErrorCode.BudgetExceeded, ScriptDomErrors.TokensDetail);
+            }
             if (token.Text == OpenParenthesis && ++depth > limits.MaxQueryDepth)
-            { throw Errors.Fail(ErrorCode.BudgetExceeded, ScriptDomErrors.DepthDetail); }
+            {
+                throw Errors.Fail(ErrorCode.BudgetExceeded, ScriptDomErrors.DepthDetail);
+            }
             if (token.Text == CloseParenthesis)
-            { depth--; }
+            {
+                depth--;
+            }
         }
         validateTokens?.Invoke(tokens, check);
         if (unsupportedStructure)
-        { throw ScriptDomErrors.Unsupported(); }
+        {
+            throw ScriptDomErrors.Unsupported();
+        }
     }
 
     private static void RequireCommentDepth(string text, int maximumDepth, Action check)
@@ -46,11 +60,16 @@ internal static class ScriptDomTokenBounds
             if (text[index] == Slash && text[index + NextCharacter] == Asterisk)
             {
                 if (++depth > maximumDepth)
-                { throw Errors.Fail(ErrorCode.BudgetExceeded, ScriptDomErrors.DepthDetail); }
+                {
+                    throw Errors.Fail(ErrorCode.BudgetExceeded, ScriptDomErrors.DepthDetail);
+                }
                 index++;
             }
             else if (text[index] == Asterisk && text[index + NextCharacter] == Slash)
-            { depth--; index++; }
+            {
+                depth--;
+                index++;
+            }
         }
     }
     private const string OpenParenthesis = "(";

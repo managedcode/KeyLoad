@@ -19,8 +19,13 @@ internal static class EventVectorFirstIssuanceDisposition
         var original = EventVectorFirstReleaseAdmission.Require(transaction, principal, phase,
             originalOutcome: false, authorization, admission);
         if (phase.Action == EventVectorControlAction.CleanupAbandonedIssuance)
-        { return EventVectorFirstIssuanceWriter.Release(transaction, original, operation, admission); }
-        var abandoned = original with { State = EventVectorFirstIssuanceState.Abandoned };
+        {
+            return EventVectorFirstIssuanceWriter.Release(transaction, original, operation, admission);
+        }
+        var abandoned = original with
+        {
+            State = EventVectorFirstIssuanceState.Abandoned
+        };
         EventVectorFirstIssuanceWriter.Replace(transaction, original, abandoned, admission);
         return abandoned;
     }

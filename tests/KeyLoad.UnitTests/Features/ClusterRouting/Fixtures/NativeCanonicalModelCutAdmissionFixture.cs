@@ -34,9 +34,13 @@ internal sealed class NativeCanonicalModelCutAdmissionFixture : IAsyncDisposable
         {
             var failures = new List<Exception> { primary };
             if (host is not null)
-            { ServerFailureObserver.Observe(host.Dispose, failures); }
+            {
+                ServerFailureObserver.Observe(host.Dispose, failures);
+            }
             if (stopping is not null)
-            { ServerFailureObserver.Observe(stopping.Dispose, failures); }
+            {
+                ServerFailureObserver.Observe(stopping.Dispose, failures);
+            }
             ServerFailureObserver.ThrowIfAny(failures);
             throw;
         }
@@ -54,14 +58,19 @@ internal sealed class NativeCanonicalModelCutAdmissionFixture : IAsyncDisposable
             return action(fixture);
         }, failures);
         if (fixture is not null)
-        { await ServerFailureObserver.ObserveAsync(() => fixture.DisposeAsync().AsTask(), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => fixture.DisposeAsync().AsTask(), failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
     internal static NativeCanonicalModelCutRequest Request()
     {
         var source = new PartitionRef("cut-tenant", "cut-database", "cut-domain", SourcePartitionKey);
-        var destination = source with { PartitionKey = "destination" };
+        var destination = source with
+        {
+            PartitionKey = "destination"
+        };
         return new(Guid.NewGuid(), RequestCqrsProbeCodecInput.ArmId, RequestCqrsProbeCodecInput.SessionId,
             source, destination, RequestCqrsProbeCodecInput.CommandId, RequestCqrsProbeCodecInput.TestPrincipal,
             "cut-technical", new(source, "source-queue"), Guid.NewGuid(), new(destination, "target-queue"));
@@ -74,17 +83,29 @@ internal sealed class NativeCanonicalModelCutAdmissionFixture : IAsyncDisposable
         ServerFailureObserver.Observe(ApplicationLifetime.StopApplication, failures);
         await ServerFailureObserver.ObserveAsync(Lifecycle.StopAdmissionAndJoin, failures);
         try
-        { host.Dispose(); }
+        {
+            host.Dispose();
+        }
         catch (Exception error) when (global::ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         catch (Exception error) when (global::ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null)
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         try
-        { stopping.Dispose(); }
+        {
+            stopping.Dispose();
+        }
         catch (Exception error) when (global::ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         catch (Exception error) when (global::ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null)
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

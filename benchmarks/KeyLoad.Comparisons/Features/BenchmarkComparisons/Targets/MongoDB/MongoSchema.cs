@@ -136,7 +136,11 @@ internal static class MongoSchema
     public static WriteConcern MajorityJournalWriteConcern => WriteConcern.WMajority.With(journal: true);
 
     public static BsonDocument Document(BenchmarkDocument document)
-        => new() { [IdField] = document.Id, [BodyField] = document.Json };
+        => new()
+        {
+            [IdField] = document.Id,
+            [BodyField] = document.Json
+        };
 
     public static BsonDocument Event(string streamId, Guid eventId, string json)
         => new()

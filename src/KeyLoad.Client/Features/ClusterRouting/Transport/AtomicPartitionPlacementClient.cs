@@ -21,7 +21,9 @@ public static class AtomicPartitionPlacementClient
         ArgumentNullException.ThrowIfNull(client);
         ArgumentNullException.ThrowIfNull(request);
         if (commandId == Guid.Empty)
-        { throw new ArgumentException(InvalidCommandId, nameof(commandId)); }
+        {
+            throw new ArgumentException(InvalidCommandId, nameof(commandId));
+        }
         return client.Send<bool>(BindRoute, request, true, commandId, cancellationToken);
     }
 

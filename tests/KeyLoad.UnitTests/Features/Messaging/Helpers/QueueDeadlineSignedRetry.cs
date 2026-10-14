@@ -14,7 +14,10 @@ internal static class QueueDeadlineSignedRetry
     {
         using var fixture = new TestDatabase();
         fixture.Configure(QueueDeadlineNativeProtocol.Queue, ResourceKind.WorkQueue, queuePolicy: new()
-        { RetryJitter = QueueRetryJitter.Full, RetryBaseMilliseconds = QueueDeadlineNativeProtocol.RetryCapMilliseconds });
+        {
+            RetryJitter = QueueRetryJitter.Full,
+            RetryBaseMilliseconds = QueueDeadlineNativeProtocol.RetryCapMilliseconds
+        });
         var lane = new QueueLaneRef(fixture.Partition, QueueDeadlineNativeProtocol.Queue);
         var start = QueueWholeFlowStorage.Clock(fixture.Store);
         fixture.Commit(new EnqueueMessage(lane.Queue, QueueDeadlineNativeProtocol.Message, QueueDeadlineNativeProtocol.Payload));

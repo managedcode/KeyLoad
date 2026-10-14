@@ -14,19 +14,25 @@ public sealed partial class DatabaseEngine
         if (proof is null || proof.Version != RemoteGraphProtocol.Version || proof.Intent is null
             || proof.Intent.Content is null || proof.Cut is null || proof.Cut.Owner is null
             || proof.Cut.Placement is null || proof.Cut.NodeId == Guid.Empty || proof.Cut.ReadGeneration < RemoteGraphFirstGeneration)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteGraphProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, RemoteGraphProtocol.Invalid);
+        }
         var intent = proof.Intent;
         var content = intent.Content;
         if (intent.Version != RemoteGraphProtocol.Version || intent.SourceOwner is null || intent.SourceCommit is null
             || intent.SourceCommandId == Guid.Empty || !PhysicalOwnerEntryValidation.Valid(intent.DestinationOwner)
             || !PhysicalOwnerEntryValidation.SameOwner(intent.SourceOwner, proof.Cut.Owner)
             || PhysicalOwnerEntryValidation.SameOwner(intent.SourceOwner, intent.DestinationOwner.Owner))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteGraphProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, RemoteGraphProtocol.Invalid);
+        }
         GraphCrossPartitionValidation.ValidateIntent(content, content.SourcePartition, content.Graph,
             content.EdgeId, content.Destination, Limits);
         if (GraphCrossPartitionRecords.Fingerprint(content.SourcePartition, content.Graph, content.EdgeId,
             content.Destination, content.Revision, content.Deleted, content.Edge) != content.Fingerprint)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteGraphProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, RemoteGraphProtocol.Invalid);
+        }
         var directory = PhysicalOwnerDirectorySerialization.Read(view)
             ?? throw Errors.Fail(ErrorCode.OwnershipLost, RemoteGraphProtocol.MissingAuthority);
         var localCatalog = PhysicalShardCatalogRecordSerialization.Read(view)
@@ -42,7 +48,9 @@ public sealed partial class DatabaseEngine
             || (proof.Original.Upsert is null) == (proof.Original.Delete is null)
             || (proof.Original.Upsert?.Graph ?? proof.Original.Delete?.Graph) != content.Graph
             || (proof.Original.Upsert?.EdgeId ?? proof.Original.Delete?.EdgeId) != content.EdgeId)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, RemoteGraphProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, RemoteGraphProtocol.MissingAuthority);
+        }
         var placement = proof.Cut.Placement;
         if (placement.Partition != content.SourcePartition || proof.Cut.Incarnation != placement.Incarnation
             || placement.PhysicalShardId != intent.SourceOwner.PhysicalShardId
@@ -55,7 +63,9 @@ public sealed partial class DatabaseEngine
             || intent.SourceCommit.Incarnation != placement.Incarnation
             || intent.SourceCommit.OwnershipEpoch != placement.PlacementEpoch
             || intent.SourceCommit.AtomicPartitionId != content.SourcePartition.AtomicPartitionId)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, RemoteGraphProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, RemoteGraphProtocol.MissingAuthority);
+        }
     }
 
     private const int RemoteGraphFirstGeneration = 1;

@@ -18,9 +18,14 @@ internal static class PartitionMovementParentPhaseIds
                 or PartitionMovementParentPhaseRole.Retire or PartitionMovementParentPhaseRole.RetireAcknowledge
                 or PartitionMovementParentPhaseRole.RetireCancellation
                 or PartitionMovementParentPhaseRole.RetireCancellationObservation))
-        { throw Errors.Fail(ErrorCode.Validation, PartitionMoveProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, PartitionMoveProtocol.Invalid);
+        }
         var seed = new PartitionMovementParentPhaseIdentity(PartitionMoveProtocol.Version,
-            original with { Mode = PartitionMoveMode.Transfer }, principalId, role, ordinal, cleanupGeneration);
+            original with
+            {
+                Mode = PartitionMoveMode.Transfer
+            }, principalId, role, ordinal, cleanupGeneration);
         Span<byte> digest = stackalloc byte[SHA256.HashSizeInBytes];
         SHA256.HashData(NativeSerialization.Serialize(seed), digest);
         return new Guid(digest[..IdentityBytes]);

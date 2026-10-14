@@ -36,7 +36,10 @@ internal static class TenantPackingActivationRf3Admission
         var untouched = await ReadAsync(administrator, secondIdentity.Partition, token);
         await Assert.That(untouched.IsFallback).IsTrue();
         await Assert.That(untouched.DirectoryRevision).IsEqualTo(FirstDirectoryRevision);
-        await BindAsync(administrator, Guid.NewGuid(), stale with { ExpectedRevision = FirstDirectoryRevision }, token);
+        await BindAsync(administrator, Guid.NewGuid(), stale with
+        {
+            ExpectedRevision = FirstDirectoryRevision
+        }, token);
         await ConflictAsync(administrator, staleId, stale, token);
         var firstCurrent = await ReadAsync(administrator, firstIdentity.Partition, token);
         var secondCurrent = await ReadAsync(administrator, secondIdentity.Partition, token);

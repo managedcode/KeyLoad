@@ -16,8 +16,14 @@ internal static class QueueLifecycleAuthorityRefusal
             var counters = NativeSerialization.Deserialize<QueueCounters>(original);
             var exact = QueueWholeFlowStorage.Bytes(store);
             var queue = QueueLifecycleImage.Capture(store, state.Lane);
-            var corrupted = bytesOverlap ? counters with { InFlightBytes = counters.StoredBytes }
-                : counters with { InFlightMessages = QueueLifecycleTestProtocol.Three };
+            var corrupted = bytesOverlap ? counters with
+            {
+                InFlightBytes = counters.StoredBytes
+            }
+                : counters with
+                {
+                    InFlightMessages = QueueLifecycleTestProtocol.Three
+                };
             store.Commit((tx, _) => { tx.Put(key, NativeSerialization.Serialize(corrupted)); return true; });
             var damaged = QueueWholeFlowStorage.Bytes(store);
             var position = store.Position;

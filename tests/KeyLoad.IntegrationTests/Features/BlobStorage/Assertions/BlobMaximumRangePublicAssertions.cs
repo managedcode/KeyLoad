@@ -22,7 +22,9 @@ internal static class BlobMaximumRangePublicAssertions
         await SqlRf3Protocol.EqualAsync(state.CurrentUpload, (await PublicReadAssertions.RequiredUploadAsync(
             await callers.Mcp.CallAsync("keyload_blobs_upload_info", upload, token))).Value);
         foreach (var offset in new long[] { 0L, 1L, 65535L, 65536L, 65537L })
-        { await RangeAsync(callers, state, offset, 65536, token); }
+        {
+            await RangeAsync(callers, state, offset, 65536, token);
+        }
         await RangeAsync(callers, state, 131071L, 2, token);
         await RangeAsync(callers, state, 131073L, 0, token);
     }

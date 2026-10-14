@@ -21,9 +21,13 @@ internal static class SampleChunkWindowScope
         SampleChunkWindowValidation.State(window, id, options.Value.MaximumChunkWindowRecords,
             options.Value.MaximumChunkCorrections);
         if (window.Revision != revision || revision < SampleChunkLifecycleProtocol.First)
-        { throw Errors.Fail(ErrorCode.RevisionConflict, SampleChunkLifecycleProtocol.RevisionConflict); }
+        {
+            throw Errors.Fail(ErrorCode.RevisionConflict, SampleChunkLifecycleProtocol.RevisionConflict);
+        }
         if (window.State == SampleChunkWindowState.Dropped)
-        { throw Errors.Fail(ErrorCode.HistoryUnavailable, SampleChunkLifecycleProtocol.Missing); }
+        {
+            throw Errors.Fail(ErrorCode.HistoryUnavailable, SampleChunkLifecycleProtocol.Missing);
+        }
         return window;
     }
 }

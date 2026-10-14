@@ -19,11 +19,26 @@ internal sealed class Neo4jHarnessSchemaFixture : IAsyncDisposable
         client = new(endpoint, password);
     }
 
-    public string RunId { get; }
-    public string MarkerLabel { get; }
-    public string TargetLabel { get; }
-    public string ConstraintName { get; }
-    public string MarkerId { get; }
+    public string RunId
+    {
+        get;
+    }
+    public string MarkerLabel
+    {
+        get;
+    }
+    public string TargetLabel
+    {
+        get;
+    }
+    public string ConstraintName
+    {
+        get;
+    }
+    public string MarkerId
+    {
+        get;
+    }
     public string ConstraintAcknowledgementJson { get; private set; } = string.Empty;
 
     public static async Task<Neo4jHarnessSchemaFixture> CreateAsync(Uri endpoint, string password, CancellationToken cancellationToken)
@@ -45,7 +60,10 @@ internal sealed class Neo4jHarnessSchemaFixture : IAsyncDisposable
 
     public async Task<bool> MarkerExistsAsync(CancellationToken cancellationToken)
     {
-        using var response = await client.SendAsync($"MATCH (n:{MarkerLabel} {{id:$id}}) RETURN count(n)", new { id = MarkerId }, cancellationToken);
+        using var response = await client.SendAsync($"MATCH (n:{MarkerLabel} {{id:$id}}) RETURN count(n)", new
+        {
+            id = MarkerId
+        }, cancellationToken);
         RequireAccepted(response);
         Neo4jQueryResponse.ValidateErrors(response.Document.RootElement);
         return response.Document.RootElement.GetProperty(Neo4jHarnessConstants.DataProperty)
@@ -54,7 +72,10 @@ internal sealed class Neo4jHarnessSchemaFixture : IAsyncDisposable
 
     public async Task<bool> ConstraintExistsAsync(CancellationToken cancellationToken)
     {
-        using var response = await client.SendAsync("SHOW CONSTRAINTS YIELD name WHERE name=$name RETURN name", new { name = ConstraintName }, cancellationToken);
+        using var response = await client.SendAsync("SHOW CONSTRAINTS YIELD name WHERE name=$name RETURN name", new
+        {
+            name = ConstraintName
+        }, cancellationToken);
         RequireAccepted(response);
         Neo4jQueryResponse.ValidateErrors(response.Document.RootElement);
         return response.Document.RootElement.GetProperty(Neo4jHarnessConstants.DataProperty)
@@ -105,7 +126,10 @@ internal sealed class Neo4jHarnessSchemaFixture : IAsyncDisposable
             ownsConstraint = true;
         }
 
-        using var marker = await client.SendAsync($"CREATE (n:{MarkerLabel} {{id:$id}}) RETURN n.id", new { id = MarkerId }, cancellationToken);
+        using var marker = await client.SendAsync($"CREATE (n:{MarkerLabel} {{id:$id}}) RETURN n.id", new
+        {
+            id = MarkerId
+        }, cancellationToken);
         if (marker.StatusCode != 202)
         {
             throw new ComparisonFailureException(Neo4jHarnessConstants.InvalidQueryResponse);
@@ -117,7 +141,10 @@ internal sealed class Neo4jHarnessSchemaFixture : IAsyncDisposable
 
     private async Task DeleteMarkerAsync(CancellationToken cancellationToken)
     {
-        using var response = await client.SendAsync(Neo4jHarnessStatements.DeleteMarker(MarkerLabel), new { id = MarkerId }, cancellationToken);
+        using var response = await client.SendAsync(Neo4jHarnessStatements.DeleteMarker(MarkerLabel), new
+        {
+            id = MarkerId
+        }, cancellationToken);
         RequireAccepted(response);
         Neo4jQueryResponse.ValidateErrors(response.Document.RootElement);
     }

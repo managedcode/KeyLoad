@@ -42,7 +42,9 @@ internal static class ScriptDomNativeParsingCancellation
     private static async Task JoinedAsync(Task<QueryPage> original, CancellationToken token)
     {
         try
-        { _ = await original; }
+        {
+            _ = await original;
+        }
         catch (OperationCanceledException failure)
         {
             await Assert.That(failure.CancellationToken).IsEqualTo(token);

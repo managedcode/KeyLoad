@@ -15,7 +15,9 @@ internal sealed class NativeTextResourceFileReservation(NativeTextResourceOwners
         lock (gate)
         {
             if (completed)
-            { throw NativeTextErrors.Ownership(); }
+            {
+                throw NativeTextErrors.Ownership();
+            }
             // A joined failed write may leave a genuine shorter partial file.
             TargetLength = ObserveLength();
             owner.ReleaseFile(this);

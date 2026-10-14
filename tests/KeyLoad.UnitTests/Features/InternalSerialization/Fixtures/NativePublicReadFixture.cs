@@ -1,5 +1,5 @@
 using System.Text.Json;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Query;
 using KeyLoad.Server;
 
@@ -55,7 +55,9 @@ internal static class NativePublicReadFixture
     {
         // These are real public MCP JSON arguments; only the internal forwarded value becomes native.
         var arguments = new Dictionary<string, JsonElement>
-        { [McpCatalogProtocol.Request] = JsonSerializer.SerializeToElement(value, JsonDefaults.Options) };
+        {
+            [McpCatalogProtocol.Request] = JsonSerializer.SerializeToElement(value, JsonDefaults.Options)
+        };
         return McpArgumentDecoder.Read<T>(arguments, kind, database.Database.Limits.MaxQueryBytes).Payload;
     }
 

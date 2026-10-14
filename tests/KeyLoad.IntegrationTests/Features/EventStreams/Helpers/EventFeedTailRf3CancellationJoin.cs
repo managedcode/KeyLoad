@@ -34,9 +34,13 @@ internal static class EventFeedTailRf3CancellationJoin
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 try
-                { _ = await originalOperation.ConfigureAwait(false); }
+                {
+                    _ = await originalOperation.ConfigureAwait(false);
+                }
                 catch (OperationCanceledException) when (owned.IsCancellationRequested && !token.IsCancellationRequested)
-                { cancelled = true; }
+                {
+                    cancelled = true;
+                }
             }, failures).ConfigureAwait(false);
         }
         ServerFailureObserver.ThrowIfAny(failures);

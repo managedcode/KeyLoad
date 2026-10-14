@@ -25,16 +25,30 @@ internal sealed class NativeCanonicalModelCutLease : IDisposable
             linked = CancellationTokenSource.CreateLinkedTokenSource(requestCancellation,
                 applicationStopping, stopping, ceiling.Token);
         }
-        catch (Exception error) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { ReleaseCeiling(error); throw; }
-        catch (Exception error) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { ReleaseCeiling(error); throw; }
+        catch (Exception error) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            ReleaseCeiling(error);
+            throw;
+        }
+        catch (Exception error) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            ReleaseCeiling(error);
+            throw;
+        }
         try
-        { linked.Token.ThrowIfCancellationRequested(); }
-        catch (Exception error) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { ReleaseSources(error); throw; }
-        catch (Exception error) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { ReleaseSources(error); throw; }
+        {
+            linked.Token.ThrowIfCancellationRequested();
+        }
+        catch (Exception error) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            ReleaseSources(error);
+            throw;
+        }
+        catch (Exception error) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            ReleaseSources(error);
+            throw;
+        }
     }
 
     internal void Bind(NativeCanonicalModelCutRequest request)
@@ -42,14 +56,18 @@ internal sealed class NativeCanonicalModelCutLease : IDisposable
         Token.ThrowIfCancellationRequested();
         NativeCanonicalModelCutCodec.ValidateRequest(request);
         if (arm is not null)
-        { throw NativeCanonicalModelCutCodec.Invalid(); }
+        {
+            throw NativeCanonicalModelCutCodec.Invalid();
+        }
         var snapshot = files.ReadSnapshot();
         var selected = snapshot.Arms.SingleOrDefault(candidate => candidate.Record.ArmId == request.ArmId);
         if (selected is null || selected.Record.SessionId != request.SessionId
             || selected.Record.CommandId != request.AcceptCommandId
             || selected.Record.PrincipalId != request.LogicalPrincipalId
             || selected.Record.ReadKind is not null || selected.Record.Action != RequestCqrsProbeAction.Hold)
-        { throw NativeCanonicalModelCutCodec.Invalid(); }
+        {
+            throw NativeCanonicalModelCutCodec.Invalid();
+        }
         arm = selected;
         RequireCurrent();
     }
@@ -58,7 +76,9 @@ internal sealed class NativeCanonicalModelCutLease : IDisposable
     {
         Token.ThrowIfCancellationRequested();
         if (arm is null || Volatile.Read(ref disposed) != ActiveLease)
-        { throw NativeCanonicalModelCutCodec.Invalid(); }
+        {
+            throw NativeCanonicalModelCutCodec.Invalid();
+        }
         var snapshot = files.ReadSnapshot();
         RequestCqrsProbeFiles.RequireActiveArm(arm, snapshot);
         // Settlement retains the immutable arm until its owner explicitly retires it.
@@ -68,7 +88,9 @@ internal sealed class NativeCanonicalModelCutLease : IDisposable
     public void Dispose()
     {
         if (Interlocked.Exchange(ref disposed, DisposedLease) != ActiveLease)
-        { return; }
+        {
+            return;
+        }
         var failures = new List<Exception>();
         DisposeLinked(failures);
         DisposeCeiling(failures);
@@ -95,20 +117,32 @@ internal sealed class NativeCanonicalModelCutLease : IDisposable
     private void DisposeLinked(List<Exception> failures)
     {
         try
-        { linked.Dispose(); }
-        catch (Exception error) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
-        catch (Exception error) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
+        {
+            linked.Dispose();
+        }
+        catch (Exception error) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
+        catch (Exception error) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
     }
 
     private void DisposeCeiling(List<Exception> failures)
     {
         try
-        { ceiling.Dispose(); }
-        catch (Exception error) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
-        catch (Exception error) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
+        {
+            ceiling.Dispose();
+        }
+        catch (Exception error) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
+        catch (Exception error) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
     }
 }

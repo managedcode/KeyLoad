@@ -51,6 +51,9 @@ internal static class RequestCqrsProbeFixtureProtocol
     internal const string Node1Origin = "http://node1:8080";
     internal const string Node2Origin = "http://node2:8080";
     internal const string Node3Origin = "http://node3:8080";
-    internal static IReadOnlyList<string> Nodes { get; } = Array.AsReadOnly(new[]
+    internal static IReadOnlyList<string> Nodes
+    {
+        get;
+    } = Array.AsReadOnly(new[]
         { RequestCqrsRf3Protocol.Node1, RequestCqrsRf3Protocol.Node2, RequestCqrsRf3Protocol.Node3 });
 }

@@ -34,9 +34,13 @@ internal static class SqlJoinSourceBindingFixture
     internal static (global::KeyLoad.CommandRequest Command, global::KeyLoad.CommitReceipt Receipt) Seed(TestDatabase database, string kind)
     {
         if (kind == Queue)
-        { return SqlQueueReferenceJoinFixture.Seed(database); }
+        {
+            return SqlQueueReferenceJoinFixture.Seed(database);
+        }
         if (kind == Events)
-        { return SqlEventReferenceJoinFixture.Seed(database); }
+        {
+            return SqlEventReferenceJoinFixture.Seed(database);
+        }
         database.Submit(global::KeyLoad.OperationKind.ConfigureResource, new global::KeyLoad.ConfigureResourceRequest(database.Partition.TenantId,
             database.Partition.DatabaseId, new global::KeyLoad.ResourceDefinition(LeftCollection, global::KeyLoad.ResourceKind.Collection, database.Partition.TransactionDomainId)
             {
@@ -45,7 +49,9 @@ internal static class SqlJoinSourceBindingFixture
             })).Get<global::KeyLoad.ResourceDefinition>();
         database.Submit(global::KeyLoad.OperationKind.ConfigureResource, new global::KeyLoad.ConfigureResourceRequest(database.Partition.TenantId,
             database.Partition.DatabaseId, new global::KeyLoad.ResourceDefinition(RightCollection, global::KeyLoad.ResourceKind.Collection, database.Partition.TransactionDomainId)
-            { RelationalSchema = new(TargetKey, [new(TargetKey, global::KeyLoad.RelationalColumnType.Text), new(Name, global::KeyLoad.RelationalColumnType.Text)]) })).Get<global::KeyLoad.ResourceDefinition>();
+            {
+                RelationalSchema = new(TargetKey, [new(TargetKey, global::KeyLoad.RelationalColumnType.Text), new(Name, global::KeyLoad.RelationalColumnType.Text)])
+            })).Get<global::KeyLoad.ResourceDefinition>();
         var id = Guid.NewGuid();
         var command = new global::KeyLoad.CommandRequest(id, database.Partition,
             [new global::KeyLoad.PutDocument(LeftCollection, OrderEntity, SqlInnerJoinRejectionFixture.LeftJson),
@@ -62,15 +68,26 @@ internal static class SqlJoinSourceBindingFixture
                 AllowFullScan: true, AstVersion: Dialect);
         }
         var source = kind == Events ? SqlEventReferenceJoinFixture.Ast(partition) : SqlQueueReferenceJoinFixture.Ast(partition);
-        return source with { Query = source.Query with { Projection = [new(NamePath, NameOutput, ModelRightAlias)] } };
+        return source with
+        {
+            Query = source.Query with
+            {
+                Projection = [new(NamePath, NameOutput, ModelRightAlias)]
+            }
+        };
     }
 
     internal static global::KeyLoad.QueryRequest Request(global::KeyLoad.PartitionRef partition, string kind)
     {
         if (kind == Typed)
-        { return new(partition, Sql, AllowFullScan: true, QueryDialectVersion: Dialect); }
+        {
+            return new(partition, Sql, AllowFullScan: true, QueryDialectVersion: Dialect);
+        }
         var request = kind == Events ? SqlEventReferenceJoinFixture.Request(partition) : SqlQueueReferenceJoinFixture.Request(partition);
         var prefix = kind == Events ? SqlEventReferenceJoinFixture.Prefix : SqlQueueReferenceJoinFixture.Prefix;
-        return request with { Sql = request.Sql.Replace(prefix, ModelSelect, StringComparison.Ordinal) };
+        return request with
+        {
+            Sql = request.Sql.Replace(prefix, ModelSelect, StringComparison.Ordinal)
+        };
     }
 }

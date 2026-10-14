@@ -45,7 +45,9 @@ internal static class QueueLeaseAuthorityTrial
     {
         var replay = database.Apply(state.Claim);
         if (state.Kind == QueueLeaseAuthorityOperation.Renew)
-        { await NativeReplayResultAssertions.Same<ReceiveResult>(replay, state.Claimed); }
+        {
+            await NativeReplayResultAssertions.Same<ReceiveResult>(replay, state.Claimed);
+        }
         else
         {
             await Assert.That(replay.Error).IsEqualTo(ErrorCode.StaleLease);

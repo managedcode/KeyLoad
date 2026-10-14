@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
@@ -37,6 +37,8 @@ internal static class PartitionMovementIssuerSourceAckVerifier
         if (outcome.Error is not null || state.CurrentReadCut < receipt.AppliedPosition
             || !NativeSerialization.Serialize(outcome.Get<PartitionMovePhaseResult>().Journal).AsSpan()
                 .SequenceEqual(NativeSerialization.Serialize(receipt)))
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMovementProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMovementProtocol.InvalidProof);
+        }
     }
 }

@@ -10,7 +10,10 @@ internal sealed class GraphCycleFrontierPublicState(GraphIncomingRf3Seed seed)
     internal EntityRef B => Vertex("r42-b");
     internal EntityRef Target => Vertex("r42-t");
     internal EntityRef[] Vertices => [A, B, Start, Target];
-    internal bool Hidden { get; set; }
+    internal bool Hidden
+    {
+        get; set;
+    }
     internal long BranchRevision { get; set; } = 1L;
     internal AtomicPartitionPlacementResolution Placement { get; set; } = null!;
     internal OutboxStatus Outbox { get; set; } = null!;

@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.UnitTests.Features.Messaging;
 using KeyLoad.UnitTests.Features.Search;
 using ManagedCode.Communication.CQRS;
@@ -59,7 +59,10 @@ internal static class RequestCqrsActualTextReplayFlow
             OperationKind.Batch, command, id, token);
         await Assert.That(receipt.CommandId).IsEqualTo(id);
         await Assert.That(receipt.Mutations.Length).IsEqualTo(SingleMutation);
-        var current = previous with { CommandId = Guid.NewGuid() };
+        var current = previous with
+        {
+            CommandId = Guid.NewGuid()
+        };
         var completed = await RequestCqrsActualTextMaintenanceFlow.ExecuteAsync(fixture, current, token);
         await ReplayAsync(fixture, current, completed, token);
         var before = QueueWholeFlowStorage.Bytes(fixture.Database.Store);
@@ -69,7 +72,10 @@ internal static class RequestCqrsActualTextReplayFlow
         await Assert.That(refused.Payload.IsEmpty).IsTrue();
         await Assert.That(QueueWholeFlowStorage.Bytes(fixture.Database.Store).AsSpan().SequenceEqual(before)).IsTrue();
         await RequestCqrsActualTextAssertions.VerifyAsync(fixture, current, changed: true, FinalRevision, token);
-        var noOp = current with { CommandId = Guid.NewGuid() };
+        var noOp = current with
+        {
+            CommandId = Guid.NewGuid()
+        };
         var unchanged = await RequestCqrsActualTextMaintenanceFlow.ExecuteAsync(fixture, noOp, expectNativeWork: false, token);
         await Assert.That(unchanged.Checkpoint).IsNull();
         await ReplayAsync(fixture, noOp, unchanged, token);
@@ -79,7 +85,11 @@ internal static class RequestCqrsActualTextReplayFlow
     internal static async Task ReleaseAsync(RequestCqrsClusterFixture fixture,
         TextIndexMaintenanceRequest original, CancellationToken token)
     {
-        var release = original with { CommandId = Guid.NewGuid(), Mode = TextIndexMaintenanceMode.Release };
+        var release = original with
+        {
+            CommandId = Guid.NewGuid(),
+            Mode = TextIndexMaintenanceMode.Release
+        };
         var actual = await RequestCqrsActualTextMaintenanceFlow.ExecuteAsync(fixture, release, expectNativeWork: false, token);
         await Assert.That(actual.CommandId).IsEqualTo(release.CommandId);
         await Assert.That(actual.Consumer).IsEqualTo(original.Consumer);
@@ -101,7 +111,10 @@ internal static class RequestCqrsActualTextReplayFlow
         }
         await Assert.That(frames.Last().Kind).IsEqualTo(CqrsStreamChunkKind.Completed);
         if (mode == TextIndexMaintenanceMode.Release)
-        { await Assert.That(frames.Count).IsEqualTo(OrdinaryFrames); return; }
+        {
+            await Assert.That(frames.Count).IsEqualTo(OrdinaryFrames);
+            return;
+        }
         var phases = frames.Where(frame => frame.Kind == CqrsStreamChunkKind.Progress)
             .Select(frame => frame.ProgressResult!.Value.Value!.TextPhase).ToArray();
         await Assert.That(phases.First()).IsEqualTo(TextIndexMaintenancePhase.Configure);
@@ -109,6 +122,8 @@ internal static class RequestCqrsActualTextReplayFlow
         await Assert.That(phases.Contains(TextIndexMaintenancePhase.Capture)).IsTrue();
         foreach (var phase in new[] { TextIndexMaintenancePhase.NativeIndex,
             TextIndexMaintenancePhase.Publish, TextIndexMaintenancePhase.Checkpoint })
-        { await Assert.That(phases.Contains(phase)).IsEqualTo(expectNativeWork); }
+        {
+            await Assert.That(phases.Contains(phase)).IsEqualTo(expectNativeWork);
+        }
     }
 }

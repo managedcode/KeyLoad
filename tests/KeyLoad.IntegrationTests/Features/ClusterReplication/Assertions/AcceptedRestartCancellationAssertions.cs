@@ -10,9 +10,13 @@ internal static class AcceptedRestartCancellationAssertions
         await interrupted.CancelAsync().ConfigureAwait(false);
         OperationCanceledException? original = null;
         try
-        { await fixture.RestartContainerAsync(resourceName, interrupted.Token); }
+        {
+            await fixture.RestartContainerAsync(resourceName, interrupted.Token);
+        }
         catch (OperationCanceledException failure)
-        { original = failure; }
+        {
+            original = failure;
+        }
         await Assert.That(original).IsNotNull();
         await Assert.That(original!.CancellationToken).IsEqualTo(interrupted.Token);
         await fixture.SaveFailureDiagnosticsAsync(cancellationToken);

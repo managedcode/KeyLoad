@@ -35,7 +35,9 @@ internal sealed class RequestCqrsRf3SubscriberTransitionObservation
     {
         var bit = NodeBit(name);
         if (active)
-        { admissionNodeMask |= bit; }
+        {
+            admissionNodeMask |= bit;
+        }
         return bit != 0;
     }
 
@@ -46,7 +48,9 @@ internal sealed class RequestCqrsRf3SubscriberTransitionObservation
     internal void ClaimAdmissionMove(Task<bool> pending)
     {
         if (ReferenceEquals(pending, diagnosticMove))
-        { diagnosticMove = null; }
+        {
+            diagnosticMove = null;
+        }
     }
 
     internal void BeginOwnedCancellation(Task<bool>? pendingMove)
@@ -64,7 +68,9 @@ internal sealed class RequestCqrsRf3SubscriberTransitionObservation
     internal void MoveJoined(Task<bool> pending)
     {
         if (ReferenceEquals(pending, diagnosticMove))
-        { diagnosticMove = null; }
+        {
+            diagnosticMove = null;
+        }
     }
 
     internal void DrainAvailableEvents(IAsyncEnumerator<LogSubscriber> active, ref Task<bool>? pendingMove,
@@ -81,7 +87,9 @@ internal sealed class RequestCqrsRf3SubscriberTransitionObservation
                 diagnosticMove = pending;
             }
             if (!pending.IsCompleted)
-            { break; }
+            {
+                break;
+            }
             if (!pending.IsCompletedSuccessfully)
             {
                 MarkAmbiguous();
@@ -103,19 +111,27 @@ internal sealed class RequestCqrsRf3SubscriberTransitionObservation
         }
 
         if (examined == MaximumEventsPerDrain)
-        { MarkLimitReached(); }
+        {
+            MarkLimitReached();
+        }
         MarkSample(afterOriginalJoin);
     }
 
     internal void RecordCompletion(string name, bool active)
     {
         if (!completionObservationStarted)
-        { return; }
+        {
+            return;
+        }
         var bit = NodeBit(name);
         if (bit != 0 && !active)
-        { completionNodeMask |= bit; }
+        {
+            completionNodeMask |= bit;
+        }
         else
-        { MarkAmbiguous(); }
+        {
+            MarkAmbiguous();
+        }
     }
 
     internal void MarkAmbiguous()
@@ -124,9 +140,13 @@ internal sealed class RequestCqrsRf3SubscriberTransitionObservation
         {
             var current = System.Threading.Volatile.Read(ref unknownEventCount);
             if (current >= RequestCqrsRf3Protocol.NodeCount)
-            { return; }
+            {
+                return;
+            }
             if (System.Threading.Interlocked.CompareExchange(ref unknownEventCount, current + 1, current) == current)
-            { return; }
+            {
+                return;
+            }
         }
     }
 

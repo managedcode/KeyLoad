@@ -59,23 +59,27 @@ internal static class SampleChunkJobRevocationHeld
     }
 
     private static async Task CleanupAsync(RequestCqrsProbeFixture controls,
-        IReadOnlyList<KeyLoad.Orleans.ReplicaSiloDiscovery> discovery, Exception? primary,
+        IReadOnlyList<KeyLoad.Clustering.ReplicaSiloDiscovery> discovery, Exception? primary,
         CancellationToken token)
     {
         try
-        { await controls.ReleaseOpenArmsAsync(discovery, token).ConfigureAwait(false); }
+        {
+            await controls.ReleaseOpenArmsAsync(discovery, token).ConfigureAwait(false);
+        }
         catch (Exception cleanup)
         {
             if (primary is not null)
-            { throw new AggregateException(primary, cleanup); }
+            {
+                throw new AggregateException(primary, cleanup);
+            }
             throw;
         }
     }
 
-    private static async Task<IReadOnlyList<KeyLoad.Orleans.ReplicaSiloDiscovery>> DiscoveryAsync(
+    private static async Task<IReadOnlyList<KeyLoad.Clustering.ReplicaSiloDiscovery>> DiscoveryAsync(
         TwoRf3MembershipWave wave, CancellationToken token)
     {
-        var result = new List<KeyLoad.Orleans.ReplicaSiloDiscovery>();
+        var result = new List<KeyLoad.Clustering.ReplicaSiloDiscovery>();
         foreach (var node in new[] { RequestCqrsRf3Protocol.Node1, RequestCqrsRf3Protocol.Node2,
             RequestCqrsRf3Protocol.Node3 })
         {

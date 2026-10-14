@@ -11,9 +11,18 @@ internal sealed class ZoneTreeCoordinatedPointCacheLifetimeTests
     private static readonly byte[] Value = [3, 6, 9, 12];
     private sealed class HeldOperations
     {
-        internal Task<bool>? Borrower { get; set; }
-        internal Task<bool>? Disposer { get; set; }
-        internal byte[]? BorrowedCopy { get; set; }
+        internal Task<bool>? Borrower
+        {
+            get; set;
+        }
+        internal Task<bool>? Disposer
+        {
+            get; set;
+        }
+        internal byte[]? BorrowedCopy
+        {
+            get; set;
+        }
     }
 
     [Test]

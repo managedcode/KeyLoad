@@ -7,25 +7,34 @@ internal sealed partial class NativeTextResourceOwnership
     internal NativeTextOpenFileGroup OpenFile(string path, ZoneTree.AbstractFileStream.IFileStream stream)
     {
         lock (gate)
-        { return openFiles.Open(Path.GetFullPath(path), stream); }
+        {
+            return openFiles.Open(Path.GetFullPath(path), stream);
+        }
     }
 
     internal void BeginCloseFile(NativeTextOpenFileGroup group, ZoneTree.AbstractFileStream.IFileStream stream)
     {
         lock (gate)
-        { openFiles.BeginClose(group, stream); }
+        {
+            openFiles.BeginClose(group, stream);
+        }
     }
 
     internal void CloseFile(NativeTextOpenFileGroup group, ZoneTree.AbstractFileStream.IFileStream stream)
     {
         lock (gate)
-        { openFiles.Close(group, stream); Check(null); }
+        {
+            openFiles.Close(group, stream);
+            Check(null);
+        }
     }
 
     internal void RequireKnownFile(string path)
     {
         lock (gate)
-        { openFiles.RequireKnownPath(Path.GetFullPath(path)); }
+        {
+            openFiles.RequireKnownPath(Path.GetFullPath(path));
+        }
     }
 
     internal void DeleteOwnedDirectory(string path, Action mutation)
@@ -48,7 +57,9 @@ internal sealed partial class NativeTextResourceOwnership
             var failures = new List<Exception>();
             ServerFailureObserver.Observe(() => { mutation(); openFiles.Detach(path); }, failures);
             if (failures.Count != NoPhysicalFailures)
-            { ServerFailureObserver.Observe(() => openFiles.MarkAmbiguous(path), failures); }
+            {
+                ServerFailureObserver.Observe(() => openFiles.MarkAmbiguous(path), failures);
+            }
             ServerFailureObserver.Observe(() => Check(null), failures);
             ServerFailureObserver.ThrowIfAny(failures);
         }
@@ -62,7 +73,9 @@ internal sealed partial class NativeTextResourceOwnership
             var failures = new List<Exception>();
             ServerFailureObserver.Observe(() => { mutation(); openFiles.Replace(source, destination, backup); }, failures);
             if (failures.Count != NoPhysicalFailures)
-            { ServerFailureObserver.Observe(() => openFiles.MarkAmbiguous(source, destination, backup), failures); }
+            {
+                ServerFailureObserver.Observe(() => openFiles.MarkAmbiguous(source, destination, backup), failures);
+            }
             ServerFailureObserver.Observe(() => Check(null), failures);
             ServerFailureObserver.ThrowIfAny(failures);
         }

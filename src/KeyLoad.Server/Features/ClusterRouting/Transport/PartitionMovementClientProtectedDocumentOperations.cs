@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
@@ -15,7 +15,9 @@ internal static class PartitionMovementClientProtectedDocumentOperations
             or PartitionMovePeerStage.ControlAcknowledgeCommand or PartitionMovePeerStage.ControlFinalizeCommand
             or PartitionMovePeerStage.ControlApplyCommand or PartitionMovePeerStage.ControlAuthorize
             or PartitionMovePeerStage.ControlAcknowledge))
-        { throw Errors.Fail(ErrorCode.UnsupportedCapability, PartitionMovementProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, PartitionMovementProtocol.Unavailable);
+        }
         work.Check();
         await owner.partition.Coordinator.ReadBarrierAsync(cancellationToken).ConfigureAwait(false);
         owner.partition.Database.ValidatePartitionMovementDispatch(original, authorization, phaseCommandId, work);

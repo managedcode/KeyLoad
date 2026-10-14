@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
@@ -26,7 +26,9 @@ internal sealed class PartitionMovementLateNativeHttp : IDisposable
         {
             failures.Add(original);
             try
-            { Dispose(); }
+            {
+                Dispose();
+            }
             catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
             catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
             ServerFailureObserver.ThrowIfAny(failures);
@@ -41,11 +43,15 @@ internal sealed class PartitionMovementLateNativeHttp : IDisposable
     {
         var failures = new List<Exception>();
         try
-        { client?.Dispose(); }
+        {
+            client?.Dispose();
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         try
-        { handler?.Dispose(); }
+        {
+            handler?.Dispose();
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         ServerFailureObserver.ThrowIfAny(failures);

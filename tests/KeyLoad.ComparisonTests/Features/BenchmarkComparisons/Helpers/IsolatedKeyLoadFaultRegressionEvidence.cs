@@ -10,9 +10,15 @@ internal sealed class IsolatedKeyLoadFaultRegressionEvidence(string cell, Isolat
     public string Cell { get; } = cell;
     public IsolatedComparisonWorker Worker { get; } = worker;
     public DateTimeOffset StartedAt { get; } = TimeProvider.System.GetUtcNow();
-    public DateTimeOffset? CompletedAt { get; private set; }
+    public DateTimeOffset? CompletedAt
+    {
+        get; private set;
+    }
     public string Status { get; private set; } = "failed";
-    public string? FailureCategory { get; private set; }
+    public string? FailureCategory
+    {
+        get; private set;
+    }
     public string Stage { get; internal set; } = "setup";
     public IsolatedKeyLoadFaultRegressionMembership[] Baseline { get; internal set; } = [];
     public List<IsolatedKeyLoadFaultRegressionPhaseReceipt> Phases { get; } = [];
@@ -59,9 +65,21 @@ internal sealed class IsolatedKeyLoadFaultRegressionPhaseReceipt(int phase, int 
     public int KilledNode { get; } = killedNode;
     public Guid CommandId { get; } = commandId;
     public string Kind { get; } = kind;
-    public bool NativeMcpAuthentication503 { get; internal set; }
-    public string? WriteRejection { get; internal set; }
-    public long? ResolvedPosition { get; internal set; }
+    public bool NativeMcpAuthentication503
+    {
+        get; internal set;
+    }
+    public string? WriteRejection
+    {
+        get; internal set;
+    }
+    public long? ResolvedPosition
+    {
+        get; internal set;
+    }
     public IsolatedKeyLoadFaultRegressionMembership[] Restored { get; internal set; } = [];
-    public bool Complete { get; internal set; }
+    public bool Complete
+    {
+        get; internal set;
+    }
 }

@@ -34,7 +34,10 @@ internal static class ThreeWayHybridTestSupport
     internal const double GraphWeight = 13d / 132d;
     internal const double Tolerance = 0.000000000001;
 
-    internal static VectorSpace Space { get; } = new("three-way-space", 2, DistanceMetric.Cosine,
+    internal static VectorSpace Space
+    {
+        get;
+    } = new("three-way-space", 2, DistanceMetric.Cosine,
         "three-way-model", "1");
 
     internal static void Configure(TestDatabase database)
@@ -116,7 +119,9 @@ internal static class ThreeWayHybridTestSupport
             Limit: 10, TextWeight: allZero ? 0 : TextWeight, VectorWeight: allZero ? 0 : VectorWeight,
             FusionConstant: FusionConstant, AllowedIds: allowedIds);
         var retrieveWalk = Walk(partition, RetrieveRoot, 4) with
-        { Labels = labeled ? ImmutableArray.Create("related") : null };
+        {
+            Labels = labeled ? ImmutableArray.Create("related") : null
+        };
         return new(1, search,
             Scope: scoped ? new(Walk(partition, ScopeRoot, 2)) : null,
             Retriever: new(retrieveWalk, allZero ? 0 : GraphWeight),

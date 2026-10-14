@@ -11,7 +11,9 @@ internal static class NativeTextOnlineCapture
         var budget = session.Budget;
         budget.Check();
         if (session.SourcePin is not null || session.Base is not null)
-        { throw NativeTextErrors.Mismatch(); }
+        {
+            throw NativeTextErrors.Mismatch();
+        }
         var request = session.Request;
         session.OperationReservation = resources.ReserveLease(budget);
         session.ExpectedCurrentCommandId = database.Store.Read(raw =>
@@ -46,6 +48,8 @@ internal static class NativeTextOnlineCapture
             || fresh.ReadGeneration != original.ReadGeneration || fresh.SchemaVersion != original.SchemaVersion
             || fresh.ResourceSha256 != original.ResourceSha256 || fresh.Position < original.Position
             || fresh.AppliedPosition < original.AppliedPosition || fresh.UpperSequence < original.UpperSequence)
-        { throw NativeTextErrors.Mismatch(); }
+        {
+            throw NativeTextErrors.Mismatch();
+        }
     }
 }

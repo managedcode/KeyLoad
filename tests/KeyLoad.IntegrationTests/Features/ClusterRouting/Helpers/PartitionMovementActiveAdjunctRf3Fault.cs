@@ -27,7 +27,9 @@ internal static class PartitionMovementActiveAdjunctRf3Fault
         {
             var state = wave.QueryControls.ArmFor(arm);
             if (state.RequestId is not null)
-            { throw new InvalidOperationException(PartitionMovementActiveAdjunctProtocol.MissingPrimary); }
+            {
+                throw new InvalidOperationException(PartitionMovementActiveAdjunctProtocol.MissingPrimary);
+            }
             await ServerFailureObserver.ObserveAsync(() => wave.QueryControls.RetireArmAsync(arm,
                 cancellationToken), failures).ConfigureAwait(false);
         }

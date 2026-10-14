@@ -43,7 +43,9 @@ internal sealed record NativeTextMaintenanceRf3Scenario(PartitionRef Partition)
         await Assert.That(official.NodeId).IsEqualTo(actual.NodeId);
         await Assert.That(official.Incarnation).IsEqualTo(actual.Incarnation);
         if (!Guid.TryParse(actual.NodeId, out var node) || node == Guid.Empty)
-        { throw new InvalidOperationException(InvalidOwner); }
+        {
+            throw new InvalidOperationException(InvalidOwner);
+        }
         var placement = await McpCallerAssertions.SdkSuccessAsync(await sdk.ReadAtomicPartitionPlacementAsync(
             new(PlacementVersion, Partition), token));
         return new(Guid.NewGuid(), new(Partition, Consumer), Collection, Field, Generation, node,

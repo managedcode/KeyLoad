@@ -1,6 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 using KeyLoad.UnitTests.Features.ClientApi;
 
@@ -23,13 +23,17 @@ internal static class DistributedSearchMcpDecodeAssertions
             = JsonValue.Create(McpCanonicalTestData.Principal);
         await DeniedAsync(descriptor, Arguments(JsonSerializer.SerializeToUtf8Bytes(nestedAuthority)), expected);
         var absentRequest = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
-        { [McpCanonicalTestData.RequestKey] = JsonSerializer.SerializeToElement<object?>(null) };
+        {
+            [McpCanonicalTestData.RequestKey] = JsonSerializer.SerializeToElement<object?>(null)
+        };
         await DeniedAsync(descriptor, absentRequest, expected);
         McpDecodedOperation decoded;
         using (var original = JsonDocument.Parse(JsonDefaults.Serialize(expected)))
         {
             decoded = descriptor.Decode(new Dictionary<string, JsonElement>(StringComparer.Ordinal)
-            { [McpCanonicalTestData.RequestKey] = original.RootElement });
+            {
+                [McpCanonicalTestData.RequestKey] = original.RootElement
+            });
         }
         await HealthyAsync(decoded, expected);
     }
@@ -57,6 +61,9 @@ internal static class DistributedSearchMcpDecodeAssertions
     private static Dictionary<string, JsonElement> Arguments(byte[] bytes)
     {
         using var body = JsonDocument.Parse(bytes);
-        return new(StringComparer.Ordinal) { [McpCanonicalTestData.RequestKey] = body.RootElement.Clone() };
+        return new(StringComparer.Ordinal)
+        {
+            [McpCanonicalTestData.RequestKey] = body.RootElement.Clone()
+        };
     }
 }

@@ -15,7 +15,10 @@ internal static class EventMessageSensitiveSafeR52Seed
             EventMessageSensitivePublicProtocol.Classification, EventMessageSensitivePublicProtocol.GrantBefore);
         var resource = new ResourceDefinition(EventMessageSensitiveSafeR52Protocol.Resource,
             subscription ? ResourceKind.Topic : ResourceKind.WorkQueue, partition.TransactionDomainId)
-        { FieldPolicies = header ? [] : [policy], HeaderPolicies = header ? [policy] : [] };
+        {
+            FieldPolicies = header ? [] : [policy],
+            HeaderPolicies = header ? [policy] : []
+        };
         resource = await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.ConfigureResourceAsync(Guid.NewGuid(),
             new(partition.TenantId, partition.DatabaseId, resource), token));
         var id = EventMessageSensitiveSafeR52Protocol.WorkerPrefix + suffix;

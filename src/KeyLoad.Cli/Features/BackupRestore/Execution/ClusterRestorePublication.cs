@@ -11,7 +11,9 @@ internal static class ClusterRestorePublication
         ClusterRestorePathValidation.Root(root);
         var empty = stage + EmptySuffix;
         if (Directory.Exists(empty) || File.Exists(empty) || Directory.Exists(root) != originallyEmpty)
-        { throw Errors.Fail(ErrorCode.Conflict, Changed); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, Changed);
+        }
         var ownsEmpty = false;
         var published = false;
         try
@@ -24,7 +26,9 @@ internal static class ClusterRestorePublication
             Directory.Move(stage, root);
             published = true;
             if (ownsEmpty)
-            { Directory.Delete(empty, recursive: false); }
+            {
+                Directory.Delete(empty, recursive: false);
+            }
         }
         catch (Exception primary)
         {
@@ -41,7 +45,9 @@ internal static class ClusterRestorePublication
         try
         {
             if (Directory.Exists(root) || File.Exists(root))
-            { throw Errors.Fail(ErrorCode.Conflict, Changed); }
+            {
+                throw Errors.Fail(ErrorCode.Conflict, Changed);
+            }
             Directory.Move(empty, root);
         }
         catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }

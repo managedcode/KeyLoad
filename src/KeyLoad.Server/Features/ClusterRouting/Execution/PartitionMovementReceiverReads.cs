@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
@@ -69,13 +69,17 @@ internal sealed class PartitionMovementReceiverReads(PartitionMovementReceiverCo
         var terminal = await context.ExecuteSignedAsync(principal, requestId, Guid.Empty, signed, command: false,
             cancellationToken).ConfigureAwait(false);
         if (terminal.Error is { } code)
-        { throw Errors.Fail(code, terminal.SafeDetail ?? PartitionMovementProtocol.Unavailable); }
+        {
+            throw Errors.Fail(code, terminal.SafeDetail ?? PartitionMovementProtocol.Unavailable);
+        }
         var actual = GrainNativePayload.Read<GrainValue>(terminal.Payload).Value as PartitionMovementParentStateResult
             ?? throw Errors.Fail(ErrorCode.Corruption, PartitionMovementProtocol.InvalidProof);
         var pending = actual.State.Pending;
         if (pending?.OriginalPhaseCommandId != phaseId || pending.OriginalResult is not null
             || actual.State.CurrentOperatorPrincipalId != principal.Id || actual.State.CurrentOperatorPolicyEpoch <= PartitionMovementProtocol.UnissuedPolicyEpoch)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMovementProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMovementProtocol.InvalidProof);
+        }
         work.ImportReadGrant(grant, actual.ReadBytes, actual.ExaminedRecords);
         work.CompleteReadGrant(grant);
         var nonce = Guid.NewGuid();
@@ -84,7 +88,9 @@ internal sealed class PartitionMovementReceiverReads(PartitionMovementReceiverCo
             actual.State.CurrentOperatorPolicyEpoch, terminal, context.Discovery());
         var encoded = NativeSerialization.Serialize(reply);
         if (encoded.Length > context.Partition.Database.Limits.MaxBatchBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMovementProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMovementProtocol.InvalidProof);
+        }
         var key = Convert.FromBase64String(context.Options.Value.PeerSecret);
         try
         {
@@ -113,13 +119,17 @@ internal sealed class PartitionMovementReceiverReads(PartitionMovementReceiverCo
             MaximumResultBytes = Math.Min(query.MaximumResultBytes, work.MaximumResultBytes)
         };
         if (bounded.MaximumReadBytes <= PartitionMovementProtocol.NoReadBytes || bounded.MaximumExaminedRecords <= PartitionMovementProtocol.NoExaminedRecords || bounded.MaximumResultBytes <= PartitionMovementProtocol.NoResultBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMovementProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMovementProtocol.Unavailable);
+        }
         var requestId = Guid.NewGuid();
         var signed = context.Node.CatalogRequestCodec().MovementTransfer.CreatePartitionMovementTransferAuthority(requestId, principal.Id, bounded, expiry);
         var terminal = await context.ExecuteSignedAsync(principal, requestId, Guid.Empty, signed, command: false,
             cancellationToken).ConfigureAwait(false);
         if (terminal.Error is { } code)
-        { throw Errors.Fail(code, terminal.SafeDetail ?? PartitionMovementProtocol.Unavailable); }
+        {
+            throw Errors.Fail(code, terminal.SafeDetail ?? PartitionMovementProtocol.Unavailable);
+        }
         var result = GrainNativePayload.Read<GrainValue>(terminal.Payload).Value as PartitionMovementTransferAuthorityResult
             ?? throw Errors.Fail(ErrorCode.Corruption, PartitionMovementProtocol.InvalidProof);
         work.ImportReadGrant(leaf, result.ReadBytes, result.ExaminedRecords);
@@ -131,7 +141,9 @@ internal sealed class PartitionMovementReceiverReads(PartitionMovementReceiverCo
             Guid.NewGuid(), expiry, context.LocalOwner(), original.Header.OriginalSourceOwner
                 ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMovementProtocol.InvalidProof), context.Discovery(), terminal);
         if (NativeSerialization.Measure(reply) > context.Partition.Database.Limits.MaxBatchBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMovementProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMovementProtocol.Unavailable);
+        }
         var encoded = NativeSerialization.Serialize(reply);
         var key = Convert.FromBase64String(context.Options.Value.PeerSecret);
         try

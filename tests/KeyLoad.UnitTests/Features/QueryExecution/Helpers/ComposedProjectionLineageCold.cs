@@ -20,7 +20,10 @@ internal static class ComposedProjectionLineageCold
             var failures = new List<Exception>();
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                using var reopened = ZoneTreeExistingStore.Open(new(database.Directory) { Incarnation = identity.Incarnation },
+                using var reopened = ZoneTreeExistingStore.Open(new(database.Directory)
+                {
+                    Incarnation = identity.Incarnation
+                },
                     identity.NodeId, database.StorageExecution);
                 await ServerFailureObserver.ObserveAsync(async () =>
                 {

@@ -14,7 +14,9 @@ internal static class PostgresPositiveExecuteWave
             await NativeAsync(fixture, state, root.Sdk, controls, deadline.Token);
             var image = await PostgresPortalOwnershipAssertions.ImageAsync(root.Sdk, state, deadline.Token);
             if (controls)
-            { await PostgresRf3Cancellation.RunAsync(fixture, selection, state, root.Sdk, deadline.Token); }
+            {
+                await PostgresRf3Cancellation.RunAsync(fixture, selection, state, root.Sdk, deadline.Token);
+            }
             await PostgresPortalOwnershipHealthy.RunAsync(fixture, state, deadline.Token);
             await global::TUnit.Assertions.Assert.That(await PostgresPortalOwnershipAssertions.ImageAsync(root.Sdk, state, deadline.Token)).IsEqualTo(image);
             return true;
@@ -34,7 +36,9 @@ internal static class PostgresPositiveExecuteWave
                 await PostgresPositiveExecuteTrial.RunAsync(wire.Stream, state, token);
                 await global::TUnit.Assertions.Assert.That(await PostgresPortalOwnershipAssertions.ImageAsync(root, state, token)).IsEqualTo(image);
                 if (controls)
-                { await PostgresPositiveExecutePolicy.RunAsync(fixture, state, root, wire.Stream, token); }
+                {
+                    await PostgresPositiveExecutePolicy.RunAsync(fixture, state, root, wire.Stream, token);
+                }
                 await PostgresRf3WireMessage.WriteAsync(wire.Stream, PostgresPortalOwnershipProtocol.Terminate, [], token);
                 await PostgresRf3TransportClosed.RequireAsync(wire.Stream, token);
             }, failures);

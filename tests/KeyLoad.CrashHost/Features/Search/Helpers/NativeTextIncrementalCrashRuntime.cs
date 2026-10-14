@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 using KeyLoad.Replication;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.Search;
@@ -20,9 +20,18 @@ internal sealed class NativeTextIncrementalCrashRuntime : IAsyncDisposable
     private Guid session = Guid.NewGuid();
     internal DatabaseEngine Database => Node.Database;
     internal ServerRuntimeOptions Options => services.GetRequiredService<ServerRuntimeOptions>();
-    internal string ProjectionRoot { get; }
-    internal string EvidenceRoot { get; }
-    internal ReplicaCrashNode Node { get; }
+    internal string ProjectionRoot
+    {
+        get;
+    }
+    internal string EvidenceRoot
+    {
+        get;
+    }
+    internal ReplicaCrashNode Node
+    {
+        get;
+    }
 
     internal NativeTextIncrementalCrashRuntime(string root, Guid incarnation,
         Action<NativeTextFaultStage>? observer = null)
@@ -48,11 +57,17 @@ internal sealed class NativeTextIncrementalCrashRuntime : IAsyncDisposable
         {
             var failures = new List<Exception> { primary };
             if (openedMaterializer is not null)
-            { ServerFailureObserver.Observe(() => openedMaterializer.DisposeAsync().AsTask().GetAwaiter().GetResult(), failures); }
+            {
+                ServerFailureObserver.Observe(() => openedMaterializer.DisposeAsync().AsTask().GetAwaiter().GetResult(), failures);
+            }
             if (openedServices is not null)
-            { ServerFailureObserver.Observe(openedServices.Dispose, failures); }
+            {
+                ServerFailureObserver.Observe(openedServices.Dispose, failures);
+            }
             try
-            { Node.Dispose(); }
+            {
+                Node.Dispose();
+            }
             catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is null) { failures.Add(error); }
             catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is not null) { failures.Add(error); }
             ServerFailureObserver.ThrowIfAny(failures);
@@ -74,21 +89,29 @@ internal sealed class NativeTextIncrementalCrashRuntime : IAsyncDisposable
             CrashFixtureValues.Principal, Database.EvaluationClock.GetUtcNow(),
             System.Text.Json.JsonSerializer.Serialize(payload, payload.GetType(), JsonDefaults.Options)));
         if (Node.Log.State.LastIndex > MaximumRetainedEntries)
-        { throw new InvalidOperationException(NativeTextIncrementalCrashProtocol.Invalid); }
+        {
+            throw new InvalidOperationException(NativeTextIncrementalCrashProtocol.Invalid);
+        }
         for (var retained = Increment; retained <= Node.Log.State.LastIndex; retained += Increment)
         {
             token.ThrowIfCancellationRequested();
             var original = Node.Log.ReadEntry(retained)
                 ?? throw new InvalidOperationException(NativeTextIncrementalCrashProtocol.Invalid);
             if (original.Operation?.Id != commandId)
-            { continue; }
+            {
+                continue;
+            }
             if (retained > Node.Log.State.CommittedIndex)
-            { materializer.Commit(retained); }
+            {
+                materializer.Commit(retained);
+            }
             await materializer.WaitForApplyAsync(retained, token).ConfigureAwait(false);
             return Database.ResolveOutcome(operation).Get<T>();
         }
         if (Node.Log.State.Term == InitialTerm)
-        { Node.Log.SaveTermAndVote(NativeTextIncrementalCrashProtocol.FirstTerm, Node.Configuration.LocalId); }
+        {
+            Node.Log.SaveTermAndVote(NativeTextIncrementalCrashProtocol.FirstTerm, Node.Configuration.LocalId);
+        }
         var index = checked(Node.Log.State.LastIndex + Increment);
         Node.Log.Append([new ReplicaEntry(index, Node.Log.State.Term, operation)]);
         materializer.Commit(index);
@@ -99,10 +122,14 @@ internal sealed class NativeTextIncrementalCrashRuntime : IAsyncDisposable
     internal async Task<OperationResult> CommitIssuedAsync(ReplicatedOperation operation, CancellationToken token)
     {
         if (operation.Kind != OperationKind.OnlineTextPublicationPhase || operation.Id == Guid.Empty)
-        { throw new InvalidOperationException(NativeTextIncrementalCrashProtocol.Invalid); }
+        {
+            throw new InvalidOperationException(NativeTextIncrementalCrashProtocol.Invalid);
+        }
         var index = checked(Node.Log.State.LastIndex + ReplicaLogIndexStep);
         if (index > MaximumRetainedEntries)
-        { throw new InvalidOperationException(NativeTextIncrementalCrashProtocol.Invalid); }
+        {
+            throw new InvalidOperationException(NativeTextIncrementalCrashProtocol.Invalid);
+        }
         Node.Log.Append([new ReplicaEntry(index, Node.Log.State.Term, operation)]);
         materializer.Commit(index);
         await materializer.WaitForApplyAsync(index, token).ConfigureAwait(false);
@@ -129,19 +156,27 @@ internal sealed class NativeTextIncrementalCrashRuntime : IAsyncDisposable
     {
         var failures = new List<Exception>();
         try
-        { await owner.DisposeAsync().ConfigureAwait(false); }
+        {
+            await owner.DisposeAsync().ConfigureAwait(false);
+        }
         catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is null) { failures.Add(error); }
         catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is not null) { failures.Add(error); }
         try
-        { await materializer.DisposeAsync().ConfigureAwait(false); }
+        {
+            await materializer.DisposeAsync().ConfigureAwait(false);
+        }
         catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is null) { failures.Add(error); }
         catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is not null) { failures.Add(error); }
         try
-        { await services.DisposeAsync().ConfigureAwait(false); }
+        {
+            await services.DisposeAsync().ConfigureAwait(false);
+        }
         catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is null) { failures.Add(error); }
         catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is not null) { failures.Add(error); }
         try
-        { Node.Dispose(); }
+        {
+            Node.Dispose();
+        }
         catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is null) { failures.Add(error); }
         catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is not null) { failures.Add(error); }
         ServerFailureObserver.ThrowIfAny(failures);

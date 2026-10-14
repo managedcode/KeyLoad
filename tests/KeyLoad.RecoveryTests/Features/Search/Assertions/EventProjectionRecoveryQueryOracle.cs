@@ -38,8 +38,17 @@ internal static class EventProjectionRecoveryQueryOracle
     {
         var command = JsonDefaults.Deserialize<CommandRequest>(Encoding.UTF8.GetBytes(operation.PayloadJson));
         var projection = (ApplyVectorProjection)command.Mutations.Single();
-        var changed = projection with { Target = projection.Target with { Values = [0, 1] } };
-        var changedCommand = command with { Mutations = [changed] };
+        var changed = projection with
+        {
+            Target = projection.Target with
+            {
+                Values = [0, 1]
+            }
+        };
+        var changedCommand = command with
+        {
+            Mutations = [changed]
+        };
         var conflict = database.Apply(operation with
         {
             PayloadJson = JsonSerializer.Serialize(changedCommand, JsonDefaults.Options)

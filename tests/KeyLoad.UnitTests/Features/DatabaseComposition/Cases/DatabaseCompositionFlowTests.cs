@@ -141,7 +141,10 @@ internal sealed class DatabaseCompositionFlowTests
     [Test]
     public async Task AcComp006ExactExpandedEffectCapSucceedsAndCumulativeOverflowRollsBack()
     {
-        using var db = NewDatabase(limits: new() { MaxBatchMutations = ThreeEffects });
+        using var db = NewDatabase(limits: new()
+        {
+            MaxBatchMutations = ThreeEffects
+        });
         var payload = JsonSerializer.Serialize(new QueueGraphLink(Vertex(db, First), Vertex(db, Second), Label), JsonDefaults.Options);
         db.Commit(new EnqueueMessage(Queue, "a", payload), new EnqueueMessage(Queue, "b", payload),
             new EnqueueMessage(Queue, "c", payload));

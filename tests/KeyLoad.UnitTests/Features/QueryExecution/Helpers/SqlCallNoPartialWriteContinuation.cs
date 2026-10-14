@@ -36,8 +36,14 @@ internal static class SqlCallNoPartialWriteContinuation
                     new PutDocument(SqlBetweenTestData.Collection, FirstId, FirstBody, AbsentRevision),
                     new PutDocument(SqlBetweenTestData.Collection, SecondId, SecondBody, AbsentRevision)]);
                 var request = Request(original);
-                await RefusedAsync(db, request with { Sql = MultipleCall }, ErrorCode.UnsupportedCapability);
-                await RefusedAsync(db, request with { Sql = UnsupportedCall }, ErrorCode.UnsupportedCapability);
+                await RefusedAsync(db, request with
+                {
+                    Sql = MultipleCall
+                }, ErrorCode.UnsupportedCapability);
+                await RefusedAsync(db, request with
+                {
+                    Sql = UnsupportedCall
+                }, ErrorCode.UnsupportedCapability);
                 var extra = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
                 {
                     [RequestKey] = JsonSerializer.SerializeToElement(original, JsonDefaults.Options),
@@ -62,8 +68,12 @@ internal static class SqlCallNoPartialWriteContinuation
 
     private static SqlOperationRequest Request(CommandRequest command)
         => SqlOperationTestData.Call(McpToolNames.DocumentsCommit, new Dictionary<string, JsonElement>(StringComparer.Ordinal)
-        { [RequestKey] = JsonSerializer.SerializeToElement(command, JsonDefaults.Options) }) with
-        { Sql = CommentedCall };
+        {
+            [RequestKey] = JsonSerializer.SerializeToElement(command, JsonDefaults.Options)
+        }) with
+        {
+            Sql = CommentedCall
+        };
 
     private static CommandRequest Decode(McpDecodedOperation operation)
         => NativeSerialization.Deserialize<CommandRequest>(operation.Payload.Span,
@@ -93,7 +103,10 @@ internal static class SqlCallNoPartialWriteContinuation
         await SqlCallNoPartialWriteAssertions.ReceiptAsync(receipt, QueueWholeFlowStorage.Apply(database,
             OperationKind.Batch, original, original.CommandId, issued).Get<CommitReceipt>());
         await SqlCallNoPartialWriteAssertions.UnchangedAsync(store, image, cut);
-        var changed = original with { Mutations = [new PutDocument(SqlBetweenTestData.Collection, FirstId, HealthyBody)] };
+        var changed = original with
+        {
+            Mutations = [new PutDocument(SqlBetweenTestData.Collection, FirstId, HealthyBody)]
+        };
         var conflict = QueueWholeFlowStorage.Apply(database, OperationKind.Batch,
             Decode(SqlOperationTestData.Compile(Request(changed))), original.CommandId, issued);
         await Assert.That(conflict.Error).IsEqualTo(ErrorCode.Conflict);

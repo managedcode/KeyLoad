@@ -41,7 +41,9 @@ internal static class SqlInnerJoinPrimaryIdentityFixture
         database.Submit(global::KeyLoad.OperationKind.ConfigureResource, new global::KeyLoad.ConfigureResourceRequest(
             database.Partition.TenantId, database.Partition.DatabaseId,
             new global::KeyLoad.ResourceDefinition(Right, global::KeyLoad.ResourceKind.Collection, database.Partition.TransactionDomainId)
-            { RelationalSchema = new(Id, [new(Id, global::KeyLoad.RelationalColumnType.Text), new(Name, global::KeyLoad.RelationalColumnType.Text)]) }));
+            {
+                RelationalSchema = new(Id, [new(Id, global::KeyLoad.RelationalColumnType.Text), new(Name, global::KeyLoad.RelationalColumnType.Text)])
+            }));
         var id = Guid.NewGuid();
         var command = new global::KeyLoad.CommandRequest(id, database.Partition,
             [new global::KeyLoad.PutDocument(Left, FirstLeft, FirstOrder), new global::KeyLoad.PutDocument(Left, LastLeft, LastOrder),
@@ -60,7 +62,12 @@ internal static class SqlInnerJoinPrimaryIdentityFixture
             var row = global::KeyLoad.NativeSerialization.Deserialize<global::KeyLoad.DocumentRecord>(bytes);
             foreach (var json in left ? new[] { ForeignOrder, MissingOrder, NonTextOrder, MalformedRow, NonObjectRow, DuplicateOrder }
                 : new[] { ForeignCustomer, MissingCustomer, NonTextCustomer, MalformedRow, NonObjectRow, DuplicateCustomer })
-            { faults.Add(new(key, bytes, global::KeyLoad.NativeSerialization.Serialize(row with { Json = json }), left)); }
+            {
+                faults.Add(new(key, bytes, global::KeyLoad.NativeSerialization.Serialize(row with
+                {
+                    Json = json
+                }), left));
+            }
         }
         return [.. faults];
     }

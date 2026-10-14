@@ -25,12 +25,16 @@ internal static class DistributedSearchValidation
         if (request.Version != VersionOne || request.Search is null || request.Partitions.IsDefaultOrEmpty
             || request.Partitions.Length > execution.MaximumPartitions
             || request.Search.Partition != request.Partitions[FirstPartition])
-        { throw Errors.Fail(ErrorCode.Validation, InvalidShape); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, InvalidShape);
+        }
         FilteredSearchRequestSizer.EnsureBounded(request, limits.MaxQueryBytes, budget);
         SearchRequestValidation.Validate(request.Search, limits, false, execution);
         FilteredSearchEligibility.ValidateRequest(request.Search.AllowedIds, limits, budget);
         if (request.Search.TextIndex is not null)
-        { throw Errors.Fail(ErrorCode.UnsupportedCapability, SelectedGenerationUnsupported); }
+        {
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, SelectedGenerationUnsupported);
+        }
         var retention = new GlobalBranchByteAdmission(budget.MaximumResultBytes, budget);
         retention.Accept(checked(PartitionQueryRetention.RootDescriptorBytes
             + (long)request.Partitions.Length * PartitionQueryRetention.LeafDescriptorBytes));
@@ -39,10 +43,14 @@ internal static class DistributedSearchValidation
         {
             budget.Check();
             if (partition is null)
-            { throw Errors.Fail(ErrorCode.Validation, InvalidShape); }
+            {
+                throw Errors.Fail(ErrorCode.Validation, InvalidShape);
+            }
             DatabaseEngine.ValidatePartition(partition);
             if (!unique.Add(partition))
-            { throw Errors.Fail(ErrorCode.Validation, InvalidShape); }
+            {
+                throw Errors.Fail(ErrorCode.Validation, InvalidShape);
+            }
         }
         var ordered = request.Partitions.ToArray();
         Array.Sort(ordered, Comparer<PartitionRef>.Create(PartitionQueryOrder.ComparePartition));

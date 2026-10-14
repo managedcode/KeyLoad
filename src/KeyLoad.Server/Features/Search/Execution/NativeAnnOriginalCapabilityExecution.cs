@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.Server.Features.Search;
 
@@ -12,7 +12,9 @@ internal static class NativeAnnOriginalCapabilityExecution
         if (request.Kind is not (AnnMaintenanceCapabilityKind.AdmitOriginal or AnnMaintenanceCapabilityKind.SettleOriginalResult))
         {
             if (request.OriginalConfigure is not null || request.FullOriginalResult is not null)
-            { throw Errors.Fail(ErrorCode.Validation, NativeAnnProtocol.InvalidSource); }
+            {
+                throw Errors.Fail(ErrorCode.Validation, NativeAnnProtocol.InvalidSource);
+            }
             return;
         }
         if (request.SessionId == Guid.Empty || request.Maintenance.Mode == AnnMaintenanceMode.Release
@@ -21,19 +23,25 @@ internal static class NativeAnnOriginalCapabilityExecution
                 && (request.OriginalConfigure is null || request.FullOriginalResult is not null)
             || request.Kind == AnnMaintenanceCapabilityKind.SettleOriginalResult
                 && (request.FullOriginalResult is null || request.OriginalConfigure is not null))
-        { throw Errors.Fail(ErrorCode.Validation, NativeAnnProtocol.InvalidSource); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, NativeAnnProtocol.InvalidSource);
+        }
     }
 
     internal static async Task<AnnMaintenanceCapabilityResult> ExecuteAsync(NativeAnnMaintenanceService native,
         PrincipalRecord principal, AnnMaintenanceCapabilityRequest request, CancellationToken token)
     {
         if (request.Kind == AnnMaintenanceCapabilityKind.SettleOriginalResult)
-        { native.RequireOriginalCapabilitySession(principal, request); }
+        {
+            native.RequireOriginalCapabilitySession(principal, request);
+        }
         var original = await native.ExecuteOriginalCapabilityAsync(principal, request, token).ConfigureAwait(false);
         var result = original.Result;
         return new(request.SessionId, result?.Source, result?.Source?.ThroughSequence ?? EmptySequence,
             result?.Count ?? EmptyCount, null, result?.IndexSha256,
             result?.Checkpoint?.Checkpoint ?? EmptySequence, false, result)
-        { EnrollmentSettlementIntent = original.Intent };
+        {
+            EnrollmentSettlementIntent = original.Intent
+        };
     }
 }

@@ -22,7 +22,12 @@ internal static class BlobScopedBytesR42Publication
             state.Parts[ordinal] = new(Guid.NewGuid(), state.Blob, state.Begin.UploadId, ordinal, bytes, sha);
             state.Written[ordinal] = (await McpCallerAssertions.SuccessAsync<BlobCommitResult<BlobUploadInfo>>(await callers.Mcp.CallAsync("keyload_blobs_write_part", state.Parts[ordinal], token))).Value;
             hash = BlobScopedBytesR42Corpus.Next(hash, ordinal, bytes.Length, sha);
-            state.Current = state.Begun.Value with { NextOrdinal = ordinal + 1, StoredBytes = ordinal == 0 ? 65536L : 65553L, IntegrityHash = hash };
+            state.Current = state.Begun.Value with
+            {
+                NextOrdinal = ordinal + 1,
+                StoredBytes = ordinal == 0 ? 65536L : 65553L,
+                IntegrityHash = hash
+            };
             await SqlRf3Protocol.EqualAsync(state.Current, state.Written[ordinal].Value);
             await BlobScopedBytesR42Assertions.ReceiptAsync(state.Written[ordinal].Receipt, state.Parts[ordinal].CommandId, state);
             await BlobScopedBytesR42Assertions.CurrentAsync(callers, states, token);
@@ -34,7 +39,10 @@ internal static class BlobScopedBytesR42Publication
         state.Published = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.CompleteBlobUploadAsync(state.Complete, token));
         var expected = new BlobMetadata(state.Blob, 1L, state.Begin.UploadId, 65553L, 2, state.Written[1].Value.IntegrityHash, new RowAccess(), state.Published.Value.UpdatedAt);
         await SqlRf3Protocol.EqualAsync(expected, state.Published.Value);
-        state.Current = state.Written[1].Value with { Status = BlobUploadStatus.Complete };
+        state.Current = state.Written[1].Value with
+        {
+            Status = BlobUploadStatus.Complete
+        };
         await BlobScopedBytesR42Assertions.ReceiptAsync(state.Published.Receipt, state.Complete.CommandId, state);
         await BlobScopedBytesR42Assertions.CurrentAsync(callers, states, token);
     }

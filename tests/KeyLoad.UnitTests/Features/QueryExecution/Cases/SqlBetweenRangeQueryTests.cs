@@ -24,7 +24,10 @@ internal sealed class SqlBetweenRangeQueryTests
         var expected = new AstQueryRequest(database.Partition,
             new(SqlBetweenTestData.Collection, null, [new("*", "*")], Range(new FieldOperand(SqlBetweenTestData.NumberPath),
                 ValueOperand.Create(1m), ValueOperand.Create(9m)), [new(SqlBetweenTestData.IdPath, false)], 100));
-        var astPage = engine.ExecuteAst(SqlBetweenTestData.Root, expected with { AllowFullScan = true });
+        var astPage = engine.ExecuteAst(SqlBetweenTestData.Root, expected with
+        {
+            AllowFullScan = true
+        });
 
         await Assert.That(SqlBetweenTestData.Ids(sqlPage)).IsEqualTo("high,low,middle");
         await SqlBetweenTestData.SameRows(astPage, sqlPage);
@@ -72,7 +75,10 @@ internal sealed class SqlBetweenRangeQueryTests
         var stringPage = engine.Execute(SqlBetweenTestData.Root, SqlBetweenTestData.Request(database, StringSql));
         var booleanPage = engine.Execute(SqlBetweenTestData.Root, SqlBetweenTestData.Request(database, BooleanSql,
             new Dictionary<string, global::System.Text.Json.JsonElement>(StringComparer.Ordinal)
-            { [LowerFlagParameter] = global::System.Text.Json.JsonSerializer.SerializeToElement(false), [UpperFlagParameter] = global::System.Text.Json.JsonSerializer.SerializeToElement(true) }));
+            {
+                [LowerFlagParameter] = global::System.Text.Json.JsonSerializer.SerializeToElement(false),
+                [UpperFlagParameter] = global::System.Text.Json.JsonSerializer.SerializeToElement(true)
+            }));
 
         await Assert.That(SqlBetweenTestData.Ids(parameterPage)).IsEqualTo("high,low,middle");
         await SqlBetweenTestData.SameRows(astPage, parameterPage);
@@ -124,15 +130,22 @@ internal sealed class SqlBetweenRangeQueryTests
             SqlBetweenTestData.Request(database, "SELECT TOP (2) * FROM orders WHERE number BETWEEN 1 AND 9 ORDER BY id"));
         var sqlNext = engine.Execute(SqlBetweenTestData.Root, SqlBetweenTestData.Request(database,
             "SELECT TOP (2) * FROM orders WHERE number BETWEEN 1 AND 9 ORDER BY id") with
-        { Cursor = sql.Cursor });
+        {
+            Cursor = sql.Cursor
+        });
         var astRequest = new AstQueryRequest(database.Partition,
             new(SqlBetweenTestData.Collection, null, [new("*", "*")], Range(new FieldOperand(SqlBetweenTestData.NumberPath),
                 ValueOperand.Create(1m), ValueOperand.Create(9m)), [new(SqlBetweenTestData.IdPath, false)], 2), AllowFullScan: true);
         var ast = engine.ExecuteAst(SqlBetweenTestData.Root, astRequest);
-        var sqlCursorInAst = engine.ExecuteAst(SqlBetweenTestData.Root, astRequest with { Cursor = sql.Cursor });
+        var sqlCursorInAst = engine.ExecuteAst(SqlBetweenTestData.Root, astRequest with
+        {
+            Cursor = sql.Cursor
+        });
         var astCursorInSql = engine.Execute(SqlBetweenTestData.Root, SqlBetweenTestData.Request(database,
             "SELECT TOP (2) * FROM orders WHERE number BETWEEN 1 AND 9 ORDER BY id") with
-        { Cursor = ast.Cursor });
+        {
+            Cursor = ast.Cursor
+        });
 
         await SqlBetweenTestData.SameRows(ast, sql);
         await SqlBetweenTestData.SameRows(sqlCursorInAst, sqlNext);
@@ -145,7 +158,9 @@ internal sealed class SqlBetweenRangeQueryTests
         var sqlExplain = engine.ExecuteAst(SqlBetweenTestData.Root, new AstQueryRequest(database.Partition,
             new SqlParser("SELECT TOP (2) * FROM orders WHERE number BETWEEN 1 AND 9 ORDER BY id",
                 UnitExecutionOptions.DatabaseLimits(database.Database.Limits), UnitExecutionOptions.QueryExecution()).Parse() with
-            { Explain = true }, AllowFullScan: true));
+            {
+                Explain = true
+            }, AllowFullScan: true));
         var astExplain = engine.ExecuteAst(SqlBetweenTestData.Root, new AstQueryRequest(database.Partition,
             new(SqlBetweenTestData.Collection, null, [new("*", "*")], Range(new FieldOperand(SqlBetweenTestData.NumberPath),
                 ValueOperand.Create(1m), ValueOperand.Create(9m)), [new(SqlBetweenTestData.IdPath, false)], 2, Explain: true),

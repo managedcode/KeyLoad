@@ -85,7 +85,10 @@ internal static class PartitionMovementParentPreparedWinnerTrial
         var applied = source.Database.LastApplied;
         var body = new PartitionMoveCheckpointBody(PartitionMoveProtocol.Version,
             PartitionMoveCheckpointAction.CancelUnprepared, PhysicalShardCatalogFixture.RootPrincipalId,
-            request with { Mode = PartitionMoveMode.Abort }, pending.Header!.Generation, phaseId,
+            request with
+            {
+                Mode = PartitionMoveMode.Abort
+            }, pending.Header!.Generation, phaseId,
             prepare, null, null, null, null, OriginalExpiresAt: expiry);
         var denied = await Assert.ThrowsAsync<KeyLoadException>(() => fixture.CheckpointAsync(pending, body, prepare));
         await Assert.That(denied!.Code).IsEqualTo(ErrorCode.Conflict);

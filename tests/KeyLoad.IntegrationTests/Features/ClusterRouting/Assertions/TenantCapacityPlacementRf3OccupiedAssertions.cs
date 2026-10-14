@@ -18,7 +18,10 @@ internal static class TenantCapacityPlacementRf3OccupiedAssertions
         await TenantCapacityPlacementRf3Assertions.RefusalAsync(sdk, ErrorCode.ResourceExhausted);
         await SqlRf3Protocol.EqualAsync(Errors.Problem(ErrorCode.ResourceExhausted,
             TenantPlacementPolicyProtocol.ScopeMismatch), sdk.Problem!);
-        var mcp = await seed.Official.CallAsync(TenantPlacementPublicProtocol.PlanTool, new { request }, token);
+        var mcp = await seed.Official.CallAsync(TenantPlacementPublicProtocol.PlanTool, new
+        {
+            request
+        }, token);
         await McpCallerAssertions.ErrorAsync(mcp, ErrorCode.ResourceExhausted, dispatched: true);
         await Assert.That(mcp.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
             .GetProperty(McpCallerProtocol.ProblemDetail).GetString()).IsEqualTo(McpUnavailableDetail);

@@ -30,11 +30,15 @@ internal static class RequestCqrsRf3McpGuardEvidenceCallAssertions
         {
             var count = await stream.ReadAsync(buffer.AsMemory(total), cancellationToken).ConfigureAwait(false);
             if (count == 0)
-            { break; }
+            {
+                break;
+            }
             total += count;
         }
         if (total > McpCallerProtocol.ErrorByteLimit)
-        { throw new InvalidDataException(OversizedProblemMessage); }
+        {
+            throw new InvalidDataException(OversizedProblemMessage);
+        }
         lifecycle.SetStage(RequestCqrsLifecycleStage.GuardBodyReaderDispose);
         return buffer[..total];
     }

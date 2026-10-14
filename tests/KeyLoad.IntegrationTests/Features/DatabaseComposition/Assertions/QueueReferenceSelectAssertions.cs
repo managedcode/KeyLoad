@@ -25,7 +25,9 @@ internal static class QueueReferenceSelectAssertions
         await Assert.That(direct.CutPosition).IsGreaterThanOrEqualTo(state.Receipt.Token.Position);
         var expected = new List<(string Message, string Target, string Name)> { ("a", "c1", "Ada") };
         if (state.Repair is not null)
-        { expected.Add(("b", "m", "Max")); }
+        {
+            expected.Add(("b", "m", "Max"));
+        }
         await Assert.That(direct.Rows.Length).IsEqualTo(expected.Count);
         for (var index = 0; index < expected.Count; index++)
         {

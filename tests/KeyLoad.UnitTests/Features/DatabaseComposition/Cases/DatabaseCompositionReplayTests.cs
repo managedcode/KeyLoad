@@ -156,7 +156,11 @@ internal sealed class DatabaseCompositionReplayTests
             new ScopeGrant(db.Partition.DatabaseId, Queue, Capability.QueuePublish)
         };
         var principal = new PrincipalRecord(Principal, db.Partition.TenantId, [.. grants], [])
-        { RestrictRows = true, OwnerId = Principal, PolicyEpoch = 1 };
+        {
+            RestrictRows = true,
+            OwnerId = Principal,
+            PolicyEpoch = 1
+        };
         db.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(principal)).Get<PrincipalRecord>();
         var id = Guid.NewGuid();
         var request = new CommandRequest(id, db.Partition,
@@ -307,7 +311,11 @@ internal static class CompositionReplayFixture
         var previous = db.Store.Read(view => view.GetRecord<PrincipalRecord>(KeySpace.Principal(Principal)));
         var active = revoked is null ? grants : grants.Where(grant => grant.Capabilities != revoked).ToArray();
         var record = new PrincipalRecord(Principal, db.Partition.TenantId, [.. active], [])
-        { RestrictRows = true, OwnerId = Principal, PolicyEpoch = (previous?.PolicyEpoch ?? 0) + 1 };
+        {
+            RestrictRows = true,
+            OwnerId = Principal,
+            PolicyEpoch = (previous?.PolicyEpoch ?? 0) + 1
+        };
         db.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(record)).Get<PrincipalRecord>();
     }
 }

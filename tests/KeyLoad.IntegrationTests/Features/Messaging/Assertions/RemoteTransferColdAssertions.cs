@@ -16,7 +16,9 @@ internal static class RemoteTransferColdAssertions
         await Assert.That(actual.TransferId).IsEqualTo(seed.TransferId);
         await Assert.That(string.IsNullOrEmpty(actual.IntentToken)).IsFalse();
         if (expected is not null)
-        { await SqlRf3Protocol.EqualAsync(expected, actual); }
+        {
+            await SqlRf3Protocol.EqualAsync(expected, actual);
+        }
         await SqlRf3Protocol.EqualAsync(actual, (await PublicReadAssertions.TransferAsync(
             await mcp.CallAsync(RemoteTransferColdProtocol.InspectSource, seed.SourceRequest, token))).Value);
         var sql = SqlRf3Protocol.Call(seed.Scenario.SourcePartition, RemoteTransferColdProtocol.InspectSource, seed.SourceRequest);

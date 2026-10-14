@@ -38,7 +38,10 @@ internal static class NativeTextNestedWildcardPublicTrial
                                 NativeTextNestedWildcardPublicScenario.ArrayRead]
                         }, token);
                         await NativeTextNestedWildcardPublicAssertions.DeniedAsync(reader, administrator, state, token);
-                        await PersistAsync(administrator, readable with { PolicyEpoch = 5L }, token);
+                        await PersistAsync(administrator, readable with
+                        {
+                            PolicyEpoch = 5L
+                        }, token);
                         await NativeTextNestedWildcardPublicAssertions.PhaseAsync(reader, administrator, state, 2, token);
                         return true;
                     }, token);

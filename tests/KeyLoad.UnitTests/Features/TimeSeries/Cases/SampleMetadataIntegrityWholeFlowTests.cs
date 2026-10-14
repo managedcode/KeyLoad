@@ -31,7 +31,10 @@ internal sealed class SampleMetadataIntegrityWholeFlowTests
         await SampleMetadataIntegrityAssertions.Unchanged(fixture, corrupt);
         await SampleMetadataIntegrityAssertions.Refuse(fixture, fault, refresh, expiry);
         SampleMetadataIntegrityScenario.Put(fixture, fault, original);
-        await SampleMetadataIntegrityAssertions.Unchanged(fixture, originalCut with { Position = originalCut.Position + 2 });
+        await SampleMetadataIntegrityAssertions.Unchanged(fixture, originalCut with
+        {
+            Position = originalCut.Position + 2
+        });
         var repaired = fixture.Apply(refresh);
         await SampleMetadataIntegrityAssertions.Healthy(fixture, 2, appended: false);
         await SampleMetadataIntegrityAssertions.Replay(fixture, refresh, repaired);

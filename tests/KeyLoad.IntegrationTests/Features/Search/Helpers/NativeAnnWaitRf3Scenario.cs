@@ -31,10 +31,14 @@ internal static class NativeAnnWaitRf3Scenario
                 }, failures);
             }
         }
-        catch (Exception error) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
-        catch (Exception error) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
+        catch (Exception error) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
+        catch (Exception error) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
     }
 
     private static async Task RunObservedAsync(ClusterFixture fixture, NativeTextRf3Scenario scenario,
@@ -45,7 +49,11 @@ internal static class NativeAnnWaitRf3Scenario
         {
             var pin = (await new NativeAnnMaintenanceRf3Scenario(scenario.Partition)
                 .RequestAsync(administrator.Sdk, administrator.Mcp, token)) with
-            { Collection = NativeTextRf3Scenario.Collection, Field = NativeTextRf3Scenario.VectorField, Space = NativeTextRf3Scenario.SpaceFor() };
+            {
+                Collection = NativeTextRf3Scenario.Collection,
+                Field = NativeTextRf3Scenario.VectorField,
+                Space = NativeTextRf3Scenario.SpaceFor()
+            };
             var built = await NativeAnnWaitRf3Build.ExecuteAsync(administrator.Sdk, pin, observation, token);
             await using var denied = await RequestCqrsRf3Callers.ConnectAsync(fixture.App, Node, deniedSecret, token);
             await ServerFailureObserver.ObserveAsync(async () =>
@@ -63,12 +71,22 @@ internal static class NativeAnnWaitRf3Scenario
                             NativeTextRf3Scenario.VectorField, [2, 0], NativeTextRf3Scenario.SpaceFor(), Revision),
                          new DeleteDocument(NativeTextRf3Scenario.Collection, NativeTextRf3Scenario.ThirdId, Revision)]);
                     var receipt = await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.CommitAsync(command, token));
-                    var changed = request with { MinimumToken = receipt.Token };
+                    var changed = request with
+                    {
+                        MinimumToken = receipt.Token
+                    };
                     await NativeAnnWaitRf3Assertions.RejectedAsync(administrator.Sdk, reader, changed, ErrorCode.HistoryUnavailable, token);
                     var restored = await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.MaintainAnnIndexAsync(
-                        pin with { CommandId = Guid.NewGuid(), Mode = AnnMaintenanceMode.Restore }, token));
+                        pin with
+                        {
+                            CommandId = Guid.NewGuid(),
+                            Mode = AnnMaintenanceMode.Restore
+                        }, token));
                     await NativeAnnWaitRf3Assertions.AllPathsAsync(reader, changed, restored.Source!.AppliedPosition, token);
-                    var indexedBeforeStop = changed.MinimumToken with { Position = restored.Source.AppliedPosition };
+                    var indexedBeforeStop = changed.MinimumToken with
+                    {
+                        Position = restored.Source.AppliedPosition
+                    };
                     await NativeAnnWaitRf3Assertions.LiteralAsync(reader, scenario, pin, true, token);
                     var beforeStop = await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.StatusAsync(token));
                     await NativeAnnWaitRf3Cold.RunAsync(fixture, readerSecret, scenario, pin, changed, command, receipt, indexedBeforeStop, beforeStop, token);

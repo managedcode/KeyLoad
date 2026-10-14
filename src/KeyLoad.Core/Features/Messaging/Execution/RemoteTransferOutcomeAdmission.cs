@@ -11,7 +11,9 @@ public sealed partial class DatabaseEngine
     {
         var proof = ReadRemoteTransferNativeProof(operation);
         if (proof is null)
-        { return null; }
+        {
+            return null;
+        }
         RequireRemoteTransferPeerAtView(view, principal, proof);
         return RemoteTransferAuthorityFromProof(proof);
     }
@@ -28,14 +30,18 @@ public sealed partial class DatabaseEngine
         if (proof is null)
         {
             if (outcome.RemoteTransferAuthority is not null)
-            { throw Errors.Fail(ErrorCode.Corruption, RemoteTransferPeerProtocol.Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, RemoteTransferPeerProtocol.Invalid);
+            }
             return false;
         }
         RequireRemoteTransferPeerAtView(view, principal, proof);
         if (outcome.Result.Error is not null)
         {
             if (outcome.RemoteTransferAuthority is not null)
-            { throw Errors.Fail(ErrorCode.Corruption, RemoteTransferPeerProtocol.Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, RemoteTransferPeerProtocol.Invalid);
+            }
             return true;
         }
         RequireRemoteTransferObservedStamp(outcome, proof.Call, principal);

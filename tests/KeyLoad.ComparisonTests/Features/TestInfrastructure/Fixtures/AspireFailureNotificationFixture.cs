@@ -29,10 +29,14 @@ internal sealed class AspireFailureNotificationFixture : IAsyncDisposable
         if (includeDependencies)
         {
             Runner.Annotations.Add(new WaitAnnotation(Server, WaitType.WaitUntilHealthy)
-            { WaitBehavior = WaitBehavior.StopOnResourceUnavailable });
+            {
+                WaitBehavior = WaitBehavior.StopOnResourceUnavailable
+            });
             Runner.Annotations.Add(new WaitAnnotation(Bootstrap, WaitType.WaitForCompletion, bootstrapExit));
             Server.Annotations.Add(new WaitAnnotation(Leaf, WaitType.WaitUntilStarted)
-            { WaitBehavior = WaitBehavior.StopOnResourceUnavailable });
+            {
+                WaitBehavior = WaitBehavior.StopOnResourceUnavailable
+            });
         }
         if (beforeStart is not null)
         {
@@ -41,16 +45,38 @@ internal sealed class AspireFailureNotificationFixture : IAsyncDisposable
         Application = builder.Build();
     }
 
-    internal DistributedApplication Application { get; }
-    internal ContainerResource Runner { get; }
-    internal ContainerResource Server { get; }
-    internal ContainerResource Leaf { get; }
-    internal ContainerResource Bootstrap { get; }
-    internal AspireFailureConfigurationResource Configuration { get; }
+    internal DistributedApplication Application
+    {
+        get;
+    }
+    internal ContainerResource Runner
+    {
+        get;
+    }
+    internal ContainerResource Server
+    {
+        get;
+    }
+    internal ContainerResource Leaf
+    {
+        get;
+    }
+    internal ContainerResource Bootstrap
+    {
+        get;
+    }
+    internal AspireFailureConfigurationResource Configuration
+    {
+        get;
+    }
     internal ResourceNotificationService Notifications => Application.ResourceNotifications;
 
     internal Task PublishAsync(IResource resource, string state, int? exit = null, HealthStatus? health = null)
-        => Notifications.PublishUpdateAsync(resource, snapshot => (snapshot with { State = state, ExitCode = exit })
+        => Notifications.PublishUpdateAsync(resource, snapshot => (snapshot with
+        {
+            State = state,
+            ExitCode = exit
+        })
             .WithHealthReports(health is { } status ? [new("native-health", status, null, null)] : []));
 
     internal void StopHost() => Application.Services.GetRequiredService<IHostApplicationLifetime>().StopApplication();

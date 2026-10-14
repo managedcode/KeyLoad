@@ -20,16 +20,24 @@ internal static class ZoneTreeRestoreSlotAdmissionOwner
         stage = Path.TrimEndingDirectorySeparator(Path.GetFullPath(stage));
         if (requireExisting && (!Directory.Exists(stage) || !File.Exists(Path.Combine(stage, AdmissionFile))
             || !File.Exists(Path.Combine(stage, OwnerFile))))
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         ZoneTreeStoreFiles.CreatePrivateDirectory(stage);
         var ownerPath = Path.Combine(stage, OwnerFile);
         if (File.Exists(ownerPath))
-        { RequireRegular(ownerPath); }
+        {
+            RequireRegular(ownerPath);
+        }
         FileStream owner;
         try
-        { owner = new(ownerPath, requireExisting ? FileMode.Open : FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, policy.StreamBufferBytes); }
+        {
+            owner = new(ownerPath, requireExisting ? FileMode.Open : FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, policy.StreamBufferBytes);
+        }
         catch (IOException failure) when ((failure.HResult & NativeErrorCodeMask) == SharingViolation)
-        { throw Errors.Fail(ErrorCode.Conflict, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, Invalid);
+        }
         try
         {
             var admissionPath = Path.Combine(stage, AdmissionFile);
@@ -37,13 +45,17 @@ internal static class ZoneTreeRestoreSlotAdmissionOwner
             {
                 var original = Read(admissionPath, policy);
                 if (original.Version != ZoneTreeRestoreSlotAdmission.CurrentVersion || original.Context != context)
-                { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+                {
+                    throw Errors.Fail(ErrorCode.Corruption, Invalid);
+                }
                 ZoneTreeRestoreSlotSource.RequireSame(original.SourceFiles, sourceFiles);
             }
             else
             {
                 if (Directory.EnumerateFileSystemEntries(stage).Any(path => path != ownerPath))
-                { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+                {
+                    throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+                }
                 Write(admissionPath, new(ZoneTreeRestoreSlotAdmission.CurrentVersion, context, sourceFiles,
                     clock.GetUtcNow()), policy);
             }
@@ -53,7 +65,9 @@ internal static class ZoneTreeRestoreSlotAdmissionOwner
         catch (Exception primary)
         {
             try
-            { owner.Dispose(); }
+            {
+                owner.Dispose();
+            }
             catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
             throw;
         }
@@ -65,7 +79,9 @@ internal static class ZoneTreeRestoreSlotAdmissionOwner
         var bytes = ZoneTreeMetadataFile.Read(path, policy.MaximumBackupManifestBytes, policy.StreamBufferBytes, Invalid);
         var envelope = ZoneTreeMetadataBinary.Read<ZoneTreeRestoreSlotEnvelope>(bytes.Span, Magic, Invalid);
         if (!CryptographicOperations.FixedTimeEquals(SHA256.HashData(envelope.Payload.Span), envelope.Checksum.Span))
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
         return NativeSerialization.Deserialize<ZoneTreeRestoreSlotAdmission>(envelope.Payload.Span);
     }
 
@@ -74,7 +90,9 @@ internal static class ZoneTreeRestoreSlotAdmissionOwner
         var payload = NativeSerialization.Serialize(admission);
         var bytes = ZoneTreeMetadataBinary.Write(new ZoneTreeRestoreSlotEnvelope(payload, SHA256.HashData(payload)), Magic);
         if (bytes.Length > policy.MaximumBackupManifestBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, Invalid);
+        }
         using var file = new FileStream(path, FileMode.CreateNew, FileAccess.Write, FileShare.None, policy.StreamBufferBytes);
         file.Write(bytes);
         file.Flush(true);
@@ -83,6 +101,8 @@ internal static class ZoneTreeRestoreSlotAdmissionOwner
     private static void RequireRegular(string path)
     {
         if ((File.GetAttributes(path) & (FileAttributes.ReparsePoint | FileAttributes.Directory)) != Empty)
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
     }
 }

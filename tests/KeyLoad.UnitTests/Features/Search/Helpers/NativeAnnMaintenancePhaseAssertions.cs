@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.Search;
@@ -52,9 +52,13 @@ internal static class NativeAnnMaintenancePhaseAssertions
             if (page.ThroughSequence == page.Consumer.Checkpoint)
             {
                 if (page.HasMore || page.ThroughSequence != upper || !page.Entries.IsEmpty)
-                { throw new InvalidOperationException("The native ANN empty admission does not settle its exact upper."); }
+                {
+                    throw new InvalidOperationException("The native ANN empty admission does not settle its exact upper.");
+                }
                 if (request.Mode == AnnMaintenanceMode.Build)
-                { emptyIntent = NativeAnnMaintenanceTestData.Intent(page); }
+                {
+                    emptyIntent = NativeAnnMaintenanceTestData.Intent(page);
+                }
                 completed = true;
                 break;
             }
@@ -63,14 +67,21 @@ internal static class NativeAnnMaintenancePhaseAssertions
             _ = await UnchangedPhaseAsync(database, runtime, request, AnnMaintenanceCapabilityKind.StagePage, intent: intent);
             _ = await CommitReplayAsync(database, intent);
             if (!page.HasMore)
-            { completed = true; break; }
+            {
+                completed = true;
+                break;
+            }
         }
         if (!completed)
-        { throw new InvalidOperationException("The native ANN lifecycle fixture exceeds its page bound."); }
+        {
+            throw new InvalidOperationException("The native ANN lifecycle fixture exceeds its page bound.");
+        }
         _ = await UnchangedPhaseAsync(database, runtime, request, AnnMaintenanceCapabilityKind.Verify);
         var published = await UnchangedPhaseAsync(database, runtime, request, AnnMaintenanceCapabilityKind.Publish, intent: emptyIntent);
         if (emptyIntent is not null)
-        { _ = await CommitReplayAsync(database, emptyIntent); }
+        {
+            _ = await CommitReplayAsync(database, emptyIntent);
+        }
         return published;
     }
 }

@@ -39,7 +39,9 @@ internal static class EventFeedTailRf3NextOffer
         var sourceReceipt = publish ? await PublishAsync(wave, credential, remote,
             offered.Scope.Resource, expectedEventId, token).ConfigureAwait(false) : originalSourceReceipt;
         if (sourceReceipt is null || sourceReceipt.Token.AtomicPartitionId != remote.AtomicPartitionId)
-        { throw new InvalidOperationException("The two-offer flow requires its actual original source receipt."); }
+        {
+            throw new InvalidOperationException("The two-offer flow requires its actual original source receipt.");
+        }
         var pages = ImmutableArray.CreateBuilder<EventSourcePage>(original.Pages.Length);
         foreach (var prior in original.Pages)
         {
@@ -77,7 +79,9 @@ internal static class EventFeedTailRf3NextOffer
         await Assert.That(page.CutPosition).IsGreaterThan(0);
         await Assert.That(string.IsNullOrEmpty(page.Cursor)).IsFalse();
         if (!remote)
-        { return; }
+        {
+            return;
+        }
         var actual = page.Events[EmptyEvents];
         await Assert.That(actual.Source).IsEqualTo(page.Source);
         await Assert.That(actual.Position).IsEqualTo(tail);

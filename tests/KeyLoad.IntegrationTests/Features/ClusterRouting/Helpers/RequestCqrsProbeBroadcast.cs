@@ -27,9 +27,13 @@ internal static class RequestCqrsProbeBroadcast
             }
         }, failures);
         if (failures.Count == 0)
-        { return; }
+        {
+            return;
+        }
         foreach (var directory in written)
-        { ServerFailureObserver.Observe(() => RequestCqrsProbeFileStore.DeleteExactFile(directory, fileName, bytes), failures); }
+        {
+            ServerFailureObserver.Observe(() => RequestCqrsProbeFileStore.DeleteExactFile(directory, fileName, bytes), failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

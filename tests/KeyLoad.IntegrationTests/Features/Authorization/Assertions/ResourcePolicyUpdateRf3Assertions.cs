@@ -15,7 +15,9 @@ internal static class ResourcePolicyUpdateRf3Assertions
         CancellationToken cancellationToken)
     {
         foreach (var node in new[] { FirstNode, SecondNode, ThirdNode })
-        { await AssertSdkDeniedAsync(fixture, scenario, reader, node, cancellationToken); }
+        {
+            await AssertSdkDeniedAsync(fixture, scenario, reader, node, cancellationToken);
+        }
         await AssertMcpDeniedAsync(mcp, scenario, cancellationToken);
     }
 

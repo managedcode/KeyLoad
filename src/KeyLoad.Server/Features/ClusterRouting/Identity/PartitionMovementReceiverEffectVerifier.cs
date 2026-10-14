@@ -1,8 +1,8 @@
 using System.Security.Cryptography;
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
-using KeyLoad.Orleans;
 using KeyLoad.Replication;
 using Microsoft.Extensions.Options;
 
@@ -15,7 +15,9 @@ internal sealed class PartitionMovementReceiverEffectVerifier(IOptions<NodeOptio
         PartitionMoveParentPhase pending, PartitionMoveParentState state)
     {
         if (envelope.Nonce == pending.OriginalRequestNonce)
-        { return; }
+        {
+            return;
+        }
         var captureAck = pending.CaptureProofCheckpointReceipt;
         if (envelope.Stage != PartitionMovePeerStage.Capture || pending.Stage != PartitionMovePeerStage.Capture
             || pending.OriginalCaptureReleaseNonce == Guid.Empty
@@ -26,7 +28,9 @@ internal sealed class PartitionMovementReceiverEffectVerifier(IOptions<NodeOptio
             || captureAck.CommandId == Guid.Empty || captureAck.AppliedPosition <= PartitionMovementProtocol.NoAppliedPosition
             || state.CurrentReadCut < captureAck.AppliedPosition
             || !PhysicalOwnerEntryValidation.SameOwner(captureAck.PhysicalOwner, envelope.ControlOwner))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof);
+        }
     }
 
     internal void RequireRetainedIssuerPacket(DatabaseEngine database, PartitionMoveParentPhase pending,
@@ -56,7 +60,9 @@ internal sealed class PartitionMovementReceiverEffectVerifier(IOptions<NodeOptio
             || packet.IssuanceNonce != actual.IssuanceNonce
             || !NativeSerialization.Serialize(actual.SourceProofCheckpointReceipt).AsSpan()
                 .SequenceEqual(NativeSerialization.Serialize(pending.ReceiverSourceCheckpointReceipt)))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof);
+        }
         work.Check();
     }
 
@@ -65,7 +71,9 @@ internal sealed class PartitionMovementReceiverEffectVerifier(IOptions<NodeOptio
     {
         PartitionMovementReceiverIssuerVerifier.RequireReceiverAdministrator(database, principalId, work);
         if (ownedEnvelope.IsEmpty || ownedEnvelope.Length > database.Limits.MaxBatchBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMovementProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMovementProtocol.InvalidProof);
+        }
         var original = NativeSerialization.Deserialize<PartitionMovePeerEnvelope>(ownedEnvelope.Span);
         var source = original.SourceDispatchWitness
             ?? throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof);
@@ -73,7 +81,9 @@ internal sealed class PartitionMovementReceiverEffectVerifier(IOptions<NodeOptio
             ?? throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof);
         if (original.Grant is not { RequireReceiverIssuance: true } || source.OriginalPhaseCommandId != originalCommandId
             || source.OriginalReplyBytes.IsEmpty || source.OriginalReplyBytes.Length > database.Limits.MaxBatchBytes)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof);
+        }
         var reply = NativeSerialization.Deserialize<PartitionMovementSourcePendingReply>(source.OriginalReplyBytes.Span);
         var read = GrainNativePayload.Read<GrainValue>(reply.Reply.Payload).Value as PartitionMovementParentStateResult
             ?? throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof);
@@ -121,7 +131,9 @@ internal sealed class PartitionMovementReceiverEffectVerifier(IOptions<NodeOptio
             || pending.ReceiverIssuePacketCheckpointReceipt.AppliedPosition >= pending.ReceiverIssuanceCheckpointReceipt.AppliedPosition
             || !NativeSerialization.Serialize(pending.OriginalReceiverIssuanceWitness).AsSpan()
                 .SequenceEqual(NativeSerialization.Serialize(receiver)))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof);
+        }
     }
 
     internal void RequireReceiverEffectSnapshot(DatabaseEngine database, Guid originalCommandId,
@@ -136,7 +148,9 @@ internal sealed class PartitionMovementReceiverEffectVerifier(IOptions<NodeOptio
             || !pending.OriginalReceiverOwner.VoterIds.Contains(reply.Discovery.VoterId)
             || reply.Discovery.Incarnation != pending.OriginalReceiverOwner.Incarnation
             || reply.Discovery.ClusterId != options.Value.ClusterId)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof);
+        }
         var actual = GrainNativePayload.Read<GrainValue>(reply.Reply.Payload).Value as PartitionMovementReceiverIssuanceResult
             ?? throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof);
         PartitionMovementReceiverCheckpointProofs.RequireReceiverSnapshot(database, pending, actual.Snapshot);

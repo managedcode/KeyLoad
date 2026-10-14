@@ -40,7 +40,10 @@ internal static class RestoreResumedTokenHealthy
         var queue = fixture.Apply(fixture.Database, OperationKind.Receive,
             new ReceiveRequest(id, fixture.Lane), id).Get<ReceiveResult>();
         await Assert.That(queue.Deliveries.Length).IsEqualTo(1);
-        await Assert.That(queue.Deliveries[0] with { Token = string.Empty }).IsEqualTo(new Delivery(HealthyId,
+        await Assert.That(queue.Deliveries[0] with
+        {
+            Token = string.Empty
+        }).IsEqualTo(new Delivery(HealthyId,
             EventingArtifactFixture.Json, EventingArtifactFixture.EmptyJson, string.Empty,
             1, fixture.Time.AddSeconds(30), 1, 1));
         await Assert.That(queue.Deliveries[0].Token).IsNotEmpty();

@@ -30,17 +30,33 @@ internal sealed class ZoneTreeExistingStoreFixture : IDisposable
         DirectoryPath = Path.Combine(root, CanonicalDirectory);
         OuterOwnerPath = Path.Combine(root, OuterOwnerFile);
         using (File.Create(OuterOwnerPath))
-        { }
-        Options = new(DirectoryPath) { Incarnation = Guid.NewGuid() };
+        {
+        }
+        Options = new(DirectoryPath)
+        {
+            Incarnation = Guid.NewGuid()
+        };
         using var original = new ZoneTreeStore(Options, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         Identity = original.Identity;
         original.Commit((transaction, _) => { transaction.Put(Key, Value); return true; });
     }
 
-    internal string DirectoryPath { get; }
-    internal string OuterOwnerPath { get; }
-    internal ZoneTreeStoreOptions Options { get; }
-    internal StoreIdentity Identity { get; }
+    internal string DirectoryPath
+    {
+        get;
+    }
+    internal string OuterOwnerPath
+    {
+        get;
+    }
+    internal ZoneTreeStoreOptions Options
+    {
+        get;
+    }
+    internal StoreIdentity Identity
+    {
+        get;
+    }
     internal byte[] Key { get; } = Encoding.UTF8.GetBytes(KeyText);
     internal byte[] Value { get; } = Encoding.UTF8.GetBytes(ValueText);
     internal string IdentityPath => Path.Combine(DirectoryPath, IdentityFile);

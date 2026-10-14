@@ -45,11 +45,15 @@ internal static class ClusterBackupCanonicalCensus
                 cancellationToken.ThrowIfCancellationRequested();
                 if (AtomicPartitionRosterKeyValidation.TryReadCandidate(key, value, hasValue: true, out var partition)
                     && partition is not null && !entries.ContainsKey(partition))
-                { throw Errors.Fail(ErrorCode.Corruption, MissingScope); }
+                {
+                    throw Errors.Fail(ErrorCode.Corruption, MissingScope);
+                }
                 if (partition is not null)
                 {
                     if (key.StartsWith(Bm25Prefix))
-                    { Bm25CorpusShape.RequireRecord(key, value, partition, limits); }
+                    {
+                        Bm25CorpusShape.RequireRecord(key, value, partition, limits);
+                    }
                     Append(scoped[partition], key);
                     Append(scoped[partition], value);
                     counts[partition] = checked(counts[partition] + RecordStep);
@@ -59,7 +63,9 @@ internal static class ClusterBackupCanonicalCensus
                 return true;
             }, cancellationToken: cancellationToken);
             if (range.HasMore || range.StoppedByVisitor)
-            { throw Errors.Fail(ErrorCode.BudgetExceeded, CensusExceeded); }
+            {
+                throw Errors.Fail(ErrorCode.BudgetExceeded, CensusExceeded);
+            }
             cancellationToken.ThrowIfCancellationRequested();
             var result = scoped.ToDictionary(entry => entry.Key,
                 entry => new Scope(counts[entry.Key], Convert.ToHexString(entry.Value.GetHashAndReset())));
@@ -75,13 +81,19 @@ internal static class ClusterBackupCanonicalCensus
         foreach (var hash in hashes)
         {
             try
-            { DisposeHash(hash); }
+            {
+                DisposeHash(hash);
+            }
             catch (AggregateException cleanup) { failures.AddRange(cleanup.InnerExceptions); }
         }
         if (failures.Count == NoFailures)
-        { return; }
+        {
+            return;
+        }
         if (primary is not null)
-        { failures.Insert(PrimaryFailureIndex, primary); }
+        {
+            failures.Insert(PrimaryFailureIndex, primary);
+        }
         throw new AggregateException(failures);
     }
 
@@ -90,7 +102,9 @@ internal static class ClusterBackupCanonicalCensus
     private static void DisposeHash(IncrementalHash hash)
     {
         try
-        { hash.Dispose(); }
+        {
+            hash.Dispose();
+        }
         catch (Exception original) { throw new AggregateException(original); }
     }
 

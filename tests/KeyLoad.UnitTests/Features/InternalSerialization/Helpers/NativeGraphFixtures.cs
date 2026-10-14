@@ -25,7 +25,10 @@ internal static class NativeGraphFixtures
     {
         for (var index = 0; index < nodes; index++)
         {
-            tail = new() { Next = tail };
+            tail = new()
+            {
+                Next = tail
+            };
         }
         return tail!;
     }
@@ -39,7 +42,10 @@ internal static class NativeGraphFixtures
 internal sealed class NativeGraphNode
 {
     [global::Orleans.Id(0)]
-    public NativeGraphNode? Next { get; set; }
+    public NativeGraphNode? Next
+    {
+        get; set;
+    }
 }
 
 [global::Orleans.GenerateSerializer, global::Orleans.Alias(NativeGraphFixtures.BranchAlias)]

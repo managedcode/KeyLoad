@@ -17,7 +17,9 @@ internal static class PartitionMovementParentIssuanceFaultTrial
         source.Store.Commit((transaction, _) =>
         {
             transaction.Put(key, NativeSerialization.Serialize(phase with
-            { OriginalIssuancePolicyEpoch = checked(phase.OriginalIssuancePolicyEpoch + 1) }));
+            {
+                OriginalIssuancePolicyEpoch = checked(phase.OriginalIssuancePolicyEpoch + 1)
+            }));
             return true;
         });
         var failures = new List<Exception>();

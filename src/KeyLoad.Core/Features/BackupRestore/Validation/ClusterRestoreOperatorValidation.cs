@@ -17,7 +17,9 @@ public static class ClusterRestoreOperatorValidation
         var witness = DatabaseEngine.IssueCredentialWitness(secret);
         var principal = DatabaseCredentialValidation.Require(view, witness, null, now);
         if (!principal.ClusterAdministrator)
-        { throw Errors.Fail(ErrorCode.PermissionDenied, AdministratorRequired); }
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, AdministratorRequired);
+        }
         return principal;
     }
 }

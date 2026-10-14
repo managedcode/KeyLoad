@@ -9,7 +9,9 @@ internal static class PhysicalShardCatalogFence
     internal static Task EnsureAdmissionAsync(PhysicalShardCatalogStartup? catalog, CancellationToken cancellationToken)
     {
         if (catalog is null || !catalog.IsReady)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, NotReady); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, NotReady);
+        }
         return catalog.EnsureAdmissionAsync(cancellationToken);
     }
 

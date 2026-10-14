@@ -858,7 +858,7 @@ src/
     Policies/
     Classification/
     Projection/
-  KeyLoad.Orleans/
+  KeyLoad.Clustering/
   KeyLoad.Replication/
   KeyLoad.Search/
     Text/

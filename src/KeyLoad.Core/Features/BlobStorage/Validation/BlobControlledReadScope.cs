@@ -11,20 +11,28 @@ internal static class BlobControlledReadScope
         StoredOutcome? outcome, ReadOnlyMemory<byte> nativeRequest)
     {
         if (!Enum.IsDefined(purpose))
-        { throw Errors.Fail(ErrorCode.Validation, PartitionMoveProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, PartitionMoveProtocol.Invalid);
+        }
         if (purpose == ControlledBlobReadPurpose.Outcome)
         {
             if (original is null || outcome is null || !nativeRequest.IsEmpty
                 || !BlobStorageOperations.Handles(original.Kind))
-            { throw Errors.Fail(ErrorCode.Validation, PartitionMoveProtocol.Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Validation, PartitionMoveProtocol.Invalid);
+            }
             var scope = BlobCommandScope.From(original);
             if (scope.CommandId != original.Id)
-            { throw BlobErrors.Validation(); }
+            {
+                throw BlobErrors.Validation();
+            }
             BlobKeys.Validate(scope.Blob);
             return scope.Blob;
         }
         if (original is not null || outcome is not null || nativeRequest.IsEmpty)
-        { throw Errors.Fail(ErrorCode.Validation, PartitionMoveProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, PartitionMoveProtocol.Invalid);
+        }
         var blob = purpose switch
         {
             ControlledBlobReadPurpose.Metadata => NativeSerialization.Deserialize<BlobMetadataRequest>(nativeRequest.Span).Blob,

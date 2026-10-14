@@ -97,7 +97,9 @@ internal static class TenantCapacityPlacementRf3Cold
             var current = after.Single(cut => cut.Node == before.Node);
             await Assert.That(current.StorePosition).IsGreaterThanOrEqualTo(before.StorePosition);
             foreach (var key in keys)
-            { await Assert.That(Row(current, key)).IsEqualTo(Row(before, key)); }
+            {
+                await Assert.That(Row(current, key)).IsEqualTo(Row(before, key));
+            }
             await Assert.That(current.OutstandingMoveGrants).IsEqualTo(before.OutstandingMoveGrants);
             await Assert.That(current.OutstandingDatabaseGrants).IsEqualTo(before.OutstandingDatabaseGrants);
         }

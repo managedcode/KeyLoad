@@ -118,7 +118,9 @@ internal sealed class SqlTriviaReaderTests
             global::Microsoft.SqlServer.TransactSql.ScriptDom.SqlEngineType.Standalone);
         var tokens = parser.GetTokenStream(reader, out var errors);
         if (errors.Count != 0)
-        { throw new InvalidOperationException("The native token fixture is malformed."); }
+        {
+            throw new InvalidOperationException("The native token fixture is malformed.");
+        }
         global::KeyLoad.Features.QueryExecution.ScriptDomTokenBounds.Require(tokens, options.Value, budget.Check);
         return tokens;
     }

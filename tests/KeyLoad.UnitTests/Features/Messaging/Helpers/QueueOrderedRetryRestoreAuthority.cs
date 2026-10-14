@@ -27,7 +27,9 @@ internal static class QueueOrderedRetryRestoreAuthority
         CaptureHistorical(database, state, original);
         var image = QueueOrderedRetryImage.Capture(database.Store, state.Lane);
         var denied = Expected(state, QueueOrderedRetryProtocol.Two) with
-        { Grants = [new(state.Partition.DatabaseId, state.Lane.Queue, Capability.QueueInspect)] };
+        {
+            Grants = [new(state.Partition.DatabaseId, state.Lane.Queue, Capability.QueueInspect)]
+        };
         await ConfigureAsync(database, state, denied);
         var id = Guid.NewGuid();
         var secondVersion = state.ParkedHead == QueueParkedHeadPolicy.Continue ? QueueOrderedRetryProtocol.Two : QueueOrderedRetryProtocol.One;
@@ -42,14 +44,19 @@ internal static class QueueOrderedRetryRestoreAuthority
             ?? throw new InvalidOperationException(HistoricalMissing);
         if (rejectedBytes.Length + state.HistoricalOutcomes.Values.Sum(bytes => bytes.LongLength)
             + state.RestoredResourceBytes!.LongLength > UnitExecutionOptions.DatabaseLimits().Value.MaxBatchBytes)
-        { throw new InvalidOperationException(HistoricalBound); }
+        {
+            throw new InvalidOperationException(HistoricalBound);
+        }
         state.HistoricalOutcomes.Add(id, rejectedBytes);
         await ConfigureAsync(database, state, Expected(state, QueueOrderedRetryProtocol.Three));
         await RefusedAsync(database, state, operation, image, ErrorCode.PermissionDenied);
         foreach (var prior in original.Outcomes.Where(item => item.Operation.Kind == OperationKind.Batch && item.Result.Error is null))
         {
             await OriginalAuthorityRefusedAsync(database, state, prior.Operation, image);
-            var current = database.NormalizeOperation(prior.Operation with { NativePayload = ReadOnlyMemory<byte>.Empty });
+            var current = database.NormalizeOperation(prior.Operation with
+            {
+                NativePayload = ReadOnlyMemory<byte>.Empty
+            });
             await RefusedAsync(database, state, current, image, ErrorCode.TokenInvalidated);
         }
         await RequireAsync(database, state);
@@ -75,7 +82,10 @@ internal static class QueueOrderedRetryRestoreAuthority
             [new(state.Partition.DatabaseId, state.Lane.Queue, Capability.QueuePublish | Capability.QueueConsume
                 | Capability.QueueAck | Capability.QueueRenew | Capability.QueueInspect | Capability.DeadLettersRead
                 | Capability.DeadLettersRedrive | Capability.QueueCancel | Capability.Query)], [Wildcard])
-        { ClusterAdministrator = true, PolicyEpoch = epoch };
+        {
+            ClusterAdministrator = true,
+            PolicyEpoch = epoch
+        };
 
     private static async Task ConfigureAsync(DatabaseEngine database, QueueOrderedRetryState state, PrincipalRecord principal)
     {
@@ -133,7 +143,9 @@ internal static class QueueOrderedRetryRestoreAuthority
             KeySpace.Resource(state.Partition.TenantId, state.Partition.DatabaseId, state.Lane.Queue)))
             ?? throw new InvalidOperationException(HistoricalMissing);
         if (state.RestoredResourceBytes.Length > remaining)
-        { throw new InvalidOperationException(HistoricalBound); }
+        {
+            throw new InvalidOperationException(HistoricalBound);
+        }
         remaining -= state.RestoredResourceBytes.Length;
         foreach (var item in original.Outcomes.Where(item => item.Result.Error is null
             && item.Operation.Kind is OperationKind.Batch or OperationKind.Receive or OperationKind.Delivery))
@@ -141,7 +153,9 @@ internal static class QueueOrderedRetryRestoreAuthority
             var bytes = database.Store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(state.Partition, state.Principal, item.Operation.Id)))
                 ?? throw new InvalidOperationException(HistoricalMissing);
             if (bytes.Length > remaining)
-            { throw new InvalidOperationException(HistoricalBound); }
+            {
+                throw new InvalidOperationException(HistoricalBound);
+            }
             remaining -= bytes.Length;
             state.HistoricalOutcomes.Add(item.Operation.Id, bytes);
         }

@@ -11,11 +11,23 @@ internal sealed record BenchmarkRelayOptions
     private const string CellKey = "Benchmarks:TimeSeries:CellId";
     private const string ContractKey = "Benchmarks:TimeSeries:ContractSha256";
     [ConfigurationKeyName(EvidenceProfileKey)]
-    public string? EvidenceProfile { get; init; }
+    public string? EvidenceProfile
+    {
+        get; init;
+    }
     [ConfigurationKeyName(SourceRevisionKey)]
-    public string? SourceRevision { get; init; }
+    public string? SourceRevision
+    {
+        get; init;
+    }
     [ConfigurationKeyName(CellKey)]
-    public string? TimeSeriesCellId { get; init; }
+    public string? TimeSeriesCellId
+    {
+        get; init;
+    }
     [ConfigurationKeyName(ContractKey)]
-    public string? TimeSeriesContractSha256 { get; init; }
+    public string? TimeSeriesContractSha256
+    {
+        get; init;
+    }
 }

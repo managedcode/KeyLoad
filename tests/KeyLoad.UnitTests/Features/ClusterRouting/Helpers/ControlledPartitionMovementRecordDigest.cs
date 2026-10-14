@@ -17,7 +17,9 @@ internal static class ControlledPartitionMovementRecordDigest
         {
             var separator = row.IndexOf(':', StringComparison.Ordinal);
             if (separator <= InvalidSeparator)
-            { throw new InvalidOperationException("The original raw reference is malformed."); }
+            {
+                throw new InvalidOperationException("The original raw reference is malformed.");
+            }
             Append(hash, Convert.FromHexString(row[..separator]));
             Append(hash, Convert.FromHexString(row[(separator + SeparatorCharacters)..]));
         }

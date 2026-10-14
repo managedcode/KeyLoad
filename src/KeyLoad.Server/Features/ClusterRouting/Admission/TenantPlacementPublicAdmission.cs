@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server.Features.ClusterRouting;
 using Microsoft.Extensions.Options;
 
@@ -11,7 +11,9 @@ internal static class TenantPlacementPublicAdmission
         if (read is not (GrainReadKind.PlacementPolicy or GrainReadKind.PlacementPlan or GrainReadKind.PlacementIntent)
             && command is not (OperationKind.ConfigurePlacementPolicy or OperationKind.PersistPlacementIntent
                 or OperationKind.ApplyPlacementIntent))
-        { return; }
+        {
+            return;
+        }
         var options = context.RequestServices.GetRequiredService<IOptions<NodeOptions>>().Value;
         var execution = context.RequestServices.GetRequiredService<IOptions<TenantPlacementExecutionOptions>>().Value;
         if (!execution.Enabled || options.PhysicalGroupTrust.Role != PhysicalGroupTrustRole.Control

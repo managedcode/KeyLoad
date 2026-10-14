@@ -21,7 +21,10 @@ internal sealed class SqlGraphSearchResultCompositionTests
         using var database = new TestDatabase();
         GraphSearchTestSupport.Configure(database);
         GraphSearchTestSupport.AddPath(database);
-        var json = JsonSerializer.Serialize(new { text = new string('x', PayloadLength) });
+        var json = JsonSerializer.Serialize(new
+        {
+            text = new string('x', PayloadLength)
+        });
         database.Commit(new PutDocument(GraphSearchTestSupport.Documents, GraphSearchTestSupport.FirstHit, json, 1),
             new PutDocument(GraphSearchTestSupport.Documents, GraphSearchTestSupport.SecondHit, json, 1));
         var token = TestContext.Current!.Execution.CancellationToken;
@@ -34,13 +37,19 @@ internal sealed class SqlGraphSearchResultCompositionTests
         await Assert.That(before.HasMore).IsFalse();
         var position = database.Store.Position;
         var search = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(new QueryExecutionOptions
-        { MaximumResultBytes = sqlIsLower ? null : ResultCap }));
+        {
+            MaximumResultBytes = sqlIsLower ? null : ResultCap
+        }));
         var owner = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution(new QueryExecutionOptions
-        { MaximumResultBytes = sqlIsLower ? ResultCap : null }), search);
+        {
+            MaximumResultBytes = sqlIsLower ? ResultCap : null
+        }), search);
         GraphSearchResult? partial = null;
         KeyLoadException? failure = null;
         try
-        { partial = await owner.SearchSqlAsync(Principal, request, token); }
+        {
+            partial = await owner.SearchSqlAsync(Principal, request, token);
+        }
         catch (KeyLoadException error) { failure = error; }
         await Assert.That(failure).IsNotNull();
         await Assert.That(failure!.Code).IsEqualTo(ErrorCode.BudgetExceeded);

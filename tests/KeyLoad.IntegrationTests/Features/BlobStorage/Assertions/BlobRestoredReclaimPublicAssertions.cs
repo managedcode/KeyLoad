@@ -14,7 +14,9 @@ internal static class BlobRestoredReclaimPublicAssertions
     {
         await BlobArchiveActivePublicAssertions.CurrentAsync(sdk, official, state.Published, token);
         if (state.Healthy is { } healthy)
-        { await BlobArchiveActivePublicAssertions.CurrentAsync(sdk, official, healthy, token); }
+        {
+            await BlobArchiveActivePublicAssertions.CurrentAsync(sdk, official, healthy, token);
+        }
         if (state.Healthy is null)
         {
             var metadata = new BlobMetadataRequest(state.Active.Begin.Blob);
@@ -23,7 +25,10 @@ internal static class BlobRestoredReclaimPublicAssertions
         }
         var request = new BlobUploadInfoRequest(state.Active.Begin.Blob, state.Active.Begin.UploadId);
         var expected = final ? null : state.Active.Written.Last().Value with
-        { Status = BlobUploadStatus.Aborted, StoredBytes = state.FirstResult is null ? 131072L : 65536L };
+        {
+            Status = BlobUploadStatus.Aborted,
+            StoredBytes = state.FirstResult is null ? 131072L : 65536L
+        };
         await SqlRf3Protocol.EqualAsync(expected, await PublicReadAssertions.UploadAsync(await sdk.GetBlobUploadInfoAsync(request, token)));
         await SqlRf3Protocol.EqualAsync(expected, (await PublicReadAssertions.UploadAsync(await official.CallAsync("keyload_blobs_upload_info", request, token))).Value);
     }

@@ -30,7 +30,11 @@ internal static class Bm25PortableMovementRefusals
         byte[] badBytes, CancellationToken token)
     {
         var rows = original.Page.Records.SetItem(0, new(original.Page.Records[0].Key, badBytes));
-        var controlled = original.Page with { Records = rows, Digest = PartitionMoveImageDigest.Records(rows) };
+        var controlled = original.Page with
+        {
+            Records = rows,
+            Digest = PartitionMoveImageDigest.Records(rows)
+        };
         var before = await Bm25PortableMovementCapture.SixAsync(owners, token);
         var refused = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => Task.Run(() =>
             PartitionMovePageAdmission.Require(controlled, original.Fence, owners.Target.Database.Limits,
@@ -61,7 +65,10 @@ internal static class Bm25PortableMovementRefusals
         if (repairRequired)
         {
             ServerFailureObserver.Observe(() => source.Store.Commit((transaction, _) =>
-                { transaction.Put(key, original); return true; }), failures);
+                {
+                    transaction.Put(key, original);
+                    return true;
+                }), failures);
         }
         ServerFailureObserver.ThrowIfAny(failures);
         await Bm25PortableMovementAssertions.HeadAsync(source, current, original, token);

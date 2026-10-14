@@ -22,7 +22,9 @@ internal static class MovementCursorRf3Stream
         var official = (await McpCallerAssertions.SuccessAsync<StreamPage>(
             await seed.Official.CallAsync(McpCallerTools.StreamsRead, request, token))).Value;
         foreach (var page in new[] { source, target, official })
-        { await MovementCursorRf3StreamAssertions.FirstAsync(page, request.Stream); }
+        {
+            await MovementCursorRf3StreamAssertions.FirstAsync(page, request.Stream);
+        }
         var streams = new MovementCursorRf3Streams(source, target, official);
         await ContinueAsync(seed, streams, token);
         return streams;

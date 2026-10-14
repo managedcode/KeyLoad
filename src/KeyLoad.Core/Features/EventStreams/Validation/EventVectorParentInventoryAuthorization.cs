@@ -6,7 +6,9 @@ internal static class EventVectorParentInventoryAuthorization
         EventVectorAdmissionPolicy admission)
     {
         if (inventory.Header is not { } map)
-        { return; }
+        {
+            return;
+        }
         var parentKey = EventVectorKeys.ParentCall(map.ControlPartition, map.MapId);
         var cleanupKey = EventVectorKeys.CleanupCall(map.ControlPartition, map.MapId);
         foreach (var row in inventory.PayloadRows)

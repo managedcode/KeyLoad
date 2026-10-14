@@ -11,7 +11,9 @@ internal static class PartitionMovementParentCapacityFinalInstall
     internal static bool IsFinal(PartitionMoveParentState state, PartitionMovePhaseCommand phase)
     {
         if (phase.Stage != PartitionMovePeerStage.Install)
-        { return false; }
+        {
+            return false;
+        }
         var descriptor = state.Selected?.OriginalDescriptor
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
         return phase.PageOrdinal == descriptor.Families.Sum(static family => family.PageCount);
@@ -28,9 +30,13 @@ internal static class PartitionMovementParentCapacityFinalInstall
     {
         var actual = PartitionMovementParentCapacityBounds.Bound(state);
         if (!IsFinal(state, phase))
-        { return actual; }
+        {
+            return actual;
+        }
         if (state.Pending is { Stage: not PartitionMovePeerStage.ControlAuthorize })
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+        }
         var header = state.Header
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
         var authorizeBody = Root<PartitionMoveAuthorizeBody>(checked(ReferenceFieldBytes

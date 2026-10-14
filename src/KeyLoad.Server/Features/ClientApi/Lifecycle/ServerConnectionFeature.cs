@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using Microsoft.AspNetCore.Connections;
 using Microsoft.Extensions.Options;
 
@@ -46,9 +46,13 @@ internal sealed class ServerConnectionFeature : IAsyncDisposable
         lock (gate)
         {
             if (closing)
-            { throw Errors.Fail(ErrorCode.Cancelled, ServerConnectionProtocol.Closed); }
+            {
+                throw Errors.Fail(ErrorCode.Cancelled, ServerConnectionProtocol.Closed);
+            }
             if (active >= settings.MaximumConnectionOperations)
-            { throw Errors.Fail(ErrorCode.ResourceExhausted, ServerConnectionProtocol.Capacity); }
+            {
+                throw Errors.Fail(ErrorCode.ResourceExhausted, ServerConnectionProtocol.Capacity);
+            }
             var operation = new ServerConnectionOperation(this, cancellationToken, closed.Token);
             ++active;
             used = true;
@@ -63,11 +67,17 @@ internal sealed class ServerConnectionFeature : IAsyncDisposable
         {
             --active;
             if (active != ServerConnectionProtocol.NoOperations)
-            { return; }
+            {
+                return;
+            }
             if (closing)
-            { drained.TrySetResult(); }
+            {
+                drained.TrySetResult();
+            }
             else
-            { idle.Change(settings.ConnectionIdleTimeout, Timeout.InfiniteTimeSpan); }
+            {
+                idle.Change(settings.ConnectionIdleTimeout, Timeout.InfiniteTimeSpan);
+            }
         }
     }
 
@@ -76,11 +86,15 @@ internal sealed class ServerConnectionFeature : IAsyncDisposable
         lock (gate)
         {
             if (closing)
-            { return; }
+            {
+                return;
+            }
             closing = true;
             idle.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
             if (active == ServerConnectionProtocol.NoOperations)
-            { drained.TrySetResult(); }
+            {
+                drained.TrySetResult();
+            }
         }
         CompleteClose(ServerConnectionProtocol.Closed);
     }
@@ -90,7 +104,9 @@ internal sealed class ServerConnectionFeature : IAsyncDisposable
         lock (gate)
         {
             if (closing || active != ServerConnectionProtocol.NoOperations)
-            { return; }
+            {
+                return;
+            }
             closing = true;
             drained.TrySetResult();
         }
@@ -103,15 +119,21 @@ internal sealed class ServerConnectionFeature : IAsyncDisposable
         ServerFailureObserver.Observe(closed.Cancel, failures);
         ServerFailureObserver.Observe(() => transport.Abort(new ConnectionAbortedException(message)), failures);
         if (failures.Count == ServerConnectionProtocol.NoFailures)
-        { closeSignal.TrySetResult(); }
+        {
+            closeSignal.TrySetResult();
+        }
         else
-        { closeSignal.TrySetException(failures); }
+        {
+            closeSignal.TrySetException(failures);
+        }
     }
 
     internal Task CloseAsync()
     {
         lock (gate)
-        { return closeTask ??= CloseCoreAsync(); }
+        {
+            return closeTask ??= CloseCoreAsync();
+        }
     }
 
     private async Task CloseCoreAsync()

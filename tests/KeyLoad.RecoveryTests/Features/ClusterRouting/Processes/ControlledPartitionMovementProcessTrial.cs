@@ -56,9 +56,15 @@ internal static class ControlledPartitionMovementProcessTrial
     private static ProcessStartInfo CreateStart(string root, string mode)
     {
         var start = new ProcessStartInfo(Dotnet)
-        { RedirectStandardOutput = true, RedirectStandardError = true, UseShellExecute = false };
+        {
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false
+        };
         foreach (var argument in new[] { typeof(CrashHostMarker).Assembly.Location, root, mode })
-        { start.ArgumentList.Add(argument); }
+        {
+            start.ArgumentList.Add(argument);
+        }
         return start;
     }
 
@@ -72,7 +78,9 @@ internal static class ControlledPartitionMovementProcessTrial
         }
         await actual.WaitAndJoinAsync(token);
         if (actual.ExitCode != SuccessExit)
-        { throw new InvalidOperationException(FailedChild); }
+        {
+            throw new InvalidOperationException(FailedChild);
+        }
     }
 
     private static async Task SettleAsync(string root, CommandIdempotencyProcessChild? active, Exception? primary,
@@ -82,9 +90,13 @@ internal static class ControlledPartitionMovementProcessTrial
             CommandIdempotencyProcessRecoveryTests.CleanupTimeoutSeconds), clock);
         var failures = new List<Exception>();
         if (active is not null)
-        { await CommandIdempotencyProcess.SettleActiveAsync(active, failures, cleanup.Token); }
+        {
+            await CommandIdempotencyProcess.SettleActiveAsync(active, failures, cleanup.Token);
+        }
         if (active is { IsSettled: false })
-        { failures.Add(new IOException(Unsettled)); }
+        {
+            failures.Add(new IOException(Unsettled));
+        }
         if (active is null or { IsSettled: true })
         {
             await ServerFailureObserver.ObserveAsync(
@@ -92,7 +104,9 @@ internal static class ControlledPartitionMovementProcessTrial
         }
         primary?.Data[RetainedRoot] = root;
         foreach (var failure in failures)
-        { failure.Data[RetainedRoot] = root; }
+        {
+            failure.Data[RetainedRoot] = root;
+        }
         CommandIdempotencyProcess.ThrowFailures(primary, failures);
     }
 }

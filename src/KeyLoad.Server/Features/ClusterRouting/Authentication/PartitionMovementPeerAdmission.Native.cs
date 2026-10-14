@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
@@ -26,12 +26,19 @@ internal sealed partial class PartitionMovementPeerAdmission
             || !PhysicalGroupAddress.CanonicalAddress(request.CallerSiloAddress, membership)
             || request.DestinationVoter != local.VoterId || request.DestinationSiloAddress != local.SiloAddress
             || !local.TransportReady)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, InvalidProof); }
-        request = request with { Payload = request.Payload.ToArray() };
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, InvalidProof);
+        }
+        request = request with
+        {
+            Payload = request.Payload.ToArray()
+        };
         observeStage?.Invoke(PartitionMovementNativeObservationStage.OuterMac);
         using var mac = CreateControlMac();
         if (!mac.VerifyNativeRequest(request))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, InvalidProof);
+        }
         observeStage?.Invoke(PartitionMovementNativeObservationStage.CallerDiscovery);
         await requireCaller(request.CallerVoter, request.CallerSiloAddress, cancellationToken).ConfigureAwait(false);
         cancellationToken.ThrowIfCancellationRequested();
@@ -44,6 +51,8 @@ internal sealed partial class PartitionMovementPeerAdmission
         cancellationToken.ThrowIfCancellationRequested();
         observeStage?.Invoke(PartitionMovementNativeObservationStage.ExpiryReplay);
         if (request.ExpiresAt <= clock.GetUtcNow() || !nativeReplay.TryUse(request.Nonce.ToString(NonceFormat)))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, InvalidProof);
+        }
     }
 }

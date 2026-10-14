@@ -29,7 +29,11 @@ internal static class MixedEventingCatalogRestore
         await Assert.That(original.StorePosition).IsEqualTo(capture.Position);
         await Assert.That(original.SourceNodeId).IsEqualTo(source.Store.Identity.NodeId);
         await Assert.That(original.AppliedIndex).IsEqualTo(source.Database.LastApplied);
-        var targetOwner = original.Owner with { PhysicalShardId = Guid.NewGuid(), Incarnation = Guid.NewGuid() };
+        var targetOwner = original.Owner with
+        {
+            PhysicalShardId = Guid.NewGuid(),
+            Incarnation = Guid.NewGuid()
+        };
         var mapping = new ClusterRestoreOwnerMapping(ClusterRestoreOwnerMapping.CurrentVersion,
             original.Owner, targetOwner, [FirstEndpoint, SecondEndpoint, ThirdEndpoint]);
         var signingKey = RandomNumberGenerator.GetBytes(source.Store.Identity.SigningKey.Length);

@@ -13,7 +13,10 @@ internal static class SubscriptionCheckpointAuthorityFlow
         using var fixture = new TestDatabase();
         fixture.Configure("topic", ResourceKind.Topic);
         SubscriptionTestActions.Publish(fixture);
-        var group = SubscriptionTestActions.Configure(fixture, policy: new() { MaxWindow = 3 });
+        var group = SubscriptionTestActions.Configure(fixture, policy: new()
+        {
+            MaxWindow = 3
+        });
         var source = SubscriptionCheckpointAuthorityAssertions.SourceImage(fixture.Store, group.Source.Partition);
         await SubscriptionCheckpointAuthorityAssertions.SourceAsync(fixture.Database, fixture.Store, group.Source, source);
         var request = new ReceiveSubscriptionRequest(Guid.NewGuid(), group, MaxEvents: 3);
@@ -82,7 +85,10 @@ internal static class SubscriptionCheckpointAuthorityFlow
         await SubscriptionCheckpointAuthorityAssertions.ReplayAsync(cold, secondCold, second, secondResult, token);
         await SubscriptionCheckpointAuthorityAssertions.ReplayAsync(cold, secondCold, third, thirdResult, token);
         await SubscriptionCheckpointAuthorityAssertions.SettledClaimAsync(cold, secondCold, request, original, token);
-        var stale = third with { CommandId = Guid.NewGuid() };
+        var stale = third with
+        {
+            CommandId = Guid.NewGuid()
+        };
         await SubscriptionCheckpointAuthorityAssertions.StaleAsync(cold, secondCold, stale, token);
         await HealthyAsync(cold, secondCold, group, token);
     }

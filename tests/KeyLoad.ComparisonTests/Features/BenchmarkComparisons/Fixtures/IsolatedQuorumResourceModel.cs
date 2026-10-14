@@ -12,9 +12,15 @@ internal sealed class IsolatedQuorumResourceModel : IDisposable
 {
     private DistributedApplication? application;
     internal string Root { get; } = Directory.CreateTempSubdirectory(T.TemporaryPrefix).FullName;
-    internal IDistributedApplicationBuilder Builder { get; } = DistributedApplication.CreateBuilder(
+    internal IDistributedApplicationBuilder Builder
+    {
+        get;
+    } = DistributedApplication.CreateBuilder(
         new DistributedApplicationOptions { DisableDashboard = true });
-    internal IResourceBuilder<ContainerResource> Runner { get; }
+    internal IResourceBuilder<ContainerResource> Runner
+    {
+        get;
+    }
 
     internal IsolatedQuorumResourceModel()
     {

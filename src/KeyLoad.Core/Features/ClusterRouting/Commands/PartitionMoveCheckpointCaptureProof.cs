@@ -40,9 +40,13 @@ public sealed partial class DatabaseEngine
             || body.OriginalCaptureReleaseNonce != previous.OriginalCaptureReleaseNonce
             || body.OriginalOutcomeWitness is not null || body.OriginalReceiverSourceWitness is not null
             || body.OriginalReceiverIssuanceWitness is not null || body.OriginalReceiverIssuePacket is not null)
-        { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict);
+        }
         if (previous.OriginalCaptureWitness is not null || previous.CaptureProofCheckpointReceipt is not null)
-        { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict);
+        }
     }
 
     private PartitionMoveParentHeader SaveMoveParentPhaseObservation(IAtomicTransaction transaction,
@@ -59,11 +63,15 @@ public sealed partial class DatabaseEngine
         };
         updated = MeasureMoveParentHeader(updated, baseBytes);
         if (updated.RetainedMetadataBytes > movementCheckpoints.MaxRetainedMetadataBytesPerMove)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
+        }
         var payloadBytes = checked((long)phaseKey.Length + NativeSerialization.Measure(observed)
             + PartitionMoveParentKeys.Header(header.Partition, header.MoveId).Length + NativeSerialization.Measure(updated));
         if (payloadBytes > Limits.MaxBatchBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
+        }
         PartitionMoveParentStorage.WritePhase(transaction, observed, Limits.MaxBatchBytes);
         PartitionMoveParentStorage.WriteHeader(transaction, updated, Limits.MaxBatchBytes);
         return updated;

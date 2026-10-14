@@ -12,7 +12,9 @@ public sealed partial class DatabaseEngine
     private ReadOnlyMemory<byte> CanonicalMoveRetireCancellationBody(ReadOnlyMemory<byte> body)
     {
         if (body.IsEmpty || body.Length > Limits.MaxBatchBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
+        }
         var value = NativeSerialization.Deserialize<PartitionMoveRetireCancellationBody>(body.Span);
         var canonical = value with
         {
@@ -22,7 +24,9 @@ public sealed partial class DatabaseEngine
             OriginalSourceWitness = null
         };
         if (NativeSerialization.Measure(canonical) > Limits.MaxBatchBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
+        }
         return NativeSerialization.Serialize(canonical);
     }
     private void RequireMoveRetireCancellationScope(IKeyValueView view,
@@ -61,7 +65,9 @@ public sealed partial class DatabaseEngine
             || body.OriginalAuthorization.AppliedPosition != grant.AdmissionPosition
             || body.OriginalAuthorization.ControlIntentDigest != original.ControlIntentDigest
             || !PhysicalOwnerEntryValidation.SameOwner(body.OriginalAuthorization.PhysicalOwner, original.ControlOwner))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.MissingAuthority);
+        }
         var issued = PartitionMoveReceiverIssuanceStorage.Read(view, original.Partition, original.MoveId,
             body.OriginalPhaseCommandId, Limits.MaxBatchBytes);
         if (issued is not null)
@@ -69,17 +75,23 @@ public sealed partial class DatabaseEngine
             PartitionMoveReceiverIssuanceValidation.Require(issued, body.OriginalPhaseCommandId, original,
                 body.OriginalAuthorization, catalog.DefaultShard, Limits.MaxBatchBytes);
             if (issued.ReceiverPrincipalId != principalId)
-            { throw Errors.Fail(ErrorCode.PermissionDenied, ClusterAdministrationRequiredMessage); }
+            {
+                throw Errors.Fail(ErrorCode.PermissionDenied, ClusterAdministrationRequiredMessage);
+            }
         }
     }
 
     private void RequireMoveRetireNotCancelled(IKeyValueView view, Guid commandId, PartitionMovePhaseCommand phase)
     {
         if (phase.Stage != PartitionMovePeerStage.Retire)
-        { return; }
+        {
+            return;
+        }
         if (PartitionMoveRetireCancellationStorage.Read(view, phase.Partition, phase.MoveId,
             commandId, Limits.MaxBatchBytes) is not null)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.MissingAuthority);
+        }
     }
 
     private long RequireMoveParentCleanupGeneration(IKeyValueView view, PartitionMoveCheckpointBody body,
@@ -100,7 +112,9 @@ public sealed partial class DatabaseEngine
         }
         var expected = retire ? header.CleanupGeneration : PartitionMoveProtocol.EmptyCount;
         if (body.CleanupGeneration != expected || body.RetireCancellation is not null || body.RetireCancellationAttempt is not null)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.MissingAuthority);
+        }
         return expected;
     }
 

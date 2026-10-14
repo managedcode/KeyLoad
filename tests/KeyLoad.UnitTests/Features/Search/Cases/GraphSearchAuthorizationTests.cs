@@ -42,7 +42,9 @@ internal sealed class GraphSearchAuthorizationTests
         var walk = GraphSearchTestSupport.Walk(
             GraphSearchTestSupport.Vertex(database, GraphSearchTestSupport.Projects, GraphSearchTestSupport.Root))
         with
-        { Labels = [GraphSearchTestSupport.Label] };
+        {
+            Labels = [GraphSearchTestSupport.Label]
+        };
         var search = RetrievalRequest(database);
         var engine = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution());
 

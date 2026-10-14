@@ -25,17 +25,23 @@ internal static class EventVectorFirstAdmitOutcome
             principal.Id, default, JsonSerializer.Serialize(identity, JsonDefaults.Options));
         if (outcome.Incarnation != incarnation || outcome.PolicyEpoch != principal.PolicyEpoch
             || outcome.Fingerprint != NativeOperationFingerprint.Compute(original))
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, Invalid);
+        }
         if (outcome.Result.Error is null)
         {
             RequireResult(outcome.Result.Get<EventVectorFirstIssuanceResult>(), principal, request,
             commandId, incarnation, authorization, admission);
         }
         else if (outcome.Result.NativeValue is not null)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         var raw = EventVectorFirstLookupRows.Read(boundedView, selection.Key, admission);
         if (raw.IsEmpty)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         return (commandId, outcome, raw);
     }
 
@@ -48,7 +54,9 @@ internal static class EventVectorFirstAdmitOutcome
         var selection = CommandOutcomeKeyResolver.Select(boundedView, principal.Id, commandId,
             new CommandOutcomePartitionScope(CommandOutcomeScopeKind.Partition, request.ControlPartition));
         if (selection.Outcome is null)
-        { return (commandId, null, ReadOnlyMemory<byte>.Empty); }
+        {
+            return (commandId, null, ReadOnlyMemory<byte>.Empty);
+        }
         var actual = Read(boundedView, principal, request, incarnation, authorization, admission);
         return (actual.CommandId, actual.Outcome, actual.Raw);
     }
@@ -66,7 +74,9 @@ internal static class EventVectorFirstAdmitOutcome
             || result.Issuance.OriginalPublicCommandId != request.CommandId
             || result.Issuance.MapId != request.MapId
             || result.Issuance.State != EventVectorFirstIssuanceState.Admitted)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         EventVectorParentScopes.Authorize(authorization, principal,
             result.Issuance.OriginalAuthorizedSourceScopes, admission);
         _ = EventVectorFirstIssuanceValidation.RequireRequest(result.Issuance, request, admission);

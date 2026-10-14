@@ -40,7 +40,12 @@ internal static class PartitionMovementLateNativeColdOracle
             await Assert.That(clockAfter >= clockBefore).IsTrue();
             await Assert.That(after.Outcome!.PolicyEpoch).IsEqualTo(principal.PolicyEpoch);
             await Assert.That(after.Outcome.Fingerprint).IsEqualTo(JsonData.Fingerprint(new
-            { original.Id, original.Kind, original.PrincipalId, original.PayloadJson }));
+            {
+                original.Id,
+                original.Kind,
+                original.PrincipalId,
+                original.PayloadJson
+            }));
             var committed = database.Store.Read(view => NativeSerialization.Deserialize<DateTimeOffset>(view.ReadOwnedValue(KeySpace.ClockBytes)!));
             await Assert.That(committed >= clockBefore && committed <= clockAfter).IsTrue();
             await Assert.That(after.Outcome.Incarnation).IsEqualTo(database.Store.Identity.Incarnation);
@@ -81,7 +86,9 @@ internal static class PartitionMovementLateNativeColdOracle
         for (var index = FirstOwner; index < PartitionMovementLateNativeSettings.OwnerCount; index++)
         {
             if (index == captured.OwnerIndex)
-            { continue; }
+            {
+                continue;
+            }
             var node = owners.OpenStopped(index);
             var failures = new List<Exception>();
             ServerFailureObserver.Observe(() => rows.Add(PartitionMovementLateNativeCut.Read(node, captured.Operation).Rows

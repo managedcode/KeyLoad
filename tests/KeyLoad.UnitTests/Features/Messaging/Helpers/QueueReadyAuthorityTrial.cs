@@ -57,7 +57,9 @@ internal static class QueueReadyAuthorityTrial
         QueueLaneRef lane, QueueReadyAuthorityFault fault)
     {
         if (IsNumericReadyFault(fault))
-        { return QueueReadyAuthorityFaultRow.Damage(fixture, lane, fault); }
+        {
+            return QueueReadyAuthorityFaultRow.Damage(fixture, lane, fault);
+        }
         var key = global::KeyLoad.Core.KeySpace.Partition("queue-counters", lane.Partition, lane.Queue);
         var row = fixture.Store.Commit((tx, _) =>
         {
@@ -152,8 +154,8 @@ internal static class QueueReadyAuthorityTrial
                 await QueueReadyAuthorityHealthy.RunAsync(fixture, lane, now.AddSeconds(2), token);
             }, owningFailures);
         }
-        catch (Exception error) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error)) { owningFailures.Add(error); }
-        catch (Exception error) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error)) { owningFailures.Add(error); }
+        catch (Exception error) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error)) { owningFailures.Add(error); }
+        catch (Exception error) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error)) { owningFailures.Add(error); }
         KeyLoad.Server.ServerFailureObserver.ThrowIfAny(owningFailures);
     }
 }

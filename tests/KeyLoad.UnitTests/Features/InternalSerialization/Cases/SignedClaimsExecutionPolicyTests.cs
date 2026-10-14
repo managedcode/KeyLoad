@@ -15,7 +15,10 @@ internal sealed class SignedClaimsExecutionPolicyTests
         var lane = SignedClaimsExecutionPolicyFlow.Lane(database);
         var before = SignedClaimsExecutionPolicyFlow.CaptureLease(database, delivery);
         var inspection = database.Database.InspectMessage(SignedClaimsExecutionPolicyFlow.PrincipalId, lane, delivery.Id)!;
-        var shortOptions = UnitExecutionOptions.NativeClaimsExecution(new() { MaximumTokenCharacters = delivery.Token.Length - 1 });
+        var shortOptions = UnitExecutionOptions.NativeClaimsExecution(new()
+        {
+            MaximumTokenCharacters = delivery.Token.Length - 1
+        });
         var lower = SignedClaimsExecutionPolicyFlow.Borrow(database, shortOptions);
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => lower.Verify<DeliveryClaims>(delivery.Token));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.TokenInvalidated);
@@ -69,7 +72,10 @@ internal sealed class SignedClaimsExecutionPolicyTests
         using var database = new TestDatabase();
         var delivery = SignedClaimsExecutionPolicyFlow.Lease(database);
         var lower = SignedClaimsExecutionPolicyFlow.Borrow(database,
-            UnitExecutionOptions.NativeClaimsExecution(new() { MaximumTokenCharacters = 1 }));
+            UnitExecutionOptions.NativeClaimsExecution(new()
+            {
+                MaximumTokenCharacters = 1
+            }));
         var expected = database.Database.Verify<DeliveryClaims>(delivery.Token);
         await Assert.That(lower.Verify<DeliveryClaims>(delivery.Token, delivery.Token.Length)).IsEqualTo(expected);
         await Assert.That(lower.Sign(expected)).IsEqualTo(delivery.Token);
@@ -89,7 +95,10 @@ internal sealed class SignedClaimsExecutionPolicyTests
         var failure = Assert.ThrowsExactly<InvalidOperationException>(() =>
         {
             using var database = new TestDatabase(directory: directory,
-                claimsExecution: new() { MaximumTokenCharacters = maximumCharacters });
+                claimsExecution: new()
+                {
+                    MaximumTokenCharacters = maximumCharacters
+                });
         });
         await Assert.That(failure.Message).IsEqualTo(NativeClaimsExecutionOptions.ValidationMessage);
         await Assert.That(Directory.Exists(directory)).IsFalse();
@@ -101,7 +110,10 @@ internal sealed class SignedClaimsExecutionPolicyTests
         await Assert.That(UnitExecutionOptions.NativeClaimsExecution().Value.MaximumTokenCharacters).IsEqualTo(8192);
         foreach (var maximumCharacters in new[] { 1, 8192 })
         {
-            var options = UnitExecutionOptions.NativeClaimsExecution(new() { MaximumTokenCharacters = maximumCharacters });
+            var options = UnitExecutionOptions.NativeClaimsExecution(new()
+            {
+                MaximumTokenCharacters = maximumCharacters
+            });
             await Assert.That(options.Value.IsValid()).IsTrue();
             await Assert.That(options.Value.MaximumTokenCharacters).IsEqualTo(maximumCharacters);
         }

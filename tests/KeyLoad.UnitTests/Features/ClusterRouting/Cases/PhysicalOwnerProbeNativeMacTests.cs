@@ -12,7 +12,10 @@ internal sealed class PhysicalOwnerProbeNativeMacTests
         using var outer = new PartitionMovementMac(fixture.Options.Secret.Span, PhysicalOwnerProbeProtocol.MaximumBodyBytes);
         var call = PhysicalOwnerProbeNativeTestValues.Call(fixture);
         var request = PhysicalOwnerProbeNativeTestValues.Request(fixture, call, inner);
-        request = request with { SenderSignature = outer.SignNativeRequest(request) };
+        request = request with
+        {
+            SenderSignature = outer.SignNativeRequest(request)
+        };
         var restored = NativeSerialization.Deserialize<PartitionMovementGrainServiceRequest>(NativeSerialization.Serialize(request));
         var original = PhysicalOwnerProbeWire.DecodeCall(restored.Payload.Span);
         await Assert.That(PhysicalOwnerProbeWire.Encode(original).AsSpan().SequenceEqual(request.Payload.Span)).IsTrue();
@@ -26,7 +29,10 @@ internal sealed class PhysicalOwnerProbeNativeMacTests
         await Assert.That(inner.Verify(restored.Payload.Span, restored.Signature, reply: false)).IsTrue();
         await Assert.That(inner.Verify(restored.Payload.Span, restored.Signature, reply: true)).IsFalse();
         await Assert.That(inner.Verify(restored.Payload.Span, restored.SenderSignature, reply: false)).IsFalse();
-        await Assert.That(outer.VerifyNativeRequest(restored with { SenderSignature = restored.Signature })).IsFalse();
+        await Assert.That(outer.VerifyNativeRequest(restored with
+        {
+            SenderSignature = restored.Signature
+        })).IsFalse();
     }
 
     [Test]
@@ -36,7 +42,10 @@ internal sealed class PhysicalOwnerProbeNativeMacTests
         using var inner = new PhysicalOwnerProbeMac(fixture.Options.Secret.Span);
         using var outer = new PartitionMovementMac(fixture.Options.Secret.Span, PhysicalOwnerProbeProtocol.MaximumBodyBytes);
         var request = PhysicalOwnerProbeNativeTestValues.Request(fixture, PhysicalOwnerProbeNativeTestValues.Call(fixture), inner);
-        request = request with { SenderSignature = outer.SignNativeRequest(request) };
+        request = request with
+        {
+            SenderSignature = outer.SignNativeRequest(request)
+        };
         var changed = new[]
         {
             request with { Channel = PartitionMovementGrainServiceChannel.Outcome },
@@ -50,8 +59,13 @@ internal sealed class PhysicalOwnerProbeNativeMacTests
             request with { Signature = new string('0', 64) }
         };
         foreach (var mutation in changed)
-        { await Assert.That(outer.VerifyNativeRequest(mutation)).IsFalse(); }
-        var altered = changed[^1] with { SenderSignature = outer.SignNativeRequest(changed[^1]) };
+        {
+            await Assert.That(outer.VerifyNativeRequest(mutation)).IsFalse();
+        }
+        var altered = changed[^1] with
+        {
+            SenderSignature = outer.SignNativeRequest(changed[^1])
+        };
         await Assert.That(outer.VerifyNativeRequest(altered)).IsTrue();
         await Assert.That(inner.Verify(altered.Payload.Span, altered.Signature, reply: false)).IsFalse();
     }
@@ -67,12 +81,27 @@ internal sealed class PhysicalOwnerProbeNativeMacTests
         await Assert.That(restored.Payload.IsEmpty).IsTrue();
         await Assert.That(restored.Signature).IsEqualTo(string.Empty);
         await Assert.That(outer.VerifyNativeReply(restored)).IsFalse();
-        var signed = restored with { SenderSignature = outer.SignNativeReply(restored) };
+        var signed = restored with
+        {
+            SenderSignature = outer.SignNativeReply(restored)
+        };
         await Assert.That(outer.VerifyNativeReply(signed)).IsTrue();
-        await Assert.That(outer.VerifyNativeReply(signed with { Nonce = Guid.NewGuid() })).IsFalse();
-        await Assert.That(outer.VerifyNativeReply(signed with { Error = ErrorCode.OwnershipLost })).IsFalse();
-        await Assert.That(outer.VerifyNativeReply(signed with { SafeDetail = string.Empty })).IsFalse();
-        await Assert.That(outer.VerifyNativeReply(signed with { Signature = new string('0', 64) })).IsFalse();
+        await Assert.That(outer.VerifyNativeReply(signed with
+        {
+            Nonce = Guid.NewGuid()
+        })).IsFalse();
+        await Assert.That(outer.VerifyNativeReply(signed with
+        {
+            Error = ErrorCode.OwnershipLost
+        })).IsFalse();
+        await Assert.That(outer.VerifyNativeReply(signed with
+        {
+            SafeDetail = string.Empty
+        })).IsFalse();
+        await Assert.That(outer.VerifyNativeReply(signed with
+        {
+            Signature = new string('0', 64)
+        })).IsFalse();
     }
 
     [Test]
@@ -82,7 +111,10 @@ internal sealed class PhysicalOwnerProbeNativeMacTests
         var inner = new PhysicalOwnerProbeMac(fixture.Options.Secret.Span);
         var outer = new PartitionMovementMac(fixture.Options.Secret.Span, PhysicalOwnerProbeProtocol.MaximumBodyBytes);
         var request = PhysicalOwnerProbeNativeTestValues.Request(fixture, PhysicalOwnerProbeNativeTestValues.Call(fixture), inner);
-        request = request with { SenderSignature = outer.SignNativeRequest(request) };
+        request = request with
+        {
+            SenderSignature = outer.SignNativeRequest(request)
+        };
         inner.Dispose();
         outer.Dispose();
         inner.Dispose();

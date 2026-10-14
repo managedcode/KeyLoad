@@ -43,7 +43,9 @@ internal sealed class SqlOperationByteCounter(int maximumBytes, CancellationToke
     {
         cancellationToken.ThrowIfCancellationRequested();
         if (buffer.Length > maximumBytes - written)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, McpFramingProtocol.CanonicalPayloadExceeded); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, McpFramingProtocol.CanonicalPayloadExceeded);
+        }
         written += buffer.Length;
     }
 }

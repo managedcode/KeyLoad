@@ -6,13 +6,18 @@ internal sealed class RemotePartitionNativeReadClock(Func<long> bytes, RemotePar
     private const long Unobserved = -1;
     private long before = Unobserved;
     private bool armed = true;
-    internal bool Triggered { get; private set; }
+    internal bool Triggered
+    {
+        get; private set;
+    }
     public override long TimestampFrequency => TimeProvider.System.TimestampFrequency;
     public override DateTimeOffset GetUtcNow() => TimeProvider.System.GetUtcNow();
     public override long GetTimestamp()
     {
         if (before == Unobserved)
-        { before = bytes(); }
+        {
+            before = bytes();
+        }
         else if (armed && bytes() > before)
         {
             armed = false;

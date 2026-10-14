@@ -43,7 +43,10 @@ internal sealed class NativeStoreOpenPreflightTests
         files.Compact();
         var snapshotBytes = new FileInfo(files.Source.JournalPath).Length;
         await files.AppendAsync(files.Frame());
-        using var store = new ZoneTreeStore(files.Source.Options with { MaxSnapshotBytes = snapshotBytes }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var store = new ZoneTreeStore(files.Source.Options with
+        {
+            MaxSnapshotBytes = snapshotBytes
+        }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         await Assert.That(store.Position).IsEqualTo(NativeStoreOpenPreflightFiles.TailPosition);
         await Assert.That(store.Read(view => view.ReadOwnedValue(files.Source.Key)))
             .IsEquivalentTo(NativeStoreOpenPreflightFiles.TailValue, CollectionOrdering.Matching);
@@ -193,4 +196,7 @@ internal sealed class NativeStoreOpenPreflightTests
     }
 }
 
-internal enum NativeStoreOpenPreflightDefect { Checksum, Sequence, Semantics, UnsupportedTornPayload, Checkpoint, PayloadLengthMismatch }
+internal enum NativeStoreOpenPreflightDefect
+{
+    Checksum, Sequence, Semantics, UnsupportedTornPayload, Checkpoint, PayloadLengthMismatch
+}

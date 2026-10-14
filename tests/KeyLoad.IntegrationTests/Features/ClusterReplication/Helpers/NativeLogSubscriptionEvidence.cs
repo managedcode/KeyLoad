@@ -2,7 +2,10 @@ using System.Globalization;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterReplication;
 
-internal enum NativeLogSubscriptionPhase { Running, Completed, Canceled, Faulted }
+internal enum NativeLogSubscriptionPhase
+{
+    Running, Completed, Canceled, Faulted
+}
 
 internal sealed class NativeLogSubscriptionEvidence(string nodeName)
 {
@@ -28,7 +31,9 @@ internal sealed class NativeLogSubscriptionEvidence(string nodeName)
         lock (gate)
         {
             if (state == NativeLogSubscriptionPhase.Running)
-            { state = terminal; }
+            {
+                state = terminal;
+            }
         }
     }
 

@@ -29,6 +29,8 @@ internal static class PlacementCapacityWitnessValidation
                 || !claims.Plan.CapacityDigests.Contains(item.OriginalSnapshotDigest, StringComparer.Ordinal))
             || claims.Plan.SampledAt != originals.Min(item => item.OriginalSampledAt)
             || claims.Plan.ExpiresAt > originals.Min(item => item.OriginalSampleDeadline))
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, TenantPlacementPolicyProtocol.ExpiredPlan); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, TenantPlacementPolicyProtocol.ExpiredPlan);
+        }
     }
 }

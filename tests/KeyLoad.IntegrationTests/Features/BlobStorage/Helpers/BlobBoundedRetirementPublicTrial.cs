@@ -54,7 +54,11 @@ internal static class BlobBoundedRetirementPublicTrial
         await SqlRf3Protocol.EqualAsync(new BlobReclaimResult(old.Begin.UploadId, 1, 1, (long)BlobLimits.RawPartBytes, false), reclaimed.Value);
         await Assert.That(reclaimed.Receipt.CommandId).IsEqualTo(first.CommandId);
         await Assert.That(reclaimed.Receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
-        var remaining = old.Written[1].Value with { Status = BlobUploadStatus.Complete, StoredBytes = 1L };
+        var remaining = old.Written[1].Value with
+        {
+            Status = BlobUploadStatus.Complete,
+            StoredBytes = 1L
+        };
         async Task ObservePartial()
         {
             await BlobBoundedRetirementPublicAssertions.HeadAsync(callers, tombstone, token);

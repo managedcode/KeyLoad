@@ -23,7 +23,9 @@ internal static class GenerationVisibilityPartialScanFlow
         await GenerationVisibilityFlow.ConfigureAsync(db, new(Reader, GenerationVisibilityFlow.Tenant,
             [new(GenerationVisibilityFlow.DatabaseScope, TeamRowPolicyFlow.Collection,
                 Capability.DocumentsRead | Capability.Query)], [])
-        { PolicyEpoch = GenerationVisibilityFlow.OriginalEpoch });
+        {
+            PolicyEpoch = GenerationVisibilityFlow.OriginalEpoch
+        });
         var before = memory.GetSnapshot();
         var limited = CreateOwner(db);
         RowVisibilityCache? cache = null;
@@ -34,11 +36,20 @@ internal static class GenerationVisibilityPartialScanFlow
             await RefusedAsync(db, limited, cache, memory, token);
         }
         catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null)
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         finally
-        { if (cache is not null) { RowVisibilityFailureLedger.Capture(cache.Dispose, failures); } }
+        {
+            if (cache is not null)
+            {
+                RowVisibilityFailureLedger.Capture(cache.Dispose, failures);
+            }
+        }
         RowVisibilityFailureLedger.Throw(failures);
         await Assert.That(memory.GetSnapshot()).IsEqualTo(before);
         await HealthyAsync(db.Database, db.Store, db.Partition, GenerationVisibilityFlow.InitialRevision,
@@ -47,7 +58,10 @@ internal static class GenerationVisibilityPartialScanFlow
 
     private static DatabaseEngine CreateOwner(TestDatabase db)
         => new(db.Store, db.Database.Authorization,
-            UnitExecutionOptions.DatabaseLimits(db.Database.Limits with { MaxScanRecords = PartialScanRecords }),
+            UnitExecutionOptions.DatabaseLimits(db.Database.Limits with
+            {
+                MaxScanRecords = PartialScanRecords
+            }),
             UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(),
             UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(),
             UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(),
@@ -65,7 +79,9 @@ internal static class GenerationVisibilityPartialScanFlow
         var scope = Scope(limited, db.Partition);
         var admitted = memory.GetSnapshot();
         using (var draft = cache.Begin(scope) ?? throw new InvalidOperationException(MissingDraft))
-        { draft.AddVisible(TeamRowPolicyFlow.ForeignTeam); }
+        {
+            draft.AddVisible(TeamRowPolicyFlow.ForeignTeam);
+        }
         await Assert.That(memory.GetSnapshot()).IsEqualTo(admitted);
         var image = TeamRowPolicyAssertions.Image(db.Store);
         var identity = db.Store.Identity;

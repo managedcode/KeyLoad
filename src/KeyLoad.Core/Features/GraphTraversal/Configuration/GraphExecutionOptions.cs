@@ -39,6 +39,8 @@ public sealed record GraphExecutionOptions
     public void Validate()
     {
         if (!IsValid())
-        { throw new InvalidOperationException(ValidationMessage); }
+        {
+            throw new InvalidOperationException(ValidationMessage);
+        }
     }
 }

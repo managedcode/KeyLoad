@@ -1,8 +1,8 @@
 using System.Security.Cryptography;
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
@@ -24,7 +24,9 @@ internal static class PartitionMovementCaptureProofVerifier
             || !PhysicalOwnerEntryValidation.SameOwner(grant.ReceiverOwner, original.OriginalReceiverOwner)
             || witness.OriginalReplyBytes.IsEmpty || witness.OriginalReplyBytes.Length > database.Limits.MaxBatchBytes
             || string.IsNullOrWhiteSpace(witness.OriginalReplySignature))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof);
+        }
         var key = Convert.FromBase64String(original.OriginalReceiverOwner.PhysicalShardId == options.PhysicalShardId
             && original.OriginalReceiverOwner.Incarnation == database.Store.Identity.Incarnation
             ? options.PeerSecret : options.PhysicalGroupTrust.ForeignPeerSecret
@@ -33,7 +35,9 @@ internal static class PartitionMovementCaptureProofVerifier
         {
             using var mac = new PartitionMovementMac(key, database.Limits.MaxBatchBytes);
             if (!mac.Verify(witness.OriginalReplyBytes.Span, witness.OriginalReplySignature, reply: true))
-            { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof); }
+            {
+                throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof);
+            }
         }
         finally { CryptographicOperations.ZeroMemory(key); }
         work.Check();
@@ -44,7 +48,9 @@ internal static class PartitionMovementCaptureProofVerifier
             || !original.OriginalReceiverOwner.VoterIds.Contains(reply.Discovery.VoterId)
             || reply.Discovery.Incarnation != original.OriginalReceiverOwner.Incarnation
             || reply.Discovery.ClusterId != options.ClusterId || reply.Reply.Error is not null)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof);
+        }
         var handle = GrainNativePayload.Read<GrainValue>(reply.Reply.Payload).Value as PartitionMovementCaptureHandle
             ?? throw Errors.Fail(ErrorCode.Corruption, PartitionMovementProtocol.InvalidProof);
         RequireDescriptor(database, body, original, handle);
@@ -69,6 +75,8 @@ internal static class PartitionMovementCaptureProofVerifier
                 && !NativeSerialization.Serialize(retained).AsSpan().SequenceEqual(NativeSerialization.Serialize(descriptor))
             || original.OriginalCaptureWitness is { } proof
                 && !NativeSerialization.Serialize(proof).AsSpan().SequenceEqual(NativeSerialization.Serialize(body.OriginalCaptureWitness)))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof);
+        }
     }
 }

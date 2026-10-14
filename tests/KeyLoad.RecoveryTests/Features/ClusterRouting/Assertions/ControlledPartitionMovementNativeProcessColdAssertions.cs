@@ -90,7 +90,10 @@ internal static class ControlledPartitionMovementNativeProcessColdAssertions
                     && original.NativePayload.Span.SequenceEqual(replay.NativePayload.Span);
                 var operationEqual = original is not null && replay is not null
                     && JsonDefaults.Serialize(original).AsSpan().SequenceEqual(
-                        JsonDefaults.Serialize(replay with { EvaluatedAt = original.EvaluatedAt }));
+                        JsonDefaults.Serialize(replay with
+                        {
+                            EvaluatedAt = original.EvaluatedAt
+                        }));
                 var kind = replay is null ? MissingOperationKind : (int)replay.Kind;
                 return Console.Error.WriteLineAsync(FormattableString.Invariant($"{TailPrefix}{OwnerField}{owner}{EntryField}{entry.Index}{HasOperationField}{replay is not null}{KindField}{kind}{PriorAuthorityField}{original is not null}{PayloadField}{payloadEqual}{OperationField}{operationEqual}"));
             }, failures);
@@ -103,7 +106,9 @@ internal static class ControlledPartitionMovementNativeProcessColdAssertions
         await Assert.That(before.Length).IsEqualTo(Owners);
         await Assert.That(after.Length).IsEqualTo(Owners);
         for (var index = FirstOwner; index < Owners; index++)
-        { await OwnerAsync(before[index], after[index]); }
+        {
+            await OwnerAsync(before[index], after[index]);
+        }
     }
 
     private static async Task OwnerAsync(ControlledPartitionMovementNativeProcessSnapshot before,
@@ -144,7 +149,9 @@ internal static class ControlledPartitionMovementNativeProcessColdAssertions
         ControlledPartitionMovementNativeProcessSnapshot after, int entryOffset)
     {
         if (after.Entries[entryOffset].Operation is not { } replay)
-        { return; }
+        {
+            return;
+        }
         await Assert.That(replay.Kind is OperationKind.BootstrapPhysicalShardCatalog or OperationKind.RegisterPhysicalOwner).IsTrue();
         var original = before.Entries.Select(entry => entry.Operation)
             .FirstOrDefault(operation => operation is not null && operation.Id == replay.Id)
@@ -152,6 +159,9 @@ internal static class ControlledPartitionMovementNativeProcessColdAssertions
         await Assert.That(original.Kind).IsEqualTo(replay.Kind);
         await Assert.That(replay.EvaluatedAt >= original.EvaluatedAt).IsTrue();
         await Assert.That(replay.NativePayload.Span.SequenceEqual(original.NativePayload.Span)).IsTrue();
-        await EqualAsync(original, replay with { EvaluatedAt = original.EvaluatedAt });
+        await EqualAsync(original, replay with
+        {
+            EvaluatedAt = original.EvaluatedAt
+        });
     }
 }

@@ -9,9 +9,15 @@ internal sealed class BlobScopedBytesR42State(int index, BlobRef blob, Guid uplo
     internal BlobCommitResult<BlobUploadInfo> Begun { get; set; } = null!;
     internal WriteBlobPartRequest[] Parts { get; } = new WriteBlobPartRequest[2];
     internal BlobCommitResult<BlobUploadInfo>[] Written { get; } = new BlobCommitResult<BlobUploadInfo>[2];
-    internal BlobUploadInfo? Current { get; set; }
+    internal BlobUploadInfo? Current
+    {
+        get; set;
+    }
     internal CompleteBlobUploadRequest Complete { get; set; } = null!;
-    internal BlobCommitResult<BlobMetadata>? Published { get; set; }
+    internal BlobCommitResult<BlobMetadata>? Published
+    {
+        get; set;
+    }
     internal AbortBlobUploadRequest Abort { get; set; } = null!;
     internal BlobCommitResult<BlobUploadInfo> Aborted { get; set; } = null!;
     internal ReclaimBlobRequest[] Reclaims { get; } = new ReclaimBlobRequest[2];

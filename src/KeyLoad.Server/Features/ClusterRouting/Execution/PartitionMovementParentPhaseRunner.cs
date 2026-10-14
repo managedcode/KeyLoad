@@ -1,7 +1,7 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
-using KeyLoad.Orleans;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
@@ -21,7 +21,9 @@ internal sealed class PartitionMovementParentPhaseRunner(PartitionMovementReceiv
         if (before.Pending is not null && (request.Mode != PartitionMoveMode.Abort
                 || intended.Stage != PartitionMovePeerStage.ControlBeginAbort || before.Interrupted is not null)
             || intended.Stage == PartitionMovePeerStage.Capture)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+        }
         var cleanupGeneration = role is PartitionMovementParentPhaseRole.RetireGrant
             or PartitionMovementParentPhaseRole.Retire or PartitionMovementParentPhaseRole.RetireAcknowledge
             ? before.Header?.CleanupGeneration
@@ -51,7 +53,9 @@ internal sealed class PartitionMovementParentPhaseRunner(PartitionMovementReceiv
     {
         var original = PartitionMovementParentPromotionValidation.Require(state);
         if (original.Stage == PartitionMovePeerStage.Capture)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+        }
         return ExecuteFirstAdmittedAsync(principalId, request, state, original, work, phaseObservation, cancellationToken);
     }
 
@@ -84,36 +88,56 @@ internal sealed class PartitionMovementParentPhaseRunner(PartitionMovementReceiv
                     cancellationToken).ConfigureAwait(false)
                 : (await client.DispatchParentOriginalAsync(original, dispatch!, work, cancellationToken).ConfigureAwait(false)).Reply;
             if (reply.Error is { } code)
-            { throw Errors.Fail(code, reply.SafeDetail ?? PartitionMovementProtocol.Unavailable); }
+            {
+                throw Errors.Fail(code, reply.SafeDetail ?? PartitionMovementProtocol.Unavailable);
+            }
         }, failures).ConfigureAwait(false);
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             if (original.Stage == PartitionMovePeerStage.ControlAuthorize)
-            { await observer.ObserveAuthorizationAsync(principalId, request, current, work, cancellationToken).ConfigureAwait(false); }
+            {
+                await observer.ObserveAuthorizationAsync(principalId, request, current, work, cancellationToken).ConfigureAwait(false);
+            }
             else
-            { await observer.ObserveAsync(principalId, request, current, work, cancellationToken).ConfigureAwait(false); }
+            {
+                await observer.ObserveAsync(principalId, request, current, work, cancellationToken).ConfigureAwait(false);
+            }
         }, failures).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny(failures);
         work.Check();
         var settled = await receiver.ReadParentStateAsync(principalId, request, phaseId,
             PartitionMovementParentDeadline.Expiry(work, clock, routing), work, cancellationToken).ConfigureAwait(false);
+        RequireSettledPhase(settled, phaseId, original, intended);
+        return settled;
+    }
+
+    private static void RequireSettledPhase(PartitionMoveParentState settled, Guid phaseId,
+        PartitionMoveParentPhase original, PartitionMovePhaseCommand intended)
+    {
         var actual = settled.Selected
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
         if (actual.OriginalPhaseCommandId != phaseId
             || actual.OriginalResult is null || actual.ObservationCheckpointReceipt is null)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+        }
         if (actual.OriginalResult.Error is { } error)
-        { throw Errors.Fail(error, actual.OriginalResult.SafeDetail ?? PartitionMovementProtocol.Unavailable); }
+        {
+            throw Errors.Fail(error, actual.OriginalResult.SafeDetail ?? PartitionMovementProtocol.Unavailable);
+        }
         if (original.Stage == PartitionMovePeerStage.ControlAuthorize)
         {
             var issued = NativeSerialization.Deserialize<PartitionMoveAuthorizeBody>(intended.Body.Span);
             if (settled.Pending is not { } promoted || promoted.OriginalPhaseCommandId != issued.PhaseCommandId
                 || promoted.OriginalExpiresAt != issued.ExpiresAt || promoted.OriginalResult is not null)
-            { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
+            {
+                throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+            }
         }
         else if (settled.Pending is not null)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
-        return settled;
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+        }
     }
 
     internal static PartitionMoveParentPhase RequireFirstAdmission(PartitionMoveParentState current,
@@ -127,7 +151,9 @@ internal sealed class PartitionMovementParentPhaseRunner(PartitionMovementReceiv
             || original.OriginalPhase is null
             || !NativeSerialization.Serialize(original.OriginalPhase).AsSpan()
                 .SequenceEqual(NativeSerialization.Serialize(intended)))
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMovementProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMovementProtocol.InvalidProof);
+        }
         return original;
     }
 }

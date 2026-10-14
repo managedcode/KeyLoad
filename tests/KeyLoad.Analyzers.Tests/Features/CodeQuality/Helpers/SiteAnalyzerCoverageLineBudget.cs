@@ -26,7 +26,9 @@ internal static class SiteAnalyzerCoverageLineBudget
         ref int totalCovered)
     {
         if (coveredLinePercent is null || !sources.Contains(SiteAnalyzerCoverageTokens.CriticalPipelineSource, StringComparer.Ordinal))
-        { return; }
+        {
+            return;
+        }
         var protectedLines = Math.Min(linesPerSource, totalCovered);
         result.Add(SiteAnalyzerCoverageTokens.CriticalPipelineSource, protectedLines);
         totalCovered -= protectedLines;
@@ -44,7 +46,9 @@ internal static class SiteAnalyzerCoverageLineBudget
         foreach (var source in sources)
         {
             if (result.ContainsKey(source))
-            { continue; }
+            {
+                continue;
+            }
             if (coveredLinePercent is not null)
             {
                 var coveredHere = Math.Min(linesPerSource, totalCovered);

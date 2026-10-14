@@ -41,9 +41,13 @@ internal static class PartitionMovementControlledBlobLifecycleRf3Calls
         {
             await Assert.That(actual.IsFailed).IsTrue();
             if (actual.Value is JsonElement json)
-            { await Assert.That(json.ValueKind).IsEqualTo(JsonValueKind.Undefined); }
+            {
+                await Assert.That(json.ValueKind).IsEqualTo(JsonValueKind.Undefined);
+            }
             else
-            { await Assert.That(actual.Value).IsNull(); }
+            {
+                await Assert.That(actual.Value).IsNull();
+            }
             await Assert.That(actual.Problem?.ErrorCode).IsEqualTo(denied.ToString());
             return;
         }

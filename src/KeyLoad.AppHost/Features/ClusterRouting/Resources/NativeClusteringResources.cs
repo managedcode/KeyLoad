@@ -1,5 +1,5 @@
 using Aspire.Hosting.Azure;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.AppHost.Features.ClusterRouting;
 

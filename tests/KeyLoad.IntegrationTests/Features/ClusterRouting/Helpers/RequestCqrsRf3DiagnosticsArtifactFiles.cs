@@ -24,14 +24,18 @@ internal static class RequestCqrsRf3DiagnosticsArtifactFiles
     internal static void CreateDataRootDirectory(string path)
     {
         if (Directory.Exists(path) || File.Exists(path))
-        { throw new InvalidOperationException(ExistingDataRootMessage); }
+        {
+            throw new InvalidOperationException(ExistingDataRootMessage);
+        }
         Directory.CreateDirectory(path);
     }
 
     internal static void RestrictDataRoot(string path)
     {
         if (!OperatingSystem.IsWindows())
-        { File.SetUnixFileMode(path, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute); }
+        {
+            File.SetUnixFileMode(path, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+        }
     }
 
     internal static string[] CreateAppHostArguments(string dataRoot)
@@ -48,16 +52,22 @@ internal static class RequestCqrsRf3DiagnosticsArtifactFiles
         diagnostics.SaveFailureEvidence(failure);
         var written = failure.Data[ArtifactDataKey] as string;
         if (!string.Equals(written, artifactPath, StringComparison.Ordinal))
-        { throw new InvalidOperationException("The diagnostics artifact path did not match the owned wave."); }
+        {
+            throw new InvalidOperationException("The diagnostics artifact path did not match the owned wave.");
+        }
         var bytes = await File.ReadAllBytesAsync(artifactPath, cancellationToken).ConfigureAwait(false);
         if (bytes.Length > MaximumArtifactBytes)
-        { throw new InvalidOperationException("The diagnostics artifact exceeded its frozen byte bound."); }
+        {
+            throw new InvalidOperationException("The diagnostics artifact exceeded its frozen byte bound.");
+        }
         return bytes;
     }
 
     internal static void DeleteOwned(string? artifactPath, List<Exception> failures)
     {
         if (artifactPath is not null && File.Exists(artifactPath))
-        { ServerFailureObserver.Observe(() => File.Delete(artifactPath), failures); }
+        {
+            ServerFailureObserver.Observe(() => File.Delete(artifactPath), failures);
+        }
     }
 }

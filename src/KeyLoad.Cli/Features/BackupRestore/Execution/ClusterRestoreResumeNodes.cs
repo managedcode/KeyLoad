@@ -14,21 +14,30 @@ internal static class ClusterRestoreResumeNodes
         var destination = runtime.Plan.DestinationPath;
         var published = Directory.Exists(destination) && Directory.EnumerateFileSystemEntries(destination).Any();
         if (published && Directory.Exists(stage))
-        { throw Errors.Fail(ErrorCode.Conflict, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, Invalid);
+        }
         var root = published ? destination : stage;
         var original = ClusterRestoreProgressOwner.Read(runtime, operationRoot, root);
         if (published)
         {
             if (original.PublicationState == ClusterRestorePublicationState.Admitted)
-            { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+            }
             var actual = ClusterRestoreNativeSlots.RequireAll(runtime, destination);
             RequireSame(original.SlotObservations, actual);
             if (original.TerminalReceipt is { } terminal)
-            { RequireReceipt(runtime, terminal); return terminal; }
+            {
+                RequireReceipt(runtime, terminal);
+                return terminal;
+            }
             return Terminal(runtime, operationRoot, original, started);
         }
         if (original.PublicationState == ClusterRestorePublicationState.Published)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         if (original.PublicationState == ClusterRestorePublicationState.Ready)
         {
             ClusterRestoreResumePublication.Publish(runtime, original, stage);
@@ -74,7 +83,9 @@ internal static class ClusterRestoreResumeNodes
             var configured = runtime.Configuration.Value.Nodes.Single(value => value.SourceOwnerId == slot.SourceOwnerId
                 && value.RelativeDataDirectory == slot.StageName);
             if (!mapping.Target.VoterIds.Contains(configured.VoterId, StringComparer.Ordinal))
-            { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, Invalid);
+            }
             return new ClusterRestoreNodeReceipt(slot.SourceOwnerId, slot.TargetOwnerId, configured.VoterId,
                 slot.StageName, slot.TargetNodeId, slot.TargetIncarnation, DispatchPaused: true);
         }).ToImmutableArray();
@@ -83,14 +94,20 @@ internal static class ClusterRestoreResumeNodes
         ImmutableArray<NativeCatalogRestoreSlotCompletion> actual)
     {
         if (expected.Length != actual.Length)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         foreach (var pair in expected.Zip(actual))
-        { ClusterRestoreNativeSlots.RequireSame(pair.First, pair.Second); }
+        {
+            ClusterRestoreNativeSlots.RequireSame(pair.First, pair.Second);
+        }
     }
 
     private static void RequireReceipt(ClusterRestoreOperationRuntime runtime, ClusterRestoreExecutionReceipt original)
     {
         if (original.CaptureId != runtime.Plan.CaptureId || !original.Nodes.SequenceEqual(Nodes(runtime)))
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
     }
 }

@@ -101,7 +101,10 @@ internal static class IsolatedKeyLoadPublicRegressionMessaging
         await Assert.That(acknowledged.PayloadJson).IsNull();
         await Assert.That(acknowledged.HeadersJson).IsNull();
         await IsolatedKeyLoadPublicRegressionAssertions.ErrorAsync(
-            await sdk.CompleteAsync(command with { CommandId = Guid.NewGuid() }, token), ErrorCode.StaleLease);
+            await sdk.CompleteAsync(command with
+            {
+                CommandId = Guid.NewGuid()
+            }, token), ErrorCode.StaleLease);
         await Assert.That((await IsolatedKeyLoadPublicRegressionAssertions.SuccessAsync(
             await sdk.ReceiveAsync(new(Guid.NewGuid(), scenario.Lane), token))).Deliveries).IsEmpty();
     }

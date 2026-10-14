@@ -93,17 +93,26 @@ internal sealed class DocumentSessionReadTests
             [new(db.Partition.DatabaseId, Collection, Capability.DocumentsRead)], []);
         db.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(principal)).Get<PrincipalRecord>();
         await LiteralAsync(db.Database.GetDocument(Reader, reference, receipt.Token), reference, FirstJson, First);
-        var revoked = principal with { Grants = [], PolicyEpoch = principal.PolicyEpoch + First };
+        var revoked = principal with
+        {
+            Grants = [],
+            PolicyEpoch = principal.PolicyEpoch + First
+        };
         db.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(revoked)).Get<PrincipalRecord>();
         var before = Snapshot(db);
         var position = db.Store.Position;
         var denied = Assert.ThrowsExactly<KeyLoadException>(() => db.Database.GetDocument(Reader, reference,
-            receipt.Token with { Incarnation = Guid.NewGuid() }));
+            receipt.Token with
+            {
+                Incarnation = Guid.NewGuid()
+            }));
         await Assert.That(denied.Code).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(Snapshot(db)).IsEquivalentTo(before, CollectionOrdering.Matching);
         await Assert.That(db.Store.Position).IsEqualTo(position);
         db.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(principal with
-        { PolicyEpoch = revoked.PolicyEpoch + First })).Get<PrincipalRecord>();
+        {
+            PolicyEpoch = revoked.PolicyEpoch + First
+        })).Get<PrincipalRecord>();
         await LiteralAsync(db.Database.GetDocument(Reader, reference, receipt.Token), reference, FirstJson, First);
     }
 
@@ -168,7 +177,9 @@ internal sealed class DocumentSessionReadTests
     {
         var page = view.Scan([], SnapshotBound);
         if (page.HasMore)
-        { throw new InvalidOperationException("The complete session-read fixture exceeds its native snapshot bound."); }
+        {
+            throw new InvalidOperationException("The complete session-read fixture exceeds its native snapshot bound.");
+        }
         return page.Records.Select(record => (Convert.ToHexString(record.Key.Span),
             Convert.ToHexString(record.Value.Span))).ToArray();
     });

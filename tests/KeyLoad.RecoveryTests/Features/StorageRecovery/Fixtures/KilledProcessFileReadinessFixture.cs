@@ -34,7 +34,9 @@ internal sealed class KilledProcessFileReadinessFixture : IAsyncDisposable
         catch (Exception)
         {
             try
-            { DeleteStoreRoot(); }
+            {
+                DeleteStoreRoot();
+            }
             catch (IOException) { }
             catch (UnauthorizedAccessException) { }
             cancellation.Dispose();
@@ -42,7 +44,10 @@ internal sealed class KilledProcessFileReadinessFixture : IAsyncDisposable
         }
     }
 
-    internal string Root { get; }
+    internal string Root
+    {
+        get;
+    }
 
     internal void HoldFile(string relativePath) => heldFile = new FileStream(
         Path.Combine(Root, relativePath), FileMode.Open, FileAccess.ReadWrite, FileShare.None);
@@ -97,7 +102,9 @@ internal sealed class KilledProcessFileReadinessFixture : IAsyncDisposable
         {
             preservingOriginalFailure = true;
             try
-            { await DisposeAsync(); }
+            {
+                await DisposeAsync();
+            }
             catch (IOException) { }
             catch (OperationCanceledException) { }
             catch (AggregateException) { }
@@ -129,14 +136,18 @@ internal sealed class KilledProcessFileReadinessFixture : IAsyncDisposable
     private async Task CancelReadinessAsync(Action<Exception> captureFailure)
     {
         try
-        { await cancellation.CancelAsync(); }
+        {
+            await cancellation.CancelAsync();
+        }
         catch (ObjectDisposedException error) { captureFailure(error); }
     }
 
     private void ReleaseHeldFile(ref Exception? cleanupFailure)
     {
         try
-        { ReleaseFile(); }
+        {
+            ReleaseFile();
+        }
         catch (IOException error) { cleanupFailure ??= error; }
         catch (ObjectDisposedException error) { cleanupFailure ??= error; }
     }
@@ -149,7 +160,9 @@ internal sealed class KilledProcessFileReadinessFixture : IAsyncDisposable
         }
 
         try
-        { await readiness; }
+        {
+            await readiness;
+        }
         catch (OperationCanceledException) when (cancellation.IsCancellationRequested) { }
         catch (IOException error) when (preservingOriginalFailure) { captureFailure(error); }
         catch (AggregateException error) when (preservingOriginalFailure) { captureFailure(error); }
@@ -159,7 +172,9 @@ internal sealed class KilledProcessFileReadinessFixture : IAsyncDisposable
     private void DeleteRoot(ref Exception? cleanupFailure)
     {
         try
-        { DeleteStoreRoot(); }
+        {
+            DeleteStoreRoot();
+        }
         catch (IOException error) { cleanupFailure ??= error; }
         catch (UnauthorizedAccessException error) { cleanupFailure ??= error; }
     }

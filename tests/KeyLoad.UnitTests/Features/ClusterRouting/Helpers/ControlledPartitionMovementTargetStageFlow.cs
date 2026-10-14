@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
 
@@ -52,7 +52,13 @@ internal static class ControlledPartitionMovementTargetStageFlow
             var originalPosition = target.Store.Position;
             var originalIndex = target.Journal.Log.State.LastIndex;
             var replay = await ControlledPartitionMovementVerifiedSubmit.SubmitAsync(target, targetRuntime,
-                targetAdmission, request with { Envelope = request.Envelope with { Nonce = Guid.NewGuid() } },
+                targetAdmission, request with
+                {
+                    Envelope = request.Envelope with
+                    {
+                        Nonce = Guid.NewGuid()
+                    }
+                },
                 cancellationToken);
             await Assert.That(NativeSerialization.Serialize(replay).SequenceEqual(originalBytes)).IsTrue();
             await Assert.That(target.Store.Position).IsEqualTo(originalPosition);

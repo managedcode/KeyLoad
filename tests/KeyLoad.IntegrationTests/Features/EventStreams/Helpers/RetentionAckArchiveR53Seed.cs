@@ -39,7 +39,12 @@ internal static class RetentionAckArchiveR53Seed
         var expected = state.Claimed with
         {
             Deliveries = state.Claimed.Deliveries.Select((delivery, i) =>
-            delivery with { Event = state.Page.Events[i], Attempt = 1, LeaseVersion = 1 }).ToImmutableArray()
+            delivery with
+            {
+                Event = state.Page.Events[i],
+                Attempt = 1,
+                LeaseVersion = 1
+            }).ToImmutableArray()
         };
         await SqlRf3Protocol.EqualAsync(expected, state.Claimed);
         await Assert.That(state.Claimed.Token.AtomicPartitionId).IsEqualTo(original.Partition.AtomicPartitionId);

@@ -92,9 +92,15 @@ internal sealed class PackedAnnValidationTests
             [new float[4_096], new float[4_096]]);
         var records = PackedAnnTestData.Load(database, metric);
         await AssertBudgetExceeded(() => PackedAnnIndex.Build(space, records,
-            UnitExecutionOptions.PackedAnn(new() { MaxRecords = 1 }), PackedAnnIndexTestSupport.Budget(database)));
+            UnitExecutionOptions.PackedAnn(new()
+            {
+                MaxRecords = 1
+            }), PackedAnnIndexTestSupport.Budget(database)));
         await AssertBudgetExceeded(() => PackedAnnIndex.Build(space, records,
-            UnitExecutionOptions.PackedAnn(new() { MaxIndexBytes = 1_024 }), PackedAnnIndexTestSupport.Budget(database)));
+            UnitExecutionOptions.PackedAnn(new()
+            {
+                MaxIndexBytes = 1_024
+            }), PackedAnnIndexTestSupport.Budget(database)));
         var queryScratchLimited = new PackedAnnOptions
         {
             Connections = 4,

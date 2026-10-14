@@ -82,7 +82,9 @@ internal sealed class McpOutputSchemaTests
             await Assert.That(McpSchemaInspector.HasType(result, McpSchemaInspector.Null)).IsEqualTo(expected);
             var field = NullableDomainField(descriptor.Name);
             if (field is null)
-            { continue; }
+            {
+                continue;
+            }
             var (_, response) = ResultSchema(descriptor.Name);
             var properties = response.GetProperty(McpSchemaInspector.Properties);
             await Assert.That(properties.EnumerateObject().Select(property => property.Name))
@@ -167,7 +169,9 @@ internal sealed class McpOutputSchemaTests
         var result = descriptor.OutputSchema.GetProperty(McpSchemaInspector.OneOf)[0]
             .GetProperty(McpSchemaInspector.Properties).GetProperty(McpSchemaInspector.Result);
         if (operationName == McpCatalogExpectations.CredentialsConfigure)
-        { return (descriptor.OutputSchema, result); }
+        {
+            return (descriptor.OutputSchema, result);
+        }
         var reference = McpSchemaInspector.References(result).First();
         return (descriptor.OutputSchema, McpSchemaInspector.Resolve(descriptor.OutputSchema, reference));
     }
@@ -175,20 +179,26 @@ internal sealed class McpOutputSchemaTests
     private static bool ResolvesToType(JsonElement root, JsonElement schema, string type)
     {
         if (McpSchemaInspector.HasType(schema, type))
-        { return true; }
+        {
+            return true;
+        }
         return McpSchemaInspector.References(schema).Any(pointer => McpSchemaInspector.HasType(McpSchemaInspector.Resolve(root, pointer), type));
     }
 
     private static bool HasEnumSchema(JsonElement root, JsonElement schema)
     {
         if (schema.ValueKind == JsonValueKind.Object && schema.TryGetProperty(McpSchemaInspector.Enum, out _))
-        { return true; }
+        {
+            return true;
+        }
         if (schema.ValueKind == JsonValueKind.Array)
         {
             return schema.EnumerateArray().Any(item => HasEnumSchema(root, item));
         }
         if (schema.ValueKind != JsonValueKind.Object)
-        { return false; }
+        {
+            return false;
+        }
         return schema.EnumerateObject().Where(property => property.Name != McpSchemaInspector.Ref)
                 .Any(property => HasEnumSchema(root, property.Value)) ||
             McpSchemaInspector.References(schema).Any(pointer => HasEnumSchema(root, McpSchemaInspector.Resolve(root, pointer)));

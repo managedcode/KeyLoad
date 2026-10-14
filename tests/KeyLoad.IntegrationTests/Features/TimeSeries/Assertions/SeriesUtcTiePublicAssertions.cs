@@ -9,11 +9,15 @@ internal static class SeriesUtcTiePublicAssertions
     {
         var rows = new List<SampleRecord>();
         if (!state.Purged)
-        { rows.Add(new(TimeSeriesRf3Scenario.Series, state.Original[0], 1L, tags)); }
+        {
+            rows.Add(new(TimeSeriesRf3Scenario.Series, state.Original[0], 1L, tags));
+        }
         rows.Add(new(TimeSeriesRf3Scenario.Series, state.Original[1], 2L, tags));
         rows.Add(new(TimeSeriesRf3Scenario.Series, state.Original[2], 3L, tags));
         if (state.Fresh)
-        { rows.Add(new(TimeSeriesRf3Scenario.Series, SeriesUtcTiePublicSeed.FreshSample(), 5L, tags)); }
+        {
+            rows.Add(new(TimeSeriesRf3Scenario.Series, SeriesUtcTiePublicSeed.FreshSample(), 5L, tags));
+        }
         rows.Add(new(TimeSeriesRf3Scenario.Series, state.Original[3], 4L, tags));
         return rows.ToArray();
     }

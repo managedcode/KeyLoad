@@ -32,7 +32,9 @@ internal sealed class RequestCqrsRf3FollowerRestartTests
             "artifacts", "qualification", "cluster-routing-c1-follower-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(root);
         if (!OperatingSystem.IsWindows())
-        { File.SetUnixFileMode(root, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute); }
+        {
+            File.SetUnixFileMode(root, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+        }
         return root;
     }
 }
@@ -69,7 +71,9 @@ internal sealed class RequestCqrsRf3FollowerRun(string dataRoot, NodeEpochRf3Pro
         var restored = await NodeEpochRf3StatusOracle.CaptureAsync(wave.App, profile, cancellationToken).ConfigureAwait(false);
         await NodeEpochRf3StatusOracle.AssertSamePhysicalTopologyAsync(originalStatus, restored).ConfigureAwait(false);
         foreach (var node in restored)
-        { await Assert.That(node.Status.Applied).IsGreaterThanOrEqualTo(receipt.Token.Position); }
+        {
+            await Assert.That(node.Status.Applied).IsGreaterThanOrEqualTo(receipt.Token.Position);
+        }
         await workload.VerifyPreservedAsync(wave.App, profile, cancellationToken, currentWriteExists: true)
             .ConfigureAwait(false);
         await workload.VerifyCurrentWriteAsync(wave.App, profile, follower.Name, receipt, cancellationToken)
@@ -77,13 +81,15 @@ internal sealed class RequestCqrsRf3FollowerRun(string dataRoot, NodeEpochRf3Pro
     }
 
     private async Task VerifyRestartedGenerationAsync(DistributedApplication app,
-        KeyLoad.Orleans.ReplicaSiloDiscovery[] before, string follower)
+        KeyLoad.Clustering.ReplicaSiloDiscovery[] before, string follower)
     {
         var after = await RequestCqrsRf3DiscoveryOracle.CaptureCurrentAsync(app, profile, cancellationToken)
             .ConfigureAwait(false);
         var index = Array.FindIndex(before, record => record.VoterId == VoterOrigin(follower));
         if (index < 0)
-        { throw new InvalidOperationException("The restarted voter was absent from the original signed RF3 topology."); }
+        {
+            throw new InvalidOperationException("The restarted voter was absent from the original signed RF3 topology.");
+        }
         await RequestCqrsRf3DiscoveryOracle.AssertOneReplacementAsync(before, after, index).ConfigureAwait(false);
     }
 
@@ -92,7 +98,9 @@ internal sealed class RequestCqrsRf3FollowerRun(string dataRoot, NodeEpochRf3Pro
         var leaders = nodes.Select(node => node.Status.Leader).Where(value => value is not null)
             .Distinct(StringComparer.Ordinal).ToArray();
         if (leaders.Length != 1)
-        { throw new InvalidOperationException("The healthy RF3 topology did not report one actual leader."); }
+        {
+            throw new InvalidOperationException("The healthy RF3 topology did not report one actual leader.");
+        }
         return nodes.First(node => node.Admin.LocalVoter != leaders[0]);
     }
 

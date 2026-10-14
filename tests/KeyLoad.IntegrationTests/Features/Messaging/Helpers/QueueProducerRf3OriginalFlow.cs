@@ -11,7 +11,9 @@ internal static class QueueProducerRf3OriginalFlow
     {
         var returned = await QueueProducerRf3ResponseCall.SendAsync(fixture, seed, cancelAfterResponse, failures, token);
         if (failures.Count != QueueProducerRf3Protocol.NoFailures)
-        { return null; }
+        {
+            return null;
+        }
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node2);
         var publisher = new KeyLoadClient(http, seed.Identity.Secret, IntegrationClientOptions.Execution());
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3, seed.Identity.Secret, token);
@@ -24,7 +26,9 @@ internal static class QueueProducerRf3OriginalFlow
             await Assert.That(receipt.CommandId).IsEqualTo(seed.Original.CommandId);
             await Assert.That(receipt.Mutations.Length).IsEqualTo(QueueProducerRf3Protocol.OriginalMutationCount);
             if (returned is not null)
-            { await QueueProducerRf3Assertions.EqualAsync(returned, receipt); }
+            {
+                await QueueProducerRf3Assertions.EqualAsync(returned, receipt);
+            }
             await QueueProducerRf3Assertions.ReplayAsync(publisher, mcp, seed.Original, receipt, token);
             var image = await QueueProducerRf3Assertions.ImageAsync(publisher, seed, QueueProducerRf3Protocol.Original, token);
             await AtomicProducerRf3EventAssertions.LiteralAsync(image.Events, seed, QueueProducerRf3Protocol.Original,

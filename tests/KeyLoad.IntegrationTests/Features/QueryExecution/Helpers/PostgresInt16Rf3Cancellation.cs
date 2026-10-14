@@ -30,7 +30,9 @@ internal static class PostgresInt16Rf3Cancellation
                     await global::TUnit.Assertions.Assert.That(mcp?.CancellationToken).IsEqualTo(cancelled.Token);
                     var parameter = new global::Npgsql.NpgsqlParameter(PostgresInt16Rf3Protocol.Parameter,
                         global::NpgsqlTypes.NpgsqlDbType.Smallint)
-                    { Value = PostgresInt16Rf3Protocol.ProbeValue };
+                    {
+                        Value = PostgresInt16Rf3Protocol.ProbeValue
+                    };
                     var driver = await global::TUnit.Assertions.Assert.ThrowsAsync<OperationCanceledException>(
                         () => wire.ExecuteAsync<QueryPage>(PostgresInt16Rf3Protocol.DriverSql,
                             [parameter], prepared: true, cancelled.Token));

@@ -100,10 +100,17 @@ public sealed partial class DatabaseEngine
 
         foreach (var policy in resource.HeaderPolicies)
         {
-            Authorization.RequireFieldWrite(principal, resource with { FieldPolicies = resource.HeaderPolicies }, policy.Path);
+            Authorization.RequireFieldWrite(principal, resource with
+            {
+                FieldPolicies = resource.HeaderPolicies
+            }, policy.Path);
         }
 
-        var data = item with { PayloadJson = JsonData.Validate(item.PayloadJson, Limits), HeadersJson = JsonData.Validate(item.HeadersJson, Limits) };
+        var data = item with
+        {
+            PayloadJson = JsonData.Validate(item.PayloadJson, Limits),
+            HeadersJson = JsonData.Validate(item.HeadersJson, Limits)
+        };
         if (retained is not null)
         {
             var existing = tx.GetRecord<EventRecord>(KeySpace.Partition(EventRecordSpace, partition, append.StreamSet, retained.StreamId, retained.Generation, retained.Revision))

@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 using System.Text.Json;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 using KeyLoad.UnitTests.Features.ClientApi;
 
@@ -21,7 +21,9 @@ internal static class PartitionQueryMcpCatalogAssertions
     internal static async Task VerifyAsync()
     {
         if (!McpOperationCatalog.TryGetTool(McpCatalogExpectations.QueryPartitions, out var descriptor))
-        { throw new InvalidOperationException("The public partition-query tool is missing."); }
+        {
+            throw new InvalidOperationException("The public partition-query tool is missing.");
+        }
         await Assert.That(descriptor!.Route).IsEqualTo(Route);
         await Assert.That(descriptor.ReadKind).IsEqualTo(GrainReadKind.PartitionQuery);
         await Assert.That(descriptor.CommandKind).IsNull();
@@ -148,7 +150,9 @@ internal static class PartitionQueryMcpCatalogAssertions
             .Select(item => item.Name).ToImmutableHashSet(StringComparer.Ordinal);
         await Assert.That(actualFields.SetEquals(fields)).IsTrue();
         if (required.IsDefault)
-        { required = fields; }
+        {
+            required = fields;
+        }
         var actualRequired = schema.GetProperty(McpSchemaInspector.Required).EnumerateArray()
             .Select(item => item.GetString()!).ToImmutableHashSet(StringComparer.Ordinal);
         await Assert.That(actualRequired.SetEquals(required)).IsTrue();

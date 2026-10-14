@@ -12,7 +12,9 @@ internal static class SqlModelParserConservation
         {
             var page = view.Scan([], Bound);
             if (page.HasMore)
-            { throw new InvalidOperationException(ImageBound); }
+            {
+                throw new InvalidOperationException(ImageBound);
+            }
             return JsonSerializer.Serialize(page.Records.Select(record => new[]
                 { Convert.ToHexString(record.Key.Span), Convert.ToHexString(record.Value.Span) }).ToArray());
         }));

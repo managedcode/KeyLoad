@@ -58,7 +58,10 @@ internal static class RequestCqrsFaultReplayContinuation
         await Assert.That(originalReceipt.Token.Position).IsGreaterThan(ZeroPosition);
         await Assert.That(originalReceipt.Token.Position).IsLessThanOrEqualTo(before.Applied);
         await Assert.That(originalReceipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
-        var healthy = changed with { CommandId = Guid.NewGuid() };
+        var healthy = changed with
+        {
+            CommandId = Guid.NewGuid()
+        };
         await Assert.That(healthy.CommandId).IsNotEqualTo(original.CommandId);
         var healthyReceipt = await McpCallerAssertions.SdkSuccessAsync(await RequestCqrsFaultCallers.CommitSdkAsync(
             callers.Sdk, healthy, cancellationToken).ConfigureAwait(false)).ConfigureAwait(false);

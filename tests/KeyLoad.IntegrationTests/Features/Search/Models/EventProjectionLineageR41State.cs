@@ -15,6 +15,12 @@ internal sealed class EventProjectionLineageR41State(PartitionRef partition,
     internal CommandRequest FreshProjection { get; set; } = null!;
     internal EventRecord OriginalEvent { get; set; } = null!;
     internal OutboxStatus Outbox { get; set; } = null!;
-    internal bool Deleted { get; set; }
-    internal bool Replaced { get; set; }
+    internal bool Deleted
+    {
+        get; set;
+    }
+    internal bool Replaced
+    {
+        get; set;
+    }
 }

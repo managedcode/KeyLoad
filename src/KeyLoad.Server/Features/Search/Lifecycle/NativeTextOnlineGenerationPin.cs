@@ -19,7 +19,9 @@ internal sealed class NativeTextOnlineGenerationPin(NativeTextOnlineGeneration o
     {
         RequireActive();
         if (!StringComparer.Ordinal.Equals(generationPath, Path.Combine(owner.Root, owner.Original.Authority.Leaf)))
-        { throw NativeTextErrors.Ownership(); }
+        {
+            throw NativeTextErrors.Ownership();
+        }
     }
 
     public void Dispose()
@@ -27,7 +29,9 @@ internal sealed class NativeTextOnlineGenerationPin(NativeTextOnlineGeneration o
         lock (gate)
         {
             if (disposed)
-            { return; }
+            {
+                return;
+            }
             owner.ReleasePin();
             disposed = true;
         }

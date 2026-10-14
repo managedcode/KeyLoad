@@ -19,7 +19,9 @@ internal static class NativeTextIncrementalCrashInventory
         var manifest = NativeTextIncrementalMetadata.ReadManifest(Path.Combine(runtime.ProjectionRoot, leaf),
             options.Value.MaximumDiskBytes, budget);
         if (manifest.Bootstrap)
-        { throw new InvalidOperationException(NativeTextIncrementalCrashProtocol.Invalid); }
+        {
+            throw new InvalidOperationException(NativeTextIncrementalCrashProtocol.Invalid);
+        }
         IndexOfTokenRecordPreviousToken<ulong, ulong>? index = null;
         var postings = new List<NativeTextIncrementalPosting>();
         var failures = new List<Exception>();
@@ -39,7 +41,9 @@ internal static class NativeTextIncrementalCrashInventory
                         while (iterator.Next())
                         {
                             if (postings.Count >= MaximumPostings)
-                            { throw new InvalidOperationException(NativeTextIncrementalCrashProtocol.Invalid); }
+                            {
+                                throw new InvalidOperationException(NativeTextIncrementalCrashProtocol.Invalid);
+                            }
                             var key = iterator.CurrentKey;
                             postings.Add(new(key.Token, key.Record, key.PreviousToken));
                         }
@@ -53,7 +57,9 @@ internal static class NativeTextIncrementalCrashInventory
         finally
         {
             if (index is not null)
-            { ServerFailureObserver.Observe(index.Dispose, failures); }
+            {
+                ServerFailureObserver.Observe(index.Dispose, failures);
+            }
         }
         ServerFailureObserver.ThrowIfAny(failures);
         return (manifest.Records, [.. postings.OrderBy(posting => posting.Token)]);

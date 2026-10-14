@@ -4,7 +4,10 @@ internal sealed class PhysicalOwnerProbeTrace
 {
     private const string ObservedPrefix = "; Observed=";
     private const string RefusedPrefix = "; Refused=";
-    internal PhysicalOwnerProbeStage Stage { get; set; }
+    internal PhysicalOwnerProbeStage Stage
+    {
+        get; set;
+    }
     private PhysicalOwnerProbePredicate observed;
     private PhysicalOwnerProbePredicate refused;
 
@@ -12,7 +15,9 @@ internal sealed class PhysicalOwnerProbeTrace
     {
         observed |= predicate;
         if (failed)
-        { refused |= predicate; }
+        {
+            refused |= predicate;
+        }
         return failed;
     }
 

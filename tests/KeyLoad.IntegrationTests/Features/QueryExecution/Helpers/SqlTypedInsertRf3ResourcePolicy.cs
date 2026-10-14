@@ -27,7 +27,10 @@ internal static class SqlTypedInsertRf3ResourcePolicy
                     await SqlTypedInsertRf3Wave.FenceAsync(caller, wire, state.Created, token);
                     await SqlTypedInsertRf3Wave.FenceAsync(caller, wire, state.Failed, token);
                     await SqlTypedInsertRf3Images.RequireAsync(root, before, token);
-                    await ConfigureAsync(root, original with { SchemaVersion = checked(denied.SchemaVersion + NextVersion) }, denied.SchemaVersion, token);
+                    await ConfigureAsync(root, original with
+                    {
+                        SchemaVersion = checked(denied.SchemaVersion + NextVersion)
+                    }, denied.SchemaVersion, token);
                     await SqlTypedInsertRf3Wave.ReplayAsync(caller, wire, state.Created, state.Receipt, token);
                     await SqlCreateTableRf3Failures.SdkAsync(caller.Sdk, state.Failed, ErrorCode.Conflict, token);
                     await SqlCreateTableRf3Failures.McpAsync(caller.Mcp, state.Failed, ErrorCode.Conflict, dispatched: true, token);
@@ -43,6 +46,8 @@ internal static class SqlTypedInsertRf3ResourcePolicy
         => await SqlRf3Protocol.EqualAsync(definition, await McpCallerAssertions.SdkSuccessAsync(await root.ConfigureResourceAsync(Guid.NewGuid(),
             new(SqlTypedInsertRf3Literal.Partition.TenantId, SqlTypedInsertRf3Literal.Partition.DatabaseId,
                 definition)
-            { ExpectedSchemaVersion = expected }, token)));
+            {
+                ExpectedSchemaVersion = expected
+            }, token)));
     private const long NextVersion = 1;
 }

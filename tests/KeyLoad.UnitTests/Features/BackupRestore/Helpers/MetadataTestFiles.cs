@@ -42,7 +42,9 @@ internal static class MetadataTestFiles
         var replacement = new ZoneTreeBackupRestoreManifestFile(fileName, file.Length,
             Convert.ToHexStringLower(await SHA256.HashDataAsync(file)));
         await WriteManifestAsync(backupDirectory, manifest with
-        { Files = manifest.Files.Select(entry => entry.Name == fileName ? replacement : entry).ToArray() });
+        {
+            Files = manifest.Files.Select(entry => entry.Name == fileName ? replacement : entry).ToArray()
+        });
     }
 
     internal static async Task BreakIdentityEnvelopeChecksumAsync(string backupDirectory)
@@ -53,7 +55,10 @@ internal static class MetadataTestFiles
         var checksum = envelope.Checksum.ToArray();
         checksum[0] ^= 1;
         await File.WriteAllBytesAsync(path, ZoneTreeMetadataBinary.Write(
-            envelope with { Checksum = checksum }, ZoneTreeMetadataBinary.IdentityMagic));
+            envelope with
+            {
+                Checksum = checksum
+            }, ZoneTreeMetadataBinary.IdentityMagic));
         await UpdateManifestFileAsync(backupDirectory, MetadataTestContract.IdentityFileName);
     }
 }

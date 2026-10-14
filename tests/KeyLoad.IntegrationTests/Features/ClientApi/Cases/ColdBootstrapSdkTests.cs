@@ -23,7 +23,9 @@ internal sealed class ColdBootstrapSdkTests
             finally
             {
                 if (fixture is not null)
-                { await fixture.DisposeAsync().ConfigureAwait(false); }
+                {
+                    await fixture.DisposeAsync().ConfigureAwait(false);
+                }
             }
         }, failures).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny(failures);

@@ -68,7 +68,9 @@ public static class OpenLoopNativeCompletionMarker
     private static bool TryProfile(string value)
     {
         try
-        { return ScaledComparisonProfileParser.Parse(value).Id == value; }
+        {
+            return ScaledComparisonProfileParser.Parse(value).Id == value;
+        }
         catch (ArgumentOutOfRangeException) { return false; }
     }
 

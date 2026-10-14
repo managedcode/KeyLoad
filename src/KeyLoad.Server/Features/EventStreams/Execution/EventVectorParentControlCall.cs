@@ -1,7 +1,7 @@
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.Server.Features.EventStreams;
 
@@ -23,15 +23,21 @@ internal static class EventVectorParentControlCall
             || envelope.CommandKind != OperationKind.EventFeedControl || envelope.ReadKind is not null
             || envelope.CommandId != original.CommandId || original != phase.OriginalRequest
             || envelope.ExpiresAt != phase.OriginalParentExpiresAt || envelope.ExpiresAt <= clock.GetUtcNow())
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, EventVectorRemoteProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, EventVectorRemoteProtocol.Invalid);
+        }
         if (phase.OriginalParentRequestId != Guid.Empty
             && phase.OriginalParentRequestId != envelope.RequestId)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, EventVectorRemoteProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, EventVectorRemoteProtocol.Invalid);
+        }
         var database = partition.Database;
         var principal = GrainRequestAuthority.ReloadForRequest(database, envelope, clock);
         var owner = database.ReadEventVectorControlOwner(principal.Id, original, work, originalCancellationToken);
         if (owner.Incarnation != database.Store.Identity.Incarnation)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, EventVectorRemoteProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, EventVectorRemoteProtocol.Unavailable);
+        }
         var operation = database.CreateVerifiedEventVectorControlPhase(principal.Id, phase, work);
         var requestId = Guid.NewGuid();
         var signed = node.CatalogRequestCodec().CreateEventVectorPhase(requestId, operation,
@@ -44,7 +50,9 @@ internal static class EventVectorParentControlCall
         {
             work.Check();
             if (reply.Error is { } failure)
-            { throw Errors.Fail(failure, EventVectorRemoteProtocol.Unavailable); }
+            {
+                throw Errors.Fail(failure, EventVectorRemoteProtocol.Unavailable);
+            }
             work.ChargeBytes(reply.Payload.Length);
             transferred = true;
             return reply;
@@ -52,7 +60,9 @@ internal static class EventVectorParentControlCall
         finally
         {
             if (!transferred)
-            { CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(reply.Payload).Span); }
+            {
+                CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(reply.Payload).Span);
+            }
         }
     }
 

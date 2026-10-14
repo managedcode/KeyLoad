@@ -35,9 +35,13 @@ internal static class QueueLeaseAuthorityProcessTrial
         store.Commit((tx, _) =>
         {
             if (foreignReference)
-            { tx.PutRecord(key, QueueOrderedRetryCrashProtocol.Second); }
+            {
+                tx.PutRecord(key, QueueOrderedRetryCrashProtocol.Second);
+            }
             else
-            { tx.Delete(key); }
+            {
+                tx.Delete(key);
+            }
             return true;
         });
         var damaged = QueueLeaseAuthorityProcessImage.Capture(store);

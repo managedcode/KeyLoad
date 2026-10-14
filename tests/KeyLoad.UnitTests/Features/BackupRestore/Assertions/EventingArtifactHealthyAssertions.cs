@@ -19,7 +19,10 @@ internal static class EventingArtifactHealthyAssertions
         await Assert.That(actual.Token).IsNotEmpty();
         var expected = new Delivery(HealthyId, EventingArtifactFixture.Json, EventingArtifactFixture.EmptyJson,
             string.Empty, 1, fixture.Time.AddSeconds(30), 1, 1);
-        await Assert.That(actual with { Token = string.Empty }).IsEqualTo(expected);
+        await Assert.That(actual with
+        {
+            Token = string.Empty
+        }).IsEqualTo(expected);
     }
 
     internal static Task CompletedAsync(EventingArtifactFixture fixture, DatabaseEngine database)

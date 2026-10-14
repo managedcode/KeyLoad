@@ -35,11 +35,17 @@ internal static class QueueLifecyclePublicSeed
             [new(partition.DatabaseId, queue.Name, Capability.QueuePublish | Capability.QueueConsume | Capability.QueueAck
                 | Capability.QueueInspect | Capability.DeadLettersRead | Capability.DeadLettersRedrive | Capability.QueueCancel | Capability.Query),
              new(partition.DatabaseId, QueueLifecyclePublicProtocol.Collection, Capability.DocumentsRead | Capability.DocumentsWrite | Capability.Query)], ["*"])
-        { ClusterAdministrator = true };
+        {
+            ClusterAdministrator = true
+        };
         await ConfigureAsync(root, principal, key, token);
         var deniedId = "denied-" + suffix;
         var deniedKey = deniedId + ".keyload-native-lifecycle-credential";
-        await ConfigureAsync(root, principal with { Id = deniedId, FieldGrants = [] }, deniedKey, token);
+        await ConfigureAsync(root, principal with
+        {
+            Id = deniedId,
+            FieldGrants = []
+        }, deniedKey, token);
         return new(partition, key, deniedKey, route);
     }
 

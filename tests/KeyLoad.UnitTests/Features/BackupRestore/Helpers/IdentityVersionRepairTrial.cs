@@ -48,7 +48,9 @@ internal static class IdentityVersionRepairTrial
         await ServerFailureObserver.ObserveAsync(() => File.WriteAllBytesAsync(manifestPath,
             original[ZoneTreePersistenceFormat.BackupManifestFileName], CancellationToken.None), failures);
         if (failures.Count == 0)
-        { await ServerFailureObserver.ObserveAsync(() => HealthyAsync(fixture, source, original, token), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => HealthyAsync(fixture, source, original, token), failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 

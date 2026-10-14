@@ -64,7 +64,9 @@ internal static class EventFeedTailCatalogAssertions
     private static async Task DenialsAsync(McpOperationDescriptor descriptor, EventFeedControlRequest original)
     {
         var wrongAction = new Dictionary<string, JsonElement>
-        { [Request] = JsonSerializer.SerializeToElement(original with { Action = EventFeedControlAction.Open }, JsonDefaults.Options) };
+        {
+            [Request] = JsonSerializer.SerializeToElement(original with { Action = EventFeedControlAction.Open }, JsonDefaults.Options)
+        };
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => descriptor.Decode(wrongAction)).Code)
             .IsEqualTo(ErrorCode.Validation);
         var authority = JsonNode.Parse(JsonSerializer.Serialize(original, JsonDefaults.Options))!.AsObject();

@@ -85,7 +85,10 @@ internal sealed class SqlClientOutcomeTests
             context.Response.ContentType = JsonType;
             var first = Interlocked.Increment(ref calls) == 1;
             if (first && abort)
-            { context.Abort(); return; }
+            {
+                context.Abort();
+                return;
+            }
             context.Response.StatusCode = first ? StatusCodes.Status503ServiceUnavailable : StatusCodes.Status200OK;
             await context.Response.WriteAsync(first ? NullReply : SuccessReply, context.RequestAborted);
         });

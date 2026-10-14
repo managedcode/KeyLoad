@@ -1,5 +1,5 @@
 using System.Net;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Replication;
 using KeyLoad.Server.Features.ClusterRouting;
 
@@ -16,13 +16,22 @@ internal sealed record NodeOptions
     /// <summary>Fixed voter origins including the local origin; production requires an odd group of at least three.</summary>
     public IReadOnlyList<string> Peers { get; init; } = [];
     /// <summary>Trusted startup opt-in for isolated benchmark fixed groups of one, two or three voters.</summary>
-    public bool BenchmarkTopology { get; init; }
+    public bool BenchmarkTopology
+    {
+        get; init;
+    }
     /// <summary>Orleans cluster identity, shared by every voter.</summary>
     public string ClusterId { get; init; } = NodeDefaults.ClusterId;
     /// <summary>Independent physical shard identity shared by every configured voter and stable across restart.</summary>
-    public Guid PhysicalShardId { get; init; }
+    public Guid PhysicalShardId
+    {
+        get; init;
+    }
     /// <summary>Database incarnation, stable across process restarts and snapshot catch-up.</summary>
-    public Guid Incarnation { get; init; }
+    public Guid Incarnation
+    {
+        get; init;
+    }
     /// <summary>Base64 database signing credential; stored only in the private node catalog.</summary>
     public string SigningKey { get; init; } = string.Empty;
     /// <summary>Base64 peer HMAC credential; public callers cannot send replica control requests.</summary>
@@ -34,9 +43,15 @@ internal sealed record NodeOptions
     /// <summary>Routable silo IP or DNS name resolved on process startup.</summary>
     public string SiloAddress { get; init; } = NodeDefaults.SiloAddress;
     /// <summary>Permits plaintext discovery/public HTTP on explicit loopback development origins.</summary>
-    public bool AllowLoopbackHttp { get; init; }
+    public bool AllowLoopbackHttp
+    {
+        get; init;
+    }
     /// <summary>Permits HTTP on the explicitly isolated Docker/Aspire development network.</summary>
-    public bool AllowPrivateNetworkHttp { get; init; }
+    public bool AllowPrivateNetworkHttp
+    {
+        get; init;
+    }
     /// <summary>Committed entries between canonical checkpoints.</summary>
     public int SnapshotThreshold { get; init; } = NodeDefaults.SnapshotThreshold;
     /// <summary>Lower randomized election bound, longer than an individual peer RPC.</summary>
@@ -60,7 +75,10 @@ internal sealed record NodeOptions
     /// <summary>Explicit physical-group trust independent of the native Orleans membership provider.</summary>
     public PhysicalGroupTrustOptions PhysicalGroupTrust { get; init; } = new();
     /// <summary>Optional existing persisted technical subject for distinct-owner queue transfer admission; null is unavailable.</summary>
-    public string? RemoteTransferPrincipalId { get; init; }
+    public string? RemoteTransferPrincipalId
+    {
+        get; init;
+    }
 
     /// <summary>Rejects invalid identity, timing, transport and admission settings before opening files.</summary>
     public void Validate()
@@ -87,7 +105,9 @@ internal sealed record NodeOptions
         configuration.Validate();
         PhysicalGroupTrustValidator.Validate(PhysicalGroupTrust, this);
         if (RemoteTransferPrincipalId is not null)
-        { global::KeyLoad.Core.JsonData.Identifier(RemoteTransferPrincipalId); }
+        {
+            global::KeyLoad.Core.JsonData.Identifier(RemoteTransferPrincipalId);
+        }
         RequestCqrsProbeOptionsReader.Validate(RequestCqrsProbe, configuration, AllowPrivateNetworkHttp);
         MovementFrameObservationOptionsReader.Validate(MovementFrameObservation, this);
         NativeDiscoveryOmissionOptionsReader.Validate(NativeDiscoveryOmission, this);
@@ -133,7 +153,9 @@ internal sealed record NodeOptions
         const int SecretLengthAbsentCount = 0;
 
         if (encoded is null)
-        { return SecretLengthEmptyResult; }
+        {
+            return SecretLengthEmptyResult;
+        }
         Span<byte> bytes = stackalloc byte[ReplicaTransportProtocol.SecretBytes];
         return Convert.TryFromBase64String(encoded, bytes, out var count) ? count : SecretLengthAbsentCount;
     }

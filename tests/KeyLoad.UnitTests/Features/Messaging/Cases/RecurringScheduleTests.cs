@@ -24,7 +24,10 @@ internal sealed class RecurringScheduleTests
             [new ConfigureRecurringSchedule(definition with { PayloadJson = ReplacementPayload }, 0)]));
         await Assert.That(stale.Error).IsEqualTo(ErrorCode.RevisionConflict);
         var replacement = fixture.Commit(fixture.Partition,
-            new ConfigureRecurringSchedule(definition with { PayloadJson = ReplacementPayload }, 1));
+            new ConfigureRecurringSchedule(definition with
+            {
+                PayloadJson = ReplacementPayload
+            }, 1));
         await Assert.That(replacement.Mutations[0].Revision).IsEqualTo(2);
         var revised = fixture.Database.InspectRecurringSchedule(RecurringSagaDatabase.RootPrincipal,
             fixture.Queue, scheduleId)!;
@@ -42,7 +45,10 @@ internal sealed class RecurringScheduleTests
             [new EmitRecurringOccurrences(fixture.Queue, scheduleId, 2, 1)]));
         await Assert.That(emit.Error).IsEqualTo(ErrorCode.RevisionConflict);
         var reactivated = fixture.Commit(fixture.Partition,
-            new ConfigureRecurringSchedule(definition with { PayloadJson = Payload }, 3));
+            new ConfigureRecurringSchedule(definition with
+            {
+                PayloadJson = Payload
+            }, 3));
         await Assert.That(reactivated.Mutations[0].Revision).IsEqualTo(4);
         var active = fixture.Database.InspectRecurringSchedule(RecurringSagaDatabase.RootPrincipal,
             fixture.Queue, scheduleId)!;

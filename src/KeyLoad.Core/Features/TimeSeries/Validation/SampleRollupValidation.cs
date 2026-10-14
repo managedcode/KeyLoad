@@ -7,13 +7,17 @@ internal static class SampleRollupValidation
     internal static void Range(DateTimeOffset from, DateTimeOffset until, long revision = Empty)
     {
         if (from.UtcTicks >= until.UtcTicks || revision < Empty || revision == long.MaxValue)
-        { throw Errors.Fail(ErrorCode.Validation, SampleRollupProtocol.InvalidRange); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, SampleRollupProtocol.InvalidRange);
+        }
     }
 
     internal static void State(SampleRollupState state, DateTimeOffset from, DateTimeOffset until)
     {
         if (state.FormatVersion != SampleRollupNative.Version)
-        { throw Errors.Fail(ErrorCode.FormatUnsupported, SampleRollupProtocol.Unsupported); }
+        {
+            throw Errors.Fail(ErrorCode.FormatUnsupported, SampleRollupProtocol.Unsupported);
+        }
         var empty = state.Count == Empty;
         if (state.FromUtcTicks != from.UtcTicks || state.UntilUtcTicks != until.UtcTicks
             || state.FromUtcTicks >= state.UntilUtcTicks || state.Revision < FirstRevision
@@ -23,6 +27,8 @@ internal static class SampleRollupValidation
             || empty && (state.Sum != Empty || state.Minimum is not null || state.Maximum is not null)
             || !empty && (state.Minimum is not { } minimum || state.Maximum is not { } maximum
                 || !double.IsFinite(minimum) || !double.IsFinite(maximum) || minimum > maximum))
-        { throw Errors.Fail(ErrorCode.Corruption, SampleRollupProtocol.Corrupt); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, SampleRollupProtocol.Corrupt);
+        }
     }
 }

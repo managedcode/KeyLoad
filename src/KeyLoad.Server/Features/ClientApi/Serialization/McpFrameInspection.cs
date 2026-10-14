@@ -49,7 +49,9 @@ internal sealed class McpFrameInspection(bool boundIdentifier, IOptions<McpExecu
     {
         if (boundIdentifier && rootIdentifier && reader.TokenType == JsonTokenType.String
             && reader.ValueSpan.Length > settings.MaximumIdentifierBytes)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, McpFramingProtocol.FrameBudgetExceeded); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, McpFramingProtocol.FrameBudgetExceeded);
+        }
         rootIdentifier = false;
     }
 

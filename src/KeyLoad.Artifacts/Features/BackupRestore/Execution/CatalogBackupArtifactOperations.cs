@@ -31,7 +31,9 @@ internal static class CatalogBackupArtifactOperations
             if (owned)
             {
                 try
-                { File.Delete(artifactPath); }
+                {
+                    File.Delete(artifactPath);
+                }
                 catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
             }
             throw;
@@ -65,7 +67,9 @@ internal static class CatalogBackupArtifactOperations
             }
         }
         if (failure is not null)
-        { ExceptionDispatchInfo.Capture(failure).Throw(); }
+        {
+            ExceptionDispatchInfo.Capture(failure).Throw();
+        }
     }
 
     private static void Require(string source, string expectedDigest,
@@ -74,7 +78,9 @@ internal static class CatalogBackupArtifactOperations
         ArgumentException.ThrowIfNullOrEmpty(expectedDigest);
         var actual = ZoneTreeStore.ReadVerifiedCatalogBackup(source, options, cancellationToken);
         if (!string.Equals(expectedDigest, actual.ManifestDigest, StringComparison.Ordinal))
-        { throw Errors.Fail(ErrorCode.Corruption, DigestMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, DigestMismatch);
+        }
         cancellationToken.ThrowIfCancellationRequested();
     }
 }

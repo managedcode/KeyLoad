@@ -77,9 +77,15 @@ internal sealed class EventVectorReservedLocalProfileTests
             [LocalReceiptKey] = "TestResults/rf3/local-images/image-0123456789abcdef0123456789abcdef.json"
         };
         if (changed is not null)
-        { values[changed] = value; }
+        {
+            values[changed] = value;
+        }
         if (changed == RegistrationKey && value == "false")
-        { values.Remove(RemoteDocumentKey); values.Remove(RemoteQueryKey); values.Remove(ProtectedKey); }
+        {
+            values.Remove(RemoteDocumentKey);
+            values.Remove(RemoteQueryKey);
+            values.Remove(ProtectedKey);
+        }
         builder.Configuration.AddInMemoryCollection(values);
         return builder;
     }
@@ -88,10 +94,14 @@ internal sealed class EventVectorReservedLocalProfileTests
         CancellationToken token)
     {
         if (OperatingSystem.IsWindows())
-        { throw new PlatformNotSupportedException("Private mode fixtures require a Unix host."); }
+        {
+            throw new PlatformNotSupportedException("Private mode fixtures require a Unix host.");
+        }
         var result = new Dictionary<string, (byte[] Bytes, UnixFileMode Mode)>(StringComparer.Ordinal);
         foreach (var path in Directory.EnumerateFiles(fixture.Parent, "*", SearchOption.AllDirectories))
-        { result.Add(path, (await File.ReadAllBytesAsync(path, token).ConfigureAwait(false), File.GetUnixFileMode(path))); }
+        {
+            result.Add(path, (await File.ReadAllBytesAsync(path, token).ConfigureAwait(false), File.GetUnixFileMode(path)));
+        }
         return result;
     }
 

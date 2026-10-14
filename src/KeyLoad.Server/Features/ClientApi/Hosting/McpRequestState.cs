@@ -28,9 +28,15 @@ internal sealed class McpRequestState : IDisposable
     /// <summary>Gets the current database-resolved principal; native sessions cannot cache it.</summary>
     internal PrincipalRecord Principal { get; private set; } = null!;
     /// <summary>Gets the exact public capability selected before native typed decoding.</summary>
-    internal McpOperationDescriptor? Operation { get; private set; }
+    internal McpOperationDescriptor? Operation
+    {
+        get; private set;
+    }
     /// <summary>Gets the one fixed public meta operation admitted for this request.</summary>
-    internal McpGatewayMetaOperation MetaOperation { get; private set; }
+    internal McpGatewayMetaOperation MetaOperation
+    {
+        get; private set;
+    }
     /// <summary>Gets the canonical payload ceiling after admission.</summary>
     internal int MaximumPayloadBytes => admission.MaximumPayloadBytes;
     /// <summary>Gets the classified canonical result bound.</summary>
@@ -56,7 +62,9 @@ internal sealed class McpRequestState : IDisposable
         ArgumentNullException.ThrowIfNull(ownedBody);
         ObjectDisposedException.ThrowIf(disposed, this);
         if (body is not null)
-        { throw new InvalidOperationException(McpCatalogProtocol.InvalidOperation); }
+        {
+            throw new InvalidOperationException(McpCatalogProtocol.InvalidOperation);
+        }
         body = ownedBody;
     }
 
@@ -108,11 +116,15 @@ internal sealed class McpRequestState : IDisposable
             finally
             {
                 if (!retained)
-                { owner.Dispose(); }
+                {
+                    owner.Dispose();
+                }
             }
         }
         finally
-        { System.Security.Cryptography.CryptographicOperations.ZeroMemory(canonical); }
+        {
+            System.Security.Cryptography.CryptographicOperations.ZeroMemory(canonical);
+        }
     }
 
     /// <summary>Creates only fixed safe error content, retaining null or actual execution identity.</summary>
@@ -127,10 +139,14 @@ internal sealed class McpRequestState : IDisposable
     public void Dispose()
     {
         if (disposed)
-        { return; }
+        {
+            return;
+        }
         disposed = true;
         foreach (var reply in replies)
-        { reply.Dispose(); }
+        {
+            reply.Dispose();
+        }
         body?.Dispose();
         authentication = default;
         admission.Dispose();

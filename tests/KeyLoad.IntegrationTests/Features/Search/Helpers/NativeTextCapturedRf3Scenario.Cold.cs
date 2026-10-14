@@ -18,7 +18,9 @@ internal sealed partial class NativeTextCapturedRf3Scenario
         var restarted = await Task.WhenAll(nodes.Select(node => ObserveAsync(() => actual.RestartAsync(node, token))));
         ServerFailureObserver.ThrowIfAny([.. stopped.SelectMany(row => row), .. restarted.SelectMany(row => row)]);
         foreach (var node in nodes)
-        { await actual.App.ResourceNotifications.WaitForResourceHealthyAsync(node, WaitBehavior.WaitOnResourceUnavailable, token); }
+        {
+            await actual.App.ResourceNotifications.WaitForResourceHealthyAsync(node, WaitBehavior.WaitOnResourceUnavailable, token);
+        }
         var errors = new List<Exception>();
         RequestCqrsRf3Callers? fresh = null;
         await ServerFailureObserver.ObserveAsync(async () =>
@@ -35,7 +37,9 @@ internal sealed partial class NativeTextCapturedRf3Scenario
             await NativeTextOnlineRf3Assertions.LiteralAllAsync(fresh.Sdk, fresh.Mcp, seed, true, token);
         }, errors);
         if (fresh is not null)
-        { await ServerFailureObserver.ObserveAsync(() => fresh.DisposeAsync().AsTask(), errors); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => fresh.DisposeAsync().AsTask(), errors);
+        }
         ServerFailureObserver.ThrowIfAny(errors);
     }
 

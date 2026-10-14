@@ -27,17 +27,23 @@ public sealed partial class DatabaseEngine
         ArgumentNullException.ThrowIfNull(work);
         work.Check();
         if (captureId == Guid.Empty)
-        { throw Errors.Fail(ErrorCode.Validation, ClusterBackupConfiguredOwnerRequired); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, ClusterBackupConfiguredOwnerRequired);
+        }
         var admitted = work.CreateView(view);
         var catalog = ReadPhysicalShardCatalog(admitted, principalId);
         if (configuredPhysicalOwner is null || identity.Incarnation != configuredPhysicalOwner.Incarnation
             || identity.NodeId != Store.Identity.NodeId || position != Store.Position
             || !PhysicalOwnerEntryValidation.SameOwner(catalog.DefaultShard, configuredPhysicalOwner))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, ClusterBackupConfiguredOwnerRequired); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, ClusterBackupConfiguredOwnerRequired);
+        }
         var bytes = admitted.ReadOwnedValue(KeySpace.AppliedBytes);
         var applied = bytes is null ? ClusterBackupNoAppliedIndex : NativeSerialization.Deserialize<long>(bytes);
         if (applied <= ClusterBackupNoAppliedIndex)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, ClusterBackupConfiguredOwnerRequired); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, ClusterBackupConfiguredOwnerRequired);
+        }
         var entries = ClusterBackupRosterCapture.Read(admitted, identity.Incarnation, position, applied, Limits);
         var census = ClusterBackupCanonicalCensus.Require(admitted, entries, Limits, work.Cancellation);
         var partitions = ImmutableArray.CreateBuilder<ClusterBackupPartitionCut>(entries.Count);
@@ -46,7 +52,9 @@ public sealed partial class DatabaseEngine
             work.Check();
             var partition = entry.Value.Entry.Partition;
             if (admitted.ReadOwnedValue(PartitionMoveParentKeys.Active(partition)) is not null)
-            { throw Errors.Fail(ErrorCode.RecoveryRequired, ClusterBackupActiveMovement); }
+            {
+                throw Errors.Fail(ErrorCode.RecoveryRequired, ClusterBackupActiveMovement);
+            }
             var placement = ResolveRegisteredPlacement(admitted, partition, catalog.DefaultShard);
             var scope = census.Partitions[partition];
             partitions.Add(new(ClusterBackupOwnerCut.CurrentVersion, entry.Value.Entry, entry.Value.Digest, placement, applied, scope.Count, scope.Digest));

@@ -1,12 +1,15 @@
+using KeyLoad.Clustering;
 using KeyLoad.Features.InternalSerialization;
-using KeyLoad.Orleans;
 using Orleans.Serialization.Buffers;
 using Orleans.Serialization.Codecs;
 using Orleans.Serialization.WireProtocol;
 
 namespace KeyLoad.UnitTests.Features.InternalSerialization;
 
-internal enum NativeUnknownWellKnownHeaderAuthenticationScope { Envelope, Value, Member, ArrayCount }
+internal enum NativeUnknownWellKnownHeaderAuthenticationScope
+{
+    Envelope, Value, Member, ArrayCount
+}
 
 // Copy the genuine auth writer's bytes, replacing only the located header's metadata.
 internal static class NativeUnknownWellKnownHeaderAuthenticationFixture

@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.Server.Features.GraphTraversal;
@@ -16,6 +16,8 @@ internal static class RemoteGraphNativeHosting
             options.GrainRouting, provider.GetRequiredService<PartitionMovementGrainServiceClient>(),
             provider.GetRequiredService<ReplicaSiloDiscoveryState>(), clock));
         if (runtime is not null)
-        { services.AddSingleton(runtime.Parent); }
+        {
+            services.AddSingleton(runtime.Parent);
+        }
     }
 }

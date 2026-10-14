@@ -1,5 +1,5 @@
 using System.Diagnostics;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.ServiceDefaults;
 using KeyLoad.ServiceDefaults.Features.ClusterRouting.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,10 +27,22 @@ internal sealed class OrleansRuntimeTelemetryFixture : IAsyncDisposable
         CaptureOptions = captureOptions;
     }
 
-    internal OrleansActivityCaptureExporter Activities { get; }
-    internal OrleansMetricCaptureExporter Metrics { get; }
-    internal OrleansTelemetryOptions Options { get; }
-    internal OrleansTelemetryCaptureOptions CaptureOptions { get; }
+    internal OrleansActivityCaptureExporter Activities
+    {
+        get;
+    }
+    internal OrleansMetricCaptureExporter Metrics
+    {
+        get;
+    }
+    internal OrleansTelemetryOptions Options
+    {
+        get;
+    }
+    internal OrleansTelemetryCaptureOptions CaptureOptions
+    {
+        get;
+    }
 
     internal static async Task<OrleansRuntimeTelemetryFixture> StartAsync()
     {

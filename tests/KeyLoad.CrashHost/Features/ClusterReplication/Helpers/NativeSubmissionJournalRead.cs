@@ -35,12 +35,16 @@ internal static class NativeSubmissionJournalRead
             ReplicaBenchmarkMembership.Validate(membership, hasHardState: true, configuration);
             if (entryIndex <= (state.Snapshot?.Index ?? BeforeFirstEntry)
                 || entryIndex > state.LastIndex || entryIndex > state.CommittedIndex)
-            { throw Errors.Fail(ErrorCode.RecoveryRequired, MissingCommittedEntry); }
+            {
+                throw Errors.Fail(ErrorCode.RecoveryRequired, MissingCommittedEntry);
+            }
             var originalEntry = budget.Required(view, ReplicaProtocol.EntryStorageKey(entryIndex), cancellationToken);
             var entry = ReplicaAdmittedEntryRead.Decode(originalEntry, entryIndex, state.Term,
                 configuration.MaxAppendEntries, canonical);
             if (entry.Term != entryTerm)
-            { throw Errors.Fail(ErrorCode.Corruption, WrongTerm); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, WrongTerm);
+            }
             cancellationToken.ThrowIfCancellationRequested();
             return new NativeSubmissionJournalCut(replica.Identity.NodeId, replica.Identity.Incarnation,
                 replica.Position, originalState, originalEntry, state, entry);
@@ -53,6 +57,8 @@ internal static class NativeSubmissionJournalRead
         var authority = canonical.Store.Identity;
         if (actual.Incarnation != configuration.Incarnation || actual.Incarnation != authority.Incarnation
             || !CryptographicOperations.FixedTimeEquals(actual.SigningKey.Span, authority.SigningKey.Span))
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, ForeignOwner); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, ForeignOwner);
+        }
     }
 }

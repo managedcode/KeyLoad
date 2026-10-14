@@ -24,7 +24,10 @@ internal static class NativeAnnSettledRf3Flow
                 await AnnPublicRf3Assertions.AllPathsAsync(caller.Sdk, caller.Mcp, scenario, request, empty: false, token);
                 await NativeAnnSettledRf3Assertions.ReplayAsync(caller, scenario, request, result, token);
                 await NativeAnnSettledRf3Assertions.RefuseAsync(caller,
-                    request with { Mode = AnnMaintenanceMode.Restore }, ErrorCode.Conflict, token);
+                    request with
+                    {
+                        Mode = AnnMaintenanceMode.Restore
+                    }, ErrorCode.Conflict, token);
                 return (Request: request, Result: result, Batch: await NativeAnnSettledRf3Assertions.ReadAsync(caller.Sdk, request, token));
             }, token);
         await NativeAnnPublicColdOwners.RestartAsync(fixture, token);
@@ -34,7 +37,11 @@ internal static class NativeAnnSettledRf3Flow
                 await NativeAnnSettledRf3Assertions.UnchangedAsync(build.Batch,
                     await NativeAnnSettledRf3Assertions.ReadAsync(caller.Sdk, build.Request, token));
                 await NativeAnnSettledRf3Assertions.ReplayAsync(caller, scenario, build.Request, build.Result, token);
-                var request = build.Request with { CommandId = Guid.NewGuid(), Mode = AnnMaintenanceMode.Restore };
+                var request = build.Request with
+                {
+                    CommandId = Guid.NewGuid(),
+                    Mode = AnnMaintenanceMode.Restore
+                };
                 var result = (await McpCallerAssertions.SuccessAsync<AnnMaintenanceResult>(await caller.Mcp.CallAsync(
                     NativeAnnMaintenanceRf3Scenario.Tool, request, token))).Value;
                 await NativeAnnMaintenanceRf3Assertions.ResultAsync(result, request);
@@ -61,7 +68,10 @@ internal static class NativeAnnSettledRf3Flow
             fixture.AdminKey, async caller => await McpCallerAssertions.SdkSuccessAsync(
                 await caller.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), principal, token)), token);
         await NativeAnnSettledRf3Assertions.ExactAsync(principal, actual);
-        return identity with { Principal = actual };
+        return identity with
+        {
+            Principal = actual
+        };
     }
 
     private static async Task FreshNoOpAsync(ClusterFixture fixture, McpPersistedIdentity administrator,
@@ -74,7 +84,11 @@ internal static class NativeAnnSettledRf3Flow
                 await NativeAnnSettledRf3Assertions.UnchangedAsync(originalBatch,
                     await NativeAnnSettledRf3Assertions.ReadAsync(caller.Sdk, restore, token));
                 await NativeAnnSettledRf3Assertions.ReplayAsync(caller, scenario, restore, settled, token);
-                var request = restore with { CommandId = Guid.NewGuid(), Mode = AnnMaintenanceMode.Build };
+                var request = restore with
+                {
+                    CommandId = Guid.NewGuid(),
+                    Mode = AnnMaintenanceMode.Build
+                };
                 var result = await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.MaintainAnnIndexAsync(request, token));
                 await Assert.That(result.CommandId).IsEqualTo(request.CommandId);
                 await Assert.That(result.Consumer).IsEqualTo(request.Consumer);

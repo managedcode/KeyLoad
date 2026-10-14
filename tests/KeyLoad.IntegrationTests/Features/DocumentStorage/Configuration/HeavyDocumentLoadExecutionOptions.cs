@@ -7,5 +7,8 @@ internal sealed class HeavyDocumentLoadExecutionOptions
     internal const string SectionName = "KeyLoadTests:HeavyLoad";
     internal const string EnabledSetting = SectionName + ":Enabled";
     internal const string ValidationMessage = "Heavy RF3 load requires explicit exclusive functional admission.";
-    public bool Enabled { get; set; }
+    public bool Enabled
+    {
+        get; set;
+    }
 }

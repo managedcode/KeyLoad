@@ -73,12 +73,16 @@ internal static class AppHostControlOptionsRegistration
         var root = section[NativeBlobRootKey];
         var session = section[NativeBlobSessionKey];
         if (root is null && session is null)
-        { return null; }
+        {
+            return null;
+        }
         if (!options.Ephemeral || !options.TwoRf3 || options.BenchmarksEnabled || options.ProtocolCohortEnabled
             || !options.RemoteDocumentReads || !options.RemotePartitionQueries || !options.ProtectedDocumentMovement
             || options.RequestProbe is null || session != options.RequestProbe.SessionId
             || string.IsNullOrEmpty(root) || !Path.IsPathFullyQualified(root))
-        { throw new InvalidOperationException(NativeBlobWireProbeProfile.Invalid); }
+        {
+            throw new InvalidOperationException(NativeBlobWireProbeProfile.Invalid);
+        }
         return new RequestCqrsProbeProfileSettings(root, session!);
     }
 
@@ -88,7 +92,9 @@ internal static class AppHostControlOptionsRegistration
         var selected = control.Value;
         var hasNestedSelection = control.GetChildren().Take(SectionPresenceCount).Any();
         if (selected is null && !hasNestedSelection)
-        { return false; }
+        {
+            return false;
+        }
 
         if (selected != LoggerModelControlEnabledValue
             || hasNestedSelection
@@ -103,7 +109,9 @@ internal static class AppHostControlOptionsRegistration
             || configuration[LocalRf3ImageRequest.EnabledSetting] == LoggerModelControlEnabledValue
             || configuration[EphemeralSetting] != LoggerModelControlEnabledValue
             || string.IsNullOrWhiteSpace(configuration[DataRootSetting]))
-        { throw new InvalidOperationException(InvalidLoggerModelControl); }
+        {
+            throw new InvalidOperationException(InvalidLoggerModelControl);
+        }
 
         return true;
     }

@@ -17,18 +17,30 @@ internal sealed record EventVectorParentCall(
 {
     internal const int ExpiryField = 10;
     [Orleans.Id(ExpiryField)]
-    public DateTimeOffset OriginalParentExpiresAt { get; init; }
+    public DateTimeOffset OriginalParentExpiresAt
+    {
+        get; init;
+    }
 
     internal const int ScopesField = 9;
     [Orleans.Id(ScopesField)]
-    public ImmutableArray<EventVectorAuthorizationScope> OriginalAuthorizedSourceScopes { get; init; }
+    public ImmutableArray<EventVectorAuthorizationScope> OriginalAuthorizedSourceScopes
+    {
+        get; init;
+    }
 
     internal const int FirstOpenPhaseField = 11;
     internal const int FirstOpenCommandField = 12;
     [Orleans.Id(FirstOpenPhaseField)]
-    public ReadOnlyMemory<byte> OriginalFirstOpenPhaseBytes { get; init; }
+    public ReadOnlyMemory<byte> OriginalFirstOpenPhaseBytes
+    {
+        get; init;
+    }
     [Orleans.Id(FirstOpenCommandField)]
-    public Guid OriginalFirstOpenNativeCommandId { get; init; }
+    public Guid OriginalFirstOpenNativeCommandId
+    {
+        get; init;
+    }
 
     internal const string SerializerAlias = "keyload.core.event-vector-parent-call.v1";
     internal const uint Field0 = 0;

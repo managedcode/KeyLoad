@@ -63,12 +63,18 @@ internal sealed class ReportFileTests
         try
         {
             var casesError = await Assert.ThrowsExactlyAsync<JsonException>(() =>
-                ReportWriter.WriteAsync(report with { Cases = default }, directory, UnitBenchmarkOptions.Native(), TestContext.Current!.Execution.CancellationToken))
+                ReportWriter.WriteAsync(report with
+                {
+                    Cases = default
+                }, directory, UnitBenchmarkOptions.Native(), TestContext.Current!.Execution.CancellationToken))
                 ?? throw new InvalidOperationException("The default case array was not rejected.");
             await Assert.That(casesError.Message).IsEqualTo(detail);
 
             var samplesError = await Assert.ThrowsExactlyAsync<JsonException>(() =>
-                ReportWriter.WriteAsync(report with { Cases = [report.Cases[0] with { Samples = default }] }, directory,
+                ReportWriter.WriteAsync(report with
+                {
+                    Cases = [report.Cases[0] with { Samples = default }]
+                }, directory,
                     UnitBenchmarkOptions.Native(), TestContext.Current!.Execution.CancellationToken))
                 ?? throw new InvalidOperationException("The default sample array was not rejected.");
             await Assert.That(samplesError.Message).IsEqualTo(detail);
@@ -118,7 +124,9 @@ internal sealed class ReportFileTests
             // A write that finishes before observed file growth fails this assertion instead of passing spuriously.
             var stopped = false;
             try
-            { await writing; }
+            {
+                await writing;
+            }
             catch (OperationCanceledException) { stopped = true; }
             await Assert.That(stopped).IsTrue();
             var rawErrorBytes = (long)samples.Length * error.Length;
@@ -150,7 +158,9 @@ internal sealed class ReportFileTests
         }
 
         try
-        { await operation; }
+        {
+            await operation;
+        }
         catch (OperationCanceledException) { }
     }
 

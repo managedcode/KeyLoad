@@ -55,7 +55,10 @@ internal static class SubscriptionInboxConflictAssertions
         await FailureAsync(failure);
         await SubscriptionProcessingAtomicAssertions.OwnOutcomeOnlyAsync(store, group, operation, before, position + 1);
         await PreservedAsync(db, store, group, inbox, source);
-        await SubscriptionParkedRecoveryAssertions.StatusAsync(db, group, new() { MaxWindow = 3 }, 2, 0, 3, 3, false, null);
+        await SubscriptionParkedRecoveryAssertions.StatusAsync(db, group, new()
+        {
+            MaxWindow = 3
+        }, 2, 0, 3, 3, false, null);
         var saved = SubscriptionProcessingAtomicAssertions.OutcomeBytes(store, group, operation.Id);
         history.Add((operation, failure, saved));
         await ReplayAsync(db, store, group, history[^1]);
@@ -72,7 +75,10 @@ internal static class SubscriptionInboxConflictAssertions
         await Assert.That(processing.Receipt.CommandId).IsEqualTo(request.CommandId);
         await Assert.That(processing.Receipt.Mutations).IsEquivalentTo(
             new MutationReceipt[] { new("Ack", "topic", "1", 1) }, CollectionOrdering.Matching);
-        await SubscriptionParkedRecoveryAssertions.StatusAsync(db, group, new() { MaxWindow = 3 }, 2, 1, 3, 3, false, null);
+        await SubscriptionParkedRecoveryAssertions.StatusAsync(db, group, new()
+        {
+            MaxWindow = 3
+        }, 2, 1, 3, 3, false, null);
         await PreservedAsync(db, store, group, inbox, source);
     }
 
@@ -104,11 +110,17 @@ internal static class SubscriptionInboxConflictAssertions
                 .IsEqualTo(JsonSerializer.Serialize(entry.Result, JsonDefaults.Options));
         }
         else if (entry.Result.NativeValue is SubscriptionProcessingResult)
-        { await NativeReplayResultAssertions.Same<SubscriptionProcessingResult>(replay, entry.Result); }
+        {
+            await NativeReplayResultAssertions.Same<SubscriptionProcessingResult>(replay, entry.Result);
+        }
         else if (entry.Result.NativeValue is SubscriptionInfo)
-        { await NativeReplayResultAssertions.Same<SubscriptionInfo>(replay, entry.Result); }
+        {
+            await NativeReplayResultAssertions.Same<SubscriptionInfo>(replay, entry.Result);
+        }
         else
-        { await NativeReplayResultAssertions.Same<CommitReceipt>(replay, entry.Result); }
+        {
+            await NativeReplayResultAssertions.Same<CommitReceipt>(replay, entry.Result);
+        }
         var saved = SubscriptionProcessingAtomicAssertions.OutcomeBytes(store, group, entry.Operation.Id);
         await Assert.That(saved.AsSpan().SequenceEqual(entry.Saved)).IsTrue();
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, cut, position, identity);

@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
 
@@ -38,9 +38,13 @@ internal static class NativeActivationRf3HeldCall
         ServerFailureObserver.Observe(caller.Cancel, failures);
         using var cleanup = new CancellationTokenSource(RequestCqrsRf3Protocol.CleanupDeadline, TimeProvider.System);
         if (producer is { } original)
-        { await ServerFailureObserver.ObserveAsync(async () => { _ = await original.WaitAsync(cleanup.Token).ConfigureAwait(false); }, failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(async () => { _ = await original.WaitAsync(cleanup.Token).ConfigureAwait(false); }, failures).ConfigureAwait(false);
+        }
         if (result is null)
-        { await ServerFailureObserver.ObserveAsync(() => controls.ReleaseOpenArmsAsync(discovery, cleanup.Token), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => controls.ReleaseOpenArmsAsync(discovery, cleanup.Token), failures).ConfigureAwait(false);
+        }
         if (result is null && observed is { } originalMarker)
         {
             await ServerFailureObserver.ObserveAsync(() => RequestCqrsPhaseFaultAssertions.VerifySettledAsync(

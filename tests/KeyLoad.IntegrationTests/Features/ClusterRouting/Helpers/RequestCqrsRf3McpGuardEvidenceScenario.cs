@@ -67,7 +67,9 @@ internal static class RequestCqrsRf3McpGuardEvidenceScenario
             "artifacts", "qualification", "c1-mcp-guard-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(path);
         if (!OperatingSystem.IsWindows())
-        { File.SetUnixFileMode(path, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute); }
+        {
+            File.SetUnixFileMode(path, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+        }
         return path;
     }
 

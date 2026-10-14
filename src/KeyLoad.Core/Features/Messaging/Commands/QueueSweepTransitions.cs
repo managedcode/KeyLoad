@@ -75,7 +75,9 @@ public sealed partial class DatabaseEngine
         var body = StoredMessageBody.Read(tx, QueueKey(MessageBodySpace, lane, id))
             ?? throw Errors.Fail(ErrorCode.Corruption, MissingIndexedBody);
         if (body.Body.Id != id)
-        { throw Errors.Fail(ErrorCode.Corruption, MissingIndexedBody); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, MissingIndexedBody);
+        }
         RequireCurrentQueueDueEntry(lane, metadata, now, leased, item.Key.Span);
         var current = counters ?? Counters(tx, lane);
         tx.Delete(item.Key.ToArray());
@@ -127,7 +129,10 @@ public sealed partial class DatabaseEngine
             };
         }
         var sequence = checked(counters.NextReadySequence + QueueSweepTransitionsAdjacentElementOffset);
-        counters = counters with { NextReadySequence = sequence };
+        counters = counters with
+        {
+            NextReadySequence = sequence
+        };
         tx.PutRecord(QueueKey(ReadyQueueSpace, lane, sequence, metadata.Id), metadata.Id);
         return metadata with
         {

@@ -17,7 +17,9 @@ internal static class ControlledPartitionMovementNativeProcessEntry
         await owner.Partition.Coordinator.ReadBarrierAsync(cancellationToken).ConfigureAwait(false);
         await owner.Log.ProtocolGate.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
-        { return Read(owner, commandId, cancellationToken); }
+        {
+            return Read(owner, commandId, cancellationToken);
+        }
         finally { owner.Log.ProtocolGate.Release(); }
     }
 
@@ -32,13 +34,19 @@ internal static class ControlledPartitionMovementNativeProcessEntry
         {
             work.Check();
             if (examined >= owner.Database.Limits.MaxScanRecords)
-            { throw Errors.Fail(ErrorCode.BudgetExceeded, Exhausted); }
+            {
+                throw Errors.Fail(ErrorCode.BudgetExceeded, Exhausted);
+            }
             examined++;
             var entry = owner.Log.ReadEntry(index, work.ChargeBytes);
             if (entry?.Operation?.Id != commandId)
-            { continue; }
+            {
+                continue;
+            }
             if (found is not null)
-            { throw new InvalidOperationException(Duplicate); }
+            {
+                throw new InvalidOperationException(Duplicate);
+            }
             found = entry;
         }
         work.Check();

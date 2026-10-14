@@ -24,7 +24,10 @@ internal static class GraphVertexPublicFlow
             }, ErrorCode.Conflict, token);
             var missing = GraphVertexPublicCommands.Command(state,
                 new PutDocument(GraphIncomingRf3Scenario.Collection, GraphVertexPublicState.WitnessId, GraphVertexPublicState.Json),
-                GraphVertexPublicCommands.Upsert(state, seed.Target with { Id = GraphVertexPublicState.MissingId }, 1L));
+                GraphVertexPublicCommands.Upsert(state, seed.Target with
+                {
+                    Id = GraphVertexPublicState.MissingId
+                }, 1L));
             await GraphVertexPublicCommands.Refuse(callers, state, missing, ErrorCode.NotFound, token);
             var stale = GraphVertexPublicCommands.Command(state,
                 new PutDocument(GraphIncomingRf3Scenario.Collection, GraphVertexPublicState.WitnessId, GraphVertexPublicState.Json),

@@ -17,7 +17,13 @@ internal static class PartitionMovementNativeOutcomeCodecFlow
             runtime, admission, callerAddress, token);
         var original = ControlledPartitionMovementPrepareRequest.Create(source, runtime, corpus,
             ControlledPartitionMovementPrepareAssertions.Placement(corpus), callerAddress);
-        original = original with { Envelope = original.Envelope with { ExpiresAt = prepared.ExpiresAt } };
+        original = original with
+        {
+            Envelope = original.Envelope with
+            {
+                ExpiresAt = prepared.ExpiresAt
+            }
+        };
         var targetPosition = target.Store.Position;
         var targetIndex = target.Journal.Log.State.LastIndex;
         var query = new PartitionMovementOutcomeTransportRequest(original, original.Envelope.ExpiresAt,
@@ -51,7 +57,13 @@ internal static class PartitionMovementNativeOutcomeCodecFlow
         var phase = await admission.VerifyAsync(phaseBytes, mac.Sign(phaseBytes, reply: false), token);
         await Assert.That(NativeSerialization.Serialize(phase).SequenceEqual(phaseBytes)).IsTrue();
         var replay = await ControlledPartitionMovementVerifiedSubmit.SubmitAsync(source, runtime, admission,
-            original with { Envelope = original.Envelope with { Nonce = Guid.NewGuid() } }, token);
+            original with
+            {
+                Envelope = original.Envelope with
+                {
+                    Nonce = Guid.NewGuid()
+                }
+            }, token);
         await Assert.That(NativeSerialization.Serialize(replay.Get<PartitionMovePhaseResult>())
             .SequenceEqual(NativeSerialization.Serialize(prepared.Prepared))).IsTrue();
         await ControlledPartitionMovementPrepareFlow.UnchangedAsync(source, target, prepared.Source,

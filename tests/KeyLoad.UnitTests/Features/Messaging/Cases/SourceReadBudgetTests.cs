@@ -21,8 +21,14 @@ internal sealed class SourceReadBudgetTests
     {
         using var database = CreateTopicDatabase();
         var requiredBytes = TopicReadBytes(database);
-        var exact = new DatabaseEngine(database.Store, database.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxQueryReadBytes = requiredBytes }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
-        var shortBudget = new DatabaseEngine(database.Store, database.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxQueryReadBytes = requiredBytes - 1 }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
+        var exact = new DatabaseEngine(database.Store, database.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new()
+        {
+            MaxQueryReadBytes = requiredBytes
+        }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
+        var shortBudget = new DatabaseEngine(database.Store, database.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new()
+        {
+            MaxQueryReadBytes = requiredBytes - 1
+        }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
         var source = new EventSourceRef(database.Partition, TopicName, EventSourceKind.Topic);
 
         var before = database.Store.GetReadDiagnostics();
@@ -65,7 +71,10 @@ internal sealed class SourceReadBudgetTests
             new(otherSource, Cursor: page.Cursor)));
         await Assert.That(wrongScope.Code).IsEqualTo(ErrorCode.CursorExpired);
         var stale = Assert.ThrowsExactly<KeyLoadException>(() => database.Database.ReadEventSource("root",
-            new(source with { Generation = 2 })));
+            new(source with
+            {
+                Generation = 2
+            })));
         await Assert.That(stale.Code).IsEqualTo(ErrorCode.TokenInvalidated);
 
         var principal = database.Store.Read(view => view.GetRecord<PrincipalRecord>(KeySpace.Principal("root")))!;
@@ -79,7 +88,10 @@ internal sealed class SourceReadBudgetTests
 
         using var empty = new TestDatabase();
         ConfigureTopic(empty, TopicName);
-        var limited = new DatabaseEngine(empty.Store, empty.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxBatchBytes = TooSmallBatchByteLimit }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
+        var limited = new DatabaseEngine(empty.Store, empty.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new()
+        {
+            MaxBatchBytes = TooSmallBatchByteLimit
+        }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
         var envelopeError = Assert.ThrowsExactly<KeyLoadException>(() => limited.ReadEventSource("root",
             new(new(empty.Partition, TopicName, EventSourceKind.Topic))));
         await Assert.That(envelopeError.Code).IsEqualTo(ErrorCode.BudgetExceeded);
@@ -94,7 +106,10 @@ internal sealed class SourceReadBudgetTests
             var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
             {
                 using var unexpected = CreateTopicDatabase(
-                    new() { MaxBatchBytes = TooSmallBatchByteLimit }, directory);
+                    new()
+                    {
+                        MaxBatchBytes = TooSmallBatchByteLimit
+                    }, directory);
             });
             await Assert.That(failure.Code).IsEqualTo(ErrorCode.ResourceExhausted);
             await Assert.That(Directory.Exists(directory)).IsFalse();

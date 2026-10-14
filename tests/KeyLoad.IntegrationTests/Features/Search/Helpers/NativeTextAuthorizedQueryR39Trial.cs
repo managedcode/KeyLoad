@@ -31,7 +31,10 @@ internal static class NativeTextAuthorizedQueryR39Trial
         await NativeTextProtectedPublicColdRestart.RunAsync(fixture, token);
         _ = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
             fixture.AdminKey, async admin =>
-            { await SessionAsync(fixture, admin, state, 5L, token); return true; }, token);
+            {
+                await SessionAsync(fixture, admin, state, 5L, token);
+                return true;
+            }, token);
     }
 
     private static Task<bool> SessionAsync(ClusterFixture fixture, RequestCqrsRf3Callers admin,
@@ -44,9 +47,13 @@ internal static class NativeTextAuthorizedQueryR39Trial
                 async Task CurrentAsync()
                 {
                     if (epoch == 4L)
-                    { await NativeTextAuthorizedQueryR39Replay.DeniedAsync(reader, admin, state, baseline, token); }
+                    {
+                        await NativeTextAuthorizedQueryR39Replay.DeniedAsync(reader, admin, state, baseline, token);
+                    }
                     else
-                    { await NativeTextAuthorizedQueryR39Pages.ReaderAsync(reader, state, epoch, admin, baseline, token); }
+                    {
+                        await NativeTextAuthorizedQueryR39Pages.ReaderAsync(reader, state, epoch, admin, baseline, token);
+                    }
                     await NativeTextAuthorizedQueryR39Pages.AdminAsync(admin, state, baseline, token);
                 }
                 await NativeTextAuthorizedQueryR39Replay.RunAsync(admin, state, CurrentAsync, token);

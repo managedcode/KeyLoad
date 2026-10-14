@@ -8,17 +8,33 @@ internal sealed class BenchmarkArtifactOptions
     internal const string InvalidSource = "The sample chunk measurement source identity is missing or malformed.";
     private const int GitShaLength = 40;
     private const int Sha256Length = 64;
-    public string? NativeSerializationDirectory { get; set; }
-    public string? SampleChunkDirectory { get; set; }
-    public string? SourceHead { get; set; }
-    public string? SourceInventorySha256 { get; set; }
+    public string? NativeSerializationDirectory
+    {
+        get; set;
+    }
+    public string? SampleChunkDirectory
+    {
+        get; set;
+    }
+    public string? SourceHead
+    {
+        get; set;
+    }
+    public string? SourceInventorySha256
+    {
+        get; set;
+    }
 
     internal bool IsValid()
     {
         if (string.IsNullOrWhiteSpace(SampleChunkDirectory))
-        { return true; }
+        {
+            return true;
+        }
         if (!IsHex(SourceHead, GitShaLength) || !IsHex(SourceInventorySha256, Sha256Length))
-        { throw new InvalidOperationException(InvalidSource); }
+        {
+            throw new InvalidOperationException(InvalidSource);
+        }
         return true;
     }
 

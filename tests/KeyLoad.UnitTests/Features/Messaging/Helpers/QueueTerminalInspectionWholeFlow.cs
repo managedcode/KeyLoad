@@ -16,10 +16,14 @@ internal static class QueueTerminalInspectionWholeFlow
             await KeyLoad.Server.ServerFailureObserver.ObserveAsync(
                 () => CompleteAsync(fixture, terminalState, foreignBody, failures, token), failures);
         }
-        catch (Exception error) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
-        catch (Exception error) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
+        catch (Exception error) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
+        catch (Exception error) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
         KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }
 
@@ -37,7 +41,10 @@ internal static class QueueTerminalInspectionWholeFlow
         await QueueTerminalInspectionAssertions.ReplayAsync(fixture.Database, fixture.Store, state);
         var original = QueueLifecycleConditionAssertions.Capture(fixture.Store);
         var injected = foreignBody
-            ? NativeSerialization.Serialize(NativeSerialization.Deserialize<MessageBody>(body) with { Id = "foreign-terminal-body" })
+            ? NativeSerialization.Serialize(NativeSerialization.Deserialize<MessageBody>(body) with
+            {
+                Id = "foreign-terminal-body"
+            })
             : body;
         QueueLifecycleConditionOperations.Restore(fixture.Store, key, injected);
         var damaged = QueueLifecycleConditionAssertions.Capture(fixture.Store);
@@ -54,7 +61,10 @@ internal static class QueueTerminalInspectionWholeFlow
                 await QueueLifecycleConditionAssertions.Same(cold, damaged);
                 await QueueTerminalInspectionAssertions.RefusalAsync(owner, cold, state, damaged);
                 cold.Commit((tx, _) => { tx.Delete(key); return true; });
-                await QueueLifecycleConditionAssertions.Same(cold, original with { Position = original.Position + 2 });
+                await QueueLifecycleConditionAssertions.Same(cold, original with
+                {
+                    Position = original.Position + 2
+                });
                 await QueueTerminalInspectionAssertions.TerminalAsync(owner, cold, state, expected, false);
                 await QueueTerminalInspectionAssertions.ReplayAsync(owner, cold, state);
                 await HealthyAsync(owner, state);
@@ -82,13 +92,17 @@ internal static class QueueTerminalInspectionWholeFlow
     private static QueueLifecycleTestState Seed(TestDatabase fixture, MessageState terminalState)
     {
         if (terminalState is not (MessageState.Acked or MessageState.Cancelled or MessageState.Expired))
-        { throw new ArgumentOutOfRangeException(nameof(terminalState)); }
+        {
+            throw new ArgumentOutOfRangeException(nameof(terminalState));
+        }
         QueueLifecycleProvisioning.Seed(fixture, byteSublimit: false);
         var time = QueueWholeFlowStorage.Clock(fixture.Store).AddSeconds(1);
         var state = new QueueLifecycleTestState(fixture.Partition, time.AddSeconds(2));
         var id = Guid.NewGuid();
         var message = QueueLifecycleHealthy.Enqueue(QueueLifecycleConditionOperations.Source) with
-        { ExpiresAt = terminalState == MessageState.Expired ? time.AddSeconds(1) : null };
+        {
+            ExpiresAt = terminalState == MessageState.Expired ? time.AddSeconds(1) : null
+        };
         var command = new CommandRequest(id, state.Partition, [message]);
         var operation = new ReplicatedOperation(id, OperationKind.Batch, QueueLifecycleTestProtocol.Administrator,
             time, JsonSerializer.Serialize(command, JsonDefaults.Options));
@@ -112,7 +126,10 @@ internal static class QueueTerminalInspectionWholeFlow
         var request = new ReceiveRequest(Guid.NewGuid(), state.Lane, LeaseSeconds: QueueLifecycleTestProtocol.LeaseSeconds);
         var resultReceived = state.Execute(owner, OperationKind.Receive, request, request.RequestId).Get<ReceiveResult>();
         if (terminalState == MessageState.Expired)
-        { await Assert.That(resultReceived.Deliveries).IsEmpty(); return; }
+        {
+            await Assert.That(resultReceived.Deliveries).IsEmpty();
+            return;
+        }
         var delivery = await Assert.That(resultReceived.Deliveries).HasSingleItem();
         await QueueTerminalInspectionAssertions.DeliveryAsync(delivery, QueueLifecycleConditionOperations.Source, state.Time);
         await QueueTerminalInspectionAssertions.ReplayAsync(owner, store, state, QueueLifecycleConditionOperations.Source);

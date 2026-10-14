@@ -56,7 +56,10 @@ internal sealed class DocumentScalarIndexMutationTests
         await DocumentCrudFixture.AssertIndexedIds(database, "label", IndexName, Gamma, [ThirdDocumentId]);
         await DocumentCrudFixture.AssertIndexedIds(database, "label", IndexName, Safe, []);
 
-        var otherPartition = database.Partition with { PartitionKey = OtherPartitionKey };
+        var otherPartition = database.Partition with
+        {
+            PartitionKey = OtherPartitionKey
+        };
         var sameValueElsewhere = DocumentCrudFixture.SubmitAt(database,
             DocumentCrudFixture.Root, otherPartition,
             new PutDocument(Collection, DocumentId, "{\"label\":\"beta\"}", 0));

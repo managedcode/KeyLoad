@@ -15,7 +15,9 @@ internal static class NativeAnnPublicAcquisition
     {
         if (manifest.Collection != request.Collection || manifest.Field != request.VectorField
             || manifest.Space != request.Space || manifest.Consumer.Partition != request.Partition)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, NativeAnnProtocol.InvalidSource); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, NativeAnnProtocol.InvalidSource);
+        }
     }
 
     internal static AnnMaintenanceRequest Request(DatabaseEngine database, IKeyValueView view,
@@ -28,12 +30,16 @@ internal static class NativeAnnPublicAcquisition
         var profile = consumer.Definition.AnnMaintenance;
         if (profile is not null && (profile.Collection != manifest.Collection
             || profile.Field != manifest.Field || profile.Space != manifest.Space))
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, NativeAnnProtocol.InvalidSource); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, NativeAnnProtocol.InvalidSource);
+        }
         budget.Check();
         var id = manifest.CheckpointIntent?.CommandId
             ?? throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Corrupt);
         return new(id, manifest.Consumer, manifest.Collection, manifest.Field, manifest.Space,
             manifest.IndexGeneration, manifest.Source.NodeId, manifest.Placement, AnnMaintenanceMode.Restore)
-        { MaintenanceProfile = profile };
+        {
+            MaintenanceProfile = profile
+        };
     }
 }

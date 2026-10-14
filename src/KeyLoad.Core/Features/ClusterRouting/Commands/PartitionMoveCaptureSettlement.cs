@@ -18,7 +18,9 @@ public sealed partial class DatabaseEngine
             || body.MaximumImageBytes > Limits.MaxQueryReadBytes
             || body.MaximumRecords <= PartitionMoveProtocol.EmptyCount
             || body.MaximumRecords > Limits.MaxScanRecords)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
+        }
         var fence = PartitionMoveSourceFenceStorage.Read(transaction, phase.Partition, Limits.MaxBatchBytes)
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
         if (fence.MoveId != phase.MoveId || fence.SourceCut != body.Fence.SourceCut
@@ -27,7 +29,9 @@ public sealed partial class DatabaseEngine
             || !PartitionMoveControlValidation.SameSource(fence.SourcePlacement, phase.SourcePlacement)
             || !PhysicalOwnerEntryValidation.SameOwner(fence.ControlOwner, phase.ControlOwner)
             || !PhysicalOwnerEntryValidation.SameOwner(fence.DestinationOwner, phase.DestinationOwner))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
         return new(phase.MoveId, phase.Stage, MoveJournalReceipt(transaction, commandId, position,
             phase.ControlIntentDigest), null, fence, null, null);
     }

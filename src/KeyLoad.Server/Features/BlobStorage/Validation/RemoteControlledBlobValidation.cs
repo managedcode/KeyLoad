@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core.Features.BlobStorage;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.Server.Features.DocumentStorage;
 using Microsoft.Extensions.Options;
@@ -33,9 +33,13 @@ internal static class RemoteControlledBlobValidation
             || call.MaximumReplyBytes <= RemoteControlledBlobProtocol.EmptyCount
             || call.MaximumReplyBytes > partition.Database.Limits.MaxBatchBytes
             || request.MaximumResultBytes > call.MaximumReplyBytes)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof);
+        }
         if (BlobControlledReadScope.Require(frame).Partition != frame.Control.Partition)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof);
+        }
         _ = node.Discovery?.Read() ?? throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentProtocol.Unavailable);
     }
 }

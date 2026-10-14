@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using System.Net;
 using System.Security.Cryptography;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Replication;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -38,27 +38,66 @@ internal sealed class ReplicaSecurityFixture : IDisposable
     private readonly ReplicaMessageMac mac;
     private readonly byte[] credential;
     internal KeyLoad.Core.DatabaseEngine Database => canonical.Database;
-    internal ReplicaConfiguration Configuration { get; }
-    internal ReplicaPeerOptions Options { get; }
-    internal ReplicaSiloDiscoveryState Discovery { get; }
-    internal ReplicaEnvelopeAuthenticator Sender { get; }
-    internal ReplicaEnvelopeAuthenticator Receiver { get; }
-    internal string OtherGeneration { get; }
+    internal ReplicaConfiguration Configuration
+    {
+        get;
+    }
+    internal ReplicaPeerOptions Options
+    {
+        get;
+    }
+    internal ReplicaSiloDiscoveryState Discovery
+    {
+        get;
+    }
+    internal ReplicaEnvelopeAuthenticator Sender
+    {
+        get;
+    }
+    internal ReplicaEnvelopeAuthenticator Receiver
+    {
+        get;
+    }
+    internal string OtherGeneration
+    {
+        get;
+    }
 
     internal ReplicaSecurityFixture(ReplicaReplayLimits? limits = null, TimeProvider? clock = null)
     {
         this.clock = clock ?? TimeProvider.System;
         host = new HostBuilder().UseOrleans(silo => silo.Services.Configure<EndpointOptions>(endpoint =>
-        { endpoint.AdvertisedIPAddress = IPAddress.Loopback; endpoint.SiloPort = SiloPort; endpoint.GatewayPort = 0; })).Build();
+        {
+            endpoint.AdvertisedIPAddress = IPAddress.Loopback;
+            endpoint.SiloPort = SiloPort;
+            endpoint.GatewayPort = 0;
+        })).Build();
         var local = host.Services.GetRequiredService<ILocalSiloDetails>();
         Configuration = new(VoterB, [VoterA, VoterB, VoterC], canonical.Directory, canonical.Store.Identity.Incarnation);
         credential = RandomNumberGenerator.GetBytes(ReplicaTransportProtocol.SecretBytes);
-        Options = new(new() { [VoterA] = new(VoterA), [VoterB] = new(VoterB), [VoterC] = new(VoterC) },
+        Options = new(new()
+        {
+            [VoterA] = new(VoterA),
+            [VoterB] = new(VoterB),
+            [VoterC] = new(VoterC)
+        },
             credential, ClusterId)
-        { ConnectTimeout = TimeSpan.FromSeconds(1), ReplayLimits = limits ?? new() { CriticalPerVoter = ReservedCapacity, ForwardPerVoter = 1, ReadBarrierPerVoter = 1, DataAppendPerVoter = 1 } };
+        {
+            ConnectTimeout = TimeSpan.FromSeconds(1),
+            ReplayLimits = limits ?? new()
+            {
+                CriticalPerVoter = ReservedCapacity,
+                ForwardPerVoter = 1,
+                ReadBarrierPerVoter = 1,
+                DataAppendPerVoter = 1
+            }
+        };
         Discovery = new(UnitExecutionOptions.ReplicaConfiguration(Configuration), UnitRoutingOptions.Peers(Configuration, Options), local);
         Receiver = new(UnitExecutionOptions.ReplicaConfiguration(Configuration), UnitRoutingOptions.Peers(Configuration, Options), Discovery, this.clock, UnitRoutingOptions.Transport(), UnitRoutingOptions.Replay(Options.ReplayLimits), canonicalDatabase: Database);
-        var senderConfiguration = Configuration with { LocalId = VoterA };
+        var senderConfiguration = Configuration with
+        {
+            LocalId = VoterA
+        };
         Sender = new(UnitExecutionOptions.ReplicaConfiguration(senderConfiguration), UnitRoutingOptions.Peers(senderConfiguration, Options), new(UnitExecutionOptions.ReplicaConfiguration(senderConfiguration), UnitRoutingOptions.Peers(senderConfiguration, Options), local), this.clock, UnitRoutingOptions.Transport(), UnitRoutingOptions.Replay(Options.ReplayLimits), canonicalDatabase: Database);
         OtherGeneration = SiloAddress.New(local.SiloAddress.Endpoint, checked(local.SiloAddress.Generation + 1)).ToParsableString();
         mac = new(Options.Secret, Options.ClusterId);
@@ -73,23 +112,40 @@ internal sealed class ReplicaSecurityFixture : IDisposable
     internal ReplicaPeerEnvelope Request<T>(ReplicaRpc method, T payload, string? sender = null)
     {
         var request = Sender.SignRequest(VoterB, method, Discovery.RuntimeAddress, ReplicaProtocolCodec.Serialize(payload));
-        return sender is null ? request : Resign(request with { Sender = sender });
+        return sender is null ? request : Resign(request with
+        {
+            Sender = sender
+        });
     }
     internal ReplicaPeerEnvelope Resign(ReplicaPeerEnvelope request) => request with { Signature = mac.Request(request) };
     internal ReplicaPeerEnvelope InvalidControl(string scenario)
     {
         var operation = Operation(OperationKind.Membership);
         var request = Request(ReplicaRpc.Forward, operation);
-        return Resign(request with { Payload = ReplicaSecurityWireFixture.Operation(operation, scenario) });
+        return Resign(request with
+        {
+            Payload = ReplicaSecurityWireFixture.Operation(operation, scenario)
+        });
     }
     internal ReplicaPeerEnvelope DuplicateAppend(bool operation)
     {
         var value = new AppendRequest(VoterA, 1, 0, 0, 0, [new(1, 1, Operation(OperationKind.Membership))]);
         var request = Request(ReplicaRpc.Append, value);
-        return Resign(request with { Payload = ReplicaSecurityWireFixture.Append(value, operation) });
+        return Resign(request with
+        {
+            Payload = ReplicaSecurityWireFixture.Append(value, operation)
+        });
     }
     private ReplicatedOperation Operation(OperationKind kind)
         => Database.NormalizeOperation(new(Guid.NewGuid(), kind, VoterA, clock.GetUtcNow(), OperationPayload));
     /// <inheritdoc />
-    public void Dispose() { Sender.Dispose(); Receiver.Dispose(); mac.Dispose(); host.Dispose(); canonical.Dispose(); CryptographicOperations.ZeroMemory(credential); }
+    public void Dispose()
+    {
+        Sender.Dispose();
+        Receiver.Dispose();
+        mac.Dispose();
+        host.Dispose();
+        canonical.Dispose();
+        CryptographicOperations.ZeroMemory(credential);
+    }
 }

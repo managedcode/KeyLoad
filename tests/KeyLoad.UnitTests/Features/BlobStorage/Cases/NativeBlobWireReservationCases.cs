@@ -27,9 +27,13 @@ internal sealed class NativeBlobWireReservationCases
             await Assert.That(acquired.Slot).IsEqualTo(0);
             fixture.Reservations.Leave(acquired);
             foreach (var reservation in original.Skip(1))
-            { fixture.Reservations.Leave(reservation); }
+            {
+                fixture.Reservations.Leave(reservation);
+            }
             for (var slot = 0; slot < 4; slot++)
-            { await Assert.That(fixture.Files.Exists(NativeBlobWireNames.Slot(slot))).IsFalse(); }
+            {
+                await Assert.That(fixture.Files.Exists(NativeBlobWireNames.Slot(slot))).IsFalse();
+            }
         });
 
     [Test]

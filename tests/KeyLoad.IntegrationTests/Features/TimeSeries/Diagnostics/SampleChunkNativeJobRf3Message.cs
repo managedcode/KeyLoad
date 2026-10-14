@@ -18,24 +18,37 @@ internal static class SampleChunkNativeJobRf3Message
         var prefix = (executing ? Executing : Returned) + commandId.ToString(SampleChunkPendingRf3Protocol.GuidFormat) + Job;
         var start = actual.IndexOf(prefix, StringComparison.Ordinal);
         if (start < 0)
-        { return null; }
+        {
+            return null;
+        }
         if (Encoding.UTF8.GetByteCount(actual) > RequestCqrsProbeFixtureProtocol.MaximumRecordBytes)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         var body = actual.AsSpan(start + prefix.Length);
         var separator = body.LastIndexOf(Metadata.AsSpan(), StringComparison.Ordinal);
         if (separator <= 0)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         var digest = body[(separator + Metadata.Length)..];
         if (digest.Length != DigestCharacters + TerminatorCharacters || digest[^TerminatorCharacters] != Terminator
             || !IsDigest(digest[..DigestCharacters]))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         return new(commandId, body[..separator].ToString(), digest[..DigestCharacters].ToString());
     }
 
     private static bool IsDigest(ReadOnlySpan<char> digest)
     {
         foreach (var character in digest)
-        { if (character is not (>= '0' and <= '9') and not (>= 'a' and <= 'f')) { return false; } }
+        {
+            if (character is not (>= '0' and <= '9') and not (>= 'a' and <= 'f'))
+            {
+                return false;
+            }
+        }
         return true;
     }
 

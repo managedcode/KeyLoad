@@ -16,12 +16,16 @@ internal static class EventVectorCleanupSourceBinding
             control.OriginalCleanupFrontierBytes.Span);
         if (frontier.IsDefault || intended.SourceOrdinal < FirstOrdinal || intended.SourceOrdinal >= frontier.Length
             || intended.Role != EventVectorSourcePhaseRole.Release)
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
         admission.RequireEntryCount(frontier.Length);
         var retained = frontier[intended.SourceOrdinal];
         if (retained is null || retained.OriginalPinPhaseBytes.IsEmpty
             || retained.AuthenticatedSourceObservationBytes.IsEmpty)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         var pin = NativeSerialization.Deserialize<EventVectorSourcePhase>(retained.OriginalPinPhaseBytes.Span);
         var observation = NativeSerialization.Deserialize<EventVectorSourceObservation>(
             retained.AuthenticatedSourceObservationBytes.Span);
@@ -40,6 +44,8 @@ internal static class EventVectorCleanupSourceBinding
             || mutation.ExpectedCoverageGeneration != (current?.CoverageGeneration ?? AbsentRevision)
             || intended.CoverageGeneration != expectedCoverage
             || intended.OriginalPosition != expectedPosition || intended.TargetPosition != expectedPosition)
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
     }
 }

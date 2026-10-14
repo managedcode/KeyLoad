@@ -182,7 +182,10 @@ internal sealed class NativeTextCrashBoundary(NativeTextFaultStage expected)
     private const int GetObservedEmptyRead = 0;
 
     private int observed;
-    internal bool Armed { get; set; }
+    internal bool Armed
+    {
+        get; set;
+    }
     internal bool Observed => Volatile.Read(ref observed) != GetObservedEmptyRead;
 
     internal void Observe(NativeTextFaultStage stage)

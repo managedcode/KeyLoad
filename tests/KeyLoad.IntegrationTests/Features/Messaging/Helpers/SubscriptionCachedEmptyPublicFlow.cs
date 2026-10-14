@@ -13,7 +13,9 @@ internal static class SubscriptionCachedEmptyPublicFlow
     {
         SubscriptionCachedEmptyPublicState? state = null;
         await SubscriptionPhasePublicTrial.WithCallersAsync(fixture, seed, async (sdk, mcp) =>
-        { state = await StartAsync(sdk, mcp, seed, token); }, token);
+        {
+            state = await StartAsync(sdk, mcp, seed, token);
+        }, token);
         var original = state ?? throw new InvalidOperationException("The original empty subscription flow is absent.");
         await SubscriptionFilterRf3Cold.RestartAsync(fixture, token);
         await SubscriptionPhasePublicTrial.WithCallersAsync(fixture, seed,

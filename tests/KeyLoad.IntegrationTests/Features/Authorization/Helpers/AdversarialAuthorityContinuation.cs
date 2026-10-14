@@ -12,13 +12,21 @@ internal static class AdversarialAuthorityContinuation
         await AdversarialAuthorityRefusals.ForeignAsync(root, reader, session, state, token);
         await AdversarialAuthorityAssertions.HealthyAsync(reader, session, state, token);
         await PersistAsync(root, state.Identity.Principal with
-        { Grants = [], PolicyEpoch = AdversarialAuthorityProtocol.RestrictedEpoch }, token);
+        {
+            Grants = [],
+            PolicyEpoch = AdversarialAuthorityProtocol.RestrictedEpoch
+        }, token);
         await AdversarialAuthorityRefusals.OwnedAsync(fixture, root, reader, session, state, ErrorCode.PermissionDenied, token);
         await PersistAsync(root, state.Identity.Principal with
-        { Revoked = true, PolicyEpoch = AdversarialAuthorityProtocol.RevokedEpoch }, token);
+        {
+            Revoked = true,
+            PolicyEpoch = AdversarialAuthorityProtocol.RevokedEpoch
+        }, token);
         await AdversarialAuthorityRefusals.OwnedAsync(fixture, root, reader, session, state, ErrorCode.Unauthenticated, token);
         await PersistAsync(root, state.Identity.Principal with
-        { PolicyEpoch = AdversarialAuthorityProtocol.RepairedEpoch }, token);
+        {
+            PolicyEpoch = AdversarialAuthorityProtocol.RepairedEpoch
+        }, token);
         await AdversarialAuthorityAssertions.HealthyAsync(reader, session, state, token);
         await AdversarialAuthorityRefusals.ForeignAsync(root, reader, session, state, token);
     }

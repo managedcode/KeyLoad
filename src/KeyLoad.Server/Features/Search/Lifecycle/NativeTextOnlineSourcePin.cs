@@ -44,7 +44,9 @@ internal sealed class NativeTextOnlineSourcePin : IDisposable
             budget.Check();
         }, failures);
         if (failures.Count != NoFailures && captured is not null)
-        { ServerFailureObserver.Observe(captured.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(captured.Dispose, failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
         return captured!;
     }
@@ -53,7 +55,9 @@ internal sealed class NativeTextOnlineSourcePin : IDisposable
         NativeTextSeedPin scope, NativeTextSeedCapture metadata, ReadExecutionBudget budget)
     {
         if (database.Store is not ZoneTreeStore owner)
-        { throw Errors.Fail(ErrorCode.UnsupportedCapability, InvalidPin); }
+        {
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, InvalidPin);
+        }
         var grant = budget.CreateReadGrant(budget.RemainingReadGrantBytes, budget.RemainingReadGrantRecords);
         var limits = new ZoneTreeReadCutLimits(grant.RemainingRecords, grant.RemainingBytes, budget.RemainingLifetime);
         ZoneTreeReadCutLease native;
@@ -65,7 +69,9 @@ internal sealed class NativeTextOnlineSourcePin : IDisposable
         {
             // Native capture aggregates its primary and failed cleanup; uncertain ownership stays reserved.
             if (failure is AggregateException)
-            { throw; }
+            {
+                throw;
+            }
             var failures = new List<Exception> { failure };
             ServerFailureObserver.Observe(() => budget.CompleteSettledReadGrant(grant), failures);
             ServerFailureObserver.ThrowIfAny(failures);
@@ -101,10 +107,15 @@ internal sealed class NativeTextOnlineSourcePin : IDisposable
         {
             ObjectDisposedException.ThrowIf(disposed, this);
             if (visited)
-            { throw Errors.Fail(ErrorCode.Conflict, AlreadyVisited); }
+            {
+                throw Errors.Fail(ErrorCode.Conflict, AlreadyVisited);
+            }
             visited = true;
             var reader = new NativeTextOnlineSeedReader(native, budget, grant, scope);
-            return metadata with { Documents = reader.Read() };
+            return metadata with
+            {
+                Documents = reader.Read()
+            };
         }
     }
 
@@ -114,7 +125,9 @@ internal sealed class NativeTextOnlineSourcePin : IDisposable
         if (actual.NodeId != scope.NodeId || actual.Incarnation != metadata.Incarnation
             || actual.FormatVersion != metadata.DataEpoch || actual.ReadGeneration != metadata.ReadGeneration
             || actual.Position != metadata.Position)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidPin); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidPin);
+        }
     }
 
     public void Dispose()
@@ -123,7 +136,9 @@ internal sealed class NativeTextOnlineSourcePin : IDisposable
         {
             native.EnsureDisposalCanJoin();
             if (disposed)
-            { return; }
+            {
+                return;
+            }
             native.Dispose();
             budget.CompleteSettledReadGrant(grant);
             disposed = true;

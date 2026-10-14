@@ -150,7 +150,9 @@ internal sealed class ReadDiagnosticsRangeTests
     private static byte[] Key(string value) => Encoding.UTF8.GetBytes(value);
     private sealed class ObserverRejectedException : Exception
     {
-        public ObserverRejectedException() { }
+        public ObserverRejectedException()
+        {
+        }
         public ObserverRejectedException(string message) : base(message) { }
         public ObserverRejectedException(string message, Exception innerException) : base(message, innerException) { }
     }
@@ -158,7 +160,10 @@ internal sealed class ReadDiagnosticsRangeTests
     private sealed class StoreFixture : IDisposable
     {
         private readonly string directory = Path.Combine(Path.GetTempPath(), "keyload-read-diagnostics-" + Guid.NewGuid().ToString("N"));
-        public ZoneTreeStore Store { get; }
+        public ZoneTreeStore Store
+        {
+            get;
+        }
         public StoreFixture() => Store = new(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         public void Dispose()
         {

@@ -50,7 +50,10 @@ internal static class HelixDbIndexLifecycle
         var started = timeProvider.GetTimestamp();
         while (true)
         {
-            var ast = HelixDbProtocol.Node(HelixDbNativeTokens.TokenGetIndexOperation, new() { [HelixDbNativeTokens.TokenOperationId] = operation });
+            var ast = HelixDbProtocol.Node(HelixDbNativeTokens.TokenGetIndexOperation, new()
+            {
+                [HelixDbNativeTokens.TokenOperationId] = operation
+            });
             using var response = await HelixDbProtocol.QueryAsync(http, HelixDbProtocol.Batch(ast, false), false, policy, token: token, timeProvider: timeProvider).ConfigureAwait(false);
             var observedOperation = Single(response.RootElement.GetProperty(HelixDbNativeTokens.TokenRows));
             var status = observedOperation.GetProperty(HelixDbNativeTokens.TokenStatus).GetString();

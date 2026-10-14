@@ -46,17 +46,23 @@ internal static class ReplicaMaintenanceCheckpointTrial
             }, failures);
             ServerFailureObserver.Observe(scenario.Release, failures);
         }
-        catch (Exception failure) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(failure))
-        { (acquired ? cleanup : failures).Add(failure); }
-        catch (Exception failure) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(failure))
-        { (acquired ? cleanup : failures).Add(failure); }
+        catch (Exception failure) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            (acquired ? cleanup : failures).Add(failure);
+        }
+        catch (Exception failure) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            (acquired ? cleanup : failures).Add(failure);
+        }
         if (failNativeFlush && failures.Count == 0)
         {
             await ServerFailureObserver.ObserveAsync(() =>
                 ReplicaMaintenanceCheckpointAssertions.RequireNativeFailuresAsync(cleanup), failures);
         }
         if (!failNativeFlush || failures.Count != 0)
-        { failures.AddRange(cleanup); }
+        {
+            failures.AddRange(cleanup);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

@@ -14,7 +14,9 @@ public sealed partial class DatabaseEngine
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
         if (header.OperatorPrincipalId != principal.Id || header.TerminalResult is not null
             || header.PendingOriginalPhaseCommandId != authorizationCommandId)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.MissingAuthority);
+        }
         var request = header.OriginalTransferRequest;
         var pending = ReadParentStatePhase(transaction, request, authorizationCommandId)!;
         var last = ReadSharedParentStatePhase(transaction, request,
@@ -42,7 +44,9 @@ public sealed partial class DatabaseEngine
             intended, candidate, Limits.MaxBatchBytes, movementCheckpoints.MaxPhaseRecordsPerMove,
             movementCheckpoints.MaxRetainedMetadataBytesPerMove);
         if (NativeSerialization.Measure(context) > Limits.MaxBatchBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
+        }
         movementCheckpointVerifier.RequireReceiverIssueCapacity(NativeSerialization.Serialize(context));
     }
 }

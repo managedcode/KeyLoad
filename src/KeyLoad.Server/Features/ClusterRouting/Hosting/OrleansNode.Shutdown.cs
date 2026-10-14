@@ -8,7 +8,9 @@ internal sealed partial class OrleansNode
     {
         await registered.ConfigureAwait(false);
         if (starting is not null)
-        { await starting.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing); }
+        {
+            await starting.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
+        }
         Volatile.Read(ref physicalShardCatalog)?.CloseAdmission();
         var failures = new List<Exception>();
         var stopping = Volatile.Read(ref host);
@@ -54,15 +56,25 @@ internal static class OrleansNodeNativeWorkShutdown
         await ServerFailureObserver.ObserveAsync(placement.CloseAdmissionAsync, failures).ConfigureAwait(false);
         await graphs.JoinAsync(failures).ConfigureAwait(false);
         if (receiver is not null)
-        { await ServerFailureObserver.ObserveAsync(receiver.StopAsync, failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(receiver.StopAsync, failures).ConfigureAwait(false);
+        }
         if (client is not null)
-        { await ServerFailureObserver.ObserveAsync(client.StopAsync, failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(client.StopAsync, failures).ConfigureAwait(false);
+        }
         if (blobObserver is not null)
-        { await ServerFailureObserver.ObserveAsync(blobObserver.StopAsync, failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(blobObserver.StopAsync, failures).ConfigureAwait(false);
+        }
         if (movement is not null)
-        { await ServerFailureObserver.ObserveAsync(() => movement.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => movement.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         await ServerFailureObserver.ObserveAsync(placement.JoinAsync, failures).ConfigureAwait(false);
         if (documents is not null)
-        { await ServerFailureObserver.ObserveAsync(() => documents.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => documents.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
     }
 }

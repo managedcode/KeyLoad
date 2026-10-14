@@ -17,28 +17,49 @@ internal sealed record EventVectorControlPhase(
 {
     internal const int ParentRequestField = 17;
     [Orleans.Id(ParentRequestField)]
-    public Guid OriginalParentRequestId { get; init; }
+    public Guid OriginalParentRequestId
+    {
+        get; init;
+    }
 
     internal const int SourcePageField = 16;
     [Orleans.Id(SourcePageField)]
-    public ReadOnlyMemory<byte> OriginalSourcePageBytes { get; init; }
+    public ReadOnlyMemory<byte> OriginalSourcePageBytes
+    {
+        get; init;
+    }
 
     internal const int CapturedFirstPhaseField = 14;
     internal const int FirstIssuanceReferenceField = 15;
     [Orleans.Id(CapturedFirstPhaseField)]
-    public ReadOnlyMemory<byte> OriginalCapturedFirstOpenPhaseBytes { get; init; }
+    public ReadOnlyMemory<byte> OriginalCapturedFirstOpenPhaseBytes
+    {
+        get; init;
+    }
     [Orleans.Id(FirstIssuanceReferenceField)]
-    public Guid OriginalFirstIssuancePublicCommandId { get; init; }
+    public Guid OriginalFirstIssuancePublicCommandId
+    {
+        get; init;
+    }
 
     internal const int CleanupFrontierField = 13;
     [Orleans.Id(CleanupFrontierField)]
-    public ReadOnlyMemory<byte> OriginalCleanupFrontierBytes { get; init; }
+    public ReadOnlyMemory<byte> OriginalCleanupFrontierBytes
+    {
+        get; init;
+    }
 
     internal const int ParentExpiryField = 12;
     [Orleans.Id(ParentExpiryField)]
-    public DateTimeOffset OriginalParentExpiresAt { get; init; }
+    public DateTimeOffset OriginalParentExpiresAt
+    {
+        get; init;
+    }
 
     internal const string SerializerAlias = "keyload.core.event-vector-control-phase.v1";
     [Orleans.Id(11)]
-    public ReadOnlyMemory<byte> OriginalCoverageWitness { get; init; }
+    public ReadOnlyMemory<byte> OriginalCoverageWitness
+    {
+        get; init;
+    }
 }

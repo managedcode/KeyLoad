@@ -121,9 +121,15 @@ public sealed record StoreIdentity([property: Orleans.Id(0)] int FormatVersion, 
 public interface IAtomicStore : IDisposable
 {
     /// <summary>Gets the current persisted store and token-signing identity.</summary>
-    StoreIdentity Identity { get; }
+    StoreIdentity Identity
+    {
+        get;
+    }
     /// <summary>Gets the last published local storage commit position.</summary>
-    long Position { get; }
+    long Position
+    {
+        get;
+    }
     /// <summary>Runs a synchronous read while its consistent storage gate is held.</summary>
     /// <typeparam name="T">Owned result type.</typeparam>
     /// <param name="read">Action that must not retain the view or borrowed bytes.</param>

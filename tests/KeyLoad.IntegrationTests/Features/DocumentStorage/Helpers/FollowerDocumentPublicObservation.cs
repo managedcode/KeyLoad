@@ -31,11 +31,15 @@ internal sealed record FollowerDocumentPublicObservation(FollowerDocumentReadRes
                 ? await mcp.CallAsync(FollowerDocumentRf3Protocol.Tool, request, token).ConfigureAwait(false)
                 : await mcp.CallAsync(SqlOperationProtocol.ToolName, sql, token).ConfigureAwait(false);
             if (official.IsError is true)
-            { return new(null, null, official, null, false); }
+            {
+                return new(null, null, official, null, false);
+            }
             var result = await McpCallerAssertions.SuccessAsync<FollowerDocumentReadResultV1>(official).ConfigureAwait(false);
             return new(result.Value, null, official, null, true);
         }
         catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
-        { return new(null, null, null, error, false); }
+        {
+            return new(null, null, null, error, false);
+        }
     }
 }

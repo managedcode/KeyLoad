@@ -32,12 +32,17 @@ internal sealed class IsolatedResourceTopologyFixture : IAsyncDisposable
         });
         var selection = new ComparisonWorkerSelection(target, nodes, Scenario.PointRead,
             documents is null ? IsolatedComparisonContract.Current.Profile : DocumentWorkerSelection.ProfileId(documents))
-        { DocumentWorkload = documents };
+        {
+            DocumentWorkload = documents
+        };
         var runner = builder.AddContainer(RunnerName, "model-runner", "model");
         Context = new(builder, selection, runner, root);
     }
 
-    internal IsolatedResourceContext Context { get; }
+    internal IsolatedResourceContext Context
+    {
+        get;
+    }
 
     internal ContainerResource[] Build()
     {

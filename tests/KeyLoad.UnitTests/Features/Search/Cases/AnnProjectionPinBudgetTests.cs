@@ -61,7 +61,10 @@ internal sealed class AnnProjectionPinBudgetTests
     public async Task ProjectionBatchByteBoundaryUsesTheActualNativeOutboxRecordLength()
     {
         var nativeBytes = MeasureVectorEntryBytes();
-        using var database = AnnProjectionPinTestSupport.Create(new() { MaxProjectionBatchBytes = nativeBytes });
+        using var database = AnnProjectionPinTestSupport.Create(new()
+        {
+            MaxProjectionBatchBytes = nativeBytes
+        });
         var consumer = AnnProjectionPinTestSupport.Consumer(database, ByteBoundaryConsumer);
         var start = AnnProjectionPinTestSupport.Tail(database);
         AnnProjectionPinTestSupport.Configure(database, consumer, start);

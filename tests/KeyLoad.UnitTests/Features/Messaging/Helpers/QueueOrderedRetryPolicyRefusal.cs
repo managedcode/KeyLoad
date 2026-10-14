@@ -22,7 +22,9 @@ internal static class QueueOrderedRetryPolicyRefusal
         var before = QueueOrderedRetryImage.Capture(database.Store, state.Lane);
         var failed = state.Execute(database, OperationKind.ConfigureResource,
             new ConfigureResourceRequest(state.Partition.TenantId, state.Partition.DatabaseId, replacement)
-            { ExpectedSchemaVersion = original.SchemaVersion }, Guid.NewGuid());
+            {
+                ExpectedSchemaVersion = original.SchemaVersion
+            }, Guid.NewGuid());
         await Assert.That(failed.Error).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(database.Store.Read(view => view.GetRecord<ResourceDefinition>(key))).IsEqualTo(original);
         await QueueOrderedRetryImage.SameAsync(database.Store, state.Lane, before);

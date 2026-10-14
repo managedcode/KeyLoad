@@ -89,7 +89,10 @@ internal static class PartitionRecordFamilies
     internal const string VectorProjectionLineage = "vector-projection-lineage";
     internal const string VisibilityEpoch = "visibility-epoch";
 
-    internal static ImmutableArray<string> All { get; } =
+    internal static ImmutableArray<string> All
+    {
+        get;
+    } =
     [
         Adjacency,
         AggregateSnapshot,

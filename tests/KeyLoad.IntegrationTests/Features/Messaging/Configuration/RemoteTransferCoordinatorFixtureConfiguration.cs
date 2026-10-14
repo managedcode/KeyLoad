@@ -28,16 +28,22 @@ internal static class RemoteTransferCoordinatorFixtureConfiguration
         RemoteTransferCoordinatorFixtureSelection? selection)
     {
         if (selection is null)
-        { return; }
+        {
+            return;
+        }
         foreach (var number in Enumerable.Range(ClusterFixtureProtocol.FirstNodeNumber, ClusterFixtureProtocol.NodeCount))
         {
             var node = builder.CreateResourceBuilder(builder.Resources.OfType<ContainerResource>()
                 .Single(resource => resource.Name == ClusterFixtureProtocol.NodeName(number)));
             node.WithEnvironment(Setting, selection.PrincipalId);
             if (selection.AcceptAttemptCeiling is { } ceiling)
-            { node.WithEnvironment(AttemptSetting, ceiling.ToString(System.Globalization.CultureInfo.InvariantCulture)); }
+            {
+                node.WithEnvironment(AttemptSetting, ceiling.ToString(System.Globalization.CultureInfo.InvariantCulture));
+            }
             if (selection.RepairCeiling is { } repair)
-            { node.WithEnvironment(RepairSetting, repair.ToString(System.Globalization.CultureInfo.InvariantCulture)); }
+            {
+                node.WithEnvironment(RepairSetting, repair.ToString(System.Globalization.CultureInfo.InvariantCulture));
+            }
         }
     }
 }

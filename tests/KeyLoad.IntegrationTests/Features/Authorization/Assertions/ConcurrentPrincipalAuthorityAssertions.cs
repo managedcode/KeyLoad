@@ -17,7 +17,12 @@ internal static class ConcurrentPrincipalAuthorityAssertions
             var firstOutbox = await McpCallerAssertions.SdkSuccessAsync(await root.OutboxStatusAsync(first.Partition, token));
             var secondOutbox = await McpCallerAssertions.SdkSuccessAsync(await root.OutboxStatusAsync(second.Partition, token));
             return global::System.Text.Json.JsonSerializer.SerializeToElement(new
-            { FirstDocument = firstDocument, SecondDocument = secondDocument, FirstOutbox = firstOutbox, SecondOutbox = secondOutbox },
+            {
+                FirstDocument = firstDocument,
+                SecondDocument = secondDocument,
+                FirstOutbox = firstOutbox,
+                SecondOutbox = secondOutbox
+            },
                 global::KeyLoad.JsonDefaults.Options);
         });
 

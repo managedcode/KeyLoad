@@ -1,9 +1,9 @@
 using Aspire.Hosting;
 using KeyLoad.Client;
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
 using KeyLoad.IntegrationTests.Features.StorageRecovery;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.IntegrationTests.Features.Messaging;
 
@@ -27,7 +27,10 @@ internal static class DueFaultRf3Leadership
         await VerifySurvivorProgressAsync(app, profile, seed, cut, cancellationToken).ConfigureAwait(false);
         var requiredApplied = await ReadSurvivorHighWaterAsync(app, profile, cut, cancellationToken).ConfigureAwait(false);
         await VerifySurvivorOutcomesAsync(app, seed, cut, cancellationToken).ConfigureAwait(false);
-        return cut with { RequiredApplied = requiredApplied };
+        return cut with
+        {
+            RequiredApplied = requiredApplied
+        };
     }
 
     internal static async Task VerifyLeaderRejoinAsync(DistributedApplication app, RequestCqrsRf3Wave wave,
@@ -44,7 +47,9 @@ internal static class DueFaultRf3Leadership
             .ConfigureAwait(false);
         var index = Array.FindIndex(cut.BeforeDiscovery, value => value.VoterId == VoterOrigin(cut.LeaderNode));
         if (index < 0)
-        { throw new InvalidOperationException(LeaderMissing); }
+        {
+            throw new InvalidOperationException(LeaderMissing);
+        }
         await RequestCqrsRf3DiscoveryOracle.AssertOneReplacementAsync(cut.BeforeDiscovery, current, index)
             .ConfigureAwait(false);
         await VerifySurvivorOutcomesAsync(app, seed, cut, cancellationToken).ConfigureAwait(false);
@@ -84,7 +89,9 @@ internal static class DueFaultRf3Leadership
             var a = await first.StatusAsync(cancellationToken).ConfigureAwait(false);
             var b = await second.StatusAsync(cancellationToken).ConfigureAwait(false);
             if (HasReplacementLeader(a, b, cut, out _))
-            { return (a.Value!, b.Value!); }
+            {
+                return (a.Value!, b.Value!);
+            }
             await Task.Delay(TimeSpan.FromMilliseconds(DueFaultRf3Protocol.PollMilliseconds), TimeProvider.System,
                 cancellationToken).ConfigureAwait(false);
         }
@@ -97,9 +104,13 @@ internal static class DueFaultRf3Leadership
         if (!first.IsSuccess || !second.IsSuccess || first.Value is not { RoutingReady: true, Voters: 3 } a
             || second.Value is not { RoutingReady: true, Voters: 3 } b || a.Leader is null
             || a.Leader != b.Leader || a.Leader == VoterOrigin(cut.LeaderNode))
-        { return false; }
+        {
+            return false;
+        }
         if (!cut.Survivors.Any(name => VoterOrigin(name) == a.Leader))
-        { return false; }
+        {
+            return false;
+        }
         leader = a.Leader;
         return true;
     }
@@ -148,7 +159,9 @@ internal static class DueFaultRf3Leadership
     {
         var delay = dueAt - TimeProvider.System.GetUtcNow();
         if (delay > TimeSpan.Zero)
-        { await Task.Delay(delay, TimeProvider.System, cancellationToken).ConfigureAwait(false); }
+        {
+            await Task.Delay(delay, TimeProvider.System, cancellationToken).ConfigureAwait(false);
+        }
     }
 
     private static async Task<long> ReadSurvivorHighWaterAsync(Aspire.Hosting.DistributedApplication app,
@@ -179,7 +192,9 @@ internal static class DueFaultRf3Leadership
     private static async Task AssertAppliedAsync(IReadOnlyList<NodeEpochRf3NodeObservation> nodes, long required)
     {
         foreach (var node in nodes)
-        { await Assert.That(node.Status.Applied).IsGreaterThanOrEqualTo(required); }
+        {
+            await Assert.That(node.Status.Applied).IsGreaterThanOrEqualTo(required);
+        }
     }
 
     private static NodeEpochRf3NodeObservation FindLeader(IReadOnlyList<NodeEpochRf3NodeObservation> nodes)
@@ -187,9 +202,13 @@ internal static class DueFaultRf3Leadership
         var leaders = nodes.Select(value => value.Status.Leader).Where(value => value is not null)
             .Distinct(StringComparer.Ordinal).ToArray();
         if (leaders.Length != 1)
-        { throw new InvalidOperationException(LeaderMissing); }
+        {
+            throw new InvalidOperationException(LeaderMissing);
+        }
         if (nodes.Any(node => node.Status.Leader != leaders[0]))
-        { throw new InvalidOperationException(LeaderMissing); }
+        {
+            throw new InvalidOperationException(LeaderMissing);
+        }
         return nodes.Single(value => value.Admin.LocalVoter == leaders[0]);
     }
 

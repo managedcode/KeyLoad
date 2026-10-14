@@ -10,7 +10,9 @@ internal static class ScriptDomGraphSeeds
     {
         var arguments = ScriptDomGraphShape.Call(expression, SeedsFunction, context, depth);
         if (arguments.Count == EmptyCount)
-        { throw ScriptDomErrors.Invalid(); }
+        {
+            throw ScriptDomErrors.Invalid();
+        }
         var seeds = ImmutableArray.CreateBuilder<EntityRef>(arguments.Count);
         foreach (var argument in arguments)
         {

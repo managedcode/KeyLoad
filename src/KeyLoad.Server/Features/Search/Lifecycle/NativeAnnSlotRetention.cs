@@ -15,13 +15,17 @@ internal static class NativeAnnSlotRetention
         if (receipt.OwnedGenerations.Any(leaf => !slots.Any(slot => slot.Manifest.GenerationLeaf == leaf)
             && !receipt.Published.Any(item => item.Pointer.GenerationLeaf == leaf)
             && !receipt.Pending.Any(item => item.Pointer.GenerationLeaf == leaf)))
-        { return; }
+        {
+            return;
+        }
         foreach (var original in receipt.OriginalOperations.Where(entry => entry.Released))
         {
             if (!slots.Any(slot => SameKey(slot.Manifest, original.Key))
                 && !receipt.Published.Any(item => item.Key == original.Key)
                 && !receipt.Pending.Any(item => item.Key == original.Key))
-            { root.CompleteOriginalRelease(original.Key, options); }
+            {
+                root.CompleteOriginalRelease(original.Key, options);
+            }
         }
     }
 
@@ -30,9 +34,13 @@ internal static class NativeAnnSlotRetention
     {
         var retained = incoming;
         foreach (var slot in slots)
-        { retained = checked(retained + slot.Index.RetainedBytesUpperBound); }
+        {
+            retained = checked(retained + slot.Index.RetainedBytesUpperBound);
+        }
         if (retained > options.MaximumResidentBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, NativeAnnProtocol.Bound); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, NativeAnnProtocol.Bound);
+        }
     }
 
     internal static bool SameKey(NativeAnnManifest manifest, NativeAnnOwnedKey key)

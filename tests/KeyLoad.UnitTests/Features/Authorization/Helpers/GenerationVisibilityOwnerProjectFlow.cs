@@ -33,7 +33,12 @@ internal sealed class GenerationVisibilityOwnerProjectFlow
 
     private static PrincipalRecord Principal => new(Reader, Tenant,
         [new(DatabaseScope, Collection, Capability.DocumentsRead | Capability.Query)], [])
-    { OwnerId = Reader, Projects = [Project], RestrictRows = true, PolicyEpoch = Initial };
+    {
+        OwnerId = Reader,
+        Projects = [Project],
+        RestrictRows = true,
+        PolicyEpoch = Initial
+    };
 
     internal static async Task<GenerationVisibilityOwnerProjectFlow> RunAsync(TestDatabase db,
         QueryEngine queries, RowVisibilityCache cache, CancellationToken token)
@@ -67,13 +72,24 @@ internal sealed class GenerationVisibilityOwnerProjectFlow
         await Assert.That(held.Contains(Own)).IsTrue();
         using var negative = Hold(db, cache);
         await Assert.That(negative.Contains(Own)).IsFalse();
-        await GenerationVisibilityFlow.ConfigureAsync(db, Principal with { Projects = [], PolicyEpoch = RemovedEpoch });
+        await GenerationVisibilityFlow.ConfigureAsync(db, Principal with
+        {
+            Projects = [],
+            PolicyEpoch = RemovedEpoch
+        });
         await GenerationVisibilityOwnerProjectAssertions.ReadAsync(db.Database, queries, db.Store, db.Partition,
             [], Changed, Initial, token);
         await Assert.That(held.Contains(Shared)).IsTrue();
-        await GenerationVisibilityFlow.ConfigureAsync(db, Principal with { Revoked = true, PolicyEpoch = RevokedEpoch });
+        await GenerationVisibilityFlow.ConfigureAsync(db, Principal with
+        {
+            Revoked = true,
+            PolicyEpoch = RevokedEpoch
+        });
         await GenerationVisibilityOwnerProjectAssertions.RevokedAsync(db.Database, queries, db.Store, db.Partition, token);
-        await GenerationVisibilityFlow.ConfigureAsync(db, Principal with { PolicyEpoch = RepairedEpoch });
+        await GenerationVisibilityFlow.ConfigureAsync(db, Principal with
+        {
+            PolicyEpoch = RepairedEpoch
+        });
         await GenerationVisibilityOwnerProjectAssertions.ReadAsync(db.Database, queries, db.Store, db.Partition,
             [Shared], Changed, Initial, token);
         using var positive = Hold(db, cache);

@@ -12,7 +12,9 @@ public sealed partial class DatabaseEngine
         PersistPlacementIntentRequest original, ImmutableArray<OwnerCapacitySnapshotV1> capacity, string? cohort)
     {
         if (commandId == Guid.Empty)
-        { throw Errors.Fail(ErrorCode.Validation, TenantPlacementPolicyProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, TenantPlacementPolicyProtocol.Invalid);
+        }
         var payload = NativeSerialization.Serialize(new PlacementIntentPersistenceAdmissionV1(original, capacity, cohort));
         RequireNativeBudget(payload.Length);
         var identity = System.Text.Json.JsonSerializer.Serialize(original, JsonDefaults.Options);
@@ -27,7 +29,9 @@ public sealed partial class DatabaseEngine
             var principal = Principal(charged, prepared.PrincipalId, EvaluationClock.GetUtcNow());
             // Ordinary apply owns and retains denial; this probe never substitutes that failure or its ACK.
             if (!principal.ClusterAdministrator)
-            { return false; }
+            {
+                return false;
+            }
             _ = AuthorizeOperation(charged, principal, prepared);
             var scope = CommandOutcomePartitionIdentity.Resolve(prepared);
             var retained = CommandOutcomeKeyResolver.Select(charged, prepared.PrincipalId, prepared.Id, scope);

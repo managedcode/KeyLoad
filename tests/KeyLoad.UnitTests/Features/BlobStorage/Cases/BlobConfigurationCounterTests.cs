@@ -28,7 +28,9 @@ internal sealed class BlobConfigurationCounterTests
         };
         var definition = new ResourceDefinition(ResourceName, ResourceKind.BlobStore,
             database.Partition.TransactionDomainId)
-        { BlobPolicy = policy };
+        {
+            BlobPolicy = policy
+        };
         Configure(database, definition);
 
         var firstBlob = new BlobRef(database.Partition, ResourceName, FirstBlobId);

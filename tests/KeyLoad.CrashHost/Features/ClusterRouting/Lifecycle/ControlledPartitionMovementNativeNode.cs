@@ -35,10 +35,15 @@ internal sealed class ControlledPartitionMovementNativeNode : IDisposable
         ArgumentNullException.ThrowIfNull(owner);
         if (maximumFixtureEntries != ControlledPartitionMovementNativeJournal.SupportingHistoryEntries
             && maximumFixtureEntries != ControlledPartitionMovementNativeJournal.TerminalHistoryEntries)
-        { throw new ArgumentOutOfRangeException(nameof(maximumFixtureEntries)); }
+        {
+            throw new ArgumentOutOfRangeException(nameof(maximumFixtureEntries));
+        }
         Root = Path.GetFullPath(root);
         Store = new(new(Path.Combine(Root, CanonicalDirectory))
-        { Incarnation = owner.Incarnation, FaultObserver = observer },
+        {
+            Incarnation = owner.Incarnation,
+            FaultObserver = observer
+        },
             CrashExecutionOptions.StorageExecution(), CrashExecutionOptions.PointCacheExecution());
         try
         {
@@ -49,7 +54,9 @@ internal sealed class ControlledPartitionMovementNativeNode : IDisposable
                 CrashExecutionOptions.TimeSeriesExecution(), CrashExecutionOptions.MovementCheckpoints(), checkpointVerifier, physicalOwner: owner);
             Database.Bootstrap(new(InfrastructurePrincipal, SystemTenant,
                 [new(Wildcard, Wildcard, Capability.All)], [Wildcard])
-            { ClusterAdministrator = true },
+            {
+                ClusterAdministrator = true
+            },
                 DatabaseEngine.Credential(InfrastructurePrincipal, InfrastructurePrincipal, InfrastructureCredential));
             Journal = new(Database, owner, Path.Combine(Root, ReplicaDirectory), maximumFixtureEntries);
         }
@@ -57,7 +64,9 @@ internal sealed class ControlledPartitionMovementNativeNode : IDisposable
         {
             var failures = new List<Exception> { primary };
             try
-            { Store.Dispose(); }
+            {
+                Store.Dispose();
+            }
             catch (Exception cleanup) when (CqrsRuntimeFailures.FindFatal(cleanup) is null) { failures.Add(cleanup); }
             catch (Exception cleanup) when (CqrsRuntimeFailures.FindFatal(cleanup) is not null) { failures.Add(cleanup); }
             ServerFailureObserver.ThrowIfAny(failures);
@@ -66,27 +75,45 @@ internal sealed class ControlledPartitionMovementNativeNode : IDisposable
     }
 
     /// <summary>The exact owned physical directory used for current native configuration.</summary>
-    public string Root { get; }
+    public string Root
+    {
+        get;
+    }
     /// <summary>The actual canonical node-local store.</summary>
-    public ZoneTreeStore Store { get; }
+    public ZoneTreeStore Store
+    {
+        get;
+    }
     /// <summary>The actual database with only locally bootstrapped infrastructure authority.</summary>
-    public DatabaseEngine Database { get; }
+    public DatabaseEngine Database
+    {
+        get;
+    }
     /// <summary>The original joined durable native command path for every subsequent effect.</summary>
-    public ControlledPartitionMovementNativeJournal Journal { get; }
+    public ControlledPartitionMovementNativeJournal Journal
+    {
+        get;
+    }
 
     /// <summary>Joins the original journal/materializer before disposing canonical ownership.</summary>
     public void Dispose()
     {
         if (closed)
-        { return; }
+        {
+            return;
+        }
         closed = true;
         var failures = new List<Exception>();
         try
-        { Journal.Dispose(); }
+        {
+            Journal.Dispose();
+        }
         catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is null) { failures.Add(error); }
         catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is not null) { failures.Add(error); }
         try
-        { Store.Dispose(); }
+        {
+            Store.Dispose();
+        }
         catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is null) { failures.Add(error); }
         catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is not null) { failures.Add(error); }
         ServerFailureObserver.ThrowIfAny(failures);

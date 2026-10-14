@@ -231,9 +231,18 @@ internal sealed class IsolatedTimeSeriesTimescaleResourceModel : IAsyncDisposabl
         Runner = Builder.AddContainer("comparisons", "timescale-model-runner", "model");
     }
 
-    internal IDistributedApplicationBuilder Builder { get; }
-    internal IResourceBuilder<ContainerResource> Runner { get; }
-    internal string Root { get; }
+    internal IDistributedApplicationBuilder Builder
+    {
+        get;
+    }
+    internal IResourceBuilder<ContainerResource> Runner
+    {
+        get;
+    }
+    internal string Root
+    {
+        get;
+    }
     internal IsolatedTimeSeriesResourceContext Context(int count) => new(Builder, count, Runner, Root);
 
     internal ContainerResource[] Build()

@@ -5,10 +5,22 @@ namespace KeyLoad.IntegrationTests.Features.TimeSeries;
 
 internal sealed record SampleChunkPendingRf3Item(SampleChunkJobRevocationScenario Scope, string Series, Guid WindowId)
 {
-    internal CommandRequest? OriginalSeal { get; set; }
-    internal CommitReceipt? SealReceipt { get; set; }
-    internal CommandRequest? OriginalCorrection { get; set; }
-    internal CommitReceipt? CorrectionReceipt { get; set; }
+    internal CommandRequest? OriginalSeal
+    {
+        get; set;
+    }
+    internal CommitReceipt? SealReceipt
+    {
+        get; set;
+    }
+    internal CommandRequest? OriginalCorrection
+    {
+        get; set;
+    }
+    internal CommitReceipt? CorrectionReceipt
+    {
+        get; set;
+    }
     internal PartitionRef Partition => Scope.Window.Native.Partition;
     internal ReadSampleChunkWindowRequest Request => new(Partition, TimeSeriesRf3Scenario.Set, Series,
         WindowId, null, null, Limit: SampleChunkRf3Protocol.OutputLimit);

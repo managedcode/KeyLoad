@@ -17,17 +17,25 @@ internal static class PostgresCompositionRf3Flow
                 ErrorCode.PermissionDenied, PostgresRf3Protocol.PermissionSqlState, token);
             await SqlRf3Protocol.EqualAsync(seed.Before, await PostgresCompositionRf3Models.ReadAsync(root, token));
             var principal = await PostgresCompositionRf3Operations.RepairAsync(root, seed.Principal, token);
-            seed = seed with { Principal = principal };
+            seed = seed with
+            {
+                Principal = principal
+            };
             await PostgresCompositionRf3Operations.RefusedAsync(callers, wire, seed.Denied,
                 ErrorCode.PermissionDenied, PostgresRf3Protocol.PermissionSqlState, token);
             await SqlRf3Protocol.EqualAsync(seed.Before, await PostgresCompositionRf3Models.ReadAsync(root, token));
-            var forward = seed.Denied with { CommandId = Guid.NewGuid() };
+            var forward = seed.Denied with
+            {
+                CommandId = Guid.NewGuid()
+            };
             var receipt = await PostgresCompositionRf3Operations.ApplyAsync(callers, wire, forward, token);
             var afterForward = await PostgresCompositionRf3Models.ReadAsync(root, token);
             await PostgresCompositionRf3Models.LiteralAsync(afterForward, reverse: false);
             await SqlRf3Protocol.EqualAsync(seed.Before.Source, afterForward.Source);
             var changed = forward with
-            { Mutations = [((QueueToGraph)forward.Mutations[0]) with { EdgeIdPrefix = ChangedPrefix }] };
+            {
+                Mutations = [((QueueToGraph)forward.Mutations[0]) with { EdgeIdPrefix = ChangedPrefix }]
+            };
             await PostgresCompositionRf3Operations.RefusedAsync(callers, wire, changed,
                 ErrorCode.Conflict, PostgresRf3Protocol.ConflictSqlState, token);
             await SqlRf3Protocol.EqualAsync(afterForward, await PostgresCompositionRf3Models.ReadAsync(root, token));

@@ -1,6 +1,6 @@
 using KeyLoad.Client;
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
 
@@ -16,7 +16,10 @@ internal static class PartitionMovementNativeSealedCallbacks
         var arm = wave.QueryControls.WriteArm(PartitionMovementPublicParentRf3Administrator.PrincipalId,
             commandId, null, phase, RequestCqrsProbeAction.Hold);
         using var caller = CancellationTokenSource.CreateLinkedTokenSource(token);
-        var request = cancelCaller ? seed.FirstRequest with { Mode = PartitionMoveMode.Resume } : seed.FirstRequest;
+        var request = cancelCaller ? seed.FirstRequest with
+        {
+            Mode = PartitionMoveMode.Resume
+        } : seed.FirstRequest;
         var call = seed.Source.MovePartitionAsync(request, caller.Token);
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
@@ -25,7 +28,9 @@ internal static class PartitionMovementNativeSealedCallbacks
                 RequestCqrsProbeOutcome.Observed, discovery, token);
             await RequestCqrsPhaseFaultAssertions.VerifyMarkerAsync(observed, arm, commandId, phase, discovery);
             if (cancelCaller)
-            { await caller.CancelAsync(); }
+            {
+                await caller.CancelAsync();
+            }
             var cancelled = await wave.QueryControls.WaitForMarkerAsync(arm, phase,
                 RequestCqrsProbeOutcome.Cancelled, discovery, token);
             await Assert.That(cancelled.RequestId).IsEqualTo(observed.RequestId);

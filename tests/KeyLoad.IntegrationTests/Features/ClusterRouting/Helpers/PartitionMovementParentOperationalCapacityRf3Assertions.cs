@@ -22,7 +22,10 @@ internal static class PartitionMovementParentOperationalCapacityRf3Assertions
     internal static async Task RequireRefusedAsync(PartitionMovementPublicParentRf3Seed seed,
         CancellationToken cancellationToken)
     {
-        var resume = seed.FirstRequest with { Mode = PartitionMoveMode.Resume };
+        var resume = seed.FirstRequest with
+        {
+            Mode = PartitionMoveMode.Resume
+        };
         await McpCallerAssertions.ErrorAsync(await seed.Official.CallAsync(PartitionMovePublicProtocol.ToolName,
             resume, cancellationToken).ConfigureAwait(false), ErrorCode.BudgetExceeded, dispatched: true);
         var sql = SqlRf3Protocol.Call(resume.Partition, PartitionMovePublicProtocol.ToolName, resume);
@@ -45,11 +48,15 @@ internal static class PartitionMovementParentOperationalCapacityRf3Assertions
             foreach (var entry in entries)
             {
                 if (entry.Operation is { } operation)
-                { await Assert.That(await membership.TryApplyAsync(operation).ConfigureAwait(false)).IsTrue(); }
+                {
+                    await Assert.That(await membership.TryApplyAsync(operation).ConfigureAwait(false)).IsTrue();
+                }
             }
             await membership.RequireCompleteAsync().ConfigureAwait(false);
             if (entries.Length != PartitionMoveProtocol.EmptyCount)
-            { allowed.Add(Convert.ToHexString(KeySpace.AppliedBytes)); }
+            {
+                allowed.Add(Convert.ToHexString(KeySpace.AppliedBytes));
+            }
             await PartitionMovementCapturePointerRf3Cut.RequireExactRemainingRowsAsync(original, actual, allowed);
             await Assert.That(actual.StorePosition - original.StorePosition).IsEqualTo((long)entries.Length);
             await SqlRf3Protocol.EqualAsync(original.Header, actual.Header);

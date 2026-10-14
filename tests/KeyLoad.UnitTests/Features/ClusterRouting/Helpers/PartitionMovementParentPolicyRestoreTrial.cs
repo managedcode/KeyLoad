@@ -13,14 +13,28 @@ internal static class PartitionMovementParentPolicyRestoreTrial
     {
         var root = source.Store.Read(view => source.Database.Principal(view, PhysicalShardCatalogFixture.RootPrincipalId,
             source.Database.EvaluationClock.GetUtcNow()));
-        await ConfigureAsync(source, root with { Id = RepairPrincipalId }, root.Id);
-        await ConfigureAsync(source, root with { Id = DeniedPrincipalId, ClusterAdministrator = false }, root.Id);
+        await ConfigureAsync(source, root with
+        {
+            Id = RepairPrincipalId
+        }, root.Id);
+        await ConfigureAsync(source, root with
+        {
+            Id = DeniedPrincipalId,
+            ClusterAdministrator = false
+        }, root.Id);
         await DeniedReadAsync(source, target, () => fixture.Read(request, phaseId, DeniedPrincipalId), ErrorCode.PermissionDenied);
         await DeniedReadAsync(source, target, () => fixture.Read(request, phaseId, RepairPrincipalId), ErrorCode.PermissionDenied);
-        await ConfigureAsync(source, root with { Revoked = true, PolicyEpoch = checked(root.PolicyEpoch + 1) }, RepairPrincipalId);
+        await ConfigureAsync(source, root with
+        {
+            Revoked = true,
+            PolicyEpoch = checked(root.PolicyEpoch + 1)
+        }, RepairPrincipalId);
         source.Reopen();
         await DeniedReadAsync(source, target, () => fixture.Read(request, phaseId), ErrorCode.Unauthenticated);
-        await ConfigureAsync(source, root with { PolicyEpoch = checked(root.PolicyEpoch + 2) }, RepairPrincipalId);
+        await ConfigureAsync(source, root with
+        {
+            PolicyEpoch = checked(root.PolicyEpoch + 2)
+        }, RepairPrincipalId);
         source.Reopen();
         await DeniedOriginalUserOutcomeAsync(source, target);
         await PartitionMovementParentIssuanceFaultTrial.ExecuteAsync(source, target, fixture, request, phaseId, DeniedPrincipalId);

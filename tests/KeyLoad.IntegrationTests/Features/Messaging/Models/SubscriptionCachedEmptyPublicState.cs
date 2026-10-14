@@ -4,6 +4,12 @@ internal sealed record SubscriptionCachedEmptyPublicState(ConfigureSubscriptionR
     ReceiveSubscriptionRequest Empty, ReceiveSubscriptionResult Original, CommandRequest Publish, CommitReceipt Published,
     EventSourcePage Source)
 {
-    internal SubscriptionDeliveryCommand? Ack { get; set; }
-    internal CommitReceipt? Acknowledged { get; set; }
+    internal SubscriptionDeliveryCommand? Ack
+    {
+        get; set;
+    }
+    internal CommitReceipt? Acknowledged
+    {
+        get; set;
+    }
 }

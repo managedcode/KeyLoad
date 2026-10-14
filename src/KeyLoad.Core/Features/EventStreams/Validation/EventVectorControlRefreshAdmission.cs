@@ -18,22 +18,30 @@ internal static class EventVectorControlRefreshAdmission
         EventVectorEncodedRow? added = null;
         var existing = inventory.PayloadRows.SingleOrDefault(row => row.Key.Span.SequenceEqual(key));
         if (existing.Key.IsEmpty)
-        { added = EventVectorEncodedRow.Create(key, proof, admission); }
+        {
+            added = EventVectorEncodedRow.Create(key, proof, admission);
+        }
         else
         {
             var original = EventVectorCoverageProofValidation.Read(existing, map, admission);
             if (!CryptographicOperations.FixedTimeEquals(original.OriginalSemanticDigest.Span,
                     proof.OriginalSemanticDigest.Span)
                 || !original.OriginalSemanticProjectionBytes.Span.SequenceEqual(proof.OriginalSemanticProjectionBytes.Span))
-            { throw Errors.Fail(ErrorCode.Conflict, InvalidRefresh); }
+            {
+                throw Errors.Fail(ErrorCode.Conflict, InvalidRefresh);
+            }
             proof = original;
         }
         var prior = EventVectorControlPages.Entries(inventory, admission);
         var candidate = EventVectorRefreshEntries.Create(prior, proof, admission);
         if (intended.Role == EventVectorSourcePhaseRole.Release)
-        { RequireRemoved(map, prior, candidate, intended); }
+        {
+            RequireRemoved(map, prior, candidate, intended);
+        }
         else
-        { RequireRetained(map, prior, candidate, intended); }
+        {
+            RequireRetained(map, prior, candidate, intended);
+        }
         return added;
     }
 
@@ -45,7 +53,9 @@ internal static class EventVectorControlRefreshAdmission
             || candidate.Any(entry => entry.Source == intended.Source)
             || intended.CoverageGeneration != map.CoverageGeneration
             || intended.OriginalPosition != prior[ordinal].Position || intended.TargetPosition != prior[ordinal].Position)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidRefresh); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidRefresh);
+        }
     }
 
     private static void RequireRetained(EventVectorMap map, ImmutableArray<EventVectorEntry> prior,
@@ -54,12 +64,16 @@ internal static class EventVectorControlRefreshAdmission
         var ordinal = intended.SourceOrdinal;
         if (ordinal < FirstOrdinal || ordinal >= candidate.Length || intended.Source != candidate[ordinal].Source
             || intended.CoverageGeneration != checked(map.CoverageGeneration + CoverageStep))
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidRefresh); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidRefresh);
+        }
         var original = prior.FirstOrDefault(entry => entry.Source == intended.Source);
         var role = original is null ? EventVectorSourcePhaseRole.Pin : EventVectorSourcePhaseRole.Advance;
         var before = original?.Position ?? candidate[ordinal].Position;
         if (intended.Role != role || intended.OriginalPosition != before
             || intended.TargetPosition != candidate[ordinal].Position)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidRefresh); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidRefresh);
+        }
     }
 }

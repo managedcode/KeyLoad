@@ -40,7 +40,9 @@ internal static class ConfiguredVectorProfileRf3Flow
         var sdk = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node2, fixture.AdminKey, token);
         var definition = new ResourceDefinition(Collection, ResourceKind.Collection, partition.TransactionDomainId)
-        { VectorProfiles = [new(Field, Space)] };
+        {
+            VectorProfiles = [new(Field, Space)]
+        };
         var configured = await SqlRf3Protocol.SdkAsync<ResourceDefinition>(sdk, SqlRf3Protocol.Call(partition,
             McpCallerTools.ResourcesConfigure, new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId, definition),
             Guid.NewGuid()), token);
@@ -50,7 +52,10 @@ internal static class ConfiguredVectorProfileRf3Flow
             new PutVector(Collection, Rival, Field, [0.5f, 0.5f], Space, InitialRevision)]);
         await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(seed, token));
         await VerifyAsync(sdk, mcp, partition, changed: false, token);
-        var wrong = Command(partition, Space with { Model = WrongModel });
+        var wrong = Command(partition, Space with
+        {
+            Model = WrongModel
+        });
         await RejectAsync(sdk, mcp, path, wrong, token);
         await RejectAsync(sdk, mcp, path, wrong, token);
         await VerifyAsync(sdk, mcp, partition, changed: false, token);

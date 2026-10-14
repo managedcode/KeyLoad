@@ -25,13 +25,21 @@ internal static class McpSchemaProjection
             var bytes = converter.CanConvert(typeof(ReadOnlyMemory<byte>));
             var arrays = converter.CanConvert(typeof(ImmutableArray<Mutation>));
             if (bytes && arrays)
-            { throw new InvalidOperationException(McpCatalogProtocol.ConverterConfiguration); }
+            {
+                throw new InvalidOperationException(McpCatalogProtocol.ConverterConfiguration);
+            }
             if (bytes)
-            { byteMatches++; }
+            {
+                byteMatches++;
+            }
             if (arrays)
-            { arrayMatches++; }
+            {
+                arrayMatches++;
+            }
             if (bytes || arrays)
-            { options.Converters.RemoveAt(index); }
+            {
+                options.Converters.RemoveAt(index);
+            }
         }
         if (byteMatches != RequiredFamilyMatches || arrayMatches != RequiredFamilyMatches)
         {

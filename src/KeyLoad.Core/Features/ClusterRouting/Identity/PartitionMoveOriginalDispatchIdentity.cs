@@ -10,7 +10,10 @@ internal static class PartitionMoveOriginalDispatchIdentity
     internal static string Digest(Guid commandId, PartitionMovePhaseCommand phase,
         PartitionMovePhaseGrant? grant, DateTimeOffset originalExpiry)
         => Convert.ToHexStringLower(SHA256.HashData(NativeSerialization.Serialize(
-            new PartitionMoveOriginalDispatchScope(commandId, phase with { ReceiverEffectAdmission = null }, grant, originalExpiry))));
+            new PartitionMoveOriginalDispatchScope(commandId, phase with
+            {
+                ReceiverEffectAdmission = null
+            }, grant, originalExpiry))));
 
     internal static string Digest(Guid commandId, PartitionMovePeerEnvelope envelope)
     {

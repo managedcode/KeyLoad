@@ -27,9 +27,21 @@ internal sealed class NativeDiscoveryOmissionFiles
         _ = Snapshot();
     }
     internal NativeDiscoveryOmissionArm? PeekArm()
-    { lock (sync) { RequestCqrsProbePaths.RequireDirectory(root, root); return Arm(); } }
+    {
+        lock (sync)
+        {
+            RequestCqrsProbePaths.RequireDirectory(root, root);
+            return Arm();
+        }
+    }
     internal NativeDiscoveryOmissionWitness? PeekWitness(string name)
-    { lock (sync) { RequestCqrsProbePaths.RequireDirectory(root, root); return Witness(name); } }
+    {
+        lock (sync)
+        {
+            RequestCqrsProbePaths.RequireDirectory(root, root);
+            return Witness(name);
+        }
+    }
     internal NativeSignedPurposeArm? ReadPurposeEnrollment()
     {
         lock (sync)
@@ -37,42 +49,36 @@ internal sealed class NativeDiscoveryOmissionFiles
             _ = Snapshot();
             var bytes = PurposeRecord(NativeSignedPurposeProtocol.ArmFile);
             if (bytes is null)
-            { return null; }
+            {
+                return null;
+            }
             var arm = purposeJson.Arm(bytes);
             RequirePurposeArm(arm);
             return arm;
         }
     }
     internal T Locked<T>(Func<T> action)
-    { lock (sync) { return LockedCore(action); } }
-    private T LockedCore<T>(Func<T> action)
     {
-        if (OperatingSystem.IsWindows())
-        { throw Invalid(); }
-        RequestCqrsProbePaths.RequireDirectory(root, root);
-        var path = Path.Combine(root, NativeDiscoveryOmissionProtocol.LockFile);
-        if (File.Exists(path))
-        { _ = Measure(path); }
-        using var ownership = new FileStream(Path.Combine(root, NativeDiscoveryOmissionProtocol.LockFile), new FileStreamOptions
+        lock (sync)
         {
-            Mode = FileMode.OpenOrCreate,
-            Access = FileAccess.ReadWrite,
-            Share = FileShare.None,
-            UnixCreateMode = RequestCqrsProbeProtocol.PrivateFileMode,
-            BufferSize = options.Value.FileBufferBytes
-        });
-        _ = Snapshot();
-        return action();
+            return LockedCore(action);
+        }
     }
+    private T LockedCore<T>(Func<T> action)
+        => NativeDiscoveryOmissionFileAdmission.Locked(root, options, Measure, Snapshot, action);
     internal NativeDiscoveryOmissionArm? Arm()
     {
         var path = Path.Combine(root, NativeDiscoveryOmissionProtocol.ArmFile);
         if (!File.Exists(path))
-        { return null; }
+        {
+            return null;
+        }
         var value = json.ReadArm(Read(path));
         if (value.SessionId != session || !voters.Contains(value.SourceVoter, StringComparer.Ordinal)
             || !voters.Contains(value.TargetVoter, StringComparer.Ordinal))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         return value;
     }
     internal NativeDiscoveryOmissionWitness? Witness(string name)
@@ -87,24 +93,32 @@ internal sealed class NativeDiscoveryOmissionFiles
     {
         if (name is not (NativeSignedPurposeProtocol.ArmFile or NativeSignedPurposeProtocol.IssuedFile
             or NativeSignedPurposeProtocol.RejectedFile))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         var path = Path.Combine(root, name);
         return File.Exists(path) ? Read(path) : null;
     }
     internal void RequirePurposeArm(NativeSignedPurposeArm arm)
     {
         if (arm.SessionId != session || !voters.Contains(arm.SourceVoter, StringComparer.Ordinal))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
     }
     internal void RequirePurposeReceiver(string voter)
     {
         if (!voters.Contains(voter, StringComparer.Ordinal))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
     }
     internal void WritePurpose(string name, byte[] bytes)
     {
         if (name is not (NativeSignedPurposeProtocol.IssuedFile or NativeSignedPurposeProtocol.RejectedFile))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         RequestCqrsProbeAtomicFiles.Write(root, Path.Combine(root, name), bytes, options, Snapshot);
     }
     private RequestCqrsProbeSnapshot Snapshot()
@@ -112,15 +126,21 @@ internal sealed class NativeDiscoveryOmissionFiles
         RequestCqrsProbePaths.RequireDirectory(root, root);
         if (File.Exists(Path.Combine(root, NativeDiscoveryOmissionProtocol.ArmFile))
             && File.Exists(Path.Combine(root, NativeSignedPurposeProtocol.ArmFile)))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         if (!File.Exists(Path.Combine(root, NativeSignedPurposeProtocol.ArmFile))
             && (File.Exists(Path.Combine(root, NativeSignedPurposeProtocol.IssuedFile))
                 || File.Exists(Path.Combine(root, NativeSignedPurposeProtocol.RejectedFile))))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         var entries = Directory.EnumerateFileSystemEntries(root)
             .Take(options.Value.MaximumFiles + NativeDiscoveryOmissionProtocol.ExcessEntry).ToArray();
         if (entries.Length > options.Value.MaximumFiles)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         long bytes = NativeDiscoveryOmissionProtocol.EmptyCount;
         var files = NativeDiscoveryOmissionProtocol.EmptyCount;
         var owners = new HashSet<string>(StringComparer.Ordinal);
@@ -134,53 +154,49 @@ internal sealed class NativeDiscoveryOmissionFiles
                 var children = Directory.EnumerateFileSystemEntries(path).Take(NativeDiscoveryOmissionProtocol.ExcessEntry + NativeDiscoveryOmissionProtocol.ExcessEntry).ToArray();
                 if (children.Length != NativeDiscoveryOmissionProtocol.ExcessEntry
                     || Path.GetFileName(children[NativeDiscoveryOmissionProtocol.EmptyCount]) != RequestCqrsProbeProtocol.OwnerFile)
-                { throw Invalid(); }
+                {
+                    throw Invalid();
+                }
                 var ownerPath = children[NativeDiscoveryOmissionProtocol.EmptyCount];
                 var owner = ownerJson.ReadOwner(Read(ownerPath));
                 if (owner.SessionId != session || owner.Voter != voter || !owners.Add(voter))
-                { throw Invalid(); }
+                {
+                    throw Invalid();
+                }
                 bytes = checked(bytes + Measure(ownerPath));
             }
             else
             {
                 if (!Known(name))
-                { throw Invalid(); }
+                {
+                    throw Invalid();
+                }
                 bytes = checked(bytes + Measure(path));
             }
             files = checked(files + NativeDiscoveryOmissionProtocol.ExcessEntry);
         }
         if (immutable.Keys.Any(path => !File.Exists(path)))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         if (owners.Count != voters.Length || files > options.Value.MaximumFiles || bytes > options.Value.MaximumAggregateBytes)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         return new([], [], [], files, bytes);
     }
     private long Measure(string path)
-    {
-        var identity = KeyLoad.Storage.IO.OfflineRegularFile.Inspect(path);
-        RequestCqrsProbePaths.RequirePrivateMode(path, RequestCqrsProbeProtocol.PrivateFileMode);
-        if (identity.Length > options.Value.MaximumRecordBytes
-            || Path.GetFileName(path) == NativeDiscoveryOmissionProtocol.LockFile && identity.Length != NativeDiscoveryOmissionProtocol.EmptyCount)
-        { throw Invalid(); }
-        return identity.Length;
-    }
+        => NativeDiscoveryOmissionFileAdmission.Measure(path, options);
     private byte[] Read(string path)
     {
         var current = RequestCqrsProbeFiles.ReadRecord(path, options);
         if (immutable.TryGetValue(path, out var prior) && !CryptographicOperations.FixedTimeEquals(prior, current))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         immutable.TryAdd(path, current.ToArray());
         return current;
     }
-    private const string TemporarySuffix = ".tmp";
-    private static bool Known(string name) => name is NativeDiscoveryOmissionProtocol.ArmFile
-        or NativeDiscoveryOmissionProtocol.RequestFile or NativeDiscoveryOmissionProtocol.OmittedFile
-        or NativeDiscoveryOmissionProtocol.VerifiedFile or NativeDiscoveryOmissionProtocol.LockFile
-        or NativeSignedPurposeProtocol.ArmFile or NativeSignedPurposeProtocol.IssuedFile or NativeSignedPurposeProtocol.RejectedFile
-        || name.StartsWith(RequestCqrsProbeProtocol.TemporaryFilePrefix, StringComparison.Ordinal)
-            && name.EndsWith(TemporarySuffix, StringComparison.Ordinal)
-            && Guid.TryParseExact(name.AsSpan(RequestCqrsProbeProtocol.TemporaryFilePrefix.Length,
-                name.Length - RequestCqrsProbeProtocol.TemporaryFilePrefix.Length - TemporarySuffix.Length), RequestCqrsProbeProtocol.SessionIdFormat, out var id)
-            && id != Guid.Empty;
+    private static bool Known(string name) => NativeDiscoveryOmissionFileAdmission.Known(name);
     private static InvalidOperationException Invalid() => new(NativeDiscoveryOmissionProtocol.Invalid);
 }

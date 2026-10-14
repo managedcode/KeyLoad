@@ -7,7 +7,10 @@ internal static class EventVectorOpenControlPhases
     internal static EventVectorControlPhase Admit(EventVectorControlPhase original,
         EventVectorSourcePhase intended)
         => Source(original, intended) with
-        { Action = EventVectorControlAction.AdmitSource, IntendedSourcePhase = intended };
+        {
+            Action = EventVectorControlAction.AdmitSource,
+            IntendedSourcePhase = intended
+        };
 
     internal static EventVectorControlPhase Observe(EventVectorControlPhase original,
         EventVectorSourcePhase observed)

@@ -42,10 +42,16 @@ internal sealed class ScaledRawStorageCorpus
     }
 
     /// <summary>Gets the number of seeded records; the next index is reserved for a miss.</summary>
-    public int RecordCount { get; }
+    public int RecordCount
+    {
+        get;
+    }
 
     /// <summary>Gets the exact generated value length.</summary>
-    public int ValueBytes { get; }
+    public int ValueBytes
+    {
+        get;
+    }
 
     /// <summary>Gets the retained bytes in the single pinned key slab.</summary>
     public long RetainedKeyBytes => keys.LongLength;

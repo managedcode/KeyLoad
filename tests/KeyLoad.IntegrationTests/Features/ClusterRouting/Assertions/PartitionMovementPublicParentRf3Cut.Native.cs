@@ -68,7 +68,9 @@ internal static partial class PartitionMovementPublicParentRf3Cut
                 var limits = IntegrationExecutionOptions.DatabaseLimits().Value;
                 var rows = view.Scan([], limits.MaxScanRecords);
                 if (rows.HasMore)
-                { throw new InvalidOperationException("The complete parent raw cut exceeded its native bound."); }
+                {
+                    throw new InvalidOperationException("The complete parent raw cut exceeded its native bound.");
+                }
                 var header = PartitionMoveParentStorage.Header(view, request.Partition, request.MoveId, limits.MaxBatchBytes);
                 var pending = header?.PendingOriginalPhaseCommandId is { } id
                     ? PartitionMoveParentStorage.Phase(view, request.Partition, request.MoveId, id, limits.MaxBatchBytes) : null;
@@ -110,7 +112,9 @@ internal static partial class PartitionMovementPublicParentRf3Cut
             });
         }, failures);
         if (store is { } owned)
-        { ServerFailureObserver.Observe(owned.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(owned.Dispose, failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
         return result ?? throw new InvalidOperationException("The actual stopped parent cut is absent.");
     }

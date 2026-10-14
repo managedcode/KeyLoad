@@ -17,7 +17,9 @@ internal static class UnconfiguredMovementGlobalCommandAssertions
     {
         var principal = new PrincipalRecord(Subject, Tenant,
             [new(Database, Collection, Capability.DocumentsRead)], [])
-        { PolicyEpoch = PolicyEpoch };
+        {
+            PolicyEpoch = PolicyEpoch
+        };
         var operation = engine.CreateNativeOperation(OperationKind.ConfigurePrincipal, Guid.NewGuid(), Root,
             engine.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(new ConfigurePrincipalRequest(principal)));
         var rejected = engine.Apply(operation);

@@ -41,7 +41,9 @@ internal sealed class NativeTextProjection : ITextProjection
     public ITextProjectionLease Acquire(TextProjectionScope scope, ReadExecutionBudget budget)
     {
         if (resources is null)
-        { return AcquireNative(scope, budget); }
+        {
+            return AcquireNative(scope, budget);
+        }
         var retained = resources.ReserveLease(budget);
         try
         {
@@ -50,7 +52,9 @@ internal sealed class NativeTextProjection : ITextProjection
         catch (Exception error)
         {
             if (error is AggregateException)
-            { throw; }
+            {
+                throw;
+            }
             var failures = new List<Exception> { error };
             ServerFailureObserver.Observe(retained.CompleteAfterJoinedCleanup, failures);
             ServerFailureObserver.ThrowIfAny(failures);
@@ -123,5 +127,10 @@ internal sealed class NativeTextProjection : ITextProjection
     internal void MutatePhysical(Action mutation) => physicalGate.Run(mutation);
 
     private static Exception? Failure(List<Exception> failures)
-        => failures.Count switch { FailureEmptyCount => null, FailureSingleItemCount => failures[FailureIndexEmptyCount], _ => new AggregateException(failures) };
+        => failures.Count switch
+        {
+            FailureEmptyCount => null,
+            FailureSingleItemCount => failures[FailureIndexEmptyCount],
+            _ => new AggregateException(failures)
+        };
 }

@@ -60,9 +60,13 @@ internal static class ScaleServerResourceEvidenceWriter
         {
             var count = await stream.ReadAsync(buffer, token);
             if (count == EmptyValue)
-            { break; }
+            {
+                break;
+            }
             if (total > settings.MaxWorkerBytes - count)
-            { throw new InvalidDataException(ExceededWorker); }
+            {
+                throw new InvalidDataException(ExceededWorker);
+            }
             total += count;
             hash.AppendData(buffer, EmptyValue, count);
         }

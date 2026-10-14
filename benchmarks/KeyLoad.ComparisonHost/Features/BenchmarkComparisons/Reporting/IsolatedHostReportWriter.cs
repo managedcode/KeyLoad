@@ -29,7 +29,9 @@ internal static class IsolatedHostReportWriter
     {
         cancellationToken.ThrowIfCancellationRequested();
         if (!executionOptions.Value.IsValid())
-        { throw new OptionsValidationException(Options.DefaultName, typeof(ComparisonHostExecutionOptions), [ComparisonHostExecutionOptions.InvalidSettings]); }
+        {
+            throw new OptionsValidationException(Options.DefaultName, typeof(ComparisonHostExecutionOptions), [ComparisonHostExecutionOptions.InvalidSettings]);
+        }
         ValidateDestination(directory, fileName);
         Directory.CreateDirectory(directory);
         var pending = Path.Combine(directory, IsolatedHostConstants.PendingPrefix + Guid.NewGuid().ToString(ComparisonHostConstants.GuidFormat)

@@ -16,7 +16,10 @@ internal static class NativeInstallFrameInspectionOperation
         C1OutcomeInspectionFailureEvidence evidence)
     {
         var options = new ZoneTreeStoreOptions(request.Directory)
-        { Incarnation = request.Incarnation, MaxFrameBytes = request.MaximumFrameBytes }
+        {
+            Incarnation = request.Incarnation,
+            MaxFrameBytes = request.MaximumFrameBytes
+        }
             .ResolveExecutionOptions(CrashExecutionOptions.StorageExecution());
         var failures = new List<Exception>();
         NativeInstallFrameInspectionReceipt? receipt = null;
@@ -33,7 +36,9 @@ internal static class NativeInstallFrameInspectionOperation
                 receipt = RequireOutcome(frame, request);
             }, failures);
             if (failures.Count > NoFailures)
-            { evidence.Capture(failures[FirstFailure]); }
+            {
+                evidence.Capture(failures[FirstFailure]);
+            }
             evidence.SetPhase(C1OutcomeInspectionFailurePhase.DisposeStore);
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
@@ -47,10 +52,14 @@ internal static class NativeInstallFrameInspectionOperation
         if (actual.Incarnation != request.Incarnation || actual.ScopeKind != CommandOutcomeScopeKind.Partition
             || actual.Partition != request.Partition || actual.Result is null
             || actual.Result.Error is not null && (actual.Result.NativeValue is not null || actual.Result.Json is not null))
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidOutcome); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidOutcome);
+        }
         var phase = actual.Result.Error is null ? actual.Result.NativeValue as PartitionMovePhaseResult : null;
         if (phase is not null && phase.Journal.CommandId != request.CommandId)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidOutcome); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidOutcome);
+        }
         return new(C1OutcomeInspectionProtocol.Version, frame.NodeId, frame.Incarnation, request.CommandId,
             frame.FormatVersion, frame.Sequence, frame.PayloadBytes, frame.PayloadSha256, frame.MutationCount,
             frame.RawMutationBytes, frame.ExaminedFrames, frame.ExaminedBytes, frame.MaximumObservedPayloadBytes,

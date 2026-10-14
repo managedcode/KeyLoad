@@ -18,7 +18,9 @@ internal static class NativeBlobWholeParentTrial
                 await ServerFailureObserver.ObserveAsync(() => original, failures).ConfigureAwait(false);
             }
             finally
-            { ServerFailureObserver.Observe(lifetime.Cancel, failures); }
+            {
+                ServerFailureObserver.Observe(lifetime.Cancel, failures);
+            }
         }, failures).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny(failures);
     }

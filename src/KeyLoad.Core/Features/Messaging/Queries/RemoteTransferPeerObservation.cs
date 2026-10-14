@@ -13,7 +13,9 @@ public sealed partial class DatabaseEngine
         var proof = admitted.Proof;
         var call = proof.Call;
         if (call.ExpiresAt <= Clock.GetUtcNow())
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteTransferPeerProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteTransferPeerProtocol.Invalid);
+        }
         var result = Store.Read(view =>
         {
             var charged = work.CreateView(view);
@@ -21,13 +23,17 @@ public sealed partial class DatabaseEngine
             RequireRemoteTransferPeerOwner().Require(proof);
             RequireRemoteTransferPeerAtView(charged, principal, proof);
             if (call.Stage == RemoteQueueTransferPeerStage.Receipt)
-            { return new RemoteQueueTransferPeerResult(call.Stage, ReadRemoteTransferPeerReceipt(charged, principal, call), null); }
+            {
+                return new RemoteQueueTransferPeerResult(call.Stage, ReadRemoteTransferPeerReceipt(charged, principal, call), null);
+            }
             return new RemoteQueueTransferPeerResult(call.Stage, null, ReadRemoteTransferPeerOutcome(charged, principal, call));
         });
         var bytes = NativeSerialization.Measure(result);
         RequireNativeBudget(bytes);
         if (bytes > call.MaximumReplyBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, RemoteTransferPeerProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, RemoteTransferPeerProtocol.Unavailable);
+        }
         work.ChargeBytes(bytes);
         work.Check();
         return result;
@@ -39,7 +45,9 @@ public sealed partial class DatabaseEngine
         var intent = call.IntentClaims;
         var receipt = InspectQueueTransferReceipt(view, principal.Id, intent.Destination, intent.Source, intent.TransferId);
         if (receipt is null)
-        { return null; }
+        {
+            return null;
+        }
         var record = view.GetRecord<RemoteTransferTargetReceiptRecord>(
             RemoteTransferStorage.TargetReceiptKey(intent.Source, intent.TransferId, intent.Destination))
             ?? throw Errors.Fail(ErrorCode.Corruption, RemoteTransferPeerProtocol.Invalid);

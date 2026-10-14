@@ -11,7 +11,9 @@ internal static class ScriptDomCreateTableOperation
         token.ThrowIfCancellationRequested();
         if (request.Partition is null || request.Parameters is { Count: > EmptyCount }
             || request.AllowFullScan || request.Cursor is not null)
-        { throw ScriptDomOperationErrors.Invalid(); }
+        {
+            throw ScriptDomOperationErrors.Invalid();
+        }
         var identity = SqlOriginalMutationIdentity.Required(request.CommandId);
         var definition = ScriptDomCreateTableDefinition.Read(request.Partition, statement, limits, checkBudget, token);
         var arguments = new Dictionary<string, global::System.Text.Json.JsonElement>(StringComparer.Ordinal)

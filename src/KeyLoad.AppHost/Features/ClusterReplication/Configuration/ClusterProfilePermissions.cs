@@ -14,16 +14,22 @@ internal static class ClusterProfilePermissions
         const int EmptyValue = 0;
 
         if (OperatingSystem.IsWindows())
-        { return; }
+        {
+            return;
+        }
         var mode = File.GetUnixFileMode(path);
         if ((mode & ~OwnerPermissions) != EmptyValue || (mode & UnixFileMode.UserRead) == EmptyValue)
-        { throw new InvalidOperationException(ClusterProfileStore.InvalidProfile); }
+        {
+            throw new InvalidOperationException(ClusterProfileStore.InvalidProfile);
+        }
     }
 
     internal static void PreparePrivateDirectory(string directory)
     {
         if (!OperatingSystem.IsWindows())
-        { File.SetUnixFileMode(directory, PrivateDirectory); }
+        {
+            File.SetUnixFileMode(directory, PrivateDirectory);
+        }
     }
 
     internal static UnixFileMode? ReadMode(string path)
@@ -32,12 +38,16 @@ internal static class ClusterProfilePermissions
     internal static void ApplyFileMode(string path, UnixFileMode? mode)
     {
         if (!OperatingSystem.IsWindows())
-        { File.SetUnixFileMode(path, mode ?? PrivateFile); }
+        {
+            File.SetUnixFileMode(path, mode ?? PrivateFile);
+        }
     }
 
     internal static void EnsureMode(string path, UnixFileMode? expected)
     {
         if (!OperatingSystem.IsWindows() && expected is { } mode && File.GetUnixFileMode(path) != mode)
-        { throw new InvalidOperationException(ClusterProfileStore.InvalidProfile); }
+        {
+            throw new InvalidOperationException(ClusterProfileStore.InvalidProfile);
+        }
     }
 }

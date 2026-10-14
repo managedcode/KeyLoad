@@ -16,7 +16,10 @@ internal sealed class NativeAnnWaitProviderTests
             var cut = database.Store.Position;
             WaitForAnnIndexResult? partial = null;
             var engine = AnnPublicWholeFlow.Engine(database, runtime, enabled: !disabled);
-            var invalid = disabled ? request : request with { IndexGeneration = MissingGeneration };
+            var invalid = disabled ? request : request with
+            {
+                IndexGeneration = MissingGeneration
+            };
             var error = await Assert.ThrowsExactlyAsync<KeyLoadException>(async () => partial =
                 await engine.WaitForAnnIndexAsync(NativeAnnWaitWholeFlow.Root, invalid, TestContext.Current!.Execution.CancellationToken))
                 ?? throw new InvalidOperationException();

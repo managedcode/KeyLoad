@@ -20,33 +20,45 @@ internal sealed class NativeTextOpenFileGroups
             owned.Add(group);
         }
         if (group.Ambiguous || !group.Streams.TryAdd(stream, new(stream)))
-        { throw NativeTextErrors.Ownership(); }
+        {
+            throw NativeTextErrors.Ownership();
+        }
         return group;
     }
 
     internal void BeginClose(NativeTextOpenFileGroup group, IFileStream stream)
     {
         if (!owned.Contains(group) || !group.Streams.TryGetValue(stream, out var actual))
-        { throw NativeTextErrors.Ownership(); }
+        {
+            throw NativeTextErrors.Ownership();
+        }
         actual.BeginJoinedClose();
     }
 
     internal void Close(NativeTextOpenFileGroup group, IFileStream stream)
     {
         if (!owned.Contains(group) || !group.Streams.Remove(stream))
-        { throw NativeTextErrors.Ownership(); }
+        {
+            throw NativeTextErrors.Ownership();
+        }
         if (group.Streams.Count != EmptyStreamCount)
-        { return; }
+        {
+            return;
+        }
         if (group.LinkedPath is { } path && linked.TryGetValue(path, out var current)
             && ReferenceEquals(current, group))
-        { linked.Remove(path); }
+        {
+            linked.Remove(path);
+        }
         owned.Remove(group);
     }
 
     internal void RequireKnownPath(string path)
     {
         if (linked.TryGetValue(path, out var group) && group.Ambiguous)
-        { throw NativeTextErrors.Ownership(); }
+        {
+            throw NativeTextErrors.Ownership();
+        }
     }
 
     internal void DetachDirectory(string directory, bool ambiguous)
@@ -54,18 +66,26 @@ internal sealed class NativeTextOpenFileGroups
         foreach (var path in linked.Keys.ToArray())
         {
             if (!path.StartsWith(directory + Path.DirectorySeparatorChar, StringComparison.Ordinal))
-            { continue; }
+            {
+                continue;
+            }
             if (ambiguous)
-            { linked[path].Ambiguous = true; }
+            {
+                linked[path].Ambiguous = true;
+            }
             else
-            { Detach(path); }
+            {
+                Detach(path);
+            }
         }
     }
 
     internal void Detach(string path)
     {
         if (linked.Remove(path, out var group))
-        { group.LinkedPath = null; }
+        {
+            group.LinkedPath = null;
+        }
     }
 
     internal void Replace(string source, string destination, string? backup)
@@ -73,12 +93,16 @@ internal sealed class NativeTextOpenFileGroups
         linked.Remove(source, out var sourceGroup);
         linked.Remove(destination, out var destinationGroup);
         if (backup is not null)
-        { Detach(backup); }
+        {
+            Detach(backup);
+        }
         if (destinationGroup is not null)
         {
             destinationGroup.LinkedPath = backup;
             if (backup is not null)
-            { linked.Add(backup, destinationGroup); }
+            {
+                linked.Add(backup, destinationGroup);
+            }
         }
         if (sourceGroup is not null)
         {
@@ -92,7 +116,9 @@ internal sealed class NativeTextOpenFileGroups
         foreach (var path in paths)
         {
             if (path is not null && linked.TryGetValue(path, out var group))
-            { group.Ambiguous = true; }
+            {
+                group.Ambiguous = true;
+            }
         }
     }
 
@@ -103,16 +129,22 @@ internal sealed class NativeTextOpenFileGroups
         {
             var actual = group.ObserveLength();
             if (reservations.TryGetValue(group, out var reservation))
-            { actual = Math.Max(actual, reservation.TargetLength); }
+            {
+                actual = Math.Max(actual, reservation.TargetLength);
+            }
             var linkedPath = group.LinkedPath;
             var exists = linkedPath is not null && File.Exists(linkedPath);
             var physical = exists ? new FileInfo(linkedPath!).Length : AbsentFileLength;
             var additional = group.Ambiguous ? actual : Math.Max(NoAdditionalBytes, actual - physical);
             if ((!exists || group.Ambiguous) && files >= options.Value.MaximumFiles
                 || additional > options.Value.MaximumDiskBytes - bytes)
-            { throw NativeTextErrors.BoundExceeded(); }
+            {
+                throw NativeTextErrors.BoundExceeded();
+            }
             if (!exists || group.Ambiguous)
-            { files++; }
+            {
+                files++;
+            }
             bytes += additional;
         }
     }

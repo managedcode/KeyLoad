@@ -34,12 +34,17 @@ internal static class BlobCommitCutProcess
             await verify(root, cut, linked.Token);
         }
         catch (Exception failure)
-        { activeFailure = failure; throw; }
+        {
+            activeFailure = failure;
+            throw;
+        }
         finally
         {
             using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(30), TimeProvider.System);
             try
-            { await SettleDrainsAsync(process, errorDrain, outputDrain, activeFailure, cleanup.Token); }
+            {
+                await SettleDrainsAsync(process, errorDrain, outputDrain, activeFailure, cleanup.Token);
+            }
             finally { await RecoveryProcessCleanup.SettleAsync(process, root, root, activeFailure, cleanup.Token); }
         }
     }
@@ -53,9 +58,15 @@ internal static class BlobCommitCutProcess
             _ => throw new ArgumentOutOfRangeException(nameof(kind))
         };
         var start = new ProcessStartInfo("dotnet")
-        { RedirectStandardOutput = true, RedirectStandardError = true, UseShellExecute = false };
+        {
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false
+        };
         foreach (var argument in new[] { typeof(CrashHostMarker).Assembly.Location, root, cut.ToString(), "0", mode })
-        { start.ArgumentList.Add(argument); }
+        {
+            start.ArgumentList.Add(argument);
+        }
         return Process.Start(start) ?? throw new InvalidOperationException("The genuine blob CrashHost could not start.");
     }
 
@@ -71,9 +82,14 @@ internal static class BlobCommitCutProcess
             _ => throw new ArgumentOutOfRangeException(nameof(cut))
         };
         if (marker == expected)
-        { return; }
+        {
+            return;
+        }
         if (!process.HasExited)
-        { process.Kill(entireProcessTree: true); await process.WaitForExitAsync(cancellationToken); }
+        {
+            process.Kill(entireProcessTree: true);
+            await process.WaitForExitAsync(cancellationToken);
+        }
         throw new InvalidOperationException("The genuine blob process missed its selected native boundary: "
             + await error.WaitAsync(cancellationToken));
     }
@@ -86,7 +102,9 @@ internal static class BlobCommitCutProcess
         {
             var read = await reader.ReadAsync(bytes.AsMemory(count), cancellationToken);
             if (read == 0)
-            { return new string(bytes, 0, count); }
+            {
+                return new string(bytes, 0, count);
+            }
             count += read;
         }
         throw new InvalidOperationException("The owned blob child exceeded its bounded pipe output.");
@@ -96,19 +114,30 @@ internal static class BlobCommitCutProcess
         Exception? activeFailure, CancellationToken cancellationToken)
     {
         if (process is null)
-        { return; }
+        {
+            return;
+        }
         try
         {
             if (!process.HasExited)
-            { process.Kill(entireProcessTree: true); await process.WaitForExitAsync(cancellationToken); }
+            {
+                process.Kill(entireProcessTree: true);
+                await process.WaitForExitAsync(cancellationToken);
+            }
             var pending = new List<Task<string>>();
             if (error is not null)
-            { pending.Add(error); }
+            {
+                pending.Add(error);
+            }
             if (output is not null)
-            { pending.Add(output); }
+            {
+                pending.Add(output);
+            }
             _ = await Task.WhenAll(pending).WaitAsync(cancellationToken);
         }
         catch (Exception failure) when (activeFailure is not null)
-        { activeFailure.Data[PipeCleanupDiagnosticKey] = failure; }
+        {
+            activeFailure.Data[PipeCleanupDiagnosticKey] = failure;
+        }
     }
 }

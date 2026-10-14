@@ -44,7 +44,10 @@ internal sealed class DatabaseCompositionVisibilityTests
             [new(db.Partition.DatabaseId, Collection, Capability.DocumentsRead),
                 new(db.Partition.DatabaseId, Queue, Capability.QueueInspect),
                 new(db.Partition.DatabaseId, Graph, Capability.GraphWrite)], [])
-        { RestrictRows = true, OwnerId = Principal };
+        {
+            RestrictRows = true,
+            OwnerId = Principal
+        };
         db.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(caller)).Get<PrincipalRecord>();
         var request = new CommandRequest(Guid.NewGuid(), db.Partition, [new QueueToGraph(Graph, Queue, Prefix)]);
 

@@ -66,7 +66,10 @@ internal sealed class NativeTextWaitRf3Tests(ClusterFixture fixture)
         var command = new CommandRequest(Guid.NewGuid(), scenario.Partition,
             [new DeleteDocument(NativeTextRf3Scenario.Collection, NativeTextRf3Scenario.SecondId, OriginalRevision)]);
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await administrator.CommitAsync(command, token));
-        await NativeTextWaitRf3Assertions.WaitAsync(caller, official, administrator, request with { MinimumToken = receipt.Token },
+        await NativeTextWaitRf3Assertions.WaitAsync(caller, official, administrator, request with
+        {
+            MinimumToken = receipt.Token
+        },
             scenario.Resource.SchemaVersion, identity.Principal.PolicyEpoch, token);
         await NativeTextWaitRf3Assertions.LiteralAsync(scenario, caller, official, true, token);
         var deleted = await McpCallerAssertions.SdkSuccessAsync(await administrator.GetAsync(

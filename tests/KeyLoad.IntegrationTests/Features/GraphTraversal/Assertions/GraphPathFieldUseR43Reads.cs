@@ -12,9 +12,13 @@ internal static class GraphPathFieldUseR43Reads
     {
         await HealthyAsync(admin, reader, state, false, token);
         if (state.Allowed)
-        { await HealthyAsync(admin, reader, state, true, token); }
+        {
+            await HealthyAsync(admin, reader, state, true, token);
+        }
         else
-        { await GraphPathFieldUseR43Policy.RefuseAsync(admin, reader, state, token); }
+        {
+            await GraphPathFieldUseR43Policy.RefuseAsync(admin, reader, state, token);
+        }
     }
 
     internal static async Task HealthyAsync(RequestCqrsRf3Callers admin, RequestCqrsRf3Callers reader,

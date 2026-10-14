@@ -11,7 +11,10 @@ internal sealed class RowVisibilityCache : IDisposable
     private Exception? ownerReleaseFailure;
 
     internal RowVisibilityCache(ICacheMemoryBudget budget, ICacheMemoryReservation ownerCharge)
-    { this.budget = budget; this.ownerCharge = ownerCharge; }
+    {
+        this.budget = budget;
+        this.ownerCharge = ownerCharge;
+    }
 
     internal static RowVisibilityCache? Create(ICacheMemoryBudget budget)
         => RowVisibilityTransfers.CreateOwner(budget);
@@ -34,19 +37,36 @@ internal sealed class RowVisibilityCache : IDisposable
             try
             {
                 if (!ReserveEntry(scope, out acquired))
-                { return null; }
+                {
+                    return null;
+                }
                 return RowVisibilityTransfers.Draft(this, budget, scope, ref acquired);
             }
             catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
-            { primary = error; throw; }
+            {
+                primary = error;
+                throw;
+            }
             catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null)
-            { primary = error; throw; }
-            finally { acquired?.Dispose(); }
+            {
+                primary = error;
+                throw;
+            }
+            finally
+            {
+                acquired?.Dispose();
+            }
         }
         catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
-        { RowVisibilityFailureLedger.ThrowJoined(primary, error); throw; }
+        {
+            RowVisibilityFailureLedger.ThrowJoined(primary, error);
+            throw;
+        }
         catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null)
-        { RowVisibilityFailureLedger.ThrowJoined(primary, error); throw; }
+        {
+            RowVisibilityFailureLedger.ThrowJoined(primary, error);
+            throw;
+        }
     }
 
     internal RowVisibilityLease? Acquire(RowVisibilityScope scope)
@@ -66,7 +86,9 @@ internal sealed class RowVisibilityCache : IDisposable
             for (var entry = head; entry is not null; entry = entry.Next)
             {
                 if (!entry.Retired && entry.Scope.Current == current)
-                { found = entry; }
+                {
+                    found = entry;
+                }
             }
             return Pin(found);
         }
@@ -80,9 +102,16 @@ internal sealed class RowVisibilityCache : IDisposable
     {
         if (budget.TryReserve(RowVisibilityMemoryModel.EntryBytes(scope), RowVisibilityMemoryModel.SingleEntry,
                 out acquired))
-        { return true; }
+        {
+            return true;
+        }
         for (var entry = head; entry is not null; entry = entry.Next)
-        { if (entry.Pins == RowVisibilityMemoryModel.MetadataOnly) { entry.Retired = true; } }
+        {
+            if (entry.Pins == RowVisibilityMemoryModel.MetadataOnly)
+            {
+                entry.Retired = true;
+            }
+        }
         Sweep();
         return budget.TryReserve(RowVisibilityMemoryModel.EntryBytes(scope), RowVisibilityMemoryModel.SingleEntry,
             out acquired);
@@ -93,7 +122,9 @@ internal sealed class RowVisibilityCache : IDisposable
         lock (gate)
         {
             if (closed || Find(entry.Scope) is not null)
-            { return false; }
+            {
+                return false;
+            }
             entry.Next = head;
             head = entry;
             return true;
@@ -113,23 +144,7 @@ internal sealed class RowVisibilityCache : IDisposable
     {
         lock (gate)
         {
-            if (!chargeReleased)
-            {
-                if (releaseFailure is not null)
-                { RowVisibilityFailureLedger.Throw([releaseFailure]); }
-                try
-                { charge.Dispose(); }
-                catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
-                { releaseFailure = error; throw; }
-                catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null)
-                { releaseFailure = error; throw; }
-                chargeReleased = true;
-            }
-            if (!pinReleased)
-            {
-                entry.Pins--;
-                pinReleased = true;
-            }
+            RowVisibilityRetirement.ReleasePin(entry, charge, ref chargeReleased, ref pinReleased, ref releaseFailure);
             Sweep();
         }
     }
@@ -140,7 +155,9 @@ internal sealed class RowVisibilityCache : IDisposable
         {
             closed = true;
             for (var entry = head; entry is not null; entry = entry.Next)
-            { entry.Retired = true; }
+            {
+                entry.Retired = true;
+            }
             Sweep();
         }
     }
@@ -148,49 +165,27 @@ internal sealed class RowVisibilityCache : IDisposable
     private RowVisibilityEntry? Find(RowVisibilityScope scope)
     {
         for (var entry = head; entry is not null; entry = entry.Next)
-        { if (!entry.Retired && entry.Scope == scope) { return entry; } }
+        {
+            if (!entry.Retired && entry.Scope == scope)
+            {
+                return entry;
+            }
+        }
         return null;
     }
 
     private void RetireStale(RowVisibilityScope scope)
     {
         for (var entry = head; entry is not null; entry = entry.Next)
-        { if (entry.Scope.SameResourcePrincipal(scope) && entry.Scope != scope) { entry.Retired = true; } }
+        {
+            if (entry.Scope.SameResourcePrincipal(scope) && entry.Scope != scope)
+            {
+                entry.Retired = true;
+            }
+        }
         Sweep();
     }
 
     private void Sweep()
-    {
-        var failures = new List<Exception>();
-        RowVisibilityEntry? previous = null;
-        for (var entry = head; entry is not null;)
-        {
-            var next = entry.Next;
-            var before = failures.Count;
-            if (entry.Retired && entry.Pins == RowVisibilityMemoryModel.MetadataOnly)
-            { RowVisibilityFailureLedger.Capture(entry.Dispose, failures); }
-            if (entry.Retired && entry.Pins == RowVisibilityMemoryModel.MetadataOnly && failures.Count == before)
-            {
-                if (previous is null)
-                { head = next; }
-                else
-                { previous.Next = next; }
-            }
-            else
-            { previous = entry; }
-            entry = next;
-        }
-        if (closed && head is null && !ownerReleased)
-        {
-            if (ownerReleaseFailure is not null)
-            { failures.Add(ownerReleaseFailure); }
-            else
-            {
-                RowVisibilityFailureLedger.Capture(ownerCharge.Dispose, failures);
-                ownerReleaseFailure = failures.Count == RowVisibilityMemoryModel.MetadataOnly ? null : failures[^RowVisibilityMemoryModel.SingleEntry];
-            }
-            ownerReleased = failures.Count == RowVisibilityMemoryModel.MetadataOnly;
-        }
-        RowVisibilityFailureLedger.Throw(failures);
-    }
+        => RowVisibilityRetirement.Sweep(ref head, ref closed, ownerCharge, ref ownerReleased, ref ownerReleaseFailure);
 }

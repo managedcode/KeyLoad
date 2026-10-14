@@ -56,7 +56,10 @@ internal sealed class SampleChunkPendingBoundTrial(SampleChunkCanonicalFixture f
     private async Task WindowAsync(Guid id, DateTimeOffset from, DateTimeOffset until, long generation,
         long revision, long sequence, SampleRecord[] rows)
     {
-        var request = fixture.Request with { WindowId = id };
+        var request = fixture.Request with
+        {
+            WindowId = id
+        };
         var actual = fixture.Owner.Database.ReadSampleChunkWindow(SampleChunkCanonicalFixture.Principal, request);
         var expected = new SampleChunkWindowResult(id, from, until, generation, revision, sequence, null,
             [.. rows], fixture.Owner.Store.Position);

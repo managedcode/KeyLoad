@@ -24,7 +24,9 @@ internal sealed class PostgresErrorDeliveryClaim(PostgresErrorDeliveryArm arm, G
         if (!receiverClosed || failures.Count <= PostgresErrorDeliveryProtocol.FirstFlushFailure
             || !ReferenceEquals(failures[PostgresErrorDeliveryProtocol.PrimaryIndex], Primary)
             || !PostgresErrorDeliveryErrors.HasCancellation(failures[PostgresErrorDeliveryProtocol.FirstFlushFailure]))
-        { throw new InvalidOperationException(PostgresErrorDeliveryProtocol.Invalid); }
+        {
+            throw new InvalidOperationException(PostgresErrorDeliveryProtocol.Invalid);
+        }
         ledgerJoined = true;
         Publish(PostgresErrorDeliveryPhase.LedgerJoined, true, failures.Count);
     }
@@ -32,7 +34,9 @@ internal sealed class PostgresErrorDeliveryClaim(PostgresErrorDeliveryArm arm, G
     internal void Session(IReadOnlyList<Exception> failures)
     {
         if (!ledgerJoined || !PostgresErrorDeliveryErrors.IsFirst(failures, Primary))
-        { throw new InvalidOperationException(PostgresErrorDeliveryProtocol.Invalid); }
+        {
+            throw new InvalidOperationException(PostgresErrorDeliveryProtocol.Invalid);
+        }
         sessionJoined = true;
         Publish(PostgresErrorDeliveryPhase.SessionJoined, true, PostgresErrorDeliveryErrors.Count(failures));
     }
@@ -40,7 +44,9 @@ internal sealed class PostgresErrorDeliveryClaim(PostgresErrorDeliveryArm arm, G
     internal void ConnectionJoined(IReadOnlyList<Exception> failures)
     {
         if (!sessionJoined || !PostgresErrorDeliveryErrors.IsFirst(failures, Primary))
-        { throw new InvalidOperationException(PostgresErrorDeliveryProtocol.Invalid); }
+        {
+            throw new InvalidOperationException(PostgresErrorDeliveryProtocol.Invalid);
+        }
         Publish(PostgresErrorDeliveryPhase.ConnectionJoined, true, PostgresErrorDeliveryErrors.Count(failures));
     }
 }

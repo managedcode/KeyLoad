@@ -15,7 +15,9 @@ internal static class NativeChecksumProfileEvidence
         if (current.NodeId != original.NodeId || current.Incarnation != original.Incarnation
             || current.Position != original.Position || current.ReadGeneration < original.ReadGeneration
             || !NativeSerialization.Serialize(current.Rows).AsSpan().SequenceEqual(NativeSerialization.Serialize(original.Rows)))
-        { throw new InvalidOperationException(NativeChecksumProfileProtocol.Invalid); }
+        {
+            throw new InvalidOperationException(NativeChecksumProfileProtocol.Invalid);
+        }
     }
 
     private static NativeChecksumProfileCut Capture(ZoneTreeStore store) => store.Read<NativeChecksumProfileCut>(view =>
@@ -23,7 +25,9 @@ internal static class NativeChecksumProfileEvidence
         var page = view.Scan([], CrashExecutionOptions.DatabaseLimits().Value.MaxScanRecords);
         if (page.HasMore || page.Records.Sum(row => row.Key.Length + (long)row.Value.Length)
             > CommandIdempotencyCrashContract.EvidenceMaximumBytes)
-        { throw new InvalidOperationException(NativeChecksumProfileProtocol.Invalid); }
+        {
+            throw new InvalidOperationException(NativeChecksumProfileProtocol.Invalid);
+        }
         return new(store.Identity.NodeId, store.Identity.Incarnation, store.Position, store.Identity.ReadGeneration,
             [.. page.Records.Select(row => new NativeChecksumProfileRow(row.Key.ToArray(), row.Value.ToArray()))]);
     });

@@ -14,7 +14,9 @@ internal sealed class EventVectorCoveragePacketOwner : IDisposable
     private byte[] capture = [];
     private EventVectorCoveragePacket? packet;
 
-    private EventVectorCoveragePacketOwner() { }
+    private EventVectorCoveragePacketOwner()
+    {
+    }
 
     internal EventVectorCoveragePacket OriginalPacket => packet
         ?? throw new ObjectDisposedException(nameof(EventVectorCoveragePacketOwner));
@@ -26,7 +28,9 @@ internal sealed class EventVectorCoveragePacketOwner : IDisposable
         var actualReply = original.Reply;
         if (actualReply.Reply.Action != EventVectorRemoteAction.Coverage
             || actualReply.Reply.Error is not null || actualReply.Reply.OriginalNativeReply.IsEmpty)
-        { throw Errors.Fail(ErrorCode.Corruption, EventVectorRemoteProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, EventVectorRemoteProtocol.Invalid);
+        }
         var requestSignatureLength = Encoding.UTF8.GetByteCount(original.OriginalRequestSignature);
         var replySignatureLength = Encoding.UTF8.GetByteCount(actualReply.OriginalSignature);
         work.ChargeBytes(checked((long)original.OriginalRequestBytes.Length + requestSignatureLength
@@ -56,7 +60,9 @@ internal sealed class EventVectorCoveragePacketOwner : IDisposable
         finally
         {
             if (!transferred)
-            { owner.Dispose(); }
+            {
+                owner.Dispose();
+            }
         }
     }
 

@@ -64,7 +64,11 @@ internal sealed class JsonTextQueueReplayTests
         await NativeReplayResultAssertions.Same<ReceiveResult>(replay, original);
 
         db.Submit(OperationKind.ConfigurePrincipal,
-            new ConfigurePrincipalRequest(worker with { Revoked = true, PolicyEpoch = 2 }), time: now.AddSeconds(1))
+            new ConfigurePrincipalRequest(worker with
+            {
+                Revoked = true,
+                PolicyEpoch = 2
+            }), time: now.AddSeconds(1))
             .Get<PrincipalRecord>();
         await Assert.That(db.Submit(OperationKind.Receive, request, principal: WorkerPrincipal,
             id: id, time: now.AddSeconds(1)).Error).IsEqualTo(ErrorCode.Unauthenticated);
@@ -96,6 +100,9 @@ internal sealed class JsonTextQueueReplayTests
             _ => throw new ArgumentOutOfRangeException(nameof(field))
         };
         await Assert.ThrowsExactlyAsync<AssertionException>(() => NativeReplayResultAssertions.Same<ReceiveResult>(
-            original with { NativeValue = changed }, original));
+            original with
+            {
+                NativeValue = changed
+            }, original));
     }
 }

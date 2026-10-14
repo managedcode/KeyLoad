@@ -13,7 +13,9 @@ internal static class AuthorizationCredentialHttpExportAssertions
         using var expected = JsonDocument.Parse(AuthorizationCredentialHttpExportProtocol.ExpectedProblem);
         await Assert.That(JsonElement.DeepEquals(actual.RootElement, expected.RootElement)).IsTrue();
         foreach (var canary in AuthorizationTelemetryTestProtocol.Canaries)
-        { await Assert.That(body.Contains(canary, StringComparison.Ordinal)).IsFalse(); }
+        {
+            await Assert.That(body.Contains(canary, StringComparison.Ordinal)).IsFalse();
+        }
     }
 
     internal static async Task<(Guid Id, ConfigureApiKeyRequest Request, OperationResult Result)> ConfigureAsync(TestDatabase database, global::KeyLoad.ApiKeyRecord key)

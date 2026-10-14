@@ -1,7 +1,7 @@
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.DocumentStorage;
 using Microsoft.Extensions.Options;
 
@@ -30,13 +30,17 @@ internal static class EventVectorRemoteReplyAdmission
                 originalCancellationToken).ConfigureAwait(false);
             accepted = true;
             if (checkedReply.Reply.Error is { } failure)
-            { throw Errors.Fail(failure, checkedReply.Reply.SafeDetail ?? EventVectorRemoteProtocol.Unavailable); }
+            {
+                throw Errors.Fail(failure, checkedReply.Reply.SafeDetail ?? EventVectorRemoteProtocol.Unavailable);
+            }
             completed(checkedReply, originalRequestSignature);
             transferred = true;
         }
         catch (Exception error) when (!accepted && nativeReply.MayHaveEffects
-            && global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { throw Errors.Fail(ErrorCode.UnknownWriteOutcome, EventVectorRemoteProtocol.Unavailable, error); }
+            && global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            throw Errors.Fail(ErrorCode.UnknownWriteOutcome, EventVectorRemoteProtocol.Unavailable, error);
+        }
         finally
         {
             if (!transferred && checkedReply is not null)

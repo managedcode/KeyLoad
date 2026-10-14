@@ -7,23 +7,31 @@ internal static class DistributedSearchDeadlineFailure
     internal static bool IsOwnedDeadline(Exception cause, CancellationToken deadline, CancellationToken original)
     {
         if (!deadline.IsCancellationRequested || original.IsCancellationRequested)
-        { return false; }
+        {
+            return false;
+        }
         var pending = new Stack<Exception>();
         pending.Push(cause);
         var foundCancellation = false;
         while (pending.TryPop(out var actual))
         {
             if (actual is KeyLoadException { Code: ErrorCode.Cancelled, InnerException: { } inner })
-            { pending.Push(inner); }
+            {
+                pending.Push(inner);
+            }
             if (actual is KeyLoadException { Code: ErrorCode.Cancelled })
             {
                 foundCancellation = true;
                 continue;
             }
             if (actual is not AggregateException aggregate || aggregate.InnerExceptions.Count == NoFailures)
-            { return false; }
+            {
+                return false;
+            }
             foreach (var failure in aggregate.InnerExceptions)
-            { pending.Push(failure); }
+            {
+                pending.Push(failure);
+            }
         }
         return foundCancellation;
     }

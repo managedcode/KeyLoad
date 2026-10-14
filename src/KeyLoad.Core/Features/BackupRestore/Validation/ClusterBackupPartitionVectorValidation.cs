@@ -23,18 +23,26 @@ internal static class ClusterBackupPartitionVectorValidation
                     || partition.CanonicalRecordCount < NoRecords || partition.CanonicalDigest is null
                     || partition.CanonicalDigest.Length != Sha256HexCharacters
                     || !partition.CanonicalDigest.All(IsHex))
-                { throw Errors.Fail(ErrorCode.Corruption, Inconsistent); }
+                {
+                    throw Errors.Fail(ErrorCode.Corruption, Inconsistent);
+                }
                 if (canonical.TryGetValue(identity, out var original) && !SameOwner(original, placement))
-                { throw Errors.Fail(ErrorCode.RecoveryRequired, Inconsistent); }
+                {
+                    throw Errors.Fail(ErrorCode.RecoveryRequired, Inconsistent);
+                }
                 canonical.TryAdd(identity, placement);
                 if (placement.PhysicalShardId == cut.Owner.PhysicalShardId && !owned.TryAdd(identity, placement))
-                { throw Errors.Fail(ErrorCode.Corruption, Inconsistent); }
+                {
+                    throw Errors.Fail(ErrorCode.Corruption, Inconsistent);
+                }
             }
         }
         foreach (var partition in canonical)
         {
             if (!owned.TryGetValue(partition.Key, out var actual) || !SameOwner(partition.Value, actual))
-            { throw Errors.Fail(ErrorCode.RecoveryRequired, Inconsistent); }
+            {
+                throw Errors.Fail(ErrorCode.RecoveryRequired, Inconsistent);
+            }
         }
     }
 

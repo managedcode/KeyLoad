@@ -14,11 +14,26 @@ internal interface IAnnProjection
 
 internal interface IAnnProjectionLease : IDisposable
 {
-    long IndexedAppliedPosition { get; }
-    long IndexGeneration { get; }
-    ImmutableArray<VectorRecord> Records { get; }
-    AnnSeedWork ScopeWork { get; }
-    IOptions<AnnSeedOptions> CallerSeedOptions { get; }
+    long IndexedAppliedPosition
+    {
+        get;
+    }
+    long IndexGeneration
+    {
+        get;
+    }
+    ImmutableArray<VectorRecord> Records
+    {
+        get;
+    }
+    AnnSeedWork ScopeWork
+    {
+        get;
+    }
+    IOptions<AnnSeedOptions> CallerSeedOptions
+    {
+        get;
+    }
     AnnSearchResult Search(ReadOnlyMemory<float> query, int limit,
         ReadOnlyMemory<ulong> eligible, AnnWorkBudget budget);
 }

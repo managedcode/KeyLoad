@@ -34,7 +34,11 @@ internal static class RemoteTransferRepairColdHealthy
         await Assert.That(RemoteTransferRepairColdNative.Outcome(fixture, deniedComplete.CommandId, fixture.SourcePartition).AsSpan().SequenceEqual(completeBytes)).IsTrue();
         await RemoteTransferCoordinationColdAssertions.EqualAsync(RemoteTransferRepairColdNative.Apply(fixture, completedCommand).Get<CommitReceipt>(), completed);
         await RemoteTransferCoordinationColdAssertions.EqualAsync(fixture.Database.InspectQueueTransfer(RemoteTransferRepairColdProtocol.Subject,
-            fixture.SourceQueue, transfer.TransferId), original with { State = QueueTransferState.Delivered, ReceiptToken = proof.ReceiptToken });
+            fixture.SourceQueue, transfer.TransferId), original with
+            {
+                State = QueueTransferState.Delivered,
+                ReceiptToken = proof.ReceiptToken
+            });
         await RemoteTransferCoordinationColdAssertions.EqualAsync(fixture.Database.InspectQueueTransferReceipt(RemoteTransferRepairColdProtocol.Subject,
             fixture.DestinationQueue, fixture.SourceQueue, transfer.TransferId), proof);
         await RemoteTransferCoordinationColdAssertions.EqualAsync(fixture.Database.InspectMessage(RemoteTransferRepairColdProtocol.Subject,

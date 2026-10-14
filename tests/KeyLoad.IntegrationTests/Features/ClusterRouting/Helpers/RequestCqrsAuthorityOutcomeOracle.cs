@@ -54,7 +54,9 @@ internal sealed class RequestCqrsAuthorityOutcomeOracle(string dataRoot, NodeEpo
             await Assert.That(held.OutcomePresent).IsFalse();
             var positive = await InspectNodeAsync(node, positiveCommandId, cancellationToken).ConfigureAwait(false);
             if (positive.OutcomePresent)
-            { positiveCount++; }
+            {
+                positiveCount++;
+            }
         }
         await Assert.That(positiveCount).IsGreaterThanOrEqualTo(RequestCqrsRf3Protocol.NodeCount / 2 + 1);
     }
@@ -63,7 +65,9 @@ internal sealed class RequestCqrsAuthorityOutcomeOracle(string dataRoot, NodeEpo
         Guid commandId, CancellationToken cancellationToken)
     {
         if (!Guid.TryParse(node.Status.NodeId, out var expectedNodeId) || expectedNodeId == Guid.Empty)
-        { throw new InvalidOperationException(MissingCut); }
+        {
+            throw new InvalidOperationException(MissingCut);
+        }
         var nodeRoot = Path.Combine(dataRoot, node.Name);
         var request = new C1OutcomeInspectionRequest(C1OutcomeInspectionProtocol.Version,
             Path.Combine(nodeRoot, PartitionStoreProtocol.CanonicalDirectory), expectedNodeId,

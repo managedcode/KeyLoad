@@ -122,7 +122,10 @@ internal sealed class McpTransportGuardInspectionTests
     [Arguments(RequestMethods.ResourcesRead, McpTransportGuardTestData.UriField, McpTransportGuardTestData.Resource)]
     public async Task BodyMethodSelectsPresentNameHeader(string method, string field, string target)
     {
-        var wire = McpTransportGuardTestData.Frame(method, new() { [field] = target });
+        var wire = McpTransportGuardTestData.Frame(method, new()
+        {
+            [field] = target
+        });
         var snapshot = wire.ToArray();
         var headers = McpTransportGuard.ReadHeaders(McpTransportGuardTestData.Headers(null, target), UnitMcpOptions.Execution());
         McpTransportGuard.Inspect(wire, headers);
@@ -139,7 +142,10 @@ internal sealed class McpTransportGuardInspectionTests
     [Arguments(RequestMethods.ResourcesRead, McpTransportGuardTestData.UriField)]
     public async Task BodySelectedTargetMismatchUsesSafeValidation(string method, string field)
     {
-        var wire = McpTransportGuardTestData.Frame(method, new() { [field] = McpTransportGuardTestData.Marker });
+        var wire = McpTransportGuardTestData.Frame(method, new()
+        {
+            [field] = McpTransportGuardTestData.Marker
+        });
         var headers = McpTransportGuard.ReadHeaders(McpTransportGuardTestData.Headers(null, McpTransportGuardTestData.Target), UnitMcpOptions.Execution());
         var error = Assert.ThrowsExactly<KeyLoadException>(() => McpTransportGuard.Inspect(wire, headers));
         await Assert.That(error.Code).IsEqualTo(ErrorCode.Validation);
@@ -154,7 +160,10 @@ internal sealed class McpTransportGuardInspectionTests
     public async Task UnroutedBodyMethodLeavesNativeValidationIntact(bool missingMethod)
     {
         var method = missingMethod ? null : RequestMethods.ServerDiscover;
-        var wire = McpTransportGuardTestData.Frame(method, new() { [McpTransportGuardTestData.NameField] = McpTransportGuardTestData.Marker });
+        var wire = McpTransportGuardTestData.Frame(method, new()
+        {
+            [McpTransportGuardTestData.NameField] = McpTransportGuardTestData.Marker
+        });
         var snapshot = wire.ToArray();
         McpTransportGuard.Inspect(wire, McpTransportGuard.ReadHeaders(McpTransportGuardTestData.Headers(null, McpTransportGuardTestData.Target), UnitMcpOptions.Execution()));
         await Assert.That(wire.AsSpan().SequenceEqual(snapshot)).IsTrue();

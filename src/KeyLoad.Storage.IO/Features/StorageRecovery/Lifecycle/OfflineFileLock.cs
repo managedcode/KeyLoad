@@ -17,9 +17,13 @@ internal static class OfflineFileLock
     internal static void Close(SafeFileHandle? handle, bool releaseLock, Exception? primaryFailure)
     {
         if (handle is null)
-        { return; }
+        {
+            return;
+        }
         try
-        { Release(handle, releaseLock); }
+        {
+            Release(handle, releaseLock);
+        }
         catch (Exception cleanup)
         {
             if (primaryFailure is null)
@@ -31,13 +35,17 @@ internal static class OfflineFileLock
             throw primaryFailure;
         }
         finally
-        { OfflineNativeHandleLease.DisposeUntransferred(ref handle, primaryFailure); }
+        {
+            OfflineNativeHandleLease.DisposeUntransferred(ref handle, primaryFailure);
+        }
     }
 
     internal static void Release(SafeFileHandle handle, bool releaseLock)
     {
         if (releaseLock && !handle.IsClosed)
-        { Apply(handle, LockUnlock); }
+        {
+            Apply(handle, LockUnlock);
+        }
     }
 
     private static void Apply(SafeFileHandle handle, int operation)
@@ -46,10 +54,16 @@ internal static class OfflineFileLock
         var descriptor = handle.DangerousGetHandle().ToInt32();
         int result;
         try
-        { result = isMac ? OfflineMacFileSystem.Lock(descriptor, operation) : OfflineLinuxFileSystem.Lock(descriptor, operation); }
+        {
+            result = isMac ? OfflineMacFileSystem.Lock(descriptor, operation) : OfflineLinuxFileSystem.Lock(descriptor, operation);
+        }
         catch (Exception error) when (OfflineNativeErrors.IsUnavailable(error))
-        { throw OfflineNativeErrors.Unsupported(); }
+        {
+            throw OfflineNativeErrors.Unsupported();
+        }
         if (result != NativeCallSuccess)
-        { throw OfflineNativeErrors.FromErrno(Marshal.GetLastPInvokeError(), isMac); }
+        {
+            throw OfflineNativeErrors.FromErrno(Marshal.GetLastPInvokeError(), isMac);
+        }
     }
 }

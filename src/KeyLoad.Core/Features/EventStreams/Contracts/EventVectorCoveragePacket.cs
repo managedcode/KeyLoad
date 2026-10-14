@@ -7,21 +7,39 @@ internal sealed record EventVectorCoveragePacket
     internal const string SerializerAlias = "keyload.core.event-vector-coverage-packet.v1";
 
     [Orleans.Id(0)]
-    public int Version { get; init; }
+    public int Version
+    {
+        get; init;
+    }
 
     [Orleans.Id(1)]
-    public ReadOnlyMemory<byte> RequestBytes { get; init; }
+    public ReadOnlyMemory<byte> RequestBytes
+    {
+        get; init;
+    }
 
     [Orleans.Id(2)]
-    public ReadOnlyMemory<byte> RequestSignature { get; init; }
+    public ReadOnlyMemory<byte> RequestSignature
+    {
+        get; init;
+    }
 
     [Orleans.Id(3)]
-    public ReadOnlyMemory<byte> ReplyBytes { get; init; }
+    public ReadOnlyMemory<byte> ReplyBytes
+    {
+        get; init;
+    }
 
     [Orleans.Id(4)]
-    public ReadOnlyMemory<byte> ReplySignature { get; init; }
+    public ReadOnlyMemory<byte> ReplySignature
+    {
+        get; init;
+    }
 
     [Orleans.Id(5)]
-    public ReadOnlyMemory<byte> OriginalCaptureBytes { get; init; }
+    public ReadOnlyMemory<byte> OriginalCaptureBytes
+    {
+        get; init;
+    }
 
 }

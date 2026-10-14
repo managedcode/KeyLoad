@@ -44,7 +44,9 @@ internal static class RequestCqrsMovementJournalInventory
     {
         if (name.Length != Prefix.Length + IdentifierPairCharacters + Suffix.Length
             || !name.StartsWith(Prefix, StringComparison.Ordinal) || !name.EndsWith(Suffix, StringComparison.Ordinal))
-        { return false; }
+        {
+            return false;
+        }
         var ids = name.AsSpan(Prefix.Length, IdentifierPairCharacters);
         return ids[GuidHexCharacters] == IdentifierSeparatorCharacter && Guid.TryParseExact(ids[..GuidHexCharacters], IdentifierFormat, out var arm)
             && Guid.TryParseExact(ids[RequestOffset..], IdentifierFormat, out var request)
@@ -58,11 +60,15 @@ internal static class RequestCqrsMovementJournalInventory
             || value.RequestId == Guid.Empty || value.CommandId == Guid.Empty || value.ConnectionId == Guid.Empty
             || string.IsNullOrWhiteSpace(value.PrincipalId) || string.IsNullOrWhiteSpace(value.Voter)
             || string.IsNullOrWhiteSpace(value.SiloAddress) || value.Partition is null)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         if (value.Error is { } error)
         {
             if (!Enum.IsDefined(error) || value.MoveId != Guid.Empty || value.Stage is not null || value.Journal is not null)
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             return;
         }
         if (value.MoveId == Guid.Empty || !IsObservedControlStage(value.Stage)
@@ -74,7 +80,9 @@ internal static class RequestCqrsMovementJournalInventory
             || owner.VoterIds.Any(string.IsNullOrWhiteSpace)
             || owner.VoterIds.Distinct(StringComparer.Ordinal).Count() != owner.VoterIds.Length
             || !owner.VoterIds.Contains(value.Voter, StringComparer.Ordinal))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
     }
 
     internal static void RequireArm(RequestCqrsMovementJournalRecord value, RequestCqrsProbeArmRecord arm)
@@ -84,7 +92,9 @@ internal static class RequestCqrsMovementJournalInventory
             || arm.ReadKind is not null || arm.Phase != RequestCqrsProbePhase.SubmitReturned
             || arm.Action != RequestCqrsProbeAction.Hold || arm.TargetVoter is not null
             || arm.SourceRequestId is not null || arm.SourceArmId is not null)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
     }
 
     internal static void RequireMarker(RequestCqrsMovementJournalRecord value, RequestCqrsProbeMarkerRecord marker)
@@ -93,7 +103,9 @@ internal static class RequestCqrsMovementJournalInventory
             || marker.CommandId != value.CommandId || marker.Voter != value.Voter || marker.SiloAddress != value.SiloAddress
             || marker.Phase != RequestCqrsProbePhase.SubmitReturned || marker.Outcome != RequestCqrsProbeOutcome.Observed
             || marker.EntryIndex is not null || marker.EntryTerm is not null)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
     }
 
     internal static void RequireInventory(IEnumerable<RequestCqrsMovementJournalRecord> values,
@@ -108,7 +120,9 @@ internal static class RequestCqrsMovementJournalInventory
                 && marker.RequestId == value.RequestId && marker.Phase == RequestCqrsProbePhase.SubmitReturned
                 && marker.Outcome == RequestCqrsProbeOutcome.Observed).ToArray();
             if (originals.Length != ExactWitnessCount)
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             RequireMarker(value, originals[OriginalMarkerIndex]);
         }
         RequireScopedMarkers(witnesses, markers, arms, retainedArm);
@@ -124,10 +138,14 @@ internal static class RequestCqrsMovementJournalInventory
             var arm = arms.SingleOrDefault(value => value.Record.ArmId == marker.ArmId)?.Record
                 ?? retainedArm(marker.ArmId);
             if (arm?.Partition is null)
-            { continue; }
+            {
+                continue;
+            }
             if (witnesses.Count(value => value.ArmId == marker.ArmId && value.RequestId == marker.RequestId)
                 != ExactWitnessCount)
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
         }
     }
 

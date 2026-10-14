@@ -19,7 +19,9 @@ internal static class RemoteModelNativeDispatch
             var call = NativeSerialization.Deserialize<EventVectorRemoteCall>(request.Payload.Span);
             if (!PhysicalOwnerEntryValidation.SameOwner(call.Source, request.SourceOwner)
                 || call.ExpiresAt != request.ExpiresAt)
-            { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteModelNativeProtocol.InvalidProof); }
+            {
+                throw Errors.Fail(ErrorCode.Unauthenticated, RemoteModelNativeProtocol.InvalidProof);
+            }
             return (runtime.EventVectors?.Endpoint ?? throw Errors.Fail(ErrorCode.UnsupportedCapability, RemoteModelNativeProtocol.Unavailable))
                 .ExecuteAsync(request.Payload, request.Signature, effectBoundary, token);
         }

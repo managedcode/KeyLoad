@@ -6,7 +6,9 @@ internal sealed partial class NativeTextOnlineMaintenanceService
     {
         var original = sessions.FindForCleanup(sessionId);
         if (original is null)
-        { return; }
+        {
+            return;
+        }
         _ = await worker.RunAsync(async () =>
         {
             await CleanupSessionAsync(original).ConfigureAwait(false);
@@ -18,13 +20,19 @@ internal sealed partial class NativeTextOnlineMaintenanceService
     {
         await session.CloseCommandAdmissionAndJoinAsync().ConfigureAwait(false);
         if (session.Publication.CapturedOriginal() is not null && !session.CatalogCommitted)
-        { throw NativeTextErrors.Ownership(); }
+        {
+            throw NativeTextErrors.Ownership();
+        }
         session.DisposeWithJoinedNativeCleanup(() =>
         {
             if (session.CatalogCommitted)
-            { return; }
+            {
+                return;
+            }
             if (session.Leaf is { } leaf && session.Scope is { } scope)
-            { root.DeleteAfterJoinedOwnership(leaf, scope); }
+            {
+                root.DeleteAfterJoinedOwnership(leaf, scope);
+            }
             session.GenerationReservation?.CompleteAfterJoinedCleanup();
             session.GenerationReservation = null;
         });
@@ -39,9 +47,13 @@ internal sealed partial class NativeTextOnlineMaintenanceService
         await ServerFailureObserver.ObserveAsync(shutdown.CancelAsync, failures).ConfigureAwait(false);
         await ServerFailureObserver.ObserveAsync(() => worker.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         foreach (var original in originals)
-        { await ServerFailureObserver.ObserveAsync(() => CleanupSessionAsync(original), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => CleanupSessionAsync(original), failures).ConfigureAwait(false);
+        }
         foreach (var originalRetirement in catalog.CaptureOriginalRetirements())
-        { await ServerFailureObserver.ObserveAsync(() => originalRetirement, failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => originalRetirement, failures).ConfigureAwait(false);
+        }
         await ServerFailureObserver.ObserveAsync(() => originalReaders, failures).ConfigureAwait(false);
         ServerFailureObserver.Observe(catalog.OnlineReadAdmission.ThrowRetained, failures);
         var retained = catalog.CaptureGenerations();
@@ -51,7 +63,9 @@ internal sealed partial class NativeTextOnlineMaintenanceService
             ServerFailureObserver.Observe(generation.CompleteAfterJoinedRetirement, failures);
         }
         try
-        { shutdown.Dispose(); }
+        {
+            shutdown.Dispose();
+        }
         catch (Exception cleanup)
         {
             failures.Add(cleanup);

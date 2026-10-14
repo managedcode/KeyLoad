@@ -32,7 +32,9 @@ internal static class McpSchemaFactory
         if (requestType is null)
         {
             if (outerCommandId)
-            { throw new ArgumentException(McpCatalogProtocol.InvalidOperation, nameof(outerCommandId)); }
+            {
+                throw new ArgumentException(McpCatalogProtocol.InvalidOperation, nameof(outerCommandId));
+            }
             return JsonSerializer.SerializeToElement(root);
         }
         var request = Export(requestType, InputOptions, McpSchemaKeywords.RequestReference);

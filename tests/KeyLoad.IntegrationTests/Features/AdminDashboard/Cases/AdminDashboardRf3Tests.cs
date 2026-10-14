@@ -131,7 +131,10 @@ internal sealed class AdminDashboardRf3Tests(ClusterFixture fixture)
             AdminDashboardScenario.Collection, Capability.All, deadline.Token);
         var root = fixture.Client(McpCallerProtocol.Node1);
         var administrator = identity.Principal with
-        { ClusterAdministrator = true, PolicyEpoch = identity.Principal.PolicyEpoch + 1 };
+        {
+            ClusterAdministrator = true,
+            PolicyEpoch = identity.Principal.PolicyEpoch + 1
+        };
         await McpCallerAssertions.SdkSuccessAsync(await root.ConfigurePrincipalAsync(Guid.NewGuid(), administrator, deadline.Token));
         var sdk = fixture.Client(McpCallerProtocol.Node2, identity.Secret);
         await McpCallerAssertions.SdkSuccessAsync(await sdk.ListResourcesAsync(scenario.Resources, deadline.Token));

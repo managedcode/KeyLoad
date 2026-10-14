@@ -28,7 +28,10 @@ internal static class AnnPublicRf3Scenario
                 McpCallerProtocol.Node1, identity.Secret, deadline.Token);
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                var denied = await reader.Sdk.MaintainAnnIndexAsync(pin with { CommandId = Guid.NewGuid() }, deadline.Token);
+                var denied = await reader.Sdk.MaintainAnnIndexAsync(pin with
+                {
+                    CommandId = Guid.NewGuid()
+                }, deadline.Token);
                 await Assert.That(denied.IsSuccess).IsFalse();
                 await Assert.That(denied.Value).IsNull();
                 await Assert.That(denied.Problem?.ErrorCode).IsEqualTo(ErrorCode.PermissionDenied.ToString());

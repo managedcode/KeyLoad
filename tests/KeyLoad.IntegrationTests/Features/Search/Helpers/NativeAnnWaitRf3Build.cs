@@ -23,7 +23,9 @@ internal static class NativeAnnWaitRf3Build
             throw;
         }
         finally
-        { observation.Stop(); }
+        {
+            observation.Stop();
+        }
     }
 }
 

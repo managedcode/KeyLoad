@@ -21,7 +21,9 @@ internal static class ClusterRestoreImageOrigins
             || state.Target.ReadOwnedValue(KeySpace.ClockBytes) is not null
             || state.Target.ReadOwnedValue(MembershipKey) is not null
             || paused is null || !NativeSerialization.Deserialize<bool>(paused))
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
         var hasOrigins = false;
         foreach (var partition in state.Original.Partitions)
         {
@@ -32,7 +34,9 @@ internal static class ClusterRestoreImageOrigins
             if (entry.FirstSeenAppliedIndex <= NoAppliedIndex)
             {
                 if (actual is not null)
-                { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+                {
+                    throw Errors.Fail(ErrorCode.Corruption, Invalid);
+                }
                 continue;
             }
             hasOrigins = true;
@@ -46,14 +50,18 @@ internal static class ClusterRestoreImageOrigins
                 || actual.Partition != entry.Partition || actual.SourceIncarnation != state.Context.SourceIncarnation
                 || actual.RestoredIncarnation != state.Context.TargetIncarnation || actual.AppliedUpperBound != bound
                 || !CryptographicOperations.FixedTimeEquals(actual.EntryDigest.Span, SHA256.HashData(originalBytes)))
-            { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, Invalid);
+            }
         }
         var identity = state.Target.GetRecord<AtomicPartitionRosterRestoreIdentity>(
             AtomicPartitionRosterRestoreOriginSerialization.IdentityKey());
         if (hasOrigins ? identity is null || identity.Version != AtomicPartitionRosterRestoreOriginSerialization.CurrentVersion
                 || identity.SourceIncarnation != state.Context.SourceIncarnation
                 || identity.RestoredIncarnation != state.Context.TargetIncarnation : identity is not null)
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
     }
 
     internal static List<byte[]> ChangedKeys(ClusterRestoreImageState state)
@@ -61,7 +69,9 @@ internal static class ClusterRestoreImageOrigins
         List<byte[]> keys = [KeySpace.AppliedBytes, KeySpace.ClockBytes, MembershipKey, PausedKey,
             AtomicPartitionRosterRestoreOriginSerialization.IdentityKey()];
         foreach (var partition in state.Original.Partitions)
-        { keys.Add(AtomicPartitionRosterRestoreOriginSerialization.OriginKey(partition.Roster.Partition)); }
+        {
+            keys.Add(AtomicPartitionRosterRestoreOriginSerialization.OriginKey(partition.Roster.Partition));
+        }
         return keys;
     }
 }

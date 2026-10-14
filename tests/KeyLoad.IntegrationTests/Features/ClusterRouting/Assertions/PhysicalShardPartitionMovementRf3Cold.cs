@@ -28,7 +28,9 @@ internal static class PhysicalShardPartitionMovementRf3Cold
     {
         var before = await StopAndReadAsync(wave, requests, token);
         foreach (var cut in before)
-        { await PartitionMovementPublicParentRf3Cut.RequireCompactedAsync(cut); }
+        {
+            await PartitionMovementPublicParentRf3Cut.RequireCompactedAsync(cut);
+        }
         await PartitionMovementPublicParentRf3Cut.RestartAsync(wave, token);
         var replay = await PhysicalShardPartitionMovementRf3Flow.ExecuteAsync(seeds, requests, token);
         await SqlRf3Protocol.EqualAsync(terminals, replay);

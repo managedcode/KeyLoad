@@ -30,7 +30,9 @@ internal static class C1OutcomeInspectionHealthyFollowUp
             JsonSerializer.Serialize(command, JsonDefaults.Options));
         var result = fixture.Database.Apply(operation);
         if (result.Error is not null || fixture.Database.ResolveOutcome(operation).Error is not null)
-        { throw new InvalidOperationException(C1OutcomeInspectionFixture.SuccessMessage); }
+        {
+            throw new InvalidOperationException(C1OutcomeInspectionFixture.SuccessMessage);
+        }
         fixture.RecordPosition(fixture.Store.Position);
     }
 
@@ -38,12 +40,17 @@ internal static class C1OutcomeInspectionHealthyFollowUp
         byte[]? expectedCorruptOutcome, byte[]? expectedCorruptLocator)
     {
         using var store = ZoneTreeExistingStore.Open(new ZoneTreeStoreOptions(fixture.DirectoryPath)
-        { Incarnation = fixture.Incarnation }, fixture.Identity.NodeId, UnitExecutionOptions.StorageExecution());
+        {
+            Incarnation = fixture.Incarnation
+        }, fixture.Identity.NodeId, UnitExecutionOptions.StorageExecution());
         var corruptOutcomeKey = KeySpace.PartitionOutcome(fixture.Partition,
             C1OutcomeInspectionAssertions.AdminId, fixture.CommandId);
         var corruptLocatorKey = KeySpace.OutcomeLocatorV2(fixture.Partition,
             C1OutcomeInspectionAssertions.AdminId, fixture.CommandId);
-        var partition = fixture.Partition with { PartitionKey = HealthyPartitionKey };
+        var partition = fixture.Partition with
+        {
+            PartitionKey = HealthyPartitionKey
+        };
         var commandId = Guid.NewGuid();
         var command = new CommandRequest(commandId, partition,
             [new PutDocument(C1OutcomeInspectionFixture.ResourceName, HealthyDocumentId, HealthyDocumentJson)]);

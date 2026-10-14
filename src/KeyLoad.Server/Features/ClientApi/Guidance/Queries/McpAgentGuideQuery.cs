@@ -31,7 +31,9 @@ internal static class McpAgentGuideQuery
         cancellationToken.ThrowIfCancellationRequested();
         ValidateContent(executionOptions: executionOptions);
         if (!string.Equals(uri, McpAgentGuideContract.ResourceUri, StringComparison.Ordinal))
-        { throw Protocol(McpAgentGuideContract.UnknownResource); }
+        {
+            throw Protocol(McpAgentGuideContract.UnknownResource);
+        }
         return new ReadResourceResult
         {
             Contents = [new TextResourceContents
@@ -66,9 +68,13 @@ internal static class McpAgentGuideQuery
         cancellationToken.ThrowIfCancellationRequested();
         ValidateContent(executionOptions: executionOptions);
         if (!string.Equals(name, McpAgentGuideContract.PromptName, StringComparison.Ordinal))
-        { throw Protocol(McpAgentGuideContract.UnknownPrompt); }
+        {
+            throw Protocol(McpAgentGuideContract.UnknownPrompt);
+        }
         if (arguments is { Count: > ArgumentsEmptyCount })
-        { throw Protocol(McpAgentGuideContract.PromptArguments); }
+        {
+            throw Protocol(McpAgentGuideContract.PromptArguments);
+        }
         return new GetPromptResult
         {
             Description = McpAgentGuideContract.Description,
@@ -80,13 +86,17 @@ internal static class McpAgentGuideQuery
     {
         cancellationToken.ThrowIfCancellationRequested();
         if (!string.IsNullOrEmpty(cursor))
-        { throw Protocol(McpAgentGuideContract.InvalidCursor); }
+        {
+            throw Protocol(McpAgentGuideContract.InvalidCursor);
+        }
     }
 
     private static void ValidateContent(IOptions<McpExecutionOptions> executionOptions)
     {
         if (Encoding.UTF8.GetByteCount(McpAgentGuideMarkdown.Text) > executionOptions.Value.MaximumAgentGuideBytes)
-        { throw new InvalidOperationException(McpAgentGuideContract.Description); }
+        {
+            throw new InvalidOperationException(McpAgentGuideContract.Description);
+        }
     }
 
     private static McpProtocolException Protocol(string message) => new(message, McpErrorCode.InvalidParams);

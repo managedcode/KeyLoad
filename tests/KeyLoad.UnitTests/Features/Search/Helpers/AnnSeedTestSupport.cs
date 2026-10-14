@@ -48,7 +48,9 @@ internal static class AnnSeedTestSupport
         catch (Exception primary)
         {
             try
-            { database.Dispose(); }
+            {
+                database.Dispose();
+            }
             catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
             throw;
         }

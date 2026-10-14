@@ -74,9 +74,13 @@ internal static class Bm25RestoredEligibilityTrial
         {
             var current = Bm25RestoredEligibilityAssertions.Current(fixture, subject);
             if (repaired && subject == Bm25PortableFamilyBackupSeed.FirstSubject)
-            { await Assert.That(current!.DocumentCount).IsEqualTo(1); }
+            {
+                await Assert.That(current!.DocumentCount).IsEqualTo(1);
+            }
             else
-            { await Assert.That(current).IsNull(); }
+            {
+                await Assert.That(current).IsNull();
+            }
             var source = await Bm25RestoredEligibilityAssertions.SearchAsync(fixture.Source.Database,
                 fixture.Source.Partition, subject, token);
             var target = await Bm25RestoredEligibilityAssertions.SearchAsync(fixture.Database,

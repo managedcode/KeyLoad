@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Replication;
 using KeyLoad.Storage;
 using KeyLoad.UnitTests.Features.Messaging;
@@ -122,7 +122,9 @@ internal static class ReplicaTransportShutdownFlow
             await RequestCqrsCohortCleanup.CaptureAsync(async () =>
             {
                 try
-                { await endpoint; }
+                {
+                    await endpoint;
+                }
                 catch (OperationCanceledException) when (observed.EndpointCancellationObserved) { }
             }, failures);
         }
@@ -168,18 +170,41 @@ internal static class ReplicaTransportShutdownFlow
         => RequestCqrsCohortCleanup.CaptureAsync(async () =>
         {
             try
-            { await close(); }
+            {
+                await close();
+            }
             catch (Exception error) when (ReferenceEquals(error, expected())) { }
         }, failures);
 
     private sealed class Settlement
     {
-        internal Task<ReplicaNativeDiscoveryReply>? NativeAttempt { get; set; }
-        internal Task? EndpointAttempt { get; set; }
-        internal Task? FrameworkStop { get; set; }
-        internal Exception? NativeFailure { get; set; }
-        internal Exception? EndpointFailure { get; set; }
-        internal Exception? TransportFailure { get; set; }
-        internal bool EndpointCancellationObserved { get; set; }
+        internal Task<ReplicaNativeDiscoveryReply>? NativeAttempt
+        {
+            get; set;
+        }
+        internal Task? EndpointAttempt
+        {
+            get; set;
+        }
+        internal Task? FrameworkStop
+        {
+            get; set;
+        }
+        internal Exception? NativeFailure
+        {
+            get; set;
+        }
+        internal Exception? EndpointFailure
+        {
+            get; set;
+        }
+        internal Exception? TransportFailure
+        {
+            get; set;
+        }
+        internal bool EndpointCancellationObserved
+        {
+            get; set;
+        }
     }
 }

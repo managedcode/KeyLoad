@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
 using KeyLoad.Core.Features.Messaging;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.Server.Features.Messaging;
@@ -17,7 +17,9 @@ internal static class RemoteTransferSourceCall
             || options.PhysicalGroupTrust.Role != global::KeyLoad.Server.Features.ClusterRouting.PhysicalGroupTrustRole.Control
             || !PhysicalOwnerEntryValidation.Same(context.Target.DestinationOwner,
                 PhysicalOwnerConfiguredTuples.Destination(options, partition)))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, RemoteTransferPeerProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, RemoteTransferPeerProtocol.Unavailable);
+        }
         var discovery = node.Discovery?.Read()
             ?? throw Errors.Fail(ErrorCode.OwnershipLost, RemoteTransferPeerProtocol.Unavailable);
         var call = new RemoteQueueTransferPeerCall(RemoteTransferPeerProtocol.Version, envelope.RequestId,

@@ -23,11 +23,15 @@ internal static class ReplicaPrefixReclaimer
             var keys = Collect(transaction, snapshot, configuration, canonicalDatabase, cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
             foreach (var key in keys)
-            { transaction.Delete(key); }
+            {
+                transaction.Delete(key);
+            }
             return keys.Count;
         }) : NoReclaimedEntries;
         if (removed == NoReclaimedEntries)
-        { cancellationToken.ThrowIfCancellationRequested(); }
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+        }
         // Also settle an interrupted rewrite after deletion already committed in an earlier process.
         // After deletion publishes, join the native rewrite even if caller cancellation arrives.
         _ = store.Compact();
@@ -43,7 +47,9 @@ internal static class ReplicaPrefixReclaimer
             var entry = ReplicaProtocolCodec.DeserializeStored<ReplicaEntry>(value.ToArray(), configuration.MaxAppendEntries);
             if (entry.Index < FirstLogPosition || entry.Index > snapshot.Index
                 || entry.Term < FirstLogPosition || entry.Term > snapshot.Term || !key.SequenceEqual(ReplicaProtocol.EntryStorageKey(entry.Index)))
-            { throw Errors.Fail(ErrorCode.Corruption, ReplicaProtocol.CorruptLog); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, ReplicaProtocol.CorruptLog);
+            }
             _ = ReplicaOperationAuthority.Own(entry, canonicalDatabase);
             keys.Add(key.ToArray());
             return true;
@@ -58,7 +64,9 @@ internal static class ReplicaPrefixReclaimer
         {
             bytes = checked(bytes + examined);
             if (bytes > configuration.MaxAppendBytes)
-            { throw Errors.Fail(ErrorCode.BudgetExceeded, WorkLimit); }
+            {
+                throw Errors.Fail(ErrorCode.BudgetExceeded, WorkLimit);
+            }
         };
     }
 

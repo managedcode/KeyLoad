@@ -18,7 +18,9 @@ internal static class EventVectorReleasePass
         if (map.Version != Version || map.State != EventVectorMapState.Releasing || map.Released
             || map.PendingPhaseId is not null || entries.IsDefault || observed.IsDefault
             || entries.Length != observed.Length)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidPass); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidPass);
+        }
         EventVectorReleaseCoverage.Require(map, originalProofRow, entries, admission);
         admission.RequireEntryCount(entries.Length);
         var retained = false;
@@ -32,7 +34,9 @@ internal static class EventVectorReleasePass
                 || phase.MapRevision != map.Revision || phase.CoverageGeneration != map.CoverageGeneration
                 || phase.CleanupGeneration != map.CleanupGeneration || phase.Role != EventVectorSourcePhaseRole.Release
                 || phase.SourceOrdinal != ordinal || phase.Source != entries[ordinal].Source)
-            { throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidPass); }
+            {
+                throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidPass);
+            }
             var request = EventVectorSourceMutationValidation.ReadObserved(phase, admission);
             var result = phase.SourceOriginalResult!.Get<EventVectorSourceReleaseResult>();
             EventVectorReleaseResultValidation.Require(phase, request, result, admission);

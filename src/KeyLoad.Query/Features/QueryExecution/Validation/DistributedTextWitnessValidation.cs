@@ -26,7 +26,9 @@ internal static class DistributedTextWitnessValidation
             || witness.Incarnation != identity.Incarnation || witness.ReadGeneration != identity.ReadGeneration || witness.CutPosition != database.Store.Position
             || witness.PolicyEpoch != principal.PolicyEpoch || witness.SchemaVersion != resource.SchemaVersion
             || !string.Equals(witness.ResourcePolicyDigest, digest, StringComparison.Ordinal))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, CutChanged); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, CutChanged);
+        }
         budget.Check();
     }
 }

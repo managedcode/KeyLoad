@@ -5,7 +5,10 @@ namespace KeyLoad.Server;
 internal sealed class PostgresEncodedReply(PostgresRetainedAdmission admission, int reservedBytes) : IDisposable
 {
     private int disposed;
-    internal bool PossibleWrite { get; set; }
+    internal bool PossibleWrite
+    {
+        get; set;
+    }
     internal byte[] Payload { get; set; } = [];
 
     internal static PostgresEncodedReply Admit(PostgresSessionOptions profile, McpExecutionOptions execution,
@@ -21,7 +24,9 @@ internal sealed class PostgresEncodedReply(PostgresRetainedAdmission admission, 
     public void Dispose()
     {
         if (Interlocked.Exchange(ref disposed, sizeof(byte)) != PostgresProtocol.AllRows)
-        { return; }
+        {
+            return;
+        }
         CryptographicOperations.ZeroMemory(Payload);
         Payload = [];
         admission.Resize(reservedBytes, PostgresProtocol.AllRows);

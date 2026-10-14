@@ -18,7 +18,10 @@ internal sealed class Bm25CorpusOptionalHeadTests
             var bytes = flow.Database.Store.Read(view => view.ReadOwnedValue(key))
                 ?? throw new InvalidOperationException("The actual published head is missing.");
             var invalid = malformedBytes ? new byte[] { 0 }
-                : NativeSerialization.Serialize(current with { FormatVersion = 0 });
+                : NativeSerialization.Serialize(current with
+                {
+                    FormatVersion = 0
+                });
             var failures = new List<Exception>();
             var restore = false;
             await ServerFailureObserver.ObserveAsync(async () =>
@@ -33,7 +36,10 @@ internal sealed class Bm25CorpusOptionalHeadTests
             if (restore)
             {
                 ServerFailureObserver.Observe(() => flow.Database.Store.Commit((transaction, _) =>
-                { transaction.Put(key, bytes); return true; }), failures);
+                {
+                    transaction.Put(key, bytes);
+                    return true;
+                }), failures);
             }
             ServerFailureObserver.ThrowIfAny(failures);
             var restored = flow.Database.Store.Read(view => view.ReadOwnedValue(key))!;

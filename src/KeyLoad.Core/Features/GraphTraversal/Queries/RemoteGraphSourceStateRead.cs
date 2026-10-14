@@ -16,14 +16,18 @@ public sealed partial class DatabaseEngine
         ArgumentNullException.ThrowIfNull(work);
         work.Check();
         if (request.SourceOwner is null)
-        { throw Errors.Fail(ErrorCode.Validation, RemoteGraphProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, RemoteGraphProtocol.Invalid);
+        }
         if (request.Delivery is not null)
         {
             if (request.Original is not null || request.OriginalCommandId != Guid.Empty
                 || request.Delivery.CommandId == Guid.Empty || request.Delivery.ExpectedRevision < RemoteGraphFirstGeneration
                 || request.Delivery.SourcePartition != request.SourcePartition || request.Delivery.Graph != request.Graph
                 || request.Delivery.EdgeId != request.EdgeId)
-            { throw Errors.Fail(ErrorCode.Validation, RemoteGraphProtocol.Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Validation, RemoteGraphProtocol.Invalid);
+            }
             ValidatePartition(request.SourcePartition);
             JsonData.Identifier(request.Graph);
             JsonData.Identifier(request.EdgeId);
@@ -37,7 +41,9 @@ public sealed partial class DatabaseEngine
             || (request.Original.Upsert is null) == (request.Original.Delete is null)
             || (request.Original.Upsert?.Graph ?? request.Original.Delete?.Graph) != request.Graph
             || (request.Original.Upsert?.EdgeId ?? request.Original.Delete?.EdgeId) != request.EdgeId)
-        { throw Errors.Fail(ErrorCode.Validation, RemoteGraphProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, RemoteGraphProtocol.Invalid);
+        }
         ValidatePartition(request.SourcePartition);
         JsonData.Identifier(request.Graph);
         JsonData.Identifier(request.EdgeId);
@@ -76,12 +82,16 @@ public sealed partial class DatabaseEngine
             RequireRemoteGraphStoredIntent(view, request, intent);
             if (!key.SequenceEqual(RemoteGraphKeys.Intent(request.SourcePartition, request.Graph,
                 request.EdgeId, intent.Content.Destination)))
-            { throw Errors.Fail(ErrorCode.Corruption, RemoteGraphProtocol.Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, RemoteGraphProtocol.Invalid);
+            }
             intents.Add(intent);
             return true;
         });
         if (scan.HasMore)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, RemoteGraphProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, RemoteGraphProtocol.Invalid);
+        }
         return new(RemoteGraphProtocol.Version, request, edge,
             ownerVersion?.Revision ?? edge?.Revision ?? RemoteGraphAbsentRevision, intents.ToImmutable(), cut,
             ReadRemoteGraphOriginalOutcome(view, principal, request));

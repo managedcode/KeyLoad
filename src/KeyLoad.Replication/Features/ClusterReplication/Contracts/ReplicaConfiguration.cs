@@ -28,7 +28,10 @@ public sealed record ReplicaConfiguration(string LocalId, ImmutableArray<string>
     private const int DefaultSnapshotChunkBytes = 262_144;
     private const long DefaultMaxSnapshotBytes = 4_294_967_296;
     /// <summary>Permits only explicit trusted benchmark fixed groups of one, two or three voters.</summary>
-    public bool BenchmarkTopology { get; init; }
+    public bool BenchmarkTopology
+    {
+        get; init;
+    }
     /// <summary>Gets the number of voters required for durable acknowledgement.</summary>
     public int Majority => VoterIds.Length / MajorityDivisor + MajorityIncrement;
     /// <summary>Gets the committed-entry interval triggering canonical checkpoints.</summary>

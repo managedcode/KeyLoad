@@ -24,7 +24,9 @@ public sealed partial class DatabaseEngine
         var scope = new CommandOutcomePartitionScope(CommandOutcomeScopeKind.Partition, request.Consumer.Partition);
         var previous = CommandOutcomeKeyResolver.Select(view, principal.Id, request.CommandId, scope).Outcome;
         if (previous is null)
-        { return null; }
+        {
+            return null;
+        }
         ValidateOnlineTextStoredOutcome(view, principal, request, previous, budget);
         budget.Check();
         return previous.Result;
@@ -40,7 +42,9 @@ public sealed partial class DatabaseEngine
             var scope = new CommandOutcomePartitionScope(CommandOutcomeScopeKind.Partition, request.Consumer.Partition);
             var previous = CommandOutcomeKeyResolver.Select(view, principal.Id, request.CommandId, scope).Outcome;
             if (previous is null)
-            { return null; }
+            {
+                return null;
+            }
             ValidateOnlineTextStoredOutcome(view, principal, request, previous, budget);
             var result = previous.Result.Get<OnlineTextIndexMaintenanceResult>();
             var authority = previous.OnlineTextAuthority ?? throw Errors.Fail(ErrorCode.Corruption, OnlineTextPublicationProtocol.MissingAuthority);
@@ -53,7 +57,9 @@ public sealed partial class DatabaseEngine
         ReplicatedOperation operation, StoredOutcome previous)
     {
         if (operation.Kind != OperationKind.OnlineTextPublicationPhase)
-        { return; }
+        {
+            return;
+        }
         var command = Payload<OnlineTextPublicationPhaseCommand>(operation);
         RequireOnlineTextOriginalAuthority(view, principal, command.Request);
         ValidateOnlineTextStoredOutcome(view, principal, command.Request, previous, null);
@@ -65,13 +71,21 @@ public sealed partial class DatabaseEngine
         if (previous.OnlineTextAuthority is not { } authority
             || authority.ParentFingerprint != OnlineTextParentIdentity.Fingerprint(principal.Id, request)
             || authority.Collection != request.Collection || authority.Field != request.Field)
-        { throw Errors.Fail(ErrorCode.Conflict, OnlineTextPublicationProtocol.ChangedOriginal); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, OnlineTextPublicationProtocol.ChangedOriginal);
+        }
         if (previous.Incarnation != Store.Identity.Incarnation || authority.DataEpoch != Store.Identity.FormatVersion)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, OnlineTextPublicationProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, OnlineTextPublicationProtocol.MissingAuthority);
+        }
         if (previous.PolicyEpoch != principal.PolicyEpoch)
-        { throw Errors.Fail(ErrorCode.PermissionDenied, OnlineTextPublicationProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, OnlineTextPublicationProtocol.MissingAuthority);
+        }
         if (previous.Result.Error is not null)
-        { return; }
+        {
+            return;
+        }
         var original = previous.Result.Get<OnlineTextIndexMaintenanceResult>();
         var resource = Resource(view, request.Consumer.Partition, request.Collection, ResourceKind.Collection);
         budget?.ChargeBytes(NativeSerialization.Measure(resource));
@@ -80,7 +94,9 @@ public sealed partial class DatabaseEngine
             || original.ConsumerGeneration != request.ConsumerGeneration
             || original.PublishedCut.ResourceSha256 != sha
             || original.PublishedCut.SchemaVersion != resource.SchemaVersion)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, OnlineTextPublicationProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, OnlineTextPublicationProtocol.MissingAuthority);
+        }
         budget?.CheckResult(original);
     }
 
@@ -98,6 +114,8 @@ public sealed partial class DatabaseEngine
             || current.Incarnation != request.Placement.Incarnation
             || current.PlacementEpoch != request.Placement.PlacementEpoch
             || !current.VoterIds.SequenceEqual(request.Placement.VoterIds, StringComparer.Ordinal))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, OnlineTextPublicationProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, OnlineTextPublicationProtocol.MissingAuthority);
+        }
     }
 }

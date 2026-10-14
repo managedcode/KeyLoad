@@ -82,11 +82,17 @@ internal sealed class NativePublicNormalizationTests
         await Assert.That(result.Error).IsEqualTo(ErrorCode.ClockUncertain);
         var stored = NativePublicNormalizationFixture.Stored(database, operation);
         await Assert.That(stored.Result).IsEqualTo(result);
-        var retry = operation with { EvaluatedAt = database.Database.EvaluationClock.GetUtcNow() };
+        var retry = operation with
+        {
+            EvaluatedAt = database.Database.EvaluationClock.GetUtcNow()
+        };
         await Assert.That(database.Database.Apply(retry)).IsEqualTo(result);
         await Assert.That(database.Database.ResolveOutcome(normalized)).IsEqualTo(result);
         await Assert.That(NativePublicNormalizationFixture.Stored(database, operation)).IsEqualTo(stored);
-        var changed = retry with { PayloadJson = retry.PayloadJson + "\n" };
+        var changed = retry with
+        {
+            PayloadJson = retry.PayloadJson + "\n"
+        };
         await Assert.That(database.Database.Apply(changed).Error).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(NativePublicNormalizationFixture.Stored(database, operation)).IsEqualTo(stored);
     }
@@ -124,7 +130,10 @@ internal sealed class NativePublicNormalizationTests
             operation.EvaluatedAt, value);
         await Assert.That(NativePublicNormalizationChecks.HasNullElement(created, shape)).IsTrue();
         await Assert.That(database.Database.NativeOperationsEqual(normalized,
-            normalized with { NativePayload = normalized.NativePayload.ToArray() })).IsTrue();
+            normalized with
+            {
+                NativePayload = normalized.NativePayload.ToArray()
+            })).IsTrue();
         var result = database.Database.Apply(created);
         await Assert.That(result.Error).IsEqualTo(ErrorCode.Validation);
         await Assert.That(result.SafeDetail).IsEqualTo(NativePublicNormalizationFixture.Detail(shape));
@@ -138,7 +147,9 @@ internal sealed class NativePublicNormalizationTests
         using var database = new TestDatabase();
         var operation = NativePublicNormalizationFixture.Create(database, NativePublicShape.NullGrant)
             with
-        { NativePayload = new byte[] { 0xff } };
+        {
+            NativePayload = new byte[] { 0xff }
+        };
         var before = database.Store.Position;
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => database.Database.NormalizeOperation(operation));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);

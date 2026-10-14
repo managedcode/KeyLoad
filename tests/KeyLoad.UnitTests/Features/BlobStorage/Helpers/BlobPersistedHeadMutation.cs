@@ -36,7 +36,12 @@ internal static class BlobPersistedHeadMutation
             ? UnsupportedFormatVersion : head.FormatVersion;
         var headIncarnation = testCase == BlobPersistedHeadCase.FencedIncarnation
             ? Different(incarnation) : head.Incarnation;
-        return head with { FormatVersion = formatVersion, Incarnation = headIncarnation, Metadata = metadata };
+        return head with
+        {
+            FormatVersion = formatVersion,
+            Incarnation = headIncarnation,
+            Metadata = metadata
+        };
     }
 
     private static Guid Different(Guid value) => value == Guid.Empty ? Guid.NewGuid() : Guid.Empty;

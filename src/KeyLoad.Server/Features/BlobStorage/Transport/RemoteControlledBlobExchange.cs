@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core.Features.BlobStorage;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.Server.Features.DocumentStorage;
 using KeyLoad.Storage;
@@ -21,7 +21,9 @@ internal static class RemoteControlledBlobExchange
         using var sourceMac = RemoteDocumentMac.FromConfiguredSecret(options.PeerSecret);
         var signature = sourceMac.Sign(body, reply: false);
         if (observer is not null)
-        { await observer.ObserveAsync(call, body, signature, token).ConfigureAwait(false); }
+        {
+            await observer.ObserveAsync(call, body, signature, token).ConfigureAwait(false);
+        }
         var original = await client.SendNativeAsync(call.Destination, call.Source,
             RemoteModelNativeChannel.DocumentEnvelope, body, signature, call.Request.Frame.ExpiresAt,
             call.MaximumReplyBytes, token).ConfigureAwait(false);
@@ -30,16 +32,22 @@ internal static class RemoteControlledBlobExchange
         {
             using var targetMac = RemoteDocumentMac.FromConfiguredSecret(options.PhysicalGroupTrust.ForeignPeerSecret);
             if (!targetMac.Verify(original.Payload.Span, original.Signature, reply: true))
-            { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof); }
+            {
+                throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof);
+            }
             reply = NativeSerialization.Deserialize<RemoteDocumentReplyV1>(original.Payload.Span);
             Require(call, reply, options, membership, clock, token);
             await client.RequireCurrentReplyAsync(call.Destination, original, reply.EndpointDiscovery.SiloAddress,
                 token).ConfigureAwait(false);
         }
         catch (Exception transportFailure) when (original.MayHaveEffects && NativeCqrsBoundaryErrors.IsNonFatal(transportFailure))
-        { throw Errors.Fail(ErrorCode.UnknownWriteOutcome, RemoteModelNativeProtocol.Unavailable, transportFailure); }
+        {
+            throw Errors.Fail(ErrorCode.UnknownWriteOutcome, RemoteModelNativeProtocol.Unavailable, transportFailure);
+        }
         if (reply.Error is { } error)
-        { throw Errors.Fail(error, reply.SafeDetail ?? RemoteDocumentProtocol.Unavailable); }
+        {
+            throw Errors.Fail(error, reply.SafeDetail ?? RemoteDocumentProtocol.Unavailable);
+        }
         return reply.ControlledBlob
             ?? throw Errors.Fail(ErrorCode.Corruption, RemoteDocumentProtocol.InvalidProof);
     }
@@ -71,13 +79,19 @@ internal static class RemoteControlledBlobExchange
             || discovery.PeerEnvelopeVersion != ReplicaTransportProtocol.Version
             || discovery.RuntimeJournalReaderContract != StoreReaderContract.RuntimeJournal
             || !PhysicalGroupAddress.CanonicalAddress(discovery.SiloAddress, membership))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof);
+        }
         if (reply.ControlledBlob is { } result && (result.ReadBytes < EmptyCount || result.ExaminedRecords < EmptyCount
             || result.ReadBytes > call.Request.MaximumReadBytes || result.ExaminedRecords > call.Request.MaximumExaminedRecords))
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, RemoteDocumentProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, RemoteDocumentProtocol.InvalidProof);
+        }
         if (reply.ControlledBlob is { } value && (value.OutcomeValidated != (call.Request.Frame.Purpose == ControlledBlobReadPurpose.Outcome)
             || value.OutcomeValidated && value.NativeValue is not null
             || !ValidValue(call.Request.Frame.Purpose, value.NativeValue)))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof);
+        }
     }
 }

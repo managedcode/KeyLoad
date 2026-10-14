@@ -31,14 +31,20 @@ internal static class EventVectorRetentionPins
                 if (pin.Source == source)
                 {
                     if (pin.Position > tail)
-                    { throw Errors.Fail(ErrorCode.Corruption, InvalidPin); }
+                    {
+                        throw Errors.Fail(ErrorCode.Corruption, InvalidPin);
+                    }
                     if (cut > pin.Position)
-                    { throw Errors.Fail(ErrorCode.ResourceExhausted, PinnedHistory); }
+                    {
+                        throw Errors.Fail(ErrorCode.ResourceExhausted, PinnedHistory);
+                    }
                 }
                 return true;
             }, observer: observer);
         if (scan.HasMore)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, ScanExhausted); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, ScanExhausted);
+        }
     }
 
     private static void RequireIdentity(EventVectorSourcePin pin, ReadOnlySpan<byte> key, PartitionRef partition)
@@ -48,7 +54,9 @@ internal static class EventVectorRetentionPins
             || pin.PinRevision < FirstRevision || pin.Position < BeforeFirstPosition
             || pin.OriginalPinBodyDigest.Length != SHA256.HashSizeInBytes
             || !key.SequenceEqual(EventVectorKeys.Pin(pin.Source, pin.MapId)))
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidPin); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidPin);
+        }
         DatabaseEngine.ValidatePartition(pin.ControlPartition);
         DatabaseEngine.ValidatePartition(pin.Source.Partition);
     }

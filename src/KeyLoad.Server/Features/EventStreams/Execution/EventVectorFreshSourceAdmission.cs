@@ -1,7 +1,7 @@
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 using KeyLoad.Replication;
 using KeyLoad.Server.Features.DocumentStorage;
 
@@ -39,7 +39,9 @@ internal static class EventVectorFreshSourceAdmission
         finally
         {
             if (fresh is not null)
-            { ServerFailureObserver.Observe(fresh.Dispose, failures); }
+            {
+                ServerFailureObserver.Observe(fresh.Dispose, failures);
+            }
             CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(reply.Payload).Span);
         }
         ServerFailureObserver.ThrowIfAny(failures);
@@ -63,7 +65,9 @@ internal static class EventVectorFreshSourceAdmission
             || actual.PhaseCommandId != intended.PhaseCommandId
             || !actual.OriginalNativeBody.Span.SequenceEqual(intended.OriginalNativeBody.Span)
             || !actual.OriginalBodyDigest.Span.SequenceEqual(intended.OriginalBodyDigest.Span))
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         _ = EventVectorSourceMutationValidation.ReadOriginal(actual, admission);
         return actual;
     }

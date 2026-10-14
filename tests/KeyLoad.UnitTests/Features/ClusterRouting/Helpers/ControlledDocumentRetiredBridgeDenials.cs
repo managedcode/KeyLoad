@@ -15,13 +15,25 @@ internal static class ControlledDocumentRetiredBridgeDenials
     {
         var root = source.Store.Read(view => source.Database.Principal(view,
             PhysicalShardCatalogFixture.RootPrincipalId, source.Database.EvaluationClock.GetUtcNow()));
-        var denied = root with { Id = DeniedPrincipalId, ClusterAdministrator = false, Grants = [] };
+        var denied = root with
+        {
+            Id = DeniedPrincipalId,
+            ClusterAdministrator = false,
+            Grants = []
+        };
         Configure(source, denied, token);
         await PolicyDeniedAsync(source, target, ErrorCode.PermissionDenied, token);
-        var revoked = denied with { Revoked = true, PolicyEpoch = checked(denied.PolicyEpoch + EpochStep) };
+        var revoked = denied with
+        {
+            Revoked = true,
+            PolicyEpoch = checked(denied.PolicyEpoch + EpochStep)
+        };
         Configure(source, revoked, token);
         await PolicyDeniedAsync(source, target, ErrorCode.Unauthenticated, token);
-        Configure(source, denied with { PolicyEpoch = checked(revoked.PolicyEpoch + EpochStep) }, token);
+        Configure(source, denied with
+        {
+            PolicyEpoch = checked(revoked.PolicyEpoch + EpochStep)
+        }, token);
         await PolicyDeniedAsync(source, target, ErrorCode.PermissionDenied, token);
         await ChangedFrameAsync(source, target, token);
     }
@@ -34,7 +46,9 @@ internal static class ControlledDocumentRetiredBridgeDenials
             NativeSerialization.Serialize(new ConfigurePrincipalRequest(principal)));
         var result = source.Journal.Submit(operation, token);
         if (result.Error is { } code)
-        { throw Errors.Fail(code, result.SafeDetail!); }
+        {
+            throw Errors.Fail(code, result.SafeDetail!);
+        }
     }
 
     private static async Task PolicyDeniedAsync(ControlledPartitionMovementNode source,
@@ -69,7 +83,12 @@ internal static class ControlledDocumentRetiredBridgeDenials
         var changed = frame with
         {
             Publication = frame.Publication with
-            { Placement = frame.Publication.Placement with { Revision = checked(frame.Publication.Placement.Revision + EpochStep) } }
+            {
+                Placement = frame.Publication.Placement with
+                {
+                    Revision = checked(frame.Publication.Placement.Revision + EpochStep)
+                }
+            }
         };
         var sourceFailure = Assert.ThrowsExactly<KeyLoadException>(() =>
             source.Database.ValidateControlledDocumentRead(changed, Work(source, token)));

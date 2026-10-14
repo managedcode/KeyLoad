@@ -12,7 +12,9 @@ internal static class ChunkMultiblockCrashState
     {
         var receiptPath = Path.Combine(root, SampleChunkCrashContract.OriginalReceiptFile);
         if (new FileInfo(receiptPath).Length > database.Limits.MaxBatchBytes)
-        { throw new InvalidOperationException(SampleChunkCrashContract.Invalid); }
+        {
+            throw new InvalidOperationException(SampleChunkCrashContract.Invalid);
+        }
         var acknowledged = await File.ReadAllBytesAsync(receiptPath).ConfigureAwait(false);
         var window = database.ReadSampleChunkWindow(CrashFixtureValues.Principal,
             new(SampleChunkCrashContract.Partition, SampleChunkCrashContract.Set, SampleChunkCrashContract.Series,
@@ -35,21 +37,27 @@ internal static class ChunkMultiblockCrashState
         var result = replay();
         result.Get<CommitReceipt>();
         if (database.Store.Position != position || SampleChunkCrashState.Complete(database) != before)
-        { throw new InvalidOperationException(SampleChunkCrashContract.Invalid); }
+        {
+            throw new InvalidOperationException(SampleChunkCrashContract.Invalid);
+        }
         return Convert.ToHexString(NativeSerialization.Serialize(result));
     }
 
     private static string[][] Blocks(DatabaseEngine database, long generation)
     {
         if (generation == ChunkMultiblockCrashProtocol.OpenGeneration)
-        { return []; }
+        {
+            return [];
+        }
         return database.Store.Read(view =>
         {
             var prefix = KeySpace.Partition(BlockFamily, SampleChunkCrashContract.Partition, SampleChunkCrashContract.Set,
                 SampleChunkCrashContract.Series, SampleChunkCrashContract.WindowId, generation);
             var page = view.Scan(prefix, SampleChunkCrashContract.MaximumRecords);
             if (page.HasMore)
-            { throw new InvalidOperationException(SampleChunkCrashContract.Invalid); }
+            {
+                throw new InvalidOperationException(SampleChunkCrashContract.Invalid);
+            }
             return page.Records.Select(record => new[] { Convert.ToHexString(record.Key.Span), Convert.ToHexString(record.Value.Span) }).ToArray();
         });
     }

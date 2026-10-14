@@ -13,18 +13,52 @@ internal sealed class DocumentRepetitionOwner(DocumentComparisonSelection select
     internal List<IDocumentComparisonSession> Clients { get; } = [];
     private readonly List<string> errors = [];
     private readonly List<Exception> failures = [];
-    internal IComparisonTarget? Target { get; set; }
-    internal TargetProfile? Profile { get; set; }
-    internal DocumentReadbackEvidence? Readback { get; set; }
-    internal ClientResources? Resources { get; set; }
-    internal bool Unsupported { get; set; }
+    internal IComparisonTarget? Target
+    {
+        get; set;
+    }
+    internal TargetProfile? Profile
+    {
+        get; set;
+    }
+    internal DocumentReadbackEvidence? Readback
+    {
+        get; set;
+    }
+    internal ClientResources? Resources
+    {
+        get; set;
+    }
+    internal bool Unsupported
+    {
+        get; set;
+    }
     internal bool SingleOperation { get; set; } = true;
-    internal double SetupSeconds { get; set; }
-    internal double WarmupSeconds { get; set; }
-    internal double MeasuredSeconds { get; set; }
-    internal double VerificationSeconds { get; set; }
-    internal double CleanupSeconds { get; set; }
-    internal void Observe(Exception error) { failures.Add(error); errors.Add(ComparisonErrors.Safe(error)); }
+    internal double SetupSeconds
+    {
+        get; set;
+    }
+    internal double WarmupSeconds
+    {
+        get; set;
+    }
+    internal double MeasuredSeconds
+    {
+        get; set;
+    }
+    internal double VerificationSeconds
+    {
+        get; set;
+    }
+    internal double CleanupSeconds
+    {
+        get; set;
+    }
+    internal void Observe(Exception error)
+    {
+        failures.Add(error);
+        errors.Add(ComparisonErrors.Safe(error));
+    }
     internal void Observe(string error) => errors.Add(error);
     internal DocumentComparisonRepetition Complete()
     {

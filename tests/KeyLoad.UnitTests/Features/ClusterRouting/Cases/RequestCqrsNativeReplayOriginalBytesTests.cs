@@ -32,11 +32,28 @@ internal sealed class RequestCqrsNativeReplayOriginalBytesTests
         _ = Assert.ThrowsExactly<InvalidOperationException>(() => RequestCqrsNativeReplayInventory.ReadWitness(duplicate));
         var original = RequestCqrsNativeReplayInventory.Original(value);
         var actual = RequestCqrsNativeReplayInventory.Request(value);
-        var wrongNonce = value with { OriginalNativeRequest = NativeSerialization.Serialize(original with { Nonce = actual.Nonce }) };
-        var wrongCommand = value with { CommandId = Guid.NewGuid() };
-        var wrongMac = value with { OriginalNativeRequest = NativeSerialization.Serialize(original with { Signature = original.Signature + "!" }) };
+        var wrongNonce = value with
+        {
+            OriginalNativeRequest = NativeSerialization.Serialize(original with
+            {
+                Nonce = actual.Nonce
+            })
+        };
+        var wrongCommand = value with
+        {
+            CommandId = Guid.NewGuid()
+        };
+        var wrongMac = value with
+        {
+            OriginalNativeRequest = NativeSerialization.Serialize(original with
+            {
+                Signature = original.Signature + "!"
+            })
+        };
         foreach (var invalid in new[] { wrongNonce, wrongCommand, wrongMac })
-        { _ = Assert.ThrowsExactly<InvalidOperationException>(() => RequestCqrsNativeReplayInventory.WriteWitness(invalid)); }
+        {
+            _ = Assert.ThrowsExactly<InvalidOperationException>(() => RequestCqrsNativeReplayInventory.WriteWitness(invalid));
+        }
         await Assert.That(RequestCqrsNativeReplayInventory.ReadWitness(RequestCqrsNativeReplayInventory.WriteWitness(value)).RequestId).IsEqualTo(value.RequestId);
     }
 

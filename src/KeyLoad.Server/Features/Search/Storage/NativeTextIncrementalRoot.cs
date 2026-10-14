@@ -26,7 +26,9 @@ internal static class NativeTextIncrementalRoot
             budget?.Check();
             NativeTextFileIO.VerifyDirectory(root);
             if (initialized)
-            { NativeTextRootFiles.VerifyReceipt(root, sourceNodeId, executionOptions); }
+            {
+                NativeTextRootFiles.VerifyReceipt(root, sourceNodeId, executionOptions);
+            }
         });
         NativeTextRootFiles.InitializeReceipt(root, sourceNodeId, executionOptions, resources);
         initialized = true;
@@ -42,21 +44,35 @@ internal static class NativeTextIncrementalRoot
         NativeTextValidation.ValidateScope(scope, scope.NodeId);
         if (sourceUpperSequence < NativeTextIncrementalProtocol.InitialSequence
             || !NativeTextIncrementalDigest.IsCanonical(resourceSha256))
-        { throw NativeTextErrors.Corrupt(); }
+        {
+            throw NativeTextErrors.Corrupt();
+        }
         if (!NativeTextValidation.IsGenerationLeaf(leaf))
-        { throw NativeTextErrors.Ownership(); }
+        {
+            throw NativeTextErrors.Ownership();
+        }
         var generations = CheckRoot(root, scope.NodeId, executionOptions, budget);
         if (generations >= executionOptions.Value.MaximumGenerations)
-        { throw NativeTextErrors.BoundExceeded(); }
+        {
+            throw NativeTextErrors.BoundExceeded();
+        }
         if (NativeTextIncrementalEnrollmentFiles.Find(root, request, budget, executionOptions) is not null)
-        { throw NativeTextErrors.Mismatch(); }
+        {
+            throw NativeTextErrors.Mismatch();
+        }
         var path = Path.Combine(root, leaf);
         if (Directory.Exists(path) || File.Exists(path))
-        { throw NativeTextErrors.Ownership(); }
+        {
+            throw NativeTextErrors.Ownership();
+        }
         if (resources is null)
-        { Directory.CreateDirectory(path); }
+        {
+            Directory.CreateDirectory(path);
+        }
         else
-        { resources.MutatePhysical(() => Directory.CreateDirectory(path), budget); }
+        {
+            resources.MutatePhysical(() => Directory.CreateDirectory(path), budget);
+        }
         NativeTextFileIO.VerifyDirectory(path);
         NativeTextFileIO.SetPrivateDirectoryMode(path);
         NativeTextFileIO.WriteEnvelope(Path.Combine(path, NativeTextProtocol.OwnerFile),
@@ -85,12 +101,18 @@ internal static class NativeTextIncrementalRoot
         foreach (var entry in Directory.EnumerateFileSystemEntries(root))
         {
             if (Path.GetFileName(entry) == NativeTextProtocol.RootReceiptFile)
-            { continue; }
+            {
+                continue;
+            }
             var leaf = Path.GetFileName(entry);
             if (!NativeTextValidation.IsGenerationLeaf(leaf) || !Directory.Exists(entry))
-            { throw NativeTextErrors.Ownership(); }
+            {
+                throw NativeTextErrors.Ownership();
+            }
             if (++generations > executionOptions.Value.MaximumGenerations)
-            { throw NativeTextErrors.BoundExceeded(); }
+            {
+                throw NativeTextErrors.BoundExceeded();
+            }
             budget?.Check();
             NativeTextFileIO.VerifyDirectory(entry);
             budget?.ChargeBytes(new FileInfo(Path.Combine(entry, NativeTextProtocol.OwnerFile)).Length);
@@ -99,9 +121,13 @@ internal static class NativeTextIncrementalRoot
             CheckEntries(entry);
             var enrollment = NativeTextIncrementalEnrollmentFiles.Read(entry, sourceNodeId, budget, executionOptions);
             if (enrollment.Scope != owner.Scope)
-            { throw NativeTextErrors.Corrupt(); }
+            {
+                throw NativeTextErrors.Corrupt();
+            }
             if (File.Exists(Path.Combine(entry, NativeTextProtocol.OwnerPendingFile)))
-            { throw NativeTextErrors.Corrupt(); }
+            {
+                throw NativeTextErrors.Corrupt();
+            }
             NativeTextOwnedInventory.ValidateTrackedLayout(entry, owner.OwnedPaths, budget,
                 allowMissingNative: true, executionOptions: executionOptions);
         }
@@ -120,11 +146,15 @@ internal static class NativeTextIncrementalRoot
                 or NativeTextIncrementalProtocol.ManifestFile
                 or NativeTextIncrementalProtocol.PendingManifestFile or NativeTextIncrementalProtocol.IntentFile
                 or NativeTextIncrementalProtocol.PendingIntentFile))
-            { throw NativeTextErrors.Ownership(); }
+            {
+                throw NativeTextErrors.Ownership();
+            }
             var attributes = File.GetAttributes(entry);
             if ((attributes & FileAttributes.ReparsePoint) != EmptyAttributes
                 || (name == NativeTextProtocol.NativeDirectory) != ((attributes & FileAttributes.Directory) != EmptyAttributes))
-            { throw NativeTextErrors.Ownership(); }
+            {
+                throw NativeTextErrors.Ownership();
+            }
         }
     }
 }

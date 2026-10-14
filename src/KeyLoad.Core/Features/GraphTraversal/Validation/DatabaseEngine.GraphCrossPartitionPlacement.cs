@@ -28,7 +28,9 @@ public sealed partial class DatabaseEngine
             throw Errors.Fail(ErrorCode.UnsupportedCapability, DifferentPhysicalOwner);
         }
         if (sourcePlacement.PhysicalShardId != catalog.DefaultShard.PhysicalShardId)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, ForeignPlacementExecution); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, ForeignPlacementExecution);
+        }
     }
 
     private static AtomicPartitionPlacementResolution ResolveGraphPlacement(IKeyValueView view,

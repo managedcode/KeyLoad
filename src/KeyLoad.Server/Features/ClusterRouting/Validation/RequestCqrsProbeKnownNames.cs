@@ -26,7 +26,9 @@ internal static class RequestCqrsProbeKnownNames
 
         if (!name.StartsWith(prefix, StringComparison.Ordinal) || !name.EndsWith(suffix, StringComparison.Ordinal)
             || !Guid.TryParseExact(name.AsSpan(prefix.Length, name.Length - prefix.Length - suffix.Length), CompactIdentityFormat, out var value))
-        { return false; }
+        {
+            return false;
+        }
         return name.AsSpan(prefix.Length, CompactGuidCharacterCount).SequenceEqual(value.ToString(RequestCqrsProbeProtocol.SessionIdFormat));
     }
 

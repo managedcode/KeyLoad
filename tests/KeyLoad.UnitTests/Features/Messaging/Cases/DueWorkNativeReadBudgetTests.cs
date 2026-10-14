@@ -46,7 +46,10 @@ internal sealed class DueWorkNativeReadBudgetTests
     private static RecurringSagaDatabase CreateFixture() => new();
 
     private static RecurringSagaDatabase CreateFixture(long maxQueryReadBytes)
-        => new(new() { MaxQueryReadBytes = maxQueryReadBytes });
+        => new(new()
+        {
+            MaxQueryReadBytes = maxQueryReadBytes
+        });
 
     private const string MissingScheduleRecord = "The independently seeded schedule record is missing.";
     private static readonly Guid ScheduleId = Guid.ParseExact("00000000000000000000000000000001", DueWorkFields.GuidFormat);

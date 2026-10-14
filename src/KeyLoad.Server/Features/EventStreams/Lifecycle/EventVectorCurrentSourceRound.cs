@@ -49,9 +49,16 @@ internal sealed class EventVectorCurrentSourceRound : IDisposable
     {
         var failures = new List<Exception>();
         if (witness is not null)
-        { ServerFailureObserver.Observe(witness.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(witness.Dispose, failures);
+        }
         foreach (var capture in captures)
-        { if (capture is not null) { ServerFailureObserver.Observe(capture.Dispose, failures); } }
+        {
+            if (capture is not null)
+            {
+                ServerFailureObserver.Observe(capture.Dispose, failures);
+            }
+        }
         witness = null;
         ServerFailureObserver.ThrowIfAny(failures);
     }

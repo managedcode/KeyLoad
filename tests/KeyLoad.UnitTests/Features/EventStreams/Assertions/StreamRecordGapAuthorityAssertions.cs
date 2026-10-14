@@ -26,7 +26,9 @@ internal static class StreamRecordGapAuthorityAssertions
                 fixture.Now, direction, cursor.Cursor, cursor.SnapshotCutPosition, [2L, 1L], 3L, token);
             }
             else
-            { await RefusalAsync(fixture, direction, cursor.Cursor, token); }
+            {
+                await RefusalAsync(fixture, direction, cursor.Cursor, token);
+            }
         }
         var empty = fixture.Database.Database.ReadStream(EventAppendWholeFlowFixture.Root,
             new ReadStreamRequest(fixture.Stream, AfterRevision: 3L), token);

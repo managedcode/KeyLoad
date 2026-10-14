@@ -6,12 +6,30 @@ namespace KeyLoad.Core;
 
 internal sealed class EventVectorPreparedOffer : IDisposable
 {
-    internal long Revision { get; }
-    internal long CoverageGeneration { get; }
-    internal long CleanupGeneration { get; }
-    internal ImmutableArray<EventVectorEntry> Entries { get; }
-    internal ReadOnlyMemory<byte> OriginalCoverageWitness { get; }
-    internal ImmutableArray<ReadOnlyMemory<byte>> OriginalPinPhaseBytes { get; }
+    internal long Revision
+    {
+        get;
+    }
+    internal long CoverageGeneration
+    {
+        get;
+    }
+    internal long CleanupGeneration
+    {
+        get;
+    }
+    internal ImmutableArray<EventVectorEntry> Entries
+    {
+        get;
+    }
+    internal ReadOnlyMemory<byte> OriginalCoverageWitness
+    {
+        get;
+    }
+    internal ImmutableArray<ReadOnlyMemory<byte>> OriginalPinPhaseBytes
+    {
+        get;
+    }
 
     internal EventVectorPreparedOffer(EventVectorMap map, ImmutableArray<EventVectorEntry> entries,
         ReadOnlyMemory<byte> witness, ImmutableArray<ReadOnlyMemory<byte>> pins)
@@ -28,7 +46,9 @@ internal sealed class EventVectorPreparedOffer : IDisposable
     {
         Clear(OriginalCoverageWitness);
         foreach (var pin in OriginalPinPhaseBytes)
-        { Clear(pin); }
+        {
+            Clear(pin);
+        }
     }
 
     private static void Clear(ReadOnlyMemory<byte> bytes)

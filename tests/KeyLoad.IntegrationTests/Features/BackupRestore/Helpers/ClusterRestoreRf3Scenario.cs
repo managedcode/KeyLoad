@@ -47,7 +47,9 @@ internal static class ClusterRestoreRf3Scenario
         var archives = await ClusterRestoreRf3NativeArchive.CopyAsync(source, originals,
             Path.Combine(ownedRoot, OffNodeDirectory), cancellationToken).ConfigureAwait(false);
         if (mixed is not null)
-        { await ClusterRestoreMixedRetentionRf3NativeCut.SourceAsync(originals, archives, mixed, cancellationToken).ConfigureAwait(false); }
+        {
+            await ClusterRestoreMixedRetentionRf3NativeCut.SourceAsync(originals, archives, mixed, cancellationToken).ConfigureAwait(false);
+        }
         await ClusterRestoreRf3ColdCapture.RequireAsync(source, seed, originals, archives,
             cancellationToken).ConfigureAwait(false);
         var target = new ClusterRestoreRf3Fixture(ownedRoot, source.Profile.AdminKey, originals, archives);
@@ -76,7 +78,9 @@ internal static class ClusterRestoreRf3Scenario
         catch (Exception terminal)
         {
             if (initiatingFailure is not null && !cleanupCompleted)
-            { throw new AggregateException(initiatingFailure, terminal); }
+            {
+                throw new AggregateException(initiatingFailure, terminal);
+            }
             throw;
         }
         await drill.WriteAsync(originals).ConfigureAwait(false);
@@ -94,7 +98,9 @@ internal static class ClusterRestoreRf3Scenario
             .First(partition => partition.Roster.Partition == seed.Partition).Placement.PhysicalShardId;
         var index = Array.FindIndex(target.Mappings.ToArray(), mapping => mapping.Source.PhysicalShardId == effective);
         if (index < FirstOwnerIndex)
-        { throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid); }
+        {
+            throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid);
+        }
         var node = index == FirstOwnerIndex ? TwoRf3MembershipProtocol.Node1 : TwoRf3MembershipProtocol.Node4;
         return await ClusterRestoreRf3CallerOwner.RunAsync(target.Application, node,
             seed.Credential, (sdk, official) => RequireCallersAsync(target, seed, originals, eventing, fresh,

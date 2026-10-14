@@ -78,7 +78,10 @@ internal sealed class SourceReadTests
 
         database.Store.Commit((transaction, _) =>
         {
-            transaction.PutRecord(key, record with { Source = wrongSource });
+            transaction.PutRecord(key, record with
+            {
+                Source = wrongSource
+            });
             return true;
         });
         var sourceError = Assert.ThrowsExactly<KeyLoadException>(() => database.Database.ReadEventSource(ReaderId, new(source)));
@@ -86,7 +89,10 @@ internal sealed class SourceReadTests
 
         database.Store.Commit((transaction, _) =>
         {
-            transaction.PutRecord(key, record with { Position = 2 });
+            transaction.PutRecord(key, record with
+            {
+                Position = 2
+            });
             return true;
         });
         var positionError = Assert.ThrowsExactly<KeyLoadException>(() => database.Database.ReadEventSource(ReaderId, new(source)));
@@ -109,7 +115,13 @@ internal sealed class SourceReadTests
 
         database.Store.Commit((transaction, _) =>
         {
-            transaction.PutRecord(key, record with { Stream = record.Stream with { StreamId = "other-stream" } });
+            transaction.PutRecord(key, record with
+            {
+                Stream = record.Stream with
+                {
+                    StreamId = "other-stream"
+                }
+            });
             return true;
         });
         var streamError = Assert.ThrowsExactly<KeyLoadException>(() => database.Database.ReadEventSource(ReaderId, new(source)));
@@ -117,7 +129,10 @@ internal sealed class SourceReadTests
 
         database.Store.Commit((transaction, _) =>
         {
-            transaction.PutRecord(key, record with { Revision = 2 });
+            transaction.PutRecord(key, record with
+            {
+                Revision = 2
+            });
             return true;
         });
         var revisionError = Assert.ThrowsExactly<KeyLoadException>(() => database.Database.ReadEventSource(ReaderId, new(source)));

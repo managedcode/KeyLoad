@@ -8,10 +8,14 @@ internal sealed class AuthorizationUnsafeClientSpanProcessor(Func<AuthorizationU
     public override void OnEnd(Activity activity)
     {
         if (activity.Source.Name != AuthorizationTelemetryTestProtocol.HttpClientSource)
-        { return; }
+        {
+            return;
+        }
         var selected = state();
         if (selected == AuthorizationUnsafeSpanState.ClientEvent)
-        { activity.AddEvent(new(AuthorizationTelemetryTestProtocol.ExceptionCanary)); }
+        {
+            activity.AddEvent(new(AuthorizationTelemetryTestProtocol.ExceptionCanary));
+        }
         if (selected is AuthorizationUnsafeSpanState.ClientTaggedLink or AuthorizationUnsafeSpanState.ClientExtraLink or AuthorizationUnsafeSpanState.ClientRemoteLink)
         {
             var context = new ActivityContext(ActivityTraceId.CreateRandom(), ActivitySpanId.CreateRandom(), ActivityTraceFlags.Recorded,

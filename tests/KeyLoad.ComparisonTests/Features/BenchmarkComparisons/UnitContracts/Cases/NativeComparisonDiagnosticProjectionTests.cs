@@ -111,7 +111,9 @@ internal sealed class NativeComparisonDiagnosticProjectionTests
     private static InvalidOperationException Capture(Action operation)
     {
         try
-        { operation(); }
+        {
+            operation();
+        }
         catch (InvalidOperationException error) { return error; }
         throw new InvalidOperationException("The native fixture did not fail.");
     }
@@ -122,12 +124,18 @@ internal sealed class NativeComparisonDiagnosticProjectionTests
         if (depth > 0)
         {
             try
-            { ThrowNested(depth - 1); }
+            {
+                ThrowNested(depth - 1);
+            }
             catch (Exception error) when (error is InvalidOperationException or DivideByZeroException)
-            { throw new InvalidOperationException(Canary, error); }
+            {
+                throw new InvalidOperationException(Canary, error);
+            }
         }
         else
-        { _ = Divide(0); }
+        {
+            _ = Divide(0);
+        }
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]

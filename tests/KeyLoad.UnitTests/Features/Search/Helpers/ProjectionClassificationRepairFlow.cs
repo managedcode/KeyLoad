@@ -89,7 +89,9 @@ internal static class ProjectionClassificationRepairFlow
         };
         var actual = fixture.Harness.Submit(OperationKind.ConfigureResource,
             new ConfigureResourceRequest(fixture.Partition.TenantId, fixture.Partition.DatabaseId, replacement)
-            { ExpectedSchemaVersion = OriginalSchema }).Get<ResourceDefinition>();
+            {
+                ExpectedSchemaVersion = OriginalSchema
+            }).Get<ResourceDefinition>();
         await Assert.That(JsonDefaults.Serialize(actual).AsSpan()
             .SequenceEqual(JsonDefaults.Serialize(replacement))).IsTrue();
     }
@@ -118,11 +120,15 @@ internal static class ProjectionClassificationRepairFlow
             UnitExecutionOptions.DatabaseLimits(fixture.Database.Limits), fixture.Harness.Store.Identity.NodeId,
             UnitNativeTextOptions.Execution());
         try
-        { await ClassificationLineageWholeAssertions.HealthyAsync(fixture, projection); }
+        {
+            await ClassificationLineageWholeAssertions.HealthyAsync(fixture, projection);
+        }
         catch (Exception primary)
         {
             try
-            { projection.Dispose(); }
+            {
+                projection.Dispose();
+            }
             catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
             throw;
         }

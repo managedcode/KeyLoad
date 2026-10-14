@@ -40,10 +40,14 @@ internal static class ControlledPartitionMovementNativeProcessPrepare
         cancellationToken.ThrowIfCancellationRequested();
         var maximum = hosts.Source.Database.Limits.MaxBatchBytes;
         if (NativeSerialization.Measure(original) > maximum)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, PartitionMovementProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, PartitionMovementProtocol.Unavailable);
+        }
         var bytes = NativeSerialization.Serialize(original);
         if (bytes.Length > maximum)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, PartitionMovementProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, PartitionMovementProtocol.Unavailable);
+        }
         PartitionMovementAuthenticatedReply? reply = null;
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>

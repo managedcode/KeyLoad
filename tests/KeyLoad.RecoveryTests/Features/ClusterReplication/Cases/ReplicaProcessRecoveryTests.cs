@@ -75,10 +75,15 @@ internal sealed class ReplicaProcessRecoveryTests
         }
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() =>
         {
-            using var rejected = new ZoneTreeStore(new(directory) { Incarnation = trial.Incarnation }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
+            using var rejected = new ZoneTreeStore(new(directory)
+            {
+                Incarnation = trial.Incarnation
+            }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
         }).Code).IsEqualTo(ErrorCode.Corruption);
         using var canonical = new ZoneTreeStore(new(ReplicaCrashNode.TargetStoreDirectories(trial.DirectoryPath)[0])
-        { Incarnation = trial.Incarnation }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
+        {
+            Incarnation = trial.Incarnation
+        }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
         await Assert.That(canonical.Identity.NodeId).IsEqualTo(trial.Ready.NodeId);
     }
 }
@@ -211,9 +216,13 @@ internal sealed class ReplicaSnapshotProcessRecoveryTests
         var savedImage = path + ReplicaSnapshotDamageRecovery.SavedImageSuffix;
         File.Copy(path, savedImage);
         if (missing)
-        { File.Delete(path); }
+        {
+            File.Delete(path);
+        }
         else
-        { File.WriteAllBytes(path, [1]); }
+        {
+            File.WriteAllBytes(path, [1]);
+        }
         await ReplicaSnapshotDamageRecovery.RefuseAsync(trial, published, missing);
         File.Copy(savedImage, path, overwrite: true);
         await ReplicaSnapshotDamageRecovery.ContinueAsync(trial, published, cancellationToken);

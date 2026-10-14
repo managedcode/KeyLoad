@@ -31,7 +31,9 @@ internal static class DistributedSearchCandidateWindow
             var document = budget.ReadRecord<DocumentRecord>(view, DocumentStorageKeys.RecordKey(score.Reference));
             if (document is null || document.Deleted || document.Reference != score.Reference
                 || document.Reference.Partition != partition || document.Reference.Collection != collection)
-            { throw Errors.Fail(ErrorCode.HistoryUnavailable, MissingDocument); }
+            {
+                throw Errors.Fail(ErrorCode.HistoryUnavailable, MissingDocument);
+            }
             var candidate = new GlobalBranchCandidate(document.Reference, document.Revision, score.Score);
             admission.Accept(NativeSerialization.Measure(candidate));
             candidates.Add(candidate);

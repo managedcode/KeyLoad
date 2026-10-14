@@ -31,7 +31,11 @@ internal static class FeedDeleteClassificationFixture
             new DocumentRecord(reference, 3L, TombstoneJson, new RowAccess(), source.CommittedAt, true)));
         await Assert.That(after.Deleted).IsTrue();
         database.Store.Commit((transaction, _) => { global::KeyLoad.Storage.StorageRecords.PutRecord(transaction, key, entry with { After = after with { Deleted = false } }); return true; });
-        state = state with { DirtyImage = FeedVertexAuthorityAssertions.Image(database.Store), DirtyPosition = database.Store.Position };
+        state = state with
+        {
+            DirtyImage = FeedVertexAuthorityAssertions.Image(database.Store),
+            DirtyPosition = database.Store.Position
+        };
         await FeedDeleteClassificationAssertions.RefuseAsync(database.Database, database.Store, state, token);
         return state;
     }

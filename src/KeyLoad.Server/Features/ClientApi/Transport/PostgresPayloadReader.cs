@@ -22,7 +22,9 @@ internal ref struct PostgresPayloadReader(ReadOnlySpan<byte> bytes)
     internal ReadOnlySpan<byte> Take(int count)
     {
         if (count < PostgresProtocol.EmptyBytes || count > remaining.Length)
-        { throw Errors.Fail(ErrorCode.Validation, InvalidPayload); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, InvalidPayload);
+        }
         var result = remaining[..count];
         remaining = remaining[count..];
         return result;
@@ -32,10 +34,14 @@ internal ref struct PostgresPayloadReader(ReadOnlySpan<byte> bytes)
     {
         var end = remaining.IndexOf(PostgresProtocol.TextTerminator);
         if (end < PostgresProtocol.FirstField || end > maximumBytes)
-        { throw Errors.Fail(ErrorCode.Validation, InvalidPayload); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, InvalidPayload);
+        }
         string value;
         try
-        { value = Utf8.GetString(Take(end)); }
+        {
+            value = Utf8.GetString(Take(end));
+        }
         catch (DecoderFallbackException) { throw Errors.Fail(ErrorCode.Validation, InvalidPayload); }
         _ = Take(sizeof(byte));
         return value;
@@ -44,6 +50,8 @@ internal ref struct PostgresPayloadReader(ReadOnlySpan<byte> bytes)
     internal readonly void Complete()
     {
         if (!remaining.IsEmpty)
-        { throw Errors.Fail(ErrorCode.Validation, InvalidPayload); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, InvalidPayload);
+        }
     }
 }

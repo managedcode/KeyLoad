@@ -40,7 +40,10 @@ internal static class TenantCapacityPlacementRf3OwnerLoss
         await TenantCapacityPlacementRf3OwnerLossLifetime.JoinAsync(wave, originalOwner, controls, arm,
             discovery, original, marker, held, caller, observer, failures, cleanup.Token);
         if (failures.Count != 0)
-        { wave.RetainRoots(); controls.RetainEvidence(); }
+        {
+            wave.RetainRoots();
+            controls.RetainEvidence();
+        }
         ServerFailureObserver.ThrowIfAny(failures);
         var observed = held ?? throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState);
         await TenantCapacityPlacementRf3OwnerLossCold.RequireAsync(wave, seed, move, observed);

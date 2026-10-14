@@ -1,5 +1,5 @@
 using System.Collections.Immutable;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Query;
 
 namespace KeyLoad.Server;
@@ -7,7 +7,10 @@ namespace KeyLoad.Server;
 /// <summary>Explicit typed bindings for the frozen read capabilities.</summary>
 internal static class McpReadCatalog
 {
-    internal static ImmutableArray<McpOperationDescriptor> Entries { get; } =
+    internal static ImmutableArray<McpOperationDescriptor> Entries
+    {
+        get;
+    } =
     [
         McpOperationFactory.Read<ReadRemoteIncomingGraphEdgesRequestV1, RemoteIncomingGraphEdgesPageV1>(
             RemoteGraphPublicProtocol.IncomingTool, RemoteGraphPublicProtocol.IncomingRoute, GrainReadKind.RemoteGraphIncomingParent),

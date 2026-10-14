@@ -23,7 +23,10 @@ internal static class ProjectionPublicPolicyFlow
         McpPersistedIdentity reader, CancellationToken token)
     {
         var revoked = reader.Principal with
-        { Revoked = true, PolicyEpoch = checked(reader.Principal.PolicyEpoch + 1) };
+        {
+            Revoked = true,
+            PolicyEpoch = checked(reader.Principal.PolicyEpoch + 1)
+        };
         await PersistAsync(root, revoked, token);
         var before = await ProjectionPublicPolicyImage.ReadAsync(root, scenario, token);
         await EventProjectionRf3Assertions.AssertSdkFailureAsync(
@@ -32,12 +35,20 @@ internal static class ProjectionPublicPolicyFlow
         var after = await ProjectionPublicPolicyImage.ReadAsync(root, scenario, token);
         await Assert.That(after.CutPosition).IsEqualTo(before.CutPosition);
         var repaired = revoked with
-        { Revoked = false, RestrictRows = false, OwnerId = null, PolicyEpoch = checked(revoked.PolicyEpoch + 1) };
+        {
+            Revoked = false,
+            RestrictRows = false,
+            OwnerId = null,
+            PolicyEpoch = checked(revoked.PolicyEpoch + 1)
+        };
         await PersistAsync(root, repaired, token);
         await EventProjectionRf3Assertions.VerifyVectorBothAsync(caller.Sdk, caller.Mcp,
             scenario.VectorSearch(), reader.Secret, ProjectionPublicPolicyProtocol.Healthy(), token);
         await ProjectionPublicPolicyImage.ReadAsync(root, scenario, token);
-        return reader with { Principal = repaired };
+        return reader with
+        {
+            Principal = repaired
+        };
     }
 
     private static async Task RefuseMcpAsync(ClusterFixture fixture, RequestCqrsRf3Callers caller,

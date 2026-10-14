@@ -16,7 +16,9 @@ public sealed partial class DatabaseEngine
         right = VerifyOperationAuthority(right);
         if (left.Id != right.Id || left.Kind != right.Kind || left.PrincipalId != right.PrincipalId
             || left.EvaluatedAt != right.EvaluatedAt || NativeOperationFingerprint.Compute(left) != NativeOperationFingerprint.Compute(right))
-        { return false; }
+        {
+            return false;
+        }
         var first = NativeSerialization.Deserialize<NativeCommandPayload>(left.NativePayload.Span);
         var second = NativeSerialization.Deserialize<NativeCommandPayload>(right.NativePayload.Span);
         return NativeContentFingerprint(left.Kind, first) == NativeContentFingerprint(right.Kind, second);
@@ -70,7 +72,13 @@ public sealed partial class DatabaseEngine
     private static string NativeContentFingerprint(OperationKind kind, NativeCommandPayload payload)
     {
         if (payload.Error is not null)
-        { return JsonData.Fingerprint(new { payload.Error, payload.SafeDetail }); }
+        {
+            return JsonData.Fingerprint(new
+            {
+                payload.Error,
+                payload.SafeDetail
+            });
+        }
         return kind switch
         {
             OperationKind.OnlineTextPublicationPhase => NativeTypedFingerprint<global::KeyLoad.Core.Features.Search.OnlineTextPublicationPhaseCommand>(payload.Value),

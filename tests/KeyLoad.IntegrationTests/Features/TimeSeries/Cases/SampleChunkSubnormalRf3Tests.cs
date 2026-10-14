@@ -25,7 +25,9 @@ internal sealed class SampleChunkSubnormalRf3Tests(ClusterFixture fixture)
         finally
         {
             if (deadline is not null)
-            { ServerFailureObserver.Observe(deadline.Dispose, failures); }
+            {
+                ServerFailureObserver.Observe(deadline.Dispose, failures);
+            }
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }

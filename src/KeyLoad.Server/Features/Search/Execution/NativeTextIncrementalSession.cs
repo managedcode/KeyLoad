@@ -15,7 +15,9 @@ internal sealed class NativeTextIncrementalSession
     {
         if (id == Guid.Empty || request.CommandId == Guid.Empty
             || replayUpperSequence < admitted.Checkpoint || replayUpperSequence > admitted.UpperSequence)
-        { throw NativeTextErrors.Corrupt(); }
+        {
+            throw NativeTextErrors.Corrupt();
+        }
         budget.Check();
         budget.ChargeBytes(NativeSerialization.Measure(request));
         budget.ChargeBytes(SHA256.HashSizeInBytes);
@@ -35,38 +37,86 @@ internal sealed class NativeTextIncrementalSession
             || Scope.PrincipalId != admitted.PrincipalId || Scope.PolicyEpoch != admitted.PolicyEpoch
             || Scope.SchemaVersion != admitted.SchemaVersion || Scope.Partition != request.Consumer.Partition
             || Scope.Collection != request.Collection || Scope.Field != request.Field)
-        { throw NativeTextErrors.Mismatch(); }
+        {
+            throw NativeTextErrors.Mismatch();
+        }
         budget.Check();
     }
 
-    internal NativeTextResourceReservation? OperationReservation { get; set; }
-    internal Guid Id { get; }
-    internal TextIndexMaintenanceRequest Request { get; }
-    internal NativeTextSeedCapture Upper { get; }
-    internal ReadExecutionBudget Budget { get; }
-    internal long ReplayUpperSequence { get; }
+    internal NativeTextResourceReservation? OperationReservation
+    {
+        get; set;
+    }
+    internal Guid Id
+    {
+        get;
+    }
+    internal TextIndexMaintenanceRequest Request
+    {
+        get;
+    }
+    internal NativeTextSeedCapture Upper
+    {
+        get;
+    }
+    internal ReadExecutionBudget Budget
+    {
+        get;
+    }
+    internal long ReplayUpperSequence
+    {
+        get;
+    }
     internal long CurrentReplayUpperSequence => Manifest is { Bootstrap: true } bootstrap
         ? bootstrap.ThroughSequence : ReplayUpperSequence;
-    internal TextProjectionScope Scope { get; }
-    internal long Checkpoint { get; set; }
-    internal bool OriginalBuild { get; set; }
-    internal string? GenerationLeaf { get; set; }
-    internal NativeTextIncrementalNativeOwner? NativeOwner { get; set; }
-    internal NativeTextIncrementalManifest? Manifest { get; set; }
-    internal NativeTextIncrementalIntent? Intent { get; set; }
-    internal NativeTextIncrementalManifest? Target { get; set; }
+    internal TextProjectionScope Scope
+    {
+        get;
+    }
+    internal long Checkpoint
+    {
+        get; set;
+    }
+    internal bool OriginalBuild
+    {
+        get; set;
+    }
+    internal string? GenerationLeaf
+    {
+        get; set;
+    }
+    internal NativeTextIncrementalNativeOwner? NativeOwner
+    {
+        get; set;
+    }
+    internal NativeTextIncrementalManifest? Manifest
+    {
+        get; set;
+    }
+    internal NativeTextIncrementalIntent? Intent
+    {
+        get; set;
+    }
+    internal NativeTextIncrementalManifest? Target
+    {
+        get; set;
+    }
 
     internal void Require(Guid id, TextIndexMaintenanceRequest request, string principalId)
     {
         Budget.Check();
         if (id != Id || principalId != Upper.PrincipalId)
-        { throw NativeTextErrors.Mismatch(); }
+        {
+            throw NativeTextErrors.Mismatch();
+        }
         Budget.ChargeBytes(NativeSerialization.Measure(request));
         Budget.ChargeBytes(SHA256.HashSizeInBytes);
         var actual = SHA256.HashData(NativeSerialization.Serialize(request));
         Budget.Check();
         if (!CryptographicOperations.FixedTimeEquals(immutableRequest, actual))
-        { throw NativeTextErrors.Mismatch(); }
+        {
+            throw NativeTextErrors.Mismatch();
+        }
     }
 
     internal void RequireUpper(NativeTextSeedCapture current)
@@ -77,6 +127,8 @@ internal sealed class NativeTextIncrementalSession
             || current.PolicyEpoch != Upper.PolicyEpoch || current.SchemaVersion != Upper.SchemaVersion
             || current.ResourceSha256 != Upper.ResourceSha256
             || current.UpperSequence != Upper.UpperSequence || current.AppliedPosition < Upper.AppliedPosition)
-        { throw NativeTextErrors.Mismatch(); }
+        {
+            throw NativeTextErrors.Mismatch();
+        }
     }
 }

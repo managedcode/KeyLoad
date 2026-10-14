@@ -30,13 +30,17 @@ internal static class StoredOutboxReader
             _ => null
         };
         if (expected is not { } document)
-        { return; }
+        {
+            return;
+        }
         if (entry.Mutation.Resource != document.Resource
             || entry.Receipt.Resource != document.Resource || entry.Receipt.Id != document.Id
             || entry.Receipt.Kind != document.Kind || entry.After is not { } after
             || entry.Receipt.Revision != after.Revision
             || after.Deleted != (entry.Mutation is DeleteDocument))
-        { throw Errors.Fail(ErrorCode.Corruption, CorruptDocumentMutation); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, CorruptDocumentMutation);
+        }
         RequireDocumentRevisionChain(entry);
     }
 
@@ -54,7 +58,9 @@ internal static class StoredOutboxReader
             invalid |= entry.Mutation is not PutDocument || after.Revision != InitialDocumentRevision;
         }
         if (invalid)
-        { throw Errors.Fail(ErrorCode.Corruption, CorruptDocumentMutation); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, CorruptDocumentMutation);
+        }
     }
 
     public static IEnumerable<StoredOutboxEntry> ReadRange(IKeyValueView view, PartitionRef partition,

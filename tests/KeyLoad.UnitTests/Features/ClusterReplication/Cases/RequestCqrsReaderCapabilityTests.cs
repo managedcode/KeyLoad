@@ -25,7 +25,9 @@ internal sealed class RequestCqrsReaderCapabilityTests(RequestCqrsCohortRuntimeF
         var unsupported = scenario.Discovery(RequestCqrsCohortScenario.SecondRemote, 2,
             runtimeJournalReaderContract: StoreReaderContract.Unspecified)
         with
-        { TransportReady = false };
+        {
+            TransportReady = false
+        };
         scenario.PublishRemoteTwoRecord(unsupported);
 
         var failure = await Assert.ThrowsExactlyAsync<KeyLoadException>(

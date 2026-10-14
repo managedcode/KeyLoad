@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.ExceptionServices;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 using KeyLoad.UnitTests.Features.TestInfrastructure;
 using ManagedCode.Communication.CQRS;

@@ -29,7 +29,9 @@ internal sealed class McpInitializeHttpObservation(HttpMessageHandler inner) : D
     internal void Stop()
     {
         lock (gate)
-        { enabled = false; }
+        {
+            enabled = false;
+        }
     }
 
     /// <summary>Preserves the initiating native exception and bounded diagnostic write failures.</summary>
@@ -57,12 +59,16 @@ internal sealed class McpInitializeHttpObservation(HttpMessageHandler inner) : D
     {
         var recording = Recording();
         if (recording)
-        { Record(request.Method, NoResponse, false, false, false, cancellationToken.IsCancellationRequested, NoneCategory); }
+        {
+            Record(request.Method, NoResponse, false, false, false, cancellationToken.IsCancellationRequested, NoneCategory);
+        }
         try
         {
             var response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
             if (recording)
-            { Record(request.Method, (int)response.StatusCode, true, true, false, cancellationToken.IsCancellationRequested, NoneCategory); }
+            {
+                Record(request.Method, (int)response.StatusCode, true, true, false, cancellationToken.IsCancellationRequested, NoneCategory);
+            }
             return response;
         }
         catch (Exception error)
@@ -79,7 +85,9 @@ internal sealed class McpInitializeHttpObservation(HttpMessageHandler inner) : D
     private bool Recording()
     {
         lock (gate)
-        { return enabled; }
+        {
+            return enabled;
+        }
     }
 
     private void Record(HttpMethod method, int status, bool terminal, bool response, bool canceled, bool tokenCanceled, string category)
@@ -87,9 +95,14 @@ internal sealed class McpInitializeHttpObservation(HttpMessageHandler inner) : D
         lock (gate)
         {
             if (!enabled)
-            { return; }
+            {
+                return;
+            }
             if (observations.Count == MaximumObservations)
-            { saturated = true; return; }
+            {
+                saturated = true;
+                return;
+            }
             observations.Add(new
             {
                 method = method == HttpMethod.Post ? PostMethod : method == HttpMethod.Get ? GetMethod : OtherCategory,

@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 
 namespace KeyLoad.UnitTests.Features.QueryExecution;
@@ -22,14 +22,22 @@ internal sealed class SqlEventReferenceJoinTests
                 await SqlEventReferenceJoinCold.RunAsync(database, seed.Command, seed.Receipt, repair.Command, repair.Receipt);
             }
             catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-            { failures.Add(error); }
+            {
+                failures.Add(error);
+            }
             catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-            { failures.Add(error); }
+            {
+                failures.Add(error);
+            }
         }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

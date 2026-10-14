@@ -8,7 +8,10 @@ internal sealed class SecurityAndQueryTests
     private static void Reader(TestDatabase db, bool revoked = false, long epoch = 1)
         => db.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(new("reader", "tenant",
             [new("database", "orders", Capability.DocumentsRead | Capability.Query)], [])
-        { Revoked = revoked, PolicyEpoch = epoch })).Get<PrincipalRecord>();
+        {
+            Revoked = revoked,
+            PolicyEpoch = epoch
+        })).Get<PrincipalRecord>();
     [Test]
     public async Task NestedSensitiveFieldsAreOmittedAndAliasedPredicateAndSortAreDenied()
     {
@@ -56,12 +59,18 @@ internal sealed class SecurityAndQueryTests
         db.Commit(new PutDocument("orders", "mine", "{}", Access: new("alice")), new PutDocument("orders", "hidden", "{}", Access: new("bob")));
         db.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(new("alice", "tenant",
             [new("database", "orders", Capability.DocumentsRead | Capability.Query)], [])
-        { OwnerId = "alice", RestrictRows = true })).Get<PrincipalRecord>();
+        {
+            OwnerId = "alice",
+            RestrictRows = true
+        })).Get<PrincipalRecord>();
         var query = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution()).Execute("alice", new(db.Partition, "SELECT * FROM orders", AllowFullScan: true));
         await Assert.That(System.Linq.Enumerable.Single(query.Rows).EntityId).IsEqualTo("mine");
         await Assert.That(db.Database.GetDocument("alice", new(db.Partition, "orders", "hidden"))).IsNull();
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => db.Database.GetDocument("alice",
-            new(db.Partition with { TenantId = "other" }, "orders", "mine"))).Code).IsEqualTo(ErrorCode.PermissionDenied);
+            new(db.Partition with
+            {
+                TenantId = "other"
+            }, "orders", "mine"))).Code).IsEqualTo(ErrorCode.PermissionDenied);
         await ProjectRowAuthorityContinuation.RunAsync(db, TestContext.Current!.Execution.CancellationToken);
     }
     [Test]
@@ -77,7 +86,10 @@ internal sealed class SecurityAndQueryTests
         var path = Path.Combine(db.Directory, "replica.snapshot");
         db.Store.CreateSnapshot(path);
         db.Store.Compact();
-        await Assert.That(System.Linq.Enumerable.Single(engine.Execute("root", request with { Cursor = first.Cursor }).Rows).EntityId).IsEqualTo("b");
+        await Assert.That(System.Linq.Enumerable.Single(engine.Execute("root", request with
+        {
+            Cursor = first.Cursor
+        }).Rows).EntityId).IsEqualTo("b");
         db.Store.InstallSnapshot(path, 0);
         await Assert.That(db.Store.Position).IsEqualTo(first.CutPosition);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute("root", request with { Cursor = first.Cursor })).Code).IsEqualTo(ErrorCode.CursorExpired);

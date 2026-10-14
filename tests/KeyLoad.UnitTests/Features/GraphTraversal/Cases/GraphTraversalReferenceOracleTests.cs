@@ -158,7 +158,10 @@ internal sealed class GraphTraversalReferenceOracleTests
                 [new(DatabaseScope, OrdersCollection, Capability.DocumentsRead),
                     new(DatabaseScope, ProjectsCollection, Capability.DocumentsRead),
                     new(DatabaseScope, GraphName, Capability.GraphRead)], [])
-            { OwnerId = Alice, RestrictRows = true })).Get<PrincipalRecord>();
+            {
+                OwnerId = Alice,
+                RestrictRows = true
+            })).Get<PrincipalRecord>();
             return database;
         }
         catch (Exception primary)

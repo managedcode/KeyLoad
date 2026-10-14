@@ -14,7 +14,9 @@ internal sealed class PostgresRetainedAdmission(IOptions<PostgresSessionOptions>
         {
             var replacement = checked(reserved - previous + next);
             if (replacement > options.Value.MaximumTotalRetainedBytes)
-            { throw Errors.Fail(ErrorCode.ResourceExhausted, Exhausted); }
+            {
+                throw Errors.Fail(ErrorCode.ResourceExhausted, Exhausted);
+            }
             reserved = replacement;
         }
     }

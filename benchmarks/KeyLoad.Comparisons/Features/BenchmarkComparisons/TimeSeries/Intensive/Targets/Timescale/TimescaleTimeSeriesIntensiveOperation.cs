@@ -13,7 +13,10 @@ internal sealed class TimescaleTimeSeriesIntensiveOperation : IAsyncDisposable
     private int resourceCount;
     private bool finished;
 
-    internal TimeSeriesIntensiveAcknowledgement? Acknowledgement { get; set; }
+    internal TimeSeriesIntensiveAcknowledgement? Acknowledgement
+    {
+        get; set;
+    }
     internal NpgsqlConnection Connection { get; private set; } = null!;
     internal Exception? CleanupException => cleanup?.SourceException;
 

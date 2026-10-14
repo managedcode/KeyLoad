@@ -18,13 +18,18 @@ internal sealed class NativeAnnWaitHttpObservation
     internal void Start(CancellationToken token)
     {
         lock (gate)
-        { originalCancellation = token; enabled = true; }
+        {
+            originalCancellation = token;
+            enabled = true;
+        }
     }
 
     internal void Stop()
     {
         lock (gate)
-        { enabled = false; }
+        {
+            enabled = false;
+        }
     }
 
     internal void Write(List<Exception> failures)
@@ -57,9 +62,14 @@ internal sealed class NativeAnnWaitHttpObservation
         lock (gate)
         {
             if (!enabled)
-            { return; }
+            {
+                return;
+            }
             if (observations.Count == MaximumObservations)
-            { saturated = true; return; }
+            {
+                saturated = true;
+                return;
+            }
             observations.Add(new(true, settled, response, status, category.ToString(),
                 actualSendCancellation.IsCancellationRequested, originalCancellation.IsCancellationRequested));
         }
@@ -74,7 +84,9 @@ internal sealed class NativeAnnWaitHttpObservation
     };
 
     private enum FailureCategory
-    { None, Canceled, HttpRequest, Io, Other }
+    {
+        None, Canceled, HttpRequest, Io, Other
+    }
 
     private sealed record Observation(bool SendStarted, bool Settled, bool ResponseReceived,
         int HttpStatus, string FailureCategory, bool SendTokenCancelled, bool OriginalTokenCancelled);

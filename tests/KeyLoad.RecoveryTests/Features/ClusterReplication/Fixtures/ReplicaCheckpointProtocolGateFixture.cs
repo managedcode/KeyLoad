@@ -37,7 +37,10 @@ internal sealed class ReplicaCheckpointProtocolGateFixture : IAsyncDisposable
         }
     }
 
-    internal ReplicaCheckpointProtocolGateNode Node { get; }
+    internal ReplicaCheckpointProtocolGateNode Node
+    {
+        get;
+    }
     internal Task NativeFlushed => pause.Entered;
     internal Task<ReplicaSnapshot?> Publication => publication ?? throw new InvalidOperationException("Checkpoint publication has not started.");
     internal void ReleaseNativeFlush() => pause.Release();
@@ -167,12 +170,18 @@ internal sealed class ReplicaCheckpointProtocolGateFixture : IAsyncDisposable
             try
             {
                 try
-                { await source.DisposeAsync(); }
+                {
+                    await source.DisposeAsync();
+                }
                 catch (Exception original)
-                { throw new AggregateException(original); }
+                {
+                    throw new AggregateException(original);
+                }
             }
             catch (AggregateException wrapper)
-            { ReplicaMaterializerLifecycleErrors.AddWrapped(wrapper, failures); }
+            {
+                ReplicaMaterializerLifecycleErrors.AddWrapped(wrapper, failures);
+            }
         }
         ReplicaMaterializerLifecycleErrors.Attempt(() => Directory.Delete(directory, true), failures);
     }

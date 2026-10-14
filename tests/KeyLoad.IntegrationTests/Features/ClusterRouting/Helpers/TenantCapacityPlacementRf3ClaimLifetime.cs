@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
 using ManagedCode.Communication;
@@ -20,10 +20,14 @@ internal static class TenantCapacityPlacementRf3ClaimLifetime
         await ServerFailureObserver.ObserveAsync(() => marker, failures);
         var state = controls.ArmFor(arm);
         if (state.RequestId is { } request && !state.ReleaseWritten && !state.Settled)
-        { ServerFailureObserver.Observe(() => controls.WriteRelease(arm, request), failures); }
+        {
+            ServerFailureObserver.Observe(() => controls.WriteRelease(arm, request), failures);
+        }
         await ServerFailureObserver.ObserveAsync(() => original, failures);
         if (state.RequestId is null)
-        { return; }
+        {
+            return;
+        }
         await ServerFailureObserver.ObserveAsync(() => controls.WaitForSettlementAsync(arm, discovery, token), failures);
         await ServerFailureObserver.ObserveAsync(async () =>
         {

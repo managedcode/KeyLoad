@@ -50,7 +50,10 @@ internal static class ControlledDocumentPublishedReadFlow
             await HealthyAsync(source, target, reference, token);
             await UnchangedAsync(source, target, sourceBytes, targetBytes, sourcePosition, targetPosition);
             if (attempt == default)
-            { source.Reopen(); target.Reopen(); }
+            {
+                source.Reopen();
+                target.Reopen();
+            }
         }
     }
 

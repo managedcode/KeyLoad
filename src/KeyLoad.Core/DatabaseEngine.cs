@@ -78,7 +78,9 @@ public sealed partial class DatabaseEngine
         Store = store;
         configuredPhysicalOwner = physicalOwner;
         if (physicalOwner is not null && physicalOwner.Incarnation != store.Identity.Incarnation)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, ForeignPlacementExecution); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, ForeignPlacementExecution);
+        }
         Authorization = authorization;
         Limits = operationLimits;
         ValidateMovementRestoration();
@@ -91,10 +93,19 @@ public sealed partial class DatabaseEngine
 
     private readonly PhysicalShardRecord? configuredPhysicalOwner;
     private readonly ChangeFeedExecutionOptions changeFeedExecution;
-    internal BlobExecutionOptions BlobExecution { get; }
-    internal NativeClaimsExecutionOptions ClaimsExecution { get; }
+    internal BlobExecutionOptions BlobExecution
+    {
+        get;
+    }
+    internal NativeClaimsExecutionOptions ClaimsExecution
+    {
+        get;
+    }
     private readonly TimeSeriesExecutionOptions timeSeriesExecution;
-    internal IOptions<TimeSeriesExecutionOptions> TimeSeriesOptions { get; }
+    internal IOptions<TimeSeriesExecutionOptions> TimeSeriesOptions
+    {
+        get;
+    }
     private readonly PartitionMovementCheckpointOptions movementCheckpoints;
     private readonly IPartitionMovementCheckpointVerifier movementCheckpointVerifier;
     private readonly EventSourceExecutionOptions eventSourceExecution;
@@ -102,22 +113,46 @@ public sealed partial class DatabaseEngine
     internal DueWorkExecutionOptions DueExecution => dueExecution;
     private readonly MessagingExecutionOptions messagingExecution;
     private readonly GraphExecutionOptions graphExecution;
-    internal IOptions<DatabaseLimits> OperationLimitsOptions { get; }
-    internal IOptions<GraphExecutionOptions> GraphOptions { get; }
+    internal IOptions<DatabaseLimits> OperationLimitsOptions
+    {
+        get;
+    }
+    internal IOptions<GraphExecutionOptions> GraphOptions
+    {
+        get;
+    }
     internal GraphExecutionOptions GraphExecution => graphExecution;
     private readonly TimeSpan eventSourceCursorLifetime;
-    private TimeProvider Clock { get; }
-    internal TimeSpan DueDiscoveryDeadline { get; }
+    private TimeProvider Clock
+    {
+        get;
+    }
+    internal TimeSpan DueDiscoveryDeadline
+    {
+        get;
+    }
     /// <summary>Gets the borrowed business clock for consistent persisted read authority.</summary>
     public TimeProvider EvaluationClock => Clock;
     /// <summary>Gets the externally owned atomic store used by this engine.</summary>
-    public IAtomicStore Store { get; }
+    public IAtomicStore Store
+    {
+        get;
+    }
     /// <summary>Gets the evaluator for persisted authorization policy.</summary>
-    public IAuthorizationPolicy Authorization { get; }
+    public IAuthorizationPolicy Authorization
+    {
+        get;
+    }
     /// <summary>Gets the configured operation resource limits.</summary>
-    public DatabaseLimits Limits { get; }
+    public DatabaseLimits Limits
+    {
+        get;
+    }
     /// <summary>Gets or sets the acknowledgement durability reported in commit receipts.</summary>
-    public DurabilityProfile Durability { get; set; }
+    public DurabilityProfile Durability
+    {
+        get; set;
+    }
     /// <summary>Gets the canonical store's last applied replicated position.</summary>
     public long LastApplied => Store.Read(view => view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes ? NativeSerialization.Deserialize<long>(bytes) : DatabaseEngineNoRetainedBytes);
 

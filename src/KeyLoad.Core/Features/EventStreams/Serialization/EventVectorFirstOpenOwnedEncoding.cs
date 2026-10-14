@@ -34,9 +34,13 @@ internal static class EventVectorFirstOpenOwnedEncoding
         catch (Exception)
         {
             if (entries is not null)
-            { CryptographicOperations.ZeroMemory(entries); }
+            {
+                CryptographicOperations.ZeroMemory(entries);
+            }
             if (!checksum.IsEmpty)
-            { CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(checksum).Span); }
+            {
+                CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(checksum).Span);
+            }
             if (first is not null)
             {
                 CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(first.OriginalNativeBody).Span);

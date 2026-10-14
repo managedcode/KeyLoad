@@ -17,11 +17,15 @@ internal static class TenantCapacityPlacementRf3OccupiedScenario
             await TenantCapacityPlacementRf3OccupiedOperation.RunAsync(wave, seed, capacity, token);
         }, failures);
         if (seed is not null)
-        { await ServerFailureObserver.ObserveAsync(() => seed.DisposeAsync().AsTask(), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => seed.DisposeAsync().AsTask(), failures);
+        }
         if (wave is not null)
         {
             if (failures.Count != 0)
-            { wave.RetainRoots(); }
+            {
+                wave.RetainRoots();
+            }
             await ServerFailureObserver.ObserveAsync(() => wave.DisposeAsync().AsTask(), failures);
         }
         ServerFailureObserver.ThrowIfAny(failures);

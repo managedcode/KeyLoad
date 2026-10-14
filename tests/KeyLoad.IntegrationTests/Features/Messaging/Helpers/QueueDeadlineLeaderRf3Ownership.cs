@@ -16,10 +16,14 @@ internal sealed class QueueDeadlineLeaderRf3Ownership(string originalLeaderNode,
     {
         var captured = new List<QueueDeadlineLeaderRf3Observation>();
         foreach (var name in QueueLeaseRf3Protocol.Nodes)
-        { captured.Add(await ReadAsync(fixture, name, token)); }
+        {
+            captured.Add(await ReadAsync(fixture, name, token));
+        }
         var leaders = captured.Select(x => x.Status.Leader).Distinct(StringComparer.Ordinal).ToArray();
         if (leaders.Length != 1 || leaders[0] is null)
-        { throw new InvalidOperationException(InvalidLeader); }
+        {
+            throw new InvalidOperationException(InvalidLeader);
+        }
         var owner = captured.Single(x => x.Voter == leaders[0]);
         var remaining = captured.Where(x => x.ResourceName != owner.ResourceName).Select(x => x.ResourceName).ToArray();
         await Assert.That(remaining.Length).IsEqualTo(2);
@@ -42,7 +46,9 @@ internal sealed class QueueDeadlineLeaderRf3Ownership(string originalLeaderNode,
                 if (currentFirst.Status.Leader == currentSecond.Status.Leader
                     && currentFirst.Status.Leader != originalVoter
                     && (currentFirst.Status.Leader == currentFirst.Voter || currentFirst.Status.Leader == currentSecond.Voter))
-                { return; }
+                {
+                    return;
+                }
             }
             await Task.Delay(DueRecurringRf3Protocol.PollInterval, TimeProvider.System, token);
         }

@@ -17,9 +17,9 @@ $script:FcNativeMergeInput = [ordered]@{
     InvalidSource = 'The native coverage merge source identity is incomplete or stale.'
     InvalidReceipt = 'An original native coverage terminal receipt is incomplete or mismatched.'
     ModuleRoster = @('KeyLoad.Abstractions','KeyLoad.Analyzers','KeyLoad.AppHost','KeyLoad.Artifacts','KeyLoad.Cli',
-        'KeyLoad.Client','KeyLoad.Core','KeyLoad.Diagnostics','KeyLoad.Orleans','KeyLoad.Query','KeyLoad.Replication',
+        'KeyLoad.Client','KeyLoad.Core','KeyLoad.Diagnostics','KeyLoad.Clustering','KeyLoad.Query','KeyLoad.Replication',
         'KeyLoad.Security','KeyLoad.Server','KeyLoad.ServiceDefaults','KeyLoad.Storage.IO','KeyLoad.Storage.ZoneTree')
-    ServerModuleRoster = @('KeyLoad.Abstractions','KeyLoad.Core','KeyLoad.Diagnostics','KeyLoad.Orleans','KeyLoad.Query',
+    ServerModuleRoster = @('KeyLoad.Abstractions','KeyLoad.Core','KeyLoad.Diagnostics','KeyLoad.Clustering','KeyLoad.Query',
         'KeyLoad.Replication','KeyLoad.Security','KeyLoad.Server','KeyLoad.ServiceDefaults','KeyLoad.Storage.IO','KeyLoad.Storage.ZoneTree')
 }
 

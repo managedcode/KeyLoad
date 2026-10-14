@@ -44,7 +44,10 @@ internal static class SubscriptionFilterCrashScenario
         CrashDatabase.Submit(db, OperationKind.SetSubscriptionPaused,
             new SetSubscriptionPausedRequest(pause, Subscription, OriginalGeneration, true), pause).Get<SubscriptionInfo>();
         var operation = CrashDatabase.Operation(OperationKind.ConfigureSubscription,
-            new ConfigureSubscriptionRequest(CommandId, Subscription, definition with { EventTypes = [ReplacementType] },
+            new ConfigureSubscriptionRequest(CommandId, Subscription, definition with
+            {
+                EventTypes = [ReplacementType]
+            },
                 ExpectedGeneration: OriginalGeneration), CommandId);
         await File.WriteAllBytesAsync(Path.Combine(directory, OperationFile), JsonDefaults.Serialize(operation));
         await File.WriteAllBytesAsync(Path.Combine(directory, OldTokenFile), JsonDefaults.Serialize(received.Deliveries[UnacknowledgedDeliveryIndex].Token));

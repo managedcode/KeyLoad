@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.Messaging;
@@ -54,7 +54,10 @@ internal static class QueueDeadlineRf3Trial
             var future = scheduled with
             {
                 Metadata = scheduled.Metadata with
-                { Id = QueueDeadlineRf3Protocol.Future, NotBefore = ((EnqueueMessage)original.Mutations.Last()).NotBefore }
+                {
+                    Id = QueueDeadlineRf3Protocol.Future,
+                    NotBefore = ((EnqueueMessage)original.Mutations.Last()).NotBefore
+                }
             };
             await QueueDeadlineRf3Assertions.RequireAsync(admin, lane, scheduled, token);
             await QueueDeadlineRf3Assertions.RequireAsync(admin, lane, future, token);

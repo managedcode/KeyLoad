@@ -25,9 +25,13 @@ internal static class DistributedSearchGlobalFusion
             : Complete(DistributedSearchBranchNames.Vector, GlobalBranchKind.Vector, vector, expectedWindows, scope, limits, budget);
         fusion = new SearchRankFusion(request.FusionConstant, request.Limit, budget, request.Explain);
         if (request.Text is not null)
-        { fusion.AddBranch(Scores(textCandidates, budget), request.TextWeight, SearchBranchKind.Text); }
+        {
+            fusion.AddBranch(Scores(textCandidates, budget), request.TextWeight, SearchBranchKind.Text);
+        }
         if (request.Vector is not null)
-        { fusion.AddBranch(Scores(vectorCandidates, budget), request.VectorWeight, SearchBranchKind.Vector); }
+        {
+            fusion.AddBranch(Scores(vectorCandidates, budget), request.VectorWeight, SearchBranchKind.Vector);
+        }
         var ranked = fusion.Select();
         var admission = new GlobalBranchByteAdmission(budget.MaximumResultBytes, budget);
         admission.Accept(PartitionQueryRetention.CandidateArrayBytes(ranked.Length));
@@ -51,7 +55,9 @@ internal static class DistributedSearchGlobalFusion
         var merged = GlobalBranchWindowMerger.Merge(request, windows, limits, budget);
         if (!merged.WindowComplete || merged.Approximate || merged.Truncated || !merged.Exhaustive
             || !merged.MissingWindowIds.IsEmpty)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, IncompleteBranch); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, IncompleteBranch);
+        }
         return merged.Candidates;
     }
 
@@ -61,7 +67,10 @@ internal static class DistributedSearchGlobalFusion
         admission.Accept(PartitionQueryRetention.CandidateArrayBytes(candidates.Length));
         var result = new SearchScore[candidates.Length];
         for (var index = FirstElement; index < candidates.Length; index++)
-        { budget.Check(); result[index] = new(candidates[index].Reference, candidates[index].Score); }
+        {
+            budget.Check();
+            result[index] = new(candidates[index].Reference, candidates[index].Score);
+        }
         return result;
     }
 
@@ -70,14 +79,24 @@ internal static class DistributedSearchGlobalFusion
     {
         long? revision = null;
         foreach (var candidate in text)
-        { budget.Check(); if (candidate.Reference == reference) { revision = candidate.Revision; } }
+        {
+            budget.Check();
+            if (candidate.Reference == reference)
+            {
+                revision = candidate.Revision;
+            }
+        }
         foreach (var candidate in vector)
         {
             budget.Check();
             if (candidate.Reference != reference)
-            { continue; }
+            {
+                continue;
+            }
             if (revision is not null && revision.Value != candidate.Revision)
-            { throw Errors.Fail(ErrorCode.Corruption, ConflictingRevision); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, ConflictingRevision);
+            }
             revision = candidate.Revision;
         }
         return revision ?? throw Errors.Fail(ErrorCode.Corruption, ConflictingRevision);

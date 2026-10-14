@@ -18,7 +18,10 @@ internal static class SqlTypedInsertRetiredResourcePolicy
             () => SqlTypedInsertRetiredAssertions.FencedAsync(source, state, FieldDenied, token),
             () => state.Authority.RemainsControlOwnedAsync(source, target),
             () => state.FailedAuthority.RemainsControlOwnedAsync(source, target));
-        var repaired = SqlTypedInsertRetiredLiteral.Definition(partition) with { SchemaVersion = RepairedVersion };
+        var repaired = SqlTypedInsertRetiredLiteral.Definition(partition) with
+        {
+            SchemaVersion = RepairedVersion
+        };
         await ConfigureAsync(source, target, repaired, DeniedVersion, token);
         await SqlTypedInsertRetiredImage.ObserveAsync(source, target, async () =>
         {

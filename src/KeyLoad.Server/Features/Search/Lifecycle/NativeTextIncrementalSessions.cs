@@ -20,12 +20,18 @@ internal sealed class NativeTextIncrementalSessions
         {
             ObjectDisposedException.ThrowIf(closed, this);
             if (actual.GenerationLeaf is null)
-            { throw NativeTextErrors.Mismatch(); }
+            {
+                throw NativeTextErrors.Mismatch();
+            }
             if (sessions.Count >= maximumSessions || sessions.Values.Any(current =>
                 string.Equals(current.GenerationLeaf, actual.GenerationLeaf, StringComparison.Ordinal)))
-            { throw NativeTextErrors.BoundExceeded(); }
+            {
+                throw NativeTextErrors.BoundExceeded();
+            }
             if (!sessions.TryAdd(actual.Id, actual))
-            { throw NativeTextErrors.Mismatch(); }
+            {
+                throw NativeTextErrors.Mismatch();
+            }
         }
     }
 
@@ -44,12 +50,16 @@ internal sealed class NativeTextIncrementalSessions
         lock (gate)
         {
             if (!sessions.TryGetValue(id, out var found))
-            { return; }
+            {
+                return;
+            }
             actual = found;
         }
         NativeTextIncrementalSessionLifetime.DisposeNative(actual);
         lock (gate)
-        { sessions.Remove(id); }
+        {
+            sessions.Remove(id);
+        }
     }
 
     internal void RetireGeneration(string leaf)
@@ -62,21 +72,27 @@ internal sealed class NativeTextIncrementalSessions
         }
         var failures = new List<Exception>();
         foreach (var id in originals)
-        { ServerFailureObserver.Observe(() => Retire(id), failures); }
+        {
+            ServerFailureObserver.Observe(() => Retire(id), failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
     internal void CloseAdmission()
     {
         lock (gate)
-        { closed = true; }
+        {
+            closed = true;
+        }
     }
 
     internal void DisposeAfterWorkerJoin()
     {
         NativeTextIncrementalSession[] originals;
         lock (gate)
-        { originals = sessions.Values.ToArray(); }
+        {
+            originals = sessions.Values.ToArray();
+        }
         var failures = new List<Exception>();
         foreach (var actual in originals)
         {

@@ -50,11 +50,17 @@ internal static class TenantCapacityPlacementRf3OccupiedOperation
         await TenantCapacityPlacementRf3OccupiedMoves.ReplayAsync(wave, forward, occupied, token);
         await TenantCapacityPlacementRf3OccupiedMoves.ReplayAsync(wave, reverse, repaired, token);
         await TenantCapacityPlacementRf3OccupiedAssertions.SiblingAsync(wave, packed,
-            repairedPlacement with { DirectoryRevision = CompletedDirectoryRevision }, token);
+            repairedPlacement with
+            {
+                DirectoryRevision = CompletedDirectoryRevision
+            }, token);
         await TenantCapacityPlacementRf3ExpiryAssertions.PersistReplayAsync(seed, id, request, pending, token);
         await TenantDedicatedOwnerRf3Assertions.DeniedAsync(wave, packed, token);
         var healthy = await TenantCapacityPlacementRf3OccupiedHealthy.CreateAsync(wave, seed, packed, token);
         await TenantCapacityPlacementRf3OccupiedHealthyCold.RequireAsync(wave, seed, capacity, packed,
-            reverse, repaired, occupied, repairedPlacement with { DirectoryRevision = CompletedDirectoryRevision }, healthy, token);
+            reverse, repaired, occupied, repairedPlacement with
+            {
+                DirectoryRevision = CompletedDirectoryRevision
+            }, healthy, token);
     }
 }

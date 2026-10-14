@@ -37,7 +37,9 @@ internal static class SqlBooleanTruthRf3Refusals
                     if (healthy)
                     {
                         foreach (var item in SqlBooleanTruthRf3Cases.All)
-                        { await SqlBooleanTruthRf3Pages.CaseAsync(caller, wire, item, state.LowRevision, token); }
+                        {
+                            await SqlBooleanTruthRf3Pages.CaseAsync(caller, wire, item, state.LowRevision, token);
+                        }
                     }
                 }, failures);
             }, failures);
@@ -53,7 +55,9 @@ internal static class SqlBooleanTruthRf3Refusals
         await SqlBooleanOperandRf3Controls.InvalidAsync(fixture, state, root, token);
         foreach (var clause in new[] { "score IS", "score IS NOT",
             "score IS 'TRUE'", "score IS @absent" })
-        { await RejectAsync(fixture, state, clause, ErrorCode.Validation, token); }
+        {
+            await RejectAsync(fixture, state, clause, ErrorCode.Validation, token);
+        }
         await global::TUnit.Assertions.Assert.That(await SqlBooleanTruthRf3Image.ReadAsync(root, state, token)).IsEqualTo(before);
         await SqlBooleanTruthRf3Pages.HealthyAsync(fixture, state, token);
     }

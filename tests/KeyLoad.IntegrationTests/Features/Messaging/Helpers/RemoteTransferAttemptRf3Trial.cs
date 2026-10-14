@@ -36,7 +36,10 @@ internal static class RemoteTransferAttemptRf3Trial
             created = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(seed.Create, token));
             await QueueProducerRf3Assertions.ReplayAsync(sdk, mcp, seed.Create, created, token);
             intent = await RemoteTransferColdAssertions.SourceAsync(sdk, mcp, seed, null, token);
-            hint = RemoteTransferCoordinatorRf3Assertions.Hint(seed, created, intent) with { AcceptAttemptCeiling = ceiling };
+            hint = RemoteTransferCoordinatorRf3Assertions.Hint(seed, created, intent) with
+            {
+                AcceptAttemptCeiling = ceiling
+            };
             failed = await RemoteTransferCoordinatorRf3Assertions.FailedAcceptAsync(sdk, mcp, seed, hint, intent, token);
         }, token);
         ArgumentNullException.ThrowIfNull(created);

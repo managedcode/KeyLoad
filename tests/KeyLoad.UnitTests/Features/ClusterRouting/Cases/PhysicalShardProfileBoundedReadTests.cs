@@ -74,7 +74,9 @@ internal sealed class PhysicalShardProfileBoundedReadTests
     {
         var json = JsonSerializer.SerializeToUtf8Bytes(profile, ClusterProfileStore.CreateJson(UnitProfileOptions.Execution()));
         if (json.Length >= size)
-        { throw new InvalidOperationException("The bounded profile fixture must have room for JSON whitespace."); }
+        {
+            throw new InvalidOperationException("The bounded profile fixture must have room for JSON whitespace.");
+        }
         var bytes = new byte[size];
         json.CopyTo(bytes, 0);
         bytes.AsSpan(json.Length).Fill((byte)' ');
@@ -85,7 +87,10 @@ internal sealed class PhysicalShardProfileBoundedReadTests
     {
         private ProfileFixture(string root) => Root = root;
 
-        internal string Root { get; }
+        internal string Root
+        {
+            get;
+        }
         internal string ProfilePath => Path.Combine(Root, ClusterProfileStore.ProfileName);
 
         internal static ProfileFixture Create()
@@ -93,7 +98,9 @@ internal sealed class PhysicalShardProfileBoundedReadTests
             var root = Path.Combine(Path.GetTempPath(), "keyload-physical-shard-bounded-profile-" + Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(root);
             if (!OperatingSystem.IsWindows())
-            { File.SetUnixFileMode(root, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute); }
+            {
+                File.SetUnixFileMode(root, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+            }
             return new ProfileFixture(root);
         }
 
@@ -101,7 +108,9 @@ internal sealed class PhysicalShardProfileBoundedReadTests
         {
             File.WriteAllBytes(ProfilePath, bytes);
             if (!OperatingSystem.IsWindows())
-            { File.SetUnixFileMode(ProfilePath, UnixFileMode.UserRead | UnixFileMode.UserWrite); }
+            {
+                File.SetUnixFileMode(ProfilePath, UnixFileMode.UserRead | UnixFileMode.UserWrite);
+            }
         }
 
         public void Dispose() => Directory.Delete(Root, recursive: true);

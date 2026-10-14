@@ -39,7 +39,9 @@ internal static class NativeCanonicalModelCutBudgetHttpReply
             token.ThrowIfCancellationRequested();
         }, failures).ConfigureAwait(false);
         if (client is { } owned)
-        { ServerFailureObserver.Observe(owned.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(owned.Dispose, failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
@@ -47,7 +49,9 @@ internal static class NativeCanonicalModelCutBudgetHttpReply
     {
         var maximum = NativeCanonicalModelCutCodec.MaximumRecordBytes;
         if (response.Content.Headers.ContentLength is { } length && (length <= 0 || length > maximum))
-        { throw new InvalidDataException(Invalid); }
+        {
+            throw new InvalidDataException(Invalid);
+        }
         await using var stream = await response.Content.ReadAsStreamAsync(token).ConfigureAwait(false);
         var bytes = new byte[maximum + OverflowByte];
         var total = 0;
@@ -55,11 +59,15 @@ internal static class NativeCanonicalModelCutBudgetHttpReply
         {
             var count = await stream.ReadAsync(bytes.AsMemory(total), token).ConfigureAwait(false);
             if (count == 0)
-            { break; }
+            {
+                break;
+            }
             total += count;
         }
         if (total <= 0 || total > maximum || response.Content.Headers.ContentLength is { } expected && expected != total)
-        { throw new InvalidDataException(Invalid); }
+        {
+            throw new InvalidDataException(Invalid);
+        }
         token.ThrowIfCancellationRequested();
         return bytes.AsSpan(0, total).ToArray();
     }

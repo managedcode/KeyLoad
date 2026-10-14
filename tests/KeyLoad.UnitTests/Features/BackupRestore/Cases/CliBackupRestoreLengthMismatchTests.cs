@@ -182,7 +182,10 @@ internal sealed class CliBackupRestoreLengthMismatchTests
     }
 
     private static Dictionary<string, string> PieceBytesOverride()
-        => new(StringComparer.Ordinal) { [PieceBytesEnvironment] = PieceBytesConfigurationValue };
+        => new(StringComparer.Ordinal)
+        {
+            [PieceBytesEnvironment] = PieceBytesConfigurationValue
+        };
 
     private static Task<CliBackupRestoreProcessResult> RunAsync(IOptions<TestExecutionOptions> options,
         IReadOnlyList<string> arguments, CancellationToken cancellationToken)

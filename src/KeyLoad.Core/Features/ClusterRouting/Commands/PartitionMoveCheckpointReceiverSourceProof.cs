@@ -10,11 +10,17 @@ public sealed partial class DatabaseEngine
         PartitionMoveCheckpointBody body, PartitionMoveParentHeader header, PartitionMoveJournalReceipt receipt)
     {
         if (body.OriginalReceiverIssuePacket is not null)
-        { return ObserveMoveParentIssuerPacket(transaction, body, header, receipt); }
+        {
+            return ObserveMoveParentIssuerPacket(transaction, body, header, receipt);
+        }
         if (body.OriginalReceiverIssuanceWitness is not null)
-        { return ObserveMoveParentReceiverProof(transaction, body, header, receipt); }
+        {
+            return ObserveMoveParentReceiverProof(transaction, body, header, receipt);
+        }
         if (body.OriginalReceiverSourceWitness is null)
-        { return ObserveMoveParentCaptureProof(transaction, body, header, receipt); }
+        {
+            return ObserveMoveParentCaptureProof(transaction, body, header, receipt);
+        }
         var original = PartitionMoveParentStorage.Phase(transaction, header.Partition, header.MoveId,
             body.OriginalPhaseCommandId, Limits.MaxBatchBytes)
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
@@ -31,13 +37,21 @@ public sealed partial class DatabaseEngine
         PartitionMoveParentHeader header, PartitionMoveParentPhase original)
     {
         if (body.OriginalReceiverIssuePacket is not null)
-        { RequireMoveParentIssuerPacket(body, header, original); }
+        {
+            RequireMoveParentIssuerPacket(body, header, original);
+        }
         else if (body.OriginalReceiverIssuanceWitness is not null)
-        { RequireMoveParentReceiverProof(body, header, original); }
+        {
+            RequireMoveParentReceiverProof(body, header, original);
+        }
         else if (body.OriginalReceiverSourceWitness is null)
-        { RequireMoveParentCaptureProof(body, header, original); }
+        {
+            RequireMoveParentCaptureProof(body, header, original);
+        }
         else
-        { RequireMoveParentReceiverSourceProof(body, header, original); }
+        {
+            RequireMoveParentReceiverSourceProof(body, header, original);
+        }
     }
 
     private static void RequireMoveParentReceiverSourceProof(PartitionMoveCheckpointBody body,
@@ -61,6 +75,8 @@ public sealed partial class DatabaseEngine
             || body.NextOriginalPhaseCommandId is not null || body.NextOriginalPhase is not null
             || body.NextOriginalAuthorization is not null || body.NextOriginalExpiresAt != default
             || body.NextOriginalRequestNonce != Guid.Empty || body.NextOriginalCaptureReleaseNonce != Guid.Empty)
-        { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict);
+        }
     }
 }

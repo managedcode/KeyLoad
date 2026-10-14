@@ -29,7 +29,9 @@ internal static class PhysicalOwnerDirectorySerialization
     private static PhysicalOwnerDirectoryV1 Decode(ReadOnlySpan<byte> bytes)
     {
         if (bytes.Length > PhysicalOwnerDirectoryProtocol.MaximumEncodedBytes)
-        { throw Errors.Fail(ErrorCode.Corruption, PhysicalOwnerDirectoryProtocol.Malformed); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, PhysicalOwnerDirectoryProtocol.Malformed);
+        }
         try
         {
             var value = NativeSerialization.Deserialize<PhysicalOwnerDirectoryV1>(bytes);
@@ -37,7 +39,9 @@ internal static class PhysicalOwnerDirectorySerialization
             return value;
         }
         catch (KeyLoadException error) when (error.Code == ErrorCode.FormatUnsupported)
-        { throw Errors.Fail(ErrorCode.Corruption, PhysicalOwnerDirectoryProtocol.Malformed); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, PhysicalOwnerDirectoryProtocol.Malformed);
+        }
     }
 
     internal static byte[] Encode(PhysicalOwnerDirectoryV1 value)
@@ -45,7 +49,9 @@ internal static class PhysicalOwnerDirectorySerialization
         PhysicalOwnerDirectoryValidation.Validate(value);
         var bytes = NativeSerialization.Serialize(value);
         if (bytes.Length > PhysicalOwnerDirectoryProtocol.MaximumEncodedBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PhysicalOwnerDirectoryProtocol.Capacity); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PhysicalOwnerDirectoryProtocol.Capacity);
+        }
         return bytes;
     }
 }

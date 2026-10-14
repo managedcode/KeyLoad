@@ -56,7 +56,9 @@ internal sealed class RequestCqrsRf3DiagnosticsTests
             lifecycle.RecordFirstFailureIfAny(failures);
         }, failures).ConfigureAwait(false);
         if (failures.Count > 0)
-        { lifecycle.RecordFirstFailure(); }
+        {
+            lifecycle.RecordFirstFailure();
+        }
         lifecycle.RecordTerminal();
         lifecycle.ThrowWithContext(failures);
     }

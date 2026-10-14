@@ -20,13 +20,17 @@ internal sealed class BlobReclaimCommand(DatabaseEngine database)
         const int UploadsEmptyCount = 0;
 
         if (request.MaxParts is < MaxPartsFirstCount or > BlobLimits.MaxReclaimParts)
-        { throw BlobErrors.Validation(); }
+        {
+            throw BlobErrors.Validation();
+        }
         var head = Reader.Head(tx, request.Blob);
         var state = Reader.State(tx, request.Blob, request.UploadId);
         if (head?.Metadata.VersionId == request.UploadId)
         {
             if (state is null)
-            { throw BlobErrors.Corruption(); }
+            {
+                throw BlobErrors.Corruption();
+            }
             _ = Reader.Current(tx, head);
             throw BlobErrors.StateConflict();
         }
@@ -36,10 +40,14 @@ internal sealed class BlobReclaimCommand(DatabaseEngine database)
             return new(request.UploadId, DeletedPartsEmptyCount, RemainingPartsEmptyCount, ReleasedBytesEmptyCount, true);
         }
         if (head is null)
-        { throw BlobErrors.Corruption(); }
+        {
+            throw BlobErrors.Corruption();
+        }
         if (state.Status == BlobUploadStatus.Active && state.ExpiresAt > now
             || state.Status == BlobUploadStatus.Complete && !state.Retired)
-        { throw BlobErrors.StateConflict(); }
+        {
+            throw BlobErrors.StateConflict();
+        }
         var released = state.Status == BlobUploadStatus.Active ? state.RemainingReservation : NoReleasedReservationBytes;
         state = new BlobUploadCommands(database).ReleaseActive(tx, state, BlobUploadStatus.Expired);
         var count = Math.Min(request.MaxParts, state.NextOrdinal - state.ReclaimCursor);
@@ -54,7 +62,13 @@ internal sealed class BlobReclaimCommand(DatabaseEngine database)
             tx.Delete(BlobKeys.State(request.Blob, request.UploadId));
         }
         else
-        { BlobMetadataRules.Put(tx, BlobKeys.State(request.Blob, request.UploadId), state with { ReclaimCursor = cursor, StoredBytes = state.StoredBytes - deletedBytes }); }
+        {
+            BlobMetadataRules.Put(tx, BlobKeys.State(request.Blob, request.UploadId), state with
+            {
+                ReclaimCursor = cursor,
+                StoredBytes = state.StoredBytes - deletedBytes
+            });
+        }
         return new(request.UploadId, count, state.NextOrdinal - cursor, checked(released + deletedBytes), done);
     }
 
@@ -82,6 +96,8 @@ internal sealed class BlobReclaimCommand(DatabaseEngine database)
         var meta = KeySpace.Partition(BlobKeys.PartMetaSpace, blob.Partition, blob.Resource, blob.Id, upload.ToString(BlobKeys.GuidFormat));
         if (view.VisitRange(raw, MaxRecordsSingleItemCount, static (_, _) => false).Records != EmptyRecords
             || view.VisitRange(meta, MaxRecordsSingleItemCount, static (_, _) => false).Records != EmptyRecords)
-        { throw BlobErrors.Corruption(); }
+        {
+            throw BlobErrors.Corruption();
+        }
     }
 }

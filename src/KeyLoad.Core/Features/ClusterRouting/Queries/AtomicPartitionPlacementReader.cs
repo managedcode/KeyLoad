@@ -53,7 +53,9 @@ public sealed partial class DatabaseEngine
         PhysicalShardCatalogValidation.ValidateCatalog(catalog);
         var placement = ResolveRegisteredPlacement(view, partition, catalog.DefaultShard);
         if (placement.PhysicalShardId != catalog.DefaultShard.PhysicalShardId)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, ForeignPlacementExecution); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, ForeignPlacementExecution);
+        }
         return placement;
     }
 

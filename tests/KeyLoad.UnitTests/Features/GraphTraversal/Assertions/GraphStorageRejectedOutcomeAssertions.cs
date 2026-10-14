@@ -45,7 +45,13 @@ internal static class GraphStorageRejectedOutcomeAssertions
     {
         var page = database.Database.ReadStream(GraphStorageReferenceFixture.Root,
             new StreamRef(database.Partition, GraphStorageReferenceFixture.Events, stream));
-        return JsonSerializer.SerializeToUtf8Bytes(new { page.Stream, page.Head, page.Events, page.HasMore }, JsonDefaults.Options);
+        return JsonSerializer.SerializeToUtf8Bytes(new
+        {
+            page.Stream,
+            page.Head,
+            page.Events,
+            page.HasMore
+        }, JsonDefaults.Options);
     }
 
     private static byte[] OutcomeBytes(TestDatabase database, CommandRequest command)

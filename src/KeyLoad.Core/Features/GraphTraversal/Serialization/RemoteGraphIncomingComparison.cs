@@ -12,14 +12,19 @@ public sealed partial class DatabaseEngine
         var secondLength = NativeSerialization.Measure(right);
         if (firstLength > Limits.MaxBatchBytes || secondLength > Limits.MaxBatchBytes
             || firstLength > work.MaximumResultBytes || secondLength > work.MaximumResultBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, RemoteGraphProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, RemoteGraphProtocol.Invalid);
+        }
         work.ChargeBytes(checked(firstLength + secondLength));
         var first = NativeSerialization.Serialize(left);
         try
         {
             var second = NativeSerialization.Serialize(right);
             try
-            { work.Check(); return first.AsSpan().SequenceEqual(second); }
+            {
+                work.Check();
+                return first.AsSpan().SequenceEqual(second);
+            }
             finally { CryptographicOperations.ZeroMemory(second); }
         }
         finally { CryptographicOperations.ZeroMemory(first); }

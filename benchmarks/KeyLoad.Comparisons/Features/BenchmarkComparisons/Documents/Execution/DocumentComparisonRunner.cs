@@ -67,7 +67,10 @@ public sealed class DocumentComparisonRunner(IOptions<NativeComparisonExecutionO
         var phases = new DocumentComparisonExecution(executionOptions, clock, nativeProgress);
         var error = await OpenLoopFailure.ObserveAsync(ExecuteRepetitionAsync()).ConfigureAwait(false);
         if (error is NotSupportedException)
-        { run.Unsupported = true; run.Observe(DocumentProtocolText.NativeDocumentLifecycleOrOperationUnavailable); }
+        {
+            run.Unsupported = true;
+            run.Observe(DocumentProtocolText.NativeDocumentLifecycleOrOperationUnavailable);
+        }
         else if (error is not null)
         {
             run.Observe(error);

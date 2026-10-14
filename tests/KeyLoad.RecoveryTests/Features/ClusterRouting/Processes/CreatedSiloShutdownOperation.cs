@@ -22,7 +22,9 @@ internal static class CreatedSiloShutdownOperation
             await ExecuteOwnedAsync(service, selected, path, startup, failures, cancellationToken);
         }, failures);
         if (failures.Count != 0)
-        { failures.InsertRange(0, startup); }
+        {
+            failures.InsertRange(0, startup);
+        }
         global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }
 
@@ -60,13 +62,19 @@ internal static class CreatedSiloShutdownOperation
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {
                 if (host is IAsyncDisposable asynchronous)
-                { await asynchronous.DisposeAsync().ConfigureAwait(false); }
+                {
+                    await asynchronous.DisposeAsync().ConfigureAwait(false);
+                }
                 else
-                { host.Dispose(); }
+                {
+                    host.Dispose();
+                }
             }, failures);
         }
         await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => service.DisposeAsync().AsTask(), failures);
         if (service.Opened && service.FileReleased)
-        { await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => { File.Delete(path); return Task.CompletedTask; }, failures); }
+        {
+            await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => { File.Delete(path); return Task.CompletedTask; }, failures);
+        }
     }
 }

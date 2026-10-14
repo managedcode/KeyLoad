@@ -77,7 +77,9 @@ internal static class ControlledPartitionMovementRetireFlow
             ?? throw new InvalidOperationException("The actual first source retirement grant is absent.");
         await Assert.That(request.Envelope.ExpiresAt).IsEqualTo(issued.ExpiresAt);
         if (family == FirstFamily)
-        { await ControlledPartitionMovementRetireExpiryAssertions.AssertAsync(source, runtime, admission, request, cancellationToken); }
+        {
+            await ControlledPartitionMovementRetireExpiryAssertions.AssertAsync(source, runtime, admission, request, cancellationToken);
+        }
         var outcome = await ControlledPartitionMovementVerifiedSubmit.SubmitAsync(source, runtime,
             admission, request, cancellationToken);
         await Assert.That(outcome.Error).IsNull();

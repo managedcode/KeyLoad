@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using ManagedCode.Communication;
 using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.DependencyInjection;
@@ -73,7 +73,11 @@ internal static class ConnectionNativeProducerCleanupFlow
         IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> stream, CancellationToken token)
     {
         try
-        { await foreach (var unused in stream.WithCancellation(token)) { } }
+        {
+            await foreach (var unused in stream.WithCancellation(token))
+            {
+            }
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { return error; }
         throw new InvalidOperationException("The genuine native primary and cleanup failures must escape.");
     }

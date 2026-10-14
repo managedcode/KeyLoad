@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.InternalSerialization;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
@@ -20,7 +20,9 @@ internal sealed class PartitionMovementLateNativeBorrow
         lock (gate)
         {
             if (next is not null)
-            { throw new InvalidOperationException("A sealed native borrow is already armed."); }
+            {
+                throw new InvalidOperationException("A sealed native borrow is already armed.");
+            }
             next = new(TaskCreationOptions.RunContinuationsAsynchronously);
             return next.Task;
         }
@@ -36,24 +38,36 @@ internal sealed class PartitionMovementLateNativeBorrow
         {
             selected = next;
             if (selected is null)
-            { return; }
+            {
+                return;
+            }
             next = null;
             ordinal = ++admitted;
         }
         var phase = NativeCommandPayload.Read<PartitionMovePhaseCommand>(operation);
         if (phase.Stage != PartitionMovePeerStage.Retire || phase.ReceiverEffectAdmission is null)
-        { throw new InvalidOperationException("The actual parent receiver did not seal Retire authority."); }
+        {
+            throw new InvalidOperationException("The actual parent receiver did not seal Retire authority.");
+        }
         if (ordinal is not (First or Second))
-        { throw new InvalidOperationException("The finite native borrow exceeded its two producers."); }
+        {
+            throw new InvalidOperationException("The finite native borrow exceeded its two producers.");
+        }
         selected.SetResult(new(index, operation));
         try
-        { await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken).ConfigureAwait(false); }
+        {
+            await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken).ConfigureAwait(false);
+        }
         finally
         {
             if (ordinal == First)
-            { firstJoined.TrySetResult(); }
+            {
+                firstJoined.TrySetResult();
+            }
             else if (ordinal == Second)
-            { secondJoined.TrySetResult(); }
+            {
+                secondJoined.TrySetResult();
+            }
 
         }
     }

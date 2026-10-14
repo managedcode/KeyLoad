@@ -92,9 +92,21 @@ internal static class ScaleServerResourceBoundsFlow
         internal string Directory { get; } = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
         internal string Marker => Path.Combine(Directory, ScaleServerResourceCancellationNativeFixture.StartMarkerName);
         internal string Gate => Path.Combine(Directory, StartGateName);
-        internal ScaleServerResourceChildIdentity? Child { get; set; }
-        internal Task<string?>? Original { get; set; }
-        internal Task<string?>? Healthy { get; set; }
-        internal Exception? ExpectedFailure { get; set; }
+        internal ScaleServerResourceChildIdentity? Child
+        {
+            get; set;
+        }
+        internal Task<string?>? Original
+        {
+            get; set;
+        }
+        internal Task<string?>? Healthy
+        {
+            get; set;
+        }
+        internal Exception? ExpectedFailure
+        {
+            get; set;
+        }
     }
 }

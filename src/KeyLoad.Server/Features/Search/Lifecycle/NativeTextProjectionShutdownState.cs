@@ -3,7 +3,10 @@ namespace KeyLoad.Server.Features.Search;
 internal sealed class NativeTextProjectionShutdownState(Lock sync, NativeTextProjectionWork work,
     NativeTextProjectionSlotSet slots)
 {
-    internal bool Closing { get; private set; }
+    internal bool Closing
+    {
+        get; private set;
+    }
 
     internal void Begin()
     {

@@ -19,8 +19,13 @@ public sealed partial class DatabaseEngine
             || JsonData.Fingerprint(body.Control) != JsonData.Fingerprint(current)
             || phase.ControlIntentDigest != PartitionMoveIntentIdentity.Digest(current)
             || current.Phase is PartitionMovePhase.Published or PartitionMovePhase.Retired or PartitionMovePhase.Aborted)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
-        var aborting = current with { Phase = PartitionMovePhase.Aborting };
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
+        var aborting = current with
+        {
+            Phase = PartitionMovePhase.Aborting
+        };
         PartitionMoveControlStorage.Write(transaction, aborting, Limits.MaxBatchBytes);
         return new(phase.MoveId, phase.Stage, MoveJournalReceipt(transaction, commandId, position,
             phase.ControlIntentDigest), aborting, null, null, null);

@@ -21,7 +21,9 @@ internal static class RemoteTransferDistinctSetup
         var technical = await RemoteTransferDistinctIdentity.CreateAsync(targetRoot, new PrincipalRecord(RemoteTransferDistinctProtocol.TechnicalSubject,
                 target.TenantId, [new(target.DatabaseId, scenario.DestinationQueue.Queue,
                     RemoteTransferDistinctProtocol.TargetCapabilities | Capability.QueueConsume)], [])
-        { ClusterAdministrator = true }, token);
+        {
+            ClusterAdministrator = true
+        }, token);
         var identity = await RemoteTransferDistinctIdentity.CreateAsync(parent.Source,
             new PrincipalRecord(RemoteTransferDistinctProtocol.LogicalPrefix
                 + Guid.NewGuid().ToString(RemoteTransferColdProtocol.TransferIdFormat), source.TenantId,
@@ -40,7 +42,9 @@ internal static class RemoteTransferDistinctSetup
         CancellationToken token)
     {
         var resource = new ResourceDefinition(queue, ResourceKind.WorkQueue, partition.TransactionDomainId)
-        { QueuePolicy = new() };
+        {
+            QueuePolicy = new()
+        };
         _ = await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigureResourceAsync(Guid.NewGuid(),
             new(partition.TenantId, partition.DatabaseId, resource), token));
     }

@@ -82,7 +82,9 @@ internal static class TwoRf3ClusterResources
             firstPeer, secondPeer, containerUser, firstGroup, secondGroup, clusterId, image, localImage);
         var tables = NativeClusteringResources.Add(builder);
         foreach (var resource in resources)
-        { NativeClusteringResources.Apply(resource, tables); }
+        {
+            NativeClusteringResources.Apply(resource, tables);
+        }
         TwoRf3QueryProbe.Apply(probe, resources, Nodes);
         global::KeyLoad.AppHost.Features.BlobStorage.NativeBlobWireProbeProfile.Apply(builder, root, resources);
         frameObservation?.ApplyReceivers(resources, Nodes);
@@ -184,7 +186,9 @@ internal static class TwoRf3ClusterResources
         const int IndexInitialValue = 0;
         const string EnvironmentIndexSeparator = "__";
         for (var index = IndexInitialValue; index < values.Length; index++)
-        { resource.WithEnvironment(TrustPrefix + name + EnvironmentIndexSeparator + index.ToString(CultureInfo.InvariantCulture), values[index]); }
+        {
+            resource.WithEnvironment(TrustPrefix + name + EnvironmentIndexSeparator + index.ToString(CultureInfo.InvariantCulture), values[index]);
+        }
     }
 
     private static void ValidateMode(IDistributedApplicationBuilder builder, LocalProfile profile)
@@ -194,7 +198,9 @@ internal static class TwoRf3ClusterResources
         if (!AppHostOptionsRegistration.Get(builder).Control.Value.Ephemeral
             || AppHostOptionsRegistration.Get(builder).Control.Value.BenchmarksEnabled
             || AppHostOptionsRegistration.Get(builder).Control.Value.ProtocolCohortEnabled)
-        { throw new InvalidOperationException(TwoRf3ProfileProtocol.Invalid); }
+        {
+            throw new InvalidOperationException(TwoRf3ProfileProtocol.Invalid);
+        }
     }
 
     internal static string Origin(string node) => string.Format(CultureInfo.InvariantCulture, OriginFormat, node);
@@ -205,7 +211,9 @@ internal static class TwoRf3ClusterResources
 
         var bytes = RandomNumberGenerator.GetBytes(CountValue);
         try
-        { return Convert.ToBase64String(bytes); }
+        {
+            return Convert.ToBase64String(bytes);
+        }
         finally { CryptographicOperations.ZeroMemory(bytes); }
     }
 }

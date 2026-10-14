@@ -20,19 +20,27 @@ internal static class ClusterRestoreProcessCutScenario
     internal static Task<bool> TryRunAsync(string[] args)
     {
         if (args.Length == NoArguments || args[ModeIndex] != Mode)
-        { return Task.FromResult(false); }
+        {
+            return Task.FromResult(false);
+        }
         if (args.Length != ArgumentCount || !Enum.TryParse<NativeClusterRestoreStage>(args[StageIndex], out var selected)
             || !Enum.IsDefined(selected) || selected == NativeClusterRestoreStage.None || !Guid.TryParseExact(args[OperationIndex], OperationFormat, out var operation)
             || operation == Guid.Empty)
-        { throw Errors.Fail(ErrorCode.Validation, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, Invalid);
+        }
         var configuration = ClusterRestoreConfigurationBinding.Read();
         if (configuration.Value.OperationId != operation)
-        { throw Errors.Fail(ErrorCode.Conflict, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, Invalid);
+        }
         var original = ClusterRestoreCoordinator.Run(configuration, CliStorageConfiguration.Read().Storage,
             ClusterRestoreConfigurationBinding.ReadLimits(), TimeProvider.System, actual =>
             {
                 if (actual != selected)
-                { return; }
+                {
+                    return;
+                }
                 Console.WriteLine(MarkerPrefix + Separator + actual + Separator + operation.ToString(OperationFormat)
                     + Separator + Environment.ProcessId.ToString(CultureInfo.InvariantCulture));
                 Console.Out.Flush();

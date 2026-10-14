@@ -1,4 +1,4 @@
-using KeyLoad.Orleans.Features.Search;
+using KeyLoad.Clustering.Features.Search;
 using KeyLoad.Query;
 using KeyLoad.Query.Features.Search;
 using KeyLoad.Server;
@@ -11,10 +11,22 @@ internal sealed class NativeTextOnlineCrashRuntime : IAsyncDisposable
     private const int OriginalStorageOwnerIndex = 0;
     private readonly NativeTextIncrementalMaintenanceService explicitOwner;
     private readonly ITextProjection projection;
-    internal NativeTextIncrementalCrashRuntime Canonical { get; }
-    internal NativeTextOnlineMaintenanceService Online { get; }
-    internal SearchEngine Search { get; }
-    internal string PhysicalRoot { get; }
+    internal NativeTextIncrementalCrashRuntime Canonical
+    {
+        get;
+    }
+    internal NativeTextOnlineMaintenanceService Online
+    {
+        get;
+    }
+    internal SearchEngine Search
+    {
+        get;
+    }
+    internal string PhysicalRoot
+    {
+        get;
+    }
 
     internal NativeTextOnlineCrashRuntime(string root, Guid incarnation, Action<NativeTextFaultStage>? observer)
     {

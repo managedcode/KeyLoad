@@ -219,7 +219,9 @@ internal static class ComparisonHostLaunchSettings
         {
             var separator = argument.IndexOf('=', StringComparison.Ordinal);
             if (!argument.StartsWith("--", StringComparison.Ordinal) || separator <= 2)
-            { throw new InvalidOperationException("The native workload test requires configuration assignments."); }
+            {
+                throw new InvalidOperationException("The native workload test requires configuration assignments.");
+            }
             startInfo.Environment[argument[2..separator].Replace(":", "__", StringComparison.Ordinal)] = argument[(separator + 1)..];
         }
         return startInfo;

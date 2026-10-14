@@ -36,7 +36,9 @@ internal static class McpHttpPipeline
                 pendingBody = null;
             }
             else
-            { state.Admit(default, context.RequestAborted); }
+            {
+                state.Admit(default, context.RequestAborted);
+            }
             await next(context).ConfigureAwait(false);
         }
         catch (KeyLoadException error) when (McpTransportDiagnostics.HasStage(error))
@@ -59,15 +61,21 @@ internal static class McpHttpPipeline
     private static int Capacity(HttpRequest request, int maximumBytes)
     {
         if (!HttpMethods.IsPost(request.Method))
-        { return NoBodyCapacity; }
+        {
+            return NoBodyCapacity;
+        }
         if (request.ContentLength is < NoBodyCapacity || request.ContentLength > maximumBytes)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, ServerProtocol.BodyExceeded); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, ServerProtocol.BodyExceeded);
+        }
         return checked((int)(request.ContentLength ?? maximumBytes));
     }
 
     private static void SetBodyLimit(HttpContext context, int maximumBytes)
     {
         if (context.Features.Get<IHttpMaxRequestBodySizeFeature>() is { IsReadOnly: false } feature)
-        { feature.MaxRequestBodySize = maximumBytes; }
+        {
+            feature.MaxRequestBodySize = maximumBytes;
+        }
     }
 }

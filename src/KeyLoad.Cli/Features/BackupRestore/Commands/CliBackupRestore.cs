@@ -94,7 +94,12 @@ internal static class CliBackupRestore
             throw Errors.Fail(ErrorCode.Corruption, GetMessage(BackupMissingRequiredFileMessageKey));
         }
         Console.WriteLine(JsonSerializer.Serialize(
-            new { identity.NodeId, identity.Incarnation, identity.DispatchPaused },
+            new
+            {
+                identity.NodeId,
+                identity.Incarnation,
+                identity.DispatchPaused
+            },
             JsonDefaults.Options));
     }
 

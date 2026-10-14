@@ -37,7 +37,10 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
     private bool isolationCleanupIncomplete;
     private readonly string coverageFixtureId = Guid.NewGuid().ToString("D");
     private byte[] peerSecret = [];
-    internal ClusterFixtureSnapshotReadiness? SnapshotReadiness { get; private set; }
+    internal ClusterFixtureSnapshotReadiness? SnapshotReadiness
+    {
+        get; private set;
+    }
     /// <summary>Receives the native keyed data-source identity before initialization.</summary>
     public string Key { get; set; } = string.Empty;
 
@@ -45,7 +48,9 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
     private const string DiagnosticsUnavailable = "The Aspire diagnostic capture is not initialized.";
 
     /// <summary>Creates the standard RF3 fixture for the shared TUnit class data source.</summary>
-    public ClusterFixture() { }
+    public ClusterFixture()
+    {
+    }
 
     internal ClusterFixture(RemoteTransferCoordinatorFixtureSelection selection)
         => transferCoordinator = RemoteTransferCoordinatorFixtureConfiguration.Validate(selection);
@@ -87,7 +92,10 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
         => this.queryExecution = ClusterFixtureQueryResultLimits.Validate(queryExecution);
 
     /// <summary>Gets the unique private host directory used by the Aspire application.</summary>
-    public string Root { get; private set; } = Path.Combine(Path.GetTempPath(),
+    public string Root
+    {
+        get; private set;
+    } = Path.Combine(Path.GetTempPath(),
         ClusterFixtureProtocol.RootDirectoryPrefix + Guid.NewGuid().ToString(ClusterFixtureProtocol.GuidFormat));
 
     /// <summary>Gets the actual started Aspire application and its allocated endpoint model.</summary>
@@ -95,10 +103,16 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
     /// <summary>Gets the administrator credential loaded from the private local profile.</summary>
     public string AdminKey { get; private set; } = "";
 
-    internal ClusterFixtureColdStartObservation? ColdStartObservation { get; private set; }
+    internal ClusterFixtureColdStartObservation? ColdStartObservation
+    {
+        get; private set;
+    }
 
     /// <summary>Gets the opaque physical-shard identity from the actual private shared V2 profile.</summary>
-    public Guid PhysicalShardId { get; private set; }
+    public Guid PhysicalShardId
+    {
+        get; private set;
+    }
 
     /// <summary>Starts all three genuine Aspire resources and waits for their health concurrently.</summary>
     /// <returns>A task that completes when each of the three resources is healthy.</returns>
@@ -108,7 +122,9 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
         {
             using var preparation = new CancellationTokenSource(TimeSpan.FromMinutes(15), TimeProvider.System);
             if (isolateReplicaNamespace)
-            { await ReplicaIsolationAdmission.PreflightAsync(preparation.Token).ConfigureAwait(false); }
+            {
+                await ReplicaIsolationAdmission.PreflightAsync(preparation.Token).ConfigureAwait(false);
+            }
             localImageSession = await LocalRf3ImageTestSession.StartIfSelectedAsync(preparation.Token)
                 .ConfigureAwait(false);
             using var timeout = new CancellationTokenSource(StartupTimeout, TimeProvider.System);
@@ -123,7 +139,9 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
             var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_AppHost>(
                 arguments, timeout.Token);
             if (isolateReplicaNamespace)
-            { isolationBuilder = new(builder); }
+            {
+                isolationBuilder = new(builder);
+            }
             ClusterFixtureComposition.ConfigureTestOverrides(builder, commandBytes, httpAdmission, databaseLimits, queryExecution);
             queueDeadline?.Configure(builder);
             nativeSql.Configure(builder, Root);
@@ -145,7 +163,9 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
             diagnosticIncarnation = ClusterFixturePhysicalShardIdentity.ReadProfile(Root).Incarnation;
             await StartApplicationAsync(containerNames, repository.FullName, timeout.Token).ConfigureAwait(false);
             if (isolationOwner is not null)
-            { await isolationOwner.VerifyStartedAsync(App, timeout.Token).ConfigureAwait(false); }
+            {
+                await isolationOwner.VerifyStartedAsync(App, timeout.Token).ConfigureAwait(false);
+            }
         }
         catch (Exception startupFailure)
         {
@@ -213,7 +233,9 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
         var token = deadline?.Token ?? localCleanup?.Token ?? faultCleanup?.Token ?? CancellationToken.None;
         var failures = new List<Exception>();
         if (isolationOwner is not null)
-        { await CollectCleanupAsync(deadline, () => isolationOwner.RestoreAsync(token), failures).ConfigureAwait(false); }
+        {
+            await CollectCleanupAsync(deadline, () => isolationOwner.RestoreAsync(token), failures).ConfigureAwait(false);
+        }
         await SaveDiagnosticsAsync(diagnostics, peerSecret, AdminKey, diagnosticIncarnation, deadline, failures).ConfigureAwait(false);
         if (diagnostics is not null)
         {
@@ -253,14 +275,16 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
                 .ConfigureAwait(false);
         }
         if (failures.Count == 1 && coverage is not null)
-        { Rethrow(failures[0]); }
+        {
+            Rethrow(failures[0]);
+        }
         if (failures.Count > 0)
         {
             throw new AggregateException("Cluster fixture cleanup failed.", failures);
         }
     }
 
-    internal Task<KeyLoad.Orleans.ReplicaSiloDiscovery> ReadSnapshotDiscoveryAsync(string node, CancellationToken token)
+    internal Task<KeyLoad.Clustering.ReplicaSiloDiscovery> ReadSnapshotDiscoveryAsync(string node, CancellationToken token)
         => RequestCqrsRf3SignedDiscovery.ReadAsync(RequireApp(), node,
             ClusterFixturePhysicalShardIdentity.ReadProfile(Root).Incarnation, peerSecret, AdminKey, token);
 

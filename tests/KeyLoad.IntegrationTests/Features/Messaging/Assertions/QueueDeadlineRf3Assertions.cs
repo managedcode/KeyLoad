@@ -32,7 +32,10 @@ internal static class QueueDeadlineRf3Assertions
         {
             var actual = await ReadAsync(callers, lane, expected.Metadata.Id, token);
             if (actual.Metadata.State == MessageState.Ready)
-            { await QueueLeaseRf3Assertions.EqualAsync(actual, expected); return; }
+            {
+                await QueueLeaseRf3Assertions.EqualAsync(actual, expected);
+                return;
+            }
             await Assert.That(actual.Metadata.State).IsEqualTo(MessageState.Scheduled);
             await Task.Delay(DueRecurringRf3Protocol.PollInterval, TimeProvider.System, token);
         }

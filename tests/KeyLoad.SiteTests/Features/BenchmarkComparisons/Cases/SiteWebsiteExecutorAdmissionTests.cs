@@ -35,7 +35,10 @@ internal sealed class SiteWebsiteExecutorAdmissionTests
         {
             repository = inputs.Repository,
             operation = SiteIsolatedGitHubFields.ExecutorAdmissionOperation,
-            arguments = new { identity },
+            arguments = new
+            {
+                identity
+            },
         }, TestContext.Current!.Execution.CancellationToken);
     }
 }

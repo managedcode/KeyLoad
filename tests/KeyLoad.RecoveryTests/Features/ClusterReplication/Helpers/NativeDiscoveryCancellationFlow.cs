@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
@@ -15,7 +15,10 @@ internal static class NativeDiscoveryCancellationFlow
         using var caller = CancellationTokenSource.CreateLinkedTokenSource(token);
         var gate = new NativeDiscoveryCancellationGate();
         var settings = new OrleansMembershipOptions
-        { MaximumAdmissions = OneAdmission, ReplayNonceCapacity = OriginalAndHealthyNonces };
+        {
+            MaximumAdmissions = OneAdmission,
+            ReplayNonceCapacity = OriginalAndHealthyNonces
+        };
         List<Exception> failures = [];
         Task<ReplicaNativeDiscoveryReply>? original = null;
         try
@@ -55,13 +58,19 @@ internal static class NativeDiscoveryCancellationFlow
                 gate.Release();
                 await ReplicaMaterializerLifecycleErrors.AttemptAsync(runtime.StopAsync, failures);
                 if (original is not null)
-                { await ReplicaMaterializerLifecycleErrors.AttemptAsync(async () => { _ = await original; }, failures); }
+                {
+                    await ReplicaMaterializerLifecycleErrors.AttemptAsync(async () => { _ = await original; }, failures);
+                }
             }
         }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { ReplicaMaterializerLifecycleErrors.Add(error, failures); }
+        {
+            ReplicaMaterializerLifecycleErrors.Add(error, failures);
+        }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { ReplicaMaterializerLifecycleErrors.Add(error, failures); }
+        {
+            ReplicaMaterializerLifecycleErrors.Add(error, failures);
+        }
         ReplicaMaterializerLifecycleErrors.Throw(failures);
     }
 

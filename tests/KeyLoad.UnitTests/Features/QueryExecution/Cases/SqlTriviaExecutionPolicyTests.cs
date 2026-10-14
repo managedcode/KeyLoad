@@ -169,7 +169,9 @@ internal sealed class SqlTriviaExecutionPolicyTests
             var text = value.ToString(CultureInfo.InvariantCulture);
             settings[$"{KeyLoadClientExecutionOptions.SectionName}:{nameof(KeyLoadClientExecutionOptions.SqlBudgetCheckInterval)}"] = text;
             if (includeQuery)
-            { settings[$"{QueryExecutionOptions.SectionName}:{nameof(QueryExecutionOptions.SqlBudgetCheckInterval)}"] = text; }
+            {
+                settings[$"{QueryExecutionOptions.SectionName}:{nameof(QueryExecutionOptions.SqlBudgetCheckInterval)}"] = text;
+            }
         }
         return new ConfigurationBuilder().AddInMemoryCollection(settings).Build();
     }

@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.IntegrationTests.Features.QueryExecution;
@@ -46,9 +46,13 @@ internal static class PostgresPureReadRf3Cancellation
                     var disposed = await controls.WaitForMarkerAsync(arm, RequestCqrsProbePhase.ProducerDisposed,
                         RequestCqrsProbeOutcome.Observed, discovery, token);
                     await SqlRf3Protocol.EqualAsync(held with
-                    { Outcome = cancelled.Outcome }, cancelled);
+                    {
+                        Outcome = cancelled.Outcome
+                    }, cancelled);
                     await SqlRf3Protocol.EqualAsync(held with
-                    { Phase = RequestCqrsProbePhase.ProducerDisposed }, disposed);
+                    {
+                        Phase = RequestCqrsProbePhase.ProducerDisposed
+                    }, disposed);
                     await controls.RetireArmAsync(arm, token);
                     await SqlRf3Protocol.EqualAsync(before, await PostgresCompositionRf3Models.ReadAsync(root, token));
                     await SqlRf3Protocol.EqualAsync(new DocumentReadResult(state.Image.Left),
@@ -62,7 +66,9 @@ internal static class PostgresPureReadRf3Cancellation
                         originalJoined, operationFailures);
                 }
                 if (operationFailures.Count != PostgresRf3Protocol.FirstColumn)
-                { selection.RetainEvidence(); }
+                {
+                    selection.RetainEvidence();
+                }
                 global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(operationFailures);
             }, failures);
         }, failures);

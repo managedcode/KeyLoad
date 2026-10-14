@@ -22,31 +22,48 @@ internal static class ScriptDomSyntax
         var limits = limitsOptions.Value;
         ArgumentNullException.ThrowIfNull(checkBudget);
         void Check()
-        { cancellationToken.ThrowIfCancellationRequested(); checkBudget(); }
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            checkBudget();
+        }
         limits.Validate();
         Check();
         if (sql.Length > limits.MaxQueryBytes || Encoding.UTF8.GetByteCount(sql) > limits.MaxQueryBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, ScriptDomErrors.BytesDetail); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, ScriptDomErrors.BytesDetail);
+        }
         var parser = new Dom.TSql180Parser(initialQuotedIdentifiers: true, Dom.SqlEngineType.Standalone);
         using var reader = new ScriptDomBoundedReader(sql, Check);
         var tokens = parser.GetTokenStream(reader, out var lexicalErrors);
         Check();
         if (lexicalErrors.Count != EmptyCount)
-        { throw ScriptDomErrors.Invalid(); }
+        {
+            throw ScriptDomErrors.Invalid();
+        }
         ScriptDomTokenBounds.Require(tokens, limits, Check, validateTokens);
         var fragment = parser.Parse(new ScriptDomCheckedTokens(tokens, limitsOptions, Check), out var errors);
         Check();
         if (errors.Count != EmptyCount)
-        { throw ScriptDomErrors.Invalid(); }
+        {
+            throw ScriptDomErrors.Invalid();
+        }
         if (fragment is not Dom.TSqlScript script)
-        { throw ScriptDomErrors.Unsupported(); }
+        {
+            throw ScriptDomErrors.Unsupported();
+        }
         if (script.TrailingGoCount != EmptyCount)
-        { throw ScriptDomErrors.Unsupported(); }
+        {
+            throw ScriptDomErrors.Unsupported();
+        }
         if (script.Batches.Count == EmptyCount
             || script.Batches.Count == SingleElement && script.Batches[FirstIndex].Statements.Count == EmptyCount)
-        { throw ScriptDomErrors.Invalid(); }
+        {
+            throw ScriptDomErrors.Invalid();
+        }
         if (script.Batches.Count != SingleElement || script.Batches[FirstIndex].Statements.Count != SingleElement)
-        { throw ScriptDomErrors.Unsupported(); }
+        {
+            throw ScriptDomErrors.Unsupported();
+        }
         var statement = script.Batches[FirstIndex].Statements[FirstIndex];
         statement.Accept(new ScriptDomSlotVisitor(RequireOrigin(statement), null, Check, cancellationToken));
         Check();
@@ -58,7 +75,9 @@ internal static class ScriptDomSyntax
         ArgumentNullException.ThrowIfNull(statement);
         ArgumentNullException.ThrowIfNull(checkBudget);
         if (positionalParameterCount < EmptyCount)
-        { throw ScriptDomErrors.Invalid(); }
+        {
+            throw ScriptDomErrors.Invalid();
+        }
         cancellationToken.ThrowIfCancellationRequested();
         checkBudget();
         statement.Accept(new ScriptDomSlotVisitor(RequireOrigin(statement), positionalParameterCount, checkBudget, cancellationToken));

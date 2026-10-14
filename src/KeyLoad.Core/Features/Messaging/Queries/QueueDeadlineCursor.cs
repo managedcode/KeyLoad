@@ -19,9 +19,17 @@ internal sealed record QueueDeadlineCursor(Guid Incarnation, long ReadGeneration
         }
         var validator = new DueSweepCursor(previous.Incarnation, previous.ReadGeneration,
             Features.Messaging.DueWorkKind.Schedule, previous.Scheduled, previous.Leased);
-        var second = validator with { Schedules = previous.Metadata };
+        var second = validator with
+        {
+            Schedules = previous.Metadata
+        };
         return DueWorkCursor.IsValid(validator) && DueWorkCursor.IsValid(second)
-            ? previous with { Scheduled = Copy(previous.Scheduled), Leased = Copy(previous.Leased), Metadata = Copy(previous.Metadata) }
+            ? previous with
+            {
+                Scheduled = Copy(previous.Scheduled),
+                Leased = Copy(previous.Leased),
+                Metadata = Copy(previous.Metadata)
+            }
             : Match(identity, null);
     }
 
@@ -47,5 +55,9 @@ internal sealed record QueueDeadlineCursor(Guid Incarnation, long ReadGeneration
     };
 
     private static DuePrefixCursor Copy(DuePrefixCursor value)
-        => value with { UpperKey = value.UpperKey?.ToArray(), LastKey = value.LastKey?.ToArray() };
+        => value with
+        {
+            UpperKey = value.UpperKey?.ToArray(),
+            LastKey = value.LastKey?.ToArray()
+        };
 }

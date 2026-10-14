@@ -11,7 +11,10 @@ internal static class BlobScopedBytesR42Cleanup
         var state = states[0];
         state.Abort = new(Guid.NewGuid(), state.Blob, state.Begin.UploadId);
         state.Aborted = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.AbortBlobUploadAsync(state.Abort, token));
-        state.Current = state.Written[1].Value with { Status = BlobUploadStatus.Aborted };
+        state.Current = state.Written[1].Value with
+        {
+            Status = BlobUploadStatus.Aborted
+        };
         await SqlRf3Protocol.EqualAsync(state.Current, state.Aborted.Value);
         await BlobScopedBytesR42Assertions.ReceiptAsync(state.Aborted.Receipt, state.Abort.CommandId, state);
         await BlobScopedBytesR42Assertions.CurrentAsync(callers, states, token);
@@ -23,7 +26,10 @@ internal static class BlobScopedBytesR42Cleanup
             state.Reclaimed[index] = (await McpCallerAssertions.SuccessAsync<BlobCommitResult<BlobReclaimResult>>(await callers.Mcp.CallAsync("keyload_blobs_reclaim", state.Reclaims[index], token))).Value;
             await SqlRf3Protocol.EqualAsync(new BlobReclaimResult(state.Begin.UploadId, 1, index == 0 ? 1 : 0, index == 0 ? 65536L : 17L, index == 1), state.Reclaimed[index].Value);
             await BlobScopedBytesR42Assertions.ReceiptAsync(state.Reclaimed[index].Receipt, state.Reclaims[index].CommandId, state);
-            state.Current = index == 0 ? state.Current! with { StoredBytes = 17L } : null;
+            state.Current = index == 0 ? state.Current! with
+            {
+                StoredBytes = 17L
+            } : null;
             await BlobScopedBytesR42Assertions.CurrentAsync(callers, states, token);
             if (index == 0)
             {

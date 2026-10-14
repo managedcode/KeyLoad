@@ -13,10 +13,14 @@ internal static class PhysicalOwnerDirectoryValidation
             || value.Revision <= PhysicalOwnerDirectoryProtocol.EmptyRevision || value.ControlOwner is null
             || value.Owners.IsDefault || value.Owners.Length is < MinimumOwnerCount or > PhysicalOwnerDirectoryProtocol.MaximumOwners
             || !value.Owners.All(PhysicalOwnerEntryValidation.Valid))
-        { throw Errors.Fail(ErrorCode.Corruption, PhysicalOwnerDirectoryProtocol.Malformed); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, PhysicalOwnerDirectoryProtocol.Malformed);
+        }
         var controls = value.Owners.Where(entry => PhysicalOwnerEntryValidation.SameOwner(entry.Owner, value.ControlOwner)).ToArray();
         if (controls.Length != ControlOwnerCount || !Unique(value.Owners))
-        { throw Errors.Fail(ErrorCode.Corruption, PhysicalOwnerDirectoryProtocol.Malformed); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, PhysicalOwnerDirectoryProtocol.Malformed);
+        }
     }
 
     internal static bool Unique(IEnumerable<RegisteredPhysicalOwnerV1> entries)
@@ -41,6 +45,8 @@ internal static class PhysicalOwnerDirectoryValidation
             || !PhysicalOwnerEntryValidation.Valid(request.Control)
             || !PhysicalOwnerEntryValidation.Valid(request.Destination)
             || !Unique([request.Control, request.Destination]))
-        { throw Errors.Fail(ErrorCode.Validation, PhysicalOwnerDirectoryProtocol.InvalidRegistration); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, PhysicalOwnerDirectoryProtocol.InvalidRegistration);
+        }
     }
 }

@@ -9,10 +9,18 @@ internal static class RemoteTransferDistinctHealthy
     {
         var transferId = Guid.NewGuid();
         var message = original.Message with
-        { MessageId = RemoteTransferColdProtocol.Healthy, PayloadJson = RemoteTransferColdProtocol.HealthyPayload };
+        {
+            MessageId = RemoteTransferColdProtocol.Healthy,
+            PayloadJson = RemoteTransferColdProtocol.HealthyPayload
+        };
         var create = new CommandRequest(Guid.NewGuid(), original.Scenario.SourcePartition,
             [new CreateQueueTransfer(original.Scenario.SourceQueue, transferId, original.Scenario.DestinationQueue, message)]);
-        var healthy = original with { TransferId = transferId, Message = message, Create = create };
+        var healthy = original with
+        {
+            TransferId = transferId,
+            Message = message,
+            Create = create
+        };
         await RemoteTransferDistinctCallers.WithAsync(wave, healthy, async (sdk, mcp) =>
         {
             var source = await RemoteTransferColdStages.CreateAsync(sdk, mcp, healthy, token);

@@ -12,7 +12,10 @@ internal sealed class RequestIdResponseRecorder : DelegatingHandler
     private const int MaximumReceipts = 64;
     private readonly System.Threading.Lock gate = new();
     private readonly List<RequestIdReceipt> receipts = [];
-    private bool OverflowedValue { get; set; }
+    private bool OverflowedValue
+    {
+        get; set;
+    }
 
     public bool Overflowed
     {

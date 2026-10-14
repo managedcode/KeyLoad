@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 using Microsoft.Extensions.Options;
 
@@ -22,7 +22,9 @@ internal static class RemoteModelNativeIdentity
         var destination = PhysicalOwnerConfiguredTuples.Destination(options, partition);
         if (owner is null || (!PhysicalOwnerEntryValidation.SameOwner(owner, control.Owner)
             && !PhysicalOwnerEntryValidation.SameOwner(owner, destination.Owner)))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteModelNativeProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, RemoteModelNativeProtocol.InvalidProof);
+        }
     }
 
     internal static string Secret(NodeOptions options, PartitionHost partition, PhysicalShardRecord owner)
@@ -48,7 +50,9 @@ internal static class RemoteModelNativeIdentity
             || !PhysicalGroupAddress.CanonicalAddress(request.CallerSiloAddress, membership)
             || !PhysicalGroupAddress.CanonicalAddress(request.DestinationSiloAddress, membership)
             || request.Nonce == Guid.Empty || request.ExpiresAt.Offset != TimeSpan.Zero)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteModelNativeProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, RemoteModelNativeProtocol.InvalidProof);
+        }
     }
 
     internal static bool ReplyShape(RemoteModelNativeReply reply, long maximum)

@@ -266,11 +266,15 @@ internal static class McpMemoryProjectionComponents
     {
         ArgumentOutOfRangeException.ThrowIfNegative(bytes);
         if (bytes <= MinimumCapacity)
-        { return MinimumCapacity; }
+        {
+            return MinimumCapacity;
+        }
         var rounded = System.Numerics.BitOperations.RoundUpToPowerOf2((ulong)bytes);
         const ulong PowerOfTwoOverflow = 0;
         if (rounded == PowerOfTwoOverflow || rounded > (ulong)long.MaxValue)
-        { throw new OverflowException(); }
+        {
+            throw new OverflowException();
+        }
         return (long)rounded;
     }
 }

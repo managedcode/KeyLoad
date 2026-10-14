@@ -27,7 +27,10 @@ internal static class AuthorizationMalformedHttpExportFlow
         using (var caller = new AuthorizationTelemetryCallerActivities(AuthorizationUnsafeSpanState.None))
         {
             await AuthorizationTelemetryNativeAssertions.CallerAsync(caller);
-            using var healthy = await SendAsync(fixture, payload with { AfterName = null }, malformed: false, deadline.Token);
+            using var healthy = await SendAsync(fixture, payload with
+            {
+                AfterName = null
+            }, malformed: false, deadline.Token);
             await Assert.That(healthy.StatusCode).IsEqualTo(HttpStatusCode.OK);
             var catalog = await healthy.Content.ReadFromJsonAsync<AdminResourcesPage>(JsonDefaults.Options, deadline.Token);
             await AuthorizationTelemetryAssertions.CatalogAsync(catalog!, partition, position);

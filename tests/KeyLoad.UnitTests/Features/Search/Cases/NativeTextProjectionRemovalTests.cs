@@ -49,11 +49,17 @@ internal sealed class NativeTextProjectionRemovalTests
         var position = db.Store.Position;
         await Assert.That(await engine.SearchAsync(Principal, request, token)).IsEmpty();
         await LiteralAsync(db, await engine.SearchAsync(Principal,
-            request with { Text = NewTerm }, token), [One], NewJson, NextRevision, FirstRank);
+            request with
+            {
+                Text = NewTerm
+            }, token), [One], NewJson, NextRevision, FirstRank);
         await Assert.That(Snapshot(db)).IsEquivalentTo(before, CollectionOrdering.Matching);
         await Assert.That(db.Store.Position).IsEqualTo(position);
         db.Commit(new PutDocument(Collection, Three, NewJson));
-        var healthy = await engine.SearchAsync(Principal, request with { Text = NewTerm }, token);
+        var healthy = await engine.SearchAsync(Principal, request with
+        {
+            Text = NewTerm
+        }, token);
         await Assert.That(healthy.Select(row => row.Document.Reference.Id).ToArray())
             .IsEquivalentTo([One, Three], CollectionOrdering.Matching);
         await LiteralAsync(db, [healthy[0]], [One], NewJson, NextRevision, FirstRank);
@@ -68,7 +74,9 @@ internal sealed class NativeTextProjectionRemovalTests
     {
         var page = view.Scan([], SnapshotBound);
         if (page.HasMore)
-        { throw new InvalidOperationException("The native removal fixture exceeds its complete snapshot bound."); }
+        {
+            throw new InvalidOperationException("The native removal fixture exceeds its complete snapshot bound.");
+        }
         return page.Records.Select(row => (Convert.ToHexString(row.Key.Span), Convert.ToHexString(row.Value.Span))).ToArray();
     });
 

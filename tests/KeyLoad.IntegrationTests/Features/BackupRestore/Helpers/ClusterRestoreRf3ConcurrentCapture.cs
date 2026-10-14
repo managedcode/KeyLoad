@@ -19,12 +19,18 @@ internal static class ClusterRestoreRf3ConcurrentCapture
             SqlRf3Protocol.McpAsync<ClusterBackupOwnerReceipt>(official, sql, cancellationToken));
         ClusterBackupOwnerReceipt[] actual;
         try
-        { actual = await children.ConfigureAwait(false); }
+        {
+            actual = await children.ConfigureAwait(false);
+        }
         catch (Exception failure)
-        { throw children.Exception ?? new AggregateException(failure); }
+        {
+            throw children.Exception ?? new AggregateException(failure);
+        }
         var original = actual[FirstResult];
         foreach (var receipt in actual)
-        { await SqlRf3Protocol.EqualAsync(original, receipt); }
+        {
+            await SqlRf3Protocol.EqualAsync(original, receipt);
+        }
         return original;
     }
 

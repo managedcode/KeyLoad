@@ -20,12 +20,16 @@ internal static class EventVectorControlOpen
         var request = phase.OriginalRequest;
         if (phase.Action != EventVectorControlAction.Open || expiresAt <= default(DateTimeOffset)
             || transaction.GetRecord<EventVectorMap>(EventVectorKeys.Map(request.ControlPartition, request.MapId)) is not null)
-        { throw Errors.Fail(ErrorCode.Conflict, InvalidOpen); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, InvalidOpen);
+        }
         var witness = EventVectorCoverageWitnessEncoding.Read(phase.OriginalCoverageWitness, request, admission);
         var projection = NativeSerialization.Deserialize<EventVectorCoverageSemanticIdentity>(
             witness.OriginalSemanticProjectionBytes.Span);
         if (!phase.OriginalEncodedEntries.Span.SequenceEqual(projection.OriginalEncodedEntries.Span))
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidOpen); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidOpen);
+        }
         var page = new EventVectorPage
         {
             Version = Version,
@@ -62,7 +66,10 @@ internal static class EventVectorControlOpen
             EventVectorControlFirstPin.Require(map, phase, first, admission);
             payload = payload.Add(EventVectorEncodedRow.Create(
                 EventVectorKeys.Phase(map.ControlPartition, map.MapId, first.PhaseCommandId), first, admission));
-            map = map with { PendingPhaseId = first.PhaseCommandId };
+            map = map with
+            {
+                PendingPhaseId = first.PhaseCommandId
+            };
         }
         return EventVectorMapWriter.Write(transaction, map, payload, options, cancellationToken);
     }

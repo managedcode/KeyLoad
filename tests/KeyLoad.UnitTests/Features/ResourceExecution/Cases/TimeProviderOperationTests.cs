@@ -46,7 +46,10 @@ internal sealed class TimeProviderOperationTests
     public async Task DefaultQueryClockExpiresWithoutSleepingAndPreservesCommittedDocument()
     {
         var clock = new ControlledReadClock(Epoch);
-        using var fixture = new TestDatabase(new() { QueryDeadlineSeconds = DeadlineSeconds }, timeProvider: clock);
+        using var fixture = new TestDatabase(new()
+        {
+            QueryDeadlineSeconds = DeadlineSeconds
+        }, timeProvider: clock);
         fixture.Configure(Collection, ResourceKind.Collection);
         fixture.Commit(new PutDocument(Collection, Entity, Json));
         var before = fixture.Store.Position;
@@ -89,7 +92,10 @@ internal sealed class TimeProviderOperationTests
         using var fixture = new TestDatabase(timeProvider: clock);
         fixture.Configure(Collection, ResourceKind.Collection);
         fixture.Commit(new PutDocument(Collection, Entity, Json));
-        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new() { QueryDeadlineSeconds = DeadlineSeconds }), clock);
+        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new()
+        {
+            QueryDeadlineSeconds = DeadlineSeconds
+        }), clock);
         var before = fixture.Store.Position;
         clock.MoveUtc(Epoch.AddYears(1));
         var record = fixture.Store.Read(view => budget.CreateView(view).GetRecord<DocumentRecord>(

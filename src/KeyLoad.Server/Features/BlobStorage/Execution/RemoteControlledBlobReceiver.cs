@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server.Features.DocumentStorage;
 using Microsoft.Extensions.Options;
 
@@ -42,7 +42,9 @@ internal sealed class RemoteControlledBlobReceiver(OrleansNode node, PartitionHo
                     Errors.Fail(terminal, reply.SafeDetail ?? RemoteDocumentProtocol.Unavailable));
                 }
                 if (reply.Error is { } error)
-                { throw Errors.Fail(error, reply.SafeDetail ?? RemoteDocumentProtocol.Unavailable); }
+                {
+                    throw Errors.Fail(error, reply.SafeDetail ?? RemoteDocumentProtocol.Unavailable);
+                }
                 result = GrainNativePayload.Read<GrainValue>(reply.Payload).Value as ControlledBlobReadResult
                     ?? throw Errors.Fail(ErrorCode.Corruption, RemoteDocumentProtocol.InvalidProof);
             }, failures).ConfigureAwait(false);

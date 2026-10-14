@@ -59,7 +59,10 @@ internal sealed record ThreeWayHybridRf3Scenario(PartitionRef Partition)
         var search = new SearchRequest(Partition, Documents, TextField, "signal", VectorField, [1, 0], Space,
             Limit: 10, TextWeight: allZero ? 0 : TextWeight, VectorWeight: allZero ? 0 : VectorWeight,
             FusionConstant: FusionConstant, AllowedIds: allowed);
-        var retrieveWalk = Walk(RetrieveRoot, 4) with { Labels = labeled ? ImmutableArray.Create("related") : null };
+        var retrieveWalk = Walk(RetrieveRoot, 4) with
+        {
+            Labels = labeled ? ImmutableArray.Create("related") : null
+        };
         return new(1, search,
             Scope: restricted ? new(Walk(ScopeRoot, 2)) : null,
             Retriever: new(retrieveWalk, allZero ? 0 : GraphWeight),
@@ -122,7 +125,11 @@ internal sealed record ThreeWayHybridRf3Scenario(PartitionRef Partition)
     internal static async Task RevokeAsync(ClusterFixture fixture, McpPersistedIdentity identity,
         CancellationToken cancellationToken)
     {
-        var revoked = identity.Principal with { Revoked = true, PolicyEpoch = identity.Principal.PolicyEpoch + 1 };
+        var revoked = identity.Principal with
+        {
+            Revoked = true,
+            PolicyEpoch = identity.Principal.PolicyEpoch + 1
+        };
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node2);
         var admin = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         await McpCallerAssertions.SdkSuccessAsync(await admin.ConfigurePrincipalAsync(Guid.NewGuid(), revoked,

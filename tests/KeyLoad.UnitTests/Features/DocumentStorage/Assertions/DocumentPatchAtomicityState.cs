@@ -34,7 +34,9 @@ internal sealed record DocumentPatchAtomicityState(long Position, long Applied, 
     {
         var page = work.Scan(view, prefix, limit);
         if (page.HasMore)
-        { throw new InvalidOperationException("The genuine document fixture exceeded its bounded complete inventory."); }
+        {
+            throw new InvalidOperationException("The genuine document fixture exceeded its bounded complete inventory.");
+        }
         return NativeSerialization.Serialize(page);
     }
 
@@ -42,7 +44,9 @@ internal sealed record DocumentPatchAtomicityState(long Position, long Applied, 
     {
         await Assert.That(actual.Domain.Length).IsEqualTo(Domain.Length);
         for (var index = 0; index < Domain.Length; index++)
-        { await DocumentPatchAtomicityAssertions.BytesAsync(Domain[index], actual.Domain[index]); }
+        {
+            await DocumentPatchAtomicityAssertions.BytesAsync(Domain[index], actual.Domain[index]);
+        }
     }
 
     internal async Task RequireAsync(DocumentPatchAtomicityState actual)

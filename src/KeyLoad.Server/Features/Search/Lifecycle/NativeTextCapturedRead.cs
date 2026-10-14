@@ -39,16 +39,29 @@ internal sealed partial class NativeTextCapturedRead : ICapturedTextRead
         builder = new(native, Admit);
     }
 
-    public PrincipalRecord Principal { get; }
-    public ResourceDefinition Resource { get; }
-    public ITextProjectionLease OriginalProjection { get; }
+    public PrincipalRecord Principal
+    {
+        get;
+    }
+    public ResourceDefinition Resource
+    {
+        get;
+    }
+    public ITextProjectionLease OriginalProjection
+    {
+        get;
+    }
 
     private void Admit(long bytes, int records)
     {
         ObjectDisposedException.ThrowIf(disposed, this);
         if (!grant.IsCompleted)
-        { budget.ImportReadGrant(grant, bytes, records); }
+        {
+            budget.ImportReadGrant(grant, bytes, records);
+        }
         else
-        { budget.ChargeBytes(bytes); }
+        {
+            budget.ChargeBytes(bytes);
+        }
     }
 }

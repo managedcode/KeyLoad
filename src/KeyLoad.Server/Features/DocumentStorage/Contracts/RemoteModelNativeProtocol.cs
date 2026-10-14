@@ -13,7 +13,7 @@ internal static class RemoteModelNativeProtocol
     internal const string NativeReplyPurpose = "KeyLoad.RemoteModel.Native.Reply.v1";
     internal const int MaximumFrameBytes = 512;
     internal const int MaximumEnvelopeBytes = RemoteDocumentProtocol.MaximumBodyBytes
-        + global::KeyLoad.Orleans.ReplicaTransportProtocol.MaximumMetadataBytes;
+        + global::KeyLoad.Clustering.ReplicaTransportProtocol.MaximumMetadataBytes;
     internal const string InvalidProof = "The native remote model proof is invalid.";
     internal const string Unavailable = "The configured model owner is unavailable.";
 }

@@ -1,4 +1,4 @@
-using KeyLoad.Orleans.Features.ResourceExecution;
+using KeyLoad.Clustering.Features.ResourceExecution;
 using static KeyLoad.UnitTests.Features.ResourceExecution.CacheControlWireAuthenticatorSupport;
 
 namespace KeyLoad.UnitTests.Features.ResourceExecution;
@@ -17,13 +17,22 @@ internal sealed class CacheControlWireNestedProofAuthenticationTests
         var validReplyMac = CacheControlWireHmacTestSupport.ComputeOuterMac(signedReady);
         var invalidNestedReply = signedReady with
         {
-            Proof = signedReady.Proof! with { Mac = CacheControlWireTestData.Digest(0x89) }
+            Proof = signedReady.Proof! with
+            {
+                Mac = CacheControlWireTestData.Digest(0x89)
+            }
         };
 
         await Assert.That(validGrantMac.FixedTimeEquals(signedGrant.Mac)).IsTrue();
-        await Assert.That(authenticator.TryAuthenticate(signedGrant with { Mac = validGrantMac })).IsTrue();
+        await Assert.That(authenticator.TryAuthenticate(signedGrant with
+        {
+            Mac = validGrantMac
+        })).IsTrue();
         await Assert.That(validReplyMac.FixedTimeEquals(signedReady.Mac)).IsTrue();
-        await Assert.That(authenticator.TryAuthenticate(signedReady with { Mac = validReplyMac })).IsTrue();
+        await Assert.That(authenticator.TryAuthenticate(signedReady with
+        {
+            Mac = validReplyMac
+        })).IsTrue();
         await AssertForgedGrantProofsRejectedAsync(authenticator, signedGrant);
         await AssertForgedPrepareProofRejectedAsync(authenticator, invalidNestedReply);
     }
@@ -37,7 +46,10 @@ internal sealed class CacheControlWireNestedProofAuthenticationTests
             var signAccepted = authenticator.TrySign(invalid, out var signed);
             var completeAccepted = CacheControlWire.TryEncodeSigned(invalid, out var complete);
             var signingAccepted = CacheControlWire.TryEncodeForSigning(invalid, out var signing);
-            var forged = invalid with { Mac = CacheControlWireHmacTestSupport.ComputeOuterMac(invalid) };
+            var forged = invalid with
+            {
+                Mac = CacheControlWireHmacTestSupport.ComputeOuterMac(invalid)
+            };
 
             await Assert.That(signAccepted).IsFalse();
             await Assert.That(signed).IsNull();
@@ -55,7 +67,10 @@ internal sealed class CacheControlWireNestedProofAuthenticationTests
         var signAccepted = authenticator.TrySign(invalid, out var signed);
         var completeAccepted = CacheControlWire.TryEncodeSigned(invalid, out var complete);
         var signingAccepted = CacheControlWire.TryEncodeForSigning(invalid, out var signing);
-        var forged = invalid with { Mac = CacheControlWireHmacTestSupport.ComputeOuterMac(invalid) };
+        var forged = invalid with
+        {
+            Mac = CacheControlWireHmacTestSupport.ComputeOuterMac(invalid)
+        };
 
         await Assert.That(signAccepted).IsFalse();
         await Assert.That(signed).IsNull();
@@ -68,7 +83,10 @@ internal sealed class CacheControlWireNestedProofAuthenticationTests
 
     private static CacheGrantRequest MutateNestedGrantProof(CacheGrantRequest grant, int slot)
     {
-        var proof = GrantProof(grant, slot) with { Mac = CacheControlWireTestData.Digest((byte)(0x80 + slot)) };
+        var proof = GrantProof(grant, slot) with
+        {
+            Mac = CacheControlWireTestData.Digest((byte)(0x80 + slot))
+        };
         return slot switch
         {
             0 => grant with { Slot0Proof = proof },

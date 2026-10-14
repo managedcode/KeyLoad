@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using ZoneTree.AbstractFileStream;
 
 namespace KeyLoad.Server.Features.Search;
@@ -22,7 +22,9 @@ internal sealed class NativeTextBoundedStreamWrites(IFileStream original, Native
         {
             ObjectDisposedException.ThrowIf(closing, this);
             if (retained is not null)
-            { throw new AggregateException(retained); }
+            {
+                throw new AggregateException(retained);
+            }
             reservation = resources.ReserveFile(original.FilePath, targetLength(), () => original.Length, group);
         }, failures);
         if (failures.Count != NoFailures)
@@ -42,7 +44,9 @@ internal sealed class NativeTextBoundedStreamWrites(IFileStream original, Native
         {
             ObjectDisposedException.ThrowIf(closing, this);
             if (retained is not null)
-            { throw new AggregateException(retained); }
+            {
+                throw new AggregateException(retained);
+            }
             result = mutation();
         }, failures);
         ServerFailureObserver.Observe(Exit, failures);
@@ -58,7 +62,9 @@ internal sealed class NativeTextBoundedStreamWrites(IFileStream original, Native
         var beforeSettlement = failures.Count;
         ServerFailureObserver.Observe(reservation.CompleteAfterJoinedWrite, failures);
         if (failures.Count != beforeSettlement)
-        { retained = failures.Count == SingleFailure ? failures[FirstFailure] : new AggregateException(failures); }
+        {
+            retained = failures.Count == SingleFailure ? failures[FirstFailure] : new AggregateException(failures);
+        }
         ServerFailureObserver.Observe(Exit, failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -69,7 +75,9 @@ internal sealed class NativeTextBoundedStreamWrites(IFileStream original, Native
         var reservation = BeginWrite(bytes.Length);
         var failures = new List<Exception>();
         try
-        { await original.WriteAsync(bytes, token).ConfigureAwait(false); }
+        {
+            await original.WriteAsync(bytes, token).ConfigureAwait(false);
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         Complete(reservation, failures);
@@ -78,7 +86,9 @@ internal sealed class NativeTextBoundedStreamWrites(IFileStream original, Native
     internal void ThrowRetained()
     {
         if (retained is not null)
-        { ServerFailureObserver.ThrowIfAny([retained]); }
+        {
+            ServerFailureObserver.ThrowIfAny([retained]);
+        }
     }
 
     private void Enter()
@@ -87,7 +97,9 @@ internal sealed class NativeTextBoundedStreamWrites(IFileStream original, Native
         {
             ObjectDisposedException.ThrowIf(closing, this);
             if (active is not null)
-            { throw NativeTextErrors.Busy(); }
+            {
+                throw NativeTextErrors.Busy();
+            }
             active = new(TaskCreationOptions.RunContinuationsAsynchronously);
         }
     }

@@ -16,14 +16,19 @@ internal static class PartitionMovementReceiverIssueFailoverRf3LostObservation
         // Consume the exact three existing kill receipts before the shared six-stop/cold owner helper.
         // The settled failed ingress cannot dispatch or observe while these resources restart.
         foreach (var node in TwoRf3MembershipProtocol.Nodes.Skip(TwoRf3MembershipProtocol.MembersPerGroup))
-        { await wave.RemoteRuntime.RestartAsync(node, cancellationToken).ConfigureAwait(false); }
+        {
+            await wave.RemoteRuntime.RestartAsync(node, cancellationToken).ConfigureAwait(false);
+        }
         var originalId = PartitionMovementReceiverIssueFailoverRf3NativeCut.StageId(seed);
         var before = await PartitionMovementPublicParentRf3Cut.StopAndReadAsync(wave, seed.FirstRequest,
             originalId, cancellationToken).ConfigureAwait(false);
         var original = PartitionMovementReceiverIssueFailoverRf3NativeCut.Pending(before);
         await PartitionMovementReceiverIssueFailoverRf3NativeCut.RequireUnknownAsync(before, original, observed: false);
         await PartitionMovementPublicParentRf3Cut.RestartAsync(wave, cancellationToken).ConfigureAwait(false);
-        var resume = await seed.Source.MovePartitionAsync(seed.FirstRequest with { Mode = PartitionMoveMode.Resume },
+        var resume = await seed.Source.MovePartitionAsync(seed.FirstRequest with
+        {
+            Mode = PartitionMoveMode.Resume
+        },
             cancellationToken).ConfigureAwait(false);
         await Assert.That(resume.IsFailed).IsTrue();
         await Assert.That(resume.Value).IsNull();

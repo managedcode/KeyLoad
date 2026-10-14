@@ -32,7 +32,10 @@ internal static class BlobCompleteCasPublicReplay
     {
         loser.Abort = new(Guid.NewGuid(), loser.Begin.Blob, loser.Begin.UploadId);
         loser.Aborted = (await McpCallerAssertions.SuccessAsync<BlobCommitResult<BlobUploadInfo>>(await callers.Mcp.CallAsync("keyload_blobs_abort_upload", loser.Abort, token))).Value;
-        loser.Current = loser.Written.Value with { Status = BlobUploadStatus.Aborted };
+        loser.Current = loser.Written.Value with
+        {
+            Status = BlobUploadStatus.Aborted
+        };
         await SqlRf3Protocol.EqualAsync(loser.Current, loser.Aborted.Value);
         await BlobCompleteCasPublicAssertions.ReceiptAsync(callers, loser.Aborted.Receipt, loser.Abort.CommandId, loser.Begin.Blob, token);
         await BlobCompleteCasPublicAssertions.CurrentAsync(callers, uploads, head, token);

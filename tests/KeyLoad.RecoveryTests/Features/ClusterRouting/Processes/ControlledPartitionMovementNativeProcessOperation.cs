@@ -52,16 +52,22 @@ internal static class ControlledPartitionMovementNativeProcessOperation
         IOptions<NativeProcessReadinessOptions> readiness, TimeProvider clock, List<Exception> failures)
     {
         if (owners is not null)
-        { await ServerFailureObserver.ObserveAsync(() => owners.CloseRetainingRootAsync().AsTask(), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => owners.CloseRetainingRootAsync().AsTask(), failures);
+        }
         using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(
             CommandIdempotencyProcessRecoveryTests.CleanupTimeoutSeconds), clock);
         if (root is not null)
         {
             await ServerFailureObserver.ObserveAsync(() => RequireRootsAsync(root, readiness, clock, cleanup.Token), failures);
             if (failures.Count == 0)
-            { ServerFailureObserver.Observe(() => Directory.Delete(root, recursive: true), failures); }
+            {
+                ServerFailureObserver.Observe(() => Directory.Delete(root, recursive: true), failures);
+            }
             foreach (var failure in failures)
-            { failure.Data[RetainedRoot] = root; }
+            {
+                failure.Data[RetainedRoot] = root;
+            }
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -72,7 +78,9 @@ internal static class ControlledPartitionMovementNativeProcessOperation
         var replies = await ControlledPartitionMovementNativeProcessSeed.SubmitAsync(owners.Source, cancellationToken);
         await Assert.That(replies.Length).IsEqualTo(OriginalReplyCount);
         foreach (var reply in replies)
-        { await Assert.That(reply.Error).IsNull(); }
+        {
+            await Assert.That(reply.Error).IsNull();
+        }
         var seed = await ControlledPartitionMovementNativeProcessAssertions.SeedAsync(owners.Source, replies[^1], cancellationToken);
         var blobReplies = await ControlledPartitionMovementNativeProcessBlob.PublishAsync(owners.Source, cancellationToken);
         await Assert.That(blobReplies.Replies.Length).IsEqualTo(OriginalReplyCount);

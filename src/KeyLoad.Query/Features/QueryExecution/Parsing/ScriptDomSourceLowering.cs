@@ -10,17 +10,25 @@ internal static class ScriptDomSourceLowering
     {
         context.Observe(RootDepth);
         if (table is Dom.TableReferenceWithAlias { ForPath: true })
-        { throw ScriptDomErrors.Unsupported(); }
+        {
+            throw ScriptDomErrors.Unsupported();
+        }
         if (table is Dom.NamedTableReference named)
         {
             if (named.TableHints.Count != EmptyCount || named.TableSampleClause is not null || named.TemporalClause is not null)
-            { throw ScriptDomErrors.Unsupported(); }
+            {
+                throw ScriptDomErrors.Unsupported();
+            }
             return (ScriptDomNames.Object(named.SchemaObject), Alias(named.Alias), null);
         }
         if (table is not Dom.SchemaObjectFunctionTableReference function)
-        { throw ScriptDomErrors.Unsupported(); }
+        {
+            throw ScriptDomErrors.Unsupported();
+        }
         if (function.Columns.Count != EmptyCount)
-        { throw ScriptDomErrors.Unsupported(); }
+        {
+            throw ScriptDomErrors.Unsupported();
+        }
         var name = ScriptDomNames.Object(function.SchemaObject);
         var values = function.Parameters;
         var alias = Alias(function.Alias);
@@ -42,13 +50,17 @@ internal static class ScriptDomSourceLowering
         if (StringComparer.OrdinalIgnoreCase.Equals(name, SqlSyntax.Events)
             || StringComparer.OrdinalIgnoreCase.Equals(name, SqlSyntax.QueueMessages)
             || StringComparer.OrdinalIgnoreCase.Equals(name, SqlSyntax.TopicEvents))
-        { throw ScriptDomErrors.Invalid(); }
+        {
+            throw ScriptDomErrors.Invalid();
+        }
         throw ScriptDomErrors.Unsupported();
     }
     private static string? Alias(Dom.Identifier? alias)
     {
         if (alias is null)
-        { return null; }
+        {
+            return null;
+        }
         global::KeyLoad.Core.JsonData.Identifier(alias.Value);
         return alias.Value;
     }
@@ -62,41 +74,57 @@ internal static class ScriptDomSourceLowering
     private static string StringParameter(Dom.ScalarExpression expression, ScriptDomLoweringContext context)
     {
         if (expression is not (Dom.VariableReference or Dom.MoneyLiteral))
-        { throw ScriptDomErrors.Invalid(); }
+        {
+            throw ScriptDomErrors.Invalid();
+        }
         var name = ScriptDomParameterLowering.Name(expression, context);
         if (context.Parameters is null || !context.Parameters.TryGetValue(name, out var value)
             || value.ValueKind != global::System.Text.Json.JsonValueKind.String || value.GetString() is not { } text)
-        { throw ScriptDomErrors.Invalid(); }
+        {
+            throw ScriptDomErrors.Invalid();
+        }
         return text;
     }
     private static long Generation(IList<Dom.ScalarExpression> values, int index, ScriptDomLoweringContext context)
     {
         if (values.Count == index)
-        { return FirstGeneration; }
+        {
+            return FirstGeneration;
+        }
         context.Observe(RootDepth);
         long generation;
         if (values[index] is Dom.UnaryExpression unary && unary.Expression is Dom.IntegerLiteral signed)
         {
             if (unary.UnaryExpressionType is not (Dom.UnaryExpressionType.Positive or Dom.UnaryExpressionType.Negative))
-            { throw ScriptDomErrors.Unsupported(); }
+            {
+                throw ScriptDomErrors.Unsupported();
+            }
             var text = (unary.UnaryExpressionType == Dom.UnaryExpressionType.Negative ? Negative : Positive) + signed.Value;
             if (!long.TryParse(text, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out generation))
-            { throw ScriptDomErrors.Invalid(); }
+            {
+                throw ScriptDomErrors.Invalid();
+            }
         }
         else if (values[index] is Dom.IntegerLiteral value)
         {
             if (!long.TryParse(value.Value, NumberStyles.None, CultureInfo.InvariantCulture, out generation))
-            { throw ScriptDomErrors.Invalid(); }
+            {
+                throw ScriptDomErrors.Invalid();
+            }
         }
         else
         {
             var name = ScriptDomParameterLowering.Name(values[index], context);
             if (context.Parameters is null || !context.Parameters.TryGetValue(name, out var parameter)
                 || parameter.ValueKind != global::System.Text.Json.JsonValueKind.Number || !parameter.TryGetInt64(out generation))
-            { throw ScriptDomErrors.Invalid(); }
+            {
+                throw ScriptDomErrors.Invalid();
+            }
         }
         if (generation < FirstGeneration)
-        { throw ScriptDomErrors.Invalid(); }
+        {
+            throw ScriptDomErrors.Invalid();
+        }
         return generation;
     }
     private const long FirstGeneration = 1;

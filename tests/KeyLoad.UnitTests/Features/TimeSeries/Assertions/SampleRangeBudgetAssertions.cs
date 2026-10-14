@@ -15,7 +15,9 @@ internal static class SampleRangeBudgetAssertions
     {
         var cut = SampleRawIntegrityAssertions.Capture(fixture.Store);
         if (fault == SampleRangeBudgetFault.CumulativeResponse)
-        { await CumulativeAsync(fixture); }
+        {
+            await CumulativeAsync(fixture);
+        }
         else
         {
             var failure = Assert.ThrowsExactly<KeyLoadException>(() => RefuseInvalid(fixture, fault));

@@ -12,7 +12,9 @@ internal static class ClusterRestoreRf3BuilderCleanup
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(actualStage, failures).ConfigureAwait(false);
         if (failures.Count != EmptyFailures)
-        { await ServerFailureObserver.ObserveAsync(() => builder.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => builder.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 

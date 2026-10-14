@@ -19,7 +19,9 @@ internal static class Bm25OriginalExpiryAssertions
             var page = work.Scan(view, Bm25CorpusKeys.Prefix(owner.Source.Partition),
                 owner.Source.Database.Limits.MaxScanRecords);
             if (page.HasMore)
-            { throw new InvalidOperationException("The original corpus family exceeded its inspection bound."); }
+            {
+                throw new InvalidOperationException("The original corpus family exceeded its inspection bound.");
+            }
             return page.Records.Select(row => Convert.ToHexString(row.Key.Span)
                 + ":" + Convert.ToHexString(row.Value.Span)).ToArray();
         });

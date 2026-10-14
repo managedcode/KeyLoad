@@ -20,9 +20,6 @@ internal static class QueryValidation
     private const string ModelQueryContinuationIsNotSupportedDetail = "Model query continuation is not supported.";
     private const int AdjacentElementOffset = 1;
     private const string ModelQuerySourceArgumentsAreInvalidDetail = "The model query source arguments are invalid.";
-    private const string QueryProjectionEntryIsMissingDetail = "A query projection entry is missing.";
-    private const string QueryProjectionHasDuplicateAliasesOrAnInvalidStarDetail = "The query projection has duplicate aliases or an invalid star.";
-    private const string QueryOrderingEntryIsMissingDetail = "A query ordering entry is missing.";
     private const int EmptyElementCount = 0;
 
     private const string InvalidPath = "The query field path is invalid.";
@@ -54,8 +51,8 @@ internal static class QueryValidation
             throw Errors.Fail(ErrorCode.BudgetExceeded, QueryStructureExceedsItsBudgetDetail);
         }
 
-        var projection = NormalizeProjection(query.Projection, limits);
-        var order = NormalizeOrder(query.Order, limits);
+        var projection = QuerySelectionNormalization.Projection(query.Projection, limits.MaxQueryDepth);
+        var order = QuerySelectionNormalization.Order(query.Order, limits.MaxQueryDepth);
         ValidateJoinVersion(request, query, projection);
         var join = NormalizeJoin(query.InnerJoin, limits);
         if (join is not null)
@@ -71,7 +68,14 @@ internal static class QueryValidation
         global::KeyLoad.Query.Features.QueryExecution.EventEntityRefJoinBinding.ValidateJoinPredicate(query, filter, parameters);
         var normalized = request with
         {
-            Query = query with { Alias = join is null ? null : query.Alias, Projection = projection, Order = order, Filter = filter, InnerJoin = join },
+            Query = query with
+            {
+                Alias = join is null ? null : query.Alias,
+                Projection = projection,
+                Order = order,
+                Filter = filter,
+                InnerJoin = join
+            },
             Parameters = parameters
         };
         if (JsonDefaults.Serialize(normalized).Length > limits.MaxQueryBytes)
@@ -124,7 +128,11 @@ internal static class QueryValidation
         JsonData.Identifier(join.Alias);
         var leftPath = CanonicalPath(join.LeftKeyPath, limits.MaxQueryDepth);
         var rightPath = CanonicalPath(join.RightKeyPath, limits.MaxQueryDepth);
-        return join with { LeftKeyPath = leftPath, RightKeyPath = rightPath };
+        return join with
+        {
+            LeftKeyPath = leftPath,
+            RightKeyPath = rightPath
+        };
     }
 
     private static string CanonicalPath(string path, int maximumDepth)
@@ -164,41 +172,6 @@ internal static class QueryValidation
             throw Errors.Fail(ErrorCode.Validation, ModelQuerySourceArgumentsAreInvalidDetail);
         }
     }
-
-    private static ImmutableArray<Selection> NormalizeProjection(ImmutableArray<Selection> input, DatabaseLimits limits)
-    {
-        var projection = input.Select(selection =>
-        {
-            if (selection is null)
-            {
-                throw Errors.Fail(ErrorCode.Validation, QueryProjectionEntryIsMissingDetail);
-            }
-            Path(selection.Path, limits.MaxQueryDepth, true);
-            JsonData.Identifier(selection.Alias);
-            if (selection.SourceAlias is not null)
-            {
-                JsonData.Identifier(selection.SourceAlias);
-            }
-            return selection with { };
-        }).ToImmutableArray();
-        if (projection.Select(s => s.Alias).Distinct(StringComparer.Ordinal).Count() != projection.Length
-            || projection.Length > MinimumPositiveCount && projection.Any(s => s.Path == SqlSyntax.Star))
-        {
-            throw Errors.Fail(ErrorCode.Validation, QueryProjectionHasDuplicateAliasesOrAnInvalidStarDetail);
-        }
-        return projection;
-    }
-
-    private static ImmutableArray<Ordering> NormalizeOrder(ImmutableArray<Ordering> input, DatabaseLimits limits)
-        => input.Select(item =>
-        {
-            if (item is null)
-            {
-                throw Errors.Fail(ErrorCode.Validation, QueryOrderingEntryIsMissingDetail);
-            }
-            Path(item.Path, limits.MaxQueryDepth);
-            return item with { };
-        }).ToImmutableArray();
 
     private static Dictionary<string, JsonElement>? NormalizeParameters(Dictionary<string, JsonElement>? parameters,
         QueryPredicateNormalizer predicates) => parameters is not { Count: > EmptyElementCount } ? null : parameters.ToDictionary(item =>

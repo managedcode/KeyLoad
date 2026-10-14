@@ -1,5 +1,5 @@
 using System.Collections.Immutable;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Query;
 
 namespace KeyLoad.UnitTests.Features.InternalSerialization;
@@ -57,7 +57,10 @@ internal sealed class NativePublicReadElementsTests
         database.Configure(NativePublicReadFixture.Collection, ResourceKind.Collection);
         database.Configure(NativePublicReadFixture.Graph, ResourceKind.Graph);
         var start = new EntityRef(database.Partition, NativePublicReadFixture.Collection, NativePublicReadFixture.Start);
-        var end = start with { Id = NativePublicReadFixture.End };
+        var end = start with
+        {
+            Id = NativePublicReadFixture.End
+        };
         database.Commit(new PutDocument(start.Collection, start.Id, "{}"), new PutDocument(end.Collection, end.Id, "{}"),
             new UpsertEdge(NativePublicReadFixture.Graph, NativePublicReadFixture.Edge, start, end, NativePublicReadFixture.Label));
         ImmutableArray<string> labels = onlyNull ? [null!] : [null!, NativePublicReadFixture.Label];

@@ -11,10 +11,14 @@ internal static class BlobScopedBytesR42Trial
         {
             var states = await BlobScopedBytesR42Seed.CreateAsync(callers, token);
             foreach (var state in states.Take(4))
-            { await BlobScopedBytesR42Publication.WriteAsync(callers, state, states, token); }
+            {
+                await BlobScopedBytesR42Publication.WriteAsync(callers, state, states, token);
+            }
             await BlobScopedBytesR42Cleanup.RunAsync(callers, states, token);
             foreach (var state in states.Skip(1).Take(3))
-            { await BlobScopedBytesR42Publication.CompleteAsync(callers, state, states, token); }
+            {
+                await BlobScopedBytesR42Publication.CompleteAsync(callers, state, states, token);
+            }
             await BlobScopedBytesR42Replay.RunAsync(callers, states, token);
             return states;
         }, token);
@@ -22,7 +26,11 @@ internal static class BlobScopedBytesR42Trial
         {
             await NativeTextProtectedPublicColdRestart.RunAsync(fixture, token);
             _ = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey, async callers =>
-            { await BlobScopedBytesR42Assertions.CurrentAsync(callers, states, token); await BlobScopedBytesR42Replay.RunAsync(callers, states, token); return true; }, token);
+            {
+                await BlobScopedBytesR42Assertions.CurrentAsync(callers, states, token);
+                await BlobScopedBytesR42Replay.RunAsync(callers, states, token);
+                return true;
+            }, token);
         }
     }
 }

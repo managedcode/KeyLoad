@@ -16,25 +16,21 @@ internal sealed class CommittedResponseEndpoint(ConnectionNativeScenario scenari
     internal TaskCompletionSource FirstJoined { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
     internal TaskCompletionSource Aborted { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
     internal TaskCompletionSource<Exception> Failure { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
-    internal CommitReceipt? Original { get; private set; }
-    internal byte[]? OriginalNativeReply { get; private set; }
+    internal CommitReceipt? Original
+    {
+        get; private set;
+    }
+    internal byte[]? OriginalNativeReply
+    {
+        get; private set;
+    }
 
     internal async Task HandleAsync(HttpContext context)
     {
         var first = Interlocked.Increment(ref count) == CommittedResponseProtocol.FirstRequest;
         try
         {
-            if (count > CommittedResponseProtocol.MaximumRequests ||
-                context.Request.Headers[CommittedResponseProtocol.Authorization].SingleOrDefault() !=
-                CommittedResponseProtocol.Bearer + CommittedResponseProtocol.ApiKey ||
-                scenario.Fixture.Database.Database.Authenticate(CommittedResponseProtocol.ApiKey,
-                    scenario.Fixture.Clock.GetUtcNow()) != principal.Id)
-            { throw new InvalidOperationException(CommittedResponseProtocol.UnexpectedRequest); }
-            var command = await JsonSerializer.DeserializeAsync<CommandRequest>(context.Request.Body,
-                JsonDefaults.Options, context.RequestAborted)
-                ?? throw new InvalidOperationException(CommittedResponseProtocol.UnexpectedRequest);
-            if (context.Request.Headers[CommittedResponseProtocol.CommandHeader].SingleOrDefault() != command.CommandId.ToString())
-            { throw new InvalidOperationException(CommittedResponseProtocol.UnexpectedRequest); }
+            var command = await ReadOriginalCommandAsync(context);
             Requests.Enqueue(command);
             var requestId = Guid.NewGuid();
             var reply = await scenario.CommandAsync(principal, requestId, command, context.RequestAborted);
@@ -51,19 +47,58 @@ internal sealed class CommittedResponseEndpoint(ConnectionNativeScenario scenari
             NativeReplies.Enqueue(reply.Payload.ToArray());
             var receipt = ConnectionNativeAssertions.Value<CommitReceipt>(reply);
             if (first)
-            { Original = receipt; OriginalNativeReply = reply.Payload.ToArray(); await InterruptAsync(context, receipt); }
+            {
+                Original = receipt;
+                OriginalNativeReply = reply.Payload.ToArray();
+                await InterruptAsync(context, receipt);
+            }
             else
-            { await JsonSerializer.SerializeAsync(context.Response.Body, receipt, JsonDefaults.Options, context.RequestAborted); }
+            {
+                await JsonSerializer.SerializeAsync(context.Response.Body, receipt, JsonDefaults.Options, context.RequestAborted);
+            }
         }
         catch (OperationCanceledException) when (first && FirstChunk.Task.IsCompletedSuccessfully
             && context.RequestAborted.IsCancellationRequested)
-        { Aborted.TrySetResult(); }
-        catch (Exception error) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { Failure.TrySetResult(error); throw; }
-        catch (Exception error) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { Failure.TrySetResult(error); throw; }
+        {
+            Aborted.TrySetResult();
+        }
+        catch (Exception error) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            Failure.TrySetResult(error);
+            throw;
+        }
+        catch (Exception error) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            Failure.TrySetResult(error);
+            throw;
+        }
         finally
-        { if (first) { FirstJoined.TrySetResult(); } }
+        {
+            if (first)
+            {
+                FirstJoined.TrySetResult();
+            }
+        }
+    }
+
+    private async Task<CommandRequest> ReadOriginalCommandAsync(HttpContext context)
+    {
+        if (count > CommittedResponseProtocol.MaximumRequests ||
+            context.Request.Headers[CommittedResponseProtocol.Authorization].SingleOrDefault() !=
+            CommittedResponseProtocol.Bearer + CommittedResponseProtocol.ApiKey ||
+            scenario.Fixture.Database.Database.Authenticate(CommittedResponseProtocol.ApiKey,
+                scenario.Fixture.Clock.GetUtcNow()) != principal.Id)
+        {
+            throw new InvalidOperationException(CommittedResponseProtocol.UnexpectedRequest);
+        }
+        var command = await JsonSerializer.DeserializeAsync<CommandRequest>(context.Request.Body,
+            JsonDefaults.Options, context.RequestAborted)
+            ?? throw new InvalidOperationException(CommittedResponseProtocol.UnexpectedRequest);
+        if (context.Request.Headers[CommittedResponseProtocol.CommandHeader].SingleOrDefault() != command.CommandId.ToString())
+        {
+            throw new InvalidOperationException(CommittedResponseProtocol.UnexpectedRequest);
+        }
+        return command;
     }
 
     private async Task InterruptAsync(HttpContext context, CommitReceipt receipt)
@@ -75,6 +110,9 @@ internal sealed class CommittedResponseEndpoint(ConnectionNativeScenario scenari
         FirstChunk.TrySetResult();
         await Release.Task.WaitAsync(context.RequestAborted);
         if (!callerCancellation)
-        { context.Abort(); await Aborted.Task.WaitAsync(context.RequestAborted); }
+        {
+            context.Abort();
+            await Aborted.Task.WaitAsync(context.RequestAborted);
+        }
     }
 }

@@ -8,16 +8,24 @@ internal static class SqlTableRf3Pages
     {
         foreach (var sql in new[] { TableSql, FetchSql, SelectSql })
         {
-            var query = state.Query with { Sql = sql };
+            var query = state.Query with
+            {
+                Sql = sql
+            };
             await PageAsync(await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.SdkSuccessAsync(
                 await reader.Sdk.QueryAsync(query, token)));
             await PageAsync((await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.SuccessAsync<QueryPage>(
                 await reader.Mcp.CallAsync(global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerTools.QueryExecute, query, token))).Value);
-            var operation = state.Operation with { Sql = sql };
+            var operation = state.Operation with
+            {
+                Sql = sql
+            };
             await PageAsync(await SqlRf3Protocol.SdkAsync<QueryPage>(reader.Sdk, operation, token));
             await PageAsync(await SqlRf3Protocol.McpAsync<QueryPage>(reader.Mcp, operation, token));
             foreach (var prepared in new[] { false, true })
-            { await PageAsync(await wire.ExecuteAsync<QueryPage>(sql, [], prepared, token)); }
+            {
+                await PageAsync(await wire.ExecuteAsync<QueryPage>(sql, [], prepared, token));
+            }
         }
         var ast = Ast(state);
         await PageAsync(await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.SdkSuccessAsync(

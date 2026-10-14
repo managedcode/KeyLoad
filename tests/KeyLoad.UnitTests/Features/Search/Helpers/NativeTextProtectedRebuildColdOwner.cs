@@ -9,8 +9,14 @@ namespace KeyLoad.UnitTests.Features.Search;
 internal sealed class NativeTextProtectedRebuildColdOwner : IDisposable
 {
     internal TestDatabase Source { get; } = new();
-    internal ZoneTreeStore Store { get; private set; }
-    internal DatabaseEngine Database { get; private set; }
+    internal ZoneTreeStore Store
+    {
+        get; private set;
+    }
+    internal DatabaseEngine Database
+    {
+        get; private set;
+    }
     private NativeTextProjection? projection;
     internal string ProjectionRoot => Path.Combine(Source.Directory, "protected-cold-text");
     internal SearchEngine Search
@@ -24,7 +30,10 @@ internal sealed class NativeTextProtectedRebuildColdOwner : IDisposable
     }
 
     internal NativeTextProtectedRebuildColdOwner()
-    { Store = Source.Store; Database = Source.Database; }
+    {
+        Store = Source.Store;
+        Database = Source.Database;
+    }
 
     internal static async Task RunAsync(Func<NativeTextProtectedRebuildColdOwner, CancellationToken, Task> body,
         CancellationToken token)
@@ -32,7 +41,11 @@ internal sealed class NativeTextProtectedRebuildColdOwner : IDisposable
         NativeTextProtectedRebuildColdOwner? owner = null;
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
-        { token.ThrowIfCancellationRequested(); owner = new(); await body(owner, token); }, failures);
+        {
+            token.ThrowIfCancellationRequested();
+            owner = new();
+            await body(owner, token);
+        }, failures);
         ServerFailureObserver.Observe(() => owner?.Dispose(), failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -49,12 +62,16 @@ internal sealed class NativeTextProtectedRebuildColdOwner : IDisposable
         var original = Store.Identity;
         CloseCurrent();
         if (removeProjection)
-        { Directory.Delete(ProjectionRoot, recursive: true); }
+        {
+            Directory.Delete(ProjectionRoot, recursive: true);
+        }
         Store = new(new(Source.Directory), Source.StorageExecution, UnitExecutionOptions.PointCacheExecution());
         Database = Source.CreateConfiguredDatabase(Store);
         if (!NativeSerialization.Serialize(Store.Identity).SequenceEqual(
             NativeSerialization.Serialize(original)))
-        { throw new InvalidOperationException("The genuine canonical cold owner identity changed."); }
+        {
+            throw new InvalidOperationException("The genuine canonical cold owner identity changed.");
+        }
     }
 
     private void CloseCurrent()

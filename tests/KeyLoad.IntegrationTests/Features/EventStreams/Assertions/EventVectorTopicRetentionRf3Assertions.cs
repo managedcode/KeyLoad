@@ -23,7 +23,9 @@ internal static class EventVectorTopicRetentionRf3Assertions
             var expected = purged ? EventVectorTopicRetentionRf3Seed.Events()[2..]
                 : EventVectorTopicRetentionRf3Seed.Events();
             if (healthy)
-            { expected = [.. expected, new("fourth", "Created", "{\"n\":4}")]; }
+            {
+                expected = [.. expected, new("fourth", "Created", "{\"n\":4}")];
+            }
             await Assert.That(page.Events.Length).IsEqualTo(expected.Length);
             for (var index = 0; index < expected.Length; index++)
             {
@@ -34,7 +36,9 @@ internal static class EventVectorTopicRetentionRf3Assertions
             }
             await UnrelatedAsync(callers, seed, token);
             if (purged)
-            { await HistoryAsync(callers, seed.Source, token); }
+            {
+                await HistoryAsync(callers, seed.Source, token);
+            }
             return page;
         }, token);
 

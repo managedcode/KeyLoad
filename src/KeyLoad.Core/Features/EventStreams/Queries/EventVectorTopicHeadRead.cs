@@ -44,6 +44,8 @@ internal static class EventVectorTopicHeadRead
             (_, _) => { found = true; return false; }, observer: budget.Observe,
             cancellationToken: cancellationToken);
         if (found)
-        { throw Errors.Fail(ErrorCode.Corruption, MissingRequiredHead); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, MissingRequiredHead);
+        }
     }
 }

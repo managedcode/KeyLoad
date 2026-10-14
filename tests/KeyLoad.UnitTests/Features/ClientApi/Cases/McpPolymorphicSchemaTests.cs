@@ -139,7 +139,9 @@ internal sealed class McpPolymorphicSchemaTests
         {
             var found = FindValueOperandSchemaNode(McpSchemaInspector.Resolve(root, pointer));
             if (found.ValueKind != JsonValueKind.Undefined)
-            { return found; }
+            {
+                return found;
+            }
         }
         throw new InvalidOperationException(ValueKind);
     }
@@ -159,13 +161,17 @@ internal sealed class McpPolymorphicSchemaTests
         if (node.TryGetProperty(McpSchemaInspector.Properties, out var properties) &&
             properties.TryGetProperty(McpSchemaInspector.Kind, out var kind) &&
             kind.TryGetProperty(McpSchemaInspector.Const, out var discriminator) && discriminator.GetString() == ValueKind)
-        { return properties.GetProperty(ValueProperty); }
+        {
+            return properties.GetProperty(ValueProperty);
+        }
 
         foreach (var property in node.EnumerateObject())
         {
             var found = FindValueOperandSchemaNode(property.Value);
             if (found.ValueKind != JsonValueKind.Undefined)
-            { return found; }
+            {
+                return found;
+            }
         }
         return default;
     }
@@ -176,7 +182,9 @@ internal sealed class McpPolymorphicSchemaTests
         {
             var found = FindValueOperandSchemaNode(item);
             if (found.ValueKind != JsonValueKind.Undefined)
-            { return found; }
+            {
+                return found;
+            }
         }
         return default;
     }
@@ -184,9 +192,13 @@ internal sealed class McpPolymorphicSchemaTests
     private static bool IsUnconstrainedJsonSchema(JsonElement schema)
     {
         if (schema.ValueKind == JsonValueKind.True)
-        { return true; }
+        {
+            return true;
+        }
         if (schema.ValueKind != JsonValueKind.Object)
-        { return false; }
+        {
+            return false;
+        }
         var constraintKeywords = new[]
         {
             McpSchemaInspector.Ref, McpSchemaInspector.Type, McpSchemaInspector.Const, McpSchemaInspector.Enum,
@@ -203,7 +215,9 @@ internal sealed class McpPolymorphicSchemaTests
     private static McpOperationDescriptor Find(string name)
     {
         if (!McpOperationCatalog.TryGet(name, out var descriptor))
-        { throw new InvalidOperationException(name); }
+        {
+            throw new InvalidOperationException(name);
+        }
         return descriptor!;
     }
 }

@@ -38,7 +38,9 @@ internal sealed class KeyLoadClientTransport
         var policy = streaming ?? throw new OptionsValidationException(KeyLoadClientStreamPolicy.SectionName,
             typeof(CqrsStreamClientOptions), [KeyLoadClientStreamPolicy.Invalid]);
         if (request.Action != EventFeedControlAction.Tail || request.CommandId == Guid.Empty)
-        { throw Errors.Fail(ErrorCode.Validation, KeyLoadClientStreamPolicy.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, KeyLoadClientStreamPolicy.Invalid);
+        }
         cancellationToken.ThrowIfCancellationRequested();
         return http.SendForCqrsStreamAsync<EventFeedTailProgress, EventFeedControlResult>(
             CreateMessage, policy, cancellationToken);

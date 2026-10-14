@@ -78,7 +78,10 @@ internal sealed record GraphSearchRf3Scenario(PartitionRef Partition)
         var persisted = await McpCallerAssertions.SdkSuccessAsync(await admin.ConfigurePrincipalAsync(Guid.NewGuid(),
             updated, cancellationToken));
         await Assert.That(persisted.PolicyEpoch).IsEqualTo(updated.PolicyEpoch);
-        return identity with { Principal = persisted };
+        return identity with
+        {
+            Principal = persisted
+        };
     }
 
     internal async Task AddReachableDocumentAsync(KeyLoadClient admin, CancellationToken cancellationToken)
@@ -105,7 +108,9 @@ internal sealed record GraphSearchRf3Scenario(PartitionRef Partition)
         CancellationToken cancellationToken)
     {
         var graph = new ResourceDefinition(Graph, ResourceKind.Graph, partition.TransactionDomainId)
-        { FieldPolicies = [new("/label", "graph-label", RawUseGrant: LabelFieldGrant)] };
+        {
+            FieldPolicies = [new("/label", "graph-label", RawUseGrant: LabelFieldGrant)]
+        };
         await McpCallerAssertions.SdkSuccessAsync(await admin.ConfigureResourceAsync(Guid.NewGuid(),
             new(partition.TenantId, partition.DatabaseId, graph), cancellationToken));
     }

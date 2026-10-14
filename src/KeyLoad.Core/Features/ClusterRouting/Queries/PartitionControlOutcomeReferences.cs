@@ -22,7 +22,9 @@ internal static class PartitionControlOutcomeReferences
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
         if (outcome.Incarnation != controlOwner.Incarnation
             || !PartitionMoveSourceFenceValidation.ValidDigest(outcome.Fingerprint))
-        { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid);
+        }
         var bytes = work.Read(view, key)
             ?? throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid);
         return new(PartitionMoveProtocol.Version, identity, outcome.Fingerprint, controlOwner,
@@ -37,7 +39,9 @@ internal static class PartitionControlOutcomeReferences
         var bytes = work.Read(view, key)
             ?? throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid);
         if (!CryptographicOperations.FixedTimeEquals(Convert.FromHexString(reference.OutcomeDigest), SHA256.HashData(bytes)))
-        { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid);
+        }
         var admitted = work.CreateView(view);
         RequireControlOwner(admitted, reference.ControlOwner);
         var selection = CommandOutcomeKeyResolver.Select(admitted, reference.Identity.PrincipalId,
@@ -45,7 +49,9 @@ internal static class PartitionControlOutcomeReferences
         var outcome = selection.Outcome
             ?? throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid);
         if (outcome.Incarnation != reference.ControlOwner.Incarnation || outcome.Fingerprint != reference.Fingerprint)
-        { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid);
+        }
         work.Check();
         return outcome;
     }
@@ -56,7 +62,9 @@ internal static class PartitionControlOutcomeReferences
             ?? throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority);
         PhysicalShardCatalogValidation.ValidateCatalog(catalog);
         if (!PhysicalOwnerEntryValidation.SameOwner(catalog.DefaultShard, owner))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
     }
 
     private static void RequireReference(PartitionControlOutcomeReference reference)
@@ -66,6 +74,8 @@ internal static class PartitionControlOutcomeReferences
             || !PartitionMoveSourceFenceValidation.ValidDigest(reference.Fingerprint)
             || !PartitionMoveSourceFenceValidation.ValidDigest(reference.OutcomeDigest)
             || !PartitionControlCommandKeys.Original(reference.Identity).AsSpan().SequenceEqual(reference.OutcomeKey.Span))
-        { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid);
+        }
     }
 }

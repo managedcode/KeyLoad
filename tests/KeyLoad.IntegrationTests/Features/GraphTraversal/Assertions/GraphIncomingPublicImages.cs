@@ -11,10 +11,14 @@ internal static class GraphIncomingPublicImages
     {
         var documents = new List<DocumentResult>();
         foreach (var reference in new[] { seed.Target, seed.LocalSource, seed.FirstSource, seed.SecondSource })
-        { documents.Add((await PublicReadAssertions.DocumentAsync(await administrator.GetAsync(reference, token)))!); }
+        {
+            documents.Add((await PublicReadAssertions.DocumentAsync(await administrator.GetAsync(reference, token)))!);
+        }
         var outbox = new List<OutboxStatus>();
         foreach (var partition in new[] { seed.TargetPartition, seed.FirstSourcePartition, seed.SecondSourcePartition })
-        { outbox.Add(await McpCallerAssertions.SdkSuccessAsync(await administrator.OutboxStatusAsync(partition, token))); }
+        {
+            outbox.Add(await McpCallerAssertions.SdkSuccessAsync(await administrator.OutboxStatusAsync(partition, token)));
+        }
         var incoming = await McpCallerAssertions.SdkSuccessAsync(await administrator.IncomingEdgesAsync(
             GraphIncomingRf3Scenario.Request(seed), token));
         return ([.. documents], [.. outbox], incoming);

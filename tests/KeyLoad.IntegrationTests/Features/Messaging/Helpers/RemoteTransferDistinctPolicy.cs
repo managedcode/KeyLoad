@@ -29,7 +29,9 @@ internal static class RemoteTransferDistinctPolicy
             RemoteTransferDistinctProtocol.TargetCapabilities);
         await ConfigureAsync(parent.Source, restored, token);
         await RemoteTransferDistinctCallers.WithAsync(wave, seed, async (sdk, mcp) =>
-        { await RemoteTransferColdRefusals.OriginalEpochRefusedAsync(sdk, mcp, seed, token); }, token);
+        {
+            await RemoteTransferColdRefusals.OriginalEpochRefusedAsync(sdk, mcp, seed, token);
+        }, token);
     }
 
     private static async Task ConfigureAsync(KeyLoadClient administrator, PrincipalRecord expected, CancellationToken token)

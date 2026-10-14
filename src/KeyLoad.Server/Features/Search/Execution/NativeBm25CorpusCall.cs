@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Search;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.Server.Features.Search;
 
@@ -27,9 +27,13 @@ internal static class NativeBm25CorpusCall
             }, failures).ConfigureAwait(false);
         }
         catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure))
-        { failures.Add(failure); }
+        {
+            failures.Add(failure);
+        }
         catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure))
-        { failures.Add(failure); }
+        {
+            failures.Add(failure);
+        }
         if (failures.Count != NoFailures)
         {
             if (reply is { Error: null } && failures.All(NativeCqrsBoundaryErrors.IsNonFatal))
@@ -40,23 +44,33 @@ internal static class NativeBm25CorpusCall
             ServerFailureObserver.ThrowIfAny(failures);
         }
         if (reply is null)
-        { throw Errors.Fail(ErrorCode.UnknownWriteOutcome, Bm25CorpusProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.UnknownWriteOutcome, Bm25CorpusProtocol.Unavailable);
+        }
         if (reply.Error is { } error)
-        { throw Errors.Fail(error, reply.SafeDetail ?? Bm25CorpusProtocol.Unavailable); }
+        {
+            throw Errors.Fail(error, reply.SafeDetail ?? Bm25CorpusProtocol.Unavailable);
+        }
         try
         {
             work.Check();
             token.ThrowIfCancellationRequested();
             if (reply.Payload.Length > partition.Database.Limits.MaxBatchBytes
                 || reply.Payload.Length > work.MaximumResultBytes)
-            { throw Errors.Fail(ErrorCode.BudgetExceeded, ReadExecutionBudget.ReadBytesExceeded); }
+            {
+                throw Errors.Fail(ErrorCode.BudgetExceeded, ReadExecutionBudget.ReadBytesExceeded);
+            }
             work.ChargeBytes(reply.Payload.Length);
             if (GrainNativePayload.Read<GrainValue>(reply.Payload).Value is not CommitReceipt receipt
                 || receipt.CommandId != commandId)
-            { throw Errors.Fail(ErrorCode.Corruption, Bm25CorpusProtocol.Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, Bm25CorpusProtocol.Invalid);
+            }
             return receipt;
         }
         catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure))
-        { throw Errors.Fail(ErrorCode.UnknownWriteOutcome, Bm25CorpusProtocol.Unavailable, failure); }
+        {
+            throw Errors.Fail(ErrorCode.UnknownWriteOutcome, Bm25CorpusProtocol.Unavailable, failure);
+        }
     }
 }

@@ -1,5 +1,5 @@
 using System.Security.Cryptography;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
@@ -35,7 +35,9 @@ internal sealed class PhysicalShardCatalogStartup(OrleansNode node, PartitionHos
         cancellationToken.ThrowIfCancellationRequested();
         var principalId = Volatile.Read(ref administratorId);
         if (!IsReady || principalId is null)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalShardCatalogFence.NotReady); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalShardCatalogFence.NotReady);
+        }
         await VerifyCatalogAsync(principalId, cancellationToken).ConfigureAwait(false);
     }
 
@@ -51,11 +53,19 @@ internal sealed class PhysicalShardCatalogStartup(OrleansNode node, PartitionHos
     {
         var observation = new PhysicalShardCatalogPrerequisiteObservation();
         try
-        { await AwaitNativeReplicaPrerequisiteCoreAsync(observation, cancellationToken).ConfigureAwait(false); }
+        {
+            await AwaitNativeReplicaPrerequisiteCoreAsync(observation, cancellationToken).ConfigureAwait(false);
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { observation.Failed(logger, error); throw; }
+        {
+            observation.Failed(logger, error);
+            throw;
+        }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { observation.Failed(logger, error); throw; }
+        {
+            observation.Failed(logger, error);
+            throw;
+        }
     }
 
     private Task AwaitNativeReplicaPrerequisiteCoreAsync(PhysicalShardCatalogPrerequisiteObservation observation,
@@ -69,15 +79,21 @@ internal sealed class PhysicalShardCatalogStartup(OrleansNode node, PartitionHos
         var payload = NativeSerialization.Serialize(options.AdminKey);
         string signed;
         try
-        { signed = codec.CreateRead(requestId, null, GrainReadKind.Authenticate, payload); }
+        {
+            signed = codec.CreateRead(requestId, null, GrainReadKind.Authenticate, payload);
+        }
         finally
-        { CryptographicOperations.ZeroMemory(payload); }
+        {
+            CryptographicOperations.ZeroMemory(payload);
+        }
         using var requestContext = node.OpenRequestContext(null, requestId, Guid.Empty, cancellationToken);
         var reply = await node.ExecutePhysicalShardStartupRequestAsync(requestId, signed, command: false,
             cancellationToken: cancellationToken).ConfigureAwait(false);
         var principal = McpNativeAuthentication.ReadPrincipal(payload: reply.Payload.Span, cancellationToken: cancellationToken, options: mcpExecutionOptions);
         if (!principal.ClusterAdministrator)
-        { throw Errors.Fail(ErrorCode.PermissionDenied, PhysicalShardCatalogFence.AdministratorRequired); }
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, PhysicalShardCatalogFence.AdministratorRequired);
+        }
         return principal;
     }
 

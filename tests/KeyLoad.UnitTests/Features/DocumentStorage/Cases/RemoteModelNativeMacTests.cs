@@ -10,7 +10,10 @@ internal sealed class RemoteModelNativeMacTests
         await RemoteModelNativeMacFixture.RunAsync(async fixture =>
         {
             var request = fixture.Request();
-            request = request with { SenderSignature = fixture.Mac.SignNativeRequest(request) };
+            request = request with
+            {
+                SenderSignature = fixture.Mac.SignNativeRequest(request)
+            };
             var bytes = NativeSerialization.Serialize(request);
             var restored = NativeSerialization.Deserialize<RemoteModelNativeRequest>(bytes);
             await Assert.That(NativeSerialization.Serialize(restored).SequenceEqual(bytes)).IsTrue();
@@ -23,7 +26,10 @@ internal sealed class RemoteModelNativeMacTests
             await Assert.That(restored.ExpiresAt).IsEqualTo(request.ExpiresAt);
             await Assert.That(fixture.Mac.VerifyNativeRequest(restored)).IsTrue();
             var reply = fixture.Reply(request);
-            reply = reply with { SenderSignature = fixture.Mac.SignNativeReply(reply) };
+            reply = reply with
+            {
+                SenderSignature = fixture.Mac.SignNativeReply(reply)
+            };
             var replyBytes = NativeSerialization.Serialize(reply);
             var retained = NativeSerialization.Deserialize<RemoteModelNativeReply>(replyBytes);
             await Assert.That(NativeSerialization.Serialize(retained).SequenceEqual(replyBytes)).IsTrue();
@@ -38,7 +44,10 @@ internal sealed class RemoteModelNativeMacTests
         await RemoteModelNativeMacFixture.RunAsync(async fixture =>
         {
             var request = fixture.Request();
-            request = request with { SenderSignature = fixture.Mac.SignNativeRequest(request) };
+            request = request with
+            {
+                SenderSignature = fixture.Mac.SignNativeRequest(request)
+            };
             var changed = new[]
             {
                 request with { Channel = RemoteModelNativeChannel.EventVector },
@@ -61,7 +70,9 @@ internal sealed class RemoteModelNativeMacTests
                 request with { SenderSignature = new string('0', request.SenderSignature.Length) }
             };
             foreach (var candidate in changed)
-            { await Assert.That(fixture.Mac.VerifyNativeRequest(candidate)).IsFalse(); }
+            {
+                await Assert.That(fixture.Mac.VerifyNativeRequest(candidate)).IsFalse();
+            }
             await Assert.That(fixture.Mac.VerifyNativeRequest(request)).IsTrue();
         });
     }
@@ -73,7 +84,10 @@ internal sealed class RemoteModelNativeMacTests
         {
             var request = fixture.Request();
             var reply = fixture.Reply(request);
-            reply = reply with { SenderSignature = fixture.Mac.SignNativeReply(reply) };
+            reply = reply with
+            {
+                SenderSignature = fixture.Mac.SignNativeReply(reply)
+            };
             var changed = new[]
             {
                 reply with { Payload = new byte[] { 254, 128, 127, 1, 0 } },
@@ -84,7 +98,9 @@ internal sealed class RemoteModelNativeMacTests
                 reply with { SenderSignature = new string('z', reply.SenderSignature.Length) }
             };
             foreach (var candidate in changed)
-            { await Assert.That(fixture.Mac.VerifyNativeReply(candidate)).IsFalse(); }
+            {
+                await Assert.That(fixture.Mac.VerifyNativeReply(candidate)).IsFalse();
+            }
             using var other = new RemoteModelNativeMacFixture();
             await Assert.That(other.Mac.VerifyNativeReply(reply)).IsFalse();
             await Assert.That(fixture.Mac.VerifyNativeReply(reply)).IsTrue();
@@ -103,11 +119,20 @@ internal sealed class RemoteModelNativeMacTests
             var native = fixture.Mac.SignNativeRequest(request);
             await Assert.That(native == fixture.Mac.Sign(bytes, false)).IsFalse();
             await Assert.That(native == fixture.Mac.Sign(bytes, true)).IsFalse();
-            await Assert.That(fixture.Mac.VerifyNativeRequest(request with { SenderSignature = fixture.Mac.Sign(bytes, false) })).IsFalse();
+            await Assert.That(fixture.Mac.VerifyNativeRequest(request with
+            {
+                SenderSignature = fixture.Mac.Sign(bytes, false)
+            })).IsFalse();
             var reply = fixture.Reply(request);
-            await Assert.That(fixture.Mac.VerifyNativeReply(reply with { SenderSignature = native })).IsFalse();
+            await Assert.That(fixture.Mac.VerifyNativeReply(reply with
+            {
+                SenderSignature = native
+            })).IsFalse();
             var replyProof = fixture.Mac.SignNativeReply(reply);
-            await Assert.That(fixture.Mac.VerifyNativeRequest(request with { SenderSignature = replyProof })).IsFalse();
+            await Assert.That(fixture.Mac.VerifyNativeRequest(request with
+            {
+                SenderSignature = replyProof
+            })).IsFalse();
         });
     }
 }

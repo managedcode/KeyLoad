@@ -44,7 +44,9 @@ internal sealed class ScopedRangeBudgetTests
 
     private sealed class RangeBudgetRejectedException : Exception
     {
-        public RangeBudgetRejectedException() { }
+        public RangeBudgetRejectedException()
+        {
+        }
         public RangeBudgetRejectedException(string message) : base(message) { }
         public RangeBudgetRejectedException(string message, Exception innerException) : base(message, innerException) { }
     }

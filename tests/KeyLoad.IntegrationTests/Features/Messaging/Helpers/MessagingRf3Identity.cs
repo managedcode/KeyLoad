@@ -28,7 +28,9 @@ internal sealed record MessagingRf3Identity(PrincipalRecord Principal, ApiKeyRec
         JsonData.Identifier(principalId);
         var principal = new PrincipalRecord(principalId, tenantId,
             [.. grants], fieldGrants)
-        { ClusterAdministrator = clusterAdministrator };
+        {
+            ClusterAdministrator = clusterAdministrator
+        };
         var credentialId = CredentialPrefix + Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat);
         var secret = credentialId + SecretSeparator + Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(SecretBytes));
         var credential = new ApiKeyRecord(credentialId, principalId,
@@ -60,5 +62,9 @@ internal sealed record MessagingRf3Identity(PrincipalRecord Principal, ApiKeyRec
         };
 
     internal static PrincipalRecord WithFieldGrants(PrincipalRecord current, ImmutableArray<string> fieldGrants)
-        => current with { FieldGrants = fieldGrants, PolicyEpoch = checked(current.PolicyEpoch + 1) };
+        => current with
+        {
+            FieldGrants = fieldGrants,
+            PolicyEpoch = checked(current.PolicyEpoch + 1)
+        };
 }

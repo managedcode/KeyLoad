@@ -9,7 +9,10 @@ internal sealed class BlobExecutionPolicyTests
     [Test]
     public async Task ConfiguredCatalogProofRejectsUnexaminedCatalogWithoutCreatingQuota()
     {
-        using var fixture = new TestDatabase(blobExecution: new() { InitialCatalogProofRecords = 1 });
+        using var fixture = new TestDatabase(blobExecution: new()
+        {
+            InitialCatalogProofRecords = 1
+        });
         fixture.Configure("first", ResourceKind.Collection);
         fixture.Configure("second", ResourceKind.Collection);
         var rejected = fixture.Submit(OperationKind.ConfigureResource,
@@ -23,7 +26,10 @@ internal sealed class BlobExecutionPolicyTests
         var healthy = new DatabaseEngine(fixture.Store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(),
             UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(),
             UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(),
-            UnitExecutionOptions.BlobExecution(new() { InitialCatalogProofRecords = 2 }), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
+            UnitExecutionOptions.BlobExecution(new()
+            {
+                InitialCatalogProofRecords = 2
+            }), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
         var request = new ConfigureResourceRequest(fixture.Partition.TenantId, fixture.Partition.DatabaseId,
             new("blob-policy", ResourceKind.BlobStore, fixture.Partition.TransactionDomainId));
         var operation = new ReplicatedOperation(Guid.NewGuid(), OperationKind.ConfigureResource, "root",
@@ -47,7 +53,12 @@ internal sealed class BlobExecutionPolicyTests
         Assert.ThrowsExactly<InvalidOperationException>(() =>
         {
             using var unexpected = new TestDatabase(directory: directory,
-                blobExecution: new() { MetadataPageSize = pageSize, InitialCatalogProofRecords = proofRecords, RestorePageBytes = pageBytes });
+                blobExecution: new()
+                {
+                    MetadataPageSize = pageSize,
+                    InitialCatalogProofRecords = proofRecords,
+                    RestorePageBytes = pageBytes
+                });
         });
         await Assert.That(Directory.Exists(directory)).IsFalse();
     }

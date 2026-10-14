@@ -32,18 +32,27 @@ public sealed partial class DatabaseEngine
         }
     }
 
-    private enum BatchResourceAdmission { CurrentPhysicalOwner, RetiredOutcomeMetadata }
+    private enum BatchResourceAdmission
+    {
+        CurrentPhysicalOwner, RetiredOutcomeMetadata
+    }
 
     private ResourceDefinition BatchResource(IKeyValueView view, PartitionRef partition, string name, BatchResourceAdmission admission, ResourceKind? kind = null)
     {
         if (admission == BatchResourceAdmission.CurrentPhysicalOwner)
-        { return Resource(view, partition, name, kind); }
+        {
+            return Resource(view, partition, name, kind);
+        }
         var resource = view.GetRecord<ResourceDefinition>(KeySpace.Resource(partition.TenantId, partition.DatabaseId, name))
             ?? throw Errors.Fail(ErrorCode.NotFound, DatabaseEngineResourceIsNotConfiguredDetail);
         if (resource.TransactionDomainId != partition.TransactionDomainId)
-        { throw Errors.Fail(ErrorCode.Conflict, DatabaseEngineResourceBelongsToADifferentTransactionDomainDetail); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, DatabaseEngineResourceBelongsToADifferentTransactionDomainDetail);
+        }
         if (kind is { } required && resource.Kind != required)
-        { throw Errors.Fail(ErrorCode.Validation, DatabaseEngineResourceHasADifferentKindDetail); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, DatabaseEngineResourceHasADifferentKindDetail);
+        }
         return resource;
     }
 
@@ -81,14 +90,20 @@ public sealed partial class DatabaseEngine
     private void RequireBatchMutationCapabilities(PrincipalRecord principal, CommandRequest command)
     {
         if (command.Mutations.IsDefaultOrEmpty || command.Mutations.Length > Limits.MaxBatchMutations)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, MutationCountBudgetMessage); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, MutationCountBudgetMessage);
+        }
         foreach (var mutation in command.Mutations)
         {
             Authorization.Require(principal, command.Partition, mutation.Resource, BatchMutationCapability(mutation));
             if (mutation is QueueToGraph forward)
-            { ValidateForward(forward); }
+            {
+                ValidateForward(forward);
+            }
             else if (mutation is GraphToQueueMutation reverse)
-            { ValidateReverse(command.Partition, reverse); }
+            {
+                ValidateReverse(command.Partition, reverse);
+            }
             RequireCompositionCapabilities(principal, command.Partition, mutation);
         }
     }

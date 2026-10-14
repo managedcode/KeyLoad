@@ -16,7 +16,10 @@ internal sealed class EventAppendWholeFlowFixture : IDisposable
         "stream-head", "event", "event-id", "event-feed", "event-sequence", "message-body",
         "message-meta", "queue-counters", "ready", "scheduled", "lease", "dead-letter", "inbox"];
     internal TestDatabase Database { get; } = new();
-    internal DateTimeOffset Now { get; }
+    internal DateTimeOffset Now
+    {
+        get;
+    }
     internal StreamRef Stream => new(Database.Partition, Streams, StreamId);
     internal QueueLaneRef Lane => new(Database.Partition, Queue);
 
@@ -57,7 +60,9 @@ internal sealed class EventAppendWholeFlowFixture : IDisposable
     {
         var page = view.Scan(KeySpace.Partition(family, Database.Partition), 4096);
         if (page.HasMore)
-        { throw new InvalidOperationException("Whole domain state exceeded the fixture bound."); }
+        {
+            throw new InvalidOperationException("Whole domain state exceeded the fixture bound.");
+        }
         return page.Records.Select(record => Convert.ToHexString(record.Key.Span) + ":" +
             Convert.ToHexString(record.Value.Span));
     }).ToArray());

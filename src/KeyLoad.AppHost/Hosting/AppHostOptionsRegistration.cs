@@ -29,7 +29,7 @@ internal static class AppHostOptionsRegistration
         var cluster = Bind<ClusterDeploymentOptions>(builder.Configuration, value => value.IsValid(), ClusterDeploymentOptions.ValidationMessage);
         var command = Bind<CommandAdmissionLimits>(builder.Configuration.GetSection(CommandAdmissionLimits.SectionName), value => Validate(value.Validate), CommandAdmissionLimits.ValidationMessage);
         var http = Bind<HttpAdmissionLimits>(builder.Configuration.GetSection(HttpAdmissionLimits.SectionName), value => Validate(value.Validate), HttpAdmissionLimits.ValidationMessage);
-        var replay = Bind<KeyLoad.Orleans.ReplicaReplayLimits>(builder.Configuration.GetSection(ClusterDeploymentOptions.ReplaySection), value => Validate(() => value.Validate(ClusterDeploymentOptions.VoterCount)), ClusterDeploymentOptions.ValidationMessage);
+        var replay = Bind<KeyLoad.Clustering.ReplicaReplayLimits>(builder.Configuration.GetSection(ClusterDeploymentOptions.ReplaySection), value => Validate(() => value.Validate(ClusterDeploymentOptions.VoterCount)), ClusterDeploymentOptions.ValidationMessage);
         var profile = BindProfileExecution(builder.Configuration);
         var deployment = Bind<BenchmarkDeploymentOptions>(builder.Configuration.GetSection(BenchmarkDeploymentOptions.SectionName), value => value.IsValid(), BenchmarkDeploymentOptions.ValidationMessage);
         var relay = Bind<BenchmarkRelayOptions>(builder.Configuration, _ => true, BenchmarkDeploymentOptions.ValidationMessage);
@@ -68,7 +68,9 @@ internal static class AppHostOptionsRegistration
         services.AddSingleton(runtime.Deployment);
         services.AddSingleton(runtime.BenchmarkRelay);
         if (runtime.BenchmarkWorkload is { } workload)
-        { services.AddSingleton(workload); }
+        {
+            services.AddSingleton(workload);
+        }
         services.AddSingleton(runtime.RequestProbeFiles);
         services.AddSingleton(runtime.LocalImage);
         services.AddSingleton(runtime.Images);
@@ -129,7 +131,10 @@ internal static class AppHostOptionsRegistration
     private static bool Validate(Action validate)
     {
         try
-        { validate(); return true; }
+        {
+            validate();
+            return true;
+        }
         catch (ArgumentException) { return false; }
         catch (InvalidOperationException) { return false; }
     }
@@ -149,9 +154,9 @@ internal sealed record AppHostRuntimeOptions(IOptions<TestExecutionOptions> Test
     IOptions<AppHostControlOptions> Control, IOptions<ContainerImageOptions> Images,
     IOptions<ContainerImageExecutionOptions> ImageExecution, IOptions<LocalImageOptions> LocalImage,
     IOptions<ClusterDeploymentOptions> Cluster, IOptions<CommandAdmissionLimits> CommandAdmission,
-    IOptions<HttpAdmissionLimits> HttpAdmission, IOptions<KeyLoad.Orleans.ReplicaReplayLimits> ReplayAdmission, IOptions<ClusterProfileExecutionOptions> Profile, IOptions<BenchmarkDeploymentOptions> Deployment,
+    IOptions<HttpAdmissionLimits> HttpAdmission, IOptions<KeyLoad.Clustering.ReplicaReplayLimits> ReplayAdmission, IOptions<ClusterProfileExecutionOptions> Profile, IOptions<BenchmarkDeploymentOptions> Deployment,
     IOptions<BenchmarkRelayOptions> BenchmarkRelay, IOptions<KeyLoad.Comparisons.ComparisonOptions>? BenchmarkWorkload, IOptions<RequestProbeFileOptions> RequestProbeFiles,
-    IOptions<KeyLoad.Orleans.ReplicaReplayLimits> IsolatedReplayAdmission,
+    IOptions<KeyLoad.Clustering.ReplicaReplayLimits> IsolatedReplayAdmission,
     IOptions<KeyLoad.Comparisons.IsolatedKeyLoadAdmissionOptions> IsolatedAdmission,
     IOptions<NativeCoverageExecutionOptions> NativeCoverage,
     IOptions<NativeCoverageRf3ImageOptions> NativeCoverageRf3Image);

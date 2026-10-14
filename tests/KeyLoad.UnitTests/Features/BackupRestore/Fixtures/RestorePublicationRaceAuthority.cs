@@ -19,7 +19,11 @@ internal sealed class RestorePublicationRaceAuthority : IDisposable
     internal RestorePublicationRaceAuthority(EventingArtifactFixture fixture, NativeCatalogBackupCapture capture)
     {
         original = NativeSerialization.Deserialize<ClusterBackupOwnerCut>(capture.Metadata.Span);
-        var target = original.Owner with { PhysicalShardId = Guid.NewGuid(), Incarnation = Guid.NewGuid() };
+        var target = original.Owner with
+        {
+            PhysicalShardId = Guid.NewGuid(),
+            Incarnation = Guid.NewGuid()
+        };
         incarnation = target.Incarnation;
         mapping = new(ClusterRestoreOwnerMapping.CurrentVersion, original.Owner, target, Endpoints);
         signingKey = RandomNumberGenerator.GetBytes(fixture.Source.Store.Identity.SigningKey.Length);

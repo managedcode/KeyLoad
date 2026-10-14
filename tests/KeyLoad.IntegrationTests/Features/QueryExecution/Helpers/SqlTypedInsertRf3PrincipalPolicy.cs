@@ -19,7 +19,10 @@ internal static class SqlTypedInsertRf3PrincipalPolicy
                 Grants = [new(SqlTypedInsertRf3Literal.Partition.DatabaseId, SqlTypedInsertRf3Literal.Table,
                     Capability.DocumentsRead | Capability.Query)]
             };
-            var restored = original with { PolicyEpoch = checked(denied.PolicyEpoch + NextEpoch) };
+            var restored = original with
+            {
+                PolicyEpoch = checked(denied.PolicyEpoch + NextEpoch)
+            };
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {
                 await using var wire = await PostgresRf3Caller.ConnectAsync(fixture.App, McpCallerProtocol.Node3,
@@ -47,7 +50,10 @@ internal static class SqlTypedInsertRf3PrincipalPolicy
             global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
             return state with
             {
-                Identity = state.Identity with { Principal = restored },
+                Identity = state.Identity with
+                {
+                    Principal = restored
+                },
                 EpochFenced = true,
                 Repaired = repair,
                 RepairedReceipt = repairedReceipt ?? throw new InvalidOperationException(MissingRepair)

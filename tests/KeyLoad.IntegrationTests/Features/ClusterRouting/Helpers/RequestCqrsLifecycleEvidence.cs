@@ -1,5 +1,5 @@
 using System.Text;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting.Helpers;
@@ -33,7 +33,11 @@ internal sealed class RequestCqrsLifecycleEvidence
     internal void SetScenarioPhase(RequestCqrsLifecycleStage value) => scenarioPhase = value;
     internal void SetWaveToken(CancellationToken value) => waveToken = value;
     internal void SetTokens(CancellationToken caller, CancellationToken parent, CancellationToken wave)
-    { callerToken = caller; parentToken = parent; waveToken = wave; }
+    {
+        callerToken = caller;
+        parentToken = parent;
+        waveToken = wave;
+    }
     internal void BindDiagnostics(RequestCqrsRf3Diagnostics value) => diagnostics = value;
     internal void BindObserver(RequestCqrsRf3DiagnosticsSubscriberObserver value) => observer = value;
     internal void BindConsumer(RequestCqrsRf3DiagnosticsIndependentConsumer value) => consumer = value;
@@ -73,9 +77,15 @@ internal sealed class RequestCqrsLifecycleEvidence
     }
 
     internal void RecordFirstFailure()
-    { FirstFailureSnapshot ??= Snapshot(); firstScenarioPhase ??= scenarioPhase; }
+    {
+        FirstFailureSnapshot ??= Snapshot();
+        firstScenarioPhase ??= scenarioPhase;
+    }
 
-    internal RequestCqrsLifecycleSnapshot? FirstFailureSnapshot { get; private set; }
+    internal RequestCqrsLifecycleSnapshot? FirstFailureSnapshot
+    {
+        get; private set;
+    }
 
     internal void RecordOwnerFailure(RequestCqrsLifecycleStage ownerStage)
     {
@@ -86,11 +96,15 @@ internal sealed class RequestCqrsLifecycleEvidence
     internal void RecordFirstFailureIfAny(IReadOnlyCollection<Exception> failures)
     {
         if (failures.Count > 0)
-        { RecordFirstFailure(); }
+        {
+            RecordFirstFailure();
+        }
     }
 
     internal void RecordTerminal()
-    { terminal = Snapshot(); }
+    {
+        terminal = Snapshot();
+    }
 
     internal string FormatBoundedContext()
     {
@@ -98,18 +112,24 @@ internal sealed class RequestCqrsLifecycleEvidence
         var last = Format(terminal ?? Snapshot());
         var context = ContextPrefix + "phase=" + (firstScenarioPhase ?? scenarioPhase) + " first{" + first + "} terminal{" + last + "}";
         if (Encoding.UTF8.GetByteCount(context) > MaximumContextBytes)
-        { throw new InvalidOperationException("The fixed C1 lifecycle context exceeded its byte limit."); }
+        {
+            throw new InvalidOperationException("The fixed C1 lifecycle context exceeded its byte limit.");
+        }
         return context;
     }
 
     internal void ThrowWithContext(List<Exception> failures)
     {
         if (failures.Count == 0)
-        { return; }
+        {
+            return;
+        }
         var hasFatal = failures.Any(failure => !NativeCqrsBoundaryErrors.IsNonFatal(failure));
         string context;
         try
-        { context = FormatBoundedContext(); }
+        {
+            context = FormatBoundedContext();
+        }
         catch (InvalidOperationException error)
         {
             if (hasFatal)
@@ -131,9 +151,13 @@ internal sealed class RequestCqrsLifecycleEvidence
     private static void WriteFatalContextAndRethrow(string context, List<Exception> failures)
     {
         try
-        { TestContext.Current?.Output.WriteLine(context); }
+        {
+            TestContext.Current?.Output.WriteLine(context);
+        }
         finally
-        { ServerFailureObserver.ThrowIfAny(failures); }
+        {
+            ServerFailureObserver.ThrowIfAny(failures);
+        }
     }
 
     private static string Format(RequestCqrsLifecycleSnapshot value)

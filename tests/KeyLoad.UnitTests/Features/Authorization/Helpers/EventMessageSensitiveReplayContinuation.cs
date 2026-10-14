@@ -7,13 +7,19 @@ internal static class EventMessageSensitiveReplayContinuation
     internal static async Task RepairAsync(DatabaseEngine database, EventMessageSensitiveReplayState state, CancellationToken token)
     {
         EventMessageSensitiveReplayOperations.Principal(database, state.Worker with
-        { Revoked = true, PolicyEpoch = EventMessageSensitiveReplayProtocol.RevokedEpoch }, token);
+        {
+            Revoked = true,
+            PolicyEpoch = EventMessageSensitiveReplayProtocol.RevokedEpoch
+        }, token);
         var id = Guid.NewGuid();
         var refusal = EventMessageSensitiveReplayOperations.Apply(database, state.ReceiveKind,
             EventMessageSensitiveReplayOperations.Receive(state, id, true), state.Caller, id, token);
         await EventMessageSensitiveReplayAssertions.DeniedAsync(refusal, ErrorCode.Unauthenticated);
         EventMessageSensitiveReplayOperations.Principal(database, state.Worker with
-        { PolicyEpoch = EventMessageSensitiveReplayProtocol.RepairedEpoch, FieldGrants = [EventMessageSensitiveReplayProtocol.GrantAfter] }, token);
+        {
+            PolicyEpoch = EventMessageSensitiveReplayProtocol.RepairedEpoch,
+            FieldGrants = [EventMessageSensitiveReplayProtocol.GrantAfter]
+        }, token);
     }
 
     internal static async Task HealthyAsync(DatabaseEngine database, EventMessageSensitiveReplayState state, CancellationToken token)
@@ -48,8 +54,12 @@ internal static class EventMessageSensitiveReplayContinuation
         var empty = EventMessageSensitiveReplayOperations.Apply(database, state.ReceiveKind,
             EventMessageSensitiveReplayOperations.Receive(state, emptyId, true), state.Caller, emptyId, token);
         if (state.Subscription)
-        { await Assert.That(empty.Get<ReceiveSubscriptionResult>().Deliveries).IsEmpty(); }
+        {
+            await Assert.That(empty.Get<ReceiveSubscriptionResult>().Deliveries).IsEmpty();
+        }
         else
-        { await Assert.That(empty.Get<ReceiveResult>().Deliveries).IsEmpty(); }
+        {
+            await Assert.That(empty.Get<ReceiveResult>().Deliveries).IsEmpty();
+        }
     }
 }

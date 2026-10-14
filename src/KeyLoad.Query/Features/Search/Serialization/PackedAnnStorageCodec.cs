@@ -45,7 +45,9 @@ internal static class PackedAnnStorageCodec
         storage.Validate();
         budget.Check();
         if (digest is null || digest.Length != PackedAnnStorageFrames.DigestBytes)
-        { throw Errors.Fail(ErrorCode.Corruption, PackedAnnStorageFrames.InvalidSnapshot); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, PackedAnnStorageFrames.InvalidSnapshot);
+        }
         var admittedDigest = digest.ToArray();
         PackedAnnStorageFrames.RequireDigest(source, admittedDigest, storage, budget);
         source.Position = Empty;

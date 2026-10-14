@@ -11,7 +11,10 @@ internal sealed class ReadExecutionBudgetStageCancellationLease : IDisposable
         Token = token;
     }
 
-    internal CancellationToken Token { get; }
+    internal CancellationToken Token
+    {
+        get;
+    }
 
     public void Dispose() => Interlocked.Exchange(ref owner, null)?.Release(this);
 }

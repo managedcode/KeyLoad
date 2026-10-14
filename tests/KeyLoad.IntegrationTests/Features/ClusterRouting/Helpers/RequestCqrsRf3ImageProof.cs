@@ -39,7 +39,9 @@ internal static class RequestCqrsRf3ImageProof
         {
             var expectedReference = ValidateExpectedReferences(expected);
             if (!string.Equals(localIdentity.Reference, expectedReference, StringComparison.Ordinal))
-            { throw new InvalidOperationException(ResourceMismatch); }
+            {
+                throw new InvalidOperationException(ResourceMismatch);
+            }
             return localIdentity;
         }
         await Assert.That(expected.Count).IsEqualTo(RequestCqrsRf3Protocol.NodeCount);
@@ -49,7 +51,9 @@ internal static class RequestCqrsRf3ImageProof
         foreach (var node in actual)
         {
             if (!expected.TryGetValue(node.Name, out var reference))
-            { throw new InvalidOperationException(ResourceMismatch); }
+            {
+                throw new InvalidOperationException(ResourceMismatch);
+            }
             await VerifyNodeAsync(node, reference, cancellationToken).ConfigureAwait(false);
         }
         return null;
@@ -67,7 +71,9 @@ internal static class RequestCqrsRf3ImageProof
             || !expected.ContainsKey(RequestCqrsRf3Protocol.Node1)
             || !expected.ContainsKey(RequestCqrsRf3Protocol.Node2)
             || !expected.ContainsKey(RequestCqrsRf3Protocol.Node3))
-        { throw new InvalidOperationException(ResourceMismatch); }
+        {
+            throw new InvalidOperationException(ResourceMismatch);
+        }
         var references = expected.Values.Distinct(StringComparer.Ordinal).ToArray();
         return references.Length == 1 ? references[0] : throw new InvalidOperationException(ResourceMismatch);
     }
@@ -78,7 +84,9 @@ internal static class RequestCqrsRf3ImageProof
         cancellationToken.ThrowIfCancellationRequested();
         var marker = expected.LastIndexOf(DigestMarker, StringComparison.Ordinal);
         if (marker <= 0)
-        { throw new InvalidOperationException(MissingReference); }
+        {
+            throw new InvalidOperationException(MissingReference);
+        }
         var tagged = expected[..marker];
         var repository = tagged[..tagged.LastIndexOf(':')];
         var digest = expected[(marker + DigestMarker.Length)..];
@@ -86,7 +94,9 @@ internal static class RequestCqrsRf3ImageProof
         if (annotation.Image != repository || annotation.Tag is not null || annotation.SHA256 != digest
             || !resource.TryGetContainerImageName(out var actual) || actual is null
             || !actual.EndsWith(DigestMarker + digest, StringComparison.Ordinal))
-        { throw new InvalidOperationException(ResourceMismatch); }
+        {
+            throw new InvalidOperationException(ResourceMismatch);
+        }
         await Assert.That(IsNode(resource.Name)).IsTrue();
     }
 

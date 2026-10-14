@@ -21,16 +21,26 @@ internal static class EventSchemaCursorPublicExpected
         int[] indices, bool reader, bool more, long? snapshot = null)
     {
         var expected = indices.Select(index => reader && state.Definition.SchemaVersion == 2L
-            ? state.Original.Events[index] with { Data = state.Original.Events[index].Data with { HeadersJson = ProjectedHeaders[index] } }
+            ? state.Original.Events[index] with
+            {
+                Data = state.Original.Events[index].Data with
+                {
+                    HeadersJson = ProjectedHeaders[index]
+                }
+            }
             : state.Original.Events[index]).ToArray();
         await SqlRf3Protocol.EqualAsync(state.Scenario.Stream, page.Stream);
         await SqlRf3Protocol.EqualAsync(new StreamHead(3L, 1L, 1L), page.Head);
         await SqlRf3Protocol.EqualAsync(expected, page.Events.ToArray());
         await Assert.That(page.HasMore).IsEqualTo(more);
         if (more)
-        { await Assert.That(page.Cursor).IsNotNull(); }
+        {
+            await Assert.That(page.Cursor).IsNotNull();
+        }
         else
-        { await Assert.That(page.Cursor).IsNull(); }
+        {
+            await Assert.That(page.Cursor).IsNull();
+        }
         await Assert.That(page.CutPosition).IsGreaterThan(0L);
         await Assert.That(page.SnapshotCutPosition).IsEqualTo(snapshot ?? page.CutPosition);
     }

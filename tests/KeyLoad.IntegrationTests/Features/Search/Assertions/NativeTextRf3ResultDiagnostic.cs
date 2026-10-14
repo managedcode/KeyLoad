@@ -18,19 +18,33 @@ internal static class NativeTextRf3ResultDiagnostic
             var right = expected[index];
             var fields = new List<string>();
             if (left.Document.Reference != right.Document.Reference)
-            { fields.Add("Reference"); }
+            {
+                fields.Add("Reference");
+            }
             if (left.Document.Revision != right.Document.Revision)
-            { fields.Add("Revision"); }
+            {
+                fields.Add("Revision");
+            }
             if (left.Document.Json != right.Document.Json)
-            { fields.Add("ProjectedJson"); }
+            {
+                fields.Add("ProjectedJson");
+            }
             if (left.Document.Redacted != right.Document.Redacted)
-            { fields.Add("Redacted"); }
+            {
+                fields.Add("Redacted");
+            }
             if (!left.Document.RedactedFields.SequenceEqual(right.Document.RedactedFields))
-            { fields.Add("RedactedFields"); }
+            {
+                fields.Add("RedactedFields");
+            }
             if (BitConverter.DoubleToInt64Bits(left.Score) != BitConverter.DoubleToInt64Bits(right.Score))
-            { fields.Add("ScoreBits"); }
+            {
+                fields.Add("ScoreBits");
+            }
             if (!JsonDefaults.Serialize(left.Explanation).AsSpan().SequenceEqual(JsonDefaults.Serialize(right.Explanation)))
-            { fields.Add("Explanation"); }
+            {
+                fields.Add("Explanation");
+            }
             rows.Add(index.ToString(CultureInfo.InvariantCulture) + ":" + string.Join(',', fields));
         }
         return Prefix + " path=" + path + " count=" + actual.Length.ToString(CultureInfo.InvariantCulture)

@@ -36,7 +36,10 @@ internal static class MixedEventingRetentionBackupHealthy
         await Assert.That(issuedReceive.Kind).IsEqualTo(OperationKind.Receive);
         await Assert.That(issuedReceive.PrincipalId).IsEqualTo(EventingArtifactFixture.Principal);
         await Assert.That(delivery.Token).IsNotEmpty();
-        await Assert.That(delivery with { Token = string.Empty }).IsEqualTo(new Delivery(Healthy,
+        await Assert.That(delivery with
+        {
+            Token = string.Empty
+        }).IsEqualTo(new Delivery(Healthy,
             EventingArtifactFixture.Json, EventingArtifactFixture.EmptyJson, string.Empty, 1,
             issuedReceive.EvaluatedAt.AddSeconds(30), 1, 1));
         var ack = new DeliveryCommand(Guid.NewGuid(), fixture.Lane, delivery.Token, DeliveryAction.Ack);

@@ -22,7 +22,9 @@ internal sealed class FeedLiveRf3Connections(ClusterFixture fixture)
     internal async Task CloseAsync(RequestCqrsRf3Callers caller)
     {
         if (!callers.Remove(caller))
-        { throw new InvalidOperationException(nameof(FeedLiveRf3Connections)); }
+        {
+            throw new InvalidOperationException(nameof(FeedLiveRf3Connections));
+        }
         await caller.DisposeAsync();
     }
 
@@ -31,7 +33,9 @@ internal sealed class FeedLiveRf3Connections(ClusterFixture fixture)
         var owner = new FeedLiveRf3Connections(fixture);
         var failures = new List<Exception>();
         try
-        { await ServerFailureObserver.ObserveAsync(() => operation(owner), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => operation(owner), failures);
+        }
         finally
         {
             for (var index = owner.callers.Count; index > NoCallers;)

@@ -55,9 +55,15 @@ internal sealed class SiteMetadataTestScope : IAsyncDisposable
         Fixture = fixture;
     }
 
-    internal string Repository { get; }
+    internal string Repository
+    {
+        get;
+    }
     internal string Output => Repository + "-" + SiteMetadataTokens.OutputName;
-    internal SiteIsolatedFixture Fixture { get; }
+    internal SiteIsolatedFixture Fixture
+    {
+        get;
+    }
 
     internal static async Task<SiteMetadataTestScope> CreateAsync(SiteIsolatedFixture sourceFixture, CancellationToken token)
     {

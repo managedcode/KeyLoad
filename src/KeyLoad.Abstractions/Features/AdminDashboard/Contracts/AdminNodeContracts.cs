@@ -65,7 +65,10 @@ public sealed record AdminNodeSnapshot([property: Orleans.Id(0)] DateTimeOffset 
 {
     /// <summary>Gets the configured voter identity of the executing node, comparable with the reported leader.</summary>
     [Orleans.Id(5)]
-    public string? LocalVoter { get; init; }
+    public string? LocalVoter
+    {
+        get; init;
+    }
 
     /// <summary>Gets the configured voter membership; membership never implies that another voter is healthy.</summary>
     [Orleans.Id(6)]

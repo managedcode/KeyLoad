@@ -54,5 +54,9 @@ internal sealed class DocumentNativeTargetAcquisition : IAsyncDisposable
             await target.DisposeAsync().ConfigureAwait(false);
         }
     }
-    private async Task DisposeClientAsync() { await Task.CompletedTask.ConfigureAwait(false); client?.Dispose(); }
+    private async Task DisposeClientAsync()
+    {
+        await Task.CompletedTask.ConfigureAwait(false);
+        client?.Dispose();
+    }
 }

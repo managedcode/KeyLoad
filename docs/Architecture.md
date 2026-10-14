@@ -253,7 +253,7 @@ All KeyLoad-owned backend, clients, contracts, frontend, tests, infrastructure a
 | src/KeyLoad.Query | Features/QueryExecution/Queries/QueryEngine.cs, Features/QueryExecution/Execution/SqlParser.cs, Features/Search/Queries/SearchEngine.cs; Features/ChangeFeeds/Queries/LiveQueryExecutor.cs behind Features/ChangeFeeds/Execution/LiveQueries.cs facade | QueryExecution, Search, ChangeFeeds; one authorized typed AST and bounded read cut. |
 | src/KeyLoad.Artifacts | Features/BackupRestore/Execution/ArtifactTransfer.cs, Features/BackupRestore/Execution/BackupArtifact.cs | BackupRestore; verified artifact transport and format ownership. |
 | src/KeyLoad.Replication | Features/ClusterReplication/Execution/ClusterCoordinator.cs, Features/ClusterReplication/Storage/DurableReplicaLog.cs, Features/ClusterReplication/Execution/ReplicaMaterializer.cs | ClusterReplication, StorageRecovery; ordered durable apply and quorum authority behind the active Orleans server composition; delivered-SHA RF3 qualification pending. |
-| src/KeyLoad.Orleans | Features/ClusterRouting/Grains/{ConnectionGrain,CommandPartitionGrain}.cs; Queries/ConnectionReadExecution.cs; Topology/ReplicaMembershipTable.cs | ClusterRouting; active server composition routes through grains while node-local hosts own storage; forced activation-migration qualification pending. |
+| src/KeyLoad.Clustering | Features/ClusterRouting/Grains/{ConnectionGrain,CommandPartitionGrain}.cs; Queries/ConnectionReadExecution.cs; Topology/ReplicaMembershipTable.cs | ClusterRouting; active server composition routes through grains while node-local hosts own storage; forced activation-migration qualification pending. |
 | src/KeyLoad.Server | Program.cs, NodeOptions.cs, Features/ClientApi/, Features/ClusterRouting/Hosting/OrleansNode.cs and feature API files | Composition root and public API; caller identity never supplies trusted roles. |
 | src/KeyLoad.Client | KeyLoadClient.cs, Features/QueryExecution/Queries/KeyLoadQuery.cs | ClientApi shared transport; business operations mirror the same canonical slices as core/contracts/API/tests. |
 | src/KeyLoad.Cli | Program.cs, Features/ClientApi/Hosting/KeyLoadCliApplication.cs, Features/ClientApi/Transport/CliClientApi.cs and Features/BackupRestore/Commands/CliBackupRestore.cs | Composition-only administrative entry point and typed ClientApi/BackupRestore feature owners. |
@@ -300,7 +300,7 @@ classDiagram
 
 Each vertical slice groups actual responsibilities in populated local role folders;
 `Features/<SliceName>/` is an ownership boundary, not a flat file collection.
-KeyLoad.Orleans now separates routing grains, commands, queries, models, contracts,
+KeyLoad.Clustering now separates routing grains, commands, queries, models, contracts,
 streaming, identity, serialization, diagnostics and topology. Its replication slice
 separates grain services, discovery, transport, authentication, replay and wire models;
 ResourceExecution separates cache-control models, contracts, serialization,

@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Replication;
 using Microsoft.Extensions.Options;
 
@@ -40,10 +40,14 @@ internal sealed class RequestCqrsProbeNativeRelay : IAsyncDisposable
     {
         using var operation = Enter();
         if (!string.Equals(producerAddress.ToParsableString(), trust.Address, StringComparison.Ordinal))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, RequestCqrsProbeNativeProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, RequestCqrsProbeNativeProtocol.Unavailable);
+        }
         _ = trust.RequireCurrent(trust.Local, trust.Voter, trust.Address);
         if (!await outgoing.WaitAsync(TimeSpan.Zero, operation.ShutdownToken).ConfigureAwait(false))
-        { throw Capacity(); }
+        {
+            throw Capacity();
+        }
         try
         {
             using var deadline = new CancellationTokenSource(configuration.RpcTimeout, clock);
@@ -60,7 +64,9 @@ internal sealed class RequestCqrsProbeNativeRelay : IAsyncDisposable
         ArgumentNullException.ThrowIfNull(request);
         using var operation = Enter();
         if (!await incoming.WaitAsync(TimeSpan.Zero, token).ConfigureAwait(false))
-        { throw Capacity(); }
+        {
+            throw Capacity();
+        }
         try
         {
             var owned = authentication.Verify(request, method);
@@ -80,7 +86,9 @@ internal sealed class RequestCqrsProbeNativeRelay : IAsyncDisposable
         {
             var remaining = request.ExpiresAt - clock.GetUtcNow();
             if (remaining <= TimeSpan.Zero)
-            { throw new OperationCanceledException(); }
+            {
+                throw new OperationCanceledException();
+            }
             using var expiry = new CancellationTokenSource(remaining < configuration.RpcTimeout ? remaining : configuration.RpcTimeout, clock);
             using var linked = CancellationTokenSource.CreateLinkedTokenSource(caller, shutdown, expiry.Token);
             linked.Token.ThrowIfCancellationRequested();
@@ -91,7 +99,9 @@ internal sealed class RequestCqrsProbeNativeRelay : IAsyncDisposable
             {
                 linked.Token.ThrowIfCancellationRequested();
                 if (request.ExpiresAt <= clock.GetUtcNow())
-                { throw new OperationCanceledException(); }
+                {
+                    throw new OperationCanceledException();
+                }
                 authentication.RequireCurrent(request);
                 dispatched = true;
                 disposal.Complete(claim!, trust.Local, trust.Voter, trust.Address);
@@ -120,22 +130,32 @@ internal sealed class RequestCqrsProbeNativeRelay : IAsyncDisposable
     private void Release()
     {
         if (Interlocked.Exchange(ref resourcesReleased, ResourcesReleased) != ResourcesNotReleased)
-        { return; }
+        {
+            return;
+        }
         var failures = new List<Exception>();
         try
-        { trust.Dispose(); }
+        {
+            trust.Dispose();
+        }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         try
-        { incoming.Dispose(); }
+        {
+            incoming.Dispose();
+        }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         try
-        { outgoing.Dispose(); }
+        {
+            outgoing.Dispose();
+        }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         try
-        { stopping.Dispose(); }
+        {
+            stopping.Dispose();
+        }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         ServerFailureObserver.ThrowIfAny(failures);

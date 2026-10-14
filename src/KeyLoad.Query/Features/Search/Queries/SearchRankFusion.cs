@@ -23,7 +23,9 @@ internal sealed class SearchRankFusion(int constant, int limit, ReadExecutionBud
             var contribution = weight / ((double)constant + rank + AdjacentElementOffset);
             scores[reference] = scores.GetValueOrDefault(reference) + contribution;
             if (weight > EmptyElementCount)
-            { explanations?.Record(reference, new(kind, nativeRank, weight, contribution)); }
+            {
+                explanations?.Record(reference, new(kind, nativeRank, weight, contribution));
+            }
         }
     }
 

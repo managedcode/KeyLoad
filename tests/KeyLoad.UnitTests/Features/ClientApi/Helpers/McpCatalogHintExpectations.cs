@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
@@ -13,12 +13,20 @@ internal static class McpCatalogHintExpectations
         var destructive = !read.HasValue;
         if (command is OperationKind.MaintainAnnIndex or OperationKind.MaintainTextIndex or OperationKind.ReceiveAcrossLanes
             or OperationKind.EventFeedControl)
-        { idempotent = false; }
+        {
+            idempotent = false;
+        }
         if (command is OperationKind.ConfigureResource or OperationKind.BindAtomicPartitionPlacement
             or OperationKind.BeginBlobUpload or OperationKind.WriteBlobPart or OperationKind.AbortBlobUpload)
-        { destructive = false; }
+        {
+            destructive = false;
+        }
         if (actual.Name == "keyload_tail_event_feed")
-        { readOnly = true; idempotent = true; destructive = false; }
+        {
+            readOnly = true;
+            idempotent = true;
+            destructive = false;
+        }
         await Assert.That(actual.ReadOnly).IsEqualTo(readOnly);
         await Assert.That(actual.Idempotent).IsEqualTo(idempotent);
         await Assert.That(actual.Destructive).IsEqualTo(destructive);
@@ -32,7 +40,10 @@ internal static class McpCatalogHintExpectations
 internal static class McpRemoteGraphCatalogExpectations
 {
     private const string AdditionalProperties = "additionalProperties";
-    internal static global::System.Collections.Immutable.ImmutableArray<(string Name, string Route, GrainReadKind? ReadKind, OperationKind? CommandKind)> Entries { get; } =
+    internal static global::System.Collections.Immutable.ImmutableArray<(string Name, string Route, GrainReadKind? ReadKind, OperationKind? CommandKind)> Entries
+    {
+        get;
+    } =
     [
         ("keyload_graph_remote_upsert", "/v1/graph/remote/upsert", null, OperationKind.UpsertRemoteGraphEdge),
         ("keyload_graph_remote_delete", "/v1/graph/remote/delete", null, OperationKind.DeleteRemoteGraphEdge),

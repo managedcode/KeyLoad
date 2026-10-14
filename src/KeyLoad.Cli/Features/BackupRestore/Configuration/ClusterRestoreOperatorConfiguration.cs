@@ -4,7 +4,10 @@ namespace KeyLoad.Cli.Features.BackupRestore;
 [ConfigurationOptions]
 internal sealed class ClusterRestoreOperatorConfiguration
 {
-    public Guid OperationId { get; set; }
+    public Guid OperationId
+    {
+        get; set;
+    }
     public ClusterRestoreOperatorCredential[] Credentials { get; set; } = [];
     public string DestinationRoot { get; set; } = string.Empty;
     public ClusterRestoreOwnerSource[] Sources { get; set; } = [];

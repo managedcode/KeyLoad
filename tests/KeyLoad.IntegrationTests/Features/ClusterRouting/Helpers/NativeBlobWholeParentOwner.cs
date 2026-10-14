@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.Messaging;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
@@ -45,17 +45,23 @@ internal sealed class NativeBlobWholeParentOwner(List<Exception> failures) : IAs
     {
         var cleanup = new List<Exception>();
         if (producer is { } original)
-        { await ServerFailureObserver.ObserveAsync(() => original, cleanup); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => original, cleanup);
+        }
         await ServerFailureObserver.ObserveAsync(CloseCallersAsync, cleanup);
         if (wave is { } actual)
         {
             if (failures.Count != NoFailures || cleanup.Count != NoFailures)
-            { actual.RetainRoots(); }
+            {
+                actual.RetainRoots();
+            }
             await ServerFailureObserver.ObserveAsync(() => actual.DisposeAsync().AsTask(), cleanup);
             if (actual.applicationDisposed && actual.nodeLocksReleased)
             {
                 foreach (var membership in memberships)
-                { ServerFailureObserver.Observe(membership.Dispose, cleanup); }
+                {
+                    ServerFailureObserver.Observe(membership.Dispose, cleanup);
+                }
             }
             else
             {
@@ -64,6 +70,11 @@ internal sealed class NativeBlobWholeParentOwner(List<Exception> failures) : IAs
             }
         }
         foreach (var error in cleanup)
-        { if (!failures.Any(prior => ReferenceEquals(prior, error))) { failures.Add(error); } }
+        {
+            if (!failures.Any(prior => ReferenceEquals(prior, error)))
+            {
+                failures.Add(error);
+            }
+        }
     }
 }

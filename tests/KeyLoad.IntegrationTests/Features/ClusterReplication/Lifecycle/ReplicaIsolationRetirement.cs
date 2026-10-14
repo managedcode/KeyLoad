@@ -53,15 +53,21 @@ internal static class ReplicaIsolationRetirement
         ContainerRuntimeDocker.EnsureSuccessful(result, List, pair.Key);
         var ids = result.StandardOutput.Split('\n', StringSplitOptions.RemoveEmptyEntries).Select(id => id.Trim()).ToArray();
         if (ids.Length == NoContainers)
-        { return; }
+        {
+            return;
+        }
         if (ids.Length != SingleContainer || original is not null && ids[ContainerIndex] != original.Container.Id)
-        { throw new InvalidOperationException("The original owned namespace has ambiguous stopped identity."); }
+        {
+            throw new InvalidOperationException("The original owned namespace has ambiguous stopped identity.");
+        }
         _ = ReplicaIsolationRules.NativeArguments(ids[ContainerIndex], []);
         var state = await ContainerRuntimeDocker.RunAsync([ReplicaIsolationNativeKeys.Inspect, Format, RunningFormat, ids[ContainerIndex]], cancellationToken);
         evidence.Add(new(ReplicaIsolationNativeKeys.Inspect, pair.Key, state, false));
         ContainerRuntimeDocker.EnsureSuccessful(state, ReplicaIsolationNativeKeys.Inspect, pair.Key);
         if (state.StandardOutput.Trim() != False)
-        { throw new InvalidOperationException("An original owned namespace is still running; its images and root must remain."); }
+        {
+            throw new InvalidOperationException("An original owned namespace is still running; its images and root must remain.");
+        }
     }
 
     internal static void AssertLocks(string root, List<ReplicaIsolationRetirementObservation> evidence)
@@ -105,17 +111,23 @@ internal static class ReplicaIsolationRetirement
         ContainerRuntimeDocker.EnsureSuccessful(listed, ImageList, target.ResourceName);
         var imageId = listed.StandardOutput.Trim();
         if (imageId.Length == NoContainers)
-        { return; }
+        {
+            return;
+        }
         var actual = await ReplicaIsolationInspectionReader.ImageAsync(target.ImageReference, cancellationToken);
         if (imageId != actual.Id || actual.FaultSource != plan.DockerfileSha256)
-        { throw new InvalidOperationException("The actual partial-build tag is not owned by this immutable fault context."); }
+        {
+            throw new InvalidOperationException("The actual partial-build tag is not owned by this immutable fault context.");
+        }
         var original = await ReplicaIsolationInspectionReader.ImageAsync(plan.BaseImage, cancellationToken);
         ReplicaIsolationInspectionReader.RequireDerived(original, actual, plan, original.Revision);
         var references = await ContainerRuntimeDocker.RunAsync([List, All, NoTruncation, Filter, AncestorFilter + imageId, Format, IdFormat], cancellationToken);
         evidence.Add(new(List, target.ResourceName, references, false));
         ContainerRuntimeDocker.EnsureSuccessful(references, List, target.ResourceName);
         if (!string.IsNullOrWhiteSpace(references.StandardOutput))
-        { throw new InvalidOperationException("A native container still references the fault image; the tag must remain."); }
+        {
+            throw new InvalidOperationException("A native container still references the fault image; the tag must remain.");
+        }
         var removed = await ContainerRuntimeDocker.RunAsync([ImageCommand, Remove, NoPrune, target.ImageReference], cancellationToken);
         evidence.Add(new(Remove, target.ResourceName, removed, false));
         ContainerRuntimeDocker.EnsureSuccessful(removed, Remove, target.ResourceName);
@@ -123,6 +135,8 @@ internal static class ReplicaIsolationRetirement
         evidence.Add(new(ImageList, target.ResourceName, remaining, false));
         ContainerRuntimeDocker.EnsureSuccessful(remaining, ImageList, target.ResourceName);
         if (!string.IsNullOrWhiteSpace(remaining.StandardOutput))
-        { throw new InvalidOperationException("An original owned fault tag remains after native removal."); }
+        {
+            throw new InvalidOperationException("An original owned fault tag remains after native removal.");
+        }
     }
 }

@@ -14,7 +14,10 @@ internal sealed class EqualityAccessPathSecurityTests
     [Arguments(true)]
     public async Task AcAisql008ProtectedReversedEqualityIsDeniedBeforeTheIndexReadBudget(bool parameterized)
     {
-        using var db = new TestDatabase(new() { MaxQueryReadBytes = MinimumReadBudgetBytes });
+        using var db = new TestDatabase(new()
+        {
+            MaxQueryReadBytes = MinimumReadBudgetBytes
+        });
         db.Configure(EqualityAccessPathSupport.Collection, ResourceKind.Collection,
             indexes: [new(EqualityAccessPathSupport.StatusIndex, [EqualityAccessPathSupport.StatusPath])],
             fields: [new(EqualityAccessPathSupport.StatusPath, SensitiveLabel)]);
@@ -65,11 +68,17 @@ internal sealed class EqualityAccessPathSecurityTests
     [Arguments(true)]
     public async Task AcAisql008MissingReversedParameterIsRejectedBeforeCandidateSelection(bool indexed)
     {
-        using var db = EqualityAccessPathSupport.Create(new() { MaxQueryReadBytes = MinimumReadBudgetBytes });
+        using var db = EqualityAccessPathSupport.Create(new()
+        {
+            MaxQueryReadBytes = MinimumReadBudgetBytes
+        });
         var engine = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
         foreach (var reversed in new[] { false, true })
         {
-            var request = EqualityAccessPathSupport.Request(db, indexed, parameterized: true, reversed) with { Parameters = null };
+            var request = EqualityAccessPathSupport.Request(db, indexed, parameterized: true, reversed) with
+            {
+                Parameters = null
+            };
             await Assert.That(EqualityAccessPathSupport.Failure(engine, request).Code).IsEqualTo(ErrorCode.Validation);
         }
     }
@@ -77,5 +86,8 @@ internal sealed class EqualityAccessPathSecurityTests
     private static void ConfigureReader(TestDatabase db, string principal, bool restrictRows = false)
         => db.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(new(principal, EqualityAccessPathSupport.Tenant,
             [new(EqualityAccessPathSupport.Database, EqualityAccessPathSupport.Collection, Capability.DocumentsRead | Capability.Query)], [])
-        { OwnerId = principal, RestrictRows = restrictRows })).Get<PrincipalRecord>();
+        {
+            OwnerId = principal,
+            RestrictRows = restrictRows
+        })).Get<PrincipalRecord>();
 }

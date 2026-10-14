@@ -24,7 +24,9 @@ internal sealed class NativeReadProbeCodec(NativeReadProbeFault fault) : IFieldC
         [AllowNull] AppendRequest value) where TWriter : IBufferWriter<byte>
     {
         if (ReferenceCodec.TryWriteReferenceField(ref writer, delta, expectedType, value))
-        { return; }
+        {
+            return;
+        }
         writer.WriteFieldHeader(delta, expectedType, typeof(AppendRequest), WireType.TagDelimited);
         writer.WriteEndBase();
         NativeReadProbeProducer.Write(ref writer, LeaderField, value.LeaderId);
@@ -45,7 +47,9 @@ internal sealed class NativeReadProbeCodec(NativeReadProbeFault fault) : IFieldC
         NativeReadProbeFault missing) where TWriter : IBufferWriter<byte>
     {
         if (fault == missing)
-        { return; }
+        {
+            return;
+        }
         NativeReadProbeProducer.Write(ref writer, fieldId - previous, value);
         previous = fieldId;
     }
@@ -61,8 +65,12 @@ internal sealed class NativeReadProbeCodec(NativeReadProbeFault fault) : IFieldC
         NativeReadProbeProducer.Write(ref writer, EntriesField - previous,
             fault == NativeReadProbeFault.NullEntries ? default : entries);
         if (fault == NativeReadProbeFault.DuplicateEntries)
-        { NativeReadProbeProducer.Write(ref writer, 0, entries); }
+        {
+            NativeReadProbeProducer.Write(ref writer, 0, entries);
+        }
         if (fault == NativeReadProbeFault.UnknownEntries)
-        { NativeReadProbeProducer.Write(ref writer, UnknownField - EntriesField, entries); }
+        {
+            NativeReadProbeProducer.Write(ref writer, UnknownField - EntriesField, entries);
+        }
     }
 }

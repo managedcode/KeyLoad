@@ -39,7 +39,10 @@ internal static class EventMessageSensitiveReplayTrial
             EventMessageSensitiveReplayProtocol.Classification, EventMessageSensitiveReplayProtocol.GrantBefore);
         var resource = new ResourceDefinition(EventMessageSensitiveReplayProtocol.Resource,
             subscription ? ResourceKind.Topic : ResourceKind.WorkQueue, fixture.Partition.TransactionDomainId)
-        { FieldPolicies = header ? [] : [policy], HeaderPolicies = header ? [policy] : [] };
+        {
+            FieldPolicies = header ? [] : [policy],
+            HeaderPolicies = header ? [policy] : []
+        };
         resource = fixture.Submit(OperationKind.ConfigureResource,
             new ConfigureResourceRequest(fixture.Partition.TenantId, fixture.Partition.DatabaseId, resource)).Get<ResourceDefinition>();
         var capabilities = Capability.QueueConsume | Capability.QueueAck | Capability.QueueInspect

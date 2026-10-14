@@ -29,7 +29,9 @@ internal static class PhysicalOwnerDirectoryWholeFlow
         var result = fixture.Bootstrap(new(Version, EmptyRevision, Control.Owner.PhysicalShardId,
             Control.Owner.Incarnation, Control.Owner.VoterIds));
         if (result.Error is not null)
-        { throw new InvalidOperationException("The actual control catalog bootstrap failed."); }
+        {
+            throw new InvalidOperationException("The actual control catalog bootstrap failed.");
+        }
     }
 
     internal static RegisterPhysicalOwnerV1 Request(long revision = EmptyRevision)
@@ -44,7 +46,9 @@ internal static class PhysicalOwnerDirectoryWholeFlow
     {
         var page = view.Scan([], MaximumFixtureRecords);
         if (page.HasMore)
-        { throw new InvalidOperationException("The owner directory fixture exceeded its complete image bound."); }
+        {
+            throw new InvalidOperationException("The owner directory fixture exceeded its complete image bound.");
+        }
         return page.Records.Select(record => Convert.ToHexString(record.Key.Span) + ":" +
             Convert.ToHexString(record.Value.Span)).ToArray();
     });

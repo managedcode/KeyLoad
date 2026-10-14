@@ -35,10 +35,17 @@ internal static class DistributedSearchCoordinator
                 prepare, sourceBarrier, execution, statisticsCaptured).RunAsync().ConfigureAwait(false);
         }
         catch (OperationCanceledException) when (original.IsCancellationRequested)
-        { original.ThrowIfCancellationRequested(); throw; }
+        {
+            original.ThrowIfCancellationRequested();
+            throw;
+        }
         catch (OperationCanceledException) when (deadline.IsCancellationRequested)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, DeadlineExceeded); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, DeadlineExceeded);
+        }
         catch (Exception cause) when (DistributedSearchDeadlineFailure.IsOwnedDeadline(cause, deadline.Token, original))
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, DeadlineExceeded, cause); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, DeadlineExceeded, cause);
+        }
     }
 }

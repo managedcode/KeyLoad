@@ -41,7 +41,9 @@ internal sealed class ServerSynchronousCancellationWholeFlowTests
                 await ServerFailureObserver.ObserveAsync(() => { Stage(); return Task.CompletedTask; }, failures);
             }
             else
-            { ServerFailureObserver.Observe(Stage, failures); }
+            {
+                ServerFailureObserver.Observe(Stage, failures);
+            }
             await Assert.That(failures.Count).IsEqualTo(SingleFailure);
             await Assert.That(original).IsNotNull();
             var emitted = Assert.ThrowsExactly<OperationCanceledException>(() => ServerFailureObserver.ThrowIfAny(failures));

@@ -11,18 +11,32 @@ internal sealed class AuthenticationExecutionCollector
     private bool overflow;
 
     internal IDatabaseAuthenticationExecutionObserver ForOwner(int owner) => new Observer(this, owner);
-    internal int Position { get { lock (gate) { return count; } } }
+    internal int Position
+    {
+        get
+        {
+            lock (gate)
+            {
+                return count;
+            }
+        }
+    }
     internal (AuthenticationExecutionEvent[] Events, bool Overflow) Read(int position)
     {
         lock (gate)
-        { return (events.Skip(position).Take(count - position).Select(item => item!).ToArray(), overflow); }
+        {
+            return (events.Skip(position).Take(count - position).Select(item => item!).ToArray(), overflow);
+        }
     }
     private void Add(AuthenticationExecutionEvent observation)
     {
         lock (gate)
         {
             if (count == AuthenticationExecutionProtocol.MaximumEvents)
-            { overflow = true; return; }
+            {
+                overflow = true;
+                return;
+            }
             events[count++] = observation;
         }
     }

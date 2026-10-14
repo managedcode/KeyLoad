@@ -7,7 +7,10 @@ internal sealed class GraphPathFieldUseR43State(GraphPathRf3Seed seed)
 {
     internal GraphPathRf3Seed Seed { get; } = seed;
     internal McpPersistedIdentity Identity { get; set; } = seed.Reader;
-    internal bool Allowed { get; set; }
+    internal bool Allowed
+    {
+        get; set;
+    }
     internal long AllowedEpoch { get; set; } = 2L;
     internal EntityRef Source => Ref(GraphPathRf3Scenario.CollectionA, "r43-field-s");
     internal EntityRef Middle => Ref(GraphPathRf3Scenario.CollectionA, "r43-field-m");

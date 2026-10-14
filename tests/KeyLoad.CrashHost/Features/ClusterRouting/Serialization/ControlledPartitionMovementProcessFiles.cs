@@ -20,7 +20,9 @@ internal static class ControlledPartitionMovementProcessFiles
             {
                 if (input.Length is <= EmptyLength
                     || input.Length > CrashExecutionOptions.DatabaseLimits().Value.MaxBatchBytes)
-                { throw new InvalidOperationException(ControlledPartitionMovementProcessProtocol.Invalid); }
+                {
+                    throw new InvalidOperationException(ControlledPartitionMovementProcessProtocol.Invalid);
+                }
                 var bytes = new byte[checked((int)input.Length)];
                 await input.ReadExactlyAsync(bytes, cancellationToken);
                 result = NativeSerialization.Deserialize<T>(bytes);
@@ -36,7 +38,9 @@ internal static class ControlledPartitionMovementProcessFiles
         var measured = NativeSerialization.Measure(value);
         if (measured is <= EmptyLength
             || measured > CrashExecutionOptions.DatabaseLimits().Value.MaxBatchBytes)
-        { throw new InvalidOperationException(ControlledPartitionMovementProcessProtocol.Invalid); }
+        {
+            throw new InvalidOperationException(ControlledPartitionMovementProcessProtocol.Invalid);
+        }
         var bytes = NativeSerialization.Serialize(value);
         var options = new FileStreamOptions
         {
@@ -47,7 +51,9 @@ internal static class ControlledPartitionMovementProcessFiles
             Options = FileOptions.Asynchronous
         };
         if (!OperatingSystem.IsWindows())
-        { options.UnixCreateMode = UnixFileMode.UserRead | UnixFileMode.UserWrite; }
+        {
+            options.UnixCreateMode = UnixFileMode.UserRead | UnixFileMode.UserWrite;
+        }
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {

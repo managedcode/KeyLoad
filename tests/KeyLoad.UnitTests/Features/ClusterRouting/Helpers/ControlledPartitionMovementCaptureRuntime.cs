@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core.Features.ResourceExecution;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
@@ -27,7 +27,9 @@ internal sealed class ControlledPartitionMovementCaptureRuntime : IAsyncDisposab
         {
             var failures = new List<Exception> { primary };
             try
-            { DisposeAsync().AsTask().GetAwaiter().GetResult(); }
+            {
+                DisposeAsync().AsTask().GetAwaiter().GetResult();
+            }
             catch (Exception cleanup) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
             catch (Exception cleanup) when (!NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
             ServerFailureObserver.ThrowIfAny(failures);
@@ -43,7 +45,9 @@ internal sealed class ControlledPartitionMovementCaptureRuntime : IAsyncDisposab
     public ValueTask DisposeAsync()
     {
         lock (gate)
-        { return new(closing ??= DisposeCoreAsync()); }
+        {
+            return new(closing ??= DisposeCoreAsync());
+        }
     }
 
     private async Task DisposeCoreAsync()
@@ -52,19 +56,25 @@ internal sealed class ControlledPartitionMovementCaptureRuntime : IAsyncDisposab
         if (source is not null)
         {
             try
-            { await source.DisposeAsync().ConfigureAwait(false); }
+            {
+                await source.DisposeAsync().ConfigureAwait(false);
+            }
             catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
             catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
         }
         if (work is not null)
         {
             try
-            { await work.DisposeAsync().ConfigureAwait(false); }
+            {
+                await work.DisposeAsync().ConfigureAwait(false);
+            }
             catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
             catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
         }
         try
-        { memory.Dispose(); }
+        {
+            memory.Dispose();
+        }
         catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
         catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
         ServerFailureObserver.ThrowIfAny(failures);

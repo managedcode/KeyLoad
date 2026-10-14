@@ -16,7 +16,9 @@ internal static class PartitionMoveFamilyCapture
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maximumPageBytes);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maximumImageBytes);
         if (maximumPageBytes > limits.MaxBatchBytes || maximumImageBytes > limits.MaxQueryReadBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
+        }
         using var digest = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         var before = pages.Count;
         long count = PartitionMoveProtocol.EmptyCount;
@@ -33,7 +35,9 @@ internal static class PartitionMoveFamilyCapture
             {
                 work.Check();
                 if (family == PartitionRecordFamilies.Bm25CorpusCurrent)
-                { Bm25CorpusShape.RequireRecord(record.Key.Span, record.Value.Span, fence.Partition, limits); }
+                {
+                    Bm25CorpusShape.RequireRecord(record.Key.Span, record.Value.Span, fence.Partition, limits);
+                }
                 PartitionMoveImageDigest.Append(digest, record.Key.Span);
                 PartitionMoveImageDigest.Append(digest, record.Value.Span);
                 count = checked(count + PartitionMoveProtocol.SequenceStep);
@@ -44,12 +48,16 @@ internal static class PartitionMoveFamilyCapture
                 var captured = new PartitionMoveImagePage(PartitionMoveProtocol.Version, fence.MoveId,
                     fence.Partition, family, pages.Count, page.Records, PartitionMoveImageDigest.Records(page.Records));
                 if (NativeSerialization.Measure(captured) > maximumPageBytes)
-                { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity); }
+                {
+                    throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
+                }
                 retained = checked(retained + page.RetainedBytes);
                 pages.Add(captured);
             }
             if (!page.HasMore)
-            { break; }
+            {
+                break;
+            }
             after = page.Continuation ?? throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.InvalidImage);
         }
         return new(family, count, rawBytes, pages.Count - before, Convert.ToHexStringLower(digest.GetHashAndReset()));

@@ -43,20 +43,28 @@ internal sealed class OfflineNativeHandleLease(SafeFileHandle handle) : IDisposa
         var owned = handle;
         handle = null;
         try
-        { owned?.Dispose(); }
+        {
+            owned?.Dispose();
+        }
         catch (Exception cleanup) when (primaryFailure is not null)
-        { throw new AggregateException(primaryFailure, cleanup); }
+        {
+            throw new AggregateException(primaryFailure, cleanup);
+        }
     }
 
     public void Dispose()
     {
         if (ownershipTransferred || Interlocked.Exchange(ref disposalState, Disposed) == Disposed)
-        { return; }
+        {
+            return;
+        }
         var releaseLock = lockAcquired;
         lockAcquired = false;
         var failure = primaryFailure;
         try
-        { OfflineFileLock.Release(ownedHandle, releaseLock); }
+        {
+            OfflineFileLock.Release(ownedHandle, releaseLock);
+        }
         catch (Exception cleanup)
         {
             if (failure is null)
@@ -68,14 +76,20 @@ internal sealed class OfflineNativeHandleLease(SafeFileHandle handle) : IDisposa
             throw failure;
         }
         finally
-        { DisposeOwnedHandle(failure); }
+        {
+            DisposeOwnedHandle(failure);
+        }
     }
 
     private void DisposeOwnedHandle(Exception? failure)
     {
         try
-        { ownedHandle.Dispose(); }
+        {
+            ownedHandle.Dispose();
+        }
         catch (Exception cleanup) when (failure is not null)
-        { throw new AggregateException(failure, cleanup); }
+        {
+            throw new AggregateException(failure, cleanup);
+        }
     }
 }

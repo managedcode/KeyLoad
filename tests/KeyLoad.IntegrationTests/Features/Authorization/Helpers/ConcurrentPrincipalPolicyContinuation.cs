@@ -17,19 +17,27 @@ internal static class ConcurrentPrincipalPolicyContinuation
     {
         var original = firstIdentity.Principal;
         await PersistAsync(fixture, original with
-        { Grants = [], PolicyEpoch = original.PolicyEpoch + RestrictedAdvance }, token);
+        {
+            Grants = [],
+            PolicyEpoch = original.PolicyEpoch + RestrictedAdvance
+        }, token);
         var restricted = await ConcurrentPrincipalAuthorityAssertions.CaptureAsync(fixture, first, second, token);
         await ConcurrentAsync(DeniedAsync(firstClient, first, firstIdentity, token),
             HealthyAsync(secondClient, second, token));
         await UnchangedAsync(fixture, first, second, restricted, token);
         await PersistAsync(fixture, original with
-        { Revoked = true, PolicyEpoch = original.PolicyEpoch + RevokedAdvance }, token);
+        {
+            Revoked = true,
+            PolicyEpoch = original.PolicyEpoch + RevokedAdvance
+        }, token);
         var revoked = await ConcurrentPrincipalAuthorityAssertions.CaptureAsync(fixture, first, second, token);
         await ConcurrentAsync(RevokedAsync(firstClient, first, firstIdentity, token),
             HealthyAsync(secondClient, second, token));
         await UnchangedAsync(fixture, first, second, revoked, token);
         await PersistAsync(fixture, original with
-        { PolicyEpoch = original.PolicyEpoch + RepairedAdvance }, token);
+        {
+            PolicyEpoch = original.PolicyEpoch + RepairedAdvance
+        }, token);
         var repaired = await ConcurrentPrincipalAuthorityAssertions.CaptureAsync(fixture, first, second, token);
         await ConcurrentAsync(HealthyAsync(firstClient, first, token), HealthyAsync(secondClient, second, token));
         await ConcurrentAsync(DeniedAsync(firstClient, second, firstIdentity, token),

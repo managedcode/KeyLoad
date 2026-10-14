@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 using TUnit.Assertions.Enums;
 
@@ -15,7 +15,10 @@ internal sealed class NativeAnnPendingLifecycleTests
         using var database = AnnSeedTestSupport.Create(LiteralCount);
         var request = NativeAnnMaintenanceTestData.Pin(database);
         var prepared = await PrepareAndAcknowledgeAsync(database, request);
-        request = request with { Mode = AnnMaintenanceMode.Restore };
+        request = request with
+        {
+            Mode = AnnMaintenanceMode.Restore
+        };
         var completed = await RestoreAndPublishAsync(database, request, prepared.Upper, prepared.Intent);
         await NativeAnnPublishedImageAssertions.AssertAsync(database, request, completed.IndexSha256!);
         await AssertNativeRestoreAsync(database, request, completed.IndexSha256!);
@@ -45,8 +48,8 @@ internal sealed class NativeAnnPendingLifecycleTests
                 _ = await NativeAnnMaintenancePhaseAssertions.CommitReplayAsync(database, intent);
             }, failures);
         }
-        catch (Exception cleanup) when (KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
-        catch (Exception cleanup) when (!KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
+        catch (Exception cleanup) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
+        catch (Exception cleanup) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
         ServerFailureObserver.ThrowIfAny(failures);
         return (upper, intent ?? throw new InvalidOperationException("The native pending fixture did not retain its original checkpoint intent."));
     }
@@ -72,8 +75,8 @@ internal sealed class NativeAnnPendingLifecycleTests
                 await Assert.That(completed.IndexSha256).IsNotNull();
             }, failures);
         }
-        catch (Exception cleanup) when (KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
-        catch (Exception cleanup) when (!KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
+        catch (Exception cleanup) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
+        catch (Exception cleanup) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
         ServerFailureObserver.ThrowIfAny(failures);
         return completed ?? throw new InvalidOperationException("The native pending fixture did not complete its original publication.");
     }
@@ -87,8 +90,8 @@ internal sealed class NativeAnnPendingLifecycleTests
             var actual = runtime;
             await ServerFailureObserver.ObserveAsync(() => RestoreAndContinueAsync(database, actual, request, digest), failures);
         }
-        catch (Exception cleanup) when (KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
-        catch (Exception cleanup) when (!KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
+        catch (Exception cleanup) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
+        catch (Exception cleanup) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 

@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.Options;
 using Orleans.Serialization;
@@ -37,7 +37,9 @@ internal sealed class OrleansNodeRequestExecutor(IOptions<GrainRoutingOptions> r
         Func<GrainRequestProgress, CancellationToken, ValueTask>? progress, CancellationToken cancellationToken)
     {
         if (requireCatalogAdmission && (!databaseReady || catalog is null || !catalog.IsReady))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalShardCatalogFence.NotReady); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalShardCatalogFence.NotReady);
+        }
         var grains = factory ?? throw Errors.Fail(ErrorCode.OwnershipLost, OrleansNodeProtocol.RoutingUnavailable);
         var services = runtime ?? throw Errors.Fail(ErrorCode.OwnershipLost, OrleansNodeProtocol.RoutingUnavailable);
         var connectionId = NativeConnectionExecutionIdentity.Resolve(services);

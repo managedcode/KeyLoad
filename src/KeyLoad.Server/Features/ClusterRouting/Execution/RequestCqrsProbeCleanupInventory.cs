@@ -17,22 +17,32 @@ internal sealed class RequestCqrsProbeCleanupInventory(
         {
             var known = arms.SingleOrDefault(pair => RequestCqrsProbeFiles.ArmName(pair.Value.Record) == name);
             if (known.Key == Guid.Empty)
-            { return; }
+            {
+                return;
+            }
             RequireBytes(path, known.Value.Bytes);
             loaded.Add(new(known.Value.Record, known.Value.Bytes));
             return;
         }
         if (name == RequestCqrsProbeProtocol.OwnerFile
             || name.StartsWith(RequestCqrsProbeProtocol.TemporaryFilePrefix, StringComparison.Ordinal))
-        { return; }
+        {
+            return;
+        }
         if (!controls.TryGetValue(name, out var bytes))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         RequireBytes(path, bytes);
         present.Add(name);
         if (name.StartsWith(RequestCqrsProbeProtocol.MarkerFilePrefix, StringComparison.Ordinal))
-        { markers.Add(json.ReadMarker(bytes)); }
+        {
+            markers.Add(json.ReadMarker(bytes));
+        }
         else if (name.StartsWith(RequestCqrsProbeProtocol.ReleaseFilePrefix, StringComparison.Ordinal))
-        { releases.Add(json.ReadRelease(bytes)); }
+        {
+            releases.Add(json.ReadRelease(bytes));
+        }
     }
 
     internal void RequireKnownArmPresence(IReadOnlyList<RequestCqrsProbeLoadedArm> loaded)
@@ -40,7 +50,9 @@ internal sealed class RequestCqrsProbeCleanupInventory(
         var present = loaded.Select(arm => arm.Record.ArmId).ToHashSet();
         if (present.Any(retired.Contains)
             || arms.Keys.Any(identity => !retired.Contains(identity) && !present.Contains(identity)))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
     }
 
     internal void RequireArmQuota(IEnumerable<string> names)
@@ -50,14 +62,18 @@ internal sealed class RequestCqrsProbeCleanupInventory(
             .Concat(retired.Select(id => RequestCqrsProbeProtocol.ArmFilePrefix + id.ToString(RequestCqrsProbeProtocol.SessionIdFormat)
                 + RequestCqrsProbeProtocol.JsonFileSuffix)).Distinct(StringComparer.Ordinal).Count();
         if (count > options.Value.MaximumArms)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
     }
 
     private void RequireBytes(string path, byte[] expected)
     {
         var actual = RequestCqrsProbeFiles.ReadRecord(path, options);
         if (!CryptographicOperations.FixedTimeEquals(expected, actual))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
     }
 
     private static InvalidOperationException Invalid() => new(RequestCqrsProbeProtocol.InvalidFiles);

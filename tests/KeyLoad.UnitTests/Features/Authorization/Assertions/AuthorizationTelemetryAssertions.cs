@@ -29,9 +29,18 @@ internal static class AuthorizationTelemetryAssertions
         var metrics = fixture.Metrics.Bank.Snapshot();
         var observation = fixture.Observations.Snapshot();
         var suppressed = fixture.Metrics.Suppressed.Snapshot();
-        var serialized = JsonSerializer.Serialize(new { spans, logs, metrics, observation, suppressed }, JsonDefaults.Options);
+        var serialized = JsonSerializer.Serialize(new
+        {
+            spans,
+            logs,
+            metrics,
+            observation,
+            suppressed
+        }, JsonDefaults.Options);
         foreach (var canary in AuthorizationTelemetryTestProtocol.Canaries)
-        { await Assert.That(serialized.Contains(canary, StringComparison.Ordinal)).IsFalse(); }
+        {
+            await Assert.That(serialized.Contains(canary, StringComparison.Ordinal)).IsFalse();
+        }
         var servers = spans.Where(static span => span.Source == AuthorizationTelemetryTestProtocol.HttpServerSource).ToArray();
         var clients = spans.Where(static span => span.Source == AuthorizationTelemetryTestProtocol.HttpClientSource).ToArray();
         await Assert.That(servers.Length).IsEqualTo(state is AuthorizationUnsafeSpanState.None or AuthorizationUnsafeSpanState.InheritedParentBaggage or AuthorizationUnsafeSpanState.ExcessParentLinks
@@ -39,7 +48,11 @@ internal static class AuthorizationTelemetryAssertions
             ? AuthorizationTelemetryTestProtocol.RequestCount : AuthorizationTelemetryTestProtocol.HealthyCount);
         await Assert.That(clients.Length).IsEqualTo(state is AuthorizationUnsafeSpanState.InheritedParentBaggage or AuthorizationUnsafeSpanState.ExcessParentLinks
             or AuthorizationUnsafeSpanState.ClientEvent or AuthorizationUnsafeSpanState.ClientTaggedLink or AuthorizationUnsafeSpanState.ClientTraceStateLink or AuthorizationUnsafeSpanState.ClientExtraLink or AuthorizationUnsafeSpanState.ClientRemoteLink
-            ? AuthorizationTelemetryTestProtocol.HealthyCount : AuthorizationTelemetryTestProtocol.RequestCount).Because(JsonSerializer.Serialize(new { exported = serialized, nativeSpans }, JsonDefaults.Options));
+            ? AuthorizationTelemetryTestProtocol.HealthyCount : AuthorizationTelemetryTestProtocol.RequestCount).Because(JsonSerializer.Serialize(new
+            {
+                exported = serialized,
+                nativeSpans
+            }, JsonDefaults.Options));
         await AuthorizationTelemetryNativeAssertions.SuppressionAsync(nativeSpans, suppressed, state, suppressedTrace);
         await AuthorizationTelemetryNativeAssertions.IdentityAsync(spans, nativeSpans);
         await SpansAsync(servers, clients, suppressedTrace);
@@ -114,7 +127,9 @@ internal static class AuthorizationTelemetryAssertions
         var healthy = operationLogs.Single(static log => log.EventId == AuthorizationTelemetryTestProtocol.HealthyEventId);
         await Assert.That(servers.Any(span => span.SpanId == healthy.SpanId && span.TraceId == healthy.TraceId)).IsTrue();
         if (!noRejectedCatalogLog)
-        { await Assert.That(operationLogs.Single(static log => log.EventId == AuthorizationTelemetryTestProtocol.DeniedEventId).Level).IsEqualTo(LogLevel.Error); }
+        {
+            await Assert.That(operationLogs.Single(static log => log.EventId == AuthorizationTelemetryTestProtocol.DeniedEventId).Level).IsEqualTo(LogLevel.Error);
+        }
         await Assert.That(healthy.Level).IsEqualTo(LogLevel.Information);
     }
     private static async Task MetricsAsync(AuthorizationMetricCapture[] metrics)

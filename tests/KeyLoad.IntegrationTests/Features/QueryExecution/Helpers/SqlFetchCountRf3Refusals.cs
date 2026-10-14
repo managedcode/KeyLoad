@@ -20,7 +20,10 @@ internal static class SqlFetchCountRf3Refusals
         await RejectAsync(fixture, state, SqlFetchCountRf3Protocol.FirstOne,
             ErrorCode.PermissionDenied, PostgresRf3Protocol.PermissionSqlState, token);
         await global::TUnit.Assertions.Assert.That(await SqlFetchCountRf3Assertions.ImageAsync(root, state, token)).IsEqualTo(image);
-        await PersistAsync(root, original with { PolicyEpoch = original.PolicyEpoch + SqlFetchCountRf3Protocol.RepairAdvance }, token);
+        await PersistAsync(root, original with
+        {
+            PolicyEpoch = original.PolicyEpoch + SqlFetchCountRf3Protocol.RepairAdvance
+        }, token);
         await SqlFetchCountRf3Pages.HealthyAsync(fixture, state, root, token);
     }
 
@@ -57,7 +60,9 @@ internal static class SqlFetchCountRf3Refusals
                 {
                     await PostgresRf3Assertions.ErrorAsync(wire.ExecuteAsync<QueryPage>(sql, [], prepared: true, token), sqlState, code);
                     if (code != ErrorCode.PermissionDenied)
-                    { await SqlFetchCountRf3Assertions.PageAsync(await wire.ExecuteAsync<QueryPage>(SqlFetchCountRf3Protocol.FirstOne, [], prepared: false, token), 1); }
+                    {
+                        await SqlFetchCountRf3Assertions.PageAsync(await wire.ExecuteAsync<QueryPage>(SqlFetchCountRf3Protocol.FirstOne, [], prepared: false, token), 1);
+                    }
                 }, failures);
             }, failures);
             global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);

@@ -8,7 +8,10 @@ internal static class RemoteTransferRepairArithmeticFlow
 {
     internal static async Task RunAsync(bool advancedHistory, bool exchangedGenerations = false)
     {
-        using var fixture = new RemoteTransferDatabase(new() { MaxQueueTransferRepairAttempts = RemoteTransferRepairColdProtocol.FullCeiling },
+        using var fixture = new RemoteTransferDatabase(new()
+        {
+            MaxQueueTransferRepairAttempts = RemoteTransferRepairColdProtocol.FullCeiling
+        },
             timeProvider: new RemoteTransferDiscoveryClock());
         var original = await PrepareAsync(fixture, advancedHistory);
         var key = original.IntentKey;
@@ -22,8 +25,15 @@ internal static class RemoteTransferRepairArithmeticFlow
                     AcceptPolicyGeneration = state.CompleteGeneration,
                     CompleteGeneration = state.AcceptPolicyGeneration
                 }
-                : state with { AcceptPolicyGeneration = long.MaxValue, CompleteGeneration = long.MaxValue };
-            tx.PutRecord(key, record with { Repairs = corrupted });
+                : state with
+                {
+                    AcceptPolicyGeneration = long.MaxValue,
+                    CompleteGeneration = long.MaxValue
+                };
+            tx.PutRecord(key, record with
+            {
+                Repairs = corrupted
+            });
             return true;
         });
         var faultImage = QueueWholeFlowStorage.Bytes((ZoneTreeStore)fixture.Store);
@@ -56,7 +66,10 @@ internal static class RemoteTransferRepairArithmeticFlow
         fixture.AddPrincipal(new(RemoteTransferRepairColdProtocol.Subject, RemoteTransferDatabase.TenantId,
             [new(RemoteTransferRepairColdProtocol.Wildcard, RemoteTransferRepairColdProtocol.Wildcard, Capability.All)],
             [RemoteTransferRepairColdProtocol.Wildcard])
-        { ClusterAdministrator = true, PolicyEpoch = RemoteTransferRepairColdProtocol.InitialEpoch });
+        {
+            ClusterAdministrator = true,
+            PolicyEpoch = RemoteTransferRepairColdProtocol.InitialEpoch
+        });
         var transfer = new CreateQueueTransfer(fixture.SourceQueue, Guid.NewGuid(), fixture.DestinationQueue,
             new(fixture.DestinationQueue.Queue, RemoteTransferRepairColdProtocol.Message, RemoteTransferRepairColdProtocol.Payload));
         var create = new CommandRequest(Guid.NewGuid(), fixture.SourcePartition, [transfer]);

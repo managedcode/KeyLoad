@@ -12,7 +12,10 @@ internal static class FeedPageRf3Assertions
         await Assert.That(string.IsNullOrEmpty(actual.Cursor)).IsFalse();
         await SqlRf3Protocol.EqualAsync(new ChangeFeedPage(actual.Changes, actual.Cursor, sequence, tail,
             FeedLiveRf3Protocol.FirstSequence, sequence < tail, actual.CutPosition), actual);
-        var continuation = await read(original with { Cursor = actual.Cursor });
+        var continuation = await read(original with
+        {
+            Cursor = actual.Cursor
+        });
         // Exactly one fixture position can be examined: hidden sequence2 or an empty caught-up tail.
         var through = sequence == FeedLiveRf3Protocol.FirstSequence ? FeedLiveRf3Protocol.HiddenSequence : sequence;
         await FeedLiveReadCoordinatesR49.RequireAsync(continuation.CutPosition, originalCommit);

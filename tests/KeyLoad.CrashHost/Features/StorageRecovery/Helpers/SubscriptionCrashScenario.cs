@@ -5,7 +5,10 @@ namespace KeyLoad.CrashHost;
 
 internal static class SubscriptionCrashScenario
 {
-    internal static PartitionRef Partition { get; } = new(CrashFixtureValues.Tenant, CrashFixtureValues.Database,
+    internal static PartitionRef Partition
+    {
+        get;
+    } = new(CrashFixtureValues.Tenant, CrashFixtureValues.Database,
         CrashFixtureValues.Orders, CrashFixtureValues.Partition);
     internal static SubscriptionRef Subscription { get; } = new(new(Partition, CrashFixtureValues.Topic, EventSourceKind.Topic), CrashFixtureValues.Group);
     internal static Guid CommandId { get; } = new(CrashFixtureValues.SubscriptionCommandId);

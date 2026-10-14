@@ -30,7 +30,9 @@ public sealed partial class DatabaseEngine
                 || issuance.OriginalParentExpiresAt != originalAdmit.OriginalParentExpiresAt
                 || issuance.OriginalParentExpiresAt <= EvaluationClock.GetUtcNow()
                 || !issuance.OriginalCoverageWitnessBytes.Span.SequenceEqual(originalAdmit.OriginalCoverageWitness.Span))
-            { throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidFirstEventVectorPreparation); }
+            {
+                throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidFirstEventVectorPreparation);
+            }
             var catalog = PhysicalShardCatalogRecordSerialization.Read(bounded)
                 ?? throw Errors.Fail(ErrorCode.OwnershipLost, InvalidFirstEventVectorPreparation);
             var owner = ResolveRegisteredPlacementOwner(bounded, catalog.DefaultShard,

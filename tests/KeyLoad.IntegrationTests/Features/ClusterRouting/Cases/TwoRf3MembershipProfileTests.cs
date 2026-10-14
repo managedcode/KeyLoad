@@ -25,10 +25,14 @@ internal sealed class TwoRf3MembershipProfileTests
         }, failures).ConfigureAwait(false);
         var beforeWaveCleanup = failures.Count;
         if (wave is { } ownedWave)
-        { await ServerFailureObserver.ObserveAsync(() => ownedWave.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => ownedWave.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         var waveCleanupSucceeded = wave is not null && failures.Count == beforeWaveCleanup;
         if (localImage is { } ownedImage)
-        { await ServerFailureObserver.ObserveAsync(() => ownedImage.DisposeAsync(removeImage: waveCleanupSucceeded).AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => ownedImage.DisposeAsync(removeImage: waveCleanupSucceeded).AsTask(), failures).ConfigureAwait(false);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 

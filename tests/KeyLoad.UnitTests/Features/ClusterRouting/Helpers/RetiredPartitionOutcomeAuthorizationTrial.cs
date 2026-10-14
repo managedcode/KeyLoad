@@ -17,23 +17,45 @@ internal static class RetiredPartitionOutcomeAuthorizationTrial
         var authority = new ControlledPartitionMovementOutcomeAuthority(source, original);
         var root = source.Store.Read(view => source.Database.Principal(view, PhysicalShardCatalogFixture.RootPrincipalId,
             source.Database.EvaluationClock.GetUtcNow()));
-        await ConfigureAsync(source, root with { Id = RepairPrincipalId }, root.Id, token);
-        await ConfigureAsync(source, root with { Id = WrongPrincipalId, Grants = [], ClusterAdministrator = false }, root.Id, token);
+        await ConfigureAsync(source, root with
+        {
+            Id = RepairPrincipalId
+        }, root.Id, token);
+        await ConfigureAsync(source, root with
+        {
+            Id = WrongPrincipalId,
+            Grants = [],
+            ClusterAdministrator = false
+        }, root.Id, token);
         var originalPayload = NativeSerialization.Deserialize<NativeCommandPayload>(original.NativePayload.Span);
         var originalCommand = NativeSerialization.Deserialize<CommandRequest>(originalPayload.Value.Span);
         var changedSubject = source.Database.CreateNativeOperation(OperationKind.Batch, original.Id, WrongPrincipalId,
             source.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(
-                ControlledPartitionMovementCorpus.Seed() with { OwnershipEpoch = originalCommand.OwnershipEpoch }));
+                ControlledPartitionMovementCorpus.Seed() with
+                {
+                    OwnershipEpoch = originalCommand.OwnershipEpoch
+                }));
         await RetiredPartitionOutcomeAuthorizationOracles.DeniedAsync(source, target, changedSubject,
             ErrorCode.PermissionDenied, authority, token);
         await ControlledPartitionMovementReceiptAssertions.ReplayAsync(source.Journal.Submit(original, token), originalReceipt);
-        var revoked = root with { Revoked = true, PolicyEpoch = checked(root.PolicyEpoch + EpochStep) };
+        var revoked = root with
+        {
+            Revoked = true,
+            PolicyEpoch = checked(root.PolicyEpoch + EpochStep)
+        };
         await ConfigureAsync(source, revoked, RepairPrincipalId, token);
         await RetiredPartitionOutcomeAuthorizationOracles.DeniedAsync(source, target, original,
             ErrorCode.Unauthenticated, authority, token);
-        var restored = root with { PolicyEpoch = checked(revoked.PolicyEpoch + EpochStep) };
+        var restored = root with
+        {
+            PolicyEpoch = checked(revoked.PolicyEpoch + EpochStep)
+        };
         await ConfigureAsync(source, restored, RepairPrincipalId, token);
-        var healthy = await ConfigureAsync(source, root with { Id = HealthyPrincipalId, ClusterAdministrator = false }, root.Id, token);
+        var healthy = await ConfigureAsync(source, root with
+        {
+            Id = HealthyPrincipalId,
+            ClusterAdministrator = false
+        }, root.Id, token);
         await RetiredPartitionOutcomeAuthorizationOracles.DeniedAsync(source, target, original,
             ErrorCode.PermissionDenied, authority, token);
         source.Reopen();
@@ -53,7 +75,9 @@ internal static class RetiredPartitionOutcomeAuthorizationTrial
             source.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(new ConfigurePrincipalRequest(principal)));
         var result = source.Journal.Submit(operation, cancellationToken);
         if (result.Error is { } code)
-        { throw Errors.Fail(code, result.SafeDetail!); }
+        {
+            throw Errors.Fail(code, result.SafeDetail!);
+        }
         return Task.FromResult((operation, NativeSerialization.Serialize(result.Get<PrincipalRecord>())));
     }
 }

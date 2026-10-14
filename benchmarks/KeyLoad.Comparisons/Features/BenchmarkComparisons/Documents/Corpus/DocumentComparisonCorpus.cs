@@ -25,9 +25,15 @@ public sealed class DocumentComparisonCorpus : IComparisonCorpus
         digest = new(() => DocumentComparisonOracle.Digest(Enumerable.Range(DocumentMeasurementValues.NoObservedItems, records).Select(CreateDocument)));
     }
     /// <inheritdoc/>
-    public IComparisonSettings Settings { get; }
+    public IComparisonSettings Settings
+    {
+        get;
+    }
     /// <inheritdoc/>
-    public IReadOnlyList<BenchmarkDocument> Documents { get; }
+    public IReadOnlyList<BenchmarkDocument> Documents
+    {
+        get;
+    }
     /// <inheritdoc/>
     public IReadOnlyList<BenchmarkEdge> Edges => Array.Empty<BenchmarkEdge>();
     /// <inheritdoc/>
@@ -45,14 +51,23 @@ public sealed class DocumentComparisonCorpus : IComparisonCorpus
         var id = ScaledComparisonCorpus.Id(number);
         var empty = ScaledComparisonCorpus.EmptyJson(id, number);
         var padding = new string(DocumentProtocolText.PaddingCharacter, DocumentComparisonContract.Current.PayloadBytes - Encoding.UTF8.GetByteCount(empty));
-        var json = JsonSerializer.Serialize(new { id, number, text = DocumentProtocolText.KeyLoadSharedCorpus, padding });
+        var json = JsonSerializer.Serialize(new
+        {
+            id,
+            number,
+            text = DocumentProtocolText.KeyLoadSharedCorpus,
+            padding
+        });
         return new(number, id, json, ImmutableArray<float>.Empty);
     }
     /// <summary>Creates a same-sized replacement whose complete canonical body differs from its initial value.</summary>
     public BenchmarkDocument Replacement(int number)
     {
         var original = CreateDocument(number);
-        return original with { Json = original.Json.Replace(DocumentProtocolText.KeyLoadSharedCorpus, DocumentProtocolText.KeyLoadUpdateCorpus, StringComparison.Ordinal) };
+        return original with
+        {
+            Json = original.Json.Replace(DocumentProtocolText.KeyLoadSharedCorpus, DocumentProtocolText.KeyLoadUpdateCorpus, StringComparison.Ordinal)
+        };
     }
     /// <inheritdoc/>
     public BenchmarkDocument Input(Scenario scenario, int repetition, int operation, bool warmup) => CreateDocument(operation);

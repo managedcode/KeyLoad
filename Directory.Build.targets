@@ -23,7 +23,7 @@
               '$(MSBuildProjectName)' == 'KeyLoad.Client' or
               '$(MSBuildProjectName)' == 'KeyLoad.Core' or
               '$(MSBuildProjectName)' == 'KeyLoad.Diagnostics' or
-              '$(MSBuildProjectName)' == 'KeyLoad.Orleans' or
+              '$(MSBuildProjectName)' == 'KeyLoad.Clustering' or
               '$(MSBuildProjectName)' == 'KeyLoad.Query' or
               '$(MSBuildProjectName)' == 'KeyLoad.Replication' or
               '$(MSBuildProjectName)' == 'KeyLoad.Security' or

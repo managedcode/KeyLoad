@@ -20,7 +20,9 @@ internal sealed class ReplicaAppliedPositionWaitFixture : IAsyncDisposable
         Canonical = new TestDatabase(limits, timeProvider: timeProvider);
         Configuration = new(RootPrincipal, [RootPrincipal], Path.Combine(Canonical.Directory, ReplicaKey),
             Canonical.Store.Identity.Incarnation)
-        { BenchmarkTopology = true };
+        {
+            BenchmarkTopology = true
+        };
         ZoneTreeStore? acquiredReplica = null;
         DurableReplicaLog? acquiredLog = null;
         ReplicaMaterializer? acquiredMaterializer = null;
@@ -42,24 +44,47 @@ internal sealed class ReplicaAppliedPositionWaitFixture : IAsyncDisposable
         {
             var failures = new List<Exception> { primary };
             if (acquiredConsensus is not null)
-            { ServerFailureObserver.ObserveAsync(() => acquiredConsensus.DisposeAsync().AsTask(), failures).GetAwaiter().GetResult(); }
+            {
+                ServerFailureObserver.ObserveAsync(() => acquiredConsensus.DisposeAsync().AsTask(), failures).GetAwaiter().GetResult();
+            }
             if (acquiredMaterializer is not null)
-            { ServerFailureObserver.ObserveAsync(() => acquiredMaterializer.DisposeAsync().AsTask(), failures).GetAwaiter().GetResult(); }
+            {
+                ServerFailureObserver.ObserveAsync(() => acquiredMaterializer.DisposeAsync().AsTask(), failures).GetAwaiter().GetResult();
+            }
             if (acquiredLog is not null)
-            { ServerFailureObserver.Observe(acquiredLog.Dispose, failures); }
+            {
+                ServerFailureObserver.Observe(acquiredLog.Dispose, failures);
+            }
             if (acquiredReplica is not null)
-            { ServerFailureObserver.Observe(acquiredReplica.Dispose, failures); }
+            {
+                ServerFailureObserver.Observe(acquiredReplica.Dispose, failures);
+            }
             ServerFailureObserver.Observe(Canonical.Dispose, failures);
             ServerFailureObserver.ThrowIfAny(failures);
             throw;
         }
     }
 
-    internal TestDatabase Canonical { get; }
-    internal ReplicaConfiguration Configuration { get; }
-    internal DurableReplicaLog Log { get; }
-    internal ReplicaMaterializer Materializer { get; private set; }
-    internal ReplicaConsensus Consensus { get; }
+    internal TestDatabase Canonical
+    {
+        get;
+    }
+    internal ReplicaConfiguration Configuration
+    {
+        get;
+    }
+    internal DurableReplicaLog Log
+    {
+        get;
+    }
+    internal ReplicaMaterializer Materializer
+    {
+        get; private set;
+    }
+    internal ReplicaConsensus Consensus
+    {
+        get;
+    }
 
     internal async Task RecreateMaterializerAsync()
     {
@@ -132,7 +157,9 @@ internal sealed class ReplicaAppliedPositionWaitFixture : IAsyncDisposable
         await ServerFailureObserver.ObserveAsync(() => Materializer.DisposeAsync().AsTask(), failures);
         ServerFailureObserver.Observe(Log.Dispose, failures);
         try
-        { replica.Dispose(); }
+        {
+            replica.Dispose();
+        }
         catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null) { failures.Add(error); }
         catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null) { failures.Add(error); }
         ServerFailureObserver.Observe(Canonical.Dispose, failures);

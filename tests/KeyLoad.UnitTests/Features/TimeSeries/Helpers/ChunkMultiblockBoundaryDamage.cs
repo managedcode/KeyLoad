@@ -37,18 +37,35 @@ internal static class ChunkMultiblockBoundaryDamage
     internal static void Inject(ChunkSelectedIntegrityFixture fixture, ChunkMultiblockBoundaryFault fault, bool unknownVersion)
     {
         if (!unknownVersion)
-        { fixture.Store.Commit((tx, _) => { tx.Delete(fault.BlockKey); return true; }); return; }
+        {
+            fixture.Store.Commit((tx, _) => { tx.Delete(fault.BlockKey); return true; });
+            return;
+        }
         var payload = NativeSerialization.Deserialize<SampleChunkPayload>(fault.BlockOriginal);
         var envelope = NativeSerialization.Deserialize<SampleChunkManifestEnvelope>(fault.ManifestOriginal);
         var manifest = NativeSerialization.Deserialize<SampleChunkManifest>(envelope.Encoded.Span);
-        var changed = NativeSerialization.Serialize(payload with { FormatVersion = checked(SampleChunkWire.CurrentVersion + 1) });
-        var updated = manifest with { BlockDigests = manifest.BlockDigests.SetItem(SecondOrdinal, SHA256.HashData(changed)) };
+        var changed = NativeSerialization.Serialize(payload with
+        {
+            FormatVersion = checked(SampleChunkWire.CurrentVersion + 1)
+        });
+        var updated = manifest with
+        {
+            BlockDigests = manifest.BlockDigests.SetItem(SecondOrdinal, SHA256.HashData(changed))
+        };
         var encoded = NativeSerialization.Serialize(updated);
         fixture.Store.Commit((tx, _) =>
-        { tx.Put(fault.BlockKey, changed); tx.PutRecord(fault.ManifestKey, new SampleChunkManifestEnvelope(encoded, SHA256.HashData(encoded))); return true; });
+        {
+            tx.Put(fault.BlockKey, changed);
+            tx.PutRecord(fault.ManifestKey, new SampleChunkManifestEnvelope(encoded, SHA256.HashData(encoded)));
+            return true;
+        });
     }
 
     internal static void Repair(ChunkSelectedIntegrityFixture fixture, ChunkMultiblockBoundaryFault original)
         => fixture.Store.Commit((tx, _) =>
-        { tx.Put(original.BlockKey, original.BlockOriginal); tx.Put(original.ManifestKey, original.ManifestOriginal); return true; });
+        {
+            tx.Put(original.BlockKey, original.BlockOriginal);
+            tx.Put(original.ManifestKey, original.ManifestOriginal);
+            return true;
+        });
 }

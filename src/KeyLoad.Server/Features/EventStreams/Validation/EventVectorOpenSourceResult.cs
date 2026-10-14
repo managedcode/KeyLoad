@@ -15,10 +15,14 @@ internal static class EventVectorOpenSourceResult
             || !actual.OriginalNativeBody.Span.SequenceEqual(admitted.OriginalNativeBody.Span)
             || !actual.SourceOriginalOutcomeDigest.Span.SequenceEqual(observed.SourceOriginalOutcomeDigest.Span)
             || !actual.SourceObservationWitness.Span.SequenceEqual(observed.SourceObservationWitness.Span))
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, EventVectorRemoteProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, EventVectorRemoteProtocol.Invalid);
+        }
         var mutation = EventVectorSourceMutationValidation.ReadObserved(actual, admission);
         if (actual.SourceOriginalResult is null || actual.SourceOriginalResult.Error is not null)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, EventVectorRemoteProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, EventVectorRemoteProtocol.Invalid);
+        }
         if (actual.Role == EventVectorSourcePhaseRole.Release)
         {
             EventVectorReleaseResultValidation.Require(actual, mutation,

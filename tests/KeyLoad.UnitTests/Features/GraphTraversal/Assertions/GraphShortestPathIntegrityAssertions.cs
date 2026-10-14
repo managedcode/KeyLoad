@@ -24,7 +24,9 @@ internal static class GraphShortestPathIntegrityAssertions
     {
         await Path(owner, store, state.DamagedEdge, filtered, token);
         if (continuation is not null)
-        { await Path(owner, store, continuation.Edge, filtered, token); }
+        {
+            await Path(owner, store, continuation.Edge, filtered, token);
+        }
     }
 
     private static async Task Path(DatabaseEngine owner, ZoneTreeStore store, EdgeRecord edge,
@@ -48,5 +50,7 @@ internal static class GraphShortestPathIntegrityAssertions
         => new(Version, edge.From.Partition, GraphTraversalIntegrityFixture.Graph, edge.From, edge.To,
             GraphTraversalIntegrityFixture.Depth, GraphTraversalIntegrityFixture.MaximumVertices,
             GraphTraversalIntegrityFixture.MaximumEdges)
-        { Labels = filtered ? [GraphTraversalIntegrityFixture.OtherLabel] : [] };
+        {
+            Labels = filtered ? [GraphTraversalIntegrityFixture.OtherLabel] : []
+        };
 }

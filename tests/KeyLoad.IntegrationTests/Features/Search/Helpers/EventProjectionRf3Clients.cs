@@ -9,9 +9,18 @@ internal sealed class EventProjectionRf3Clients : IDisposable
     private readonly HttpClient[] readerHttp;
     private readonly HttpClient[] administratorHttp;
 
-    internal KeyLoadClient[] Callers { get; }
-    internal KeyLoadClient[] Readers { get; }
-    internal KeyLoadClient[] Administrators { get; }
+    internal KeyLoadClient[] Callers
+    {
+        get;
+    }
+    internal KeyLoadClient[] Readers
+    {
+        get;
+    }
+    internal KeyLoadClient[] Administrators
+    {
+        get;
+    }
 
     internal EventProjectionRf3Clients(ClusterFixture fixture, EventProjectionRf3Scenario scenario,
         string[] nodes)
@@ -34,6 +43,8 @@ internal sealed class EventProjectionRf3Clients : IDisposable
     private static void DisposeAll(IEnumerable<HttpClient> clients)
     {
         foreach (var client in clients)
-        { client.Dispose(); }
+        {
+            client.Dispose();
+        }
     }
 }

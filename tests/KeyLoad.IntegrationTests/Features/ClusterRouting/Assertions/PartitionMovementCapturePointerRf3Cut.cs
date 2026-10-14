@@ -78,7 +78,9 @@ internal static class PartitionMovementCapturePointerRf3Cut
             var entries = PartitionMovementCapturePointerRf3Fault.AppliedEntries(wave, original, actual);
             var allowed = new HashSet<string>(StringComparer.Ordinal);
             if (entries.Length != PartitionMoveProtocol.EmptyCount)
-            { allowed.Add(Convert.ToHexString(KeySpace.AppliedBytes)); }
+            {
+                allowed.Add(Convert.ToHexString(KeySpace.AppliedBytes));
+            }
             var receipts = await RequireJournalAsync(request, advance, original, actual, entries, allowed);
             if (original.Header is not null)
             {
@@ -98,7 +100,9 @@ internal static class PartitionMovementCapturePointerRf3Cut
         foreach (var entry in entries)
         {
             if (entry.Operation is not { } operation)
-            { continue; } // Actual native election no-op, not an inferred effect.
+            {
+                continue;
+            } // Actual native election no-op, not an inferred effect.
             await Assert.That(before.Header).IsNotNull();
             await Assert.That(operation.Kind).IsEqualTo(OperationKind.PartitionMovementPhase);
             var phase = NativeCommandPayload.Read<PartitionMovePhaseCommand>(operation);
@@ -119,7 +123,12 @@ internal static class PartitionMovementCapturePointerRf3Cut
             await Assert.That(stored.ScopeKind).IsEqualTo(CommandOutcomeScopeKind.Partition);
             await SqlRf3Protocol.EqualAsync(request.Partition, stored.Partition);
             await Assert.That(stored.Fingerprint).IsEqualTo(JsonData.Fingerprint(new
-            { operation.Id, operation.Kind, operation.PrincipalId, operation.PayloadJson }));
+            {
+                operation.Id,
+                operation.Kind,
+                operation.PrincipalId,
+                operation.PayloadJson
+            }));
             allowed.Add(Convert.ToHexString(key));
             var locator = CommandOutcomePartitionLocatorSerialization.ScopedKey(request.Partition, operation.PrincipalId, operation.Id);
             var rows = PartitionMovementCapturePointerRf3Fault.Rows(after);
@@ -149,7 +158,9 @@ internal static class PartitionMovementCapturePointerRf3Cut
         PartitionMoveJournalReceipt[] receipts, HashSet<string> allowed)
     {
         if (receipts.Length == PartitionMoveProtocol.EmptyCount)
-        { return; }
+        {
+            return;
+        }
         await Assert.That(receipts.Length).IsEqualTo(PartitionMoveProtocol.SequenceStep);
         var oldPhase = before.OriginalPhase!;
         var newPhase = after.OriginalPhase!;

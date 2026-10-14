@@ -8,7 +8,9 @@ public sealed partial class DatabaseEngine
     private void AuthorizeQueueLifecycle(IKeyValueView view, PrincipalRecord principal, PartitionRef partition, Mutation mutation)
     {
         if (!principal.ClusterAdministrator)
-        { throw Errors.Fail(ErrorCode.PermissionDenied, QueueLifecycleProtocol.AdministratorRequired); }
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, QueueLifecycleProtocol.AdministratorRequired);
+        }
         var (queue, _, _, _) = QueueLifecycleOperands(mutation);
         var dataPrincipal = TransferDataPrincipal(principal);
         var capability = mutation is CancelQueueMessage ? Capability.QueueCancel : Capability.DeadLettersRedrive;

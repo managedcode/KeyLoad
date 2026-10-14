@@ -108,7 +108,9 @@ internal sealed class GraphSearchOperatorTests
         var scope = new GraphScope(GraphSearchTestSupport.Walk(
             GraphSearchTestSupport.Vertex(database, GraphSearchTestSupport.Projects, GraphSearchTestSupport.Root))
         with
-        { Labels = System.Collections.Immutable.ImmutableArray<string>.Empty });
+        {
+            Labels = System.Collections.Immutable.ImmutableArray<string>.Empty
+        });
         var search = new SearchRequest(database.Partition, GraphSearchTestSupport.Documents,
             GraphSearchTestSupport.TextField, "needle");
 

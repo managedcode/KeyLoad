@@ -26,7 +26,9 @@ internal static class RemoteTransferRepairRf3Trial
                     await QueueProducerRf3Assertions.DeniedAsync(await sdk.CommitAsync(original.Failed, deadline.Token), ErrorCode.PermissionDenied);
                 }, deadline.Token);
                 var repaired = original.Seed.Identity.Principal with
-                { PolicyEpoch = checked(original.Seed.Identity.Principal.PolicyEpoch + RemoteTransferRepairRf3Protocol.RepairedGeneration) };
+                {
+                    PolicyEpoch = checked(original.Seed.Identity.Principal.PolicyEpoch + RemoteTransferRepairRf3Protocol.RepairedGeneration)
+                };
                 await MessagingRf3Identity.UpdateAsync(fixture, repaired, deadline.Token);
                 await RemoteTransferColdCallers.WithAsync(fixture, original.Seed,
                     (sdk, mcp) => RemoteTransferRepairRf3Healthy.ProveAsync(sdk, mcp, original, acked: false, deadline.Token), deadline.Token);

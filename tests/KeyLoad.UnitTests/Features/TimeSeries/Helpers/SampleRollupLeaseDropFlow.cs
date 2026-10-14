@@ -44,7 +44,9 @@ internal static class SampleRollupLeaseDropFlow
         finally { release.Set(); }
         await ServerFailureObserver.ObserveAsync(() => reader, failures);
         if (writer is { } owned)
-        { await ServerFailureObserver.ObserveAsync(() => owned, failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => owned, failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
         return await writer!;
     }
@@ -62,7 +64,9 @@ internal static class SampleRollupLeaseDropFlow
             budget.CheckResult(result);
             var page = view.Scan([], MaximumRecords);
             if (page.HasMore)
-            { throw new InvalidOperationException(Truncated); }
+            {
+                throw new InvalidOperationException(Truncated);
+            }
             var bytes = JsonSerializer.Serialize(page.Records.Select(record =>
                 new[] { Convert.ToHexString(record.Key.Span), Convert.ToHexString(record.Value.Span) }).ToArray());
             var held = new SampleRollupHeldRead(result, bytes, db.Store.Position);
@@ -84,9 +88,13 @@ internal static class SampleRollupLeaseDropFlow
             cancellation.ThrowIfCancellationRequested();
             var snapshot = store.GateDiagnostics;
             if (snapshot.SessionId != session)
-            { throw new InvalidOperationException(WrongSession); }
+            {
+                throw new InvalidOperationException(WrongSession);
+            }
             if (snapshot.WaitingWriters > 0)
-            { return snapshot; }
+            {
+                return snapshot;
+            }
             await Task.Yield();
         }
     }

@@ -17,7 +17,10 @@ internal static class PartitionMovementTransferCloseRf3AbortAssertions
         CancellationToken cancellationToken)
     {
         var actual = await McpCallerAssertions.SdkSuccessAsync(await seed.Source.MovePartitionAsync(
-            seed.FirstRequest with { Mode = PartitionMoveMode.Abort }, cancellationToken).ConfigureAwait(false));
+            seed.FirstRequest with
+            {
+                Mode = PartitionMoveMode.Abort
+            }, cancellationToken).ConfigureAwait(false));
         await Assert.That(actual.MoveId).IsEqualTo(seed.FirstRequest.MoveId);
         await Assert.That(actual.Phase).IsEqualTo(PartitionMovePhase.Aborted);
         await SqlRf3Protocol.EqualAsync(seed.Partition, actual.Partition);

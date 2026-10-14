@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
@@ -11,9 +11,15 @@ internal sealed class RequestCqrsProbeTamperTests
         using var fixture = new ReplicaSecurityFixture();
         using var mac = new PartitionMovementMac(fixture.Options.Secret.Span, PhysicalOwnerProbeProtocol.MaximumBodyBytes);
         var request = RequestCqrsProbeNativeWireValues.Request(fixture);
-        request = request with { Signature = mac.SignProbeRequest(request) };
+        request = request with
+        {
+            Signature = mac.SignProbeRequest(request)
+        };
         var reply = RequestCqrsProbeNativeWireValues.Reply(request);
-        reply = reply with { Signature = mac.SignProbeReply(reply) };
+        reply = reply with
+        {
+            Signature = mac.SignProbeReply(reply)
+        };
         var identity = request.Identity;
         var changed = new[]
         {
@@ -27,9 +33,24 @@ internal sealed class RequestCqrsProbeTamperTests
         };
         foreach (var mutation in changed)
         {
-            await Assert.That(mac.VerifyProbeRequest(request with { Identity = mutation })).IsFalse();
-            await Assert.That(mac.VerifyProbeRequest(request with { Claim = request.Claim! with { Identity = mutation } })).IsFalse();
-            await Assert.That(mac.VerifyProbeReply(reply with { Claim = reply.Claim! with { Identity = mutation } })).IsFalse();
+            await Assert.That(mac.VerifyProbeRequest(request with
+            {
+                Identity = mutation
+            })).IsFalse();
+            await Assert.That(mac.VerifyProbeRequest(request with
+            {
+                Claim = request.Claim! with
+                {
+                    Identity = mutation
+                }
+            })).IsFalse();
+            await Assert.That(mac.VerifyProbeReply(reply with
+            {
+                Claim = reply.Claim! with
+                {
+                    Identity = mutation
+                }
+            })).IsFalse();
         }
     }
 
@@ -39,9 +60,15 @@ internal sealed class RequestCqrsProbeTamperTests
         using var fixture = new ReplicaSecurityFixture();
         using var mac = new PartitionMovementMac(fixture.Options.Secret.Span, PhysicalOwnerProbeProtocol.MaximumBodyBytes);
         var request = RequestCqrsProbeNativeWireValues.Request(fixture);
-        request = request with { Signature = mac.SignProbeRequest(request) };
+        request = request with
+        {
+            Signature = mac.SignProbeRequest(request)
+        };
         var reply = RequestCqrsProbeNativeWireValues.Reply(request);
-        reply = reply with { Signature = mac.SignProbeReply(reply) };
+        reply = reply with
+        {
+            Signature = mac.SignProbeReply(reply)
+        };
         var owner = request.CallerOwner;
         var changedOwners = new[]
         {
@@ -52,10 +79,28 @@ internal sealed class RequestCqrsProbeTamperTests
         };
         foreach (var changed in changedOwners)
         {
-            await Assert.That(mac.VerifyProbeRequest(request with { CallerOwner = changed })).IsFalse();
-            await Assert.That(mac.VerifyProbeRequest(request with { DestinationOwner = changed })).IsFalse();
-            await Assert.That(mac.VerifyProbeRequest(request with { Claim = request.Claim! with { Owner = changed } })).IsFalse();
-            await Assert.That(mac.VerifyProbeReply(reply with { Claim = reply.Claim! with { Owner = changed } })).IsFalse();
+            await Assert.That(mac.VerifyProbeRequest(request with
+            {
+                CallerOwner = changed
+            })).IsFalse();
+            await Assert.That(mac.VerifyProbeRequest(request with
+            {
+                DestinationOwner = changed
+            })).IsFalse();
+            await Assert.That(mac.VerifyProbeRequest(request with
+            {
+                Claim = request.Claim! with
+                {
+                    Owner = changed
+                }
+            })).IsFalse();
+            await Assert.That(mac.VerifyProbeReply(reply with
+            {
+                Claim = reply.Claim! with
+                {
+                    Owner = changed
+                }
+            })).IsFalse();
         }
         var mutations = new[]
         {
@@ -70,7 +115,9 @@ internal sealed class RequestCqrsProbeTamperTests
             request with { Claim = null }
         };
         foreach (var mutation in mutations)
-        { await Assert.That(mac.VerifyProbeRequest(mutation)).IsFalse(); }
+        {
+            await Assert.That(mac.VerifyProbeRequest(mutation)).IsFalse();
+        }
     }
 
     [Test]
@@ -79,9 +126,15 @@ internal sealed class RequestCqrsProbeTamperTests
         using var fixture = new ReplicaSecurityFixture();
         using var mac = new PartitionMovementMac(fixture.Options.Secret.Span, PhysicalOwnerProbeProtocol.MaximumBodyBytes);
         var request = RequestCqrsProbeNativeWireValues.Request(fixture);
-        request = request with { Signature = mac.SignProbeRequest(request) };
+        request = request with
+        {
+            Signature = mac.SignProbeRequest(request)
+        };
         var reply = RequestCqrsProbeNativeWireValues.Reply(request);
-        reply = reply with { Signature = mac.SignProbeReply(reply) };
+        reply = reply with
+        {
+            Signature = mac.SignProbeReply(reply)
+        };
         var claim = request.Claim!;
         var changed = new[]
         {
@@ -95,8 +148,14 @@ internal sealed class RequestCqrsProbeTamperTests
         };
         foreach (var mutation in changed)
         {
-            await Assert.That(mac.VerifyProbeRequest(request with { Claim = mutation })).IsFalse();
-            await Assert.That(mac.VerifyProbeReply(reply with { Claim = mutation })).IsFalse();
+            await Assert.That(mac.VerifyProbeRequest(request with
+            {
+                Claim = mutation
+            })).IsFalse();
+            await Assert.That(mac.VerifyProbeReply(reply with
+            {
+                Claim = mutation
+            })).IsFalse();
         }
     }
 }

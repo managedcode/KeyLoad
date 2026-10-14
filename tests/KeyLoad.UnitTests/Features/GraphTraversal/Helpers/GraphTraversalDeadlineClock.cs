@@ -8,7 +8,10 @@ internal sealed class GraphTraversalDeadlineClock : TimeProvider
     private long timestamp;
     private long advanceTicks;
 
-    internal bool ElapsedCapTriggered { get; private set; }
+    internal bool ElapsedCapTriggered
+    {
+        get; private set;
+    }
     public override long TimestampFrequency => TimeSpan.TicksPerSecond;
     public override DateTimeOffset GetUtcNow() => Epoch.AddTicks(Interlocked.Read(ref timestamp));
 

@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core.Features.BlobStorage;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
@@ -18,7 +18,9 @@ internal static class ControlledPartitionMovementInstalledModelImage
         var pages = originalPages.Select(result => NativeSerialization.Deserialize<PartitionMoveImagePage>(
             result.NativePage.Span)).ToArray();
         foreach (var page in pages)
-        { await AssertPageAsync(target, corpus, page); }
+        {
+            await AssertPageAsync(target, corpus, page);
+        }
         var expectedQuota = new BlobQuota(Version, corpus.Destination.Owner.Incarnation,
             BlobBytes, OneBlob, OneBlob, NoUploads);
         var quota = target.Store.Read(view => BlobRecordReader.Get<BlobQuota>(view,
@@ -40,7 +42,10 @@ internal static class ControlledPartitionMovementInstalledModelImage
             if (page.Family == PartitionRecordFamilies.BlobHead)
             {
                 var original = NativeSerialization.Deserialize<BlobHead>(record.Value.Span);
-                var expected = original with { Incarnation = corpus.Destination.Owner.Incarnation };
+                var expected = original with
+                {
+                    Incarnation = corpus.Destination.Owner.Incarnation
+                };
                 await Assert.That(JsonDefaults.Serialize(NativeSerialization.Deserialize<BlobHead>(actual))
                     .SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
             }
@@ -48,12 +53,17 @@ internal static class ControlledPartitionMovementInstalledModelImage
             {
                 var original = NativeSerialization.Deserialize<BlobState>(record.Value.Span);
                 await Assert.That(original.IntegrityIncarnation).IsEqualTo(corpus.Control.Owner.Incarnation);
-                var expected = original with { Incarnation = corpus.Destination.Owner.Incarnation };
+                var expected = original with
+                {
+                    Incarnation = corpus.Destination.Owner.Incarnation
+                };
                 await Assert.That(JsonDefaults.Serialize(NativeSerialization.Deserialize<BlobState>(actual))
                     .SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
             }
             else
-            { await Assert.That(actual.AsSpan().SequenceEqual(record.Value.Span)).IsTrue(); }
+            {
+                await Assert.That(actual.AsSpan().SequenceEqual(record.Value.Span)).IsTrue();
+            }
         }
     }
 }

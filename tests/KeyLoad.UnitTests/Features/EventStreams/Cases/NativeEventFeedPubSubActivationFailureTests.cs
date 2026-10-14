@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 
 namespace KeyLoad.UnitTests.Features.EventStreams;
@@ -22,7 +22,9 @@ internal sealed class NativeEventFeedPubSubActivationFailureTests
         token.ThrowIfCancellationRequested();
         var state = new GrainState<string>(NativeEventFeedPubSubFreshStateFixture.Original);
         if (clear)
-        { await fixture.Storage.WriteStateAsync(EventFeedPubSubProtocol.StateName, fixture.Id, state, token); }
+        {
+            await fixture.Storage.WriteStateAsync(EventFeedPubSubProtocol.StateName, fixture.Id, state, token);
+        }
         var retained = state.State;
         var tag = state.ETag;
         var exists = state.RecordExists;
@@ -32,21 +34,27 @@ internal sealed class NativeEventFeedPubSubActivationFailureTests
         ServerFailureObserver.Observe(() => _ = fixture.CreateNativeState<string>(), nativeFailures);
         await Assert.That(nativeFailures.Count).IsEqualTo(SingleFailure);
         if (!NativeCqrsBoundaryErrors.IsNonFatal(nativeFailures[FirstFailure]))
-        { ServerFailureObserver.ThrowIfAny(nativeFailures); }
+        {
+            ServerFailureObserver.ThrowIfAny(nativeFailures);
+        }
         var actualFailures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(() => clear
             ? fixture.Storage.ClearStateAsync(EventFeedPubSubProtocol.StateName, fixture.Id, state, token)
             : fixture.Storage.ReadStateAsync(EventFeedPubSubProtocol.StateName, fixture.Id, state, token), actualFailures);
         await Assert.That(actualFailures.Count).IsEqualTo(SingleFailure);
         if (!NativeCqrsBoundaryErrors.IsNonFatal(actualFailures[FirstFailure]))
-        { ServerFailureObserver.ThrowIfAny(actualFailures); }
+        {
+            ServerFailureObserver.ThrowIfAny(actualFailures);
+        }
         await Assert.That(actualFailures[FirstFailure].GetType()).IsEqualTo(nativeFailures[FirstFailure].GetType());
         await Assert.That(actualFailures[FirstFailure].Message).IsEqualTo(nativeFailures[FirstFailure].Message);
         await Assert.That(ReferenceEquals(state.State, retained)).IsTrue();
         await Assert.That(state.ETag).IsEqualTo(tag);
         await Assert.That(state.RecordExists).IsEqualTo(exists);
         if (clear)
-        { await RequireStoredAsync(fixture, NativeEventFeedPubSubFreshStateFixture.Original, tag, token); }
+        {
+            await RequireStoredAsync(fixture, NativeEventFeedPubSubFreshStateFixture.Original, tag, token);
+        }
         state.State = NativeEventFeedPubSubFreshStateFixture.Healthy;
         await fixture.Storage.WriteStateAsync(EventFeedPubSubProtocol.StateName, fixture.Id, state, token);
         await RequireStoredAsync(fixture, NativeEventFeedPubSubFreshStateFixture.Healthy, state.ETag, token);

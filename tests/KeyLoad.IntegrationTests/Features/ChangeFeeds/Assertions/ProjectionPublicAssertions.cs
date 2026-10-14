@@ -44,7 +44,9 @@ internal static class ProjectionPublicAssertions
         var status = await McpCallerAssertions.SdkSuccessAsync(await root.OutboxStatusAsync(state.Partition, token));
         await global::TUnit.Assertions.Assert.That(status.Head.StoredBytes).IsGreaterThanOrEqualTo(0L);
         if (!purged)
-        { await global::TUnit.Assertions.Assert.That(status.Head.StoredBytes).IsGreaterThan(0L); }
+        {
+            await global::TUnit.Assertions.Assert.That(status.Head.StoredBytes).IsGreaterThan(0L);
+        }
         await ExactAsync(new OutboxHead(2L, purged ? 3L : 1L, purged ? 0L : 2L,
             purged ? 0L : status.Head.StoredBytes), status.Head);
         await ExactAsync(global::System.Collections.Immutable.ImmutableArray.Create(new ProjectionConsumerInfo(

@@ -8,6 +8,8 @@ internal static class RequestCqrsCanonicalSourceArmValidation
             && source.Record.SessionId == arm.SessionId && source.Record.PrincipalId == arm.PrincipalId
             && source.Record.CommandId == arm.CommandId && source.Record.ReadKind is null
             && source.Record.Phase == RequestCqrsProbePhase.BeforeSubmit && source.Record.Action == RequestCqrsProbeAction.Hold))
-        { throw new InvalidOperationException(RequestCqrsProbeProtocol.InvalidFiles); }
+        {
+            throw new InvalidOperationException(RequestCqrsProbeProtocol.InvalidFiles);
+        }
     }
 }

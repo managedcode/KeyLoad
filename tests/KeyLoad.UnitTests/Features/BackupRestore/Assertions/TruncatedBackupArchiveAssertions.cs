@@ -18,7 +18,9 @@ internal static class TruncatedBackupArchiveAssertions
     {
         Exception? original = null;
         try
-        { BackupArtifact.Unpack(fixture.ArtifactPath, output); }
+        {
+            BackupArtifact.Unpack(fixture.ArtifactPath, output);
+        }
         catch (Cartograph.Format.CartographFormatException failure) { original = failure; }
         await Assert.That(original).IsNotNull();
         var retained = original ?? throw new InvalidOperationException(MissingRefusal);
@@ -42,7 +44,9 @@ internal static class TruncatedBackupArchiveAssertions
         {
             await Assert.That(Directory.EnumerateFileSystemEntries(path).Any()).IsFalse();
             if (!OperatingSystem.IsWindows() && mode is not null)
-            { await Assert.That(File.GetUnixFileMode(path)).IsEqualTo(mode.Value); }
+            {
+                await Assert.That(File.GetUnixFileMode(path)).IsEqualTo(mode.Value);
+            }
         }
     }
 

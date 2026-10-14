@@ -1,11 +1,14 @@
 using System.Collections.Immutable;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.Server;
 
 internal static class TenantPlacementMcpCatalog
 {
-    internal static ImmutableArray<McpOperationDescriptor> Entries { get; } =
+    internal static ImmutableArray<McpOperationDescriptor> Entries
+    {
+        get;
+    } =
     [
         McpOperationFactory.HeaderCommand<ConfigurePlacementPolicyRequest, TenantPlacementPolicyV1>(
             TenantPlacementPublicProtocol.ConfigureTool, TenantPlacementPublicProtocol.ConfigureRoute, OperationKind.ConfigurePlacementPolicy),

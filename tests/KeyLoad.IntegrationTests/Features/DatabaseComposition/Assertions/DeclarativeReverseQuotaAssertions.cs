@@ -54,7 +54,9 @@ internal static class DeclarativeReverseQuotaAssertions
                 await callers.Mcp.CallAsync(McpCallerTools.DocumentsGet, new GetDocumentRequest(reference), token))).Value);
         }
         foreach (var (edge, sequence) in new[] { (FirstEdge, FirstSequence), (SecondEdge, SecondSequence) })
-        { await MessageAsync(callers, state, edge, sequence, token); }
+        {
+            await MessageAsync(callers, state, edge, sequence, token);
+        }
     }
 
     private static async Task MessageAsync(RequestCqrsRf3Callers callers, DeclarativeReverseQuotaState state,

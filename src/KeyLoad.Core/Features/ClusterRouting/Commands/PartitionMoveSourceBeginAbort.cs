@@ -15,11 +15,15 @@ public sealed partial class DatabaseEngine
         if (body.Control.Phase != PartitionMovePhase.Aborting || body.Role != PartitionMoveCleanupRole.Source
             || body.FamilyOrdinal != PartitionMoveCleanupFamilies.All.Length
             || body.PrecedingGrantId == Guid.Empty || body.OperatorPrincipalId != body.Control.PrincipalId)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
         RequireMoveCleanupOwner(transaction, body, phase);
         var state = PartitionMoveCleanupStorage.Read(transaction, phase.Partition, phase.MoveId, Limits.MaxBatchBytes);
         if (state is not null)
-        { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict);
+        }
         state = new(PartitionMoveProtocol.Version, phase.MoveId, phase.Partition, phase.ControlIntentDigest,
             PartitionMovePeerStage.Abort, PartitionMoveCleanupRole.Source,
             PartitionMoveCleanupFamilies.All.Length, null, PartitionMoveProtocol.EmptyCount);

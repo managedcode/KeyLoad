@@ -17,7 +17,9 @@ internal static class EventVectorObservationIdentity
             || observation.ReadGeneration < InitialCut || observation.StoreCutPosition < InitialCut
             || observation.AppliedCutPosition < InitialCut || observation.PrincipalId != admitted.PrincipalId
             || observation.PolicyEpoch != admitted.SourcePolicyEpoch)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidObservation); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidObservation);
+        }
         EventVectorObservationPlacement.Require(admitted, observation);
     }
 }

@@ -13,7 +13,10 @@ internal sealed class McpMemoryLease(McpMemoryBudget owner, McpMemoryLane lane, 
     internal long RetainedBytes { get; set; } = retainedBytes;
 
     /// <summary>Gets or sets whether release completed while the owning budget lock is held.</summary>
-    internal bool Disposed { get; set; }
+    internal bool Disposed
+    {
+        get; set;
+    }
 
     /// <summary>Increases retained capacity atomically without releasing the existing reservation on failure.</summary>
     /// <param name="totalBytes">The new total retained-byte count, including existing capacity.</param>

@@ -5,7 +5,10 @@ internal sealed class GraphShortestPathObservedWorkClock : TimeProvider
 {
     private Func<bool>? observed;
     private Action? cancel;
-    internal bool Triggered { get; private set; }
+    internal bool Triggered
+    {
+        get; private set;
+    }
     public override long TimestampFrequency => TimeSpan.TicksPerSecond;
     public override long GetTimestamp()
     {
@@ -22,5 +25,9 @@ internal sealed class GraphShortestPathObservedWorkClock : TimeProvider
         observed = predicate;
         cancel = action;
     }
-    internal void Disarm() { observed = null; cancel = null; }
+    internal void Disarm()
+    {
+        observed = null;
+        cancel = null;
+    }
 }

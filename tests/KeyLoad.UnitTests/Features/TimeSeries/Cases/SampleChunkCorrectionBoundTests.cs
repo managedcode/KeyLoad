@@ -65,7 +65,10 @@ internal sealed class SampleChunkCorrectionBoundTests
     private static async Task LiteralAsync(SampleChunkCanonicalFixture fixture, long revision,
         long generation, ImmutableArray<SampleRecord> rows)
     {
-        var request = fixture.Request with { Limit = CorrectionBound + InitialSequence + FirstOrdinal };
+        var request = fixture.Request with
+        {
+            Limit = CorrectionBound + InitialSequence + FirstOrdinal
+        };
         var actual = fixture.Owner.Database.ReadSampleChunkWindow(SampleChunkCanonicalFixture.Principal, request);
         var expected = new SampleChunkWindowResult(fixture.WindowId, SampleChunkCanonicalFixture.Start,
             SampleChunkCanonicalFixture.Until, generation, revision, rows.Length, null, rows,

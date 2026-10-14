@@ -154,11 +154,15 @@ internal sealed class LocalRf3ImageContextSnapshotTests
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             if (Directory.Exists(ownedRoot) || File.Exists(ownedRoot))
-            { throw new IOException("The unique local image filesystem root is already occupied."); }
+            {
+                throw new IOException("The unique local image filesystem root is already occupied.");
+            }
             Directory.CreateDirectory(ownedRoot);
             rootCreated = true;
             if (!OperatingSystem.IsWindows())
-            { File.SetUnixFileMode(ownedRoot, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute); }
+            {
+                File.SetUnixFileMode(ownedRoot, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+            }
             var result = await LocalImageSnapshotProcess.RunAsync(root, modulePath, Program, ownedRoot,
                 TestContext.Current!.Execution.CancellationToken).ConfigureAwait(false);
             await Assert.That(result.ExitCode).IsEqualTo(0);
@@ -166,7 +170,9 @@ internal sealed class LocalRf3ImageContextSnapshotTests
             await Assert.That(result.StandardError).IsEmpty();
         }, failures).ConfigureAwait(false);
         if (rootCreated && Directory.Exists(ownedRoot))
-        { ServerFailureObserver.Observe(() => Directory.Delete(ownedRoot, recursive: true), failures); }
+        {
+            ServerFailureObserver.Observe(() => Directory.Delete(ownedRoot, recursive: true), failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
@@ -174,7 +180,9 @@ internal sealed class LocalRf3ImageContextSnapshotTests
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
         while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "KeyLoad.slnx")))
-        { directory = directory.Parent; }
+        {
+            directory = directory.Parent;
+        }
         return directory?.FullName ?? throw new DirectoryNotFoundException("Local image snapshot regression requires the checkout.");
     }
 }

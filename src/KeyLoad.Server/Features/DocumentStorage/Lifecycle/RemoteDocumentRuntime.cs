@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server.Features.BlobStorage;
 using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.Server.Features.Messaging;
@@ -19,16 +19,46 @@ internal sealed class RemoteDocumentRuntime : IAsyncDisposable
     private readonly Lock gate = new();
     private Task? disposal;
     internal bool IsJoined => work.IsJoined;
-    internal IRemoteDocumentReadRouter? Router { get; private set; }
-    internal IRemoteBlobReadRouter? BlobRouter { get; private set; }
-    internal IControlledDocumentCommandRouter? CommandRouter { get; private set; }
-    internal IRemotePartitionQueryRouter? QueryRouter { get; private set; }
-    internal IRemoteDistributedSearchRouter? DistributedSearchRouter { get; private set; }
-    internal RemoteDocumentEndpoint? Endpoint { get; private set; }
-    internal global::KeyLoad.Server.Features.EventStreams.EventVectorRuntime? EventVectors { get; private set; }
-    internal IEventVectorParent? EventVectorParent { get; private set; }
-    internal global::KeyLoad.Server.Features.Search.AnnProjectionNativeReceiver? AnnObservations { get; private set; }
-    internal IRemoteAnnReadRouter? AnnReadRouter { get; private set; }
+    internal IRemoteDocumentReadRouter? Router
+    {
+        get; private set;
+    }
+    internal IRemoteBlobReadRouter? BlobRouter
+    {
+        get; private set;
+    }
+    internal IControlledDocumentCommandRouter? CommandRouter
+    {
+        get; private set;
+    }
+    internal IRemotePartitionQueryRouter? QueryRouter
+    {
+        get; private set;
+    }
+    internal IRemoteDistributedSearchRouter? DistributedSearchRouter
+    {
+        get; private set;
+    }
+    internal RemoteDocumentEndpoint? Endpoint
+    {
+        get; private set;
+    }
+    internal global::KeyLoad.Server.Features.EventStreams.EventVectorRuntime? EventVectors
+    {
+        get; private set;
+    }
+    internal IEventVectorParent? EventVectorParent
+    {
+        get; private set;
+    }
+    internal global::KeyLoad.Server.Features.Search.AnnProjectionNativeReceiver? AnnObservations
+    {
+        get; private set;
+    }
+    internal IRemoteAnnReadRouter? AnnReadRouter
+    {
+        get; private set;
+    }
 
     internal static async Task<RemoteDocumentRuntime?> CreateAsync(OrleansNode node,
         PartitionHost partition, ServerRuntimeOptions options, TimeProvider clock,
@@ -36,7 +66,9 @@ internal sealed class RemoteDocumentRuntime : IAsyncDisposable
     {
         var settings = options.Node.Value.PhysicalGroupTrust;
         if (!settings.RemoteDocumentReads)
-        { return null; }
+        {
+            return null;
+        }
         var runtime = new RemoteDocumentRuntime(options);
         try
         {
@@ -48,7 +80,9 @@ internal sealed class RemoteDocumentRuntime : IAsyncDisposable
         {
             var failures = new List<Exception> { primary };
             try
-            { await runtime.DisposeAsync().ConfigureAwait(false); }
+            {
+                await runtime.DisposeAsync().ConfigureAwait(false);
+            }
             catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
             catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
             ServerFailureObserver.ThrowIfAny(failures);
@@ -108,7 +142,9 @@ internal sealed class RemoteDocumentRuntime : IAsyncDisposable
     {
         ArgumentNullException.ThrowIfNull(receiver);
         if (Interlocked.CompareExchange(ref nativeReceiver, receiver, null) is not null)
-        { throw new InvalidOperationException(AttachedReceiverFailure); }
+        {
+            throw new InvalidOperationException(AttachedReceiverFailure);
+        }
         receiver.Attach(this);
     }
 
@@ -139,29 +175,42 @@ internal sealed class RemoteDocumentRuntime : IAsyncDisposable
     public ValueTask DisposeAsync()
     {
         lock (gate)
-        { disposal ??= DisposeCoreAsync(); return new ValueTask(disposal); }
+        {
+            disposal ??= DisposeCoreAsync();
+            return new ValueTask(disposal);
+        }
     }
 
     private async Task DisposeCoreAsync()
     {
         var failures = new List<Exception>();
         if (nativeReceiver is not null)
-        { await ServerFailureObserver.ObserveAsync(nativeReceiver.StopAsync, failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(nativeReceiver.StopAsync, failures).ConfigureAwait(false);
+        }
         if (client is not null)
-        { await DisposeClientAsync(failures).ConfigureAwait(false); }
+        {
+            await DisposeClientAsync(failures).ConfigureAwait(false);
+        }
         await ServerFailureObserver.ObserveAsync(work.StopAsync, failures).ConfigureAwait(false);
         EventVectorParent = null;
         if (EventVectors is not null)
-        { ServerFailureObserver.Observe(EventVectors.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(EventVectors.Dispose, failures);
+        }
         if (Endpoint is not null)
         {
             try
-            { await Endpoint.DisposeAsync().ConfigureAwait(false); }
+            {
+                await Endpoint.DisposeAsync().ConfigureAwait(false);
+            }
             catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
             catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         }
         try
-        { await work.DisposeAsync().ConfigureAwait(false); }
+        {
+            await work.DisposeAsync().ConfigureAwait(false);
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         ServerFailureObserver.ThrowIfAny(failures);
@@ -170,16 +219,28 @@ internal sealed class RemoteDocumentRuntime : IAsyncDisposable
     {
         Task terminal;
         try
-        { terminal = DisposeClientCoreAsync(); }
+        {
+            terminal = DisposeClientCoreAsync();
+        }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); return; }
+        {
+            failures.Add(error);
+            return;
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); return; }
+        {
+            failures.Add(error);
+            return;
+        }
         await terminal.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
         if (terminal.Exception is { } terminalFailure)
-        { failures.AddRange(terminalFailure.InnerExceptions); }
+        {
+            failures.AddRange(terminalFailure.InnerExceptions);
+        }
         else if (terminal.IsCanceled)
-        { failures.Add(new TaskCanceledException(terminal)); }
+        {
+            failures.Add(new TaskCanceledException(terminal));
+        }
     }
 
     private async Task DisposeClientCoreAsync()

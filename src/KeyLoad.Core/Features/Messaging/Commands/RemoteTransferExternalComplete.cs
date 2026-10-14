@@ -12,18 +12,28 @@ public sealed partial class DatabaseEngine
         CompleteQueueTransfer request, RemoteTransferIntentRecord record)
     {
         if (record.PrincipalId != principal.Id)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteTransferPeerProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteTransferPeerProtocol.Invalid);
+        }
         ValidateRemoteTransferIntentReceipt(tx, record, request.ReceiptToken);
         if (record.State == QueueTransferState.Delivered)
         {
             if (record.ReceiptToken != request.ReceiptToken)
-            { throw Errors.Fail(ErrorCode.TokenInvalidated, TransferReceiptInvalidMessage); }
+            {
+                throw Errors.Fail(ErrorCode.TokenInvalidated, TransferReceiptInvalidMessage);
+            }
             return TransferMutationReceipt(RemoteTransferProtocol.CompleteReceiptKind, request.SourceQueue,
                 request.TransferId, RemoteTransferCommandsTransferIdentifierSeparatorCount);
         }
         if (record.State != QueueTransferState.OutputPending)
-        { throw Errors.Fail(ErrorCode.Corruption, TransferCorruptionMessage); }
-        var updated = record with { State = QueueTransferState.Delivered, ReceiptToken = request.ReceiptToken };
+        {
+            throw Errors.Fail(ErrorCode.Corruption, TransferCorruptionMessage);
+        }
+        var updated = record with
+        {
+            State = QueueTransferState.Delivered,
+            ReceiptToken = request.ReceiptToken
+        };
         var capacity = RemoteTransferStorage.RequireSourceCounter(tx, request.SourceQueue);
         var next = RemoteTransferStorage.Replace(capacity, RemoteTransferStorage.SourceAccountedBytes(record),
             RemoteTransferStorage.SourceAccountedBytes(updated), Limits);
@@ -59,7 +69,9 @@ public sealed partial class DatabaseEngine
             || receipt.OriginalTargetReceiptDigest != Convert.ToHexString(SHA256.HashData(
                 Encoding.UTF8.GetBytes(receipt.OriginalTargetReceiptToken)))
             || Encoding.UTF8.GetByteCount(token) > record.ReceiptReservationBytes)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteTransferPeerProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteTransferPeerProtocol.Invalid);
+        }
         ValidateCommitToken(view, record.Source.Partition, receipt.SourceCut,
             ErrorCode.TokenInvalidated, RemoteTransferPeerProtocol.Invalid);
     }

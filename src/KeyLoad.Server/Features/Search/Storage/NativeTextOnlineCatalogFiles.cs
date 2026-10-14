@@ -51,7 +51,9 @@ internal static class NativeTextOnlineCatalogFiles
             resources.DeleteOwnedFile(pending, () => File.Delete(pending));
         }
         if (File.Exists(current))
-        { NativeTextFileIO.VerifyRegularFile(current); }
+        {
+            NativeTextFileIO.VerifyRegularFile(current);
+        }
         budget.ChargeBytes(NativeSerialization.Measure(catalog));
         NativeTextFileIO.WriteEnvelope(pending, catalog, options.Value.MaximumOwnerReceiptBytes, options, resources);
         budget.ChargeBytes(new FileInfo(pending).Length);
@@ -70,7 +72,9 @@ internal static class NativeTextOnlineCatalogFiles
         ReadExecutionBudget budget, IOptions<NativeTextExecutionOptions> options)
     {
         if (File.Exists(Path.Combine(root, PendingFile)))
-        { throw NativeTextErrors.Ownership(); }
+        {
+            throw NativeTextErrors.Ownership();
+        }
         RequireRebind(Read(root, budget, options), expected, budget);
     }
 
@@ -81,17 +85,25 @@ internal static class NativeTextOnlineCatalogFiles
         ValidateShape(fresh);
         if (original.Scope.ReadGeneration > fresh.Scope.ReadGeneration || original.Scope.Position > fresh.Scope.Position
             || original.AppliedPosition > fresh.AppliedPosition || original.ThroughSequence > fresh.ThroughSequence)
-        { throw NativeTextErrors.Mismatch(); }
+        {
+            throw NativeTextErrors.Mismatch();
+        }
         var normalized = original with
         {
-            Scope = original.Scope with { ReadGeneration = fresh.Scope.ReadGeneration, Position = fresh.Scope.Position },
+            Scope = original.Scope with
+            {
+                ReadGeneration = fresh.Scope.ReadGeneration,
+                Position = fresh.Scope.Position
+            },
             AppliedPosition = fresh.AppliedPosition,
             ThroughSequence = fresh.ThroughSequence
         };
         budget.ChargeBytes(NativeSerialization.Measure(normalized));
         budget.ChargeBytes(NativeSerialization.Measure(fresh));
         if (!NativeSerialization.Serialize(normalized).AsSpan().SequenceEqual(NativeSerialization.Serialize(fresh)))
-        { throw NativeTextErrors.Mismatch(); }
+        {
+            throw NativeTextErrors.Mismatch();
+        }
         budget.Check();
     }
 
@@ -102,7 +114,9 @@ internal static class NativeTextOnlineCatalogFiles
             || catalog.NodeId != catalog.Scope.NodeId || catalog.Consumer.Partition != catalog.Scope.Partition
             || !NativeTextValidation.IsGenerationLeaf(catalog.Leaf)
             || !NativeTextIncrementalDigest.IsCanonical(catalog.ManifestSha256))
-        { throw NativeTextErrors.Corrupt(); }
+        {
+            throw NativeTextErrors.Corrupt();
+        }
         NativeTextValidation.ValidateScope(catalog.Scope, catalog.NodeId);
     }
 }

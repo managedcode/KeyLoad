@@ -1,8 +1,8 @@
 using KeyLoad.Client;
+using KeyLoad.Clustering;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 using ManagedCode.Communication;
 
@@ -37,7 +37,11 @@ internal static class TenantCapacityPlacementRf3OwnerLossHeld
             marker, proof, discovery);
         await Assert.That(original.IsCompleted).IsFalse();
         var refused = await seed.Official.CallAsync(TenantPlacementPublicProtocol.ApplyTool,
-            new { commandId = id, request }, token);
+            new
+            {
+                commandId = id,
+                request
+            }, token);
         await McpCallerAssertions.ErrorAsync(refused, ErrorCode.Conflict, dispatched: true);
         await Assert.That(refused.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
             .GetProperty(McpCallerProtocol.ProblemDetail).GetString()).IsEqualTo(TenantPlacementPolicyProtocol.Stale);

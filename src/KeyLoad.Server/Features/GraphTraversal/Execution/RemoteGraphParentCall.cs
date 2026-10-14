@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.Server.Features.GraphTraversal;
 
@@ -18,7 +18,9 @@ internal static class RemoteGraphParentCall
             var result = await RemoteGraphNativeChild.ExecuteAsync<T>(node, partition, principal,
                 id, Guid.Empty, signed, false, null, work, token).ConfigureAwait(false);
             try
-            { return Decode<T>(result, partition, work); }
+            {
+                return Decode<T>(result, partition, work);
+            }
             finally { Clear(result); }
         }
         finally { Clear(bytes); }
@@ -35,7 +37,9 @@ internal static class RemoteGraphParentCall
         var result = await RemoteGraphNativeChild.ExecuteAsync<T>(node, partition, principal,
             id, operation.Id, signed, true, boundary, work, token).ConfigureAwait(false);
         try
-        { return Decode<T>(result, partition, work); }
+        {
+            return Decode<T>(result, partition, work);
+        }
         finally { Clear(result); }
     }
 
@@ -56,14 +60,18 @@ internal static class RemoteGraphParentCall
         {
             Clear(bytes);
             if (!result.IsEmpty && System.Runtime.InteropServices.MemoryMarshal.TryGetArray(result, out var array))
-            { CryptographicOperations.ZeroMemory(array.AsSpan()); }
+            {
+                CryptographicOperations.ZeroMemory(array.AsSpan());
+            }
         }
     }
 
     private static void Clear(ReadOnlyMemory<byte> bytes)
     {
         if (!bytes.IsEmpty && System.Runtime.InteropServices.MemoryMarshal.TryGetArray(bytes, out var array))
-        { CryptographicOperations.ZeroMemory(array.AsSpan()); }
+        {
+            CryptographicOperations.ZeroMemory(array.AsSpan());
+        }
     }
 
     private static T Decode<T>(ReadOnlyMemory<byte> bytes, PartitionHost partition, ReadExecutionBudget work)
@@ -71,7 +79,9 @@ internal static class RemoteGraphParentCall
         work.Check();
         if (bytes.IsEmpty || bytes.Length > partition.Database.Limits.MaxBatchBytes
             || bytes.Length > work.MaximumResultBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, ReadExecutionBudget.ReadBytesExceeded); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, ReadExecutionBudget.ReadBytesExceeded);
+        }
         work.ChargeBytes(bytes.Length);
         return NativeSerialization.Deserialize<T>(bytes.Span);
     }

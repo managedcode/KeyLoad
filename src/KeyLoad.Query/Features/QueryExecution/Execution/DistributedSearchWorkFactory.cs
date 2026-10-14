@@ -25,7 +25,10 @@ internal static class DistributedSearchWorkFactory
             var witness = phase == DistributedSearchPhase.Statistics ? null : witnesses[index];
             var projection = phase == DistributedSearchPhase.Projection
                 ? ForPartition(selected, partitions[index], budget) : default;
-            work.Add(new(phase, search with { Partition = partitions[index] }, witness,
+            work.Add(new(phase, search with
+            {
+                Partition = partitions[index]
+            }, witness,
                 statistics, scope, phase == DistributedSearchPhase.Candidates ? windows[index] : null,
                 projection, resultBytes));
         }
@@ -38,7 +41,9 @@ internal static class DistributedSearchWorkFactory
         budget.ChargeBytes(PartitionQueryRetention.CandidateArrayBytes(partitions.Length));
         var windows = ImmutableArray.CreateBuilder<string>(partitions.Length);
         foreach (var partition in partitions)
-        { windows.Add(DistributedSearchRequestDigest.Create(partition, budget)); }
+        {
+            windows.Add(DistributedSearchRequestDigest.Create(partition, budget));
+        }
         return windows.MoveToImmutable();
     }
 
@@ -47,11 +52,23 @@ internal static class DistributedSearchWorkFactory
     {
         var count = FirstLeaf;
         foreach (var candidate in selected)
-        { budget.Check(); if (candidate.Reference.Partition == partition) { count++; } }
+        {
+            budget.Check();
+            if (candidate.Reference.Partition == partition)
+            {
+                count++;
+            }
+        }
         budget.ChargeBytes(PartitionQueryRetention.CandidateArrayBytes(count));
         var result = ImmutableArray.CreateBuilder<GlobalBranchCandidate>(count);
         foreach (var candidate in selected)
-        { budget.Check(); if (candidate.Reference.Partition == partition) { result.Add(candidate); } }
+        {
+            budget.Check();
+            if (candidate.Reference.Partition == partition)
+            {
+                result.Add(candidate);
+            }
+        }
         return result.MoveToImmutable();
     }
 }

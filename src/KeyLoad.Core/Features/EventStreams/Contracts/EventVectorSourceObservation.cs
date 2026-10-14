@@ -19,7 +19,10 @@ internal sealed record EventVectorSourceObservation(
 {
     internal const int CurrentPinRowField = 13;
     [Orleans.Id(CurrentPinRowField)]
-    public ReadOnlyMemory<byte> CurrentPinRowBytes { get; init; }
+    public ReadOnlyMemory<byte> CurrentPinRowBytes
+    {
+        get; init;
+    }
 
     internal const string SerializerAlias = "keyload.core.event-vector-source-observation.v1";
 }

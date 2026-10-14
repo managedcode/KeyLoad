@@ -16,22 +16,32 @@ internal sealed class ScriptDomGraphContext(QueryRequest query, IOptions<Databas
     {
         budget.Check();
         if (depth > limitsOptions.Value.MaxQueryDepth)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, ScriptDomErrors.DepthDetail); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, ScriptDomErrors.DepthDetail);
+        }
         if (++nodes > limitsOptions.Value.MaxQueryTokens)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, ScriptDomErrors.NodesDetail); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, ScriptDomErrors.NodesDetail);
+        }
         if (fragment is Dom.PrimaryExpression { Collation: not null })
-        { throw ScriptDomErrors.Unsupported(); }
+        {
+            throw ScriptDomErrors.Unsupported();
+        }
     }
     internal JsonElement Parameter(Dom.VariableReference variable)
     {
         budget.Check();
         if (variable.Name.Length <= PrefixLength || variable.Name[FirstIndex] != Prefix
             || variable.Name[PrefixLength] == Prefix)
-        { throw ScriptDomErrors.Unsupported(); }
+        {
+            throw ScriptDomErrors.Unsupported();
+        }
         var name = variable.Name[PrefixLength..];
         JsonData.Identifier(name);
         if (query.Parameters is null || !query.Parameters.TryGetValue(name, out var value))
-        { throw Errors.Fail(ErrorCode.Validation, parameterDetail); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, parameterDetail);
+        }
         return value;
     }
     private const char Prefix = '@';

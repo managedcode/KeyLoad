@@ -36,7 +36,9 @@ internal static class TenantCapacityPlacementRf3MissingMember
         using (var http = McpCallerHttp.Create(originalApplication, TwoRf3MembershipProtocol.Node1))
         using (var response = await http.GetAsync(new Uri(http.BaseAddress!, TwoRf3MembershipProtocol.HealthMembership),
             HttpCompletionOption.ResponseHeadersRead, token))
-        { await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.ServiceUnavailable); }
+        {
+            await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.ServiceUnavailable);
+        }
         await RequireRefusalsAsync(seed, query, token);
         var stopped = await PartitionMovementPublicParentRf3Cut.StopAndReadAsync(wave, seed.FirstRequest, token);
         await TenantCapacityPlacementRf3Cold.RequireRefusalCutAsync(state, original, stopped, seed.FirstRequest);
@@ -65,7 +67,10 @@ internal static class TenantCapacityPlacementRf3MissingMember
         var sdk = await seed.Source.PlanTenantPlacementAsync(query, token);
         await TenantCapacityPlacementRf3Assertions.RefusalAsync(sdk, ErrorCode.OwnershipLost);
         await Assert.That(sdk.Problem!.Detail).IsEqualTo(TenantPlacementCapacityProtocol.WrongCohort);
-        var official = await seed.Official.CallAsync(TenantPlacementPublicProtocol.PlanTool, new { request = query }, token);
+        var official = await seed.Official.CallAsync(TenantPlacementPublicProtocol.PlanTool, new
+        {
+            request = query
+        }, token);
         await McpCallerAssertions.ErrorAsync(official, ErrorCode.OwnershipLost, dispatched: true);
         await Assert.That(official.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
             .GetProperty(McpCallerProtocol.ProblemDetail).GetString()).IsEqualTo(TenantPlacementCapacityProtocol.WrongCohort);

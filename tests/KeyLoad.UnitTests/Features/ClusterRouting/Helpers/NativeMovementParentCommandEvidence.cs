@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
@@ -21,7 +21,9 @@ internal sealed class NativeMovementParentCommandEvidence
                 or GrainRequestPhase.ParentTransferCloseFailed or GrainRequestPhase.ParentReceiverIssueAcknowledged
                 or GrainRequestPhase.ParentReceiverIssueObserved or GrainRequestPhase.ParentFinalInstallPreflight);
         if (!child && !parent)
-        { return; }
+        {
+            return;
+        }
         lock (gate)
         {
             var snapshot = new Snapshot(identity.RequestId, identity.CommandId, phase,
@@ -30,13 +32,17 @@ internal sealed class NativeMovementParentCommandEvidence
             {
                 firstChild ??= snapshot;
                 if (firstChild.RequestId == identity.RequestId)
-                { firstChild = snapshot; }
+                {
+                    firstChild = snapshot;
+                }
                 latestChild = snapshot;
                 return;
             }
             first ??= snapshot;
             if (first.RequestId == identity.RequestId)
-            { first = snapshot; }
+            {
+                first = snapshot;
+            }
             latest = snapshot;
         }
     }
@@ -44,17 +50,39 @@ internal sealed class NativeMovementParentCommandEvidence
     internal void ProducerDisposed(GrainRequestProbeIdentity identity)
     {
         if (identity.CommandKind is not (OperationKind.MovePartition or OperationKind.PartitionMovementPhase))
-        { return; }
+        {
+            return;
+        }
         lock (gate)
         {
             if (firstChild?.RequestId == identity.RequestId)
-            { firstChild = firstChild with { Disposed = true }; }
+            {
+                firstChild = firstChild with
+                {
+                    Disposed = true
+                };
+            }
             if (latestChild?.RequestId == identity.RequestId)
-            { latestChild = latestChild with { Disposed = true }; }
+            {
+                latestChild = latestChild with
+                {
+                    Disposed = true
+                };
+            }
             if (first?.RequestId == identity.RequestId)
-            { first = first with { Disposed = true }; }
+            {
+                first = first with
+                {
+                    Disposed = true
+                };
+            }
             if (latest?.RequestId == identity.RequestId)
-            { latest = latest with { Disposed = true }; }
+            {
+                latest = latest with
+                {
+                    Disposed = true
+                };
+            }
         }
     }
 
@@ -65,7 +93,12 @@ internal sealed class NativeMovementParentCommandEvidence
         Snapshot? originalChild;
         Snapshot? lastChild;
         lock (gate)
-        { original = first; last = latest; originalChild = firstChild; lastChild = latestChild; }
+        {
+            original = first;
+            last = latest;
+            originalChild = firstChild;
+            lastChild = latestChild;
+        }
         output.WriteLine($"Native movement parent configuredObserverOwnerIndex={configuredOwnerIndex}; First={original}; Latest={last}");
         output.WriteLine($"Native movement child configuredObserverOwnerIndex={configuredOwnerIndex}; First={originalChild}; Latest={lastChild}");
     }

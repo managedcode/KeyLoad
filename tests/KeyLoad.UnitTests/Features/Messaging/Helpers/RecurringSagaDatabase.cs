@@ -33,7 +33,10 @@ internal sealed class RecurringSagaDatabase : IDisposable
     internal PartitionRef Partition { get; } = new(TenantId, DatabaseId, Domain, PartitionId);
     internal QueueLaneRef Queue => new(Partition, QueueName);
     internal QueueLaneRef TimeoutQueue => new(Partition, TimeoutQueueName);
-    internal DatabaseEngine Database { get; private set; }
+    internal DatabaseEngine Database
+    {
+        get; private set;
+    }
     internal IAtomicStore Store => store;
 
     internal RecurringSagaDatabase(DatabaseLimits? databaseLimits = null, SensitiveFieldPolicy[]? fields = null,
@@ -46,7 +49,9 @@ internal sealed class RecurringSagaDatabase : IDisposable
         store = new(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         Database = new(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance, timeProvider: timeProvider);
         Database.Bootstrap(new(RootPrincipal, TenantId, [new("*", "*", Capability.All)], ["*"])
-        { ClusterAdministrator = true }, DatabaseEngine.Credential(RootPrincipal, RootPrincipal, Credential));
+        {
+            ClusterAdministrator = true
+        }, DatabaseEngine.Credential(RootPrincipal, RootPrincipal, Credential));
         PhysicalShardTestBootstrap.Bootstrap(Database, RootPrincipal);
         ConfigureQueueDefinition(Queue, fields, headers, queuePolicy, null);
         ConfigureQueueDefinition(TimeoutQueue, null, null, timeoutQueuePolicy, null);
@@ -77,7 +82,10 @@ internal sealed class RecurringSagaDatabase : IDisposable
     internal void AddPrincipal(PrincipalRecord principal, DateTimeOffset? time = null)
     {
         var previous = store.Read(view => view.GetRecord<PrincipalRecord>(KeySpace.Principal(principal.Id)));
-        var updated = previous is null ? principal : principal with { PolicyEpoch = checked(previous.PolicyEpoch + 1) };
+        var updated = previous is null ? principal : principal with
+        {
+            PolicyEpoch = checked(previous.PolicyEpoch + 1)
+        };
         _ = Apply(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(updated), time: time)
             .Get<PrincipalRecord>();
     }

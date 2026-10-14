@@ -18,7 +18,9 @@ internal static class C1SubmissionJournalInspectionValidation
             || request.Voters.Any(voter => !VoterValid(voter))
             || request.Voters.Distinct(StringComparer.Ordinal).Count() != request.Voters.Length
             || !request.Voters.Contains(request.LocalVoter, StringComparer.Ordinal))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         return request;
     }
     internal static C1SubmissionJournalInspectionReceipt Receipt(C1SubmissionJournalInspectionReceipt? receipt)
@@ -28,7 +30,9 @@ internal static class C1SubmissionJournalInspectionValidation
             || receipt.CanonicalNodeId == receipt.ReplicaNodeId || receipt.Incarnation == Guid.Empty
             || receipt.CanonicalPosition < EmptyCount || receipt.ReplicaPosition < EmptyCount
             || !NativeBytesValid(receipt.NativeHardState) || !NativeBytesValid(receipt.NativeEntry))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         return receipt;
     }
     private static bool NativeBytesValid(byte[]? bytes)
@@ -46,9 +50,13 @@ internal static class C1SubmissionJournalInspectionValidation
     private static bool VoterValid(string? voter)
     {
         if (string.IsNullOrWhiteSpace(voter))
-        { return false; }
+        {
+            return false;
+        }
         try
-        { return StrictUtf8.GetByteCount(voter) is > EmptyCount and <= C1SubmissionJournalInspectionProtocol.MaximumVoterBytes; }
+        {
+            return StrictUtf8.GetByteCount(voter) is > EmptyCount and <= C1SubmissionJournalInspectionProtocol.MaximumVoterBytes;
+        }
         catch (EncoderFallbackException) { return false; }
     }
 }

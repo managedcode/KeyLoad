@@ -13,7 +13,9 @@ internal static class EventFeedParentArguments
     {
         ArgumentNullException.ThrowIfNull(request);
         if (request.Action != expected)
-        { throw Errors.Fail(ErrorCode.Validation, WrongAction); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, WrongAction);
+        }
         return request.CommandId;
     }
 }

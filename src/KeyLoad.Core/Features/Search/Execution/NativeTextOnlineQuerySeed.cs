@@ -22,7 +22,9 @@ internal static partial class NativeTextSeedCollector
                     var capacity = documents.Capacity == EmptyDocumentCapacity ? FirstDocumentCapacity
                         : (int)Math.Min(database.Limits.MaxScanRecords, checked((long)documents.Capacity * DocumentCapacityGrowthFactor));
                     if (capacity <= documents.Count)
-                    { throw Errors.Fail(ErrorCode.BudgetExceeded, SeedExceeded); }
+                    {
+                        throw Errors.Fail(ErrorCode.BudgetExceeded, SeedExceeded);
+                    }
                     budget.ChargeBytes(checked((long)capacity * IntPtr.Size));
                     documents.Capacity = capacity;
                 }
@@ -30,13 +32,20 @@ internal static partial class NativeTextSeedCollector
                 if (document.Reference.Partition != pin.Consumer.Partition
                     || document.Reference.Collection != pin.Collection || document.Revision <= EmptyPosition
                     || !key.SequenceEqual(DocumentStorageKeys.RecordKey(document.Reference)))
-                { throw Errors.Fail(ErrorCode.Corruption, InvalidScope); }
+                {
+                    throw Errors.Fail(ErrorCode.Corruption, InvalidScope);
+                }
                 documents.Add(document);
                 return true;
             });
         if (scan.HasMore)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, SeedExceeded); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, SeedExceeded);
+        }
         budget.ChargeBytes(checked((long)documents.Count * IntPtr.Size));
-        return metadata with { Documents = documents.ToArray() };
+        return metadata with
+        {
+            Documents = documents.ToArray()
+        };
     }
 }

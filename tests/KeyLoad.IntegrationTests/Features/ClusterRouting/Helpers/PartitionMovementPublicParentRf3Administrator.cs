@@ -18,7 +18,11 @@ internal static class PartitionMovementPublicParentRf3Administrator
     internal static PrincipalRecord InitialDefinition() => Definition(InitialPolicyEpoch, true);
 
     internal static PrincipalRecord Definition(long policyEpoch, bool administrator)
-        => new(PrincipalId, Tenant, [], []) { ClusterAdministrator = administrator, PolicyEpoch = policyEpoch };
+        => new(PrincipalId, Tenant, [], [])
+        {
+            ClusterAdministrator = administrator,
+            PolicyEpoch = policyEpoch
+        };
 
     internal static async Task<string> PersistAsync(TwoRf3MembershipWave wave, CancellationToken cancellationToken)
     {

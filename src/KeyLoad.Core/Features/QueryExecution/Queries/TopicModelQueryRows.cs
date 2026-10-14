@@ -16,7 +16,9 @@ public sealed partial class DatabaseEngine
         var head = SourceHead(budgetedView, source, resource);
         TopicModelQueryValidation.RequireHead(head, Limits.MaxScanRecords);
         if (explain || head.FirstAvailablePosition > head.TailPosition)
-        { return; }
+        {
+            return;
+        }
         var position = head.FirstAvailablePosition;
         while (true)
         {
@@ -24,7 +26,9 @@ public sealed partial class DatabaseEngine
             var record = SourceRecord(budgetedView, source, position);
             TopicModelQueryValidation.Accept(partition, resource, record, accept);
             if (position == head.TailPosition)
-            { return; }
+            {
+                return;
+            }
             position++;
         }
     }

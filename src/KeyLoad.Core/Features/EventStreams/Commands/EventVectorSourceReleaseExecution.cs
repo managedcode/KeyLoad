@@ -15,7 +15,9 @@ public sealed partial class DatabaseEngine
         RequireEventVectorSourceApply(transaction, currentPrincipal, request, placement);
         var resource = SourceResource(transaction, request.Source);
         if (resource.SchemaVersion != request.SourceSchemaVersion)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, EventVectorApplyAuthorityChanged); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, EventVectorApplyAuthorityChanged);
+        }
         var admission = new EventVectorAdmissionPolicy(OperationLimitsOptions);
         var retained = ReadEventVectorPinRow(transaction, request.Source, request.MapId, admission);
         var original = retained is { } row
@@ -27,10 +29,14 @@ public sealed partial class DatabaseEngine
         if (settled)
         {
             if (retained is { } existing)
-            { EventVectorSourcePinWriter.Delete(transaction, request.Source, request.MapId, existing, admission); }
+            {
+                EventVectorSourcePinWriter.Delete(transaction, request.Source, request.MapId, existing, admission);
+            }
         }
         else
-        { EventVectorSourcePinWriter.Write(transaction, retained, released, admission); }
+        {
+            EventVectorSourcePinWriter.Write(transaction, retained, released, admission);
+        }
         var token = new CommitToken(placement!.Incarnation, request.Source.Partition.AtomicPartitionId,
             position, placement.PlacementEpoch);
         return Result(new EventVectorSourceReleaseResult

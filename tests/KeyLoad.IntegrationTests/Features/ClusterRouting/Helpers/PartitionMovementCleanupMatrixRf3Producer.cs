@@ -26,14 +26,22 @@ internal static class PartitionMovementCleanupMatrixRf3Producer
         {
             _ = await Task.WhenAny(observed, original).ConfigureAwait(false);
             if (!observed.IsCompletedSuccessfully)
-            { throw new InvalidOperationException(PartitionMovementActiveAdjunctProtocol.EarlyTerminal); }
+            {
+                throw new InvalidOperationException(PartitionMovementActiveAdjunctProtocol.EarlyTerminal);
+            }
             var primary = await observed.ConfigureAwait(false);
             if (role == PartitionMovementCleanupMatrixFaultRole.ClaimedOwnerBytesChanged)
-            { PartitionMovementCleanupMatrixByteFault.ReplaceClaimed(controls, primary, faults); }
+            {
+                PartitionMovementCleanupMatrixByteFault.ReplaceClaimed(controls, primary, faults);
+            }
             else if (role == PartitionMovementCleanupMatrixFaultRole.RetainedObservedControl)
-            { PartitionMovementCleanupMatrixRf3Fault.RenameObservedControl(controls, primary, faults); }
+            {
+                PartitionMovementCleanupMatrixRf3Fault.RenameObservedControl(controls, primary, faults);
+            }
             else
-            { PartitionMovementCleanupMatrixRf3Fault.RenameAdmittedArm(controls, SelectArm(role, other, primary), primary, faults); }
+            {
+                PartitionMovementCleanupMatrixRf3Fault.RenameAdmittedArm(controls, SelectArm(role, other, primary), primary, faults);
+            }
             var refused = await original.ConfigureAwait(false);
             await Assert.That(refused.IsFailed).IsTrue();
             await Assert.That(refused.Value).IsNull();
@@ -49,7 +57,9 @@ internal static class PartitionMovementCleanupMatrixRf3Producer
         if (faults.Count != (role == PartitionMovementCleanupMatrixFaultRole.RetainedObservedControl
             ? PartitionMovementCleanupMatrixProtocol.SelectedControlVoterCount
             : RequestCqrsProbeFixtureProtocol.Nodes.Count))
-        { throw new InvalidOperationException(PartitionMovementCleanupMatrixProtocol.MissingRefusal); }
+        {
+            throw new InvalidOperationException(PartitionMovementCleanupMatrixProtocol.MissingRefusal);
+        }
         return faults.ToArray();
     }
     private static Guid SelectArm(PartitionMovementCleanupMatrixFaultRole role, Guid other,
@@ -62,7 +72,9 @@ internal static class PartitionMovementCleanupMatrixRf3Producer
     private static async Task JoinObservedAsync(Task<RequestCqrsProbeMarkerRecord> observed, CancellationToken originalWait)
     {
         try
-        { _ = await observed.ConfigureAwait(false); }
+        {
+            _ = await observed.ConfigureAwait(false);
+        }
         catch (OperationCanceledException) when (originalWait.IsCancellationRequested) { }
     }
 }

@@ -50,7 +50,10 @@ internal static class GraphPathRawReadR43Commands
         var persisted = await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.ConfigurePrincipalAsync(
             Guid.NewGuid(), expected, token));
         await SqlRf3Protocol.EqualAsync(expected, persisted);
-        state.Identity = state.Identity with { Principal = persisted };
+        state.Identity = state.Identity with
+        {
+            Principal = persisted
+        };
         state.Allowed = allowed;
         state.Outbox = await GraphPathRawReadR43Current.OutboxAsync(admin, state, token);
     }

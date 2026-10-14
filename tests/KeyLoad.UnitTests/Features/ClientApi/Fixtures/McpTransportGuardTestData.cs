@@ -48,9 +48,13 @@ internal static class McpTransportGuardTestData
     {
         var headers = new HeaderDictionary { [RevisionHeader] = Revision };
         if (method is not null)
-        { headers[MethodHeader] = method; }
+        {
+            headers[MethodHeader] = method;
+        }
         if (name is not null)
-        { headers[NameHeader] = name; }
+        {
+            headers[NameHeader] = name;
+        }
         return headers;
     }
 
@@ -91,7 +95,9 @@ internal static class McpTransportGuardTestData
             headers[mutation.Field] = value;
         }
         else
-        { headers.Remove(mutation.Field); }
+        {
+            headers.Remove(mutation.Field);
+        }
         return headers;
     }
 

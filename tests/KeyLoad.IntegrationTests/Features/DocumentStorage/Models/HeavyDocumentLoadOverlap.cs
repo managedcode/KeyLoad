@@ -15,7 +15,9 @@ internal sealed class HeavyDocumentLoadOverlap
     internal async Task ArriveAsync(CancellationToken token)
     {
         if (Interlocked.Increment(ref ready) == HeavyDocumentLoadProtocol.Writers + HeavyDocumentLoadProtocol.ReaderLanes)
-        { start.SetResult(); }
+        {
+            start.SetResult();
+        }
         await start.Task.WaitAsync(token).ConfigureAwait(false);
     }
     internal void Original(int writer, Task? original) => Volatile.Write(ref originals[writer], original);
@@ -26,7 +28,9 @@ internal sealed class HeavyDocumentLoadOverlap
         for (var index = 0; index < originals.Length; index++)
         {
             if (Volatile.Read(ref originals[index]) is { IsCompleted: false })
-            { return true; }
+            {
+                return true;
+            }
         }
         return false;
     }
@@ -36,6 +40,8 @@ internal sealed class HeavyDocumentLoadOverlap
         await Assert.That(Acknowledged).IsEqualTo((long)HeavyDocumentLoadProtocol.Records);
         await Assert.That(WritersDone).IsTrue();
         foreach (var count in overlappingReads)
-        { await Assert.That(count).IsGreaterThan(0); }
+        {
+            await Assert.That(count).IsGreaterThan(0);
+        }
     }
 }

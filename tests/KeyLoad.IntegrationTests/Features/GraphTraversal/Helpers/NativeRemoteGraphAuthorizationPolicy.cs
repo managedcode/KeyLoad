@@ -18,7 +18,9 @@ internal static class NativeRemoteGraphAuthorizationPolicy
         {
             PolicyEpoch = checked(original.PolicyEpoch + 1),
             Grants = original.Grants.Select(grant => grant with
-            { Capabilities = grant.Capabilities & ~Capability.GraphWrite }).ToImmutableArray()
+            {
+                Capabilities = grant.Capabilities & ~Capability.GraphWrite
+            }).ToImmutableArray()
         };
         return await PersistAsync(administrator, denied, cancellationToken).ConfigureAwait(false);
     }
@@ -28,7 +30,10 @@ internal static class NativeRemoteGraphAuthorizationPolicy
     {
         await Assert.That(denied.Id).IsEqualTo(original.Id);
         await Assert.That(denied.PolicyEpoch).IsEqualTo(checked(original.PolicyEpoch + 1));
-        var restored = original with { PolicyEpoch = checked(denied.PolicyEpoch + 1) };
+        var restored = original with
+        {
+            PolicyEpoch = checked(denied.PolicyEpoch + 1)
+        };
         return await PersistAsync(administrator, restored, cancellationToken).ConfigureAwait(false);
     }
 

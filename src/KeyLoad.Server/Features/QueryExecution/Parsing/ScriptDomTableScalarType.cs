@@ -10,12 +10,18 @@ internal static class ScriptDomTableScalarType
     {
         context.Check();
         if (dataType is not Dom.SqlDataTypeReference native)
-        { throw ScriptDomOperationErrors.Unsupported(); }
+        {
+            throw ScriptDomOperationErrors.Unsupported();
+        }
         if (native.SqlDataTypeOption == Dom.SqlDataTypeOption.NVarChar
             && native.Parameters.Count == SingleParameter && native.Parameters[FirstParameter] is Dom.MaxLiteral)
-        { return RelationalColumnType.Text; }
+        {
+            return RelationalColumnType.Text;
+        }
         if (native.Parameters.Count != EmptyCount)
-        { throw ScriptDomOperationErrors.Unsupported(); }
+        {
+            throw ScriptDomOperationErrors.Unsupported();
+        }
         return native.SqlDataTypeOption switch
         {
             Dom.SqlDataTypeOption.Bit => RelationalColumnType.Boolean,

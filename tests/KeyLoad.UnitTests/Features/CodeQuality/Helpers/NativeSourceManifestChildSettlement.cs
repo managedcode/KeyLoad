@@ -84,7 +84,11 @@ internal static class NativeSourceManifestChildSettlement
             NativeCoverageImageNodeSettlement.ThrowFailures(failures);
             throw new InvalidOperationException(StartFailure);
         }
-        return joined with { ProcessDisposed = disposed, OwnedRootDeleted = deleted };
+        return joined with
+        {
+            ProcessDisposed = disposed,
+            OwnedRootDeleted = deleted
+        };
     }
 
     private static async Task<NativeSourceManifestChildJoined?> RunChildAsync(Process process,
@@ -171,12 +175,30 @@ internal static class NativeSourceManifestChildSettlement
 
 internal sealed class NativeSourceManifestChildOriginals
 {
-    internal bool Started { get; set; }
-    internal Task? Exit { get; private set; }
-    internal Task<string?>? Ready { get; private set; }
-    internal Task<string>? Output { get; private set; }
-    internal Task<string>? Error { get; private set; }
-    internal Task? Original { get; private set; }
+    internal bool Started
+    {
+        get; set;
+    }
+    internal Task? Exit
+    {
+        get; private set;
+    }
+    internal Task<string?>? Ready
+    {
+        get; private set;
+    }
+    internal Task<string>? Output
+    {
+        get; private set;
+    }
+    internal Task<string>? Error
+    {
+        get; private set;
+    }
+    internal Task? Original
+    {
+        get; private set;
+    }
 
     internal void Capture(Process process, TestExecutionOptions options, List<Exception> failures)
     {

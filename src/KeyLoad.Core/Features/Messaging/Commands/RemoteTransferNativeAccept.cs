@@ -12,7 +12,9 @@ public sealed partial class DatabaseEngine
     {
         var proof = operation is null ? null : ReadRemoteTransferNativeProof(operation);
         if (proof is null)
-        { return ApplyAcceptQueueTransfer(tx, principal, partition, request, now, position); }
+        {
+            return ApplyAcceptQueueTransfer(tx, principal, partition, request, now, position);
+        }
         RequireRemoteTransferPeerAtView(tx, principal, proof);
         ValidateTransferDestination(request.DestinationQueue, partition);
         var claims = proof.Call.IntentClaims;
@@ -37,7 +39,9 @@ public sealed partial class DatabaseEngine
         RequireTokenBound(receiptToken);
         var record = new RemoteTransferTargetReceiptRecord(claims.Source, claims.TransferId, claims.Destination,
             claims.PrincipalId, claims.Fingerprint, receiptToken, targetCommit)
-        { RemoteOrigin = origin };
+        {
+            RemoteOrigin = origin
+        };
         var bytes = RemoteTransferStorage.SerializedBytes(record);
         var capacity = RemoteTransferStorage.TargetCapacity(tx, claims.Destination);
         RemoteTransferStorage.RequireCapacity(capacity, bytes, Limits);
@@ -53,6 +57,8 @@ public sealed partial class DatabaseEngine
     {
         if (actual is null || !PhysicalOwnerEntryValidation.Same(actual.SourceOwner, expected.SourceOwner)
             || actual.LogicalPrincipalId != expected.LogicalPrincipalId || actual.IntentDigest != expected.IntentDigest)
-        { throw Errors.Fail(ErrorCode.Corruption, RemoteTransferPeerProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, RemoteTransferPeerProtocol.Invalid);
+        }
     }
 }

@@ -24,7 +24,9 @@ internal sealed record PartitionMovementLateNativeCut(long Position, Dictionary<
         {
             var page = view.Scan([], limits.MaxScanRecords);
             if (page.HasMore)
-            { throw new InvalidOperationException("The complete native cut exceeded its bound."); }
+            {
+                throw new InvalidOperationException("The complete native cut exceeded its bound.");
+            }
             var selection = CommandOutcomeKeyResolver.Select(view, operation.PrincipalId, operation.Id,
                 new(CommandOutcomeScopeKind.Partition, phase.Partition));
             var cancellation = PartitionMoveRetireCancellationStorage.Read(view, phase.Partition,
@@ -86,7 +88,10 @@ internal sealed record PartitionMovementLateNativeCut(long Position, Dictionary<
         await Assert.That(before.CurrentGrant!.Settlement).IsNull();
         await Assert.That(before.CurrentGrant.AbortDisposition).IsNull();
         await Assert.That(before.CurrentGrant.RetireCancellationDisposition).IsNotNull();
-        var unchanged = before.CurrentGrant with { RetireCancellationDisposition = null };
+        var unchanged = before.CurrentGrant with
+        {
+            RetireCancellationDisposition = null
+        };
         await Assert.That(NativeSerialization.Serialize(unchanged).AsSpan()
             .SequenceEqual(NativeSerialization.Serialize(admission.OriginalGrant))).IsTrue();
         await Assert.That(before.Header!.PendingOriginalPhaseCommandId).IsNotNull();

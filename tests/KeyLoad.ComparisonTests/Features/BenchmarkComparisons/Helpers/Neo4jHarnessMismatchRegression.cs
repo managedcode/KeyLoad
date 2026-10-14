@@ -9,7 +9,11 @@ internal static class Neo4jHarnessMismatchRegression
 
     internal static async Task VerifyAsync(Uri endpoint, string password, string image, CancellationToken cancellationToken)
     {
-        var options = Neo4jHarnessConstants.SmallOptions() with { Warmup = 0, Repetitions = 1 };
+        var options = Neo4jHarnessConstants.SmallOptions() with
+        {
+            Warmup = 0,
+            Repetitions = 1
+        };
         var dataset = new BenchmarkDataset(Microsoft.Extensions.Options.Options.Create(options));
         var runId = Guid.NewGuid().ToString("D");
         var failures = new List<Exception>();

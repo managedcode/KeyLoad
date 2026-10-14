@@ -11,7 +11,9 @@ internal static class NativeCanonicalModelCutRejectionAssertions
         CancellationToken token)
     {
         if (actualSix.Count != TwoRf3MembershipProtocol.NodeCount)
-        { throw new InvalidDataException(MissingRealData); }
+        {
+            throw new InvalidDataException(MissingRealData);
+        }
         var original = actualSix.Values.FirstOrDefault(cut => cut.Rows.Any(row => !row.Value.IsEmpty))
             ?? throw new InvalidDataException(MissingRealData);
         var other = actualSix.Values.First(cut => cut.Owner.VoterId != original.Owner.VoterId);
@@ -23,7 +25,13 @@ internal static class NativeCanonicalModelCutRejectionAssertions
 
         _ = Assert.ThrowsExactly<InvalidDataException>(() => NativeCanonicalModelCutAssertions.Require(
             original.Request, other.Owner, original, token));
-        var changedNonce = original with { Request = original.Request with { Nonce = Guid.NewGuid() } };
+        var changedNonce = original with
+        {
+            Request = original.Request with
+            {
+                Nonce = Guid.NewGuid()
+            }
+        };
         _ = Assert.ThrowsExactly<InvalidDataException>(() => NativeCanonicalModelCutAssertions.Require(
             original.Request, original.Owner, changedNonce, token));
         var rowIndex = Enumerable.Range(0, original.Rows.Length).First(index => !original.Rows[index].Value.IsEmpty);
@@ -32,17 +40,28 @@ internal static class NativeCanonicalModelCutRejectionAssertions
         changed[0] ^= ChangedBit;
         var changedRows = original.Rows.SetItem(rowIndex, new(row.Key, changed));
         _ = Assert.ThrowsExactly<InvalidDataException>(() => NativeCanonicalModelCutAssertions.RequireUnchanged(
-            original, original with { Rows = changedRows }, token));
+            original, original with
+            {
+                Rows = changedRows
+            }, token));
         _ = Assert.ThrowsExactly<InvalidDataException>(() => NativeCanonicalModelCutAssertions.RequireUnchanged(
-            original, original with { Rows = original.Rows.RemoveAt(rowIndex) }, token));
-        var duplicated = original with { Rows = original.Rows.Add(row) };
+            original, original with
+            {
+                Rows = original.Rows.RemoveAt(rowIndex)
+            }, token));
+        var duplicated = original with
+        {
+            Rows = original.Rows.Add(row)
+        };
         RequireDuplicateRefusal(() => NativeCanonicalModelCutAssertions.RequireUnchanged(original, duplicated, token));
         await Assert.That(NativeCanonicalModelCutCodec.Encode(original, token).SequenceEqual(originalBytes)).IsTrue();
     }
     private static void RequireDuplicateRefusal(Action operation)
     {
         try
-        { operation(); }
+        {
+            operation();
+        }
         catch (InvalidDataException) { return; }
         catch (KeyLoadException error) when (error.Code == ErrorCode.ResourceExhausted) { return; }
         throw new InvalidOperationException(MissingRealData);

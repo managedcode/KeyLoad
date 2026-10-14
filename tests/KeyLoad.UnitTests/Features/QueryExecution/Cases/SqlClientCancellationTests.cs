@@ -81,7 +81,8 @@ internal sealed class SqlClientCancellationTests
             await Task.Delay(Timeout.InfiniteTimeSpan, TimeProvider.System, context.RequestAborted);
         }
         catch (OperationCanceledException) when (context.RequestAborted.IsCancellationRequested)
-        { }
+        {
+        }
         catch (Exception error)
         {
             firstChunk.TrySetException(error);
@@ -89,6 +90,8 @@ internal sealed class SqlClientCancellationTests
             throw;
         }
         finally
-        { stopped.TrySetResult(); }
+        {
+            stopped.TrySetResult();
+        }
     }
 }

@@ -22,11 +22,15 @@ internal sealed class RequestCqrsProbeBatchPublicationTests
         {
             reads++;
             if (File.Exists(Path.Combine(directory.Root, name)) || File.Exists(Path.Combine(directory.Root, markerName)))
-            { throw new InvalidOperationException("Inventory read during committed publication."); }
+            {
+                throw new InvalidOperationException("Inventory read during committed publication.");
+            }
             var paths = Directory.GetFiles(directory.Root);
             var total = paths.Sum(path => (long)RequestCqrsProbeFiles.ReadRecord(path, UnitRequestProbeOptions.Execution).Length);
             if (!RequestCqrsProbeFiles.ReadRecord(Path.Combine(directory.Root, RequestCqrsProbeProtocol.OwnerFile), UnitRequestProbeOptions.Execution).SequenceEqual(owner))
-            { throw new InvalidOperationException("Original owner changed."); }
+            {
+                throw new InvalidOperationException("Original owner changed.");
+            }
             return new([], [], [], paths.Length, total);
         }
         RequestCqrsProbeBatchPublication.Write(directory.Root, [(name, bytes), (markerName, markerBytes)], UnitRequestProbeOptions.Execution, Inspect);

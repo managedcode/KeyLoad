@@ -27,7 +27,10 @@ internal static class CommandIdempotencyCrashContract
     private const string PartitionKey = "command-restart-partition";
     private const string CommandIdText = "e3c5d2eb-20f4-4f82-9ab6-c94a75c2cb8f";
     private const string FollowUpCommandText = "3c83be09-a8a8-4304-8a27-90028e56e4a3";
-    internal static PartitionRef Partition { get; } = new(CrashFixtureValues.Tenant,
+    internal static PartitionRef Partition
+    {
+        get;
+    } = new(CrashFixtureValues.Tenant,
         CrashFixtureValues.Database, CrashFixtureValues.Orders, PartitionKey);
     internal static Guid CommandId { get; } = Guid.Parse(CommandIdText);
     internal static Guid FollowUpCommandId { get; } = Guid.Parse(FollowUpCommandText);

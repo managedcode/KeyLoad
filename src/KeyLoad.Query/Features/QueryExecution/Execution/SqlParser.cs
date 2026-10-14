@@ -30,7 +30,9 @@ public sealed class SqlParser
         var execution = executionOptions.Value;
         execution.Validate();
         if (dialectVersion is not (DefaultDialectVersion or JoinDialectVersion))
-        { throw global::KeyLoad.Features.QueryExecution.ScriptDomErrors.Unsupported(); }
+        {
+            throw global::KeyLoad.Features.QueryExecution.ScriptDomErrors.Unsupported();
+        }
         this.dialectVersion = dialectVersion;
         var originalBudget = budget ?? new ReadExecutionBudget(limitsOptions);
         statement = global::KeyLoad.Features.QueryExecution.ScriptDomSyntax.Parse(sql, limitsOptions, originalBudget.Check, originalBudget.Cancellation);

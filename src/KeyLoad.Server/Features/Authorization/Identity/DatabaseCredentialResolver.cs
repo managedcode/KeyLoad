@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Diagnostics.Features.ResourceExecution;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.Server;
 
@@ -16,7 +16,9 @@ internal static class DatabaseCredentialResolver
         ArgumentNullException.ThrowIfNull(context);
         var key = context.Request.Headers.Authorization.ToString();
         if (!key.StartsWith(ServerProtocol.BearerPrefix, StringComparison.Ordinal))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, ServerProtocol.MissingCredential); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, ServerProtocol.MissingCredential);
+        }
         var requestId = Guid.NewGuid();
         var codec = context.RequestServices.GetRequiredService<GrainRequestCodec>();
         var token = CanonicalCredentialDispatch.Prepare(codec,
@@ -49,7 +51,9 @@ internal static class DatabaseCredentialResolver
         {
             DatabasePhaseTelemetry.End(DatabasePhaseKind.PublicAuthenticationDispatch, outcome, started);
             if (observedExecution)
-            { executionObserver!.Terminal(context.TraceIdentifier, requestId, outcome); }
+            {
+                executionObserver!.Terminal(context.TraceIdentifier, requestId, outcome);
+            }
         }
         return reply.Payload;
     }

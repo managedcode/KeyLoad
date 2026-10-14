@@ -9,7 +9,10 @@ using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
-internal enum PartitionMovementCapturePointerFault { Missing, AbsentRow, NonCaptureRow }
+internal enum PartitionMovementCapturePointerFault
+{
+    Missing, AbsentRow, NonCaptureRow
+}
 
 /// <summary>Only stopped, file-locked fixture roots are opened; every native owner is joined on all paths.</summary>
 internal static class PartitionMovementCapturePointerRf3Fault
@@ -32,7 +35,10 @@ internal static class PartitionMovementCapturePointerRf3Fault
             };
             UseStore(wave, cut.Node, DatabaseDirectory, store => store.Commit((transaction, _) =>
             {
-                PartitionMoveParentStorage.WriteHeader(transaction, header with { OriginalCapturePhaseCommandId = pointer },
+                PartitionMoveParentStorage.WriteHeader(transaction, header with
+                {
+                    OriginalCapturePhaseCommandId = pointer
+                },
                     IntegrationExecutionOptions.DatabaseLimits().Value.MaxBatchBytes);
                 return true;
             }));
@@ -49,7 +55,10 @@ internal static class PartitionMovementCapturePointerRf3Fault
             if (original.Header is { } header)
             {
                 var pointer = actual.Header!.OriginalCapturePhaseCommandId;
-                await SqlRf3Protocol.EqualAsync(header with { OriginalCapturePhaseCommandId = pointer }, actual.Header);
+                await SqlRf3Protocol.EqualAsync(header with
+                {
+                    OriginalCapturePhaseCommandId = pointer
+                }, actual.Header);
                 await RequirePointerVariantAsync(original, header, pointer, fault, advance);
                 allowed.Add(Convert.ToHexString(PartitionMoveParentKeys.Header(header.Partition, header.MoveId)));
             }
@@ -63,9 +72,13 @@ internal static class PartitionMovementCapturePointerRf3Fault
         PartitionMoveParentHeader header, Guid? pointer, PartitionMovementCapturePointerFault fault, Guid advance)
     {
         if (fault == PartitionMovementCapturePointerFault.Missing)
-        { await Assert.That(pointer).IsNull(); }
+        {
+            await Assert.That(pointer).IsNull();
+        }
         else if (fault == PartitionMovementCapturePointerFault.NonCaptureRow)
-        { await Assert.That(pointer).IsEqualTo((Guid?)advance); }
+        {
+            await Assert.That(pointer).IsEqualTo((Guid?)advance);
+        }
         else
         {
             await Assert.That(pointer).IsNotNull();
@@ -79,7 +92,9 @@ internal static class PartitionMovementCapturePointerRf3Fault
         var identity = Guid.NewGuid();
         var key = Convert.ToHexString(PartitionMoveParentKeys.Phase(header.Partition, header.MoveId, identity));
         if (Rows(cut).ContainsKey(key))
-        { throw new InvalidOperationException("The missing pointer unexpectedly identifies a real row."); }
+        {
+            throw new InvalidOperationException("The missing pointer unexpectedly identifies a real row.");
+        }
         return identity;
     }
 
@@ -100,11 +115,15 @@ internal static class PartitionMovementCapturePointerRf3Fault
             var first = Applied(before);
             var last = Applied(after);
             if (last < first || last - first > IntegrationExecutionOptions.DatabaseLimits().Value.MaxScanRecords)
-            { throw new InvalidOperationException("The actual applied journal delta exceeds its original bounded read."); }
+            {
+                throw new InvalidOperationException("The actual applied journal delta exceeds its original bounded read.");
+            }
             var hard = ReplicaProtocolCodec.Deserialize<ReplicaHardState>(view.ReadOwnedValue(KeyCodec.Encode(ReplicaProtocol.StateKey))
                 ?? throw new InvalidOperationException("The real replica authority is absent."));
             if (hard.CommittedIndex < last)
-            { throw new InvalidOperationException("The applied delta is not acknowledged by this native owner."); }
+            {
+                throw new InvalidOperationException("The applied delta is not acknowledged by this native owner.");
+            }
             var entries = new List<ReplicaEntry>();
             for (var offset = PartitionMoveProtocol.SequenceStep; offset <= last - first; offset++)
             {
@@ -112,7 +131,9 @@ internal static class PartitionMovementCapturePointerRf3Fault
                 var entry = ReplicaProtocolCodec.Deserialize<ReplicaEntry>(view.ReadOwnedValue(ReplicaProtocol.EntryStorageKey(index))
                     ?? throw new InvalidOperationException("The actual newly applied journal entry is absent."));
                 if (entry.Index != index)
-                { throw new InvalidOperationException("The native journal index is inconsistent."); }
+                {
+                    throw new InvalidOperationException("The native journal index is inconsistent.");
+                }
                 entries.Add(entry);
             }
             return entries.ToArray();
@@ -130,7 +151,9 @@ internal static class PartitionMovementCapturePointerRf3Fault
             result = operation(store);
         }, failures);
         if (store is { } owner)
-        { ServerFailureObserver.Observe(owner.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(owner.Dispose, failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
         return result;
     }

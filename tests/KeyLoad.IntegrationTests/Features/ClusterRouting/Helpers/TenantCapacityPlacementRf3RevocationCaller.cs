@@ -15,7 +15,10 @@ internal sealed class TenantCapacityPlacementRf3RevocationCaller : IAsyncDisposa
         this.credential = credential;
         Sdk = new(http, credential, IntegrationClientOptions.Execution());
     }
-    internal KeyLoadClient Sdk { get; }
+    internal KeyLoadClient Sdk
+    {
+        get;
+    }
     internal McpOfficialClient Official => official ?? throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState);
 
     internal static async Task<TenantCapacityPlacementRf3RevocationCaller> OpenAsync(
@@ -27,7 +30,9 @@ internal sealed class TenantCapacityPlacementRf3RevocationCaller : IAsyncDisposa
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(() => caller.ReconnectAsync(wave, token), failures);
         if (failures.Count == NoFailures)
-        { return caller; }
+        {
+            return caller;
+        }
         await ServerFailureObserver.ObserveAsync(() => caller.DisposeAsync().AsTask(), failures);
         ServerFailureObserver.ThrowIfAny(failures);
         throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState);

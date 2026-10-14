@@ -25,7 +25,10 @@ internal static class IsolatedKurrentCleanupRegressionGossip
             endpoints[index] = app.GetEndpoint(names[index], Http);
             using var handler = new SocketsHttpHandler { AllowAutoRedirect = false };
             using var client = new HttpClient(handler, disposeHandler: false)
-            { BaseAddress = endpoints[index], Timeout = Timeout.InfiniteTimeSpan };
+            {
+                BaseAddress = endpoints[index],
+                Timeout = Timeout.InfiniteTimeSpan
+            };
             using var response = await client.GetAsync(new Uri(KurrentConstants.GossipPath, UriKind.Relative),
                 HttpCompletionOption.ResponseHeadersRead, token);
             response.EnsureSuccessStatusCode();

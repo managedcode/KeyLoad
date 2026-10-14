@@ -25,7 +25,9 @@ internal static class QueueDeadLetterSelectedTrial
         reopened.Commit((tx, _) =>
         {
             foreach (var repair in state.Repairs)
-            { tx.Put(repair.Key, repair.Bytes); }
+            {
+                tx.Put(repair.Key, repair.Bytes);
+            }
             return true;
         });
         await Assert.That(reopened.Position).IsEqualTo(originalPosition + QueueDeadLetterSelectedProtocol.Two);

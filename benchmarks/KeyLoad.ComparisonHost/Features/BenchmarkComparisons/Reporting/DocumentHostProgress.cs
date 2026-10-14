@@ -24,7 +24,9 @@ internal sealed class DocumentHostProgress(IOptions<NativeComparisonExecutionOpt
             repetition = progress.Repetition;
             var completed = progress.Acknowledged + progress.Failed + progress.Canceled;
             if (!newRepetition && completed < progress.Planned && clock.GetElapsedTime(lastObserved, now) < execution.Value.ProgressHeartbeatInterval)
-            { return; }
+            {
+                return;
+            }
             lastObserved = now;
             Console.WriteLine(string.Format(CultureInfo.InvariantCulture, ProgressTemplate, repetition, completed,
                 progress.Planned, progress.Failed + progress.Canceled, progress.ElapsedSeconds));

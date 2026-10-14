@@ -26,12 +26,18 @@ internal sealed class BlobUploadCommands(DatabaseEngine database)
 
         var policy = Policy(tx, request.Blob);
         if (request.Length < RequestLengthValidationBoundary || request.Length > policy.MaxBlobBytes || request.ExpectedRevision < ExpectedRevisionValidationBoundary)
-        { throw BlobErrors.Validation(); }
+        {
+            throw BlobErrors.Validation();
+        }
         var head = Reader.Head(tx, request.Blob);
         if ((head?.Metadata.Revision ?? HeadMetadataRevisionValidationBoundary) != request.ExpectedRevision)
-        { throw Errors.Fail(ErrorCode.RevisionConflict, BlobErrors.Revision); }
+        {
+            throw Errors.Fail(ErrorCode.RevisionConflict, BlobErrors.Revision);
+        }
         if (Reader.State(tx, request.Blob, request.UploadId) is not null)
-        { throw BlobErrors.StateConflict(); }
+        {
+            throw BlobErrors.StateConflict();
+        }
         ProveNoParts(tx, request.Blob, request.UploadId);
         var access = request.Access ?? head?.Metadata.Access ?? new RowAccess();
         BlobMetadataRules.Access(access, false);
@@ -45,7 +51,9 @@ internal sealed class BlobUploadCommands(DatabaseEngine database)
             new(request.Blob, RevisionEmptyCount, null, LengthEmptyCount, PartCountEmptyCount, null, access, now))) : null;
         BlobQuotaOperations.Change(tx, request.Blob, Incarnation, policy, request.Length, head is null ? KeysSingleItemCount : KeysEmptyCount, VersionsSingleItemCount, UploadsSingleItemCount);
         if (headBytes is not null)
-        { tx.Put(BlobKeys.Head(request.Blob), headBytes); }
+        {
+            tx.Put(BlobKeys.Head(request.Blob), headBytes);
+        }
         tx.Put(BlobKeys.State(request.Blob, request.UploadId), stateBytes);
         return state.Info;
     }
@@ -59,7 +67,9 @@ internal sealed class BlobUploadCommands(DatabaseEngine database)
         var meta = KeySpace.Partition(BlobKeys.PartMetaSpace, blob.Partition, blob.Resource, blob.Id, upload.ToString(BlobKeys.GuidFormat));
         if (view.VisitRange(raw, MaxRecordsSingleItemCount, static (_, _) => false).Records != EmptyRecords
             || view.VisitRange(meta, MaxRecordsSingleItemCount, static (_, _) => false).Records != EmptyRecords)
-        { throw BlobErrors.Corruption(); }
+        {
+            throw BlobErrors.Corruption();
+        }
     }
 
     internal BlobUploadInfo Write(IAtomicTransaction tx, WriteBlobPartRequest request, DateTimeOffset now)
@@ -71,22 +81,32 @@ internal sealed class BlobUploadCommands(DatabaseEngine database)
         var state = Reader.State(tx, request.Blob, request.UploadId) ?? throw BlobErrors.Token();
         if (request.Ordinal < OrdinalValidationBoundary || request.Ordinal > state.NextOrdinal || request.Bytes.IsEmpty
             || request.Bytes.Length > BlobLimits.RawPartBytes)
-        { throw BlobErrors.Validation(); }
+        {
+            throw BlobErrors.Validation();
+        }
         if (!BlobIntegrity.Matches(BlobIntegrity.PartHash(request.Bytes.Span), request.Sha256))
-        { throw BlobErrors.Validation(); }
+        {
+            throw BlobErrors.Validation();
+        }
         if (request.Ordinal < state.NextOrdinal)
         {
             if (request.Ordinal < state.ReclaimCursor)
-            { throw BlobErrors.StateConflict(); }
+            {
+                throw BlobErrors.StateConflict();
+            }
             return Duplicate(tx, state, request);
         }
         RequireActive(state, now);
         var expected = Math.Min(BlobLimits.RawPartBytes, state.DeclaredLength - state.StoredBytes);
         if (request.Bytes.Length != expected || expected < ExpectedValidationBoundary)
-        { throw BlobErrors.Validation(); }
+        {
+            throw BlobErrors.Validation();
+        }
         if (tx.ReadOwnedValue(BlobKeys.Part(request.Blob, request.UploadId, request.Ordinal)) is not null
             || tx.ReadOwnedValue(BlobKeys.PartMeta(request.Blob, request.UploadId, request.Ordinal)) is not null)
-        { throw BlobErrors.Corruption(); }
+        {
+            throw BlobErrors.Corruption();
+        }
         var advanced = state with
         {
             NextOrdinal = checked(state.NextOrdinal + NextOrdinalStep),
@@ -107,7 +127,9 @@ internal sealed class BlobUploadCommands(DatabaseEngine database)
         var identical = false;
         var meta = BlobRecordReader.Part(view, state, request.Ordinal, bytes => identical = bytes.SequenceEqual(request.Bytes.Span));
         if (!identical || meta.Length != request.Bytes.Length || meta.Sha256 != request.Sha256)
-        { throw BlobErrors.StateConflict(); }
+        {
+            throw BlobErrors.StateConflict();
+        }
         return state.Info;
     }
 
@@ -115,9 +137,13 @@ internal sealed class BlobUploadCommands(DatabaseEngine database)
     {
         var state = Reader.State(tx, request.Blob, request.UploadId) ?? throw BlobErrors.Token();
         if (state.Status is BlobUploadStatus.Aborted or BlobUploadStatus.Expired)
-        { return state.Info; }
+        {
+            return state.Info;
+        }
         if (state.Status != BlobUploadStatus.Active)
-        { throw BlobErrors.StateConflict(); }
+        {
+            throw BlobErrors.StateConflict();
+        }
         var aborted = ReleaseActive(tx, state, BlobUploadStatus.Aborted);
         BlobMetadataRules.Put(tx, BlobKeys.State(request.Blob, request.UploadId), aborted);
         return aborted.Info;
@@ -131,14 +157,22 @@ internal sealed class BlobUploadCommands(DatabaseEngine database)
         const int RemainingReservationEmptyCount = 0;
 
         if (state.Status != BlobUploadStatus.Active)
-        { return state; }
+        {
+            return state;
+        }
         BlobQuotaOperations.Change(tx, state.Blob, Incarnation, Policy(tx, state.Blob), -state.RemainingReservation, KeysEmptyCount, VersionsEmptyCount, UploadsRemovalDelta);
-        return state with { Status = status, RemainingReservation = RemainingReservationEmptyCount };
+        return state with
+        {
+            Status = status,
+            RemainingReservation = RemainingReservationEmptyCount
+        };
     }
 
     internal static void RequireActive(BlobState state, DateTimeOffset now)
     {
         if (state.Status != BlobUploadStatus.Active || state.ExpiresAt <= now)
-        { throw BlobErrors.StateConflict(); }
+        {
+            throw BlobErrors.StateConflict();
+        }
     }
 }

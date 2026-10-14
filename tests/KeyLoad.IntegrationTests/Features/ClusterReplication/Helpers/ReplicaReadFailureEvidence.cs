@@ -20,7 +20,9 @@ internal static class ReplicaReadFailureEvidence
     internal static string Attach(string failure, IReadOnlyList<string> tail)
     {
         if (!Request(failure, Cause, out var id) && !Request(failure, Rpc, out id))
-        { return failure; }
+        {
+            return failure;
+        }
         foreach (var line in tail.Reverse())
         {
             if (Read(line, out var candidate, out var stage, out var flags) && candidate == id)
@@ -37,7 +39,9 @@ internal static class ReplicaReadFailureEvidence
         id = default;
         var start = line.IndexOf(marker, StringComparison.Ordinal);
         if (start < 0)
-        { return false; }
+        {
+            return false;
+        }
         var value = line.AsSpan(start + marker.Length).TrimStart();
         return value.Length >= GuidCharacters && Guid.TryParseExact(value[..GuidCharacters], GuidFormat, out id)
             && id != Guid.Empty;
@@ -47,13 +51,17 @@ internal static class ReplicaReadFailureEvidence
     {
         stage = flags = default;
         if (!Request(line, Leaf, out id))
-        { return false; }
+        {
+            return false;
+        }
         var start = line.IndexOf(Leaf, StringComparison.Ordinal);
         var value = line.AsSpan(start + Leaf.Length).TrimStart()[GuidCharacters..];
         var split = value.IndexOf(Flags, StringComparison.Ordinal);
         if (!value.StartsWith(Stage, StringComparison.Ordinal) || split < Stage.Length
             || !value.EndsWith(Period, StringComparison.Ordinal))
-        { return false; }
+        {
+            return false;
+        }
         return int.TryParse(value[Stage.Length..split], NumberStyles.None, CultureInfo.InvariantCulture, out stage)
             && int.TryParse(value[(split + Flags.Length)..^Period.Length], NumberStyles.None,
                 CultureInfo.InvariantCulture, out flags)

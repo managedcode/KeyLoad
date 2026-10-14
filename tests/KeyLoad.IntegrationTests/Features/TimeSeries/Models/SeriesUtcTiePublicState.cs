@@ -11,7 +11,13 @@ internal sealed class SeriesUtcTiePublicState(TimeSeriesRf3Scenario scenario, Im
     internal McpPersistedIdentity Reader { get; } = reader;
     internal AtomicPartitionPlacementResolution Placement { get; } = placement;
     internal List<(CommandRequest Command, CommitReceipt Receipt)> Receipts { get; } = [];
-    internal bool Purged { get; set; }
-    internal bool Fresh { get; set; }
+    internal bool Purged
+    {
+        get; set;
+    }
+    internal bool Fresh
+    {
+        get; set;
+    }
     internal OutboxStatus Outbox { get; set; } = null!;
 }

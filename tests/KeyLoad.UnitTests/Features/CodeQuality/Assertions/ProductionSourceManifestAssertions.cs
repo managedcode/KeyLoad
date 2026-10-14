@@ -59,7 +59,7 @@ internal static class ProductionSourceManifestAssertions
     private static readonly string[] ExpectedModules =
     [
         "KeyLoad.Abstractions", "KeyLoad.Analyzers", "KeyLoad.AppHost", "KeyLoad.Artifacts",
-        "KeyLoad.Cli", "KeyLoad.Client", "KeyLoad.Core", "KeyLoad.Diagnostics", "KeyLoad.Orleans",
+        "KeyLoad.Cli", "KeyLoad.Client", "KeyLoad.Core", "KeyLoad.Diagnostics", "KeyLoad.Clustering",
         "KeyLoad.Query", "KeyLoad.Replication", "KeyLoad.Security", "KeyLoad.Server",
         "KeyLoad.ServiceDefaults", "KeyLoad.Storage.IO", "KeyLoad.Storage.ZoneTree"
     ];

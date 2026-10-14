@@ -17,7 +17,9 @@ internal static class PartitionMovementParentPromotionValidation
                 OriginalResult: not null, ObservationCheckpointReceipt: not null
             }
             || observed.OriginalResult.Error is not null)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+        }
         var actual = observed.OriginalResult.Get<PartitionMovePhaseResult>();
         var grant = actual.Grant
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
@@ -28,7 +30,9 @@ internal static class PartitionMovementParentPromotionValidation
                 .SequenceEqual(NativeSerialization.Serialize(pending.OriginalAuthorization))
             || !NativeSerialization.Serialize(pending.AdmissionCheckpointReceipt).AsSpan()
                 .SequenceEqual(NativeSerialization.Serialize(observed.ObservationCheckpointReceipt)))
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMovementProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMovementProtocol.InvalidProof);
+        }
         return pending;
     }
 }

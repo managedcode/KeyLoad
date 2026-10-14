@@ -33,7 +33,9 @@ internal sealed class OfflineLockedFileStream : FileStream
             throw;
         }
         finally
-        { OfflineNativeHandleLease.DisposeUntransferred(ref borrowed, primaryFailure); }
+        {
+            OfflineNativeHandleLease.DisposeUntransferred(ref borrowed, primaryFailure);
+        }
     }
 
     public override SafeFileHandle SafeFileHandle
@@ -64,7 +66,9 @@ internal sealed class OfflineLockedFileStream : FileStream
         if (!disposing)
         {
             if (originalHandle?.IsClosed == true)
-            { borrowedHandle.Dispose(); }
+            {
+                borrowedHandle.Dispose();
+            }
             base.Dispose(disposing);
             return;
         }
@@ -95,11 +99,17 @@ internal sealed class OfflineLockedFileStream : FileStream
         try
         {
             if (originalHandle.IsClosed)
-            { borrowedHandle.Dispose(); }
+            {
+                borrowedHandle.Dispose();
+            }
             else if (useAsync)
-            { await base.FlushAsync(CancellationToken.None).ConfigureAwait(false); }
+            {
+                await base.FlushAsync(CancellationToken.None).ConfigureAwait(false);
+            }
             else
-            { FlushSynchronous(); }
+            {
+                FlushSynchronous();
+            }
         }
         catch (Exception error)
         {
@@ -109,9 +119,13 @@ internal sealed class OfflineLockedFileStream : FileStream
         finally
         {
             if (useAsync)
-            { await DisposeViewAndOwnerAsync(disposeAsyncBase!, primaryFailure).ConfigureAwait(false); }
+            {
+                await DisposeViewAndOwnerAsync(disposeAsyncBase!, primaryFailure).ConfigureAwait(false);
+            }
             else
-            { DisposeViewAndOwner(primaryFailure); }
+            {
+                DisposeViewAndOwner(primaryFailure);
+            }
         }
     }
 
@@ -120,7 +134,9 @@ internal sealed class OfflineLockedFileStream : FileStream
     private void DisposeViewAndOwner(Exception? primaryFailure)
     {
         try
-        { base.Dispose(disposing: true); }
+        {
+            base.Dispose(disposing: true);
+        }
         catch (Exception cleanup)
         {
             if (primaryFailure is null)
@@ -132,7 +148,9 @@ internal sealed class OfflineLockedFileStream : FileStream
             throw primaryFailure;
         }
         finally
-        { OfflineFileLock.Close(originalHandle, releaseLock: true, primaryFailure); }
+        {
+            OfflineFileLock.Close(originalHandle, releaseLock: true, primaryFailure);
+        }
     }
 
     private async Task DisposeViewAndOwnerAsync(Func<ValueTask> disposeViewAsync, Exception? primaryFailure)
@@ -140,7 +158,9 @@ internal sealed class OfflineLockedFileStream : FileStream
         var previousEntry = disposingBaseView.Value;
         disposingBaseView.Value = true;
         try
-        { await disposeViewAsync().ConfigureAwait(false); }
+        {
+            await disposeViewAsync().ConfigureAwait(false);
+        }
         catch (Exception cleanup)
         {
             if (primaryFailure is null)

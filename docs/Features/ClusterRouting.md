@@ -69,7 +69,7 @@ flowchart LR
     Migration[Activation repartitioner] --> Request
 ```
 
-Slice map: `src/KeyLoad.Orleans/Features/ClusterRouting/` owns request routing/membership; Server composition wires it. ClientApi owns HTTP/MCP adapters. Tests mirror ClusterRouting in IntegrationTests. Frontend: N/A, routing has no independent UI. Credentials remain in Authorization's persisted catalog.
+Slice map: `src/KeyLoad.Clustering/Features/ClusterRouting/` owns request routing/membership; Server composition wires it. ClientApi owns HTTP/MCP adapters. Tests mirror ClusterRouting in IntegrationTests. Frontend: N/A, routing has no independent UI. Credentials remain in Authorization's persisted catalog.
 
 Traceability: AC-ROUTE-001/002/003 map to client-visible RF3 scenarios and targeted migration evidence in TASK-REP-TRANSPORT/INTEGRATE/VERIFY. Existing `CommandRouterGrain` and membership files are replaced in the same migration. No result is qualified until the exact GitHub Actions SHA/run/artifacts are recorded.
 
@@ -87,7 +87,7 @@ principal ID, TimeProvider, and startup CancellationToken in that order.
 
 ## Identity, placement та movement
 
-Актори: caller/request grain, directory/membership provider та future placement operator. Current source: [Orleans project](../../src/KeyLoad.Orleans/KeyLoad.Orleans.csproj), [partition/public contracts](../../src/KeyLoad.Abstractions/Contracts.cs), [Core domain resolution](../../src/KeyLoad.Core/DatabaseEngine.cs). Current deployment — один replicated physical shard, який містить багато незалежних atomic partitions; directory activation movement не переносить файли чи transaction identity.
+Актори: caller/request grain, directory/membership provider та future placement operator. Current source: [Orleans project](../../src/KeyLoad.Clustering/KeyLoad.Clustering.csproj), [partition/public contracts](../../src/KeyLoad.Abstractions/Contracts.cs), [Core domain resolution](../../src/KeyLoad.Core/DatabaseEngine.cs). Current deployment — один replicated physical shard, який містить багато незалежних atomic partitions; directory activation movement не переносить файли чи transaction identity.
 
 | Вимога | Acceptance / flows | Test mapping |
 |---|---|---|
@@ -377,8 +377,8 @@ Frontend: N/A, internal native execution. No public database protocol, storage f
 
 | Exact source/test path |
 |---|
-| `src/KeyLoad.Orleans/Features/ClusterRouting/Contracts/IGrainActivationMigrationObserver.cs` |
-| `src/KeyLoad.Orleans/Features/ClusterRouting/Grains/CommandPartitionGrain.cs` |
+| `src/KeyLoad.Clustering/Features/ClusterRouting/Contracts/IGrainActivationMigrationObserver.cs` |
+| `src/KeyLoad.Clustering/Features/ClusterRouting/Grains/CommandPartitionGrain.cs` |
 | `src/KeyLoad.Server/Features/ClusterRouting/Contracts/RequestCqrsProbeMigrationProtocol.cs` |
 | `src/KeyLoad.Server/Features/ClusterRouting/Contracts/RequestCqrsProbeMigrationRecord.cs` |
 | `src/KeyLoad.Server/Features/ClusterRouting/Execution/RequestCqrsProbeMigration.cs` |
@@ -778,7 +778,7 @@ AC-CMD-UNC-001 maps to `ConnectionPostSubmitFailureTests.ReturnedSubmitObserverF
 
 REQ-CMD-UNC-002: when post-submit observation succeeds, an actual persisted refusal `OperationResult.Error` retains its exact code/detail; pre-submit authorization refusal must not become blanket uncertainty. AC-CMD-UNC-002 maps to the same two cases' genuine subsequent revision-conflict command and exact persisted error/detail comparison, plus existing `ConnectionNativeFailureTests.AcCrs052FailureAndRevocationLeaveNoEffectsAndFollowingCallSucceeds` for revoked authorization, absent outcome/document effects and a healthy following call.
 
-Canonical ClusterRouting slice: [GrainCommandExecutor](../../src/KeyLoad.Orleans/Features/ClusterRouting/Commands/GrainCommandExecutor.cs) owns the control-flow marker; existing [GrainReplyFactory](../../src/KeyLoad.Orleans/Features/ClusterRouting/Serialization/GrainReplyFactory.cs) owns bounded reply classification. [ConnectionPostSubmitFailureTests](../../tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/ConnectionPostSubmitFailureTests.cs) and [ConnectionPostSubmitFailureObserver](../../tests/KeyLoad.UnitTests/Features/ClusterRouting/Helpers/ConnectionPostSubmitFailureObserver.cs) reuse the genuine fixture construction seam, actual context, coordinator, ZoneTree and disposal callbacks; [existing failure cases](../../tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/ConnectionNativeFailureTests.cs) retain the pre-submit refusal oracle.
+Canonical ClusterRouting slice: [GrainCommandExecutor](../../src/KeyLoad.Clustering/Features/ClusterRouting/Commands/GrainCommandExecutor.cs) owns the control-flow marker; existing [GrainReplyFactory](../../src/KeyLoad.Clustering/Features/ClusterRouting/Serialization/GrainReplyFactory.cs) owns bounded reply classification. [ConnectionPostSubmitFailureTests](../../tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/ConnectionPostSubmitFailureTests.cs) and [ConnectionPostSubmitFailureObserver](../../tests/KeyLoad.UnitTests/Features/ClusterRouting/Helpers/ConnectionPostSubmitFailureObserver.cs) reuse the genuine fixture construction seam, actual context, coordinator, ZoneTree and disposal callbacks; [existing failure cases](../../tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/ConnectionNativeFailureTests.cs) retain the pre-submit refusal oracle.
 
 ```mermaid
 flowchart LR

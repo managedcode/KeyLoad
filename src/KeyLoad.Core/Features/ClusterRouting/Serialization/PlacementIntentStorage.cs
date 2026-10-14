@@ -13,11 +13,15 @@ internal static class PlacementIntentStorage
         view.ReadValue(TenantPlacementPolicyStorage.IntentKey(tenant, database, intentId), bytes =>
         {
             if (bytes.Length > maximumBytes)
-            { throw Errors.Fail(ErrorCode.Corruption, TenantPlacementPolicyProtocol.Malformed); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, TenantPlacementPolicyProtocol.Malformed);
+            }
             result = NativeSerialization.Deserialize<PlacementIntentV1>(bytes);
             PlacementIntentValidation.Require(result, ErrorCode.Corruption);
             if (result.IntentId != intentId || result.Plan.TenantId != tenant || result.Plan.DatabaseId != database)
-            { throw Errors.Fail(ErrorCode.Corruption, TenantPlacementPolicyProtocol.Malformed); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, TenantPlacementPolicyProtocol.Malformed);
+            }
         });
         return result;
     }

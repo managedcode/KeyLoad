@@ -19,7 +19,9 @@ internal static class EventVectorCoverageEntries
             || head.FirstAvailablePosition < BeforeFirstPosition || head.TailPosition < UnconsumedEventSequence
             || head.FirstAvailablePosition > checked(head.TailPosition + BeforeFirstPosition)
             || placement.Partition != source.Partition || actualAppliedCut < UnconsumedEventSequence)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidHead); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidHead);
+        }
         return new EventVectorEntry
         {
             Source = source,

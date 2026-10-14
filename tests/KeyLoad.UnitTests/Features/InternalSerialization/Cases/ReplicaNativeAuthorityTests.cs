@@ -22,7 +22,10 @@ internal sealed class ReplicaNativeAuthorityTests
         var original = database.NormalizeOperation(new(Guid.NewGuid(), OperationKind.SetDispatch, Principal,
             DateTimeOffset.UnixEpoch, BooleanPayload));
         var callerBytes = original.NativePayload.ToArray();
-        var callerOperation = original with { NativePayload = callerBytes };
+        var callerOperation = original with
+        {
+            NativePayload = callerBytes
+        };
         var owned = ReplicaOperationAuthority.Own(new(1, 1, callerOperation), database);
         Array.Fill(callerBytes, CorruptByte);
         await Assert.That(database.NativeOperationsEqual(owned.Operation!, original)).IsTrue();

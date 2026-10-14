@@ -12,7 +12,13 @@ internal static class ControlledPartitionMovementOutcomeContinuation
     internal static async Task ConflictAsync(ControlledPartitionMovementNode source, ReplicatedOperation original)
     {
         var request = NativeCommandPayload.Read<ConfigureResourceRequest>(original);
-        var changed = request with { Definition = request.Definition with { TransactionDomainId = ChangedDomain } };
+        var changed = request with
+        {
+            Definition = request.Definition with
+            {
+                TransactionDomainId = ChangedDomain
+            }
+        };
         var operation = source.Database.CreateNativeOperation(original.Kind, original.Id, original.PrincipalId,
             original.EvaluatedAt, NativeSerialization.Serialize(changed));
         var denied = source.Database.ResolveOutcome(operation);

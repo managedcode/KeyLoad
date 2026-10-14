@@ -18,7 +18,9 @@ internal static class PartitionMoveTargetStorage
         view.ReadValue(key, bytes =>
         {
             if (bytes.Length > maximumBytes)
-            { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.InvalidImage); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.InvalidImage);
+            }
             result = NativeSerialization.Deserialize<T>(bytes);
         });
         return result;
@@ -27,7 +29,9 @@ internal static class PartitionMoveTargetStorage
     internal static void Write<T>(IAtomicTransaction transaction, byte[] key, T record, int maximumBytes)
     {
         if (NativeSerialization.Measure(record) > maximumBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
+        }
         transaction.Put(key, NativeSerialization.Serialize(record));
     }
 }

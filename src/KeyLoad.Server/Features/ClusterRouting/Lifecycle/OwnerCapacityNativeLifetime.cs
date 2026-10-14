@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
@@ -39,7 +39,9 @@ internal sealed class OwnerCapacityNativeLifetime : IAsyncDisposable
             lease = work.Acquire(request.RequestId, NativeRequestWorkKind.ReadCapability);
             var remaining = request.ExpiresAt - clock.GetUtcNow();
             if (remaining <= TimeSpan.Zero)
-            { throw Errors.Fail(ErrorCode.TokenInvalidated, KeyLoad.Core.Features.ClusterRouting.Contracts.TenantPlacementCapacityProtocol.InvalidProof); }
+            {
+                throw Errors.Fail(ErrorCode.TokenInvalidated, KeyLoad.Core.Features.ClusterRouting.Contracts.TenantPlacementCapacityProtocol.InvalidProof);
+            }
             deadline = new(remaining < routing.ExecutionLifetime ? remaining : routing.ExecutionLifetime, clock);
             linked = CancellationTokenSource.CreateLinkedTokenSource(token, work.ShutdownToken, deadline.Token);
             result = await receiver.ReadAsync(request, linked.Token).ConfigureAwait(false);
@@ -54,7 +56,9 @@ internal sealed class OwnerCapacityNativeLifetime : IAsyncDisposable
     public ValueTask DisposeAsync()
     {
         lock (stopping)
-        { return new(shutdown ??= StopCoreAsync()); }
+        {
+            return new(shutdown ??= StopCoreAsync());
+        }
     }
 
     private async Task StopCoreAsync()
@@ -64,11 +68,17 @@ internal sealed class OwnerCapacityNativeLifetime : IAsyncDisposable
         await ServerFailureObserver.ObserveAsync(() => sampler.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         ServerFailureObserver.Observe(admission.Dispose, failures);
         try
-        { await work.DisposeAsync().ConfigureAwait(false); }
+        {
+            await work.DisposeAsync().ConfigureAwait(false);
+        }
         catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null)
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

@@ -52,9 +52,17 @@ internal sealed class PhysicalShardCatalogValidationTests
         await Assert.That(fixture.Bootstrap(request).Error).IsNull();
         var initial = fixture.Store.Read(view => view.GetRecord<PhysicalShardCatalog>(
             PhysicalShardCatalogRecordSerialization.CatalogKey()))!;
-        await AssertCorruptReadPreservesBytesAsync(fixture, initial with { Revision = 0 });
         await AssertCorruptReadPreservesBytesAsync(fixture, initial with
-        { DefaultShard = initial.DefaultShard with { PlacementEpoch = 0 } });
+        {
+            Revision = 0
+        });
+        await AssertCorruptReadPreservesBytesAsync(fixture, initial with
+        {
+            DefaultShard = initial.DefaultShard with
+            {
+                PlacementEpoch = 0
+            }
+        });
     }
 
     [Test]

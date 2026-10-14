@@ -22,7 +22,10 @@ internal static class PostgresPureReadRf3Flow
             await PostgresPureReadRf3Assertions.DeniedAsync(callers, wire, token);
             await SqlRf3Protocol.EqualAsync(image, await PostgresCompositionRf3Models.ReadAsync(root, token));
             var repaired = await PostgresPureReadRf3Provisioning.GraphPolicyAsync(root, revoked, allowed: true, token);
-            state = state with { Principal = repaired };
+            state = state with
+            {
+                Principal = repaired
+            };
             await PostgresPureReadRf3Assertions.HealthyAsync(callers, wire, state, token);
             await PostgresPureReadRf3Cancellation.RunAsync(fixture, selection, state, root, token);
             await SqlRf3Protocol.EqualAsync(image, await PostgresCompositionRf3Models.ReadAsync(root, token));

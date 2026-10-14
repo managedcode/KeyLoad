@@ -21,7 +21,9 @@ internal static class TwoRf3MembershipFingerprintAssertions
         if (ordered.Length != TwoRf3MembershipProtocol.NodeCount
             || ordered.Distinct(StringComparer.Ordinal).Count() != TwoRf3MembershipProtocol.NodeCount
             || ordered.Any(value => Encoding.UTF8.GetByteCount(value) is 0 or > 256))
-        { throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState); }
+        {
+            throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState);
+        }
         using var stream = new MemoryStream();
         using (var writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
         {
@@ -41,7 +43,9 @@ internal static class TwoRf3MembershipFingerprintAssertions
         CancellationToken token)
     {
         foreach (var node in TwoRf3MembershipProtocol.Nodes)
-        { await VerifyNodeAsync(app, node, fingerprint, token).ConfigureAwait(false); }
+        {
+            await VerifyNodeAsync(app, node, fingerprint, token).ConfigureAwait(false);
+        }
     }
 
     private static async Task VerifyNodeAsync(DistributedApplication app, string node, string expected,
@@ -70,7 +74,9 @@ internal static class TwoRf3MembershipFingerprintAssertions
     internal static async Task<byte[]> ReadBoundedHealthAsync(HttpResponseMessage response, CancellationToken token)
     {
         if (response.Content.Headers.ContentLength is > MaximumHealthBytes)
-        { throw new InvalidDataException(TwoRf3MembershipProtocol.MissingState); }
+        {
+            throw new InvalidDataException(TwoRf3MembershipProtocol.MissingState);
+        }
         await using var stream = await response.Content.ReadAsStreamAsync(token).ConfigureAwait(false);
         var buffer = new byte[MaximumHealthBytes + 1];
         var count = 0;
@@ -79,20 +85,31 @@ internal static class TwoRf3MembershipFingerprintAssertions
             token.ThrowIfCancellationRequested();
             var read = await stream.ReadAsync(buffer.AsMemory(count), token).ConfigureAwait(false);
             if (read == 0)
-            { break; }
+            {
+                break;
+            }
             count += read;
         }
         if (count > MaximumHealthBytes || response.Content.Headers.ContentLength is { } length && length != count)
-        { throw new InvalidDataException(TwoRf3MembershipProtocol.MissingState); }
+        {
+            throw new InvalidDataException(TwoRf3MembershipProtocol.MissingState);
+        }
         return buffer.AsSpan(0, count).ToArray();
     }
 
     private static bool IsLowerHex(string? value)
     {
         if (value is null || value.Length != 64)
-        { return false; }
+        {
+            return false;
+        }
         foreach (var character in value)
-        { if (character is not (>= '0' and <= '9') and not (>= 'a' and <= 'f')) { return false; } }
+        {
+            if (character is not (>= '0' and <= '9') and not (>= 'a' and <= 'f'))
+            {
+                return false;
+            }
+        }
         return true;
     }
 }

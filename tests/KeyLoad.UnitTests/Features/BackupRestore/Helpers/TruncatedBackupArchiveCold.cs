@@ -21,7 +21,10 @@ internal static class TruncatedBackupArchiveCold
         {
             var value = new string(LargeCharacter, LargeCharacters);
             await Assert.That(store.Commit((transaction, _) =>
-                { transaction.PutRecord(KeyCodec.Encode(LargeKey), value); return true; })).IsTrue();
+                {
+                    transaction.PutRecord(KeyCodec.Encode(LargeKey), value);
+                    return true;
+                })).IsTrue();
             await LargeAsync(store);
         });
 
@@ -42,7 +45,10 @@ internal static class TruncatedBackupArchiveCold
         {
             var before = store.Position;
             await Assert.That(store.Commit((transaction, _) =>
-                { transaction.PutRecord(KeyCodec.Encode(HealthyKey), HealthyValue); return true; })).IsTrue();
+                {
+                    transaction.PutRecord(KeyCodec.Encode(HealthyKey), HealthyValue);
+                    return true;
+                })).IsTrue();
             await Assert.That(store.Position).IsEqualTo(before + 1);
             await HealthyAsync(store);
             image = EventingArtifactState.FullBytes(store);

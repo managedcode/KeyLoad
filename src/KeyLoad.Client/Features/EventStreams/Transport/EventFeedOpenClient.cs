@@ -16,7 +16,9 @@ public static class EventFeedOpenClient
         ArgumentNullException.ThrowIfNull(client);
         ArgumentNullException.ThrowIfNull(request);
         if (request.Action != EventFeedControlAction.Open)
-        { throw new ArgumentException(EventFeedOpenProtocol.Description, nameof(request)); }
+        {
+            throw new ArgumentException(EventFeedOpenProtocol.Description, nameof(request));
+        }
         return client.Send<EventFeedControlResult>(EventFeedOpenProtocol.Route, request, true, request.CommandId, cancellationToken);
     }
 }

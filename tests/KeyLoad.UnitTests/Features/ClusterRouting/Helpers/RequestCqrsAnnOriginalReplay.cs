@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.UnitTests.Features.Search;
 using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,7 +27,10 @@ internal static class RequestCqrsAnnOriginalReplay
 
     internal static Task RefuseUnsettledAsync(RequestCqrsClusterFixture fixture,
         AnnMaintenanceRequest original, CancellationToken token)
-        => RefuseAsync(fixture, original with { CommandId = Guid.NewGuid() }, ErrorCode.RecoveryRequired, token);
+        => RefuseAsync(fixture, original with
+        {
+            CommandId = Guid.NewGuid()
+        }, ErrorCode.RecoveryRequired, token);
 
     internal static Task RefusePriorAsync(RequestCqrsClusterFixture fixture,
         AnnMaintenanceRequest original, CancellationToken token)

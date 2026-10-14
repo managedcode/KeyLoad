@@ -15,10 +15,14 @@ public sealed partial class DatabaseEngine
         var now = EvaluationClock.GetUtcNow();
         var local = Principal(view, localPrincipalId, now);
         if (!local.ClusterAdministrator)
-        { throw Errors.Fail(ErrorCode.PermissionDenied, ClusterAdministrationRequiredMessage); }
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, ClusterAdministrationRequiredMessage);
+        }
         if (frame is null || frame.Principal is null || frame.Resource is null
             || frame.Control is null || frame.Publication is null)
-        { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid);
+        }
         var blob = BlobControlledReadScope.Require(frame);
         ValidatePartition(blob.Partition);
         var stage = PartitionMoveTargetStorage.Read<PartitionMoveTargetStage>(view,
@@ -37,10 +41,14 @@ public sealed partial class DatabaseEngine
             || frame.Publication.Destination.Incarnation != Store.Identity.Incarnation
             || frame.Resource.Name != blob.Resource || frame.Resource.Kind != ResourceKind.BlobStore
             || frame.Resource.TransactionDomainId != blob.Partition.TransactionDomainId)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
         var baseline = stage.Descriptor.Resources.SingleOrDefault(value => value.Name == frame.Resource.Name);
         if (baseline is null || !ResourcePolicyUpdates.SameNonPolicyDefinition(baseline, frame.Resource))
-        { throw Errors.Fail(ErrorCode.UnsupportedCapability, PartitionMoveProtocol.InvalidImage); }
+        {
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, PartitionMoveProtocol.InvalidImage);
+        }
         BlobQuotaOperations.ValidatePolicy(frame.Resource);
         RequireControlledBlobReadPolicy(frame, blob);
     }
@@ -60,9 +68,13 @@ public sealed partial class DatabaseEngine
             || previous.Partition != blob.Partition
             || previous.Incarnation != frame.Publication.ControlFinalize.PhysicalOwner.Incarnation
             || previous.Fingerprint != CommandFingerprint(original))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
         if (previous.PolicyEpoch != frame.Principal.PolicyEpoch)
-        { throw Errors.Fail(ErrorCode.PermissionDenied, ChangedOutcomePrincipalPolicyMessage); }
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, ChangedOutcomePrincipalPolicyMessage);
+        }
         _ = RequireControlledBlobPolicies(frame.Principal, original, [frame.Resource]);
     }
 }

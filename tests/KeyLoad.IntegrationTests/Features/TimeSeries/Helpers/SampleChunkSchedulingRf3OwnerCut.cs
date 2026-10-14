@@ -19,7 +19,9 @@ internal static class SampleChunkSchedulingRf3OwnerCut
                 .ConfigureAwait(false);
         }
         await ServerFailureObserver.ObserveAsync(async () =>
-        { _ = await wave.StopForDirectoryReadAsync().ConfigureAwait(false); }, failures).ConfigureAwait(false);
+        {
+            _ = await wave.StopForDirectoryReadAsync().ConfigureAwait(false);
+        }, failures).ConfigureAwait(false);
         if (failures.Count == 0)
         {
             ServerFailureObserver.Observe(() => wave.QueryControls.JoinKilledOwnerGates(wave,

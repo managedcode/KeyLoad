@@ -6,7 +6,9 @@ internal sealed class SampleRollupReadCharge(long maximum)
     internal void Charge(long bytes)
     {
         if (bytes > maximum - used)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, SampleRollupProtocol.ByteBudget); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, SampleRollupProtocol.ByteBudget);
+        }
         used += bytes;
     }
 }

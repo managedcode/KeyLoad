@@ -62,14 +62,18 @@ public sealed partial class DatabaseEngine
             {
                 if (!SelectTypedEndpointPair(tx, principal, command, link, budget,
                     typedPrimaryKeys!.Value.FromPrimaryKey, typedPrimaryKeys.Value.ToPrimaryKey))
-                { continue; }
+                {
+                    continue;
+                }
             }
             else
             {
                 var from = VisibleVertex(tx, principal, link.From, budget);
                 var to = VisibleVertex(tx, principal, link.To, budget);
                 if (from.Reference != link.From || to.Reference != link.To)
-                { throw Errors.Fail(ErrorCode.Corruption, TypedJoinRecordMismatch); }
+                {
+                    throw Errors.Fail(ErrorCode.Corruption, TypedJoinRecordMismatch);
+                }
             }
             var edgeId = command.EdgeIdPrefix + id;
             JsonData.Identifier(edgeId);

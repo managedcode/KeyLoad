@@ -1,8 +1,8 @@
 using System.Collections.Immutable;
 using System.Security.Cryptography;
+using KeyLoad.Clustering;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.InternalSerialization;
-using KeyLoad.Orleans;
 using static KeyLoad.Server.Features.ClusterRouting.PartitionMovementParentCapacityPrimitives;
 using static KeyLoad.Server.Features.ClusterRouting.PartitionMovementParentCapacitySchema;
 
@@ -23,7 +23,9 @@ internal static class PartitionMovementParentCapacityFuture
     {
         var voter = ReferenceFieldBytes;
         foreach (var value in owner.VoterIds)
-        { voter = Math.Max(voter, PartitionMovementParentCapacityBounds.Bound(value)); }
+        {
+            voter = Math.Max(voter, PartitionMovementParentCapacityBounds.Bound(value));
+        }
         return checked(ReferenceFieldBytes + voter + PartitionMovementParentCapacityBounds.Bound(cluster) + GuidFieldBytes + SiloField
             + ScalarFieldBytes * FutureDiscoveryScalarOccurrences4);
     }
@@ -118,7 +120,9 @@ internal static class PartitionMovementParentCapacityFuture
     {
         var families = checked(ReferenceFieldBytes * FutureDescriptorReferenceOccurrences2 + ScalarFieldBytes);
         foreach (var family in PartitionRecordFamilies.All)
-        { families = checked(families + ReferenceFieldBytes + PartitionMovementParentCapacityBounds.Bound(family) + ScalarFieldBytes * FutureDescriptorScalarOccurrences3 + DigestField); }
+        {
+            families = checked(families + ReferenceFieldBytes + PartitionMovementParentCapacityBounds.Bound(family) + ScalarFieldBytes * FutureDescriptorScalarOccurrences3 + DigestField);
+        }
         return checked(ReferenceFieldBytes + ScalarFieldBytes * FutureDescriptorScalarOccurrences2 + GuidFieldBytes
             + PartitionMovementParentCapacityBounds.Bound(state.Header!.OriginalTransferRequest.Partition) + PartitionMovementParentCapacityBounds.Bound(state.Header.SourcePlacement)
             + families + DigestField + PartitionMovementParentCapacityBounds.Bound(resources));

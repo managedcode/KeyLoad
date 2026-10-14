@@ -40,11 +40,17 @@ internal sealed record ResourcePolicyUpdateRf3Scenario(PartitionRef Partition, E
         McpPersistedIdentity identity, ImmutableArray<string> grants, CancellationToken cancellationToken)
     {
         var principal = identity.Principal with
-        { FieldGrants = grants, PolicyEpoch = checked(identity.Principal.PolicyEpoch + 1) };
+        {
+            FieldGrants = grants,
+            PolicyEpoch = checked(identity.Principal.PolicyEpoch + 1)
+        };
         var persisted = await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigurePrincipalAsync(Guid.NewGuid(),
             principal, cancellationToken));
         await Assert.That(persisted.PolicyEpoch).IsEqualTo(principal.PolicyEpoch);
-        return identity with { Principal = principal };
+        return identity with
+        {
+            Principal = principal
+        };
     }
 
     internal ConfigureResourceRequest Request(string readGrant, string useGrant, long expectedVersion)
@@ -55,7 +61,9 @@ internal sealed record ResourcePolicyUpdateRf3Scenario(PartitionRef Partition, E
                     ResourcePolicyUpdateRf3Protocol.Classification, readGrant, useGrant)],
                 SchemaVersion = checked(expectedVersion + 1)
             })
-        { ExpectedSchemaVersion = expectedVersion };
+        {
+            ExpectedSchemaVersion = expectedVersion
+        };
 
     internal static async Task<ResourcePolicyUpdateCursors> CaptureCursorsAsync(KeyLoadClient administrator,
         McpOfficialClient administratorMcp, ResourcePolicyUpdateRf3Scenario scenario,
@@ -146,7 +154,11 @@ internal sealed record ResourcePolicyUpdateRf3Scenario(PartitionRef Partition, E
         await Assert.That(listed.Items.Single(item => item.Name == ResourcePolicyUpdateRf3Protocol.Collection).SchemaVersion)
             .IsEqualTo(actual.SchemaVersion);
         await ResourcePolicyUpdateRf3Assertions.AssertSameDefinitionAsync(actual,
-            scenario.InitialDefinition with { FieldPolicies = actual.FieldPolicies, SchemaVersion = actual.SchemaVersion });
+            scenario.InitialDefinition with
+            {
+                FieldPolicies = actual.FieldPolicies,
+                SchemaVersion = actual.SchemaVersion
+            });
     }
 
     internal static ResourceDefinition Definition(PartitionRef partition, string readGrant, string useGrant)

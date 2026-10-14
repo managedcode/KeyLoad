@@ -57,7 +57,10 @@ internal static class CompositeIndexCrashContract
     internal const string OtherPartitionCommandText = "07ad9bd7-e10c-47f7-e24d-49f3b80f1267";
     internal const string FaultCommandText = "18beace8-f21d-4808-f35e-5a04c9102378";
     internal const string HealthyCommandText = "29cfbdf9-032e-4919-a46f-6b15da214389";
-    internal static PartitionRef Partition { get; } = new(CrashFixtureValues.Tenant,
+    internal static PartitionRef Partition
+    {
+        get;
+    } = new(CrashFixtureValues.Tenant,
         CrashFixtureValues.Database, CrashFixtureValues.Orders, PartitionKey);
     internal static PartitionRef OtherPartition { get; } = Partition with { PartitionKey = OtherPartitionKey };
 }

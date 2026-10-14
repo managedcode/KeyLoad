@@ -22,9 +22,13 @@ internal static class ControlledPartitionMovementPhaseChild
                 or ControlledPartitionMovementProcessProtocol.Fault
                 or ControlledPartitionMovementProcessProtocol.Recover
                 or ControlledPartitionMovementProcessProtocol.Verify))
-        { throw new InvalidOperationException(ControlledPartitionMovementProcessProtocol.Invalid); }
+        {
+            throw new InvalidOperationException(ControlledPartitionMovementProcessProtocol.Invalid);
+        }
         var boundary = new CanonicalCrashBoundary(input.FaultStage, mutationIndex: FirstMutationIndex, initiallyArmed: false)
-        { Position = checked(input.BeforePosition + PositionStep) };
+        {
+            Position = checked(input.BeforePosition + PositionStep)
+        };
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
@@ -37,14 +41,18 @@ internal static class ControlledPartitionMovementPhaseChild
                     if (actual.Store.Position != input.BeforePosition
                         || actual.Journal.Log.State.LastIndex != input.BeforeReplicaIndex
                         || actual.Journal.Log.State.CommittedIndex != input.BeforeReplicaIndex)
-                    { throw new InvalidOperationException(ControlledPartitionMovementProcessProtocol.Invalid); }
+                    {
+                        throw new InvalidOperationException(ControlledPartitionMovementProcessProtocol.Invalid);
+                    }
                     await CrashHostPause.WaitForKillAsync();
                     return;
                 }
                 boundary.Armed = mode == ControlledPartitionMovementProcessProtocol.Fault;
                 var result = actual.Journal.Submit(input.OriginalOperation, cancellationToken);
                 if (mode == ControlledPartitionMovementProcessProtocol.Fault)
-                { throw new InvalidOperationException(ControlledPartitionMovementProcessProtocol.Invalid); }
+                {
+                    throw new InvalidOperationException(ControlledPartitionMovementProcessProtocol.Invalid);
+                }
                 await ControlledPartitionMovementPhaseChildReplay.AssertAsync(actual, input, result,
                     cancellationToken);
                 var file = mode == ControlledPartitionMovementProcessProtocol.Verify

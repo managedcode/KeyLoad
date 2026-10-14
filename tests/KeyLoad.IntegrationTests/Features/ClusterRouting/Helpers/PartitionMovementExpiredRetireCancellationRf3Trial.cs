@@ -1,9 +1,9 @@
 using KeyLoad.Client;
+using KeyLoad.Clustering;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.ClusterReplication;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
 using ManagedCode.Communication;
@@ -30,17 +30,29 @@ internal sealed class PartitionMovementExpiredRetireCancellationRf3Trial
         await ServerFailureObserver.ObserveAsync(() => trial.ExecuteAsync(cancellationPhase, corruptDisposition, parent.Token), trial.failures);
         using var cleanup = new CancellationTokenSource(TwoRf3MembershipProtocol.CleanupDeadline, TimeProvider.System);
         foreach (var caller in trial.callers)
-        { await ServerFailureObserver.ObserveAsync(caller.CancelAsync, trial.failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(caller.CancelAsync, trial.failures);
+        }
         if (trial.wave is { } owned && trial.discovery is { } signed)
-        { await ServerFailureObserver.ObserveAsync(() => owned.QueryControls.ReleaseOpenArmsAsync(signed, cleanup.Token), trial.failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => owned.QueryControls.ReleaseOpenArmsAsync(signed, cleanup.Token), trial.failures);
+        }
         foreach (var call in trial.calls)
-        { await ServerFailureObserver.ObserveAsync(async () => { _ = await call; }, trial.failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(async () => { _ = await call; }, trial.failures);
+        }
         if (trial.seed is { } clients)
-        { await ServerFailureObserver.ObserveAsync(() => clients.DisposeAsync().AsTask(), trial.failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => clients.DisposeAsync().AsTask(), trial.failures);
+        }
         if (trial.wave is { } resources)
-        { await ServerFailureObserver.ObserveAsync(() => resources.DisposeAsync().AsTask(), trial.failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => resources.DisposeAsync().AsTask(), trial.failures);
+        }
         foreach (var caller in trial.callers)
-        { ServerFailureObserver.Observe(caller.Dispose, trial.failures); }
+        {
+            ServerFailureObserver.Observe(caller.Dispose, trial.failures);
+        }
         ServerFailureObserver.ThrowIfAny(trial.failures);
     }
 
@@ -64,7 +76,9 @@ internal sealed class PartitionMovementExpiredRetireCancellationRf3Trial
         await PartitionMovementRetireGrantDispositionRf3Trial.RequirePendingAsync(first, original);
         var remaining = original.OriginalExpiresAt - TimeProvider.System.GetUtcNow();
         if (remaining > TimeSpan.Zero)
-        { await Task.Delay(remaining, TimeProvider.System, cancellationToken); }
+        {
+            await Task.Delay(remaining, TimeProvider.System, cancellationToken);
+        }
         await Assert.That(original.OriginalExpiresAt <= TimeProvider.System.GetUtcNow()).IsTrue();
         await PartitionMovementPublicParentRf3Cut.RestartAsync(wave, cancellationToken);
         var initialDiscovery = discovery;
@@ -81,9 +95,13 @@ internal sealed class PartitionMovementExpiredRetireCancellationRf3Trial
         await PartitionMovementHistoricalPacketAssertions.ExactAsync(original, retainedAttempt);
         await PartitionMovementHistoricalPacketAssertions.CancellationAsync(cancellationDiscovery, discovery, retainedAttempt);
         if (cancellationPhase == RequestCqrsProbePhase.BeforeSubmit)
-        { await RequireUnknownAsync(original, interrupted, cancellationToken); }
+        {
+            await RequireUnknownAsync(original, interrupted, cancellationToken);
+        }
         else
-        { await RequireSettledAsync(original, cancellationId, interrupted, corruptDisposition, cancellationToken); }
+        {
+            await RequireSettledAsync(original, cancellationId, interrupted, corruptDisposition, cancellationToken);
+        }
         await seed.VerifyAsync(cancellationToken);
     }
 
@@ -184,10 +202,14 @@ internal sealed class PartitionMovementExpiredRetireCancellationRf3Trial
     {
         var pending = cuts.Where(cut => cut.Pending?.OriginalPhaseCommandId == originalId).Select(cut => cut.Pending!).ToArray();
         if (pending.Length != TwoRf3MembershipProtocol.MembersPerGroup || pending.Any(value => value.Stage != PartitionMovePeerStage.Retire))
-        { throw new InvalidOperationException(MissingNativePhase); }
+        {
+            throw new InvalidOperationException(MissingNativePhase);
+        }
         var bytes = NativeSerialization.Serialize(pending.First());
         if (pending.Any(value => !NativeSerialization.Serialize(value).AsSpan().SequenceEqual(bytes)))
-        { throw new InvalidOperationException(MissingNativePhase); }
+        {
+            throw new InvalidOperationException(MissingNativePhase);
+        }
         return pending.First();
     }
 

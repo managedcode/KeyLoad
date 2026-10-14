@@ -35,7 +35,10 @@ internal sealed class DeniedCommandReplayClockTests
         await Assert.That(first.SafeDetail).IsEqualTo(AdministrationRequired);
         await Assert.That(fixture.Store.Position).IsEqualTo(before + 1);
         var retained = Bytes(fixture.Store);
-        var retry = original with { EvaluatedAt = laterTime ? time.AddSeconds(1) : time };
+        var retry = original with
+        {
+            EvaluatedAt = laterTime ? time.AddSeconds(1) : time
+        };
         await SameResultAsync(first, fixture.Database.Apply(retry));
         await Assert.That(fixture.Store.Position).IsEqualTo(before + 1);
         await Assert.That(Bytes(fixture.Store)).IsEquivalentTo(retained, CollectionOrdering.Matching);
@@ -65,11 +68,18 @@ internal sealed class DeniedCommandReplayClockTests
         var originalReceipt = fixture.Database.Apply(original).Get<CommitReceipt>();
         await DeniedCommandRepairContinuation.OriginalReceiptAsync(fixture, originalReceipt, id, originalPosition);
         fixture.Submit(OperationKind.ConfigurePrincipal,
-            new ConfigurePrincipalRequest(writer with { Grants = [], PolicyEpoch = writer.PolicyEpoch + 1 })).Get<PrincipalRecord>();
+            new ConfigurePrincipalRequest(writer with
+            {
+                Grants = [],
+                PolicyEpoch = writer.PolicyEpoch + 1
+            })).Get<PrincipalRecord>();
         var position = fixture.Store.Position;
         var retained = Bytes(fixture.Store);
         var outcome = fixture.Store.Read(view => view.ReadOwnedValue(OutcomeStoreOracle.PartitionKey(fixture.Partition, Reader, id)))!;
-        var failure = fixture.Database.Apply(original with { EvaluatedAt = original.EvaluatedAt.AddSeconds(1) });
+        var failure = fixture.Database.Apply(original with
+        {
+            EvaluatedAt = original.EvaluatedAt.AddSeconds(1)
+        });
         await Assert.That(failure.Error).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(failure.SafeDetail).IsEqualTo(ScopeDenied);
         await Assert.That(fixture.Store.Position).IsEqualTo(position);
@@ -88,7 +98,10 @@ internal sealed class DeniedCommandReplayClockTests
     private static async Task<DateTimeOffset> VerifyReplicaApplyAsync(TestDatabase fixture, OperationResult expected,
         ReplicatedOperation original, byte[] stored)
     {
-        var operation = original with { EvaluatedAt = original.EvaluatedAt.AddSeconds(1) };
+        var operation = original with
+        {
+            EvaluatedAt = original.EvaluatedAt.AddSeconds(1)
+        };
         var position = fixture.Store.Position;
         await SameResultAsync(expected, fixture.Database.Apply(operation, replicationIndex: 1));
         await Assert.That(fixture.Store.Position).IsEqualTo(position + 1);
@@ -97,7 +110,10 @@ internal sealed class DeniedCommandReplayClockTests
         await SameResultAsync(expected, fixture.Database.Apply(operation, replicationIndex: 1));
         await Assert.That(fixture.Store.Position).IsEqualTo(position + 1);
         await Assert.That(Bytes(fixture.Store)).IsEquivalentTo(bytes, CollectionOrdering.Matching);
-        operation = operation with { EvaluatedAt = operation.EvaluatedAt.AddSeconds(1) };
+        operation = operation with
+        {
+            EvaluatedAt = operation.EvaluatedAt.AddSeconds(1)
+        };
         await SameResultAsync(expected, fixture.Database.Apply(operation, replicationIndex: 2));
         await Assert.That(fixture.Store.Position).IsEqualTo(position + 2);
         await AssertReplicaMetadataAsync(fixture, 2, operation.EvaluatedAt);
@@ -120,7 +136,9 @@ internal sealed class DeniedCommandReplayClockTests
     {
         var page = view.Scan([], MaximumRecords);
         if (page.HasMore)
-        { throw new InvalidOperationException(Overflow); }
+        {
+            throw new InvalidOperationException(Overflow);
+        }
         return page.Records.Select(item => Convert.ToHexString(item.Key.Span) + Separator + Convert.ToHexString(item.Value.Span)).ToArray();
     });
 }

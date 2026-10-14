@@ -42,7 +42,10 @@ public sealed class RabbitTarget(string connectionString, string runId, string i
     private IConnection? connection;
 
     /// <summary>Gets the observed broker version and topology plus publisher-confirm and manual-acknowledgement profile.</summary>
-    public TargetProfile Profile { get; private set; } = new(nameof(RabbitMQ), UnverifiedToken, UnverifiedNativeTopologyToken,
+    public TargetProfile Profile
+    {
+        get; private set;
+    } = new(nameof(RabbitMQ), UnverifiedToken, UnverifiedNativeTopologyToken,
         PublisherConfirmAndConsumerAcknowledgementContract,
         BasicGetManualAcknowledgementsAtLeastOnceToken, AMQPTCPOneChannelPerWorkerToken, AspireUserNoFieldPolicyToken, null);
     /// <summary>Reports support only for the queue-cycle scenario.</summary>
@@ -121,7 +124,10 @@ public sealed class RabbitTarget(string connectionString, string runId, string i
     public async ValueTask DisposeAsync()
     {
         if (connection is null)
-        { managementClient?.Dispose(); return; }
+        {
+            managementClient?.Dispose();
+            return;
+        }
         try
         {
             await using var channel = await connection.CreateChannelAsync();

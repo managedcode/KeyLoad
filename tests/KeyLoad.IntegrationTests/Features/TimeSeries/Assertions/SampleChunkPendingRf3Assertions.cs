@@ -17,7 +17,10 @@ internal static class SampleChunkPendingRf3Assertions
             .ConfigureAwait(false));
         var minimum = item.CorrectionReceipt ?? throw new InvalidOperationException(SampleChunkPendingRf3Protocol.Missing);
         await Assert.That(actual.CutPosition >= minimum.Token.Position).IsTrue();
-        await SampleChunkRetentionRf3ReadOracle.EqualAsync(actual, Expected(item, merged: false) with { CutPosition = actual.CutPosition });
+        await SampleChunkRetentionRf3ReadOracle.EqualAsync(actual, Expected(item, merged: false) with
+        {
+            CutPosition = actual.CutPosition
+        });
     }
 
     internal static async Task CompleteAsync(SampleChunkPendingRf3Item item, KeyLoadClient sdk,
@@ -43,7 +46,9 @@ internal static class SampleChunkPendingRf3Assertions
             var actual = await McpCallerAssertions.SdkSuccessAsync(await sdk.ReadSampleChunkWindowAsync(item.Request, token)
                 .ConfigureAwait(false));
             if (actual.Generation == SampleChunkRf3Protocol.MergedGeneration)
-            { return; }
+            {
+                return;
+            }
             await PendingAsync(item, sdk, token).ConfigureAwait(false);
             await Task.Delay(SampleChunkRf3Protocol.PollInterval, token).ConfigureAwait(false);
         }

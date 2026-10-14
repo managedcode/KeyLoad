@@ -26,7 +26,10 @@ internal static class SqlNullOrderingRf3Refusals
         await RejectAsync(fixture, state, SqlImplicitAliasRf3Pages.BasicSql,
             ErrorCode.PermissionDenied, PostgresRf3Protocol.PermissionSqlState, token);
         await global::TUnit.Assertions.Assert.That(await SqlNullOrderingRf3Assertions.ImageAsync(root, state, token)).IsEqualTo(image);
-        await PersistAsync(root, original with { PolicyEpoch = original.PolicyEpoch + SqlNullOrderingRf3Protocol.RepairAdvance }, token);
+        await PersistAsync(root, original with
+        {
+            PolicyEpoch = original.PolicyEpoch + SqlNullOrderingRf3Protocol.RepairAdvance
+        }, token);
         await SqlNullOrderingRf3Pages.HealthyAsync(fixture, state, root, token);
     }
 

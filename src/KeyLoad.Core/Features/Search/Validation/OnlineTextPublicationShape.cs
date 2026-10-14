@@ -26,7 +26,9 @@ internal static class OnlineTextPublicationShape
             || !IsCanonicalSha(command.ManifestSha256) || !IsCanonicalSha(result.IndexSha256)
             || request.NodeId == Guid.Empty || result.BaseCut.NodeId != request.NodeId
             || result.PublishedCut.NodeId != request.NodeId || command.DataEpoch <= EmptyDataEpoch)
-        { throw Errors.Fail(ErrorCode.Corruption, OnlineTextPublicationProtocol.InvalidPublication); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, OnlineTextPublicationProtocol.InvalidPublication);
+        }
         RequireCuts(result.BaseCut, result.PublishedCut);
     }
 
@@ -39,7 +41,9 @@ internal static class OnlineTextPublicationShape
             || first.ThroughSequence > last.ThroughSequence || first.PolicyEpoch != last.PolicyEpoch
             || first.SchemaVersion != last.SchemaVersion || first.ResourceSha256 != last.ResourceSha256
             || !IsCanonicalSha(first.ResourceSha256))
-        { throw Errors.Fail(ErrorCode.Corruption, OnlineTextPublicationProtocol.InvalidPublication); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, OnlineTextPublicationProtocol.InvalidPublication);
+        }
     }
 
     private static bool IsCanonicalSha(string? value)

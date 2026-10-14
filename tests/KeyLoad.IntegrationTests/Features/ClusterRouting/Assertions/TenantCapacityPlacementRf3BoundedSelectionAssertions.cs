@@ -28,7 +28,10 @@ internal static class TenantCapacityPlacementRf3BoundedSelectionAssertions
         var sdk = await seed.Source.PlanTenantPlacementAsync(request, token);
         await TenantCapacityPlacementRf3Assertions.RefusalAsync(sdk, ErrorCode.Validation);
         await SqlRf3Protocol.EqualAsync(Errors.Problem(ErrorCode.Validation, TenantPlacementPolicyProtocol.Invalid), sdk.Problem!);
-        var mcp = await seed.Official.CallAsync(TenantPlacementPublicProtocol.PlanTool, new { request }, token);
+        var mcp = await seed.Official.CallAsync(TenantPlacementPublicProtocol.PlanTool, new
+        {
+            request
+        }, token);
         await McpCallerAssertions.ErrorAsync(mcp, ErrorCode.Validation, dispatched: true);
         await Assert.That(mcp.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
             .GetProperty(McpCallerProtocol.ProblemDetail).GetString()).IsEqualTo(McpInvalidDetail);

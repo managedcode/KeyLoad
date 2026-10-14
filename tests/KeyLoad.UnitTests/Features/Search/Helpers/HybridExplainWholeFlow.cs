@@ -31,7 +31,13 @@ internal static class HybridExplainWholeFlow
     {
         var original = ThreeWayHybridTestSupport.Request(db.Partition,
             restricted ? [B, C, D] : null, scoped: restricted);
-        return original with { Search = original.Search with { Explain = true } };
+        return original with
+        {
+            Search = original.Search with
+            {
+                Explain = true
+            }
+        };
     }
 
     internal static async Task LiteralAsync(GraphSearchResult result, PartitionRef partition, bool restricted)
@@ -47,7 +53,9 @@ internal static class HybridExplainWholeFlow
             Add(Graph, SearchBranchKind.Graph, GraphWeight);
             var score = 0d;
             foreach (var part in parts)
-            { score += part.Contribution; }
+            {
+                score += part.Contribution;
+            }
             var expected = new RankedDocument(new(new(partition, ThreeWayHybridTestSupport.Documents,
                 ids[index]), Revision, "{}", true, [TextField, VectorField]), score, new(Fusion, [.. parts]));
             await Assert.That(JsonDefaults.Serialize(result.Hits[index]).AsSpan()
@@ -58,7 +66,9 @@ internal static class HybridExplainWholeFlow
                 var eligible = order.Where(ids.Contains).ToArray();
                 var rank = Array.IndexOf(eligible, ids[index]) + FirstRank;
                 if (rank > NoRank)
-                { parts.Add(new(branch, rank, weight, weight / (Fusion + (double)rank))); }
+                {
+                    parts.Add(new(branch, rank, weight, weight / (Fusion + (double)rank)));
+                }
             }
         }
         await Assert.That(result.Expansion).IsNull();
@@ -68,7 +78,9 @@ internal static class HybridExplainWholeFlow
     {
         var page = view.Scan([], SnapshotLimit);
         if (page.HasMore)
-        { throw new InvalidOperationException("The complete hybrid Explain fixture exceeds its snapshot bound."); }
+        {
+            throw new InvalidOperationException("The complete hybrid Explain fixture exceeds its snapshot bound.");
+        }
         return page.Records.Select(row => (Convert.ToHexString(row.Key.Span), Convert.ToHexString(row.Value.Span))).ToArray();
     });
 }

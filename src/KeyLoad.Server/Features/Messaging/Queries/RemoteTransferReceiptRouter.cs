@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Messaging;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.DocumentStorage;
 using Microsoft.Extensions.Options;
 
@@ -37,11 +37,15 @@ internal sealed class RemoteTransferReceiptRouter(OrleansNode node, PartitionHos
         node.CatalogRequestCodec().ValidateScope(envelope);
         var currentPrincipal = GrainRequestAuthority.ReloadForRequest(partition.Database, envelope, clock);
         if (currentPrincipal.Id != principal.Id)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteTransferPeerProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, RemoteTransferPeerProtocol.Invalid);
+        }
         var work = new ReadExecutionBudget(limits, clock, token);
         var context = partition.Database.CaptureRemoteTransferReceiptDispatch(principal.Id, request, work);
         if (context is null)
-        { return new(false, null); }
+        {
+            return new(false, null);
+        }
         var call = RemoteTransferSourceCall.Create(node, partition, options.Value, envelope,
             context, RemoteQueueTransferPeerStage.Receipt, limits.Value.MaxBatchBytes);
         var result = await client.TransferAsync(call, token).ConfigureAwait(false);
@@ -52,7 +56,9 @@ internal sealed class RemoteTransferReceiptRouter(OrleansNode node, PartitionHos
         DatabaseEngine.RequireRemoteTransferSameDispatch(context, current);
         RemoteTransferPeerShape.RequireResult(result, RemoteQueueTransferPeerStage.Receipt);
         if (result.Receipt is null)
-        { return new(true, null); }
+        {
+            return new(true, null);
+        }
         var receipt = partition.Database.MintRemoteTransferReceiptInspection(currentPrincipal.Id, request,
             context, call.SourceOwner, result.Receipt, work);
         work.Check();
@@ -63,7 +69,9 @@ internal sealed class RemoteTransferReceiptRouter(OrleansNode node, PartitionHos
     {
         var remaining = expiresAt - clock.GetUtcNow();
         if (remaining <= TimeSpan.Zero)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteTransferPeerProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteTransferPeerProtocol.Invalid);
+        }
         return new(remaining, clock);
     }
 }

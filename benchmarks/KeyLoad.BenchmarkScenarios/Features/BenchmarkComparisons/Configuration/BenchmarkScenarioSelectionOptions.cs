@@ -9,5 +9,8 @@ internal sealed class BenchmarkScenarioSelectionOptions
     internal const int HundredThousandRecords = 100_000;
     internal const int OneMillionRecords = 1_000_000;
     public string Engine { get; set; } = ZoneTree;
-    public string? RecordCount { get; set; }
+    public string? RecordCount
+    {
+        get; set;
+    }
 }

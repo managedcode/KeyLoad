@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.CrashHost.Features.ClusterRouting;
 using KeyLoad.IntegrationTests.Features.StorageRecovery;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.BlobStorage;
 using Microsoft.AspNetCore.Builder;
@@ -14,7 +14,10 @@ internal sealed class PartitionMovementLateNativeOwners : IAsyncDisposable
     private const int FirstOwner = 0;
     private readonly ControlledPartitionMovementLoopbackListeners listeners = new();
     private readonly List<PartitionMovementLateNativeNode> nodes = [];
-    internal PartitionMovementLateNativeSettings Settings { get; }
+    internal PartitionMovementLateNativeSettings Settings
+    {
+        get;
+    }
     internal PartitionMovementLateNativeBorrow Borrow { get; } = new();
     internal IReadOnlyList<PartitionMovementLateNativeNode> Nodes => nodes;
     private bool stopped = true;
@@ -38,7 +41,9 @@ internal sealed class PartitionMovementLateNativeOwners : IAsyncDisposable
         var root = Path.Combine(Path.GetTempPath(), "keyload-late-native-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(root);
         if (!OperatingSystem.IsWindows())
-        { File.SetUnixFileMode(root, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute); }
+        {
+            File.SetUnixFileMode(root, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+        }
         Settings = new(listeners, root);
         listeners.JoinForChild();
     }
@@ -46,7 +51,9 @@ internal sealed class PartitionMovementLateNativeOwners : IAsyncDisposable
     internal async Task StartAsync(CancellationToken cancellationToken)
     {
         if (!stopped || producers.Any(task => !task.IsCompleted))
-        { throw new InvalidOperationException("The previous native owners have not joined."); }
+        {
+            throw new InvalidOperationException("The previous native owners have not joined.");
+        }
         shutdownDeadline?.Dispose();
         shutdownDeadline = null;
         nodes.Clear();
@@ -65,14 +72,18 @@ internal sealed class PartitionMovementLateNativeOwners : IAsyncDisposable
         var runtime = services.GetRequiredService<ServerRuntimeOptions>();
         var clock = services.GetRequiredService<TimeProvider>();
         while (nodes.Any(node => !node.Silo.DatabaseReady))
-        { await Task.Delay(runtime.Membership.Value.StartupRetryDelay, clock, cancellationToken).ConfigureAwait(false); }
+        {
+            await Task.Delay(runtime.Membership.Value.StartupRetryDelay, clock, cancellationToken).ConfigureAwait(false);
+        }
     }
 
     private string[] Arguments(int index)
     {
         var original = Settings.Arguments(index);
         if (configureArguments is null)
-        { return original; }
+        {
+            return original;
+        }
         var configured = original.ToList();
         configureArguments(index, configured);
         return configured.ToArray();
@@ -84,9 +95,13 @@ internal sealed class PartitionMovementLateNativeOwners : IAsyncDisposable
     internal Task JoinProducerAsync(Task original)
     {
         if (shutdownDeadline is { } deadline)
-        { return original.WaitAsync(deadline.Token); }
+        {
+            return original.WaitAsync(deadline.Token);
+        }
         if (original.IsCompleted)
-        { return original; }
+        {
+            return original;
+        }
         throw new InvalidOperationException("The original native shutdown owner has no joined producer deadline.");
     }
 
@@ -95,16 +110,23 @@ internal sealed class PartitionMovementLateNativeOwners : IAsyncDisposable
     private async Task StopCoreAsync()
     {
         if (stopped)
-        { return; }
+        {
+            return;
+        }
         if (nodes.Count == FirstOwner)
-        { stopped = true; return; }
+        {
+            stopped = true;
+            return;
+        }
         var first = nodes.First();
         shutdownDeadline ??= new CancellationTokenSource(shutdownTimeout ?? first.ShutdownTimeout,
             shutdownClock ?? first.Clock);
         var deadline = shutdownDeadline;
         var failures = new List<Exception>();
         foreach (var task in nodes.Select(node => node.StopAsync(deadline.Token)).ToArray())
-        { await ServerFailureObserver.ObserveAsync(() => task, failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => task, failures).ConfigureAwait(false);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
         for (var index = FirstOwner; index < PartitionMovementLateNativeSettings.OwnerCount; index++)
         {
@@ -119,7 +141,9 @@ internal sealed class PartitionMovementLateNativeOwners : IAsyncDisposable
     internal PartitionMovementLateNativeNode OpenStopped(int index)
     {
         if (!stopped)
-        { throw new InvalidOperationException("Native locks remain owned by the live cohort."); }
+        {
+            throw new InvalidOperationException("Native locks remain owned by the live cohort.");
+        }
         var owned = new PartitionMovementLateNativeNode(Arguments(index), null, localhostClustering: Settings.LocalhostClustering);
         coldNodes.Add(owned);
         return owned;
@@ -130,17 +154,25 @@ internal sealed class PartitionMovementLateNativeOwners : IAsyncDisposable
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(StopAsync, failures).ConfigureAwait(false);
         foreach (var cold in coldNodes)
-        { await ServerFailureObserver.ObserveAsync(() => cold.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => cold.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         try
-        { listeners.Dispose(); }
+        {
+            listeners.Dispose();
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         if (retainRoots || !stopped || nodes.Any(node => !node.IsDisposed) || coldNodes.Any(node => !node.IsDisposed)
             || producers.Any(task => !task.IsCompleted))
-        { failures.Add(new InvalidOperationException("Retain the native roots while any physical owner or original SDK producer is unjoined.")); }
+        {
+            failures.Add(new InvalidOperationException("Retain the native roots while any physical owner or original SDK producer is unjoined."));
+        }
         if (stopped && nodes.All(node => node.IsDisposed) && coldNodes.All(node => node.IsDisposed)
             && producers.All(task => task.IsCompleted))
-        { ServerFailureObserver.Observe(() => shutdownDeadline?.Dispose(), failures); }
+        {
+            ServerFailureObserver.Observe(() => shutdownDeadline?.Dispose(), failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
         ServerFailureObserver.Observe(() => Directory.Delete(Settings.Root, recursive: true), failures);
         ServerFailureObserver.ThrowIfAny(failures);

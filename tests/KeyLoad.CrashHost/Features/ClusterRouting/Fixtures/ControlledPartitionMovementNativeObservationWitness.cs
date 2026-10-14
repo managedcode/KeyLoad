@@ -21,7 +21,9 @@ internal sealed class ControlledPartitionMovementNativeObservationWitness : IPar
         {
             ObjectDisposedException.ThrowIf(disposed, this);
             if (current is not null)
-            { throw new InvalidOperationException(nameof(Arm)); }
+            {
+                throw new InvalidOperationException(nameof(Arm));
+            }
             return current = new(this, nonce, voter);
         }
     }
@@ -44,7 +46,9 @@ internal sealed class ControlledPartitionMovementNativeObservationWitness : IPar
             current?.Dispose();
             disposed = true;
             if (wasArmed)
-            { throw new InvalidOperationException(Active); }
+            {
+                throw new InvalidOperationException(Active);
+            }
         }
         GC.SuppressFinalize(this);
     }
@@ -63,7 +67,9 @@ internal sealed class ControlledPartitionMovementNativeObservationWitness : IPar
             lock (owner.gate)
             {
                 if (terminal is null)
-                { stage = value; }
+                {
+                    stage = value;
+                }
             }
         }
 
@@ -89,12 +95,16 @@ internal sealed class ControlledPartitionMovementNativeObservationWitness : IPar
             lock (owner.gate)
             {
                 if (terminal is not { } value || completions != ExpectedCompletions)
-                { throw new InvalidOperationException(Unjoined); }
+                {
+                    throw new InvalidOperationException(Unjoined);
+                }
                 Console.WriteLine(string.Format(System.Globalization.CultureInfo.InvariantCulture, ReportFormat, nonce,
                     value.Stage, value.Error, value.Authenticated, value.Dispatched, value.FailureStage,
                     Cause(value.Original), Cause(value.Secondary)));
                 if (expected is not null)
-                { RequireOriginalRefusal(value, expected); }
+                {
+                    RequireOriginalRefusal(value, expected);
+                }
             }
         }
 
@@ -103,7 +113,9 @@ internal sealed class ControlledPartitionMovementNativeObservationWitness : IPar
             lock (owner.gate)
             {
                 if (ReferenceEquals(owner.current, this))
-                { owner.current = null; }
+                {
+                    owner.current = null;
+                }
                 terminal = null;
             }
         }
@@ -118,12 +130,18 @@ internal sealed class ControlledPartitionMovementNativeObservationWitness : IPar
                 && value.Error == error.Code && value.Error == expected.Error && value.Stage == expected.Stage
                 && value.FailureStage == expected.Stage && value.Authenticated == expected.Authenticated
                 && value.Dispatched == expected.Dispatched && value.Secondary is null)
-            { return; }
+            {
+                return;
+            }
             var failures = new List<Exception>();
             if (value.Original is { } original)
-            { failures.Add(original); }
+            {
+                failures.Add(original);
+            }
             if (value.Secondary is { } secondary)
-            { failures.Add(secondary); }
+            {
+                failures.Add(secondary);
+            }
             failures.Add(new InvalidOperationException(Unjoined));
             throw new AggregateException(failures);
         }
@@ -138,6 +156,9 @@ internal sealed class ControlledPartitionMovementNativeObservationWitness : IPar
             _ => FailureCause.Other
         };
 
-        private enum FailureCause { None, KeyLoad, Cancelled, Timeout, Aggregate, Other }
+        private enum FailureCause
+        {
+            None, KeyLoad, Cancelled, Timeout, Aggregate, Other
+        }
     }
 }

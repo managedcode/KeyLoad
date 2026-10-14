@@ -95,7 +95,9 @@ internal sealed class ReplicaMaintenance(ReplicaState state, ReplicaElection ele
         if (checkpoint is not null)
         {
             try
-            { await checkpoint.WaitAsync(cancellationToken).ConfigureAwait(false); }
+            {
+                await checkpoint.WaitAsync(cancellationToken).ConfigureAwait(false);
+            }
             catch (OperationCanceledException) when (checkpoint.IsCanceled) { }
         }
     }

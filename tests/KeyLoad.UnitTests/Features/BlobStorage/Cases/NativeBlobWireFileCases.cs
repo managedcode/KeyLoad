@@ -15,10 +15,15 @@ internal sealed class NativeBlobWireFileCases
             {
                 await start.Task;
                 try
-                { fixture.Publish(name, bytes); return true; }
+                {
+                    fixture.Publish(name, bytes);
+                    return true;
+                }
                 catch (IOException) { return false; }
                 catch (InvalidOperationException failure) when (failure.Message == NativeBlobWireProbeProtocol.InvalidEvidence)
-                { return false; }
+                {
+                    return false;
+                }
             })).ToArray();
             start.SetResult();
             var result = await Task.WhenAll(original);
@@ -50,12 +55,18 @@ internal sealed class NativeBlobWireFileCases
         {
             var names = new List<string>();
             for (var index = 0; index < 128; index++)
-            { var name = NativeBlobWireFileFixture.Temporary(); fixture.Publish(name, new byte[8192]); names.Add(name); }
+            {
+                var name = NativeBlobWireFileFixture.Temporary();
+                fixture.Publish(name, new byte[8192]);
+                names.Add(name);
+            }
             await Assert.That(Directory.GetFiles(fixture.Root).Sum(path => new FileInfo(path).Length)).IsEqualTo(1048576L);
             Assert.ThrowsExactly<InvalidOperationException>(() => fixture.Publish(NativeBlobWireFileFixture.Temporary(), [1]));
             await Assert.That(Directory.GetFiles(fixture.Root).Length).IsEqualTo(129);
             foreach (var name in names)
-            { await Assert.That(fixture.Files.Read(name).Length).IsEqualTo(8192); }
+            {
+                await Assert.That(fixture.Files.Read(name).Length).IsEqualTo(8192);
+            }
         });
 
     [Test]
@@ -63,7 +74,9 @@ internal sealed class NativeBlobWireFileCases
         => NativeBlobWireFileFixture.RunOwnedAsync(async fixture =>
         {
             for (var index = 0; index < 399; index++)
-            { fixture.Publish(NativeBlobWireFileFixture.Temporary(), []); }
+            {
+                fixture.Publish(NativeBlobWireFileFixture.Temporary(), []);
+            }
             await Assert.That(Directory.GetFiles(fixture.Root).Length).IsEqualTo(400);
             Assert.ThrowsExactly<InvalidOperationException>(() => fixture.Publish(NativeBlobWireFileFixture.Temporary(), [1]));
             await Assert.That(Directory.GetFiles(fixture.Root).Length).IsEqualTo(400);

@@ -16,7 +16,9 @@ internal static class RestorePublicationRaceFlow
             var capture = MixedEventingCatalogRestore.Capture(fixture.Source, backup, token);
             var archive = await CatalogRestoreCancellationFlow.ArchiveAsync(backup, token);
             if (existingEmpty)
-            { Directory.CreateDirectory(target); }
+            {
+                Directory.CreateDirectory(target);
+            }
             await Assert.That(Directory.Exists(target)).IsEqualTo(existingEmpty);
             var failures = new List<Exception>();
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>

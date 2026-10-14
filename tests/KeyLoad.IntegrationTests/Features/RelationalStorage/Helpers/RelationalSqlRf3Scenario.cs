@@ -61,7 +61,10 @@ internal sealed record RelationalSqlRf3Scenario(PartitionRef Partition, Resource
         => new(new(Partition, RelationalSqlRf3Tokens.Queue), id);
 
     internal ReadStreamRequest ReadStream(string id = RelationalSqlRf3Tokens.StreamId)
-        => new(Stream with { StreamId = id });
+        => new(Stream with
+        {
+            StreamId = id
+        });
 
     private static Task<ResourceDefinition> ConfigureAsync(KeyLoadClient administrator, PartitionRef partition,
         ResourceDefinition definition, CancellationToken cancellationToken)

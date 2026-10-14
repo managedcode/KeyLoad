@@ -30,7 +30,9 @@ internal sealed class DocumentSessionIsolationRf3Tests
             }
         }, failures).ConfigureAwait(false);
         if (failures.Count == ReplicaIsolationFlowProtocol.Zero)
-        { await Assert.That(Directory.Exists(root)).IsFalse(); }
+        {
+            await Assert.That(Directory.Exists(root)).IsFalse();
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

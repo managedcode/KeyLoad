@@ -39,8 +39,14 @@ internal sealed class ReplicaProcessTrial : IAsyncDisposable
         diagnostics = CaptureDiagnosticsAsync(process.StandardError);
     }
 
-    internal string DirectoryPath { get; }
-    internal Guid Incarnation { get; }
+    internal string DirectoryPath
+    {
+        get;
+    }
+    internal Guid Incarnation
+    {
+        get;
+    }
     internal ReplicaCrashReady Ready { get; private set; } = null!;
 
     internal static ReplicaProcessTrial Start(ReplicaCrashBoundary boundary) => new(boundary);
@@ -75,10 +81,14 @@ internal sealed class ReplicaProcessTrial : IAsyncDisposable
         {
             var count = await reader.ReadAsync(buffer);
             if (count == 0)
-            { break; }
+            {
+                break;
+            }
             var retained = Math.Min(count, DiagnosticLimit - output.Length);
             if (retained > 0)
-            { output.Append(buffer, 0, retained); }
+            {
+                output.Append(buffer, 0, retained);
+            }
         }
         return output.ToString();
     }

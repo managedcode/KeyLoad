@@ -40,6 +40,8 @@ internal sealed record NativeAnnExecutionOptions
     public void Validate()
     {
         if (!IsValid())
-        { throw Errors.Fail(ErrorCode.Validation, ValidationMessage); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, ValidationMessage);
+        }
     }
 }

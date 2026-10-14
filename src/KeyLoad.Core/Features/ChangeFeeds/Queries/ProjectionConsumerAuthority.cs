@@ -21,7 +21,9 @@ public sealed partial class DatabaseEngine
         RequireProjectionAdministrator(principal);
         var state = ProjectionConsumer(view, consumer);
         if (!state.Released || state.Definition.IndexGeneration != generation)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, ReleasedProjectionGenerationDetail); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, ReleasedProjectionGenerationDetail);
+        }
         return state;
     }
 

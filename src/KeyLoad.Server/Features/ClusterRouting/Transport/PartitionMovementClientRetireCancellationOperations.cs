@@ -1,9 +1,9 @@
 using System.Security.Cryptography;
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Identity;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
@@ -16,7 +16,9 @@ internal static class PartitionMovementClientRetireCancellationOperations
         var current = PartitionMovementClientReceiverIssueOperations.ReadCurrentReceiverIssueSource(owner, original, work);
         if (original.Stage != PartitionMovePeerStage.Retire || original.OriginalExpiresAt > owner.clock.GetUtcNow()
             || original.RetireCancellationAttempt is not null || current.CurrentOperatorPolicyEpoch <= PartitionMoveProtocol.EmptyCount)
-        { throw Errors.Fail(ErrorCode.Conflict, PartitionMovementProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, PartitionMovementProtocol.InvalidProof);
+        }
         var envelope = PartitionMovementClientRetireCancellationOperations.RetireCancellationOriginalEnvelope(original);
         var discovery = owner.node.Discovery?.Read()
             ?? throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMovementProtocol.Unavailable);
@@ -25,7 +27,9 @@ internal static class PartitionMovementClientRetireCancellationOperations
             freshSource, Guid.NewGuid(), expiry, owner.partition.Configuration.LocalId, discovery.SiloAddress);
         var bytes = NativeSerialization.Serialize(request);
         if (bytes.Length > owner.partition.Database.Limits.MaxBatchBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMovementProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMovementProtocol.Unavailable);
+        }
         return new(request.Version, cancellationId, request.CancellationNonce, expiry, bytes,
             PartitionMovementClientRetireCancellationOperations.SignRetireCancellationRequest(owner, bytes, query: false));
     }
@@ -39,7 +43,9 @@ internal static class PartitionMovementClientRetireCancellationOperations
         if (first.CancellationExpiresAt <= owner.clock.GetUtcNow() || request.CancellationCommandId != first.CancellationCommandId
             || request.CancellationNonce != first.CancellationNonce || request.CancellationExpiresAt != first.CancellationExpiresAt
             || !NativeSerialization.Serialize(original.RetireCancellationAttempt).AsSpan().SequenceEqual(NativeSerialization.Serialize(first)))
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMovementProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMovementProtocol.InvalidProof);
+        }
         var selected = PartitionMovementClientReceiverIssueOperations.ReceiverIssueOwner(owner, original);
         var scope = PartitionMovementClientRetireCancellationOperations.RetireCancellationReplyScope(original, request.CancellationCommandId, request.CancellationNonce,
             request.CancellationExpiresAt, request.CallerVoter, request.CallerSiloAddress);
@@ -49,7 +55,9 @@ internal static class PartitionMovementClientRetireCancellationOperations
             first.OriginalRequestBytes.ToArray(), PhysicalOwnerEntryValidation.SameOwner(selected.Owner, request.OriginalEnvelope.ControlOwner),
             cancellationToken).ConfigureAwait(false);
         if (reply.Value.Reply.Error is { } code)
-        { throw Errors.Fail(code, reply.Value.Reply.SafeDetail ?? PartitionMovementProtocol.Unavailable); }
+        {
+            throw Errors.Fail(code, reply.Value.Reply.SafeDetail ?? PartitionMovementProtocol.Unavailable);
+        }
         work.CheckResult(reply.Value);
     }
 
@@ -91,7 +99,9 @@ internal static class PartitionMovementClientRetireCancellationOperations
             Math.Min(owner.partition.Database.Limits.MaxQueryReadBytes, owner.partition.Database.Limits.MaxBatchBytes));
         var maximumRecords = Math.Min(work.RemainingReadGrantRecords / remainingAttempts, owner.partition.Database.Limits.MaxScanRecords);
         if (maximumBytes <= PartitionMoveProtocol.EmptyCount || maximumRecords <= PartitionMoveProtocol.EmptyCount)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMovementProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMovementProtocol.Unavailable);
+        }
         var read = work.CreateReadGrant(maximumBytes, maximumRecords);
         var query = new PartitionMovementRetireCancellationQuery(PartitionMoveProtocol.Version, cancellationId,
             original.OriginalPhaseCommandId, envelope, original.OriginalAuthorization!, Guid.NewGuid(), expiry,
@@ -99,7 +109,9 @@ internal static class PartitionMovementClientRetireCancellationOperations
             Math.Min(work.MaximumResultBytes, owner.partition.Database.Limits.MaxBatchBytes));
         var bytes = NativeSerialization.Serialize(query);
         if (bytes.Length > owner.partition.Database.Limits.MaxBatchBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMovementProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMovementProtocol.Unavailable);
+        }
         var scope = PartitionMovementClientRetireCancellationOperations.RetireCancellationReplyScope(original, cancellationId, query.QueryNonce, expiry,
             query.CallerVoter, query.CallerSiloAddress);
         var exchange = new PartitionMovementReceiverExchange(scope, original.OriginalPhaseIdentityDigest,
@@ -107,7 +119,9 @@ internal static class PartitionMovementClientRetireCancellationOperations
         var reply = await owner.transport.ExchangeRetireCancellationAsync(voter, selected, exchange, bytes,
             PhysicalOwnerEntryValidation.SameOwner(selected.Owner, envelope.ControlOwner), cancellationToken).ConfigureAwait(false);
         if (reply.Value.Reply.Error is { } code)
-        { throw Errors.Fail(code, reply.Value.Reply.SafeDetail ?? PartitionMovementProtocol.Unavailable); }
+        {
+            throw Errors.Fail(code, reply.Value.Reply.SafeDetail ?? PartitionMovementProtocol.Unavailable);
+        }
         var actual = GrainNativePayload.Read<GrainValue>(reply.Value.Reply.Payload).Value as PartitionMovementRetireCancellationOutcomeResult
             ?? throw Errors.Fail(ErrorCode.Corruption, PartitionMovementProtocol.InvalidProof);
         work.ImportReadGrant(read, actual.ReadBytes, actual.ExaminedRecords);
@@ -124,13 +138,19 @@ internal static class PartitionMovementClientRetireCancellationOperations
         if (envelope.ReceiverIssuanceProof is not null || envelope.SourceDispatchWitness is not null
             || original.OriginalAuthorization is null || envelope.Stage != PartitionMovePeerStage.Retire
             || PartitionMoveOriginalDispatchIdentity.Digest(original.OriginalPhaseCommandId, envelope) != original.OriginalPhaseIdentityDigest)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof);
+        }
         return envelope;
     }
 
     internal static PartitionMovementTransportRequest RetireCancellationReplyScope(PartitionMoveParentPhase original,
         Guid cancellationId, Guid nonce, DateTimeOffset expiry, string voter, string silo)
-        => new(cancellationId, PartitionMovementClientRetireCancellationOperations.RetireCancellationOriginalEnvelope(original) with { Nonce = nonce, ExpiresAt = expiry },
+        => new(cancellationId, PartitionMovementClientRetireCancellationOperations.RetireCancellationOriginalEnvelope(original) with
+        {
+            Nonce = nonce,
+            ExpiresAt = expiry
+        },
             original.OriginalAuthorization, voter, silo, PartitionMovementTransportAction.Apply, Guid.Empty, PartitionMovementClient.FirstVoter);
 
     internal static string SignRetireCancellationRequest(PartitionMovementClient owner, ReadOnlySpan<byte> bytes, bool query)

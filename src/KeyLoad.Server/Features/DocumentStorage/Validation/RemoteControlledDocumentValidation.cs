@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 using Microsoft.Extensions.Options;
 
@@ -35,7 +35,9 @@ internal static class RemoteControlledDocumentValidation
             || frame.Control.Partition != frame.Reference.Partition
             || call.MaximumReplyBytes <= EmptyCount || call.MaximumReplyBytes > partition.Database.Limits.MaxBatchBytes
             || request.MaximumResultBytes > call.MaximumReplyBytes)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof);
+        }
         _ = node.Discovery?.Read() ?? throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentProtocol.Unavailable);
     }
 }

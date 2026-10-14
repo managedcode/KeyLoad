@@ -15,7 +15,13 @@ internal static class AtomicPartitionPlacementDirectoryAuthorityFlow
     {
         var directory = fixture.Store.Read(view => view.GetRecord<AtomicPartitionPlacementDirectoryV1>(
             AtomicPartitionPlacementTestSupport.DirectoryKey()))!;
-        Replace(fixture, directory with { Version = MalformedVersion }, row with { PhysicalShardId = ForeignOwner });
+        Replace(fixture, directory with
+        {
+            Version = MalformedVersion
+        }, row with
+        {
+            PhysicalShardId = ForeignOwner
+        });
         var image = AtomicPartitionPlacementAuthorityAssertions.Capture(fixture);
         var cut = fixture.Store.Position;
         await RefuseAsync(fixture, original, image, cut);

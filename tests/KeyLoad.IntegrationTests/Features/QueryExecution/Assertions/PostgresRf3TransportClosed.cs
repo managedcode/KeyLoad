@@ -14,7 +14,9 @@ internal static class PostgresRf3TransportClosed
         }
         catch (IOException failure) when (failure.InnerException is SocketException socket
             && socket.SocketErrorCode is SocketError.ConnectionReset or SocketError.ConnectionAborted)
-        { closed = true; }
+        {
+            closed = true;
+        }
         await global::TUnit.Assertions.Assert.That(originalDeadline.IsCancellationRequested).IsFalse();
         await global::TUnit.Assertions.Assert.That(closed).IsTrue();
     }

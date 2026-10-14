@@ -28,7 +28,9 @@ internal static class VerifiedBackupMixedCutCold
         {
             token.ThrowIfCancellationRequested();
             if (cold != FirstWarmOwner)
-            { fixture.ReopenTarget(target); }
+            {
+                fixture.ReopenTarget(target);
+            }
             var current = fixture.Target!;
             await Assert.That(current.Position).IsEqualTo(restoredPosition + HealthyCommit);
             await Assert.That(JsonSerializer.Serialize(current.Identity, JsonDefaults.Options)).IsEqualTo(identity);

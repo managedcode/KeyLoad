@@ -11,13 +11,17 @@ public sealed partial class DatabaseEngine
     {
         var page = view.Scan(PartitionMoveGrantStorage.MovePrefix(control.Partition, control.MoveId), Limits.MaxScanRecords);
         if (page.HasMore)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
+        }
         long bytes = PartitionMoveProtocol.EmptyCount;
         foreach (var row in page.Records)
         {
             bytes = checked(bytes + row.Key.Length + row.Value.Length);
             if (bytes > Limits.MaxQueryReadBytes)
-            { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity); }
+            {
+                throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
+            }
         }
         return page.Records;
     }
@@ -31,7 +35,9 @@ public sealed partial class DatabaseEngine
         if (id == Guid.Empty || grant.GrantId != id || grant.MoveId != control.MoveId
             || grant.Partition != control.Partition || grant.OperatorPrincipalId != control.PrincipalId
             || !row.Key.Span.SequenceEqual(PartitionMoveGrantStorage.MoveKey(control.Partition, control.MoveId, id)))
-        { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid);
+        }
         return grant;
     }
 }

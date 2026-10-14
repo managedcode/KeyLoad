@@ -37,7 +37,9 @@ public sealed partial class DatabaseEngine
         var inventory = new EventVectorInventoryReadBudget(OperationLimitsOptions);
         var catalog = EventVectorCoverageCatalogRead.Read(bounded, sourceOwner, controlOwner, inventory);
         if (sourceOwner.Incarnation != Store.Identity.Incarnation)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, InvalidEventVectorCapture); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, InvalidEventVectorCapture);
+        }
         var applied = EventVectorInitialAppliedCut;
         bounded.ReadValue(KeySpace.AppliedBytes, bytes => applied = NativeSerialization.Deserialize<long>(bytes),
             inventory.Observe);
@@ -72,7 +74,9 @@ public sealed partial class DatabaseEngine
             || request.MapId == Guid.Empty || request.ControlPartition is null || request.Scope is null
             || groupOrdinal < EventVectorFirstGroup || !Enum.IsDefined(request.Start)
             || request.Scope.Kind is not (EventSourceKind.Topic or EventSourceKind.Stream))
-        { throw Errors.Fail(ErrorCode.Validation, InvalidEventVectorCapture); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, InvalidEventVectorCapture);
+        }
         ValidatePartition(request.ControlPartition);
         JsonData.Identifier(request.Scope.Domain);
         JsonData.Identifier(request.Scope.Resource);

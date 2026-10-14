@@ -32,7 +32,10 @@ internal static class SqlFetchCountPages
         var request = SqlFetchCountProtocol.Ast(partition, PageRows);
         var first = engine.Execute(principal, SqlFetchCountProtocol.Sql(partition, "OFFSET 0 ROWS FETCH FIRST 2 ROWS ONLY"));
         await CursorAsync(first, PageRows);
-        var final = engine.ExecuteAst(principal, request with { Cursor = first.Cursor });
+        var final = engine.ExecuteAst(principal, request with
+        {
+            Cursor = first.Cursor
+        });
         var expected = new QueryPage([new("c", Revision, """{"label":"c"}""", RedactedFields: [])], null, position, AccessPath);
         await EqualAsync(expected, final);
         await SqlFetchCountRefusals.UnchangedAsync(store, image, position, identity);
@@ -46,9 +49,13 @@ internal static class SqlFetchCountPages
     private static async Task CursorAsync(QueryPage page, int count)
     {
         if (count < SqlFetchCountProtocol.ResultCount)
-        { await Assert.That(page.Cursor).IsNotNull(); }
+        {
+            await Assert.That(page.Cursor).IsNotNull();
+        }
         else
-        { await Assert.That(page.Cursor).IsNull(); }
+        {
+            await Assert.That(page.Cursor).IsNull();
+        }
     }
     internal static async Task EqualAsync(QueryPage expected, QueryPage actual)
         => await Assert.That(JsonDefaults.Serialize(actual)).IsEquivalentTo(JsonDefaults.Serialize(expected),

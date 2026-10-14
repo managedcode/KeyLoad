@@ -50,7 +50,9 @@ internal static class SqlOrdinalRf3Controls
         await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(McpCallerTools.QueryExecute, request, token),
             code, dispatched: true);
         if (dialect != SqlOffsetRf3Protocol.Q1)
-        { return; }
+        {
+            return;
+        }
         foreach (var prepared in new[] { false, true })
         {
             var error = await global::TUnit.Assertions.Assert.ThrowsAsync<global::Npgsql.PostgresException>(

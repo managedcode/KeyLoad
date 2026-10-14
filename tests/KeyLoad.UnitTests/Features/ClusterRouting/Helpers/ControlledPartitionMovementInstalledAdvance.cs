@@ -37,7 +37,11 @@ internal static class ControlledPartitionMovementInstalledAdvance
                 PartitionMovementTransportAction.Apply, Guid.Empty, InitialOrdinal), cancellationToken);
         await Assert.That(result.Error).IsNull();
         var actual = result.Get<PartitionMovePhaseResult>();
-        var expected = control with { Phase = PartitionMovePhase.Installed, InstalledReceipt = receipt.Token };
+        var expected = control with
+        {
+            Phase = PartitionMovePhase.Installed,
+            InstalledReceipt = receipt.Token
+        };
         await Assert.That(JsonDefaults.Serialize(actual.Control).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
         await Assert.That(JsonDefaults.Serialize(actual.Fence).SequenceEqual(JsonDefaults.Serialize(fence))).IsTrue();
         await Assert.That(JsonDefaults.Serialize(actual.InstalledReceipt)

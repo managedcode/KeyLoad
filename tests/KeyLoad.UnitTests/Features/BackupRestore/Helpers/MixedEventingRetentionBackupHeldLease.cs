@@ -22,7 +22,9 @@ internal static class MixedEventingRetentionBackupHeldLease
         var clock = fixture.Database.EvaluationClock;
         var now = clock.GetUtcNow();
         if (now < deadline)
-        { await Task.Delay(deadline - now, clock, token); }
+        {
+            await Task.Delay(deadline - now, clock, token);
+        }
         token.ThrowIfCancellationRequested();
         await Assert.That(clock.GetUtcNow() >= deadline).IsTrue();
         await Assert.That(store.Position).IsEqualTo(position);

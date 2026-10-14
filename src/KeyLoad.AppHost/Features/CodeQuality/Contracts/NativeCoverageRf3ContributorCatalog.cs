@@ -28,7 +28,10 @@ internal static class NativeCoverageRf3ContributorCatalog
     private const string RelationalJoinReadByteBudget = "JoinReadByteBudgetReturnsSafeErrorsAndPreservesStateBeforeHealthyFollowUp";
     private const string RelationalJoinPageByteBudget = "JoinedPageByteBudgetReturnsSafeErrorsAndPreservesStateBeforeHealthyFollowUp";
 
-    internal static ImmutableArray<NativeCoverageRf3Contributor> Contributors { get; } =
+    internal static ImmutableArray<NativeCoverageRf3Contributor> Contributors
+    {
+        get;
+    } =
     [
         new(PartitionQueryClass, PartitionQueryReferenceOrder, PartitionQueryReferenceOrder),
         new(DocumentCrudClass, SdkPatchMcpDelete, SdkPatchMcpDelete),

@@ -62,7 +62,9 @@ internal sealed class OfflineRegularFileIdentityTests
         var root = Path.Combine(Path.GetTempPath(), RootPrefix + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(root);
         try
-        { await action(root); }
+        {
+            await action(root);
+        }
         finally { Directory.Delete(root, recursive: true); }
     }
 }

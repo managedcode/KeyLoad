@@ -20,9 +20,13 @@ internal static class ReplicaSnapshotDamageRecovery
         => ReplicaPrefixGcOwners.NodeAsync(trial.DirectoryPath, trial.Incarnation, async reopened =>
         {
             if (missing)
-            { Assert.ThrowsExactly<FileNotFoundException>(reopened.Snapshots.Recover); }
+            {
+                Assert.ThrowsExactly<FileNotFoundException>(reopened.Snapshots.Recover);
+            }
             else
-            { await Assert.That(Assert.ThrowsExactly<KeyLoadException>(reopened.Snapshots.Recover).Code).IsEqualTo(ErrorCode.Corruption); }
+            {
+                await Assert.That(Assert.ThrowsExactly<KeyLoadException>(reopened.Snapshots.Recover).Code).IsEqualTo(ErrorCode.Corruption);
+            }
             await Assert.That(reopened.Snapshots.Current).IsEqualTo(published);
             await Assert.That(reopened.Log.State.CommittedIndex).IsEqualTo((long)TailCut);
             await Assert.That(reopened.Canonical.Identity.NodeId).IsEqualTo(trial.Ready.NodeId);

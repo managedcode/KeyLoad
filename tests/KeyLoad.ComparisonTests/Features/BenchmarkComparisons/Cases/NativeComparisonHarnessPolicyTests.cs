@@ -35,7 +35,9 @@ internal sealed class NativeComparisonHarnessPolicyTests
         {
             await owner.CancelAsync();
             try
-            { await original; }
+            {
+                await original;
+            }
             catch (OperationCanceledException) when (original.IsCanceled) { }
             await settlement;
         }
@@ -59,7 +61,9 @@ internal sealed class NativeComparisonHarnessPolicyTests
     private static AggregateException CaptureFailure(IsolatedNativeTeardownFailures failures)
     {
         try
-        { failures.ThrowIfAny(); }
+        {
+            failures.ThrowIfAny();
+        }
         catch (AggregateException failure) { return failure; }
         throw new InvalidOperationException("The actual native threshold, callback and cancellation failures were not retained.");
     }

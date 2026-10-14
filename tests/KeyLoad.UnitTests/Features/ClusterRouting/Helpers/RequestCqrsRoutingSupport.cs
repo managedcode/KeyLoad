@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using ManagedCode.Communication.CQRS;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
@@ -68,7 +68,11 @@ internal static class RequestCqrsRoutingCases
         var requestId = Guid.NewGuid();
         var signed = fixture.Codec.CreateCommand(requestId, writer.Id, OperationKind.Batch, commandId,
             NativeSerialization.Serialize(command));
-        var revoked = writer with { Revoked = true, PolicyEpoch = writer.PolicyEpoch + 1 };
+        var revoked = writer with
+        {
+            Revoked = true,
+            PolicyEpoch = writer.PolicyEpoch + 1
+        };
         fixture.Database.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(revoked));
         var deniedPosition = fixture.Database.Store.Position;
 
@@ -286,6 +290,10 @@ internal static class RequestCqrsNativeCommandStream
         CqrsStreamChunk<GrainRequestProgress, GrainOperationReply> chunk)
     {
         var problem = chunk.Final?.Problem ?? throw new InvalidOperationException("The failed request has no Problem.");
-        return new() { Error = GrainRequestStreamProblem.ReadCode(problem, UnitRoutingOptions.Routing()), SafeDetail = problem.Detail };
+        return new()
+        {
+            Error = GrainRequestStreamProblem.ReadCode(problem, UnitRoutingOptions.Routing()),
+            SafeDetail = problem.Detail
+        };
     }
 }

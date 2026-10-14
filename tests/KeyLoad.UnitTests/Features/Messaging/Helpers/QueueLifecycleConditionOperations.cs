@@ -32,8 +32,14 @@ internal static class QueueLifecycleConditionOperations
         var key = Key(state, fault);
         var original = store.Read(view => view.ReadOwnedValue(key))!;
         var bytes = fault == QueueLifecycleConditionFault.MetadataIdentity
-            ? NativeSerialization.Serialize(NativeSerialization.Deserialize<MessageMetadata>(original) with { Id = ForeignId })
-            : NativeSerialization.Serialize(NativeSerialization.Deserialize<MessageBody>(original) with { Id = ForeignId });
+            ? NativeSerialization.Serialize(NativeSerialization.Deserialize<MessageMetadata>(original) with
+            {
+                Id = ForeignId
+            })
+            : NativeSerialization.Serialize(NativeSerialization.Deserialize<MessageBody>(original) with
+            {
+                Id = ForeignId
+            });
         Restore(store, key, bytes);
         return original;
     }

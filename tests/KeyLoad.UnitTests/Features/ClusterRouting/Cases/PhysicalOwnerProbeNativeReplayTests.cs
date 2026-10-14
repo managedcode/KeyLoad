@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.UnitTests.Features.ResourceExecution;
 using Microsoft.Extensions.Options;
@@ -61,5 +61,8 @@ internal sealed class PhysicalOwnerProbeNativeReplayTests
 
     private static PhysicalOwnerProbeNativeReplay Create(ControlledReadClock clock)
         => new(clock, Options.Create(new OrleansMembershipOptions
-        { ReplayNonceCapacity = 1, ReplayLifetime = PhysicalOwnerProbeNativeTestValues.Retention }));
+        {
+            ReplayNonceCapacity = 1,
+            ReplayLifetime = PhysicalOwnerProbeNativeTestValues.Retention
+        }));
 }

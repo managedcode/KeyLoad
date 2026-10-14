@@ -17,7 +17,10 @@ internal sealed class GraphTraversalResourceTests
     [Test]
     public async Task AcMp005_ConvergingLargeTargetUsesOneVisibilityLookup()
     {
-        using var db = new TestDatabase(new() { MaxQueryReadBytes = OneLargeVertexReadBudget });
+        using var db = new TestDatabase(new()
+        {
+            MaxQueryReadBytes = OneLargeVertexReadBudget
+        });
         Configure(db);
         var start = Vertex(db, "a");
         var left = Vertex(db, "b");
@@ -40,7 +43,10 @@ internal sealed class GraphTraversalResourceTests
     [Test]
     public async Task AcMp006_RepeatedHiddenTargetIsNotExpanded()
     {
-        using var db = new TestDatabase(new() { MaxQueryReadBytes = OneLargeVertexReadBudget });
+        using var db = new TestDatabase(new()
+        {
+            MaxQueryReadBytes = OneLargeVertexReadBudget
+        });
         Configure(db);
         var start = Vertex(db, "a");
         var hidden = Vertex(db, "b");
@@ -87,8 +93,14 @@ internal sealed class GraphTraversalResourceTests
         db.Commit(new PutDocument(Collection, start.Id, "{}"));
         var expected = db.Database.Traverse(Root, db.Partition, Graph, start, maxDepth: 0);
         var bytes = JsonDefaults.Serialize(expected).Length;
-        var exact = new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxBatchBytes = bytes }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
-        var shortLimit = new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxBatchBytes = bytes - 1 }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
+        var exact = new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new()
+        {
+            MaxBatchBytes = bytes
+        }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
+        var shortLimit = new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new()
+        {
+            MaxBatchBytes = bytes - 1
+        }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
         await Assert.That(exact.Traverse(Root, db.Partition, Graph, start, maxDepth: 0).Vertices)
             .IsEquivalentTo(expected.Vertices);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => shortLimit.Traverse(Root, db.Partition, Graph, start,
@@ -114,5 +126,8 @@ internal sealed class GraphTraversalResourceTests
     private static void AuthorizeAlice(TestDatabase db) => db.Submit(OperationKind.ConfigurePrincipal,
         new ConfigurePrincipalRequest(new PrincipalRecord(Alice, "tenant",
             [new("database", Collection, Capability.DocumentsRead), new("database", Graph, Capability.GraphRead)], [])
-        { OwnerId = Alice, RestrictRows = true })).Get<PrincipalRecord>();
+        {
+            OwnerId = Alice,
+            RestrictRows = true
+        })).Get<PrincipalRecord>();
 }

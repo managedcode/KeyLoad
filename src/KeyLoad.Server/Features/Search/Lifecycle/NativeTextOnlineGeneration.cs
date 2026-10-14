@@ -47,7 +47,9 @@ internal sealed class NativeTextOnlineGeneration(string root, OnlineTextCurrentP
             {
                 failures.Add(primary);
                 if (transferred)
-                { SettleFailedReader(primary, reader, failures); }
+                {
+                    SettleFailedReader(primary, reader, failures);
+                }
                 throw;
             }
             finally { retained?.Dispose(); }
@@ -55,9 +57,13 @@ internal sealed class NativeTextOnlineGeneration(string root, OnlineTextCurrentP
         catch (Exception cleanup)
         {
             if (!failures.Any(originalFailure => ReferenceEquals(originalFailure, cleanup)))
-            { failures.Add(cleanup); }
+            {
+                failures.Add(cleanup);
+            }
             if (!transferred && failures.Count == SingleFailure)
-            { ServerFailureObserver.Observe(grant.CompleteAfterJoinedCleanup, failures); }
+            {
+                ServerFailureObserver.Observe(grant.CompleteAfterJoinedCleanup, failures);
+            }
             ServerFailureObserver.ThrowIfAny(failures);
             throw;
         }
@@ -77,7 +83,9 @@ internal sealed class NativeTextOnlineGeneration(string root, OnlineTextCurrentP
                 RetainReaderFailure(primary);
                 failures.AddRange(settled);
                 foreach (var cleanup in settled)
-                { RetainReaderFailure(cleanup); }
+                {
+                    RetainReaderFailure(cleanup);
+                }
                 return;
             }
             ServerFailureObserver.Observe(() => CompleteReader(reader, primary), failures);
@@ -96,7 +104,9 @@ internal sealed class NativeTextOnlineGeneration(string root, OnlineTextCurrentP
         catch (Exception cleanup)
         {
             if (initiating is not null)
-            { RetainReaderFailure(initiating); }
+            {
+                RetainReaderFailure(initiating);
+            }
             RetainReaderFailure(cleanup);
             throw;
         }
@@ -112,7 +122,9 @@ internal sealed class NativeTextOnlineGeneration(string root, OnlineTextCurrentP
         lock (gate)
         {
             if (readers is null || !readers.TryGetValue(reader, out var original))
-            { throw NativeTextErrors.Ownership(); }
+            {
+                throw NativeTextErrors.Ownership();
+            }
             try
             {
                 if (!original.IndexExited)
@@ -142,7 +154,9 @@ internal sealed class NativeTextOnlineGeneration(string root, OnlineTextCurrentP
         {
             budget.Check();
             if (retiring || retired)
-            { throw NativeTextErrors.Ownership(); }
+            {
+                throw NativeTextErrors.Ownership();
+            }
             pins++;
             return new(this);
         }
@@ -153,7 +167,9 @@ internal sealed class NativeTextOnlineGeneration(string root, OnlineTextCurrentP
         lock (gate)
         {
             if (retired || pins <= NoReaderPins)
-            { throw NativeTextErrors.Ownership(); }
+            {
+                throw NativeTextErrors.Ownership();
+            }
         }
     }
 
@@ -162,10 +178,14 @@ internal sealed class NativeTextOnlineGeneration(string root, OnlineTextCurrentP
         lock (gate)
         {
             if (pins <= NoReaderPins)
-            { throw NativeTextErrors.Ownership(); }
+            {
+                throw NativeTextErrors.Ownership();
+            }
             pins--;
             if (pins == NoReaderPins)
-            { quiet?.TrySetResult(); }
+            {
+                quiet?.TrySetResult();
+            }
         }
     }
 
@@ -174,7 +194,9 @@ internal sealed class NativeTextOnlineGeneration(string root, OnlineTextCurrentP
         lock (gate)
         {
             if (reservation is not null || retiring || retired)
-            { throw NativeTextErrors.Ownership(); }
+            {
+                throw NativeTextErrors.Ownership();
+            }
             reservation = originalReservation;
         }
     }
@@ -184,7 +206,9 @@ internal sealed class NativeTextOnlineGeneration(string root, OnlineTextCurrentP
         lock (gate)
         {
             if (!retired || pins != NoReaderPins)
-            { throw NativeTextErrors.Ownership(); }
+            {
+                throw NativeTextErrors.Ownership();
+            }
             reservation?.CompleteAfterJoinedCleanup();
             reservation = null;
         }
@@ -196,9 +220,13 @@ internal sealed class NativeTextOnlineGeneration(string root, OnlineTextCurrentP
         {
             retiring = true;
             if (readerFailure is not null)
-            { return Task.FromException(readerFailure); }
+            {
+                return Task.FromException(readerFailure);
+            }
             if (pins == NoReaderPins)
-            { return Task.CompletedTask; }
+            {
+                return Task.CompletedTask;
+            }
             quiet ??= new(TaskCreationOptions.RunContinuationsAsynchronously);
             return quiet.Task;
         }
@@ -209,11 +237,17 @@ internal sealed class NativeTextOnlineGeneration(string root, OnlineTextCurrentP
         lock (gate)
         {
             if (retired)
-            { return; }
+            {
+                return;
+            }
             if (readerFailure is not null)
-            { throw new AggregateException(readerFailure); }
+            {
+                throw new AggregateException(readerFailure);
+            }
             if (!retiring || pins != NoReaderPins || (readers?.Count ?? NoReaderPins) != NoReaderPins)
-            { throw NativeTextErrors.Ownership(); }
+            {
+                throw NativeTextErrors.Ownership();
+            }
             index.RequireSettled();
             index.Dispose();
             retired = true;

@@ -111,7 +111,9 @@ internal static class PhysicalShardPartitionMovementRf3Flow
         var directory = checked(seeds[FirstEntry].OriginalPlacement.DirectoryRevision + RevisionIncrement);
         await Assert.That(first.PublishedPlacement!.Revision).IsEqualTo(directory);
         await SqlRf3Protocol.EqualAsync(seeds[SecondEntry].OriginalPlacement with
-        { DirectoryRevision = directory }, untouched);
+        {
+            DirectoryRevision = directory
+        }, untouched);
         await VerifyAsync(seeds, token);
         return first;
     }
@@ -121,7 +123,9 @@ internal static class PhysicalShardPartitionMovementRf3Flow
     {
         var actual = new List<PartitionMoveResult>();
         await foreach (var settled in seeds[FirstEntry].Source.MoveWholePartitionsAsync(original, token).ConfigureAwait(false))
-        { actual.Add(await McpCallerAssertions.SdkSuccessAsync(settled)); }
+        {
+            actual.Add(await McpCallerAssertions.SdkSuccessAsync(settled));
+        }
         await Assert.That(actual.Count).IsEqualTo(original.Length);
         for (var index = FirstEntry; index < original.Length; index++)
         {
@@ -136,7 +140,10 @@ internal static class PhysicalShardPartitionMovementRf3Flow
         PartitionMoveRequest[] original, CancellationToken token)
     {
         var changed = original.ToArray();
-        changed[FirstEntry] = changed[FirstEntry] with { ExpectedPlacementRevision = checked(changed[FirstEntry].ExpectedPlacementRevision + RevisionIncrement) };
+        changed[FirstEntry] = changed[FirstEntry] with
+        {
+            ExpectedPlacementRevision = checked(changed[FirstEntry].ExpectedPlacementRevision + RevisionIncrement)
+        };
         var count = NoResults;
         await foreach (var refusal in seeds[FirstEntry].Source.MoveWholePartitionsAsync(changed, token).ConfigureAwait(false))
         {
@@ -169,6 +176,8 @@ internal static class PhysicalShardPartitionMovementRf3Flow
     internal static async Task VerifyAsync(PartitionMovementPublicParentRf3Seed[] seeds, CancellationToken token)
     {
         foreach (var seed in seeds)
-        { await seed.VerifyAsync(token).ConfigureAwait(false); }
+        {
+            await seed.VerifyAsync(token).ConfigureAwait(false);
+        }
     }
 }

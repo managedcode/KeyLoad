@@ -1,6 +1,6 @@
 using System.Text;
 using System.Text.Json;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server.Features.ClusterRouting;
 using Microsoft.Extensions.Options;
 
@@ -49,11 +49,15 @@ internal sealed class NativeDiscoveryOmissionJson
             || value.SourceSiloAddress == value.TargetSiloAddress
             || value.Stage is not (NativeDiscoveryOmissionProtocol.SourceStage
                 or NativeDiscoveryOmissionProtocol.OmittedStage or NativeDiscoveryOmissionProtocol.VerifiedStage))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         if (value.Stage == NativeDiscoveryOmissionProtocol.SourceStage
             ? value.RuntimeJournalReaderContract is not null || value.ProducerVoter is not null
             : value.RuntimeJournalReaderContract != KeyLoad.Storage.StoreReaderContract.Unspecified || value.ProducerVoter != value.TargetVoter)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         return value;
     }
     internal byte[] Write(NativeDiscoveryOmissionWitness value)
@@ -70,14 +74,20 @@ internal sealed class NativeDiscoveryOmissionJson
             || string.IsNullOrWhiteSpace(value.SourceVoter) || string.IsNullOrWhiteSpace(value.TargetVoter)
             || Utf8.GetByteCount(value.SourceVoter) > options.Value.MaximumPrincipalBytes
             || Utf8.GetByteCount(value.TargetVoter) > options.Value.MaximumPrincipalBytes)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
     }
     private static bool CanonicalAddress(string value)
     {
         if (string.IsNullOrWhiteSpace(value) || value.Length > ReplicaTransportProtocol.MaximumAddressCharacters)
-        { return false; }
+        {
+            return false;
+        }
         try
-        { return SiloAddress.FromParsableString(value).ToParsableString() == value; }
+        {
+            return SiloAddress.FromParsableString(value).ToParsableString() == value;
+        }
         catch (Exception error) when (error is ArgumentException or FormatException) { return false; }
     }
     private static InvalidOperationException Invalid() => new(NativeDiscoveryOmissionProtocol.Invalid);

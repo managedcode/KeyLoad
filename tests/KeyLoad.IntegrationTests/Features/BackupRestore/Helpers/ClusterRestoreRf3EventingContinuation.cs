@@ -21,7 +21,10 @@ internal static class ClusterRestoreRf3EventingContinuation
             McpCallerTools.SubscriptionsSeek, seek, cancellationToken).ConfigureAwait(false);
         var unpause = new SetSubscriptionPausedRequest(Guid.NewGuid(), state.Group,
             ClusterRestoreRf3EventingProtocol.ReconciledGeneration, false);
-        await ClusterRestoreRf3EventingReadOracle.FourAsync(expected with { Paused = false },
+        await ClusterRestoreRf3EventingReadOracle.FourAsync(expected with
+        {
+            Paused = false
+        },
             await McpCallerAssertions.SdkSuccessAsync(await sdk.SetSubscriptionPausedAsync(unpause,
             cancellationToken).ConfigureAwait(false)), sdk, official, state.Partition,
             McpCallerTools.SubscriptionsPause, unpause, cancellationToken).ConfigureAwait(false);
@@ -42,7 +45,9 @@ internal static class ClusterRestoreRf3EventingContinuation
             cancellationToken).ConfigureAwait(false));
         await ClusterRestoreRf3EventingReceiveOracle.GroupAsync(request, state, owner, received, healthy: false);
         for (var index = ClusterRestoreRf3EventingProtocol.FirstIndex; index < received.Deliveries.Length; index++)
-        { await SqlRf3Protocol.EqualAsync(state.Page.Events[index], received.Deliveries[index].Event); }
+        {
+            await SqlRf3Protocol.EqualAsync(state.Page.Events[index], received.Deliveries[index].Event);
+        }
         await ClusterRestoreRf3EventingReadOracle.FourAsync(received, received, sdk, official, state.Partition,
             McpCallerTools.SubscriptionsReceive, request, cancellationToken).ConfigureAwait(false);
         var process = new SubscriptionProcessingRequest(Guid.NewGuid(), state.Group,

@@ -27,7 +27,10 @@ internal sealed record RemoteDocumentRf3Seed(PrincipalRecord Principal, string S
         var credential = new ApiKeyRecord(keyId, id,
             Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(secret))));
         await PersistAsync(source, principal, credential, token).ConfigureAwait(false);
-        await PersistAsync(destination, principal with { Grants = [] }, credential, token).ConfigureAwait(false);
+        await PersistAsync(destination, principal with
+        {
+            Grants = []
+        }, credential, token).ConfigureAwait(false);
         var commandId = Guid.NewGuid();
         var command = new CommandRequest(commandId, RemoteDocumentRf3Protocol.Partition,
             [new PutDocument(RemoteDocumentRf3Protocol.Collection, RemoteDocumentRf3Protocol.Document,
@@ -44,7 +47,9 @@ internal sealed record RemoteDocumentRf3Seed(PrincipalRecord Principal, string S
     {
         var resource = new ResourceDefinition(RemoteDocumentRf3Protocol.Collection, ResourceKind.Collection,
             RemoteDocumentRf3Protocol.Domain)
-        { FieldPolicies = [new(RemoteDocumentRf3Protocol.Secret, RemoteDocumentRf3Protocol.Classification)] };
+        {
+            FieldPolicies = [new(RemoteDocumentRf3Protocol.Secret, RemoteDocumentRf3Protocol.Classification)]
+        };
         await McpCallerAssertions.SdkSuccessAsync(await sdk.ConfigureResourceAsync(Guid.NewGuid(),
             new(RemoteDocumentRf3Protocol.Tenant, RemoteDocumentRf3Protocol.Database, resource), token));
     }
@@ -59,7 +64,10 @@ internal sealed record RemoteDocumentRf3Seed(PrincipalRecord Principal, string S
 
     internal async Task GrantDestinationAsync(KeyLoadClient sdk, CancellationToken token)
     {
-        var expected = Principal with { PolicyEpoch = RemoteDocumentRf3Protocol.GrantedPolicyEpoch };
+        var expected = Principal with
+        {
+            PolicyEpoch = RemoteDocumentRf3Protocol.GrantedPolicyEpoch
+        };
         var actual = await McpCallerAssertions.SdkSuccessAsync(await sdk.ConfigurePrincipalAsync(Guid.NewGuid(), expected, token));
         await Assert.That(NativeSerialization.Serialize(actual).SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
     }

@@ -21,7 +21,9 @@ internal static class ReplicaIsolationModelAssertions
         var model = app.Services.GetRequiredService<DistributedApplicationModel>();
         var resources = model.Resources.OfType<ContainerResource>().ToArray();
         if (resources.Length != plan.Targets.Count)
-        { throw new InvalidOperationException("The native fault model must retain exactly the admitted voter cohort."); }
+        {
+            throw new InvalidOperationException("The native fault model must retain exactly the admitted voter cohort.");
+        }
         foreach (var target in plan.Targets)
         {
             var node = resources.Single(resource => resource.Name == target.ResourceName);
@@ -34,15 +36,21 @@ internal static class ReplicaIsolationModelAssertions
                 || annotation.BuildArguments[ReplicaIsolationComposition.SourceArgument] is not string digest || digest != plan.DockerfileSha256
                 || !node.TryGetContainerImageName(useBuiltImage: false, out var baseImage) || baseImage != plan.NativeBaseImage
                 || !node.TryGetContainerImageName(useBuiltImage: true, out var builtImage) || builtImage != target.ImageReference)
-            { throw new InvalidOperationException("The native fault build context or authenticated image identity changed before startup."); }
+            {
+                throw new InvalidOperationException("The native fault build context or authenticated image identity changed before startup.");
+            }
             var arguments = new List<object>();
             var context = new ContainerRuntimeArgsCallbackContext(arguments, cancellationToken);
             foreach (var callback in node.Annotations.OfType<ContainerRuntimeArgsCallbackAnnotation>())
-            { await callback.Callback(context).ConfigureAwait(false); }
+            {
+                await callback.Callback(context).ConfigureAwait(false);
+            }
             object[] expected = [User, target.ServiceUser, ReplicaIsolationComposition.Capability,
                 Label + ReplicaIsolationComposition.IncarnationLabel + "=" + plan.Incarnation.ToString(GuidFormat)];
             if (!arguments.SequenceEqual(expected))
-            { throw new InvalidOperationException("Only the unchanged native service user and selected NET_ADMIN/identity label are admitted."); }
+            {
+                throw new InvalidOperationException("Only the unchanged native service user and selected NET_ADMIN/identity label are admitted.");
+            }
         }
     }
 }

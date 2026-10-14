@@ -1,9 +1,9 @@
 using System.Collections.Immutable;
 using System.Security.Cryptography;
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.GraphTraversal;
 using KeyLoad.Core.Features.GraphTraversal.Serialization;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.Server.Features.GraphTraversal;
 
@@ -15,7 +15,9 @@ internal static class RemoteGraphParentDelivery
         CancellationToken token)
     {
         if (source?.Original?.Original is null || source.Receipt is null || source.Intents.IsDefaultOrEmpty)
-        { throw Errors.Fail(ErrorCode.Corruption, RemoteGraphNativeProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, RemoteGraphNativeProtocol.InvalidProof);
+        }
         var results = ImmutableArray.CreateBuilder<RemoteGraphDeliveryResultV1>(source.Intents.Length);
         foreach (var intent in source.Intents)
         {
@@ -39,7 +41,9 @@ internal static class RemoteGraphParentDelivery
             if (completed?.Original is null || completed.Receipt?.CommandId != completeId
                 || completed.Original.CommandId != completeId
                 || !Same(completed.Original.Receipt, received.Receipt, partition, work))
-            { throw Errors.Fail(ErrorCode.Corruption, RemoteGraphNativeProtocol.InvalidProof); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, RemoteGraphNativeProtocol.InvalidProof);
+            }
             results.Add(new(intent.Content.Destination, intent.Content.Revision, intent.Content.Deleted,
                 received.Receipt.TargetReceipt, completed.Receipt));
         }
@@ -53,7 +57,9 @@ internal static class RemoteGraphParentDelivery
             || actual.Receipt.TargetReceipt?.CommandId != expectedId || actual.Original.CommandId != expectedId
             || !Same(actual.Receipt.Intent, intent, partition, work)
             || !Same(actual.Original.SourceProof.Intent, intent, partition, work))
-        { throw Errors.Fail(ErrorCode.Corruption, RemoteGraphNativeProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, RemoteGraphNativeProtocol.InvalidProof);
+        }
     }
 
     private static bool Same<T>(T left, T right, PartitionHost partition, ReadExecutionBudget work)
@@ -63,7 +69,9 @@ internal static class RemoteGraphParentDelivery
         {
             var b = RemoteGraphNativeResultEncoding.Encode(right, partition.Database.Limits.MaxBatchBytes, work);
             try
-            { return a.Span.SequenceEqual(b.Span); }
+            {
+                return a.Span.SequenceEqual(b.Span);
+            }
             finally { CryptographicOperations.ZeroMemory(System.Runtime.InteropServices.MemoryMarshal.AsMemory(b).Span); }
         }
         finally { CryptographicOperations.ZeroMemory(System.Runtime.InteropServices.MemoryMarshal.AsMemory(a).Span); }

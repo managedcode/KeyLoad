@@ -17,7 +17,9 @@ internal static class AuthenticationExecutionCold
             await Assert.That(originalOwners.All(owner => owner.IsJoined)).IsTrue();
             await Assert.That(hosts.Nodes.Count).IsEqualTo(originalOwners.Length);
             for (var index = AuthenticationExecutionProtocol.NoEvents; index < identities.Length; index++)
-            { await Assert.That(NativeSerialization.Serialize(hosts.Nodes[index].Store.Identity).AsSpan().SequenceEqual(identities[index])).IsTrue(); }
+            {
+                await Assert.That(NativeSerialization.Serialize(hosts.Nodes[index].Store.Identity).AsSpan().SequenceEqual(identities[index])).IsTrue();
+            }
             using var rootHttp = new HttpClient { BaseAddress = new(hosts.Source.Runtime.Node.Value.PublicEndpoint), Timeout = Timeout.InfiniteTimeSpan };
             var root = new KeyLoadClient(rootHttp, hosts.Source.Runtime.Node.Value.AdminKey, IntegrationClientOptions.Execution());
             await AuthenticationExecutionValues.ReplayAsync(root, state, token);

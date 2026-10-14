@@ -20,7 +20,10 @@ internal static class ChunkManifestCardinalityTrial
         await ChunkManifestTagInventoryAssertions.OnlyOwnedRowChanged(fixture, originalCut, damaged);
         await ChunkSelectedIntegrityDamage.Refuse(fixture);
         ChunkSelectedIntegrityDamage.Put(fixture, original);
-        await SampleRawIntegrityAssertions.UnchangedAsync(fixture.Store, originalCut with { Position = originalCut.Position + 2 });
+        await SampleRawIntegrityAssertions.UnchangedAsync(fixture.Store, originalCut with
+        {
+            Position = originalCut.Position + 2
+        });
         await ChunkSelectedIntegrityAssertions.Healthy(fixture, final: false);
         await ChunkSelectedIntegrityAssertions.Replay(fixture);
         fixture.Apply(fixture.Merge);
@@ -46,7 +49,10 @@ internal static class ChunkManifestCardinalityTrial
         var envelope = NativeSerialization.Deserialize<SampleChunkManifestEnvelope>(original);
         var manifest = NativeSerialization.Deserialize<SampleChunkManifest>(envelope.Encoded.Span);
         await Assert.That(manifest.RecordCount).IsEqualTo(2);
-        var bytes = NativeSerialization.Serialize(manifest with { RecordCount = 1 });
+        var bytes = NativeSerialization.Serialize(manifest with
+        {
+            RecordCount = 1
+        });
         ChunkSelectedIntegrityDamage.Put(fixture,
             NativeSerialization.Serialize(new SampleChunkManifestEnvelope(bytes, SHA256.HashData(bytes))));
         return original;

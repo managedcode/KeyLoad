@@ -25,7 +25,9 @@ internal static class QueueDispatchCasRf3Callers
                     return pending;
                 }, failures);
                 if (original is { IsCompletedSuccessfully: true } completed)
-                { result = await completed; }
+                {
+                    result = await completed;
+                }
             }, failures);
         }, failures);
         global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);

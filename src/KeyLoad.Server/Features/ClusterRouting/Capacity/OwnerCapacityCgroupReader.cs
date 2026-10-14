@@ -15,7 +15,9 @@ internal static class OwnerCapacityCgroupReader
         TimeProvider clock, IOptions<TenantPlacementExecutionOptions> options, CancellationToken token)
     {
         if (!OperatingSystem.IsLinux())
-        { return null; }
+        {
+            return null;
+        }
         var sampledAt = clock.GetUtcNow();
         try
         {
@@ -27,22 +29,30 @@ internal static class OwnerCapacityCgroupReader
                 || !OwnerCapacityCgroupValues.Memory(memory, maximum, out var used, out var limit)
                 || !OwnerCapacityCgroupValues.CpuLimit(cpu, out var quota, out var period)
                 || !OwnerCapacityCgroupValues.CpuUsage(usage, out var consumed))
-            { return null; }
+            {
+                return null;
+            }
             var cpuTimestamp = clock.GetTimestamp();
             var disk = new DriveInfo(ownerDirectory);
             var total = disk.TotalSize;
             var available = disk.AvailableFreeSpace;
             if (!disk.IsReady || total <= NoBytes || available < NoBytes || available > total)
-            { return null; }
+            {
+                return null;
+            }
             var domain = await HostDomainAsync(options, token).ConfigureAwait(false);
             token.ThrowIfCancellationRequested();
             return new(cpuTimestamp, sampledAt, available, total, used, limit,
                 consumed, quota, period, domain);
         }
         catch (IOException)
-        { return null; }
+        {
+            return null;
+        }
         catch (UnauthorizedAccessException)
-        { return null; }
+        {
+            return null;
+        }
     }
 
     private static async Task<string?> HostDomainAsync(IOptions<TenantPlacementExecutionOptions> options, CancellationToken token)
@@ -54,8 +64,12 @@ internal static class OwnerCapacityCgroupReader
                 ? native.ToString(HostIdentityFormat) : null;
         }
         catch (IOException)
-        { return null; }
+        {
+            return null;
+        }
         catch (UnauthorizedAccessException)
-        { return null; }
+        {
+            return null;
+        }
     }
 }

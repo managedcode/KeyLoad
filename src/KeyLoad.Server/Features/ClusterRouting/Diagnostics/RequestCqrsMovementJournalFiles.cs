@@ -18,12 +18,16 @@ internal sealed class RequestCqrsMovementJournalFiles(string root, string sessio
             RequestCqrsMovementJournalInventory.RequireArm(value, claim.Arm.Record);
             RequestCqrsMovementJournalInventory.RequireMarker(value, marker);
             if (value.SessionId != sessionId)
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             records.ValidateMarker(marker, snapshot, null);
             var name = RequestCqrsMovementJournalInventory.Name(value.ArmId, value.RequestId);
             var bytes = JsonSerializer.SerializeToUtf8Bytes(value, json.MovementJournalTypeInfo);
             if (bytes.Length > options.Value.MaximumRecordBytes)
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             var markerName = RequestCqrsProbeFiles.MarkerName(marker);
             var markerBytes = json.WriteMarker(marker);
             RequestCqrsProbeBatchPublication.Write(root, [(name, bytes), (markerName, markerBytes)],
@@ -40,7 +44,9 @@ internal sealed class RequestCqrsMovementJournalFiles(string root, string sessio
         var value = json.Read(bytes, RequestCqrsMovementJournalInventory.Fields, json.MovementJournalTypeInfo);
         RequestCqrsMovementJournalInventory.Require(value);
         if (value.SessionId != sessionId || RequestCqrsMovementJournalInventory.Name(value.ArmId, value.RequestId) != name)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         records.RegisterImmutable(name, bytes);
         presentControls.Add(name);
         values.Add(value);

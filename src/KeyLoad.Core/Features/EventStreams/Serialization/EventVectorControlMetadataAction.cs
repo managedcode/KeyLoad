@@ -14,7 +14,9 @@ internal static class EventVectorControlMetadataAction
             || !document.RootElement.TryGetProperty(ActionField, out var action)
             || action.ValueKind != JsonValueKind.String
             || !Enum.TryParse<EventVectorControlAction>(action.GetString(), out var value) || !Enum.IsDefined(value))
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
         return value;
     }
 }

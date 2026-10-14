@@ -17,7 +17,9 @@ internal sealed class ExistingStoreInspectorLifetime : IAsyncDisposable
     private string assemblySha256 = string.Empty;
     private bool canceled;
 
-    private ExistingStoreInspectorLifetime() { }
+    private ExistingStoreInspectorLifetime()
+    {
+    }
 
     internal static async Task<ExistingStoreInspectorExit> RunAsync(string payload, string outerOwnerPath,
         bool cancelWhenReady, CancellationToken cancellationToken)
@@ -107,7 +109,10 @@ internal sealed class ExistingStoreInspectorLifetime : IAsyncDisposable
         await owner!.DisposeAsync();
         if (result is not null)
         {
-            result = result with { OuterOwnerReleased = ownerHandle!.IsClosed };
+            result = result with
+            {
+                OuterOwnerReleased = ownerHandle!.IsClosed
+            };
         }
     }
 

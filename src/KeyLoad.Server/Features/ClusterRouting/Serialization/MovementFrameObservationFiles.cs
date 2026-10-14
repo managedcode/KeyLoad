@@ -28,7 +28,9 @@ internal sealed class MovementFrameObservationFiles
         ownerBytes = RequestCqrsProbeFiles.ReadRecord(Path.Combine(root, MovementFrameObservationProtocol.OwnerFile), options);
         var owner = json.ReadOwner(ownerBytes);
         if (!enrollment.Enabled || owner.SessionId != session || owner.Voter != voter)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         _ = ReadInventory();
     }
 
@@ -41,15 +43,21 @@ internal sealed class MovementFrameObservationFiles
             if (!File.Exists(path))
             {
                 if (selectedBytes is not null)
-                { throw Invalid(); }
+                {
+                    throw Invalid();
+                }
                 return null;
             }
             var bytes = RequestCqrsProbeFiles.ReadRecord(path, options);
             if (selectedBytes is not null && !CryptographicOperations.FixedTimeEquals(selectedBytes, bytes))
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             var value = json.ReadSelection(bytes);
             if (value.SessionId != session)
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             selectedBytes ??= bytes;
             return value;
         }
@@ -64,7 +72,9 @@ internal sealed class MovementFrameObservationFiles
                 || value.MoveId != selection.MoveId || value.Partition != selection.Partition
                 || value.OperatorPrincipalId != selection.OperatorPrincipalId
                 || value.PhysicalShardId != selection.PhysicalShardId || value.Incarnation != selection.Incarnation)
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             var bytes = json.WriteObservation(value);
             RequestCqrsProbeAtomicFiles.Write(root, Path.Combine(root, MovementFrameObservationProtocol.ObservationFile),
                 bytes, options, ReadInventory);
@@ -77,29 +87,41 @@ internal sealed class MovementFrameObservationFiles
         RequestCqrsProbePaths.RequireDirectory(root, MovementFrameObservationProtocol.FixedRoot);
         var currentOwner = RequestCqrsProbeFiles.ReadRecord(Path.Combine(root, MovementFrameObservationProtocol.OwnerFile), options);
         if (!CryptographicOperations.FixedTimeEquals(ownerBytes, currentOwner))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         var entries = Directory.EnumerateFileSystemEntries(root).Take(options.Value.MaximumFiles + InventoryOverflowStep).ToArray();
         if (entries.Length > options.Value.MaximumFiles)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         var bytes = InitialAggregateBytes;
         foreach (var path in entries)
         {
             var name = Path.GetFileName(path);
             if (!KnownName(name))
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             if (name == MovementFrameObservationProtocol.ObservationFile)
             {
                 var actual = RequestCqrsProbeFiles.ReadRecord(path, options);
                 if (observedBytes is null || !CryptographicOperations.FixedTimeEquals(observedBytes, actual))
-                { throw Invalid(); }
+                {
+                    throw Invalid();
+                }
             }
             var identity = OfflineRegularFile.Inspect(path);
             RequestCqrsProbePaths.RequirePrivateMode(path, RequestCqrsProbeProtocol.PrivateFileMode);
             if (identity.Length > options.Value.MaximumRecordBytes)
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             bytes = checked(bytes + identity.Length);
             if (bytes > options.Value.MaximumAggregateBytes)
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
         }
         return new([], [], [], entries.Length, bytes);
     }

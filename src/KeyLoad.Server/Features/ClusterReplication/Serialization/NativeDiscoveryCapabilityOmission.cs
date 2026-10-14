@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Features.InternalSerialization;
-using KeyLoad.Orleans;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Server;
@@ -10,7 +10,9 @@ internal static class NativeDiscoveryCapabilityOmission
     {
         if (original.IsEmpty || original.Length > ReplicaTransportProtocol.MaximumDiscoveryBytes
             || expected.RuntimeJournalReaderContract != StoreReaderContract.RuntimeJournal)
-        { throw NativeDiscoveryCapabilityField.Invalid(); }
+        {
+            throw NativeDiscoveryCapabilityField.Invalid();
+        }
         RequireOriginal(expected, NativeSerialization.Deserialize<ReplicaSiloDiscovery>(original.Span));
         var context = NativeSerializerProviders.Get(typeof(ReplicaSiloDiscovery));
         NativeDiscoveryCapabilityField.Span field;
@@ -25,13 +27,19 @@ internal static class NativeDiscoveryCapabilityOmission
         using (var session = context.Sessions.GetSession())
         {
             if (NativeDiscoveryCapabilityField.Find(omitted, session) is not null)
-            { throw NativeDiscoveryCapabilityField.Invalid(); }
+            {
+                throw NativeDiscoveryCapabilityField.Invalid();
+            }
         }
         var decoded = NativeSerialization.Deserialize<ReplicaSiloDiscovery>(omitted);
         if (decoded.RuntimeJournalReaderContract != StoreReaderContract.Unspecified)
-        { throw NativeDiscoveryCapabilityField.Invalid(); }
+        {
+            throw NativeDiscoveryCapabilityField.Invalid();
+        }
         RequireOriginal(expected, decoded with
-        { RuntimeJournalReaderContract = expected.RuntimeJournalReaderContract });
+        {
+            RuntimeJournalReaderContract = expected.RuntimeJournalReaderContract
+        });
         return omitted;
     }
 
@@ -43,6 +51,8 @@ internal static class NativeDiscoveryCapabilityOmission
             || actual.ApplicationRpcVersion != expected.ApplicationRpcVersion
             || actual.PeerEnvelopeVersion != expected.PeerEnvelopeVersion
             || actual.RuntimeJournalReaderContract != expected.RuntimeJournalReaderContract)
-        { throw NativeDiscoveryCapabilityField.Invalid(); }
+        {
+            throw NativeDiscoveryCapabilityField.Invalid();
+        }
     }
 }

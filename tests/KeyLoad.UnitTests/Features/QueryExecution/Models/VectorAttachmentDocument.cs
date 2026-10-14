@@ -10,5 +10,8 @@ internal sealed record VectorAttachmentDocument([property: JsonPropertyName(Vect
 
     [JsonPropertyName(VectorProperty)]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-    public ImmutableArray<float> Embedding { get; init; }
+    public ImmutableArray<float> Embedding
+    {
+        get; init;
+    }
 }

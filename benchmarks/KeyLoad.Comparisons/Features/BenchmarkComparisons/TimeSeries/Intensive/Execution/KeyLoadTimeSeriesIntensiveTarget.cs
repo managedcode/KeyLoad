@@ -10,7 +10,10 @@ internal sealed partial class KeyLoadTimeSeriesIntensiveTarget(KeyLoadTimeSeries
     internal long MaximumValidatedAcknowledgementPosition =>
         Interlocked.Read(ref maximumValidatedAcknowledgementPosition);
 
-    internal KeyLoadTimeSeriesIntensiveContext Context { get; } =
+    internal KeyLoadTimeSeriesIntensiveContext Context
+    {
+        get;
+    } =
         context ?? throw new ArgumentNullException(nameof(context));
 
     public ValueTask DisposeAsync()

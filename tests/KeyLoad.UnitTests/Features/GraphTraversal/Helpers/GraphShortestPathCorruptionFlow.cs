@@ -70,7 +70,12 @@ internal static class GraphShortestPathCorruptionFlow
             GraphShortestPathCorruptionCase.ForeignTarget => expected with
             {
                 To = expected.To with
-                { Partition = expected.To.Partition with { PartitionKey = OtherPartitionKey } }
+                {
+                    Partition = expected.To.Partition with
+                    {
+                        PartitionKey = OtherPartitionKey
+                    }
+                }
             },
             GraphShortestPathCorruptionCase.InvalidLabel => expected with { Label = string.Empty },
             GraphShortestPathCorruptionCase.InvalidTargetId => expected with { To = expected.To with { Id = string.Empty } },

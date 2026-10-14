@@ -12,7 +12,9 @@ internal static class EventingArtifactFixtureLifetime
         try
         {
             if (failures.Count == 0)
-            { fatal ??= await TestDatabaseJoinedLifetime.ObserveAsync(() => operation(fixture), failures); }
+            {
+                fatal ??= await TestDatabaseJoinedLifetime.ObserveAsync(() => operation(fixture), failures);
+            }
         }
         finally
         {
@@ -25,9 +27,13 @@ internal static class EventingArtifactFixtureLifetime
             }
         }
         if (failures.Count == 0)
-        { fatal ??= TestDatabaseJoinedLifetime.Observe(() => Directory.Delete(fixture.Root, true), failures); }
+        {
+            fatal ??= TestDatabaseJoinedLifetime.Observe(() => Directory.Delete(fixture.Root, true), failures);
+        }
         foreach (var failure in failures)
-        { failure.Data[RootEvidenceKey] = fixture.Root; }
+        {
+            failure.Data[RootEvidenceKey] = fixture.Root;
+        }
         TestDatabaseJoinedLifetime.ThrowIfAny(failures, fatal);
     }
 

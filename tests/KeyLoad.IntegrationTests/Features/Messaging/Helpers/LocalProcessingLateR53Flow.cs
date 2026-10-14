@@ -41,7 +41,13 @@ internal static class LocalProcessingLateR53Flow
             state.OutputReceipt = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitProcessingAsync(state.OutputProcessing, token));
             await LocalProcessingLateR53Current.ReceiptAsync(state, state.OutputReceipt, state.OutputProcessing.CommandId,
                 [new(LocalProcessingLateR53Protocol.AckKind, state.Output.Queue, LocalProcessingLateR53Protocol.Message, 3L)]);
-            state.OutputImage = new(state.OutputImage.Metadata with { State = MessageState.Acked, StateVersion = 3, LeaseOwner = null, LeaseUntil = null }, null, null);
+            state.OutputImage = new(state.OutputImage.Metadata with
+            {
+                State = MessageState.Acked,
+                StateVersion = 3,
+                LeaseOwner = null,
+                LeaseUntil = null
+            }, null, null);
             await LocalProcessingLateR53Current.RunAsync(state, sdk, mcp, admin, official, token);
             await InboxProcessingRf3Assertions.EqualAsync((await McpCallerAssertions.SuccessAsync<CommitReceipt>(
                 await mcp.CallAsync(McpCallerTools.MessagesProcess, state.OutputProcessing, token))).Value, state.OutputReceipt);

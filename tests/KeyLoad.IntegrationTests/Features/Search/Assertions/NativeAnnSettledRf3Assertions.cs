@@ -46,7 +46,10 @@ internal static class NativeAnnSettledRf3Assertions
         await Assert.That(string.IsNullOrEmpty(before.Token)).IsFalse();
         await Assert.That(string.IsNullOrEmpty(after.Token)).IsFalse();
         // The signed read token has its own fresh expiry. All persisted state and page content remain exact.
-        await ExactAsync(before with { Token = after.Token }, after);
+        await ExactAsync(before with
+        {
+            Token = after.Token
+        }, after);
     }
 
     internal static async Task ExactAsync<T>(T expected, T actual)

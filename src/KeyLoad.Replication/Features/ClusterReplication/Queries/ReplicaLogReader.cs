@@ -23,7 +23,9 @@ internal static class ReplicaLogReader
         {
             var entry = load(index);
             if (ReplicaProtocolCodec.MeasureEntries([entry]) > maxBytes)
-            { throw Errors.Fail(ErrorCode.ResourceExhausted, ReplicaPersistence.ReadLimit); }
+            {
+                throw Errors.Fail(ErrorCode.ResourceExhausted, ReplicaPersistence.ReadLimit);
+            }
             entries.Add(entry);
             if (ReplicaProtocolCodec.MeasureEntries(entries) > maxBytes)
             {
@@ -31,7 +33,9 @@ internal static class ReplicaLogReader
                 break;
             }
             if (index == long.MaxValue)
-            { break; }
+            {
+                break;
+            }
             index++;
         }
         return [.. entries];

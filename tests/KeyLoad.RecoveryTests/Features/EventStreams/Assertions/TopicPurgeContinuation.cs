@@ -12,7 +12,11 @@ internal static class TopicPurgeContinuation
             var id = Guid.NewGuid();
             var request = new CommandRequest(id, TopicPurgeCrashContract.Partition, [new PublishTopic(TopicPurgeCrashContract.Topic,
                 [changed ? new("event1", "Created", "{\"n\":99}") : TopicPurgeCrashContract.Event(1)])]);
-            var operation = original with { Id = id, PayloadJson = JsonSerializer.Serialize(request, JsonDefaults.Options) };
+            var operation = original with
+            {
+                Id = id,
+                PayloadJson = JsonSerializer.Serialize(request, JsonDefaults.Options)
+            };
             var position = database.Store.Position;
             var protectedBytes = TopicPurgeCrashScenario.ProtectedBytes(database.Store);
             var outcome = database.Apply(operation);
@@ -23,7 +27,11 @@ internal static class TopicPurgeContinuation
         }
         var healthy = new CommandRequest(TopicPurgeCrashContract.HealthyId, TopicPurgeCrashContract.Partition,
             [new PublishTopic(TopicPurgeCrashContract.Topic, [TopicPurgeCrashContract.Event(4)])]);
-        var healthyOperation = original with { Id = healthy.CommandId, PayloadJson = JsonSerializer.Serialize(healthy, JsonDefaults.Options) };
+        var healthyOperation = original with
+        {
+            Id = healthy.CommandId,
+            PayloadJson = JsonSerializer.Serialize(healthy, JsonDefaults.Options)
+        };
         var receipt = database.Apply(healthyOperation).Get<CommitReceipt>();
         await Assert.That(receipt.Mutations.Single()).IsEqualTo(new MutationReceipt("publishTopic", TopicPurgeCrashContract.Topic, "event4", 4));
         var page = database.ReadEventSource("root", new(TopicPurgeCrashContract.Source, AfterPosition: 3));

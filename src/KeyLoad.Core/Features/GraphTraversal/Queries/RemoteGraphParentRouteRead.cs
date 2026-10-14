@@ -29,12 +29,16 @@ public sealed partial class DatabaseEngine
             var directory = ReadRemoteGraphControlDirectory(bounded, configuredControl);
             var actualSource = RouteRemoteGraphOwner(directory, ReadPlacementWitness(bounded, source));
             if (!PhysicalOwnerEntryValidation.SameOwner(actualSource.Owner, configuredControl))
-            { throw Errors.Fail(ErrorCode.OwnershipLost, RemoteGraphProtocol.MissingAuthority); }
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, RemoteGraphProtocol.MissingAuthority);
+            }
             var actualTarget = destination is null ? null : RouteRemoteGraphOwner(directory,
                 ResolveRegisteredPlacement(bounded, destination.Partition, configuredControl));
             if (actualTarget is not null
                 && PhysicalOwnerEntryValidation.SameOwner(actualSource.Owner, actualTarget.Owner))
-            { throw Errors.Fail(ErrorCode.UnsupportedCapability, RemoteGraphProtocol.Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.UnsupportedCapability, RemoteGraphProtocol.Invalid);
+            }
             return new RemoteGraphParentRouteV1(actualSource, actualTarget, directory);
         });
         work.CheckResult(result);

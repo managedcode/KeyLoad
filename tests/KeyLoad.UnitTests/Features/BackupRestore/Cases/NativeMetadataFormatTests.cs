@@ -185,7 +185,16 @@ internal sealed class NativeMetadataFormatTests
         await Assert.That(Directory.Exists(fixture.RestoredDirectory)).IsFalse();
     }
 
-    internal enum IdentityDefect { WrongType, NullRoot, NullPayload, NullChecksum, ChecksumMismatch, EmptyNode, EmptyIncarnation, EmptySigningKey, PayloadTrailing, FileTrailing, Truncated, UnsupportedVersion, UnsupportedCodec }
-    internal enum ManifestDefect { WrongType, NullRoot, NullFiles, NullEntry, NullChecksum, Trailing, Truncated, UnsupportedVersion }
-    internal enum CheckpointDefect { WrongType, NullRoot, EmptyIncarnation, UnsupportedVersion, UnsupportedCodec, Trailing, Truncated }
+    internal enum IdentityDefect
+    {
+        WrongType, NullRoot, NullPayload, NullChecksum, ChecksumMismatch, EmptyNode, EmptyIncarnation, EmptySigningKey, PayloadTrailing, FileTrailing, Truncated, UnsupportedVersion, UnsupportedCodec
+    }
+    internal enum ManifestDefect
+    {
+        WrongType, NullRoot, NullFiles, NullEntry, NullChecksum, Trailing, Truncated, UnsupportedVersion
+    }
+    internal enum CheckpointDefect
+    {
+        WrongType, NullRoot, EmptyIncarnation, UnsupportedVersion, UnsupportedCodec, Trailing, Truncated
+    }
 }

@@ -9,7 +9,9 @@ internal static class PostgresErrorReceiverFiles
     {
         RequireInventory(root);
         if (bytes.Length > RequestCqrsProbeFixtureProtocol.MaximumRecordBytes)
-        { throw new InvalidOperationException(PostgresErrorReceiverProtocol.Invalid); }
+        {
+            throw new InvalidOperationException(PostgresErrorReceiverProtocol.Invalid);
+        }
         var failures = new List<Exception>();
         ServerFailureObserver.Observe(() =>
         {
@@ -30,7 +32,9 @@ internal static class PostgresErrorReceiverFiles
             ServerFailureObserver.Observe(() =>
             {
                 if (input.Length <= PostgresRf3Protocol.FirstColumn || input.Length > RequestCqrsProbeFixtureProtocol.MaximumRecordBytes)
-                { throw new InvalidOperationException(PostgresErrorReceiverProtocol.Invalid); }
+                {
+                    throw new InvalidOperationException(PostgresErrorReceiverProtocol.Invalid);
+                }
                 result = new byte[checked((int)input.Length)];
                 input.ReadExactly(result);
             }, failures);
@@ -43,10 +47,14 @@ internal static class PostgresErrorReceiverFiles
     {
         var info = new DirectoryInfo(root);
         if (!info.Exists || (info.Attributes & FileAttributes.ReparsePoint) != default(FileAttributes))
-        { throw new InvalidOperationException(PostgresErrorReceiverProtocol.Invalid); }
+        {
+            throw new InvalidOperationException(PostgresErrorReceiverProtocol.Invalid);
+        }
         var files = info.EnumerateFileSystemInfos().Take(RequestCqrsProbeFixtureProtocol.MaximumFilesPerVoter + 1).ToArray();
         if (files.Length > RequestCqrsProbeFixtureProtocol.MaximumFilesPerVoter)
-        { throw new InvalidOperationException(PostgresErrorReceiverProtocol.Invalid); }
+        {
+            throw new InvalidOperationException(PostgresErrorReceiverProtocol.Invalid);
+        }
         long total = PostgresRf3Protocol.FirstColumn;
         foreach (var item in files)
         {
@@ -54,10 +62,14 @@ internal static class PostgresErrorReceiverFiles
                 || file.Length > RequestCqrsProbeFixtureProtocol.MaximumRecordBytes
                 || file.Name != PostgresErrorDeliveryProtocol.Owner && file.Name != PostgresErrorDeliveryProtocol.Arm
                     && !file.Name.StartsWith(PostgresErrorDeliveryProtocol.WitnessPrefix, StringComparison.Ordinal))
-            { throw new InvalidOperationException(PostgresErrorReceiverProtocol.Invalid); }
+            {
+                throw new InvalidOperationException(PostgresErrorReceiverProtocol.Invalid);
+            }
             total = checked(total + file.Length);
             if (total > RequestCqrsProbeFixtureProtocol.MaximumVoterBytes)
-            { throw new InvalidOperationException(PostgresErrorReceiverProtocol.Invalid); }
+            {
+                throw new InvalidOperationException(PostgresErrorReceiverProtocol.Invalid);
+            }
         }
     }
 }

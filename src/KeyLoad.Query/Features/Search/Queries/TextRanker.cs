@@ -33,7 +33,8 @@ internal sealed class TextRanker
     public TextRanker(string query, string field, ReadExecutionBudget budget, int budgetCheckInterval,
         int maximumDocumentWords, int maximumWordCharacters)
         : this(query, field, budget, budgetCheckInterval, maximumDocumentWords, maximumWordCharacters, true)
-    { }
+    {
+    }
 
     internal static TextRanker ForStatistics(string query, string field, ReadExecutionBudget budget,
         int budgetCheckInterval, int maximumDocumentWords, int maximumWordCharacters)

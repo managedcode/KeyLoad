@@ -29,7 +29,7 @@ internal sealed class ZoneTreeStoreRuntime : IDisposable
                 Checkpoints = new(this);
                 Backups = new(this);
                 ZoneTreeStoreInitializer.Open(this);
-                EmbeddedPointCache = OpenPointCache();
+                EmbeddedPointCache = ZoneTreeStorePointCacheOpening.Open(this);
             }
             catch (Exception)
             {
@@ -53,25 +53,52 @@ internal sealed class ZoneTreeStoreRuntime : IDisposable
         }
     }
 
-    internal ZoneTreeStoreOptions Options { get; }
-    internal TimeProvider Clock { get; }
+    internal ZoneTreeStoreOptions Options
+    {
+        get;
+    }
+    internal TimeProvider Clock
+    {
+        get;
+    }
 
     internal ReaderWriterLockSlim Gate { get; } = new();
     internal ZoneTreeReadCutLifecycle NativeReadCuts { get; } = new();
     internal FileStream Ownership { get; set; } = null!;
     internal FileStream Journal { get; set; } = null!;
     internal IZoneTree<Memory<byte>, Memory<byte>> Tree { get; set; } = null!;
-    internal ZoneTreeMaintenanceLifetime? Maintenance { get; set; }
+    internal ZoneTreeMaintenanceLifetime? Maintenance
+    {
+        get; set;
+    }
     internal IMaintainer Maintainer => Maintenance!.Maintainer;
     internal StoreIdentity Identity { get; set; } = null!;
     internal ZoneTreeReadCounters ReadCounters { get; } = new();
-    internal ZoneTreePointCache? EmbeddedPointCache { get; }
-    internal ZoneTreePointCacheLifecycle CacheLifecycle { get; }
+    internal ZoneTreePointCache? EmbeddedPointCache
+    {
+        get;
+    }
+    internal ZoneTreePointCacheLifecycle CacheLifecycle
+    {
+        get;
+    }
     internal ZoneTreePointCache? PointCache => CacheLifecycle.MaintenanceCache;
-    internal ZoneTreeReadView View { get; }
-    internal ZoneTreeCheckpointManager Checkpoints { get; }
-    internal ZoneTreeBackupRestore Backups { get; }
-    internal bool Poisoned { get; set; }
+    internal ZoneTreeReadView View
+    {
+        get;
+    }
+    internal ZoneTreeCheckpointManager Checkpoints
+    {
+        get;
+    }
+    internal ZoneTreeBackupRestore Backups
+    {
+        get;
+    }
+    internal bool Poisoned
+    {
+        get; set;
+    }
     internal long Position => Interlocked.Read(ref position);
     internal void SetPosition(long value) => position = value;
 
@@ -186,23 +213,5 @@ internal sealed class ZoneTreeStoreRuntime : IDisposable
         }
         ZoneTreeExistingStoreCleanup.Capture(Gate.Dispose, failures);
         ZoneTreeExistingStoreCleanup.ThrowFailures(failures);
-    }
-
-    private ZoneTreePointCache? OpenPointCache()
-    {
-        if (Options.EmbeddedPointCache is not { } options)
-        {
-            return null;
-        }
-
-        try
-        {
-            return ZoneTreePointCache.CreateResolved(options);
-        }
-        catch (Exception)
-        {
-            ZoneTreeStoreHandleDisposal.FailedOpen(this);
-            throw;
-        }
     }
 }

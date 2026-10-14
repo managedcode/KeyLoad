@@ -1,8 +1,8 @@
 using KeyLoad.Client;
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.DocumentStorage;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.Authorization;
@@ -30,7 +30,9 @@ internal static class AdversarialAuthorityTrial
             {
                 using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
                 try
-                { await RunClientsAsync(fixture, http, session, state, changePolicy, token); }
+                {
+                    await RunClientsAsync(fixture, http, session, state, changePolicy, token);
+                }
                 catch (Exception original) when (NativeCqrsBoundaryErrors.IsNonFatal(original)) { failures.Add(original); }
                 catch (Exception original) when (!NativeCqrsBoundaryErrors.IsNonFatal(original)) { failures.Add(original); }
             }
@@ -48,7 +50,9 @@ internal static class AdversarialAuthorityTrial
         var root = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         var reader = new KeyLoadClient(http, state.Identity.Secret, IntegrationClientOptions.Execution());
         if (changePolicy)
-        { await AdversarialAuthorityContinuation.RunAsync(fixture, root, reader, session, state, token); }
+        {
+            await AdversarialAuthorityContinuation.RunAsync(fixture, root, reader, session, state, token);
+        }
         else
         {
             await AdversarialAuthorityAssertions.HealthyAsync(reader, session, state, token);
@@ -65,7 +69,9 @@ internal static class AdversarialAuthorityTrial
         {
             await using var rootSession = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node2, fixture.AdminKey, token);
             try
-            { await AdversarialAuthorityAssertions.ReplayAsync(root, rootSession, state, token); }
+            {
+                await AdversarialAuthorityAssertions.ReplayAsync(root, rootSession, state, token);
+            }
             catch (Exception original) when (NativeCqrsBoundaryErrors.IsNonFatal(original)) { failures.Add(original); }
             catch (Exception original) when (!NativeCqrsBoundaryErrors.IsNonFatal(original)) { failures.Add(original); }
         }
@@ -96,7 +102,9 @@ internal static class AdversarialAuthorityTrial
         {
             using var http = McpCallerHttp.Create(fixture, node);
             try
-            { value = await operation(new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution())); }
+            {
+                value = await operation(new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution()));
+            }
             catch (Exception original) when (NativeCqrsBoundaryErrors.IsNonFatal(original)) { failures.Add(original); }
             catch (Exception original) when (!NativeCqrsBoundaryErrors.IsNonFatal(original)) { failures.Add(original); }
         }

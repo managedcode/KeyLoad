@@ -48,7 +48,10 @@ internal static class PostgresRf3Policy
                     await PostgresDefaultJoinCalls.DeniedAsync(state, reader, wire, token);
                     await SqlTableRf3Refusals.DeniedAsync(state, reader, wire, token);
                     await global::TUnit.Assertions.Assert.That(await PostgresRf3Assertions.ImageAsync(root, token)).IsEqualTo(before);
-                    await PersistAsync(root, original with { PolicyEpoch = original.PolicyEpoch + RepairAdvance }, token);
+                    await PersistAsync(root, original with
+                    {
+                        PolicyEpoch = original.PolicyEpoch + RepairAdvance
+                    }, token);
                     await PostgresDefaultJoinCalls.HealthyAsync(state, reader, wire, token);
                     before = await PostgresRf3Assertions.ImageAsync(root, token);
                     await PostgresRf3Assertions.PageAsync(state,

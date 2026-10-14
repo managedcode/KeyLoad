@@ -48,7 +48,11 @@ internal sealed class RemoteTransferCoordinationColdTests
         await RemoteTransferCoordinationColdAssertions.EqualAsync(fixture.Apply(OperationKind.Batch, accept).Get<CommitReceipt>(), accepted);
         await RemoteTransferCoordinationColdAssertions.EqualAsync(fixture.Apply(OperationKind.Batch, complete).Get<CommitReceipt>(), completed);
         await RemoteTransferCoordinationColdAssertions.EqualAsync(fixture.Database.InspectQueueTransfer(RemoteTransferDatabase.RootPrincipal,
-            fixture.SourceQueue, transfer.TransferId), original with { State = QueueTransferState.Delivered, ReceiptToken = proof.ReceiptToken });
+            fixture.SourceQueue, transfer.TransferId), original with
+            {
+                State = QueueTransferState.Delivered,
+                ReceiptToken = proof.ReceiptToken
+            });
         await RemoteTransferCoordinationColdAssertions.EqualAsync(fixture.Database.InspectQueueTransferReceipt(RemoteTransferDatabase.RootPrincipal,
             fixture.DestinationQueue, fixture.SourceQueue, transfer.TransferId), proof);
         await RemoteTransferCoordinationColdAssertions.EqualAsync(fixture.Database.InspectMessage(RemoteTransferDatabase.RootPrincipal,

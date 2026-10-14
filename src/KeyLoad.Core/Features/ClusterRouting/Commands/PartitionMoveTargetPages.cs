@@ -20,7 +20,9 @@ public sealed partial class DatabaseEngine
         if (phase.ControlIntentDigest != PartitionMoveIntentIdentity.Digest(body.Control)
             || body.Fence.ControlIntentDigest != phase.ControlIntentDigest
             || phase.PageOrdinal != body.Page.Ordinal)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
         var stage = RequireTargetStage(transaction, body);
         var key = PartitionMoveTargetStorage.PageKey(phase.Partition, phase.MoveId, body.Page.Ordinal);
         var previous = PartitionMoveTargetStorage.Read<PartitionMoveImagePage>(transaction, key, Limits.MaxBatchBytes);
@@ -29,15 +31,21 @@ public sealed partial class DatabaseEngine
             PartitionMovePageAdmission.Require(previous, body.Fence, Limits, Limits.MaxBatchBytes);
             if (previous.Family != body.Page.Family || previous.Digest != body.Page.Digest
                 || previous.MoveId != body.Page.MoveId || previous.Partition != body.Page.Partition)
-            { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict); }
+            {
+                throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict);
+            }
             return new(phase.MoveId, phase.Stage, MoveJournalReceipt(transaction, commandId,
                 position, phase.ControlIntentDigest), body.Control, body.Fence, null, null);
         }
         if (stage.Installed || stage.Published || stage.AcceptedPages != body.Page.Ordinal)
-        { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict);
+        }
         var encodedBytes = NativeSerialization.Measure(body.Page);
         if (encodedBytes > Limits.MaxQueryReadBytes - stage.RetainedBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
+        }
         PartitionMoveTargetStorage.Write(transaction, key, body.Page, Limits.MaxBatchBytes);
         PartitionMoveTargetStorage.Write(transaction, PartitionMoveTargetStorage.Key(phase.Partition),
             stage with
@@ -62,7 +70,9 @@ public sealed partial class DatabaseEngine
                 || existing.Fence.ControlIntentDigest != body.Fence.ControlIntentDigest
                 || !PhysicalOwnerEntryValidation.SameOwner(existing.Fence.ControlOwner, body.Fence.ControlOwner)
                 || !PartitionMoveControlValidation.SameSource(existing.Fence.SourcePlacement, body.Fence.SourcePlacement))
-            { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict); }
+            {
+                throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict);
+            }
             return existing;
         }
         foreach (var family in PartitionRecordFamilies.All)
@@ -70,7 +80,9 @@ public sealed partial class DatabaseEngine
             if (!PartitionMoveFamilyCapture.ControlOwned(family)
                 && transaction.Scan(KeySpace.Partition(family, body.Control.Partition),
                     PartitionMoveProtocol.SequenceStep).Records.Length != PartitionMoveProtocol.EmptyCount)
-            { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict); }
+            {
+                throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict);
+            }
         }
         return new(PartitionMoveProtocol.Version, body.Control, body.Fence, body.Descriptor,
             PartitionMoveProtocol.EmptyCount, PartitionMoveProtocol.EmptyCount, false, false);

@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
 
@@ -33,7 +33,9 @@ internal static class NativeActivationMigrationRf3Operation
         await SqlRf3Protocol.EqualAsync(receipt, after.Receipt);
         await RequireStateAsync(wave, administrator, callers, identity, placement, physical, cancellationToken);
         if (failures.Count != EmptyFailureCount)
-        { ServerFailureObserver.ThrowIfAny(failures); }
+        {
+            ServerFailureObserver.ThrowIfAny(failures);
+        }
         await NativeActivationRf3ColdOutcome.VerifyAsync(wave, identity, command, receipt, cancellationToken);
         await RequireStateAsync(wave, administrator, callers, identity, placement, physical, cancellationToken);
         var reference = new EntityRef(identity.Partition, RequestCqrsRf3Protocol.AdminCollection, RequestCqrsRf3Protocol.DocumentId);

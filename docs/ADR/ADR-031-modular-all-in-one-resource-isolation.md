@@ -23,7 +23,7 @@ One unbounded shared queue is rejected because application saturation can preven
 
 ## Related requirements and implementation contract
 
-Related: `REQ-REP-006/AC-REP-006`, `REQ-MP-003/AC-MP-007`, `REQ-MSG-004/AC-MSG-004`; ADR-020/028/036; KL-040, KL-052, KL-076, KL-080, KL-093, KL-104. Current admission code is in `src/KeyLoad.Core/AdmittedCommandQueue.cs`, `HttpAdmissionGovernor.cs`, and `src/KeyLoad.Orleans/`; policy is in root `AGENTS.md`.
+Related: `REQ-REP-006/AC-REP-006`, `REQ-MP-003/AC-MP-007`, `REQ-MSG-004/AC-MSG-004`; ADR-020/028/036; KL-040, KL-052, KL-076, KL-080, KL-093, KL-104. Current admission code is in `src/KeyLoad.Core/AdmittedCommandQueue.cs`, `HttpAdmissionGovernor.cs`, and `src/KeyLoad.Clustering/`; policy is in root `AGENTS.md`.
 
 1. Freeze capability manifest, reserved control classes, admission quotas, and overload behavior.
 2. Test saturating application work while votes/heartbeats, shutdown, cancellation, and recovery retain bounded progress; test unsupported capabilities fail clearly.

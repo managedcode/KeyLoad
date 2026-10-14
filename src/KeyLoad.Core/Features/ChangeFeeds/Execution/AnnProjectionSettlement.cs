@@ -14,7 +14,9 @@ public sealed partial class DatabaseEngine
             var principal = Principal(view, expected.Id, Clock.GetUtcNow());
             RequireProjectionAdministrator(principal);
             if (principal.PolicyEpoch != expected.PolicyEpoch || principal.Revoked)
-            { throw Errors.Fail(ErrorCode.PermissionDenied, InvalidAnnSettlement); }
+            {
+                throw Errors.Fail(ErrorCode.PermissionDenied, InvalidAnnSettlement);
+            }
             Features.Search.AnnProjectionPinValidation.RequireOwner(this, view, principal,
                 request.Consumer.Partition, request);
             return ProjectionConsumer(view, request.Consumer);
@@ -25,51 +27,72 @@ public sealed partial class DatabaseEngine
     {
         var initial = Store.Read(view => ProjectionConsumer(view, original.Consumer));
         if (initial.InitialAnnMaintenance is not { } reserved)
-        { return null; }
+        {
+            return null;
+        }
         if (!global::KeyLoad.AnnMaintenanceRequestIdentity.Same(reserved, original))
         {
             if (!initial.InitialAnnMaintenanceSettled)
-            { throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidAnnSettlement); }
+            {
+                throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidAnnSettlement);
+            }
             return null;
         }
         var checkpoint = result.Checkpoint?.Checkpoint ?? result.Source?.ThroughSequence
             ?? throw Errors.Fail(ErrorCode.Corruption, InvalidAnnSettlement);
         var page = ReadProjectionBatch(principal.Id, new(original.Consumer, ThroughSequence: checkpoint));
         if (!page.Entries.IsEmpty || page.ThroughSequence != checkpoint)
-        { throw Errors.Fail(ErrorCode.Conflict, InvalidAnnSettlement); }
-        return Store.Read(view =>
         {
-            var now = Clock.GetUtcNow();
-            var fresh = Principal(view, principal.Id, now);
-            RequireProjectionAdministrator(fresh);
-            var state = ProjectionConsumer(view, original.Consumer);
-            var authority = RequireAnnSettlementAuthority(state, fresh);
-            Features.Search.AnnProjectionPinValidation.RequireOwner(this, view, fresh,
-                original.Consumer.Partition, original);
-            if (state.Released || state.Checkpoint != checkpoint
-                || state.Definition.IndexGeneration != original.IndexGeneration
-                || state.InitialAnnMaintenance is not { } exact
-                || !global::KeyLoad.AnnMaintenanceRequestIdentity.Same(exact, original)
-                || childCommandId == Guid.Empty || result.CommandId != original.CommandId
-                || result.Consumer != original.Consumer || result.IndexGeneration != original.IndexGeneration)
-            { throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidAnnSettlement); }
-            var batch = Verify<ProjectionBatchClaims>(page.Token);
-            if (batch.After != checkpoint || batch.Through != checkpoint || batch.ExpiresAt <= now)
-            { throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidAnnSettlement); }
-            var proof = new AnnProjectionSettlementClaims(AnnProjectionSettlementClaims.SettlementPurpose,
-                Store.Identity.Incarnation, fresh.Id, fresh.PolicyEpoch, authority.ConfigureCommandId,
-                original.Consumer, original.IndexGeneration, original.CommandId,
-                System.Security.Cryptography.SHA256.HashData(NativeSerialization.Serialize(exact)),
-                System.Security.Cryptography.SHA256.HashData(NativeSerialization.Serialize(result)),
-                checkpoint, original.NodeId, original.Placement, batch.ExpiresAt, childCommandId);
-            if (CoreNativeClaims.MeasureCharacters(proof) > ClaimsExecution.MaximumTokenCharacters)
-            { throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidAnnSettlement); }
-            var intent = new CommitProjectionBatchRequest(childCommandId, original.Consumer, page.Token, [])
-            { InitialAnnMaintenanceSettlement = Sign(proof) };
-            if (NativeSerialization.Measure(intent) > Limits.MaxBatchBytes)
-            { throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidAnnSettlement); }
-            return intent;
-        });
+            throw Errors.Fail(ErrorCode.Conflict, InvalidAnnSettlement);
+        }
+        return Store.Read(view =>
+            CreateValidatedAnnSettlementIntent(principal, original, result, childCommandId, view, checkpoint, page));
+    }
+
+    private CommitProjectionBatchRequest CreateValidatedAnnSettlementIntent(PrincipalRecord principal,
+        AnnMaintenanceRequest original, AnnMaintenanceResult result, Guid childCommandId, IKeyValueView view,
+        long checkpoint, ProjectionBatch page)
+    {
+        var now = Clock.GetUtcNow();
+        var fresh = Principal(view, principal.Id, now);
+        RequireProjectionAdministrator(fresh);
+        var state = ProjectionConsumer(view, original.Consumer);
+        var authority = RequireAnnSettlementAuthority(state, fresh);
+        Features.Search.AnnProjectionPinValidation.RequireOwner(this, view, fresh,
+            original.Consumer.Partition, original);
+        if (state.Released || state.Checkpoint != checkpoint
+            || state.Definition.IndexGeneration != original.IndexGeneration
+            || state.InitialAnnMaintenance is not { } exact
+            || !global::KeyLoad.AnnMaintenanceRequestIdentity.Same(exact, original)
+            || childCommandId == Guid.Empty || result.CommandId != original.CommandId
+            || result.Consumer != original.Consumer || result.IndexGeneration != original.IndexGeneration)
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidAnnSettlement);
+        }
+        var batch = Verify<ProjectionBatchClaims>(page.Token);
+        if (batch.After != checkpoint || batch.Through != checkpoint || batch.ExpiresAt <= now)
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidAnnSettlement);
+        }
+        var proof = new AnnProjectionSettlementClaims(AnnProjectionSettlementClaims.SettlementPurpose,
+            Store.Identity.Incarnation, fresh.Id, fresh.PolicyEpoch, authority.ConfigureCommandId,
+            original.Consumer, original.IndexGeneration, original.CommandId,
+            System.Security.Cryptography.SHA256.HashData(NativeSerialization.Serialize(exact)),
+            System.Security.Cryptography.SHA256.HashData(NativeSerialization.Serialize(result)),
+            checkpoint, original.NodeId, original.Placement, batch.ExpiresAt, childCommandId);
+        if (CoreNativeClaims.MeasureCharacters(proof) > ClaimsExecution.MaximumTokenCharacters)
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidAnnSettlement);
+        }
+        var intent = new CommitProjectionBatchRequest(childCommandId, original.Consumer, page.Token, [])
+        {
+            InitialAnnMaintenanceSettlement = Sign(proof)
+        };
+        if (NativeSerialization.Measure(intent) > Limits.MaxBatchBytes)
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidAnnSettlement);
+        }
+        return intent;
     }
 
     private static ProjectionMaintenanceAuthority RequireAnnSettlementAuthority(
@@ -78,7 +101,9 @@ public sealed partial class DatabaseEngine
         var authority = state.MaintenanceAuthority;
         if (authority is null || authority.PrincipalId != principal.Id
             || authority.PolicyEpoch != principal.PolicyEpoch || authority.ConfigureCommandId == Guid.Empty)
-        { throw Errors.Fail(ErrorCode.PermissionDenied, InvalidAnnSettlement); }
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, InvalidAnnSettlement);
+        }
         return authority;
     }
 
@@ -86,7 +111,9 @@ public sealed partial class DatabaseEngine
         CommitProjectionBatchRequest request, ProjectionBatchClaims batch, DateTimeOffset now, bool completed)
     {
         if (request.InitialAnnMaintenanceSettlement is not { } token)
-        { return null; }
+        {
+            return null;
+        }
         var proof = Verify<AnnProjectionSettlementClaims>(token);
         var state = ProjectionConsumer(view, request.Consumer);
         var authority = RequireAnnSettlementAuthority(state, principal);
@@ -109,7 +136,9 @@ public sealed partial class DatabaseEngine
             || !NativeSerialization.Serialize(proof.PhysicalPlacement).AsSpan()
                 .SequenceEqual(NativeSerialization.Serialize(original.Placement))
             || completed && !state.InitialAnnMaintenanceSettled)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidAnnSettlement); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidAnnSettlement);
+        }
         return state;
     }
 

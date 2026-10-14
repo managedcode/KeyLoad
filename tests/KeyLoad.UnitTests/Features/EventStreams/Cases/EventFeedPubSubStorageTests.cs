@@ -1,6 +1,6 @@
 using global::Orleans.Serialization;
 using global::Orleans.Storage;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
@@ -39,7 +39,10 @@ internal sealed class EventFeedPubSubStorageTests
         await RequireState(storage, firstId, firstValue, originalTag);
         var stale = new GrainState<EventFeedWakeupHint>(firstValue);
         await RequireConflict(() => storage.WriteStateAsync(EventFeedPubSubProtocol.StateName, firstId, stale));
-        var secondValue = firstValue with { MapRevision = SecondRevision };
+        var secondValue = firstValue with
+        {
+            MapRevision = SecondRevision
+        };
         var second = new GrainState<EventFeedWakeupHint>(secondValue) { ETag = null, RecordExists = false };
         await RequireCode(ErrorCode.ResourceExhausted,
             () => storage.WriteStateAsync(EventFeedPubSubProtocol.StateName, secondId, second));
@@ -90,7 +93,10 @@ internal sealed class EventFeedPubSubStorageTests
             var originalTag = original.ETag;
             var oversized = new string(OversizeData, checked((int)legalBytes));
             var refused = new GrainState<List<string>>([oversized])
-            { ETag = originalTag, RecordExists = true };
+            {
+                ETag = originalTag,
+                RecordExists = true
+            };
             await RequireCode(ErrorCode.ResourceExhausted,
                 () => storage.WriteStateAsync(EventFeedPubSubProtocol.StateName, id, refused));
             var read = new GrainState<List<string>>();
@@ -141,7 +147,9 @@ internal sealed class EventFeedPubSubStorageTests
     private static async Task RequireCode(ErrorCode expected, Func<Task> operation)
     {
         try
-        { await operation(); }
+        {
+            await operation();
+        }
         catch (KeyLoadException failure) when (failure.Code == expected) { return; }
         throw new InvalidOperationException("The native pubsub operation did not preserve its closed refusal.");
     }
@@ -149,7 +157,9 @@ internal sealed class EventFeedPubSubStorageTests
     private static async Task RequireConflict(Func<Task> operation)
     {
         try
-        { await operation(); }
+        {
+            await operation();
+        }
         catch (InconsistentStateException) { return; }
         throw new InvalidOperationException("The native pubsub operation accepted a stale state revision.");
     }
@@ -157,7 +167,9 @@ internal sealed class EventFeedPubSubStorageTests
     private static async Task RequireCancelled(Func<Task> operation)
     {
         try
-        { await operation(); }
+        {
+            await operation();
+        }
         catch (OperationCanceledException) { return; }
         throw new InvalidOperationException("The native pubsub operation ignored original cancellation.");
     }
@@ -165,7 +177,9 @@ internal sealed class EventFeedPubSubStorageTests
     private static async Task RequireDisposed(Func<Task> operation)
     {
         try
-        { await operation(); }
+        {
+            await operation();
+        }
         catch (ObjectDisposedException) { return; }
         throw new InvalidOperationException("The native pubsub operation entered after disposal.");
     }

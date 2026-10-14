@@ -37,7 +37,9 @@ internal static class PartitionMovementFinalInstallFrameRf3Healthy
             precut.EffectId, cancellationToken);
         await PartitionMovementParentOperationalCapacityRf3Assertions.RequireNoEffectsAsync(wave, before, after);
         foreach (var original in before.Where(cut => cut.Header is not null))
-        { await SqlRf3Protocol.EqualAsync(original.OriginalPhase, after.Single(cut => cut.Node == original.Node).OriginalPhase); }
+        {
+            await SqlRf3Protocol.EqualAsync(original.OriginalPhase, after.Single(cut => cut.Node == original.Node).OriginalPhase);
+        }
         await PartitionMovementPublicParentRf3Cut.RestartAsync(wave, cancellationToken);
     }
 }

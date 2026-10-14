@@ -43,7 +43,10 @@ internal sealed class TimeSeriesIntensiveSummaryTests
         var attempts = Enumerable.Range(0, 10000).Select(index => TimeSeriesIntensiveAttemptValues.Success(0, index)).ToArray();
         attempts[345] = default;
         Assert.ThrowsExactly<ComparisonFailureException>(() => TimeSeriesIntensiveSummary.Calculate(attempts, 1, 1));
-        attempts[345] = TimeSeriesIntensiveAttemptValues.Success(0, 345) with { LatencyTicks = -1 };
+        attempts[345] = TimeSeriesIntensiveAttemptValues.Success(0, 345) with
+        {
+            LatencyTicks = -1
+        };
         Assert.ThrowsExactly<ComparisonFailureException>(() => TimeSeriesIntensiveSummary.Calculate(attempts, 1, 1));
         Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => TimeSeriesIntensiveSummary.Calculate(attempts, 0, 1));
     }

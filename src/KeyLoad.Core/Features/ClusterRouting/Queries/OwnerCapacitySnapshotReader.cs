@@ -24,23 +24,31 @@ public sealed partial class DatabaseEngine
             var principal = Principal(charged, principalId, now);
             RequirePlacementAdministrator(principal);
             if (principal.PolicyEpoch != request.OriginalPolicyEpoch)
-            { throw Errors.Fail(ErrorCode.TokenInvalidated, TenantPlacementPolicyProtocol.ScopeMismatch); }
+            {
+                throw Errors.Fail(ErrorCode.TokenInvalidated, TenantPlacementPolicyProtocol.ScopeMismatch);
+            }
             RequireCapacityReadRequest(request, now);
             var catalog = PhysicalShardCatalogRecordSerialization.Read(charged)
                 ?? throw Errors.Fail(ErrorCode.NotFound, TenantPlacementPolicyProtocol.Missing);
             PhysicalShardCatalogValidation.ValidateCatalog(catalog);
             if (!PhysicalOwnerEntryValidation.SameOwner(catalog.DefaultShard, request.Owner)
                 || request.Owner.Incarnation != Store.Identity.Incarnation)
-            { throw Errors.Fail(ErrorCode.OwnershipLost, TenantPlacementPolicyProtocol.ScopeMismatch); }
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, TenantPlacementPolicyProtocol.ScopeMismatch);
+            }
             var parts = ImmutableArray.CreateBuilder<PartitionCapacityBytesV1>(request.Partitions.Length);
             foreach (var partition in request.Partitions)
-            { parts.Add(new(partition, TenantPlacementByteAccounting.Read(charged, partition, grant, token))); }
+            {
+                parts.Add(new(partition, TenantPlacementByteAccounting.Read(charged, partition, grant, token)));
+            }
             token.ThrowIfCancellationRequested();
             RequireCapacityReadRequest(request, EvaluationClock.GetUtcNow());
             var appliedBytes = charged.ReadOwnedValue(KeySpace.AppliedBytes);
             var applied = appliedBytes is null ? NoCapacityAppliedPosition : NativeSerialization.Deserialize<long>(appliedBytes);
             if (applied < NoCapacityAppliedPosition)
-            { throw Errors.Fail(ErrorCode.Corruption, TenantPlacementPolicyProtocol.Malformed); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, TenantPlacementPolicyProtocol.Malformed);
+            }
             var roster = ClusterBackupRosterCapture.Read(charged, Store.Identity.Incarnation, Store.Position, applied, Limits);
             work.Check();
             return new(TenantPlacementPolicyProtocol.Version, request.RequestId, request.Nonce, catalog.DefaultShard,
@@ -59,6 +67,8 @@ public sealed partial class DatabaseEngine
             || request.OriginalExpiry <= now
             || !request.Owner.VoterIds.Contains(request.VoterId, StringComparer.Ordinal)
             || string.IsNullOrWhiteSpace(request.SiloAddress) || string.IsNullOrWhiteSpace(request.CohortFingerprint))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, TenantPlacementPolicyProtocol.ScopeMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, TenantPlacementPolicyProtocol.ScopeMismatch);
+        }
     }
 }

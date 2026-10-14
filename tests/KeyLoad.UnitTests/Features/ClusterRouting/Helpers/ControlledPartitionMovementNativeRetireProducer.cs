@@ -1,7 +1,7 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.CrashHost.Features.ClusterRouting;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
@@ -48,7 +48,9 @@ internal static class ControlledPartitionMovementNativeRetireProducer
         var clock = owners.Source.Clock;
         var remaining = expiry - clock.GetUtcNow();
         if (remaining > TimeSpan.Zero)
-        { await Task.Delay(remaining, clock, cancellationToken).ConfigureAwait(false); }
+        {
+            await Task.Delay(remaining, clock, cancellationToken).ConfigureAwait(false);
+        }
         await Assert.That(clock.GetUtcNow() >= expiry).IsTrue();
     }
 

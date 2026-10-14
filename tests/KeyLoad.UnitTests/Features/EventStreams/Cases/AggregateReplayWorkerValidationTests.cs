@@ -60,7 +60,10 @@ internal sealed class AggregateReplayWorkerValidationTests
                 Page(stream, snapshot, []), reducer, limitsOptions: UnitClientOptions.Replay()));
         }
         Assert.ThrowsExactly<InvalidDataException>(() => AggregateReplayReduction.Reduce(
-            Page(stream, null, []), reducer with { InitialStateJson = "invalid" }, limitsOptions: UnitClientOptions.Replay()));
+            Page(stream, null, []), reducer with
+            {
+                InitialStateJson = "invalid"
+            }, limitsOptions: UnitClientOptions.Replay()));
         var invalidPages = new[]
         {
             Page(stream with { Generation = 2 }, null, [record]),

@@ -28,7 +28,9 @@ internal sealed class NativeDiscoveryOmissionProfile
         var section = configuration.GetSection(Section);
         var fields = section.GetChildren().Take(MaximumFields + ExcessField).ToArray();
         if (section.Value is null && fields.Length == NoFields)
-        { return null; }
+        {
+            return null;
+        }
         if (section.Value is not null || fields.Length > MaximumFields
             || fields.Any(field => field.Key is not (Enabled or Root or SessionId)
                 || field.Value is null || field.GetChildren().Take(ExcessField).Any())
@@ -39,7 +41,9 @@ internal sealed class NativeDiscoveryOmissionProfile
             || control.RequestProbe is null || control.Tests is not null || control.ProtocolCohortEnabled
             || control.ProtocolCohortConfigured || control.BenchmarksEnabled || control.ComparisonSelectorsPresent
             || control.TargetSelected || control.ScaleSelected || control.LoggerModelControl)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         return new(section[Root]!, section[SessionId]!);
     }
     internal static NativeDiscoveryOmissionProfile? Create(IDistributedApplicationBuilder builder, string dataRoot,
@@ -47,9 +51,13 @@ internal sealed class NativeDiscoveryOmissionProfile
     {
         var selected = AppHostOptionsRegistration.Get(builder).Control.Value.NativeDiscoveryOmission;
         if (selected is null)
-        { return null; }
+        {
+            return null;
+        }
         if ((image is null) == (local is null))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         _ = RequestCqrsProbeProfilePaths.Validate(selected.Root, selected.SessionId, dataRoot,
             AppHostOptionsRegistration.Get(builder).RequestProbeFiles);
         return new(selected);

@@ -18,15 +18,32 @@ internal static class ReplicaIsolationEvidence
     internal static Task WriteStartedAsync(string root, ClusterFixtureSourceImage source, ReplicaIsolationBuildPlan plan,
         ReplicaIsolationNode node, ReplicaIsolationImage original, ReplicaIsolationImage derived,
         ContainerRuntimeProcessResult tools, ContainerRuntimeProcessResult modules, CancellationToken cancellationToken)
-        => WriteAsync(root, node.Resource, new { source, plan, node, original, derived, tools, modules }, cancellationToken);
+        => WriteAsync(root, node.Resource, new
+        {
+            source,
+            plan,
+            node,
+            original,
+            derived,
+            tools,
+            modules
+        }, cancellationToken);
 
     internal static Task WriteMutationsAsync(string root, IReadOnlyList<ReplicaIsolationMutation> mutations,
         IReadOnlyList<Exception> failures, CancellationToken cancellationToken)
-        => WriteAsync(root, MutationsSuffix, new { mutations, failureCount = failures.Count }, cancellationToken);
+        => WriteAsync(root, MutationsSuffix, new
+        {
+            mutations,
+            failureCount = failures.Count
+        }, cancellationToken);
 
     internal static Task WriteRetirementAsync(string root, IReadOnlyList<ReplicaIsolationRetirementObservation> observations,
         int failureCount, CancellationToken cancellationToken)
-        => WriteAsync(root, RetirementSuffix, new { observations, failureCount }, cancellationToken);
+        => WriteAsync(root, RetirementSuffix, new
+        {
+            observations,
+            failureCount
+        }, cancellationToken);
 
     internal static Task WriteAuthorityAsync(string root, IReadOnlyList<ReplicaIsolationAuthorityObservation> observations,
         CancellationToken cancellationToken) => WriteAsync(root, AuthoritySuffix, observations, cancellationToken);
@@ -43,12 +60,22 @@ internal static class ReplicaIsolationEvidence
         var directory = Path.Combine(repository, ContainerRuntimeProtocol.ArtifactsDirectory,
             ContainerRuntimeProtocol.QualificationDirectory, Prefix + Path.GetFileName(root) + FailureSuffix, nativeCase);
         if (Directory.Exists(directory))
-        { throw new InvalidOperationException("The original owned failure receipt already exists."); }
+        {
+            throw new InvalidOperationException("The original owned failure receipt already exists.");
+        }
         var revision = Environment.GetEnvironmentVariable(SourceSetting)
             ?? throw new InvalidOperationException("The original source revision is absent.");
         var run = long.Parse(Environment.GetEnvironmentVariable(RunSetting)!, System.Globalization.CultureInfo.InvariantCulture);
         var attempt = long.Parse(Environment.GetEnvironmentVariable(AttemptSetting)!, System.Globalization.CultureInfo.InvariantCulture);
-        var bytes = JsonSerializer.SerializeToUtf8Bytes(new { root = Path.GetFileName(root), nativeCase, revision, run, attempt, source }, Options);
+        var bytes = JsonSerializer.SerializeToUtf8Bytes(new
+        {
+            root = Path.GetFileName(root),
+            nativeCase,
+            revision,
+            run,
+            attempt,
+            source
+        }, Options);
         Directory.CreateDirectory(directory);
         using var stream = new FileStream(Path.Combine(directory, FailureIdentityName), FileMode.CreateNew, FileAccess.Write, FileShare.None);
         stream.Write(bytes);
@@ -58,13 +85,19 @@ internal static class ReplicaIsolationEvidence
 
     internal static Task WriteCountersAsync(string root, ContainerRuntimeProcessResult input,
         ContainerRuntimeProcessResult output, CancellationToken cancellationToken)
-        => WriteAsync(root, CountersSuffix, new { input, output }, cancellationToken);
+        => WriteAsync(root, CountersSuffix, new
+        {
+            input,
+            output
+        }, cancellationToken);
 
     private static async Task WriteAsync<T>(string root, string suffix, T value, CancellationToken cancellationToken)
     {
         var bytes = JsonSerializer.SerializeToUtf8Bytes(value, Options);
         if (bytes.Length > MaximumBytes)
-        { throw new InvalidOperationException("Actual namespace evidence exceeds its bounded diagnostic size."); }
+        {
+            throw new InvalidOperationException("Actual namespace evidence exceeds its bounded diagnostic size.");
+        }
         var repository = ClusterFixtureDiagnostics.FindRepositoryRoot().FullName;
         var directory = Path.Combine(repository, ContainerRuntimeProtocol.ArtifactsDirectory, ContainerRuntimeProtocol.QualificationDirectory);
         Directory.CreateDirectory(directory);

@@ -128,7 +128,9 @@ internal sealed class McpGraphPathCatalogTests
         await VerifyTypeAsync(root, properties.GetProperty(McpGraphPathCatalogProtocol.Collection), String);
         await VerifyTypeAsync(root, properties.GetProperty(McpGraphPathCatalogProtocol.Id), String);
         foreach (var field in partition.GetProperty(Properties).EnumerateObject())
-        { await VerifyTypeAsync(root, field.Value, String); }
+        {
+            await VerifyTypeAsync(root, field.Value, String);
+        }
     }
 
     private static async Task VerifyPartitionAsync(JsonElement root, JsonElement schema)
@@ -138,7 +140,9 @@ internal sealed class McpGraphPathCatalogTests
             McpGraphPathCatalogProtocol.TransactionDomainId, McpGraphPathCatalogProtocol.PartitionKey };
         await VerifyObjectAsync(schema, [.. fields, McpGraphPathCatalogProtocol.AtomicPartitionId], fields);
         foreach (var field in schema.GetProperty(Properties).EnumerateObject())
-        { await VerifyTypeAsync(root, field.Value, String); }
+        {
+            await VerifyTypeAsync(root, field.Value, String);
+        }
     }
 
     private static async Task VerifyEdgeAsync(JsonElement root, JsonElement schema)
@@ -180,7 +184,9 @@ internal sealed class McpGraphPathCatalogTests
     private static McpOperationDescriptor Find(string name)
     {
         if (!McpOperationCatalog.TryGetTool(name, out var descriptor))
-        { throw new InvalidOperationException(name); }
+        {
+            throw new InvalidOperationException(name);
+        }
         return descriptor!;
     }
 }

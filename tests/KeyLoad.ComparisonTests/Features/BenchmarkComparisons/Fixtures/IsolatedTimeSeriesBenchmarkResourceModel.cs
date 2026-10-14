@@ -53,9 +53,18 @@ internal sealed class IsolatedTimeSeriesBenchmarkResourceModel : IAsyncDisposabl
     private const string OutputKey = "Benchmarks:Output";
     private const string ServerImage = IsolatedResourceTopologyFixture.ServerImage;
     private const string RunnerImage = "ghcr.io/managedcode/keyload-comparison-runner:model@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
-    internal IDistributedApplicationBuilder Builder { get; }
-    internal string Root { get; private set; }
-    internal string Output { get; }
+    internal IDistributedApplicationBuilder Builder
+    {
+        get;
+    }
+    internal string Root
+    {
+        get; private set;
+    }
+    internal string Output
+    {
+        get;
+    }
     internal void SetRootForCleanup(string root) => Root = root;
     internal void ConfigureSelection(TimeSeriesIntensiveFamilyCell cell, bool includeIdentity = true)
     {

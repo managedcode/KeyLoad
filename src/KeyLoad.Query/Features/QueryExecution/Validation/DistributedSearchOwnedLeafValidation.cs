@@ -25,18 +25,26 @@ internal static class DistributedSearchOwnedLeafValidation
             || request.Search is null || request.Owner is null || string.IsNullOrEmpty(request.Tenant)
             || request.Search.Partition is null || request.Search.Partition.TenantId != request.Tenant
             || !ValidSlots(request))
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidPhase); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidPhase);
+        }
         if (request.MaxReadBytes < NoBytes || request.MaxReadBytes > limits.MaxQueryReadBytes
             || request.MaxExaminedRecords < NoRecords || request.MaxExaminedRecords > limits.MaxScanRecords
             || request.MaxResultBytes < MinimumResultBytes
             || request.MaxResultBytes > QueryResultBudgetPolicy.Resolve(limits, execution))
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidBudget); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidBudget);
+        }
         SearchRequestValidation.Validate(request.Search, limits, false, execution);
         FilteredSearchEligibility.ValidateRequest(request.Search.AllowedIds, limits, budget);
         if (request.Search.TextIndex is not null)
-        { throw Errors.Fail(ErrorCode.UnsupportedCapability, CanonicalTextRequired); }
+        {
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, CanonicalTextRequired);
+        }
         if (request.Witness is { } witness && witness.Partition != request.Search.Partition)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidPhase); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidPhase);
+        }
         budget.Check();
     }
 

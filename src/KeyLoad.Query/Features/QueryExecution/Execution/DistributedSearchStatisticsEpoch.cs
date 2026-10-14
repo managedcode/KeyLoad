@@ -22,7 +22,9 @@ internal static class DistributedSearchStatisticsEpoch
         budget.Check();
         if (requestDigest is null || requestDigest.Length != SHA256.HashSizeInBytes * HexCharactersPerByte
             || witnesses.IsDefaultOrEmpty || witnesses.Length > options.Value.MaximumPartitions)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidScope); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidScope);
+        }
         for (var index = FirstElement; index < witnesses.Length; index++)
         {
             budget.Check();
@@ -31,7 +33,9 @@ internal static class DistributedSearchStatisticsEpoch
                 || witness.ReadGeneration < FirstElement || witness.CutPosition < FirstElement
                 || index > FirstElement && PartitionQueryOrder.ComparePartition(
                     witnesses[index - PreviousElement].Partition, witness.Partition) >= FirstElement)
-            { throw Errors.Fail(ErrorCode.Corruption, InvalidScope); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, InvalidScope);
+            }
             DistributedTextStatisticsValidation.Require(witness.Statistics, witness.Statistics.Terms, budget);
         }
         var input = new DistributedSearchEpochInputV1(VersionOne, requestDigest, witnesses);

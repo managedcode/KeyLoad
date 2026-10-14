@@ -17,10 +17,19 @@ internal sealed class ClusterRestoreRf3EventingState(PartitionRef partition)
     internal SubscriptionProcessingResult Processed { get; set; } = null!;
     internal MessageInspection Message { get; set; } = null!;
     internal OutboxStatus Outbox { get; set; } = null!;
-    internal ImmutableArray<SourceEventRecord> FinalEvents { get; set; }
+    internal ImmutableArray<SourceEventRecord> FinalEvents
+    {
+        get; set;
+    }
     internal OutboxStatus FinalOutbox { get; set; } = null!;
     internal MessageInspection HealthyMessage { get; set; } = null!;
-    internal bool Resumed { get; set; }
-    internal long CurrentCommitPosition { get; set; }
+    internal bool Resumed
+    {
+        get; set;
+    }
+    internal long CurrentCommitPosition
+    {
+        get; set;
+    }
     public override string ToString() => nameof(ClusterRestoreRf3EventingState);
 }

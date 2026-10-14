@@ -20,9 +20,13 @@ internal static class PartitionMovementFinalOutcomeCapacityRf3Trial
             await ExecuteAsync(wave, seed, originalFrame, caller.Token);
         }, failures).ConfigureAwait(false);
         if (seed is { } clients)
-        { await ServerFailureObserver.ObserveAsync(() => clients.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => clients.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         if (wave is { } resources)
-        { await ServerFailureObserver.ObserveAsync(() => resources.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => resources.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
@@ -54,7 +58,10 @@ internal static class PartitionMovementFinalOutcomeCapacityRf3Trial
             var actual = PartitionMovementParentCapacityRf3Snapshot.Read(wave,
                 precut.Cuts.First(cut => cut.Header is not null).Node, seed, seed.FirstRequest,
                 new DatabaseLimits().MaxBatchBytes, cancellationToken);
-            var restored = precut with { State = actual };
+            var restored = precut with
+            {
+                State = actual
+            };
             await Assert.That(await PartitionMovementFinalOutcomeCapacityRf3Boundary.RequireAsync(restored,
                 cluster, cancellationToken)).IsEqualTo(minimum);
             await PartitionMovementFinalOutcomeCapacityRf3Stages.LegalThenHealthyAsync(wave, seed, restored,

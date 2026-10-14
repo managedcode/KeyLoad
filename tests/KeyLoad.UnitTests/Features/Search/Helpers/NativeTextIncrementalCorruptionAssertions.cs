@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.Search;
 using KeyLoad.UnitTests.Features.Messaging;
@@ -27,7 +27,11 @@ internal static class NativeTextIncrementalCorruptionAssertions
         var original = await File.ReadAllBytesAsync(path, token);
         var damaged = original.ToArray();
         damaged[^LastByte] ^= DamageMask;
-        var restore = build with { CommandId = Guid.NewGuid(), Mode = TextIndexMaintenanceMode.Restore };
+        var restore = build with
+        {
+            CommandId = Guid.NewGuid(),
+            Mode = TextIndexMaintenanceMode.Restore
+        };
         var image = QueueWholeFlowStorage.Bytes(database.Store);
         var position = database.Store.Position;
         var failures = new List<Exception>();

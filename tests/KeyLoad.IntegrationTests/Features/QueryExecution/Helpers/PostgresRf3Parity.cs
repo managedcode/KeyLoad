@@ -62,7 +62,10 @@ internal static class PostgresRf3Parity
         {
             var sql = state.Sql.Replace(" ORDER BY ", " WHERE " + predicate + " ORDER BY ", StringComparison.Ordinal);
             await global::TUnit.Assertions.Assert.That(sql).IsNotEqualTo(state.Sql);
-            var operation = state.Operation with { Sql = sql };
+            var operation = state.Operation with
+            {
+                Sql = sql
+            };
             await PageAsync(state, await SqlRf3Protocol.SdkAsync<QueryPage>(reader.Sdk, operation, token));
             await PageAsync(state, await SqlRf3Protocol.McpAsync<QueryPage>(reader.Mcp, operation, token));
             await PageAsync(state, await wire.ExecuteAsync<QueryPage>(sql, [], prepared: false, token));
@@ -89,7 +92,9 @@ internal static class PostgresRf3Parity
             {
                 Sql = state.Sql.Replace(" ORDER BY ", named, StringComparison.Ordinal),
                 Parameters = new(StringComparer.Ordinal)
-                { [ParameterName] = global::System.Text.Json.JsonSerializer.SerializeToElement(ParameterValue, JsonDefaults.Options) }
+                {
+                    [ParameterName] = global::System.Text.Json.JsonSerializer.SerializeToElement(ParameterValue, JsonDefaults.Options)
+                }
             };
             await PageAsync(state, await SqlRf3Protocol.SdkAsync<QueryPage>(reader.Sdk, operation, token));
             await PageAsync(state, await SqlRf3Protocol.McpAsync<QueryPage>(reader.Mcp, operation, token));
@@ -99,7 +104,10 @@ internal static class PostgresRf3Parity
             foreach (var prepared in new[] { false, true })
             {
                 var parameter = new global::Npgsql.NpgsqlParameter
-                { NpgsqlDbType = global::NpgsqlTypes.NpgsqlDbType.Integer, Value = ParameterValue };
+                {
+                    NpgsqlDbType = global::NpgsqlTypes.NpgsqlDbType.Integer,
+                    Value = ParameterValue
+                };
                 await PageAsync(state, await wire.ExecuteAsync<QueryPage>(sql, [parameter], prepared, token));
             }
         }
@@ -111,7 +119,9 @@ internal static class PostgresRf3Parity
         var sql = state.Sql.Replace("budgetorders", "[budgetorders]", StringComparison.Ordinal)
             .Replace("budgetcustomers", "[budgetcustomers]", StringComparison.Ordinal);
         foreach (var prepared in new[] { false, true })
-        { await PageAsync(state, await wire.ExecuteAsync<QueryPage>(sql, [], prepared, token)); }
+        {
+            await PageAsync(state, await wire.ExecuteAsync<QueryPage>(sql, [], prepared, token));
+        }
     }
 
     private const string ParameterName = "p1";

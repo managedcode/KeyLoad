@@ -139,13 +139,19 @@ internal sealed class AdminHttpMetricsMiddlewareTests
         var metrics = new AdminHttpMetrics(UnitAdminObservationOptions.Execution());
         var context = CreateContext(method, path, query);
         if (aborted)
-        { context.RequestAborted = new CancellationToken(true); }
+        {
+            context.RequestAborted = new CancellationToken(true);
+        }
         if (!routedInsideNext)
-        { context.SetEndpoint(endpoint); }
+        {
+            context.SetEndpoint(endpoint);
+        }
         var middleware = new AdminHttpMetricsMiddleware(http =>
         {
             if (routedInsideNext)
-            { http.SetEndpoint(endpoint); }
+            {
+                http.SetEndpoint(endpoint);
+            }
             http.Response.StatusCode = status;
             return Task.CompletedTask;
         });

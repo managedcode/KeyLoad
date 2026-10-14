@@ -33,7 +33,10 @@ internal sealed class SubscriptionProcessRecoveryTests
         finally
         {
             if (!process.HasExited)
-            { process.Kill(); await process.WaitForExitAsync(cancellationToken); }
+            {
+                process.Kill();
+                await process.WaitForExitAsync(cancellationToken);
+            }
             if (Directory.Exists(root))
             {
                 await StoragePublicationRecoveryTests.DeleteTrialAsync(root, cancellationToken);
@@ -89,7 +92,10 @@ internal sealed class SubscriptionProcessRecoveryTests
 
         var original = JsonDefaults.Deserialize<ReplicatedOperation>(await File.ReadAllBytesAsync(
             Path.Combine(root, "processing-command.json"), cancellationToken));
-        var recovered = database.Apply(original with { EvaluatedAt = TimeProvider.System.GetUtcNow() })
+        var recovered = database.Apply(original with
+        {
+            EvaluatedAt = TimeProvider.System.GetUtcNow()
+        })
             .Get<SubscriptionProcessingResult>();
         await Assert.That(database.GetSubscription("root", subscription).Checkpoint).IsEqualTo(1);
         await Assert.That(database.GetDocument("root", new(SubscriptionCrashScenario.Partition, "orders", "effect"), cancellationToken: cancellationToken)!
@@ -103,7 +109,10 @@ internal sealed class SubscriptionProcessRecoveryTests
         var request = JsonDefaults.Deserialize<SubscriptionProcessingRequest>(System.Text.Encoding.UTF8.GetBytes(original.PayloadJson));
         var retryId = Guid.NewGuid();
         var retry = database.Apply(new(retryId, OperationKind.SubscriptionProcessing, "root", TimeProvider.System.GetUtcNow(),
-            System.Text.Json.JsonSerializer.Serialize(request with { CommandId = retryId }, JsonDefaults.Options)))
+            System.Text.Json.JsonSerializer.Serialize(request with
+            {
+                CommandId = retryId
+            }, JsonDefaults.Options)))
             .Get<SubscriptionProcessingResult>();
         await Assert.That(retry.AlreadyProcessed).IsTrue();
         await Assert.That(retry.OriginalEffectsToken).IsEqualTo(recovered.OriginalEffectsToken);

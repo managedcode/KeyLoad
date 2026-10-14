@@ -16,7 +16,10 @@ internal static class MultiLaneReceiveCancellationProvisioning
         var principal = new PrincipalRecord(identity.PrincipalId, partition.TenantId,
             [.. queues.Select(queue => new ScopeGrant(partition.DatabaseId, queue,
                 Capability.QueueConsume | Capability.QueueAck))], [])
-        { ClusterAdministrator = false, PolicyEpoch = QueuePolicyEpoch };
+        {
+            ClusterAdministrator = false,
+            PolicyEpoch = QueuePolicyEpoch
+        };
         var stored = await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigurePrincipalAsync(
             Guid.NewGuid(), principal, token).ConfigureAwait(false)).ConfigureAwait(false);
         await Assert.That(stored.ClusterAdministrator).IsFalse();

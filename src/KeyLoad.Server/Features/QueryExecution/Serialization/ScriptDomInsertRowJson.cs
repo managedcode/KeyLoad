@@ -10,13 +10,19 @@ internal static class ScriptDomInsertRowJson
         IOptions<DatabaseLimits> limits, int maximumBytes, Action checkBudget, CancellationToken token)
     {
         if (row.ColumnValues.Count != columns.Length)
-        { throw ScriptDomOperationErrors.Invalid(); }
+        {
+            throw ScriptDomOperationErrors.Invalid();
+        }
         using var counter = new SqlOperationByteCounter(maximumBytes, token);
         using (var writer = new Utf8JsonWriter(counter))
-        { Write(writer, columns, row, parameters, limits.Value.MaxQueryDepth, checkBudget, token); }
+        {
+            Write(writer, columns, row, parameters, limits.Value.MaxQueryDepth, checkBudget, token);
+        }
         using var buffer = new MemoryStream(checked((int)counter.Length));
         using (var writer = new Utf8JsonWriter(buffer))
-        { Write(writer, columns, row, parameters, limits.Value.MaxQueryDepth, checkBudget, token); }
+        {
+            Write(writer, columns, row, parameters, limits.Value.MaxQueryDepth, checkBudget, token);
+        }
         checkBudget();
         token.ThrowIfCancellationRequested();
         return Encoding.UTF8.GetString(buffer.GetBuffer(), Empty, checked((int)buffer.Length));

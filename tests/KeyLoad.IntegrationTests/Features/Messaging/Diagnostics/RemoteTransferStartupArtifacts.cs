@@ -22,7 +22,9 @@ internal static class RemoteTransferStartupArtifacts
                 BoundedDiagnosticLog.Bound(RemoteTransferStartupFailureLines.Read(originalFailure)));
         }
         if (window is null)
-        { return; }
+        {
+            return;
+        }
         foreach (var item in window.Buffers)
         {
             var path = Path.Combine(root, item.Key);

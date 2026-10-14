@@ -25,7 +25,9 @@ internal sealed class ReadCountingZoneTreeStore : IAtomicStore
         inner = new(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         Database = new(this, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
         Database.Bootstrap(new(RootPrincipal, Tenant, [new("*", "*", Capability.All)], ["*"])
-        { ClusterAdministrator = true }, DatabaseEngine.Credential(RootPrincipal, RootPrincipal, RootCredential));
+        {
+            ClusterAdministrator = true
+        }, DatabaseEngine.Credential(RootPrincipal, RootPrincipal, RootCredential));
         PhysicalShardTestBootstrap.Bootstrap(Database, RootPrincipal);
         Configure(GraphSearchTestSupport.Documents, ResourceKind.Collection);
         Configure(GraphSearchTestSupport.Projects, ResourceKind.Collection);
@@ -34,7 +36,10 @@ internal sealed class ReadCountingZoneTreeStore : IAtomicStore
         ResetReadCalls();
     }
 
-    internal DatabaseEngine Database { get; }
+    internal DatabaseEngine Database
+    {
+        get;
+    }
     internal PartitionRef Partition { get; } = new(Tenant, "database", "orders", PartitionKey);
     internal int ReadCalls => Volatile.Read(ref readCalls);
     public StoreIdentity Identity => inner.Identity;

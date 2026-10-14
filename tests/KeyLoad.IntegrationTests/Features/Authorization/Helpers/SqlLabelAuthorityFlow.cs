@@ -30,7 +30,11 @@ internal static class SqlLabelAuthorityFlow
                 PolicyEpoch = identity.Principal.PolicyEpoch + 1
             }, granted.Principal);
             await SqlLabelAuthorityResults.HealthyAsync(sdk, session, scenario.Partition, token);
-            var revoked = granted.Principal with { Revoked = true, PolicyEpoch = SqlLabelAuthorityProtocol.RevokedEpoch };
+            var revoked = granted.Principal with
+            {
+                Revoked = true,
+                PolicyEpoch = SqlLabelAuthorityProtocol.RevokedEpoch
+            };
             await SqlRf3Protocol.EqualAsync(revoked,
                 await McpCallerAssertions.SdkSuccessAsync(await root.ConfigurePrincipalAsync(Guid.NewGuid(), revoked, token)));
             await SqlLabelAuthorityRefusals.RevokedAsync(fixture, sdk, session, state, token);

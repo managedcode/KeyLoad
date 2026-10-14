@@ -6,12 +6,18 @@ internal static class RemoteTransferRepairColdTrial
 {
     internal static async Task RunAsync(int ceiling)
     {
-        using var fixture = new RemoteTransferDatabase(new() { MaxQueueTransferRepairAttempts = ceiling },
+        using var fixture = new RemoteTransferDatabase(new()
+        {
+            MaxQueueTransferRepairAttempts = ceiling
+        },
             timeProvider: new RemoteTransferDiscoveryClock());
         fixture.AddPrincipal(new(RemoteTransferRepairColdProtocol.Subject, RemoteTransferDatabase.TenantId,
             [new(RemoteTransferRepairColdProtocol.Wildcard, RemoteTransferRepairColdProtocol.Wildcard, Capability.All)],
             [RemoteTransferRepairColdProtocol.Wildcard])
-        { ClusterAdministrator = true, PolicyEpoch = RemoteTransferRepairColdProtocol.InitialEpoch });
+        {
+            ClusterAdministrator = true,
+            PolicyEpoch = RemoteTransferRepairColdProtocol.InitialEpoch
+        });
         var transfer = new CreateQueueTransfer(fixture.SourceQueue, Guid.NewGuid(), fixture.DestinationQueue,
             new(fixture.DestinationQueue.Queue, RemoteTransferRepairColdProtocol.Message, RemoteTransferRepairColdProtocol.Payload));
         var create = new CommandRequest(Guid.NewGuid(), fixture.SourcePartition, [transfer]);

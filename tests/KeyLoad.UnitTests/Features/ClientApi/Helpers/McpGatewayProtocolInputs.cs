@@ -9,7 +9,9 @@ internal static class McpGatewayProtocolInputs
     {
         using var document = JsonDocument.Parse(json);
         if (document.RootElement.ValueKind != JsonValueKind.Object)
-        { throw new InvalidOperationException("The test input must be an object."); }
+        {
+            throw new InvalidOperationException("The test input must be an object.");
+        }
         return document.RootElement.EnumerateObject()
             .ToDictionary(static property => property.Name, static property => property.Value.Clone(), StringComparer.Ordinal);
     }

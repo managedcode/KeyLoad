@@ -22,7 +22,11 @@ internal static class GraphIncomingPublicPolicy
         GraphIncomingRf3Seed seed, CancellationToken token)
     {
         var original = seed.Reader.Principal;
-        var sourceReduced = original with { PolicyEpoch = SourceReducedEpoch, Grants = seed.TargetOnlyReader.Principal.Grants };
+        var sourceReduced = original with
+        {
+            PolicyEpoch = SourceReducedEpoch,
+            Grants = seed.TargetOnlyReader.Principal.Grants
+        };
         await ConfigureAsync(administrator, sourceReduced, token);
         await UnchangedAsync(fixture, administrator, callers, seed, null, sourceHidden: true, token);
         var targetReduced = original with
@@ -33,11 +37,21 @@ internal static class GraphIncomingPublicPolicy
         };
         await ConfigureAsync(administrator, targetReduced, token);
         await UnchangedAsync(fixture, administrator, callers, seed, ErrorCode.NotFound, sourceHidden: false, token);
-        await ConfigureAsync(administrator, original with { PolicyEpoch = FirstRepairEpoch }, token);
+        await ConfigureAsync(administrator, original with
+        {
+            PolicyEpoch = FirstRepairEpoch
+        }, token);
         await UnchangedAsync(fixture, administrator, callers, seed, null, sourceHidden: false, token);
-        await ConfigureAsync(administrator, original with { PolicyEpoch = RevokedEpoch, Revoked = true }, token);
+        await ConfigureAsync(administrator, original with
+        {
+            PolicyEpoch = RevokedEpoch,
+            Revoked = true
+        }, token);
         await UnchangedAsync(fixture, administrator, callers, seed, ErrorCode.Unauthenticated, sourceHidden: false, token);
-        await ConfigureAsync(administrator, original with { PolicyEpoch = FinalRepairEpoch }, token);
+        await ConfigureAsync(administrator, original with
+        {
+            PolicyEpoch = FinalRepairEpoch
+        }, token);
         await UnchangedAsync(fixture, administrator, callers, seed, null, sourceHidden: false, token);
     }
 
@@ -50,9 +64,13 @@ internal static class GraphIncomingPublicPolicy
     {
         var before = await GraphIncomingPublicImages.CaptureAsync(administrator, seed, token);
         if (code is { } failure)
-        { await GraphIncomingPublicRoutes.DeniedAsync(fixture, callers, seed, failure, token); }
+        {
+            await GraphIncomingPublicRoutes.DeniedAsync(fixture, callers, seed, failure, token);
+        }
         else
-        { await GraphIncomingPublicRoutes.HealthyAsync(callers, seed, sourceHidden, token); }
+        {
+            await GraphIncomingPublicRoutes.HealthyAsync(callers, seed, sourceHidden, token);
+        }
         await GraphIncomingPublicImages.SameAsync(before,
             await GraphIncomingPublicImages.CaptureAsync(administrator, seed, token));
     }

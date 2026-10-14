@@ -8,13 +8,25 @@ internal sealed class ChunkSelectedIntegrityFixture : IDisposable
 {
     private readonly TestDatabase original = new();
     private readonly List<ZoneTreeStore> opened = [];
-    internal ZoneTreeStore Store { get; private set; }
-    internal DatabaseEngine Owner { get; private set; }
+    internal ZoneTreeStore Store
+    {
+        get; private set;
+    }
+    internal DatabaseEngine Owner
+    {
+        get; private set;
+    }
     internal PartitionRef Partition => original.Partition;
     internal Guid WindowId { get; } = Guid.NewGuid();
     internal List<(ReplicatedOperation Operation, CommitReceipt Receipt)> Successes { get; } = [];
-    internal ReplicatedOperation Seal { get; }
-    internal ReplicatedOperation Merge { get; }
+    internal ReplicatedOperation Seal
+    {
+        get;
+    }
+    internal ReplicatedOperation Merge
+    {
+        get;
+    }
     internal const string OtherSeries = "selected-healthy";
     internal static readonly SampleData Fresh = new("fresh-correction", SampleChunkCanonicalFixture.Start.AddTicks(2), 8);
     internal static readonly SampleData Other = new("independent", SampleChunkCanonicalFixture.Start.AddMinutes(1), 12);
@@ -77,15 +89,23 @@ internal sealed class ChunkSelectedIntegrityFixture : IDisposable
     {
         var failures = new List<Exception>();
         for (var index = opened.Count - 1; index >= 0; index--)
-        { KeyLoad.Server.ServerFailureObserver.Observe(opened[index].Dispose, failures); }
+        {
+            KeyLoad.Server.ServerFailureObserver.Observe(opened[index].Dispose, failures);
+        }
         if (failures.Count == 0)
         {
             try
-            { original.Dispose(); }
-            catch (Exception error) when (KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-            { failures.Add(error); }
-            catch (Exception error) when (!KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-            { failures.Add(error); }
+            {
+                original.Dispose();
+            }
+            catch (Exception error) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+            {
+                failures.Add(error);
+            }
+            catch (Exception error) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+            {
+                failures.Add(error);
+            }
         }
         KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }

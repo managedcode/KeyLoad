@@ -34,14 +34,22 @@ internal static class SqlTypedInsertRf3Wave
                     if (state.Cancelled is { } cancelled && state.CancelledReceipt is { } cancelledReceipt)
                     {
                         if (state.EpochFenced)
-                        { await FenceAsync(caller, wire, cancelled, token); }
+                        {
+                            await FenceAsync(caller, wire, cancelled, token);
+                        }
                         else
-                        { await ReplayAsync(caller, wire, cancelled, cancelledReceipt, token); }
+                        {
+                            await ReplayAsync(caller, wire, cancelled, cancelledReceipt, token);
+                        }
                     }
                     if (state.Repaired is { } repaired && state.RepairedReceipt is { } receipt)
-                    { await ReplayAsync(caller, wire, repaired, receipt, token); }
+                    {
+                        await ReplayAsync(caller, wire, repaired, receipt, token);
+                    }
                     foreach (var cold in state.ColdReceipts ?? [])
-                    { await ReplayAsync(caller, wire, cold.Request, cold.Receipt, token); }
+                    {
+                        await ReplayAsync(caller, wire, cold.Request, cold.Receipt, token);
+                    }
                     await SqlTypedInsertRf3Pages.RunAsync(caller, wire, state, token);
                     await SqlTypedInsertRf3Images.RequireAsync(root, before, token);
                 }, failures);

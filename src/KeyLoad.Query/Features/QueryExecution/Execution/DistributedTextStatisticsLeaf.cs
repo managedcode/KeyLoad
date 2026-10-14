@@ -26,7 +26,9 @@ internal static class DistributedTextStatisticsLeaf
         execution.Validate();
         SearchRequestValidation.Validate(request, database.Limits, false, execution);
         if (request.TextIndex is not null)
-        { throw Errors.Fail(ErrorCode.UnsupportedCapability, CanonicalTextRequired); }
+        {
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, CanonicalTextRequired);
+        }
         using var admission = database.AdmitQuery(budget.Cancellation);
         using var charged = budget.EnterReadGrant(grant);
         return database.WithPartitionQueryFenceView(principalId, request.Partition, request.Collection, grant,
@@ -41,11 +43,15 @@ internal static class DistributedTextStatisticsLeaf
     {
         budget.Check();
         if (!string.Equals(principal.TenantId, tenant, StringComparison.Ordinal))
-        { throw Errors.Fail(ErrorCode.PermissionDenied, ReceivingPrincipalChanged); }
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, ReceivingPrincipalChanged);
+        }
         var placement = DatabaseEngine.ReadAtomicPartitionPlacementForAuthorizedQuery(view, request.Partition, grant);
         PartitionQueryPlacementValidation.Validate(placement, request.Partition, owner);
         if (request.Text is not null)
-        { database.Authorization.RequireFieldUse(principal, resource, request.TextField!); }
+        {
+            database.Authorization.RequireFieldUse(principal, resource, request.TextField!);
+        }
         if (request.Vector is not null)
         {
             database.Authorization.Require(principal, request.Partition, request.Collection, Capability.VectorSearch);

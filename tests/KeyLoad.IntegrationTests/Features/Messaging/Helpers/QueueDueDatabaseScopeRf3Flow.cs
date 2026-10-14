@@ -65,7 +65,10 @@ internal static class QueueDueDatabaseScopeRf3Flow
             QueueDeadlineRf3Protocol.Worker);
         await Assert.That(repaired.PolicyEpoch).IsEqualTo(2L);
         await MessagingRf3Identity.UpdateAsync(fixture, repaired, token);
-        state.Identity = state.Identity with { Principal = repaired };
+        state.Identity = state.Identity with
+        {
+            Principal = repaired
+        };
         await WithAsync(fixture, state, async (admin, worker) =>
         {
             await ReadyAsync(admin, state, state.Denied, token);

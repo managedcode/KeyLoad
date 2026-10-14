@@ -27,7 +27,9 @@ internal sealed record CompositeUniqueRf3Scenario(PartitionRef Partition, McpPer
     {
         var partition = new PartitionRef("kl011-" + Guid.NewGuid().ToString("N"), "database", "documents", FirstPartition);
         var definition = new ResourceDefinition(Collection, ResourceKind.Collection, partition.TransactionDomainId)
-        { Indexes = [new(Index, ["/label", "/rank"], Unique: true)] };
+        {
+            Indexes = [new(Index, ["/label", "/rank"], Unique: true)]
+        };
         var configured = await McpCallerAssertions.SdkSuccessAsync(await admin.ConfigureResourceAsync(Guid.NewGuid(),
             new(partition.TenantId, partition.DatabaseId, definition), token));
         await Assert.That(JsonDefaults.Serialize(configured.Indexes).AsSpan()
@@ -39,7 +41,10 @@ internal sealed record CompositeUniqueRf3Scenario(PartitionRef Partition, McpPer
     internal async Task SetGrantsAsync(KeyLoadClient admin, Capability capabilities, long epoch, CancellationToken token)
     {
         var principal = Identity.Principal with
-        { Grants = [new(Partition.DatabaseId, Collection, capabilities)], PolicyEpoch = epoch };
+        {
+            Grants = [new(Partition.DatabaseId, Collection, capabilities)],
+            PolicyEpoch = epoch
+        };
         var persisted = await McpCallerAssertions.SdkSuccessAsync(await admin.ConfigurePrincipalAsync(Guid.NewGuid(), principal, token));
         await Assert.That(persisted.PolicyEpoch).IsEqualTo(epoch);
         await Assert.That(persisted.Grants.Single().Capabilities).IsEqualTo(capabilities);

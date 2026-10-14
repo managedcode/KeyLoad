@@ -27,7 +27,10 @@ internal static class QueueAccountingFaultHealthy
         await Assert.That(receipt.CommandId).IsEqualTo(ack.CommandId);
         await Assert.That(receipt.Mutations).IsEquivalentTo([new MutationReceipt(nameof(DeliveryAction.Ack), state.Lane.Queue,
             QueueAccountingFaultProtocol.Healthy, QueueAccountingFaultProtocol.Three)], TUnit.Assertions.Enums.CollectionOrdering.Matching);
-        var counters = prior with { NextReadySequence = prior.NextReadySequence + QueueAccountingFaultProtocol.One };
+        var counters = prior with
+        {
+            NextReadySequence = prior.NextReadySequence + QueueAccountingFaultProtocol.One
+        };
         var metadata = new MessageMetadata(QueueAccountingFaultProtocol.Healthy, MessageState.Acked,
             QueueAccountingFaultProtocol.One, QueueAccountingFaultProtocol.Three, counters.NextReadySequence, null, null,
             LeaseVersion: QueueAccountingFaultProtocol.One);

@@ -14,13 +14,17 @@ public sealed partial class DatabaseEngine
             var effect = ApplyControlledDocumentEffect(transaction, phase, operation.Id, position, operation.EvaluatedAt);
             var effectJournal = MoveJournalReceipt(transaction, operation.Id, position, phase.ControlIntentDigest)
                 with
-            { EffectDigest = Convert.ToHexStringLower(SHA256.HashData(NativeSerialization.Serialize(effect))) };
+            {
+                EffectDigest = Convert.ToHexStringLower(SHA256.HashData(NativeSerialization.Serialize(effect)))
+            };
             return new(phase.MoveId, phase.Stage, effectJournal, null, null, null, null,
                 ControlledEffect: effect);
         }
         var record = ExecuteControlledDocumentAuthority(transaction, principal, phase, position, operation.EvaluatedAt);
         if (record.Delegation!.MoveId != phase.MoveId || record.Identity.Partition != phase.Partition)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
         return new(phase.MoveId, phase.Stage, MoveJournalReceipt(transaction, operation.Id, position,
             phase.ControlIntentDigest), null, null, null, null, ControlledCommand: record);
     }
@@ -50,6 +54,8 @@ public sealed partial class DatabaseEngine
     private static void RequireControlOperator(string expected, PrincipalRecord principal)
     {
         if (!principal.ClusterAdministrator || expected != principal.Id)
-        { throw Errors.Fail(ErrorCode.PermissionDenied, ClusterAdministrationRequiredMessage); }
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, ClusterAdministrationRequiredMessage);
+        }
     }
 }

@@ -27,16 +27,22 @@ internal static class EventAppendRecoveryOracle
         var committed = recovered is not null;
         await Assert.That(store.Position).IsEqualTo(seedPosition + (committed ? PositionStep : 0));
         if (stage is CommitStage.JournalFlushed or CommitStage.MutationApplied or CommitStage.ApplyCompleted)
-        { await Assert.That(committed).IsTrue(); }
+        {
+            await Assert.That(committed).IsTrue();
+        }
         await EventAppendStateAssertions.VerifyAsync(database, original.EvaluatedAt, seedTail, committed, healthy: false);
         if (recovered is not null)
-        { await EventAppendReceiptAssertions.VerifyAsync(store, recovered.Get<CommitReceipt>(), seedPosition + PositionStep); }
+        {
+            await EventAppendReceiptAssertions.VerifyAsync(store, recovered.Get<CommitReceipt>(), seedPosition + PositionStep);
+        }
         await EventAppendReceiptAssertions.AssertOutboxPresenceAsync(store, seedTail, committed);
         var applied = database.Apply(original);
         await EventAppendReceiptAssertions.VerifyAsync(store, applied.Get<CommitReceipt>(), seedPosition + PositionStep);
         await EventAppendStateAssertions.VerifyAsync(database, original.EvaluatedAt, seedTail, committed: true, healthy: false);
         if (recovered is not null)
-        { await EventAppendReceiptAssertions.SameResultAsync(recovered, applied); }
+        {
+            await EventAppendReceiptAssertions.SameResultAsync(recovered, applied);
+        }
         await EventAppendReceiptAssertions.VerifyOutboxAsync(store, applied.Get<CommitReceipt>(), seedTail);
         var stablePosition = store.Position;
         var stable = EventAppendStateAssertions.Bytes(store);
@@ -49,7 +55,10 @@ internal static class EventAppendRecoveryOracle
             Mutations = [new PutDocument(EventAppendCrashContract.Documents, EventAppendCrashContract.Producer,
                 EventAppendCrashContract.ChangedJson, 0)]
         };
-        var conflict = database.Apply(original with { PayloadJson = JsonSerializer.Serialize(changedRequest, JsonDefaults.Options) });
+        var conflict = database.Apply(original with
+        {
+            PayloadJson = JsonSerializer.Serialize(changedRequest, JsonDefaults.Options)
+        });
         await Assert.That(conflict.Error).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(conflict.SafeDetail).IsEqualTo(ContentConflict);
         await Assert.That(store.Position).IsEqualTo(stablePosition);
@@ -58,7 +67,11 @@ internal static class EventAppendRecoveryOracle
         await EventAppendDedupAssertions.VerifyAsync(database, original.EvaluatedAt, seedTail);
         var healthy = EventAppendCrashContract.ProducerCommand(EventAppendCrashContract.HealthyCommandId,
             EventAppendCrashContract.Healthy, 2);
-        var result = database.Apply(original with { Id = healthy.CommandId, PayloadJson = JsonSerializer.Serialize(healthy, JsonDefaults.Options) });
+        var result = database.Apply(original with
+        {
+            Id = healthy.CommandId,
+            PayloadJson = JsonSerializer.Serialize(healthy, JsonDefaults.Options)
+        });
         await EventAppendReceiptAssertions.VerifyHealthyAsync(store, result.Get<CommitReceipt>());
         await EventAppendReceiptAssertions.VerifyOutboxAsync(store, result.Get<CommitReceipt>(), seedTail + 3);
         await EventAppendStateAssertions.VerifyAsync(database, original.EvaluatedAt, seedTail, committed: true, healthy: true);

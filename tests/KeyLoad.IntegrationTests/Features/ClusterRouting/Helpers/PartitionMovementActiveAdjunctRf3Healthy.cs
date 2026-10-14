@@ -12,7 +12,10 @@ internal static class PartitionMovementActiveAdjunctRf3Healthy
         var originalId = PartitionMovementReceiverIssueFailoverRf3NativeCut.StageId(seed);
         var original = PartitionMovementReceiverIssueFailoverRf3NativeCut.Pending(before);
         await PartitionMovementPublicParentRf3Cut.RestartAsync(wave, cancellationToken).ConfigureAwait(false);
-        var resume = await seed.Source.MovePartitionAsync(seed.FirstRequest with { Mode = PartitionMoveMode.Resume },
+        var resume = await seed.Source.MovePartitionAsync(seed.FirstRequest with
+        {
+            Mode = PartitionMoveMode.Resume
+        },
             cancellationToken).ConfigureAwait(false);
         await Assert.That(resume.IsFailed).IsTrue();
         await Assert.That(resume.Value).IsNull();

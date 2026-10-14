@@ -59,7 +59,9 @@ internal static class BlobPrincipalRevokedR44Refusals
             McpOfficialClient? unexpected;
             HttpRequestException? refusal = null;
             try
-            { unexpected = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node2, state.Identity.Secret, token); }
+            {
+                unexpected = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node2, state.Identity.Secret, token);
+            }
             catch (HttpRequestException error) { unexpected = null; refusal = error; }
             await using var owned = unexpected;
             await ServerFailureObserver.ObserveAsync(async () =>

@@ -69,7 +69,10 @@ internal static class SiteBrowserProcess
 
 internal sealed class SiteBrowserProcessStart : IAsyncDisposable
 {
-    public Process Process { get; }
+    public Process Process
+    {
+        get;
+    }
     private readonly SiteHeavyChildLease lease;
     private int transferred;
     private int disposed;
@@ -83,7 +86,10 @@ internal sealed class SiteBrowserProcessStart : IAsyncDisposable
         this.lease = lease;
     }
 
-    public string Version { get; }
+    public string Version
+    {
+        get;
+    }
     internal bool OriginalProcessExitObserved => Volatile.Read(ref originalProcessExitObserved) == SiteBrowserTokens.One;
 
     public static async Task<SiteBrowserProcessStart> StartAsync(string browserPath, string profilePath, string version,

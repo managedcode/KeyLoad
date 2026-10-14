@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.Server;
 
@@ -14,12 +14,17 @@ internal class PartitionMovementPendingSourceRead<T>(PartitionRef partition, Gui
     public Guid MoveId { get; } = moveId;
     internal CancellationToken StageCancellation => stopping.Token;
     public Task CompletionTask => Completion.Task;
-    internal TaskCompletionSource<T> Completion { get; } =
+    internal TaskCompletionSource<T> Completion
+    {
+        get;
+    } =
         new(TaskCreationOptions.RunContinuationsAsynchronously);
     public Task StopAsync()
     {
         lock (gate)
-        { return disposed ? Task.CompletedTask : cancellation ??= stopping.CancelAsync(); }
+        {
+            return disposed ? Task.CompletedTask : cancellation ??= stopping.CancelAsync();
+        }
     }
 
     public void Dispose()
@@ -28,15 +33,21 @@ internal class PartitionMovementPendingSourceRead<T>(PartitionRef partition, Gui
         lock (gate)
         {
             if (disposed)
-            { return; }
+            {
+                return;
+            }
             disposed = true;
             original = cancellation;
         }
         var failures = new List<Exception>();
         if (original is not null)
-        { ServerFailureObserver.Observe(() => original.GetAwaiter().GetResult(), failures); }
+        {
+            ServerFailureObserver.Observe(() => original.GetAwaiter().GetResult(), failures);
+        }
         try
-        { stopping.Dispose(); }
+        {
+            stopping.Dispose();
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         ServerFailureObserver.ThrowIfAny(failures);

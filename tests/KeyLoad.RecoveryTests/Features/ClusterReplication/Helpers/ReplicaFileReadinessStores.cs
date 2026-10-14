@@ -16,7 +16,10 @@ internal sealed class ReplicaFileReadinessStores : IAsyncDisposable
         Root = root;
     }
 
-    internal string Root { get; }
+    internal string Root
+    {
+        get;
+    }
 
     internal void HoldTargetFile(string store, string file) => Hold(TargetDirectory(store), file);
 

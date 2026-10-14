@@ -15,9 +15,13 @@ internal static class TwoRf3RemoteReadResources
         if (registerOwners)
         {
             foreach (var resource in resources)
-            { resource.WithEnvironment(TwoRf3ProfileProtocol.RegistrationEnvironment, TwoRf3ProfileProtocol.Enabled); }
+            {
+                resource.WithEnvironment(TwoRf3ProfileProtocol.RegistrationEnvironment, TwoRf3ProfileProtocol.Enabled);
+            }
             foreach (var resource in resources.Take(TwoRf3ProfileProtocol.MembersPerGroup))
-            { resource.WithEnvironment(RegistrationLogEnvironment, RegistrationLogLevel); }
+            {
+                resource.WithEnvironment(RegistrationLogEnvironment, RegistrationLogLevel);
+            }
         }
         if (control.Value.RemoteDocumentReads)
         {
@@ -29,12 +33,16 @@ internal static class TwoRf3RemoteReadResources
         if (control.Value.ProtectedDocumentMovement)
         {
             foreach (var resource in resources)
-            { resource.WithEnvironment(TwoRf3ProfileProtocol.MovementEnvironment, TwoRf3ProfileProtocol.Enabled); }
+            {
+                resource.WithEnvironment(TwoRf3ProfileProtocol.MovementEnvironment, TwoRf3ProfileProtocol.Enabled);
+            }
         }
         if (control.Value.TenantCapacityPlacement)
         {
             foreach (var resource in resources)
-            { resource.WithEnvironment(TenantCapacityPlacementProfile.Environment, TwoRf3ProfileProtocol.Enabled); }
+            {
+                resource.WithEnvironment(TenantCapacityPlacementProfile.Environment, TwoRf3ProfileProtocol.Enabled);
+            }
         }
         if (control.Value.MovementMaxBatchBytes is { } maxBatchBytes)
         {
@@ -55,7 +63,9 @@ internal static class TwoRf3RemoteReadResources
         if (control.Value.RemotePartitionQueries)
         {
             foreach (var resource in resources)
-            { resource.WithEnvironment(TwoRf3ProfileProtocol.RemoteQueryEnvironment, TwoRf3ProfileProtocol.Enabled); }
+            {
+                resource.WithEnvironment(TwoRf3ProfileProtocol.RemoteQueryEnvironment, TwoRf3ProfileProtocol.Enabled);
+            }
         }
     }
 }

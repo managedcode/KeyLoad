@@ -41,7 +41,9 @@ internal sealed partial class PartitionMovementMac : IDisposable
     internal PartitionMovementMac(ReadOnlySpan<byte> configuredKey, int maximumBytes)
     {
         if (configuredKey.Length != KeyBytes || maximumBytes < MinimumBodyBytes)
-        { throw Errors.Fail(ErrorCode.Validation, InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, InvalidProof);
+        }
         this.maximumBytes = maximumBytes;
         key = configuredKey.ToArray();
     }
@@ -50,84 +52,48 @@ internal sealed partial class PartitionMovementMac : IDisposable
         => Convert.ToHexStringLower(Digest(originalBody, reply));
 
     internal bool Verify(ReadOnlySpan<byte> originalBody, string signature, bool reply)
-    {
-        if (signature.Length != SignatureCharacters
-            || signature.Any(character => !char.IsAsciiHexDigitLower(character)))
-        { return false; }
-        var supplied = Convert.FromHexString(signature);
-        var expected = Digest(originalBody, reply);
-        return CryptographicOperations.FixedTimeEquals(supplied, expected);
-    }
+        => PartitionMovementSignatureVerification.Verify(this, originalBody, signature, reply ? ReplyDomain : RequestDomain);
 
     internal string SignOutcome(ReadOnlySpan<byte> originalBody, bool reply)
         => Convert.ToHexStringLower(DigestDomain(originalBody, reply ? OutcomeReplyDomain : OutcomeQueryDomain));
 
     internal bool VerifyOutcome(ReadOnlySpan<byte> originalBody, string signature, bool reply)
-    {
-        if (signature.Length != SignatureCharacters
-            || signature.Any(character => !char.IsAsciiHexDigitLower(character)))
-        { return false; }
-        var supplied = Convert.FromHexString(signature);
-        var expected = DigestDomain(originalBody, reply ? OutcomeReplyDomain : OutcomeQueryDomain);
-        return CryptographicOperations.FixedTimeEquals(supplied, expected);
-    }
+        => PartitionMovementSignatureVerification.Verify(this, originalBody, signature, reply ? OutcomeReplyDomain : OutcomeQueryDomain);
 
     internal string SignTransferAuthority(ReadOnlySpan<byte> originalBody)
         => Convert.ToHexStringLower(DigestDomain(originalBody, TransferAuthorityDomain));
 
     internal bool VerifyTransferAuthority(ReadOnlySpan<byte> originalBody, string signature)
-    {
-        if (signature.Length != SignatureCharacters
-            || signature.Any(character => !char.IsAsciiHexDigitLower(character)))
-        { return false; }
-        return CryptographicOperations.FixedTimeEquals(Convert.FromHexString(signature),
-            DigestDomain(originalBody, TransferAuthorityDomain));
-    }
+        => PartitionMovementSignatureVerification.Verify(this, originalBody, signature, TransferAuthorityDomain);
 
     internal string SignTransferData(ReadOnlySpan<byte> originalBody, bool reply)
         => Convert.ToHexStringLower(DigestDomain(originalBody, reply ? TransferDataReplyDomain : TransferDataRequestDomain));
 
     internal bool VerifyTransferData(ReadOnlySpan<byte> originalBody, string signature, bool reply)
-    {
-        if (signature.Length != SignatureCharacters
-            || signature.Any(character => !char.IsAsciiHexDigitLower(character)))
-        { return false; }
-        return CryptographicOperations.FixedTimeEquals(Convert.FromHexString(signature),
-            DigestDomain(originalBody, reply ? TransferDataReplyDomain : TransferDataRequestDomain));
-    }
+        => PartitionMovementSignatureVerification.Verify(this, originalBody, signature, reply ? TransferDataReplyDomain : TransferDataRequestDomain);
 
     internal string SignReceiverIssue(ReadOnlySpan<byte> originalBody, bool source)
         => Convert.ToHexStringLower(DigestDomain(originalBody, source ? ReceiverIssueSourceDomain : ReceiverIssueReplyDomain));
 
     internal bool VerifyReceiverIssue(ReadOnlySpan<byte> originalBody, string signature, bool source)
-    {
-        if (signature.Length != SignatureCharacters
-            || signature.Any(character => !char.IsAsciiHexDigitLower(character)))
-        { return false; }
-        return CryptographicOperations.FixedTimeEquals(Convert.FromHexString(signature),
-            DigestDomain(originalBody, source ? ReceiverIssueSourceDomain : ReceiverIssueReplyDomain));
-    }
+        => PartitionMovementSignatureVerification.Verify(this, originalBody, signature, source ? ReceiverIssueSourceDomain : ReceiverIssueReplyDomain);
 
     internal string SignReceiverIssueRequest(ReadOnlySpan<byte> originalBody, bool query)
         => Convert.ToHexStringLower(DigestDomain(originalBody, query ? ReceiverIssueQueryDomain : ReceiverIssueCommandDomain));
 
     internal bool VerifyReceiverIssueRequest(ReadOnlySpan<byte> originalBody, string signature, bool query)
-    {
-        if (signature.Length != SignatureCharacters
-            || signature.Any(character => !char.IsAsciiHexDigitLower(character)))
-        { return false; }
-        return CryptographicOperations.FixedTimeEquals(Convert.FromHexString(signature),
-            DigestDomain(originalBody, query ? ReceiverIssueQueryDomain : ReceiverIssueCommandDomain));
-    }
+        => PartitionMovementSignatureVerification.Verify(this, originalBody, signature, query ? ReceiverIssueQueryDomain : ReceiverIssueCommandDomain);
 
     private byte[] Digest(ReadOnlySpan<byte> originalBody, bool reply)
         => DigestDomain(originalBody, reply ? ReplyDomain : RequestDomain);
 
-    private byte[] DigestDomain(ReadOnlySpan<byte> originalBody, ReadOnlySpan<byte> domain)
+    internal byte[] DigestDomain(ReadOnlySpan<byte> originalBody, ReadOnlySpan<byte> domain)
     {
         ObjectDisposedException.ThrowIf(Volatile.Read(ref disposed) != Active, this);
         if (originalBody.IsEmpty || originalBody.Length > maximumBytes)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, InvalidProof);
+        }
         using var hash = IncrementalHash.CreateHMAC(HashAlgorithmName.SHA256, key);
         hash.AppendData(domain);
         hash.AppendData(originalBody);
@@ -137,6 +103,8 @@ internal sealed partial class PartitionMovementMac : IDisposable
     public void Dispose()
     {
         if (Interlocked.Exchange(ref disposed, Disposed) == Active)
-        { CryptographicOperations.ZeroMemory(key); }
+        {
+            CryptographicOperations.ZeroMemory(key);
+        }
     }
 }

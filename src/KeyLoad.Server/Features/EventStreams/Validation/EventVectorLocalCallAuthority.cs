@@ -16,6 +16,8 @@ internal static class EventVectorLocalCallAuthority
             || actual.Incarnation != authority.LocalOwner.Owner.Incarnation
             || originalCall.CallerVoter != actual.VoterId || originalCall.CallerSiloAddress != actual.SiloAddress
             || !PhysicalOwnerEntryValidation.SameOwner(originalCall.Source, authority.LocalOwner.Owner))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, EventVectorRemoteProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, EventVectorRemoteProtocol.Unavailable);
+        }
     }
 }

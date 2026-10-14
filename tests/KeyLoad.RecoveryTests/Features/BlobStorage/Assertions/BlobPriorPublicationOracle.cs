@@ -29,9 +29,13 @@ internal static class BlobPriorPublicationOracle
         var fields = new object[] { prefix, blob.Partition.TenantId, blob.Partition.DatabaseId,
             blob.Partition.TransactionDomainId, blob.Partition.PartitionKey, blob.Resource, blob.Id };
         if (prefix == "blob-state-v1")
-        { return KeyCodec.Encode([.. fields, seed.Upload.ToString("N")]); }
+        {
+            return KeyCodec.Encode([.. fields, seed.Upload.ToString("N")]);
+        }
         if (prefix is "blob-part-v1" or "blob-partmeta-v1")
-        { return KeyCodec.Encode([.. fields, seed.Upload.ToString("N"), 0L]); }
+        {
+            return KeyCodec.Encode([.. fields, seed.Upload.ToString("N"), 0L]);
+        }
         return KeyCodec.Encode(fields);
     }
 }

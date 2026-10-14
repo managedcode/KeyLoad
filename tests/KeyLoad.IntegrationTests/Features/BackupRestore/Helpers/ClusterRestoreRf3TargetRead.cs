@@ -29,7 +29,9 @@ internal static class ClusterRestoreRf3TargetRead
                     originals, original, mapping, nodes, index, dispatchPaused, target.OperationId, target.ExpectedSignerFingerprint).ConfigureAwait(false));
             }, failures).ConfigureAwait(false);
             if (store is { } owned)
-            { ServerFailureObserver.Observe(owned.Dispose, failures); }
+            {
+                ServerFailureObserver.Observe(owned.Dispose, failures);
+            }
         }
         ServerFailureObserver.ThrowIfAny(failures);
         return nodes.ToImmutable();

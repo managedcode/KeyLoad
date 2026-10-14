@@ -1,5 +1,5 @@
 using System.Runtime.CompilerServices;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.DependencyInjection;
 using Orleans.Serialization;
@@ -30,9 +30,13 @@ internal static class RequestCqrsAnnInvocation
         var result = NativeSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value as AnnMaintenanceResult
             ?? throw new InvalidOperationException();
         if (retainedReplay)
-        { await RequestCqrsAnnAssertions.RetainedFramesAsync(frames, id); }
+        {
+            await RequestCqrsAnnAssertions.RetainedFramesAsync(frames, id);
+        }
         else
-        { await RequestCqrsAnnAssertions.FramesAsync(frames, request, id); }
+        {
+            await RequestCqrsAnnAssertions.FramesAsync(frames, request, id);
+        }
         await Assert.That(NativeSerialization.Serialize(NativeSerialization.Deserialize<GrainValue>(reply.Payload.Span))
             .AsSpan().SequenceEqual(reply.Payload.Span)).IsTrue();
         return (result, reply);
@@ -44,6 +48,9 @@ internal static class RequestCqrsAnnInvocation
         [EnumeratorCancellation] CancellationToken token)
     {
         await foreach (var frame in original.WithCancellation(token))
-        { frames.Add(frame); yield return frame; }
+        {
+            frames.Add(frame);
+            yield return frame;
+        }
     }
 }

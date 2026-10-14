@@ -21,13 +21,17 @@ internal static class EventVectorControlReplay
             phase.OriginalRequest.ControlPartition);
         var outcome = CommandOutcomeKeyResolver.Select(view, principal.Id, id, scope).Outcome;
         if (outcome is null)
-        { return null; }
+        {
+            return null;
+        }
         var metadata = identity.Metadata;
         var operation = new ReplicatedOperation(id, OperationKind.EventFeedControl, principal.Id,
             default, metadata);
         if (outcome.Incarnation != incarnation || outcome.PolicyEpoch != principal.PolicyEpoch
             || outcome.Fingerprint != NativeOperationFingerprint.Compute(operation))
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidReplay); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidReplay);
+        }
         return outcome.Result;
     }
 }

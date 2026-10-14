@@ -31,7 +31,10 @@ internal sealed class McpCommandConflictDiagnosticWholeFlowTests
         var position = database.Store.Position;
         var replay = database.Submit(OperationKind.Batch, command, id: command.CommandId);
         await Assert.That(NativeSerialization.Serialize(replay).AsSpan().SequenceEqual(NativeSerialization.Serialize(original))).IsTrue();
-        var changed = command with { Mutations = [new PutDocument(Collection, Document, ChangedJson, ExpectedRevision: First)] };
+        var changed = command with
+        {
+            Mutations = [new PutDocument(Collection, Document, ChangedJson, ExpectedRevision: First)]
+        };
         var rejected = database.Submit(OperationKind.Batch, changed, id: command.CommandId);
         await Assert.That(rejected.Error).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(rejected.SafeDetail).IsEqualTo(Conflict);

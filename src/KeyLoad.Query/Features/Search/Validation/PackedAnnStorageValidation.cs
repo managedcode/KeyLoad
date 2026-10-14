@@ -101,7 +101,10 @@ internal static class PackedAnnStorageValidation
         {
             budget.Check();
             if (node.Level > maximum)
-            { entry = node.Ordinal; maximum = node.Level; }
+            {
+                entry = node.Ordinal;
+                maximum = node.Level;
+            }
             ValidateTargetLayers(node, nodes, budget);
         }
         if (header.EntryPoint != entry || header.MaximumLevel != maximum)

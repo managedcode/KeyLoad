@@ -12,7 +12,9 @@ internal static class ControlledPartitionMovementPrepareAdmission
         PartitionMovementPeerAdmission admission, PartitionMovementTransportRequest request, CancellationToken token)
     {
         if (ControlledPartitionMovementProcessScope.Current is null)
-        { return await RejectOriginalAsync(source, target, admission, request, token); }
+        {
+            return await RejectOriginalAsync(source, target, admission, request, token);
+        }
         DatabaseEngine? original = null;
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>

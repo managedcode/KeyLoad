@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.IntegrationTests.Features.ChangeFeeds;
@@ -15,9 +15,13 @@ internal static class LiveReadCancellationR49Held
         var cancellation = CancellationTokenSource.CreateLinkedTokenSource(token);
         owner.Cancellations.Add(cancellation);
         if (useMcp)
-        { owner.McpCall = OfficialAsync(owner, cancellation.Token); }
+        {
+            owner.McpCall = OfficialAsync(owner, cancellation.Token);
+        }
         else
-        { owner.SdkCall = owner.Caller.Sdk.ReadLiveQueryAsync(owner.Original, cancellation.Token); }
+        {
+            owner.SdkCall = owner.Caller.Sdk.ReadLiveQueryAsync(owner.Original, cancellation.Token);
+        }
         var marker = await owner.Controls.WaitForMarkerAsync(arm, RequestCqrsProbePhase.AuthorizationReload,
             RequestCqrsProbeOutcome.Observed, owner.Discovery, token);
         await RequestCqrsPhaseFaultAssertions.VerifyMarkerAsync(marker, arm, Guid.Empty,
@@ -50,7 +54,9 @@ internal static class LiveReadCancellationR49Held
         CancellationToken token)
     {
         try
-        { return new(await owner.Caller.Mcp.CallAsync(FeedLiveRf3Protocol.LiveRead, owner.Original, token), null); }
+        {
+            return new(await owner.Caller.Mcp.CallAsync(FeedLiveRf3Protocol.LiveRead, owner.Original, token), null);
+        }
         catch (OperationCanceledException error) { return new(null, error); }
         catch (HttpRequestException error) { return new(null, error); }
         catch (IOException error) { return new(null, error); }

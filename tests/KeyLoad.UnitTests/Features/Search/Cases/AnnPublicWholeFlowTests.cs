@@ -25,7 +25,13 @@ internal sealed class AnnPublicWholeFlowTests
             var actual = await engine.ApproximateSearchAsync(AnnProjectionPinTestSupport.Principal, request);
             await AnnPublicWholeFlow.PageAsync(actual, database, cut, mode);
             await AnnPublicWholeFlow.UnchangedAsync(database, image, cut);
-            var empty = request with { Search = request.Search with { AllowedIds = [] } };
+            var empty = request with
+            {
+                Search = request.Search with
+                {
+                    AllowedIds = []
+                }
+            };
             actual = await engine.ApproximateSearchAsync(AnnProjectionPinTestSupport.Principal, empty);
             await AnnPublicWholeFlow.PageAsync(actual, database, cut, AnnPageMode.Exact, empty: true);
             await AnnPublicWholeFlow.UnchangedAsync(database, image, cut);
@@ -45,7 +51,10 @@ internal sealed class AnnPublicWholeFlowTests
                 .ApproximateSearchAsync(AnnProjectionPinTestSupport.Principal, request), ErrorCode.UnsupportedCapability);
             var engine = AnnPublicWholeFlow.Engine(database, runtime);
             await FailureAsync(() => engine.ApproximateSearchAsync(AnnProjectionPinTestSupport.Principal,
-                request with { IndexGeneration = MissingGeneration }), ErrorCode.HistoryUnavailable);
+                request with
+                {
+                    IndexGeneration = MissingGeneration
+                }), ErrorCode.HistoryUnavailable);
             await FailureAsync(() => AnnPublicWholeFlow.Engine(database, runtime, bytes: TooSmallResult)
                 .ApproximateSearchAsync(AnnProjectionPinTestSupport.Principal, request), ErrorCode.BudgetExceeded);
             await AnnPublicWholeFlow.UnchangedAsync(database, image, cut);
@@ -67,7 +76,10 @@ internal sealed class AnnPublicWholeFlowTests
             var original = AnnPublicWholeFlow.Request(database, pin);
             var request = original with
             {
-                Search = original.Search with { AllowedIds = ["seed-00000", "missing-ann-id", "seed-00000"] }
+                Search = original.Search with
+                {
+                    AllowedIds = ["seed-00000", "missing-ann-id", "seed-00000"]
+                }
             };
             var expected = new AnnSearchPage(AnnPublicWholeFlow.Version,
                 [new RankedDocument(new DocumentResult(

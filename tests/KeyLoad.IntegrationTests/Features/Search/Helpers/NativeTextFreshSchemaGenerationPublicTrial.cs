@@ -12,7 +12,10 @@ internal static class NativeTextFreshSchemaGenerationPublicTrial
             fixture.AdminKey, async caller =>
             {
                 var original = await NativeTextSelectedSchemaPublicSeed.CreateAsync(caller, token);
-                var schema = original.Resource with { SchemaVersion = 2L };
+                var schema = original.Resource with
+                {
+                    SchemaVersion = 2L
+                };
                 await SqlRf3Protocol.EqualAsync(schema, await McpCallerAssertions.SdkSuccessAsync(
                     await caller.Sdk.ConfigureResourceAsync(Guid.NewGuid(), new(original.Scenario.Partition.TenantId,
                         original.Scenario.Partition.DatabaseId, schema), token)));
@@ -22,14 +25,22 @@ internal static class NativeTextFreshSchemaGenerationPublicTrial
                     await caller.Sdk.OutboxStatusAsync(original.Scenario.Partition, token));
                 await NativeTextSelectedSchemaPublicAssertions.RefuseAsync(caller, original, beforeBuild, token);
                 var request = (await original.Scenario.RequestAsync(caller.Sdk, caller.Mcp, token)) with
-                { Consumer = new(original.Scenario.Partition, "schema2-native-text"), IndexGeneration = 2L };
+                {
+                    Consumer = new(original.Scenario.Partition, "schema2-native-text"),
+                    IndexGeneration = 2L
+                };
                 var before = await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.StatusAsync(token));
                 var built = await NativeTextMaintenanceRf3Call.ExecuteAsync(caller.Sdk, caller.Mcp,
                     request, NativeTextMaintenancePath.Mcp, token);
                 var after = await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.StatusAsync(token));
                 await NativeTextFreshSchemaGenerationPublicAssertions.FirstAsync(built, request,
                     original, schema, before, after);
-                var current = original with { Resource = schema, Build = request, Built = built };
+                var current = original with
+                {
+                    Resource = schema,
+                    Build = request,
+                    Built = built
+                };
                 await NativeTextSelectedSchemaPublicAssertions.PagesAsync(caller, current, selected: true, token);
                 var baseline = await McpCallerAssertions.SdkSuccessAsync(
                     await caller.Sdk.OutboxStatusAsync(original.Scenario.Partition, token));

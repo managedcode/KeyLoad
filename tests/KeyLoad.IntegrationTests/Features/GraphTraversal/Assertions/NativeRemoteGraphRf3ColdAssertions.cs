@@ -40,13 +40,19 @@ internal static class NativeRemoteGraphRf3ColdAssertions
             token.ThrowIfCancellationRequested();
             var entry = delta.Single(value => value.Index == index);
             if (entry.Operation is not { } operation)
-            { continue; }
+            {
+                continue;
+            }
             if (await membership.TryApplyAsync(operation))
-            { continue; }
+            {
+                continue;
+            }
             await NativeRemoteGraphRf3ReplayProof.RequireAsync(left, operation, seed, originals, token);
         }
         if (delta.Length != 0)
-        { allowed.Add(Convert.ToHexString(KeySpace.AppliedBytes)); }
+        {
+            allowed.Add(Convert.ToHexString(KeySpace.AppliedBytes));
+        }
         await membership.RequireCompleteAsync();
         var before = Rows(left.CanonicalRows);
         var after = Rows(right.CanonicalRows);
@@ -86,7 +92,9 @@ internal static class NativeRemoteGraphRf3ColdAssertions
             token.ThrowIfCancellationRequested();
             await Assert.That(right.Entries[index].Index).IsEqualTo((long)index + 1);
             if (index < left.Entries.Length)
-            { await Assert.That(left.Entries[index].Index).IsEqualTo((long)index + 1); }
+            {
+                await Assert.That(left.Entries[index].Index).IsEqualTo((long)index + 1);
+            }
         }
     }
 
@@ -100,7 +108,9 @@ internal static class NativeRemoteGraphRf3ColdAssertions
             token.ThrowIfCancellationRequested();
             await Assert.That(entry.Index <= right.HardState.CommittedIndex).IsTrue();
             if (entry.Operation is { } operation && operation.Kind != OperationKind.Membership)
-            { await NativeRemoteGraphRf3ReplayProof.RequireAsync(left, operation, seed, originals, token); }
+            {
+                await NativeRemoteGraphRf3ReplayProof.RequireAsync(left, operation, seed, originals, token);
+            }
             allowed.Add(Convert.ToHexString(ReplicaProtocol.EntryStorageKey(entry.Index)));
         }
         return allowed;
@@ -115,9 +125,13 @@ internal static class NativeRemoteGraphRf3ColdAssertions
         {
             token.ThrowIfCancellationRequested();
             if (allowed.Contains(key))
-            { continue; }
+            {
+                continue;
+            }
             if (!left.TryGetValue(key, out var original) || !right.TryGetValue(key, out var actual) || original != actual)
-            { throw new InvalidOperationException("The complete original Blob journal changed outside native membership authority."); }
+            {
+                throw new InvalidOperationException("The complete original Blob journal changed outside native membership authority.");
+            }
         }
     }
 

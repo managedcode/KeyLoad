@@ -14,7 +14,9 @@ internal sealed class ControlledPartitionMovementNativeCommandObservation(
     internal void Report(IReadOnlyList<Exception> failures, CancellationToken caller)
     {
         if (failures.Count == FirstFailure)
-        { return; }
+        {
+            return;
+        }
         var original = failures[FirstFailure];
         var category = original switch
         {
@@ -32,6 +34,12 @@ internal sealed class ControlledPartitionMovementNativeCommandObservation(
             clock.GetElapsedTime(started).Ticks, category, code, failures.Count));
     }
 
-    internal enum Stage { ContextAdmission, Execution, ContextSettlement }
-    private enum Cause { Domain, Cancellation, Timeout, Aggregate, Disposed, Other }
+    internal enum Stage
+    {
+        ContextAdmission, Execution, ContextSettlement
+    }
+    private enum Cause
+    {
+        Domain, Cancellation, Timeout, Aggregate, Disposed, Other
+    }
 }

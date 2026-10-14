@@ -11,7 +11,9 @@ internal static class EventVectorBorrowedRemoteCall
         CancellationToken originalCancellationToken)
     {
         if (originalClient is null)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, EventVectorRemoteProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, EventVectorRemoteProtocol.Unavailable);
+        }
         RemoteDocumentWorkOwner.Operation? operation = null;
         EventVectorAuthenticatedExchange? result = null;
         var failures = new List<Exception>();
@@ -29,12 +31,16 @@ internal static class EventVectorBorrowedRemoteCall
         finally
         {
             if (operation is not null)
-            { ServerFailureObserver.Observe(operation.Dispose, failures); }
+            {
+                ServerFailureObserver.Observe(operation.Dispose, failures);
+            }
         }
         if (failures.Count != EventVectorLocalCallProtocol.NoFailures)
         {
             if (result is not null)
-            { ServerFailureObserver.Observe(result.Dispose, failures); }
+            {
+                ServerFailureObserver.Observe(result.Dispose, failures);
+            }
             ServerFailureObserver.ThrowIfAny(failures);
         }
         return result ?? throw Errors.Fail(ErrorCode.Corruption, EventVectorRemoteProtocol.Invalid);

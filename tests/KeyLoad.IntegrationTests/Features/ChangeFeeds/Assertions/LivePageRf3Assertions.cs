@@ -17,9 +17,15 @@ internal static class LivePageRf3Assertions
         await LiveQueryCutRf3Assertions.BoundsAsync(before, actual.CutPosition, after);
         await Assert.That(string.IsNullOrEmpty(actual.Cursor)).IsFalse();
         await SqlRf3Protocol.EqualAsync(expected with
-        { Cursor = actual.Cursor, CutPosition = actual.CutPosition }, actual);
+        {
+            Cursor = actual.Cursor,
+            CutPosition = actual.CutPosition
+        }, actual);
         var continuationBefore = await observeCut();
-        var continuation = await read(original with { Cursor = actual.Cursor });
+        var continuation = await read(original with
+        {
+            Cursor = actual.Cursor
+        });
         var continuationAfter = await observeCut();
         await LiveQueryCutRf3Assertions.BoundsAsync(continuationBefore, continuation.CutPosition, continuationAfter);
         await Assert.That(string.IsNullOrEmpty(continuation.Cursor)).IsFalse();

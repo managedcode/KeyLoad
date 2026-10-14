@@ -11,7 +11,9 @@ internal static class RemoteTransferCoordinationIdentity
     internal static Guid CommandId(RemoteTransferCoordinationHint hint, string stage)
     {
         if (stage is not (RemoteTransferCoordinationProtocol.AcceptStage or RemoteTransferCoordinationProtocol.CompleteStage))
-        { throw Errors.Fail(ErrorCode.Validation, RemoteTransferCoordinationProtocol.InvalidHint); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, RemoteTransferCoordinationProtocol.InvalidHint);
+        }
         var source = hint.Source.Partition;
         var target = hint.Destination.Partition;
         var digest = SHA256.HashData(KeyCodec.Encode(RemoteTransferCoordinationProtocol.CommandDomain, stage,

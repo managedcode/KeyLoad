@@ -28,9 +28,16 @@ internal static class BlobSelectiveReadR43Trial
                     async reader =>
                     {
                         await BlobSelectiveReadR43Reads.MatrixAsync(admin, reader, state, false, token);
-                        await PersistAsync(admin, state, state.Both with { Grants = [state.Both.Grants[1]], PolicyEpoch = 3L }, token);
+                        await PersistAsync(admin, state, state.Both with
+                        {
+                            Grants = [state.Both.Grants[1]],
+                            PolicyEpoch = 3L
+                        }, token);
                         await BlobSelectiveReadR43Reads.MatrixAsync(admin, reader, state, true, token);
-                        await PersistAsync(admin, state, state.Both with { PolicyEpoch = 4L }, token);
+                        await PersistAsync(admin, state, state.Both with
+                        {
+                            PolicyEpoch = 4L
+                        }, token);
                         await BlobSelectiveReadR43Reads.MatrixAsync(admin, reader, state, false, token);
                         await BlobSelectiveReadR43Replay.RunAsync(admin, state, token);
                         return true;
@@ -42,7 +49,10 @@ internal static class BlobSelectiveReadR43Trial
     {
         var actual = await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), expected, token));
         await SqlRf3Protocol.EqualAsync(expected, actual);
-        state.Identity = state.Identity with { Principal = actual };
+        state.Identity = state.Identity with
+        {
+            Principal = actual
+        };
         state.Outbox = await BlobSelectiveReadR43Reads.OutboxAsync(admin, state, token);
     }
 }

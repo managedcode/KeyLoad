@@ -20,7 +20,9 @@ internal static class KeyLoadClientStreamPolicy
         ArgumentNullException.ThrowIfNull(configured);
         var value = configured.Value;
         if (!IsValid(value))
-        { throw new OptionsValidationException(SectionName, typeof(CqrsStreamClientOptions), [Invalid]); }
+        {
+            throw new OptionsValidationException(SectionName, typeof(CqrsStreamClientOptions), [Invalid]);
+        }
         return new CqrsStreamClientOptions
         {
             MaximumFrameBytes = value.MaximumFrameBytes,

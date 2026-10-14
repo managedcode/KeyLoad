@@ -36,11 +36,15 @@ internal static class RequestCqrsRf3Epoch7WaveRunner
             var originalFailure = failures.FirstOrDefault();
             await ServerFailureObserver.ObserveAsync(wave.StopAsync, failures).ConfigureAwait(false);
             if (originalFailure is not null)
-            { ServerFailureObserver.Observe(() => wave.SaveFailureEvidence(originalFailure), failures); }
+            {
+                ServerFailureObserver.Observe(() => wave.SaveFailureEvidence(originalFailure), failures);
+            }
         }
         scope?.Lifecycle.RecordTerminal();
         if (scope is not null && failures.Count > 0)
-        { scope.Lifecycle.ThrowWithContext(failures); }
+        {
+            scope.Lifecycle.ThrowWithContext(failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

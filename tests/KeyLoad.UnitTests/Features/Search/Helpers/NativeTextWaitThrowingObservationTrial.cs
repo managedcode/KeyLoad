@@ -48,13 +48,15 @@ internal static class NativeTextWaitThrowingObservationTrial
                 await Assert.That(observer.Capture.Count).IsEqualTo(1);
             }, failures);
             if (projection is not null)
-            { ServerFailureObserver.Observe(projection.Dispose, failures); }
+            {
+                ServerFailureObserver.Observe(projection.Dispose, failures);
+            }
         }
-        catch (Exception error) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        catch (Exception error) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
             failures.Add(error);
         }
-        catch (Exception error) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        catch (Exception error) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
             failures.Add(error);
         }

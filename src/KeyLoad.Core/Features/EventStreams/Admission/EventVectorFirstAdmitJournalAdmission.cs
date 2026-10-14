@@ -17,19 +17,27 @@ public sealed partial class DatabaseEngine
     {
         ArgumentNullException.ThrowIfNull(operation);
         if (operation.Kind != OperationKind.EventFeedControl)
-        { return null; }
+        {
+            return null;
+        }
         var verified = VerifyOperationAuthority(operation);
         RequireNativeBudget(System.Text.Encoding.UTF8.GetByteCount(verified.PayloadJson));
         if (EventVectorControlMetadataAction.Read(verified.PayloadJson) != EventVectorControlAction.AdmitFirstIntent)
-        { return null; }
+        {
+            return null;
+        }
         var metadata = System.Text.Json.JsonSerializer.Deserialize<EventVectorFirstIssuanceIdentity>(
             verified.PayloadJson, JsonDefaults.Options);
         if (metadata is null || metadata.Action != EventVectorControlAction.AdmitFirstIntent)
-        { return null; }
+        {
+            return null;
+        }
         var admission = new EventVectorAdmissionPolicy(OperationLimitsOptions);
         if (metadata.PrincipalId != verified.PrincipalId
             || EventVectorFirstIssuanceIds.For(metadata, admission) != verified.Id)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidEventVectorControlAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidEventVectorControlAuthority);
+        }
         var work = new ReadExecutionBudget(OperationLimitsOptions, EvaluationClock, cancellationToken);
         var grant = work.CreateReadGrant(work.RemainingReadGrantBytes, work.RemainingReadGrantRecords);
         var probe = new EventVectorFirstAdmitProbe(work, grant);
@@ -52,17 +60,23 @@ public sealed partial class DatabaseEngine
         var principal = Principal(bounded, verified.PrincipalId, EvaluationClock.GetUtcNow());
         var phase = Payload<EventVectorControlPhase>(verified);
         if (phase.Action != EventVectorControlAction.AdmitFirstIntent)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidEventVectorControlAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidEventVectorControlAuthority);
+        }
         work.ConstrainLifetime(phase.OriginalParentExpiresAt);
         RequireCurrentEventVectorFirstAdmitView(bounded, principal, phase);
         var admission = new EventVectorAdmissionPolicy(OperationLimitsOptions);
         var identity = EventVectorControlOperationIdentity.Create(phase, principal.Id, admission);
         if (verified.Id != identity.CommandId || verified.PayloadJson != identity.Metadata)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidEventVectorControlAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidEventVectorControlAuthority);
+        }
         var original = EventVectorFirstAdmitOutcome.Observe(bounded, principal,
             phase.OriginalRequest, Store.Identity.Incarnation, Authorization, admission);
         if (original.Outcome is null)
-        { _ = RequireEventVectorControlView(bounded, principal, phase); }
+        {
+            _ = RequireEventVectorControlView(bounded, principal, phase);
+        }
         probe.OriginalParentRequestId = phase.OriginalParentRequestId;
         probe.OriginalOutcome = original.Outcome?.Result;
         probe.AppliedPosition = bounded.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes

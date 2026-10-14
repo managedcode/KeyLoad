@@ -25,9 +25,13 @@ internal static class ChunkSelectedBlockIntegrityAssertions
             {
                 await Assert.That(after[index][0]).IsEqualTo(before[index][0]);
                 if (before[index][0] == key)
-                { await ChangedByte(before[index][1], after[index][1]); }
+                {
+                    await ChangedByte(before[index][1], after[index][1]);
+                }
                 else
-                { await Assert.That(after[index][1]).IsEqualTo(before[index][1]); }
+                {
+                    await Assert.That(after[index][1]).IsEqualTo(before[index][1]);
+                }
             }
         }
         await SampleRawIntegrityAssertions.UnchangedAsync(fixture.Store, damaged);

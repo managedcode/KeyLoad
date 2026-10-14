@@ -16,7 +16,10 @@ internal static class QueueDeadlineNativeContinuation
         await QueueDeadlineNativeAssertions.RefusedAsync(database, first, lane, command, due, ErrorCode.PermissionDenied);
         QueueDeadlineNativeOperations.ConfigureWorker(database, lane.Partition, due,
             Capability.QueueConsume | Capability.QueueInspect | Capability.QueueAck, QueueDeadlineNativeProtocol.Third);
-        command = command with { CommandId = Guid.NewGuid() };
+        command = command with
+        {
+            CommandId = Guid.NewGuid()
+        };
         var result = QueueDeadlineNativeOperations.Batch(database, command, due);
         var receipt = result.Get<CommitReceipt>();
         var expectedReceipt = new MutationReceipt(KeyLoad.Core.Features.Messaging.QueueDeadlineProtocol.ReceiptKind, lane.Queue,

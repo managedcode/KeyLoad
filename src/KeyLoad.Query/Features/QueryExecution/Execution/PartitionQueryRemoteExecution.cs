@@ -32,7 +32,10 @@ internal static class PartitionQueryRemoteExecution
             var grants = Reserve(plan, budget);
             var preparedLeaves = new PartitionQueryPreparedLeaf[plan.Leaves.Length];
             for (var index = FirstLeafIndex; index < preparedLeaves.Length; index++)
-            { budget.Check(); preparedLeaves[index] = prepare(plan.Leaves[index], grants[index], budget); }
+            {
+                budget.Check();
+                preparedLeaves[index] = prepare(plan.Leaves[index], grants[index], budget);
+            }
             var leaves = ImmutableArray.CreateBuilder<PartitionQueryLeafResultV1>(plan.Leaves.Length);
             var owners = ImmutableArray.CreateBuilder<PhysicalShardRecord>(plan.Leaves.Length);
             var concurrency = Math.Min(engine.Execution.MaximumConcurrentPartitionLeaves, plan.Leaves.Length);
@@ -52,34 +55,60 @@ internal static class PartitionQueryRemoteExecution
             }
             await RevalidateAsync(revalidate, deadline, execution.Token, cancellationToken).ConfigureAwait(false);
             budget.Check();
-            for (var index = FirstLeafIndex; index < leaves.Count; index++)
-            { leaves[index] = leaves[index] with { ReadBytes = grants[index].ReadBytes, ExaminedRecords = grants[index].ExaminedRecords }; }
+            CompleteReadAccounting(leaves, grants);
             var result = PartitionQueryMerge.Complete(plan, leaves.MoveToImmutable(), identity,
                 database.Limits, budget, engine.Execution, owners.MoveToImmutable());
             return PartitionQueryPublicMapper.MapPublic(result, database.Limits, budget);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-        { cancellationToken.ThrowIfCancellationRequested(); throw; }
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            throw;
+        }
         catch (OperationCanceledException) when (deadline.IsCancellationRequested)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, DeadlineExceededDetail); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, DeadlineExceededDetail);
+        }
+    }
+
+    private static void CompleteReadAccounting(ImmutableArray<PartitionQueryLeafResultV1>.Builder leaves,
+        ReadExecutionBudgetReadGrant[] grants)
+    {
+        for (var index = FirstLeafIndex; index < leaves.Count; index++)
+        {
+            leaves[index] = leaves[index] with
+            {
+                ReadBytes = grants[index].ReadBytes,
+                ExaminedRecords = grants[index].ExaminedRecords
+            };
+        }
     }
 
     private static async Task RevalidateAsync(Func<CancellationToken, Task> revalidate,
         CancellationTokenSource deadline, CancellationToken execution, CancellationToken original)
     {
         try
-        { await revalidate(execution).ConfigureAwait(false); }
+        {
+            await revalidate(execution).ConfigureAwait(false);
+        }
         catch (OperationCanceledException) when (original.IsCancellationRequested)
-        { original.ThrowIfCancellationRequested(); throw; }
+        {
+            original.ThrowIfCancellationRequested();
+            throw;
+        }
         catch (OperationCanceledException) when (deadline.IsCancellationRequested)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, DeadlineExceededDetail); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, DeadlineExceededDetail);
+        }
     }
 
     private static ReadExecutionBudgetReadGrant[] Reserve(PartitionQueryPlanV1 plan, ReadExecutionBudget budget)
     {
         var grants = new ReadExecutionBudgetReadGrant[plan.Leaves.Length];
         for (var index = FirstLeafIndex; index < plan.Leaves.Length; index++)
-        { grants[index] = budget.CreateReadGrant(plan.Leaves[index].MaxReadBytes, plan.Leaves[index].MaxExaminedRecords); }
+        {
+            grants[index] = budget.CreateReadGrant(plan.Leaves[index].MaxReadBytes, plan.Leaves[index].MaxExaminedRecords);
+        }
         return grants;
     }
 }

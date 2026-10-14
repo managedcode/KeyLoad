@@ -44,9 +44,13 @@ internal static class EventMessageSensitivePublicTrial
                 async inspector =>
                 {
                     if (cold)
-                    { await ColdAsync(root, worker, state, token); }
+                    {
+                        await ColdAsync(root, worker, state, token);
+                    }
                     else
-                    { await LiveAsync(root, worker, inspector, state, token); }
+                    {
+                        await LiveAsync(root, worker, inspector, state, token);
+                    }
                     return true;
                 }, token), token);
 
@@ -59,9 +63,13 @@ internal static class EventMessageSensitivePublicTrial
         state.Original = await EventMessageSensitivePublicOperations.ReceiveAsync(caller, state, state.OriginalRequest, QueueLifecyclePublicProtocol.Sdk, token);
         await EventMessageSensitivePublicAssertions.FullAsync(state.Original, state);
         if (state.Subscription)
-        { state.OriginalPage = await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.ReadEventSourceAsync(new(state.Source), token)); }
+        {
+            state.OriginalPage = await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.ReadEventSourceAsync(new(state.Source), token));
+        }
         else
-        { state.OriginalInspection = await PublicReadAssertions.MessageAsync(await root.Sdk.InspectAsync(new(state.Lane, EventMessageSensitivePublicProtocol.Message), token)); }
+        {
+            state.OriginalInspection = await PublicReadAssertions.MessageAsync(await root.Sdk.InspectAsync(new(state.Lane, EventMessageSensitivePublicProtocol.Message), token));
+        }
         await EventMessageSensitivePublicOperations.PolicyAsync(root, state, false, token);
         await EventMessageSensitivePublicRefusals.ReceiveAsync(caller, state, state.OriginalRequest, ErrorCode.PermissionDenied, token);
         await EventMessageSensitivePublicReads.RedactedAsync(inspector, state, false, token);

@@ -13,7 +13,9 @@ internal static class PartitionControlCommandStorage
         view.ReadValue(PartitionControlCommandKeys.Authority(identity), bytes =>
         {
             if (bytes.Length > maximumBytes)
-            { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid);
+            }
             record = NativeSerialization.Deserialize<PartitionControlCommandRecord>(bytes);
             PartitionControlCommandValidation.Require(record, identity);
         });
@@ -25,7 +27,9 @@ internal static class PartitionControlCommandStorage
     {
         PartitionControlCommandValidation.Require(record, record.Identity);
         if (NativeSerialization.Measure(record) > maximumBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
+        }
         transaction.Put(PartitionControlCommandKeys.Authority(record.Identity), NativeSerialization.Serialize(record));
     }
 }

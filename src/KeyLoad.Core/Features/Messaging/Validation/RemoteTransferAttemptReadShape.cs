@@ -9,7 +9,9 @@ internal static class RemoteTransferAttemptReadShape
             || request.AcceptCommandId == Guid.Empty || string.IsNullOrEmpty(request.IntentToken)
             || request.Purpose is not (RemoteTransferAttemptProtocol.SourceReadPurpose or RemoteTransferAttemptProtocol.FailureReadPurpose
                 or RemoteTransferRepairProtocol.ReadPurpose))
-        { throw Errors.Fail(ErrorCode.Validation, RemoteTransferAttemptProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, RemoteTransferAttemptProtocol.Invalid);
+        }
         RequireRepairFields(request);
         DatabaseEngine.ValidatePartition(request.Source.Partition);
         DatabaseEngine.ValidatePartition(request.Destination.Partition);
@@ -24,12 +26,16 @@ internal static class RemoteTransferAttemptReadShape
         {
             if (request.RepairStage is not { } stage || !Enum.IsDefined(stage)
                 || (stage == QueueTransferRepairStage.Accept ? request.ReceiptToken is not null : string.IsNullOrEmpty(request.ReceiptToken)))
-            { throw Errors.Fail(ErrorCode.Validation, RemoteTransferRepairProtocol.Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Validation, RemoteTransferRepairProtocol.Invalid);
+            }
             return;
         }
         if (request.RepairStage is not null || request.ReceiptToken is not null
             || request.Purpose == RemoteTransferAttemptProtocol.FailureReadPurpose
                 && request.PolicyGeneration != RemoteTransferRepairProtocol.InitialGeneration)
-        { throw Errors.Fail(ErrorCode.Validation, RemoteTransferRepairProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, RemoteTransferRepairProtocol.Invalid);
+        }
     }
 }

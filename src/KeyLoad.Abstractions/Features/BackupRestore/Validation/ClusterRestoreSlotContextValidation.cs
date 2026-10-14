@@ -23,15 +23,24 @@ public static class ClusterRestoreSlotContextValidation
             || context.TargetNodeId == Guid.Empty || context.TargetIncarnation == Guid.Empty
             || context.TargetNodeId == context.SourceNodeId || context.TargetIncarnation == context.SourceIncarnation
             || !Digest(context.PlanDigest) || !Digest(context.SourceEnvelopeDigest) || !Digest(context.TargetSignerFingerprint))
-        { throw Errors.Fail(ErrorCode.Validation, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, Invalid);
+        }
     }
 
     private static bool Digest(string value)
     {
         if (value is null || value.Length != DigestCharacters)
-        { return false; }
+        {
+            return false;
+        }
         foreach (var character in value)
-        { if (character is not (>= FirstHexDigit and <= LastHexDigit) and not (>= FirstHexLetter and <= LastHexLetter)) { return false; } }
+        {
+            if (character is not (>= FirstHexDigit and <= LastHexDigit) and not (>= FirstHexLetter and <= LastHexLetter))
+            {
+                return false;
+            }
+        }
         return true;
     }
 }

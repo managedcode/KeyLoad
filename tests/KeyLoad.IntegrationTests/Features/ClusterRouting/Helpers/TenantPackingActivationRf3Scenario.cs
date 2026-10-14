@@ -37,15 +37,23 @@ internal static class TenantPackingActivationRf3Scenario
             await TenantPackingActivationRf3Flow.RunAsync(wave, administrator, first, second, state, token);
         }, failures);
         if (second is { } ownedSecond)
-        { await ServerFailureObserver.ObserveAsync(() => ownedSecond.DisposeAsync().AsTask(), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => ownedSecond.DisposeAsync().AsTask(), failures);
+        }
         if (first is { } ownedFirst)
-        { await ServerFailureObserver.ObserveAsync(() => ownedFirst.DisposeAsync().AsTask(), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => ownedFirst.DisposeAsync().AsTask(), failures);
+        }
         if (administrator is { } ownedAdministrator)
-        { await ServerFailureObserver.ObserveAsync(() => ownedAdministrator.DisposeAsync().AsTask(), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => ownedAdministrator.DisposeAsync().AsTask(), failures);
+        }
         if (wave is { } owners)
         {
             if (failures.Count != 0)
-            { owners.RetainRoots(); }
+            {
+                owners.RetainRoots();
+            }
             await ServerFailureObserver.ObserveAsync(() => owners.DisposeAsync().AsTask(), failures);
         }
         ServerFailureObserver.ThrowIfAny(failures);

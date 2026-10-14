@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Replication;
 using Microsoft.Extensions.Options;
 
@@ -20,31 +20,43 @@ internal sealed class RequestCqrsProbeMigration(RequestCqrsProbeFiles files, Req
         {
             var claim = lifecycle.FindClaim(identity.RequestId);
             if (claim is null)
-            { return null; }
+            {
+                return null;
+            }
             if (claim.Identity != identity || context.GrainInstance is not CommandPartitionGrain)
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             var marker = new RequestCqrsProbeMarkerRecord(RequestCqrsProbeProtocol.Version, RequestCqrsProbeProtocol.MarkerKind,
                 files.SessionId, claim.Arm.Record.ArmId, identity.RequestId, identity.CommandId,
                 RequestCqrsProbePhase.BeforeSubmit, RequestCqrsProbeOutcome.Observed, replica.LocalId, siloAddress);
             var witness = RequestCqrsProbeActivationCapture.Create(marker, context);
             var request = files.Migration.Find(witness);
             if (request is null)
-            { return null; }
+            {
+                return null;
+            }
             files.RequireActiveArm(claim.Arm);
             if (claim.Arm.Record.Phase != RequestCqrsProbePhase.BeforeSubmit
                 || claim.Arm.Record.Action != RequestCqrsProbeAction.Hold || claim.Arm.Record.ReadKind is not null
                 || request.Value.TargetVoter == replica.LocalId || !replica.VoterIds.Contains(request.Value.TargetVoter, StringComparer.Ordinal))
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             using var lifetime = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, stopping);
             var target = await discovery.ResolveAsync(request.Value.TargetVoter, refresh: true, lifetime.Token).ConfigureAwait(true);
             lifetime.Token.ThrowIfCancellationRequested();
             if (target.ToParsableString() != request.Value.TargetSiloAddress || target.ToParsableString() == siloAddress)
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             files.Migration.Requested(request.Value);
             return target;
         }
         finally
-        { lifecycle.ExitCallback(); }
+        {
+            lifecycle.ExitCallback();
+        }
     }
     private static KeyLoadException Invalid() => Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
 }

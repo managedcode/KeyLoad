@@ -30,24 +30,37 @@ internal sealed class RequestCqrsRf3McpRejectionNodeCapture(string name)
             lock (gate)
             {
                 if (connectionCancellations.Count < MaximumRecords)
-                { connectionCancellations.Add(cancellation); }
+                {
+                    connectionCancellations.Add(cancellation);
+                }
                 else
-                { connectionCancellationOverflowed = true; }
+                {
+                    connectionCancellationOverflowed = true;
+                }
             }
         }
         if (RequestCqrsRpcFailureParser.TryParse(line, waveId, Name, out var rpc))
         {
             lock (gate)
-            { if (rpcFailures.Count < MaximumRecords) { rpcFailures.Add(rpc); } }
+            {
+                if (rpcFailures.Count < MaximumRecords)
+                {
+                    rpcFailures.Add(rpc);
+                }
+            }
         }
         var parsed = TryParse(line, Name, waveId, out var record);
         lock (gate)
         {
             nativeEvidence.Observe(line, parsed);
             if (!parsed)
-            { return; }
+            {
+                return;
+            }
             if (records.Count >= MaximumRecords)
-            { return; }
+            {
+                return;
+            }
             records.Add(record);
             var signal = changed;
             changed = NewChangeSignal();
@@ -59,7 +72,9 @@ internal sealed class RequestCqrsRf3McpRejectionNodeCapture(string name)
         McpTransportMethodCategory methodCategory, CancellationToken cancellationToken)
     {
         try
-        { await WaitForRecordCoreAsync(stage, methodCategory, cancellationToken).ConfigureAwait(false); }
+        {
+            await WaitForRecordCoreAsync(stage, methodCategory, cancellationToken).ConfigureAwait(false);
+        }
         catch (OperationCanceledException error) when (cancellationToken.IsCancellationRequested)
         {
             RequestCqrsCaptureCancellationDiagnostics.WriteAndThrow(error, NativeSnapshot(), stage, methodCategory);
@@ -78,11 +93,17 @@ internal sealed class RequestCqrsRf3McpRejectionNodeCapture(string name)
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 if (records.Any(record => record.Stage == stage && record.MethodCategory == methodCategory))
-                { return; }
+                {
+                    return;
+                }
                 if (completed)
-                { throw new InvalidOperationException(MissingRecordMessage); }
+                {
+                    throw new InvalidOperationException(MissingRecordMessage);
+                }
                 if (records.Count >= MaximumRecords)
-                { throw new InvalidOperationException(RecordLimitMessage); }
+                {
+                    throw new InvalidOperationException(RecordLimitMessage);
+                }
                 signal = changed.Task;
             }
             await signal.WaitAsync(cancellationToken).ConfigureAwait(false);
@@ -103,25 +124,33 @@ internal sealed class RequestCqrsRf3McpRejectionNodeCapture(string name)
     internal RequestCqrsRf3McpRejectionRecord[] Snapshot()
     {
         lock (gate)
-        { return [.. records]; }
+        {
+            return [.. records];
+        }
     }
 
     internal RequestCqrsRpcFailureRecord[] RpcSnapshot()
     {
         lock (gate)
-        { return [.. rpcFailures]; }
+        {
+            return [.. rpcFailures];
+        }
     }
 
     internal RequestCqrsConnectionCancellationNodeSnapshot ConnectionCancellationSnapshot()
     {
         lock (gate)
-        { return new(Name, connectionCancellationOverflowed, [.. connectionCancellations]); }
+        {
+            return new(Name, connectionCancellationOverflowed, [.. connectionCancellations]);
+        }
     }
 
     internal RequestCqrsNativeCaptureSnapshot NativeSnapshot()
     {
         lock (gate)
-        { return nativeEvidence.Snapshot(Name); }
+        {
+            return nativeEvidence.Snapshot(Name);
+        }
     }
 
     private static TaskCompletionSource<bool> NewChangeSignal()
@@ -132,16 +161,22 @@ internal sealed class RequestCqrsRf3McpRejectionNodeCapture(string name)
     {
         record = null!;
         if (line.Length > MaximumLineCharacters)
-        { return false; }
+        {
+            return false;
+        }
         var marker = line.IndexOf(MessagePrefix, StringComparison.Ordinal);
         if (marker < 0 || line.IndexOf(MessagePrefix, marker + MessagePrefix.Length,
             StringComparison.Ordinal) >= 0)
-        { return false; }
+        {
+            return false;
+        }
 
         var message = line.AsSpan(marker + MessagePrefix.Length).TrimEnd("\r\n");
         var separator = message.IndexOf(Separator, StringComparison.Ordinal);
         if (separator <= 0 || message[^1] != '.')
-        { return false; }
+        {
+            return false;
+        }
         var stageText = message[..separator];
         var methodText = message[(separator + Separator.Length)..^1];
         if (!Enum.TryParse<McpTransportStage>(stageText, false, out var stage)
@@ -149,7 +184,9 @@ internal sealed class RequestCqrsRf3McpRejectionNodeCapture(string name)
             || !stageText.SequenceEqual(stage.ToString())
             || !Enum.TryParse<McpTransportMethodCategory>(methodText, false, out var method)
             || !Enum.IsDefined(method) || !methodText.SequenceEqual(method.ToString()))
-        { return false; }
+        {
+            return false;
+        }
 
         record = new(waveId, node, stage, method);
         return true;

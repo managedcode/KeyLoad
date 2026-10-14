@@ -21,7 +21,10 @@ internal static class RetiredOutcomeMetadataFaultScope
         var outcomeBefore = source.Store.Read(view => view.ReadOwnedValue(outcomeKey));
         var locatorBefore = source.Store.Read(view => view.ReadOwnedValue(locatorKey));
         var changed = NativeSerialization.Deserialize<StoredOutcome>(retained) with
-        { ScopeKind = CommandOutcomeScopeKind.Global, Partition = null };
+        {
+            ScopeKind = CommandOutcomeScopeKind.Global,
+            Partition = null
+        };
         source.Store.Commit((transaction, _) =>
         {
             transaction.Put(outcomeKey, corruptOutcome ? NativeSerialization.Serialize(changed) : retained);
@@ -34,13 +37,21 @@ internal static class RetiredOutcomeMetadataFaultScope
         ServerFailureObserver.Observe(() => source.Store.Commit((transaction, _) =>
         {
             if (outcomeBefore is null)
-            { transaction.Delete(outcomeKey); }
+            {
+                transaction.Delete(outcomeKey);
+            }
             else
-            { transaction.Put(outcomeKey, outcomeBefore); }
+            {
+                transaction.Put(outcomeKey, outcomeBefore);
+            }
             if (locatorBefore is null)
-            { transaction.Delete(locatorKey); }
+            {
+                transaction.Delete(locatorKey);
+            }
             else
-            { transaction.Put(locatorKey, locatorBefore); }
+            {
+                transaction.Put(locatorKey, locatorBefore);
+            }
             return true;
         }), failures);
         ServerFailureObserver.ThrowIfAny(failures);

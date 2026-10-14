@@ -10,7 +10,9 @@ internal static class RequestCqrsProbeFixtureFactory
     internal static RequestCqrsProbeFixture Create(string dataRoot, Guid sessionId, bool includeDestination = false)
     {
         if (sessionId == Guid.Empty)
-        { throw new ArgumentException(InvalidArm, nameof(sessionId)); }
+        {
+            throw new ArgumentException(InvalidArm, nameof(sessionId));
+        }
         var session = sessionId.ToString("N");
         var json = new RequestCqrsProbeJson(IntegrationRoutingOptions.ProbeExecution());
         var root = CreateRoot(dataRoot, session);
@@ -22,7 +24,9 @@ internal static class RequestCqrsProbeFixtureFactory
         {
             var nodes = includeDestination ? TwoRf3MembershipProtocol.Nodes : Nodes;
             foreach (var node in nodes)
-            { CreateNode(root, session, node, "http://" + node + ":8080", directories, owners, json); }
+            {
+                CreateNode(root, session, node, "http://" + node + ":8080", directories, owners, json);
+            }
             fixture = new RequestCqrsProbeFixture(root, session, directories, owners, json, includeDestination);
         }, failures);
         if (failures.Count > 0)
@@ -46,20 +50,26 @@ internal static class RequestCqrsProbeFixtureFactory
     private static string CreateRoot(string dataRoot, string sessionId)
     {
         if (OperatingSystem.IsWindows())
-        { throw new PlatformNotSupportedException(PrivatePermissionsUnsupported); }
+        {
+            throw new PlatformNotSupportedException(PrivatePermissionsUnsupported);
+        }
         var root = Path.Combine(Path.GetTempPath(), RootPrefix + sessionId);
         var fullRoot = Path.GetFullPath(root);
         var fullDataRoot = Path.GetFullPath(dataRoot);
         if (Directory.Exists(fullRoot) || File.Exists(fullRoot)
             || RequestCqrsProbeFileValidation.IsWithin(fullRoot, fullDataRoot)
             || RequestCqrsProbeFileValidation.IsWithin(fullDataRoot, fullRoot))
-        { throw new IOException(OwnershipConflict); }
+        {
+            throw new IOException(OwnershipConflict);
+        }
         RequestCqrsProbeFileValidation.EnsureUnixPermissions();
         Directory.CreateDirectory(fullRoot, RequestCqrsProbeFileValidation.PrivateDirectoryMode);
         var failures = new List<Exception>();
         ServerFailureObserver.Observe(() => RequestCqrsProbeFileValidation.ValidateDirectory(fullRoot), failures);
         if (failures.Count == 0)
-        { return fullRoot; }
+        {
+            return fullRoot;
+        }
         ServerFailureObserver.Observe(() => Directory.Delete(fullRoot, recursive: false), failures);
         ServerFailureObserver.ThrowIfAny(failures);
         throw new IOException(InvalidControlEntry);

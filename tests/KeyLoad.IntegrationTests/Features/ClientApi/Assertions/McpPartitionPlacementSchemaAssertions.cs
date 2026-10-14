@@ -82,7 +82,9 @@ internal static class McpPartitionPlacementSchemaAssertions
         schema = Resolve(root, schema);
         await VerifyObjectAsync(schema, PartitionFields.Add(McpDiscoveryProtocol.AtomicPartitionId), PartitionFields);
         foreach (var field in PartitionFields)
-        { await VerifyPrimitiveAsync(root, schema.GetProperty(McpDiscoveryProtocol.Properties).GetProperty(field), McpDiscoveryProtocol.String); }
+        {
+            await VerifyPrimitiveAsync(root, schema.GetProperty(McpDiscoveryProtocol.Properties).GetProperty(field), McpDiscoveryProtocol.String);
+        }
         var computed = Resolve(root, schema.GetProperty(McpDiscoveryProtocol.Properties)
             .GetProperty(McpDiscoveryProtocol.AtomicPartitionId));
         await VerifyExactTypeSetAsync(computed, [McpDiscoveryProtocol.String, McpDiscoveryProtocol.Null]);
@@ -120,7 +122,9 @@ internal static class McpPartitionPlacementSchemaAssertions
         await Assert.That(actual.Length).IsEqualTo(expected.Length);
         await Assert.That(actual.All(item => item.ValueKind == JsonValueKind.String)).IsTrue();
         foreach (var item in expected)
-        { await Assert.That(actual.Count(value => value.GetString() == item)).IsEqualTo(1); }
+        {
+            await Assert.That(actual.Count(value => value.GetString() == item)).IsEqualTo(1);
+        }
     }
 
     private static JsonElement Resolve(JsonElement root, JsonElement schema)
@@ -130,7 +134,9 @@ internal static class McpPartitionPlacementSchemaAssertions
         {
             var pointer = reference.GetString();
             if (pointer is null || !pointer.StartsWith("#/", StringComparison.Ordinal))
-            { throw new InvalidOperationException(InvalidReference); }
+            {
+                throw new InvalidOperationException(InvalidReference);
+            }
             schema = root;
             foreach (var segment in pointer[2..].Split('/'))
             {
@@ -140,7 +146,9 @@ internal static class McpPartitionPlacementSchemaAssertions
             }
         }
         if (schema.TryGetProperty(McpDiscoveryProtocol.ReferenceKeyword, out _))
-        { throw new InvalidOperationException(ExcessReferenceDepth); }
+        {
+            throw new InvalidOperationException(ExcessReferenceDepth);
+        }
         return schema;
     }
 }

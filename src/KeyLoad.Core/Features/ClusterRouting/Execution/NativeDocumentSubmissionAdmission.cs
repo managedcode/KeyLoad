@@ -11,9 +11,13 @@ public sealed partial class DatabaseEngine
     internal CommandRequest? TryReadOrdinaryDocumentSubmission(ReplicatedOperation operation)
     {
         if (operation.Kind != OperationKind.Batch)
-        { return null; }
+        {
+            return null;
+        }
         try
-        { return ReadOrdinaryDocumentSubmission(operation); }
+        {
+            return ReadOrdinaryDocumentSubmission(operation);
+        }
         catch (KeyLoadException) { return null; }
     }
 
@@ -21,13 +25,19 @@ public sealed partial class DatabaseEngine
     internal void ValidateSubmissionAdmission(ReplicatedOperation operation)
     {
         if (operation.Kind != OperationKind.Batch)
-        { return; }
+        {
+            return;
+        }
         ReplicatedOperation normalized;
         try
-        { normalized = NormalizeOperation(operation); }
+        {
+            normalized = NormalizeOperation(operation);
+        }
         catch (KeyLoadException) { return; }
         if (TryReadOrdinaryDocumentSubmission(normalized) is { } command)
-        { ValidateSubmissionAdmission(normalized, command); }
+        {
+            ValidateSubmissionAdmission(normalized, command);
+        }
     }
 
     /// <summary>Checks authorized changed identity using the original verified operation and candidate.</summary>
@@ -40,17 +50,23 @@ public sealed partial class DatabaseEngine
             {
                 if (principal is not null && denial is not null
                     && HasChangedRetainedDocumentDenial(view, principal, operation, denial))
-                { System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(denial).Throw(); }
+                {
+                    System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(denial).Throw();
+                }
                 return false;
             }
             if (PartitionMoveSourceFenceStorage.Read(view, command.Partition, Limits.MaxBatchBytes) is not null)
-            { return false; }
+            {
+                return false;
+            }
             var scope = CommandOutcomePartitionIdentity.Resolve(operation);
             var selection = CommandOutcomeKeyResolver.Select(view, operation.PrincipalId, operation.Id, scope);
             if (selection.Outcome is not { } outcome || outcome.PolicyEpoch != principal.PolicyEpoch
                 || outcome.Incarnation != Store.Identity.Incarnation
                 || outcome.Fingerprint == CommandFingerprint(operation))
-            { return false; }
+            {
+                return false;
+            }
             ValidateSubmissionOutcomeIdentity(view, principal, operation, selection, outcome);
             return true;
         });
@@ -75,7 +91,9 @@ public sealed partial class DatabaseEngine
         catch (KeyLoadException error)
         {
             if (error.Code == ErrorCode.PermissionDenied)
-            { denial = error; }
+            {
+                denial = error;
+            }
             return false;
         }
     }
@@ -86,13 +104,17 @@ public sealed partial class DatabaseEngine
         try
         {
             if (!IsOrdinaryDocumentSubmission(view, operation))
-            { return false; }
+            {
+                return false;
+            }
             var scope = CommandOutcomePartitionIdentity.Resolve(operation);
             var selection = CommandOutcomeKeyResolver.Select(view, operation.PrincipalId, operation.Id, scope);
             if (selection.Outcome is not { } outcome || outcome.PolicyEpoch != principal.PolicyEpoch
                 || outcome.Incarnation != Store.Identity.Incarnation || string.IsNullOrEmpty(outcome.Fingerprint)
                 || outcome.Fingerprint == CommandFingerprint(operation))
-            { return false; }
+            {
+                return false;
+            }
             CommandOutcomeKeyResolver.ValidateSelectedScope(view, operation, selection);
             return outcome.Result is { } result && result.Error == denial.Code
                 && string.Equals(result.SafeDetail, denial.Message, StringComparison.Ordinal)
@@ -107,7 +129,9 @@ public sealed partial class DatabaseEngine
     private CommandRequest? ReadOrdinaryDocumentSubmission(ReplicatedOperation operation)
     {
         if (operation.Kind != OperationKind.Batch || ReadRemoteTransferNativeProof(operation) is not null)
-        { return null; }
+        {
+            return null;
+        }
         var command = Payload<CommandRequest>(operation);
         return !command.Mutations.IsDefaultOrEmpty
             && command.Mutations.All(static mutation => mutation is InsertTypedRow or PutDocument or PatchDocument or DeleteDocument)

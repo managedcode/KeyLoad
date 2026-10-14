@@ -51,7 +51,10 @@ internal static class ColdBootstrapSdkFlow
         await ColdBootstrapSdkAssertions.DocumentAsync(sdk, reference, FirstRevision, OriginalJson, joined.Token);
         var replay = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(command, joined.Token));
         await Assert.That(NativeSerialization.Serialize(replay).SequenceEqual(NativeSerialization.Serialize(receipt))).IsTrue();
-        var changed = command with { Mutations = [new PutDocument(Collection, Document, HealthyJson, FirstRevision, ExplicitReplacement: true)] };
+        var changed = command with
+        {
+            Mutations = [new PutDocument(Collection, Document, HealthyJson, FirstRevision, ExplicitReplacement: true)]
+        };
         var rejection = await sdk.CommitAsync(changed, joined.Token).ConfigureAwait(false);
         await Assert.That(rejection.IsSuccess).IsFalse();
         await Assert.That(rejection.Value).IsNull();
@@ -67,7 +70,10 @@ internal static class ColdBootstrapSdkFlow
         CommandRequest original, CommandRequest changed, CommitReceipt originalReceipt,
         AtomicPartitionPlacementResolution placement, CancellationToken token)
     {
-        var healthyCommand = changed with { CommandId = Guid.NewGuid() };
+        var healthyCommand = changed with
+        {
+            CommandId = Guid.NewGuid()
+        };
         await Assert.That(healthyCommand.CommandId).IsNotEqualTo(original.CommandId);
         var healthy = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(healthyCommand, token));
         await Assert.That(healthy.Mutations.Length).IsEqualTo(OneMutation);

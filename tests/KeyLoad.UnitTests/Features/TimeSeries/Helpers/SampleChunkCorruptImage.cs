@@ -40,7 +40,10 @@ internal sealed class SampleChunkCorruptImage
                     break;
                 case SampleChunkCorruptionCut.ManifestDigest:
                     var envelope = NativeSerialization.Deserialize<SampleChunkManifestEnvelope>(manifest);
-                    transaction.Put(manifestKey, NativeSerialization.Serialize(envelope with { Digest = Flip(envelope.Digest.Span) }));
+                    transaction.Put(manifestKey, NativeSerialization.Serialize(envelope with
+                    {
+                        Digest = Flip(envelope.Digest.Span)
+                    }));
                     break;
                 case SampleChunkCorruptionCut.ManifestVersion:
                 case SampleChunkCorruptionCut.ManifestGeneration:
@@ -57,7 +60,10 @@ internal sealed class SampleChunkCorruptImage
                     break;
                 case SampleChunkCorruptionCut.CorrectionSequence:
                     var row = NativeSerialization.Deserialize<SampleRecord>(correction);
-                    transaction.Put(correctionKey, NativeSerialization.Serialize(row with { Sequence = SampleChunkCanonicalFixture.InitialSequence }));
+                    transaction.Put(correctionKey, NativeSerialization.Serialize(row with
+                    {
+                        Sequence = SampleChunkCanonicalFixture.InitialSequence
+                    }));
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(cut));
@@ -80,8 +86,14 @@ internal sealed class SampleChunkCorruptImage
         var envelope = NativeSerialization.Deserialize<SampleChunkManifestEnvelope>(manifest);
         var actual = NativeSerialization.Deserialize<SampleChunkManifest>(envelope.Encoded.Span);
         var malformed = cut == SampleChunkCorruptionCut.ManifestVersion
-            ? actual with { Version = checked(actual.Version + ChangedBit) }
-            : actual with { Generation = SampleChunkCanonicalFixture.MergedGeneration };
+            ? actual with
+            {
+                Version = checked(actual.Version + ChangedBit)
+            }
+            : actual with
+            {
+                Generation = SampleChunkCanonicalFixture.MergedGeneration
+            };
         var bytes = NativeSerialization.Serialize(malformed);
         return NativeSerialization.Serialize(new SampleChunkManifestEnvelope(bytes, SHA256.HashData(bytes)));
     }

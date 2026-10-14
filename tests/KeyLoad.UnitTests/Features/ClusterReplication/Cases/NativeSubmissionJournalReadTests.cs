@@ -32,7 +32,9 @@ internal sealed class NativeSubmissionJournalReadTests
             fixture.Canonical.Database, fixture.Configuration, original.Index, checked(original.Term + 1), default));
         await Assert.That(wrongTerm.Code).IsEqualTo(ErrorCode.Corruption);
         var foreign = fixture.Configuration with
-        { VoterIds = [fixture.Configuration.LocalId, "foreign-journal-b", "foreign-journal-c"] };
+        {
+            VoterIds = [fixture.Configuration.LocalId, "foreign-journal-b", "foreign-journal-c"]
+        };
         var wrongMembership = Assert.ThrowsExactly<KeyLoadException>(() => NativeSubmissionJournalRead.Run(fixture.Store,
             fixture.Canonical.Database, foreign, original.Index, original.Term, default));
         await Assert.That(wrongMembership.Code).IsEqualTo(ErrorCode.TokenInvalidated);
@@ -53,7 +55,10 @@ internal sealed class NativeSubmissionJournalReadTests
         var key = ReplicaProtocol.EntryStorageKey(original.Index);
         var originalBytes = ReplicaProtocolCodec.Serialize(original);
         fixture.Store.Commit((tx, _) =>
-        { tx.Put(key, new byte[NativeSubmissionJournalReadBudget.MaximumRecordBytes + 1]); return true; });
+        {
+            tx.Put(key, new byte[NativeSubmissionJournalReadBudget.MaximumRecordBytes + 1]);
+            return true;
+        });
         var oversized = ReplicaAppendBoundaryCut.Read(fixture);
         Assert.ThrowsExactly<InvalidDataException>(() => Read(fixture, original));
         await oversized.RequireAsync(ReplicaAppendBoundaryCut.Read(fixture));

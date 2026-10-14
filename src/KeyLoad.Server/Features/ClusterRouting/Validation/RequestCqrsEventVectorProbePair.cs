@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
@@ -21,26 +21,36 @@ internal static class RequestCqrsEventVectorProbePair
     {
         if (arm.Phase is not (RequestCqrsProbePhase.EventVectorFirstCapturesReady
             or RequestCqrsProbePhase.EventVectorFirstAdmitPrepared))
-        { return true; }
+        {
+            return true;
+        }
         if (identity.CommandKind != OperationKind.EventFeedControl
             || arm.Phase == RequestCqrsProbePhase.EventVectorFirstAdmitPrepared
                 && arm.SourceRequestId == identity.RequestId)
-        { return false; }
+        {
+            return false;
+        }
         if (arm.Phase == RequestCqrsProbePhase.EventVectorFirstAdmitPrepared)
-        { RequireObserved(arm, markers); }
+        {
+            RequireObserved(arm, markers);
+        }
         return true;
     }
 
     internal static void RequireDeclaredPair(RequestCqrsProbeArmRecord adjunct, IReadOnlyList<RequestCqrsProbeLoadedArm> arms)
     {
         if (adjunct.Phase != RequestCqrsProbePhase.EventVectorFirstAdmitPrepared)
-        { return; }
+        {
+            return;
+        }
         var sources = arms.Where(arm => arm.Record.ArmId == adjunct.SourceArmId).ToArray();
         if (!ValidArm(adjunct) || sources.Length != ExactlyOne
             || !SameOriginal(sources.Single().Record, adjunct)
             || arms.Count(arm => arm.Record.Phase == adjunct.Phase
                 && arm.Record.SourceArmId == adjunct.SourceArmId) != ExactlyOne)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
     }
 
     private static void RequireObserved(RequestCqrsProbeArmRecord adjunct,
@@ -51,7 +61,9 @@ internal static class RequestCqrsEventVectorProbePair
             && marker.Outcome == RequestCqrsProbeOutcome.Observed).ToArray();
         if (observed.Length != ExactlyOne || observed.Single().RequestId != adjunct.SourceRequestId
             || observed.Single().CommandId != adjunct.CommandId)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
     }
 
     private static bool SameOriginal(RequestCqrsProbeArmRecord primary, RequestCqrsProbeArmRecord adjunct)

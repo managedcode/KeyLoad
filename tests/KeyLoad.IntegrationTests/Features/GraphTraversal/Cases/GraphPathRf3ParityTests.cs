@@ -91,20 +91,41 @@ internal sealed class GraphPathRf3ParityTests(ClusterFixture fixture)
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node2,
             seed.Reader.Secret, deadline.Token);
         var request = GraphPathRf3Scenario.Request(seed);
-        await AssertRequestErrorAsync(sdk, mcp, request with { Version = 2 }, ErrorCode.Validation, deadline.Token);
-        await AssertSqlRequestErrorAsync(sdk, mcp, GraphPathRf3Scenario.SqlRequest(seed) with { Version = 2 },
+        await AssertRequestErrorAsync(sdk, mcp, request with
+        {
+            Version = 2
+        }, ErrorCode.Validation, deadline.Token);
+        await AssertSqlRequestErrorAsync(sdk, mcp, GraphPathRf3Scenario.SqlRequest(seed) with
+        {
+            Version = 2
+        },
             ErrorCode.Validation, deadline.Token);
         var foreignPartition = new PartitionRef("foreign", "db", "domain", ForeignPartitionKey);
-        var foreign = request with { To = request.To with { Partition = foreignPartition } };
+        var foreign = request with
+        {
+            To = request.To with
+            {
+                Partition = foreignPartition
+            }
+        };
         await AssertRequestErrorAsync(sdk, mcp, foreign, ErrorCode.UnsupportedCapability, deadline.Token);
         // SQL scopes the whole statement with Query.Partition; endpoint literals have no partition argument.
         var foreignSqlScope = GraphPathRf3Scenario.SqlRequestInPartition(seed, foreignPartition);
         await AssertSqlRequestErrorAsync(sdk, mcp, foreignSqlScope,
             ErrorCode.PermissionDenied, deadline.Token);
-        await AssertRequestErrorAsync(sdk, mcp, request with { MaxDepth = 17 }, ErrorCode.BudgetExceeded, deadline.Token);
-        await AssertRequestErrorAsync(sdk, mcp, request with { MaxVertices = 10_001 },
+        await AssertRequestErrorAsync(sdk, mcp, request with
+        {
+            MaxDepth = 17
+        }, ErrorCode.BudgetExceeded, deadline.Token);
+        await AssertRequestErrorAsync(sdk, mcp, request with
+        {
+            MaxVertices = 10_001
+        },
             ErrorCode.BudgetExceeded, deadline.Token);
-        await AssertRequestErrorAsync(sdk, mcp, request with { MaxEdges = 50_001 },
+        await AssertRequestErrorAsync(sdk, mcp, request with
+        {
+            MaxEdges = 50_001
+        },
             ErrorCode.BudgetExceeded, deadline.Token);
         await AssertSqlRequestErrorAsync(sdk, mcp,
             GraphPathRf3Scenario.SqlRequest(seed, maxDepth: 17), ErrorCode.BudgetExceeded, deadline.Token);

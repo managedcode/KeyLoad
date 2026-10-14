@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 using Microsoft.Extensions.Options;
 
@@ -11,11 +11,15 @@ internal static class RemoteGraphNativeIdentity
     internal static void RequireOwner(NodeOptions options, PartitionHost partition, RegisteredPhysicalOwnerV1 owner)
     {
         if (!PhysicalOwnerEntryValidation.Valid(owner))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteGraphNativeProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, RemoteGraphNativeProtocol.InvalidProof);
+        }
         var control = PhysicalOwnerConfiguredTuples.Control(options, partition);
         var destination = PhysicalOwnerConfiguredTuples.Destination(options, partition);
         if (!PhysicalOwnerEntryValidation.Same(owner, control) && !PhysicalOwnerEntryValidation.Same(owner, destination))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteGraphNativeProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, RemoteGraphNativeProtocol.InvalidProof);
+        }
     }
 
     internal static void RequireShape(RemoteGraphNativeRequestV1 request, int maximumBytes,
@@ -34,7 +38,9 @@ internal static class RemoteGraphNativeIdentity
             || !PhysicalGroupAddress.CanonicalAddress(request.CallerSiloAddress, membership)
             || !PhysicalGroupAddress.CanonicalAddress(request.DestinationSiloAddress, membership)
             || request.ExpiresAt.Offset != TimeSpan.Zero)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteGraphNativeProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, RemoteGraphNativeProtocol.InvalidProof);
+        }
         JsonData.Identifier(request.PrincipalId);
     }
 

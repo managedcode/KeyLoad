@@ -35,19 +35,33 @@ internal static class BlobActivePolicyPublicOperations
     internal static async Task PublishAsync(RequestCqrsRf3Callers administrator,
         RequestCqrsRf3Callers creator, BlobActivePolicyPublicState state, CancellationToken token)
     {
-        state.Part = state.DeniedPart with { CommandId = Guid.NewGuid() };
+        state.Part = state.DeniedPart with
+        {
+            CommandId = Guid.NewGuid()
+        };
         state.Written = (await McpCallerAssertions.SuccessAsync<BlobCommitResult<BlobUploadInfo>>(
             await creator.Mcp.CallAsync("keyload_blobs_write_part", state.Part, token))).Value;
-        state.Current = state.Begun.Value with { NextOrdinal = 1, StoredBytes = 4L, IntegrityHash = state.DeniedComplete.ExpectedIntegrityHash };
+        state.Current = state.Begun.Value with
+        {
+            NextOrdinal = 1,
+            StoredBytes = 4L,
+            IntegrityHash = state.DeniedComplete.ExpectedIntegrityHash
+        };
         await SqlRf3Protocol.EqualAsync(state.Current, state.Written.Value);
         await BlobActivePolicyPublicAssertions.ReceiptAsync(state, state.Part.CommandId, state.Written.Receipt);
         await BlobActivePolicyPublicAssertions.CurrentAsync(administrator, creator, state, token);
-        state.Complete = state.DeniedComplete with { CommandId = Guid.NewGuid() };
+        state.Complete = state.DeniedComplete with
+        {
+            CommandId = Guid.NewGuid()
+        };
         state.Completed = await McpCallerAssertions.SdkSuccessAsync(await creator.Sdk.CompleteBlobUploadAsync(state.Complete, token));
         var expected = new BlobMetadata(state.Blob, 1L, state.Begin.UploadId, 4L, 1,
             state.DeniedComplete.ExpectedIntegrityHash, new RowAccess(), state.Completed.Value.UpdatedAt);
         await SqlRf3Protocol.EqualAsync(expected, state.Completed.Value);
-        state.Current = state.Current with { Status = BlobUploadStatus.Complete };
+        state.Current = state.Current with
+        {
+            Status = BlobUploadStatus.Complete
+        };
         await BlobActivePolicyPublicAssertions.ReceiptAsync(state, state.Complete.CommandId, state.Completed.Receipt);
         await BlobActivePolicyPublicAssertions.CurrentAsync(administrator, creator, state, token);
     }

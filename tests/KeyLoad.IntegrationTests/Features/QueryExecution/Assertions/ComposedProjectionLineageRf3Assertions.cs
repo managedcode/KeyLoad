@@ -34,9 +34,14 @@ internal static class ComposedProjectionLineageRf3Assertions
                 new QueryRowSource[] { new("q", item.Message, 1), new("d", item.Target, 1) }, global::TUnit.Assertions.Enums.CollectionOrdering.Matching);
             var redactedFields = new List<string>();
             if (masked)
-            { redactedFields.Add("q.payload/to"); redactedFields.Add("d.name"); }
+            {
+                redactedFields.Add("q.payload/to");
+                redactedFields.Add("d.name");
+            }
             if (scoreMasked)
-            { redactedFields.Add("q.payload/score"); }
+            {
+                redactedFields.Add("q.payload/score");
+            }
             await Assert.That(row.Redacted).IsEqualTo(masked || scoreMasked);
             await Assert.That(row.RedactedFields!.Value).IsEquivalentTo(
                 redactedFields, global::TUnit.Assertions.Enums.CollectionOrdering.Matching);
@@ -46,9 +51,13 @@ internal static class ComposedProjectionLineageRf3Assertions
             await Assert.That(json.RootElement.GetProperty(ReferenceField).GetString()).IsEqualTo(masked ? null : item.Target);
             await Assert.That(json.RootElement.GetProperty(NameField).GetString()).IsEqualTo(masked ? null : item.Name);
             if (scoreMasked)
-            { await Assert.That(json.RootElement.GetProperty(ScoreField).ValueKind).IsEqualTo(JsonValueKind.Null); }
+            {
+                await Assert.That(json.RootElement.GetProperty(ScoreField).ValueKind).IsEqualTo(JsonValueKind.Null);
+            }
             else
-            { await Assert.That(json.RootElement.GetProperty(ScoreField).GetInt32()).IsEqualTo(Score); }
+            {
+                await Assert.That(json.RootElement.GetProperty(ScoreField).GetInt32()).IsEqualTo(Score);
+            }
         }
     }
 }

@@ -54,7 +54,9 @@ internal sealed class NativeCoverageImageSourceSnapshot
             }
             totalBytes = checked(totalBytes + info.Length);
             if (totalBytes > maximumTotalBytes)
-            { throw new InvalidDataException(SourceClosureBoundExceededMessage); }
+            {
+                throw new InvalidDataException(SourceClosureBoundExceededMessage);
+            }
             var mode = NativeCoverageImageOracleSupport.Mode(path);
             var hash = HashExact(path, info.Length, maximumFileBytes, buffer);
             var after = new FileInfo(path);

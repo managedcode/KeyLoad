@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Messaging;
-using KeyLoad.Orleans;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.Messaging;
@@ -44,7 +44,9 @@ internal sealed class RemoteTransferPeerReceiver(OrleansNode node, PartitionHost
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 if (command)
-                { effectBoundary?.Begin(token); }
+                {
+                    effectBoundary?.Begin(token);
+                }
                 var reply = await node.ExecuteAsync(requestId, signed, command, token).ConfigureAwait(false);
                 work.Check();
                 result = reply.Error is { } error
@@ -65,7 +67,9 @@ internal sealed class RemoteTransferPeerReceiver(OrleansNode node, PartitionHost
         ServerFailureObserver.Observe(() => observed = database.ObserveRemoteTransferPeer(admitted, work), failures);
         if (observed?.OriginalOutcome?.Result is { } original
             && original.Error == error && original.SafeDetail == detail)
-        { return observed; }
+        {
+            return observed;
+        }
         ServerFailureObserver.ThrowIfAny(failures);
         throw primary;
     }

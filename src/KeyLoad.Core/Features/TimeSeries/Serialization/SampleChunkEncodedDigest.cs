@@ -15,6 +15,8 @@ internal static class SampleChunkEncodedDigest
         }
         work.Check();
         if (!hash.GetHashAndReset().AsSpan().SequenceEqual(expected))
-        { throw Errors.Fail(ErrorCode.Corruption, SampleChunkLifecycleProtocol.Corrupt); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, SampleChunkLifecycleProtocol.Corrupt);
+        }
     }
 }

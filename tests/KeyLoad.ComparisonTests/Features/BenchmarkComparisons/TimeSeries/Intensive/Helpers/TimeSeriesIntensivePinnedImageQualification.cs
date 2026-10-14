@@ -113,7 +113,12 @@ internal static class TimeSeriesIntensivePinnedImageQualification
             if (primary is not null)
             {
                 await evidence.WriteJsonAsync(TimeSeriesIntensivePinnedImageProtocol.FailureFile,
-                    new { context, primaryType = primary.GetType().FullName, cleanup });
+                    new
+                    {
+                        context,
+                        primaryType = primary.GetType().FullName,
+                        cleanup
+                    });
             }
         }
         catch (Exception persistence) when (primary is not null || TimeSeriesIntensivePinnedImageFailure.IsNative(persistence))

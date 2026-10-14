@@ -14,14 +14,18 @@ internal static class NativeTextRowOwnershipPublicAssertions
             [NativeTextRf3Scenario.TextField, NativeTextRf3Scenario.VectorField,
                 NativeTextRf3Scenario.SecretField]), 1d / 61d)];
         foreach (var term in new[] { "needle", "Київ" })
-        { await PageAsync(reader, scenario.Text(term), expected, token); }
+        {
+            await PageAsync(reader, scenario.Text(term), expected, token);
+        }
     }
 
     internal static async Task EmptyAsync(RequestCqrsRf3Callers reader,
         NativeTextRf3Scenario scenario, CancellationToken token)
     {
         foreach (var term in new[] { "needle", "Київ" })
-        { await PageAsync(reader, scenario.Text(term), [], token); }
+        {
+            await PageAsync(reader, scenario.Text(term), [], token);
+        }
     }
 
     private static async Task PageAsync(RequestCqrsRf3Callers reader, SearchRequest request,

@@ -14,8 +14,14 @@ internal sealed class SampleChunkWireTests
         var payload = SampleChunkTestData.Payload(Encoded(SampleChunkTestData.FixedRecords()));
         var badChecksum = payload.Checksum.ToArray();
         badChecksum[0] ^= 1;
-        var checksumFailure = DecodeFailure(SampleChunkTestData.Serialize(payload with { Checksum = badChecksum }));
-        var unknownPayload = payload with { FormatVersion = payload.FormatVersion + 1 };
+        var checksumFailure = DecodeFailure(SampleChunkTestData.Serialize(payload with
+        {
+            Checksum = badChecksum
+        }));
+        var unknownPayload = payload with
+        {
+            FormatVersion = payload.FormatVersion + 1
+        };
         var versionFailure = DecodeFailure(SampleChunkTestData.Rechecksum(unknownPayload));
 
         await Assert.That(checksumFailure.Code).IsEqualTo(ErrorCode.Corruption);
@@ -46,10 +52,19 @@ internal sealed class SampleChunkWireTests
     {
         var single = SampleChunkTestData.Row("wire-one", DateTimeOffset.UnixEpoch, 1, 1d, "{}");
         var onePayload = SampleChunkTestData.Payload(Encoded([single]));
-        var badOffset = onePayload with { Offsets = SampleChunkWireData.Memory([0x49, 0x03]) };
-        var badOffsetShape = onePayload with { Offsets = SampleChunkWireData.Memory([0]) };
+        var badOffset = onePayload with
+        {
+            Offsets = SampleChunkWireData.Memory([0x49, 0x03])
+        };
+        var badOffsetShape = onePayload with
+        {
+            Offsets = SampleChunkWireData.Memory([0])
+        };
         var beyondUtcRange = SampleChunkWireData.Uleb((ulong)DateTimeOffset.MaxValue.UtcTicks + 1);
-        var badTimestamp = onePayload with { UtcTicks = beyondUtcRange };
+        var badTimestamp = onePayload with
+        {
+            UtcTicks = beyondUtcRange
+        };
         var offsetFailure = DecodeFailure(SampleChunkTestData.Rechecksum(badOffset));
         var offsetShapeFailure = DecodeFailure(SampleChunkTestData.Rechecksum(badOffsetShape));
         var timestampFailure = DecodeFailure(SampleChunkTestData.Rechecksum(badTimestamp));
@@ -61,9 +76,14 @@ internal sealed class SampleChunkWireTests
         overflowSequences[8] = 0x7F;
         overflowSequences[9] = 0x02;
         var sequenceFailure = DecodeFailure(SampleChunkTestData.Rechecksum(pairPayload with
-        { Sequences = overflowSequences }));
+        {
+            Sequences = overflowSequences
+        }));
         var infinity = SampleChunkWireData.Uleb(0x7FF0_0000_0000_0000UL);
-        var valueFailure = DecodeFailure(SampleChunkTestData.Rechecksum(onePayload with { Values = infinity }));
+        var valueFailure = DecodeFailure(SampleChunkTestData.Rechecksum(onePayload with
+        {
+            Values = infinity
+        }));
 
         await Assert.That(offsetFailure.Code).IsEqualTo(ErrorCode.Corruption);
         await Assert.That(offsetShapeFailure.Code).IsEqualTo(ErrorCode.Corruption);
@@ -90,7 +110,10 @@ internal sealed class SampleChunkWireTests
         };
         var orderedPayload = SampleChunkTestData.Payload(Encoded(decreasing));
         var equalTicks = SampleChunkWireData.Uleb((ulong)DateTimeOffset.UnixEpoch.UtcTicks).Append((byte)0).ToArray();
-        var equalTimestamps = orderedPayload with { UtcTicks = SampleChunkWireData.Memory(equalTicks) };
+        var equalTimestamps = orderedPayload with
+        {
+            UtcTicks = SampleChunkWireData.Memory(equalTicks)
+        };
         var orderFailure = DecodeFailure(SampleChunkTestData.Rechecksum(equalTimestamps));
 
         await Assert.That(nonminimalFailure.Code).IsEqualTo(ErrorCode.Corruption);
@@ -102,8 +125,14 @@ internal sealed class SampleChunkWireTests
     {
         var payload = SampleChunkTestData.Payload(Encoded(
             [SampleChunkTestData.Row("wire-text", DateTimeOffset.UnixEpoch, 1, 1d, "{}")]));
-        var invalidUtf8 = payload with { Series = SampleChunkWireData.Memory([0x02, 0xFF]) };
-        var unnecessaryUtf16 = payload with { Series = SampleChunkWireData.Memory([0x05, 0x61, 0x62]) };
+        var invalidUtf8 = payload with
+        {
+            Series = SampleChunkWireData.Memory([0x02, 0xFF])
+        };
+        var unnecessaryUtf16 = payload with
+        {
+            Series = SampleChunkWireData.Memory([0x05, 0x61, 0x62])
+        };
         var invalidFailure = DecodeFailure(SampleChunkTestData.Rechecksum(invalidUtf8));
         var fallbackFailure = DecodeFailure(SampleChunkTestData.Rechecksum(unnecessaryUtf16));
 
@@ -116,9 +145,18 @@ internal sealed class SampleChunkWireTests
     {
         var row = SampleChunkTestData.Row("wire-empty", DateTimeOffset.UnixEpoch, 1, 1d, "{}");
         var payload = SampleChunkTestData.Payload(Encoded([row]));
-        var emptySeries = payload with { Series = SampleChunkWireData.Memory([0]) };
-        var emptyEvent = payload with { EventIds = SampleChunkWireData.Memory([0]) };
-        var emptyTag = payload with { Tags = SampleChunkWireData.Memory([1, 0, 0]) };
+        var emptySeries = payload with
+        {
+            Series = SampleChunkWireData.Memory([0])
+        };
+        var emptyEvent = payload with
+        {
+            EventIds = SampleChunkWireData.Memory([0])
+        };
+        var emptyTag = payload with
+        {
+            Tags = SampleChunkWireData.Memory([1, 0, 0])
+        };
         var seriesFailure = DecodeFailure(SampleChunkTestData.Rechecksum(emptySeries));
         var eventFailure = DecodeFailure(SampleChunkTestData.Rechecksum(emptyEvent));
         var tagFailure = DecodeFailure(SampleChunkTestData.Rechecksum(emptyTag));
@@ -134,15 +172,36 @@ internal sealed class SampleChunkWireTests
         var unreferencedTags = SampleChunkWireData.TagDictionaryWithUnreferencedEntry();
         var pair = SampleChunkTestData.SeededRecords(2);
         var pairPayload = SampleChunkTestData.Payload(Encoded(pair));
-        var badDictionary = pairPayload with { Tags = unreferencedTags };
-        var duplicateDictionary = pairPayload with { Tags = SampleChunkWireData.TagDictionaryWithDuplicates() };
-        var outOfOrderDictionary = pairPayload with { Tags = SampleChunkWireData.TagDictionaryWithOutOfOrderIndexes() };
+        var badDictionary = pairPayload with
+        {
+            Tags = unreferencedTags
+        };
+        var duplicateDictionary = pairPayload with
+        {
+            Tags = SampleChunkWireData.TagDictionaryWithDuplicates()
+        };
+        var outOfOrderDictionary = pairPayload with
+        {
+            Tags = SampleChunkWireData.TagDictionaryWithOutOfOrderIndexes()
+        };
         var extraSeries = pairPayload.Series.ToArray().Append((byte)0).ToArray();
-        var extraSeriesByte = pairPayload with { Series = SampleChunkWireData.Memory(extraSeries) };
-        var truncatedSeries = pairPayload with { Series = pairPayload.Series[..^1] };
+        var extraSeriesByte = pairPayload with
+        {
+            Series = SampleChunkWireData.Memory(extraSeries)
+        };
+        var truncatedSeries = pairPayload with
+        {
+            Series = pairPayload.Series[..^1]
+        };
         var invalidIndexTags = SampleChunkWireData.TagDictionaryWithInvalidIndexes();
-        var invalidIndex = pairPayload with { Tags = invalidIndexTags };
-        var badCount = pairPayload with { RecordCount = pairPayload.RecordCount - 1 };
+        var invalidIndex = pairPayload with
+        {
+            Tags = invalidIndexTags
+        };
+        var badCount = pairPayload with
+        {
+            RecordCount = pairPayload.RecordCount - 1
+        };
         var dictionaryFailure = DecodeFailure(SampleChunkTestData.Rechecksum(badDictionary));
         var duplicateFailure = DecodeFailure(SampleChunkTestData.Rechecksum(duplicateDictionary));
         var dictionaryOrderFailure = DecodeFailure(SampleChunkTestData.Rechecksum(outOfOrderDictionary));

@@ -46,11 +46,17 @@ public sealed class KeyLoadException : Exception
 
     /// <summary>Gets the domain error code.</summary>
     [Orleans.Id(0)]
-    public ErrorCode Code { get; }
+    public ErrorCode Code
+    {
+        get;
+    }
 
     /// <summary>Gets the corresponding HTTP status code.</summary>
     [Orleans.Id(1)]
-    public int StatusCode { get; }
+    public int StatusCode
+    {
+        get;
+    }
 
     /// <summary>Creates the safe problem detail for this failure.</summary>
     /// <returns>The problem detail associated with this exception.</returns>

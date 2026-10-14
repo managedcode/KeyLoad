@@ -4,10 +4,16 @@ namespace KeyLoad;
 public interface ICacheMemoryReservation : IDisposable
 {
     /// <summary>Positive modeled byte charge held by this reservation.</summary>
-    long Bytes { get; }
+    long Bytes
+    {
+        get;
+    }
 
     /// <summary>Nonnegative live-entry charge; an index baseline may have zero entries.</summary>
-    int Entries { get; }
+    int Entries
+    {
+        get;
+    }
 }
 
 /// <summary>Shares retained cache admission across node-owned stores and cache families.</summary>

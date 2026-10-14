@@ -24,7 +24,10 @@ public sealed partial class DatabaseEngine
         }
 
         foreach (var grant in principal.Grants)
-        { JsonData.Identifier(grant.Database); JsonData.Identifier(grant.Resource); }
+        {
+            JsonData.Identifier(grant.Database);
+            JsonData.Identifier(grant.Resource);
+        }
         foreach (var field in principal.FieldGrants)
         {
             JsonData.Identifier(field);

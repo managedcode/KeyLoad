@@ -50,7 +50,9 @@ internal static class BlobMaximumRangePublicPublication
         var state = new BlobMaximumRangePublicState(begin, begun, parts, written, complete, completed, placement);
         await BlobMaximumRangePublicAssertions.ReceiptAsync(begun.Receipt, begin.CommandId, state);
         for (var index = 0; index < 3; index++)
-        { await BlobMaximumRangePublicAssertions.ReceiptAsync(written[index].Receipt, parts[index].CommandId, state); }
+        {
+            await BlobMaximumRangePublicAssertions.ReceiptAsync(written[index].Receipt, parts[index].CommandId, state);
+        }
         await BlobMaximumRangePublicAssertions.ReceiptAsync(completed.Receipt, complete.CommandId, state);
         return state;
     }

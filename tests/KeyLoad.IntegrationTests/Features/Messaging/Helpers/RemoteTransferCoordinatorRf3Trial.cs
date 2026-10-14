@@ -53,7 +53,9 @@ internal static class RemoteTransferCoordinatorRf3Trial
         {
             await QueueProducerRf3Assertions.ReplayAsync(sdk, mcp, seed.Create, created, token);
             if (fullTarget)
-            { await RepairAsync(sdk, mcp, seed, intent, failed!, token); }
+            {
+                await RepairAsync(sdk, mcp, seed, intent, failed!, token);
+            }
             var delivered = await RemoteTransferCoordinatorRf3Wait.DeliveredAsync(sdk, seed, token);
             _ = await RemoteTransferCoordinatorRf3Assertions.CompletedAsync(sdk, mcp, seed, hint, delivered,
                 fullTarget ? RemoteTransferCoordinatorRf3Protocol.RepairedReady : RemoteTransferCoordinatorRf3Protocol.OriginalReady, token);
@@ -66,7 +68,9 @@ internal static class RemoteTransferCoordinatorRf3Trial
                 fullTarget ? RemoteTransferCoordinatorRf3Protocol.RepairedReady : RemoteTransferCoordinatorRf3Protocol.OriginalReady, token);
             await QueueProducerRf3Assertions.ReplayAsync(sdk, mcp, seed.Create, created, token);
             if (failed is not null)
-            { await QueueProducerRf3Assertions.DeniedAsync(await sdk.CommitAsync(failed, token), ErrorCode.ResourceExhausted); }
+            {
+                await QueueProducerRf3Assertions.DeniedAsync(await sdk.CommitAsync(failed, token), ErrorCode.ResourceExhausted);
+            }
         }, token);
     }
 

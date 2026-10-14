@@ -11,7 +11,9 @@ internal static class NativeInstallFrameInspection
     internal static async Task<bool> TryRunAsync(string[] args)
     {
         if (args.Length == FirstArgument || !string.Equals(args[FirstArgument], NativeInstallFrameInspectionProtocol.Mode, StringComparison.Ordinal))
-        { return false; }
+        {
+            return false;
+        }
         Console.SetOut(TextWriter.Null);
         Console.SetError(TextWriter.Null);
         var evidence = new C1OutcomeInspectionFailureEvidence();
@@ -19,7 +21,9 @@ internal static class NativeInstallFrameInspection
         {
             evidence.SetPhase(C1OutcomeInspectionFailurePhase.ValidateRequest);
             if (args.Length != SingleArgument)
-            { throw new InvalidDataException(C1OutcomeInspectionProtocol.InvalidRequest); }
+            {
+                throw new InvalidDataException(C1OutcomeInspectionProtocol.InvalidRequest);
+            }
             evidence.SetPhase(C1OutcomeInspectionFailurePhase.ReadInput);
             var bytes = await C1OutcomeInspection.ReadRequestBytesAsync().ConfigureAwait(false);
             evidence.SetPhase(C1OutcomeInspectionFailurePhase.ValidateRequest);
@@ -35,7 +39,9 @@ internal static class NativeInstallFrameInspection
             var failures = new List<Exception> { failure };
             await ServerFailureObserver.ObserveAsync(() => C1OutcomeInspection.WriteBytesAsync(evidence.Bytes(), true), failures).ConfigureAwait(false);
             if (failures.Any(C1OutcomeInspectionFailures.ContainsFatal))
-            { ServerFailureObserver.ThrowIfAny(failures); }
+            {
+                ServerFailureObserver.ThrowIfAny(failures);
+            }
             Environment.ExitCode = C1OutcomeInspectionProtocol.FailureExitCode;
             GC.KeepAlive(failures);
         }

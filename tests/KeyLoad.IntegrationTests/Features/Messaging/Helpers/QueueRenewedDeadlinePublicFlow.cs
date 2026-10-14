@@ -47,7 +47,14 @@ internal static class QueueRenewedDeadlinePublicFlow
         var until = observed.Metadata.LeaseUntil
             ?? throw new InvalidOperationException("The successful renewal omitted its current deadline.");
         await Assert.That(until).IsGreaterThan(delivery.LeaseUntil);
-        var renewed = leased with { Metadata = leased.Metadata with { StateVersion = 3L, LeaseUntil = until } };
+        var renewed = leased with
+        {
+            Metadata = leased.Metadata with
+            {
+                StateVersion = 3L,
+                LeaseUntil = until
+            }
+        };
         var state = new QueueRenewedDeadlinePublicState(seed, request, claim, delivery, renew, receipt, renewed, []);
         await QueueRenewedDeadlinePublicAssertions.LiveOriginalAsync(callers, state, token);
         await Assert.That(TimeProvider.System.GetUtcNow()).IsLessThan(delivery.LeaseUntil);
@@ -90,7 +97,9 @@ internal static class QueueRenewedDeadlinePublicFlow
         {
             var remaining = original - TimeProvider.System.GetUtcNow();
             if (remaining <= TimeSpan.Zero)
-            { return; }
+            {
+                return;
+            }
             await Task.Delay(remaining, TimeProvider.System, token);
         }
     }
@@ -106,7 +115,12 @@ internal static class QueueRenewedDeadlinePublicFlow
         await QueueRenewedDeadlinePublicAssertions.ReceiptAsync(receipt.Value, ack.CommandId, state.Seed.Lane,
             QueueLeaseRf3Protocol.Message, "Ack", 4L);
         var acked = new MessageInspection(state.Renewed.Metadata with
-        { State = MessageState.Acked, StateVersion = 4L, LeaseOwner = null, LeaseUntil = null }, null, null);
+        {
+            State = MessageState.Acked,
+            StateVersion = 4L,
+            LeaseOwner = null,
+            LeaseUntil = null
+        }, null, null);
         var settled = new QueueRenewedDeadlineSettled(state, ack, receipt.Value, acked);
         await QueueRenewedDeadlinePublicAssertions.SettledOriginalAsync(callers, settled, token);
         return settled;

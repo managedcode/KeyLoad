@@ -15,9 +15,13 @@ internal static class BlobRetiredPartBytesDamage
         store.Commit((tx, _) =>
         {
             if (fault == BlobRetiredPartBytesFault.AlteredRawBytes)
-            { tx.Put(key, [5, 6, 7, 8]); }
+            {
+                tx.Put(key, [5, 6, 7, 8]);
+            }
             else
-            { tx.PutRecord(key, new BlobPartMetadata(1, 3, BlobPriorPublicationOracle.Hash(new byte[] { 1, 2, 3, 4 }))); }
+            {
+                tx.PutRecord(key, new BlobPartMetadata(1, 3, BlobPriorPublicationOracle.Hash(new byte[] { 1, 2, 3, 4 })));
+            }
             return true;
         });
         return new(key, original);

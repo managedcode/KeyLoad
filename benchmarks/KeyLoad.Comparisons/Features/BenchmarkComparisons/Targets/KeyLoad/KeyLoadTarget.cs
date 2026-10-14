@@ -59,7 +59,10 @@ public sealed partial class KeyLoadTarget(HttpClient http, string apiKey, string
     private int topK;
     private int graphDepth, graphVertices, graphEdges, expectedCorpusCount;
     private string[] admissionObservations = [];
-    internal bool RequireIsolatedAdmission { get; init; }
+    internal bool RequireIsolatedAdmission
+    {
+        get; init;
+    }
     /// <summary>Gets the declared quorum, durability, API and authorization contract before actual cluster observation.</summary>
     public TargetProfile Profile { get; private set; } = KeyLoadTopologyProfile.CreateProfile(expectedNodes, image);
     /// <summary>Reports support for document, vector, queue, graph, and event-stream comparison scenarios.</summary>
@@ -105,7 +108,10 @@ public sealed partial class KeyLoadTarget(HttpClient http, string apiKey, string
     {
         if (scaled)
         {
-            Profile = Profile with { ReadContract = ConfigureCorpusAuthenticatedPrimaryDocumentReadsS1SeedsDocumentsOnlyWithNoVectorText };
+            Profile = Profile with
+            {
+                ReadContract = ConfigureCorpusAuthenticatedPrimaryDocumentReadsS1SeedsDocumentsOnlyWithNoVectorText
+            };
         }
         expectedCorpusCount = dataset.Documents.Count;
         space = scaled ? null! : new(ComparisonDatabaseName, dataset.Settings.Dimensions, DistanceMetric.Cosine, SeededVectorModel, VectorModelVersion);
@@ -166,7 +172,9 @@ public sealed partial class KeyLoadTarget(HttpClient http, string apiKey, string
     public async ValueTask DisposeAsync()
     {
         try
-        { await CleanupDocumentNamespaceAsync().ConfigureAwait(false); }
+        {
+            await CleanupDocumentNamespaceAsync().ConfigureAwait(false);
+        }
         finally
         {
             foreach (var peer in peerClients.Distinct())

@@ -6,7 +6,10 @@ internal static class McpEventFeedDiscoveryExpectations
 {
     private static readonly ImmutableArray<string> RequestProperties = ["version", "commandId", "controlPartition", "mapId", "action", "scope", "start", "expectedRevision", "expectedCoverageGeneration", "cursor", "offerDigest", "limit", "originalFirstIssuancePublicCommandId"];
     private static readonly ImmutableArray<string> ResultProperties = ["version", "publicCommandId", "mapId", "revision", "coverageGeneration", "released", "retained", "cursor", "offerDigest", "pages", "receipt"];
-    internal static ImmutableArray<McpToolExpectation> Entries { get; } =
+    internal static ImmutableArray<McpToolExpectation> Entries
+    {
+        get;
+    } =
     [
         new("keyload_tail_event_feed", true, true, false, McpExpectedBody.Object, false,
             [],

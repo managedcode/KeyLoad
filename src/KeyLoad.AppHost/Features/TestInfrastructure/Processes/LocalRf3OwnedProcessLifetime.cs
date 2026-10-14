@@ -92,7 +92,9 @@ internal static class LocalRf3OwnedProcessLifetime
         {
             observations.Clear();
             if (HasExited(process, observations))
-            { return; }
+            {
+                return;
+            }
             if (!observationFailureRecorded && observations.Count != CompletionCount)
             {
                 failures.AddRange(observations);
@@ -115,13 +117,17 @@ internal static class LocalRf3OwnedProcessLifetime
             foreach (var error in errors.InnerExceptions)
             {
                 if (!failures.Any(failure => ReferenceEquals(failure, error)))
-                { failures.Add(error); }
+                {
+                    failures.Add(error);
+                }
             }
         }
         if (task.IsCanceled)
         {
             try
-            { await task.ConfigureAwait(false); }
+            {
+                await task.ConfigureAwait(false);
+            }
             catch (OperationCanceledException error) { failures.Add(error); }
         }
     }

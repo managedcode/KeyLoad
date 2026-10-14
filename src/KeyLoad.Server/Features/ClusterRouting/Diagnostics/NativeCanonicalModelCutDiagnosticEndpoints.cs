@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
@@ -9,7 +9,9 @@ internal static class NativeCanonicalModelCutDiagnosticEndpoints
     {
         ArgumentNullException.ThrowIfNull(app);
         if (!app.Services.GetRequiredService<IOptions<NodeOptions>>().Value.RequestCqrsProbe.Enabled)
-        { return; }
+        {
+            return;
+        }
         app.MapPost(NativeCanonicalModelCutDiagnosticProtocol.Path, ReadAsync);
     }
 
@@ -17,7 +19,9 @@ internal static class NativeCanonicalModelCutDiagnosticEndpoints
     {
         context.RequestAborted.ThrowIfCancellationRequested();
         if (context.Items[ServerProtocol.PrincipalItem] is not PrincipalRecord principal)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, ServerProtocol.MissingCredential); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, ServerProtocol.MissingCredential);
+        }
         principal = GrainRequestAuthority.Reload(partition.Database, principal.Id, clock);
         GrainRequestAuthority.RequireAdministrator(principal);
         var observer = node.CanonicalCutObserver ?? throw NativeCanonicalModelCutDiagnosticRead.Unavailable();

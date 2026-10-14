@@ -9,10 +9,16 @@ internal sealed record EventVectorParentLookupCall(
 {
     internal const int TailObservationField = 4;
     [global::Orleans.Id(TailObservationField)]
-    public bool TailObservation { get; init; }
+    public bool TailObservation
+    {
+        get; init;
+    }
 
     [global::Orleans.Id(Field3)]
-    public ReadOnlyMemory<byte> FreshSourceAuthorizationWitness { get; init; }
+    public ReadOnlyMemory<byte> FreshSourceAuthorizationWitness
+    {
+        get; init;
+    }
 
     internal const int Field3 = 3;
     internal const string SerializerAlias = "keyload.server.event-vector-parent-lookup-call.v1";

@@ -25,11 +25,15 @@ internal static class QueuePolicyEpochRf3ColdAssertions
                 token.ThrowIfCancellationRequested();
                 var entry = right.Entries.Single(value => value.Index == index);
                 if (entry.Operation is not { } operation || await membership.TryApplyAsync(operation))
-                { continue; }
+                {
+                    continue;
+                }
                 await QueuePolicyEpochRf3ReplayProof.RequireAsync(left, operation, seed, known, token);
             }
             if (right.Applied != left.Applied)
-            { allowed.Add(Convert.ToHexString(KeySpace.AppliedBytes)); }
+            {
+                allowed.Add(Convert.ToHexString(KeySpace.AppliedBytes));
+            }
             await membership.RequireCompleteAsync();
             ExactRows(left.CanonicalRows, right.CanonicalRows, allowed, token);
             await Assert.That(right.CanonicalPosition - left.CanonicalPosition).IsEqualTo(right.Applied - left.Applied);
@@ -39,7 +43,9 @@ internal static class QueuePolicyEpochRf3ColdAssertions
                 token.ThrowIfCancellationRequested();
                 await Assert.That(entry.Index <= right.HardState.CommittedIndex).IsTrue();
                 if (entry.Operation is { } operation && operation.Kind != OperationKind.Membership)
-                { await QueuePolicyEpochRf3ReplayProof.RequireAsync(left, operation, seed, known, token); }
+                {
+                    await QueuePolicyEpochRf3ReplayProof.RequireAsync(left, operation, seed, known, token);
+                }
                 journal.Add(Convert.ToHexString(ReplicaProtocol.EntryStorageKey(entry.Index)));
             }
             ExactRows(left.ReplicaRows, right.ReplicaRows, journal, token);
@@ -67,7 +73,9 @@ internal static class QueuePolicyEpochRf3ColdAssertions
         await Assert.That((long)right.Entries.Length).IsEqualTo(right.HardState.LastIndex);
         await Assert.That(right.HardState.LastIndex >= left.HardState.LastIndex).IsTrue();
         for (var index = 0; index < right.Entries.Length; index++)
-        { await Assert.That(right.Entries[index].Index).IsEqualTo((long)index + 1); }
+        {
+            await Assert.That(right.Entries[index].Index).IsEqualTo((long)index + 1);
+        }
     }
 
     private static void ExactRows(string[] original, string[] current, HashSet<string> allowed, CancellationToken token)
@@ -79,7 +87,9 @@ internal static class QueuePolicyEpochRf3ColdAssertions
             token.ThrowIfCancellationRequested();
             if (!allowed.Contains(key) && (!left.TryGetValue(key, out var value)
                 || !right.TryGetValue(key, out var actual) || value != actual))
-            { throw new InvalidOperationException("The original complete queue policy-epoch cut changed outside exact native replay authority."); }
+            {
+                throw new InvalidOperationException("The original complete queue policy-epoch cut changed outside exact native replay authority.");
+            }
         }
     }
 

@@ -24,7 +24,9 @@ public sealed partial class DatabaseEngine
         var separator = secret.IndexOf(NativeCredentialIdentitySeparator, StringComparison.Ordinal);
         if (secret.Length is < NativeCredentialMinimumCharacters or > NativeCredentialMaximumCharacters
             || separator <= NativeCredentialFirstIdentityCharacter)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, NativeCredentialRequired); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, NativeCredentialRequired);
+        }
         return new(secret[..separator], SHA256.HashData(Encoding.UTF8.GetBytes(secret)));
     }
 

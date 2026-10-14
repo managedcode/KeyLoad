@@ -14,7 +14,13 @@ internal static class QueueDeadLetterRf3Scenario
         {
             await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.ConfigureResourceAsync(Guid.NewGuid(),
                 new(partition.TenantId, partition.DatabaseId, new(queue, ResourceKind.WorkQueue, partition.TransactionDomainId)
-                { QueuePolicy = new() { MaxAttempts = QueueDeadLetterRf3Protocol.One, MaxStoredMessages = QueueDeadLetterRf3Protocol.One } }), token));
+                {
+                    QueuePolicy = new()
+                    {
+                        MaxAttempts = QueueDeadLetterRf3Protocol.One,
+                        MaxStoredMessages = QueueDeadLetterRf3Protocol.One
+                    }
+                }), token));
         }
         await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.ConfigureResourceAsync(Guid.NewGuid(),
             new(partition.TenantId, partition.DatabaseId, new(QueueDeadLetterRf3Protocol.Collection, ResourceKind.Collection,

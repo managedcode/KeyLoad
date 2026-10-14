@@ -39,7 +39,9 @@ internal static class ControlledPartitionMovementFenceRequest
         var grant = actualAuthorization.Grant
             ?? throw new InvalidOperationException("The actual logged A authorization grant is required.");
         if (grant.GrantId != GrantId || grant.PhaseCommandId != FenceCommandId)
-        { throw new InvalidOperationException("The original native A grant identity does not match."); }
+        {
+            throw new InvalidOperationException("The original native A grant identity does not match.");
+        }
         var envelope = new PartitionMovePeerEnvelope(Version, control.MoveId, control.Partition,
             corpus.Control.Owner, control.SourcePlacement, control.DestinationOwner,
             actualPrepared.Journal.ControlIntentDigest, PartitionMovePeerStage.Fence, InitialOrdinal,

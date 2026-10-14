@@ -31,7 +31,9 @@ internal static class PackedBackupNativeCutTransfer
             await CliBackupRestoreAssertions.SuccessfulProcessAsync(result);
         }
         else
-        { BackupArtifact.Pack(source, artifact, PieceBytes); }
+        {
+            BackupArtifact.Pack(source, artifact, PieceBytes);
+        }
         var actual = BackupArtifact.Inspect(artifact);
         var expected = files.Select(row => (Name: row.Key, Bytes: row.Value.LongLength,
             Pieces: Math.Max(FirstPiece, checked((row.Value.Length + PieceBytes - FirstPiece) / PieceBytes))))
@@ -50,14 +52,18 @@ internal static class PackedBackupNativeCutTransfer
             await CliBackupRestoreAssertions.SuccessfulProcessAsync(result);
         }
         else
-        { BackupArtifact.Unpack(artifact, unpacked); }
+        {
+            BackupArtifact.Unpack(artifact, unpacked);
+        }
         await NativeBackupJournalRepairAssertions.SameArchiveAsync(files, unpacked, token);
     }
 
     internal static async Task RepairAsync(string selected, Dictionary<string, byte[]> original)
     {
         foreach (var row in original)
-        { await File.WriteAllBytesAsync(Path.Combine(selected, row.Key), row.Value, CancellationToken.None); }
+        {
+            await File.WriteAllBytesAsync(Path.Combine(selected, row.Key), row.Value, CancellationToken.None);
+        }
         await NativeBackupJournalRepairAssertions.SameArchiveAsync(original, selected, CancellationToken.None);
     }
 }

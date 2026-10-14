@@ -21,7 +21,9 @@ public static class DispatchClient
     {
         ArgumentNullException.ThrowIfNull(client);
         if (commandId == Guid.Empty)
-        { throw new ArgumentException(InvalidCommandId, nameof(commandId)); }
+        {
+            throw new ArgumentException(InvalidCommandId, nameof(commandId));
+        }
         var path = string.Concat(ClientApiRoutes.AdminDispatch, ClientApiRoutes.DispatchPausedQuery,
             paused ? PausedQueryValue : UnpausedQueryValue);
         return client.Send<bool>(path, null, true, commandId, cancellationToken, HttpMethod.Post);

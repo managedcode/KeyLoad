@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Search;
-using KeyLoad.Orleans;
 using KeyLoad.Query.Features.Search;
 
 namespace KeyLoad.Server.Features.Search;
@@ -27,7 +27,9 @@ internal static class NativeAnnEnrollmentRead
                     original.IndexGeneration, read);
                 RequireReservation(eligible, principal, original);
                 if (!eligible.InitialAnnMaintenanceSettled)
-                { return null; }
+                {
+                    return null;
+                }
                 var owner = owningRoot();
                 result = await owner.RunAsync(stages => ReadOwned(database, principal, original,
                     configured, clock, owner, stages, eligible, read)).ConfigureAwait(false);
@@ -55,7 +57,10 @@ internal static class NativeAnnEnrollmentRead
             {
                 var candidate = stages.ReadEnrollment(original);
                 if (candidate is null)
-                { read.Check(); return null; }
+                {
+                    read.Check();
+                    return null;
+                }
                 var fresh = database.Store.Read(view => database.Principal(view, principal.Id, clock.GetUtcNow()));
                 RequireReservation(eligible, fresh, original);
                 var seeds = NativeAnnMaintenanceAdmission.Seeds(configured.Core.AnnSeed, memory.Bytes / CaptureFrames);
@@ -67,14 +72,18 @@ internal static class NativeAnnEnrollmentRead
                 NativeAnnOriginalResults.RequirePublication(candidate.LastResult, published, captured);
                 if (published.Count != candidate.LastResult.Count
                     || Convert.ToHexStringLower(published.IndexSha256) != candidate.LastResult.IndexSha256)
-                { throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Corrupt); }
+                {
+                    throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Corrupt);
+                }
                 var current = database.ReadProjectionMaintenanceEligibility(original.Consumer,
                     original.IndexGeneration, read);
                 RequireReservation(current, fresh, original);
                 if (current.MaintenanceAuthority != eligible.MaintenanceAuthority
                     || current.Checkpoint != eligible.Checkpoint
                     || current.LastProgressReservationCut != eligible.LastProgressReservationCut)
-                { throw Errors.Fail(ErrorCode.TokenInvalidated, NativeAnnProtocol.InvalidSource); }
+                {
+                    throw Errors.Fail(ErrorCode.TokenInvalidated, NativeAnnProtocol.InvalidSource);
+                }
                 result = candidate;
                 read.ChargeBytes(global::KeyLoad.NativeSerialization.Measure(candidate));
                 read.Check();
@@ -95,6 +104,8 @@ internal static class NativeAnnEnrollmentRead
             || authority.PrincipalId != principal.Id || authority.PolicyEpoch != principal.PolicyEpoch
             || principal.Revoked || !principal.ClusterAdministrator || state.Released
             || !NativeAnnOriginalResults.SameRequest(reserved, original))
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, NativeAnnProtocol.InvalidSource); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, NativeAnnProtocol.InvalidSource);
+        }
     }
 }

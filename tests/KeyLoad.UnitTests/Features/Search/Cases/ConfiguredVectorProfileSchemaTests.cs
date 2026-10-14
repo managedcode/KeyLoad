@@ -37,7 +37,9 @@ internal sealed class ConfiguredVectorProfileSchemaTests
         using var database = new TestDatabase();
         var profiles = InvalidProfiles(failure);
         var definition = new ResourceDefinition(Collection, failure == IncompatibleKind ? ResourceKind.StreamSet : ResourceKind.Collection, database.Partition.TransactionDomainId)
-        { VectorProfiles = profiles };
+        {
+            VectorProfiles = profiles
+        };
         var request = new ConfigureResourceRequest(database.Partition.TenantId, database.Partition.DatabaseId, definition);
         var id = Guid.NewGuid();
         var state = ConfiguredVectorProfileFlow.StateBytes(database, id, global: true);
@@ -57,7 +59,10 @@ internal sealed class ConfiguredVectorProfileSchemaTests
         var healthy = request with
         {
             Definition = definition with
-            { Kind = ResourceKind.Collection, VectorProfiles = [new(ConfiguredVectorProfileFlow.Field, ConfiguredVectorProfileFlow.Space)] }
+            {
+                Kind = ResourceKind.Collection,
+                VectorProfiles = [new(ConfiguredVectorProfileFlow.Field, ConfiguredVectorProfileFlow.Space)]
+            }
         };
         var committed = database.Submit(OperationKind.ConfigureResource, healthy).Get<ResourceDefinition>();
         await Assert.That(NativeSerialization.Serialize(committed).SequenceEqual(NativeSerialization.Serialize(healthy.Definition))).IsTrue();

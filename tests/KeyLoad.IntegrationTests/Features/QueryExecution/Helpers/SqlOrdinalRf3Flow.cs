@@ -41,7 +41,9 @@ internal static class SqlOrdinalRf3Flow
         {
             using var deadline = McpCallerDeadline.Create();
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
-                { result = await use(deadline.Token); }, failures);
+                {
+                    result = await use(deadline.Token);
+                }, failures);
         }, failures);
         global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
         return result;

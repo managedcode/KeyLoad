@@ -13,7 +13,10 @@ internal sealed class SqlGraphPathDeadlineTests
     [Test]
     public async Task SharedDeadlineInterruptsBoundedSqlParsingBeforeSyntaxFailure()
     {
-        using var database = new TestDatabase(new() { QueryDeadlineSeconds = DeadlineSeconds });
+        using var database = new TestDatabase(new()
+        {
+            QueryDeadlineSeconds = DeadlineSeconds
+        });
         var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => engine.ShortestPathSql(Principal,
             SqlGraphPathTestSupport.Request(database, UnterminatedPrefix + new string(Padding, PaddingLength)),

@@ -34,7 +34,9 @@ internal static class ProjectionPartitionIsolationAssertions
             ProjectionPartitionIsolationFixture.HealthyEffect, healthy ? state.HealthyEffectReceipt : null, token);
         await ProjectionConsumerIdentityAssertions.SameAsync(store, image, cut);
         foreach (var item in state.Outcomes)
-        { await ProjectionConsumerIdentityAssertions.ReplayAsync(owner, store, item.Operation, item.Result, token); }
+        {
+            await ProjectionConsumerIdentityAssertions.ReplayAsync(owner, store, item.Operation, item.Result, token);
+        }
         await ProjectionConsumerIdentityAssertions.SameAsync(store, image, cut);
     }
 
@@ -48,7 +50,9 @@ internal static class ProjectionPartitionIsolationAssertions
         var reference = new EntityRef(partition, collection, id);
         var actual = owner.GetDocument(ProjectionConsumerIdentityFixture.Root, reference, receipt?.Token, token);
         if (receipt is null)
-        { await Assert.That(actual).IsNull(); }
+        {
+            await Assert.That(actual).IsNull();
+        }
         else
         {
             await ProjectionConsumerIdentityAssertions.ExactAsync(actual,

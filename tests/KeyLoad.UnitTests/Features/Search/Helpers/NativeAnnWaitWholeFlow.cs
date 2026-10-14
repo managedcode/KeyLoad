@@ -1,5 +1,5 @@
 using System.Text.Json;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Replication;
 using KeyLoad.Server;
 
@@ -63,7 +63,9 @@ internal static class NativeAnnWaitWholeFlow
         var operation = database.Database.NormalizeOperation(new ReplicatedOperation(id, OperationKind.Batch,
             Root, database.Database.EvaluationClock.GetUtcNow(), JsonSerializer.Serialize(command, JsonDefaults.Options)));
         if (fixture.Log.State.Term < Term)
-        { fixture.Log.SaveTermAndVote(Term, fixture.Configuration.LocalId); }
+        {
+            fixture.Log.SaveTermAndVote(Term, fixture.Configuration.LocalId);
+        }
         var index = checked(fixture.Log.State.LastIndex + FirstPosition);
         fixture.Log.Append([new ReplicaEntry(index, Term, operation)]);
         fixture.Materializer.Commit(index);

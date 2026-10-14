@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using ZoneTree.AbstractFileStream;
 
 namespace KeyLoad.Server.Features.Search;
@@ -14,7 +14,9 @@ internal sealed partial class NativeTextFileStreamProvider
         var exists = File.Exists(full);
         var created = false;
         if (exists)
-        { pathAccess.Require(full, directory: false); }
+        {
+            pathAccess.Require(full, directory: false);
+        }
         else if (CreatesOrOpens(mode))
         {
             pathAccess.Track(full, directory: false);
@@ -29,9 +31,13 @@ internal sealed partial class NativeTextFileStreamProvider
         {
             stream = inner.CreateFileStream(full, mode, access, share, Math.Min(bufferSize, fileBufferBytes), options);
             if (resources is not null)
-            { stream = new NativeTextBoundedFileStream(stream, resources); }
+            {
+                stream = new NativeTextBoundedFileStream(stream, resources);
+            }
             if (created)
-            { NativeTextFileIO.SetPrivateFileMode(full); }
+            {
+                NativeTextFileIO.SetPrivateFileMode(full);
+            }
             reservation?.CompleteAfterJoinedWrite();
             return stream;
         }
@@ -39,9 +45,13 @@ internal sealed partial class NativeTextFileStreamProvider
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         var beforeClose = failures.Count;
         if (stream is not null)
-        { ServerFailureObserver.Observe(stream.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(stream.Dispose, failures);
+        }
         if (failures.Count == beforeClose && reservation is not null)
-        { ServerFailureObserver.Observe(reservation.CompleteAfterJoinedWrite, failures); }
+        {
+            ServerFailureObserver.Observe(reservation.CompleteAfterJoinedWrite, failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
         throw NativeTextErrors.Ownership();
     }

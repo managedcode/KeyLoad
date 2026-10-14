@@ -8,7 +8,9 @@ internal static class DistributedSearchFieldAuthorization
         ResourceDefinition resource, SearchRequest request)
     {
         if (request.Text is not null)
-        { database.Authorization.RequireFieldUse(principal, resource, request.TextField!); }
+        {
+            database.Authorization.RequireFieldUse(principal, resource, request.TextField!);
+        }
         if (request.Vector is not null)
         {
             database.Authorization.Require(principal, request.Partition, request.Collection, Capability.VectorSearch);

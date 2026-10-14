@@ -20,18 +20,25 @@ public sealed partial class DatabaseEngine
             || receipt.AppliedPosition <= PartitionMoveProtocol.EmptyCount
             || receipt.ControlIntentDigest != grant.ControlIntentDigest
             || !PhysicalOwnerEntryValidation.SameOwner(receipt.PhysicalOwner, grant.ReceiverOwner))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
         if (grant.Settlement is { } previous)
         {
             if (previous.CommandId != receipt.CommandId || previous.AppliedPosition != receipt.AppliedPosition
                 || previous.ControlIntentDigest != receipt.ControlIntentDigest
                 || previous.EffectDigest != receipt.EffectDigest
                 || !PhysicalOwnerEntryValidation.SameOwner(previous.PhysicalOwner, receipt.PhysicalOwner))
-            { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict); }
+            {
+                throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict);
+            }
         }
         else
         {
-            grant = grant with { Settlement = receipt };
+            grant = grant with
+            {
+                Settlement = receipt
+            };
             PartitionMoveGrantStorage.Write(transaction, grant, Limits.MaxBatchBytes);
             PartitionMoveGrantStorage.ChangeOutstanding(transaction,
                 PartitionMoveGrantStorage.MoveCountKey(phase.Partition, phase.MoveId), false, Limits.MaxBatchMutations);

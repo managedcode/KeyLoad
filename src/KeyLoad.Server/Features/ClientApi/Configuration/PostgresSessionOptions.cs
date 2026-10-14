@@ -17,9 +17,15 @@ internal sealed class PostgresSessionOptions
     private const int MinimumFrame = 256;
     internal const int RelationalDialect = 2;
 
-    public int Port { get; set; }
+    public int Port
+    {
+        get; set;
+    }
     public int QueryDialectVersion { get; set; } = SqlOperationProtocol.DefaultQueryDialectVersion;
-    public bool AllowFullScan { get; set; }
+    public bool AllowFullScan
+    {
+        get; set;
+    }
     public string CertificatePath { get; set; } = string.Empty;
     public int MaximumStartupBytes { get; set; } = MaximumStartup;
     public int MaximumFrameBytes { get; set; } = MaximumFrame;
@@ -43,6 +49,8 @@ internal sealed class PostgresSessionOptions
             || Databases.Any(item => string.IsNullOrWhiteSpace(item.Key) || item.Value is null
                 || string.IsNullOrWhiteSpace(item.Value.TenantId) || string.IsNullOrWhiteSpace(item.Value.DatabaseId)
                 || string.IsNullOrWhiteSpace(item.Value.TransactionDomainId) || string.IsNullOrWhiteSpace(item.Value.PartitionKey)))
-        { throw new OptionsValidationException(Section, typeof(PostgresSessionOptions), [Invalid]); }
+        {
+            throw new OptionsValidationException(Section, typeof(PostgresSessionOptions), [Invalid]);
+        }
     }
 }

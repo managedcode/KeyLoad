@@ -64,7 +64,9 @@ internal static class QueueVisibilityBoundaryAssertions
                 await Assert.That(actual.NativeValue).IsNull();
             }
             else
-            { await NativeReplayResultAssertions.Same<CommitReceipt>(actual, original.Result); }
+            {
+                await NativeReplayResultAssertions.Same<CommitReceipt>(actual, original.Result);
+            }
             await SameAsync(store, cut);
         }
     }
@@ -89,7 +91,9 @@ internal static class QueueVisibilityBoundaryAssertions
             await Assert.That(persisted.AsSpan().SequenceEqual(saved)).IsTrue();
         }
         else
-        { await Assert.That(body).IsNull(); }
+        {
+            await Assert.That(body).IsNull();
+        }
     }
 
     internal static async Task DeliveryReceiptAsync((ReplicatedOperation Operation, OperationResult Result) original,

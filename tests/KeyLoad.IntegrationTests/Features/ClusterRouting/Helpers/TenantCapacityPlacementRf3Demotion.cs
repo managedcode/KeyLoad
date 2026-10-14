@@ -21,7 +21,10 @@ internal static class TenantCapacityPlacementRf3Demotion
         var query = new TenantPlacementPlanRequest(seed.Partition.TenantId,
             seed.Partition.DatabaseId, [seed.Partition], state.Control);
         var official = (await McpCallerAssertions.SuccessAsync<TenantPlacementPlanResultV1>(
-            await seed.Official.CallAsync(TenantPlacementPublicProtocol.PlanTool, new { request = query }, token))).Value;
+            await seed.Official.CallAsync(TenantPlacementPublicProtocol.PlanTool, new
+            {
+                request = query
+            }, token))).Value;
         await TenantCapacityPlacementRf3DemotionAssertions.PlanAsync(
             seed, state, equality, official, moveExpected: true, token);
         var plan = await McpCallerAssertions.SdkSuccessAsync(await seed.Source.PlanTenantPlacementAsync(query, token));

@@ -26,7 +26,10 @@ internal sealed record NativeRemoteGraphRf3Seed(string Credential, PrincipalReco
         var directory = await PhysicalOwnerDirectoryRf3Assertions.ExpectedAsync(wave.Application, wave.Profile, token);
         var tenant = "remote-graph-" + Guid.NewGuid().ToString("N");
         var source = new PartitionRef(tenant, "graphdb", "graphdomain", Guid.NewGuid().ToString("N"));
-        var target = source with { PartitionKey = Guid.NewGuid().ToString("N") };
+        var target = source with
+        {
+            PartitionKey = Guid.NewGuid().ToString("N")
+        };
         var principal = new PrincipalRecord(principalId, tenant,
             [new(source.DatabaseId, Graph, Capability.GraphRead | Capability.GraphWrite),
              new(source.DatabaseId, Documents, Capability.DocumentsRead)], []);

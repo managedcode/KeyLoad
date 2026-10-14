@@ -32,13 +32,17 @@ internal static partial class OfflineMacFileSystem
         if (RuntimeInformation.ProcessArchitecture == Architecture.X64)
         {
             if (LStatX64(path, out var value) != NativeCallSuccess)
-            { throw OfflineNativeErrors.FromErrno(Marshal.GetLastPInvokeError(), isMac: true); }
+            {
+                throw OfflineNativeErrors.FromErrno(Marshal.GetLastPInvokeError(), isMac: true);
+            }
             return Convert(value);
         }
         if (RuntimeInformation.ProcessArchitecture == Architecture.Arm64)
         {
             if (LStatArm64(path, out var value) != NativeCallSuccess)
-            { throw OfflineNativeErrors.FromErrno(Marshal.GetLastPInvokeError(), isMac: true); }
+            {
+                throw OfflineNativeErrors.FromErrno(Marshal.GetLastPInvokeError(), isMac: true);
+            }
             return Convert(value);
         }
         throw OfflineNativeErrors.Unsupported();
@@ -49,13 +53,17 @@ internal static partial class OfflineMacFileSystem
         if (RuntimeInformation.ProcessArchitecture == Architecture.X64)
         {
             if (FStatX64(descriptor, out var value) != NativeCallSuccess)
-            { throw OfflineNativeErrors.FromErrno(Marshal.GetLastPInvokeError(), isMac: true); }
+            {
+                throw OfflineNativeErrors.FromErrno(Marshal.GetLastPInvokeError(), isMac: true);
+            }
             return Convert(value);
         }
         if (RuntimeInformation.ProcessArchitecture == Architecture.Arm64)
         {
             if (FStatArm64(descriptor, out var value) != NativeCallSuccess)
-            { throw OfflineNativeErrors.FromErrno(Marshal.GetLastPInvokeError(), isMac: true); }
+            {
+                throw OfflineNativeErrors.FromErrno(Marshal.GetLastPInvokeError(), isMac: true);
+            }
             return Convert(value);
         }
         throw OfflineNativeErrors.Unsupported();
@@ -64,7 +72,9 @@ internal static partial class OfflineMacFileSystem
     private static OfflineFileMetadata Convert(MacStat value)
     {
         if (value.Size < MinimumFileSize)
-        { throw OfflineNativeErrors.Unsupported(); }
+        {
+            throw OfflineNativeErrors.Unsupported();
+        }
         return new(new(unchecked((uint)value.Device), value.Inode, value.Size), (uint)(value.Mode & TypeMask));
     }
 

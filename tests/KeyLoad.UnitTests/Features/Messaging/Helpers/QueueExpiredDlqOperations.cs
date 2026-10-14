@@ -15,13 +15,22 @@ internal static class QueueExpiredDlqOperations
         var state = new QueueLifecycleTestState(fixture.Partition, QueueWholeFlowStorage.Clock(fixture.Store));
         var expiry = state.Time.AddSeconds(ExpiryAdvanceSeconds);
         state.Batch(fixture.Database, new PutDocument(QueueLifecycleTestProtocol.Collection, Witness, QueueLifecycleTestProtocol.Payload),
-            QueueLifecycleHealthy.Enqueue(QueueLifecycleTestProtocol.Parked) with { ExpiresAt = expiry },
-            QueueLifecycleHealthy.Enqueue(QueueLifecycleTestProtocol.Pending) with { ExpiresAt = expiry }).Get<CommitReceipt>();
+            QueueLifecycleHealthy.Enqueue(QueueLifecycleTestProtocol.Parked) with
+            {
+                ExpiresAt = expiry
+            },
+            QueueLifecycleHealthy.Enqueue(QueueLifecycleTestProtocol.Pending) with
+            {
+                ExpiresAt = expiry
+            }).Get<CommitReceipt>();
         var parked = await QueueLifecycleOperations.ClaimAsync(fixture.Database, state, QueueLifecycleTestProtocol.Parked);
         QueueLifecycleOperations.Complete(fixture.Database, state, parked, DeliveryAction.Nack).Get<CommitReceipt>();
         var pending = await QueueLifecycleOperations.ClaimAsync(fixture.Database, state, QueueLifecycleTestProtocol.Pending);
         QueueLifecycleOperations.Complete(fixture.Database, state, pending, DeliveryAction.Nack).Get<CommitReceipt>();
-        var result = new QueueExpiredDlqState(state with { Time = expiry }, expiry,
+        var result = new QueueExpiredDlqState(state with
+        {
+            Time = expiry
+        }, expiry,
             QueueExpiredDlqAssertions.ReadBody(fixture.Store, state, QueueLifecycleTestProtocol.Parked),
             QueueExpiredDlqAssertions.ReadBody(fixture.Store, state, QueueLifecycleTestProtocol.Pending));
         await QueueExpiredDlqAssertions.RetainedAsync(fixture.Database, result, false);

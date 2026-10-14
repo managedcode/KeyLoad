@@ -108,7 +108,10 @@ public sealed class BlobStorageOperations(DatabaseEngine database, TimeProvider?
     private OperationResult Result<T>(IKeyValueView view, ReplicatedOperation operation, BlobCommandScope scope, long position, T value)
     {
         var receipt = new CommitReceipt(operation.Id, DatabaseEngine.Token(view, scope.Blob.Partition, position), [], database.Durability);
-        return new(null) { NativeValue = new BlobCommitResult<T>(receipt, value) };
+        return new(null)
+        {
+            NativeValue = new BlobCommitResult<T>(receipt, value)
+        };
     }
 
     /// <summary>Reads authorized current metadata from one bounded storage cut.</summary>

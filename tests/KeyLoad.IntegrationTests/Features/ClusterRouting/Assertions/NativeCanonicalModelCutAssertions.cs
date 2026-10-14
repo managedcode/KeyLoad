@@ -1,7 +1,7 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Execution;
 using KeyLoad.Core.Features.Messaging;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
@@ -35,17 +35,24 @@ internal static class NativeCanonicalModelCutAssertions
     {
         NativeCanonicalModelCutCodec.RequireEnvelope(original, token);
         NativeCanonicalModelCutCodec.RequireEnvelope(returned, token);
-        RequireBytes(NativeSerialization.Serialize(original.Request with { Nonce = returned.Request.Nonce }),
+        RequireBytes(NativeSerialization.Serialize(original.Request with
+        {
+            Nonce = returned.Request.Nonce
+        }),
             NativeSerialization.Serialize(returned.Request));
         var before = Rows(original, token);
         var after = Rows(returned, token);
         if (before.Count != after.Count)
-        { throw new InvalidDataException(Invalid); }
+        {
+            throw new InvalidDataException(Invalid);
+        }
         foreach (var row in before)
         {
             token.ThrowIfCancellationRequested();
             if (!after.TryGetValue(row.Key, out var actual))
-            { throw new InvalidDataException(Invalid); }
+            {
+                throw new InvalidDataException(Invalid);
+            }
             RequireBytes(row.Value.Span, actual.Span);
         }
         RequireNullable(original.LogicalOutcome, returned.LogicalOutcome);
@@ -64,7 +71,9 @@ internal static class NativeCanonicalModelCutAssertions
         {
             token.ThrowIfCancellationRequested();
             if (!rows.TryAdd(Convert.ToHexString(row.Key.Span), row.Value))
-            { throw new InvalidDataException(Invalid); }
+            {
+                throw new InvalidDataException(Invalid);
+            }
         }
         return rows;
     }
@@ -74,22 +83,32 @@ internal static class NativeCanonicalModelCutAssertions
     {
         var present = rows.TryGetValue(Convert.ToHexString(key), out var raw);
         if (present != selected.HasValue)
-        { throw new InvalidDataException(Invalid); }
+        {
+            throw new InvalidDataException(Invalid);
+        }
         if (selected is { } exact)
-        { RequireBytes(raw.Span, exact.Span); }
+        {
+            RequireBytes(raw.Span, exact.Span);
+        }
     }
 
     private static void RequireNullable(ReadOnlyMemory<byte>? original, ReadOnlyMemory<byte>? returned)
     {
         if (original.HasValue != returned.HasValue)
-        { throw new InvalidDataException(Invalid); }
+        {
+            throw new InvalidDataException(Invalid);
+        }
         if (original is { } before && returned is { } after)
-        { RequireBytes(before.Span, after.Span); }
+        {
+            RequireBytes(before.Span, after.Span);
+        }
     }
 
     private static void RequireBytes(ReadOnlySpan<byte> original, ReadOnlySpan<byte> returned)
     {
         if (!original.SequenceEqual(returned))
-        { throw new InvalidDataException(Invalid); }
+        {
+            throw new InvalidDataException(Invalid);
+        }
     }
 }

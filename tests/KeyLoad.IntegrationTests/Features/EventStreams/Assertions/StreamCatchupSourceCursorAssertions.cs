@@ -48,7 +48,10 @@ internal static class StreamCatchupSourceCursorAssertions
             McpEventStreamTokens.FirstEventRevision, McpEventStreamTokens.StreamGeneration);
         await SqlRf3Protocol.EqualAsync(new EventSourcePage(original.Source, head, [expected],
             page.Cursor, page.CutPosition, false), page);
-        var empty = await read(original with { Cursor = page.Cursor });
+        var empty = await read(original with
+        {
+            Cursor = page.Cursor
+        });
         await Assert.That(empty.CutPosition).IsGreaterThanOrEqualTo(page.CutPosition);
         await Assert.That(string.IsNullOrEmpty(empty.Cursor)).IsFalse();
         await SqlRf3Protocol.EqualAsync(new EventSourcePage(original.Source, head, [],

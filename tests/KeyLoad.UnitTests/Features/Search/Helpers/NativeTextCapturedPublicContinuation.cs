@@ -15,8 +15,13 @@ internal static class NativeTextCapturedPublicContinuation
             new("deleteDocument", NativeTextBilingualAudit.Collection, NativeTextBilingualAudit.EnglishId, 2)];
         await Assert.That(JsonDefaults.Serialize(receipt.Mutations).SequenceEqual(JsonDefaults.Serialize(expected.ToImmutableArray()))).IsTrue();
         foreach (var mutation in receipt.Mutations)
-        { await Assert.That(mutation.CompositionReferences).IsEmpty(); }
-        return await NativeTextOnlineWholeFlow.RunAsync(fixture, runtime, original with { CommandId = Guid.NewGuid() }, token);
+        {
+            await Assert.That(mutation.CompositionReferences).IsEmpty();
+        }
+        return await NativeTextOnlineWholeFlow.RunAsync(fixture, runtime, original with
+        {
+            CommandId = Guid.NewGuid()
+        }, token);
     }
 
     internal static async Task OriginalAsync(RankedDocument[] actual, PartitionRef partition)
@@ -50,7 +55,10 @@ internal static class NativeTextCapturedPublicContinuation
         await Assert.That(NativeSerialization.Serialize(replay).SequenceEqual(NativeSerialization.Serialize(original))).IsTrue();
         await HealthyAsync(runtime, fixture.Partition, token);
         var successorReplay = await NativeTextOnlineWholeFlow.RunAsync(fixture, runtime,
-            request with { CommandId = successor.CommandId }, token);
+            request with
+            {
+                CommandId = successor.CommandId
+            }, token);
         await Assert.That(NativeSerialization.Serialize(successorReplay).SequenceEqual(NativeSerialization.Serialize(successor))).IsTrue();
         await HealthyAsync(runtime, fixture.Partition, token);
     }

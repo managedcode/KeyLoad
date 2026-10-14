@@ -12,8 +12,14 @@ internal sealed class SampleWindowAccumulator
             : new DateTimeOffset(untilExclusiveTicks, TimeSpan.Zero);
     }
 
-    internal DateTimeOffset From { get; }
-    internal DateTimeOffset? UntilExclusive { get; }
+    internal DateTimeOffset From
+    {
+        get;
+    }
+    internal DateTimeOffset? UntilExclusive
+    {
+        get;
+    }
 
     internal void Add(SampleRecord sample)
     {

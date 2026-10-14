@@ -41,7 +41,9 @@ internal static class NativeMaintenanceJoinFlow
                     disposal = Task.Run(store.Dispose, CancellationToken.None);
                     if (!SpinWait.SpinUntil(() => runtime.Gate.WaitingWriteCount > 0,
                         TimeSpan.FromSeconds(NativeMaintenanceBarrier.DeadlineSeconds)))
-                    { throw new TimeoutException("The original owner disposal did not reach its native writer gate."); }
+                    {
+                        throw new TimeoutException("The original owner disposal did not reach its native writer gate.");
+                    }
                     return true;
                 });
                 await ObserveAcquiredWriterAsync(runtime, disposal!, caller.Token);
@@ -51,7 +53,9 @@ internal static class NativeMaintenanceJoinFlow
                 await Assert.That(await barrier.Ended.Task.WaitAsync(caller.Token)).IsEqualTo(MergeResult.SUCCESS);
                 await Assert.That(merger.ThreadState).IsEqualTo(ThreadState.Stopped);
                 if (barrier.Failure is { } observerFailure)
-                { throw observerFailure; }
+                {
+                    throw observerFailure;
+                }
                 await VerifyReopenAsync(root, image, position, identity);
             }, failures);
         }
@@ -63,13 +67,21 @@ internal static class NativeMaintenanceJoinFlow
                 await ServerFailureObserver.ObserveAsync(async () => await disposal, failures);
             }
             if (store is not null)
-            { ServerFailureObserver.Observe(store.Dispose, failures); }
+            {
+                ServerFailureObserver.Observe(store.Dispose, failures);
+            }
             if (barrier.Failure is { } failure && !failures.Contains(failure))
-            { failures.Add(failure); }
+            {
+                failures.Add(failure);
+            }
             if (failures.Count == 0)
-            { ServerFailureObserver.Observe(() => Directory.Delete(root, recursive: true), failures); }
+            {
+                ServerFailureObserver.Observe(() => Directory.Delete(root, recursive: true), failures);
+            }
             foreach (var retainedFailure in failures)
-            { retainedFailure.Data[RetainedRoot] = root; }
+            {
+                retainedFailure.Data[RetainedRoot] = root;
+            }
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -105,7 +117,9 @@ internal static class NativeMaintenanceJoinFlow
         finally
         {
             if (reopened is not null)
-            { ServerFailureObserver.Observe(reopened.Dispose, failures); }
+            {
+                ServerFailureObserver.Observe(reopened.Dispose, failures);
+            }
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -115,7 +129,9 @@ internal static class NativeMaintenanceJoinFlow
         store.Commit((tx, _) =>
         {
             foreach (var key in new[] { "alpha", "beta", "gamma" })
-            { tx.Put(NativeMaintenanceState.Key(key), NativeMaintenanceState.Value("original")); }
+            {
+                tx.Put(NativeMaintenanceState.Key(key), NativeMaintenanceState.Value("original"));
+            }
             return true;
         });
         store.Commit((tx, _) =>
@@ -132,11 +148,16 @@ internal static class NativeMaintenanceJoinFlow
         {
             token.ThrowIfCancellationRequested();
             if (disposal.IsCompleted)
-            { await disposal; throw new InvalidOperationException("Owner disposal completed before the held native merge settled."); }
+            {
+                await disposal;
+                throw new InvalidOperationException("Owner disposal completed before the held native merge settled.");
+            }
             if (!runtime.Gate.TryEnterReadLock(0))
             {
                 if (runtime.Gate.WaitingWriteCount == 0)
-                { return; }
+                {
+                    return;
+                }
                 await Task.Yield();
                 continue;
             }

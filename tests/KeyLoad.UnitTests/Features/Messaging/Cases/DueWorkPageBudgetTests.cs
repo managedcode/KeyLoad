@@ -8,7 +8,10 @@ internal sealed class DueWorkPageBudgetTests
     [Test]
     public async Task ValidValueCrossingAdmittedByteCapIsRevisitedAfterPrefixAlternation()
     {
-        using var fixture = new RecurringSagaDatabase(new() { MaxBatchBytes = SmallBatchLimit },
+        using var fixture = new RecurringSagaDatabase(new()
+        {
+            MaxBatchBytes = SmallBatchLimit
+        },
             timeProvider: new DueDiscoveryClock());
         var first = DueWorkTestData.OrderedId(1);
         var second = DueWorkTestData.OrderedId(2);
@@ -36,7 +39,10 @@ internal sealed class DueWorkPageBudgetTests
     [Test]
     public async Task IndividuallyOversizedValueIsRejectedAndItsCanonicalKeyAdvances()
     {
-        using var fixture = new RecurringSagaDatabase(new() { MaxBatchBytes = SmallBatchLimit },
+        using var fixture = new RecurringSagaDatabase(new()
+        {
+            MaxBatchBytes = SmallBatchLimit
+        },
             timeProvider: new DueDiscoveryClock());
         var oversized = DueWorkTestData.OrderedId(1);
         var following = DueWorkTestData.OrderedId(2);

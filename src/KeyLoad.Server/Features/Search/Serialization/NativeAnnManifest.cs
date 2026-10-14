@@ -64,11 +64,31 @@ internal sealed record NativeAnnManifest(
     [property: global::Orleans.Id(12)] byte[] IndexSha256,
     [property: global::Orleans.Id(13)] CommitProjectionBatchRequest? CheckpointIntent)
 {
-    [global::Orleans.Id(14)] public bool IsPending { get; init; }
-    [global::Orleans.Id(15)] public long ReplayAfter { get; init; }
-    [global::Orleans.Id(16)] public long ReplayThrough { get; init; }
-    [global::Orleans.Id(17)] public string? ReplayCorpusSha256 { get; init; }
-    [global::Orleans.Id(18)] public bool ExplicitBuildStage { get; init; }
+    [global::Orleans.Id(14)]
+    public bool IsPending
+    {
+        get; init;
+    }
+    [global::Orleans.Id(15)]
+    public long ReplayAfter
+    {
+        get; init;
+    }
+    [global::Orleans.Id(16)]
+    public long ReplayThrough
+    {
+        get; init;
+    }
+    [global::Orleans.Id(17)]
+    public string? ReplayCorpusSha256
+    {
+        get; init;
+    }
+    [global::Orleans.Id(18)]
+    public bool ExplicitBuildStage
+    {
+        get; init;
+    }
 }
 
 [global::Orleans.GenerateSerializer, global::Orleans.Alias(NativeAnnProtocol.PointerAlias)]

@@ -113,7 +113,9 @@ public sealed partial class DatabaseEngine
             throw Errors.Fail(ErrorCode.TokenInvalidated, TransferReceiptInvalidMessage);
         }
         if (record.RemoteTarget is not null)
-        { ValidateRemoteTransferIntentReceipt(view, record, request.ReceiptToken); }
+        {
+            ValidateRemoteTransferIntentReceipt(view, record, request.ReceiptToken);
+        }
         else
         {
             var claims = Verify<RemoteTransferReceiptClaims>(request.ReceiptToken, Limits.MaxBatchBytes);
@@ -157,7 +159,9 @@ public sealed partial class DatabaseEngine
         {
             ValidateIntentRecord(view, record, request.SourceQueue, request.TransferId);
             if (record.PrincipalId != principal.Id)
-            { throw Errors.Fail(ErrorCode.TokenInvalidated, TransferReceiptInvalidMessage); }
+            {
+                throw Errors.Fail(ErrorCode.TokenInvalidated, TransferReceiptInvalidMessage);
+            }
             ValidateRemoteTransferIntentReceipt(view, record, request.ReceiptToken);
             return;
         }

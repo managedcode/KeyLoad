@@ -86,8 +86,12 @@ internal static class ControlledPartitionMovementProcessOperation
                 () => ControlledPartitionMovementProcessOwnership.RequireAsync(ownerRoot, readiness, clock, cleanup.Token), failures);
         }
         if (failures.Count == 0)
-        { ServerFailureObserver.Observe(() => Directory.Delete(root, recursive: true), failures); }
+        {
+            ServerFailureObserver.Observe(() => Directory.Delete(root, recursive: true), failures);
+        }
         foreach (var failure in failures)
-        { failure.Data[RetainedRoot] = root; }
+        {
+            failure.Data[RetainedRoot] = root;
+        }
     }
 }

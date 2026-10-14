@@ -12,7 +12,10 @@ internal static class McpCallerAssertions
 {
     private const int FailureReasonUtf8ByteLimit = 128;
     private const string UnclassifiedMcpError = "MCP error Unclassified.";
-    internal static ImmutableArray<string> ProblemFields { get; } =
+    internal static ImmutableArray<string> ProblemFields
+    {
+        get;
+    } =
     [McpCallerProtocol.ProblemType, McpCallerProtocol.ProblemTitle, McpCallerProtocol.ProblemStatus,
         McpCallerProtocol.ProblemDetail, McpCallerProtocol.ProblemCode];
 
@@ -59,11 +62,15 @@ internal static class McpCallerAssertions
             || problem.ValueKind != JsonValueKind.Object
             || !problem.TryGetProperty(McpCallerProtocol.ProblemCode, out var errorCode)
             || errorCode.ValueKind != JsonValueKind.String)
-        { return UnclassifiedMcpError; }
+        {
+            return UnclassifiedMcpError;
+        }
 
         var code = ClosedErrorCode(errorCode.GetString());
         if (code == "Unclassified" || !Enum.TryParse<ErrorCode>(code, out var parsed))
-        { return UnclassifiedMcpError; }
+        {
+            return UnclassifiedMcpError;
+        }
         var reason = string.Concat("MCP safe error code ", code, " status ",
             Errors.Status(parsed).ToString(CultureInfo.InvariantCulture), ".");
         return Encoding.UTF8.GetByteCount(reason) < FailureReasonUtf8ByteLimit ? reason : UnclassifiedMcpError;
@@ -99,7 +106,9 @@ internal static class McpCallerAssertions
         await Assert.That(requestId.ValueKind == JsonValueKind.Null).IsEqualTo(!dispatched);
         await VerifySummaryAsync(reply);
         if (!dispatched)
-        { return null; }
+        {
+            return null;
+        }
         var id = requestId.GetGuid();
         await Assert.That(id).IsNotEqualTo(Guid.Empty);
         return id;

@@ -13,11 +13,15 @@ internal static class ReplicaFirstEventVectorAdmit
         ReplicatedOperation operation)
     {
         if (probe is null)
-        { return; }
+        {
+            return;
+        }
         var last = state.Log.State.LastIndex;
         var snapshot = state.Log.State.Snapshot?.Index ?? BeforeFirstLogPosition;
         if (probe.AppliedPosition < snapshot || probe.AppliedPosition > last)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, ReplicaProtocol.CorruptLog); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, ReplicaProtocol.CorruptLog);
+        }
         var first = checked(probe.AppliedPosition + ContiguousIndexStep);
         while (first <= last)
         {
@@ -25,9 +29,13 @@ internal static class ReplicaFirstEventVectorAdmit
             var entry = state.Log.ReadEntry(first, probe.AcceptNativeRecord)
                 ?? throw Errors.Fail(ErrorCode.RecoveryRequired, ReplicaProtocol.CorruptLog);
             if (entry.Index != first || entry.Index > last)
-            { throw Errors.Fail(ErrorCode.RecoveryRequired, ReplicaProtocol.CorruptLog); }
+            {
+                throw Errors.Fail(ErrorCode.RecoveryRequired, ReplicaProtocol.CorruptLog);
+            }
             if (entry.Operation is { } retained)
-            { RequireDifferent(retained, operation); }
+            {
+                RequireDifferent(retained, operation);
+            }
             first = checked(first + ContiguousIndexStep);
         }
         probe.Check();
@@ -35,10 +43,14 @@ internal static class ReplicaFirstEventVectorAdmit
     private static void RequireDifferent(ReplicatedOperation retained, ReplicatedOperation original)
     {
         if (retained.Id != original.Id)
-        { return; }
+        {
+            return;
+        }
         if (retained.Kind != original.Kind || retained.PrincipalId != original.PrincipalId
             || retained.PayloadJson != original.PayloadJson)
-        { throw Errors.Fail(ErrorCode.Conflict, Changed); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, Changed);
+        }
         throw Errors.Fail(ErrorCode.UnknownWriteOutcome, Pending);
     }
 }

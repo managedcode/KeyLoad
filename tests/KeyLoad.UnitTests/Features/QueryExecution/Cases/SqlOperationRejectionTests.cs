@@ -23,12 +23,18 @@ internal sealed class SqlOperationRejectionTests
     public async Task AcAiSql005RejectsUnknownVersionsTargetsCaseAndRecursiveAdapter()
     {
         var request = SqlOperationTestData.Call(McpCatalogExpectations.QueryCapabilities);
-        await SqlOperationTestData.Reject(request with { Version = SqlOperationProtocol.Version + 1 },
+        await SqlOperationTestData.Reject(request with
+        {
+            Version = SqlOperationProtocol.Version + 1
+        },
             ErrorCode.UnsupportedCapability);
         foreach (var sql in new[] { SqlOperationTestData.UnknownCall, SqlOperationTestData.WrongCaseCall,
                      SqlOperationTestData.RecursiveCall, LiteralCall, MultipleStatements, MutationSql })
         {
-            await SqlOperationTestData.Reject(request with { Sql = sql }, ErrorCode.UnsupportedCapability);
+            await SqlOperationTestData.Reject(request with
+            {
+                Sql = sql
+            }, ErrorCode.UnsupportedCapability);
         }
     }
 
@@ -38,12 +44,24 @@ internal sealed class SqlOperationRejectionTests
         var request = SqlOperationTestData.Call(McpCatalogExpectations.QueryCapabilities);
         foreach (var sql in new[] { MissingParenthesis, MultipleArguments, QuotedSelect, EmptySql })
         {
-            await SqlOperationTestData.Reject(request with { Sql = sql }, ErrorCode.Validation);
+            await SqlOperationTestData.Reject(request with
+            {
+                Sql = sql
+            }, ErrorCode.Validation);
         }
-        await SqlOperationTestData.Same(SqlOperationTestData.Compile(request with { Sql = QuotedCall }),
+        await SqlOperationTestData.Same(SqlOperationTestData.Compile(request with
+        {
+            Sql = QuotedCall
+        }),
             SqlOperationTestData.Find(McpCatalogExpectations.QueryCapabilities).Decode(null));
-        await SqlOperationTestData.Reject(request with { Cursor = SqlOperationTestData.Cursor }, ErrorCode.Validation);
-        await SqlOperationTestData.Reject(request with { AllowFullScan = true }, ErrorCode.Validation);
+        await SqlOperationTestData.Reject(request with
+        {
+            Cursor = SqlOperationTestData.Cursor
+        }, ErrorCode.Validation);
+        await SqlOperationTestData.Reject(request with
+        {
+            AllowFullScan = true
+        }, ErrorCode.Validation);
         await SqlCallNoPartialWriteContinuation.RunAsync();
     }
 
@@ -51,16 +69,29 @@ internal sealed class SqlOperationRejectionTests
     public async Task AcAiSql005CallRequiresExactlyOnePresentObjectParameter()
     {
         var request = SqlOperationTestData.Call(McpCatalogExpectations.QueryCapabilities);
-        await SqlOperationTestData.Reject(request with { Parameters = null }, ErrorCode.Validation);
-        await SqlOperationTestData.Reject(request with { Parameters = [] }, ErrorCode.Validation);
+        await SqlOperationTestData.Reject(request with
+        {
+            Parameters = null
+        }, ErrorCode.Validation);
+        await SqlOperationTestData.Reject(request with
+        {
+            Parameters = []
+        }, ErrorCode.Validation);
         await SqlOperationTestData.Reject(request with
         {
             Parameters = new Dictionary<string, JsonElement>(StringComparer.OrdinalIgnoreCase)
-            { [SqlOperationTestData.ExtraParameter] = request.Parameters![SqlOperationTestData.Parameter] }
+            {
+                [SqlOperationTestData.ExtraParameter] = request.Parameters![SqlOperationTestData.Parameter]
+            }
         }, ErrorCode.Validation);
         var extra = new Dictionary<string, JsonElement>(request.Parameters!, StringComparer.Ordinal)
-        { [SqlOperationTestData.ExtraParameter] = JsonSerializer.SerializeToElement(SqlOperationTestData.PrivateMarker) };
-        await SqlOperationTestData.Reject(request with { Parameters = extra }, ErrorCode.Validation);
+        {
+            [SqlOperationTestData.ExtraParameter] = JsonSerializer.SerializeToElement(SqlOperationTestData.PrivateMarker)
+        };
+        await SqlOperationTestData.Reject(request with
+        {
+            Parameters = extra
+        }, ErrorCode.Validation);
         foreach (var json in new[] { SqlOperationTestData.Null, SqlOperationTestData.Array })
         {
             await SqlOperationTestData.Reject(SqlOperationTestData.Request(request.Sql,
@@ -76,7 +107,9 @@ internal sealed class SqlOperationRejectionTests
         arguments[McpCatalogProtocol.Request] = JsonSerializer.Deserialize<JsonElement>(SqlOperationTestData.Null);
         await SqlOperationTestData.Reject(SqlOperationTestData.Call(read.Name, arguments), ErrorCode.Validation);
         arguments = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
-        { [SqlOperationTestData.WrongCaseKey] = read.Request };
+        {
+            [SqlOperationTestData.WrongCaseKey] = read.Request
+        };
         await SqlOperationTestData.Reject(SqlOperationTestData.Call(read.Name, arguments), ErrorCode.Validation);
         arguments = read.Arguments();
         arguments[SqlOperationTestData.ExtraParameter] = JsonSerializer.SerializeToElement(SqlOperationTestData.PrivateMarker);

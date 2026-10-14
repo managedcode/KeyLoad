@@ -1,9 +1,9 @@
 using System.Text;
 using System.Text.Json;
 using KeyLoad.Client;
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
@@ -25,7 +25,9 @@ internal static class NativeCanonicalModelCutBudgetAssertions
         ArgumentException.ThrowIfNullOrWhiteSpace(existingCollection);
         if (!token.CanBeCanceled || scope.SessionId != wave.QueryControls.SessionId
             || owners.Count != TwoRf3MembershipProtocol.NodeCount || secrets.Count != owners.Count)
-        { throw new InvalidDataException(Invalid); }
+        {
+            throw new InvalidDataException(Invalid);
+        }
         var originalArm = NativeCanonicalModelCutOriginalArm.Read(wave.QueryControls, scope.ArmId);
         NativeCanonicalModelCutRetainedArmAssertions.RequireSettledOriginal(wave.QueryControls, scope.ArmId, originalArm);
         var json = JsonSerializer.Serialize(new
@@ -47,7 +49,10 @@ internal static class NativeCanonicalModelCutBudgetAssertions
         foreach (var node in NativeCanonicalModelCutFiles.Nodes)
         {
             await NativeCanonicalModelCutBudgetHttpReply.RequireAsync(wave, node, adminCredential,
-                scope with { Nonce = Guid.NewGuid() }, json, token).ConfigureAwait(false);
+                scope with
+                {
+                    Nonce = Guid.NewGuid()
+                }, json, token).ConfigureAwait(false);
         }
         foreach (var node in TwoRf3MembershipProtocol.Nodes)
         {

@@ -15,7 +15,9 @@ internal static class EventVectorSourceReadPin
         if (carrier is null || carrier.Version != Version || carrier.OriginalPinPhaseBytes.IsEmpty
             || !carrier.LastAdmittedAdvancePhaseBytes.IsEmpty || !carrier.AuthenticatedSourceObservationBytes.IsEmpty
             || carrier.CurrentCoverageGeneration is null || carrier.CurrentPinRevision is null)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         admission.RequireEncodedBytes(carrier.OriginalPinPhaseBytes.Length);
         var phase = NativeSerialization.Deserialize<EventVectorSourcePhase>(carrier.OriginalPinPhaseBytes.Span);
         var mutation = EventVectorSourceMutationValidation.ReadOriginal(phase, admission);
@@ -24,7 +26,9 @@ internal static class EventVectorSourceReadPin
             || mutation.ExpectedCoverageGeneration != InitialPinRevision
             || phase.Source != read.Source
             || phase.PrincipalId != principal.Id)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, Invalid);
+        }
         var pin = EventVectorRowStorage.Read<EventVectorSourcePin>(view,
             EventVectorKeys.Pin(read.Source, phase.MapId), admission)
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
@@ -37,7 +41,9 @@ internal static class EventVectorSourceReadPin
             || pin.CoverageGeneration != carrier.CurrentCoverageGeneration || pin.PinRevision != carrier.CurrentPinRevision
             || read.AfterPosition != pin.Position || pin.Position < mutation.Position
             || !CryptographicOperations.FixedTimeEquals(pin.OriginalPinBodyDigest.Span, phase.OriginalBodyDigest.Span))
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, Invalid);
+        }
         return mutation;
     }
 }

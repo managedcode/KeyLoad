@@ -83,7 +83,13 @@ internal sealed class AtomicPartitionRosterRestoreTests
             var entryKey = AtomicPartitionRosterRestoreOriginSerialization.EntryKey(partition);
             var row = NativeSerialization.Deserialize<AtomicPartitionCatalogEntryV1>(fixture.OriginalRoster);
             fixture.Target.Commit((transaction, _) =>
-            { transaction.PutRecord(entryKey, row with { FirstSeenAppliedIndex = FirstNewApplied }); return true; });
+            {
+                transaction.PutRecord(entryKey, row with
+                {
+                    FirstSeenAppliedIndex = FirstNewApplied
+                });
+                return true;
+            });
             await RequireNoEffectCorruptionAsync(fixture);
             fixture.Target.Commit((transaction, _) => { transaction.Put(entryKey, fixture.OriginalRoster); return true; });
             var healthy = AtomicPartitionRosterRestoreFixture.Operation(fixture.Database, AtomicPartitionRosterRestoreFixture.NewId);
@@ -100,7 +106,13 @@ internal sealed class AtomicPartitionRosterRestoreTests
             var key = AtomicPartitionRosterRestoreOriginSerialization.OriginKey(AtomicPartitionRosterFixture.Source);
             var origin = fixture.Target.Read(view => view.GetRecord<AtomicPartitionRosterRestoreOrigin>(key))!;
             fixture.Target.Commit((transaction, _) =>
-            { transaction.PutRecord(key, origin with { Version = WrongVersion }); return true; });
+            {
+                transaction.PutRecord(key, origin with
+                {
+                    Version = WrongVersion
+                });
+                return true;
+            });
             await fixture.RequireCorruptBackupRejectedAsync();
             fixture.Target.Commit((transaction, _) => { transaction.PutRecord(key, origin); return true; });
             fixture.RestoreAgain();

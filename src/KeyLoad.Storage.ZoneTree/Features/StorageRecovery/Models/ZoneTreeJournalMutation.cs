@@ -11,11 +11,20 @@ internal readonly struct ZoneTreeJournalMutation
     internal const byte DeleteKind = 2;
 
     [Id(0)]
-    public ReadOnlyMemory<byte> Key { get; init; }
+    public ReadOnlyMemory<byte> Key
+    {
+        get; init;
+    }
 
     [Id(1)]
-    public ReadOnlyMemory<byte>? Value { get; init; }
+    public ReadOnlyMemory<byte>? Value
+    {
+        get; init;
+    }
 
     [Id(2)]
-    public byte Kind { get; init; }
+    public byte Kind
+    {
+        get; init;
+    }
 }

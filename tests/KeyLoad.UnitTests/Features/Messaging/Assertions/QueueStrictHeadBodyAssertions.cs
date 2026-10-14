@@ -42,9 +42,13 @@ internal static class QueueStrictHeadBodyAssertions
                     () => owner.Apply(operation));
             }
             else if (operation.Kind is OperationKind.Batch or OperationKind.Delivery)
-            { await NativeReplayResultAssertions.Same<CommitReceipt>(owner.Apply(operation), result); }
+            {
+                await NativeReplayResultAssertions.Same<CommitReceipt>(owner.Apply(operation), result);
+            }
             else
-            { throw new InvalidOperationException("The strict-head fixture requires its original typed operation receipt."); }
+            {
+                throw new InvalidOperationException("The strict-head fixture requires its original typed operation receipt.");
+            }
             await QueueLifecycleConditionAssertions.Same(store, before);
         }
     }
@@ -62,7 +66,9 @@ internal static class QueueStrictHeadBodyAssertions
         await Assert.That(owner.InspectMessage(queue.Principal, queue.Lane, expected.Id)).IsEqualTo(
             new MessageInspection(expected, QueueOrderedRetryProtocol.Payload, QueueOrderedRetryProtocol.Headers));
         var literal = QueueOrderedRetryOperations.Literal(expected.Id) with
-        { NotBefore = scheduled ? state.ScheduledAt : null };
+        {
+            NotBefore = scheduled ? state.ScheduledAt : null
+        };
         var body = store.Read(view => view.GetRecord<MessageBody>(state.BodyKey));
         await Assert.That(body).IsEqualTo(new MessageBody(literal.MessageId, literal.PayloadJson,
             literal.HeadersJson, literal.OrderingKey, JsonData.Fingerprint(literal)));

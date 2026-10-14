@@ -21,7 +21,9 @@ internal sealed record EventFeedReferencedOutcomeRf3Image(long Position, string[
             }, observer: bytes => budget.Observe(checked(bytes * HexStringStorageMultiplier + sizeof(char))),
                 cancellationToken: token);
             if (scan.HasMore)
-            { throw Errors.Fail(ErrorCode.ResourceExhausted, Exhausted); }
+            {
+                throw Errors.Fail(ErrorCode.ResourceExhausted, Exhausted);
+            }
             return new EventFeedReferencedOutcomeRf3Image(store.Position, rows.ToArray());
         });
 }

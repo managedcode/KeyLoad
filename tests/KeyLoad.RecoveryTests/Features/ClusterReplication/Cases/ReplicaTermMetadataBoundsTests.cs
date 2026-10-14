@@ -25,7 +25,10 @@ internal sealed class ReplicaTermMetadataBoundsTests
                 Incarnation = fixture.Configuration.Incarnation
             }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution()));
             var snapshot = ReplicaTermMetadataFixture.CreateVerifiedSnapshot(fixture, sourceStore,
-                fixture.Configuration with { Directory = sourceDirectory });
+                fixture.Configuration with
+                {
+                    Directory = sourceDirectory
+                });
             fixture.Log.PublishSnapshot(snapshot);
             await Assert.That(fixture.Log.TermAt(SnapshotIndex)).IsEqualTo(SnapshotTerm);
             await Assert.That(fixture.Log.TermAt(0)).IsEqualTo(0);
@@ -48,8 +51,14 @@ internal sealed class ReplicaTermMetadataBoundsTests
                 Incarnation = fixture.Configuration.Incarnation
             }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution()));
             var verified = ReplicaTermMetadataFixture.CreateVerifiedSnapshot(fixture, sourceStore,
-                fixture.Configuration with { Directory = sourceDirectory });
-            var invalid = verified with { Term = 0 };
+                fixture.Configuration with
+                {
+                    Directory = sourceDirectory
+                });
+            var invalid = verified with
+            {
+                Term = 0
+            };
 
             await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => fixture.Log.PublishSnapshot(invalid)).Code)
                 .IsEqualTo(ErrorCode.Validation);

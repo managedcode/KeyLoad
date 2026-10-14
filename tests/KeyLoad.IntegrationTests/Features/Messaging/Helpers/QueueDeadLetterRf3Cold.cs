@@ -15,7 +15,9 @@ internal static class QueueDeadLetterRf3Cold
             () => fixture.RestartContainerAsync(node, token))));
         ServerFailureObserver.ThrowIfAny([.. killed.SelectMany(row => row), .. restarted.SelectMany(row => row)]);
         foreach (var node in QueueDeadLetterRf3Protocol.Nodes)
-        { await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(node, WaitBehavior.WaitOnResourceUnavailable, token); }
+        {
+            await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(node, WaitBehavior.WaitOnResourceUnavailable, token);
+        }
         var failures = new List<Exception>();
         RequestCqrsRf3Callers? fresh = null;
         await ServerFailureObserver.ObserveAsync(async () =>
@@ -31,7 +33,9 @@ internal static class QueueDeadLetterRf3Cold
             await QueueDeadLetterRf3Assertions.LiteralAsync(fresh, state, token);
         }, failures);
         if (fresh is not null)
-        { await ServerFailureObserver.ObserveAsync(() => fresh.DisposeAsync().AsTask(), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => fresh.DisposeAsync().AsTask(), failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 

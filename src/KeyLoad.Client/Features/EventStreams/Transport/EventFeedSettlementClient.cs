@@ -16,7 +16,9 @@ public static class EventFeedSettlementClient
         ArgumentNullException.ThrowIfNull(client);
         ArgumentNullException.ThrowIfNull(request);
         if (request.Action != EventFeedControlAction.Acknowledge)
-        { throw new ArgumentException(EventFeedSettlementProtocol.AcknowledgeDescription, nameof(request)); }
+        {
+            throw new ArgumentException(EventFeedSettlementProtocol.AcknowledgeDescription, nameof(request));
+        }
         return client.Send<EventFeedControlResult>(EventFeedSettlementProtocol.AcknowledgeRoute,
             request, true, request.CommandId, cancellationToken);
     }
@@ -32,7 +34,9 @@ public static class EventFeedSettlementClient
         ArgumentNullException.ThrowIfNull(client);
         ArgumentNullException.ThrowIfNull(request);
         if (request.Action != EventFeedControlAction.Release)
-        { throw new ArgumentException(EventFeedSettlementProtocol.ReleaseDescription, nameof(request)); }
+        {
+            throw new ArgumentException(EventFeedSettlementProtocol.ReleaseDescription, nameof(request));
+        }
         return client.Send<EventFeedControlResult>(EventFeedSettlementProtocol.ReleaseRoute,
             request, true, request.CommandId, cancellationToken);
     }

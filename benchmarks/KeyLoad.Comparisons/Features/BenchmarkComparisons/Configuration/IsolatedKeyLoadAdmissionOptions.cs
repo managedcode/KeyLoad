@@ -18,7 +18,10 @@ public sealed class IsolatedKeyLoadAdmissionOptions
     /// <summary>The request slots for each node, tenant, principal and reserved control scope.</summary>
     public int RequestsPerScope { get; set; } = DefaultRequestsPerScope;
     /// <summary>Enables only the declared document-family request capacity.</summary>
-    public bool DocumentWorkload { get; set; }
+    public bool DocumentWorkload
+    {
+        get; set;
+    }
     /// <summary>The total bytes reserved by data requests on one node.</summary>
     public long ReservedBytes { get; set; } = DefaultReservedBytes;
 

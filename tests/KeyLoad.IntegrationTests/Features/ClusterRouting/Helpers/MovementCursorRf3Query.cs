@@ -13,7 +13,9 @@ internal static class MovementCursorRf3Query
         var official = (await McpCallerAssertions.SuccessAsync<QueryPage>(
             await seed.Official.CallAsync(McpCallerTools.QueryExecute, request, token))).Value;
         foreach (var page in new[] { source, target, official })
-        { await MovementCursorRf3Assertions.FirstAsync(page); }
+        {
+            await MovementCursorRf3Assertions.FirstAsync(page);
+        }
         var pages = new MovementCursorRf3Pages(source, target, official);
         await ContinueAsync(seed, pages, token);
         return pages;

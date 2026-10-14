@@ -16,7 +16,9 @@ internal static class PhysicalOwnerRegistrationIdentity
         PhysicalOwnerDirectoryValidation.ValidateRegistration(request);
         var payload = NativeSerialization.Serialize(request);
         if (payload.Length > PhysicalOwnerDirectoryProtocol.MaximumRegistrationBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PhysicalOwnerDirectoryProtocol.Capacity); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PhysicalOwnerDirectoryProtocol.Capacity);
+        }
         using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         hash.AppendData(Domain);
         hash.AppendData(payload);

@@ -25,7 +25,9 @@ internal static class SiteContentPointerInput
             "&&target.contains(document.elementFromPoint(x,y)) ? {x,y} : null; })()";
         var point = await cdp.EvaluateAsync(script, false, token);
         if (point.ValueKind != JsonValueKind.Object)
-        { throw new InvalidOperationException(MissingTarget); }
+        {
+            throw new InvalidOperationException(MissingTarget);
+        }
         var parameters = new Dictionary<string, object?>
         {
             [Type] = Pressed,

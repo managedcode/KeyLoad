@@ -63,7 +63,11 @@ internal static class TimeSeriesCurrentCapabilityRf3Trial
                     TimeSeriesCurrentCapabilityRf3Seed.Fourth, 3, 11d);
                 var receipt = await McpCallerAssertions.SdkSuccessAsync(await reader.Sdk.CommitAsync(command, token));
                 await TimeSeriesCurrentCapabilityRf3Seed.ReceiptAsync(command, receipt, state.Scenario.Partition);
-                return state with { FreshCommand = command, FreshReceipt = receipt };
+                return state with
+                {
+                    FreshCommand = command,
+                    FreshReceipt = receipt
+                };
             }, token);
 
     private static Task<bool> ReadersAsync(ClusterFixture fixture, RequestCqrsRf3Callers administrator,
@@ -72,7 +76,9 @@ internal static class TimeSeriesCurrentCapabilityRf3Trial
             async reader =>
             {
                 if (denied)
-                { await TimeSeriesCurrentCapabilityRf3Refusal.RunAsync(reader, administrator, state, token); }
+                {
+                    await TimeSeriesCurrentCapabilityRf3Refusal.RunAsync(reader, administrator, state, token);
+                }
                 else
                 {
                     var before = await McpCallerAssertions.SdkSuccessAsync(
@@ -82,7 +88,9 @@ internal static class TimeSeriesCurrentCapabilityRf3Trial
                     await current();
                     await TimeSeriesCurrentCapabilityRf3Seed.ReplayAsync(administrator, state.Command, state.Receipt, current, token);
                     if (state.FreshCommand is null)
-                    { await TimeSeriesCurrentCapabilityRf3Seed.ReplayAsync(reader, state.ReaderCommand, state.ReaderReceipt, current, token); }
+                    {
+                        await TimeSeriesCurrentCapabilityRf3Seed.ReplayAsync(reader, state.ReaderCommand, state.ReaderReceipt, current, token);
+                    }
                     else
                     {
                         await TimeSeriesCurrentCapabilityRf3Refusal.FencedOriginalAsync(reader, administrator, state, token);

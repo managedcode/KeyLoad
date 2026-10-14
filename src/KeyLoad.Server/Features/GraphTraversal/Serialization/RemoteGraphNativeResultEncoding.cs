@@ -10,11 +10,15 @@ internal static class RemoteGraphNativeResultEncoding
         work.Check();
         var measured = NativeSerialization.Measure(actual);
         if (measured > maximumBytes || measured > work.MaximumResultBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, ReadExecutionBudget.ReadBytesExceeded); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, ReadExecutionBudget.ReadBytesExceeded);
+        }
         work.ChargeBytes(measured);
         var encoded = NativeSerialization.Serialize(actual);
         if (encoded.Length == measured)
-        { return encoded; }
+        {
+            return encoded;
+        }
         CryptographicOperations.ZeroMemory(encoded);
         throw Errors.Fail(ErrorCode.Corruption, RemoteGraphNativeProtocol.InvalidProof);
     }

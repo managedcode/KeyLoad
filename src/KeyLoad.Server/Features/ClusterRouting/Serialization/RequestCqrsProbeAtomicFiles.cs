@@ -9,13 +9,19 @@ internal static class RequestCqrsProbeAtomicFiles
     internal static void Write(string root, string destination, byte[] bytes, IOptions<RequestProbeExecutionOptions> executionOptions, Func<RequestCqrsProbeSnapshot> readSnapshot)
     {
         if (OperatingSystem.IsWindows())
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         if (bytes.Length > executionOptions.Value.MaximumRecordBytes || File.Exists(destination))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         var before = readSnapshot();
         if (before.FileCount >= executionOptions.Value.MaximumFiles
             || before.AggregateBytes + bytes.Length > executionOptions.Value.MaximumAggregateBytes)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         var temporary = Path.Combine(root, RequestCqrsProbeProtocol.TemporaryFilePrefix + Guid.NewGuid().ToString(RequestCqrsProbeProtocol.SessionIdFormat) + TemporarySuffix);
         using (var stream = new FileStream(temporary, new FileStreamOptions
         {
@@ -33,7 +39,9 @@ internal static class RequestCqrsProbeAtomicFiles
         var staged = readSnapshot();
         if (staged.FileCount > executionOptions.Value.MaximumFiles
             || staged.AggregateBytes > executionOptions.Value.MaximumAggregateBytes)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         File.Move(temporary, destination, overwrite: false);
     }
 

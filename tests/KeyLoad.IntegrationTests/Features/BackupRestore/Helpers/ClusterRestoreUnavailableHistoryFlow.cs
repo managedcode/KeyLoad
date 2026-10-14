@@ -30,11 +30,17 @@ internal static class ClusterRestoreUnavailableHistoryFlow
                         await ClusterRestoreMixedRetentionRf3Literal.InboxAsync(callers, state, token).ConfigureAwait(false);
                         return true;
                     }, token).ConfigureAwait(false);
-                var afterRequest = beforeRequest with { CaptureId = Guid.NewGuid() };
+                var afterRequest = beforeRequest with
+                {
+                    CaptureId = Guid.NewGuid()
+                };
                 var after = await McpCallerAssertions.SdkSuccessAsync(await global::KeyLoad.Client.BackupClient.CaptureClusterBackupOwnerAsync(
                     sdk, afterRequest, token).ConfigureAwait(false));
                 await ClusterRestoreUnavailableHistoryAssertions.IdentityAsync(after, afterRequest);
-                await SqlRf3Protocol.EqualAsync(before.Cut with { CaptureId = afterRequest.CaptureId }, after.Cut);
+                await SqlRf3Protocol.EqualAsync(before.Cut with
+                {
+                    CaptureId = afterRequest.CaptureId
+                }, after.Cut);
                 return true;
             }, token);
 
@@ -43,7 +49,9 @@ internal static class ClusterRestoreUnavailableHistoryFlow
         var ownerIndex = target.Mappings.ToList().FindIndex(mapping =>
             mapping.Source.PhysicalShardId == state.TargetOwner.PhysicalShardId);
         if (ownerIndex < FirstOwnerIndex)
-        { throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid); }
+        {
+            throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid);
+        }
         return ClusterRestoreRf3Protocol.Nodes.Skip(ownerIndex * ReplicaCount).First();
     }
 

@@ -12,7 +12,10 @@ internal static class PostgresClosedCommandRf3Flow
         Task Models() => PostgresClosedCommandRf3Assertions.ModelsAsync(root, state, token);
         Task Target(bool allowed) => PostgresClosedCommandRf3Assertions.TargetAsync(fixture, state, allowed, Models, token);
         async Task Observe(bool allowed)
-        { await Models(); await Target(allowed); }
+        {
+            await Models();
+            await Target(allowed);
+        }
         await Target(allowed: true);
         await PostgresClosedCommandRf3Operations.RefusedAsync(fixture, state, root, token);
         await Target(allowed: true);

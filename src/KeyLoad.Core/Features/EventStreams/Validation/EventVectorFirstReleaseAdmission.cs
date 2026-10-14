@@ -17,7 +17,9 @@ internal static class EventVectorFirstReleaseAdmission
         var terminal = EventVectorRowStorage.Read<EventVectorFirstIssuance>(view,
             EventVectorKeys.TerminalFirstIssuance(request.ControlPartition, principal.Id, target), admission);
         if (active is not null && terminal is not null || !originalOutcome && terminal is not null)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         var row = EventVectorFirstIssuanceValidation.Read(view, request.ControlPartition, principal.Id,
             target, terminal: active is null, admission);
         EventVectorParentScopes.Authorize(authorization, principal, row.OriginalAuthorizedSourceScopes, admission);
@@ -28,12 +30,16 @@ internal static class EventVectorFirstReleaseAdmission
             || !row.OriginalCoverageWitnessBytes.Span.SequenceEqual(phase.OriginalCoverageWitness.Span)
             || !row.OriginalCapturedFirstOpenPhaseBytes.Span.SequenceEqual(
                 phase.OriginalCapturedFirstOpenPhaseBytes.Span))
-        { throw Errors.Fail(ErrorCode.Conflict, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, Invalid);
+        }
         EventVectorParentScopes.RequireExact(row.OriginalAuthorizedSourceScopes,
             EventVectorParentScopes.Derive(phase, null, admission));
         EventVectorFirstPhaseCarrier.Require(phase, admission);
         if (originalOutcome)
-        { return row; }
+        {
+            return row;
+        }
         var matches = phase.Action switch
         {
             EventVectorControlAction.AbandonFirstIssuance => row.State is EventVectorFirstIssuanceState.Admitted
@@ -42,7 +48,9 @@ internal static class EventVectorFirstReleaseAdmission
             _ => false
         };
         if (!matches)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         return row;
     }
 }

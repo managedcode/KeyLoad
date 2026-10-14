@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Replication;
 using KeyLoad.UnitTests.Features.ResourceExecution;
 
@@ -74,7 +74,9 @@ internal sealed class ReplicaBorrowedClockOperationTests
     {
         var page = view.Scan([], CompleteScanLimit);
         if (page.HasMore)
-        { throw new InvalidOperationException("The complete peer fixture exceeds its bounded oracle."); }
+        {
+            throw new InvalidOperationException("The complete peer fixture exceeds its bounded oracle.");
+        }
         return page.Records.Select(record => Convert.ToHexString(record.Key.Span) + ":" +
             Convert.ToHexString(record.Value.Span)).ToArray();
     });

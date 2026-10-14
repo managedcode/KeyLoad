@@ -38,14 +38,21 @@ internal static partial class NativeTextSeedCollector
                 if (document.Reference.Partition != partition || document.Reference.Collection != pin.Collection
                     || document.Revision <= EmptyPosition
                     || !key.SequenceEqual(DocumentStorageKeys.RecordKey(document.Reference)))
-                { throw Errors.Fail(ErrorCode.Corruption, InvalidScope); }
+                {
+                    throw Errors.Fail(ErrorCode.Corruption, InvalidScope);
+                }
                 documents.Add(document);
                 return true;
             });
         if (range.HasMore)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, SeedExceeded); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, SeedExceeded);
+        }
         budget.Check();
-        return metadata with { Documents = documents.ToArray() };
+        return metadata with
+        {
+            Documents = documents.ToArray()
+        };
     }
 
     internal static T CaptureOnlinePinned<T>(DatabaseEngine database, string principalId,
@@ -61,7 +68,9 @@ internal static partial class NativeTextSeedCollector
         {
             var current = database.Principal(budget.CreateView(raw), principalId, database.EvaluationClock.GetUtcNow());
             if (!current.ClusterAdministrator)
-            { throw Errors.Fail(ErrorCode.PermissionDenied, OnlineTextAdministratorRequired); }
+            {
+                throw Errors.Fail(ErrorCode.PermissionDenied, OnlineTextAdministratorRequired);
+            }
             var metadata = CaptureMetadataView(database, raw, principalId, pin, budget);
             budget.Check();
             return capture(raw, metadata);
@@ -79,7 +88,9 @@ internal static partial class NativeTextSeedCollector
         var consumer = DatabaseEngine.RequireActiveProjectionConsumer(view, principal, pin.Consumer, pin.Generation);
         if (!consumer.Definition.Resources.SequenceEqual([pin.Collection], StringComparer.Ordinal)
             || !consumer.Definition.MutationKinds.SequenceEqual(MutationKinds, StringComparer.Ordinal))
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidScope); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidScope);
+        }
         RequireOwner(database, view, principalId, pin);
         database.Authorization.Require(principal, partition, pin.Collection, Capability.Query | Capability.DocumentsRead);
         var resource = database.Resource(view, partition, pin.Collection, ResourceKind.Collection);
@@ -89,7 +100,9 @@ internal static partial class NativeTextSeedCollector
         var appliedBytes = view.ReadOwnedValue(KeySpace.AppliedBytes) ?? throw Errors.Fail(ErrorCode.Corruption, InvalidScope);
         var applied = NativeSerialization.Deserialize<long>(appliedBytes);
         if (applied < EmptyPosition || consumer.Checkpoint > head.Tail)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidScope); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidScope);
+        }
         budget.Check();
         var identity = database.Store.Identity;
         return new(principal.Id, principal.PolicyEpoch, resource.SchemaVersion,
@@ -108,7 +121,9 @@ internal static partial class NativeTextSeedCollector
             var state = DatabaseEngine.RequireReleasedProjectionConsumer(bounded, principal, pin.Consumer, pin.Generation);
             if (!state.Definition.Resources.SequenceEqual([pin.Collection], StringComparer.Ordinal)
                 || !state.Definition.MutationKinds.SequenceEqual(MutationKinds, StringComparer.Ordinal))
-            { throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidScope); }
+            {
+                throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidScope);
+            }
             RequireOwner(database, bounded, principalId, pin);
             budget.Check();
             return true;
@@ -134,6 +149,8 @@ internal static partial class NativeTextSeedCollector
             || actual.PhysicalShardId != expected.PhysicalShardId || actual.Incarnation != expected.Incarnation
             || actual.PlacementEpoch != expected.PlacementEpoch
             || !actual.VoterIds.SequenceEqual(expected.VoterIds, StringComparer.Ordinal))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, OwnerLost); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, OwnerLost);
+        }
     }
 }

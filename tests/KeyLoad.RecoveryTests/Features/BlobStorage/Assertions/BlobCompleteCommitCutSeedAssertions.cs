@@ -20,7 +20,9 @@ internal static class BlobCompleteCommitCutSeedAssertions
                 continue;
             }
             if (operation.Kind == OperationKind.ConfigureResource)
-            { continue; }
+            {
+                continue;
+            }
             var receipt = await ValueAsync(proof, operation, result);
             await BlobCompleteCommitCutOracle.ExactAsync(receipt, new CommitReceipt(operation.Id,
                 new CommitToken(proof.Incarnation, BlobCommitCutProtocol.Partition.AtomicPartitionId,

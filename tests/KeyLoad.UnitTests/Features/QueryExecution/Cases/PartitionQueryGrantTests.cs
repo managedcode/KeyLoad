@@ -55,12 +55,18 @@ internal sealed class PartitionQueryGrantTests
         var wireBytes = JsonDefaults.Serialize(measuredResult).Length;
         var retainedAdmission = PartitionQueryReferenceSizing.MinimumSingleLeafBatchBytes(measuredResult, SeedCount);
         var exactBatchBytes = checked((int)Math.Max(wireBytes, retainedAdmission));
-        using var exact = PartitionQueryTestSupport.Create(new() { MaxBatchBytes = exactBatchBytes });
+        using var exact = PartitionQueryTestSupport.Create(new()
+        {
+            MaxBatchBytes = exactBatchBytes
+        });
         PartitionQueryTestSupport.AddRows(exact, exact.Partition, SeedRows());
         var result = Run(exact);
         await Assert.That(result.Complete).IsTrue();
 
-        using var below = PartitionQueryTestSupport.Create(new() { MaxBatchBytes = exactBatchBytes - 1 });
+        using var below = PartitionQueryTestSupport.Create(new()
+        {
+            MaxBatchBytes = exactBatchBytes - 1
+        });
         PartitionQueryTestSupport.AddRows(below, below.Partition, SeedRows());
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => Run(below));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);

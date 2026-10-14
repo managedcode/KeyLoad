@@ -9,13 +9,17 @@ internal static class RemoteTransferRepairStateValidation
     internal static void Require(RemoteTransferRepairState? state)
     {
         if (state is null)
-        { return; }
+        {
+            return;
+        }
         var first = RemoteTransferRepairProtocol.InitialGeneration;
         if (state.Ceiling < first || state.AcceptPolicyGeneration < first || state.CompleteGeneration < first
             || state.History.IsDefault || state.History.Length >= state.Ceiling
             || state.AcceptPolicyGeneration - first > state.History.Length
             || state.CompleteGeneration - first != state.History.Length - (state.AcceptPolicyGeneration - first))
-        { throw Errors.Fail(ErrorCode.Corruption, RemoteTransferRepairProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, RemoteTransferRepairProtocol.Invalid);
+        }
         var policy = first;
         var complete = first;
         foreach (var reference in state.History)
@@ -24,13 +28,21 @@ internal static class RemoteTransferRepairStateValidation
                 || reference.CompleteGeneration != complete || reference.CapacityGeneration < first
                 || reference.FailedCommandId == Guid.Empty || !RemoteTransferDependencyShape.Digest(reference.OutcomeDigest)
                 || !RemoteTransferDependencyShape.Digest(reference.Fingerprint) || string.IsNullOrEmpty(reference.WitnessToken))
-            { throw Errors.Fail(ErrorCode.Corruption, RemoteTransferRepairProtocol.Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, RemoteTransferRepairProtocol.Invalid);
+            }
             if (reference.Stage == QueueTransferRepairStage.Accept)
-            { policy = checked(policy + first); }
+            {
+                policy = checked(policy + first);
+            }
             else
-            { complete = checked(complete + first); }
+            {
+                complete = checked(complete + first);
+            }
         }
         if (policy != state.AcceptPolicyGeneration || complete != state.CompleteGeneration)
-        { throw Errors.Fail(ErrorCode.Corruption, RemoteTransferRepairProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, RemoteTransferRepairProtocol.Invalid);
+        }
     }
 }

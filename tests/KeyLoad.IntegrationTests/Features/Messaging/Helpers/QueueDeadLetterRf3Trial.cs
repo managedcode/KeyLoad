@@ -25,7 +25,9 @@ internal static class QueueDeadLetterRf3Trial
             before = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.StatusAsync(deadline.Token));
         }, failures);
         if (callers is not null)
-        { await ServerFailureObserver.ObserveAsync(() => callers.DisposeAsync().AsTask(), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => callers.DisposeAsync().AsTask(), failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
         await QueueDeadLetterRf3Cold.RunAsync(fixture, state!, before!, deadline.Token);
     }

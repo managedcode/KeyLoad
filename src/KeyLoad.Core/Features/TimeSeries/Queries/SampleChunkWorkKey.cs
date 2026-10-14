@@ -25,7 +25,9 @@ internal static class SampleChunkWorkKey
             || parts[SetIndex] is not string set || parts[SeriesIndex] is not string series
             || parts[WindowIndex] is not string id || !Guid.TryParseExact(id, GuidFormat, out var windowId)
             || windowId == Guid.Empty || !KeyCodec.Encode(parts).AsSpan().SequenceEqual(key))
-        { throw Errors.Fail(ErrorCode.Corruption, SampleChunkLifecycleProtocol.Corrupt); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, SampleChunkLifecycleProtocol.Corrupt);
+        }
         var scope = new PartitionRef(tenant, database, domain, partition);
         DatabaseEngine.ValidatePartition(scope);
         JsonData.Identifier(set);

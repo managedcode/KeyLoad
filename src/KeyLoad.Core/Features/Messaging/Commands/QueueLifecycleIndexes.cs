@@ -8,7 +8,9 @@ public sealed partial class DatabaseEngine
     private static void DeleteQueueStringReference(IAtomicTransaction tx, byte[] key, string id)
     {
         if (tx.GetRecord<string>(key) != id)
-        { throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.MissingReference); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.MissingReference);
+        }
         tx.Delete(key);
     }
 
@@ -47,7 +49,9 @@ public sealed partial class DatabaseEngine
         var key = QueueKey(QueueLifecycleProtocol.PendingSpace, lane, metadata.Id);
         var expected = new QueuePendingDeadLetterReference(metadata.Id, metadata.DeliveryGeneration, AttemptsExhausted);
         if (tx.GetRecord<QueuePendingDeadLetterReference>(key) != expected)
-        { throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.MissingReference); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.MissingReference);
+        }
         tx.Delete(key);
     }
 
@@ -56,7 +60,9 @@ public sealed partial class DatabaseEngine
         var key = QueueKey(QueueLifecycleProtocol.ParkedSpace, lane, metadata.ParkedSequence, metadata.Id);
         var expected = new QueueDeadLetterReference(metadata.Id, metadata.ParkedSequence, metadata.DeliveryGeneration, AttemptsExhausted);
         if (metadata.ParkedSequence <= QueueLifecycleProtocol.Initial || tx.GetRecord<QueueDeadLetterReference>(key) != expected)
-        { throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.MissingReference); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.MissingReference);
+        }
         DeleteQueueStringReference(tx, QueueKey(DeadLetterQueueSpace, lane, metadata.Id), metadata.Id);
         tx.Delete(key);
     }

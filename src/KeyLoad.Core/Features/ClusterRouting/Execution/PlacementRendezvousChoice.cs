@@ -24,7 +24,11 @@ internal static class PlacementRendezvousChoice
                 policy.TenantId, policy.DatabaseId, owner));
             var score = BinaryPrimitives.ReadUInt64BigEndian(bytes.AsSpan(ScoreOffset, ScoreBytes));
             if (best is null || PlacementRendezvousScore.Compare(score, configured.Weight, bestScore, bestWeight) > EqualScore)
-            { best = owner; bestScore = score; bestWeight = configured.Weight; }
+            {
+                best = owner;
+                bestScore = score;
+                bestWeight = configured.Weight;
+            }
         }
         return best ?? throw Errors.Fail(ErrorCode.ResourceExhausted, Contracts.TenantPlacementPolicyProtocol.ScopeMismatch);
     }

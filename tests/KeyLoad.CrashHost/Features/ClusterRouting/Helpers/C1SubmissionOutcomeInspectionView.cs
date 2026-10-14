@@ -18,7 +18,9 @@ internal sealed class C1SubmissionOutcomeInspectionView(IKeyValueView original) 
     {
         if (bytes < NoBytes || bytes > C1SubmissionOutcomeInspectionProtocol.MaximumNativeRecordBytes
             || bytes > C1SubmissionOutcomeInspectionProtocol.MaximumReadBytes - examined)
-        { throw C1SubmissionOutcomeInspectionValidation.Invalid(); }
+        {
+            throw C1SubmissionOutcomeInspectionValidation.Invalid();
+        }
         examined += bytes;
     }
     public ScanPage Scan(byte[] prefix, int maxRecords, byte[]? afterKey = null)

@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Replication;
 using KeyLoad.Storage;
 
@@ -26,8 +26,14 @@ internal sealed class RequestCqrsCohortObservationWholeFlowTests(RequestCqrsCoho
         await scenario.Client.EnsureCompatibleCohortAsync(token);
         await RequestCqrsCohortObservationAssertions.RequireAsync(scenario,
             ReplicaCohortAdmissionCode.Compatible, 2, 2, 0, 0, 3);
-        scenario.PublishRemoteOneRecord(first with { TransportReady = false });
-        scenario.PublishRemoteTwoRecord(second with { TransportReady = false });
+        scenario.PublishRemoteOneRecord(first with
+        {
+            TransportReady = false
+        });
+        scenario.PublishRemoteTwoRecord(second with
+        {
+            TransportReady = false
+        });
         await RequestCqrsCohortObservationAssertions.RefuseResolutionAsync(scenario,
             RequestCqrsCohortScenario.FirstRemote, ReplicaTransportProtocol.InvalidDiscovery, token);
         await RequestCqrsCohortObservationAssertions.RefuseResolutionAsync(scenario,
@@ -53,14 +59,20 @@ internal sealed class RequestCqrsCohortObservationWholeFlowTests(RequestCqrsCoho
         await RequestCqrsCohortObservationAssertions.ResolveAsync(scenario, first, token);
         await RequestCqrsCohortObservationAssertions.RequireAsync(scenario,
             ReplicaCohortAdmissionCode.Compatible, 2, 1, 1, 0, 2);
-        scenario.PublishRemoteTwoRecord(second with { RuntimeJournalReaderContract = StoreReaderContract.Unspecified });
+        scenario.PublishRemoteTwoRecord(second with
+        {
+            RuntimeJournalReaderContract = StoreReaderContract.Unspecified
+        });
         await RequestCqrsCohortObservationAssertions.RefuseResolutionAsync(scenario,
             RequestCqrsCohortScenario.SecondRemote, ReplicaTransportProtocol.IncompatibleCohort, token);
         await RequestCqrsCohortObservationAssertions.RequireAsync(scenario,
             ReplicaCohortAdmissionCode.PeerReaderMismatch, 2, 2, 0, 0, 2);
         await RequestCqrsCohortObservationAssertions.RefuseAdmissionAsync(scenario,
             ReplicaTransportProtocol.IncompatibleCohort, token);
-        scenario.PublishRemoteOneRecord(first with { ApplicationRpcVersion = GrainRoutingProtocol.RequestInterfaceVersion - 1 });
+        scenario.PublishRemoteOneRecord(first with
+        {
+            ApplicationRpcVersion = GrainRoutingProtocol.RequestInterfaceVersion - 1
+        });
         await RequestCqrsCohortObservationAssertions.RefuseResolutionAsync(scenario,
             RequestCqrsCohortScenario.FirstRemote, ReplicaTransportProtocol.IncompatibleCohort, token);
         await RequestCqrsCohortObservationAssertions.RequireAsync(scenario,

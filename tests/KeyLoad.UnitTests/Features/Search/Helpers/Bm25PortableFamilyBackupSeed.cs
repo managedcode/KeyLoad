@@ -22,7 +22,10 @@ internal static class Bm25PortableFamilyBackupSeed
         {
             var principal = new PrincipalRecord(subject, source.Partition.TenantId,
                 [new(source.Partition.DatabaseId, Collection, Capability.Query | Capability.DocumentsRead)], [])
-            { RestrictRows = true, OwnerId = subject };
+            {
+                RestrictRows = true,
+                OwnerId = subject
+            };
             var actual = source.Submit(OperationKind.ConfigurePrincipal,
                 new ConfigurePrincipalRequest(principal)).Get<PrincipalRecord>();
             await Assert.That(actual.PolicyEpoch).IsEqualTo(1L);

@@ -30,7 +30,9 @@ internal sealed class EventVectorRemoteEncoding(IOptions<DatabaseLimits> options
             || call.RequestId == Guid.Empty || string.IsNullOrWhiteSpace(call.Nonce)
             || string.IsNullOrWhiteSpace(call.CallerVoter) || string.IsNullOrWhiteSpace(call.CallerSiloAddress)
             || call.Source is null || call.OriginalNativeRequest.IsEmpty)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, EventVectorRemoteProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, EventVectorRemoteProtocol.Invalid);
+        }
         RequireBytes(call.OriginalNativeRequest.Length);
         return call;
     }
@@ -49,15 +51,21 @@ internal sealed class EventVectorRemoteEncoding(IOptions<DatabaseLimits> options
             || reply.Error is not null && (!reply.OriginalNativeReply.IsEmpty || reply.SafeDetail is null)
             || reply.SafeDetail is not null && reply.SafeDetail != EventVectorRemoteProtocol.Invalid
                 && reply.SafeDetail != EventVectorRemoteProtocol.Unavailable)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, EventVectorRemoteProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, EventVectorRemoteProtocol.Invalid);
+        }
         if (!reply.OriginalNativeReply.IsEmpty)
-        { RequireBytes(reply.OriginalNativeReply.Length); }
+        {
+            RequireBytes(reply.OriginalNativeReply.Length);
+        }
         return reply;
     }
 
     private void RequireBytes(long length)
     {
         if (length < FirstByte || length > MaximumBytes)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, EventVectorRemoteProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, EventVectorRemoteProtocol.Invalid);
+        }
     }
 }

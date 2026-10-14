@@ -12,7 +12,14 @@ internal static class DocumentNeo4jProtocol
     {
         const string DbNeo4jQueryV2Token = "db/neo4j/query/v2";
 
-        using var response = await operationClient.PostAsJsonAsync(DbNeo4jQueryV2Token, new { statement, parameters = parameters ?? new { }, maxExecutionTime = execution.Neo4jMaximumExecutionTimeSeconds }, cancellationToken);
+        using var response = await operationClient.PostAsJsonAsync(DbNeo4jQueryV2Token, new
+        {
+            statement,
+            parameters = parameters ?? new
+            {
+            },
+            maxExecutionTime = execution.Neo4jMaximumExecutionTimeSeconds
+        }, cancellationToken);
         Neo4jQueryProtocol.RequireQueryStatus((int)response.StatusCode);
         JsonDocument? json = null;
         try

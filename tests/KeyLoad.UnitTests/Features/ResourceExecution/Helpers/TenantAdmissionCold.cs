@@ -39,7 +39,10 @@ internal static class TenantAdmissionCold
             token.ThrowIfCancellationRequested();
             await NativeReplayResultAssertions.Same<CommitReceipt>(replay(operations[index]), results[index]);
             var partition = operations[index].PrincipalId == TenantAdmissionOperations.PrincipalA
-                ? firstPartition : firstPartition with { TenantId = TenantAdmissionOperations.OtherTenant };
+                ? firstPartition : firstPartition with
+                {
+                    TenantId = TenantAdmissionOperations.OtherTenant
+                };
             await TenantAdmissionAssertions.RecordAsync(database, operations[index], partition, ids[index]);
         }
 

@@ -24,7 +24,10 @@ public sealed class KurrentTarget : IComparisonTarget
     private KurrentSetupStage setupStage = KurrentSetupStage.WriterConstruction;
 
     /// <summary>Gets the observed KurrentDB version, topology, acknowledgement, read, transport, and authorization profile.</summary>
-    public TargetProfile Profile { get; private set; }
+    public TargetProfile Profile
+    {
+        get; private set;
+    }
 
     /// <summary>Creates a KurrentDB stream target that verifies the requested native topology before measurement.</summary>
     /// <param name="connectionString">Connection settings used to create the writer and verify the cluster.</param>
@@ -104,7 +107,10 @@ public sealed class KurrentTarget : IComparisonTarget
             var evidence = await KurrentClusterVerifier.VerifyCopyAsync(writer: RequireWriter(), nodeClients: nodeClients,
                 httpClients: nodeHttpClients, topology: topology, stream: probe, eventData: eventData, ownership: ownership,
                 timeout: timeout, cancellationToken: cancellationToken, options: lifecycleOptions, timeProvider: timeProvider);
-            Profile = Profile with { Cluster = evidence };
+            Profile = Profile with
+            {
+                Cluster = evidence
+            };
             initialized = true;
             setupStage = KurrentSetupStage.Complete;
         }

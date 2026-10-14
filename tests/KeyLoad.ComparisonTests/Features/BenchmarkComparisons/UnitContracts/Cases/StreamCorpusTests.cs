@@ -44,17 +44,32 @@ internal sealed class StreamCorpusTests
         var document = dataset.Documents[0];
         var expected = new FoundEvent(BenchmarkDataset.EventId(document), 1, document.Json);
         await Assert.That(BenchmarkDataset.SameEvent(expected, document)).IsTrue();
-        await Assert.That(BenchmarkDataset.SameEvent(expected with { EventId = BenchmarkDataset.EventId(dataset.Documents[1]) }, document)).IsFalse();
-        await Assert.That(BenchmarkDataset.SameEvent(expected with { Revision = 0 }, document)).IsFalse();
-        await Assert.That(BenchmarkDataset.SameEvent(expected with { Json = EmptyPayload }, document)).IsFalse();
+        await Assert.That(BenchmarkDataset.SameEvent(expected with
+        {
+            EventId = BenchmarkDataset.EventId(dataset.Documents[1])
+        }, document)).IsFalse();
+        await Assert.That(BenchmarkDataset.SameEvent(expected with
+        {
+            Revision = 0
+        }, document)).IsFalse();
+        await Assert.That(BenchmarkDataset.SameEvent(expected with
+        {
+            Json = EmptyPayload
+        }, document)).IsFalse();
         await Assert.That(BenchmarkDataset.SameEvent(null, document)).IsFalse();
     }
 
     [Test]
     public async Task TopologyDoesNotChangeCorpusOrLogicalEventIdentity()
     {
-        var single = new BenchmarkDataset(Microsoft.Extensions.Options.Options.Create(Options with { Topology = ComparisonTopology.Standalone }));
-        var replicated = new BenchmarkDataset(Microsoft.Extensions.Options.Options.Create(Options with { Topology = ComparisonTopology.Replicated }));
+        var single = new BenchmarkDataset(Microsoft.Extensions.Options.Options.Create(Options with
+        {
+            Topology = ComparisonTopology.Standalone
+        }));
+        var replicated = new BenchmarkDataset(Microsoft.Extensions.Options.Options.Create(Options with
+        {
+            Topology = ComparisonTopology.Replicated
+        }));
         await Assert.That(single.Sha256).IsEqualTo(replicated.Sha256);
         await Assert.That(BenchmarkDataset.EventId(single.Documents[0])).IsEqualTo(BenchmarkDataset.EventId(replicated.Documents[0]));
         await Assert.That(BenchmarkDataset.EventId(single.Documents[0])).IsNotEqualTo(BenchmarkDataset.EventId(single.Documents[1]));

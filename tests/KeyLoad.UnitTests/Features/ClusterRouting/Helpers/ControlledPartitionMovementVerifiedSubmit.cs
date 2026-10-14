@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
 
@@ -14,7 +14,9 @@ internal static class ControlledPartitionMovementVerifiedSubmit
         PartitionMovementTransportRequest original, CancellationToken cancellationToken)
     {
         if (ControlledPartitionMovementProcessScope.Current is { } process)
-        { return await process.SubmitAsync(receiver, runtime, original, cancellationToken); }
+        {
+            return await process.SubmitAsync(receiver, runtime, original, cancellationToken);
+        }
         OperationResult? result = null;
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
@@ -26,7 +28,9 @@ internal static class ControlledPartitionMovementVerifiedSubmit
                     var bytes = NativeSerialization.Serialize(original);
                     var verified = await admission.VerifyAsync(bytes, mac.Sign(bytes, reply: false), cancellationToken);
                     if (verified.Action != PartitionMovementTransportAction.Apply)
-                    { throw new InvalidOperationException("Only an original admitted logged phase may be submitted here."); }
+                    {
+                        throw new InvalidOperationException("Only an original admitted logged phase may be submitted here.");
+                    }
                     var principalId = PartitionMovementControlPrincipal.Resolve(receiver.Database, verified.Envelope);
                     var principal = receiver.Store.Read(view => receiver.Database.Principal(view, principalId,
                         receiver.Database.EvaluationClock.GetUtcNow()));

@@ -17,7 +17,10 @@ internal sealed class DocumentPatchAtomicityOwner
     private ZoneTreeStore? coldStore;
     private DatabaseEngine? coldDatabase;
     private TestDatabaseReplicaAdmission? coldAdmission;
-    internal TestDatabase Source { get; }
+    internal TestDatabase Source
+    {
+        get;
+    }
     private string ReplicaDirectory => Source.Directory + TestDatabaseReplicaDirectory.Suffix;
 
     private DocumentPatchAtomicityOwner()
@@ -47,7 +50,9 @@ internal sealed class DocumentPatchAtomicityOwner
         {
             ServerFailureObserver.Observe(owner.Join, failures);
             if (failures.Count == 0)
-            { ServerFailureObserver.Observe(owner.DeleteJoinedDirectories, failures); }
+            {
+                ServerFailureObserver.Observe(owner.DeleteJoinedDirectories, failures);
+            }
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -74,7 +79,9 @@ internal sealed class DocumentPatchAtomicityOwner
         await DocumentPatchAtomicityAssertions.BytesAsync(NativeSerialization.Serialize(originalReplicaIdentity),
             NativeSerialization.Serialize(ReadReplicaIdentity()));
         coldStore = ZoneTreeExistingStore.Open(new(Source.Directory)
-        { Incarnation = originalIdentity.Incarnation }, originalIdentity.NodeId, Source.StorageExecution);
+        {
+            Incarnation = originalIdentity.Incarnation
+        }, originalIdentity.NodeId, Source.StorageExecution);
         await DocumentPatchAtomicityAssertions.BytesAsync(NativeSerialization.Serialize(originalIdentity),
             NativeSerialization.Serialize(coldStore.Identity));
         coldDatabase = Source.CreateConfiguredDatabase(coldStore);
@@ -89,7 +96,9 @@ internal sealed class DocumentPatchAtomicityOwner
             limits.MaximumIdentityFileBytes, limits.StreamBufferBytes);
         if (replica.NodeId == originalIdentity.NodeId || replica.Incarnation != originalIdentity.Incarnation
             || !CryptographicOperations.FixedTimeEquals(replica.SigningKey.Span, originalIdentity.SigningKey.Span))
-        { throw new InvalidOperationException("The original native replica identity is not the canonical owner\'s distinct replica."); }
+        {
+            throw new InvalidOperationException("The original native replica identity is not the canonical owner\'s distinct replica.");
+        }
         return replica;
     }
 
@@ -108,9 +117,13 @@ internal sealed class DocumentPatchAtomicityOwner
         coldDatabase = null;
         var failures = new List<Exception>();
         if (admission is not null)
-        { ServerFailureObserver.Observe(admission.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(admission.Dispose, failures);
+        }
         if (store is not null)
-        { ServerFailureObserver.Observe(store.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(store.Dispose, failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 

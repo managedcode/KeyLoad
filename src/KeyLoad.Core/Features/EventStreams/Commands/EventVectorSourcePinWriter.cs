@@ -49,10 +49,14 @@ internal static class EventVectorSourcePinWriter
             admission.RequireEncodedBytes(encodedBytes);
             if (original is not { } retained || !key.AsSpan().SequenceEqual(retained.Key.Span)
                 || !current.SequenceEqual(retained.Value.Span))
-            { throw Errors.Fail(ErrorCode.Corruption, InvalidPin); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, InvalidPin);
+            }
         });
         if (!found && original is not null)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidPin); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidPin);
+        }
         return encodedBytes;
     }
 }

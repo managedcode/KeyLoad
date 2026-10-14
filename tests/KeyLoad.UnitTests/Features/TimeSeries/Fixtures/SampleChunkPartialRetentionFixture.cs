@@ -16,8 +16,14 @@ internal sealed class SampleChunkPartialRetentionFixture : IDisposable
     private readonly TestDatabase original;
     private readonly List<ZoneTreeStore> opened = [];
     internal SampleChunkRetentionClock Clock { get; } = new(SampleChunkCanonicalFixture.Start);
-    internal ZoneTreeStore Store { get; private set; }
-    internal DatabaseEngine Owner { get; private set; }
+    internal ZoneTreeStore Store
+    {
+        get; private set;
+    }
+    internal DatabaseEngine Owner
+    {
+        get; private set;
+    }
     internal PartitionRef Partition => original.Partition;
     internal Guid WindowId { get; } = Guid.NewGuid();
     internal List<(ReplicatedOperation Operation, OperationResult Result)> Outcomes { get; } = [];
@@ -29,7 +35,9 @@ internal sealed class SampleChunkPartialRetentionFixture : IDisposable
         Owner = original.Database;
         opened.Add(Store);
         try
-        { SampleAggregateTestData.Configure(original); }
+        {
+            SampleAggregateTestData.Configure(original);
+        }
         catch (Exception initiating)
         {
             var failures = new List<Exception> { initiating };
@@ -74,13 +82,17 @@ internal sealed class SampleChunkPartialRetentionFixture : IDisposable
     {
         var failures = new List<Exception>();
         for (var index = opened.Count - 1; index >= 0; index--)
-        { KeyLoad.Server.ServerFailureObserver.Observe(opened[index].Dispose, failures); }
+        {
+            KeyLoad.Server.ServerFailureObserver.Observe(opened[index].Dispose, failures);
+        }
         if (failures.Count == 0)
         {
             try
-            { original.Dispose(); }
-            catch (Exception failure) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
-            catch (Exception failure) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
+            {
+                original.Dispose();
+            }
+            catch (Exception failure) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
+            catch (Exception failure) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
         }
         KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }

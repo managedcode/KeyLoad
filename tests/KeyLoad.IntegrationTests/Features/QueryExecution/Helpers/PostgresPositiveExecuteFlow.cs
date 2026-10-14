@@ -20,7 +20,9 @@ internal static class PostgresPositiveExecuteFlow
                     for (var cold = PostgresRf3Protocol.FirstColumn; cold < PostgresPositiveExecuteProtocol.ColdCuts; cold++)
                     {
                         using (var deadline = McpCallerDeadline.Create())
-                        { await ModelSqlRf3Cold.RunAsync(fixture, deadline.Token); }
+                        {
+                            await ModelSqlRf3Cold.RunAsync(fixture, deadline.Token);
+                        }
                         await PostgresPositiveExecuteWave.RunAsync(fixture, selection, state, controls: false);
                     }
                 }

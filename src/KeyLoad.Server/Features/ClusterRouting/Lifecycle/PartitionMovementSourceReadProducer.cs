@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 using Microsoft.Extensions.Options;
 
@@ -46,9 +46,18 @@ internal static class PartitionMovementSourceReadProducer
             }, failures);
         }, failures);
         if (session is not null)
-        { ServerFailureObserver.Observe(() => session.DisposeAsync().AsTask().GetAwaiter().GetResult(), failures); }
+        {
+            ServerFailureObserver.Observe(() => session.DisposeAsync().AsTask().GetAwaiter().GetResult(), failures);
+        }
         if (retainedWork is not null)
-        { ServerFailureObserver.Observe(retainedWork.Dispose, failures); }
-        return (completed, failures.Count switch { PartitionMovementProtocol.NoFailures => null, PartitionMovementProtocol.SingleFailure => failures[PartitionMovementProtocol.FirstFailureIndex], _ => new AggregateException(failures) });
+        {
+            ServerFailureObserver.Observe(retainedWork.Dispose, failures);
+        }
+        return (completed, failures.Count switch
+        {
+            PartitionMovementProtocol.NoFailures => null,
+            PartitionMovementProtocol.SingleFailure => failures[PartitionMovementProtocol.FirstFailureIndex],
+            _ => new AggregateException(failures)
+        });
     }
 }

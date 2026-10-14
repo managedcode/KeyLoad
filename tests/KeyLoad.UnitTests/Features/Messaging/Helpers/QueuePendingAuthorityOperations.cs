@@ -38,7 +38,9 @@ internal static class QueuePendingAuthorityOperations
         => store.Commit((tx, _) =>
         {
             if (fault == QueuePendingAuthorityFault.MissingMarker)
-            { tx.Delete(state.MarkerKey); }
+            {
+                tx.Delete(state.MarkerKey);
+            }
             else
             {
                 tx.PutRecord(state.MarkerKey, new QueuePendingDeadLetterReference(QueueLifecycleTestProtocol.Pending, 2,

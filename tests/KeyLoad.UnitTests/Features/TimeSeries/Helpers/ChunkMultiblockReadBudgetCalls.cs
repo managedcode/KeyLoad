@@ -6,7 +6,10 @@ namespace KeyLoad.UnitTests.Features.TimeSeries;
 internal static class ChunkMultiblockReadBudgetCalls
 {
     internal static ReadExecutionBudget Budget(ChunkSelectedIntegrityFixture fixture, long maximum)
-        => new(UnitExecutionOptions.DatabaseLimits(new() { MaxQueryReadBytes = checked((int)maximum) }),
+        => new(UnitExecutionOptions.DatabaseLimits(new()
+        {
+            MaxQueryReadBytes = checked((int)maximum)
+        }),
             fixture.Owner.EvaluationClock);
 
     internal static SampleRecord[] Read(ChunkSelectedIntegrityFixture fixture, ReadExecutionBudget budget)

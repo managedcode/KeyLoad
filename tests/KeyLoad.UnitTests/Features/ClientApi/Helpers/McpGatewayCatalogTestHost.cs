@@ -19,7 +19,10 @@ internal sealed class McpGatewayCatalogTestHost : IAsyncDisposable
             services.GetRequiredService<IHttpContextAccessor>(), ExecutionOptions);
     }
 
-    internal McpGatewayCatalogOwner Owner { get; }
+    internal McpGatewayCatalogOwner Owner
+    {
+        get;
+    }
     internal IOptions<McpExecutionOptions> ExecutionOptions { get; } = UnitMcpOptions.Execution();
 
     internal static McpGatewayCatalogTestHost Create()

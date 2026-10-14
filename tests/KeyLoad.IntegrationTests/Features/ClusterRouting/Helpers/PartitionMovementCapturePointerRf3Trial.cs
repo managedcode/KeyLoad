@@ -21,9 +21,13 @@ internal static class PartitionMovementCapturePointerRf3Trial
             await ExecuteAsync(wave, seed, fault, caller.Token).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
         if (seed is { } calls)
-        { await ServerFailureObserver.ObserveAsync(() => calls.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => calls.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         if (wave is { } resources)
-        { await ServerFailureObserver.ObserveAsync(() => resources.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => resources.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
@@ -76,7 +80,10 @@ internal static class PartitionMovementCapturePointerRf3Trial
 
     private static async Task RefuseAsync(PartitionMovementPublicParentRf3Seed seed, CancellationToken cancellationToken)
     {
-        var resume = seed.FirstRequest with { Mode = PartitionMoveMode.Resume };
+        var resume = seed.FirstRequest with
+        {
+            Mode = PartitionMoveMode.Resume
+        };
         var refused = await seed.Source.MovePartitionAsync(resume, cancellationToken).ConfigureAwait(false);
         await Assert.That(refused.IsFailed).IsTrue();
         await Assert.That(refused.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.RecoveryRequired));
@@ -87,7 +94,10 @@ internal static class PartitionMovementCapturePointerRf3Trial
     private static async Task HealthyAsync(TwoRf3MembershipWave wave, PartitionMovementPublicParentRf3Seed seed,
         CancellationToken cancellationToken)
     {
-        var resume = seed.FirstRequest with { Mode = PartitionMoveMode.Resume };
+        var resume = seed.FirstRequest with
+        {
+            Mode = PartitionMoveMode.Resume
+        };
         var terminal = await McpCallerAssertions.SdkSuccessAsync(await seed.Source.MovePartitionAsync(resume,
             cancellationToken).ConfigureAwait(false));
         await PartitionMovementPublicParentRf3Scenario.RequireTerminalAsync(seed, seed.FirstRequest, seed.OriginalPlacement,

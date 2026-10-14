@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using ModelContextProtocol;
 using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;
@@ -26,7 +26,9 @@ internal sealed class EventFeedTailMcpProgressOwner : IDisposable
         this.request = request;
         this.progressToken = progressToken;
         if (context.Features.Get<EventFeedTailMcpProgressOwner>() is not null)
-        { throw Errors.Fail(ErrorCode.Validation, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, Invalid);
+        }
         context.Features.Set(this);
     }
 
@@ -45,7 +47,9 @@ internal sealed class EventFeedTailMcpProgressOwner : IDisposable
         ObjectDisposedException.ThrowIf(disposed, this);
         cancellationToken.ThrowIfCancellationRequested();
         if (frame.EventFeedTail is not { Version: CurrentProgressVersion } progress || ++delivered > limit)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         var length = EventFeedTailJsonMeasurement.Measure(progress, state.MaximumReplyBytes, JsonDefaults.Options);
         using var admission = state.ReserveProgress(checked((int)length), cancellationToken);
         var bytes = McpBoundedJson.Serialize(progress, checked((int)length));
@@ -64,9 +68,13 @@ internal sealed class EventFeedTailMcpProgressOwner : IDisposable
     public void Dispose()
     {
         if (disposed)
-        { return; }
+        {
+            return;
+        }
         disposed = true;
         if (ReferenceEquals(context.Features.Get<EventFeedTailMcpProgressOwner>(), this))
-        { context.Features.Set<EventFeedTailMcpProgressOwner>(null); }
+        {
+            context.Features.Set<EventFeedTailMcpProgressOwner>(null);
+        }
     }
 }

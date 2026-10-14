@@ -32,7 +32,9 @@ internal static class EventAppendRf3Authorization
                     await EventAppendRf3Assertions.PageAsync(reader, official, scenario, expected, original, token));
             }, failures).ConfigureAwait(false);
             if (official is { } owned)
-            { await ServerFailureObserver.ObserveAsync(() => owned.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+            {
+                await ServerFailureObserver.ObserveAsync(() => owned.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+            }
         }, failures).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny(failures);
     }

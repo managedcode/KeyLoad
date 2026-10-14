@@ -23,12 +23,16 @@ internal static class TenantCapacityPlacementRf3CompleteRosterAssertions
         await Assert.That(request.Partitions.Length).IsEqualTo(OmittedSelectionCount);
         await RefuseAsync(first, request, token);
         foreach (var seed in seeds)
-        { await seed.VerifyAsync(token); }
+        {
+            await seed.VerifyAsync(token);
+        }
         await TenantCapacityPlacementRf3MultiCold.RunAsync(wave, seeds, state,
             seeds.Select(seed => seed.FirstRequest).ToArray(), null, null, null, token);
         await RefuseAsync(first, request, token);
         foreach (var seed in seeds)
-        { await seed.VerifyAsync(token); }
+        {
+            await seed.VerifyAsync(token);
+        }
     }
 
     private static async Task RefuseAsync(PartitionMovementPublicParentRf3Seed first,
@@ -38,7 +42,10 @@ internal static class TenantCapacityPlacementRf3CompleteRosterAssertions
         await TenantCapacityPlacementRf3Assertions.RefusalAsync(sdk, ErrorCode.OwnershipLost);
         await SqlRf3Protocol.EqualAsync(Errors.Problem(ErrorCode.OwnershipLost,
             TenantPlacementPolicyProtocol.ScopeMismatch), sdk.Problem!);
-        var mcp = await first.Official.CallAsync(TenantPlacementPublicProtocol.PlanTool, new { request }, token);
+        var mcp = await first.Official.CallAsync(TenantPlacementPublicProtocol.PlanTool, new
+        {
+            request
+        }, token);
         await McpCallerAssertions.ErrorAsync(mcp, ErrorCode.OwnershipLost, dispatched: true);
         await Assert.That(mcp.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
             .GetProperty(McpCallerProtocol.ProblemDetail).GetString()).IsEqualTo(McpScopeDetail);

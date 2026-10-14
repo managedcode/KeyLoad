@@ -35,23 +35,33 @@ internal sealed class RequestCqrsCohortCheckpointScenario(bool failNativeFlush, 
         var verified = journal.Database.Store.VerifySnapshot(Path.Combine(journal.Configuration.Directory,
             ReplicaProtocol.SnapshotDirectory, snapshot.FileName));
         if (verified.AppliedPosition != InitialCut || verified.Incarnation != journal.Configuration.Incarnation)
-        { throw new InvalidOperationException("The genuine initial checkpoint fingerprint is invalid."); }
+        {
+            throw new InvalidOperationException("The genuine initial checkpoint fingerprint is invalid.");
+        }
         journal.Materializer.Commit(FollowingCut);
         journal.Materializer.WaitForApplyAsync(FollowingCut, linked.Token).GetAwaiter().GetResult();
         var entries = journal.Log.Read(FollowingCut, journal.Configuration.MaxAppendEntries, journal.Configuration.MaxAppendBytes);
         if (!prepared.TryAdd(voter, (snapshot, global::KeyLoad.NativeSerialization.Serialize(entries))))
-        { throw new InvalidOperationException("The native checkpoint owner was prepared twice."); }
+        {
+            throw new InvalidOperationException("The native checkpoint owner was prepared twice.");
+        }
         if (voter == RequestCqrsCohortScenario.LocalVoter)
-        { Volatile.Write(ref armed, 1); }
+        {
+            Volatile.Write(ref armed, 1);
+        }
     }
 
     private void Observe(CommitStage stage, long _, int _1)
     {
         if (stage != CommitStage.SnapshotFlushed || Interlocked.Exchange(ref armed, 0) == 0)
-        { return; }
+        {
+            return;
+        }
         entered.TrySetResult();
         released.Task.GetAwaiter().GetResult();
         if (failNativeFlush)
-        { throw new IOException(NativeFailure); }
+        {
+            throw new IOException(NativeFailure);
+        }
     }
 }

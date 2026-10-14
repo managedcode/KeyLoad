@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 using KeyLoad.Query;
 using KeyLoad.Server;
 using KeyLoad.Storage;
@@ -30,9 +30,13 @@ internal static class Bm25InvalidationDependencyFlow
             await ServerFailureObserver.ObserveAsync(() => ExecuteAsync(database), failures);
         }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
@@ -92,7 +96,10 @@ internal static class Bm25InvalidationDependencyFlow
         await Assert.That(ConfigurePrincipal(database, denied).PolicyEpoch).IsEqualTo(2L);
         await Assert.That(database.Database.GetOutboxStatus(Root, database.Partition).Head.Tail).IsEqualTo(tail);
         await DeniedAsync(database, search);
-        var repaired = principal with { PolicyEpoch = 3 };
+        var repaired = principal with
+        {
+            PolicyEpoch = 3
+        };
         await Assert.That(ConfigurePrincipal(database, repaired).PolicyEpoch).IsEqualTo(3L);
         await HealthyAsync(database, search);
         await ResourcePolicyAsync(database, search, repaired, tail);
@@ -110,11 +117,17 @@ internal static class Bm25InvalidationDependencyFlow
         };
         var definition = database.Submit(OperationKind.ConfigureResource,
             new ConfigureResourceRequest(database.Partition.TenantId, database.Partition.DatabaseId, replacement)
-            { ExpectedSchemaVersion = current.SchemaVersion }).Get<ResourceDefinition>();
+            {
+                ExpectedSchemaVersion = current.SchemaVersion
+            }).Get<ResourceDefinition>();
         await Assert.That(definition.SchemaVersion).IsEqualTo(current.SchemaVersion + 1);
         await Assert.That(database.Database.GetOutboxStatus(Root, database.Partition).Head.Tail).IsEqualTo(tail);
         await DeniedAsync(database, search);
-        var repaired = principal with { PolicyEpoch = 4, FieldGrants = [ReadGrant, UseGrant] };
+        var repaired = principal with
+        {
+            PolicyEpoch = 4,
+            FieldGrants = [ReadGrant, UseGrant]
+        };
         await Assert.That(ConfigurePrincipal(database, repaired).PolicyEpoch).IsEqualTo(4L);
         await HealthyAsync(database, search);
         await Assert.That(database.Database.GetOutboxStatus(Root, database.Partition).Head.Tail).IsEqualTo(tail);
@@ -163,7 +176,9 @@ internal static class Bm25InvalidationDependencyFlow
         {
             var page = budget.Scan(view, [], UnitExecutionOptions.DatabaseLimits().Value.MaxScanRecords);
             if (page.HasMore)
-            { throw new InvalidOperationException("The full native dependency image exceeded its original scan budget."); }
+            {
+                throw new InvalidOperationException("The full native dependency image exceeded its original scan budget.");
+            }
             var rows = page.Records.Select(row =>
                 Convert.ToHexString(row.Key.Span) + ":" + Convert.ToHexString(row.Value.Span)).ToArray();
             return (database.Store.Identity.NodeId, database.Store.Identity.Incarnation,

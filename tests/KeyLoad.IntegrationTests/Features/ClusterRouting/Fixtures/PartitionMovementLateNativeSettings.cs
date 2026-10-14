@@ -53,7 +53,9 @@ internal sealed class PartitionMovementLateNativeSettings(ControlledPartitionMov
         Set(PartitionMovementLateNativeProtocol.RemotePartitionQueries, Enabled);
         AddScope(args, source);
         for (var voter = FirstVoter; voter < GroupSize; voter++)
-        { Set(PartitionMovementLateNativeProtocol.Peers + voter.ToString(System.Globalization.CultureInfo.InvariantCulture), Origin((source ? FirstVoter : GroupSize) + voter)); }
+        {
+            Set(PartitionMovementLateNativeProtocol.Peers + voter.ToString(System.Globalization.CultureInfo.InvariantCulture), Origin((source ? FirstVoter : GroupSize) + voter));
+        }
         return args.ToArray();
     }
 

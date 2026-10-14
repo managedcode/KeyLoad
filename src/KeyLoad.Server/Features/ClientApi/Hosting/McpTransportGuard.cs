@@ -22,13 +22,21 @@ internal static class McpTransportGuard
         bounds.Validate();
         var revision = headers[McpTransportProtocol.RevisionHeader];
         if (revision.Count != EmptyRevisionCount)
-        { throw InvalidTransport(McpTransportStage.ProtocolRevisionCount); }
+        {
+            throw InvalidTransport(McpTransportStage.ProtocolRevisionCount);
+        }
         if (revision[IndexEmptyCount] != McpTransportProtocol.Revision)
-        { throw InvalidTransport(McpTransportStage.ProtocolRevisionValue); }
+        {
+            throw InvalidTransport(McpTransportStage.ProtocolRevisionValue);
+        }
         if (headers.ContainsKey(McpTransportProtocol.SessionHeader))
-        { throw InvalidTransport(McpTransportStage.SessionHeaderPresence); }
+        {
+            throw InvalidTransport(McpTransportStage.SessionHeaderPresence);
+        }
         if (headers.ContainsKey(McpTransportProtocol.LastEventHeader))
-        { throw InvalidTransport(McpTransportStage.LastEventHeaderPresence); }
+        {
+            throw InvalidTransport(McpTransportStage.LastEventHeaderPresence);
+        }
         return new(ReadRoutingHeader(headers, McpTransportProtocol.MethodHeader, bounds.MaximumTransportMethodCharacters,
                 McpTransportStage.MethodHeaderShape, McpTransportStage.MethodHeaderEncoding),
             ReadTargetHeader(headers, bounds.MaximumTransportNameCharacters));
@@ -43,21 +51,31 @@ internal static class McpTransportGuard
         var root = document.RootElement;
         var hasMethod = root.TryGetProperty(McpTransportProtocol.Method, out var method);
         if (hasMethod && method.ValueKind != JsonValueKind.String)
-        { throw InvalidTransport(McpTransportStage.BodyMethodShape); }
+        {
+            throw InvalidTransport(McpTransportStage.BodyMethodShape);
+        }
         if (headers.Method is { } expectedMethod && (!hasMethod || !method.ValueEquals(expectedMethod)))
-        { throw InvalidTransport(McpTransportStage.BodyMethodMismatch); }
+        {
+            throw InvalidTransport(McpTransportStage.BodyMethodMismatch);
+        }
         if (!root.TryGetProperty(McpTransportProtocol.Parameters, out var parameters)
             || parameters.ValueKind != JsonValueKind.Object)
         {
             if (headers.Name is not null && hasMethod && TargetField(method) is not null)
-            { throw InvalidTransport(McpTransportStage.MissingTarget); }
+            {
+                throw InvalidTransport(McpTransportStage.MissingTarget);
+            }
             return;
         }
         CheckRevision(parameters, McpTransportProtocol.RevisionField, McpTransportStage.ParameterRevision);
         if (parameters.TryGetProperty(McpTransportProtocol.Meta, out var meta) && meta.ValueKind == JsonValueKind.Object)
-        { CheckRevision(meta, MetaKeys.ProtocolVersion, McpTransportStage.MetadataRevision); }
+        {
+            CheckRevision(meta, MetaKeys.ProtocolVersion, McpTransportStage.MetadataRevision);
+        }
         if (headers.Name is { } expectedName && hasMethod)
-        { CheckTarget(parameters, method, expectedName); }
+        {
+            CheckTarget(parameters, method, expectedName);
+        }
     }
 
     private static string? ReadRoutingHeader(IHeaderDictionary headers, string name, int maximumCharacters,
@@ -71,16 +89,24 @@ internal static class McpTransportGuard
         const char ReadRoutingHeaderCharacterToken = '~';
 
         if (!headers.TryGetValue(name, out var values))
-        { return null; }
+        {
+            return null;
+        }
         if (values.Count != EmptyValuesCount || values[IndexEmptyCount] is not { } value)
-        { throw InvalidTransport(shapeStage); }
+        {
+            throw InvalidTransport(shapeStage);
+        }
         var trimmed = value.Trim();
         if (trimmed.Length == EmptyTrimmedLength || trimmed.Length > maximumCharacters)
-        { throw InvalidTransport(shapeStage); }
+        {
+            throw InvalidTransport(shapeStage);
+        }
         foreach (var character in trimmed)
         {
             if (character != TabCharacter && (character < SpaceCharacter || character > ReadRoutingHeaderCharacterToken))
-            { throw InvalidTransport(encodingStage); }
+            {
+                throw InvalidTransport(encodingStage);
+            }
         }
         return trimmed;
     }
@@ -89,7 +115,9 @@ internal static class McpTransportGuard
     {
         if (fields.TryGetProperty(name, out var revision)
             && (revision.ValueKind != JsonValueKind.String || !revision.ValueEquals(McpTransportProtocol.Revision)))
-        { throw InvalidTransport(stage); }
+        {
+            throw InvalidTransport(stage);
+        }
     }
 
     private static string? ReadTargetHeader(IHeaderDictionary headers, int maximumCharacters)
@@ -102,17 +130,25 @@ internal static class McpTransportGuard
         var encoded = ReadRoutingHeader(headers, McpTransportProtocol.NameHeader, maximumCharacters,
             McpTransportStage.NameHeaderShape, McpTransportStage.NameHeaderEncoding);
         if (encoded is null)
-        { return null; }
+        {
+            return null;
+        }
         if (encoded.StartsWith(McpTransportProtocol.EncodedHeaderPrefix, StringComparison.Ordinal)
             && !encoded.EndsWith(McpTransportProtocol.EncodedHeaderSuffix, StringComparison.Ordinal))
-        { throw InvalidTransport(McpTransportStage.NameHeaderEncoding); }
+        {
+            throw InvalidTransport(McpTransportStage.NameHeaderEncoding);
+        }
         var decoded = McpHeaderEncoder.DecodeValue(encoded);
         if (decoded is null || decoded.Length == EmptyDecodedLength || decoded.Length > maximumCharacters)
-        { throw InvalidTransport(McpTransportStage.NameHeaderEncoding); }
+        {
+            throw InvalidTransport(McpTransportStage.NameHeaderEncoding);
+        }
         foreach (var character in decoded)
         {
             if (character != TabCharacter && (character < SpaceCharacter || character == ReadTargetHeaderCharacterToken))
-            { throw InvalidTransport(McpTransportStage.NameHeaderEncoding); }
+            {
+                throw InvalidTransport(McpTransportStage.NameHeaderEncoding);
+            }
         }
         return decoded;
     }
@@ -121,11 +157,17 @@ internal static class McpTransportGuard
     {
         var name = TargetField(method);
         if (name is null)
-        { return; }
+        {
+            return;
+        }
         if (!parameters.TryGetProperty(name, out var target))
-        { throw InvalidTransport(McpTransportStage.MissingTarget); }
+        {
+            throw InvalidTransport(McpTransportStage.MissingTarget);
+        }
         if (target.ValueKind != JsonValueKind.String || !target.ValueEquals(expectedName))
-        { throw InvalidTransport(McpTransportStage.TargetMismatch); }
+        {
+            throw InvalidTransport(McpTransportStage.TargetMismatch);
+        }
     }
 
     private static string? TargetField(JsonElement method) => method.ValueEquals(RequestMethods.ResourcesRead) ? McpTransportProtocol.Uri

@@ -16,7 +16,9 @@ internal static class CheckpointFooterRepairFault
             var header = original.AsSpan(offset, ZoneTreePersistenceFormat.HeaderLength);
             var length = BinaryPrimitives.ReadInt32LittleEndian(header[ZoneTreePersistenceFormat.PayloadLengthOffset..]);
             if (length < 0 || length > original.Length - offset - ZoneTreePersistenceFormat.HeaderLength)
-            { throw new InvalidOperationException(MissingFooter); }
+            {
+                throw new InvalidOperationException(MissingFooter);
+            }
             var end = checked(offset + ZoneTreePersistenceFormat.HeaderLength + length);
             if (BinaryPrimitives.ReadUInt64LittleEndian(header) == ZoneTreePersistenceFormat.CheckpointEndMagic)
             {
@@ -24,7 +26,10 @@ internal static class CheckpointFooterRepairFault
                     offset + ZoneTreePersistenceFormat.HeaderLength, length));
                 var sequence = BinaryPrimitives.ReadInt64LittleEndian(header[ZoneTreePersistenceFormat.SequenceOffset..]);
                 var replacement = WalFileFixture.CreateFrame(NativeSerialization.Serialize(
-                    footer with { Records = checked(footer.Records + 1L) }), sequence,
+                    footer with
+                    {
+                        Records = checked(footer.Records + 1L)
+                    }), sequence,
                     ZoneTreePersistenceFormat.CheckpointEndMagic);
                 return [.. original[..offset], .. replacement, .. original[end..]];
             }

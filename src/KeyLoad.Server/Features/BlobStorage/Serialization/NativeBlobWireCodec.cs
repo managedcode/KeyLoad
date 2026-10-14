@@ -25,8 +25,8 @@ internal sealed class NativeBlobWireCodec(IOptions<RequestProbeExecutionOptions>
             using var writer = new Utf8JsonWriter(bounded);
             ServerFailureObserver.Observe(() => { JsonSerializer.Serialize(writer, value, info); }, failures);
         }
-        catch (Exception cleanup) when (KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
-        catch (Exception cleanup) when (!KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
+        catch (Exception cleanup) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
+        catch (Exception cleanup) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
         ServerFailureObserver.ThrowIfAny(failures);
         return output.ToArray();
     }
@@ -34,10 +34,14 @@ internal sealed class NativeBlobWireCodec(IOptions<RequestProbeExecutionOptions>
     internal T Read<T>(ReadOnlySpan<byte> bytes)
     {
         if (bytes.IsEmpty || bytes.Length > limits.Value.MaximumRecordBytes)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         var value = JsonSerializer.Deserialize(bytes, Type<T>()) ?? throw Invalid();
         if (!bytes.SequenceEqual(Encode(value)))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         return value;
     }
 

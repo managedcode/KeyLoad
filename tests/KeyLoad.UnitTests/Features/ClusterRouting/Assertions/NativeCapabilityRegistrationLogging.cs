@@ -18,7 +18,9 @@ internal static class NativeCapabilityRegistrationLogging
             builder.AddContainer("marker-node-" + index, image.Reference)
                 .WithHttpEndpoint(targetPort: TwoRf3ProfileProtocol.HttpPort, name: "http", isProxied: false)).ToArray();
         foreach (var resource in resources)
-        { ClusterResourceSettings.Apply(builder, resource, null); }
+        {
+            ClusterResourceSettings.Apply(builder, resource, null);
+        }
         profile?.Apply(resources);
         var registerOwners = TwoRf3Profile.ReadRegistration(builder.Configuration);
         TwoRf3RemoteReadResources.Configure(KeyLoad.AppHost.Hosting.AppHostOptionsRegistration.Get(builder).Control,
@@ -29,12 +31,18 @@ internal static class NativeCapabilityRegistrationLogging
             var context = new EnvironmentCallbackContext(builder.ExecutionContext,
                 resources[index].Resource, environment);
             foreach (var callback in resources[index].Resource.Annotations.OfType<EnvironmentCallbackAnnotation>())
-            { await callback.Callback(context).ConfigureAwait(false); }
+            {
+                await callback.Callback(context).ConfigureAwait(false);
+            }
             await Assert.That(environment[DefaultKey]).IsEqualTo("Warning");
             if (registerOwners && index < 3)
-            { await Assert.That(environment[WorkerKey]).IsEqualTo("Information"); }
+            {
+                await Assert.That(environment[WorkerKey]).IsEqualTo("Information");
+            }
             else
-            { await Assert.That(environment.ContainsKey(WorkerKey)).IsFalse(); }
+            {
+                await Assert.That(environment.ContainsKey(WorkerKey)).IsFalse();
+            }
         }
     }
 }

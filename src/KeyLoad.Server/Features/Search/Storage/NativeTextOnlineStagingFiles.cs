@@ -31,7 +31,9 @@ internal static class NativeTextOnlineStagingFiles
         session.Budget.ChargeBytes(NativeSerialization.Measure(actual));
         session.Budget.ChargeBytes(NativeSerialization.Measure(expected));
         if (!NativeSerialization.Serialize(actual).AsSpan().SequenceEqual(NativeSerialization.Serialize(expected)))
-        { throw NativeTextErrors.Mismatch(); }
+        {
+            throw NativeTextErrors.Mismatch();
+        }
         session.Budget.Check();
     }
 
@@ -52,7 +54,9 @@ internal static class NativeTextOnlineStagingFiles
         budget.ChargeBytes(NativeSerialization.Measure(staged));
         budget.ChargeBytes(NativeSerialization.Measure(expected));
         if (!NativeSerialization.Serialize(staged).AsSpan().SequenceEqual(NativeSerialization.Serialize(expected)))
-        { throw NativeTextErrors.Mismatch(); }
+        {
+            throw NativeTextErrors.Mismatch();
+        }
         budget.Check();
     }
 

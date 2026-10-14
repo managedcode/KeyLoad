@@ -37,10 +37,18 @@ internal static class BlobObjectKeyLifetimePublicTrial
     private static async Task<BlobObjectKeyLifetimePublicState[]> ConfigureAsync(RequestCqrsRf3Callers callers, CancellationToken token)
     {
         var first = new PartitionRef("blob-key-slot-" + Guid.NewGuid().ToString("N"), "public-key-slot", "domain", FirstPartitionKey);
-        var second = first with { PartitionKey = "second" };
+        var second = first with
+        {
+            PartitionKey = "second"
+        };
         var a = new ResourceDefinition("resource-a", ResourceKind.BlobStore, first.TransactionDomainId)
-        { BlobPolicy = new() { MaxBlobBytes = 1L, MaxReservedBytes = 1L, MaxObjectKeys = 1, MaxVersions = 3, MaxUploads = 3 } };
-        var b = a with { Name = "resource-b" };
+        {
+            BlobPolicy = new() { MaxBlobBytes = 1L, MaxReservedBytes = 1L, MaxObjectKeys = 1, MaxVersions = 3, MaxUploads = 3 }
+        };
+        var b = a with
+        {
+            Name = "resource-b"
+        };
         await SqlRf3Protocol.EqualAsync(a, await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.ConfigureResourceAsync(Guid.NewGuid(), new(first.TenantId, first.DatabaseId, a), token)));
         await SqlRf3Protocol.EqualAsync(b, await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.ConfigureResourceAsync(Guid.NewGuid(), new(first.TenantId, first.DatabaseId, b), token)));
         return [new(new(first, a.Name, "first-empty")), new(new(second, a.Name, "second-empty")), new(new(second, b.Name, "independent-empty")), new(new(first, a.Name, "first-empty"))];

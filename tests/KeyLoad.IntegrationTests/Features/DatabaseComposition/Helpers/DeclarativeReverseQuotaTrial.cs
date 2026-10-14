@@ -42,7 +42,14 @@ internal static class DeclarativeReverseQuotaTrial
             await callers.Mcp.CallAsync(McpCallerTools.MessagesComplete, ack, token))).Value;
         await ReceiptAsync(state.Holder, state.HolderReceipt, "enqueue", 1L);
         await ReceiptAsync(new(ack.CommandId, request.Lane.Partition, []), receipt, "Ack", 3L);
-        return state with { ClaimRequest = request, Claim = claim, ClaimImage = global::System.Text.Json.JsonSerializer.SerializeToElement(claim, JsonDefaults.Options), HolderAck = ack, HolderAckReceipt = receipt };
+        return state with
+        {
+            ClaimRequest = request,
+            Claim = claim,
+            ClaimImage = global::System.Text.Json.JsonSerializer.SerializeToElement(claim, JsonDefaults.Options),
+            HolderAck = ack,
+            HolderAckReceipt = receipt
+        };
     }
 
     internal static async Task HistoryAsync(RequestCqrsRf3Callers callers,

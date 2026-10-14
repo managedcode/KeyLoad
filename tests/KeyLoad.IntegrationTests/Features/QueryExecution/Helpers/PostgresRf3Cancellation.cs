@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.IntegrationTests.Features.QueryExecution;
@@ -49,15 +49,21 @@ internal static class PostgresRf3Cancellation
                     var disposed = await controls.WaitForMarkerAsync(arm, RequestCqrsProbePhase.ProducerDisposed,
                         RequestCqrsProbeOutcome.Observed, discovery, token);
                     await SqlRf3Protocol.EqualAsync(held with
-                    { Outcome = cancelled.Outcome }, cancelled);
+                    {
+                        Outcome = cancelled.Outcome
+                    }, cancelled);
                     await SqlRf3Protocol.EqualAsync(held with
-                    { Phase = RequestCqrsProbePhase.ProducerDisposed }, disposed);
+                    {
+                        Phase = RequestCqrsProbePhase.ProducerDisposed
+                    }, disposed);
                     await controls.RetireArmAsync(arm, token);
                     await global::TUnit.Assertions.Assert.That(await PostgresRf3Assertions.ImageAsync(root, token)).IsEqualTo(before);
                     await PostgresRf3Assertions.PageAsync(state,
                         await wire.ExecuteAsync<QueryPage>(state.Sql, [], prepared: true, token));
                     if (sql is not null)
-                    { await SqlTableRf3Pages.PageAsync(await wire.ExecuteAsync<QueryPage>(sql, [], prepared: true, token)); }
+                    {
+                        await SqlTableRf3Pages.PageAsync(await wire.ExecuteAsync<QueryPage>(sql, [], prepared: true, token));
+                    }
                 }, operationFailures);
                 if (operationFailures.Count != PostgresRf3Protocol.FirstColumn && !controls.ArmFor(arm).Retired)
                 {
@@ -65,7 +71,9 @@ internal static class PostgresRf3Cancellation
                         originalJoined, operationFailures);
                 }
                 if (operationFailures.Count != PostgresRf3Protocol.FirstColumn)
-                { selection.RetainEvidence(); }
+                {
+                    selection.RetainEvidence();
+                }
                 global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(operationFailures);
             }, failures);
         }, failures);
@@ -85,7 +93,12 @@ internal static class PostgresRf3Cancellation
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {
                 try
-                { if (!originalJoined) { await original; } }
+                {
+                    if (!originalJoined)
+                    {
+                        await original;
+                    }
+                }
                 catch (OperationCanceledException error) when (error.CancellationToken == originalCancellation.Token) { }
             }, operationFailures);
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
@@ -93,7 +106,9 @@ internal static class PostgresRf3Cancellation
                 _ = await controls.WaitForMarkerAsync(arm, RequestCqrsProbePhase.ProducerDisposed,
                     RequestCqrsProbeOutcome.Observed, discovery, cleanup.Token);
                 if (!controls.ArmFor(arm).Settled)
-                { controls.JoinDisposedGate(arm, original); }
+                {
+                    controls.JoinDisposedGate(arm, original);
+                }
                 await controls.RetireArmAsync(arm, cleanup.Token);
             }, operationFailures);
         }, operationFailures);

@@ -25,33 +25,50 @@ internal static class AdminBrowserLifecycleAssertions
     private static readonly TimeSpan PollSuspensionObservation = TimeSpan.FromSeconds(11);
 
     internal static async Task BeginNetworkAsync(AdminBrowserCdp browser, CancellationToken cancellationToken)
-        => await browser.CommandAsync(EnableNetwork, new { }, cancellationToken);
+        => await browser.CommandAsync(EnableNetwork, new
+        {
+        }, cancellationToken);
 
     internal static async Task VerifyRefreshAndMotionAsync(AdminBrowserCdp browser, CancellationToken cancellationToken)
     {
         await browser.EvaluateAsync(RefreshBurst, cancellationToken);
         await browser.WaitAsync(ObservationReady, cancellationToken);
         await Assert.That(browser.Network.MaximumConcurrent).IsEqualTo(1);
-        await browser.CommandAsync(EmulateMedia, new { features = new[] { new { name = ReducedMotion, value = Reduce } } }, cancellationToken);
+        await browser.CommandAsync(EmulateMedia, new
+        {
+            features = new[] { new { name = ReducedMotion, value = Reduce } }
+        }, cancellationToken);
         await Assert.That((await browser.EvaluateAsync(MotionDisabled, cancellationToken)).GetBoolean()).IsTrue();
     }
 
     internal static async Task VerifyBackgroundSuspensionAsync(AdminBrowserCdp browser, CancellationToken cancellationToken)
     {
-        var original = await browser.CommandAsync(GetTarget, new { }, cancellationToken);
+        var original = await browser.CommandAsync(GetTarget, new
+        {
+        }, cancellationToken);
         var originalId = original.GetProperty(TargetInfo).GetProperty(TargetId).GetString();
-        var background = await browser.CommandAsync(CreateTarget, new { url = BlankPage, background = false }, cancellationToken);
+        var background = await browser.CommandAsync(CreateTarget, new
+        {
+            url = BlankPage,
+            background = false
+        }, cancellationToken);
         var foregroundId = background.GetProperty(TargetId).GetString();
         try
         {
-            await browser.CommandAsync(ActivateTarget, new { targetId = foregroundId }, cancellationToken);
+            await browser.CommandAsync(ActivateTarget, new
+            {
+                targetId = foregroundId
+            }, cancellationToken);
             await browser.WaitAsync(Hidden, cancellationToken);
             await browser.WaitForNetworkIdleAsync(cancellationToken);
             var before = (await browser.EvaluateAsync(ObservationText, cancellationToken)).GetString();
             await Task.Delay(PollSuspensionObservation, TimeProvider.System, cancellationToken);
             var after = (await browser.EvaluateAsync(ObservationText, cancellationToken)).GetString();
             await Assert.That(after).IsEqualTo(before);
-            await browser.CommandAsync(ActivateTarget, new { targetId = originalId }, cancellationToken);
+            await browser.CommandAsync(ActivateTarget, new
+            {
+                targetId = originalId
+            }, cancellationToken);
             await browser.WaitAsync(Visible, cancellationToken);
             await browser.WaitAsync(ObservationChanged.Replace("VALUE", JsonSerializer.Serialize(before), StringComparison.Ordinal), cancellationToken);
         }

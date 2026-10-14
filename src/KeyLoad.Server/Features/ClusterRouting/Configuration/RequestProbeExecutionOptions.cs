@@ -67,6 +67,8 @@ internal sealed class RequestProbeExecutionOptions
     internal void Validate()
     {
         if (!IsValid())
-        { throw new OptionsValidationException(SectionName, typeof(RequestProbeExecutionOptions), [ValidationMessage]); }
+        {
+            throw new OptionsValidationException(SectionName, typeof(RequestProbeExecutionOptions), [ValidationMessage]);
+        }
     }
 }

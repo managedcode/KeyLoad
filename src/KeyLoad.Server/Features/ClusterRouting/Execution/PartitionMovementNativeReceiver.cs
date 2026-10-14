@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
@@ -21,7 +21,7 @@ internal sealed class PartitionMovementNativeReceiver(PartitionMovementRuntime r
     {
         PartitionMovementGrainServiceReply? reply = null;
         var armed = observationObserver?.Begin(OriginalNonce(request), options.Value.PublicEndpoint);
-        var observation = armed is null ? null : new NativeObservation(armed);
+        var observation = armed is null ? null : new PartitionMovementNativeObservationState(armed);
         var entered = false;
         observation?.Enter(PartitionMovementNativeObservationStage.RuntimeAdmission);
         try
@@ -38,21 +38,27 @@ internal sealed class PartitionMovementNativeReceiver(PartitionMovementRuntime r
         {
             observation?.Fail(error, error.Code);
             if (entered && observation is { OperationCompleted: true })
-            { observation.Enter(PartitionMovementNativeObservationStage.RuntimeCompletion); }
+            {
+                observation.Enter(PartitionMovementNativeObservationStage.RuntimeCompletion);
+            }
             return Failure(request, false, error.Code);
         }
         catch (OperationCanceledException error)
         {
             observation?.Fail(error, ErrorCode.Cancelled);
             if (entered && observation is { OperationCompleted: true })
-            { observation.Enter(PartitionMovementNativeObservationStage.RuntimeCompletion); }
+            {
+                observation.Enter(PartitionMovementNativeObservationStage.RuntimeCompletion);
+            }
             return Failure(request, false, ErrorCode.Cancelled);
         }
         catch (Exception error)
         {
             observation?.Fail(error, null);
             if (entered && observation is { OperationCompleted: true })
-            { observation.Enter(PartitionMovementNativeObservationStage.RuntimeCompletion); }
+            {
+                observation.Enter(PartitionMovementNativeObservationStage.RuntimeCompletion);
+            }
             throw;
         }
         finally
@@ -66,7 +72,7 @@ internal sealed class PartitionMovementNativeReceiver(PartitionMovementRuntime r
         => request?.Nonce ?? Guid.Empty;
 
     private async Task<PartitionMovementGrainServiceReply> ExecuteOwnedAsync(PartitionMovementGrainServiceRequest request,
-        Action<Exception> observeFailure, NativeObservation? observation, CancellationToken token)
+        Action<Exception> observeFailure, PartitionMovementNativeObservationState? observation, CancellationToken token)
     {
         var authenticated = false;
         var dispatched = false;
@@ -118,9 +124,13 @@ internal sealed class PartitionMovementNativeReceiver(PartitionMovementRuntime r
         PartitionMovementNativeObservationStage? failureStage)
     {
         if (observation is null)
-        { return; }
+        {
+            return;
+        }
         try
-        { observation.Complete(error, authenticated, dispatched, original, secondary, failureStage); }
+        {
+            observation.Complete(error, authenticated, dispatched, original, secondary, failureStage);
+        }
         catch (Exception observationFailure)
         {
             if (original is not null)
@@ -144,12 +154,14 @@ internal sealed class PartitionMovementNativeReceiver(PartitionMovementRuntime r
         };
 
     private PartitionMovementGrainServiceReply Failure(PartitionMovementGrainServiceRequest? request, bool authenticated,
-        ErrorCode code, NativeObservation? observation = null)
+        ErrorCode code, PartitionMovementNativeObservationState? observation = null)
     {
         var reply = new PartitionMovementGrainServiceReply(ReadOnlyMemory<byte>.Empty, string.Empty, code,
             PartitionMovementProtocol.Unavailable, request?.Nonce ?? Guid.Empty, string.Empty);
         try
-        { return authenticated && request is not null ? SignOuter(reply, request) : reply; }
+        {
+            return authenticated && request is not null ? SignOuter(reply, request) : reply;
+        }
         catch (Exception)
         {
             observation?.Enter(PartitionMovementNativeObservationStage.OuterSigning);
@@ -159,36 +171,17 @@ internal sealed class PartitionMovementNativeReceiver(PartitionMovementRuntime r
 
     private PartitionMovementGrainServiceReply SignOuter(PartitionMovementGrainServiceReply reply, PartitionMovementGrainServiceRequest request)
     {
-        reply = reply with { Nonce = request.Nonce, SenderSignature = string.Empty };
+        reply = reply with
+        {
+            Nonce = request.Nonce,
+            SenderSignature = string.Empty
+        };
         using var mac = admission.CreateControlMac();
-        return reply with { SenderSignature = mac.SignNativeReply(reply) };
-    }
-    private sealed class NativeObservation(IPartitionMovementNativeObservation observer)
-    {
-        internal bool Authenticated { get; set; }
-        internal bool Dispatched { get; set; }
-        internal bool OperationCompleted { get; set; }
-        internal ErrorCode? Error { get; private set; }
-        internal Exception? Failure { get; private set; }
-        internal Exception? SecondaryFailure { get; private set; }
-        internal PartitionMovementNativeObservationStage? FailureStage { get; private set; }
-        private PartitionMovementNativeObservationStage stage;
-        internal void Enter(PartitionMovementNativeObservationStage value)
+        return reply with
         {
-            stage = value;
-            observer.Enter(value);
-        }
-        internal void Fail(Exception original, ErrorCode? code)
-        {
-            if (Failure is null)
-            {
-                Error = code;
-                Failure = original;
-                FailureStage = stage;
-            }
-            else if (!ReferenceEquals(Failure, original))
-            { SecondaryFailure ??= original; }
-        }
+            SenderSignature = mac.SignNativeReply(reply)
+        };
     }
+
 
 }

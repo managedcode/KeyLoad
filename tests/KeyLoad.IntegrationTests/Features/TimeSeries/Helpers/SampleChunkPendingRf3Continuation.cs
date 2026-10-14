@@ -15,13 +15,17 @@ internal static class SampleChunkPendingRf3Continuation
         // no probe arm beyond the original strict32 is created and no scheduling retry is requested.
         await SampleChunkPendingRf3Log.RequireAsync(wave, state.Candidate.CommandId, token).ConfigureAwait(false);
         foreach (var item in state.Admitted)
-        { await SampleChunkPendingRf3Assertions.PendingAsync(item, creator.Sdk, token).ConfigureAwait(false); }
+        {
+            await SampleChunkPendingRf3Assertions.PendingAsync(item, creator.Sdk, token).ConfigureAwait(false);
+        }
         await SampleChunkPendingRf3Assertions.CompleteAsync(state.Candidate, creator.Sdk, creator.Mcp, merged: false, token)
             .ConfigureAwait(false);
         await MergeAsync(state.Admitted[SampleChunkPendingRf3Protocol.FirstIndex], administrator, token).ConfigureAwait(false);
         await SampleChunkPendingRf3Assertions.WaitMergedAsync(state.Candidate, creator.Sdk, token).ConfigureAwait(false);
         foreach (var item in state.Admitted.Skip(SampleChunkPendingRf3Protocol.AfterFirstSettled))
-        { await MergeAsync(item, administrator, token).ConfigureAwait(false); }
+        {
+            await MergeAsync(item, administrator, token).ConfigureAwait(false);
+        }
         var fresh = await SampleChunkPendingRf3Seed.CreateAsync(state.Scope, SampleChunkPendingRf3Protocol.FreshOrdinal,
             creator.Sdk, administrator.Sdk, token).ConfigureAwait(false);
         await SampleChunkPendingRf3Seed.CorrectAsync(fresh, administrator.Sdk, token).ConfigureAwait(false);
@@ -34,7 +38,9 @@ internal static class SampleChunkPendingRf3Continuation
         CancellationToken token)
     {
         foreach (var item in state.Admitted)
-        { await SampleChunkPendingRf3Assertions.CompleteAsync(item, caller.Sdk, caller.Mcp, merged: true, token).ConfigureAwait(false); }
+        {
+            await SampleChunkPendingRf3Assertions.CompleteAsync(item, caller.Sdk, caller.Mcp, merged: true, token).ConfigureAwait(false);
+        }
         await SampleChunkPendingRf3Assertions.CompleteAsync(state.Candidate, caller.Sdk, caller.Mcp, merged: true, token).ConfigureAwait(false);
         await SampleChunkPendingRf3Assertions.CompleteAsync(state.Fresh
             ?? throw new InvalidOperationException(SampleChunkPendingRf3Protocol.Missing), caller.Sdk, caller.Mcp, merged: true, token)

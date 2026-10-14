@@ -10,11 +10,17 @@ internal static class ScriptDomOrderingLowering
         string? leftAlias, InnerJoinClause? join, ScriptDomLoweringContext context)
     {
         if (clause is null)
-        { return []; }
+        {
+            return [];
+        }
         if (clause.All)
-        { throw ScriptDomErrors.Unsupported(); }
+        {
+            throw ScriptDomErrors.Unsupported();
+        }
         if (clause.OrderByElements.Count > context.Execution.MaximumOrdering)
-        { throw ScriptDomErrors.Invalid(); }
+        {
+            throw ScriptDomErrors.Invalid();
+        }
         var ordering = new List<Ordering>(clause.OrderByElements.Count);
         foreach (var element in clause.OrderByElements)
         {
@@ -31,19 +37,29 @@ internal static class ScriptDomOrderingLowering
         {
             if (!int.TryParse(ordinal.Value, NumberStyles.None, CultureInfo.InvariantCulture, out var position)
                 || position < FirstOrdinal || position > projection.Count)
-            { throw ScriptDomErrors.Invalid(); }
+            {
+                throw ScriptDomErrors.Invalid();
+            }
             var selected = projection[position - FirstOrdinal];
             if (selected.Path == SqlSyntax.Star)
-            { throw ScriptDomErrors.Unsupported(); }
+            {
+                throw ScriptDomErrors.Unsupported();
+            }
             if (join is not null && selected.SourceAlias != leftAlias)
-            { throw ScriptDomErrors.Invalid(); }
+            {
+                throw ScriptDomErrors.Invalid();
+            }
             return selected.Path;
         }
         if (expression is Dom.NumericLiteral or Dom.RealLiteral
             || expression is Dom.UnaryExpression { Expression: Dom.IntegerLiteral or Dom.NumericLiteral or Dom.RealLiteral })
-        { throw ScriptDomErrors.Invalid(); }
+        {
+            throw ScriptDomErrors.Invalid();
+        }
         if (expression is not Dom.ColumnReferenceExpression column)
-        { throw ScriptDomErrors.Unsupported(); }
+        {
+            throw ScriptDomErrors.Unsupported();
+        }
         var parts = ScriptDomNames.Column(column);
         if (parts.Count == SingleElement)
         {
@@ -51,12 +67,16 @@ internal static class ScriptDomOrderingLowering
             if (selected is not null)
             {
                 if (join is not null && selected.SourceAlias != leftAlias)
-                { throw ScriptDomErrors.Invalid(); }
+                {
+                    throw ScriptDomErrors.Invalid();
+                }
                 return selected.Path;
             }
         }
         if (join is not null && (parts.Count != QualifiedSegments || parts[FirstIndex] != leftAlias))
-        { throw ScriptDomErrors.Invalid(); }
+        {
+            throw ScriptDomErrors.Invalid();
+        }
         return ScriptDomNames.Path(parts, leftAlias, documentMetadata);
     }
     private const int FirstOrdinal = 1;

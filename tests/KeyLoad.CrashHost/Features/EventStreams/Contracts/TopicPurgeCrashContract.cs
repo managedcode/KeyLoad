@@ -29,7 +29,10 @@ internal static class TopicPurgeCrashContract
     private const string EventType = "Created";
     private const string EventJsonPrefix = "{\"n\":";
     private const string EventJsonSuffix = "}";
-    internal static PartitionRef Partition { get; } = new(CrashFixtureValues.Tenant,
+    internal static PartitionRef Partition
+    {
+        get;
+    } = new(CrashFixtureValues.Tenant,
         CrashFixtureValues.Database, CrashFixtureValues.Orders, Mode);
     internal static EventSourceRef Source { get; } = new(Partition, Topic, EventSourceKind.Topic);
     internal static SubscriptionRef Subscription { get; } = new(Source, Group);

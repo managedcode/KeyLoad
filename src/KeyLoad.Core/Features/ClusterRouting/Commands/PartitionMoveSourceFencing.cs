@@ -17,16 +17,22 @@ public sealed partial class DatabaseEngine
         if (phase.GrantId is null || body.OperatorPrincipalId != record.PrincipalId
             || phase.ControlIntentDigest != PartitionMoveIntentIdentity.Digest(record)
             || record.Phase != PartitionMovePhase.Prepared)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
         var placement = ReadPlacementWitness(transaction, phase.Partition);
         if (!PartitionMoveControlValidation.SameSource(placement, record.SourcePlacement))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
         PartitionMoveSourceQuiescence.Require(transaction, phase.Partition, Limits);
         var existing = PartitionMoveSourceFenceStorage.Read(transaction, phase.Partition, Limits.MaxBatchBytes);
         if (existing is not null)
         {
             if (existing.MoveId != phase.MoveId || existing.ControlIntentDigest != phase.ControlIntentDigest)
-            { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict); }
+            {
+                throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict);
+            }
             return new(phase.MoveId, phase.Stage, MoveJournalReceipt(transaction, commandId, position,
                 phase.ControlIntentDigest), record, existing, null, null);
         }

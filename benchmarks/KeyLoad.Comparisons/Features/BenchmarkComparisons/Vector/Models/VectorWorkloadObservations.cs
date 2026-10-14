@@ -13,6 +13,12 @@ internal sealed class VectorWorkloadObservations(VectorComparisonProfile profile
     internal int QuerySuccesses;
     internal int UpdateAttempts;
     internal int UpdateSuccesses;
-    internal double QuerySeconds { get; set; }
-    internal double UpdateSeconds { get; set; }
+    internal double QuerySeconds
+    {
+        get; set;
+    }
+    internal double UpdateSeconds
+    {
+        get; set;
+    }
 }

@@ -26,7 +26,9 @@ internal static class CapturedPolicyRf3Flow
         (administrator, reader) = await LiveSubscriptionRf3Cold.RestartAsync(owner, administrator, reader, scenario, token);
         await RevokedAsync(administrator, reader, scenario, original.Feed, original.Live, token);
         var restored = scenario.Identity.Principal with
-        { PolicyEpoch = revoked.PolicyEpoch + FeedLiveRf3Protocol.EpochStep };
+        {
+            PolicyEpoch = revoked.PolicyEpoch + FeedLiveRf3Protocol.EpochStep
+        };
         await ConfigureAsync(administrator, restored, token);
         await CapturedPolicyRf3Refusals.RequireAsync(administrator, reader, scenario, original.Feed,
             original.Live, ErrorCode.TokenInvalidated, false, token);

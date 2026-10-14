@@ -13,11 +13,15 @@ internal static class RequestCqrsProbeFileStore
         if (bytes.Length is <= 0 or > RequestCqrsProbeFixtureProtocol.MaximumRecordBytes
             || !RequestCqrsProbeFileValidation.IsAllowedFileName(fileName)
             || fileName.StartsWith(RequestCqrsProbeFileValidation.TemporaryPrefix, StringComparison.Ordinal))
-        { throw new IOException(RequestCqrsProbeFixtureProtocol.RecordLimitExceeded); }
+        {
+            throw new IOException(RequestCqrsProbeFixtureProtocol.RecordLimitExceeded);
+        }
         RequestCqrsProbeFileValidation.EnsureQuota(directory, bytes.Length);
         var destination = Path.Combine(directory, fileName);
         if (File.Exists(destination) || Directory.Exists(destination))
-        { throw new IOException(RequestCqrsProbeFixtureProtocol.DuplicateControlFile); }
+        {
+            throw new IOException(RequestCqrsProbeFixtureProtocol.DuplicateControlFile);
+        }
 
         var temporary = Path.Combine(directory, RequestCqrsProbeFileValidation.TemporaryPrefix
             + Guid.NewGuid().ToString("N") + ".tmp");
@@ -31,7 +35,9 @@ internal static class RequestCqrsProbeFileStore
         }, failures);
         CleanupTemporary(temporary, failures);
         if (moved && failures.Count > 0)
-        { RequestCqrsProbeAtomicWriteSettlement.RemoveFailedPublication(directory, fileName, bytes, failures); }
+        {
+            RequestCqrsProbeAtomicWriteSettlement.RemoveFailedPublication(directory, fileName, bytes, failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
@@ -40,7 +46,9 @@ internal static class RequestCqrsProbeFileStore
         if (!fileName.StartsWith(RequestCqrsProbeFixtureProtocol.ArmFilePrefix, StringComparison.Ordinal)
             || !RequestCqrsProbeFileValidation.IsAllowedFileName(fileName)
             || replacement.Length != expected.Length || replacement.Length is <= 0 or > RequestCqrsProbeFixtureProtocol.MaximumRecordBytes)
-        { throw new IOException(RequestCqrsProbeFixtureProtocol.InvalidControlEntry); }
+        {
+            throw new IOException(RequestCqrsProbeFixtureProtocol.InvalidControlEntry);
+        }
         VerifyExactFile(directory, fileName, expected);
         RequestCqrsProbeFileValidation.EnsureQuota(directory, replacement.Length);
         var temporary = Path.Combine(directory, RequestCqrsProbeFileValidation.TemporaryPrefix
@@ -61,7 +69,9 @@ internal static class RequestCqrsProbeFileStore
     private static void WriteTemporary(string path, ReadOnlySpan<byte> bytes)
     {
         if (OperatingSystem.IsWindows())
-        { throw new PlatformNotSupportedException(RequestCqrsProbeFixtureProtocol.PrivatePermissionsUnsupported); }
+        {
+            throw new PlatformNotSupportedException(RequestCqrsProbeFixtureProtocol.PrivatePermissionsUnsupported);
+        }
         var options = new FileStreamOptions
         {
             Mode = FileMode.CreateNew,
@@ -80,25 +90,33 @@ internal static class RequestCqrsProbeFileStore
         => ServerFailureObserver.Observe(() =>
         {
             if (File.Exists(path))
-            { File.Delete(path); }
+            {
+                File.Delete(path);
+            }
         }, failures);
 
     internal static void EnsureCanWrite(string directory, string fileName, int bytes)
     {
         if (bytes is <= 0 or > RequestCqrsProbeFixtureProtocol.MaximumRecordBytes
             || !RequestCqrsProbeFileValidation.IsAllowedFileName(fileName) || fileName.StartsWith(RequestCqrsProbeFileValidation.TemporaryPrefix, StringComparison.Ordinal))
-        { throw new IOException(RequestCqrsProbeFixtureProtocol.InvalidControlEntry); }
+        {
+            throw new IOException(RequestCqrsProbeFixtureProtocol.InvalidControlEntry);
+        }
         RequestCqrsProbeFileValidation.EnsureQuota(directory, bytes);
         var path = Path.Combine(directory, fileName);
         if (File.Exists(path) || Directory.Exists(path))
-        { throw new IOException(RequestCqrsProbeFixtureProtocol.DuplicateControlFile); }
+        {
+            throw new IOException(RequestCqrsProbeFixtureProtocol.DuplicateControlFile);
+        }
     }
 
     internal static void VerifyExactFile(string directory, string fileName, byte[] expected)
     {
         var actual = ReadRecord(Path.Combine(directory, fileName));
         if (!actual.AsSpan().SequenceEqual(expected))
-        { throw new IOException(RequestCqrsProbeFixtureProtocol.OwnerChanged); }
+        {
+            throw new IOException(RequestCqrsProbeFixtureProtocol.OwnerChanged);
+        }
     }
 
     internal static void DeleteExactFile(string directory, string fileName, byte[] expected)
@@ -110,19 +128,29 @@ internal static class RequestCqrsProbeFileStore
     internal static byte[] ReadRecord(string path)
     {
         if (OperatingSystem.IsWindows())
-        { throw new PlatformNotSupportedException(RequestCqrsProbeFixtureProtocol.PrivatePermissionsUnsupported); }
+        {
+            throw new PlatformNotSupportedException(RequestCqrsProbeFixtureProtocol.PrivatePermissionsUnsupported);
+        }
         var identity = OfflineRegularFile.Inspect(path);
         if (identity.Length is <= 0 or > RequestCqrsProbeFixtureProtocol.MaximumRecordBytes)
-        { throw new IOException(RequestCqrsProbeFixtureProtocol.RecordLimitExceeded); }
+        {
+            throw new IOException(RequestCqrsProbeFixtureProtocol.RecordLimitExceeded);
+        }
         if (File.GetUnixFileMode(path) != RequestCqrsProbeFileValidation.PrivateFileMode)
-        { throw new IOException(RequestCqrsProbeFixtureProtocol.InvalidControlEntry); }
+        {
+            throw new IOException(RequestCqrsProbeFixtureProtocol.InvalidControlEntry);
+        }
         var bytes = new byte[checked((int)identity.Length)];
         using var input = OfflineRegularFile.OpenWithIdentity(path, identity, FileAccess.Read, FileShare.Read, 4096);
         if (input.Length != bytes.Length)
-        { throw new IOException(RequestCqrsProbeFixtureProtocol.RecordLimitExceeded); }
+        {
+            throw new IOException(RequestCqrsProbeFixtureProtocol.RecordLimitExceeded);
+        }
         input.ReadExactly(bytes);
         if (input.ReadByte() != -1)
-        { throw new IOException(RequestCqrsProbeFixtureProtocol.RecordLimitExceeded); }
+        {
+            throw new IOException(RequestCqrsProbeFixtureProtocol.RecordLimitExceeded);
+        }
         return bytes;
     }
 
@@ -130,7 +158,9 @@ internal static class RequestCqrsProbeFileStore
     {
         var actual = ReadRecord(Path.Combine(directory, RequestCqrsProbeFixtureProtocol.OwnerFileName));
         if (!actual.AsSpan().SequenceEqual(expected))
-        { throw new IOException(RequestCqrsProbeFixtureProtocol.OwnerChanged); }
+        {
+            throw new IOException(RequestCqrsProbeFixtureProtocol.OwnerChanged);
+        }
     }
 
     internal static void DeleteOwnedTree(string root, IReadOnlyDictionary<string, string> nodePaths,
@@ -140,27 +170,37 @@ internal static class RequestCqrsProbeFileStore
         var nodes = includeDestination ? TwoRf3MembershipProtocol.Nodes : RequestCqrsProbeFixtureProtocol.Nodes;
         if (nodePaths.Count > nodes.Count
             || (requireAllOwners && nodePaths.Count != nodes.Count))
-        { throw new IOException(RequestCqrsProbeFixtureProtocol.InvalidControlEntry); }
+        {
+            throw new IOException(RequestCqrsProbeFixtureProtocol.InvalidControlEntry);
+        }
         var rootEntries = Directory.EnumerateFileSystemEntries(root).Take(nodes.Count + 1).ToArray();
         if (rootEntries.Length != nodePaths.Count
             || rootEntries.Any(path => !nodePaths.Values.Contains(path, StringComparer.Ordinal)))
-        { throw new IOException(RequestCqrsProbeFixtureProtocol.InvalidControlEntry); }
+        {
+            throw new IOException(RequestCqrsProbeFixtureProtocol.InvalidControlEntry);
+        }
         foreach (var pair in nodePaths)
         {
             var node = pair.Value;
             var expectedPath = Path.GetFullPath(Path.Combine(root, pair.Key));
             if (!nodes.Contains(pair.Key, StringComparer.Ordinal)
                 || !string.Equals(Path.GetFullPath(node), expectedPath, StringComparison.Ordinal))
-            { throw new IOException(RequestCqrsProbeFixtureProtocol.InvalidControlEntry); }
+            {
+                throw new IOException(RequestCqrsProbeFixtureProtocol.InvalidControlEntry);
+            }
             RequestCqrsProbeFileValidation.ValidateDirectory(node);
             VerifyNodeOwner(node, pair.Key, ownerRecords, requireAllOwners);
             var files = RequestCqrsProbeFileValidation.ValidateContents(node);
             foreach (var file in files)
-            { File.Delete(file); }
+            {
+                File.Delete(file);
+            }
             Directory.Delete(node, recursive: false);
         }
         if (Directory.EnumerateFileSystemEntries(root).Take(1).Any())
-        { throw new IOException(RequestCqrsProbeFixtureProtocol.InvalidControlEntry); }
+        {
+            throw new IOException(RequestCqrsProbeFixtureProtocol.InvalidControlEntry);
+        }
         Directory.Delete(root, recursive: false);
     }
 
@@ -174,6 +214,8 @@ internal static class RequestCqrsProbeFileStore
             return;
         }
         if (requireAllOwners)
-        { throw new IOException(RequestCqrsProbeFixtureProtocol.OwnerChanged); }
+        {
+            throw new IOException(RequestCqrsProbeFixtureProtocol.OwnerChanged);
+        }
     }
 }

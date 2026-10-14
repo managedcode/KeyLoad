@@ -19,15 +19,21 @@ internal static class EventVectorCleanupParentCommit
         var key = EventVectorKeys.ParentCall(map.ControlPartition, map.MapId);
         var row = inventory.PayloadRows.SingleOrDefault(current => current.Key.Span.SequenceEqual(key));
         if (row.Key.IsEmpty)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         var original = EventVectorParentValidation.Read(map, row, admission);
         if (original.PrincipalId != principal.Id || original.OriginalPublicCommandId == phase.OriginalRequest.CommandId
             || phase.OriginalRequest.Action != EventFeedControlAction.Release)
-        { throw Errors.Fail(ErrorCode.Conflict, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, Invalid);
+        }
         EventVectorParentScopes.Authorize(authorization, principal, original.OriginalAuthorizedSourceScopes, admission);
         var originalPhase = EventVectorParentValidation.ReadPhase(original, admission);
         if (originalPhase.OriginalRequest.Action is not (EventFeedControlAction.Open or EventFeedControlAction.Refresh))
-        { throw Errors.Fail(ErrorCode.Conflict, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, Invalid);
+        }
         EventVectorParentScopes.RequireExact(original.OriginalAuthorizedSourceScopes,
             EventVectorParentScopes.Derive(originalPhase, inventory, admission));
         var cleanupKey = EventVectorKeys.CleanupCall(map.ControlPartition, map.MapId);
@@ -49,7 +55,9 @@ internal static class EventVectorCleanupParentCommit
                 || settled.CleanupGeneration != map.CleanupGeneration || map.PendingPhaseId is not null
                 || map.CleanupGeneration != checked(cleanup.CleanupGeneration + NextPass)
                 || phase.ExpectedCleanupGeneration != map.CleanupGeneration)
-            { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+            }
             _ = EventVectorCleanupFrontierValidation.Require(inventory, phase.OriginalCleanupFrontierBytes,
                 principal, authorization, admission);
             return original;
@@ -58,7 +66,9 @@ internal static class EventVectorCleanupParentCommit
         if (cleanup.CleanupGeneration != phase.ExpectedCleanupGeneration
             || cleanup.ReleaseExpiresAt != phase.OriginalParentExpiresAt
             || !cleanup.AuthenticatedFrontierBytes.Span.SequenceEqual(phase.OriginalCleanupFrontierBytes.Span))
-        { throw Errors.Fail(ErrorCode.Conflict, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, Invalid);
+        }
         return original;
     }
 
@@ -69,14 +79,18 @@ internal static class EventVectorCleanupParentCommit
         if (phase.OriginalCleanupFrontierBytes.IsEmpty || phase.Action != EventVectorControlAction.AdmitSource
             || map.State is not (EventVectorMapState.Opening or EventVectorMapState.Refreshing)
             || map.PendingPhaseId is not { } pending)
-        { return false; }
+        {
+            return false;
+        }
         _ = RequirePrevious(view, inventory, principal, phase, authorization, admission);
         var frontier = EventVectorCleanupFrontierValidation.Require(inventory,
             phase.OriginalCleanupFrontierBytes, principal, authorization, admission);
         var key = EventVectorKeys.Phase(map.ControlPartition, map.MapId, pending);
         var row = inventory.PayloadRows.SingleOrDefault(current => current.Key.Span.SequenceEqual(key));
         if (row.Key.IsEmpty)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         return frontier.Any(pin => pin.OriginalPinPhaseBytes.Span.SequenceEqual(row.Value.Span)
             || pin.LastAdmittedAdvancePhaseBytes.Span.SequenceEqual(row.Value.Span));
     }
@@ -95,7 +109,9 @@ internal static class EventVectorCleanupParentCommit
         {
             var cleanup = EventVectorCleanupValidation.Read(map, prior, admission);
             if (cleanup.ReleasePublicCommandId != request.CommandId)
-            { Write(transaction, principal, phase, operation, authorization, options); }
+            {
+                Write(transaction, principal, phase, operation, authorization, options);
+            }
             return;
         }
         _ = RequirePrevious(transaction, inventory, principal, phase, authorization, admission);
@@ -105,7 +121,10 @@ internal static class EventVectorCleanupParentCommit
         // The original pending phase remains immutable in its row and original parent/cleanup frontier.
         // The active pointer now belongs to the newly admitted cleanup pass; no source disposition is inferred.
         _ = EventVectorMapWriter.Write(transaction, map with
-        { State = EventVectorMapState.Releasing, PendingPhaseId = null }, inventory.PayloadRows,
+        {
+            State = EventVectorMapState.Releasing,
+            PendingPhaseId = null
+        }, inventory.PayloadRows,
             options, CancellationToken.None);
     }
 

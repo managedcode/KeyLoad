@@ -26,7 +26,9 @@ internal static class GraphIncomingMcpNativeAssertions
         await Assert.That(aliasAttribute is not null).IsTrue();
         await Assert.That(aliasAttribute!.ConstructorArguments.Single().Value).IsEqualTo(alias);
         if (type.GetProperties().Length != propertyNames.Length)
-        { throw new InvalidOperationException(IncompleteContract); }
+        {
+            throw new InvalidOperationException(IncompleteContract);
+        }
         await VerifyFieldsAsync(type, propertyNames);
     }
 

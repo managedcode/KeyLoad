@@ -17,7 +17,9 @@ internal static class PartitionMoveTransferDataReader
         ArgumentNullException.ThrowIfNull(view);
         ArgumentNullException.ThrowIfNull(work);
         if (maximumRecords <= PartitionMoveProtocol.EmptyCount || maximumRecords > limits.MaxScanRecords)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
+        }
         PartitionMoveSourceFenceValidation.Require(originalFence, originalFence.Partition);
         PartitionMoveDescriptorValidation.Require(originalDescriptor, originalFence, limits);
         var persisted = PartitionMoveSourceFenceStorage.Read(work.CreateView(view), originalFence.Partition,
@@ -30,11 +32,15 @@ internal static class PartitionMoveTransferDataReader
         {
             work.Check();
             if (PartitionMoveFamilyCapture.ControlOwned(expected.Family))
-            { continue; }
+            {
+                continue;
+            }
             var actual = PartitionMoveFamilyCapture.Capture(view, originalFence, expected.Family,
                 work, captureBudget, limits, maximumPageBytes, maximumImageBytes, pages, ref retained);
             if (actual != expected)
-            { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.InvalidImage); }
+            {
+                throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.InvalidImage);
+            }
         }
         work.Check();
         return new(originalDescriptor, pages.ToImmutable(), currentReadCut);

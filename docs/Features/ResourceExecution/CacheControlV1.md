@@ -17,7 +17,7 @@ or CacheReadPermitAcceptance enters these generated internal control types.
 
 ## Immutable wire schema
 
-All types are in KeyLoad.Orleans/Features/ResourceExecution. Use GenerateSerializer,
+All types are in KeyLoad.Clustering/Features/ResourceExecution. Use GenerateSerializer,
 stable Alias and Id attributes, and actual immutable records; no mutable arrays or
 variable proof collection. Alias prefix is `keyload.cache.control.`; suffix is
 `.v1`. The following table gives the middle alias and permanent increasing field

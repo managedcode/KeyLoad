@@ -21,7 +21,10 @@ internal static class LiveTailRf3Trial
         var deletion = await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.CommitAsync(
             new(Guid.NewGuid(), scenario.Partition, [new DeleteDocument(FeedLiveRf3Protocol.Collection,
                 FeedLiveRf3Protocol.First, FeedLiveRf3Protocol.UpdatedRevision)]), token));
-        var deletedRequest = request with { Cursor = fresh.Cursor };
+        var deletedRequest = request with
+        {
+            Cursor = fresh.Cursor
+        };
         var deletedCut = await LiveQueryCutRf3Assertions.CreateAsync(administrator, reader, scenario, deletion,
             [], () => LiveTailRf3Assertions.QueryAsync(reader, scenario, token), token);
         var deletionBefore = await deletedCut();
@@ -51,7 +54,10 @@ internal static class LiveTailRf3Trial
         await FeedLiveRf3NoEffects.RequireAsync(administrator, scenario,
             FeedLiveRf3NoEffects.Rows(FeedLiveRf3Protocol.DeletedRevision, null), FeedLiveRf3Protocol.DeletedSequence,
             () => LiveTailRf3Assertions.DeniedAsync(reader, original, ErrorCode.PermissionDenied, token), token);
-        var restored = scenario.Identity.Principal with { PolicyEpoch = revoked.PolicyEpoch + FeedLiveRf3Protocol.EpochStep };
+        var restored = scenario.Identity.Principal with
+        {
+            PolicyEpoch = revoked.PolicyEpoch + FeedLiveRf3Protocol.EpochStep
+        };
         await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), restored, token));
         await FeedLiveRf3NoEffects.RequireAsync(administrator, scenario,
             FeedLiveRf3NoEffects.Rows(FeedLiveRf3Protocol.DeletedRevision, null), FeedLiveRf3Protocol.DeletedSequence,

@@ -42,7 +42,9 @@ internal static class RestoreResumedTokenAssertions
         var before = EventingArtifactState.FullBytes(fixture.Database.Store);
         var position = fixture.Database.Store.Position;
         foreach (var original in saved)
-        { await EventingArtifactState.SameResultAsync(original.Result, fixture.Database.Apply(original.Operation)); }
+        {
+            await EventingArtifactState.SameResultAsync(original.Result, fixture.Database.Apply(original.Operation));
+        }
         var cursor = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Database.ReadEventSource(
             EventingArtifactFixture.Principal, new(fixture.Events, Cursor: fixture.Cursor)));
         await Assert.That(cursor.Code).IsEqualTo(ErrorCode.TokenInvalidated);

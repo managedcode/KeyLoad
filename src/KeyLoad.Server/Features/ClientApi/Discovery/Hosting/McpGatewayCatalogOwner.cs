@@ -42,7 +42,10 @@ internal sealed class McpGatewayCatalogOwner : IAsyncDisposable
             new McpGatewaySearchRequest(Query: query, MaxResults: maxResults), cancellationToken)
             .ConfigureAwait(false);
         cancellationToken.ThrowIfCancellationRequested();
-        return result with { Diagnostics = [] };
+        return result with
+        {
+            Diagnostics = []
+        };
     }
 
     internal async Task<McpGatewayToolRouteResult> RouteAsync(
@@ -63,7 +66,10 @@ internal sealed class McpGatewayCatalogOwner : IAsyncDisposable
                 PreferReadOnly: preferReadOnly), cancellationToken)
             .ConfigureAwait(false);
         cancellationToken.ThrowIfCancellationRequested();
-        return result with { Diagnostics = [] };
+        return result with
+        {
+            Diagnostics = []
+        };
     }
 
     internal async Task<McpGatewayInvokeResult> InvokeAsync(

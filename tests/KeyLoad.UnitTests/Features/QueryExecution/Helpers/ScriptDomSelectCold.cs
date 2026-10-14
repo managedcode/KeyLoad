@@ -15,7 +15,10 @@ internal static class ScriptDomSelectCold
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {
                 using var store = global::KeyLoad.Storage.ZoneTree.ZoneTreeExistingStore.Open(
-                    new(database.Directory) { Incarnation = identity.Incarnation }, identity.NodeId, database.StorageExecution);
+                    new(database.Directory)
+                    {
+                        Incarnation = identity.Incarnation
+                    }, identity.NodeId, database.StorageExecution);
                 await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
                 {
                     await SqlNullOrderingRefusals.UnchangedAsync(store, image, position, identityBytes);

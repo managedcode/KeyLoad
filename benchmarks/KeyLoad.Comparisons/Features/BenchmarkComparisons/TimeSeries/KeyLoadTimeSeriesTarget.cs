@@ -20,7 +20,10 @@ internal sealed class KeyLoadTimeSeriesTarget(HttpClient http, string apiKey, IO
     private readonly NativeComparisonExecutionOptions execution = NativeComparisonExecutionOptions.Require(executionOptions).Value;
     private readonly KeyLoadClient client = new(http, apiKey, clientOptions);
 
-    public TimeSeriesTargetMetadata Metadata { get; } = new(TargetName, PersistedRF3TimeSeriesToken,
+    public TimeSeriesTargetMetadata Metadata
+    {
+        get;
+    } = new(TargetName, PersistedRF3TimeSeriesToken,
         StorageGuarantee, AcknowledgementGuarantee, image, null);
 
     public async Task InitializeAsync(TimeSeriesComparisonWorkload workload, CancellationToken cancellationToken)

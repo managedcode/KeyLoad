@@ -54,9 +54,18 @@ internal sealed class CanonicalVectorAtomicRevisionTests
         await Assert.That(updated.Reference).IsEqualTo(new EntityRef(database.Partition, Collection, Target));
         await Assert.That(updated.Json).IsEqualTo(UpdatedJson);
         await Assert.That(updated.Revision).IsEqualTo(2L);
-        await Assert.That(await search.SearchAsync(Root, request with { Space = Space with { Model = "other-model" } },
+        await Assert.That(await search.SearchAsync(Root, request with
+        {
+            Space = Space with
+            {
+                Model = "other-model"
+            }
+        },
             TestContext.Current!.Execution.CancellationToken)).IsEmpty();
-        var recovered = await search.SearchAsync(Root, request with { Vector = [0, 1] },
+        var recovered = await search.SearchAsync(Root, request with
+        {
+            Vector = [0, 1]
+        },
             TestContext.Current!.Execution.CancellationToken);
         await Assert.That(recovered.Select(row => row.Document.Reference.Id)).IsEquivalentTo(
             new[] { Target, Rival }, CollectionOrdering.Matching);

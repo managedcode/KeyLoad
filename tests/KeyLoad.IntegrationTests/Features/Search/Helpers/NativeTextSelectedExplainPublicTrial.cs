@@ -52,7 +52,11 @@ internal static class NativeTextSelectedExplainPublicTrial
             new(scenario.Partition, resource.Name, NativeTextMaintenanceRf3Scenario.Field, deletion.Token), token));
         var baseline = await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.OutboxStatusAsync(scenario.Partition, token));
         await NativeTextSelectedExplainPublicPages.StaleAsync(caller, build, baseline, token);
-        var restore = build with { CommandId = Guid.NewGuid(), Mode = TextIndexMaintenanceMode.Restore };
+        var restore = build with
+        {
+            CommandId = Guid.NewGuid(),
+            Mode = TextIndexMaintenanceMode.Restore
+        };
         var restored = await MaintainAsync(caller, restore, resource, 3L, token);
         var currentOutbox = await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.OutboxStatusAsync(scenario.Partition, token));
         var status = await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.StatusAsync(token));

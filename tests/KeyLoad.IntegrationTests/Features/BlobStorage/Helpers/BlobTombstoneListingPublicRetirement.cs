@@ -17,7 +17,15 @@ internal static class BlobTombstoneListingPublicRetirement
         var delete = new DeleteBlobRequest(Guid.NewGuid(), blob, 1L);
         var deleted = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.DeleteBlobAsync(delete, token));
         var tombstone = original.Completed.Value with
-        { Revision = 2L, VersionId = null, Length = 0L, PartCount = 0, IntegrityHash = null, Deleted = true, UpdatedAt = deleted.Value.UpdatedAt };
+        {
+            Revision = 2L,
+            VersionId = null,
+            Length = 0L,
+            PartCount = 0,
+            IntegrityHash = null,
+            Deleted = true,
+            UpdatedAt = deleted.Value.UpdatedAt
+        };
         await SqlRf3Protocol.EqualAsync(tombstone, deleted.Value);
         await BlobTombstoneListingPublicAssertions.ReceiptAsync(placement, delete.CommandId, deleted.Receipt);
         Task Retired() => BlobBoundedRetirementPublicAssertions.HeadAsync(callers, tombstone, token);
@@ -45,7 +53,10 @@ internal static class BlobTombstoneListingPublicRetirement
         Task Observe() => BlobTombstoneListingPublicAssertions.CurrentAsync(callers, state, token);
         state.Abort = new(Guid.NewGuid(), state.Begin.Blob, state.Begin.UploadId);
         state.Aborted = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.AbortBlobUploadAsync(state.Abort, token));
-        state.Unpublished = state.Begun.Value with { Status = BlobUploadStatus.Aborted };
+        state.Unpublished = state.Begun.Value with
+        {
+            Status = BlobUploadStatus.Aborted
+        };
         await SqlRf3Protocol.EqualAsync(state.Unpublished, state.Aborted.Value);
         await BlobTombstoneListingPublicAssertions.ReceiptAsync(state.Placement, state.Abort.CommandId, state.Aborted.Receipt);
         await Observe();

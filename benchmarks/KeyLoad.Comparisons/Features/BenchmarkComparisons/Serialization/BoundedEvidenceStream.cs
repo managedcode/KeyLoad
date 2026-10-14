@@ -7,7 +7,10 @@ internal sealed class BoundedEvidenceStream(Stream output, int maximumBytes) : S
     public override bool CanSeek => false;
     public override bool CanWrite => true;
     public override long Length => written;
-    public override long Position { get => written; set => throw new NotSupportedException(); }
+    public override long Position
+    {
+        get => written; set => throw new NotSupportedException();
+    }
     public override void Flush() => output.Flush();
     public override Task FlushAsync(CancellationToken cancellationToken) => output.FlushAsync(cancellationToken);
     public override int Read(byte[] buffer, int offset, int count) => throw new NotSupportedException();

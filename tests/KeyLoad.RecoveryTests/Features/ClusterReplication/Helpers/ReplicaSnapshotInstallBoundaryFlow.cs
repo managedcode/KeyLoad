@@ -49,7 +49,9 @@ internal static class ReplicaSnapshotInstallBoundaryFlow
                     InstallAsync(active, node, materializer, image, canceled, token)));
         }, failures);
         if (source is { } owned)
-        { ServerFailureObserver.Observe(owned.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(owned.Dispose, failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
@@ -75,7 +77,9 @@ internal static class ReplicaSnapshotInstallBoundaryFlow
             await Assert.That(failure.CancellationToken).IsEqualTo(original.Token);
         }
         else
-        { await RejectCeilingAsync(node, image); }
+        {
+            await RejectCeilingAsync(node, image);
+        }
         await ReplicaSnapshotInstallBoundaryAssertions.UnchangedAsync(node, before);
         await Assert.That(await materializer.InstallCheckpointAsync(image.TransferId, token)).IsEqualTo(image);
         await ReplicaProcessAssertions.DocumentAsync(node, SnapshotCut);

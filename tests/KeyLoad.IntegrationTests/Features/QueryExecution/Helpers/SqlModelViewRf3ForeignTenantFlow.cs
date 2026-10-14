@@ -20,9 +20,13 @@ internal static class SqlModelViewRf3ForeignTenantFlow
                 request, cancellationToken));
             await Assert.That(before.CutPosition).IsGreaterThan(0L);
             if (request == foreign.EventSql())
-            { await SqlModelViewRf3ParityAssertions.AssertEventRowsAsync(eventsBefore.Events, before); }
+            {
+                await SqlModelViewRf3ParityAssertions.AssertEventRowsAsync(eventsBefore.Events, before);
+            }
             else
-            { await SqlModelViewRf3ParityAssertions.AssertQueueRowsAsync(queueBefore, before); }
+            {
+                await SqlModelViewRf3ParityAssertions.AssertQueueRowsAsync(queueBefore, before);
+            }
             await SqlModelViewRf3DenialAssertions.SdkAsync(await reader.QueryAsync(request, cancellationToken),
                 secret, foreignScope: true);
             await SqlModelViewRf3DenialAssertions.McpAsync(await mcp.CallAsync(

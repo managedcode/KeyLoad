@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using ManagedCode.Communication;
 using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.DependencyInjection;
@@ -71,9 +71,18 @@ internal sealed class RequestCqrsProducerObservation
     internal TaskCompletionSource Started { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
     internal TaskCompletionSource ProducerSettled { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
     internal TaskCompletionSource ActivationSettled { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
-    internal int ProducerSettlementCount { get; private set; }
-    internal int ActivationSettlementCount { get; private set; }
-    internal bool CancellationObserved { get; private set; }
+    internal int ProducerSettlementCount
+    {
+        get; private set;
+    }
+    internal int ActivationSettlementCount
+    {
+        get; private set;
+    }
+    internal bool CancellationObserved
+    {
+        get; private set;
+    }
 
     internal void MarkStarted() => Started.TrySetResult();
 

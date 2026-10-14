@@ -1,7 +1,7 @@
 using System.Globalization;
 using KeyLoad;
 using KeyLoad.AppHost.Hosting;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 internal static class ClusterResourceSettings
 {
@@ -43,7 +43,9 @@ internal static class ClusterResourceSettings
         Copy(resource, options.HttpAdmission.Value, HttpOptions, HttpEnvironment);
         Copy(resource, options.ReplayAdmission.Value, ReplayOptions, ReplayEnvironment);
         if (containerUser is not null)
-        { resource.WithContainerRuntimeArgs(ContainerUserArgument, containerUser); }
+        {
+            resource.WithContainerRuntimeArgs(ContainerUserArgument, containerUser);
+        }
     }
 
     private static void Copy<T>(IResourceBuilder<ContainerResource> resource, T snapshot,

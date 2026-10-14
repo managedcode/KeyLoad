@@ -17,7 +17,9 @@ internal static class NativeTextIncrementalReplayPreparation
         NativeTextOwnedInventory.ValidateTrackedLayout(path, owner.OwnedPaths, budget,
             allowMissingNative: true, executionOptions: options);
         if (File.Exists(Path.Combine(path, NativeTextIncrementalProtocol.PendingIntentFile)))
-        { throw NativeTextErrors.Corrupt(); }
+        {
+            throw NativeTextErrors.Corrupt();
+        }
         var actual = NativeTextIncrementalMetadata.ReadIntent(path, options.Value.MaximumDiskBytes, budget);
         NativeTextIncrementalIntentValidation.Require(actual, expected.Scope, expected.Consumer,
             expected.Generation, expected.Placement, maximumRecords, maximumChanges, budget);
@@ -28,9 +30,13 @@ internal static class NativeTextIncrementalReplayPreparation
             NativeTextFileIO.VerifyBoundedFile(pending, options);
             budget.Check();
             if (resources is null)
-            { File.Delete(pending); }
+            {
+                File.Delete(pending);
+            }
             else
-            { resources.DeleteOwnedFile(pending, () => File.Delete(pending)); }
+            {
+                resources.DeleteOwnedFile(pending, () => File.Delete(pending));
+            }
         }
         budget.Check();
     }
@@ -44,6 +50,8 @@ internal static class NativeTextIncrementalReplayPreparation
         var persisted = NativeSerialization.Serialize(actual);
         budget.Check();
         if (!original.AsSpan().SequenceEqual(persisted))
-        { throw NativeTextErrors.Corrupt(); }
+        {
+            throw NativeTextErrors.Corrupt();
+        }
     }
 }

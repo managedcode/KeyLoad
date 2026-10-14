@@ -11,5 +11,7 @@ internal static class NativeTextWaitObservationPermission
                 [new(database.Partition.DatabaseId, NativeTextBilingualAudit.Collection,
                     Capability.DocumentsRead | Capability.Query)],
                 allowField ? ["pii.read", "pii.use"] : [])
-            { PolicyEpoch = allowField ? 2L : 1L })).Get<PrincipalRecord>();
+            {
+                PolicyEpoch = allowField ? 2L : 1L
+            })).Get<PrincipalRecord>();
 }

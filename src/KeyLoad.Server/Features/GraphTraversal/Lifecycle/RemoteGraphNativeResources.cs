@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server.Features.ClusterRouting;
 using Microsoft.Extensions.Options;
 
@@ -28,19 +28,31 @@ internal sealed class RemoteGraphNativeResources : IDisposable
             admission = acquiredAdmission;
         }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { ReleaseFailedCreation(error); throw; }
+        {
+            ReleaseFailedCreation(error);
+            throw;
+        }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { ReleaseFailedCreation(error); throw; }
+        {
+            ReleaseFailedCreation(error);
+            throw;
+        }
 
         void ReleaseFailedCreation(Exception primary)
         {
             var failures = new List<Exception> { primary };
             if (acquiredAdmission is not null)
-            { ServerFailureObserver.Observe(acquiredAdmission.Dispose, failures); }
+            {
+                ServerFailureObserver.Observe(acquiredAdmission.Dispose, failures);
+            }
             if (acquiredReplay is not null)
-            { ServerFailureObserver.Observe(acquiredReplay.Dispose, failures); }
+            {
+                ServerFailureObserver.Observe(acquiredReplay.Dispose, failures);
+            }
             if (acquiredStopping is not null)
-            { ServerFailureObserver.Observe(acquiredStopping.Dispose, failures); }
+            {
+                ServerFailureObserver.Observe(acquiredStopping.Dispose, failures);
+            }
             ServerFailureObserver.ThrowIfAny(failures);
         }
     }
@@ -52,18 +64,26 @@ internal sealed class RemoteGraphNativeResources : IDisposable
     public void Dispose()
     {
         if (Interlocked.Exchange(ref disposed, Disposed) != Active)
-        { return; }
+        {
+            return;
+        }
         var failures = new List<Exception>();
         try
-        { admission.Dispose(); }
+        {
+            admission.Dispose();
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         try
-        { replay.Dispose(); }
+        {
+            replay.Dispose();
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         try
-        { stopping.Dispose(); }
+        {
+            stopping.Dispose();
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         ServerFailureObserver.ThrowIfAny(failures);

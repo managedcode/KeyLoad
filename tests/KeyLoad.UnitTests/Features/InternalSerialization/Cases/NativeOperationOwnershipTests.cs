@@ -17,11 +17,17 @@ internal sealed class NativeOperationOwnershipTests
             database.Database.EvaluationClock.GetUtcNow(), input);
         Array.Clear(input);
         var callerBytes = issued.NativePayload.ToArray();
-        var caller = issued with { NativePayload = callerBytes };
+        var caller = issued with
+        {
+            NativePayload = callerBytes
+        };
         var verified = database.Database.VerifyOperationAuthority(caller);
         Array.Clear(callerBytes);
         var first = database.Database.Apply(verified);
-        var replay = database.Database.Apply(verified with { NativePayload = verified.NativePayload.ToArray() });
+        var replay = database.Database.Apply(verified with
+        {
+            NativePayload = verified.NativePayload.ToArray()
+        });
         await Assert.That(first.Error).IsNull();
         await Assert.That(first.Get<CommitReceipt>().Token).IsEqualTo(replay.Get<CommitReceipt>().Token);
         var entity = database.Database.GetDocument(NativeAuthorityFixture.Root,
@@ -36,12 +42,18 @@ internal sealed class NativeOperationOwnershipTests
     {
         using var database = new TestDatabase();
         var operation = NativeAuthorityFixture.Create(database);
-        var restamped = operation with { EvaluatedAt = operation.EvaluatedAt.AddTicks(1) };
+        var restamped = operation with
+        {
+            EvaluatedAt = operation.EvaluatedAt.AddTicks(1)
+        };
         var verified = database.Database.VerifyOperationAuthority(restamped);
         await Assert.That(verified.EvaluatedAt).IsEqualTo(restamped.EvaluatedAt);
         await Assert.That(database.Database.NativeOperationsEqual(operation, restamped)).IsFalse();
         await Assert.That(database.Database.NativeOperationsEqual(operation,
-            operation with { NativePayload = operation.NativePayload.ToArray() })).IsTrue();
+            operation with
+            {
+                NativePayload = operation.NativePayload.ToArray()
+            })).IsTrue();
     }
 
     [Test]
@@ -49,7 +61,10 @@ internal sealed class NativeOperationOwnershipTests
     {
         using var database = new TestDatabase();
         var operation = NativeAuthorityFixture.Create(database);
-        var engine = new DatabaseEngine(database.Store, database.Database.Authorization, UnitExecutionOptions.DatabaseLimits(database.Database.Limits with { MaxBatchBytes = operation.NativePayload.Length - 1 }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
+        var engine = new DatabaseEngine(database.Store, database.Database.Authorization, UnitExecutionOptions.DatabaseLimits(database.Database.Limits with
+        {
+            MaxBatchBytes = operation.NativePayload.Length - 1
+        }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
         var before = database.Store.Position;
         var error = Assert.ThrowsExactly<KeyLoadException>(() => engine.VerifyOperationAuthority(operation));
         await Assert.That(error.Code).IsEqualTo(ErrorCode.ResourceExhausted);

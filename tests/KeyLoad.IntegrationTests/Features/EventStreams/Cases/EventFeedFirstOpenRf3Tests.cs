@@ -23,7 +23,9 @@ internal sealed class EventFeedFirstOpenRf3Tests
                 localImage = await LocalRf3ImageTestSession.StartIfSelectedAsync(deadline.Token).ConfigureAwait(false);
                 wave = await TwoRf3MembershipWave.StartOwnedAsync(new TwoRf3MembershipWave(localImage?.Selection,
                     register: true, remote: true, query: true, probe: true, protectedDocument: true)
-                { EventVectorReservedProbe = true }, deadline.Token).ConfigureAwait(false);
+                {
+                    EventVectorReservedProbe = true
+                }, deadline.Token).ConfigureAwait(false);
                 await EventFeedFirstOpenRf3Flow.RunAsync(wave, deadline.Token).ConfigureAwait(false);
             }, failures).ConfigureAwait(false);
         }
@@ -31,10 +33,14 @@ internal sealed class EventFeedFirstOpenRf3Tests
         {
             var beforeCleanup = failures.Count;
             if (wave is not null)
-            { await ServerFailureObserver.ObserveAsync(() => wave.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+            {
+                await ServerFailureObserver.ObserveAsync(() => wave.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+            }
             var waveJoined = wave is not null && failures.Count == beforeCleanup;
             if (localImage is not null)
-            { await ServerFailureObserver.ObserveAsync(() => localImage.DisposeAsync(removeImage: waveJoined).AsTask(), failures).ConfigureAwait(false); }
+            {
+                await ServerFailureObserver.ObserveAsync(() => localImage.DisposeAsync(removeImage: waveJoined).AsTask(), failures).ConfigureAwait(false);
+            }
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }

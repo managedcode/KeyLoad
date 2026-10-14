@@ -30,10 +30,18 @@ internal sealed class ReplicaCrashNode : IDisposable
         Action<CommitStage, long, int>? replicaObserver = null, ReadOnlyMemory<byte>? canonicalSigningKey = null)
     {
         configurationOptions = CrashExecutionOptions.Configuration(voter, [VoterA, VoterB, VoterC], directory, incarnation);
-        Canonical = new(new(Path.Combine(directory, CanonicalDirectory)) { Incarnation = incarnation, SigningKey = canonicalSigningKey }, CrashExecutionOptions.StorageExecution(), CrashExecutionOptions.PointCacheExecution());
+        Canonical = new(new(Path.Combine(directory, CanonicalDirectory))
+        {
+            Incarnation = incarnation,
+            SigningKey = canonicalSigningKey
+        }, CrashExecutionOptions.StorageExecution(), CrashExecutionOptions.PointCacheExecution());
         try
         {
-            ReplicaStore = new(new(Path.Combine(directory, ReplicaDirectory)) { Incarnation = incarnation, FaultObserver = replicaObserver }, CrashExecutionOptions.StorageExecution(), CrashExecutionOptions.PointCacheExecution());
+            ReplicaStore = new(new(Path.Combine(directory, ReplicaDirectory))
+            {
+                Incarnation = incarnation,
+                FaultObserver = replicaObserver
+            }, CrashExecutionOptions.StorageExecution(), CrashExecutionOptions.PointCacheExecution());
             try
             {
                 Database = new(Canonical, new AuthorizationPolicy(), CrashExecutionOptions.DatabaseLimits(), CrashExecutionOptions.DueWork(), CrashExecutionOptions.EventSource(), CrashExecutionOptions.Messaging(), CrashExecutionOptions.GraphExecution(), CrashExecutionOptions.ChangeFeedExecution(), CrashExecutionOptions.BlobExecution(), CrashExecutionOptions.NativeClaimsExecution(), CrashExecutionOptions.TimeSeriesExecution(), CrashExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
@@ -45,9 +53,13 @@ internal sealed class ReplicaCrashNode : IDisposable
             {
                 var failures = new List<Exception> { primary };
                 if (Log is { } log)
-                { ServerFailureObserver.Observe(log.Dispose, failures); }
+                {
+                    ServerFailureObserver.Observe(log.Dispose, failures);
+                }
                 try
-                { ReplicaStore.Dispose(); }
+                {
+                    ReplicaStore.Dispose();
+                }
                 catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is null) { failures.Add(error); }
                 catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is not null) { failures.Add(error); }
                 ServerFailureObserver.ThrowIfAny(failures);
@@ -66,15 +78,30 @@ internal sealed class ReplicaCrashNode : IDisposable
     /// <summary>The configured fixed RF3 voter set and stable cluster incarnation.</summary>
     public ReplicaConfiguration Configuration => configurationOptions.Value;
     /// <summary>The node-owned canonical storage engine.</summary>
-    public ZoneTreeStore Canonical { get; }
+    public ZoneTreeStore Canonical
+    {
+        get;
+    }
     /// <summary>The independently owned native replica store, borrowed for GC operation assertions.</summary>
-    public ZoneTreeStore ReplicaStore { get; }
+    public ZoneTreeStore ReplicaStore
+    {
+        get;
+    }
     /// <summary>The real caller-visible database engine.</summary>
-    public DatabaseEngine Database { get; }
+    public DatabaseEngine Database
+    {
+        get;
+    }
     /// <summary>The independently persisted durable replica log.</summary>
-    public DurableReplicaLog Log { get; }
+    public DurableReplicaLog Log
+    {
+        get;
+    }
     /// <summary>The real verified snapshot transfer implementation.</summary>
-    public ReplicaSnapshotStore Snapshots { get; }
+    public ReplicaSnapshotStore Snapshots
+    {
+        get;
+    }
     /// <summary>The voter used for the durable vote scenario.</summary>
     public static string CandidateId => VoterB;
 
@@ -147,7 +174,10 @@ internal sealed class ReplicaCrashNode : IDisposable
     private void Bootstrap()
     {
         var principal = ReplicaCrashModel.PrincipalId;
-        Database.Bootstrap(new(principal, System, [new(Wildcard, Wildcard, Capability.All)], [Wildcard]) { ClusterAdministrator = true },
+        Database.Bootstrap(new(principal, System, [new(Wildcard, Wildcard, Capability.All)], [Wildcard])
+        {
+            ClusterAdministrator = true
+        },
             DatabaseEngine.Credential(principal, principal, Convert.ToHexString(RandomNumberGenerator.GetBytes(CredentialBytes))));
         RecoveryPhysicalShardBootstrap.Bootstrap(Database, principal, Configuration.VoterIds);
     }
@@ -158,7 +188,9 @@ internal sealed class ReplicaCrashNode : IDisposable
         var failures = new List<Exception>();
         ServerFailureObserver.Observe(Log.Dispose, failures);
         try
-        { ReplicaStore.Dispose(); }
+        {
+            ReplicaStore.Dispose();
+        }
         catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is null) { failures.Add(error); }
         catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is not null) { failures.Add(error); }
         ServerFailureObserver.Observe(Canonical.Dispose, failures);

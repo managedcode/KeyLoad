@@ -9,13 +9,22 @@ internal sealed class QueueOrderedRetryState(PartitionRef partition, DateTimeOff
     internal PartitionRef Partition { get; } = partition;
     internal string Principal { get; } = principal;
     internal Dictionary<Guid, byte[]> HistoricalOutcomes { get; } = [];
-    internal byte[]? RestoredResourceBytes { get; set; }
+    internal byte[]? RestoredResourceBytes
+    {
+        get; set;
+    }
     internal QueueLaneRef Lane { get; } = new(partition, QueueOrderedRetryProtocol.Queue);
     internal DateTimeOffset Time { get; set; } = time;
     internal QueueParkedHeadPolicy ParkedHead { get; } = parkedHead;
     internal List<(ReplicatedOperation Operation, OperationResult Result)> Outcomes { get; } = [];
-    internal Delivery? FirstLease { get; set; }
-    internal Delivery? SecondLease { get; set; }
+    internal Delivery? FirstLease
+    {
+        get; set;
+    }
+    internal Delivery? SecondLease
+    {
+        get; set;
+    }
     internal OperationResult Execute<T>(DatabaseEngine database, OperationKind kind, T payload, Guid id)
     {
         var operation = database.NormalizeOperation(new(id, kind, Principal, Time,

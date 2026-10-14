@@ -13,7 +13,9 @@ internal static class OwnedProcessFailureObserver
         if (actual.IsCanceled)
         {
             try
-            { actual.GetAwaiter().GetResult(); }
+            {
+                actual.GetAwaiter().GetResult();
+            }
             catch (OperationCanceledException canceled) { failures.Add(canceled); }
         }
     }
@@ -28,7 +30,9 @@ internal static class OwnedProcessFailureObserver
         if (original.IsCanceled)
         {
             try
-            { await original.ConfigureAwait(false); }
+            {
+                await original.ConfigureAwait(false);
+            }
             catch (OperationCanceledException canceled) { return canceled; }
         }
         return null;

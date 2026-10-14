@@ -1,12 +1,15 @@
 using System.Collections.Immutable;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
 
 /// <summary>Independent placement operation identities for the frozen public catalog.</summary>
 internal static class McpPlacementCatalogExpectations
 {
-    internal static ImmutableArray<(string Name, string Route, GrainReadKind? ReadKind, OperationKind? CommandKind)> Entries { get; } =
+    internal static ImmutableArray<(string Name, string Route, GrainReadKind? ReadKind, OperationKind? CommandKind)> Entries
+    {
+        get;
+    } =
     [
         ("keyload_admin_placement_policy_configure", "/admin/placement/policy/configure", null, OperationKind.ConfigurePlacementPolicy),
         ("keyload_admin_placement_policy_read", "/admin/placement/policy/read", GrainReadKind.PlacementPolicy, null),

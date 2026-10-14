@@ -25,6 +25,8 @@ internal sealed class NativeMovementProcessOptions
             || IssuedGrantExpiryWindow.Ticks > MaximumIssuedGrantExpirySeconds * TimeSpan.TicksPerSecond
             || OutputCharacters <= 0 || OutputCharacters > MaximumOutputCharacters
             || ReadCharacters <= 0 || ReadCharacters > MaximumReadCharacters || ReadCharacters > OutputCharacters)
-        { throw new InvalidOperationException(Invalid); }
+        {
+            throw new InvalidOperationException(Invalid);
+        }
     }
 }

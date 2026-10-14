@@ -25,9 +25,13 @@ internal sealed class ReplicaConsensusLifecycleTests
         {
             await start.Task.WaitAsync(linked.Token);
             if (index % 2 == 0)
-            { await fixture.Consensus.StopAsync(linked.Token); }
+            {
+                await fixture.Consensus.StopAsync(linked.Token);
+            }
             else
-            { await fixture.Consensus.DisposeAsync(); }
+            {
+                await fixture.Consensus.DisposeAsync();
+            }
         }, linked.Token)).ToArray();
         start.SetResult();
         await Task.WhenAll(calls).WaitAsync(linked.Token);
@@ -85,13 +89,25 @@ internal sealed class ReplicaLifecycleFixture : IAsyncDisposable
         directory = Path.Combine(Resolve(new(Path.GetTempPath())), Prefix + Guid.NewGuid().ToString(GuidFormat));
         Configuration = (configuration ?? new(VoterA, [VoterA, VoterB, VoterC], directory, Guid.NewGuid()))
             with
-        { Directory = directory };
+        {
+            Directory = directory
+        };
         if (maximumAppendEntries is { } maximum)
         {
-            Configuration = Configuration with { MaxAppendEntries = maximum };
+            Configuration = Configuration with
+            {
+                MaxAppendEntries = maximum
+            };
         }
-        canonical = new(new(Path.Combine(directory, CanonicalDirectory)) { Incarnation = Configuration.Incarnation, FaultObserver = canonicalObserver }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
-        ReplicaStore = new(new(Path.Combine(directory, ReplicaDirectory)) { Incarnation = Configuration.Incarnation }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        canonical = new(new(Path.Combine(directory, CanonicalDirectory))
+        {
+            Incarnation = Configuration.Incarnation,
+            FaultObserver = canonicalObserver
+        }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        ReplicaStore = new(new(Path.Combine(directory, ReplicaDirectory))
+        {
+            Incarnation = Configuration.Incarnation
+        }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         Log = new(ReplicaStore, ReplicaExecutionTestOptions.Configuration(Configuration));
         Database = new(canonical, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(),
             UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
@@ -101,17 +117,37 @@ internal sealed class ReplicaLifecycleFixture : IAsyncDisposable
         Consensus = new(Materializer, ReplicaExecutionTestOptions.Configuration(Configuration), execution, TimeProvider.System);
     }
 
-    internal ReplicaConfiguration Configuration { get; }
-    internal ZoneTreeStore ReplicaStore { get; }
-    internal DurableReplicaLog Log { get; }
-    internal DatabaseEngine Database { get; }
-    internal ReplicaMaterializer Materializer { get; }
-    internal ReplicaConsensus Consensus { get; }
+    internal ReplicaConfiguration Configuration
+    {
+        get;
+    }
+    internal ZoneTreeStore ReplicaStore
+    {
+        get;
+    }
+    internal DurableReplicaLog Log
+    {
+        get;
+    }
+    internal DatabaseEngine Database
+    {
+        get;
+    }
+    internal ReplicaMaterializer Materializer
+    {
+        get;
+    }
+    internal ReplicaConsensus Consensus
+    {
+        get;
+    }
 
     private static string Resolve(DirectoryInfo directory)
     {
         if (directory.Parent is null)
-        { return directory.FullName; }
+        {
+            return directory.FullName;
+        }
         var entry = new DirectoryInfo(Path.Combine(Resolve(directory.Parent), directory.Name));
         return entry.ResolveLinkTarget(returnFinalTarget: true)?.FullName ?? entry.FullName;
     }
@@ -124,9 +160,11 @@ internal sealed class ReplicaLifecycleFixture : IAsyncDisposable
         KeyLoad.Server.ServerFailureObserver.Observe(Log.Dispose, failures);
         KeyLoad.Server.ServerFailureObserver.Observe(ReplicaStore.Dispose, failures);
         try
-        { canonical.Dispose(); }
-        catch (Exception failure) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
-        catch (Exception failure) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
+        {
+            canonical.Dispose();
+        }
+        catch (Exception failure) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
+        catch (Exception failure) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
         KeyLoad.Server.ServerFailureObserver.Observe(() => Directory.Delete(directory, true), failures);
         KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }

@@ -28,7 +28,10 @@ internal sealed class SampleRollupPolicyTests
         await Assert.That(SampleRollupWholeFlow.Image(db)).IsEqualTo(image);
         await Assert.That(db.Store.Position).IsEqualTo(position);
         db.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(
-            new(Reader, db.Partition.TenantId, [], []) { PolicyEpoch = 2 }));
+            new(Reader, db.Partition.TenantId, [], [])
+            {
+                PolicyEpoch = 2
+            }));
         image = SampleRollupWholeFlow.Image(db);
         position = db.Store.Position;
         var denied = Assert.ThrowsExactly<KeyLoadException>(() => SampleRollupWholeFlow.Read(db, Reader));

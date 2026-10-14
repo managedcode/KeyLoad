@@ -8,7 +8,9 @@ internal static class RemoteTransferCapacityRepair
         var current = claims.CurrentDependency;
         if (current.PrincipalPolicyEpoch != original.PrincipalPolicyEpoch
             || current.FieldHeaderPolicyDigest != original.FieldHeaderPolicyDigest)
-        { return false; }
+        {
+            return false;
+        }
         return claims.FailureKind switch
         {
             RemoteTransferAcceptFailureKind.QueueStorage => current.QueueStoredMessages < original.QueueStoredMessages

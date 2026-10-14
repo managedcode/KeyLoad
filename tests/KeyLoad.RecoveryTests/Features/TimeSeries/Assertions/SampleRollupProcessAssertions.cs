@@ -98,7 +98,9 @@ internal static class SampleRollupProcessAssertions
         var info = new FileInfo(path);
         if (!info.Exists || (info.Attributes & FileAttributes.ReparsePoint) != 0
             || info.Length < MinimumBytes || info.Length > CommandIdempotencyCrashContract.EvidenceMaximumBytes)
-        { throw new InvalidOperationException(SampleRollupCrashContract.Invalid); }
+        {
+            throw new InvalidOperationException(SampleRollupCrashContract.Invalid);
+        }
         return JsonSerializer.Deserialize<SampleRollupCrashSnapshot>(await File.ReadAllBytesAsync(path, token), JsonDefaults.Options)
             ?? throw new InvalidOperationException(SampleRollupCrashContract.Invalid);
     }

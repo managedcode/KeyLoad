@@ -15,12 +15,16 @@ internal static class ClusterRestoreImageCommits
         if (reset is null)
         {
             if (position != reconciled.NativeCommitPosition)
-            { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, Invalid);
+            }
             return false;
         }
         reset = RequireRow(reset, original, context, mappingsDigest, ClusterRestoreSlotCommitKind.AuthorityReset);
         if (position != reset.NativeCommitPosition || reset.NativeCommitPosition <= reconciled.NativeCommitPosition)
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
         return true;
     }
 
@@ -31,7 +35,9 @@ internal static class ClusterRestoreImageCommits
             || row.Kind != kind || row.NativeCommitPosition <= context.SourcePosition
             || row.OriginalCut is null || !ClusterBackupMetadataEquality.OwnerCut(original, row.OriginalCut)
             || !string.Equals(row.MappingsDigest, mappingsDigest, StringComparison.Ordinal))
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
         return row;
     }
 }

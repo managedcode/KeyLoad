@@ -30,17 +30,38 @@ internal sealed class NativeTextGeneration
         CurrentIndex = NativeTextIndex.Open(System.IO.Path.Combine(Path, NativeTextProtocol.NativeDirectory), provider, executionOptions: executionOptions);
     }
 
-    internal string Leaf { get; }
-    internal string Path { get; }
-    internal TextProjectionScope Scope { get; }
-    internal IndexOfTokenRecordPreviousToken<ulong, ulong>? CurrentIndex { get; private set; }
+    internal string Leaf
+    {
+        get;
+    }
+    internal string Path
+    {
+        get;
+    }
+    internal TextProjectionScope Scope
+    {
+        get;
+    }
+    internal IndexOfTokenRecordPreviousToken<ulong, ulong>? CurrentIndex
+    {
+        get; private set;
+    }
     internal IndexOfTokenRecordPreviousToken<ulong, ulong> Index
         => CurrentIndex ?? throw new ObjectDisposedException(nameof(NativeTextGeneration));
-    internal DatabaseLimits Limits { get; }
+    internal DatabaseLimits Limits
+    {
+        get;
+    }
     internal NativeTextFile[] Files { get; private set; } = [];
-    internal Exception? DeferredBudgetFailure { get; private set; }
+    internal Exception? DeferredBudgetFailure
+    {
+        get; private set;
+    }
     internal IReadOnlyList<NativeTextRecord> Records => sealedRecords is { } records ? records : pendingRecords!;
-    internal bool Published { get; private set; }
+    internal bool Published
+    {
+        get; private set;
+    }
 
     internal void DeferBudgetFailure(Exception failure) => DeferredBudgetFailure ??= failure;
 

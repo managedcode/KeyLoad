@@ -31,8 +31,14 @@ internal sealed class RequestCqrsProbeMacTests
         };
         await Assert.That(mac.VerifyProbeRequest(wrongRequest)).IsFalse();
         await Assert.That(mac.VerifyProbeReply(wrongReply)).IsFalse();
-        await Assert.That(mac.VerifyProbeRequest(request with { Signature = mac.Sign(requestBytes, reply: false) })).IsFalse();
-        await Assert.That(mac.VerifyProbeReply(reply with { Signature = mac.Sign(replyBytes, reply: true) })).IsFalse();
+        await Assert.That(mac.VerifyProbeRequest(request with
+        {
+            Signature = mac.Sign(requestBytes, reply: false)
+        })).IsFalse();
+        await Assert.That(mac.VerifyProbeReply(reply with
+        {
+            Signature = mac.Sign(replyBytes, reply: true)
+        })).IsFalse();
     }
 
     [Test]
@@ -43,18 +49,46 @@ internal sealed class RequestCqrsProbeMacTests
         var request = RequestCqrsProbeNativeWireValues.Request(fixture);
         var unsigned = RequestCqrsProbeNativeWireValues.Reply(request);
         await Assert.That(mac.VerifyProbeReply(unsigned)).IsFalse();
-        await Assert.That(mac.VerifyProbeReply(unsigned with { Acknowledged = true })).IsFalse();
-        var refusal = unsigned with { Claim = null, Error = ErrorCode.UnsupportedCapability };
+        await Assert.That(mac.VerifyProbeReply(unsigned with
+        {
+            Acknowledged = true
+        })).IsFalse();
+        var refusal = unsigned with
+        {
+            Claim = null,
+            Error = ErrorCode.UnsupportedCapability
+        };
         await Assert.That(mac.VerifyProbeReply(refusal)).IsFalse();
-        refusal = refusal with { Signature = mac.SignProbeReply(refusal) };
+        refusal = refusal with
+        {
+            Signature = mac.SignProbeReply(refusal)
+        };
         await Assert.That(mac.VerifyProbeReply(refusal)).IsTrue();
         await Assert.That(refusal.Acknowledged).IsFalse();
-        await Assert.That(mac.VerifyProbeReply(refusal with { Acknowledged = true })).IsFalse();
-        await Assert.That(mac.VerifyProbeReply(refusal with { Error = null })).IsFalse();
-        await Assert.That(mac.VerifyProbeReply(refusal with { Claim = request.Claim })).IsFalse();
-        await Assert.That(mac.VerifyProbeReply(refusal with { Nonce = Guid.NewGuid() })).IsFalse();
-        await Assert.That(mac.VerifyProbeReply(refusal with { Method = RequestCqrsProbeNativeMethod.Locate })).IsFalse();
-        await Assert.That(mac.VerifyProbeReply(refusal with { Version = refusal.Version + 1 })).IsFalse();
+        await Assert.That(mac.VerifyProbeReply(refusal with
+        {
+            Acknowledged = true
+        })).IsFalse();
+        await Assert.That(mac.VerifyProbeReply(refusal with
+        {
+            Error = null
+        })).IsFalse();
+        await Assert.That(mac.VerifyProbeReply(refusal with
+        {
+            Claim = request.Claim
+        })).IsFalse();
+        await Assert.That(mac.VerifyProbeReply(refusal with
+        {
+            Nonce = Guid.NewGuid()
+        })).IsFalse();
+        await Assert.That(mac.VerifyProbeReply(refusal with
+        {
+            Method = RequestCqrsProbeNativeMethod.Locate
+        })).IsFalse();
+        await Assert.That(mac.VerifyProbeReply(refusal with
+        {
+            Version = refusal.Version + 1
+        })).IsFalse();
     }
 
     [Test]
@@ -63,9 +97,15 @@ internal sealed class RequestCqrsProbeMacTests
         using var fixture = new ReplicaSecurityFixture();
         var mac = new PartitionMovementMac(fixture.Options.Secret.Span, PhysicalOwnerProbeProtocol.MaximumBodyBytes);
         var request = RequestCqrsProbeNativeWireValues.Request(fixture);
-        request = request with { Signature = mac.SignProbeRequest(request) };
+        request = request with
+        {
+            Signature = mac.SignProbeRequest(request)
+        };
         var reply = RequestCqrsProbeNativeWireValues.Reply(request);
-        reply = reply with { Signature = mac.SignProbeReply(reply) };
+        reply = reply with
+        {
+            Signature = mac.SignProbeReply(reply)
+        };
         mac.Dispose();
         mac.Dispose();
         Assert.ThrowsExactly<ObjectDisposedException>(() => mac.SignProbeRequest(request));

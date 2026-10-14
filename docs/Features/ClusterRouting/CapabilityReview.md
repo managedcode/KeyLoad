@@ -116,8 +116,8 @@ flowchart LR
 ## Actual source joins and qualification
 
 - [OrleansSiloConfiguration](../../../src/KeyLoad.Server/Features/ClusterRouting/Hosting/OrleansSiloConfiguration.cs) owns borrowed DI, message bound, services, serializer registration, native directory/repartitioner and Graph transitions.
-- [Replica service](../../../src/KeyLoad.Orleans/Features/ClusterReplication/GrainServices/PartitionReplicaGrainService.cs), [transport lifecycle](../../../src/KeyLoad.Orleans/Features/ClusterReplication/Transport/ReplicaTransportLifecycle.cs) and [due service](../../../src/KeyLoad.Orleans/Features/Messaging/GrainServices/RecurringDueGrainService.cs) own real per-silo startup/dispatch/stop joins.
-- [Native request owner](../../../src/KeyLoad.Orleans/Features/ClusterRouting/Streaming/NativeRequestWorkOwner.cs) and [OrleansNode](../../../src/KeyLoad.Server/Features/ClusterRouting/Hosting/OrleansNode.cs) own bounded admission, cancellation and drain before physical cleanup.
+- [Replica service](../../../src/KeyLoad.Clustering/Features/ClusterReplication/GrainServices/PartitionReplicaGrainService.cs), [transport lifecycle](../../../src/KeyLoad.Clustering/Features/ClusterReplication/Transport/ReplicaTransportLifecycle.cs) and [due service](../../../src/KeyLoad.Clustering/Features/Messaging/GrainServices/RecurringDueGrainService.cs) own real per-silo startup/dispatch/stop joins.
+- [Native request owner](../../../src/KeyLoad.Clustering/Features/ClusterRouting/Streaming/NativeRequestWorkOwner.cs) and [OrleansNode](../../../src/KeyLoad.Server/Features/ClusterRouting/Hosting/OrleansNode.cs) own bounded admission, cancellation and drain before physical cleanup.
 - [StorageContracts](../../../src/KeyLoad.Abstractions/Storage/StorageContracts.cs), [EventStreams](../EventStreams.md), [Messaging](../Messaging.md), [ChangeFeeds](../ChangeFeeds.md) and [ResourceExecution](../ResourceExecution.md) retain canonical data/effect/cursor/cache contracts.
 
 REQ/AC-ORL-007..010 and TASK-ORL-SERVICES/MESSAGING/STATE/CAPABILITY-REVIEW in the

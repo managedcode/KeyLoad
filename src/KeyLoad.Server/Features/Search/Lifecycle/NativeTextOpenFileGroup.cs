@@ -6,7 +6,10 @@ internal sealed class NativeTextOpenFileGroup(string path)
 {
     private const long EmptyFileLength = 0;
     internal string? LinkedPath { get; set; } = path;
-    internal bool Ambiguous { get; set; }
+    internal bool Ambiguous
+    {
+        get; set;
+    }
     internal Dictionary<IFileStream, NativeTextOpenStream> Streams { get; } = new(ReferenceEqualityComparer.Instance);
 
     internal long ObserveLength()
@@ -16,7 +19,9 @@ internal sealed class NativeTextOpenFileGroup(string path)
         {
             var actual = stream.ObserveLength();
             if (actual < EmptyFileLength)
-            { throw NativeTextErrors.Corrupt(); }
+            {
+                throw NativeTextErrors.Corrupt();
+            }
             length = Math.Max(length, actual);
         }
         return length;

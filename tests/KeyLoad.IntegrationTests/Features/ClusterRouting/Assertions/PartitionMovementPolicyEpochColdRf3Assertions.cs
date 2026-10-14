@@ -34,7 +34,9 @@ internal static class PartitionMovementPolicyEpochColdRf3Assertions
             await SqlRf3Protocol.EqualAsync(expected, PartitionMovementCapturePointerRf3Fault.Read<PrincipalRecord>(
                 cut, KeySpace.Principal(expected.Id)));
             if (cut.Header is not { } header)
-            { continue; }
+            {
+                continue;
+            }
             await Assert.That(header.OperatorPrincipalId).IsEqualTo(expected.Id);
             await Assert.That(header.InitialPolicyEpoch).IsEqualTo(
                 PartitionMovementPublicParentRf3Administrator.InitialDefinition().PolicyEpoch);
@@ -65,7 +67,9 @@ internal static class PartitionMovementPolicyEpochColdRf3Assertions
             }
             var allowed = new HashSet<string>(StringComparer.Ordinal);
             if (entries.Length != PartitionMoveProtocol.EmptyCount)
-            { allowed.Add(Convert.ToHexString(KeySpace.AppliedBytes)); }
+            {
+                allowed.Add(Convert.ToHexString(KeySpace.AppliedBytes));
+            }
             await PartitionMovementCapturePointerRf3Cut.RequireExactRemainingRowsAsync(original, actual, allowed);
             await Assert.That(actual.StorePosition - original.StorePosition).IsEqualTo((long)entries.Length);
             if (original.Header is not null)

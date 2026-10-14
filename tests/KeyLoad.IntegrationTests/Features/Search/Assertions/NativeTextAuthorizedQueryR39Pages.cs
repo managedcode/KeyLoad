@@ -50,7 +50,9 @@ internal static class NativeTextAuthorizedQueryR39Pages
                 await SqlRf3Protocol.EqualAsync(expected, await NativeTextSelectedRf3Call.ExecuteAsync(
                     caller.Sdk, caller.Mcp, request, path, token));
                 if (current is not null)
-                { await current(); }
+                {
+                    await current();
+                }
             }
         }
     }

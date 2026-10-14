@@ -3,7 +3,10 @@ using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.Authorization;
 
-internal enum AuthenticationExecutionEventKind { Started, Terminal, Ticket }
+internal enum AuthenticationExecutionEventKind
+{
+    Started, Terminal, Ticket
+}
 
 internal sealed record AuthenticationExecutionEvent(int Owner, string HttpRequestId,
     Guid AuthenticateRequestId, AuthenticationExecutionEventKind Kind,

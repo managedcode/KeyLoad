@@ -26,12 +26,16 @@ internal static class CrossTenantRf3StateAssertions
         await Assert.That(indexed.AccessPath).IsEqualTo("index:secret");
         await Assert.That(indexed.Cursor).IsNull();
         if (json == McpDocumentProtocol.InitialJson)
-        { await PageAsync(indexed, json, revision, "index:secret"); }
+        {
+            await PageAsync(indexed, json, revision, "index:secret");
+        }
         else
         {
             await Assert.That(indexed.Rows).IsEmpty();
             var positive = Query(scenario.Partition, true) with
-            { Sql = Indexed.Replace(McpDocumentProtocol.PrivateValue, CrossTenantRf3WholeFlow.HealthyCanary, StringComparison.Ordinal) };
+            {
+                Sql = Indexed.Replace(McpDocumentProtocol.PrivateValue, CrossTenantRf3WholeFlow.HealthyCanary, StringComparison.Ordinal)
+            };
             await PageAsync(await McpCallerAssertions.SdkSuccessAsync(await admin.QueryAsync(positive, token)), json, revision, "index:secret");
         }
     }

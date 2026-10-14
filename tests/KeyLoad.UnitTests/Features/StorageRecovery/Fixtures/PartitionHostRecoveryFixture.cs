@@ -9,11 +9,16 @@ using Microsoft.Extensions.Logging;
 
 namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
-internal enum PendingPrincipal { Missing, Modified, Valid }
+internal enum PendingPrincipal
+{
+    Missing, Modified, Valid
+}
 
 internal sealed class VerifiedSnapshotInterruption : Exception
 {
-    public VerifiedSnapshotInterruption() { }
+    public VerifiedSnapshotInterruption()
+    {
+    }
     public VerifiedSnapshotInterruption(string message) : base(message) { }
     public VerifiedSnapshotInterruption(string message, Exception innerException) : base(message, innerException) { }
 }
@@ -53,15 +58,27 @@ internal sealed class PartitionHostRecoveryFixture : IDisposable
         Options.Validate();
     }
 
-    internal NodeOptions Options { get; }
+    internal NodeOptions Options
+    {
+        get;
+    }
     internal ReplicaSnapshot Pending { get; private set; } = null!;
-    internal Guid TargetNodeId { get; private set; }
-    internal long TargetGeneration { get; private set; }
+    internal Guid TargetNodeId
+    {
+        get; private set;
+    }
+    internal long TargetGeneration
+    {
+        get; private set;
+    }
 
     internal void StagePending(PendingPrincipal principal)
     {
         using var source = new HostReplicaStores(Options with
-        { DataDirectory = Path.Combine(directory, SourceDirectory), PublicEndpoint = VoterB });
+        {
+            DataDirectory = Path.Combine(directory, SourceDirectory),
+            PublicEndpoint = VoterB
+        });
         using var target = OpenStores();
         TargetNodeId = target.Canonical.Identity.NodeId;
         TargetGeneration = target.Canonical.Identity.ReadGeneration;
@@ -70,11 +87,16 @@ internal sealed class PartitionHostRecoveryFixture : IDisposable
         {
             var key = KeySpace.Principal(ClusterPrincipalPolicy.InternalPrincipalId);
             if (principal == PendingPrincipal.Missing)
-            { transaction.Delete(key); }
+            {
+                transaction.Delete(key);
+            }
             else if (principal == PendingPrincipal.Modified)
             {
                 var original = transaction.GetRecord<PrincipalRecord>(key)!;
-                transaction.PutRecord(key, original with { Revoked = true });
+                transaction.PutRecord(key, original with
+                {
+                    Revoked = true
+                });
             }
             transaction.PutRecord(KeySpace.Applied.ToArray(), SnapshotCut);
             return true;
@@ -86,7 +108,9 @@ internal sealed class PartitionHostRecoveryFixture : IDisposable
         var incoming = new ReplicaSnapshotStore(target.Canonical, target.Log, UnitExecutionOptions.ReplicaConfiguration(target.Configuration), UnitExecutionOptions.ReplicaExecution(), boundary =>
         {
             if (boundary == ReplicaCrashBoundary.SnapshotVerified)
-            { throw new VerifiedSnapshotInterruption(); }
+            {
+                throw new VerifiedSnapshotInterruption();
+            }
         });
         var offset = incoming.Begin(Pending);
         while (offset < Pending.Length)
@@ -112,7 +136,9 @@ internal sealed class PartitionHostRecoveryFixture : IDisposable
     private static string Resolve(DirectoryInfo directory)
     {
         if (directory.Parent is null)
-        { return directory.FullName; }
+        {
+            return directory.FullName;
+        }
         var entry = new DirectoryInfo(Path.Combine(Resolve(directory.Parent), directory.Name));
         return entry.ResolveLinkTarget(returnFinalTarget: true)?.FullName ?? entry.FullName;
     }
@@ -121,7 +147,9 @@ internal sealed class PartitionHostRecoveryFixture : IDisposable
     {
         logging.Dispose();
         if (Directory.Exists(directory))
-        { Directory.Delete(directory, true); }
+        {
+            Directory.Delete(directory, true);
+        }
     }
 }
 
@@ -147,23 +175,45 @@ internal sealed class HostReplicaStores : IDisposable
         catch (Exception) { Canonical.Dispose(); throw; }
     }
 
-    internal ReplicaConfiguration Configuration { get; }
-    internal ZoneTreeStore Canonical { get; }
-    internal DurableReplicaLog Log { get; }
-    internal DatabaseEngine Database { get; }
-    internal ReplicaSnapshotStore Snapshots { get; }
+    internal ReplicaConfiguration Configuration
+    {
+        get;
+    }
+    internal ZoneTreeStore Canonical
+    {
+        get;
+    }
+    internal DurableReplicaLog Log
+    {
+        get;
+    }
+    internal DatabaseEngine Database
+    {
+        get;
+    }
+    internal ReplicaSnapshotStore Snapshots
+    {
+        get;
+    }
 
     private static ZoneTreeStore Open(NodeOptions options, string suffix) => new(new(Path.Combine(options.DataDirectory, suffix))
-    { Incarnation = options.Incarnation, SigningKey = Convert.FromBase64String(options.SigningKey) }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+    {
+        Incarnation = options.Incarnation,
+        SigningKey = Convert.FromBase64String(options.SigningKey)
+    }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
 
     public void Dispose()
     {
         try
-        { Log.Dispose(); }
+        {
+            Log.Dispose();
+        }
         finally
         {
             try
-            { replica.Dispose(); }
+            {
+                replica.Dispose();
+            }
             finally { Canonical.Dispose(); }
         }
     }

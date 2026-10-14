@@ -33,7 +33,9 @@ internal static class PostgresErrorReceiverFault
                 await global::TUnit.Assertions.Assert.That(original.IsCompleted).IsFalse();
                 wire.AbortReceiver();
                 try
-                { await original; }
+                {
+                    await original;
+                }
                 finally { originalJoined = true; }
                 await PostgresErrorReceiverAssertions.TerminalAsync(control, arm, buffered, token);
                 await global::TUnit.Assertions.Assert.That(token.IsCancellationRequested).IsFalse();
@@ -41,7 +43,9 @@ internal static class PostgresErrorReceiverFault
             }, failures);
             ServerFailureObserver.Observe(wire.AbortReceiver, failures);
             if (original is not null && !originalJoined)
-            { await ServerFailureObserver.ObserveAsync(() => original, failures); }
+            {
+                await ServerFailureObserver.ObserveAsync(() => original, failures);
+            }
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }

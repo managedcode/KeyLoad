@@ -14,10 +14,14 @@ public sealed partial class DatabaseEngine
         var original = Verify<RemoteTransferIntentClaims>(request.IntentToken, Limits.MaxBatchBytes);
         ValidateIntentClaims(original, request.Destination, principal.Id);
         if (original.Source != request.Source || original.TransferId != request.TransferId)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteTransferAttemptProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteTransferAttemptProtocol.Invalid);
+        }
         var receipt = InspectQueueTransferReceipt(view, principal.Id, request.Destination, request.Source, request.TransferId);
         if (receipt is not null)
-        { return new(null, null, receipt); }
+        {
+            return new(null, null, receipt);
+        }
         var selection = CommandOutcomeKeyResolver.Select(view, principal.Id, request.AcceptCommandId,
             new(CommandOutcomeScopeKind.Partition, request.Destination.Partition));
         var outcome = selection.Outcome ?? throw Errors.Fail(ErrorCode.RecoveryRequired, RemoteTransferAttemptProtocol.Unavailable);
@@ -29,7 +33,9 @@ public sealed partial class DatabaseEngine
             Convert.ToHexString(SHA256.HashData(bytes)), CaptureRemoteTransferDependency(view, principal, request.Destination),
             cut, cut.Position, RemoteTransferFailureKind(outcome.Result));
         if (!RemoteTransferCapacityRepair.Improved(claims))
-        { throw Errors.Fail(ErrorCode.RevisionConflict, RemoteTransferAttemptProtocol.Stale); }
+        {
+            throw Errors.Fail(ErrorCode.RevisionConflict, RemoteTransferAttemptProtocol.Stale);
+        }
         var signed = Sign(claims);
         RequireTokenBound(signed);
         return new(null, signed, null);
@@ -41,7 +47,9 @@ public sealed partial class DatabaseEngine
         var stamp = outcome.RemoteTransferFailureAuthority;
         if (stamp is null || outcome.Result is null || !RemoteTransferDependencyShape.Valid(stamp.Dependency)
             || !HasRemoteTransferCapacityFailure(outcome.Result) || (outcome.Result.Json is not null || outcome.Result.NativeValue is not null))
-        { throw Errors.Fail(ErrorCode.UnsupportedCapability, RemoteTransferAttemptProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, RemoteTransferAttemptProtocol.Unavailable);
+        }
         var intentDigest = RemoteTransferCoordinationIdentity.IntentDigest(request.IntentToken);
         if (outcome.Incarnation != Store.Identity.Incarnation || stamp.TargetIncarnation != outcome.Incarnation
             || stamp.Source != intent.Source || stamp.Destination != intent.Destination || stamp.TransferId != intent.TransferId
@@ -50,7 +58,9 @@ public sealed partial class DatabaseEngine
             || stamp.CommandFingerprint != outcome.Fingerprint || stamp.Dependency.PrincipalPolicyEpoch != outcome.PolicyEpoch
             || RemoteTransferAttemptIdentity.AcceptId(intent.Source, intent.Destination, intent.TransferId,
                 intent.PrincipalId, intent.Fingerprint, intentDigest, intent.Incarnation, request.ExpectedGeneration) != request.AcceptCommandId)
-        { throw Errors.Fail(ErrorCode.Conflict, RemoteTransferAttemptProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, RemoteTransferAttemptProtocol.Invalid);
+        }
         return stamp;
     }
 }

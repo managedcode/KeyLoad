@@ -39,6 +39,8 @@ internal static class NativeTextPartitionGenerationPublicTrial
         await NativeTextPartitionGenerationPublicAssertions.RefuseAsync(caller, states[0], states[1], states, token);
         await NativeTextPartitionGenerationPublicAssertions.RefuseAsync(caller, states[1], states[0], states, token);
         foreach (var state in states)
-        { await NativeTextPartitionGenerationPublicAssertions.ReplayAsync(caller, state, states, token); }
+        {
+            await NativeTextPartitionGenerationPublicAssertions.ReplayAsync(caller, state, states, token);
+        }
     }
 }

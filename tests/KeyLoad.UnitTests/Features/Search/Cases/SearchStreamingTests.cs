@@ -74,15 +74,24 @@ internal sealed class SearchStreamingTests
             new PutVector(Collection, "bob", VectorPath, [1, 0], space, 1));
         db.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(new("alice", "tenant",
             [new("database", Collection, Capability.Query | Capability.DocumentsRead | Capability.VectorSearch)], [])
-        { OwnerId = "alice", RestrictRows = true })).Get<PrincipalRecord>();
+        {
+            OwnerId = "alice",
+            RestrictRows = true
+        })).Get<PrincipalRecord>();
         var search = new SearchEngine(db.Database, UnitExecutionOptions.QueryExecution());
         var request = new SearchRequest(db.Partition, Collection, VectorField: VectorPath, Vector: [1, 0], Space: space);
 
         var visible = await Assert.That(await search.SearchAsync("alice", request,
             TestContext.Current!.Execution.CancellationToken)).HasSingleItem();
         await Assert.That(visible.Document.Reference.Id).IsEqualTo("alice");
-        var otherSpace = space with { Id = "different" };
-        await Assert.That(await search.SearchAsync("alice", request with { Space = otherSpace },
+        var otherSpace = space with
+        {
+            Id = "different"
+        };
+        await Assert.That(await search.SearchAsync("alice", request with
+        {
+            Space = otherSpace
+        },
             TestContext.Current!.Execution.CancellationToken)).IsEmpty();
     }
 
@@ -93,7 +102,10 @@ internal sealed class SearchStreamingTests
         db.Configure(Collection, ResourceKind.Collection);
         db.Commit(new PutDocument(Collection, "a", "{\"text\":\"alpha\",\"padding\":\"" + new string('x', 1_024) + "\"}"));
         var position = db.Store.Position;
-        var bounded = new SearchEngine(new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxBatchBytes = 128 }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance), UnitExecutionOptions.QueryExecution());
+        var bounded = new SearchEngine(new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new()
+        {
+            MaxBatchBytes = 128
+        }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance), UnitExecutionOptions.QueryExecution());
         var failure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() => bounded.SearchAsync("root",
             new(db.Partition, Collection, TextPath, "alpha"), TestContext.Current!.Execution.CancellationToken)))!;
         await Assert.That(failure.Code)

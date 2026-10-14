@@ -18,7 +18,10 @@ internal static class BlobCompleteCommitCutHealthy
     internal static async Task<BlobCompleteCommitCutHealthyState> RunAsync(DatabaseEngine owner, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
-        var blob = BlobCommitCutProtocol.Blob with { Id = HealthyId };
+        var blob = BlobCommitCutProtocol.Blob with
+        {
+            Id = HealthyId
+        };
         var upload = Guid.NewGuid();
         byte[] bytes = [101, 102, 103, 104];
         var begin = new BeginBlobUploadRequest(Guid.NewGuid(), blob, upload, PayloadBytes, 0);
@@ -53,7 +56,9 @@ internal static class BlobCompleteCommitCutHealthy
         var position = owner.Store.Position;
         var result = owner.Apply(operation);
         if (result.Error is not null)
-        { throw Errors.Fail(result.Error.Value, result.SafeDetail!); }
+        {
+            throw Errors.Fail(result.Error.Value, result.SafeDetail!);
+        }
         var receipt = kind == OperationKind.CompleteBlobUpload
             ? result.Get<BlobCommitResult<BlobMetadata>>().Receipt : result.Get<BlobCommitResult<BlobUploadInfo>>().Receipt;
         await BlobCompleteCommitCutOracle.ExactAsync(receipt, new CommitReceipt(id,
@@ -88,7 +93,9 @@ internal static class BlobCompleteCommitCutHealthy
         await BlobCompleteCommitCutOracle.ExactAsync(owner.Store.Read(view => view.GetRecord<BlobPartMetadata>(part)),
             new BlobPartMetadata(1, PayloadBytes, BlobCompleteCommitCutOracle.Hash(seed.Bytes)));
         for (var index = 0; index < seed.Operations.Length; index++)
-        { await BlobCompleteCommitCutTrial.ReplayAsync(owner, seed.Operations[index], seed.Results[index]); }
+        {
+            await BlobCompleteCommitCutTrial.ReplayAsync(owner, seed.Operations[index], seed.Results[index]);
+        }
     }
 
     private static byte[] Key(string space, BlobCompleteCommitCutHealthyState seed)

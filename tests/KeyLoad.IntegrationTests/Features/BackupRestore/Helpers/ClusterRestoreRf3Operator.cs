@@ -47,7 +47,9 @@ internal static class ClusterRestoreRf3Operator
         var cli = System.IO.Path.Combine(repository, cut is null ? ClusterRestoreRf3Protocol.CliDll
             : ClusterRestoreRf3ResumeProtocol.CrashHostDll);
         if (!File.Exists(cli) || receipts.Length != archives.Length || receipts.Length != mappings.Length)
-        { throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid); }
+        {
+            throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid);
+        }
         var resource = builder.AddExecutable(ClusterRestoreRf3Protocol.RestoreResource, Runtime, repository,
             cut is { } selected ? [cli, ClusterRestoreRf3ResumeProtocol.CutMode, selected.ToString(),
                 operationId.ToString(ClusterRestoreRf3Protocol.IdentityFormat)] : [cli, ClusterRestoreRf3Protocol.CliCommand]);
@@ -78,7 +80,9 @@ internal static class ClusterRestoreRf3Operator
             }
         }
         if (nodeIndex != ClusterRestoreRf3Protocol.Nodes.Length)
-        { throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid); }
+        {
+            throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid);
+        }
         return resource;
     }
 
@@ -88,18 +92,24 @@ internal static class ClusterRestoreRf3Operator
         var nodes = builder.Resources.OfType<ContainerResource>().Where(resource =>
             ClusterRestoreRf3Protocol.Nodes.Contains(resource.Name, StringComparer.Ordinal)).ToArray();
         if (nodes.Length != ClusterRestoreRf3Protocol.Nodes.Length)
-        { throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid); }
+        {
+            throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid);
+        }
         foreach (var node in nodes)
         {
             var mount = node.Annotations.OfType<ContainerMountAnnotation>().Single(value => value.Target == ContainerData);
             if (mount.Type != ContainerMountType.BindMount || mount.IsReadOnly
                 || !string.Equals(mount.Source, System.IO.Path.Combine(profileRoot, node.Name), StringComparison.Ordinal))
-            { throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid); }
+            {
+                throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid);
+            }
             node.Annotations.Remove(mount);
             node.Annotations.Add(new ContainerMountAnnotation(System.IO.Path.Combine(publicationRoot, node.Name), ContainerData,
                 ContainerMountType.BindMount, isReadOnly: false));
             if (cli is not null)
-            { builder.CreateResourceBuilder(node).WaitForCompletion(cli, ClusterRestoreRf3Protocol.SuccessfulExit); }
+            {
+                builder.CreateResourceBuilder(node).WaitForCompletion(cli, ClusterRestoreRf3Protocol.SuccessfulExit);
+            }
         }
     }
 
@@ -111,7 +121,9 @@ internal static class ClusterRestoreRf3Operator
         Set(resource, MappingsSection, index, prefix + IncarnationField, owner.Incarnation.ToString(ClusterRestoreRf3Protocol.IdentityFormat));
         Set(resource, MappingsSection, index, prefix + EpochField, owner.PlacementEpoch.ToString(CultureInfo.InvariantCulture));
         for (var voter = FirstIndex; voter < owner.VoterIds.Length; voter++)
-        { Set(resource, MappingsSection, index, prefix + VotersField + Separator + Index(voter), owner.VoterIds[voter]); }
+        {
+            Set(resource, MappingsSection, index, prefix + VotersField + Separator + Index(voter), owner.VoterIds[voter]);
+        }
     }
 
     private static void Node(IResourceBuilder<ExecutableResource> resource, string index,

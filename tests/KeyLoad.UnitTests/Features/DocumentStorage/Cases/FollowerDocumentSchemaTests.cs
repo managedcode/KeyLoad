@@ -1,6 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 using KeyLoad.UnitTests.Features.ClientApi;
 using KeyLoad.UnitTests.Features.QueryExecution;
@@ -30,14 +30,18 @@ internal sealed class FollowerDocumentSchemaTests
         await Assert.That(descriptor.Idempotent).IsTrue();
         await Assert.That(descriptor.Destructive).IsFalse();
         var arguments = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
-        { [McpCanonicalTestData.RequestKey] = JsonSerializer.SerializeToElement(request, JsonDefaults.Options) };
+        {
+            [McpCanonicalTestData.RequestKey] = JsonSerializer.SerializeToElement(request, JsonDefaults.Options)
+        };
         var decoded = descriptor.Decode(arguments);
         var typed = NativeSerialization.Deserialize<ReadFollowerDocumentRequestV1>(decoded.Payload.Span)!;
         await Assert.That(JsonDefaults.Serialize(typed).SequenceEqual(JsonDefaults.Serialize(request))).IsTrue();
         await Assert.That(decoded.CommandId).IsEqualTo(Guid.Empty);
         var sql = new SqlOperationRequest(fixture.Db.Partition, SqlOperationTestData.CallPrefix + Tool + SqlOperationTestData.CallSuffix,
             new Dictionary<string, JsonElement>(StringComparer.Ordinal)
-            { [SqlOperationTestData.Parameter] = JsonSerializer.SerializeToElement(arguments, JsonDefaults.Options) });
+            {
+                [SqlOperationTestData.Parameter] = JsonSerializer.SerializeToElement(arguments, JsonDefaults.Options)
+            });
         var compiled = SqlOperationTestData.Compile(sql);
         await Assert.That(compiled.ReadKind).IsEqualTo(GrainReadKind.FollowerDocument);
         await Assert.That(compiled.CommandId).IsEqualTo(Guid.Empty);
@@ -66,14 +70,18 @@ internal sealed class FollowerDocumentSchemaTests
         var result = root.GetProperty(McpSchemaInspector.OneOf)[0].GetProperty(McpSchemaInspector.Properties)
             .GetProperty(McpSchemaInspector.Result);
         if (result.TryGetProperty(McpSchemaInspector.Ref, out var reference))
-        { result = McpSchemaInspector.Resolve(root, reference.GetString()!); }
+        {
+            result = McpSchemaInspector.Resolve(root, reference.GetString()!);
+        }
         string[] fields = ["version", "mode", "replicaId", "capturedTerm", "authorityTerm", "dataToken",
             "authorizationToken", "positionLag", "policyEpoch", DocumentField];
         await ShapeAsync(result, fields, fields);
         await Assert.That(McpSchemaInspector.HasType(result, McpSchemaInspector.Null)).IsFalse();
         var document = result.GetProperty(McpSchemaInspector.Properties).GetProperty(DocumentField);
         if (document.TryGetProperty(McpSchemaInspector.Ref, out var documentReference))
-        { document = McpSchemaInspector.Resolve(root, documentReference.GetString()!); }
+        {
+            document = McpSchemaInspector.Resolve(root, documentReference.GetString()!);
+        }
         await Assert.That(McpSchemaInspector.HasType(document, McpSchemaInspector.Null)).IsTrue();
         foreach (var schema in new[] { descriptor.InputSchema, root })
         {

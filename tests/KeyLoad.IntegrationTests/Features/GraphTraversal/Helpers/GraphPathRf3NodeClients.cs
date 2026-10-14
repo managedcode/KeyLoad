@@ -10,8 +10,14 @@ internal sealed class GraphPathRf3NodeClients : IDisposable
     private readonly HttpClient[] adminHttp;
     private readonly HttpClient[] readerHttp;
 
-    internal KeyLoadClient[] Administrators { get; }
-    internal KeyLoadClient[] Readers { get; }
+    internal KeyLoadClient[] Administrators
+    {
+        get;
+    }
+    internal KeyLoadClient[] Readers
+    {
+        get;
+    }
 
     internal GraphPathRf3NodeClients(ClusterFixture fixture, string readerSecret)
     {

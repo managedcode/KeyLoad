@@ -31,7 +31,9 @@ internal static class TenantCapacityPlacementRf3PolicyRevisionRows
             await Assert.That(cut.OutstandingDatabaseGrants).IsEqualTo(0L);
             await Assert.That(Row(cut, intentKey)).IsNull();
             if (!controls.Contains(cut))
-            { await Assert.That(Row(cut, outcomeKey)).IsNull(); }
+            {
+                await Assert.That(Row(cut, outcomeKey)).IsNull();
+            }
         }
         foreach (var cut in controls)
         {

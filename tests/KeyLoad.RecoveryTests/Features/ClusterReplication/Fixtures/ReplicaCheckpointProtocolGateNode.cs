@@ -42,12 +42,27 @@ internal sealed class ReplicaCheckpointProtocolGateNode : IAsyncDisposable
         }
     }
 
-    internal ReplicaConfiguration Configuration { get; }
+    internal ReplicaConfiguration Configuration
+    {
+        get;
+    }
     internal ZoneTreeStore Canonical => stores.Canonical;
-    internal DatabaseEngine Database { get; }
-    internal DurableReplicaLog Log { get; }
-    internal ReplicaSnapshotStore Snapshots { get; }
-    internal ReplicaMaterializer Materializer { get; }
+    internal DatabaseEngine Database
+    {
+        get;
+    }
+    internal DurableReplicaLog Log
+    {
+        get;
+    }
+    internal ReplicaSnapshotStore Snapshots
+    {
+        get;
+    }
+    internal ReplicaMaterializer Materializer
+    {
+        get;
+    }
     internal string SnapshotDirectory => Path.Combine(Configuration.Directory, ReplicaProtocol.SnapshotDirectory);
 
     internal async Task SeedAsync(long applied, CancellationToken cancellationToken)
@@ -71,12 +86,18 @@ internal sealed class ReplicaCheckpointProtocolGateNode : IAsyncDisposable
         try
         {
             try
-            { stores.Dispose(); }
+            {
+                stores.Dispose();
+            }
             catch (Exception original)
-            { throw new AggregateException(original); }
+            {
+                throw new AggregateException(original);
+            }
         }
         catch (AggregateException wrapper)
-        { ReplicaMaterializerLifecycleErrors.AddWrapped(wrapper, failures); }
+        {
+            ReplicaMaterializerLifecycleErrors.AddWrapped(wrapper, failures);
+        }
         ReplicaMaterializerLifecycleErrors.Throw(failures);
     }
 }

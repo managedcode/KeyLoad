@@ -11,7 +11,9 @@ internal static class SqlBetweenSymmetricRf3Pages
             var capabilities = await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.QueryCapabilitiesAsync(token));
             await global::TUnit.Assertions.Assert.That(capabilities.ReadProfiles.Contains(SqlBetweenSymmetricRf3Cases.Profile)).IsTrue();
             var mcp = (await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.SuccessAsync<QueryCapabilityManifest>(
-                await caller.Mcp.CallAsync(global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerTools.QueryCapabilities, new { }, token))).Value;
+                await caller.Mcp.CallAsync(global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerTools.QueryCapabilities, new
+                {
+                }, token))).Value;
             await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlBetweenSymmetricRf3Cases.Profile)).IsTrue();
             var failures = new List<Exception>();
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
@@ -21,7 +23,9 @@ internal static class SqlBetweenSymmetricRf3Pages
                 await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
                 {
                     foreach (var item in SqlBetweenSymmetricRf3Cases.All)
-                    { await CaseAsync(caller, wire, item, state.LowRevision, token); }
+                    {
+                        await CaseAsync(caller, wire, item, state.LowRevision, token);
+                    }
                 }, failures);
             }, failures);
             global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);

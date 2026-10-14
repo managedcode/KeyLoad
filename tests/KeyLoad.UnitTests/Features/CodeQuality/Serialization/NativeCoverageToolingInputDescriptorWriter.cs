@@ -17,10 +17,14 @@ internal static class NativeCoverageToolingInputDescriptorWriter
         IReadOnlyList<string> reports, NativeCoverageExecutionOptions options, CancellationToken cancellationToken)
     {
         if (reports.Count != InputCount || File.Exists(descriptorPath) || Directory.Exists(descriptorPath))
-        { throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure); }
+        {
+            throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure);
+        }
         var descriptor = Serialize(evidenceRoot, reports, options);
         if (descriptor.Length > options.MaximumDescriptorBytes || InputCount + 1 > options.MaximumFiles)
-        { throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure); }
+        {
+            throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure);
+        }
         await using var stream = new FileStream(descriptorPath, FileMode.CreateNew, FileAccess.Write, FileShare.None,
             options.ReadBufferBytes, FileOptions.Asynchronous | FileOptions.WriteThrough);
         await stream.WriteAsync(descriptor, cancellationToken).ConfigureAwait(false);
@@ -58,11 +62,15 @@ internal static class NativeCoverageToolingInputDescriptorWriter
             if (Path.IsPathRooted(relativePath) || relativePath == ".." ||
                 relativePath.StartsWith("../", StringComparison.Ordinal) || relativePath.Length > options.MaximumPathCharacters ||
                 !seen.Add(relativePath))
-            { throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure); }
+            {
+                throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure);
+            }
             var info = new FileInfo(fullPath);
             if (!info.Exists || info.Length <= 0 || info.Length > options.MaximumReportBytes || info.LinkTarget is not null ||
                 totalBytes > options.MaximumTotalBytes - info.Length)
-            { throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure); }
+            {
+                throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure);
+            }
             totalBytes += info.Length;
             writer.WriteStartObject();
             writer.WriteString(PathProperty, relativePath);

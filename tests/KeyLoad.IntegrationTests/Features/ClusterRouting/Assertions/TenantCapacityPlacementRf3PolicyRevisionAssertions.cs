@@ -16,7 +16,11 @@ internal static class TenantCapacityPlacementRf3PolicyRevisionAssertions
         await SqlRf3Protocol.EqualAsync(Errors.Problem(ErrorCode.Conflict,
             TenantPlacementPolicyProtocol.Stale), sdk.Problem!);
         var mcp = await seed.Official.CallAsync(TenantPlacementPublicProtocol.PersistTool,
-            new { commandId = original.Id, request = original.Request }, token);
+            new
+            {
+                commandId = original.Id,
+                request = original.Request
+            }, token);
         await McpCallerAssertions.ErrorAsync(mcp, ErrorCode.Conflict, dispatched: true);
         await Assert.That(mcp.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
             .GetProperty(McpCallerProtocol.ProblemDetail).GetString()).IsEqualTo(McpStaleDetail);

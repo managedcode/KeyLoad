@@ -32,7 +32,9 @@ internal static class SampleRollupCrashState
                 SampleRollupCrashContract.Set, SampleRollupCrashContract.Series);
             var page = view.Scan(prefix, SampleRollupCrashContract.MaximumRecords);
             if (page.HasMore)
-            { throw new InvalidOperationException(SampleRollupCrashContract.Invalid); }
+            {
+                throw new InvalidOperationException(SampleRollupCrashContract.Invalid);
+            }
             records.AddRange(page.Records.Select(record =>
                 new[] { Convert.ToHexString(record.Key.Span), Convert.ToHexString(record.Value.Span) }));
         }
@@ -43,7 +45,9 @@ internal static class SampleRollupCrashState
     {
         var page = view.Scan([], SampleRollupCrashContract.MaximumRecords);
         if (page.HasMore)
-        { throw new InvalidOperationException(SampleRollupCrashContract.Invalid); }
+        {
+            throw new InvalidOperationException(SampleRollupCrashContract.Invalid);
+        }
         return JsonDefaults.Serialize(page.Records);
     });
 }

@@ -43,13 +43,23 @@ internal static class AggregateReplayAuthorizationContinuation
             stateJson: previous.StateJson, commandId: id);
         await EqualAsync(new MutationReceipt(SnapshotMutation, AggregateReplayFixture.StreamSet,
             AggregateReplayFixture.StreamId, previous.SnapshotVersion + SnapshotVersionStep), receipt.Mutations.Single());
-        var expected = previous with { SnapshotVersion = previous.SnapshotVersion + SnapshotVersionStep, Checksum = string.Empty };
-        expected = expected with { Checksum = JsonData.Fingerprint(expected) };
+        var expected = previous with
+        {
+            SnapshotVersion = previous.SnapshotVersion + SnapshotVersionStep,
+            Checksum = string.Empty
+        };
+        expected = expected with
+        {
+            Checksum = JsonData.Fingerprint(expected)
+        };
         var outcome = fixture.Store.Read(view => view.ReadOwnedValue(OutcomeStoreOracle.PartitionKey(
             fixture.Partition, AggregateReplayFixture.WorkerId, id)));
         await Assert.That(NativeSerialization.Deserialize<StoredOutcome>(outcome!).PolicyEpoch).IsEqualTo(RepairedPolicyEpoch);
         var page = fixture.Read(maximumEvents: RetainedTailMaximum);
-        await PageAsync(page, oldPage with { Snapshot = expected });
+        await PageAsync(page, oldPage with
+        {
+            Snapshot = expected
+        });
         return (id, receipt, page);
     }
 
@@ -73,7 +83,10 @@ internal static class AggregateReplayAuthorizationContinuation
     private static async Task PageAsync(AggregateReplayPage actual, AggregateReplayPage expected)
     {
         await Assert.That(actual.CutPosition).IsGreaterThanOrEqualTo(expected.CutPosition);
-        await EqualAsync(expected, actual with { CutPosition = expected.CutPosition });
+        await EqualAsync(expected, actual with
+        {
+            CutPosition = expected.CutPosition
+        });
         await Assert.That(actual.Snapshot!.StateJson).IsEqualTo(AggregateReplayFixture.StateJson);
         await Assert.That(actual.Events.Length).IsEqualTo(NoTailEvents);
     }

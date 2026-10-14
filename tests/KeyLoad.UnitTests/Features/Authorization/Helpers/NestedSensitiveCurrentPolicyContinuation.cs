@@ -54,7 +54,10 @@ internal static class NestedSensitiveCurrentPolicyContinuation
     {
         var expected = new PrincipalRecord(Reader, Tenant,
             [new(DatabaseScope, Collection, Capability.DocumentsRead | Capability.Query)], [ReadGrant, UseGrant])
-        { PolicyEpoch = epoch, Revoked = revoked };
+        {
+            PolicyEpoch = epoch,
+            Revoked = revoked
+        };
         var actual = db.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(expected)).Get<PrincipalRecord>();
         await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
     }

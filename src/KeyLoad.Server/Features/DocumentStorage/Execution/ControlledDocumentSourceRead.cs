@@ -1,7 +1,7 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 using Microsoft.Extensions.Options;
 
@@ -21,17 +21,23 @@ internal sealed class ControlledDocumentSourceRead(OrleansNode node, PartitionHo
         var work = new ReadExecutionBudget(limits, clock, token);
         var expiry = clock.GetUtcNow() + TimeSpan.FromSeconds(limits.Value.QueryDeadlineSeconds);
         if (expiry > envelope.ExpiresAt)
-        { expiry = envelope.ExpiresAt; }
+        {
+            expiry = envelope.ExpiresAt;
+        }
         var frame = partition.Database.TryCaptureControlledDocumentRead(principalId,
             request.Reference, request.MinimumToken, expiry, work);
         if (frame is null)
-        { return (false, null); }
+        {
+            return (false, null);
+        }
         var destination = RequireDestination(frame);
         var metadata = work.ReadBytes;
         var maximumBytes = Math.Min(limits.Value.MaxBatchBytes,
             limits.Value.MaxQueryReadBytes - checked(metadata * RevalidationPasses));
         if (maximumBytes <= MinimumBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, RemoteDocumentProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, RemoteDocumentProtocol.Unavailable);
+        }
         var maximumRecords = Math.Min(limits.Value.MaxBatchMutations, limits.Value.MaxScanRecords);
         var grant = work.CreateReadGrant(maximumBytes, maximumRecords);
         var maximumReply = Math.Min(limits.Value.MaxBatchBytes, RemoteDocumentProtocol.MaximumBodyBytes);
@@ -56,7 +62,9 @@ internal sealed class ControlledDocumentSourceRead(OrleansNode node, PartitionHo
         if (!settings.RemoteDocumentReads || !settings.RegisterPhysicalOwners
             || settings.Role != PhysicalGroupTrustRole.Control
             || !PhysicalOwnerEntryValidation.SameOwner(frame.Publication.Destination, destination.Owner))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentProtocol.Unavailable);
+        }
         return destination;
     }
 }

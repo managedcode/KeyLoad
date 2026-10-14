@@ -38,7 +38,9 @@ internal static class ReplicaIsolationStatusIdentity
         Guid incarnation, CancellationToken cancellationToken)
     {
         foreach (var pair in identities)
-        { await VerifyRestoredNodeAsync(fixture, pair.Key, pair.Value, identities, incarnation, cancellationToken); }
+        {
+            await VerifyRestoredNodeAsync(fixture, pair.Key, pair.Value, identities, incarnation, cancellationToken);
+        }
     }
 
     private static async Task VerifyRestoredNodeAsync(ClusterFixture fixture, string resource, NodeStatus original,

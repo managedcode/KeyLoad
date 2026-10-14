@@ -19,7 +19,10 @@ internal sealed class ReadRoundStoredNode : IAsyncDisposable
 
     internal ReadRoundStoredNode(string directory, string voter, string[] voters, Guid incarnation, ReadOnlyMemory<byte> signingKey)
     {
-        Configuration = new(voter, [.. voters], directory, incarnation) { BenchmarkTopology = voters.Length < 3 };
+        Configuration = new(voter, [.. voters], directory, incarnation)
+        {
+            BenchmarkTopology = voters.Length < 3
+        };
         var validatedConfiguration = RecoveryExecutionOptions.Configuration(Configuration);
         stores = ReplicaMaterializerLifecycleStores.Open(
             () => new(new(Path.Combine(directory, CanonicalDirectory)) { Incarnation = incarnation, SigningKey = signingKey }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution()),
@@ -31,7 +34,9 @@ internal sealed class ReadRoundStoredNode : IAsyncDisposable
             Database = new(stores.Canonical, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource(), RecoveryExecutionOptions.Messaging(), RecoveryExecutionOptions.GraphExecution(), RecoveryExecutionOptions.ChangeFeedExecution(), RecoveryExecutionOptions.BlobExecution(), RecoveryExecutionOptions.NativeClaimsExecution(), RecoveryExecutionOptions.TimeSeriesExecution(), RecoveryExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
             Log = openedLog = new(stores.Replica, validatedConfiguration, canonicalDatabase: Database);
             Database.Bootstrap(new(Principal, System, [new(Wildcard, Wildcard, Capability.All)], [Wildcard])
-            { ClusterAdministrator = true }, DatabaseEngine.Credential(Principal, Principal,
+            {
+                ClusterAdministrator = true
+            }, DatabaseEngine.Credential(Principal, Principal,
                     Convert.ToHexString(RandomNumberGenerator.GetBytes(CredentialBytes))));
             RecoveryPhysicalShardBootstrap.Bootstrap(Database, Principal, Configuration.VoterIds);
             Materializer = openedMaterializer = new(Database, Log, new ReplicaSnapshotStore(stores.Canonical, Log, validatedConfiguration, RecoveryExecutionOptions.Replica()), RecoveryExecutionOptions.Replica());
@@ -51,11 +56,26 @@ internal sealed class ReadRoundStoredNode : IAsyncDisposable
         }
     }
 
-    internal ReplicaConfiguration Configuration { get; }
-    internal DurableReplicaLog Log { get; }
-    internal DatabaseEngine Database { get; }
-    internal ReplicaMaterializer Materializer { get; }
-    internal ReplicaConsensus Consensus { get; }
+    internal ReplicaConfiguration Configuration
+    {
+        get;
+    }
+    internal DurableReplicaLog Log
+    {
+        get;
+    }
+    internal DatabaseEngine Database
+    {
+        get;
+    }
+    internal ReplicaMaterializer Materializer
+    {
+        get;
+    }
+    internal ReplicaConsensus Consensus
+    {
+        get;
+    }
     internal ReadRoundProtocolTransport Transport { get; private set; } = null!;
 
     internal void Attach(IReadOnlyDictionary<string, ReadRoundStoredNode> nodes)
@@ -83,7 +103,9 @@ internal sealed class ReadRoundStoredNode : IAsyncDisposable
     private void CloseStores(List<Exception> failures)
     {
         try
-        { stores.Dispose(); }
+        {
+            stores.Dispose();
+        }
         catch (IOException error) { ReplicaMaterializerLifecycleErrors.Add(error, failures); }
         catch (UnauthorizedAccessException error) { ReplicaMaterializerLifecycleErrors.Add(error, failures); }
         catch (ObjectDisposedException error) { ReplicaMaterializerLifecycleErrors.Add(error, failures); }

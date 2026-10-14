@@ -1,10 +1,10 @@
 using System.Net;
 using System.Text.Json;
 using KeyLoad.Client;
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.DocumentStorage;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.Authorization;
@@ -24,8 +24,13 @@ internal static class CredentialAuthorityFlow
     {
         var identity = state.Document.Identity;
         var unusable = expire ? identity.Credential with
-        { ExpiresAt = TimeProvider.System.GetUtcNow() - McpCallerProtocol.ExpiredOffset }
-            : identity.Credential with { Revoked = true };
+        {
+            ExpiresAt = TimeProvider.System.GetUtcNow() - McpCallerProtocol.ExpiredOffset
+        }
+            : identity.Credential with
+            {
+                Revoked = true
+            };
         var changed = await McpCallerAssertions.SdkStatusAsync(await root.ConfigureApiKeyAsync(Guid.NewGuid(), unusable, token));
         await Assert.That(changed.IsSuccess).IsTrue();
         await RefusedAsync(fixture, root, reader, session, state, token);
@@ -97,7 +102,9 @@ internal static class CredentialAuthorityFlow
     internal static async Task ReplayAsync(KeyLoadClient root, CredentialAuthorityState state, CancellationToken token)
     {
         if (state.OriginalRepairResult is not { IsSuccess: true, Problem: null } original)
-        { throw new InvalidOperationException(MissingRepairResult); }
+        {
+            throw new InvalidOperationException(MissingRepairResult);
+        }
         var before = await DiscoveryAuthorityValues.ImageAsync(root, state.Document, token);
         var replay = await McpCallerAssertions.SdkStatusAsync(await root.ConfigureApiKeyAsync(
             state.RepairCommandId, state.Document.Identity.Credential, token));

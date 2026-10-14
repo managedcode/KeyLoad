@@ -113,7 +113,9 @@ internal sealed class DocumentResourceBudgetTests
         await using var fixture = new IsolatedResourceTopologyFixture(KeyLoadTarget, 3,
             documents: new(DocumentComparisonScenario.Ingest, MillionRecords, IngestionClients));
         fixture.Context.Builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
-        { [DeploymentPrefix + option] = value });
+        {
+            [DeploymentPrefix + option] = value
+        });
         await Assert.That(() => IsolatedKeyLoadResources.Add(fixture.Context)).Throws<OptionsValidationException>();
         await Assert.That(Directory.Exists(Path.Combine(fixture.Context.Root, NativeDirectory))).IsFalse();
         fixture.Context.Builder.Configuration[DeploymentPrefix + option] = option switch

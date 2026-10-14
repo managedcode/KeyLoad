@@ -13,7 +13,9 @@ internal static partial class PartitionMovementParentNativePhases
     {
         if (request.Mode != PartitionMoveMode.Transfer || state.Header is not null || state.Pending is not null
             || state.Placement.Revision != request.ExpectedPlacementRevision)
-        { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict);
+        }
         var destination = state.Directory.Owners.SingleOrDefault(
             entry => entry.Owner.PhysicalShardId == request.DestinationPhysicalShardId)?.Owner
             ?? throw Errors.Fail(ErrorCode.NotFound, PartitionMoveProtocol.OwnerMismatch);
@@ -58,8 +60,14 @@ internal static partial class PartitionMovementParentNativePhases
             || grant.AdmissionPosition != authorization.Journal.AppliedPosition
             || !PhysicalOwnerEntryValidation.SameOwner(grant.ReceiverOwner, receiver)
             || !PhysicalOwnerEntryValidation.SameOwner(grant.ControlOwner, intended.ControlOwner))
-        { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict); }
-        return intended with { GrantId = grant.GrantId, Resources = grant.Resources };
+        {
+            throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict);
+        }
+        return intended with
+        {
+            GrantId = grant.GrantId,
+            Resources = grant.Resources
+        };
     }
 
     internal static PartitionMovePhaseCommand Acknowledge(PartitionMoveParentHeader header,
@@ -80,7 +88,9 @@ internal static partial class PartitionMovementParentNativePhases
     {
         var total = originalDescriptor.Families.Sum(static family => family.PageCount);
         if (actualNextOrdinal < PartitionMoveProtocol.EmptyCount || actualNextOrdinal > total)
-        { throw Errors.Fail(ErrorCode.Validation, PartitionMoveProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, PartitionMoveProtocol.Invalid);
+        }
         return Frame(header, control, PartitionMovePeerStage.Install,
             NativeSerialization.Serialize(new PartitionMoveInstallBody(header.OperatorPrincipalId,
                 control, originalFence, originalDescriptor)), actualNextOrdinal);
@@ -103,7 +113,9 @@ internal static partial class PartitionMovementParentNativePhases
             || control.SourcePlacement.DirectoryRevision != header.SourcePlacement.DirectoryRevision
             || control.SourcePlacement.IsFallback != header.SourcePlacement.IsFallback
             || !PhysicalOwnerEntryValidation.SameOwner(control.DestinationOwner, header.DestinationOwner))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
         return new(PartitionMoveProtocol.Version, header.MoveId, header.Partition, header.ControlOwner,
             header.SourcePlacement, header.DestinationOwner, PartitionMoveIntentIdentity.Digest(control),
             stage, ordinal, body, Resources: ImmutableArray<ResourceDefinition>.Empty);

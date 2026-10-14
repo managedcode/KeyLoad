@@ -149,7 +149,9 @@ public class EmbeddedBenchmarks : IDisposable
                 UnavailablePartitionMovementCheckpointVerifier.Instance, timeProvider);
             database.Bootstrap(new(PrincipalId, PrincipalScope,
                 [new(Wildcard, Wildcard, Capability.All)], [Wildcard])
-            { ClusterAdministrator = true },
+            {
+                ClusterAdministrator = true
+            },
                 DatabaseEngine.Credential(PrincipalId, PrincipalId, BenchmarkCredential));
             var shardId = store.Identity.NodeId;
             var catalog = new BootstrapPhysicalShardCatalogRequest(BootstrapCatalogVersion, InitialCatalogRevision, shardId, store.Identity.Incarnation,

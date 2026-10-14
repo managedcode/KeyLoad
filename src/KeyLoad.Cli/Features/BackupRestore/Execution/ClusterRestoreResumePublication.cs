@@ -8,18 +8,24 @@ internal static class ClusterRestoreResumePublication
     internal static void Publish(ClusterRestoreOperationRuntime runtime, ClusterRestoreProgress ready, string stage)
     {
         if (ready.PublicationState != ClusterRestorePublicationState.Ready)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         ClusterRestoreProgressOwner.Require(runtime, ready, stage);
         var destination = runtime.Plan.DestinationPath;
         ClusterRestorePathValidation.RequireAncestors(stage);
         ClusterRestorePathValidation.RequireAncestors(destination);
         if (!Directory.Exists(stage) || File.Exists(destination)
             || Directory.Exists(destination) && Directory.EnumerateFileSystemEntries(destination).Any())
-        { throw Errors.Fail(ErrorCode.Conflict, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, Invalid);
+        }
         runtime.Work.Check();
         // An interrupted deletion leaves an absent destination and the SAME admitted unpublished stage.
         if (Directory.Exists(destination))
-        { Directory.Delete(destination, recursive: false); }
+        {
+            Directory.Delete(destination, recursive: false);
+        }
         Directory.Move(stage, destination);
         runtime.Observer?.Invoke(NativeClusterRestoreStage.NodesPublished);
         runtime.Work.Check();

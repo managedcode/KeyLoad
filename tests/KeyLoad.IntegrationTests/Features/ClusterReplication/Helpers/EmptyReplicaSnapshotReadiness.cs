@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
 using ManagedCode.Communication;
@@ -54,7 +54,9 @@ internal static class EmptyReplicaSnapshotReadiness
     {
         // A failed original caller wakes this observation; no waiting on an impossible held marker.
         if (await Task.WhenAny(observed, producer) == producer)
-        { _ = ClusterReplicationTestSupport.Success(await producer); }
+        {
+            _ = ClusterReplicationTestSupport.Success(await producer);
+        }
         var marker = await observed;
         var native = ReadCut(controls, node, marker);
         await RequireCutAsync(native, final);
@@ -83,7 +85,9 @@ internal static class EmptyReplicaSnapshotReadiness
         var value = RequestCqrsReplicaSnapshotJson.Read(controls.Json, RequestCqrsProbeFileStore.ReadRecord(
             Path.Combine(owned.Directory, RequestCqrsReplicaSnapshotJson.Name(identity))));
         if (value.SessionId != marker.SessionId || value.ArmId != marker.ArmId || value.RequestId != marker.RequestId)
-        { throw RequestCqrsReplicaSnapshotJson.Invalid(); }
+        {
+            throw RequestCqrsReplicaSnapshotJson.Invalid();
+        }
         return value;
     }
 

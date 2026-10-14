@@ -38,7 +38,10 @@ internal static class PartitionQueryPlanValidation
             if (index != EmptyElementCount)
             {
                 _ = NormalizeShape(leaf, plan, partitions, index);
-                var comparable = leaf.Request with { Partition = firstRequest.Partition };
+                var comparable = leaf.Request with
+                {
+                    Partition = firstRequest.Partition
+                };
                 if (!JsonDefaults.Serialize(comparable).AsSpan().SequenceEqual(JsonDefaults.Serialize(firstRequest)))
                 {
                     throw Errors.Fail(ErrorCode.Validation, InvalidPlanMessage);

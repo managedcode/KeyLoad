@@ -11,7 +11,10 @@ internal sealed class DuePageState
     private readonly long started;
     private readonly ReadExecutionBudget budget;
     private readonly long maximumRangeBytes;
-    internal int MaximumRecordsPerPage { get; }
+    internal int MaximumRecordsPerPage
+    {
+        get;
+    }
 
     internal DuePageState(IOptions<DatabaseLimits> limits, DateTimeOffset wakeAt, TimeProvider clock, TimeSpan discoveryDeadline, int maximumRecordsPerPage, long maximumRangeBytes,
         CancellationToken cancellationToken)
@@ -26,10 +29,22 @@ internal sealed class DuePageState
         budget = new(limits, clock, cancellationToken);
     }
 
-    internal DateTimeOffset WakeAt { get; }
-    internal CancellationToken CancellationToken { get; }
-    internal int ExaminedRecords { get; private set; }
-    internal long ExaminedBytes { get; private set; }
+    internal DateTimeOffset WakeAt
+    {
+        get;
+    }
+    internal CancellationToken CancellationToken
+    {
+        get;
+    }
+    internal int ExaminedRecords
+    {
+        get; private set;
+    }
+    internal long ExaminedBytes
+    {
+        get; private set;
+    }
 
     internal void ExamineRecord() => ExaminedRecords = checked(ExaminedRecords + AdjacentElementOffset);
 

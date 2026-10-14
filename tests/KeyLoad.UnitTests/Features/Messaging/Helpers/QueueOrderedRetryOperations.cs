@@ -28,7 +28,9 @@ internal static class QueueOrderedRetryOperations
     internal static async Task ReplayAsync(DatabaseEngine database, QueueOrderedRetryState state)
     {
         foreach (var item in state.Outcomes.Where(item => item.Operation.Kind != OperationKind.Receive))
-        { await ReplayResultAsync(database, item.Operation, item.Result); }
+        {
+            await ReplayResultAsync(database, item.Operation, item.Result);
+        }
     }
     private static async Task ReplayResultAsync(DatabaseEngine database, ReplicatedOperation operation, OperationResult original)
     {

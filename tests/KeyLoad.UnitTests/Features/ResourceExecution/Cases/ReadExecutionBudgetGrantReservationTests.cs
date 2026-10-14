@@ -10,7 +10,10 @@ internal sealed class ReadExecutionBudgetGrantReservationTests
     {
         var maximumBytes = ReadExecutionBudgetGrantSeed.FirstKey.Length + ReadExecutionBudgetGrantSeed.FirstValue.Length
             + ReadExecutionBudgetGrantSeed.SecondKey.Length + ReadExecutionBudgetGrantSeed.SecondValue.Length;
-        using var database = ReadExecutionBudgetGrantSeed.CreateDatabase(new() { MaxQueryReadBytes = maximumBytes });
+        using var database = ReadExecutionBudgetGrantSeed.CreateDatabase(new()
+        {
+            MaxQueryReadBytes = maximumBytes
+        });
         var result = database.Store.Read(view =>
         {
             var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits));
@@ -34,7 +37,10 @@ internal sealed class ReadExecutionBudgetGrantReservationTests
     [Test]
     public async Task FixedReservationsCannotBeConsumedByRootOrLaterGrants()
     {
-        using var database = ReadExecutionBudgetGrantSeed.CreateDatabase(new() { MaxQueryReadBytes = 64 });
+        using var database = ReadExecutionBudgetGrantSeed.CreateDatabase(new()
+        {
+            MaxQueryReadBytes = 64
+        });
         var rootCharge = Assert.ThrowsExactly<KeyLoadException>(() => database.Store.Read(_ =>
         {
             var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits));

@@ -39,7 +39,10 @@ internal sealed class TopicRetentionBoundaryTests
     {
         using var fixture = new TopicRetentionFixture();
         fixture.ReleasePins();
-        fixture.SetLimits(new() { MaxScanRecords = 1 });
+        fixture.SetLimits(new()
+        {
+            MaxScanRecords = 1
+        });
         await TopicRetentionAssertions.Reject(fixture, fixture.Purge(), ErrorCode.ResourceExhausted);
         fixture.SetLimits(new());
         fixture.Submit(fixture.Purge()).Get<CommitReceipt>();
@@ -55,7 +58,10 @@ internal sealed class TopicRetentionBoundaryTests
             types: ["Created", .. Enumerable.Range(0, 120).Select(index => "EventType" + index.ToString("D3", System.Globalization.CultureInfo.InvariantCulture) + new string('x', 40))]);
         var key = KeySpace.Partition("subscription", fixture.Owner.Partition, "topic", "Topic", null, 1L, "large");
         await Assert.That(fixture.Store.Read(view => view.ReadOwnedValue(key)!.Length)).IsGreaterThan(4096);
-        fixture.SetLimits(new() { MaxBatchBytes = 4096 });
+        fixture.SetLimits(new()
+        {
+            MaxBatchBytes = 4096
+        });
         await TopicRetentionAssertions.Reject(fixture, fixture.Purge(), ErrorCode.ResourceExhausted);
         fixture.SetLimits(new());
         fixture.Submit(fixture.Purge()).Get<CommitReceipt>();

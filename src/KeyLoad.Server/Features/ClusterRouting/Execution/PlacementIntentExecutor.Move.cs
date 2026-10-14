@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
@@ -32,7 +32,9 @@ internal sealed partial class PlacementIntentExecutor
                 static _ => ValueTask.CompletedTask, phaseObservation: null, token).ConfigureAwait(false);
         }
         if (receipt.Phase != PartitionMovePhase.Retired)
-        { throw Errors.Fail(ErrorCode.UnknownWriteOutcome, TenantPlacementPolicyProtocol.ScopeMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.UnknownWriteOutcome, TenantPlacementPolicyProtocol.ScopeMismatch);
+        }
         var status = intent.CompletedMoves + CompletedMoveIncrement == intent.Plan.Moves.Length
             ? PlacementIntentStatus.Completed : PlacementIntentStatus.Paused;
         var phase = new PlacementIntentPhaseRequestV1(TenantPlacementPolicyProtocol.Version,

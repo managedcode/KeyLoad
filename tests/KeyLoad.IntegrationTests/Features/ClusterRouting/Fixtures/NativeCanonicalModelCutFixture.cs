@@ -16,7 +16,11 @@ internal sealed class NativeCanonicalModelCutFixture
     private bool cleaned;
 
     private NativeCanonicalModelCutFixture(TwoRf3MembershipWave wave, NativeCanonicalModelCutFiles files)
-    { owner = wave; original = wave.QueryControls; this.files = files; }
+    {
+        owner = wave;
+        original = wave.QueryControls;
+        this.files = files;
+    }
 
     internal string Root => files.Root;
     internal string SessionId => original.SessionId;
@@ -27,7 +31,9 @@ internal sealed class NativeCanonicalModelCutFixture
         if (!wave.remoteDocumentReads || !wave.remotePartitionQueries || !wave.queryProbe
             || !wave.protectedDocuments || wave.queryControls is null
             || wave.nativeMembershipDiagnostics || Path.GetFullPath(dataRoot) != Path.GetFullPath(wave.OwnedDataRoot))
-        { throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState); }
+        {
+            throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState);
+        }
         NativeCanonicalModelCutOriginalArm.RequireOwners(wave.QueryControls);
         return new(wave, NativeCanonicalModelCutFiles.Create(dataRoot, wave.QueryControls));
     }
@@ -38,11 +44,15 @@ internal sealed class NativeCanonicalModelCutFixture
         {
             RequireAdmission();
             if (configured)
-            { throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState); }
+            {
+                throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState);
+            }
             NativeCanonicalModelCutOriginalArm.RequireOwners(original);
             files.RequireInventory(arms);
             try
-            { NativeCanonicalModelCutMounts.Configure(builder, files, SessionId); }
+            {
+                NativeCanonicalModelCutMounts.Configure(builder, files, SessionId);
+            }
             catch (Exception) { admissionStopped = true; retained = true; throw; }
             configured = true;
         }
@@ -54,9 +64,13 @@ internal sealed class NativeCanonicalModelCutFixture
         {
             RequireAdmission();
             if (!configured)
-            { throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState); }
+            {
+                throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState);
+            }
             try
-            { MirrorOriginal(originalArmId); }
+            {
+                MirrorOriginal(originalArmId);
+            }
             catch (Exception) { admissionStopped = true; retained = true; throw; }
         }
     }
@@ -68,24 +82,41 @@ internal sealed class NativeCanonicalModelCutFixture
         if (arms.TryGetValue(armId, out var existing))
         {
             if (!existing.AsSpan().SequenceEqual(bytes))
-            { throw new IOException(RequestCqrsProbeFixtureProtocol.OwnerChanged); }
+            {
+                throw new IOException(RequestCqrsProbeFixtureProtocol.OwnerChanged);
+            }
             return;
         }
         if (arms.Count >= RequestCqrsProbeFixtureProtocol.MaximumArms)
-        { throw new IOException(RequestCqrsProbeFixtureProtocol.FileLimitExceeded); }
+        {
+            throw new IOException(RequestCqrsProbeFixtureProtocol.FileLimitExceeded);
+        }
         RequestCqrsProbeBroadcast.WriteIdentical(NativeCanonicalModelCutFiles.Nodes,
             files.Directories, files.Owners, RequestCqrsProbeFileNames.Arm(armId), bytes);
         arms.Add(armId, bytes);
         if (!NativeCanonicalModelCutOriginalArm.Read(original, armId).AsSpan().SequenceEqual(bytes))
-        { throw new IOException(RequestCqrsProbeFixtureProtocol.OwnerChanged); }
+        {
+            throw new IOException(RequestCqrsProbeFixtureProtocol.OwnerChanged);
+        }
         files.RequireInventory(arms);
     }
 
     internal void StopAdmission()
-    { lock (sync) { admissionStopped = true; } }
+    {
+        lock (sync)
+        {
+            admissionStopped = true;
+        }
+    }
 
     internal void RetainEvidence()
-    { lock (sync) { retained = true; admissionStopped = true; } }
+    {
+        lock (sync)
+        {
+            retained = true;
+            admissionStopped = true;
+        }
+    }
 
     internal Task ReopenAfterOwnersJoinedAsync(TwoRf3MembershipWave wave)
     {
@@ -93,7 +124,9 @@ internal sealed class NativeCanonicalModelCutFixture
         {
             RequireOwner(wave);
             if (!admissionStopped || cleaned || retained)
-            { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.AdmissionStopped); }
+            {
+                throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.AdmissionStopped);
+            }
             NativeCanonicalModelCutFiles.RequireJoinedOwners(wave);
             NativeCanonicalModelCutOriginalArm.RequireOwners(original);
             files.RequireInventory(arms);
@@ -109,14 +142,23 @@ internal sealed class NativeCanonicalModelCutFixture
         {
             RequireOwner(wave);
             if (!admissionStopped)
-            { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.UnsettledGates); }
+            {
+                throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.UnsettledGates);
+            }
             if (cleaned)
-            { return Task.CompletedTask; }
+            {
+                return Task.CompletedTask;
+            }
             NativeCanonicalModelCutFiles.RequireJoinedOwners(wave);
             if (retained)
-            { return Task.CompletedTask; }
+            {
+                return Task.CompletedTask;
+            }
             try
-            { files.Delete(arms); cleaned = true; }
+            {
+                files.Delete(arms);
+                cleaned = true;
+            }
             catch (Exception) { retained = true; throw; }
             return Task.CompletedTask;
         }
@@ -126,12 +168,16 @@ internal sealed class NativeCanonicalModelCutFixture
     {
         RequireOwner(owner);
         if (admissionStopped || cleaned || retained)
-        { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.AdmissionStopped); }
+        {
+            throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.AdmissionStopped);
+        }
     }
 
     private void RequireOwner(TwoRf3MembershipWave wave)
     {
         if (!ReferenceEquals(owner, wave) || !ReferenceEquals(original, wave.queryControls))
-        { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.OwnerChanged); }
+        {
+            throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.OwnerChanged);
+        }
     }
 }

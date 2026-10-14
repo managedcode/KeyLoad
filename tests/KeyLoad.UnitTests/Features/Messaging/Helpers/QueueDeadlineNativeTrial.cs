@@ -37,7 +37,10 @@ internal static class QueueDeadlineNativeTrial
         var originalBody = fixture.Store.Commit((tx, _) =>
         {
             var bytes = tx.ReadOwnedValue(key) ?? throw new InvalidOperationException("Original body is absent.");
-            tx.PutRecord(key, NativeSerialization.Deserialize<MessageBody>(bytes) with { Id = "foreign" });
+            tx.PutRecord(key, NativeSerialization.Deserialize<MessageBody>(bytes) with
+            {
+                Id = "foreign"
+            });
             return bytes;
         });
         var damaged = QueueWholeFlowStorage.Bytes(fixture.Store);
@@ -186,14 +189,23 @@ internal static class QueueDeadlineNativeTrial
             notBefore, expiry);
         await QueueDeadlineNativeAssertions.OriginalAsync(fixture.Database, lane, metadata);
         if (kind == QueueDeadlineKind.ExpireLease)
-        { (metadata, due) = await QueueDeadlineNativeLease.CreateAsync(fixture.Database, lane, metadata, due); }
+        {
+            (metadata, due) = await QueueDeadlineNativeLease.CreateAsync(fixture.Database, lane, metadata, due);
+        }
         var advance = new AdvanceQueueDeadline(lane.Queue, metadata.Id, metadata.State, metadata.StateVersion,
             metadata.LeaseVersion, due, kind);
         var command = new CommandRequest(Guid.NewGuid(), lane.Partition, [advance]);
         await QueueDeadlineNativeAssertions.RefusedAsync(fixture.Database, fixture.Store, lane, command,
             due.AddTicks(QueueDeadlineNativeProtocol.PreviousTick), ErrorCode.Conflict);
-        command = command with { CommandId = Guid.NewGuid() };
-        var stale = command with { CommandId = Guid.NewGuid(), Mutations = [advance with { ExpectedStateVersion = metadata.StateVersion + QueueDeadlineNativeProtocol.First }] };
+        command = command with
+        {
+            CommandId = Guid.NewGuid()
+        };
+        var stale = command with
+        {
+            CommandId = Guid.NewGuid(),
+            Mutations = [advance with { ExpectedStateVersion = metadata.StateVersion + QueueDeadlineNativeProtocol.First }]
+        };
         await QueueDeadlineNativeAssertions.RefusedAsync(fixture.Database, fixture.Store, lane, stale, due, ErrorCode.RevisionConflict);
         await QueueDeadlineNativeDiscovery.RequireAsync(fixture, lane, advance, due, token);
         fixture.Store.Dispose();

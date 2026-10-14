@@ -45,7 +45,9 @@ internal static class PostgresPortalOwnershipWave
                     await global::TUnit.Assertions.Assert.That(await PostgresPortalOwnershipAssertions.ImageAsync(
                         root, state, token)).IsEqualTo(conserved), token);
                 if (policyControls)
-                { await PostgresPortalOwnershipPolicy.RunAsync(fixture, state, root, wire.Stream, token); }
+                {
+                    await PostgresPortalOwnershipPolicy.RunAsync(fixture, state, root, wire.Stream, token);
+                }
                 await PostgresRf3WireMessage.WriteAsync(wire.Stream, PostgresPortalOwnershipProtocol.Terminate, [], token);
                 await PostgresRf3TransportClosed.RequireAsync(wire.Stream, token);
             }, failures);

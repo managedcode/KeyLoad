@@ -67,7 +67,9 @@ internal sealed class TwoRf3MembershipImageModelTests
             applicationDisposed = failures.Count == before;
         }
         if (rootOwned && (application is null || applicationDisposed))
-        { ServerFailureObserver.Observe(() => Directory.Delete(root, recursive: true), failures); }
+        {
+            ServerFailureObserver.Observe(() => Directory.Delete(root, recursive: true), failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
@@ -91,9 +93,13 @@ internal sealed class TwoRf3MembershipImageModelTests
                 cancellationToken).ConfigureAwait(false);
         }
         catch (InvalidOperationException exception) when (exception.Message == TwoRf3MembershipProtocol.ImageMismatch)
-        { rejected = true; }
+        {
+            rejected = true;
+        }
         if (!rejected)
-        { throw new InvalidOperationException(ImageMismatchExpected); }
+        {
+            throw new InvalidOperationException(ImageMismatchExpected);
+        }
         AssertUnchanged(resources, before);
         image.SHA256 = originalDigest;
         await TwoRf3MembershipImageAssertions.VerifyAsync(application, ControlledImageReference, cancellationToken)
@@ -119,7 +125,9 @@ internal sealed class TwoRf3MembershipImageModelTests
     {
         var actual = Capture(resources);
         if (resources.Length != TwoRf3MembershipProtocol.NodeCount || !expected.SequenceEqual(actual))
-        { throw new InvalidOperationException(ModelMutation); }
+        {
+            throw new InvalidOperationException(ModelMutation);
+        }
     }
 
     private static string CreateRootPath()
@@ -129,6 +137,8 @@ internal sealed class TwoRf3MembershipImageModelTests
     private static void MakePrivateDirectory(string path)
     {
         if (!OperatingSystem.IsWindows())
-        { File.SetUnixFileMode(path, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute); }
+        {
+            File.SetUnixFileMode(path, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+        }
     }
 }

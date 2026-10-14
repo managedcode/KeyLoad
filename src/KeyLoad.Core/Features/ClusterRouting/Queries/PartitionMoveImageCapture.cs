@@ -16,7 +16,9 @@ internal static class PartitionMoveImageCapture
         ArgumentNullException.ThrowIfNull(view);
         ArgumentNullException.ThrowIfNull(work);
         if (maximumRecords <= PartitionMoveProtocol.EmptyCount || maximumRecords > limits.MaxScanRecords)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
+        }
         PartitionMoveSourceFenceValidation.Require(fence, fence.Partition);
         var persisted = PartitionMoveSourceFenceStorage.Read(work.CreateView(view), fence.Partition, limits.MaxBatchBytes)
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
@@ -46,12 +48,16 @@ internal static class PartitionMoveImageCapture
             || !PartitionMoveControlValidation.SameSource(expected.SourcePlacement, actual.SourcePlacement)
             || !PhysicalOwnerEntryValidation.SameOwner(expected.ControlOwner, actual.ControlOwner)
             || !PhysicalOwnerEntryValidation.SameOwner(expected.DestinationOwner, actual.DestinationOwner))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
         var applied = work.Read(view, KeySpace.AppliedBytes)
             ?? throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority);
         var currentReadCut = NativeSerialization.Deserialize<long>(applied);
         if (currentReadCut < actual.SourceCut)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+        }
         return currentReadCut;
     }
 }

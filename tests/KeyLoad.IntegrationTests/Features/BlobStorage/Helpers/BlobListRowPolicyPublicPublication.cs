@@ -15,7 +15,9 @@ internal static class BlobListRowPolicyPublicPublication
     {
         var versions = new BlobSupersessionPublicTrial.Version[Ids.Length];
         for (var index = 0; index < Ids.Length; index++)
-        { versions[index] = await PublishAsync(admin, partition, index, token); }
+        {
+            versions[index] = await PublishAsync(admin, partition, index, token);
+        }
         await BlobListRowPolicyPublicAssertions.AllAsync(admin, versions, token);
         return versions;
     }

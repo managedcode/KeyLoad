@@ -31,7 +31,9 @@ internal static class McpMovementCatalogScalarSchema
     internal static async Task RequireStringsAsync(JsonElement root, JsonElement body, string[] fields)
     {
         foreach (var field in fields)
-        { await LeafAsync(root, body, field, McpSchemaInspector.String); }
+        {
+            await LeafAsync(root, body, field, McpSchemaInspector.String);
+        }
     }
 
     internal static async Task RequireOwnerAsync(JsonElement root, JsonElement body)
@@ -69,7 +71,9 @@ internal static class McpMovementCatalogScalarSchema
         await Assert.That(branches[0].EnumerateObject().Select(property => property.Name)
             .ToHashSet(StringComparer.Ordinal).SetEquals(stringKeys)).IsTrue();
         if (input)
-        { await Assert.That(branches[0].GetProperty(McpSchemaInspector.Type).GetString()).IsEqualTo(McpSchemaInspector.String); }
+        {
+            await Assert.That(branches[0].GetProperty(McpSchemaInspector.Type).GetString()).IsEqualTo(McpSchemaInspector.String);
+        }
         var actualNames = branches[0].GetProperty(input ? McpSchemaInspector.Examples : McpSchemaInspector.Enum)
             .EnumerateArray().Select(name => name.GetString()!).ToArray();
         await Assert.That(actualNames.Length).IsEqualTo(names.Length);

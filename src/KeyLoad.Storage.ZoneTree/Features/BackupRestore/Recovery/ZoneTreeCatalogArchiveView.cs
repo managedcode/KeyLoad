@@ -35,7 +35,9 @@ internal static class ZoneTreeCatalogArchiveView
                 store = new(runtime, runtime.Identity.NodeId);
                 runtime = null; // Ownership transfers only after the actual store constructor succeeds.
                 if (store.Position != position)
-                { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+                {
+                    throw Errors.Fail(ErrorCode.Corruption, Invalid);
+                }
                 var result = store.Read(view =>
                 {
                     ct.ThrowIfCancellationRequested();
@@ -51,14 +53,18 @@ internal static class ZoneTreeCatalogArchiveView
                 runtime?.Dispose();
                 // Only genuinely joined native handles permit deleting this owned temporary view.
                 if (Directory.Exists(stage))
-                { Directory.Delete(stage, recursive: true); }
+                {
+                    Directory.Delete(stage, recursive: true);
+                }
                 cleanupCompleted = true;
             }
         }
         catch (Exception terminal)
         {
             if (primary is not null && !cleanupCompleted)
-            { throw new AggregateException(primary, terminal); }
+            {
+                throw new AggregateException(primary, terminal);
+            }
             throw;
         }
     }

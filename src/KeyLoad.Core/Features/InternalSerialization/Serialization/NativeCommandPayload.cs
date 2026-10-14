@@ -10,16 +10,28 @@ internal sealed record NativeCommandPayload(
     [property: Orleans.Id(NativeCommandContract.SafeDetailId)] string? SafeDetail = null)
 {
     [Orleans.Id(NativeCommandContract.AuthorityId)]
-    public ReadOnlyMemory<byte> Authority { get; init; }
+    public ReadOnlyMemory<byte> Authority
+    {
+        get; init;
+    }
 
     [Orleans.Id(NativeCommandContract.SignatureId)]
-    public ReadOnlyMemory<byte> Signature { get; init; }
+    public ReadOnlyMemory<byte> Signature
+    {
+        get; init;
+    }
 
     [Orleans.Id(NativeCommandContract.RetryDecisionsId)]
-    public ReadOnlyMemory<byte> RetryDecisions { get; init; }
+    public ReadOnlyMemory<byte> RetryDecisions
+    {
+        get; init;
+    }
 
     [Orleans.Id(NativeCommandContract.TransferProofId)]
-    public ReadOnlyMemory<byte> TransferProof { get; init; }
+    public ReadOnlyMemory<byte> TransferProof
+    {
+        get; init;
+    }
 
     internal static T Read<T>(ReplicatedOperation operation)
     {

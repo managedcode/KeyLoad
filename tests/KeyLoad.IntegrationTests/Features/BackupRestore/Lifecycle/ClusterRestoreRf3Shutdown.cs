@@ -22,9 +22,13 @@ internal static class ClusterRestoreRf3Shutdown
         await ServerFailureObserver.ObserveAsync(() => owned.StopAsync(deadline.Token), failures).ConfigureAwait(false);
         await ServerFailureObserver.ObserveAsync(() => owned.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         if (operatorReader is { } reader)
-        { await ServerFailureObserver.ObserveAsync(reader.JoinAsync, failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(reader.JoinAsync, failures).ConfigureAwait(false);
+        }
         if (heldReader is { } held)
-        { await ServerFailureObserver.ObserveAsync(held.JoinAsync, failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(held.JoinAsync, failures).ConfigureAwait(false);
+        }
         if (started && serversAdmitted && failures.Count == 0)
         {
             foreach (var node in ClusterRestoreRf3Protocol.Nodes)
@@ -36,7 +40,9 @@ internal static class ClusterRestoreRf3Shutdown
             }
         }
         if (started && failures.Count == 0)
-        { ClusterRestoreRf3OfflineLocks.Require(fixture, failures); }
+        {
+            ClusterRestoreRf3OfflineLocks.Require(fixture, failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

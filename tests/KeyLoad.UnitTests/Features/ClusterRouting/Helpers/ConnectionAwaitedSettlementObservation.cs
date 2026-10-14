@@ -1,5 +1,5 @@
 using System.Collections.Concurrent;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
@@ -13,7 +13,9 @@ internal sealed class ConnectionAwaitedSettlementObservation(ConnectionOperation
     {
         var callback = new ConnectionAwaitedCallback(failure);
         if (!callbacks.TryAdd(requestId, callback))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         return callback;
     }
 
@@ -26,7 +28,9 @@ internal sealed class ConnectionAwaitedSettlementObservation(ConnectionOperation
                 || state.RequestId != identity.RequestId || state.CommandId != identity.CommandId
                 || context.GrainInstance is not ConnectionGrain connection || connection.GetPrimaryKey() != state.ConnectionId
                 || !identities.TryAdd(identity.RequestId, state))
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
         }
         return original.ObserveAsync(identity, phase, context, token);
     }
@@ -38,7 +42,9 @@ internal sealed class ConnectionAwaitedSettlementObservation(ConnectionOperation
     {
         if (!identities.TryGetValue(identity.RequestId, out var state) || state.ConnectionId != connectionId
             || context.GrainInstance is not ConnectionGrain connection || connection.GetPrimaryKey() != connectionId)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         original.ProducerDisposed(identity, context);
         return callbacks.TryGetValue(identity.RequestId, out var callback) ? callback.NotifyAsync() : ValueTask.CompletedTask;
     }
@@ -47,7 +53,9 @@ internal sealed class ConnectionAwaitedSettlementObservation(ConnectionOperation
     internal void ReleaseAll()
     {
         foreach (var callback in callbacks.Values)
-        { callback.Release.TrySetResult(); }
+        {
+            callback.Release.TrySetResult();
+        }
         original.ReleaseAll();
     }
     private static InvalidOperationException Invalid() => new(ConnectionNativeProtocol.IdentityChanged);

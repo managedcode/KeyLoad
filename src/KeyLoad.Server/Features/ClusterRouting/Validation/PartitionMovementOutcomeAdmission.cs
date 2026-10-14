@@ -21,6 +21,8 @@ internal static class PartitionMovementOutcomeAdmission
             || query.MaximumExaminedRecords < MinimumCount
             || query.MaximumExaminedRecords > Math.Min(limits.MaxBatchMutations, limits.MaxScanRecords)
             || query.MaximumResultBytes < MinimumCount || query.MaximumResultBytes > limits.MaxBatchBytes)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, InvalidProof);
+        }
     }
 }

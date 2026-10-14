@@ -40,7 +40,9 @@ internal static class RemoteTransferRepairColdContinuation
                 .IsEqualTo(RemoteTransferRepairColdProtocol.FirstGeneration);
         }
         else
-        { _ = advance.Result.Get<CommitReceipt>(); }
+        {
+            _ = advance.Result.Get<CommitReceipt>();
+        }
         hint = RemoteTransferRepairColdNative.Hint(fixture);
         var id = ceiling == RemoteTransferRepairColdProtocol.ExhaustedCeiling ? Guid.NewGuid()
             : RemoteTransferRepairIdentity.CommandId(hint, QueueTransferRepairStage.Complete);

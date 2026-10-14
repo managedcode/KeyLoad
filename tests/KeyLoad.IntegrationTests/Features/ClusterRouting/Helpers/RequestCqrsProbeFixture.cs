@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server.Features.ClusterRouting;
 using static KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsProbeFixtureProtocol;
 
@@ -28,12 +28,23 @@ internal sealed class RequestCqrsProbeFixture
         nodeDirectories = directories;
         ownerRecords = owners;
         foreach (var node in Nodes)
-        { activeGates.Add(node, 0); }
+        {
+            activeGates.Add(node, 0);
+        }
     }
 
-    internal string Root { get; }
-    internal string SessionId { get; }
-    internal RequestCqrsProbeJson Json { get; }
+    internal string Root
+    {
+        get;
+    }
+    internal string SessionId
+    {
+        get;
+    }
+    internal RequestCqrsProbeJson Json
+    {
+        get;
+    }
 
     internal static RequestCqrsProbeFixture Create(string dataRoot, Guid sessionId)
         => RequestCqrsProbeFixtureFactory.Create(dataRoot, sessionId);
@@ -47,22 +58,32 @@ internal sealed class RequestCqrsProbeFixture
         lock (sync)
         {
             if (admissionStopped || cleaned)
-            { throw new InvalidOperationException(AdmissionStopped); }
+            {
+                throw new InvalidOperationException(AdmissionStopped);
+            }
             RequestCqrsProbeArmValidator.Validate(principalId, commandId, readKind, phase, action);
             if (arms.Count >= MaximumArms)
-            { throw new IOException(FileLimitExceeded); }
+            {
+                throw new IOException(FileLimitExceeded);
+            }
             var armId = Guid.NewGuid();
             while (arms.ContainsKey(armId))
-            { armId = Guid.NewGuid(); }
+            {
+                armId = Guid.NewGuid();
+            }
             var bytes = RequestCqrsProbeJsonWriter.Arm(SessionId, armId, principalId, commandId, readKind, phase, action, partition, sourceRequestId, targetVoter, sourceArmId);
             var decoded = Json.ReadArm(bytes);
             RequestCqrsProbeArmValidator.ValidateDecoded(decoded, armId, principalId, commandId, readKind, phase, action);
             if (decoded.Partition?.ToPartition() != partition || decoded.SourceRequestId != sourceRequestId || decoded.TargetVoter != targetVoter || decoded.SourceArmId != sourceArmId)
-            { throw new InvalidOperationException(InvalidArm); }
+            {
+                throw new InvalidOperationException(InvalidArm);
+            }
             RequestCqrsProbeBroadcast.WriteIdentical(Nodes, nodeDirectories, ownerRecords,
                 RequestCqrsProbeFileNames.Arm(armId), bytes);
             var state = new RequestCqrsProbeArmState(principalId, commandId, readKind, phase, action, bytes)
-            { ArmId = armId };
+            {
+                ArmId = armId
+            };
             arms.Add(armId, state);
             return armId;
         }
@@ -74,7 +95,9 @@ internal sealed class RequestCqrsProbeFixture
         {
             if (admissionStopped || cleaned || !arms.TryGetValue(armId, out var arm) || arm.Retired
                 || arm.RequestId is not null || arm.Phase != RequestCqrsProbePhase.NativeModelReplayBeforeDispatch)
-            { throw new InvalidOperationException(InvalidArm); }
+            {
+                throw new InvalidOperationException(InvalidArm);
+            }
             var plan = new RequestCqrsNativeReplayPlan(RequestCqrsProbeProtocol.Version,
                 RequestCqrsNativeReplayInventory.PlanKind, SessionId, armId, arm.CommandId, arm.PrincipalId, mode);
             RequestCqrsNativeReplayInventory.RequireArm(plan, Json.ReadArm(arm.Bytes));
@@ -91,11 +114,15 @@ internal sealed class RequestCqrsProbeFixture
             if (!arms.TryGetValue(armId, out var arm) || arm.Action != RequestCqrsProbeAction.Hold
                 || arm.Retired || arm.Settled || arm.DisposedGateJoined || arm.ProcessOwnerJoined || requestId == Guid.Empty
                 || arm.RequestId != requestId || arm.ReleaseWritten)
-            { throw new InvalidOperationException(InvalidRelease); }
+            {
+                throw new InvalidOperationException(InvalidRelease);
+            }
             var bytes = RequestCqrsProbeJsonWriter.Release(SessionId, armId, requestId);
             var decoded = Json.ReadRelease(bytes);
             if (decoded.SessionId != SessionId || decoded.ArmId != armId || decoded.RequestId != requestId)
-            { throw new InvalidOperationException(InvalidRelease); }
+            {
+                throw new InvalidOperationException(InvalidRelease);
+            }
             RequestCqrsProbeBroadcast.WriteIdentical(Nodes, nodeDirectories, ownerRecords,
                 RequestCqrsProbeFileNames.Release(armId, requestId), bytes);
             arm.ReleaseWritten = true;
@@ -105,14 +132,18 @@ internal sealed class RequestCqrsProbeFixture
     internal void StopAdmission()
     {
         lock (sync)
-        { admissionStopped = true; }
+        {
+            admissionStopped = true;
+        }
     }
 
     internal async Task ReleaseOpenArmsAsync(IReadOnlyList<ReplicaSiloDiscovery> signedDiscovery,
         CancellationToken cancellationToken)
     {
         if (!cancellationToken.CanBeCanceled)
-        { throw new InvalidOperationException(MissingScenarioDeadline); }
+        {
+            throw new InvalidOperationException(MissingScenarioDeadline);
+        }
         RequestCqrsProbeArmState[] open;
         lock (sync)
         {
@@ -124,7 +155,9 @@ internal sealed class RequestCqrsProbeFixture
         {
             cancellationToken.ThrowIfCancellationRequested();
             if (!arm.ReleaseWritten)
-            { WriteRelease(arm.ArmId, arm.RequestId!.Value); }
+            {
+                WriteRelease(arm.ArmId, arm.RequestId!.Value);
+            }
             await RequestCqrsProbeMarkerReader.WaitForSettlementAsync(this, arm.ArmId, signedDiscovery,
                 cancellationToken).ConfigureAwait(false);
         }
@@ -141,7 +174,9 @@ internal sealed class RequestCqrsProbeFixture
             var arm = arms[armId];
             arm.RequestId ??= marker.RequestId;
             if (arm.RequestId != marker.RequestId)
-            { throw new InvalidOperationException(MarkerMismatch); }
+            {
+                throw new InvalidOperationException(MarkerMismatch);
+            }
         }
         return marker;
     }
@@ -157,7 +192,9 @@ internal sealed class RequestCqrsProbeFixture
         {
             if (cleaned || !arms.TryGetValue(armId, out var arm) || arm.Retired
                 || (arm.Action == RequestCqrsProbeAction.Hold && arm.RequestId is not null && !arm.Settled && !arm.DisposedGateJoined && !arm.ProcessOwnerJoined))
-            { throw new InvalidOperationException(InvalidArm); }
+            {
+                throw new InvalidOperationException(InvalidArm);
+            }
             RequestCqrsProbeFixtureOperations.RetireArmFiles(armId, arm.Bytes, nodeDirectories, ownerRecords);
             arm.Retired = true;
         }
@@ -165,20 +202,29 @@ internal sealed class RequestCqrsProbeFixture
     }
 
     internal void JoinDisposedGate(Guid armId, Task originalProducer)
-    { lock (sync) { RequestCqrsProbeDisposedGateCleanup.Join(ArmFor(armId), activeGates, originalProducer); } }
+    {
+        lock (sync)
+        {
+            RequestCqrsProbeDisposedGateCleanup.Join(ArmFor(armId), activeGates, originalProducer);
+        }
+    }
 
     internal void JoinKilledOwnerGates(TwoRf3MembershipWave wave, Aspire.Hosting.DistributedApplication originalOwner,
         IReadOnlyList<Guid> originalArms, KeyLoad.Server.Features.ClusterRouting.RequestCqrsMovementJournalRecord? movementJournal = null,
         RequestCqrsProbeMarkerRecord? originalMarker = null, Task? originalProducer = null)
     {
         lock (sync)
-        { RequestCqrsProbeKilledOwnerCleanup.Join(wave, originalOwner, originalArms, arms, activeGates, Json, movementJournal, originalMarker, originalProducer); }
+        {
+            RequestCqrsProbeKilledOwnerCleanup.Join(wave, originalOwner, originalArms, arms, activeGates, Json, movementJournal, originalMarker, originalProducer);
+        }
     }
 
     internal void RetainEvidence()
     {
         lock (sync)
-        { retainEvidence = true; }
+        {
+            retainEvidence = true;
+        }
     }
 
     internal Task DisposeAfterResourcesJoinedAsync()
@@ -189,13 +235,19 @@ internal sealed class RequestCqrsProbeFixture
             if (arms.Values.Any(arm => (arm.Action == RequestCqrsProbeAction.Hold
                     && arm.RequestId is not null && !arm.Settled && !arm.DisposedGateJoined && !arm.ProcessOwnerJoined && !arm.Retired)
                 || (arm.RequestId is not null && !arm.OwnerDisposedSeen && !arm.ProcessOwnerJoined)))
-            { throw new InvalidOperationException(UnsettledGates); }
+            {
+                throw new InvalidOperationException(UnsettledGates);
+            }
             if (cleaned || retainEvidence)
-            { return Task.CompletedTask; }
+            {
+                return Task.CompletedTask;
+            }
         }
         RequestCqrsProbeFileStore.DeleteOwnedTree(Root, nodeDirectories, ownerRecords, requireAllOwners: true, includeDestination);
         lock (sync)
-        { cleaned = true; }
+        {
+            cleaned = true;
+        }
         return Task.CompletedTask;
     }
 
@@ -208,7 +260,9 @@ internal sealed class RequestCqrsProbeFixture
     internal RequestCqrsProbeArmState ArmFor(Guid armId)
     {
         lock (sync)
-        { return arms.TryGetValue(armId, out var state) ? state : throw new InvalidOperationException(InvalidArm); }
+        {
+            return arms.TryGetValue(armId, out var state) ? state : throw new InvalidOperationException(InvalidArm);
+        }
     }
 
     internal void RecordMarker(RequestCqrsProbeMarkerRecord marker, string node, string expectedPhase,
@@ -217,7 +271,9 @@ internal sealed class RequestCqrsProbeFixture
         lock (sync)
         {
             if (!arms.TryGetValue(marker.ArmId, out var arm))
-            { throw new InvalidOperationException(MarkerMismatch); }
+            {
+                throw new InvalidOperationException(MarkerMismatch);
+            }
             RequestCqrsProbeMarkerState.Record(SessionId, arm, marker, node, expectedPhase, expectedOutcome,
                 signedDiscovery, activeGates, Json);
         }

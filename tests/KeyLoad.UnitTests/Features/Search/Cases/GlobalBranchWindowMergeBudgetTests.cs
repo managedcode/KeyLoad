@@ -51,7 +51,11 @@ internal sealed class GlobalBranchWindowMergeBudgetTests
             MaxScanRecords = MaximumCandidates,
             MaxResults = MaximumCandidates
         };
-        var batchLimits = readLimits with { MaxBatchBytes = checked((int)exactBytes - 1), MaxQueryReadBytes = long.MaxValue };
+        var batchLimits = readLimits with
+        {
+            MaxBatchBytes = checked((int)exactBytes - 1),
+            MaxQueryReadBytes = long.MaxValue
+        };
 
         var readFailure = Assert.ThrowsExactly<KeyLoadException>(() => GlobalBranchWindowMerger.Merge(request,
             windows, readLimits, new(UnitExecutionOptions.DatabaseLimits(readLimits))));

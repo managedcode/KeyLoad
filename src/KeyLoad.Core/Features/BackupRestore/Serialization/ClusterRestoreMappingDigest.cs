@@ -21,7 +21,9 @@ public static class ClusterRestoreMappingDigest
             AppendOwner(hash, mapping.Target);
             Append(hash, mapping.Endpoints.Length);
             foreach (var endpoint in mapping.Endpoints)
-            { Append(hash, endpoint); }
+            {
+                Append(hash, endpoint);
+            }
         }
         return Convert.ToHexStringLower(hash.GetHashAndReset());
     }
@@ -33,7 +35,9 @@ public static class ClusterRestoreMappingDigest
         Append(hash, owner.PlacementEpoch);
         Append(hash, owner.VoterIds.Length);
         foreach (var voter in owner.VoterIds)
-        { Append(hash, voter); }
+        {
+            Append(hash, voter);
+        }
     }
 
     private static void Append<T>(IncrementalHash hash, T value)

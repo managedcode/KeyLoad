@@ -100,7 +100,9 @@ internal static class CrashExecutionOptions
 
     internal static DatabaseLimits RemoteTransferRepairLimits()
         => DatabaseLimits(new DatabaseLimits
-        { MaxQueueTransferRepairAttempts = Features.Messaging.RemoteTransferRepairCrashProtocol.Ceiling }).Value;
+        {
+            MaxQueueTransferRepairAttempts = Features.Messaging.RemoteTransferRepairCrashProtocol.Ceiling
+        }).Value;
 
     internal static DatabaseLimits RemoteTransferAttemptLimits()
         => DatabaseLimits(new DatabaseLimits

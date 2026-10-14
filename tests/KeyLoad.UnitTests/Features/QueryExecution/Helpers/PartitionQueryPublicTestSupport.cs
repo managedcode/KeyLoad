@@ -45,7 +45,12 @@ internal sealed class PartitionQueryPublicTestSupport : IDisposable
     internal void AddRows(PartitionRef partition, params PartitionQueryPublicSeed[] rows)
     {
         var mutations = rows.Select(row => (Mutation)new PutDocument(Collection, row.Id,
-            JsonSerializer.Serialize(new { score = row.Score, label = row.Label, secret = row.Secret },
+            JsonSerializer.Serialize(new
+            {
+                score = row.Score,
+                label = row.Label,
+                secret = row.Secret
+            },
                 JsonDefaults.Options), Access: row.Access)).ToImmutableArray();
         var id = Guid.NewGuid();
         _ = fixture.Submit(OperationKind.Batch, new CommandRequest(id, partition, mutations), id: id)

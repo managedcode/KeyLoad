@@ -20,9 +20,13 @@ internal static class BlobPartIdentityR40Replay
         await OriginalAsync(callers, state, state.Begin, state.Begun, BeginTool, ct => callers.Sdk.BeginBlobUploadAsync(state.Begin, ct), token);
         await OriginalAsync(callers, state, state.First, state.WrittenFirst, PartTool, ct => callers.Sdk.WriteBlobPartAsync(state.First, ct), token);
         if (state.Tail is { } tail && state.WrittenTail is { } written)
-        { await OriginalAsync(callers, state, tail, written, PartTool, ct => callers.Sdk.WriteBlobPartAsync(tail, ct), token); }
+        {
+            await OriginalAsync(callers, state, tail, written, PartTool, ct => callers.Sdk.WriteBlobPartAsync(tail, ct), token);
+        }
         if (state.Complete is { } complete && state.Completed is { } completed)
-        { await OriginalAsync(callers, state, complete, completed, CompleteTool, ct => callers.Sdk.CompleteBlobUploadAsync(complete, ct), token); }
+        {
+            await OriginalAsync(callers, state, complete, completed, CompleteTool, ct => callers.Sdk.CompleteBlobUploadAsync(complete, ct), token);
+        }
     }
 
     private static async Task OriginalAsync<T>(RequestCqrsRf3Callers callers, BlobPartIdentityR40State state,

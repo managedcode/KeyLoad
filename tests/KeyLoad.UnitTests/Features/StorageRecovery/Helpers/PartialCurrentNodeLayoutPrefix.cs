@@ -21,7 +21,10 @@ internal static class PartialCurrentNodeLayoutPrefix
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 using var store = new ZoneTreeStore(new(Path(fixture, replicaPrefix))
-                { Incarnation = fixture.Options.Incarnation, SigningKey = key },
+                {
+                    Incarnation = fixture.Options.Incarnation,
+                    SigningKey = key
+                },
                     UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
                 await ServerFailureObserver.ObserveAsync(async () =>
                 {
@@ -47,7 +50,10 @@ internal static class PartialCurrentNodeLayoutPrefix
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 using var store = new ZoneTreeStore(new(Path(fixture, replicaPrefix))
-                { Incarnation = fixture.Options.Incarnation, SigningKey = key },
+                {
+                    Incarnation = fixture.Options.Incarnation,
+                    SigningKey = key
+                },
                     UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
                 await ServerFailureObserver.ObserveAsync(async () =>
                     await Assert.That(JsonSerializer.Serialize(store.Identity, JsonDefaults.Options)).IsEqualTo(identity), failures);

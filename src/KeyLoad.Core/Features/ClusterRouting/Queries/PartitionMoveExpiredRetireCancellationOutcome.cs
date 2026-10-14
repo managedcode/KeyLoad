@@ -19,7 +19,9 @@ public sealed partial class DatabaseEngine
         RequireNativeBudget(bytes.Length);
         if (movementCheckpointVerifier.VerifyRetireCancellationQuery(this, principalId, bytes, work)
             != Convert.ToHexStringLower(SHA256.HashData(bytes)))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMoveProtocol.MissingAuthority);
+        }
         var result = Store.Read(view =>
         {
             var charged = work.CreateView(view, grant);
@@ -30,7 +32,9 @@ public sealed partial class DatabaseEngine
                 || body.OriginalPhaseCommandId == Guid.Empty || body.CancellationCommandId == Guid.Empty
                 || body.OriginalPhaseCommandId == body.CancellationCommandId || original.Stage != PartitionMovePeerStage.Retire
                 || original.Grant is null || original.Grant.PhaseCommandId != body.OriginalPhaseCommandId)
-            { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.MissingAuthority); }
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.MissingAuthority);
+            }
             var cancellation = PartitionMoveRetireCancellationStorage.Read(charged, original.Partition, original.MoveId,
                 body.OriginalPhaseCommandId, Limits.MaxBatchBytes);
             var actual = CommandOutcomeKeyResolver.Select(charged, principal.Id, body.CancellationCommandId,
@@ -39,9 +43,13 @@ public sealed partial class DatabaseEngine
                 ?? throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority);
             var cut = NativeSerialization.Deserialize<long>(applied);
             if (cancellation is not null)
-            { RequireMoveRetireCancellationOutcome(cancellation, actual, body, principal.Id, cut); }
+            {
+                RequireMoveRetireCancellationOutcome(cancellation, actual, body, principal.Id, cut);
+            }
             else if (actual is not null && actual.Result.Error is null)
-            { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority);
+            }
             return new PartitionMoveRetireCancellationSnapshot(cancellation, actual?.Result, cut);
         });
         work.MeasureResult(result);
@@ -66,11 +74,15 @@ public sealed partial class DatabaseEngine
                 default, MovementPhaseIdentityJson(cancellation.CancellationPhase)))
             || !NativeSerialization.Serialize(scope.OriginalEnvelope).AsSpan().SequenceEqual(NativeSerialization.Serialize(original))
             || !NativeSerialization.Serialize(scope.OriginalAuthorization).AsSpan().SequenceEqual(NativeSerialization.Serialize(query.OriginalAuthorization)))
-        { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority);
+        }
         var result = actual.Result.Get<PartitionMovePhaseResult>();
         if (result.Stage != PartitionMovePeerStage.RetireCancel || result.MoveId != original.MoveId
             || !NativeSerialization.Serialize(result.Journal).AsSpan().SequenceEqual(NativeSerialization.Serialize(cancellation.CancellationReceipt))
             || !NativeSerialization.Serialize(result.RetireCancellation).AsSpan().SequenceEqual(NativeSerialization.Serialize(cancellation)))
-        { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority);
+        }
     }
 }

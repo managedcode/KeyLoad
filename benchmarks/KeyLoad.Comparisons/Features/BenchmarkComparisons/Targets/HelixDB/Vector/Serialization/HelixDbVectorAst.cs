@@ -19,7 +19,11 @@ internal static class HelixDbVectorAst
             new JsonArray(HelixDbNativeTokens.TokenFiltered, HelixDbProtocol.Value(HelixDbNativeTokens.TokenBool, document.Number % FilteredCorpusModulo == EmptyResultCount)),
             new JsonArray(HelixDbNativeTokens.TokenStable, HelixDbProtocol.Value(HelixDbNativeTokens.TokenBool, document.Number % CanonicalRecordIdWidth != ExcludedStableRemainder))
         };
-        return HelixDbProtocol.Node(HelixDbNativeTokens.TokenAddN, new() { [HelixDbNativeTokens.TokenLabel] = label, [HelixDbNativeTokens.TokenProperties] = properties });
+        return HelixDbProtocol.Node(HelixDbNativeTokens.TokenAddN, new()
+        {
+            [HelixDbNativeTokens.TokenLabel] = label,
+            [HelixDbNativeTokens.TokenProperties] = properties
+        });
     }
 
     internal static JsonObject Search(string label, ReadOnlySpan<float> vector, int count, VectorQueryMode mode)

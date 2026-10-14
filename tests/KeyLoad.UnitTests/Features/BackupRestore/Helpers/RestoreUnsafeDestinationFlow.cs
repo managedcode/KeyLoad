@@ -48,7 +48,9 @@ internal static class RestoreUnsafeDestinationFlow
     {
         KeyLoadException? original = null;
         try
-        { ZoneTreeStore.Restore(fixture.Backup, destination, UnitExecutionOptions.StorageExecution()); }
+        {
+            ZoneTreeStore.Restore(fixture.Backup, destination, UnitExecutionOptions.StorageExecution());
+        }
         catch (KeyLoadException failure) { original = failure; }
         await Assert.That(original).IsNotNull();
         await Assert.That(original!.Code).IsEqualTo(ErrorCode.Conflict);
@@ -80,7 +82,9 @@ internal static class RestoreUnsafeDestinationFlow
     {
         var result = new Dictionary<string, byte[]>(StringComparer.Ordinal);
         foreach (var file in Directory.EnumerateFiles(backup, "*", SearchOption.AllDirectories))
-        { result.Add(Path.GetRelativePath(backup, file), await File.ReadAllBytesAsync(file)); }
+        {
+            result.Add(Path.GetRelativePath(backup, file), await File.ReadAllBytesAsync(file));
+        }
         return result;
     }
 }

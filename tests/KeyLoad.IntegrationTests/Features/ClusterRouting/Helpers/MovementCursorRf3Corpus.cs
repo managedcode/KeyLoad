@@ -29,7 +29,9 @@ internal static class MovementCursorRf3Corpus
         PartitionMovementPublicParentRf3Seed seed, CancellationToken token)
     {
         var definition = new ResourceDefinition(Collection, ResourceKind.Collection, seed.Partition.TransactionDomainId)
-        { Indexes = [new(Index, [ScopePath])] };
+        {
+            Indexes = [new(Index, [ScopePath])]
+        };
         await SqlRf3Protocol.EqualAsync(definition, await McpCallerAssertions.SdkSuccessAsync(
             await seed.Source.ConfigureResourceAsync(Guid.NewGuid(),
                 new(seed.Partition.TenantId, seed.Partition.DatabaseId, definition), token)));

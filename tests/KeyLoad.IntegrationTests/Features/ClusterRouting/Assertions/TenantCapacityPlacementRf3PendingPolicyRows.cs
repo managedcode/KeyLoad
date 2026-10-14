@@ -26,7 +26,9 @@ internal static class TenantCapacityPlacementRf3PendingPolicyRows
             await Assert.That(cut.OutstandingMoveGrants).IsEqualTo(0L);
             await Assert.That(cut.OutstandingDatabaseGrants).IsEqualTo(0L);
             if (!controls.Contains(cut))
-            { await Assert.That(Row(cut, persistKey)).IsNull(); }
+            {
+                await Assert.That(Row(cut, persistKey)).IsNull();
+            }
         }
         foreach (var cut in controls)
         {

@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.Server;
@@ -23,16 +23,24 @@ internal sealed partial class PartitionMovementTransferSourceReads
             }, shutdown);
         var failures = new List<Exception>();
         if (failure is not null)
-        { failures.Add(failure); }
+        {
+            failures.Add(failure);
+        }
         ServerFailureObserver.Observe(producer.Dispose, failures);
         lock (gate)
         {
             if (failures.Count != PartitionMovementProtocol.NoFailures)
-            { producer.Completion.TrySetException(failures); }
+            {
+                producer.Completion.TrySetException(failures);
+            }
             else if (completed is not null)
-            { producer.Completion.TrySetResult(completed); }
+            {
+                producer.Completion.TrySetResult(completed);
+            }
             else
-            { producer.Completion.TrySetException(Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority)); }
+            {
+                producer.Completion.TrySetException(Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority));
+            }
             captures.Remove(requestId);
         }
     }

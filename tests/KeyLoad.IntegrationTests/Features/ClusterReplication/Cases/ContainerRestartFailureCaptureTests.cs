@@ -64,7 +64,10 @@ internal sealed class ContainerRestartFailureCaptureTests
         await Assert.That(line.Contains("environment-canary", StringComparison.Ordinal)).IsFalse();
         await Assert.That(line.Contains("url-canary", StringComparison.Ordinal)).IsFalse();
 
-        var healthySnapshot = snapshot with { State = KnownResourceStates.Running };
+        var healthySnapshot = snapshot with
+        {
+            State = KnownResourceStates.Running
+        };
         var healthyLine = ContainerRestartDiagnostics.FormatResourceSample(
             ContainerRestartSampleStage.AfterStartSucceeded, 2,
             new ResourceEvent(resource, ValidResourceId, healthySnapshot));
@@ -150,7 +153,10 @@ internal sealed class ContainerRestartFailureCaptureTests
     {
         private const string DirectoryPrefix = "keyload-restart-failure-receipts-";
 
-        internal string Path { get; } = System.IO.Path.Combine(System.IO.Path.GetTempPath(),
+        internal string Path
+        {
+            get;
+        } = System.IO.Path.Combine(System.IO.Path.GetTempPath(),
             DirectoryPrefix + Guid.NewGuid().ToString("N"));
 
         internal ReceiptDirectory() => Directory.CreateDirectory(Path);

@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
@@ -26,7 +26,9 @@ internal sealed class ConnectionRf3OperationJoin
             await ServerFailureObserver.ObserveAsync(
                 () => operation.Original.WaitAsync(cancellationToken), failures).ConfigureAwait(false);
             if (operation.Original.IsCompleted)
-            { terminalObserved.Add(operation.Original); }
+            {
+                terminalObserved.Add(operation.Original);
+            }
         }
     }
 
@@ -52,7 +54,9 @@ internal sealed class ConnectionRf3OperationJoin
         {
             var arm = controls.ArmFor(operation.Arm);
             if (arm.RequestId is not { } requestId || arm.ProducerDisposedSeen && arm.Settled)
-            { continue; }
+            {
+                continue;
+            }
             await ServerFailureObserver.ObserveAsync(
                 () => RequestCqrsPhaseFaultAssertions.VerifySettledAsync(controls, arm.ArmId,
                     requestId, arm.CommandId, discovery, cancellationToken), failures).ConfigureAwait(false);

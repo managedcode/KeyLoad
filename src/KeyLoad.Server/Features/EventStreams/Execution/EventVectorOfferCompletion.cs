@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.DocumentStorage;
 
 namespace KeyLoad.Server.Features.EventStreams;
@@ -20,7 +20,9 @@ internal static class EventVectorOfferCompletion
         var principal = parent.Envelope.PrincipalId
             ?? throw Errors.Fail(ErrorCode.Unauthenticated, EventVectorRemoteProtocol.Invalid);
         if (prepared.Entries.Length != prepared.OriginalPinPhaseBytes.Length)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, EventVectorRemoteProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, EventVectorRemoteProtocol.Invalid);
+        }
         admission.RequireEntryCount(prepared.Entries.Length);
         var pages = ImmutableArray.CreateBuilder<EventSourcePage>(prepared.Entries.Length);
         for (var ordinal = FirstOrdinal; ordinal < prepared.Entries.Length; ordinal++)

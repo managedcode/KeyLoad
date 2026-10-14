@@ -29,20 +29,34 @@ internal static class RowVisibilityFullScan
                 }
                 var result = ScanOriginal(database, principal, budget, lease, draft, scan, accept);
                 if (result.HasMore)
-                { throw Errors.Fail(ErrorCode.BudgetExceeded, CandidateLimitExceeded); }
+                {
+                    throw Errors.Fail(ErrorCode.BudgetExceeded, CandidateLimitExceeded);
+                }
                 budget.Check();
                 draft?.Complete();
             }
             catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
-            { primary = error; throw; }
+            {
+                primary = error;
+                throw;
+            }
             catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null)
-            { primary = error; throw; }
+            {
+                primary = error;
+                throw;
+            }
             finally { draft?.Dispose(); lease?.Dispose(); }
         }
         catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
-        { RowVisibilityFailureLedger.ThrowJoined(primary, error); throw; }
+        {
+            RowVisibilityFailureLedger.ThrowJoined(primary, error);
+            throw;
+        }
         catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null)
-        { RowVisibilityFailureLedger.ThrowJoined(primary, error); throw; }
+        {
+            RowVisibilityFailureLedger.ThrowJoined(primary, error);
+            throw;
+        }
     }
     private static RowVisibilityDraft? BeginMissing(RowVisibilityCache cache, RowVisibilityScope scope, RowVisibilityLease? lease)
         => lease is null ? cache.Begin(scope) : null;

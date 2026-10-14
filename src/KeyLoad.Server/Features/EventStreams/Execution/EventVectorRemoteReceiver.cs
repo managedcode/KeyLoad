@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.Server.Features.EventStreams;
 
@@ -51,7 +51,9 @@ internal sealed class EventVectorRemoteReceiver(OrleansNode node, PartitionHost 
         if (input is null || input.Version != EventVectorRemoteProtocol.Version
             || input.OriginalRequest is null || input.GroupOrdinal != authority.GroupOrdinal
             || string.IsNullOrWhiteSpace(input.PrincipalId))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, EventVectorRemoteProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, EventVectorRemoteProtocol.Invalid);
+        }
         JsonData.Identifier(input.PrincipalId);
         var principal = native.Principal(input.PrincipalId, originalCancellationToken);
         var request = new EventVectorCoverageReadRequest(EventVectorRemoteProtocol.Version,
@@ -62,9 +64,13 @@ internal sealed class EventVectorRemoteReceiver(OrleansNode node, PartitionHost 
         if (capture.NodeId != actual.NodeId || capture.ReadGeneration != actual.ReadGeneration
             || capture.PrincipalId != principal.Id || capture.GroupOrdinal != input.GroupOrdinal
             || !PhysicalOwnerEntryValidation.SameOwner(capture.SourceOwner, authority.LocalOwner.Owner))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, EventVectorRemoteProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, EventVectorRemoteProtocol.Unavailable);
+        }
         try
-        { return EventVectorWorkEncoding.Encode(capture, encoding, work); }
+        {
+            return EventVectorWorkEncoding.Encode(capture, encoding, work);
+        }
         finally { EventVectorCaptureBuffers.Clear(capture); }
     }
 
@@ -77,10 +83,15 @@ internal sealed class EventVectorRemoteReceiver(OrleansNode node, PartitionHost 
             || input.OriginalReadRequest.Version != EventVectorRemoteProtocol.Version
             || string.IsNullOrWhiteSpace(input.PrincipalId)
             || !PhysicalOwnerEntryValidation.SameOwner(input.OriginalReadRequest.SourceOwner, authority.LocalOwner.Owner))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, EventVectorRemoteProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, EventVectorRemoteProtocol.Invalid);
+        }
         JsonData.Identifier(input.PrincipalId);
         var principal = native.Principal(input.PrincipalId, originalCancellationToken);
-        var owned = input.OriginalReadRequest with { SourceOwner = authority.LocalOwner.Owner };
+        var owned = input.OriginalReadRequest with
+        {
+            SourceOwner = authority.LocalOwner.Owner
+        };
         var pages = await EventVectorReceivingRead.ExecuteAsync<ImmutableArray<EventSourcePage>, EventVectorSourcesReadRequest>(native, call, principal,
             GrainReadKind.EventVectorSources, owned, encoding, work, originalCancellationToken).ConfigureAwait(false);
         return EventVectorWorkEncoding.Encode(pages, encoding, work);
@@ -90,11 +101,15 @@ internal sealed class EventVectorRemoteReceiver(OrleansNode node, PartitionHost 
         ReadExecutionBudget work, CancellationToken originalCancellationToken)
     {
         if (!PhysicalOwnerEntryValidation.SameOwner(authority.LocalOwner.Owner, authority.ControlOwner.Owner))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, EventVectorRemoteProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, EventVectorRemoteProtocol.Unavailable);
+        }
         var input = NativeSerialization.Deserialize<EventVectorParentLookupCall>(call.OriginalNativeRequest.Span);
         if (input is null || input.Version != EventVectorRemoteProtocol.Version
             || input.OriginalControlRequest is null || string.IsNullOrWhiteSpace(input.PrincipalId))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, EventVectorRemoteProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, EventVectorRemoteProtocol.Invalid);
+        }
         JsonData.Identifier(input.PrincipalId);
         var principal = native.Principal(input.PrincipalId, originalCancellationToken);
         var request = new EventVectorOutcomeReadRequest(EventVectorRemoteProtocol.Version, null)
@@ -111,7 +126,9 @@ internal sealed class EventVectorRemoteReceiver(OrleansNode node, PartitionHost 
             || observation.PrincipalId != principal.Id
             || !input.TailObservation && observation.OriginalPublicCommandId != input.OriginalControlRequest.CommandId
             || !PhysicalOwnerEntryValidation.SameOwner(observation.ControlOwner, authority.ControlOwner.Owner))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, EventVectorRemoteProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, EventVectorRemoteProtocol.Unavailable);
+        }
         return EventVectorWorkEncoding.Encode(observation, encoding, work);
     }
 
@@ -119,7 +136,9 @@ internal sealed class EventVectorRemoteReceiver(OrleansNode node, PartitionHost 
         ReadExecutionBudget work, CancellationToken originalCancellationToken)
     {
         if (!PhysicalOwnerEntryValidation.SameOwner(authority.LocalOwner.Owner, authority.ControlOwner.Owner))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, EventVectorRemoteProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, EventVectorRemoteProtocol.Unavailable);
+        }
         var input = NativeSerialization.Deserialize<EventVectorFirstLookupCall>(call.OriginalNativeRequest.Span);
         if (input is null || input.Version != EventVectorRemoteProtocol.Version
             || input.OriginalFirstIssuanceRequest is null
@@ -127,7 +146,9 @@ internal sealed class EventVectorRemoteReceiver(OrleansNode node, PartitionHost 
             || input.OriginalFirstIssuanceRequest.OriginalPublicRequest is null
             || !PhysicalOwnerEntryValidation.SameOwner(input.OriginalFirstIssuanceRequest.ControlOwner,
                 authority.ControlOwner.Owner) || string.IsNullOrWhiteSpace(input.PrincipalId))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, EventVectorRemoteProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, EventVectorRemoteProtocol.Invalid);
+        }
         JsonData.Identifier(input.PrincipalId);
         var principal = native.Principal(input.PrincipalId, originalCancellationToken);
         var request = new EventVectorOutcomeReadRequest(EventVectorRemoteProtocol.Version, null)
@@ -143,7 +164,9 @@ internal sealed class EventVectorRemoteReceiver(OrleansNode node, PartitionHost 
             || observation.PrincipalId != principal.Id
             || observation.OriginalPublicCommandId != input.OriginalFirstIssuanceRequest.OriginalPublicRequest.CommandId
             || !PhysicalOwnerEntryValidation.SameOwner(observation.ControlOwner, authority.ControlOwner.Owner))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, EventVectorRemoteProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, EventVectorRemoteProtocol.Unavailable);
+        }
         return EventVectorWorkEncoding.Encode(observation, encoding, work);
     }
 
@@ -155,7 +178,9 @@ internal sealed class EventVectorRemoteReceiver(OrleansNode node, PartitionHost 
         RequireSource(phase);
         var principal = native.Principal(phase.PrincipalId, originalCancellationToken);
         if (submit)
-        { await native.SubmitAsync(call, principal, phase, work, boundary, originalCancellationToken).ConfigureAwait(false); }
+        {
+            await native.SubmitAsync(call, principal, phase, work, boundary, originalCancellationToken).ConfigureAwait(false);
+        }
         var request = new EventVectorOutcomeReadRequest(EventVectorRemoteProtocol.Version, phase);
         var observation = await EventVectorReceivingRead.ExecuteAsync<EventVectorSourceObservation, EventVectorOutcomeReadRequest>(native, call, principal,
             GrainReadKind.EventVectorOriginalOutcome, request, encoding, work, originalCancellationToken).ConfigureAwait(false);
@@ -165,7 +190,9 @@ internal sealed class EventVectorRemoteReceiver(OrleansNode node, PartitionHost 
             || observation.OriginalSourcePhaseCommandId != phase.PhaseCommandId
             || !observation.OriginalBodyDigest.Span.SequenceEqual(phase.OriginalBodyDigest.Span)
             || !PhysicalOwnerEntryValidation.SameOwner(observation.SourceOwner, authority.LocalOwner.Owner))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, EventVectorRemoteProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, EventVectorRemoteProtocol.Unavailable);
+        }
         return EventVectorWorkEncoding.Encode(observation, encoding, work);
     }
 
@@ -177,7 +204,9 @@ internal sealed class EventVectorRemoteReceiver(OrleansNode node, PartitionHost 
             || !PhysicalOwnerEntryValidation.SameOwner(phase.ControlOwner, authority.ControlOwner.Owner)
             || phase.ControlIncarnation != authority.ControlOwner.Owner.Incarnation
             || string.IsNullOrWhiteSpace(phase.PrincipalId))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, EventVectorRemoteProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, EventVectorRemoteProtocol.Invalid);
+        }
         JsonData.Identifier(phase.PrincipalId);
     }
 }

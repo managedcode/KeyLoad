@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 using Aspire.Hosting.ApplicationModel;
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
-using KeyLoad.Orleans;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.IntegrationTests.Features.Messaging;
@@ -13,10 +13,21 @@ internal sealed class RemoteTransferNativeMembership : IDisposable
     private RemoteTransferNativeMembership(byte[] sourceSecret, byte[] destinationSecret,
         IReadOnlyDictionary<string, ReplicaSiloDiscovery> owners,
         IReadOnlyDictionary<string, ReadOnlyMemory<byte>> secrets)
-    { this.sourceSecret = sourceSecret; this.destinationSecret = destinationSecret; Owners = owners; Secrets = secrets; }
+    {
+        this.sourceSecret = sourceSecret;
+        this.destinationSecret = destinationSecret;
+        Owners = owners;
+        Secrets = secrets;
+    }
 
-    internal IReadOnlyDictionary<string, ReplicaSiloDiscovery> Owners { get; }
-    internal IReadOnlyDictionary<string, ReadOnlyMemory<byte>> Secrets { get; }
+    internal IReadOnlyDictionary<string, ReplicaSiloDiscovery> Owners
+    {
+        get;
+    }
+    internal IReadOnlyDictionary<string, ReadOnlyMemory<byte>> Secrets
+    {
+        get;
+    }
     internal IReadOnlyList<ReplicaSiloDiscovery> Source => TwoRf3MembershipProtocol.Nodes[..3].Select(node => Owners[node]).ToArray();
     internal IReadOnlyList<ReplicaSiloDiscovery> Destination => TwoRf3MembershipProtocol.Nodes[3..].Select(node => Owners[node]).ToArray();
     internal string SourceSecret => Convert.ToBase64String(sourceSecret);
@@ -33,7 +44,9 @@ internal sealed class RemoteTransferNativeMembership : IDisposable
         {
             target = Convert.FromBase64String(await ParameterAsync(model, "membership-peer-b", token));
             if (source.Length != 32 || target.Length != 32)
-            { throw new InvalidOperationException(RemoteTransferDistinctProtocol.Missing); }
+            {
+                throw new InvalidOperationException(RemoteTransferDistinctProtocol.Missing);
+            }
             var owners = new Dictionary<string, ReplicaSiloDiscovery>(StringComparer.Ordinal);
             var secrets = new Dictionary<string, ReadOnlyMemory<byte>>(StringComparer.Ordinal);
             var cluster = "keyload-" + wave.Profile.Incarnation.ToString("N");
@@ -47,11 +60,17 @@ internal sealed class RemoteTransferNativeMembership : IDisposable
             }
             if (owners.Values.Select(value => value.VoterId).Distinct(StringComparer.Ordinal).Count() != 6
                 || owners.Values.Select(value => value.SiloAddress).Distinct(StringComparer.Ordinal).Count() != 6)
-            { throw new InvalidOperationException(RemoteTransferDistinctProtocol.Missing); }
+            {
+                throw new InvalidOperationException(RemoteTransferDistinctProtocol.Missing);
+            }
             return new(source, target, owners, secrets);
         }
         catch (Exception)
-        { CryptographicOperations.ZeroMemory(source); CryptographicOperations.ZeroMemory(target); throw; }
+        {
+            CryptographicOperations.ZeroMemory(source);
+            CryptographicOperations.ZeroMemory(target);
+            throw;
+        }
     }
 
     private static async Task<string> ParameterAsync(DistributedApplicationModel model, string name, CancellationToken token)
@@ -59,5 +78,8 @@ internal sealed class RemoteTransferNativeMembership : IDisposable
             ?? throw new InvalidOperationException(RemoteTransferDistinctProtocol.Missing);
 
     public void Dispose()
-    { CryptographicOperations.ZeroMemory(sourceSecret); CryptographicOperations.ZeroMemory(destinationSecret); }
+    {
+        CryptographicOperations.ZeroMemory(sourceSecret);
+        CryptographicOperations.ZeroMemory(destinationSecret);
+    }
 }

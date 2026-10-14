@@ -26,7 +26,9 @@ internal sealed class NativeTextSelectedIndexSlot(string root, string leaf, Guid
         lock (gate)
         {
             if (failure is not null)
-            { throw new AggregateException(failure); }
+            {
+                throw new AggregateException(failure);
+            }
             budget.Check();
             if (readers is null)
             {
@@ -36,7 +38,9 @@ internal sealed class NativeTextSelectedIndexSlot(string root, string leaf, Guid
                 readers = new(options.Value.MaximumActiveLeases, ReferenceEqualityComparer.Instance);
             }
             if (!readers.Add(reader))
-            { throw NativeTextErrors.Ownership(); }
+            {
+                throw NativeTextErrors.Ownership();
+            }
             try
             {
                 index ??= NativeTextIndex.Open(Path.Combine(root, leaf, NativeTextProtocol.NativeDirectory),
@@ -52,7 +56,9 @@ internal sealed class NativeTextSelectedIndexSlot(string root, string leaf, Guid
         lock (gate)
         {
             if ((readers?.Count ?? Empty) <= Empty || index is null)
-            { throw NativeTextErrors.Ownership(); }
+            {
+                throw NativeTextErrors.Ownership();
+            }
             return index.ZoneTree1.CreateIterator(IteratorType.NoRefresh, contributeToTheBlockCache: false);
         }
     }
@@ -62,11 +68,15 @@ internal sealed class NativeTextSelectedIndexSlot(string root, string leaf, Guid
         lock (gate)
         {
             if (readers is null || !readers.Contains(reader))
-            { throw NativeTextErrors.Corrupt(); }
+            {
+                throw NativeTextErrors.Corrupt();
+            }
             if (readers.Count == SingleReader)
             {
                 try
-                { DisposeIndex(); }
+                {
+                    DisposeIndex();
+                }
                 catch (Exception error) { failure = error; throw; }
             }
             _ = readers.Remove(reader);
@@ -78,7 +88,9 @@ internal sealed class NativeTextSelectedIndexSlot(string root, string leaf, Guid
         lock (gate)
         {
             if (readers?.Contains(reader) == true)
-            { throw NativeTextErrors.Ownership(); }
+            {
+                throw NativeTextErrors.Ownership();
+            }
         }
     }
 
@@ -87,9 +99,13 @@ internal sealed class NativeTextSelectedIndexSlot(string root, string leaf, Guid
         lock (gate)
         {
             if (failure is not null)
-            { throw new AggregateException(failure); }
+            {
+                throw new AggregateException(failure);
+            }
             if ((readers?.Count ?? Empty) != Empty || index is not null)
-            { throw NativeTextErrors.Ownership(); }
+            {
+                throw NativeTextErrors.Ownership();
+            }
         }
     }
 
@@ -98,20 +114,30 @@ internal sealed class NativeTextSelectedIndexSlot(string root, string leaf, Guid
         lock (gate)
         {
             if ((readers?.Count ?? Empty) != Empty)
-            { throw NativeTextErrors.Ownership(); }
+            {
+                throw NativeTextErrors.Ownership();
+            }
             try
-            { DisposeIndex(); }
+            {
+                DisposeIndex();
+            }
             catch (Exception cleanup) when (failure is not null)
-            { throw new AggregateException(failure, cleanup); }
+            {
+                throw new AggregateException(failure, cleanup);
+            }
             if (failure is not null)
-            { throw new AggregateException(failure); }
+            {
+                throw new AggregateException(failure);
+            }
         }
     }
 
     private void DisposeIndex()
     {
         if (index is not { } original)
-        { return; }
+        {
+            return;
+        }
         original.Dispose();
         index = null;
     }

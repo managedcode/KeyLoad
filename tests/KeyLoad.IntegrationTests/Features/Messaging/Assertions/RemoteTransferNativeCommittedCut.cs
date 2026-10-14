@@ -29,7 +29,9 @@ internal static class RemoteTransferNativeCommittedCut
             || witness.Owner.Incarnation != original.DestinationOwner.Incarnation
             || receipt.Source != seed.Scenario.SourceQueue || receipt.Destination != seed.Scenario.DestinationQueue
             || receipt.TransferId != seed.TransferId || receipt.RemoteOrigin?.LogicalPrincipalId != seed.Identity.Principal.Id)
-        { throw new InvalidOperationException(RemoteTransferDistinctProtocol.Missing); }
+        {
+            throw new InvalidOperationException(RemoteTransferDistinctProtocol.Missing);
+        }
         return new(Convert.ToHexString(outcomeBytes.Span), Convert.ToHexString(receiptBytes.Span),
             Convert.ToHexString(capacityBytes.Span), outcome.Result.Get<CommitReceipt>());
     }
@@ -39,7 +41,9 @@ internal static class RemoteTransferNativeCommittedCut
     {
         RequireScope(witness, seed, accept);
         if (witness.LogicalOutcome is not null)
-        { throw new InvalidOperationException(RemoteTransferDistinctProtocol.Missing); }
+        {
+            throw new InvalidOperationException(RemoteTransferDistinctProtocol.Missing);
+        }
         return Convert.ToHexString(Required(witness.SourceIntent).Span)
             + Convert.ToHexString(Required(witness.SourceCounter).Span);
     }
@@ -56,7 +60,9 @@ internal static class RemoteTransferNativeCommittedCut
             || witness.Request.SourceQueue != seed.Scenario.SourceQueue
             || witness.Request.DestinationQueue != seed.Scenario.DestinationQueue
             || witness.Request.TransferId != seed.TransferId)
-        { throw new InvalidOperationException(RemoteTransferDistinctProtocol.Missing); }
+        {
+            throw new InvalidOperationException(RemoteTransferDistinctProtocol.Missing);
+        }
     }
 
     private static ReadOnlyMemory<byte> Required(ReadOnlyMemory<byte>? value)

@@ -94,24 +94,32 @@ internal static class ZoneTreeCheckpointReader
         var lastKey = previousKey;
         var nextApplied = applied;
         if (records.Length == EmptyRecordCount)
-        { throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.CheckpointRecordsInvalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.CheckpointRecordsInvalid);
+        }
         foreach (var mutation in records)
         {
             if (mutation is null || mutation.Key.Length == EmptyKeyLength || mutation.Value is null
                 || lastKey is { } priorKey && priorKey.Span.SequenceCompareTo(mutation.Key.Span) >= EqualKeys)
-            { throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.CheckpointRecordsInvalid); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.CheckpointRecordsInvalid);
+            }
             validate?.Invoke(mutation);
             lastKey = mutation.Key;
             if (mutation.Key.Span.SequenceEqual(appliedKey.Span))
             {
                 nextApplied = NativeSerialization.Deserialize<long>(mutation.Value.Value.Span);
                 if (nextApplied < InitialAppliedPosition)
-                { throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.CheckpointRecordsInvalid); }
+                {
+                    throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.CheckpointRecordsInvalid);
+                }
             }
         }
         var nextCount = checked(count + records.LongLength);
         foreach (var mutation in records)
-        { apply?.Invoke(mutation); }
+        {
+            apply?.Invoke(mutation);
+        }
         previousKey = lastKey;
         applied = nextApplied;
         count = nextCount;

@@ -49,6 +49,8 @@ internal sealed class NativeTextExecutionOptions
     internal void Validate()
     {
         if (!IsValid())
-        { throw new OptionsValidationException(SectionName, typeof(NativeTextExecutionOptions), [ValidationMessage]); }
+        {
+            throw new OptionsValidationException(SectionName, typeof(NativeTextExecutionOptions), [ValidationMessage]);
+        }
     }
 }

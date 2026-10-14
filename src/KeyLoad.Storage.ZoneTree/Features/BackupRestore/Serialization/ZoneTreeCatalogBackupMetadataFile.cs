@@ -32,7 +32,9 @@ internal static class ZoneTreeCatalogBackupMetadataFile
             position, runtime.Identity.NodeId, runtime.Identity.Incarnation, manifestDigest, metadata);
         var bytes = NativeSerialization.Serialize(envelope);
         if (bytes.Length > runtime.Options.MaximumBackupManifestBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, ZoneTreeCatalogBackupPublication.MetadataExceeded); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, ZoneTreeCatalogBackupPublication.MetadataExceeded);
+        }
         using var file = new FileStream(Path.Combine(directory, FileName), FileMode.CreateNew,
             FileAccess.Write, FileShare.None, runtime.Options.StreamBufferBytes);
         file.Write(bytes);
@@ -58,7 +60,9 @@ internal static class ZoneTreeCatalogBackupMetadataFile
             || !string.Equals(metadata.ManifestDigest,
                 ManifestDigest(directory, policy.MaximumBackupManifestBytes, policy.StreamBufferBytes),
                 StringComparison.Ordinal))
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidMetadata); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidMetadata);
+        }
         completeDigest = Convert.ToHexStringLower(SHA256.HashData(bytes.Span));
         return metadata;
     }
@@ -76,7 +80,9 @@ internal static class ZoneTreeCatalogBackupMetadataFile
         try
         {
             if ((File.GetAttributes(path) & FileAttributes.ReparsePoint) != NoFileAttributes)
-            { throw Errors.Fail(ErrorCode.Corruption, InvalidMetadata); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, InvalidMetadata);
+            }
         }
         catch (FileNotFoundException) { throw Errors.Fail(ErrorCode.Corruption, InvalidMetadata); }
         catch (DirectoryNotFoundException) { throw Errors.Fail(ErrorCode.Corruption, InvalidMetadata); }

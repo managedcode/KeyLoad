@@ -12,7 +12,9 @@ internal static class RemoteGraphPhaseCommandIdentity
     {
         ArgumentNullException.ThrowIfNull(intent);
         if (kind is not (OperationKind.RemoteGraphReceive or OperationKind.RemoteGraphComplete))
-        { throw Errors.Fail(ErrorCode.Validation, RemoteGraphNativeProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, RemoteGraphNativeProtocol.InvalidProof);
+        }
         var bytes = RemoteGraphNativeResultEncoding.Encode(new Identity(intent, kind),
             partition.Database.Limits.MaxBatchBytes, work);
         try

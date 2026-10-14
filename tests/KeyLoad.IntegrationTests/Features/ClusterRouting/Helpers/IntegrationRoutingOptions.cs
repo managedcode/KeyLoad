@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server.Features.ClusterRouting;
 using Microsoft.Extensions.Options;
 
@@ -18,7 +18,9 @@ internal static class IntegrationRoutingOptions
     {
         var value = configured ?? new GrainRoutingOptions();
         if (!value.IsValid())
-        { throw new OptionsValidationException(Options.DefaultName, typeof(GrainRoutingOptions), [GrainRoutingOptions.ValidationMessage]); }
+        {
+            throw new OptionsValidationException(Options.DefaultName, typeof(GrainRoutingOptions), [GrainRoutingOptions.ValidationMessage]);
+        }
         return Options.Create(value);
     }
 
@@ -33,7 +35,9 @@ internal static class IntegrationRoutingOptions
     {
         var value = configured ?? new ReplicaTransportOptions();
         if (!value.IsValid())
-        { throw new OptionsValidationException(Options.DefaultName, typeof(ReplicaTransportOptions), [ReplicaTransportOptions.ValidationMessage]); }
+        {
+            throw new OptionsValidationException(Options.DefaultName, typeof(ReplicaTransportOptions), [ReplicaTransportOptions.ValidationMessage]);
+        }
         return Options.Create(value);
     }
 }

@@ -8,7 +8,10 @@ internal sealed record StreamedComparisonCase(string Target, Scenario Scenario, 
     string? Detail, Measurement? Measurement, IAsyncEnumerable<OperationSample> Samples)
 {
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public VectorMetrics? VectorMetrics { get; init; }
+    public VectorMetrics? VectorMetrics
+    {
+        get; init;
+    }
 
     internal static StreamedComparisonCase Create(ComparisonCase comparisonCase)
     {
@@ -20,6 +23,8 @@ internal sealed record StreamedComparisonCase(string Target, Scenario Scenario, 
         var samples = ImmutableArrayAsyncView.Create(comparisonCase.Samples);
         return new StreamedComparisonCase(comparisonCase.Target, comparisonCase.Scenario, comparisonCase.Repetition,
             comparisonCase.Status, comparisonCase.Detail, comparisonCase.Measurement, samples)
-        { VectorMetrics = comparisonCase.VectorMetrics };
+        {
+            VectorMetrics = comparisonCase.VectorMetrics
+        };
     }
 }

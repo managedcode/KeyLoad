@@ -37,7 +37,11 @@ internal static class PartitionMovementBlobPolicyEpochRf3Replays
         var original = seed.BlobOriginals.First;
         var bytes = original.Bytes.ToArray();
         Array.Fill(bytes, ChangedPartByte);
-        var changed = original with { Bytes = bytes, Sha256 = BlobIntegrity.PartHash(bytes) };
+        var changed = original with
+        {
+            Bytes = bytes,
+            Sha256 = BlobIntegrity.PartHash(bytes)
+        };
         var sdk = await seed.Source.WriteBlobPartAsync(changed, token).ConfigureAwait(false);
         await RequireSdkErrorAsync(sdk.IsFailed, sdk.Value, sdk.Problem?.ErrorCode, ErrorCode.Conflict);
         await RequireOtherRoutesErrorAsync(seed, PartTool, changed, ErrorCode.Conflict, token).ConfigureAwait(false);
@@ -61,9 +65,13 @@ internal static class PartitionMovementBlobPolicyEpochRf3Replays
     {
         await Assert.That(failed).IsTrue();
         if (value is JsonElement json)
-        { await Assert.That(json.ValueKind).IsEqualTo(JsonValueKind.Undefined); }
+        {
+            await Assert.That(json.ValueKind).IsEqualTo(JsonValueKind.Undefined);
+        }
         else
-        { await Assert.That(value).IsNull(); }
+        {
+            await Assert.That(value).IsNull();
+        }
         await Assert.That(code).IsEqualTo(expected.ToString());
     }
 

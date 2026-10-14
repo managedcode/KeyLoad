@@ -37,7 +37,11 @@ internal static class ChunkMultiblockBoundaryFlow
         await ChunkMultiblockBoundaryRows.RequireAsync(fixture, healthy: true);
         await ChunkSelectedIntegrityAssertions.Replay(fixture);
         for (var cold = 0; cold < 2; cold++)
-        { fixture.Reopen(); await ChunkMultiblockBoundaryRows.RequireAsync(fixture, healthy: true); await ChunkSelectedIntegrityAssertions.Replay(fixture); }
+        {
+            fixture.Reopen();
+            await ChunkMultiblockBoundaryRows.RequireAsync(fixture, healthy: true);
+            await ChunkSelectedIntegrityAssertions.Replay(fixture);
+        }
     }
 
     private static async Task FaultAsync(ChunkSelectedIntegrityFixture fixture, bool unknownVersion)
@@ -61,15 +65,23 @@ internal static class ChunkMultiblockBoundaryFlow
         }, failures);
         var repairCuts = new List<SampleRawIntegrityCut>();
         await ServerFailureObserver.ObserveAsync(() =>
-        { repairCuts.Add(SampleRawIntegrityAssertions.Capture(fixture.Store)); return Task.CompletedTask; }, failures);
+        {
+            repairCuts.Add(SampleRawIntegrityAssertions.Capture(fixture.Store));
+            return Task.CompletedTask;
+        }, failures);
         await ServerFailureObserver.ObserveAsync(() =>
-        { ChunkMultiblockBoundaryDamage.Repair(fixture, fault); return Task.CompletedTask; }, failures);
+        {
+            ChunkMultiblockBoundaryDamage.Repair(fixture, fault);
+            return Task.CompletedTask;
+        }, failures);
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             var restored = SampleRawIntegrityAssertions.Capture(fixture.Store);
             await Assert.That(restored.Image).IsEqualTo(before.Image);
             foreach (var position in injected)
-            { await Assert.That(restored.Position).IsEqualTo(checked(position + FaultAndRepairCommits)); }
+            {
+                await Assert.That(restored.Position).IsEqualTo(checked(position + FaultAndRepairCommits));
+            }
             foreach (var repairCut in repairCuts)
             {
                 await Assert.That(restored.Position).IsEqualTo(checked(repairCut.Position + 1));

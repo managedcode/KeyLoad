@@ -106,7 +106,9 @@ internal sealed class ClusterRestoreRf3OperatorObservation
                 foreach (var line in reader.Current)
                 {
                     if (line.Content.Length > maximumCharacters - retainedCharacters)
-                    { throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid); }
+                    {
+                        throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid);
+                    }
                     retainedCharacters += line.Content.Length;
                     original.Add(line);
                 }

@@ -28,7 +28,9 @@ public sealed partial class DatabaseEngine
         Authorization.Require(principal, blob.Partition, blob.Resource, BlobControlledReadScope.Capability(purpose));
         var publication = PartitionMovePublishedPlacementStorage.Read(view, blob.Partition);
         if (publication is null || publication.Destination.Incarnation == Store.Identity.Incarnation)
-        { return null; }
+        {
+            return null;
+        }
         return CaptureControlledBlobFrame(view, principal, blob, purpose, null, null, nativeRequest, expiry, queryId);
     }
 
@@ -38,7 +40,9 @@ public sealed partial class DatabaseEngine
         var current = Store.Read(view => CaptureControlledBlobReadView(work.CreateView(view), original.Principal.Id,
             original.Purpose, original.NativeRequest, original.ExpiresAt, original.QueryId));
         if (current is null || JsonData.Fingerprint(current) != JsonData.Fingerprint(original))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
         work.Check();
     }
 }

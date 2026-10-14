@@ -26,7 +26,10 @@ internal static class NativeTextRawReadPolicyPublicTrial
                             PolicyEpoch = 2L
                         }, token);
                         await NativeTextRawReadPolicyPublicAssertions.PhaseAsync(reader, administrator, scenario, true, token);
-                        await PersistAsync(administrator, identity.Principal with { PolicyEpoch = 3L }, token);
+                        await PersistAsync(administrator, identity.Principal with
+                        {
+                            PolicyEpoch = 3L
+                        }, token);
                         await NativeTextRawReadPolicyPublicAssertions.PhaseAsync(reader, administrator, scenario, false, token);
                         return true;
                     }, token);

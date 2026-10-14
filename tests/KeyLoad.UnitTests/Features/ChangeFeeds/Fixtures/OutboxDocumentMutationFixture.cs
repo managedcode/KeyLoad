@@ -17,7 +17,11 @@ internal static class OutboxDocumentMutationFixture
         var state = await ProjectionConsumerIdentityFixture.SeedAsync(database, token);
         var key = global::KeyLoad.Core.KeySpace.Partition(Space, state.Partition, 2L);
         var original = database.Store.Read(view => view.ReadOwnedValue(key)) ?? throw new InvalidOperationException(Missing);
-        return state with { Key = key, Original = original };
+        return state with
+        {
+            Key = key,
+            Original = original
+        };
     }
 
     internal static void Damage(TestDatabase database, ProjectionConsumerIdentityState state, int fault)

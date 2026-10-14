@@ -15,10 +15,16 @@ internal static class SampleChunkWindowSeal
         var window = SampleChunkWindowScope.Load(tx, partition, request.SeriesSet, request.SeriesId,
             request.WindowId, request.ExpectedRevision, options, charge);
         if (window.State != SampleChunkWindowState.Open || window.OpenRecords.IsEmpty)
-        { throw Errors.Fail(ErrorCode.Conflict, SampleChunkLifecycleProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, SampleChunkLifecycleProtocol.Invalid);
+        }
         var watermark = SampleRollupRecords.Watermark(tx, partition, request.SeriesSet, request.SeriesId, charge.Charge);
         var next = Seal(database, tx, partition, request.SeriesSet, request.SeriesId,
-            window with { SourceSequence = watermark.Sequence, RetentionBeforeUtcTicks = watermark.Floor }, options);
+            window with
+            {
+                SourceSequence = watermark.Sequence,
+                RetentionBeforeUtcTicks = watermark.Floor
+            }, options);
         return new(SampleChunkLifecycleProtocol.SealKind, request.SeriesSet, request.SeriesId, next.Revision);
     }
 
@@ -26,7 +32,9 @@ internal static class SampleChunkWindowSeal
         string set, string series, SampleChunkWindow original, IOptions<TimeSeriesExecutionOptions> options)
     {
         foreach (var record in original.OpenRecords)
-        { SampleChunkWindowValidation.Record(record, original, series); }
+        {
+            SampleChunkWindowValidation.Record(record, original, series);
+        }
         var records = original.OpenRecords.OrderBy(record => record.Sample.Timestamp.UtcTicks)
             .ThenBy(record => record.Sequence).ToArray();
         var next = original with

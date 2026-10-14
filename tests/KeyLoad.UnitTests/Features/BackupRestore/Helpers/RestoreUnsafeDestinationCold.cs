@@ -36,7 +36,10 @@ internal static class RestoreUnsafeDestinationCold
                     if (cold == 0)
                     {
                         store.Commit((transaction, _) =>
-                        { transaction.PutRecord(KeyCodec.Encode(HealthyNamespace, HealthyKey), HealthyValue); return true; });
+                        {
+                            transaction.PutRecord(KeyCodec.Encode(HealthyNamespace, HealthyKey), HealthyValue);
+                            return true;
+                        });
                         await Assert.That(store.Position).IsEqualTo(fixture.Position + 2L);
                         await ImageAsync(store, healthy: true);
                     }
@@ -55,7 +58,9 @@ internal static class RestoreUnsafeDestinationCold
                 NativeSerialization.Serialize(true))
         };
         if (healthy)
-        { expected.Add(Row(KeyCodec.Encode(HealthyNamespace, HealthyKey), NativeSerialization.Serialize(HealthyValue))); }
+        {
+            expected.Add(Row(KeyCodec.Encode(HealthyNamespace, HealthyKey), NativeSerialization.Serialize(HealthyValue)));
+        }
         var actual = QueueWholeFlowStorage.Bytes(store);
         await Assert.That(actual).IsEquivalentTo(expected);
     }

@@ -33,7 +33,9 @@ internal static class BlobPortableBackupAssertions
         (ReplicatedOperation Operation, OperationResult Result)[] originals, CancellationToken token)
     {
         foreach (var original in originals)
-        { await BackupPersistedPolicyAssertions.ReplayAsync(database, original.Operation, original.Result, token); }
+        {
+            await BackupPersistedPolicyAssertions.ReplayAsync(database, original.Operation, original.Result, token);
+        }
     }
 
     internal static async Task ActiveAsync(DatabaseEngine database, BlobUploadInfo original,
@@ -41,7 +43,10 @@ internal static class BlobPortableBackupAssertions
     {
         var before = BackupPersistedPolicyAssertions.Capture(database.Store);
         var blobs = new BlobStorageOperations(database);
-        await BackupPersistedPolicyAssertions.SameAsync(original with { Status = BlobUploadStatus.Aborted },
+        await BackupPersistedPolicyAssertions.SameAsync(original with
+        {
+            Status = BlobUploadStatus.Aborted
+        },
             blobs.UploadInfo(BlobPortableBackupSeed.Root, new(original.Blob, original.UploadId), token));
         var bytes = database.Store.Read(view => view.ReadOwnedValue(BlobKeys.Part(original.Blob, original.UploadId, 0)));
         await Assert.That(bytes).IsNotNull();

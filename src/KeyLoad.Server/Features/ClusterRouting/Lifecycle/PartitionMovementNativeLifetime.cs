@@ -12,7 +12,9 @@ internal static class PartitionMovementNativeLifetime
     {
         var remaining = expiry - owner.Clock.GetUtcNow();
         if (remaining <= TimeSpan.Zero)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, PartitionMovementProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, PartitionMovementProtocol.Unavailable);
+        }
         return WithinAsync(remaining, owner.Clock, operation, caller);
     }
 
@@ -28,7 +30,9 @@ internal static class PartitionMovementNativeLifetime
             {
                 using var linked = CancellationTokenSource.CreateLinkedTokenSource(caller, deadline.Token);
                 await ServerFailureObserver.ObserveAsync(async () =>
-                { result = await operation(linked.Token).ConfigureAwait(false); }, failures).ConfigureAwait(false);
+                {
+                    result = await operation(linked.Token).ConfigureAwait(false);
+                }, failures).ConfigureAwait(false);
             }, failures).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny(failures);

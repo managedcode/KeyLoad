@@ -19,7 +19,9 @@ internal sealed class C1OutcomeInspectionOwnerPhaseTests
             var error = (await Assert.ThrowsExactlyAsync<IOException>(
                 () => C1OutcomeInspectionAssertions.AssertOuterOwnerReleasedAsync(fixture)))!;
             if (!C1OutcomeInspectionOwnerPhase.IsAllowedBusyError(error))
-            { throw new InvalidOperationException(UnexpectedNativeErrorMessage); }
+            {
+                throw new InvalidOperationException(UnexpectedNativeErrorMessage);
+            }
             var native = (Win32Exception)error.InnerException!;
             await Assert.That(native.NativeErrorCode)
                 .IsEqualTo(OperatingSystem.IsMacOS() ? EagainMac : EagainLinux);
@@ -38,7 +40,9 @@ internal sealed class C1OutcomeInspectionOwnerPhaseTests
                 observed = (await Assert.ThrowsExactlyAsync<IOException>(
                     () => C1OutcomeInspectionAssertions.AssertOuterOwnerReleasedAsync(fixture)))!;
                 if (!C1OutcomeInspectionOwnerPhase.IsAllowedBusyError(observed))
-                { throw new InvalidOperationException(UnexpectedNativeErrorMessage); }
+                {
+                    throw new InvalidOperationException(UnexpectedNativeErrorMessage);
+                }
                 throw observed;
             })))!;
         await Assert.That(observed).IsNotNull();

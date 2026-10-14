@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.Text.Json;
 
 namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
@@ -64,7 +63,14 @@ internal sealed class SiteBenchmarkProducerSelectionTests
         var attempt = run[SiteIsolatedGitHubTokens.Attempt]!.GetValue<int>();
         var sourceRevision = cohort[SiteIsolatedGitHubTokens.SourceRevision]!.GetValue<string>();
         var (producerEvent, conclusion) = await ReadProducerStateAsync(scope, token);
-        var producer = new { runId, attempt, sourceRevision, @event = producerEvent, conclusion };
+        var producer = new
+        {
+            runId,
+            attempt,
+            sourceRevision,
+            @event = producerEvent,
+            conclusion
+        };
 
         var selection = await SelectAsync(scope, SiteIsolatedGitHubTokens.Publish, null,
             producer, token);
@@ -95,24 +101,8 @@ internal sealed class SiteBenchmarkProducerSelectionTests
         var attempt = run[SiteIsolatedGitHubTokens.Attempt]!.GetValue<int>();
         var sourceRevision = cohort[SiteIsolatedGitHubTokens.SourceRevision]!.GetValue<string>();
         var (producerEvent, conclusion) = await ReadProducerStateAsync(scope, token);
-        var tokenTuple = new { runId, attempt, sourceRevision, @event = producerEvent, conclusion };
-
-        await AssertRejectedAsync(scope, SiteIsolatedGitHubTokens.Publish, null,
-            new { runId = runId + 1, attempt, sourceRevision, @event = producerEvent, conclusion }, token);
-        await AssertRejectedAsync(scope, SiteIsolatedGitHubTokens.Publish, null,
-            new { runId, attempt = attempt + 1, sourceRevision, @event = producerEvent, conclusion }, token);
-        await AssertRejectedAsync(scope, SiteIsolatedGitHubTokens.Publish, null,
-            new { runId, attempt, sourceRevision = SiteIsolatedGitHubTokens.WrongSha, @event = producerEvent, conclusion }, token);
-        await AssertRejectedAsync(scope, SiteIsolatedGitHubTokens.Publish, null,
-            new { runId, attempt, sourceRevision, @event = SiteIsolatedGitHubFields.WorkflowRun, conclusion }, token);
-        var otherEvent = producerEvent == "push" ? "workflow_dispatch" : "push";
-        await AssertRejectedAsync(scope, SiteIsolatedGitHubTokens.Publish, null,
-            new { runId, attempt, sourceRevision, @event = otherEvent, conclusion }, token);
-        await AssertRejectedAsync(scope, SiteIsolatedGitHubTokens.Publish, null,
-            new { runId, attempt, sourceRevision, @event = producerEvent, conclusion = SiteIsolatedGitHubFields.Cancelled }, token);
-        await AssertRejectedAsync(scope, SiteIsolatedGitHubTokens.Publish,
-            runId.ToString(CultureInfo.InvariantCulture), tokenTuple, token);
-        await AssertRejectedAsync(scope, SiteIsolatedGitHubTokens.Validate, null, tokenTuple, token);
+        await SiteBenchmarkProducerRejectionFlow.RunAsync(scope,
+            (runId, attempt, sourceRevision, producerEvent, conclusion), token);
     }
 
     private static Task<JsonElement> ProveCurrentProducerAsync(SiteIsolatedGitHubScope scope, object producer,
@@ -151,14 +141,7 @@ internal sealed class SiteBenchmarkProducerSelectionTests
     }
 
     private static Task<JsonElement> SelectAsync(SiteIsolatedGitHubScope scope, string mode,
-        string? requestedRun, object? producer, CancellationToken token) => SiteIsolatedGitHubScope.RunAsync(
-        SiteIsolatedGitHubFields.SelectionOperation,
-        new { input = scope.Capture, mode, requestedRun, producer }, token);
-
-    private static async Task AssertRejectedAsync(SiteIsolatedGitHubScope scope, string mode,
         string? requestedRun, object? producer, CancellationToken token)
-    {
-        var result = await SelectAsync(scope, mode, requestedRun, producer, token);
-        await Assert.That(result.GetProperty(SiteIsolatedGitHubFields.Ok).GetBoolean()).IsFalse();
-    }
+        => SiteBenchmarkProducerRejectionFlow.SelectAsync(scope, mode, requestedRun, producer, token);
+
 }

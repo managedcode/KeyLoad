@@ -17,14 +17,18 @@ internal static class ContainerRuntimeOwnedReceipt
     internal static string Scenario(Guid incarnation, long ordinal)
     {
         if (incarnation == Guid.Empty || ordinal <= 0)
-        { throw new InvalidOperationException(Invalid); }
+        {
+            throw new InvalidOperationException(Invalid);
+        }
         return Prefix + incarnation.ToString(GuidFormat) + Separator + ordinal.ToString(CultureInfo.InvariantCulture);
     }
 
     internal static string PathFor(string repository, string scenario, string resource)
     {
         if (!scenario.StartsWith(Prefix, StringComparison.Ordinal))
-        { throw new InvalidOperationException(Invalid); }
+        {
+            throw new InvalidOperationException(Invalid);
+        }
         var suffix = scenario.AsSpan(Prefix.Length);
         if (suffix.Length <= GuidCharacters
             || suffix[GuidCharacters] != Separator
@@ -32,7 +36,9 @@ internal static class ContainerRuntimeOwnedReceipt
             || !long.TryParse(suffix[(GuidCharacters + 1)..], NumberStyles.None, CultureInfo.InvariantCulture, out var ordinal)
             || !string.Equals(Scenario(incarnation, ordinal), scenario, StringComparison.Ordinal)
             || resource is not (Node1 or Node2 or Node3))
-        { throw new InvalidOperationException(Invalid); }
+        {
+            throw new InvalidOperationException(Invalid);
+        }
         return Path.Combine(repository, ContainerRuntimeProtocol.ArtifactsDirectory,
             ContainerRuntimeProtocol.QualificationDirectory,
             string.Format(CultureInfo.InvariantCulture, ContainerRuntimeProtocol.ReceiptFileName, scenario, resource));
@@ -41,7 +47,9 @@ internal static class ContainerRuntimeOwnedReceipt
     internal static async Task<bool> TryWriteAsync(ContainerRuntimeRestartReceipt receipt, string json, CancellationToken token)
     {
         if (!receipt.Scenario.StartsWith(Prefix, StringComparison.Ordinal))
-        { return false; }
+        {
+            return false;
+        }
         var path = PathFor(receipt.RepositoryRoot, receipt.Scenario, receipt.ResourceName);
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
         var pending = path + Pending;
@@ -49,7 +57,12 @@ internal static class ContainerRuntimeOwnedReceipt
         await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
         {
             await using var stream = new FileStream(pending, new FileStreamOptions
-            { Mode = FileMode.CreateNew, Access = FileAccess.Write, Share = FileShare.None, Options = FileOptions.Asynchronous });
+            {
+                Mode = FileMode.CreateNew,
+                Access = FileAccess.Write,
+                Share = FileShare.None,
+                Options = FileOptions.Asynchronous
+            });
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {
                 await stream.WriteAsync(Encoding.UTF8.GetBytes(json), token);

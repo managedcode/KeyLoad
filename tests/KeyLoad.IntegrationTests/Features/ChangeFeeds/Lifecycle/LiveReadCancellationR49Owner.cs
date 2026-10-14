@@ -1,7 +1,7 @@
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClusterReplication;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
 using KeyLoad.IntegrationTests.Features.ClusterRouting.Helpers;
-using KeyLoad.Orleans;
 using KeyLoad.Query;
 using KeyLoad.Server;
 
@@ -60,15 +60,21 @@ internal sealed class LiveReadCancellationR49Owner
     {
         var before = failures.Count;
         foreach (var cancellation in Cancellations)
-        { await ServerFailureObserver.ObserveAsync(cancellation.CancelAsync, failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(cancellation.CancelAsync, failures);
+        }
         await RequestCqrsPhaseFaultCleanup.RunAsync(Root, RootOwned && ImageSession is null,
             Controls, Wave, WaveStartupAttempted, Caller, Administrator,
             Discovery.Count == 0 ? null : Discovery, null, null, SdkCall, McpCall,
             Arms.FirstOrDefault(), failures, Arms.Skip(1).ToArray());
         foreach (var cancellation in Cancellations)
-        { ServerFailureObserver.Observe(cancellation.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(cancellation.Dispose, failures);
+        }
         if (ImageSession is null)
-        { return; }
+        {
+            return;
+        }
         var cleanup = failures.Skip(before).ToList();
         var prior = cleanup.Count;
         var stopped = (Wave is not null && cleanup.Count == 0) || !WaveStartupAttempted;
@@ -76,6 +82,8 @@ internal sealed class LiveReadCancellationR49Owner
             !WaveStartupAttempted, cleanup);
         failures.AddRange(cleanup.Skip(prior));
         if (RootOwned && stopped && cleanup.Count == 0)
-        { ServerFailureObserver.Observe(() => Directory.Delete(Root, recursive: true), failures); }
+        {
+            ServerFailureObserver.Observe(() => Directory.Delete(Root, recursive: true), failures);
+        }
     }
 }

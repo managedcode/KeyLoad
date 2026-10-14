@@ -16,7 +16,9 @@ internal static class TargetInboxNativeAssertions
             {
                 var page = view.Scan(KeySpace.Partition(family, partition), TargetInboxUnitProtocol.MaximumFixtureRows);
                 if (page.HasMore)
-                { throw new InvalidOperationException("Target inbox fixture exceeded its closed row bound."); }
+                {
+                    throw new InvalidOperationException("Target inbox fixture exceeded its closed row bound.");
+                }
                 return page.Records.Select(row => Convert.ToHexString(row.Key.Span) + ":" + Convert.ToHexString(row.Value.Span));
             })).ToArray());
 

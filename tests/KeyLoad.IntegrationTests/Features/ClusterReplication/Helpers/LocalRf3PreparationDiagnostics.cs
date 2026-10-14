@@ -19,7 +19,9 @@ internal sealed class LocalRf3PreparationDiagnostics : IAsyncDisposable
     internal void RecordVerifierPhase(LocalImageVerifierPhase phase)
     {
         lock (gate)
-        { verifierPhase = phase; }
+        {
+            verifierPhase = phase;
+        }
     }
 
     internal void Record(string record)
@@ -28,7 +30,9 @@ internal sealed class LocalRf3PreparationDiagnostics : IAsyncDisposable
         {
             records.Enqueue(record);
             while (records.Count > MaximumRecords)
-            { records.Dequeue(); }
+            {
+                records.Dequeue();
+            }
         }
     }
 
@@ -58,11 +62,17 @@ internal sealed class LocalRf3PreparationDiagnostics : IAsyncDisposable
             lines.Add(State(current.Snapshot.State?.Text, current.Snapshot.ExitCode));
         }
         else
-        { lines.Add("Preparation resource state unobserved."); }
+        {
+            lines.Add("Preparation resource state unobserved.");
+        }
         lock (gate)
-        { lines.AddRange(records); }
+        {
+            lines.AddRange(records);
+        }
         foreach (var line in BoundedDiagnosticLog.Bound(lines))
-        { Console.Error.WriteLine(line); }
+        {
+            Console.Error.WriteLine(line);
+        }
     }
 
     public async ValueTask DisposeAsync()
@@ -71,7 +81,9 @@ internal sealed class LocalRf3PreparationDiagnostics : IAsyncDisposable
         {
             await lifetime.CancelAsync().ConfigureAwait(false);
             if (observation is not null)
-            { await observation.ConfigureAwait(false); }
+            {
+                await observation.ConfigureAwait(false);
+            }
         }
         finally { lifetime.Dispose(); }
     }
@@ -84,7 +96,9 @@ internal sealed class LocalRf3PreparationDiagnostics : IAsyncDisposable
                 .ConfigureAwait(false))
             {
                 if (update.Resource.Name == LocalRf3ImagePrerequisite.ResourceName)
-                { Record(State(update.Snapshot.State?.Text, update.Snapshot.ExitCode)); }
+                {
+                    Record(State(update.Snapshot.State?.Text, update.Snapshot.ExitCode));
+                }
             }
         }
         catch (OperationCanceledException) when (lifetime.IsCancellationRequested) { }

@@ -21,7 +21,9 @@ internal sealed class ReplicaNativeContractTests
         using var database = new TestDatabase();
         var operation = database.Database.NormalizeOperation(new(Guid.NewGuid(), OperationKind.Batch, Principal,
             DateTimeOffset.UnixEpoch.AddMinutes(1), Payload));
-        var entries = ImmutableArray.Create(new ReplicaEntry(1, 2, operation), new ReplicaEntry(2, 2, operation with { }));
+        var entries = ImmutableArray.Create(new ReplicaEntry(1, 2, operation), new ReplicaEntry(2, 2, operation with
+        {
+        }));
         var append = new AppendRequest(Voter, 2, 0, 0, 1, entries);
         var encoded = ReplicaProtocolCodec.Serialize(append);
         var decoded = ReplicaProtocolCodec.Deserialize<AppendRequest>(encoded);

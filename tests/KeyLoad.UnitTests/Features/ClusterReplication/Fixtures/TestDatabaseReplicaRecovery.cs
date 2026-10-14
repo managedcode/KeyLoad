@@ -21,19 +21,27 @@ internal static class TestDatabaseReplicaRecovery
         if (entry?.Operation is not { } retained || log.State.CommittedIndex != log.State.LastIndex
             || database.LastApplied >= entry.Index || !Same(retained, operation)
             || database.ResolveOutcome(operation).Error != ErrorCode.RecoveryRequired)
-        { throw new InvalidOperationException(InvalidRecovery); }
+        {
+            throw new InvalidOperationException(InvalidRecovery);
+        }
         RequireFailed(original);
         var expectedError = RequireOriginalError(originalFailures, expectedApplyError);
         var joined = new List<Exception>();
         try
-        { original.DisposeAsync().AsTask().GetAwaiter().GetResult(); }
+        {
+            original.DisposeAsync().AsTask().GetAwaiter().GetResult();
+        }
         catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is null)
-        { joined.Add(error); }
+        {
+            joined.Add(error);
+        }
         originalFailures.AddRange(joined);
         if (joined.Count == 0 || joined.Any(error => !IsOriginalFailure(error, expectedError)))
         {
             if (joined.Count != 0)
-            { KeyLoad.Server.ServerFailureObserver.ThrowIfAny(joined); }
+            {
+                KeyLoad.Server.ServerFailureObserver.ThrowIfAny(joined);
+            }
             throw new InvalidOperationException(InvalidRecovery);
         }
         retireJoinedOwner();
@@ -45,9 +53,13 @@ internal static class TestDatabaseReplicaRecovery
     private static void RequireFailed(ReplicaMaterializer original)
     {
         try
-        { _ = original.AppliedPosition; }
+        {
+            _ = original.AppliedPosition;
+        }
         catch (KeyLoadException error) when (error.Code == ErrorCode.RecoveryRequired)
-        { return; }
+        {
+            return;
+        }
         throw new InvalidOperationException(InvalidRecovery);
     }
 
@@ -58,7 +70,9 @@ internal static class TestDatabaseReplicaRecovery
             || !IsOriginalFailure(failures[RetainedReplayFailureIndex], ErrorCode.RecoveryRequired)
             || expectedApplyError is not (null or ErrorCode.Corruption or ErrorCode.RecoveryRequired)
             || expectedApplyError is not null && first.Code != ErrorCode.RecoveryRequired)
-        { throw new InvalidOperationException(InvalidRecovery); }
+        {
+            throw new InvalidOperationException(InvalidRecovery);
+        }
         return expectedApplyError ?? first.Code;
     }
 

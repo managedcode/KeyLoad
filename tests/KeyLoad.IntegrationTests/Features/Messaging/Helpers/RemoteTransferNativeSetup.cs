@@ -19,7 +19,9 @@ internal sealed record RemoteTransferNativeSetup(RemoteTransferColdSeed Seed, Me
             new(RemoteTransferDistinctProtocol.TechnicalSubject, target.TenantId,
                 [new(target.DatabaseId, scenario.DestinationQueue.Queue,
                     RemoteTransferColdProtocol.Target)], [])
-            { ClusterAdministrator = true }, token);
+            {
+                ClusterAdministrator = true
+            }, token);
         var logical = await RemoteTransferDistinctIdentity.CreateAsync(administrator.Source,
             new("c1-probe-transfer-a-logical-" + Guid.NewGuid().ToString(RemoteTransferColdProtocol.TransferIdFormat),
                 source.TenantId, [new(source.DatabaseId, scenario.SourceQueue.Queue, RemoteTransferColdProtocol.Source),
@@ -35,6 +37,9 @@ internal sealed record RemoteTransferNativeSetup(RemoteTransferColdSeed Seed, Me
         CancellationToken token)
         => _ = await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigureResourceAsync(Guid.NewGuid(),
             new(partition.TenantId, partition.DatabaseId,
-                new(queue, ResourceKind.WorkQueue, partition.TransactionDomainId) { QueuePolicy = new() }), token));
+                new(queue, ResourceKind.WorkQueue, partition.TransactionDomainId)
+                {
+                    QueuePolicy = new()
+                }), token));
 }
 

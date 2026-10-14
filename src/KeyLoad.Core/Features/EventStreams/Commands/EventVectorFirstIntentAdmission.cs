@@ -23,7 +23,9 @@ internal static class EventVectorFirstIntentAdmission
             || request.Action != EventFeedControlAction.Open
             || phase.OriginalParentExpiresAt <= operation.EvaluatedAt
             || phase.OriginalParentRequestId == Guid.Empty)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, Invalid);
+        }
         var scopes = EventVectorParentScopes.Derive(phase, null, admission);
         EventVectorParentScopes.Authorize(authorization, principal, scopes, admission);
         var existing = EventVectorMapInventory.Read(transaction, request.ControlPartition,
@@ -32,7 +34,9 @@ internal static class EventVectorFirstIntentAdmission
             || EventVectorRowStorage.Read<EventVectorParentOutcomeIndex>(transaction,
                 EventVectorKeys.ParentOutcome(request.ControlPartition, principal.Id, request.CommandId),
                 admission) is not null)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         admission.RequireEncodedBytes(NativeSerialization.Measure(request));
         var rawRequest = NativeSerialization.Serialize(request);
         admission.RequireEncodedBytes(rawRequest.Length);
@@ -42,7 +46,9 @@ internal static class EventVectorFirstIntentAdmission
             phase.OriginalParentExpiresAt, scopes, phase.OriginalCoverageWitness.ToArray(),
             ReadOnlyMemory<byte>.Empty, EventVectorFirstIssuanceState.Admitted,
             Guid.Empty, ReadOnlyMemory<byte>.Empty, null)
-        { OriginalParentRequestId = phase.OriginalParentRequestId };
+        {
+            OriginalParentRequestId = phase.OriginalParentRequestId
+        };
         EventVectorFirstIssuanceWriter.Create(transaction, row, admission);
         return row;
     }

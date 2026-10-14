@@ -14,7 +14,9 @@ internal sealed class NativeAnnMaintenanceAdmissions
         {
             ObjectDisposedException.ThrowIf(closed, this);
             if (active >= maximum)
-            { throw Errors.Fail(ErrorCode.ResourceExhausted, NativeAnnProtocol.Bound); }
+            {
+                throw Errors.Fail(ErrorCode.ResourceExhausted, NativeAnnProtocol.Bound);
+            }
             var lease = new NativeAnnMaintenanceAdmissionLease(this);
             active++;
             return lease;
@@ -27,7 +29,9 @@ internal sealed class NativeAnnMaintenanceAdmissions
         {
             closed = true;
             if (active == Empty)
-            { settled.TrySetResult(); }
+            {
+                settled.TrySetResult();
+            }
             return settled.Task;
         }
     }
@@ -37,10 +41,14 @@ internal sealed class NativeAnnMaintenanceAdmissions
         lock (gate)
         {
             if (active == Empty)
-            { throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Ownership); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Ownership);
+            }
             active--;
             if (closed && active == Empty)
-            { settled.TrySetResult(); }
+            {
+                settled.TrySetResult();
+            }
         }
     }
 }

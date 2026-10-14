@@ -1,5 +1,5 @@
 using System.Text.Json;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.Server;
 
@@ -23,7 +23,9 @@ internal static class McpArgumentDecoder
         const int ValueEmptyCount = 0;
 
         if (arguments is { Count: > ArgumentsEmptyCount })
-        { throw InvalidArguments(); }
+        {
+            throw InvalidArguments();
+        }
         return new McpDecodedOperation(kind, null, Guid.Empty, InternalNativePayload.Serialize(ValueEmptyCount, maximumPayloadBytes));
     }
 
@@ -55,7 +57,9 @@ internal static class McpArgumentDecoder
         ValidateKeys(arguments, headerCommand);
         var value = arguments![McpCatalogProtocol.Request];
         if (value.ValueKind is JsonValueKind.Null or JsonValueKind.Undefined)
-        { throw InvalidArguments(); }
+        {
+            throw InvalidArguments();
+        }
         try
         {
             var request = value.Deserialize<TRequest>(JsonDefaults.Options);
@@ -68,7 +72,9 @@ internal static class McpArgumentDecoder
     {
         var expected = headerCommand ? McpCatalogProtocol.HeaderArgumentCount : McpCatalogProtocol.BodyArgumentCount;
         if (arguments is null || arguments.Count != expected)
-        { throw InvalidArguments(); }
+        {
+            throw InvalidArguments();
+        }
         foreach (var key in arguments.Keys)
         {
             if (!StringComparer.Ordinal.Equals(key, McpCatalogProtocol.Request) &&
@@ -82,7 +88,9 @@ internal static class McpArgumentDecoder
     private static void RequireIdentity(Guid commandId)
     {
         if (commandId == Guid.Empty)
-        { throw Errors.Fail(ErrorCode.Validation, McpCatalogProtocol.StableCommandRequired); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, McpCatalogProtocol.StableCommandRequired);
+        }
     }
 
     private static KeyLoadException InvalidArguments() => Errors.Fail(ErrorCode.Validation, McpCatalogProtocol.InvalidArguments);

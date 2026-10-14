@@ -113,22 +113,37 @@ public sealed record PrincipalRecord([property: Orleans.Id(0)] string Id, [prope
 
     /// <summary>Gets whether the principal has cluster administration rights.</summary>
     [Orleans.Id(4)]
-    public bool ClusterAdministrator { get; init; }
+    public bool ClusterAdministrator
+    {
+        get; init;
+    }
     /// <summary>Gets the optional owner identity.</summary>
     [Orleans.Id(5)]
-    public string? OwnerId { get; init; }
+    public string? OwnerId
+    {
+        get; init;
+    }
     /// <summary>Gets the projects visible to the principal.</summary>
     [Orleans.Id(6)]
     public ImmutableArray<string> Projects { get; init; } = [];
     /// <summary>Gets whether row-level restrictions are enabled.</summary>
     [Orleans.Id(7)]
-    public bool RestrictRows { get; init; }
+    public bool RestrictRows
+    {
+        get; init;
+    }
     /// <summary>Gets whether the principal is revoked.</summary>
     [Orleans.Id(8)]
-    public bool Revoked { get; init; }
+    public bool Revoked
+    {
+        get; init;
+    }
     /// <summary>Gets the optional expiration time.</summary>
     [Orleans.Id(9)]
-    public DateTimeOffset? ExpiresAt { get; init; }
+    public DateTimeOffset? ExpiresAt
+    {
+        get; init;
+    }
     /// <summary>Gets the principal policy epoch.</summary>
     [Orleans.Id(10)]
     public long PolicyEpoch { get; init; } = InitialPolicyEpoch;

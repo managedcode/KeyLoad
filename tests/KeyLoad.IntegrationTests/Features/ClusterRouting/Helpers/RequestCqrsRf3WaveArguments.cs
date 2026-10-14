@@ -12,12 +12,16 @@ internal static class RequestCqrsRf3WaveArguments
             RequestCqrsRf3Protocol.Ephemeral
         };
         if (snapshotThresholdArgument is not null)
-        { args.Add(snapshotThresholdArgument); }
+        {
+            args.Add(snapshotThresholdArgument);
+        }
         if (configureCohort)
         {
             args.Add(RequestCqrsRf3Protocol.CohortEnabled);
             foreach (var node in new[] { RequestCqrsRf3Protocol.Node1, RequestCqrsRf3Protocol.Node2, RequestCqrsRf3Protocol.Node3 })
-            { args.Add(RequestCqrsRf3Protocol.VoterPrefix + node + "=" + images[node]); }
+            {
+                args.Add(RequestCqrsRf3Protocol.VoterPrefix + node + "=" + images[node]);
+            }
         }
         if (controls is not null)
         {
@@ -26,7 +30,9 @@ internal static class RequestCqrsRf3WaveArguments
             args.Add("--KeyLoadTests:RequestCqrsProbe:SessionId=" + controls.SessionId);
         }
         if (selection is not null)
-        { args.AddRange(selection.CreateWaveArguments()); }
+        {
+            args.AddRange(selection.CreateWaveArguments());
+        }
         return [.. args];
     }
 

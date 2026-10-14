@@ -22,23 +22,41 @@ internal sealed class AppHostStartupOptions
     private const int MinimumLookupCharacters = 1;
     internal const string ValidationMessage = "Container identity lookup settings exceed supported bounds.";
     [ConfigurationKeyName(ContainerUserKey)]
-    public string? ContainerUser { get; set; }
+    public string? ContainerUser
+    {
+        get; set;
+    }
     [ConfigurationKeyName(ContainerIdentityLookupTimeoutKey)]
     public TimeSpan ContainerIdentityLookupTimeout { get; set; } = TimeSpan.FromSeconds(DefaultLookupSeconds);
     [ConfigurationKeyName(ContainerIdentityOutputCharactersKey)]
     public int ContainerIdentityOutputCharacters { get; set; } = DefaultLookupCharacters;
     [ConfigurationKeyName(BenchmarkModeKey)]
-    public bool BenchmarkMode { get; set; }
+    public bool BenchmarkMode
+    {
+        get; set;
+    }
     [ConfigurationKeyName(BenchmarkProfileKey)]
     public string BenchmarkProfile { get; set; } = global::AppHostConfiguration.GeneralBenchmarkProfile;
     [ConfigurationKeyName(BenchmarkOutputKey)]
-    public string? BenchmarkOutput { get; set; }
+    public string? BenchmarkOutput
+    {
+        get; set;
+    }
     [ConfigurationKeyName(BenchmarkRootKey)]
-    public string? BenchmarkRoot { get; set; }
+    public string? BenchmarkRoot
+    {
+        get; set;
+    }
     [ConfigurationKeyName(DataRootKey)]
-    public string? DataRoot { get; set; }
+    public string? DataRoot
+    {
+        get; set;
+    }
     [ConfigurationKeyName(EphemeralKey)]
-    public bool? Ephemeral { get; set; }
+    public bool? Ephemeral
+    {
+        get; set;
+    }
 
     internal bool IsValid() => ContainerIdentityLookupTimeout > TimeSpan.Zero
         && ContainerIdentityLookupTimeout.Ticks <= MaximumLookupSeconds * TimeSpan.TicksPerSecond

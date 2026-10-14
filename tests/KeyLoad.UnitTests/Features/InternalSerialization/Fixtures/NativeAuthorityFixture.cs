@@ -22,7 +22,10 @@ internal static class NativeAuthorityFixture
         => NativeSerialization.Deserialize<NativeCommandPayload>(operation.NativePayload.Span);
 
     internal static ReplicatedOperation Wrap(ReplicatedOperation operation, NativeCommandPayload payload)
-        => operation with { NativePayload = NativeSerialization.Serialize(payload) };
+        => operation with
+        {
+            NativePayload = NativeSerialization.Serialize(payload)
+        };
 
     internal static ReplicatedOperation Resign(TestDatabase database, ReplicatedOperation operation, NativeCommandAuthority claims)
     {

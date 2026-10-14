@@ -12,7 +12,9 @@ internal sealed class RemoteTransferNativeCallers : IAsyncDisposable
     private const string MissingCaller = "The native caller owner has not been initialized.";
     private RequestCqrsRf3Callers? original;
 
-    private RemoteTransferNativeCallers() { }
+    private RemoteTransferNativeCallers()
+    {
+    }
 
     private RequestCqrsRf3Callers Original => original ?? throw new InvalidOperationException(MissingCaller);
 
@@ -31,11 +33,17 @@ internal sealed class RemoteTransferNativeCallers : IAsyncDisposable
         {
             var failures = new List<Exception> { failure };
             try
-            { await holder.DisposeAsync().ConfigureAwait(false); }
-            catch (Exception cleanup) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
-            { failures.Add(cleanup); }
-            catch (Exception cleanup) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
-            { failures.Add(cleanup); }
+            {
+                await holder.DisposeAsync().ConfigureAwait(false);
+            }
+            catch (Exception cleanup) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
+            {
+                failures.Add(cleanup);
+            }
+            catch (Exception cleanup) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
+            {
+                failures.Add(cleanup);
+            }
             ServerFailureObserver.ThrowIfAny(failures);
             throw;
         }

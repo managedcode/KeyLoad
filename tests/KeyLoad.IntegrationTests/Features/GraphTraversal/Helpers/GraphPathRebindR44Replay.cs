@@ -20,7 +20,9 @@ internal static class GraphPathRebindR44Replay
             await GraphPathRebindR44Reads.MatrixAsync(admin, reader, state, token);
         }
         if (state.Stage > 1)
-        { await GraphPathRebindR44Refusals.StaleAsync(admin, reader, state, token); }
+        {
+            await GraphPathRebindR44Refusals.StaleAsync(admin, reader, state, token);
+        }
         await GraphPathRebindR44Refusals.BoundsAsync(admin, reader, state, token);
     }
 }

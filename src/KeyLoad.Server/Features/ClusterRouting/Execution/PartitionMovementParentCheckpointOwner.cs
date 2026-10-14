@@ -1,8 +1,8 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Identity;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
-using KeyLoad.Orleans;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
@@ -24,12 +24,16 @@ internal sealed class PartitionMovementParentCheckpointOwner(PartitionMovementRe
             Guid.NewGuid(), NativeSerialization.Serialize(body));
         var reply = await receiver.ApplyParentPhaseAsync(Guid.NewGuid(), envelope, cancellationToken).ConfigureAwait(false);
         if (reply.Error is { } code)
-        { throw Errors.Fail(code, reply.SafeDetail ?? PartitionMovementProtocol.Unavailable); }
+        {
+            throw Errors.Fail(code, reply.SafeDetail ?? PartitionMovementProtocol.Unavailable);
+        }
         var actual = GrainNativePayload.Read<GrainValue>(reply.Payload).Value as PartitionMovePhaseResult
             ?? throw Errors.Fail(ErrorCode.Corruption, PartitionMovementProtocol.InvalidProof);
         if (actual.Stage != PartitionMovePeerStage.ControlCheckpoint || actual.MoveId != body.OriginalTransferRequest.MoveId
             || actual.Journal.AppliedPosition <= PartitionMovementProtocol.NoAppliedPosition || actual.Journal.ControlIntentDigest != digest)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMovementProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMovementProtocol.InvalidProof);
+        }
         return actual;
     }
 
@@ -50,7 +54,9 @@ internal sealed class PartitionMovementParentCheckpointOwner(PartitionMovementRe
                     .ValidDigest(actual.Journal.ControlIntentDigest)
                 || actual.Control is { } committed
                     && PartitionMoveIntentIdentity.Digest(committed) != actual.Journal.ControlIntentDigest)
-            { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMovementProtocol.InvalidProof); }
+            {
+                throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMovementProtocol.InvalidProof);
+            }
             return actual.Journal.ControlIntentDigest;
         }
         return state.Control is { } current
@@ -65,7 +71,9 @@ internal sealed class PartitionMovementParentCheckpointOwner(PartitionMovementRe
         var local = PartitionMoveGrantValidation.IsLocalControl(phase.Stage);
         if (!local && original.OriginalRequestNonce == Guid.Empty
             || release && (phase.Stage != PartitionMovePeerStage.Capture || original.OriginalCaptureReleaseNonce == Guid.Empty))
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+        }
         var nonce = local ? Guid.NewGuid() : original.OriginalRequestNonce;
         return new(phase.Version, phase.MoveId, phase.Partition, phase.ControlOwner, phase.SourcePlacement,
             phase.DestinationOwner, phase.ControlIntentDigest, phase.Stage, phase.PageOrdinal,

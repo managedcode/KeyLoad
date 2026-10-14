@@ -145,14 +145,18 @@ internal sealed class ReverseRangeResourceTests
     private static byte[] Key(string text) => Encoding.UTF8.GetBytes(text);
     private sealed class ObserverFailureException : Exception
     {
-        public ObserverFailureException() { }
+        public ObserverFailureException()
+        {
+        }
         public ObserverFailureException(string message) : base(message) { }
         public ObserverFailureException(string message, Exception innerException) : base(message, innerException) { }
     }
 
     private sealed class VisitorFailureException : Exception
     {
-        public VisitorFailureException() { }
+        public VisitorFailureException()
+        {
+        }
         public VisitorFailureException(string message) : base(message) { }
         public VisitorFailureException(string message, Exception innerException) : base(message, innerException) { }
     }

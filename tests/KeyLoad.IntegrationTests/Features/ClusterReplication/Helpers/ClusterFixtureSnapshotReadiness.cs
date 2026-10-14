@@ -33,11 +33,16 @@ internal sealed class ClusterFixtureSnapshotReadiness(RequestCqrsProbeFixture co
     internal async Task ProvisionAsync(ClusterFixture fixture, CancellationToken token)
     {
         if (secret is not null)
-        { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.InvalidArm); }
+        {
+            throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.InvalidArm);
+        }
         var key = KeyPrefix + Guid.NewGuid().ToString("N");
         var credential = key + Separator + Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(SecretBytes));
         var principal = new PrincipalRecord(PrincipalId, Tenant, [], [])
-        { ClusterAdministrator = true, PolicyEpoch = PolicyEpoch };
+        {
+            ClusterAdministrator = true,
+            PolicyEpoch = PolicyEpoch
+        };
         var definition = new ApiKeyRecord(key, PrincipalId,
             Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(credential))));
         var actual = ClusterReplicationTestSupport.Success(await fixture.Client(RequestCqrsRf3Protocol.Node1)
@@ -54,9 +59,14 @@ internal sealed class ClusterFixtureSnapshotReadiness(RequestCqrsProbeFixture co
     {
         secret = null;
         if (!appStopped)
-        { controls.RetainEvidence(); return; }
+        {
+            controls.RetainEvidence();
+            return;
+        }
         await ServerFailureObserver.ObserveAsync(controls.DisposeAfterResourcesJoinedAsync, failures);
         if (failures.Count != 0)
-        { controls.RetainEvidence(); }
+        {
+            controls.RetainEvidence();
+        }
     }
 }

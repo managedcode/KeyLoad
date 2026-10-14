@@ -15,7 +15,13 @@ internal static class SqlJoinSourceBindingFlow
         var position = store.Position;
         var identity = global::KeyLoad.JsonDefaults.Serialize(store.Identity);
         var healthy = SqlJoinSourceBindingFixture.Ast(partition, kind);
-        var invalid = healthy with { Query = healthy.Query with { Projection = [healthy.Query.Projection[FirstSelection] with { SourceAlias = SqlJoinSourceBindingFixture.Unbound }] } };
+        var invalid = healthy with
+        {
+            Query = healthy.Query with
+            {
+                Projection = [healthy.Query.Projection[FirstSelection] with { SourceAlias = SqlJoinSourceBindingFixture.Unbound }]
+            }
+        };
         foreach (var request in new[] { Q2CapabilityFixtures.JsonRoundTrip(invalid), Q2CapabilityFixtures.NativeRoundTrip(invalid) })
         {
             var native = store.GetReadDiagnostics();

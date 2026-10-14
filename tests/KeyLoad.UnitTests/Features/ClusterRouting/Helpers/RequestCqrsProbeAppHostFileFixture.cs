@@ -24,9 +24,13 @@ internal sealed class RequestCqrsProbeAppHostFileFixture : IDisposable
     private void Initialize()
     {
         if (OperatingSystem.IsWindows())
-        { throw new PlatformNotSupportedException("Private mode fixtures require a Unix host."); }
+        {
+            throw new PlatformNotSupportedException("Private mode fixtures require a Unix host.");
+        }
         if (Directory.Exists(Parent) || File.Exists(Parent))
-        { throw new IOException("The private AppHost fixture root already exists."); }
+        {
+            throw new IOException("The private AppHost fixture root already exists.");
+        }
         Directory.CreateDirectory(Parent);
         parentOwned = true;
         File.SetUnixFileMode(Parent, PrivateDirectory);
@@ -34,13 +38,17 @@ internal sealed class RequestCqrsProbeAppHostFileFixture : IDisposable
         File.SetUnixFileMode(DataRoot, PrivateDirectory);
         InitializeRoot(Root, Voters);
         if (!string.Equals(ProbeRoot, Root, StringComparison.Ordinal))
-        { InitializeRoot(ProbeRoot, [.. Voters, "node4", "node5", "node6"]); }
+        {
+            InitializeRoot(ProbeRoot, [.. Voters, "node4", "node5", "node6"]);
+        }
     }
 
     private void InitializeRoot(string root, IReadOnlyList<string> voters)
     {
         if (OperatingSystem.IsWindows())
-        { throw new PlatformNotSupportedException("Private mode fixtures require a Unix host."); }
+        {
+            throw new PlatformNotSupportedException("Private mode fixtures require a Unix host.");
+        }
         Directory.CreateDirectory(root);
         File.SetUnixFileMode(root, PrivateDirectory);
         foreach (var voter in voters)
@@ -52,10 +60,22 @@ internal sealed class RequestCqrsProbeAppHostFileFixture : IDisposable
         }
     }
 
-    internal string ProbeRoot { get; }
-    internal string Parent { get; }
-    internal string Root { get; }
-    internal string DataRoot { get; }
+    internal string ProbeRoot
+    {
+        get;
+    }
+    internal string Parent
+    {
+        get;
+    }
+    internal string Root
+    {
+        get;
+    }
+    internal string DataRoot
+    {
+        get;
+    }
     internal string SessionId { get; } = Session;
 
     private static RequestCqrsProbeAppHostFileFixture Create(bool includeDestination)
@@ -67,7 +87,9 @@ internal sealed class RequestCqrsProbeAppHostFileFixture : IDisposable
     internal void WriteOwner(string voter, string? session = null, string? ownerVoter = null, int bytes = 0, string? root = null)
     {
         if (OperatingSystem.IsWindows())
-        { throw new PlatformNotSupportedException("Private mode fixtures require a Unix host."); }
+        {
+            throw new PlatformNotSupportedException("Private mode fixtures require a Unix host.");
+        }
         var path = Path.Combine(root ?? Root, voter, OwnerFile);
         var text = OwnerJson(session ?? Session, ownerVoter ?? ClusterResources.Origin(voter));
         var content = Encoding.UTF8.GetBytes(text);
@@ -101,7 +123,9 @@ internal sealed class RequestCqrsProbeAppHostFileFixture : IDisposable
             return action(fixture);
         }, failures);
         if (fixture is not null)
-        { ServerFailureObserver.Observe(fixture.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(fixture.Dispose, failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 

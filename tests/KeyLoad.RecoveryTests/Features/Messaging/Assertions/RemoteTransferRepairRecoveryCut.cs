@@ -21,7 +21,9 @@ internal static class RemoteTransferRepairRecoveryCut
         var state = record.Repairs ?? throw new InvalidOperationException(RemoteTransferRepairCrashProtocol.Missing);
         var committed = cut.Outcome is not null;
         if (stage >= CommitStage.JournalFlushed)
-        { await Assert.That(committed).IsTrue(); }
+        {
+            await Assert.That(committed).IsTrue();
+        }
         var generation = committed ? RemoteTransferRepairCrashProtocol.RepairedGeneration : RemoteTransferRepairCrashProtocol.InitialGeneration;
         await Assert.That(state.AcceptPolicyGeneration).IsEqualTo(mutation.Stage == QueueTransferRepairStage.Accept
             ? generation : RemoteTransferRepairCrashProtocol.InitialGeneration);

@@ -37,7 +37,9 @@ internal static class PartitionMoveParentValidation
             || value.PendingOriginalPhaseCommandId == Guid.Empty
             || (value.TerminalResult is null) != (value.TerminalObservationReceipt is null)
             || value.TerminalResult is not null && value.PendingOriginalPhaseCommandId is not null)
-        { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority);
+        }
     }
 
     internal static void RequirePhase(PartitionMoveParentPhase value, PartitionRef partition, Guid moveId,
@@ -67,13 +69,17 @@ internal static class PartitionMoveParentValidation
             || value.OriginalOutcomeWitness is not null && value.OriginalResult is null
             || !PartitionMoveGrantValidation.IsLocalControl(value.Stage) && value.OriginalResult is not null
                 && value.OriginalOutcomeWitness is null)
-        { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority);
+        }
         if (value.OriginalPhase is { } phase && (phase.MoveId != moveId || phase.Partition != partition
             || phase.Stage != value.Stage || phase.PageOrdinal != value.PageOrdinal
             || BodyDigest(phase) != value.OriginalBodyDigest
             || PartitionMoveOriginalDispatchIdentity.Digest(value.OriginalPhaseCommandId, phase,
                 value.OriginalGrant, value.OriginalExpiresAt) != value.OriginalPhaseIdentityDigest))
-        { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority);
+        }
     }
 
     private static bool InvalidCancellation(PartitionMoveParentPhase value, Guid originalPhaseId)
@@ -114,6 +120,8 @@ internal static class PartitionMoveParentValidation
             || original.DestinationPhysicalShardId != request.DestinationPhysicalShardId
             || original.ExpectedPlacementRevision != request.ExpectedPlacementRevision
             || !Enum.IsDefined(request.Mode) || request.Mode == PartitionMoveMode.None)
-        { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict);
+        }
     }
 }

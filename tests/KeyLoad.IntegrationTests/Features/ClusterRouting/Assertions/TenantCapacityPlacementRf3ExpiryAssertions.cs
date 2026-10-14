@@ -18,7 +18,11 @@ internal static class TenantCapacityPlacementRf3ExpiryAssertions
         await SqlRf3Protocol.EqualAsync(Errors.Problem(ErrorCode.TokenInvalidated,
             TenantPlacementPolicyProtocol.ExpiredPlan), original.Problem!);
         var official = await seed.Official.CallAsync(TenantPlacementPublicProtocol.PersistTool,
-            new { commandId = id, request }, token);
+            new
+            {
+                commandId = id,
+                request
+            }, token);
         await McpCallerAssertions.ErrorAsync(official, ErrorCode.TokenInvalidated, dispatched: true);
         await Assert.That(official.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
             .GetProperty(McpCallerProtocol.ProblemDetail).GetString())
@@ -51,7 +55,11 @@ internal static class TenantCapacityPlacementRf3ExpiryAssertions
             await McpCallerAssertions.SdkSuccessAsync(await seed.Source.PersistPlacementIntentAsync(id, request, token)));
         await SqlRf3Protocol.EqualAsync(pending,
             (await McpCallerAssertions.SuccessAsync<PlacementIntentV1>(await seed.Official.CallAsync(
-                TenantPlacementPublicProtocol.PersistTool, new { commandId = id, request }, token))).Value);
+                TenantPlacementPublicProtocol.PersistTool, new
+                {
+                    commandId = id,
+                    request
+                }, token))).Value);
         await TenantCapacityPlacementRf3MultiContinuation.RequireAsync(seed, token);
     }
 

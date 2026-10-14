@@ -7,9 +7,18 @@ internal sealed class ScaleServerResourceSampleBudget
 {
     private readonly int maximum;
     private int _used;
-    internal TimeProvider TimeProvider { get; }
-    internal ScaleServerResourceOptions Settings { get; }
-    internal BenchmarkProvenanceOptions Provenance { get; }
+    internal TimeProvider TimeProvider
+    {
+        get;
+    }
+    internal ScaleServerResourceOptions Settings
+    {
+        get;
+    }
+    internal BenchmarkProvenanceOptions Provenance
+    {
+        get;
+    }
 
     internal ScaleServerResourceSampleBudget(IOptions<ScaleServerResourceOptions> settings,
         IOptions<BenchmarkProvenanceOptions> provenance, int? maximumBytes = null, TimeProvider? timeProvider = null)
@@ -21,7 +30,9 @@ internal sealed class ScaleServerResourceSampleBudget
         maximum = maximumBytes ?? Settings.MaxSampleMetadataBytes;
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maximum);
         if (maximum > Settings.MaxSampleMetadataBytes)
-        { throw new ArgumentOutOfRangeException(nameof(maximumBytes)); }
+        {
+            throw new ArgumentOutOfRangeException(nameof(maximumBytes));
+        }
     }
     internal int Remaining => maximum - _used;
 

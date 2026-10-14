@@ -14,7 +14,9 @@ internal static class NativeTextIncrementalGenerationFlow
         NativeTextIncrementalIntentValidation.Require(intent, proposed.Scope, proposed.Consumer,
             proposed.Generation, proposed.Placement, maximumRecords, maximumChanges, budget);
         if (intent.NextRecord != proposed.NextRecord)
-        { throw NativeTextErrors.Corrupt(); }
+        {
+            throw NativeTextErrors.Corrupt();
+        }
         RequireRecords(intent, proposed, budget);
         NativeTextIncrementalReplayPreparation.Prepare(actual.Root, actual.Leaf, intent, maximumRecords,
             maximumChanges, budget, options, actual.Resources);
@@ -28,7 +30,10 @@ internal static class NativeTextIncrementalGenerationFlow
                 actual.ApplyIntent(intent, options.Value.MaximumDiskBytes, budget);
                 var files = actual.CloseAndCapture(budget);
                 actual.Observe(NativeTextFaultStage.NativeInventoryFlushed);
-                completed = proposed with { Files = files };
+                completed = proposed with
+                {
+                    Files = files
+                };
                 NativeTextIncrementalValidation.Manifest(completed, proposed.Scope, proposed.Consumer,
                     proposed.Generation, proposed.Placement, maximumRecords, budget, options);
                 NativeTextIncrementalMetadata.Publish(actual.Path, completed,
@@ -50,6 +55,8 @@ internal static class NativeTextIncrementalGenerationFlow
         var target = NativeSerialization.Serialize(manifest.Records);
         budget.Check();
         if (!original.AsSpan().SequenceEqual(target))
-        { throw NativeTextErrors.Corrupt(); }
+        {
+            throw NativeTextErrors.Corrupt();
+        }
     }
 }

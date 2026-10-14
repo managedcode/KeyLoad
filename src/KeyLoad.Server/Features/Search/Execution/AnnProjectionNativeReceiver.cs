@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.DocumentStorage;
 
 namespace KeyLoad.Server.Features.Search;
@@ -15,7 +15,9 @@ internal sealed class AnnProjectionNativeReceiver(OrleansNode node, PartitionHos
         using var source = RemoteDocumentMac.FromConfiguredSecret(
             RemoteModelNativeIdentity.Secret(options.Node.Value, partition, original.SourceOwner));
         if (!source.Verify(original.Payload.Span, original.Signature, reply: false))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, AnnProjectionObservationProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, AnnProjectionObservationProtocol.Invalid);
+        }
         var call = NativeSerialization.Deserialize<AnnProjectionNativeCall>(original.Payload.Span);
         Require(call, original, cancellationToken);
         var work = new ReadExecutionBudget(options.Core.DatabaseLimits, clock, cancellationToken);
@@ -37,11 +39,15 @@ internal sealed class AnnProjectionNativeReceiver(OrleansNode node, PartitionHos
             var current = partition.Database.Store.Read(view =>
                 partition.Database.Principal(work.CreateView(view), call.PrincipalId, clock.GetUtcNow()));
             if (current.PolicyEpoch != principal.PolicyEpoch)
-            { throw Errors.Fail(ErrorCode.TokenInvalidated, AnnProjectionObservationProtocol.Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.TokenInvalidated, AnnProjectionObservationProtocol.Invalid);
+            }
             partition.Database.RequireLocalAnnObservation(principal.Id, call.Observation.OriginalRequest, admitted, work);
             var actual = partition.Database.Store.Identity;
             if (result.NodeId != actual.NodeId || result.ReadGeneration != actual.ReadGeneration)
-            { throw Errors.Fail(ErrorCode.OwnershipLost, AnnProjectionObservationProtocol.Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, AnnProjectionObservationProtocol.Invalid);
+            }
             result = result with
             {
                 AcceptedReadBytes = work.ReadBytes,
@@ -49,18 +55,32 @@ internal sealed class AnnProjectionNativeReceiver(OrleansNode node, PartitionHos
             };
             var bytes = AnnProjectionNativeEncoding.Encode(result, work,
                 options.GrainRouting.Value.MaximumCompletedBytes);
-            try
-            {
-                using var destination = RemoteDocumentMac.FromConfiguredSecret(
-                    RemoteModelNativeIdentity.Secret(options.Node.Value, partition, original.DestinationOwner));
-                return (bytes, destination.Sign(bytes, reply: true));
-            }
-            catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure))
-            { CryptographicOperations.ZeroMemory(bytes); throw; }
-            catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure))
-            { CryptographicOperations.ZeroMemory(bytes); throw; }
+            return SignReply(bytes, original);
         }
-        finally { CryptographicOperations.ZeroMemory(input); }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(input);
+        }
+    }
+
+    private (ReadOnlyMemory<byte> Payload, string Signature) SignReply(byte[] bytes, RemoteModelNativeRequest original)
+    {
+        try
+        {
+            using var destination = RemoteDocumentMac.FromConfiguredSecret(
+                RemoteModelNativeIdentity.Secret(options.Node.Value, partition, original.DestinationOwner));
+            return (bytes, destination.Sign(bytes, reply: true));
+        }
+        catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            CryptographicOperations.ZeroMemory(bytes);
+            throw;
+        }
+        catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            CryptographicOperations.ZeroMemory(bytes);
+            throw;
+        }
     }
 
     private void Require(AnnProjectionNativeCall call, RemoteModelNativeRequest original,
@@ -73,7 +93,9 @@ internal sealed class AnnProjectionNativeReceiver(OrleansNode node, PartitionHos
             || string.IsNullOrWhiteSpace(call.PrincipalId)
             || !AnnProjectionObservationScope.SamePhysicalIdentity(
                 original.DestinationOwner, call.Observation.OriginalRequest.Placement))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, AnnProjectionObservationProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, AnnProjectionObservationProtocol.Invalid);
+        }
         JsonData.Identifier(call.PrincipalId);
     }
 }

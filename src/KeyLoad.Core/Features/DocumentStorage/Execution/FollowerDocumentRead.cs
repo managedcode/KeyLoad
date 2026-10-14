@@ -19,7 +19,9 @@ public sealed partial class DatabaseEngine
             var record = view.GetRecord<DocumentRecord>(DocumentKey(request.Reference.Partition,
                 request.Reference.Collection, request.Reference.Id));
             if (record is not null && Encoding.UTF8.GetByteCount(record.Json) > Limits.MaxDocumentBytes)
-            { throw Errors.Fail(ErrorCode.ResourceExhausted, FollowerReadInvalid); }
+            {
+                throw Errors.Fail(ErrorCode.ResourceExhausted, FollowerReadInvalid);
+            }
             var identity = Store.Identity;
             cancellationToken.ThrowIfCancellationRequested();
             return new FollowerDocumentSnapshot(record, token, identity.NodeId, identity.ReadGeneration,
@@ -39,11 +41,15 @@ public sealed partial class DatabaseEngine
             var resource = Resource(view, request.Reference.Partition, request.Reference.Collection, ResourceKind.Collection);
             var authority = FollowerReadToken(view, request.Reference.Partition, snapshot.Owner);
             if (request.MinimumToken is { } minimum)
-            { ValidateDocumentSessionToken(view, request.Reference.Partition, minimum); }
+            {
+                ValidateDocumentSessionToken(view, request.Reference.Partition, minimum);
+            }
             var identity = Store.Identity;
             var lag = ValidateFollowerDataCut(request, snapshot, authority, identity.NodeId, identity.ReadGeneration);
             if (replicaId != snapshot.ReplicaId || authorityTerm < snapshot.Term)
-            { throw Errors.Fail(ErrorCode.OwnershipLost, FollowerReadOwnerChanged); }
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, FollowerReadOwnerChanged);
+            }
             var current = ReadVisibleDocument(view, principal, request.Reference);
             var old = snapshot.Record;
             var document = current is null || old is null || old.Deleted || !Authorization.CanReadRow(principal, old.Access)

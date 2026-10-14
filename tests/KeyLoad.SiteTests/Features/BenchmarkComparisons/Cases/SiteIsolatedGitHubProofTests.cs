@@ -12,7 +12,11 @@ internal sealed class SiteIsolatedGitHubProofTests
         {
             operation = SiteIsolatedGitHubFields.InputsOperation,
             repository = site.Repository,
-            arguments = new { input = inputs.Capture, receipt = inputs.Receipt },
+            arguments = new
+            {
+                input = inputs.Capture,
+                receipt = inputs.Receipt
+            },
         }, token);
         await Assert.That(result.GetProperty(SiteIsolatedFields.Ok).GetBoolean()).IsTrue();
         await Assert.That(result.GetProperty(SiteIsolatedFields.Result).GetProperty(SiteIsolatedFields.Workers).GetInt32())

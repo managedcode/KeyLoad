@@ -30,7 +30,9 @@ internal static class NativeChecksumProfileProcess
                 active.ThrowStartupFailure();
                 await active.WaitAndJoinAsync(timeout.Token);
                 if (active.ExitCode != NativeChecksumProfileProtocol.Success)
-                { throw new InvalidOperationException(Failed); }
+                {
+                    throw new InvalidOperationException(Failed);
+                }
                 await KilledProcessFileReadiness.WaitAsync(root, timeout.Token);
                 RecoveryFileInventory.AssertNativeHandlesReleased(root);
                 active.CloseNativeProcessAfterJoin();
@@ -46,7 +48,9 @@ internal static class NativeChecksumProfileProcess
     {
         var start = new ProcessStartInfo(Dotnet) { RedirectStandardOutput = true, RedirectStandardError = true, UseShellExecute = false };
         foreach (var value in new[] { typeof(CrashHostMarker).Assembly.Location, NativeChecksumProfileProtocol.Mode, root, phase })
-        { start.ArgumentList.Add(value); }
+        {
+            start.ArgumentList.Add(value);
+        }
         return start;
     }
 }

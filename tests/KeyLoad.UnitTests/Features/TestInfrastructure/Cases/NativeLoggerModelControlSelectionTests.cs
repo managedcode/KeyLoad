@@ -73,15 +73,25 @@ internal sealed class NativeLoggerModelControlSelectionTests
         ServerFailureObserver.Observe(() => KeyLoadAppHostApplication.AddKeyLoad(builder), failures);
         LocalProfile? profile = null;
         if (failures.Count == 0)
-        { ServerFailureObserver.Observe(() => profile = ReadCreatedProfile(root, builder), failures); }
+        {
+            ServerFailureObserver.Observe(() => profile = ReadCreatedProfile(root, builder), failures);
+        }
         if (failures.Count == 0)
-        { ServerFailureObserver.Observe(() => app = builder.Build(), failures); }
+        {
+            ServerFailureObserver.Observe(() => app = builder.Build(), failures);
+        }
         if (failures.Count == 0 && app is { } built && profile is { } created)
-        { await ServerFailureObserver.ObserveAsync(() => VerifyModelAsync(built, root, created.Incarnation), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => VerifyModelAsync(built, root, created.Incarnation), failures).ConfigureAwait(false);
+        }
         if (app is not null)
-        { await ServerFailureObserver.ObserveAsync(() => app.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => app.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         if (Directory.Exists(root))
-        { ServerFailureObserver.Observe(() => Directory.Delete(root, recursive: true), failures); }
+        {
+            ServerFailureObserver.Observe(() => Directory.Delete(root, recursive: true), failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
         await Assert.That(Directory.Exists(root)).IsFalse();
     }
@@ -106,7 +116,9 @@ internal sealed class NativeLoggerModelControlSelectionTests
         await Assert.That(model.Resources.OfType<ParameterResource>().Count()).IsEqualTo(IdentityParameterCount);
         await Assert.That(File.Exists(Path.Combine(root, ClusterProfileStore.ProfileName))).IsTrue();
         foreach (var node in nodes)
-        { await VerifyNodeAsync(node, root, incarnation).ConfigureAwait(false); }
+        {
+            await VerifyNodeAsync(node, root, incarnation).ConfigureAwait(false);
+        }
     }
 
     private static async Task VerifyNodeAsync(ContainerResource node, string root, Guid incarnation)
@@ -168,7 +180,9 @@ internal sealed class NativeLoggerModelControlSelectionTests
             Argument(ContainerUserSetting, ContainerUser)
         };
         if (includeImage)
-        { arguments.Add(Argument(ImageSetting, ImageReference)); }
+        {
+            arguments.Add(Argument(ImageSetting, ImageReference));
+        }
         arguments.AddRange(overrides);
         return DistributedApplication.CreateBuilder(new DistributedApplicationOptions
         {
@@ -194,7 +208,9 @@ internal sealed class NativeLoggerModelControlSelectionTests
         for (var directory = AppContext.BaseDirectory; directory is not null; directory = Path.GetDirectoryName(directory))
         {
             if (File.Exists(Path.Combine(directory, SolutionFileName)))
-            { return directory; }
+            {
+                return directory;
+            }
         }
         throw new InvalidOperationException(MissingRepositoryMessage);
     }

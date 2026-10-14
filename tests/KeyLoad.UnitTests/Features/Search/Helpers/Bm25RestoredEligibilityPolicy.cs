@@ -38,7 +38,10 @@ internal static class Bm25RestoredEligibilityPolicy
         }, failures);
         PrincipalRecord? restored = null;
         ServerFailureObserver.Observe(() => restored = Set(fixture,
-            original with { PolicyEpoch = checked(denied.PolicyEpoch + 1) }), failures);
+            original with
+            {
+                PolicyEpoch = checked(denied.PolicyEpoch + 1)
+            }), failures);
         ServerFailureObserver.ThrowIfAny(failures);
         await Assert.That(restored!.PolicyEpoch).IsEqualTo(3L);
         await Assert.That(Bm25RestoredEligibilityAssertions.Current(fixture, original.Id)).IsNull();

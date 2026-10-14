@@ -10,7 +10,9 @@ internal static class ClusterRestoreRf3OfflineLocks
     {
         var owner = target.DataRoot + ClusterRestoreRf3ResumeProtocol.OperationOwnerSuffix;
         if (File.Exists(owner))
-        { ServerFailureObserver.Observe(() => NodeEpochRf3OfflineFiles.AssertExclusive(owner), failures); }
+        {
+            ServerFailureObserver.Observe(() => NodeEpochRf3OfflineFiles.AssertExclusive(owner), failures);
+        }
         foreach (var root in new[] { target.DataRoot, Path.Combine(ClusterRestoreRf3RetainedCut.OperationRoot(target),
             ClusterRestoreRf3ResumeProtocol.NodesDirectory) })
         {
@@ -29,7 +31,9 @@ internal static class ClusterRestoreRf3OfflineLocks
         {
             var path = Path.Combine(database, name);
             if (File.Exists(path))
-            { ServerFailureObserver.Observe(() => NodeEpochRf3OfflineFiles.AssertExclusive(path), failures); }
+            {
+                ServerFailureObserver.Observe(() => NodeEpochRf3OfflineFiles.AssertExclusive(path), failures);
+            }
         }
     }
 }

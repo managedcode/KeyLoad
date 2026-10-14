@@ -30,8 +30,14 @@ internal sealed class NativeTextProjectionLifecycle
         shutdown = new(root, limitsOptions, sourceNodeId, state, physicalGate, faultObserver, executionOptions: executionOptions, resources: resources);
     }
 
-    internal string Root { get; }
-    internal Guid SourceNodeId { get; }
+    internal string Root
+    {
+        get;
+    }
+    internal Guid SourceNodeId
+    {
+        get;
+    }
 
     internal NativeTextGeneration CreateGeneration(NativeTextGenerationSlot slot, TextProjectionScope scope,
         ReadExecutionBudget budget)

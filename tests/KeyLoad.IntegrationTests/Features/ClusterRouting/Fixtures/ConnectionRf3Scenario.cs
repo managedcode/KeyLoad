@@ -1,7 +1,7 @@
 using KeyLoad.Client;
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClusterReplication;
 using KeyLoad.IntegrationTests.Features.StorageRecovery;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
 
@@ -141,7 +141,9 @@ internal sealed class ConnectionRf3Scenario : IAsyncDisposable
         if (operations.HasPending)
         {
             foreach (var caller in callers)
-            { caller.AbortTransport(failures); }
+            {
+                caller.AbortTransport(failures);
+            }
         }
         await operations.JoinBoundedAsync(failures, timeout.Token).ConfigureAwait(false);
         if (controls is not null && Discovery.Length == RequestCqrsRf3Protocol.NodeCount)
@@ -149,7 +151,9 @@ internal sealed class ConnectionRf3Scenario : IAsyncDisposable
             await operations.JoinProducersAsync(controls, Discovery, failures, timeout.Token).ConfigureAwait(false);
         }
         foreach (var caller in callers)
-        { await ServerFailureObserver.ObserveAsync(() => caller.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => caller.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         await operations.JoinAfterTransportDisposedAsync(failures).ConfigureAwait(false);
         if (controls is not null && Discovery.Length == RequestCqrsRf3Protocol.NodeCount)
         {
@@ -161,28 +165,40 @@ internal sealed class ConnectionRf3Scenario : IAsyncDisposable
             }
         }
         if (administrator is not null)
-        { await ServerFailureObserver.ObserveAsync(() => administrator.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => administrator.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         if (wave is not null)
-        { await ServerFailureObserver.ObserveAsync(wave.StopAsync, failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(wave.StopAsync, failures).ConfigureAwait(false);
+        }
         try
-        { requestWork.Dispose(); }
+        {
+            requestWork.Dispose();
+        }
         catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
         catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
         if (localImage is not null)
         {
             try
-            { await localImage.DisposeAsync(removeImage: failures.Count == 0).ConfigureAwait(false); }
+            {
+                await localImage.DisposeAsync(removeImage: failures.Count == 0).ConfigureAwait(false);
+            }
             catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
             catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
         }
         if (controls is not null)
         {
             if (failures.Count > 0)
-            { controls.RetainEvidence(); }
+            {
+                controls.RetainEvidence();
+            }
             await ServerFailureObserver.ObserveAsync(controls.DisposeAfterResourcesJoinedAsync, failures).ConfigureAwait(false);
         }
         if (rootOwned && !retainEvidence && failures.Count == 0)
-        { ServerFailureObserver.Observe(() => Directory.Delete(root, recursive: true), failures); }
+        {
+            ServerFailureObserver.Observe(() => Directory.Delete(root, recursive: true), failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 

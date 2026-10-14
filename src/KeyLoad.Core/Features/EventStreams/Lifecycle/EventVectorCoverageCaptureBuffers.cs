@@ -8,7 +8,9 @@ internal static class EventVectorCoverageCaptureBuffers
     internal static void Clear(EventVectorCoverageCapture? capture)
     {
         if (capture is null)
-        { return; }
+        {
+            return;
+        }
         Clear(capture.OriginalEncodedEntries);
         Clear(capture.EntryChecksum);
         Clear(capture.PhysicalCatalog);
@@ -24,15 +26,21 @@ internal static class EventVectorCoverageCaptureBuffers
     private static void Clear(EventVectorCoverageRow[]? rows)
     {
         if (rows is null)
-        { return; }
+        {
+            return;
+        }
         foreach (var row in rows)
-        { Clear(row); }
+        {
+            Clear(row);
+        }
     }
 
     private static void Clear(EventVectorCoverageRow? row)
     {
         if (row is null)
-        { return; }
+        {
+            return;
+        }
         Clear(row.Key);
         Clear(row.Value);
     }

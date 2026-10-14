@@ -14,7 +14,9 @@ internal sealed partial class ControlledPartitionMovementNativeHost
     public ValueTask DisposeAsync()
     {
         lock (lifecycle)
-        { return new(shutdown ??= StopCoreAsync()); }
+        {
+            return new(shutdown ??= StopCoreAsync());
+        }
     }
 
     internal Task StopAsync(CancellationToken cancellationToken)
@@ -34,7 +36,9 @@ internal sealed partial class ControlledPartitionMovementNativeHost
         }, failures).ConfigureAwait(false);
         var nativeHostReleased = false;
         if (nodeStop is { IsCompleted: true } && Silo.HasJoinedRequestWork)
-        { ServerFailureObserver.Observe(() => nativeHostReleased = Silo.Discovery is null, failures); }
+        {
+            ServerFailureObserver.Observe(() => nativeHostReleased = Silo.Discovery is null, failures);
+        }
         if (nodeStop is not { IsCompleted: true } || !Silo.HasJoinedRequestWork || !nativeHostReleased)
         {
             failures.Add(Errors.Fail(ErrorCode.OwnershipLost, PartitionMovementProtocol.Unavailable));
@@ -85,14 +89,25 @@ internal sealed partial class ControlledPartitionMovementNativeHost
             Volatile.Read(ref coldShutdownNode), stage, true, token, CancellationToken.None).ConfigureAwait(false);
         failures.AddRange(observation);
         if (observation.Count == NoCommandFailures)
-        { return; }
+        {
+            return;
+        }
+        if (stage == ControlledNativeColdShutdownEvidence.Stage.NodeStopObservation)
+        {
+            await ServerFailureObserver.ObserveAsync(() =>
+                ControlledNativeColdShutdownEvidence.CaptureNodeStopOwnerStateAsync(
+                    Volatile.Read(ref coldShutdownNode), original, Silo.HasJoinedRequestWork,
+                    Silo.Discovery is not null), failures).ConfigureAwait(false);
+        }
         var completion = new List<Exception>();
         await ControlledNativeColdShutdownEvidence.ObserveAsync(() => original, completion,
             Volatile.Read(ref coldShutdownNode), (ControlledNativeColdShutdownEvidence.Stage)((int)stage + OriginalJoinStageOffset), false, token, CancellationToken.None).ConfigureAwait(false);
         foreach (var error in completion)
         {
             if (!observation.Any(observed => ReferenceEquals(observed, error)))
-            { failures.Add(error); }
+            {
+                failures.Add(error);
+            }
         }
         await ControlledNativeColdShutdownEvidence.AfterJoinAsync(observation, original, failures,
             Volatile.Read(ref coldShutdownNode), stage).ConfigureAwait(false);

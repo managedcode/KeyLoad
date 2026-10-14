@@ -17,7 +17,9 @@ internal sealed partial class NativeTextOnlineCatalogOwner(DatabaseEngine databa
         observer?.Invoke(NativeTextFaultStage.CanonicalOnlinePublicationAcknowledged);
         var current = ReadCommittedCurrent(session.PrincipalId, session.Request, session.Budget);
         if (current.CommandId != session.Request.CommandId || current.Authority.Leaf != session.Leaf)
-        { throw NativeTextErrors.Mismatch(); }
+        {
+            throw NativeTextErrors.Mismatch();
+        }
         PublishCurrentCatalog(current, session.Request, session.Budget, session);
     }
 
@@ -56,10 +58,14 @@ internal sealed partial class NativeTextOnlineCatalogOwner(DatabaseEngine databa
             }
         }, failures);
         if (proof is not null)
-        { ServerFailureObserver.Observe(proof.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(proof.Dispose, failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
         if (previous is not null && !ReferenceEquals(previous, generation))
-        { BeginRetirement(previous); }
+        {
+            BeginRetirement(previous);
+        }
         return generation;
     }
 
@@ -69,9 +75,13 @@ internal sealed partial class NativeTextOnlineCatalogOwner(DatabaseEngine databa
         lock (generationGate)
         {
             if (generations.TryGetValue(current.Authority.Leaf, out var existing))
-            { return existing; }
+            {
+                return existing;
+            }
             if (generations.Count >= options.NativeText.Value.MaximumGenerations)
-            { throw NativeTextErrors.BoundExceeded(); }
+            {
+                throw NativeTextErrors.BoundExceeded();
+            }
             var path = Path.Combine(root.Directory, current.Authority.Leaf);
             var manifest = NativeTextIncrementalMetadata.ReadManifest(path, options.NativeText.Value.MaximumDiskBytes, budget);
             var actual = new NativeTextOnlineGeneration(root.Directory, current, manifest, options.NativeText, resources);

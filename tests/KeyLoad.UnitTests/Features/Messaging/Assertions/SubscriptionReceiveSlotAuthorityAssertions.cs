@@ -46,7 +46,9 @@ internal static class SubscriptionReceiveSlotAuthorityAssertions
         await SubscriptionCheckpointAuthorityAssertions.StatusAsync(db, group, 3, 3, 3);
         await SubscriptionCheckpointAuthorityAssertions.NoWindowAsync(store, group);
         foreach (var receipt in receipts)
-        { await SubscriptionCheckpointAuthorityAssertions.ReplayAsync(db, store, receipt.Command, receipt.Result, token); }
+        {
+            await SubscriptionCheckpointAuthorityAssertions.ReplayAsync(db, store, receipt.Command, receipt.Result, token);
+        }
         await ReplayEmptyAsync(db, store, request, result, token);
         await SubscriptionCheckpointAuthorityAssertions.SettledClaimAsync(db, store, claimRequest, original, token);
     }
@@ -86,7 +88,9 @@ internal static class SubscriptionReceiveSlotAuthorityAssertions
     {
         token.ThrowIfCancellationRequested();
         if (evaluatedAt is null)
-        { return SubscriptionReceiveSlotAuthorityFlow.Apply(db, kind, payload, id, token); }
+        {
+            return SubscriptionReceiveSlotAuthorityFlow.Apply(db, kind, payload, id, token);
+        }
         return db.Apply(new(id, kind, "root", evaluatedAt.Value,
             System.Text.Json.JsonSerializer.Serialize(payload, JsonDefaults.Options)));
     }

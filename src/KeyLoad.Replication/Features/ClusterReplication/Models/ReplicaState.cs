@@ -11,9 +11,15 @@ internal sealed class ReplicaState
     private const int BeforeFirstLogPosition = 0;
 
     private readonly ReplicaConfiguration configuration;
-    internal ReplicaMaterializer Materializer { get; }
+    internal ReplicaMaterializer Materializer
+    {
+        get;
+    }
     internal ReplicaConfiguration Configuration => configuration;
-    internal TimeProvider Clock { get; }
+    internal TimeProvider Clock
+    {
+        get;
+    }
 
     internal ReplicaState(ReplicaMaterializer materializer, IOptions<ReplicaConfiguration> options, TimeProvider clock)
     {
@@ -27,8 +33,14 @@ internal sealed class ReplicaState
     }
     internal IDurableReplicaLog Log => Materializer.Log;
     internal ReplicaRole Role { get; set; } = ReplicaRole.Follower;
-    internal string? LeaderId { get; set; }
-    internal long LeaderReadyIndex { get; set; }
+    internal string? LeaderId
+    {
+        get; set;
+    }
+    internal long LeaderReadyIndex
+    {
+        get; set;
+    }
     internal Dictionary<string, ReplicaProgress> Progress { get; } = new(StringComparer.Ordinal);
     internal volatile bool Ready;
     private long electionStarted;

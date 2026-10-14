@@ -16,9 +16,13 @@ internal static class EventVectorRowStorage
         view.ReadValue(key, bytes =>
         {
             try
-            { admission.RequireEncodedBytes(checked(key.LongLength + bytes.Length)); }
+            {
+                admission.RequireEncodedBytes(checked(key.LongLength + bytes.Length));
+            }
             catch (KeyLoadException error) when (error.Code == ErrorCode.ResourceExhausted)
-            { throw Errors.Fail(ErrorCode.Corruption, InvalidRow, error); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, InvalidRow, error);
+            }
             result = NativeSerialization.Deserialize<T>(bytes);
         });
         return result;

@@ -68,7 +68,13 @@ internal static class GraphPathRf3Scenario
     internal static SqlGraphPathRequest SqlRequestInPartition(GraphPathRf3Seed seed, PartitionRef partition)
     {
         var request = SqlRequest(seed);
-        return request with { Query = request.Query with { Partition = partition } };
+        return request with
+        {
+            Query = request.Query with
+            {
+                Partition = partition
+            }
+        };
     }
 
     internal static async Task<McpPersistedIdentity> GrantLabelUseAsync(ClusterFixture fixture,
@@ -84,7 +90,10 @@ internal static class GraphPathRf3Scenario
         var persisted = await McpCallerAssertions.SdkSuccessAsync(await admin.ConfigurePrincipalAsync(
             Guid.NewGuid(), updated, cancellationToken));
         await Assert.That(persisted.PolicyEpoch).IsEqualTo(updated.PolicyEpoch);
-        return seed.Reader with { Principal = persisted };
+        return seed.Reader with
+        {
+            Principal = persisted
+        };
     }
 
     internal static async Task<McpPersistedIdentity> ReplaceGrantsAsync(ClusterFixture fixture,
@@ -102,7 +111,10 @@ internal static class GraphPathRf3Scenario
         var persisted = await McpCallerAssertions.SdkSuccessAsync(await admin.ConfigurePrincipalAsync(
             Guid.NewGuid(), updated, cancellationToken));
         await Assert.That(persisted.PolicyEpoch).IsEqualTo(updated.PolicyEpoch);
-        return identity with { Principal = persisted };
+        return identity with
+        {
+            Principal = persisted
+        };
     }
 
     internal static ScopeGrant[] FullGraphGrants(PartitionRef partition)
@@ -141,7 +153,10 @@ internal static class GraphPathRf3Scenario
     {
         var principalId = "graph-path-reader-" + Guid.NewGuid().ToString("N");
         var principal = new PrincipalRecord(principalId, partition.TenantId, [.. FullGraphGrants(partition)], [LabelReadGrant])
-        { RestrictRows = true, OwnerId = principalId };
+        {
+            RestrictRows = true,
+            OwnerId = principalId
+        };
         var persisted = await McpCallerAssertions.SdkSuccessAsync(await admin.ConfigurePrincipalAsync(
             Guid.NewGuid(), principal, cancellationToken));
         var keyId = "graph-path-key-" + Guid.NewGuid().ToString("N");

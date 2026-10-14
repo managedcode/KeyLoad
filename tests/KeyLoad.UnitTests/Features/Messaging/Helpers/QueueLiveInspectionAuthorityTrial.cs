@@ -15,13 +15,19 @@ internal static class QueueLiveInspectionAuthorityTrial
         var original = QueuePendingAuthorityHistory.Capture(fixture.Store);
         var foreign = NativeSerialization.Serialize(NativeSerialization.Deserialize<MessageBody>(state.OriginalBytes)
             with
-        { Id = QueueLeaseAuthorityProtocol.Foreign });
+        {
+            Id = QueueLeaseAuthorityProtocol.Foreign
+        });
         fixture.Store.Commit((tx, _) =>
         {
             if (missingBody)
-            { tx.Delete(state.FaultKey); }
+            {
+                tx.Delete(state.FaultKey);
+            }
             else
-            { tx.Put(state.FaultKey, foreign); }
+            {
+                tx.Put(state.FaultKey, foreign);
+            }
             return true;
         });
         var damaged = QueuePendingAuthorityHistory.Capture(fixture.Store);
@@ -39,7 +45,10 @@ internal static class QueueLiveInspectionAuthorityTrial
             await QueueLiveInspectionAuthorityAssertions.RefuseAsync(owner, cold, state, damaged);
             await QueueLiveInspectionAuthorityAssertions.PositiveAsync(owner, cold, state, positive);
             cold.Commit((tx, _) => { tx.Put(state.FaultKey, state.OriginalBytes); return true; });
-            await QueuePendingAuthorityHistory.SameAsync(cold, original with { Position = original.Position + 2 });
+            await QueuePendingAuthorityHistory.SameAsync(cold, original with
+            {
+                Position = original.Position + 2
+            });
             await QueueLiveInspectionAuthorityAssertions.LeasedAsync(owner, cold, state);
             processed = owner.Apply(state.Original);
             await QueueLeaseAuthorityPostimage.RequireAsync(owner, cold, state, processed);

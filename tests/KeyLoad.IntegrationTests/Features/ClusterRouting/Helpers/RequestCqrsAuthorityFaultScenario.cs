@@ -1,8 +1,8 @@
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.ClusterRouting.Assertions;
 using KeyLoad.IntegrationTests.Features.ClusterRouting.Helpers;
 using KeyLoad.IntegrationTests.Features.StorageRecovery;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 using ManagedCode.Communication;
 
@@ -123,9 +123,13 @@ internal sealed class RequestCqrsAuthorityFaultScenario(bool useMcp, RequestCqrs
             RequestCqrsAuthorityFaultAssertions.HeldJson, 1);
         var activeCaller = caller ?? throw new InvalidOperationException(MissingOwner);
         if (useMcp)
-        { mcpCall = RequestCqrsFaultCallers.CommitMcpAsync(activeCaller.Mcp, command, cancellationToken); }
+        {
+            mcpCall = RequestCqrsFaultCallers.CommitMcpAsync(activeCaller.Mcp, command, cancellationToken);
+        }
         else
-        { sdkCall = RequestCqrsFaultCallers.CommitSdkAsync(activeCaller.Sdk, command, cancellationToken); }
+        {
+            sdkCall = RequestCqrsFaultCallers.CommitSdkAsync(activeCaller.Sdk, command, cancellationToken);
+        }
         originalStarted = true;
         var marker = await activeControls.WaitForMarkerAsync(armId, RequestCqrsProbePhase.AuthorizationReload,
             RequestCqrsProbeOutcome.Observed, discovery ?? throw new InvalidOperationException(MissingOwner),
@@ -148,7 +152,10 @@ internal sealed class RequestCqrsAuthorityFaultScenario(bool useMcp, RequestCqrs
             cancellationToken).ConfigureAwait(false)).ConfigureAwait(false);
         lifecycle.SetStage(RequestCqrsLifecycleStage.RevocationAckAssert);
         await RequestCqrsAuthorityFaultAssertions.VerifyRevocationAckAsync(saved, expected).ConfigureAwait(false);
-        identity = activeIdentity with { Principal = saved };
+        identity = activeIdentity with
+        {
+            Principal = saved
+        };
         lifecycle.SetStage(RequestCqrsLifecycleStage.RevocationNoEffects);
         await VerifyNoEffectAsync(cancellationToken).ConfigureAwait(false);
         var marker = heldMarker ?? throw new InvalidOperationException(MissingOwner);

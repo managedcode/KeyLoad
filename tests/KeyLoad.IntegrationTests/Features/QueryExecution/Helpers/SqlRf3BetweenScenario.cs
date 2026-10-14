@@ -45,7 +45,9 @@ internal sealed record SqlRf3BetweenScenario(PartitionRef Partition, long Commit
         var partition = new PartitionRef(TenantPrefix + Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat),
             DatabaseId, Domain, Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat));
         var definition = new ResourceDefinition(Collection, ResourceKind.Collection, partition.TransactionDomainId)
-        { Indexes = [new(GroupIndex, [GroupPath])] };
+        {
+            Indexes = [new(GroupIndex, [GroupPath])]
+        };
         var configured = await SqlRf3Protocol.SdkAsync<ResourceDefinition>(administrator,
             SqlRf3Protocol.Call(partition, McpCallerTools.ResourcesConfigure,
                 new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId, definition), Guid.NewGuid()),

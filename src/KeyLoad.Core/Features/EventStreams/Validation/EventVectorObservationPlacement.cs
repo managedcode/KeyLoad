@@ -20,6 +20,8 @@ internal static class EventVectorObservationPlacement
             || placement.Revision != admitted.SourceLogicalPlacementRevision
             || placement.DirectoryRevision != admitted.SourceDirectoryFence
             || !placement.VoterIds.SequenceEqual(admitted.SourceOwner.VoterIds, StringComparer.Ordinal))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, InvalidPlacement); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, InvalidPlacement);
+        }
     }
 }

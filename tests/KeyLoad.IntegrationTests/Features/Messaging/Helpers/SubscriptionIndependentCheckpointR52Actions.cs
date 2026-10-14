@@ -25,9 +25,13 @@ internal static class SubscriptionIndependentCheckpointR52Actions
     private static void SetIssued(SubscriptionIndependentCheckpointR52State state, SubscriptionRef group, long issued)
     {
         if (group == state.Seed.Independent)
-        { state.Issued = issued; }
+        {
+            state.Issued = issued;
+        }
         else
-        { state.PrimaryIssued = issued; }
+        {
+            state.PrimaryIssued = issued;
+        }
     }
 
     private static async Task ClaimResultAsync(SubscriptionIndependentCheckpointR52State state,
@@ -58,9 +62,13 @@ internal static class SubscriptionIndependentCheckpointR52Actions
         var request = new SubscriptionDeliveryCommand(Guid.NewGuid(), group, delivery.Token, DeliveryAction.Ack);
         var result = await McpCallerAssertions.SdkSuccessAsync(await sdk.CompleteSubscriptionAsync(request, token));
         if (group == state.Seed.Independent)
-        { state.Checkpoint = checkpoint; }
+        {
+            state.Checkpoint = checkpoint;
+        }
         else
-        { state.PrimaryCheckpoint = checkpoint; }
+        {
+            state.PrimaryCheckpoint = checkpoint;
+        }
         await SubscriptionPhasePublicAssertions.ReceiptAsync(result, request, delivery.Event.Position);
         await Assert.That(result.Token.AtomicPartitionId).IsEqualTo(group.Source.Partition.AtomicPartitionId);
         await Assert.That(result.Token.Incarnation).IsEqualTo(state.Placement!.Incarnation);

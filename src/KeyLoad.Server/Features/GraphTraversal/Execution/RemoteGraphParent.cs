@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.Server.Features.GraphTraversal;
 
@@ -20,7 +20,9 @@ internal sealed class RemoteGraphParent(OrleansNode node, PartitionHost partitio
             return result;
         }
         catch (Exception failure) when (effects.IsStarted && NativeCqrsBoundaryErrors.IsNonFatal(failure))
-        { throw Errors.Fail(ErrorCode.UnknownWriteOutcome, RemoteGraphNativeProtocol.Unavailable, failure); }
+        {
+            throw Errors.Fail(ErrorCode.UnknownWriteOutcome, RemoteGraphNativeProtocol.Unavailable, failure);
+        }
     }
 
     public Task<RemoteIncomingGraphEdgesPageV1> ReadIncomingAsync(GrainRequestEnvelope trusted,

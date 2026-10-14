@@ -51,7 +51,10 @@ internal static class BlobPublishedLifetimeAssertions
         await BlobWholeFlowAssertions.Exact(operations.Read("root", new(old.Blob, 3, 0, 0)),
             new BlobReadResult(current.Metadata, 0, ReadOnlyMemory<byte>.Empty));
         await BlobWholeFlowAssertions.Exact(operations.UploadInfo("root", new(old.Blob, old.UploadId)),
-            current.Active with { Status = BlobUploadStatus.Complete });
+            current.Active with
+            {
+                Status = BlobUploadStatus.Complete
+            });
         await BlobWholeFlowAssertions.Quotas(owner, old.Blob, 0, 1, 0);
         var incarnation = store.Identity.Incarnation;
         var expectedState = new BlobState(1, incarnation, incarnation, current.Begin.CommandId, "root", old.Blob,

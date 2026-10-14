@@ -12,7 +12,9 @@ internal static class SampleChunkSchedulingRf3KillEvidence
         {
             var original = JsonDefaults.Serialize(originals[node]);
             if (original.Length > RequestCqrsProbeFixtureProtocol.MaximumRecordBytes)
-            { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.RecordLimitExceeded); }
+            {
+                throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.RecordLimitExceeded);
+            }
             // Original inspect/kill bytes contain resource/runtime identities only, never caller credentials or data.
             await TestContext.Current!.OutputWriter.WriteLineAsync(Encoding.UTF8.GetString(original));
         }

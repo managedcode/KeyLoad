@@ -13,9 +13,13 @@ internal static class SampleChunkCrashRecovery
             SampleChunkCrashOperations.OriginalAcknowledged(database)));
         var receiptPath = Path.Combine(root, SampleChunkCrashContract.OriginalReceiptFile);
         if (new FileInfo(receiptPath).Length > database.Limits.MaxBatchBytes)
-        { throw new InvalidOperationException(SampleChunkCrashContract.Invalid); }
+        {
+            throw new InvalidOperationException(SampleChunkCrashContract.Invalid);
+        }
         if (acknowledged != Convert.ToHexString(await File.ReadAllBytesAsync(receiptPath).ConfigureAwait(false)))
-        { throw new InvalidOperationException(SampleChunkCrashContract.Invalid); }
+        {
+            throw new InvalidOperationException(SampleChunkCrashContract.Invalid);
+        }
         if (!merge)
         {
             SampleChunkCrashOperations.Commit(database, Guid.NewGuid(), new AppendSamples(SampleChunkCrashContract.Set,
@@ -42,7 +46,9 @@ internal static class SampleChunkCrashRecovery
     {
         var path = Path.Combine(root, SampleChunkCrashContract.OriginalOperationFile);
         if (new FileInfo(path).Length > database.Limits.MaxBatchBytes)
-        { throw new InvalidOperationException(SampleChunkCrashContract.Invalid); }
+        {
+            throw new InvalidOperationException(SampleChunkCrashContract.Invalid);
+        }
         var bytes = await File.ReadAllBytesAsync(path).ConfigureAwait(false);
         var original = NativeSerialization.Deserialize<ReplicatedOperation>(bytes);
         var before = SampleChunkCrashState.Complete(database);
@@ -50,7 +56,9 @@ internal static class SampleChunkCrashRecovery
         var replay = database.ApplyEmbedded(original, cancellationToken: default);
         replay.Get<CommitReceipt>();
         if (SampleChunkCrashState.Complete(database) != before || database.Store.Position != position)
-        { throw new InvalidOperationException(SampleChunkCrashContract.Invalid); }
+        {
+            throw new InvalidOperationException(SampleChunkCrashContract.Invalid);
+        }
         return Convert.ToHexString(NativeSerialization.Serialize(replay));
     }
 }

@@ -5,7 +5,9 @@ internal sealed partial class NativeTextCapturedRead
     public void Dispose()
     {
         if (disposed)
-        { return; }
+        {
+            return;
+        }
         var failures = new List<Exception>();
         ServerFailureObserver.Observe(JoinNative, failures);
         ServerFailureObserver.Observe(OriginalProjection.Dispose, failures);

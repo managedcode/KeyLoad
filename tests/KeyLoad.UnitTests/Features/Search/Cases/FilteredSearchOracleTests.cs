@@ -39,7 +39,10 @@ internal sealed class FilteredSearchOracleTests
                 .Within(FilteredSearchTestSupport.Tolerance);
         }
 
-        var vectorOnly = await engine.SearchAsync(Root, VectorOnly() with { AllowedIds = allowed }, Token());
+        var vectorOnly = await engine.SearchAsync(Root, VectorOnly() with
+        {
+            AllowedIds = allowed
+        }, Token());
         await Assert.That(vectorOnly.Select(result => result.Document.Reference.Id).ToArray())
             .IsEquivalentTo(new[] { "a", "b", "d" }, CollectionOrdering.Matching);
         var empty = await engine.SearchAsync(Root,

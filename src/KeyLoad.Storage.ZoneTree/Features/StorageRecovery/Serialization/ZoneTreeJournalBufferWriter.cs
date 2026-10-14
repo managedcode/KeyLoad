@@ -26,7 +26,9 @@ internal sealed class ZoneTreeJournalBufferWriter(int maxFrameBytes, Action<Comm
     {
         var original = Errors.Fail(ErrorCode.ResourceExhausted, ZoneTreePersistenceFormat.EncodedTransactionFrameLimitExceeded);
         if (observer is null)
-        { throw original; }
+        {
+            throw original;
+        }
         var failures = new List<Exception> { original };
         ZoneTreeExistingStoreCleanup.Capture(() => observer(CommitStage.EncodedFrameRejected, attemptedBytes, maxFrameBytes), failures);
         ZoneTreeExistingStoreCleanup.ThrowFailures(failures);

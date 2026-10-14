@@ -35,7 +35,9 @@ internal static class ReplicaIsolationAdmissionDiagnostics
         string? id = null;
         if (networks.Length == SingleNetwork && networks[FirstIndex].Value.TryGetProperty(NetworkId, out var networkId)
             && networkId.ValueKind == JsonValueKind.String)
-        { id = networkId.GetString(); }
+        {
+            id = networkId.GetString();
+        }
         return JsonSerializer.Serialize(new
         {
             schemaVersion = SchemaVersion,

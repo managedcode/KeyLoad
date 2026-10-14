@@ -16,12 +16,16 @@ internal static class MovementFrameObservationOptionsReader
         var section = configuration.GetSection(MovementFrameObservationProtocol.ConfigurationSection);
         var fields = section.GetChildren().Take(ConfigurationFieldCount + ExcessConfigurationField).ToArray();
         if (fields.Length == NoConfigurationFields && section.Value is null)
-        { return MovementFrameObservationOptions.Disabled; }
+        {
+            return MovementFrameObservationOptions.Disabled;
+        }
         if (section.Value is not null || fields.Length > ConfigurationFieldCount
             || fields.Any(field => field.Key is not (EnabledSetting or RootSetting or SessionSetting)
                 || field.Value is null || field.GetChildren().Take(FirstNestedField).Any())
             || !bool.TryParse(section[EnabledSetting], out var enabled))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         var value = new MovementFrameObservationOptions(enabled, section[RootSetting], section[SessionSetting] ?? string.Empty);
         Validate(value, node);
         return value;
@@ -32,7 +36,9 @@ internal static class MovementFrameObservationOptionsReader
         if (!value.Enabled)
         {
             if (value.Root is not null || value.SessionId.Length != NoConfigurationFields)
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             return;
         }
         PhysicalGroupTrustValidator.Validate(node.PhysicalGroupTrust, node);
@@ -42,7 +48,9 @@ internal static class MovementFrameObservationOptionsReader
             || node.PhysicalGroupTrust.Role != PhysicalGroupTrustRole.Destination
             || !node.PhysicalGroupTrust.RegisterPhysicalOwners || !node.PhysicalGroupTrust.RemoteDocumentReads
             || !node.PhysicalGroupTrust.RemotePartitionQueries)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
     }
 
     private static InvalidOperationException Invalid() => new(MovementFrameObservationProtocol.Invalid);

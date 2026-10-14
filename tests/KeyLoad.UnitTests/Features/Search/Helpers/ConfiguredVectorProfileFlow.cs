@@ -40,7 +40,9 @@ internal static class ConfiguredVectorProfileFlow
     internal static void Seed(TestDatabase database)
     {
         var definition = new ResourceDefinition(Collection, ResourceKind.Collection, database.Partition.TransactionDomainId)
-        { VectorProfiles = [new(Field, Space)] };
+        {
+            VectorProfiles = [new(Field, Space)]
+        };
         database.Submit(OperationKind.ConfigureResource,
             new ConfigureResourceRequest(database.Partition.TenantId, database.Partition.DatabaseId, definition)).Get<ResourceDefinition>();
         database.Configure(StreamSet, ResourceKind.StreamSet);
@@ -52,7 +54,10 @@ internal static class ConfiguredVectorProfileFlow
     internal static CommandRequest Command(TestDatabase database, bool projection, bool wrongModel)
     {
         var vector = new PutVector(Collection, Target, Field, [0, 1],
-            wrongModel ? Space with { Model = WrongModel } : Space, UpdatedRevision);
+            wrongModel ? Space with
+            {
+                Model = WrongModel
+            } : Space, UpdatedRevision);
         Mutation effect = projection ? new ApplyVectorProjection(new(database.Partition, StreamSet, Stream, InitialRevision),
             InitialRevision, Event, new(database.Partition, Collection, Source), InitialRevision, Input,
             Reducer, Version, InitialRevision, vector) : vector;
@@ -81,7 +86,9 @@ internal static class ConfiguredVectorProfileFlow
     {
         var page = view.Scan([], ScanBound);
         if (page.HasMore)
-        { throw new InvalidOperationException("The configured vector fixture exceeded its complete-store bound."); }
+        {
+            throw new InvalidOperationException("The configured vector fixture exceeded its complete-store bound.");
+        }
         var outcome = global ? OutcomeStoreOracle.GlobalKey(principal, commandId)
             : OutcomeStoreOracle.PartitionKey(database.Partition, principal, commandId);
         var locator = global ? null : KeySpace.OutcomeLocatorV2(database.Partition, principal, commandId);

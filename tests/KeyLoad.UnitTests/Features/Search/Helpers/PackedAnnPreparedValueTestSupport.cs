@@ -61,7 +61,9 @@ internal static class PackedAnnPreparedValueTestSupport
             {
                 var prepared = PreparedPackedSimilarity.Create(packed, query, metric);
                 for (var candidate = 0; candidate < packed.Count; candidate++)
-                { total += prepared.Score(packed, candidate); }
+                {
+                    total += prepared.Score(packed, candidate);
+                }
             }
         }
         return total;

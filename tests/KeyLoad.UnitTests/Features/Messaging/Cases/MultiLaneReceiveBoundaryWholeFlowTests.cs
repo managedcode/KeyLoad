@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.UnitTests.Features.ClusterRouting;
 using TUnit.Assertions.Enums;
 
@@ -71,13 +71,18 @@ internal sealed class MultiLaneReceiveBoundaryWholeFlowTests
     {
         const int replyCeiling = 1024;
         await using var fixture = new RequestCqrsClusterFixture(routing: new GrainRoutingOptions
-        { MaximumReplyBytes = replyCeiling, InitialReplyBufferBytes = replyCeiling });
+        {
+            MaximumReplyBytes = replyCeiling,
+            InitialReplyBufferBytes = replyCeiling
+        });
         await fixture.InitializeAsync();
         var prefix = "large-receive-" + Guid.NewGuid().ToString("N");
         var lanes = new[] { new QueueLaneRef(fixture.Database.Partition, prefix + "-first"),
             new QueueLaneRef(fixture.Database.Partition, prefix + "-second") };
         foreach (var lane in lanes)
-        { fixture.Database.Configure(lane.Queue, ResourceKind.WorkQueue); }
+        {
+            fixture.Database.Configure(lane.Queue, ResourceKind.WorkQueue);
+        }
         var payload = "{\"value\":\"" + new string('a', 2048) + "\"}";
         fixture.Database.Commit(new EnqueueMessage(lanes[0].Queue, "large", payload, "{\"kind\":\"large\"}"),
             new EnqueueMessage(lanes[1].Queue, "untouched", "{\"value\":2}"));

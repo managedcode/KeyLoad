@@ -71,7 +71,9 @@ internal static class DueDiscoveryDeadlineFlow
     {
         var page = view.Scan([], fixture.Database.Limits.MaxResults);
         if (page.HasMore)
-        { throw new InvalidOperationException(IncompleteImage); }
+        {
+            throw new InvalidOperationException(IncompleteImage);
+        }
         return page.Records.Select(row => Convert.ToHexString(row.Key.Span) + ":" +
             Convert.ToHexString(row.Value.Span)).ToArray();
     });

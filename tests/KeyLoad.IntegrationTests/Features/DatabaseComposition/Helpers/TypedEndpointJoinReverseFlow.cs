@@ -34,14 +34,23 @@ internal static class TypedEndpointJoinReverseFlow
         var principal = await PolicyAsync(admin, identity.Principal, enabled: true, token);
         var deniedProblem = await FencedAsync(callers, denied, token);
         await TypedEndpointJoinReverseAssertions.UnchangedAsync(admin, state, null, token);
-        var command = denied with { CommandId = Guid.NewGuid() };
+        var command = denied with
+        {
+            CommandId = Guid.NewGuid()
+        };
         var receipt = await SqlRf3Protocol.McpAsync<CommitReceipt>(callers.Mcp,
             DeclarativeCompositionSql.Reverse(command, mutation), token);
         var reverse = new TypedEndpointJoinReverseState(identity, principal, denied, originalProblem,
             deniedProblem, command, receipt);
-        state = state with { Reverse = reverse };
+        state = state with
+        {
+            Reverse = reverse
+        };
         await TypedEndpointJoinReverseAssertions.OriginalAsync(fixture, admin, state, token);
-        var changed = command with { Mutations = [mutation with { MessageIdPrefix = ChangedPrefix }] };
+        var changed = command with
+        {
+            Mutations = [mutation with { MessageIdPrefix = ChangedPrefix }]
+        };
         await RefusedAsync(callers, changed, ErrorCode.Conflict, token);
         await TypedEndpointJoinReverseAssertions.UnchangedAsync(admin, state, reverse, token);
         principal = await PolicyAsync(admin, principal, enabled: false, token);
@@ -84,7 +93,10 @@ internal static class TypedEndpointJoinReverseFlow
         var actual = await McpCallerAssertions.SdkSuccessAsync(
             await admin.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), expected, token));
         await SqlRf3Protocol.EqualAsync(expected, actual);
-        return identity with { Principal = actual };
+        return identity with
+        {
+            Principal = actual
+        };
     }
 
     private static async Task<PrincipalRecord> PolicyAsync(RequestCqrsRf3Callers admin,

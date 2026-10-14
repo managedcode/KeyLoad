@@ -20,7 +20,9 @@ internal static class EventVectorSourceMutationValidation
             || phase.Disposition != EventVectorSourcePhaseDisposition.Admitted
             || !CryptographicOperations.FixedTimeEquals(SHA256.HashData(phase.OriginalNativeBody.Span),
                 phase.OriginalBodyDigest.Span))
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidPhase); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidPhase);
+        }
         return ReadBoundBody(phase, admission);
     }
 
@@ -36,7 +38,9 @@ internal static class EventVectorSourceMutationValidation
             || phase.OriginalNativeBody.IsEmpty
             || !CryptographicOperations.FixedTimeEquals(SHA256.HashData(phase.OriginalNativeBody.Span),
                 phase.OriginalBodyDigest.Span))
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidPhase); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidPhase);
+        }
         return ReadBoundBody(phase, admission);
     }
 
@@ -46,7 +50,9 @@ internal static class EventVectorSourceMutationValidation
         var mutation = NativeSerialization.Deserialize<EventVectorSourceMutation>(phase.OriginalNativeBody.Span);
         RequireExact(phase, mutation);
         if (EventVectorSourcePhaseIds.For(phase, admission) != phase.PhaseCommandId)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidPhase); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidPhase);
+        }
         return mutation;
     }
 
@@ -68,6 +74,8 @@ internal static class EventVectorSourceMutationValidation
             || mutation.LogicalPlacementRevision != phase.SourceLogicalPlacementRevision
             || mutation.DirectoryFence != phase.SourceDirectoryFence || mutation.Nonce != phase.Nonce
             || mutation.FirstExpiresAt != phase.FirstExpiresAt)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidPhase); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidPhase);
+        }
     }
 }

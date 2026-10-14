@@ -9,13 +9,19 @@ public sealed partial class DatabaseEngine
     private CommandRequest? RequireControlledCommandBody(ReplicatedOperation original, PartitionRef partition)
     {
         if (original.Kind == OperationKind.Batch)
-        { return RequireControlledDocumentBatch(original, partition); }
+        {
+            return RequireControlledDocumentBatch(original, partition);
+        }
         if (!BlobStorageOperations.Handles(original.Kind))
-        { throw Errors.Fail(ErrorCode.UnsupportedCapability, UnsupportedOperationMessage); }
+        {
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, UnsupportedOperationMessage);
+        }
         var scope = BlobCommandScope.From(original);
         BlobKeys.Validate(scope.Blob);
         if (scope.CommandId != original.Id || scope.Blob.Partition != partition || scope.UploadId == Guid.Empty)
-        { throw Errors.Fail(ErrorCode.Validation, PartitionMoveProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, PartitionMoveProtocol.Invalid);
+        }
         return null;
     }
 
@@ -24,7 +30,10 @@ public sealed partial class DatabaseEngine
     {
         var command = RequireControlledCommandBody(original, partition);
         if (command is not null)
-        { RequireControlledDocumentPolicies(principal, command, resources); return; }
+        {
+            RequireControlledDocumentPolicies(principal, command, resources);
+            return;
+        }
         _ = RequireControlledBlobPolicies(principal, original, resources);
     }
 }

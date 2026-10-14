@@ -19,7 +19,9 @@ internal static class McpUnauthorizedProbe
         using var http = McpCallerHttp.Create(fixture, node);
         using var request = new HttpRequestMessage(HttpMethod.Get, McpCallerProtocol.Endpoint);
         if (key is not null)
-        { request.Headers.Authorization = new AuthenticationHeaderValue(McpCallerProtocol.BearerScheme, key); }
+        {
+            request.Headers.Authorization = new AuthenticationHeaderValue(McpCallerProtocol.BearerScheme, key);
+        }
         using var response = await http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
         await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.Unauthorized);
         await Assert.That(response.Headers.Contains(McpCallerProtocol.RequestHeader)).IsFalse();
@@ -28,6 +30,8 @@ internal static class McpUnauthorizedProbe
         using var problem = JsonDocument.Parse(body);
         await McpCallerAssertions.VerifyProblemAsync(problem.RootElement, ErrorCode.Unauthenticated);
         if (key is not null)
-        { await Assert.That(Encoding.UTF8.GetString(body).Contains(key, StringComparison.Ordinal)).IsFalse(); }
+        {
+            await Assert.That(Encoding.UTF8.GetString(body).Contains(key, StringComparison.Ordinal)).IsFalse();
+        }
     }
 }

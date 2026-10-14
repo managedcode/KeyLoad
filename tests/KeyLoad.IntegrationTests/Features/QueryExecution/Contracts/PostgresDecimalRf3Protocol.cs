@@ -30,7 +30,10 @@ internal static class PostgresDecimalRf3Protocol
         [decimal.MinValue, -PostgresDecimalRf3Protocol.BetweenScores, decimal.Zero, decimal.One, PostgresDecimalRf3Protocol.BetweenScores, 2m, decimal.MaxValue, 0.0000000000000000000000000001m,
          1.0000000000000000000000000001m, 2.000000000000000000000000001m];
     internal static Dictionary<string, JsonElement> Parameters(decimal value)
-        => new() { [Parameter] = JsonSerializer.SerializeToElement(value, JsonDefaults.Options) };
+        => new()
+        {
+            [Parameter] = JsonSerializer.SerializeToElement(value, JsonDefaults.Options)
+        };
     internal static SqlOperationRequest Operation(decimal value)
         => new(PostgresRf3State.Partition, Sql, Parameters(value), AllowFullScan: true);
     internal static AstQueryRequest Ast(decimal value)

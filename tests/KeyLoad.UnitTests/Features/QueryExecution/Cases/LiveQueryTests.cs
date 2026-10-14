@@ -82,7 +82,11 @@ internal sealed class LiveQueryTests
             LiveQueryPermutationOracle.Apply(rows, replay);
             cursor = page.Cursor;
             while (page.HasMore)
-            { page = engine.ReadLiveQuery("root", new(query, cursor, Limit: 3)); LiveQueryPermutationOracle.Apply(rows, page); cursor = page.Cursor; }
+            {
+                page = engine.ReadLiveQuery("root", new(query, cursor, Limit: 3));
+                LiveQueryPermutationOracle.Apply(rows, page);
+                cursor = page.Cursor;
+            }
             previousSequence = page.ThroughSequence;
             await LiveQueryPermutationOracle.SameAsync(engine.ExecuteAst("root", query).Rows, rows.Values);
             await literal.MaterializedAsync(rows.Values);
@@ -111,7 +115,11 @@ internal sealed class LiveQueryTests
         var cursor = snapshot.Cursor;
         LiveQueryPage page;
         do
-        { page = engine.ReadLiveQuery("root", new(query, cursor, Limit: 4)); LiveQueryPermutationOracle.Apply(rows, page); cursor = page.Cursor; } while (page.HasMore);
+        {
+            page = engine.ReadLiveQuery("root", new(query, cursor, Limit: 4));
+            LiveQueryPermutationOracle.Apply(rows, page);
+            cursor = page.Cursor;
+        } while (page.HasMore);
         await Assert.That(rows.Count).IsEqualTo(60);
         await LiveQueryPermutationOracle.SameAsync(engine.ExecuteAst("root", query).Rows, rows.Values);
     }
@@ -131,7 +139,11 @@ internal sealed class LiveQueryTests
         await Assert.That(row.Redacted).IsTrue();
         await Assert.That(row.Json).DoesNotContain("open");
         await Assert.That(row.Json).DoesNotContain("status");
-        var other = reader with { Id = "ordinary", FieldGrants = [] };
+        var other = reader with
+        {
+            Id = "ordinary",
+            FieldGrants = []
+        };
         db.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(other)).Get<PrincipalRecord>();
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.StartLiveQuery("ordinary", new(query))).Code).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.ReadLiveQuery("ordinary", new(query, snapshot.Cursor))).Code).IsEqualTo(ErrorCode.PermissionDenied);
@@ -142,7 +154,10 @@ internal sealed class LiveQueryTests
         using var db = new TestDatabase();
         db.Configure("orders", ResourceKind.Collection);
         var reader = new PrincipalRecord("reader", "tenant", [new("database", "orders", Capability.Query | Capability.DocumentsRead | Capability.ChangesRead)], [])
-        { RestrictRows = true, OwnerId = "alice" };
+        {
+            RestrictRows = true,
+            OwnerId = "alice"
+        };
         db.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(reader)).Get<PrincipalRecord>();
         db.Commit(new PutDocument("orders", "a", "{\"status\":\"open\"}", Access: new("alice")));
         var query = Query(db);
@@ -152,7 +167,10 @@ internal sealed class LiveQueryTests
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.ReadLiveQuery("reader", new(query, snapshot.Cursor))).Code).IsEqualTo(ErrorCode.TokenInvalidated);
         var fresh = engine.StartLiveQuery("reader", new(query));
         await Assert.That(fresh.Rows).IsEmpty();
-        db.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(reader with { PolicyEpoch = 2 })).Get<PrincipalRecord>();
+        db.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(reader with
+        {
+            PolicyEpoch = 2
+        })).Get<PrincipalRecord>();
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.ReadLiveQuery("reader", new(query, fresh.Cursor))).Code).IsEqualTo(ErrorCode.TokenInvalidated);
         await global::KeyLoad.UnitTests.Features.Authorization.LivePolicyEpochContinuation.RunAsync(db, query,
             snapshot.Cursor, fresh.Cursor, reader);
@@ -168,7 +186,13 @@ internal sealed class LiveQueryTests
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.StartLiveQuery("root", new(query with { Query = query.Query with { Limit = 1 } }))).Code).IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.StartLiveQuery("root", new(query with { Query = query.Query with { Order = [new("/number", false)] } }))).Code).IsEqualTo(ErrorCode.UnsupportedCapability);
         var snapshot = engine.StartLiveQuery("root", new(query));
-        var other = query with { Query = query.Query with { Filter = null } };
+        var other = query with
+        {
+            Query = query.Query with
+            {
+                Filter = null
+            }
+        };
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.ReadLiveQuery("root", new(other, snapshot.Cursor))).Code).IsEqualTo(ErrorCode.TokenInvalidated);
     }
     [Test]

@@ -89,10 +89,16 @@ internal sealed class NativeTextProjectionBoundsTests
         var bytes = await File.ReadAllBytesAsync(path, TestContext.Current!.Execution.CancellationToken);
         var manifest = NativeTextEnvelopeCodec.Decode<NativeTextManifest>(bytes);
         var exact = NativeTextFiles.ReadManifest(path, manifest.Scope,
-            new() { MaxQueryReadBytes = bytes.LongLength }, UnitNativeTextOptions.Execution());
+            new()
+            {
+                MaxQueryReadBytes = bytes.LongLength
+            }, UnitNativeTextOptions.Execution());
         var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
             NativeTextFiles.ReadManifest(path, manifest.Scope,
-                new() { MaxQueryReadBytes = bytes.LongLength - 1 }, UnitNativeTextOptions.Execution()));
+                new()
+                {
+                    MaxQueryReadBytes = bytes.LongLength - 1
+                }, UnitNativeTextOptions.Execution()));
 
         await Assert.That(exact.Records.Length).IsEqualTo(1);
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
@@ -136,11 +142,17 @@ internal sealed class NativeTextProjectionBoundsTests
             new NativeTextRecord((ulong)index + 1, document.Reference, document.Revision))).Sum();
         using (var exactProjection = new NativeTextProjection(Path.Combine(database.Directory, "exact-native-text"), UnitExecutionOptions.DatabaseLimits(database.Database.Limits), database.Store.Identity.NodeId, UnitNativeTextOptions.Execution()))
         {
-            using var exactLease = exactProjection.Acquire(scope, new(UnitExecutionOptions.DatabaseLimits(new() { MaxQueryReadBytes = exactBytes })));
+            using var exactLease = exactProjection.Acquire(scope, new(UnitExecutionOptions.DatabaseLimits(new()
+            {
+                MaxQueryReadBytes = exactBytes
+            })));
             BeginAllRecords(exactLease, documents);
         }
         using var boundedProjection = new NativeTextProjection(Path.Combine(database.Directory, "bounded-native-text"), UnitExecutionOptions.DatabaseLimits(database.Database.Limits), database.Store.Identity.NodeId, UnitNativeTextOptions.Execution());
-        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new() { MaxQueryReadBytes = exactBytes - 1 }));
+        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new()
+        {
+            MaxQueryReadBytes = exactBytes - 1
+        }));
         using var boundedLease = boundedProjection.Acquire(scope, budget);
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => BeginAllRecords(boundedLease, documents));
 
@@ -199,7 +211,10 @@ internal sealed class NativeTextProjectionBoundsTests
     private static void VerifyPostingWork(NativeTextProjection projection, TextProjectionScope scope,
         DocumentRecord[] documents, long maximumBytes)
     {
-        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new() { MaxQueryReadBytes = maximumBytes }));
+        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new()
+        {
+            MaxQueryReadBytes = maximumBytes
+        }));
         using var lease = projection.Acquire(scope, budget);
         foreach (var document in documents)
         {

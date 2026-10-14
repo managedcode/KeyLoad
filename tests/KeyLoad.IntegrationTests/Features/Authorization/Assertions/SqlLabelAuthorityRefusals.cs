@@ -66,9 +66,14 @@ internal static class SqlLabelAuthorityRefusals
     {
         var refused = false;
         try
-        { await operation(); }
+        {
+            await operation();
+        }
         catch (HttpRequestException original) when (original.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-        { refused = true; await SafeAsync(original.Message, key); }
+        {
+            refused = true;
+            await SafeAsync(original.Message, key);
+        }
         await Assert.That(refused).IsTrue();
     }
 
@@ -76,6 +81,8 @@ internal static class SqlLabelAuthorityRefusals
     {
         foreach (var canary in new[] { key, GraphSearchRf3Scenario.Label, GraphSearchRf3Scenario.Alpha,
             GraphSearchRf3Scenario.Beta, GraphSearchRf3Scenario.Gamma, SqlGraphSearchRf3Scenario.LabeledStatement })
-        { await Assert.That(actual.Contains(canary, StringComparison.Ordinal)).IsFalse(); }
+        {
+            await Assert.That(actual.Contains(canary, StringComparison.Ordinal)).IsFalse();
+        }
     }
 }

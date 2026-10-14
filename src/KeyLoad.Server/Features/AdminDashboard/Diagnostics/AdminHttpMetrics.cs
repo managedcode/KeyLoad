@@ -33,14 +33,21 @@ internal sealed class AdminHttpMetrics
             completed++;
             milliseconds += elapsed.TotalMilliseconds;
             if (failure is { } detail)
-            { Retain(detail, elapsed); }
+            {
+                Retain(detail, elapsed);
+            }
         }
     }
 
     internal AdminHttpSnapshot Snapshot()
     {
         lock (gate)
-        { return new(startedAt, processInstance, completed, failed, milliseconds) { RecentFailures = NewestFirst() }; }
+        {
+            return new(startedAt, processInstance, completed, failed, milliseconds)
+            {
+                RecentFailures = NewestFirst()
+            };
+        }
     }
 
     private void Retain(AdminHttpFailureDetail detail, TimeSpan elapsed)
@@ -60,7 +67,9 @@ internal sealed class AdminHttpMetrics
 
         var builder = ImmutableArray.CreateBuilder<AdminHttpFailure>(retainedFailures);
         for (var age = AgeInitialValue; age <= retainedFailures; age++)
-        { builder.Add(failures[(nextFailure - age + failures.Length) % failures.Length]); }
+        {
+            builder.Add(failures[(nextFailure - age + failures.Length) % failures.Length]);
+        }
         return builder.MoveToImmutable();
     }
 }

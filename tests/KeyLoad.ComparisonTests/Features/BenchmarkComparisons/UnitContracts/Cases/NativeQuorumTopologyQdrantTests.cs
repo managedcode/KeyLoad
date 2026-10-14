@@ -86,7 +86,9 @@ internal sealed class NativeQuorumTopologyQdrantTests
     {
         using var root = JsonDocument.Parse(new JsonObject { [T.Version] = T.NativeVersion }.ToJsonString());
         using var cluster = JsonDocument.Parse(new JsonObject
-        { [T.Result] = new JsonObject { [T.Status] = T.Disabled } }.ToJsonString());
+        {
+            [T.Result] = new JsonObject { [T.Status] = T.Disabled }
+        }.ToJsonString());
         var collection = NativeQuorumTopologyResponses.Collection(1);
         using var seeded = JsonDocument.Parse(collection.ToJsonString());
         var proof = QdrantNodeProof.ReadDisabled(root.RootElement, cluster.RootElement, seeded.RootElement, T.PointsCount);

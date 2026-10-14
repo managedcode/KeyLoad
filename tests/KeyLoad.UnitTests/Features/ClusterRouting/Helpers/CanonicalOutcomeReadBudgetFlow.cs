@@ -35,7 +35,9 @@ internal static class CanonicalOutcomeReadBudgetFlow
             examined++;
             observedBytes = checked(observedBytes + actual);
             if (records ? examined > RefusedReads : observedBytes > bytes - OneByte)
-            { throw Errors.Fail(ErrorCode.ResourceExhausted, Budget); }
+            {
+                throw Errors.Fail(ErrorCode.ResourceExhausted, Budget);
+            }
         }
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => store.Read(view => Select(view, fixture, scope, Refuse)));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.ResourceExhausted);
@@ -50,7 +52,10 @@ internal static class CanonicalOutcomeReadBudgetFlow
         examined = 0;
         observedBytes = 0;
         var healthy = store.Read(view => Select(view, fixture, scope, actual =>
-        { examined++; observedBytes = checked(observedBytes + actual); }));
+        {
+            examined++;
+            observedBytes = checked(observedBytes + actual);
+        }));
         await Assert.That(examined).IsEqualTo(CompleteReads);
         await Assert.That(observedBytes).IsEqualTo(bytes);
         await CanonicalOutcomeReadBudgetAssertions.OriginalAsync(original, healthy, fixture);
@@ -73,7 +78,9 @@ internal static class CanonicalOutcomeReadBudgetFlow
         for (var cut = 0; cut < ColdCuts; cut++)
         {
             using var reopened = ZoneTreeExistingStore.Open(new ZoneTreeStoreOptions(fixture.DirectoryPath)
-            { Incarnation = identity.Incarnation }, identity.NodeId, UnitExecutionOptions.StorageExecution());
+            {
+                Incarnation = identity.Incarnation
+            }, identity.NodeId, UnitExecutionOptions.StorageExecution());
             await CanonicalOutcomeReadBudgetAssertions.IdentityAsync(identity, reopened.Identity);
             await CanonicalOutcomeReadBudgetAssertions.ImageAsync(reopened, image);
             await CanonicalOutcomeReadBudgetAssertions.OriginalAsync(original,

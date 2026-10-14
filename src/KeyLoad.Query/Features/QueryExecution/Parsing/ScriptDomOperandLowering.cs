@@ -11,7 +11,9 @@ internal static class ScriptDomOperandLowering
     {
         context.Check(depth);
         if (expression is Dom.PrimaryExpression { Collation: not null })
-        { throw ScriptDomErrors.Unsupported(); }
+        {
+            throw ScriptDomErrors.Unsupported();
+        }
         return expression switch
         {
             Dom.ColumnReferenceExpression column => Field(column, alias, rightAlias, context.UseDocumentMetadata),
@@ -29,7 +31,9 @@ internal static class ScriptDomOperandLowering
     private static ValueOperand Number(string text)
     {
         if (!decimal.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out var value))
-        { throw ScriptDomErrors.Invalid(); }
+        {
+            throw ScriptDomErrors.Invalid();
+        }
         return ValueOperand.Create(value);
     }
     private static ValueOperand Unary(Dom.UnaryExpression expression, ScriptDomLoweringContext context, int depth)
@@ -38,14 +42,18 @@ internal static class ScriptDomOperandLowering
         if (expression.Expression is not (Dom.IntegerLiteral or Dom.NumericLiteral or Dom.RealLiteral)
             || expression.Expression is not Dom.Literal literal
             || expression.UnaryExpressionType is not (Dom.UnaryExpressionType.Positive or Dom.UnaryExpressionType.Negative))
-        { throw ScriptDomErrors.Unsupported(); }
+        {
+            throw ScriptDomErrors.Unsupported();
+        }
         return Number((expression.UnaryExpressionType == Dom.UnaryExpressionType.Negative ? NegativePrefix : PositivePrefix) + literal.Value);
     }
     private static FieldOperand Field(Dom.ColumnReferenceExpression column, string? alias, string? rightAlias, bool documentMetadata)
     {
         var parts = ScriptDomNames.Column(column);
         if (rightAlias is not null && parts.Count > SingleElement && parts[FirstIndex] == rightAlias)
-        { throw ScriptDomErrors.Unsupported(); }
+        {
+            throw ScriptDomErrors.Unsupported();
+        }
         return new FieldOperand(ScriptDomNames.Path(parts, alias, documentMetadata));
     }
 

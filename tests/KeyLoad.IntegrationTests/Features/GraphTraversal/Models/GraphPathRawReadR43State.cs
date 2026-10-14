@@ -7,7 +7,10 @@ internal sealed class GraphPathRawReadR43State(GraphPathRf3Seed seed)
 {
     internal GraphPathRf3Seed Seed { get; } = seed;
     internal McpPersistedIdentity Identity { get; set; } = seed.Reader;
-    internal bool Allowed { get; set; }
+    internal bool Allowed
+    {
+        get; set;
+    }
     internal EntityRef Source => Ref(GraphPathRf3Scenario.CollectionA, "r43-raw-s");
     internal EntityRef Middle => Ref(GraphPathRf3Scenario.CollectionA, "r43-raw-m");
     internal EntityRef Target => Ref(GraphPathRf3Scenario.CollectionB, "r43-raw-t");

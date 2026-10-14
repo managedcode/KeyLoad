@@ -19,7 +19,10 @@ internal static class SqlLeftFilteredJoinCold
         for (var cut = 0; cut < ColdCuts; cut++)
         {
             using var reopened = ZoneTreeExistingStore.Open(
-                new(database.Directory) { Incarnation = identity.Incarnation }, identity.NodeId, database.StorageExecution);
+                new(database.Directory)
+                {
+                    Incarnation = identity.Incarnation
+                }, identity.NodeId, database.StorageExecution);
             var owner = database.CreateConfiguredDatabase(reopened);
             await Assert.That(reopened.Identity.NodeId).IsEqualTo(identity.NodeId);
             await Assert.That(reopened.Identity.Incarnation).IsEqualTo(identity.Incarnation);

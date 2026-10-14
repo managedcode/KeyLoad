@@ -16,12 +16,18 @@ internal sealed class GraphSearchBudgetTests
         var partition = new PartitionRef(Tenant, DatabaseId, Domain, PartitionKey);
         var request = BuildRequest(partition);
         var exactBytes = JsonDefaults.Serialize(request).Length;
-        using var exact = new TestDatabase(new() { MaxQueryBytes = exactBytes });
+        using var exact = new TestDatabase(new()
+        {
+            MaxQueryBytes = exactBytes
+        });
         GraphSearchTestSupport.Configure(exact);
         GraphSearchTestSupport.AddPath(exact);
         var accepted = await new SearchEngine(exact.Database, UnitExecutionOptions.QueryExecution()).GraphSearchAsync("root", request, Token());
 
-        using var excess = new TestDatabase(new() { MaxQueryBytes = exactBytes - 1 });
+        using var excess = new TestDatabase(new()
+        {
+            MaxQueryBytes = exactBytes - 1
+        });
         GraphSearchTestSupport.Configure(excess);
         GraphSearchTestSupport.AddPath(excess);
         var failure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
@@ -43,7 +49,10 @@ internal sealed class GraphSearchBudgetTests
         var root = GraphSearchTestSupport.Vertex(database, GraphSearchTestSupport.Projects, GraphSearchTestSupport.Root);
         var limited = new GraphSearchRequest(1,
             new(database.Partition, GraphSearchTestSupport.Documents),
-            Retriever: new(GraphSearchTestSupport.Walk(root) with { MaxEdges = 1 }));
+            Retriever: new(GraphSearchTestSupport.Walk(root) with
+            {
+                MaxEdges = 1
+            }));
         var failure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
             engine.GraphSearchAsync("root", limited, Token())))!;
         using var canceled = new CancellationTokenSource();

@@ -60,7 +60,9 @@ internal static class NativeTextBm25EligibilityPages
                     return NativeTextCapturedReadFactory.Capture(owner.Database, projection, view, principal, resource, request, work);
                 });
             if (expectedHead is { } admitted)
-            { await Assert.That(current is not null).IsEqualTo(admitted); }
+            {
+                await Assert.That(current is not null).IsEqualTo(admitted);
+            }
             var ranker = new TextRanker(request.Text!, request.TextField!, work, execution.TextBudgetCheckInterval,
                 execution.MaximumDocumentWords, execution.MaximumWordCharacters);
             result = SearchCapturedExecution.Complete(owner.Database, new(captured, ranker, null), request,

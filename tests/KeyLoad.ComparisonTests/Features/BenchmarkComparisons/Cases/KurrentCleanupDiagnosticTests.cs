@@ -18,9 +18,21 @@ internal sealed class KurrentCleanupDiagnosticTests
         var complete = new KurrentCleanupCounts(55_378, 55_378, 55_378, 0, 0, 16);
         await Assert.That(complete.IsValid).IsTrue();
         await Assert.That(complete.IsComplete).IsTrue();
-        await Assert.That((complete with { Acknowledged = 55_377, Pending = 1 }).IsComplete).IsFalse();
-        await Assert.That((complete with { Acknowledged = 55_377, Faulted = 1 }).IsComplete).IsFalse();
-        await Assert.That((complete with { Submitted = 55_377, Acknowledged = 55_377 }).IsComplete).IsFalse();
+        await Assert.That((complete with
+        {
+            Acknowledged = 55_377,
+            Pending = 1
+        }).IsComplete).IsFalse();
+        await Assert.That((complete with
+        {
+            Acknowledged = 55_377,
+            Faulted = 1
+        }).IsComplete).IsFalse();
+        await Assert.That((complete with
+        {
+            Submitted = 55_377,
+            Acknowledged = 55_377
+        }).IsComplete).IsFalse();
     }
 
     [Test]
@@ -75,7 +87,11 @@ internal sealed class KurrentCleanupDiagnosticTests
     public async Task CancellationAndUnknownAcknowledgementRemainFailureFacts()
     {
         var classified = diagnostics.Classify(new OperationCanceledException(Secret));
-        var diagnostic = Failure(classified.Reason, classified.GrpcStatus) with { CancellationRequested = true, DeadlineExpired = true };
+        var diagnostic = Failure(classified.Reason, classified.GrpcStatus) with
+        {
+            CancellationRequested = true,
+            DeadlineExpired = true
+        };
         using var document = JsonDocument.Parse(diagnostics.Project(diagnostic));
         await Assert.That(classified.Reason).IsEqualTo(KurrentCleanupFailureReason.Cancelled);
         await Assert.That(document.RootElement.GetProperty(nameof(KurrentCleanupDiagnostic.Outcome)).GetInt32()).IsEqualTo((int)KurrentCleanupOutcome.Failed);
@@ -145,7 +161,10 @@ internal sealed class KurrentCleanupDiagnosticTests
         ArgumentException? failure = null;
         try
         {
-            _ = diagnostics.Project(Failure(KurrentCleanupFailureReason.Unknown, null) with { SchemaVersion = version });
+            _ = diagnostics.Project(Failure(KurrentCleanupFailureReason.Unknown, null) with
+            {
+                SchemaVersion = version
+            });
         }
         catch (ArgumentException error)
         {

@@ -26,10 +26,14 @@ internal static class SubscriptionFilterWindowFaults
             group.Source.Generation, group.GroupId, SubscriptionFilterProtocol.FirstGeneration, ExcessPosition);
         store.Commit((tx, _) => { tx.Put(wrong, row.Value.ToArray()); return true; });
         await SubscriptionFilterNativeAssertions.RefusedAsync(db, store, replacement with
-        { CommandId = Guid.NewGuid() }, ErrorCode.Corruption, token);
+        {
+            CommandId = Guid.NewGuid()
+        }, ErrorCode.Corruption, token);
         store.Commit((tx, _) => { tx.Put(excess, row.Value.ToArray()); return true; });
         await SubscriptionFilterNativeAssertions.RefusedAsync(db, store, replacement with
-        { CommandId = Guid.NewGuid() }, ErrorCode.Corruption, token);
+        {
+            CommandId = Guid.NewGuid()
+        }, ErrorCode.Corruption, token);
         store.Commit((tx, _) => { tx.Delete(wrong); tx.Delete(excess); return true; });
         await Assert.That(SubscriptionFilterNativeAssertions.Image(store, group.Source.Partition)).IsEquivalentTo(original, CollectionOrdering.Matching);
     }

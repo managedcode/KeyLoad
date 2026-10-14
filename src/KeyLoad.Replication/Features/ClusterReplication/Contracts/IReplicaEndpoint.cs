@@ -4,7 +4,10 @@ namespace KeyLoad.Replication;
 public interface IReplicaEndpoint
 {
     /// <summary>Completes when the local early-lifecycle transport can receive replica requests.</summary>
-    Task TransportReady { get; }
+    Task TransportReady
+    {
+        get;
+    }
 
     /// <summary>Attaches the local Orleans transport and starts node-owned replica maintenance.</summary>
     /// <param name="transport">Authenticated, scope-bound transport owned by the Orleans host.</param>

@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core.Features.Messaging;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.DocumentStorage;
 using Microsoft.Extensions.Options;
 
@@ -40,27 +40,37 @@ internal static class RemoteTransferPeerExchange
             var signature = nativeReply.Signature;
             if (payload.IsEmpty || payload.Length > call.MaximumReplyBytes
                 || signature is not { Length: RemoteDocumentProtocol.SignatureCharacters })
-            { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteTransferPeerProtocol.Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Unauthenticated, RemoteTransferPeerProtocol.Invalid);
+            }
             encoded = payload.ToArray();
             using var mac = RemoteDocumentMac.FromConfiguredSecret(options.PhysicalGroupTrust.ForeignPeerSecret);
             if (!mac.Verify(encoded, signature, reply: true))
-            { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteTransferPeerProtocol.Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Unauthenticated, RemoteTransferPeerProtocol.Invalid);
+            }
             var reply = NativeSerialization.Deserialize<RemoteDocumentReplyV1>(encoded);
             RemoteTransferPeerReplyValidation.Require(call, reply, options, membership, clock, token);
             await client.RequireCurrentReplyAsync(call.DestinationOwner, nativeReply,
                 reply.EndpointDiscovery.SiloAddress, token).ConfigureAwait(false);
             accepted = true;
             if (reply.Error is { } error)
-            { throw Errors.Fail(error, reply.SafeDetail ?? RemoteTransferPeerProtocol.Unavailable); }
+            {
+                throw Errors.Fail(error, reply.SafeDetail ?? RemoteTransferPeerProtocol.Unavailable);
+            }
             return reply.QueueTransfer ?? throw Errors.Fail(ErrorCode.Corruption, RemoteTransferPeerProtocol.Invalid);
         }
         catch (Exception error) when (!accepted && nativeReply.MayHaveEffects
-            && global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { throw Errors.Fail(ErrorCode.UnknownWriteOutcome, RemoteTransferPeerProtocol.Unavailable, error); }
+            && global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            throw Errors.Fail(ErrorCode.UnknownWriteOutcome, RemoteTransferPeerProtocol.Unavailable, error);
+        }
         finally
         {
             if (encoded is not null)
-            { System.Security.Cryptography.CryptographicOperations.ZeroMemory(encoded); }
+            {
+                System.Security.Cryptography.CryptographicOperations.ZeroMemory(encoded);
+            }
         }
     }
 }

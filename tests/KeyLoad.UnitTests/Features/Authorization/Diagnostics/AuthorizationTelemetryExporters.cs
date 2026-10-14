@@ -61,12 +61,16 @@ internal sealed class AuthorizationMetricExporter(IOptions<AuthorizationTelemetr
                 continue;
             }
             if (metric.Name is not (AuthorizationTelemetryTestProtocol.ServerDuration or AuthorizationTelemetryTestProtocol.ClientDuration))
-            { continue; }
+            {
+                continue;
+            }
             foreach (var point in metric.GetMetricPoints())
             {
                 var tags = new List<KeyValuePair<string, string?>>();
                 foreach (var tag in point.Tags)
-                { tags.Add(new(tag.Key, tag.Value?.ToString())); }
+                {
+                    tags.Add(new(tag.Key, tag.Value?.ToString()));
+                }
                 Bank.Add(new(metric.MeterName, metric.Name, point.GetHistogramCount(), point.GetHistogramSum(), [.. tags]));
             }
         }
@@ -78,7 +82,9 @@ internal sealed class AuthorizationMetricExporter(IOptions<AuthorizationTelemetr
         {
             var tags = new List<KeyValuePair<string, string?>>();
             foreach (var tag in point.Tags)
-            { tags.Add(new(tag.Key, tag.Value?.ToString())); }
+            {
+                tags.Add(new(tag.Key, tag.Value?.ToString()));
+            }
             Suppressed.Add(new(point.GetSumLong(), [.. tags]));
         }
     }

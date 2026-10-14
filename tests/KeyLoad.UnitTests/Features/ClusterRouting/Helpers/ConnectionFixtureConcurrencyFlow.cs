@@ -40,7 +40,9 @@ internal static class ConnectionFixtureConcurrencyFlow
             rightGate.Release.TrySetResult();
             var replies = await Task.WhenAll(leftCall, rightCall);
             foreach (var reply in replies)
-            { await Assert.That(reply.Error).IsNull(); }
+            {
+                await Assert.That(reply.Error).IsNull();
+            }
             await Task.WhenAll(left.Observation.Read(leftRequest).Disposed.Task,
                 right.Observation.Read(rightRequest).Disposed.Task).WaitAsync(token);
             await Assert.That(left.Stored(Document)!.Revision).IsEqualTo(FirstRevision);

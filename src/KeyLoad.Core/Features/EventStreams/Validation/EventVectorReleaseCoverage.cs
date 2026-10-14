@@ -15,15 +15,21 @@ internal static class EventVectorReleaseCoverage
         var proof = EventVectorCoverageProofValidation.Read(originalProofRow, map, admission);
         if (proof.CoverageGeneration != map.CoverageGeneration
             || !proof.OriginalSemanticDigest.Span.SequenceEqual(map.SourceManifestDigest.Span))
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidCoverage); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidCoverage);
+        }
         var captured = EventVectorEntryEncoding.Decode(proof.OriginalEncodedEntries, proof.EntryChecksum, admission);
         if (currentEntries.IsDefault || captured.Length != currentEntries.Length)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidCoverage); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidCoverage);
+        }
         for (var ordinal = FirstOrdinal; ordinal < captured.Length; ordinal++)
         {
             if (captured[ordinal] is null || currentEntries[ordinal] is null
                 || captured[ordinal].Source != currentEntries[ordinal].Source)
-            { throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidCoverage); }
+            {
+                throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidCoverage);
+            }
         }
     }
 }

@@ -1,7 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Messaging;
-using KeyLoad.Orleans;
 using KeyLoad.UnitTests.Features.ClusterRouting;
 using Microsoft.Extensions.Options;
 using Orleans.TestingHost;
@@ -42,21 +42,39 @@ internal sealed class NativeSagaTimeoutFixture : IAsyncInitializer, IAsyncDispos
         runtime = new NativeSagaTimeoutRuntimeLifecycle(this);
     }
 
-    internal TestDatabase Database { get; }
+    internal TestDatabase Database
+    {
+        get;
+    }
     internal TestCluster Cluster => runtime.Cluster;
-    internal GrainRequestCodec Codec { get => field ?? throw NotInitialized(nameof(Codec)); private set; }
-    internal ICommitCoordinator Coordinator { get => field ?? throw NotInitialized(nameof(Coordinator)); private set; }
+    internal GrainRequestCodec Codec
+    {
+        get => field ?? throw NotInitialized(nameof(Codec)); private set;
+    }
+    internal ICommitCoordinator Coordinator
+    {
+        get => field ?? throw NotInitialized(nameof(Coordinator)); private set;
+    }
     internal NativeRequestWorkOwner RequestWork => runtime.RequestWork;
-    internal NativeSagaTimeoutJobHarness JobHarness { get => field ?? throw NotInitialized(nameof(JobHarness)); private set; }
+    internal NativeSagaTimeoutJobHarness JobHarness
+    {
+        get => field ?? throw NotInitialized(nameof(JobHarness)); private set;
+    }
     internal IServiceProvider SiloServices => Cluster.GetSiloServiceProvider();
     internal IOptions<GrainRoutingOptions> Routing { get; } = UnitRoutingOptions.Routing();
     internal IOptions<RuntimeJournalOptions> JournalOptions { get; } = Options.Create(new RuntimeJournalOptions());
-    internal IOptions<NativeDurableJobOptions> DurableJobOptions { get; }
+    internal IOptions<NativeDurableJobOptions> DurableJobOptions
+    {
+        get;
+    }
     internal IOptions<DueCoordinationOptions> DueOptions { get; } = Options.Create(new DueCoordinationOptions());
     internal NativeRuntimeTestOptions TestProfile => profile.Value;
 
     [AllowNull]
-    internal static NativeSagaTimeoutFixture Current { get => field ?? throw new InvalidOperationException("The native saga timeout fixture is not active."); private set; }
+    internal static NativeSagaTimeoutFixture Current
+    {
+        get => field ?? throw new InvalidOperationException("The native saga timeout fixture is not active."); private set;
+    }
 
     public async Task InitializeAsync()
     {

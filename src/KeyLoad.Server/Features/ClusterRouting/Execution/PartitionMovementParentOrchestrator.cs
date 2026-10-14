@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Orleans;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
@@ -46,7 +46,9 @@ internal sealed class PartitionMovementParentOrchestrator
         if (state.Header is null)
         {
             if (request.Mode != PartitionMoveMode.Transfer)
-            { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
+            {
+                throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+            }
             var first = PartitionMovementParentNativePhases.Prepare(principalId, request, state);
             state = await steps.LocalAsync(principalId, request, state,
                 PartitionMovementParentPhaseRole.Prepare, first, work, cancellationToken).ConfigureAwait(false);
@@ -57,9 +59,13 @@ internal sealed class PartitionMovementParentOrchestrator
             cancellationToken.ThrowIfCancellationRequested();
             var header = PartitionMovementParentAuthority.RequireHeader(principalId, request, state);
             if (PartitionMovementParentAuthority.RequireTerminal(state) is { } terminal)
-            { return terminal; }
+            {
+                return terminal;
+            }
             if (state.Control is { } actualControl)
-            { await progress(actualControl.Phase).ConfigureAwait(false); }
+            {
+                await progress(actualControl.Phase).ConfigureAwait(false);
+            }
             if (request.Mode == PartitionMoveMode.Abort)
             {
                 state = await abort.AbortNextAsync(principalId, request, state, work,

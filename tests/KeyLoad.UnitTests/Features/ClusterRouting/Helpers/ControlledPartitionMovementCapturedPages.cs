@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
@@ -39,7 +39,9 @@ internal static class ControlledPartitionMovementCapturedPages
             await Assert.That(family.PageCount).IsEqualTo(selected.Length);
             if (family.Family is PartitionRecordFamilies.OutcomeV2 or PartitionRecordFamilies.OutcomeLocator
                 or PartitionRecordFamilies.OutcomeLocatorV2)
-            { await Assert.That(selected.Length).IsEqualTo(NoPages); }
+            {
+                await Assert.That(selected.Length).IsEqualTo(NoPages);
+            }
             else
             {
                 var actual = selected.SelectMany(page => page.Records).Select(record =>

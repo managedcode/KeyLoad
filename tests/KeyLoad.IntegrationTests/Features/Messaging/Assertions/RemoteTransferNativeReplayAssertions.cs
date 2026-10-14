@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core.Features.Messaging;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.Server.Features.DocumentStorage;
 
@@ -16,7 +16,9 @@ internal static class RemoteTransferNativeReplayAssertions
         // Use the frozen owner codec for strict required fields, original bytes and complete8192 bound.
         _ = RequestCqrsNativeReplayInventory.ReadWitness(RequestCqrsNativeReplayInventory.WriteWitness(witness));
         if (witness.ReplayMode != mode || witness.Ordinal != ordinal || witness.CommandId != accept.CommandId)
-        { throw Missing(); }
+        {
+            throw Missing();
+        }
         var original = RequestCqrsNativeReplayInventory.Original(witness);
         var request = RequestCqrsNativeReplayInventory.Request(witness);
         var reply = RequestCqrsNativeReplayInventory.Reply(witness);
@@ -33,18 +35,26 @@ internal static class RemoteTransferNativeReplayAssertions
         using var receiver = RemoteDocumentMac.FromConfiguredSecret(destinationSecret);
         await Assert.That(receiver.VerifyNativeReply(reply)).IsTrue();
         if (reply.Nonce != request.Nonce)
-        { throw Missing(); }
+        {
+            throw Missing();
+        }
         if (mode != RemoteModelNativeReplayVariation.Original2 || ordinal == 2)
-        { RequireRefusal(request, reply, receiver); }
+        {
+            RequireRefusal(request, reply, receiver);
+        }
         else if (reply.Error is not null || reply.SafeDetail is not null || reply.Payload.IsEmpty
             || !receiver.Verify(reply.Payload.Span, reply.Signature, reply: true))
-        { throw Missing(); }
+        {
+            throw Missing();
+        }
         if (reply.Error is null)
         {
             var inner = NativeSerialization.Deserialize<RemoteDocumentReplyV1>(reply.Payload.Span);
             var signedTarget = destination.Single(value => value.VoterId == request.DestinationVoter);
             if (!Exact(inner.EndpointDiscovery, signedTarget))
-            { throw Missing(); }
+            {
+                throw Missing();
+            }
         }
         token.ThrowIfCancellationRequested();
         return (original, request, reply);
@@ -61,9 +71,13 @@ internal static class RemoteTransferNativeReplayAssertions
             || call.CallerVoter != original.CallerVoter || call.CallerSiloAddress != original.CallerSiloAddress
             || call.ExpiresAt != original.ExpiresAt || call.ExpiresAt.Offset != TimeSpan.Zero
             || !Guid.TryParseExact(call.Nonce, "N", out var nonce) || nonce == Guid.Empty || nonce.ToString("N") != call.Nonce)
-        { throw Missing(); }
+        {
+            throw Missing();
+        }
         if (!Exact(call.SourceOwner.Owner, original.SourceOwner) || !Exact(call.DestinationOwner.Owner, original.DestinationOwner))
-        { throw Missing(); }
+        {
+            throw Missing();
+        }
     }
 
     private static void RequireRefusal(RemoteModelNativeRequest request, RemoteModelNativeReply reply, RemoteDocumentMac mac)
@@ -72,11 +86,15 @@ internal static class RemoteTransferNativeReplayAssertions
         {
             if (reply.Error != ErrorCode.Unauthenticated || !reply.Payload.IsEmpty || reply.Signature is not { Length: 0 }
                 || reply.SafeDetail != RemoteModelNativeProtocol.Unavailable)
-            { throw Missing(); }
+            {
+                throw Missing();
+            }
             return;
         }
         if (reply.SafeDetail is not null || reply.Payload.IsEmpty || !mac.Verify(reply.Payload.Span, reply.Signature, reply: true))
-        { throw Missing(); }
+        {
+            throw Missing();
+        }
         var actual = NativeSerialization.Deserialize<RemoteDocumentReplyV1>(reply.Payload.Span);
         var call = NativeSerialization.Deserialize<RemoteDocumentTransportEnvelope>(request.Payload.Span).QueueTransfer;
         if (call is null || actual.RequestId != call.RequestId || actual.Nonce != call.Nonce
@@ -86,7 +104,9 @@ internal static class RemoteTransferNativeReplayAssertions
             || actual.EndpointDiscovery.SiloAddress != request.DestinationSiloAddress
             || actual.EndpointDiscovery.VoterId != request.DestinationVoter
             || actual.EndpointDiscovery.Incarnation != request.DestinationOwner.Incarnation)
-        { throw Missing(); }
+        {
+            throw Missing();
+        }
     }
 
     private static bool Exact<T>(T left, T right) => NativeSerialization.Serialize(left).AsSpan().SequenceEqual(NativeSerialization.Serialize(right));

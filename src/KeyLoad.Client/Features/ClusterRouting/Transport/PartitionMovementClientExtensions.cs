@@ -18,7 +18,9 @@ public static class PartitionMovementClientExtensions
         ArgumentNullException.ThrowIfNull(client);
         ArgumentNullException.ThrowIfNull(request);
         if (request.MoveId == Guid.Empty || request.Mode == PartitionMoveMode.None || !Enum.IsDefined(request.Mode))
-        { throw new ArgumentException(InvalidMove, nameof(request)); }
+        {
+            throw new ArgumentException(InvalidMove, nameof(request));
+        }
         return client.Send<PartitionMoveResult>(PartitionMovePublicProtocol.Route, request, true,
             request.MoveId, cancellationToken);
     }

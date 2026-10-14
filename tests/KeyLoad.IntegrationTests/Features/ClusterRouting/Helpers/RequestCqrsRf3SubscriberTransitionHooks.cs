@@ -13,6 +13,8 @@ internal sealed class RequestCqrsRf3SubscriberTransitionHooks(
         Action<RequestCqrsLifecycleStage>? failureObserver, RequestCqrsLifecycleStage stage)
     {
         if (operation is not null)
-        { RequestCqrsLifecycleFailureObserver.Observe(operation, failures, failureObserver, stage); }
+        {
+            RequestCqrsLifecycleFailureObserver.Observe(operation, failures, failureObserver, stage);
+        }
     }
 }

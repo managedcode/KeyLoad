@@ -9,10 +9,14 @@ internal static class ReplicaCheckpointPublication
     {
         ReplicaPersistence.ValidateSnapshot(snapshot, configuration);
         if (snapshot.Index < (state.Snapshot?.Index ?? BeforeFirstLogPosition))
-        { throw Errors.Fail(ErrorCode.Conflict, ReplicaProtocol.InvalidSnapshot); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, ReplicaProtocol.InvalidSnapshot);
+        }
         var retain = snapshot.Index <= state.LastIndex && termAt(snapshot.Index) == snapshot.Term;
         if (!retain && snapshot.Index <= state.CommittedIndex)
-        { throw Errors.Fail(ErrorCode.Conflict, ReplicaProtocol.InvalidSnapshot); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, ReplicaProtocol.InvalidSnapshot);
+        }
         return state with
         {
             Snapshot = snapshot,

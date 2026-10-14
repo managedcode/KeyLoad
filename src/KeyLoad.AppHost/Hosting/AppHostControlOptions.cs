@@ -7,25 +7,88 @@ namespace KeyLoad.AppHost.Hosting;
 [ConfigurationOptions]
 internal sealed class AppHostControlOptions
 {
-    internal TestSuiteSettings? Tests { get; set; }
-    internal RequestCqrsProbeProfileSettings? RequestProbe { get; set; }
-    internal RequestCqrsProbeProfileSettings? NativeDiscoveryOmission { get; set; }
-    internal RequestCqrsProbeProfileSettings? NativeBlobWireProbe { get; set; }
-    internal MovementFrameObservationProfileSettings? MovementFrameObservation { get; set; }
-    internal bool EventVectorReservedProbe { get; set; }
-    internal bool RemoteDocumentReads { get; set; }
-    internal bool RemotePartitionQueries { get; set; }
-    internal bool ProtectedDocumentMovement { get; set; }
-    internal bool TenantCapacityPlacement { get; set; }
-    internal int? MovementMaxBatchBytes { get; set; }
-    internal int? MovementMaxFrameBytes { get; set; }
-    internal bool TwoRf3 { get; set; }
-    internal bool ProtocolCohortEnabled { get; set; }
-    internal bool Ephemeral { get; set; }
-    internal bool BenchmarksEnabled { get; set; }
-    internal bool TargetSelected { get; set; }
-    internal bool ProtocolCohortConfigured { get; set; }
-    internal bool ComparisonSelectorsPresent { get; set; }
-    internal bool ScaleSelected { get; set; }
-    internal bool LoggerModelControl { get; set; }
+    internal TestSuiteSettings? Tests
+    {
+        get; set;
+    }
+    internal RequestCqrsProbeProfileSettings? RequestProbe
+    {
+        get; set;
+    }
+    internal RequestCqrsProbeProfileSettings? NativeDiscoveryOmission
+    {
+        get; set;
+    }
+    internal RequestCqrsProbeProfileSettings? NativeBlobWireProbe
+    {
+        get; set;
+    }
+    internal MovementFrameObservationProfileSettings? MovementFrameObservation
+    {
+        get; set;
+    }
+    internal bool EventVectorReservedProbe
+    {
+        get; set;
+    }
+    internal bool RemoteDocumentReads
+    {
+        get; set;
+    }
+    internal bool RemotePartitionQueries
+    {
+        get; set;
+    }
+    internal bool ProtectedDocumentMovement
+    {
+        get; set;
+    }
+    internal bool TenantCapacityPlacement
+    {
+        get; set;
+    }
+    internal int? MovementMaxBatchBytes
+    {
+        get; set;
+    }
+    internal int? MovementMaxFrameBytes
+    {
+        get; set;
+    }
+    internal bool TwoRf3
+    {
+        get; set;
+    }
+    internal bool ProtocolCohortEnabled
+    {
+        get; set;
+    }
+    internal bool Ephemeral
+    {
+        get; set;
+    }
+    internal bool BenchmarksEnabled
+    {
+        get; set;
+    }
+    internal bool TargetSelected
+    {
+        get; set;
+    }
+    internal bool ProtocolCohortConfigured
+    {
+        get; set;
+    }
+    internal bool ComparisonSelectorsPresent
+    {
+        get; set;
+    }
+    internal bool ScaleSelected
+    {
+        get; set;
+    }
+    internal bool LoggerModelControl
+    {
+        get; set;
+    }
 }

@@ -33,7 +33,9 @@ internal static class TenantCapacityPlacementRf3IntentCollisionRows
                 await Assert.That(Row(cut, intentKey)).IsNull();
                 await Assert.That(Row(cut, successKey)).IsNull();
                 if (original.CollisionId != Guid.Empty)
-                { await Assert.That(Row(cut, failureKey)).IsNull(); }
+                {
+                    await Assert.That(Row(cut, failureKey)).IsNull();
+                }
                 continue;
             }
             var intent = Row(cut, intentKey);
@@ -42,17 +44,26 @@ internal static class TenantCapacityPlacementRf3IntentCollisionRows
             await Assert.That(success).IsNotNull();
             var failure = original.CollisionId == Guid.Empty ? null : Row(cut, failureKey);
             if (original.CollisionId != Guid.Empty)
-            { await Assert.That(failure).IsNotNull(); }
+            {
+                await Assert.That(failure).IsNotNull();
+            }
             retained ??= new(intent!, success!, failure);
             await Assert.That(intent).IsEqualTo(retained.Intent);
             await Assert.That(success).IsEqualTo(retained.Success);
             if (retained.Failure is null && failure is not null)
-            { retained = retained with { Failure = failure }; }
+            {
+                retained = retained with
+                {
+                    Failure = failure
+                };
+            }
             await Assert.That(failure).IsEqualTo(retained.Failure);
             await SqlRf3Protocol.EqualAsync(original.Pending, Decode<PlacementIntentV1>(intent!));
             await TenantCapacityPlacementRf3IntentCollisionOutcome.RequireAsync(seed, capacity, Decode<StoredOutcome>(success!), false);
             if (failure is not null)
-            { await TenantCapacityPlacementRf3IntentCollisionOutcome.RequireAsync(seed, capacity, Decode<StoredOutcome>(failure), true); }
+            {
+                await TenantCapacityPlacementRf3IntentCollisionOutcome.RequireAsync(seed, capacity, Decode<StoredOutcome>(failure), true);
+            }
             await SqlRf3Protocol.EqualAsync(capacity.HealthyPolicy, Decode<TenantPlacementPolicyV1>(Row(cut, policyKey)!));
         }
         return retained ?? throw new InvalidOperationException(TenantPlacementPolicyProtocol.Malformed);

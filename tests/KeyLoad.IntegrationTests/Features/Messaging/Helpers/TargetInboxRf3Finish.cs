@@ -7,7 +7,12 @@ internal static class TargetInboxRf3Finish
     internal static async Task ExecuteAsync(KeyLoadClient client, McpOfficialClient mcp,
         TargetInboxRf3State state, CancellationToken token)
     {
-        var second = state.Original with { CommandId = Guid.NewGuid(), ExecutionGeneration = TargetInboxRf3Protocol.ReceiptCapacity, Effects = [] };
+        var second = state.Original with
+        {
+            CommandId = Guid.NewGuid(),
+            ExecutionGeneration = TargetInboxRf3Protocol.ReceiptCapacity,
+            Effects = []
+        };
         var result = await McpCallerAssertions.SdkSuccessAsync(await client.CommitInboxAsync(second, token));
         await Assert.That(result.AlreadyProcessed).IsFalse();
         var refused = second with
@@ -20,7 +25,10 @@ internal static class TargetInboxRf3Finish
         _ = await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(TargetInboxRf3Protocol.Tool, refused, token), ErrorCode.ResourceExhausted, true);
         await TargetInboxRf3Assertions.UnchangedAsync(client, state, token);
         await TargetInboxRf3Replay.ExecuteAsync(client, mcp, state, false, token);
-        var stale = state.SourceAck with { CommandId = Guid.NewGuid() };
+        var stale = state.SourceAck with
+        {
+            CommandId = Guid.NewGuid()
+        };
         await TargetInboxRf3Assertions.DeniedAsync(await client.CompleteAsync(stale, token), ErrorCode.StaleLease);
         _ = await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.MessagesComplete,
             stale, token), ErrorCode.StaleLease, true);

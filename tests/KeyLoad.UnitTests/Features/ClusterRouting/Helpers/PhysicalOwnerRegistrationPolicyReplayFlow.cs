@@ -135,7 +135,10 @@ internal static class PhysicalOwnerRegistrationPolicyReplayFlow
 
     private static PrincipalRecord Principal(bool allowed, long epoch)
         => new(PrincipalId, PhysicalOwnerDirectoryWholeFlow.TenantId, [], [])
-        { ClusterAdministrator = allowed, PolicyEpoch = epoch };
+        {
+            ClusterAdministrator = allowed,
+            PolicyEpoch = epoch
+        };
 
     private sealed record DeniedReceipt(ReplicatedOperation Operation, OperationResult Result, byte[] Outcome);
 }

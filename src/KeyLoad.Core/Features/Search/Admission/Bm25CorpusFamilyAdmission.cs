@@ -23,15 +23,21 @@ internal static class Bm25CorpusFamilyAdmission
                     records = checked(records + RetainedRecordIncrement);
                 }
                 if (bytes > limits.MaxBatchBytes || records > limits.MaxScanRecords)
-                { throw Errors.Fail(ErrorCode.BudgetExceeded, Bm25CorpusProtocol.Capacity); }
+                {
+                    throw Errors.Fail(ErrorCode.BudgetExceeded, Bm25CorpusProtocol.Capacity);
+                }
                 return true;
             }, observer: count =>
             {
                 examinedBytes = checked(examinedBytes + count);
                 if (examinedBytes > limits.MaxQueryReadBytes)
-                { throw Errors.Fail(ErrorCode.BudgetExceeded, Bm25CorpusProtocol.Capacity); }
+                {
+                    throw Errors.Fail(ErrorCode.BudgetExceeded, Bm25CorpusProtocol.Capacity);
+                }
             });
         if (scan.HasMore || bytes > limits.MaxBatchBytes || records > limits.MaxScanRecords)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, Bm25CorpusProtocol.Capacity); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, Bm25CorpusProtocol.Capacity);
+        }
     }
 }

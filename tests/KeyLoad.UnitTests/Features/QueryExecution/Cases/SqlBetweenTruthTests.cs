@@ -88,7 +88,13 @@ internal sealed class SqlBetweenTruthTests
             SqlBetweenTestData.Request(database, "SELECT * FROM orders WHERE id = 'object-number' AND number BETWEEN 1 AND 9")));
         var nonscalarParameter = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute(SqlBetweenTestData.Root,
             SqlBetweenTestData.Request(database, "SELECT * FROM orders WHERE number BETWEEN @lower AND 9",
-                new() { [SqlBetweenTestData.ParameterLow] = JsonSerializer.SerializeToElement(new { nested = 1 }) })));
+                new()
+                {
+                    [SqlBetweenTestData.ParameterLow] = JsonSerializer.SerializeToElement(new
+                    {
+                        nested = 1
+                    })
+                })));
 
         await Assert.That(missingParameter.Code).IsEqualTo(ErrorCode.Validation);
         await Assert.That(nonscalar.Code).IsEqualTo(ErrorCode.UnsupportedCapability);

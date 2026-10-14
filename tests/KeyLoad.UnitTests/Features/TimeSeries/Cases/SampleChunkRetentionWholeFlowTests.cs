@@ -48,7 +48,10 @@ internal sealed class SampleChunkRetentionWholeFlowTests
         var sample = new SampleData(FreshEventId, SampleChunkCanonicalFixture.Until, FreshSequence);
         fixture.Commit(new AppendSamples(SampleChunkCanonicalFixture.Set, SampleChunkCanonicalFixture.Series,
             [sample], SampleChunkCanonicalFixture.Tags));
-        var request = fixture.Request with { WindowId = freshId };
+        var request = fixture.Request with
+        {
+            WindowId = freshId
+        };
         var expected = new SampleChunkWindowResult(freshId, SampleChunkCanonicalFixture.Until,
             SampleChunkCanonicalFixture.Until.AddHours(WindowHours), OpenGeneration, NewWindowRevision,
             FreshSequence, SampleChunkCanonicalFixture.Until.UtcTicks,

@@ -16,29 +16,53 @@ internal static class ReplicaIsolationContainerAdmission
         string?[] capabilities, string name, ReplicaIsolationBuildPlan plan, ReplicaIsolationBuildTarget target)
     {
         if (value.GetProperty(State).GetString() != Running)
-        { return ReplicaIsolationAdmissionMismatch.NotRunning; }
+        {
+            return ReplicaIsolationAdmissionMismatch.NotRunning;
+        }
         if (value.GetProperty(Privileged).GetBoolean())
-        { return ReplicaIsolationAdmissionMismatch.Privileged; }
+        {
+            return ReplicaIsolationAdmissionMismatch.Privileged;
+        }
         if (!string.IsNullOrEmpty(Text(value, PidMode)))
-        { return ReplicaIsolationAdmissionMismatch.SharedPidNamespace; }
+        {
+            return ReplicaIsolationAdmissionMismatch.SharedPidNamespace;
+        }
         if (networks.Length != SingleNetwork)
-        { return ReplicaIsolationAdmissionMismatch.NetworkCount; }
+        {
+            return ReplicaIsolationAdmissionMismatch.NetworkCount;
+        }
         if (!IsAttachedNetwork(value.GetProperty(NetworkMode).GetString(), networks[FirstIndex]))
-        { return ReplicaIsolationAdmissionMismatch.NetworkMode; }
+        {
+            return ReplicaIsolationAdmissionMismatch.NetworkMode;
+        }
         if (capabilities.Length != SingleCapability)
-        { return ReplicaIsolationAdmissionMismatch.CapabilityCount; }
+        {
+            return ReplicaIsolationAdmissionMismatch.CapabilityCount;
+        }
         if (capabilities[FirstIndex] != NativeNetAdmin)
-        { return ReplicaIsolationAdmissionMismatch.Capability; }
+        {
+            return ReplicaIsolationAdmissionMismatch.Capability;
+        }
         if (Text(value, Name) != NamePrefix + name)
-        { return ReplicaIsolationAdmissionMismatch.ContainerName; }
+        {
+            return ReplicaIsolationAdmissionMismatch.ContainerName;
+        }
         if (Text(value, ConfigImage) != target.ImageReference)
-        { return ReplicaIsolationAdmissionMismatch.ConfiguredImage; }
+        {
+            return ReplicaIsolationAdmissionMismatch.ConfiguredImage;
+        }
         if (Text(value, User) != target.ServiceUser)
-        { return ReplicaIsolationAdmissionMismatch.RuntimeUser; }
+        {
+            return ReplicaIsolationAdmissionMismatch.RuntimeUser;
+        }
         if (Text(value, FaultSource) != plan.DockerfileSha256)
-        { return ReplicaIsolationAdmissionMismatch.BuildSource; }
+        {
+            return ReplicaIsolationAdmissionMismatch.BuildSource;
+        }
         if (Guid.ParseExact(Text(value, ReplicaIsolationNativeKeys.Incarnation), IncarnationFormat) != plan.Incarnation)
-        { return ReplicaIsolationAdmissionMismatch.Incarnation; }
+        {
+            return ReplicaIsolationAdmissionMismatch.Incarnation;
+        }
         return ReplicaIsolationAdmissionMismatch.None;
     }
 
@@ -47,7 +71,9 @@ internal static class ReplicaIsolationContainerAdmission
         if (string.IsNullOrEmpty(mode) || string.IsNullOrEmpty(network.Name)
             || !network.Value.TryGetProperty(NetworkId, out var identity)
             || identity.ValueKind != JsonValueKind.String)
-        { return false; }
+        {
+            return false;
+        }
         var id = identity.GetString();
         return !string.IsNullOrEmpty(id)
             && (string.Equals(mode, network.Name, StringComparison.Ordinal)

@@ -32,7 +32,9 @@ internal sealed class SampleChunkAppendOwner
         var index = windows.FindIndex(window => window.State != SampleChunkWindowState.Dropped
             && record.Sample.Timestamp.UtcTicks >= window.FromUtcTicks && record.Sample.Timestamp.UtcTicks < window.UntilUtcTicks);
         if (index < SampleChunkLifecycleProtocol.FirstIndex)
-        { return; }
+        {
+            return;
+        }
         var window = windows[index];
         var next = window with
         {
@@ -42,13 +44,22 @@ internal sealed class SampleChunkAppendOwner
         if (window.State == SampleChunkWindowState.Open)
         {
             if (window.OpenRecords.Length >= options.Value.MaximumChunkWindowRecords)
-            { throw Errors.Fail(ErrorCode.ResourceExhausted, SampleChunkLifecycleProtocol.Exhausted); }
-            next = next with { OpenRecords = window.OpenRecords.Add(record) };
+            {
+                throw Errors.Fail(ErrorCode.ResourceExhausted, SampleChunkLifecycleProtocol.Exhausted);
+            }
+            next = next with
+            {
+                OpenRecords = window.OpenRecords.Add(record)
+            };
             if (next.OpenRecords.Length >= SampleChunkWire.MaximumRecords || evaluatedAt.UtcTicks >= window.UntilUtcTicks)
-            { next = SampleChunkWindowSeal.Seal(database, transaction, partition, set, series, next, options); }
+            {
+                next = SampleChunkWindowSeal.Seal(database, transaction, partition, set, series, next, options);
+            }
         }
         else
-        { next = Correct(window, next, record); }
+        {
+            next = Correct(window, next, record);
+        }
         SampleChunkStorage.Write(transaction, SampleChunkKeys.Window(partition, set, series, next.WindowId),
             next, database.Limits.MaxBatchBytes);
         windows[index] = next;
@@ -60,10 +71,14 @@ internal sealed class SampleChunkAppendOwner
             options.Value.MaximumChunkWindowRecords, charge, options);
         if (original.CorrectionSequences.Length >= options.Value.MaximumChunkCorrections
             || manifest.RecordCount + original.CorrectionSequences.Length >= options.Value.MaximumChunkWindowRecords)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, SampleChunkLifecycleProtocol.Exhausted); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, SampleChunkLifecycleProtocol.Exhausted);
+        }
         if (original.CorrectionSequences.IsEmpty && windows.Count(window => window.MaintenanceCommandId != Guid.Empty)
             >= options.Value.MaximumPendingChunkWindows)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, SampleChunkLifecycleProtocol.Exhausted); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, SampleChunkLifecycleProtocol.Exhausted);
+        }
         SampleChunkStorage.Write(transaction, SampleChunkKeys.Correction(partition, set, series, original.WindowId, record.Sequence),
             record, database.Limits.MaxBatchBytes);
         return next with

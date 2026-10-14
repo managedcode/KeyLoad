@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.DocumentStorage;
 
 namespace KeyLoad.Server.Features.EventStreams;
@@ -34,7 +34,9 @@ internal static class EventVectorRefreshCompletion
         for (var ordinal = FirstOrdinal; ordinal < prepared.Original.Entries.Length; ordinal++)
         {
             if (prepared.Candidates.Any(entry => entry.Source == prepared.Original.Entries[ordinal].Source))
-            { continue; }
+            {
+                continue;
+            }
             work.Check();
             using var intended = new EventVectorOpenPinOwner(EventVectorRefreshSourcePreparation.Removed(
                 prepared, ordinal, parent.Envelope.ExpiresAt, admission, work));

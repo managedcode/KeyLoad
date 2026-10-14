@@ -29,7 +29,9 @@ internal static class EventAppendCorruptHeadFlow
         finally
         {
             if (fixture is not null)
-            { ServerFailureObserver.Observe(fixture.Dispose, failures); }
+            {
+                ServerFailureObserver.Observe(fixture.Dispose, failures);
+            }
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -49,7 +51,11 @@ internal static class EventAppendCorruptHeadFlow
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 token.ThrowIfCancellationRequested();
-                Replace(fixture, key, NativeSerialization.Serialize(head with { TailRevision = tail, FirstAvailableRevision = first }));
+                Replace(fixture, key, NativeSerialization.Serialize(head with
+                {
+                    TailRevision = tail,
+                    FirstAvailableRevision = first
+                }));
                 var before = QueueWholeFlowStorage.Bytes(fixture.Database.Store);
                 var position = fixture.Database.Store.Position;
                 for (var attempt = 0; attempt < 2; attempt++)

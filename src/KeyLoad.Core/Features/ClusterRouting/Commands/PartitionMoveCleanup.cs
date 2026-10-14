@@ -22,7 +22,9 @@ public sealed partial class DatabaseEngine
             Limits.MaxBatchBytes);
         if (phase.Stage == PartitionMovePeerStage.Abort && body.Role == PartitionMoveCleanupRole.Source
             && retained is null)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+        }
         var state = PartitionMoveCleanupStorage.Read(transaction, phase.Partition, phase.MoveId,
             Limits.MaxBatchBytes) ?? new(PartitionMoveProtocol.Version, phase.MoveId, phase.Partition,
                 phase.ControlIntentDigest, phase.Stage, body.Role,
@@ -32,14 +34,22 @@ public sealed partial class DatabaseEngine
         if (state.Stage != phase.Stage || state.Role != body.Role
             || state.ControlIntentDigest != phase.ControlIntentDigest || state.Completion is not null
             || state.NextFamily != body.FamilyOrdinal || state.NextBatch != phase.PageOrdinal)
-        { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict);
+        }
         if (phase.Resources.IsDefault)
-        { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority);
+        }
         var journal = MoveJournalReceipt(transaction, commandId, position, phase.ControlIntentDigest);
         if (body.FamilyOrdinal == PartitionMoveCleanupFamilies.All.Length)
-        { state = CompleteMoveLocalCleanup(transaction, phase, body, state, journal); }
+        {
+            state = CompleteMoveLocalCleanup(transaction, phase, body, state, journal);
+        }
         else
-        { state = DeleteMoveCleanupPage(transaction, phase, state); }
+        {
+            state = DeleteMoveCleanupPage(transaction, phase, state);
+        }
         PartitionMoveTargetStorage.Write(transaction, PartitionMoveCleanupStorage.Key(phase.Partition,
             phase.MoveId), state, Limits.MaxBatchBytes);
         return new(phase.MoveId, phase.Stage, journal, null, null, null, null, null, state);
@@ -56,10 +66,14 @@ public sealed partial class DatabaseEngine
             || phase.Stage == PartitionMovePeerStage.Abort && body.Control.Phase != PartitionMovePhase.Aborting
             || body.Role == PartitionMoveCleanupRole.Source && Store.Identity.Incarnation != body.Control.SourcePlacement.Incarnation
             || body.Role == PartitionMoveCleanupRole.Target && Store.Identity.Incarnation != body.Control.DestinationOwner.Incarnation)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
         RequireMoveCleanupOwner(view, body, phase);
         if (body.Role == PartitionMoveCleanupRole.Source && body.PrecedingGrantId == Guid.Empty)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.MissingAuthority);
+        }
 
     }
 
@@ -74,7 +88,9 @@ public sealed partial class DatabaseEngine
         {
             var maximum = (Limits.MaxBatchMutations - MoveCleanupMetadataMutations) / MoveCleanupRecordMutations;
             if (maximum <= PartitionMoveProtocol.EmptyCount)
-            { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity); }
+            {
+                throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
+            }
             var prefix = family == PartitionMoveProtocol.TargetPageSpace
                 ? MoveCleanupPagePrefix(transaction, phase, state)
                 : KeySpace.Partition(family, phase.Partition);
@@ -84,7 +100,9 @@ public sealed partial class DatabaseEngine
             {
                 bytes = checked(bytes + record.Key.Length + record.Value.Length);
                 if (bytes > Limits.MaxBatchBytes)
-                { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity); }
+                {
+                    throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
+                }
                 PartitionMoveBlobImport.Release(transaction, family, record,
                     phase.Resources, Store.Identity.Incarnation);
                 transaction.Delete(record.Key.ToArray());

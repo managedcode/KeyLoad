@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Orleans;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
@@ -17,7 +17,9 @@ internal sealed class PartitionMovementParentCaptureRunner(PartitionMovementRece
     {
         work.Check();
         if (before.Pending is not null || intended.Stage != PartitionMovePeerStage.Capture)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+        }
         var phaseId = PartitionMovementParentPhaseIds.For(request, principalId,
             PartitionMovementParentPhaseRole.Capture, intended.PageOrdinal);
         var admission = PartitionMovementParentPhaseAdmission.Create(principalId, request, before,
@@ -37,7 +39,9 @@ internal sealed class PartitionMovementParentCaptureRunner(PartitionMovementRece
     {
         var original = PartitionMovementParentPromotionValidation.Require(state);
         if (original.Stage != PartitionMovePeerStage.Capture)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+        }
         return ExecuteFirstAdmittedAsync(principalId, request, state, work, cancellationToken);
     }
 
@@ -58,7 +62,9 @@ internal sealed class PartitionMovementParentCaptureRunner(PartitionMovementRece
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
         var captured = await client.CaptureParentOriginalAsync(original, dispatch, work, cancellationToken).ConfigureAwait(false);
         if (captured.Reply.Error is { } code)
-        { throw Errors.Fail(code, captured.Reply.SafeDetail ?? PartitionMovementProtocol.Unavailable); }
+        {
+            throw Errors.Fail(code, captured.Reply.SafeDetail ?? PartitionMovementProtocol.Unavailable);
+        }
         var handle = GrainNativePayload.Read<GrainValue>(captured.Reply.Payload).Value as PartitionMovementCaptureHandle
             ?? throw Errors.Fail(ErrorCode.Corruption, PartitionMovementProtocol.InvalidProof);
         var witness = captured.CaptureWitness
@@ -85,7 +91,9 @@ internal sealed class PartitionMovementParentCaptureRunner(PartitionMovementRece
                 .SequenceEqual(NativeSerialization.Serialize(witness))
             || !NativeSerialization.Serialize(proofPending.OriginalFence).AsSpan()
                 .SequenceEqual(NativeSerialization.Serialize(captureRequest.Fence)))
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMovementProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMovementProtocol.InvalidProof);
+        }
         return await SettleFirstCaptureAsync(principalId, request, proofState, proofPending, handle,
             captured.VoterId, work, cancellationToken).ConfigureAwait(false);
     }
@@ -104,7 +112,9 @@ internal sealed class PartitionMovementParentCaptureRunner(PartitionMovementRece
             var released = await client.ReleaseParentCaptureAsync(proofPending, handle.HandleId,
                 voterId, releaseDispatch, work, cancellationToken).ConfigureAwait(false);
             if (released.Reply.Error is { } error)
-            { throw Errors.Fail(error, released.Reply.SafeDetail ?? PartitionMovementProtocol.Unavailable); }
+            {
+                throw Errors.Fail(error, released.Reply.SafeDetail ?? PartitionMovementProtocol.Unavailable);
+            }
         }, failures).ConfigureAwait(false);
         await ServerFailureObserver.ObserveAsync(async () =>
         {
@@ -117,9 +127,13 @@ internal sealed class PartitionMovementParentCaptureRunner(PartitionMovementRece
         var actual = settled.Selected;
         if (settled.Pending is not null || actual?.OriginalResult is null
             || actual.ObservationCheckpointReceipt is null)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+        }
         if (actual.OriginalResult.Error is { } errorCode)
-        { throw Errors.Fail(errorCode, actual.OriginalResult.SafeDetail ?? PartitionMovementProtocol.Unavailable); }
+        {
+            throw Errors.Fail(errorCode, actual.OriginalResult.SafeDetail ?? PartitionMovementProtocol.Unavailable);
+        }
         return settled;
     }
 }

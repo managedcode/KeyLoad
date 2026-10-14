@@ -10,10 +10,20 @@ internal sealed class NodeEpochRf3Callers : IAsyncDisposable
     private readonly HttpClient sdkHttp;
 
     private NodeEpochRf3Callers(HttpClient sdkHttp, KeyLoadClient sdk, McpOfficialClient mcp)
-    { this.sdkHttp = sdkHttp; Sdk = sdk; Mcp = mcp; }
+    {
+        this.sdkHttp = sdkHttp;
+        Sdk = sdk;
+        Mcp = mcp;
+    }
 
-    internal KeyLoadClient Sdk { get; }
-    internal McpOfficialClient Mcp { get; }
+    internal KeyLoadClient Sdk
+    {
+        get;
+    }
+    internal McpOfficialClient Mcp
+    {
+        get;
+    }
 
     internal static async Task<NodeEpochRf3Callers> ConnectAsync(DistributedApplication app,
         string sdkNode, string mcpNode, string key, CancellationToken cancellationToken)

@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Query;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
@@ -12,12 +12,16 @@ internal sealed class RequestCqrsQueryReadCutObservation(RequestCqrsProbeFiles f
     {
         cancellationToken.ThrowIfCancellationRequested();
         if (RequestContext.Get(GrainRequestStreamProtocol.ContextKey) is not GrainRequestContextState current)
-        { return; }
+        {
+            return;
+        }
         var claim = lifecycle.FindClaim(current.RequestId);
         if (claim is null || claim.Identity.ReadKind != GrainReadKind.AstQuery
             || claim.Arm.Record.Phase != RequestCqrsProbePhase.RequestStarted
             || claim.Arm.Record.Action != RequestCqrsProbeAction.Hold)
-        { return; }
+        {
+            return;
+        }
         var failures = new List<Exception>();
         lifecycle.EnterCallback();
         ServerFailureObserver.Observe(() => ObserveClaim(observation, current, claim, cancellationToken), failures);
@@ -32,7 +36,9 @@ internal sealed class RequestCqrsQueryReadCutObservation(RequestCqrsProbeFiles f
             || current.ConnectionId == Guid.Empty || claim.Identity.CommandId != Guid.Empty
             || claim.Identity.PrincipalId != observation.PrincipalId
             || claim.QueryReadContext is not { } context || context.ActivationId.IsDefault)
-        { throw new InvalidOperationException(RequestCqrsProbeProtocol.InvalidRecord); }
+        {
+            throw new InvalidOperationException(RequestCqrsProbeProtocol.InvalidRecord);
+        }
         var failures = new List<Exception>();
         lifecycle.EnterGate();
         ServerFailureObserver.Observe(() =>
@@ -58,12 +64,16 @@ internal sealed class RequestCqrsQueryReadCutObservation(RequestCqrsProbeFiles f
     {
         cancellationToken.ThrowIfCancellationRequested();
         if (RequestContext.Get(GrainRequestStreamProtocol.ContextKey) is not GrainRequestContextState current)
-        { return; }
+        {
+            return;
+        }
         var claim = lifecycle.FindClaim(current.RequestId);
         if (claim is null || claim.Identity.ReadKind != GrainReadKind.WaitForIndex
             || claim.Arm.Record.Phase != RequestCqrsProbePhase.RequestStarted
             || claim.Arm.Record.Action != RequestCqrsProbeAction.Hold)
-        { return; }
+        {
+            return;
+        }
         var failures = new List<Exception>();
         lifecycle.EnterCallback();
         ServerFailureObserver.Observe(() => ObserveWaitClaim(observation, current, claim, cancellationToken), failures);
@@ -78,7 +88,9 @@ internal sealed class RequestCqrsQueryReadCutObservation(RequestCqrsProbeFiles f
             || current.ConnectionId == Guid.Empty || claim.Identity.CommandId != Guid.Empty
             || claim.Identity.PrincipalId != observation.PrincipalId
             || claim.QueryReadContext is not { } context || context.ActivationId.IsDefault)
-        { throw new InvalidOperationException(RequestCqrsProbeProtocol.InvalidRecord); }
+        {
+            throw new InvalidOperationException(RequestCqrsProbeProtocol.InvalidRecord);
+        }
         var failures = new List<Exception>();
         lifecycle.EnterGate();
         ServerFailureObserver.Observe(() =>

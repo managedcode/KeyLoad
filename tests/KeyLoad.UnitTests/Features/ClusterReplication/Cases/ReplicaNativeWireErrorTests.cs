@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Replication;
 
 namespace KeyLoad.UnitTests;
@@ -18,7 +18,10 @@ internal sealed class ReplicaNativeWireErrorTests
     {
         using var fixture = new ReplicaSecurityFixture();
         var valid = method == ReplicaRpc.RequestVote ? fixture.Vote() : fixture.Forward(OperationKind.Membership);
-        var invalid = fixture.Resign(valid with { Payload = InvalidBytes(valid.Payload, unsupported) });
+        var invalid = fixture.Resign(valid with
+        {
+            Payload = InvalidBytes(valid.Payload, unsupported)
+        });
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Receiver.VerifyRequest(invalid));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.Validation);
         await Assert.That(failure.Message).IsEqualTo(ReplicaTransportProtocol.InvalidPayload);
@@ -48,10 +51,16 @@ internal sealed class ReplicaNativeWireErrorTests
     {
         using var fixture = new ReplicaSecurityFixture();
         var valid = fixture.Vote();
-        var invalid = valid with { Payload = InvalidBytes(valid.Payload, unsupported: true) };
+        var invalid = valid with
+        {
+            Payload = InvalidBytes(valid.Payload, unsupported: true)
+        };
         if (!wrongMac)
         {
-            invalid = fixture.Resign(invalid with { Recipient = ReplicaSecurityFixture.VoterC });
+            invalid = fixture.Resign(invalid with
+            {
+                Recipient = ReplicaSecurityFixture.VoterC
+            });
         }
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => fixture.Receiver.VerifyRequest(invalid)).Code)
             .IsEqualTo(ErrorCode.Unauthenticated);

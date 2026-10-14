@@ -51,7 +51,10 @@ internal static class CanonicalCrashScenario
 
         var snapshot = Path.Combine(directory, CrashFixtureValues.IncomingSnapshotFile);
         using var source = new ZoneTreeStore(new(Path.Combine(directory, CrashFixtureValues.SnapshotSourceDirectory))
-        { Incarnation = store.Identity.Incarnation, SigningKey = store.Identity.SigningKey }, CrashExecutionOptions.StorageExecution(), CrashExecutionOptions.PointCacheExecution());
+        {
+            Incarnation = store.Identity.Incarnation,
+            SigningKey = store.Identity.SigningKey
+        }, CrashExecutionOptions.StorageExecution(), CrashExecutionOptions.PointCacheExecution());
         source.Commit((transaction, _) =>
         {
             transaction.PutRecord(KeyCodec.Encode(CrashFixtureValues.System, CrashFixtureValues.AppliedKey), CrashFixtureValues.SnapshotPreviousCut);

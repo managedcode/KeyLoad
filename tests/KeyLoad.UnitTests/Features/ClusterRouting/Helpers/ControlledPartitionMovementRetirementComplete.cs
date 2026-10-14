@@ -31,7 +31,10 @@ internal static class ControlledPartitionMovementRetirementComplete
                 PartitionMovementTransportAction.Apply, Guid.Empty, ControlOrdinal), cancellationToken);
         await Assert.That(outcome.Error).IsNull();
         var actual = outcome.Get<PartitionMovePhaseResult>();
-        var expected = control with { Phase = PartitionMovePhase.Retired };
+        var expected = control with
+        {
+            Phase = PartitionMovePhase.Retired
+        };
         await Assert.That(actual.Stage).IsEqualTo(PartitionMovePeerStage.ControlCompleteRetirement);
         await Assert.That(actual.Journal.CommandId).IsEqualTo(CommandId);
         await Assert.That(JsonDefaults.Serialize(actual.Control).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();

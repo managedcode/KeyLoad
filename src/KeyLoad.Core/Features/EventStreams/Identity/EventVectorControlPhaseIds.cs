@@ -13,7 +13,9 @@ internal static class EventVectorControlPhaseIds
     {
         var actualBodyDigest = EventVectorControlBodyProjection.Digest(phase, admission);
         if (!CryptographicOperations.FixedTimeEquals(actualBodyDigest.Span, originalStableBodyDigest.Span))
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidIdentity); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidIdentity);
+        }
         var identity = Project(phase, principalId, actualBodyDigest);
         admission.RequireEncodedBytes(NativeSerialization.Measure(identity));
         var encoded = NativeSerialization.Serialize(identity);
@@ -31,10 +33,14 @@ internal static class EventVectorControlPhaseIds
         ReadOnlyMemory<byte> originalStableBodyDigest)
     {
         if (string.IsNullOrWhiteSpace(principalId) || originalStableBodyDigest.Length != SHA256.HashSizeInBytes)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidIdentity); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidIdentity);
+        }
         var source = phase.IntendedSourcePhase ?? phase.ObservedSourcePhase;
         if (source is not null && source.PrincipalId != principalId)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidIdentity); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidIdentity);
+        }
         return new EventVectorControlIdentity(Version, phase.OriginalRequest.CommandId,
             phase.OriginalRequest.MapId, EventVectorIdentityInputs.Partition(phase.OriginalRequest.ControlPartition),
             EventVectorIdentityInputs.Text(principalId), phase.Action,

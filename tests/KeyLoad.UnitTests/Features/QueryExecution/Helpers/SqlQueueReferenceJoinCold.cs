@@ -17,7 +17,9 @@ internal static class SqlQueueReferenceJoinCold
         var position = database.Store.Position;
         database.Store.Dispose();
         for (var cut = 0; cut < ColdCuts; cut++)
-        { await OpenAsync(database, seed, original, before, identity.NodeId, identity.Incarnation, position); }
+        {
+            await OpenAsync(database, seed, original, before, identity.NodeId, identity.Incarnation, position);
+        }
     }
 
     private static async Task OpenAsync(TestDatabase database, CommandRequest seed, CommitReceipt original,
@@ -26,7 +28,10 @@ internal static class SqlQueueReferenceJoinCold
         var failures = new List<Exception>();
         try
         {
-            using var reopened = ZoneTreeExistingStore.Open(new(database.Directory) { Incarnation = incarnation },
+            using var reopened = ZoneTreeExistingStore.Open(new(database.Directory)
+            {
+                Incarnation = incarnation
+            },
                 nodeId, database.StorageExecution);
             try
             {
@@ -57,15 +62,23 @@ internal static class SqlQueueReferenceJoinCold
                 await Assert.That(QueueWholeFlowStorage.Bytes(reopened)).IsEquivalentTo(before, CollectionOrdering.Matching);
                 await Assert.That(reopened.Position).IsEqualTo(position);
             }
-            catch (Exception failure) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(failure))
-            { failures.Add(failure); }
-            catch (Exception failure) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(failure))
-            { failures.Add(failure); }
+            catch (Exception failure) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+            {
+                failures.Add(failure);
+            }
+            catch (Exception failure) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+            {
+                failures.Add(failure);
+            }
         }
-        catch (Exception failure) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(failure))
-        { failures.Add(failure); }
-        catch (Exception failure) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(failure))
-        { failures.Add(failure); }
+        catch (Exception failure) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            failures.Add(failure);
+        }
+        catch (Exception failure) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            failures.Add(failure);
+        }
         global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }
 }

@@ -13,7 +13,9 @@ internal static class TestDatabaseRetainedCommandScope
         {
             var entry = log.ReadEntry(index) ?? throw new InvalidOperationException(MissingEntry);
             if (entry.Operation is { } retained && SameIdentity(retained, original))
-            { return index; }
+            {
+                return index;
+            }
         }
         return null;
     }
@@ -24,7 +26,9 @@ internal static class TestDatabaseRetainedCommandScope
         {
             var entry = log.ReadEntry(index) ?? throw new InvalidOperationException(MissingEntry);
             if (entry.Operation is not { } retained || retained.Id != id)
-            { continue; }
+            {
+                continue;
+            }
             RequireMatchingScopes(log, index, retained);
             return index;
         }
@@ -39,7 +43,9 @@ internal static class TestDatabaseRetainedCommandScope
             index++;
             var entry = log.ReadEntry(index) ?? throw new InvalidOperationException(MissingEntry);
             if (entry.Operation is { } retained && retained.Id == selected.Id && !SameIdentity(selected, retained))
-            { throw new InvalidOperationException(Ambiguous); }
+            {
+                throw new InvalidOperationException(Ambiguous);
+            }
         }
     }
 

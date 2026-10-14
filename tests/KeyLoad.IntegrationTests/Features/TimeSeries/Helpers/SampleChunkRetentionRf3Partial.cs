@@ -34,7 +34,10 @@ internal static class SampleChunkRetentionRf3Partial
         await SampleChunkRetentionRf3DenialOracle.RollupAsync(sdk, mcp, full, token);
         await RefreshAsync(scenario, sdk, mcp, late.Timestamp, true, token);
         await SampleChunkRetentionRf3ReadOracle.RollupAsync(sdk, mcp,
-            full with { From = late.Timestamp }, new(SampleChunkRetentionRf3Protocol.FirstRevision,
+            full with
+            {
+                From = late.Timestamp
+            }, new(SampleChunkRetentionRf3Protocol.FirstRevision,
                 new(late.Timestamp, scenario.Until, SampleChunkRf3Protocol.CorrectedSequence, late.Timestamp,
                     new(SampleChunkRetentionRf3Protocol.RemainingCount, SampleChunkRetentionRf3Protocol.LateValue,
                         SampleChunkRetentionRf3Protocol.LateValue, SampleChunkRetentionRf3Protocol.LateValue,

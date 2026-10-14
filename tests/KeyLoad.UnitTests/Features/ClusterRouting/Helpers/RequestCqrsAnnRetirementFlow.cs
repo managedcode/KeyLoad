@@ -33,7 +33,11 @@ internal static class RequestCqrsAnnRetirementFlow
         var built = await RequestCqrsAnnInvocation.RunAsync(fixture, next, token);
         await RequestCqrsAnnResultAssertions.RequireAsync(fixture, next, built.Result, before, changed: true, token);
         await RequestCqrsAnnOriginalReplay.RequireAsync(fixture, next, built.Result, token);
-        var release = next with { CommandId = Guid.NewGuid(), Mode = AnnMaintenanceMode.Release };
+        var release = next with
+        {
+            CommandId = Guid.NewGuid(),
+            Mode = AnnMaintenanceMode.Release
+        };
         var released = await RequestCqrsAnnInvocation.RunAsync(fixture, release, token);
         await RequestCqrsAnnAssertions.EqualAsync(new AnnMaintenanceResult(release.CommandId, release.Consumer,
             release.IndexGeneration, AnnMaintenancePhase.Completed, null, RequestCqrsAnnTestData.EmptyCount,

@@ -12,7 +12,10 @@ internal static class TenantCapacityPlacementRf3OccupiedPlacement
         TenantCapacityPlacementRf3Provisioning.State capacity, TenantDedicatedOwnerRf3State packed,
         AtomicPartitionPlacementResolution sibling, long directoryRevision, CancellationToken token)
     {
-        await SqlRf3Protocol.EqualAsync(packed.Original with { DirectoryRevision = directoryRevision },
+        await SqlRf3Protocol.EqualAsync(packed.Original with
+        {
+            DirectoryRevision = directoryRevision
+        },
             await McpCallerAssertions.SdkSuccessAsync(await seed.Source.ReadAtomicPartitionPlacementAsync(
                 new(CurrentVersion, seed.Partition), token)));
         var owner = seed.Directory.ControlOwner;

@@ -133,7 +133,9 @@ public sealed partial class DatabaseEngine
         }
 
         if (existing.RemoteTarget is not null)
-        { return ApplyCompleteRemoteQueueTransfer(tx, principal, request, existing); }
+        {
+            return ApplyCompleteRemoteQueueTransfer(tx, principal, request, existing);
+        }
         var receipt = Verify<RemoteTransferReceiptClaims>(request.ReceiptToken, Limits.MaxBatchBytes);
         if (receipt is null || receipt.Source is null || receipt.Destination is null || receipt.TargetCommit is null)
         {
@@ -154,7 +156,11 @@ public sealed partial class DatabaseEngine
             throw Errors.Fail(ErrorCode.Corruption, TransferCorruptionMessage);
         }
 
-        var updated = existing with { State = QueueTransferState.Delivered, ReceiptToken = request.ReceiptToken };
+        var updated = existing with
+        {
+            State = QueueTransferState.Delivered,
+            ReceiptToken = request.ReceiptToken
+        };
         var oldBytes = RemoteTransferStorage.SourceAccountedBytes(existing);
         var newBytes = RemoteTransferStorage.SourceAccountedBytes(updated);
         var capacity = RemoteTransferStorage.RequireSourceCounter(tx, request.SourceQueue);
@@ -318,7 +324,9 @@ public sealed partial class DatabaseEngine
         RequireRemoteTransferAttemptHistory(record, claims);
         RequireRemoteTransferRepairHistory(view, record, claims);
         if (record.RemoteTarget is not null)
-        { ValidateRemoteTransferOriginalSourceCommit(view, record); }
+        {
+            ValidateRemoteTransferOriginalSourceCommit(view, record);
+        }
         ValidateIntentRecordState(record);
         RemoteTransferAttemptStateValidation.Require(record.Attempts);
         ValidateReceiptToken(view, record);
@@ -345,7 +353,9 @@ public sealed partial class DatabaseEngine
         if (record.RemoteTarget is not null)
         {
             if (record.ReceiptToken is { } remoteToken)
-            { ValidateRemoteTransferIntentReceipt(view, record, remoteToken); }
+            {
+                ValidateRemoteTransferIntentReceipt(view, record, remoteToken);
+            }
             return;
         }
         if (record.ReceiptToken is { } receiptToken)

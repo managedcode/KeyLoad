@@ -92,7 +92,13 @@ internal static class ScaledCorpusReadbackVerifier
             }
         }
 
-        return JsonSerializer.Serialize(new { id = expected.Id, number = expected.Number, text = ExpectedDocumentText, padding = paddingValue });
+        return JsonSerializer.Serialize(new
+        {
+            id = expected.Id,
+            number = expected.Number,
+            text = ExpectedDocumentText,
+            padding = paddingValue
+        });
     }
 
     private static void Append(IncrementalHash hash, byte[] length, string value)

@@ -30,17 +30,23 @@ internal static class SqlOperationCompiler
         SqlOperationBounds.Validate(request, limitsOptions, maximumPayloadBytes, queryOptions, token);
         SqlOriginalMutationIdentity.ValidateDeclared(request.CommandId);
         if (positionalParameterCount is < MinimumNativeParameterCount || positionalParameterCount > queryOptions.Value.MaximumParameters)
-        { throw ScriptDomOperationErrors.Invalid(); }
+        {
+            throw ScriptDomOperationErrors.Invalid();
+        }
         var budget = new global::KeyLoad.Core.ReadExecutionBudget(limitsOptions, cancellationToken: token);
         var statement = global::KeyLoad.Features.QueryExecution.ScriptDomSyntax.Parse(request.Sql, limitsOptions, budget.Check, token);
         if (positionalParameterCount is { } count)
-        { global::KeyLoad.Features.QueryExecution.ScriptDomSyntax.ValidateNativeSessionSlots(statement, count, budget.Check, token); }
+        {
+            global::KeyLoad.Features.QueryExecution.ScriptDomSyntax.ValidateNativeSessionSlots(statement, count, budget.Check, token);
+        }
         if (nativeIdentityControl && statement is global::Microsoft.SqlServer.TransactSql.ScriptDom.SetCommandStatement control)
         {
             if (request.CommandId.HasValue || request.AllowFullScan || request.Cursor is not null
                 || request.Parameters is { Count: > MinimumNativeParameterCount }
                 || positionalParameterCount != MinimumNativeParameterCount)
-            { throw ScriptDomOperationErrors.Invalid(); }
+            {
+                throw ScriptDomOperationErrors.Invalid();
+            }
             return new(null, ScriptDomContextIdentity.Read(control, budget.Check, token));
         }
         var operation = statement switch
@@ -64,11 +70,15 @@ internal static class SqlOperationCompiler
         global::KeyLoad.Core.ReadExecutionBudget budget, int? positionalParameterCount, CancellationToken token)
     {
         if (request.Partition is null)
-        { throw ScriptDomOperationErrors.Invalid(); }
+        {
+            throw ScriptDomOperationErrors.Invalid();
+        }
         var query = new QueryRequest(request.Partition, request.Sql, request.Parameters,
             request.AllowFullScan, request.Cursor, request.QueryDialectVersion);
         if (positionalParameterCount is null)
-        { return Decode(McpToolNames.QueryExecute, query, maximumPayloadBytes, budget.Check, token); }
+        {
+            return Decode(McpToolNames.QueryExecute, query, maximumPayloadBytes, budget.Check, token);
+        }
         var ast = global::KeyLoad.Query.Features.QueryExecution.ScriptDomQueryAdapter.Lower(statement, query,
             limitsOptions, queryOptions, budget, positionalParameterCount, token);
         return Decode(McpToolNames.QueryAst, ast, maximumPayloadBytes, budget.Check, token);
@@ -91,9 +101,13 @@ internal static class SqlOperationCompiler
         token.ThrowIfCancellationRequested();
         if (!McpOperationCatalog.TryGet(name, out var descriptor)
             || descriptor.ReadKind.HasValue == descriptor.CommandKind.HasValue)
-        { throw ScriptDomOperationErrors.Unsupported(); }
+        {
+            throw ScriptDomOperationErrors.Unsupported();
+        }
         var arguments = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
-        { [McpCatalogProtocol.Request] = JsonSerializer.SerializeToElement(request, JsonDefaults.Options) };
+        {
+            [McpCatalogProtocol.Request] = JsonSerializer.SerializeToElement(request, JsonDefaults.Options)
+        };
         var operation = descriptor.Decode(arguments, maximumPayloadBytes);
         checkBudget();
         token.ThrowIfCancellationRequested();

@@ -33,7 +33,9 @@ internal static class PostgresOperationDelivery
         }
         await ServerFailureObserver.ObserveAsync(cancellation.EndAsync, failures).ConfigureAwait(false);
         if (failures.Count != PostgresProtocol.AllRows)
-        { ServerFailureObserver.Observe(catalog.ClearMutationIdentity, failures); }
+        {
+            ServerFailureObserver.Observe(catalog.ClearMutationIdentity, failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

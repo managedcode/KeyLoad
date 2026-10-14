@@ -20,8 +20,14 @@ internal sealed class TimeSeriesIntensiveCallScope : IDisposable
     }
 
     internal CancellationToken Token => deadline.Token;
-    internal long LatencyTicks { get; private set; }
-    internal TimeSeriesIntensiveOutcome Completion { get; private set; }
+    internal long LatencyTicks
+    {
+        get; private set;
+    }
+    internal TimeSeriesIntensiveOutcome Completion
+    {
+        get; private set;
+    }
 
     internal bool AcceptInvocation() => !cellCancellation.IsCancellationRequested;
 

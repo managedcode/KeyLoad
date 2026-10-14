@@ -57,7 +57,10 @@ public sealed partial class DatabaseEngine
         var range = ReadTraversalEvents(bounded, stream, principal, resource, cursor, request.Limit, budget);
         var next = range.Events.IsEmpty ? cursor.NextExclusiveRevision
             : range.Events[^StreamTraversalProtocol.LastEventOffset].Revision;
-        var token = range.HasMore ? Sign(cursor with { NextExclusiveRevision = next }) : null;
+        var token = range.HasMore ? Sign(cursor with
+        {
+            NextExclusiveRevision = next
+        }) : null;
         var page = new StreamPage(stream,
             new(cursor.CapturedTailRevision, cursor.CapturedFirstAvailableRevision, stream.Generation),
             range.Events, Store.Position, range.HasMore, token, cursor.SnapshotCutPosition);

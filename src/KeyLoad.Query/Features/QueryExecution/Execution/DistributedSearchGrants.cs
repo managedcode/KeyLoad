@@ -21,12 +21,16 @@ internal static class DistributedSearchGrants
             + (long)count * PartitionQueryRetention.LeafDescriptorBytes));
         var availableBytes = budget.RemainingReadGrantBytes - budget.MaximumResultBytes;
         if (availableBytes < NoBytes || budget.MaximumResultBytes / count < MinimumResultBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, InsufficientGrant); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, InsufficientGrant);
+        }
         var bytes = availableBytes / count;
         var records = budget.RemainingReadGrantRecords / count;
         var grants = new ReadExecutionBudgetReadGrant[count];
         for (var index = FirstGrant; index < grants.Length; index++)
-        { grants[index] = budget.CreateReadGrant(bytes, records); }
+        {
+            grants[index] = budget.CreateReadGrant(bytes, records);
+        }
         return grants;
     }
 

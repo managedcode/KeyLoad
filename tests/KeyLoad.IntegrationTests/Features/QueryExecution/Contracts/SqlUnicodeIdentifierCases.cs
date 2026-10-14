@@ -7,7 +7,10 @@ internal static class SqlUnicodeIdentifierCases
     internal const string Clause = "U&\"sc\\006fre\" = 1";
     internal const string WideClause = "u&\"sc\\+00006fre\" = 1";
     internal const string CustomClause = "U&\"sc!006fre\" UESCAPE '!' = 1";
-    internal static IReadOnlyList<SqlNullDistinctRf3Case> All { get; } =
+    internal static IReadOnlyList<SqlNullDistinctRf3Case> All
+    {
+        get;
+    } =
     [
         new("U&\"sc\\006fre\" = 1", new global::KeyLoad.Query.Comparison(SqlNullDistinctRf3Cases.Score, "=", global::KeyLoad.Query.ValueOperand.Create(UnitValue)), ["low"]),
         new("u&\"sc\\+00006fre\" = 1", new global::KeyLoad.Query.Comparison(SqlNullDistinctRf3Cases.Score, "=", global::KeyLoad.Query.ValueOperand.Create(UnitValue)), ["low"]),

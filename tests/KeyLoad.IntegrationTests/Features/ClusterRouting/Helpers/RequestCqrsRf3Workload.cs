@@ -126,5 +126,10 @@ internal sealed record RequestCqrsRf3Workload(PartitionRef Partition, CommandReq
         => "document-" + index.ToString("D2", System.Globalization.CultureInfo.InvariantCulture);
 
     private static string InitialJson(int index)
-        => JsonSerializer.Serialize(new { cohort = "rpc1", ordinal = index, value = index + 1 });
+        => JsonSerializer.Serialize(new
+        {
+            cohort = "rpc1",
+            ordinal = index,
+            value = index + 1
+        });
 }

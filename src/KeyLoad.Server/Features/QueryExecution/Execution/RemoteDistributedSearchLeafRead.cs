@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ResourceExecution.Execution;
-using KeyLoad.Orleans;
 using KeyLoad.Query.Features.QueryExecution;
 using KeyLoad.Server.Features.DocumentStorage;
 using Microsoft.Extensions.Options;
@@ -24,7 +24,9 @@ internal sealed class RemoteDistributedSearchLeafRead(OrleansNode node, Partitio
         var beforeRecords = grant.ExaminedRecords;
         var captured = Capture(principalId, work.Search, grant);
         if (original.TryGetValue(work.Search.Partition, out var initial))
-        { RemoteDistributedSearchSourceFence.RequireSame(initial, captured); }
+        {
+            RemoteDistributedSearchSourceFence.RequireSame(initial, captured);
+        }
         else
         {
             budget.ChargeBytes(PartitionQueryRetention.LeafDescriptorBytes);
@@ -35,7 +37,9 @@ internal sealed class RemoteDistributedSearchLeafRead(OrleansNode node, Partitio
         var remainingRecords = grant.RemainingRecords
             - checked((grant.ExaminedRecords - beforeRecords) * MetadataPassesRemaining);
         if (remainingBytes < EmptyGrant || remainingRecords < EmptyGrant)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, RemoteDistributedSearchSourceFence.Changed); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, RemoteDistributedSearchSourceFence.Changed);
+        }
         var request = new DistributedSearchOwnedLeafV1(CurrentVersion, work.Phase, work.Search,
             captured.Authority.Destination.Owner, captured.Authority.Tenant, remainingBytes, remainingRecords,
             work.MaxResultBytes, work.Witness, work.Statistics, work.Scope, work.SourceWindowId, work.Selected);
@@ -43,10 +47,18 @@ internal sealed class RemoteDistributedSearchLeafRead(OrleansNode node, Partitio
         var wireBytes = call is null ? NativeSerialization.Measure(request) : NativeSerialization.Measure(call);
         var childBytes = PartitionQueryParallelRetention.ChildBytes(work.MaxResultBytes, wireBytes,
             NativeSerialization.Measure(request));
-        request = request with { MaxResultBytes = checked((int)childBytes) };
-        call = call is null ? null : call with { SearchLeaf = request };
+        request = request with
+        {
+            MaxResultBytes = checked((int)childBytes)
+        };
+        call = call is null ? null : call with
+        {
+            SearchLeaf = request
+        };
         if ((call is null ? NativeSerialization.Measure(request) : NativeSerialization.Measure(call)) > wireBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, RemoteDistributedSearchSourceFence.Changed); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, RemoteDistributedSearchSourceFence.Changed);
+        }
         return new(request,
             token => calls.RunAsync(envelope.ExpiresAt, principalId, request, call, token),
             (result, token) =>

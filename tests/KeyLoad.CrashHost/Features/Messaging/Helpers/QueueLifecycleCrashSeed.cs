@@ -41,7 +41,9 @@ internal static class QueueLifecycleCrashSeed
         var received = CrashDatabase.Submit(database, OperationKind.Receive, request, request.RequestId).Get<ReceiveResult>();
         var delivery = received.Deliveries.Single();
         if (delivery.Id != expected)
-        { throw new InvalidOperationException(UnexpectedDeliveryOrder); }
+        {
+            throw new InvalidOperationException(UnexpectedDeliveryOrder);
+        }
         var nack = new DeliveryCommand(Guid.NewGuid(), request.Lane, delivery.Token, DeliveryAction.Nack);
         _ = CrashDatabase.Submit(database, OperationKind.Delivery, nack, nack.CommandId).Get<CommitReceipt>();
     }

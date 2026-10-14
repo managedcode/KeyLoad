@@ -32,7 +32,9 @@ internal sealed record RequestCqrsFaultReceiptOracle(
             McpCallerTools.DocumentsGet, new GetDocumentRequest(reference), cancellationToken).ConfigureAwait(false))
             .ConfigureAwait(false);
         if (sdk is null || mcp.Value is null)
-        { throw new InvalidOperationException(RequestCqrsFaultOutcome.MissingBaseline); }
+        {
+            throw new InvalidOperationException(RequestCqrsFaultOutcome.MissingBaseline);
+        }
         await Assert.That(sdk.Json).IsEqualTo(expectedBeforeJson);
         await Assert.That(mcp.Value.Json).IsEqualTo(expectedBeforeJson);
         await Assert.That(mcp.Value.Revision).IsEqualTo(sdk.Revision);
@@ -52,7 +54,9 @@ internal sealed record RequestCqrsFaultReceiptOracle(
     {
         ArgumentNullException.ThrowIfNull(callers);
         if (command.CommandId == Guid.Empty)
-        { throw new InvalidOperationException(RequestCqrsFaultOutcome.EmptyCommandId); }
+        {
+            throw new InvalidOperationException(RequestCqrsFaultOutcome.EmptyCommandId);
+        }
 
         var sdkReceipt = await McpCallerAssertions.SdkSuccessAsync(await RequestCqrsFaultCallers.CommitSdkAsync(
             callers.Sdk, command, cancellationToken).ConfigureAwait(false)).ConfigureAwait(false);

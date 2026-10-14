@@ -20,7 +20,9 @@ internal static class SampleChunkGenerationWriter
                 Math.Min(maximumBytes, SampleChunkCodec.MaximumEncodedBytes));
             var key = SampleChunkKeys.Block(partition, set, series, window.WindowId, window.Generation, digests.Count);
             if (tx.ReadOwnedValue(key) is not null)
-            { throw Errors.Fail(ErrorCode.Corruption, SampleChunkLifecycleProtocol.Corrupt); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, SampleChunkLifecycleProtocol.Corrupt);
+            }
             tx.Put(key, encoded);
             digests.Add(SHA256.HashData(encoded));
         }
@@ -30,7 +32,9 @@ internal static class SampleChunkGenerationWriter
             digests.ToImmutable(), tags, window.RetentionBeforeUtcTicks);
         var manifestKey = SampleChunkKeys.Manifest(partition, set, series, window.WindowId, window.Generation);
         if (tx.ReadOwnedValue(manifestKey) is not null)
-        { throw Errors.Fail(ErrorCode.Corruption, SampleChunkLifecycleProtocol.Corrupt); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, SampleChunkLifecycleProtocol.Corrupt);
+        }
         var bytes = NativeSerialization.Serialize(manifest);
         SampleChunkStorage.Write(tx, manifestKey, new SampleChunkManifestEnvelope(bytes, SHA256.HashData(bytes)), maximumBytes);
         return manifest;
@@ -43,7 +47,9 @@ internal static class SampleChunkGenerationWriter
         foreach (var record in records)
         {
             if (seen.Add(record.TagsJson))
-            { tags.Add(record.TagsJson); }
+            {
+                tags.Add(record.TagsJson);
+            }
         }
         return tags.ToImmutable();
     }

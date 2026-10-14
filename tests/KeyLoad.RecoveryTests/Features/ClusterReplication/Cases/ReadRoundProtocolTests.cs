@@ -79,7 +79,9 @@ internal sealed class ReadRoundProtocolTests
             await using var unsupported = new ReadRoundStoredCluster(count);
         }
         catch (InvalidOperationException error)
-        { refusal = error; }
+        {
+            refusal = error;
+        }
         await Assert.That(refusal).IsNotNull();
         await Assert.That(refusal!.Message).IsEqualTo(ReplicaProtocol.InvalidTopology);
     }

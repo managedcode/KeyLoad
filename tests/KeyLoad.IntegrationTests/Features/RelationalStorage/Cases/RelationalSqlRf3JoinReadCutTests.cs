@@ -111,11 +111,21 @@ internal sealed class RelationalSqlRf3JoinReadCutTests(ClusterFixture fixture)
 
     private static PutDocument PutLeft(string customer, int generation, long? expectedRevision = null)
         => new(RelationalSqlRf3Tokens.Table, OrderId, JsonSerializer.Serialize(
-            new { key = OrderId, title = customer, count = generation }, JsonDefaults.Options), expectedRevision);
+            new
+            {
+                key = OrderId,
+                title = customer,
+                count = generation
+            }, JsonDefaults.Options), expectedRevision);
 
     private static PutDocument PutRight(string customer, int generation, long? expectedRevision = null)
         => new(RightCollection, customer, JsonSerializer.Serialize(
-            new { id = customer, name = CustomerName, generation }, JsonDefaults.Options), expectedRevision);
+            new
+            {
+                id = customer,
+                name = CustomerName,
+                generation
+            }, JsonDefaults.Options), expectedRevision);
 
     private static Task<QueryPage> StartQueryAsync(int route, KeyLoadClient sdk, McpOfficialClient mcp,
         QueryRequest query, SqlOperationRequest sql, CancellationToken cancellationToken) => route switch

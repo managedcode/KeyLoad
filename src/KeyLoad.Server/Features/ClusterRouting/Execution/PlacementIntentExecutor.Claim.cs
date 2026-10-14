@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
@@ -16,7 +16,9 @@ internal sealed partial class PlacementIntentExecutor
         if (membership is null || membership.ActiveSilos != CompleteCohort || local is null || !local.TransportReady
             || !original.ControlOwner.VoterIds.Contains(local.VoterId, StringComparer.Ordinal)
             || original.ControlOwner.Incarnation != local.Incarnation || trusted.ExpiresAt <= clock.GetUtcNow())
-        { throw Errors.Fail(ErrorCode.OwnershipLost, TenantPlacementCapacityProtocol.WrongCohort); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, TenantPlacementCapacityProtocol.WrongCohort);
+        }
         var absent = original.Claim is { } previous
             && !node.ReadActiveNativeMembership().Any(item => item.SiloAddress == previous.SiloAddress);
         var claim = new PlacementIntentClaimV1(local.VoterId, local.SiloAddress,

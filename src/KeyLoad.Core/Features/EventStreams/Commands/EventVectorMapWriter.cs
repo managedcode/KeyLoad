@@ -23,13 +23,18 @@ internal static class EventVectorMapWriter
         var current = EventVectorMapInventory.Read(transaction, proposed.ControlPartition, proposed.MapId,
             options, cancellationToken);
         if (proposed.Released)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidWrite); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidWrite);
+        }
         if (current.Header is { } original)
         {
             EventVectorInventoryValidation.Require(original, current.PayloadRows, admission);
             RequireOriginal(original, proposed);
         }
-        var changed = proposed with { RetainedPayloadBytes = EventVectorRowAccounting.PayloadBytes(payload) };
+        var changed = proposed with
+        {
+            RetainedPayloadBytes = EventVectorRowAccounting.PayloadBytes(payload)
+        };
         EventVectorInventoryValidation.Require(changed, payload, admission);
         EventVectorPhaseRetention.Require(changed, current.PayloadRows, payload, admission);
         var header = EventVectorRowAccounting.Header(changed, payload, admission);
@@ -40,9 +45,13 @@ internal static class EventVectorMapWriter
             current.Header is null ? NewSlot : ExistingSlot, checked(nextBytes - priorBytes), admission);
         cancellationToken.ThrowIfCancellationRequested();
         foreach (var row in current.PayloadRows)
-        { transaction.Delete(row.Key.ToArray()); }
+        {
+            transaction.Delete(row.Key.ToArray());
+        }
         foreach (var row in payload)
-        { EventVectorRowStorage.Write(transaction, row); }
+        {
+            EventVectorRowStorage.Write(transaction, row);
+        }
         EventVectorRowStorage.Write(transaction, header);
         EventVectorRowStorage.Write(transaction, capacity);
         return changed;
@@ -56,6 +65,8 @@ internal static class EventVectorMapWriter
             || original.StartPolicy != changed.StartPolicy || original.ExpiresAt != changed.ExpiresAt
             || !original.OriginalOptionsDigest.Span.SequenceEqual(changed.OriginalOptionsDigest.Span)
             || !original.OriginalSourceManifestDigest.Span.SequenceEqual(changed.OriginalSourceManifestDigest.Span))
-        { throw Errors.Fail(ErrorCode.Conflict, InvalidWrite); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, InvalidWrite);
+        }
     }
 }

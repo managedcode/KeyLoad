@@ -28,7 +28,10 @@ internal static class AggregateReplayCrashScenario
     internal const long EventRevision = 1;
     internal const int ReplayTailLimit = 1;
     internal const string StateJson = "{\"count\":0}";
-    internal static PartitionRef Partition { get; } = new(CrashFixtureValues.Tenant, CrashFixtureValues.Database,
+    internal static PartitionRef Partition
+    {
+        get;
+    } = new(CrashFixtureValues.Tenant, CrashFixtureValues.Database,
         CrashFixtureValues.Orders, CrashFixtureValues.Partition);
     internal static Guid SnapshotCommandId { get; } = Guid.Parse(SnapshotCommandIdText);
 

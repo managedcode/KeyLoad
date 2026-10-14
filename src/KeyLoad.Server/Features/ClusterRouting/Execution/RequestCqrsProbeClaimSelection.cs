@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
@@ -9,20 +9,28 @@ internal static class RequestCqrsProbeClaimSelection
         RequestCqrsProbeSnapshot snapshot, string actualVoter, RequestCqrsProbeLifecycle lifecycle, bool knownPhase)
     {
         if (!knownPhase)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         if (global::Orleans.Runtime.RequestContext.Get(GrainRequestStreamProtocol.ContextKey) is not GrainRequestContextState context
             || context.RequestId != identity.RequestId || context.CommandId != identity.CommandId || context.ConnectionId == Guid.Empty)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         var existing = lifecycle.FindClaim(identity.RequestId);
         if (existing is not null)
         {
             if (existing.Identity != identity || existing.ConnectionId != context.ConnectionId)
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             return existing;
         }
         var selected = Find(identity, snapshot, actualVoter, phase);
         if (selected is null)
-        { return null; }
+        {
+            return null;
+        }
         // Retain the original validated identity for the joined producer-disposal relay.
         return lifecycle.AddClaim(identity, selected, context.ConnectionId);
     }
@@ -48,9 +56,13 @@ internal static class RequestCqrsProbeClaimSelection
                 && loaded.Record.SourceArmId is not null)
             && !snapshot.Markers.Any(marker => marker.ArmId == loaded.Record.ArmId)).ToArray();
         if (matches.Length == EmptyMatchesLength)
-        { return null; }
+        {
+            return null;
+        }
         if (matches.Length != ClaimEmptyMatchesLength)
-        { return RequestCqrsSampleChunkProbePair.Select(matches, phase); }
+        {
+            return RequestCqrsSampleChunkProbePair.Select(matches, phase);
+        }
         return matches[MatchesFirstIndex];
     }
 

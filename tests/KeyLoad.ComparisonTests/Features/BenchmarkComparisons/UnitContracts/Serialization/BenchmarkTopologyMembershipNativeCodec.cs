@@ -8,7 +8,10 @@ using Orleans.Serialization.WireProtocol;
 
 namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 
-internal enum BenchmarkMembershipDefect { Duplicate, Missing, Unknown, WrongVersionScalar }
+internal enum BenchmarkMembershipDefect
+{
+    Duplicate, Missing, Unknown, WrongVersionScalar
+}
 
 // Independent native producers deliberately change one authority-field shape.
 internal sealed class BenchmarkTopologyMembershipNativeCodec(BenchmarkMembershipDefect defect)
@@ -24,7 +27,9 @@ internal sealed class BenchmarkTopologyMembershipNativeCodec(BenchmarkMembership
         [AllowNull] Type expectedType, [AllowNull] ReplicaBenchmarkMembershipRecord value) where TBufferWriter : IBufferWriter<byte>
     {
         if (ReferenceCodec.TryWriteReferenceField(ref writer, delta, expectedType, value))
-        { return; }
+        {
+            return;
+        }
         writer.WriteFieldHeader(delta, expectedType, typeof(ReplicaBenchmarkMembershipRecord), WireType.TagDelimited);
         writer.WriteEndBase();
         if (defect == BenchmarkMembershipDefect.WrongVersionScalar)
@@ -36,14 +41,18 @@ internal sealed class BenchmarkTopologyMembershipNativeCodec(BenchmarkMembership
             Int32Codec.WriteField(ref writer, 0, value.Version);
         }
         if (defect == BenchmarkMembershipDefect.Duplicate)
-        { Int32Codec.WriteField(ref writer, 0, value.Version); }
+        {
+            Int32Codec.WriteField(ref writer, 0, value.Version);
+        }
         writer.Session.CodecProvider.GetCodec<Guid>().WriteField(ref writer, 1, typeof(Guid), value.Incarnation);
         if (defect != BenchmarkMembershipDefect.Missing)
         {
             writer.Session.CodecProvider.GetCodec<ImmutableArray<string>>().WriteField(ref writer, 1, typeof(ImmutableArray<string>), value.VoterIds);
         }
         if (defect == BenchmarkMembershipDefect.Unknown)
-        { StringCodec.WriteField(ref writer, 1, BenchmarkTopologyMembershipFixture.PrivateCanary); }
+        {
+            StringCodec.WriteField(ref writer, 1, BenchmarkTopologyMembershipFixture.PrivateCanary);
+        }
         writer.WriteEndObject();
     }
 }

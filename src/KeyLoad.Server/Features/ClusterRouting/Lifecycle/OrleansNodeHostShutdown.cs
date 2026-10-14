@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
@@ -25,9 +25,13 @@ internal static class OrleansNodeHostShutdown
         await ServerFailureObserver.ObserveAsync(() => partition.Consensus.StopAsync(CancellationToken.None), failures).ConfigureAwait(false);
         clearHost();
         if (stopping is IAsyncDisposable asynchronous)
-        { await ServerFailureObserver.ObserveAsync(() => asynchronous.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => asynchronous.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         else
-        { ServerFailureObserver.Observe(stopping.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(stopping.Dispose, failures);
+        }
     }
 
     private const string NativeColdPrefix = "KEYLOAD_NATIVE_COLD";
@@ -94,12 +98,16 @@ internal static class OrleansNodeHostShutdown
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             if (services.GetService<RequestCqrsProbeNativeRelay>() is { } relay)
-            { await relay.StopAsync().ConfigureAwait(false); }
+            {
+                await relay.StopAsync().ConfigureAwait(false);
+            }
         }, failures).ConfigureAwait(false);
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             if (services.GetService<RequestCqrsProbeObserver>() is { } observer)
-            { await observer.DisposeAsync().ConfigureAwait(false); }
+            {
+                await observer.DisposeAsync().ConfigureAwait(false);
+            }
         }, failures).ConfigureAwait(false);
     }
 }

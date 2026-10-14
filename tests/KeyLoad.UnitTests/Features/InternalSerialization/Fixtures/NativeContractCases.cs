@@ -52,4 +52,7 @@ internal static class NativeContractCases
     };
 }
 
-internal enum NativeContractFamily { Document, Authorization, Messaging, Events, Graph, TimeSeries, Vector, Blob, Outbox, Relational, Query }
+internal enum NativeContractFamily
+{
+    Document, Authorization, Messaging, Events, Graph, TimeSeries, Vector, Blob, Outbox, Relational, Query
+}

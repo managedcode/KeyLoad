@@ -17,7 +17,9 @@ public sealed partial class DatabaseEngine
         work.Check();
         if (originalExpiresAt.Offset != TimeSpan.Zero || originalExpiresAt <= EvaluationClock.GetUtcNow()
             || NativeSerialization.Measure(verified) > Limits.MaxBatchBytes)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteGraphProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteGraphProtocol.Invalid);
+        }
         var command = Store.Read(view => SignRemoteGraphSourcePreparations(work.CreateView(view),
             localPrincipalId, verified, originalExpiresAt, work));
         var payload = NativeSerialization.Serialize(command);
@@ -43,13 +45,21 @@ public sealed partial class DatabaseEngine
         {
             work.Check();
             if (verifiedPreparation?.Preparation is null)
-            { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteGraphProtocol.Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Unauthenticated, RemoteGraphProtocol.Invalid);
+            }
             RequireRemoteGraphPreparation(verified.Original, principal, catalog.DefaultShard,
                 verifiedPreparation.Preparation);
             var claims = new RemoteGraphPreparationClaimsV1(RemoteGraphProtocol.PreparationPurpose,
                 verifiedPreparation.Preparation, principal.Id, principal.PolicyEpoch, digest, expiresAt);
-            preparations.Add(verifiedPreparation with { Token = Sign(claims) });
+            preparations.Add(verifiedPreparation with
+            {
+                Token = Sign(claims)
+            });
         }
-        return verified with { Preparations = preparations.MoveToImmutable() };
+        return verified with
+        {
+            Preparations = preparations.MoveToImmutable()
+        };
     }
 }

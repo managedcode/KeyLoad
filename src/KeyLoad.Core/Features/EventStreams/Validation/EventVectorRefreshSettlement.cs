@@ -17,14 +17,18 @@ internal static class EventVectorRefreshSettlement
         var pins = EventVectorControlPublication.Phases(inventory, EventVectorSourcePhaseRole.Pin, admission, next);
         var advances = EventVectorControlPublication.Phases(inventory, EventVectorSourcePhaseRole.Advance, admission, next);
         if (checked(pins.Count + advances.Count) != candidate.Length)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, UnsettledRefresh); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, UnsettledRefresh);
+        }
         for (var ordinal = FirstOrdinal; ordinal < candidate.Length; ordinal++)
         {
             var existing = prior.Any(entry => entry.Source == candidate[ordinal].Source);
             var phases = existing ? advances : pins;
             if (!phases.TryGetValue(ordinal, out var phase) || phase.Source != candidate[ordinal].Source
                 || phase.TargetPosition != candidate[ordinal].Position)
-            { throw Errors.Fail(ErrorCode.RecoveryRequired, UnsettledRefresh); }
+            {
+                throw Errors.Fail(ErrorCode.RecoveryRequired, UnsettledRefresh);
+            }
             RequireObservedPin(phase, admission);
         }
         RequireRemoved(inventory, prior, candidate, admission);
@@ -34,7 +38,9 @@ internal static class EventVectorRefreshSettlement
     {
         if (phase.Disposition != EventVectorSourcePhaseDisposition.Observed
             || phase.SourceOriginalResult is null || phase.SourceOriginalResult.Error is not null)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, UnsettledRefresh); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, UnsettledRefresh);
+        }
         var request = EventVectorSourceMutationValidation.ReadObserved(phase, admission);
         EventVectorObservedPinValidation.Require(phase, request,
             phase.SourceOriginalResult.Get<EventVectorSourceResult>(), admission);
@@ -46,20 +52,28 @@ internal static class EventVectorRefreshSettlement
         var releases = EventVectorControlPublication.Phases(inventory, EventVectorSourcePhaseRole.Release, admission);
         var removed = prior.Count(entry => !candidate.Any(current => current.Source == entry.Source));
         if (releases.Count != removed)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, UnsettledRefresh); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, UnsettledRefresh);
+        }
         for (var ordinal = FirstOrdinal; ordinal < prior.Length; ordinal++)
         {
             if (candidate.Any(entry => entry.Source == prior[ordinal].Source))
-            { continue; }
+            {
+                continue;
+            }
             if (!releases.TryGetValue(ordinal, out var phase) || phase.Source != prior[ordinal].Source
                 || phase.Disposition != EventVectorSourcePhaseDisposition.Observed
                 || phase.SourceOriginalResult is null || phase.SourceOriginalResult.Error is not null)
-            { throw Errors.Fail(ErrorCode.RecoveryRequired, UnsettledRefresh); }
+            {
+                throw Errors.Fail(ErrorCode.RecoveryRequired, UnsettledRefresh);
+            }
             var request = EventVectorSourceMutationValidation.ReadObserved(phase, admission);
             var result = phase.SourceOriginalResult.Get<EventVectorSourceReleaseResult>();
             EventVectorReleaseResultValidation.Require(phase, request, result, admission);
             if (result.Disposition != EventVectorReleaseDisposition.Released)
-            { throw Errors.Fail(ErrorCode.RecoveryRequired, UnsettledRefresh); }
+            {
+                throw Errors.Fail(ErrorCode.RecoveryRequired, UnsettledRefresh);
+            }
         }
     }
 }

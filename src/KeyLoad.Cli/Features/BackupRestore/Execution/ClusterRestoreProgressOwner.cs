@@ -28,7 +28,9 @@ internal static class ClusterRestoreProgressOwner
             return original;
         }
         if (Directory.Exists(nodesRoot) || File.Exists(nodesRoot))
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, MissingProgress); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, MissingProgress);
+        }
         var initial = new ClusterRestoreProgress(ClusterRestoreProgress.CurrentVersion,
             runtime.Plan.OperationId, runtime.PlanDigest, InitialRevision, [], ClusterRestorePublicationState.Admitted, null);
         _ = ClusterRestoreStateFile.Write(path, initial, runtime.Storage.Value, replace: false);
@@ -42,14 +44,20 @@ internal static class ClusterRestoreProgressOwner
             || original.PlanDigest != runtime.PlanDigest || original.Revision < InitialRevision
             || original.SlotObservations.IsDefault || original.SlotObservations.Length > runtime.Plan.Slots.Length
             || !Enum.IsDefined(original.PublicationState))
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
         foreach (var pair in original.SlotObservations.Zip(runtime.Plan.Slots))
-        { ClusterRestoreNativeSlots.RequireSame(pair.First, ClusterRestoreNativeSlots.RequireExisting(runtime, pair.Second, nodesRoot)); }
+        {
+            ClusterRestoreNativeSlots.RequireSame(pair.First, ClusterRestoreNativeSlots.RequireExisting(runtime, pair.Second, nodesRoot));
+        }
         if (original.PublicationState != ClusterRestorePublicationState.Admitted
             && original.SlotObservations.Length != runtime.Plan.Slots.Length
             || original.PublicationState == ClusterRestorePublicationState.Published && original.TerminalReceipt is null
             || original.PublicationState != ClusterRestorePublicationState.Published && original.TerminalReceipt is not null)
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
     }
 
     internal static ClusterRestoreProgress Save(ClusterRestoreOperationRuntime runtime, string operationRoot,

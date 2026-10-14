@@ -33,7 +33,9 @@ internal static class RequestCqrsRf3DiagnosticsTestPublisher
     internal static void EmitFortyValid(ILogger logger)
     {
         for (var index = 0; index < ValidRecordsPerNode; index++)
-        { EmitValid(logger); }
+        {
+            EmitValid(logger);
+        }
     }
 
     private static void EmitRejectedTransport(ILogger logger, McpTransportStage stage)

@@ -31,7 +31,9 @@ public sealed partial class DatabaseEngine
     private static void RequireNoMovementGrant(IKeyValueView view, string principalId)
     {
         if (PartitionMoveGrantStorage.Outstanding(view, principalId) > PartitionMoveProtocol.EmptyCount)
-        { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.PolicyBusy); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.PolicyBusy);
+        }
     }
 
     private OperationResult ExecuteConfigureApiKey(IAtomicTransaction transaction, ReplicatedOperation operation)
@@ -50,7 +52,9 @@ public sealed partial class DatabaseEngine
         }
         RequireNoMovementGrant(transaction, credential.PrincipalId);
         if (transaction.GetRecord<ApiKeyRecord>(KeySpace.ApiKey(credential.Id)) is { } previous)
-        { RequireNoMovementGrant(transaction, previous.PrincipalId); }
+        {
+            RequireNoMovementGrant(transaction, previous.PrincipalId);
+        }
         transaction.PutRecord(KeySpace.ApiKey(credential.Id), credential);
         return Result(true);
     }

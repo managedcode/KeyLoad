@@ -23,7 +23,9 @@ internal sealed class RequestCqrsProbeMigrationJson(RequestCqrsProbeJson json, I
         RequestCqrsProbeMigrationValidation.Require(value);
         var bytes = JsonSerializer.SerializeToUtf8Bytes(value, RequestCqrsProbeMigrationJsonContext.Default.RequestCqrsProbeMigrationRecord);
         if (bytes.Length > options.Value.MaximumRecordBytes)
-        { throw new InvalidOperationException(RequestCqrsProbeProtocol.InvalidRecord); }
+        {
+            throw new InvalidOperationException(RequestCqrsProbeProtocol.InvalidRecord);
+        }
         return bytes;
     }
 }

@@ -22,13 +22,17 @@ public sealed partial class DatabaseEngine
             || original.ExpiresAt <= operation.EvaluatedAt || original.ReceiverIssuanceProof is not null
             || !grant.RequireReceiverIssuance || phase.GrantId is not null
             || phase.Resources.IsDefault || !phase.Resources.IsEmpty)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.MissingAuthority);
+        }
         var catalog = PhysicalShardCatalogRecordSerialization.Read(transaction)
             ?? throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority);
         PhysicalShardCatalogValidation.ValidateCatalog(catalog);
         if (PartitionMoveReceiverIssuanceStorage.Read(transaction, phase.Partition, phase.MoveId,
             body.OriginalPhaseCommandId, Limits.MaxBatchBytes) is not null)
-        { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict);
+        }
         var issued = new PartitionMoveReceiverIssuance(PartitionMoveProtocol.Version, phase.MoveId, phase.Partition,
             body.OriginalPhaseCommandId, PartitionMoveOriginalDispatchIdentity.Digest(body.OriginalPhaseCommandId, original),
             original.Nonce, original.Stage, original.PageOrdinal, grant.GrantId, grant.OperatorPrincipalId,

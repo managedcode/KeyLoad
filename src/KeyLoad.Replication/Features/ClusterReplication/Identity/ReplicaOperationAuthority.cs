@@ -22,7 +22,10 @@ internal static class ReplicaOperationAuthority
     }
 
     internal static ReplicaEntry Own(ReplicaEntry entry, DatabaseEngine? database)
-        => entry.Operation is null ? entry : entry with { Operation = Verify(entry.Operation, database) };
+        => entry.Operation is null ? entry : entry with
+        {
+            Operation = Verify(entry.Operation, database)
+        };
 
     internal static bool Equal(ReplicaEntry left, ReplicaEntry right, DatabaseEngine? database)
     {

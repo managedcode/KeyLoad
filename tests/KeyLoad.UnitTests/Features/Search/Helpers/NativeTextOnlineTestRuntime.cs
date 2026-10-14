@@ -1,5 +1,5 @@
+using KeyLoad.Clustering.Features.Search;
 using KeyLoad.Core;
-using KeyLoad.Orleans.Features.Search;
 using KeyLoad.Query;
 using KeyLoad.Query.Features.Search;
 using KeyLoad.Server;
@@ -14,9 +14,18 @@ internal sealed class NativeTextOnlineTestRuntime : IAsyncDisposable
     private readonly ServiceProvider services;
     private readonly NativeTextIncrementalMaintenanceService explicitOwner;
     private readonly ITextProjection projection;
-    internal NativeTextOnlineMaintenanceService Owner { get; }
-    internal ServerRuntimeOptions Options { get; }
-    internal SearchEngine Search { get; }
+    internal NativeTextOnlineMaintenanceService Owner
+    {
+        get;
+    }
+    internal ServerRuntimeOptions Options
+    {
+        get;
+    }
+    internal SearchEngine Search
+    {
+        get;
+    }
     internal NativeTextOnlineTestRuntime(TestDatabase fixture)
     {
         var registrations = new ServiceCollection().AddRuntimeOptions(new ConfigurationBuilder().Build());
@@ -69,7 +78,9 @@ internal sealed class NativeTextOnlineTestRuntime : IAsyncDisposable
         ServerFailureObserver.Observe(projection.Dispose, failures);
         Task providerDisposal;
         try
-        { providerDisposal = services.DisposeAsync().AsTask(); }
+        {
+            providerDisposal = services.DisposeAsync().AsTask();
+        }
         catch (Exception error)
         {
             // Every prior owner has settled; rethrow this actual final invocation failure with the ordered ledger.
@@ -79,9 +90,13 @@ internal sealed class NativeTextOnlineTestRuntime : IAsyncDisposable
         }
         await providerDisposal.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
         if (providerDisposal.Exception is { } providerFailure)
-        { failures.AddRange(providerFailure.InnerExceptions); }
+        {
+            failures.AddRange(providerFailure.InnerExceptions);
+        }
         else if (providerDisposal.IsCanceled)
-        { failures.Add(new TaskCanceledException(providerDisposal)); }
+        {
+            failures.Add(new TaskCanceledException(providerDisposal));
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

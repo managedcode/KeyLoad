@@ -11,11 +11,18 @@ public sealed partial class DatabaseEngine
         CommandOutcomePartitionScope scope)
     {
         if (operation.Kind == OperationKind.PartitionMovementPhase)
-        { return; }
+        {
+            return;
+        }
         if (configuredPhysicalOwner is null)
-        { RequireUnconfiguredMovementAbsent(view); return; }
+        {
+            RequireUnconfiguredMovementAbsent(view);
+            return;
+        }
         if (scope.Partition is not { } partition)
-        { return; }
+        {
+            return;
+        }
         RequireNoUnpublishedPartitionMoveTarget(view, partition);
         var fence = PartitionMoveSourceFenceStorage.Read(view, partition, Limits.MaxBatchBytes);
         if (fence is not null)

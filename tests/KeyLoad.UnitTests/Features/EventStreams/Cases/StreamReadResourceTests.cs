@@ -9,7 +9,10 @@ internal sealed class StreamReadResourceTests
         using var fixture = new StreamReadResourceFixture();
         var expected = fixture.Read();
         var exactBytes = JsonSerializer.SerializeToUtf8Bytes(expected, JsonDefaults.Options).Length;
-        fixture.Reopen(new() { MaxBatchBytes = exactBytes });
+        fixture.Reopen(new()
+        {
+            MaxBatchBytes = exactBytes
+        });
 
         var actual = fixture.Read();
 
@@ -23,7 +26,10 @@ internal sealed class StreamReadResourceTests
         using var fixture = new StreamReadResourceFixture(eventCount: 1);
         var expected = fixture.Read();
         var exactBytes = JsonSerializer.SerializeToUtf8Bytes(expected, JsonDefaults.Options).Length;
-        fixture.Reopen(new() { MaxBatchBytes = exactBytes - 1 });
+        fixture.Reopen(new()
+        {
+            MaxBatchBytes = exactBytes - 1
+        });
 
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Read());
 
@@ -50,7 +56,10 @@ internal sealed class StreamReadResourceTests
     {
         using var fixture = new StreamReadResourceFixture(eventCount: 3);
         var headAndFirstEventBytes = fixture.HeadAndFirstEventReadBytes();
-        fixture.Reopen(new() { MaxQueryReadBytes = headAndFirstEventBytes - 1 });
+        fixture.Reopen(new()
+        {
+            MaxQueryReadBytes = headAndFirstEventBytes - 1
+        });
 
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Read());
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);

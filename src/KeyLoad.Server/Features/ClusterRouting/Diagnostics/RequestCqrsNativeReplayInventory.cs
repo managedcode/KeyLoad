@@ -36,7 +36,9 @@ internal static class RequestCqrsNativeReplayInventory
     internal static bool IsWitnessName(string name)
     {
         if (!name.StartsWith(WitnessPrefix, StringComparison.Ordinal) || !name.EndsWith(RequestCqrsProbeProtocol.JsonFileSuffix, StringComparison.Ordinal))
-        { return false; }
+        {
+            return false;
+        }
         var parts = name[WitnessPrefix.Length..^RequestCqrsProbeProtocol.JsonFileSuffix.Length].Split(NameSeparatorCharacter);
         return parts.Length == NameComponentCount && CanonicalGuid(parts[ArmComponent]) && CanonicalGuid(parts[RequestComponent])
             && parts[OrdinalComponent] is FirstOrdinalName or SecondOrdinalName or ThirdOrdinalName or FourthOrdinalName or FifthOrdinalName or SixthOrdinalName;
@@ -69,7 +71,9 @@ internal static class RequestCqrsNativeReplayInventory
             || plan.CommandId == Guid.Empty || !Enum.IsDefined(plan.ReplayMode)
             || string.IsNullOrWhiteSpace(plan.PrincipalId) || !plan.PrincipalId.StartsWith(RequestCqrsProbeProtocol.PrincipalPrefix, StringComparison.Ordinal)
             || System.Text.Encoding.UTF8.GetByteCount(plan.PrincipalId) > RequestCqrsProbeProtocol.MaximumPrincipalBytes)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
     }
 
     internal static void RequireArm(RequestCqrsNativeReplayPlan plan, RequestCqrsProbeArmRecord arm)
@@ -78,7 +82,9 @@ internal static class RequestCqrsNativeReplayInventory
         if (plan.SessionId != arm.SessionId || plan.ArmId != arm.ArmId || plan.CommandId != arm.CommandId
             || plan.PrincipalId != arm.PrincipalId || arm.Phase != RequestCqrsProbePhase.NativeModelReplayBeforeDispatch
             || arm.Action != RequestCqrsProbeAction.Hold || arm.ReadKind is not null)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
     }
 
     internal static RequestCqrsNativeReplayWitness ReadWitness(ReadOnlySpan<byte> bytes)
@@ -112,7 +118,9 @@ internal static class RequestCqrsNativeReplayInventory
             || value.ConnectionId == Guid.Empty || !RemoteModelNativeReplayCatalog.IsIndividual(value.ReplayMode) || value.Ordinal < FirstWitnessOrdinal
             || value.Ordinal > RemoteModelNativeReplayCatalog.MaximumWitnessOrdinal(value.ReplayMode)
             || value.OriginalNativeRequest is not { Length: > EmptyNativeBytes } || value.NativeRequest is not { Length: > EmptyNativeBytes } || value.NativeReply is not { Length: > EmptyNativeBytes })
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         RequireLength(value.OriginalNativeRequest.Length);
         RequireLength(value.NativeRequest.Length);
         RequireLength(value.NativeReply.Length);
@@ -126,12 +134,16 @@ internal static class RequestCqrsNativeReplayInventory
             || original.Signature != request.Signature || original.ExpiresAt != request.ExpiresAt
             || !NativeSerialization.Serialize(original.SourceOwner).AsSpan().SequenceEqual(NativeSerialization.Serialize(request.SourceOwner))
             || !NativeSerialization.Serialize(original.DestinationOwner).AsSpan().SequenceEqual(NativeSerialization.Serialize(request.DestinationOwner)))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         var call = RemoteDocumentWire.DecodeCall(original.Payload.Span).QueueTransfer;
         if (call is null || call.Stage != RemoteQueueTransferPeerStage.Accept || call.RequestId != value.RequestId
             || call.OriginalCommandId != value.CommandId
             || !RemoteModelNativeReplayPayload.Create(original, value.ReplayMode).Span.SequenceEqual(request.Payload.Span))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
     }
 
     internal static void RequireInventory(IReadOnlyList<RequestCqrsNativeReplayPlan> plans,
@@ -149,12 +161,16 @@ internal static class RequestCqrsNativeReplayInventory
             var plan = plans.SingleOrDefault(item => item.ArmId == witness.ArmId) ?? throw Invalid();
             if (plan.SessionId != witness.SessionId || plan.CommandId != witness.CommandId || RemoteModelNativeReplayCatalog.At(plan.ReplayMode, witness.Ordinal) != witness.ReplayMode
                 || RemoteDocumentWire.DecodeCall(Original(witness).Payload.Span).QueueTransfer!.LogicalPrincipalId != plan.PrincipalId)
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             var marker = markers.SingleOrDefault(item => item.ArmId == witness.ArmId && item.RequestId == witness.RequestId
                 && item.Phase == RequestCqrsProbePhase.NativeModelReplayBeforeDispatch && item.Outcome == RequestCqrsProbeOutcome.Observed);
             if (marker.SessionId != witness.SessionId || marker.CommandId != witness.CommandId
                 || marker.Voter != witness.Voter || marker.SiloAddress != witness.SiloAddress)
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
         }
         foreach (var group in witnesses.GroupBy(item => (item.ArmId, item.RequestId)))
         {
@@ -164,7 +180,9 @@ internal static class RequestCqrsNativeReplayInventory
                 || group.Any(item => item.ConnectionId != first.ConnectionId
                     || !item.OriginalNativeRequest.AsSpan().SequenceEqual(first.OriginalNativeRequest))
                 || group.Select(item => Request(item).Nonce).Distinct().Count() != group.Count())
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
         }
     }
 
@@ -172,12 +190,25 @@ internal static class RequestCqrsNativeReplayInventory
     {
         using var document = JsonDocument.Parse(bytes.ToArray(), new JsonDocumentOptions { MaxDepth = RequestCqrsProbeProtocol.MaximumJsonDepth });
         if (document.RootElement.ValueKind != JsonValueKind.Object)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         var names = new HashSet<string>(StringComparer.Ordinal);
         foreach (var property in document.RootElement.EnumerateObject())
-        { if (!names.Add(property.Name)) { throw Invalid(); } }
+        {
+            if (!names.Add(property.Name))
+            {
+                throw Invalid();
+            }
+        }
     }
 
-    private static void RequireLength(int length) { if (length <= EmptyNativeBytes || length > MaximumBytes) { throw Invalid(); } }
+    private static void RequireLength(int length)
+    {
+        if (length <= EmptyNativeBytes || length > MaximumBytes)
+        {
+            throw Invalid();
+        }
+    }
     private static InvalidOperationException Invalid() => new(RequestCqrsProbeProtocol.InvalidRecord);
 }

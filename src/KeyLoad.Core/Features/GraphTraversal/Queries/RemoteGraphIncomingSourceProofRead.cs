@@ -13,7 +13,9 @@ public sealed partial class DatabaseEngine
         ArgumentNullException.ThrowIfNull(work);
         var intent = request.Intent;
         if (intent?.Content is null || intent.SourceOwner is null)
-        { throw Errors.Fail(ErrorCode.Validation, RemoteGraphProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, RemoteGraphProtocol.Invalid);
+        }
         ValidatePartition(intent.Content.SourcePartition);
         JsonData.Identifier(intent.Content.Graph);
         JsonData.Identifier(intent.Content.EdgeId);
@@ -38,16 +40,24 @@ public sealed partial class DatabaseEngine
             intent.SourceOwner, graph.SchemaVersion);
         var edge = view.GetRecord<EdgeRecord>(EdgeKey(content.SourcePartition, content.Graph, content.EdgeId));
         if (edge is not null)
-        { ValidateCanonicalEdge(edge, content.SourcePartition, content.EdgeId); }
+        {
+            ValidateCanonicalEdge(edge, content.SourcePartition, content.EdgeId);
+        }
         var owner = CurrentOwnerVersion(view, content.SourcePartition, content.Graph, content.EdgeId, edge)
             ?? throw Errors.Fail(ErrorCode.Corruption, RemoteGraphProtocol.Invalid);
         if (owner.Revision < content.Revision)
-        { throw Errors.Fail(ErrorCode.Corruption, RemoteGraphProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, RemoteGraphProtocol.Invalid);
+        }
         if (content.Deleted || owner.Deleted || owner.Revision > content.Revision || edge is null)
-        { return new(RemoteGraphProtocol.Version, intent, null, cut); }
+        {
+            return new(RemoteGraphProtocol.Version, intent, null, cut);
+        }
         if (edge.To != content.Destination || GraphCrossPartitionRecords.Fingerprint(content.SourcePartition,
             content.Graph, content.EdgeId, content.Destination, content.Revision, false, edge) != content.Fingerprint)
-        { throw Errors.Fail(ErrorCode.Corruption, RemoteGraphProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, RemoteGraphProtocol.Invalid);
+        }
         _ = VisibleVertex(view, principal, edge.From);
         work.Check();
         var projected = edge with

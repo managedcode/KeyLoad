@@ -9,15 +9,25 @@ internal sealed class NativeAnnGenerationSlot(NativeAnnGenerationOwner owner, Na
     private const int Step = 1;
     internal NativeAnnManifest Manifest { get; } = manifest;
     internal PackedAnnIndex Index { get; } = index;
-    internal int Readers { get; private set; }
-    internal bool Retired { get; private set; }
+    internal int Readers
+    {
+        get; private set;
+    }
+    internal bool Retired
+    {
+        get; private set;
+    }
 
     internal NativeAnnIndexLease Acquire(int maximumReaders)
     {
         if (Retired)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, NativeAnnProtocol.Stale); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, NativeAnnProtocol.Stale);
+        }
         if (Readers == maximumReaders)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, NativeAnnProtocol.Bound); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, NativeAnnProtocol.Bound);
+        }
         var lease = new NativeAnnIndexLease(this);
         Readers += Step;
         return lease;
@@ -29,7 +39,9 @@ internal sealed class NativeAnnGenerationSlot(NativeAnnGenerationOwner owner, Na
     internal void ReleaseUnderOwnerGate()
     {
         if (Readers <= Empty)
-        { throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Ownership); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Ownership);
+        }
         Readers -= Step;
     }
 }

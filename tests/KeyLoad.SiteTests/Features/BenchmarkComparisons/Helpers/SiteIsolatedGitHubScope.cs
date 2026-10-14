@@ -14,7 +14,10 @@ internal sealed class SiteIsolatedGitHubScope : IAsyncDisposable
         _temporary = SiteTempDirectory.Create();
     }
 
-    public SiteIsolatedGitHubInputs Inputs { get; }
+    public SiteIsolatedGitHubInputs Inputs
+    {
+        get;
+    }
     public string Capture => Path.Combine(_temporary.Path, SiteIsolatedGitHubFields.Capture);
     public string Before => Path.Combine(_temporary.Path, SiteIsolatedGitHubFields.Before);
     public string After => Path.Combine(_temporary.Path, SiteIsolatedGitHubFields.After);
@@ -90,7 +93,12 @@ internal sealed class SiteIsolatedGitHubScope : IAsyncDisposable
     public static async Task<JsonElement> RunAsync(string operation, object arguments, CancellationToken token)
     {
         var repository = SiteTestInputs.Read().Repository;
-        return await SiteIsolatedGitHubNodeProcess.RunAsync(repository, new { repository, operation, arguments }, token);
+        return await SiteIsolatedGitHubNodeProcess.RunAsync(repository, new
+        {
+            repository,
+            operation,
+            arguments
+        }, token);
     }
 
     private string RunValue(string key) => Inputs.Metadata[SiteIsolatedGitHubTokens.Run]![key]!

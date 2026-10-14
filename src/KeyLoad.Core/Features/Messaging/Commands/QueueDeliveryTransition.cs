@@ -15,7 +15,9 @@ public sealed partial class DatabaseEngine
         ResourceDefinition resource, ValidatedQueueLease lease, DateTimeOffset now, long position, ReplicatedOperation? operation = null)
     {
         if (command.Action is not (DeliveryAction.Ack or DeliveryAction.Nack or DeliveryAction.Renew))
-        { throw Errors.Fail(ErrorCode.Validation, InvalidQueueDeliveryAction); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, InvalidQueueDeliveryAction);
+        }
         var metadata = lease.Metadata;
         var counters = Counters(tx, command.Lane);
         tx.Delete(QueueKey(LeasedQueueSpace, command.Lane, metadata.LeaseUntil!.Value, metadata.Id));
@@ -28,7 +30,11 @@ public sealed partial class DatabaseEngine
                 throw Errors.Fail(ErrorCode.Validation, InvalidRenewal);
             }
             var deadline = now.AddSeconds(seconds);
-            updated = metadata with { LeaseUntil = deadline, StateVersion = metadata.StateVersion + QueueDeliveryTransitionVersionOne };
+            updated = metadata with
+            {
+                LeaseUntil = deadline,
+                StateVersion = metadata.StateVersion + QueueDeliveryTransitionVersionOne
+            };
             tx.PutRecord(QueueKey(LeasedQueueSpace, command.Lane, deadline, metadata.Id), metadata.Id);
         }
         else

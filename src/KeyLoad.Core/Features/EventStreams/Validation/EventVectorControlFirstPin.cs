@@ -23,7 +23,9 @@ internal static class EventVectorControlFirstPin
             || original.SourceSchemaVersion != entries[FirstOrdinal].SchemaVersion
             || original.LogicalPlacementRevision != entries[FirstOrdinal].LogicalPlacementRevision
             || original.DirectoryFence != entries[FirstOrdinal].DirectoryFence)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidFirstPin); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidFirstPin);
+        }
     }
 }
 

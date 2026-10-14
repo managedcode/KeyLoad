@@ -37,7 +37,11 @@ internal static class TimeSeriesAggregateScanBoundRf3Seed
                 TimeSeriesRf3Scenario.PrivateTags)]);
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.CommitAsync(command, token));
         await ReceiptAsync(command, receipt, state.Scenario.Partition);
-        return state with { FreshCommand = command, FreshReceipt = receipt };
+        return state with
+        {
+            FreshCommand = command,
+            FreshReceipt = receipt
+        };
     }
 
     private static async Task ReceiptAsync(CommandRequest command, CommitReceipt receipt, PartitionRef partition)

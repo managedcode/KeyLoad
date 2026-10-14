@@ -11,13 +11,19 @@ internal static class ScriptDomValuesInsertOperation
         Action checkBudget, CancellationToken token)
     {
         if (request.Partition is null || request.AllowFullScan || request.Cursor is not null)
-        { throw ScriptDomOperationErrors.Invalid(); }
+        {
+            throw ScriptDomOperationErrors.Invalid();
+        }
         if (request.QueryDialectVersion != SqlOperationProtocol.DefaultQueryDialectVersion)
-        { throw ScriptDomOperationErrors.Unsupported(); }
+        {
+            throw ScriptDomOperationErrors.Unsupported();
+        }
         var identity = SqlOriginalMutationIdentity.Required(request.CommandId);
         var (table, columns, values) = ScriptDomValuesInsertShape.Read(statement, checkBudget, token);
         if (values.RowValues.Count > limits.Value.MaxBatchMutations)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, RowsExceeded); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, RowsExceeded);
+        }
         var parameters = new ScriptDomCompositionParameters(request.Parameters, positionalCount, checkBudget, token);
         var mutations = ImmutableArray.CreateBuilder<Mutation>(values.RowValues.Count);
         var remaining = Math.Min(maximumPayloadBytes, limits.Value.MaxBatchBytes);

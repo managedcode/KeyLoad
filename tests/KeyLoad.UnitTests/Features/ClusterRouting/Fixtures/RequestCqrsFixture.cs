@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 using ManagedCode.Communication.Orleans.Converters;
 using ManagedCode.Communication.Orleans.Extensions;
 using ManagedCode.Orleans.Graph.Extensions;
@@ -90,15 +90,36 @@ internal sealed partial class RequestCqrsClusterFixture : IAsyncInitializer, IAs
         }
     }
 
-    internal TestCluster Cluster { get; }
+    internal TestCluster Cluster
+    {
+        get;
+    }
     internal Guid ConnectionId { get; } = Guid.NewGuid();
     internal NativeRuntimeTestOptions Timing { get; } = new();
-    internal GrainRequestCodec Codec { get; }
-    internal TestDatabase Database { get; }
-    internal TimeProvider Clock { get; }
-    internal IOptions<GrainRoutingOptions> RoutingOptions { get; }
-    internal KeyLoad.UnitTests.Features.Search.NativeTextMaintenanceTestRuntime? NativeMaintenance { get; private set; }
-    internal KeyLoad.UnitTests.Features.Search.NativeAnnMaintenanceTestRuntime? NativeAnnMaintenance { get; private set; }
+    internal GrainRequestCodec Codec
+    {
+        get;
+    }
+    internal TestDatabase Database
+    {
+        get;
+    }
+    internal TimeProvider Clock
+    {
+        get;
+    }
+    internal IOptions<GrainRoutingOptions> RoutingOptions
+    {
+        get;
+    }
+    internal KeyLoad.UnitTests.Features.Search.NativeTextMaintenanceTestRuntime? NativeMaintenance
+    {
+        get; private set;
+    }
+    internal KeyLoad.UnitTests.Features.Search.NativeAnnMaintenanceTestRuntime? NativeAnnMaintenance
+    {
+        get; private set;
+    }
     internal NativeRequestWorkOwner RequestWork => requestWork ??= new(RoutingOptions);
 
     public Task InitializeAsync() => InitializeAsync(CancellationToken.None);
@@ -128,7 +149,9 @@ internal sealed partial class RequestCqrsClusterFixture : IAsyncInitializer, IAs
         get
         {
             lock (disposalGate)
-            { return disposal is { IsCompletedSuccessfully: true }; }
+            {
+                return disposal is { IsCompletedSuccessfully: true };
+            }
         }
     }
 

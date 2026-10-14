@@ -16,7 +16,9 @@ internal static class QueueProducerRf3Setup
         await McpCallerAssertions.SdkSuccessAsync(await root.ConfigureResourceAsync(Guid.NewGuid(),
             new(tenant, partition.DatabaseId, new ResourceDefinition(lane.Queue, ResourceKind.WorkQueue,
                 partition.TransactionDomainId)
-            { QueuePolicy = new() { MaxStoredMessages = QueueProducerRf3Protocol.StoredMessageCapacity } }), token));
+            {
+                QueuePolicy = new() { MaxStoredMessages = QueueProducerRf3Protocol.StoredMessageCapacity }
+            }), token));
         await McpCallerAssertions.SdkSuccessAsync(await root.ConfigureResourceAsync(Guid.NewGuid(),
             new(tenant, partition.DatabaseId, new ResourceDefinition(QueueProducerRf3Protocol.Collection,
                 ResourceKind.Collection, partition.TransactionDomainId)), token));

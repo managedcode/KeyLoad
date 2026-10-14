@@ -73,13 +73,20 @@ internal sealed class SubscriptionRecoveryAndPolicyTests
         var id = Guid.NewGuid();
         var request = new ReceiveSubscriptionRequest(id, subscription);
         var received = db.Submit(OperationKind.ReceiveSubscription, request, id: id).Get<ReceiveSubscriptionResult>();
-        db.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(service with { PolicyEpoch = 2 })).Get<PrincipalRecord>();
+        db.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(service with
+        {
+            PolicyEpoch = 2
+        })).Get<PrincipalRecord>();
         await Assert.That(db.Submit(OperationKind.ReceiveSubscription, request, id: id).Error).IsEqualTo(ErrorCode.PermissionDenied);
         var ack = Guid.NewGuid();
         await Assert.That(db.Submit(OperationKind.SubscriptionDelivery,
             new SubscriptionDeliveryCommand(ack, subscription, received.Deliveries[0].Token, DeliveryAction.Ack), id: ack).Error).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(db.Database.GetSubscription("root", subscription).Checkpoint).IsEqualTo(0);
-        db.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(service with { PolicyEpoch = 3, Revoked = true })).Get<PrincipalRecord>();
+        db.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(service with
+        {
+            PolicyEpoch = 3,
+            Revoked = true
+        })).Get<PrincipalRecord>();
         var claim = Guid.NewGuid();
         await Assert.That(db.Submit(OperationKind.ReceiveSubscription,
             new ReceiveSubscriptionRequest(claim, subscription), id: claim).Error).IsEqualTo(ErrorCode.Unauthenticated);
@@ -119,7 +126,10 @@ internal sealed class SubscriptionRecoveryAndPolicyTests
             new SetSubscriptionPausedRequest(resume, subscription, sought.Generation, false), id: resume).Get<SubscriptionInfo>();
         var worker = new PrincipalRecord("worker", "tenant", [new("database", "*", Capability.TopicsRead | Capability.SubscriptionsConsume
             | Capability.SubscriptionsAck | Capability.DocumentsWrite)], [])
-        { RestrictRows = true, OwnerId = "other" };
+        {
+            RestrictRows = true,
+            OwnerId = "other"
+        };
         db.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(worker)).Get<PrincipalRecord>();
         var now = TimeProvider.System.GetUtcNow();
         var deniedLease = await Assert.That(Receive(db, subscription, time: now, principal: "worker").Deliveries).HasSingleItem();
@@ -127,7 +137,11 @@ internal sealed class SubscriptionRecoveryAndPolicyTests
         await Assert.That(db.Submit(OperationKind.SubscriptionProcessing,
             new SubscriptionProcessingRequest(deniedId, subscription, deniedLease.Token, "handler", 1, [.. effects]), id: deniedId, principal: "worker", time: now).Error).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(db.Database.GetSubscription("root", subscription).Checkpoint).IsEqualTo(0);
-        db.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(worker with { OwnerId = "private", PolicyEpoch = 2 })).Get<PrincipalRecord>();
+        db.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(worker with
+        {
+            OwnerId = "private",
+            PolicyEpoch = 2
+        })).Get<PrincipalRecord>();
         var allowedLease = await Assert.That(Receive(db, subscription, time: now.AddSeconds(31), principal: "worker").Deliveries).HasSingleItem();
         var allowedId = Guid.NewGuid();
         var replay = db.Submit(OperationKind.SubscriptionProcessing,

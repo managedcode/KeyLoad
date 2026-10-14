@@ -27,7 +27,13 @@ internal static class EventMessageSensitivePublicReads
                 await Assert.That(page.CutPosition).IsGreaterThanOrEqualTo(state.OriginalPage!.CutPosition);
                 await Assert.That(NativeSerialization.Serialize(page.Head).SequenceEqual(NativeSerialization.Serialize(state.OriginalPage.Head))).IsTrue();
                 var expected = state.OriginalPage.Events.Single() with
-                { Data = state.OriginalPage.Events.Single().Data with { PayloadJson = payload, HeadersJson = headers } };
+                {
+                    Data = state.OriginalPage.Events.Single().Data with
+                    {
+                        PayloadJson = payload,
+                        HeadersJson = headers
+                    }
+                };
                 await Assert.That(NativeSerialization.Serialize(record).SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
             }
             else
@@ -42,7 +48,9 @@ internal static class EventMessageSensitivePublicReads
                 await Assert.That(inspection.PayloadJson).IsEqualTo(payload);
                 await Assert.That(inspection.HeadersJson).IsEqualTo(headers);
                 if (!dlq)
-                { await Assert.That(NativeSerialization.Serialize(inspection.Metadata).SequenceEqual(NativeSerialization.Serialize(state.OriginalInspection!.Metadata))).IsTrue(); }
+                {
+                    await Assert.That(NativeSerialization.Serialize(inspection.Metadata).SequenceEqual(NativeSerialization.Serialize(state.OriginalInspection!.Metadata))).IsTrue();
+                }
                 else
                 {
                     var expected = state.OriginalInspection!.Metadata with

@@ -17,14 +17,20 @@ internal static class NativeAnnPendingFiles
     {
         NativeAnnRootInventory.Require(root, receipt, receipt.NodeId, receipt.Incarnation, options);
         if (!receipt.OwnedGenerations.Contains(leaf, StringComparer.Ordinal))
-        { throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Ownership); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Ownership);
+        }
         var directory = NativeAnnPaths.Generation(root, leaf);
         if (Directory.Exists(directory))
-        { throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Ownership); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Ownership);
+        }
         budget.Check();
         Directory.CreateDirectory(directory);
         if (!OperatingSystem.IsWindows())
-        { File.SetUnixFileMode(directory, PrivateDirectory); }
+        {
+            File.SetUnixFileMode(directory, PrivateDirectory);
+        }
         NativeAnnPaths.RequireDirectory(directory);
         var digest = Write(Path.Combine(directory, NativeAnnProtocol.IndexFile), pending, storage.Value, options, budget);
         var manifest = pending.AdmittedUpper with
@@ -55,12 +61,16 @@ internal static class NativeAnnPendingFiles
             digest = NativeAnnPendingCodec.Save(file, pending, storage, budget);
             file.Flush(flushToDisk: true);
             if (!OperatingSystem.IsWindows())
-            { File.SetUnixFileMode(path, PrivateFile); }
+            {
+                File.SetUnixFileMode(path, PrivateFile);
+            }
         }
         catch (Exception primary)
         {
             try
-            { file?.Dispose(); }
+            {
+                file?.Dispose();
+            }
             catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
             throw;
         }
@@ -75,7 +85,9 @@ internal static class NativeAnnPendingFiles
         NativeAnnCanonicalSource.RequireRestore(request, current, manifest);
         if (!manifest.IsPending || current.ProjectionCheckpoint != manifest.ReplayThrough
             || current.Cut.OutboxTail != manifest.Source.ThroughSequence || current.CorpusSha256 != manifest.Source.CorpusSha256)
-        { throw Errors.Fail(ErrorCode.HistoryUnavailable, NativeAnnProtocol.MissingDependencyHistory); }
+        {
+            throw Errors.Fail(ErrorCode.HistoryUnavailable, NativeAnnProtocol.MissingDependencyHistory);
+        }
         FileStream? file = null;
         NativeAnnReplaySource replay;
         try
@@ -87,7 +99,9 @@ internal static class NativeAnnPendingFiles
         catch (Exception primary)
         {
             try
-            { file?.Dispose(); }
+            {
+                file?.Dispose();
+            }
             catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
             throw;
         }

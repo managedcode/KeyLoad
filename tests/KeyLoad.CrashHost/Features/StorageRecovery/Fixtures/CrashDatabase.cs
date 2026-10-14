@@ -20,7 +20,9 @@ internal static class CrashDatabase
             CrashExecutionOptions.GraphExecution(), CrashExecutionOptions.ChangeFeedExecution(), CrashExecutionOptions.BlobExecution(), CrashExecutionOptions.NativeClaimsExecution(), CrashExecutionOptions.TimeSeriesExecution(), CrashExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
         database.Bootstrap(new(CrashFixtureValues.Principal, tenantId,
                 [new(CrashFixtureValues.Wildcard, CrashFixtureValues.Wildcard, Capability.All)], [CrashFixtureValues.Wildcard])
-        { ClusterAdministrator = true },
+        {
+            ClusterAdministrator = true
+        },
             DatabaseEngine.Credential(CrashFixtureValues.Principal, CrashFixtureValues.Principal, CrashFixtureValues.Credential));
         RecoveryPhysicalShardBootstrap.Bootstrap(database, CrashFixtureValues.Principal,
             [CreateVoterIdsText, CreateCreateVoterIdsText, ThirdCrashVoterId]);

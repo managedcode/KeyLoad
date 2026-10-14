@@ -130,7 +130,12 @@ internal static class PackedAnnBuilder
     private static VectorSpace CopySpace(VectorSpace space, AnnWorkBudget budget)
     {
         ChargeSpace(space, budget);
-        return space with { Id = new(space.Id.AsSpan()), Model = new(space.Model.AsSpan()), Version = new(space.Version.AsSpan()) };
+        return space with
+        {
+            Id = new(space.Id.AsSpan()),
+            Model = new(space.Model.AsSpan()),
+            Version = new(space.Version.AsSpan())
+        };
     }
 
     private static void ChargeSpace(VectorSpace space, AnnWorkBudget budget)

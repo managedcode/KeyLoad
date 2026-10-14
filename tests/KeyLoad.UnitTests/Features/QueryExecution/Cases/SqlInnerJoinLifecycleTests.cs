@@ -155,9 +155,13 @@ internal sealed class SqlInnerJoinLifecycleTests
     {
         database.Submit(OperationKind.ConfigureResource, new ConfigureResourceRequest(database.Partition.TenantId,
             database.Partition.DatabaseId, new ResourceDefinition(Left, ResourceKind.Collection, database.Partition.TransactionDomainId)
-            { RelationalSchema = new(LeftPrimaryKeyColumn, [new(LeftPrimaryKeyColumn, RelationalColumnType.Text), new(LeftForeignKeyColumn, RelationalColumnType.Text), new("total", RelationalColumnType.WholeNumber)]) }));
+            {
+                RelationalSchema = new(LeftPrimaryKeyColumn, [new(LeftPrimaryKeyColumn, RelationalColumnType.Text), new(LeftForeignKeyColumn, RelationalColumnType.Text), new("total", RelationalColumnType.WholeNumber)])
+            }));
         database.Submit(OperationKind.ConfigureResource, new ConfigureResourceRequest(database.Partition.TenantId,
             database.Partition.DatabaseId, new ResourceDefinition(Right, ResourceKind.Collection, database.Partition.TransactionDomainId)
-            { RelationalSchema = new(RightPrimaryKeyColumn, [new(RightPrimaryKeyColumn, RelationalColumnType.Text), new("name", RelationalColumnType.Text)]) }));
+            {
+                RelationalSchema = new(RightPrimaryKeyColumn, [new(RightPrimaryKeyColumn, RelationalColumnType.Text), new("name", RelationalColumnType.Text)])
+            }));
     }
 }

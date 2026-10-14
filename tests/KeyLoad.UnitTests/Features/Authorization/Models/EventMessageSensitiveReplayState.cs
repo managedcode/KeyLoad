@@ -15,11 +15,17 @@ internal sealed class EventMessageSensitiveReplayState(PartitionRef partition, R
     internal SubscriptionRef OriginalGroup => new(Source, EventMessageSensitiveReplayProtocol.Group);
     internal CommandRequest Producer { get; set; } = null!;
     internal OperationResult Produced { get; set; } = null!;
-    internal Guid OriginalId { get; set; }
+    internal Guid OriginalId
+    {
+        get; set;
+    }
     internal object OriginalRequest { get; set; } = null!;
     internal OperationResult Original { get; set; } = null!;
     internal byte[] OriginalOutcome { get; set; } = [];
-    internal Guid HealthyId { get; set; }
+    internal Guid HealthyId
+    {
+        get; set;
+    }
     internal object HealthyRequest { get; set; } = null!;
     internal OperationResult Healthy { get; set; } = null!;
     internal OperationKind ReceiveKind => Subscription ? OperationKind.ReceiveSubscription : OperationKind.Receive;

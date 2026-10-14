@@ -18,13 +18,21 @@ internal static class CrashHostApplication
 
         _ = SerializationExecutionRegistration.Process.Value;
         if (await global::KeyLoad.CrashHost.Features.BlobStorage.BlobCommitCutScenario.TryRunAsync(args))
-        { return; }
+        {
+            return;
+        }
         if (await NativeChecksumProfileScenario.TryRunAsync(args))
-        { return; }
+        {
+            return;
+        }
         if (await ClusterRestoreProcessCutScenario.TryRunAsync(args))
-        { return; }
+        {
+            return;
+        }
         if (await NativeTextOnlineCrashScenario.TryRunAsync(args))
-        { return; }
+        {
+            return;
+        }
         if (await NativeTextIncrementalCrashScenario.TryRunAsync(args) || await NativeTextCrashScenario.TryRunAsync(args))
         {
             return;
@@ -49,7 +57,10 @@ internal static class CrashHostApplication
         var mutationIndex = int.Parse(args[ArgsComponentIndex], CultureInfo.InvariantCulture);
         var mode = args.Length > ArgsLengthValidationBoundary ? args[RunAsyncArgsComponentIndex] : CrashFixtureValues.CommitMode;
         var boundary = new CanonicalCrashBoundary(stage, mutationIndex, mode == CrashFixtureValues.CommitMode);
-        using var store = new ZoneTreeStore(new(directory) { FaultObserver = boundary.Observe }, CrashExecutionOptions.StorageExecution(), CrashExecutionOptions.PointCacheExecution());
+        using var store = new ZoneTreeStore(new(directory)
+        {
+            FaultObserver = boundary.Observe
+        }, CrashExecutionOptions.StorageExecution(), CrashExecutionOptions.PointCacheExecution());
         await RunScenarioAsync(directory, store, boundary, mode);
     }
 

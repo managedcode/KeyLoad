@@ -20,7 +20,9 @@ internal sealed class RemoteGraphGrainService(GrainId id, Silo silo, ILoggerFact
     {
         var failures = new List<Exception>();
         if (receiver is { } actual)
-        { await ServerFailureObserver.ObserveAsync(actual.StopAsync, failures).ConfigureAwait(true); }
+        {
+            await ServerFailureObserver.ObserveAsync(actual.StopAsync, failures).ConfigureAwait(true);
+        }
         await ServerFailureObserver.ObserveAsync(base.Stop, failures).ConfigureAwait(true);
         ServerFailureObserver.ThrowIfAny(failures);
     }

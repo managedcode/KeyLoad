@@ -27,7 +27,10 @@ internal sealed class AnnProjectionPinAuthorityTests
         await AssertRejectedOperationsAsync(database, consumer, batch, OrdinaryId, ErrorCode.PermissionDenied);
 
         AnnProjectionPinTestSupport.ConfigurePrincipal(database, activeAdmin with
-        { Revoked = true, PolicyEpoch = activeAdmin.PolicyEpoch + 1 });
+        {
+            Revoked = true,
+            PolicyEpoch = activeAdmin.PolicyEpoch + 1
+        });
         await AssertRejectedOperationsAsync(database, consumer, batch, AdminId, ErrorCode.Unauthenticated);
 
         var after = database.Database.GetOutboxStatus(AnnProjectionPinTestSupport.Principal, database.Partition);

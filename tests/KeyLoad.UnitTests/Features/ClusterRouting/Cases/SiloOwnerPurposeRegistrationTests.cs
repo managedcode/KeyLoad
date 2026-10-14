@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 using KeyLoad.UnitTests.Features.Search;
 using KeyLoad.UnitTests.Features.StorageRecovery;
@@ -22,7 +22,9 @@ internal sealed class SiloOwnerPurposeRegistrationTests
         var borrowed = new Bm25PortableMovementPurposeEvidence(0, borrow);
         var explicitObserver = new NativeSignedPurposeObservation();
         if (selection == 1)
-        { builder.Services.AddSingleton<IGrainRequestPurposeObserver>(explicitObserver); }
+        {
+            builder.Services.AddSingleton<IGrainRequestPurposeObserver>(explicitObserver);
+        }
         IGrainPartitionMovementSealedOperationObserver original = selection == 2 ? borrow : borrowed;
         OrleansNativePeerServices.RegisterSiloOwners(builder, NullLoggerFactory.Instance,
             connection, discoveryOmission: null, original, localhostClustering: null);

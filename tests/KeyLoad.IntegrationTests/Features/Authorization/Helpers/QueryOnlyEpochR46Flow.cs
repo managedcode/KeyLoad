@@ -13,7 +13,10 @@ internal static class QueryOnlyEpochR46Flow
             var initial = new QueryOnlyEpochR46State(original, baseline, [],
                 await QueryOnlyEpochR46Current.OutboxAsync(root, original.Scenario, token), original.CurrentReader);
             await QueryOnlyEpochR46Current.RequireAsync(root, reader, initial, token);
-            initial = initial with { GrantedPages = await QueryOnlyEpochR46Pages.RequireAsync(root, reader, initial, token) };
+            initial = initial with
+            {
+                GrantedPages = await QueryOnlyEpochR46Pages.RequireAsync(root, reader, initial, token)
+            };
             initial = initial with
             {
                 CurrentReader = await QueryOnlyEpochR46Policy.ChangeAsync(

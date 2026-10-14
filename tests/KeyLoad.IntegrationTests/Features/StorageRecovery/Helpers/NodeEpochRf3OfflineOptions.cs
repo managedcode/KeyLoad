@@ -10,7 +10,9 @@ internal static class NodeEpochRf3OfflineOptions
     {
         ArgumentNullException.ThrowIfNull(profile);
         if (!ClusterFixtureProtocol.IsNodeName(nodeName))
-        { throw new ArgumentException("The node must belong to the closed RF3 contract.", nameof(nodeName)); }
+        {
+            throw new ArgumentException("The node must belong to the closed RF3 contract.", nameof(nodeName));
+        }
         var options = new NodeOptions
         {
             DataDirectory = Path.GetFullPath(destination),

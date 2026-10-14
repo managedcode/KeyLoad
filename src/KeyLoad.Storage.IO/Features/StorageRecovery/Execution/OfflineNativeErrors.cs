@@ -19,11 +19,17 @@ internal static class OfflineNativeErrors
     internal static Exception FromErrno(int error, bool isMac)
     {
         if (error == (isMac ? MacSymlinkLoopErrno : LinuxSymlinkLoopErrno))
-        { return Errors.Fail(ErrorCode.FormatUnsupported, InvalidPath); }
+        {
+            return Errors.Fail(ErrorCode.FormatUnsupported, InvalidPath);
+        }
         if (!isMac && error == LinuxUnsupportedSyscallErrno)
-        { return Unsupported(); }
+        {
+            return Unsupported();
+        }
         if (error == MissingFileErrno)
-        { return new FileNotFoundException(MissingFileMessage); }
+        {
+            return new FileNotFoundException(MissingFileMessage);
+        }
         return new IOException(FileSystemFailureMessage, new Win32Exception(error));
     }
 

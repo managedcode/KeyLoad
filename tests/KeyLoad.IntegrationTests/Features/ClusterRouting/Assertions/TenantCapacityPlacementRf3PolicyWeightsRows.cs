@@ -27,7 +27,9 @@ internal static class TenantCapacityPlacementRf3PolicyWeightsRows
             await SqlRf3Protocol.EqualAsync(policy, Decode<TenantPlacementPolicyV1>(row));
         }
         if (retained is not null && Decode<TenantPlacementPolicyV1>(retained.Policy).Revision == policy.Revision)
-        { await Assert.That(policyRow).IsEqualTo(retained.Policy); }
+        {
+            await Assert.That(policyRow).IsEqualTo(retained.Policy);
+        }
         foreach (var originalFailure in original)
         {
             var key = KeySpace.PartitionOutcome(state.Control,
@@ -38,7 +40,9 @@ internal static class TenantCapacityPlacementRf3PolicyWeightsRows
                 await Assert.That(cut.OutstandingMoveGrants).IsEqualTo(0L);
                 await Assert.That(cut.OutstandingDatabaseGrants).IsEqualTo(0L);
                 if (!controls.Contains(cut))
-                { await Assert.That(Row(cut, key)).IsNull(); }
+                {
+                    await Assert.That(Row(cut, key)).IsNull();
+                }
             }
             foreach (var cut in controls)
             {

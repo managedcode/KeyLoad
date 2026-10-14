@@ -19,11 +19,19 @@ internal static class EventMessageSensitiveSafeR52Flow
             await EventMessageSensitiveSafeR52Current.CaptureAsync(root, state, token);
             var policy = new SensitiveFieldPolicy(EventMessageSensitiveSafeR52Protocol.MissingPath,
                 EventMessageSensitivePublicProtocol.Classification, EventMessageSensitivePublicProtocol.GrantAfter);
-            var definition = state.Model.Header ? state.Model.Resource with { HeaderPolicies = [policy] }
-                : state.Model.Resource with { FieldPolicies = [policy] };
+            var definition = state.Model.Header ? state.Model.Resource with
+            {
+                HeaderPolicies = [policy]
+            }
+                : state.Model.Resource with
+                {
+                    FieldPolicies = [policy]
+                };
             state.Model.Resource = await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.ConfigureResourceAsync(Guid.NewGuid(),
                 new(state.Model.Partition.TenantId, state.Model.Partition.DatabaseId, definition)
-                { ExpectedSchemaVersion = state.Model.Resource.SchemaVersion }, token));
+                {
+                    ExpectedSchemaVersion = state.Model.Resource.SchemaVersion
+                }, token));
             await EventMessageSensitiveSafeR52Current.RequireAsync(root, state, token);
             await EventMessageSensitiveSafeR52Replay.ReceiveAsync(root, caller, state, state.OriginalRequest,
                 state.Original, EventMessageSensitiveSafeR52Protocol.First, token);
@@ -39,7 +47,11 @@ internal static class EventMessageSensitiveSafeR52Flow
                 state.Original, EventMessageSensitiveSafeR52Protocol.First, token);
             await EventMessageSensitiveSafeR52Replay.ReceiptsAsync(root, caller, state, token);
             await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(),
-                state.Model.Worker with { Revoked = true, PolicyEpoch = EventMessageSensitiveSafeR52Protocol.RevokedEpoch }, token));
+                state.Model.Worker with
+                {
+                    Revoked = true,
+                    PolicyEpoch = EventMessageSensitiveSafeR52Protocol.RevokedEpoch
+                }, token));
             await EventMessageSensitiveSafeR52Current.RequireAsync(root, state, token);
             await EventMessageSensitiveSafeR52Refusals.ReceiveAsync(root, caller, state,
                 EventMessageSensitivePublicOperations.Receive(state.Model, Guid.NewGuid(), false), ErrorCode.Unauthenticated, token);
@@ -98,9 +110,13 @@ internal static class EventMessageSensitiveSafeR52Flow
                 var request = EventMessageSensitivePublicOperations.Receive(state.Model, Guid.NewGuid(), true);
                 var empty = await EventMessageSensitivePublicOperations.ReceiveAsync(caller, state.Model, request, route, token);
                 if (empty is ReceiveSubscriptionResult subscription)
-                { await Assert.That(subscription.Deliveries).IsEmpty(); }
+                {
+                    await Assert.That(subscription.Deliveries).IsEmpty();
+                }
                 else
-                { await Assert.That(((ReceiveResult)empty).Deliveries).IsEmpty(); }
+                {
+                    await Assert.That(((ReceiveResult)empty).Deliveries).IsEmpty();
+                }
                 await EventMessageSensitiveSafeR52Current.RequireAsync(root, state, token);
             }
         }, token);

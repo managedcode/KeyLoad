@@ -31,7 +31,9 @@ internal static class KeyLoadAppHostApplication
         AddKeyLoad(builder);
         var app = builder.Build();
         if (loggerModelControl)
-        { return EmptyResult; }
+        {
+            return EmptyResult;
+        }
         if (tests is not null)
         {
             return await TestSuiteApplication.RunAsync(app, tests).ConfigureAwait(false);
@@ -60,7 +62,9 @@ internal static class KeyLoadAppHostApplication
         if (tests is not null)
         {
             if (twoRf3)
-            { throw new InvalidOperationException(TwoRf3ProfileProtocol.Invalid); }
+            {
+                throw new InvalidOperationException(TwoRf3ProfileProtocol.Invalid);
+            }
             TestSuiteResources.Add(builder, tests);
             return;
         }

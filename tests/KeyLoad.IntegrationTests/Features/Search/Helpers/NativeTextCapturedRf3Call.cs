@@ -25,7 +25,9 @@ internal static class NativeTextCapturedRf3Call
             {
                 var result = await caller.Sdk.ExecuteSqlAsync(NativeTextSelectedRf3Call.SqlRequest(request), token);
                 if (!result.IsSuccess)
-                { return new(null, result.Problem?.ErrorCode, null, null); }
+                {
+                    return new(null, result.Problem?.ErrorCode, null, null);
+                }
                 var json = await McpCallerAssertions.SdkSuccessAsync(result);
                 return new(json.Deserialize<RankedDocument[]>(JsonDefaults.Options) ?? throw new InvalidOperationException(), null, null, null);
             }
@@ -49,9 +51,15 @@ internal static class NativeTextCapturedRf3Call
         await Assert.That(cancelled).IsTrue();
         await Assert.That(actual.Rows).IsNull();
         if (actual.TransportFailure is not null)
-        { await Assert.That(actual.TransportFailure is OperationCanceledException or HttpRequestException or IOException).IsTrue(); return; }
+        {
+            await Assert.That(actual.TransportFailure is OperationCanceledException or HttpRequestException or IOException).IsTrue();
+            return;
+        }
         if (actual.McpError is not null)
-        { _ = await McpCallerAssertions.ErrorAsync(actual.McpError, ErrorCode.Cancelled, true); return; }
+        {
+            _ = await McpCallerAssertions.ErrorAsync(actual.McpError, ErrorCode.Cancelled, true);
+            return;
+        }
         await Assert.That(actual.SdkError).IsEqualTo(ErrorCode.Cancelled.ToString());
     }
 }

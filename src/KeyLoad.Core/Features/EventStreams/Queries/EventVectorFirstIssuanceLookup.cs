@@ -26,18 +26,24 @@ internal static class EventVectorFirstIssuanceLookup
         var capacity = EventVectorFirstLookupRows.Read(boundedView,
             EventVectorKeys.Capacity(request.ControlPartition), admission);
         if (admit.Outcome is null)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         if (admit.Outcome.Result.Error is not null)
         {
             if (!active.IsEmpty || !terminal.IsEmpty || !map.IsEmpty || !parent.IsEmpty || !index.IsEmpty)
-            { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+            }
             return new(Version, principal.Id, request.CommandId, owner, identity.NodeId, identity.ReadGeneration,
                 admit.CommandId, admit.Raw, active, map, parent, index, ReadOnlyMemory<byte>.Empty,
                 terminal, ReadOnlyMemory<byte>.Empty, capacity);
         }
         if (!active.IsEmpty && !terminal.IsEmpty || !map.IsEmpty && (!active.IsEmpty || !terminal.IsEmpty)
             || active.IsEmpty && terminal.IsEmpty && map.IsEmpty && index.IsEmpty)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         cancellationToken.ThrowIfCancellationRequested();
         var proof = map.IsEmpty && index.IsEmpty
             ? IssuanceProof(boundedView, principal, request, !terminal.IsEmpty, identity.Incarnation, authorization, admission)
@@ -48,7 +54,9 @@ internal static class EventVectorFirstIssuanceLookup
         EventVectorParentScopes.Authorize(authorization, principal, proof.Scopes, admission);
         parent = OriginalParent(parent, request.CommandId);
         if ((!map.IsEmpty || !index.IsEmpty) && originalOutcome.IsEmpty)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         return new(Version, principal.Id, request.CommandId, owner, identity.NodeId, identity.ReadGeneration,
             admit.CommandId, admit.Raw, proof.Abandoned ? ReadOnlyMemory<byte>.Empty : active, map, parent, index,
             proof.Abandoned ? active : ReadOnlyMemory<byte>.Empty, terminal, originalOutcome, capacity);
@@ -64,7 +72,9 @@ internal static class EventVectorFirstIssuanceLookup
         EventVectorParentScopes.Authorize(authorization, principal, row.OriginalAuthorizedSourceScopes, admission);
         _ = EventVectorFirstIssuanceValidation.RequireRequest(row, request, admission);
         if (terminal)
-        { EventVectorFirstTerminalOutcome.Require(view, principal, row, incarnation, admission); }
+        {
+            EventVectorFirstTerminalOutcome.Require(view, principal, row, incarnation, admission);
+        }
         var commandId = Guid.Empty;
         if (!row.OriginalCapturedFirstOpenPhaseBytes.IsEmpty)
         {
@@ -99,7 +109,9 @@ internal static class EventVectorFirstIssuanceLookup
         var map = inventory.Header ?? throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
         if (map.PrincipalId != principal.Id || map.ControlPolicyEpoch != principal.PolicyEpoch
             || map.ControlIncarnation != incarnation || map.OriginalOpenCommandId != request.CommandId)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, Invalid);
+        }
         EventVectorParentInventoryAuthorization.Require(authorization, principal, inventory, admission);
         EventVectorInventoryValidation.Require(map, inventory.PayloadRows, admission);
         _ = EventVectorParentObservationRead.Read(view, authorization, principal, request,
@@ -114,7 +126,9 @@ internal static class EventVectorFirstIssuanceLookup
     private static ReadOnlyMemory<byte> OriginalParent(ReadOnlyMemory<byte> bytes, Guid publicCommandId)
     {
         if (bytes.IsEmpty)
-        { return bytes; }
+        {
+            return bytes;
+        }
         var parent = NativeSerialization.Deserialize<EventVectorParentCall>(bytes.Span);
         return parent.OriginalPublicCommandId == publicCommandId ? bytes : ReadOnlyMemory<byte>.Empty;
     }
@@ -122,6 +136,8 @@ internal static class EventVectorFirstIssuanceLookup
     private static void RequirePublishedPair(ReadOnlyMemory<byte> phase, Guid commandId)
     {
         if (phase.IsEmpty || commandId == Guid.Empty)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
     }
 }

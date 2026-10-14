@@ -51,7 +51,9 @@ public sealed partial class DatabaseEngine
                 throw Errors.Fail(ErrorCode.Validation, QueueResourceNameMismatchDetail);
             }
             if (source.Kind == ModelQuerySourceKind.TopicEvents && source.Item != resourceName)
-            { throw Errors.Fail(ErrorCode.Validation, TopicResourceNameMismatchDetail); }
+            {
+                throw Errors.Fail(ErrorCode.Validation, TopicResourceNameMismatchDetail);
+            }
             JsonData.Identifier(source.Item);
             if (source.Kind != ModelQuerySourceKind.QueueMessages && source.Generation < FirstSourceGeneration)
             {

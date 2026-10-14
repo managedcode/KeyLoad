@@ -25,12 +25,16 @@ public sealed partial class DatabaseEngine
         var bounded = work.CreateView(view);
         var principal = Principal(bounded, principalId, EvaluationClock.GetUtcNow());
         if (request.ControlPartition is null || request.Scope is null)
-        { throw Errors.Fail(ErrorCode.Validation, InvalidEventVectorParentObservation); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, InvalidEventVectorParentObservation);
+        }
         Authorization.Require(principal, request.ControlPartition, request.Scope.Resource,
             Capability.SubscriptionsManage);
         _ = StreamTraversalPlacement(bounded, request.ControlPartition, controlOwner);
         if (freshSourceAuthorizationWitness.IsEmpty)
-        { throw Errors.Fail(ErrorCode.PermissionDenied, InvalidEventVectorParentObservation); }
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, InvalidEventVectorParentObservation);
+        }
         _ = EventVectorCurrentSourceAuthorization.Require(bounded, principal, request,
             System.Collections.Immutable.ImmutableArray<EventVectorAuthorizationScope>.Empty,
             freshSourceAuthorizationWitness, new EventVectorAdmissionPolicy(OperationLimitsOptions));

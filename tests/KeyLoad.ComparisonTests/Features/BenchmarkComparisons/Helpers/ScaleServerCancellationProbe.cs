@@ -74,7 +74,9 @@ internal static class ScaleServerCancellationProbe
     private static void ThrowFailures(List<Exception> failures)
     {
         if (failures.Count == 0)
-        { return; }
+        {
+            return;
+        }
         var fatal = failures.Select(CqrsRuntimeFailures.FindFatal).FirstOrDefault(item => item is not null);
         var ordered = new List<Exception>();
         if (fatal is not null)
@@ -148,7 +150,9 @@ internal static class ScaleServerCancellationProbe
         var observation = StartObservationAsync(app, containers, collector, caller);
         var body = RunCanceledObservationAsync(app, caller, collector, observation, token);
         try
-        { await ScaleServerCancellationProbeSettlement.CaptureAsync(body, failures); }
+        {
+            await ScaleServerCancellationProbeSettlement.CaptureAsync(body, failures);
+        }
         finally
         {
             await ScaleServerCancellationProbeSettlement.CaptureAsync(caller.CancelAsync(), failures);
@@ -162,7 +166,9 @@ internal static class ScaleServerCancellationProbe
         var observation = StartObservationAsync(app, containers, collector, caller);
         var body = VerifyFailedWriteAsync(app, containers, caller, collector, observation, output);
         try
-        { await ScaleServerCancellationProbeSettlement.CaptureAsync(body, failures); }
+        {
+            await ScaleServerCancellationProbeSettlement.CaptureAsync(body, failures);
+        }
         finally
         {
             await ScaleServerCancellationProbeSettlement.CaptureAsync(caller.CancelAsync(), failures);
@@ -198,7 +204,9 @@ internal static class ScaleServerCancellationProbe
         var original = AspireResourceCompletion.WaitForExitAsync(app, resourceName, caller.Token);
         await caller.CancelAsync();
         try
-        { await original; }
+        {
+            await original;
+        }
         catch (OperationCanceledException failure) { return failure; }
         throw new InvalidOperationException("The actual Aspire resource wait did not observe caller cancellation.");
     }
@@ -207,7 +215,9 @@ internal static class ScaleServerCancellationProbe
         CancellationTokenSource caller, ScaleServerResourceEvidenceCollector collector, Task observation)
     {
         try
-        { await SettleFailureAsync(primary, caller, collector, observation); }
+        {
+            await SettleFailureAsync(primary, caller, collector, observation);
+        }
         catch (AggregateException failure) { return failure; }
         throw new InvalidOperationException("Cancellation and native sidecar writer failures were not retained together.");
     }
@@ -215,7 +225,9 @@ internal static class ScaleServerCancellationProbe
     private static async Task<Exception> CaptureWriteFailureAsync(Task completion)
     {
         try
-        { await completion; }
+        {
+            await completion;
+        }
         catch (IOException failure) { return failure; }
         catch (UnauthorizedAccessException failure) { return failure; }
         throw new InvalidOperationException("The native resource-evidence writer accepted a directory as its sidecar.");

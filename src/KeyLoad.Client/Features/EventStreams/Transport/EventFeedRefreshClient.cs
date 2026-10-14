@@ -16,7 +16,9 @@ public static class EventFeedRefreshClient
         ArgumentNullException.ThrowIfNull(client);
         ArgumentNullException.ThrowIfNull(request);
         if (request.Action != EventFeedControlAction.Refresh)
-        { throw new ArgumentException(EventFeedRefreshProtocol.Description, nameof(request)); }
+        {
+            throw new ArgumentException(EventFeedRefreshProtocol.Description, nameof(request));
+        }
         return client.Send<EventFeedControlResult>(EventFeedRefreshProtocol.Route,
             request, true, request.CommandId, cancellationToken);
     }

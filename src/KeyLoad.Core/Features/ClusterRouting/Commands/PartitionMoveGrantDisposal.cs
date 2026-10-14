@@ -15,7 +15,9 @@ public sealed partial class DatabaseEngine
     {
         var maximum = (Limits.MaxBatchMutations - MoveAbortMetadataMutations) / MoveAbortGrantMutations;
         if (maximum <= PartitionMoveProtocol.EmptyCount)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
+        }
         var changed = PartitionMoveProtocol.EmptyCount;
         long bytes = PartitionMoveProtocol.EmptyCount;
         var pending = false;
@@ -28,14 +30,24 @@ public sealed partial class DatabaseEngine
                 continue;
             }
             if (grant.Settlement is not null || grant.AbortDisposition is not null)
-            { continue; }
+            {
+                continue;
+            }
             var barrier = grant.ReceiverOwner.Incarnation == control.SourcePlacement.Incarnation ? source : target;
             if (!PhysicalOwnerEntryValidation.SameOwner(barrier.PhysicalOwner, grant.ReceiverOwner))
-            { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
-            var disposed = grant with { AbortDisposition = barrier };
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+            }
+            var disposed = grant with
+            {
+                AbortDisposition = barrier
+            };
             var measured = NativeSerialization.Measure(disposed);
             if (changed >= maximum || bytes + measured > Limits.MaxBatchBytes)
-            { pending = true; continue; }
+            {
+                pending = true;
+                continue;
+            }
             bytes = checked(bytes + measured);
             PartitionMoveGrantStorage.Write(transaction, disposed, Limits.MaxBatchBytes);
             PartitionMoveGrantStorage.ChangeOutstanding(transaction,
@@ -47,7 +59,9 @@ public sealed partial class DatabaseEngine
             changed++;
         }
         if (pending && changed == PartitionMoveProtocol.EmptyCount)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
+        }
         return !pending;
     }
 
@@ -57,7 +71,9 @@ public sealed partial class DatabaseEngine
         {
             var grant = ReadIndexedMoveGrant(view, control, row);
             if (grant.RetireCancellationDisposition is not null)
-            { RequireRetireGrantCancellationDisposition(view, control, grant); }
+            {
+                RequireRetireGrantCancellationDisposition(view, control, grant);
+            }
         }
     }
 
@@ -65,7 +81,9 @@ public sealed partial class DatabaseEngine
     {
         if (PartitionMoveGrantStorage.Outstanding(view,
             PartitionMoveGrantStorage.MoveCountKey(control.Partition, control.MoveId)) != PartitionMoveProtocol.EmptyCount)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+        }
         foreach (var row in ReadMoveGrantIndex(view, control))
         {
             var grant = ReadIndexedMoveGrant(view, control, row);
@@ -75,7 +93,9 @@ public sealed partial class DatabaseEngine
                 continue;
             }
             if (grant.Settlement is null && grant.AbortDisposition is null)
-            { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
+            {
+                throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+            }
         }
     }
 }

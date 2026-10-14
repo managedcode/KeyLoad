@@ -36,7 +36,10 @@ internal static class SqlNullDistinctCases
     internal const string Tail = " ORDER BY label ASC";
     internal static readonly FieldOperand Score = new("/score");
     internal static readonly FieldOperand Label = new("/label");
-    internal static IReadOnlyList<SqlNullDistinctCase> All { get; } =
+    internal static IReadOnlyList<SqlNullDistinctCase> All
+    {
+        get;
+    } =
     [
         new("score IS DISTINCT FROM NULL", And(new NullTest(Score, true, false), new NullTest(Score, true, true)), ["high", "low"]),
         new("score IS NOT DISTINCT FROM NULL", new NullTest(Score, false, false), ["null_a", "null_b"]),

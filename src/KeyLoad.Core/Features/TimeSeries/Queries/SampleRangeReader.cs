@@ -34,7 +34,10 @@ internal static class SampleRangeReader
         {
             var sample = SampleRawReadDecoder.Read(key, value,
                 request.Partition, request.Set, request.SeriesId);
-            var projected = sample with { TagsJson = database.Authorization.Project(principal, resource.FieldPolicies, sample.TagsJson, out _) };
+            var projected = sample with
+            {
+                TagsJson = database.Authorization.Project(principal, resource.FieldPolicies, sample.TagsJson, out _)
+            };
             resultBytes += budget.MeasureResult(projected);
             if (resultBytes > database.Limits.MaxBatchBytes)
             {

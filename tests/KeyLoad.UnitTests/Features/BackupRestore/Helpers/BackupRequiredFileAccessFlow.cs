@@ -30,7 +30,9 @@ internal static class BackupRequiredFileAccessFlow
         var original = await NativeBackupJournalRepairAssertions.ArchiveAsync(fixture.BackupDirectory, token);
         var destination = Path.Combine(fixture.BackupDirectory, DestinationName);
         if (existingEmpty)
-        { Directory.CreateDirectory(destination); }
+        {
+            Directory.CreateDirectory(destination);
+        }
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {

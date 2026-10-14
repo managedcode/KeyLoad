@@ -1,6 +1,6 @@
 using KeyLoad.Client;
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.Authorization;
@@ -41,7 +41,9 @@ internal static class DiscoveryAuthorityClients
                 var reader = new KeyLoadClient(http, state.Identity.Secret, IntegrationClientOptions.Execution());
                 await StandardAspNetAuthorityTrial.RunAsync(http, root, reader, session, state, token);
                 if (changePolicy)
-                { await DiscoveryAuthorityFlow.WarmAsync(fixture, root, reader, session, state, firstRequest, token); }
+                {
+                    await DiscoveryAuthorityFlow.WarmAsync(fixture, root, reader, session, state, firstRequest, token);
+                }
                 else
                 {
                     await DiscoveryAuthorityValues.HealthyAsync(root, reader, session, state, token);

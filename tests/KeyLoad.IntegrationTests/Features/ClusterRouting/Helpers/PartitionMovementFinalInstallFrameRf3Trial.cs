@@ -38,9 +38,13 @@ internal static class PartitionMovementFinalInstallFrameRf3Trial
             await ExecuteAsync(wave, seed, originalCap, mode, continueFailedState, requirePolicyFence, caller.Token);
         }, failures).ConfigureAwait(false);
         if (seed is { } clients)
-        { await ServerFailureObserver.ObserveAsync(() => clients.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => clients.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         if (wave is { } resources)
-        { await ServerFailureObserver.ObserveAsync(() => resources.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => resources.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
@@ -84,9 +88,13 @@ internal static class PartitionMovementFinalInstallFrameRf3Trial
             joinedRefusal = refused;
             await PartitionMovementFinalInstallFrameRf3Assertions.RequireDeniedAsync(wave, seed, precut, refused);
             if (mode == MovementFrameObservationSelectionMode.Exact)
-            { await MovementFrameObservationRf3Assertions.RequireAsync(wave, seed, precut, refused, exact); }
+            {
+                await MovementFrameObservationRf3Assertions.RequireAsync(wave, seed, precut, refused, exact);
+            }
             else
-            { await wave.frameObservation.RequireAbsentAsync(); }
+            {
+                await wave.frameObservation.RequireAbsentAsync();
+            }
             var frames = await ReadFinalFramesAsync(wave, seed, precut, refused, deniedCap, cancellationToken);
             foreach (var frame in frames)
             {

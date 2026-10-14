@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core.Features.Messaging;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.DocumentStorage;
 using KeyLoad.Storage;
 using Microsoft.Extensions.Options;
@@ -26,8 +26,12 @@ internal static class RemoteTransferPeerReplyValidation
             || discovery.PeerEnvelopeVersion != ReplicaTransportProtocol.Version
             || discovery.RuntimeJournalReaderContract != StoreReaderContract.RuntimeJournal
             || !global::KeyLoad.Server.Features.ClusterRouting.PhysicalGroupAddress.CanonicalAddress(discovery.SiloAddress, membership))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteTransferPeerProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, RemoteTransferPeerProtocol.Invalid);
+        }
         if (reply.QueueTransfer is { } result)
-        { RemoteTransferPeerShape.RequireResult(result, call.Stage); }
+        {
+            RemoteTransferPeerShape.RequireResult(result, call.Stage);
+        }
     }
 }

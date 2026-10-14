@@ -20,9 +20,13 @@ internal static class BlobRangeIntegrityFaults
         store.Commit((tx, _) =>
         {
             if (damaged is null)
-            { tx.Delete(key); }
+            {
+                tx.Delete(key);
+            }
             else
-            { tx.Put(key, damaged); }
+            {
+                tx.Put(key, damaged);
+            }
             return true;
         });
         return new(key, original);

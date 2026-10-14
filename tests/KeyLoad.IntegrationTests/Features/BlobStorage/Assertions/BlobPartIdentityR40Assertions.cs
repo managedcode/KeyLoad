@@ -20,9 +20,13 @@ internal static class BlobPartIdentityR40Assertions
     {
         await CanonicalAsync(callers, state, token);
         if (state.Completed is null)
-        { await HiddenRangeAsync(callers, state, token); }
+        {
+            await HiddenRangeAsync(callers, state, token);
+        }
         else
-        { await PublishedRangesAsync(callers, state, token); }
+        {
+            await PublishedRangesAsync(callers, state, token);
+        }
         await OutboxAsync(callers, state, token);
     }
 

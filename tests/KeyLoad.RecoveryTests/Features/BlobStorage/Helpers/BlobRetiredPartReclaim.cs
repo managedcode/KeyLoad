@@ -15,7 +15,9 @@ internal static class BlobRetiredPartReclaim
         await BlobPriorPublicationImage.ReceiptAsync(owner, result.Receipt, original.Id, seed.Publication.Blob);
         await BlobPriorPublicationAssertions.QuotasAsync(owner, seed.Publication, 0, 0);
         foreach (var family in new[] { "blob-state-v1", "blob-part-v1", "blob-partmeta-v1" })
-        { await Assert.That(owner.Store.Read(view => view.ReadOwnedValue(BlobPriorPublicationOracle.Key(family, seed.Publication)))).IsNull(); }
+        {
+            await Assert.That(owner.Store.Read(view => view.ReadOwnedValue(BlobPriorPublicationOracle.Key(family, seed.Publication)))).IsNull();
+        }
         await Assert.That(new BlobStorageOperations(owner).UploadInfo("root", new(seed.Publication.Blob, seed.Publication.Upload))).IsNull();
         await BlobRetiredPartAssertions.TombstoneAsync(owner, seed);
         await BlobPriorPublicationImage.ReplayAsync(owner, seed.Deletion);
@@ -31,7 +33,9 @@ internal static class BlobRetiredPartReclaim
         await BlobPriorPublicationAssertions.HealthyAsync(owner, current);
         await BlobPriorPublicationImage.ReplayAsync(owner, old.Deletion);
         foreach (var command in old.Publication.Commands)
-        { await BlobPriorPublicationRefusal.InvalidatedAsync(owner, command); }
+        {
+            await BlobPriorPublicationRefusal.InvalidatedAsync(owner, command);
+        }
         await BlobPriorPublicationRefusal.InvalidatedAsync(owner, reclaimed);
         await BlobPriorPublicationImage.SameAsync(store, image, position, old.Publication.Identity);
     }

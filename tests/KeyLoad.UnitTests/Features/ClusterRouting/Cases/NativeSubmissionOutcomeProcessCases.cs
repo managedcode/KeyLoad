@@ -18,9 +18,18 @@ internal sealed class NativeSubmissionOutcomeProcessCases
         => C1OutcomeInspectionFixture.RunOwnedAsync(async fixture =>
         {
             var seed = await NativeSubmissionOutcomeProcessSeed.CreateAsync(fixture).ConfigureAwait(false);
-            var wrongNode = seed.Request with { ExpectedNodeId = Guid.NewGuid() };
-            var wrongIncarnation = seed.Request with { Incarnation = Guid.NewGuid() };
-            var missing = seed.Request with { CommandId = Guid.NewGuid() };
+            var wrongNode = seed.Request with
+            {
+                ExpectedNodeId = Guid.NewGuid()
+            };
+            var wrongIncarnation = seed.Request with
+            {
+                Incarnation = Guid.NewGuid()
+            };
+            var missing = seed.Request with
+            {
+                CommandId = Guid.NewGuid()
+            };
             foreach (var request in new[] { wrongNode, wrongIncarnation, missing })
             {
                 var phase = request.CommandId == seed.Command.CommandId

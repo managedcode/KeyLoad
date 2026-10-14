@@ -20,7 +20,9 @@ internal sealed class ModelSqlRf3ColdOwnership
     internal string Claim(ClusterFixture fixture)
     {
         if (ClusterFixturePhysicalShardIdentity.ReadProfile(fixture.Root).Incarnation != incarnation)
-        { throw new InvalidOperationException(Changed); }
+        {
+            throw new InvalidOperationException(Changed);
+        }
         return ContainerRuntimeOwnedReceipt.Scenario(incarnation, Interlocked.Increment(ref ordinal));
     }
 
@@ -30,7 +32,9 @@ internal sealed class ModelSqlRf3ColdOwnership
         {
             var actual = await ReadEvidenceAsync(item.Path, token);
             if (actual.Length != item.Length || !actual.Hash.AsSpan().SequenceEqual(item.Hash))
-            { throw new InvalidOperationException(Changed); }
+            {
+                throw new InvalidOperationException(Changed);
+            }
         }
     }
 
@@ -54,9 +58,16 @@ internal sealed class ModelSqlRf3ColdOwnership
         await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
         {
             await using var stream = new FileStream(path, new FileStreamOptions
-            { Mode = FileMode.Open, Access = FileAccess.Read, Share = FileShare.Read, Options = FileOptions.Asynchronous });
+            {
+                Mode = FileMode.Open,
+                Access = FileAccess.Read,
+                Share = FileShare.Read,
+                Options = FileOptions.Asynchronous
+            });
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
-            { result = new(path, stream.Length, await SHA256.HashDataAsync(stream, token)); }, failures);
+            {
+                result = new(path, stream.Length, await SHA256.HashDataAsync(stream, token));
+            }, failures);
         }, failures);
         global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
         return result!;

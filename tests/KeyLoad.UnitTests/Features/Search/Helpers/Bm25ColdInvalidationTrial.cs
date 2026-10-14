@@ -74,17 +74,26 @@ internal static class Bm25ColdInvalidationTrial
                     SchemaVersion = resource.SchemaVersion + 1,
                     FieldPolicies = [new(Field, "cold-private", ReadGrant, UseGrant, "cold.corpus.write")]
                 })
-            { ExpectedSchemaVersion = resource.SchemaVersion })).Get<ResourceDefinition>();
+            {
+                ExpectedSchemaVersion = resource.SchemaVersion
+            })).Get<ResourceDefinition>();
         await Assert.That(changed.SchemaVersion).IsEqualTo(resource.SchemaVersion + 1);
         await Assert.That(Tail(flow)).IsEqualTo(tail);
         var before = Bm25OriginalPhaseRecoveryState.Read(owner);
         owner.Reopen();
         await before.RequireAsync(Bm25OriginalPhaseRecoveryState.Read(owner));
         await Bm25ColdInvalidationAssertions.DeniedAsync(flow, original);
-        var repaired = flow.Configure(flow.Reader with { PolicyEpoch = 3 });
+        var repaired = flow.Configure(flow.Reader with
+        {
+            PolicyEpoch = 3
+        });
         await Assert.That(repaired.PolicyEpoch).IsEqualTo(3L);
         await Bm25ColdInvalidationAssertions.DeniedAsync(flow, original);
-        repaired = flow.Configure(repaired with { PolicyEpoch = 4, FieldGrants = [ReadGrant, UseGrant] });
+        repaired = flow.Configure(repaired with
+        {
+            PolicyEpoch = 4,
+            FieldGrants = [ReadGrant, UseGrant]
+        });
         await Assert.That(repaired.PolicyEpoch).IsEqualTo(4L);
         await Assert.That(Tail(flow)).IsEqualTo(tail);
         await Bm25ColdInvalidationAssertions.SearchAsync(flow, expectedCurrent: false);

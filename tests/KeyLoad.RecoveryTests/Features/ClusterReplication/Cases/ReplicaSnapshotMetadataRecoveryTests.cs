@@ -12,7 +12,10 @@ internal sealed class ReplicaSnapshotMetadataRecoveryTests
     {
         using var trial = new ReplicaSnapshotTrial();
         var receiver = trial.Receiver();
-        var foreign = trial.Image with { Incarnation = Guid.NewGuid() };
+        var foreign = trial.Image with
+        {
+            Incarnation = Guid.NewGuid()
+        };
         var error = Assert.ThrowsExactly<KeyLoadException>(() => receiver.Begin(foreign));
         await Assert.That(error.Code).IsEqualTo(ErrorCode.Validation);
         await Assert.That(receiver.Current).IsNull();

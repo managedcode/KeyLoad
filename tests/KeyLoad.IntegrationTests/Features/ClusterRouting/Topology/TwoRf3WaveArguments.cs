@@ -27,25 +27,47 @@ internal static class TwoRf3WaveArguments
         if (tenantCapacityPlacement)
         {
             if (!protectedDocuments || !registerPhysicalOwners || !remotePartitionQueries)
-            { throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState); }
+            {
+                throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState);
+            }
             args.Add("--KeyLoadTests:ClusterRouting:TenantCapacityPlacement=true");
         }
         if (protectedDocuments)
-        { args.Add("--KeyLoadTests:ClusterRouting:ProtectedDocumentMovement=true"); }
+        {
+            args.Add("--KeyLoadTests:ClusterRouting:ProtectedDocumentMovement=true");
+        }
         if (movementMaxBatchBytes is { } maxBatchBytes)
-        { args.Add("--KeyLoadTests:ClusterRouting:MovementMaxBatchBytes=" + maxBatchBytes.ToString(CultureInfo.InvariantCulture)); }
+        {
+            args.Add("--KeyLoadTests:ClusterRouting:MovementMaxBatchBytes=" + maxBatchBytes.ToString(CultureInfo.InvariantCulture));
+        }
         if (movementMaxFrameBytes is { } maxFrameBytes)
-        { args.Add("--KeyLoadTests:ClusterRouting:MovementMaxFrameBytes=" + maxFrameBytes.ToString(CultureInfo.InvariantCulture)); }
+        {
+            args.Add("--KeyLoadTests:ClusterRouting:MovementMaxFrameBytes=" + maxFrameBytes.ToString(CultureInfo.InvariantCulture));
+        }
         if (registerPhysicalOwners)
-        { args.Add(RegisterArgument); }
+        {
+            args.Add(RegisterArgument);
+        }
         if (remoteDocumentReads)
-        { args.Add(RemoteDocumentArgument); }
+        {
+            args.Add(RemoteDocumentArgument);
+        }
         if (remotePartitionQueries)
-        { args.Add(RemoteQueryArgument); }
+        {
+            args.Add(RemoteQueryArgument);
+        }
         if (controls is not null)
-        { args.Add(ProbeEnabled); args.Add(ProbeRoot + controls.Root); args.Add(ProbeSession + controls.SessionId); }
+        {
+            args.Add(ProbeEnabled);
+            args.Add(ProbeRoot + controls.Root);
+            args.Add(ProbeSession + controls.SessionId);
+        }
         if (nativeMembershipControls is not null)
-        { args.Add(ProbeEnabled); args.Add(ProbeRoot + nativeMembershipControls.Root); args.Add(ProbeSession + nativeMembershipControls.SessionId); }
+        {
+            args.Add(ProbeEnabled);
+            args.Add(ProbeRoot + nativeMembershipControls.Root);
+            args.Add(ProbeSession + nativeMembershipControls.SessionId);
+        }
         if (frameObservation is not null)
         {
             args.Add(MovementFrameObservationFixtureProtocol.EnabledArgument);
@@ -59,7 +81,9 @@ internal static class TwoRf3WaveArguments
             args.Add(KeyLoad.IntegrationTests.Features.StorageRecovery.NativeCapabilityOmissionRf3Protocol.SessionArgument + nativeDiscoveryOmission.SessionId);
         }
         if (eventVectorReservedProbe)
-        { args.Add("--KeyLoadTests:EventVectorReservedProbe=true"); }
+        {
+            args.Add("--KeyLoadTests:EventVectorReservedProbe=true");
+        }
         if (selection is not null)
         {
             args.AddRange(selection.CreateWaveArguments());

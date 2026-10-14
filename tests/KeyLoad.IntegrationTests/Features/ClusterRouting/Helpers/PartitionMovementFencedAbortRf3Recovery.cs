@@ -22,9 +22,14 @@ internal static class PartitionMovementFencedAbortRf3Recovery
         await wave.RestartJoinedAsync(token);
         await wave.WaitForSixHealthyAsync(token);
         foreach (var seed in seeds)
-        { await seed.ReconnectAsync(wave, token); }
+        {
+            await seed.ReconnectAsync(wave, token);
+        }
         var first = seeds[FirstEntry];
-        var abort = requests[FirstEntry] with { Mode = PartitionMoveMode.Abort };
+        var abort = requests[FirstEntry] with
+        {
+            Mode = PartitionMoveMode.Abort
+        };
         var source = first.Directory.Owners.Single(owner =>
             owner.Owner.PhysicalShardId == first.OriginalPlacement.PhysicalShardId).Owner;
         var target = first.Directory.Owners.Single(owner =>

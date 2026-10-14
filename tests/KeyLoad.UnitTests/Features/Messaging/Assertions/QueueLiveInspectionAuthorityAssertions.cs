@@ -116,7 +116,9 @@ internal static class QueueLiveInspectionAuthorityAssertions
                 await Assert.That(replay.NativeValue).IsNull();
             }
             else
-            { await Assert.That(NativeSerialization.Serialize(replay).SequenceEqual(NativeSerialization.Serialize(result))).IsTrue(); }
+            {
+                await Assert.That(NativeSerialization.Serialize(replay).SequenceEqual(NativeSerialization.Serialize(result))).IsTrue();
+            }
         }
         var produced = QueueWholeFlowStorage.Apply(owner, OperationKind.Batch, state.Producer,
             state.Producer.CommandId, state.Start);

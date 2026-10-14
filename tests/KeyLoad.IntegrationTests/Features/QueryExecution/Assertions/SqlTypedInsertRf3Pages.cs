@@ -27,15 +27,23 @@ internal static class SqlTypedInsertRf3Pages
     {
         var expected = new List<QueryRow>();
         if (state.Cancelled is not null)
-        { expected.Add(Row(SqlTypedInsertRf3Literal.Cancelled, SqlTypedInsertRf3Literal.CancelJson)); }
+        {
+            expected.Add(Row(SqlTypedInsertRf3Literal.Cancelled, SqlTypedInsertRf3Literal.CancelJson));
+        }
         expected.Add(Row(SqlTypedInsertRf3Literal.One, SqlTypedInsertRf3Literal.OneJson));
         if (state.Repaired is not null)
-        { expected.Add(Row(SqlTypedInsertRf3Literal.Three, SqlTypedInsertRf3Literal.ThreeJson)); }
+        {
+            expected.Add(Row(SqlTypedInsertRf3Literal.Three, SqlTypedInsertRf3Literal.ThreeJson));
+        }
         expected.Add(Row(SqlTypedInsertRf3Literal.Two, SqlTypedInsertRf3Literal.TwoJson));
         if (state.ColdRows >= FirstCold)
-        { expected.Add(Row(SqlTypedInsertRf3Literal.FirstCold, SqlTypedInsertRf3Literal.FirstColdJson)); }
+        {
+            expected.Add(Row(SqlTypedInsertRf3Literal.FirstCold, SqlTypedInsertRf3Literal.FirstColdJson));
+        }
         if (state.ColdRows >= SecondCold)
-        { expected.Add(Row(SqlTypedInsertRf3Literal.SecondCold, SqlTypedInsertRf3Literal.SecondColdJson)); }
+        {
+            expected.Add(Row(SqlTypedInsertRf3Literal.SecondCold, SqlTypedInsertRf3Literal.SecondColdJson));
+        }
         await SqlRf3Protocol.EqualAsync(global::System.Collections.Immutable.ImmutableArray.CreateRange(expected), page.Rows);
         await Assert.That(page.Cursor).IsNull();
         await Assert.That(page.AccessPath).IsEqualTo(FullScan);

@@ -1,5 +1,5 @@
 using System.Text;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Replication;
 using Microsoft.Extensions.Options;
 
@@ -44,7 +44,10 @@ internal sealed class RequestCqrsProbeNativeAuthentication
             clock.GetUtcNow().Add(configuration.RpcTimeout), claim, string.Empty);
         RequireRequestShape(request, signed: false);
         Bound(request, membership.Value.MaximumRequestBytes);
-        return request with { Signature = trust.Mac(trust.Local).SignProbeRequest(request) };
+        return request with
+        {
+            Signature = trust.Mac(trust.Local).SignProbeRequest(request)
+        };
     }
 
     internal RequestCqrsProbeNativeRequest Verify(RequestCqrsProbeNativeRequest request, RequestCqrsProbeNativeMethod method)
@@ -52,16 +55,22 @@ internal sealed class RequestCqrsProbeNativeAuthentication
         RequireRequestShape(request, signed: true);
         if (request.Method != method || !RequestCqrsProbeNativeTrust.Same(trust.Local, request.DestinationOwner)
             || request.DestinationVoter != trust.Voter || request.DestinationSiloAddress != trust.Address)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         var ownerMac = trust.Mac(request.CallerOwner);
         var now = clock.GetUtcNow();
         if (request.ExpiresAt.Offset != TimeSpan.Zero || request.ExpiresAt <= now
             || request.ExpiresAt > now.Add(configuration.RpcTimeout).Add(membership.Value.ClockSkew))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         var bytes = Bound(request, membership.Value.MaximumRequestBytes);
         var owned = NativeSerialization.Deserialize<RequestCqrsProbeNativeRequest>(bytes);
         if (!ownerMac.VerifyProbeRequest(owned))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         RequireCurrent(owned);
         return owned;
     }
@@ -73,30 +82,45 @@ internal sealed class RequestCqrsProbeNativeAuthentication
             request.Nonce, claim, acknowledged, error, string.Empty);
         RequireReplyShape(reply, signed: false);
         Bound(reply, membership.Value.MaximumReplyBytes);
-        return reply with { Signature = trust.Mac(trust.Local).SignProbeReply(reply) };
+        return reply with
+        {
+            Signature = trust.Mac(trust.Local).SignProbeReply(reply)
+        };
     }
 
     internal RequestCqrsProbeNativeReply VerifyReply(RequestCqrsProbeNativeRequest request, RequestCqrsProbeNativeReply reply)
     {
         RequireReplyShape(reply, signed: true);
         if (reply.Nonce != request.Nonce || reply.Method != request.Method)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         var bytes = Bound(reply, membership.Value.MaximumReplyBytes);
         var owned = NativeSerialization.Deserialize<RequestCqrsProbeNativeReply>(bytes);
         if (!trust.Mac(request.DestinationOwner).VerifyProbeReply(owned))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         if (request.ExpiresAt <= clock.GetUtcNow())
-        { throw Errors.Fail(ErrorCode.Cancelled, RequestCqrsProbeNativeProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.Cancelled, RequestCqrsProbeNativeProtocol.Unavailable);
+        }
         RequireCurrent(request);
         if (owned.Error is { } code)
-        { throw Errors.Fail(code, RequestCqrsProbeNativeProtocol.Unavailable); }
+        {
+            throw Errors.Fail(code, RequestCqrsProbeNativeProtocol.Unavailable);
+        }
         if (owned.Claim is { } claim && (claim.Identity != request.Identity
             || !RequestCqrsProbeNativeTrust.Same(request.DestinationOwner, claim.Owner)
             || claim.Voter != request.DestinationVoter || claim.SiloAddress != request.DestinationSiloAddress))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         if (request.Method == RequestCqrsProbeNativeMethod.Notify
             && (!owned.Acknowledged || owned.Claim != request.Claim && !SameClaim(owned.Claim, request.Claim)))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         return owned;
     }
 
@@ -120,11 +144,15 @@ internal sealed class RequestCqrsProbeNativeAuthentication
             || signed && !Signature(request.Signature) || !signed && request.Signature is not { Length: EmptySignatureLength }
             || request.Method == RequestCqrsProbeNativeMethod.Locate && request.Claim is not null
             || request.Method == RequestCqrsProbeNativeMethod.Notify && !Claim(request.Claim))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         if (request.Claim is { } claim && (claim.Identity != request.Identity
             || !RequestCqrsProbeNativeTrust.Same(request.DestinationOwner, claim.Owner)
             || claim.Voter != request.DestinationVoter || claim.SiloAddress != request.DestinationSiloAddress))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
     }
 
     private void RequireReplyShape(RequestCqrsProbeNativeReply? reply, bool signed)
@@ -135,7 +163,9 @@ internal sealed class RequestCqrsProbeNativeAuthentication
             || reply.Claim is not null && !Claim(reply.Claim)
             || reply.Method == RequestCqrsProbeNativeMethod.Locate && reply.Acknowledged
             || reply.Method == RequestCqrsProbeNativeMethod.Notify && reply.Error is null && (!reply.Acknowledged || reply.Claim is null))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
     }
 
     private bool Identity(RequestCqrsProbeNativeIdentity? identity)
@@ -157,9 +187,13 @@ internal sealed class RequestCqrsProbeNativeAuthentication
     private bool Text(string? value, int? maximum = null)
     {
         if (string.IsNullOrWhiteSpace(value))
-        { return false; }
+        {
+            return false;
+        }
         try
-        { return Utf8.GetByteCount(value) <= (maximum ?? membership.Value.MaximumAddressBytes); }
+        {
+            return Utf8.GetByteCount(value) <= (maximum ?? membership.Value.MaximumAddressBytes);
+        }
         catch (EncoderFallbackException) { return false; }
     }
     private static bool Signature(string? value)
@@ -168,7 +202,9 @@ internal sealed class RequestCqrsProbeNativeAuthentication
     {
         var bytes = NativeSerialization.Serialize(value);
         if (bytes.Length > maximum)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, RequestCqrsProbeNativeProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, RequestCqrsProbeNativeProtocol.Unavailable);
+        }
         return bytes;
     }
     private static KeyLoadException Invalid() => Errors.Fail(ErrorCode.Unauthenticated, RequestCqrsProbeNativeProtocol.Unavailable);

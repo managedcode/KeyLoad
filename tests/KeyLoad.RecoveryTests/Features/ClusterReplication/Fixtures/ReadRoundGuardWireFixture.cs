@@ -24,20 +24,39 @@ internal static class ReadRoundGuardWireFixture
     {
         var value = new AppendRequest(ReadRoundStoredCluster.VoterA, 3, 0, 0, 0, []);
         if (shape == ReadRoundGuardPayloads.Nonempty)
-        { return ReplicaProtocolCodec.Serialize(value with { Entries = [new(1, 3, null)] }); }
+        {
+            return ReplicaProtocolCodec.Serialize(value with
+            {
+                Entries = [new(1, 3, null)]
+            });
+        }
         if (shape == ReadRoundGuardPayloads.InvalidTerm)
-        { return ReplicaProtocolCodec.Serialize(value with { Term = 0 }); }
+        {
+            return ReplicaProtocolCodec.Serialize(value with
+            {
+                Term = 0
+            });
+        }
         if (shape == ReadRoundGuardPayloads.InvalidPrevious)
-        { return ReplicaProtocolCodec.Serialize(value with { PreviousIndex = 1 }); }
+        {
+            return ReplicaProtocolCodec.Serialize(value with
+            {
+                PreviousIndex = 1
+            });
+        }
         var bytes = shape is ReadRoundGuardPayloads.CaseMutated or ReadRoundGuardPayloads.Trailing
             ? ReplicaProtocolCodec.Serialize(value) : Encode(value, shape);
         if (shape == ReadRoundGuardPayloads.Trailing)
-        { return [.. bytes, TrailingByte]; }
+        {
+            return [.. bytes, TrailingByte];
+        }
         if (shape == ReadRoundGuardPayloads.CaseMutated)
         {
             var aliasOffset = bytes.AsSpan().IndexOf(Encoding.UTF8.GetBytes(AppendAlias));
             if (aliasOffset < 0)
-            { throw new InvalidOperationException(AliasNotEncoded); }
+            {
+                throw new InvalidOperationException(AliasNotEncoded);
+            }
             bytes[aliasOffset] ^= CaseBit;
         }
         return bytes;
@@ -86,11 +105,15 @@ internal sealed class ReadRoundGuardAppendCodec(string shape) : IFieldCodec<Appe
         [AllowNull] AppendRequest value) where TWriter : IBufferWriter<byte>
     {
         if (ReferenceCodec.TryWriteReferenceField(ref writer, delta, expectedType, value))
-        { return; }
+        {
+            return;
+        }
         writer.WriteFieldHeader(delta, expectedType, typeof(AppendRequest), WireType.TagDelimited);
         writer.WriteEndBase();
         if (shape != ReadRoundGuardPayloads.MissingLeader)
-        { Write(ref writer, 0, value.LeaderId); }
+        {
+            Write(ref writer, 0, value.LeaderId);
+        }
         WriteScalars(ref writer, value);
         if (shape != ReadRoundGuardPayloads.MissingEntries)
         {
@@ -98,22 +121,34 @@ internal sealed class ReadRoundGuardAppendCodec(string shape) : IFieldCodec<Appe
                 shape == ReadRoundGuardPayloads.NullEntries ? default : value.Entries);
         }
         if (shape == ReadRoundGuardPayloads.Duplicate)
-        { Write(ref writer, 0, value.Entries); }
+        {
+            Write(ref writer, 0, value.Entries);
+        }
         if (shape == ReadRoundGuardPayloads.Unknown)
-        { Write(ref writer, 1, true); }
+        {
+            Write(ref writer, 1, true);
+        }
         writer.WriteEndObject();
     }
 
     private void WriteScalars<TWriter>(ref Writer<TWriter> writer, AppendRequest value) where TWriter : IBufferWriter<byte>
     {
         if (shape != ReadRoundGuardPayloads.MissingTerm)
-        { Write(ref writer, 1, value.Term); }
+        {
+            Write(ref writer, 1, value.Term);
+        }
         if (shape != ReadRoundGuardPayloads.MissingPreviousIndex)
-        { Write(ref writer, shape == ReadRoundGuardPayloads.MissingTerm ? 2U : 1U, value.PreviousIndex); }
+        {
+            Write(ref writer, shape == ReadRoundGuardPayloads.MissingTerm ? 2U : 1U, value.PreviousIndex);
+        }
         if (shape != ReadRoundGuardPayloads.MissingPreviousTerm)
-        { Write(ref writer, shape == ReadRoundGuardPayloads.MissingPreviousIndex ? 2U : 1U, value.PreviousTerm); }
+        {
+            Write(ref writer, shape == ReadRoundGuardPayloads.MissingPreviousIndex ? 2U : 1U, value.PreviousTerm);
+        }
         if (shape != ReadRoundGuardPayloads.MissingCommittedIndex)
-        { Write(ref writer, shape == ReadRoundGuardPayloads.MissingPreviousTerm ? 2U : 1U, value.CommittedIndex); }
+        {
+            Write(ref writer, shape == ReadRoundGuardPayloads.MissingPreviousTerm ? 2U : 1U, value.CommittedIndex);
+        }
     }
 
     private static void Write<T, TWriter>(ref Writer<TWriter> writer, uint delta, T value) where TWriter : IBufferWriter<byte>

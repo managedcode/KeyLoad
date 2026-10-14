@@ -14,7 +14,16 @@ internal sealed class BlobEmptySlotPublicState(BlobRef blob)
     internal BeginBlobUploadRequest Healthy { get; set; } = null!;
     internal BlobCommitResult<BlobUploadInfo> HealthyBegun { get; set; } = null!;
     internal CompleteBlobUploadRequest Complete { get; set; } = null!;
-    internal BlobCommitResult<BlobMetadata>? Published { get; set; }
-    internal BlobUploadInfo? HealthyCurrent { get; set; }
-    internal BlobUploadInfo? OriginalCurrent { get; set; }
+    internal BlobCommitResult<BlobMetadata>? Published
+    {
+        get; set;
+    }
+    internal BlobUploadInfo? HealthyCurrent
+    {
+        get; set;
+    }
+    internal BlobUploadInfo? OriginalCurrent
+    {
+        get; set;
+    }
 }

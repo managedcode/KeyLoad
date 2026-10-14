@@ -26,3 +26,12 @@ flowchart LR
   A --> P[Original primary shutdown]
   P --> K[Original cold reconstruction and second cold]
 ```
+
+
+## R53 first original node-stop observation owner facts
+
+R52 original Prepare c21cb9e2-d933-f9ad-71a7-2e4e9e0907f7 and Retire299b2d9e-318b-d59e-c34f-5edbefe179f8 preserve successful original node-stop/application-disposal tasks after canceled bounded observations. The exact caller token was not requested; these facts locate the observer failure and do not prove an initiating product defect or an exact elapsed duration. Every original exception, KEYLOAD_NATIVE_COLD line, deadline, same task join, six-owner order, receipt and two-cold assertion remains required.
+
+REQ-NATIVE-COLD-ATTRIBUTION-004 maps to AC-NATIVE-COLD-ATTRIBUTION-004: only when the existing first NodeStopObservation records a failure, capture two actual readonly owner facts before joining that same original task: OrleansNode.HasJoinedRequestWork and whether OrleansNode.Discovery is present. Emit one bounded supplementary KEYLOAD_NATIVE_COLD_OWNER_STATE line with the same configured node ordinal/original task ID/status and those booleans; no messages, addresses, roots, user data, credentials or token values. Reads and output failures follow the original error through the existing observer ledger. No new production hook, owner state, timer, counter, provider, cache, task or retry is introduced.
+
+HasJoinedRequestWork is the existing conjunction of requestWork, RemoteDocuments, Movement and GraphResources join states; it is not every preceding cleanup owner. Discovery resolves the existing live-host discovery service; absence reflects the cleared host reference, not a physical storage qualification. These independently read facts are not an atomic progress snapshot, and a true joined flag alone does not identify an exact blocking await. The same two original whole classes and current native/API/compiler/Linux gates must run before causal repair or shutdown qualification is claimed.

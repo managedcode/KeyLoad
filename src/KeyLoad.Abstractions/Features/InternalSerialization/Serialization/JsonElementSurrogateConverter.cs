@@ -7,7 +7,10 @@ namespace KeyLoad.Features.InternalSerialization;
 internal sealed class JsonElementSurrogateConverter : Orleans.IConverter<JsonElement, JsonElementSurrogate>
 {
     public JsonElementSurrogate ConvertToSurrogate(in JsonElement value)
-        => new() { Root = NativeDomProjection.Create(value) };
+        => new()
+        {
+            Root = NativeDomProjection.Create(value)
+        };
 
     public JsonElement ConvertFromSurrogate(in JsonElementSurrogate surrogate)
     {

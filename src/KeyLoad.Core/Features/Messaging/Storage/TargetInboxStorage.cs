@@ -30,11 +30,15 @@ internal static class TargetInboxStorage
     {
         var current = view.GetRecord<TargetInboxCapacity>(CapacityKey(target));
         if (current is null && required)
-        { throw Errors.Fail(ErrorCode.Corruption, TargetInboxProtocol.Corrupt); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, TargetInboxProtocol.Corrupt);
+        }
         current ??= new(TargetInboxProtocol.EmptyCount, TargetInboxProtocol.EmptyCount);
         if (current.Count < TargetInboxProtocol.EmptyCount || current.Bytes < TargetInboxProtocol.EmptyCount
             || (current.Count == TargetInboxProtocol.EmptyCount) != (current.Bytes == TargetInboxProtocol.EmptyCount))
-        { throw Errors.Fail(ErrorCode.Corruption, TargetInboxProtocol.Corrupt); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, TargetInboxProtocol.Corrupt);
+        }
         return current;
     }
 
@@ -42,7 +46,9 @@ internal static class TargetInboxStorage
     {
         if (current.Count >= policy.MaxReceipts || bytes < TargetInboxProtocol.MinimumCount
             || bytes > policy.MaxBytes - current.Bytes)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, TargetInboxProtocol.Exhausted); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, TargetInboxProtocol.Exhausted);
+        }
         return new(checked(current.Count + TargetInboxProtocol.MinimumCount), checked(current.Bytes + bytes));
     }
 }

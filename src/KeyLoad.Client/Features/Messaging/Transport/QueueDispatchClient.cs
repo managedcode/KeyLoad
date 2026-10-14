@@ -19,7 +19,9 @@ public static class QueueDispatchClient
         ArgumentNullException.ThrowIfNull(client);
         ArgumentNullException.ThrowIfNull(request);
         if (commandId == Guid.Empty)
-        { throw new ArgumentException(InvalidCommandId, nameof(commandId)); }
+        {
+            throw new ArgumentException(InvalidCommandId, nameof(commandId));
+        }
         return client.Send<ResourceDefinition>(QueueDispatchControlProtocol.Route, request,
             true, commandId, cancellationToken, HttpMethod.Post);
     }

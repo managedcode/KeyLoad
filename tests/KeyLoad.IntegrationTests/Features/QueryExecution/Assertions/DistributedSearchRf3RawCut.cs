@@ -29,7 +29,10 @@ internal static class DistributedSearchRf3RawCut
         }
         var cuts = new List<string[]>();
         foreach (var node in TwoRf3MembershipProtocol.Nodes)
-        { token.ThrowIfCancellationRequested(); cuts.Add(Read(Path.Combine(root, node, Database))); }
+        {
+            token.ThrowIfCancellationRequested();
+            cuts.Add(Read(Path.Combine(root, node, Database)));
+        }
         return [.. cuts];
     }
 
@@ -47,20 +50,26 @@ internal static class DistributedSearchRf3RawCut
             {
                 var rows = view.Scan([], limits.MaxScanRecords);
                 if (rows.HasMore)
-                { throw new InvalidOperationException(Overflow); }
+                {
+                    throw new InvalidOperationException(Overflow);
+                }
                 var bytes = EmptyBytes;
                 foreach (var row in rows.Records)
                 {
                     bytes = checked(bytes + checked((row.Key.Length + row.Value.Length) * HexExpansion) + Separator.Length);
                     if (bytes > limits.MaxBatchBytes)
-                    { throw new InvalidOperationException(Overflow); }
+                    {
+                        throw new InvalidOperationException(Overflow);
+                    }
                 }
                 return rows.Records.Select(row => Convert.ToHexString(row.Key.Span) + Separator
                     + Convert.ToHexString(row.Value.Span)).Prepend(store.Position.ToString(CultureInfo.InvariantCulture)).ToArray();
             });
         }, failures);
         if (store is { } owned)
-        { ServerFailureObserver.Observe(owned.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(owned.Dispose, failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
         return result ?? throw new InvalidOperationException(Overflow);
     }

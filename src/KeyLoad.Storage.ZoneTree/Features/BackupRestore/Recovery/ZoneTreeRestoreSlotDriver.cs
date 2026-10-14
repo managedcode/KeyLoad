@@ -7,8 +7,7 @@ namespace KeyLoad.Storage.ZoneTree;
 /// <summary>Continues one original admitted native slot without deleting retained source or generating a new identity.</summary>
 internal static class ZoneTreeRestoreSlotDriver
 {
-    private const string Invalid = "The native restore slot identity or publication is inconsistent.";
-    private const string TerminalCutLost = "The published restore target no longer has its original terminal native cut.";
+    internal const string Invalid = "The native restore slot identity or publication is inconsistent.";
 
     internal static NativeCatalogRestoreSlotCompletion Restore(string backup, string destination, string stage,
         IOptions<ZoneTreeStorageExecutionOptions> executionOptions, TimeProvider clock, ClusterRestoreSlotContext context,
@@ -34,7 +33,9 @@ internal static class ZoneTreeRestoreSlotDriver
             || !string.Equals(Convert.ToHexStringLower(SHA256.HashData(signingKey.Span)),
                 context.TargetSignerFingerprint, StringComparison.Ordinal)
             || CryptographicOperations.FixedTimeEquals(original.SigningKey.Span, signingKey.Span))
-        { throw Errors.Fail(ErrorCode.Validation, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, Invalid);
+        }
         var published = Directory.Exists(destination);
         var ownedRoot = published ? destination : stage;
         var owner = ZoneTreeRestoreSlotAdmissionOwner.Acquire(ownedRoot, context, sourceFiles, policy, clock, requireExisting: false, ct);
@@ -50,13 +51,23 @@ internal static class ZoneTreeRestoreSlotDriver
                 PublishJoined(published, stage, destination);
                 return completion;
             }
-            catch (Exception failure) { primary = failure; throw; }
-            finally { owner.Dispose(); cleanupCompleted = true; }
+            catch (Exception failure)
+            {
+                primary = failure;
+                throw;
+            }
+            finally
+            {
+                owner.Dispose();
+                cleanupCompleted = true;
+            }
         }
         catch (Exception terminal)
         {
             if (primary is not null && !cleanupCompleted)
-            { throw new AggregateException(primary, terminal); }
+            {
+                throw new AggregateException(primary, terminal);
+            }
             throw;
         }
     }
@@ -68,18 +79,8 @@ internal static class ZoneTreeRestoreSlotDriver
         Action<IAtomicTransaction, StoreIdentity, long, ReadOnlyMemory<byte>, ClusterRestoreSlotContext> reconcile,
         Action<IKeyValueView, StoreIdentity, long, ClusterRestoreSlotContext> verify, bool published, Action<NativeClusterRestoreStage>? observer, CancellationToken ct)
     {
-        var policy = options.Value;
-        var identityPath = Path.Combine(root, IdentityFileName);
-        var journal = manifest.Files.Single(file => file.Name == JournalFileName);
-        if (!File.Exists(identityPath))
-        {
-            if (published)
-            { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
-            ZoneTreeRestoreSlotPrefix.Continue(backup, root, journal, policy, ct);
-            observer?.Invoke(NativeClusterRestoreStage.SourcePrefixPersisted);
-            ZoneTreeIdentityFile.Write(identityPath, original, policy.IdentityBufferBytes);
-        }
-        ZoneTreeRestoreSlotPrefix.RequireOriginalPrefix(backup, root, journal, policy, ct);
+        ZoneTreeRestoreSlotPrefixPreparation.Require(backup, root, options.Value, original, manifest,
+            published, observer, IdentityFileName, JournalFileName, ct);
         ZoneTreeStoreRuntime? runtime = null;
         ZoneTreeStore? store = null;
         Exception? primary = null;
@@ -94,7 +95,9 @@ internal static class ZoneTreeRestoreSlotDriver
 
                 var sourceIdentity = store.Identity.NodeId == original.NodeId && store.Identity.Incarnation == original.Incarnation;
                 if (sourceIdentity && published)
-                { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+                {
+                    throw Errors.Fail(ErrorCode.Corruption, Invalid);
+                }
                 if (sourceIdentity)
                 {
                     ZoneTreeRestoreSlotTransactions.Continue(store, original, context, metadata, reconcile, verify, observer, ct);
@@ -113,13 +116,24 @@ internal static class ZoneTreeRestoreSlotDriver
                 ZoneTreeRestoreSlotTransactions.Reset(store, context, verify, observer, ct);
                 return Observe(store, context, signingKey, verify, ct);
             }
-            catch (Exception failure) { primary = failure; throw; }
-            finally { store?.Dispose(); runtime?.Dispose(); cleanupCompleted = true; }
+            catch (Exception failure)
+            {
+                primary = failure;
+                throw;
+            }
+            finally
+            {
+                store?.Dispose();
+                runtime?.Dispose();
+                cleanupCompleted = true;
+            }
         }
         catch (Exception terminal)
         {
             if (primary is not null && !cleanupCompleted)
-            { throw new AggregateException(primary, terminal); }
+            {
+                throw new AggregateException(primary, terminal);
+            }
             throw;
         }
     }
@@ -149,13 +163,24 @@ internal static class ZoneTreeRestoreSlotDriver
                 ZoneTreeRestoreSlotTransactions.Reset(target, context, verify, observer, ct);
                 return Observe(target, context, signingKey, verify, ct);
             }
-            catch (Exception failure) { primary = failure; throw; }
-            finally { target?.Dispose(); runtime?.Dispose(); cleanupCompleted = true; }
+            catch (Exception failure)
+            {
+                primary = failure;
+                throw;
+            }
+            finally
+            {
+                target?.Dispose();
+                runtime?.Dispose();
+                cleanupCompleted = true;
+            }
         }
         catch (Exception terminal)
         {
             if (primary is not null && !cleanupCompleted)
-            { throw new AggregateException(primary, terminal); }
+            {
+                throw new AggregateException(primary, terminal);
+            }
             throw;
         }
     }
@@ -163,9 +188,13 @@ internal static class ZoneTreeRestoreSlotDriver
     private static void PublishJoined(bool published, string stage, string destination)
     {
         if (published)
-        { return; }
+        {
+            return;
+        }
         if (Directory.Exists(destination) || File.Exists(destination))
-        { throw Errors.Fail(ErrorCode.Conflict, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, Invalid);
+        }
         // The CLI's exclusive operation owner spans all joined stores and checked publication.
         Directory.Move(stage, destination);
     }
@@ -173,21 +202,5 @@ internal static class ZoneTreeRestoreSlotDriver
     internal static NativeCatalogRestoreSlotCompletion Observe(ZoneTreeStore store, ClusterRestoreSlotContext context,
         ReadOnlyMemory<byte> signingKey,
         Action<IKeyValueView, StoreIdentity, long, ClusterRestoreSlotContext> verify, CancellationToken ct)
-        => store.Read(view =>
-        {
-            ct.ThrowIfCancellationRequested();
-            ZoneTreeRestoreSlotState.RequireTarget(store.Identity, context, signingKey);
-            var reconciled = ZoneTreeRestoreSlotState.Require(view, context,
-                ClusterRestoreSlotCommitKind.Reconciled, store.Position);
-            var reset = ZoneTreeRestoreSlotState.Require(view, context,
-                ClusterRestoreSlotCommitKind.AuthorityReset, store.Position);
-            if (reset.MappingsDigest != reconciled.MappingsDigest)
-            { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
-            if (reset.NativeCommitPosition != store.Position)
-            { throw Errors.Fail(ErrorCode.RecoveryRequired, TerminalCutLost); }
-            verify(view, store.Identity, store.Position, context);
-            return new NativeCatalogRestoreSlotCompletion(NativeCatalogRestoreSlotCompletion.CurrentVersion,
-                context, store.Identity.NodeId, store.Identity.Incarnation, context.TargetSignerFingerprint,
-                reconciled.NativeCommitPosition, reset.NativeCommitPosition, store.Position);
-        });
+        => ZoneTreeRestoreSlotCompletionObservation.Observe(store, context, signingKey, verify, ct);
 }

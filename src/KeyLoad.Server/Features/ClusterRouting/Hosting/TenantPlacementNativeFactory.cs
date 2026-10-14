@@ -9,10 +9,14 @@ internal static class TenantPlacementNativeFactory
         TimeProvider clock)
     {
         if (!options.TenantPlacement.Value.Enabled)
-        { return null; }
+        {
+            return null;
+        }
         if (movement is null || !options.PartitionMovement.Value.Enabled
             || !options.Node.Value.PhysicalGroupTrust.RegisterPhysicalOwners)
-        { throw Errors.Fail(ErrorCode.UnsupportedCapability, TenantPlacementCapacityProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, TenantPlacementCapacityProtocol.Unavailable);
+        }
         PartitionMovementPeerAdmission? peer = null;
         OwnerCapacityPeerAdmission? admission = null;
         OwnerCapacityResourceSampler? sampler = null;
@@ -43,15 +47,21 @@ internal static class TenantPlacementNativeFactory
         if (result is null)
         {
             if (capacity is not null)
-            { await ServerFailureObserver.ObserveAsync(() => capacity.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+            {
+                await ServerFailureObserver.ObserveAsync(() => capacity.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+            }
             else
             {
                 if (sampler is not null)
-                { await ServerFailureObserver.ObserveAsync(() => sampler.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+                {
+                    await ServerFailureObserver.ObserveAsync(() => sampler.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+                }
                 ServerFailureObserver.Observe(() => admission?.Dispose(), failures);
             }
             if (applies is not null)
-            { await ServerFailureObserver.ObserveAsync(() => applies.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+            {
+                await ServerFailureObserver.ObserveAsync(() => applies.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+            }
             ServerFailureObserver.Observe(() => peer?.Dispose(), failures);
         }
         ServerFailureObserver.ThrowIfAny(failures);

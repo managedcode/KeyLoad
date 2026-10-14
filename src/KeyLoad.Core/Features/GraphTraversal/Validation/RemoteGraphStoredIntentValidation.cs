@@ -22,14 +22,18 @@ public sealed partial class DatabaseEngine
             || !PhysicalOwnerEntryValidation.Valid(intent.DestinationOwner)
             || !PhysicalOwnerEntryValidation.SameOwner(intent.SourceOwner, sourceOwner)
             || PhysicalOwnerEntryValidation.SameOwner(intent.SourceOwner, intent.DestinationOwner.Owner))
-        { throw Errors.Fail(ErrorCode.Corruption, RemoteGraphProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, RemoteGraphProtocol.Invalid);
+        }
         GraphCrossPartitionValidation.ValidateIntent(intent.Content, sourcePartition, graph,
             edgeId, intent.Content.Destination, Limits);
         var expected = GraphCrossPartitionRecords.Fingerprint(sourcePartition, graph,
             edgeId, intent.Content.Destination, intent.Content.Revision, intent.Content.Deleted,
             intent.Content.Edge);
         if (!string.Equals(expected, intent.Content.Fingerprint, StringComparison.Ordinal))
-        { throw Errors.Fail(ErrorCode.Corruption, RemoteGraphProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, RemoteGraphProtocol.Invalid);
+        }
         ValidateCommitToken(view, sourcePartition, intent.SourceCommit,
             ErrorCode.Corruption, RemoteGraphProtocol.Invalid);
         var catalog = PhysicalShardCatalogRecordSerialization.Read(view)
@@ -43,6 +47,8 @@ public sealed partial class DatabaseEngine
         if (!PhysicalOwnerEntryValidation.SameOwner(catalog.DefaultShard, sourceOwner)
             || !PhysicalOwnerEntryValidation.SameOwner(directory.ControlOwner, catalog.DefaultShard)
             || destination is null || !PhysicalOwnerEntryValidation.SameOwner(registered, intent.DestinationOwner.Owner))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, RemoteGraphProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, RemoteGraphProtocol.MissingAuthority);
+        }
     }
 }

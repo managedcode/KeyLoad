@@ -34,7 +34,10 @@ internal sealed class ClusterRestoreRf3PhaseObservation
         _ => ClusterRestoreRf3Phase.Unknown
     };
 
-    internal ClusterRestoreRf3Phase Current { get; private set; }
+    internal ClusterRestoreRf3Phase Current
+    {
+        get; private set;
+    }
 
     internal async Task WriteAsync(ClusterRestoreRf3Phase bodyPhase, int failures,
         bool callerCanceled, bool deadlineCanceled)

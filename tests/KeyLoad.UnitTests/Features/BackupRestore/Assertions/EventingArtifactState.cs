@@ -51,7 +51,9 @@ internal static class EventingArtifactState
         {
             var page = view.Scan(KeySpace.Partition(family, partition), MaximumRecords);
             if (page.HasMore)
-            { throw new InvalidOperationException(Overflow); }
+            {
+                throw new InvalidOperationException(Overflow);
+            }
             return page.Records.Select(item => Convert.ToHexString(item.Key.Span) + Separator + Convert.ToHexString(item.Value.Span));
         }).ToArray());
     internal static async Task SameAsync(string[] expected, IAtomicStore store, PartitionRef partition, bool effectsOnly = false)
@@ -60,7 +62,9 @@ internal static class EventingArtifactState
     {
         var page = view.Scan([], MaximumRecords);
         if (page.HasMore)
-        { throw new InvalidOperationException(Overflow); }
+        {
+            throw new InvalidOperationException(Overflow);
+        }
         return page.Records.Select(item => Convert.ToHexString(item.Key.Span) + Separator + Convert.ToHexString(item.Value.Span)).ToArray();
     });
     internal static async Task SameResultAsync(OperationResult expected, OperationResult actual)

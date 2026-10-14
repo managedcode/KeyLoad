@@ -73,7 +73,11 @@ internal sealed class NativeTextRf3Tests(ClusterFixture fixture)
         using var administratorHttp = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
         await VerifyFreshnessAsync(scenario, sdk, mcp,
             new KeyLoadClient(administratorHttp, fixture.AdminKey, IntegrationClientOptions.Execution()), deadline.Token);
-        var revoked = identity.Principal with { Revoked = true, PolicyEpoch = identity.Principal.PolicyEpoch + 1 };
+        var revoked = identity.Principal with
+        {
+            Revoked = true,
+            PolicyEpoch = identity.Principal.PolicyEpoch + 1
+        };
         await McpCallerAssertions.SdkSuccessAsync(await new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution())
             .ConfigurePrincipalAsync(Guid.NewGuid(), revoked, deadline.Token));
         await AssertSdkUnauthenticatedAsync(await sdk.SearchAsync(scenario.Text(Needle), deadline.Token));

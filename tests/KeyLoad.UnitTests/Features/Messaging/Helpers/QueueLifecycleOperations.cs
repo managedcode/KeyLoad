@@ -53,11 +53,17 @@ internal static class QueueLifecycleOperations
             }
             var actual = state.SubmitOriginal(database, operation);
             if (operation.Kind == OperationKind.SetDispatch)
-            { await DispatchReplayAsync(actual, result); }
+            {
+                await DispatchReplayAsync(actual, result);
+            }
             else if (operation.Kind == OperationKind.ConfigurePrincipal)
-            { await NativeReplayResultAssertions.Same<PrincipalRecord>(actual, result); }
+            {
+                await NativeReplayResultAssertions.Same<PrincipalRecord>(actual, result);
+            }
             else
-            { await NativeReplayResultAssertions.Same<CommitReceipt>(actual, result); }
+            {
+                await NativeReplayResultAssertions.Same<CommitReceipt>(actual, result);
+            }
             await QueueLifecycleReplayCutAssertions.SameAsync(database.Store, before);
         }
     }

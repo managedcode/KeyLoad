@@ -14,11 +14,15 @@ internal static class ClusterBackupMetadataEquality
     internal static bool Registered(PhysicalOwnerDirectoryV1? expected, PhysicalOwnerDirectoryV1? actual)
     {
         if (expected is null || actual is null)
-        { return expected is null && actual is null; }
+        {
+            return expected is null && actual is null;
+        }
         if (expected.ControlOwner is null || expected.ControlOwner.VoterIds.IsDefault || expected.Owners.IsDefault || expected.Version != actual.Version
             || expected.Revision != actual.Revision || expected.Owners.Length != actual.Owners.Length
             || !PhysicalOwnerEntryValidation.SameOwner(expected.ControlOwner, actual.ControlOwner))
-        { return false; }
+        {
+            return false;
+        }
         return expected.Owners.Zip(actual.Owners).All(pair => pair.First is not null && pair.First.Owner is not null
             && !pair.First.Owner.VoterIds.IsDefault && !pair.First.Endpoints.IsDefault
             && PhysicalOwnerEntryValidation.Same(pair.First, pair.Second));

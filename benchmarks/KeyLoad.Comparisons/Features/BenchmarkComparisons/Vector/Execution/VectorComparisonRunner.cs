@@ -46,7 +46,10 @@ public sealed class VectorComparisonRunner(VectorComparisonProfile profile, IOpt
         var index = await target.BuildIndexAsync(profile, cancellationToken).ConfigureAwait(false);
         var parameters = new Dictionary<string, string>(index.Parameters, StringComparer.Ordinal);
         executionOptions.Value.RecordEvidence(parameters);
-        index = index with { Parameters = parameters };
+        index = index with
+        {
+            Parameters = parameters
+        };
         var queries = corpus.CreateQueries();
         var expected = corpus.ExactNeighborsBatch(queries, cancellationToken);
 
@@ -116,12 +119,16 @@ public sealed class VectorComparisonRunner(VectorComparisonProfile profile, IOpt
             measured.UpdateSeconds, measured.UpdateSeconds == VectorComparisonRunnerValues.FirstIndex ? VectorComparisonRunnerValues.FirstIndex : measured.UpdateSuccesses / measured.UpdateSeconds);
         var result = new ComparisonCase(target.Name, Scenario.VectorExact, VectorComparisonRunnerValues.FirstIndex, ComparisonStatuses.Measured,
             null, null, [])
-        { VectorMetrics = metrics };
+        {
+            VectorMetrics = metrics
+        };
         var report = new ComparisonReport(VectorComparisonRunnerValues.ReportSchemaVersion, Guid.NewGuid(), started, null, datasetHash,
             VectorComparisonRunnerValues.ClosedLoopVectorQueryThroughputIncludes,
             RuntimeInformation.OSDescription, RuntimeInformation.ProcessArchitecture.ToString(), Environment.ProcessorCount,
             RuntimeInformation.FrameworkDescription, storage, sourceRevision, [target.Profile], [result])
-        { VectorProfile = profile };
+        {
+            VectorProfile = profile
+        };
         report.ValidateConfiguration();
         return report;
     }

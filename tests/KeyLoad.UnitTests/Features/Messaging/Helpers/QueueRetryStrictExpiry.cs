@@ -11,7 +11,10 @@ internal static class QueueRetryStrictExpiry
     {
         token.ThrowIfCancellationRequested();
         var expiry = state.Time.AddSeconds(QueueOrderedRetryProtocol.One);
-        state.Batch(database, QueueOrderedRetryOperations.Literal(QueueOrderedRetryProtocol.Expired) with { ExpiresAt = expiry }).Get<CommitReceipt>();
+        state.Batch(database, QueueOrderedRetryOperations.Literal(QueueOrderedRetryProtocol.Expired) with
+        {
+            ExpiresAt = expiry
+        }).Get<CommitReceipt>();
         var original = await QueueOrderedRetryOperations.ClaimAsync(database, state, QueueOrderedRetryProtocol.Expired);
         state.Time = original.LeaseUntil;
         await Assert.That(QueueOrderedRetryOperations.Receive(database, state).Deliveries).IsEmpty();

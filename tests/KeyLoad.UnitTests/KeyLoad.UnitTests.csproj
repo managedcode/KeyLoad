@@ -10,7 +10,7 @@
     <ProjectReference Include="../../src/KeyLoad.AppHost/KeyLoad.AppHost.csproj" IsAspireProjectResource="false" />
     <ProjectReference Include="../../src/KeyLoad.Client/KeyLoad.Client.csproj" />
     <ProjectReference Include="../../src/KeyLoad.Diagnostics/KeyLoad.Diagnostics.csproj" />
-    <ProjectReference Include="../../src/KeyLoad.Orleans/KeyLoad.Orleans.csproj" />
+    <ProjectReference Include="../../src/KeyLoad.Clustering/KeyLoad.Clustering.csproj" />
     <ProjectReference Include="../../src/KeyLoad.Server/KeyLoad.Server.csproj" />
     <ProjectReference Include="../../src/KeyLoad.Query/KeyLoad.Query.csproj" />
     <ProjectReference Include="../../src/KeyLoad.Security/KeyLoad.Security.csproj" />

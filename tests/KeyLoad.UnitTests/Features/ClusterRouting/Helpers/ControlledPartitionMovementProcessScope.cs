@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.CrashHost.Features.ClusterRouting;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.Storage.ZoneTree;
@@ -24,7 +24,9 @@ internal sealed class ControlledPartitionMovementProcessScope : IDisposable
         PartitionMovePeerStage stage, CommitStage cut)
     {
         if (Active.Value is not null)
-        { throw new InvalidOperationException("A process phase is already owned."); }
+        {
+            throw new InvalidOperationException("A process phase is already owned.");
+        }
         this.source = source;
         this.target = target;
         this.listeners = listeners;
@@ -34,7 +36,10 @@ internal sealed class ControlledPartitionMovementProcessScope : IDisposable
     }
 
     internal static ControlledPartitionMovementProcessScope? Current => Active.Value;
-    internal bool Exercised { get; private set; }
+    internal bool Exercised
+    {
+        get; private set;
+    }
     internal void RegisterClosedSource(ControlledPartitionMovementCaptureRuntime owner) => closedSource = owner;
 
     internal static Task<PartitionMovementTransportRequest> VerifyAsync(ControlledPartitionMovementNode node,
@@ -46,7 +51,9 @@ internal sealed class ControlledPartitionMovementProcessScope : IDisposable
     {
         var verified = await VerifyAsync(node, runtime, original, token);
         if (verified.Action != PartitionMovementTransportAction.Apply)
-        { throw new InvalidOperationException("Only an admitted original logged phase is submitted."); }
+        {
+            throw new InvalidOperationException("Only an admitted original logged phase is submitted.");
+        }
         var principalId = PartitionMovementControlPrincipal.Resolve(node.Database, verified.Envelope);
         var principal = node.Store.Read(view => node.Database.Principal(view, principalId,
             node.Database.EvaluationClock.GetUtcNow()));
@@ -55,7 +62,9 @@ internal sealed class ControlledPartitionMovementProcessScope : IDisposable
             principal.Id, node.Database.EvaluationClock.GetUtcNow(), verified.Envelope);
         if (Exercised || verified.Envelope.Stage != stage || verified.Envelope.PageOrdinal != FirstOrdinal
             || stage == PartitionMovePeerStage.Abort && !ReferenceEquals(node, source))
-        { return node.Journal.Submit(operation, token); }
+        {
+            return node.Journal.Submit(operation, token);
+        }
         if (stage == PartitionMovePeerStage.Abort)
         {
             var joined = closedSource ?? throw new InvalidOperationException("The source abort owner is not joined.");

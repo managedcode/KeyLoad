@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.Server;
 
@@ -20,7 +20,9 @@ internal sealed class PartitionMovementSourceEntry(PartitionMovePeerEnvelope ver
     {
         var failures = await PartitionMovementSourceEntryDisposal.ObserveSessionAsync(Session).ConfigureAwait(false);
         try
-        { retainedWork.Dispose(); }
+        {
+            retainedWork.Dispose();
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         ServerFailureObserver.ThrowIfAny(failures);
@@ -40,6 +42,8 @@ internal sealed class PartitionMovementSourceEntry(PartitionMovePeerEnvelope ver
             || actual.ControlIntentDigest != verified.ControlIntentDigest
             || JsonData.Fingerprint(actual.Grant) != scope
             || !actual.Body.Span.SequenceEqual(verified.Body.Span))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, Unavailable);
+        }
     }
 }

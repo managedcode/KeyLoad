@@ -72,7 +72,9 @@ public sealed class ReplicaConsensus : IReplicaEndpoint, IAsyncDisposable
         lock (lifecycle)
         {
             if (shutdown is not null)
-            { throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaProtocol.NoLeader); }
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaProtocol.NoLeader);
+            }
             rpc.Attach(transport);
             state.Ready = true;
             worker = Task.Run(() => maintenance.RunAsync(stoppingToken));
@@ -211,9 +213,13 @@ public sealed class ReplicaConsensus : IReplicaEndpoint, IAsyncDisposable
         await ReplicaShutdownStage.ObserveAsync(Task.WhenAll(followers.DrainAsync(CancellationToken.None),
             snapshots.DrainAsync(CancellationToken.None), maintenance.DrainAsync(CancellationToken.None)), failures);
         if (failures.Count == SingleShutdownFailure)
-        { ExceptionDispatchInfo.Capture(failures[FirstShutdownFailureIndex]).Throw(); }
+        {
+            ExceptionDispatchInfo.Capture(failures[FirstShutdownFailureIndex]).Throw();
+        }
         if (failures.Count > SingleShutdownFailure)
-        { throw new AggregateException(failures); }
+        {
+            throw new AggregateException(failures);
+        }
     }
 
     /// <summary>Stops protocol work before the composition root disposes node-owned storage.</summary>

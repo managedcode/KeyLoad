@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.Server;
@@ -37,9 +37,13 @@ internal static class PartitionMovementTransferSourceCapture
         {
             var failures = new List<Exception> { primary };
             if (session is not null)
-            { ServerFailureObserver.Observe(() => session.DisposeAsync().AsTask().GetAwaiter().GetResult(), failures); }
+            {
+                ServerFailureObserver.Observe(() => session.DisposeAsync().AsTask().GetAwaiter().GetResult(), failures);
+            }
             else
-            { ServerFailureObserver.Observe(reservation.Dispose, failures); }
+            {
+                ServerFailureObserver.Observe(reservation.Dispose, failures);
+            }
             ServerFailureObserver.ThrowIfAny(failures);
             throw;
         }

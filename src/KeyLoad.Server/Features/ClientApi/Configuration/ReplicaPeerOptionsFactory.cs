@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Replication;
 using Microsoft.Extensions.Options;
 
@@ -11,7 +11,9 @@ internal sealed class ReplicaPeerOptionsFactory(IOptions<NodeOptions> node, IOpt
     public ReplicaPeerOptions Create(string name)
     {
         var options = node.Value.CreatePeerOptions(TimeSpan.Zero) with
-        { ReplayLimits = replay.Value };
+        {
+            ReplayLimits = replay.Value
+        };
         options.Validate(replica.Value);
         return options;
     }

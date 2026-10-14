@@ -52,6 +52,8 @@ internal static class ControlledPartitionMovementBlobSeed
     private static void Require(OperationResult result)
     {
         if (result.Error is not null)
-        { throw new InvalidOperationException(Failed); }
+        {
+            throw new InvalidOperationException(Failed);
+        }
     }
 }

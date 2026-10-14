@@ -16,7 +16,10 @@ internal static class GraphIncomingVertexAuthorityFlow
         var dirtyImage = GraphShortestPathFullStoreImage.Bytes(database.Store);
         var dirtyCut = database.Store.Position;
         database.Store.Dispose();
-        var next = state.DamagedEdge with { Id = "zz-incoming-continuation" };
+        var next = state.DamagedEdge with
+        {
+            Id = "zz-incoming-continuation"
+        };
         var command = GraphStorageReferenceFixture.Command(database.Partition,
             new PutDocument(GraphTraversalIntegrityFixture.Nodes, "incoming-witness", "{}"),
             GraphTraversalIntegrityFixture.Mutation(next));

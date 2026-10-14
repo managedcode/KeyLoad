@@ -7,8 +7,13 @@ internal sealed class NativeFailureStream(Exception failure, CancellationToken c
     public override bool CanSeek => false;
     public override bool CanWrite => true;
     public override long Length => 0;
-    public override long Position { get => 0; set => throw new NotSupportedException(); }
-    public override void Flush() { }
+    public override long Position
+    {
+        get => 0; set => throw new NotSupportedException();
+    }
+    public override void Flush()
+    {
+    }
     public override int Read(byte[] buffer, int offset, int count) => throw new NotSupportedException();
     public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
     public override void SetLength(long value) => throw new NotSupportedException();

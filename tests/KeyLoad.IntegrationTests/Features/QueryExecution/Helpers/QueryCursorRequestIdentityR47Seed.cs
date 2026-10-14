@@ -12,7 +12,9 @@ internal static class QueryCursorRequestIdentityR47Seed
                 var original = await SqlOffsetRf3Setup.RunAsync(fixture, admin, token);
                 var request = SqlOffsetRf3Protocol.ScalarRequest(original.Partition);
                 return await CaptureAsync(admin, original, request with
-                { Sql = request.Sql.Replace("OFFSET 1", "OFFSET 0", StringComparison.Ordinal) }, token);
+                {
+                    Sql = request.Sql.Replace("OFFSET 1", "OFFSET 0", StringComparison.Ordinal)
+                }, token);
             }, token);
 
     private static async Task<QueryCursorRequestIdentityR47State> CaptureAsync(
@@ -22,7 +24,9 @@ internal static class QueryCursorRequestIdentityR47Seed
         await SqlRf3Protocol.EqualAsync(original.Partition, changedRequest.Partition);
         await Assert.That(changedRequest.Cursor).IsNull();
         var complete = SqlOffsetRf3Protocol.ScalarRequest(original.Partition) with
-        { Sql = "SELECT TOP(4) title FROM offsetleft ORDER BY order_id" };
+        {
+            Sql = "SELECT TOP(4) title FROM offsetleft ORDER BY order_id"
+        };
         var resources = await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.ListResourcesAsync(
             new(original.Partition.TenantId, original.Partition.DatabaseId), token));
         return new(original.Identity.Secret, original.Partition,

@@ -82,9 +82,13 @@ internal static class NativeTextAuthorityContinuation
         finally
         {
             if (projection is not null)
-            { ServerFailureObserver.Observe(projection.Dispose, failures); }
+            {
+                ServerFailureObserver.Observe(projection.Dispose, failures);
+            }
             if (reopened is not null)
-            { ServerFailureObserver.Observe(reopened.Dispose, failures); }
+            {
+                ServerFailureObserver.Observe(reopened.Dispose, failures);
+            }
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -104,11 +108,20 @@ internal static class NativeTextAuthorityContinuation
 
     private static async Task LiteralAsync(SearchEngine search, SearchRequest request, CancellationToken token)
     {
-        var rows = await search.SearchAsync(Reader, request with { Text = HealthyTerm }, token);
+        var rows = await search.SearchAsync(Reader, request with
+        {
+            Text = HealthyTerm
+        }, token);
         var expected = new RankedDocument(new(new(request.Partition, request.Collection, HealthyId),
             Revision, PublicJson, true, [Field]), Score);
         await Assert.That(JsonDefaults.Serialize(rows).SequenceEqual(JsonDefaults.Serialize(new[] { expected }))).IsTrue();
-        await Assert.That(await search.SearchAsync(Reader, request with { Text = OldTerm }, token)).IsEmpty();
-        await Assert.That(await search.SearchAsync(Reader, request with { Text = ChangedTerm }, token)).IsEmpty();
+        await Assert.That(await search.SearchAsync(Reader, request with
+        {
+            Text = OldTerm
+        }, token)).IsEmpty();
+        await Assert.That(await search.SearchAsync(Reader, request with
+        {
+            Text = ChangedTerm
+        }, token)).IsEmpty();
     }
 }

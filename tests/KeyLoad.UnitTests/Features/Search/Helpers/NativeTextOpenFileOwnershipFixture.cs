@@ -23,13 +23,17 @@ internal static class NativeTextOpenFileOwnershipFixture
         var original = UnitNativeTextOptions.Execution();
         var initial = new NativeTextFileStreamProvider(root, leaf, database.Store.Identity.NodeId, original);
         using (initial.CreateFileStream(heldPath, FileMode.CreateNew, FileAccess.Write, FileShare.None))
-        { }
+        {
+        }
         using (initial.CreateFileStream(healthyPath, FileMode.CreateNew, FileAccess.Write, FileShare.None))
-        { }
+        {
+        }
         var observed = NativeTextFileIO.MeasureRegularFiles(root, original.Value.MaximumFiles,
             original.Value.MaximumDiskBytes, original);
         var options = UnitNativeTextOptions.Execution(new NativeTextExecutionOptions
-        { MaximumDiskBytes = checked(observed.Bytes + Held.LongLength + Healthy.LongLength - 1) });
+        {
+            MaximumDiskBytes = checked(observed.Bytes + Held.LongLength + Healthy.LongLength - 1)
+        });
         var resources = new NativeTextResourceOwnership(options);
         resources.RegisterRoot(root, _ => NativeTextRootFiles.VerifyReceipt(root, database.Store.Identity.NodeId, options));
         return (new(root, leaf, database.Store.Identity.NodeId, options, resources), heldPath, healthyPath);

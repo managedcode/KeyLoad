@@ -10,7 +10,7 @@ internal static class ControlledPartitionMovementCaptureReceiptAssertions
     private const long CaptureNativeIndex = 17;
 
     internal static async Task AssertAsync(ControlledPartitionMovementLoopbackCorpus corpus,
-        PartitionMovePhaseResult acceptedFence, KeyLoad.Orleans.PartitionMovementCaptureHandle handle,
+        PartitionMovePhaseResult acceptedFence, KeyLoad.Clustering.PartitionMovementCaptureHandle handle,
         PartitionMovePhaseResult actual, long additionalSeedEntries = 0)
     {
         var fence = acceptedFence.Fence

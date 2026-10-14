@@ -9,7 +9,10 @@ internal sealed class EventVectorOfferPinObservation : IDisposable
     private const int Version = 1;
     private readonly EventVectorSourceObservation original;
     private readonly EventVectorSourcePhase observed;
-    internal EventVectorCleanupPin Carrier { get; }
+    internal EventVectorCleanupPin Carrier
+    {
+        get;
+    }
 
     private EventVectorOfferPinObservation(EventVectorSourceObservation original,
         EventVectorSourcePhase observed, ReadOnlyMemory<byte> originalPinBytes, EventVectorSourcePin pin)
@@ -26,7 +29,9 @@ internal sealed class EventVectorOfferPinObservation : IDisposable
     {
         var reply = authenticated.Reply;
         if (reply.Error is { } error)
-        { throw Errors.Fail(error, EventVectorRemoteProtocol.Unavailable); }
+        {
+            throw Errors.Fail(error, EventVectorRemoteProtocol.Unavailable);
+        }
         admission.RequireEncodedBytes(reply.OriginalNativeReply.Length);
         work.ChargeBytes(reply.OriginalNativeReply.Length);
         work.ChargeBytes(authenticated.OriginalReplyBytes.Length);
@@ -39,12 +44,16 @@ internal sealed class EventVectorOfferPinObservation : IDisposable
             observed = EventVectorAuthenticatedSourceObservation.Read(originalPin, actualCall, authenticated, admission);
             admission.RequireEncodedBytes(original.CurrentPinRowBytes.Length);
             if (original.CurrentPinRowBytes.IsEmpty)
-            { throw Errors.Fail(ErrorCode.RecoveryRequired, EventVectorRemoteProtocol.Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.RecoveryRequired, EventVectorRemoteProtocol.Invalid);
+            }
             var pin = NativeSerialization.Deserialize<EventVectorSourcePin>(original.CurrentPinRowBytes.Span);
             if (pin.Released || pin.Source != acknowledged.Source || pin.Position != acknowledged.Position
                 || pin.MapId != originalPin.MapId || pin.PrincipalId != originalPin.PrincipalId
                 || pin.CoverageGeneration != originalPin.CoverageGeneration)
-            { throw Errors.Fail(ErrorCode.TokenInvalidated, EventVectorRemoteProtocol.Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.TokenInvalidated, EventVectorRemoteProtocol.Invalid);
+            }
             work.Check();
             var result = new EventVectorOfferPinObservation(original, observed, originalPinBytes, pin);
             transferred = true;
@@ -61,7 +70,10 @@ internal sealed class EventVectorOfferPinObservation : IDisposable
         Clear(original.CurrentPinRowBytes);
         Clear(original.OriginalBodyDigest);
         if (observed is not null)
-        { Clear(observed.SourceObservationWitness); Clear(observed.SourceOriginalOutcomeDigest); }
+        {
+            Clear(observed.SourceObservationWitness);
+            Clear(observed.SourceOriginalOutcomeDigest);
+        }
     }
 
     private static void Clear(ReadOnlyMemory<byte> bytes)

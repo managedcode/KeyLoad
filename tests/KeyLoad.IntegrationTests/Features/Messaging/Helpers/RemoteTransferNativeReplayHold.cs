@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.Server.Features.DocumentStorage;
 
@@ -22,13 +22,18 @@ internal sealed class RemoteTransferNativeReplayHold
         fixture.WriteReplayPlan(ArmId, mode);
     }
 
-    internal Guid ArmId { get; }
+    internal Guid ArmId
+    {
+        get;
+    }
 
     internal async Task<IReadOnlyList<RequestCqrsNativeReplayWitness>> WaitAsync(Task original,
         IReadOnlyList<ReplicaSiloDiscovery> source, int count, CancellationToken token)
     {
         if (count is not (2 or 6))
-        { throw Missing(); }
+        {
+            throw Missing();
+        }
         using var waiting = CancellationTokenSource.CreateLinkedTokenSource(token);
         var observed = fixture.WaitForMarkerAsync(ArmId, RequestCqrsProbePhase.NativeModelReplayBeforeDispatch,
             RequestCqrsProbeOutcome.Observed, source, waiting.Token);
@@ -36,7 +41,9 @@ internal sealed class RemoteTransferNativeReplayHold
         {
             await waiting.CancelAsync().ConfigureAwait(false);
             try
-            { _ = await observed.ConfigureAwait(false); }
+            {
+                _ = await observed.ConfigureAwait(false);
+            }
             catch (OperationCanceledException) when (waiting.IsCancellationRequested) { }
             await original.ConfigureAwait(false);
             throw Missing();
@@ -65,7 +72,9 @@ internal sealed class RemoteTransferNativeReplayHold
         if (witness.SessionId != fixture.SessionId || witness.ArmId != ArmId || witness.Ordinal != ordinal
             || witness.RequestId != marker.RequestId || witness.CommandId != commandId || marker.CommandId != commandId
             || witness.ConnectionId == Guid.Empty || witness.Voter != marker.Voter || witness.SiloAddress != marker.SiloAddress)
-        { throw Missing(); }
+        {
+            throw Missing();
+        }
     }
 
     internal void Release()

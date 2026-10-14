@@ -7,7 +7,9 @@ internal sealed record NativeSignedPurposeCut(long Position, string[] Rows)
         {
             var page = view.Scan([], fixture.Database.Limits.MaxScanRecords);
             if (page.HasMore)
-            { throw new InvalidOperationException("The complete original native cut exceeded its bound."); }
+            {
+                throw new InvalidOperationException("The complete original native cut exceeded its bound.");
+            }
             return new NativeSignedPurposeCut(fixture.Store.Position, page.Records.Select(static row =>
                 Convert.ToHexString(row.Key.Span) + ":" + Convert.ToHexString(row.Value.Span)).ToArray());
         });

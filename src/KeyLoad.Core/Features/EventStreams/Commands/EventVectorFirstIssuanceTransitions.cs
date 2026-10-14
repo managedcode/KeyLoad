@@ -26,7 +26,9 @@ internal static class EventVectorFirstIssuanceTransitions
         if (original.OriginalParentRequestId != phase.OriginalParentRequestId
             || original.OriginalParentExpiresAt != phase.OriginalParentExpiresAt
             || !original.OriginalCoverageWitnessBytes.Span.SequenceEqual(phase.OriginalCoverageWitness.Span))
-        { throw Errors.Fail(ErrorCode.Conflict, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, Invalid);
+        }
         var first = EventVectorFirstPhaseCarrier.Read(phase.OriginalCapturedFirstOpenPhaseBytes, admission);
         EventVectorFirstPhaseCarrier.Require(phase, admission);
         EventVectorParentScopes.RequireExact(original.OriginalAuthorizedSourceScopes,
@@ -44,7 +46,10 @@ internal static class EventVectorFirstIssuanceTransitions
                 when original.State == EventVectorFirstIssuanceState.Captured
                     && original.OriginalCapturedFirstOpenPhaseBytes.Span.SequenceEqual(
                         phase.OriginalCapturedFirstOpenPhaseBytes.Span)
-                => original with { State = EventVectorFirstIssuanceState.DispatchReserved },
+                => original with
+                {
+                    State = EventVectorFirstIssuanceState.DispatchReserved
+                },
             _ => throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid)
         };
         EventVectorFirstIssuanceWriter.Replace(transaction, original, next, admission);

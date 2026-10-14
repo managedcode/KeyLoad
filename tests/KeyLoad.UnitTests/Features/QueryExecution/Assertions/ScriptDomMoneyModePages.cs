@@ -9,7 +9,10 @@ internal static class ScriptDomMoneyModePages
         var position = database.Store.Position;
         var identity = JsonDefaults.Serialize(database.Store.Identity);
         var named = new QueryRequest(database.Partition, NamedSql,
-            new(StringComparer.Ordinal) { [NamedParameter] = global::System.Text.Json.JsonSerializer.SerializeToElement("a", JsonDefaults.Options) },
+            new(StringComparer.Ordinal)
+            {
+                [NamedParameter] = global::System.Text.Json.JsonSerializer.SerializeToElement("a", JsonDefaults.Options)
+            },
             AllowFullScan: true);
         var expected = new QueryPage([new("a", Revision, """{"title":"first"}""", false, [])],
             null, position, ScriptDomSelectPages.FullScan);
@@ -18,7 +21,9 @@ internal static class ScriptDomMoneyModePages
         {
             Sql = SlotSql,
             Parameters = new(StringComparer.Ordinal)
-            { [SlotParameter] = global::System.Text.Json.JsonSerializer.SerializeToElement("a", JsonDefaults.Options) }
+            {
+                [SlotParameter] = global::System.Text.Json.JsonSerializer.SerializeToElement("a", JsonDefaults.Options)
+            }
         };
         var budget = new global::KeyLoad.Core.ReadExecutionBudget(database.Database.OperationLimitsOptions);
         var statement = global::KeyLoad.Features.QueryExecution.ScriptDomSyntax.Parse(wire.Sql,

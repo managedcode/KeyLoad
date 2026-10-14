@@ -35,7 +35,10 @@ internal sealed class RequestCqrsNativeReplayCatalogTests
             await Assert.That(witness.OriginalNativeRequest.SequenceEqual(original.OriginalNativeRequest)).IsTrue();
         }
         var wrongOrder = witnesses.ToArray();
-        wrongOrder[0] = wrongOrder[0] with { Ordinal = 2 };
+        wrongOrder[0] = wrongOrder[0] with
+        {
+            Ordinal = 2
+        };
         _ = Assert.ThrowsExactly<InvalidOperationException>(() => RequestCqrsNativeReplayInventory.RequireInventory([plan], wrongOrder,
             [new(arm, armBytes)], [marker], _ => null));
         _ = Assert.ThrowsExactly<InvalidOperationException>(() => RequestCqrsNativeReplayInventory.RequireInventory([plan], witnesses[..5],
@@ -50,12 +53,17 @@ internal sealed class RequestCqrsNativeReplayCatalogTests
         foreach (var mode in Enum.GetValues<RemoteModelNativeReplayVariation>().Where(RemoteModelNativeReplayCatalog.IsIndividual))
         {
             if (mode == RemoteModelNativeReplayVariation.Original2)
-            { continue; }
+            {
+                continue;
+            }
             await Assert.That(RemoteModelNativeReplayCatalog.Count(mode)).IsEqualTo(1);
             _ = Assert.ThrowsExactly<InvalidOperationException>(() => RemoteModelNativeReplayCatalog.At(mode, 2));
         }
         using var fixture = new RequestCqrsNativeReplayFrameCase();
-        var invalid = fixture.Create() with { ReplayMode = RemoteModelNativeReplayVariation.AllWireFaults6 };
+        var invalid = fixture.Create() with
+        {
+            ReplayMode = RemoteModelNativeReplayVariation.AllWireFaults6
+        };
         _ = Assert.ThrowsExactly<InvalidOperationException>(() => RequestCqrsNativeReplayInventory.WriteWitness(invalid));
         await Assert.That(RequestCqrsNativeReplayInventory.IsWitnessName(RequestCqrsNativeReplayInventory.WitnessName(
             invalid.ArmId, invalid.RequestId, 7))).IsFalse();
@@ -68,12 +76,32 @@ internal sealed class RequestCqrsNativeReplayCatalogTests
         for (var ordinal = 1; ordinal <= result.Length; ordinal++)
         {
             var mode = RemoteModelNativeReplayCatalog.At(RemoteModelNativeReplayVariation.AllWireFaults6, ordinal);
-            var request = original with { Payload = RemoteModelNativeReplayPayload.Create(original, mode), Nonce = Guid.NewGuid(), SenderSignature = string.Empty };
-            request = request with { SenderSignature = fixture.Mac.SignNativeRequest(request) };
-            var reply = RequestCqrsNativeReplayInventory.Reply(basis) with { Nonce = request.Nonce, SenderSignature = string.Empty };
-            reply = reply with { SenderSignature = fixture.Mac.SignNativeReply(reply) };
+            var request = original with
+            {
+                Payload = RemoteModelNativeReplayPayload.Create(original, mode),
+                Nonce = Guid.NewGuid(),
+                SenderSignature = string.Empty
+            };
+            request = request with
+            {
+                SenderSignature = fixture.Mac.SignNativeRequest(request)
+            };
+            var reply = RequestCqrsNativeReplayInventory.Reply(basis) with
+            {
+                Nonce = request.Nonce,
+                SenderSignature = string.Empty
+            };
+            reply = reply with
+            {
+                SenderSignature = fixture.Mac.SignNativeReply(reply)
+            };
             result[ordinal - 1] = RequestCqrsNativeReplayInventory.ReadWitness(RequestCqrsNativeReplayInventory.WriteWitness(basis with
-            { ReplayMode = mode, Ordinal = ordinal, NativeRequest = NativeSerialization.Serialize(request), NativeReply = NativeSerialization.Serialize(reply) }));
+            {
+                ReplayMode = mode,
+                Ordinal = ordinal,
+                NativeRequest = NativeSerialization.Serialize(request),
+                NativeReply = NativeSerialization.Serialize(reply)
+            }));
         }
         return result;
     }

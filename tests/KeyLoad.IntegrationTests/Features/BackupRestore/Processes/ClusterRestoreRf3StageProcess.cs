@@ -12,7 +12,9 @@ internal static class ClusterRestoreRf3StageProcess
         NativeClusterRestoreStage stage, int maximumBytes, CancellationToken cancellationToken)
     {
         if (!OperatingSystem.IsLinux() || pid < ClusterRestoreRf3ResumeProtocol.MinimumPid)
-        { throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid); }
+        {
+            throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid);
+        }
         var failures = new List<Exception>();
         var process = Process.GetProcessById(pid);
         await ServerFailureObserver.ObserveAsync(async () =>
@@ -22,7 +24,9 @@ internal static class ClusterRestoreRf3StageProcess
             process.Kill(entireProcessTree: true);
             await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
             if (!process.HasExited)
-            { throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid); }
+            {
+                throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid);
+            }
         }, failures).ConfigureAwait(false);
         ServerFailureObserver.Observe(process.Dispose, failures);
         ServerFailureObserver.ThrowIfAny(failures);
@@ -32,7 +36,9 @@ internal static class ClusterRestoreRf3StageProcess
         NativeClusterRestoreStage stage, int maximumBytes, DateTime originalStart)
     {
         if (process.HasExited || process.StartTime != originalStart)
-        { throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid); }
+        {
+            throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid);
+        }
         var path = Path.Combine(ClusterRestoreRf3ResumeProtocol.ProcRoot,
             process.Id.ToString(CultureInfo.InvariantCulture), ClusterRestoreRf3ResumeProtocol.CommandLine);
         // procfs reports length zero: read into the admitted fixed buffer, never ReadAllBytes.
@@ -40,7 +46,9 @@ internal static class ClusterRestoreRf3StageProcess
         var buffer = new byte[checked(maximumBytes + ClusterRestoreRf3ResumeProtocol.OverflowByte)];
         var read = stream.ReadAtLeast(buffer, buffer.Length, throwOnEndOfStream: false);
         if (read > maximumBytes)
-        { throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid); }
+        {
+            throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid);
+        }
         var arguments = Encoding.UTF8.GetString(buffer.AsSpan(0, read))
             .Split(ClusterRestoreRf3ResumeProtocol.ArgumentSeparator, StringSplitOptions.RemoveEmptyEntries);
         var assembly = Path.Combine(repository, ClusterRestoreRf3ResumeProtocol.CrashHostDll);
@@ -51,6 +59,8 @@ internal static class ClusterRestoreRf3StageProcess
             || !string.Equals(arguments[ClusterRestoreRf3ResumeProtocol.StageArgument], stage.ToString(), StringComparison.Ordinal)
             || !string.Equals(arguments[ClusterRestoreRf3ResumeProtocol.OperationArgument], operationId.ToString(ClusterRestoreRf3Protocol.IdentityFormat), StringComparison.Ordinal)
             || process.HasExited || process.StartTime != originalStart)
-        { throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid); }
+        {
+            throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid);
+        }
     }
 }

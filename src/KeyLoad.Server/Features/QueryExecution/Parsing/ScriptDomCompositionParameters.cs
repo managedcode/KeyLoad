@@ -13,7 +13,9 @@ internal sealed class ScriptDomCompositionParameters(Dictionary<string, global::
         token.ThrowIfCancellationRequested();
         var name = Name(expression);
         if (parameters is null || !parameters.TryGetValue(name, out var value))
-        { throw ScriptDomOperationErrors.Invalid(); }
+        {
+            throw ScriptDomOperationErrors.Invalid();
+        }
         try
         {
             var result = global::System.Text.Json.JsonSerializer.Deserialize<T>(value, JsonDefaults.Options)
@@ -30,7 +32,9 @@ internal sealed class ScriptDomCompositionParameters(Dictionary<string, global::
         checkBudget();
         token.ThrowIfCancellationRequested();
         if (parameters is null || parameters.Count != used.Count)
-        { throw ScriptDomOperationErrors.Invalid(); }
+        {
+            throw ScriptDomOperationErrors.Invalid();
+        }
     }
     internal global::System.Text.Json.JsonElement ReadScalar(Dom.ScalarExpression expression)
     {
@@ -38,7 +42,9 @@ internal sealed class ScriptDomCompositionParameters(Dictionary<string, global::
         token.ThrowIfCancellationRequested();
         var name = Name(expression);
         if (parameters is null || !parameters.TryGetValue(name, out var value))
-        { throw ScriptDomOperationErrors.Invalid(); }
+        {
+            throw ScriptDomOperationErrors.Invalid();
+        }
         used.Add(name);
         return value;
     }
@@ -48,23 +54,31 @@ internal sealed class ScriptDomCompositionParameters(Dictionary<string, global::
         checkBudget();
         token.ThrowIfCancellationRequested();
         if ((parameters?.Count ?? EmptyCount) != used.Count)
-        { throw ScriptDomOperationErrors.Invalid(); }
+        {
+            throw ScriptDomOperationErrors.Invalid();
+        }
     }
     private const int EmptyCount = 0;
 
     private string Name(Dom.ScalarExpression expression)
     {
         if (expression is Dom.PrimaryExpression { Collation: not null })
-        { throw ScriptDomOperationErrors.Unsupported(); }
+        {
+            throw ScriptDomOperationErrors.Unsupported();
+        }
         if (positionalCount is { } count)
         {
             if (expression is Dom.MoneyLiteral money && ScriptDomSyntax.TryGetNativeSessionSlot(money, count, out var slot))
-            { return slot; }
+            {
+                return slot;
+            }
             throw ScriptDomOperationErrors.Invalid();
         }
         if (expression is Dom.VariableReference variable && variable.Name.Length > PrefixLength
             && variable.Name.StartsWith(Prefix, StringComparison.Ordinal))
-        { return variable.Name[PrefixLength..]; }
+        {
+            return variable.Name[PrefixLength..];
+        }
         throw ScriptDomOperationErrors.Unsupported();
     }
     private const int PrefixLength = 1;

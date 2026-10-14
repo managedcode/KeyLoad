@@ -47,9 +47,15 @@ internal sealed class NativeTextProjectionLeaseTests
         using var projection = new NativeTextProjection(Path.Combine(database.Directory, "native-text"), UnitExecutionOptions.DatabaseLimits(database.Database.Limits), database.Store.Identity.NodeId, UnitNativeTextOptions.Execution());
         var request = new SearchRequest(database.Partition, Collection, TextPath, "needle");
         var position = database.Store.Position;
-        var recordBound = BoundedEngine(database, new() { MaxScanRecords = 1 }, projection);
+        var recordBound = BoundedEngine(database, new()
+        {
+            MaxScanRecords = 1
+        }, projection);
         var recordFailure = Assert.ThrowsExactly<KeyLoadException>(() => recordBound.Search("root", request));
-        var tokenBound = BoundedEngine(database, new() { MaxSearchTextTokens = 1 }, projection);
+        var tokenBound = BoundedEngine(database, new()
+        {
+            MaxSearchTextTokens = 1
+        }, projection);
         var tokenFailure = Assert.ThrowsExactly<KeyLoadException>(() => tokenBound.Search("root", request));
 
         await Assert.That(recordFailure.Code).IsEqualTo(ErrorCode.BudgetExceeded);

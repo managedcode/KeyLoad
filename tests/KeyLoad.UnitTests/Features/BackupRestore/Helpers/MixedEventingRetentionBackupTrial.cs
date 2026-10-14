@@ -17,8 +17,14 @@ internal static class MixedEventingRetentionBackupTrial
         var signingFingerprint = SHA256.HashData(identity.SigningKey.Span);
         var cut = fixture.Target.Position;
         fixture.ReopenTarget(Path.Combine(fixture.Root, MixedEventingRetentionBackupProtocol.Target));
-        await Assert.That(fixture.Target!.Identity with { SigningKey = ReadOnlyMemory<byte>.Empty })
-            .IsEqualTo(identity with { SigningKey = ReadOnlyMemory<byte>.Empty });
+        await Assert.That(fixture.Target!.Identity with
+        {
+            SigningKey = ReadOnlyMemory<byte>.Empty
+        })
+            .IsEqualTo(identity with
+            {
+                SigningKey = ReadOnlyMemory<byte>.Empty
+            });
         await Assert.That(SHA256.HashData(fixture.Target.Identity.SigningKey.Span))
             .IsEquivalentTo(signingFingerprint, CollectionOrdering.Matching);
         await Assert.That(fixture.Target.Position).IsEqualTo(cut);

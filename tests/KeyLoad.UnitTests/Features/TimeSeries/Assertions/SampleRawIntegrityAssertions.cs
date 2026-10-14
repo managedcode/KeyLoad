@@ -17,7 +17,9 @@ internal static class SampleRawIntegrityAssertions
         {
             var page = view.Scan([], MaximumImageRecords);
             if (page.HasMore)
-            { throw new InvalidOperationException(ImageBound); }
+            {
+                throw new InvalidOperationException(ImageBound);
+            }
             return JsonSerializer.Serialize(page.Records.Select(record =>
                 new[] { Convert.ToHexString(record.Key.Span), Convert.ToHexString(record.Value.Span) }).ToArray());
         }));

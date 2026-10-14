@@ -44,9 +44,13 @@ internal static class ControlledPartitionMovementTerminalTrial
         var initialPosition = source.Store.Position;
         var seeded = await ControlledPartitionMovementPrepareSeed.ExecuteAsync(source, target, corpus, token);
         if (additionalSeed is not null)
-        { await additionalSeed(token); }
+        {
+            await additionalSeed(token);
+        }
         if (audit is not null)
-        { await audit.CaptureAsync(source, target, token); }
+        {
+            await audit.CaptureAsync(source, target, token);
+        }
         var controlSecret = Convert.ToBase64String(RandomNumberGenerator.GetBytes(PeerKeyBytes));
         var targetSecret = Convert.ToBase64String(RandomNumberGenerator.GetBytes(PeerKeyBytes));
         var sourceRuntime = ControlledPartitionMovementLoopbackOptions.Bind(source, corpus,
@@ -60,7 +64,9 @@ internal static class ControlledPartitionMovementTerminalTrial
                     ControlledPartitionMovementPrepareRequest.CallerAddress(listeners), seeded.Receipt,
                     seeded.Authority, seeded.RecordedAt, initialPosition, wholeExpiresAt, naturalExpiry ? options.IssuedGrantExpiryWindow : TimeSpan.Zero, token, audit)));
         if (audit is not null)
-        { await audit.FinishAsync(source, target, token); }
+        {
+            await audit.FinishAsync(source, target, token);
+        }
     }
 
     private static async Task WithSourceAdmissionAsync(ControlledPartitionMovementNode source,

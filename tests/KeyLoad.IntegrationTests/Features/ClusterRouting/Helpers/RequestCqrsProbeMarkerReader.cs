@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server.Features.ClusterRouting;
 using static KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsProbeFixtureProtocol;
 
@@ -20,7 +20,9 @@ internal static class RequestCqrsProbeMarkerReader
             cancellationToken.ThrowIfCancellationRequested();
             var match = FindMarker(fixture, armId, phase, outcome, null, signedDiscovery);
             if (match is { } marker)
-            { return marker; }
+            {
+                return marker;
+            }
             await Task.Delay(PollInterval, TimeProvider.System, cancellationToken).ConfigureAwait(false);
         }
     }
@@ -37,7 +39,9 @@ internal static class RequestCqrsProbeMarkerReader
             var match = FindMarker(fixture, armId, arm.Phase, RequestCqrsProbeOutcome.Released,
                 RequestCqrsProbeOutcome.Cancelled, signedDiscovery);
             if (match is not null)
-            { return; }
+            {
+                return;
+            }
             await Task.Delay(PollInterval, TimeProvider.System, cancellationToken).ConfigureAwait(false);
         }
     }
@@ -51,9 +55,13 @@ internal static class RequestCqrsProbeMarkerReader
         {
             var observed = FindNodeMarker(fixture, node, armId, phase, outcome, alternate, signedDiscovery);
             if (observed is null)
-            { continue; }
+            {
+                continue;
+            }
             if (match is not null)
-            { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch); }
+            {
+                throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch);
+            }
             match = observed;
         }
         return match;
@@ -72,13 +80,19 @@ internal static class RequestCqrsProbeMarkerReader
             var alternateMatch = alternate is { } alternateOutcome && Matches(path, armId, phase, alternateOutcome);
             var matchedOutcome = primaryMatch ? outcome : alternateMatch ? alternate : null;
             if (matchedOutcome is null)
-            { continue; }
+            {
+                continue;
+            }
             if (match is not null)
-            { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch); }
+            {
+                throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch);
+            }
             var marker = fixture.Json.ReadMarker(RequestCqrsProbeFileStore.ReadRecord(path));
             if (marker.ArmId != armId || marker.Phase != phase || marker.Outcome != matchedOutcome
                 || Path.GetFileName(path) != RequestCqrsProbeFileNames.Marker(marker))
-            { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch); }
+            {
+                throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch);
+            }
             ValidateMarkerCount(fixture, node, armId, marker.RequestId);
             fixture.RecordMarker(marker, node, phase.ToString(), matchedOutcome.Value.ToString(), signedDiscovery);
             match = marker;
@@ -102,14 +116,18 @@ internal static class RequestCqrsProbeMarkerReader
         {
             if (Path.GetFileName(path).StartsWith(prefix, StringComparison.Ordinal)
                 && ++count > RequestCqrsProbeFixtureProtocol.MaximumMarkersPerRequestPerVoter)
-            { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerLimitExceeded); }
+            {
+                throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerLimitExceeded);
+            }
         }
     }
 
     private static void EnsureScenarioDeadline(CancellationToken cancellationToken)
     {
         if (!cancellationToken.CanBeCanceled)
-        { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MissingScenarioDeadline); }
+        {
+            throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MissingScenarioDeadline);
+        }
     }
 
     private static void ValidateDiscovery(IReadOnlyList<ReplicaSiloDiscovery> discovery)
@@ -122,6 +140,8 @@ internal static class RequestCqrsProbeMarkerReader
             || discovery.Select(item => item.Incarnation).Distinct().Count() != 1
             || discovery.Any(item => item.VoterId != Node1Origin && item.VoterId != Node2Origin
                 && item.VoterId != Node3Origin))
-        { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch); }
+        {
+            throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch);
+        }
     }
 }

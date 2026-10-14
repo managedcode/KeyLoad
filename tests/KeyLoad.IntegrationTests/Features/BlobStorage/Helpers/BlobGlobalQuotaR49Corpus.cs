@@ -21,7 +21,9 @@ internal static class BlobGlobalQuotaR49Corpus
     {
         var bytes = new byte[count];
         for (var index = 0; index < count; index++)
-        { bytes[index] = (byte)(((offset + index) * 17L + 3L) % 251L); }
+        {
+            bytes[index] = (byte)(((offset + index) * 17L + 3L) % 251L);
+        }
         return bytes;
     }
     internal static string Initial(Guid creationIncarnation, BeginBlobUploadRequest request)

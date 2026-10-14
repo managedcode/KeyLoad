@@ -29,10 +29,16 @@ internal static class PolicyEpochPublicContinuation
         var cursors = await PolicyEpochPublicAssertions.PagesAsync(reader, root, scenario, false, token);
         var state = new PolicyEpochPublicState(scenario, seed, receipt, cursors, scenario.Reader);
         var reduced = await PolicyEpochPublicPolicy.ChangeAsync(root, scenario.Reader, [], false, token);
-        state = state with { CurrentReader = reduced };
+        state = state with
+        {
+            CurrentReader = reduced
+        };
         await PolicyEpochPublicRefusals.AllAsync(fixture, reader, root, state, ErrorCode.CursorExpired, token);
         await PolicyEpochPublicAssertions.PagesAsync(reader, root, scenario, true, token);
-        state = state with { CurrentReader = await PolicyEpochPublicPolicy.ChangeAsync(root, reduced, [], true, token) };
+        state = state with
+        {
+            CurrentReader = await PolicyEpochPublicPolicy.ChangeAsync(root, reduced, [], true, token)
+        };
         await PolicyEpochPublicRefusals.AllAsync(fixture, reader, root, state, ErrorCode.Unauthenticated, token);
         state = state with
         {

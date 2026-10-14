@@ -24,7 +24,12 @@ internal static class EventAppendDedupAssertions
             var id = Guid.NewGuid();
             var item = EventAppendCrashContract.Event(EventAppendCrashContract.EventId);
             if (changed)
-            { item = item with { PayloadJson = ChangedEventJson }; }
+            {
+                item = item with
+                {
+                    PayloadJson = ChangedEventJson
+                };
+            }
             var command = new CommandRequest(id, EventAppendCrashContract.Partition,
                 [new AppendEvents(EventAppendCrashContract.Streams, EventAppendCrashContract.StreamId, [item], ExpectedStreamRevision.Any)]);
             var original = new ReplicatedOperation(id, OperationKind.Batch, EventAppendCrashContract.Principal,
@@ -48,7 +53,9 @@ internal static class EventAppendDedupAssertions
     {
         var page = view.Scan(KeySpace.Partition(family, EventAppendCrashContract.Partition), MaximumFixtureRecords);
         if (page.HasMore)
-        { throw new InvalidOperationException(Overflow); }
+        {
+            throw new InvalidOperationException(Overflow);
+        }
         return page.Records.Select(record => Convert.ToHexString(record.Key.Span) + ByteSeparator + Convert.ToHexString(record.Value.Span));
     }).ToArray());
 }

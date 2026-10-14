@@ -10,7 +10,9 @@ public sealed partial class DatabaseEngine
     {
         var payload = NativeSerialization.Deserialize<NativeCommandPayload>(operation.NativePayload.Span);
         if (payload.TransferProof.IsEmpty)
-        { return null; }
+        {
+            return null;
+        }
         RequireNativeBudget(payload.TransferProof.Length);
         var proof = NativeSerialization.Deserialize<RemoteTransferNativeProof>(payload.TransferProof.Span);
         RemoteTransferPeerShape.Require(proof.Call);
@@ -26,7 +28,9 @@ public sealed partial class DatabaseEngine
             || request.Mutations[RemoteTransferPeerProtocol.FirstMutation] is not AcceptQueueTransfer accept
             || accept.DestinationQueue != proof.Call.IntentClaims.Destination
             || accept.IntentToken != proof.Call.IntentToken)
-        { throw Errors.Fail(ErrorCode.Corruption, RemoteTransferPeerProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, RemoteTransferPeerProtocol.Invalid);
+        }
         return proof;
     }
 
@@ -37,7 +41,9 @@ public sealed partial class DatabaseEngine
         var request = Payload<CommandRequest>(operation);
         var placement = ReadPlacementWitness(view, request.Partition);
         if (request.OwnershipEpoch != placement.PlacementEpoch)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, StalePartitionOwnershipMessage); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, StalePartitionOwnershipMessage);
+        }
         return placement;
     }
 }

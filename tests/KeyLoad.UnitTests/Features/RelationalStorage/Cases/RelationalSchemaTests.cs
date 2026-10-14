@@ -63,8 +63,14 @@ internal sealed class RelationalSchemaTests
     public async Task AcAisql002ColumnBoundsAndMalformedInProcessShapesRejectBeforeSerialization()
     {
         var definition = RelationalTestData.Definition();
-        var defaultColumns = definition with { RelationalSchema = new(RelationalTestData.Key, default) };
-        var nullColumn = definition with { RelationalSchema = new(RelationalTestData.Key, [null!]) };
+        var defaultColumns = definition with
+        {
+            RelationalSchema = new(RelationalTestData.Key, default)
+        };
+        var nullColumn = definition with
+        {
+            RelationalSchema = new(RelationalTestData.Key, [null!])
+        };
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => RelationalRowValidation.ValidateSchema(defaultColumns)).Code)
             .IsEqualTo(ErrorCode.Validation);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => RelationalRowValidation.ValidateSchema(nullColumn)).Code)
@@ -73,9 +79,16 @@ internal sealed class RelationalSchemaTests
             RelationalTestData.Name + index, RelationalColumnType.Text, Nullable: true)).Prepend(new(RelationalTestData.Key, RelationalColumnType.Text))
             .ToImmutableArray();
         using var database = new TestDatabase();
-        var atLimit = definition with { Indexes = [], RelationalSchema = new(RelationalTestData.Key, columns[..MaximumColumns]) };
+        var atLimit = definition with
+        {
+            Indexes = [],
+            RelationalSchema = new(RelationalTestData.Key, columns[..MaximumColumns])
+        };
         RelationalTestData.Configure(database, atLimit);
-        var overLimit = definition with { RelationalSchema = new(RelationalTestData.Key, columns) };
+        var overLimit = definition with
+        {
+            RelationalSchema = new(RelationalTestData.Key, columns)
+        };
         await Assert.That(RelationalTestData.ConfigureResult(database, overLimit).Error).IsEqualTo(ErrorCode.ResourceExhausted);
     }
 }

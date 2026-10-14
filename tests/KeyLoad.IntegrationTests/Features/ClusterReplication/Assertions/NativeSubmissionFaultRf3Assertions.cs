@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.StorageRecovery;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterReplication;
@@ -10,7 +10,9 @@ internal static class NativeSubmissionFaultRf3Assertions
     {
         var leaders = nodes.Select(value => value.Status.Leader).Distinct(StringComparer.Ordinal).ToArray();
         if (leaders.Length != 1 || leaders[0] is null)
-        { throw NativeSubmissionFaultRf3Owner.Missing(); }
+        {
+            throw NativeSubmissionFaultRf3Owner.Missing();
+        }
         return nodes.Single(value => value.Admin.LocalVoter == leaders[0]);
     }
 
@@ -48,7 +50,11 @@ internal static class NativeSubmissionFaultRf3Assertions
     {
         await Assert.That(disposed.Phase).IsEqualTo(RequestCqrsProbePhase.ReplicaEntryObserverDisposed);
         await Assert.That(disposed.Outcome).IsEqualTo(RequestCqrsProbeOutcome.Observed);
-        await Assert.That(disposed with { Phase = acknowledged.Phase, Outcome = acknowledged.Outcome })
+        await Assert.That(disposed with
+        {
+            Phase = acknowledged.Phase,
+            Outcome = acknowledged.Outcome
+        })
             .IsEqualTo(acknowledged);
     }
 }

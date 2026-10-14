@@ -51,7 +51,9 @@ internal sealed class QueryResultByteLimitTests
         var sources = QueryResultByteLimitFixture.Sources(database);
         var position = database.Store.Position;
         var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution(new QueryExecutionOptions
-        { MaximumResultBytes = larger ? QueryResultByteLimitFixture.LargerCap : null }));
+        {
+            MaximumResultBytes = larger ? QueryResultByteLimitFixture.LargerCap : null
+        }));
         KeyLoadException? failure = null;
         QueryPage? partial = null;
         try
@@ -83,7 +85,9 @@ internal sealed class QueryResultByteLimitTests
         try
         {
             var rejected = new QueryEngine(database.Database, Options.Create(new QueryExecutionOptions
-            { MaximumResultBytes = maximum }));
+            {
+                MaximumResultBytes = maximum
+            }));
             QueryResultByteLimitFixture.Execute(rejected, database, false, false, true);
         }
         catch (InvalidOperationException exception)

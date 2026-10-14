@@ -13,7 +13,10 @@ internal sealed class RequestCqrsRf3NativeNodeAdmission(ContainerResource resour
 
     internal ContainerResource Resource { get; } = resource;
     internal bool IsAdmitted => OriginalCallback is { IsCompletedSuccessfully: true } && observer.IsJoined;
-    internal Task? OriginalCallback { get; private set; }
+    internal Task? OriginalCallback
+    {
+        get; private set;
+    }
 
     internal Task StartAsync(ResourceLoggerService logger, string actualId, Task modelProof,
         Action startCapture, RequestCqrsLifecycleEvidence? lifecycle,
@@ -22,7 +25,9 @@ internal sealed class RequestCqrsRf3NativeNodeAdmission(ContainerResource resour
         lock (gate)
         {
             if (instanceId is not null && !string.Equals(instanceId, actualId, StringComparison.Ordinal))
-            { throw new InvalidOperationException(ChangedInstanceMessage); }
+            {
+                throw new InvalidOperationException(ChangedInstanceMessage);
+            }
             instanceId = actualId;
             return OriginalCallback ??= RunAsync(logger, actualId, modelProof, startCapture, lifecycle,
                 failureObserver, ownerToken, nativeToken);
@@ -48,7 +53,9 @@ internal sealed class RequestCqrsRf3NativeNodeAdmission(ContainerResource resour
         await RequestCqrsLifecycleFailureObserver.ObserveAsync(() => DisposeAsync().AsTask(), failures,
             failureObserver, RequestCqrsLifecycleStage.ObserverJoin).ConfigureAwait(false);
         if (!observer.IsJoined)
-        { await observer.RetryFailedCloseAsync(failures, failureObserver).ConfigureAwait(false); }
+        {
+            await observer.RetryFailedCloseAsync(failures, failureObserver).ConfigureAwait(false);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 

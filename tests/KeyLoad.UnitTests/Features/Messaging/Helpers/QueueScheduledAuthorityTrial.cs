@@ -15,17 +15,24 @@ internal static class QueueScheduledAuthorityTrial
             QueueLifecycleTestProtocol.Payload, QueueLifecycleTestProtocol.Headers, NotBefore: due)).Get<CommitReceipt>();
         var key = KeySpace.Partition("message-meta", flow.Partition, flow.Lane.Queue, QueueLifecycleTestProtocol.Pending);
         var exact = fixture.Store.Read(view => view.ReadOwnedValue(key))!;
-        flow = flow with { Time = due.AddSeconds(1) };
+        flow = flow with
+        {
+            Time = due.AddSeconds(1)
+        };
         var request = new ReceiveRequest(Guid.NewGuid(), flow.Lane, LeaseSeconds: QueueLifecycleTestProtocol.LeaseSeconds);
         var receive = QueueLeaseAuthoritySetup.Create(OperationKind.Receive, request, request.RequestId, flow.Time)
             with
-        { PrincipalId = QueueLifecycleTestProtocol.Administrator };
+        {
+            PrincipalId = QueueLifecycleTestProtocol.Administrator
+        };
         var state = new QueueScheduledAuthorityState(flow, due, key, exact, receive);
         await QueueScheduledAuthorityImage.ScheduledAsync(fixture.Database, fixture.Store, state);
         var original = QueuePendingAuthorityHistory.Capture(fixture.Store);
         var malformed = NativeSerialization.Serialize(NativeSerialization.Deserialize<MessageMetadata>(exact)
             with
-        { NotBefore = due.AddTicks(1) });
+        {
+            NotBefore = due.AddTicks(1)
+        });
         Put(fixture.Store, key, malformed);
         var damaged = QueuePendingAuthorityHistory.Capture(fixture.Store);
         await QueueScheduledAuthorityHistory.OneRowAsync(original, damaged, key, malformed);
@@ -39,7 +46,10 @@ internal static class QueueScheduledAuthorityTrial
             await QueuePendingAuthorityHistory.SameAsync(cold, damaged);
             await QueueScheduledAuthorityHistory.RefuseAsync(owner, cold, state, damaged);
             Put(cold, key, exact);
-            await QueuePendingAuthorityHistory.SameAsync(cold, original with { Position = original.Position + 2 });
+            await QueuePendingAuthorityHistory.SameAsync(cold, original with
+            {
+                Position = original.Position + 2
+            });
             await QueueScheduledAuthorityImage.ScheduledAsync(owner, cold, state);
             var claimed = owner.Apply(receive);
             flow.Successes.Add((receive, claimed));

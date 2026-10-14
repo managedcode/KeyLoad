@@ -54,9 +54,15 @@ internal static class NativeTextMaintenanceRf3Assertions
         await Assert.That(JsonDefaults.Serialize(officialRows).SequenceEqual(JsonDefaults.Serialize(literal))).IsTrue();
         if (changed)
         {
-            await EmptyAsync(sdk, mcp, search with { Text = OriginalUkrainianQuery }, observation,
+            await EmptyAsync(sdk, mcp, search with
+            {
+                Text = OriginalUkrainianQuery
+            }, observation,
                 NativeTextMaintenanceFlowPhase.FinalEmptyUkrainian, token);
-            await EmptyAsync(sdk, mcp, search with { Text = OriginalEnglishQuery }, observation,
+            await EmptyAsync(sdk, mcp, search with
+            {
+                Text = OriginalEnglishQuery
+            }, observation,
                 NativeTextMaintenanceFlowPhase.FinalEmptyEnglish, token);
             var removed = new EntityRef(scenario.Partition, NativeTextMaintenanceRf3Scenario.Collection,
                 NativeTextMaintenanceRf3Scenario.English);

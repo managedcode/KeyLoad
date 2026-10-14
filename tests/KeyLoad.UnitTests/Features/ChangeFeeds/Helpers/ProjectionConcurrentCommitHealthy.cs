@@ -13,7 +13,9 @@ internal static class ProjectionConcurrentCommitHealthy
         var mutation = new PutDocument(ProjectionConsumerIdentityFixture.Source, "c", SourceJson, 0L);
         var command = ProjectionConsumerIdentityFixture.Operation(OperationKind.Batch, id,
             new CommandRequest(id, source.Partition, [mutation])) with
-        { EvaluatedAt = source.Time };
+        {
+            EvaluatedAt = source.Time
+        };
         token.ThrowIfCancellationRequested();
         var produced = FeedNativeHealthyAdmission.Submit(owner, store, directory, command, explicitTime: true, token);
         var receipt = produced.Get<CommitReceipt>();

@@ -37,7 +37,9 @@ internal static class GraphIncomingPublicRoutes
         await SdkDeniedAsync(await callers.Sdk.ExecuteSqlAsync(sql, token), code, seed.Reader.Secret);
         await McpDeniedAsync(callers, SqlOperationProtocol.ToolName, sql, code, seed.Reader.Secret, token);
         if (code == ErrorCode.Unauthenticated)
-        { await McpUnauthorizedProbe.VerifyAsync(fixture, McpCallerProtocol.Node2, seed.Reader.Secret, token); }
+        {
+            await McpUnauthorizedProbe.VerifyAsync(fixture, McpCallerProtocol.Node2, seed.Reader.Secret, token);
+        }
     }
 
     private static async Task SdkDeniedAsync<T>(Result<T> result, ErrorCode code, string credential)
@@ -45,9 +47,13 @@ internal static class GraphIncomingPublicRoutes
         await Assert.That(result.IsFailed).IsTrue();
         await Assert.That(result.Problem?.ErrorCode).IsEqualTo(code.ToString());
         if (result.Value is JsonElement element)
-        { await Assert.That(element.ValueKind is JsonValueKind.Undefined or JsonValueKind.Null).IsTrue(); }
+        {
+            await Assert.That(element.ValueKind is JsonValueKind.Undefined or JsonValueKind.Null).IsTrue();
+        }
         else
-        { await Assert.That(result.Value).IsNull(); }
+        {
+            await Assert.That(result.Value).IsNull();
+        }
         var text = Encoding.UTF8.GetString(JsonDefaults.Serialize(result.Problem));
         await Assert.That(text.Contains(credential, StringComparison.Ordinal)).IsFalse();
         await Assert.That(text.Contains(GraphIncomingRf3Scenario.PrivateMarker, StringComparison.Ordinal)).IsFalse();
@@ -72,9 +78,13 @@ internal static class GraphIncomingPublicRoutes
     private static async Task LiteralAsync(GraphIncomingEdgesPageV1 page, GraphIncomingRf3Seed seed, bool hidden)
     {
         if (hidden)
-        { await GraphIncomingRf3Assertions.AssertSourceHiddenAsync(page, seed); }
+        {
+            await GraphIncomingRf3Assertions.AssertSourceHiddenAsync(page, seed);
+        }
         else
-        { await GraphIncomingRf3Assertions.AssertThreeRowsAsync(page, seed); }
+        {
+            await GraphIncomingRf3Assertions.AssertThreeRowsAsync(page, seed);
+        }
         await Assert.That(page.Version).IsEqualTo(GraphIncomingPublicPolicy.Version);
         await Assert.That(page.CutPosition).IsGreaterThan(GraphIncomingPublicPolicy.EmptyPosition);
     }

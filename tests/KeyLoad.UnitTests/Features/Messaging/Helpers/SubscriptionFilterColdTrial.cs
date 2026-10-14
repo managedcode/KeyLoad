@@ -17,13 +17,19 @@ internal static class SubscriptionFilterColdTrial
             [new(SubscriptionFilterProtocol.FirstEvent, SubscriptionFilterProtocol.OldType, SubscriptionFilterProtocol.Payload),
              new(SubscriptionFilterProtocol.SecondEvent, SubscriptionFilterProtocol.NewType, SubscriptionFilterProtocol.Payload),
              new(SubscriptionFilterProtocol.ThirdEvent, SubscriptionFilterProtocol.OldType, SubscriptionFilterProtocol.Payload)]));
-        var group = Configure(fixture, SubscriptionFilterProtocol.Group, new() { MaxWindow = SubscriptionFilterProtocol.WindowSize });
+        var group = Configure(fixture, SubscriptionFilterProtocol.Group, new()
+        {
+            MaxWindow = SubscriptionFilterProtocol.WindowSize
+        });
         var independent = Configure(fixture, SubscriptionFilterProtocol.Independent);
         var received = Receive(fixture, group);
         Complete(fixture, group, received.Deliveries[0]);
         Complete(fixture, group, received.Deliveries[2]);
         var replacement = new ConfigureSubscriptionRequest(Guid.NewGuid(), group,
-            new(SubscriptionFilterProtocol.Root) { EventTypes = [SubscriptionFilterProtocol.NewType] },
+            new(SubscriptionFilterProtocol.Root)
+            {
+                EventTypes = [SubscriptionFilterProtocol.NewType]
+            },
             ExpectedGeneration: SubscriptionFilterProtocol.FirstGeneration);
         await SubscriptionFilterNativeAssertions.RefusedAsync(fixture.Database, fixture.Store, replacement, ErrorCode.Conflict, token);
         var pause = new SetSubscriptionPausedRequest(Guid.NewGuid(), group, SubscriptionFilterProtocol.FirstGeneration, true);
@@ -36,7 +42,10 @@ internal static class SubscriptionFilterColdTrial
         await SubscriptionFilterNativeAssertions.StatusAsync(db, group, SubscriptionFilterProtocol.FirstGeneration, SubscriptionFilterProtocol.GapCheckpoint, true);
         await SubscriptionFilterRefusals.RunAsync(db, first, replacement, token);
         await SubscriptionFilterWindowFaults.RunAsync(db, first, replacement, token);
-        replacement = replacement with { CommandId = Guid.NewGuid() };
+        replacement = replacement with
+        {
+            CommandId = Guid.NewGuid()
+        };
         var original = Apply(db, OperationKind.ConfigureSubscription, replacement, replacement.CommandId, token);
         var updated = original.Get<SubscriptionInfo>();
         await Assert.That(updated.IssuedPosition).IsEqualTo(SubscriptionFilterProtocol.GapCheckpoint);

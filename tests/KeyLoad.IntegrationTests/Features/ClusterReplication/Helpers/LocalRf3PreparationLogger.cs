@@ -9,7 +9,9 @@ internal sealed class LocalRf3PreparationLogger(LocalRf3PreparationDiagnostics d
         => new Capture(diagnostics, categoryName.StartsWith("Aspire.Hosting", StringComparison.Ordinal)
             ? "Aspire" : categoryName.StartsWith("Microsoft.Extensions.Hosting", StringComparison.Ordinal)
                 ? "Host" : null);
-    public void Dispose() { }
+    public void Dispose()
+    {
+    }
 
     internal static string FailureKind(Exception? failure) => failure switch
     {

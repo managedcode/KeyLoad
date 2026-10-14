@@ -20,15 +20,24 @@ internal static class NativeTextBm25EligibilityPolicy
                 SchemaVersion = resource.SchemaVersion + 1,
                 FieldPolicies = [new("/text", "captured-private", "captured.corpus.read", Use, "captured.corpus.write")]
             })
-        { ExpectedSchemaVersion = resource.SchemaVersion };
+        {
+            ExpectedSchemaVersion = resource.SchemaVersion
+        };
         var configuration = owner.Database.CreateNativeOperation(OperationKind.ConfigureResource, Guid.NewGuid(), "root",
             owner.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request));
         var changed = owner.Submit(configuration).Get<ResourceDefinition>();
         await Assert.That(changed.SchemaVersion).IsEqualTo(resource.SchemaVersion + 1);
-        var revoked = flow.Configure(flow.Reader with { PolicyEpoch = 2 });
+        var revoked = flow.Configure(flow.Reader with
+        {
+            PolicyEpoch = 2
+        });
         await Assert.That(revoked.PolicyEpoch).IsEqualTo(2L);
         await NativeTextBm25EligibilityPages.DeniedAsync(flow);
-        var repaired = flow.Configure(revoked with { PolicyEpoch = 3, FieldGrants = [Use] });
+        var repaired = flow.Configure(revoked with
+        {
+            PolicyEpoch = 3,
+            FieldGrants = [Use]
+        });
         await Assert.That(repaired.PolicyEpoch).IsEqualTo(3L);
         await Assert.That(owner.Database.GetOutboxStatus("root", owner.Source.Partition).Head.Tail).IsEqualTo(tail);
         await NativeTextBm25EligibilityPages.RequireAsync(flow, false, true, true);

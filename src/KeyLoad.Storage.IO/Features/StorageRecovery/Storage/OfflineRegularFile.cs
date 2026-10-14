@@ -26,7 +26,9 @@ internal static class OfflineRegularFile
         ValidatePath(path);
         var metadata = InspectNativePath(path);
         if (metadata.Type != RegularType)
-        { throw OfflineNativeErrors.InvalidEntry(); }
+        {
+            throw OfflineNativeErrors.InvalidEntry();
+        }
         return metadata.Identity;
     }
 
@@ -42,7 +44,9 @@ internal static class OfflineRegularFile
     {
         ValidatePath(path);
         if (bufferSize is <= NoBufferBytes or > MaximumBufferBytes)
-        { throw new ArgumentOutOfRangeException(nameof(bufferSize)); }
+        {
+            throw new ArgumentOutOfRangeException(nameof(bufferSize));
+        }
 
         var expected = Inspect(path);
         using var lease = OpenNative(path, FileAccess.Read);
@@ -83,18 +87,26 @@ internal static class OfflineRegularFile
     {
         var metadata = InspectNativeHandle(handle);
         if (metadata.Type != RegularType)
-        { throw OfflineNativeErrors.InvalidEntry(); }
+        {
+            throw OfflineNativeErrors.InvalidEntry();
+        }
         if (metadata.Identity != expected)
-        { throw OfflineNativeErrors.ChangedEntry(); }
+        {
+            throw OfflineNativeErrors.ChangedEntry();
+        }
     }
 
     private static void VerifyPath(string path, OfflineFileIdentity expected)
     {
         var metadata = InspectNativePath(path);
         if (metadata.Type != RegularType)
-        { throw OfflineNativeErrors.InvalidEntry(); }
+        {
+            throw OfflineNativeErrors.InvalidEntry();
+        }
         if (metadata.Identity != expected)
-        { throw OfflineNativeErrors.ChangedEntry(); }
+        {
+            throw OfflineNativeErrors.ChangedEntry();
+        }
     }
 
     private static OfflineNativeHandleLease OpenNative(string path, FileAccess access)
@@ -102,11 +114,17 @@ internal static class OfflineRegularFile
         var (flags, isMac) = OpenFlags(access);
         int descriptor;
         try
-        { descriptor = isMac ? OfflineMacFileSystem.Open(path, flags) : OfflineLinuxFileSystem.Open(path, flags); }
+        {
+            descriptor = isMac ? OfflineMacFileSystem.Open(path, flags) : OfflineLinuxFileSystem.Open(path, flags);
+        }
         catch (Exception error) when (OfflineNativeErrors.IsUnavailable(error))
-        { throw OfflineNativeErrors.Unsupported(); }
+        {
+            throw OfflineNativeErrors.Unsupported();
+        }
         if (descriptor < FirstValidDescriptor)
-        { throw OfflineNativeErrors.FromErrno(Marshal.GetLastPInvokeError(), isMac); }
+        {
+            throw OfflineNativeErrors.FromErrno(Marshal.GetLastPInvokeError(), isMac);
+        }
         SafeFileHandle? handle = new(new IntPtr(descriptor), ownsHandle: true);
         Exception? primaryFailure = null;
         try
@@ -121,23 +139,33 @@ internal static class OfflineRegularFile
             throw;
         }
         finally
-        { OfflineNativeHandleLease.DisposeUntransferred(ref handle, primaryFailure); }
+        {
+            OfflineNativeHandleLease.DisposeUntransferred(ref handle, primaryFailure);
+        }
     }
 
     private static OfflineFileMetadata InspectNativePath(string path)
     {
         try
-        { return OperatingSystem.IsMacOS() ? OfflineMacFileSystem.InspectPath(path) : OfflineLinuxFileSystem.InspectPath(path); }
+        {
+            return OperatingSystem.IsMacOS() ? OfflineMacFileSystem.InspectPath(path) : OfflineLinuxFileSystem.InspectPath(path);
+        }
         catch (Exception error) when (OfflineNativeErrors.IsUnavailable(error))
-        { throw OfflineNativeErrors.Unsupported(); }
+        {
+            throw OfflineNativeErrors.Unsupported();
+        }
     }
 
     private static OfflineFileMetadata InspectNativeHandle(SafeFileHandle handle)
     {
         try
-        { return OperatingSystem.IsMacOS() ? OfflineMacFileSystem.InspectHandle(handle) : OfflineLinuxFileSystem.InspectHandle(handle); }
+        {
+            return OperatingSystem.IsMacOS() ? OfflineMacFileSystem.InspectHandle(handle) : OfflineLinuxFileSystem.InspectHandle(handle);
+        }
         catch (Exception error) when (OfflineNativeErrors.IsUnavailable(error))
-        { throw OfflineNativeErrors.Unsupported(); }
+        {
+            throw OfflineNativeErrors.Unsupported();
+        }
     }
 
     private static (int Flags, bool IsMac) OpenFlags(FileAccess access)
@@ -163,16 +191,22 @@ internal static class OfflineRegularFile
         if (access is not (FileAccess.Read or FileAccess.ReadWrite)
             || share is not (FileShare.Read or FileShare.None)
             || bufferSize is <= NoBufferBytes or > MaximumBufferBytes)
-        { throw new ArgumentOutOfRangeException(nameof(access)); }
+        {
+            throw new ArgumentOutOfRangeException(nameof(access));
+        }
     }
 
     private static void ValidatePath(string path)
     {
         if (string.IsNullOrWhiteSpace(path) || path.Contains(NullPathCharacter, StringComparison.Ordinal))
-        { throw OfflineNativeErrors.InvalidEntry(); }
+        {
+            throw OfflineNativeErrors.InvalidEntry();
+        }
         if (!BitConverter.IsLittleEndian || !IsSupportedArchitecture()
             || !OperatingSystem.IsLinux() && !OperatingSystem.IsMacOS())
-        { throw OfflineNativeErrors.Unsupported(); }
+        {
+            throw OfflineNativeErrors.Unsupported();
+        }
     }
 
     private static bool IsSupportedArchitecture() => RuntimeInformation.ProcessArchitecture is Architecture.X64 or Architecture.Arm64;

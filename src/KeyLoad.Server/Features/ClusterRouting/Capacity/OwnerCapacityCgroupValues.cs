@@ -33,7 +33,9 @@ internal static class OwnerCapacityCgroupValues
         {
             var fields = line.Split(FieldSeparator, StringSplitOptions.RemoveEmptyEntries);
             if (fields.Length == PairFields && fields[FirstField] == UsageField)
-            { return Integer(fields[SecondField], MinimumUsage, out usage); }
+            {
+                return Integer(fields[SecondField], MinimumUsage, out usage);
+            }
         }
         return false;
     }

@@ -27,7 +27,9 @@ internal static class AdapterVectorWholeFlow
             RootDepth, ScopeVertices, ScopeEdges)));
     internal static SqlGraphSearchRequest SqlRequest(TestDatabase database, bool invalid = false)
         => new(1, new(database.Partition, Sql, new Dictionary<string, JsonElement>(StringComparer.Ordinal)
-        { [VectorParameter] = JsonSerializer.SerializeToElement(invalid ? new[] { 1f } : new[] { 1f, 0f }) }, AllowFullScan: true));
+        {
+            [VectorParameter] = JsonSerializer.SerializeToElement(invalid ? new[] { 1f } : new[] { 1f, 0f })
+        }, AllowFullScan: true));
     internal static GraphSearchRequest CSharp(TestDatabase database, bool invalid = false)
     {
         var canonical = Typed(database, invalid);

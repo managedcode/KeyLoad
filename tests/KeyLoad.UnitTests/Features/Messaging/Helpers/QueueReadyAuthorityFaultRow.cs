@@ -13,7 +13,12 @@ internal static class QueueReadyAuthorityFaultRow
             var key = KeySpace.Partition(body ? "message-body" : "message-meta", lane.Partition, lane.Queue, "input");
             var original = tx.ReadOwnedValue(key) ?? throw new InvalidOperationException("The original native fault-owned row is absent.");
             if (body)
-            { tx.PutRecord(key, NativeSerialization.Deserialize<MessageBody>(original) with { Id = "foreign" }); }
+            {
+                tx.PutRecord(key, NativeSerialization.Deserialize<MessageBody>(original) with
+                {
+                    Id = "foreign"
+                });
+            }
             else
             {
                 var metadata = NativeSerialization.Deserialize<MessageMetadata>(original);

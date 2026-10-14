@@ -123,7 +123,10 @@ internal sealed class StreamTraversalNativeTests
         var actual = fixture.Placement;
         var owner = new PhysicalShardRecord(actual.PhysicalShardId, actual.Incarnation, actual.VoterIds, actual.PlacementEpoch);
         var before = fixture.Cut();
-        var foreign = owner with { VoterIds = [.. owner.VoterIds.Reverse()] };
+        var foreign = owner with
+        {
+            VoterIds = [.. owner.VoterIds.Reverse()]
+        };
         var refused = Assert.ThrowsExactly<KeyLoadException>(() => fixture.TraverseConfigured(fixture.Traversal(), foreign));
         await Assert.That(refused.Code).IsEqualTo(ErrorCode.OwnershipLost);
         await StreamTraversalNativeAssertions.UnchangedAsync(fixture, before);

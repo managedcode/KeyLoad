@@ -20,7 +20,10 @@ internal static class PartitionMovementNativeBlobEffects
     internal static async Task RequireAsync(RemoteTransferNativeAdministrator callers, RemoteTransferNativeParentSeed seed,
         CancellationToken token, NativeBlobWireEffectPlan? plan = null)
     {
-        var blob = seed.Metadata.Blob with { Id = SecondaryId };
+        var blob = seed.Metadata.Blob with
+        {
+            Id = SecondaryId
+        };
         var aborted = await UploadAsync(callers, seed.Partition, blob, false, token, plan);
         var reclaim = new ReclaimBlobRequest(plan?.ReclaimCommandId ?? Guid.NewGuid(), blob, aborted, OnePart);
         var reclaimed = await McpCallerAssertions.SdkSuccessAsync(await callers.Source.ReclaimBlobAsync(reclaim, token));

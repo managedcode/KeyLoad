@@ -122,10 +122,15 @@ internal sealed class AdminHttpMetricsTests
     [Arguments(3)]
     public async Task AcCq034ConfiguredRetentionKeepsOnlyNewestFailuresAndPreservesCounters(int retained)
     {
-        var options = UnitAdminObservationOptions.Execution(new() { MaximumRecentFailures = retained });
+        var options = UnitAdminObservationOptions.Execution(new()
+        {
+            MaximumRecentFailures = retained
+        });
         var metrics = new AdminHttpMetrics(options);
         for (var index = 0; index < Requests; index++)
-        { metrics.Record(TimeSpan.FromMilliseconds(index), Failure(index)); }
+        {
+            metrics.Record(TimeSpan.FromMilliseconds(index), Failure(index));
+        }
 
         var snapshot = metrics.Snapshot();
         await Assert.That(snapshot.CompletedRequests).IsEqualTo(Requests);

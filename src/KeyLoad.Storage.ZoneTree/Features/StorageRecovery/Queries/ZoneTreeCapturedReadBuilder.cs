@@ -29,10 +29,14 @@ internal sealed class ZoneTreeCapturedReadBuilder(ZoneTreeReadCutLease original,
     {
         ArgumentNullException.ThrowIfNull(prefix);
         if (prefix.Length == EmptyScopeLength)
-        { throw new ArgumentException(EmptyScope, nameof(prefix)); }
+        {
+            throw new ArgumentException(EmptyScope, nameof(prefix));
+        }
         ObjectDisposedException.ThrowIf(transferred, this);
         if (Covers(prefix))
-        { return; }
+        {
+            return;
+        }
         ReserveScope(prefixes, prefix.Length);
         var ownedPrefix = prefix.ToArray();
         prefixBaseRecords = records.Count;
@@ -46,10 +50,14 @@ internal sealed class ZoneTreeCapturedReadBuilder(ZoneTreeReadCutLease original,
     {
         ArgumentNullException.ThrowIfNull(key);
         if (key.Length == EmptyScopeLength)
-        { throw new ArgumentException(EmptyScope, nameof(key)); }
+        {
+            throw new ArgumentException(EmptyScope, nameof(key));
+        }
         ObjectDisposedException.ThrowIf(transferred, this);
         if (Covers(key) || exactKeys.Any(exact => exact.AsSpan().SequenceEqual(key)))
-        { return; }
+        {
+            return;
+        }
         ReserveScope(exactKeys, key.Length);
         var ownedKey = key.ToArray();
         original.ReadExact(key, value =>
@@ -58,7 +66,9 @@ internal sealed class ZoneTreeCapturedReadBuilder(ZoneTreeReadCutLease original,
             admit(checked((long)ownedKey.Length + value.Length + KeyValueArrayHeaderPointerSlots * IntPtr.Size), NoImportedRecords);
             var location = ZoneTreeCapturedReadLookup.Find(records, ownedKey, records.Count);
             if (location >= FirstRecordIndex)
-            { throw Errors.Fail(ErrorCode.Corruption, DuplicatePoint); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, DuplicatePoint);
+            }
             records.Insert(~location, new(ownedKey.ToArray(), value.ToArray()));
         }, admit);
         // Native absence is an explicitly observed key, not permission to query any other key.
@@ -71,7 +81,9 @@ internal sealed class ZoneTreeCapturedReadBuilder(ZoneTreeReadCutLease original,
         CaptureExact(key);
         var location = ZoneTreeCapturedReadLookup.Find(records, key, records.Count);
         if (location < FirstRecordIndex)
-        { return false; }
+        {
+            return false;
+        }
         reader(records[location].Value.Span);
         return true;
     }
@@ -86,7 +98,9 @@ internal sealed class ZoneTreeCapturedReadBuilder(ZoneTreeReadCutLease original,
         {
             var record = records[index];
             if (!record.Key.Span.StartsWith(prefix) || !visitor(record.Key.Span, record.Value.Span))
-            { return; }
+            {
+                return;
+            }
             // The callback may insert admitted dependency points; resume from the original owned key.
             index = ZoneTreeCapturedReadLookup.Find(records, record.Key.Span, records.Count) + NextRecordOffset;
         }
@@ -103,7 +117,9 @@ internal sealed class ZoneTreeCapturedReadBuilder(ZoneTreeReadCutLease original,
     internal void ClearUntransferred()
     {
         if (transferred)
-        { return; }
+        {
+            return;
+        }
         records.Clear();
         prefixes.Clear();
         exactKeys.Clear();
@@ -115,7 +131,9 @@ internal sealed class ZoneTreeCapturedReadBuilder(ZoneTreeReadCutLease original,
         if (location >= FirstRecordIndex)
         {
             if (!records[location].Value.Span.SequenceEqual(value))
-            { throw Errors.Fail(ErrorCode.Corruption, ConflictingValue); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, ConflictingValue);
+            }
             return true;
         }
         records.Add(new(key.ToArray(), value.ToArray()));
@@ -126,7 +144,9 @@ internal sealed class ZoneTreeCapturedReadBuilder(ZoneTreeReadCutLease original,
     {
         admit(bytes, count);
         if (count == NoImportedRecords)
-        { return; }
+        {
+            return;
+        }
         ReserveRecord();
         // The owning captured-record visitor copies borrowed key/value only after this callback.
         // Raw bytes include the value header and conservatively charge that header again.
@@ -136,7 +156,9 @@ internal sealed class ZoneTreeCapturedReadBuilder(ZoneTreeReadCutLease original,
     private void ReserveRecord()
     {
         if (records.Count < records.Capacity)
-        { return; }
+        {
+            return;
+        }
         var next = Math.Max(InitialCapacity, checked(records.Capacity * CapacityGrowthFactor));
         admit(checked((long)Unsafe.SizeOf<ZoneTreeCapturedReadRecord>() * next + ArrayHeaderPointerSlots * IntPtr.Size), NoImportedRecords);
         records.Capacity = next;
@@ -146,7 +168,9 @@ internal sealed class ZoneTreeCapturedReadBuilder(ZoneTreeReadCutLease original,
     {
         admit(checked(bytes + ArrayHeaderPointerSlots * IntPtr.Size), NoImportedRecords);
         if (scopes.Count < scopes.Capacity)
-        { return; }
+        {
+            return;
+        }
         var next = Math.Max(InitialCapacity, checked(scopes.Capacity * CapacityGrowthFactor));
         admit(checked((long)IntPtr.Size * next + ArrayHeaderPointerSlots * IntPtr.Size), NoImportedRecords);
         scopes.Capacity = next;
@@ -155,7 +179,12 @@ internal sealed class ZoneTreeCapturedReadBuilder(ZoneTreeReadCutLease original,
     private bool Covers(byte[] key)
     {
         foreach (var prefix in prefixes)
-        { if (key.AsSpan().StartsWith(prefix)) { return true; } }
+        {
+            if (key.AsSpan().StartsWith(prefix))
+            {
+                return true;
+            }
+        }
         return false;
     }
 }

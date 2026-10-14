@@ -19,7 +19,13 @@ internal static class GraphVertexAuthorityFault
             ?? throw new InvalidOperationException(OriginalRequired);
         store.Commit((transaction, _) =>
         {
-            transaction.PutRecord(key, record with { Reference = selected with { Id = ForeignId } });
+            transaction.PutRecord(key, record with
+            {
+                Reference = selected with
+                {
+                    Id = ForeignId
+                }
+            });
             return true;
         });
         return new(key, original);

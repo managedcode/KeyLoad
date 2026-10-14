@@ -39,7 +39,10 @@ public sealed class HelixDbVectorTarget(HttpClient http, string image, string ru
     /// <inheritdoc/>
     public string Name => HelixDbNativeTokens.TokenHelixDB;
     /// <inheritdoc/>
-    public TargetProfile Profile { get; private set; } = new(HelixDbNativeTokens.TokenHelixDB, V0PinnedServerImage, OnePersistentLocalServerHELIXDATADIR, XHelixAwaitDurableTrueNativeDiskFlush, NativeCommittedReadsStrongSearchConsistency, POSTV2QueryJSONOperationTree, IsolatedLocalServerNoAuthentication, image)
+    public TargetProfile Profile
+    {
+        get; private set;
+    } = new(HelixDbNativeTokens.TokenHelixDB, V0PinnedServerImage, OnePersistentLocalServerHELIXDATADIR, XHelixAwaitDurableTrueNativeDiskFlush, NativeCommittedReadsStrongSearchConsistency, POSTV2QueryJSONOperationTree, IsolatedLocalServerNoAuthentication, image)
     {
         Cluster = new(SingleResultCardinality, SingleResultCardinality, SingleNativeLocalWriterNoReplicationConfigured, [PersistentNativeDirectory, StrongSearchConsistency])
     };
@@ -76,7 +79,10 @@ public sealed class HelixDbVectorTarget(HttpClient http, string image, string ru
         {
             parameters[scalarIndex.Key] = scalarIndex.Value;
         }
-        return receipt with { Parameters = parameters };
+        return receipt with
+        {
+            Parameters = parameters
+        };
     }
 
     /// <inheritdoc/>
@@ -133,7 +139,10 @@ public sealed class HelixDbVectorTarget(HttpClient http, string image, string ru
             if (ownsData)
             {
                 await HelixDbVectorSetup.DropAsync(http, label, scalarIndexes.Keys, Policy, token: timeout.Token, timeProvider: timeProvider).ConfigureAwait(false);
-                using var response = await HelixDbProtocol.QueryAsync(http, HelixDbProtocol.Batch(HelixDbProtocol.Node(HelixDbNativeTokens.TokenDrop, new() { [HelixDbNativeTokens.TokenInput] = HelixDbProtocol.Nodes(label) }), true), true, Policy, token: timeout.Token, timeProvider: timeProvider).ConfigureAwait(false);
+                using var response = await HelixDbProtocol.QueryAsync(http, HelixDbProtocol.Batch(HelixDbProtocol.Node(HelixDbNativeTokens.TokenDrop, new()
+                {
+                    [HelixDbNativeTokens.TokenInput] = HelixDbProtocol.Nodes(label)
+                }), true), true, Policy, token: timeout.Token, timeProvider: timeProvider).ConfigureAwait(false);
             }
         }
         finally

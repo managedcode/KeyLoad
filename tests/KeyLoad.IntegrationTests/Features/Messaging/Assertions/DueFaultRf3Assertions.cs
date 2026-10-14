@@ -39,7 +39,9 @@ internal static class DueFaultRf3Assertions
         var b = await PublicReadAssertions.SagaAsync(await second.InspectSagaAsync(
             new(seed.SagaLane, seed.SagaId), cancellationToken).ConfigureAwait(false)).ConfigureAwait(false);
         if (a is null || b is null)
-        { throw new InvalidOperationException(MissingDueRecord); }
+        {
+            throw new InvalidOperationException(MissingDueRecord);
+        }
         return a.NextOrdinal == 1 && b.Phase == SagaPhase.TimedOut && b.Revision == 2;
     }
 

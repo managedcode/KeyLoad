@@ -10,7 +10,10 @@ internal static class CodeQualityCompositionMethods
     private const string Map = "MapKeyLoad";
     private const string Run = "RunKeyLoad";
 
-    public static ImmutableArray<string> All { get; } =
+    public static ImmutableArray<string> All
+    {
+        get;
+    } =
     [
         Add,
         Build,

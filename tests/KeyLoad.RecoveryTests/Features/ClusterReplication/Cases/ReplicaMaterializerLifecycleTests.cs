@@ -109,7 +109,9 @@ internal sealed class ReplicaMaterializerLifecycleTests
         await Assert.That(materializer.ProtocolGate).IsSameReferenceAs(log.ProtocolGate);
         var entered = log.ProtocolGate.Wait(0);
         try
-        { await Assert.That(entered).IsTrue(); }
+        {
+            await Assert.That(entered).IsTrue();
+        }
         finally { if (entered) { log.ProtocolGate.Release(); } }
     }
 

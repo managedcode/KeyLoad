@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
 
@@ -10,12 +10,16 @@ internal static class CanonicalApplyNetworkCleanup
         IReadOnlyList<ReplicaSiloDiscovery>? discovery, Guid armId, List<Exception> failures)
     {
         if (controls is null || discovery is null || armId == Guid.Empty)
-        { return; }
+        {
+            return;
+        }
         using var deadline = new CancellationTokenSource(RequestCqrsRf3Protocol.CleanupDeadline, TimeProvider.System);
         ServerFailureObserver.Observe(controls.StopAdmission, failures);
         await ServerFailureObserver.ObserveAsync(() => controls.ReleaseOpenArmsAsync(discovery, deadline.Token), failures);
         if (controls.ArmFor(armId).RequestId is null || controls.ArmFor(armId).CanonicalOwnerDisposedSeen)
-        { return; }
+        {
+            return;
+        }
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             await controls.WaitForMarkerAsync(armId, RequestCqrsProbePhase.CanonicalOwnerDisposed,

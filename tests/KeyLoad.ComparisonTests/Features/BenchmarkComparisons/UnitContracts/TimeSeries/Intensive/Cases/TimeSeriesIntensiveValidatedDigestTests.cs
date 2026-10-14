@@ -28,13 +28,22 @@ internal sealed class TimeSeriesIntensiveValidatedDigestTests
             "{\"kind\":\"intensive\",\"revision\":1,\"extra\":true}" })
         {
             Assert.ThrowsExactly<ComparisonFailureException>(() => TimeSeriesIntensiveResultDigest.ValidatedRaw(expected,
-                actual.SetItem(500, actual[500] with { TagsJson = invalid })));
+                actual.SetItem(500, actual[500] with
+                {
+                    TagsJson = invalid
+                })));
         }
 
         foreach (var invalid in new[] { double.NaN, double.PositiveInfinity, double.NegativeInfinity })
         {
             Assert.ThrowsExactly<ComparisonFailureException>(() => TimeSeriesIntensiveResultDigest.ValidatedRaw(expected,
-                actual.SetItem(500, actual[500] with { Sample = actual[500].Sample with { Value = invalid } })));
+                actual.SetItem(500, actual[500] with
+                {
+                    Sample = actual[500].Sample with
+                    {
+                        Value = invalid
+                    }
+                })));
         }
 
         Assert.ThrowsExactly<ComparisonFailureException>(() => TimeSeriesIntensiveResultDigest.ValidatedRaw(expected, default));

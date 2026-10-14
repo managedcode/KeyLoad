@@ -41,5 +41,8 @@ internal sealed class SiteBenchmarkLatestProducerTests
     }
 
     private static Task<JsonElement> ProbeAsync(SiteIsolatedGitHubScope scope, CancellationToken token) =>
-        SiteIsolatedGitHubScope.RunAsync("latest-selection", new { input = scope.Capture }, token);
+        SiteIsolatedGitHubScope.RunAsync("latest-selection", new
+        {
+            input = scope.Capture
+        }, token);
 }

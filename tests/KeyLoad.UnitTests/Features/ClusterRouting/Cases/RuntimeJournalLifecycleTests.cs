@@ -21,7 +21,10 @@ internal sealed class RuntimeJournalLifecycleTests
     public async Task RealStoreCreatesAppendsReplacesReadsAndDeletesOpaqueContent()
     {
         using var fixture = new RuntimeJournalFixture();
-        var created = fixture.Create(JournalName, FirstInstance, new(StringComparer.Ordinal) { [OriginProperty] = TestOrigin });
+        var created = fixture.Create(JournalName, FirstInstance, new(StringComparer.Ordinal)
+        {
+            [OriginProperty] = TestOrigin
+        });
         var content = Enumerable.Range(0, MultiPageLength).Select(index => (byte)(index % byte.MaxValue)).ToArray();
         var appended = fixture.Submit(RuntimeJournalFixture.Mutation(RuntimeJournalAction.Append, created, content)).Snapshot!;
         await Assert.That(appended.ContentRevision).IsEqualTo(1L);
@@ -62,11 +65,17 @@ internal sealed class RuntimeJournalLifecycleTests
         using var fixture = new RuntimeJournalFixture();
         var created = fixture.Create(JournalName, FirstInstance);
         var claimed = fixture.Submit(RuntimeJournalFixture.Mutation(RuntimeJournalAction.UpdateMetadata, created,
-            etag: created.MetadataETag, set: new(StringComparer.Ordinal) { [RuntimeJournalProtocol.OwnerProperty] = SiloA })).Snapshot!;
+            etag: created.MetadataETag, set: new(StringComparer.Ordinal)
+            {
+                [RuntimeJournalProtocol.OwnerProperty] = SiloA
+            })).Snapshot!;
         await Assert.That(claimed.OwnerGeneration).IsEqualTo(created.OwnerGeneration + 1);
         var staleEtag = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => Task.Run(() => fixture.Submit(
             RuntimeJournalFixture.Mutation(RuntimeJournalAction.UpdateMetadata, created, etag: created.MetadataETag,
-                set: new(StringComparer.Ordinal) { [StaleProperty] = "stale" }))));
+                set: new(StringComparer.Ordinal)
+                {
+                    [StaleProperty] = "stale"
+                }))));
         await Assert.That(staleEtag!.Code).IsEqualTo(ErrorCode.Conflict);
 
         var sameOwner = fixture.Submit(RuntimeJournalFixture.Mutation(RuntimeJournalAction.UpdateMetadata, claimed,
@@ -84,7 +93,9 @@ internal sealed class RuntimeJournalLifecycleTests
 
         var poisoned = fixture.Submit(RuntimeJournalFixture.Mutation(RuntimeJournalAction.UpdateMetadata, sameOwner,
             etag: sameOwner.MetadataETag, set: new(StringComparer.Ordinal)
-            { [RuntimeJournalProtocol.PoisonedProperty] = ClosedValue })).Snapshot!;
+            {
+                [RuntimeJournalProtocol.PoisonedProperty] = ClosedValue
+            })).Snapshot!;
         await Assert.That(poisoned.OwnerGeneration).IsEqualTo(sameOwner.OwnerGeneration + 1);
         var unpoisoned = fixture.Submit(RuntimeJournalFixture.Mutation(RuntimeJournalAction.UpdateMetadata, poisoned,
             etag: poisoned.MetadataETag, remove: [RuntimeJournalProtocol.PoisonedProperty])).Snapshot!;

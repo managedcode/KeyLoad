@@ -24,9 +24,18 @@ internal sealed record TestSuiteSettings(
 {
     private const string GetResourceNameComparisonText = "tests-";
 
-    internal VectorComparisonProfile? VectorProfile { get; init; }
-    internal int? OpenLoopRate { get; init; }
-    internal NativeCoverageRf3Selection? NativeCoverageRf3 { get; init; }
+    internal VectorComparisonProfile? VectorProfile
+    {
+        get; init;
+    }
+    internal int? OpenLoopRate
+    {
+        get; init;
+    }
+    internal NativeCoverageRf3Selection? NativeCoverageRf3
+    {
+        get; init;
+    }
     internal string CoverageFormat { get; init; } = NativeCoverageProtocol.CoberturaFormat;
     internal const string VectorProfileSetting = TestSuiteProtocol.VectorProfileSetting;
     internal const string VectorProfileEnvironment = TestSuiteProtocol.VectorProfileEnvironment;

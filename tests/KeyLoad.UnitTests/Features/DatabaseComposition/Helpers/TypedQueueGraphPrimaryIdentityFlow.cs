@@ -19,10 +19,16 @@ internal static class TypedQueueGraphPrimaryIdentityFlow
     internal static async Task RunAsync(TestDatabase db, bool from, string json)
     {
         var source = await TypedQueueGraphReplayFixture.SeedAsync(db, from);
-        source = source with { Healthy = source.Failed };
+        source = source with
+        {
+            Healthy = source.Failed
+        };
         var record = from ? source.First : source.Second;
         await QueueGraphIdentityFlow.RunFaultAsync(source,
-            NativeSerialization.Serialize(record with { Json = json }));
+            NativeSerialization.Serialize(record with
+            {
+                Json = json
+            }));
         await ContinueAsync(source);
     }
 
@@ -34,7 +40,10 @@ internal static class TypedQueueGraphPrimaryIdentityFlow
         {
             var identity = source.Fixture.Store.Identity;
             using var store = global::KeyLoad.Storage.ZoneTree.ZoneTreeExistingStore.Open(
-                new(source.Fixture.Directory) { Incarnation = identity.Incarnation },
+                new(source.Fixture.Directory)
+                {
+                    Incarnation = identity.Incarnation
+                },
                 identity.NodeId, source.Fixture.StorageExecution);
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {

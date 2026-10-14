@@ -13,7 +13,10 @@ internal static class Bm25ConfiguredCountTrial
     internal static async Task RunAsync(Bm25OriginalPhaseRecoveryFlow flow, int maximumHeads)
     {
         var owner = flow.Owner;
-        var second = flow.Configure(flow.Reader with { Id = SecondSubject });
+        var second = flow.Configure(flow.Reader with
+        {
+            Id = SecondSubject
+        });
         await Assert.That(second.PolicyEpoch).IsEqualTo(flow.Reader.PolicyEpoch);
         var first = flow.Capture(null);
         var firstResult = flow.Publish(first);
@@ -24,15 +27,22 @@ internal static class Bm25ConfiguredCountTrial
         var healthy = flow.Capture(replacement.Id);
         var before = Bm25OriginalPhaseRecoveryState.Read(owner);
         var familyBefore = Family(flow);
-        var limits = owner.Source.Database.Limits with { MaxScanRecords = maximumHeads };
+        var limits = owner.Source.Database.Limits with
+        {
+            MaxScanRecords = maximumHeads
+        };
         owner.Reopen(limits);
         await before.RequireAsync(Bm25OriginalPhaseRecoveryState.Read(owner));
         await Assert.That(owner.Database.Limits).IsEqualTo(limits);
         var result = flow.Publish(next);
         if (maximumHeads == 1)
-        { await RequireQuotaFailureAsync(flow, next, result, before, familyBefore); }
+        {
+            await RequireQuotaFailureAsync(flow, next, result, before, familyBefore);
+        }
         else
-        { await RequireStoredAsync(flow, next, result); }
+        {
+            await RequireStoredAsync(flow, next, result);
+        }
         await Assert.That(Family(flow).Length).IsEqualTo(maximumHeads);
         await Bm25OriginalPhaseRecoveryState.RequireRetainedAsync(owner, first, originalEntry);
         await RequireReplayAsync(flow, next, result);
@@ -62,10 +72,15 @@ internal static class Bm25ConfiguredCountTrial
             var rows = new List<string>();
             var scan = view.VisitRange(Bm25CorpusKeys.Prefix(owner.Source.Partition),
                 owner.Source.Database.Limits.MaxScanRecords, (key, value) =>
-                { rows.Add(Convert.ToHexString(key) + ":" + Convert.ToHexString(value)); return true; },
+                {
+                    rows.Add(Convert.ToHexString(key) + ":" + Convert.ToHexString(value));
+                    return true;
+                },
                 observer: work.ChargeBytes, cancellationToken: Bm25OriginalPhaseRecoveryFlow.Token);
             if (scan.HasMore)
-            { throw new InvalidOperationException("The complete original corpus family exceeded its inspection bound."); }
+            {
+                throw new InvalidOperationException("The complete original corpus family exceeded its inspection bound.");
+            }
             return rows.ToArray();
         });
     }

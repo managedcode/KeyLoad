@@ -23,7 +23,10 @@ internal sealed record TimeSeriesTargetMetadata(string Name, string StorageModel
 
 internal interface ITimeSeriesPersistentTarget : IAsyncDisposable
 {
-    TimeSeriesTargetMetadata Metadata { get; }
+    TimeSeriesTargetMetadata Metadata
+    {
+        get;
+    }
 
     Task InitializeAsync(TimeSeriesComparisonWorkload workload, CancellationToken cancellationToken);
 
@@ -50,6 +53,12 @@ internal sealed record TimeSeriesComparisonReport(int SchemaVersion, string Sour
     TimeSeriesTargetMetadata[] Targets, TimeSeriesComparisonAttempt[] Attempts,
     TimeSeriesCorrectnessCheck[] CorrectnessChecks)
 {
-    public GitHubProvenance? Provenance { get; init; }
-    public string? LoadGeneratorImage { get; init; }
+    public GitHubProvenance? Provenance
+    {
+        get; init;
+    }
+    public string? LoadGeneratorImage
+    {
+        get; init;
+    }
 }

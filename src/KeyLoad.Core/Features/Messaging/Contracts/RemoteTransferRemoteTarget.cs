@@ -6,5 +6,8 @@ internal sealed record RemoteTransferRemoteTarget(
     [property: global::Orleans.Id(RemoteTransferRemoteTargetFields.MaximumReservedReceiptBytes)] int MaximumReservedReceiptBytes)
 {
     [global::Orleans.Id(RemoteTransferRemoteTargetFields.OriginalSourceCommit)]
-    public CommitToken? OriginalSourceCommit { get; init; }
+    public CommitToken? OriginalSourceCommit
+    {
+        get; init;
+    }
 }

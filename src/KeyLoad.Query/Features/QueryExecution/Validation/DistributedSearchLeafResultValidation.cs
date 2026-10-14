@@ -24,7 +24,9 @@ internal static class DistributedSearchLeafResultValidation
             || result.ExaminedRecords < NoRecords || result.ExaminedRecords > request.MaxExaminedRecords
             || !ValidSlots(request, result)
             || request.Witness is { } original && !DistributedSearchWitnessEquality.Same(original, result.Witness))
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidResult); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidResult);
+        }
         DistributedTextStatisticsValidation.Require(result.Witness.Statistics, result.Witness.Statistics.Terms, budget);
         DistributedSearchReplyShapeValidation.Require(request, result, budget);
         budget.CheckResult(result);

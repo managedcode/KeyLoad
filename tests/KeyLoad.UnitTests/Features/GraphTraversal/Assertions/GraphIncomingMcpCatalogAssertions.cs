@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 using System.Text.Json;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 using KeyLoad.UnitTests.Features.ClientApi;
 
@@ -13,7 +13,9 @@ internal static class GraphIncomingMcpCatalogAssertions
     internal static async Task VerifyAsync()
     {
         if (!McpOperationCatalog.TryGetTool(McpCatalogExpectations.GraphIncomingEdges, out var descriptor))
-        { throw new InvalidOperationException(MissingTool); }
+        {
+            throw new InvalidOperationException(MissingTool);
+        }
         await Assert.That(descriptor!.Route).IsEqualTo(GraphIncomingMcpProtocol.Route);
         await Assert.That(descriptor.ReadKind).IsEqualTo(GrainReadKind.GraphIncomingEdges);
         await Assert.That(descriptor.CommandKind).IsNull();
@@ -72,7 +74,9 @@ internal static class GraphIncomingMcpCatalogAssertions
         var properties = schema.GetProperty(McpSchemaInspector.Properties);
         foreach (var field in new[] { GraphIncomingMcpProtocol.Id, GraphIncomingMcpProtocol.Label,
             GraphIncomingMcpProtocol.AttributesJson })
-        { await VerifyPrimitiveAsync(root, properties.GetProperty(field), McpSchemaInspector.String); }
+        {
+            await VerifyPrimitiveAsync(root, properties.GetProperty(field), McpSchemaInspector.String);
+        }
         await VerifyPrimitiveAsync(root, properties.GetProperty(GraphIncomingMcpProtocol.Revision), McpSchemaInspector.Integer);
         await VerifyEntityAsync(root, properties.GetProperty(GraphIncomingMcpProtocol.From));
         await VerifyEntityAsync(root, properties.GetProperty(GraphIncomingMcpProtocol.To));
@@ -97,7 +101,9 @@ internal static class GraphIncomingMcpCatalogAssertions
             GraphIncomingMcpProtocol.TransactionDomainId, GraphIncomingMcpProtocol.PartitionKey);
         await VerifyObjectAsync(schema, fields.Add(GraphIncomingMcpProtocol.AtomicPartitionId), fields);
         foreach (var field in fields)
-        { await VerifyPrimitiveAsync(root, schema.GetProperty(McpSchemaInspector.Properties).GetProperty(field), McpSchemaInspector.String); }
+        {
+            await VerifyPrimitiveAsync(root, schema.GetProperty(McpSchemaInspector.Properties).GetProperty(field), McpSchemaInspector.String);
+        }
     }
 
     private static Task VerifyObjectAsync(JsonElement schema, ImmutableArray<string> fields)

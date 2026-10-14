@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.Server;
 
@@ -45,11 +45,15 @@ internal sealed partial class PartitionMovementTransferSourceReads
             requireOpen();
             RequireNoAbortingHandle(query.HandleId);
             if (!sessions.TryGetValue(query.HandleId, out var retained))
-            { return new(query.HandleId, PartitionMovementTransferCloseDisposition.AlreadyAbsent); }
+            {
+                return new(query.HandleId, PartitionMovementTransferCloseDisposition.AlreadyAbsent);
+            }
             entry = retained as PartitionMovementTransferSourceEntry
                 ?? throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
             if (authority.Header.Partition != entry.Partition || authority.Header.MoveId != entry.MoveId)
-            { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+            }
             entry.Require(principal.Id, query);
         }
         await entry.Session.DisposeAsync().ConfigureAwait(false);
@@ -65,7 +69,9 @@ internal sealed partial class PartitionMovementTransferSourceReads
     private void RequireNoAbortingHandle(Guid handleId)
     {
         if (closedMoves.Values.SelectMany(value => value).Any(value => value.HandleId == handleId))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
     }
 
     private PartitionMovementTransferSourceEntry Find(PrincipalRecord principal,
@@ -76,7 +82,9 @@ internal sealed partial class PartitionMovementTransferSourceReads
         lock (gate)
         {
             if (!sessions.TryGetValue(query.HandleId, out var retained) || retained is not PartitionMovementTransferSourceEntry entry)
-            { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+            }
             requireMoveOpen(entry.Partition, entry.MoveId);
             entry.Require(principal.Id, query);
             return entry;

@@ -147,7 +147,10 @@ internal sealed class GraphIncomingRf3Tests(ClusterFixture fixture)
     private static async Task AssertBudgetFailureAsync(KeyLoadClient reader, McpOfficialClient mcp,
         ReadIncomingGraphEdgesRequestV1 request, CancellationToken cancellationToken)
     {
-        var limited = request with { Limit = 2 };
+        var limited = request with
+        {
+            Limit = 2
+        };
         var sdk = await reader.IncomingEdgesAsync(limited, cancellationToken);
         await GraphIncomingRf3Assertions.AssertFailureAsync(sdk, ErrorCode.BudgetExceeded);
         var reply = await mcp.CallAsync(GraphIncomingRf3Scenario.Tool, limited, cancellationToken);

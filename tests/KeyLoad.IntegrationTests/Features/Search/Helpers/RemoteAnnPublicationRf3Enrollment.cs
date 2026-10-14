@@ -15,7 +15,9 @@ internal static class RemoteAnnPublicationRf3Enrollment
         IOptions<QueryExecutionOptions>? configured)
     {
         if (configured is null)
-        { return; }
+        {
+            return;
+        }
         var options = configured.Value;
         options.Validate();
         var nodes = builder.Resources.OfType<ContainerResource>()
@@ -23,7 +25,9 @@ internal static class RemoteAnnPublicationRf3Enrollment
         if (nodes.Length != TwoRf3MembershipProtocol.NodeCount
             || !nodes.Select(node => node.Name).Order(StringComparer.Ordinal).SequenceEqual(
                 TwoRf3MembershipProtocol.Nodes.Order(StringComparer.Ordinal), StringComparer.Ordinal))
-        { throw new InvalidOperationException(TwoRf3MembershipProtocol.ImageMismatch); }
+        {
+            throw new InvalidOperationException(TwoRf3MembershipProtocol.ImageMismatch);
+        }
         foreach (var resource in nodes)
         {
             builder.CreateResourceBuilder(resource).WithEnvironment(ApproximateSearchSetting,

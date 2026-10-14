@@ -26,7 +26,9 @@ internal static class EventVectorInventoryValidation
             || header.SourceManifestDigest.Length != SHA256.HashSizeInBytes
             || header.OriginalSourceManifestDigest.Length != SHA256.HashSizeInBytes
             || header.OriginalOptionsDigest.Length != SHA256.HashSizeInBytes)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidInventory); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidInventory);
+        }
         _ = EventVectorRowAccounting.PayloadBytes(rows);
         var maximumCoverage = EventVectorInventoryCoverageBound.Read(header, rows, admission);
         var pages = new HashSet<int>();
@@ -38,11 +40,15 @@ internal static class EventVectorInventoryValidation
             RequireRow(header, row, pages, phases, proofs, admission, maximumCoverage);
         }
         if (pages.Count != header.PageCount)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidInventory); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidInventory);
+        }
         for (var ordinal = FirstOrdinal; ordinal < header.PageCount; ordinal = checked(ordinal + NextOrdinal))
         {
             if (!pages.Contains(ordinal))
-            { throw Errors.Fail(ErrorCode.Corruption, InvalidInventory); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, InvalidInventory);
+            }
         }
         EventVectorInventoryPhaseValidation.RequirePointers(header, phases);
         EventVectorCoverageProofInventory.Require(header, proofs, maximumCoverage);
@@ -58,7 +64,9 @@ internal static class EventVectorInventoryValidation
             if (page.Version != Version || page.MapId != header.MapId || page.PageOrdinal < FirstOrdinal
                 || !pages.Add(page.PageOrdinal) || !row.Key.Span.SequenceEqual(
                     EventVectorKeys.Page(header.ControlPartition, header.MapId, page.PageOrdinal)))
-            { throw Errors.Fail(ErrorCode.Corruption, InvalidInventory); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, InvalidInventory);
+            }
             _ = EventVectorEntryEncoding.Decode(page.Entries, page.Checksum, admission);
             return;
         }
@@ -66,7 +74,9 @@ internal static class EventVectorInventoryValidation
         {
             var phase = EventVectorInventoryPhaseValidation.Read(header, row, admission, maximumCoverage);
             if (!phases.TryAdd(phase.PhaseCommandId, phase))
-            { throw Errors.Fail(ErrorCode.Corruption, InvalidInventory); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, InvalidInventory);
+            }
             return;
         }
         if (row.Key.Span.StartsWith(EventVectorKeys.Proofs(header.ControlPartition, header.MapId)))
@@ -85,11 +95,15 @@ internal static class EventVectorInventoryValidation
             return;
         }
         if (!row.Key.Span.SequenceEqual(EventVectorKeys.Offer(header.ControlPartition, header.MapId)))
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidInventory); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidInventory);
+        }
         var offer = NativeSerialization.Deserialize<EventVectorOffer>(row.Value.Span);
         if (offer.Version != Version || offer.MapId != header.MapId || offer.MapRevision != header.Revision
             || offer.OriginalReadCommandId == Guid.Empty || offer.ExpiresAt <= offer.IssuedAt)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidInventory); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidInventory);
+        }
         _ = EventVectorEntryEncoding.Decode(offer.Entries, offer.PageDigest, admission);
     }
 }

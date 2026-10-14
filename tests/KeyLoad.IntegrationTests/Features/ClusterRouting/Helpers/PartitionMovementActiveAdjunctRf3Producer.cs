@@ -25,7 +25,9 @@ internal static class PartitionMovementActiveAdjunctRf3Producer
         {
             _ = await Task.WhenAny(marker, call).ConfigureAwait(false);
             if (!marker.IsCompletedSuccessfully)
-            { throw new InvalidOperationException(PartitionMovementActiveAdjunctProtocol.EarlyTerminal); }
+            {
+                throw new InvalidOperationException(PartitionMovementActiveAdjunctProtocol.EarlyTerminal);
+            }
             var primary = await marker.ConfigureAwait(false);
             faults = PartitionMovementActiveAdjunctRf3Fault.Create(wave, seed, primary, duplicate);
             var failed = await call.ConfigureAwait(false);
@@ -67,7 +69,9 @@ internal static class PartitionMovementActiveAdjunctRf3Producer
                 var marker = fixture.Json.ReadMarker(RequestCqrsProbeFileStore.ReadRecord(path));
                 await Assert.That(unclaimed.Contains(marker.ArmId)).IsFalse();
                 if (marker.ArmId == primary)
-                { await Assert.That(marker.Outcome is RequestCqrsProbeOutcome.Cancelled or RequestCqrsProbeOutcome.Released).IsFalse(); }
+                {
+                    await Assert.That(marker.Outcome is RequestCqrsProbeOutcome.Cancelled or RequestCqrsProbeOutcome.Released).IsFalse();
+                }
             }
         }
         foreach (var fault in unclaimed)
@@ -80,7 +84,9 @@ internal static class PartitionMovementActiveAdjunctRf3Producer
     private static async Task JoinMarkerAsync(Task<RequestCqrsProbeMarkerRecord> marker, CancellationToken originalWait)
     {
         try
-        { _ = await marker.ConfigureAwait(false); }
+        {
+            _ = await marker.ConfigureAwait(false);
+        }
         catch (OperationCanceledException) when (originalWait.IsCancellationRequested) { }
     }
     private const int NoMarkers = 0;

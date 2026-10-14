@@ -11,7 +11,9 @@ internal static class ScriptDomGraphChannels
         ScriptDomGraphContext context, int depth)
     {
         if (ScriptDomGraphShape.IsNull(expression, context, depth))
-        { return (null, null, SqlGraphSearchSyntax.DefaultWeight); }
+        {
+            return (null, null, SqlGraphSearchSyntax.DefaultWeight);
+        }
         var arguments = ScriptDomGraphShape.Call(expression, TextFunction, context, depth, ChannelArity);
         return (ScriptDomGraphScalar.String(arguments[FieldIndex], context, depth + ChildDepth),
             ScriptDomGraphScalar.String(arguments[ValueIndex], context, depth + ChildDepth),
@@ -21,29 +23,39 @@ internal static class ScriptDomGraphChannels
         Dom.ScalarExpression expression, ScriptDomGraphContext context, int depth)
     {
         if (ScriptDomGraphShape.IsNull(expression, context, depth))
-        { return (null, null, null, SqlGraphSearchSyntax.DefaultWeight); }
+        {
+            return (null, null, null, SqlGraphSearchSyntax.DefaultWeight);
+        }
         var arguments = ScriptDomGraphShape.Call(expression, VectorFunction, context, depth, VectorArity);
         var space = Space(arguments[SpaceIndex], context, depth + ChildDepth);
         var values = Components(arguments[ValueIndex], context, depth + ChildDepth);
         if (values.Length != space.Dimension)
-        { throw Errors.Fail(ErrorCode.Validation, SqlGraphSearchSyntax.VectorSpaceDetail); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, SqlGraphSearchSyntax.VectorSpaceDetail);
+        }
         return (ScriptDomGraphScalar.String(arguments[FieldIndex], context, depth + ChildDepth), values, space,
             ScriptDomGraphScalar.Weight(arguments[VectorWeightIndex], context, depth + ChildDepth));
     }
     private static ImmutableArray<float> Components(Dom.ScalarExpression expression, ScriptDomGraphContext context, int depth)
     {
         if (expression is not Dom.VariableReference variable)
-        { throw ScriptDomErrors.Unsupported(); }
+        {
+            throw ScriptDomErrors.Unsupported();
+        }
         context.Check(variable, depth);
         var value = context.Parameter(variable);
         if (value.ValueKind != JsonValueKind.Array || value.GetArrayLength() is < MinimumDimension or > SqlGraphSearchSyntax.MaximumVectorDimension)
-        { throw Errors.Fail(ErrorCode.Validation, SqlGraphSearchSyntax.ParameterDetail); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, SqlGraphSearchSyntax.ParameterDetail);
+        }
         var components = ImmutableArray.CreateBuilder<float>(value.GetArrayLength());
         foreach (var component in value.EnumerateArray())
         {
             context.Budget.Check();
             if (component.ValueKind != JsonValueKind.Number || !component.TryGetSingle(out var number) || !float.IsFinite(number))
-            { throw Errors.Fail(ErrorCode.Validation, SqlGraphSearchSyntax.VectorSpaceDetail); }
+            {
+                throw Errors.Fail(ErrorCode.Validation, SqlGraphSearchSyntax.VectorSpaceDetail);
+            }
             components.Add(number);
         }
         return components.ToImmutable();
@@ -58,7 +70,9 @@ internal static class ScriptDomGraphChannels
         var version = ScriptDomGraphScalar.String(arguments[VersionIndex], context, depth + ChildDepth);
         if (!Enum.TryParse<DistanceMetric>(metric, ignoreCase: true, out var parsed) || !Enum.IsDefined(parsed)
             || dimension is < MinimumDimension or > SqlGraphSearchSyntax.MaximumVectorDimension)
-        { throw Errors.Fail(ErrorCode.Validation, SqlGraphSearchSyntax.VectorSpaceDetail); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, SqlGraphSearchSyntax.VectorSpaceDetail);
+        }
         return new(id, dimension, parsed, model, version);
     }
     private const string TextFunction = "TEXT_MATCH";

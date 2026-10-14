@@ -71,15 +71,30 @@ public sealed record OpenLoopProgressV1
     }
 
     /// <summary>Gets observed terminal native calls.</summary>
-    public long Completed { get; }
+    public long Completed
+    {
+        get;
+    }
     /// <summary>Gets the fixed scheduled position count.</summary>
-    public long Planned { get; }
+    public long Planned
+    {
+        get;
+    }
     /// <summary>Gets native calls admitted to sessions.</summary>
-    public long Started { get; }
+    public long Started
+    {
+        get;
+    }
     /// <summary>Gets the cell's offered arrival rate.</summary>
-    public int OfferedRatePerSecond { get; }
+    public int OfferedRatePerSecond
+    {
+        get;
+    }
     /// <summary>Gets the existing workload scenario.</summary>
-    public Scenario Scenario { get; }
+    public Scenario Scenario
+    {
+        get;
+    }
 }
 
 /// <summary>One internal fixed-rate native comparison measurement; it does not change report schema 3.</summary>
@@ -91,11 +106,20 @@ public sealed record OpenLoopComparisonReport(int Version, long RunId, int Attem
     ImmutableArray<OpenLoopLatencySample> Samples, OpenLoopExecutionPolicy ExecutionPolicy)
 {
     /// <summary>Gets the exact native worker identity that binds this separate measurement artifact.</summary>
-    public IsolatedComparisonWorker? Worker { get; init; }
+    public IsolatedComparisonWorker? Worker
+    {
+        get; init;
+    }
     /// <summary>Gets load-generator resource observations, which are not target-server resources.</summary>
-    public ClientResources? ClientResources { get; init; }
+    public ClientResources? ClientResources
+    {
+        get; init;
+    }
     /// <summary>Gets the runtime that executed this comparison worker.</summary>
-    public string? Runtime { get; init; }
+    public string? Runtime
+    {
+        get; init;
+    }
 }
 
 internal enum OpenLoopSessionDisposition

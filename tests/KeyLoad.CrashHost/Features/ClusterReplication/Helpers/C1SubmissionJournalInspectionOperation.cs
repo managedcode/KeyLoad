@@ -24,11 +24,16 @@ internal static class C1SubmissionJournalInspectionOperation
             evidence?.SetPhase(C1OutcomeInspectionFailurePhase.OpenStore);
             C1SubmissionJournalInspectionPaths.RequireOwnedScope(request);
             var openedCanonical = ZoneTreeExistingStore.Open(
-                new(C1SubmissionJournalInspectionPaths.Canonical(request)) { Incarnation = request.Incarnation },
+                new(C1SubmissionJournalInspectionPaths.Canonical(request))
+                {
+                    Incarnation = request.Incarnation
+                },
                 request.ExpectedCanonicalNodeId, CrashExecutionOptions.StorageExecution());
             canonical = openedCanonical;
             var replicaOptions = new ZoneTreeStoreOptions(C1SubmissionJournalInspectionPaths.Replica(request))
-            { Incarnation = request.Incarnation };
+            {
+                Incarnation = request.Incarnation
+            };
             var policy = CrashExecutionOptions.StorageExecution();
             var resolved = replicaOptions.ResolveExecutionOptions(policy);
             var identity = ZoneTreeIdentityFile.Read(C1SubmissionJournalInspectionPaths.Identity(resolved.Directory),
@@ -49,12 +54,16 @@ internal static class C1SubmissionJournalInspectionOperation
                 cut.NativeHardState, cut.NativeEntry);
         }, failures);
         if (failures.Count > NoFailures)
-        { evidence?.Capture(failures[FirstFailureIndex]); }
+        {
+            evidence?.Capture(failures[FirstFailureIndex]);
+        }
         evidence?.SetPhase(C1OutcomeInspectionFailurePhase.DisposeStore);
         ServerFailureObserver.Observe(() => replica?.Dispose(), failures);
         ServerFailureObserver.Observe(() => canonical?.Dispose(), failures);
         if (failures.Count > NoFailures)
-        { evidence?.Capture(failures[FirstFailureIndex]); }
+        {
+            evidence?.Capture(failures[FirstFailureIndex]);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
         return receipt ?? throw C1SubmissionJournalInspectionValidation.Invalid();
     }
@@ -64,6 +73,8 @@ internal static class C1SubmissionJournalInspectionOperation
         if (canonical.Identity.Incarnation != request.Incarnation || replica.Identity.Incarnation != request.Incarnation
             || canonical.Identity.NodeId == replica.Identity.NodeId
             || !CryptographicOperations.FixedTimeEquals(canonical.Identity.SigningKey.Span, replica.Identity.SigningKey.Span))
-        { throw C1SubmissionJournalInspectionValidation.Invalid(); }
+        {
+            throw C1SubmissionJournalInspectionValidation.Invalid();
+        }
     }
 }

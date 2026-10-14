@@ -25,7 +25,9 @@ internal static class NativeTextIncrementalSourceValidation
             || manifest.Placement.Incarnation != request.Placement.Incarnation
             || manifest.Placement.PlacementEpoch != request.Placement.PlacementEpoch
             || !manifest.Placement.VoterIds.SequenceEqual(request.Placement.VoterIds, StringComparer.Ordinal))
-        { throw NativeTextErrors.Mismatch(); }
+        {
+            throw NativeTextErrors.Mismatch();
+        }
         budget.Check();
     }
 
@@ -35,7 +37,9 @@ internal static class NativeTextIncrementalSourceValidation
         budget.Check();
         if (manifest.ThroughSequence != current.UpperSequence
             || manifest.Records.Length != current.Documents.Length)
-        { throw NativeTextErrors.Mismatch(); }
+        {
+            throw NativeTextErrors.Mismatch();
+        }
         budget.ChargeBytes(checked((long)manifest.Records.Length * NativeTextIncrementalSourceProtocol.MapSlotBytes));
         var records = manifest.Records.ToDictionary(record => record.Reference);
         foreach (var document in current.Documents)
@@ -43,14 +47,20 @@ internal static class NativeTextIncrementalSourceValidation
             budget.Check();
             if (!records.Remove(document.Reference, out var retained)
                 || retained.Revision != document.Revision || retained.Deleted != document.Deleted)
-            { throw NativeTextErrors.Mismatch(); }
+            {
+                throw NativeTextErrors.Mismatch();
+            }
             var actual = NativeTextIncrementalRevision.Digest(document, budget);
             if (retained.CanonicalSha256 is null || retained.CanonicalSha256.Length != SHA256.HashSizeInBytes
                 || !CryptographicOperations.FixedTimeEquals(retained.CanonicalSha256, actual))
-            { throw NativeTextErrors.Mismatch(); }
+            {
+                throw NativeTextErrors.Mismatch();
+            }
         }
         if (records.Count != NativeTextIncrementalSourceProtocol.EmptyRecords)
-        { throw NativeTextErrors.Mismatch(); }
+        {
+            throw NativeTextErrors.Mismatch();
+        }
         budget.Check();
     }
 }

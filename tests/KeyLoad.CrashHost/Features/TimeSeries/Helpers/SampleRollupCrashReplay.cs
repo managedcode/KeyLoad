@@ -29,7 +29,9 @@ internal static class SampleRollupCrashReplay
             || !NativeSerialization.Serialize(first.Mutations[FirstMutation]).SequenceEqual(
                 NativeSerialization.Serialize(new MutationReceipt(kind, SampleRollupCrashContract.Set,
                     SampleRollupCrashContract.Series, ExpectedInflightRevision))))
-        { throw new InvalidOperationException(SampleRollupCrashContract.Invalid); }
+        {
+            throw new InvalidOperationException(SampleRollupCrashContract.Invalid);
+        }
         var retry = database.ApplyEmbedded(operation, cancellationToken: default).Get<CommitReceipt>();
         RequireEqual(NativeSerialization.Serialize(first), NativeSerialization.Serialize(retry));
         RequireUnchanged(database, before, position);
@@ -47,7 +49,9 @@ internal static class SampleRollupCrashReplay
         Mutation changed = drop ? SampleRollupCrashContract.Drop(ChangedRevision) : SampleRollupCrashContract.Refresh(ChangedRevision);
         var failure = SampleRollupCrashOperations.Commit(database, SampleRollupCrashContract.InflightId, changed);
         if (failure.Error != ErrorCode.Conflict || failure.SafeDetail != ContentConflict || failure.Json is not null)
-        { throw new InvalidOperationException(SampleRollupCrashContract.Invalid); }
+        {
+            throw new InvalidOperationException(SampleRollupCrashContract.Invalid);
+        }
         RequireUnchanged(database, all, originalPosition);
         var before = SampleRollupCrashState.All(database);
         var position = database.Store.Position;
@@ -58,18 +62,24 @@ internal static class SampleRollupCrashReplay
         var after = database.ReadSampleRollup(CrashFixtureValues.Principal, new(SampleRollupCrashContract.Partition,
             SampleRollupCrashContract.Set, SampleRollupCrashContract.Series, SampleRollupCrashContract.Start, SampleRollupCrashContract.End));
         if (result != after)
-        { throw new InvalidOperationException(SampleRollupCrashContract.Invalid); }
+        {
+            throw new InvalidOperationException(SampleRollupCrashContract.Invalid);
+        }
     }
 
     private static void RequireUnchanged(DatabaseEngine database, byte[] before, long position)
     {
         RequireEqual(before, SampleRollupCrashState.All(database));
         if (database.Store.Position != position)
-        { throw new InvalidOperationException(SampleRollupCrashContract.Invalid); }
+        {
+            throw new InvalidOperationException(SampleRollupCrashContract.Invalid);
+        }
     }
     private static void RequireEqual(byte[] expected, byte[] actual)
     {
         if (!expected.AsSpan().SequenceEqual(actual))
-        { throw new InvalidOperationException(SampleRollupCrashContract.Invalid); }
+        {
+            throw new InvalidOperationException(SampleRollupCrashContract.Invalid);
+        }
     }
 }

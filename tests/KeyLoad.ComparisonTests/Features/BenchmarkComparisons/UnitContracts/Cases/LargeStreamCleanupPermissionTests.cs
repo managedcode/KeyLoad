@@ -8,7 +8,9 @@ internal sealed class LargeStreamCleanupPermissionTests
     public async Task ActualLinuxPermissionFaultPreservesInitiatingEvidenceAndSurfacesCleanupOnlyFailure(bool retain)
     {
         if (!OperatingSystem.IsLinux())
-        { throw new PlatformNotSupportedException("This actual permission-fault control requires Linux."); }
+        {
+            throw new PlatformNotSupportedException("This actual permission-fault control requires Linux.");
+        }
         await LargeStreamCleanupPermissionTrial.RunAsync(retain,
             TestContext.Current!.Execution.CancellationToken).ConfigureAwait(false);
     }

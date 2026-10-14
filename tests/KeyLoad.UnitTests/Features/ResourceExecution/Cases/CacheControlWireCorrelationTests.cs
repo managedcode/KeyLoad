@@ -1,5 +1,5 @@
 using System.Net;
-using KeyLoad.Orleans.Features.ResourceExecution;
+using KeyLoad.Clustering.Features.ResourceExecution;
 
 namespace KeyLoad.UnitTests.Features.ResourceExecution;
 
@@ -10,8 +10,17 @@ internal sealed class CacheControlWireCorrelationTests
     {
         var request = CacheControlWireTestData.GrantRequest();
         var created = CacheControlCorrelation.TryCreate(request, out var correlation);
-        var changedOuter = request with { Mac = CacheControlWireTestData.Digest(0x72) };
-        var changedHeader = request with { Header = request.Header with { SentUnixMilliseconds = request.Header.SentUnixMilliseconds + 1 } };
+        var changedOuter = request with
+        {
+            Mac = CacheControlWireTestData.Digest(0x72)
+        };
+        var changedHeader = request with
+        {
+            Header = request.Header with
+            {
+                SentUnixMilliseconds = request.Header.SentUnixMilliseconds + 1
+            }
+        };
         ICacheControlRequest[] changedProofs =
         [
             request with { Slot0Proof = request.Slot0Proof with { Mac = CacheControlWireTestData.Digest(0x73) } },
@@ -41,12 +50,18 @@ internal sealed class CacheControlWireCorrelationTests
         {
             Correlation = prepareCorrelation with
             {
-                Header = prepareCorrelation.Header with { SentUnixMilliseconds = prepareCorrelation.Header.SentUnixMilliseconds + 1 }
+                Header = prepareCorrelation.Header with
+                {
+                    SentUnixMilliseconds = prepareCorrelation.Header.SentUnixMilliseconds + 1
+                }
             }
         };
         var mismatchedDigest = prepareReply with
         {
-            Correlation = prepareCorrelation with { SignedRequestDigest = CacheControlWireTestData.Digest(0x76) }
+            Correlation = prepareCorrelation with
+            {
+                SignedRequestDigest = CacheControlWireTestData.Digest(0x76)
+            }
         };
 
         await Assert.That(CacheControlCorrelation.TryMatch(prepare, prepareReply)).IsTrue();
@@ -76,7 +91,10 @@ internal sealed class CacheControlWireCorrelationTests
                 SiloAddress = SiloAddress.New(IPAddress.Parse("127.0.0.9"), 11119, 8).ToParsableString()
             }
         };
-        var wrongSequence = accepted with { AcceptedSequence = grant.Slot1Proof.ChallengeSequence };
+        var wrongSequence = accepted with
+        {
+            AcceptedSequence = grant.Slot1Proof.ChallengeSequence
+        };
         var negative = accepted with
         {
             Status = CacheControlStatus.PolicyMismatch,
@@ -106,10 +124,16 @@ internal sealed class CacheControlWireCorrelationTests
         {
             Correlation = refreshCorrelation with
             {
-                Header = refreshCorrelation.Header with { Operation = CacheControlOperation.Revoke }
+                Header = refreshCorrelation.Header with
+                {
+                    Operation = CacheControlOperation.Revoke
+                }
             }
         };
-        var defaultMacReply = revokeReply with { Mac = default };
+        var defaultMacReply = revokeReply with
+        {
+            Mac = default
+        };
 
         await Assert.That(CacheControlCorrelation.TryMatch(revoke, revokeReply)).IsTrue();
         await Assert.That(CacheControlCorrelation.TryMatch(refresh, refreshReply)).IsTrue();
@@ -123,9 +147,15 @@ internal sealed class CacheControlWireCorrelationTests
     public async Task AcCache014CorrelationCreationClearsOutputForMissingOrUnsignedRequests()
     {
         var missing = CacheControlCorrelation.TryCreate(null, out var missingCorrelation);
-        var defaultDigest = CacheControlWireTestData.PrepareRequest() with { Mac = default };
+        var defaultDigest = CacheControlWireTestData.PrepareRequest() with
+        {
+            Mac = default
+        };
         var defaultDigestCreated = CacheControlCorrelation.TryCreate(defaultDigest, out var defaultDigestCorrelation);
-        var unsigned = CacheControlWireTestData.PrepareRequest() with { Mac = default };
+        var unsigned = CacheControlWireTestData.PrepareRequest() with
+        {
+            Mac = default
+        };
         var unsignedCreated = CacheControlCorrelation.TryCreate(unsigned, out var unsignedCorrelation);
 
         await Assert.That(missing).IsFalse();
@@ -144,11 +174,17 @@ internal sealed class CacheControlWireCorrelationTests
             CacheControlWireTestData.NondefaultMac);
         var malformed = reply with
         {
-            Correlation = reply.Correlation! with { Header = null! }
+            Correlation = reply.Correlation! with
+            {
+                Header = null!
+            }
         };
         var defaultDigest = reply with
         {
-            Correlation = reply.Correlation! with { SignedRequestDigest = default }
+            Correlation = reply.Correlation! with
+            {
+                SignedRequestDigest = default
+            }
         };
         var encoded = CacheControlWire.TryEncodeSigned(malformed, out var bytes);
         var defaultDigestEncoded = CacheControlWire.TryEncodeSigned(defaultDigest, out var defaultDigestBytes);

@@ -14,7 +14,9 @@ internal static class PartitionMovementNativeBlobMutationAssertions
             : new RemoteDocumentTransportEnvelope(null, null, Change(original,
                 actual.ControlledBlob ?? throw Missing(), fault.Variation));
         if (!RemoteDocumentWire.Encode(expected).AsSpan().SequenceEqual(fault.Payload.Span))
-        { throw Missing(); }
+        {
+            throw Missing();
+        }
     }
 
     private static RemoteControlledBlobCall Change(RemoteControlledBlobCall original, RemoteControlledBlobCall actual,
@@ -27,22 +29,56 @@ internal static class PartitionMovementNativeBlobMutationAssertions
             NativeControlledBlobFaultVariation.Nonce => original with { Nonce = "wire-fault-nonce" },
             NativeControlledBlobFaultVariation.RequestId => original with { RequestId = Different(actual.RequestId, original.RequestId) },
             NativeControlledBlobFaultVariation.SourcePhysicalShard => original with
-            { Source = original.Source with { PhysicalShardId = Different(actual.Source.PhysicalShardId, original.Source.PhysicalShardId) } },
+            {
+                Source = original.Source with
+                {
+                    PhysicalShardId = Different(actual.Source.PhysicalShardId, original.Source.PhysicalShardId)
+                }
+            },
             NativeControlledBlobFaultVariation.DestinationIncarnation => original with
             {
                 Destination = original.Destination with
                 {
                     Owner = original.Destination.Owner with
-                    { Incarnation = Different(actual.Destination.Owner.Incarnation, original.Destination.Owner.Incarnation) }
+                    {
+                        Incarnation = Different(actual.Destination.Owner.Incarnation, original.Destination.Owner.Incarnation)
+                    }
                 }
             },
             NativeControlledBlobFaultVariation.PrincipalPolicyEpoch => ChangePrincipalPolicyEpoch(original, frame),
             NativeControlledBlobFaultVariation.QueryId => original with
-            { Request = original.Request with { Frame = frame with { QueryId = Different(changed.QueryId, frame.QueryId) } } },
+            {
+                Request = original.Request with
+                {
+                    Frame = frame with
+                    {
+                        QueryId = Different(changed.QueryId, frame.QueryId)
+                    }
+                }
+            },
             NativeControlledBlobFaultVariation.Resource => original with
-            { Request = original.Request with { Frame = frame with { Resource = frame.Resource with { Name = "wire-fault-resource" } } } },
+            {
+                Request = original.Request with
+                {
+                    Frame = frame with
+                    {
+                        Resource = frame.Resource with
+                        {
+                            Name = "wire-fault-resource"
+                        }
+                    }
+                }
+            },
             NativeControlledBlobFaultVariation.ExpiresAt => original with
-            { Request = original.Request with { Frame = frame with { ExpiresAt = DateTimeOffset.MinValue } } },
+            {
+                Request = original.Request with
+                {
+                    Frame = frame with
+                    {
+                        ExpiresAt = DateTimeOffset.MinValue
+                    }
+                }
+            },
             NativeControlledBlobFaultVariation.Purpose => original with
             {
                 Request = original.Request with
@@ -59,11 +95,21 @@ internal static class PartitionMovementNativeBlobMutationAssertions
                 Request = original.Request with
                 {
                     Frame = frame with
-                    { NativeRequest = frame.NativeRequest.IsEmpty ? new byte[] { 0x01 } : ReadOnlyMemory<byte>.Empty }
+                    {
+                        NativeRequest = frame.NativeRequest.IsEmpty ? new byte[] { 0x01 } : ReadOnlyMemory<byte>.Empty
+                    }
                 }
             },
             NativeControlledBlobFaultVariation.OriginalOutcome when frame.OriginalOutcome is not null => original with
-            { Request = original.Request with { Frame = frame with { OriginalOutcome = null } } },
+            {
+                Request = original.Request with
+                {
+                    Frame = frame with
+                    {
+                        OriginalOutcome = null
+                    }
+                }
+            },
             NativeControlledBlobFaultVariation.OriginalOperationId when frame.Original is { } operation => original with
             {
                 Request = original.Request with
@@ -71,7 +117,9 @@ internal static class PartitionMovementNativeBlobMutationAssertions
                     Frame = frame with
                     {
                         Original = operation with
-                        { Id = Different(changed.Original?.Id ?? throw Missing(), operation.Id) }
+                        {
+                            Id = Different(changed.Original?.Id ?? throw Missing(), operation.Id)
+                        }
                     }
                 }
             },
@@ -86,7 +134,12 @@ internal static class PartitionMovementNativeBlobMutationAssertions
             Request = original.Request with
             {
                 Frame = frame with
-                { Principal = frame.Principal with { PolicyEpoch = checked(frame.Principal.PolicyEpoch + 1) } }
+                {
+                    Principal = frame.Principal with
+                    {
+                        PolicyEpoch = checked(frame.Principal.PolicyEpoch + 1)
+                    }
+                }
             }
         };
     }

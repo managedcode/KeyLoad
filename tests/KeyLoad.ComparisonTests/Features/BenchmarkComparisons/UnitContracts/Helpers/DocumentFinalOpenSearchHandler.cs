@@ -12,7 +12,10 @@ internal sealed class DocumentFinalOpenSearchHandler(DocumentComparisonSchedule 
 {
     internal const string Index = "controlled-documents";
     internal readonly HashSet<string> ReadCopies = new(StringComparer.Ordinal);
-    internal int FlushRequests { get; private set; }
+    internal int FlushRequests
+    {
+        get; private set;
+    }
     private int states;
 
     private const string FirstShardField = "0", ShardsSetting = "index.number_of_shards", ReplicasSetting = "index.number_of_replicas";
@@ -24,7 +27,16 @@ internal sealed class DocumentFinalOpenSearchHandler(DocumentComparisonSchedule 
         var uri = request.RequestUri!;
         if (uri.AbsolutePath.Contains("/_cluster/health/", StringComparison.Ordinal))
         {
-            return Response(new { timed_out = false, status = "green", number_of_nodes = 3, number_of_data_nodes = 3, active_primary_shards = 1, active_shards = 3, unassigned_shards = 0 });
+            return Response(new
+            {
+                timed_out = false,
+                status = "green",
+                number_of_nodes = 3,
+                number_of_data_nodes = 3,
+                active_primary_shards = 1,
+                active_shards = 3,
+                unassigned_shards = 0
+            });
         }
 
         if (uri.AbsolutePath.Contains("/_cluster/state/", StringComparison.Ordinal))
@@ -40,11 +52,27 @@ internal sealed class DocumentFinalOpenSearchHandler(DocumentComparisonSchedule 
         if (uri.AbsolutePath.EndsWith("/_flush", StringComparison.Ordinal))
         {
             FlushRequests++;
-            return Response(new { _shards = new { total = 3, successful = corruption == "flush" ? 2 : 3, failed = corruption == "flush" ? 1 : 0 } });
+            return Response(new
+            {
+                _shards = new
+                {
+                    total = 3,
+                    successful = corruption == "flush" ? 2 : 3,
+                    failed = corruption == "flush" ? 1 : 0
+                }
+            });
         }
         if (uri.AbsolutePath.EndsWith("/_refresh", StringComparison.Ordinal))
         {
-            return Response(new { _shards = new { total = 3, successful = 3, failed = 0 } });
+            return Response(new
+            {
+                _shards = new
+                {
+                    total = 3,
+                    successful = 3,
+                    failed = 0
+                }
+            });
         }
 
         if (uri.AbsolutePath.EndsWith("/_settings", StringComparison.Ordinal))
@@ -68,12 +96,25 @@ internal sealed class DocumentFinalOpenSearchHandler(DocumentComparisonSchedule 
             [FirstShardField] = nodes.Select((node, index) => new { node, primary = index == 0, state = "STARTED" }).ToArray()
         };
         var indices = new Dictionary<string, object> { [Index] = new { shards } };
-        return new { cluster_manager_node = "n1", nodes = nodes.ToDictionary(node => node, _ => new { }), routing_table = new { indices } };
+        return new
+        {
+            cluster_manager_node = "n1",
+            nodes = nodes.ToDictionary(node => node, _ => new { }),
+            routing_table = new
+            {
+                indices
+            }
+        };
     }
     private static object Nodes()
         => new
         {
-            _nodes = new { total = 3, successful = 3, failed = 0 },
+            _nodes = new
+            {
+                total = 3,
+                successful = 3,
+                failed = 0
+            },
             nodes = new[] { "n1", "n2", "n3" }.ToDictionary(node => node,
                 _ => new { version = OpenSearchNames.ExpectedVersion, roles = new[] { "data", "cluster_manager" } })
         };
@@ -99,8 +140,21 @@ internal sealed class DocumentFinalOpenSearchHandler(DocumentComparisonSchedule 
         return new
         {
             timed_out = false,
-            _shards = new { total = 1, successful = 1, failed = 0 },
-            hits = new { total = new { value = schedule.Final, relation = "eq" }, hits = documents }
+            _shards = new
+            {
+                total = 1,
+                successful = 1,
+                failed = 0
+            },
+            hits = new
+            {
+                total = new
+                {
+                    value = schedule.Final,
+                    relation = "eq"
+                },
+                hits = documents
+            }
         };
     }
     private object SearchDocument(BenchmarkDocument document, string node)
@@ -112,8 +166,16 @@ internal sealed class DocumentFinalOpenSearchHandler(DocumentComparisonSchedule 
             parsed[NumberField] = -1;
             json = parsed.ToJsonString();
         }
-        return new { _id = document.Id, _source = OpenSearchDocument.CreateWithoutVector(document.Id, json), sort = new[] { document.Id } };
+        return new
+        {
+            _id = document.Id,
+            _source = OpenSearchDocument.CreateWithoutVector(document.Id, json),
+            sort = new[] { document.Id }
+        };
     }
     private static HttpResponseMessage Response(object value)
-        => new(HttpStatusCode.OK) { Content = new StringContent(JsonSerializer.Serialize(value, OpenSearchHttp.JsonOptions), Encoding.UTF8, "application/json") };
+        => new(HttpStatusCode.OK)
+        {
+            Content = new StringContent(JsonSerializer.Serialize(value, OpenSearchHttp.JsonOptions), Encoding.UTF8, "application/json")
+        };
 }

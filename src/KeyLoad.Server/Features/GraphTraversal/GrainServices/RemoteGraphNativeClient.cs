@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 using Microsoft.Extensions.Options;
 using Orleans.Runtime.Services;
@@ -66,7 +66,9 @@ internal sealed class RemoteGraphNativeClient : GrainServiceClient<IRemoteGraphG
     private void ReleaseStopping()
     {
         if (Interlocked.Exchange(ref stoppingDisposed, StoppingReleased) == StoppingActive)
-        { stopping.Dispose(); }
+        {
+            stopping.Dispose();
+        }
     }
 
     internal async Task<RemoteGraphNativeReplyV1> SendAsync(RegisteredPhysicalOwnerV1 receiver,
@@ -76,7 +78,9 @@ internal sealed class RemoteGraphNativeClient : GrainServiceClient<IRemoteGraphG
         var reply = await ExchangeVerifiedAsync(receiver, action, actualPrincipalId, originalPayload,
             originalRequestId, originalExpiry, work, caller).ConfigureAwait(false);
         if (reply.Error is { } refusal)
-        { throw Errors.Fail(refusal, RemoteGraphNativeProtocol.Unavailable); }
+        {
+            throw Errors.Fail(refusal, RemoteGraphNativeProtocol.Unavailable);
+        }
         return reply;
     }
 
@@ -95,11 +99,15 @@ internal sealed class RemoteGraphNativeClient : GrainServiceClient<IRemoteGraphG
         work.Check();
         if (!Enum.IsDefined(action) || originalRequestId == Guid.Empty || originalPayload.IsEmpty
             || originalPayload.Length > partition.Database.Limits.MaxBatchBytes)
-        { throw Errors.Fail(ErrorCode.Validation, RemoteGraphNativeProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, RemoteGraphNativeProtocol.InvalidProof);
+        }
         JsonData.Identifier(actualPrincipalId);
         var remaining = originalExpiry - clock.GetUtcNow();
         if (remaining <= TimeSpan.Zero || originalExpiry.Offset != TimeSpan.Zero || remaining > routing.RequestLifetime)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteGraphNativeProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteGraphNativeProtocol.Unavailable);
+        }
         var bound = remaining < routing.ExecutionLifetime ? remaining : routing.ExecutionLifetime;
         var workRemaining = work.RemainingLifetime;
         bound = bound < workRemaining ? bound : workRemaining;
@@ -113,14 +121,19 @@ internal sealed class RemoteGraphNativeClient : GrainServiceClient<IRemoteGraphG
         var address = await movement.ResolveAsync(receiver, RemoteGraphNativeProtocol.SelectedVoter, token).ConfigureAwait(false);
         var current = local.Read();
         if (!current.TransportReady || !sender.Owner.VoterIds.Contains(current.VoterId, StringComparer.Ordinal))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, RemoteGraphNativeProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, RemoteGraphNativeProtocol.Unavailable);
+        }
         work.ChargeBytes(originalPayload.Length);
         var request = new RemoteGraphNativeRequestV1(RemoteGraphNativeProtocol.Version, originalRequestId, action,
             actualPrincipalId, sender, receiver, current.VoterId, current.SiloAddress,
             receiver.Owner.VoterIds[RemoteGraphNativeProtocol.SelectedVoter], address.ToParsableString(),
             Guid.NewGuid(), originalExpiry, originalPayload.ToArray(), string.Empty);
         using var mac = RemoteGraphNativeMac.Create(options, partition, sender);
-        request = request with { Signature = mac.SignRemoteGraphRequest(request) };
+        request = request with
+        {
+            Signature = mac.SignRemoteGraphRequest(request)
+        };
         await RequireCurrentAsync(request, token).ConfigureAwait(false);
         work.Check();
         token.ThrowIfCancellationRequested();
@@ -132,9 +145,13 @@ internal sealed class RemoteGraphNativeClient : GrainServiceClient<IRemoteGraphG
                 request, received, work, token).ConfigureAwait(false);
         }
         catch (Exception error) when (RemoteGraphNativeProtocol.MayHaveEffects(action) && NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { throw Errors.Fail(ErrorCode.UnknownWriteOutcome, RemoteGraphNativeProtocol.Unavailable, error); }
+        {
+            throw Errors.Fail(ErrorCode.UnknownWriteOutcome, RemoteGraphNativeProtocol.Unavailable, error);
+        }
         catch (Exception error) when (error is OrleansException or TimeoutException or ObjectDisposedException)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, RemoteGraphNativeProtocol.Unavailable, error); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, RemoteGraphNativeProtocol.Unavailable, error);
+        }
         return reply;
     }
 
@@ -151,7 +168,9 @@ internal sealed class RemoteGraphNativeClient : GrainServiceClient<IRemoteGraphG
             || current.SiloAddress != request.CallerSiloAddress
             || source.ToParsableString() != request.CallerSiloAddress
             || target.ToParsableString() != request.DestinationSiloAddress || request.ExpiresAt <= clock.GetUtcNow())
-        { throw Errors.Fail(ErrorCode.OwnershipLost, RemoteGraphNativeProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, RemoteGraphNativeProtocol.Unavailable);
+        }
     }
 
     internal Task StopAsync() => DisposeAsync().AsTask();
@@ -160,7 +179,9 @@ internal sealed class RemoteGraphNativeClient : GrainServiceClient<IRemoteGraphG
     {
         await lifetime.DisposeAsync().ConfigureAwait(false);
         if (Interlocked.Exchange(ref stoppingDisposed, StoppingReleased) == StoppingActive)
-        { stopping.Dispose(); }
+        {
+            stopping.Dispose();
+        }
         Volatile.Write(ref joined, Joined);
     }
 }

@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.Storage;
 using Microsoft.Extensions.Options;
@@ -26,16 +26,22 @@ internal static class RemoteControlledDocumentExchange
         {
             using var targetMac = RemoteDocumentMac.FromConfiguredSecret(options.PhysicalGroupTrust.ForeignPeerSecret);
             if (!targetMac.Verify(original.Payload.Span, original.Signature, reply: true))
-            { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof); }
+            {
+                throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof);
+            }
             reply = NativeSerialization.Deserialize<RemoteDocumentReplyV1>(original.Payload.Span);
             Require(call, reply, options, membership, clock, token);
             await client.RequireCurrentReplyAsync(call.Destination, original, reply.EndpointDiscovery.SiloAddress,
                 token).ConfigureAwait(false);
         }
         catch (Exception transportFailure) when (original.MayHaveEffects && NativeCqrsBoundaryErrors.IsNonFatal(transportFailure))
-        { throw Errors.Fail(ErrorCode.UnknownWriteOutcome, RemoteModelNativeProtocol.Unavailable, transportFailure); }
+        {
+            throw Errors.Fail(ErrorCode.UnknownWriteOutcome, RemoteModelNativeProtocol.Unavailable, transportFailure);
+        }
         if (reply.Error is { } error)
-        { throw Errors.Fail(error, reply.SafeDetail ?? RemoteDocumentProtocol.Unavailable); }
+        {
+            throw Errors.Fail(error, reply.SafeDetail ?? RemoteDocumentProtocol.Unavailable);
+        }
         return reply.Controlled
             ?? throw Errors.Fail(ErrorCode.Corruption, RemoteDocumentProtocol.InvalidProof);
     }
@@ -57,9 +63,13 @@ internal static class RemoteControlledDocumentExchange
             || discovery.PeerEnvelopeVersion != ReplicaTransportProtocol.Version
             || discovery.RuntimeJournalReaderContract != StoreReaderContract.RuntimeJournal
             || !PhysicalGroupAddress.CanonicalAddress(discovery.SiloAddress, membership))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof);
+        }
         if (reply.Controlled is { } result && (result.ReadBytes < EmptyCount || result.ExaminedRecords < EmptyCount
             || result.ReadBytes > call.Request.MaximumReadBytes || result.ExaminedRecords > call.Request.MaximumExaminedRecords))
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, RemoteDocumentProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, RemoteDocumentProtocol.InvalidProof);
+        }
     }
 }

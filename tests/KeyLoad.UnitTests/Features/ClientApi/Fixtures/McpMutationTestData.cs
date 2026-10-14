@@ -123,6 +123,9 @@ internal static class McpMutationTestData
 
     private static EntityRef ReverseDestination() => McpCanonicalTestData.Reference with
     {
-        Partition = McpCanonicalTestData.Partition with { PartitionKey = TargetPartitionKey }
+        Partition = McpCanonicalTestData.Partition with
+        {
+            PartitionKey = TargetPartitionKey
+        }
     };
 }

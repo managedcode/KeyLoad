@@ -26,9 +26,13 @@ internal sealed class AnnPublicObservedWorkTests
                 () =>
                 {
                     if (cancel)
-                    { cancellation.Cancel(); }
+                    {
+                        cancellation.Cancel();
+                    }
                     else
-                    { clock.Advance(TimeSpan.FromSeconds(database.Database.Limits.QueryDeadlineSeconds + ExpiryStep)); }
+                    {
+                        clock.Advance(TimeSpan.FromSeconds(database.Database.Limits.QueryDeadlineSeconds + ExpiryStep));
+                    }
                 });
             AnnSearchPage? partial = null;
             try

@@ -17,25 +17,82 @@ internal sealed class NativeCoverageRf3ImageOptions
     private static readonly SearchValues<char> ShaCharacters = SearchValues.Create("0123456789abcdef");
     private static readonly SearchValues<char> LabelCharacters = SearchValues.Create("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789._-");
 
-    public string? ServerMode { get; set; }
-    public string? SourceManifest { get; set; }
-    public string? ImageReference { get; set; }
-    public string? RunId { get; set; }
-    public string? OutputRoot { get; set; }
-    public string? SourceReceiptSha256 { get; set; }
-    public string? ContextManifestSha256 { get; set; }
-    public string? ImageId { get; set; }
-    public string? ServerDllSha256 { get; set; }
-    public string? ServerPdbSha256 { get; set; }
-    public string? ServerMvid { get; set; }
-    public string? ToolVersion { get; set; }
-    public string? ToolClosureSha256 { get; set; }
-    public string? SettingsSha256 { get; set; }
-    public string? ShutdownSeconds { get; set; }
-    public string? SettlementSeconds { get; set; }
-    public string? MaximumReportBytes { get; set; }
-    public string? StartupPollMilliseconds { get; set; }
-    public string? RunManifest { get; set; }
+    public string? ServerMode
+    {
+        get; set;
+    }
+    public string? SourceManifest
+    {
+        get; set;
+    }
+    public string? ImageReference
+    {
+        get; set;
+    }
+    public string? RunId
+    {
+        get; set;
+    }
+    public string? OutputRoot
+    {
+        get; set;
+    }
+    public string? SourceReceiptSha256
+    {
+        get; set;
+    }
+    public string? ContextManifestSha256
+    {
+        get; set;
+    }
+    public string? ImageId
+    {
+        get; set;
+    }
+    public string? ServerDllSha256
+    {
+        get; set;
+    }
+    public string? ServerPdbSha256
+    {
+        get; set;
+    }
+    public string? ServerMvid
+    {
+        get; set;
+    }
+    public string? ToolVersion
+    {
+        get; set;
+    }
+    public string? ToolClosureSha256
+    {
+        get; set;
+    }
+    public string? SettingsSha256
+    {
+        get; set;
+    }
+    public string? ShutdownSeconds
+    {
+        get; set;
+    }
+    public string? SettlementSeconds
+    {
+        get; set;
+    }
+    public string? MaximumReportBytes
+    {
+        get; set;
+    }
+    public string? StartupPollMilliseconds
+    {
+        get; set;
+    }
+    public string? RunManifest
+    {
+        get; set;
+    }
 
     internal bool IsValid()
     {

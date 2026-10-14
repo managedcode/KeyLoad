@@ -12,7 +12,10 @@ internal static class QueryCursorRequestIdentityR47Refusals
     {
         foreach (var original in state.OriginalPages)
         {
-            var request = (afterCold ? state.OriginalRequest : state.ChangedRequest) with { Cursor = original.Cursor };
+            var request = (afterCold ? state.OriginalRequest : state.ChangedRequest) with
+            {
+                Cursor = original.Cursor
+            };
             var sdk = await reader.Sdk.QueryAsync(request, token);
             await Assert.That(sdk.IsSuccess).IsFalse();
             await Assert.That(sdk.Value).IsNull();

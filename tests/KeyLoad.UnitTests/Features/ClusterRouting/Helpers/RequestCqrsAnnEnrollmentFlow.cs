@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.Search;
 using KeyLoad.UnitTests.Features.Search;
 
@@ -20,9 +20,13 @@ internal static class RequestCqrsAnnEnrollmentFlow
             [MutationDiscriminatorNames.PutDocument, MutationDiscriminatorNames.PatchDocument,
              MutationDiscriminatorNames.DeleteDocument, MutationDiscriminatorNames.PutVector,
              MutationDiscriminatorNames.ApplyVectorProjection])
-        { AnnMaintenance = original.MaintenanceProfile };
+        {
+            AnnMaintenance = original.MaintenanceProfile
+        };
         var configure = new ConfigureProjectionConsumerRequest(configureId, original.Consumer, definition)
-        { InitialAnnMaintenance = original };
+        {
+            InitialAnnMaintenance = original
+        };
         var configured = await NativeTextMaintenanceCommit.ExecuteAsync<ProjectionConsumerInfo>(fixture.Database,
             OperationKind.ConfigureProjectionConsumer, configure, configureId, token);
         var principal = fixture.Database.Store.Read(view => fixture.Database.Database.Principal(view,
@@ -69,7 +73,9 @@ internal static class RequestCqrsAnnEnrollmentFlow
             RequestCqrsAnnTestData.OriginalTail);
         await RequestCqrsAnnAssertions.EqualAsync(new CommitProjectionBatchRequest(child,
             original.Consumer, intent.Token, [])
-        { InitialAnnMaintenanceSettlement = intent.InitialAnnMaintenanceSettlement }, intent);
+        {
+            InitialAnnMaintenanceSettlement = intent.InitialAnnMaintenanceSettlement
+        }, intent);
         await RequestCqrsAnnAssertions.EqualAsync(new AnnProjectionSettlementClaims(
             AnnProjectionSettlementClaims.SettlementPurpose, fixture.Database.Store.Identity.Incarnation,
             RequestCqrsAnnTestData.Principal, authority.PolicyEpoch,

@@ -46,9 +46,13 @@ internal static class ClusterRestoreRf3TargetAuthority
                         item.Target, item.Endpoints))]), actual.Owners);
         await Assert.That(actual.Identity.Incarnation).IsEqualTo(mapping.Target.Incarnation);
         foreach (var source in originals)
-        { await Assert.That(actual.Identity.NodeId).IsNotEqualTo(source.Cut.SourceNodeId); }
+        {
+            await Assert.That(actual.Identity.NodeId).IsNotEqualTo(source.Cut.SourceNodeId);
+        }
         foreach (var prior in previous)
-        { await Assert.That(actual.Identity.NodeId).IsNotEqualTo(prior.NodeId); }
+        {
+            await Assert.That(actual.Identity.NodeId).IsNotEqualTo(prior.NodeId);
+        }
         await Assert.That(actual.Identity.NodeId).IsNotEqualTo(Guid.Empty);
         await Assert.That(actual.Identity.DispatchPaused).IsTrue();
         await Assert.That(actual.Paused).IsEqualTo(dispatchPaused);

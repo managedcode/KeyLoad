@@ -38,7 +38,10 @@ internal sealed record EventProjectionRf3Scenario(PartitionRef Partition, Stream
     internal const int Revision = 1;
     internal const long Generation = 1;
     internal const int NodeCount = 3;
-    internal static VectorSpace Space { get; } = new("event-projection-rf3-space", 2,
+    internal static VectorSpace Space
+    {
+        get;
+    } = new("event-projection-rf3-space", 2,
         DistanceMetric.Cosine, "event-projection-rf3-model", ReducerVersion);
 
     internal static async Task<EventProjectionRf3Scenario> CreateAsync(ClusterFixture fixture,
@@ -80,9 +83,15 @@ internal sealed record EventProjectionRf3Scenario(PartitionRef Partition, Stream
     {
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
         var administrator = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
-        var resource = Resource(partition, ChangedSourceClass) with { SchemaVersion = 2 };
+        var resource = Resource(partition, ChangedSourceClass) with
+        {
+            SchemaVersion = 2
+        };
         await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigureResourceAsync(Guid.NewGuid(),
-            new(partition.TenantId, partition.DatabaseId, resource) { ExpectedSchemaVersion = 1 }, cancellationToken));
+            new(partition.TenantId, partition.DatabaseId, resource)
+            {
+                ExpectedSchemaVersion = 1
+            }, cancellationToken));
     }
 
     internal CommandRequest ChangeSourceCommand()

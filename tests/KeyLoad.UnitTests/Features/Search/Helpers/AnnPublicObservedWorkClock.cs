@@ -7,7 +7,10 @@ internal sealed class AnnPublicObservedWorkClock : TimeProvider
     private Func<bool>? observedWork;
     private Action? afterWork;
     private long timestamp;
-    internal bool Triggered { get; private set; }
+    internal bool Triggered
+    {
+        get; private set;
+    }
     public override long TimestampFrequency => TimeSpan.TicksPerSecond;
     public override DateTimeOffset GetUtcNow() => epoch.AddTicks(timestamp);
     public override long GetTimestamp()
@@ -28,5 +31,9 @@ internal sealed class AnnPublicObservedWorkClock : TimeProvider
         afterWork = action;
     }
     internal void Advance(TimeSpan elapsed) => timestamp += elapsed.Ticks;
-    internal void Disarm() { observedWork = null; afterWork = null; }
+    internal void Disarm()
+    {
+        observedWork = null;
+        afterWork = null;
+    }
 }

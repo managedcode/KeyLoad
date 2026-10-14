@@ -24,7 +24,10 @@ internal static class TenantPackingActivationRf3Provisioning
         var definition = new PrincipalRecord(principal, tenant,
             [new(partition.DatabaseId, RequestCqrsRf3Protocol.AdminCollection,
                 Capability.DocumentsRead | Capability.DocumentsWrite)], [])
-        { PolicyEpoch = InitialPolicyEpoch, ClusterAdministrator = false };
+        {
+            PolicyEpoch = InitialPolicyEpoch,
+            ClusterAdministrator = false
+        };
         var credential = new ApiKeyRecord(key, principal,
             Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(secret))));
         _ = await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigureResourceAsync(Guid.NewGuid(),

@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Replication;
 using KeyLoad.Server.Features.ClusterRouting;
 using Microsoft.Extensions.Options;
@@ -22,17 +22,23 @@ internal static class OrleansNativePeerServices
             builder.Services.AddSingleton<IReplicaNativeDiscoveryObserver>(discoveryOmission);
             builder.Services.AddSingleton(discoveryOmission.CreateBorrowedProbe());
             if (discoveryOmission.PurposeObserver is { } purposeObserver)
-            { builder.Services.AddSingleton(purposeObserver); }
+            {
+                builder.Services.AddSingleton(purposeObserver);
+            }
         }
         if (sealedObserver is not null)
         {
             builder.Services.AddSingleton(sealedObserver);
             if (sealedObserver is IGrainRequestPurposeObserver purposeObservation
                 && !builder.Services.Any(registration => registration.ServiceType == typeof(IGrainRequestPurposeObserver)))
-            { builder.Services.AddSingleton(purposeObservation); }
+            {
+                builder.Services.AddSingleton(purposeObservation);
+            }
             if (sealedObserver is IGrainRequestPhaseObserver phaseObservation
                 && !builder.Services.Any(registration => registration.ServiceType == typeof(IGrainRequestPhaseObserver)))
-            { builder.Services.AddSingleton(phaseObservation); }
+            {
+                builder.Services.AddSingleton(phaseObservation);
+            }
         }
     }
 
@@ -60,7 +66,9 @@ internal static class OrleansNativePeerServices
     internal static void RegisterPhysicalProbe(IServiceCollection services, PhysicalOwnerProbeNativeRuntime? runtime)
     {
         if (runtime is not null)
-        { services.AddSingleton(runtime); }
+        {
+            services.AddSingleton(runtime);
+        }
         services.AddSingleton<PhysicalOwnerProbeNativeClient>(provider => new(provider));
     }
 }

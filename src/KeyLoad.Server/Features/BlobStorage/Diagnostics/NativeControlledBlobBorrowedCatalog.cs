@@ -35,10 +35,14 @@ internal sealed class NativeControlledBlobBorrowedCatalog : IAsyncDisposable
         {
             ObjectDisposedException.ThrowIf(closing is not null, this);
             if (active || count >= expected)
-            { throw new InvalidOperationException(RemoteModelNativeProtocol.InvalidProof); }
+            {
+                throw new InvalidOperationException(RemoteModelNativeProtocol.InvalidProof);
+            }
             originalToken.ThrowIfCancellationRequested();
             if (!catalog.MoveNext())
-            { throw new InvalidOperationException(RemoteModelNativeProtocol.InvalidProof); }
+            {
+                throw new InvalidOperationException(RemoteModelNativeProtocol.InvalidProof);
+            }
             var payload = catalog.Current;
             active = true;
             count++;
@@ -56,7 +60,9 @@ internal sealed class NativeControlledBlobBorrowedCatalog : IAsyncDisposable
         {
             originalToken.ThrowIfCancellationRequested();
             if (active || count != expected)
-            { throw new InvalidOperationException(RemoteModelNativeProtocol.InvalidProof); }
+            {
+                throw new InvalidOperationException(RemoteModelNativeProtocol.InvalidProof);
+            }
         }
     }
 
@@ -65,7 +71,9 @@ internal sealed class NativeControlledBlobBorrowedCatalog : IAsyncDisposable
     {
         await start.ConfigureAwait(false);
         try
-        { return await dispatcher.ExecuteAsync(payload, ordinal).ConfigureAwait(false); }
+        {
+            return await dispatcher.ExecuteAsync(payload, ordinal).ConfigureAwait(false);
+        }
         catch (Exception error) { lock (gate) { actualFailures.Add(error); } throw; }
         finally { lock (gate) { active = false; } }
     }
@@ -73,21 +81,34 @@ internal sealed class NativeControlledBlobBorrowedCatalog : IAsyncDisposable
     public ValueTask DisposeAsync()
     {
         lock (gate)
-        { return new(closing ??= JoinAsync(running)); }
+        {
+            return new(closing ??= JoinAsync(running));
+        }
     }
 
     private async Task JoinAsync(Task? admitted)
     {
         var joinFailures = new List<Exception>();
         if (admitted is not null)
-        { await ServerFailureObserver.ObserveAsync(() => admitted, joinFailures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => admitted, joinFailures).ConfigureAwait(false);
+        }
         List<Exception> failures;
         lock (gate)
-        { failures = new(actualFailures); }
+        {
+            failures = new(actualFailures);
+        }
         foreach (var error in joinFailures)
-        { if (!failures.Any(existing => ReferenceEquals(existing, error))) { failures.Add(error); } }
+        {
+            if (!failures.Any(existing => ReferenceEquals(existing, error)))
+            {
+                failures.Add(error);
+            }
+        }
         try
-        { catalog.Dispose(); }
+        {
+            catalog.Dispose();
+        }
         catch (Exception error) { failures.Add(error); throw; }
         finally { ServerFailureObserver.ThrowIfAny(failures); }
     }

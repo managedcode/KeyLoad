@@ -63,7 +63,10 @@ internal sealed class GraphIncomingSortCancellationTests
 
     private static ReadExecutionBudget CreateBudget(TestDatabase database, TimeProvider clock,
         CancellationToken cancellationToken)
-        => new(UnitExecutionOptions.DatabaseLimits(database.Database.Limits with { QueryDeadlineSeconds = 1 }), clock, cancellationToken);
+        => new(UnitExecutionOptions.DatabaseLimits(database.Database.Limits with
+        {
+            QueryDeadlineSeconds = 1
+        }), clock, cancellationToken);
 
     private static GraphIncomingEdgesPageBuilder CreateBuilder(TestDatabase database,
         GraphIncomingEdgesPageV1 page, EntityRef target, ReadExecutionBudget budget)

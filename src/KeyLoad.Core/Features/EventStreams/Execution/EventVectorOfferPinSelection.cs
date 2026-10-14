@@ -15,21 +15,29 @@ internal static class EventVectorOfferPinSelection
         foreach (var row in inventory.PayloadRows)
         {
             if (!row.Key.Span.StartsWith(prefix))
-            { continue; }
+            {
+                continue;
+            }
             var phase = EventVectorInventoryPhaseValidation.Read(map, row, admission);
             if (phase.Role != EventVectorSourcePhaseRole.Pin
                 || phase.CoverageGeneration != map.CoverageGeneration)
-            { continue; }
+            {
+                continue;
+            }
             if (phase.Disposition != EventVectorSourcePhaseDisposition.Observed
                 || phase.SourceOriginalResult is null || phase.SourceOriginalResult.Error is not null
                 || !pins.TryAdd(phase.Source, phase))
-            { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+            }
             var original = EventVectorSourceMutationValidation.ReadObserved(phase, admission);
             EventVectorObservedPinValidation.Require(phase, original,
                 phase.SourceOriginalResult.Get<EventVectorSourceResult>(), admission);
         }
         if (pins.Count != entries.Length)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         var ordered = ImmutableArray.CreateBuilder<EventVectorSourcePhase>(entries.Length);
         foreach (var entry in entries)
         {
@@ -39,7 +47,9 @@ internal static class EventVectorOfferPinSelection
                 || phase.SourceSchemaVersion != entry.SchemaVersion
                 || phase.SourceLogicalPlacementRevision != entry.LogicalPlacementRevision
                 || phase.SourceDirectoryFence != entry.DirectoryFence)
-            { throw Errors.Fail(ErrorCode.TokenInvalidated, Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.TokenInvalidated, Invalid);
+            }
             ordered.Add(phase with
             {
                 SourceOriginalResult = null,

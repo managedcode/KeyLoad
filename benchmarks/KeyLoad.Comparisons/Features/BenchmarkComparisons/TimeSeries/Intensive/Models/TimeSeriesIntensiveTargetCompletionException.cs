@@ -22,8 +22,14 @@ internal sealed class TimeSeriesIntensiveTargetCompletionException : InvalidOper
         Acknowledgement = acknowledgement;
     }
 
-    internal TimeSeriesIntensiveFailure CleanupFailure { get; }
-    internal TimeSeriesIntensiveAcknowledgement? Acknowledgement { get; }
+    internal TimeSeriesIntensiveFailure CleanupFailure
+    {
+        get;
+    }
+    internal TimeSeriesIntensiveAcknowledgement? Acknowledgement
+    {
+        get;
+    }
 
     internal static Exception? Join(Exception? primary, Exception? cleanup, TimeSeriesIntensiveAcknowledgement? acknowledgement)
     {

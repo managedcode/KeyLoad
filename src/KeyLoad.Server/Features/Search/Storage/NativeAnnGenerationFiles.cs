@@ -16,17 +16,26 @@ internal static class NativeAnnGenerationFiles
     {
         NativeAnnRootInventory.Require(root, receipt, receipt.NodeId, receipt.Incarnation, options);
         if (!receipt.OwnedGenerations.Contains(manifest.GenerationLeaf, StringComparer.Ordinal))
-        { throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Ownership); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Ownership);
+        }
         var directory = NativeAnnPaths.Generation(root, manifest.GenerationLeaf);
         if (Directory.Exists(directory))
-        { throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Ownership); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Ownership);
+        }
         budget.Check();
         Directory.CreateDirectory(directory);
         if (!OperatingSystem.IsWindows())
-        { File.SetUnixFileMode(directory, PrivateDirectory); }
+        {
+            File.SetUnixFileMode(directory, PrivateDirectory);
+        }
         NativeAnnPaths.RequireDirectory(directory);
         var digest = SaveIndex(Path.Combine(directory, NativeAnnProtocol.IndexFile), index, storage, options, budget);
-        var completed = manifest with { IndexSha256 = digest };
+        var completed = manifest with
+        {
+            IndexSha256 = digest
+        };
         budget.Check();
         var manifestDigest = NativeAnnReceiptFiles.Write(Path.Combine(directory, NativeAnnProtocol.ManifestFile), completed, options);
         NativeAnnPaths.RequireClosedGeneration(root, manifest.GenerationLeaf);
@@ -45,12 +54,16 @@ internal static class NativeAnnGenerationFiles
             digest = index.Save(file, storage, budget);
             file.Flush(flushToDisk: true);
             if (!OperatingSystem.IsWindows())
-            { File.SetUnixFileMode(path, PrivateFile); }
+            {
+                File.SetUnixFileMode(path, PrivateFile);
+            }
         }
         catch (Exception primary)
         {
             try
-            { file?.Dispose(); }
+            {
+                file?.Dispose();
+            }
             catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
             throw;
         }
@@ -70,12 +83,16 @@ internal static class NativeAnnGenerationFiles
         var manifest = observed.Value;
         if (manifest.IsPending || pointer.Version != NativeAnnProtocol.Version || manifest.Version != NativeAnnProtocol.Version
             || manifest.GenerationLeaf != pointer.GenerationLeaf || manifest.Policy != policy.Value)
-        { throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Corrupt); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Corrupt);
+        }
         NativeAnnCanonicalSource.RequireRestore(request, current, manifest);
         var index = LoadIndex(NativeAnnPaths.ExistingFile(root, pointer.GenerationLeaf, NativeAnnProtocol.IndexFile),
             manifest.IndexSha256, policy, storage, options, budget);
         if (index.Count != manifest.Count || index.Space != manifest.Space)
-        { throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Corrupt); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Corrupt);
+        }
         return (manifest, index);
     }
 
@@ -92,7 +109,9 @@ internal static class NativeAnnGenerationFiles
         catch (Exception primary)
         {
             try
-            { file?.Dispose(); }
+            {
+                file?.Dispose();
+            }
             catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
             throw;
         }

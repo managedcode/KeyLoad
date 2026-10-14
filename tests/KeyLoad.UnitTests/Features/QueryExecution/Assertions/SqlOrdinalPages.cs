@@ -22,8 +22,14 @@ internal static class SqlOrdinalPages
                     var astPage = engine.ExecuteAst(principal, ast);
                     await PageAsync(sqlPage, id, json, position, final);
                     await PageAsync(astPage, id, json, position, final);
-                    sql = sql with { Cursor = sqlPage.Cursor };
-                    ast = ast with { Cursor = astPage.Cursor };
+                    sql = sql with
+                    {
+                        Cursor = sqlPage.Cursor
+                    };
+                    ast = ast with
+                    {
+                        Cursor = astPage.Cursor
+                    };
                 }
             }
         }
@@ -40,9 +46,13 @@ internal static class SqlOrdinalPages
     private static async Task PageAsync(QueryPage page, string id, string json, long cut, bool final)
     {
         if (final)
-        { await Assert.That(page.Cursor).IsNull(); }
+        {
+            await Assert.That(page.Cursor).IsNull();
+        }
         else
-        { await Assert.That(page.Cursor).IsNotNull(); }
+        {
+            await Assert.That(page.Cursor).IsNotNull();
+        }
         await SqlOffsetPages.ExactAsync(page, new([new(id, SqlOffsetProtocol.InitialRevision, json, false, [])],
             page.Cursor, cut, FullScan));
     }

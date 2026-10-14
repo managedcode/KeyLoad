@@ -85,7 +85,9 @@ internal static class PartitionMovementRetireGrantDispositionRf3Trial
         await Assert.That(pendingCuts.All(cut => cut.OriginalNativeResult is null)).IsTrue();
         var remaining = pending.OriginalExpiresAt - TimeProvider.System.GetUtcNow();
         if (remaining > TimeSpan.Zero)
-        { await Task.Delay(remaining, TimeProvider.System, cancellationToken); }
+        {
+            await Task.Delay(remaining, TimeProvider.System, cancellationToken);
+        }
         var snapshot = await PartitionMovementStoppedNativeSnapshot.CaptureAsync(wave, stopped, cancellationToken);
         return (snapshot, stopped);
     }
@@ -106,13 +108,21 @@ internal static class PartitionMovementRetireGrantDispositionRf3Trial
                 store.Commit((transaction, _) =>
                 {
                     PartitionMoveGrantStorage.Write(transaction,
-                        grant with { RetireCancellationDisposition = disposition with { OriginalNonce = Guid.NewGuid() } },
+                        grant with
+                        {
+                            RetireCancellationDisposition = disposition with
+                            {
+                                OriginalNonce = Guid.NewGuid()
+                            }
+                        },
                         IntegrationExecutionOptions.DatabaseLimits().Value.MaxBatchBytes);
                     return true;
                 });
             }, failures);
             if (store is { } owned)
-            { ServerFailureObserver.Observe(owned.Dispose, failures); }
+            {
+                ServerFailureObserver.Observe(owned.Dispose, failures);
+            }
             ServerFailureObserver.ThrowIfAny(failures);
         }
     }
@@ -151,7 +161,10 @@ internal static class PartitionMovementRetireGrantDispositionRf3Trial
             await Assert.That(grant.RetireCancellationDisposition).IsNotNull();
             await Assert.That(grant.Settlement).IsNull();
             await Assert.That(grant.AbortDisposition).IsNull();
-            await SqlRf3Protocol.EqualAsync(grant with { RetireCancellationDisposition = null }, original.OriginalGrant);
+            await SqlRf3Protocol.EqualAsync(grant with
+            {
+                RetireCancellationDisposition = null
+            }, original.OriginalGrant);
             await SqlRf3Protocol.EqualAsync(phase.OriginalGrant, original.OriginalGrant);
             var disposal = grant.RetireCancellationDisposition!;
             var cancellation = phase.RetireCancellation!.Cancellation;

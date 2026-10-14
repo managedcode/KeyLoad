@@ -15,7 +15,10 @@ internal static class EventReferenceSelectAssertions
     internal static async Task SamePageAsync(QueryPage expected, QueryPage actual)
     {
         await Assert.That(actual.CutPosition).IsGreaterThanOrEqualTo(expected.CutPosition);
-        await SqlRf3Protocol.EqualAsync(expected with { CutPosition = actual.CutPosition }, actual);
+        await SqlRf3Protocol.EqualAsync(expected with
+        {
+            CutPosition = actual.CutPosition
+        }, actual);
     }
 
     internal static async Task PageAsync(RequestCqrsRf3Callers callers, EventReferenceSelectState state,
@@ -31,7 +34,9 @@ internal static class EventReferenceSelectAssertions
         await Assert.That(direct.CutPosition).IsGreaterThanOrEqualTo(state.Receipt.Token.Position);
         var expected = new List<(string Event, long Revision, string Target, string Name)> { ("z", 1, "c1", "Ada") };
         if (state.Repair is not null)
-        { expected.Add(("a", 2, "m", "Max")); }
+        {
+            expected.Add(("a", 2, "m", "Max"));
+        }
         await Assert.That(direct.Rows.Length).IsEqualTo(expected.Count);
         for (var index = 0; index < expected.Count; index++)
         {

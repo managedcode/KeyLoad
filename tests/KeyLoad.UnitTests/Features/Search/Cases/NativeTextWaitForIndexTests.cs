@@ -27,12 +27,21 @@ internal sealed class NativeTextWaitForIndexTests
         using var projection = NativeTextBilingualAudit.Open(database);
         var search = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection);
         var original = new WaitForIndexRequest(database.Partition, NativeTextBilingualAudit.Collection, TextField, receipt.Token);
-        var invalid = future ? receipt.Token with { Position = receipt.Token.Position + NextPosition }
-            : receipt.Token with { Incarnation = Guid.NewGuid() };
+        var invalid = future ? receipt.Token with
+        {
+            Position = receipt.Token.Position + NextPosition
+        }
+            : receipt.Token with
+            {
+                Incarnation = Guid.NewGuid()
+            };
         var image = QueueWholeFlowStorage.Bytes(database.Store);
         var position = database.Store.Position;
         var error = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => search.WaitForIndexAsync(Root,
-            original with { MinimumToken = invalid }, token)) ?? throw new InvalidOperationException();
+            original with
+            {
+                MinimumToken = invalid
+            }, token)) ?? throw new InvalidOperationException();
         await Assert.That(error.Code).IsEqualTo(ErrorCode.TokenInvalidated);
         await Assert.That(error.Message).IsEqualTo(future ? FutureDetail : WrongIncarnationDetail);
         await Assert.That(database.Store.Position).IsEqualTo(position);

@@ -34,7 +34,9 @@ internal static class PartitionMovementNativeRetireOperations
     private static PartitionMovementGrainServiceReply Encode(PartitionMovementNativeReceiver owner, PartitionMovementTransportReply reply)
     {
         if (NativeSerialization.Measure(reply) > owner.Limits.Value.MaxBatchBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMovementProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMovementProtocol.Unavailable);
+        }
         var bytes = NativeSerialization.Serialize(reply);
         return PartitionMovementNativeReplies.Original(owner, bytes, owner.Receiver.SignRetireCancellationReply(bytes));
     }

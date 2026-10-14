@@ -10,6 +10,8 @@ internal static class NativeAnnDigest
     {
         if (expected is null || expected.Length != Bytes || actual is null || actual.Length != Bytes
             || !CryptographicOperations.FixedTimeEquals(expected, actual))
-        { throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Corrupt); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Corrupt);
+        }
     }
 }

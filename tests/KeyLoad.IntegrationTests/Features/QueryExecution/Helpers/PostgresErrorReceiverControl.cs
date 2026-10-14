@@ -14,15 +14,23 @@ internal sealed class PostgresErrorReceiverControl
     private bool joined;
     private bool terminal;
     private readonly Dictionary<string, byte[]> witnesses = new(StringComparer.Ordinal);
-    internal Guid Session { get; }
-    internal string Root { get; }
+    internal Guid Session
+    {
+        get;
+    }
+    internal string Root
+    {
+        get;
+    }
 
     internal PostgresErrorReceiverControl(string dataRoot, Guid session)
     {
         Session = session;
         Root = Path.Combine(dataRoot, PostgresErrorReceiverProtocol.Directory);
         if (Directory.Exists(Root))
-        { throw new InvalidOperationException(PostgresErrorReceiverProtocol.Invalid); }
+        {
+            throw new InvalidOperationException(PostgresErrorReceiverProtocol.Invalid);
+        }
         Directory.CreateDirectory(Root);
         foreach (var node in RequestCqrsProbeFixtureProtocol.Nodes)
         {
@@ -37,7 +45,13 @@ internal sealed class PostgresErrorReceiverControl
     }
 
     internal string NodeDirectory(string node) => directories[node];
-    internal void RetainEvidence() { lock (sync) { retained = true; } }
+    internal void RetainEvidence()
+    {
+        lock (sync)
+        {
+            retained = true;
+        }
+    }
 
     internal Guid Arm(string node, string subject)
     {
@@ -45,7 +59,9 @@ internal sealed class PostgresErrorReceiverControl
         {
             RequireOwners();
             if (joined || arms.Count != PostgresRf3Protocol.FirstColumn)
-            { throw new InvalidOperationException(PostgresErrorReceiverProtocol.Invalid); }
+            {
+                throw new InvalidOperationException(PostgresErrorReceiverProtocol.Invalid);
+            }
             var id = Guid.NewGuid();
             var bytes = NativeSerialization.Serialize(new PostgresErrorDeliveryArm(Session, id, subject));
             PostgresErrorReceiverFiles.Write(directories[node], PostgresErrorDeliveryProtocol.Arm, bytes);
@@ -58,7 +74,9 @@ internal sealed class PostgresErrorReceiverControl
         PostgresErrorDeliveryPhase phase, CancellationToken token)
     {
         if (!token.CanBeCanceled)
-        { throw new InvalidOperationException(PostgresErrorReceiverProtocol.Invalid); }
+        {
+            throw new InvalidOperationException(PostgresErrorReceiverProtocol.Invalid);
+        }
         while (true)
         {
             token.ThrowIfCancellationRequested();
@@ -83,10 +101,14 @@ internal sealed class PostgresErrorReceiverControl
         var witness = NativeSerialization.Deserialize<PostgresErrorDeliveryWitness>(PostgresErrorReceiverFiles.Read(path));
         if (witness.Session != Session || witness.Arm != arm || witness.Phase != phase
             || witness.Connection == Guid.Empty || witness.Primary != ErrorCode.PermissionDenied)
-        { throw new InvalidOperationException(PostgresErrorReceiverProtocol.Invalid); }
+        {
+            throw new InvalidOperationException(PostgresErrorReceiverProtocol.Invalid);
+        }
         var exact = PostgresErrorReceiverFiles.Read(path);
         if (witnesses.TryGetValue(name, out var before) && !before.AsSpan().SequenceEqual(exact))
-        { throw new InvalidOperationException(PostgresErrorReceiverProtocol.Invalid); }
+        {
+            throw new InvalidOperationException(PostgresErrorReceiverProtocol.Invalid);
+        }
         witnesses[name] = exact;
         terminal |= phase == PostgresErrorDeliveryPhase.ConnectionJoined;
         return witness;
@@ -99,16 +121,22 @@ internal sealed class PostgresErrorReceiverControl
             PostgresErrorReceiverFiles.RequireInventory(directories[node]);
             if (!PostgresErrorReceiverFiles.Read(Path.Combine(directories[node],
                 PostgresErrorDeliveryProtocol.Owner)).AsSpan().SequenceEqual(owners[node]))
-            { throw new InvalidOperationException(PostgresErrorReceiverProtocol.Invalid); }
+            {
+                throw new InvalidOperationException(PostgresErrorReceiverProtocol.Invalid);
+            }
             if (arms.TryGetValue(node, out var expected) && !PostgresErrorReceiverFiles.Read(
                 Path.Combine(directories[node], PostgresErrorDeliveryProtocol.Arm)).AsSpan().SequenceEqual(expected))
-            { throw new InvalidOperationException(PostgresErrorReceiverProtocol.Invalid); }
+            {
+                throw new InvalidOperationException(PostgresErrorReceiverProtocol.Invalid);
+            }
         }
         foreach (var entry in witnesses)
         {
             if (!PostgresErrorReceiverFiles.Read(Path.Combine(directories[McpCallerProtocol.Node3], entry.Key))
                 .AsSpan().SequenceEqual(entry.Value))
-            { throw new InvalidOperationException(PostgresErrorReceiverProtocol.Invalid); }
+            {
+                throw new InvalidOperationException(PostgresErrorReceiverProtocol.Invalid);
+            }
         }
     }
 
@@ -117,13 +145,20 @@ internal sealed class PostgresErrorReceiverControl
         lock (sync)
         {
             if (!resourcesJoined)
-            { retained = true; throw new InvalidOperationException(PostgresErrorReceiverProtocol.Invalid); }
+            {
+                retained = true;
+                throw new InvalidOperationException(PostgresErrorReceiverProtocol.Invalid);
+            }
             RequireOwners();
             joined = true;
             if (!retained && arms.Count != PostgresRf3Protocol.FirstColumn && !terminal)
-            { throw new InvalidOperationException(PostgresErrorReceiverProtocol.Invalid); }
+            {
+                throw new InvalidOperationException(PostgresErrorReceiverProtocol.Invalid);
+            }
             if (!retained)
-            { Directory.Delete(Root, recursive: true); }
+            {
+                Directory.Delete(Root, recursive: true);
+            }
         }
         return Task.CompletedTask;
     }

@@ -21,9 +21,13 @@ internal sealed class PartitionMovementPublicParentFlowTests
             await PartitionMovementPublicParentRf3Scenario.RunAsync(wave, seed, caller.Token).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
         if (seed is { } calls)
-        { await ServerFailureObserver.ObserveAsync(() => calls.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => calls.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         if (wave is { } resources)
-        { await ServerFailureObserver.ObserveAsync(() => resources.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => resources.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

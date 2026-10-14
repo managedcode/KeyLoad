@@ -19,7 +19,9 @@ internal static class ClusterRestoreRf3PlanCorruption
         var file = new FileInfo(path);
         if (!file.Exists || file.Length <= MagicByte || file.Length > IntegrationExecutionOptions.StorageExecution().Value.MaximumBackupManifestBytes
             || (file.Attributes & FileAttributes.ReparsePoint) != default)
-        { throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid); }
+        {
+            throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid);
+        }
         var original = await File.ReadAllBytesAsync(path, cancellationToken).ConfigureAwait(false);
         var originalImage = ClusterRestoreRf3FaultImage.Capture(target);
         var changed = original.ToArray();
@@ -41,7 +43,9 @@ internal static class ClusterRestoreRf3PlanCorruption
             joined = true;
         }, failures).ConfigureAwait(false);
         if (faultWritten && joined)
-        { ServerFailureObserver.Observe(() => Replace(path, changed, original), failures); }
+        {
+            ServerFailureObserver.Observe(() => Replace(path, changed, original), failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
         await ClusterRestoreRf3FaultImageAssertions.RequireAsync(target, originalImage).ConfigureAwait(false);
     }
@@ -51,14 +55,20 @@ internal static class ClusterRestoreRf3PlanCorruption
         var attributes = File.GetAttributes(path);
         if ((attributes & (FileAttributes.ReparsePoint | FileAttributes.Directory)) != default
             || expected.Length != replacement.Length)
-        { throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid); }
+        {
+            throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid);
+        }
         using var file = new FileStream(path, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
         if (file.Length != expected.Length)
-        { throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid); }
+        {
+            throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid);
+        }
         var actual = new byte[expected.Length];
         file.ReadExactly(actual);
         if (!actual.AsSpan().SequenceEqual(expected))
-        { throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid); }
+        {
+            throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid);
+        }
         file.Position = MagicByte;
         file.Write(replacement);
         file.Flush(flushToDisk: true);

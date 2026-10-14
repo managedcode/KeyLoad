@@ -40,7 +40,9 @@ internal static class PostgresInt16Rf3Pages
                         {
                             var parameter = new global::Npgsql.NpgsqlParameter(PostgresInt16Rf3Protocol.Parameter,
                                 global::NpgsqlTypes.NpgsqlDbType.Smallint)
-                            { Value = value };
+                            {
+                                Value = value
+                            };
                             await PageAsync(await wire.ExecuteAsync<QueryPage>(PostgresInt16Rf3Protocol.DriverSql,
                                 [parameter], prepared, token), value);
                         }

@@ -140,7 +140,9 @@ internal static class QueueScheduledCancelPublicFlow
         await QueueScheduledCancelPublicAssertions.TerminalAsync(callers, state, QueueScheduledCancelPublicAssertions.Sibling, 1L, token);
         await QueueScheduledCancelPublicAssertions.TerminalAsync(callers, state, QueueScheduledCancelPublicAssertions.Replacement, 2L, token);
         if (healthy)
-        { await QueueScheduledCancelPublicAssertions.TerminalAsync(callers, state, QueueLifecyclePublicProtocol.Healthy, 3L, token); }
+        {
+            await QueueScheduledCancelPublicAssertions.TerminalAsync(callers, state, QueueLifecyclePublicProtocol.Healthy, 3L, token);
+        }
         var witness = await PublicReadAssertions.DocumentAsync(await callers.Sdk.GetAsync(
             new(state.Owner.Partition, QueueLifecyclePublicProtocol.Collection, QueueScheduledCancelPublicAssertions.Witness), token));
         await Assert.That(witness!.Revision).IsEqualTo(1L);
@@ -156,9 +158,13 @@ internal static class QueueScheduledCancelPublicFlow
         var problem = await QueueLeasedCancelPublicAssertions.RefusedAsync(
             callers, state.Owner, state.Denied, ErrorCode.PermissionDenied, token);
         if (state.DeniedProblem is { } saved)
-        { await Assert.That(JsonDefaults.Serialize(problem).SequenceEqual(JsonDefaults.Serialize(saved))).IsTrue(); }
+        {
+            await Assert.That(JsonDefaults.Serialize(problem).SequenceEqual(JsonDefaults.Serialize(saved))).IsTrue();
+        }
         else
-        { state.DeniedProblem = problem; }
+        {
+            state.DeniedProblem = problem;
+        }
         return true;
     }, token);
 }

@@ -1,6 +1,6 @@
 using System.Net;
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
@@ -24,7 +24,10 @@ internal sealed class ConnectionRf3AuthorizationTests
         var principal = new PrincipalRecord(scenario.Identity.PrincipalId, scenario.Identity.Partition.TenantId,
             [new(scenario.Identity.Partition.DatabaseId, RequestCqrsRf3Protocol.AdminCollection,
                 Capability.DocumentsRead | Capability.DocumentsWrite)], [])
-        { Revoked = true, PolicyEpoch = ConnectionRf3Protocol.RevokedPolicyEpoch };
+        {
+            Revoked = true,
+            PolicyEpoch = ConnectionRf3Protocol.RevokedPolicyEpoch
+        };
         await McpCallerAssertions.SdkSuccessAsync(await scenario.Administrator.ConfigurePrincipalAsync(
             Guid.NewGuid(), principal, token));
         await VerifyRejectedAsync(caller, scenario.Identity, useMcp, token);

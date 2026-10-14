@@ -19,7 +19,10 @@ internal sealed class SampleChunkStoreFixture : IDisposable
     internal static readonly TimeSpan WindowWidth = TimeSpan.FromMinutes(1);
     internal const string Tags = "{\"label\":\"café\",\"unit\":\"°C\"}";
 
-    internal TestDatabase Database { get; }
+    internal TestDatabase Database
+    {
+        get;
+    }
 
     private SampleChunkStoreFixture(TestDatabase database) => Database = database;
 

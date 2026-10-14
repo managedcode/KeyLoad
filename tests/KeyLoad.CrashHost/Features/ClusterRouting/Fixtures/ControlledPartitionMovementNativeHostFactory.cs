@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 
 namespace KeyLoad.CrashHost.Features.ClusterRouting;
@@ -48,9 +48,13 @@ internal static class ControlledPartitionMovementNativeHostFactory
                 }
             }
             catch (Exception cleanup) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
-            { failures.Add(cleanup); }
+            {
+                failures.Add(cleanup);
+            }
             catch (Exception cleanup) when (!NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
-            { failures.Add(cleanup); }
+            {
+                failures.Add(cleanup);
+            }
             ServerFailureObserver.ThrowIfAny(failures);
         }
     }

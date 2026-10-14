@@ -11,7 +11,9 @@ internal static class PostgresCompositionRf3Operations
     internal static SqlOperationRequest Public(CommandRequest command)
         => command.Mutations[0] is QueueToGraph forward
             ? DeclarativeCompositionSql.Forward(command, forward) with
-            { QueryDialectVersion = forward.FromCollection is null ? PostgresRf3Protocol.ScalarDialect : PostgresRf3Protocol.JoinDialect }
+            {
+                QueryDialectVersion = forward.FromCollection is null ? PostgresRf3Protocol.ScalarDialect : PostgresRf3Protocol.JoinDialect
+            }
             : DeclarativeCompositionSql.Reverse(command, (GraphToQueueMutation)command.Mutations[0]);
 
     internal static async Task<CommitReceipt> ApplyAsync(RequestCqrsRf3Callers callers, PostgresRf3Caller wire,
@@ -62,7 +64,10 @@ internal static class PostgresCompositionRf3Operations
         {
             PolicyEpoch = checked(current.PolicyEpoch + EpochStep),
             Grants = current.Grants.Select(grant => grant.Resource == PostgresCompositionRf3Protocol.Graph
-                ? grant with { Capabilities = grant.Capabilities | Capability.GraphWrite } : grant).ToImmutableArray()
+                ? grant with
+                {
+                    Capabilities = grant.Capabilities | Capability.GraphWrite
+                } : grant).ToImmutableArray()
         };
         var actual = await McpCallerAssertions.SdkSuccessAsync(await root.ConfigurePrincipalAsync(Guid.NewGuid(), expected, token));
         await SqlRf3Protocol.EqualAsync(expected, actual);

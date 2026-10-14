@@ -23,17 +23,29 @@ internal sealed class BenchmarkTopologyMembershipFixture : IDisposable
         Incarnation = Guid.NewGuid();
     }
 
-    internal string DirectoryPath { get; }
-    internal Guid Incarnation { get; }
+    internal string DirectoryPath
+    {
+        get;
+    }
+    internal Guid Incarnation
+    {
+        get;
+    }
 
     internal ReplicaConfiguration Configuration(int nodes, bool benchmark = true)
         => new(LocalVoter, Enumerable.Range(1, nodes)
             .Select(number => VoterPrefix + number.ToString(CultureInfo.InvariantCulture)).ToImmutableArray(),
             DirectoryPath, Incarnation)
-        { BenchmarkTopology = benchmark };
+        {
+            BenchmarkTopology = benchmark
+        };
 
     internal ZoneTreeStore Open(Action<CommitStage, long, int>? observer = null)
-        => new(new(DirectoryPath) { Incarnation = Incarnation, FaultObserver = observer }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        => new(new(DirectoryPath)
+        {
+            Incarnation = Incarnation,
+            FaultObserver = observer
+        }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
 
     internal static byte[]? Membership(ZoneTreeStore store)
         => store.Read(view => view.ReadOwnedValue(MembershipKey));

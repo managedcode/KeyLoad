@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
 using System.Globalization;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Replication;
 using Microsoft.Extensions.Logging;
 
@@ -31,7 +31,10 @@ internal sealed class ReplicaReplayDiagnosticsTests
         var request = fixture.Request(ReplicaRpc.ReadProbe,
             new AppendRequest(ReplicaSecurityFixture.VoterA, 1, 0, 0, 0, []));
         receiver.VerifyRequest(request);
-        var rejected = fixture.Resign(request with { Nonce = Guid.NewGuid() });
+        var rejected = fixture.Resign(request with
+        {
+            Nonce = Guid.NewGuid()
+        });
         var error = Assert.ThrowsExactly<KeyLoadException>(() => receiver.VerifyRequest(rejected));
         await Assert.That(error.Code).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(error.Message).IsEqualTo(ReplicaTransportProtocol.ReplayCapacityExceeded);
@@ -62,7 +65,10 @@ internal sealed class ReplicaReplayDiagnosticsTests
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => receiver.VerifyRequest(request)).Code)
             .IsEqualTo(ErrorCode.Unauthenticated);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => receiver.VerifyRequest(
-            request with { Nonce = Guid.NewGuid() })).Code).IsEqualTo(ErrorCode.Unauthenticated);
+            request with
+            {
+                Nonce = Guid.NewGuid()
+            })).Code).IsEqualTo(ErrorCode.Unauthenticated);
         await Assert.That(capture.Entries.Count(item => item.Event == CapacityEvent)).IsEqualTo(0);
     }
 
@@ -82,9 +88,14 @@ internal sealed class ReplicaReplayDiagnosticsTests
             ReplicaReplayPool.ReadBarrier, ReplicaRpc.ReadProbe, out var failure)).IsFalse();
         diagnostics.Report(failure);
         for (var index = 0; index < SuppressedCalls; index++)
-        { diagnostics.Report(failure); }
+        {
+            diagnostics.Report(failure);
+        }
         await Assert.That(capture.Entries.Count(item => item.Event == CapacityEvent)).IsEqualTo(1);
-        diagnostics.Report(failure with { ObservedUnixMilliseconds = now + IntervalMilliseconds });
+        diagnostics.Report(failure with
+        {
+            ObservedUnixMilliseconds = now + IntervalMilliseconds
+        });
         var summary = capture.Entries.Last(item => item.Event == CapacityEvent);
         await Assert.That(summary.Number(Suppressed)).IsEqualTo((long)SuppressedCalls);
         await Assert.That(capture.Entries.Count(item => item.Event == CapacityEvent)).IsEqualTo(2);
@@ -95,7 +106,9 @@ internal sealed class ReplicaReplayLogCapture : ILoggerProvider
 {
     internal ConcurrentQueue<ReplicaReplayLogEntry> Entries { get; } = new();
     public ILogger CreateLogger(string categoryName) => new CaptureLogger(Entries);
-    public void Dispose() { }
+    public void Dispose()
+    {
+    }
 
     private sealed class CaptureLogger(ConcurrentQueue<ReplicaReplayLogEntry> entries) : ILogger
     {

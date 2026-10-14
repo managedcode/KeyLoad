@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Orleans;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
@@ -94,7 +94,9 @@ internal sealed class PartitionMovementReceiver
         CancellationToken cancellationToken)
     {
         if (verified.Action == PartitionMovementTransportAction.Apply)
-        { return await cleanup.ApplyPhaseAsync(verified.CommandId, verified.Envelope, cancellationToken).ConfigureAwait(false); }
+        {
+            return await cleanup.ApplyPhaseAsync(verified.CommandId, verified.Envelope, cancellationToken).ConfigureAwait(false);
+        }
         var action = verified.Action switch
         {
             PartitionMovementTransportAction.Capture => PartitionMovementCaptureAction.Capture,
@@ -118,7 +120,9 @@ internal sealed class PartitionMovementReceiver
             ?? throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.Invalid);
         var reply = await context.ApplyAsync(commandId, original, cancellationToken).ConfigureAwait(false);
         if (reply.Error is { } code)
-        { throw Errors.Fail(code, reply.SafeDetail ?? PartitionMovementProtocol.Unavailable); }
+        {
+            throw Errors.Fail(code, reply.SafeDetail ?? PartitionMovementProtocol.Unavailable);
+        }
         var value = GrainNativePayload.Read<GrainValue>(reply.Payload).Value as PartitionMovePhaseResult
             ?? throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid);
         return value;

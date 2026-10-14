@@ -47,7 +47,14 @@ internal sealed class QdrantVectorContractTests
         {
             id = 101,
             vector = input.Embedding.ToArray(),
-            payload = new { id = input.Id, number = input.Number, document = input.Payload, filtered = true, mixed = true }
+            payload = new
+            {
+                id = input.Id,
+                number = input.Number,
+                document = input.Payload,
+                filtered = true,
+                mixed = true
+            }
         });
         var actual = QdrantVectorReadback.Parse(native.RootElement);
         await Assert.That(actual.Id).IsEqualTo("v000000100");
@@ -57,7 +64,14 @@ internal sealed class QdrantVectorContractTests
         {
             id = 102,
             vector = input.Embedding.ToArray(),
-            payload = new { id = input.Id, number = input.Number, document = input.Payload, filtered = true, mixed = true }
+            payload = new
+            {
+                id = input.Id,
+                number = input.Number,
+                document = input.Payload,
+                filtered = true,
+                mixed = true
+            }
         });
         Assert.ThrowsExactly<ComparisonFailureException>(() => QdrantVectorReadback.Parse(wrongIdentity.RootElement));
     }
@@ -85,8 +99,20 @@ internal sealed class QdrantVectorContractTests
             indexed_vectors_count = indexed,
             config = new
             {
-                @params = new { vectors = new { size = 128, distance = metric } },
-                hnsw_config = new { m, ef_construct = 200, full_scan_threshold = 0 }
+                @params = new
+                {
+                    vectors = new
+                    {
+                        size = 128,
+                        distance = metric
+                    }
+                },
+                hnsw_config = new
+                {
+                    m,
+                    ef_construct = 200,
+                    full_scan_threshold = 0
+                }
             }
         });
 }

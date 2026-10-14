@@ -19,7 +19,9 @@ internal static class ScriptDomParsingObservation
         public void Dispose()
         {
             if (disposed)
-            { return; }
+            {
+                return;
+            }
             disposed = true;
             Current.Value = previous;
         }

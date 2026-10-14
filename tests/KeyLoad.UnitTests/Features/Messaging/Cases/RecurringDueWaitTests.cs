@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 namespace KeyLoad.UnitTests;
 
 /// <summary>AC-ORL-011: due discovery waits on real canonical apply with a joined clock fallback.</summary>

@@ -57,7 +57,11 @@ internal static class NativeTextMaintenanceRf3ReplayAssertions
         NativeTextMaintenanceRf3Scenario scenario, TextIndexMaintenanceRequest current,
         TextIndexSourceCut expectedCut, string expectedIndexDigest, NativeTextMaintenancePath path, CancellationToken token)
     {
-        var request = current with { CommandId = Guid.NewGuid(), Mode = TextIndexMaintenanceMode.Restore };
+        var request = current with
+        {
+            CommandId = Guid.NewGuid(),
+            Mode = TextIndexMaintenanceMode.Restore
+        };
         var before = JsonDefaults.Serialize(await McpCallerAssertions.SdkSuccessAsync(
             await sdk.OutboxStatusAsync(scenario.Partition, token)));
         var beforeFirst = await McpCallerAssertions.SdkSuccessAsync(await sdk.StatusAsync(token));
@@ -103,8 +107,14 @@ internal static class NativeTextMaintenanceRf3ReplayAssertions
 
     internal static async Task StableAsync(TextIndexMaintenanceResult actual, TextIndexMaintenanceResult original)
     {
-        await Assert.That(JsonDefaults.Serialize(actual with { Source = null })
-            .SequenceEqual(JsonDefaults.Serialize(original with { Source = null }))).IsTrue();
+        await Assert.That(JsonDefaults.Serialize(actual with
+        {
+            Source = null
+        })
+            .SequenceEqual(JsonDefaults.Serialize(original with
+            {
+                Source = null
+            }))).IsTrue();
     }
 
     internal static async Task SourceAsync(TextIndexSourceCut actual, TextIndexSourceCut original,
@@ -142,7 +152,9 @@ internal static class NativeTextMaintenanceRf3ReplayAssertions
         }
         var sql = new SqlOperationRequest(request.Consumer.Partition, Sql,
             new(StringComparer.Ordinal)
-            { [Arguments] = JsonSerializer.SerializeToElement(McpOfficialClient.Arguments(request), JsonDefaults.Options) });
+            {
+                [Arguments] = JsonSerializer.SerializeToElement(McpOfficialClient.Arguments(request), JsonDefaults.Options)
+            });
         if (path == NativeTextMaintenancePath.SdkSql)
         {
             var actual = await sdk.ExecuteSqlAsync(sql, token);

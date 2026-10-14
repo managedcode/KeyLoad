@@ -19,7 +19,10 @@ internal sealed class CliBackupRestoreFixture
 
     private const string RootPrefix = "keyload-cli-backup-flow-";
     private const string MissingIdentityMessage = "The CLI backup fixture has not initialized its real store identity.";
-    private StoreIdentity? InitializedIdentity { get; set; }
+    private StoreIdentity? InitializedIdentity
+    {
+        get; set;
+    }
     private bool rootOwned;
     private bool storeClosed;
 
@@ -35,7 +38,9 @@ internal sealed class CliBackupRestoreFixture
     internal StoreIdentity OriginalIdentity => InitializedIdentity ?? throw new InvalidOperationException(MissingIdentityMessage);
     internal static byte[] StoredKeyBytes => KeyCodec.Encode(StoredKey);
 
-    private CliBackupRestoreFixture() { }
+    private CliBackupRestoreFixture()
+    {
+    }
 
     internal static async Task<string> RunAsync(Func<CliBackupRestoreFixture, Task> operation, CancellationToken cancellationToken)
     {

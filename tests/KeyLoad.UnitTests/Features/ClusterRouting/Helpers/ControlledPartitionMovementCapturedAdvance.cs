@@ -33,7 +33,11 @@ internal static class ControlledPartitionMovementCapturedAdvance
                 PartitionMovementTransportAction.Apply, Guid.Empty, InitialOrdinal), cancellationToken);
         await Assert.That(result.Error).IsNull();
         var actual = result.Get<PartitionMovePhaseResult>();
-        var expected = control with { Phase = PartitionMovePhase.Captured, ImageDigest = originalDescriptor.Digest };
+        var expected = control with
+        {
+            Phase = PartitionMovePhase.Captured,
+            ImageDigest = originalDescriptor.Digest
+        };
         await Assert.That(JsonDefaults.Serialize(actual.Control).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
         await Assert.That(JsonDefaults.Serialize(actual.Fence).SequenceEqual(JsonDefaults.Serialize(fence))).IsTrue();
         await Assert.That(actual.InstalledReceipt).IsNull();

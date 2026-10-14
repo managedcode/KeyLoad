@@ -29,7 +29,10 @@ internal static class QueueReferenceSelectSources
                 payloads[index], index + 1L, token);
         }
         await MessageAsync(admin, state.Partition, QueueReferenceSelectProtocol.InvalidQueue, "wrong",
-            ExpectedPayload(state.Partition with { PartitionKey = "foreign" }, "c1", 7), 1L, token);
+            ExpectedPayload(state.Partition with
+            {
+                PartitionKey = "foreign"
+            }, "c1", 7), 1L, token);
         await SqlRf3Protocol.EqualAsync(state.Receipt, await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.CommitAsync(state.Seed, token)));
         if (state.Repair is not null)
         {
@@ -65,7 +68,9 @@ internal static class QueueReferenceSelectSources
         var official = await PublicReadAssertions.MessageAsync(await admin.Mcp.CallAsync(McpCallerTools.MessagesInspect, request, token));
         await SqlRf3Protocol.EqualAsync(sdk, official.Value);
         if (sdk is null)
-        { throw new InvalidOperationException("The original queue source is unavailable."); }
+        {
+            throw new InvalidOperationException("The original queue source is unavailable.");
+        }
         await SqlRf3Protocol.EqualAsync(new MessageMetadata(id, MessageState.Ready, 0, 1, sequence, null, null), sdk.Metadata);
         await Assert.That(sdk.PayloadJson).IsEqualTo(payload);
         await Assert.That(sdk.HeadersJson).IsEqualTo("{}");

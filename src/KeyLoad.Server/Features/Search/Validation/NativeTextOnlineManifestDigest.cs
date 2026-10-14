@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.Search;
@@ -13,7 +13,9 @@ internal static class NativeTextOnlineManifestDigest
         NativeTextFileIO.VerifyRegularFile(path);
         var size = new FileInfo(path).Length;
         if (size > options.Value.MaximumDiskBytes)
-        { throw NativeTextErrors.BoundExceeded(); }
+        {
+            throw NativeTextErrors.BoundExceeded();
+        }
         budget.ChargeBytes(size);
         string? digest = null;
         var failures = new List<Exception>();
@@ -27,14 +29,24 @@ internal static class NativeTextOnlineManifestDigest
                 budget.Check();
             }
             catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-            { primary = error; throw; }
+            {
+                primary = error;
+                throw;
+            }
             catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-            { primary = error; throw; }
+            {
+                primary = error;
+                throw;
+            }
         }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { CaptureFailures(primary, error, failures); }
+        {
+            CaptureFailures(primary, error, failures);
+        }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { CaptureFailures(primary, error, failures); }
+        {
+            CaptureFailures(primary, error, failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
         return digest ?? throw NativeTextErrors.Corrupt();
     }
@@ -42,9 +54,13 @@ internal static class NativeTextOnlineManifestDigest
     private static void CaptureFailures(Exception? primary, Exception observed, List<Exception> failures)
     {
         if (primary is not null)
-        { failures.Add(primary); }
+        {
+            failures.Add(primary);
+        }
         if (!ReferenceEquals(primary, observed))
-        { failures.Add(observed); }
+        {
+            failures.Add(observed);
+        }
     }
 
 }

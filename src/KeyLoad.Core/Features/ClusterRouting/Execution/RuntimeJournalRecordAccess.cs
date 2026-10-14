@@ -111,7 +111,11 @@ internal static class RuntimeJournalRecordAccess
         {
             Capacity();
         }
-        transaction.PutRecord(RuntimeJournalKeys.Quota(), quota with { JournalCount = count, TotalBytes = bytes });
+        transaction.PutRecord(RuntimeJournalKeys.Quota(), quota with
+        {
+            JournalCount = count,
+            TotalBytes = bytes
+        });
     }
 
     private static RuntimeJournalChunkV1 RequireChunk(IKeyValueView view, string name, int index, int chunkBytes)

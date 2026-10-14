@@ -11,7 +11,11 @@ public sealed partial class DatabaseEngine
         var resource = Resource(view, destination.Partition, destination.Queue, ResourceKind.WorkQueue);
         var counters = Counters(view, destination);
         var retained = RemoteTransferStorage.TargetCapacity(view, destination);
-        return new(principal.PolicyEpoch, JsonData.Fingerprint(new { resource.FieldPolicies, resource.HeaderPolicies }),
+        return new(principal.PolicyEpoch, JsonData.Fingerprint(new
+        {
+            resource.FieldPolicies,
+            resource.HeaderPolicies
+        }),
             resource.QueuePolicy.MaxStoredMessages, resource.QueuePolicy.MaxStoredBytes, counters.StoredMessages,
             counters.StoredBytes, retained.StoredRecords, retained.StoredBytes, Limits.MaxBatchBytes, Limits.MaxScanRecords);
     }

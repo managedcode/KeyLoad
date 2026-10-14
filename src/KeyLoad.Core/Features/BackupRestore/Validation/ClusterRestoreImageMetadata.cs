@@ -20,7 +20,9 @@ internal static class ClusterRestoreImageMetadata
         if (catalog is null || catalog.Version != PhysicalShardCatalogProtocol.CurrentVersion
             || catalog.Revision != PhysicalShardCatalogProtocol.InitialRevision
             || !PhysicalOwnerEntryValidation.SameOwner(catalog.DefaultShard, state.Local.Target))
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
         if (state.Mappings.Length > SingleOwner)
         {
             var owners = state.Mappings.Select(mapping => new RegisteredPhysicalOwnerV1(mapping.Target, mapping.Endpoints))
@@ -29,13 +31,17 @@ internal static class ClusterRestoreImageMetadata
             var expected = new PhysicalOwnerDirectoryV1(PhysicalOwnerDirectoryProtocol.Version,
                 revision, state.Local.Target, owners);
             if (!ClusterBackupMetadataEquality.Registered(expected, PhysicalOwnerDirectorySerialization.Read(state.Target)))
-            { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, Invalid);
+            }
         }
         var marker = state.Target.GetRecord<ClusterRestoreMarker>(MarkerKey());
         if (marker is null || marker.Version != ClusterRestoreMarker.CurrentVersion || marker.SlotContext != state.Context || marker.OriginalCut is null
             || !ClusterBackupMetadataEquality.OwnerCut(state.Original, marker.OriginalCut)
             || ClusterRestoreMappingDigest.Compute(marker.Mappings) != ClusterRestoreMappingDigest.Compute(state.Mappings))
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
         foreach (var original in state.Original.Partitions)
         {
             state.Work.Check();
@@ -50,7 +56,9 @@ internal static class ClusterRestoreImageMetadata
             };
             if (!ClusterBackupMetadataEquality.Placement(expected, DatabaseEngine.ReadClusterBackupPlacement(
                 state.Target, original.Roster.Partition, state.Local.Target)))
-            { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, Invalid);
+            }
         }
     }
 
@@ -59,14 +67,20 @@ internal static class ClusterRestoreImageMetadata
         List<byte[]> keys = [PhysicalShardCatalogRecordSerialization.CatalogKey(), MarkerKey(),
             ClusterRestoreSlotKeys.Reconciled(), ClusterRestoreSlotKeys.AuthorityReset()];
         if (state.Mappings.Length > SingleOwner)
-        { keys.Add(PhysicalOwnerDirectorySerialization.Key()); }
+        {
+            keys.Add(PhysicalOwnerDirectorySerialization.Key());
+        }
         foreach (var partition in state.Original.Partitions)
         {
             if (!partition.Placement.IsFallback)
-            { keys.Add(AtomicPartitionPlacementSerialization.RowKey(partition.Roster.Partition)); }
+            {
+                keys.Add(AtomicPartitionPlacementSerialization.RowKey(partition.Roster.Partition));
+            }
         }
         if (state.Reset)
-        { keys.AddRange(ClusterRestoreImageOrigins.ChangedKeys(state)); }
+        {
+            keys.AddRange(ClusterRestoreImageOrigins.ChangedKeys(state));
+        }
         return keys;
     }
 }

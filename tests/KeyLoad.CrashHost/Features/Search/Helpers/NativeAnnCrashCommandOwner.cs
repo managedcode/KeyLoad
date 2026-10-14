@@ -29,7 +29,10 @@ internal sealed class NativeAnnCrashCommandOwner : IDisposable
         var options = CrashExecutionOptions.Replica();
         execution = options.Value;
         replica = new(new(configuration.Value.Directory)
-        { Incarnation = configuration.Value.Incarnation, SigningKey = database.Store.Identity.SigningKey },
+        {
+            Incarnation = configuration.Value.Incarnation,
+            SigningKey = database.Store.Identity.SigningKey
+        },
             CrashExecutionOptions.StorageExecution(), CrashExecutionOptions.PointCacheExecution());
         try
         {
@@ -42,7 +45,9 @@ internal sealed class NativeAnnCrashCommandOwner : IDisposable
             catch (Exception primary)
             {
                 try
-                { log.Dispose(); }
+                {
+                    log.Dispose();
+                }
                 catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
                 throw;
             }
@@ -50,13 +55,18 @@ internal sealed class NativeAnnCrashCommandOwner : IDisposable
         catch (Exception primary)
         {
             try
-            { replica.Dispose(); }
+            {
+                replica.Dispose();
+            }
             catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
             throw;
         }
     }
 
-    internal DatabaseEngine Database { get; }
+    internal DatabaseEngine Database
+    {
+        get;
+    }
 
     internal OperationResult Submit(ReplicatedOperation operation, bool explicitTime)
     {
@@ -65,16 +75,23 @@ internal sealed class NativeAnnCrashCommandOwner : IDisposable
             using var timeout = new CancellationTokenSource(execution.CommandTimeout, TimeProvider.System);
 
             var actual = Database.NormalizeOperation(explicitTime ? operation
-                : operation with { EvaluatedAt = Database.EvaluationClock.GetUtcNow() });
+                : operation with
+                {
+                    EvaluatedAt = Database.EvaluationClock.GetUtcNow()
+                });
             if (RetainedCommandIndex(actual.Id) is { } originalIndex)
             {
                 if (originalIndex > log.State.CommittedIndex)
-                { materializer.Commit(originalIndex); }
+                {
+                    materializer.Commit(originalIndex);
+                }
                 materializer.WaitForApplyAsync(originalIndex, timeout.Token).GetAwaiter().GetResult();
                 return Database.ResolveOutcome(actual);
             }
             if (log.State.Term < FirstTerm)
-            { log.SaveTermAndVote(FirstTerm, Voter); }
+            {
+                log.SaveTermAndVote(FirstTerm, Voter);
+            }
             var index = checked(log.State.LastIndex + IndexStep);
             log.Append([new(index, log.State.Term, actual)]);
             materializer.Commit(index);
@@ -89,7 +106,9 @@ internal sealed class NativeAnnCrashCommandOwner : IDisposable
         {
             var entry = log.ReadEntry(index) ?? throw new InvalidOperationException(MissingEntry);
             if (entry.Operation?.Id == id)
-            { return index; }
+            {
+                return index;
+            }
         }
         return null;
     }
@@ -98,15 +117,21 @@ internal sealed class NativeAnnCrashCommandOwner : IDisposable
     {
         var failures = new List<Exception>();
         try
-        { materializer.DisposeAsync().AsTask().GetAwaiter().GetResult(); }
+        {
+            materializer.DisposeAsync().AsTask().GetAwaiter().GetResult();
+        }
         catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is null) { failures.Add(error); }
         catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is not null) { failures.Add(error); }
         try
-        { log.Dispose(); }
+        {
+            log.Dispose();
+        }
         catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is null) { failures.Add(error); }
         catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is not null) { failures.Add(error); }
         try
-        { replica.Dispose(); }
+        {
+            replica.Dispose();
+        }
         catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is null) { failures.Add(error); }
         catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is not null) { failures.Add(error); }
         ServerFailureObserver.ThrowIfAny(failures);

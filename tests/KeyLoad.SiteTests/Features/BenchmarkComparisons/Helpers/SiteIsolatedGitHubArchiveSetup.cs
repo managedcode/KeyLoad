@@ -59,7 +59,11 @@ internal static class SiteIsolatedGitHubArchiveSetup
         {
             operation = SiteIsolatedGitHubFields.InputsOperation,
             repository,
-            arguments = new { input = receipt.Capture, receipt = receipt.ReceiptPath },
+            arguments = new
+            {
+                input = receipt.Capture,
+                receipt = receipt.ReceiptPath
+            },
         }, token, captureCoverage);
         if (!result.GetProperty(SiteIsolatedGitHubFields.Ok).GetBoolean())
         {

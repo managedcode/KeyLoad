@@ -18,7 +18,9 @@ internal sealed record PartitionMovementBlobWireNativeCut(PartitionMovementPubli
         {
             var page = view.Scan([], limits.MaxScanRecords);
             if (page.HasMore)
-            { throw new InvalidOperationException("The complete native wire cut exceeded its original bound."); }
+            {
+                throw new InvalidOperationException("The complete native wire cut exceeded its original bound.");
+            }
             var rows = page.Records.Select(row => Convert.ToHexString(row.Key.Span) + ":" + Convert.ToHexString(row.Value.Span)).ToArray();
             var applied = view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes ? NativeSerialization.Deserialize<long>(bytes) : EmptyCounter;
             return new PartitionMovementBlobWireNativeCut(new(owner.Partition.Configuration.LocalId,
@@ -50,12 +52,16 @@ internal sealed record PartitionMovementBlobWireNativeCut(PartitionMovementPubli
             var entry = entries.Single(value => value.Index == index);
             await Assert.That(entry.Index).IsEqualTo(index);
             if (entry.Operation is { } operation)
-            { await Assert.That(await membership.TryApplyAsync(operation)).IsTrue(); }
+            {
+                await Assert.That(await membership.TryApplyAsync(operation)).IsTrue();
+            }
             count++;
         }
         await Assert.That(entries.Length).IsEqualTo(count);
         if (count != EmptyCounter)
-        { allowed.Add(Convert.ToHexString(KeySpace.AppliedBytes)); }
+        {
+            allowed.Add(Convert.ToHexString(KeySpace.AppliedBytes));
+        }
         await membership.RequireCompleteAsync();
         var left = PartitionMovementCapturePointerRf3Fault.Rows(before.Rows);
         var right = PartitionMovementCapturePointerRf3Fault.Rows(after.Rows);

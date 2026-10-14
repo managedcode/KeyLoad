@@ -14,7 +14,9 @@ public sealed partial class DatabaseEngine
             or PartitionMovePeerStage.RetireCancel
             || verified.Grant is { RequireReceiverIssuance: true }
             || verified.ReceiverIssuanceProof is not null || verified.SourceDispatchWitness is not null)
-        { throw Errors.Fail(ErrorCode.PermissionDenied, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, PartitionMoveProtocol.MissingAuthority);
+        }
         return CreateMovementOperationCore(commandId, localPrincipalId, evaluatedAt, verified);
     }
 
@@ -24,14 +26,21 @@ public sealed partial class DatabaseEngine
         ArgumentNullException.ThrowIfNull(work);
         work.Check();
         if (verified.Stage != PartitionMovePeerStage.ControlCheckpoint)
-        { throw Errors.Fail(ErrorCode.PermissionDenied, PartitionMoveProtocol.MissingAuthority); }
-        var owned = verified with { Body = verified.Body.ToArray() };
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, PartitionMoveProtocol.MissingAuthority);
+        }
+        var owned = verified with
+        {
+            Body = verified.Body.ToArray()
+        };
         PartitionMovePeerEnvelopeValidation.RequireStructure(owned, Limits.MaxBatchBytes);
         RequireCheckpointProofAdmission(localPrincipalId, owned, work);
         var proof = movementCheckpointVerifier.Verify(this, localPrincipalId, owned.Body, work);
         var expected = Convert.ToHexStringLower(System.Security.Cryptography.SHA256.HashData(owned.Body.Span));
         if (proof != expected)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMoveProtocol.MissingAuthority);
+        }
         var operation = CreateMovementOperationCore(commandId, localPrincipalId, evaluatedAt, owned);
         work.Check();
         return operation;
@@ -42,9 +51,13 @@ public sealed partial class DatabaseEngine
     {
         PartitionMovePeerEnvelopeValidation.RequireStructure(verified, Limits.MaxBatchBytes);
         if (commandId == Guid.Empty || string.IsNullOrWhiteSpace(localPrincipalId))
-        { throw PartitionMoveOwnerDiagnostic.Fail(PartitionMoveOwnerGuard.DispatchIdentity); }
+        {
+            throw PartitionMoveOwnerDiagnostic.Fail(PartitionMoveOwnerGuard.DispatchIdentity);
+        }
         if (verified.ExpiresAt <= EvaluationClock.GetUtcNow())
-        { throw PartitionMoveOwnerDiagnostic.Fail(PartitionMoveOwnerGuard.DispatchExpiry); }
+        {
+            throw PartitionMoveOwnerDiagnostic.Fail(PartitionMoveOwnerGuard.DispatchExpiry);
+        }
         RequireMovementReceiver(verified);
         RequireControlledCommandPhaseIdentity(commandId, verified);
         if (!PartitionMoveGrantValidation.IsLocalControl(verified.Stage))
@@ -84,7 +97,9 @@ public sealed partial class DatabaseEngine
             {
                 var principal = Principal(view, localPrincipalId, EvaluationClock.GetUtcNow());
                 if (!principal.ClusterAdministrator)
-                { throw Errors.Fail(ErrorCode.PermissionDenied, ClusterAdministrationRequiredMessage); }
+                {
+                    throw Errors.Fail(ErrorCode.PermissionDenied, ClusterAdministrationRequiredMessage);
+                }
                 RequireMovePrepareNotCancelled(view, principal, commandId, command);
                 return true;
             });
@@ -133,13 +148,21 @@ public sealed partial class DatabaseEngine
             _ => request.DestinationOwner.PhysicalShardId
         };
         if (catalog.DefaultShard.PhysicalShardId != physicalId)
-        { throw PartitionMoveOwnerDiagnostic.Fail(PartitionMoveOwnerGuard.ReceiverPhysicalShard); }
+        {
+            throw PartitionMoveOwnerDiagnostic.Fail(PartitionMoveOwnerGuard.ReceiverPhysicalShard);
+        }
         if (expected != Store.Identity.Incarnation)
-        { throw PartitionMoveOwnerDiagnostic.Fail(PartitionMoveOwnerGuard.ReceiverStoreIncarnation); }
+        {
+            throw PartitionMoveOwnerDiagnostic.Fail(PartitionMoveOwnerGuard.ReceiverStoreIncarnation);
+        }
         if (catalog.DefaultShard.Incarnation != expected)
-        { throw PartitionMoveOwnerDiagnostic.Fail(PartitionMoveOwnerGuard.ReceiverCatalogIncarnation); }
+        {
+            throw PartitionMoveOwnerDiagnostic.Fail(PartitionMoveOwnerGuard.ReceiverCatalogIncarnation);
+        }
         if (request.Stage == PartitionMovePeerStage.Abort
             && expected != request.SourcePlacement.Incarnation && expected != request.DestinationOwner.Incarnation)
-        { throw PartitionMoveOwnerDiagnostic.Fail(PartitionMoveOwnerGuard.ReceiverAbortScope); }
+        {
+            throw PartitionMoveOwnerDiagnostic.Fail(PartitionMoveOwnerGuard.ReceiverAbortScope);
+        }
     }
 }

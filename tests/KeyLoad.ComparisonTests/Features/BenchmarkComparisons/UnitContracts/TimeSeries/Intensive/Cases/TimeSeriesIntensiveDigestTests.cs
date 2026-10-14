@@ -28,13 +28,19 @@ internal sealed class TimeSeriesIntensiveDigestTests
         var rows = TimeSeriesIntensiveOracle.Raw(TimeSeriesIntensivePlans.Read(0));
         var equivalent = rows.SetItem(0, rows[0] with
         {
-            Sample = rows[0].Sample with { Timestamp = rows[0].Sample.Timestamp.ToOffset(TimeSpan.FromHours(-5)) },
+            Sample = rows[0].Sample with
+            {
+                Timestamp = rows[0].Sample.Timestamp.ToOffset(TimeSpan.FromHours(-5))
+            },
             TagsJson = "{\"revision\":1,\"kind\":\"intensive\"}"
         });
         await Assert.That(TimeSeriesIntensiveResultDigest.Raw(rows)).IsEqualTo(TimeSeriesIntensiveResultDigest.Raw(equivalent));
         await Assert.That(TimeSeriesIntensiveResultDigest.Raw(rows)).IsNotEqualTo(TimeSeriesIntensiveResultDigest.Raw(rows.Reverse().ToImmutableArray()));
         var aggregate = TimeSeriesIntensiveOracle.Aggregate(TimeSeriesIntensivePlans.Read(0));
-        await Assert.That(TimeSeriesIntensiveResultDigest.Aggregate(aggregate)).IsNotEqualTo(TimeSeriesIntensiveResultDigest.Aggregate(aggregate with { Average = aggregate.Average + 5e-13 }));
+        await Assert.That(TimeSeriesIntensiveResultDigest.Aggregate(aggregate)).IsNotEqualTo(TimeSeriesIntensiveResultDigest.Aggregate(aggregate with
+        {
+            Average = aggregate.Average + 5e-13
+        }));
     }
 
     [Test]

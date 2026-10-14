@@ -17,7 +17,9 @@ internal static partial class LocalRf3OwnedProcessSignals
         OwnedProcessFailureObserver.Observe(() =>
         {
             if (process.HasExited || OperatingSystem.IsWindows())
-            { return; }
+            {
+                return;
+            }
             if (SendSignal(process.Id, SignalTerminate) != CompletionCount && !process.HasExited)
             {
                 failures.Add(new Win32Exception(Marshal.GetLastPInvokeError()));
@@ -30,7 +32,9 @@ internal static partial class LocalRf3OwnedProcessSignals
         OwnedProcessFailureObserver.Observe(() =>
         {
             if (!process.HasExited)
-            { process.Kill(entireProcessTree: true); }
+            {
+                process.Kill(entireProcessTree: true);
+            }
         }, failures);
     }
 

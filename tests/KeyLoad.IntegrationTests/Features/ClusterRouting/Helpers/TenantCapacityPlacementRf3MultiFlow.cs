@@ -39,7 +39,11 @@ internal static class TenantCapacityPlacementRf3MultiFlow
         await TenantCapacityPlacementRf3Assertions.RequirePendingAsync(pending, plan.Plan, intentId);
         await SqlRf3Protocol.EqualAsync(pending, (await McpCallerAssertions.SuccessAsync<PlacementIntentV1>(
             await first.Official.CallAsync(TenantPlacementPublicProtocol.PersistTool,
-                new { commandId = persistId, request = persist }, token))).Value);
+                new
+                {
+                    commandId = persistId,
+                    request = persist
+                }, token))).Value);
         var id = Guid.NewGuid();
         var request = new ApplyPlacementIntentRequest(first.Partition.TenantId,
             first.Partition.DatabaseId, intentId, pending.Revision, state.Control);
@@ -52,7 +56,10 @@ internal static class TenantCapacityPlacementRf3MultiFlow
             id, request, completed, token);
         await TenantCapacityPlacementRf3Assertions.RefusalAsync(
             await first.Source.ApplyPlacementIntentAsync(id,
-                request with { ExpectedRevision = completed.Revision }, token), ErrorCode.Conflict);
+                request with
+                {
+                    ExpectedRevision = completed.Revision
+                }, token), ErrorCode.Conflict);
         await TenantCapacityPlacementRf3MultiReplay.RequireAsync(seeds, state, moves,
             id, request, completed, token);
         await TenantCapacityPlacementRf3MultiCold.RunAsync(wave, seeds, state,
@@ -61,6 +68,8 @@ internal static class TenantCapacityPlacementRf3MultiFlow
         await TenantCapacityPlacementRf3MultiReplay.RequireAsync(seeds, state, moves,
             id, request, completed, token);
         foreach (var seed in seeds)
-        { await TenantCapacityPlacementRf3MultiContinuation.RequireAsync(seed, token); }
+        {
+            await TenantCapacityPlacementRf3MultiContinuation.RequireAsync(seed, token);
+        }
     }
 }

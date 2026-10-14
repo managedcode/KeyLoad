@@ -16,7 +16,9 @@ internal sealed record NativeAnnPublicColdSeed(NativeAnnMaintenanceRf3Scenario S
         var scenario = new NativeAnnMaintenanceRf3Scenario();
         var definition = new ResourceDefinition(NativeAnnMaintenanceRf3Scenario.Collection,
             ResourceKind.Collection, scenario.Partition.TransactionDomainId)
-        { VectorProfiles = [new(NativeAnnMaintenanceRf3Scenario.Field, NativeAnnMaintenanceRf3Scenario.Space)] };
+        {
+            VectorProfiles = [new(NativeAnnMaintenanceRf3Scenario.Field, NativeAnnMaintenanceRf3Scenario.Space)]
+        };
         _ = await McpCallerAssertions.SdkSuccessAsync(await sdk.ConfigureResourceAsync(Guid.NewGuid(),
             new(scenario.Partition.TenantId, scenario.Partition.DatabaseId, definition), token));
         var ids = NativeAnnMaintenanceRf3Scenario.Ids;

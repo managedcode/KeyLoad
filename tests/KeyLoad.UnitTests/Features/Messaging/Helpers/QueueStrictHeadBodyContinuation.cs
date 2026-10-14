@@ -19,7 +19,10 @@ internal static class QueueStrictHeadBodyContinuation
                 await QueueLifecycleConditionAssertions.Same(cold, state.Damaged);
                 await QueueStrictHeadBodyAssertions.RefusalAsync(owner, cold, state);
                 QueueLifecycleConditionOperations.Restore(cold, state.BodyKey, state.OriginalBody);
-                await QueueLifecycleConditionAssertions.Same(cold, state.Original with { Position = state.Original.Position + 2 });
+                await QueueLifecycleConditionAssertions.Same(cold, state.Original with
+                {
+                    Position = state.Original.Position + 2
+                });
                 await QueueStrictHeadBodyAssertions.ReplayAsync(owner, cold, state.Queue,
                     state.HeadState == MessageState.Leased ? QueueOrderedRetryProtocol.First : null);
                 await FinishAsync(owner, cold, state);

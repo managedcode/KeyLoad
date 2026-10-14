@@ -11,7 +11,9 @@ internal static class PartitionMoveControlValidation
             || string.IsNullOrWhiteSpace(record.PrincipalId) || record.PolicyEpoch <= PartitionMoveProtocol.EmptyCount
             || record.Phase == PartitionMovePhase.None || !Enum.IsDefined(record.Phase)
             || record.ControlPosition <= PartitionMoveProtocol.EmptyCount)
-        { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid);
+        }
         DatabaseEngine.ValidatePartition(record.Partition);
         var source = record.SourcePlacement;
         var destination = record.DestinationOwner;
@@ -20,7 +22,9 @@ internal static class PartitionMoveControlValidation
             || source.PhysicalShardId == destination.PhysicalShardId || source.Incarnation == destination.Incarnation
             || source.PlacementEpoch <= PartitionMoveProtocol.EmptyCount
             || destination.PlacementEpoch <= PartitionMoveProtocol.EmptyCount)
-        { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid);
+        }
         RequirePhase(record);
     }
 
@@ -34,12 +38,16 @@ internal static class PartitionMoveControlValidation
                 && (record.InstalledReceipt is null || record.ImageDigest is null)
             || record.Phase is PartitionMovePhase.Published or PartitionMovePhase.Retired
                 && record.PublishedPlacement is null)
-        { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid);
+        }
         if (record.InstalledReceipt is { } installed
             && (installed.Incarnation != record.DestinationOwner.Incarnation
                 || installed.AtomicPartitionId != record.Partition.AtomicPartitionId
                 || installed.Position <= PartitionMoveProtocol.EmptyCount))
-        { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid);
+        }
     }
 
     internal static bool SameSource(AtomicPartitionPlacementResolution left,

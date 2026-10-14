@@ -30,7 +30,10 @@ internal sealed class IsolatedResourceLogSubscriberScope<T> : IAsyncDisposable
         }
     }
 
-    internal IAsyncEnumerator<T> Enumerator { get; }
+    internal IAsyncEnumerator<T> Enumerator
+    {
+        get;
+    }
 
     internal Task<bool> RegisterMove(Task<bool> move)
     {

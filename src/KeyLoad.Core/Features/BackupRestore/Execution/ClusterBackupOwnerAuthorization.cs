@@ -14,10 +14,14 @@ public sealed partial class DatabaseEngine
         ClusterBackupRequestValidation.Require(capability.Request);
         var principal = RevalidateCredential(view, capability.Credential, principalId, Clock.GetUtcNow());
         if (!principal.ClusterAdministrator)
-        { throw Errors.Fail(ErrorCode.PermissionDenied, ClusterBackupAdministratorRequired); }
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, ClusterBackupAdministratorRequired);
+        }
         if (Store.Identity.NodeId != capability.Request.ExpectedNodeId || configuredPhysicalOwner is null
             || !PhysicalOwnerEntryValidation.SameOwner(configuredPhysicalOwner, capability.Request.ExpectedOwner))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, ClusterBackupConfiguredOwnerRequired); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, ClusterBackupConfiguredOwnerRequired);
+        }
         work.Check();
     }
 }

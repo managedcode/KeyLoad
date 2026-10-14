@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
@@ -28,9 +28,13 @@ internal sealed class NodeAdministration(PartitionHost partition, CommandAdmissi
         lock (lifecycle)
         {
             if (shutdown is not null)
-            { throw Errors.Fail(ErrorCode.OwnershipLost, AdministrationStopping); }
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, AdministrationStopping);
+            }
             if (backup is { IsCompleted: false } || captures.Any(operation => !operation.IsCompleted))
-            { throw Errors.Fail(ErrorCode.ResourceExhausted, BackupBusy); }
+            {
+                throw Errors.Fail(ErrorCode.ResourceExhausted, BackupBusy);
+            }
             var operation = Task.Run(() => CreateBackup(cancellationToken), cancellationToken);
             backup = operation;
             return operation.WaitAsync(cancellationToken);
@@ -45,12 +49,18 @@ internal sealed class NodeAdministration(PartitionHost partition, CommandAdmissi
         lock (lifecycle)
         {
             if (shutdown is not null)
-            { throw Errors.Fail(ErrorCode.OwnershipLost, AdministrationStopping); }
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, AdministrationStopping);
+            }
             if (backup is { IsCompleted: false })
-            { throw Errors.Fail(ErrorCode.ResourceExhausted, BackupBusy); }
+            {
+                throw Errors.Fail(ErrorCode.ResourceExhausted, BackupBusy);
+            }
             RetireSettledCaptures();
             if (captures.Count >= captureOptions.Value.MaximumAdmissions)
-            { throw Errors.Fail(ErrorCode.ResourceExhausted, BackupBusy); }
+            {
+                throw Errors.Fail(ErrorCode.ResourceExhausted, BackupBusy);
+            }
             var operation = Task.Run(() => ClusterBackupOwnerArchive.Capture(partition, principalId,
                 capability, work), cancellationToken);
             captures.Add(operation);
@@ -85,12 +95,16 @@ internal sealed class NodeAdministration(PartitionHost partition, CommandAdmissi
     {
         var state = await partition.Consensus.StateAsync(cancellationToken).ConfigureAwait(false);
         if (services.GetRequiredService<OrleansNode>().ReplicaSnapshotObserver is { } observer)
-        { state = await observer.ObserveAsync(state, partition.Consensus.ReadCheckpointStateAsync, cancellationToken).ConfigureAwait(false); }
+        {
+            state = await observer.ObserveAsync(state, partition.Consensus.ReadCheckpointStateAsync, cancellationToken).ConfigureAwait(false);
+        }
         var identity = partition.Database.Store.Identity;
         return new(identity.NodeId.ToString(), identity.Incarnation, state.MaterializedPosition, state.LeaderId,
             partition.Configuration.VoterIds.Length, partition.Database.Durability,
             services.GetRequiredService<OrleansNode>().HasCompatibleCohort, Environment.ProcessId, identity.ReadGeneration)
-        { ConsensusTerm = state.Term };
+        {
+            ConsensusTerm = state.Term
+        };
     }
 
     /// <summary>Observes and drains any accepted backup before the physical owner closes its store.</summary>
@@ -98,18 +112,27 @@ internal sealed class NodeAdministration(PartitionHost partition, CommandAdmissi
     {
         Task stopping;
         lock (lifecycle)
-        { shutdown ??= DrainAcceptedAsync(backup, captures.ToArray()); stopping = shutdown; }
+        {
+            shutdown ??= DrainAcceptedAsync(backup, captures.ToArray());
+            stopping = shutdown;
+        }
         await stopping.ConfigureAwait(false);
     }
     private static async Task DrainAcceptedAsync(Task? ordinaryBackup, Task[] acceptedCaptures)
     {
         // Preserve the legacy ordinary-backup cleanup contract; capture failures stay native originals.
         if (ordinaryBackup is not null)
-        { await ordinaryBackup.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing); }
+        {
+            await ordinaryBackup.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
+        }
         var joined = Task.WhenAll(acceptedCaptures);
         try
-        { await joined.ConfigureAwait(false); }
+        {
+            await joined.ConfigureAwait(false);
+        }
         catch (Exception failure)
-        { throw joined.Exception ?? new AggregateException(failure); }
+        {
+            throw joined.Exception ?? new AggregateException(failure);
+        }
     }
 }

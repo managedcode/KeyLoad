@@ -13,7 +13,9 @@ internal static class RemoteDocumentWire
         var bytes = NativeSerialization.Measure(value);
         if (maximumBytes is < MinimumBodyBytes or > RemoteDocumentProtocol.MaximumBodyBytes
             || bytes < MinimumBodyBytes || bytes > maximumBytes)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, RemoteDocumentProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, RemoteDocumentProtocol.InvalidProof);
+        }
         return NativeSerialization.Serialize(value);
     }
 
@@ -29,7 +31,9 @@ internal static class RemoteDocumentWire
             || request.ContentLength is not (>= MinimumBodyBytes and <= RemoteDocumentProtocol.MaximumBodyBytes)
             || request.Headers.ContainsKey(Microsoft.Net.Http.Headers.HeaderNames.TransferEncoding)
             || request.Headers.ContainsKey(Microsoft.Net.Http.Headers.HeaderNames.ContentEncoding))
-        { throw Errors.Fail(ErrorCode.Validation, RemoteDocumentProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, RemoteDocumentProtocol.InvalidProof);
+        }
         var bytes = new byte[checked((int)request.ContentLength.Value)];
         await request.Body.ReadExactlyAsync(bytes, cancellationToken).ConfigureAwait(false);
         return bytes;
@@ -43,7 +47,9 @@ internal static class RemoteDocumentWire
             || content.Headers.ContentLength is not (>= MinimumBodyBytes and <= RemoteDocumentProtocol.MaximumBodyBytes)
             || content.Headers.ContentLength > maximumBytes
             || content.Headers.ContentEncoding.Count != NoContentEncodings)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentProtocol.InvalidProof);
+        }
         var bytes = new byte[checked((int)content.Headers.ContentLength.Value)];
         await using var stream = await content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
         await stream.ReadExactlyAsync(bytes, cancellationToken).ConfigureAwait(false);
@@ -60,9 +66,13 @@ internal static class RemoteDocumentWire
     internal static RemoteDocumentTransportEnvelope DecodeCall(ReadOnlySpan<byte> body)
     {
         try
-        { return NativeSerialization.Deserialize<RemoteDocumentTransportEnvelope>(body); }
+        {
+            return NativeSerialization.Deserialize<RemoteDocumentTransportEnvelope>(body);
+        }
         catch (KeyLoadException error) when (error.Code is ErrorCode.Corruption or ErrorCode.FormatUnsupported)
-        { throw Errors.Fail(ErrorCode.Validation, RemoteDocumentProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, RemoteDocumentProtocol.InvalidProof);
+        }
     }
 
     internal static string Signature(IHeaderDictionary headers)
@@ -70,7 +80,9 @@ internal static class RemoteDocumentWire
         const int SingleSignature = 1;
         if (!headers.TryGetValue(RemoteDocumentProtocol.SignatureHeader, out var signatures)
             || signatures.Count != SingleSignature || signatures[FirstSignatureIndex] is not { } signature)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof);
+        }
         return signature;
     }
 }

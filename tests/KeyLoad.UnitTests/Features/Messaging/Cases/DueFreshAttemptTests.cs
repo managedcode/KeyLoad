@@ -80,7 +80,10 @@ internal sealed class DueFreshAttemptTests
 
     private static async Task RevokeCreatorAsync(RecurringSagaDatabase fixture, PrincipalRecord creator)
     {
-        fixture.AddPrincipal(creator with { FieldGrants = [RecurringSagaDatabase.FieldWriteGrant] },
+        fixture.AddPrincipal(creator with
+        {
+            FieldGrants = [RecurringSagaDatabase.FieldWriteGrant]
+        },
             RecurringSagaDatabase.Epoch.AddSeconds(DueSeconds));
         var persisted = fixture.Principal(CreatorId);
         await Assert.That(persisted.FieldGrants).IsEquivalentTo([RecurringSagaDatabase.FieldWriteGrant]);

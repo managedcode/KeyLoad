@@ -70,14 +70,20 @@ internal sealed class NativeBoundaryTests
     public async Task AcIs002NullableCollectionsKeepNullDistinctFromInitializedEmpty()
     {
         var absent = new QueryRow(Principal, 1, NativeContractCases.Json, RedactedFields: null);
-        var empty = absent with { RedactedFields = ImmutableArray<string>.Empty };
+        var empty = absent with
+        {
+            RedactedFields = ImmutableArray<string>.Empty
+        };
         var actualAbsent = NativeSerialization.Deserialize<QueryRow>(NativeSerialization.Serialize(absent));
         var actualEmpty = NativeSerialization.Deserialize<QueryRow>(NativeSerialization.Serialize(empty));
         await Assert.That(actualAbsent.RedactedFields).IsNull();
         await Assert.That(actualEmpty.RedactedFields!.Value.IsDefault).IsFalse();
         await Assert.That(actualEmpty.RedactedFields!.Value.IsEmpty).IsTrue();
         using var serializer = new NativeSerializerFixture();
-        var malformed = absent with { RedactedFields = [null!] };
+        var malformed = absent with
+        {
+            RedactedFields = [null!]
+        };
         await Assert.That(Capture(() => NativeSerialization.Serialize(malformed)).Code).IsEqualTo(ErrorCode.Corruption);
         await Assert.That(Capture(() => NativeSerialization.Deserialize<QueryRow>(serializer.Encode(malformed))).Code).IsEqualTo(ErrorCode.Corruption);
     }

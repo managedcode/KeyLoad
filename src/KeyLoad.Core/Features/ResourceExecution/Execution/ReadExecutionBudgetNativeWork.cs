@@ -18,7 +18,9 @@ internal record struct ReadExecutionBudgetNativeWork(long maximumBytes, int maxi
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(bytes);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(records);
         if (bytes < acceptedAndReservedBytes || records < examinedRecords + claimedRecords)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, ReadExecutionBudget.ReadBytesExceeded); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, ReadExecutionBudget.ReadBytesExceeded);
+        }
         byteLimit = Math.Min(byteLimit, bytes);
         recordLimit = Math.Min(recordLimit, records);
         constrained = true;
@@ -27,19 +29,25 @@ internal record struct ReadExecutionBudgetNativeWork(long maximumBytes, int maxi
     internal readonly void RequireRecord(int remainingRecords)
     {
         if (constrained && remainingRecords <= EmptyRecords)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, ReadExecutionBudget.ReadBytesExceeded); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, ReadExecutionBudget.ReadBytesExceeded);
+        }
     }
 
     internal readonly void RequireObservation(int observedRecords, int remainingRecords)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(observedRecords);
         if (!constrained || observedRecords > remainingRecords)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, ReadExecutionBudget.ReadBytesExceeded); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, ReadExecutionBudget.ReadBytesExceeded);
+        }
     }
 
     internal void Record(int count)
     {
         if (constrained)
-        { examinedRecords += count; }
+        {
+            examinedRecords += count;
+        }
     }
 }

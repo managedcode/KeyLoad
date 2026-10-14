@@ -20,7 +20,11 @@ internal sealed class CatalogRestoreCancellationAuthority : IDisposable
     internal CatalogRestoreCancellationAuthority(EventingArtifactFixture fixture, NativeCatalogBackupCapture capture)
     {
         original = NativeSerialization.Deserialize<ClusterBackupOwnerCut>(capture.Metadata.Span);
-        var target = original.Owner with { PhysicalShardId = Guid.NewGuid(), Incarnation = Guid.NewGuid() };
+        var target = original.Owner with
+        {
+            PhysicalShardId = Guid.NewGuid(),
+            Incarnation = Guid.NewGuid()
+        };
         incarnation = target.Incarnation;
         mapping = new(ClusterRestoreOwnerMapping.CurrentVersion, original.Owner, target, Endpoints);
         signingKey = RandomNumberGenerator.GetBytes(fixture.Source.Store.Identity.SigningKey.Length);
@@ -44,9 +48,18 @@ internal sealed class CatalogRestoreCancellationAuthority : IDisposable
         bool reuseIncarnation, ReadExecutionBudget work, CancellationToken token)
     {
         var rejectedTarget = reuseIncarnation
-            ? mapping.Target with { Incarnation = original.Owner.Incarnation }
-            : mapping.Target with { PhysicalShardId = original.Owner.PhysicalShardId };
-        var rejected = mapping with { Target = rejectedTarget };
+            ? mapping.Target with
+            {
+                Incarnation = original.Owner.Incarnation
+            }
+            : mapping.Target with
+            {
+                PhysicalShardId = original.Owner.PhysicalShardId
+            };
+        var rejected = mapping with
+        {
+            Target = rejectedTarget
+        };
         return ZoneTreeStore.RestoreCatalogBackup(backup, target, fixture.Source.StorageExecution,
             (transaction, identity, position, metadata) =>
                 fixture.Source.ReconcileCatalogRestore(transaction, identity, position, metadata,

@@ -53,7 +53,10 @@ internal sealed class C1SubmissionOutcomeInspectionProtocolTests
                 C1OutcomeInspectionFailurePhase.ReadOutcome).ConfigureAwait(false);
             var nodeBytes = request.ExpectedNodeId.ToByteArray();
             nodeBytes[MutatedNodeByteIndex] ^= MutatedNodeBit;
-            var wrongOwner = request with { ExpectedNodeId = new Guid(nodeBytes) };
+            var wrongOwner = request with
+            {
+                ExpectedNodeId = new Guid(nodeBytes)
+            };
             await AssertRejectedAsync(fixture, C1SubmissionOutcomeInspectionProtocol.SerializeRequest(wrongOwner),
                 C1OutcomeInspectionFailurePhase.OpenStore).ConfigureAwait(false);
             await C1OutcomeInspectionAssertions.AssertOutcomeAsync(fixture, expected: true).ConfigureAwait(false);

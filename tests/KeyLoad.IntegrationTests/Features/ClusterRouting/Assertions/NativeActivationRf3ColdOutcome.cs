@@ -29,11 +29,17 @@ internal static class NativeActivationRf3ColdOutcome
         }
         var outcomes = new Dictionary<string, OperationResult?>(StringComparer.Ordinal);
         foreach (var node in TwoRf3MembershipProtocol.Nodes)
-        { outcomes.Add(node, Read(wave, node, identity, command)); }
+        {
+            outcomes.Add(node, Read(wave, node, identity, command));
+        }
         foreach (var node in RequestCqrsProbeFixtureProtocol.Nodes)
-        { await Assert.That(outcomes[node]).IsNotNull(); }
+        {
+            await Assert.That(outcomes[node]).IsNotNull();
+        }
         foreach (var node in TwoRf3MembershipProtocol.Nodes.Except(RequestCqrsProbeFixtureProtocol.Nodes, StringComparer.Ordinal))
-        { await Assert.That(outcomes[node]).IsNull(); }
+        {
+            await Assert.That(outcomes[node]).IsNull();
+        }
         foreach (var outcome in outcomes.Values.Where(value => value is not null))
         {
             await Assert.That(outcome!.Error).IsNull();
@@ -58,7 +64,9 @@ internal static class NativeActivationRf3ColdOutcome
                 command.CommandId, new(CommandOutcomeScopeKind.Partition, identity.Partition)).Outcome?.Result);
         }, failures);
         if (store is { } owned)
-        { ServerFailureObserver.Observe(owned.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(owned.Dispose, failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
         return result;
     }

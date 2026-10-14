@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using ZoneTree.AbstractFileStream;
 
 namespace KeyLoad.Server.Features.Search;
@@ -31,8 +31,14 @@ internal sealed class NativeTextBoundedFileStream : Stream, IFileStream
         get => original.Position;
         set => writes.MutatePosition(() => { original.Position = value; return value; });
     }
-    public override int ReadTimeout { get => original.ReadTimeout; set => original.ReadTimeout = value; }
-    public override int WriteTimeout { get => original.WriteTimeout; set => original.WriteTimeout = value; }
+    public override int ReadTimeout
+    {
+        get => original.ReadTimeout; set => original.ReadTimeout = value;
+    }
+    public override int WriteTimeout
+    {
+        get => original.WriteTimeout; set => original.WriteTimeout = value;
+    }
     public Stream ToStream() => this;
     public int ReadFaster(byte[] buffer, int offset, int count) => original.ReadFaster(buffer, offset, count);
     public override int Read(byte[] buffer, int offset, int count) => original.Read(buffer, offset, count);
@@ -56,7 +62,9 @@ internal sealed class NativeTextBoundedFileStream : Stream, IFileStream
         var reservation = writes.BeginWrite(buffer.Length);
         var failures = new List<Exception>();
         try
-        { original.Write(buffer); }
+        {
+            original.Write(buffer);
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         writes.Complete(reservation, failures);
@@ -87,7 +95,9 @@ internal sealed class NativeTextBoundedFileStream : Stream, IFileStream
     {
         var failures = new List<Exception>();
         if (disposing)
-        { ServerFailureObserver.Observe(() => SharedClose().GetAwaiter().GetResult(), failures); }
+        {
+            ServerFailureObserver.Observe(() => SharedClose().GetAwaiter().GetResult(), failures);
+        }
         ServerFailureObserver.Observe(() => base.Dispose(disposing), failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -97,11 +107,23 @@ internal sealed class NativeTextBoundedFileStream : Stream, IFileStream
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(SharedClose, failures).ConfigureAwait(false);
         try
-        { await base.DisposeAsync().ConfigureAwait(false); }
+        {
+            await base.DisposeAsync().ConfigureAwait(false);
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { if (!failures.Contains(error)) { failures.Add(error); } }
+        {
+            if (!failures.Contains(error))
+            {
+                failures.Add(error);
+            }
+        }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { if (!failures.Contains(error)) { failures.Add(error); } }
+        {
+            if (!failures.Contains(error))
+            {
+                failures.Add(error);
+            }
+        }
         GC.SuppressFinalize(this);
         ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -109,7 +131,9 @@ internal sealed class NativeTextBoundedFileStream : Stream, IFileStream
     private Task SharedClose()
     {
         lock (disposalGate)
-        { return disposal ??= CloseCoreAsync(); }
+        {
+            return disposal ??= CloseCoreAsync();
+        }
     }
 
     private async Task CloseCoreAsync()
@@ -119,11 +143,15 @@ internal sealed class NativeTextBoundedFileStream : Stream, IFileStream
         ServerFailureObserver.Observe(() => resources.BeginCloseFile(group, original), failures);
         var beforeNativeClose = failures.Count;
         try
-        { await original.DisposeAsync().ConfigureAwait(false); }
+        {
+            await original.DisposeAsync().ConfigureAwait(false);
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         if (failures.Count == beforeNativeClose)
-        { ServerFailureObserver.Observe(() => resources.CloseFile(group, original), failures); }
+        {
+            ServerFailureObserver.Observe(() => resources.CloseFile(group, original), failures);
+        }
         ServerFailureObserver.Observe(writes.ThrowRetained, failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }

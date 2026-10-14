@@ -101,15 +101,27 @@ internal sealed class GraphVertexVisibility(DatabaseEngine database, IKeyValueVi
                 }
             }
             catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
-            { primary = error; throw; }
+            {
+                primary = error;
+                throw;
+            }
             catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null)
-            { primary = error; throw; }
+            {
+                primary = error;
+                throw;
+            }
             finally { lease?.Dispose(); }
         }
         catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
-        { RowVisibilityFailureLedger.ThrowJoined(primary, error); throw; }
+        {
+            RowVisibilityFailureLedger.ThrowJoined(primary, error);
+            throw;
+        }
         catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null)
-        { RowVisibilityFailureLedger.ThrowJoined(primary, error); throw; }
+        {
+            RowVisibilityFailureLedger.ThrowJoined(primary, error);
+            throw;
+        }
         return allowed;
     }
 

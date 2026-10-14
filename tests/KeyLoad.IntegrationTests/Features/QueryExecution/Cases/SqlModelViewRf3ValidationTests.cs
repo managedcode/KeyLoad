@@ -64,7 +64,9 @@ internal sealed class SqlModelViewRf3ValidationTests(ClusterFixture fixture)
         var ast = scenario.QueueAst() with
         {
             Query = scenario.QueueAst().Query with
-            { ModelSource = new(ModelQuerySourceKind.QueueMessages, "other-lane") }
+            {
+                ModelSource = new(ModelQuerySourceKind.QueueMessages, "other-lane")
+            }
         };
         var astResult = await sdk.QueryAstAsync(ast, cancellationToken);
         await Assert.That(astResult.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.Validation));
@@ -73,7 +75,10 @@ internal sealed class SqlModelViewRf3ValidationTests(ClusterFixture fixture)
     private static async Task AssertUnsupportedCursorAsync(KeyLoadClient sdk,
         SqlModelViewRf3Scenario scenario, CancellationToken cancellationToken)
     {
-        var request = scenario.EventAst() with { Cursor = "unsupported-model-cursor" };
+        var request = scenario.EventAst() with
+        {
+            Cursor = "unsupported-model-cursor"
+        };
         var result = await sdk.QueryAstAsync(request, cancellationToken);
         await Assert.That(result.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.UnsupportedCapability));
     }

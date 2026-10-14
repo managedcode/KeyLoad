@@ -15,7 +15,9 @@ internal static class NativeAnnSeedOptionsFactory
         var original = configured.Value;
         original.Validate();
         if (available / HeadroomDivisor < MinimumBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, NativeAnnProtocol.Bound); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, NativeAnnProtocol.Bound);
+        }
         var bounded = original with
         {
             MaxOwnedBytes = Math.Min(original.MaxOwnedBytes, available / HeadroomDivisor),

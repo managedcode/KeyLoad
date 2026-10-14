@@ -10,10 +10,14 @@ internal static class PartitionControlCommandKeys
     {
         ArgumentNullException.ThrowIfNull(identity);
         if (string.IsNullOrWhiteSpace(identity.PrincipalId) || identity.CommandId == Guid.Empty)
-        { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid);
+        }
         var scope = new CommandOutcomePartitionScope(identity.ScopeKind, identity.Partition);
         if (scope.Kind == CommandOutcomeScopeKind.Partition && scope.Partition is not null)
-        { DatabaseEngine.ValidatePartition(scope.Partition); }
+        {
+            DatabaseEngine.ValidatePartition(scope.Partition);
+        }
         return CommandOutcomeKeyResolver.ForNew(identity.PrincipalId, identity.CommandId, scope).Key;
     }
 

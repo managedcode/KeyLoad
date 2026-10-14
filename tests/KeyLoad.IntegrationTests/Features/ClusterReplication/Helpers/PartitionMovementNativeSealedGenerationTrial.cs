@@ -44,11 +44,16 @@ internal static class PartitionMovementNativeSealedGenerationTrial
         }
         var remaining = second.OriginalExpiresAt - TimeProvider.System.GetUtcNow();
         if (remaining > TimeSpan.Zero)
-        { await Task.Delay(remaining, TimeProvider.System, token); }
+        {
+            await Task.Delay(remaining, TimeProvider.System, token);
+        }
         await Assert.That(second.OriginalExpiresAt <= TimeProvider.System.GetUtcNow()).IsTrue();
         await PartitionMovementPublicParentRf3Cut.RestartAsync(wave, token);
         var terminal = await McpCallerAssertions.SdkSuccessAsync(await seed.Source.MovePartitionAsync(
-            seed.FirstRequest with { Mode = PartitionMoveMode.Resume }, token));
+            seed.FirstRequest with
+            {
+                Mode = PartitionMoveMode.Resume
+            }, token));
         await Assert.That(terminal.Phase).IsEqualTo(PartitionMovePhase.Retired);
         await seed.VerifyAsync(token);
         await PartitionMovementPublicCallerReplay.RequireAsync(seed.Source, seed.Official, seed.FirstRequest, terminal, token);

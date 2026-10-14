@@ -6,13 +6,18 @@ public sealed partial class DatabaseEngine
 {
     private const string AlreadyConfiguredVisibility = "The node visibility owner is already configured.";
     private bool visibilityConfigured;
-    internal RowVisibilityCache? RowVisibility { get; private set; }
+    internal RowVisibilityCache? RowVisibility
+    {
+        get; private set;
+    }
 
     internal RowVisibilityCache? ConfigureRowVisibility(ICacheMemoryBudget memory)
     {
         ArgumentNullException.ThrowIfNull(memory);
         if (visibilityConfigured)
-        { throw new InvalidOperationException(AlreadyConfiguredVisibility); }
+        {
+            throw new InvalidOperationException(AlreadyConfiguredVisibility);
+        }
         visibilityConfigured = true;
         return RowVisibility = RowVisibilityCache.Create(memory);
     }

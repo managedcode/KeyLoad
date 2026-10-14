@@ -27,7 +27,10 @@ internal static class DeniedCommandRepairContinuation
         ReplicatedOperation original, byte[] outcome)
     {
         fixture.Submit(OperationKind.ConfigurePrincipal,
-            new ConfigurePrincipalRequest(writer with { PolicyEpoch = writer.PolicyEpoch + RepairEpochAdvance })).Get<PrincipalRecord>();
+            new ConfigurePrincipalRequest(writer with
+            {
+                PolicyEpoch = writer.PolicyEpoch + RepairEpochAdvance
+            })).Get<PrincipalRecord>();
         await OldDeniedAsync(fixture.Database, fixture.Store, fixture.Partition, original, outcome);
         var current = Fresh(fixture.Database, fixture.Partition, writer.Id, RepairedRevision, RepairedJson);
         var position = fixture.Store.Position;
@@ -69,11 +72,11 @@ internal static class DeniedCommandRepairContinuation
                 await DocumentAsync(database, fixture.Partition, RepairedRevision, RepairedJson);
                 await ColdHealthyAsync(database, reopened, fixture.Partition, original.PrincipalId);
             }
-            catch (Exception error) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-            catch (Exception error) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
+            catch (Exception error) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
+            catch (Exception error) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         }
-        catch (Exception error) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        catch (Exception error) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
+        catch (Exception error) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
+        catch (Exception error) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }
 
@@ -103,7 +106,10 @@ internal static class DeniedCommandRepairContinuation
     {
         var position = store.Position;
         var bytes = QueueWholeFlowStorage.Bytes(store);
-        var denied = database.Apply(original with { EvaluatedAt = database.EvaluationClock.GetUtcNow() });
+        var denied = database.Apply(original with
+        {
+            EvaluatedAt = database.EvaluationClock.GetUtcNow()
+        });
         await Assert.That(denied.Error).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(denied.SafeDetail).IsEqualTo(ChangedPolicy);
         await Assert.That(denied.Json).IsNull();
@@ -119,7 +125,10 @@ internal static class DeniedCommandRepairContinuation
     {
         var position = store.Position;
         var bytes = QueueWholeFlowStorage.Bytes(store);
-        var replay = database.Apply(original with { EvaluatedAt = database.EvaluationClock.GetUtcNow() });
+        var replay = database.Apply(original with
+        {
+            EvaluatedAt = database.EvaluationClock.GetUtcNow()
+        });
         await Assert.That(NativeSerialization.Serialize(replay).SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
         await UnchangedAsync(store, position, bytes);
     }

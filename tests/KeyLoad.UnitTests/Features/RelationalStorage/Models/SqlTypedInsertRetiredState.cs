@@ -5,7 +5,16 @@ internal sealed record SqlTypedInsertRetiredState(PrincipalRecord Principal, Rep
     ReplicatedOperation Failed, CommitReceipt Receipt, ControlledPartitionMovementOutcomeAuthority Authority,
     ControlledPartitionMovementOutcomeAuthority FailedAuthority)
 {
-    internal bool EpochFenced { get; init; }
-    internal ReplicatedOperation? Healthy { get; init; }
-    internal CommitReceipt? HealthyReceipt { get; init; }
+    internal bool EpochFenced
+    {
+        get; init;
+    }
+    internal ReplicatedOperation? Healthy
+    {
+        get; init;
+    }
+    internal CommitReceipt? HealthyReceipt
+    {
+        get; init;
+    }
 }

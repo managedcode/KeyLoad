@@ -12,7 +12,11 @@ internal static class IsolatedKeyLoadFaultRegressionDocker
         token.ThrowIfCancellationRequested();
         using var deadline = IsolatedKeyLoadFaultRegressionProtocol.Deadline(NativeExecutionPolicyFixture.Harness().Value.KeyLoadFaultCliTimeout, token);
         var start = new ProcessStartInfo(Docker)
-        { UseShellExecute = false, RedirectStandardOutput = true, RedirectStandardError = true };
+        {
+            UseShellExecute = false,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true
+        };
         foreach (var argument in arguments)
         {
             start.ArgumentList.Add(argument);

@@ -10,7 +10,10 @@ internal static class ProjectionPublicHealthy
     {
         var state = settled.Original;
         var consumer = new ProjectionConsumerRef(state.Partition, ProjectionPublicProtocol.NextConsumer);
-        var definition = state.Definition with { IndexGeneration = 2L };
+        var definition = state.Definition with
+        {
+            IndexGeneration = 2L
+        };
         var configure = new ConfigureProjectionConsumerRequest(Guid.NewGuid(), consumer, definition, 2L);
         var configured = await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.ConfigureProjectionAsync(configure, token));
         await ProjectionPublicAssertions.ExactAsync(new ProjectionConsumerInfo(consumer, definition, 2L, false), configured);
@@ -35,7 +38,10 @@ internal static class ProjectionPublicHealthy
             new MutationReceipt(ProjectionPublicProtocol.PutKind, ProjectionPublicProtocol.Target, "healthy", 1L));
         await ProjectionPublicAssertions.ExactAsync(new ProjectionBatchResult(completed.Receipt, false, 3L), completed);
         var tail = await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.ReadProjectionAsync(new(consumer), token));
-        await ProjectionPublicAssertions.ExactAsync(new ProjectionBatch(configured with { Checkpoint = 3L }, [], 4L, tail.Token, false), tail);
+        await ProjectionPublicAssertions.ExactAsync(new ProjectionBatch(configured with
+        {
+            Checkpoint = 3L
+        }, [], 4L, tail.Token, false), tail);
         var advance = new CommitProjectionBatchRequest(Guid.NewGuid(), consumer, tail.Token, []);
         var advanced = await ProjectionPublicOperations.CommitBothAsync(caller, advance, token);
         await ProjectionPublicAssertions.LiteralReceiptAsync(advance.CommandId, advanced.Receipt);

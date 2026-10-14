@@ -4,29 +4,68 @@ namespace KeyLoad.Comparisons;
 public interface IComparisonSettings
 {
     /// <summary>Gets the bounded documents setting.</summary>
-    int Documents { get; }
+    int Documents
+    {
+        get;
+    }
     /// <summary>Gets the bounded operations setting.</summary>
-    int Operations { get; }
+    int Operations
+    {
+        get;
+    }
     /// <summary>Gets the bounded warmup setting.</summary>
-    int Warmup { get; }
+    int Warmup
+    {
+        get;
+    }
     /// <summary>Gets the bounded repetitions setting.</summary>
-    int Repetitions { get; }
+    int Repetitions
+    {
+        get;
+    }
     /// <summary>Gets the bounded concurrency setting.</summary>
-    int Concurrency { get; }
+    int Concurrency
+    {
+        get;
+    }
     /// <summary>Gets the bounded payloadbytes setting.</summary>
-    int PayloadBytes { get; }
+    int PayloadBytes
+    {
+        get;
+    }
     /// <summary>Gets the bounded seed setting.</summary>
-    int Seed { get; }
+    int Seed
+    {
+        get;
+    }
     /// <summary>Gets the bounded dimensions setting.</summary>
-    int Dimensions { get; }
+    int Dimensions
+    {
+        get;
+    }
     /// <summary>Gets the bounded topk setting.</summary>
-    int TopK { get; }
+    int TopK
+    {
+        get;
+    }
     /// <summary>Gets the bounded timeoutseconds setting.</summary>
-    int TimeoutSeconds { get; }
+    int TimeoutSeconds
+    {
+        get;
+    }
     /// <summary>Gets the bounded graphvertices setting.</summary>
-    int GraphVertices { get; }
+    int GraphVertices
+    {
+        get;
+    }
     /// <summary>Gets the bounded graphfanout setting.</summary>
-    int GraphFanOut { get; }
+    int GraphFanOut
+    {
+        get;
+    }
     /// <summary>Gets the bounded graphdepth setting.</summary>
-    int GraphDepth { get; }
+    int GraphDepth
+    {
+        get;
+    }
 }

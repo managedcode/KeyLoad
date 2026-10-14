@@ -40,7 +40,9 @@ internal sealed class RequestCqrsProbeAppHostAdmissionTests
         await Assert.That(RequestCqrsProbeProfile.Read(absent, "/missing/data", false, null, null!)).IsNull();
         var disabled = DistributedApplication.CreateBuilder(new DistributedApplicationOptions { DisableDashboard = true, Args = [] });
         disabled.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
-        { [RequestCqrsProbeAppHostBuilder.EnabledKey] = "false" });
+        {
+            [RequestCqrsProbeAppHostBuilder.EnabledKey] = "false"
+        });
         var profile = RequestCqrsProbeProfile.Read(disabled, "/missing/data", false, null, null!);
         await Assert.That(profile).IsNull();
     }

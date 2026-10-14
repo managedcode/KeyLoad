@@ -22,9 +22,13 @@ internal static class ClusterRestoreRf3CallerOwner
             result = await operation(sdk, official).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
         if (official is { } session)
-        { await ServerFailureObserver.ObserveAsync(() => session.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => session.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         if (http is { } connection)
-        { ServerFailureObserver.Observe(connection.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(connection.Dispose, failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
         return result;
     }

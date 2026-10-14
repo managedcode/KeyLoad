@@ -12,7 +12,10 @@ internal static class QueueGraphIdentityCold
         {
             var identity = state.Fixture.Store.Identity;
             using var store = ZoneTreeExistingStore.Open(
-                new(state.Fixture.Directory) { Incarnation = identity.Incarnation },
+                new(state.Fixture.Directory)
+                {
+                    Incarnation = identity.Incarnation
+                },
                 identity.NodeId, state.Fixture.StorageExecution);
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {
@@ -26,7 +29,9 @@ internal static class QueueGraphIdentityCold
                 {
                     await QueueGraphIdentityAssertions.RefusesAsync(state, engine, store);
                     if (!repair)
-                    { return; }
+                    {
+                        return;
+                    }
                     store.Commit((tx, _) => { tx.Put(state.EndpointKey, state.OriginalEndpoint); return true; });
                     await Assert.That(store.Read(view => view.ReadOwnedValue(state.EndpointKey))!
                         .AsSpan().SequenceEqual(state.OriginalEndpoint)).IsTrue();

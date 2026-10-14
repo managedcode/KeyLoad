@@ -17,7 +17,9 @@ internal static class SearchReadBudgetCost
             var resourceValue = view.ReadOwnedValue(resource)
                 ?? throw new InvalidOperationException("The original configured resource is missing.");
             if (view.ReadOwnedValue(head) is not null)
-            { throw new InvalidOperationException("The original kernel fixture must have no retained BM25 head."); }
+            {
+                throw new InvalidOperationException("The original kernel fixture must have no retained BM25 head.");
+            }
             return checked((long)resource.Length + resourceValue.Length + head.Length);
         });
     internal static long Rows(ZoneTreeStore store, byte[] prefix)
@@ -25,7 +27,9 @@ internal static class SearchReadBudgetCost
         {
             var page = view.Scan(prefix, MaximumSeedRows);
             if (page.HasMore)
-            { throw new InvalidOperationException("The bounded original seed rows are incomplete."); }
+            {
+                throw new InvalidOperationException("The bounded original seed rows are incomplete.");
+            }
             return page.Records.Sum(row => checked((long)row.Key.Length + row.Value.Length));
         });
     internal static long Point(ZoneTreeStore store, byte[] key)

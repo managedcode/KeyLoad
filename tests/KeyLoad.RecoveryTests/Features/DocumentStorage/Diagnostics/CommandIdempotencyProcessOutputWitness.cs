@@ -24,7 +24,9 @@ internal static class CommandIdempotencyProcessOutputWitness
         CommandIdempotencyProcessOutputReader? error, Task? originalError, List<Exception> failures)
     {
         if (hold is not { } selected)
-        { return; }
+        {
+            return;
+        }
         var mode = selected ? HoldMode : ObserveMode;
         await PipeAsync(mode, StandardOutput, output, originalOutput, failures);
         await PipeAsync(mode, StandardError, error, originalError, failures);
@@ -36,7 +38,9 @@ internal static class CommandIdempotencyProcessOutputWitness
         if (reader is null || original is not { IsCompleted: true }
             || original.IsCompletedSuccessfully || reader.WitnessFirstCrossing <= NoCrossing
             || !reader.TryMarkWitnessReported())
-        { return; }
+        {
+            return;
+        }
         await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(
             () => WriteAsync(mode, pipe, reader, original), failures);
     }

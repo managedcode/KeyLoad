@@ -76,7 +76,10 @@ internal static class GraphCrossPartitionIntentWriter
         if (previous is { } oldEdge && oldEdge.To.Partition != source
             && (next is null || next.To != oldEdge.To))
         {
-            desired[oldEdge.To] = oldEdge with { Revision = revision };
+            desired[oldEdge.To] = oldEdge with
+            {
+                Revision = revision
+            };
         }
     }
 
@@ -104,7 +107,10 @@ internal static class GraphCrossPartitionIntentWriter
             database.RequireGraphWrite(transaction, principal, source, target.Partition, graph);
             DatabaseEngine.RequireSameGraphOwner(transaction, source, target.Partition);
             var deleted = next is null || target != next.To;
-            var edge = deleted ? snapshot with { Revision = revision } : next!;
+            var edge = deleted ? snapshot with
+            {
+                Revision = revision
+            } : next!;
             AddUpdate(updates, principal, source, graph, edge, target, deleted, limits);
         }
         return updates;

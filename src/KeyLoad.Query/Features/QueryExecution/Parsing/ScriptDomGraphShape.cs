@@ -24,7 +24,9 @@ internal static class ScriptDomGraphShape
             || table.Alias is not null || table.ForPath || table.Columns.Count != EmptyCount
             || table.SchemaObject.Identifiers.Count != SingleElement
             || !string.Equals(table.SchemaObject.Identifiers[FirstIndex].Value, function, StringComparison.OrdinalIgnoreCase))
-        { throw ScriptDomErrors.Unsupported(); }
+        {
+            throw ScriptDomErrors.Unsupported();
+        }
         context.Check(query, ChildDepth);
         context.Check(table, ChildDepth);
         return table.Parameters;
@@ -39,15 +41,21 @@ internal static class ScriptDomGraphShape
             || call.IgnoreRespectNulls.Count != EmptyCount || call.AbsentOrNullOnNull.Count != EmptyCount
             || call.TrimOptions is not null || call.ReturnType is { Count: > EmptyCount } || call.WithArrayWrapper
             || call.JsonOrderByClause is not null || call.JsonParameters.Count != EmptyCount)
-        { throw ScriptDomErrors.Unsupported(); }
+        {
+            throw ScriptDomErrors.Unsupported();
+        }
         if (arity is { } count && call.Parameters.Count != count)
-        { throw ScriptDomErrors.Invalid(); }
+        {
+            throw ScriptDomErrors.Invalid();
+        }
         return call.Parameters;
     }
     internal static bool IsNull(Dom.ScalarExpression expression, ScriptDomGraphContext context, int depth)
     {
         if (expression is not Dom.NullLiteral)
-        { return false; }
+        {
+            return false;
+        }
         context.Check(expression, depth);
         return true;
     }
@@ -61,16 +69,26 @@ internal static class ScriptDomGraphShape
             check();
             if (token.TokenType is Dom.TSqlTokenType.WhiteSpace or Dom.TSqlTokenType.SingleLineComment
                 or Dom.TSqlTokenType.MultilineComment or Dom.TSqlTokenType.EndOfFile)
-            { continue; }
+            {
+                continue;
+            }
             if (token.TokenType == Dom.TSqlTokenType.Go)
-            { batchSeparator = true; }
+            {
+                batchSeparator = true;
+            }
             if (token.TokenType == Dom.TSqlTokenType.Semicolon)
-            { terminators++; }
+            {
+                terminators++;
+            }
             else if (terminators != EmptyCount)
-            { nonTerminal = true; }
+            {
+                nonTerminal = true;
+            }
         }
         if (!batchSeparator && !nonTerminal && terminators > SingleElement)
-        { throw ScriptDomErrors.Invalid(); }
+        {
+            throw ScriptDomErrors.Invalid();
+        }
     }
     private const int EmptyCount = 0;
     private const int SingleElement = 1;

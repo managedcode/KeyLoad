@@ -11,7 +11,11 @@ internal sealed class SiteIsolatedGitHubFreshnessTests
         await using var scope = await SiteIsolatedGitHubScope.CreateAsync(token);
         await WritePublishParserInputsAsync(scope, token);
         var result = await SiteIsolatedGitHubScope.RunAsync(SiteIsolatedGitHubFields.FreshOperation,
-            new { before = scope.Before, after = scope.After }, token);
+            new
+            {
+                before = scope.Before,
+                after = scope.After
+            }, token);
         await Assert.That(result.GetProperty(SiteIsolatedGitHubFields.Ok).GetBoolean()).IsTrue();
         await Assert.That(result.GetProperty(SiteIsolatedGitHubFields.Result).GetProperty(SiteIsolatedGitHubFields.Fresh).GetBoolean()).IsTrue();
     }
@@ -40,7 +44,11 @@ internal sealed class SiteIsolatedGitHubFreshnessTests
             mutate(after);
             await File.WriteAllTextAsync(scope.After, after.ToJsonString(), token);
             var result = await SiteIsolatedGitHubScope.RunAsync(SiteIsolatedGitHubFields.FreshOperation,
-                new { before = scope.Before, after = scope.After }, token);
+                new
+                {
+                    before = scope.Before,
+                    after = scope.After
+                }, token);
             await Assert.That(result.GetProperty(SiteIsolatedGitHubFields.Ok).GetBoolean()).IsFalse();
         }
     }

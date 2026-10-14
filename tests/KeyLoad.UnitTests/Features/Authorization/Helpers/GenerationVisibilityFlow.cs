@@ -23,7 +23,12 @@ internal static class GenerationVisibilityFlow
         [new(DatabaseScope, TeamRowPolicyFlow.Collection, Capability.DocumentsRead | Capability.DocumentsWrite | Capability.Query),
             new(DatabaseScope, TeamGraphVisibilityAssertions.Collection, Capability.DocumentsRead | Capability.Query),
             new(DatabaseScope, TeamGraphVisibilityAssertions.Graph, Capability.GraphRead)], [])
-    { OwnerId = TeamRowPolicyFlow.Reader, RestrictRows = true, Teams = [TeamRowPolicyFlow.Team], PolicyEpoch = OriginalEpoch };
+    {
+        OwnerId = TeamRowPolicyFlow.Reader,
+        RestrictRows = true,
+        Teams = [TeamRowPolicyFlow.Team],
+        PolicyEpoch = OriginalEpoch
+    };
 
     internal static async Task RunAsync(TestDatabase db, CancellationToken token, bool admissionControls = false)
     {
@@ -32,7 +37,9 @@ internal static class GenerationVisibilityFlow
         await SeedAsync(db);
         var queries = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
         if (admissionControls)
-        { await GenerationVisibilityAdmissionFlow.ControlsAsync(db, queries, cache, memory, token); }
+        {
+            await GenerationVisibilityAdmissionFlow.ControlsAsync(db, queries, cache, memory, token);
+        }
         await GenerationVisibilityAssertions.HealthyAsync(db, db.Database, queries, db.Store, InitialRevision, TeamRowPolicyFlow.OriginalJson, token);
         await GenerationVisibilitySnapshotFlow.RunAsync(db, queries, cache, token);
         var writes = await GenerationVisibilityWriteFlow.RunAsync(db, queries, cache, token);
@@ -84,15 +91,26 @@ internal static class GenerationVisibilityFlow
     private static async Task PolicyTransitionsAsync(TestDatabase db, QueryEngine queries, CommandRequest original,
         byte[] outcome, RowVisibilityLease held, CancellationToken token)
     {
-        await ConfigureAsync(db, Principal with { Teams = [], PolicyEpoch = RemovedEpoch });
+        await ConfigureAsync(db, Principal with
+        {
+            Teams = [],
+            PolicyEpoch = RemovedEpoch
+        });
         await TeamRowPolicyAssertions.HiddenAsync(db, db.Database, queries, db.Store, token);
         await TeamGraphVisibilityAssertions.ReadAsync(db.Database, db.Store, db.Partition, false, token);
         await Assert.That(held.Contains(TeamRowPolicyFlow.Row)).IsTrue();
         await TeamRowPolicyAssertions.OldRefusedAsync(db.Database, db.Store, original, outcome, ErrorCode.PermissionDenied, token);
-        await ConfigureAsync(db, Principal with { Revoked = true, PolicyEpoch = RevokedEpoch });
+        await ConfigureAsync(db, Principal with
+        {
+            Revoked = true,
+            PolicyEpoch = RevokedEpoch
+        });
         await TeamRowPolicyAssertions.RevokedAsync(db, queries, db.Store, token);
         await TeamGraphVisibilityAssertions.RevokedAsync(db.Database, db.Store, db.Partition, token);
-        await ConfigureAsync(db, Principal with { PolicyEpoch = RepairedEpoch });
+        await ConfigureAsync(db, Principal with
+        {
+            PolicyEpoch = RepairedEpoch
+        });
         await GenerationVisibilityAssertions.HealthyAsync(db, db.Database, queries, db.Store, CurrentRevision, TeamRowPolicyFlow.CurrentJson, token);
         await TeamRowPolicyAssertions.OldRefusedAsync(db.Database, db.Store, original, outcome, ErrorCode.PermissionDenied, token);
     }

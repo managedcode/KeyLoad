@@ -10,10 +10,14 @@ public sealed partial class DatabaseEngine
     {
         if (outcome.Incarnation != Store.Identity.Incarnation
             || outcome.Fingerprint == CommandFingerprint(operation))
-        { return; }
+        {
+            return;
+        }
         if (!TryAuthorizeOrdinaryDocumentSubmission(view, operation, out var principal, out _)
             || principal is null || outcome.PolicyEpoch != principal.PolicyEpoch)
-        { return; }
+        {
+            return;
+        }
         ValidateSubmissionOutcomeIdentity(view, principal, operation, selection, outcome);
     }
 }

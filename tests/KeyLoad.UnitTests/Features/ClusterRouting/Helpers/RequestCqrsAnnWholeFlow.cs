@@ -33,7 +33,11 @@ internal static class RequestCqrsAnnWholeFlow
             }
         }
         await RequestCqrsAnnTestData.ChangeAsync(fixture, token);
-        var restore = request with { CommandId = Guid.NewGuid(), Mode = AnnMaintenanceMode.Restore };
+        var restore = request with
+        {
+            CommandId = Guid.NewGuid(),
+            Mode = AnnMaintenanceMode.Restore
+        };
         before = fixture.Database.Store.Position;
         beforeJournal = fixture.Database.ReadJournalCut().LastIndex;
         var restored = await RequestCqrsAnnInvocation.RunAsync(fixture, restore, token);
@@ -51,7 +55,10 @@ internal static class RequestCqrsAnnWholeFlow
     private static async Task<AnnMaintenanceRequest> NoOpSequenceAsync(RequestCqrsClusterFixture fixture,
         AnnMaintenanceRequest restore, AnnMaintenanceResult restored, CancellationToken token)
     {
-        var noOp = restore with { CommandId = Guid.NewGuid() };
+        var noOp = restore with
+        {
+            CommandId = Guid.NewGuid()
+        };
         var before = fixture.Database.Store.Position;
         var applied = fixture.Database.ReadJournalCut().CommittedIndex;
         var unchanged = await RequestCqrsAnnInvocation.RunAsync(fixture, noOp, token);
@@ -63,7 +70,10 @@ internal static class RequestCqrsAnnWholeFlow
         await RequestCqrsAnnOriginalReplay.RefusePriorAsync(fixture, restore, token);
         await RequestCqrsAnnOriginalReplay.RefuseChangedAsync(fixture, restore, token);
         await RequestCqrsAnnOriginalReplay.RequireAsync(fixture, noOp, unchanged.Result, token);
-        var fresh = noOp with { CommandId = Guid.NewGuid() };
+        var fresh = noOp with
+        {
+            CommandId = Guid.NewGuid()
+        };
         before = fixture.Database.Store.Position;
         applied = fixture.Database.ReadJournalCut().CommittedIndex;
         var healthy = await RequestCqrsAnnInvocation.RunAsync(fixture, fresh, token);

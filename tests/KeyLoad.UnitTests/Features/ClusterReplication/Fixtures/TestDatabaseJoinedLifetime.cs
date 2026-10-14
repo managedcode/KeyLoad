@@ -17,22 +17,36 @@ internal static class TestDatabaseJoinedLifetime
     internal static Exception? Observe(Action operation, List<Exception> failures)
     {
         try
-        { operation(); }
+        {
+            operation();
+        }
         catch (Exception failure) when (CqrsRuntimeFailures.FindFatal(failure) is null)
-        { failures.Add(failure); }
+        {
+            failures.Add(failure);
+        }
         catch (Exception fatal) when (CqrsRuntimeFailures.FindFatal(fatal) is not null)
-        { failures.Add(fatal); return fatal; }
+        {
+            failures.Add(fatal);
+            return fatal;
+        }
         return null;
     }
 
     internal static async Task<Exception?> ObserveAsync(Func<Task> operation, List<Exception> failures)
     {
         try
-        { await operation(); }
+        {
+            await operation();
+        }
         catch (Exception failure) when (CqrsRuntimeFailures.FindFatal(failure) is null)
-        { failures.Add(failure); }
+        {
+            failures.Add(failure);
+        }
         catch (Exception fatal) when (CqrsRuntimeFailures.FindFatal(fatal) is not null)
-        { failures.Add(fatal); return fatal; }
+        {
+            failures.Add(fatal);
+            return fatal;
+        }
         return null;
     }
 
@@ -45,7 +59,9 @@ internal static class TestDatabaseJoinedLifetime
     internal static void ThrowIfAny(List<Exception> failures, Exception? fatal)
     {
         if (fatal is not null)
-        { ExceptionDispatchInfo.Capture(failures.Count == 1 ? fatal : new AggregateException(failures)).Throw(); }
+        {
+            ExceptionDispatchInfo.Capture(failures.Count == 1 ? fatal : new AggregateException(failures)).Throw();
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

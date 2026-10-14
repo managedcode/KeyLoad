@@ -105,9 +105,18 @@ internal static class IsolatedKurrentCleanupRegression
     {
         internal List<KurrentDBClient> Clients { get; } = [];
         internal List<string> PrivateStreams { get; } = [];
-        internal KurrentDBClient? Writer { get; set; }
-        internal bool ForeignOwned { get; set; }
-        internal bool PrivateDeletionStarted { get; set; }
+        internal KurrentDBClient? Writer
+        {
+            get; set;
+        }
+        internal bool ForeignOwned
+        {
+            get; set;
+        }
+        internal bool PrivateDeletionStarted
+        {
+            get; set;
+        }
         internal string Foreign { get; } = IsolatedKurrentCleanupRegressionNative.ForeignPrefix + Guid.NewGuid().ToString(KurrentConstants.GuidFormat);
         internal KurrentEventData Expected { get; } = IsolatedKurrentCleanupRegressionNative.CreateEvent();
 

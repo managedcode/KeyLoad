@@ -13,7 +13,12 @@ internal static class PartitionMovementControlledBlobFailedCutRf3Phases
     {
         var original = command.OriginalOperation!;
         if (!source)
-        { return new() { [command.EffectId] = PartitionMovePeerStage.ControlApplyCommand }; }
+        {
+            return new()
+            {
+                [command.EffectId] = PartitionMovePeerStage.ControlApplyCommand
+            };
+        }
         return new()
         {
             [ControlledDocumentTechnicalIdentity.Derive(original, ControlledDocumentTechnicalIdentity.Admit)] = PartitionMovePeerStage.ControlAdmitCommand,
@@ -58,7 +63,9 @@ internal static class PartitionMovementControlledBlobFailedCutRf3Phases
         var actual = PartitionMovementCapturePointerRf3Fault.Rows(cut)[Convert.ToHexString(key)];
         var expected = CommandOutcomePartitionLocatorSerialization.ScopedValue(partition, principal, commandId);
         if (actual != Convert.ToHexString(expected))
-        { throw new InvalidOperationException(PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw new InvalidOperationException(PartitionMoveProtocol.MissingAuthority);
+        }
     }
 
     internal static async Task RequireGrantAsync(PartitionMovementPublicParentRf3Seed seed,

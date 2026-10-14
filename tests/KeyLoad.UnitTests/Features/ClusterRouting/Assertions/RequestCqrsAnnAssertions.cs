@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using ManagedCode.Communication.CQRS;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
@@ -30,7 +30,10 @@ internal static class RequestCqrsAnnAssertions
     {
         await BoundaryAsync(frames, requestId);
         if (request.Mode == AnnMaintenanceMode.Release)
-        { await Assert.That(frames.Count).IsEqualTo(RequestCqrsAnnTestData.OrdinaryFrameCount); return; }
+        {
+            await Assert.That(frames.Count).IsEqualTo(RequestCqrsAnnTestData.OrdinaryFrameCount);
+            return;
+        }
         var progress = frames.Where(frame => frame.Kind == CqrsStreamChunkKind.Progress).ToArray();
         var phases = progress.Select(frame => frame.ProgressResult!.Value.Value!.AnnPhase).ToArray();
         await Assert.That(phases.Where(phase => phase != AnnMaintenancePhase.Replay)
@@ -44,13 +47,21 @@ internal static class RequestCqrsAnnAssertions
             await Assert.That(frame.ProgressResult!.Value.Problem).IsNull();
             var phase = frame.ProgressResult!.Value.Value!.AnnPhase!.Value;
             if (phase == AnnMaintenancePhase.Configure)
-            { configured = true; }
+            {
+                configured = true;
+            }
             if (phase == AnnMaintenancePhase.Capture)
-            { captured = true; }
+            {
+                captured = true;
+            }
             if (phase == AnnMaintenancePhase.Verify)
-            { verified = true; }
+            {
+                verified = true;
+            }
             if (phase == AnnMaintenancePhase.Replay)
-            { await Assert.That(configured && captured && !verified).IsTrue(); }
+            {
+                await Assert.That(configured && captured && !verified).IsTrue();
+            }
             await EqualAsync(new GrainRequestProgress(requestId) { AnnPhase = phase }, frame.ProgressResult!.Value.Value!);
             await Assert.That(frame.Message).IsEqualTo(AnnMaintenanceProgress.PhaseCompleted);
             await Assert.That(frame.EventId).IsNull();
@@ -98,7 +109,9 @@ internal static class RequestCqrsAnnAssertions
         await Assert.That(last.EventId).IsNull();
         await Assert.That(last.EventType).IsEqualTo(CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>.ResolveEventType(last.Kind));
         for (var index = RequestCqrsAnnTestData.FirstOffset; index < frames.Count; index++)
-        { await Assert.That(frames[index].Sequence).IsEqualTo(index + RequestCqrsAnnTestData.OneStep); }
+        {
+            await Assert.That(frames[index].Sequence).IsEqualTo(index + RequestCqrsAnnTestData.OneStep);
+        }
     }
 
 }

@@ -25,7 +25,9 @@ internal static class EventFeedRefreshRf3Flow
         };
         var refreshed = await EventFeedRefreshRf3Operations.RoutesAsync(wave, credential, refresh, token).ConfigureAwait(false);
         await EventFeedSettlementRf3Assertions.ResultAsync(refresh with
-        { ExpectedCoverageGeneration = checked(empty.CoverageGeneration + Step) }, refreshed,
+        {
+            ExpectedCoverageGeneration = checked(empty.CoverageGeneration + Step)
+        }, refreshed,
             checked(empty.Revision + Step), released: false).ConfigureAwait(false);
         var offered = await EventFeedOfferRf3Flow.RunAsync(wave, credential, opened, refreshed,
             opened.ControlPartition, remote, First, Second, token).ConfigureAwait(false);
@@ -38,7 +40,11 @@ internal static class EventFeedRefreshRf3Flow
         }, token).ConfigureAwait(false);
         await SqlRf3Protocol.EqualAsync(offered.Result, await EventFeedOfferRf3Flow.RoutesAsync(
             wave, credential, offered.Request, token).ConfigureAwait(false));
-        var acknowledge = offered.Request with { CommandId = Guid.NewGuid(), Action = EventFeedControlAction.Acknowledge };
+        var acknowledge = offered.Request with
+        {
+            CommandId = Guid.NewGuid(),
+            Action = EventFeedControlAction.Acknowledge
+        };
         var acknowledged = await EventFeedSettlementRf3Flow.RoutesAsync(wave, credential, acknowledge, token).ConfigureAwait(false);
         await EventFeedSettlementRf3Assertions.ResultAsync(acknowledge, acknowledged,
             checked(refreshed.Revision + Step), released: false).ConfigureAwait(false);
@@ -51,7 +57,9 @@ internal static class EventFeedRefreshRf3Flow
         };
         var current = await EventFeedRefreshRf3Operations.RoutesAsync(wave, credential, next, token).ConfigureAwait(false);
         await EventFeedSettlementRf3Assertions.ResultAsync(next with
-        { ExpectedCoverageGeneration = checked(acknowledged.CoverageGeneration + Step) }, current,
+        {
+            ExpectedCoverageGeneration = checked(acknowledged.CoverageGeneration + Step)
+        }, current,
             checked(acknowledged.Revision + Step), released: false).ConfigureAwait(false);
         await EventFeedTailRf3Refusal.RunAsync(wave, credential, offered.Request, offered.Result,
             ErrorCode.TokenInvalidated, token).ConfigureAwait(false);
@@ -83,7 +91,10 @@ internal static class EventFeedRefreshRf3Flow
         {
             CommandId = Guid.NewGuid(),
             MapId = Guid.NewGuid(),
-            Scope = source.Scope with { Resource = Topic }
+            Scope = source.Scope with
+            {
+                Resource = Topic
+            }
         };
         await EventFeedRefreshRf3Operations.ConfigureAsync(wave, credential, opened.ControlPartition,
             remote, Topic, token).ConfigureAwait(false);

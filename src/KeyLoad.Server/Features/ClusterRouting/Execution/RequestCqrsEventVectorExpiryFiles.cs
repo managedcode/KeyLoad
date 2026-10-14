@@ -11,7 +11,9 @@ internal sealed class RequestCqrsEventVectorExpiryFiles(string root, RequestCqrs
         var bytes = RequestCqrsProbeFiles.ReadRecord(path, options);
         var value = RequestCqrsEventVectorExpiryJson.Read(json, bytes);
         if (RequestCqrsEventVectorExpiryJson.Name(value) != name)
-        { throw RequestCqrsEventVectorExpiryJson.Invalid(); }
+        {
+            throw RequestCqrsEventVectorExpiryJson.Invalid();
+        }
         records.RegisterImmutable(name, bytes);
         present.Add(name);
         values.Add(value);
@@ -25,7 +27,9 @@ internal sealed class RequestCqrsEventVectorExpiryFiles(string root, RequestCqrs
             if (claim.Arm.Record.Phase != RequestCqrsProbePhase.EventVectorFirstDispatchReserved
                 || claim.Arm.Record.Action != RequestCqrsProbeAction.Hold
                 || claim.Arm.Record.CommandId != claim.Identity.CommandId)
-            { throw RequestCqrsEventVectorExpiryJson.Invalid(); }
+            {
+                throw RequestCqrsEventVectorExpiryJson.Invalid();
+            }
             var value = new RequestCqrsEventVectorExpiryRecord(RequestCqrsProbeProtocol.Version,
                 claim.Identity.RequestId, claim.Identity.CommandId, claim.Identity.OriginalExpiresAt);
             var name = RequestCqrsEventVectorExpiryJson.Name(value);
@@ -46,7 +50,9 @@ internal sealed class RequestCqrsEventVectorExpiryFiles(string root, RequestCqrs
                 && !arms.Any(arm => arm.Record.CommandId == value.CommandId
                     && arm.Record.Phase == RequestCqrsProbePhase.EventVectorFirstDispatchReserved
                     && arm.Record.Action == RequestCqrsProbeAction.Hold))
-            { throw RequestCqrsEventVectorExpiryJson.Invalid(); }
+            {
+                throw RequestCqrsEventVectorExpiryJson.Invalid();
+            }
         }
     }
 }

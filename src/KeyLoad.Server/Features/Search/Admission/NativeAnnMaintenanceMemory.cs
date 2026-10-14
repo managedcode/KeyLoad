@@ -9,8 +9,26 @@ internal sealed class NativeAnnMaintenanceMemory(Lock gate, List<NativeAnnGenera
     private const long Empty = 0;
     private NativeAnnMaintenanceMemoryLease? current;
     private bool closed;
-    internal long Bytes { get { lock (gate) { return current?.Bytes ?? Empty; } } }
-    internal bool Active { get { lock (gate) { return current is not null; } } }
+    internal long Bytes
+    {
+        get
+        {
+            lock (gate)
+            {
+                return current?.Bytes ?? Empty;
+            }
+        }
+    }
+    internal bool Active
+    {
+        get
+        {
+            lock (gate)
+            {
+                return current is not null;
+            }
+        }
+    }
 
     internal NativeAnnMaintenanceMemoryLease Reserve()
     {
@@ -18,10 +36,14 @@ internal sealed class NativeAnnMaintenanceMemory(Lock gate, List<NativeAnnGenera
         {
             ObjectDisposedException.ThrowIf(closed, this);
             if (current is not null)
-            { throw Errors.Fail(ErrorCode.ResourceExhausted, NativeAnnProtocol.Bound); }
+            {
+                throw Errors.Fail(ErrorCode.ResourceExhausted, NativeAnnProtocol.Bound);
+            }
             var available = Available();
             if (available <= Empty)
-            { throw Errors.Fail(ErrorCode.ResourceExhausted, NativeAnnProtocol.Bound); }
+            {
+                throw Errors.Fail(ErrorCode.ResourceExhausted, NativeAnnProtocol.Bound);
+            }
             return current = new(this, available);
         }
     }
@@ -33,7 +55,9 @@ internal sealed class NativeAnnMaintenanceMemory(Lock gate, List<NativeAnnGenera
             Require(lease);
             var available = Available();
             if (available < lease.Bytes)
-            { throw Errors.Fail(ErrorCode.ResourceExhausted, NativeAnnProtocol.Bound); }
+            {
+                throw Errors.Fail(ErrorCode.ResourceExhausted, NativeAnnProtocol.Bound);
+            }
             lease.Bytes = available;
         }
     }
@@ -43,7 +67,9 @@ internal sealed class NativeAnnMaintenanceMemory(Lock gate, List<NativeAnnGenera
         lock (gate)
         {
             if (current is null || incoming < Empty || incoming > current.Bytes)
-            { throw Errors.Fail(ErrorCode.ResourceExhausted, NativeAnnProtocol.Bound); }
+            {
+                throw Errors.Fail(ErrorCode.ResourceExhausted, NativeAnnProtocol.Bound);
+            }
             return current.Bytes - incoming;
         }
     }
@@ -54,7 +80,9 @@ internal sealed class NativeAnnMaintenanceMemory(Lock gate, List<NativeAnnGenera
         {
             Require(lease);
             if (retained < Empty || retained > lease.Bytes)
-            { throw Errors.Fail(ErrorCode.ResourceExhausted, NativeAnnProtocol.Bound); }
+            {
+                throw Errors.Fail(ErrorCode.ResourceExhausted, NativeAnnProtocol.Bound);
+            }
             lease.Bytes = retained;
         }
     }
@@ -64,9 +92,13 @@ internal sealed class NativeAnnMaintenanceMemory(Lock gate, List<NativeAnnGenera
         lock (gate)
         {
             if (current is null)
-            { return; }
+            {
+                return;
+            }
             if (bytes <= Empty || bytes > current.Bytes)
-            { throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Ownership); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Ownership);
+            }
             current.Bytes -= bytes;
         }
     }
@@ -74,7 +106,10 @@ internal sealed class NativeAnnMaintenanceMemory(Lock gate, List<NativeAnnGenera
     public void Release(NativeAnnMaintenanceMemoryLease lease)
     {
         lock (gate)
-        { Require(lease); current = null; }
+        {
+            Require(lease);
+            current = null;
+        }
     }
 
     internal void Close() => Dispose();
@@ -95,6 +130,8 @@ internal sealed class NativeAnnMaintenanceMemory(Lock gate, List<NativeAnnGenera
     private void Require(NativeAnnMaintenanceMemoryLease lease)
     {
         if (!ReferenceEquals(current, lease))
-        { throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Ownership); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Ownership);
+        }
     }
 }

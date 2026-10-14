@@ -28,13 +28,17 @@ internal static class ControlledPartitionMovementNativeHostInputValidation
             || !Path.IsPathFullyQualified(input.Root)
             || !StringComparer.Ordinal.Equals(Path.GetFullPath(input.Root), Path.GetFullPath(originalRoot))
             || !Path.GetFileName(input.Root).StartsWith(RootPrefix, StringComparison.Ordinal))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         var origins = ImmutableArray.CreateBuilder<string>();
         var silos = ImmutableArray.CreateBuilder<IPEndPoint>();
         foreach (var arguments in input.Arguments)
         {
             if (arguments.IsDefaultOrEmpty)
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             var origin = Require(arguments, UrlPrefix);
             if (!Uri.TryCreate(origin, UriKind.Absolute, out var uri)
                 || uri.Scheme != Uri.UriSchemeHttp || !uri.IsLoopback
@@ -42,24 +46,32 @@ internal static class ControlledPartitionMovementNativeHostInputValidation
                 || uri.UserInfo.Length != EmptyUriComponentLength || uri.Query.Length != EmptyUriComponentLength
                 || uri.Fragment.Length != EmptyUriComponentLength
                 || uri.AbsolutePath != OriginRootPath)
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             var address = Read(arguments, nameof(NodeOptions.SiloAddress));
             var port = Read(arguments, nameof(NodeOptions.SiloPort));
             if (address != IPAddress.Loopback.ToString()
                 || !int.TryParse(port, NumberStyles.None, CultureInfo.InvariantCulture, out var number)
                 || number <= IPEndPoint.MinPort || number > IPEndPoint.MaxPort)
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             var expected = Path.Combine(input.Root, NodeDirectoryPrefix
                 + origins.Count.ToString(CultureInfo.InvariantCulture));
             if (!StringComparer.Ordinal.Equals(Read(arguments, nameof(NodeOptions.DataDirectory)), expected))
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             origins.Add(origin);
             silos.Add(new(IPAddress.Loopback, number));
         }
         if (origins.Distinct(StringComparer.Ordinal).Count() != origins.Count
             || silos.Select(endpoint => endpoint.Port).Distinct().Count() != silos.Count
             || input.PrimarySiloPort != silos[FirstNode].Port)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         return (origins.ToImmutable(), silos.ToImmutable());
     }
 
@@ -71,7 +83,9 @@ internal static class ControlledPartitionMovementNativeHostInputValidation
         var selected = arguments.Where(value => value is not null
             && value.StartsWith(prefix, StringComparison.Ordinal)).ToArray();
         if (selected.Length != SingleArgumentCount || selected[FirstNode].Length == prefix.Length)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         return selected[FirstNode][prefix.Length..];
     }
 

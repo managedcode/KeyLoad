@@ -7,10 +7,16 @@ internal static class SubscriptionInboxPublicAssertions
 {
     private const string First = "inbox-first";
     private const string Second = "inbox-second";
-    internal static global::System.Collections.Immutable.ImmutableArray<Mutation> Effects { get; } =
+    internal static global::System.Collections.Immutable.ImmutableArray<Mutation> Effects
+    {
+        get;
+    } =
         [new PutDocument(SubscriptionFilterRf3Protocol.Collection, First, "{\"n\":1}", 0),
          new PutDocument(SubscriptionFilterRf3Protocol.Collection, Second, "{\"n\":2}", 0)];
-    internal static global::System.Collections.Immutable.ImmutableArray<Mutation> ChangedEffects { get; } =
+    internal static global::System.Collections.Immutable.ImmutableArray<Mutation> ChangedEffects
+    {
+        get;
+    } =
         [new PutDocument(SubscriptionFilterRf3Protocol.Collection, First, "{\"n\":99}", 1),
          new PutDocument(SubscriptionFilterRf3Protocol.Collection, Second, "{\"n\":2}", 0)];
 

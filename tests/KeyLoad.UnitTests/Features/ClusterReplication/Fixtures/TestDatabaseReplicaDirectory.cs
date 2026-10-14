@@ -21,13 +21,17 @@ internal static class TestDatabaseReplicaDirectory
             || (Directory.Exists(replica) && (new DirectoryInfo(replica).Attributes & FileAttributes.ReparsePoint) != 0)
             || (originalNodeId is null && Directory.Exists(replica))
             || (originalNodeId is not null && !Directory.Exists(replica)))
-        { throw new InvalidOperationException(Invalid); }
+        {
+            throw new InvalidOperationException(Invalid);
+        }
         return replica;
     }
 
     internal static void RequireOriginal(Guid actualNodeId, Guid? originalNodeId)
     {
         if (originalNodeId is { } expected && actualNodeId != expected)
-        { throw new InvalidOperationException(Invalid); }
+        {
+            throw new InvalidOperationException(Invalid);
+        }
     }
 }

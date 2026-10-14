@@ -25,8 +25,14 @@ internal static class PartitionMovementPublicParentRf3OmissionTrial
             var faulted = ReadCuts(wave, request);
             stopped = false;
             await PartitionMovementPublicParentRf3Cut.RestartAsync(wave, cancellationToken).ConfigureAwait(false);
-            await RequireDeniedAsync(seed, request with { Mode = PartitionMoveMode.Resume }, cancellationToken).ConfigureAwait(false);
-            await RequireDeniedAsync(seed, request with { Mode = PartitionMoveMode.Abort }, cancellationToken).ConfigureAwait(false);
+            await RequireDeniedAsync(seed, request with
+            {
+                Mode = PartitionMoveMode.Resume
+            }, cancellationToken).ConfigureAwait(false);
+            await RequireDeniedAsync(seed, request with
+            {
+                Mode = PartitionMoveMode.Abort
+            }, cancellationToken).ConfigureAwait(false);
             var after = await PartitionMovementPublicParentRf3Cut.StopAndReadAsync(wave, request,
                 cancellationToken).ConfigureAwait(false);
             stopped = true;
@@ -91,7 +97,9 @@ internal static class PartitionMovementPublicParentRf3OmissionTrial
             var original = WithStore(wave, node, store => store.Read(view =>
                 view.ReadOwnedValue(PartitionMoveParentKeys.Header(request.Partition, request.MoveId))));
             if (original is not null)
-            { originals.Add(node, original); }
+            {
+                originals.Add(node, original);
+            }
         }
         return originals;
     }
@@ -105,9 +113,13 @@ internal static class PartitionMovementPublicParentRf3OmissionTrial
             {
                 var key = PartitionMoveParentKeys.Header(request.Partition, request.MoveId);
                 if (remove)
-                { transaction.Delete(key); }
+                {
+                    transaction.Delete(key);
+                }
                 else
-                { transaction.Put(key, pair.Value); }
+                {
+                    transaction.Put(key, pair.Value);
+                }
                 return true;
             }));
         }
@@ -124,7 +136,9 @@ internal static class PartitionMovementPublicParentRf3OmissionTrial
             result = read(store);
         }, failures);
         if (store is { } owned)
-        { ServerFailureObserver.Observe(owned.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(owned.Dispose, failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
         return result;
     }

@@ -13,15 +13,21 @@ internal sealed class PostgresErrorDeliveryProbe(PostgresErrorDeliveryFiles file
         PostgresSessionIdentity identity, Exception original, CancellationToken closed)
     {
         if (original is not KeyLoadException { Code: ErrorCode.PermissionDenied } primary)
-        { return null; }
+        {
+            return null;
+        }
         lock (sync)
         {
             var arm = files.ReadArm();
             if (arm is null || !StringComparer.Ordinal.Equals(arm.Subject, identity.Subject))
-            { return null; }
+            {
+                return null;
+            }
             if (claims.Count >= configured.Value.MaximumActiveGates || claims.ContainsKey(owner.Id)
                 || claims.Values.Any(item => item.Arm == arm.Id) || files.WasClaimed(arm.Id))
-            { throw new InvalidOperationException(PostgresErrorDeliveryProtocol.Invalid); }
+            {
+                throw new InvalidOperationException(PostgresErrorDeliveryProtocol.Invalid);
+            }
             var claim = new PostgresErrorDeliveryClaim(arm, owner.Id, primary, files);
             claims.Add(owner.Id, claim);
             return token => HoldAsync(claim, closed, token);
@@ -34,26 +40,50 @@ internal sealed class PostgresErrorDeliveryProbe(PostgresErrorDeliveryFiles file
         try
         {
             while (true)
-            { await Task.Delay(configured.Value.PollInterval, clock, deadline).ConfigureAwait(false); }
+            {
+                await Task.Delay(configured.Value.PollInterval, clock, deadline).ConfigureAwait(false);
+            }
         }
         catch (OperationCanceledException) when (closed.IsCancellationRequested)
-        { claim.ReceiverClosed(); }
+        {
+            claim.ReceiverClosed();
+        }
     }
 
     internal void Ledger(Guid connection, IReadOnlyList<Exception> failures)
-    { lock (sync) { if (claims.TryGetValue(connection, out var claim)) { claim.Ledger(failures); } } }
+    {
+        lock (sync)
+        {
+            if (claims.TryGetValue(connection, out var claim))
+            {
+                claim.Ledger(failures);
+            }
+        }
+    }
 
     internal void Session(Guid connection, IReadOnlyList<Exception> failures)
-    { lock (sync) { if (claims.TryGetValue(connection, out var claim)) { claim.Session(failures); } } }
+    {
+        lock (sync)
+        {
+            if (claims.TryGetValue(connection, out var claim))
+            {
+                claim.Session(failures);
+            }
+        }
+    }
 
     internal void Joined(Guid connection, IReadOnlyList<Exception> failures)
     {
         lock (sync)
         {
             if (!claims.TryGetValue(connection, out var claim))
-            { return; }
+            {
+                return;
+            }
             try
-            { claim.ConnectionJoined(failures); }
+            {
+                claim.ConnectionJoined(failures);
+            }
             finally { claims.Remove(connection); }
         }
     }

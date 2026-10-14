@@ -21,7 +21,9 @@ internal static class ZoneTreeRestoreSlotObserver
         _ = ZoneTreeRestoreSlotSource.Require(backup, context, policy, ct, out _);
         var sourceFiles = ZoneTreeRestoreSlotSource.Describe(backup, policy, ct);
         if (!Directory.Exists(destination))
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         var owner = ZoneTreeRestoreSlotAdmissionOwner.Acquire(destination, context, sourceFiles, policy, clock, requireExisting: true, ct);
         Exception? primary = null;
         var cleanupCompleted = false;
@@ -37,7 +39,9 @@ internal static class ZoneTreeRestoreSlotObserver
         catch (Exception terminal)
         {
             if (primary is not null && !cleanupCompleted)
-            { throw new AggregateException(primary, terminal); }
+            {
+                throw new AggregateException(primary, terminal);
+            }
             throw;
         }
     }
@@ -66,7 +70,9 @@ internal static class ZoneTreeRestoreSlotObserver
         catch (Exception terminal)
         {
             if (primary is not null && !cleanupCompleted)
-            { throw new AggregateException(primary, terminal); }
+            {
+                throw new AggregateException(primary, terminal);
+            }
             throw;
         }
     }

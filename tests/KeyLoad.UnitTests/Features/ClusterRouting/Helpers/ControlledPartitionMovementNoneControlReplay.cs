@@ -15,7 +15,13 @@ internal static class ControlledPartitionMovementNoneControlReplay
         var position = source.Store.Position;
         var index = source.Journal.Log.State.LastIndex;
         var replay = await ControlledPartitionMovementVerifiedSubmit.SubmitAsync(source, runtime, admission,
-            originalRequest with { Envelope = originalRequest.Envelope with { Nonce = Guid.NewGuid() } }, cancellationToken);
+            originalRequest with
+            {
+                Envelope = originalRequest.Envelope with
+                {
+                    Nonce = Guid.NewGuid()
+                }
+            }, cancellationToken);
         await Assert.That(NativeSerialization.Serialize(replay)
             .SequenceEqual(NativeSerialization.Serialize(original))).IsTrue();
         await Assert.That(source.Store.Position).IsEqualTo(position);

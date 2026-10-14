@@ -129,7 +129,10 @@ internal sealed class DueWorkDiscoveryTests
         await Assert.That(matched.NextPrefix).IsEqualTo(DueWorkKind.Saga);
         await Assert.That(matched.Schedules.LastKey).IsNotNull();
 
-        var replaced = identity with { ReadGeneration = checked(identity.ReadGeneration + 1) };
+        var replaced = identity with
+        {
+            ReadGeneration = checked(identity.ReadGeneration + 1)
+        };
         var reset = DueWorkCursor.Match(replaced, cursor);
         await Assert.That(reset.NextPrefix).IsEqualTo(DueWorkKind.Schedule);
         await Assert.That(reset.Schedules.HasUpperBound).IsFalse();

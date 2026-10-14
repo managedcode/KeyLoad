@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.Server;
@@ -65,7 +65,7 @@ internal static class RuntimeJournalStartup
             }
             catch (KeyLoadException error) when (error.Code == ErrorCode.UnknownWriteOutcome
                 || error.Code == ErrorCode.OwnershipLost
-                && (error.Message == global::KeyLoad.Orleans.ReplicaTransportProtocol.TransportUnavailable
+                && (error.Message == global::KeyLoad.Clustering.ReplicaTransportProtocol.TransportUnavailable
                     || error.Message == global::KeyLoad.Replication.ReplicaProtocol.NoLeader))
             {
                 await Task.Delay(runtime.DurableJobs.Value.BootstrapPollInterval, clock, token)

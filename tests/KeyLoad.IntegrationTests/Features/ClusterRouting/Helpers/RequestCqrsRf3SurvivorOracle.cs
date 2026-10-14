@@ -41,7 +41,9 @@ internal static class RequestCqrsRf3SurvivorOracle
         await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
         RequestCqrsRf3Callers connected;
         try
-        { connected = await RequestCqrsRf3Callers.ConnectAsync(app, node, profile.AdminKey, cancellationToken).ConfigureAwait(false); }
+        {
+            connected = await RequestCqrsRf3Callers.ConnectAsync(app, node, profile.AdminKey, cancellationToken).ConfigureAwait(false);
+        }
         catch (Exception primary)
         {
             primary.Data[PhaseDataKey] = FollowerFailurePhase;

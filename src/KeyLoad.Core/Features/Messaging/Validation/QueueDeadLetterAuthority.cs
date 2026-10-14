@@ -27,21 +27,29 @@ public sealed partial class DatabaseEngine
             || counters.InFlightBytes > counters.StoredBytes - counters.DeadLetterBytes
             || (counters.DeadLetterMessages == QueueLifecycleProtocol.Initial) != (counters.DeadLetterBytes == QueueLifecycleProtocol.Initial)
             || counters.DeadLetterMessages > QueueLifecycleProtocol.Initial && counters.NextParkedSequence <= QueueLifecycleProtocol.Initial)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, QueueLifecycleProtocol.InvalidCounter); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, QueueLifecycleProtocol.InvalidCounter);
+        }
         // This witness detects pre-admission records; it never reconstructs or resets authoritative usage.
         var existing = view.Scan(QueueKey(DeadLetterQueueSpace, lane), QueueLifecycleProtocol.Increment);
         if (existing.Records.IsEmpty != (counters.DeadLetterMessages == QueueLifecycleProtocol.Initial))
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, QueueLifecycleProtocol.InvalidCounter); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, QueueLifecycleProtocol.InvalidCounter);
+        }
         foreach (var record in existing.Records)
         {
             var id = view.GetRecord<string>(record.Key.ToArray())
                 ?? throw Errors.Fail(ErrorCode.RecoveryRequired, QueueLifecycleProtocol.MissingReference);
             if (!record.Key.Span.SequenceEqual(QueueKey(DeadLetterQueueSpace, lane, id)))
-            { throw Errors.Fail(ErrorCode.RecoveryRequired, QueueLifecycleProtocol.MissingReference); }
+            {
+                throw Errors.Fail(ErrorCode.RecoveryRequired, QueueLifecycleProtocol.MissingReference);
+            }
             var metadata = view.GetRecord<MessageMetadata>(QueueKey(MessageMetadataSpace, lane, id))
                 ?? throw Errors.Fail(ErrorCode.RecoveryRequired, QueueLifecycleProtocol.MissingMetadata);
             if (metadata.Id != id)
-            { throw Errors.Fail(ErrorCode.RecoveryRequired, QueueLifecycleProtocol.MissingMetadata); }
+            {
+                throw Errors.Fail(ErrorCode.RecoveryRequired, QueueLifecycleProtocol.MissingMetadata);
+            }
             RequireQueueParkedAuthority(view, lane, metadata);
         }
     }
@@ -55,7 +63,9 @@ public sealed partial class DatabaseEngine
             || view.GetRecord<string>(QueueKey(DeadLetterQueueSpace, lane, metadata.Id)) != metadata.Id
             || view.GetRecord<QueueDeadLetterReference>(QueueKey(QueueLifecycleProtocol.ParkedSpace, lane,
                 metadata.ParkedSequence, metadata.Id)) != expected)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, QueueLifecycleProtocol.MissingReference); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, QueueLifecycleProtocol.MissingReference);
+        }
     }
 
     private static void RequireQueuePendingAuthority(IKeyValueView view, QueueLaneRef lane, MessageMetadata metadata)
@@ -63,6 +73,8 @@ public sealed partial class DatabaseEngine
         var expected = new QueuePendingDeadLetterReference(metadata.Id, metadata.DeliveryGeneration, AttemptsExhausted);
         if (metadata.ParkedSequence != QueueLifecycleProtocol.Initial || metadata.SafeFailureCode != AttemptsExhausted
             || view.GetRecord<QueuePendingDeadLetterReference>(QueueKey(QueueLifecycleProtocol.PendingSpace, lane, metadata.Id)) != expected)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, QueueLifecycleProtocol.MissingReference); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, QueueLifecycleProtocol.MissingReference);
+        }
     }
 }

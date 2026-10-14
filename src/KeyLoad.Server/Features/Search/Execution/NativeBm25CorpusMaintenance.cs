@@ -1,7 +1,7 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Core.Features.Search;
-using KeyLoad.Orleans;
 using KeyLoad.Query;
 using KeyLoad.Query.Features.Search;
 using Microsoft.Extensions.Options;
@@ -35,7 +35,9 @@ internal static class NativeBm25CorpusMaintenance
         work.ConstrainLifetime(envelopeExpiry);
         var verified = partition.Database.VerifyOperationAuthority(original);
         if (verified.Kind != OperationKind.Bm25CorpusPublicationPhase)
-        { throw Errors.Fail(ErrorCode.PermissionDenied, Bm25CorpusProtocol.Administrator); }
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, Bm25CorpusProtocol.Administrator);
+        }
         var phase = NativeCommandPayload.Read<Bm25CorpusPublicationPhaseCommand>(verified);
         var actual = partition.Database.CreateVerifiedBm25CorpusPublication(verified.PrincipalId, phase, work);
         var principal = partition.Database.Store.Read(view => partition.Database.Principal(
@@ -54,7 +56,9 @@ internal static class NativeBm25CorpusMaintenance
         var lifetime = work.RemainingLifetime;
         var bounded = remaining < lifetime ? remaining : lifetime;
         if (bounded <= TimeSpan.Zero)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, Bm25CorpusProtocol.Changed); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, Bm25CorpusProtocol.Changed);
+        }
         var failures = new List<Exception>();
         try
         {
@@ -65,9 +69,13 @@ internal static class NativeBm25CorpusMaintenance
                 partition.Coordinator.ReadBarrierAsync(caller.Token), failures).ConfigureAwait(false);
         }
         catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure))
-        { failures.Add(failure); }
+        {
+            failures.Add(failure);
+        }
         catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure))
-        { failures.Add(failure); }
+        {
+            failures.Add(failure);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
         work.Check();
     }

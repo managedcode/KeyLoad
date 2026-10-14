@@ -28,7 +28,9 @@ internal sealed class KeyLoadClientKestrelObservation
     private bool nativeServerEventsObserved;
 
     internal KeyLoadClientKestrelObservation()
-    { started = clock.GetTimestamp(); }
+    {
+        started = clock.GetTimestamp();
+    }
 
     internal void Record(KestrelObservationStage stage, int status = 0, Exception? error = null,
         CancellationToken token = default)
@@ -36,7 +38,10 @@ internal sealed class KeyLoadClientKestrelObservation
         lock (gate)
         {
             if (records.Count == MaximumRecords)
-            { saturated = true; return; }
+            {
+                saturated = true;
+                return;
+            }
             ThreadPool.GetAvailableThreads(out var workers, out var io);
             records.Add(new
             {
@@ -66,7 +71,10 @@ internal sealed class KeyLoadClientKestrelObservation
         {
             nativeServerEventsObserved = true;
             if (records.Count == MaximumRecords)
-            { saturated = true; return; }
+            {
+                saturated = true;
+                return;
+            }
             records.Add(new
             {
                 nativeCategory = category,
@@ -139,7 +147,9 @@ internal sealed class KeyLoadClientKestrelObservation
     {
         var transport = new HttpClientHandler();
         try
-        { handler.InnerHandler = transport; }
+        {
+            handler.InnerHandler = transport;
+        }
         catch (Exception original)
         {
             failures.Add(original);
@@ -150,7 +160,9 @@ internal sealed class KeyLoadClientKestrelObservation
     private static void RecordFailure(List<Exception> failures, Exception observed)
     {
         if (!failures.Exists(failure => ReferenceEquals(failure, observed)))
-        { failures.Add(observed); }
+        {
+            failures.Add(observed);
+        }
     }
 
 }

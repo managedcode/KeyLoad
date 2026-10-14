@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.DocumentStorage;
 using Microsoft.Extensions.Options;
 
@@ -28,7 +28,9 @@ internal static class EventVectorRemoteExchange
         try
         {
             if (body.Length != measuredRequestBytes)
-            { throw Errors.Fail(ErrorCode.Corruption, EventVectorRemoteProtocol.Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, EventVectorRemoteProtocol.Invalid);
+            }
             await EventVectorRemoteRequestSend.SendAsync(client, options, membership, clock,
                 destination, originalCall, body, encoding, work, failures,
                 (checkedReply, signature) => { result = checkedReply; originalRequestSignature = signature; },

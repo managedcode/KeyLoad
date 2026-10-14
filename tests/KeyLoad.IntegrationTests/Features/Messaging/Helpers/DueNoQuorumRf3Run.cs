@@ -34,7 +34,9 @@ internal static class DueNoQuorumRf3Run
         finally
         {
             if (root is not null && failures.Count == 0)
-            { ServerFailureObserver.Observe(() => Directory.Delete(root, recursive: true), failures); }
+            {
+                ServerFailureObserver.Observe(() => Directory.Delete(root, recursive: true), failures);
+            }
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -110,7 +112,9 @@ internal static class DueNoQuorumRf3Run
             .ConfigureAwait(false);
         var status = await NodeEpochRf3StatusOracle.CaptureAsync(app, profile, cancellationToken).ConfigureAwait(false);
         foreach (var node in status)
-        { await Assert.That(node.Status.Applied).IsGreaterThanOrEqualTo(minimumApplied); }
+        {
+            await Assert.That(node.Status.Applied).IsGreaterThanOrEqualTo(minimumApplied);
+        }
         await DueNoQuorumRf3Topology.AssertFinalDiscoveryAsync(app, profile, plan, cancellationToken)
             .ConfigureAwait(false);
         foreach (var node in new[] { RequestCqrsRf3Protocol.Node1, RequestCqrsRf3Protocol.Node2,
@@ -128,13 +132,17 @@ internal static class DueNoQuorumRf3Run
         var observationEnd = dueAt.AddSeconds(DueNoQuorumRf3Protocol.NoQuorumObservationSeconds);
         var remaining = observationEnd - TimeProvider.System.GetUtcNow();
         if (remaining > TimeSpan.Zero)
-        { await Task.Delay(remaining, TimeProvider.System, cancellationToken).ConfigureAwait(false); }
+        {
+            await Task.Delay(remaining, TimeProvider.System, cancellationToken).ConfigureAwait(false);
+        }
     }
 
     private static void RequireBeforeDue(DateTimeOffset dueAt)
     {
         if (TimeProvider.System.GetUtcNow() >= dueAt)
-        { throw new TimeoutException(DueNoQuorumRf3Protocol.SetupFailure); }
+        {
+            throw new TimeoutException(DueNoQuorumRf3Protocol.SetupFailure);
+        }
     }
 
     private static string CreatePrivateRoot()
@@ -145,7 +153,9 @@ internal static class DueNoQuorumRf3Run
         var root = Path.Combine(parent, "due-no-quorum-rf3-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(root);
         if (!OperatingSystem.IsWindows())
-        { File.SetUnixFileMode(root, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute); }
+        {
+            File.SetUnixFileMode(root, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+        }
         return root;
     }
 

@@ -34,7 +34,10 @@ internal static class QueueLifecycleRefusals
         var denied = state.Execute(database, OperationKind.Batch, command, id, QueueLifecycleTestProtocol.DeniedAdministrator);
         await Assert.That(denied.Error).IsEqualTo(ErrorCode.PermissionDenied);
         await QueueLifecycleImage.SameAsync(store, state.Lane, image);
-        state.CancelledCommand = command with { CommandId = Guid.NewGuid() };
+        state.CancelledCommand = command with
+        {
+            CommandId = Guid.NewGuid()
+        };
         var whole = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
         var cancelled = new CancellationToken(canceled: true);

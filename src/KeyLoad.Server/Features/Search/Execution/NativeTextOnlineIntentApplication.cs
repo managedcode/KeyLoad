@@ -19,14 +19,19 @@ internal static class NativeTextOnlineIntentApplication
         budget.ChargeBytes(NativeSerialization.Measure(target.Records));
         if (intent.NextRecord != target.NextRecord || !NativeSerialization.Serialize(intent.Records).AsSpan()
             .SequenceEqual(NativeSerialization.Serialize(target.Records)))
-        { throw NativeTextErrors.Corrupt(); }
+        {
+            throw NativeTextErrors.Corrupt();
+        }
         var failures = new List<Exception>();
         NativeTextIncrementalManifest? completed = null;
         ServerFailureObserver.Observe(() =>
         {
             actual.Open(budget);
             actual.ApplyIntent(intent, options.NativeText.Value.MaximumDiskBytes, budget);
-            completed = target with { Files = actual.CloseAndCapture(budget) };
+            completed = target with
+            {
+                Files = actual.CloseAndCapture(budget)
+            };
             NativeTextIncrementalValidation.Manifest(completed, target.Scope, target.Consumer,
                 target.Generation, target.Placement, database.Limits.MaxScanRecords, budget, options.NativeText);
             NativeTextIncrementalMetadata.Publish(actual.Path, completed,

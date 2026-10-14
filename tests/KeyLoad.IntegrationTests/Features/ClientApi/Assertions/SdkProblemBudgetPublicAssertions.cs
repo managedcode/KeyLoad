@@ -16,7 +16,9 @@ internal static class SdkProblemBudgetPublicAssertions
         await Assert.That(actual.Problem!.ErrorCode).IsEqualTo(code.ToString());
         await Assert.That(actual.Problem.StatusCode).IsEqualTo(Errors.Status(code));
         if (bounded)
-        { await SqlRf3Protocol.EqualAsync(Errors.Problem(code, Unavailable), actual.Problem); }
+        {
+            await SqlRf3Protocol.EqualAsync(Errors.Problem(code, Unavailable), actual.Problem);
+        }
     }
 
     internal static async Task ReceiptAsync(CommitReceipt actual, CommandRequest command,

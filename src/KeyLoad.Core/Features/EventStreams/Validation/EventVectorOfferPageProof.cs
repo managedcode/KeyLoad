@@ -11,11 +11,15 @@ internal static class EventVectorOfferPageProof
     {
         admission.RequireEncodedBytes(phase.OriginalSourcePageBytes.Length);
         if (phase.OriginalSourcePageBytes.IsEmpty)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         var pages = NativeSerialization.Deserialize<ImmutableArray<EventSourcePage>>(phase.OriginalSourcePageBytes.Span);
         var derived = EventVectorOfferPageProjection.Create(acknowledged, pages, admission);
         if (!derived.SequenceEqual(offered))
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
     }
 
     internal static void RequireResult(EventVectorControlResult result, EventVectorControlPhase phase,
@@ -23,6 +27,8 @@ internal static class EventVectorOfferPageProof
     {
         admission.RequireEncodedBytes(result.OriginalSourcePageBytes.Length);
         if (!result.OriginalSourcePageBytes.Span.SequenceEqual(phase.OriginalSourcePageBytes.Span))
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
     }
 }

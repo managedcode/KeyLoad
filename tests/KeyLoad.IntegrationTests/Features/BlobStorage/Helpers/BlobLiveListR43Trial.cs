@@ -38,7 +38,15 @@ internal static class BlobLiveListR43Trial
         state.Delete = new(Guid.NewGuid(), state.Versions[1].Begin.Blob, 1L);
         state.Deleted = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.DeleteBlobAsync(state.Delete, token));
         var tombstone = state.Versions[1].Completed.Value with
-        { Revision = 2L, VersionId = null, Length = 0L, PartCount = 0, IntegrityHash = null, Deleted = true, UpdatedAt = state.Deleted.Value.UpdatedAt };
+        {
+            Revision = 2L,
+            VersionId = null,
+            Length = 0L,
+            PartCount = 0,
+            IntegrityHash = null,
+            Deleted = true,
+            UpdatedAt = state.Deleted.Value.UpdatedAt
+        };
         await SqlRf3Protocol.EqualAsync(tombstone, state.Deleted.Value);
         await BlobLiveListR43Publication.ReceiptAsync(state.Placement, state.Delete.CommandId, state.Deleted.Receipt);
         state.Phase = 3;

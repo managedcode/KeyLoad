@@ -15,7 +15,9 @@ internal static class PackedAnnAdjacencyAssertions
                 var count = state.Graph.NeighborCount(source, layer, budget);
                 var neighbors = new int[count];
                 for (var offset = 0; offset < count; offset++)
-                { neighbors[offset] = state.Graph.Neighbor(source, layer, offset); }
+                {
+                    neighbors[offset] = state.Graph.Neighbor(source, layer, offset);
+                }
                 adjacency[source][layer] = neighbors;
             }
         }
@@ -29,7 +31,9 @@ internal static class PackedAnnAdjacencyAssertions
         {
             await Assert.That(actual[source].Length).IsEqualTo(expected[source].Length);
             for (var layer = 0; layer < expected[source].Length; layer++)
-            { await Assert.That(actual[source][layer].SequenceEqual(expected[source][layer])).IsTrue(); }
+            {
+                await Assert.That(actual[source][layer].SequenceEqual(expected[source][layer])).IsTrue();
+            }
         }
     }
 }

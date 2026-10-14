@@ -1,8 +1,8 @@
 using System.Collections.Immutable;
 using System.Security.Cryptography;
+using KeyLoad.Clustering;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Execution;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.IntegrationTests.Features.DocumentStorage;
@@ -99,7 +99,10 @@ internal sealed class ProtectedDocumentRf3Setup(ProtectedDocumentRf3SetupPeer pe
             {
                 pages[ordinal] = await peer.SendAsync<PartitionMovementPageResult>(request with
                 {
-                    Envelope = request.Envelope with { Nonce = Guid.NewGuid() },
+                    Envelope = request.Envelope with
+                    {
+                        Nonce = Guid.NewGuid()
+                    },
                     Action = PartitionMovementTransportAction.Page,
                     HandleId = handle.HandleId,
                     Ordinal = ordinal
@@ -114,7 +117,10 @@ internal sealed class ProtectedDocumentRf3Setup(ProtectedDocumentRf3SetupPeer pe
         {
             settled = await peer.SendAsync<PartitionMovePhaseResult>(request with
             {
-                Envelope = request.Envelope with { Nonce = Guid.NewGuid() },
+                Envelope = request.Envelope with
+                {
+                    Nonce = Guid.NewGuid()
+                },
                 Action = PartitionMovementTransportAction.Release,
                 HandleId = handle.HandleId
             }, false, cleanup.Token).ConfigureAwait(false);

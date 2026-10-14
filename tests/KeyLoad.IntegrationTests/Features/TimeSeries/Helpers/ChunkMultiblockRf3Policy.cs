@@ -14,13 +14,20 @@ internal static class ChunkMultiblockRf3Policy
     internal static async Task RunAsync(RequestCqrsRf3Callers administrator, RequestCqrsRf3Callers reader,
         ChunkMultiblockRf3State state, CancellationToken token)
     {
-        var denied = state.Reader.Principal with { PolicyEpoch = DeniedEpoch, Grants = [] };
+        var denied = state.Reader.Principal with
+        {
+            PolicyEpoch = DeniedEpoch,
+            Grants = []
+        };
         await SampleChunkRetentionRf3ReadOracle.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(
             await administrator.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), denied, token)), denied);
         await ChunkMultiblockRf3Current.RequireAsync(administrator, administrator, state, token);
         await DeniedSdkAsync(administrator, reader, state, token);
         await DeniedMcpAsync(administrator, reader, state, token);
-        var repaired = state.Reader.Principal with { PolicyEpoch = RepairedEpoch };
+        var repaired = state.Reader.Principal with
+        {
+            PolicyEpoch = RepairedEpoch
+        };
         await SampleChunkRetentionRf3ReadOracle.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(
             await administrator.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), repaired, token)), repaired);
         await ChunkMultiblockRf3Current.RequireAsync(administrator, reader, state, token);

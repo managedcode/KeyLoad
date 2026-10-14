@@ -8,7 +8,10 @@ internal static class FollowerDocumentAssertions
     {
         var data = new CommitToken(fixture.Owner.Incarnation, fixture.Db.Partition.AtomicPartitionId,
             dataPosition, fixture.Owner.PlacementEpoch);
-        var authority = data with { Position = authorityPosition };
+        var authority = data with
+        {
+            Position = authorityPosition
+        };
         var document = json is null ? null : new DocumentResult(fixture.Reference, revision, json,
             redacted, redacted ? ["/secret"] : []);
         var expected = new FollowerDocumentReadResultV1(FollowerDocumentFixture.Version,
@@ -25,7 +28,9 @@ internal static class FollowerDocumentAssertions
         var error = Assert.ThrowsExactly<KeyLoadException>(operation);
         await Assert.That(error.Code).IsEqualTo(code);
         if (detail is not null)
-        { await Assert.That(error.Message).IsEqualTo(detail); }
+        {
+            await Assert.That(error.Message).IsEqualTo(detail);
+        }
         await Assert.That(fixture.State().SequenceEqual(before)).IsTrue();
         await Assert.That(fixture.Db.Store.Position).IsEqualTo(position);
     }

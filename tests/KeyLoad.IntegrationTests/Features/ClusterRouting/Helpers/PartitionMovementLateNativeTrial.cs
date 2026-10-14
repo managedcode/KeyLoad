@@ -1,8 +1,8 @@
 using KeyLoad.Client;
+using KeyLoad.Clustering;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
 using ManagedCode.Communication;
@@ -30,9 +30,13 @@ internal sealed class PartitionMovementLateNativeTrial : IAsyncDisposable
         await using (var trial = new PartitionMovementLateNativeTrial(failures))
         {
             try
-            { await ServerFailureObserver.ObserveAsync(() => trial.ExecuteAsync(lifetime.Token), failures); }
+            {
+                await ServerFailureObserver.ObserveAsync(() => trial.ExecuteAsync(lifetime.Token), failures);
+            }
             finally
-            { ServerFailureObserver.Observe(lifetime.Cancel, failures); }
+            {
+                ServerFailureObserver.Observe(lifetime.Cancel, failures);
+            }
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -43,24 +47,36 @@ internal sealed class PartitionMovementLateNativeTrial : IAsyncDisposable
     {
         var cleanupFailures = new List<Exception>();
         if (owners is { } owned)
-        { await ServerFailureObserver.ObserveAsync(owned.StopAsync, cleanupFailures); }
+        {
+            await ServerFailureObserver.ObserveAsync(owned.StopAsync, cleanupFailures);
+        }
         if (producer is { } operation && owners is { } producerOwner)
-        { await ServerFailureObserver.ObserveAsync(() => producerOwner.JoinProducerAsync(operation), cleanupFailures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => producerOwner.JoinProducerAsync(operation), cleanupFailures);
+        }
         if (producer is { IsCompleted: false })
-        { cleanupFailures.Add(new InvalidOperationException("Retain the original clients and roots while the SDK producer is unjoined.")); }
+        {
+            cleanupFailures.Add(new InvalidOperationException("Retain the original clients and roots while the SDK producer is unjoined."));
+        }
         else if (seed is not null)
         {
             try
-            { seed.Dispose(); }
+            {
+                seed.Dispose();
+            }
             catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { cleanupFailures.Add(error); }
             catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { cleanupFailures.Add(error); }
         }
         if (owners is not null)
         {
             if (cleanupFailures.Count != 0 || failures.Count != 0)
-            { owners.RetainRoots(); }
+            {
+                owners.RetainRoots();
+            }
             try
-            { await owners.DisposeAsync().ConfigureAwait(false); }
+            {
+                await owners.DisposeAsync().ConfigureAwait(false);
+            }
             catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { cleanupFailures.Add(error); }
             catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { cleanupFailures.Add(error); }
         }
@@ -85,7 +101,10 @@ internal sealed class PartitionMovementLateNativeTrial : IAsyncDisposable
         await Assert.That(original.Operation.Id).IsEqualTo(PartitionMovementParentPhaseIds.For(seed.Request, "root", PartitionMovementParentPhaseRole.Retire, cleanupGeneration: InitialGeneration));
         await WaitForOriginalExpiryAsync(originalAdmission.OriginalExpiresAt, cancellationToken);
         var secondBorrow = owners.Borrow.Arm();
-        producer = seed.Source.MovePartitionAsync(seed.Request with { Mode = PartitionMoveMode.Resume }, cancellationToken);
+        producer = seed.Source.MovePartitionAsync(seed.Request with
+        {
+            Mode = PartitionMoveMode.Resume
+        }, cancellationToken);
         owners.TrackProducer(producer);
         var next = await secondBorrow.WaitAsync(cancellationToken);
         var nextPhase = NativeCommandPayload.Read<PartitionMovePhaseCommand>(next.Operation);
@@ -100,7 +119,10 @@ internal sealed class PartitionMovementLateNativeTrial : IAsyncDisposable
         await WaitForOriginalExpiryAsync(nextAdmission.OriginalExpiresAt, cancellationToken);
         await owners.StartAsync(cancellationToken);
         var terminal = await McpCallerAssertions.SdkSuccessAsync(await seed.Source.MovePartitionAsync(
-            seed.Request with { Mode = PartitionMoveMode.Resume }, cancellationToken));
+            seed.Request with
+            {
+                Mode = PartitionMoveMode.Resume
+            }, cancellationToken));
         await seed.RequireOriginalAsync(cancellationToken);
         await owners.StopAsync();
         await PartitionMovementLateNativeColdOracle.RequirePersistedAsync(owners, original, cancellationToken);
@@ -114,7 +136,9 @@ internal sealed class PartitionMovementLateNativeTrial : IAsyncDisposable
     {
         var remaining = expiresAt - TimeProvider.System.GetUtcNow();
         if (remaining > TimeSpan.Zero)
-        { await Task.Delay(remaining, TimeProvider.System, cancellationToken).ConfigureAwait(false); }
+        {
+            await Task.Delay(remaining, TimeProvider.System, cancellationToken).ConfigureAwait(false);
+        }
         await Assert.That(TimeProvider.System.GetUtcNow() >= expiresAt).IsTrue();
     }
 }

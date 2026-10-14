@@ -58,7 +58,9 @@ internal static class PartitionMovementParentOperationalCapacityRf3Preparation
         }
         var body = NativeSerialization.Deserialize<PartitionMoveAuthorizeBody>(controls.First().Pending!.OriginalPhase!.Body.Span);
         foreach (var cut in controls)
-        { await SqlRf3Protocol.EqualAsync(body, NativeSerialization.Deserialize<PartitionMoveAuthorizeBody>(cut.Pending!.OriginalPhase!.Body.Span)); }
+        {
+            await SqlRf3Protocol.EqualAsync(body, NativeSerialization.Deserialize<PartitionMoveAuthorizeBody>(cut.Pending!.OriginalPhase!.Body.Span));
+        }
         await precut.Inspected.RestoreAsync(wave, observed, cancellationToken);
         await PartitionMovementParentOperationalCapacityRf3Assertions.RequireRestoredAsync(wave, seed, precut.Cuts);
         return body;

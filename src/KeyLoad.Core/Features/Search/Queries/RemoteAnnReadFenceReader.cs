@@ -20,45 +20,47 @@ public sealed partial class DatabaseEngine
         long generation, RegisteredPhysicalOwnerV1 configuredLocal, ReadExecutionBudget budget)
     {
         budget.Check();
-        if (!PhysicalOwnerEntryValidation.Valid(configuredLocal) || configuredPhysicalOwner is null
-            || !PhysicalOwnerEntryValidation.SameOwner(configuredLocal.Owner, configuredPhysicalOwner))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, RemoteAnnReadInvalid); }
+        RequireConfiguredRemoteAnnOwner(configuredLocal);
         ValidatePartition(consumer.Partition);
         JsonData.Identifier(collection);
         var bounded = budget.CreateView(view);
         var principal = Principal(bounded, principalId, EvaluationClock.GetUtcNow());
         if (!principal.ClusterAdministrator && principal.TenantId != consumer.Partition.TenantId)
-        { throw Errors.Fail(ErrorCode.PermissionDenied, RemoteAnnReadInvalid); }
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, RemoteAnnReadInvalid);
+        }
         Authorization.Require(principal, consumer.Partition, collection, Capability.VectorSearch);
         // This is source metadata authorization only; no local resource/data read is authorized here.
         // The addressed receiver independently requires actual local ownership and current field policy.
-        var resource = bounded.GetRecord<ResourceDefinition>(KeySpace.Resource(
-            consumer.Partition.TenantId, consumer.Partition.DatabaseId, collection))
-            ?? throw Errors.Fail(ErrorCode.NotFound, RemoteAnnReadInvalid);
-        if (resource.TransactionDomainId != consumer.Partition.TransactionDomainId
-            || resource.Kind != ResourceKind.Collection || resource.Name != collection)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteAnnReadInvalid); }
-        Authorization.RequireFieldUse(principal, resource, field);
+        var resource = ReadRemoteAnnResource(consumer, collection, field, bounded, principal);
         var configured = ProjectionConsumer(bounded, consumer);
         if (configured.Definition.AnnMaintenance is null)
-        { return null; }
+        {
+            return null;
+        }
         var state = ReadProjectionMaintenanceEligibilityCore(view, consumer, generation, budget, resource);
         var original = state.InitialAnnMaintenance;
         if (!state.InitialAnnMaintenanceSettled || original is null
             || original.Consumer != consumer || original.IndexGeneration != generation
             || original.Collection != collection || original.Field != field || original.Space != space
             || original.NodeId == Guid.Empty || original.MaintenanceProfile != state.Definition.AnnMaintenance)
-        { throw Errors.Fail(ErrorCode.HistoryUnavailable, RemoteAnnReadInvalid); }
+        {
+            throw Errors.Fail(ErrorCode.HistoryUnavailable, RemoteAnnReadInvalid);
+        }
         var catalog = PhysicalShardCatalogRecordSerialization.Read(bounded)
             ?? throw Errors.Fail(ErrorCode.OwnershipLost, RemoteAnnReadInvalid);
         PhysicalShardCatalogValidation.ValidateCatalog(catalog);
         if (configuredPhysicalOwner is not null
             && !PhysicalOwnerEntryValidation.SameOwner(catalog.DefaultShard, configuredPhysicalOwner))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, RemoteAnnReadInvalid); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, RemoteAnnReadInvalid);
+        }
         var placement = ResolveRegisteredPlacement(bounded, consumer.Partition, catalog.DefaultShard);
         if (!PhysicalOwnerEntryValidation.SameOwner(original.Placement,
             new(placement.PhysicalShardId, placement.Incarnation, placement.VoterIds, placement.PlacementEpoch)))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, RemoteAnnReadInvalid); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, RemoteAnnReadInvalid);
+        }
         var localPlacement = placement.PhysicalShardId == configuredLocal.Owner.PhysicalShardId;
         var directory = localPlacement ? null : PhysicalOwnerDirectorySerialization.Read(bounded)
             ?? throw Errors.Fail(ErrorCode.OwnershipLost, RemoteAnnReadInvalid);
@@ -68,11 +70,37 @@ public sealed partial class DatabaseEngine
         if (destination.Owner.PhysicalShardId != original.Placement.PhysicalShardId
             || destination.Owner.Incarnation != original.Placement.Incarnation
             || !destination.Owner.VoterIds.SequenceEqual(original.Placement.VoterIds, StringComparer.Ordinal))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, RemoteAnnReadInvalid); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, RemoteAnnReadInvalid);
+        }
         var identity = Store.Identity;
         return new(principal.Id, principal.TenantId, principal.PolicyEpoch, identity.NodeId,
             identity.ReadGeneration, directory?.Revision, RemoteAnnDigest(resource, budget),
             RemoteAnnDigest(state, budget), configuredLocal, destination, original);
+    }
+
+    private void RequireConfiguredRemoteAnnOwner(RegisteredPhysicalOwnerV1 configuredLocal)
+    {
+        if (!PhysicalOwnerEntryValidation.Valid(configuredLocal) || configuredPhysicalOwner is null
+                    || !PhysicalOwnerEntryValidation.SameOwner(configuredLocal.Owner, configuredPhysicalOwner))
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, RemoteAnnReadInvalid);
+        }
+    }
+
+    private ResourceDefinition ReadRemoteAnnResource(ProjectionConsumerRef consumer, string collection, string field,
+        IKeyValueView bounded, PrincipalRecord principal)
+    {
+        var resource = bounded.GetRecord<ResourceDefinition>(KeySpace.Resource(
+            consumer.Partition.TenantId, consumer.Partition.DatabaseId, collection))
+            ?? throw Errors.Fail(ErrorCode.NotFound, RemoteAnnReadInvalid);
+        if (resource.TransactionDomainId != consumer.Partition.TransactionDomainId
+            || resource.Kind != ResourceKind.Collection || resource.Name != collection)
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteAnnReadInvalid);
+        }
+        Authorization.RequireFieldUse(principal, resource, field);
+        return resource;
     }
 
     internal void ValidateRemoteAnnRead(RemoteAnnReadFence original, ProjectionConsumerRef consumer,
@@ -87,7 +115,9 @@ public sealed partial class DatabaseEngine
             || current.ResourceSha256 != original.ResourceSha256
             || current.ConsumerSha256 != original.ConsumerSha256
             || !PhysicalOwnerEntryValidation.Same(current.Destination, original.Destination))
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteAnnReadInvalid); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteAnnReadInvalid);
+        }
     }
 
     private static string RemoteAnnDigest<T>(T value, ReadExecutionBudget budget)
@@ -98,7 +128,9 @@ public sealed partial class DatabaseEngine
         try
         {
             if (bytes.Length != measured)
-            { throw Errors.Fail(ErrorCode.ResourceExhausted, RemoteAnnReadInvalid); }
+            {
+                throw Errors.Fail(ErrorCode.ResourceExhausted, RemoteAnnReadInvalid);
+            }
             return Convert.ToHexStringLower(SHA256.HashData(bytes));
         }
         finally { CryptographicOperations.ZeroMemory(bytes); }

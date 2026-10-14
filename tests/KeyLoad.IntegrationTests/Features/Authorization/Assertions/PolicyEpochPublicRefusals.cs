@@ -28,7 +28,10 @@ internal static class PolicyEpochPublicRefusals
     {
         var sql = SqlRf3Protocol.Call(request.Partition, McpCallerTools.QueryExecute, request);
         if (route == PolicyEpochPublicProtocol.Sdk)
-        { await SdkAsync(await reader.Sdk.QueryAsync(request, token), code, credential); return; }
+        {
+            await SdkAsync(await reader.Sdk.QueryAsync(request, token), code, credential);
+            return;
+        }
         if (route == PolicyEpochPublicProtocol.SdkAst)
         {
             await SdkAsync(await reader.Sdk.QueryAstAsync(PolicyEpochPublicProtocol.Ast(
@@ -36,7 +39,10 @@ internal static class PolicyEpochPublicRefusals
             return;
         }
         if (route == PolicyEpochPublicProtocol.Q1Sdk)
-        { await SdkAsync(await reader.Sdk.ExecuteSqlAsync(sql, token), code, credential); return; }
+        {
+            await SdkAsync(await reader.Sdk.ExecuteSqlAsync(sql, token), code, credential);
+            return;
+        }
         if (code == ErrorCode.Unauthenticated)
         {
             await RefuseMcpAsync(fixture, reader, request, sql, route, credential, token);
@@ -75,9 +81,13 @@ internal static class PolicyEpochPublicRefusals
         await Assert.That(result.IsSuccess).IsFalse();
         await Assert.That(result.Problem?.ErrorCode).IsEqualTo(code.ToString());
         if (result.Value is JsonElement value)
-        { await Assert.That(value.ValueKind).IsEqualTo(JsonValueKind.Undefined); }
+        {
+            await Assert.That(value.ValueKind).IsEqualTo(JsonValueKind.Undefined);
+        }
         else
-        { await Assert.That(result.Value).IsNull(); }
+        {
+            await Assert.That(result.Value).IsNull();
+        }
         var text = Encoding.UTF8.GetString(JsonDefaults.Serialize(result.Problem));
         await Assert.That(text.Contains(credential, StringComparison.Ordinal)).IsFalse();
         await Assert.That(text.Contains(ResourcePolicyUpdateRf3Protocol.SecretValue, StringComparison.Ordinal)).IsFalse();

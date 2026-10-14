@@ -16,14 +16,22 @@ internal static class DiscoveryAuthorityFlow
         McpOfficialClient session, DiscoveryAuthorityState state, Guid firstRequest, CancellationToken token)
     {
         var restricted = state.Identity.Principal with
-        { Grants = [], PolicyEpoch = state.Identity.Principal.PolicyEpoch + McpCallerProtocol.EpochIncrement };
+        {
+            Grants = [],
+            PolicyEpoch = state.Identity.Principal.PolicyEpoch + McpCallerProtocol.EpochIncrement
+        };
         _ = await PersistAsync(root, Guid.NewGuid(), restricted, token);
         await DiscoveryAuthorityRefusals.RestrictedAsync(root, reader, session, state, firstRequest, token);
         _ = await PersistAsync(root, Guid.NewGuid(), state.Identity.Principal with
-        { PolicyEpoch = DiscoveryAuthorityProtocol.RepairEpoch }, token);
+        {
+            PolicyEpoch = DiscoveryAuthorityProtocol.RepairEpoch
+        }, token);
         await DiscoveryAuthorityValues.HealthyAsync(root, reader, session, state, token);
         _ = await PersistAsync(root, Guid.NewGuid(), state.Identity.Principal with
-        { Revoked = true, PolicyEpoch = DiscoveryAuthorityProtocol.RevokedEpoch }, token);
+        {
+            Revoked = true,
+            PolicyEpoch = DiscoveryAuthorityProtocol.RevokedEpoch
+        }, token);
         await DiscoveryAuthorityRefusals.RevokedAsync(fixture, root, reader, session, state, token);
         state.OriginalRepairResult = await PersistAsync(root, state.RepairCommandId, state.Repaired, token);
         await DiscoveryAuthorityValues.HealthyAsync(root, reader, session, state, token);

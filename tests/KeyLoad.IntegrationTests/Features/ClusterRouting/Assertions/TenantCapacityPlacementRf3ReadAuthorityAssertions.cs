@@ -13,9 +13,12 @@ internal static class TenantCapacityPlacementRf3ReadAuthorityAssertions
         var policy = await caller.Sdk.ReadPlacementPolicyAsync(scope, token);
         await TenantCapacityPlacementRf3Assertions.RefusalAsync(policy, ErrorCode.PermissionDenied);
         await SqlRf3Protocol.EqualAsync(Errors.Problem(ErrorCode.PermissionDenied,
-            KeyLoad.Orleans.GrainRoutingProtocol.AdministrationRequired), policy.Problem!);
+            KeyLoad.Clustering.GrainRoutingProtocol.AdministrationRequired), policy.Problem!);
         var officialPolicy = await caller.Official.CallAsync(TenantPlacementPublicProtocol.PolicyTool,
-            new { request = scope }, token);
+            new
+            {
+                request = scope
+            }, token);
         await McpCallerAssertions.ErrorAsync(officialPolicy, ErrorCode.PermissionDenied, dispatched: true);
         await Assert.That(officialPolicy.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
             .GetProperty(McpCallerProtocol.ProblemDetail).GetString())
@@ -24,9 +27,12 @@ internal static class TenantCapacityPlacementRf3ReadAuthorityAssertions
         var intent = await caller.Sdk.ReadPlacementIntentAsync(request, token);
         await TenantCapacityPlacementRf3Assertions.RefusalAsync(intent, ErrorCode.PermissionDenied);
         await SqlRf3Protocol.EqualAsync(Errors.Problem(ErrorCode.PermissionDenied,
-            KeyLoad.Orleans.GrainRoutingProtocol.AdministrationRequired), intent.Problem!);
+            KeyLoad.Clustering.GrainRoutingProtocol.AdministrationRequired), intent.Problem!);
         var officialIntent = await caller.Official.CallAsync(TenantPlacementPublicProtocol.IntentTool,
-            new { request }, token);
+            new
+            {
+                request
+            }, token);
         await McpCallerAssertions.ErrorAsync(officialIntent, ErrorCode.PermissionDenied, dispatched: true);
         await Assert.That(officialIntent.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
             .GetProperty(McpCallerProtocol.ProblemDetail).GetString())
@@ -42,7 +48,10 @@ internal static class TenantCapacityPlacementRf3ReadAuthorityAssertions
         await TenantCapacityPlacementRf3Assertions.RefusalAsync(sdk, ErrorCode.TokenInvalidated);
         await SqlRf3Protocol.EqualAsync(Errors.Problem(ErrorCode.TokenInvalidated,
             TenantPlacementPolicyProtocol.ScopeMismatch), sdk.Problem!);
-        var mcp = await caller.Official.CallAsync(TenantPlacementPublicProtocol.IntentTool, new { request }, token);
+        var mcp = await caller.Official.CallAsync(TenantPlacementPublicProtocol.IntentTool, new
+        {
+            request
+        }, token);
         await McpCallerAssertions.ErrorAsync(mcp, ErrorCode.TokenInvalidated, dispatched: true);
         await Assert.That(mcp.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
             .GetProperty(McpCallerProtocol.ProblemDetail).GetString())
@@ -57,7 +66,10 @@ internal static class TenantCapacityPlacementRf3ReadAuthorityAssertions
         await SqlRf3Protocol.EqualAsync(expected,
             await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.ReadPlacementIntentAsync(request, token)));
         await SqlRf3Protocol.EqualAsync(expected, (await McpCallerAssertions.SuccessAsync<PlacementIntentV1>(
-            await caller.Official.CallAsync(TenantPlacementPublicProtocol.IntentTool, new { request }, token))).Value);
+            await caller.Official.CallAsync(TenantPlacementPublicProtocol.IntentTool, new
+            {
+                request
+            }, token))).Value);
     }
 
     private static async Task PolicyAsync(TenantCapacityPlacementRf3RevocationCaller caller,
@@ -66,6 +78,9 @@ internal static class TenantCapacityPlacementRf3ReadAuthorityAssertions
         await SqlRf3Protocol.EqualAsync(expected,
             await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.ReadPlacementPolicyAsync(request, token)));
         await SqlRf3Protocol.EqualAsync(expected, (await McpCallerAssertions.SuccessAsync<TenantPlacementPolicyV1>(
-            await caller.Official.CallAsync(TenantPlacementPublicProtocol.PolicyTool, new { request }, token))).Value);
+            await caller.Official.CallAsync(TenantPlacementPublicProtocol.PolicyTool, new
+            {
+                request
+            }, token))).Value);
     }
 }

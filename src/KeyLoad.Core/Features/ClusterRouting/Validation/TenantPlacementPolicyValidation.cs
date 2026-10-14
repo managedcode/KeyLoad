@@ -25,7 +25,9 @@ internal static class TenantPlacementPolicyValidation
             || value.OwnerWeights.IsDefaultOrEmpty || value.OwnerWeights.Length > ConfiguredPhysicalOwnerCount
             || value.OwnerWeights.Any(item => item.PhysicalShardId == Guid.Empty || item.Weight is < MinimumOwnerWeight or > MaximumOwnerWeight)
             || value.OwnerWeights.Select(item => item.PhysicalShardId).Distinct().Count() != value.OwnerWeights.Length)
-        { throw Errors.Fail(error, TenantPlacementPolicyProtocol.Invalid); }
+        {
+            throw Errors.Fail(error, TenantPlacementPolicyProtocol.Invalid);
+        }
     }
 
     internal static void RequirePlan(TenantPlacementPlanV1 value, ErrorCode error)
@@ -45,7 +47,9 @@ internal static class TenantPlacementPolicyValidation
             || value.CapacityDigests.IsDefaultOrEmpty || value.CapacityDigests.Any(string.IsNullOrWhiteSpace)
             || value.Moves.Select(move => move.Partition).Distinct().Count() != value.Moves.Length
             || value.Moves.Select(move => move.MoveId).Distinct().Count() != value.Moves.Length)
-        { throw Errors.Fail(error, TenantPlacementPolicyProtocol.Invalid); }
+        {
+            throw Errors.Fail(error, TenantPlacementPolicyProtocol.Invalid);
+        }
         foreach (var move in value.Moves)
         {
             DatabaseEngine.ValidatePartition(move.Partition);
@@ -53,7 +57,9 @@ internal static class TenantPlacementPolicyValidation
                 || move.MoveId == Guid.Empty || move.Mode != PartitionMoveMode.Transfer
                 || move.DestinationPhysicalShardId == Guid.Empty
                 || move.ExpectedPlacementRevision < MinimumBytes)
-            { throw Errors.Fail(error, TenantPlacementPolicyProtocol.Invalid); }
+            {
+                throw Errors.Fail(error, TenantPlacementPolicyProtocol.Invalid);
+            }
         }
         _ = checked(value.DirectoryRevision + value.Moves.Length * TenantPlacementPolicyProtocol.RevisionStep);
     }

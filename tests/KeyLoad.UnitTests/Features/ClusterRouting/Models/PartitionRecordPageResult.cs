@@ -4,5 +4,8 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
 internal sealed class PartitionRecordPageResult
 {
-    internal PartitionRecordPage? Value { get; set; }
+    internal PartitionRecordPage? Value
+    {
+        get; set;
+    }
 }

@@ -12,7 +12,9 @@ internal static class NativeCoverageProductEvidenceOptions
         var info = new FileInfo(path);
         if (!info.Exists || info.Length <= 0 || info.Length > options.MaximumManifestBytes
             || info.LinkTarget is not null || (info.Attributes & FileAttributes.ReparsePoint) != 0)
-        { throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure); }
+        {
+            throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure);
+        }
         var beforeLength = info.Length;
         var beforeWrite = info.LastWriteTimeUtc;
         using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
@@ -22,14 +24,18 @@ internal static class NativeCoverageProductEvidenceOptions
         while ((read = stream.Read(buffer, 0, buffer.Length)) > 0)
         {
             if (contents.Length > options.MaximumManifestBytes - read)
-            { throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure); }
+            {
+                throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure);
+            }
             contents.Write(buffer, 0, read);
         }
         info.Refresh();
         if (!info.Exists || contents.Length != beforeLength || info.Length != beforeLength
             || info.LastWriteTimeUtc != beforeWrite || info.LinkTarget is not null
             || (info.Attributes & FileAttributes.ReparsePoint) != 0)
-        { throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure); }
+        {
+            throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure);
+        }
         return System.Text.Encoding.UTF8.GetString(contents.ToArray());
     }
 }

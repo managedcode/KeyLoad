@@ -36,7 +36,9 @@ internal static class CrossTenantRf3WholeFlow
             await CrossTenantRf3StateAssertions.StateAsync(admin, foreign, McpDocumentProtocol.InitialJson, 1, deadline.Token);
         }, failures);
         if (session is not null)
-        { await ServerFailureObserver.ObserveAsync(() => session.DisposeAsync().AsTask(), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => session.DisposeAsync().AsTask(), failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
     private static async Task<McpDocumentScenario> SeedAsync(ClusterFixture fixture, KeyLoadClient admin, CancellationToken token)
@@ -45,7 +47,9 @@ internal static class CrossTenantRf3WholeFlow
             McpDocumentProtocol.Database, McpDocumentProtocol.Domain, Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat));
         var scenario = new McpDocumentScenario(partition);
         var resource = new ResourceDefinition(McpDocumentProtocol.Collection, ResourceKind.Collection, scenario.Partition.TransactionDomainId)
-        { Indexes = [new(Index, ["/secret"])] };
+        {
+            Indexes = [new(Index, ["/secret"])]
+        };
         await McpCallerAssertions.SdkSuccessAsync(await admin.ConfigureResourceAsync(Guid.NewGuid(),
             new(scenario.Partition.TenantId, scenario.Partition.DatabaseId, resource), token));
         await scenario.SeedAsync(fixture, token);

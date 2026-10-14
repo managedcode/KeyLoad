@@ -19,12 +19,18 @@ public sealed partial class DatabaseEngine
     {
         RequireNativeBudget(payload.Length);
         if (kind == OperationKind.BootstrapPhysicalShardCatalog)
-        { PhysicalShardCatalogValidation.ValidateEncodedRequestLength(payload.Length); }
+        {
+            PhysicalShardCatalogValidation.ValidateEncodedRequestLength(payload.Length);
+        }
         if (kind == OperationKind.BindAtomicPartitionPlacement)
-        { AtomicPartitionPlacementValidation.ValidateEncodedRequestLength(payload.Length); }
+        {
+            AtomicPartitionPlacementValidation.ValidateEncodedRequestLength(payload.Length);
+        }
         if (kind == OperationKind.RegisterPhysicalOwner
             && payload.Length > KeyLoad.Core.Features.ClusterRouting.Contracts.PhysicalOwnerDirectoryProtocol.MaximumRegistrationBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, KeyLoad.Core.Features.ClusterRouting.Contracts.PhysicalOwnerDirectoryProtocol.Capacity); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, KeyLoad.Core.Features.ClusterRouting.Contracts.PhysicalOwnerDirectoryProtocol.Capacity);
+        }
         payload = payload.ToArray();
         var identity = kind switch
         {

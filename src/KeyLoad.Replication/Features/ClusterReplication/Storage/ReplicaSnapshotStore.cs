@@ -104,7 +104,9 @@ public sealed class ReplicaSnapshotStore : IReplicaSnapshotStore
                 ReplicaPersistence.ValidateSnapshot(snapshot, configuration);
                 ReplicaPersistence.VerifyImage(canonical, temporary, snapshot);
                 using (var image = files.OpenPrivate(temporary, FileMode.Open))
-                { image.Flush(true); }
+                {
+                    image.Flush(true);
+                }
                 File.Move(temporary, files.ImagePath(snapshot));
                 log.PublishSnapshot(snapshot);
                 return snapshot;
@@ -122,7 +124,9 @@ public sealed class ReplicaSnapshotStore : IReplicaSnapshotStore
             ValidateScope();
             ReplicaPersistence.ValidateSnapshot(snapshot, configuration);
             if (Current == snapshot)
-            { return snapshot.Length; }
+            {
+                return snapshot.Length;
+            }
             ValidateCut(snapshot);
             var offset = Incoming.Begin(snapshot);
             faultObserver?.Invoke(ReplicaCrashBoundary.SnapshotTransferBegun);
@@ -149,7 +153,9 @@ public sealed class ReplicaSnapshotStore : IReplicaSnapshotStore
         {
             ValidateScope();
             if (Current is { } current && current.TransferId == transferId && Incoming.Descriptor is null)
-            { return current; }
+            {
+                return current;
+            }
             var snapshot = Incoming.Required(transferId);
             ValidateCut(snapshot);
             if (Incoming.Length(snapshot) != snapshot.Length)
@@ -174,7 +180,9 @@ public sealed class ReplicaSnapshotStore : IReplicaSnapshotStore
     private void VerifyIncoming(ReplicaSnapshot snapshot)
     {
         try
-        { ReplicaPersistence.VerifyImage(canonical, files.TransferImage(snapshot), snapshot); }
+        {
+            ReplicaPersistence.VerifyImage(canonical, files.TransferImage(snapshot), snapshot);
+        }
         catch (KeyLoadException error) when (error.Code is ErrorCode.Corruption or ErrorCode.FormatUnsupported or ErrorCode.Validation)
         {
             faultObserver?.Invoke(ReplicaCrashBoundary.SnapshotRejected);
@@ -184,22 +192,10 @@ public sealed class ReplicaSnapshotStore : IReplicaSnapshotStore
     }
 
     private void ValidateCut(ReplicaSnapshot snapshot)
-    {
-        var state = log.State;
-        if (snapshot.Index < ReplicaPersistence.AppliedPosition(canonical) || snapshot.Index < (state.Snapshot?.Index ?? BeforeFirstLogPosition)
-            || snapshot.Index <= state.CommittedIndex && log.TermAt(snapshot.Index) != snapshot.Term)
-        {
-            throw Errors.Fail(ErrorCode.Conflict, ReplicaProtocol.InvalidSnapshot);
-        }
-    }
+        => ReplicaSnapshotAdmission.ValidateCut(canonical, log, snapshot);
 
     private void ValidateScope()
-    {
-        if (canonical.Identity.Incarnation != configuration.Incarnation || log.State.Incarnation != configuration.Incarnation)
-        {
-            throw Errors.Fail(ErrorCode.TokenInvalidated, ReplicaProtocol.InvalidSnapshot);
-        }
-    }
+        => ReplicaSnapshotAdmission.ValidateScope(canonical, log, configuration);
 
     /// <inheritdoc />
     public byte[] ReadChunk(Guid transferId, long offset, int maxBytes)
@@ -218,7 +214,9 @@ public sealed class ReplicaSnapshotStore : IReplicaSnapshotStore
             }
             using var image = File.OpenRead(files.ImagePath(snapshot));
             if (image.Length != snapshot.Length)
-            { throw Errors.Fail(ErrorCode.Corruption, ReplicaProtocol.InvalidSnapshot); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, ReplicaProtocol.InvalidSnapshot);
+            }
             var bytes = new byte[(int)Math.Min(maxBytes, snapshot.Length - offset)];
             image.Position = offset;
             image.ReadExactly(bytes);

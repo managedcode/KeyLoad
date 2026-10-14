@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.Server.Features.Search;
 
@@ -14,6 +14,8 @@ internal static class NativeTextIncrementalAdmission
             || maintenance.NodeId != nodeId || maintenance.IndexGeneration <= EmptyGeneration
             || !Enum.IsDefined(maintenance.Mode) || !Enum.IsDefined(request.Kind)
             || (request.Kind == TextMaintenanceCapabilityKind.Release) != (maintenance.Mode == TextIndexMaintenanceMode.Release))
-        { throw Errors.Fail(ErrorCode.Validation, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, Invalid);
+        }
     }
 }

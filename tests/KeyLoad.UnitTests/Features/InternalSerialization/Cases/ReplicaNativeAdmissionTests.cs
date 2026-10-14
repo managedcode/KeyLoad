@@ -48,7 +48,10 @@ internal sealed class ReplicaNativeAdmissionTests
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() =>
             ReplicaNativeOperationAdmission.Validate(inspected, inspected.Value, null, ControlBytes)).Code).IsEqualTo(ErrorCode.RecoveryRequired);
         var other = NativeAuthorityFixture.Create(database);
-        var substituted = operation with { NativePayload = other.NativePayload };
+        var substituted = operation with
+        {
+            NativePayload = other.NativePayload
+        };
         var changed = ReplicaNativeInspection.Inspect<ReplicatedOperation>(ReplicaProtocolCodec.Serialize(substituted), MaximumEntries);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() =>
             ReplicaNativeOperationAdmission.Validate(changed, changed.Value, database.Database, ControlBytes)).Code).IsEqualTo(ErrorCode.Corruption);
@@ -62,8 +65,14 @@ internal sealed class ReplicaNativeAdmissionTests
         var operation = NativeAuthorityFixture.Create(database);
         var payload = NativeAuthorityFixture.Read(operation);
         var wrong = NativeSerialization.Serialize(WrongValue);
-        var wrapped = NativeAuthorityFixture.Wrap(operation, payload with { Value = wrong });
-        var claims = NativeSerialization.Deserialize<NativeCommandAuthority>(payload.Authority.Span) with { ValueHash = SHA256.HashData(wrong) };
+        var wrapped = NativeAuthorityFixture.Wrap(operation, payload with
+        {
+            Value = wrong
+        });
+        var claims = NativeSerialization.Deserialize<NativeCommandAuthority>(payload.Authority.Span) with
+        {
+            ValueHash = SHA256.HashData(wrong)
+        };
         var signed = NativeAuthorityFixture.Resign(database, wrapped, claims);
         var inspected = ReplicaNativeInspection.Inspect<ReplicatedOperation>(ReplicaProtocolCodec.Serialize(signed), MaximumEntries);
         var before = database.Store.Position;
@@ -82,7 +91,10 @@ internal sealed class ReplicaNativeAdmissionTests
         var operation = NativeAuthorityFixture.Create(database);
         var payload = NativeAuthorityFixture.Read(operation);
         var framed = ReplicaNativeFixtureWriter.Encode(payload, new ReplicaMalformedCommandCodec(shape));
-        var malformed = operation with { NativePayload = framed.AsMemory(ReplicaProtocol.PayloadPrefixBytes) };
+        var malformed = operation with
+        {
+            NativePayload = framed.AsMemory(ReplicaProtocol.PayloadPrefixBytes)
+        };
         var inspected = ReplicaNativeInspection.Inspect<ReplicatedOperation>(ReplicaProtocolCodec.Serialize(malformed), MaximumEntries);
         var before = database.Store.Position;
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() =>
@@ -100,7 +112,10 @@ internal sealed class ReplicaNativeAdmissionTests
     }
 }
 
-internal enum ReplicaMalformedCommandShape { MissingAuthority, WrongBodyReset, UnknownBody }
+internal enum ReplicaMalformedCommandShape
+{
+    MissingAuthority, WrongBodyReset, UnknownBody
+}
 
 // A real native writer profile emits invalid schema groups inside the shared authoritative envelope.
 internal sealed class ReplicaMalformedCommandCodec(ReplicaMalformedCommandShape shape) : IFieldCodec<NativeCommandPayload>
@@ -111,14 +126,18 @@ internal sealed class ReplicaMalformedCommandCodec(ReplicaMalformedCommandShape 
         [AllowNull] Type expectedType, [AllowNull] NativeCommandPayload value) where TBufferWriter : IBufferWriter<byte>
     {
         if (ReferenceCodec.TryWriteReferenceField(ref writer, fieldIdDelta, expectedType, value))
-        { return; }
+        {
+            return;
+        }
         writer.WriteFieldHeader(fieldIdDelta, expectedType, typeof(NativeCommandPayload), WireType.TagDelimited);
         writer.WriteEndBase();
         writer.Session.CodecProvider.GetCodec<ReadOnlyMemory<byte>>().WriteField(ref writer, 0, typeof(ReadOnlyMemory<byte>), value.Value);
         writer.Session.CodecProvider.GetCodec<ErrorCode?>().WriteField(ref writer, 1, typeof(ErrorCode?), value.Error);
         StringCodec.WriteField(ref writer, 1, value.SafeDetail);
         if (shape == ReplicaMalformedCommandShape.WrongBodyReset)
-        { writer.WriteEndBase(); }
+        {
+            writer.WriteEndBase();
+        }
         if (shape != ReplicaMalformedCommandShape.MissingAuthority)
         {
             var delta = shape == ReplicaMalformedCommandShape.WrongBodyReset ? NativeCommandContract.AuthorityId

@@ -10,7 +10,9 @@ internal static class ScriptDomGraphPath
     {
         if (arguments.Count < SqlGraphPathSyntax.MandatoryArgumentCount
             || arguments.Count - SqlGraphPathSyntax.MandatoryArgumentCount > maximumLabels)
-        { throw SqlGraphPathSyntax.Invalid(); }
+        {
+            throw SqlGraphPathSyntax.Invalid();
+        }
         var graph = ScriptDomGraphScalar.String(arguments[GraphIndex], context, ValueDepth);
         var fromCollection = ScriptDomGraphScalar.String(arguments[FromCollectionIndex], context, ValueDepth);
         var fromId = ScriptDomGraphScalar.String(arguments[FromIdIndex], context, ValueDepth);
@@ -24,7 +26,9 @@ internal static class ScriptDomGraphPath
         {
             var builder = ImmutableArray.CreateBuilder<string>();
             for (var index = SqlGraphPathSyntax.MandatoryArgumentCount; index < arguments.Count; index++)
-            { builder.Add(ScriptDomGraphScalar.String(arguments[index], context, ValueDepth)); }
+            {
+                builder.Add(ScriptDomGraphScalar.String(arguments[index], context, ValueDepth));
+            }
             labels = builder.ToImmutable();
         }
         var partition = context.Query.Partition;

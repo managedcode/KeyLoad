@@ -22,12 +22,18 @@ internal sealed class AdminCatalogTests
         await Assert.That(first.Items.Length).IsEqualTo(1);
         await Assert.That(first.Items[0].Name).IsEqualTo(First);
         await Assert.That(first.NextAfterName).IsEqualTo(First);
-        var next = reader.Read(Administrator, request with { AfterName = first.NextAfterName }, CancellationToken.None);
+        var next = reader.Read(Administrator, request with
+        {
+            AfterName = first.NextAfterName
+        }, CancellationToken.None);
         await Assert.That(next.Items.Length).IsEqualTo(1);
         await Assert.That(next.Items[0].Name).IsEqualTo(Second);
         await Assert.That(next.NextAfterName).IsNull();
         await Assert.That(next.CutPosition).IsEqualTo(first.CutPosition);
-        await Assert.That(reader.Read(Administrator, request with { TenantId = ForeignTenant }, CancellationToken.None).Items).IsEmpty();
+        await Assert.That(reader.Read(Administrator, request with
+        {
+            TenantId = ForeignTenant
+        }, CancellationToken.None).Items).IsEmpty();
     }
 
     [Test]
@@ -54,7 +60,11 @@ internal sealed class AdminCatalogTests
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => reader.Read(Member, request, CancellationToken.None)).Code)
             .IsEqualTo(ErrorCode.PermissionDenied);
         db.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(principal with
-        { ClusterAdministrator = true, Revoked = true, PolicyEpoch = principal.PolicyEpoch + 1 })).Get<PrincipalRecord>();
+        {
+            ClusterAdministrator = true,
+            Revoked = true,
+            PolicyEpoch = principal.PolicyEpoch + 1
+        })).Get<PrincipalRecord>();
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => reader.Read(Member, request, CancellationToken.None)).Code)
             .IsEqualTo(ErrorCode.Unauthenticated);
     }
@@ -75,7 +85,10 @@ internal sealed class AdminCatalogTests
     [Test]
     public async Task AcAd004RealCatalogFailsClosedWhenReadByteBudgetIsExhausted()
     {
-        using var db = new TestDatabase(new() { MaxQueryReadBytes = 1 });
+        using var db = new TestDatabase(new()
+        {
+            MaxQueryReadBytes = 1
+        });
         db.Configure(First, ResourceKind.Collection);
         var error = Assert.ThrowsExactly<KeyLoadException>(() => new AdminCatalogReader(db.Database).Read(Administrator,
             new(db.Partition.TenantId, db.Partition.DatabaseId), CancellationToken.None));

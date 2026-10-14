@@ -21,11 +21,15 @@ internal static class RequestCqrsAuthorityFaultProvisioning
         ArgumentNullException.ThrowIfNull(root);
         ArgumentNullException.ThrowIfNull(markOwned);
         if (Directory.Exists(root) || File.Exists(root))
-        { throw new IOException("The isolated C1 test root already exists."); }
+        {
+            throw new IOException("The isolated C1 test root already exists.");
+        }
         Directory.CreateDirectory(root);
         markOwned();
         if (!OperatingSystem.IsWindows())
-        { File.SetUnixFileMode(root, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute); }
+        {
+            File.SetUnixFileMode(root, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+        }
     }
 
     internal static Dictionary<string, string> CurrentImages(string image)
@@ -58,7 +62,11 @@ internal static class RequestCqrsAuthorityFaultProvisioning
     }
 
     internal static PrincipalRecord Revoke(PrincipalRecord principal)
-        => principal with { Revoked = true, PolicyEpoch = checked(principal.PolicyEpoch + 1) };
+        => principal with
+        {
+            Revoked = true,
+            PolicyEpoch = checked(principal.PolicyEpoch + 1)
+        };
 
     internal static CommandRequest Replacement(RequestCqrsAuthorityFaultIdentity identity, Guid commandId,
         string json, long expectedRevision)

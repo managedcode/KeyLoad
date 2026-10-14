@@ -88,8 +88,12 @@ internal sealed class PartitionHostRecoveryTests
         await Assert.That(File.Exists(Path.Combine(path, ReplicaProtocol.IncomingManifest))).IsFalse();
         var principal = stores.Canonical.Read(view => view.GetRecord<PrincipalRecord>(KeySpace.Principal(ClusterPrincipalPolicy.InternalPrincipalId)));
         if (expected == PendingPrincipal.Missing)
-        { await Assert.That(principal).IsNull(); }
+        {
+            await Assert.That(principal).IsNull();
+        }
         else
-        { await Assert.That(principal!.Revoked).IsEqualTo(expected == PendingPrincipal.Modified); }
+        {
+            await Assert.That(principal!.Revoked).IsEqualTo(expected == PendingPrincipal.Modified);
+        }
     }
 }

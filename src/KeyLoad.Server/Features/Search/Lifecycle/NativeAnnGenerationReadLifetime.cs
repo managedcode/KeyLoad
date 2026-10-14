@@ -26,7 +26,9 @@ internal sealed class NativeAnnGenerationReadLifetime(Lock gate, int maximumRead
         lock (gate)
         {
             if (readers == maximumReaders)
-            { throw Errors.Fail(ErrorCode.ResourceExhausted, NativeAnnProtocol.Bound); }
+            {
+                throw Errors.Fail(ErrorCode.ResourceExhausted, NativeAnnProtocol.Bound);
+            }
             var pendingZero = readers == Empty ? new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously) : noReaders;
             var lease = slot.Acquire(maximumReaders);
             noReaders = pendingZero;
@@ -43,7 +45,9 @@ internal sealed class NativeAnnGenerationReadLifetime(Lock gate, int maximumRead
             slot.ReleaseUnderOwnerGate();
             readers--;
             try
-            { NativeAnnSlotRetention.RetireUnpinned(root, slots, configured.Value); }
+            {
+                NativeAnnSlotRetention.RetireUnpinned(root, slots, configured.Value);
+            }
             catch (Exception error)
             {
                 readerFailure = readerFailure is null ? error : new AggregateException(readerFailure, error);
@@ -56,9 +60,13 @@ internal sealed class NativeAnnGenerationReadLifetime(Lock gate, int maximumRead
     private void SignalReaders()
     {
         if (readerFailure is null)
-        { noReaders?.TrySetResult(); }
+        {
+            noReaders?.TrySetResult();
+        }
         else
-        { noReaders?.TrySetException(readerFailure); }
+        {
+            noReaders?.TrySetException(readerFailure);
+        }
         noReaders = null;
     }
 }

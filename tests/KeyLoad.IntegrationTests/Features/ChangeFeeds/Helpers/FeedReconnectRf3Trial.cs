@@ -19,7 +19,10 @@ internal static class FeedReconnectRf3Trial
         await FeedLiveRf3NoEffects.RequireAsync(administrator, scenario,
             FeedLiveRf3NoEffects.Rows(FeedLiveRf3Protocol.FirstRevision, FeedLiveRf3Protocol.FirstJson), FeedLiveRf3Protocol.HiddenSequence,
             () => FeedLiveRf3Assertions.DeniedAsync(reader,
-                scenario.Feed with { MaxBytes = FeedLiveRf3Protocol.RejectedFirstEntryBytes },
+                scenario.Feed with
+                {
+                    MaxBytes = FeedLiveRf3Protocol.RejectedFirstEntryBytes
+                },
                 ErrorCode.BudgetExceeded, token), token);
         {
             var initial = await FeedLiveRf3Assertions.FeedAsync(reader, scenario, scenario.Feed,
@@ -35,7 +38,10 @@ internal static class FeedReconnectRf3Trial
         var recoveredAdmin = await owner.ConnectAsync(fixture.AdminKey, token);
         var reconnected = await owner.ConnectAsync(scenario.Identity.Secret, token);
         var hidden = await FeedGapRf3Assertions.AdvanceAsync(reconnected, scenario, cursor, token);
-        var request = scenario.Feed with { Cursor = hidden.Cursor };
+        var request = scenario.Feed with
+        {
+            Cursor = hidden.Cursor
+        };
         var page = await FeedLiveRf3Assertions.FeedAsync(reconnected, scenario, request, updated.Token,
             FeedLiveRf3Protocol.UpdatedSequence, FeedLiveRf3Protocol.UpdatedRevision,
             FeedLiveRf3Protocol.UpdatedProjected, true, FeedLiveRf3Protocol.UpdatedSequence, token);
@@ -68,7 +74,10 @@ internal static class FeedReconnectRf3Trial
         await FeedLiveRf3NoEffects.RequireAsync(administrator, scenario,
             FeedLiveRf3NoEffects.Rows(FeedLiveRf3Protocol.UpdatedRevision, FeedLiveRf3Protocol.UpdatedJson), FeedLiveRf3Protocol.UpdatedSequence,
             () => FeedLiveRf3Assertions.DeniedAsync(reader, original, ErrorCode.PermissionDenied, token), token);
-        var restored = scenario.Identity.Principal with { PolicyEpoch = revoked.PolicyEpoch + FeedLiveRf3Protocol.EpochStep };
+        var restored = scenario.Identity.Principal with
+        {
+            PolicyEpoch = revoked.PolicyEpoch + FeedLiveRf3Protocol.EpochStep
+        };
         await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), restored, token));
         await FeedLiveRf3NoEffects.RequireAsync(administrator, scenario,
             FeedLiveRf3NoEffects.Rows(FeedLiveRf3Protocol.UpdatedRevision, FeedLiveRf3Protocol.UpdatedJson), FeedLiveRf3Protocol.UpdatedSequence,

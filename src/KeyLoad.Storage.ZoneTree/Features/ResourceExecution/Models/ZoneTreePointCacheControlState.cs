@@ -34,7 +34,11 @@ internal sealed class ZoneTreePointCacheControlState
         var enabled = !closed && binding is { Retired: false }
             && ReferenceEquals(binding, Volatile.Read(ref Binding))
             && Permit.IsCurrentAcceptance(binding.Acceptance) && snapshot.Enabled;
-        return snapshot with { Enabled = enabled, Closed = closed };
+        return snapshot with
+        {
+            Enabled = enabled,
+            Closed = closed
+        };
     }
 
     internal ZoneTreePointCacheControlResult ApplyUnderWrite(CacheReadPermitAcceptance receipt)

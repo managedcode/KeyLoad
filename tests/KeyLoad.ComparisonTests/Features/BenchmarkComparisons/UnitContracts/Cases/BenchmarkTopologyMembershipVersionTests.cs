@@ -17,7 +17,9 @@ internal sealed class BenchmarkTopologyMembershipVersionTests
     [Arguments(false)]
     public Task AcIs004UnknownNativeMembershipVersionRejectsWithoutChangingPersistedAuthority(bool benchmark)
         => RejectWithoutMutationAsync(record => ReplicaProtocolCodec.Serialize(record with
-        { Version = UnsupportedFutureMembershipVersion }), benchmark);
+        {
+            Version = UnsupportedFutureMembershipVersion
+        }), benchmark);
 
     private static async Task RejectWithoutMutationAsync(Func<ReplicaBenchmarkMembershipRecord, byte[]> encode, bool benchmark)
     {
@@ -45,7 +47,10 @@ internal sealed class BenchmarkTopologyMembershipVersionTests
 
         using var reopened = fixture.Open();
         var identity = reopened.Identity;
-        var failure = BenchmarkTopologyMembershipFixture.Reject(reopened, configuration with { BenchmarkTopology = benchmark });
+        var failure = BenchmarkTopologyMembershipFixture.Reject(reopened, configuration with
+        {
+            BenchmarkTopology = benchmark
+        });
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.FormatUnsupported);
         await Assert.That(reopened.Position).IsEqualTo(PersistedPosition);
         await Assert.That(reopened.Identity).IsEqualTo(identity);

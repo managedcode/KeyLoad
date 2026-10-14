@@ -55,7 +55,10 @@ public static class DocumentComparisonOracle
     {
         using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         foreach (var document in documents)
-        { Append(hash, document.Id); Append(hash, CanonicalBody(document.Json)); }
+        {
+            Append(hash, document.Id);
+            Append(hash, CanonicalBody(document.Json));
+        }
         return Convert.ToHexStringLower(hash.GetHashAndReset());
     }
     private static string CanonicalBody(string json)

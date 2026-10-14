@@ -58,5 +58,7 @@ internal static class TopicSqlNativeSeed
         => database.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(new(TopicSqlProtocol.Reader,
             database.Partition.TenantId, [new(database.Partition.DatabaseId, TopicSqlProtocol.Topic, capability)],
             fields.IsDefault ? [] : fields)
-        { PolicyEpoch = epoch })).Get<PrincipalRecord>();
+        {
+            PolicyEpoch = epoch
+        })).Get<PrincipalRecord>();
 }

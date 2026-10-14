@@ -42,9 +42,13 @@ internal static class RetentionAckArchiveR53Current
         await PageAsync(state, (await McpCallerAssertions.SuccessAsync<EventSourcePage>(
             await callers.Mcp.CallAsync(McpCallerTools.EventsRead, read, token))).Value);
         if (state.Original.Continued)
-        { await ClusterRestoreMixedRetentionRf3Queue.HealthyAsync(callers, state.Original, token); }
+        {
+            await ClusterRestoreMixedRetentionRf3Queue.HealthyAsync(callers, state.Original, token);
+        }
         else
-        { await QueueLifecyclePublicAssertions.InitialAsync(callers, state.Original.OriginalQueue, token); }
+        {
+            await QueueLifecyclePublicAssertions.InitialAsync(callers, state.Original.OriginalQueue, token);
+        }
         var placement = new AtomicPartitionPlacementReadRequest(1, state.Original.Partition);
         await SqlRf3Protocol.EqualAsync(state.Placement, await McpCallerAssertions.SdkSuccessAsync(
             await callers.Sdk.ReadAtomicPartitionPlacementAsync(placement, token)));
@@ -60,7 +64,11 @@ internal static class RetentionAckArchiveR53Current
     {
         await Assert.That(page.Cursor).IsNotEmpty();
         await Assert.That(page.CutPosition).IsGreaterThan(0L);
-        await SqlRf3Protocol.EqualAsync(state.Page with { Cursor = page.Cursor, CutPosition = page.CutPosition }, page);
+        await SqlRf3Protocol.EqualAsync(state.Page with
+        {
+            Cursor = page.Cursor,
+            CutPosition = page.CutPosition
+        }, page);
     }
 
     internal static async Task ReceiptAsync(RetentionAckArchiveR53State state, CommitReceipt receipt,

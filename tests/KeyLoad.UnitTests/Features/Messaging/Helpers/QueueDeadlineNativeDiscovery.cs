@@ -12,7 +12,10 @@ internal static class QueueDeadlineNativeDiscovery
     {
         var clock = new DueDiscoveryClock();
         var database = new DatabaseEngine(fixture.Store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(),
-            UnitExecutionOptions.DueWork(new() { MaximumRecordsPerPage = QueueDeadlineNativeProtocol.MinimumPageRecords }),
+            UnitExecutionOptions.DueWork(new()
+            {
+                MaximumRecordsPerPage = QueueDeadlineNativeProtocol.MinimumPageRecords
+            }),
             UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(),
             UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(),
             UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(),
@@ -47,7 +50,9 @@ internal static class QueueDeadlineNativeDiscovery
             await Assert.That(page.ExaminedBytes).IsLessThanOrEqualTo(database.DueExecution.MaximumRangeBytes);
             await Assert.That(page.Rejected).IsEmpty();
             if (!page.Jobs.IsEmpty)
-            { observed = page.Jobs.Single(); }
+            {
+                observed = page.Jobs.Single();
+            }
         }
         await Assert.That(clock.ExpiredAfterNativeProgress).IsTrue();
         await Assert.That(observed).IsEqualTo(new QueueDeadlineHint(lane, expected));

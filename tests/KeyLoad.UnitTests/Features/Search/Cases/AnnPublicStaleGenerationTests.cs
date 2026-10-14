@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.UnitTests.Features.Search;
 
@@ -30,7 +30,11 @@ internal sealed class AnnPublicStaleGenerationTests
             await Assert.That(NativeAnnFixtureFileSnapshot.Capture(database.Directory))
                 .IsEquivalentTo(files, TUnit.Assertions.Enums.CollectionOrdering.Matching);
             await runtime.Owner.AbortAsync(runtime.SessionId);
-            var restore = pin with { CommandId = Guid.NewGuid(), Mode = AnnMaintenanceMode.Restore };
+            var restore = pin with
+            {
+                CommandId = Guid.NewGuid(),
+                Mode = AnnMaintenanceMode.Restore
+            };
             var began = await NativeAnnMaintenancePhaseAssertions.UnchangedPhaseAsync(database, runtime, restore,
                 AnnMaintenanceCapabilityKind.Begin);
             _ = await NativeAnnMaintenancePhaseAssertions.UnchangedPhaseAsync(database, runtime, restore,

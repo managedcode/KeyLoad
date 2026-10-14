@@ -47,6 +47,8 @@ internal static class McpOwnedDiagnosticAssertions
             new(projection ? ProjectionKind : PutVectorKind, ConfiguredVectorProfileFlow.Collection, ConfiguredVectorProfileFlow.Target, Revision)
         ];
         for (var index = 0; index < ExpectedCount; index++)
-        { await Assert.That(NativeSerialization.Serialize(actual.Mutations[index]).SequenceEqual(NativeSerialization.Serialize(expected[index]))).IsTrue(); }
+        {
+            await Assert.That(NativeSerialization.Serialize(actual.Mutations[index]).SequenceEqual(NativeSerialization.Serialize(expected[index]))).IsTrue();
+        }
     }
 }

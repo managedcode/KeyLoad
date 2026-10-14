@@ -12,7 +12,10 @@ internal static class SubscriptionReceiveSlotAuthorityFlow
         using var fixture = new TestDatabase();
         fixture.Configure("topic", ResourceKind.Topic);
         SubscriptionTestActions.Publish(fixture);
-        var group = SubscriptionTestActions.Configure(fixture, policy: new() { MaxWindow = 3 });
+        var group = SubscriptionTestActions.Configure(fixture, policy: new()
+        {
+            MaxWindow = 3
+        });
         var source = SubscriptionCheckpointAuthorityAssertions.SourceImage(fixture.Store, group.Source.Partition);
         var claimRequest = new ReceiveSubscriptionRequest(Guid.NewGuid(), group, MaxEvents: 3);
         var original = Apply(fixture.Database, OperationKind.ReceiveSubscription, claimRequest, claimRequest.RequestId, token);
@@ -84,7 +87,10 @@ internal static class SubscriptionReceiveSlotAuthorityFlow
         await SubscriptionReceiveSlotAuthorityAssertions.SettledAsync(cold, second, group, request, result,
             claimRequest, original, receipts, token);
         await SubscriptionCheckpointAuthorityAssertions.StaleAsync(cold, second,
-            receipts[2].Command with { CommandId = Guid.NewGuid() }, token);
+            receipts[2].Command with
+            {
+                CommandId = Guid.NewGuid()
+            }, token);
         await SubscriptionReceiveSlotAuthorityAssertions.HealthyAsync(cold, second, group, token);
     }
 

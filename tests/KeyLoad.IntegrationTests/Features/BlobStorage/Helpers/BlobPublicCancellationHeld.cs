@@ -19,9 +19,17 @@ internal static class BlobPublicCancellationHeld
         Task<Result<T>>? sdkTask = null;
         Task<RequestCqrsFaultMcpObservation>? mcpTask = null;
         if (useMcp)
-        { mcpTask = mcp(cancellation.Token); owner.McpCall = mcpTask; owner.SdkCall = null; }
+        {
+            mcpTask = mcp(cancellation.Token);
+            owner.McpCall = mcpTask;
+            owner.SdkCall = null;
+        }
         else
-        { sdkTask = sdk(cancellation.Token); owner.SdkCall = sdkTask; owner.McpCall = null; }
+        {
+            sdkTask = sdk(cancellation.Token);
+            owner.SdkCall = sdkTask;
+            owner.McpCall = null;
+        }
         owner.Lifecycle.SetStage(RequestCqrsLifecycleStage.FaultMarkerWait);
         var marker = await owner.Controls.WaitForMarkerAsync(arm, RequestCqrsProbePhase.BeforeSubmit,
             RequestCqrsProbeOutcome.Observed, owner.Discovery, token);
@@ -37,7 +45,9 @@ internal static class BlobPublicCancellationHeld
         {
             var actualRequest = await RequestCqrsFaultOutcome.AssertMcpInterruptionAsync(await mcpTask!);
             if (actualRequest is { } value)
-            { await Assert.That(value).IsEqualTo(marker.RequestId); }
+            {
+                await Assert.That(value).IsEqualTo(marker.RequestId);
+            }
         }
         else
         {
@@ -55,7 +65,9 @@ internal static class BlobPublicCancellationHeld
         string tool, T request, CancellationToken token)
     {
         try
-        { return new(await callers.Mcp.CallAsync(tool, request, token), null); }
+        {
+            return new(await callers.Mcp.CallAsync(tool, request, token), null);
+        }
         catch (OperationCanceledException error) { return new(null, error); }
         catch (HttpRequestException error) { return new(null, error); }
         catch (IOException error) { return new(null, error); }

@@ -18,7 +18,11 @@ internal sealed class RequestCqrsResourceCompletionEvidence
         var previous = ReadScopeCompletion(owner, node);
         var current = state == RequestCqrsCompletionCallState.Started
             ? new RequestCqrsCompletionCallSnapshot(state, status, null)
-            : previous with { State = state, StatusAtReturn = status };
+            : previous with
+            {
+                State = state,
+                StatusAtReturn = status
+            };
         scope = WriteScopeCompletion(owner, node, current);
     }
 
@@ -49,10 +53,17 @@ internal sealed class RequestCqrsResourceCompletionEvidence
         };
 
     internal void ReturnDrain()
-        => drain = drain with { Returned = true };
+        => drain = drain with
+        {
+            Returned = true
+        };
 
     internal void EnterFallback(bool captureCanceled)
-        => drain = drain with { FallbackEntered = true, CaptureCanceledAtFallback = captureCanceled };
+        => drain = drain with
+        {
+            FallbackEntered = true,
+            CaptureCanceledAtFallback = captureCanceled
+        };
 
     internal void JoinOriginal(bool captureCanceled, TaskStatus? first, TaskStatus? second, TaskStatus? third)
         => drain = drain with
@@ -114,7 +125,11 @@ internal sealed class RequestCqrsResourceCompletionEvidence
         var previous = ReadCompletion(node);
         var current = state == RequestCqrsCompletionCallState.Started
             ? new RequestCqrsCompletionCallSnapshot(state, status, null)
-            : previous with { State = state, StatusAtReturn = status };
+            : previous with
+            {
+                State = state,
+                StatusAtReturn = status
+            };
         WriteCompletion(node, current);
     }
 

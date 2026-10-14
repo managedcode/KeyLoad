@@ -13,22 +13,30 @@ public sealed partial class DatabaseEngine
             var request = Payload<DeliveryCommand>(operation);
             var policy = Resource(view, request.Lane.Partition, request.Lane.Queue, ResourceKind.WorkQueue).QueuePolicy;
             if (request.Action != DeliveryAction.Nack || policy.RetryJitter != QueueRetryJitter.Full)
-            { return inputs; }
+            {
+                return inputs;
+            }
             var lease = Lease(view, principal, request.Lane, request.Token, operation.EvaluatedAt);
             if (lease.Metadata.Attempts < policy.MaxAttempts)
-            { inputs.Add(new(request.Lane, policy, lease.Metadata, ReadOnlyMemory<byte>.Empty)); }
+            {
+                inputs.Add(new(request.Lane, policy, lease.Metadata, ReadOnlyMemory<byte>.Empty));
+            }
         }
         if (operation.Kind == OperationKind.Receive)
         {
             var request = Payload<ReceiveRequest>(operation);
             var resource = Resource(view, request.Lane.Partition, request.Lane.Queue, ResourceKind.WorkQueue);
             if (resource.QueuePolicy.RetryJitter != QueueRetryJitter.Full || resource.Paused || DispatchPaused(view))
-            { return inputs; }
+            {
+                return inputs;
+            }
             RequireQueueRetryReceive(request, resource.QueuePolicy);
             ReadQueueLeaseRetryInputs(view, request.Lane, resource.QueuePolicy, operation.EvaluatedAt, inputs);
         }
         if (operation.Kind == OperationKind.Batch)
-        { ReadQueueDeadlineRetryInputs(view, operation, inputs); }
+        {
+            ReadQueueDeadlineRetryInputs(view, operation, inputs);
+        }
         return inputs;
     }
 
@@ -37,7 +45,9 @@ public sealed partial class DatabaseEngine
         if (request.MaxMessages < MessagingMinimumPositiveCount || request.MaxMessages > messagingExecution.MaximumReceiveMessages
             || request.MaxBytes < MessagingMinimumPositiveCount || request.MaxBytes > Limits.MaxBatchBytes
             || request.LeaseSeconds < MessagingMinimumPositiveCount || request.LeaseSeconds > policy.MaxLeaseSeconds)
-        { throw Errors.Fail(ErrorCode.Validation, InvalidReceiveBudget); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, InvalidReceiveBudget);
+        }
     }
 
     private void ReadQueueLeaseRetryInputs(IKeyValueView view, QueueLaneRef lane, QueuePolicy policy,
@@ -48,13 +58,17 @@ public sealed partial class DatabaseEngine
         {
             var key = KeyCodec.Decode(row.Key.Span);
             if ((DateTimeOffset)key[^QueueSweepTransitionsNamespaceComponentFromEnd]! > now)
-            { break; }
+            {
+                break;
+            }
             var id = NativeSerialization.Deserialize<string>(row.Value.Span);
             var metadata = view.GetRecord<MessageMetadata>(QueueKey(MessageMetadataSpace, lane, id))
                 ?? throw Errors.Fail(ErrorCode.Corruption, MissingIndexedMetadata);
             RequireCurrentQueueDueEntry(lane, metadata, now, leased: true, row.Key.Span);
             if (metadata.ExpiresAt <= now || metadata.Attempts >= policy.MaxAttempts)
-            { continue; }
+            {
+                continue;
+            }
             inputs.Add(new(lane, policy, metadata, row.Key.ToArray()));
         }
     }

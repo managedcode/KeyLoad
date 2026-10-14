@@ -28,7 +28,10 @@ internal sealed class ReplicaOperationInspectionCodec : ReplicaRecordInspectionC
             ReplicaInspectionFields.Read<string, TInput>(ref reader, ReplicaInspectionFields.FollowingFieldIdDelta),
             ReplicaInspectionFields.Read<DateTimeOffset, TInput>(ref reader, ReplicaInspectionFields.FollowingFieldIdDelta),
             ReplicaInspectionFields.Read<string, TInput>(ref reader, ReplicaInspectionFields.FollowingFieldIdDelta));
-        return result with { NativePayload = ReplicaInspectionFields.Read<ReadOnlyMemory<byte>, TInput>(ref reader, ReplicaInspectionFields.FollowingFieldIdDelta) };
+        return result with
+        {
+            NativePayload = ReplicaInspectionFields.Read<ReadOnlyMemory<byte>, TInput>(ref reader, ReplicaInspectionFields.FollowingFieldIdDelta)
+        };
     }
 
     protected override void WriteFields<TBufferWriter>(ref Writer<TBufferWriter> writer, ReplicatedOperation value)

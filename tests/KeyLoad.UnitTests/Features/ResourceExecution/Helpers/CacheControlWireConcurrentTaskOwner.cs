@@ -1,4 +1,4 @@
-using KeyLoad.Orleans.Features.ResourceExecution;
+using KeyLoad.Clustering.Features.ResourceExecution;
 using static KeyLoad.UnitTests.Features.ResourceExecution.CacheControlWireConcurrencySupport;
 
 namespace KeyLoad.UnitTests.Features.ResourceExecution;
@@ -6,15 +6,39 @@ namespace KeyLoad.UnitTests.Features.ResourceExecution;
 internal sealed class CacheControlWireConcurrentTaskOwner
 {
     internal Task<ConcurrentResult>?[] Workers { get; } = new Task<ConcurrentResult>?[WorkerCount];
-    internal Task<ConcurrentResult[]>? WorkerJoin { get; set; }
-    internal Task? ScenarioTask { get; set; }
-    internal Task? DisposeTask { get; set; }
-    internal Task? FallbackTask { get; set; }
-    internal Task? FallbackDispatchTask { get; set; }
+    internal Task<ConcurrentResult[]>? WorkerJoin
+    {
+        get; set;
+    }
+    internal Task? ScenarioTask
+    {
+        get; set;
+    }
+    internal Task? DisposeTask
+    {
+        get; set;
+    }
+    internal Task? FallbackTask
+    {
+        get; set;
+    }
+    internal Task? FallbackDispatchTask
+    {
+        get; set;
+    }
     internal Task[] Originals { get; private set; } = [];
-    internal Task? OriginalJoin { get; private set; }
-    internal Task? Cleanup { get; private set; }
-    internal Task? CleanupObservation { get; private set; }
+    internal Task? OriginalJoin
+    {
+        get; private set;
+    }
+    internal Task? Cleanup
+    {
+        get; private set;
+    }
+    internal Task? CleanupObservation
+    {
+        get; private set;
+    }
 
     internal void RegisterCleanup(CacheControlAuthenticator authenticator)
     {

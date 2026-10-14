@@ -20,7 +20,9 @@ internal static class PolicyEpochCursorContinuation
             ErrorCode.Unauthenticated, token);
         var principal = new PrincipalRecord(Reader, Tenant,
             [new(DatabaseScope, Collection, Capability.DocumentsRead | Capability.Query)], [])
-        { PolicyEpoch = RepairedEpoch };
+        {
+            PolicyEpoch = RepairedEpoch
+        };
         var persisted = db.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(principal)).Get<PrincipalRecord>();
         await Assert.That(JsonDefaults.Serialize(persisted).AsSpan().SequenceEqual(JsonDefaults.Serialize(principal))).IsTrue();
         await PolicyEpochCursorAssertions.RefusedAsync(queries, db.Store, request, originalCursor, ErrorCode.CursorExpired, token);
@@ -51,27 +53,43 @@ internal static class PolicyEpochCursorContinuation
                 var queries = new QueryEngine(database, UnitExecutionOptions.QueryExecution());
                 await PolicyEpochCursorAssertions.RefusedAsync(queries, cold, request, originalCursor, ErrorCode.CursorExpired, token);
                 if (cold.Identity.ReadGeneration == identity.ReadGeneration)
-                { await PolicyEpochCursorAssertions.ContinuationAsync(queries, cold, request, repairedCursor, cut, token); }
+                {
+                    await PolicyEpochCursorAssertions.ContinuationAsync(queries, cold, request, repairedCursor, cut, token);
+                }
                 else
-                { await PolicyEpochCursorAssertions.RefusedAsync(queries, cold, request, repairedCursor, ErrorCode.CursorExpired, token); }
+                {
+                    await PolicyEpochCursorAssertions.RefusedAsync(queries, cold, request, repairedCursor, ErrorCode.CursorExpired, token);
+                }
                 await PolicyEpochCursorAssertions.PagesAsync(queries, cold, request, token);
             }
             catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
-            { primary = error; throw; }
+            {
+                primary = error;
+                throw;
+            }
             catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null)
-            { primary = error; throw; }
+            {
+                primary = error;
+                throw;
+            }
         }
         catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
-        { Retain(primary, error, failures); }
+        {
+            Retain(primary, error, failures);
+        }
         catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null)
-        { Retain(primary, error, failures); }
+        {
+            Retain(primary, error, failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
     private static void Retain(Exception? primary, Exception terminal, List<Exception> failures)
     {
         if (primary is not null && !ReferenceEquals(primary, terminal))
-        { failures.Add(primary); }
+        {
+            failures.Add(primary);
+        }
         failures.Add(terminal);
     }
 }

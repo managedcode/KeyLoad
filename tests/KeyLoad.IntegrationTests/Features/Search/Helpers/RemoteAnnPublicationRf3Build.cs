@@ -46,13 +46,20 @@ internal static class RemoteAnnPublicationRf3Build
         var current = await previous.Scenario.RequestAsync(sdk, official, token);
         var original = current with
         {
-            Consumer = current.Consumer with { Name = RemoteAnnPublicationRf3Protocol.MovedConsumer },
+            Consumer = current.Consumer with
+            {
+                Name = RemoteAnnPublicationRf3Protocol.MovedConsumer
+            },
             MaintenanceProfile = previous.Original.MaintenanceProfile
         };
         await Assert.That(original.NodeId).IsNotEqualTo(previous.Original.NodeId);
         await Assert.That(original.Placement.PhysicalShardId).IsNotEqualTo(previous.Original.Placement.PhysicalShardId);
         var completed = await McpCallerAssertions.SdkSuccessAsync(await sdk.MaintainAnnIndexAsync(original, token));
         await NativeAnnMaintenanceRf3Assertions.ResultAsync(completed, original);
-        return previous with { Original = original, Completed = completed };
+        return previous with
+        {
+            Original = original,
+            Completed = completed
+        };
     }
 }

@@ -34,17 +34,25 @@ internal static class PartitionWriterOrleansStores
             var owner = seed.Directory.ControlOwner;
             if (configured.Incarnation != owner.Incarnation
                 || !configured.VoterIds.SequenceEqual(owner.VoterIds, StringComparer.Ordinal))
-            { throw new InvalidOperationException(PartitionWriterOrleansProtocol.OwnerMismatch); }
+            {
+                throw new InvalidOperationException(PartitionWriterOrleansProtocol.OwnerMismatch);
+            }
             var database = Database(canonical, owner);
             log = new(replica, Options.Create(configured), canonicalDatabase: database);
             await operation(canonical, replica, log, database).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
         if (log is { } journal)
-        { ServerFailureObserver.Observe(journal.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(journal.Dispose, failures);
+        }
         if (replica is { } replicaOwner)
-        { ServerFailureObserver.Observe(replicaOwner.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(replicaOwner.Dispose, failures);
+        }
         if (canonical is { } canonicalOwner)
-        { ServerFailureObserver.Observe(canonicalOwner.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(canonicalOwner.Dispose, failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 

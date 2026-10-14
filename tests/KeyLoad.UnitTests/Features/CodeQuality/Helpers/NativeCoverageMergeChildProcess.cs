@@ -55,7 +55,9 @@ internal static class NativeCoverageMergeChildProcess
         {
             ServerFailureObserver.Observe(() => started = process.Start(), failures);
             if (!started && failures.Count == 0)
-            { failures.Add(new InvalidOperationException(StartFailure)); }
+            {
+                failures.Add(new InvalidOperationException(StartFailure));
+            }
             if (started)
             {
                 await ServerFailureObserver.ObserveAsync(async () =>
@@ -70,7 +72,9 @@ internal static class NativeCoverageMergeChildProcess
         finally
         {
             if (unsettled)
-            { FailStop(); }
+            {
+                FailStop();
+            }
             ServerFailureObserver.Observe(() =>
             {
                 process.Dispose();
@@ -78,7 +82,12 @@ internal static class NativeCoverageMergeChildProcess
             }, failures);
         }
         if (result is not null && disposed)
-        { result = result with { Disposed = true }; }
+        {
+            result = result with
+            {
+                Disposed = true
+            };
+        }
         ServerFailureObserver.ThrowIfAny(failures);
         return result ?? throw new InvalidOperationException(StartFailure);
     }
@@ -131,7 +140,9 @@ internal static class NativeCoverageMergeChildProcess
         var expiration = Task.Delay(TimeSpan.FromMilliseconds(InfiniteWaitMilliseconds), startedAt.Provider, cleanupDeadline.Token);
         ServerFailureObserver.Observe(() => KillIfRunning(process), failures);
         if (!joined.IsCompleted)
-        { _ = await Task.WhenAny(joined, expiration).ConfigureAwait(false); }
+        {
+            _ = await Task.WhenAny(joined, expiration).ConfigureAwait(false);
+        }
         if (!joined.IsCompleted)
         {
             failures.Add(new TimeoutException(TimeoutFailure));
@@ -150,7 +161,9 @@ internal static class NativeCoverageMergeChildProcess
     {
         var elapsed = startedAt.Elapsed;
         if (elapsed <= timeout)
-        { return settlement; }
+        {
+            return settlement;
+        }
         var elapsedAfterPrimaryDeadline = elapsed - timeout;
         return elapsedAfterPrimaryDeadline >= settlement ? TimeSpan.Zero : settlement - elapsedAfterPrimaryDeadline;
     }
@@ -159,7 +172,9 @@ internal static class NativeCoverageMergeChildProcess
         CliBackupRestoreProcessOutput stderr, Task? exit, Task? output, Task? error, Task joined)
     {
         if (!joined.IsCompletedSuccessfully || exit is null || output is null || error is null)
-        { return null; }
+        {
+            return null;
+        }
         return new(process.ExitCode, stdout.Text, stderr.Text, exit.IsCompleted, output.IsCompleted,
             error.IsCompleted, Disposed: false);
     }
@@ -167,7 +182,12 @@ internal static class NativeCoverageMergeChildProcess
     private static void KillIfRunning(Process process)
     {
         try
-        { if (!process.HasExited) { process.Kill(entireProcessTree: true); } }
+        {
+            if (!process.HasExited)
+            {
+                process.Kill(entireProcessTree: true);
+            }
+        }
         catch (InvalidOperationException) when (process.HasExited) { }
     }
 
@@ -175,9 +195,13 @@ internal static class NativeCoverageMergeChildProcess
     private static void FailStop()
     {
         try
-        { Console.Error.WriteLine(FailStopMessage); }
+        {
+            Console.Error.WriteLine(FailStopMessage);
+        }
         finally
-        { Environment.Exit(FailStopExitCode); }
+        {
+            Environment.Exit(FailStopExitCode);
+        }
         throw new InvalidOperationException(FailStopMessage);
     }
 }

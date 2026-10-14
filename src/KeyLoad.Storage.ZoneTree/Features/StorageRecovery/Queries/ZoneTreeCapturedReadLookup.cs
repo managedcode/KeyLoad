@@ -16,11 +16,17 @@ internal static class ZoneTreeCapturedReadLookup
             var middle = lower + (upper - lower) / MidpointDivisor;
             var comparison = records[middle].Key.Span.SequenceCompareTo(key);
             if (comparison == EqualKeyComparison)
-            { return middle; }
+            {
+                return middle;
+            }
             if (comparison < EqualKeyComparison)
-            { lower = middle + NeighborOffset; }
+            {
+                lower = middle + NeighborOffset;
+            }
             else
-            { upper = middle - NeighborOffset; }
+            {
+                upper = middle - NeighborOffset;
+            }
         }
         return ~lower;
     }

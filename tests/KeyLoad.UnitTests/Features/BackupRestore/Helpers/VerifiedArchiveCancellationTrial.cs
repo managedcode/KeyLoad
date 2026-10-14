@@ -29,14 +29,18 @@ internal static class VerifiedArchiveCancellationTrial
         await BackupPersistedPolicyAssertions.SameAsync(source.Identity, verified.Identity);
         await Assert.That(verified.Position).IsEqualTo(source.Position);
         if (existingEmpty)
-        { Directory.CreateDirectory(fixture.Destination); }
+        {
+            Directory.CreateDirectory(fixture.Destination);
+        }
         var parent = Path.GetDirectoryName(fixture.Destination) ?? throw new InvalidOperationException(MissingParent);
         var before = Directory.EnumerateFileSystemEntries(parent).Order(StringComparer.Ordinal).ToArray();
         await RefuseAsync(fixture);
         await Assert.That(Directory.Exists(fixture.Destination)).IsEqualTo(existingEmpty);
         await Assert.That(File.Exists(fixture.Destination)).IsFalse();
         if (existingEmpty)
-        { await Assert.That(Directory.EnumerateFileSystemEntries(fixture.Destination).Any()).IsFalse(); }
+        {
+            await Assert.That(Directory.EnumerateFileSystemEntries(fixture.Destination).Any()).IsFalse();
+        }
         await Assert.That(Directory.EnumerateFileSystemEntries(parent).Order(StringComparer.Ordinal).ToArray())
             .IsEquivalentTo(before, CollectionOrdering.Matching);
         await NativeBackupJournalRepairAssertions.SameCutAsync(source,

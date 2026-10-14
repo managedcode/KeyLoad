@@ -30,7 +30,11 @@ internal sealed class VectorIndexContractTests
             .Throws<InvalidDataException>();
         var hnsw = VectorComparisonProfile.Parse("vector-100k-hnsw-plain-c16");
         await Assert.That(() => VectorComparisonRunner.ValidateIndex(hnsw,
-            receipt with { IndexKind = VectorIndexKind.Hnsw, BuildMilliseconds = 1d }, "sequential scan"))
+            receipt with
+            {
+                IndexKind = VectorIndexKind.Hnsw,
+                BuildMilliseconds = 1d
+            }, "sequential scan"))
             .Throws<InvalidDataException>();
     }
 }

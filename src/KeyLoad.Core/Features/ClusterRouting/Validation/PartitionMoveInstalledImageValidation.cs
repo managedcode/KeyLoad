@@ -18,11 +18,15 @@ internal static class PartitionMoveInstalledImageValidation
         foreach (var family in stage.Descriptor.Families)
         {
             if (PartitionMoveFamilyCapture.ControlOwned(family.Family))
-            { continue; }
+            {
+                continue;
+            }
             VerifyFamily(view, stage, family, destination, limits, ref ordinal, ref examined);
         }
         if (ordinal != stage.AcceptedPages || ordinal != stage.InstalledPages)
-        { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.InvalidImage); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.InvalidImage);
+        }
     }
 
     private static void VerifyFamily(IKeyValueView view, PartitionMoveTargetStage stage,
@@ -41,7 +45,9 @@ internal static class PartitionMoveInstalledImageValidation
                 ?? throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.InvalidImage);
             PartitionMovePageAdmission.Require(page, stage.Fence, limits, limits.MaxBatchBytes);
             if (page.Ordinal != ordinal || page.Family != family.Family)
-            { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.InvalidImage); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.InvalidImage);
+            }
             VerifyPage(view, stage, page, destination, limits, hash, ref after, ref examined);
             records = checked(records + page.Records.Length);
             bytes = checked(bytes + page.Records.Sum(value => (long)value.Key.Length + value.Value.Length));
@@ -51,7 +57,9 @@ internal static class PartitionMoveInstalledImageValidation
             || Convert.ToHexStringLower(hash.GetHashAndReset()) != family.Digest
             || view.Scan(KeySpace.Partition(family.Family, stage.Control.Partition),
                 PartitionMoveProtocol.SequenceStep, after).Records.Length != PartitionMoveProtocol.EmptyCount)
-        { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.InvalidImage); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.InvalidImage);
+        }
     }
 
     private static void VerifyPage(IKeyValueView view, PartitionMoveTargetStage stage,
@@ -60,7 +68,9 @@ internal static class PartitionMoveInstalledImageValidation
     {
         var actual = view.Scan(KeySpace.Partition(page.Family, stage.Control.Partition), page.Records.Length, after);
         if (actual.Records.Length != page.Records.Length)
-        { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.InvalidImage); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.InvalidImage);
+        }
         for (var index = PartitionMoveProtocol.EmptyCount; index < page.Records.Length; index++)
         {
             var original = page.Records[index];
@@ -68,11 +78,15 @@ internal static class PartitionMoveInstalledImageValidation
             examined = checked(examined + original.Key.Length + original.Value.Length
                 + target.Key.Length + target.Value.Length);
             if (examined > limits.MaxQueryReadBytes)
-            { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity); }
+            {
+                throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
+            }
             var expected = PartitionMoveBlobImport.Value(page, original,
                 stage.Fence.SourcePlacement.Incarnation, destination);
             if (!original.Key.Span.SequenceEqual(target.Key.Span) || !expected.AsSpan().SequenceEqual(target.Value.Span))
-            { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.InvalidImage); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.InvalidImage);
+            }
             PartitionMoveImageDigest.Append(hash, original.Key.Span);
             PartitionMoveImageDigest.Append(hash, original.Value.Span);
         }

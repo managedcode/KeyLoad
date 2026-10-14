@@ -16,7 +16,12 @@ internal static class ControlledPartitionMovementRetireExpiryAssertions
         var committed = source.Journal.Log.State.CommittedIndex;
         var applied = source.Database.LastApplied;
         var expired = original with
-        { Envelope = original.Envelope with { ExpiresAt = source.Database.EvaluationClock.GetUtcNow() } };
+        {
+            Envelope = original.Envelope with
+            {
+                ExpiresAt = source.Database.EvaluationClock.GetUtcNow()
+            }
+        };
         var denied = await Assert.ThrowsAsync<KeyLoadException>(() =>
             ControlledPartitionMovementVerifiedSubmit.SubmitAsync(source, runtime, admission, expired, cancellationToken));
         await Assert.That(denied).IsNotNull();

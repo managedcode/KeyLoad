@@ -26,10 +26,22 @@ internal sealed partial class ControlledPartitionMovementNativeHostSettings
     private readonly ImmutableArray<string> origins;
     private readonly ImmutableArray<System.Net.IPEndPoint> silos;
     private readonly string cluster;
-    internal string AdministratorKey { get; }
-    internal string Root { get; }
-    internal RegisteredPhysicalOwnerV1 Control { get; }
-    internal RegisteredPhysicalOwnerV1 Destination { get; }
+    internal string AdministratorKey
+    {
+        get;
+    }
+    internal string Root
+    {
+        get;
+    }
+    internal RegisteredPhysicalOwnerV1 Control
+    {
+        get;
+    }
+    internal RegisteredPhysicalOwnerV1 Destination
+    {
+        get;
+    }
 
     internal ControlledPartitionMovementNativeHostSettings(ControlledPartitionMovementNativeHostEndpoints endpoints)
     {

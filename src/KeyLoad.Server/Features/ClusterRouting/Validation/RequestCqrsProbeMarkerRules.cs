@@ -33,7 +33,9 @@ internal static class RequestCqrsProbeMarkerRules
                 or RequestCqrsProbePhase.ReplicaEntryAcknowledged
                 or RequestCqrsProbePhase.ReplicaEntryObserverDisposed or RequestCqrsProbePhase.QueryReadCutCaptured or RequestCqrsProbePhase.WaitForIndexReadCutCaptured)
             || snapshot.Markers.Any(existing => RequestCqrsProbeFiles.MarkerName(existing) == RequestCqrsProbeFiles.MarkerName(marker)))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         var group = snapshot.Markers
             .Where(existing => existing.ArmId == marker.ArmId && existing.RequestId == marker.RequestId).ToArray();
         var active = snapshot.Arms.SingleOrDefault(arm => arm.Record.ArmId == marker.ArmId);
@@ -47,14 +49,16 @@ internal static class RequestCqrsProbeMarkerRules
         if (group.Any(existing => existing.EntryIndex != marker.EntryIndex || existing.EntryTerm != marker.EntryTerm)
             || active is not null && !RequestCqrsCanonicalScopeValidation.Matches(active.Record, marker)
             || group.Length >= executionOptions.Value.MaximumMarkersPerRequest || !validArm)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
     }
 
     internal static bool CanonicalAdjunct(RequestCqrsProbeArmRecord arm, RequestCqrsProbeMarkerRecord marker)
-        => arm.Phase == RequestCqrsProbePhase.RequestStarted && arm.ReadKind == KeyLoad.Orleans.GrainReadKind.WaitForIndex
+        => arm.Phase == RequestCqrsProbePhase.RequestStarted && arm.ReadKind == KeyLoad.Clustering.GrainReadKind.WaitForIndex
             && arm.Action == RequestCqrsProbeAction.Hold && marker.Phase == RequestCqrsProbePhase.WaitForIndexReadCutCaptured
             && marker.Outcome == RequestCqrsProbeOutcome.Observed
-            || arm.Phase == RequestCqrsProbePhase.RequestStarted && arm.ReadKind == KeyLoad.Orleans.GrainReadKind.AstQuery
+            || arm.Phase == RequestCqrsProbePhase.RequestStarted && arm.ReadKind == KeyLoad.Clustering.GrainReadKind.AstQuery
             && arm.Action == RequestCqrsProbeAction.Hold && marker.Phase == RequestCqrsProbePhase.QueryReadCutCaptured
             && marker.Outcome == RequestCqrsProbeOutcome.Observed
             || arm.Phase == RequestCqrsProbePhase.ReplicaEntryAcknowledged
@@ -67,9 +71,13 @@ internal static class RequestCqrsProbeMarkerRules
     internal static bool ValidOutcome(RequestCqrsProbeArmRecord arm, RequestCqrsProbeMarkerRecord marker)
     {
         if (marker.Phase == RequestCqrsProbePhase.ReplicaEntryObserverDisposed)
-        { return arm.Phase == RequestCqrsProbePhase.ReplicaEntryAcknowledged && marker.Outcome == RequestCqrsProbeOutcome.Observed; }
+        {
+            return arm.Phase == RequestCqrsProbePhase.ReplicaEntryAcknowledged && marker.Outcome == RequestCqrsProbeOutcome.Observed;
+        }
         if (marker.Phase == RequestCqrsProbePhase.ProducerDisposed)
-        { return marker.Outcome == RequestCqrsProbeOutcome.Observed; }
+        {
+            return marker.Outcome == RequestCqrsProbeOutcome.Observed;
+        }
         return arm.Action == RequestCqrsProbeAction.Hold
             ? marker.Outcome is RequestCqrsProbeOutcome.Observed or RequestCqrsProbeOutcome.Released or RequestCqrsProbeOutcome.Cancelled
             : marker.Outcome == RequestCqrsProbeOutcome.FaultRequested;

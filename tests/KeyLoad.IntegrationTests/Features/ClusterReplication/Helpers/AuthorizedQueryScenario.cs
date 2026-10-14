@@ -101,9 +101,16 @@ internal static class AuthorizedQueryScenario
         PartitionRef partition, SelectQuery ast, CancellationToken cancellationToken)
     {
         var denied = await client.QueryAstAsync(new(partition,
-            ast with { Filter = new Comparison(new FieldOperand("/secret"), "=", ValueOperand.Create(Canary)) }), cancellationToken);
+            ast with
+            {
+                Filter = new Comparison(new FieldOperand("/secret"), "=", ValueOperand.Create(Canary))
+            }), cancellationToken);
         await Assert.That(denied.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
-        var liveRequest = new AstQueryRequest(partition, ast with { Order = [], Limit = 100 });
+        var liveRequest = new AstQueryRequest(partition, ast with
+        {
+            Order = [],
+            Limit = 100
+        });
         var snapshot = Success(await client.StartLiveQueryAsync(new(liveRequest), cancellationToken));
         await Assert.That(snapshot.Rows.Length).IsEqualTo(2);
         await CommitUpdateAsync(administrator, partition, cancellationToken);

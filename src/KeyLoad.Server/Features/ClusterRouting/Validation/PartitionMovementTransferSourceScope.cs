@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.Server;
@@ -19,7 +19,12 @@ internal static class PartitionMovementTransferSourceScope
             || expected != PartitionMovementTransferDataAction.Open && query.HandleId == Guid.Empty
             || expected == PartitionMovementTransferDataAction.Page && query.Ordinal < PartitionMovementProtocol.InitialPhaseOrdinal
             || expected == PartitionMovementTransferDataAction.Close && query.Ordinal != PartitionMovementProtocol.InitialPhaseOrdinal)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, Features.ClusterRouting.PartitionMovementProtocol.InvalidProof); }
-        return query with { OriginalAuthorityReplyBytes = query.OriginalAuthorityReplyBytes.ToArray() };
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, Features.ClusterRouting.PartitionMovementProtocol.InvalidProof);
+        }
+        return query with
+        {
+            OriginalAuthorityReplyBytes = query.OriginalAuthorityReplyBytes.ToArray()
+        };
     }
 }

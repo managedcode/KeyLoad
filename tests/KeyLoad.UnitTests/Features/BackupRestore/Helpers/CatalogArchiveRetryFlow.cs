@@ -62,7 +62,9 @@ internal static class CatalogArchiveRetryFlow
                 view, EventingArtifactFixture.Principal, id, position, identity, work)),
             capture => observed = capture, token);
         if (observed is null)
-        { throw new InvalidOperationException("The native catalog capture callback was not joined."); }
+        {
+            throw new InvalidOperationException("The native catalog capture callback was not joined.");
+        }
         return result;
     }
 }

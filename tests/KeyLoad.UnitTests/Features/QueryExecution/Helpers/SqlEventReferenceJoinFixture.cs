@@ -27,7 +27,10 @@ internal static class SqlEventReferenceJoinFixture
         => Prefix + "EVENTS('" + streamSet + "','" + Stream + "'," + generation.ToString(System.Globalization.CultureInfo.InvariantCulture) + ")" + Suffix;
 
     internal static QueryRequest Request(PartitionRef partition, string streamSet = StreamSet, long generation = 1)
-        => new(partition, Sql(streamSet, generation), new() { [MinimumParameter] = JsonSerializer.SerializeToElement(7) },
+        => new(partition, Sql(streamSet, generation), new()
+        {
+            [MinimumParameter] = JsonSerializer.SerializeToElement(7)
+        },
             AllowFullScan: true, QueryDialectVersion: 2);
 
     internal static AstQueryRequest Ast(PartitionRef partition)
@@ -36,10 +39,17 @@ internal static class SqlEventReferenceJoinFixture
             new Comparison(new FieldOperand("/payload/score"), ">=", new ParameterOperand(MinimumParameter)),
             [new("/revision", false)], 10, ModelSource: new(ModelQuerySourceKind.Events, Stream, 1),
             InnerJoin: new(Target, "d", "/payload/to", "/entity_ref")),
-            new() { [MinimumParameter] = JsonSerializer.SerializeToElement(7) }, AllowFullScan: true, AstVersion: 2);
+            new()
+            {
+                [MinimumParameter] = JsonSerializer.SerializeToElement(7)
+            }, AllowFullScan: true, AstVersion: 2);
 
     internal static string Payload(PartitionRef partition, string id, int score)
-        => JsonSerializer.Serialize(new { to = new EntityRef(partition, Target, id), score }, JsonDefaults.Options);
+        => JsonSerializer.Serialize(new
+        {
+            to = new EntityRef(partition, Target, id),
+            score
+        }, JsonDefaults.Options);
 
     internal static (CommandRequest Command, CommitReceipt Receipt) Seed(TestDatabase database)
     {
@@ -48,7 +58,9 @@ internal static class SqlEventReferenceJoinFixture
             database.Submit(OperationKind.ConfigureResource, new ConfigureResourceRequest(database.Partition.TenantId,
                 database.Partition.DatabaseId, new ResourceDefinition(streamSet, ResourceKind.StreamSet,
                     database.Partition.TransactionDomainId)
-                { FieldPolicies = [new("/to", "reference", RawReadGrant: RefRead, RawUseGrant: RefUse)] }));
+                {
+                    FieldPolicies = [new("/to", "reference", RawReadGrant: RefRead, RawUseGrant: RefUse)]
+                }));
         }
         database.Submit(OperationKind.ConfigureResource, new ConfigureResourceRequest(database.Partition.TenantId,
             database.Partition.DatabaseId, new ResourceDefinition(Target, ResourceKind.Collection, database.Partition.TransactionDomainId)

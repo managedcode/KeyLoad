@@ -41,7 +41,9 @@ internal static class AtomicProducerRf3DocumentRefusalAssertions
         await McpCallerAssertions.DoesNotDiscloseAsync(reply, seed.Identity.Secret, QueueProducerRf3Protocol.HealthyPayload);
         var problem = reply.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error);
         if (expected is { } retained)
-        { await Assert.That(JsonElement.DeepEquals(problem, retained)).IsTrue(); }
+        {
+            await Assert.That(JsonElement.DeepEquals(problem, retained)).IsTrue();
+        }
         return problem.Clone();
     }
 

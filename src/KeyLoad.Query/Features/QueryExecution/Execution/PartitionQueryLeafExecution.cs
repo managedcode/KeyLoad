@@ -15,7 +15,9 @@ internal static class PartitionQueryLeafExecution
         if (request.Owner.PhysicalShardId != owner.PhysicalShardId || request.Owner.Incarnation != owner.Incarnation
             || request.Owner.PlacementEpoch != owner.PlacementEpoch
             || !request.Owner.VoterIds.SequenceEqual(owner.VoterIds, StringComparer.Ordinal))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, OwnerChangedDetail); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, OwnerChangedDetail);
+        }
         var budget = new ReadExecutionBudget(database.OperationLimitsOptions, clock, token);
         QueryResultBudgetPolicy.Constrain(budget, engine.Execution);
         var normalized = QueryValidation.Normalize(plan.Request, database.Limits, engine.Execution);

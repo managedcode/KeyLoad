@@ -35,7 +35,10 @@ internal sealed class GraphTraversalTests
             new UpsertEdge(Links, EdgeCA, Vertex(VertexC), Vertex(VertexA), NextLabel));
         database.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(new PrincipalRecord(Alice, Tenant,
             [new(DatabaseScope, Orders, Capability.DocumentsRead), new(DatabaseScope, Links, Capability.GraphRead)], [])
-        { OwnerId = Alice, RestrictRows = true })).Get<PrincipalRecord>();
+        {
+            OwnerId = Alice,
+            RestrictRows = true
+        })).Get<PrincipalRecord>();
 
         var hidden = database.Database.Traverse(Alice, database.Partition, Links, Vertex(VertexA),
             cancellationToken: TestContext.Current!.Execution.CancellationToken);

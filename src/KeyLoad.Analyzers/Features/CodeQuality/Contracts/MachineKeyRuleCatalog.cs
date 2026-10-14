@@ -6,7 +6,10 @@ namespace KeyLoad.Analyzers.Features.CodeQuality;
 
 internal static class MachineKeyRuleCatalog
 {
-    public static ImmutableHashSet<string> AllStringArgumentAttributes { get; } =
+    public static ImmutableHashSet<string> AllStringArgumentAttributes
+    {
+        get;
+    } =
         ImmutableHashSet.Create(StringComparer.Ordinal,
             MachineKeyAttributeNames.Alias,
             MachineKeyAttributeNames.AliasAttribute,
@@ -21,7 +24,10 @@ internal static class MachineKeyRuleCatalog
             MachineKeyAttributeNames.StorageProvider,
             MachineKeyAttributeNames.StorageProviderAttribute);
 
-    public static ImmutableDictionary<string, ImmutableHashSet<string>> NamedStringArgumentAttributes { get; } =
+    public static ImmutableDictionary<string, ImmutableHashSet<string>> NamedStringArgumentAttributes
+    {
+        get;
+    } =
         new Dictionary<string, ImmutableHashSet<string>>(StringComparer.Ordinal)
         {
             [MachineKeyAttributeNames.BindProperty] = Names(MachineKeyAttributeArgumentNames.Name),
@@ -58,7 +64,10 @@ internal static class MachineKeyRuleCatalog
             [MachineKeyAttributeNames.YamlMemberAttribute] = Names(MachineKeyAttributeArgumentNames.Alias),
         }.ToImmutableDictionary(StringComparer.Ordinal);
 
-    public static ImmutableHashSet<string> AlwaysKeyMethodNames { get; } =
+    public static ImmutableHashSet<string> AlwaysKeyMethodNames
+    {
+        get;
+    } =
         ImmutableHashSet.Create(StringComparer.Ordinal,
             MachineKeyMethodNames.ContainsKey,
             MachineKeyMethodNames.FindFirstValue,
@@ -82,7 +91,10 @@ internal static class MachineKeyRuleCatalog
             MachineKeyMethodNames.WithName,
             MachineKeyMethodNames.WithTags);
 
-    public static ImmutableHashSet<string> ExplicitKeyParameterNames { get; } =
+    public static ImmutableHashSet<string> ExplicitKeyParameterNames
+    {
+        get;
+    } =
         ImmutableHashSet.Create(StringComparer.OrdinalIgnoreCase,
             MachineKeyParameterNames.ConfigurationKey,
             MachineKeyParameterNames.DictionaryKey,

@@ -17,9 +17,15 @@ internal static class TopicSqlNativeBoundary
             await Assert.That(error.Code).IsEqualTo(ErrorCode.Validation);
         }
         var noConsent = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute(TopicSqlProtocol.Root,
-            TopicSqlNativeSeed.Request(database) with { AllowFullScan = false }));
+            TopicSqlNativeSeed.Request(database) with
+            {
+                AllowFullScan = false
+            }));
         var cursor = Assert.ThrowsExactly<KeyLoadException>(() => engine.ExecuteAst(TopicSqlProtocol.Root,
-            TopicSqlNativeSeed.Ast(database) with { Cursor = TopicSqlProtocol.InvalidCursor }));
+            TopicSqlNativeSeed.Ast(database) with
+            {
+                Cursor = TopicSqlProtocol.InvalidCursor
+            }));
         await Assert.That(noConsent.Code).IsEqualTo(ErrorCode.UnsupportedCapability);
         await Assert.That(cursor.Code).IsEqualTo(ErrorCode.UnsupportedCapability);
         var ordinary = engine.Execute(TopicSqlProtocol.Root, TopicSqlNativeSeed.Request(database, TopicSqlProtocol.OrdinarySql));

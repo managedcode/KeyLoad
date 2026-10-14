@@ -20,8 +20,14 @@ internal static class SubscriptionFilterRf3Policy
         };
         await MessagingRf3Identity.UpdateAsync(fixture, denied, token);
         await SubscriptionFilterRf3Assertions.RefusedAsync(manager, mcp,
-            seed.Replacement with { CommandId = Guid.NewGuid() }, ErrorCode.PermissionDenied, token);
-        await MessagingRf3Identity.UpdateAsync(fixture, seed.Manager.Principal with { PolicyEpoch = RestoredEpoch }, token);
+            seed.Replacement with
+            {
+                CommandId = Guid.NewGuid()
+            }, ErrorCode.PermissionDenied, token);
+        await MessagingRf3Identity.UpdateAsync(fixture, seed.Manager.Principal with
+        {
+            PolicyEpoch = RestoredEpoch
+        }, token);
         var historical = await manager.CommitAsync(seed.Publish, token);
         await Assert.That(historical.Problem!.ErrorCode).IsEqualTo(ErrorCode.PermissionDenied.ToString());
         await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit,

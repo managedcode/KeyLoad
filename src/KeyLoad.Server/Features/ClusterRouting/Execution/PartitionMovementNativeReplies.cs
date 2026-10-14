@@ -1,5 +1,5 @@
 using System.Security.Cryptography;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
@@ -9,7 +9,12 @@ internal static class PartitionMovementNativeReplies
     internal static GrainOperationReply Safe(GrainOperationReply reply)
     {
         if (reply.Error is not null)
-        { reply = reply with { SafeDetail = PartitionMovementProtocol.Unavailable }; }
+        {
+            reply = reply with
+            {
+                SafeDetail = PartitionMovementProtocol.Unavailable
+            };
+        }
         PartitionMovementTransportReplyValidation.RequireValue(reply);
         return reply;
     }
@@ -17,16 +22,26 @@ internal static class PartitionMovementNativeReplies
     internal static async Task<GrainOperationReply> ExecuteAsync(Func<Task<GrainOperationReply>> operation)
     {
         try
-        { return Safe(await operation().ConfigureAwait(false)); }
+        {
+            return Safe(await operation().ConfigureAwait(false));
+        }
         catch (KeyLoadException error) when (error.Code != ErrorCode.Corruption)
-        { return new() { Error = error.Code, SafeDetail = PartitionMovementProtocol.Unavailable }; }
+        {
+            return new()
+            {
+                Error = error.Code,
+                SafeDetail = PartitionMovementProtocol.Unavailable
+            };
+        }
     }
 
     internal static PartitionMovementGrainServiceReply Encode<T>(PartitionMovementNativeReceiver owner, T value,
         Func<PartitionMovementMac, byte[], string> sign)
     {
         if (NativeSerialization.Measure(value) > owner.Limits.Value.MaxBatchBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMovementProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMovementProtocol.Unavailable);
+        }
         var bytes = NativeSerialization.Serialize(value);
         var key = Convert.FromBase64String(owner.Options.Value.PeerSecret);
         try
@@ -41,7 +56,9 @@ internal static class PartitionMovementNativeReplies
         ReadOnlyMemory<byte> bytes, string signature)
     {
         if (bytes.IsEmpty || bytes.Length > owner.Limits.Value.MaxBatchBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMovementProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMovementProtocol.Unavailable);
+        }
         return new(bytes, signature, null, null, Guid.Empty, string.Empty);
     }
 }

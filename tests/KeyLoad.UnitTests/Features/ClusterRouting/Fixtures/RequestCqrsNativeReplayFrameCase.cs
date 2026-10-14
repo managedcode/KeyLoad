@@ -11,12 +11,17 @@ internal sealed class RequestCqrsNativeReplayFrameCase : IDisposable
     private readonly ReplicaSecurityFixture security = new();
     private readonly RemoteTransferDatabase database = new();
     internal const string Principal = "c1-probe-replay-codec";
-    internal RemoteDocumentMac Mac { get; }
+    internal RemoteDocumentMac Mac
+    {
+        get;
+    }
     internal RequestCqrsNativeReplayFrameCase()
     {
         Mac = new(security.Options.Secret.Span);
         database.AddPrincipal(new(Principal, RemoteTransferDatabase.TenantId, [new("*", "*", Capability.All)], ["*"])
-        { ClusterAdministrator = true });
+        {
+            ClusterAdministrator = true
+        });
     }
 
     internal RequestCqrsNativeReplayWitness Create(RemoteModelNativeReplayVariation mode = RemoteModelNativeReplayVariation.Original2)
@@ -41,15 +46,34 @@ internal sealed class RequestCqrsNativeReplayFrameCase : IDisposable
         var original = new RemoteModelNativeRequest(RemoteModelNativeChannel.DocumentEnvelope, payload, Mac.Sign(payload.AsSpan(), false),
             owner, owner, security.Configuration.LocalId, security.Discovery.RuntimeAddress, security.Configuration.LocalId,
             security.Discovery.RuntimeAddress, Guid.NewGuid(), expiry, string.Empty);
-        original = original with { SenderSignature = Mac.SignNativeRequest(original) };
-        var actual = original with { Payload = RemoteModelNativeReplayPayload.Create(original, mode), Nonce = Guid.NewGuid(), SenderSignature = string.Empty };
-        actual = actual with { SenderSignature = Mac.SignNativeRequest(actual) };
+        original = original with
+        {
+            SenderSignature = Mac.SignNativeRequest(original)
+        };
+        var actual = original with
+        {
+            Payload = RemoteModelNativeReplayPayload.Create(original, mode),
+            Nonce = Guid.NewGuid(),
+            SenderSignature = string.Empty
+        };
+        actual = actual with
+        {
+            SenderSignature = Mac.SignNativeRequest(actual)
+        };
         var refusal = new RemoteModelNativeReply(ReadOnlyMemory<byte>.Empty, string.Empty, ErrorCode.Unauthenticated, null, actual.Nonce, string.Empty);
-        refusal = refusal with { SenderSignature = Mac.SignNativeReply(refusal) };
+        refusal = refusal with
+        {
+            SenderSignature = Mac.SignNativeReply(refusal)
+        };
         return new(RequestCqrsProbeProtocol.Version, Guid.NewGuid().ToString("N"), Guid.NewGuid(), requestId, commandId,
             Guid.NewGuid(), actual.CallerVoter, actual.CallerSiloAddress, mode, 1,
             NativeSerialization.Serialize(original), NativeSerialization.Serialize(actual), NativeSerialization.Serialize(refusal));
     }
 
-    public void Dispose() { Mac.Dispose(); database.Dispose(); security.Dispose(); }
+    public void Dispose()
+    {
+        Mac.Dispose();
+        database.Dispose();
+        security.Dispose();
+    }
 }

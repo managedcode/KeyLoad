@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.UnitTests.Features.Messaging;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;

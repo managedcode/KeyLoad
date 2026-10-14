@@ -14,7 +14,9 @@ internal static class PostgresRf3WireAuthentication
         await PostgresRf3WireFrames.PasswordChallengeAsync(wire.Stream, token).ConfigureAwait(false);
         var password = Encoding.UTF8.GetBytes(identity.Secret + Null);
         try
-        { await PostgresRf3WireMessage.WriteAsync(wire.Stream, PostgresRf3BackpressureProtocol.Password, password, token); }
+        {
+            await PostgresRf3WireMessage.WriteAsync(wire.Stream, PostgresRf3BackpressureProtocol.Password, password, token);
+        }
         finally { CryptographicOperations.ZeroMemory(password); }
         (int Id, int Secret)? backend = null;
         var authenticated = false;

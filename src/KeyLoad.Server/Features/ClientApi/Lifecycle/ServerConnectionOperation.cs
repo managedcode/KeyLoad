@@ -13,14 +13,19 @@ internal sealed class ServerConnectionOperation : IDisposable
         Id = owner.Id;
     }
 
-    internal Guid Id { get; }
+    internal Guid Id
+    {
+        get;
+    }
     internal CancellationToken Token => cancellation.Token;
 
     public void Dispose()
     {
         var original = Interlocked.Exchange(ref owner, null);
         if (original is null)
-        { return; }
+        {
+            return;
+        }
         cancellation.Dispose();
         original.Release();
     }

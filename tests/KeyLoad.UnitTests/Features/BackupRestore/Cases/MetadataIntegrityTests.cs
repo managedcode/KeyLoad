@@ -100,7 +100,10 @@ internal sealed class MetadataIntegrityTests
         using var fixture = new MetadataBackupFixture();
         var manifest = await MetadataTestFiles.ReadManifestAsync(fixture.BackupDirectory);
         await MetadataTestFiles.WriteManifestAsync(fixture.BackupDirectory,
-            manifest with { Version = MetadataTestContract.UnsupportedManifestVersion });
+            manifest with
+            {
+                Version = MetadataTestContract.UnsupportedManifestVersion
+            });
         var destination = Path.Combine(fixture.BackupDirectory,
             MetadataTestContract.UnsupportedVersionRestorePath);
 

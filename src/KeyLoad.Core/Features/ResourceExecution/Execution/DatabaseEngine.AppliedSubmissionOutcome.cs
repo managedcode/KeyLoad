@@ -26,7 +26,9 @@ public sealed partial class DatabaseEngine
             catch (KeyLoadException refusal) when (CqrsRuntimeFailures.FindFatal(refusal) is null
                 && refusal.Code is ErrorCode.PermissionDenied or ErrorCode.TokenInvalidated
                     or ErrorCode.StaleLease or ErrorCode.Conflict)
-            { return new(null, refusal.Code, refusal.Message); }
+            {
+                return new(null, refusal.Code, refusal.Message);
+            }
         });
     }
 
@@ -34,9 +36,13 @@ public sealed partial class DatabaseEngine
         CommandOutcomeSelection selection, StoredOutcome outcome)
     {
         if (outcome.Incarnation != Store.Identity.Incarnation)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, EarlierOutcomeIncarnationMessage); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, EarlierOutcomeIncarnationMessage);
+        }
         if (outcome.Fingerprint != CommandFingerprint(operation))
-        { throw Errors.Fail(ErrorCode.Conflict, CommandContentConflictMessage); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, CommandContentConflictMessage);
+        }
         CommandOutcomeKeyResolver.ValidateSelectedScope(view, operation, selection);
     }
 }

@@ -116,7 +116,9 @@ internal sealed class ReadDiagnosticsTests
 
     private sealed class ObserverRejectedException : Exception
     {
-        public ObserverRejectedException() { }
+        public ObserverRejectedException()
+        {
+        }
         public ObserverRejectedException(string message) : base(message) { }
         public ObserverRejectedException(string message, Exception innerException) : base(message, innerException) { }
     }
@@ -124,7 +126,10 @@ internal sealed class ReadDiagnosticsTests
     private sealed class StoreFixture : IDisposable
     {
         public string Directory { get; } = Path.Combine(Path.GetTempPath(), "keyload-read-diagnostics-" + Guid.NewGuid().ToString("N"));
-        public ZoneTreeStore Store { get; }
+        public ZoneTreeStore Store
+        {
+            get;
+        }
         public StoreFixture() => Store = new(new(Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         public void Dispose()
         {

@@ -16,10 +16,15 @@ internal static class SqlDefaultJoinControls
         var position = database.Store.Position;
         var identity = JsonDefaults.Serialize(database.Store.Identity);
         var original = SqlOffsetProtocol.JoinRequest(database.Partition);
-        var plain = original with { Sql = original.Sql.Replace(ExplicitJoin, DefaultJoin, StringComparison.Ordinal) };
+        var plain = original with
+        {
+            Sql = original.Sql.Replace(ExplicitJoin, DefaultJoin, StringComparison.Ordinal)
+        };
         var on = plain.Sql.IndexOf(On, StringComparison.Ordinal);
         if (on < default(int))
-        { throw new InvalidOperationException(MissingOn); }
+        {
+            throw new InvalidOperationException(MissingOn);
+        }
         foreach (var sql in new[] { plain.Sql[..on], plain.Sql.Replace(On, Where, StringComparison.Ordinal) })
         {
             await ErrorAsync(() => engine.Execute(SqlOffsetProtocol.Root, plain with { Sql = sql }), ErrorCode.Validation);
@@ -27,7 +32,10 @@ internal static class SqlDefaultJoinControls
             await SqlOffsetPages.ExactAsync(engine.Execute(SqlOffsetProtocol.Root, plain), SqlOffsetPages.JoinPage(position));
             await SqlOffsetRefusals.UnchangedAsync(database.Store, image, position, identity);
         }
-        var scalar = SqlOffsetProtocol.ScalarRequest(database.Partition) with { Sql = plain.Sql };
+        var scalar = SqlOffsetProtocol.ScalarRequest(database.Partition) with
+        {
+            Sql = plain.Sql
+        };
         await ErrorAsync(() => engine.Execute(SqlOffsetProtocol.Root, scalar), ErrorCode.UnsupportedCapability);
         await SqlOffsetRefusals.UnchangedAsync(database.Store, image, position, identity);
         await SqlOffsetPages.ExactAsync(engine.Execute(SqlOffsetProtocol.Root, plain), SqlOffsetPages.JoinPage(position));
@@ -39,7 +47,10 @@ internal static class SqlDefaultJoinControls
         var position = database.Store.Position;
         var identity = JsonDefaults.Serialize(database.Store.Identity);
         var original = SqlOffsetProtocol.JoinRequest(database.Partition);
-        var plain = original with { Sql = original.Sql.Replace(ExplicitJoin, DefaultJoin, StringComparison.Ordinal) };
+        var plain = original with
+        {
+            Sql = original.Sql.Replace(ExplicitJoin, DefaultJoin, StringComparison.Ordinal)
+        };
         var failure = Assert.ThrowsExactly<OperationCanceledException>(() => engine.Execute(SqlOffsetProtocol.Root,
             plain, cancellationToken: originalToken));
         await Assert.That(failure.CancellationToken).IsEqualTo(originalToken);

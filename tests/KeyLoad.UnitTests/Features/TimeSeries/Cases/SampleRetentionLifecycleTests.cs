@@ -208,7 +208,10 @@ internal sealed class SampleRetentionLifecycleTests
     private static DatabaseEngine Bootstrap(ZoneTreeStore store)
     {
         var database = new DatabaseEngine(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
-        database.Bootstrap(new("root", "system", [new("*", "*", Capability.All)], ["*"]) { ClusterAdministrator = true },
+        database.Bootstrap(new("root", "system", [new("*", "*", Capability.All)], ["*"])
+        {
+            ClusterAdministrator = true
+        },
             DatabaseEngine.Credential("root", "root", "root.unit-test-credential-32-characters"));
         PhysicalShardTestBootstrap.Bootstrap(database, "root");
         database.Apply(new(Guid.NewGuid(), OperationKind.ConfigureResource, "root", TimeProvider.System.GetUtcNow(),

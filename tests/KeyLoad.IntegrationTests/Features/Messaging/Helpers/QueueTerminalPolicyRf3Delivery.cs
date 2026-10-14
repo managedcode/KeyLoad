@@ -70,8 +70,12 @@ internal static class QueueTerminalPolicyRf3Delivery
     private static void Set(QueueTerminalPolicyRf3State state, MessageInspection message, bool healthy)
     {
         if (healthy)
-        { state.Healthy = message; }
+        {
+            state.Healthy = message;
+        }
         else
-        { state.Original = message; }
+        {
+            state.Original = message;
+        }
     }
 }

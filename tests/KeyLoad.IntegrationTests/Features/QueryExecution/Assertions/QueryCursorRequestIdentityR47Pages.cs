@@ -28,13 +28,20 @@ internal static class QueryCursorRequestIdentityR47Pages
         var cursor = original.Cursor;
         for (var index = 2; index < state.CompleteRows.Length; index++)
         {
-            var page = await ReadAsync(reader, state.OriginalRequest with { Cursor = cursor }, route, token);
+            var page = await ReadAsync(reader, state.OriginalRequest with
+            {
+                Cursor = cursor
+            }, route, token);
             await RowsAsync(page, [state.CompleteRows[index]], state.AccessPath);
             await Assert.That(page.CutPosition).IsEqualTo(original.CutPosition);
             if (index == state.CompleteRows.Length - 1)
-            { await Assert.That(page.Cursor).IsNull(); }
+            {
+                await Assert.That(page.Cursor).IsNull();
+            }
             else
-            { await Assert.That(string.IsNullOrEmpty(page.Cursor)).IsFalse(); }
+            {
+                await Assert.That(string.IsNullOrEmpty(page.Cursor)).IsFalse();
+            }
             await QueryCursorRequestIdentityR47Current.RequireAsync(root, reader, state, token);
             cursor = page.Cursor;
         }

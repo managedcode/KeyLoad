@@ -44,6 +44,8 @@ public sealed partial class DatabaseEngine
             || body.NextOriginalPhaseCommandId is not null || body.NextOriginalPhase is not null
             || body.NextOriginalAuthorization is not null || body.NextOriginalExpiresAt != default
             || body.NextOriginalRequestNonce != Guid.Empty || body.NextOriginalCaptureReleaseNonce != Guid.Empty)
-        { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict);
+        }
     }
 }

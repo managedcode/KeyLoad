@@ -16,16 +16,20 @@ internal static class RequestCqrsCanonicalArmValidation
         }
         if (arm.Phase is RequestCqrsProbePhase.EventVectorFirstCapturesReady
             or RequestCqrsProbePhase.EventVectorFirstAdmitPrepared)
-        { return RequestCqrsEventVectorProbePair.ValidArm(arm); }
+        {
+            return RequestCqrsEventVectorProbePair.ValidArm(arm);
+        }
         if (arm.Phase == RequestCqrsProbePhase.ReplicaSnapshotReadiness)
         {
-            return arm.ReadKind == KeyLoad.Orleans.GrainReadKind.NodeStatus
+            return arm.ReadKind == KeyLoad.Clustering.GrainReadKind.NodeStatus
                 && arm.Action == RequestCqrsProbeAction.Hold && arm.CommandId == Guid.Empty
                 && arm.Partition is null && arm.SourceRequestId is null && arm.SourceArmId is null
                 && arm.TargetVoter is { } target && RequestCqrsProbeActivationTargetValidation.Valid(target);
         }
         if (arm.Phase == RequestCqrsProbePhase.AuthorizationReload && arm.SourceArmId is not null)
-        { return RequestCqrsSampleChunkProbePair.ValidAdjunct(arm); }
+        {
+            return RequestCqrsSampleChunkProbePair.ValidAdjunct(arm);
+        }
         if (arm.Phase == RequestCqrsProbePhase.ParentReceiverIssueObserved)
         {
             return arm.Action == RequestCqrsProbeAction.Hold && arm.ReadKind is null && arm.CommandId != Guid.Empty

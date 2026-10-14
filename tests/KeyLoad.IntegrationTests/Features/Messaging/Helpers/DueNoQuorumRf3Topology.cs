@@ -1,7 +1,7 @@
 using Aspire.Hosting;
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
 using KeyLoad.IntegrationTests.Features.StorageRecovery;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.IntegrationTests.Features.Messaging;
 
@@ -16,15 +16,21 @@ internal static class DueNoQuorumRf3Topology
         var leaders = status.Select(item => item.Status.Leader).Where(item => item is not null)
             .Distinct(StringComparer.Ordinal).ToArray();
         if (leaders.Length != 1 || status.Any(item => item.Status.Leader != leaders[0]))
-        { throw new InvalidOperationException(DueNoQuorumRf3Protocol.LeaderFailure); }
+        {
+            throw new InvalidOperationException(DueNoQuorumRf3Protocol.LeaderFailure);
+        }
         var leader = status.Single(item => item.Admin.LocalVoter == leaders[0]).Name;
         if (dueAt - TimeProvider.System.GetUtcNow() < TimeSpan.FromSeconds(DueNoQuorumRf3Protocol.MinimumSetupLeadSeconds))
-        { throw new TimeoutException(DueNoQuorumRf3Protocol.SetupFailure); }
+        {
+            throw new TimeoutException(DueNoQuorumRf3Protocol.SetupFailure);
+        }
         var ordered = new[] { RequestCqrsRf3Protocol.Node1, RequestCqrsRf3Protocol.Node2, RequestCqrsRf3Protocol.Node3 };
         var recovery = ordered.First(item => item != leader);
         var survivor = ordered.Single(item => item != leader && item != recovery);
         if (new[] { leader, recovery, survivor }.Distinct(StringComparer.Ordinal).Count() != RequestCqrsRf3Protocol.NodeCount)
-        { throw new InvalidOperationException(DueNoQuorumRf3Protocol.VoterFailure); }
+        {
+            throw new InvalidOperationException(DueNoQuorumRf3Protocol.VoterFailure);
+        }
         return new(leader, recovery, survivor, status, discovery);
     }
 

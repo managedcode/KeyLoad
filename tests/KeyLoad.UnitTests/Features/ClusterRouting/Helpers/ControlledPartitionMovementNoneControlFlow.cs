@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Orleans;
 using KeyLoad.Replication;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
@@ -31,12 +31,18 @@ internal static class ControlledPartitionMovementNoneControlFlow
         var originalBytes = source.Store.Read(view => view.ReadOwnedValue(key))
             ?? throw new InvalidOperationException("The actual persisted control row is absent.");
         var original = NativeSerialization.Deserialize<PartitionMoveControlRecord>(originalBytes);
-        var corrupt = NativeSerialization.Serialize(original with { Phase = PartitionMovePhase.None });
+        var corrupt = NativeSerialization.Serialize(original with
+        {
+            Phase = PartitionMovePhase.None
+        });
         source.Store.Commit((transaction, _) => { transaction.Put(key, corrupt); return true; });
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(() => RejectAsync(source, verified, operation, cancellationToken), failures);
         ServerFailureObserver.Observe(() => source.Store.Commit((transaction, _) =>
-            { transaction.Put(key, originalBytes); return true; }), failures);
+            {
+                transaction.Put(key, originalBytes);
+                return true;
+            }), failures);
         ServerFailureObserver.ThrowIfAny(failures);
         var joinedCorruption = source.ReopenAfterExpectedCorruptApply();
         await Assert.That(joinedCorruption.Code).IsEqualTo(ErrorCode.Corruption);

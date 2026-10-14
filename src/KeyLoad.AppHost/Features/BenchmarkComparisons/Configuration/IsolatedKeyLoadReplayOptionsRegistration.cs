@@ -1,5 +1,5 @@
 using KeyLoad.AppHost.Features.ClusterReplication;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
@@ -26,7 +26,9 @@ internal static class IsolatedKeyLoadReplayOptionsRegistration
     private static bool IsValid(ReplicaReplayLimits value)
     {
         try
-        { value.Validate(ClusterDeploymentOptions.VoterCount); }
+        {
+            value.Validate(ClusterDeploymentOptions.VoterCount);
+        }
         catch (InvalidOperationException) { return false; }
         return value.CriticalPerVoter <= DefaultCriticalCapacity && value.ForwardPerVoter <= DefaultForwardCapacity
             && value.ReadBarrierPerVoter <= DefaultReadBarrierCapacity && value.DataAppendPerVoter <= DefaultDataAppendCapacity;

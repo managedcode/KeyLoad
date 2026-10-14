@@ -24,7 +24,10 @@ internal static class AggregateSnapshotPersistence
         var snapshot = new AggregateSnapshotState(stream, version, sourceRevision, reducerVersion,
             stateSchemaVersion, stateJson, string.Empty);
         // The checksum identity is the exact public snapshot with Checksum empty; StateJson remains an exact string value.
-        return snapshot with { Checksum = JsonData.Fingerprint(snapshot) };
+        return snapshot with
+        {
+            Checksum = JsonData.Fingerprint(snapshot)
+        };
     }
 
     internal static byte[] Serialize(AggregateSnapshotState snapshot)
@@ -56,7 +59,10 @@ internal static class AggregateSnapshotPersistence
         {
             throw Errors.Fail(ErrorCode.Corruption, InvalidSnapshotMessage);
         }
-        if (!string.Equals(snapshot.Checksum, JsonData.Fingerprint(snapshot with { Checksum = string.Empty }),
+        if (!string.Equals(snapshot.Checksum, JsonData.Fingerprint(snapshot with
+        {
+            Checksum = string.Empty
+        }),
             StringComparison.Ordinal))
         {
             throw Errors.Fail(ErrorCode.Corruption, InvalidSnapshotMessage);

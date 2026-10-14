@@ -11,7 +11,10 @@ internal sealed class MetadataBackupFixture : IDisposable
     internal string SourceDirectory => Path.Combine(root, MetadataTestContract.SourceDirectoryName);
     internal string BackupDirectory => Path.Combine(root, MetadataTestContract.BackupDirectoryName);
     internal string RestoredDirectory => Path.Combine(root, MetadataTestContract.RestoredDirectoryName);
-    internal StoreIdentity OriginalIdentity { get; }
+    internal StoreIdentity OriginalIdentity
+    {
+        get;
+    }
 
     internal MetadataBackupFixture()
     {

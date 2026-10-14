@@ -38,14 +38,19 @@ internal sealed class PhysicalOwnerRegistrationRf3Evidence
     internal void MarkCompleted() => completedMarker = true;
     internal void MarkFailed() => failedMarker = true;
     internal void HealthReceived(HttpStatusCode value)
-    { responseReceived = true; status = (int)value; }
+    {
+        responseReceived = true;
+        status = (int)value;
+    }
 
     internal void Write(DistributedApplication? app, bool waveReturned, bool applicationDisposed, List<Exception> failures, CancellationToken timeout,
         CancellationToken deadline, CancellationToken caller)
     {
         PhysicalOwnerRegistrationRf3State[]? states = null;
         if (app is not null && !applicationDisposed)
-        { ServerFailureObserver.Observe(() => states = ReadStates(app), failures); }
+        {
+            ServerFailureObserver.Observe(() => states = ReadStates(app), failures);
+        }
         var json = JsonSerializer.Serialize(new
         {
             schemaVersion = Version,
@@ -67,7 +72,9 @@ internal sealed class PhysicalOwnerRegistrationRf3Evidence
             states
         });
         if (Encoding.UTF8.GetByteCount(json) > MaximumBytes)
-        { throw new InvalidOperationException(OverBound); }
+        {
+            throw new InvalidOperationException(OverBound);
+        }
         Console.Error.WriteLine(json);
     }
 

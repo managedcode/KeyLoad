@@ -45,7 +45,9 @@ internal static class ConnectionRf3PublicOperations
         await Assert.That(reply.Value.Mutations[0].Id).IsEqualTo(RequestCqrsRf3Protocol.DocumentId);
         await Assert.That(reply.Value.Mutations[0].Revision).IsEqualTo(ConnectionRf3Protocol.UpdatedRevision);
         if (reply.RequestId is { } actual)
-        { await Assert.That(actual).IsEqualTo(witness.RequestId); }
+        {
+            await Assert.That(actual).IsEqualTo(witness.RequestId);
+        }
     }
 
     internal static async Task DocumentAsync(ConnectionRf3Reply<DocumentResult?> reply,
@@ -56,7 +58,9 @@ internal static class ConnectionRf3PublicOperations
         await Assert.That(reply.Value?.Revision).IsEqualTo(revision);
         await Assert.That(reply.Value?.Redacted).IsFalse();
         if (reply.RequestId is { } actual)
-        { await Assert.That(actual).IsEqualTo(witness.RequestId); }
+        {
+            await Assert.That(actual).IsEqualTo(witness.RequestId);
+        }
     }
 
     internal static async Task ErrorAsync(ConnectionRf3Caller caller, CommandRequest command, bool useMcp,

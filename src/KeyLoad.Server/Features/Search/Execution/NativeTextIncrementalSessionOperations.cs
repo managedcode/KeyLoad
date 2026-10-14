@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Search;
-using KeyLoad.Orleans;
 using KeyLoad.Query;
 using Microsoft.Extensions.Options;
 
@@ -56,9 +56,13 @@ internal static class NativeTextIncrementalSessionOperations
         if (session.Intent is not null || manifest.Bootstrap
             || manifest.ThroughSequence != session.ReplayUpperSequence
             || session.Checkpoint != session.ReplayUpperSequence)
-        { throw NativeTextErrors.Mismatch(); }
+        {
+            throw NativeTextErrors.Mismatch();
+        }
         if (manifest.ThroughSequence == fresh.UpperSequence)
-        { NativeTextIncrementalSourceValidation.CompleteCorpus(manifest, fresh, session.Budget); }
+        {
+            NativeTextIncrementalSourceValidation.CompleteCorpus(manifest, fresh, session.Budget);
+        }
         NativeTextIncrementalPublishedInventory.Require(
             NativeTextIncrementalPagePreparation.RequireOwner(session), manifest, session.Budget, options);
         session.Budget.Check();

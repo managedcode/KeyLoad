@@ -6,7 +6,10 @@ internal sealed class EventMessageSensitiveSafeR52State(EventMessageSensitivePub
     internal EventMessageSensitivePublicState Model { get; } = model;
     internal AtomicPartitionPlacementResolution Placement { get; } = placement;
     internal OutboxStatus Outbox { get; set; } = null!;
-    internal EventSourcePage? Page { get; set; }
+    internal EventSourcePage? Page
+    {
+        get; set;
+    }
     internal Dictionary<string, MessageInspection?> Messages { get; } = [];
     internal List<string> Published { get; } = [];
     internal HashSet<string> Leased { get; } = [];

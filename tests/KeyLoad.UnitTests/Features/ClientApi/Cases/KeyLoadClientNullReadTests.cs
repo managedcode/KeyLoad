@@ -36,7 +36,9 @@ internal sealed class KeyLoadClientNullReadTests
     {
         var observation = new KeyLoadClientKestrelObservation();
         try
-        { await ExecuteObservedAsync(unavailable, observation); }
+        {
+            await ExecuteObservedAsync(unavailable, observation);
+        }
         catch (Exception original)
         {
             observation.WriteAndThrow(original);
@@ -62,9 +64,13 @@ internal sealed class KeyLoadClientNullReadTests
                 return;
             }
             if (Interlocked.Increment(ref statusCalls) == 1)
-            { await context.Response.WriteAsync(unavailable, context.RequestAborted); }
+            {
+                await context.Response.WriteAsync(unavailable, context.RequestAborted);
+            }
             else
-            { await JsonSerializer.SerializeAsync(context.Response.Body, expected, JsonDefaults.Options, context.RequestAborted); }
+            {
+                await JsonSerializer.SerializeAsync(context.Response.Body, expected, JsonDefaults.Options, context.RequestAborted);
+            }
         }, observation);
         using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(5), TimeProvider.System);
         var client = new KeyLoadClient(server.Client, ApiKey, UnitClientOptions.Execution());
@@ -109,7 +115,9 @@ internal sealed class KeyLoadClientNullReadTests
         var result = await pending;
         observation.Record(KestrelObservationStage.SdkCompleted);
         if (result.IsFailed)
-        { throw new InvalidOperationException(result.Problem.Detail); }
+        {
+            throw new InvalidOperationException(result.Problem.Detail);
+        }
         await Assert.That(result.Value).IsNotNull();
         await Assert.That(data(result.Value)).IsNull();
     }

@@ -13,7 +13,9 @@ internal static class QueryReadCutObservationDispatch
         budget.Check();
         var position = database.Store.Position;
         if (result.CutPosition < MinimumReadCut || result.CutPosition > position)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidReadCutDetail); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidReadCutDetail);
+        }
         var identity = database.Store.Identity;
         return new(identity.NodeId, identity.Incarnation, identity.ReadGeneration,
             result.CutPosition, position, principal.Id, principal.PolicyEpoch, resource.SchemaVersion,
@@ -24,7 +26,9 @@ internal static class QueryReadCutObservationDispatch
         ReadExecutionBudget budget)
     {
         if (observer is null || observation is not { } captured)
-        { return; }
+        {
+            return;
+        }
         budget.Check();
         observer.Observe(captured, budget.Cancellation);
         budget.Check();

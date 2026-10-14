@@ -53,7 +53,10 @@ internal sealed class GlobalBranchWindowMergeValidationTests
         var low = GlobalBranchTestSupport.Candidate("low", 0.2);
         var high = GlobalBranchTestSupport.Candidate("high", 0.9);
         var unordered = GlobalBranchTestSupport.Window("w", [low, high]);
-        var invalidRequest = GlobalBranchTestSupport.Request(["w"]) with { BranchName = " " };
+        var invalidRequest = GlobalBranchTestSupport.Request(["w"]) with
+        {
+            BranchName = " "
+        };
 
         await AssertFailure(GlobalBranchTestSupport.Request(["w"]), [unordered], ErrorCode.Corruption);
         var invalid = Assert.ThrowsExactly<KeyLoadException>(() => GlobalBranchTestSupport.Merge(invalidRequest,
@@ -66,9 +69,18 @@ internal sealed class GlobalBranchWindowMergeValidationTests
     {
         var validWindow = GlobalBranchTestSupport.Window("w", [GlobalBranchTestSupport.Candidate("a", 1)]);
         var validRequest = GlobalBranchTestSupport.Request(["w"]);
-        var defaultIds = validRequest with { ExpectedWindowIds = default };
-        var zeroLimit = validRequest with { Limit = 0 };
-        var invalidKind = validRequest with { Kind = (GlobalBranchKind)9 };
+        var defaultIds = validRequest with
+        {
+            ExpectedWindowIds = default
+        };
+        var zeroLimit = validRequest with
+        {
+            Limit = 0
+        };
+        var invalidKind = validRequest with
+        {
+            Kind = (GlobalBranchKind)9
+        };
 
         await AssertFailure(defaultIds, [validWindow], ErrorCode.Validation);
         await AssertFailure(zeroLimit, [validWindow], ErrorCode.Validation);
@@ -80,7 +92,10 @@ internal sealed class GlobalBranchWindowMergeValidationTests
     {
         var onlyWindow = GlobalBranchTestSupport.Window("first", [GlobalBranchTestSupport.Candidate("a", 0.8)]);
         var strict = GlobalBranchTestSupport.Request(["first", "second"]);
-        var incomplete = strict with { AllowIncomplete = true };
+        var incomplete = strict with
+        {
+            AllowIncomplete = true
+        };
 
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => GlobalBranchTestSupport.Merge(strict, [onlyWindow]));
         var result = GlobalBranchTestSupport.Merge(incomplete, [onlyWindow]);
@@ -104,11 +119,20 @@ internal sealed class GlobalBranchWindowMergeValidationTests
             GlobalBranchTestSupport.Merge(request, [approximate]));
         var truncatedFailure = Assert.ThrowsExactly<KeyLoadException>(() =>
             GlobalBranchTestSupport.Merge(request, [truncated]));
-        var partial = GlobalBranchTestSupport.Merge(request with { AllowIncomplete = true }, [truncated]);
-        var approximatePartial = GlobalBranchTestSupport.Merge(request with { AllowIncomplete = true }, [approximate]);
+        var partial = GlobalBranchTestSupport.Merge(request with
+        {
+            AllowIncomplete = true
+        }, [truncated]);
+        var approximatePartial = GlobalBranchTestSupport.Merge(request with
+        {
+            AllowIncomplete = true
+        }, [approximate]);
         var incompleteFailure = Assert.ThrowsExactly<KeyLoadException>(() =>
             GlobalBranchTestSupport.Merge(request, [incomplete]));
-        var incompletePartial = GlobalBranchTestSupport.Merge(request with { AllowIncomplete = true }, [incomplete]);
+        var incompletePartial = GlobalBranchTestSupport.Merge(request with
+        {
+            AllowIncomplete = true
+        }, [incomplete]);
 
         await Assert.That(approximateFailure.Code).IsEqualTo(ErrorCode.UnsupportedCapability);
         await Assert.That(truncatedFailure.Code).IsEqualTo(ErrorCode.UnsupportedCapability);

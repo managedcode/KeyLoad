@@ -34,17 +34,23 @@ internal static class NativeAnnCanonicalSource
         if (request.NodeId != seed.Cut.NodeId || request.Placement.Incarnation != seed.Cut.Incarnation
             || request.Consumer.Partition != seed.Scope.Partition || request.Collection != seed.Scope.Collection
             || request.Field != seed.Scope.Field || request.Space != seed.Scope.Space)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, NativeAnnProtocol.InvalidSource); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, NativeAnnProtocol.InvalidSource);
+        }
     }
 
     internal static void RequireRestore(AnnMaintenanceRequest request, AnnSeed current, NativeAnnManifest manifest)
     {
         RequireRestoreIdentity(request, current, manifest);
         if (manifest.Source.DependencySha256 != current.DependencySha256)
-        { throw Errors.Fail(ErrorCode.HistoryUnavailable, NativeAnnProtocol.MissingDependencyHistory); }
+        {
+            throw Errors.Fail(ErrorCode.HistoryUnavailable, NativeAnnProtocol.MissingDependencyHistory);
+        }
         if (manifest.Source.SchemaVersion != current.Scope.SchemaVersion
             || manifest.Source.PolicyEpoch != current.Scope.PolicyEpoch)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, NativeAnnProtocol.InvalidSource); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, NativeAnnProtocol.InvalidSource);
+        }
     }
 
     internal static void RequireRestoreIdentity(AnnMaintenanceRequest request, AnnSeed current, NativeAnnManifest manifest)
@@ -59,7 +65,9 @@ internal static class NativeAnnCanonicalSource
             || manifest.Source.ThroughSequence > current.Cut.OutboxTail
             || manifest.Source.Position > current.Cut.Position || manifest.Source.AppliedPosition > current.Cut.AppliedPosition
             || !SamePlacement(manifest.Placement, request.Placement))
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, NativeAnnProtocol.InvalidSource); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, NativeAnnProtocol.InvalidSource);
+        }
     }
 
     internal static void RequireExactUpper(AnnSeed upper, AnnSeed actual)
@@ -69,7 +77,9 @@ internal static class NativeAnnCanonicalSource
             || upper.Scope.Field != actual.Scope.Field || upper.Scope.SchemaVersion != actual.Scope.SchemaVersion
             || upper.Scope.Space != actual.Scope.Space || upper.CorpusSha256 != actual.CorpusSha256
             || upper.Records.Length != actual.Records.Length)
-        { throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.InvalidSource); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.InvalidSource);
+        }
     }
 
     private static bool SamePlacement(PhysicalShardRecord left, PhysicalShardRecord right)

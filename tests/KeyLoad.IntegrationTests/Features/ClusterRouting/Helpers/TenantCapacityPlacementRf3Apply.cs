@@ -27,7 +27,10 @@ internal static class TenantCapacityPlacementRf3Apply
         await PartitionMovementPublicCallerReplay.RequireAsync(seed.Source, seed.Official, move, original, token);
         await RequireReplayAsync(seed, state, id, request, completed, token);
         await TenantCapacityPlacementRf3Assertions.RefusalAsync(
-            await seed.Source.ApplyPlacementIntentAsync(id, request with { ExpectedRevision = completed.Revision }, token),
+            await seed.Source.ApplyPlacementIntentAsync(id, request with
+            {
+                ExpectedRevision = completed.Revision
+            }, token),
             ErrorCode.Conflict);
         await RequireReplayAsync(seed, state, id, request, completed, token);
         await TenantCapacityPlacementRf3Cold.RequireHealthyReplayAsync(wave, seed, state,
@@ -43,7 +46,11 @@ internal static class TenantCapacityPlacementRf3Apply
         await SqlRf3Protocol.EqualAsync(original,
             (await McpCallerAssertions.SuccessAsync<PlacementIntentV1>(
                 await seed.Official.CallAsync(TenantPlacementPublicProtocol.ApplyTool,
-                    new { commandId = id, request }, token))).Value);
+                    new
+                    {
+                        commandId = id,
+                        request
+                    }, token))).Value);
         await SqlRf3Protocol.EqualAsync(original,
             await McpCallerAssertions.SdkSuccessAsync(await seed.Source.ReadPlacementIntentAsync(
                 new(new(seed.Partition.TenantId, seed.Partition.DatabaseId, state.Control), original.IntentId), token)));

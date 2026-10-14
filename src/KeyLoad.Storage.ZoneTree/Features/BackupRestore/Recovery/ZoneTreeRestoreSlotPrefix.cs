@@ -17,15 +17,21 @@ internal static class ZoneTreeRestoreSlotPrefix
         var targetPath = Path.Combine(stage, JournalFileName);
         RequireRegular(sourcePath);
         if (File.Exists(targetPath))
-        { RequireRegular(targetPath); }
+        {
+            RequireRegular(targetPath);
+        }
         using var source = new FileStream(sourcePath, FileMode.Open, FileAccess.Read, FileShare.Read,
             policy.StreamBufferBytes);
         if (source.Length != expected.Length || expected.Name != JournalFileName)
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
         using var target = new FileStream(targetPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None,
             policy.StreamBufferBytes);
         if (target.Length > expected.Length)
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
         RequirePrefix(source, target, policy.FileBufferBytes, null, ct);
         var buffer = new byte[policy.FileBufferBytes];
         while (target.Position < expected.Length)
@@ -39,7 +45,9 @@ internal static class ZoneTreeRestoreSlotPrefix
         target.Position = Start;
         if (!string.Equals(Convert.ToHexStringLower(SHA256.HashData(target)), expected.Checksum,
             StringComparison.Ordinal))
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
         ct.ThrowIfCancellationRequested();
     }
 
@@ -53,7 +61,9 @@ internal static class ZoneTreeRestoreSlotPrefix
         using var source = new FileStream(sourcePath, FileMode.Open, FileAccess.Read, FileShare.Read, policy.StreamBufferBytes);
         using var target = new FileStream(targetPath, FileMode.Open, FileAccess.Read, FileShare.Read, policy.StreamBufferBytes);
         if (source.Length != expected.Length || target.Length < expected.Length)
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
         RequirePrefix(source, target, policy.FileBufferBytes, expected.Length, ct);
     }
 
@@ -71,7 +81,9 @@ internal static class ZoneTreeRestoreSlotPrefix
             source.ReadExactly(sourceBytes.AsSpan(Start, length));
             target.ReadExactly(targetBytes.AsSpan(Start, length));
             if (!sourceBytes.AsSpan(Start, length).SequenceEqual(targetBytes.AsSpan(Start, length)))
-            { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, Invalid);
+            }
             remaining -= length;
         }
     }
@@ -79,6 +91,8 @@ internal static class ZoneTreeRestoreSlotPrefix
     private static void RequireRegular(string path)
     {
         if ((File.GetAttributes(path) & (FileAttributes.ReparsePoint | FileAttributes.Directory)) != NoBytes)
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
     }
 }

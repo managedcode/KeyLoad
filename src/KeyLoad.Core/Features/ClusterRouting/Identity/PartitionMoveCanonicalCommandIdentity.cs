@@ -9,8 +9,13 @@ public sealed partial class DatabaseEngine
     private string MovementPhaseIdentityJson(PartitionMovePhaseCommand actual)
     {
         if (NativeSerialization.Measure(actual) > Limits.MaxBatchBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity); }
-        var identity = actual with { ReceiverEffectAdmission = null };
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
+        }
+        var identity = actual with
+        {
+            ReceiverEffectAdmission = null
+        };
         if (actual.Stage == PartitionMovePeerStage.RetireCancel)
         {
             identity = actual with
@@ -24,16 +29,27 @@ public sealed partial class DatabaseEngine
             var body = NativeSerialization.Deserialize<PartitionControlAdmitBody>(actual.Body.Span);
             var canonical = body with
             {
-                OriginalOperation = body.OriginalOperation with { EvaluatedAt = default },
+                OriginalOperation = body.OriginalOperation with
+                {
+                    EvaluatedAt = default
+                },
                 ExpiresAt = default
             };
             if (NativeSerialization.Measure(canonical) > Limits.MaxBatchBytes)
-            { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity); }
-            identity = actual with { Body = NativeSerialization.Serialize(canonical), ReceiverEffectAdmission = null };
+            {
+                throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
+            }
+            identity = actual with
+            {
+                Body = NativeSerialization.Serialize(canonical),
+                ReceiverEffectAdmission = null
+            };
         }
         var json = JsonSerializer.Serialize(identity, JsonDefaults.Options);
         if (Encoding.UTF8.GetByteCount(json) > Limits.MaxBatchBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
+        }
         return json;
     }
 }

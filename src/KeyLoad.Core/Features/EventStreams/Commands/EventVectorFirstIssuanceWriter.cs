@@ -22,9 +22,13 @@ internal static class EventVectorFirstIssuanceWriter
             || EventVectorRowStorage.Read<EventVectorFirstIssuance>(transaction,
                 EventVectorKeys.TerminalFirstIssuance(proposed.ControlPartition, proposed.PrincipalId,
                     proposed.OriginalPublicCommandId), admission) is not null)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         if (proposed.State != EventVectorFirstIssuanceState.Admitted)
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
         var row = EventVectorEncodedRow.Create(key, proposed, admission);
         var capacity = EventVectorCapacityLedger.Prepare(transaction, proposed.ControlPartition,
             NewSlot, row.EncodedBytes, admission);
@@ -42,7 +46,9 @@ internal static class EventVectorFirstIssuanceWriter
         RequireOriginal(original, proposed);
         if (original.State == EventVectorFirstIssuanceState.Released
             || proposed.State == EventVectorFirstIssuanceState.Released)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         var key = EventVectorKeys.FirstIssuance(original.ControlPartition, original.PrincipalId,
             original.OriginalPublicCommandId);
         var previousBytes = ReadOriginalBytes(transaction, key, admission);
@@ -60,7 +66,9 @@ internal static class EventVectorFirstIssuanceWriter
         ArgumentNullException.ThrowIfNull(original);
         ArgumentNullException.ThrowIfNull(admission);
         if (original.State != EventVectorFirstIssuanceState.DispatchReserved)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         var key = EventVectorKeys.FirstIssuance(original.ControlPartition, original.PrincipalId,
             original.OriginalPublicCommandId);
         var originalBytes = ReadOriginalBytes(transaction, key, admission);
@@ -84,16 +92,22 @@ internal static class EventVectorFirstIssuanceWriter
             || phase.OriginalFirstIssuancePublicCommandId != original.OriginalPublicCommandId
             || phase.OriginalRequest.ControlPartition != original.ControlPartition
             || phase.OriginalRequest.MapId != original.MapId)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, Invalid);
+        }
         if (original.State != EventVectorFirstIssuanceState.Abandoned
             || actualCleanup.EvaluatedAt < original.OriginalParentExpiresAt)
-        { throw Errors.Fail(ErrorCode.CursorExpired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.CursorExpired, Invalid);
+        }
         var activeKey = EventVectorKeys.FirstIssuance(original.ControlPartition, original.PrincipalId,
             original.OriginalPublicCommandId);
         var terminalKey = EventVectorKeys.TerminalFirstIssuance(original.ControlPartition, original.PrincipalId,
             original.OriginalPublicCommandId);
         if (EventVectorRowStorage.Read<EventVectorFirstIssuance>(transaction, terminalKey, admission) is not null)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         var released = original with
         {
             State = EventVectorFirstIssuanceState.Released,
@@ -120,7 +134,9 @@ internal static class EventVectorFirstIssuanceWriter
             admission.RequireEncodedBytes(originalBytes);
         });
         if (!found)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         return originalBytes;
     }
 
@@ -137,6 +153,8 @@ internal static class EventVectorFirstIssuanceWriter
             || !original.OriginalCapturedFirstOpenPhaseBytes.IsEmpty
                 && !original.OriginalCapturedFirstOpenPhaseBytes.Span.SequenceEqual(
                     proposed.OriginalCapturedFirstOpenPhaseBytes.Span))
-        { throw Errors.Fail(ErrorCode.Conflict, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, Invalid);
+        }
     }
 }

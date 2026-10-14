@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Diagnostics.Features.ResourceExecution;
-using KeyLoad.Orleans;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
@@ -72,7 +72,9 @@ internal static class CanonicalOperationGateway
             commandId, payload, cancellationToken);
         TenantPlacementPublicAdmission.Require(context, readKind, commandKind);
         if (progress is not null && !actual.ReceivingOnly)
-        { throw Errors.Fail(ErrorCode.Validation, GrainRoutingProtocol.InvalidRequest); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, GrainRoutingProtocol.InvalidRequest);
+        }
         var requestId = actual.RequestId;
         var started = DatabasePhaseTelemetry.Begin();
         var outcome = DatabasePhaseOutcome.Faulted;

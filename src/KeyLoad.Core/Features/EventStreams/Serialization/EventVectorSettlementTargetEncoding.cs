@@ -18,7 +18,9 @@ internal static class EventVectorSettlementTargetEncoding
         work.ChargeBytes(offer.PageDigest.Length);
         var bytes = offer.Entries.ToArray();
         try
-        { return (bytes, offer.PageDigest.ToArray()); }
+        {
+            return (bytes, offer.PageDigest.ToArray());
+        }
         catch (Exception) { CryptographicOperations.ZeroMemory(bytes); throw; }
     }
 
@@ -33,7 +35,9 @@ internal static class EventVectorSettlementTargetEncoding
         try
         {
             if (bytes.Length != length)
-            { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, Invalid);
+            }
             return (bytes, SHA256.HashData(bytes));
         }
         catch (Exception) { CryptographicOperations.ZeroMemory(bytes); throw; }

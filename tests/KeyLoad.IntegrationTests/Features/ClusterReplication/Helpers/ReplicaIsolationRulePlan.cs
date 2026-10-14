@@ -10,16 +10,26 @@ internal sealed class ReplicaIsolationRulePlan : IReplicaIsolationRulePlan
     private const int MulticastFirstOctet = 224;
     private const string OperationFormat = "N";
     private readonly string[] peers;
-    public string InputChain { get; }
-    public string OutputChain { get; }
+    public string InputChain
+    {
+        get;
+    }
+    public string OutputChain
+    {
+        get;
+    }
 
     internal ReplicaIsolationRulePlan(Guid operation, IReadOnlyList<string> peerAddresses, int peerCount)
     {
         if (operation == Guid.Empty || peerAddresses.Count != peerCount)
-        { throw new InvalidOperationException("Namespace isolation requires one operation and the exact admitted peers."); }
+        {
+            throw new InvalidOperationException("Namespace isolation requires one operation and the exact admitted peers.");
+        }
         peers = peerAddresses.Select(RequireIpv4).ToArray();
         if (peers.Distinct(StringComparer.Ordinal).Count() != peerCount)
-        { throw new InvalidOperationException("Namespace isolation requires distinct voter endpoints."); }
+        {
+            throw new InvalidOperationException("Namespace isolation requires distinct voter endpoints.");
+        }
         var suffix = operation.ToString(OperationFormat)[..ReplicaIsolationProtocol.ChainSuffixLength];
         InputChain = ReplicaIsolationProtocol.InputPrefix + suffix;
         OutputChain = ReplicaIsolationProtocol.OutputPrefix + suffix;
@@ -47,7 +57,9 @@ internal sealed class ReplicaIsolationRulePlan : IReplicaIsolationRulePlan
     {
         if (fullContainerId.Length != ReplicaIsolationProtocol.FullContainerIdLength
             || !fullContainerId.All(character => character is >= '0' and <= '9' or >= 'a' and <= 'f'))
-        { throw new InvalidOperationException("Namespace mutation requires an inspected full container identity."); }
+        {
+            throw new InvalidOperationException("Namespace mutation requires an inspected full container identity.");
+        }
         return [ReplicaIsolationProtocol.Exec, ReplicaIsolationProtocol.User, ReplicaIsolationProtocol.RootUser,
             fullContainerId, ReplicaIsolationProtocol.Timeout, ReplicaIsolationProtocol.TermSignal,
             ReplicaIsolationProtocol.KillBound, ReplicaIsolationProtocol.ExecutionBound, ReplicaIsolationProtocol.Iptables,
@@ -63,7 +75,9 @@ internal sealed class ReplicaIsolationRulePlan : IReplicaIsolationRulePlan
         if (!IPAddress.TryParse(value, out var address) || address.AddressFamily != AddressFamily.InterNetwork
             || IPAddress.IsLoopback(address) || address.Equals(IPAddress.Any) || address.Equals(IPAddress.Broadcast)
             || address.GetAddressBytes()[AddressFirstOctet] >= MulticastFirstOctet || !string.Equals(value, address.ToString(), StringComparison.Ordinal))
-        { throw new InvalidOperationException("Namespace isolation requires a canonical native unicast IPv4 voter endpoint."); }
+        {
+            throw new InvalidOperationException("Namespace isolation requires a canonical native unicast IPv4 voter endpoint.");
+        }
         return address.ToString();
     }
 }

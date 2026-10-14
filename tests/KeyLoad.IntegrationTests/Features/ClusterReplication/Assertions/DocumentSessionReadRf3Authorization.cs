@@ -10,7 +10,11 @@ internal static class DocumentSessionReadRf3Authorization
     internal static async Task VerifyAsync(KeyLoadClient admin, KeyLoadClient sdk, McpOfficialClient mcp,
         EntityRef reference, CommitToken minimum, McpPersistedIdentity identity, CancellationToken token)
     {
-        var revoked = identity.Principal with { Grants = [], PolicyEpoch = identity.Principal.PolicyEpoch + First };
+        var revoked = identity.Principal with
+        {
+            Grants = [],
+            PolicyEpoch = identity.Principal.PolicyEpoch + First
+        };
         await McpCallerAssertions.SdkSuccessAsync(await admin.ConfigurePrincipalAsync(Guid.NewGuid(), revoked, token));
         var denied = await sdk.GetAsync(reference, minimum, token);
         await Assert.That(denied.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
@@ -33,7 +37,10 @@ internal static class DocumentSessionReadRf3Authorization
         var unchanged = await PublicReadAssertions.DocumentAsync(await admin.GetAsync(reference, minimum, token));
         var expected = new DocumentResult(reference, First, FirstJson, false, []);
         await Assert.That(JsonDefaults.Serialize(unchanged).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
-        var restored = identity.Principal with { PolicyEpoch = revoked.PolicyEpoch + First };
+        var restored = identity.Principal with
+        {
+            PolicyEpoch = revoked.PolicyEpoch + First
+        };
         await McpCallerAssertions.SdkSuccessAsync(await admin.ConfigurePrincipalAsync(Guid.NewGuid(), restored, token));
         await DocumentSessionReadRf3Assertions.HealthyAsync(sdk, mcp, reference, minimum, FirstJson, First, token);
     }

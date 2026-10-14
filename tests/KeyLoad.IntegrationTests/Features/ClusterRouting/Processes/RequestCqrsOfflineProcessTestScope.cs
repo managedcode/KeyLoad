@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClusterReplication;
 using KeyLoad.IntegrationTests.Features.StorageRecovery;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
@@ -14,7 +14,10 @@ internal sealed class RequestCqrsOfflineProcessTestScope : IAsyncDisposable
     private Task? disposalTask;
 
     private RequestCqrsOfflineProcessTestScope(string root, CancellationToken cancellationToken)
-    { this.root = root; this.cancellationToken = cancellationToken; }
+    {
+        this.root = root;
+        this.cancellationToken = cancellationToken;
+    }
 
     internal static async Task RunAsync(Func<RequestCqrsOfflineProcessTestScope, Task> test,
         CancellationToken cancellationToken)
@@ -26,9 +29,13 @@ internal sealed class RequestCqrsOfflineProcessTestScope : IAsyncDisposable
             await ServerFailureObserver.ObserveAsync(() => test(scope), failures).ConfigureAwait(false);
         }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
@@ -66,9 +73,13 @@ internal sealed class RequestCqrsOfflineProcessTestScope : IAsyncDisposable
     {
         var failures = new List<Exception>();
         foreach (var child in children)
-        { await ServerFailureObserver.ObserveAsync(() => child.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => child.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         if (children.All(child => child.IsSettled))
-        { ServerFailureObserver.Observe(DeleteRoot, failures); }
+        {
+            ServerFailureObserver.Observe(DeleteRoot, failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
@@ -80,7 +91,9 @@ internal sealed class RequestCqrsOfflineProcessTestScope : IAsyncDisposable
         var root = Path.Combine(parent, "cluster-routing-offline-process-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(root);
         if (!OperatingSystem.IsWindows())
-        { File.SetUnixFileMode(root, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute); }
+        {
+            File.SetUnixFileMode(root, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+        }
         return root;
     }
 

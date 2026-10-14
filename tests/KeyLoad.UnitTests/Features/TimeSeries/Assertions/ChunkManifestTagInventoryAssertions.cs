@@ -18,9 +18,13 @@ internal static class ChunkManifestTagInventoryAssertions
         {
             await Assert.That(after[index][0]).IsEqualTo(before[index][0]);
             if (before[index][0] == key)
-            { await Assert.That(after[index][1] == before[index][1]).IsFalse(); }
+            {
+                await Assert.That(after[index][1] == before[index][1]).IsFalse();
+            }
             else
-            { await Assert.That(after[index][1]).IsEqualTo(before[index][1]); }
+            {
+                await Assert.That(after[index][1]).IsEqualTo(before[index][1]);
+            }
         }
         await SampleRawIntegrityAssertions.UnchangedAsync(fixture.Store, damaged);
     }

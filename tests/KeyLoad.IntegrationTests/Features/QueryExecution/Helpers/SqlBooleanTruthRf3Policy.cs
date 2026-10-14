@@ -18,7 +18,10 @@ internal static class SqlBooleanTruthRf3Policy
             SqlBooleanTruthRf3Cases.All[SqlBooleanTruthRf3State.AgainstOne].Clause, ErrorCode.PermissionDenied, token, ast: true);
         await SqlBooleanOperandRf3Controls.RequireAsync(fixture, state, root, ErrorCode.PermissionDenied, token);
         await global::TUnit.Assertions.Assert.That(await SqlBooleanTruthRf3Image.ReadAsync(root, state, token)).IsEqualTo(before);
-        var repaired = original with { PolicyEpoch = original.PolicyEpoch + SqlNullOrderingRf3Protocol.RepairAdvance };
+        var repaired = original with
+        {
+            PolicyEpoch = original.PolicyEpoch + SqlNullOrderingRf3Protocol.RepairAdvance
+        };
         await SqlRf3Protocol.EqualAsync(repaired, await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.SdkSuccessAsync(
             await root.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), repaired, token)));
         await SqlBooleanTruthRf3Pages.HealthyAsync(fixture, state, token);

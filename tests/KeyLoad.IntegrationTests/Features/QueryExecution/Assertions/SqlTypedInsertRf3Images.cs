@@ -8,7 +8,9 @@ internal static class SqlTypedInsertRf3Images
     {
         var values = new List<DocumentReadResult>(Ids.Length);
         foreach (var id in Ids)
-        { values.Add(await McpCallerAssertions.SdkSuccessAsync(await root.GetAsync(new(SqlTypedInsertRf3Literal.Partition, SqlTypedInsertRf3Literal.Table, id), token))); }
+        {
+            values.Add(await McpCallerAssertions.SdkSuccessAsync(await root.GetAsync(new(SqlTypedInsertRf3Literal.Partition, SqlTypedInsertRf3Literal.Table, id), token)));
+        }
         return new(values.ToArray(), await McpCallerAssertions.SdkSuccessAsync(
             await root.OutboxStatusAsync(SqlTypedInsertRf3Literal.Partition, token)));
     }

@@ -14,7 +14,9 @@ internal sealed record PartitionMovementReceiverIssueNonce(
     internal static Guid For(Guid originalPhaseCommandId, Guid sourceQueryNonce)
     {
         if (originalPhaseCommandId == Guid.Empty || sourceQueryNonce == Guid.Empty)
-        { throw Errors.Fail(ErrorCode.Validation, PartitionMoveProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, PartitionMoveProtocol.Invalid);
+        }
         Span<byte> digest = stackalloc byte[SHA256.HashSizeInBytes];
         SHA256.HashData(NativeSerialization.Serialize(new PartitionMovementReceiverIssueNonce(
             PartitionMoveProtocol.Version, originalPhaseCommandId, sourceQueryNonce)), digest);

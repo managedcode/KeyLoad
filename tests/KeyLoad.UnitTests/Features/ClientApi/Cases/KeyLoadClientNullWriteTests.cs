@@ -28,7 +28,9 @@ internal sealed class KeyLoadClientNullWriteTests
     {
         var observation = new KeyLoadClientKestrelObservation();
         try
-        { await ExecuteObservedAsync(unavailable, observation); }
+        {
+            await ExecuteObservedAsync(unavailable, observation);
+        }
         catch (Exception original)
         {
             observation.WriteAndThrow(original);
@@ -54,7 +56,9 @@ internal sealed class KeyLoadClientNullWriteTests
                 await context.Response.WriteAsync("true", context.RequestAborted);
             }
             else
-            { context.Response.StatusCode = StatusCodes.Status204NoContent; }
+            {
+                context.Response.StatusCode = StatusCodes.Status204NoContent;
+            }
         });
         var client = new KeyLoadClient(server.Client, ApiKey, UnitClientOptions.Execution());
         var unknown = await client.ConfigureApiKeyAsync(commandId, credential);
@@ -66,9 +70,13 @@ internal sealed class KeyLoadClientNullWriteTests
         await Assert.That(acknowledged.Problem).IsNull();
         await Assert.That(requests.Count).IsEqualTo(2);
         foreach (var request in requests)
-        { await Assert.That(JsonDefaults.Serialize(request).SequenceEqual(JsonDefaults.Serialize(new ConfigureApiKeyRequest(credential)))).IsTrue(); }
+        {
+            await Assert.That(JsonDefaults.Serialize(request).SequenceEqual(JsonDefaults.Serialize(new ConfigureApiKeyRequest(credential)))).IsTrue();
+        }
         foreach (var header in headers)
-        { await Assert.That(header).IsEqualTo(commandId.ToString()); }
+        {
+            await Assert.That(header).IsEqualTo(commandId.ToString());
+        }
     }
 
     [Test]
@@ -120,7 +128,9 @@ internal sealed class KeyLoadClientNullWriteTests
                 await JsonSerializer.SerializeAsync(context.Response.Body, expected, JsonDefaults.Options, context.RequestAborted);
             }
             else
-            { context.Response.StatusCode = StatusCodes.Status204NoContent; }
+            {
+                context.Response.StatusCode = StatusCodes.Status204NoContent;
+            }
         });
         var client = new KeyLoadClient(server.Client, ApiKey, UnitClientOptions.Execution());
         var refused = await client.ConfigureApiKeyAsync(commandId, credential);
@@ -132,7 +142,9 @@ internal sealed class KeyLoadClientNullWriteTests
         await Assert.That(healthy.Problem).IsNull();
         await Assert.That(requests.Count).IsEqualTo(2);
         foreach (var request in requests)
-        { await Assert.That(JsonDefaults.Serialize(request).SequenceEqual(JsonDefaults.Serialize(new ConfigureApiKeyRequest(credential)))).IsTrue(); }
+        {
+            await Assert.That(JsonDefaults.Serialize(request).SequenceEqual(JsonDefaults.Serialize(new ConfigureApiKeyRequest(credential)))).IsTrue();
+        }
     }
 
     private static async Task ExecuteObservedAsync(string unavailable, KeyLoadClientKestrelObservation observation)
@@ -156,17 +168,25 @@ internal sealed class KeyLoadClientNullWriteTests
                     JsonDefaults.Options, context.RequestAborted))!);
                 headers.Add(context.Request.Headers[CommandIdHeader].SingleOrDefault());
                 if (requests.Count == 1)
-                { await context.Response.WriteAsync(unavailable, context.RequestAborted); }
+                {
+                    await context.Response.WriteAsync(unavailable, context.RequestAborted);
+                }
                 else
-                { await JsonSerializer.SerializeAsync(context.Response.Body, receipt, JsonDefaults.Options, context.RequestAborted); }
+                {
+                    await JsonSerializer.SerializeAsync(context.Response.Body, receipt, JsonDefaults.Options, context.RequestAborted);
+                }
                 return;
             }
             _ = await JsonSerializer.DeserializeAsync<GetDocumentRequest>(context.Request.Body,
                 JsonDefaults.Options, context.RequestAborted);
             if (Interlocked.Increment(ref readCount) == 1)
-            { await context.Response.WriteAsync(DocumentAbsence, context.RequestAborted); }
+            {
+                await context.Response.WriteAsync(DocumentAbsence, context.RequestAborted);
+            }
             else
-            { await JsonSerializer.SerializeAsync(context.Response.Body, new DocumentReadResult(document), JsonDefaults.Options, context.RequestAborted); }
+            {
+                await JsonSerializer.SerializeAsync(context.Response.Body, new DocumentReadResult(document), JsonDefaults.Options, context.RequestAborted);
+            }
         }, observation);
         using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(5), TimeProvider.System);
         var client = new KeyLoadClient(server.Client, ApiKey, UnitClientOptions.Execution());
@@ -180,28 +200,6 @@ internal sealed class KeyLoadClientNullWriteTests
         observation.Record(KestrelObservationStage.SdkCompleted);
         await Assert.That(retry.IsSuccess).IsTrue();
         await Assert.That(NativeSerialization.Serialize(retry.Value!).SequenceEqual(NativeSerialization.Serialize(receipt))).IsTrue();
-        await VerifyRequestsAndReadsAsync(client, command, requests, headers, reference, document, deadline.Token);
-    }
-
-    private static async Task VerifyRequestsAndReadsAsync(KeyLoadClient client, CommandRequest command,
-        List<CommandRequest> requests, List<string?> headers, EntityRef reference, DocumentResult document, CancellationToken cancellationToken)
-    {
-        await Assert.That(requests.Count).IsEqualTo(2);
-        await Assert.That(headers.Count).IsEqualTo(2);
-        foreach (var request in requests)
-        {
-            await Assert.That(JsonDefaults.Serialize(request).SequenceEqual(JsonDefaults.Serialize(command))).IsTrue();
-        }
-        foreach (var header in headers)
-        { await Assert.That(header).IsEqualTo(command.CommandId.ToString()); }
-        var absent = await client.GetAsync(reference, cancellationToken);
-        if (absent.IsFailed)
-        { throw new InvalidOperationException(absent.Problem.Detail); }
-        await Assert.That(absent.Value.Document).IsNull();
-        var healthy = await client.GetAsync(reference, cancellationToken);
-        if (healthy.IsFailed)
-        { throw new InvalidOperationException(healthy.Problem.Detail); }
-        await Assert.That(healthy.Value.Document).IsNotNull();
-        await Assert.That(NativeSerialization.Serialize(healthy.Value.Document).SequenceEqual(NativeSerialization.Serialize(document))).IsTrue();
+        await KeyLoadClientNullWriteReadAssertions.VerifyRequestsAndReadsAsync(client, command, requests, headers, reference, document, deadline.Token);
     }
 }

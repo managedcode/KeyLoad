@@ -9,7 +9,10 @@ internal static class QueueOrderedRetryRestoreRefusal
         var image = QueueOrderedRetryImage.Capture(database.Store, original.Lane);
         var position = database.Store.Position;
         var prior = original.Outcomes.First(item => item.Operation.Kind == OperationKind.Batch && item.Result.Error is null);
-        var publicOperation = prior.Operation with { NativePayload = default };
+        var publicOperation = prior.Operation with
+        {
+            NativePayload = default
+        };
         var current = database.NormalizeOperation(publicOperation);
         await Assert.That(database.Apply(current).Error).IsEqualTo(ErrorCode.TokenInvalidated);
         await Assert.That(database.Store.Position).IsEqualTo(position);

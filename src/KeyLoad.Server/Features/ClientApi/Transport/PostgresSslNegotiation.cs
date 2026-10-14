@@ -17,7 +17,9 @@ internal sealed class PostgresSslNegotiation(global::Microsoft.Extensions.Option
             await ServerFailureObserver.ObserveAsync(() =>
             {
                 if (frame is null || !RequireSsl(frame.Payload))
-                { throw Errors.Fail(ErrorCode.Unauthenticated, ServerProtocol.MissingCredential); }
+                {
+                    throw Errors.Fail(ErrorCode.Unauthenticated, ServerProtocol.MissingCredential);
+                }
                 return Task.CompletedTask;
             }, failures).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
@@ -25,7 +27,10 @@ internal sealed class PostgresSslNegotiation(global::Microsoft.Extensions.Option
         context.Transport.Output.Write(SslAccepted);
         var flushed = await context.Transport.Output.FlushAsync(token).ConfigureAwait(false);
         if (flushed.IsCompleted || flushed.IsCanceled)
-        { token.ThrowIfCancellationRequested(); throw new EndOfStreamException(); }
+        {
+            token.ThrowIfCancellationRequested();
+            throw new EndOfStreamException();
+        }
         await next(context).ConfigureAwait(false);
     }
 

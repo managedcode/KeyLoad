@@ -22,7 +22,9 @@ internal static class EventVectorSourcePhaseIds
             || phase.OriginalBodyDigest.Length != SHA256.HashSizeInBytes
             || phase.CleanupGeneration < InitialCleanupGeneration
             || phase.CleanupGeneration != InitialCleanupGeneration && phase.Role != EventVectorSourcePhaseRole.Release)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidIdentity); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidIdentity);
+        }
         var identity = new EventVectorSourceIdentity(Version, phase.MapId, EventVectorIdentityInputs.Partition(phase.ControlPartition),
             phase.ControlIncarnation, phase.MapRevision, phase.CoverageGeneration, EventVectorIdentityInputs.Text(phase.PrincipalId),
             phase.Role, phase.SourceOrdinal, EventVectorIdentityInputs.Digest(phase.OriginalBodyDigest), phase.CleanupGeneration);

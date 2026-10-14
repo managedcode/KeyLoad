@@ -20,7 +20,9 @@ internal static class NativeAnnProcessAssertions
     internal static async Task VerifyStageAsync(string root, string mode, CancellationToken token)
     {
         if (mode is NativeAnnCrashContract.Prepare or NativeAnnCrashContract.Fault)
-        { return; }
+        {
+            return;
+        }
         var recovered = await ReadAsync(root, NativeAnnCrashContract.RecoveredFile, token);
         var healthy = await ReadAsync(root, NativeAnnCrashContract.HealthyFile, token);
         await AssertLiteralAsync(recovered, healthy: false);

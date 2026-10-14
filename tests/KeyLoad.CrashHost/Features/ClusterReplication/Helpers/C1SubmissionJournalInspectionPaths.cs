@@ -19,7 +19,9 @@ internal static class C1SubmissionJournalInspectionPaths
         var owner = Owner(request);
         RequireRegularFile(owner);
         if (new FileInfo(owner).Length != EmptyLength)
-        { throw C1SubmissionJournalInspectionValidation.Invalid(); }
+        {
+            throw C1SubmissionJournalInspectionValidation.Invalid();
+        }
     }
     internal static string Identity(string directory)
     {
@@ -32,13 +34,17 @@ internal static class C1SubmissionJournalInspectionPaths
         for (var current = new DirectoryInfo(path); current is not null; current = current.Parent)
         {
             if (!current.Exists || (current.Attributes & FileAttributes.ReparsePoint) != EmptyLength)
-            { throw C1SubmissionJournalInspectionValidation.Invalid(); }
+            {
+                throw C1SubmissionJournalInspectionValidation.Invalid();
+            }
         }
         return path;
     }
     private static void RequireRegularFile(string path)
     {
         if (!File.Exists(path) || (File.GetAttributes(path) & (FileAttributes.Directory | FileAttributes.ReparsePoint)) != EmptyLength)
-        { throw C1SubmissionJournalInspectionValidation.Invalid(); }
+        {
+            throw C1SubmissionJournalInspectionValidation.Invalid();
+        }
     }
 }

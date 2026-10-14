@@ -43,10 +43,16 @@ internal static class QueueTerminalPolicyRf3Replay
     {
         Func<Task> current = () => QueueTerminalPolicyRf3Assertions.CurrentAsync(admin, worker, state, token);
         foreach (var row in state.Producers)
-        { await ProducerAsync(worker, row.Request, row.Result, current, token); }
+        {
+            await ProducerAsync(worker, row.Request, row.Result, current, token);
+        }
         foreach (var row in state.Completions)
-        { await CompletionAsync(worker, row.Request, row.Result, current, token); }
+        {
+            await CompletionAsync(worker, row.Request, row.Result, current, token);
+        }
         foreach (var row in state.Configurations)
-        { await QueueTerminalPolicyRf3Policy.ReplayAsync(admin, row.Id, row.Request, row.Result, current, token); }
+        {
+            await QueueTerminalPolicyRf3Policy.ReplayAsync(admin, row.Id, row.Request, row.Result, current, token);
+        }
     }
 }

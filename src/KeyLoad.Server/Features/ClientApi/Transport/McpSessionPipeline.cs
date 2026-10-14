@@ -24,7 +24,9 @@ internal sealed class McpSessionPipeline(HttpContext context, McpRequestState st
             McpPipelineFailureDiagnostic.Write(context, message.JsonRpcMessage,
                 McpPipelineFailureStage.IncomingAdmission, error);
             if (request is not null)
-            { await RejectAsync(message, request, tool, error.Code, cancellationToken).ConfigureAwait(false); }
+            {
+                await RejectAsync(message, request, tool, error.Code, cancellationToken).ConfigureAwait(false);
+            }
             return;
         }
         catch (Exception error) when (error is not KeyLoadException)
@@ -34,7 +36,9 @@ internal sealed class McpSessionPipeline(HttpContext context, McpRequestState st
             throw;
         }
         try
-        { await next(message, cancellationToken).ConfigureAwait(false); }
+        {
+            await next(message, cancellationToken).ConfigureAwait(false);
+        }
         catch (Exception error)
         {
             McpPipelineFailureDiagnostic.WriteExecutionFailure(context, message.JsonRpcMessage,
@@ -47,12 +51,16 @@ internal sealed class McpSessionPipeline(HttpContext context, McpRequestState st
     internal McpMessageHandler Outgoing(McpMessageHandler next) => async (message, cancellationToken) =>
     {
         if (message.JsonRpcMessage is JsonRpcError nativeError)
-        { nativeError.Error = SafeProtocolError(nativeError.Error.Code); }
+        {
+            nativeError.Error = SafeProtocolError(nativeError.Error.Code);
+        }
         var executionOptions = state.ExecutionOptions;
         var envelopeBytes = executionOptions.Value.EnvelopeAllowanceBytes;
         var maximumBytes = checked(state.MaximumReplyBytes + envelopeBytes);
         try
-        { McpNativeOutput.Validate(message.JsonRpcMessage, maximumBytes, executionOptions); }
+        {
+            McpNativeOutput.Validate(message.JsonRpcMessage, maximumBytes, executionOptions);
+        }
         catch (KeyLoadException error)
         {
             McpPipelineFailureDiagnostic.Write(context, message.JsonRpcMessage,
@@ -62,9 +70,13 @@ internal sealed class McpSessionPipeline(HttpContext context, McpRequestState st
                 McpResponseReplacement.Apply(response, state.Failure(error.Code, CanonicalOperationGateway.RequestId(context)));
             }
             else if (message.JsonRpcMessage is JsonRpcError failed)
-            { failed.Error = SafeProtocolError((int)McpErrorCode.InternalError); }
+            {
+                failed.Error = SafeProtocolError((int)McpErrorCode.InternalError);
+            }
             else
-            { throw; }
+            {
+                throw;
+            }
             McpNativeOutput.Validate(message.JsonRpcMessage, envelopeBytes, executionOptions);
         }
         await next(message, cancellationToken).ConfigureAwait(false);

@@ -23,7 +23,10 @@ public sealed partial class OpenSearchTarget(HttpClient client, string runId, st
     private int corpusCount;
 
     /// <summary>Gets the observed server, transport, index-copy, and acknowledgement evidence collected during initialization.</summary>
-    public TargetProfile Profile { get; private set; } = new(OpenSearchNames.TargetName, OpenSearchNames.Unverified,
+    public TargetProfile Profile
+    {
+        get; private set;
+    } = new(OpenSearchNames.TargetName, OpenSearchNames.Unverified,
         topology == ComparisonTopology.Standalone ? OpenSearchNames.SingleTopology : OpenSearchNames.ReplicatedTopology,
         topology == ComparisonTopology.Standalone ? OpenSearchNames.SingleAcknowledgement : OpenSearchNames.ReplicatedAcknowledgement,
         OpenSearchNames.RealtimeReadContract, OpenSearchNames.HttpJson, OpenSearchNames.AspireAuthorization, image);
@@ -55,7 +58,10 @@ public sealed partial class OpenSearchTarget(HttpClient client, string runId, st
         topK = dataset.Settings.TopK;
         if ((dataset.Settings is ScaledComparisonProfile || dataset is DocumentComparisonCorpus))
         {
-            Profile = Profile with { ReadContract = RealTimeDocumentGETS1SourceContainsNoVectorValuesToken };
+            Profile = Profile with
+            {
+                ReadContract = RealTimeDocumentGETS1SourceContainsNoVectorValuesToken
+            };
         }
         corpusCount = dataset.Documents.Count;
         using var root = await OpenSearchHttp.SendJsonAsync(client, HttpMethod.Get, OpenSearchNames.PathSeparator, null, cancellationToken);

@@ -30,10 +30,14 @@ internal static class ClusterRestoreRf3CanonicalCut
                 {
                     if (identity.NodeId != original.Cut.SourceNodeId || identity.Incarnation != original.Cut.Owner.Incarnation
                         || position != original.Cut.StorePosition)
-                    { throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid); }
+                    {
+                        throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid);
+                    }
                     var cut = NativeSerialization.Deserialize<ClusterBackupOwnerCut>(metadata.Span);
                     if (!NativeSerialization.Serialize(cut).AsSpan().SequenceEqual(NativeSerialization.Serialize(original.Cut)))
-                    { throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid); }
+                    {
+                        throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid);
+                    }
                     return Read(view, original, token);
                 }, token);
             images.Add(original.Cut.Owner.PhysicalShardId, actual);
@@ -60,7 +64,9 @@ internal static class ClusterRestoreRf3CanonicalCut
                 results.Add(store.Read(view => Read(view, original, token)));
             }, failures);
             if (store is { } owned)
-            { ServerFailureObserver.Observe(owned.Dispose, failures); }
+            {
+                ServerFailureObserver.Observe(owned.Dispose, failures);
+            }
         }
         ServerFailureObserver.ThrowIfAny(failures);
         return results.ToImmutable();
@@ -75,7 +81,9 @@ internal static class ClusterRestoreRf3CanonicalCut
     {
         await Assert.That(actual.Length).IsEqualTo(expected.Length);
         for (var index = FirstNode; index < expected.Length; index++)
-        { await Assert.That(actual[index]).IsEquivalentTo(expected[index], CollectionOrdering.Matching); }
+        {
+            await Assert.That(actual[index]).IsEquivalentTo(expected[index], CollectionOrdering.Matching);
+        }
     }
 
     private static ImmutableArray<ClusterRestoreRf3CanonicalImage> Read(IKeyValueView view,
@@ -104,7 +112,9 @@ internal static class ClusterRestoreRf3CanonicalCut
         {
             token.ThrowIfCancellationRequested();
             if (count >= maximum)
-            { throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid); }
+            {
+                throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid);
+            }
             var page = view.VisitRange(KeySpace.Partition(family, partition), maximum - count, (key, value) =>
             {
                 Append(hash, key);
@@ -113,7 +123,9 @@ internal static class ClusterRestoreRf3CanonicalCut
                 return true;
             }, cancellationToken: token);
             if (page.HasMore || page.StoppedByVisitor)
-            { throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid); }
+            {
+                throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid);
+            }
         }
         return new(partition, count, Convert.ToHexString(hash.GetHashAndReset()));
     }

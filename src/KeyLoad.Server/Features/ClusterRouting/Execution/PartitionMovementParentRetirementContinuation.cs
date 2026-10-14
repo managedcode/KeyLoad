@@ -96,7 +96,9 @@ internal sealed class PartitionMovementParentRetirementContinuation
             || cancellation.FamilyOrdinal != body.FamilyOrdinal || cancellation.BatchOrdinal != original.PageOrdinal
             || cancellation.OriginalRequestNonce != last.OriginalRequestNonce
             || cancellation.OriginalExpiresAt != last.OriginalExpiresAt)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+        }
         // A fresh generation admits a distinct native grant at the exact cancelled cursor.
         // The retained original command, nonce, expiry and cancellation witness remain unchanged.
         var intended = PartitionMovementParentNativePhases.Cleanup(header, PartitionMovementParentAuthority.RequireControl(state),

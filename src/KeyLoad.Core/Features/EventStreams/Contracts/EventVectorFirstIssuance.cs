@@ -20,7 +20,10 @@ internal sealed record EventVectorFirstIssuance(
 {
     internal const int ParentRequestField = 15;
     [Orleans.Id(ParentRequestField)]
-    public Guid OriginalParentRequestId { get; init; }
+    public Guid OriginalParentRequestId
+    {
+        get; init;
+    }
 
     internal const string SerializerAlias = "keyload.core.event-vector-first-issuance.v1";
 }

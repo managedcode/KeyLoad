@@ -9,7 +9,9 @@ internal sealed class PostgresTransportDeadline : IDisposable
     {
         deadline = new CancellationTokenSource(duration, clock);
         try
-        { linked = CancellationTokenSource.CreateLinkedTokenSource(closed, deadline.Token); }
+        {
+            linked = CancellationTokenSource.CreateLinkedTokenSource(closed, deadline.Token);
+        }
         catch (Exception primary)
         {
             var failures = new List<Exception> { primary };

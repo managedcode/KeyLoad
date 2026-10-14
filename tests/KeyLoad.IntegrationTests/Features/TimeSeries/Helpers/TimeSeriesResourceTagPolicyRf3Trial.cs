@@ -56,6 +56,8 @@ internal static class TimeSeriesResourceTagPolicyRf3Trial
     private static async Task DiscoverAsync(RequestCqrsRf3Callers reader, CancellationToken token)
     {
         foreach (var tool in new[] { McpCallerTools.SeriesRead, McpCallerTools.SeriesLatest, McpCallerTools.SeriesAggregate })
-        { await McpDiscoveryAssertions.VerifyAsync(await reader.Mcp.Client.DiscoverKeyLoadToolAsync(tool, token)); }
+        {
+            await McpDiscoveryAssertions.VerifyAsync(await reader.Mcp.Client.DiscoverKeyLoadToolAsync(tool, token));
+        }
     }
 }

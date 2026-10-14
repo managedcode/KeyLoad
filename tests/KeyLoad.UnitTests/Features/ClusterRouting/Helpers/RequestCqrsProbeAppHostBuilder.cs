@@ -27,7 +27,9 @@ internal static class RequestCqrsProbeAppHostBuilder
             [RuntimeContainerImage.ServerConfiguration] = ValidImage
         };
         foreach (var pair in extra)
-        { values[pair.Key] = pair.Value; }
+        {
+            values[pair.Key] = pair.Value;
+        }
         builder.Configuration.AddInMemoryCollection(values);
         return builder;
     }

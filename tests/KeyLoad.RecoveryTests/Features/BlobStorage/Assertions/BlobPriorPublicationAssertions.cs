@@ -37,7 +37,9 @@ internal static class BlobPriorPublicationAssertions
             BlobPriorPublicationOracle.Key("blob-partmeta-v1", seed))), new BlobPartMetadata(1, 4, BlobPriorPublicationOracle.Hash(seed.Bytes)));
         await QuotasAsync(owner, seed, 4, 1);
         foreach (var command in seed.Commands)
-        { await BlobPriorPublicationImage.ReplayAsync(owner, command); }
+        {
+            await BlobPriorPublicationImage.ReplayAsync(owner, command);
+        }
     }
 
     internal static async Task QuotasAsync(DatabaseEngine owner, BlobPriorPublicationState seed, long bytes, int versions)

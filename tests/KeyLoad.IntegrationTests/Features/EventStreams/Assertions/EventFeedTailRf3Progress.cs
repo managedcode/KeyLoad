@@ -17,7 +17,10 @@ internal sealed class EventFeedTailRf3Progress(int maximumBytes) : IProgress<Pro
         lock (gate)
         {
             if (observed is not null || value.Message is null || Encoding.UTF8.GetByteCount(value.Message) > maximumBytes)
-            { failure ??= new InvalidOperationException(Invalid); return; }
+            {
+                failure ??= new InvalidOperationException(Invalid);
+                return;
+            }
             observed = value;
             first.TrySetResult();
         }
@@ -30,7 +33,9 @@ internal sealed class EventFeedTailRf3Progress(int maximumBytes) : IProgress<Pro
         lock (gate)
         {
             if (failure is not null)
-            { throw failure; }
+            {
+                throw failure;
+            }
             value = observed ?? throw new InvalidOperationException(Invalid);
         }
         await Assert.That(value.Progress).IsEqualTo(OneDelivery);
@@ -46,7 +51,9 @@ internal sealed class EventFeedTailRf3Progress(int maximumBytes) : IProgress<Pro
         lock (gate)
         {
             if (failure is not null)
-            { throw failure; }
+            {
+                throw failure;
+            }
             absent = observed is null;
         }
         await Assert.That(absent).IsTrue();

@@ -24,7 +24,9 @@ public sealed partial class DatabaseEngine
         var head = ReadTopicHead(tx, source);
         if (request.ThroughPosition < head.Head.FirstAvailablePosition || request.ThroughPosition > head.Head.TailPosition
             || request.ThroughPosition == long.MaxValue)
-        { throw Errors.Fail(ErrorCode.Validation, InvalidTopicPurgeCut); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, InvalidTopicPurgeCut);
+        }
         RequireTopicPurgePins(tx, source, head.Head.TailPosition, request.ThroughPosition, budget);
         var bytes = head.StoredBytes;
         for (var position = head.Head.FirstAvailablePosition; position <= request.ThroughPosition; position++)
@@ -32,7 +34,9 @@ public sealed partial class DatabaseEngine
             bytes = checked(bytes - PurgeTopicRecord(tx, source, position, budget));
         }
         if (bytes < NoRetainedBytes)
-        { throw Errors.Fail(ErrorCode.Corruption, EventSourceRetainedHistoryDetail); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, EventSourceRetainedHistoryDetail);
+        }
         tx.PutRecord(KeySpace.Partition(TopicHeadKeySpace, partition, request.Topic),
             new TopicHead(head.Head.TailPosition, checked(request.ThroughPosition + RetainedPositionStep), source.Generation, bytes));
         return new(PurgeTopicKind, request.Topic, request.ThroughPosition.ToString(System.Globalization.CultureInfo.InvariantCulture),
@@ -51,15 +55,21 @@ public sealed partial class DatabaseEngine
             removedBytes = value.Length;
         }, budget.ObserveBytes);
         if (!found || record is null || record.Source != source || record.Position != position)
-        { throw Errors.Fail(ErrorCode.Corruption, EventSourceRetainedHistoryDetail); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, EventSourceRetainedHistoryDetail);
+        }
         var identityKey = KeySpace.Partition(TopicEventIdKeySpace, source.Partition, source.Resource, source.Generation, record.Data.EventId);
         var indexedPosition = NoRetainedBytes;
         if (!tx.ReadValue(identityKey, value => indexedPosition = NativeSerialization.Deserialize<long>(value), budget.ObserveBytes)
             || indexedPosition != position)
-        { throw Errors.Fail(ErrorCode.Corruption, EventSourceRetainedHistoryDetail); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, EventSourceRetainedHistoryDetail);
+        }
         if (tx.ReadValue(PurgedTopicIdentityKey(source, record.Data.EventId), _ =>
             throw Errors.Fail(ErrorCode.Corruption, EventSourceRetainedHistoryDetail), budget.ObserveBytes))
-        { throw Errors.Fail(ErrorCode.Corruption, EventSourceRetainedHistoryDetail); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, EventSourceRetainedHistoryDetail);
+        }
         tx.PutRecord(PurgedTopicIdentityKey(source, record.Data.EventId),
             new RetainedTopicEventIdentity(JsonData.Fingerprint(record.Data), position, source.Generation));
         tx.Delete(identityKey);
@@ -75,11 +85,15 @@ public sealed partial class DatabaseEngine
         {
             var group = ReadTopicPurgePin(key, value, tail);
             if (cut > group.Checkpoint)
-            { throw Errors.Fail(ErrorCode.ResourceExhausted, PinnedTopicHistory); }
+            {
+                throw Errors.Fail(ErrorCode.ResourceExhausted, PinnedTopicHistory);
+            }
             return true;
         }, observer: budget.ObserveBytes);
         if (scan.HasMore)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, TopicPurgeScanExhausted); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, TopicPurgeScanExhausted);
+        }
         EventVectorRetentionPins.Require(view, source, tail, cut, OperationLimitsOptions, budget.ObserveBytes);
     }
 }

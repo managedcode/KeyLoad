@@ -66,14 +66,18 @@ internal sealed class ZoneTreeMaintenancePolicyTests
         finally
         {
             if (Directory.Exists(path))
-            { Directory.Delete(path, recursive: true); }
+            {
+                Directory.Delete(path, recursive: true);
+            }
         }
     }
 
     private static void Seed(ZoneTreeStore store) => store.Commit((tx, _) =>
     {
         foreach (var name in new[] { "a", "b", "c" })
-        { tx.Put(Encoding.UTF8.GetBytes(name), Value); }
+        {
+            tx.Put(Encoding.UTF8.GetBytes(name), Value);
+        }
         return true;
     });
 }

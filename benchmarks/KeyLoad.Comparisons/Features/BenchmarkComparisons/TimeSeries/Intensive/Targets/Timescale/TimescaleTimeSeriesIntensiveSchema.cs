@@ -6,7 +6,10 @@ namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive
 
 internal static class TimescaleTimeSeriesIntensiveSchema
 {
-    private enum InstallStage { Tables, Append, Read, Aggregate, Windows }
+    private enum InstallStage
+    {
+        Tables, Append, Read, Aggregate, Windows
+    }
 
     private const string SchemaToken = "__KEYLOAD_SCHEMA__";
     private const string DdlSearchPathSql = "SELECT set_config('search_path', $1, true)";

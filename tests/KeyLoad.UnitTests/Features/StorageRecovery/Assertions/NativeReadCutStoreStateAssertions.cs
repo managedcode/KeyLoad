@@ -8,7 +8,10 @@ internal static class NativeReadCutStoreStateAssertions
     internal static StoreIdentity SnapshotIdentity(ZoneTreeStore store)
     {
         var identity = store.Identity;
-        return identity with { SigningKey = identity.SigningKey.ToArray() };
+        return identity with
+        {
+            SigningKey = identity.SigningKey.ToArray()
+        };
     }
 
     internal static async Task AssertIdentityAndPositionAsync(ZoneTreeStore store, StoreIdentity expected, long position)

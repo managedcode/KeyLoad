@@ -29,14 +29,20 @@ internal sealed class TopicRetentionPinCorruptionTests
             _ => state
         };
         if (kind == "key")
-        { key = KeySpace.Partition("subscription", fixture.Owner.Partition, "topic", "Topic", null, 1L, "first", "extra"); }
+        {
+            key = KeySpace.Partition("subscription", fixture.Owner.Partition, "topic", "Topic", null, 1L, "first", "extra");
+        }
         Write(fixture, key, kind == "alias" ? NativeSerialization.Serialize(new TopicHead(3, 1, 1, 0)) : NativeSerialization.Serialize(corrupt));
         var command = fixture.Purge();
         await TopicRetentionCorruptionAssertions.RejectAsync(fixture, command);
         if (kind == "key")
-        { Delete(fixture, key); }
+        {
+            Delete(fixture, key);
+        }
         else
-        { Write(fixture, key, original); }
+        {
+            Write(fixture, key, original);
+        }
         await TopicRetentionCorruptionAssertions.PurgeRepairedAsync(fixture, command);
         await HealthyAsync(fixture);
     }

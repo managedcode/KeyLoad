@@ -19,7 +19,9 @@ internal static class ControlledPartitionMovementCaptureAcknowledgement
     {
         if (originalSettlement.Stage != PartitionMovePeerStage.Capture
             || originalSettlement.Journal.CommandId != ControlledPartitionMovementCaptureRequest.CaptureCommandId)
-        { throw new InvalidOperationException("The original actual Capture settlement is required."); }
+        {
+            throw new InvalidOperationException("The original actual Capture settlement is required.");
+        }
         var control = acceptedFence.Control
             ?? throw new InvalidOperationException("The actual Fenced control is required.");
         var body = NativeSerialization.Serialize(new PartitionMoveAcknowledgeBody(

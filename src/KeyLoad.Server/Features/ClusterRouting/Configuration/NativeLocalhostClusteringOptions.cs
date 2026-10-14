@@ -16,7 +16,9 @@ internal sealed class NativeLocalhostClusteringOptions
             || !IPAddress.IsLoopback(primarySiloEndpoint.Address)
             || primarySiloEndpoint.Port <= IPEndPoint.MinPort
             || primarySiloEndpoint.Port > IPEndPoint.MaxPort)
-        { throw new ArgumentOutOfRangeException(nameof(primarySiloEndpoint)); }
+        {
+            throw new ArgumentOutOfRangeException(nameof(primarySiloEndpoint));
+        }
         address = primarySiloEndpoint.Address.GetAddressBytes();
         port = primarySiloEndpoint.Port;
     }

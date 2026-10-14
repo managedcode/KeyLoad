@@ -17,9 +17,13 @@ internal static class QueueDueDatabaseScopeRf3Actions
         await QueueDueDatabaseScopeRf3Expected.ReceiptAsync(receipt, command.CommandId, lane,
             [new(QueueDueDatabaseScopeRf3Protocol.EnqueueKind, lane.Lane.Queue, id, 1L)]);
         if (healthy)
-        { lane.Healthy = QueueDueDatabaseScopeRf3Expected.Ready(lane, true); }
+        {
+            lane.Healthy = QueueDueDatabaseScopeRf3Expected.Ready(lane, true);
+        }
         else
-        { lane.Message = QueueDueDatabaseScopeRf3Expected.Scheduled(lane, state.Due); }
+        {
+            lane.Message = QueueDueDatabaseScopeRf3Expected.Scheduled(lane, state.Due);
+        }
         lane.Seeds.Add((command, receipt));
         await QueueDueDatabaseScopeRf3Current.ObserveAsync(admin, state, token);
         await QueueDueDatabaseScopeRf3Expected.EqualAsync((await McpCallerAssertions.SuccessAsync<CommitReceipt>(
@@ -77,7 +81,9 @@ internal static class QueueDueDatabaseScopeRf3Actions
             foreach (var (command, result, epoch) in lane.Acks)
             {
                 if (epoch != state.Identity.Principal.PolicyEpoch)
-                { continue; }
+                {
+                    continue;
+                }
                 await QueueDueDatabaseScopeRf3Expected.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(
                     await worker.Sdk.CompleteAsync(command, token)), result);
                 await QueueDueDatabaseScopeRf3Current.ObserveAsync(admin, state, token);

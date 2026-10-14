@@ -40,7 +40,10 @@ internal static class PartitionMovementRetainedPageCapacityRf3Bounds
         await Assert.That(PartitionMoveImageDigest.Records(records)).IsEqualTo(family.Digest);
         await Assert.That(family.PageCount).IsEqualTo(SingleOriginalPage);
         var cap = checked((int)(family.RawBytes - ByteBoundaryStep));
-        var limits = IntegrationExecutionOptions.DatabaseLimits(new() { MaxBatchBytes = cap }).Value;
+        var limits = IntegrationExecutionOptions.DatabaseLimits(new()
+        {
+            MaxBatchBytes = cap
+        }).Value;
         limits.Validate();
         await Assert.That(records.Length).IsLessThanOrEqualTo(limits.MaxBatchMutations);
         PartitionMoveDescriptorValidation.Require(descriptor, capture.OriginalFence!, limits);
@@ -66,7 +69,9 @@ internal static class PartitionMovementRetainedPageCapacityRf3Bounds
         foreach (var family in descriptor.Families)
         {
             if (PartitionMoveFamilyCapture.ControlOwned(family.Family))
-            { continue; }
+            {
+                continue;
+            }
             var prefix = KeySpace.Partition(family.Family, descriptor.Partition);
             var maximumKey = rows.Select(Parse).Where(value => value.Key.Span.StartsWith(prefix))
                 .Select(static value => value.Key.Length).DefaultIfEmpty(PartitionMoveProtocol.EmptyCount).Max();
@@ -80,7 +85,9 @@ internal static class PartitionMovementRetainedPageCapacityRf3Bounds
     {
         var split = row.IndexOf(RowSeparator, StringComparison.Ordinal);
         if (split <= FirstRowPart)
-        { throw new InvalidOperationException(PartitionMoveProtocol.InvalidImage); }
+        {
+            throw new InvalidOperationException(PartitionMoveProtocol.InvalidImage);
+        }
         return new(Convert.FromHexString(row.AsSpan(FirstRowPart, split)),
             Convert.FromHexString(row.AsSpan(split + ByteBoundaryStep)));
     }

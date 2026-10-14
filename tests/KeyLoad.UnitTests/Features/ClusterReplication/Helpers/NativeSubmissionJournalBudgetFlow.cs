@@ -35,9 +35,13 @@ internal static class NativeSubmissionJournalBudgetFlow
         using var inspection = C1SubmissionJournalInspectionDatabase.Open(fixture.Canonical.Store, budget, token);
         var database = inspection.Database;
         if (exhaustCanonical)
-        { await RequireSharedRefusalAsync(fixture, database, original, budget); }
+        {
+            await RequireSharedRefusalAsync(fixture, database, original, budget);
+        }
         else
-        { await RequireReadAsync(fixture, database, original, budget); }
+        {
+            await RequireReadAsync(fixture, database, original, budget);
+        }
         await before.RequireUnchangedAsync(fixture);
         await RequireFreshReadAsync(fixture, original);
         var following = Append(fixture, "shared-budget-following");
@@ -76,18 +80,24 @@ internal static class NativeSubmissionJournalBudgetFlow
                     bytes => { callback = true; actual = bytes.ToArray(); },
                     bytes => admittedBytes = checked(admittedBytes + bytes)));
                 if (!found || actual is null || !actual.AsSpan().SequenceEqual(TinyValue))
-                { throw new InvalidOperationException("The original tiny native row changed."); }
+                {
+                    throw new InvalidOperationException("The original tiny native row changed.");
+                }
                 successful++;
             }
             catch (InvalidDataException failure)
             {
                 if (failure.Message != C1SubmissionJournalInspectionProtocol.Invalid || callback)
-                { throw; }
+                {
+                    throw;
+                }
                 denied = true;
             }
         }
         if (!denied || admittedBytes != successful * rowBytes)
-        { throw new InvalidOperationException("The actual shared native read budget did not refuse before copy."); }
+        {
+            throw new InvalidOperationException("The actual shared native read budget did not refuse before copy.");
+        }
         return admittedBytes;
     }
 
@@ -98,7 +108,9 @@ internal static class NativeSubmissionJournalBudgetFlow
         var found = store.Read(view => view.ReadValue(key, bytes => actual = bytes.ToArray(),
             bytes => measured = checked(measured + bytes)));
         if (!found || actual is null || actual.Length == 0 || measured <= 0 || measured > 8192)
-        { throw new InvalidOperationException("The real original native row could not be independently measured."); }
+        {
+            throw new InvalidOperationException("The real original native row could not be independently measured.");
+        }
         return measured;
     }
 

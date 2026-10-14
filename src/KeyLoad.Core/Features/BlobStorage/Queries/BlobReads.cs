@@ -27,22 +27,30 @@ internal sealed class BlobReads(DatabaseEngine database, TimeProvider clock)
         _ = Authority.Scope(view, principal, request.Blob, Capability.BlobRead);
         var head = Reader.Head(view, request.Blob);
         if (head is null)
-        { return null; }
+        {
+            return null;
+        }
         Authority.ReadRow(principal, head.Metadata.Access);
         if (head.Metadata.Revision == EmptyRevision)
-        { return null; }
+        {
+            return null;
+        }
         return head.Metadata;
     }
 
     internal BlobUploadInfo? UploadInfo(IKeyValueView view, PrincipalRecord principal, BlobUploadInfoRequest request)
     {
         if (request.UploadId == Guid.Empty)
-        { throw BlobErrors.Validation(); }
+        {
+            throw BlobErrors.Validation();
+        }
         _ = Authority.Scope(view, principal, request.Blob, Capability.BlobWrite);
         var head = Reader.Head(view, request.Blob);
         var state = Reader.State(view, request.Blob, request.UploadId);
         if (head is null && state is not null)
-        { throw BlobErrors.Corruption(); }
+        {
+            throw BlobErrors.Corruption();
+        }
         Authority.WriteState(principal, state);
         return state?.Info;
     }
@@ -54,17 +62,25 @@ internal sealed class BlobReads(DatabaseEngine database, TimeProvider clock)
         const int RequestCountEmptyCount = 0;
 
         if (request.ExpectedRevision <= ExpectedRevisionValidationBoundary || request.Offset < OffsetValidationBoundary || request.Count is < RequestCountEmptyCount or > BlobLimits.MaxRangeBytes)
-        { throw BlobErrors.Validation(); }
+        {
+            throw BlobErrors.Validation();
+        }
         _ = Authority.Scope(view, principal, request.Blob, Capability.BlobRead);
         var head = Reader.Head(view, request.Blob);
         if (head is null || head.Metadata.VersionId is null)
-        { throw Errors.Fail(ErrorCode.NotFound, BlobErrors.Missing); }
+        {
+            throw Errors.Fail(ErrorCode.NotFound, BlobErrors.Missing);
+        }
         Authority.ReadRow(principal, head.Metadata.Access);
         if (request.ExpectedRevision != head.Metadata.Revision)
-        { throw Errors.Fail(ErrorCode.RevisionConflict, BlobErrors.Revision); }
+        {
+            throw Errors.Fail(ErrorCode.RevisionConflict, BlobErrors.Revision);
+        }
         var state = Reader.Current(view, head);
         if (request.Offset > state.DeclaredLength || request.Count > state.DeclaredLength - request.Offset)
-        { throw BlobErrors.Validation(); }
+        {
+            throw BlobErrors.Validation();
+        }
         var result = new byte[request.Count];
         CopyParts(view, state, request.Offset, result);
         return new(head.Metadata, request.Offset, result);
@@ -94,9 +110,13 @@ internal sealed class BlobReads(DatabaseEngine database, TimeProvider clock)
         const int LimitFirstCount = 1;
 
         if (request.Limit is < LimitFirstCount or > BlobLimits.MaxListItems)
-        { throw BlobErrors.Validation(); }
+        {
+            throw BlobErrors.Validation();
+        }
         if (request.AfterId is not null)
-        { JsonData.Identifier(request.AfterId); }
+        {
+            JsonData.Identifier(request.AfterId);
+        }
         var scope = new BlobRef(request.Partition, request.Resource, request.AfterId ?? BlobListAccumulator.ScopeId);
         _ = Authority.Scope(view, principal, scope, Capability.BlobRead);
         var accumulator = new BlobListAccumulator(database, principal, request.Limit);
@@ -113,7 +133,10 @@ internal sealed class BlobListAccumulator(DatabaseEngine database, PrincipalReco
     internal const int CandidateMultiplier = 2;
     private int visited;
     internal List<BlobMetadata> Items { get; } = [];
-    internal string? LastId { get; private set; }
+    internal string? LastId
+    {
+        get; private set;
+    }
 
     internal bool Visit(IKeyValueView view, ReadOnlySpan<byte> key, ReadOnlySpan<byte> value)
     {

@@ -45,8 +45,14 @@ internal sealed class NativeCanonicalModelCutCaptureTests
         await C1OutcomeInspectionFixture.RunOwnedAsync(async fixture =>
         {
             var before = fixture.Store.Position;
-            var records = fixture.Database.Limits with { MaxScanRecords = 1 };
-            var bytes = fixture.Database.Limits with { MaxQueryReadBytes = 1 };
+            var records = fixture.Database.Limits with
+            {
+                MaxScanRecords = 1
+            };
+            var bytes = fixture.Database.Limits with
+            {
+                MaxQueryReadBytes = 1
+            };
             foreach (var limits in new[] { records, bytes })
             {
                 var error = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Store.Read(view =>

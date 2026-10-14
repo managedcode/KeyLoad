@@ -41,13 +41,17 @@ internal static class ControlledPartitionMovementTerminalProcessHandoff
         }
         var unsettled = failures.Any(ControlledPartitionMovementRetainedChild.ContainsUnsettled);
         if (!unsettled)
-        { await ServerFailureObserver.ObserveAsync(() => OpenAsync(source, target, listeners), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => OpenAsync(source, target, listeners), failures);
+        }
         if (failures.Count != 0)
         {
             source.RetainRoot = true;
             target.RetainRoot = true;
             foreach (var error in failures)
-            { error.Data[RetainedRootKey] = receiver.Root; }
+            {
+                error.Data[RetainedRootKey] = receiver.Root;
+            }
         }
         ServerFailureObserver.ThrowIfAny(failures);
         await Assert.That(unaffected.Store.Position).IsEqualTo(unaffectedPosition);

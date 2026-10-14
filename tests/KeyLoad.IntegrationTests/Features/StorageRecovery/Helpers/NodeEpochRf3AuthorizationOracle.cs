@@ -32,11 +32,17 @@ internal static class NodeEpochRf3AuthorizationOracle
         await NodeEpochRf3CredentialRevocationOracle.VerifyAsync(app, admin, workload, cancellationToken)
             .ConfigureAwait(false);
         var revokedPrincipal = workload.Reader.Principal with
-        { Revoked = true, PolicyEpoch = workload.Reader.Principal.PolicyEpoch + 1 };
+        {
+            Revoked = true,
+            PolicyEpoch = workload.Reader.Principal.PolicyEpoch + 1
+        };
         var saved = await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(),
             revokedPrincipal, cancellationToken).ConfigureAwait(false)).ConfigureAwait(false);
         await Assert.That(saved.PolicyEpoch).IsEqualTo(revokedPrincipal.PolicyEpoch);
-        var revokedCredential = workload.Reader.Credential with { Revoked = true };
+        var revokedCredential = workload.Reader.Credential with
+        {
+            Revoked = true
+        };
         var rejectedKeyUpdate = await admin.Sdk.ConfigureApiKeyAsync(Guid.NewGuid(), revokedCredential,
             cancellationToken).ConfigureAwait(false);
         await Assert.That(rejectedKeyUpdate.IsFailed).IsTrue();

@@ -21,7 +21,9 @@ internal static class NativeTextRawReadPolicyPublicAssertions
         for (var repeat = 0; repeat < 2; repeat++)
         {
             foreach (var term in new[] { "needle", "Київ" })
-            { await PageAsync(reader, scenario.Text(term), expected, token); }
+            {
+                await PageAsync(reader, scenario.Text(term), expected, token);
+            }
         }
         RankedDocument[] full = [new(new(new(scenario.Partition, NativeTextRf3Scenario.Collection,
             NativeTextRf3Scenario.FirstId), 1L,

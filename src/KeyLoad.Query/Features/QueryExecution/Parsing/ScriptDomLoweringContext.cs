@@ -18,12 +18,16 @@ internal sealed class ScriptDomLoweringContext(global::Microsoft.Extensions.Opti
     {
         budget?.Check();
         if (depth > limitsOptions.Value.MaxQueryDepth)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, ScriptDomErrors.DepthDetail); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, ScriptDomErrors.DepthDetail);
+        }
     }
     internal void Check(int depth)
     {
         Observe(depth);
         if (++nodes > maximumNodes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, ScriptDomErrors.NodesDetail); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, ScriptDomErrors.NodesDetail);
+        }
     }
 }

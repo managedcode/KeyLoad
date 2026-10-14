@@ -23,6 +23,8 @@ internal sealed class ScriptDomTableLoweringContext
         token.ThrowIfCancellationRequested();
         checkBudget();
         if (++nodes > maximumNodes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, global::KeyLoad.Features.QueryExecution.ScriptDomErrors.NodesDetail); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, global::KeyLoad.Features.QueryExecution.ScriptDomErrors.NodesDetail);
+        }
     }
 }

@@ -16,7 +16,9 @@ internal static class ControlledPartitionMovementRetainedOutcomeAssertions
         await Assert.That(records.Length).IsEqualTo(ExpectedOutcomes);
         var beganAt = records.Single(record => record.Index == ControlledPartitionMovementOutcomeInventory.BeginIndex).Operation.EvaluatedAt;
         foreach (var record in records)
-        { await RequireRecordAsync(source, target, record, beganAt); }
+        {
+            await RequireRecordAsync(source, target, record, beganAt);
+        }
     }
 
     private static async Task RequireRecordAsync(ControlledPartitionMovementNode source,
@@ -31,9 +33,13 @@ internal static class ControlledPartitionMovementRetainedOutcomeAssertions
         await Assert.That(outcome.PolicyEpoch).IsEqualTo(InitialPolicyEpoch);
         await Assert.That(outcome.ScopeKind).IsEqualTo(record.Scope);
         if (record.Scope == CommandOutcomeScopeKind.Partition)
-        { await ControlledPartitionMovementOutcomeValueAssertions.EqualAsync(outcome.Partition, ControlledPartitionMovementCorpus.Partition); }
+        {
+            await ControlledPartitionMovementOutcomeValueAssertions.EqualAsync(outcome.Partition, ControlledPartitionMovementCorpus.Partition);
+        }
         else
-        { await Assert.That(outcome.Partition).IsNull(); }
+        {
+            await Assert.That(outcome.Partition).IsNull();
+        }
         if (record.LocatorKey is { } locator)
         {
             await Assert.That(source.Store.Read(view => view.ReadOwnedValue(locator))!.SequenceEqual(record.Key)).IsTrue();
@@ -47,7 +53,9 @@ internal static class ControlledPartitionMovementRetainedOutcomeAssertions
                     PhysicalShardCatalogFixture.RootPrincipalId));
         }
         else
-        { await Assert.That(outcome.BlobAuthority).IsNull(); }
+        {
+            await Assert.That(outcome.BlobAuthority).IsNull();
+        }
         await Assert.That(outcome.CompositionAuthority).IsNull();
         await Assert.That(outcome.OnlineTextAuthority).IsNull();
         await Assert.That(outcome.RemoteTransferAuthority).IsNull();
@@ -63,7 +71,9 @@ internal static class ControlledPartitionMovementRetainedOutcomeAssertions
         var scopedLocator = KeySpace.OutcomeLocatorV2(ControlledPartitionMovementCorpus.Partition, principal, command);
         await Assert.That(target.Store.Read(view => view.ReadOwnedValue(scopedLocator))).IsNull();
         if (record.Scope == CommandOutcomeScopeKind.Global)
-        { await Assert.That(source.Store.Read(view => view.ReadOwnedValue(scopedLocator))).IsNull(); }
+        {
+            await Assert.That(source.Store.Read(view => view.ReadOwnedValue(scopedLocator))).IsNull();
+        }
         await Assert.That(target.Store.Read(view => view.ReadOwnedValue(KeySpace.GlobalOutcome(principal, command)))).IsNull();
         await Assert.That(target.Store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(ControlledPartitionMovementCorpus.Partition, principal, command)))).IsNull();
         await Assert.That(target.Store.Read(view => view.ReadOwnedValue(KeySpace.UnknownOutcome(principal, command)))).IsNull();

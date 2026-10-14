@@ -21,7 +21,9 @@ internal static class EventVectorParentValidation
             || call.OriginalParentExpiresAt == default || call.OriginalAuthorizedSourceScopes.IsDefault
             || call.OriginalPublicRequestDigest.Length != SHA256.HashSizeInBytes
             || !row.Key.Span.SequenceEqual(EventVectorKeys.ParentCall(map.ControlPartition, map.MapId)))
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidParent); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidParent);
+        }
         admission.RequireEncodedBytes(call.OriginalPublicRequestBytes.Length);
         admission.RequireEncodedBytes(call.OriginalAdmittedControlPhaseBytes.Length);
         var request = NativeSerialization.Deserialize<EventFeedControlRequest>(call.OriginalPublicRequestBytes.Span);
@@ -38,7 +40,9 @@ internal static class EventVectorParentValidation
         if (phase.OriginalParentExpiresAt != call.OriginalParentExpiresAt
             || EventVectorControlPhaseIds.For(phase, call.PrincipalId, identity.OriginalBodyDigest, admission)
                 != call.LastAdmittedControlPhaseId)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidParent); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidParent);
+        }
         return phase;
     }
 
@@ -49,6 +53,8 @@ internal static class EventVectorParentValidation
             || request.MapId != call.MapId || !CryptographicOperations.FixedTimeEquals(
                 EventVectorControlBodyProjection.RequestDigest(request, admission).Span,
                 call.OriginalPublicRequestDigest.Span))
-        { throw Errors.Fail(ErrorCode.Conflict, InvalidParent); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, InvalidParent);
+        }
     }
 }

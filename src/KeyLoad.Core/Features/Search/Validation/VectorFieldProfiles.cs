@@ -14,34 +14,48 @@ internal static class VectorFieldProfiles
     internal static void Validate(ResourceDefinition definition, ErrorCode invalidCode = ErrorCode.Validation)
     {
         if (definition.VectorProfiles.IsDefault || !definition.VectorProfiles.IsEmpty && definition.Kind != ResourceKind.Collection)
-        { throw Errors.Fail(invalidCode, Invalid); }
+        {
+            throw Errors.Fail(invalidCode, Invalid);
+        }
         if (definition.VectorProfiles.Length > MaximumProfiles)
-        { throw Errors.Fail(invalidCode == ErrorCode.Corruption ? invalidCode : ErrorCode.ResourceExhausted, OverBudget); }
+        {
+            throw Errors.Fail(invalidCode == ErrorCode.Corruption ? invalidCode : ErrorCode.ResourceExhausted, OverBudget);
+        }
         var fields = new HashSet<string>(StringComparer.Ordinal);
         foreach (var profile in definition.VectorProfiles)
         {
             if (profile is null || profile.Space is null || string.IsNullOrEmpty(profile.Field)
                 || profile.Space.Dimension is < MinimumDimension or > MaximumDimension || !Enum.IsDefined(profile.Space.Metric)
                 || !fields.Add(profile.Field))
-            { throw Errors.Fail(invalidCode, Invalid); }
+            {
+                throw Errors.Fail(invalidCode, Invalid);
+            }
             JsonData.Identifier(profile.Space.Id);
             JsonData.Identifier(profile.Space.Model);
             JsonData.Identifier(profile.Space.Version);
             var parts = JsonData.PathSegments(profile.Field);
             var canonical = JsonPointerPaths.Encode(parts);
             if (profile.Field != canonical)
-            { throw Errors.Fail(invalidCode, Invalid); }
+            {
+                throw Errors.Fail(invalidCode, Invalid);
+            }
         }
     }
 
     internal static void Require(ResourceDefinition definition, PutVector vector)
     {
         try
-        { Validate(definition, ErrorCode.Corruption); }
+        {
+            Validate(definition, ErrorCode.Corruption);
+        }
         catch (KeyLoadException failure) when (failure.Code == ErrorCode.Validation)
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
         var configured = definition.VectorProfiles.FirstOrDefault(profile => profile.Field == vector.Field);
         if (configured is not null && configured.Space != vector.Space)
-        { throw Errors.Fail(ErrorCode.Validation, Mismatch); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, Mismatch);
+        }
     }
 }

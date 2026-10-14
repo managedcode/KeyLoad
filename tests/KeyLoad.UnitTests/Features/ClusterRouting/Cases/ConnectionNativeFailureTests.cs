@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
@@ -20,7 +20,11 @@ internal sealed class ConnectionNativeFailureTests
             var failed = await scenario.CommandAsync(principal, failedId, failedCommand, token);
             await Assert.That(failed.Error).IsEqualTo(ErrorCode.UnknownWriteOutcome);
             await ConnectionNativeAssertions.MissingOutcomeAsync(scenario, principal, failedCommand, "ordinary-failure");
-            var revoked = principal with { Revoked = true, PolicyEpoch = principal.PolicyEpoch + 1 };
+            var revoked = principal with
+            {
+                Revoked = true,
+                PolicyEpoch = principal.PolicyEpoch + 1
+            };
             scenario.Fixture.Database.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(revoked));
             var rejectedId = Guid.NewGuid();
             var rejectedCommand = scenario.Command("revoked-operation");

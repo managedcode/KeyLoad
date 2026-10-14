@@ -20,7 +20,9 @@ internal static class EventVectorSettledSourceMutation
             || settled.SourceOriginalResult is null || settled.SourceOriginalResult.Error is not null
             || current.Source != target.Source || current.Source != settled.Source
             || target.Position < current.Position || role == EventVectorSourcePhaseRole.Release && target != current)
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
         var original = EventVectorSourceMutationValidation.ReadObserved(settled, admission);
         var result = settled.SourceOriginalResult.Get<EventVectorSourceResult>();
         EventVectorObservedPinValidation.Require(settled, original, result, admission);
@@ -29,7 +31,9 @@ internal static class EventVectorSettledSourceMutation
             || pin.PrincipalId != map.PrincipalId || pin.ControlIncarnation != map.ControlIncarnation
             || originalParentExpiry == default || currentSourcePolicyEpoch <= EmptyPolicyEpoch
             || role == EventVectorSourcePhaseRole.Advance && pin.SourcePolicyEpoch != currentSourcePolicyEpoch)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, Invalid);
+        }
         var firstBody = settled.Role == EventVectorSourcePhaseRole.Pin
             ? settled.OriginalNativeBody : original.OriginalPinNativeBody;
         admission.RequireEncodedBytes(firstBody.Length);

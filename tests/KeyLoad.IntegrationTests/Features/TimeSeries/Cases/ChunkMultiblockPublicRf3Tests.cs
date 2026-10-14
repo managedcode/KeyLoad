@@ -24,7 +24,9 @@ internal sealed class ChunkMultiblockPublicRf3Tests(ClusterFixture fixture)
         finally
         {
             if (deadline is not null)
-            { KeyLoad.Server.ServerFailureObserver.Observe(deadline.Dispose, failures); }
+            {
+                KeyLoad.Server.ServerFailureObserver.Observe(deadline.Dispose, failures);
+            }
         }
         KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }

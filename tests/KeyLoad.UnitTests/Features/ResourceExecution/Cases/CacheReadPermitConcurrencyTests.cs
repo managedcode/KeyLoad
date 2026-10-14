@@ -103,9 +103,13 @@ internal sealed class CacheReadPermitConcurrencyTests
     private static async Task RethrowAsAggregateAsync(Func<Task> action)
     {
         try
-        { await action(); }
+        {
+            await action();
+        }
         catch (Exception error)
-        { throw new AggregateException(error); }
+        {
+            throw new AggregateException(error);
+        }
     }
 
     private static void AddUnobservedFailures(Task<bool[]> aggregate, ExceptionDispatchInfo? primaryFailure,

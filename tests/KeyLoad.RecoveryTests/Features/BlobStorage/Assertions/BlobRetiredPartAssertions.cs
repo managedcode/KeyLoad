@@ -11,7 +11,10 @@ internal static class BlobRetiredPartAssertions
         await TombstoneAsync(owner, seed);
         var publication = seed.Publication;
         await BlobPriorPublicationImage.ExactAsync(owner.Store.Read(view => view.GetRecord<BlobState>(
-            BlobPriorPublicationOracle.Key("blob-state-v1", publication))), publication.State with { Retired = true });
+            BlobPriorPublicationOracle.Key("blob-state-v1", publication))), publication.State with
+            {
+                Retired = true
+            });
         await BlobPriorPublicationImage.ExactAsync(new BlobStorageOperations(owner).UploadInfo("root",
             new(publication.Blob, publication.Upload)), new BlobUploadInfo(publication.Blob, publication.Upload,
             4, 0, 1, 4, publication.State.ExpiresAt, BlobUploadStatus.Complete, publication.Metadata.IntegrityHash!));
@@ -22,7 +25,9 @@ internal static class BlobRetiredPartAssertions
             new BlobPartMetadata(1, 4, BlobPriorPublicationOracle.Hash(publication.Bytes)));
         await BlobPriorPublicationAssertions.QuotasAsync(owner, publication, 4, 1);
         foreach (var command in publication.Commands)
-        { await BlobPriorPublicationImage.ReplayAsync(owner, command); }
+        {
+            await BlobPriorPublicationImage.ReplayAsync(owner, command);
+        }
         await BlobPriorPublicationImage.ReplayAsync(owner, seed.Deletion);
     }
 

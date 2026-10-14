@@ -16,25 +16,40 @@ internal sealed class ControlledPartitionMovementTerminalProcessPipe(string? exp
         {
             var read = await reader.ReadAsync(buffer.AsMemory());
             if (read == 0)
-            { break; }
+            {
+                break;
+            }
             retained = checked(retained + read);
             if (retained > options.OutputCharacters)
-            { exceeded = true; }
+            {
+                exceeded = true;
+            }
             if (exceeded)
-            { continue; }
+            {
+                continue;
+            }
             foreach (var character in buffer.AsSpan(0, read))
-            { ConsumeCharacter(character, line); }
+            {
+                ConsumeCharacter(character, line);
+            }
         }
         if (exceeded)
-        { throw new IOException("Original movement child output exceeded its bound."); }
+        {
+            throw new IOException("Original movement child output exceeded its bound.");
+        }
     }
 
     private void ConsumeCharacter(char character, System.Text.StringBuilder line)
     {
         if (character != '\n')
-        { line.Append(character); return; }
+        {
+            line.Append(character);
+            return;
+        }
         if (line.ToString().TrimEnd('\r') == expected)
-        { signal.TrySetResult(); }
+        {
+            signal.TrySetResult();
+        }
         line.Clear();
     }
 }

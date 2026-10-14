@@ -1,5 +1,5 @@
 using System.Text.Json;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 using KeyLoad.UnitTests.Features.ClientApi;
 using KeyLoad.UnitTests.Features.QueryExecution;
@@ -41,7 +41,9 @@ internal sealed class DatabaseCompositionContractTests
     {
         var command = Command();
         var arguments = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
-        { [McpCatalogProtocol.Request] = JsonSerializer.SerializeToElement(command, JsonDefaults.Options) };
+        {
+            [McpCatalogProtocol.Request] = JsonSerializer.SerializeToElement(command, JsonDefaults.Options)
+        };
         var compiled = SqlOperationTestData.Compile(SqlOperationTestData.Call(McpCatalogExpectations.DocumentsCommit, arguments));
         var native = SqlOperationTestData.Find(McpCatalogExpectations.DocumentsCommit).Decode(arguments);
         await SqlOperationTestData.Same(compiled, native);

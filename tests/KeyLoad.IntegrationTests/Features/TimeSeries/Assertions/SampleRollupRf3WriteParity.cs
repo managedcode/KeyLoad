@@ -16,7 +16,10 @@ internal static class SampleRollupRf3WriteParity
             TimeSeriesRf3Scenario.Series, TimeSeriesRf3Scenario.Start, TimeSeriesRf3Scenario.Start.AddMinutes(1), SampleLimit);
         var before = await McpCallerAssertions.SdkSuccessAsync(await sdk.ReadSamplesAsync(rawRequest, cancellation));
         var sql = new SqlOperationRequest(scenario.Partition, CommitSql,
-            new() { [Arguments] = JsonSerializer.SerializeToElement(McpOfficialClient.Arguments(original), JsonDefaults.Options) });
+            new()
+            {
+                [Arguments] = JsonSerializer.SerializeToElement(McpOfficialClient.Arguments(original), JsonDefaults.Options)
+            });
         var sqlResult = await McpCallerAssertions.SdkSuccessAsync(await sdk.ExecuteSqlAsync(sql, cancellation));
         var sqlReceipt = sqlResult.Deserialize<CommitReceipt>(JsonDefaults.Options)!;
         var officialSql = await McpCallerAssertions.SuccessAsync<CommitReceipt>(

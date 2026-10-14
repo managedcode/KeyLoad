@@ -55,9 +55,13 @@ internal sealed class PostgresMessageDispatch(IServiceProvider services, global:
     {
         var (kind, name) = Target(payload);
         if (kind == PostgresMessageProtocol.Statement)
-        { PostgresSessionReplies.Parameters(writer, catalog.Statement(name)); }
+        {
+            PostgresSessionReplies.Parameters(writer, catalog.Statement(name));
+        }
         else if (kind != PostgresMessageProtocol.Portal)
-        { throw Errors.Fail(ErrorCode.Validation, PostgresProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, PostgresProtocol.Invalid);
+        }
         var format = kind == PostgresMessageProtocol.Portal
             ? catalog.Portal(name).ResultFormat : PostgresProtocol.TextFormat;
         writer.Describe(PostgresSessionReplies.ResultColumn, format);
@@ -67,11 +71,17 @@ internal sealed class PostgresMessageDispatch(IServiceProvider services, global:
     {
         var (kind, name) = Target(payload);
         if (kind == PostgresMessageProtocol.Statement)
-        { catalog.CloseStatement(name); }
+        {
+            catalog.CloseStatement(name);
+        }
         else if (kind == PostgresMessageProtocol.Portal)
-        { catalog.ClosePortal(name); }
+        {
+            catalog.ClosePortal(name);
+        }
         else
-        { throw Errors.Fail(ErrorCode.Validation, PostgresProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, PostgresProtocol.Invalid);
+        }
         writer.Empty(PostgresWireWriter.CloseComplete);
     }
 

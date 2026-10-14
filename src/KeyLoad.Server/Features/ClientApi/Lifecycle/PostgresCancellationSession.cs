@@ -12,7 +12,9 @@ internal sealed class PostgresCancellationSession
         lock (gate)
         {
             if (closing || active is not null)
-            { throw Errors.Fail(ErrorCode.ResourceExhausted, ServerConnectionProtocol.Closed); }
+            {
+                throw Errors.Fail(ErrorCode.ResourceExhausted, ServerConnectionProtocol.Closed);
+            }
             active = CancellationTokenSource.CreateLinkedTokenSource(closed);
             cancel = null;
             return active.Token;
@@ -40,16 +42,22 @@ internal sealed class PostgresCancellationSession
         }
         var failures = new List<Exception>();
         if (originalCancel is not null)
-        { await ServerFailureObserver.ObserveAsync(() => originalCancel, failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => originalCancel, failures).ConfigureAwait(false);
+        }
         if (original is not null)
-        { ServerFailureObserver.Observe(original.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(original.Dispose, failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
     internal async Task CloseAsync()
     {
         lock (gate)
-        { closing = true; }
+        {
+            closing = true;
+        }
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(CancelAsync, failures).ConfigureAwait(false);
         await ServerFailureObserver.ObserveAsync(EndAsync, failures).ConfigureAwait(false);

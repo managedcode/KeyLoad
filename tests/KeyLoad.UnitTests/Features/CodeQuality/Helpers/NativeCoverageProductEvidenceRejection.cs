@@ -16,14 +16,20 @@ internal static class NativeCoverageProductEvidenceRejection
         var phase = Environment.GetEnvironmentVariable(NativeCoverageMergeProcess.ProductAdmissionRequiredEnvironment);
         var descriptorPath = Environment.GetEnvironmentVariable(NativeCoverageMergeProcess.ProductAdmissionDescriptorEnvironment);
         if (phase is null && descriptorPath is null)
-        { return; }
+        {
+            return;
+        }
         if (!string.Equals(phase, RequiredPhase, StringComparison.Ordinal)
             || string.IsNullOrWhiteSpace(descriptorPath) || !Path.IsPathFullyQualified(descriptorPath))
-        { throw new InvalidDataException("The required native product-admission inputs are invalid."); }
+        {
+            throw new InvalidDataException("The required native product-admission inputs are invalid.");
+        }
         var descriptor = Path.GetFullPath(descriptorPath);
         if (!string.Equals(Path.GetFileName(descriptor), NativeCoverageMergeProcess.ProductDescriptorName,
                 StringComparison.Ordinal))
-        { throw new InvalidDataException("The required native product descriptor is unavailable."); }
+        {
+            throw new InvalidDataException("The required native product descriptor is unavailable.");
+        }
         var evidenceRoot = Path.GetDirectoryName(descriptor)
             ?? throw new InvalidDataException("The required native product descriptor is unavailable.");
         var descriptorInfo = new FileInfo(descriptor);
@@ -32,7 +38,9 @@ internal static class NativeCoverageProductEvidenceRejection
             || (descriptorInfo.Attributes & FileAttributes.ReparsePoint) != 0
             || !optionsInfo.Exists || optionsInfo.LinkTarget is not null
             || (optionsInfo.Attributes & FileAttributes.ReparsePoint) != 0)
-        { throw new InvalidDataException("The required native product descriptor or bounds input is unavailable."); }
+        {
+            throw new InvalidDataException("The required native product descriptor or bounds input is unavailable.");
+        }
         await RunAsync(options, evidenceRoot, descriptor, resultsDirectory, cancellationToken).ConfigureAwait(false);
     }
 
@@ -44,7 +52,9 @@ internal static class NativeCoverageProductEvidenceRejection
         var originalDescriptor = originals[Path.GetFullPath(descriptor)];
         if (originalEntryCount > options.Coverage.MaximumFiles
             - NativeCoverageProductEvidenceFiles.RejectedOwnedEntryCount)
-        { throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure); }
+        {
+            throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure);
+        }
         var temporaryRoot = NativeCoverageProductEvidenceFiles.SelectOwnedDirectory(
             Path.Combine(evidenceRoot, "unit-functional-01"));
         var failures = new List<Exception>();
@@ -89,7 +99,9 @@ internal static class NativeCoverageProductEvidenceRejection
     {
         var receiptPath = Path.Combine(resultsDirectory, ReceiptName);
         if (descriptor.Length <= 0 || descriptor.Length > options.MaximumDescriptorBytes)
-        { throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure); }
+        {
+            throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure);
+        }
         var receipt = JsonSerializer.SerializeToUtf8Bytes(new
         {
             schemaVersion = 1,
@@ -100,7 +112,9 @@ internal static class NativeCoverageProductEvidenceRejection
             rejectedOutcome = TrxOutcomeFailure
         });
         if (receipt.LongLength > options.MaximumDescriptorBytes)
-        { throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure); }
+        {
+            throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure);
+        }
         using var stream = new FileStream(receiptPath, FileMode.CreateNew, FileAccess.Write, FileShare.None);
         stream.Write(receipt, 0, receipt.Length);
         stream.Flush(flushToDisk: true);

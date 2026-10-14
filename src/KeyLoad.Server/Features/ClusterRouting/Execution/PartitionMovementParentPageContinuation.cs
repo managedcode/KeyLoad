@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
@@ -49,7 +49,9 @@ internal sealed class PartitionMovementParentPageContinuation
             ordinal = checked(installed.PageOrdinal + PartitionMoveProtocol.SequenceStep);
         }
         else if (role != PartitionMovementParentPhaseRole.AdvanceCaptured)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+        }
         state = await ReadOriginalCaptureAsync(principalId, request, state, work,
             cancellationToken).ConfigureAwait(false);
         var captured = state.Selected!;
@@ -73,7 +75,9 @@ internal sealed class PartitionMovementParentPageContinuation
                 phaseObservation, cancellationToken).ConfigureAwait(false);
         }
         if (ordinal != total)
-        { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid);
+        }
         return await InstallNextAsync(principalId, request, state, PartitionMoveProtocol.EmptyCount,
             work, phaseObservation, cancellationToken).ConfigureAwait(false);
     }
@@ -84,14 +88,18 @@ internal sealed class PartitionMovementParentPageContinuation
     {
         if (PartitionMovementParentAuthority.RequireHeader(principalId, request, state).OriginalCapturePhaseCommandId is not { } originalId
             || originalId == Guid.Empty)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+        }
         var current = await states.ReadCurrentAsync(principalId, request, originalId, work,
             cancellationToken).ConfigureAwait(false);
         var captured = current.Selected;
         if (captured is null || captured.OriginalPhaseCommandId != originalId
             || captured.OriginalDescriptor is null || captured.OriginalFence is null
             || captured.OriginalCaptureWitness is null || captured.CaptureProofCheckpointReceipt is null)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+        }
         _ = PartitionMovementParentAuthority.RequireObserved(captured, PartitionMovePeerStage.Capture);
         return current;
     }

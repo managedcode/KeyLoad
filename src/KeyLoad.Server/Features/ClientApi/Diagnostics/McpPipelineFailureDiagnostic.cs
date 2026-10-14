@@ -25,7 +25,9 @@ internal static class McpPipelineFailureDiagnostic
             context.RequestServices.GetRequiredService<ILogger<McpSessionPipeline>>(), stage, original.Code,
             Category(message), null), failures);
         if (failures.Count > OriginalFailureCount)
-        { ServerFailureObserver.ThrowIfAny(failures); }
+        {
+            ServerFailureObserver.ThrowIfAny(failures);
+        }
     }
 
     private const int ExecutionFailureEventId = 6;
@@ -48,7 +50,9 @@ internal static class McpPipelineFailureDiagnostic
             original is KeyLoadException canonical ? canonical.Code : null, ExceptionCategory(original),
             Category(message), null), failures);
         if (failures.Count > OriginalFailureCount)
-        { ServerFailureObserver.ThrowIfAny(failures); }
+        {
+            ServerFailureObserver.ThrowIfAny(failures);
+        }
     }
 
     private static McpPipelineExceptionCategory ExceptionCategory(Exception original) => original switch

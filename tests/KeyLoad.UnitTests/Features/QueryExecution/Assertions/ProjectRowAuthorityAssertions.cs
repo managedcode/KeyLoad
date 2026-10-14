@@ -39,7 +39,9 @@ internal static class ProjectRowAuthorityAssertions
             new SqlParser(Sql, UnitExecutionOptions.DatabaseLimits(db.Database.Limits), UnitExecutionOptions.QueryExecution(),
                 new global::KeyLoad.Core.ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(db.Database.Limits),
                     cancellationToken: token)).Parse() with
-            { Explain = true }, AllowFullScan: true), cancellationToken: token);
+            {
+                Explain = true
+            }, AllowFullScan: true), cancellationToken: token);
         QueryRow[] explanation = [new(ExplainId, ExplainRevision, plan)];
         await Assert.That(JsonDefaults.Serialize(explain.Rows).AsSpan().SequenceEqual(JsonDefaults.Serialize(explanation))).IsTrue();
         await PageAsync(explain, cut);
@@ -61,7 +63,9 @@ internal static class ProjectRowAuthorityAssertions
                     new SqlParser(Sql, UnitExecutionOptions.DatabaseLimits(db.Database.Limits), UnitExecutionOptions.QueryExecution(),
                 new global::KeyLoad.Core.ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(db.Database.Limits),
                     cancellationToken: token)).Parse() with
-                    { Explain = true }, AllowFullScan: true), cancellationToken: token)
+                    {
+                        Explain = true
+                    }, AllowFullScan: true), cancellationToken: token)
                 : engine.Execute(Reader, new(db.Partition, Sql, AllowFullScan: true), cancellationToken: token);
             });
             await Assert.That(failure.Code).IsEqualTo(ErrorCode.Unauthenticated);

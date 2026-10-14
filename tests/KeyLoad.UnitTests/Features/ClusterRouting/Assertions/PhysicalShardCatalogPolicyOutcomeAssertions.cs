@@ -18,7 +18,9 @@ internal static class PhysicalShardCatalogPolicyOutcomeAssertions
         {
             var page = view.Scan([], fixture.Database.Limits.MaxScanRecords);
             if (page.HasMore)
-            { throw new InvalidOperationException(CompleteImageRequired); }
+            {
+                throw new InvalidOperationException(CompleteImageRequired);
+            }
             return NativeSerialization.Serialize(page);
         });
 

@@ -27,7 +27,9 @@ internal static class ReplicaIsolationRuleState
             || lines.First(line => line.StartsWith(AppendPrefix + ReplicaIsolationProtocol.Output + " ", StringComparison.Ordinal))
                 != Canonical([ReplicaIsolationProtocol.Insert, ReplicaIsolationProtocol.Output, ReplicaIsolationProtocol.FirstRule,
                     ReplicaIsolationProtocol.Jump, plan.OutputChain]))
-        { throw new InvalidOperationException("The actual native filter table does not contain the exact owned isolation rules first."); }
+        {
+            throw new InvalidOperationException("The actual native filter table does not contain the exact owned isolation rules first.");
+        }
     }
 
     internal static IEnumerable<string[]> Removal(string native, IReplicaIsolationRulePlan plan)
@@ -35,11 +37,17 @@ internal static class ReplicaIsolationRuleState
         var lines = Lines(native);
         var expected = plan.Installation().Select(Canonical).ToHashSet(StringComparer.Ordinal);
         if (lines.Where(line => Owned(line, plan)).Any(line => !expected.Contains(line)))
-        { throw new InvalidOperationException("Unexpected native rules refer to an owned namespace chain; ownership is unresolved."); }
+        {
+            throw new InvalidOperationException("Unexpected native rules refer to an owned namespace chain; ownership is unresolved.");
+        }
         if (lines.Contains(AppendPrefix + ReplicaIsolationProtocol.Input + " -j " + plan.InputChain, StringComparer.Ordinal))
-        { yield return [ReplicaIsolationProtocol.Delete, ReplicaIsolationProtocol.Input, ReplicaIsolationProtocol.Jump, plan.InputChain]; }
+        {
+            yield return [ReplicaIsolationProtocol.Delete, ReplicaIsolationProtocol.Input, ReplicaIsolationProtocol.Jump, plan.InputChain];
+        }
         if (lines.Contains(AppendPrefix + ReplicaIsolationProtocol.Output + " -j " + plan.OutputChain, StringComparer.Ordinal))
-        { yield return [ReplicaIsolationProtocol.Delete, ReplicaIsolationProtocol.Output, ReplicaIsolationProtocol.Jump, plan.OutputChain]; }
+        {
+            yield return [ReplicaIsolationProtocol.Delete, ReplicaIsolationProtocol.Output, ReplicaIsolationProtocol.Jump, plan.OutputChain];
+        }
         foreach (var chain in new[] { plan.InputChain, plan.OutputChain })
         {
             if (lines.Contains(CreatePrefix + chain, StringComparer.Ordinal))
@@ -53,11 +61,17 @@ internal static class ReplicaIsolationRuleState
     private static string Canonical(string[] rule)
     {
         if (rule[OperationIndex] == ReplicaIsolationProtocol.Create)
-        { return CreatePrefix + rule[ChainIndex]; }
+        {
+            return CreatePrefix + rule[ChainIndex];
+        }
         if (rule[OperationIndex] == ReplicaIsolationProtocol.Insert)
-        { return AppendPrefix + rule[ChainIndex] + " -j " + rule[^1]; }
+        {
+            return AppendPrefix + rule[ChainIndex] + " -j " + rule[^1];
+        }
         if (rule.Length != DropArgumentCount || rule[DirectionIndex] is not (SourceOption or DestinationOption))
-        { throw new InvalidOperationException("Only the frozen native namespace rule shape is supported."); }
+        {
+            throw new InvalidOperationException("Only the frozen native namespace rule shape is supported.");
+        }
         return AppendPrefix + rule[ChainIndex] + " " + rule[DirectionIndex] + " " + rule[PeerIndex] + HostMask
             + " " + MatchTcp + " " + rule[PortIndex] + " " + ReplicaIsolationProtocol.SiloPort + " -j " + ReplicaIsolationProtocol.Drop;
     }

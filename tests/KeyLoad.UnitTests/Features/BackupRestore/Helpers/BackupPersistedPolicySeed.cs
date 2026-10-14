@@ -20,11 +20,15 @@ internal static class BackupPersistedPolicySeed
         => new(Reader, partition.TenantId,
             [new(partition.DatabaseId, Collection, Capability.DocumentsRead | Capability.Query)],
             repaired ? ["pii.read", "pii.use"] : ["pii.read"])
-        { PolicyEpoch = repaired ? 3L : 2L };
+        {
+            PolicyEpoch = repaired ? 3L : 2L
+        };
 
     internal static ResourceDefinition Resource(PartitionRef partition)
         => new(Collection, ResourceKind.Collection, partition.TransactionDomainId)
-        { FieldPolicies = [new("/secret", "private")] };
+        {
+            FieldPolicies = [new("/secret", "private")]
+        };
 
     internal static ApiKeyRecord LiveKey => DatabaseEngine.Credential(LiveKeyId, Reader, LiveSecret);
     internal static ApiKeyRecord RevokedKey => DatabaseEngine.Credential(RevokedKeyId, Reader, RevokedSecret) with { Revoked = true };

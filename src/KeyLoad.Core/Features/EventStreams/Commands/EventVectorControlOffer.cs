@@ -22,7 +22,9 @@ internal static class EventVectorControlOffer
         if (phase.Action != EventVectorControlAction.Offer || map.State != EventVectorMapState.Active
             || map.PendingPhaseId is not null || map.ExpiresAt <= now
             || inventory.PayloadRows.Any(row => row.Key.Span.SequenceEqual(key)))
-        { throw Errors.Fail(ErrorCode.Conflict, InvalidOffer); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, InvalidOffer);
+        }
         var offered = EventVectorEntryEncoding.Decode(phase.OriginalEncodedEntries,
             phase.OriginalEntryChecksum, admission);
         var acknowledged = EventVectorControlPages.Entries(inventory, admission);
@@ -30,7 +32,9 @@ internal static class EventVectorControlOffer
         EventVectorOfferPageProof.Require(phase, acknowledged, offered, admission);
         var witness = EventVectorCoverageWitnessEncoding.Read(phase.OriginalCoverageWitness, request, admission);
         if (!witness.OriginalSemanticDigest.Span.SequenceEqual(map.SourceManifestDigest.Span))
-        { throw Errors.Fail(ErrorCode.Conflict, InvalidOffer); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, InvalidOffer);
+        }
         var offer = new EventVectorOffer
         {
             Version = Version,
@@ -51,7 +55,9 @@ internal static class EventVectorControlOffer
         ImmutableArray<EventVectorEntry> offered)
     {
         if (original.Length != offered.Length)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidOffer); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidOffer);
+        }
         for (var ordinal = EventVectorControlPages.FirstOrdinal; ordinal < original.Length; ordinal++)
         {
             var before = original[ordinal];
@@ -63,7 +69,9 @@ internal static class EventVectorControlOffer
                 || after.PolicyEpoch != before.PolicyEpoch || after.SchemaVersion != before.SchemaVersion
                 || after.LogicalPlacementRevision != before.LogicalPlacementRevision
                 || after.DirectoryFence != before.DirectoryFence)
-            { throw Errors.Fail(ErrorCode.Corruption, InvalidOffer); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, InvalidOffer);
+            }
         }
     }
 }

@@ -12,7 +12,9 @@ internal sealed class DatabaseAuthenticationHandler(IOptionsMonitor<Authenticati
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
         if (!DatabaseAuthenticationComposition.IsProtected(Context.Request))
-        { return AuthenticateResult.NoResult(); }
+        {
+            return AuthenticateResult.NoResult();
+        }
         var reply = await DatabaseCredentialResolver.ReadAsync(Context, executionObserver).ConfigureAwait(false);
         PrincipalRecord principal;
         if (Context.Items[McpHttpPipeline.StateItem] is McpRequestState state)

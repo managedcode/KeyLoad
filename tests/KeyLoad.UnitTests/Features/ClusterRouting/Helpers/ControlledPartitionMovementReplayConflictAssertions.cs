@@ -16,7 +16,10 @@ internal static class ControlledPartitionMovementReplayConflictAssertions
         var changes = seed.Mutations.SetItem(DocumentMutationOrdinal,
             new PutDocument(ControlledPartitionMovementCorpus.Collection,
                 ControlledPartitionMovementCorpus.DocumentId, ChangedJson));
-        var changed = seed with { Mutations = changes };
+        var changed = seed with
+        {
+            Mutations = changes
+        };
         var operation = source.Database.CreateNativeOperation(OperationKind.Batch,
             ControlledPartitionMovementCorpus.SeedId, PhysicalShardCatalogFixture.RootPrincipalId,
             source.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(changed));

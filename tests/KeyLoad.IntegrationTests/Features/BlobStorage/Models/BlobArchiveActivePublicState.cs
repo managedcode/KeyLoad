@@ -10,7 +10,10 @@ internal sealed class BlobArchiveActivePublicState(BlobArchiveActivePublicVersio
     internal PrincipalRecord Reader { get; set; } = reader;
     internal string Key { get; } = key;
     internal Guid SourceOwner { get; } = sourceOwner;
-    internal WriteBlobPartRequest RefusedPart { get; } = new(Guid.NewGuid(), active.Begin.Blob, active.Begin.UploadId,
+    internal WriteBlobPartRequest RefusedPart
+    {
+        get;
+    } = new(Guid.NewGuid(), active.Begin.Blob, active.Begin.UploadId,
         2, BlobArchiveActivePublicPublication.Bytes(2, 17), BlobIntegrity.PartHash(BlobArchiveActivePublicPublication.Bytes(2, 17)));
 }
 

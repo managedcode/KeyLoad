@@ -1,0 +1,151 @@
+using KeyLoad.Replication;
+using Microsoft.Extensions.Options;
+
+namespace KeyLoad.Clustering;
+
+/// <summary>Applies fixed-voter readiness rules over bounded authenticated observations.</summary>
+internal sealed class ReplicaCohortAdmission
+{
+    private readonly ReplicaConfiguration configuration;
+    private readonly ReplicaDiscoveryObservationCache observations;
+    private readonly Func<string, bool, CancellationToken, Task<ReplicaDiscoveryObservation?>> resolve;
+
+    internal ReplicaCohortAdmission(IOptions<ReplicaConfiguration> configurationOptions,
+        ReplicaDiscoveryObservationCache observations,
+        Func<string, bool, CancellationToken, Task<ReplicaDiscoveryObservation?>> resolve)
+    {
+        configuration = configurationOptions.Value;
+        this.observations = observations;
+        this.resolve = resolve;
+    }
+
+    internal bool HasCompatibleCohort => ObserveCompatibleCohort().Compatible;
+
+    internal ReplicaCohortAdmissionStatus ObserveCompatibleCohort()
+    {
+        const int CompatibleInitialValue = 1;
+        const int NoObservedPeers = 0;
+        var local = observations.ReadLocal();
+        if (!local.CurrentContractCompatible)
+        {
+            return Status(local.ProtocolCompatible ? ReplicaCohortAdmissionCode.LocalReaderMismatch
+                : ReplicaCohortAdmissionCode.LocalProtocolMismatch, NoObservedPeers, NoObservedPeers,
+                NoObservedPeers, NoObservedPeers, NoObservedPeers);
+        }
+        if (!local.TransportReady)
+        {
+            return Status(ReplicaCohortAdmissionCode.LocalTransportUnavailable, NoObservedPeers,
+            NoObservedPeers, NoObservedPeers, NoObservedPeers, NoObservedPeers);
+        }
+        var compatible = CompatibleInitialValue;
+        var evaluated = NoObservedPeers;
+        var fresh = NoObservedPeers;
+        var missing = NoObservedPeers;
+        var expired = NoObservedPeers;
+        foreach (var voterId in configuration.VoterIds)
+        {
+            if (voterId == configuration.LocalId)
+            {
+                continue;
+            }
+            evaluated++;
+            var freshness = observations.ReadFresh(voterId, out var observation);
+            if (freshness != ReplicaObservationFreshness.Fresh)
+            {
+                if (freshness == ReplicaObservationFreshness.Expired)
+                {
+                    expired++;
+                }
+                else
+                {
+                    missing++;
+                }
+                continue;
+            }
+            fresh++;
+            if (!observation!.CurrentContractCompatible)
+            {
+                return Status(observation.ProtocolCompatible ? ReplicaCohortAdmissionCode.PeerReaderMismatch
+                    : ReplicaCohortAdmissionCode.PeerProtocolMismatch, evaluated, fresh, missing, expired, compatible);
+            }
+            if (observation.TransportReady)
+            {
+                compatible++;
+            }
+        }
+        return Status(compatible >= configuration.Majority ? ReplicaCohortAdmissionCode.Compatible
+            : ReplicaCohortAdmissionCode.InsufficientFreshReady, evaluated, fresh, missing, expired, compatible);
+    }
+
+    private ReplicaCohortAdmissionStatus Status(ReplicaCohortAdmissionCode code, int evaluated,
+        int fresh, int missing, int expired, int ready)
+        => new(code, configuration.Majority, evaluated, fresh, missing, expired, ready);
+
+    internal async Task EnsureCompatibleCohortAsync(CancellationToken cancellationToken)
+    {
+        const int CompatibleInitialValue = 1;
+
+        cancellationToken.ThrowIfCancellationRequested();
+        var local = observations.ReadLocal();
+        if (!local.CurrentContractCompatible)
+        {
+            throw Incompatible();
+        }
+
+        if (!local.TransportReady)
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaTransportProtocol.InvalidDiscovery);
+        }
+
+        var compatible = CompatibleInitialValue;
+        var incompatible = false;
+        foreach (var voterId in configuration.VoterIds)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (voterId == configuration.LocalId)
+            {
+                continue;
+            }
+
+            var observation = await ObserveAvailableAsync(voterId, cancellationToken).ConfigureAwait(false);
+            if (observation is null)
+            {
+                continue;
+            }
+
+            incompatible |= !observation.CurrentContractCompatible;
+            if (observation.CurrentContractCompatible && observation.TransportReady)
+            {
+                compatible++;
+            }
+        }
+
+        cancellationToken.ThrowIfCancellationRequested();
+        if (incompatible)
+        {
+            throw Incompatible();
+        }
+
+        if (compatible < configuration.Majority)
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaProtocol.NoLeader);
+        }
+    }
+
+    private async Task<ReplicaDiscoveryObservation?> ObserveAvailableAsync(string voterId,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            return await resolve(voterId, false, cancellationToken).ConfigureAwait(false);
+        }
+        catch (KeyLoadException error) when (error.Code == ErrorCode.Unauthenticated)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            return null;
+        }
+    }
+
+    private static KeyLoadException Incompatible()
+        => Errors.Fail(ErrorCode.OwnershipLost, ReplicaTransportProtocol.IncompatibleCohort);
+}

@@ -53,7 +53,10 @@ internal static class BlobGlobalQuotaR49Operations
         upload.Complete = request;
         upload.Completed = result;
         upload.Metadata = expected;
-        upload.Progress = progress with { Status = BlobUploadStatus.Complete };
+        upload.Progress = progress with
+        {
+            Status = BlobUploadStatus.Complete
+        };
         await BlobGlobalQuotaR49Current.RunAsync(callers, state, token);
     }
     internal static async Task AbortAsync(RequestCqrsRf3Callers callers, BlobGlobalQuotaR49State state, BlobGlobalQuotaR49Upload upload, CancellationToken token)
@@ -61,7 +64,10 @@ internal static class BlobGlobalQuotaR49Operations
         var current = upload.Progress ?? throw new InvalidOperationException();
         var request = new AbortBlobUploadRequest(Guid.NewGuid(), upload.Blob, current.UploadId);
         var result = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.AbortBlobUploadAsync(request, token));
-        var expected = current with { Status = BlobUploadStatus.Aborted };
+        var expected = current with
+        {
+            Status = BlobUploadStatus.Aborted
+        };
         await SqlRf3Protocol.EqualAsync(expected, result.Value);
         await BlobGlobalQuotaR49Results.ReceiptAsync(result.Receipt, request.CommandId, state);
         upload.Abort = request;

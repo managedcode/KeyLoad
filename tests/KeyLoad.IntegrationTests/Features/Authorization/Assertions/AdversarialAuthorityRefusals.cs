@@ -35,7 +35,9 @@ internal static class AdversarialAuthorityRefusals
         var before = await AdversarialAuthorityAssertions.ImageAsync(root, state, token);
         await SdkAsync(await reader.GetAsync(state.Owned.Scenario.Reference, token), state, expected);
         if (expected == ErrorCode.Unauthenticated)
-        { await RevokedAsync(fixture, session, state, token); }
+        {
+            await RevokedAsync(fixture, session, state, token);
+        }
         else
         {
             var denied = await session.CallAsync(McpCallerTools.DocumentsGet,

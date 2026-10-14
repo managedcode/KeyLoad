@@ -21,7 +21,9 @@ internal static class McpAuthenticationNativeFields
         var expected = Nullable.GetUnderlyingType(typeof(T)) ?? typeof(T);
         // Current ungenerated Capability uses Orleans10.3.1 backing-scalar metadata.
         if (expected == typeof(Capability))
-        { expected = typeof(long); }
+        {
+            expected = typeof(long);
+        }
         return reader.Session.CodecProvider.GetCodec<T>().ReadValue(ref reader, Field(ref reader, delta, expected))!;
     }
 
@@ -39,7 +41,9 @@ internal static class McpAuthenticationNativeFields
         ReferenceCodec.MarkValueField(reader.Session);
         var reference = reader.ReadVarUInt32();
         if (reference == EmptyReference)
-        { return null; }
+        {
+            return null;
+        }
         var value = reader.Session.ReferencedObjects.TryGetReferencedObject(reference) as McpAuthenticationReference;
         Require(value is not null && value.NativeType == expected);
         return value;
@@ -53,6 +57,8 @@ internal static class McpAuthenticationNativeFields
     internal static void Require(bool condition)
     {
         if (!condition)
-        { throw Errors.Fail(ErrorCode.Validation, McpNativeAuthentication.InvalidReply); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, McpNativeAuthentication.InvalidReply);
+        }
     }
 }

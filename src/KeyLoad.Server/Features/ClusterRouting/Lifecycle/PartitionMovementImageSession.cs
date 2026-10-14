@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.Server;
 
@@ -33,7 +33,9 @@ internal sealed class PartitionMovementImageSession : IAsyncDisposable
             ObjectDisposedException.ThrowIf(closing, this);
             var current = image ?? throw new InvalidOperationException();
             if ((uint)ordinal >= (uint)current.Pages.Length)
-            { throw new ArgumentOutOfRangeException(nameof(ordinal)); }
+            {
+                throw new ArgumentOutOfRangeException(nameof(ordinal));
+            }
             var lease = new PartitionMovementImagePageLease(this, current.Pages[ordinal]);
             readers = checked(readers + SingleBorrower);
             return lease;
@@ -45,7 +47,9 @@ internal sealed class PartitionMovementImageSession : IAsyncDisposable
     internal void RequireOpen()
     {
         lock (gate)
-        { ObjectDisposedException.ThrowIf(closing || image is null, this); }
+        {
+            ObjectDisposedException.ThrowIf(closing || image is null, this);
+        }
     }
 
     internal void Return()
@@ -54,7 +58,9 @@ internal sealed class PartitionMovementImageSession : IAsyncDisposable
         {
             readers--;
             if (closing && readers == NoBorrowers)
-            { drained.TrySetResult(); }
+            {
+                drained.TrySetResult();
+            }
         }
     }
 
@@ -64,7 +70,9 @@ internal sealed class PartitionMovementImageSession : IAsyncDisposable
         {
             closing = true;
             if (readers == NoBorrowers)
-            { drained.TrySetResult(); }
+            {
+                drained.TrySetResult();
+            }
             shutdown ??= ReleaseAsync();
             return new(shutdown);
         }
@@ -76,10 +84,14 @@ internal sealed class PartitionMovementImageSession : IAsyncDisposable
         await ServerFailureObserver.ObserveAsync(stopping.CancelAsync, failures).ConfigureAwait(false);
         await ServerFailureObserver.ObserveAsync(() => drained.Task, failures).ConfigureAwait(false);
         lock (gate)
-        { image = null; }
+        {
+            image = null;
+        }
         ServerFailureObserver.Observe(reservation.Dispose, failures);
         try
-        { stopping.Dispose(); }
+        {
+            stopping.Dispose();
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         ServerFailureObserver.ThrowIfAny(failures);

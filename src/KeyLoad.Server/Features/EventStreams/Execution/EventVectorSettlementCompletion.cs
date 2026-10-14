@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.DocumentStorage;
 
 namespace KeyLoad.Server.Features.EventStreams;
@@ -34,7 +34,9 @@ internal static class EventVectorSettlementCompletion
             || prepared.Owned.Entries.Length != prepared.TargetEntries.Length
             || prepared.Owned.Entries.Length != prepared.Owned.OriginalPinPhaseBytes.Length
             || prepared.Owned.Entries.Length != prepared.CurrentSourcePolicyEpochs.Length)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, EventVectorRemoteProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, EventVectorRemoteProtocol.Invalid);
+        }
         var action = request.Action == EventFeedControlAction.Acknowledge
             ? EventVectorControlAction.PublishAcknowledgement : EventVectorControlAction.CompleteRelease;
         var phase = new EventVectorControlPhase(Version, request, action, prepared.Owned.Revision,
@@ -66,7 +68,10 @@ internal static class EventVectorSettlementCompletion
         var state = role == EventVectorSourcePhaseRole.Advance
             ? EventVectorMapState.Acknowledging : EventVectorMapState.Releasing;
         using var intended = new EventVectorOpenPinOwner(EventVectorPhasePreparation.Prepare(
-            prepared.Map with { State = state }, ordinal, prepared.Owned.Entries[ordinal], mutation, admission));
+            prepared.Map with
+            {
+                State = state
+            }, ordinal, prepared.Owned.Entries[ordinal], mutation, admission));
         var control = EventVectorOpenControlPhases.Admit(terminal, intended.Phase);
         using var admitted = new EventVectorOpenPinOwner(await EventVectorFreshSourceAdmission.ExecuteAsync(
             runtime, node, partition, options, clock, parent, control, admission,

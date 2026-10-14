@@ -36,7 +36,9 @@ internal static class EventVectorParentCaptureScopes
         foreach (var row in capture.PlacementRows)
         {
             if (!row.Key.Span.SequenceEqual(key))
-            { continue; }
+            {
+                continue;
+            }
             admission.RequireEncodedBytes(checked(row.Key.Length + row.Value.Length));
             var placement = NativeSerialization.Deserialize<AtomicPartitionPlacementV1>(row.Value.Span);
             AtomicPartitionPlacementValidation.ValidateRowShape(placement, partition);

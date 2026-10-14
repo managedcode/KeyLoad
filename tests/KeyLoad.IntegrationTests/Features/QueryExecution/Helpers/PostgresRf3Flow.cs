@@ -20,7 +20,9 @@ internal static class PostgresRf3Flow
                     var state = await SeedAsync(fixture, dialect);
                     PostgresNativeExtendedRf3State? extended = null;
                     using (var receiptDeadline = McpCallerDeadline.Create())
-                    { await PostgresRf3Assertions.MinimumTokenAsync(fixture, state, receiptDeadline.Token); }
+                    {
+                        await PostgresRf3Assertions.MinimumTokenAsync(fixture, state, receiptDeadline.Token);
+                    }
                     await PostgresRf3StalledBootstrap.RunAsync(fixture, state);
                     var backpressure = await PostgresRf3BackpressureFlow.CreateAndRunAsync(fixture, selection);
                     using (var deadline = McpCallerDeadline.Create())

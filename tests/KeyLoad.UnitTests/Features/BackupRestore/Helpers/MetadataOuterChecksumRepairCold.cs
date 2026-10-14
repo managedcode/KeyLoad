@@ -22,7 +22,10 @@ internal static class MetadataOuterChecksumRepairCold
         {
             var before = store.Position;
             await Assert.That(store.Commit((transaction, _) =>
-                { transaction.PutRecord(KeyCodec.Encode(HealthyKey), HealthyValue); return true; })).IsTrue();
+                {
+                    transaction.PutRecord(KeyCodec.Encode(HealthyKey), HealthyValue);
+                    return true;
+                })).IsTrue();
             await Assert.That(store.Position).IsEqualTo(before + HealthyCommitCount);
             await ValuesAsync(store);
             image = EventingArtifactState.FullBytes(store);

@@ -22,7 +22,9 @@ internal static class EventVectorParentObservationRead
         var terminal = EventVectorParentLookup.ReadTerminalDetails(view, authorization, principal, request, incarnation,
             freshSourceAuthorizationWitness, options, cancellationToken);
         if (terminal is { } actual)
-        { return (actual.PhaseBytes, OutcomeBytes(view, principal, request, actual.PhaseId, admission)); }
+        {
+            return (actual.PhaseBytes, OutcomeBytes(view, principal, request, actual.PhaseId, admission));
+        }
         var budget = new EventVectorInventoryReadBudget(options);
         var key = EventVectorKeys.ParentCall(request.ControlPartition, request.MapId);
         EventVectorEncodedRow? row = null;
@@ -32,13 +34,17 @@ internal static class EventVectorParentObservationRead
             row = new(key, bytes.ToArray());
         }, budget.Observe);
         if (row is not { } actualRow)
-        { return (ReadOnlyMemory<byte>.Empty, ReadOnlyMemory<byte>.Empty); }
+        {
+            return (ReadOnlyMemory<byte>.Empty, ReadOnlyMemory<byte>.Empty);
+        }
         var map = EventVectorRowStorage.Read<EventVectorMap>(view,
             EventVectorKeys.Map(request.ControlPartition, request.MapId), admission)
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
         if (map.PrincipalId != principal.Id || map.ControlPolicyEpoch != principal.PolicyEpoch
             || map.ControlIncarnation != incarnation)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, Invalid);
+        }
         var call = EventVectorParentValidation.Read(map, actualRow, admission);
         EventVectorParentValidation.RequireRequest(call, request, admission);
         EventVectorParentScopes.Authorize(authorization, principal, call.OriginalAuthorizedSourceScopes, admission);
@@ -50,7 +56,9 @@ internal static class EventVectorParentObservationRead
         EventVectorInventoryValidation.Require(map, inventory.PayloadRows, admission);
         var phase = EventVectorParentValidation.ReadPhase(call, admission);
         if (fresh is not null)
-        { EventVectorCurrentSourceAuthorization.RequireOriginalFences(phase, fresh, admission); }
+        {
+            EventVectorCurrentSourceAuthorization.RequireOriginalFences(phase, fresh, admission);
+        }
         EventVectorParentScopes.RequireExact(call.OriginalAuthorizedSourceScopes,
             EventVectorParentScopes.Derive(phase, inventory, admission));
         _ = EventVectorParentOutcome.Require(view, principal, phase, call.LastAdmittedControlPhaseId,
@@ -65,7 +73,9 @@ internal static class EventVectorParentObservationRead
         var selected = CommandOutcomeKeyResolver.Select(view, principal.Id, phaseId,
             new CommandOutcomePartitionScope(CommandOutcomeScopeKind.Partition, request.ControlPartition));
         if (selected.Outcome is null)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         var original = ReadOnlyMemory<byte>.Empty;
         var found = view.ReadValue(selected.Key, bytes =>
         {
@@ -73,7 +83,9 @@ internal static class EventVectorParentObservationRead
             original = bytes.ToArray();
         });
         if (!found || original.IsEmpty)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         return original;
     }
 }

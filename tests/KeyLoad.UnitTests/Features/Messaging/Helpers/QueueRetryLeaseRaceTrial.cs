@@ -8,14 +8,21 @@ internal static class QueueRetryLeaseRaceTrial
     {
         using var fixture = new TestDatabase();
         fixture.Configure(QueueOrderedRetryProtocol.Queue, ResourceKind.WorkQueue, queuePolicy: new()
-        { OrderingProfile = QueueOrderingProfile.StrictPerKey, RetryJitter = QueueRetryJitter.Full });
+        {
+            OrderingProfile = QueueOrderingProfile.StrictPerKey,
+            RetryJitter = QueueRetryJitter.Full
+        });
         var state = new QueueOrderedRetryState(fixture.Partition, QueueWholeFlowStorage.Clock(fixture.Store), QueueParkedHeadPolicy.Continue);
         state.Batch(fixture.Database, QueueOrderedRetryOperations.Literal(QueueOrderedRetryProtocol.First)).Get<CommitReceipt>();
         var original = await QueueOrderedRetryOperations.ClaimAsync(fixture.Database, state, QueueOrderedRetryProtocol.First);
         if (renewFirst)
-        { await QueueRetryLeaseRenewFirst.RunAsync(fixture.Database, state, original, token); }
+        {
+            await QueueRetryLeaseRenewFirst.RunAsync(fixture.Database, state, original, token);
+        }
         else
-        { await QueueRetryLeaseReclaimFirst.RunAsync(fixture.Database, state, original, token); }
+        {
+            await QueueRetryLeaseReclaimFirst.RunAsync(fixture.Database, state, original, token);
+        }
         await QueueRetryLeaseRaceAssertions.TerminalAsync(fixture.Database, state, renewFirst, healthy: false);
         await QueueOrderedRetryOperations.ReplayAsync(fixture.Database, state);
         var image = QueueOrderedRetryImage.Capture(fixture.Store, state.Lane);

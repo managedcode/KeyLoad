@@ -45,7 +45,9 @@ internal sealed class ControlledPartitionMovementNativePrepareTests
                         blob.Request, blob.Expected, cancellation);
                     await ControlledPartitionMovementNativeModels.ReadAsync(owners.Source, operation.EvaluatedAt, cancellation);
                     if (cold == FirstColdCut)
-                    { healthy = await ControlledPartitionMovementNativeHealthy.SubmitAsync(owners.Source, cancellation); }
+                    {
+                        healthy = await ControlledPartitionMovementNativeHealthy.SubmitAsync(owners.Source, cancellation);
+                    }
                     else
                     {
                         await ControlledPartitionMovementNativeHealthy.ReplayAsync(owners.Source,
@@ -54,7 +56,9 @@ internal sealed class ControlledPartitionMovementNativePrepareTests
                 }
             }, failures);
             if (failures.Count != 0)
-            { owners.RetainRoots(); }
+            {
+                owners.RetainRoots();
+            }
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }

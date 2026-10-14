@@ -10,7 +10,9 @@ public sealed partial class DatabaseEngine
         PlacementIntentPhaseRequestV1 request)
     {
         if (original.CompletedMoves >= original.Plan.Moves.Length)
-        { throw Errors.Fail(ErrorCode.Conflict, TenantPlacementPolicyProtocol.Stale); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, TenantPlacementPolicyProtocol.Stale);
+        }
         var move = original.Plan.Moves[original.CompletedMoves];
         var header = PartitionMoveParentStorage.Header(view, move.Partition, move.MoveId, Limits.MaxBatchBytes)
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, TenantPlacementPolicyProtocol.Missing);
@@ -20,12 +22,16 @@ public sealed partial class DatabaseEngine
             || actual.Phase != PartitionMovePhase.Retired || actual.MoveId != move.MoveId
             || actual.Partition != move.Partition || actual.DestinationOwner.PhysicalShardId != move.DestinationPhysicalShardId
             || !NativeSerialization.Serialize(actual).AsSpan().SequenceEqual(NativeSerialization.Serialize(receipt)))
-        { throw Errors.Fail(ErrorCode.Conflict, TenantPlacementPolicyProtocol.Stale); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, TenantPlacementPolicyProtocol.Stale);
+        }
         var completed = checked(original.CompletedMoves + TenantPlacementPolicyProtocol.RevisionStep);
         var status = completed == original.Plan.Moves.Length
             ? PlacementIntentStatus.Completed : PlacementIntentStatus.Paused;
         if (request.TargetStatus != status)
-        { throw Errors.Fail(ErrorCode.Conflict, TenantPlacementPolicyProtocol.Stale); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, TenantPlacementPolicyProtocol.Stale);
+        }
         return original with
         {
             CompletedMoves = checked((int)completed),

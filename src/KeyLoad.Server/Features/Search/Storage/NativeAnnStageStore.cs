@@ -11,17 +11,23 @@ internal sealed class NativeAnnStageStore(NativeAnnRootLease root, IOptions<Nati
     private const int Empty = 0;
     private readonly NativeAnnExecutionOptions options = configured.Value;
 
-    internal global::KeyLoad.Orleans.AnnProjectionEnrollment? ReadEnrollment(AnnMaintenanceRequest request)
+    internal global::KeyLoad.Clustering.AnnProjectionEnrollment? ReadEnrollment(AnnMaintenanceRequest request)
     {
         var key = new NativeAnnOwnedKey(request.Consumer, request.IndexGeneration);
         var entry = root.Receipt.OriginalOperations.SingleOrDefault(item => item.Key == key);
         if (entry is null)
-        { return null; }
+        {
+            return null;
+        }
         NativeAnnOriginalResults.Require(entry);
         if (!NativeAnnOriginalResults.SameRequest(entry.InitialRequest, request))
-        { throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Corrupt); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Corrupt);
+        }
         if (entry.Released || !entry.InitialSettled || entry.PendingRequest is not null)
-        { return null; }
+        {
+            return null;
+        }
         return new(entry.InitialRequest,
             entry.LastRequest ?? throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Corrupt),
             entry.LastResult ?? throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Corrupt));
@@ -75,7 +81,9 @@ internal sealed class NativeAnnStageStore(NativeAnnRootLease root, IOptions<Nati
     {
         var manifest = Describe(request, current);
         if (!manifest.IsPending)
-        { throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Corrupt); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Corrupt);
+        }
         return NativeAnnPendingFiles.Load(root.Root, manifest, request, current, storage, options, seeds, budget, readBudget);
     }
 
@@ -84,7 +92,9 @@ internal sealed class NativeAnnStageStore(NativeAnnRootLease root, IOptions<Nati
     {
         var manifest = Describe(request, current);
         if (manifest.IsPending)
-        { throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Corrupt); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Corrupt);
+        }
         var key = new NativeAnnOwnedKey(request.Consumer, request.IndexGeneration);
         var pointer = root.Receipt.Published.Single(item => item.Key == key).Pointer;
         return NativeAnnLoadedSources.Load(root.Root, pointer, request, current, policy, storage,
@@ -106,7 +116,9 @@ internal sealed class NativeAnnStageStore(NativeAnnRootLease root, IOptions<Nati
             root.Stage(key, saved.Pointer, options);
             staged = true;
             if (previous is not null)
-            { root.Remove(previous.Pointer.GenerationLeaf, options); }
+            {
+                root.Remove(previous.Pointer.GenerationLeaf, options);
+            }
             return saved.Manifest;
         }
         catch (Exception primary)
@@ -114,7 +126,9 @@ internal sealed class NativeAnnStageStore(NativeAnnRootLease root, IOptions<Nati
             if (!staged)
             {
                 try
-                { root.Remove(leaf, options); }
+                {
+                    root.Remove(leaf, options);
+                }
                 catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
             }
             throw;
@@ -126,7 +140,9 @@ internal sealed class NativeAnnStageStore(NativeAnnRootLease root, IOptions<Nati
         var pending = root.Receipt.Pending.SingleOrDefault(item => item.Key == key);
         root.Unpublish(key, options, releaseOriginal: true);
         if (pending is not null)
-        { root.Remove(pending.Pointer.GenerationLeaf, options); }
+        {
+            root.Remove(pending.Pointer.GenerationLeaf, options);
+        }
     }
 
     private static void RequireProgress(NativeAnnManifest manifest, AnnSeed current)
@@ -136,9 +152,13 @@ internal sealed class NativeAnnStageStore(NativeAnnRootLease root, IOptions<Nati
             || manifest.CheckpointIntent.Consumer != manifest.Consumer || !manifest.CheckpointIntent.Effects.IsEmpty
             || manifest.ReplayAfter < Empty || through < manifest.ReplayAfter || through > manifest.Source.ThroughSequence
             || current.ProjectionCheckpoint != manifest.ReplayAfter && current.ProjectionCheckpoint != through)
-        { throw Errors.Fail(ErrorCode.HistoryUnavailable, NativeAnnProtocol.MissingDependencyHistory); }
+        {
+            throw Errors.Fail(ErrorCode.HistoryUnavailable, NativeAnnProtocol.MissingDependencyHistory);
+        }
         if (manifest.IsPending && (current.Cut.OutboxTail != manifest.Source.ThroughSequence
             || current.CorpusSha256 != manifest.Source.CorpusSha256))
-        { throw Errors.Fail(ErrorCode.HistoryUnavailable, NativeAnnProtocol.MissingDependencyHistory); }
+        {
+            throw Errors.Fail(ErrorCode.HistoryUnavailable, NativeAnnProtocol.MissingDependencyHistory);
+        }
     }
 }

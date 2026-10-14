@@ -4,6 +4,9 @@ namespace KeyLoad.Server.Features.DocumentStorage;
 internal sealed record RemoteModelAuthenticatedReply(ReadOnlyMemory<byte> Payload, string Signature,
     string DispatchSiloAddress)
 {
-    internal bool MayHaveEffects { get; init; }
+    internal bool MayHaveEffects
+    {
+        get; init;
+    }
 }
 

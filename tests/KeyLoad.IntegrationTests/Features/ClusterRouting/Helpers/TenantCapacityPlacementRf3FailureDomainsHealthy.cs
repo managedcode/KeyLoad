@@ -27,15 +27,22 @@ internal static class TenantCapacityPlacementRf3FailureDomainsHealthy
         await TenantCapacityPlacementRf3RevocationAssertions.CompletedAsync(pending, completed, id, request);
         var move = plan.Plan.Moves.Single();
         await PhysicalShardPartitionMovementRf3Placement.RequireAsync(seed, move, seed.OriginalPlacement with
-        { DirectoryRevision = 1 }, seed.Directory.ControlOwner, completed.Receipts.Single(), 2, 2, token);
+        {
+            DirectoryRevision = 1
+        }, seed.Directory.ControlOwner, completed.Receipts.Single(), 2, 2, token);
         await PartitionMovementPublicCallerReplay.RequireAsync(seed.Source, seed.Official, move, completed.Receipts.Single(), token);
         await TenantCapacityPlacementRf3Apply.RequireReplayAsync(seed, state, id, request, completed, token);
         await TenantCapacityPlacementRf3Assertions.RefusalAsync(await seed.Source.ApplyPlacementIntentAsync(
-            id, request with { ExpectedRevision = completed.Revision }, token), ErrorCode.Conflict);
+            id, request with
+            {
+                ExpectedRevision = completed.Revision
+            }, token), ErrorCode.Conflict);
         for (var cold = 0; cold < RequiredColdCuts; cold++)
         {
             foreach (var historical in policies)
-            { await TenantCapacityPlacementRf3FailureDomainsAuthority.ConfigureReplayAsync(seed, historical, token); }
+            {
+                await TenantCapacityPlacementRf3FailureDomainsAuthority.ConfigureReplayAsync(seed, historical, token);
+            }
             var rows = await TenantCapacityPlacementRf3FailureDomainsCold.RequireAsync(wave, seed, state, policy,
                 original, applying, originalRows.Persist, move, false, token);
             await Assert.That(rows.Intent).IsEqualTo(originalRows.Intent);

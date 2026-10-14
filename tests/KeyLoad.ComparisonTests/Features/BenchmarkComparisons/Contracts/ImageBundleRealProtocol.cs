@@ -13,7 +13,10 @@ internal static class ImageBundleRealProtocol
     internal const string Slice = "BenchmarkComparisons";
     internal const string Entry = "image-bundle-roundtrip.mjs";
     internal const string Failure = "The actual image bundle Node child failed its bound.";
-    internal static IReadOnlyList<string> Assertions { get; } =
+    internal static IReadOnlyList<string> Assertions
+    {
+        get;
+    } =
         ["nativeIdsAbsentBeforeImport", "nativeIdsExact", "manifestBytesExact", "buildReceiptBytesExact",
             "importReceiptBytesExact", "outputsExact", "cleanupCompleted"];
 

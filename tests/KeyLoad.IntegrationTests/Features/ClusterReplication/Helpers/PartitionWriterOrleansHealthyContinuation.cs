@@ -19,11 +19,19 @@ internal sealed class PartitionWriterOrleansHealthyContinuation(PartitionMovemen
             request, cancellationToken).ConfigureAwait(false));
         await SqlRf3Protocol.EqualAsync(request.Definition, actual);
         if (original is { } retained)
-        { await SqlRf3Protocol.EqualAsync(retained, actual); }
+        {
+            await SqlRf3Protocol.EqualAsync(retained, actual);
+        }
         else
-        { original = actual; }
+        {
+            original = actual;
+        }
         var official = (await McpCallerAssertions.SuccessAsync<ResourceDefinition>(await seed.Official.CallAsync(
-            McpCallerTools.ResourcesConfigure, new { commandId = identity, request }, cancellationToken)
+            McpCallerTools.ResourcesConfigure, new
+            {
+                commandId = identity,
+                request
+            }, cancellationToken)
             .ConfigureAwait(false))).Value;
         await SqlRf3Protocol.EqualAsync(actual, official);
     }

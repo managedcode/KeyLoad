@@ -37,7 +37,10 @@ internal static class SqlLexicalAdmissionFixture
     }
 
     internal static global::KeyLoad.QueryRequest LiteralSql(global::KeyLoad.QueryRequest healthy)
-        => healthy with { Sql = healthy.Sql.Replace(Order, LiteralPredicate + Order, StringComparison.Ordinal) };
+        => healthy with
+        {
+            Sql = healthy.Sql.Replace(Order, LiteralPredicate + Order, StringComparison.Ordinal)
+        };
 
     internal static global::KeyLoad.Query.AstQueryRequest LiteralAst(global::KeyLoad.Query.AstQueryRequest healthy)
         => healthy with

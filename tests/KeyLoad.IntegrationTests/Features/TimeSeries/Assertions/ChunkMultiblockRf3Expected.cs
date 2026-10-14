@@ -26,9 +26,15 @@ internal static class ChunkMultiblockRf3Expected
         var expectedGeneration = state.Opened ? NoGeneration : state.Healthy ? HealthyGeneration : OriginalGeneration;
         var expectedRevision = state.Opened ? OpenRevision : state.Healthy ? HealthyRevision : OriginalRevision;
         if (state.Phase == ChunkMultiblockRf3Phase.OriginalPending && generation == PendingOriginalGeneration)
-        { expectedGeneration = PendingOriginalGeneration; expectedRevision = PendingOriginalRevision; }
+        {
+            expectedGeneration = PendingOriginalGeneration;
+            expectedRevision = PendingOriginalRevision;
+        }
         if (state.Phase == ChunkMultiblockRf3Phase.HealthyPending && generation == PendingHealthyGeneration)
-        { expectedGeneration = PendingHealthyGeneration; expectedRevision = PendingHealthyRevision; }
+        {
+            expectedGeneration = PendingHealthyGeneration;
+            expectedRevision = PendingHealthyRevision;
+        }
         return new(state.Scenario.WindowId, state.Scenario.From, state.Scenario.Until, expectedGeneration, expectedRevision,
             state.Opened ? NoRecords : state.Healthy ? ChunkMultiblockRf3Data.HealthyCount : ChunkMultiblockRf3Data.OriginalCount,
             state.Expired ? state.Scenario.From.AddTicks(FloorTick).UtcTicks : null,

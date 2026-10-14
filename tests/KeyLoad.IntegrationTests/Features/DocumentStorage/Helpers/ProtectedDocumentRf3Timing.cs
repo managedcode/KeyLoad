@@ -21,7 +21,10 @@ internal sealed class ProtectedDocumentRf3Timing
         Clock = wave.Application.Services.GetRequiredService<TimeProvider>();
     }
 
-    internal TimeProvider Clock { get; }
+    internal TimeProvider Clock
+    {
+        get;
+    }
     internal DateTimeOffset SetupExpiry => Clock.GetUtcNow() + execution.ProtectedMovementSetupRequestLifetime;
     internal DateTimeOffset OutcomeExpiry => Clock.GetUtcNow() + execution.ProtectedMovementOutcomeRequestLifetime;
     internal TimeSpan CleanupTimeout => execution.ProtectedMovementCaptureCleanupTimeout;

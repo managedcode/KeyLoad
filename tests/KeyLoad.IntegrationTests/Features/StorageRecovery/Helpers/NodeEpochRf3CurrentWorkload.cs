@@ -56,7 +56,9 @@ internal static class NodeEpochRf3CurrentWorkload
             var sequence = FirstCurrentSequence + index;
             var command = AppendCommand(workload, data, CurrentTags);
             if (index % 2 == 0)
-            { _ = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.CommitAsync(command, cancellationToken).ConfigureAwait(false)).ConfigureAwait(false); }
+            {
+                _ = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.CommitAsync(command, cancellationToken).ConfigureAwait(false)).ConfigureAwait(false);
+            }
             else
             {
                 _ = await McpCallerAssertions.SuccessAsync<CommitReceipt>(await callers.Mcp.CallAsync(
@@ -122,7 +124,10 @@ internal static class NodeEpochRf3CurrentWorkload
         NodeEpochRf3Workload workload, CancellationToken cancellationToken)
     {
         var source = workload.PriorSamples[10];
-        var changed = source with { Value = source.Value + 100 };
+        var changed = source with
+        {
+            Value = source.Value + 100
+        };
         var command = AppendCommand(workload, changed, NodeEpochRf3Workload.Tags(10));
         var sdk = await admin.Sdk.CommitAsync(command, cancellationToken).ConfigureAwait(false);
         await Assert.That(sdk.IsFailed).IsTrue();
@@ -196,10 +201,14 @@ internal static class NodeEpochRf3CurrentWorkload
         {
             var result = await writer.CommitAsync(command, cancellationToken).ConfigureAwait(false);
             if (result.IsSuccess)
-            { return result.Value!; }
+            {
+                return result.Value!;
+            }
             var code = result.Problem?.ErrorCode;
             if (code is not (nameof(ErrorCode.UnknownWriteOutcome) or nameof(ErrorCode.OwnershipLost)))
-            { throw new InvalidOperationException("The RF3 follower-loss write returned an unrecognized result code."); }
+            {
+                throw new InvalidOperationException("The RF3 follower-loss write returned an unrecognized result code.");
+            }
             await Task.Delay(TimeSpan.FromMilliseconds(250), TimeProvider.System, cancellationToken).ConfigureAwait(false);
         }
         throw new TimeoutException("The same-ID RF3 follower-loss command did not reconcile before its bound.");

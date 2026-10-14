@@ -28,7 +28,10 @@ internal sealed class ReplicaFollowerSender(ReplicaState state, ReplicaRpcClient
         }
         catch (Exception error) when (ReplicaRpcClient.Unavailable(error)) { return false; }
         catch (Exception error) when (error is KeyLoadException or IOException)
-        { state.Poison(error); return false; }
+        {
+            state.Poison(error);
+            return false;
+        }
         finally { gates[voter].Release(); }
     }
 
@@ -57,7 +60,10 @@ internal sealed class ReplicaFollowerSender(ReplicaState state, ReplicaRpcClient
         catch (KeyLoadException error) when (error.Code == ErrorCode.ResourceExhausted && request.Entries.Length > EmptyEntryCount)
         {
             // A read-generated fallback remains in application admission; native control retains its reserve.
-            request = request with { Entries = [] };
+            request = request with
+            {
+                Entries = []
+            };
             reply = await rpc.InvokeAsync<AppendRequest, AppendReply>(voter, AppendMethod(request, purpose), request, cancellationToken).ConfigureAwait(false);
         }
 

@@ -18,21 +18,29 @@ public sealed partial class DatabaseEngine
         PrincipalRecord principal, ReplicatedOperation operation)
     {
         if (operation.Kind != OperationKind.Batch || configuredPhysicalOwner is null)
-        { return null; }
+        {
+            return null;
+        }
         var command = Payload<CommandRequest>(operation);
         ClusterPrincipalPolicy.RequireOperation(principal, operation.Kind);
         RequireBatchMutationCapabilities(principal, command);
         var fence = PartitionMoveSourceFenceStorage.Read(view, command.Partition, Limits.MaxBatchBytes);
         if (fence is null)
-        { return null; }
+        {
+            return null;
+        }
         var control = PartitionMoveControlStorage.ReadHistory(view, command.Partition, fence.MoveId, Limits.MaxBatchBytes);
         if (control?.Phase != PartitionMovePhase.Retired)
-        { return null; }
+        {
+            return null;
+        }
         var directory = RequireMoveDirectory(view);
         var placement = ResolveRegisteredPlacement(view, command.Partition, directory.ControlOwner);
         RequireRetiredOriginalPlacement(fence, control, placement, directory.ControlOwner, configuredPhysicalOwner);
         if (command.OwnershipEpoch != fence.SourcePlacement.PlacementEpoch)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
         AuthorizeBatchMutations(view, principal, command, false, BatchResourceAdmission.RetiredOutcomeMetadata);
         return new(command, fence, control, placement, directory.ControlOwner, configuredPhysicalOwner);
     }
@@ -48,7 +56,9 @@ public sealed partial class DatabaseEngine
             || receipt.Token.AtomicPartitionId != fence.Partition.AtomicPartitionId
             || receipt.Token.OwnershipEpoch != fence.SourcePlacement.PlacementEpoch
             || receipt.Token.Position <= UncommittedReceiptPosition || receipt.Token.Position > fence.SourceCut)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
     }
     private static void RequireRetiredOriginalPlacement(PartitionMoveSourceFenceRecord fence,
         PartitionMoveControlRecord control, AtomicPartitionPlacementResolution placement,
@@ -65,7 +75,9 @@ public sealed partial class DatabaseEngine
             || placement.Incarnation != control.DestinationOwner.Incarnation
             || placement.PlacementEpoch != control.PublishedPlacement.PlacementEpoch
             || placement.Revision != control.PublishedPlacement.Revision)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
     }
 
 }

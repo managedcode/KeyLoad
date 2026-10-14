@@ -34,10 +34,14 @@ internal static class PostgresPortalOwnershipClose
         await PostgresPortalOwnershipCommands.ParseAsync(stream, first, state.Sql, token);
         await PostgresPortalOwnershipCommands.ParseAsync(stream, second, state.Sql, token);
         for (var index = PostgresRf3Protocol.FirstColumn; index < PostgresPortalOwnershipProtocol.Slots; index++)
-        { await PostgresPortalOwnershipCommands.BindAsync(stream, PostgresPortalOwnershipProtocol.Slot(index), first, token); }
+        {
+            await PostgresPortalOwnershipCommands.BindAsync(stream, PostgresPortalOwnershipProtocol.Slot(index), first, token);
+        }
         await PostgresPortalOwnershipCommands.CloseAsync(stream, PostgresPortalOwnershipProtocol.Statement, first, token);
         for (var index = PostgresRf3Protocol.FirstColumn; index < PostgresPortalOwnershipProtocol.Slots; index++)
-        { await PostgresPortalOwnershipCommands.BindAsync(stream, PostgresPortalOwnershipProtocol.Slot(index), second, token); }
+        {
+            await PostgresPortalOwnershipCommands.BindAsync(stream, PostgresPortalOwnershipProtocol.Slot(index), second, token);
+        }
         await PostgresPortalOwnershipReplies.RefusedAsync(stream, PostgresPortalOwnershipProtocol.Bind,
             PostgresPortalOwnershipFrames.Bind(PostgresPortalOwnershipProtocol.OverflowPortal, second),
             PostgresPortalOwnershipProtocol.Exhausted, token);

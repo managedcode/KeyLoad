@@ -28,7 +28,9 @@ internal static class BlobScopedBytesR42Replay
     {
         await RefuseAsync(callers, state, state.Begin.CommandId, "keyload_blobs_begin_upload", state.Begin, ct => callers.Sdk.BeginBlobUploadAsync(state.Begin, ct), states, token);
         foreach (var part in state.Parts)
-        { await RefuseAsync(callers, state, part.CommandId, "keyload_blobs_write_part", part, ct => callers.Sdk.WriteBlobPartAsync(part, ct), states, token); }
+        {
+            await RefuseAsync(callers, state, part.CommandId, "keyload_blobs_write_part", part, ct => callers.Sdk.WriteBlobPartAsync(part, ct), states, token);
+        }
         await RefuseAsync(callers, state, state.Abort.CommandId, "keyload_blobs_abort_upload", state.Abort, ct => callers.Sdk.AbortBlobUploadAsync(state.Abort, ct), states, token);
         var partial = state.Reclaims[0];
         await RefuseAsync(callers, state, partial.CommandId, "keyload_blobs_reclaim", partial, ct => callers.Sdk.ReclaimBlobAsync(partial, ct), states, token);
@@ -42,9 +44,13 @@ internal static class BlobScopedBytesR42Replay
         var closed = Errors.Problem(ErrorCode.TokenInvalidated, "The selected upload lifetime is unavailable.");
         await SqlRf3Protocol.EqualAsync(closed, result.Problem);
         if (state.Refusals.TryGetValue(id, out var original))
-        { await SqlRf3Protocol.EqualAsync(original, result.Problem); }
+        {
+            await SqlRf3Protocol.EqualAsync(original, result.Problem);
+        }
         else
-        { state.Refusals.Add(id, result.Problem!); }
+        {
+            state.Refusals.Add(id, result.Problem!);
+        }
         await BlobScopedBytesR42Assertions.CurrentAsync(callers, states, token);
         await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(tool, request, token), ErrorCode.TokenInvalidated, dispatched: true);
         await BlobScopedBytesR42Assertions.CurrentAsync(callers, states, token);

@@ -24,10 +24,17 @@ internal static class PostgresClosedCommandRf3Provisioning
         {
             PolicyEpoch = checked(target.Principal.PolicyEpoch + PostgresClosedCommandRf3Protocol.EpochStep),
             Grants = target.Principal.Grants.Select(grant => grant with
-            { Capabilities = grant.Capabilities & ~Capability.DocumentsRead }).ToImmutableArray()
+            {
+                Capabilities = grant.Capabilities & ~Capability.DocumentsRead
+            }).ToImmutableArray()
         };
         var repaired = target.Principal with
-        { PolicyEpoch = checked(denied.PolicyEpoch + PostgresClosedCommandRf3Protocol.EpochStep) };
-        return new(admin with { Principal = administrator }, target, denied, repaired, Guid.NewGuid(), image);
+        {
+            PolicyEpoch = checked(denied.PolicyEpoch + PostgresClosedCommandRf3Protocol.EpochStep)
+        };
+        return new(admin with
+        {
+            Principal = administrator
+        }, target, denied, repaired, Guid.NewGuid(), image);
     }
 }

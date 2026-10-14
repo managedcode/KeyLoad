@@ -16,7 +16,9 @@ internal static class RequestCqrsMovementJournalOwnerJoin
         if (originalArms.Count != OneGate || proof is not { } actual || marker is not { } held
             || originalProducer is null || originalArms[FirstArm] != actual.ArmId
             || !arms.TryGetValue(actual.ArmId, out var arm))
-        { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.UnsettledGates); }
+        {
+            throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.UnsettledGates);
+        }
         Join(wave, originalOwner, arm, actual, held, gates, json, originalProducer);
     }
 
@@ -35,11 +37,15 @@ internal static class RequestCqrsMovementJournalOwnerJoin
             || arm.GateVoter is not { } node || arm.Settled || arm.Retired || arm.DisposedGateJoined
             || arm.ProcessOwnerJoined || arm.ProducerDisposedSeen || gates[node] != OneGate
             || gates.Values.Sum() != OneGate)
-        { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.UnsettledGates); }
+        {
+            throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.UnsettledGates);
+        }
         var receipts = wave.RemoteRuntime.RequireKilledOwners(originalOwner);
         if (receipts.Count != TwoRf3MembershipProtocol.NodeCount || !receipts.ContainsKey(node)
             || !TwoRf3MembershipProtocol.Nodes.All(receipts.ContainsKey))
-        { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.UnsettledGates); }
+        {
+            throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.UnsettledGates);
+        }
         gates[node] -= OneGate;
         arm.ProcessOwnerJoined = true;
     }

@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 using Microsoft.Extensions.Options;
 
@@ -22,8 +22,12 @@ internal sealed class RemoteGraphNativeAdmission(PartitionHost partition, IOptio
             || actual.VoterId != request.DestinationVoter || actual.SiloAddress != request.DestinationSiloAddress
             || !membership.IsCurrent(request.CallerVoter, SiloAddress.FromParsableString(request.CallerSiloAddress))
             || !membership.IsCurrent(request.DestinationVoter, SiloAddress.FromParsableString(request.DestinationSiloAddress)))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteGraphNativeProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, RemoteGraphNativeProtocol.InvalidProof);
+        }
         if (request.ExpiresAt <= clock.GetUtcNow())
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteGraphNativeProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteGraphNativeProtocol.Unavailable);
+        }
     }
 }

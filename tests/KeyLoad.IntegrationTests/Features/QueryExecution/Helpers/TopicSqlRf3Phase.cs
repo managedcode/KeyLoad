@@ -13,7 +13,9 @@ internal static class TopicSqlRf3Phase
         await TopicSqlRf3Assertions.RedactedAsync(await TopicSqlRf3Routes.QueryAsync(reader, route, state, false, token));
         await TopicSqlRf3Assertions.RedactedAsync(await TopicSqlRf3Routes.QueryAsync(reader, route, state, true, token));
         foreach (var sql in new[] { TopicSqlRf3Protocol.PrivatePredicate, TopicSqlRf3Protocol.PrivateOrder })
-        { await TopicSqlRf3Routes.DeniedAsync(reader, route, state, state.Sql(sql), ErrorCode.PermissionDenied, token); }
+        {
+            await TopicSqlRf3Routes.DeniedAsync(reader, route, state, state.Sql(sql), ErrorCode.PermissionDenied, token);
+        }
         principal = await GrantAsync(fixture, state, principal, Capability.Query | Capability.TopicsRead, true, token);
         await TopicSqlRf3Assertions.FullAsync(state, await TopicSqlRf3Routes.QueryAsync(reader, route, state, false, token));
         await TopicSqlRf3Assertions.FullAsync(state, await TopicSqlRf3Routes.QueryAsync(reader, route, state, true, token));

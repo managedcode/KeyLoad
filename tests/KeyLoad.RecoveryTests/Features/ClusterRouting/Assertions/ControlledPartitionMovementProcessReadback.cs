@@ -20,7 +20,9 @@ internal sealed class ControlledPartitionMovementProcessReadback(
     {
         if (mode is ControlledPartitionMovementProcessProtocol.Prepare
             or ControlledPartitionMovementProcessProtocol.Fault)
-        { return; }
+        {
+            return;
+        }
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
@@ -69,7 +71,9 @@ internal sealed class ControlledPartitionMovementProcessReadback(
         await Assert.That(ControlledPartitionMovementProcessRawImage.Bytes(target.Store)
             .SequenceEqual(prepared.UntouchedTargetImage)).IsTrue();
         if (recoveredImage is not null)
-        { await Assert.That(image.SequenceEqual(recoveredImage)).IsTrue(); }
+        {
+            await Assert.That(image.SequenceEqual(recoveredImage)).IsTrue();
+        }
         recoveredImage ??= image;
     }
 

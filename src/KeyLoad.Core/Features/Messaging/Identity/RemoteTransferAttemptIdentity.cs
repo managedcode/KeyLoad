@@ -39,7 +39,9 @@ internal static class RemoteTransferAttemptIdentity
     private static void RequireGeneration(long generation)
     {
         if (generation < RemoteTransferAttemptProtocol.FirstGeneration)
-        { throw Errors.Fail(ErrorCode.Validation, RemoteTransferAttemptProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, RemoteTransferAttemptProtocol.Invalid);
+        }
     }
 
     private static Guid Hash(byte[] bytes)

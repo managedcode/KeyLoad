@@ -55,7 +55,10 @@ internal sealed class StreamReadResourceFixture : IDisposable
         try
         {
             Open(new());
-            database.Bootstrap(new(AdministratorId, SystemTenantId, [new(AllScopes, AllScopes, Capability.All)], [AllScopes]) { ClusterAdministrator = true },
+            database.Bootstrap(new(AdministratorId, SystemTenantId, [new(AllScopes, AllScopes, Capability.All)], [AllScopes])
+            {
+                ClusterAdministrator = true
+            },
                 DatabaseEngine.Credential(AdministratorId, AdministratorId, CredentialSecret));
             PhysicalShardTestBootstrap.Bootstrap(database, AdministratorId);
             ConfigureResource(protectedFields);
@@ -112,8 +115,8 @@ internal sealed class StreamReadResourceFixture : IDisposable
         => database.ReadAtomicPartitionPlacement(AdministratorId, new(PlacementReadVersion, Partition));
 
     internal StreamPage TraverseConfigured(ReadStreamRequest request, PhysicalShardRecord owner)
-        => (StreamPage)new KeyLoad.Orleans.GrainCoreReadCapabilities(database).Execute(
-            KeyLoad.Orleans.GrainReadKind.Stream, ReaderId, NativeSerialization.Serialize(request), default, owner)!;
+        => (StreamPage)new KeyLoad.Clustering.GrainCoreReadCapabilities(database).Execute(
+            KeyLoad.Clustering.GrainReadKind.Stream, ReaderId, NativeSerialization.Serialize(request), default, owner)!;
 
     internal TimeSpan CursorLifetime => eventSourceOptions.Value.CursorLifetime;
 
@@ -148,7 +151,10 @@ internal sealed class StreamReadResourceFixture : IDisposable
         => store.Commit((transaction, _) =>
         {
             var head = transaction.GetRecord<StreamHead>(HeadKey) ?? throw new InvalidOperationException();
-            transaction.PutRecord(HeadKey, head with { FirstAvailableRevision = revision });
+            transaction.PutRecord(HeadKey, head with
+            {
+                FirstAvailableRevision = revision
+            });
             return true;
         });
 

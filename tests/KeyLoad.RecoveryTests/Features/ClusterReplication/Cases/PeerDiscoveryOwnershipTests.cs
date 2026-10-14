@@ -1,6 +1,6 @@
 using System.Reflection;
 using System.Security.Cryptography;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.RecoveryTests;
 

@@ -89,7 +89,9 @@ internal sealed class IsolatedHostTargetOwner(IOptions<NativeComparisonExecution
 
         var clients = CreateClients(native);
         return new(clients[ClientsFirstIndex], native.AdminKey!, settings.RunId, lifecycleOptions, executionOptions, diagnostics, admissionOptions, clientOptions, translationOptions, native.Image, clients, settings.Selection.NodeCount, provider: Clock)
-        { RequireIsolatedAdmission = true };
+        {
+            RequireIsolatedAdmission = true
+        };
     }
 
     private QdrantTarget CreateQdrant(IsolatedHostSettings settings, IsolatedHostNativeSettings native)

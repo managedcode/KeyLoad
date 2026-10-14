@@ -39,8 +39,14 @@ internal static class CommandIdempotencyCrashData
         var command = JsonDefaults.Deserialize<CommandRequest>(Encoding.UTF8.GetBytes(operation.PayloadJson));
         var changed = command.Mutations.SetItem(IndexEmptyCount,
             new PutDocument(CommandIdempotencyCrashContract.Collection, CommandIdempotencyCrashContract.DocumentId, CommandIdempotencyCrashContract.ChangedDocumentJson, ExpectedRevisionEmptyCount));
-        var payload = JsonSerializer.Serialize(command with { Mutations = changed }, JsonDefaults.Options);
-        return operation with { PayloadJson = payload };
+        var payload = JsonSerializer.Serialize(command with
+        {
+            Mutations = changed
+        }, JsonDefaults.Options);
+        return operation with
+        {
+            PayloadJson = payload
+        };
     }
 
     internal static CommitReceipt CreateFollowUp(DatabaseEngine database)

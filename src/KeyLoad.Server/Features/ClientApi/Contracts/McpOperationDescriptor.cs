@@ -1,5 +1,5 @@
 using System.Text.Json;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using ModelContextProtocol.Protocol;
 
 namespace KeyLoad.Server;
@@ -17,9 +17,13 @@ internal sealed record McpOperationDescriptor
         ArgumentException.ThrowIfNullOrWhiteSpace(route);
         ArgumentException.ThrowIfNullOrWhiteSpace(description);
         if (commandKind is OperationKind.Bm25CorpusPublicationPhase or OperationKind.PlacementIntentPhase)
-        { throw new ArgumentException(McpCatalogProtocol.InvalidOperation, nameof(commandKind)); }
+        {
+            throw new ArgumentException(McpCatalogProtocol.InvalidOperation, nameof(commandKind));
+        }
         if (!adapter)
-        { ArgumentNullException.ThrowIfNull(decoder); }
+        {
+            ArgumentNullException.ThrowIfNull(decoder);
+        }
         if (adapter ? readKind.HasValue || commandKind.HasValue : readKind.HasValue == commandKind.HasValue)
         {
             throw new ArgumentException(McpCatalogProtocol.InvalidOperation, nameof(readKind));
@@ -39,27 +43,60 @@ internal sealed record McpOperationDescriptor
     }
 
     /// <summary>Stable version-one native tool name.</summary>
-    internal string Name { get; }
+    internal string Name
+    {
+        get;
+    }
     /// <summary>Existing canonical HTTP admission route.</summary>
-    internal string Route { get; }
+    internal string Route
+    {
+        get;
+    }
     /// <summary>Read-dispatch capability, absent for commands.</summary>
-    internal GrainReadKind? ReadKind { get; }
+    internal GrainReadKind? ReadKind
+    {
+        get;
+    }
     /// <summary>Command-dispatch capability, absent for reads.</summary>
-    internal OperationKind? CommandKind { get; }
+    internal OperationKind? CommandKind
+    {
+        get;
+    }
     /// <summary>Agent guidance including pagination and retry behavior.</summary>
-    internal string Description { get; }
+    internal string Description
+    {
+        get;
+    }
     /// <summary>Owned immutable root-object argument schema.</summary>
-    internal JsonElement InputSchema { get; }
+    internal JsonElement InputSchema
+    {
+        get;
+    }
     /// <summary>Owned immutable structured success/error envelope schema.</summary>
-    internal JsonElement OutputSchema { get; }
+    internal JsonElement OutputSchema
+    {
+        get;
+    }
     /// <summary>Explicit advisory read-only hint; backup has physical side effects.</summary>
-    internal bool ReadOnly { get; }
+    internal bool ReadOnly
+    {
+        get;
+    }
     /// <summary>Advisory retry hint; command retries require the same identity and payload.</summary>
-    internal bool Idempotent { get; }
+    internal bool Idempotent
+    {
+        get;
+    }
     /// <summary>Advisory hint for operations that can remove or consume existing data.</summary>
-    internal bool Destructive { get; }
+    internal bool Destructive
+    {
+        get;
+    }
     /// <summary>Whether the decoder resolves one canonical operation rather than declaring a fixed effect.</summary>
-    internal bool IsAdapter { get; }
+    internal bool IsAdapter
+    {
+        get;
+    }
 
     /// <summary>Decodes strict outer arguments using the actual canonical JSON contract.</summary>
     /// <param name="arguments">Native SDK arguments, inspected without mutation.</param>

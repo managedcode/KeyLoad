@@ -50,11 +50,26 @@ internal sealed class IsolatedAggregateCliFixture : IDisposable
         Proof = Path.Combine(root, ProofFile);
     }
 
-    internal string Root { get; }
-    internal string Input { get; }
-    internal string Output { get; }
-    internal string Plan { get; }
-    internal string Proof { get; }
+    internal string Root
+    {
+        get;
+    }
+    internal string Input
+    {
+        get;
+    }
+    internal string Output
+    {
+        get;
+    }
+    internal string Plan
+    {
+        get;
+    }
+    internal string Proof
+    {
+        get;
+    }
 
     internal static async Task<IsolatedAggregateCliFixture> CreateAsync(CancellationToken token)
     {

@@ -1,4 +1,4 @@
-using KeyLoad.Orleans.Features.ResourceExecution;
+using KeyLoad.Clustering.Features.ResourceExecution;
 using static KeyLoad.UnitTests.Features.ResourceExecution.CacheControlWireAuthenticatorSupport;
 
 namespace KeyLoad.UnitTests.Features.ResourceExecution;
@@ -22,7 +22,10 @@ internal sealed class CacheControlWireAuthenticatorTests
         var signedPrepare = SignPrepare(authenticator, CacheControlWireTestData.PrepareRequest());
         var wrongOperation = signedPrepare with
         {
-            Header = signedPrepare.Header with { Operation = CacheControlOperation.Grant }
+            Header = signedPrepare.Header with
+            {
+                Operation = CacheControlOperation.Grant
+            }
         };
         var signedProof = SignProof(authenticator, CacheVoterSlot.Slot0, CacheVoterSlot.Slot1);
         var proofMacAsReplyMac = new CachePrepareReply(Correlation(signedPrepare), CacheControlStatus.Busy,
@@ -111,7 +114,10 @@ internal sealed class CacheControlWireAuthenticatorTests
 
         await Assert.That(actual.Mac.FixedTimeEquals(expected.Mac)).IsTrue();
         await Assert.That(owner.TryAuthenticate(actual)).IsTrue();
-        await Assert.That(actual with { Mac = proof.Mac }).IsEqualTo(proof);
+        await Assert.That(actual with
+        {
+            Mac = proof.Mac
+        }).IsEqualTo(proof);
 
         owner.Dispose();
         owner.Dispose();

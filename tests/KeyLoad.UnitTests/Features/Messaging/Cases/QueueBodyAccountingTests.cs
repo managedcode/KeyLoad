@@ -46,7 +46,10 @@ internal sealed class QueueBodyAccountingTests
         await Assert.That(Counters(exact).InFlightBytes).IsEqualTo(0);
 
         using var storedShort = new TestDatabase();
-        storedShort.Configure(QueueName, ResourceKind.WorkQueue, queuePolicy: new() { MaxStoredBytes = storedBytes - 1 });
+        storedShort.Configure(QueueName, ResourceKind.WorkQueue, queuePolicy: new()
+        {
+            MaxStoredBytes = storedBytes - 1
+        });
         var rejectId = Guid.NewGuid();
         var rejected = storedShort.Submit(OperationKind.Batch,
             new CommandRequest(rejectId, storedShort.Partition, [message]), id: rejectId);

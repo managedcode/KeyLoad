@@ -204,7 +204,9 @@ internal sealed class ReplicaSnapshotRecoveryTests
         var receiver = trial.Receiver(stage =>
         {
             if (stage == boundary)
-            { throw new IOException(ReplicaSnapshotTrial.Interrupted); }
+            {
+                throw new IOException(ReplicaSnapshotTrial.Interrupted);
+            }
         });
         trial.Transfer(receiver);
         Assert.ThrowsExactly<IOException>(() => receiver.Complete(trial.Image.TransferId));
@@ -253,7 +255,11 @@ internal sealed class ReplicaSnapshotRecoveryTests
         bytes[^1] ^= 1;
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => receiver.Append(trial.Image.TransferId, 0, bytes)).Code).IsEqualTo(ErrorCode.Conflict);
         var otherId = Guid.NewGuid();
-        var other = trial.Image with { TransferId = otherId, FileName = otherId.ToString(ReplicaSnapshotTrial.GuidFormat) + ReplicaProtocol.SnapshotExtension };
+        var other = trial.Image with
+        {
+            TransferId = otherId,
+            FileName = otherId.ToString(ReplicaSnapshotTrial.GuidFormat) + ReplicaProtocol.SnapshotExtension
+        };
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => receiver.Begin(other)).Code).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(receiver.Begin(trial.Image)).IsEqualTo(bytes.LongLength);
     }
@@ -325,11 +331,26 @@ internal sealed class ReplicaSnapshotTrial : IDisposable
     private readonly ZoneTreeStore sourceLogStore;
     private readonly ZoneTreeStore targetLogStore;
     private readonly DurableReplicaLog sourceLog;
-    internal ReplicaConfiguration Configuration { get; }
-    internal ZoneTreeStore Target { get; }
-    internal DurableReplicaLog TargetLog { get; }
-    internal ReplicaSnapshotStore Sender { get; }
-    internal ReplicaSnapshot Image { get; }
+    internal ReplicaConfiguration Configuration
+    {
+        get;
+    }
+    internal ZoneTreeStore Target
+    {
+        get;
+    }
+    internal DurableReplicaLog TargetLog
+    {
+        get;
+    }
+    internal ReplicaSnapshotStore Sender
+    {
+        get;
+    }
+    internal ReplicaSnapshot Image
+    {
+        get;
+    }
     internal string ImagePath => Path.Combine(directory, SourceDirectory, ReplicaProtocol.SnapshotDirectory, Image.FileName);
     internal string TargetImagePath(ReplicaSnapshot image) => Path.Combine(directory, TargetDirectory, ReplicaProtocol.SnapshotDirectory, image.FileName);
 
@@ -352,13 +373,19 @@ internal sealed class ReplicaSnapshotTrial : IDisposable
             return true;
         });
         Target.Commit((tx, _) => { tx.PutRecord(KeyCodec.Encode(ValueKey), OldValue); return true; });
-        Sender = new(source, sourceLog, RecoveryExecutionOptions.Configuration(Configuration with { Directory = Path.Combine(directory, SourceDirectory) }), RecoveryExecutionOptions.Replica());
+        Sender = new(source, sourceLog, RecoveryExecutionOptions.Configuration(Configuration with
+        {
+            Directory = Path.Combine(directory, SourceDirectory)
+        }), RecoveryExecutionOptions.Replica());
         Image = Sender.Create(1, 1);
     }
 
     private ZoneTreeStore Store(string name) => new(new(Path.Combine(directory, name)) { Incarnation = Configuration.Incarnation }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
     internal ReplicaSnapshotStore Receiver(Action<ReplicaCrashBoundary>? observer = null)
-        => new(Target, TargetLog, RecoveryExecutionOptions.Configuration(Configuration with { Directory = Path.Combine(directory, TargetDirectory) }), RecoveryExecutionOptions.Replica(), observer);
+        => new(Target, TargetLog, RecoveryExecutionOptions.Configuration(Configuration with
+        {
+            Directory = Path.Combine(directory, TargetDirectory)
+        }), RecoveryExecutionOptions.Replica(), observer);
     internal void Transfer(ReplicaSnapshotStore receiver, ReplicaSnapshot? image = null)
     {
         var snapshot = image ?? Image;

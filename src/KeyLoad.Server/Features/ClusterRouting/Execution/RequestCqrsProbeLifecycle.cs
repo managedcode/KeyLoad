@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
@@ -18,7 +18,9 @@ internal sealed class RequestCqrsProbeLifecycle(IOptions<RequestProbeExecutionOp
         lock (sync)
         {
             if (stopAdmission)
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             StartCallback(resetJoin: true);
         }
     }
@@ -26,13 +28,17 @@ internal sealed class RequestCqrsProbeLifecycle(IOptions<RequestProbeExecutionOp
     internal void EnterClaimedCallback()
     {
         lock (sync)
-        { StartCallback(resetJoin: !stopAdmission); }
+        {
+            StartCallback(resetJoin: !stopAdmission);
+        }
     }
 
     internal RequestCqrsProbeClaim? FindClaim(Guid requestId)
     {
         lock (sync)
-        { return claims.GetValueOrDefault(requestId); }
+        {
+            return claims.GetValueOrDefault(requestId);
+        }
     }
 
     internal RequestCqrsProbeClaim AddClaim(GrainRequestProbeIdentity identity, RequestCqrsProbeLoadedArm arm, Guid connectionId)
@@ -41,7 +47,9 @@ internal sealed class RequestCqrsProbeLifecycle(IOptions<RequestProbeExecutionOp
         {
             if (stopAdmission || claims.ContainsKey(identity.RequestId)
                 || claims.Values.Any(existing => existing.Arm.Record.ArmId == arm.Record.ArmId))
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             var claim = new RequestCqrsProbeClaim(arm, identity) { ConnectionId = connectionId };
             claims.Add(identity.RequestId, claim);
             return claim;
@@ -53,7 +61,9 @@ internal sealed class RequestCqrsProbeLifecycle(IOptions<RequestProbeExecutionOp
         lock (sync)
         {
             if (claims.TryGetValue(requestId, out var existing) && ReferenceEquals(existing, claim))
-            { claims.Remove(requestId); }
+            {
+                claims.Remove(requestId);
+            }
             CompleteJoinIfDrained();
         }
     }
@@ -72,7 +82,9 @@ internal sealed class RequestCqrsProbeLifecycle(IOptions<RequestProbeExecutionOp
         lock (sync)
         {
             if (activeGates >= settings.MaximumActiveGates)
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             activeGates++;
         }
     }
@@ -80,7 +92,9 @@ internal sealed class RequestCqrsProbeLifecycle(IOptions<RequestProbeExecutionOp
     internal void ExitGate()
     {
         lock (sync)
-        { activeGates--; }
+        {
+            activeGates--;
+        }
     }
 
     internal Task StopAdmissionAndJoin()
@@ -98,7 +112,9 @@ internal sealed class RequestCqrsProbeLifecycle(IOptions<RequestProbeExecutionOp
         const int EmptyActiveCallbacks = 0;
 
         if (activeCallbacks == EmptyActiveCallbacks && resetJoin)
-        { drained = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously); }
+        {
+            drained = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        }
         activeCallbacks++;
     }
 
@@ -107,7 +123,9 @@ internal sealed class RequestCqrsProbeLifecycle(IOptions<RequestProbeExecutionOp
         const int EmptyActiveCallbacks = 0;
 
         if (stopAdmission && activeCallbacks == EmptyActiveCallbacks)
-        { drained.TrySetResult(); }
+        {
+            drained.TrySetResult();
+        }
     }
 
     private static TaskCompletionSource Completed()

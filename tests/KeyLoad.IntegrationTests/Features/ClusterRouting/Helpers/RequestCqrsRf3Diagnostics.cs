@@ -52,7 +52,9 @@ internal sealed class RequestCqrsRf3Diagnostics : IAsyncDisposable
         ArgumentNullException.ThrowIfNull(resources);
         ArgumentNullException.ThrowIfNull(logger);
         if (waveId == Guid.Empty)
-        { throw new ArgumentException(InvalidWaveIdMessage, nameof(waveId)); }
+        {
+            throw new ArgumentException(InvalidWaveIdMessage, nameof(waveId));
+        }
 
         var captures = new[]
         {
@@ -63,7 +65,9 @@ internal sealed class RequestCqrsRf3Diagnostics : IAsyncDisposable
         var nodeResources = resources.Where(resource => IsNode(resource.Name)).ToArray();
         if (nodeResources.Length != captures.Length
             || captures.Any(node => nodeResources.Count(resource => resource.Name == node.Name) != 1))
-        { throw new InvalidOperationException(InvalidNodesMessage); }
+        {
+            throw new InvalidOperationException(InvalidNodesMessage);
+        }
 
         return new(waveId, captures, logger, nodeResources, failureObserver, subscriberTransitions);
     }
@@ -87,7 +91,9 @@ internal sealed class RequestCqrsRf3Diagnostics : IAsyncDisposable
         lock (disposalGate)
         {
             if (disposalTask is not { IsCompleted: true } || !cleanup.IsJoined)
-            { throw new InvalidOperationException(IncompleteSubscriptionMessage); }
+            {
+                throw new InvalidOperationException(IncompleteSubscriptionMessage);
+            }
             if (artifactPath is null)
             {
                 artifactPath = WriteArtifact();
@@ -133,7 +139,9 @@ internal sealed class RequestCqrsRf3Diagnostics : IAsyncDisposable
         var artifact = new RequestCqrsRf3McpRejectionArtifact(ArtifactVersion, waveId, records);
         var bytes = JsonSerializer.SerializeToUtf8Bytes(artifact);
         if (bytes.Length > MaximumArtifactBytes)
-        { throw new InvalidOperationException(OversizedArtifactMessage); }
+        {
+            throw new InvalidOperationException(OversizedArtifactMessage);
+        }
 
         var root = ClusterFixtureDiagnostics.FindRepositoryRoot().FullName;
         var directory = Path.Combine(root, ArtifactRootDirectory, ArtifactDirectory);
@@ -151,7 +159,9 @@ internal sealed class RequestCqrsRf3Diagnostics : IAsyncDisposable
         var bytes = JsonSerializer.SerializeToUtf8Bytes(new RequestCqrsRpcFailureArtifact(RpcArtifactVersion,
             waveId, records));
         if (bytes.Length > MaximumArtifactBytes)
-        { throw new InvalidOperationException(OversizedArtifactMessage); }
+        {
+            throw new InvalidOperationException(OversizedArtifactMessage);
+        }
         var directory = Path.Combine(ClusterFixtureDiagnostics.FindRepositoryRoot().FullName,
             ArtifactRootDirectory, ArtifactDirectory);
         Directory.CreateDirectory(directory);
@@ -171,11 +181,15 @@ internal sealed class RequestCqrsRf3Diagnostics : IAsyncDisposable
         using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
         stream.ReadExactly(saved);
         if (stream.ReadByte() != -1 || !saved.AsSpan().SequenceEqual(original))
-        { throw new InvalidOperationException(RpcReadbackMessage); }
+        {
+            throw new InvalidOperationException(RpcReadbackMessage);
+        }
         var result = JsonSerializer.Deserialize<RequestCqrsRpcFailureArtifact>(saved);
         if (result is null || result.Version != RpcArtifactVersion || result.WaveId != waveId
             || result.Failures is null || !result.Failures.SequenceEqual(records))
-        { throw new InvalidOperationException(RpcReadbackMessage); }
+        {
+            throw new InvalidOperationException(RpcReadbackMessage);
+        }
     }
 
     private static bool IsNode(string name) => name is RequestCqrsRf3Protocol.Node1

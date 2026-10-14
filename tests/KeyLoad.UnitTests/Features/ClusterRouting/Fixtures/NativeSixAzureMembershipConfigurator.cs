@@ -7,7 +7,9 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
 internal sealed class NativeSixAzureMembershipConfigurator : IHostConfigurator
 {
-    public NativeSixAzureMembershipConfigurator() { }
+    public NativeSixAzureMembershipConfigurator()
+    {
+    }
 
     private const string MissingConnection = "The owned native membership connection is missing.";
     internal const string ConnectionName = "orleans-membership";

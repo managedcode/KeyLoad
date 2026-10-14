@@ -30,9 +30,13 @@ internal static class SqlOrdinalRf3Pages
             cut ??= page.CutPosition;
             await global::TUnit.Assertions.Assert.That(page.CutPosition).IsEqualTo(cut.Value);
             if (final)
-            { await global::TUnit.Assertions.Assert.That(page.Cursor).IsNull(); }
+            {
+                await global::TUnit.Assertions.Assert.That(page.Cursor).IsNull();
+            }
             else
-            { await global::TUnit.Assertions.Assert.That(page.Cursor).IsNotNull(); }
+            {
+                await global::TUnit.Assertions.Assert.That(page.Cursor).IsNotNull();
+            }
             await SqlRf3Protocol.EqualAsync(new QueryPage(
                 [new(id, SqlOffsetRf3Protocol.InitialRevision, json, false, [])],
                 page.Cursor, cut.Value, FullScan), page);

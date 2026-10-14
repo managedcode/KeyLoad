@@ -10,7 +10,9 @@ internal static class ReplicaIsolationCounters
     {
         var packets = ReadPackets(input).Concat(ReadPackets(output)).ToArray();
         if (!packets.Any(value => value > Zero))
-        { throw new InvalidOperationException("The native isolation rules did not observe actual blocked replica traffic."); }
+        {
+            throw new InvalidOperationException("The native isolation rules did not observe actual blocked replica traffic.");
+        }
     }
 
     private static IEnumerable<ulong> ReadPackets(string native)
@@ -22,7 +24,9 @@ internal static class ReplicaIsolationCounters
             if (columns.Length <= ByteColumn || !ulong.TryParse(columns[PacketColumn], NumberStyles.None,
                 CultureInfo.InvariantCulture, out var packets) || !ulong.TryParse(columns[ByteColumn], NumberStyles.None,
                 CultureInfo.InvariantCulture, out _))
-            { throw new InvalidOperationException("Native filter traffic counters have an unsupported shape."); }
+            {
+                throw new InvalidOperationException("Native filter traffic counters have an unsupported shape.");
+            }
             yield return packets;
         }
     }

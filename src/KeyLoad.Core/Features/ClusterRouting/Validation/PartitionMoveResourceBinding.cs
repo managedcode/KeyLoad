@@ -11,7 +11,9 @@ internal static class PartitionMoveResourceBinding
             var apply = NativeSerialization.Deserialize<PartitionControlApplyBody>(envelope.Body.Span);
             if (envelope.Grant is null || apply.Delegation.Resources.IsDefault || envelope.Grant.Resources.IsDefault
                 || JsonData.Fingerprint(apply.Delegation.Resources) != JsonData.Fingerprint(envelope.Grant.Resources))
-            { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+            }
             return;
         }
         if (envelope.Stage == PartitionMovePeerStage.PublishWitness)
@@ -19,7 +21,9 @@ internal static class PartitionMoveResourceBinding
             var body = NativeSerialization.Deserialize<PartitionMovePublishBody>(envelope.Body.Span);
             if (envelope.Grant is null || body.Resources.IsDefault || envelope.Grant.Resources.IsDefault
                 || JsonData.Fingerprint(body.Resources) != JsonData.Fingerprint(envelope.Grant.Resources))
-            { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+            }
             return;
         }
         var descriptor = envelope.Stage switch
@@ -29,11 +33,15 @@ internal static class PartitionMoveResourceBinding
             _ => null
         };
         if (descriptor is null)
-        { return; }
+        {
+            return;
+        }
         var grant = envelope.Grant
             ?? throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.MissingAuthority);
         if (grant.Resources.IsDefault || descriptor.Resources.IsDefault
             || JsonData.Fingerprint(grant.Resources) != JsonData.Fingerprint(descriptor.Resources))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
     }
 }

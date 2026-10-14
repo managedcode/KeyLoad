@@ -1,5 +1,5 @@
 using System.Text.Json;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.Server;
 
@@ -11,9 +11,13 @@ internal sealed class ServerErrorMiddleware(RequestDelegate next, ILogger<Server
     public async Task InvokeAsync(HttpContext context)
     {
         try
-        { await next(context).ConfigureAwait(false); }
+        {
+            await next(context).ConfigureAwait(false);
+        }
         catch (KeyLoadException error) when (!context.Response.HasStarted)
-        { await WriteAsync(context, error.Code, error.Message).ConfigureAwait(false); }
+        {
+            await WriteAsync(context, error.Code, error.Message).ConfigureAwait(false);
+        }
         catch (JsonException) when (!context.Response.HasStarted)
         {
             await WriteAsync(context, ErrorCode.Validation, ServerProtocol.InvalidJson).ConfigureAwait(false);

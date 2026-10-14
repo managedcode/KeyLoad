@@ -30,8 +30,14 @@ internal sealed class RemotePartitionQueryNativeFlow(RemoteDocumentNativeFixture
         fixture.Seed();
         var permissions = new PrincipalRecord(RemoteDocumentNativeFixture.Reader, RemoteDocumentNativeFixture.Tenant,
             [new(Local.DatabaseId, RemoteDocumentNativeFixture.Collection, Capability.Query | Capability.DocumentsRead)], []);
-        Configure(fixture.Source, permissions with { PolicyEpoch = DestinationEpoch });
-        Configure(fixture.Source, permissions with { PolicyEpoch = SourceEpoch });
+        Configure(fixture.Source, permissions with
+        {
+            PolicyEpoch = DestinationEpoch
+        });
+        Configure(fixture.Source, permissions with
+        {
+            PolicyEpoch = SourceEpoch
+        });
         var id = Guid.NewGuid();
         _ = fixture.Source.Database.Apply(RemoteDocumentNativeFixture.Operation(fixture.Source, OperationKind.Batch,
             id, new CommandRequest(id, Local, [new PutDocument(RemoteDocumentNativeFixture.Collection,
@@ -41,22 +47,31 @@ internal sealed class RemotePartitionQueryNativeFlow(RemoteDocumentNativeFixture
     internal void GrantDestination()
         => Configure(fixture.Destination, new(RemoteDocumentNativeFixture.Reader, RemoteDocumentNativeFixture.Tenant,
             [new(Local.DatabaseId, RemoteDocumentNativeFixture.Collection, Capability.Query | Capability.DocumentsRead)], [])
-        { PolicyEpoch = DestinationEpoch });
+        {
+            PolicyEpoch = DestinationEpoch
+        });
 
     internal void SetSourceGrant(long epoch, bool granted)
         => Configure(fixture.Source, new(RemoteDocumentNativeFixture.Reader, RemoteDocumentNativeFixture.Tenant,
             granted ? [new(Local.DatabaseId, RemoteDocumentNativeFixture.Collection,
                 Capability.Query | Capability.DocumentsRead)] : [], [])
-        { PolicyEpoch = epoch });
+        {
+            PolicyEpoch = epoch
+        });
 
     internal void ChangeSourceResourcePolicy(long expectedVersion, long replacementVersion, string classification)
     {
         var definition = new ResourceDefinition(RemoteDocumentNativeFixture.Collection, ResourceKind.Collection,
             RemoteDocumentNativeFixture.Partition.TransactionDomainId)
-        { SchemaVersion = replacementVersion, FieldPolicies = [new(RemoteDocumentNativeFixture.Secret, classification)] };
+        {
+            SchemaVersion = replacementVersion,
+            FieldPolicies = [new(RemoteDocumentNativeFixture.Secret, classification)]
+        };
         var request = new ConfigureResourceRequest(RemoteDocumentNativeFixture.Tenant,
             Local.DatabaseId, definition)
-        { ExpectedSchemaVersion = expectedVersion };
+        {
+            ExpectedSchemaVersion = expectedVersion
+        };
         _ = fixture.Source.Database.Apply(RemoteDocumentNativeFixture.Operation(fixture.Source,
             OperationKind.ConfigureResource, Guid.NewGuid(), request)).Get<ResourceDefinition>();
     }
@@ -104,9 +119,13 @@ internal sealed class RemotePartitionQueryNativeFlow(RemoteDocumentNativeFixture
                 budget.ImportReadGrant(grant, actual.Result.ReadBytes, actual.Result.ExaminedRecords);
                 completed++;
                 if (completed == RemoteDocumentNativeFixture.Version && afterFirstActualLeaf is not null)
-                { await afterFirstActualLeaf().ConfigureAwait(false); }
+                {
+                    await afterFirstActualLeaf().ConfigureAwait(false);
+                }
                 if (afterActualLeaf is not null)
-                { await afterActualLeaf(completed).ConfigureAwait(false); }
+                {
+                    await afterActualLeaf(completed).ConfigureAwait(false);
+                }
             });
         }
     }
@@ -127,7 +146,9 @@ internal sealed class RemotePartitionQueryNativeFlow(RemoteDocumentNativeFixture
             token.ThrowIfCancellationRequested();
             var actual = Capture(item.Plan, item.Grant);
             if (!JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(item.Fence)))
-            { throw Errors.Fail(ErrorCode.OwnershipLost, AuthorityChangedDetail); }
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, AuthorityChangedDetail);
+            }
         }
         return Task.CompletedTask;
     }

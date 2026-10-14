@@ -9,18 +9,26 @@ public sealed partial class DatabaseEngine
         PrincipalRecord principal, ReplicatedOperation operation)
     {
         if (Limits.MaxQueueTransferAcceptAttempts is null || operation.Kind != OperationKind.Batch)
-        { return null; }
+        {
+            return null;
+        }
         if (ReadRemoteTransferNativeProof(operation) is not null)
-        { return null; }
+        {
+            return null;
+        }
         var batch = Payload<CommandRequest>(operation);
         if (batch.Mutations.Length != RemoteTransferAttemptProtocol.SingleMutation
             || batch.Mutations[RemoteTransferAttemptProtocol.FirstIndex] is not AcceptQueueTransfer accept)
-        { return null; }
+        {
+            return null;
+        }
         var claims = AuthorizeAcceptQueueTransfer(view, principal, batch.Partition, accept);
         var existing = view.GetRecord<RemoteTransferTargetReceiptRecord>(
             RemoteTransferStorage.TargetReceiptKey(claims.Source, claims.TransferId, claims.Destination));
         if (existing is not null)
-        { return null; }
+        {
+            return null;
+        }
         return new(claims.Source, claims.Destination, claims.TransferId, principal.Id, claims.Fingerprint,
             RemoteTransferCoordinationIdentity.IntentDigest(accept.IntentToken), operation.Id, CommandFingerprint(operation),
             Store.Identity.Incarnation, CaptureRemoteTransferDependency(view, principal, claims.Destination));

@@ -78,7 +78,10 @@ internal static class SqlBooleanOperandControls
                 + SqlBooleanTruthCases.Tail, parameters, AllowFullScan: true);
             await SqlNullOrderingPages.EqualAsync(Page(item.Ids, position, lowRevision), engine.Execute(SqlNullOrderingProtocol.Reader, query));
             await SqlNullOrderingPages.EqualAsync(Page(item.Ids, position, lowRevision), engine.ExecuteAst(SqlNullOrderingProtocol.Reader,
-                SqlBooleanTruthCases.Ast(partition, item) with { Parameters = parameters }));
+                SqlBooleanTruthCases.Ast(partition, item) with
+                {
+                    Parameters = parameters
+                }));
             await SqlNullOrderingRefusals.UnchangedAsync(store, image, position, identity);
         }
     }

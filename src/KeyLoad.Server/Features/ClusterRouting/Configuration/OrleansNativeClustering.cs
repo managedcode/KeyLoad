@@ -1,5 +1,5 @@
 using System.Net;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Replication;
 using Microsoft.Extensions.Options;
 using Orleans.Configuration;

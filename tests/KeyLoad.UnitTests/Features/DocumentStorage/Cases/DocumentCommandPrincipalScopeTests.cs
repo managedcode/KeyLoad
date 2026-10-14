@@ -49,10 +49,16 @@ internal sealed class DocumentCommandPrincipalScopeTests
         byte[] secondOutcomeBytes, OutboxSnapshot committedOutbox)
     {
         var firstConflict = database.Submit(OperationKind.Batch,
-            firstCommand with { Mutations = [new PutDocument(Collection, FirstDocument, ChangedFirstJson, 1)] },
+            firstCommand with
+            {
+                Mutations = [new PutDocument(Collection, FirstDocument, ChangedFirstJson, 1)]
+            },
             FirstPrincipal, commandId);
         var secondConflict = database.Submit(OperationKind.Batch,
-            secondCommand with { Mutations = [new PutDocument(Collection, SecondDocument, ChangedSecondJson, 1)] },
+            secondCommand with
+            {
+                Mutations = [new PutDocument(Collection, SecondDocument, ChangedSecondJson, 1)]
+            },
             SecondPrincipal, commandId);
         await Assert.That(firstConflict.Error).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(secondConflict.Error).IsEqualTo(ErrorCode.Conflict);

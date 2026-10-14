@@ -129,7 +129,9 @@ internal sealed class BlobReclaimTests
     {
         var definition = new ResourceDefinition("blobs", ResourceKind.BlobStore,
             database.Partition.TransactionDomainId)
-        { BlobPolicy = new() { UploadTtlSeconds = BlobLimits.MinimumUploadTtlSeconds } };
+        {
+            BlobPolicy = new() { UploadTtlSeconds = BlobLimits.MinimumUploadTtlSeconds }
+        };
         database.Submit(OperationKind.ConfigureResource,
             new ConfigureResourceRequest(database.Partition.TenantId, database.Partition.DatabaseId, definition))
             .Get<ResourceDefinition>();

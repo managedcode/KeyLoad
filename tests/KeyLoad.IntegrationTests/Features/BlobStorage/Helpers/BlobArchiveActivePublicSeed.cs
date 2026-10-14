@@ -17,7 +17,10 @@ internal static class BlobArchiveActivePublicSeed
                 var blob = new BlobRef(seed.Partition, RelationalSqlRf3Tokens.Blobs, "archive-published-multipart");
                 var published = await BlobArchiveActivePublicPublication.CreateAsync(sdk, official, blob, 3, true, 0, token);
                 var active = await BlobArchiveActivePublicPublication.CreateAsync(sdk, official,
-                    blob with { Id = "archive-abandoned-active" }, 2, false, 0, token);
+                    blob with
+                    {
+                        Id = "archive-abandoned-active"
+                    }, 2, false, 0, token);
                 var id = "archive-reader-" + Guid.NewGuid().ToString("N");
                 var key = id + "." + Guid.NewGuid().ToString("N");
                 var principal = new PrincipalRecord(id, seed.Partition.TenantId,

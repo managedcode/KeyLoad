@@ -401,3 +401,7 @@ flowchart LR
 Source joined; compiler, current-image native execution, Linux and Aspire public SDK/MCP gates remain OPEN. Actual owning BlobReads.Cut/DatabaseCredentialValidation.ReadPrincipal reload semantics remain unchanged; no production defect is asserted.
 
 Policy writes use actual CreateNativeOperation with unchanged root, actual EvaluationClock and generated ConfigurePrincipalRequest native bytes, then owning DatabaseEngine.Apply. Caller cancellation is checked before this synchronous operation; this is not async cancellation or a native replica-issued journal claim.
+
+### Numeric responsibility extraction source candidate
+
+Restored blob resource/quota verification is a pure feature-local validation owner; marker progression, exact bounded record pages, atomic commit/finish and all original corruption/fence checks retain their original order. Compiler and full existing operation qualification remain required.

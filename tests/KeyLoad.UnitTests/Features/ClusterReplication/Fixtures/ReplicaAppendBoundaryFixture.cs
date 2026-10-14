@@ -9,9 +9,18 @@ internal sealed class ReplicaAppendBoundaryFixture : IDisposable
     internal const string Resource = "append-boundary-documents";
     private const string Voter = "append-boundary-a";
     internal TestDatabase Canonical { get; } = new();
-    internal ZoneTreeStore Store { get; }
-    internal DurableReplicaLog Log { get; private set; }
-    internal ReplicaConfiguration Configuration { get; }
+    internal ZoneTreeStore Store
+    {
+        get;
+    }
+    internal DurableReplicaLog Log
+    {
+        get; private set;
+    }
+    internal ReplicaConfiguration Configuration
+    {
+        get;
+    }
     private readonly Action<ReplicaCrashBoundary>? observer;
 
     internal ReplicaAppendBoundaryFixture(Action<ReplicaCrashBoundary>? observer = null)
@@ -25,7 +34,10 @@ internal sealed class ReplicaAppendBoundaryFixture : IDisposable
         {
             Canonical.Configure(Resource, ResourceKind.Collection);
             Store = acquiredStore = new(new(Configuration.Directory)
-            { Incarnation = Configuration.Incarnation, SigningKey = Canonical.Store.Identity.SigningKey },
+            {
+                Incarnation = Configuration.Incarnation,
+                SigningKey = Canonical.Store.Identity.SigningKey
+            },
                 UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
             Log = acquiredLog = Open();
             Log.SaveTermAndVote(1, Voter);
@@ -34,9 +46,13 @@ internal sealed class ReplicaAppendBoundaryFixture : IDisposable
         {
             var failures = new List<Exception> { primary };
             if (acquiredLog is not null)
-            { ServerFailureObserver.Observe(acquiredLog.Dispose, failures); }
+            {
+                ServerFailureObserver.Observe(acquiredLog.Dispose, failures);
+            }
             if (acquiredStore is not null)
-            { ServerFailureObserver.Observe(acquiredStore.Dispose, failures); }
+            {
+                ServerFailureObserver.Observe(acquiredStore.Dispose, failures);
+            }
             ServerFailureObserver.Observe(Canonical.Dispose, failures);
             ServerFailureObserver.ThrowIfAny(failures);
             throw;

@@ -36,16 +36,33 @@ internal sealed class PartitionQueryPublicContractTests
         var position = fixture.Position;
         var empty = Assert.ThrowsExactly<KeyLoadException>(() => Run(fixture, valid with { Partitions = [] }));
         var defaultArray = Assert.ThrowsExactly<KeyLoadException>(() => Run(fixture,
-            valid with { Partitions = default }));
+            valid with
+            {
+                Partitions = default
+            }));
         var duplicate = Assert.ThrowsExactly<KeyLoadException>(() => Run(fixture,
-            valid with { Partitions = [fixture.First, fixture.First] }));
+            valid with
+            {
+                Partitions = [fixture.First, fixture.First]
+            }));
         var oversizedParts = Enumerable.Range(0, 9).Select(index => fixture.First with
-        { PartitionKey = "query-partition-" + index.ToString(System.Globalization.CultureInfo.InvariantCulture) })
+        {
+            PartitionKey = "query-partition-" + index.ToString(System.Globalization.CultureInfo.InvariantCulture)
+        })
             .ToImmutableArray();
         var oversized = Assert.ThrowsExactly<KeyLoadException>(() => Run(fixture,
-            valid with { Partitions = oversizedParts }));
+            valid with
+            {
+                Partitions = oversizedParts
+            }));
         var unsupported = Assert.ThrowsExactly<KeyLoadException>(() => Run(fixture,
-            valid with { Query = valid.Query with { Explain = true } }));
+            valid with
+            {
+                Query = valid.Query with
+                {
+                    Explain = true
+                }
+            }));
         var badAst = Assert.ThrowsExactly<KeyLoadException>(() => Run(fixture, valid with { AstVersion = 3 }));
         var badVersion = Assert.ThrowsExactly<KeyLoadException>(() => Run(fixture, valid with { Version = 2 }));
 

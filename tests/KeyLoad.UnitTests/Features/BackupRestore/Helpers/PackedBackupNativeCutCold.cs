@@ -43,9 +43,13 @@ internal static class PackedBackupNativeCutCold
         var expected = new List<string> { Row(CliBackupRestoreFixture.StoredKey, CliBackupRestoreFixture.StoredValue),
             Row(ZoneTreePersistenceFormat.SystemNamespace, ZoneTreePersistenceFormat.DispatchPausedKey, true) };
         if (containsSecond)
-        { expected.Add(Row(PackedBackupCutPair.SecondKey, PackedBackupCutPair.SecondValue)); }
+        {
+            expected.Add(Row(PackedBackupCutPair.SecondKey, PackedBackupCutPair.SecondValue));
+        }
         if (healthy)
-        { expected.Add(Row(HealthyKey, HealthyValue)); }
+        {
+            expected.Add(Row(HealthyKey, HealthyValue));
+        }
         await Assert.That(actual.Rows).IsEquivalentTo(expected.Order(StringComparer.Ordinal), CollectionOrdering.Matching);
         await Assert.That(actual.Position).IsEqualTo(position);
         await Assert.That(JsonSerializer.Serialize(actual.Identity, JsonDefaults.Options))

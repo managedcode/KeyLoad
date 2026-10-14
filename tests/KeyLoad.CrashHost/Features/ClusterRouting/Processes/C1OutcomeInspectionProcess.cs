@@ -38,7 +38,9 @@ internal static class C1OutcomeInspectionProcess
         var request = global::KeyLoad.CrashHost.Features.ClusterReplication.C1SubmissionJournalInspectionJson.ReadRequest(input.Span);
         var owner = global::KeyLoad.CrashHost.Features.ClusterReplication.C1SubmissionJournalInspectionPaths.Owner(request);
         if (!string.Equals(owner, outerOwnerLockPath, StringComparison.Ordinal))
-        { throw global::KeyLoad.CrashHost.Features.ClusterReplication.C1SubmissionJournalInspectionValidation.Invalid(); }
+        {
+            throw global::KeyLoad.CrashHost.Features.ClusterReplication.C1SubmissionJournalInspectionValidation.Invalid();
+        }
         return RunOwnedAsync(input, outerOwnerLockPath,
             global::KeyLoad.CrashHost.Features.ClusterReplication.C1SubmissionJournalInspectionProtocol.Mode, cancellationToken);
     }
@@ -50,7 +52,9 @@ internal static class C1OutcomeInspectionProcess
 
         ArgumentException.ThrowIfNullOrWhiteSpace(outerOwnerLockPath);
         if (input.Length is InputLengthEmptyCount or > MaximumInputBytes)
-        { throw new ArgumentOutOfRangeException(nameof(input)); }
+        {
+            throw new ArgumentOutOfRangeException(nameof(input));
+        }
         cancellationToken.ThrowIfCancellationRequested();
         var failures = new List<Exception>();
         C1OutcomeInspectionProcessResult? result = null;

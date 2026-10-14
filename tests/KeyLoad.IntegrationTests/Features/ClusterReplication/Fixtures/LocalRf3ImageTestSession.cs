@@ -26,7 +26,10 @@ internal sealed class LocalRf3ImageTestSession : IAsyncDisposable
     private Task? output;
     private LocalRf3PreparationDiagnostics? preparationDiagnostics;
     private readonly string repositoryRoot;
-    private LocalRf3ImageSelection.Selection? PreparedSelection { get; set; }
+    private LocalRf3ImageSelection.Selection? PreparedSelection
+    {
+        get; set;
+    }
 
     private LocalRf3ImageTestSession(string repositoryRoot) => this.repositoryRoot = repositoryRoot;
 

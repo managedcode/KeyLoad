@@ -13,7 +13,9 @@ public sealed partial class DatabaseEngine
             var bounded = budget.CreateView(view);
             var principal = Principal(bounded, principalId, EvaluationClock.GetUtcNow());
             if (!principal.ClusterAdministrator && principal.TenantId != original.Consumer.Partition.TenantId)
-            { throw Errors.Fail(ErrorCode.PermissionDenied, RemoteAnnReadInvalid); }
+            {
+                throw Errors.Fail(ErrorCode.PermissionDenied, RemoteAnnReadInvalid);
+            }
             Authorization.Require(principal, original.Consumer.Partition, original.Collection, Capability.VectorSearch);
             var resource = Resource(bounded, original.Consumer.Partition, original.Collection, ResourceKind.Collection);
             Authorization.RequireFieldUse(principal, resource, original.Field);
@@ -22,10 +24,14 @@ public sealed partial class DatabaseEngine
                 || current.Incarnation != original.Placement.Incarnation
                 || current.PlacementEpoch != original.Placement.PlacementEpoch
                 || !current.VoterIds.SequenceEqual(original.Placement.VoterIds, StringComparer.Ordinal))
-            { throw Errors.Fail(ErrorCode.OwnershipLost, RemoteAnnReadInvalid); }
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, RemoteAnnReadInvalid);
+            }
             var state = ReadProjectionMaintenanceEligibilityCore(view, original.Consumer, original.IndexGeneration, budget, null);
             if (!state.InitialAnnMaintenanceSettled || state.InitialAnnMaintenance is not { } retained)
-            { throw Errors.Fail(ErrorCode.HistoryUnavailable, RemoteAnnReadInvalid); }
+            {
+                throw Errors.Fail(ErrorCode.HistoryUnavailable, RemoteAnnReadInvalid);
+            }
             RequireSameAnnObservation(retained, original, budget);
             var actual = Store.Identity;
             return new LocalAnnObservationFence(principal.Id, principal.TenantId, principal.PolicyEpoch,
@@ -37,7 +43,9 @@ public sealed partial class DatabaseEngine
         LocalAnnObservationFence admitted, ReadExecutionBudget budget)
     {
         if (CaptureLocalAnnObservation(principalId, original, budget) != admitted)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteAnnReadInvalid); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteAnnReadInvalid);
+        }
     }
 
     private static void RequireSameAnnObservation(AnnMaintenanceRequest retained,
@@ -53,13 +61,17 @@ public sealed partial class DatabaseEngine
             originalBytes = NativeSerialization.Serialize(original);
             if (retainedBytes.Length != retainedSize || originalBytes.Length != originalSize
                 || !retainedBytes.AsSpan().SequenceEqual(originalBytes))
-            { throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteAnnReadInvalid); }
+            {
+                throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteAnnReadInvalid);
+            }
         }
         finally
         {
             CryptographicOperations.ZeroMemory(retainedBytes);
             if (originalBytes is not null)
-            { CryptographicOperations.ZeroMemory(originalBytes); }
+            {
+                CryptographicOperations.ZeroMemory(originalBytes);
+            }
         }
     }
 }

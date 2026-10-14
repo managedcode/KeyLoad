@@ -14,10 +14,14 @@ internal static class EventVectorCleanupFrontierValidation
     {
         var map = inventory.Header ?? throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
         if (principal.Id != map.PrincipalId || principal.PolicyEpoch != map.ControlPolicyEpoch)
-        { throw Errors.Fail(ErrorCode.PermissionDenied, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, Invalid);
+        }
         admission.RequireEncodedBytes(frontierBytes.Length);
         if (frontierBytes.IsEmpty)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         var retained = EventVectorCleanupRetainedPins.Read(inventory, admission);
         foreach (var row in retained)
         {
@@ -28,16 +32,22 @@ internal static class EventVectorCleanupFrontierValidation
         }
         var frontier = NativeSerialization.Deserialize<ImmutableArray<EventVectorCleanupPin>>(frontierBytes.Span);
         if (frontier.IsDefault)
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
         admission.RequireEntryCount(frontier.Length);
         if (frontier.Length != retained.Length)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         for (var ordinal = FirstOrdinal; ordinal < retained.Length; ordinal++)
         {
             var supplied = frontier[ordinal];
             if (supplied is null || supplied.Version != Version
                 || !supplied.OriginalPinPhaseBytes.Span.SequenceEqual(retained[ordinal].Value.Span))
-            { throw Errors.Fail(ErrorCode.Conflict, Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Conflict, Invalid);
+            }
             var original = NativeSerialization.Deserialize<EventVectorSourcePhase>(retained[ordinal].Value.Span);
             RequirePin(inventory, original, supplied, admission);
         }
@@ -49,17 +59,23 @@ internal static class EventVectorCleanupFrontierValidation
     {
         if (!supplied.LastAdmittedAdvancePhaseBytes.Span.SequenceEqual(
                 EventVectorCleanupRetainedPins.LastAdvance(original, inventory, admission).Span))
-        { throw Errors.Fail(ErrorCode.Conflict, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, Invalid);
+        }
         admission.RequireEncodedBytes(supplied.AuthenticatedSourceObservationBytes.Length);
         if (supplied.AuthenticatedSourceObservationBytes.IsEmpty)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         var observation = NativeSerialization.Deserialize<EventVectorSourceObservation>(
             supplied.AuthenticatedSourceObservationBytes.Span);
         EventVectorObservationIdentity.Require(original, observation);
         if (original.Disposition == EventVectorSourcePhaseDisposition.Observed
             && (observation.OriginalStoredOutcome.IsEmpty || !CryptographicOperations.FixedTimeEquals(
                 SHA256.HashData(observation.OriginalStoredOutcome.Span), original.SourceOriginalOutcomeDigest.Span)))
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         RequireCurrent(original, supplied, observation, admission);
     }
 
@@ -70,7 +86,9 @@ internal static class EventVectorCleanupFrontierValidation
         if (observation.CurrentPinRowBytes.IsEmpty)
         {
             if (supplied.CurrentCoverageGeneration is not null || supplied.CurrentPinRevision is not null)
-            { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, Invalid);
+            }
             return;
         }
         var current = NativeSerialization.Deserialize<EventVectorSourcePin>(observation.CurrentPinRowBytes.Span);
@@ -84,6 +102,8 @@ internal static class EventVectorCleanupFrontierValidation
             || !CryptographicOperations.FixedTimeEquals(current.OriginalPinBodyDigest.Span, original.OriginalBodyDigest.Span)
             || current.CoverageGeneration != supplied.CurrentCoverageGeneration
             || current.PinRevision != supplied.CurrentPinRevision || current.Position < original.TargetPosition)
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
     }
 }

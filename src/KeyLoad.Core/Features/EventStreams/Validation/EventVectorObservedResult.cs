@@ -13,7 +13,9 @@ internal static class EventVectorObservedResult
         ArgumentNullException.ThrowIfNull(result);
         ArgumentNullException.ThrowIfNull(admission);
         if (result.Error is not null)
-        { return; }
+        {
+            return;
+        }
         CommitToken token;
         if (phase.Role == EventVectorSourcePhaseRole.Release)
         {
@@ -28,6 +30,8 @@ internal static class EventVectorObservedResult
             token = pinned.Token;
         }
         if (token is null || token.Position <= EmptyPosition || token.Position > actualAppliedCut)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidResult); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidResult);
+        }
     }
 }

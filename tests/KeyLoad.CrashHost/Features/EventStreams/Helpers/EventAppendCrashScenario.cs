@@ -25,7 +25,9 @@ internal static class EventAppendCrashScenario
                 [EventAppendCrashContract.Event(EventAppendCrashContract.SeedId)], ExpectedStreamRevision.NoStream)]);
         database.Apply(CrashDatabase.Operation(OperationKind.Batch, seed, seed.CommandId)
             with
-        { EvaluatedAt = operation.EvaluatedAt }).Get<CommitReceipt>();
+        {
+            EvaluatedAt = operation.EvaluatedAt
+        }).Get<CommitReceipt>();
         await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, EventAppendCrashContract.OperationFile, operation);
         await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, EventAppendCrashContract.SeedPositionFile, store.Position);
         await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, EventAppendCrashContract.SeedTailFile,

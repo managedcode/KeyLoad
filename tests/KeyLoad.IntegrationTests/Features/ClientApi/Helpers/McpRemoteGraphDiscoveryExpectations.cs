@@ -4,7 +4,10 @@ namespace KeyLoad.IntegrationTests.Features.ClientApi;
 
 internal static class McpRemoteGraphDiscoveryExpectations
 {
-    internal static ImmutableArray<McpToolExpectation> Entries { get; } =
+    internal static ImmutableArray<McpToolExpectation> Entries
+    {
+        get;
+    } =
     [
         new("keyload_graph_remote_upsert", false, true, true, McpExpectedBody.Object, false,
             ["commandId", "sourcePartition", "edge"],

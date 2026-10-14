@@ -21,7 +21,9 @@ internal static class GraphIncomingRowAuthorityContinuation
         List<(CommandRequest Request, CommitReceipt Receipt, byte[] Outcome)> repairs =
             [Repair(database, source, original.Id)];
         if (repairTarget)
-        { repairs.Add(Repair(database, target, original.Id)); }
+        {
+            repairs.Add(Repair(database, target, original.Id));
+        }
         await GraphIncomingRowAuthorityAssertions.HealthyAsync(database.Database, database.Store,
             source, target, original.Id, repairTarget);
         await ConfigureAsync(database, original with
@@ -31,10 +33,17 @@ internal static class GraphIncomingRowAuthorityContinuation
         });
         await GraphIncomingRowAuthorityAssertions.RefusedAsync(database.Database, database.Store,
             target, original.Id, ErrorCode.PermissionDenied);
-        await ConfigureAsync(database, original with { PolicyEpoch = RevokedEpoch, Revoked = true });
+        await ConfigureAsync(database, original with
+        {
+            PolicyEpoch = RevokedEpoch,
+            Revoked = true
+        });
         await GraphIncomingRowAuthorityAssertions.RefusedAsync(database.Database, database.Store,
             target, original.Id, ErrorCode.Unauthenticated);
-        await ConfigureAsync(database, original with { PolicyEpoch = RepairedEpoch });
+        await ConfigureAsync(database, original with
+        {
+            PolicyEpoch = RepairedEpoch
+        });
         await GraphIncomingRowAuthorityAssertions.HealthyAsync(database.Database, database.Store,
             source, target, original.Id, repairTarget);
         await GraphIncomingRowAuthorityCold.RunAsync(database, source, target, original.Id, repairTarget, repairs);

@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Orleans;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
@@ -31,7 +31,9 @@ internal sealed class PartitionMovementParentExpiredRetireCancellation(Partition
             original = RequireExpiredRetire(state, principalId);
             if (original.RetireCancellationAttempt is null
                 || !NativeSerialization.Serialize(original.RetireCancellationAttempt).AsSpan().SequenceEqual(NativeSerialization.Serialize(first)))
-            { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
+            {
+                throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+            }
             await ServerFailureObserver.ObserveAsync(() => client.SendRetireCancellationFirstAsync(original,
                 first, work, cancellationToken), failures).ConfigureAwait(false);
         }
@@ -43,12 +45,16 @@ internal sealed class PartitionMovementParentExpiredRetireCancellation(Partition
             var actual = GrainNativePayload.Read<GrainValue>(reply.Value.Reply.Payload).Value as PartitionMovementRetireCancellationOutcomeResult
                 ?? throw Errors.Fail(ErrorCode.Corruption, PartitionMovementProtocol.InvalidProof);
             if (actual.Snapshot.NativeCancellationResult?.Error is { } code)
-            { throw Errors.Fail(code, actual.Snapshot.NativeCancellationResult.SafeDetail ?? PartitionMovementProtocol.Unavailable); }
+            {
+                throw Errors.Fail(code, actual.Snapshot.NativeCancellationResult.SafeDetail ?? PartitionMovementProtocol.Unavailable);
+            }
             var cancelled = actual.Snapshot.Cancellation;
             if (cancelled is null || actual.Snapshot.NativeCancellationResult is null
                 || cancelled.CancellationCommandId != cancellationId
                 || cancelled.OriginalPhaseCommandId != original.OriginalPhaseCommandId)
-            { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
+            {
+                throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+            }
             var witness = new PartitionMoveRetireCancellationWitness(cancelled, reply.OriginalBytes, reply.Signature);
             var body = Body(principalId, request, state, original, PartitionMoveCheckpointAction.ObserveRetireCancellation,
                 null, witness);
@@ -61,7 +67,9 @@ internal sealed class PartitionMovementParentExpiredRetireCancellation(Partition
             || last.OriginalPhaseCommandId != original.OriginalPhaseCommandId
             || header.CleanupGeneration != checked(original.CleanupGeneration + PartitionMoveProtocol.SequenceStep)
             || observed.Control?.Phase != PartitionMovePhase.Published)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+        }
         return observed;
     }
 
@@ -80,7 +88,9 @@ internal sealed class PartitionMovementParentExpiredRetireCancellation(Partition
                 OriginalResult: null, RetireCancellation: null
             } original
             || original.OriginalExpiresAt > clock.GetUtcNow() || header.CleanupGeneration != original.CleanupGeneration)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+        }
         return original;
     }
 

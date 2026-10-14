@@ -15,9 +15,13 @@ internal static class NativeTextGenerationFiles
             throw NativeTextErrors.Ownership();
         }
         if (resources is null)
-        { Directory.CreateDirectory(path); }
+        {
+            Directory.CreateDirectory(path);
+        }
         else
-        { resources.MutatePhysical(() => Directory.CreateDirectory(path)); }
+        {
+            resources.MutatePhysical(() => Directory.CreateDirectory(path));
+        }
         NativeTextFileIO.VerifyDirectory(path);
         NativeTextFileIO.SetPrivateDirectoryMode(path);
         NativeTextFileIO.WriteEnvelope(Path.Combine(path, NativeTextProtocol.OwnerFile),
@@ -61,9 +65,13 @@ internal static class NativeTextGenerationFiles
         }
         ValidateGeneration(path, root, leaf, sourceNodeId, limits, executionOptions: executionOptions);
         if (resources is null)
-        { Directory.Delete(path, recursive: true); }
+        {
+            Directory.Delete(path, recursive: true);
+        }
         else
-        { resources.DeleteOwnedDirectory(path, () => Directory.Delete(path, recursive: true)); }
+        {
+            resources.DeleteOwnedDirectory(path, () => Directory.Delete(path, recursive: true));
+        }
     }
 
     internal static void DeleteBuilding(string root, string leaf, Guid sourceNodeId, DatabaseLimits limits, IOptions<NativeTextExecutionOptions> executionOptions, NativeTextResourceOwnership? resources = null)
@@ -91,9 +99,13 @@ internal static class NativeTextGenerationFiles
             NativeTextInventory.ValidateTrackedLayout(path, owner.OwnedPaths, allowMissingNative: true, executionOptions: executionOptions);
         }
         if (resources is null)
-        { Directory.Delete(path, recursive: true); }
+        {
+            Directory.Delete(path, recursive: true);
+        }
         else
-        { resources.DeleteOwnedDirectory(path, () => Directory.Delete(path, recursive: true)); }
+        {
+            resources.DeleteOwnedDirectory(path, () => Directory.Delete(path, recursive: true));
+        }
     }
 
     internal static void ValidateGeneration(string path, string root, string leaf, Guid sourceNodeId, DatabaseLimits limits, IOptions<NativeTextExecutionOptions> executionOptions)

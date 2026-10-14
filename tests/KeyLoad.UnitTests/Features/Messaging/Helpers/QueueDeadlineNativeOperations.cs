@@ -22,7 +22,9 @@ internal static class QueueDeadlineNativeOperations
     {
         var principal = new PrincipalRecord(QueueDeadlineNativeProtocol.Worker, partition.TenantId,
             [new(partition.DatabaseId, QueueDeadlineNativeProtocol.Queue, capability)], [])
-        { PolicyEpoch = epoch };
+        {
+            PolicyEpoch = epoch
+        };
         Apply(database, OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(principal), Guid.NewGuid(), time)
             .Get<PrincipalRecord>();
     }

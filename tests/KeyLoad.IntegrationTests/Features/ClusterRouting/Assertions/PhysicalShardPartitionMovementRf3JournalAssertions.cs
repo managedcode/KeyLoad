@@ -72,7 +72,9 @@ internal static class PhysicalShardPartitionMovementRf3JournalAssertions
         PartitionMovementPublicParentRf3Seed seed, PhysicalShardRecord target)
     {
         if (phase.Stage == PartitionMovePeerStage.ControlPrepare)
-        { return; }
+        {
+            return;
+        }
         await Assert.That(phase.Control!.SourceCut).IsGreaterThan(UnappliedPosition);
         if (phase.Stage == PartitionMovePeerStage.ControlAcceptFence)
         {
@@ -109,16 +111,22 @@ internal static class PhysicalShardPartitionMovementRf3JournalAssertions
             ServerFailureObserver.Observe(() => result = store.Read(view =>
             {
                 if (store.Position < proof.Journal!.AppliedPosition)
-                { throw new InvalidOperationException("The stopped native journal precedes its observed Prepare."); }
+                {
+                    throw new InvalidOperationException("The stopped native journal precedes its observed Prepare.");
+                }
                 return CommandOutcomeKeyResolver.Select(view, proof.PrincipalId, proof.CommandId,
                     new(CommandOutcomeScopeKind.Partition, proof.Partition)).Outcome?.Result
                     ?? throw new InvalidOperationException("The original committed scoped Prepare outcome is absent.");
             }), failures);
         }
         catch (Exception cleanup) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(cleanup) is null)
-        { failures.Add(cleanup); }
+        {
+            failures.Add(cleanup);
+        }
         catch (Exception cleanup) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(cleanup) is not null)
-        { failures.Add(cleanup); }
+        {
+            failures.Add(cleanup);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
         return result ?? throw new InvalidOperationException("The actual scoped Prepare outcome is absent.");
     }

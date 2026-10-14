@@ -39,7 +39,9 @@ internal static class PostgresInt16Rf3Policy
         }, token);
         await global::TUnit.Assertions.Assert.That(await SqlNullOrderingRf3Assertions.ImageAsync(root, state, token)).IsEqualTo(image);
         await PersistAsync(root, original with
-        { PolicyEpoch = original.PolicyEpoch + SqlNullOrderingRf3Protocol.RepairAdvance }, token);
+        {
+            PolicyEpoch = original.PolicyEpoch + SqlNullOrderingRf3Protocol.RepairAdvance
+        }, token);
         await PostgresInt16Rf3Pages.HealthyAsync(fixture, state, token);
         await global::TUnit.Assertions.Assert.That(await SqlNullOrderingRf3Assertions.ImageAsync(root, state, token)).IsEqualTo(image);
     }
@@ -55,7 +57,9 @@ internal static class PostgresInt16Rf3Policy
             {
                 var parameter = new global::Npgsql.NpgsqlParameter(PostgresInt16Rf3Protocol.Parameter,
                     global::NpgsqlTypes.NpgsqlDbType.Smallint)
-                { Value = PostgresInt16Rf3Protocol.ProbeValue };
+                {
+                    Value = PostgresInt16Rf3Protocol.ProbeValue
+                };
                 await PostgresRf3Assertions.ErrorAsync(wire.ExecuteAsync<QueryPage>(
                     PostgresInt16Rf3Protocol.DriverSql, [parameter], prepared: true, token),
                     PostgresRf3Protocol.PermissionSqlState, ErrorCode.PermissionDenied);

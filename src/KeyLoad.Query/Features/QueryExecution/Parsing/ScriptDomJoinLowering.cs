@@ -9,7 +9,9 @@ internal static class ScriptDomJoinLowering
         Dom.FromClause from, int dialectVersion, ScriptDomLoweringContext context)
     {
         if (from.TableReferences.Count != SingleElement || from.PredictTableReference.Count != EmptyCount)
-        { throw ScriptDomErrors.Unsupported(); }
+        {
+            throw ScriptDomErrors.Unsupported();
+        }
         var table = from.TableReferences[FirstIndex];
         if (table is not Dom.QualifiedJoin join)
         {
@@ -18,17 +20,23 @@ internal static class ScriptDomJoinLowering
         }
         if (dialectVersion != JoinDialectVersion || join.QualifiedJoinType != Dom.QualifiedJoinType.Inner
             || join.JoinHint != Dom.JoinHint.None || join.JoinHintColumnsCount is not null)
-        { throw ScriptDomErrors.Unsupported(); }
+        {
+            throw ScriptDomErrors.Unsupported();
+        }
         var left = ScriptDomSourceLowering.Read(join.FirstTableReference, context);
         var right = ScriptDomSourceLowering.Read(join.SecondTableReference, context);
         if (right.Model is not null || left.Alias is null || right.Alias is null
             || left.Alias == right.Alias || left.Collection == right.Collection)
-        { throw ScriptDomErrors.Invalid(); }
+        {
+            throw ScriptDomErrors.Invalid();
+        }
         if (join.SearchCondition is not Dom.BooleanComparisonExpression condition
             || condition.ComparisonType != Dom.BooleanComparisonType.Equals
             || condition.FirstExpression is not Dom.ColumnReferenceExpression leftColumn
             || condition.SecondExpression is not Dom.ColumnReferenceExpression rightColumn)
-        { throw ScriptDomErrors.Unsupported(); }
+        {
+            throw ScriptDomErrors.Unsupported();
+        }
         var leftPath = Key(leftColumn, left.Alias, left.Model);
         var rightPath = Key(rightColumn, right.Alias, null);
         return (left.Collection, left.Alias, left.Model, new(right.Collection, right.Alias, leftPath, rightPath));
@@ -39,7 +47,9 @@ internal static class ScriptDomJoinLowering
         var modelReference = model?.Kind is ModelQuerySourceKind.Events or ModelQuerySourceKind.QueueMessages
             && parts.Count == ReferenceSegments && parts[PayloadIndex] == Payload && parts[TargetIndex] == Target;
         if ((parts.Count != QualifiedSegments && !modelReference) || parts[FirstIndex] != alias)
-        { throw ScriptDomErrors.Invalid(); }
+        {
+            throw ScriptDomErrors.Invalid();
+        }
         return global::KeyLoad.Core.JsonData.Path(parts.Skip(SingleElement).ToArray());
     }
     private const int PayloadIndex = 1;

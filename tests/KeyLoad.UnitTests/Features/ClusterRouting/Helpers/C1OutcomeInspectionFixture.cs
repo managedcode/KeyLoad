@@ -30,7 +30,10 @@ internal sealed class C1OutcomeInspectionFixture : IDisposable
     internal const string SuccessMessage = "The native outcome seed did not succeed.";
     private const string UninitializedMessage = "The native outcome fixture has not completed initialization.";
     private ZoneTreeStore? store;
-    private DatabaseEngine? InitializedDatabase { get; set; }
+    private DatabaseEngine? InitializedDatabase
+    {
+        get; set;
+    }
     private bool rootOwned;
     private bool storeClosed;
     private int phaseLineCount;
@@ -45,7 +48,10 @@ internal sealed class C1OutcomeInspectionFixture : IDisposable
         Incarnation = Guid.NewGuid();
         CommandId = Guid.NewGuid();
         Partition = new(TenantId, DatabaseId, DomainId, PartitionKey);
-        OtherPartition = Partition with { PartitionKey = OtherPartitionKey };
+        OtherPartition = Partition with
+        {
+            PartitionKey = OtherPartitionKey
+        };
     }
 
     internal static async Task RunOwnedAsync(Func<C1OutcomeInspectionFixture, Task> body)
@@ -61,36 +67,70 @@ internal sealed class C1OutcomeInspectionFixture : IDisposable
             }
         }
         catch (Exception error) when (!C1OutcomeInspectionFailures.ContainsFatal(error))
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         catch (Exception error) when (C1OutcomeInspectionFailures.ContainsFatal(error))
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    internal string Root { get; }
-    internal string DirectoryPath { get; }
-    internal string OuterOwnerLockPath { get; }
-    internal Guid Incarnation { get; }
+    internal string Root
+    {
+        get;
+    }
+    internal string DirectoryPath
+    {
+        get;
+    }
+    internal string OuterOwnerLockPath
+    {
+        get;
+    }
+    internal Guid Incarnation
+    {
+        get;
+    }
     internal ZoneTreeStore Store => store ?? throw new InvalidOperationException(UninitializedMessage);
     internal DatabaseEngine Database => InitializedDatabase ?? throw new InvalidOperationException(UninitializedMessage);
     internal StoreIdentity Identity => Store.Identity;
-    internal Guid CommandId { get; }
-    internal PartitionRef Partition { get; }
-    internal PartitionRef OtherPartition { get; }
-    internal long Position { get; private set; }
+    internal Guid CommandId
+    {
+        get;
+    }
+    internal PartitionRef Partition
+    {
+        get;
+    }
+    internal PartitionRef OtherPartition
+    {
+        get;
+    }
+    internal long Position
+    {
+        get; private set;
+    }
 
     private void Initialize()
     {
         var failures = new List<Exception>();
         ServerFailureObserver.Observe(CreateOwnedRoot, failures);
         if (rootOwned && failures.Count == 0)
-        { ServerFailureObserver.Observe(SeedNativeOutcome, failures); }
+        {
+            ServerFailureObserver.Observe(SeedNativeOutcome, failures);
+        }
         if (failures.Count == 0)
-        { return; }
+        {
+            return;
+        }
         var cleanupFailures = new List<Exception>();
         ServerFailureObserver.Observe(CloseStore, cleanupFailures);
         if (rootOwned && storeClosed)
-        { ServerFailureObserver.Observe(DeleteOwnedRoot, cleanupFailures); }
+        {
+            ServerFailureObserver.Observe(DeleteOwnedRoot, cleanupFailures);
+        }
         failures.AddRange(cleanupFailures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -104,13 +144,16 @@ internal sealed class C1OutcomeInspectionFixture : IDisposable
     private void SeedNativeOutcome()
     {
         using (File.Create(OuterOwnerLockPath))
-        { }
+        {
+        }
         var nativeStore = new ZoneTreeStore(new ZoneTreeStoreOptions(DirectoryPath) { Incarnation = Incarnation }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         store = nativeStore;
         var engine = C1OutcomeInspectionHealthyFollowUp.CreateDatabaseEngine(nativeStore);
         InitializedDatabase = engine;
         engine.Bootstrap(new(AdminId, TenantId, [new("*", "*", Capability.All)], ["*"])
-        { ClusterAdministrator = true }, DatabaseEngine.Credential(AdminId, AdminId, AdminSecret));
+        {
+            ClusterAdministrator = true
+        }, DatabaseEngine.Credential(AdminId, AdminId, AdminSecret));
         PhysicalShardTestBootstrap.Bootstrap(engine, AdminId);
         var configure = new ConfigureResourceRequest(TenantId, DatabaseId,
             new(ResourceName, ResourceKind.Collection, DomainId));
@@ -118,7 +161,9 @@ internal sealed class C1OutcomeInspectionFixture : IDisposable
             TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(configure, JsonDefaults.Options));
         var configureResult = engine.Apply(configureOperation);
         if (configureResult.Error is not null || engine.ResolveOutcome(configureOperation).Error is not null)
-        { throw new InvalidOperationException(SuccessMessage); }
+        {
+            throw new InvalidOperationException(SuccessMessage);
+        }
         CommitBatch(Partition, CommandId, SeedDocumentId);
         Position = nativeStore.Position;
     }
@@ -153,7 +198,9 @@ internal sealed class C1OutcomeInspectionFixture : IDisposable
             return;
         }
         if (storeClosed)
-        { return; }
+        {
+            return;
+        }
         store.Dispose();
         storeClosed = true;
     }
@@ -162,13 +209,21 @@ internal sealed class C1OutcomeInspectionFixture : IDisposable
     {
         var cleanupFailures = new List<Exception>();
         try
-        { CloseStore(); }
+        {
+            CloseStore();
+        }
         catch (Exception error) when (!C1OutcomeInspectionFailures.ContainsFatal(error))
-        { cleanupFailures.Add(error); }
+        {
+            cleanupFailures.Add(error);
+        }
         catch (Exception error) when (C1OutcomeInspectionFailures.ContainsFatal(error))
-        { cleanupFailures.Add(error); }
+        {
+            cleanupFailures.Add(error);
+        }
         if (rootOwned && storeClosed)
-        { ServerFailureObserver.Observe(DeleteOwnedRoot, cleanupFailures); }
+        {
+            ServerFailureObserver.Observe(DeleteOwnedRoot, cleanupFailures);
+        }
         cleanupFailures.AddRange(phaseFailures);
         ServerFailureObserver.ThrowIfAny(cleanupFailures);
     }

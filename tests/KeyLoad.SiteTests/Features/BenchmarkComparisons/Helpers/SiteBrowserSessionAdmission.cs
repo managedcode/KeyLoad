@@ -10,7 +10,9 @@ internal sealed class SiteBrowserSessionAdmission
 
     internal static SiteBrowserSessionAdmission Shared { get; } = new();
 
-    private SiteBrowserSessionAdmission() { }
+    private SiteBrowserSessionAdmission()
+    {
+    }
 
     internal int PendingCount => _pool.PendingCount;
 

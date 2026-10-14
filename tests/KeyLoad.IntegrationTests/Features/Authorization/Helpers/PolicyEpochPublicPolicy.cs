@@ -11,10 +11,17 @@ internal static class PolicyEpochPublicPolicy
         ImmutableArray<string> fields, bool revoked, CancellationToken token)
     {
         var principal = identity.Principal with
-        { FieldGrants = fields, Revoked = revoked, PolicyEpoch = checked(identity.Principal.PolicyEpoch + 1) };
+        {
+            FieldGrants = fields,
+            Revoked = revoked,
+            PolicyEpoch = checked(identity.Principal.PolicyEpoch + 1)
+        };
         var actual = await McpCallerAssertions.SdkSuccessAsync(await root.ConfigurePrincipalAsync(Guid.NewGuid(), principal, token));
         await SqlRf3Protocol.EqualAsync(principal, actual);
-        return identity with { Principal = principal };
+        return identity with
+        {
+            Principal = principal
+        };
     }
 
     internal static async Task ReplayAsync(KeyLoadClient root, PolicyEpochPublicState state, CancellationToken token)

@@ -12,7 +12,11 @@ internal static class SqlPendingQueuePublicFlow
     {
         var identity = await McpPersistedIdentity.CreateAsync(fixture, state.Partition, state.Lane.Queue,
             Capability.Query | Capability.QueueInspect, token);
-        var principal = identity.Principal with { FieldGrants = ["*"], PolicyEpoch = identity.Principal.PolicyEpoch + QueueLifecyclePublicProtocol.One };
+        var principal = identity.Principal with
+        {
+            FieldGrants = ["*"],
+            PolicyEpoch = identity.Principal.PolicyEpoch + QueueLifecyclePublicProtocol.One
+        };
         principal = await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), principal, token));
         await using var reader = await RequestCqrsRf3Callers.ConnectAsync(fixture.App, McpCallerProtocol.Node2, identity.Secret, token);
         var request = new QueryRequest(state.Partition,

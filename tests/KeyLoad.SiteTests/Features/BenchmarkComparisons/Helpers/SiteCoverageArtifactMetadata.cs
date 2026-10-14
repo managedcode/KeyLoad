@@ -145,5 +145,8 @@ internal static class SiteCoverageArtifactMetadata
     }
 
     private static HashSet<string> Set(params string[] fields) => new(fields, StringComparer.Ordinal);
-    private static class EmptySet { public static readonly IReadOnlySet<string> Value = new HashSet<string>(StringComparer.Ordinal); }
+    private static class EmptySet
+    {
+        public static readonly IReadOnlySet<string> Value = new HashSet<string>(StringComparer.Ordinal);
+    }
 }

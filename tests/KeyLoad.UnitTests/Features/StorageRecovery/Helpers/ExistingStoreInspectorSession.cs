@@ -13,14 +13,19 @@ internal sealed class ExistingStoreInspectorSession : IAsyncDisposable
     private Task? stderrTask;
     private bool released;
 
-    private ExistingStoreInspectorSession() { }
+    private ExistingStoreInspectorSession()
+    {
+    }
 
     internal ExistingStoreInspectorPipeCapture Stdout { get; } = new();
     internal ExistingStoreInspectorPipeCapture Stderr { get; } = new();
     internal Process Process { get; } = new();
     internal Task StdoutTask => stdoutTask!;
     internal Task StderrTask => stderrTask!;
-    internal bool OriginalTasksJoined { get; private set; }
+    internal bool OriginalTasksJoined
+    {
+        get; private set;
+    }
 
     internal static async Task<ExistingStoreInspectorSession> StartAsync(ProcessStartInfo startInfo, string payload)
     {

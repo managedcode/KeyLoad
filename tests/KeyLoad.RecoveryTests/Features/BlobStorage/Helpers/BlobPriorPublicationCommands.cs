@@ -52,7 +52,12 @@ internal static class BlobPriorPublicationCommands
         var written = Send(owner, OperationKind.WriteBlobPart, part.CommandId, part);
         var hash = BlobPriorPublicationOracle.Complete(initial, bytes);
         await BlobPriorPublicationImage.ExactAsync(written.Result.Get<BlobCommitResult<BlobUploadInfo>>().Value,
-            info with { NextOrdinal = 1, StoredBytes = 4, IntegrityHash = hash });
+            info with
+            {
+                NextOrdinal = 1,
+                StoredBytes = 4,
+                IntegrityHash = hash
+            });
         await BlobPriorPublicationImage.ReceiptAsync(owner, written.Result.Get<BlobCommitResult<BlobUploadInfo>>().Receipt, part.CommandId, blob);
         var complete = new CompleteBlobUploadRequest(Guid.NewGuid(), blob, upload, hash);
         var completed = Send(owner, OperationKind.CompleteBlobUpload, complete.CommandId, complete);

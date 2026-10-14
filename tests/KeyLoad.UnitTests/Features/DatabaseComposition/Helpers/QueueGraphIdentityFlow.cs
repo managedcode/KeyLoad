@@ -22,8 +22,14 @@ internal static class QueueGraphIdentityFlow
             _ => throw new ArgumentOutOfRangeException(nameof(component))
         };
         var record = from ? state.First : state.Second;
-        var corrupted = NativeSerialization.Serialize(record with { Reference = mismatched });
-        await RunFaultAsync(state with { FailureDetail = CanonicalVertexMismatch }, corrupted);
+        var corrupted = NativeSerialization.Serialize(record with
+        {
+            Reference = mismatched
+        });
+        await RunFaultAsync(state with
+        {
+            FailureDetail = CanonicalVertexMismatch
+        }, corrupted);
     }
 
     internal static async Task RunReadyAsync(TestDatabase db)
@@ -33,12 +39,18 @@ internal static class QueueGraphIdentityFlow
             QueueGraphIdentityState.Queue, QueueGraphIdentityState.Message);
         var original = db.Store.Read(view => view.ReadOwnedValue(key))!;
         var metadata = NativeSerialization.Deserialize<MessageMetadata>(original);
-        var changed = metadata with { ReadySequence = metadata.ReadySequence + 1 };
+        var changed = metadata with
+        {
+            ReadySequence = metadata.ReadySequence + 1
+        };
         state = state with
         {
             EndpointKey = key,
             OriginalEndpoint = original,
-            FaultSource = state.Source with { Metadata = changed },
+            FaultSource = state.Source with
+            {
+                Metadata = changed
+            },
             FailureCode = ErrorCode.RecoveryRequired,
             FailureDetail = "The recorded queue retry decision no longer matches its input."
         };
@@ -89,7 +101,10 @@ internal static class QueueGraphIdentityFlow
                 new QueueToGraph(QueueGraphIdentityState.Graph, QueueGraphIdentityState.Queue,
                     QueueGraphIdentityState.Prefix)]);
         var failed = await CompileAsync(failedRequest, at.AddSeconds(1));
-        var healthy = await CompileAsync(failedRequest with { CommandId = Guid.NewGuid() }, at.AddSeconds(2));
+        var healthy = await CompileAsync(failedRequest with
+        {
+            CommandId = Guid.NewGuid()
+        }, at.AddSeconds(2));
         var reference = from ? first : second;
         var key = global::KeyLoad.Core.Features.DocumentStorage.DocumentStorageKeys.RecordKey(reference);
         var original = db.Store.Read(view => view.ReadOwnedValue(key))!;
@@ -106,10 +121,14 @@ internal static class QueueGraphIdentityFlow
     internal static async Task<ReplicatedOperation> CompileAsync(CommandRequest command, DateTimeOffset at)
     {
         var arguments = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
-        { [global::KeyLoad.Server.McpCatalogProtocol.Request] = JsonSerializer.SerializeToElement(command, JsonDefaults.Options) };
+        {
+            [global::KeyLoad.Server.McpCatalogProtocol.Request] = JsonSerializer.SerializeToElement(command, JsonDefaults.Options)
+        };
         var request = new SqlOperationRequest(command.Partition, "EXEC keyload_documents_commit @arguments",
             new Dictionary<string, JsonElement>(StringComparer.Ordinal)
-            { [global::KeyLoad.UnitTests.Features.QueryExecution.SqlOperationTestData.Parameter] = JsonSerializer.SerializeToElement(arguments, JsonDefaults.Options) });
+            {
+                [global::KeyLoad.UnitTests.Features.QueryExecution.SqlOperationTestData.Parameter] = JsonSerializer.SerializeToElement(arguments, JsonDefaults.Options)
+            });
         var compiled = SqlOperationTestData.Compile(request);
         await Assert.That(compiled.CommandKind).IsEqualTo(OperationKind.Batch);
         await Assert.That(compiled.ReadKind).IsNull();

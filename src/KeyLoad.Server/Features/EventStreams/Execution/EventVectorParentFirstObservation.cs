@@ -1,7 +1,7 @@
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.DocumentStorage;
 using Microsoft.Extensions.Options;
 
@@ -26,12 +26,16 @@ internal static class EventVectorParentFirstObservation
             work, cancellationToken).ConfigureAwait(false);
         var reply = exchange.Reply.Reply;
         if (reply.Error is { } error)
-        { throw Errors.Fail(error, EventVectorRemoteProtocol.Unavailable); }
+        {
+            throw Errors.Fail(error, EventVectorRemoteProtocol.Unavailable);
+        }
         admission.RequireEncodedBytes(reply.OriginalNativeReply.Length);
         work.ChargeBytes(reply.OriginalNativeReply.Length);
         var observed = NativeSerialization.Deserialize<EventVectorFirstIssuanceObservation>(reply.OriginalNativeReply.Span);
         try
-        { return Resolve(observed, request, principalId, admission, routing, work, cancellationToken); }
+        {
+            return Resolve(observed, request, principalId, admission, routing, work, cancellationToken);
+        }
         finally { Clear(observed); }
     }
 
@@ -41,7 +45,9 @@ internal static class EventVectorParentFirstObservation
     {
         var identity = EventVectorFirstIssuanceIds.Admit(request, principalId, admission);
         if (observed.OriginalAdmitCommandId != EventVectorFirstIssuanceIds.For(identity, admission))
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, EventVectorRemoteProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, EventVectorRemoteProtocol.Invalid);
+        }
         if (!observed.OriginalAdmitStoredOutcomeBytes.IsEmpty)
         {
             var original = NativeSerialization.Deserialize<StoredOutcome>(observed.OriginalAdmitStoredOutcomeBytes.Span);
@@ -55,7 +61,9 @@ internal static class EventVectorParentFirstObservation
             || !observed.OriginalParentCallRowBytes.IsEmpty || !observed.OriginalParentOutcomeIndexRowBytes.IsEmpty
             || !observed.AbandonedChargedIssuanceRowBytes.IsEmpty || !observed.TerminalIssuanceRowBytes.IsEmpty
             || !observed.OriginalFirstOpenStoredOutcomeBytes.IsEmpty)
-        { throw Errors.Fail(ErrorCode.UnknownWriteOutcome, EventVectorRemoteProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.UnknownWriteOutcome, EventVectorRemoteProtocol.Unavailable);
+        }
         work.Check();
         return null;
     }

@@ -46,7 +46,9 @@ internal static class ClusterRestoreRf3ResumeTrial
         catch (Exception terminal)
         {
             if (initiatingFailure is not null && !cleanupCompleted)
-            { throw new AggregateException(initiatingFailure, terminal); }
+            {
+                throw new AggregateException(initiatingFailure, terminal);
+            }
             throw;
         }
         var elapsed = TimeProvider.System.GetElapsedTime(started);

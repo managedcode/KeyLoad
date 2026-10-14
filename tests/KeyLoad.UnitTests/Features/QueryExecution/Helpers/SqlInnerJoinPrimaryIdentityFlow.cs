@@ -8,6 +8,8 @@ internal static class SqlInnerJoinPrimaryIdentityFlow
         await SqlInnerJoinRetainedIdentityPages.HealthyAsync(database.Database, database.Store, database.Partition, command, receipt);
         database.Store.Dispose();
         foreach (var fault in faults)
-        { await SqlInnerJoinRetainedIdentityFlow.FaultAsync(database, command, receipt, fault); }
+        {
+            await SqlInnerJoinRetainedIdentityFlow.FaultAsync(database, command, receipt, fault);
+        }
     }
 }

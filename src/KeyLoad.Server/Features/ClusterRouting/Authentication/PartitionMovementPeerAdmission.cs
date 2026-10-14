@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
-using KeyLoad.Orleans;
 using KeyLoad.Replication;
 using Microsoft.Extensions.Options;
 
@@ -35,21 +35,33 @@ internal sealed partial class PartitionMovementPeerAdmission : IDisposable
         if (this.configuration.Incarnation != database.Store.Identity.Incarnation
             || this.configuration.LocalId != this.options.PublicEndpoint
             || !this.configuration.VoterIds.SequenceEqual(this.options.Peers, StringComparer.Ordinal))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, InvalidProof);
+        }
         this.routing = routing.Value;
         this.membership = membership;
         this.execution = execution.Value;
         this.clock = clock;
         replay = new(clock, membership);
         try
-        { nativeReplay = new(clock, membership); }
+        {
+            nativeReplay = new(clock, membership);
+        }
         catch (Exception primary)
         {
             var failures = new List<Exception> { primary };
             try
-            { replay.Dispose(); }
-            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
+            {
+                replay.Dispose();
+            }
+            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+            {
+                failures.Add(error);
+            }
+            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+            {
+                failures.Add(error);
+            }
             ServerFailureObserver.ThrowIfAny(failures);
             throw;
         }
@@ -61,13 +73,19 @@ internal sealed partial class PartitionMovementPeerAdmission : IDisposable
         cancellationToken.ThrowIfCancellationRequested();
         if (!execution.Enabled || !options.PhysicalGroupTrust.RegisterPhysicalOwners
             || options.PhysicalGroupTrust.Role == PhysicalGroupTrustRole.Disabled)
-        { throw Errors.Fail(ErrorCode.UnsupportedCapability, InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, InvalidProof);
+        }
         if (originalBody.Length <= EmptyBodyBytes || originalBody.Length > database.Limits.MaxBatchBytes)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, InvalidProof);
+        }
         var ownedBody = originalBody.ToArray();
         using var mac = CreateControlMac();
         if (!mac.Verify(ownedBody, signature, reply: false))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, InvalidProof);
+        }
         var request = NativeSerialization.Deserialize<PartitionMovementTransportRequest>(ownedBody);
         PartitionMovementTransportAdmission.Require(request);
         var envelope = request.Envelope;
@@ -83,53 +101,30 @@ internal sealed partial class PartitionMovementPeerAdmission : IDisposable
             || !PartitionMovementConfiguredOwners.RequirePair(envelope, control.Owner, destination.Owner)
             || !control.Owner.VoterIds.Contains(request.CallerVoter, StringComparer.Ordinal)
             || !PhysicalGroupAddress.CanonicalAddress(request.CallerSiloAddress, membership))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, InvalidProof);
+        }
         if (!PartitionMoveGrantValidation.IsLocalControl(envelope.Stage))
-        { PartitionMovementGrantProof.Require(request, control.Owner, local.Owner, now); }
+        {
+            PartitionMovementGrantProof.Require(request, control.Owner, local.Owner, now);
+        }
         else if (!PhysicalOwnerEntryValidation.SameOwner(control.Owner, local.Owner))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, InvalidProof);
+        }
         if (!replay.TryUse(envelope.Nonce.ToString(NonceFormat)))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, InvalidProof);
+        }
         database.VerifyPhysicalCommandOwner(local.Owner, false, cancellationToken);
         return Task.FromResult(request);
     }
 
     internal PartitionMovementMac CreateControlMac()
-    {
-        var control = PhysicalOwnerConfiguredTuples.Control(options, configuration);
-        var destination = PhysicalOwnerConfiguredTuples.Destination(options, configuration);
-        var local = PhysicalOwnerConfiguredTuples.Local(options, configuration);
-        if (!PhysicalOwnerEntryValidation.Valid(control) || !PhysicalOwnerEntryValidation.Valid(destination)
-            || !PhysicalOwnerEntryValidation.Valid(local))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, InvalidProof); }
-        var configured = options.PhysicalGroupTrust.Role switch
-        {
-            PhysicalGroupTrustRole.Control when PhysicalOwnerEntryValidation.SameOwner(local.Owner, control.Owner)
-                && !PhysicalOwnerEntryValidation.SameOwner(local.Owner, destination.Owner) => options.PeerSecret,
-            PhysicalGroupTrustRole.Destination when PhysicalOwnerEntryValidation.SameOwner(local.Owner, destination.Owner)
-                && !PhysicalOwnerEntryValidation.SameOwner(local.Owner, control.Owner) => options.PhysicalGroupTrust.ForeignPeerSecret,
-            _ => throw Errors.Fail(ErrorCode.Unauthenticated, InvalidProof)
-        };
-        var key = Convert.FromBase64String(configured
-            ?? throw Errors.Fail(ErrorCode.Unauthenticated, InvalidProof));
-        try
-        { return new(key, database.Limits.MaxBatchBytes); }
-        finally { CryptographicOperations.ZeroMemory(key); }
-    }
+        => PartitionMovementControlMacFactory.Create(options, configuration, database);
 
     public void Dispose()
-    {
-        var failures = new List<Exception>();
-        try
-        { nativeReplay.Dispose(); }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        try
-        { replay.Dispose(); }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        ServerFailureObserver.ThrowIfAny(failures);
-    }
+        => PartitionMovementPeerReplayShutdown.Dispose(replay, nativeReplay);
 
     internal PartitionMovementExecutionOptions Execution => execution;
     internal NodeOptions Options => options;

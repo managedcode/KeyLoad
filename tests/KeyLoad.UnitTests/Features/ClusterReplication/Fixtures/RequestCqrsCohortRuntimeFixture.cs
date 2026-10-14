@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
 using System.Security.Cryptography;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 using Microsoft.Extensions.DependencyInjection;
 using Orleans.TestingHost;
@@ -43,7 +43,9 @@ internal sealed class RequestCqrsCohortRuntimeFixture : IAsyncInitializer, IAsyn
         this.checkpoints = checkpoints;
         RequestCqrsCohortOwners.Register(ownerId, this);
         try
-        { cluster = CreateCluster(); }
+        {
+            cluster = CreateCluster();
+        }
         catch (Exception) { RequestCqrsCohortOwners.Release(ownerId); CryptographicOperations.ZeroMemory(secret); throw; }
     }
     private TestCluster CreateCluster()
@@ -99,7 +101,9 @@ internal sealed class RequestCqrsCohortRuntimeFixture : IAsyncInitializer, IAsyn
         {
             checkpoints?.Release();
             try
-            { await DisposeAsync(); }
+            {
+                await DisposeAsync();
+            }
             catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
             throw;
         }
@@ -128,7 +132,9 @@ internal sealed class RequestCqrsCohortRuntimeFixture : IAsyncInitializer, IAsyn
         await (old.Runtime ?? throw new InvalidOperationException("The native runtime is absent.")).StopAsync();
         await old.Journal.Consensus.StopAsync(token);
         if (!nodes.TryRemove(voter, out var removed))
-        { throw new InvalidOperationException("The native voter owner changed during restart."); }
+        {
+            throw new InvalidOperationException("The native voter owner changed during restart.");
+        }
         var failures = new List<Exception>();
         try
         {
@@ -140,7 +146,9 @@ internal sealed class RequestCqrsCohortRuntimeFixture : IAsyncInitializer, IAsyn
                     await ServerFailureObserver.ObserveAsync(() => old.DisposeAsync().AsTask(), failures);
                 }
                 else
-                { await ServerFailureObserver.ObserveAsync(() => cluster.RestartSiloAsync(handle), failures); }
+                {
+                    await ServerFailureObserver.ObserveAsync(() => cluster.RestartSiloAsync(handle), failures);
+                }
             }
         }
         catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
@@ -172,7 +180,9 @@ internal sealed class RequestCqrsCohortRuntimeFixture : IAsyncInitializer, IAsyn
         }
         await ServerFailureObserver.ObserveAsync(() => cluster.StopAllSilosAsync(deadline.Token), failures);
         try
-        { await cluster.DisposeAsync(); }
+        {
+            await cluster.DisposeAsync();
+        }
         catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
         catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
         foreach (var node in nodes.Values)
@@ -185,13 +195,17 @@ internal sealed class RequestCqrsCohortRuntimeFixture : IAsyncInitializer, IAsyn
     public ValueTask DisposeAsync()
     {
         lock (lifecycle)
-        { return new(disposal ??= DisposeCoreAsync()); }
+        {
+            return new(disposal ??= DisposeCoreAsync());
+        }
     }
 
     private async Task DisposeCoreAsync()
     {
         try
-        { await StopClusterAsync(); }
+        {
+            await StopClusterAsync();
+        }
         finally { RequestCqrsCohortOwners.Release(ownerId); CryptographicOperations.ZeroMemory(secret); }
     }
 }

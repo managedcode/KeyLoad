@@ -30,7 +30,9 @@ internal static class NativeRemoteGraphRf3AuthorizationFlow
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 if (wave.application is null)
-                { await wave.RestartJoinedAsync(cleanup.Token); }
+                {
+                    await wave.RestartJoinedAsync(cleanup.Token);
+                }
                 await RestoreAsync(wave, seed, denied, cleanup.Token);
             }, failures);
         }

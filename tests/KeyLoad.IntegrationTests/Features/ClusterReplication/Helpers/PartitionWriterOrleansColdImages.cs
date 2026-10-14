@@ -32,9 +32,13 @@ internal static class PartitionWriterOrleansColdImages
                 replicaRows, replica.Position, NativeSerialization.Serialize(replica.Identity));
         }, failures);
         if (replica is { } replicaOwner)
-        { ServerFailureObserver.Observe(replicaOwner.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(replicaOwner.Dispose, failures);
+        }
         if (canonical is { } canonicalOwner)
-        { ServerFailureObserver.Observe(canonicalOwner.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(canonicalOwner.Dispose, failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
         return image ?? throw new InvalidOperationException(PartitionWriterOrleansProtocol.IncompleteImage);
     }
@@ -44,7 +48,9 @@ internal static class PartitionWriterOrleansColdImages
         {
             var scan = view.Scan([], IntegrationExecutionOptions.DatabaseLimits().Value.MaxScanRecords);
             if (scan.HasMore)
-            { throw new InvalidOperationException(PartitionWriterOrleansProtocol.IncompleteImage); }
+            {
+                throw new InvalidOperationException(PartitionWriterOrleansProtocol.IncompleteImage);
+            }
             return scan.Records.Select(row => Convert.ToHexString(row.Key.Span) + RowSeparator
                 + Convert.ToHexString(row.Value.Span)).ToArray();
         });

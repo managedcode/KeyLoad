@@ -44,7 +44,9 @@ internal static class RequestCqrsProbeProfileSettingsReader
         foreach (var field in fields)
         {
             if (field.GetChildren().Take(CountValue).Any() || field.Value is null)
-            { throw new InvalidOperationException(InvalidConfiguration); }
+            {
+                throw new InvalidOperationException(InvalidConfiguration);
+            }
             switch (field.Key)
             {
                 case EnabledKey:
@@ -90,17 +92,25 @@ internal static class RequestCqrsProbeProfileSettingsReader
         const int StructuralValue = 0;
 
         if (rootFound || (sessionFound && session is not { Length: StructuralValue }))
-        { throw new InvalidOperationException(InvalidConfiguration); }
+        {
+            throw new InvalidOperationException(InvalidConfiguration);
+        }
     }
 
     private static bool ReadEnabled(bool found, string? value)
     {
         if (!found)
-        { return false; }
+        {
+            return false;
+        }
         if (value is TrueValue)
-        { return true; }
+        {
+            return true;
+        }
         if (value is FalseValue)
-        { return false; }
+        {
+            return false;
+        }
         throw new InvalidOperationException(InvalidConfiguration);
     }
 
@@ -112,7 +122,9 @@ internal static class RequestCqrsProbeProfileSettingsReader
             || !string.IsNullOrWhiteSpace(configuration[TestSuiteSettings.SuiteSetting])
             || HasBenchmarkSelection(configuration)
             || HasProtocolCohortOverride(configuration))
-        { throw new InvalidOperationException(InvalidConfiguration); }
+        {
+            throw new InvalidOperationException(InvalidConfiguration);
+        }
     }
 
     private static bool HasBenchmarkSelection(IConfiguration configuration)
@@ -131,9 +143,13 @@ internal static class RequestCqrsProbeProfileSettingsReader
     {
         var value = configuration[BenchmarkSetting];
         if (value is null or FalseValue)
-        { return false; }
+        {
+            return false;
+        }
         if (value is TrueValue)
-        { return true; }
+        {
+            return true;
+        }
         throw new InvalidOperationException(InvalidConfiguration);
     }
 

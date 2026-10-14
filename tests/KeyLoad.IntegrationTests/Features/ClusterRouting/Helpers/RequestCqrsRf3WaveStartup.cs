@@ -1,9 +1,9 @@
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClusterReplication;
 using KeyLoad.IntegrationTests.Features.ClusterRouting.Helpers;
-using KeyLoad.Orleans;
 using KeyLoad.Query;
 using KeyLoad.Server;
 using Microsoft.Extensions.DependencyInjection;
@@ -46,9 +46,13 @@ internal sealed class RequestCqrsRf3WaveStartup(string dataRoot, IReadOnlyDictio
     private void ApplyPhysicalShardOverride(IDistributedApplicationTestingBuilder builder)
     {
         if (physicalShardOverrideNode is null && physicalShardOverrideId is null)
-        { return; }
+        {
+            return;
+        }
         if (physicalShardOverrideNode is null || physicalShardOverrideId is not { } identity)
-        { throw new ArgumentException(IncompletePhysicalShardOverride); }
+        {
+            throw new ArgumentException(IncompletePhysicalShardOverride);
+        }
         ClusterFixturePhysicalShardIdentity.OverrideNode(builder, physicalShardOverrideNode, identity);
     }
 
@@ -67,7 +71,9 @@ internal sealed class RequestCqrsRf3WaveStartup(string dataRoot, IReadOnlyDictio
             return startedWave;
         }
         if (failures.Count == 0)
-        { failures.Add(new InvalidOperationException(MissingWaveMessage)); }
+        {
+            failures.Add(new InvalidOperationException(MissingWaveMessage));
+        }
         lifecycleEvidence?.RecordFirstFailure();
         ServerFailureObserver.ThrowIfAny(failures);
         throw new InvalidOperationException(MissingWaveMessage);
@@ -105,7 +111,9 @@ internal sealed class RequestCqrsRf3WaveStartup(string dataRoot, IReadOnlyDictio
             ClusterFixtureDiagnostics.FindRepositoryRoot().FullName, selection);
         diagnostics = nativeAdmission.Diagnostics;
         if (nativeAdmission.AdmittedNodeCount != RequestCqrsRf3Protocol.NodeCount)
-        { throw new InvalidOperationException(IncompleteNativeAdmission); }
+        {
+            throw new InvalidOperationException(IncompleteNativeAdmission);
+        }
         wave = RequestCqrsRf3Wave.TransferOwned(dataRoot, runtime, ref application, ref diagnostics, ref testingBuilder,
             ref nativeAdmission, lifecycleEvidence);
     }
@@ -116,7 +124,9 @@ internal sealed class RequestCqrsRf3WaveStartup(string dataRoot, IReadOnlyDictio
         if (nativeAdmission is not null)
         {
             try
-            { await nativeAdmission.DisposeAsync().ConfigureAwait(false); }
+            {
+                await nativeAdmission.DisposeAsync().ConfigureAwait(false);
+            }
             catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { AppendFailure(failures, error, RequestCqrsLifecycleStage.ObserverJoin); }
             catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { AppendFailure(failures, error, RequestCqrsLifecycleStage.ObserverJoin); }
             diagnostics ??= nativeAdmission.Diagnostics;
@@ -124,7 +134,9 @@ internal sealed class RequestCqrsRf3WaveStartup(string dataRoot, IReadOnlyDictio
         if (wave is not null)
         {
             try
-            { await wave.DisposeAsync().ConfigureAwait(false); }
+            {
+                await wave.DisposeAsync().ConfigureAwait(false);
+            }
             catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { AppendFailure(failures, error, RequestCqrsLifecycleStage.AuthorityWaveStop); }
             catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { AppendFailure(failures, error, RequestCqrsLifecycleStage.AuthorityWaveStop); }
             wave = null;
@@ -141,7 +153,9 @@ internal sealed class RequestCqrsRf3WaveStartup(string dataRoot, IReadOnlyDictio
         if (ownedDiagnostics is not null)
         {
             try
-            { await ownedDiagnostics.DisposeAsync().ConfigureAwait(false); }
+            {
+                await ownedDiagnostics.DisposeAsync().ConfigureAwait(false);
+            }
             catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { RecordDiagnosticsFailure(error, failures, FailureObserver, RequestCqrsLifecycleStage.AuthorityWaveDiagnosticsDrain); }
             catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { RecordDiagnosticsFailure(error, failures, FailureObserver, RequestCqrsLifecycleStage.AuthorityWaveDiagnosticsDrain); }
             if (failures.Count > 0)
@@ -153,7 +167,9 @@ internal sealed class RequestCqrsRf3WaveStartup(string dataRoot, IReadOnlyDictio
             diagnostics = null;
         }
         if (await RequestCqrsRf3BuilderCleanup.DisposeAsync(testingBuilder, failures, FailureObserver).ConfigureAwait(false))
-        { testingBuilder = null; }
+        {
+            testingBuilder = null;
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
@@ -167,7 +183,9 @@ internal sealed class RequestCqrsRf3WaveStartup(string dataRoot, IReadOnlyDictio
         foreach (var failure in terminal)
         {
             if (!failures.Contains(failure))
-            { RequestCqrsLifecycleFailureObserver.Append(failures, failure, failureObserver, stage); }
+            {
+                RequestCqrsLifecycleFailureObserver.Append(failures, failure, failureObserver, stage);
+            }
         }
     }
 

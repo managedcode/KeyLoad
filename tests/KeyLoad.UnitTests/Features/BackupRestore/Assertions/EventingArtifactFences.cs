@@ -19,7 +19,10 @@ internal static class EventingArtifactFences
             EventingArtifactFixture.Principal, new(fixture.Events, Cursor: fixture.Cursor)));
         await Assert.That(invalid.Code).IsEqualTo(ErrorCode.TokenInvalidated);
         invalid = Assert.ThrowsExactly<KeyLoadException>(() => database.ReadEventSource(
-            EventingArtifactFixture.Principal, new(fixture.Events with { Generation = 2 })));
+            EventingArtifactFixture.Principal, new(fixture.Events with
+            {
+                Generation = 2
+            })));
         await Assert.That(invalid.Code).IsEqualTo(ErrorCode.TokenInvalidated);
         var id = Guid.NewGuid();
         await FailedAsync(fixture, OperationKind.Receive,

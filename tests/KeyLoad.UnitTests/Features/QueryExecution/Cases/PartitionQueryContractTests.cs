@@ -39,7 +39,13 @@ internal sealed class PartitionQueryContractTests
         var invalid = plan with
         {
             Leaves = plan.Leaves.SetItem(1,
-            original with { Request = original.Request with { Partition = database.Partition } })
+            original with
+            {
+                Request = original.Request with
+                {
+                    Partition = database.Partition
+                }
+            })
         };
         var position = database.Store.Position;
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => PartitionQueryPlanValidation.Validate(invalid, limits, UnitExecutionOptions.QueryExecution().Value));
@@ -61,7 +67,9 @@ internal sealed class PartitionQueryContractTests
             database.Database.Limits, UnitExecutionOptions.QueryExecution().Value);
         var position = database.Store.Position;
         var oversized = Enumerable.Range(0, 9).Select(index => database.Partition with
-        { PartitionKey = "leaf-" + index.ToString(System.Globalization.CultureInfo.InvariantCulture) }).ToArray();
+        {
+            PartitionKey = "leaf-" + index.ToString(System.Globalization.CultureInfo.InvariantCulture)
+        }).ToArray();
         var emptyFailure = Assert.ThrowsExactly<KeyLoadException>(() => PartitionQueryPlanFactory.Create(
             request, database.Store.Identity, [], database.Database.Limits, UnitExecutionOptions.QueryExecution().Value));
         var oversizedFailure = Assert.ThrowsExactly<KeyLoadException>(() => PartitionQueryPlanFactory.Create(

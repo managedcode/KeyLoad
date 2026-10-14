@@ -176,7 +176,9 @@ internal sealed class BlobRestoreNormalizationTests
         };
         var definition = new ResourceDefinition(ResourceName, ResourceKind.BlobStore,
             database.Partition.TransactionDomainId)
-        { BlobPolicy = policy };
+        {
+            BlobPolicy = policy
+        };
         database.Submit(OperationKind.ConfigureResource,
             new ConfigureResourceRequest(database.Partition.TenantId, database.Partition.DatabaseId, definition))
             .Get<ResourceDefinition>();

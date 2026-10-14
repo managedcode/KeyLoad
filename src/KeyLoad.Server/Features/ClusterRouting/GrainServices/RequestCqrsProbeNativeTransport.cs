@@ -18,7 +18,9 @@ internal sealed class RequestCqrsProbeNativeTransport(RequestCqrsProbeNativeTrus
                 token.ThrowIfCancellationRequested();
                 var verified = authentication.VerifyReply(request, reply);
                 if (verified.Claim is { } claim)
-                { claims.Add(claim); }
+                {
+                    claims.Add(claim);
+                }
             }
         }
         foreach (var claim in claims)

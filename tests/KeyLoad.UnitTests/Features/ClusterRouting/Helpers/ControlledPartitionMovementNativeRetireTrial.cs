@@ -1,7 +1,7 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.CrashHost.Features.ClusterRouting;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
@@ -22,10 +22,14 @@ internal sealed class ControlledPartitionMovementNativeRetireTrial
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(() => trial.ExecuteAsync(cancellationToken), failures);
         if (failures.Count != 0)
-        { trial.owners?.RetainRoots(); }
+        {
+            trial.owners?.RetainRoots();
+        }
         await trial.CloseAsync(failures);
         if (failures.Count != 0)
-        { ServerFailureObserver.Observe(() => trial.borrow.WriteEvidence(Console.Error), failures); }
+        {
+            ServerFailureObserver.Observe(() => trial.borrow.WriteEvidence(Console.Error), failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
@@ -66,7 +70,10 @@ internal sealed class ControlledPartitionMovementNativeRetireTrial
         await ControlledPartitionMovementNativeRetireProducer.ExpiredAsync(owners, original, cancellationToken);
         var second = borrow.Arm();
         producer = ControlledPartitionMovementNativeRetireProducer.Start(owners,
-            request with { Mode = PartitionMoveMode.Resume }, cancellationToken);
+            request with
+            {
+                Mode = PartitionMoveMode.Resume
+            }, cancellationToken);
         var next = await ControlledPartitionMovementNativeRetireProducer.CaptureAsync(second, producer, cancellationToken);
         var nextExpected = await ControlledPartitionMovementNativeRetireAssertions.PendingAsync(owners,
             next, request, NextCleanup, cancellationToken);
@@ -83,17 +90,27 @@ internal sealed class ControlledPartitionMovementNativeRetireTrial
     private async Task CloseAsync(List<Exception> failures)
     {
         if (owners is not { } owned)
-        { return; }
+        {
+            return;
+        }
         if (selectedCaller is { } selected)
-        { await ServerFailureObserver.ObserveAsync(selected.CancelAsync, failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(selected.CancelAsync, failures);
+        }
         await ServerFailureObserver.ObserveAsync(() => owned.StopAsync(CancellationToken.None), failures);
         if (producer is { } original)
-        { await ServerFailureObserver.ObserveAsync(async () => { _ = await original.ConfigureAwait(false); }, failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(async () => { _ = await original.ConfigureAwait(false); }, failures);
+        }
         await ServerFailureObserver.ObserveAsync(() => borrow.JoinAdmittedAsync(CancellationToken.None), failures);
         if (selectedCaller is { } originalCaller)
-        { ServerFailureObserver.Observe(originalCaller.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(originalCaller.Dispose, failures);
+        }
         if (failures.Count != 0)
-        { owned.RetainRoots(); }
+        {
+            owned.RetainRoots();
+        }
         await ServerFailureObserver.ObserveAsync(() => owned.DisposeAsync().AsTask(), failures);
     }
 }

@@ -30,7 +30,13 @@ internal static class ControlledPartitionMovementGrantFlow
         var position = source.Store.Position;
         var index = source.Journal.Log.State.LastIndex;
         var replay = await ControlledPartitionMovementVerifiedSubmit.SubmitAsync(source, runtime, admission,
-            fenceRequest with { Envelope = fenceRequest.Envelope with { Nonce = Guid.NewGuid() } },
+            fenceRequest with
+            {
+                Envelope = fenceRequest.Envelope with
+                {
+                    Nonce = Guid.NewGuid()
+                }
+            },
             cancellationToken);
         await Assert.That(NativeSerialization.Serialize(replay).SequenceEqual(originalReceipt)).IsTrue();
         await Assert.That(source.Store.Position).IsEqualTo(position);

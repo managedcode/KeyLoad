@@ -29,7 +29,9 @@ internal static class HybridExplainRf3Assertions
             Add(Graph, SearchBranchKind.Graph, GraphWeight);
             var score = 0d;
             foreach (var part in parts)
-            { score += part.Contribution; }
+            {
+                score += part.Contribution;
+            }
             var expected = new RankedDocument(new(new(partition, ThreeWayHybridRf3Scenario.Documents,
                 ids[index]), Revision, "{}", true, [TextField, VectorField]), score, new(Fusion, [.. parts]));
             await Assert.That(JsonDefaults.Serialize(result.Hits[index]).AsSpan()
@@ -40,7 +42,9 @@ internal static class HybridExplainRf3Assertions
                 var eligible = order.Where(ids.Contains).ToArray();
                 var rank = Array.IndexOf(eligible, ids[index]) + FirstRank;
                 if (rank > NoRank)
-                { parts.Add(new(branch, rank, weight, weight / (Fusion + (double)rank))); }
+                {
+                    parts.Add(new(branch, rank, weight, weight / (Fusion + (double)rank)));
+                }
             }
         }
         await Assert.That(result.Expansion).IsNull();

@@ -87,13 +87,18 @@ internal sealed class PhysicalShardCatalogFixture : IDisposable
         OpenExisting();
         Database.Bootstrap(new PrincipalRecord(RootPrincipalId, TenantId,
             [new("*", "*", Capability.All)], ["*"])
-        { ClusterAdministrator = true },
+        {
+            ClusterAdministrator = true
+        },
             DatabaseEngine.Credential(RootPrincipalId, RootPrincipalId, RootCredential));
     }
 
     private void OpenExisting()
     {
-        var opened = new ZoneTreeStore(new(directory) { Incarnation = incarnation }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        var opened = new ZoneTreeStore(new(directory)
+        {
+            Incarnation = incarnation
+        }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         store = opened;
         Database = new(opened, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance, physicalOwner: physicalOwner);
     }
@@ -114,10 +119,16 @@ internal sealed class PhysicalShardCatalogFixture : IDisposable
                 store.Dispose();
                 store = null;
             }
-            catch (Exception failure) when (KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(failure))
-            { failures.Add(failure); return; }
-            catch (Exception failure) when (!KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(failure))
-            { failures.Add(failure); return; }
+            catch (Exception failure) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+            {
+                failures.Add(failure);
+                return;
+            }
+            catch (Exception failure) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+            {
+                failures.Add(failure);
+                return;
+            }
         }
 
         if (Directory.Exists(directory))

@@ -27,7 +27,9 @@ internal static class IndexedReferenceWholeFlowFixture
     {
         var page = view.Scan([], 4096);
         if (page.HasMore)
-        { throw new InvalidOperationException("Fixture state exceeds the bounded snapshot."); }
+        {
+            throw new InvalidOperationException("Fixture state exceeds the bounded snapshot.");
+        }
         return page.Records.Select(record => Convert.ToHexString(record.Key.Span) + ":" +
             Convert.ToHexString(record.Value.Span)).ToArray();
     });
@@ -39,13 +41,18 @@ internal static class IndexedReferenceWholeFlowFixture
         string? cursor = null;
         for (var pageIndex = 0; pageIndex < 4; pageIndex++)
         {
-            var page = engine.Execute("root", request with { Cursor = cursor }, clock);
+            var page = engine.Execute("root", request with
+            {
+                Cursor = cursor
+            }, clock);
             await Assert.That(page.AccessPath).IsEqualTo(path);
             await Assert.That(page.CutPosition).IsEqualTo(db.Store.Position);
             rows.AddRange(page.Rows);
             cursor = page.Cursor;
             if (cursor is null)
-            { return rows.ToArray(); }
+            {
+                return rows.ToArray();
+            }
         }
         throw new InvalidOperationException("Four matching records did not terminate within four bounded pages.");
     }
@@ -56,7 +63,12 @@ internal static class IndexedReferenceWholeFlowFixture
         await Assert.That(rows.Select(row => row.EntityId)).IsEquivalentTo(ids, CollectionOrdering.Matching);
         foreach (var row in rows)
         {
-            var number = row.EntityId switch { "b" => 1, "g" => 3, _ => 2 };
+            var number = row.EntityId switch
+            {
+                "b" => 1,
+                "g" => 3,
+                _ => 2
+            };
             await Assert.That(row.Json).IsEqualTo("{\"id\":\"" + row.EntityId + "\",\"status\":\"open\",\"number\":" + number + "}");
             await Assert.That(row.Revision).IsEqualTo(1L);
             await Assert.That(row.Redacted).IsFalse();

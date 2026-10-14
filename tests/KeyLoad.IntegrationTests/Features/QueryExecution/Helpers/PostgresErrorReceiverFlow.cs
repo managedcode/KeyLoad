@@ -20,7 +20,9 @@ internal static class PostgresErrorReceiverFlow
                 {
                     var state = await PostgresRf3Flow.SeedAsync(fixture, dialect);
                     using (var deadline = McpCallerDeadline.Create())
-                    { await PostgresErrorReceiverHealthy.RunAsync(fixture, state, deadline.Token); }
+                    {
+                        await PostgresErrorReceiverHealthy.RunAsync(fixture, state, deadline.Token);
+                    }
                     using (var deadline = McpCallerDeadline.Create())
                     {
                         await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
@@ -34,7 +36,9 @@ internal static class PostgresErrorReceiverFlow
                         }, deadline.Token);
                     }
                     using (var deadline = McpCallerDeadline.Create())
-                    { await PostgresErrorReceiverHealthy.RunAsync(fixture, state, deadline.Token); }
+                    {
+                        await PostgresErrorReceiverHealthy.RunAsync(fixture, state, deadline.Token);
+                    }
                     for (var cold = PostgresRf3Protocol.FirstColumn; cold < PostgresErrorReceiverProtocol.ColdWaves; cold++)
                     {
                         using var deadline = McpCallerDeadline.Create();

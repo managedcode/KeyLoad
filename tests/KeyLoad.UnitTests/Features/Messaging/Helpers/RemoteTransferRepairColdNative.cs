@@ -22,7 +22,11 @@ internal static class RemoteTransferRepairColdNative
             new(fixture.DestinationPartition.DatabaseId, fixture.DestinationQueue.Queue,
                 denied == fixture.DestinationQueue && !allow ? Capability.QueueInspect : Capability.All)
         };
-        fixture.AddPrincipal(current with { Grants = [.. grants], PolicyEpoch = checked(current.PolicyEpoch + RemoteTransferRepairColdProtocol.FirstGeneration) });
+        fixture.AddPrincipal(current with
+        {
+            Grants = [.. grants],
+            PolicyEpoch = checked(current.PolicyEpoch + RemoteTransferRepairColdProtocol.FirstGeneration)
+        });
     }
 
     internal static byte[] Outcome(RemoteTransferDatabase fixture, Guid command, PartitionRef partition)

@@ -15,7 +15,9 @@ internal static class RequestCqrsEventVectorExpiryJson
         if (value.Version != RequestCqrsProbeProtocol.Version || value.RequestId == Guid.Empty
             || value.CommandId == Guid.Empty || value.OriginalExpiresAt == default
             || value.OriginalExpiresAt.Offset != TimeSpan.Zero)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         return value;
     }
 
@@ -33,7 +35,9 @@ internal static class RequestCqrsEventVectorExpiryJson
     {
         if (!name.StartsWith(Prefix, StringComparison.Ordinal)
             || !name.EndsWith(RequestCqrsProbeProtocol.JsonFileSuffix, StringComparison.Ordinal))
-        { return false; }
+        {
+            return false;
+        }
         var text = name[Prefix.Length..^RequestCqrsProbeProtocol.JsonFileSuffix.Length];
         return Guid.TryParseExact(text, RequestCqrsProbeProtocol.SessionIdFormat, out var id)
             && id != Guid.Empty && id.ToString(RequestCqrsProbeProtocol.SessionIdFormat) == text;

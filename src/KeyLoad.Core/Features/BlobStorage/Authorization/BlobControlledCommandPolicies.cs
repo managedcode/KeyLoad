@@ -13,16 +13,22 @@ public sealed partial class DatabaseEngine
         var scope = BlobCommandScope.From(original);
         BlobKeys.Validate(scope.Blob);
         if (scope.CommandId != original.Id || scope.UploadId == Guid.Empty)
-        { throw BlobErrors.Validation(); }
+        {
+            throw BlobErrors.Validation();
+        }
         Authorization.Require(principal, scope.Blob.Partition, scope.Blob.Resource,
             BlobCommandScope.RequiredCapability(original.Kind));
         if (resources.IsDefault)
-        { throw BlobErrors.Corruption(); }
+        {
+            throw BlobErrors.Corruption();
+        }
         var resource = resources.SingleOrDefault(value => value.Name == scope.Blob.Resource)
             ?? throw Errors.Fail(ErrorCode.NotFound, DatabaseEngineResourceIsNotConfiguredDetail);
         if (resource.Kind != ResourceKind.BlobStore
             || resource.TransactionDomainId != scope.Blob.Partition.TransactionDomainId)
-        { throw BlobErrors.Validation(); }
+        {
+            throw BlobErrors.Validation();
+        }
         BlobQuotaOperations.ValidatePolicy(resource);
         if (original.Kind == OperationKind.BeginBlobUpload
             && BlobCommandScope.Payload<BeginBlobUploadRequest>(original).Access is { } access)

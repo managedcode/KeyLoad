@@ -25,7 +25,12 @@ internal static class BlobLaterPartPublication
             var written = BlobPriorPublicationCommands.Send(owner, OperationKind.WriteBlobPart, part.CommandId, part);
             hash = BlobLaterPartOracle.Next(hash, ordinal, partBytes.Span);
             await BlobPriorPublicationImage.ExactAsync(written.Result.Get<BlobCommitResult<BlobUploadInfo>>().Value,
-                info with { NextOrdinal = ordinal + 1, StoredBytes = ordinal == 0 ? 65_536 : 65_553, IntegrityHash = hash });
+                info with
+                {
+                    NextOrdinal = ordinal + 1,
+                    StoredBytes = ordinal == 0 ? 65_536 : 65_553,
+                    IntegrityHash = hash
+                });
             await BlobPriorPublicationImage.ReceiptAsync(owner, written.Result.Get<BlobCommitResult<BlobUploadInfo>>().Receipt, part.CommandId, blob);
             commands.Add(written);
         }

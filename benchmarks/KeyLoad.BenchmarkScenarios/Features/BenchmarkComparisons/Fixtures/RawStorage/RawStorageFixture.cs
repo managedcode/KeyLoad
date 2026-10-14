@@ -39,7 +39,10 @@ internal sealed class RawStorageFixture : IDisposable
     }
 
     /// <summary>Gets the immutable corpus retained for the fixture lifetime.</summary>
-    public RawStorageCorpus Corpus { get; }
+    public RawStorageCorpus Corpus
+    {
+        get;
+    }
 
     /// <summary>Gets the real ZoneTree directory.</summary>
     public string? Directory => engine?.Directory;

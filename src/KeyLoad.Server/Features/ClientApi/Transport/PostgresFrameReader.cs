@@ -14,12 +14,18 @@ internal static class PostgresFrameReader
     {
         var header = new byte[startup ? LengthBytes : TypedHeaderBytes];
         if (!await FillAsync(input, header, allowEmpty: true, token).ConfigureAwait(false))
-        { return null; }
+        {
+            return null;
+        }
         var size = BinaryPrimitives.ReadInt32BigEndian(header.AsSpan(startup ? PostgresProtocol.FirstField : sizeof(byte), LengthBytes));
         if (size < LengthBytes)
-        { throw Errors.Fail(ErrorCode.Validation, PostgresProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, PostgresProtocol.Invalid);
+        }
         if (size > maximumBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PostgresProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PostgresProtocol.Invalid);
+        }
         var count = size - LengthBytes;
         admission.Resize(PostgresProtocol.AllRows, count);
         PostgresFrame? frame = null;
@@ -35,9 +41,13 @@ internal static class PostgresFrameReader
             ServerFailureObserver.Observe(() =>
             {
                 if (frame is null)
-                { admission.Resize(count, PostgresProtocol.AllRows); }
+                {
+                    admission.Resize(count, PostgresProtocol.AllRows);
+                }
                 else
-                { frame.Dispose(); }
+                {
+                    frame.Dispose();
+                }
             }, failures);
             ServerFailureObserver.ThrowIfAny(failures);
             throw;
@@ -64,11 +74,17 @@ internal static class PostgresFrameReader
             var end = buffer.GetPosition(count);
             input.AdvanceTo(end, count == buffer.Length ? buffer.End : end);
             if (copied == target.Length)
-            { return true; }
+            {
+                return true;
+            }
             if (!read.IsCompleted)
-            { continue; }
+            {
+                continue;
+            }
             if (allowEmpty && copied == PostgresProtocol.AllRows)
-            { return false; }
+            {
+                return false;
+            }
             throw Errors.Fail(ErrorCode.Validation, PostgresProtocol.Invalid);
         }
         return true;

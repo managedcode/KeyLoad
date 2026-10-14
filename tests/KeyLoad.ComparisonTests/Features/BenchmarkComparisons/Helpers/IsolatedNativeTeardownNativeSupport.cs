@@ -19,7 +19,9 @@ internal static class IsolatedNativeTeardownNativeSupport
         var original = AspireResourceCompletion.WaitForExitAsync(fixture.Application, IsolatedResourceTopologyFixture.RunnerName, owner.Token);
         await owner.CancelAsync();
         try
-        { await original; }
+        {
+            await original;
+        }
         catch (OperationCanceledException failure) { return failure; }
         throw new InvalidOperationException("The actual Aspire runner wait did not observe caller cancellation.");
     }
@@ -50,7 +52,9 @@ internal static class IsolatedNativeTeardownNativeSupport
         var original = await initiation;
         failure = await OpenLoopFailure.ObserveAsync(original);
         if (failure is not null)
-        { AddOriginalFailures(original, failure, failures); }
+        {
+            AddOriginalFailures(original, failure, failures);
+        }
     }
 
     internal static void AddOriginalFailures(Task original, Exception observed, List<Exception> failures)
@@ -59,14 +63,18 @@ internal static class IsolatedNativeTeardownNativeSupport
         if (original.Exception is { } aggregate)
         {
             foreach (var failure in aggregate.InnerExceptions)
-            { AddDistinct(failure, failures); }
+            {
+                AddDistinct(failure, failures);
+            }
         }
     }
 
     private static void AddDistinct(Exception failure, List<Exception> failures)
     {
         if (!failures.Any(existing => ReferenceEquals(existing, failure)))
-        { failures.Add(failure); }
+        {
+            failures.Add(failure);
+        }
     }
 
     private static async Task<Task> StartAsync(Func<Task> operation)

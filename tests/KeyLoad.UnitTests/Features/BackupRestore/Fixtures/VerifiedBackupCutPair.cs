@@ -31,7 +31,11 @@ internal static class VerifiedBackupCutPair
         await Assert.That(fixture.Source.Store.Position).IsEqualTo(position);
         await Assert.That(EventingArtifactState.FullBytes(fixture.Source.Store))
             .IsEquivalentTo(bytes, TUnit.Assertions.Enums.CollectionOrdering.Matching);
-        var later = (await CaptureAsync(fixture, Later, token)) with { SecondOperation = issued, SecondResult = result };
+        var later = (await CaptureAsync(fixture, Later, token)) with
+        {
+            SecondOperation = issued,
+            SecondResult = result
+        };
         await Assert.That(later.Capture.Position > earlier.Capture.Position).IsTrue();
         await Assert.That(later.PartitionRows.Length > earlier.PartitionRows.Length).IsTrue();
         return (earlier, later);

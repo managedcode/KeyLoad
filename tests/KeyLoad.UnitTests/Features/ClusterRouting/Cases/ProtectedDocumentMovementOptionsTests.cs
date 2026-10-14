@@ -28,7 +28,9 @@ internal sealed class ProtectedDocumentMovementOptionsTests
                             new DistributedApplicationExecutionContext(DistributedApplicationOperation.Run),
                             NullLogger.Instance, TestContext.Current!.Execution.CancellationToken);
                     if (emitted.Exception is { } failure)
-                    { throw failure; }
+                    {
+                        throw failure;
+                    }
                     using var actual = new ConfigurationManager();
                     actual.AddInMemoryCollection(emitted.EnvironmentVariables.Select(pair => new KeyValuePair<string, string?>(
                         pair.Key.Replace("__", ":", StringComparison.Ordinal), pair.Value)));
@@ -64,7 +66,9 @@ internal sealed class ProtectedDocumentMovementOptionsTests
             configuration.AddInMemoryCollection(values);
             Exception? rejected = null;
             try
-            { _ = TwoRf3Profile.ValidateAndRead(configuration); }
+            {
+                _ = TwoRf3Profile.ValidateAndRead(configuration);
+            }
             catch (InvalidOperationException error) { rejected = error; }
             await Assert.That(rejected?.Message).IsEqualTo(TwoRf3ProfileProtocol.Invalid);
             using var healthy = new ConfigurationManager();
@@ -88,7 +92,10 @@ internal sealed class ProtectedDocumentMovementOptionsTests
             })
             {
                 var builder = DistributedApplication.CreateBuilder(new DistributedApplicationOptions
-                { DisableDashboard = true, Args = [] });
+                {
+                    DisableDashboard = true,
+                    Args = []
+                });
                 var values = Settings(true);
                 values.Add(KeyLoad.AppHost.Features.TestInfrastructure.TestExecutionOptions.SectionName + ":" + name, value);
                 builder.Configuration.AddInMemoryCollection(values);
@@ -96,7 +103,10 @@ internal sealed class ProtectedDocumentMovementOptionsTests
                     Task.FromResult(TwoRf3ClusterResources.Add(builder, Profile(), fixture.DataRoot)));
                 await Assert.That(rejected!.OptionsType).IsEqualTo(typeof(KeyLoad.AppHost.Features.TestInfrastructure.TestExecutionOptions));
                 var healthy = DistributedApplication.CreateBuilder(new DistributedApplicationOptions
-                { DisableDashboard = true, Args = [] });
+                {
+                    DisableDashboard = true,
+                    Args = []
+                });
                 healthy.Configuration.AddInMemoryCollection(Settings(true));
                 var resources = TwoRf3ClusterResources.Add(healthy, Profile(), fixture.DataRoot);
                 await Assert.That(resources.Length).IsEqualTo(6);
@@ -123,7 +133,9 @@ internal sealed class ProtectedDocumentMovementOptionsTests
             [RuntimeContainerImage.ServerConfiguration] = RequestCqrsProbeAppHostBuilder.ValidImage
         };
         if (enabled)
-        { settings.Add(TwoRf3ProfileProtocol.ProtectedDocumentMovementSetting, "true"); }
+        {
+            settings.Add(TwoRf3ProfileProtocol.ProtectedDocumentMovementSetting, "true");
+        }
         return settings;
     }
 
@@ -134,7 +146,9 @@ internal sealed class ProtectedDocumentMovementOptionsTests
     {
         var bytes = RandomNumberGenerator.GetBytes(32);
         try
-        { return Convert.ToBase64String(bytes); }
+        {
+            return Convert.ToBase64String(bytes);
+        }
         finally { CryptographicOperations.ZeroMemory(bytes); }
     }
 }

@@ -12,7 +12,10 @@ internal static class SqlDollarStringRf3Parameters
         foreach (var prepared in new[] { false, true })
         {
             var argument = new global::Npgsql.NpgsqlParameter
-            { NpgsqlDbType = global::NpgsqlTypes.NpgsqlDbType.Text, Value = Value };
+            {
+                NpgsqlDbType = global::NpgsqlTypes.NpgsqlDbType.Text,
+                Value = Value
+            };
             await SqlNullDistinctRf3Image.PageAsync(await wire.ExecuteAsync<global::KeyLoad.QueryPage>(sql,
                 [argument], prepared, token), item, revision);
         }

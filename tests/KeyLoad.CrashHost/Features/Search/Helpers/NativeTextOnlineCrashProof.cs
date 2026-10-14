@@ -35,7 +35,10 @@ internal static class NativeTextOnlineCrashProof
             return;
         }
         await CorruptRepairAsync(runtime, original.Request);
-        var healthy = original.Request with { CommandId = Guid.NewGuid() };
+        var healthy = original.Request with
+        {
+            CommandId = Guid.NewGuid()
+        };
         var result = await NativeTextOnlineCrashFlow.RunAsync(runtime, healthy, CancellationToken.None);
         await LiteralAsync(runtime, healthy);
         NativeTextOnlineCrashFlow.RequireEqual(receipt,
@@ -64,10 +67,14 @@ internal static class NativeTextOnlineCrashProof
             await File.WriteAllBytesAsync(path, invalid);
             var refused = false;
             try
-            { _ = await NativeTextOnlineCrashFlow.RunAsync(runtime, request, CancellationToken.None); }
+            {
+                _ = await NativeTextOnlineCrashFlow.RunAsync(runtime, request, CancellationToken.None);
+            }
             catch (KeyLoadException error) when (error.Code == ErrorCode.Corruption) { refused = true; }
             if (!refused)
-            { throw new InvalidOperationException(NativeTextIncrementalCrashProtocol.Invalid); }
+            {
+                throw new InvalidOperationException(NativeTextIncrementalCrashProtocol.Invalid);
+            }
         }, failures);
         await ServerFailureObserver.ObserveAsync(() => File.WriteAllBytesAsync(path, bytes), failures);
         ServerFailureObserver.ThrowIfAny(failures);
@@ -86,7 +93,10 @@ internal static class NativeTextOnlineCrashProof
         foreach (var removed in new[] { RemovedEnglishText, RemovedUkrainianText })
         {
             NativeTextOnlineCrashFlow.RequireEqual(Array.Empty<RankedDocument>(),
-                await runtime.Search.SearchAsync(CrashFixtureValues.Principal, query with { Text = removed }, CancellationToken.None));
+                await runtime.Search.SearchAsync(CrashFixtureValues.Principal, query with
+                {
+                    Text = removed
+                }, CancellationToken.None));
         }
     }
 }

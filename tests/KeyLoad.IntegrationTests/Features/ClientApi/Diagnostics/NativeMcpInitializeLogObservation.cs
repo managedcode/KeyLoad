@@ -26,21 +26,27 @@ internal sealed class NativeMcpInitializeLogObservation : ILoggerFactory
     internal void Start()
     {
         lock (gate)
-        { enabled = true; }
+        {
+            enabled = true;
+        }
     }
 
     /// <summary>Stops recording before any caller operation or subsequent owner cleanup.</summary>
     internal void Stop()
     {
         lock (gate)
-        { enabled = false; }
+        {
+            enabled = false;
+        }
     }
 
     /// <summary>Retains any observation failure even if native initialization otherwise returns successfully.</summary>
     internal void ThrowIfAny()
     {
         lock (gate)
-        { ServerFailureObserver.ThrowIfAny(failures); }
+        {
+            ServerFailureObserver.ThrowIfAny(failures);
+        }
     }
 
     /// <summary>Writes only closed native facts on failure and joins original observation/write faults.</summary>
@@ -52,10 +58,17 @@ internal sealed class NativeMcpInitializeLogObservation : ILoggerFactory
             foreach (var failure in failures)
             {
                 if (!ledger.Any(existing => ReferenceEquals(existing, failure)))
-                { ledger.Add(failure); }
+                {
+                    ledger.Add(failure);
+                }
             }
             ServerFailureObserver.Observe(() => Console.Error.WriteLine(JsonSerializer.Serialize(new
-            { schemaVersion = SchemaVersion, kind = Kind, saturated, events })), ledger);
+            {
+                schemaVersion = SchemaVersion,
+                kind = Kind,
+                saturated,
+                events
+            })), ledger);
         }
     }
 
@@ -73,13 +86,19 @@ internal sealed class NativeMcpInitializeLogObservation : ILoggerFactory
     public void Dispose()
     {
         lock (gate)
-        { enabled = false; events.Clear(); failures.Clear(); }
+        {
+            enabled = false;
+            events.Clear();
+            failures.Clear();
+        }
     }
 
     private bool Enabled(LogLevel level)
     {
         lock (gate)
-        { return enabled && level == LogLevel.Warning; }
+        {
+            return enabled && level == LogLevel.Warning;
+        }
     }
 
     private void Observe<TState>(LogLevel level, EventId eventId, TState state)
@@ -87,24 +106,39 @@ internal sealed class NativeMcpInitializeLogObservation : ILoggerFactory
         lock (gate)
         {
             if (!enabled || level != LogLevel.Warning || !string.Equals(eventId.Name, NativeFailureEvent, StringComparison.Ordinal))
-            { return; }
+            {
+                return;
+            }
             ServerFailureObserver.Observe(() => Record(state), failures);
             if (failures.Count != 0)
-            { enabled = false; }
+            {
+                enabled = false;
+            }
         }
     }
 
     private void Record<TState>(TState state)
     {
         if (state is not IReadOnlyList<KeyValuePair<string, object?>> values)
-        { return; }
+        {
+            return;
+        }
         foreach (var value in values)
         {
             if (!string.Equals(value.Key, NativeCodeKey, StringComparison.Ordinal) || value.Value is not int code)
-            { continue; }
+            {
+                continue;
+            }
             if (events.Count == MaximumEvents)
-            { saturated = true; return; }
-            events.Add(new { category = RemoteErrorCategory, code });
+            {
+                saturated = true;
+                return;
+            }
+            events.Add(new
+            {
+                category = RemoteErrorCategory,
+                code
+            });
             return;
         }
     }

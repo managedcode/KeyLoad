@@ -50,7 +50,10 @@ internal sealed class Bm25CorpusPublicationTests
             var searchDenied = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => flow.SearchAsync());
             await Assert.That(searchDenied!.Code).IsEqualTo(ErrorCode.PermissionDenied);
             await before.RequireAsync(ReplicaSubmissionOutcomeState.Read(flow.Database));
-            var restored = flow.SetPrincipal(flow.Principal with { PolicyEpoch = 3 });
+            var restored = flow.SetPrincipal(flow.Principal with
+            {
+                PolicyEpoch = 3
+            });
             await Assert.That(restored.PolicyEpoch).IsEqualTo(3L);
             var repairedBefore = ReplicaSubmissionOutcomeState.Read(flow.Database);
             var old = Assert.ThrowsExactly<KeyLoadException>(() => flow.Database.Database.CreateVerifiedBm25CorpusPublication(
@@ -79,25 +82,39 @@ internal sealed class Bm25CorpusPublicationTests
                 ?? throw new InvalidOperationException("The actual original retained head is missing.");
             var exact = checked(key.Length + replacementBytes.Length);
             await Assert.That(replacementBytes.Length).IsLessThan(priorBytes.Length);
-            var full = flow.Database.Database.Limits with { MaxBatchBytes = exact };
+            var full = flow.Database.Database.Limits with
+            {
+                MaxBatchBytes = exact
+            };
             var before = ReplicaSubmissionOutcomeState.Read(flow.Database);
             flow.RequireAdmission(replacement, full);
             var deniedBytes = Assert.ThrowsExactly<KeyLoadException>(() => flow.RequireAdmission(replacement,
-                full with { MaxBatchBytes = exact - 1 }));
+                full with
+                {
+                    MaxBatchBytes = exact - 1
+                }));
             await Assert.That(deniedBytes.Code).IsEqualTo(ErrorCode.BudgetExceeded);
             await before.RequireAsync(ReplicaSubmissionOutcomeState.Read(flow.Database));
-            flow.SetPrincipal(flow.Principal with { Id = "bm25-second-subject" });
+            flow.SetPrincipal(flow.Principal with
+            {
+                Id = "bm25-second-subject"
+            });
             var other = Bm25CorpusPublicationFlow.Phase(flow.Capture(Guid.NewGuid(), null, subject: "bm25-second-subject")).Current;
             var count = flow.Database.Store.Read(view =>
             {
                 var page = view.Scan(Bm25CorpusKeys.Prefix(flow.Database.Partition), flow.Database.Database.Limits.MaxScanRecords, null);
                 if (page.HasMore)
-                { throw new InvalidOperationException("The actual retained family was not complete."); }
+                {
+                    throw new InvalidOperationException("The actual retained family was not complete.");
+                }
                 return page.Records.Length;
             });
             var countBefore = ReplicaSubmissionOutcomeState.Read(flow.Database);
             var deniedRecords = Assert.ThrowsExactly<KeyLoadException>(() => flow.RequireAdmission(other,
-                flow.Database.Database.Limits with { MaxScanRecords = count }));
+                flow.Database.Database.Limits with
+                {
+                    MaxScanRecords = count
+                }));
             await Assert.That(deniedRecords.Code).IsEqualTo(ErrorCode.BudgetExceeded);
             await countBefore.RequireAsync(ReplicaSubmissionOutcomeState.Read(flow.Database));
         });

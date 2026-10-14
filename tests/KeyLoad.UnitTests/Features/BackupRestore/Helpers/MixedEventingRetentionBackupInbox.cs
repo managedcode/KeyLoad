@@ -17,11 +17,16 @@ internal static class MixedEventingRetentionBackupInbox
         var principal = new PrincipalRecord(Operator, state.InboxSource.Partition.TenantId,
             [new(state.InboxSource.Partition.DatabaseId, state.InboxSource.Queue,
                 Capability.QueueCancel | Capability.QueuePublish)], [])
-        { ClusterAdministrator = true };
+        {
+            ClusterAdministrator = true
+        };
         var admitted = fixture.Apply(fixture.Database, OperationKind.ConfigurePrincipal,
             new ConfigurePrincipalRequest(principal), Guid.NewGuid()).Get<PrincipalRecord>();
         await MixedEventingRetentionBackupTopic.EqualAsync(principal, admitted);
-        command = command with { CommandId = Guid.NewGuid() };
+        command = command with
+        {
+            CommandId = Guid.NewGuid()
+        };
         _ = fixture.Apply(fixture.Database, OperationKind.Batch, command, command.CommandId, Operator).Get<CommitReceipt>();
         var receive = new ReceiveRequest(Guid.NewGuid(), state.InboxSource);
         var result = fixture.Apply(fixture.Database, OperationKind.Receive, receive, receive.RequestId).Get<ReceiveResult>();

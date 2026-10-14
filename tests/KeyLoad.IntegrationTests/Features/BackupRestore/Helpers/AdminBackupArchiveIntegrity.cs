@@ -24,10 +24,14 @@ internal static class AdminBackupArchiveIntegrity
         });
         var length = manifest.Length;
         if (length <= EmptyManifestBytes || length > policy.MaximumBackupManifestBytes)
-        { throw new InvalidDataException(InvalidManifestLength); }
+        {
+            throw new InvalidDataException(InvalidManifestLength);
+        }
         var digest = await SHA256.HashDataAsync(manifest, cancellationToken).ConfigureAwait(false);
         if (manifest.Position != length || manifest.Length != length)
-        { throw new InvalidDataException(ChangedManifestLength); }
+        {
+            throw new InvalidDataException(ChangedManifestLength);
+        }
         return digest;
     }
 }

@@ -1,7 +1,7 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
-using KeyLoad.Orleans;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
@@ -52,17 +52,25 @@ internal sealed class PartitionMovementParentStateReader
         pending = state.Pending
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
         if (pending.OriginalPhaseCommandId != id)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+        }
         if (!PartitionMoveGrantValidation.IsLocalControl(pending.Stage))
         {
             state = await proofs.ObserveExistingAsync(principalId, state, work, cancellationToken).ConfigureAwait(false);
         }
         if (pending.Stage == PartitionMovePeerStage.ControlAuthorize)
-        { await observer.ObserveAuthorizationAsync(principalId, request, state, work, cancellationToken).ConfigureAwait(false); }
+        {
+            await observer.ObserveAuthorizationAsync(principalId, request, state, work, cancellationToken).ConfigureAwait(false);
+        }
         else if (pending.Stage == PartitionMovePeerStage.Capture)
-        { await observer.ObserveCaptureAsync(principalId, request, state, work, cancellationToken).ConfigureAwait(false); }
+        {
+            await observer.ObserveCaptureAsync(principalId, request, state, work, cancellationToken).ConfigureAwait(false);
+        }
         else
-        { await observer.ObserveAsync(principalId, request, state, work, cancellationToken).ConfigureAwait(false); }
+        {
+            await observer.ObserveAsync(principalId, request, state, work, cancellationToken).ConfigureAwait(false);
+        }
         // Only observation is permitted here. A resumed unknown effect never becomes a first dispatch.
         return await ReadCurrentAsync(principalId, request, id, work, cancellationToken).ConfigureAwait(false);
     }
@@ -76,7 +84,9 @@ internal sealed class PartitionMovementParentStateReader
         var grant = PartitionMovementParentAuthority.RequireObserved(acknowledged, PartitionMovePeerStage.ControlAcknowledge).Grant
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
         if (grant.Stage != expected || grant.Settlement is null || grant.AbortDisposition is not null)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+        }
         var actual = await ReadCurrentAsync(principalId, request, grant.PhaseCommandId, work,
             cancellationToken).ConfigureAwait(false);
         var original = actual.Selected
@@ -86,7 +96,9 @@ internal sealed class PartitionMovementParentStateReader
             || original.OriginalGrant?.GrantId != grant.GrantId
             || !NativeSerialization.Serialize(effect.Journal).AsSpan()
                 .SequenceEqual(NativeSerialization.Serialize(grant.Settlement)))
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+        }
         return actual;
     }
 
@@ -95,7 +107,9 @@ internal sealed class PartitionMovementParentStateReader
         CancellationToken cancellationToken)
     {
         if (actualGrantId == Guid.Empty)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+        }
         var state = await ReadCurrentAsync(principalId, request, actualGrantId, work,
             cancellationToken).ConfigureAwait(false);
         var authorization = state.Selected
@@ -103,14 +117,18 @@ internal sealed class PartitionMovementParentStateReader
         var grant = PartitionMovementParentAuthority.RequireObserved(authorization, PartitionMovePeerStage.ControlAuthorize).Grant
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
         if (grant.GrantId != actualGrantId || grant.Settlement is null || grant.AbortDisposition is not null)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+        }
         state = await ReadCurrentAsync(principalId, request, grant.PhaseCommandId, work,
             cancellationToken).ConfigureAwait(false);
         var actual = state.Selected
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
         if (!NativeSerialization.Serialize(PartitionMovementParentAuthority.RequireObserved(actual, grant.Stage).Journal).AsSpan()
             .SequenceEqual(NativeSerialization.Serialize(grant.Settlement)))
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+        }
         return state;
     }
 }

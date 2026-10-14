@@ -38,9 +38,13 @@ internal static class SampleRollupProcessRecovery
             }
         }
         catch (Exception failure) when (CommandIdempotencyProcessFailureHandling.IsNonFatal(failure))
-        { primary = failure; }
+        {
+            primary = failure;
+        }
         catch (Exception failure) when (!CommandIdempotencyProcessFailureHandling.IsNonFatal(failure))
-        { primary = failure; }
+        {
+            primary = failure;
+        }
         await CommandIdempotencyProcessCleanup.CleanupActiveTrialAsync(root, active, primary);
     }
 
@@ -55,7 +59,9 @@ internal static class SampleRollupProcessRecovery
         {
             await child.WaitAndJoinAsync(token);
             if (child.ExitCode != SuccessExit)
-            { throw new InvalidOperationException(FailedChild); }
+            {
+                throw new InvalidOperationException(FailedChild);
+            }
         }
         await KilledProcessFileReadiness.WaitAsync(root, token);
         RecoveryFileInventory.AssertNativeHandlesReleased(root);
@@ -65,10 +71,16 @@ internal static class SampleRollupProcessRecovery
     private static ProcessStartInfo CreateStart(string root, string mode)
     {
         var start = new ProcessStartInfo(DotnetHost)
-        { RedirectStandardOutput = true, RedirectStandardError = true, UseShellExecute = false };
+        {
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false
+        };
         foreach (var argument in new[] { typeof(CrashHostMarker).Assembly.Location, root,
             CommitStage.JournalFlushed.ToString(), SampleRollupCrashContract.MutationIndex.ToString(CultureInfo.InvariantCulture), mode })
-        { start.ArgumentList.Add(argument); }
+        {
+            start.ArgumentList.Add(argument);
+        }
         return start;
     }
 }

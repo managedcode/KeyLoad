@@ -16,9 +16,18 @@ internal sealed class ControlledPartitionMovementLoopbackCorpus
             listeners.DestinationOrigins.Length).Select(index => listeners.NativeEndpoint(index).ToString()).ToArray();
     }
 
-    internal RegisteredPhysicalOwnerV1 Control { get; }
-    internal RegisteredPhysicalOwnerV1 Destination { get; }
-    internal string[] DestinationSiloEndpoints { get; }
+    internal RegisteredPhysicalOwnerV1 Control
+    {
+        get;
+    }
+    internal RegisteredPhysicalOwnerV1 Destination
+    {
+        get;
+    }
+    internal string[] DestinationSiloEndpoints
+    {
+        get;
+    }
 
     private static RegisteredPhysicalOwnerV1 Entry(PhysicalShardRecord original,
         ImmutableArray<string> actualOrigins)

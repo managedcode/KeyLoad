@@ -11,7 +11,9 @@ internal static class SubscriptionCachedEmptyPolicyFlow
     {
         SubscriptionCachedEmptyPolicyState? state = null;
         await SubscriptionPhasePublicTrial.WithCallersAsync(fixture, seed, async (sdk, mcp) =>
-        { state = await StartAsync(fixture, sdk, mcp, seed, token); }, token);
+        {
+            state = await StartAsync(fixture, sdk, mcp, seed, token);
+        }, token);
         var original = state ?? throw new InvalidOperationException("The empty policy flow did not retain its original result.");
         await SubscriptionFilterRf3Cold.RestartAsync(fixture, token);
         await SubscriptionPhasePublicTrial.WithCallersAsync(fixture, seed,
@@ -42,7 +44,9 @@ internal static class SubscriptionCachedEmptyPolicyFlow
         await Assert.That(await SubscriptionCachedEmptyPolicyAssertions.RefuseAsync(sdk, mcp, blocked,
             SubscriptionCachedEmptyPolicyAssertions.ScopeDenied, token)).IsEqualTo(revoked);
         await MessagingRf3Identity.UpdateAsync(fixture, seed.Manager.Principal with
-        { PolicyEpoch = checked(denied.PolicyEpoch + SubscriptionFilterRf3Protocol.Initial) }, token);
+        {
+            PolicyEpoch = checked(denied.PolicyEpoch + SubscriptionFilterRf3Protocol.Initial)
+        }, token);
         var emptyProblem = await SubscriptionCachedEmptyPolicyAssertions.RefuseAsync(sdk, mcp, original.Empty,
             SubscriptionCachedEmptyPolicyAssertions.EpochChanged, token);
         var deniedProblem = await SubscriptionCachedEmptyPolicyAssertions.RefuseAsync(sdk, mcp, blocked,

@@ -11,19 +11,33 @@ internal static class RowVisibilityTransfers
             try
             {
                 if (!budget.TryReserve(RowVisibilityMemoryModel.OwnerBytes, RowVisibilityMemoryModel.MetadataOnly, out acquired))
-                { return null; }
+                {
+                    return null;
+                }
                 return Owner(budget, ref acquired);
             }
             catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
-            { primary = error; throw; }
+            {
+                primary = error;
+                throw;
+            }
             catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null)
-            { primary = error; throw; }
+            {
+                primary = error;
+                throw;
+            }
             finally { acquired?.Dispose(); }
         }
         catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
-        { RowVisibilityFailureLedger.ThrowJoined(primary, error); throw; }
+        {
+            RowVisibilityFailureLedger.ThrowJoined(primary, error);
+            throw;
+        }
         catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null)
-        { RowVisibilityFailureLedger.ThrowJoined(primary, error); throw; }
+        {
+            RowVisibilityFailureLedger.ThrowJoined(primary, error);
+            throw;
+        }
     }
     private static RowVisibilityCache Owner(ICacheMemoryBudget budget, ref ICacheMemoryReservation? acquired)
     {
@@ -59,19 +73,33 @@ internal static class RowVisibilityTransfers
             try
             {
                 if (!budget.TryReserve(RowVisibilityMemoryModel.LeaseBytes, RowVisibilityMemoryModel.MetadataOnly, out acquired))
-                { return null; }
+                {
+                    return null;
+                }
                 return Lease(owner, entry, ref acquired);
             }
             catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
-            { primary = error; throw; }
+            {
+                primary = error;
+                throw;
+            }
             catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null)
-            { primary = error; throw; }
+            {
+                primary = error;
+                throw;
+            }
             finally { acquired?.Dispose(); }
         }
         catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
-        { RowVisibilityFailureLedger.ThrowJoined(primary, error); throw; }
+        {
+            RowVisibilityFailureLedger.ThrowJoined(primary, error);
+            throw;
+        }
         catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null)
-        { RowVisibilityFailureLedger.ThrowJoined(primary, error); throw; }
+        {
+            RowVisibilityFailureLedger.ThrowJoined(primary, error);
+            throw;
+        }
     }
 
 }

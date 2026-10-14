@@ -46,11 +46,15 @@ internal sealed class HeavyDocumentLoadScenario(ClusterFixture fixture) : IAsync
         var joined = Task.WhenAll(work);
         originals = joined;
         try
-        { await joined.ConfigureAwait(false); }
+        {
+            await joined.ConfigureAwait(false);
+        }
         catch (Exception)
         {
             if (joined.Exception is { } originalFailures)
-            { throw originalFailures; }
+            {
+                throw originalFailures;
+            }
             throw;
         }
         await overlap.VerifyAsync().ConfigureAwait(false);
@@ -72,7 +76,9 @@ internal sealed class HeavyDocumentLoadScenario(ClusterFixture fixture) : IAsync
     private static async Task GuardAsync(Func<Task> operation, CancellationTokenSource lifetime)
     {
         try
-        { await operation().ConfigureAwait(false); }
+        {
+            await operation().ConfigureAwait(false);
+        }
         catch (Exception primary)
         {
             var failures = new List<Exception> { primary };
@@ -87,7 +93,9 @@ internal sealed class HeavyDocumentLoadScenario(ClusterFixture fixture) : IAsync
         var command = HeavyDocumentLoadProtocol.Command(partition, ordinal);
         var original = client.CommitAsync(command, token);
         if (lane is { } writer)
-        { overlap.Original(writer, original); }
+        {
+            overlap.Original(writer, original);
+        }
         try
         {
             var receipt = await McpCallerAssertions.SdkSuccessAsync(await original.ConfigureAwait(false)).ConfigureAwait(false);
@@ -119,7 +127,9 @@ internal sealed class HeavyDocumentLoadScenario(ClusterFixture fixture) : IAsync
             var result = await PublicReadAssertions.DocumentAsync(await original.ConfigureAwait(false)).ConfigureAwait(false);
             await HeavyDocumentLoadReadback.VerifySentinelAsync(result, partition).ConfigureAwait(false);
             if (concurrent)
-            { overlap.ReadOverlapped(SdkReaderLane); }
+            {
+                overlap.ReadOverlapped(SdkReaderLane);
+            }
         }
     }
     private async Task ReadMcpAsync(McpOfficialClient owner, PartitionRef partition, CancellationToken token)
@@ -135,7 +145,9 @@ internal sealed class HeavyDocumentLoadScenario(ClusterFixture fixture) : IAsync
                 .ConfigureAwait(false);
             await HeavyDocumentLoadReadback.VerifySentinelAsync(result.Value, partition).ConfigureAwait(false);
             if (concurrent)
-            { overlap.ReadOverlapped(McpReaderLane); }
+            {
+                overlap.ReadOverlapped(McpReaderLane);
+            }
         }
     }
     private async Task QueryMcpAsync(McpOfficialClient owner, PartitionRef partition, CancellationToken token)
@@ -151,22 +163,34 @@ internal sealed class HeavyDocumentLoadScenario(ClusterFixture fixture) : IAsync
                 .ConfigureAwait(false);
             await HeavyDocumentLoadReadback.VerifySentinelPageAsync(result.Value).ConfigureAwait(false);
             if (concurrent)
-            { overlap.ReadOverlapped(McpQueryLane); }
+            {
+                overlap.ReadOverlapped(McpQueryLane);
+            }
         }
     }
     public async ValueTask DisposeAsync()
     {
         if (Interlocked.Exchange(ref disposed, 1) != 0)
-        { return; }
+        {
+            return;
+        }
         var failures = new List<Exception>();
         if (lifetime is not null)
-        { await ServerFailureObserver.ObserveAsync(lifetime.CancelAsync, failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(lifetime.CancelAsync, failures).ConfigureAwait(false);
+        }
         if (originals is not null)
-        { await ServerFailureObserver.ObserveAsync(() => originals, failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => originals, failures).ConfigureAwait(false);
+        }
         foreach (var owner in official)
-        { await ServerFailureObserver.ObserveAsync(() => owner.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => owner.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         foreach (var connection in connections)
-        { ServerFailureObserver.Observe(connection.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(connection.Dispose, failures);
+        }
         lifetime?.Dispose();
         ServerFailureObserver.ThrowIfAny(failures);
     }

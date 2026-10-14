@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
-using KeyLoad.Orleans;
 using KeyLoad.Replication;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
@@ -28,7 +28,9 @@ internal static class NativeActivationDuplicateRf3Operation
                 established, receipt, discovery, failures, cancellationToken).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
         if (replacementCaller is { } caller)
-        { await ServerFailureObserver.ObserveAsync(() => caller.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => caller.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
     }
 
     private static async Task VerifyWithCallerAsync(TwoRf3MembershipWave wave, RequestCqrsRf3Callers administrator,
@@ -72,7 +74,9 @@ internal static class NativeActivationDuplicateRf3Operation
             await SqlRf3Protocol.EqualAsync(receipt, await next.Producer.ConfigureAwait(false));
         }
         if (failures.Count != NoFailuresCount)
-        { return; }
+        {
+            return;
+        }
         await (wave.IsolationOwner ?? throw new InvalidOperationException(NativeActivationRf3Protocol.Missing))
             .RestoreAsync(cancellationToken).ConfigureAwait(false);
         await RequestCqrsPhaseFaultAssertions.VerifyDocumentAsync(original, identity,

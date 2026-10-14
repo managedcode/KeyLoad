@@ -1,7 +1,7 @@
 using KeyLoad.Client;
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
@@ -19,7 +19,9 @@ internal static class SqlCreateTableRf3Cancellation
             await using var wire = await PostgresRf3Caller.ConnectAsync(fixture.App, McpCallerProtocol.Node2,
                 state.Identity.Principal.Id, state.Identity.Secret, PostgresRf3Certificate.RootPath(fixture), token);
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
-            { await OriginalAsync(fixture, selection, state, root, wire, controls, discovery, token); }, failures);
+            {
+                await OriginalAsync(fixture, selection, state, root, wire, controls, discovery, token);
+            }, failures);
         }, failures);
         global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -54,9 +56,13 @@ internal static class SqlCreateTableRf3Cancellation
                     await SqlCreateTableRf3Pages.RunAsync(fixture, state, token);
                 }, operationFailures);
                 if (operationFailures.Count != PostgresRf3Protocol.FirstColumn && !controls.ArmFor(arm).Retired)
-                { await PostgresRf3Cancellation.CleanupAsync(controls, arm, discovery, originalCancellation, original, joined, operationFailures); }
+                {
+                    await PostgresRf3Cancellation.CleanupAsync(controls, arm, discovery, originalCancellation, original, joined, operationFailures);
+                }
                 if (operationFailures.Count != PostgresRf3Protocol.FirstColumn)
-                { selection.RetainEvidence(); }
+                {
+                    selection.RetainEvidence();
+                }
                 global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(operationFailures);
             }, failures);
         }, failures);
@@ -77,7 +83,13 @@ internal static class SqlCreateTableRf3Cancellation
         await Assert.That(error.CancellationToken).IsEqualTo(cancellation.Token);
         var cancelled = await controls.WaitForMarkerAsync(arm, RequestCqrsProbePhase.AuthorizationReload, RequestCqrsProbeOutcome.Cancelled, discovery, token);
         var disposed = await controls.WaitForMarkerAsync(arm, RequestCqrsProbePhase.ProducerDisposed, RequestCqrsProbeOutcome.Observed, discovery, token);
-        await SqlRf3Protocol.EqualAsync(held with { Outcome = cancelled.Outcome }, cancelled);
-        await SqlRf3Protocol.EqualAsync(held with { Phase = RequestCqrsProbePhase.ProducerDisposed }, disposed);
+        await SqlRf3Protocol.EqualAsync(held with
+        {
+            Outcome = cancelled.Outcome
+        }, cancelled);
+        await SqlRf3Protocol.EqualAsync(held with
+        {
+            Phase = RequestCqrsProbePhase.ProducerDisposed
+        }, disposed);
     }
 }

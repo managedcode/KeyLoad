@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
@@ -128,7 +128,10 @@ internal sealed class RequestCqrsWaitForIndexValidationTests
             RequestCqrsWaitForIndexReadCutInventory.RequireArm(input.Value, arm);
         }
         _ = Assert.ThrowsExactly<InvalidOperationException>(() =>
-            input.ReadArm(arm with { Phase = RequestCqrsProbePhase.WaitForIndexReadCutCaptured }));
+            input.ReadArm(arm with
+            {
+                Phase = RequestCqrsProbePhase.WaitForIndexReadCutCaptured
+            }));
         await Assert.That(input.ReadArm(arm)).IsEqualTo(arm);
     }
 }

@@ -8,7 +8,13 @@ internal sealed record GuideLifecyclePublicState(McpDocumentScenario Scenario, M
     CommandRequest Healthy, OutboxStatus Outbox)
 {
     internal Guid RepairCommandId { get; } = Guid.NewGuid();
-    internal Result? RepairOutcome { get; set; }
-    internal CommitReceipt? HealthyReceipt { get; set; }
+    internal Result? RepairOutcome
+    {
+        get; set;
+    }
+    internal CommitReceipt? HealthyReceipt
+    {
+        get; set;
+    }
     internal OutboxStatus CurrentOutbox { get; set; } = Outbox;
 }

@@ -13,7 +13,9 @@ internal static class SampleMetadataIntegrityAssertions
         {
             var page = view.Scan([], MaximumRecords);
             if (page.HasMore)
-            { throw new InvalidOperationException("The complete metadata fixture image exceeds its bound."); }
+            {
+                throw new InvalidOperationException("The complete metadata fixture image exceeds its bound.");
+            }
             return JsonSerializer.Serialize(page.Records.Select(record =>
                 new[] { Convert.ToHexString(record.Key.Span), Convert.ToHexString(record.Value.Span) }).ToArray());
         }));
@@ -31,7 +33,9 @@ internal static class SampleMetadataIntegrityAssertions
         await Failure(fixture, () => SampleMetadataIntegrityScenario.Bucket(fixture), code);
         await Failure(fixture, () => fixture.Apply(refresh), code);
         if (!SampleMetadataIntegrityScenario.IsRetention(fault))
-        { return; }
+        {
+            return;
+        }
         await Failure(fixture, () => SampleMetadataIntegrityScenario.Range(fixture), code);
         await Failure(fixture, () => SampleMetadataIntegrityScenario.Latest(fixture), code);
         await Failure(fixture, () => SampleMetadataIntegrityScenario.Aggregate(fixture), code);

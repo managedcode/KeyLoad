@@ -18,7 +18,10 @@ internal static class BlobTombstoneListingPublicAssertions
         await PageAsync(callers, scope, 4, null, [state.Current.Completed.Value], null, token);
         await BlobBoundedRetirementPublicAssertions.CurrentAsync(callers, state.Current, token);
         await BlobBoundedRetirementPublicAssertions.UploadAsync(callers, scope, state.Current.Begin.UploadId,
-            state.Current.Written[0].Value with { Status = BlobUploadStatus.Complete }, token);
+            state.Current.Written[0].Value with
+            {
+                Status = BlobUploadStatus.Complete
+            }, token);
         var eof = new BlobReadRequest(scope, 2L, 4L, 0);
         var expected = new BlobReadResult(state.Current.Completed.Value, 4L, Array.Empty<byte>());
         await SqlRf3Protocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.ReadBlobRangeAsync(eof, token)));
@@ -51,7 +54,9 @@ internal static class BlobTombstoneListingPublicAssertions
     {
         await ReceiptAsync(placement, published.Begin.CommandId, published.Begun.Receipt);
         for (var index = 0; index < published.Parts.Length; index++)
-        { await ReceiptAsync(placement, published.Parts[index].CommandId, published.Written[index].Receipt); }
+        {
+            await ReceiptAsync(placement, published.Parts[index].CommandId, published.Written[index].Receipt);
+        }
         await ReceiptAsync(placement, published.Complete.CommandId, published.Completed.Receipt);
     }
 

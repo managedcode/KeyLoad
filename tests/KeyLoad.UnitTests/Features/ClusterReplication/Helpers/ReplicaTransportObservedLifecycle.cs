@@ -5,7 +5,10 @@ namespace KeyLoad.UnitTests.Features.ClusterReplication;
 internal sealed class ReplicaTransportObservedLifecycle(ILogger<SiloLifecycleSubject> logger) : ISiloLifecycle
 {
     private readonly SiloLifecycleSubject subject = new(logger);
-    internal Task? OriginalStop { get; private set; }
+    internal Task? OriginalStop
+    {
+        get; private set;
+    }
     internal TaskCompletionSource<Task> StopObserved { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
     public int HighestCompletedStage => subject.HighestCompletedStage;
     public int LowestStoppedStage => subject.LowestStoppedStage;

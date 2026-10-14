@@ -1,5 +1,5 @@
 using System.Runtime.CompilerServices;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.UnitTests.Features.Search;
 using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,7 +21,9 @@ internal static class RequestCqrsActualTextMaintenanceFlow
         TextIndexMaintenanceRequest? prepared, CancellationToken token)
     {
         if (prepared is null)
-        { fixture.Database.Configure(NativeTextBilingualAudit.Collection, ResourceKind.Collection); }
+        {
+            fixture.Database.Configure(NativeTextBilingualAudit.Collection, ResourceKind.Collection);
+        }
         var request = prepared ?? await NativeTextMaintenanceRequestFixture.CreateAsync(fixture.Database, token);
         _ = await NativeTextMaintenanceSeed.CommitAsync(fixture.Database, token);
         var built = await ExecuteAsync(fixture, request, token);
@@ -38,7 +40,11 @@ internal static class RequestCqrsActualTextMaintenanceFlow
                     ExpectedRevision: OriginalRevision)]);
             _ = await NativeTextMaintenanceCommit.ExecuteAsync<CommitReceipt>(fixture.Database,
                 OperationKind.Batch, write, id, token);
-            var restore = request with { CommandId = Guid.NewGuid(), Mode = TextIndexMaintenanceMode.Restore };
+            var restore = request with
+            {
+                CommandId = Guid.NewGuid(),
+                Mode = TextIndexMaintenanceMode.Restore
+            };
             var restored = await ExecuteAsync(fixture, restore, token);
             await VerifyResultAsync(fixture, restore, restored);
             await RequestCqrsActualTextReplayFlow.ReplayAsync(fixture, restore, restored, token);
@@ -95,7 +101,9 @@ internal static class RequestCqrsActualTextMaintenanceFlow
             await KeyLoad.Server.ServerFailureObserver.ObserveAsync(
                 () => RequestCqrsNativeTextCheckpointObservation.RecordAsync(fixture, request, token), failures);
             if (failures.Count > 1)
-            { KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures); }
+            {
+                KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
+            }
         }
         await RequestCqrsActualTextReplayFlow.VerifyFramesAsync(frames, request.Mode,
             expectNativeWork, reply.Error);
@@ -125,6 +133,9 @@ internal static class RequestCqrsActualTextMaintenanceFlow
         [EnumeratorCancellation] CancellationToken token)
     {
         await foreach (var frame in original.WithCancellation(token))
-        { frames.Add(frame); yield return frame; }
+        {
+            frames.Add(frame);
+            yield return frame;
+        }
     }
 }

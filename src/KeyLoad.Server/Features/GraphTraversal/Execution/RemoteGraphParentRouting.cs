@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.GraphTraversal;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 using Microsoft.Extensions.Options;
 
@@ -14,7 +14,9 @@ internal static class RemoteGraphParentRouting
         ArgumentNullException.ThrowIfNull(trusted);
         work.Check();
         if (trusted.Purpose != RemoteGraphRequestScope.ParentPurpose || string.IsNullOrEmpty(trusted.PrincipalId))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteGraphNativeProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, RemoteGraphNativeProtocol.InvalidProof);
+        }
         return partition.Database.Store.Read(view => partition.Database.Principal(work.CreateView(view),
             trusted.PrincipalId, clock.GetUtcNow()));
     }
@@ -32,7 +34,9 @@ internal static class RemoteGraphParentRouting
     {
         var options = node.RuntimeServices.GetRequiredService<IOptions<NodeOptions>>().Value;
         if (options.PhysicalGroupTrust.Role != PhysicalGroupTrustRole.Control)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, RemoteGraphNativeProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, RemoteGraphNativeProtocol.Unavailable);
+        }
         return PhysicalOwnerConfiguredTuples.Control(options, partition).Owner;
     }
 }

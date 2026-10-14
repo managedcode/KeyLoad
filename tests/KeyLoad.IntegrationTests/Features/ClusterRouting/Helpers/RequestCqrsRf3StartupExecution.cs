@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
@@ -22,11 +22,17 @@ internal static class RequestCqrsRf3StartupExecution
         finally
         {
             try
-            { await startup.DisposeAsync().ConfigureAwait(false); }
+            {
+                await startup.DisposeAsync().ConfigureAwait(false);
+            }
             catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure))
-            { failures.Add(failure); }
+            {
+                failures.Add(failure);
+            }
             catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure))
-            { failures.Add(failure); }
+            {
+                failures.Add(failure);
+            }
         }
         ServerFailureObserver.ThrowIfAny(failures);
         return wave ?? throw new InvalidOperationException(MissingWave);

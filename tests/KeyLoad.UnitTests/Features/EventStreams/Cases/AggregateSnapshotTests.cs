@@ -26,7 +26,10 @@ internal sealed class AggregateSnapshotTests
         await Assert.That(first.Mutations.Single().Revision).IsEqualTo(1);
         await Assert.That(retry.Mutations.Single().Revision).IsEqualTo(1);
         await Assert.That(stored.StateJson).IsEqualTo(AggregateReplayFixture.StateJson);
-        await Assert.That(stored.Checksum).IsEqualTo(JsonData.Fingerprint(stored with { Checksum = string.Empty }));
+        await Assert.That(stored.Checksum).IsEqualTo(JsonData.Fingerprint(stored with
+        {
+            Checksum = string.Empty
+        }));
         await Assert.That(replay.Snapshot!.StateJson).IsEqualTo(AggregateReplayFixture.StateJson);
         await Assert.That(replay.Events.Select(item => item.Revision).SequenceEqual([3L])).IsTrue();
     }
@@ -79,7 +82,10 @@ internal sealed class AggregateSnapshotTests
         var unknown = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Read());
         var beginning = fixture.Read(maximumEvents: 1, fromBeginning: true);
         fixture.StoreEnvelope(new(AggregateSnapshotPersistence.CurrentFormatVersion,
-            snapshot with { Checksum = BadChecksum }));
+            snapshot with
+            {
+                Checksum = BadChecksum
+            }));
         var checksum = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Read());
 
         await Assert.That(unknown.Code).IsEqualTo(ErrorCode.FormatUnsupported);

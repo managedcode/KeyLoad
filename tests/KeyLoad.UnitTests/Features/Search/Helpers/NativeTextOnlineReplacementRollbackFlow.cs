@@ -1,5 +1,5 @@
+using KeyLoad.Clustering.Features.Search;
 using KeyLoad.Core;
-using KeyLoad.Orleans.Features.Search;
 using KeyLoad.Server;
 
 namespace KeyLoad.UnitTests.Features.Search;
@@ -20,15 +20,19 @@ internal static class NativeTextOnlineReplacementRollbackFlow
             catch (Exception primary) { failures.Add(primary); throw; }
             finally { fixture?.Dispose(); }
         }
-        catch (Exception cleanup) when (KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
+        catch (Exception cleanup) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
         {
             if (!failures.Any(error => ReferenceEquals(error, cleanup)))
-            { failures.Add(cleanup); }
+            {
+                failures.Add(cleanup);
+            }
         }
-        catch (Exception cleanup) when (!KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
+        catch (Exception cleanup) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
         {
             if (!failures.Any(error => ReferenceEquals(error, cleanup)))
-            { failures.Add(cleanup); }
+            {
+                failures.Add(cleanup);
+            }
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -41,11 +45,15 @@ internal static class NativeTextOnlineReplacementRollbackFlow
         try
         {
             await ServerFailureObserver.ObserveAsync(async () =>
-            { completed = await ReplacementAsync(fixture, runtime, token); }, failures);
+            {
+                completed = await ReplacementAsync(fixture, runtime, token);
+            }, failures);
         }
         finally { await runtime.DisposeAsync(); }
         if (failures.Count != 0 || completed is not { } receipts)
-        { return; }
+        {
+            return;
+        }
         var cold = new NativeTextOnlineTestRuntime(fixture);
         try
         {
@@ -73,12 +81,18 @@ internal static class NativeTextOnlineReplacementRollbackFlow
             seed.Pin.Collection, seed.Pin.Field, seed.Pin.Generation, seed.Pin.NodeId, seed.Pin.Placement);
         var original = await NativeTextOnlineWholeFlow.RunAsync(fixture, runtime, initial, token);
         var current = ReadCurrent(fixture, initial, token);
-        await AbortCapturedAsync(fixture, runtime, initial with { CommandId = Guid.NewGuid() }, token);
+        await AbortCapturedAsync(fixture, runtime, initial with
+        {
+            CommandId = Guid.NewGuid()
+        }, token);
         await Assert.That(ReadCurrent(fixture, initial, token).SequenceEqual(current)).IsTrue();
         await NativeTextBilingualAudit.VerifyAsync(runtime.Search, fixture.Partition, token);
         var oldReplay = await NativeTextOnlineWholeFlow.RunAsync(fixture, runtime, initial, token);
         await Assert.That(NativeSerialization.Serialize(oldReplay).SequenceEqual(NativeSerialization.Serialize(original))).IsTrue();
-        var fresh = initial with { CommandId = Guid.NewGuid() };
+        var fresh = initial with
+        {
+            CommandId = Guid.NewGuid()
+        };
         var published = await NativeTextOnlineWholeFlow.RunAsync(fixture, runtime, fresh, token);
         await NativeTextBilingualAudit.VerifyAsync(runtime.Search, fixture.Partition, token);
         return (initial, original, fresh, published);

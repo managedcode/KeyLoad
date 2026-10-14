@@ -21,7 +21,9 @@ internal sealed class AuthorizationTelemetryEndpoint(TestDatabase database, Time
             .CreateLogger(AuthorizationTelemetryTestProtocol.LoggerCategory);
         using var scope = logger.BeginScope(AuthorizationTelemetryTestProtocol.ScopeCanary);
         if (Activity.Current is { } activity)
-        { activity.TraceStateString = AuthorizationTelemetryTestProtocol.TraceStateCanary; }
+        {
+            activity.TraceStateString = AuthorizationTelemetryTestProtocol.TraceStateCanary;
+        }
         Activity.Current?.SetTag(AuthorizationTelemetryTestProtocol.CanaryTag, AuthorizationTelemetryTestProtocol.TagCanary);
         Activity.Current?.AddBaggage(AuthorizationTelemetryTestProtocol.BaggageKey, AuthorizationTelemetryTestProtocol.BaggageCanary);
         AuthorizationTelemetryUnsafeState.Apply(Activity.Current, state());
@@ -42,7 +44,9 @@ internal sealed class AuthorizationTelemetryEndpoint(TestDatabase database, Time
         {
             Activity.Current?.SetStatus(ActivityStatusCode.Error, AuthorizationTelemetryTestProtocol.ExceptionCanary);
             if (logger.IsEnabled(LogLevel.Error))
-            { AuthorizationTelemetryLogging.Denied(logger, request.AfterName, new InvalidOperationException(AuthorizationTelemetryTestProtocol.ExceptionCanary)); }
+            {
+                AuthorizationTelemetryLogging.Denied(logger, request.AfterName, new InvalidOperationException(AuthorizationTelemetryTestProtocol.ExceptionCanary));
+            }
             context.Response.StatusCode = StatusCodes.Status403Forbidden;
             await context.Response.WriteAsJsonAsync(new AuthorizationTelemetryFailure(error.Code, error.Message),
                 JsonDefaults.Options, context.RequestAborted);

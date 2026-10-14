@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.Search;
 using TUnit.Assertions.Enums;
@@ -38,8 +38,8 @@ internal sealed class NativeAnnLineageLifecycleTests
                 await NativeAnnLineageLiteralAssertions.AssertAsync(database, built.Source, rebuilt.Source);
             }, failures);
         }
-        catch (Exception cleanup) when (KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
-        catch (Exception cleanup) when (!KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
+        catch (Exception cleanup) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
+        catch (Exception cleanup) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
@@ -49,7 +49,10 @@ internal sealed class NativeAnnLineageLifecycleTests
         var before = NativeAnnMaintenanceTestData.Snapshot(database);
         var position = database.Store.Position;
         var failure = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => runtime.PhaseAsync(database,
-            request with { Mode = AnnMaintenanceMode.Restore }, AnnMaintenanceCapabilityKind.Begin))
+            request with
+            {
+                Mode = AnnMaintenanceMode.Restore
+            }, AnnMaintenanceCapabilityKind.Begin))
             ?? throw new InvalidOperationException("The native policy transition did not reject the obsolete generation.");
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.HistoryUnavailable);
         await Assert.That(failure.Message).IsEqualTo(NativeAnnProtocol.MissingDependencyHistory);

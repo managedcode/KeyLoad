@@ -1,5 +1,5 @@
 using System.Security.Cryptography;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
@@ -11,18 +11,36 @@ internal sealed class PeerDiscoveryFixture : IAsyncDisposable
 {
     internal const int SingleCapacity = 1;
     private readonly PeerDiscoveryNativeCluster cluster;
-    internal byte[] Secret { get; }
-    internal ReplicaEnvelopeAuthenticator Sender { get; }
-    internal ReplicaEnvelopeAuthenticator Receiver { get; }
-    internal ReplicaNativeDiscoveryRuntime Runtime { get; }
-    internal OrleansMembershipOptions Settings { get; }
+    internal byte[] Secret
+    {
+        get;
+    }
+    internal ReplicaEnvelopeAuthenticator Sender
+    {
+        get;
+    }
+    internal ReplicaEnvelopeAuthenticator Receiver
+    {
+        get;
+    }
+    internal ReplicaNativeDiscoveryRuntime Runtime
+    {
+        get;
+    }
+    internal OrleansMembershipOptions Settings
+    {
+        get;
+    }
     internal static CancellationToken Cancellation => TestContext.Current!.Execution.CancellationToken;
 
     internal PeerDiscoveryFixture(PeerDiscoveryNativeCluster cluster, int capacity = SingleCapacity)
     {
         this.cluster = cluster;
         Secret = cluster.Sender.Peers.Secret.ToArray();
-        Settings = new() { ReplayNonceCapacity = capacity };
+        Settings = new()
+        {
+            ReplayNonceCapacity = capacity
+        };
         ReplicaEnvelopeAuthenticator? sender = null;
         ReplicaEnvelopeAuthenticator? receiver = null;
         try
@@ -37,9 +55,13 @@ internal sealed class PeerDiscoveryFixture : IAsyncDisposable
         {
             List<Exception> failures = [primary];
             if (receiver is not null)
-            { ReplicaMaterializerLifecycleErrors.Attempt(receiver.Dispose, failures); }
+            {
+                ReplicaMaterializerLifecycleErrors.Attempt(receiver.Dispose, failures);
+            }
             if (sender is not null)
-            { ReplicaMaterializerLifecycleErrors.Attempt(sender.Dispose, failures); }
+            {
+                ReplicaMaterializerLifecycleErrors.Attempt(sender.Dispose, failures);
+            }
             CryptographicOperations.ZeroMemory(Secret);
             ReplicaMaterializerLifecycleErrors.Throw(failures);
             throw;
@@ -63,7 +85,10 @@ internal sealed class PeerDiscoveryFixture : IAsyncDisposable
         PeerDiscoveryNativeCluster.ReceiverVoter, cluster.Receiver.Discovery.RuntimeAddress);
 
     internal static ReplicaEnvelopeAuthenticator CreateAuthentication(PeerDiscoveryNativeNode node, ReadOnlyMemory<byte> secret)
-        => new(RecoveryExecutionOptions.Configuration(node.Configuration), Options.Create(node.Peers with { Secret = secret }),
+        => new(RecoveryExecutionOptions.Configuration(node.Configuration), Options.Create(node.Peers with
+        {
+            Secret = secret
+        }),
             node.Discovery, TimeProvider.System, Options.Create(new ReplicaTransportOptions()), Options.Create(node.Peers.ReplayLimits));
 
     internal async Task<ReplicaNativeDiscoveryReply> ReceiveAsync(ReplicaNativeDiscoveryRequest request)

@@ -10,21 +10,35 @@ internal sealed class NativeCanonicalModelCutAdmission(RequestCqrsProbeFiles fil
     {
         lifecycle.EnterCallback();
         try
-        { lifecycle.EnterGate(); }
-        catch (Exception error) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { ReleaseCallback(error); throw; }
-        catch (Exception error) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { ReleaseCallback(error); throw; }
+        {
+            lifecycle.EnterGate();
+        }
+        catch (Exception error) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            ReleaseCallback(error);
+            throw;
+        }
+        catch (Exception error) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            ReleaseCallback(error);
+            throw;
+        }
         try
         {
             return new NativeCanonicalModelCutLease(files, lifecycle,
                 executionOptions.Value.HoldTimeout, clock, requestCancellation,
                 applicationLifetime.ApplicationStopping, stopping);
         }
-        catch (Exception error) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { ReleaseAdmission(error); throw; }
-        catch (Exception error) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { ReleaseAdmission(error); throw; }
+        catch (Exception error) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            ReleaseAdmission(error);
+            throw;
+        }
+        catch (Exception error) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            ReleaseAdmission(error);
+            throw;
+        }
     }
 
     private void ReleaseCallback(Exception primary)

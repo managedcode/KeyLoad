@@ -90,7 +90,10 @@ internal sealed class EventProjectionInputTests
         });
         var oldGeneration = fixture.ApplyFailure(fixture.Request() with
         {
-            SourceStream = fixture.Stream with { Generation = 2 }
+            SourceStream = fixture.Stream with
+            {
+                Generation = 2
+            }
         });
 
         await Assert.That(missing.Code).IsEqualTo(ErrorCode.RevisionConflict);

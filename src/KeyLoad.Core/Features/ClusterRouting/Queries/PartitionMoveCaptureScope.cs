@@ -13,7 +13,9 @@ public sealed partial class DatabaseEngine
         work.Check();
         PartitionMovePeerEnvelopeValidation.RequireStructure(original, Limits.MaxBatchBytes);
         if (original.Stage != PartitionMovePeerStage.Capture || original.Grant is null)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
         RequireMovementReceiver(original);
         var receiverAdmission = original.Grant is { RequireReceiverIssuance: true }
             ? VerifyMoveReceiverEffectProof(localPrincipalId, original.Grant.PhaseCommandId, original,
@@ -25,7 +27,9 @@ public sealed partial class DatabaseEngine
             var now = EvaluationClock.GetUtcNow();
             var principal = Principal(admitted, localPrincipalId, now);
             if (!principal.ClusterAdministrator)
-            { throw Errors.Fail(ErrorCode.PermissionDenied, ClusterAdministrationRequiredMessage); }
+            {
+                throw Errors.Fail(ErrorCode.PermissionDenied, ClusterAdministrationRequiredMessage);
+            }
             RequireMoveReceiverCaptureAdmission(admitted, principal, original, receiverAdmission);
             var catalog = PhysicalShardCatalogRecordSerialization.Read(admitted)
                 ?? throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority);
@@ -53,6 +57,8 @@ public sealed partial class DatabaseEngine
             || !PartitionMoveControlValidation.SameSource(current.SourcePlacement, expected.SourcePlacement)
             || !PhysicalOwnerEntryValidation.SameOwner(current.ControlOwner, expected.ControlOwner)
             || !PhysicalOwnerEntryValidation.SameOwner(current.DestinationOwner, expected.DestinationOwner))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
     }
 }

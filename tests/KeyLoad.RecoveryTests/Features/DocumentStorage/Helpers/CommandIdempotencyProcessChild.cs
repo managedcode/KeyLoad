@@ -13,8 +13,14 @@ internal sealed class CommandIdempotencyProcessChild
     private Task? processExit;
     private CommandIdempotencyProcessPipes? pipes;
     private Exception? startupFailure;
-    internal bool IsSettled { get; private set; }
-    internal bool IsDisposed { get; private set; }
+    internal bool IsSettled
+    {
+        get; private set;
+    }
+    internal bool IsDisposed
+    {
+        get; private set;
+    }
 
     private CommandIdempotencyProcessChild(int outputLimitCharacters, string? expectedSignal)
     {
@@ -68,7 +74,9 @@ internal sealed class CommandIdempotencyProcessChild
             pipes = CommandIdempotencyProcessPipes.Create(startedProcess, outputLimitCharacters,
                 expectedSignal);
             if (nativeOutputWitnessHold is { } hold)
-            { pipes.EnableNativeOutputWitness(hold); }
+            {
+                pipes.EnableNativeOutputWitness(hold);
+            }
             pipes.StartReaders();
             startupFailure = CommandIdempotencyProcessFailureHandling.PreserveStartupFailure(
                 startupFailure, pipes.StartupFailure);

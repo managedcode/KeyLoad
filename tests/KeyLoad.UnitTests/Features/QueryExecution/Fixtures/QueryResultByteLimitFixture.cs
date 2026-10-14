@@ -23,8 +23,17 @@ internal static class QueryResultByteLimitFixture
             var id = "order-" + suffix;
             var customer = "customer-" + suffix;
             var payload = new string('x', payloadCharacters);
-            database.Commit(new PutDocument(Left, id, JsonSerializer.Serialize(new { id, customer_id = customer, payload })));
-            database.Commit(new PutDocument(Right, customer, JsonSerializer.Serialize(new { id = customer, payload })));
+            database.Commit(new PutDocument(Left, id, JsonSerializer.Serialize(new
+            {
+                id,
+                customer_id = customer,
+                payload
+            })));
+            database.Commit(new PutDocument(Right, customer, JsonSerializer.Serialize(new
+            {
+                id = customer,
+                payload
+            })));
         }
     }
 
@@ -58,5 +67,7 @@ internal static class QueryResultByteLimitFixture
     private static void Configure(TestDatabase database, string name, RelationalSchema schema)
         => database.Submit(OperationKind.ConfigureResource, new ConfigureResourceRequest(database.Partition.TenantId,
             database.Partition.DatabaseId, new ResourceDefinition(name, ResourceKind.Collection, database.Partition.TransactionDomainId)
-            { RelationalSchema = schema })).Get<ResourceDefinition>();
+            {
+                RelationalSchema = schema
+            })).Get<ResourceDefinition>();
 }

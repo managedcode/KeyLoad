@@ -7,7 +7,10 @@ internal sealed class DueDiscoveryClock : TimeProvider
     private long elapsedTicks;
     private long deadlineTicks;
 
-    internal bool ExpiredAfterNativeProgress { get; private set; }
+    internal bool ExpiredAfterNativeProgress
+    {
+        get; private set;
+    }
     public override long TimestampFrequency => TimeSpan.TicksPerSecond;
     public override DateTimeOffset GetUtcNow() => RecurringSagaDatabase.Epoch.AddTicks(elapsedTicks);
     public override long GetTimestamp()

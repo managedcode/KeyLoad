@@ -13,7 +13,9 @@ internal static class QueueGraphReplayCold
             var source = state.Source;
             var identity = source.Fixture.Store.Identity;
             using var store = ZoneTreeExistingStore.Open(new(source.Fixture.Directory)
-            { Incarnation = identity.Incarnation }, identity.NodeId, source.Fixture.StorageExecution);
+            {
+                Incarnation = identity.Incarnation
+            }, identity.NodeId, source.Fixture.StorageExecution);
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {
                 await Assert.That(JsonDefaults.Serialize(store.Identity).AsSpan()
@@ -26,7 +28,9 @@ internal static class QueueGraphReplayCold
                 {
                     await QueueGraphReplayAssertions.RefusesAsync(state, engine, store);
                     if (!repair)
-                    { return; }
+                    {
+                        return;
+                    }
                     store.Commit((tx, _) => { tx.Put(source.EndpointKey, source.OriginalEndpoint); return true; });
                     await Assert.That(store.Read(view => view.ReadOwnedValue(source.EndpointKey))!
                         .AsSpan().SequenceEqual(source.OriginalEndpoint)).IsTrue();

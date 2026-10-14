@@ -38,7 +38,9 @@ internal static class TruncatedBackupArchiveFlow
         {
             Directory.CreateDirectory(output);
             if (!OperatingSystem.IsWindows())
-            { mode = File.GetUnixFileMode(output); }
+            {
+                mode = File.GetUnixFileMode(output);
+            }
         }
         await File.WriteAllBytesAsync(fixture.ArtifactPath, truncated, token);
         await TruncatedBackupArchiveAssertions.RefusalAsync(

@@ -4,10 +4,19 @@ namespace KeyLoad.Cli.Features.BackupRestore;
 [ConfigurationOptions]
 internal sealed class ClusterRestorePhysicalOwnerConfiguration
 {
-    public Guid PhysicalShardId { get; set; }
-    public Guid Incarnation { get; set; }
+    public Guid PhysicalShardId
+    {
+        get; set;
+    }
+    public Guid Incarnation
+    {
+        get; set;
+    }
     public string[] VoterIds { get; set; } = [];
-    public long PlacementEpoch { get; set; }
+    public long PlacementEpoch
+    {
+        get; set;
+    }
 
     internal PhysicalShardRecord ToNative() => new(PhysicalShardId, Incarnation, [.. VoterIds], PlacementEpoch);
 }

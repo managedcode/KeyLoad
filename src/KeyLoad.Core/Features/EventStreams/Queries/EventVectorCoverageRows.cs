@@ -18,7 +18,10 @@ internal static class EventVectorCoverageRows
         ArgumentNullException.ThrowIfNull(budget);
         EventVectorCoverageRow? row = null;
         boundedView.ReadValue(key, bytes => row = new EventVectorCoverageRow
-        { Key = key.ToArray(), Value = bytes.ToArray() }, budget.Observe);
+        {
+            Key = key.ToArray(),
+            Value = bytes.ToArray()
+        }, budget.Observe);
         return row;
     }
 }

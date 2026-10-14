@@ -24,7 +24,9 @@ internal static class EventVectorControlObserve
         if (control.Action != EventVectorControlAction.ObserveSource
             || map.PendingPhaseId != observed.PhaseCommandId
             || control.ExpectedPendingSourcePhaseId != observed.PhaseCommandId)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidObservation); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidObservation);
+        }
         var key = EventVectorKeys.Phase(map.ControlPartition, map.MapId, observed.PhaseCommandId);
         var original = ReadOriginal(map, inventory.PayloadRows, key, admission);
         if (original.Disposition != EventVectorSourcePhaseDisposition.Admitted
@@ -33,12 +35,17 @@ internal static class EventVectorControlObserve
             || original.ControlPolicyEpoch != observed.ControlPolicyEpoch
             || original.ControlIncarnation != observed.ControlIncarnation
             || original.MapRevision != observed.MapRevision)
-        { throw Errors.Fail(ErrorCode.Conflict, InvalidObservation); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, InvalidObservation);
+        }
         var replacement = EventVectorEncodedRow.Create(key, observed, admission);
         var payload = inventory.PayloadRows.Select(row => row.Key.Span.SequenceEqual(key)
             ? replacement : row).ToImmutableArray();
         EventVectorMapWriter.Write(transaction, map with
-        { PendingPhaseId = null, LastSettledPhaseId = observed.PhaseCommandId },
+        {
+            PendingPhaseId = null,
+            LastSettledPhaseId = observed.PhaseCommandId
+        },
             payload, options, cancellationToken);
         return observed;
     }

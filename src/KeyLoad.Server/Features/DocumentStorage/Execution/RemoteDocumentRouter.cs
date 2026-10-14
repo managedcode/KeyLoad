@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 using Microsoft.Extensions.Options;
 
@@ -27,15 +27,23 @@ internal sealed class RemoteDocumentRouter(OrleansNode node, PartitionHost parti
                 var controlled = await new ControlledDocumentSourceRead(node, partition, nodeOptions, limits, client, clock)
                     .TryReadAsync(envelope, principal.Id, request, original.Token).ConfigureAwait(false);
                 if (controlled.Routed)
-                { document = controlled.Document; return; }
+                {
+                    document = controlled.Document;
+                    return;
+                }
                 var fence = partition.Database.CaptureRemoteDocumentRead(principal.Id, request.Reference, original.Token);
                 if (fence is null)
-                { document = partition.Database.GetDocument(principal.Id, request.Reference, request.MinimumToken, original.Token); return; }
+                {
+                    document = partition.Database.GetDocument(principal.Id, request.Reference, request.MinimumToken, original.Token);
+                    return;
+                }
                 var settings = nodeOptions.Value.PhysicalGroupTrust;
                 if (!settings.RemoteDocumentReads || settings.Role != PhysicalGroupTrustRole.Control
                     || !PhysicalOwnerEntryValidation.Same(fence.Destination,
                         PhysicalOwnerConfiguredTuples.Destination(nodeOptions.Value, partition)))
-                { throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentProtocol.Unavailable); }
+                {
+                    throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentProtocol.Unavailable);
+                }
                 var discovery = node.Discovery?.Read()
                     ?? throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentProtocol.Unavailable);
                 var call = new RemoteDocumentCallV1(RemoteDocumentProtocol.Version, envelope.RequestId,
@@ -61,7 +69,9 @@ internal sealed class RemoteDocumentRouter(OrleansNode node, PartitionHost parti
     {
         var remaining = expiresAt - clock.GetUtcNow();
         if (remaining <= TimeSpan.Zero)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteDocumentProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteDocumentProtocol.InvalidProof);
+        }
         return new CancellationTokenSource(remaining, clock);
     }
 }

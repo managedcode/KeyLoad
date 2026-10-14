@@ -10,7 +10,10 @@ internal sealed class VectorAttachmentScalarStateWholeFlowTests
     private const string FirstId = "a";
     private const string UnsupportedDetail = "This expression is outside the supported Q1 C# subset.";
 
-    internal enum ScalarState { Filter, Projection, Explain }
+    internal enum ScalarState
+    {
+        Filter, Projection, Explain
+    }
 
     [Test]
     [Arguments(ScalarState.Filter)]

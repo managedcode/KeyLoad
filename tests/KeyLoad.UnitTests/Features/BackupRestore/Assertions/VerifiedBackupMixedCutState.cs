@@ -38,7 +38,10 @@ internal static class VerifiedBackupMixedCutState
         var second = database.GetDocument(EventingArtifactFixture.Principal,
             new(fixture.Source.Partition, EventingArtifactFixture.Documents, VerifiedBackupCutPair.DocumentId));
         if (!secondDocument)
-        { await Assert.That(second).IsNull(); return; }
+        {
+            await Assert.That(second).IsNull();
+            return;
+        }
         await Assert.That(second).IsNotNull();
         await Assert.That(second!.Reference).IsEqualTo(new EntityRef(fixture.Source.Partition,
             EventingArtifactFixture.Documents, VerifiedBackupCutPair.DocumentId));

@@ -46,7 +46,9 @@ internal static class TenantCapacityPlacementRf3Expiry
         {
             var remaining = deadline - TimeProvider.System.GetUtcNow();
             if (remaining > TimeSpan.Zero)
-            { await Task.Delay(remaining, TimeProvider.System, token).ConfigureAwait(false); }
+            {
+                await Task.Delay(remaining, TimeProvider.System, token).ConfigureAwait(false);
+            }
         }
     }
 }

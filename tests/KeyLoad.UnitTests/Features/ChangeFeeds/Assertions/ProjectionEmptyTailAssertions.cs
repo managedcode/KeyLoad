@@ -76,7 +76,9 @@ internal static class ProjectionEmptyTailAssertions
                 new DocumentResult(new(partition, Target, "effect"), 1L, "{\"sourceCount\":1}", false, []));
         }
         else
-        { await Assert.That(owner.GetDocument(Root, new(partition, Target, "effect"))).IsNull(); }
+        {
+            await Assert.That(owner.GetDocument(Root, new(partition, Target, "effect"))).IsNull();
+        }
     }
 
     internal static async Task ResultAsync(ReplicatedOperation original, OperationResult result, long checkpoint,

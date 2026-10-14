@@ -14,7 +14,9 @@ public sealed partial class DatabaseEngine
             Token(view, intent.Source.Partition, Store.Position), request.ExpectedGeneration, null,
             request.PolicyGeneration, request.CompleteGeneration);
         if (request.AcceptCommandId != RemoteTransferRepairIdentity.CommandId(hint, stage))
-        { throw Errors.Fail(ErrorCode.Conflict, RemoteTransferRepairProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, RemoteTransferRepairProtocol.Invalid);
+        }
         var partition = stage == QueueTransferRepairStage.Accept ? intent.Destination.Partition : intent.Source.Partition;
         Mutation mutation = stage == QueueTransferRepairStage.Accept
             ? new AcceptQueueTransfer(intent.Destination, request.IntentToken)
@@ -29,7 +31,9 @@ public sealed partial class DatabaseEngine
                 ?? throw Errors.Fail(ErrorCode.RecoveryRequired, RemoteTransferRepairProtocol.Unavailable);
             ValidateIntentRecord(view, record, intent.Source, intent.TransferId);
             if (record.PrincipalId != principal.Id || record.State != QueueTransferState.OutputPending)
-            { throw Errors.Fail(ErrorCode.RevisionConflict, RemoteTransferRepairProtocol.Stale); }
+            {
+                throw Errors.Fail(ErrorCode.RevisionConflict, RemoteTransferRepairProtocol.Stale);
+            }
             ValidateReceipt(view, Verify<RemoteTransferReceiptClaims>(request.ReceiptToken!, Limits.MaxBatchBytes), record);
         }
         return original;

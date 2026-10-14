@@ -18,7 +18,9 @@ public sealed partial class DatabaseEngine
             || witness.TargetCut.Incarnation != witness.OriginalAuthority.TargetIncarnation
             || witness.TargetCut.AtomicPartitionId != hint.Destination.Partition.AtomicPartitionId
             || witness.OriginalAuthority.AcceptCommandId != RemoteTransferAttemptIdentity.AcceptId(hint, hint.AcceptGeneration))
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteTransferAttemptProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteTransferAttemptProtocol.Invalid);
+        }
         JsonData.Identifier(witness.OutcomeDigest);
     }
 }

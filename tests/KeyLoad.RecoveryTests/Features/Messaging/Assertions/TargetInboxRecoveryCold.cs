@@ -33,7 +33,9 @@ internal static class TargetInboxRecoveryCold
         const int MaximumRows = 4096;
         var page = view.Scan([], MaximumRows);
         if (page.HasMore)
-        { throw new InvalidOperationException("Target inbox recovery exceeded its fixture row bound."); }
+        {
+            throw new InvalidOperationException("Target inbox recovery exceeded its fixture row bound.");
+        }
         return page.Records.Select(row => Convert.ToHexString(row.Key.Span) + ":" + Convert.ToHexString(row.Value.Span)).ToArray();
     });
 }

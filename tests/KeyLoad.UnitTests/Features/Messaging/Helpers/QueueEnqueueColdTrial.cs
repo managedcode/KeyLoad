@@ -13,7 +13,10 @@ internal static class QueueEnqueueColdTrial
         using var fixture = new TestDatabase();
         fixture.Configure(QueueEnqueueColdProtocol.Collection, ResourceKind.Collection);
         fixture.Configure(QueueEnqueueColdProtocol.Queue, ResourceKind.WorkQueue,
-            queuePolicy: new() { MaxStoredMessages = QueueEnqueueColdProtocol.MaximumStoredMessages });
+            queuePolicy: new()
+            {
+                MaxStoredMessages = QueueEnqueueColdProtocol.MaximumStoredMessages
+            });
         ConfigurePublisher(fixture.Database, fixture.Partition, Capability.QueueInspect, token);
         var scheduledAt = TimeProvider.System.GetUtcNow().AddHours(QueueEnqueueColdProtocol.FutureScheduledHours);
         var command = Original(fixture.Partition, scheduledAt);
@@ -96,7 +99,9 @@ internal static class QueueEnqueueColdTrial
         var id = Guid.NewGuid();
         var principal = new PrincipalRecord(QueueEnqueueColdProtocol.Publisher, partition.TenantId,
             [new(partition.DatabaseId, QueueEnqueueColdProtocol.Queue, capabilities)], [])
-        { PolicyEpoch = epoch };
+        {
+            PolicyEpoch = epoch
+        };
         database.ApplyEmbedded(new(id, OperationKind.ConfigurePrincipal, QueueEnqueueColdProtocol.Root, default,
             JsonSerializer.Serialize(new ConfigurePrincipalRequest(principal), JsonDefaults.Options)), token).Get<PrincipalRecord>();
     }

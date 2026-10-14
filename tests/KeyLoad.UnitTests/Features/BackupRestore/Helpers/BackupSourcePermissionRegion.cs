@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 
 namespace KeyLoad.UnitTests.Features.BackupRestore;
@@ -13,7 +13,9 @@ internal sealed class BackupSourcePermissionRegion : IAsyncDisposable
     internal BackupSourcePermissionRegion(string path)
     {
         if (OperatingSystem.IsWindows())
-        { throw new PlatformNotSupportedException("The original archive access flow requires Unix file permissions."); }
+        {
+            throw new PlatformNotSupportedException("The original archive access flow requires Unix file permissions.");
+        }
         this.path = path;
         originalMode = File.GetUnixFileMode(path);
         original = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
@@ -22,14 +24,18 @@ internal sealed class BackupSourcePermissionRegion : IAsyncDisposable
     internal void DenyNewReaders()
     {
         if (OperatingSystem.IsWindows())
-        { throw new PlatformNotSupportedException("The original archive access flow requires Unix file permissions."); }
+        {
+            throw new PlatformNotSupportedException("The original archive access flow requires Unix file permissions.");
+        }
         File.SetUnixFileMode(path, UnixFileMode.None);
     }
 
     internal void Repair()
     {
         if (OperatingSystem.IsWindows())
-        { throw new PlatformNotSupportedException("The original archive access flow requires Unix file permissions."); }
+        {
+            throw new PlatformNotSupportedException("The original archive access flow requires Unix file permissions.");
+        }
         File.SetUnixFileMode(path, originalMode);
         restored = true;
     }
@@ -47,13 +53,21 @@ internal sealed class BackupSourcePermissionRegion : IAsyncDisposable
     {
         var failures = new List<Exception>();
         if (!restored)
-        { ServerFailureObserver.Observe(Repair, failures); }
+        {
+            ServerFailureObserver.Observe(Repair, failures);
+        }
         try
-        { await original.DisposeAsync().ConfigureAwait(false); }
+        {
+            await original.DisposeAsync().ConfigureAwait(false);
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

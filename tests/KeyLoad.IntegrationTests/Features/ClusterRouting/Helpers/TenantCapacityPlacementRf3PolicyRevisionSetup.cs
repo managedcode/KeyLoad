@@ -29,10 +29,17 @@ internal static class TenantCapacityPlacementRf3PolicyRevisionSetup
             await seed.Source.BindAtomicPartitionPlacementAsync(bindId, bind, token))).IsTrue();
         await Assert.That((await McpCallerAssertions.SuccessAsync<bool>(
             await seed.Official.CallAsync(McpCallerTools.AdminPartitionPlacementBind,
-                new { commandId = bindId, request = bind }, token))).Value).IsTrue();
+                new
+                {
+                    commandId = bindId,
+                    request = bind
+                }, token))).Value).IsTrue();
         var primary = await McpCallerAssertions.SdkSuccessAsync(
             await seed.Source.ReadAtomicPartitionPlacementAsync(new(1, seed.Partition), token));
-        await SqlRf3Protocol.EqualAsync(seed.OriginalPlacement with { DirectoryRevision = 1 }, primary);
+        await SqlRf3Protocol.EqualAsync(seed.OriginalPlacement with
+        {
+            DirectoryRevision = 1
+        }, primary);
         var control = await McpCallerAssertions.SdkSuccessAsync(
             await seed.Source.ReadAtomicPartitionPlacementAsync(new(1, state.Control), token));
         await Assert.That(control.IsFallback).IsFalse();

@@ -32,8 +32,14 @@ public sealed partial class DatabaseEngine
             || !PartitionMoveControlValidation.SameSource(body.Fence.SourcePlacement, current.SourcePlacement)
             || !PhysicalOwnerEntryValidation.SameOwner(body.Fence.DestinationOwner, current.DestinationOwner)
             || !PhysicalOwnerEntryValidation.SameOwner(body.Fence.ControlOwner, phase.ControlOwner))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
-        var record = current with { Phase = PartitionMovePhase.Fenced, SourceCut = body.Fence.SourceCut };
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
+        var record = current with
+        {
+            Phase = PartitionMovePhase.Fenced,
+            SourceCut = body.Fence.SourceCut
+        };
         PartitionMoveControlStorage.Write(transaction, record, Limits.MaxBatchBytes);
         return new(phase.MoveId, phase.Stage, MoveJournalReceipt(transaction, commandId, position,
             phase.ControlIntentDigest), record, body.Fence, null, null);

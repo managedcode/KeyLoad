@@ -50,7 +50,9 @@ internal static class PartitionMovementCleanupMatrixRetiredRf3Producer
             await RequireSameOwnerAsync(primary, actualRelease, actualAdjunct);
             await RequireOriginalAbsenceSnapshotAsync(controls, other);
             if (original.IsCompleted)
-            { throw new InvalidOperationException(PartitionMovementActiveAdjunctProtocol.EarlyTerminal); }
+            {
+                throw new InvalidOperationException(PartitionMovementActiveAdjunctProtocol.EarlyTerminal);
+            }
             PublishFault(controls, other, primary, actualRelease, actualAdjunct, role, faults);
             var refused = await original.ConfigureAwait(false);
             await Assert.That(refused.IsFailed).IsTrue();
@@ -64,7 +66,9 @@ internal static class PartitionMovementCleanupMatrixRetiredRf3Producer
         controls.RetainEvidence();
         ServerFailureObserver.ThrowIfAny(failures);
         if (faults.Count != PartitionMovementCleanupMatrixProtocol.SelectedControlVoterCount)
-        { throw new InvalidOperationException(PartitionMovementCleanupMatrixProtocol.MissingRefusal); }
+        {
+            throw new InvalidOperationException(PartitionMovementCleanupMatrixProtocol.MissingRefusal);
+        }
         return faults.ToArray();
     }
 
@@ -74,9 +78,13 @@ internal static class PartitionMovementCleanupMatrixRetiredRf3Producer
         List<PartitionMovementCleanupMatrixRf3Fault> faults)
     {
         if (role == PartitionMovementCleanupMatrixFaultRole.RetiredOtherResurrection)
-        { PartitionMovementCleanupMatrixRf3Fault.ResurrectRetired(controls, other, adjunct, faults); }
+        {
+            PartitionMovementCleanupMatrixRf3Fault.ResurrectRetired(controls, other, adjunct, faults);
+        }
         else
-        { PartitionMovementCleanupMatrixUnfamiliarFault.CopyActual(controls, other, primary, released, adjunct, role, faults); }
+        {
+            PartitionMovementCleanupMatrixUnfamiliarFault.CopyActual(controls, other, primary, released, adjunct, role, faults);
+        }
     }
 
     private static async Task JoinOriginalAsync(CancellationTokenSource caller,
@@ -84,7 +92,9 @@ internal static class PartitionMovementCleanupMatrixRetiredRf3Producer
     {
         await ServerFailureObserver.ObserveAsync(caller.CancelAsync, failures).ConfigureAwait(false);
         foreach (var wait in waits)
-        { await ServerFailureObserver.ObserveAsync(() => JoinWaitAsync(wait, caller.Token), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => JoinWaitAsync(wait, caller.Token), failures).ConfigureAwait(false);
+        }
         await ServerFailureObserver.ObserveAsync(async () => { await original.ConfigureAwait(false); }, failures).ConfigureAwait(false);
     }
 
@@ -93,7 +103,9 @@ internal static class PartitionMovementCleanupMatrixRetiredRf3Producer
     {
         _ = await Task.WhenAny(marker, original).ConfigureAwait(false);
         if (!marker.IsCompletedSuccessfully || original.IsCompleted)
-        { throw new InvalidOperationException(PartitionMovementActiveAdjunctProtocol.EarlyTerminal); }
+        {
+            throw new InvalidOperationException(PartitionMovementActiveAdjunctProtocol.EarlyTerminal);
+        }
         return await marker.ConfigureAwait(false);
     }
 
@@ -136,14 +148,18 @@ internal static class PartitionMovementCleanupMatrixRetiredRf3Producer
         {
             var actual = controls.Json.ReadMarker(RequestCqrsProbeFileStore.ReadRecord(path));
             if (actual.ArmId == primary.ArmId)
-            { await Assert.That(actual.Phase == RequestCqrsProbePhase.ProducerDisposed).IsFalse(); }
+            {
+                await Assert.That(actual.Phase == RequestCqrsProbePhase.ProducerDisposed).IsFalse();
+            }
         }
     }
 
     private static async Task JoinWaitAsync(Task<RequestCqrsProbeMarkerRecord> wait, CancellationToken originalWait)
     {
         try
-        { _ = await wait.ConfigureAwait(false); }
+        {
+            _ = await wait.ConfigureAwait(false);
+        }
         catch (OperationCanceledException) when (originalWait.IsCancellationRequested) { }
     }
 }

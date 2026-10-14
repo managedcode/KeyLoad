@@ -16,7 +16,10 @@ internal sealed class AggregateReplayWorkerBoundsTests
         Assert.ThrowsExactly<InvalidDataException>(() => AggregateReplayReduction.Reduce(page, reducer,
             Microsoft.Extensions.Options.Options.Create(new AggregateReplayWorkerLimits { MaximumInputBytes = 22 })));
         Assert.ThrowsExactly<InvalidDataException>(() => AggregateReplayReduction.Reduce(page,
-            reducer with { InitialStateJson = "{\"nested\":{\"deep\":true}}" },
+            reducer with
+            {
+                InitialStateJson = "{\"nested\":{\"deep\":true}}"
+            },
             Microsoft.Extensions.Options.Options.Create(new AggregateReplayWorkerLimits { MaximumJsonDepth = 1 })));
         Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => AggregateReplayReduction.Reduce(page, reducer,
             Microsoft.Extensions.Options.Options.Create(new AggregateReplayWorkerLimits { MaximumEvents = 65_537 })));
@@ -24,7 +27,10 @@ internal sealed class AggregateReplayWorkerBoundsTests
             Page(stream, null, [Event(stream, 1, "one", "{}"), Event(stream, 2, "two", "{}")]), reducer,
             Microsoft.Extensions.Options.Options.Create(new AggregateReplayWorkerLimits { MaximumEvents = 1 })));
         Assert.ThrowsExactly<InvalidDataException>(() => AggregateReplayReduction.Reduce(page,
-            CounterReducer(apply: (_, _) => "{\"long\":\"123456\"}") with { InitialStateJson = "0" },
+            CounterReducer(apply: (_, _) => "{\"long\":\"123456\"}") with
+            {
+                InitialStateJson = "0"
+            },
             Microsoft.Extensions.Options.Options.Create(new AggregateReplayWorkerLimits { MaximumStateBytes = 8 })));
 
         await Assert.That(calls).IsEqualTo(0);

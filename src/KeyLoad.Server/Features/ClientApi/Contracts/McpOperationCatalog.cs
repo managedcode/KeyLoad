@@ -8,7 +8,10 @@ namespace KeyLoad.Server;
 internal static class McpOperationCatalog
 {
     /// <summary>All implemented public operations, excluding internal authentication and membership.</summary>
-    internal static ImmutableArray<McpOperationDescriptor> Entries { get; } =
+    internal static ImmutableArray<McpOperationDescriptor> Entries
+    {
+        get;
+    } =
         [.. McpReadCatalog.Entries, .. McpCommandCatalog.Entries, .. McpSubscriptionCatalog.Entries,
             .. McpProjectionCatalog.Entries, .. KeyLoad.Server.Features.Search.OnlineTextMcpCatalog.Entries, .. BlobMcpCatalog.Entries, .. AdminDashboardMcpCatalog.Entries, SqlMcpCatalog.Entry, .. TenantPlacementMcpCatalog.Entries];
 
@@ -21,7 +24,10 @@ internal static class McpOperationCatalog
     internal static bool TryGetTool(string name, [NotNullWhen(true)] out McpOperationDescriptor? descriptor)
     {
         if (string.IsNullOrWhiteSpace(name))
-        { descriptor = null; return false; }
+        {
+            descriptor = null;
+            return false;
+        }
         return Tools.TryGetValue(name, out descriptor);
     }
 
@@ -32,7 +38,10 @@ internal static class McpOperationCatalog
     internal static bool TryGet(string name, [NotNullWhen(true)] out McpOperationDescriptor? descriptor)
     {
         if (string.IsNullOrWhiteSpace(name))
-        { descriptor = null; return false; }
+        {
+            descriptor = null;
+            return false;
+        }
         return Lookup.TryGetValue(name, out descriptor);
     }
 }

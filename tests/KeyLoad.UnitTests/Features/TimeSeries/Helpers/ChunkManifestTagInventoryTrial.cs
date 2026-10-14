@@ -20,7 +20,10 @@ internal static class ChunkManifestTagInventoryTrial
         await ChunkManifestTagInventoryAssertions.OnlyOwnedRowChanged(fixture, originalCut, damaged);
         await ChunkSelectedIntegrityDamage.Refuse(fixture);
         ChunkSelectedIntegrityDamage.Put(fixture, original);
-        await SampleRawIntegrityAssertions.UnchangedAsync(fixture.Store, originalCut with { Position = originalCut.Position + 2 });
+        await SampleRawIntegrityAssertions.UnchangedAsync(fixture.Store, originalCut with
+        {
+            Position = originalCut.Position + 2
+        });
         await ChunkSelectedIntegrityAssertions.Healthy(fixture, final: false);
         await ChunkSelectedIntegrityAssertions.Replay(fixture);
         fixture.Apply(fixture.Merge);
@@ -47,7 +50,10 @@ internal static class ChunkManifestTagInventoryTrial
         var manifest = NativeSerialization.Deserialize<SampleChunkManifest>(envelope.Encoded.Span);
         await Assert.That(manifest.TagJsonValues.Length).IsEqualTo(1);
         await Assert.That(manifest.TagJsonValues[0]).IsEqualTo(SampleChunkCanonicalFixture.Tags);
-        var bytes = NativeSerialization.Serialize(manifest with { TagJsonValues = ["{\"visible\":18}"] });
+        var bytes = NativeSerialization.Serialize(manifest with
+        {
+            TagJsonValues = ["{\"visible\":18}"]
+        });
         ChunkSelectedIntegrityDamage.Put(fixture,
             NativeSerialization.Serialize(new SampleChunkManifestEnvelope(bytes, SHA256.HashData(bytes))));
         return original;

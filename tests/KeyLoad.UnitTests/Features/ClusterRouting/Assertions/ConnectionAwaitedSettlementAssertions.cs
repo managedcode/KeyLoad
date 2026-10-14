@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
@@ -26,7 +26,9 @@ internal static class ConnectionAwaitedSettlementAssertions
                 return;
             }
             catch (KeyLoadException error) when (error.Code == ErrorCode.ResourceExhausted)
-            { await Task.Delay(timing.PollInterval, token); }
+            {
+                await Task.Delay(timing.PollInterval, token);
+            }
         }
     }
 

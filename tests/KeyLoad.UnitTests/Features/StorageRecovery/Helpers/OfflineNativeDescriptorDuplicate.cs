@@ -36,13 +36,17 @@ internal static class OfflineNativeDescriptorDuplicate
     private static void ReleaseLibrary(IntPtr library, ref SafeFileHandle? duplicate, Exception? primaryFailure)
     {
         try
-        { NativeLibrary.Free(library); }
+        {
+            NativeLibrary.Free(library);
+        }
         catch (Exception cleanup)
         {
             var failure = primaryFailure is null ? cleanup : new AggregateException(primaryFailure, cleanup);
             OfflineNativeHandleLease.DisposeUntransferred(ref duplicate, failure);
             if (primaryFailure is null)
-            { throw; }
+            {
+                throw;
+            }
             throw failure;
         }
     }
@@ -53,7 +57,9 @@ internal static class OfflineNativeDescriptorDuplicate
             NativeLibrary.GetExport(library, DuplicateEntryPoint));
         var descriptor = duplicate(original.DangerousGetHandle().ToInt32());
         if (descriptor < FirstValidDescriptor)
-        { throw new IOException("The native test descriptor could not be duplicated.", new Win32Exception(Marshal.GetLastPInvokeError())); }
+        {
+            throw new IOException("The native test descriptor could not be duplicated.", new Win32Exception(Marshal.GetLastPInvokeError()));
+        }
         return new(new IntPtr(descriptor), ownsHandle: true);
     }
 

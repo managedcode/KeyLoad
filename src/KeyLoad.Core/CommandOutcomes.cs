@@ -24,7 +24,9 @@ public sealed partial class DatabaseEngine
     private OperationResult ResolveOutcomeCore(ReplicatedOperation operation) => Store.Read(view =>
     {
         try
-        { return ReadValidatedSubmissionOutcome(view, operation); }
+        {
+            return ReadValidatedSubmissionOutcome(view, operation);
+        }
         catch (KeyLoadException exception) { return new OperationResult(null, exception.Code, exception.Message); }
     });
 
@@ -48,12 +50,16 @@ public sealed partial class DatabaseEngine
         {
             retired = CaptureRetiredOriginalOutcomeReadScope(view, principal, operation);
             if (retired is null)
-            { AuthorizeOperation(view, principal, operation); }
+            {
+                AuthorizeOperation(view, principal, operation);
+            }
         }
         catch (KeyLoadException refusal) when (allowStoredDocumentDenial && refusal.Code == ErrorCode.PermissionDenied)
         {
             if (!IsOrdinaryDocumentSubmission(view, operation))
-            { throw; }
+            {
+                throw;
+            }
             denied = refusal;
         }
         var scope = CommandOutcomePartitionIdentity.Resolve(operation);
@@ -62,9 +68,13 @@ public sealed partial class DatabaseEngine
         if (outcome is null)
         {
             if (denied is not null)
-            { System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(denied).Throw(); }
+            {
+                System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(denied).Throw();
+            }
             if (retired is not null)
-            { AuthorizeOperation(view, principal, operation); }
+            {
+                AuthorizeOperation(view, principal, operation);
+            }
             throw Errors.Fail(ErrorCode.RecoveryRequired, MissingDurableOutcomeMessage);
         }
         ValidateSubmissionOutcomeIdentity(view, principal, operation, selection, outcome, verifiedSelection.HasValue);
@@ -74,15 +84,22 @@ public sealed partial class DatabaseEngine
             || outcome.BlobAuthority is not null || outcome.CompositionAuthority is not null
             || outcome.OnlineTextAuthority is not null || outcome.RemoteTransferFailureAuthority is not null
             || outcome.RemoteTransferAuthority is not null))
-        { System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(denied).Throw(); }
+        {
+            System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(denied).Throw();
+        }
         if (retired is { } retained)
         {
             if (outcome.Result.Error is not null)
-            { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+            }
             RequireRetiredOriginalOutcomeIdentity(retained.Command, operation.Id, outcome.Result.Get<CommitReceipt>(),
                 retained.Fence, retained.Control, retained.Placement, retained.ControlOwner, retained.LocalOwner);
         }
-        ValidateCachedResult(view, principal, operation with { EvaluatedAt = Clock.GetUtcNow() }, outcome,
+        ValidateCachedResult(view, principal, operation with
+        {
+            EvaluatedAt = Clock.GetUtcNow()
+        }, outcome,
             retired is null ? BatchResourceAdmission.CurrentPhysicalOwner : BatchResourceAdmission.RetiredOutcomeMetadata);
         return outcome.Result;
     }
@@ -90,9 +107,13 @@ public sealed partial class DatabaseEngine
         ReplicatedOperation operation, CommandOutcomeSelection selection, StoredOutcome outcome, bool originalIdentityVerified = false)
     {
         if (outcome.PolicyEpoch != principal.PolicyEpoch)
-        { throw Errors.Fail(ErrorCode.PermissionDenied, ChangedOutcomePrincipalPolicyMessage); }
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, ChangedOutcomePrincipalPolicyMessage);
+        }
         if (!originalIdentityVerified)
-        { ValidateStoredSubmissionIdentity(view, operation, selection, outcome); }
+        {
+            ValidateStoredSubmissionIdentity(view, operation, selection, outcome);
+        }
     }
 
     private void ValidateCachedResult(IKeyValueView view, PrincipalRecord principal, ReplicatedOperation operation, StoredOutcome previous,
@@ -108,12 +129,16 @@ public sealed partial class DatabaseEngine
             new BlobStorageOperations(this).ValidateOutcomeAuthority(view, operation, previous.Result, previous.BlobAuthority);
         }
         if (operation.Kind is OperationKind.RemoteGraphSource or OperationKind.RemoteGraphReceive or OperationKind.RemoteGraphComplete)
-        { ReauthorizeRemoteGraphOutcome(view, principal, operation, previous); }
+        {
+            ReauthorizeRemoteGraphOutcome(view, principal, operation, previous);
+        }
         ValidateBm25CachedOutcome(view, principal, operation, previous);
         ValidateOnlineTextCachedOutcome(view, principal, operation, previous);
         ValidateCompositionOutcome(view, principal, operation, previous);
         if (!ValidateRemoteTransferCachedOutcome(view, principal, operation, previous))
-        { ReauthorizeExtendedOutcome(view, principal, operation, previous, admission); }
+        {
+            ReauthorizeExtendedOutcome(view, principal, operation, previous, admission);
+        }
 
         if (operation.Kind == OperationKind.Receive && previous.Result.Error is null)
         {

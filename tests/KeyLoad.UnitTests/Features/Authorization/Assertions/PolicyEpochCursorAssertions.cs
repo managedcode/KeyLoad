@@ -18,7 +18,10 @@ internal static class PolicyEpochCursorAssertions
         var image = TeamRowPolicyAssertions.Image(store);
         var cut = store.Position;
         var error = Assert.ThrowsExactly<KeyLoadException>(() => queries.Execute(Reader,
-            request with { Cursor = cursor }, cancellationToken: token));
+            request with
+            {
+                Cursor = cursor
+            }, cancellationToken: token));
         await Assert.That(error.Code).IsEqualTo(expected);
         await TeamRowPolicyAssertions.UnchangedAsync(store, image, cut);
     }
@@ -30,7 +33,10 @@ internal static class PolicyEpochCursorAssertions
         var first = queries.Execute(Reader, request, cancellationToken: token);
         await RowAsync(first, FirstRow, cut);
         await Assert.That(first.Cursor).IsNotNull();
-        var second = queries.Execute(Reader, request with { Cursor = first.Cursor }, cancellationToken: token);
+        var second = queries.Execute(Reader, request with
+        {
+            Cursor = first.Cursor
+        }, cancellationToken: token);
         await RowAsync(second, LastRow, cut);
         await Assert.That(second.Cursor).IsNull();
         await TeamRowPolicyAssertions.UnchangedAsync(store, image, cut);
@@ -41,7 +47,10 @@ internal static class PolicyEpochCursorAssertions
         string cursor, long cut, CancellationToken token)
     {
         var image = TeamRowPolicyAssertions.Image(store);
-        var page = queries.Execute(Reader, request with { Cursor = cursor }, cancellationToken: token);
+        var page = queries.Execute(Reader, request with
+        {
+            Cursor = cursor
+        }, cancellationToken: token);
         await RowAsync(page, LastRow, cut);
         await Assert.That(page.Cursor).IsNull();
         await TeamRowPolicyAssertions.UnchangedAsync(store, image, cut);

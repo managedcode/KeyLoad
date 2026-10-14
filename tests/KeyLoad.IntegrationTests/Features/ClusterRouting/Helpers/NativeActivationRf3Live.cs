@@ -45,9 +45,13 @@ internal static class NativeActivationRf3Live
         {
             var marker = fixture.Json.ReadMarker(RequestCqrsProbeFileStore.ReadRecord(path));
             if (marker.ArmId != witness.ArmId || marker.RequestId != witness.RequestId)
-            { continue; }
+            {
+                continue;
+            }
             if (marker.Outcome != RequestCqrsProbeOutcome.Observed)
-            { throw new InvalidOperationException(NativeActivationRf3Protocol.Missing); }
+            {
+                throw new InvalidOperationException(NativeActivationRf3Protocol.Missing);
+            }
         }
     }
 

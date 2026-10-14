@@ -64,7 +64,10 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView, INativeCatalogB
         var resolved = options.ResolveExecutionOptions(executionOptions);
         if (resolved.EmbeddedPointCache is { } embedded)
         {
-            resolved = resolved with { EmbeddedPointCache = embedded.WithExecutionSnapshot(cacheExecutionPolicy) };
+            resolved = resolved with
+            {
+                EmbeddedPointCache = embedded.WithExecutionSnapshot(cacheExecutionPolicy)
+            };
         }
         runtime = new(resolved, timeProvider: timeProvider);
     }
@@ -183,7 +186,10 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView, INativeCatalogB
         try
         {
             runtime.Check();
-            runtime.Identity = runtime.Identity with { DispatchPaused = paused };
+            runtime.Identity = runtime.Identity with
+            {
+                DispatchPaused = paused
+            };
             ZoneTreeIdentityFile.Write(Path.Combine(runtime.Options.Directory, IdentityFileName), runtime.Identity, runtime.Options.IdentityBufferBytes);
         }
         finally

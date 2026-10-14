@@ -60,7 +60,9 @@ internal static class Bm25ConfiguredQuotaTrial
         var result = flow.Publish(healthy);
         await Bm25ConfiguredQuotaBytes.RequireStoredAsync(flow.Database, healthy, result);
         if (wasFull)
-        { await Assert.That(Bm25ConfiguredQuotaBytes.Retained(flow.Database)).IsEqualTo(capacity); }
+        {
+            await Assert.That(Bm25ConfiguredQuotaBytes.Retained(flow.Database)).IsEqualTo(capacity);
+        }
         var before = ReplicaSubmissionOutcomeState.Read(flow.Database);
         var entry = NativeSerialization.Serialize(flow.Database.ReadRetainedEntry(healthy.Id));
         var replay = flow.Database.Database.CreateVerifiedBm25CorpusPublication("root", Bm25ConfiguredQuotaFlow.Phase(healthy), flow.Database.CreateReadWork(Bm25ConfiguredQuotaFlow.Token));

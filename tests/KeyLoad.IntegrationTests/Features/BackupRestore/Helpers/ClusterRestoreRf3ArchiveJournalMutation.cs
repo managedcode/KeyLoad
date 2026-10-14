@@ -18,13 +18,17 @@ internal static class ClusterRestoreRf3ArchiveJournalMutation
         await using var file = new FileStream(path, FileMode.Open, FileAccess.ReadWrite, FileShare.None,
             policy.StreamBufferBytes, FileOptions.Asynchronous);
         if (file.Length < OneByte || file.Length > policy.MaxSnapshotBytes)
-        { throw new InvalidOperationException(InvalidOwnedJournal); }
+        {
+            throw new InvalidOperationException(InvalidOwnedJournal);
+        }
         var length = file.Length;
         var digest = await SHA256.HashDataAsync(file, cancellationToken).ConfigureAwait(false);
         file.Position = StartOffset;
         var original = file.ReadByte();
         if (original == EndOfStream)
-        { throw new InvalidOperationException(InvalidOwnedJournal); }
+        {
+            throw new InvalidOperationException(InvalidOwnedJournal);
+        }
         file.Position = StartOffset;
         await file.WriteAsync(new[] { checked((byte)(original ^ OneByte)) }, cancellationToken).ConfigureAwait(false);
         FlushDurably(file);
@@ -57,6 +61,8 @@ internal static class ClusterRestoreRf3ArchiveJournalMutation
     private static void RequireRegular(string path)
     {
         if ((File.GetAttributes(path) & FileAttributes.ReparsePoint) != NoAttributes)
-        { throw new InvalidOperationException(InvalidOwnedJournal); }
+        {
+            throw new InvalidOperationException(InvalidOwnedJournal);
+        }
     }
 }

@@ -7,4 +7,6 @@ namespace KeyLoad.Server.Features.ClusterRouting;
     RespectNullableAnnotations = true, RespectRequiredConstructorParameters = true)]
 [JsonSerializable(typeof(RequestCqrsNativeReplayPlan))]
 [JsonSerializable(typeof(RequestCqrsNativeReplayWitness))]
-internal partial class RequestCqrsNativeReplayJsonContext : JsonSerializerContext { }
+internal partial class RequestCqrsNativeReplayJsonContext : JsonSerializerContext
+{
+}

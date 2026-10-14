@@ -26,7 +26,10 @@ internal sealed class GraphReadBudgetTests
     [Test]
     public async Task GraphEdgeAndVertexDereferencesConsumeTheReadByteBudget()
     {
-        using var database = new TestDatabase(new() { MaxQueryReadBytes = ReadByteLimit });
+        using var database = new TestDatabase(new()
+        {
+            MaxQueryReadBytes = ReadByteLimit
+        });
         database.Configure(Orders, ResourceKind.Collection);
         database.Configure(Links, ResourceKind.Graph);
         EntityRef Vertex(string id) => new(database.Partition, Orders, id);
@@ -58,7 +61,10 @@ internal sealed class GraphReadBudgetTests
             new UpsertEdge(Links, EdgeBD, Vertex(VertexB), Vertex(VertexD), SkipLabel));
         database.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(new PrincipalRecord(Alice, Tenant,
             [new(DatabaseScope, Orders, Capability.DocumentsRead), new(DatabaseScope, Links, Capability.GraphRead)], [])
-        { OwnerId = Alice, RestrictRows = true })).Get<PrincipalRecord>();
+        {
+            OwnerId = Alice,
+            RestrictRows = true
+        })).Get<PrincipalRecord>();
 
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => database.Database.Traverse(hidden ? Alice : RootIdentity,
             database.Partition, Links, Vertex(VertexA), maxEdges: MaximumEdges,

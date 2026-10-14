@@ -33,17 +33,25 @@ public sealed partial class DatabaseEngine
         var identity = new PartitionControlCommandIdentity(scope.Kind, scope.Partition, original.PrincipalId, original.Id);
         var record = PartitionControlCommandStorage.Read(view, identity, Limits.MaxBatchBytes);
         if (record is not null && record.Fingerprint != CommandFingerprint(original))
-        { throw Errors.Fail(ErrorCode.Conflict, CommandContentConflictMessage); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, CommandContentConflictMessage);
+        }
         var selected = CommandOutcomeKeyResolver.Select(view, original.PrincipalId, original.Id, scope);
         OperationResult? retained = null;
         if (selected.Outcome is { } previous)
         {
             if (previous.PolicyEpoch != principal.PolicyEpoch)
-            { throw Errors.Fail(ErrorCode.PermissionDenied, ChangedOutcomePrincipalPolicyMessage); }
+            {
+                throw Errors.Fail(ErrorCode.PermissionDenied, ChangedOutcomePrincipalPolicyMessage);
+            }
             if (previous.Incarnation != Store.Identity.Incarnation)
-            { throw Errors.Fail(ErrorCode.TokenInvalidated, EarlierOutcomeIncarnationMessage); }
+            {
+                throw Errors.Fail(ErrorCode.TokenInvalidated, EarlierOutcomeIncarnationMessage);
+            }
             if (previous.Fingerprint != CommandFingerprint(original))
-            { throw Errors.Fail(ErrorCode.Conflict, CommandContentConflictMessage); }
+            {
+                throw Errors.Fail(ErrorCode.Conflict, CommandContentConflictMessage);
+            }
             CommandOutcomeKeyResolver.ValidateSelectedScope(view, original, selected);
             retained = previous.Result;
         }

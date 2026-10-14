@@ -15,8 +15,13 @@ internal static class NativeTextMaintenanceRf3Denied
         var failureCount = failures.Count;
         var original = await NativeTextMaintenanceRf3Reconciliation.CaptureAsync(sdk, mcp, scenario, failures, token);
         if (original is null)
-        { return false; }
-        var wrong = request with { NodeId = Guid.NewGuid() };
+        {
+            return false;
+        }
+        var wrong = request with
+        {
+            NodeId = Guid.NewGuid()
+        };
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             var direct = await sdk.MaintainTextIndexAsync(wrong, token);
@@ -28,7 +33,9 @@ internal static class NativeTextMaintenanceRf3Denied
         }, failures);
         await original.RequireAsync(sdk, mcp, scenario, failures, token);
         if (failures.Count != failureCount)
-        { return false; }
+        {
+            return false;
+        }
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             var official = await mcp.CallAsync(TextIndexMaintenanceProtocol.ToolName, wrong, token);
@@ -38,7 +45,9 @@ internal static class NativeTextMaintenanceRf3Denied
         }, failures);
         await original.RequireAsync(sdk, mcp, scenario, failures, token);
         if (failures.Count != failureCount)
-        { return false; }
+        {
+            return false;
+        }
         await ServerFailureObserver.ObserveAsync(() => NativeTextMaintenanceRf3Assertions.CanonicalAsync(
             sdk, mcp, scenario, changed: false, token), failures);
         return failures.Count == failureCount;

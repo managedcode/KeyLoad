@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.IntegrationTests.Features.Search;
@@ -25,7 +25,10 @@ internal sealed partial class NativeTextCapturedRf3Scenario
             RequestCqrsProbeOutcome.Observed, signed, token);
         await RequestCqrsPhaseFaultAssertions.VerifyMarkerAsync(marker, arm, Guid.Empty,
             RequestCqrsProbePhase.NativeTextOriginalPostingRead, signed);
-        var successorRequest = request with { CommandId = Guid.NewGuid() };
+        var successorRequest = request with
+        {
+            CommandId = Guid.NewGuid()
+        };
         capturedArm = probe.WriteArm(publisherId, successorRequest.CommandId, null,
             RequestCqrsProbePhase.OnlineTextCaptured, RequestCqrsProbeAction.Hold,
             targetVoter: signed[Enumerable.Range(0, RequestCqrsRf3Protocol.NodeCount).Single(index =>
@@ -35,14 +38,22 @@ internal sealed partial class NativeTextCapturedRf3Scenario
             seed, successorRequest, capturedArm, capturedCall, token);
         await Assert.That(successor.PublishedCut.ThroughSequence).IsGreaterThan(receipt.PublishedCut.ThroughSequence);
         if (cancelOriginal)
-        { await originalCancellation.CancelAsync(); }
+        {
+            await originalCancellation.CancelAsync();
+        }
         else
-        { probe.WriteRelease(arm, marker.RequestId); }
+        {
+            probe.WriteRelease(arm, marker.RequestId);
+        }
         var actual = await originalCall;
         if (cancelOriginal)
-        { await NativeTextCapturedRf3Call.CancelledAsync(actual, originalCancellation.IsCancellationRequested); }
+        {
+            await NativeTextCapturedRf3Call.CancelledAsync(actual, originalCancellation.IsCancellationRequested);
+        }
         else
-        { await OriginalAsync(actual, seed.Partition); }
+        {
+            await OriginalAsync(actual, seed.Partition);
+        }
         await RequestCqrsPhaseFaultAssertions.VerifySettledAsync(probe, arm, marker.RequestId, Guid.Empty, signed, token);
         await probe.RetireArmAsync(arm, token);
         await NativeTextMaintenanceRf3Mutation.ReplayAsync(active.Sdk, active.Mcp, mutation, token);

@@ -113,7 +113,10 @@ internal static class SampleChunkTestData
     internal static byte[] Rechecksum(SampleChunkPayload payload)
     {
         var checksum = ComputeChecksum(payload);
-        return NativeSerialization.Serialize(payload with { Checksum = checksum });
+        return NativeSerialization.Serialize(payload with
+        {
+            Checksum = checksum
+        });
     }
 
     internal static SampleChunkPayload Payload(ReadOnlySpan<byte> encoded)

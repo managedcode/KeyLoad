@@ -28,11 +28,18 @@ internal static class QdrantNativePolicy
         var nodes = ComparisonTopologies.NodeCount(topology);
         return new
         {
-            vectors = new { size = dimensions, distance = CosineToken },
+            vectors = new
+            {
+                size = dimensions,
+                distance = CosineToken
+            },
             shard_number = SingleItemCount,
             replication_factor = nodes,
             write_consistency_factor = nodes / MajorityDivisor + MajorityVoteOffset,
-            hnsw_config = new { m = NoObservedItems }
+            hnsw_config = new
+            {
+                m = NoObservedItems
+            }
         };
     }
 

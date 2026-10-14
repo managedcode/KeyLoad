@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Orleans;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
@@ -19,9 +19,13 @@ internal sealed class TenantPlacementPlanner(PartitionHost partition,
             var principal = GrainRequestAuthority.ReloadForRequest(partition.Database, trusted, clock);
             GrainRequestAuthority.RequireAdministrator(principal);
             if (request.Partitions.IsDefaultOrEmpty || request.Partitions.Length > options.Value.MaximumPlanPartitions)
-            { throw Errors.Fail(ErrorCode.Validation, TenantPlacementPolicyProtocol.Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Validation, TenantPlacementPolicyProtocol.Invalid);
+            }
             foreach (var part in request.Partitions)
-            { DatabaseEngine.ValidatePartition(part); }
+            {
+                DatabaseEngine.ValidatePartition(part);
+            }
             var capacity = await collector.ReadAsync(principal, request.Partitions, work,
                 trusted.ExpiresAt, current).ConfigureAwait(false);
             var grant = work.CreateReadGrant(work.RemainingReadGrantBytes, work.RemainingReadGrantRecords);

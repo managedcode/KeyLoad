@@ -19,7 +19,9 @@ internal static class SqlCreateTableRf3Failures
     {
         PostgresException? refusal = null;
         try
-        { await caller.ExecuteAsync<ResourceDefinition>(sql, [], prepared: true, token); }
+        {
+            await caller.ExecuteAsync<ResourceDefinition>(sql, [], prepared: true, token);
+        }
         catch (PostgresException failure) { refusal = failure; }
         await Assert.That(refusal).IsNotNull();
         await Assert.That(refusal!.SqlState).IsEqualTo(expectedState);
@@ -30,7 +32,9 @@ internal static class SqlCreateTableRf3Failures
     {
         PostgresException? refusal = null;
         try
-        { await caller.CommitAsync(command, prepared: true, token); }
+        {
+            await caller.CommitAsync(command, prepared: true, token);
+        }
         catch (PostgresException failure) { refusal = failure; }
         await Assert.That(refusal).IsNotNull();
         await Assert.That(refusal!.SqlState).IsEqualTo(expected);

@@ -24,7 +24,9 @@ internal static class EventVectorSourceOutcomeBytes
         if (selected.Outcome is null)
         {
             if (row is not null)
-            { throw Errors.Fail(ErrorCode.Corruption, InvalidOutcome); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, InvalidOutcome);
+            }
             return ReadOnlyMemory<byte>.Empty;
         }
         var json = JsonSerializer.SerializeToUtf8Bytes(mutation, JsonDefaults.Options);
@@ -33,7 +35,9 @@ internal static class EventVectorSourceOutcomeBytes
             mutation.PrincipalId, json);
         if (row is null || row.Fingerprint != expected || row.Incarnation != mutation.SourceOwner.Incarnation
             || row.PolicyEpoch != mutation.SourcePolicyEpoch)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidOutcome); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidOutcome);
+        }
         var original = ReadOnlyMemory<byte>.Empty;
         var found = view.ReadValue(selected.Key, bytes =>
         {
@@ -41,7 +45,9 @@ internal static class EventVectorSourceOutcomeBytes
             original = bytes.ToArray();
         });
         if (!found)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidOutcome); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidOutcome);
+        }
         return original;
     }
 }

@@ -18,7 +18,10 @@ internal static class PartitionMovementBlobCurrentReadsRf3Assertions
         var actual = await PublicReadAssertions.MetadataAsync(await seed.Source.GetBlobMetadataAsync(metadata, token).ConfigureAwait(false));
         await RequireRoutesAsync(seed, BlobToolNames.Metadata, metadata, seed.Blob, actual, token).ConfigureAwait(false);
         var upload = new BlobUploadInfoRequest(seed.Blob.Blob, seed.BlobOriginals.Begin.UploadId);
-        var expectedUpload = seed.BlobOriginals.TailReceipt.Value with { Status = BlobUploadStatus.Complete };
+        var expectedUpload = seed.BlobOriginals.TailReceipt.Value with
+        {
+            Status = BlobUploadStatus.Complete
+        };
         var info = await PublicReadAssertions.UploadAsync(await seed.Source.GetBlobUploadInfoAsync(upload, token).ConfigureAwait(false));
         await RequireRoutesAsync(seed, BlobToolNames.UploadInfo, upload, expectedUpload, info, token).ConfigureAwait(false);
         var firstBytes = new byte[BlobLimits.RawPartBytes];

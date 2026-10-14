@@ -13,7 +13,9 @@ internal static class NativeTextMaintenanceRf3Call
         TextIndexMaintenanceRequest request, NativeTextMaintenancePath path, CancellationToken token)
     {
         if (path == NativeTextMaintenancePath.Sdk)
-        { return await McpCallerAssertions.SdkSuccessAsync(await sdk.MaintainTextIndexAsync(request, token)); }
+        {
+            return await McpCallerAssertions.SdkSuccessAsync(await sdk.MaintainTextIndexAsync(request, token));
+        }
         if (path == NativeTextMaintenancePath.Mcp)
         {
             return (await McpCallerAssertions.SuccessAsync<TextIndexMaintenanceResult>(
@@ -32,7 +34,9 @@ internal static class NativeTextMaintenanceRf3Call
                 ?? throw new InvalidOperationException();
         }
         if (path != NativeTextMaintenancePath.McpSql)
-        { throw new ArgumentOutOfRangeException(nameof(path)); }
+        {
+            throw new ArgumentOutOfRangeException(nameof(path));
+        }
         return (await McpCallerAssertions.SuccessAsync<TextIndexMaintenanceResult>(
             await mcp.CallAsync(SqlOperationProtocol.ToolName, sql, token))).Value;
     }

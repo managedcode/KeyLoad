@@ -1,5 +1,5 @@
 using System.Collections.Concurrent;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
@@ -13,7 +13,9 @@ internal sealed class ConnectionOperationObservation : IGrainRequestPhaseObserve
     {
         var gate = new ConnectionOperationGate(phase, fail);
         if (!gates.TryAdd(requestId, gate))
-        { throw new InvalidOperationException(ConnectionNativeProtocol.DuplicateObservation); }
+        {
+            throw new InvalidOperationException(ConnectionNativeProtocol.DuplicateObservation);
+        }
         return gate;
     }
 
@@ -24,13 +26,19 @@ internal sealed class ConnectionOperationObservation : IGrainRequestPhaseObserve
         {
             var observed = new ConnectionObservedOperation(identity, context.GrainId, context.ActivationId);
             if (!operations.TryAdd(identity.RequestId, observed))
-            { throw new InvalidOperationException(ConnectionNativeProtocol.DuplicateObservation); }
+            {
+                throw new InvalidOperationException(ConnectionNativeProtocol.DuplicateObservation);
+            }
         }
         if (!gates.TryGetValue(identity.RequestId, out var gate) || phase != gate.Phase)
-        { return; }
+        {
+            return;
+        }
         gate.Arrived.TrySetResult();
         if (gate.Fail)
-        { throw new IOException(ConnectionNativeProtocol.OrdinaryFailure); }
+        {
+            throw new IOException(ConnectionNativeProtocol.OrdinaryFailure);
+        }
         await gate.Release.Task.WaitAsync(cancellationToken).ConfigureAwait(true);
     }
 
@@ -40,7 +48,9 @@ internal sealed class ConnectionOperationObservation : IGrainRequestPhaseObserve
         {
             if (observed.Identity != identity || observed.GrainId != context.GrainId
                 || observed.ActivationId != context.ActivationId)
-            { throw new InvalidOperationException(ConnectionNativeProtocol.IdentityChanged); }
+            {
+                throw new InvalidOperationException(ConnectionNativeProtocol.IdentityChanged);
+            }
             observed.Disposed.TrySetResult();
         }
     }
@@ -73,7 +83,9 @@ internal sealed class ConnectionOperationObservation : IGrainRequestPhaseObserve
     internal void ReleaseAll()
     {
         foreach (var gate in gates.Values)
-        { gate.Release.TrySetResult(); }
+        {
+            gate.Release.TrySetResult();
+        }
     }
 }
 

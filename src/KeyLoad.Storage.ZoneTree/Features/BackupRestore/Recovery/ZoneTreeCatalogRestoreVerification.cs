@@ -23,7 +23,9 @@ internal static class ZoneTreeCatalogRestoreVerification
         try
         {
             if (source.Position != originalPosition)
-            { throw Errors.Fail(ErrorCode.Corruption, WrongPosition); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, WrongPosition);
+            }
             source.Commit((view, _) =>
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -40,11 +42,15 @@ internal static class ZoneTreeCatalogRestoreVerification
     private static void Dispose(ZoneTreeStore source, Exception? primary)
     {
         try
-        { source.Dispose(); }
+        {
+            source.Dispose();
+        }
         catch (Exception cleanup)
         {
             if (primary is null)
-            { throw; }
+            {
+                throw;
+            }
             throw new AggregateException(primary, cleanup);
         }
     }

@@ -15,7 +15,11 @@ internal sealed class EventVectorPreparedFirstCleanup : IDisposable
         {
             coverage = original.OriginalCoverageWitness.ToArray();
             first = original.OriginalCapturedFirstOpenPhaseBytes.ToArray();
-            Phase = original with { OriginalCoverageWitness = coverage, OriginalCapturedFirstOpenPhaseBytes = first };
+            Phase = original with
+            {
+                OriginalCoverageWitness = coverage,
+                OriginalCapturedFirstOpenPhaseBytes = first
+            };
             transferred = true;
         }
         finally
@@ -23,14 +27,21 @@ internal sealed class EventVectorPreparedFirstCleanup : IDisposable
             if (!transferred)
             {
                 if (coverage is not null)
-                { CryptographicOperations.ZeroMemory(coverage); }
+                {
+                    CryptographicOperations.ZeroMemory(coverage);
+                }
                 if (first is not null)
-                { CryptographicOperations.ZeroMemory(first); }
+                {
+                    CryptographicOperations.ZeroMemory(first);
+                }
             }
         }
     }
 
-    internal EventVectorControlPhase Phase { get; }
+    internal EventVectorControlPhase Phase
+    {
+        get;
+    }
 
     public void Dispose()
     {

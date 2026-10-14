@@ -18,7 +18,10 @@ internal static class RuntimeJournalReaderRepairBackupContinuation
         token.ThrowIfCancellationRequested();
         await RequireRowsAsync(source, restored: false, continued: false);
         source.SetDispatchPaused(true);
-        var paused = original with { DispatchPaused = true };
+        var paused = original with
+        {
+            DispatchPaused = true
+        };
         await RequireIdentityAsync(paused, source.Identity);
         await Assert.That(source.Position).IsEqualTo(position);
         await Assert.That(source.CreateBackup(fixture.BackupPath)).IsEqualTo(position);
@@ -105,9 +108,13 @@ internal static class RuntimeJournalReaderRepairBackupContinuation
         foreach (var row in expected)
         {
             if (row.Value is null)
-            { await Assert.That(actual[row.Key]).IsNull(); }
+            {
+                await Assert.That(actual[row.Key]).IsNull();
+            }
             else
-            { await Assert.That(actual[row.Key]!).IsEquivalentTo(row.Value, CollectionOrdering.Matching); }
+            {
+                await Assert.That(actual[row.Key]!).IsEquivalentTo(row.Value, CollectionOrdering.Matching);
+            }
         }
     }
 }

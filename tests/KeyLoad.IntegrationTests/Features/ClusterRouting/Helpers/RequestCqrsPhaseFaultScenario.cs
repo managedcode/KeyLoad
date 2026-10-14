@@ -1,7 +1,7 @@
 using Aspire.Hosting;
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClusterRouting.Helpers;
 using KeyLoad.IntegrationTests.Features.StorageRecovery;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
 using ManagedCode.Communication;
@@ -42,7 +42,9 @@ internal sealed class RequestCqrsPhaseFaultScenario(bool useMcp, RequestCqrsProb
         using var parentTimeout = new CancellationTokenSource(RequestCqrsRf3Protocol.ParentDeadline, TimeProvider.System);
         using var parent = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, parentTimeout.Token);
         var scenario = new RequestCqrsPhaseFaultScenario(useMcp, phase)
-        { parentCancellationToken = parent.Token };
+        {
+            parentCancellationToken = parent.Token
+        };
         scenario.lifecycle.SetTokens(cancellationToken, parent.Token, default);
         await ServerFailureObserver.ObserveAsync(() => scenario.ExecuteAsync(parent.Token), scenario.failures)
             .ConfigureAwait(false);
@@ -170,7 +172,9 @@ internal sealed class RequestCqrsPhaseFaultScenario(bool useMcp, RequestCqrsProb
             var actualMcpRequestId = await RequestCqrsFaultOutcome.AssertMcpInterruptionAsync(observation)
                 .ConfigureAwait(false);
             if (actualMcpRequestId is { } value)
-            { await Assert.That(value).IsEqualTo(requestId); }
+            {
+                await Assert.That(value).IsEqualTo(requestId);
+            }
             return;
         }
         var sdkResult = await (sdkCall ?? throw new InvalidOperationException(MissingTask)).ConfigureAwait(false);
@@ -181,9 +185,13 @@ internal sealed class RequestCqrsPhaseFaultScenario(bool useMcp, RequestCqrsProb
         CancellationToken cancellationToken)
     {
         if (useMcp)
-        { mcpCall = RequestCqrsFaultCallers.CommitMcpAsync(callers.Mcp, command, cancellationToken); }
+        {
+            mcpCall = RequestCqrsFaultCallers.CommitMcpAsync(callers.Mcp, command, cancellationToken);
+        }
         else
-        { sdkCall = RequestCqrsFaultCallers.CommitSdkAsync(callers.Sdk, command, cancellationToken); }
+        {
+            sdkCall = RequestCqrsFaultCallers.CommitSdkAsync(callers.Sdk, command, cancellationToken);
+        }
     }
 
     private static async Task<ReplicaSiloDiscovery[]> ReadDiscoveryAsync(DistributedApplication app,

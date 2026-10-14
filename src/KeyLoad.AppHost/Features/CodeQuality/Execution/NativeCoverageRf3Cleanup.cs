@@ -23,7 +23,9 @@ internal sealed class NativeCoverageRf3Cleanup(NativeCoverageRf3Run run,
     internal async Task CleanupAsync(CancellationToken cancellationToken)
     {
         if (!coverage.IsValid() || !execution.IsValid())
-        { throw new InvalidOperationException(NativeCoverageRf3Protocol.InvalidSelection); }
+        {
+            throw new InvalidOperationException(NativeCoverageRf3Protocol.InvalidSelection);
+        }
         var start = new ProcessStartInfo(DockerExecutable)
         {
             WorkingDirectory = Path.GetDirectoryName(run.ManifestPath)!,

@@ -26,10 +26,14 @@ internal static class ScriptDomQueryAdapter
         cancellationToken.ThrowIfCancellationRequested();
         budget.Check();
         if (request.QueryDialectVersion is not (NamedVersion or JoinVersion))
-        { throw ScriptDomErrors.Unsupported(); }
+        {
+            throw ScriptDomErrors.Unsupported();
+        }
         if (request.Parameters?.Count > execution.MaximumParameters || positionalParameterCount is < EmptyCount
             || positionalParameterCount > execution.MaximumParameters)
-        { throw ScriptDomErrors.Invalid(); }
+        {
+            throw ScriptDomErrors.Invalid();
+        }
         var context = new ScriptDomLoweringContext(limitsOptions, executionOptions, budget, limits.MaxQueryTokens,
             request.Parameters, positionalParameterCount);
         var query = ScriptDomSelectLowering.Read(statement, request.QueryDialectVersion, context);

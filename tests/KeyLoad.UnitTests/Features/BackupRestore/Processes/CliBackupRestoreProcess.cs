@@ -67,7 +67,10 @@ internal static class CliBackupRestoreProcess
         ServerFailureObserver.ThrowIfAny(failures);
         return result is null
             ? throw new InvalidOperationException(StartFailureMessage)
-            : result with { ProcessDisposed = disposed };
+            : result with
+            {
+                ProcessDisposed = disposed
+            };
     }
 
     private static async Task<CliBackupRestoreProcessResult?> RunStartedAsync(

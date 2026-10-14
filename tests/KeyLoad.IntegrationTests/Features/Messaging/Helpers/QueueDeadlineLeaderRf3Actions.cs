@@ -17,9 +17,13 @@ internal static class QueueDeadlineLeaderRf3Actions
         await QueueDeadlineLeaderRf3Expected.ReceiptAsync(receipt, command.CommandId, state,
             [new(QueueDeadlineLeaderRf3Protocol.EnqueueKind, state.Lane.Queue, id, 1L)]);
         if (healthy)
-        { state.Healthy = QueueDeadlineLeaderRf3Expected.Ready(true); }
+        {
+            state.Healthy = QueueDeadlineLeaderRf3Expected.Ready(true);
+        }
         else
-        { state.Original = QueueDeadlineLeaderRf3Expected.Scheduled(state.Due); }
+        {
+            state.Original = QueueDeadlineLeaderRf3Expected.Scheduled(state.Due);
+        }
         state.Producers.Add((command, receipt));
         await QueueDeadlineLeaderRf3Current.ObserveAsync(admin, state, token);
         await QueueDeadlineLeaderRf3Expected.EqualAsync((await McpCallerAssertions.SuccessAsync<CommitReceipt>(

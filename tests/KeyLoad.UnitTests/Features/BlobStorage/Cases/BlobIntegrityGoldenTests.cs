@@ -28,8 +28,17 @@ internal sealed class BlobIntegrityGoldenTests
         var initial = BlobIntegrity.InitialHash(Guid.Parse(Incarnation), blob, Guid.Parse(UploadId), DeclaredLength);
         var part = BlobIntegrity.PartHash(System.Text.Encoding.UTF8.GetBytes(PartText));
         var next = BlobIntegrity.NextHash(initial, 0, PartText.Length, part);
-        var otherScope = blob with { Resource = "other-resource" };
-        var otherPartition = blob with { Partition = blob.Partition with { PartitionKey = "partition-b" } };
+        var otherScope = blob with
+        {
+            Resource = "other-resource"
+        };
+        var otherPartition = blob with
+        {
+            Partition = blob.Partition with
+            {
+                PartitionKey = "partition-b"
+            }
+        };
         var expectedKey = KeyLoad.Storage.KeyCodec.Encode("blob-chain-v1", Incarnation.Replace("-", string.Empty, StringComparison.Ordinal),
             Tenant, Database, Domain, FirstPartitionKey, Resource, BlobId,
             UploadId.Replace("-", string.Empty, StringComparison.Ordinal), DeclaredLength, RawPartBytes);

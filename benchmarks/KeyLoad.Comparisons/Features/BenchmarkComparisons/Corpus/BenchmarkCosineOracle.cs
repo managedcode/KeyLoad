@@ -12,7 +12,11 @@ internal static class BenchmarkCosineOracle
 
         double dot = ZeroAccumulator, a = ZeroAccumulator, b = ZeroAccumulator;
         for (var i = FirstElementIndex; i < left.Length; i++)
-        { dot += (double)left[i] * right[i]; a += (double)left[i] * left[i]; b += (double)right[i] * right[i]; }
+        {
+            dot += (double)left[i] * right[i];
+            a += (double)left[i] * left[i];
+            b += (double)right[i] * right[i];
+        }
         return dot / Math.Sqrt(a * b);
     }
 

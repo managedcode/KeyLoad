@@ -12,17 +12,25 @@ internal static class NativeControlledBlobBorrowObservation
         long maximumReplyBytes, CancellationToken originalToken)
     {
         if (observer is null || original.Channel != RemoteModelNativeChannel.DocumentEnvelope)
-        { return; }
+        {
+            return;
+        }
         originalToken.ThrowIfCancellationRequested();
         var envelope = NativeSerialization.Deserialize<RemoteDocumentTransportEnvelope>(original.Payload.Span);
         if (envelope.ControlledBlob is not { } call)
-        { return; }
+        {
+            return;
+        }
         if (envelope.Document is not null || envelope.Controlled is not null || envelope.QueueTransfer is not null
             || !borrowedSourceMac.Verify(original.Payload.Span, original.Signature, reply: false)
             || !original.Payload.Span.SequenceEqual(RemoteDocumentWire.Encode(envelope).AsSpan()))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteModelNativeProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, RemoteModelNativeProtocol.InvalidProof);
+        }
         if (!observer.Select(call, originalToken))
-        { return; }
+        {
+            return;
+        }
         var dispatcher = new NativeControlledBlobFaultDispatcher(client, destination, actualAddress,
             original, borrowedSourceMac, maximumReplyBytes, originalToken);
         var failures = new List<Exception>();
@@ -36,12 +44,18 @@ internal static class NativeControlledBlobBorrowObservation
                     () => observer.ObserveAsync(call, original, catalog, originalToken).AsTask(), failures).ConfigureAwait(false);
             }
             if (failures.Count == NoRecordedFailures)
-            { catalog.RequireComplete(); }
+            {
+                catalog.RequireComplete();
+            }
         }
-        catch (Exception error) when (KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
-        catch (Exception error) when (!KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
+        catch (Exception error) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
+        catch (Exception error) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
         await client.RequireBeforeDispatchAsync(destination, original, borrowedSourceMac, originalToken).ConfigureAwait(false);
     }

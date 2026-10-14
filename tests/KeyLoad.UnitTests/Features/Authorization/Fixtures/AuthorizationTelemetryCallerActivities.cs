@@ -6,7 +6,10 @@ namespace KeyLoad.UnitTests.Features.Authorization;
 internal sealed class AuthorizationTelemetryCallerActivities : IDisposable
 {
     private readonly Activity[] activities;
-    internal Activity? Ambient { get; }
+    internal Activity? Ambient
+    {
+        get;
+    }
     internal Activity First => activities[AuthorizationTelemetryTestProtocol.IndexCount];
     internal Activity? Current => activities.Length > AuthorizationTelemetryTestProtocol.IndexCount
         ? activities[^AuthorizationTelemetryTestProtocol.HealthyCount] : null;
@@ -25,7 +28,9 @@ internal sealed class AuthorizationTelemetryCallerActivities : IDisposable
         {
             activities[index] = new Activity(AuthorizationTelemetryTestProtocol.CallerParent);
             if (index == AuthorizationTelemetryTestProtocol.IndexCount && Ambient is not null)
-            { activities[index].SetParentId(Ambient.TraceId, Ambient.SpanId, Ambient.ActivityTraceFlags); }
+            {
+                activities[index].SetParentId(Ambient.TraceId, Ambient.SpanId, Ambient.ActivityTraceFlags);
+            }
             activities[index].Start();
             activities[index].ActivityTraceFlags |= ActivityTraceFlags.Recorded;
         }
@@ -34,6 +39,8 @@ internal sealed class AuthorizationTelemetryCallerActivities : IDisposable
     {
         for (var index = activities.Length - AuthorizationTelemetryTestProtocol.HealthyCount;
             index >= AuthorizationTelemetryTestProtocol.IndexCount; index--)
-        { activities[index].Dispose(); }
+        {
+            activities[index].Dispose();
+        }
     }
 }

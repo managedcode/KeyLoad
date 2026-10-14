@@ -7,5 +7,8 @@ internal sealed record PostgresPreparedStatement(string Sql, int[] ParameterOids
 internal sealed record PostgresBoundPortal(PostgresPreparedStatement Statement,
     Dictionary<string, JsonElement> Parameters, short ResultFormat, int RetainedBytes)
 {
-    internal bool Completed { get; set; }
+    internal bool Completed
+    {
+        get; set;
+    }
 }

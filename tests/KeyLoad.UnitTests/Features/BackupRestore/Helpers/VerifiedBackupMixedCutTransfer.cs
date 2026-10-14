@@ -19,7 +19,9 @@ internal static class VerifiedBackupMixedCutTransfer
     internal static async Task RepairAsync(VerifiedBackupCutSnapshot selected)
     {
         foreach (var file in selected.Archive)
-        { await File.WriteAllBytesAsync(Path.Combine(selected.Path, file.Key), file.Value, CancellationToken.None); }
+        {
+            await File.WriteAllBytesAsync(Path.Combine(selected.Path, file.Key), file.Value, CancellationToken.None);
+        }
         await BackupIndexedDocumentDedupAssertions.AssertArchiveUnchanged(selected.Path, selected.Archive);
     }
 }

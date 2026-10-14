@@ -21,7 +21,9 @@ internal static class BackupRequiredFileAccessAssertions
         await Assert.That(File.Exists(destination)).IsFalse();
         await Assert.That(Directory.Exists(destination)).IsEqualTo(existingEmpty);
         if (existingEmpty)
-        { await Assert.That(Directory.EnumerateFileSystemEntries(destination).Any()).IsFalse(); }
+        {
+            await Assert.That(Directory.EnumerateFileSystemEntries(destination).Any()).IsFalse();
+        }
         var root = Directory.GetParent(backup) ?? throw new DirectoryNotFoundException(MissingParent);
         await Assert.That(Directory.EnumerateDirectories(root.FullName, RestoreStagingPattern,
             SearchOption.AllDirectories).Any()).IsFalse();
@@ -39,7 +41,9 @@ internal static class BackupRequiredFileAccessAssertions
         foreach (var row in original)
         {
             if (row.Key == JournalName)
-            { continue; }
+            {
+                continue;
+            }
             var actual = await File.ReadAllBytesAsync(Path.Combine(fixture.BackupDirectory, row.Key), token);
             await Assert.That(actual.AsSpan().SequenceEqual(row.Value)).IsTrue();
         }

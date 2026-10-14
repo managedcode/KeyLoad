@@ -5,7 +5,10 @@ namespace KeyLoad.Server;
 /// <summary>Explicit typed bindings for the frozen atomic, queue and administration commands.</summary>
 internal static class McpCommandCatalog
 {
-    internal static ImmutableArray<McpOperationDescriptor> Entries { get; } =
+    internal static ImmutableArray<McpOperationDescriptor> Entries
+    {
+        get;
+    } =
     [
         McpOperationFactory.Command<UpsertRemoteGraphEdgeRequestV1, RemoteGraphEdgeResultV1>(RemoteGraphPublicProtocol.UpsertTool,
             RemoteGraphPublicProtocol.UpsertRoute, OperationKind.UpsertRemoteGraphEdge, static request => request.CommandId),

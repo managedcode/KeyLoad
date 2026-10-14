@@ -39,7 +39,9 @@ internal static class PostgresDecimalRf3Policy
         }, token);
         await global::TUnit.Assertions.Assert.That(await SqlNullOrderingRf3Assertions.ImageAsync(root, state, token)).IsEqualTo(image);
         await PersistAsync(root, original with
-        { PolicyEpoch = original.PolicyEpoch + SqlNullOrderingRf3Protocol.RepairAdvance }, token);
+        {
+            PolicyEpoch = original.PolicyEpoch + SqlNullOrderingRf3Protocol.RepairAdvance
+        }, token);
         await PostgresDecimalRf3Pages.HealthyAsync(fixture, state, token);
         await global::TUnit.Assertions.Assert.That(await SqlNullOrderingRf3Assertions.ImageAsync(root, state, token)).IsEqualTo(image);
     }
@@ -55,7 +57,9 @@ internal static class PostgresDecimalRf3Policy
             {
                 var parameter = new global::Npgsql.NpgsqlParameter(PostgresDecimalRf3Protocol.Parameter,
                     global::NpgsqlTypes.NpgsqlDbType.Numeric)
-                { Value = PostgresDecimalRf3Protocol.BetweenScores };
+                {
+                    Value = PostgresDecimalRf3Protocol.BetweenScores
+                };
                 await PostgresRf3Assertions.ErrorAsync(wire.ExecuteAsync<QueryPage>(
                     PostgresDecimalRf3Protocol.DriverSql, [parameter], prepared: true, token),
                     PostgresRf3Protocol.PermissionSqlState, ErrorCode.PermissionDenied);

@@ -73,7 +73,11 @@ internal static class NativeCoverageRf3InvocationWriter
                 sourceReceiptPath = baseReceipt.Path,
                 sourceReceiptSha256 = baseReceiptSha256
             },
-            tool = new { version = tool.Version, packageRoot = tool.PackageRoot },
+            tool = new
+            {
+                version = tool.Version,
+                packageRoot = tool.PackageRoot
+            },
             bounds = new
             {
                 maximumFiles = options.MaximumFiles,

@@ -33,7 +33,10 @@ internal sealed class HybridExplainPrivacyWholeFlowTests
             Alice, restrictRows: true);
         var before = HybridExplainWholeFlow.Snapshot(db);
         var position = db.Store.Position;
-        var request = FilteredSearchTestSupport.Request([Owned, Hidden]) with { Explain = true };
+        var request = FilteredSearchTestSupport.Request([Owned, Hidden]) with
+        {
+            Explain = true
+        };
         var engine = new SearchEngine(db.Database, UnitExecutionOptions.QueryExecution());
         var actual = await engine.SearchAsync(Reader, request, TestContext.Current!.Execution.CancellationToken);
         RankedDocument[] expected =
@@ -45,7 +48,10 @@ internal sealed class HybridExplainPrivacyWholeFlowTests
                     new(SearchBranchKind.Vector, FirstRank, Weight, Weight / (double)Denominator)]))
         ];
         await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
-        var plain = await engine.SearchAsync(Reader, request with { Explain = false },
+        var plain = await engine.SearchAsync(Reader, request with
+        {
+            Explain = false
+        },
             TestContext.Current!.Execution.CancellationToken);
         await Assert.That(JsonDefaults.Serialize(plain).AsSpan().SequenceEqual(JsonDefaults.Serialize(
             expected.Select(hit => hit with { Explanation = null }).ToArray()))).IsTrue();

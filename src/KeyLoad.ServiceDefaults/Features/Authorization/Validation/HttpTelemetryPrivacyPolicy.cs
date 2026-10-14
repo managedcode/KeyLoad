@@ -57,9 +57,13 @@ internal static class HttpTelemetryPrivacyPolicy
                 || link.Context.TraceId == default || link.Context.SpanId == default || link.Context.IsRemote
                 || link.Context.TraceState is not null || link.Context.TraceFlags is not (ActivityTraceFlags.None or ActivityTraceFlags.Recorded)
                 || (link.Tags?.Any() ?? false))
-            { return UnsafeStateReason; }
+            {
+                return UnsafeStateReason;
+            }
             if (++count > MaximumNativeLinks)
-            { return ExcessStateReason; }
+            {
+                return ExcessStateReason;
+            }
         }
         return null;
     }
@@ -88,11 +92,17 @@ internal static class HttpTelemetryPrivacyPolicy
     internal static string Category(string? category)
     {
         if (category?.StartsWith(KeyLoadPrefix, StringComparison.Ordinal) == true)
-        { return KeyLoadCategory; }
+        {
+            return KeyLoadCategory;
+        }
         if (category?.StartsWith(AspNetPrefix, StringComparison.Ordinal) == true)
-        { return AspNetCategory; }
+        {
+            return AspNetCategory;
+        }
         if (category?.StartsWith(OrleansPrefix, StringComparison.Ordinal) == true)
-        { return OrleansCategory; }
+        {
+            return OrleansCategory;
+        }
         return RuntimeCategory;
     }
 }

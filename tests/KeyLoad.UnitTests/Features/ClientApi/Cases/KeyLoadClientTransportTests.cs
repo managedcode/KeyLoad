@@ -62,7 +62,9 @@ internal sealed class KeyLoadClientTransportTests
     {
         var observation = new KeyLoadClientKestrelObservation();
         try
-        { await ExecuteObservedAsync(observation); }
+        {
+            await ExecuteObservedAsync(observation);
+        }
         catch (Exception original)
         {
             observation.WriteAndThrow(original);

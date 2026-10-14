@@ -15,7 +15,10 @@ internal sealed class ZoneTreeCoordinatedPointCacheFileFixture : IDisposable
     private readonly List<string> directories = [];
     private int disposeStarted;
 
-    internal CacheMemoryBudget Budget { get; }
+    internal CacheMemoryBudget Budget
+    {
+        get;
+    }
 
     internal ZoneTreeCoordinatedPointCacheFileFixture(CacheMemoryLimits? limits = null)
         => Budget = new CacheMemoryBudget(UnitAdmissionOptions.Cache(limits ?? new CacheMemoryLimits()));
@@ -29,7 +32,10 @@ internal sealed class ZoneTreeCoordinatedPointCacheFileFixture : IDisposable
         var options = new ZoneTreeStoreOptions(directory) { FaultObserver = faultObserver };
         if (embedded)
         {
-            options = options with { EmbeddedPointCache = CreateOptions(maxEntries) };
+            options = options with
+            {
+                EmbeddedPointCache = CreateOptions(maxEntries)
+            };
         }
 
         var store = new ZoneTreeStore(options, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());

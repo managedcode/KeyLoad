@@ -9,7 +9,9 @@ internal static class PeerDiscoveryNativeOwners
     internal static void Register(string id, PeerDiscoveryNativeCluster owner)
     {
         if (!Owners.TryAdd(id, owner))
-        { throw new InvalidOperationException("Duplicate discovery fixture owner."); }
+        {
+            throw new InvalidOperationException("Duplicate discovery fixture owner.");
+        }
     }
     internal static PeerDiscoveryNativeCluster Resolve(IConfiguration configuration)
         => Owners.TryGetValue(configuration[Key] ?? string.Empty, out var owner) ? owner

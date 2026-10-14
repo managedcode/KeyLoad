@@ -1,6 +1,6 @@
 using System.Globalization;
+using KeyLoad.Clustering;
 using KeyLoad.Core.Features.Messaging;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
 
@@ -83,7 +83,11 @@ internal static class NativeSagaTimeoutTestData
     {
         var principal = fixture.Database.Store.Read(view => fixture.Database.Database.Principal(
             view, RevocableCreator, TimeProvider.System.GetUtcNow()));
-        var revoked = principal with { Revoked = true, PolicyEpoch = principal.PolicyEpoch + PolicyEpochIncrement };
+        var revoked = principal with
+        {
+            Revoked = true,
+            PolicyEpoch = principal.PolicyEpoch + PolicyEpochIncrement
+        };
         _ = fixture.Database.Submit(OperationKind.ConfigurePrincipal,
             new ConfigurePrincipalRequest(revoked)).Get<PrincipalRecord>();
     }

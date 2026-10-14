@@ -6,7 +6,10 @@ namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 internal sealed class ScaledRawStorageFixtureCore
 {
     private const string InitializedMessage = "The scaled fixture core initialization is one-shot.";
-    internal TimeProvider TimeProvider { get; }
+    internal TimeProvider TimeProvider
+    {
+        get;
+    }
     private readonly ScaledStorageExecutionOptions settings;
     private readonly IOptions<ScaledStorageExecutionOptions> executionOptions;
     private readonly CancellationToken _token;
@@ -52,8 +55,14 @@ internal sealed class ScaledRawStorageFixtureCore
         _arena = new ScaledRawStorageValueArena(_corpus, executionOptions, token);
     }
 
-    internal int RecordCount { get; }
-    internal int PayloadBytes { get; }
+    internal int RecordCount
+    {
+        get;
+    }
+    internal int PayloadBytes
+    {
+        get;
+    }
     internal bool IsDisposed => _disposed;
     internal ScaledRawStorageCorpus Corpus => _corpus;
     internal ScaledRawStorageReadOrder ReadOrder => _readOrder;

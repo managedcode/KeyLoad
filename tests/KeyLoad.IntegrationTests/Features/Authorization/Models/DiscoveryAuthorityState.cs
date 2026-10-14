@@ -6,6 +6,9 @@ namespace KeyLoad.IntegrationTests.Features.Authorization;
 internal sealed record DiscoveryAuthorityState(McpDocumentScenario Scenario, McpPersistedIdentity Identity,
     Guid RepairCommandId, PrincipalRecord Repaired)
 {
-    internal PrincipalRecord? OriginalRepairResult { get; set; }
+    internal PrincipalRecord? OriginalRepairResult
+    {
+        get; set;
+    }
 }
 internal sealed record DiscoveryAuthorityImage(DocumentResult? Document, OutboxStatus Outbox);

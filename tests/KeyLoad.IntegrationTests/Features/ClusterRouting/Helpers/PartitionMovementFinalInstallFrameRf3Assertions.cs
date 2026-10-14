@@ -19,7 +19,9 @@ internal static class PartitionMovementFinalInstallFrameRf3Assertions
             await Assert.That(actual.StorePosition - before.StorePosition).IsEqualTo((long)entries.Length);
             await RequireBusinessAsync(seed, before, actual);
             if (before.Header is null)
-            { await RequireTargetAsync(seed, precut, before, actual, entries); }
+            {
+                await RequireTargetAsync(seed, precut, before, actual, entries);
+            }
             else
             {
                 await Assert.That(actual.Header!.TerminalResult).IsNull();
@@ -75,10 +77,14 @@ internal static class PartitionMovementFinalInstallFrameRf3Assertions
             if (family is PartitionRecordFamilies.OutcomeV2 or PartitionRecordFamilies.OutcomeLocatorV2)
             {
                 foreach (var row in old)
-                { await Assert.That(current.Contains(row, StringComparer.Ordinal)).IsTrue(); }
+                {
+                    await Assert.That(current.Contains(row, StringComparer.Ordinal)).IsTrue();
+                }
             }
             else
-            { await SqlRf3Protocol.EqualAsync(old, current); }
+            {
+                await SqlRf3Protocol.EqualAsync(old, current);
+            }
         }
     }
 
@@ -108,9 +114,13 @@ internal static class PartitionMovementFinalInstallFrameRf3Assertions
             await SqlRf3Protocol.EqualAsync(seed.Partition, result.Partition);
             await Assert.That(result.ScopeKind).IsEqualTo(CommandOutcomeScopeKind.Partition);
             if (operation.Id == precut.EffectId)
-            { await Assert.That(result.Result.Error).IsEqualTo((ErrorCode?)ErrorCode.ResourceExhausted); }
+            {
+                await Assert.That(result.Result.Error).IsEqualTo((ErrorCode?)ErrorCode.ResourceExhausted);
+            }
             else
-            { await Assert.That(result.Result.Error).IsNull(); }
+            {
+                await Assert.That(result.Result.Error).IsNull();
+            }
             allowed.Add(Convert.ToHexString(key));
             allowed.Add(Convert.ToHexString(CommandOutcomePartitionLocatorSerialization.ScopedKey(seed.Partition,
                 operation.PrincipalId, operation.Id)));

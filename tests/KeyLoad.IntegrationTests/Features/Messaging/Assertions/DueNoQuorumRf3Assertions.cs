@@ -60,7 +60,9 @@ internal static class DueNoQuorumRf3Assertions
     {
         using var http = McpCallerHttp.Create(app, survivor);
         using (var response = await http.GetAsync(RequestCqrsRf3Protocol.ReadyUri, cancellationToken).ConfigureAwait(false))
-        { await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.ServiceUnavailable); }
+        {
+            await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.ServiceUnavailable);
+        }
         var sdk = new KeyLoadClient(http, seed.Creator.Secret, IntegrationClientOptions.Execution());
         var result = await sdk.InspectRecurringScheduleAsync(new(seed.Lane, seed.ScheduleId), cancellationToken)
             .ConfigureAwait(false);
@@ -79,7 +81,9 @@ internal static class DueNoQuorumRf3Assertions
                         cancellationToken).ConfigureAwait(false);
                 }
                 catch (HttpRequestException error) when (error.StatusCode == HttpStatusCode.ServiceUnavailable)
-                { return; }
+                {
+                    return;
+                }
                 ownedMcp = connected;
                 var reply = await connected.CallAsync(DueNoQuorumRf3Protocol.InspectScheduleTool,
                     new InspectRecurringScheduleRequest(seed.Lane, seed.ScheduleId), cancellationToken)
@@ -95,7 +99,9 @@ internal static class DueNoQuorumRf3Assertions
         finally
         {
             if (ownedMcp is not null)
-            { await ServerFailureObserver.ObserveAsync(() => ownedMcp.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+            {
+                await ServerFailureObserver.ObserveAsync(() => ownedMcp.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+            }
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -114,12 +120,17 @@ internal static class DueNoQuorumRf3Assertions
                 await Assert.That(read.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.OwnershipLost));
             }
             else if (read.Value?.Schedule is { NextOrdinal: > 1 })
-            { throw new InvalidOperationException(Incomplete); }
+            {
+                throw new InvalidOperationException(Incomplete);
+            }
             if (read.IsSuccess && read.Value?.Schedule is { NextOrdinal: 1 })
             {
                 await AssertOrdinalAsync(callers, seed, 1, deadline.Token).ConfigureAwait(false);
                 await AssertOccurrenceAsync(callers, seed, expectedPresent: true, deadline.Token).ConfigureAwait(false);
-                await AssertOccurrenceAsync(callers, seed with { OccurrenceId = seed.NextOccurrenceId },
+                await AssertOccurrenceAsync(callers, seed with
+                {
+                    OccurrenceId = seed.NextOccurrenceId
+                },
                     expectedPresent: false, deadline.Token).ConfigureAwait(false);
                 return;
             }
@@ -133,7 +144,10 @@ internal static class DueNoQuorumRf3Assertions
     {
         await AssertOrdinalAsync(callers, seed, 1, cancellationToken).ConfigureAwait(false);
         await AssertOccurrenceAsync(callers, seed, expectedPresent: true, cancellationToken).ConfigureAwait(false);
-        await AssertOccurrenceAsync(callers, seed with { OccurrenceId = seed.NextOccurrenceId },
+        await AssertOccurrenceAsync(callers, seed with
+        {
+            OccurrenceId = seed.NextOccurrenceId
+        },
             expectedPresent: false, cancellationToken).ConfigureAwait(false);
     }
 

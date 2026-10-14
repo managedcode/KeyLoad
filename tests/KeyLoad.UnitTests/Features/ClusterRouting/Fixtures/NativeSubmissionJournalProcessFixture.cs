@@ -28,7 +28,9 @@ internal sealed class NativeSubmissionJournalProcessFixture(C1OutcomeInspectionF
             var ownedFailures = new List<Exception>();
             await ServerFailureObserver.ObserveAsync(owner.InitializeAsync, ownedFailures).ConfigureAwait(false);
             if (ownedFailures.Count == 0)
-            { await ServerFailureObserver.ObserveAsync(() => body(owner), ownedFailures).ConfigureAwait(false); }
+            {
+                await ServerFailureObserver.ObserveAsync(() => body(owner), ownedFailures).ConfigureAwait(false);
+            }
             ServerFailureObserver.Observe(owner.CloseAndVerify, ownedFailures);
             ServerFailureObserver.ThrowIfAny(ownedFailures);
         }), failures).ConfigureAwait(false);
@@ -42,7 +44,10 @@ internal sealed class NativeSubmissionJournalProcessFixture(C1OutcomeInspectionF
         var configuration = new ReplicaConfiguration("journal-process-a",
             ["journal-process-a", "journal-process-b", "journal-process-c"], ReplicaDirectory, Canonical.Incarnation);
         replica = new(new(ReplicaDirectory)
-        { Incarnation = Canonical.Incarnation, SigningKey = Canonical.Identity.SigningKey },
+        {
+            Incarnation = Canonical.Incarnation,
+            SigningKey = Canonical.Identity.SigningKey
+        },
             UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         ReplicaIdentity = replica.Identity;
         log = new(replica, UnitExecutionOptions.ReplicaConfiguration(configuration), canonicalDatabase: Canonical.Database);
@@ -63,7 +68,9 @@ internal sealed class NativeSubmissionJournalProcessFixture(C1OutcomeInspectionF
         if (Directory.Exists(ReplicaDirectory))
         {
             try
-            { RequireLocksReleased(); }
+            {
+                RequireLocksReleased();
+            }
             catch (Exception original) when (global::ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(original) is null)
             {
                 failures.Add(original);
@@ -85,23 +92,41 @@ internal sealed class NativeSubmissionJournalProcessFixture(C1OutcomeInspectionF
     {
         var failures = new List<Exception>();
         try
-        { log?.Dispose(); }
+        {
+            log?.Dispose();
+        }
         catch (Exception error) when (global::ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         catch (Exception error) when (global::ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null)
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         try
-        { replica?.Dispose(); }
+        {
+            replica?.Dispose();
+        }
         catch (Exception error) when (global::ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         catch (Exception error) when (global::ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null)
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         try
-        { retentionLock?.Dispose(); }
+        {
+            retentionLock?.Dispose();
+        }
         catch (Exception error) when (global::ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         catch (Exception error) when (global::ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null)
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
@@ -119,7 +144,9 @@ internal sealed class NativeSubmissionJournalProcessFixture(C1OutcomeInspectionF
             journal = OfflineRegularFile.Open(Path.Combine(ReplicaDirectory, "owner.lock"),
                 FileAccess.ReadWrite, FileShare.None, 1024);
             if (outer.Length != 0 || database.Length != 0 || journal.Length != 0)
-            { throw new InvalidDataException("The original journal process owner lock is not empty."); }
+            {
+                throw new InvalidDataException("The original journal process owner lock is not empty.");
+            }
         }, failures);
         ServerFailureObserver.Observe(() => journal?.Dispose(), failures);
         ServerFailureObserver.Observe(() => database?.Dispose(), failures);

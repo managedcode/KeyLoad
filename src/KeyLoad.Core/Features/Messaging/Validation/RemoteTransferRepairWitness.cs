@@ -26,6 +26,8 @@ public sealed partial class DatabaseEngine
             || (claims.Stage == QueueTransferRepairStage.Accept ? claims.ReceiptDigest is not null
                 : !RemoteTransferDependencyShape.Digest(claims.ReceiptDigest!))
             || claims.FailedCommandId != RemoteTransferRepairIdentity.CommandId(hint, claims.Stage))
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteTransferRepairProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteTransferRepairProtocol.Invalid);
+        }
     }
 }

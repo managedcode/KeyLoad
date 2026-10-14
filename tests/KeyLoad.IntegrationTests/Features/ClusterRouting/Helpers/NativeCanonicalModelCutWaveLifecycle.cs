@@ -7,17 +7,23 @@ internal static class NativeCanonicalModelCutWaveLifecycle
     internal static void StopAdmission(TwoRf3MembershipWave wave, List<Exception> failures)
     {
         if (wave.canonicalCutControls is not { } controls)
-        { return; }
+        {
+            return;
+        }
         var before = failures.Count;
         ServerFailureObserver.Observe(controls.StopAdmission, failures);
         if (failures.Count != before)
-        { wave.RetainRoots(); }
+        {
+            wave.RetainRoots();
+        }
     }
 
     internal static async Task JoinAsync(TwoRf3MembershipWave wave, List<Exception> failures)
     {
         if (wave.canonicalCutControls is not { } controls)
-        { return; }
+        {
+            return;
+        }
         if (!wave.applicationDisposed || !wave.nodeLocksReleased)
         {
             wave.RetainRoots();
@@ -28,6 +34,8 @@ internal static class NativeCanonicalModelCutWaveLifecycle
         await ServerFailureObserver.ObserveAsync(() => controls.DisposeAfterOwnersJoinedAsync(wave), failures)
             .ConfigureAwait(false);
         if (failures.Count != before)
-        { wave.RetainRoots(); }
+        {
+            wave.RetainRoots();
+        }
     }
 }

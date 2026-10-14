@@ -8,7 +8,12 @@ internal sealed class IsolatedMutationCorpusTests
     [Test]
     public async Task AcIso005MutationIdsAreUniqueAcrossOperationsWarmupsRepetitionsAndScenarios()
     {
-        var options = ComparisonHarnessInputs.Small with { Operations = 32, Warmup = 4, Repetitions = 3 };
+        var options = ComparisonHarnessInputs.Small with
+        {
+            Operations = 32,
+            Warmup = 4,
+            Repetitions = 3
+        };
         var data = new BenchmarkDataset(Microsoft.Extensions.Options.Options.Create(options));
         var ids = data.Documents.Select(document => document.Id).ToHashSet(StringComparer.Ordinal);
         foreach (var scenario in new[] { Scenario.DocumentWrite, Scenario.DocumentUpdate, Scenario.DocumentDelete })
@@ -49,7 +54,10 @@ internal sealed class IsolatedMutationCorpusTests
         var actual = data.Input(Scenario.DocumentWrite, 0, 0, false);
         await Assert.That(BenchmarkDataset.SameDocument(new(actual.Id, actual.Json), expected)).IsTrue();
         await Assert.That(actual.Vector.SequenceEqual(expected.Vector)).IsTrue();
-        var replicated = new BenchmarkDataset(Microsoft.Extensions.Options.Options.Create(data.Options with { Topology = ComparisonTopology.Replicated }));
+        var replicated = new BenchmarkDataset(Microsoft.Extensions.Options.Options.Create(data.Options with
+        {
+            Topology = ComparisonTopology.Replicated
+        }));
         await Assert.That(replicated.Sha256).IsEqualTo(data.Sha256);
     }
 }

@@ -31,7 +31,9 @@ internal static class PartitionQueryMcpNativeAssertions
         await Assert.That(attribute is not null).IsTrue();
         await Assert.That(attribute!.ConstructorArguments.Single().Value).IsEqualTo(alias);
         if (type.GetProperties().Length != names.Length)
-        { throw new InvalidOperationException(InvalidContract); }
+        {
+            throw new InvalidOperationException(InvalidContract);
+        }
         for (var index = 0; index < names.Length; index++)
         {
             var property = type.GetProperty(names[index], BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly);

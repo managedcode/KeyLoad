@@ -12,12 +12,16 @@ internal static class ScriptDomGraphScalar
     {
         context.Check(expression, depth);
         if (expression is Dom.StringLiteral literal)
-        { return literal.Value; }
+        {
+            return literal.Value;
+        }
         if (expression is Dom.VariableReference variable)
         {
             var value = context.Parameter(variable);
             if (value.ValueKind == JsonValueKind.String && value.GetString() is { } text)
-            { return text; }
+            {
+                return text;
+            }
             throw Errors.Fail(ErrorCode.Validation, context.ParameterDetail);
         }
         throw ScriptDomErrors.Unsupported();
@@ -29,12 +33,16 @@ internal static class ScriptDomGraphScalar
         {
             var value = context.Parameter(variable);
             if (value.ValueKind == JsonValueKind.Number && value.TryGetInt32(out var number))
-            { return number; }
+            {
+                return number;
+            }
             throw Errors.Fail(ErrorCode.Validation, context.ParameterDetail);
         }
         if (expression is Dom.IntegerLiteral literal
             && int.TryParse(literal.Value, NumberStyles.None, CultureInfo.InvariantCulture, out var integer))
-        { return integer; }
+        {
+            return integer;
+        }
         if (expression is Dom.UnaryExpression
             {
                 UnaryExpressionType: Dom.UnaryExpressionType.Negative,
@@ -44,7 +52,9 @@ internal static class ScriptDomGraphScalar
             context.Check(unary.Expression, depth + ChildDepth);
             if (long.TryParse(signed.Value, NumberStyles.None, CultureInfo.InvariantCulture, out var absolute)
                 && absolute <= NegativeMinimumMagnitude)
-            { return checked((int)-absolute); }
+            {
+                return checked((int)-absolute);
+            }
         }
         throw ScriptDomErrors.Invalid();
     }
@@ -56,26 +66,38 @@ internal static class ScriptDomGraphScalar
         {
             var parameter = context.Parameter(variable);
             if (parameter.ValueKind != JsonValueKind.Number || !parameter.TryGetDouble(out value))
-            { throw Errors.Fail(ErrorCode.Validation, SqlGraphSearchSyntax.ParameterDetail); }
+            {
+                throw Errors.Fail(ErrorCode.Validation, SqlGraphSearchSyntax.ParameterDetail);
+            }
         }
         else if (expression is Dom.Literal literal && (literal is Dom.IntegerLiteral or Dom.NumericLiteral or Dom.RealLiteral)
             && double.TryParse(literal.Value, NumberStyles.Float, CultureInfo.InvariantCulture, out var number))
-        { value = number; }
+        {
+            value = number;
+        }
         else
-        { throw ScriptDomErrors.Invalid(); }
+        {
+            throw ScriptDomErrors.Invalid();
+        }
         if (!double.IsFinite(value) || value < MinimumWeight)
-        { throw ScriptDomErrors.Invalid(); }
+        {
+            throw ScriptDomErrors.Invalid();
+        }
         return value;
     }
     internal static ImmutableArray<string>? Strings(Dom.ScalarExpression expression, string function,
         ScriptDomGraphContext context, int depth)
     {
         if (ScriptDomGraphShape.IsNull(expression, context, depth))
-        { return null; }
+        {
+            return null;
+        }
         var arguments = ScriptDomGraphShape.Call(expression, function, context, depth);
         var values = ImmutableArray.CreateBuilder<string>(arguments.Count);
         foreach (var argument in arguments)
-        { values.Add(String(argument, context, depth + ChildDepth)); }
+        {
+            values.Add(String(argument, context, depth + ChildDepth));
+        }
         return values.ToImmutable();
     }
     private const int ChildDepth = 1;

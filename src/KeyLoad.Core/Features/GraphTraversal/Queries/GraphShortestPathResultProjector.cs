@@ -28,7 +28,11 @@ internal sealed class GraphShortestPathResultProjector(DatabaseEngine database, 
         retention.AdmitResult(budget.MeasureResult(envelope));
         var vertices = ProjectVertices(path);
         var edges = ProjectEdges(path, predecessors);
-        var result = envelope with { Vertices = vertices, Edges = edges };
+        var result = envelope with
+        {
+            Vertices = vertices,
+            Edges = edges
+        };
         budget.CheckResult(result);
         return result;
     }

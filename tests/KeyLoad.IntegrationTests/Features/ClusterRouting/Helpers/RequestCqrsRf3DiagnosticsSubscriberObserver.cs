@@ -1,5 +1,5 @@
 using Aspire.Hosting.ApplicationModel;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting.Helpers;
@@ -17,7 +17,10 @@ internal sealed class RequestCqrsRf3DiagnosticsSubscriberObserver : IAsyncDispos
     private Action<RequestCqrsLifecycleStage>? failureObserver;
     private readonly RequestCqrsRf3SubscriberTransitionObservation transitionObservation = new();
     private int moveOwner;
-    private bool Initialized { get; set; }
+    private bool Initialized
+    {
+        get; set;
+    }
 
     internal RequestCqrsSingleTaskLifecycleSnapshot ReadLifecycleSnapshot()
         => new(lastAdmissionMove?.Status, lifetimeToken.IsCancellationRequested);
@@ -46,7 +49,9 @@ internal sealed class RequestCqrsRf3DiagnosticsSubscriberObserver : IAsyncDispos
     private async Task WaitForAdmissionAsync(bool expected, string? actualResourceId, string? canonicalNode)
     {
         if (System.Threading.Interlocked.CompareExchange(ref moveOwner, 1, 0) != 0)
-        { throw new InvalidOperationException("The native subscriber stream already has an active reader."); }
+        {
+            throw new InvalidOperationException("The native subscriber stream already has an active reader.");
+        }
         try
         {
             var observed = new HashSet<string>(StringComparer.Ordinal);
@@ -65,7 +70,9 @@ internal sealed class RequestCqrsRf3DiagnosticsSubscriberObserver : IAsyncDispos
                 transitionObservation.ClaimAdmissionMove(pending);
                 bool moved;
                 try
-                { moved = await pending.ConfigureAwait(false); }
+                {
+                    moved = await pending.ConfigureAwait(false);
+                }
                 catch (Exception)
                 {
                     lastMove = pending;
@@ -75,24 +82,34 @@ internal sealed class RequestCqrsRf3DiagnosticsSubscriberObserver : IAsyncDispos
                 lastMove = pending;
                 pendingMove = null;
                 if (!moved)
-                { throw new InvalidOperationException(RequestCqrsRf3SubscriberTransitionObservation.UnexpectedCompletionMessage); }
+                {
+                    throw new InvalidOperationException(RequestCqrsRf3SubscriberTransitionObservation.UnexpectedCompletionMessage);
+                }
                 var subscriber = active.Current;
                 var isNode = ObserveAdmission(subscriber, expected, actualResourceId, canonicalNode);
                 if (isNode && subscriber.AnySubscribers == expected)
-                { observed.Add(canonicalNode ?? subscriber.Name); }
+                {
+                    observed.Add(canonicalNode ?? subscriber.Name);
+                }
             }
         }
         finally
-        { System.Threading.Volatile.Write(ref moveOwner, 0); }
+        {
+            System.Threading.Volatile.Write(ref moveOwner, 0);
+        }
     }
 
     private bool ObserveAdmission(LogSubscriber subscriber, bool expected, string? actualResourceId,
         string? canonicalNode)
     {
         if (actualResourceId is null)
-        { return transitionObservation.RecordAdmission(subscriber.Name, expected && subscriber.AnySubscribers); }
+        {
+            return transitionObservation.RecordAdmission(subscriber.Name, expected && subscriber.AnySubscribers);
+        }
         if (!string.Equals(subscriber.Name, actualResourceId, StringComparison.Ordinal) || !subscriber.AnySubscribers)
-        { return false; }
+        {
+            return false;
+        }
         return transitionObservation.RecordAdmission(canonicalNode!, true);
     }
 
@@ -102,7 +119,9 @@ internal sealed class RequestCqrsRf3DiagnosticsSubscriberObserver : IAsyncDispos
     {
         var active = enumerator;
         if (active is null)
-        { return; }
+        {
+            return;
+        }
         if (System.Threading.Interlocked.CompareExchange(ref moveOwner, 1, 0) != 0)
         {
             transitionObservation.MarkAmbiguous();
@@ -113,7 +132,9 @@ internal sealed class RequestCqrsRf3DiagnosticsSubscriberObserver : IAsyncDispos
             transitionObservation.DrainAvailableEvents(active, ref pendingMove, ref lastMove, afterOriginalJoin);
         }
         finally
-        { System.Threading.Volatile.Write(ref moveOwner, 0); }
+        {
+            System.Threading.Volatile.Write(ref moveOwner, 0);
+        }
     }
 
     internal string FormatTransitionObservation() => transitionObservation.Format();
@@ -128,9 +149,13 @@ internal sealed class RequestCqrsRf3DiagnosticsSubscriberObserver : IAsyncDispos
         Action<RequestCqrsLifecycleStage>? observer = null)
     {
         if (enumerator is not null)
-        { await CloseEnumeratorAsync(failures, observer ?? failureObserver).ConfigureAwait(false); }
+        {
+            await CloseEnumeratorAsync(failures, observer ?? failureObserver).ConfigureAwait(false);
+        }
         if (lifetime is not null)
-        { CloseLifetime(failures, observer ?? failureObserver); }
+        {
+            CloseLifetime(failures, observer ?? failureObserver);
+        }
     }
 
     private async Task ShutdownCoreAsync()
@@ -159,7 +184,9 @@ internal sealed class RequestCqrsRf3DiagnosticsSubscriberObserver : IAsyncDispos
     {
         var pending = pendingMove;
         if (pending is null)
-        { return; }
+        {
+            return;
+        }
         await ((Task)pending).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
         if (!transitionObservation.IsExpectedDiagnosticCancellation(pending))
         {
@@ -176,10 +203,14 @@ internal sealed class RequestCqrsRf3DiagnosticsSubscriberObserver : IAsyncDispos
     {
         var active = enumerator;
         if (active is null)
-        { return; }
+        {
+            return;
+        }
         var before = failures.Count;
         try
-        { await active.DisposeAsync().ConfigureAwait(false); }
+        {
+            await active.DisposeAsync().ConfigureAwait(false);
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
             RequestCqrsLifecycleFailureObserver.Append(failures, error, observer ?? failureObserver,
@@ -191,14 +222,18 @@ internal sealed class RequestCqrsRf3DiagnosticsSubscriberObserver : IAsyncDispos
             RequestCqrsLifecycleStage.ObserverEnumeratorDispose);
         }
         if (failures.Count == before)
-        { enumerator = null; }
+        {
+            enumerator = null;
+        }
     }
 
     private void CloseLifetime(List<Exception> failures, Action<RequestCqrsLifecycleStage>? observer = null)
     {
         var active = lifetime;
         if (active is null)
-        { return; }
+        {
+            return;
+        }
         try
         {
             active.Dispose();

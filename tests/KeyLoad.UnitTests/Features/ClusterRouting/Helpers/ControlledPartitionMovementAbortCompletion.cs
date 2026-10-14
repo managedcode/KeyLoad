@@ -32,7 +32,10 @@ internal static class ControlledPartitionMovementAbortCompletion
             .SequenceEqual(JsonDefaults.Serialize(originalCompletion.Control))).IsTrue();
         var actual = await SubmitAsync(source, runtime, admission, corpus, aborting, body,
             PartitionMovePeerStage.ControlFinalizeAbort, FinalizeId, callerAddress, expiry, cancellationToken);
-        var completed = originalCompletion.Control with { Phase = PartitionMovePhase.Aborted };
+        var completed = originalCompletion.Control with
+        {
+            Phase = PartitionMovePhase.Aborted
+        };
         await Assert.That(JsonDefaults.Serialize(actual.Control)
             .SequenceEqual(JsonDefaults.Serialize(completed))).IsTrue();
         await Assert.That(actual.Fence).IsNull();

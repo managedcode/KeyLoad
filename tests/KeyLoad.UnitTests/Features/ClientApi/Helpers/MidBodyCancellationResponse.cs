@@ -29,7 +29,10 @@ internal sealed class MidBodyCancellationResponse(byte[] partialResponse, NodeSt
     public TaskCompletionSource FirstChunkWritten { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
     public TaskCompletionSource SecondWriteReleased { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
     public TaskCompletionSource HandlerEntered { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
-    public TaskCompletionSource<(FirstRequestStage Stage, Exception Error)> HandlerFailure { get; }
+    public TaskCompletionSource<(FirstRequestStage Stage, Exception Error)> HandlerFailure
+    {
+        get;
+    }
         = new(TaskCreationOptions.RunContinuationsAsynchronously);
     public TaskCompletionSource FirstHandlerCompleted { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
     public TaskCompletionSource SecondHandlerEntered { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);

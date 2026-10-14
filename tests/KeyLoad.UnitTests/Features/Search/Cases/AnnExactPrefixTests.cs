@@ -102,7 +102,9 @@ internal sealed class AnnExactPrefixTests
     {
         var page = view.Scan([], SnapshotBound);
         if (page.HasMore)
-        { throw new InvalidOperationException("The exact projection prefix fixture exceeds its complete snapshot bound."); }
+        {
+            throw new InvalidOperationException("The exact projection prefix fixture exceeds its complete snapshot bound.");
+        }
         return page.Records.Select(row => (Convert.ToHexString(row.Key.Span), Convert.ToHexString(row.Value.Span))).ToArray();
     });
 }

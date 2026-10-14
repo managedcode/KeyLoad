@@ -12,7 +12,9 @@ public sealed partial class DatabaseEngine
         PrincipalRecord principal, PhysicalShardRecord sourceOwner, RemoteGraphTargetPreparationV1? preparation)
     {
         if (preparation is null)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteGraphProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, RemoteGraphProtocol.Invalid);
+        }
         var request = preparation.Request;
         var cut = preparation.Cut;
         if (preparation.Version != RemoteGraphProtocol.Version || request is null || cut is null
@@ -35,7 +37,9 @@ public sealed partial class DatabaseEngine
             || cut.AppliedPosition < RemoteGraphAbsentRevision || cut.ReadGeneration < RemoteGraphAbsentRevision
             || preparation.CollectionSchemaVersion < RemoteGraphMinimumPosition
             || !request.Deleted && preparation.DocumentRevision is not >= RemoteGraphMinimumPosition)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteGraphProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, RemoteGraphProtocol.Invalid);
+        }
         ValidatePartition(request.Destination.Partition);
         JsonData.Identifier(request.Destination.Collection);
         JsonData.Identifier(request.Destination.Id);

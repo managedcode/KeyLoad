@@ -31,9 +31,13 @@ internal static partial class OfflineLinuxFileSystem
     private static OfflineFileMetadata Read(string path, int flags, int directory = AtCurrentDirectory)
     {
         if (Statx(directory, path, flags, RequiredMask, out var value) != NativeCallSuccess)
-        { throw OfflineNativeErrors.FromErrno(Marshal.GetLastPInvokeError(), isMac: false); }
+        {
+            throw OfflineNativeErrors.FromErrno(Marshal.GetLastPInvokeError(), isMac: false);
+        }
         if ((value.Mask & RequiredMask) != RequiredMask || value.Size > long.MaxValue)
-        { throw OfflineNativeErrors.Unsupported(); }
+        {
+            throw OfflineNativeErrors.Unsupported();
+        }
 
         var device = ((ulong)value.DeviceMajor << DeviceComponentBitWidth) | value.DeviceMinor;
         return new(new(device, value.Inode, (long)value.Size), (uint)(value.Mode & TypeMask));

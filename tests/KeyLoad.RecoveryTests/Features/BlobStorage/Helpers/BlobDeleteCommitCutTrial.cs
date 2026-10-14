@@ -14,13 +14,17 @@ internal static class BlobDeleteCommitCutTrial
         var original = await BlobCommitCutNativeProof.OriginalOperationAsync(root, token);
         await BlobDeleteCommitCutOracle.RequireSelectedAsync(original);
         if (cut == BlobCommitCutKind.UnknownAfterJournalFlush)
-        { await BlobCommitCutNativeProof.AssertFaultAsync(root, token); }
+        {
+            await BlobCommitCutNativeProof.AssertFaultAsync(root, token);
+        }
         using var recovered = BlobCommitCutNativeProof.Open(root);
         var owner = BlobCommitCutNativeProof.Database(recovered);
         var committed = cut != BlobCommitCutKind.HeaderWritten;
         await Assert.That(recovered.Position).IsEqualTo(proof.Position + (committed ? 1 : 0));
         if (!committed)
-        { await Assert.That(BlobCommitCutNativeProof.Image(recovered)).IsEqualTo(proof.RawImage); }
+        {
+            await Assert.That(BlobCommitCutNativeProof.Image(recovered)).IsEqualTo(proof.RawImage);
+        }
         await BlobDeleteCommitCutAssertions.PublishedAsync(owner, proof, original, committed);
         await BlobCompleteCommitCutSeedAssertions.AssertAsync(owner, proof);
         await BlobCommitCutNativeProof.ReplaySeedsAsync(owner, proof);
@@ -80,7 +84,9 @@ internal static class BlobDeleteCommitCutTrial
         {
             await Assert.That(resolved.Error).IsNull();
             if (cut == BlobCommitCutKind.Acknowledged)
-            { await BlobDeleteCommitCutOracle.ExactAsync(resolved, await BlobCommitCutNativeProof.ReturnedAsync(root, token)); }
+            {
+                await BlobDeleteCommitCutOracle.ExactAsync(resolved, await BlobCommitCutNativeProof.ReturnedAsync(root, token));
+            }
         }
         var result = owner.Apply(original);
         await Assert.That(result.Error).IsNull();

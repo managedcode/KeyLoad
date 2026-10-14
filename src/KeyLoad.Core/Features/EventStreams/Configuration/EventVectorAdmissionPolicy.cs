@@ -15,13 +15,19 @@ internal sealed class EventVectorAdmissionPolicy(IOptions<DatabaseLimits> option
         var limits = options.Value;
         limits.Validate();
         if (currentSlots < EmptyMapSlots || currentBytes < EmptyRetainedBytes)
-        { throw Errors.Fail(ErrorCode.Corruption, CorruptCapacity); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, CorruptCapacity);
+        }
         var nextSlots = checked(currentSlots + slotDelta);
         var nextBytes = checked(currentBytes + byteDelta);
         if (nextSlots < EmptyMapSlots || nextBytes < EmptyRetainedBytes)
-        { throw Errors.Fail(ErrorCode.Corruption, CorruptCapacity); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, CorruptCapacity);
+        }
         if (nextSlots > limits.MaxResults || nextBytes > limits.MaxQueryReadBytes)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, ExhaustedCapacity); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, ExhaustedCapacity);
+        }
     }
 
     internal void RequireEncodedBytes(long encodedBytes)
@@ -30,9 +36,13 @@ internal sealed class EventVectorAdmissionPolicy(IOptions<DatabaseLimits> option
         var limits = options.Value;
         limits.Validate();
         if (encodedBytes < EmptyRetainedBytes)
-        { throw Errors.Fail(ErrorCode.Corruption, CorruptCapacity); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, CorruptCapacity);
+        }
         if (encodedBytes > limits.MaxBatchBytes || encodedBytes > limits.MaxQueryReadBytes)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, ExhaustedCapacity); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, ExhaustedCapacity);
+        }
     }
     internal void RequireEntryCount(int count)
     {
@@ -40,8 +50,12 @@ internal sealed class EventVectorAdmissionPolicy(IOptions<DatabaseLimits> option
         var limits = options.Value;
         limits.Validate();
         if (count < EmptyMapSlots)
-        { throw Errors.Fail(ErrorCode.Corruption, CorruptCapacity); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, CorruptCapacity);
+        }
         if (count > limits.MaxResults)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, ExhaustedCapacity); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, ExhaustedCapacity);
+        }
     }
 }

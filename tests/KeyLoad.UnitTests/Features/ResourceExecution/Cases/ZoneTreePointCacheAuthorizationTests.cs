@@ -25,7 +25,9 @@ internal sealed class ZoneTreePointCacheAuthorizationTests
         var database = new DatabaseEngine(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
         var root = new PrincipalRecord(RootId, RootTenant,
             [new ScopeGrant("*", "*", Capability.All)], ["*"])
-        { ClusterAdministrator = true };
+        {
+            ClusterAdministrator = true
+        };
         var user = new PrincipalRecord(UserId, UserTenant, [], []);
         database.Bootstrap(root, DatabaseEngine.Credential(RootId, RootId, RootSecret));
         Submit(database, OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(user), RootId);
@@ -43,12 +45,19 @@ internal sealed class ZoneTreePointCacheAuthorizationTests
         await Assert.That(database.Authenticate(SecondUserSecret, BeforeExpiry)).IsEqualTo(UserId);
 
         Submit(database, OperationKind.ConfigureApiKey,
-            new ConfigureApiKeyRequest(DatabaseEngine.Credential(UserCredentialId, UserId, UserSecret) with { Revoked = true }), RootId);
+            new ConfigureApiKeyRequest(DatabaseEngine.Credential(UserCredentialId, UserId, UserSecret) with
+            {
+                Revoked = true
+            }), RootId);
         var beforeKeyRevocationAuth = store.GetPointCacheDiagnostics();
         var revoked = Assert.ThrowsExactly<KeyLoadException>(() => database.Authenticate(UserSecret, BeforeExpiry));
         var afterRevocation = store.GetPointCacheDiagnostics();
         Submit(database, OperationKind.ConfigurePrincipal,
-            new ConfigurePrincipalRequest(user with { Revoked = true, PolicyEpoch = user.PolicyEpoch + 1 }), RootId);
+            new ConfigurePrincipalRequest(user with
+            {
+                Revoked = true,
+                PolicyEpoch = user.PolicyEpoch + 1
+            }), RootId);
         var beforePrincipalRevocationAuth = store.GetPointCacheDiagnostics();
         var principalRevoked = Assert.ThrowsExactly<KeyLoadException>(() => database.Authenticate(SecondUserSecret, BeforeExpiry));
         var afterPrincipalRevocation = store.GetPointCacheDiagnostics();

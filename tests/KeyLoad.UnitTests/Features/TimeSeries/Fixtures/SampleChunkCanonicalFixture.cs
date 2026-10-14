@@ -34,7 +34,10 @@ internal sealed class SampleChunkCanonicalFixture : IDisposable
     internal static readonly ImmutableArray<SampleData> Initial =
     [new(FirstId, Start, FirstValue), new(SecondId, Start.ToOffset(TimeSpan.FromHours(AlternateOffsetHours)), SecondValue)];
     internal static readonly SampleData Late = new(LateId, Start.AddTicks(FirstRevision), NegativeZero);
-    internal TestDatabase Owner { get; }
+    internal TestDatabase Owner
+    {
+        get;
+    }
     internal Guid WindowId { get; } = Guid.NewGuid();
 
     internal SampleChunkCanonicalFixture(KeyLoad.Core.TimeSeriesExecutionOptions? execution = null,
@@ -43,11 +46,15 @@ internal sealed class SampleChunkCanonicalFixture : IDisposable
         Owner = new(timeSeriesExecution: execution, timeProvider: timeProvider,
             nativeReplicaAdmission: nativeReplicaAdmission);
         try
-        { SampleAggregateTestData.Configure(Owner); }
+        {
+            SampleAggregateTestData.Configure(Owner);
+        }
         catch (Exception original)
         {
             try
-            { Owner.Dispose(); }
+            {
+                Owner.Dispose();
+            }
             catch (Exception cleanup) { throw new AggregateException(original, cleanup); }
             throw;
         }

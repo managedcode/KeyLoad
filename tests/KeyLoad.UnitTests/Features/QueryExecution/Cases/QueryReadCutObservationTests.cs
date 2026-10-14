@@ -13,7 +13,9 @@ internal sealed class QueryReadCutObservationTests
             var principal = QueryReadCutObservationCapture.Reader(db, 1);
             string? callbackCut = null;
             var capture = new QueryReadCutObservationCapture
-            { AfterCapture = () => callbackCut = QueryReadCutObservationCapture.Cut(db) };
+            {
+                AfterCapture = () => callbackCut = QueryReadCutObservationCapture.Cut(db)
+            };
             var observed = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution(), searchEngine: null, readCutObserver: capture);
             var normal = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
             var request = new QueryRequest(db.Partition, "SELECT * FROM orders", AllowFullScan: true);
@@ -52,7 +54,10 @@ internal sealed class QueryReadCutObservationTests
             db.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(new("other", "tenant", [], [])))
                 .Get<PrincipalRecord>();
             var before = QueryReadCutObservationCapture.Cut(db);
-            var second = engine.Execute("reader", request with { Cursor = first.Cursor });
+            var second = engine.Execute("reader", request with
+            {
+                Cursor = first.Cursor
+            });
             var value = capture.Values.Last();
             await Assert.That(second.Rows.Single().EntityId).IsEqualTo("b");
             await Assert.That(value.ResultCutPosition).IsEqualTo(first.CutPosition);

@@ -11,13 +11,17 @@ internal static class NativeTextIncrementalRecoveryIdentity
     {
         budget.Check();
         if (enrollment.BuildCommandId != request.CommandId)
-        { throw NativeTextErrors.Mismatch(); }
+        {
+            throw NativeTextErrors.Mismatch();
+        }
         budget.ChargeBytes(NativeSerialization.Measure(request));
         budget.ChargeBytes(SHA256.HashSizeInBytes);
         var actual = SHA256.HashData(NativeSerialization.Serialize(request));
         budget.Check();
         if (!CryptographicOperations.FixedTimeEquals(enrollment.OriginalRequestSha256, actual))
-        { throw NativeTextErrors.Mismatch(); }
+        {
+            throw NativeTextErrors.Mismatch();
+        }
     }
 
     internal static long RequireAdmittedUpper(NativeTextIncrementalEnrollment enrollment,
@@ -27,16 +31,24 @@ internal static class NativeTextIncrementalRecoveryIdentity
         budget.Check();
         if (fresh.ResourceSha256 != enrollment.ResourceSha256
             || fresh.UpperSequence < enrollment.SourceUpperSequence)
-        { throw NativeTextErrors.Mismatch(); }
+        {
+            throw NativeTextErrors.Mismatch();
+        }
         if (request.Mode == TextIndexMaintenanceMode.Build)
         {
             RequireBuild(enrollment, request, budget);
             if (fresh.Checkpoint > fresh.UpperSequence)
-            { throw NativeTextErrors.Corrupt(); }
+            {
+                throw NativeTextErrors.Corrupt();
+            }
             if (hasCompleteImage && fresh.Checkpoint > enrollment.SourceUpperSequence)
-            { throw NativeTextErrors.Mismatch(); }
+            {
+                throw NativeTextErrors.Mismatch();
+            }
             if (!hasCompleteImage && fresh.UpperSequence != enrollment.SourceUpperSequence)
-            { throw NativeTextErrors.Mismatch(); }
+            {
+                throw NativeTextErrors.Mismatch();
+            }
             return enrollment.SourceUpperSequence;
         }
         budget.Check();
@@ -56,7 +68,9 @@ internal static class NativeTextIncrementalRecoveryIdentity
             || published is not null && (published.Consumer != intent.Consumer
                 || published.Generation != intent.Generation
                 || published.ResourceSha256 != intent.ResourceSha256))
-        { throw NativeTextErrors.Corrupt(); }
+        {
+            throw NativeTextErrors.Corrupt();
+        }
         budget.Check();
     }
 }

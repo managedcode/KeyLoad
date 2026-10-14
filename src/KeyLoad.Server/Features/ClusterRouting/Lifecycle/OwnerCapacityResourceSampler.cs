@@ -33,7 +33,9 @@ internal sealed class OwnerCapacityResourceSampler : IAsyncDisposable
         {
             ObjectDisposedException.ThrowIf(disposed || shutdown is not null, this);
             if (options.Value.Enabled)
-            { producer ??= ProduceAndObserveAsync(closing.Token); }
+            {
+                producer ??= ProduceAndObserveAsync(closing.Token);
+            }
         }
     }
 
@@ -43,7 +45,9 @@ internal sealed class OwnerCapacityResourceSampler : IAsyncDisposable
     private async Task ProduceAndObserveAsync(CancellationToken token)
     {
         try
-        { await ProduceAsync(token).ConfigureAwait(false); }
+        {
+            await ProduceAsync(token).ConfigureAwait(false);
+        }
         catch (Exception failure) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(failure) is null)
         {
             firstObservation.TrySetException(failure);
@@ -59,14 +63,18 @@ internal sealed class OwnerCapacityResourceSampler : IAsyncDisposable
     internal OwnerResourceSampleV1 Read(string originalProcessDomain)
     {
         if (Volatile.Read(ref stopping))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, TenantPlacementCapacityProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, TenantPlacementCapacityProtocol.Unavailable);
+        }
         var measured = Volatile.Read(ref latest);
         var now = clock.GetUtcNow();
         if (measured is null || measured.OperatingSystem.SampledAt > now
             || string.IsNullOrWhiteSpace(measured.OperatingSystem.HostDomain)
             || measured.OperatingSystem.SampledAt + TimeSpan.FromSeconds(options.Value.FreshnessSeconds) <= now
             || string.IsNullOrWhiteSpace(originalProcessDomain))
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, TenantPlacementCapacityProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, TenantPlacementCapacityProtocol.Unavailable);
+        }
         var original = measured.OperatingSystem;
         return new(measured.Sequence, original.SampledAt,
             original.SampledAt + TimeSpan.FromSeconds(options.Value.FreshnessSeconds),
@@ -110,14 +118,22 @@ internal sealed class OwnerCapacityResourceSampler : IAsyncDisposable
         var failures = new List<Exception>();
         ServerFailureObserver.Observe(closing.Cancel, failures);
         if (producer is not null)
-        { await JoinProducerAsync(producer, failures).ConfigureAwait(false); }
+        {
+            await JoinProducerAsync(producer, failures).ConfigureAwait(false);
+        }
         Volatile.Write(ref latest, null);
         try
-        { closing.Dispose(); }
+        {
+            closing.Dispose();
+        }
         catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null)
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         disposed = true;
         ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -125,13 +141,20 @@ internal sealed class OwnerCapacityResourceSampler : IAsyncDisposable
     private async Task JoinProducerAsync(Task original, List<Exception> failures)
     {
         try
-        { await original.ConfigureAwait(false); }
+        {
+            await original.ConfigureAwait(false);
+        }
         catch (OperationCanceledException error) when (closing.IsCancellationRequested
             && error.CancellationToken == closing.Token)
-        { }
+        {
+        }
         catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null)
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
     }
 }

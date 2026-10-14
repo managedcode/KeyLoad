@@ -20,18 +20,26 @@ public sealed partial class DatabaseEngine
             cancellationToken.ThrowIfCancellationRequested();
             var principal = Principal(view, principalId, Clock.GetUtcNow());
             if (!principal.ClusterAdministrator && principal.TenantId != reference.Partition.TenantId)
-            { throw Errors.Fail(ErrorCode.PermissionDenied, RemoteDocumentTenantDenied); }
+            {
+                throw Errors.Fail(ErrorCode.PermissionDenied, RemoteDocumentTenantDenied);
+            }
             Authorization.Require(principal, reference.Partition, reference.Collection, Capability.DocumentsRead);
             var catalog = PhysicalShardCatalogRecordSerialization.Read(view);
             if (catalog is null)
-            { return null; }
+            {
+                return null;
+            }
             PhysicalShardCatalogValidation.ValidateCatalog(catalog);
             if (configuredPhysicalOwner is not null
                 && !PhysicalOwnerEntryValidation.SameOwner(catalog.DefaultShard, configuredPhysicalOwner))
-            { throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentFenceChanged); }
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentFenceChanged);
+            }
             var placement = ResolveRegisteredPlacement(view, reference.Partition, catalog.DefaultShard);
             if (placement.PhysicalShardId == catalog.DefaultShard.PhysicalShardId)
-            { return null; }
+            {
+                return null;
+            }
             var directory = PhysicalOwnerDirectorySerialization.Read(view)
                 ?? throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentFenceChanged);
             var destination = directory.Owners.Single(entry => entry.Owner.PhysicalShardId == placement.PhysicalShardId);
@@ -50,6 +58,8 @@ public sealed partial class DatabaseEngine
         var current = CaptureRemoteDocumentRead(fence.PrincipalId, reference, cancellationToken);
         if (current is null || !NativeSerialization.Serialize(current).AsSpan()
             .SequenceEqual(NativeSerialization.Serialize(fence)))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentFenceChanged); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentFenceChanged);
+        }
     }
 }

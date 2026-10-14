@@ -35,7 +35,9 @@ internal static class VerifiedBackupMixedCutConservation
     private static async Task ReplaySecondAsync(EventingArtifactFixture fixture, VerifiedBackupCutSnapshot later)
     {
         if (later.SecondOperation is not { } operation || later.SecondResult is not { } result)
-        { throw new InvalidOperationException(MissingSecondCut); }
+        {
+            throw new InvalidOperationException(MissingSecondCut);
+        }
         var stored = global::KeyLoad.NativeSerialization.Deserialize<StoredOutcome>(
             BackupIndexedDocumentDedupFixture.ReadOutcomeBytes(fixture.Source.Store,
                 fixture.Source.Partition, EventingArtifactFixture.Principal, operation.Id));

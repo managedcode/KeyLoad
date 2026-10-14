@@ -48,7 +48,10 @@ internal sealed class NativeGraphTests
         var shared = NativeGraphFixtures.Chain(2);
         var edge = new NativeGraphBranches(shared, NativeGraphFixtures.Chain(NativeSerializationLimits.SemanticDepth - 3, shared));
         await Assert.That(NativeSerialization.Deserialize<NativeGraphBranches>(NativeSerialization.Serialize(edge))).IsNotNull();
-        var excessive = edge with { Deep = new NativeGraphNode { Next = edge.Deep } };
+        var excessive = edge with
+        {
+            Deep = new NativeGraphNode { Next = edge.Deep }
+        };
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => NativeSerialization.Serialize(excessive)).Code)
             .IsEqualTo(ErrorCode.Corruption);
     }

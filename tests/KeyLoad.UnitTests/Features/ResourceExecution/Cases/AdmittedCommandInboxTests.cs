@@ -12,7 +12,10 @@ internal sealed class AdmittedCommandInboxTests
     [Test]
     public async Task ActiveCommandsRetainCapacityAndAcknowledgementsHaveTheirOwnLane()
     {
-        var governor = new CommandAdmissionGovernor(UnitAdmissionOptions.Command(new() { MaxCommands = 1 }));
+        var governor = new CommandAdmissionGovernor(UnitAdmissionOptions.Command(new()
+        {
+            MaxCommands = 1
+        }));
         await using var queue = new AdmittedCommandInbox(governor, UnitAdmissionOptions.Inbox());
         var data = Enqueue(queue, Operation(), Principal(), 2);
         var acknowledgement = Enqueue(queue, Operation(OperationKind.Delivery), Principal(), 2);
@@ -33,8 +36,15 @@ internal sealed class AdmittedCommandInboxTests
     [Arguments(8)]
     public async Task ConfiguredControlBurstCannotStarveWaitingDataAndEachLanePreservesFifo(int maximumControlBurst)
     {
-        var governor = new CommandAdmissionGovernor(UnitAdmissionOptions.Command(new() { MaxPrincipalControlCommands = 16, MaxTenantControlCommands = 16 }));
-        await using var queue = new AdmittedCommandInbox(governor, UnitAdmissionOptions.Inbox(new() { MaximumControlBurst = maximumControlBurst }));
+        var governor = new CommandAdmissionGovernor(UnitAdmissionOptions.Command(new()
+        {
+            MaxPrincipalControlCommands = 16,
+            MaxTenantControlCommands = 16
+        }));
+        await using var queue = new AdmittedCommandInbox(governor, UnitAdmissionOptions.Inbox(new()
+        {
+            MaximumControlBurst = maximumControlBurst
+        }));
         var data = Enumerable.Range(0, 2).Select(_ => Enqueue(queue, Operation(), Principal(), 2)).ToArray();
         var control = Enumerable.Range(0, 10).Select(_ => Enqueue(queue, Operation(OperationKind.Membership), Principal(), 2)).ToArray();
         AdmittedCommand[] expected = maximumControlBurst switch
@@ -45,7 +55,10 @@ internal sealed class AdmittedCommandInboxTests
             _ => throw new ArgumentOutOfRangeException(nameof(maximumControlBurst))
         };
         foreach (var pending in expected)
-        { await Assert.That(await queue.ReadAsync(TestContext.Current!.Execution.CancellationToken)).IsSameReferenceAs(pending); pending.Complete(new("true")); }
+        {
+            await Assert.That(await queue.ReadAsync(TestContext.Current!.Execution.CancellationToken)).IsSameReferenceAs(pending);
+            pending.Complete(new("true"));
+        }
         await Assert.That(governor.Snapshot()).IsEqualTo(new(0, 0, 0, 0, 0, 0));
         queue.Stop();
     }
@@ -71,7 +84,10 @@ internal sealed class AdmittedCommandInboxTests
     [Test]
     public async Task CancellingAResponseDoesNotReleaseAnAcceptedCommandsReservation()
     {
-        var governor = new CommandAdmissionGovernor(UnitAdmissionOptions.Command(new() { MaxCommands = 1 }));
+        var governor = new CommandAdmissionGovernor(UnitAdmissionOptions.Command(new()
+        {
+            MaxCommands = 1
+        }));
         await using var queue = new AdmittedCommandInbox(governor, UnitAdmissionOptions.Inbox());
         var pending = Enqueue(queue, Operation(), Principal(), 2);
         using var cancellation = new CancellationTokenSource();
@@ -114,7 +130,10 @@ internal sealed class AdmittedCommandInboxTests
         var governor = new CommandAdmissionGovernor(UnitAdmissionOptions.Command());
         await using var queue = new AdmittedCommandInbox(governor, UnitAdmissionOptions.Inbox());
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() =>
-            Enqueue(queue, Operation() with { PrincipalId = "other" }, Principal(), 2)).Code).IsEqualTo(ErrorCode.PermissionDenied);
+            Enqueue(queue, Operation() with
+            {
+                PrincipalId = "other"
+            }, Principal(), 2)).Code).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(governor.Snapshot().Commands).IsEqualTo(0);
         var pending = Enqueue(queue, Operation(), Principal(), 2);
         using var cancellation = new CancellationTokenSource();

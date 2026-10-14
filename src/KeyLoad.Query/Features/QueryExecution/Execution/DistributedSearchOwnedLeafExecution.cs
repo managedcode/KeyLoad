@@ -70,6 +70,8 @@ internal static class DistributedSearchOwnedLeafExecution
             || expected.PlacementEpoch != actual.PlacementEpoch
             || !expected.VoterIds.SequenceEqual(actual.VoterIds, StringComparer.Ordinal)
             || database.Store.Identity.Incarnation != actual.Incarnation)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, OwnerChanged); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, OwnerChanged);
+        }
     }
 }

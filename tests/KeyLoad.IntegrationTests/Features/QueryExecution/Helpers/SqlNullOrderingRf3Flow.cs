@@ -18,7 +18,9 @@ internal static class SqlNullOrderingRf3Flow
                 {
                     SqlNullOrderingRf3State state;
                     using (var setupDeadline = McpCallerDeadline.Create())
-                    { state = await SqlNullOrderingRf3Setup.CreateAsync(fixture, setupDeadline.Token); }
+                    {
+                        state = await SqlNullOrderingRf3Setup.CreateAsync(fixture, setupDeadline.Token);
+                    }
                     await WaveAsync(fixture, state, faultControls: true);
                     for (var cold = 0; cold < SqlNullOrderingRf3Protocol.ColdCuts; cold++)
                     {

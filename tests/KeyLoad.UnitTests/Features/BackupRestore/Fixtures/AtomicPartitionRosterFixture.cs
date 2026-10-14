@@ -117,7 +117,9 @@ internal sealed class AtomicPartitionRosterFixture : IDisposable
     {
         Database = CreateDatabase(Store);
         Database.Bootstrap(new(RootPrincipalId, RootTenantId, [new(Wildcard, Wildcard, Capability.All)], [Wildcard])
-        { ClusterAdministrator = true }, DatabaseEngine.Credential(RootPrincipalId, RootPrincipalId, RootCredential));
+        {
+            ClusterAdministrator = true
+        }, DatabaseEngine.Credential(RootPrincipalId, RootPrincipalId, RootCredential));
         PhysicalShardTestBootstrap.Bootstrap(Database, RootPrincipalId);
     }
 

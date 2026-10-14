@@ -10,9 +10,13 @@ internal static class PolicyEpochPublicCalls
         int route, CancellationToken token)
     {
         if (route == PolicyEpochPublicProtocol.Sdk)
-        { return await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.QueryAsync(request, token)); }
+        {
+            return await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.QueryAsync(request, token));
+        }
         if (route == PolicyEpochPublicProtocol.Mcp)
-        { return (await McpCallerAssertions.SuccessAsync<QueryPage>(await callers.Mcp.CallAsync(McpCallerTools.QueryExecute, request, token))).Value; }
+        {
+            return (await McpCallerAssertions.SuccessAsync<QueryPage>(await callers.Mcp.CallAsync(McpCallerTools.QueryExecute, request, token))).Value;
+        }
         if (route == PolicyEpochPublicProtocol.SdkAst)
         {
             return await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.QueryAstAsync(

@@ -34,7 +34,9 @@ internal static class SqlPendingQueueAuthorityFlow
         await Assert.That(page.Rows.Select(row => row.EntityId).SequenceEqual(new[]
             { QueueLifecycleTestProtocol.Parked, QueueLifecycleTestProtocol.Pending, QueueLifecycleTestProtocol.Held })).IsTrue();
         foreach (var row in page.Rows)
-        { await SqlPendingQueueRowAssertions.RowAsync(database, state, row); }
+        {
+            await SqlPendingQueueRowAssertions.RowAsync(database, state, row);
+        }
         await Assert.That(store.Position).IsEqualTo(position);
         await QueueLifecycleImage.SameAsync(store, state.Lane, image);
         Save(database, state, principal with

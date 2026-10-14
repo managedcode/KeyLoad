@@ -37,9 +37,13 @@ internal static class TwoRf3MembershipDataReadiness
             using var response = await http.GetAsync(new Uri(TwoRf3MembershipProtocol.HealthReady, UriKind.Relative),
                 HttpCompletionOption.ResponseHeadersRead, token).ConfigureAwait(false);
             if (response.StatusCode == HttpStatusCode.OK)
-            { return; }
+            {
+                return;
+            }
             if (response.StatusCode != HttpStatusCode.ServiceUnavailable)
-            { throw new InvalidOperationException(UnexpectedStatus); }
+            {
+                throw new InvalidOperationException(UnexpectedStatus);
+            }
             await Task.Delay(interval, clock, token).ConfigureAwait(false);
         }
     }

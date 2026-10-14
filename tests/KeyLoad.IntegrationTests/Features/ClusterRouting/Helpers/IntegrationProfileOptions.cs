@@ -10,14 +10,18 @@ internal static class IntegrationProfileOptions
     {
         var value = configured ?? new ClusterProfileExecutionOptions();
         if (!value.IsValid())
-        { throw new OptionsValidationException(Options.DefaultName, typeof(ClusterProfileExecutionOptions), [ClusterProfileExecutionOptions.ValidationMessage]); }
+        {
+            throw new OptionsValidationException(Options.DefaultName, typeof(ClusterProfileExecutionOptions), [ClusterProfileExecutionOptions.ValidationMessage]);
+        }
         return Options.Create(value);
     }
     internal static IOptions<RequestProbeFileOptions> ProbeFiles(RequestProbeFileOptions? configured = null)
     {
         var value = configured ?? new RequestProbeFileOptions();
         if (!value.IsValid())
-        { throw new OptionsValidationException(Options.DefaultName, typeof(RequestProbeFileOptions), [RequestProbeFileOptions.ValidationMessage]); }
+        {
+            throw new OptionsValidationException(Options.DefaultName, typeof(RequestProbeFileOptions), [RequestProbeFileOptions.ValidationMessage]);
+        }
         return Options.Create(value);
     }
 }

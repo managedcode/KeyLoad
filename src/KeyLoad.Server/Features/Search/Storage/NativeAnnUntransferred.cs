@@ -5,11 +5,15 @@ internal static class NativeAnnUntransferred
     internal static void Dispose(FileStream? stream, Exception? primary)
     {
         try
-        { stream?.Dispose(); }
+        {
+            stream?.Dispose();
+        }
         catch (Exception cleanup)
         {
             if (primary is not null)
-            { throw new AggregateException(primary, cleanup); }
+            {
+                throw new AggregateException(primary, cleanup);
+            }
             throw;
         }
     }

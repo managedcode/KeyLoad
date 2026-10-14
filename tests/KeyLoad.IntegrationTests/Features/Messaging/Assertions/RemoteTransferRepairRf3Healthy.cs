@@ -15,7 +15,10 @@ internal static class RemoteTransferRepairRf3Healthy
         var proof = await PublicReadAssertions.ReceiptAsync(await sdk.InspectQueueTransferReceiptAsync(seed.ReceiptRequest, token))
             ?? throw new InvalidOperationException(RemoteTransferRepairRf3Protocol.Missing);
         await RemoteTransferColdAssertions.SourceAsync(sdk, mcp, seed, original.Intent with
-        { State = QueueTransferState.Delivered, ReceiptToken = proof.ReceiptToken }, token);
+        {
+            State = QueueTransferState.Delivered,
+            ReceiptToken = proof.ReceiptToken
+        }, token);
         await RemoteTransferColdAssertions.ReceiptAsync(sdk, mcp, seed, proof, token);
         await RemoteTransferColdAssertions.MessageAsync(sdk, mcp, seed,
             acked ? new MessageInspection(new(seed.Message.MessageId, MessageState.Acked,
@@ -23,7 +26,10 @@ internal static class RemoteTransferRepairRf3Healthy
                 RemoteTransferRepairRf3Protocol.ReadySequence, null, null, LeaseVersion: RemoteTransferRepairRf3Protocol.OriginalLeaseVersion), null, null)
                 : RemoteTransferColdAssertions.Ready(seed, RemoteTransferRepairRf3Protocol.ReadySequence), token);
         await SqlRf3Protocol.EqualAsync(delivered, original.Intent with
-        { State = QueueTransferState.Delivered, ReceiptToken = proof.ReceiptToken });
+        {
+            State = QueueTransferState.Delivered,
+            ReceiptToken = proof.ReceiptToken
+        });
         var hint = original.Hint with
         {
             AcceptPolicyGeneration = original.Stage == QueueTransferRepairStage.Accept
@@ -46,7 +52,9 @@ internal static class RemoteTransferRepairRf3Healthy
             await QueueProducerRf3Assertions.ReplayAsync(sdk, mcp, accept, accepted, token);
         }
         else
-        { await SqlRf3Protocol.EqualAsync(proof, original.AcceptedProof); }
+        {
+            await SqlRf3Protocol.EqualAsync(proof, original.AcceptedProof);
+        }
         await QueueProducerRf3Assertions.DeniedAsync(await sdk.CommitAsync(original.Failed, token), ErrorCode.PermissionDenied);
         await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit, original.Failed, token),
             ErrorCode.PermissionDenied, dispatched: true);

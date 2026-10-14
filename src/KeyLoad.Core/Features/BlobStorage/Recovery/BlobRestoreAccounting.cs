@@ -18,7 +18,9 @@ internal sealed class BlobRestoreAccounting(DatabaseEngine database, BlobRestore
         const int UploadsRemovalDelta = -1;
 
         if (state.Status != BlobUploadStatus.Active)
-        { return; }
+        {
+            return;
+        }
         var key = BlobKeys.Quota(state.Blob);
         var resource = SourceQuota(tx, key);
         var global = SourceQuota(tx, BlobKeys.Global);
@@ -33,7 +35,9 @@ internal sealed class BlobRestoreAccounting(DatabaseEngine database, BlobRestore
         var counter = BlobRecordReader.Get<BlobQuota>(tx, key) ?? BlobQuota.Empty(marker.TargetIncarnation);
         BlobRecordReader.Version(counter.FormatVersion);
         if (counter.Incarnation != marker.TargetIncarnation)
-        { throw BlobErrors.Corruption(); }
+        {
+            throw BlobErrors.Corruption();
+        }
         tx.PutRecord(key, BlobQuotaOperations.Adjust(counter, bytes, keys, versions, uploads));
     }
 
@@ -54,12 +58,19 @@ internal sealed class BlobRestoreAccounting(DatabaseEngine database, BlobRestore
         var account = BlobRecordReader.Get<BlobQuota>(tx, accountKey) ?? BlobQuota.Empty(marker.TargetIncarnation);
         BlobQuotaOperations.Validate(account, marker.TargetIncarnation);
         if (!EqualCounters(persisted, account))
-        { throw BlobErrors.Corruption(); }
+        {
+            throw BlobErrors.Corruption();
+        }
         var policy = resource.BlobPolicy ?? new BlobPolicy();
         if (account.ReservedBytes > policy.MaxReservedBytes || account.ObjectKeys > policy.MaxObjectKeys
             || account.Versions > policy.MaxVersions || account.Uploads > policy.MaxUploads)
-        { throw BlobErrors.Corruption(); }
-        tx.PutRecord(record.Key.ToArray(), persisted with { Incarnation = marker.TargetIncarnation });
+        {
+            throw BlobErrors.Corruption();
+        }
+        tx.PutRecord(record.Key.ToArray(), persisted with
+        {
+            Incarnation = marker.TargetIncarnation
+        });
         tx.Delete(accountKey);
     }
 

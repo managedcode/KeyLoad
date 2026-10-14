@@ -53,7 +53,11 @@ internal static class RemoteTransferAttemptColdContinuation
         await RemoteTransferCoordinationColdAssertions.EqualAsync(RemoteTransferAttemptColdNative.State(fixture, transfer.TransferId), state);
         await RemoteTransferAttemptColdNative.AccountingAsync(fixture, transfer.TransferId, RemoteTransferAttemptColdProtocol.TwoRetainedRecords);
         await RemoteTransferCoordinationColdAssertions.EqualAsync(fixture.Database.InspectQueueTransfer(RemoteTransferDatabase.RootPrincipal,
-            fixture.SourceQueue, transfer.TransferId), original with { State = QueueTransferState.Delivered, ReceiptToken = receipt.ReceiptToken });
+            fixture.SourceQueue, transfer.TransferId), original with
+            {
+                State = QueueTransferState.Delivered,
+                ReceiptToken = receipt.ReceiptToken
+            });
         await RemoteTransferCoordinationColdAssertions.EqualAsync(fixture.Database.InspectQueueTransferReceipt(RemoteTransferDatabase.RootPrincipal,
             fixture.DestinationQueue, fixture.SourceQueue, transfer.TransferId), receipt);
         await Assert.That(RemoteTransferAttemptColdNative.Outcome(fixture, firstAccept.CommandId,

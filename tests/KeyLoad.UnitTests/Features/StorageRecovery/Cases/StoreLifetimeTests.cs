@@ -144,7 +144,10 @@ internal sealed class StoreLifetimeTests
 
     private sealed class StoreDirectoryFixture : IDisposable
     {
-        public string Path { get; } = System.IO.Path.Combine(System.IO.Path.GetTempPath(),
+        public string Path
+        {
+            get;
+        } = System.IO.Path.Combine(System.IO.Path.GetTempPath(),
             TemporaryDirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
 
         public void Dispose()

@@ -44,7 +44,10 @@ internal sealed class NativeTextAsyncProjectionTests
         var actualOldTerm = await native.SearchAsync("root", request, token);
         var updatedGeneration = CurrentGeneration(database);
         await Assert.That(updatedGeneration).IsNotEqualTo(firstGeneration);
-        var replacementRequest = request with { Text = ReplacementText };
+        var replacementRequest = request with
+        {
+            Text = ReplacementText
+        };
         var expectedReplacement = await canonical.SearchAsync("root", replacementRequest, token);
         var actualReplacement = await native.SearchAsync("root", replacementRequest, token);
 

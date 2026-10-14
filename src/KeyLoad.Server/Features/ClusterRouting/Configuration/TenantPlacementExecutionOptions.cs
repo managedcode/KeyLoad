@@ -16,7 +16,10 @@ internal sealed class TenantPlacementExecutionOptions
     internal const int DefaultFreshnessSeconds = 15;
 
     /// <summary>Gets or sets the explicit placement capability admission.</summary>
-    public bool Enabled { get; set; }
+    public bool Enabled
+    {
+        get; set;
+    }
     /// <summary>Gets or sets active apply calls on this Control-owner silo.</summary>
     public int MaximumActive { get; set; } = DefaultActive;
     /// <summary>Gets or sets waiting apply calls on this Control-owner silo.</summary>

@@ -14,7 +14,9 @@ public sealed partial class DatabaseEngine
             || request.ExpectedState is not (MessageState.Scheduled or MessageState.Ready or MessageState.Leased)
             || request.Kind == QueueDeadlineKind.PromoteScheduled && request.ExpectedState != MessageState.Scheduled
             || request.Kind == QueueDeadlineKind.ExpireLease && request.ExpectedState != MessageState.Leased)
-        { throw Errors.Fail(ErrorCode.Validation, QueueDeadlineProtocol.InvalidShape); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, QueueDeadlineProtocol.InvalidShape);
+        }
     }
 
     private static MessageMetadata RequireQueueDeadlineState(IKeyValueView view, QueueLaneRef lane,
@@ -32,9 +34,13 @@ public sealed partial class DatabaseEngine
         if (metadata.Id != request.MessageId || metadata.State != request.ExpectedState
             || metadata.StateVersion != request.ExpectedStateVersion || metadata.LeaseVersion != request.ExpectedLeaseVersion
             || deadline != request.ExpectedDeadline)
-        { throw Errors.Fail(ErrorCode.RevisionConflict, QueueDeadlineProtocol.StaleCondition); }
+        {
+            throw Errors.Fail(ErrorCode.RevisionConflict, QueueDeadlineProtocol.StaleCondition);
+        }
         if (request.ExpectedDeadline > now)
-        { throw Errors.Fail(ErrorCode.Conflict, QueueDeadlineProtocol.NotDue); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, QueueDeadlineProtocol.NotDue);
+        }
         return metadata;
     }
 

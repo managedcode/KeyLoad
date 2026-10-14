@@ -15,19 +15,27 @@ internal sealed class PhysicalOwnerProbeMac : IDisposable
     internal PhysicalOwnerProbeMac(ReadOnlySpan<byte> key)
     {
         if (key.Length != PhysicalOwnerProbeProtocol.SecretBytes)
-        { throw Errors.Fail(ErrorCode.Validation, PhysicalOwnerProbeProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, PhysicalOwnerProbeProtocol.InvalidProof);
+        }
         this.key = key.ToArray();
     }
 
     internal static PhysicalOwnerProbeMac FromConfiguredSecret(string? secret)
     {
         if (secret is null)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PhysicalOwnerProbeProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, PhysicalOwnerProbeProtocol.InvalidProof);
+        }
         var key = Convert.FromBase64String(secret);
         try
-        { return new(key); }
+        {
+            return new(key);
+        }
         finally
-        { CryptographicOperations.ZeroMemory(key); }
+        {
+            CryptographicOperations.ZeroMemory(key);
+        }
     }
 
     internal string Sign(ReadOnlySpan<byte> body, bool reply)
@@ -37,7 +45,9 @@ internal sealed class PhysicalOwnerProbeMac : IDisposable
     {
         if (signature.Length != PhysicalOwnerProbeProtocol.SignatureCharacters
             || signature.Any(character => !char.IsAsciiHexDigitLower(character)))
-        { return false; }
+        {
+            return false;
+        }
         var supplied = Convert.FromHexString(signature);
         var expected = Digest(body, reply);
         return CryptographicOperations.FixedTimeEquals(supplied, expected);
@@ -47,7 +57,9 @@ internal sealed class PhysicalOwnerProbeMac : IDisposable
     {
         ObjectDisposedException.ThrowIf(Volatile.Read(ref disposed) != ActiveState, this);
         if (body.IsEmpty || body.Length > PhysicalOwnerProbeProtocol.MaximumBodyBytes)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, PhysicalOwnerProbeProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, PhysicalOwnerProbeProtocol.InvalidProof);
+        }
         using var hash = IncrementalHash.CreateHMAC(HashAlgorithmName.SHA256, key);
         hash.AppendData(reply ? ReplyDomain : RequestDomain);
         hash.AppendData(body);
@@ -57,6 +69,8 @@ internal sealed class PhysicalOwnerProbeMac : IDisposable
     public void Dispose()
     {
         if (Interlocked.Exchange(ref disposed, DisposedState) == ActiveState)
-        { CryptographicOperations.ZeroMemory(key); }
+        {
+            CryptographicOperations.ZeroMemory(key);
+        }
     }
 }

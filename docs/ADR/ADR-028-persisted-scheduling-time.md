@@ -26,11 +26,11 @@ Each replica consulting local time is rejected because skew creates divergent st
 
 ## Related requirements and implementation contract
 
-Related: `REQ-MSG-004/AC-MSG-004`, `REQ-REP-002/AC-REP-002`; ADR-003, ADR-026, ADR-031; KL-052, KL-088, KL-092, KL-093, KL-100, KL-102. Current source: `src/KeyLoad.Core/Features/Messaging/Execution/Messaging.cs`, `src/KeyLoad.Core/DatabaseEngine.cs`, replicated operation envelopes. Target scheduler belongs under `src/KeyLoad.Core/Features/Messaging/`; cluster coordination belongs under `src/KeyLoad.Orleans/Features/ClusterRouting/`, with message contracts in the canonical Messaging slices.
+Related: `REQ-MSG-004/AC-MSG-004`, `REQ-REP-002/AC-REP-002`; ADR-003, ADR-026, ADR-031; KL-052, KL-088, KL-092, KL-093, KL-100, KL-102. Current source: `src/KeyLoad.Core/Features/Messaging/Execution/Messaging.cs`, `src/KeyLoad.Core/DatabaseEngine.cs`, replicated operation envelopes. Target scheduler belongs under `src/KeyLoad.Core/Features/Messaging/`; cluster coordination belongs under `src/KeyLoad.Clustering/Features/ClusterRouting/`, with message contracts in the canonical Messaging slices.
 
 1. Freeze accepted clock skew, readiness/error behavior, evaluation-time encoding, and transition semantics.
 2. Test due/not-due boundaries, retry jitter determinism, restart, lease-expiry races, replica skew, leader change, and clock-uncertain denial.
-3. Implement a persisted bounded scheduler/seek index under `src/KeyLoad.Core/Features/Messaging/` and append transitions with canonical evaluated time; keep cluster coordination in `src/KeyLoad.Orleans/Features/ClusterRouting/` and preserve `TimeProvider.System` for host scheduling and timeout infrastructure.
+3. Implement a persisted bounded scheduler/seek index under `src/KeyLoad.Core/Features/Messaging/` and append transitions with canonical evaluated time; keep cluster coordination in `src/KeyLoad.Clustering/Features/ClusterRouting/` and preserve `TimeProvider.System` for host scheduling and timeout infrastructure.
 4. Use the current schedule-record contract and replay tests; rollback pauses scheduling while retaining canonical pending entries.
 5. Qualify process recovery, real RF3 leaders/followers, and operator readiness signals through GitHub Actions only.
 

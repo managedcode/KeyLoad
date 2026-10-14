@@ -14,7 +14,9 @@ public sealed partial class DatabaseEngine
         work.Check();
         if (expiresAt.Offset != TimeSpan.Zero || expiresAt <= EvaluationClock.GetUtcNow()
             || original.Version != RemoteGraphProtocol.Version || original.CommandId == Guid.Empty)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteGraphProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteGraphProtocol.Invalid);
+        }
         var verified = Store.Read(view => SignRemoteGraphReceive(work.CreateView(view), principalId,
             original, expiresAt, work));
         var bytes = NativeSerialization.Serialize(verified);
@@ -33,6 +35,9 @@ public sealed partial class DatabaseEngine
         _ = RequireRemoteGraphReceiver(view, principal, original.SourceProof, work);
         var claims = new RemoteGraphReceiverClaimsV1(RemoteGraphProtocol.ReceiverPurpose, original.SourceProof,
             principal.Id, principal.PolicyEpoch, expiresAt);
-        return original with { VerifiedToken = Sign(claims) };
+        return original with
+        {
+            VerifiedToken = Sign(claims)
+        };
     }
 }

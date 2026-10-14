@@ -19,7 +19,9 @@ internal static class NativeTextIncrementalSeedPlanner
             || scope.ReadGeneration != seed.ReadGeneration
             || scope.Position != seed.Position || scope.PrincipalId != seed.PrincipalId
             || scope.PolicyEpoch != seed.PolicyEpoch || scope.SchemaVersion != seed.SchemaVersion)
-        { throw NativeTextErrors.Corrupt(); }
+        {
+            throw NativeTextErrors.Corrupt();
+        }
         var records = new List<NativeTextIncrementalRecord>();
         var postings = new List<NativeTextIncrementalPosting[]>();
         var references = new HashSet<EntityRef>();
@@ -29,7 +31,9 @@ internal static class NativeTextIncrementalSeedPlanner
             budget.Check();
             if (document.Reference.Partition != scope.Partition
                 || document.Reference.Collection != scope.Collection || !references.Add(document.Reference))
-            { throw NativeTextErrors.Corrupt(); }
+            {
+                throw NativeTextErrors.Corrupt();
+            }
             var record = new NativeTextIncrementalRecord(next, document.Reference, document.Revision,
                 document.Deleted, NativeTextIncrementalRevision.Digest(document, budget));
             postings.Add(NativeTextIncrementalTokens.Capture(document, scope.Field, next, budget, execution));

@@ -7,8 +7,14 @@ internal sealed class GraphSearchReachabilitySortClock(CancellationTokenSource? 
     private long timestampCalls;
 
     internal long TimestampCalls => Volatile.Read(ref timestampCalls);
-    internal bool CancellationTriggered { get; private set; }
-    internal bool DeadlineTriggered { get; private set; }
+    internal bool CancellationTriggered
+    {
+        get; private set;
+    }
+    internal bool DeadlineTriggered
+    {
+        get; private set;
+    }
 
     public override long TimestampFrequency => TimeSpan.TicksPerSecond;
 

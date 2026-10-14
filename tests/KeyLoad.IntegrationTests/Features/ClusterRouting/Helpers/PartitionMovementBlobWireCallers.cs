@@ -1,9 +1,9 @@
 using System.Security.Cryptography;
 using KeyLoad.Client;
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 using ManagedCode.Communication;
 using ModelContextProtocol.Client;
@@ -26,12 +26,16 @@ internal sealed class PartitionMovementBlobWireCallers : IAsyncDisposable
     {
         source = PartitionMovementLateNativeHttp.Create(new(settings.Origin(FirstOwner)));
         try
-        { target = PartitionMovementLateNativeHttp.Create(new(settings.Origin(PartitionMovementLateNativeSettings.GroupSize))); }
+        {
+            target = PartitionMovementLateNativeHttp.Create(new(settings.Origin(PartitionMovementLateNativeSettings.GroupSize)));
+        }
         catch (Exception primary)
         {
             var failures = new List<Exception> { primary };
             try
-            { source.Dispose(); }
+            {
+                source.Dispose();
+            }
             catch (Exception cleanup) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
             catch (Exception cleanup) when (!NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
             ServerFailureObserver.ThrowIfAny(failures);
@@ -59,10 +63,14 @@ internal sealed class PartitionMovementBlobWireCallers : IAsyncDisposable
             TransportMode = HttpTransportMode.StreamableHttp,
             EnableStandaloneGetStream = false,
             AdditionalHeaders = new Dictionary<string, string>(StringComparer.Ordinal)
-            { [McpCallerProtocol.AuthorizationHeader] = McpCallerProtocol.BearerPrefix + credential }
+            {
+                [McpCallerProtocol.AuthorizationHeader] = McpCallerProtocol.BearerPrefix + credential
+            }
         }, source.Client);
         official = await McpClient.CreateAsync(transport, new McpClientOptions
-        { ProtocolVersion = McpCallerProtocol.ProtocolVersion }, cancellationToken: token);
+        {
+            ProtocolVersion = McpCallerProtocol.ProtocolVersion
+        }, cancellationToken: token);
     }
 
     internal async Task RequireAsync<TRequest, TResult>(PartitionRef partition, string tool, TRequest request,
@@ -82,20 +90,28 @@ internal sealed class PartitionMovementBlobWireCallers : IAsyncDisposable
     {
         var failures = new List<Exception>();
         if (official is { } client)
-        { await ServerFailureObserver.ObserveAsync(() => client.DisposeAsync().AsTask(), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => client.DisposeAsync().AsTask(), failures);
+        }
         if (transport is not null)
         {
             try
-            { await transport.DisposeAsync(); }
+            {
+                await transport.DisposeAsync();
+            }
             catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
             catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         }
         try
-        { target.Dispose(); }
+        {
+            target.Dispose();
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         try
-        { source.Dispose(); }
+        {
+            source.Dispose();
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         ServerFailureObserver.ThrowIfAny(failures);

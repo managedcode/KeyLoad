@@ -49,16 +49,25 @@ internal static class NativeTextCapturedPublicFlow
                 files.RequireOriginal(fixture, runtime, token);
                 var successor = await NativeTextCapturedPublicContinuation.SwapAsync(fixture, runtime, request, token);
                 files.RequireOriginal(fixture, runtime, token);
-                var successorRequest = request with { CommandId = successor.CommandId };
+                var successorRequest = request with
+                {
+                    CommandId = successor.CommandId
+                };
                 var successorFiles = NativeTextCapturedFileRoster.Capture(fixture, runtime, successorRequest, token);
                 var retirement = runtime.Owner.CaptureOriginalRetirements().Single();
                 if (cancelOriginal)
-                { await originalCancellation.CancelAsync(); }
+                {
+                    await originalCancellation.CancelAsync();
+                }
                 release.TrySetResult();
                 if (cancelOriginal)
-                { _ = await Assert.ThrowsAsync<OperationCanceledException>(async () => { _ = await original; }); }
+                {
+                    _ = await Assert.ThrowsAsync<OperationCanceledException>(async () => { _ = await original; });
+                }
                 else
-                { await NativeTextCapturedPublicContinuation.OriginalAsync(await original, fixture.Partition); }
+                {
+                    await NativeTextCapturedPublicContinuation.OriginalAsync(await original, fixture.Partition);
+                }
                 await files.RequireRetirementAsync(retirement, successorFiles, fixture, runtime, successorRequest, token);
                 await NativeTextCapturedPublicContinuation.HealthyReplayAsync(fixture, runtime, request, receipt, successor, token);
                 successorFiles.RequireCurrent(fixture, runtime, successorRequest, token);
@@ -71,17 +80,25 @@ internal static class NativeTextCapturedPublicFlow
                 firstRelease.TrySetResult();
                 release.TrySetResult();
                 if (!first.IsCompleted)
-                { await ServerFailureObserver.ObserveAsync(firstCancellation.CancelAsync, failures); }
+                {
+                    await ServerFailureObserver.ObserveAsync(firstCancellation.CancelAsync, failures);
+                }
                 await JoinOriginalAsync(original, originalCancellation, cancelOriginal, failures);
             }
             finally
             {
                 try
-                { _ = await first; }
-                catch (Exception error) when (KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-                { RetainFailure(error, failures); }
-                catch (Exception error) when (!KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-                { RetainFailure(error, failures); }
+                {
+                    _ = await first;
+                }
+                catch (Exception error) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+                {
+                    RetainFailure(error, failures);
+                }
+                catch (Exception error) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+                {
+                    RetainFailure(error, failures);
+                }
             }
         }
         ServerFailureObserver.ThrowIfAny(failures);
@@ -120,12 +137,18 @@ internal static class NativeTextCapturedPublicFlow
         {
             release.TrySetResult();
             try
-            { _ = await original; }
+            {
+                _ = await original;
+            }
             catch (OperationCanceledException) { }
-            catch (Exception error) when (KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-            { RetainFailure(error, failures); }
-            catch (Exception error) when (!KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-            { RetainFailure(error, failures); }
+            catch (Exception error) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+            {
+                RetainFailure(error, failures);
+            }
+            catch (Exception error) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+            {
+                RetainFailure(error, failures);
+            }
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -134,22 +157,34 @@ internal static class NativeTextCapturedPublicFlow
         CancellationTokenSource caller, bool cancelOriginal, List<Exception> failures)
     {
         if (original is null)
-        { return; }
+        {
+            return;
+        }
         if (!original.IsCompleted)
-        { await ServerFailureObserver.ObserveAsync(caller.CancelAsync, failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(caller.CancelAsync, failures);
+        }
         try
-        { _ = await original; }
+        {
+            _ = await original;
+        }
         catch (OperationCanceledException) when (cancelOriginal && failures.Count == 0) { }
-        catch (Exception error) when (KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { RetainFailure(error, failures); }
-        catch (Exception error) when (!KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { RetainFailure(error, failures); }
+        catch (Exception error) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            RetainFailure(error, failures);
+        }
+        catch (Exception error) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            RetainFailure(error, failures);
+        }
     }
 
     private static void RetainFailure(Exception error, List<Exception> failures)
     {
         if (!failures.Any(original => ReferenceEquals(original, error)))
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
     }
 
     private static Task<RankedDocument[]> StartOriginal(NativeTextOnlineTestRuntime runtime, TestDatabase fixture,

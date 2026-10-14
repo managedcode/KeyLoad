@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core.Features.Search;
-using KeyLoad.Orleans;
 using KeyLoad.Query.Features.Search;
 using Microsoft.Extensions.Options;
 
@@ -20,7 +20,10 @@ internal sealed class NativeAnnGenerationOwner : IAsyncDisposable
     private bool closed;
     private readonly NativeAnnWorker worker = new();
     private readonly NativeAnnReadReservations publicReads = new();
-    internal NativeAnnMaintenanceMemory MaintenanceMemory { get; }
+    internal NativeAnnMaintenanceMemory MaintenanceMemory
+    {
+        get;
+    }
     private Task? disposal;
 
     internal NativeAnnGenerationOwner(NativeAnnRootLease root, IOptions<NativeAnnExecutionOptions> configured,
@@ -33,7 +36,9 @@ internal sealed class NativeAnnGenerationOwner : IAsyncDisposable
         policy.Value.Validate();
         storage.Value.Validate();
         if (maximumReaders <= Empty)
-        { throw Errors.Fail(ErrorCode.Validation, NativeAnnProtocol.Bound); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, NativeAnnProtocol.Bound);
+        }
         this.policy = policy;
         this.storage = storage;
         configuredOptions = configured;
@@ -88,7 +93,9 @@ internal sealed class NativeAnnGenerationOwner : IAsyncDisposable
         var plan = PackedAnnAdmission.Create(seed.Scope.Space, seed.Records, policy.Value, budget);
         _ = MaintenanceMemory.Remaining(checked(retainedSession + NativeAnnPhysicalAdmission.Construction(plan, seed.PeakBytesUpperBound)));
         lock (gate)
-        { NativeAnnSlotRetention.RequireResident(slots, options, checked(retainedSession + publicReads.Bytes + NativeAnnPhysicalAdmission.Construction(plan, seed.PeakBytesUpperBound))); }
+        {
+            NativeAnnSlotRetention.RequireResident(slots, options, checked(retainedSession + publicReads.Bytes + NativeAnnPhysicalAdmission.Construction(plan, seed.PeakBytesUpperBound)));
+        }
         var index = PackedAnnIndex.Build(seed.Scope.Space, seed.Records, policy, budget);
         lock (gate)
         {
@@ -107,13 +114,19 @@ internal sealed class NativeAnnGenerationOwner : IAsyncDisposable
             ObjectDisposedException.ThrowIf(closed, this);
             if (manifest.IsPending || current.CorpusSha256 != manifest.Source.CorpusSha256
                 || current.ProjectionCheckpoint != manifest.Source.ThroughSequence)
-            { throw Errors.Fail(ErrorCode.HistoryUnavailable, NativeAnnProtocol.MissingDependencyHistory); }
+            {
+                throw Errors.Fail(ErrorCode.HistoryUnavailable, NativeAnnProtocol.MissingDependencyHistory);
+            }
             if (slots.Any(item => !item.Retired && item.Manifest.GenerationLeaf == manifest.GenerationLeaf))
-            { return manifest; }
+            {
+                return manifest;
+            }
             NativeAnnSlotRetention.RequireResident(slots, options, checked(index.RetainedBytesUpperBound + publicReads.Bytes));
             var key = new NativeAnnOwnedKey(manifest.Consumer, manifest.IndexGeneration);
             foreach (var slot in slots.Where(item => !item.Retired && NativeAnnSlotRetention.SameKey(item.Manifest, key)))
-            { slot.Retire(); }
+            {
+                slot.Retire();
+            }
             slots.Add(new(this, manifest, index));
             MaintenanceMemory.TransferIndex(index.RetainedBytesUpperBound);
             NativeAnnSlotRetention.RetireUnpinned(root, slots, options);
@@ -128,7 +141,9 @@ internal sealed class NativeAnnGenerationOwner : IAsyncDisposable
             ObjectDisposedException.ThrowIf(closed, this);
             stages.Release(key);
             foreach (var slot in slots.Where(item => NativeAnnSlotRetention.SameKey(item.Manifest, key)))
-            { slot.Retire(); }
+            {
+                slot.Retire();
+            }
             NativeAnnSlotRetention.RetireUnpinned(root, slots, options);
         }
     }
@@ -143,7 +158,9 @@ internal sealed class NativeAnnGenerationOwner : IAsyncDisposable
                 ?? throw Errors.Fail(ErrorCode.HistoryUnavailable, NativeAnnProtocol.MissingDependencyHistory);
             if (!root.Receipt.Published.Any(item => item.Key == key && item.Pointer.GenerationLeaf == slot.Manifest.GenerationLeaf)
                 || root.Receipt.Pending.Any(item => item.Key == key))
-            { throw Errors.Fail(ErrorCode.HistoryUnavailable, NativeAnnProtocol.MissingDependencyHistory); }
+            {
+                throw Errors.Fail(ErrorCode.HistoryUnavailable, NativeAnnProtocol.MissingDependencyHistory);
+            }
             NativeAnnCanonicalSource.RequireRestoreIdentity(request, current, slot.Manifest);
             if (current.DependencySha256 != slot.Manifest.Source.DependencySha256)
             {
@@ -156,7 +173,9 @@ internal sealed class NativeAnnGenerationOwner : IAsyncDisposable
             if (current.ProjectionCheckpoint != slot.Manifest.Source.ThroughSequence
                 || slot.Manifest.Source.ThroughSequence != current.Cut.OutboxTail
                 || slot.Manifest.Source.CorpusSha256 != current.CorpusSha256)
-            { throw Errors.Fail(ErrorCode.HistoryUnavailable, NativeAnnProtocol.MissingDependencyHistory); }
+            {
+                throw Errors.Fail(ErrorCode.HistoryUnavailable, NativeAnnProtocol.MissingDependencyHistory);
+            }
             return readLifetime.Acquire(slot);
         }
     }
@@ -166,7 +185,9 @@ internal sealed class NativeAnnGenerationOwner : IAsyncDisposable
         lock (gate)
         {
             if (!slots.Contains(slot))
-            { throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Ownership); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Ownership);
+            }
             readLifetime.Release(slot, root, slots, configuredOptions);
         }
     }
@@ -178,7 +199,9 @@ internal sealed class NativeAnnGenerationOwner : IAsyncDisposable
         lock (gate)
         {
             if (disposal is not null)
-            { return new(disposal); }
+            {
+                return new(disposal);
+            }
             closed = true;
             start = new(TaskCreationOptions.RunContinuationsAsynchronously);
             actual = CompleteDisposeAsync(start.Task, readLifetime.OriginalReaders);
@@ -193,7 +216,9 @@ internal sealed class NativeAnnGenerationOwner : IAsyncDisposable
         await start.ConfigureAwait(false);
         var failures = new List<Exception>();
         try
-        { await worker.DisposeAsync().ConfigureAwait(false); }
+        {
+            await worker.DisposeAsync().ConfigureAwait(false);
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         await ServerFailureObserver.ObserveAsync(() => originalReaders, failures).ConfigureAwait(false);

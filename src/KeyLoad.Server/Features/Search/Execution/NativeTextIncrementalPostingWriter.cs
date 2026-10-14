@@ -38,12 +38,16 @@ internal static class NativeTextIncrementalPostingWriter
     private static void Require(NativeTextIncrementalPosting[] postings, ReadExecutionBudget budget)
     {
         if (postings is null)
-        { throw NativeTextErrors.Corrupt(); }
+        {
+            throw NativeTextErrors.Corrupt();
+        }
         foreach (var posting in postings)
         {
             budget.ChargeBytes(NativeTextProtocol.PostingBytes);
             if (posting is null || posting.Record == InvalidRecord)
-            { throw NativeTextErrors.Corrupt(); }
+            {
+                throw NativeTextErrors.Corrupt();
+            }
         }
         budget.Check();
     }

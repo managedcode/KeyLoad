@@ -28,8 +28,14 @@ internal sealed record ContainerRuntimeInspection(string Id, string ConfigImage,
 internal sealed record ContainerRuntimeKillReceipt(string Scenario, string ResourceName, string ContainerName, ContainerRuntimeInspection Before,
     ContainerRuntimeInspection Stopped, int KillExitCode, string KillOutput, string KillError)
 {
-    public DateTimeOffset KillStartedAtUtc { get; init; }
-    public DateTimeOffset KillCompletedAtUtc { get; init; }
+    public DateTimeOffset KillStartedAtUtc
+    {
+        get; init;
+    }
+    public DateTimeOffset KillCompletedAtUtc
+    {
+        get; init;
+    }
 }
 
 /// <summary>Preserves the original restart receipt property names, types and declaration order.</summary>
@@ -61,11 +67,26 @@ internal sealed record ContainerRuntimeRestartReceipt(string Scenario, string Re
     string AfterStartedAt, bool NewRuntimeStartConfirmed, bool AspireStartSucceeded, string? AspireStartMessage, string? SourceSha, string RepositoryRoot)
 {
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public string? LocalBuildInputDigest { get; init; }
+    public string? LocalBuildInputDigest
+    {
+        get; init;
+    }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public string? LocalImageInvocationId { get; init; }
+    public string? LocalImageInvocationId
+    {
+        get; init;
+    }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public string? LocalImageConfigId { get; init; }
-    public DateTimeOffset KillStartedAtUtc { get; init; }
-    public DateTimeOffset KillCompletedAtUtc { get; init; }
+    public string? LocalImageConfigId
+    {
+        get; init;
+    }
+    public DateTimeOffset KillStartedAtUtc
+    {
+        get; init;
+    }
+    public DateTimeOffset KillCompletedAtUtc
+    {
+        get; init;
+    }
 }

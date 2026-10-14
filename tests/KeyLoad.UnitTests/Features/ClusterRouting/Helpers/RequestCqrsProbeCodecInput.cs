@@ -1,7 +1,7 @@
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
@@ -105,7 +105,9 @@ internal static class RequestCqrsProbeCodecInput
     {
         var text = Encoding.UTF8.GetString(bytes);
         if (!text.Contains(from, StringComparison.Ordinal))
-        { throw new InvalidOperationException("Test input token was not present."); }
+        {
+            throw new InvalidOperationException("Test input token was not present.");
+        }
         return Encoding.UTF8.GetBytes(text.Replace(from, to, StringComparison.Ordinal));
     }
 
@@ -115,13 +117,19 @@ internal static class RequestCqrsProbeCodecInput
         var property = $"\"{name}\":";
         var start = text.IndexOf(property, StringComparison.Ordinal);
         if (start < 0)
-        { throw new InvalidOperationException("Test input property was not present."); }
+        {
+            throw new InvalidOperationException("Test input property was not present.");
+        }
         var objectEnd = text.IndexOf('}', start + property.Length);
         if (objectEnd < 0)
-        { throw new InvalidOperationException("Test input object was not closed."); }
+        {
+            throw new InvalidOperationException("Test input object was not closed.");
+        }
         var comma = text.IndexOf(',', start + property.Length);
         if (comma >= 0 && comma < objectEnd)
-        { return Encoding.UTF8.GetBytes(text.Remove(start, comma - start + 1)); }
+        {
+            return Encoding.UTF8.GetBytes(text.Remove(start, comma - start + 1));
+        }
         var removeStart = start > 0 && text[start - 1] == ',' ? start - 1 : start;
         return Encoding.UTF8.GetBytes(text.Remove(removeStart, objectEnd - removeStart));
     }

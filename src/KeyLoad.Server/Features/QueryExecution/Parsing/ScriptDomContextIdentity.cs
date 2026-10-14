@@ -20,14 +20,20 @@ internal static class ScriptDomContextIdentity
                 CommandType: global::Microsoft.SqlServer.TransactSql.ScriptDom.GeneralSetCommandType.ContextInfo,
                 Parameter: global::Microsoft.SqlServer.TransactSql.ScriptDom.BinaryLiteral value
             })
-        { throw ScriptDomOperationErrors.Unsupported(); }
+        {
+            throw ScriptDomOperationErrors.Unsupported();
+        }
         if (value.Collation is not null)
-        { throw ScriptDomOperationErrors.Unsupported(); }
+        {
+            throw ScriptDomOperationErrors.Unsupported();
+        }
         if (value.Value.Length != PrefixLength + HexGuidLength
             || !value.Value.StartsWith(BinaryPrefix, StringComparison.OrdinalIgnoreCase)
             || !Guid.TryParseExact(value.Value.AsSpan(PrefixLength), GuidFormat, out var identity)
             || identity == Guid.Empty)
-        { throw ScriptDomOperationErrors.Invalid(); }
+        {
+            throw ScriptDomOperationErrors.Invalid();
+        }
         checkBudget();
         token.ThrowIfCancellationRequested();
         return identity;

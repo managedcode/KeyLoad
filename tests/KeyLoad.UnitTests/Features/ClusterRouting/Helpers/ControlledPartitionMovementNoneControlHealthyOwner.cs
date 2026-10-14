@@ -23,7 +23,13 @@ internal static class ControlledPartitionMovementNoneControlHealthyOwner
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 var healthy = await ControlledPartitionMovementVerifiedSubmit.SubmitAsync(source, runtime,
-                    admission, originalRequest with { Envelope = originalRequest.Envelope with { Nonce = Guid.NewGuid() } },
+                    admission, originalRequest with
+                    {
+                        Envelope = originalRequest.Envelope with
+                        {
+                            Nonce = Guid.NewGuid()
+                        }
+                    },
                     cancellationToken);
                 await Assert.That(healthy.Error).IsNull();
                 var grant = healthy.Get<PartitionMovePhaseResult>().Grant

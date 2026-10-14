@@ -79,7 +79,9 @@ internal sealed class IsolatedKeyLoadPublicRegressionMcp : IAsyncDisposable
         {
             [ToolId] = operation,
             [Arguments] = new Dictionary<string, object?>(StringComparer.Ordinal)
-            { [IsolatedKeyLoadPublicRegressionProtocol.Request] = JsonSerializer.SerializeToElement(request, request.GetType(), JsonDefaults.Options) }
+            {
+                [IsolatedKeyLoadPublicRegressionProtocol.Request] = JsonSerializer.SerializeToElement(request, request.GetType(), JsonDefaults.Options)
+            }
         },
             cancellationToken: token);
     }

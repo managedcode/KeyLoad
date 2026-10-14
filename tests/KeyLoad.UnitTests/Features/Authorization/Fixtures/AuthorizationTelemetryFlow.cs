@@ -28,24 +28,24 @@ internal static class AuthorizationTelemetryFlow
             await Assert.That(caller!.Recorded).IsTrue();
             var unsafeParent = state is AuthorizationUnsafeSpanState.InheritedParentBaggage or AuthorizationUnsafeSpanState.ExcessParentLinks;
             if (unsafeParent)
-            { caller.AddBaggage(AuthorizationTelemetryTestProtocol.BaggageKey, AuthorizationTelemetryTestProtocol.BaggageCanary); }
+            {
+                caller.AddBaggage(AuthorizationTelemetryTestProtocol.BaggageKey, AuthorizationTelemetryTestProtocol.BaggageCanary);
+            }
             suppressedTrace = unsafeParent || state is AuthorizationUnsafeSpanState.ClientEvent or AuthorizationUnsafeSpanState.ClientTaggedLink
                 or AuthorizationUnsafeSpanState.ClientTraceStateLink or AuthorizationUnsafeSpanState.ClientExtraLink or AuthorizationUnsafeSpanState.ClientRemoteLink ? caller.TraceId.ToHexString() : null;
-            using (var denied = await SendAsync(fixture, AuthorizationTelemetryTestProtocol.MemberKey, request, deadline.Token))
-            {
-                await Assert.That(denied.StatusCode).IsEqualTo(HttpStatusCode.Forbidden);
-                var error = await denied.Content.ReadFromJsonAsync<AuthorizationTelemetryFailure>(JsonDefaults.Options, deadline.Token);
-                await Assert.That(error!.Code).IsEqualTo(ErrorCode.PermissionDenied);
-                await Assert.That(error.Detail).IsEqualTo(AuthorizationTelemetryTestProtocol.ScopeDenial);
-            }
+            await DeniedAsync(fixture, request, deadline.Token);
             if (unsafeParent)
-            { await Assert.That(caller.GetBaggageItem(AuthorizationTelemetryTestProtocol.BaggageKey)).IsEqualTo(AuthorizationTelemetryTestProtocol.BaggageCanary); }
+            {
+                await Assert.That(caller.GetBaggageItem(AuthorizationTelemetryTestProtocol.BaggageKey)).IsEqualTo(AuthorizationTelemetryTestProtocol.BaggageCanary);
+            }
         }
         await Assert.That(ReferenceEquals(Activity.Current, ambient)).IsTrue();
         await Assert.That(fixture.Database.Database.LastApplied).IsEqualTo(position);
         await AuthorizationTelemetryPolicyRepair.UnchangedAsync(fixture.Database, originalImage);
         if (repairPersistedMember)
-        { position = await AuthorizationTelemetryPolicyRepair.RepairAsync(fixture.Database); }
+        {
+            position = await AuthorizationTelemetryPolicyRepair.RepairAsync(fixture.Database);
+        }
         var healthyImage = AuthorizationTelemetryPolicyRepair.Capture(fixture.Database);
         fixture.UnsafeState = AuthorizationUnsafeSpanState.None;
         using (var healthyCaller = new AuthorizationTelemetryCallerActivities(AuthorizationUnsafeSpanState.None))
@@ -53,7 +53,10 @@ internal static class AuthorizationTelemetryFlow
             await AuthorizationTelemetryNativeAssertions.CallerAsync(healthyCaller);
             using var healthy = await SendAsync(fixture, repairPersistedMember
                 ? AuthorizationTelemetryTestProtocol.MemberKey : AuthorizationTelemetryTestProtocol.AdministratorKey,
-                request with { AfterName = null }, deadline.Token);
+                request with
+                {
+                    AfterName = null
+                }, deadline.Token);
             await Assert.That(healthyCaller.Current!.Recorded).IsTrue();
             await Assert.That(healthy.StatusCode).IsEqualTo(HttpStatusCode.OK);
             var catalog = await healthy.Content.ReadFromJsonAsync<AdminResourcesPage>(JsonDefaults.Options, deadline.Token);
@@ -66,6 +69,18 @@ internal static class AuthorizationTelemetryFlow
         await fixture.AwaitExportsAsync(state, deadline.Token);
         await AuthorizationTelemetryAssertions.ExportsAsync(fixture, state, suppressedTrace);
     }
+    private static async Task DeniedAsync(AuthorizationTelemetryHttpFixture fixture,
+        AdminResourcesRequest request, CancellationToken cancellationToken)
+    {
+        using (var denied = await SendAsync(fixture, AuthorizationTelemetryTestProtocol.MemberKey, request, cancellationToken))
+        {
+            await Assert.That(denied.StatusCode).IsEqualTo(HttpStatusCode.Forbidden);
+            var error = await denied.Content.ReadFromJsonAsync<AuthorizationTelemetryFailure>(JsonDefaults.Options, cancellationToken);
+            await Assert.That(error!.Code).IsEqualTo(ErrorCode.PermissionDenied);
+            await Assert.That(error.Detail).IsEqualTo(AuthorizationTelemetryTestProtocol.ScopeDenial);
+        }
+    }
+
     private static Task<HttpResponseMessage> SendAsync(AuthorizationTelemetryHttpFixture fixture, string secret,
         AdminResourcesRequest payload, CancellationToken cancellationToken)
     {

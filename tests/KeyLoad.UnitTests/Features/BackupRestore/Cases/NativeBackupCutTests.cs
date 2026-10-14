@@ -36,7 +36,10 @@ internal sealed class NativeBackupCutTests
     {
         using var fixture = new NativeBackupCutFixture();
         var manifest = await MetadataTestFiles.ReadManifestAsync(fixture.Backup);
-        await MetadataTestFiles.WriteManifestAsync(fixture.Backup, manifest with { Position = manifest.Position + difference });
+        await MetadataTestFiles.WriteManifestAsync(fixture.Backup, manifest with
+        {
+            Position = manifest.Position + difference
+        });
         await fixture.AssertRejectedUnchangedAsync(ErrorCode.Corruption);
     }
 
@@ -76,7 +79,10 @@ internal sealed class NativeBackupCutTests
         using var fixture = new NativeBackupCutFixture();
         await fixture.RewriteJournalAsync(WalFileFixture.CreateFrame([0]));
         var manifest = await MetadataTestFiles.ReadManifestAsync(fixture.Backup);
-        await MetadataTestFiles.WriteManifestAsync(fixture.Backup, manifest with { Position = 1 });
+        await MetadataTestFiles.WriteManifestAsync(fixture.Backup, manifest with
+        {
+            Position = 1
+        });
         await fixture.AssertRejectedUnchangedAsync(ErrorCode.Corruption);
     }
 
@@ -113,7 +119,10 @@ internal sealed class NativeBackupCutTests
         var length = BinaryPrimitives.ReadInt32LittleEndian(bytes.AsSpan(offset + ZoneTreePersistenceFormat.PayloadLengthOffset));
         var footer = NativeSerialization.Deserialize<ZoneTreeCheckpointFooter>(bytes.AsSpan(
             offset + ZoneTreePersistenceFormat.HeaderLength, length));
-        var invalidFooter = WalFileFixture.CreateFrame(NativeSerialization.Serialize(footer with { Records = footer.Records + 1 }),
+        var invalidFooter = WalFileFixture.CreateFrame(NativeSerialization.Serialize(footer with
+        {
+            Records = footer.Records + 1
+        }),
             sequence: 1, magic: ZoneTreePersistenceFormat.CheckpointEndMagic);
         await fixture.RewriteJournalAsync([.. bytes[..offset], .. invalidFooter,
             .. bytes[(offset + ZoneTreePersistenceFormat.HeaderLength + length)..]]);

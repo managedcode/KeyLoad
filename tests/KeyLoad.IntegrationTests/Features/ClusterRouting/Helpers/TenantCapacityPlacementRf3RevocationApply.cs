@@ -21,7 +21,10 @@ internal static class TenantCapacityPlacementRf3RevocationApply
         var query = new TenantPlacementPlanRequest(seed.Partition.TenantId,
             seed.Partition.DatabaseId, [seed.Partition], state.Control);
         var officialPlan = (await McpCallerAssertions.SuccessAsync<TenantPlacementPlanResultV1>(
-            await caller.Official.CallAsync(TenantPlacementPublicProtocol.PlanTool, new { request = query }, token))).Value;
+            await caller.Official.CallAsync(TenantPlacementPublicProtocol.PlanTool, new
+            {
+                request = query
+            }, token))).Value;
         await TenantCapacityPlacementRf3Assertions.RequirePlanAsync(seed, state, officialPlan, token);
         var plan = await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.PlanTenantPlacementAsync(query, token));
         await TenantCapacityPlacementRf3Assertions.RequirePlanAsync(seed, state, plan, token);
@@ -34,7 +37,11 @@ internal static class TenantCapacityPlacementRf3RevocationApply
         await Assert.That(pending.PrincipalId).IsEqualTo(oldIntent.PrincipalId);
         await SqlRf3Protocol.EqualAsync(pending, (await McpCallerAssertions.SuccessAsync<PlacementIntentV1>(
             await caller.Official.CallAsync(TenantPlacementPublicProtocol.PersistTool,
-                new { commandId = persistId, request = persist }, token))).Value);
+                new
+                {
+                    commandId = persistId,
+                    request = persist
+                }, token))).Value);
         await TenantCapacityPlacementRf3ReadAuthorityAssertions.CurrentAsync(caller,
             new(seed.Partition.TenantId, seed.Partition.DatabaseId, state.Control), state.HealthyPolicy, pending, token);
         var id = Guid.NewGuid();

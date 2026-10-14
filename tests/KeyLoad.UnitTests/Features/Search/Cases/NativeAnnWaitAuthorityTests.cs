@@ -36,7 +36,10 @@ internal sealed class NativeAnnWaitAuthorityTests
             WaitForAnnIndexResult? partial = null;
             var error = await Assert.ThrowsExactlyAsync<KeyLoadException>(async () => partial =
                 await AnnPublicWholeFlow.Engine(database, runtime).WaitForAnnIndexAsync(NativeAnnWaitWholeFlow.Root,
-                    request with { MinimumToken = invalid }, TestContext.Current!.Execution.CancellationToken))
+                    request with
+                    {
+                        MinimumToken = invalid
+                    }, TestContext.Current!.Execution.CancellationToken))
                 ?? throw new InvalidOperationException();
             await Assert.That(error.Code).IsEqualTo(ErrorCode.TokenInvalidated);
             await Assert.That(partial).IsNull();
@@ -64,9 +67,13 @@ internal sealed class NativeAnnWaitAuthorityTests
                     database.Store.Commit((transaction, _) =>
                     {
                         if (missing)
-                        { transaction.Delete(KeyLoad.Core.KeySpace.AppliedBytes); }
+                        {
+                            transaction.Delete(KeyLoad.Core.KeySpace.AppliedBytes);
+                        }
                         else
-                        { transaction.Put(KeyLoad.Core.KeySpace.AppliedBytes, NativeSerialization.Serialize(long.MinValue)); }
+                        {
+                            transaction.Put(KeyLoad.Core.KeySpace.AppliedBytes, NativeSerialization.Serialize(long.MinValue));
+                        }
                         return true;
                     });
                     var faultedImage = NativeAnnMaintenanceTestData.Snapshot(database);
@@ -84,7 +91,10 @@ internal sealed class NativeAnnWaitAuthorityTests
             finally
             {
                 KeyLoad.Server.ServerFailureObserver.Observe(() => database.Store.Commit((transaction, _) =>
-                { transaction.Put(KeyLoad.Core.KeySpace.AppliedBytes, original); return true; }), failures);
+                {
+                    transaction.Put(KeyLoad.Core.KeySpace.AppliedBytes, original);
+                    return true;
+                }), failures);
             }
             KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
             var repairedCut = database.Store.Position;

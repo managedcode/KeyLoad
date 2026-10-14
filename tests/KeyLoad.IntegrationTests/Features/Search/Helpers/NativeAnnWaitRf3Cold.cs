@@ -23,7 +23,9 @@ internal static class NativeAnnWaitRf3Cold
             () => fixture.RestartContainerAsync(node, token))));
         ServerFailureObserver.ThrowIfAny([.. stopped.SelectMany(row => row), .. restarted.SelectMany(row => row)]);
         foreach (var node in Nodes)
-        { await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(node, WaitBehavior.WaitOnResourceUnavailable, token); }
+        {
+            await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(node, WaitBehavior.WaitOnResourceUnavailable, token);
+        }
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
@@ -37,7 +39,9 @@ internal static class NativeAnnWaitRf3Cold
                 await Assert.That(recovered.Applied).IsGreaterThanOrEqualTo(beforeStop.Applied);
                 await using var reader = await RequestCqrsRf3Callers.ConnectAsync(fixture.App, McpCallerProtocol.Node1, readerSecret, token);
                 await ServerFailureObserver.ObserveAsync(async () =>
-                { await ContinueAsync(administrator, reader, scenario, pin, request, original, receipt, indexedBeforeStop, token); }, failures);
+                {
+                    await ContinueAsync(administrator, reader, scenario, pin, request, original, receipt, indexedBeforeStop, token);
+                }, failures);
             }, failures);
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
@@ -49,8 +53,15 @@ internal static class NativeAnnWaitRf3Cold
     {
         await NativeAnnWaitRf3Assertions.RejectedAsync(administrator.Sdk, reader, request, ErrorCode.HistoryUnavailable, token);
         var restored = await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.MaintainAnnIndexAsync(
-            pin with { CommandId = Guid.NewGuid(), Mode = AnnMaintenanceMode.Restore }, token));
-        await Assert.That(indexedBeforeStop).IsEqualTo(request.MinimumToken with { Position = indexedBeforeStop.Position });
+            pin with
+            {
+                CommandId = Guid.NewGuid(),
+                Mode = AnnMaintenanceMode.Restore
+            }, token));
+        await Assert.That(indexedBeforeStop).IsEqualTo(request.MinimumToken with
+        {
+            Position = indexedBeforeStop.Position
+        });
         await Assert.That(restored.Source!.NodeId).IsEqualTo(pin.NodeId);
         await Assert.That(restored.Source.Incarnation).IsEqualTo(indexedBeforeStop.Incarnation);
         await Assert.That(restored.Source.AppliedPosition).IsGreaterThanOrEqualTo(indexedBeforeStop.Position);

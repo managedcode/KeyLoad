@@ -22,6 +22,8 @@ internal static class RemoteDistributedSearchSourceFence
             || left.PlacementEpoch != right.PlacementEpoch || left.DirectoryRevision != right.DirectoryRevision
             || left.Revision != right.Revision || left.IsFallback != right.IsFallback
             || !left.VoterIds.SequenceEqual(right.VoterIds, StringComparer.Ordinal))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, Changed); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, Changed);
+        }
     }
 }

@@ -27,7 +27,11 @@ internal static class Neo4jMutationOperations
         };
         try
         {
-            using var response = await query(statement, new { id = document.Id, json = document.Json }, token);
+            using var response = await query(statement, new
+            {
+                id = document.Id,
+                json = document.Json
+            }, token);
             RequireAffected(response.RootElement.GetProperty(DataProperty).GetProperty(ValuesProperty), scenario);
         }
         catch (ComparisonFailureException error) when (scenario == Scenario.DocumentWrite && error.Message == NativeConstraintConflict)

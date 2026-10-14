@@ -1,5 +1,5 @@
+using KeyLoad.Clustering.Features.Search;
 using KeyLoad.Core;
-using KeyLoad.Orleans.Features.Search;
 
 namespace KeyLoad.Server.Features.Search;
 

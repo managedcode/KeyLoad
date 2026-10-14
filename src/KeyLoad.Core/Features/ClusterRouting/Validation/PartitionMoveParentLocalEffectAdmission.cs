@@ -13,40 +13,62 @@ public sealed partial class DatabaseEngine
     {
         if (!PartitionMoveGrantValidation.IsLocalControl(phase.Stage)
             || phase.Stage == PartitionMovePeerStage.ControlCheckpoint)
-        { return false; }
+        {
+            return false;
+        }
         var header = PartitionMoveParentStorage.Header(view, phase.Partition, phase.MoveId, Limits.MaxBatchBytes);
         if (header is null)
         {
             var originalControl = PartitionMoveControlStorage.ReadHistory(view, phase.Partition,
                 phase.MoveId, Limits.MaxBatchBytes);
             if (originalControl is { ParentCheckpointRequired: true } && originalControl.PrincipalId != principal.Id)
-            { throw Errors.Fail(ErrorCode.PermissionDenied, ClusterAdministrationRequiredMessage); }
+            {
+                throw Errors.Fail(ErrorCode.PermissionDenied, ClusterAdministrationRequiredMessage);
+            }
             if (view.ReadOwnedValue(PartitionMoveParentKeys.Active(phase.Partition)) is not null
                 || PartitionMoveParentStorage.HasPhase(view, phase.Partition, phase.MoveId)
                 || originalControl is { ParentCheckpointRequired: true })
-            { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
+            {
+                throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+            }
             return false;
         }
         if (!principal.ClusterAdministrator || header.OperatorPrincipalId != principal.Id)
-        { throw Errors.Fail(ErrorCode.PermissionDenied, ClusterAdministrationRequiredMessage); }
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, ClusterAdministrationRequiredMessage);
+        }
         var first = PartitionMoveParentStorage.Phase(view, phase.Partition, phase.MoveId, commandId, Limits.MaxBatchBytes)
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
         if (first.OriginalIssuancePolicyEpoch != principal.PolicyEpoch)
-        { throw PartitionMoveOwnerDiagnostic.Fail(PartitionMoveOwnerGuard.LocalIssuance); }
+        {
+            throw PartitionMoveOwnerDiagnostic.Fail(PartitionMoveOwnerGuard.LocalIssuance);
+        }
         if (first.OriginalPhase is null)
-        { throw PartitionMoveOwnerDiagnostic.Fail(PartitionMoveOwnerGuard.LocalOriginalPhase); }
+        {
+            throw PartitionMoveOwnerDiagnostic.Fail(PartitionMoveOwnerGuard.LocalOriginalPhase);
+        }
         if (first.OriginalGrant is not null)
-        { throw PartitionMoveOwnerDiagnostic.Fail(PartitionMoveOwnerGuard.LocalGrant); }
+        {
+            throw PartitionMoveOwnerDiagnostic.Fail(PartitionMoveOwnerGuard.LocalGrant);
+        }
         if (first.OriginalResult is null && (header.TerminalResult is not null
             || header.PendingOriginalPhaseCommandId != commandId))
-        { throw PartitionMoveOwnerDiagnostic.Fail(PartitionMoveOwnerGuard.LocalPending); }
+        {
+            throw PartitionMoveOwnerDiagnostic.Fail(PartitionMoveOwnerGuard.LocalPending);
+        }
         if (!PhysicalOwnerEntryValidation.SameOwner(header.ControlOwner, phase.ControlOwner))
-        { throw PartitionMoveOwnerDiagnostic.Fail(PartitionMoveOwnerGuard.LocalControlOwner); }
+        {
+            throw PartitionMoveOwnerDiagnostic.Fail(PartitionMoveOwnerGuard.LocalControlOwner);
+        }
         if (!NativeSerialization.Serialize(first.OriginalPhase).AsSpan().SequenceEqual(NativeSerialization.Serialize(phase)))
-        { throw PartitionMoveOwnerDiagnostic.Fail(PartitionMoveOwnerGuard.LocalPhaseBytes); }
+        {
+            throw PartitionMoveOwnerDiagnostic.Fail(PartitionMoveOwnerGuard.LocalPhaseBytes);
+        }
         RequireMoveParentOriginalIssuance(view, principal, first);
         if (first.OriginalResult is not null)
-        { _ = RequireCheckpointLocalOutcome(view, principal, first, first.OriginalResult); }
+        {
+            _ = RequireCheckpointLocalOutcome(view, principal, first, first.OriginalResult);
+        }
         return true;
     }
 }

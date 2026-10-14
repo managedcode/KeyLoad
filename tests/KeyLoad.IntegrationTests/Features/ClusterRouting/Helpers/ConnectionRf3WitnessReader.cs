@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
@@ -25,9 +25,13 @@ internal static class ConnectionRf3WitnessReader
                 RequestCqrsProbeFileStore.VerifyOwnerFile(owner.Directory, owner.OwnerBytes);
                 var path = Path.Combine(owner.Directory, name);
                 if (!File.Exists(path))
-                { continue; }
+                {
+                    continue;
+                }
                 if (witness is not null)
-                { throw Invalid(); }
+                {
+                    throw Invalid();
+                }
                 witness = ConnectionProbeInventory.Read(RequestCqrsProbeFileStore.ReadRecord(path));
             }
             if (witness is not null)

@@ -18,13 +18,17 @@ internal static class PartitionMoveCleanupStorage
             || state.MoveId != moveId || state.Partition != partition
             || !Enum.IsDefined(state.Role) || state.NextFamily < PartitionMoveProtocol.EmptyCount
             || state.NextFamily > PartitionMoveCleanupFamilies.All.Length))
-        { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid);
+        }
         return state;
     }
 
     internal static void RequireOpen(IKeyValueView view, PartitionRef partition, Guid moveId, int maximumBytes)
     {
         if (Read(view, partition, moveId, maximumBytes) is not null)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.Fenced); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.Fenced);
+        }
     }
 }

@@ -1,5 +1,5 @@
 using System.Security.Cryptography;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
@@ -57,39 +57,63 @@ internal sealed class PhysicalOwnerProbeNativeRuntime : IAsyncDisposable
             var now = clock.GetUtcNow();
             var local = node.Discovery?.Read() ?? throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalOwnerProbeProtocol.Unavailable);
             RequireOuterShape(request, local, now);
-            request = request with { Payload = request.Payload.ToArray() };
+            request = request with
+            {
+                Payload = request.Payload.ToArray()
+            };
             mac = CreateControlMac();
             if (!mac.VerifyNativeRequest(request))
-            { throw Errors.Fail(ErrorCode.Unauthenticated, PhysicalOwnerProbeProtocol.InvalidProof); }
+            {
+                throw Errors.Fail(ErrorCode.Unauthenticated, PhysicalOwnerProbeProtocol.InvalidProof);
+            }
             RequireCurrent(request, token);
             authenticated = true;
             trace.Stage = PhysicalOwnerProbeStage.ReplayAdmission;
             if (!outerReplay.TryUse(request.Nonce.ToString(NonceFormat), request.ExpiresAt))
-            { throw Errors.Fail(ErrorCode.Unauthenticated, PhysicalOwnerProbeProtocol.InvalidProof); }
+            {
+                throw Errors.Fail(ErrorCode.Unauthenticated, PhysicalOwnerProbeProtocol.InvalidProof);
+            }
             var reply = await ReadOriginalAsync(request, trace, token).ConfigureAwait(false);
             token.ThrowIfCancellationRequested();
             RequireCurrent(request, token);
             if (request.ExpiresAt <= clock.GetUtcNow() || reply.EndpointDiscovery.SiloAddress != request.DestinationSiloAddress)
-            { throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalOwnerProbeProtocol.Unavailable); }
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalOwnerProbeProtocol.Unavailable);
+            }
             trace.Stage = PhysicalOwnerProbeStage.ReplyEncoding;
-            var encoded = PhysicalOwnerProbeWire.Encode(reply);
-            using var replyMac = PhysicalOwnerProbeMac.FromConfiguredSecret(options.PeerSecret);
-            var result = new PartitionMovementGrainServiceReply(encoded, replyMac.Sign(encoded, reply: true),
-                null, null, request.Nonce, string.Empty);
-            return result with { SenderSignature = mac.SignNativeReply(result) };
+            return SignReply(reply, request, mac);
         }
         catch (KeyLoadException error)
-        { return Failure(request, mac, authenticated, error.Code, trace, deadline, operation); }
+        {
+            return Failure(request, mac, authenticated, error.Code, trace, deadline, operation);
+        }
         catch (OperationCanceledException)
-        { return Failure(request, mac, authenticated, ErrorCode.Cancelled, trace, deadline, operation); }
+        {
+            return Failure(request, mac, authenticated, ErrorCode.Cancelled, trace, deadline, operation);
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { return Failure(request, mac, authenticated, ErrorCode.OwnershipLost, trace, deadline, operation); }
+        {
+            return Failure(request, mac, authenticated, ErrorCode.OwnershipLost, trace, deadline, operation);
+        }
         finally
         {
             mac?.Dispose();
             deadline?.Dispose();
             operation?.Dispose();
         }
+    }
+
+    private PartitionMovementGrainServiceReply SignReply(PhysicalOwnerProbeReplyV1 reply,
+        PartitionMovementGrainServiceRequest request, PartitionMovementMac mac)
+    {
+        var encoded = PhysicalOwnerProbeWire.Encode(reply);
+        using var replyMac = PhysicalOwnerProbeMac.FromConfiguredSecret(options.PeerSecret);
+        var result = new PartitionMovementGrainServiceReply(encoded, replyMac.Sign(encoded, reply: true),
+            null, null, request.Nonce, string.Empty);
+        return result with
+        {
+            SenderSignature = mac.SignNativeReply(result)
+        };
     }
 
     private void RequireOuterShape(PartitionMovementGrainServiceRequest request, ReplicaSiloDiscovery local,
@@ -105,7 +129,9 @@ internal sealed class PhysicalOwnerProbeNativeRuntime : IAsyncDisposable
             || request.DestinationVoter != partition.Configuration.LocalId
             || request.DestinationSiloAddress != local.SiloAddress
             || !PhysicalOwnerConfiguredTuples.Control(options, partition).Owner.VoterIds.Contains(request.CallerVoter, StringComparer.Ordinal))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PhysicalOwnerProbeProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, PhysicalOwnerProbeProtocol.InvalidProof);
+        }
     }
 
     private async Task<PhysicalOwnerProbeReplyV1> ReadOriginalAsync(PartitionMovementGrainServiceRequest request,
@@ -114,13 +140,17 @@ internal sealed class PhysicalOwnerProbeNativeRuntime : IAsyncDisposable
         trace.Stage = PhysicalOwnerProbeStage.Mac;
         using var callerMac = PhysicalOwnerProbeMac.FromConfiguredSecret(options.PhysicalGroupTrust.ForeignPeerSecret);
         if (!callerMac.Verify(request.Payload.Span, request.Signature, reply: false))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PhysicalOwnerProbeProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, PhysicalOwnerProbeProtocol.InvalidProof);
+        }
         trace.Stage = PhysicalOwnerProbeStage.Decoding;
         var call = PhysicalOwnerProbeWire.DecodeCall(request.Payload.Span);
         receiver.Validate(call, token);
         if (call.CallerVoter != request.CallerVoter || call.CallerSiloAddress != request.CallerSiloAddress
             || call.ExpiresAt != request.ExpiresAt || !innerReplay.TryUse(call.Nonce, call.ExpiresAt))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PhysicalOwnerProbeProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, PhysicalOwnerProbeProtocol.InvalidProof);
+        }
         return await receiver.ReadAsync(call, trace, token).ConfigureAwait(false);
     }
 
@@ -132,7 +162,10 @@ internal sealed class PhysicalOwnerProbeNativeRuntime : IAsyncDisposable
             operation?.ShutdownToken.IsCancellationRequested == true);
         var reply = new PartitionMovementGrainServiceReply(ReadOnlyMemory<byte>.Empty, string.Empty,
             error, PartitionMovementProtocol.Unavailable, request.Nonce, string.Empty);
-        return authenticated && mac is not null ? reply with { SenderSignature = mac.SignNativeReply(reply) } : reply;
+        return authenticated && mac is not null ? reply with
+        {
+            SenderSignature = mac.SignNativeReply(reply)
+        } : reply;
     }
 
     private void RequireCurrent(PartitionMovementGrainServiceRequest request, CancellationToken token)
@@ -147,14 +180,18 @@ internal sealed class PhysicalOwnerProbeNativeRuntime : IAsyncDisposable
         var secret = PartitionMovementNativeDiscoveryIdentity.Secret(options, partition.Configuration, control);
         var key = Convert.FromBase64String(secret);
         try
-        { return new(key, partition.Database.Limits.MaxBatchBytes); }
+        {
+            return new(key, partition.Database.Limits.MaxBatchBytes);
+        }
         finally { CryptographicOperations.ZeroMemory(key); }
     }
 
     internal Task StopAsync()
     {
         lock (stopping)
-        { return shutdown ??= StopCoreAsync(); }
+        {
+            return shutdown ??= StopCoreAsync();
+        }
     }
     private async Task StopCoreAsync()
     {

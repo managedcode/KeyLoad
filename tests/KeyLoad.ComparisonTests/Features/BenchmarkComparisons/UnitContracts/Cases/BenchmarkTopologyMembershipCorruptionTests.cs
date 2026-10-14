@@ -34,7 +34,10 @@ internal sealed class BenchmarkTopologyMembershipCorruptionTests
             });
         }
         using var reopened = fixture.Open();
-        var failure = BenchmarkTopologyMembershipFixture.Reject(reopened, configuration with { BenchmarkTopology = false });
+        var failure = BenchmarkTopologyMembershipFixture.Reject(reopened, configuration with
+        {
+            BenchmarkTopology = false
+        });
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
     }
 
@@ -106,7 +109,10 @@ internal sealed class BenchmarkTopologyMembershipCorruptionTests
 
     private static byte[] Mutate(ReplicaBenchmarkMembershipRecord record, string field)
         => field == IncarnationField
-            ? ReplicaProtocolCodec.Serialize(record with { Incarnation = Guid.NewGuid() })
+            ? ReplicaProtocolCodec.Serialize(record with
+            {
+                Incarnation = Guid.NewGuid()
+            })
             : BenchmarkTopologyMembershipNativeCodec.Encode(record, field switch
             {
                 VersionField => BenchmarkMembershipDefect.WrongVersionScalar,

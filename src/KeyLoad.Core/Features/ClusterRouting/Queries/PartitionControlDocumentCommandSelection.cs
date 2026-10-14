@@ -16,10 +16,14 @@ public sealed partial class DatabaseEngine
         work.Check();
         var original = VerifyOperationAuthority(originalOperation);
         if (original.PrincipalId != principalId)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, ClusterAdministrationRequiredMessage); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, ClusterAdministrationRequiredMessage);
+        }
         var scope = CommandOutcomePartitionIdentity.Resolve(original);
         if (scope.Partition is null)
-        { return null; }
+        {
+            return null;
+        }
         var result = Store.Read(view => CaptureControlledDocumentCommandView(work.CreateView(view), original, scope));
         work.MeasureResult(result);
         work.Check();
@@ -31,14 +35,20 @@ public sealed partial class DatabaseEngine
     {
         var principal = Principal(view, original.PrincipalId, EvaluationClock.GetUtcNow());
         if (BlobStorageOperations.Handles(original.Kind))
-        { RequireControlledBlobInitialPolicy(principal, original); }
+        {
+            RequireControlledBlobInitialPolicy(principal, original);
+        }
         var publication = PartitionMovePublishedPlacementStorage.Read(view, scope.Partition!);
         if (publication is null)
-        { return null; }
+        {
+            return null;
+        }
         if (BlobStorageOperations.Handles(original.Kind))
         {
             if (publication.Destination.Incarnation == Store.Identity.Incarnation)
-            { return null; }
+            {
+                return null;
+            }
             return CaptureControlledBlobCommandView(view, principal, original, scope, publication);
         }
         var command = RequireControlledDocumentBatch(original, scope.Partition!);
@@ -50,10 +60,14 @@ public sealed partial class DatabaseEngine
         var identity = new PartitionControlCommandIdentity(scope.Kind, scope.Partition, original.PrincipalId, original.Id);
         var record = PartitionControlCommandStorage.Read(view, identity, Limits.MaxBatchBytes);
         if (record is not null && record.Fingerprint != CommandFingerprint(original))
-        { throw Errors.Fail(ErrorCode.Conflict, CommandContentConflictMessage); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, CommandContentConflictMessage);
+        }
         var previous = CommandOutcomeKeyResolver.Select(view, original.PrincipalId, original.Id, scope).Outcome;
         if (record is null && previous is null && command.OwnershipEpoch != placement.PlacementEpoch)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, StalePartitionOwnershipMessage); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, StalePartitionOwnershipMessage);
+        }
         var outcome = previous is null ? null : ResolveControlledDocumentOutcomeView(view, original, command);
         return new(control, placement, controlPrincipal.Id, identity, record, outcome);
     }

@@ -36,7 +36,10 @@ internal static class SqlModelViewRf3AuthorizationAssertions
             Guid.NewGuid(), updated, cancellationToken));
         await Assert.That(persisted.PolicyEpoch).IsEqualTo(updated.PolicyEpoch);
         await SqlRf3Protocol.EqualAsync(updated, persisted);
-        return identity with { Principal = persisted };
+        return identity with
+        {
+            Principal = persisted
+        };
     }
 
     internal static async Task<McpPersistedIdentity> VerifyQueueReadWithoutUseAsync(

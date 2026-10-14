@@ -15,7 +15,10 @@ internal sealed class ComparisonCorpusTests
         var a = new BenchmarkDataset(Microsoft.Extensions.Options.Options.Create(ComparisonHarnessInputs.Small));
         var b = new BenchmarkDataset(Microsoft.Extensions.Options.Options.Create(ComparisonHarnessInputs.Small));
         await Assert.That(b.Sha256).IsEqualTo(a.Sha256);
-        await Assert.That(new BenchmarkDataset(Microsoft.Extensions.Options.Options.Create(ComparisonHarnessInputs.Small with { Seed = ComparisonHarnessInputs.Small.Seed + 1 })).Sha256).IsNotEqualTo(a.Sha256);
+        await Assert.That(new BenchmarkDataset(Microsoft.Extensions.Options.Options.Create(ComparisonHarnessInputs.Small with
+        {
+            Seed = ComparisonHarnessInputs.Small.Seed + 1
+        })).Sha256).IsNotEqualTo(a.Sha256);
         foreach (var document in a.Documents)
         {
             await Assert.That(System.Text.Encoding.UTF8.GetByteCount(document.Json)).IsEqualTo(ComparisonHarnessInputs.Small.PayloadBytes);

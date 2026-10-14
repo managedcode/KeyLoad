@@ -14,10 +14,14 @@ internal static class SampleChunkEarlyCrashOperations
     {
         Configure(database).Get<ResourceDefinition>();
         if (cut == SampleChunkEarlyCut.Open)
-        { return; }
+        {
+            return;
+        }
         SampleChunkCrashOperations.Commit(database, Guid.NewGuid(), Open()).Get<CommitReceipt>();
         if (cut == SampleChunkEarlyCut.Append)
-        { return; }
+        {
+            return;
+        }
         SampleChunkCrashOperations.Commit(database, Guid.NewGuid(), Append()).Get<CommitReceipt>();
         SampleChunkCrashOperations.Commit(database, Guid.NewGuid(), SampleChunkCrashOperations.Intended(false))
             .Get<CommitReceipt>();
@@ -35,7 +39,9 @@ internal static class SampleChunkEarlyCrashOperations
     internal static void Complete(DatabaseEngine database, SampleChunkEarlyCut cut)
     {
         if (cut == SampleChunkEarlyCut.Open)
-        { SampleChunkCrashOperations.Commit(database, Guid.NewGuid(), Append()).Get<CommitReceipt>(); }
+        {
+            SampleChunkCrashOperations.Commit(database, Guid.NewGuid(), Append()).Get<CommitReceipt>();
+        }
         if (cut != SampleChunkEarlyCut.Correction)
         {
             SampleChunkCrashOperations.Commit(database, Guid.NewGuid(), SampleChunkCrashOperations.Intended(false))

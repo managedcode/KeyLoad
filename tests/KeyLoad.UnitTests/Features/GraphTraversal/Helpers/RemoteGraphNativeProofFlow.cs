@@ -12,10 +12,14 @@ internal static class RemoteGraphNativeProofFlow
             using var database = new TestDatabase();
             await ServerFailureObserver.ObserveAsync(() => body(database), failures);
         }
-        catch (Exception error) when (KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
-        catch (Exception error) when (!KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
+        catch (Exception error) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
+        catch (Exception error) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
@@ -23,7 +27,9 @@ internal static class RemoteGraphNativeProofFlow
     {
         var page = view.Scan([], 512);
         if (page.HasMore)
-        { throw new InvalidOperationException("Native graph fixture exceeded its complete image bound."); }
+        {
+            throw new InvalidOperationException("Native graph fixture exceeded its complete image bound.");
+        }
         var identity = database.Store.Identity;
         return identity.NodeId.ToString("D") + ":" + identity.Incarnation.ToString("D") + ":" + database.Store.Position
             + "\\n" + string.Join("\\n", page.Records.Select(record => Convert.ToHexString(record.Key.Span)

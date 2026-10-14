@@ -26,7 +26,9 @@ internal sealed class AdmissionClusterTests
                 var payload = new DeliveryCommand(id, new(new("tenant", "database", "orders", PartitionKey), "jobs"),
                     new string('t', 2_000), DeliveryAction.Ack);
                 using var request = new HttpRequestMessage(HttpMethod.Post, "/v1/queues/delivery")
-                { Content = new ByteArrayContent(JsonDefaults.Serialize(payload)) };
+                {
+                    Content = new ByteArrayContent(JsonDefaults.Serialize(payload))
+                };
                 request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", fixture.AdminKey);
                 if (chunked)

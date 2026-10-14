@@ -19,13 +19,19 @@ internal static class RemoteTransferPeerEndpointExecution
     {
         token.ThrowIfCancellationRequested();
         if (call is null || !RemoteTransferPeerNonce.Valid(call.Nonce))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteTransferPeerProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, RemoteTransferPeerProtocol.Invalid);
+        }
         RemoteTransferPeerShape.Require(call);
         if (!replay.TryUse(call.Nonce))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteTransferPeerProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, RemoteTransferPeerProtocol.Invalid);
+        }
         var remaining = call.ExpiresAt - clock.GetUtcNow();
         if (remaining <= TimeSpan.Zero)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteTransferPeerProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteTransferPeerProtocol.Invalid);
+        }
         using var expiry = new CancellationTokenSource(remaining, clock);
         using var original = CancellationTokenSource.CreateLinkedTokenSource(token, expiry.Token);
         var reply = await ExecuteReplyAsync(call, body, signature, receiver, effectBoundary, original.Token).ConfigureAwait(false);
@@ -43,7 +49,9 @@ internal static class RemoteTransferPeerEndpointExecution
         finally
         {
             if (!transferred)
-            { System.Security.Cryptography.CryptographicOperations.ZeroMemory(encoded); }
+            {
+                System.Security.Cryptography.CryptographicOperations.ZeroMemory(encoded);
+            }
         }
     }
 
@@ -59,7 +67,9 @@ internal static class RemoteTransferPeerEndpointExecution
         catch (KeyLoadException error) when (error.Code != ErrorCode.Corruption)
         {
             if (effectBoundary?.IsStarted == true)
-            { throw Errors.Fail(ErrorCode.UnknownWriteOutcome, RemoteTransferPeerProtocol.Unavailable, error); }
+            {
+                throw Errors.Fail(ErrorCode.UnknownWriteOutcome, RemoteTransferPeerProtocol.Unavailable, error);
+            }
             return new(call.RequestId, call.Nonce, null, error.Code, error.Message, receiver.Discovery());
         }
     }

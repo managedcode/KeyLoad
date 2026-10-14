@@ -47,7 +47,9 @@ internal static class BlobKeys
             || components[TenantComponentIndex] is not string tenant || components[DatabaseComponentIndex] is not string database
             || components[DomainComponentIndex] is not string domain || components[PartitionComponentIndex] is not string partition
             || components[ResourceComponentIndex] is not string resource || components[IdComponentIndex] is not string id)
-        { throw BlobErrors.Corruption(); }
+        {
+            throw BlobErrors.Corruption();
+        }
         var blob = new BlobRef(new(tenant, database, domain, partition), resource, id);
         Validate(blob);
         return blob;

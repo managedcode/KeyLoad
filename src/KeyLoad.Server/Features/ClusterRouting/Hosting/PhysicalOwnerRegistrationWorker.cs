@@ -1,18 +1,22 @@
 using System.Threading.Channels;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
 internal sealed class PhysicalOwnerRegistrationWorker(ISiloStatusOracle oracle, OrleansNode node,
     PhysicalOwnerRegistrationController controller, IOptions<GrainRoutingOptions> routingOptions,
-    IOptions<global::KeyLoad.Orleans.OrleansMembershipOptions> membershipOptions,
+    IOptions<global::KeyLoad.Clustering.OrleansMembershipOptions> membershipOptions,
     TimeProvider clock, ILogger logger) : ISiloStatusListener, IAsyncDisposable
 {
     private const int SignalCapacity = 1;
     private const string SubscriptionUnavailable = "Physical owner registration could not subscribe to native membership.";
     private readonly Channel<bool> signals = Channel.CreateBounded<bool>(new BoundedChannelOptions(SignalCapacity)
-    { SingleReader = true, SingleWriter = false, FullMode = BoundedChannelFullMode.DropWrite });
+    {
+        SingleReader = true,
+        SingleWriter = false,
+        FullMode = BoundedChannelFullMode.DropWrite
+    });
     private readonly CancellationTokenSource stopping = new();
     private readonly Lock gate = new();
     private Task? worker;
@@ -24,10 +28,14 @@ internal sealed class PhysicalOwnerRegistrationWorker(ISiloStatusOracle oracle, 
         lock (gate)
         {
             if (worker is not null || shutdown is not null)
-            { throw new InvalidOperationException(SubscriptionUnavailable); }
+            {
+                throw new InvalidOperationException(SubscriptionUnavailable);
+            }
             subscribed = oracle.SubscribeToSiloStatusEvents(this);
             if (!subscribed)
-            { throw Errors.Fail(ErrorCode.OwnershipLost, SubscriptionUnavailable); }
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, SubscriptionUnavailable);
+            }
             return worker = RunAsync();
         }
     }
@@ -47,12 +55,15 @@ internal sealed class PhysicalOwnerRegistrationWorker(ISiloStatusOracle oracle, 
         try
         {
             while (await node.MembershipReadyAsync(execution.Token).ConfigureAwait(false) is null)
-            { await WaitForSignalAsync(execution.Token).ConfigureAwait(false); }
+            {
+                await WaitForSignalAsync(execution.Token).ConfigureAwait(false);
+            }
             await controller.RegisterAsync(expiresAt, execution.Token).ConfigureAwait(false);
             PhysicalOwnerRegistrationLog.Succeeded(logger);
         }
         catch (OperationCanceledException) when (stopping.IsCancellationRequested && !deadline.IsCancellationRequested)
-        { }
+        {
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
             var observation = controller.ObserveFailure(deadline, stopping);
@@ -67,7 +78,10 @@ internal sealed class PhysicalOwnerRegistrationWorker(ISiloStatusOracle oracle, 
     public ValueTask DisposeAsync()
     {
         lock (gate)
-        { shutdown ??= StopAsync(worker); return new ValueTask(shutdown); }
+        {
+            shutdown ??= StopAsync(worker);
+            return new ValueTask(shutdown);
+        }
     }
 
     private async Task WaitForSignalAsync(CancellationToken cancellationToken)
@@ -75,9 +89,12 @@ internal sealed class PhysicalOwnerRegistrationWorker(ISiloStatusOracle oracle, 
         using var retry = new CancellationTokenSource(membershipOptions.Value.StartupRetryDelay, clock);
         using var observed = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, retry.Token);
         try
-        { await signals.Reader.ReadAsync(observed.Token).ConfigureAwait(false); }
+        {
+            await signals.Reader.ReadAsync(observed.Token).ConfigureAwait(false);
+        }
         catch (OperationCanceledException) when (retry.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
-        { }
+        {
+        }
     }
 
     private async Task StopAsync(Task? original)
@@ -88,15 +105,21 @@ internal sealed class PhysicalOwnerRegistrationWorker(ISiloStatusOracle oracle, 
             ServerFailureObserver.Observe(() =>
             {
                 if (!oracle.UnSubscribeFromSiloStatusEvents(this))
-                { throw Errors.Fail(ErrorCode.OwnershipLost, SubscriptionUnavailable); }
+                {
+                    throw Errors.Fail(ErrorCode.OwnershipLost, SubscriptionUnavailable);
+                }
             }, failures);
             subscribed = false;
         }
         await ServerFailureObserver.ObserveAsync(stopping.CancelAsync, failures).ConfigureAwait(false);
         if (original is not null)
-        { await ServerFailureObserver.ObserveAsync(() => original, failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => original, failures).ConfigureAwait(false);
+        }
         try
-        { stopping.Dispose(); }
+        {
+            stopping.Dispose();
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         ServerFailureObserver.ThrowIfAny(failures);

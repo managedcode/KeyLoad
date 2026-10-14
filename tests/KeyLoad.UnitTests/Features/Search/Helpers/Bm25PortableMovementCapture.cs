@@ -27,7 +27,9 @@ internal static class Bm25PortableMovementCapture
                 work, new(work, limits.MaxScanRecords), limits, limits.MaxBatchBytes,
                 limits.MaxQueryReadBytes, pages, ref retained);
             if (family.RecordCount != 1 || pages.Count != 1 || retained <= 0)
-            { throw new InvalidOperationException("The original BM25 source capture is not one complete native head."); }
+            {
+                throw new InvalidOperationException("The original BM25 source capture is not one complete native head.");
+            }
             return (fence, pages[0]);
         });
     }
@@ -36,7 +38,9 @@ internal static class Bm25PortableMovementCapture
         ControlledPartitionMovementNativeHosts owners, CancellationToken token)
     {
         foreach (var node in owners.Nodes)
-        { await node.Partition.Coordinator.ReadBarrierAsync(token); }
+        {
+            await node.Partition.Coordinator.ReadBarrierAsync(token);
+        }
         return await owners.CaptureAsync(token);
     }
 }

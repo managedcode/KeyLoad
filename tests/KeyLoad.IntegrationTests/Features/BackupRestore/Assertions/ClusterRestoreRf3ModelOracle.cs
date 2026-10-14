@@ -53,7 +53,10 @@ internal static class ClusterRestoreRf3ModelOracle
         await ReadAsync(sdk, official, models.Partition, McpCallerTools.GraphTraverse, request,
             new global::KeyLoad.GraphTraversal([models.First, models.Second], [edge]),
             () => sdk.TraverseAsync(request, cancellationToken), cancellationToken);
-        var composed = request with { Graph = PartitionMovementPublicParentRf3Seed.Graph };
+        var composed = request with
+        {
+            Graph = PartitionMovementPublicParentRf3Seed.Graph
+        };
         await ReadAsync(sdk, official, models.Partition, McpCallerTools.GraphTraverse, composed,
             new global::KeyLoad.GraphTraversal([models.First, models.Second],
                 [edge with { Id = PartitionMovementPublicParentRf3Seed.ComposedEdge }]),
@@ -81,7 +84,10 @@ internal static class ClusterRestoreRf3ModelOracle
         var work = seed.Models.Inspect();
         var forward = new InspectMessageRequest(new(seed.Partition, PartitionMovementPublicParentRf3Seed.Queue),
             PartitionMovementPublicParentRf3Seed.ForwardMessage);
-        var reverse = forward with { Id = PartitionMovementPublicParentRf3Seed.DerivedMessage };
+        var reverse = forward with
+        {
+            Id = PartitionMovementPublicParentRf3Seed.DerivedMessage
+        };
         await ReadAsync(sdk, official, seed.Partition, McpCallerTools.MessagesInspect, work, new MessageInspectionResult(seed.OriginalModels.Work),
             () => sdk.InspectAsync(work, cancellationToken), cancellationToken);
         await ReadAsync(sdk, official, seed.Partition, McpCallerTools.MessagesInspect, forward, new MessageInspectionResult(seed.OriginalModels.Forward),

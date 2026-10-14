@@ -39,7 +39,11 @@ internal static class SdkProblemBudgetPublicFlow
             [new("putDocument", McpDocumentProtocol.Collection, SdkProblemBudgetPublicPreparation.Entity, 2L)]);
         var outbox = await McpCallerAssertions.SdkSuccessAsync(
             await administrator.Sdk.OutboxStatusAsync(state.Seed.Partition, token));
-        var current = state with { HealthyReceipt = receipt, Outbox = outbox };
+        var current = state with
+        {
+            HealthyReceipt = receipt,
+            Outbox = outbox
+        };
         await SdkProblemBudgetPublicAssertions.CurrentAsync(administrator, current, token);
         await ReplayHealthyAsync(administrator, caller, current, token);
         return current;

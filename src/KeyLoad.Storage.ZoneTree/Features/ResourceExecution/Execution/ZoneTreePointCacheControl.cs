@@ -15,7 +15,10 @@ public sealed class ZoneTreePointCacheControl
     }
 
     /// <summary>Gets this nonpersisted local configuration generation, excluding physical readiness claims.</summary>
-    public Guid RuntimeId { get; }
+    public Guid RuntimeId
+    {
+        get;
+    }
 
     /// <summary>Attempts a zero-wait actual physical owner and health observation.</summary>
     /// <param name="identity">Actual nonsecret identities for Healthy; default for failure or closure.</param>

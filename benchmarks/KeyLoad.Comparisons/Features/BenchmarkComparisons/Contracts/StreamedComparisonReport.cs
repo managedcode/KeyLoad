@@ -11,16 +11,28 @@ internal sealed record StreamedComparisonReport(int SchemaVersion, Guid RunId, D
     ImmutableArray<TargetProfile> Targets, IAsyncEnumerable<StreamedComparisonCase> Cases)
 {
     /// <summary>Gets GitHub Actions provenance for the report, when available.</summary>
-    public GitHubProvenance? Provenance { get; init; }
+    public GitHubProvenance? Provenance
+    {
+        get; init;
+    }
 
     /// <summary>Gets the load-generator image reference, when available.</summary>
-    public string? LoadGeneratorImage { get; init; }
+    public string? LoadGeneratorImage
+    {
+        get; init;
+    }
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public ScaledComparisonProfile? ScaledProfile { get; init; }
+    public ScaledComparisonProfile? ScaledProfile
+    {
+        get; init;
+    }
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public VectorComparisonProfile? VectorProfile { get; init; }
+    public VectorComparisonProfile? VectorProfile
+    {
+        get; init;
+    }
 
     internal static StreamedComparisonReport Create(ComparisonReport report)
     {

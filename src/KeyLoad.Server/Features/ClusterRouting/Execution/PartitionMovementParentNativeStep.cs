@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Orleans;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
@@ -36,7 +36,9 @@ internal sealed class PartitionMovementParentNativeStep(PartitionMovementParentP
         if (intended.Stage == PartitionMovePeerStage.StagePage)
         {
             if (phaseObservation is not null && intended.PageOrdinal == PartitionMovementProtocol.InitialPhaseOrdinal)
-            { await phaseObservation(GrainRequestPhase.ParentStagePreflight, cancellationToken).ConfigureAwait(false); }
+            {
+                await phaseObservation(GrainRequestPhase.ParentStagePreflight, cancellationToken).ConfigureAwait(false);
+            }
             work.Check();
             cancellationToken.ThrowIfCancellationRequested();
             var descriptor = state.Selected?.OriginalDescriptor
@@ -75,12 +77,16 @@ internal sealed class PartitionMovementParentNativeStep(PartitionMovementParentP
         Func<GrainRequestPhase, CancellationToken, ValueTask>? phaseObservation, CancellationToken cancellationToken)
     {
         if (intended.Stage != PartitionMovePeerStage.Install || phaseObservation is null)
-        { return; }
+        {
+            return;
+        }
         var descriptor = state.Selected?.OriginalDescriptor
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
         var total = descriptor.Families.Sum(static family => family.PageCount);
         if (intended.PageOrdinal != total)
-        { return; }
+        {
+            return;
+        }
         await phaseObservation(GrainRequestPhase.ParentFinalInstallPreflight, cancellationToken).ConfigureAwait(false);
         work.Check();
         cancellationToken.ThrowIfCancellationRequested();
@@ -95,9 +101,13 @@ internal sealed class PartitionMovementParentNativeStep(PartitionMovementParentP
         var actual = original.OriginalResult
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
         if (actual.Error is { } error)
-        { throw Errors.Fail(error, actual.SafeDetail ?? PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(error, actual.SafeDetail ?? PartitionMoveProtocol.MissingAuthority);
+        }
         if (original.ObservationCheckpointReceipt is null)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+        }
         var command = PartitionMovementParentNativePhases.Acknowledge(state.Header!, state.Control!,
             grant, actual.Get<PartitionMovePhaseResult>());
         return LocalAsync(principalId, request, state, role, command, work, cancellationToken);

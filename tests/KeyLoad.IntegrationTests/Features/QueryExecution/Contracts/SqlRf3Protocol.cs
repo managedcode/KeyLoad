@@ -19,7 +19,9 @@ internal static class SqlRf3Protocol
         Guid? outerCommandId = null)
     {
         var arguments = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
-        { [McpCallerProtocol.Request] = JsonSerializer.SerializeToElement(request, JsonDefaults.Options) };
+        {
+            [McpCallerProtocol.Request] = JsonSerializer.SerializeToElement(request, JsonDefaults.Options)
+        };
         if (outerCommandId is { } commandId)
         {
             arguments.Add(McpCallerProtocol.CommandId, JsonSerializer.SerializeToElement(commandId, JsonDefaults.Options));
@@ -45,5 +47,8 @@ internal static class SqlRf3Protocol
 
     private static SqlOperationRequest Envelope(PartitionRef partition, string operation, Dictionary<string, JsonElement> arguments)
         => new(partition, CallPrefix + operation + CallSuffix,
-            new() { [Argument] = JsonSerializer.SerializeToElement(arguments, JsonDefaults.Options) });
+            new()
+            {
+                [Argument] = JsonSerializer.SerializeToElement(arguments, JsonDefaults.Options)
+            });
 }

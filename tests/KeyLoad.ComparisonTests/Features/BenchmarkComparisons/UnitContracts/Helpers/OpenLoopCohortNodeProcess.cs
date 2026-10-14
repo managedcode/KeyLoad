@@ -53,7 +53,9 @@ internal static class OpenLoopCohortNodeProcess
         var path = Environment.GetEnvironmentVariable(PathEnvironment);
         start.Environment.Clear();
         if (!string.IsNullOrWhiteSpace(path))
-        { start.Environment[PathEnvironment] = path; }
+        {
+            start.Environment[PathEnvironment] = path;
+        }
         return start;
     }
 }

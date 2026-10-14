@@ -13,7 +13,9 @@ internal static class NativeMaintenanceState
     {
         var page = view.Scan(Array.Empty<byte>(), ScanLimit);
         if (page.HasMore)
-        { throw new InvalidOperationException("The literal native maintenance inventory exceeded its bound."); }
+        {
+            throw new InvalidOperationException("The literal native maintenance inventory exceeded its bound.");
+        }
         return page.Records.Select(record => Convert.ToHexString(record.Key.Span) + ":" +
             Convert.ToHexString(record.Value.Span)).ToArray();
     });

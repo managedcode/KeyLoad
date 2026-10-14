@@ -8,18 +8,35 @@ namespace KeyLoad.UnitTests;
 internal sealed class NativeBlobWireFileFixture : IDisposable
 {
     internal string Root { get; } = Path.Combine(Path.GetTempPath(), "keyload-blob-files-" + Guid.NewGuid().ToString("N"));
-    internal NativeBlobWireFiles Files { get; }
-    internal NativeBlobWireCodec Codec { get; }
-    internal NativeBlobWireReservations Reservations { get; }
-    internal NativeBlobWireOwner Owner { get; }
-    internal string OwnerDigest { get; }
+    internal NativeBlobWireFiles Files
+    {
+        get;
+    }
+    internal NativeBlobWireCodec Codec
+    {
+        get;
+    }
+    internal NativeBlobWireReservations Reservations
+    {
+        get;
+    }
+    internal NativeBlobWireOwner Owner
+    {
+        get;
+    }
+    internal string OwnerDigest
+    {
+        get;
+    }
 
     internal NativeBlobWireFileFixture()
     {
         var limits = Options.Create(new RequestProbeExecutionOptions());
         limits.Value.Validate();
         if (OperatingSystem.IsWindows())
-        { throw new PlatformNotSupportedException("Private native owner files require Unix modes."); }
+        {
+            throw new PlatformNotSupportedException("Private native owner files require Unix modes.");
+        }
         Directory.CreateDirectory(Root, RequestCqrsProbeProtocol.PrivateDirectoryMode);
         try
         {

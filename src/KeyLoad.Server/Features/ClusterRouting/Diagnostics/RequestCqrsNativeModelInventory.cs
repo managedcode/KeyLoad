@@ -23,7 +23,9 @@ internal static class RequestCqrsNativeModelInventory
     {
         if (!name.StartsWith(Prefix, StringComparison.Ordinal)
             || !name.EndsWith(RequestCqrsProbeProtocol.JsonFileSuffix, StringComparison.Ordinal))
-        { return false; }
+        {
+            return false;
+        }
         var parts = name[Prefix.Length..^RequestCqrsProbeProtocol.JsonFileSuffix.Length].Split(Separator, StringSplitOptions.None);
         return parts.Length == NameComponentCount && CanonicalGuid(parts[ArmComponent]) && CanonicalGuid(parts[RequestComponent])
             && parts[PhaseComponent] is nameof(RequestCqrsProbePhase.NativeModelBeforeDispatch)
@@ -37,7 +39,9 @@ internal static class RequestCqrsNativeModelInventory
     internal static RequestCqrsNativeModelWitness Read(ReadOnlySpan<byte> bytes)
     {
         if (bytes.IsEmpty || bytes.Length > MaximumBytes)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         var value = JsonSerializer.Deserialize(bytes, RequestCqrsNativeModelJsonContext.Default.RequestCqrsNativeModelWitness)
             ?? throw Invalid();
         Require(value);
@@ -49,7 +53,9 @@ internal static class RequestCqrsNativeModelInventory
         Require(value);
         var bytes = JsonSerializer.SerializeToUtf8Bytes(value, RequestCqrsNativeModelJsonContext.Default.RequestCqrsNativeModelWitness);
         if (bytes.Length > MaximumBytes)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         return bytes;
     }
 
@@ -68,7 +74,9 @@ internal static class RequestCqrsNativeModelInventory
                 && item.Phase == value.Phase && item.Outcome == RequestCqrsProbeOutcome.Observed);
             if (marker.SessionId != value.SessionId || marker.CommandId != value.CommandId
                 || marker.Voter != value.Voter || marker.SiloAddress != value.SiloAddress)
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
         }
     }
 
@@ -82,16 +90,22 @@ internal static class RequestCqrsNativeModelInventory
             || (value.Phase == RequestCqrsProbePhase.NativeModelBeforeDispatch ? value.NativeReply is not null
                 : value.NativeReply is not { Length: > EmptyNativeBytes })
             || value.NativeReply is { } bytes && bytes.Length > MaximumBytes)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         var request = Request(value);
         if (request is null || request.CallerVoter != value.Voter || request.CallerSiloAddress != value.SiloAddress
             || request.Nonce == Guid.Empty || string.IsNullOrWhiteSpace(request.SenderSignature))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         if (value.NativeReply is not null)
         {
             var reply = Reply(value);
             if (reply is null || reply.Nonce != request.Nonce)
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
         }
     }
 

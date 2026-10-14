@@ -16,7 +16,9 @@ internal static class ControlledPartitionMovementNativeProcessTrial
     {
         foreach (var mode in new[] { ControlledPartitionMovementNativeProcessProtocol.Hold,
             ControlledPartitionMovementNativeProcessProtocol.Observe })
-        { await ChildAsync(root, mode, cancellationToken); }
+        {
+            await ChildAsync(root, mode, cancellationToken);
+        }
     }
 
     private static async Task ChildAsync(string root, string mode, CancellationToken cancellationToken)
@@ -25,9 +27,15 @@ internal static class ControlledPartitionMovementNativeProcessTrial
         var child = CommandIdempotencyProcessChild.Create(CommandIdempotencyProcess.OutputLimitCharacters,
             hold ? CrashFixtureValues.Acknowledgement : null);
         var start = new ProcessStartInfo(Dotnet)
-        { RedirectStandardOutput = true, RedirectStandardError = true, UseShellExecute = false };
+        {
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false
+        };
         foreach (var argument in new[] { typeof(CrashHostMarker).Assembly.Location, root, mode })
-        { start.ArgumentList.Add(argument); }
+        {
+            start.ArgumentList.Add(argument);
+        }
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
@@ -43,14 +51,18 @@ internal static class ControlledPartitionMovementNativeProcessTrial
             {
                 await child.WaitAndJoinAsync(cancellationToken);
                 if (child.ExitCode != SuccessExit)
-                { throw new InvalidOperationException(Failed); }
+                {
+                    throw new InvalidOperationException(Failed);
+                }
             }
         }, failures);
         using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(
             CommandIdempotencyProcessRecoveryTests.CleanupTimeoutSeconds));
         await CommandIdempotencyProcess.SettleActiveAsync(child, failures, cleanup.Token);
         if (!child.IsSettled)
-        { failures.Add(new IOException(Failed)); }
+        {
+            failures.Add(new IOException(Failed));
+        }
         await ServerFailureObserver.ObserveAsync(() => child.ReportNativeOutputWitnessAsync(failures), failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }

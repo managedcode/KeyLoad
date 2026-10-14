@@ -52,7 +52,9 @@ internal static class RequestCqrsAnnTestData
         return new(Guid.NewGuid(), new(database.Partition, Consumer), Collection, Field, Space, Generation,
             database.Store.Identity.NodeId, new(placement.PhysicalShardId, placement.Incarnation,
                 placement.VoterIds, placement.PlacementEpoch), AnnMaintenanceMode.Build)
-        { MaintenanceProfile = new(Collection, Field, Space) };
+        {
+            MaintenanceProfile = new(Collection, Field, Space)
+        };
     }
 
     internal static async Task ChangeAsync(RequestCqrsClusterFixture fixture, CancellationToken token)

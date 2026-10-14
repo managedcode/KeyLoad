@@ -33,12 +33,30 @@ internal sealed class KeyLoadTimeSeriesIntensiveContext
         ExpectedAtomicPartitionId = partition.AtomicPartitionId;
     }
 
-    internal string RunId { get; }
-    internal PartitionRef Partition { get; }
-    internal string SeriesSet { get; }
-    internal Guid Incarnation { get; }
-    internal ImmutableArray<KeyLoadTimeSeriesIntensivePeer> Peers { get; }
-    internal string ExpectedAtomicPartitionId { get; }
+    internal string RunId
+    {
+        get;
+    }
+    internal PartitionRef Partition
+    {
+        get;
+    }
+    internal string SeriesSet
+    {
+        get;
+    }
+    internal Guid Incarnation
+    {
+        get;
+    }
+    internal ImmutableArray<KeyLoadTimeSeriesIntensivePeer> Peers
+    {
+        get;
+    }
+    internal string ExpectedAtomicPartitionId
+    {
+        get;
+    }
 
     private static void ValidatePeers(ImmutableArray<KeyLoadTimeSeriesIntensivePeer> peers)
     {

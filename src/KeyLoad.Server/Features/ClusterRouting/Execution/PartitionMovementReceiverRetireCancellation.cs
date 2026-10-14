@@ -1,8 +1,8 @@
 using System.Security.Cryptography;
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Identity;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
@@ -45,7 +45,9 @@ internal sealed class PartitionMovementReceiverRetireCancellation(PartitionMovem
         var terminal = await context.ExecuteSignedAsync(principal, requestId, Guid.Empty, signed, command: false,
             cancellationToken).ConfigureAwait(false);
         if (terminal.Error is { } code)
-        { throw Errors.Fail(code, terminal.SafeDetail ?? PartitionMovementProtocol.Unavailable); }
+        {
+            throw Errors.Fail(code, terminal.SafeDetail ?? PartitionMovementProtocol.Unavailable);
+        }
         var actual = GrainNativePayload.Read<GrainValue>(terminal.Payload).Value as PartitionMovementRetireCancellationOutcomeResult
             ?? throw Errors.Fail(ErrorCode.Corruption, PartitionMovementProtocol.InvalidProof);
         work.ImportReadGrant(grant, actual.ReadBytes, actual.ExaminedRecords);

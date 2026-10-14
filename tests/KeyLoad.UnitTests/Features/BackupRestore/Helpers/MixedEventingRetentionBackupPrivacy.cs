@@ -16,13 +16,20 @@ internal static class MixedEventingRetentionBackupPrivacy
         Configure(fixture, worker, token);
         await RequireAsync(fixture.Database, state);
         var original = MixedEventingRetentionBackupOracle.Rows(fixture.Target!, state.Queue.Partition, includeOutcomes: false);
-        Configure(fixture, worker with { PolicyEpoch = 2, Revoked = true }, token);
+        Configure(fixture, worker with
+        {
+            PolicyEpoch = 2,
+            Revoked = true
+        }, token);
         var denied = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Database.InspectMessage(Inspector,
             state.Queue.Lane, QueueLifecycleTestProtocol.Pending));
         await Assert.That(denied.Code).IsEqualTo(ErrorCode.Unauthenticated);
         await Assert.That(MixedEventingRetentionBackupOracle.Rows(fixture.Target!, state.Queue.Partition, includeOutcomes: false))
             .IsEquivalentTo(original, TUnit.Assertions.Enums.CollectionOrdering.Matching);
-        Configure(fixture, worker with { PolicyEpoch = 3 }, token);
+        Configure(fixture, worker with
+        {
+            PolicyEpoch = 3
+        }, token);
         await RequireAsync(fixture.Database, state);
     }
 

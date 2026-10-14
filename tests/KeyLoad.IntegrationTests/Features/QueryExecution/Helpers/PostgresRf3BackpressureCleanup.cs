@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.IntegrationTests.Features.QueryExecution;
@@ -23,9 +23,13 @@ internal static class PostgresRf3BackpressureCleanup
                     await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => controls.ReleaseOpenArmsAsync(discovery, cleanup.Token), failures);
                 }
                 if (!joined)
-                { await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => original.WaitAsync(cleanup.Token), failures); }
+                {
+                    await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => original.WaitAsync(cleanup.Token), failures);
+                }
                 if (header.IsFaulted)
-                { _ = header.Exception; }
+                {
+                    _ = header.Exception;
+                }
                 await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
                 {
                     _ = await controls.WaitForMarkerAsync(arm, RequestCqrsProbePhase.ProducerDisposed,

@@ -11,9 +11,14 @@ internal sealed class NativeMembershipDiagnosticFileScope
     private const string Invalid = "RequestCqrsProbeConfigurationInvalid";
     private bool dataOwned;
     private NativeMembershipDiagnosticFileScope()
-    { DataRoot = Path.Combine(Path.GetTempPath(), DataPrefix + Guid.NewGuid().ToString("N")); }
+    {
+        DataRoot = Path.Combine(Path.GetTempPath(), DataPrefix + Guid.NewGuid().ToString("N"));
+    }
 
-    internal string DataRoot { get; }
+    internal string DataRoot
+    {
+        get;
+    }
     internal NativeMembershipDiagnosticFixture Fixture { get; private set; } = null!;
     internal string Node(string node) => Path.Combine(Fixture.Root, node);
     internal string Owner(string node) => Path.Combine(Node(node), RequestCqrsProbeFixtureProtocol.OwnerFileName);
@@ -21,9 +26,13 @@ internal sealed class NativeMembershipDiagnosticFileScope
     private void Initialize()
     {
         if (OperatingSystem.IsWindows())
-        { throw new PlatformNotSupportedException(RequestCqrsProbeFixtureProtocol.PrivatePermissionsUnsupported); }
+        {
+            throw new PlatformNotSupportedException(RequestCqrsProbeFixtureProtocol.PrivatePermissionsUnsupported);
+        }
         if (Directory.Exists(DataRoot) || File.Exists(DataRoot))
-        { throw new IOException(RequestCqrsProbeFixtureProtocol.OwnershipConflict); }
+        {
+            throw new IOException(RequestCqrsProbeFixtureProtocol.OwnershipConflict);
+        }
         Directory.CreateDirectory(DataRoot, RequestCqrsProbeFileValidation.PrivateDirectoryMode);
         dataOwned = true;
         Fixture = NativeMembershipDiagnosticFixture.Create(DataRoot, Guid.NewGuid());
@@ -33,7 +42,9 @@ internal sealed class NativeMembershipDiagnosticFileScope
     {
         var options = new RequestProbeFileOptions();
         if (!options.IsValid())
-        { throw new OptionsValidationException(Options.DefaultName, typeof(RequestProbeFileOptions), [RequestProbeFileOptions.ValidationMessage]); }
+        {
+            throw new OptionsValidationException(Options.DefaultName, typeof(RequestProbeFileOptions), [RequestProbeFileOptions.ValidationMessage]);
+        }
         return RequestCqrsProbeProfilePaths.Validate(Fixture.Root, Fixture.SessionId, DataRoot,
             Options.Create(options), TwoRf3MembershipProtocol.Nodes,
             RequestCqrsProbeFixtureProtocol.Version, RequestCqrsProbeFixtureProtocol.OwnerKind);
@@ -49,9 +60,13 @@ internal sealed class NativeMembershipDiagnosticFileScope
     {
         var failures = new List<Exception>();
         if (Fixture is not null)
-        { ServerFailureObserver.Observe(() => Directory.Delete(Fixture.Root, recursive: true), failures); }
+        {
+            ServerFailureObserver.Observe(() => Directory.Delete(Fixture.Root, recursive: true), failures);
+        }
         if (dataOwned)
-        { ServerFailureObserver.Observe(() => { Directory.Delete(DataRoot, recursive: true); dataOwned = false; }, failures); }
+        {
+            ServerFailureObserver.Observe(() => { Directory.Delete(DataRoot, recursive: true); dataOwned = false; }, failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
@@ -60,7 +75,10 @@ internal sealed class NativeMembershipDiagnosticFileScope
         var scope = new NativeMembershipDiagnosticFileScope();
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(() =>
-        { scope.Initialize(); return action(scope); }, failures).ConfigureAwait(false);
+        {
+            scope.Initialize();
+            return action(scope);
+        }, failures).ConfigureAwait(false);
         ServerFailureObserver.Observe(scope.DeleteNeverMountedFiles, failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }

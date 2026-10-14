@@ -18,13 +18,17 @@ internal static class EventVectorAuthenticatedSourceObservation
             || reply.Nonce != originalCall.Nonce || reply.Error is not null || reply.OriginalNativeReply.IsEmpty
             || authenticatedReply.OriginalReplyBytes.IsEmpty
             || string.IsNullOrWhiteSpace(authenticatedReply.OriginalSignature))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, EventVectorRemoteProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, EventVectorRemoteProtocol.Invalid);
+        }
         admission.RequireEncodedBytes(originalCall.OriginalNativeRequest.Length);
         var sent = NativeSerialization.Deserialize<EventVectorSourcePhase>(originalCall.OriginalNativeRequest.Span);
         if (sent is null || sent.PhaseCommandId != admitted.PhaseCommandId
             || !sent.OriginalNativeBody.Span.SequenceEqual(admitted.OriginalNativeBody.Span)
             || !sent.OriginalBodyDigest.Span.SequenceEqual(admitted.OriginalBodyDigest.Span))
-        { throw Errors.Fail(ErrorCode.Corruption, EventVectorRemoteProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, EventVectorRemoteProtocol.Invalid);
+        }
         _ = EventVectorSourceMutationValidation.ReadOriginal(sent, admission);
         _ = EventVectorSourceMutationValidation.ReadOriginal(admitted, admission);
         admission.RequireEncodedBytes(reply.OriginalNativeReply.Length);

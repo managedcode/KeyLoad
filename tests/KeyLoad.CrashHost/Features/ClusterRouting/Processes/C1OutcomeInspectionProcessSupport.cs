@@ -46,7 +46,9 @@ internal static class C1OutcomeInspectionDeadline
     private static async Task ObserveTimerAsync(Task timer)
     {
         try
-        { await timer.ConfigureAwait(false); }
+        {
+            await timer.ConfigureAwait(false);
+        }
         catch (OperationCanceledException) { }
     }
 }
@@ -58,10 +60,13 @@ internal static class C1OutcomeInspectionProcessIo
         try
         {
             if (!process.HasExited)
-            { process.Kill(entireProcessTree: true); }
+            {
+                process.Kill(entireProcessTree: true);
+            }
         }
         catch (InvalidOperationException) when (process.HasExited)
-        { }
+        {
+        }
     }
 
     internal static async Task WriteInputAsync(Process child, ReadOnlyMemory<byte> payload)
@@ -91,7 +96,9 @@ internal sealed class C1OutcomeInspectionCapture
         settings = executionOptions.Value;
         this.maximumOutputBytes = maximumOutputBytes ?? settings.InspectionMaximumOutputBytes;
         if (this.maximumOutputBytes is <= NoOutputBytes or > C1SubmissionOutcomeInspectionProtocol.MaximumReceiptBytes)
-        { throw new ArgumentOutOfRangeException(nameof(maximumOutputBytes)); }
+        {
+            throw new ArgumentOutOfRangeException(nameof(maximumOutputBytes));
+        }
         retained = new byte[this.maximumOutputBytes];
         buffer = new byte[settings.InspectionReadBufferBytes];
     }
@@ -109,7 +116,9 @@ internal sealed class C1OutcomeInspectionCapture
         {
             var read = await stream.ReadAsync(buffer).ConfigureAwait(false);
             if (read == EmptyRead)
-            { return; }
+            {
+                return;
+            }
             var offset = checked((int)Math.Min(observedBytes, maximumOutputBytes));
             var copy = Math.Min(maximumOutputBytes - offset, read);
             buffer.AsSpan(StartEmptyCount, copy).CopyTo(retained.AsSpan(offset));

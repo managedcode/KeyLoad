@@ -17,14 +17,25 @@ internal static class AnnPublicRf3Assertions
         NativeAnnMaintenanceRf3Scenario scenario, AnnMaintenanceRequest pin, bool empty, CancellationToken token)
     {
         var request = new ApproximateSearchRequest(Version, scenario.Search(), pin.Consumer, pin.IndexGeneration);
-        var missing = request with { IndexGeneration = MissingGeneration };
+        var missing = request with
+        {
+            IndexGeneration = MissingGeneration
+        };
         var denied = await sdk.ApproximateSearchAsync(missing, token);
         await Assert.That(denied.IsSuccess).IsFalse();
         await Assert.That(denied.Value).IsNull();
         await Assert.That(denied.Problem?.ErrorCode).IsEqualTo(ErrorCode.HistoryUnavailable.ToString());
         _ = await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(Tool, missing, token), ErrorCode.HistoryUnavailable, dispatched: true);
         if (empty)
-        { request = request with { Search = request.Search with { AllowedIds = [] } }; }
+        {
+            request = request with
+            {
+                Search = request.Search with
+                {
+                    AllowedIds = []
+                }
+            };
+        }
         var direct = await McpCallerAssertions.SdkSuccessAsync(await sdk.ApproximateSearchAsync(request, token));
         await PageAsync(direct, scenario, pin, empty);
         var official = (await McpCallerAssertions.SuccessAsync<AnnSearchPage>(await mcp.CallAsync(Tool, request, token))).Value;
@@ -35,7 +46,10 @@ internal static class AnnPublicRf3Assertions
         await EqualAsync(sdkCall, direct);
         await EqualAsync(mcpCall, direct);
         var healthy = await McpCallerAssertions.SdkSuccessAsync(await sdk.ApproximateSearchAsync(
-            request with { Search = scenario.Search() }, token));
+            request with
+            {
+                Search = scenario.Search()
+            }, token));
         await PageAsync(healthy, scenario, pin, empty: false);
     }
 

@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
-using KeyLoad.Orleans;
 using KeyLoad.Query.Features.QueryExecution;
 using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.Server.Features.QueryExecution;
@@ -37,7 +37,9 @@ internal sealed class RemoteDocumentReceiver(OrleansNode node, PartitionHost par
             || call.Fence.Placement.Incarnation != call.Fence.Destination.Owner.Incarnation
             || call.Fence.Placement.PlacementEpoch != call.Fence.Destination.Owner.PlacementEpoch
             || !call.Fence.Placement.VoterIds.SequenceEqual(call.Fence.Destination.Owner.VoterIds, StringComparer.Ordinal))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof);
+        }
     }
 
     internal async Task<OwnedDocumentReadResultV1> ReadAsync(RemoteDocumentCallV1 call,
@@ -47,7 +49,9 @@ internal sealed class RemoteDocumentReceiver(OrleansNode node, PartitionHost par
         var principal = partition.Database.Store.Read(view => partition.Database.Principal(view,
             call.Fence.PrincipalId, clock.GetUtcNow()));
         if (!string.Equals(principal.TenantId, call.Fence.Tenant, StringComparison.Ordinal))
-        { throw Errors.Fail(ErrorCode.PermissionDenied, RemoteDocumentProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, RemoteDocumentProtocol.InvalidProof);
+        }
         var requestId = Guid.NewGuid();
         var request = new OwnedDocumentReadRequestV1(call.Fence.Tenant, call.Request!, call.Fence.Destination.Owner);
         var signed = node.CatalogRequestCodec().CreateOwnedDocumentRead(requestId, principal.Id,
@@ -61,7 +65,9 @@ internal sealed class RemoteDocumentReceiver(OrleansNode node, PartitionHost par
         var actual = partition.Database.Store.Identity;
         if (result.NodeId != actual.NodeId || result.Incarnation != actual.Incarnation
             || result.ReadGeneration != actual.ReadGeneration)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentProtocol.Unavailable);
+        }
         return result;
     }
     internal async Task<PartitionQueryLeafResultV1> ReadLeafAsync(RemoteDocumentCallV1 call,
@@ -71,7 +77,9 @@ internal sealed class RemoteDocumentReceiver(OrleansNode node, PartitionHost par
         var principal = partition.Database.Store.Read(view => partition.Database.Principal(view,
             call.Fence.PrincipalId, clock.GetUtcNow()));
         if (principal.TenantId != call.Fence.Tenant)
-        { throw Errors.Fail(ErrorCode.PermissionDenied, RemoteDocumentProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, RemoteDocumentProtocol.InvalidProof);
+        }
         var requestId = Guid.NewGuid();
         var request = call.QueryLeaf ?? throw Errors.Fail(ErrorCode.Corruption, RemoteDocumentProtocol.InvalidProof);
         var signed = node.CatalogRequestCodec().CreatePartitionQueryLeaf(requestId, principal.Id,
@@ -85,7 +93,9 @@ internal sealed class RemoteDocumentReceiver(OrleansNode node, PartitionHost par
         var actual = partition.Database.Store.Identity;
         if (result.NodeId != actual.NodeId || result.Incarnation != actual.Incarnation
             || result.ReadGeneration != actual.ReadGeneration)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentProtocol.Unavailable);
+        }
         return result;
     }
 
@@ -96,7 +106,9 @@ internal sealed class RemoteDocumentReceiver(OrleansNode node, PartitionHost par
         var principal = partition.Database.Store.Read(view => partition.Database.Principal(view,
             call.Fence.PrincipalId, clock.GetUtcNow()));
         if (principal.TenantId != call.Fence.Tenant)
-        { throw Errors.Fail(ErrorCode.PermissionDenied, RemoteDocumentProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, RemoteDocumentProtocol.InvalidProof);
+        }
         var requestId = Guid.NewGuid();
         var request = call.SearchLeaf ?? throw Errors.Fail(ErrorCode.Corruption, RemoteDocumentProtocol.InvalidProof);
         var signed = node.CatalogRequestCodec().CreateDistributedSearchLeaf(requestId, principal.Id,
@@ -111,7 +123,9 @@ internal sealed class RemoteDocumentReceiver(OrleansNode node, PartitionHost par
         var actual = partition.Database.Store.Identity;
         if (result.Witness is null || result.Witness.NodeId != actual.NodeId
             || result.Witness.Incarnation != actual.Incarnation || result.Witness.ReadGeneration != actual.ReadGeneration)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentProtocol.Unavailable);
+        }
         return result;
     }
 }

@@ -36,7 +36,9 @@ internal static class NativeInstallFrameInspectionJson
     {
         var bytes = JsonSerializer.SerializeToUtf8Bytes(Validate(request), C1OutcomeInspectionJson.SharedContext.NativeInstallFrameInspectionRequest);
         if (bytes.Length > C1OutcomeInspectionProtocol.MaximumRequestBytes)
-        { throw InvalidRequest(); }
+        {
+            throw InvalidRequest();
+        }
         return bytes;
     }
 
@@ -45,7 +47,9 @@ internal static class NativeInstallFrameInspectionJson
         ValidateReceipt(receipt);
         var bytes = JsonSerializer.SerializeToUtf8Bytes(receipt, C1OutcomeInspectionJson.SharedContext.NativeInstallFrameInspectionReceipt);
         if (bytes.Length > C1OutcomeInspectionProtocol.MaximumReceiptBytes)
-        { throw InvalidReceipt(); }
+        {
+            throw InvalidReceipt();
+        }
         return bytes;
     }
 
@@ -62,7 +66,9 @@ internal static class NativeInstallFrameInspectionJson
     private static NativeInstallFrameInspectionRequest Validate(NativeInstallFrameInspectionRequest? request)
     {
         if (request is null)
-        { throw InvalidRequest(); }
+        {
+            throw InvalidRequest();
+        }
         _ = C1OutcomeInspectionRequestValidation.Validate(new(request.Version, request.Directory, request.ExpectedNodeId,
             request.Incarnation, request.PrincipalId, request.CommandId, request.Partition));
         NativeInstallFrameInspectionOptions.ValidateMaximumFrameBytes(request.MaximumFrameBytes);
@@ -84,7 +90,9 @@ internal static class NativeInstallFrameInspectionJson
             || receipt.Installed && (receipt.OutcomeError != NativeInstallFrameInspectionProtocol.NoErrorOrStage
                 || receipt.OutcomeStage != (int)PartitionMovePeerStage.Install)
             || receipt.EncodedFrameLimitRejected && receipt.OutcomeError != (int)ErrorCode.ResourceExhausted)
-        { throw InvalidReceipt(); }
+        {
+            throw InvalidReceipt();
+        }
         return receipt;
     }
 

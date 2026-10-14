@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.Server;
 
@@ -19,7 +19,9 @@ internal sealed class PartitionMovementSourceImageLookup(Lock gate,
         {
             requireMoveOpen(verified.Partition, verified.MoveId);
             if (!sessions.TryGetValue(handleId, out var retained) || retained is not PartitionMovementSourceEntry entry)
-            { throw Errors.Fail(ErrorCode.OwnershipLost, Unavailable); }
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, Unavailable);
+            }
             entry.Require(verified, clock.GetUtcNow());
             return entry;
         }

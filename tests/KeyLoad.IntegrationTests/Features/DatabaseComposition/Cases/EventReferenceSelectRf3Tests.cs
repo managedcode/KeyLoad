@@ -40,6 +40,10 @@ internal sealed class EventReferenceSelectRf3Tests(ClusterFixture fixture)
                 [new PutDocument(EventReferenceSelectProtocol.Target, "m", EventReferenceSelectProtocol.RepairedJson,
                     Access: new(OwnerId: state.Identity.Principal.Id))]);
             var receipt = await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.CommitAsync(command, token));
-            return state with { Repair = command, RepairReceipt = receipt };
+            return state with
+            {
+                Repair = command,
+                RepairReceipt = receipt
+            };
         }, token);
 }

@@ -28,13 +28,22 @@ internal sealed class ScaledRawStorageValueArena
     }
 
     /// <summary>Gets the number of retained record values.</summary>
-    public int RecordCount { get; }
+    public int RecordCount
+    {
+        get;
+    }
 
     /// <summary>Gets the byte length of each retained value.</summary>
-    public int ValueBytes { get; }
+    public int ValueBytes
+    {
+        get;
+    }
 
     /// <summary>Gets bytes retained by immutable value chunks.</summary>
-    public long RetainedValueBytes { get; }
+    public long RetainedValueBytes
+    {
+        get;
+    }
 
     /// <summary>Returns the stable value slice for one seeded record.</summary>
     public Memory<byte> Value(int index)

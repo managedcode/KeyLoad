@@ -1,5 +1,5 @@
 using System.Collections.Immutable;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
 
@@ -18,7 +18,10 @@ internal static class McpEventFeedCatalogEntries
     private const string ReleaseTool = "keyload_release_event_feed";
     private const string ReleaseRoute = "/v1/event-feeds/release";
 
-    internal static ImmutableArray<(string Name, string Route, GrainReadKind? ReadKind, OperationKind? CommandKind)> All { get; } =
+    internal static ImmutableArray<(string Name, string Route, GrainReadKind? ReadKind, OperationKind? CommandKind)> All
+    {
+        get;
+    } =
     [
         (TailTool, TailRoute, null, OperationKind.EventFeedControl),
         (OpenTool, OpenRoute, null, OperationKind.EventFeedControl),

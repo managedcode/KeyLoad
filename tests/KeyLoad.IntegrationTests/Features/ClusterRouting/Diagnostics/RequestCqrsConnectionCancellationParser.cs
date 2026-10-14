@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
@@ -26,13 +26,19 @@ internal static class RequestCqrsConnectionCancellationParser
     {
         record = null!;
         if (line.Length > RequestCqrsRf3McpRejectionNodeCapture.MaximumLineCharacters)
-        { return false; }
+        {
+            return false;
+        }
         var start = line.IndexOf(Prefix, StringComparison.Ordinal);
         if (start < 0 || line.IndexOf(Prefix, start + Prefix.Length, StringComparison.Ordinal) >= 0)
-        { return false; }
+        {
+            return false;
+        }
         var message = line.AsSpan(start + Prefix.Length).TrimEnd("\r\n");
         if (message.IsEmpty || message[^1] != Terminator)
-        { return false; }
+        {
+            return false;
+        }
         var fields = message[..^1].ToString().Split(Separator, StringSplitOptions.None);
         if (fields.Length != ExactFieldCount
             || !Guid.TryParseExact(fields[RequestField], GuidFormat, out var requestId) || requestId == Guid.Empty
@@ -41,7 +47,9 @@ internal static class RequestCqrsConnectionCancellationParser
             || !Flag(fields[ClosedOrdinal], ClosedField, out var closed)
             || !Flag(fields[CancelledOrdinal], CancelledField, out var cancelled)
             || !Flag(fields[TokenOrdinal], TokenField, out var sameToken))
-        { return false; }
+        {
+            return false;
+        }
         record = new(waveId, node, requestId, stage, active, closed, cancelled, sameToken);
         return true;
     }
@@ -50,7 +58,9 @@ internal static class RequestCqrsConnectionCancellationParser
     {
         stage = default;
         if (!field.StartsWith(StageField, StringComparison.Ordinal))
-        { return false; }
+        {
+            return false;
+        }
         var value = field.AsSpan(StageField.Length);
         return Enum.TryParse(value, false, out stage) && Enum.IsDefined(stage)
             && value.SequenceEqual(stage.ToString());
@@ -60,7 +70,9 @@ internal static class RequestCqrsConnectionCancellationParser
     {
         value = default;
         if (!field.StartsWith(prefix, StringComparison.Ordinal))
-        { return false; }
+        {
+            return false;
+        }
         var literal = field.AsSpan(prefix.Length);
         return bool.TryParse(literal, out value) && literal.SequenceEqual(value.ToString());
     }

@@ -29,7 +29,13 @@ internal static class IsolatedAggregateProbe
         try
         {
             var file = Path.Combine(root, RequestFile);
-            var request = new { value, cell, cohort = IsolatedAggregateData.Cohort(), contract = IsolatedAggregateData.Contract() };
+            var request = new
+            {
+                value,
+                cell,
+                cohort = IsolatedAggregateData.Cohort(),
+                contract = IsolatedAggregateData.Contract()
+            };
             await File.WriteAllBytesAsync(file, JsonSerializer.SerializeToUtf8Bytes(request, IsolatedAggregateData.JsonOptions), token);
             var response = await IsolatedAggregateNodeProcess.RunAsync(
                 [InputMode, EvalMode, ProbeSource, file, IsolatedAggregateNodeProcess.Module(ValidatorModule)], token);

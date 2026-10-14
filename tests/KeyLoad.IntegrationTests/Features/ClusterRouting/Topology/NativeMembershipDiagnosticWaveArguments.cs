@@ -9,6 +9,8 @@ internal static class NativeMembershipDiagnosticWaveArguments
     {
         if (diagnostics is not null && (controls is not null || remoteDocuments || remoteQueries
             || protectedDocuments || omission is not null || eventReserved))
-        { throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState); }
+        {
+            throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState);
+        }
     }
 }

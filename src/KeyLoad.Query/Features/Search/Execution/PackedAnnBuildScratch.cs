@@ -20,9 +20,24 @@ internal sealed class PackedAnnBuildScratch
         budget.Check();
     }
 
-    internal PackedAnnLayerBuffers Layer { get; }
-    internal int[] NeighborNodes { get; }
-    internal double[] NeighborScores { get; }
-    internal int[] SelectedNeighbors { get; }
-    internal int[] ConnectionTargets { get; }
+    internal PackedAnnLayerBuffers Layer
+    {
+        get;
+    }
+    internal int[] NeighborNodes
+    {
+        get;
+    }
+    internal double[] NeighborScores
+    {
+        get;
+    }
+    internal int[] SelectedNeighbors
+    {
+        get;
+    }
+    internal int[] ConnectionTargets
+    {
+        get;
+    }
 }

@@ -87,7 +87,14 @@ internal sealed class SqlInnerJoinExecutionTests
                 [new("/order_id", false)], 10, InnerJoin: new(RightCollection, RightAlias, "/" + LeftForeignKey, "/" + RightPrimaryKey)),
             AllowFullScan: true, AstVersion: 3);
         var explain = Assert.ThrowsExactly<KeyLoadException>(() => engine.ExecuteAst("root",
-            ast with { AstVersion = QueryDialectVersion, Query = ast.Query with { Explain = true } }));
+            ast with
+            {
+                AstVersion = QueryDialectVersion,
+                Query = ast.Query with
+                {
+                    Explain = true
+                }
+            }));
         var badAst = Assert.ThrowsExactly<KeyLoadException>(() => engine.ExecuteAst("root", ast));
 
         await Assert.That(q1.Code).IsEqualTo(ErrorCode.UnsupportedCapability);
@@ -202,5 +209,10 @@ internal sealed class SqlInnerJoinExecutionTests
     }
 
     private static string OverlongKeyLeft() => JsonSerializer.Serialize(
-        new { order_id = "y", customer_id = new string('x', OverlongIdentifierLength), total = 7 }, JsonDefaults.Options);
+        new
+        {
+            order_id = "y",
+            customer_id = new string('x', OverlongIdentifierLength),
+            total = 7
+        }, JsonDefaults.Options);
 }

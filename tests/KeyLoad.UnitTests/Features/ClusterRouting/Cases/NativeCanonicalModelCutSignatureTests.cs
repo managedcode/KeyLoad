@@ -22,7 +22,10 @@ internal sealed class NativeCanonicalModelCutSignatureTests
             ReplicaSecurityFixture.VoterA, framed, Guid.NewGuid(), signature));
         await Assert.That(wrongNonce.Code).IsEqualTo(ErrorCode.Unauthenticated);
         var changed = NativeCanonicalModelCutSignatureFrame.Create(NativeSerialization.Serialize(
-            request with { ArmId = Guid.NewGuid() }));
+            request with
+            {
+                ArmId = Guid.NewGuid()
+            }));
         await RequireUnauthenticatedAsync(() => fixture.Receiver.VerifyDiscovery(
             ReplicaSecurityFixture.VoterA, changed, request.Nonce, signature));
         await RequireUnauthenticatedAsync(() => fixture.Receiver.VerifyDiscovery(

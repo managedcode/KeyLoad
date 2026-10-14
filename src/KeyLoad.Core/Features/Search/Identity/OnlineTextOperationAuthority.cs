@@ -13,13 +13,17 @@ public sealed partial class DatabaseEngine
         var command = prepared.Command;
         OnlineTextPublicationShape.Require(command, Limits.MaxScanRecords);
         if (EvaluationClock.GetUtcNow() >= prepared.OriginalExpiry)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, OnlineTextPublicationProtocol.InvalidPublication); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, OnlineTextPublicationProtocol.InvalidPublication);
+        }
         return Store.Read(raw =>
         {
             budget.ConstrainLifetime(prepared.OriginalExpiry);
             var principal = Principal(budget.CreateView(raw), principalId, evaluatedAt);
             if (!principal.ClusterAdministrator)
-            { throw Errors.Fail(ErrorCode.PermissionDenied, OnlineTextPublicationProtocol.AdministratorRequired); }
+            {
+                throw Errors.Fail(ErrorCode.PermissionDenied, OnlineTextPublicationProtocol.AdministratorRequired);
+            }
             var pin = new NativeTextSeedPin(command.Request.Consumer, command.Request.ConsumerGeneration,
                 command.Request.Collection, command.Request.Field, command.Request.NodeId, command.Request.Placement);
             var current = NativeTextSeedCollector.CaptureMetadataView(this, raw, principalId, pin, budget);

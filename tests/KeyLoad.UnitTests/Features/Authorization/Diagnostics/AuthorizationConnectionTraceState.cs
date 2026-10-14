@@ -10,7 +10,9 @@ internal sealed class AuthorizationConnectionTraceState : IDisposable
     internal AuthorizationConnectionTraceState(Func<AuthorizationUnsafeSpanState> state)
     {
         if (state() != AuthorizationUnsafeSpanState.ClientTraceStateLink)
-        { return; }
+        {
+            return;
+        }
         listener = new()
         {
             ShouldListenTo = static source => source.Name == ConnectionSource,
@@ -18,13 +20,20 @@ internal sealed class AuthorizationConnectionTraceState : IDisposable
             ActivityStarted = activity =>
             {
                 if (activity.OperationName == ConnectionOperation && state() == AuthorizationUnsafeSpanState.ClientTraceStateLink)
-                { activity.TraceStateString = AuthorizationTelemetryTestProtocol.TraceStateCanary; }
+                {
+                    activity.TraceStateString = AuthorizationTelemetryTestProtocol.TraceStateCanary;
+                }
             }
         };
         try
-        { ActivitySource.AddActivityListener(listener); }
+        {
+            ActivitySource.AddActivityListener(listener);
+        }
         catch (Exception)
-        { listener.Dispose(); throw; }
+        {
+            listener.Dispose();
+            throw;
+        }
     }
     public void Dispose() => listener?.Dispose();
 }

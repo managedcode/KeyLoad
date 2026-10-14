@@ -13,11 +13,15 @@ public sealed partial class DatabaseEngine
     {
         ArgumentNullException.ThrowIfNull(operation);
         if (operation.Kind != OperationKind.EventFeedControl)
-        { return null; }
+        {
+            return null;
+        }
         var verified = VerifyOperationAuthority(operation);
         RequireNativeBudget(System.Text.Encoding.UTF8.GetByteCount(verified.PayloadJson));
         if (EventVectorControlMetadataAction.Read(verified.PayloadJson) != EventVectorControlAction.AdmitSource)
-        { return null; }
+        {
+            return null;
+        }
         var work = new ReadExecutionBudget(OperationLimitsOptions, EvaluationClock, cancellationToken);
         var grant = work.CreateReadGrant(work.RemainingReadGrantBytes, work.RemainingReadGrantRecords);
         var probe = new EventVectorSourceAdmitProbe(new EventVectorFirstAdmitProbe(work, grant));
@@ -43,15 +47,21 @@ public sealed partial class DatabaseEngine
         var admission = new EventVectorAdmissionPolicy(OperationLimitsOptions);
         if (phase.Action != EventVectorControlAction.AdmitSource || phase.IntendedSourcePhase is not { } intended
             || phase.OriginalParentRequestId == Guid.Empty)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidEventVectorControlAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidEventVectorControlAuthority);
+        }
         work.ConstrainLifetime(phase.OriginalParentExpiresAt);
         _ = RequireEventVectorControlView(bounded, principal, phase);
         var identity = EventVectorControlOperationIdentity.Create(phase, principal.Id, admission);
         if (verified.Id != identity.CommandId || verified.PayloadJson != identity.Metadata)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidEventVectorControlAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidEventVectorControlAuthority);
+        }
         var original = EventVectorControlReplay.ReadOutcome(bounded, principal, phase, admission, Store.Identity.Incarnation);
         if (original is null)
-        { EventVectorParentCommit.RequirePrevious(bounded, principal, phase, Store.Identity.Incarnation, Authorization, OperationLimitsOptions); }
+        {
+            EventVectorParentCommit.RequirePrevious(bounded, principal, phase, Store.Identity.Incarnation, Authorization, OperationLimitsOptions);
+        }
         _ = EventVectorSourceMutationValidation.ReadOriginal(intended, admission);
         probe.OriginalParentRequestId = phase.OriginalParentRequestId;
         probe.OriginalSourcePhaseCommandId = intended.PhaseCommandId;

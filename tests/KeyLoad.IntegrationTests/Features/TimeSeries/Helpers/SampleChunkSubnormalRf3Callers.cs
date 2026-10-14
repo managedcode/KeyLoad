@@ -20,7 +20,9 @@ internal static class SampleChunkSubnormalRf3Callers
                 await using var mcp = await McpOfficialClient.ConnectAsync(fixture,
                     McpCallerProtocol.Node3, fixture.AdminKey, token).ConfigureAwait(false);
                 await ServerFailureObserver.ObserveAsync(async () =>
-                { result = await action(sdk, mcp).ConfigureAwait(false); }, failures);
+                {
+                    result = await action(sdk, mcp).ConfigureAwait(false);
+                }, failures);
             }, failures);
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);

@@ -12,7 +12,10 @@ internal static class QueryCursorRequestIdentityR47Flow
         var state = await QueryCursorRequestIdentityR47Callers.RunAsync(fixture, seeded.Credential, async (root, reader) =>
         {
             await QueryCursorRequestIdentityR47Current.RequireAsync(root, reader, seeded, token);
-            var captured = seeded with { OriginalPages = await QueryCursorRequestIdentityR47Pages.FreshAsync(root, reader, seeded, token) };
+            var captured = seeded with
+            {
+                OriginalPages = await QueryCursorRequestIdentityR47Pages.FreshAsync(root, reader, seeded, token)
+            };
             await QueryCursorRequestIdentityR47Refusals.RequireAsync(root, reader, captured, false, token);
             await QueryCursorRequestIdentityR47Replay.RequireAsync(root, reader, captured, token);
             return captured;

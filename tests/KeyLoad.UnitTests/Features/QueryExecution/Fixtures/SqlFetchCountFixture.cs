@@ -20,7 +20,9 @@ internal static class SqlFetchCountFixture
         var expected = new PrincipalRecord(SqlFetchCountProtocol.Reader, database.Partition.TenantId,
             allow ? [new(database.Partition.DatabaseId, SqlFetchCountProtocol.Collection,
                 Capability.Query | Capability.DocumentsRead)] : [], [])
-        { PolicyEpoch = epoch };
+        {
+            PolicyEpoch = epoch
+        };
         var actual = database.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(expected)).Get<PrincipalRecord>();
         await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
     }

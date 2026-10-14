@@ -22,7 +22,11 @@ internal static class TenantCapacityPlacementRf3DemotionApply
         await TenantCapacityPlacementRf3Assertions.RequirePendingAsync(pending, plan.Plan, persist.IntentId);
         await SqlRf3Protocol.EqualAsync(pending, (await McpCallerAssertions.SuccessAsync<PlacementIntentV1>(
             await seed.Official.CallAsync(TenantPlacementPublicProtocol.PersistTool,
-                new { commandId = persistId, request = persist }, token))).Value);
+                new
+                {
+                    commandId = persistId,
+                    request = persist
+                }, token))).Value);
         var id = Guid.NewGuid();
         var request = new ApplyPlacementIntentRequest(seed.Partition.TenantId, seed.Partition.DatabaseId,
             pending.IntentId, pending.Revision, state.Control);
@@ -46,7 +50,10 @@ internal static class TenantCapacityPlacementRf3DemotionApply
         await TenantCapacityPlacementRf3DemotionReplay.RequireAsync(seed, state, plan, pending,
             persistId, persist, id, request, completed, refusedId, refused, token);
         await TenantCapacityPlacementRf3Assertions.RefusalAsync(await seed.Source.ApplyPlacementIntentAsync(
-            id, request with { ExpectedRevision = completed.Revision }, token), ErrorCode.Conflict);
+            id, request with
+            {
+                ExpectedRevision = completed.Revision
+            }, token), ErrorCode.Conflict);
         await TenantCapacityPlacementRf3Cold.RequireHealthyReplayAsync(wave, seed, state,
             move, id, request, completed, token);
         await TenantCapacityPlacementRf3DemotionReplay.RequireAsync(seed, state, plan, pending,

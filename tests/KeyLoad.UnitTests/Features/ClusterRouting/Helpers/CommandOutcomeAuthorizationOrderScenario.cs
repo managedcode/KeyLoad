@@ -27,9 +27,16 @@ internal static class CommandOutcomeAuthorizationOrderScenario
         var locatorKey = KeySpace.OutcomeLocatorV2(database.Partition, Writer, commandId);
         var locator = database.Store.Read(view => view.ReadOwnedValue(locatorKey)!);
 
-        Configure(database, principal with { Grants = [], PolicyEpoch = principal.PolicyEpoch + 1 });
+        Configure(database, principal with
+        {
+            Grants = [],
+            PolicyEpoch = principal.PolicyEpoch + 1
+        });
         await AssertDeniedPreservesOutcomeAsync(database, operation, outcomeKey, original, locatorKey, locator);
-        Configure(database, principal with { PolicyEpoch = principal.PolicyEpoch + 2 });
+        Configure(database, principal with
+        {
+            PolicyEpoch = principal.PolicyEpoch + 2
+        });
         await AssertAuthorizedCorruptionPreservesStateAsync(database, operation, outcomeKey, original,
             locatorKey, locator, commandId);
         var healthyFollowup = CreateWrite(database, Guid.NewGuid(), HealthyFollowupDocumentId, HealthyFollowupJson);
@@ -56,7 +63,9 @@ internal static class CommandOutcomeAuthorizationOrderScenario
             new CommandRequest(commandId, database.Partition,
                 [new PutDocument(CommandOutcomePartitionScopeTestData.Resource, documentId, documentJson)]))
             with
-        { PrincipalId = Writer };
+        {
+            PrincipalId = Writer
+        };
 
     private static byte[] CorruptCurrentPartitionOutcome(TestDatabase database, Guid commandId)
     {
@@ -65,7 +74,10 @@ internal static class CommandOutcomeAuthorizationOrderScenario
         {
             var stored = transaction.GetRecord<StoredOutcome>(outcomeKey)!;
             transaction.PutRecord(outcomeKey, stored with
-            { ScopeKind = (CommandOutcomeScopeKind)InvalidScopeValue, Partition = null });
+            {
+                ScopeKind = (CommandOutcomeScopeKind)InvalidScopeValue,
+                Partition = null
+            });
             return true;
         });
         return outcomeKey;

@@ -28,7 +28,9 @@ internal static class NativeTextBoundedEnvelopeWriter
             var joined = false;
             ServerFailureObserver.Observe(() => { output.Dispose(); joined = true; }, failures);
             if (joined)
-            { ServerFailureObserver.Observe(reservation.CompleteAfterJoinedWrite, failures); }
+            {
+                ServerFailureObserver.Observe(reservation.CompleteAfterJoinedWrite, failures);
+            }
         }
         // Failed construction/close leaves uncertain ownership reserved; the actual owner must settle it.
         ServerFailureObserver.ThrowIfAny(failures);
@@ -37,7 +39,9 @@ internal static class NativeTextBoundedEnvelopeWriter
     private static long ObserveLength(string path)
     {
         if (!File.Exists(path))
-        { return AbsentFileLength; }
+        {
+            return AbsentFileLength;
+        }
         NativeTextFileIO.VerifyRegularFile(path);
         return new FileInfo(path).Length;
     }

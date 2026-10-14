@@ -14,7 +14,9 @@ internal sealed record PartitionMoveReceiverIssuanceIdentity(
     internal static Guid For(Guid originalPhaseCommandId)
     {
         if (originalPhaseCommandId == Guid.Empty)
-        { throw Errors.Fail(ErrorCode.Validation, PartitionMoveProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, PartitionMoveProtocol.Invalid);
+        }
         Span<byte> digest = stackalloc byte[SHA256.HashSizeInBytes];
         SHA256.HashData(NativeSerialization.Serialize(new PartitionMoveReceiverIssuanceIdentity(
             PartitionMoveProtocol.Version, originalPhaseCommandId)), digest);

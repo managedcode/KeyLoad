@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.UnitTests.Features.ResourceExecution;
 
 namespace KeyLoad.UnitTests;

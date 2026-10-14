@@ -8,7 +8,11 @@ internal sealed class TargetInboxPolicyTests
         using var fixture = new TestDatabase();
         var seed = TargetInboxNativeSetup.Create(fixture);
         var token = TestContext.Current!.Execution.CancellationToken;
-        var unsupported = seed.Request with { CommandId = Guid.NewGuid(), Target = new(seed.Target.Partition, TargetInboxUnitProtocol.Output) };
+        var unsupported = seed.Request with
+        {
+            CommandId = Guid.NewGuid(),
+            Target = new(seed.Target.Partition, TargetInboxUnitProtocol.Output)
+        };
         await TargetInboxNativeAssertions.RefusedAsync(fixture.Database, fixture.Store, unsupported, ErrorCode.UnsupportedCapability, token);
         var completed = TargetInboxNativeSetup.Apply(fixture.Database, seed.Request, token).Get<CommitInboxResult>();
         await Assert.That(completed.AlreadyProcessed).IsFalse();

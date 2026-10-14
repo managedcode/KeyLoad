@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server.Features.BlobStorage;
 using KeyLoad.Server.Features.DocumentStorage;
 
@@ -25,9 +25,16 @@ internal static class NativeBlobWireEvidenceReader
                 || complete.Version != NativeBlobWireProbeProtocol.Version || complete.SessionId != fixture.SessionId
                 || complete.ClaimDigest != digest || complete.Identity != arm.Identity
                 || complete.Count != expected || complete.Results.Length != expected)
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             for (var extra = expected + 1; extra <= NativeBlobWireProbeProtocol.MaximumFaultCount; extra++)
-            { if (fixture.Exists(NativeBlobWireNames.Result(arm.Identity, extra))) { throw Invalid(); } }
+            {
+                if (fixture.Exists(NativeBlobWireNames.Result(arm.Identity, extra)))
+                {
+                    throw Invalid();
+                }
+            }
             byte[]? originalBytes = null;
             for (var ordinal = 1; ordinal <= expected; ordinal++)
             {
@@ -38,10 +45,14 @@ internal static class NativeBlobWireEvidenceReader
                     || result.ClaimDigest != digest || result.Identity != arm.Identity || result.Ordinal != ordinal
                     || (int)result.Variation != ordinal - 1 || entry.Ordinal != ordinal
                     || entry.Variation != result.Variation || entry.RecordDigest != NativeBlobWireCodec.Digest(bytes))
-                { throw Invalid(); }
+                {
+                    throw Invalid();
+                }
                 originalBytes ??= result.OriginalNativeRequest;
                 if (!originalBytes.AsSpan().SequenceEqual(result.OriginalNativeRequest))
-                { throw Invalid(); }
+                {
+                    throw Invalid();
+                }
                 var original = NativeSerialization.Deserialize<RemoteModelNativeRequest>(result.OriginalNativeRequest);
                 var request = NativeSerialization.Deserialize<RemoteModelNativeRequest>(result.NativeRequest);
                 var reply = NativeSerialization.Deserialize<RemoteModelNativeReply>(result.NativeReply);
@@ -52,7 +63,9 @@ internal static class NativeBlobWireEvidenceReader
                     || claim.CallerVoter != call.CallerVoter || claim.CallerSiloAddress != call.CallerSiloAddress
                     || claim.RequestId != call.RequestId || claim.QueryId != call.Request.Frame.QueryId
                     || claim.Nonce != call.Nonce || claim.ExpiresAt != call.Request.Frame.ExpiresAt)
-                { throw Invalid(); }
+                {
+                    throw Invalid();
+                }
                 await PartitionMovementNativeBlobFaultAssertions.RequireAsync(original,
                     new(result.Variation, request.Payload, original.Signature), request, reply,
                     actualSourceAtCapture, actualDestinationAtCapture, sourceSecret, destinationSecret, token).ConfigureAwait(false);

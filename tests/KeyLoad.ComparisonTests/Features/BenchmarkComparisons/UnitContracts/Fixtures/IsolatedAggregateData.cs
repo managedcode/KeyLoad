@@ -59,7 +59,10 @@ internal static class IsolatedAggregateData
     internal static JsonObject Envelope()
     {
         var contract = Contract();
-        var options = contract[F.Options]!.Deserialize<ComparisonOptions>(JsonOptions)! with { Topology = ComparisonTopology.Replicated };
+        var options = contract[F.Options]!.Deserialize<ComparisonOptions>(JsonOptions)! with
+        {
+            Topology = ComparisonTopology.Replicated
+        };
         var samples = Enumerable.Range(0, options.Operations).Select(index => new OperationSample(
             index, index % options.Concurrency, index, index + 1, true, null, options.PayloadBytes, null, null)).ToImmutableArray();
         var measurement = new Measurement(options.Operations, options.Operations, 0, options.Operations / 1000d,

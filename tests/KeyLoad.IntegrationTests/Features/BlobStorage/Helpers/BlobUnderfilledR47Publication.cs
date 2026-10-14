@@ -15,7 +15,12 @@ internal static class BlobUnderfilledR47Publication
         state.WrittenTail = (await McpCallerAssertions.SuccessAsync<BlobCommitResult<BlobUploadInfo>>(
             await callers.Mcp.CallAsync(BlobPartIdentityR40Replay.PartTool, state.Tail, token))).Value;
         var chain = BlobPartIdentityR40Corpus.Next(state.WrittenFirst.Value.IntegrityHash, 1, 4, BlobPartIdentityR40Corpus.TailSha);
-        await SqlRf3Protocol.EqualAsync(state.Begun.Value with { NextOrdinal = 2, StoredBytes = 65540L, IntegrityHash = chain }, state.WrittenTail.Value);
+        await SqlRf3Protocol.EqualAsync(state.Begun.Value with
+        {
+            NextOrdinal = 2,
+            StoredBytes = 65540L,
+            IntegrityHash = chain
+        }, state.WrittenTail.Value);
         await BlobPartIdentityR40Assertions.ReceiptAsync(state.WrittenTail.Receipt, state.Tail.CommandId, state);
         await BlobPartIdentityR40Assertions.CurrentAsync(callers, state, token);
         await BlobPartIdentityR40Replay.RunAsync(callers, state, token);

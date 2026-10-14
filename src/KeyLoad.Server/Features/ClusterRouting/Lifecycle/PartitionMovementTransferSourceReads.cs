@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.Server;
@@ -31,7 +31,9 @@ internal sealed partial class PartitionMovementTransferSourceReads(Lock gate,
             if (captures.TryGetValue(reply.RequestId, out var pending))
             {
                 if (pending is not PartitionMovementPendingTransferRead original)
-                { throw Errors.Fail(ErrorCode.Conflict, PartitionMovementProtocol.InvalidProof); }
+                {
+                    throw Errors.Fail(ErrorCode.Conflict, PartitionMovementProtocol.InvalidProof);
+                }
                 retained = original.Completion.Task;
             }
             else
@@ -46,9 +48,14 @@ internal sealed partial class PartitionMovementTransferSourceReads(Lock gate,
             }
         }
         if (producer is not null)
-        { CompleteOpen(principal, query, reply.RequestId, producer, work); }
+        {
+            CompleteOpen(principal, query, reply.RequestId, producer, work);
+        }
         var handle = existing?.Handle ?? await (retained ?? producer!.Completion.Task).WaitAsync(cancellationToken).ConfigureAwait(false);
-        Find(principal, query with { HandleId = handle.HandleId }, cancellationToken).Session.RequireOpen();
+        Find(principal, query with
+        {
+            HandleId = handle.HandleId
+        }, cancellationToken).Session.RequireOpen();
         return handle;
     }
 }

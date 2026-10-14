@@ -77,7 +77,9 @@ internal static class BlobPartialReadBoundaryPublicAssertions
             await callers.Mcp.CallAsync("keyload_blobs_complete_upload", publication.Complete, token))).Value);
         await Assert.That(publication.Begun.Receipt.CommandId).IsEqualTo(publication.Begin.CommandId);
         for (var index = 0; index < publication.Parts.Length; index++)
-        { await Assert.That(publication.Written[index].Receipt.CommandId).IsEqualTo(publication.Parts[index].CommandId); }
+        {
+            await Assert.That(publication.Written[index].Receipt.CommandId).IsEqualTo(publication.Parts[index].CommandId);
+        }
         await Assert.That(publication.Completed.Receipt.CommandId).IsEqualTo(publication.Complete.CommandId);
         await Assert.That(publication.Completed.Receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
         await Assert.That(publication.Completed.Receipt.Token.AtomicPartitionId).IsEqualTo(publication.Begin.Blob.Partition.AtomicPartitionId);

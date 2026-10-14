@@ -40,15 +40,23 @@ internal sealed class SqlInnerJoinOrdinalOrderTests
     }
 
     private static string Row(string id) => System.Text.Json.JsonSerializer.Serialize(
-        new { order_id = id, customer_id = CustomerId }, JsonDefaults.Options);
+        new
+        {
+            order_id = id,
+            customer_id = CustomerId
+        }, JsonDefaults.Options);
 
     private static void Configure(TestDatabase database)
     {
         database.Submit(OperationKind.ConfigureResource, new ConfigureResourceRequest(database.Partition.TenantId,
             database.Partition.DatabaseId, new ResourceDefinition(Left, ResourceKind.Collection, database.Partition.TransactionDomainId)
-            { RelationalSchema = new(OrderIdColumn, [new(OrderIdColumn, RelationalColumnType.Text), new(CustomerIdColumn, RelationalColumnType.Text)]) }));
+            {
+                RelationalSchema = new(OrderIdColumn, [new(OrderIdColumn, RelationalColumnType.Text), new(CustomerIdColumn, RelationalColumnType.Text)])
+            }));
         database.Submit(OperationKind.ConfigureResource, new ConfigureResourceRequest(database.Partition.TenantId,
             database.Partition.DatabaseId, new ResourceDefinition(Right, ResourceKind.Collection, database.Partition.TransactionDomainId)
-            { RelationalSchema = new(CustomerPrimaryKeyColumn, [new(CustomerPrimaryKeyColumn, RelationalColumnType.Text), new(CustomerNameColumn, RelationalColumnType.Text)]) }));
+            {
+                RelationalSchema = new(CustomerPrimaryKeyColumn, [new(CustomerPrimaryKeyColumn, RelationalColumnType.Text), new(CustomerNameColumn, RelationalColumnType.Text)])
+            }));
     }
 }

@@ -1,7 +1,7 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
@@ -23,7 +23,9 @@ internal static class PartitionMovementReceiverIssueFailoverRf3ProofAssertions
         await Assert.That(reply.Nonce).IsEqualTo(witness.QueryNonce);
         await Assert.That(reply.OriginalPhaseIdentityDigest).IsEqualTo(original.OriginalPhaseIdentityDigest);
         if (expectedDiscovery is not null)
-        { await SqlRf3Protocol.EqualAsync(expectedDiscovery, reply.Discovery); }
+        {
+            await SqlRf3Protocol.EqualAsync(expectedDiscovery, reply.Discovery);
+        }
         var result = GrainNativePayload.Read<GrainValue>(reply.Reply.Payload).Value as PartitionMovementReceiverIssuanceResult
             ?? throw new InvalidOperationException(PartitionMovementProtocol.InvalidProof);
         var issued = result.Snapshot.Issuance;

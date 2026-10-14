@@ -34,7 +34,9 @@ internal static class PartitionMovementParentPhaseAdmission
                 ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
             if (grant.GrantId != body.GrantId || actual.OriginalResult?.Error is not null
                 || actual.OriginalResult is null || actual.ObservationCheckpointReceipt is null)
-            { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
+            {
+                throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+            }
             retire = grant.Stage == PartitionMovePeerStage.Retire;
         }
         return retire ? state.Header?.CleanupGeneration

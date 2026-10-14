@@ -16,22 +16,32 @@ public sealed class BenchmarkDataset : IComparisonCorpus
     private const string EdgeOrdinalFormat = "D6";
     private const string IdentitySeparator = "-";
 
-    private const string DocumentNumberFormat = "D9";
-
     private const string MutationTextProperty = "text";
     private const string InitialMutationText = "KeyLoad initial value";
     private readonly ComparisonOptions options;
-    internal IOptions<ComparisonOptions> ExecutionOptions { get; }
+    internal IOptions<ComparisonOptions> ExecutionOptions
+    {
+        get;
+    }
     private readonly Dictionary<int, ImmutableArray<FoundDocument>> neighbors = [];
     private readonly Dictionary<(int Number, int Depth), ImmutableArray<string>> reachable = [];
     /// <summary>Gets the generated benchmark documents.</summary>
-    public ImmutableArray<BenchmarkDocument> Documents { get; }
+    public ImmutableArray<BenchmarkDocument> Documents
+    {
+        get;
+    }
     /// <summary>Gets the generated directed graph edges.</summary>
-    public ImmutableArray<BenchmarkEdge> Edges { get; }
+    public ImmutableArray<BenchmarkEdge> Edges
+    {
+        get;
+    }
     /// <summary>Gets the number of documents represented as graph vertices.</summary>
     public int GraphVertexCount => Math.Min(options.GraphVertices, Documents.Length);
     /// <summary>Gets the lowercase hexadecimal SHA-256 hash of the generated corpus.</summary>
-    public string Sha256 { get; }
+    public string Sha256
+    {
+        get;
+    }
     /// <summary>Gets the validated options used to create the corpus.</summary>
     public ComparisonOptions Options => options;
     IComparisonSettings IComparisonCorpus.Settings => options;
@@ -74,49 +84,7 @@ public sealed class BenchmarkDataset : IComparisonCorpus
     /// <param name="number">The document number used to derive its identifier and vector.</param>
     /// <returns>The generated document, serialized payload, and vector.</returns>
     public BenchmarkDocument CreateDocument(int number)
-    {
-        const int FinalXorShift = 5;
-
-        const string DocumentIdentityPrefix = "d";
-        const string SharedCorpusText = "KeyLoad shared corpus";
-        const string EmptyText = "";
-        const char PayloadPaddingCharacter = 'x';
-        const int AdjacentElementOffset = 1;
-        const uint SeedMixMultiplierUint = 0x9e3779b9u;
-        const int UninitializedRandomState = 0;
-        const int NonzeroRandomSeed = 1;
-        const int FirstElementIndex = 0;
-        const int FirstXorShift = 13;
-        const int ReverseXorShift = 17;
-        const int VectorFractionMask = 0xffffff;
-        const float VectorFractionDenominatorFloat = 8388608f;
-        const float VectorCoordinateOffsetFloat = 1f;
-
-        var id = DocumentIdentityPrefix + number.ToString(DocumentNumberFormat, System.Globalization.CultureInfo.InvariantCulture);
-        var empty = JsonSerializer.Serialize(new { id, number, text = SharedCorpusText, padding = EmptyText });
-        var json = JsonSerializer.Serialize(new
-        {
-            id,
-            number,
-            text = SharedCorpusText,
-            padding = new string(PayloadPaddingCharacter, options.PayloadBytes - Encoding.UTF8.GetByteCount(empty))
-        });
-        var state = unchecked((uint)options.Seed ^ ((uint)number + AdjacentElementOffset) * SeedMixMultiplierUint);
-        if (state == UninitializedRandomState)
-        {
-            state = NonzeroRandomSeed;
-        }
-
-        var vector = new float[options.Dimensions];
-        for (var i = FirstElementIndex; i < vector.Length; i++)
-        {
-            state ^= state << FirstXorShift;
-            state ^= state >> ReverseXorShift;
-            state ^= state << FinalXorShift;
-            vector[i] = (state & VectorFractionMask) / VectorFractionDenominatorFloat - VectorCoordinateOffsetFloat;
-        }
-        return new(number, id, json, ImmutableCollectionsMarshal.AsImmutableArray(vector));
-    }
+        => BenchmarkDocumentFactory.Create(options, number);
 
     /// <summary>Selects the corpus document used for one operation, generating unique write inputs when needed.</summary>
     /// <param name="scenario">The workload scenario selecting the input policy.</param>
@@ -134,7 +102,12 @@ public sealed class BenchmarkDataset : IComparisonCorpus
         if (scenario is Scenario.DocumentWrite or Scenario.QueueCycle or Scenario.StreamAppend
             or Scenario.DocumentUpdate or Scenario.DocumentDelete)
         {
-            var range = scenario switch { Scenario.DocumentUpdate => UpdateIdentityBlock, Scenario.DocumentDelete => DeleteIdentityBlock, _ => NoObservedItems };
+            var range = scenario switch
+            {
+                Scenario.DocumentUpdate => UpdateIdentityBlock,
+                Scenario.DocumentDelete => DeleteIdentityBlock,
+                _ => NoObservedItems
+            };
             return CreateDocument(options.Documents + range * options.Repetitions * (options.Operations + options.Warmup)
                 + repetition * (options.Operations + options.Warmup)
                 + (warmup ? operation : options.Warmup + operation));
@@ -164,7 +137,10 @@ public sealed class BenchmarkDataset : IComparisonCorpus
 
         var payload = JsonNode.Parse(input.Json)!.AsObject();
         payload[MutationTextProperty] = InitialMutationText;
-        return input with { Json = payload.ToJsonString() };
+        return input with
+        {
+            Json = payload.ToJsonString()
+        };
     }
 
     /// <summary>Returns the identifiers reachable from a starting document within the specified edge depth.</summary>

@@ -16,19 +16,38 @@ internal static class AuthenticationExecutionChanges
         {
             await AuthenticationExecutionValues.HealthyAsync(reader, mcp, http, collector, state, state.Expected, token);
             await AuthenticationExecutionWriteRefusal.RunAsync(root, reader, mcp, http, collector, state, token);
-            await PersistAsync(root, state.Reader with { Grants = [], PolicyEpoch = AuthenticationExecutionProtocol.SecondEpoch }, token);
+            await PersistAsync(root, state.Reader with
+            {
+                Grants = [],
+                PolicyEpoch = AuthenticationExecutionProtocol.SecondEpoch
+            }, token);
             await AuthenticationExecutionRefusals.PermissionAsync(root, reader, mcp, http, collector, state, token);
-            await PersistAsync(root, state.Reader with { PolicyEpoch = AuthenticationExecutionProtocol.RepairedEpoch }, token);
+            await PersistAsync(root, state.Reader with
+            {
+                PolicyEpoch = AuthenticationExecutionProtocol.RepairedEpoch
+            }, token);
             await AuthenticationExecutionResourcePolicy.RunAsync(root, reader, mcp, http, collector, state, token);
-            await McpCallerAssertions.SdkStatusAsync(await root.ConfigureApiKeyAsync(Guid.NewGuid(), state.Credential with { Revoked = true }, token));
+            await McpCallerAssertions.SdkStatusAsync(await root.ConfigureApiKeyAsync(Guid.NewGuid(), state.Credential with
+            {
+                Revoked = true
+            }, token));
             await AuthenticationExecutionRefusals.UnauthenticatedAsync(root, reader, mcp, http, collector, state, token);
             await McpCallerAssertions.SdkStatusAsync(await root.ConfigureApiKeyAsync(Guid.NewGuid(), state.Credential with
-            { ExpiresAt = host.Clock.GetUtcNow() - McpCallerProtocol.ExpiredOffset }, token));
+            {
+                ExpiresAt = host.Clock.GetUtcNow() - McpCallerProtocol.ExpiredOffset
+            }, token));
             await AuthenticationExecutionRefusals.UnauthenticatedAsync(root, reader, mcp, http, collector, state, token);
             await McpCallerAssertions.SdkStatusAsync(await root.ConfigureApiKeyAsync(Guid.NewGuid(), state.Credential, token));
-            await PersistAsync(root, state.Reader with { Revoked = true, PolicyEpoch = AuthenticationExecutionProtocol.RepairedEpoch + AuthenticationExecutionProtocol.One }, token);
+            await PersistAsync(root, state.Reader with
+            {
+                Revoked = true,
+                PolicyEpoch = AuthenticationExecutionProtocol.RepairedEpoch + AuthenticationExecutionProtocol.One
+            }, token);
             await AuthenticationExecutionRefusals.UnauthenticatedAsync(root, reader, mcp, http, collector, state, token);
-            await PersistAsync(root, state.Reader with { PolicyEpoch = AuthenticationExecutionProtocol.FinalEpoch }, token);
+            await PersistAsync(root, state.Reader with
+            {
+                PolicyEpoch = AuthenticationExecutionProtocol.FinalEpoch
+            }, token);
             await AuthenticationExecutionValues.HealthyAsync(reader, mcp, http, collector, state, state.Expected, token);
         }, token);
         await AuthenticationExecutionValues.ReplayAsync(root, state, token);

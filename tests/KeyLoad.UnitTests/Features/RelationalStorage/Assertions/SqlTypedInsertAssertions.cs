@@ -27,13 +27,19 @@ internal static class SqlTypedInsertAssertions
         await DocumentAsync(database, fixture.Partition, SqlTypedInsertLiteral.One, SqlTypedInsertLiteral.OneJson);
         await DocumentAsync(database, fixture.Partition, SqlTypedInsertLiteral.Two, SqlTypedInsertLiteral.TwoJson);
         if (repaired)
-        { await DocumentAsync(database, fixture.Partition, SqlTypedInsertLiteral.Three, SqlTypedInsertLiteral.ThreeJson); }
+        {
+            await DocumentAsync(database, fixture.Partition, SqlTypedInsertLiteral.Three, SqlTypedInsertLiteral.ThreeJson);
+        }
         else
-        { await Assert.That(database.GetDocument(SqlTypedInsertLiteral.Root, new(fixture.Partition, SqlTypedInsertLiteral.Table, SqlTypedInsertLiteral.Three))).IsNull(); }
+        {
+            await Assert.That(database.GetDocument(SqlTypedInsertLiteral.Root, new(fixture.Partition, SqlTypedInsertLiteral.Table, SqlTypedInsertLiteral.Three))).IsNull();
+        }
         var expected = new List<QueryRow>
         { new(SqlTypedInsertLiteral.One, InitialRevision, Alpha, false, []), new(SqlTypedInsertLiteral.Two, InitialRevision, Beta, false, []) };
         if (repaired)
-        { expected.Insert(AfterOne, new(SqlTypedInsertLiteral.Three, InitialRevision, Gamma, false, [])); }
+        {
+            expected.Insert(AfterOne, new(SqlTypedInsertLiteral.Three, InitialRevision, Gamma, false, []));
+        }
         if (coldRows >= FirstCold)
         {
             await DocumentAsync(database, fixture.Partition, SqlTypedInsertCold.FirstId, SqlTypedInsertCold.FirstJson);

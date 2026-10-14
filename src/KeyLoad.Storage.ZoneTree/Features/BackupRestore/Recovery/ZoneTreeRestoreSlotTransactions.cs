@@ -17,7 +17,9 @@ internal static class ZoneTreeRestoreSlotTransactions
             if (store.Identity.NodeId != original.NodeId || store.Identity.Incarnation != original.Incarnation
                 || !store.Identity.SigningKey.Span.SequenceEqual(original.SigningKey.Span)
                 || store.Identity.DispatchPaused != original.DispatchPaused)
-            { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, Invalid);
+            }
             // Only this independently verified original position permits replacing historical slot rows.
             store.Commit((transaction, nextPosition) =>
             {
@@ -27,7 +29,9 @@ internal static class ZoneTreeRestoreSlotTransactions
                     ClusterRestoreSlotCommitKind.Reconciled, nextPosition);
                 if (row.NativeCommitPosition != nextPosition
                     || transaction.GetRecord<ClusterRestoreSlotCommit>(ClusterRestoreSlotKeys.AuthorityReset()) is not null)
-                { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+                {
+                    throw Errors.Fail(ErrorCode.Corruption, Invalid);
+                }
                 transaction.ValidateCommit();
                 ct.ThrowIfCancellationRequested();
                 return true;
@@ -40,7 +44,9 @@ internal static class ZoneTreeRestoreSlotTransactions
                 ClusterRestoreSlotCommitKind.Reconciled, store.Position);
             var reset = view.GetRecord<ClusterRestoreSlotCommit>(ClusterRestoreSlotKeys.AuthorityReset());
             if (reset is null && store.Position != reconciled.NativeCommitPosition)
-            { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, Invalid);
+            }
             if (reset is not null)
             {
                 var actual = ZoneTreeRestoreSlotState.Require(view, context,
@@ -48,7 +54,9 @@ internal static class ZoneTreeRestoreSlotTransactions
                 if (store.Position != actual.NativeCommitPosition
                     || actual.MappingsDigest != reconciled.MappingsDigest
                     )
-                { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+                {
+                    throw Errors.Fail(ErrorCode.Corruption, Invalid);
+                }
             }
             verify(view, store.Identity, store.Position, context);
             ct.ThrowIfCancellationRequested();
@@ -61,7 +69,9 @@ internal static class ZoneTreeRestoreSlotTransactions
     {
         var reset = store.Read(view => view.GetRecord<ClusterRestoreSlotCommit>(ClusterRestoreSlotKeys.AuthorityReset()));
         if (reset is not null)
-        { return; }
+        {
+            return;
+        }
         store.Commit((transaction, nextPosition) =>
         {
             ct.ThrowIfCancellationRequested();

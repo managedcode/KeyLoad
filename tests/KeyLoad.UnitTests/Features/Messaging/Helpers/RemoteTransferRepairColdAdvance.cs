@@ -21,13 +21,18 @@ internal static class RemoteTransferRepairColdAdvance
             hint.TransferId, stage, hint.AcceptGeneration, hint.AcceptPolicyGeneration, hint.CompleteGeneration, witness)]);
         var before = fixture.Store.Position;
         var malformed = Assert.ThrowsExactly<KeyLoadException>(() => RemoteTransferRepairColdNative.Read(fixture,
-            request with { AcceptCommandId = Guid.NewGuid() }));
+            request with
+            {
+                AcceptCommandId = Guid.NewGuid()
+            }));
         await Assert.That(malformed.Code).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(fixture.Store.Position).IsEqualTo(before);
         await RefuseMalformedWitnessAsync(fixture, command);
         var result = RemoteTransferRepairColdNative.Apply(fixture, command);
         if (result.Error is null)
-        { await RefuseChangedAndStaleAsync(fixture, command); }
+        {
+            await RefuseChangedAndStaleAsync(fixture, command);
+        }
         return (command, result);
     }
 
@@ -54,7 +59,10 @@ internal static class RemoteTransferRepairColdAdvance
             { Stage = original.Stage == QueueTransferRepairStage.Accept ? QueueTransferRepairStage.Complete : QueueTransferRepairStage.Accept }]
         };
         await Assert.That(RemoteTransferRepairColdNative.Apply(fixture, changed).Error).IsEqualTo(ErrorCode.Conflict);
-        var stale = command with { CommandId = Guid.NewGuid() };
+        var stale = command with
+        {
+            CommandId = Guid.NewGuid()
+        };
         await Assert.That(RemoteTransferRepairColdNative.Apply(fixture, stale).Error).IsEqualTo(ErrorCode.RevisionConflict);
         await RemoteTransferCoordinationColdAssertions.EqualAsync(RemoteTransferRepairColdNative.State(fixture, original.TransferId), state);
         await RemoteTransferCoordinationColdAssertions.EqualAsync(fixture.SourceCapacity(fixture.SourceQueue), capacity);

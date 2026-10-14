@@ -35,7 +35,10 @@ public sealed record AnnMaintenanceRequest(
 {
     /// <summary>Gets the optional immutable committed-vector maintenance profile bound to this request.</summary>
     [Orleans.Id(9), System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public AnnProjectionMaintenanceProfile? MaintenanceProfile { get; init; }
+    public AnnProjectionMaintenanceProfile? MaintenanceProfile
+    {
+        get; init;
+    }
 }
 
 /// <summary>Names bounded maintenance phases without payload or credentials.</summary>

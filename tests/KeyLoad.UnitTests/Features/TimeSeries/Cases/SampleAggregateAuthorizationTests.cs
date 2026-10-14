@@ -74,7 +74,11 @@ internal sealed class SampleAggregateAuthorizationTests
         var principalKey = KeySpace.Principal(SampleAggregateTestData.ReaderPrincipal);
         var current = db.Store.Read(view => view.GetRecord<PrincipalRecord>(principalKey)!);
         db.Submit(OperationKind.ConfigurePrincipal,
-            new ConfigurePrincipalRequest(current with { Revoked = true, PolicyEpoch = current.PolicyEpoch + 1 }));
+            new ConfigurePrincipalRequest(current with
+            {
+                Revoked = true,
+                PolicyEpoch = current.PolicyEpoch + 1
+            }));
         var position = db.Store.Position;
 
         var latest = SampleAggregateTestData.Failure(() => db.Database.ReadLatestSample(

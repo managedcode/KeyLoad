@@ -16,7 +16,9 @@ internal sealed record NativeSubmissionJournalBudgetCut(long CanonicalPosition, 
         void Observe(long bytes)
         {
             if (bytes < 0 || bytes > 131072 - examined)
-            { throw new InvalidDataException("The complete both-store byte bound was exceeded."); }
+            {
+                throw new InvalidDataException("The complete both-store byte bound was exceeded.");
+            }
             examined += bytes;
         }
     }
@@ -25,15 +27,22 @@ internal sealed record NativeSubmissionJournalBudgetCut(long CanonicalPosition, 
     {
         var remaining = 256 - records;
         if (remaining <= 0)
-        { throw new InvalidDataException("The complete both-store row bound was exceeded."); }
+        {
+            throw new InvalidDataException("The complete both-store row bound was exceeded.");
+        }
         var rows = new List<KeyValueRecord>();
         store.Read(view =>
         {
             var result = view.VisitRange([], remaining, (key, value) =>
-            { rows.Add(new(key.ToArray(), value.ToArray())); return true; }, observer: observe,
+            {
+                rows.Add(new(key.ToArray(), value.ToArray()));
+                return true;
+            }, observer: observe,
                 cancellationToken: TestContext.Current!.Execution.CancellationToken);
             if (result.HasMore || result.StoppedByVisitor)
-            { throw new InvalidDataException("The complete native cut cannot be truncated."); }
+            {
+                throw new InvalidDataException("The complete native cut cannot be truncated.");
+            }
             return true;
         });
         records += rows.Count;

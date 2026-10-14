@@ -53,7 +53,10 @@ public sealed class SurrealDbVectorTarget(HttpClient http, string image, string 
     /// <inheritdoc/>
     public string Name => SurrealDbNativeTokens.TokenSurrealDB;
     /// <inheritdoc/>
-    public TargetProfile Profile { get; private set; } = new(SurrealDbNativeTokens.TokenSurrealDB, SurrealDbNativeTokens.TokenUnverified, SurrealDBCommunityOnePersistentRocksDBNode, SingleNodeAcknowledgedWriteCommitDurabilityNotFault, SingleNodeCommittedReads, SurrealDBHTTPSqlJSON, RootBasicAuthentication, image)
+    public TargetProfile Profile
+    {
+        get; private set;
+    } = new(SurrealDbNativeTokens.TokenSurrealDB, SurrealDbNativeTokens.TokenUnverified, SurrealDBCommunityOnePersistentRocksDBNode, SingleNodeAcknowledgedWriteCommitDurabilityNotFault, SingleNodeCommittedReads, SurrealDBHTTPSqlJSON, RootBasicAuthentication, image)
     {
         Cluster = new(SingleResultCardinality, SingleResultCardinality, SingleSurrealDBCommunityNodeNoReplicationConfigured, [PersistentRocksDBPath])
     };
@@ -130,7 +133,10 @@ public sealed class SurrealDbVectorTarget(HttpClient http, string image, string 
             [ReadbackIndexEvidence] = readbackIndexDefinition ?? throw new InvalidOperationException(InvalidResponse)
         };
         serialization.RecordEvidence(parameters);
-        return receipt with { Parameters = parameters };
+        return receipt with
+        {
+            Parameters = parameters
+        };
     }
 
     /// <inheritdoc/>

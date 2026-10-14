@@ -57,9 +57,13 @@ internal static class PhysicalOwnerDirectoryRf3Assertions
                 await Assert.That(second.Image.SequenceEqual(first.Image)).IsTrue();
                 var control = Array.IndexOf(TwoRf3MembershipProtocol.Nodes, node) < TwoRf3MembershipProtocol.MembersPerGroup;
                 if (control)
-                { await Assert.That(first.Directory is not null && first.Directory.AsSpan().SequenceEqual(expectedBytes)).IsTrue(); }
+                {
+                    await Assert.That(first.Directory is not null && first.Directory.AsSpan().SequenceEqual(expectedBytes)).IsTrue();
+                }
                 else
-                { await Assert.That(first.Directory).IsNull(); }
+                {
+                    await Assert.That(first.Directory).IsNull();
+                }
             }, failures).ConfigureAwait(false);
             KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
         }
@@ -78,13 +82,17 @@ internal static class PhysicalOwnerDirectoryRf3Assertions
             {
                 var page = view.Scan([], MaximumRecords);
                 if (page.HasMore)
-                { throw new InvalidOperationException("The registration store exceeded its full image bound."); }
+                {
+                    throw new InvalidOperationException("The registration store exceeded its full image bound.");
+                }
                 return (store.Position, page.Records.Select(row => Convert.ToHexString(row.Key.Span) + ":" +
                     Convert.ToHexString(row.Value.Span)).ToArray(), view.ReadOwnedValue(key));
             });
         }, failures);
         if (store is { } owned)
-        { KeyLoad.Server.ServerFailureObserver.Observe(owned.Dispose, failures); }
+        {
+            KeyLoad.Server.ServerFailureObserver.Observe(owned.Dispose, failures);
+        }
         KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
         return result ?? throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState);
     }

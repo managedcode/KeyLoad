@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.UnitTests.Features.TestInfrastructure;
 using Microsoft.Extensions.Logging;
 
@@ -22,7 +22,9 @@ internal sealed class GrainReplyCancellationTests
         var error = await NativeCancellationAsync();
         using var incoming = new CancellationTokenSource();
         if (callerCancelled)
-        { await incoming.CancelAsync(); }
+        {
+            await incoming.CancelAsync();
+        }
         var expectedCode = callerCancelled ? ErrorCode.Cancelled : ErrorCode.OwnershipLost;
         var expectedDetail = callerCancelled ? CancelledDetail : UnavailableDetail;
         var requestId = Guid.NewGuid();
@@ -60,7 +62,9 @@ internal sealed class GrainReplyCancellationTests
         var error = await NativeCancellationAsync();
         using var incoming = new CancellationTokenSource();
         if (callerCancelled)
-        { await incoming.CancelAsync(); }
+        {
+            await incoming.CancelAsync();
+        }
         var requestId = Guid.NewGuid();
         var (reply, output) = FailureAndCapture(error, true, requestId, incoming.Token);
 
@@ -82,7 +86,9 @@ internal sealed class GrainReplyCancellationTests
     {
         using var incoming = new CancellationTokenSource();
         if (callerCancelled)
-        { await incoming.CancelAsync(); }
+        {
+            await incoming.CancelAsync();
+        }
         var error = Errors.Fail(code, PrivateCanary);
         foreach (var command in new[] { false, true })
         {

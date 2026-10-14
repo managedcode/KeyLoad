@@ -15,7 +15,10 @@ internal static class PostgresPureReadRf3Assertions
         {
             await DocumentAsync(callers, wire, PostgresRf3State.Left, state.Image.Left, prepared, token);
             await DocumentAsync(callers, wire, PostgresRf3State.Right, state.Image.Right, prepared, token);
-            await DocumentAsync(callers, wire, PostgresRf3State.Left with { Id = PostgresPureReadRf3Protocol.Missing }, null, prepared, token);
+            await DocumentAsync(callers, wire, PostgresRf3State.Left with
+            {
+                Id = PostgresPureReadRf3Protocol.Missing
+            }, null, prepared, token);
             await MessageAsync(callers, wire, PostgresCompositionRf3Protocol.SourceQueue,
                 PostgresCompositionRf3Protocol.Message, state.Image.Source, prepared, token);
             await MessageAsync(callers, wire, PostgresCompositionRf3Protocol.TargetQueue,

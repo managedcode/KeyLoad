@@ -52,7 +52,10 @@ internal static class EventMessageSensitiveSafeReplayTrial
         await EventMessageSensitiveReplayAssertions.DeniedAsync(EventMessageSensitiveReplayOperations.Apply(database,
             OperationKind.Batch, command, state.Caller, command.CommandId, token), ErrorCode.PermissionDenied);
         await Assert.That(database.InspectMessage(EventMessageSensitiveReplayProtocol.Root, state.Lane, EventMessageSensitiveReplayProtocol.Second)).IsNull();
-        var producer = command with { CommandId = Guid.NewGuid() };
+        var producer = command with
+        {
+            CommandId = Guid.NewGuid()
+        };
         var produced = EventMessageSensitiveReplayOperations.Apply(database, OperationKind.Batch, producer,
             EventMessageSensitiveReplayProtocol.Root, producer.CommandId, token);
         produced.Get<CommitReceipt>();

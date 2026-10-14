@@ -44,7 +44,9 @@ internal static class SqlBooleanTruthRf3Flow
             await SqlNullOrderingRf3Pages.ReplayAsync(fixture, state.Seed, deadline.Token);
             await global::TUnit.Assertions.Assert.That(await SqlBooleanTruthRf3Image.ReadAsync(root, state, deadline.Token)).IsEqualTo(before);
             if (!faults)
-            { return state; }
+            {
+                return state;
+            }
             await SqlBooleanTruthRf3Refusals.InvalidAsync(fixture, state, root, deadline.Token);
             await SqlBooleanTruthRf3Cancellation.RunAsync(fixture, state, root, deadline.Token);
             await SqlBooleanTruthRf3Policy.RunAsync(fixture, state, root, deadline.Token);

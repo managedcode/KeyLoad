@@ -31,7 +31,10 @@ internal static class DocumentSessionAuthorityContinuation
                 RemoteDocumentNativeFixture.OriginalJson, RemoteDocumentNativeFixture.First, ExplicitReplacement: true)]);
         var operation = RemoteDocumentNativeFixture.Operation(fixture.Destination, OperationKind.Batch, FreshId, request);
         var result = fixture.Destination.Database.Apply(operation, RemoteDocumentNativeFixture.Second);
-        var receipt = new CommitReceipt(FreshId, fixture.Receipt.Token with { Position = RemoteDocumentNativeFixture.Second },
+        var receipt = new CommitReceipt(FreshId, fixture.Receipt.Token with
+        {
+            Position = RemoteDocumentNativeFixture.Second
+        },
             [new(PutKind, RemoteDocumentNativeFixture.Collection, RemoteDocumentNativeFixture.DocumentId,
                 RemoteDocumentNativeFixture.Second)], DurabilityProfile.ProcessDurable);
         await Assert.That(NativeSerialization.Serialize(result).SequenceEqual(

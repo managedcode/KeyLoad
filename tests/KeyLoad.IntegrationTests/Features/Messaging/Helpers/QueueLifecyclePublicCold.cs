@@ -16,7 +16,9 @@ internal static class QueueLifecyclePublicCold
             () => fixture.RestartContainerAsync(node, token))));
         ServerFailureObserver.ThrowIfAny([.. killed.SelectMany(row => row), .. restarted.SelectMany(row => row)]);
         foreach (var node in QueueLifecyclePublicProtocol.Nodes)
-        { await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(node, WaitBehavior.WaitOnResourceUnavailable, token); }
+        {
+            await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(node, WaitBehavior.WaitOnResourceUnavailable, token);
+        }
         var failures = new List<Exception>();
         RequestCqrsRf3Callers? callers = null;
         NodeStatus? after = null;
@@ -29,13 +31,19 @@ internal static class QueueLifecyclePublicCold
             await Assert.That(after.ReadGeneration).IsGreaterThanOrEqualTo(before.ReadGeneration);
             await Assert.That(after.Applied).IsGreaterThanOrEqualTo(before.Applied);
             if (continueOperation)
-            { await QueueLifecyclePublicPhase.ContinueAsync(fixture, callers, state, token); }
+            {
+                await QueueLifecyclePublicPhase.ContinueAsync(fixture, callers, state, token);
+            }
             else
-            { await FinalAsync(callers, state, token); }
+            {
+                await FinalAsync(callers, state, token);
+            }
             after = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.StatusAsync(token));
         }, failures);
         if (callers is not null)
-        { await ServerFailureObserver.ObserveAsync(() => callers.DisposeAsync().AsTask(), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => callers.DisposeAsync().AsTask(), failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
         return after!;
     }

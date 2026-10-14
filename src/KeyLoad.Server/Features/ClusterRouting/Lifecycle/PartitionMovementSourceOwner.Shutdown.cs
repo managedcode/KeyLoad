@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.Server;
 
@@ -19,10 +19,14 @@ internal sealed partial class PartitionMovementSourceOwner
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(stopping.CancelAsync, failures).ConfigureAwait(false);
         foreach (var original in capturing)
-        { await ServerFailureObserver.ObserveAsync(() => original, failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => original, failures).ConfigureAwait(false);
+        }
         IPartitionMovementRetainedSourceImage[] retained;
         lock (gate)
-        { retained = sessions.Values.Concat(closedMoves.Values.SelectMany(value => value)).Distinct().ToArray(); }
+        {
+            retained = sessions.Values.Concat(closedMoves.Values.SelectMany(value => value)).Distinct().ToArray();
+        }
         foreach (var entry in retained)
         {
             await ServerFailureObserver.ObserveAsync(() => entry.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
@@ -36,9 +40,13 @@ internal sealed partial class PartitionMovementSourceOwner
             closedAdmissions.Clear();
         }
         foreach (var original in closureWork)
-        { ServerFailureObserver.Observe(original.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(original.Dispose, failures);
+        }
         try
-        { stopping.Dispose(); }
+        {
+            stopping.Dispose();
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         ServerFailureObserver.ThrowIfAny(failures);

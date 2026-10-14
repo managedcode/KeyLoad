@@ -40,7 +40,9 @@ internal static class QueueGraphReplayAssertions
         var originals = new[] { (state.Source.Healthy, state.Source.HealthyReceipt),
             (state.Reverse, state.ReverseReceipt) };
         if (continued)
-        { originals = [.. originals, (state.Next, state.NextReceipt)]; }
+        {
+            originals = [.. originals, (state.Next, state.NextReceipt)];
+        }
         foreach (var (operation, bytes) in originals)
         {
             var receipt = engine.Apply(operation).Get<CommitReceipt>();

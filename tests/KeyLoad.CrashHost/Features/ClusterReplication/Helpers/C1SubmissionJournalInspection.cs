@@ -12,7 +12,9 @@ internal static class C1SubmissionJournalInspection
     internal static async Task<bool> TryRunAsync(string[] args)
     {
         if (args.Length == NoArguments || !string.Equals(args[ModeArgumentIndex], C1SubmissionJournalInspectionProtocol.Mode, StringComparison.Ordinal))
-        { return false; }
+        {
+            return false;
+        }
         var evidence = new C1OutcomeInspectionFailureEvidence();
         Console.SetOut(TextWriter.Null);
         Console.SetError(TextWriter.Null);
@@ -20,7 +22,9 @@ internal static class C1SubmissionJournalInspection
         {
             evidence.SetPhase(C1OutcomeInspectionFailurePhase.ValidateRequest);
             if (args.Length != OnlyModeArgumentCount)
-            { throw C1SubmissionJournalInspectionValidation.Invalid(); }
+            {
+                throw C1SubmissionJournalInspectionValidation.Invalid();
+            }
             evidence.SetPhase(C1OutcomeInspectionFailurePhase.ReadInput);
             var input = await C1OutcomeInspection.ReadRequestBytesAsync().ConfigureAwait(false);
             evidence.SetPhase(C1OutcomeInspectionFailurePhase.ValidateRequest);
@@ -38,7 +42,9 @@ internal static class C1SubmissionJournalInspection
             await ServerFailureObserver.ObserveAsync(() => C1OutcomeInspection.WriteBytesAsync(evidence.Bytes(),
                 standardError: true), failures).ConfigureAwait(false);
             if (failures.Any(C1OutcomeInspectionFailures.ContainsFatal))
-            { ServerFailureObserver.ThrowIfAny(failures); }
+            {
+                ServerFailureObserver.ThrowIfAny(failures);
+            }
             Environment.ExitCode = C1OutcomeInspectionProtocol.FailureExitCode;
             GC.KeepAlive(failures);
         }

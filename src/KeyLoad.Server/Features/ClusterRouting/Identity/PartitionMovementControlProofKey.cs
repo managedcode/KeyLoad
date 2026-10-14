@@ -9,7 +9,9 @@ internal static class PartitionMovementControlProofKey
     {
         var actual = PhysicalOwnerConfiguredTuples.Control(options, configuration);
         if (!PhysicalOwnerEntryValidation.SameOwner(actual.Owner, controlOwner))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof);
+        }
         return options.PhysicalGroupTrust.Role == PhysicalGroupTrustRole.Control
             ? options.PeerSecret : options.PhysicalGroupTrust.ForeignPeerSecret
                 ?? throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof);

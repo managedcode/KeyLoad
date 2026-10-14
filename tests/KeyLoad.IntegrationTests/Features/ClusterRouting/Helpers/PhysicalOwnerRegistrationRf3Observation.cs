@@ -41,9 +41,15 @@ internal static class PhysicalOwnerRegistrationRf3Observation
             foreach (var line in batch)
             {
                 if (line.Content.Contains(Failed, StringComparison.Ordinal))
-                { evidence?.MarkFailed(); throw new InvalidOperationException("The native owner registration failed."); }
+                {
+                    evidence?.MarkFailed();
+                    throw new InvalidOperationException("The native owner registration failed.");
+                }
                 if (line.Content.Contains(Completed, StringComparison.Ordinal))
-                { evidence?.MarkCompleted(); return; }
+                {
+                    evidence?.MarkCompleted();
+                    return;
+                }
             }
         }
         throw new InvalidOperationException("The native owner registration stream ended before completion.");

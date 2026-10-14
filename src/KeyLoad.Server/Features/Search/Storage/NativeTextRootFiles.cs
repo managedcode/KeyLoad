@@ -58,9 +58,13 @@ internal static class NativeTextRootFiles
         {
             var path = Path.Combine(root, leaf);
             if (resources is null)
-            { Directory.Delete(path, recursive: true); }
+            {
+                Directory.Delete(path, recursive: true);
+            }
             else
-            { resources.DeleteOwnedDirectory(path, () => Directory.Delete(path, recursive: true)); }
+            {
+                resources.DeleteOwnedDirectory(path, () => Directory.Delete(path, recursive: true));
+            }
         }
     }
 

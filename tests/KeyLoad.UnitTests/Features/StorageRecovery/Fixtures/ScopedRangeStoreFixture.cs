@@ -9,7 +9,10 @@ internal sealed class ScopedRangeStoreFixture : IDisposable
     private readonly string directory = Path.Combine(Path.GetTempPath(),
         TemporaryDirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
 
-    public ZoneTreeStore Store { get; }
+    public ZoneTreeStore Store
+    {
+        get;
+    }
 
     public ScopedRangeStoreFixture() => Store = new(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
 

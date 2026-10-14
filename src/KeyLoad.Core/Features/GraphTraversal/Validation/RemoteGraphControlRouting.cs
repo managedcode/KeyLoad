@@ -19,7 +19,9 @@ public sealed partial class DatabaseEngine
         PhysicalOwnerDirectoryValidation.Validate(directory);
         if (!PhysicalOwnerEntryValidation.SameOwner(catalog.DefaultShard, configuredControl)
             || !PhysicalOwnerEntryValidation.SameOwner(directory.ControlOwner, configuredControl))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, RemoteGraphProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, RemoteGraphProtocol.MissingAuthority);
+        }
         return directory;
     }
 
@@ -31,7 +33,9 @@ public sealed partial class DatabaseEngine
         if (owner is null || !PhysicalOwnerEntryValidation.Valid(owner)
             || owner.Owner.Incarnation != placement.Incarnation
             || !owner.Owner.VoterIds.SequenceEqual(placement.VoterIds, StringComparer.Ordinal))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, RemoteGraphProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, RemoteGraphProtocol.MissingAuthority);
+        }
         return owner;
     }
 }

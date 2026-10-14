@@ -13,16 +13,22 @@ internal static class EventVectorFailedOpenLocator
         PrincipalRecord principal, ReplicatedOperation operation, Guid incarnation, IAuthorizationPolicy authorization, IOptions<DatabaseLimits> options)
     {
         if (operation.Kind != OperationKind.EventFeedControl)
-        { return null; }
+        {
+            return null;
+        }
         var native = NativeSerialization.Deserialize<NativeCommandPayload>(operation.NativePayload.Span);
         var phase = NativeCommandPayload.Read<EventVectorControlPhase>(operation);
         if (phase.Action != EventVectorControlAction.Open)
-        { return null; }
+        {
+            return null;
+        }
         var admission = new EventVectorAdmissionPolicy(options);
         var request = phase.OriginalRequest;
         if (EventVectorParentLookup.ReadTerminal(transaction, authorization, principal, request, incarnation, options,
             CancellationToken.None) is not null)
-        { throw Errors.Fail(ErrorCode.Conflict, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, Invalid);
+        }
         var scopes = EventVectorParentScopes.Derive(phase, null, admission);
         EventVectorParentScopes.Authorize(authorization, principal, scopes, admission);
         admission.RequireEncodedBytes(native.Value.Length);
@@ -45,11 +51,15 @@ internal static class EventVectorFailedOpenLocator
         StoredOutcome actualOutcome, IOptions<DatabaseLimits> options)
     {
         if (eligible is null || actualOutcome.Result.Error is null)
-        { return; }
+        {
+            return;
+        }
         var index = eligible.Index;
         if (actualOutcome.Incarnation != eligible.Incarnation || actualOutcome.PolicyEpoch != eligible.PolicyEpoch
             || actualOutcome.Fingerprint != index.ActualTerminalOutcomeFingerprint)
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
         var admission = new EventVectorAdmissionPolicy(options);
         EventVectorRowStorage.Write(transaction, EventVectorEncodedRow.Create(EventVectorKeys.ParentOutcome(
             index.ControlPartition, index.PrincipalId, index.OriginalPublicCommandId), index, admission));

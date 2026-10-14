@@ -17,10 +17,14 @@ internal static class BlobCommitCutSeedProofReader
         var file = Path.Combine(root, name);
         var info = new FileInfo(file);
         if (!info.Exists || info.Length <= 0 || info.Length > BlobCommitCutProtocol.MaximumSidecarBytes)
-        { throw new InvalidOperationException("The bounded original blob sidecar is absent or invalid."); }
+        {
+            throw new InvalidOperationException("The bounded original blob sidecar is absent or invalid.");
+        }
         var bytes = await File.ReadAllBytesAsync(file, cancellationToken);
         if (bytes.Length > BlobCommitCutProtocol.MaximumSidecarBytes)
-        { throw new InvalidOperationException("The original blob sidecar exceeded its bound."); }
+        {
+            throw new InvalidOperationException("The original blob sidecar exceeded its bound.");
+        }
         return bytes;
     }
 }

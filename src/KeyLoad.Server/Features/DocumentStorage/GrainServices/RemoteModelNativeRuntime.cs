@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 using Microsoft.Extensions.Options;
 
@@ -51,7 +51,9 @@ internal sealed class RemoteModelNativeRuntime : IAsyncDisposable
     {
         ArgumentNullException.ThrowIfNull(owner);
         if (Interlocked.CompareExchange(ref runtime, owner, null) is not null)
-        { throw new InvalidOperationException(AttachedRuntimeFailure); }
+        {
+            throw new InvalidOperationException(AttachedRuntimeFailure);
+        }
     }
 
     internal async Task<RemoteModelNativeReply> ExchangeAsync(RemoteModelNativeRequest original, CancellationToken caller)
@@ -65,20 +67,29 @@ internal sealed class RemoteModelNativeRuntime : IAsyncDisposable
             operation.ShutdownToken.ThrowIfCancellationRequested();
             admitted = await admission.WaitAsync(ImmediateAdmissionMilliseconds, caller).ConfigureAwait(false);
             if (!admitted)
-            { throw Errors.Fail(ErrorCode.ResourceExhausted, RemoteModelNativeProtocol.Unavailable); }
+            {
+                throw Errors.Fail(ErrorCode.ResourceExhausted, RemoteModelNativeProtocol.Unavailable);
+            }
             RemoteModelNativeIdentity.RequireShape(original, membershipOptions);
-            var request = original with { Payload = original.Payload.ToArray() };
+            var request = original with
+            {
+                Payload = original.Payload.ToArray()
+            };
             RequireCurrent(request);
             using var sourceMac = RemoteDocumentMac.FromConfiguredSecret(RemoteModelNativeIdentity.Secret(options, partition, request.SourceOwner));
             using var targetMac = RemoteDocumentMac.FromConfiguredSecret(RemoteModelNativeIdentity.Secret(options, partition, request.DestinationOwner));
             if (!sourceMac.VerifyNativeRequest(request))
-            { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteModelNativeProtocol.InvalidProof); }
+            {
+                throw Errors.Fail(ErrorCode.Unauthenticated, RemoteModelNativeProtocol.InvalidProof);
+            }
             return await ExecuteAdmittedAsync(request, targetMac, caller, operation.ShutdownToken).ConfigureAwait(false);
         }
         finally
         {
             if (admitted)
-            { admission.Release(); }
+            {
+                admission.Release();
+            }
         }
     }
 
@@ -91,10 +102,14 @@ internal sealed class RemoteModelNativeRuntime : IAsyncDisposable
         {
             RequireCurrent(request);
             if (!replay.TryUse(request.Nonce.ToString(NonceFormat)))
-            { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteModelNativeProtocol.InvalidProof); }
+            {
+                throw Errors.Fail(ErrorCode.Unauthenticated, RemoteModelNativeProtocol.InvalidProof);
+            }
             var remaining = request.ExpiresAt - clock.GetUtcNow();
             if (remaining <= TimeSpan.Zero)
-            { throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteModelNativeProtocol.Unavailable); }
+            {
+                throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteModelNativeProtocol.Unavailable);
+            }
             var bound = remaining < routing.ExecutionLifetime ? remaining : routing.ExecutionLifetime;
             using var deadline = new CancellationTokenSource(bound, clock);
             using var linked = CancellationTokenSource.CreateLinkedTokenSource(caller, shutdown, deadline.Token);
@@ -107,22 +122,33 @@ internal sealed class RemoteModelNativeRuntime : IAsyncDisposable
             token.ThrowIfCancellationRequested();
             RequireCurrent(request);
             if (request.ExpiresAt <= clock.GetUtcNow())
-            { throw new OperationCanceledException(token); }
+            {
+                throw new OperationCanceledException(token);
+            }
             if (actual.Payload.IsEmpty || actual.Payload.Length > RemoteDocumentProtocol.MaximumBodyBytes
                 || !RemoteModelNativeIdentity.Signature(actual.Signature))
-            { throw Errors.Fail(ErrorCode.Corruption, RemoteModelNativeProtocol.InvalidProof); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, RemoteModelNativeProtocol.InvalidProof);
+            }
             reply = new(actual.Payload, actual.Signature, null, null, request.Nonce, string.Empty);
         }
         catch (KeyLoadException error)
-        { reply = Failure(request, effectBoundary.IsStarted ? ErrorCode.UnknownWriteOutcome : error.Code); }
+        {
+            reply = Failure(request, effectBoundary.IsStarted ? ErrorCode.UnknownWriteOutcome : error.Code);
+        }
         catch (OperationCanceledException)
-        { reply = Failure(request, effectBoundary.IsStarted ? ErrorCode.UnknownWriteOutcome : ErrorCode.Cancelled); }
+        {
+            reply = Failure(request, effectBoundary.IsStarted ? ErrorCode.UnknownWriteOutcome : ErrorCode.Cancelled);
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
             logReplyDeliveryFailure(logger, effectBoundary.IsStarted, null);
             reply = Failure(request, effectBoundary.IsStarted ? ErrorCode.UnknownWriteOutcome : ErrorCode.OwnershipLost);
         }
-        return reply with { SenderSignature = targetMac.SignNativeReply(reply) };
+        return reply with
+        {
+            SenderSignature = targetMac.SignNativeReply(reply)
+        };
     }
 
     private void RequireCurrent(RemoteModelNativeRequest request)
@@ -135,7 +161,9 @@ internal sealed class RemoteModelNativeRuntime : IAsyncDisposable
             || !local.Read().TransportReady || request.DestinationSiloAddress != local.RuntimeAddress
             || !membership.IsCurrent(request.CallerVoter, SiloAddress.FromParsableString(request.CallerSiloAddress))
             || !membership.IsCurrent(request.DestinationVoter, SiloAddress.FromParsableString(request.DestinationSiloAddress)))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteModelNativeProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, RemoteModelNativeProtocol.InvalidProof);
+        }
     }
     private static RemoteModelNativeReply Failure(RemoteModelNativeRequest request, ErrorCode error)
         => new(ReadOnlyMemory<byte>.Empty, string.Empty, error, RemoteModelNativeProtocol.Unavailable, request.Nonce, string.Empty);
@@ -143,9 +171,13 @@ internal sealed class RemoteModelNativeRuntime : IAsyncDisposable
     public async ValueTask DisposeAsync()
     {
         try
-        { await lifetime.DisposeAsync().ConfigureAwait(false); }
+        {
+            await lifetime.DisposeAsync().ConfigureAwait(false);
+        }
         finally
-        { DisposeOwnedResources(); }
+        {
+            DisposeOwnedResources();
+        }
     }
 
     private void DisposeOwnedResources()
@@ -153,7 +185,9 @@ internal sealed class RemoteModelNativeRuntime : IAsyncDisposable
         const int DisposedResources = 1;
         const int LiveResources = 0;
         if (Interlocked.Exchange(ref resourcesDisposed, DisposedResources) != LiveResources)
-        { return; }
+        {
+            return;
+        }
         var failures = new List<Exception>();
         DisposeAdmission(failures);
         DisposeReplay(failures);
@@ -164,31 +198,49 @@ internal sealed class RemoteModelNativeRuntime : IAsyncDisposable
     private void DisposeAdmission(List<Exception> failures)
     {
         try
-        { admission.Dispose(); }
+        {
+            admission.Dispose();
+        }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
     }
 
     private void DisposeReplay(List<Exception> failures)
     {
         try
-        { replay.Dispose(); }
+        {
+            replay.Dispose();
+        }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
     }
 
     private void DisposeStopping(List<Exception> failures)
     {
         try
-        { stopping.Dispose(); }
+        {
+            stopping.Dispose();
+        }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
     }
 
 }

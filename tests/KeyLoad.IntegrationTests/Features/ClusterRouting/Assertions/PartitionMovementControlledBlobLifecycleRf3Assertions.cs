@@ -26,7 +26,9 @@ internal static class PartitionMovementControlledBlobLifecycleRf3Assertions
         foreach (var cut in source)
         {
             foreach (var proof in proofs)
-            { await RequireOneAsync(seed, proof, cut); }
+            {
+                await RequireOneAsync(seed, proof, cut);
+            }
         }
     }
 
@@ -45,7 +47,9 @@ internal static class PartitionMovementControlledBlobLifecycleRf3Assertions
         await Assert.That(record.TargetEffect!.Token.Incarnation).IsEqualTo(
             seed.Directory.Owners.Single(entry => entry.Owner.PhysicalShardId == seed.FirstRequest.DestinationPhysicalShardId).Owner.Incarnation);
         if (proof.Error is not null)
-        { await Assert.That(record.TargetEffect.Mutations.IsEmpty).IsTrue(); }
+        {
+            await Assert.That(record.TargetEffect.Mutations.IsEmpty).IsTrue();
+        }
         var original = PartitionMovementCapturePointerRf3Fault.Read<StoredOutcome>(cut, PartitionControlCommandKeys.Original(identity));
         await Assert.That(original.Result.Error).IsEqualTo(proof.Error);
         await Assert.That(original.BlobAuthority is not null).IsEqualTo(proof.HasAuthority);

@@ -20,7 +20,10 @@ internal static class CapturedPolicyRf3Pages
         await CapturedPolicyRf3Current.BracketAsync(administrator, reader, scenario, false, async () =>
             await SnapshotAsync((await McpCallerAssertions.SuccessAsync<LiveQuerySnapshot>(
                 await reader.Mcp.CallAsync(McpCallerTools.QueryLiveStart, start, token))).Value), token);
-        var feed = scenario.Feed with { Start = ChangeFeedStart.Now };
+        var feed = scenario.Feed with
+        {
+            Start = ChangeFeedStart.Now
+        };
         ChangeFeedPage? caughtUp = null;
         await CapturedPolicyRf3Current.BracketAsync(administrator, reader, scenario, false, async () =>
         {
@@ -31,7 +34,10 @@ internal static class CapturedPolicyRf3Pages
             await EmptyFeedAsync((await McpCallerAssertions.SuccessAsync<ChangeFeedPage>(
                 await reader.Mcp.CallAsync(McpCallerTools.ChangesRead, feed, token))).Value,
                 FeedLiveRf3Protocol.HiddenSequence), token);
-        return (feed with { Cursor = caughtUp!.Cursor }, new(scenario.Query, snapshot!.Cursor));
+        return (feed with
+        {
+            Cursor = caughtUp!.Cursor
+        }, new(scenario.Query, snapshot!.Cursor));
     }
 
     internal static async Task DeltaAsync(RequestCqrsRf3Callers administrator,
@@ -58,7 +64,10 @@ internal static class CapturedPolicyRf3Pages
             }, token);
             await CapturedPolicyRf3Current.BracketAsync(administrator, reader, scenario, true, async () =>
             {
-                var tail = await read(request with { Cursor = result!.Cursor });
+                var tail = await read(request with
+                {
+                    Cursor = result!.Cursor
+                });
                 await CursorAsync(tail.Cursor, tail.CutPosition);
                 await SqlRf3Protocol.EqualAsync(new LiveQueryPage([], tail.Cursor,
                     FeedLiveRf3Protocol.UpdatedSequence, false, tail.CutPosition), tail);
@@ -95,14 +104,19 @@ internal static class CapturedPolicyRf3Pages
                 await Assert.That(change.CommittedAt).IsNotEqualTo(default(DateTimeOffset));
                 await SqlRf3Protocol.EqualAsync(expected, change);
                 if (original is not null)
-                { await SqlRf3Protocol.EqualAsync(original, change); }
+                {
+                    await SqlRf3Protocol.EqualAsync(original, change);
+                }
                 original = change;
                 await SqlRf3Protocol.EqualAsync(new ChangeFeedPage([expected], result.Cursor,
                     FeedLiveRf3Protocol.UpdatedSequence, FeedLiveRf3Protocol.UpdatedSequence,
                     FeedLiveRf3Protocol.FirstSequence, false, result.CutPosition), result);
             }, token);
             await CapturedPolicyRf3Current.BracketAsync(administrator, reader, scenario, true,
-                async () => await EmptyFeedAsync(await read(request with { Cursor = result!.Cursor }),
+                async () => await EmptyFeedAsync(await read(request with
+                {
+                    Cursor = result!.Cursor
+                }),
                     FeedLiveRf3Protocol.UpdatedSequence), token);
         }
     }

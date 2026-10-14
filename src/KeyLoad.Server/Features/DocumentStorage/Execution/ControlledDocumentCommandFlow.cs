@@ -46,10 +46,14 @@ internal sealed class ControlledDocumentCommandFlow(PartitionHost partition,
                 ?? throw Errors.Fail(ErrorCode.UnknownWriteOutcome, RemoteDocumentProtocol.Unavailable);
         }
         if (admission.Phase != PartitionControlCommandPhase.Finalized)
-        { throw Errors.Fail(ErrorCode.UnknownWriteOutcome, RemoteDocumentProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.UnknownWriteOutcome, RemoteDocumentProtocol.Unavailable);
+        }
         await partition.Coordinator.ReadBarrierAsync(cancellationToken).ConfigureAwait(false);
         if (BlobStorageOperations.Handles(original.Kind))
-        { return await ObserveBlobAsync(original, requestExpiry, originalWork, cancellationToken).ConfigureAwait(false); }
+        {
+            return await ObserveBlobAsync(original, requestExpiry, originalWork, cancellationToken).ConfigureAwait(false);
+        }
         return partition.Database.ResolveControlledDocumentOutcome(original.PrincipalId, original, originalWork);
     }
 
@@ -58,7 +62,9 @@ internal sealed class ControlledDocumentCommandFlow(PartitionHost partition,
     {
         var queryExpiry = clock.GetUtcNow() + TimeSpan.FromSeconds(limits.Value.QueryDeadlineSeconds);
         if (queryExpiry > expiry)
-        { queryExpiry = expiry; }
+        {
+            queryExpiry = expiry;
+        }
         var frame = partition.Database.TryCaptureControlledBlobOutcome(original.PrincipalId, original, queryExpiry, work)
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, RemoteDocumentProtocol.Unavailable);
         return await blobReads.ObserveOutcomeAsync(ingressRequestId, frame, work, token).ConfigureAwait(false);

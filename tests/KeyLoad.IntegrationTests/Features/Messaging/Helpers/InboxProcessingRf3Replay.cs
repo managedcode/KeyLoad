@@ -20,7 +20,10 @@ internal static class InboxProcessingRf3Replay
             _ = await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.MessagesProcess,
                 state.Original, token), ErrorCode.PermissionDenied, true);
         }
-        var duplicate = state.Original with { CommandId = Guid.NewGuid() };
+        var duplicate = state.Original with
+        {
+            CommandId = Guid.NewGuid()
+        };
         await InboxProcessingRf3Assertions.EqualAsync((await McpCallerAssertions.SuccessAsync<CommitReceipt>(
             await mcp.CallAsync(McpCallerTools.MessagesProcess, duplicate, token))).Value, state.Receipt);
         var changed = state.Original with

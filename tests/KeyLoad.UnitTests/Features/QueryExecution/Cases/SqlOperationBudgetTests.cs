@@ -19,13 +19,22 @@ internal sealed class SqlOperationBudgetTests
         var request = SqlOperationTestData.Call(McpCatalogExpectations.QueryCapabilities);
         var bytes = Encoding.UTF8.GetByteCount(request.Sql);
         await SqlOperationTestData.Same(SqlOperationTestData.Compile(request,
-                SqlOperationTestData.Limits with { MaxQueryBytes = bytes }),
+                SqlOperationTestData.Limits with
+                {
+                    MaxQueryBytes = bytes
+                }),
             SqlOperationTestData.Find(McpCatalogExpectations.QueryCapabilities).Decode(null));
         await SqlOperationTestData.Reject(request, ErrorCode.BudgetExceeded,
-            SqlOperationTestData.Limits with { MaxQueryBytes = bytes - 1 });
+            SqlOperationTestData.Limits with
+            {
+                MaxQueryBytes = bytes - 1
+            });
         var unicode = new SqlOperationRequest(request.Partition, SqlOperationTestData.Select + UnicodeComment);
         await SqlOperationTestData.Reject(unicode, ErrorCode.BudgetExceeded,
-            SqlOperationTestData.Limits with { MaxQueryBytes = unicode.Sql.Length });
+            SqlOperationTestData.Limits with
+            {
+                MaxQueryBytes = unicode.Sql.Length
+            });
     }
 
     [Test]
@@ -45,15 +54,27 @@ internal sealed class SqlOperationBudgetTests
         var parameters = Enumerable.Range(0, ExtraParameterCount).ToDictionary(index =>
             ParameterPrefix + index.ToString(System.Globalization.CultureInfo.InvariantCulture),
             _ => JsonSerializer.SerializeToElement(0), StringComparer.Ordinal);
-        await SqlOperationTestData.Reject(request with { Parameters = parameters }, ErrorCode.BudgetExceeded);
+        await SqlOperationTestData.Reject(request with
+        {
+            Parameters = parameters
+        }, ErrorCode.BudgetExceeded);
         await SqlOperationTestData.Reject(SqlOperationTestData.Request(request.Sql,
                 JsonSerializer.Deserialize<JsonElement>(NestedObject)), ErrorCode.BudgetExceeded,
-            SqlOperationTestData.Limits with { MaxJsonDepth = 2 });
+            SqlOperationTestData.Limits with
+            {
+                MaxJsonDepth = 2
+            });
         await SqlOperationTestData.Reject(SqlOperationTestData.Request(request.Sql,
                 JsonSerializer.Deserialize<JsonElement>(NestedArray)), ErrorCode.BudgetExceeded,
-            SqlOperationTestData.Limits with { MaxQueryTokens = 2 });
+            SqlOperationTestData.Limits with
+            {
+                MaxQueryTokens = 2
+            });
         await SqlOperationTestData.Reject(request, ErrorCode.BudgetExceeded,
-            SqlOperationTestData.Limits with { MaxQueryTokens = 1 });
+            SqlOperationTestData.Limits with
+            {
+                MaxQueryTokens = 1
+            });
     }
 
     [Test]
@@ -61,7 +82,10 @@ internal sealed class SqlOperationBudgetTests
     {
         using var cancellation = new CancellationTokenSource();
         await cancellation.CancelAsync();
-        var request = SqlOperationTestData.Call(McpCatalogExpectations.QueryCapabilities) with { Sql = null! };
+        var request = SqlOperationTestData.Call(McpCatalogExpectations.QueryCapabilities) with
+        {
+            Sql = null!
+        };
         var failure = Assert.ThrowsExactly<OperationCanceledException>(() =>
             SqlOperationTestData.Compile(request, cancellationToken: cancellation.Token));
         await Assert.That(failure.CancellationToken).IsEqualTo(cancellation.Token);

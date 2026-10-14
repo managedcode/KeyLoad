@@ -16,19 +16,25 @@ public sealed partial class DatabaseEngine
         {
             if (view.ReadOwnedValue(PartitionMoveParentKeys.Active(phase.Partition)) is not null
                 || view.ReadOwnedValue(PartitionMoveReceiverIssuanceStorage.CountKey(phase.Partition, phase.MoveId)) is not null)
-            { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
+            {
+                throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+            }
             return;
         }
         if (admission.Version != PartitionMoveProtocol.Version || !admission.OriginalGrant.RequireReceiverIssuance
             || admission.ReceiverWitness.OriginalPhaseCommandId != commandId
             || admission.SourceDispatchWitness.OriginalPhaseCommandId != commandId)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMoveProtocol.MissingAuthority);
+        }
         var original = new PartitionMovePeerEnvelope(phase.Version, phase.MoveId, phase.Partition, phase.ControlOwner,
             phase.SourcePlacement, phase.DestinationOwner, phase.ControlIntentDigest, phase.Stage, phase.PageOrdinal,
             admission.OriginalExpiresAt, admission.OriginalRequestNonce, phase.Body, admission.OriginalGrant);
         var originalEpoch = RequireMoveReceiverOriginalObservationEpoch(view, principal, original, commandId);
         if (principal.PolicyEpoch != originalEpoch)
-        { throw Errors.Fail(ErrorCode.PermissionDenied, ChangedOutcomePrincipalPolicyMessage); }
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, ChangedOutcomePrincipalPolicyMessage);
+        }
         var catalog = PhysicalShardCatalogRecordSerialization.Read(view)
             ?? throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority);
         PhysicalShardCatalogValidation.ValidateCatalog(catalog);
@@ -37,6 +43,8 @@ public sealed partial class DatabaseEngine
         if (phase.GrantId != admission.OriginalGrant.GrantId
             || !NativeSerialization.Serialize(phase.Resources).AsSpan()
                 .SequenceEqual(NativeSerialization.Serialize(admission.OriginalGrant.Resources)))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
     }
 }

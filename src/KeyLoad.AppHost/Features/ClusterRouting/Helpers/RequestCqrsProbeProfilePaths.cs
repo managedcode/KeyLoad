@@ -29,7 +29,9 @@ internal static class RequestCqrsProbeProfilePaths
             var root = CanonicalDirectory(configuredRoot, executionOptions);
             var data = CanonicalDirectory(dataRoot, executionOptions);
             if (IsWithin(root, data) || IsWithin(data, root))
-            { throw new InvalidOperationException(InvalidConfiguration); }
+            {
+                throw new InvalidOperationException(InvalidConfiguration);
+            }
             ValidateDirectoryAndAncestors(root, PrivateDirectoryMode);
             ValidateRootEntries(root, voters);
             var nodes = new Dictionary<string, string>(StringComparer.Ordinal);
@@ -43,7 +45,9 @@ internal static class RequestCqrsProbeProfilePaths
             return nodes;
         }
         catch (Exception error) when (IsPathOrFileFailure(error))
-        { throw new InvalidOperationException(InvalidConfiguration); }
+        {
+            throw new InvalidOperationException(InvalidConfiguration);
+        }
     }
 
     private static string CanonicalDirectory(string path, IOptions<RequestProbeFileOptions> executionOptions)
@@ -51,20 +55,26 @@ internal static class RequestCqrsProbeProfilePaths
         const int StructuralValue = 0;
 
         if (path.Length == StructuralValue || path.Length > executionOptions.Value.MaximumPathCharacters || !Path.IsPathFullyQualified(path))
-        { throw new InvalidOperationException(InvalidConfiguration); }
+        {
+            throw new InvalidOperationException(InvalidConfiguration);
+        }
         var full = Path.GetFullPath(path);
         var trimmed = Path.TrimEndingDirectorySeparator(full);
         if (!string.Equals(full, path, StringComparison.Ordinal)
             || !string.Equals(trimmed, full, StringComparison.Ordinal)
             || string.Equals(trimmed, Path.GetPathRoot(full), StringComparison.Ordinal))
-        { throw new InvalidOperationException(InvalidConfiguration); }
+        {
+            throw new InvalidOperationException(InvalidConfiguration);
+        }
         return full;
     }
 
     private static void ValidatePlatform()
     {
         if (OperatingSystem.IsWindows())
-        { throw new PlatformNotSupportedException(InvalidConfiguration); }
+        {
+            throw new PlatformNotSupportedException(InvalidConfiguration);
+        }
     }
 
     private static void ValidateDirectoryAndAncestors(string path, UnixFileMode? expectedMode)
@@ -72,15 +82,21 @@ internal static class RequestCqrsProbeProfilePaths
         const int OwnerEntryCount = 0;
 
         if (OperatingSystem.IsWindows())
-        { throw new InvalidOperationException(InvalidConfiguration); }
+        {
+            throw new InvalidOperationException(InvalidConfiguration);
+        }
         for (var current = path; current is not null; current = Path.GetDirectoryName(current))
         {
             var attributes = File.GetAttributes(current);
             if ((attributes & FileAttributes.Directory) == OwnerEntryCount || (attributes & FileAttributes.ReparsePoint) != OwnerEntryCount)
-            { throw new InvalidOperationException(InvalidConfiguration); }
+            {
+                throw new InvalidOperationException(InvalidConfiguration);
+            }
             if (string.Equals(current, path, StringComparison.Ordinal) && expectedMode is { } mode
                 && File.GetUnixFileMode(current) != mode)
-            { throw new InvalidOperationException(InvalidConfiguration); }
+            {
+                throw new InvalidOperationException(InvalidConfiguration);
+            }
         }
     }
 
@@ -91,7 +107,9 @@ internal static class RequestCqrsProbeProfilePaths
         var entries = Directory.EnumerateFileSystemEntries(root).Take(voters.Count + Step).ToArray();
         if (entries.Length != voters.Count
             || voters.Any(voter => !entries.Contains(Path.Combine(root, voter), StringComparer.Ordinal)))
-        { throw new InvalidOperationException(InvalidConfiguration); }
+        {
+            throw new InvalidOperationException(InvalidConfiguration);
+        }
     }
 
     private static void ValidateOwnerDirectory(string directory, string sessionId, string voter, IOptions<RequestProbeFileOptions> executionOptions, int ownerVersion, string ownerKind)
@@ -102,12 +120,16 @@ internal static class RequestCqrsProbeProfilePaths
 
         var entries = Directory.EnumerateFileSystemEntries(directory).Take(CountValue).ToArray();
         if (entries.Length != OwnerEntryCount || !string.Equals(Path.GetFileName(entries[FirstIndex]), OwnerFileName, StringComparison.Ordinal))
-        { throw new InvalidOperationException(InvalidConfiguration); }
+        {
+            throw new InvalidOperationException(InvalidConfiguration);
+        }
         var ownerPath = Path.Combine(directory, OwnerFileName);
         var owner = RequestCqrsProbeOwnerReader.ReadFile(ownerPath, executionOptions, ownerVersion, ownerKind);
         if (!string.Equals(owner.SessionId, sessionId, StringComparison.Ordinal)
             || !string.Equals(owner.Voter, voter, StringComparison.Ordinal))
-        { throw new InvalidOperationException(InvalidConfiguration); }
+        {
+            throw new InvalidOperationException(InvalidConfiguration);
+        }
     }
 
     private static bool IsWithin(string candidate, string root)

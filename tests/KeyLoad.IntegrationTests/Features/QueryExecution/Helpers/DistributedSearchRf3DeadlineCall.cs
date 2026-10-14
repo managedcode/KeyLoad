@@ -23,14 +23,22 @@ internal sealed class DistributedSearchRf3DeadlineCall
         {
             var call = SqlRf3Protocol.Call(RemoteDocumentRf3Protocol.Partition, DistributedSearchProtocol.Tool, request);
             if (useMcp)
-            { mcp = official.CallAsync(SqlOperationProtocol.ToolName, call, token); }
+            {
+                mcp = official.CallAsync(SqlOperationProtocol.ToolName, call, token);
+            }
             else
-            { sql = reader.ExecuteSqlAsync(call, token); }
+            {
+                sql = reader.ExecuteSqlAsync(call, token);
+            }
         }
         else if (useMcp)
-        { mcp = official.CallAsync(DistributedSearchProtocol.Tool, request, token); }
+        {
+            mcp = official.CallAsync(DistributedSearchProtocol.Tool, request, token);
+        }
         else
-        { sdk = reader.DistributedSearchAsync(request, token); }
+        {
+            sdk = reader.DistributedSearchAsync(request, token);
+        }
     }
 
     internal async Task RequireOriginalAsync(Guid parentId)
@@ -66,10 +74,16 @@ internal sealed class DistributedSearchRf3DeadlineCall
     internal async Task JoinAsync(List<Exception> failures)
     {
         if (sdk is { } actualSdk)
-        { await ServerFailureObserver.ObserveAsync(async () => { _ = await actualSdk.ConfigureAwait(false); }, failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(async () => { _ = await actualSdk.ConfigureAwait(false); }, failures).ConfigureAwait(false);
+        }
         if (sql is { } actualSql)
-        { await ServerFailureObserver.ObserveAsync(async () => { _ = await actualSql.ConfigureAwait(false); }, failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(async () => { _ = await actualSql.ConfigureAwait(false); }, failures).ConfigureAwait(false);
+        }
         if (mcp is { } actualMcp)
-        { await ServerFailureObserver.ObserveAsync(async () => { _ = await actualMcp.ConfigureAwait(false); }, failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(async () => { _ = await actualMcp.ConfigureAwait(false); }, failures).ConfigureAwait(false);
+        }
     }
 }

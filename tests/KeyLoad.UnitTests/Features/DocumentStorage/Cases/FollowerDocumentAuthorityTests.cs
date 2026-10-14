@@ -22,9 +22,13 @@ internal sealed class FollowerDocumentAuthorityTests
         fixture.Db.Store.Commit((tx, _) =>
         {
             if (change == "missing")
-            { tx.Delete(KeySpace.AppliedBytes); }
+            {
+                tx.Delete(KeySpace.AppliedBytes);
+            }
             else
-            { tx.Put(KeySpace.AppliedBytes, NativeSerialization.Serialize(-1L)); }
+            {
+                tx.Put(KeySpace.AppliedBytes, NativeSerialization.Serialize(-1L));
+            }
             return true;
         });
         await FollowerDocumentAssertions.FailureUnchangedAsync(fixture, () => fixture.Complete(request, captured),
@@ -42,17 +46,27 @@ internal sealed class FollowerDocumentAuthorityTests
         var original = fixture.CredentialBytes();
         fixture.Db.Store.Commit((tx, _) =>
         {
-            tx.PutRecord(KeySpace.ApiKey(FollowerDocumentFixture.KeyId), fixture.Credential with { Verifier = InvalidHex });
+            tx.PutRecord(KeySpace.ApiKey(FollowerDocumentFixture.KeyId), fixture.Credential with
+            {
+                Verifier = InvalidHex
+            });
             return true;
         });
         await FollowerDocumentAssertions.FailureUnchangedAsync(fixture, () => fixture.Complete(request, captured),
             ErrorCode.Corruption, CorruptVerifier);
         fixture.Db.Store.Commit((tx, _) => { tx.Put(KeySpace.ApiKey(FollowerDocumentFixture.KeyId), original); return true; });
-        var revoked = fixture.Principal with { Revoked = true, PolicyEpoch = fixture.Principal.PolicyEpoch + 1 };
+        var revoked = fixture.Principal with
+        {
+            Revoked = true,
+            PolicyEpoch = fixture.Principal.PolicyEpoch + 1
+        };
         fixture.Apply(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(revoked)).Get<PrincipalRecord>();
         await FollowerDocumentAssertions.FailureUnchangedAsync(fixture, () => fixture.Complete(request, captured),
             ErrorCode.Unauthenticated, Unavailable);
-        var restored = fixture.Principal with { PolicyEpoch = revoked.PolicyEpoch + 1 };
+        var restored = fixture.Principal with
+        {
+            PolicyEpoch = revoked.PolicyEpoch + 1
+        };
         fixture.Apply(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(restored)).Get<PrincipalRecord>();
         fixture.Put(FollowerDocumentFixture.FreshJson, FollowerDocumentFixture.FirstRevision);
         var renewed = fixture.Capture(request);

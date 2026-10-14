@@ -12,7 +12,9 @@ internal static class EventReferenceSelectSetup
         foreach (var streamSet in new[] { EventReferenceSelectProtocol.StreamSet, EventReferenceSelectProtocol.InvalidStreamSet, EventReferenceSelectProtocol.EmptyStreamSet })
         {
             await ConfigureAsync(admin, partition, new(streamSet, ResourceKind.StreamSet, partition.TransactionDomainId)
-            { FieldPolicies = [new("/to", "reference", RawReadGrant: EventReferenceSelectProtocol.RefRead, RawUseGrant: EventReferenceSelectProtocol.RefUse)] }, token);
+            {
+                FieldPolicies = [new("/to", "reference", RawReadGrant: EventReferenceSelectProtocol.RefRead, RawUseGrant: EventReferenceSelectProtocol.RefUse)]
+            }, token);
         }
         await ConfigureAsync(admin, partition, new(EventReferenceSelectProtocol.Target, ResourceKind.Collection, partition.TransactionDomainId)
         {
@@ -51,9 +53,13 @@ internal static class EventReferenceSelectSetup
     {
         var fields = new List<string> { EventReferenceSelectProtocol.RefRead };
         if (allow)
-        { fields.Add(EventReferenceSelectProtocol.RefUse); }
+        {
+            fields.Add(EventReferenceSelectProtocol.RefUse);
+        }
         if (names)
-        { fields.Add(EventReferenceSelectProtocol.NameRead); }
+        {
+            fields.Add(EventReferenceSelectProtocol.NameRead);
+        }
         var principal = state.Identity.Principal with
         {
             PolicyEpoch = epoch,

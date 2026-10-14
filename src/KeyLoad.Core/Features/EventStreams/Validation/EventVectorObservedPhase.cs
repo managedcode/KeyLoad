@@ -20,10 +20,14 @@ internal static class EventVectorObservedPhase
         admission.RequireEncodedBytes(authenticatedReplyWitness.Length);
         admission.RequireEncodedBytes(observation.OriginalStoredOutcome.Length);
         if (authenticatedReplyWitness.IsEmpty)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidObservation); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidObservation);
+        }
         EventVectorObservationIdentity.Require(admitted, observation);
         if (observation.OriginalStoredOutcome.IsEmpty)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidObservation); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidObservation);
+        }
         var outcome = NativeSerialization.Deserialize<StoredOutcome>(observation.OriginalStoredOutcome.Span);
         var originalJson = JsonSerializer.SerializeToUtf8Bytes(mutation, JsonDefaults.Options);
         admission.RequireEncodedBytes(originalJson.LongLength);
@@ -32,7 +36,9 @@ internal static class EventVectorObservedPhase
         if (outcome.Fingerprint != fingerprint || outcome.Incarnation != admitted.SourceOwner.Incarnation
             || outcome.PolicyEpoch != admitted.SourcePolicyEpoch || outcome.ScopeKind != CommandOutcomeScopeKind.Partition
             || outcome.Partition != admitted.Source.Partition || outcome.Result is null)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidObservation); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidObservation);
+        }
         EventVectorObservedResult.Require(admitted, mutation, outcome.Result,
             observation.AppliedCutPosition, admission);
         var observed = admitted with

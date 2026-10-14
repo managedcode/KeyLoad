@@ -21,7 +21,9 @@ public sealed partial class DatabaseEngine
                 originalId, Limits.MaxBatchBytes)
                 ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
             if (principal.Id != issued.ReceiverPrincipalId)
-            { throw Errors.Fail(ErrorCode.PermissionDenied, ClusterAdministrationRequiredMessage); }
+            {
+                throw Errors.Fail(ErrorCode.PermissionDenied, ClusterAdministrationRequiredMessage);
+            }
             var catalog = PhysicalShardCatalogRecordSerialization.Read(charged)
                 ?? throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority);
             PhysicalShardCatalogValidation.ValidateCatalog(catalog);

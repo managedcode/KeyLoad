@@ -82,3 +82,7 @@ REQ-SQLC-006 / AC-SQLC-006, REQ-REL-001/003 and AC-TSQL-003/006 use the [canonic
 ## TASK-KL046-ORDINARY-TYPED-INSERT-001
 
 REQ-SQLC-006 / AC-SQLC-006, REQ-REL-001/003 and AC-TSQL-003/006 use the [canonical ordinary typed INSERT contract](../RelationalStorage/OrdinarySqlInsert.md). It defines bounded VALUES/parameter lowering, original command identity, current atomic create-only authority and complete native/public cold operation gates. General DML/full SQL and Linux/client qualification remain open.
+
+### Original NULL whole-operation window refusal correction
+
+AC-TSQL-002/004/006 preserve the original SqlNullDistinct whole-operation identity and fixed Validation/count-bound oracle. Its original R52 failure at InvalidAsync line39 belongs to the nine-window loop; the report does not identify which loop iteration failed. Replace retired LIMIT/OFFSET-LIMIT/FETCH-alone window producers with selected ordered OFFSET-FETCH negative/zero/noninteger numeric/binary count refusals. Use the existing no-TOP WindowPrefix so TOP-plus-OFFSET unsupported composition does not mask intended count validation. Positive signed integer counts remain supported and have an independent complete healthy page in the same operation. Original malformed predicate and legitimate UnsupportedCapability controls, cancellation token, type repair, persisted revoke/repair, receipt replay, raw/cut/identity conservation and two cold stores remain unchanged. Native source N is not execution evidence; exact pinned shape/diagnostic and whole-operation/Linux gates remain OPEN.

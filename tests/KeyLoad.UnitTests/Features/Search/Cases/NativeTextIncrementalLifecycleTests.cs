@@ -38,7 +38,11 @@ internal sealed class NativeTextIncrementalLifecycleTests
                 _ = await NativeTextMaintenanceCommit.ExecuteAsync<CommitReceipt>(fixture,
                     OperationKind.Batch, write, writeId, token);
                 runtime = new(fixture);
-                var restore = request with { CommandId = Guid.NewGuid(), Mode = TextIndexMaintenanceMode.Restore };
+                var restore = request with
+                {
+                    CommandId = Guid.NewGuid(),
+                    Mode = TextIndexMaintenanceMode.Restore
+                };
                 var replayed = await NativeTextMaintenancePhaseFlow.FinishAsync(fixture, runtime, restore, token);
                 await Assert.That(replayed.TrackedRecords).IsEqualTo(TrackedRecords);
                 await Assert.That(replayed.ThroughSequence).IsGreaterThan(built.ThroughSequence);
@@ -51,9 +55,13 @@ internal sealed class NativeTextIncrementalLifecycleTests
         finally
         {
             if (runtime is not null)
-            { await ServerFailureObserver.ObserveAsync(() => runtime.DisposeAsync().AsTask(), failures); }
+            {
+                await ServerFailureObserver.ObserveAsync(() => runtime.DisposeAsync().AsTask(), failures);
+            }
             if (fixture is not null)
-            { ServerFailureObserver.Observe(fixture.Dispose, failures); }
+            {
+                ServerFailureObserver.Observe(fixture.Dispose, failures);
+            }
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }

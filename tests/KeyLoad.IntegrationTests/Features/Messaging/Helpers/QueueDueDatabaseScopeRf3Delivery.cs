@@ -56,8 +56,12 @@ internal static class QueueDueDatabaseScopeRf3Delivery
     private static void Set(QueueDueDatabaseScopeRf3Lane lane, MessageInspection value, bool healthy)
     {
         if (healthy)
-        { lane.Healthy = value; }
+        {
+            lane.Healthy = value;
+        }
         else
-        { lane.Message = value; }
+        {
+            lane.Message = value;
+        }
     }
 }

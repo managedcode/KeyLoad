@@ -13,7 +13,9 @@ internal static class EventAppendSequenceAuthorityCold
         var before = QueueWholeFlowStorage.Bytes(fixture.Database.Store);
         fixture.Database.JoinOwnedResources();
         for (var cold = 0; cold < 2; cold++)
-        { await ColdAsync(fixture, command, original, healthy, healthyResult, position, before, token); }
+        {
+            await ColdAsync(fixture, command, original, healthy, healthyResult, position, before, token);
+        }
     }
 
     private static async Task ColdAsync(EventAppendWholeFlowFixture fixture, CommandRequest command,

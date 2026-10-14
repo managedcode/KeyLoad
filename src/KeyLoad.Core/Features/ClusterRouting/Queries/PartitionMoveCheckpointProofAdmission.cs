@@ -13,7 +13,9 @@ public sealed partial class DatabaseEngine
         if (body.Action is not (PartitionMoveCheckpointAction.Observe
             or PartitionMoveCheckpointAction.CancelUnprepared or PartitionMoveCheckpointAction.ObserveCancellation
             or PartitionMoveCheckpointAction.ObserveRetireCancellation or PartitionMoveCheckpointAction.AdmitRetireCancellation))
-        { return; }
+        {
+            return;
+        }
         Store.Read(view =>
         {
             var charged = work.CreateView(view);
@@ -63,12 +65,18 @@ public sealed partial class DatabaseEngine
             ? RequireCheckpointLocalOutcome(view, principal, original, body.ObservedOriginalResult)
             : body.ObservedOriginalResult;
         if (actual.Error is null)
-        { RequireMoveParentResultIdentity(header, original, actual.Get<PartitionMovePhaseResult>()); }
+        {
+            RequireMoveParentResultIdentity(header, original, actual.Get<PartitionMovePhaseResult>());
+        }
         if (body.NextOriginalPhase is null)
-        { return; }
+        {
+            return;
+        }
         var grant = RequireMoveParentGrantPromotion(principal, body, original, actual);
         if (PartitionMoveParentStorage.Phase(view, header.Partition, header.MoveId, grant.PhaseCommandId,
             Limits.MaxBatchBytes) is not null)
-        { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict);
+        }
     }
 }

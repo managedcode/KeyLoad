@@ -7,7 +7,10 @@ internal static class SqlUnicodeIdentifierCases
     internal const string Clause = "\"score\" = 1 /* retained escaped identifier */";
     internal const string WideClause = "\"score\" = 1 /* retained wide identifier */";
     internal const string CustomClause = "\"score\" = 1 /* retained custom identifier */";
-    internal static IReadOnlyList<SqlNullDistinctCase> All { get; } =
+    internal static IReadOnlyList<SqlNullDistinctCase> All
+    {
+        get;
+    } =
     [
         new("\"score\" = 1 /* retained escaped identifier */", new global::KeyLoad.Query.Comparison(SqlNullDistinctCases.Score, "=", global::KeyLoad.Query.ValueOperand.Create(UnitValue)), ["low"]),
         new("\"score\" = 1 /* retained wide identifier */", new global::KeyLoad.Query.Comparison(SqlNullDistinctCases.Score, "=", global::KeyLoad.Query.ValueOperand.Create(UnitValue)), ["low"]),

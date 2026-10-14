@@ -59,7 +59,11 @@ public sealed partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.RevisionConflict, RecurringSagaProtocol.RevisionConflict);
         }
-        var next = record with { Revision = checked(record.Revision + RecurringScheduleCommandsAdjacentElementOffset), Cancelled = true };
+        var next = record with
+        {
+            Revision = checked(record.Revision + RecurringScheduleCommandsAdjacentElementOffset),
+            Cancelled = true
+        };
         var capacity = RecurringSagaStorage.RequireCapacity(tx, request.Lane);
         var updatedCapacity = RecurringSagaStorage.Replace(capacity, RecurringSagaStorage.SerializedBytes(record),
             RecurringSagaStorage.SerializedBytes(next), Limits);
@@ -137,7 +141,10 @@ public sealed partial class DatabaseEngine
 
     private void UpdateScheduleOrdinal(IAtomicTransaction tx, RecurringScheduleRecord record, long nextOrdinal)
     {
-        var next = record with { NextOrdinal = nextOrdinal };
+        var next = record with
+        {
+            NextOrdinal = nextOrdinal
+        };
         var capacity = RecurringSagaStorage.RequireCapacity(tx, record.Lane);
         var updated = RecurringSagaStorage.Replace(capacity, RecurringSagaStorage.SerializedBytes(record),
             RecurringSagaStorage.SerializedBytes(next), Limits);
@@ -215,7 +222,11 @@ public sealed partial class DatabaseEngine
         {
             JsonData.Identifier(definition.OrderingKey);
         }
-        return definition with { PayloadJson = payload, HeadersJson = headers };
+        return definition with
+        {
+            PayloadJson = payload,
+            HeadersJson = headers
+        };
     }
 
     private static DateTimeOffset OccurrenceDueAt(RecurringScheduleDefinition definition, long ordinal)

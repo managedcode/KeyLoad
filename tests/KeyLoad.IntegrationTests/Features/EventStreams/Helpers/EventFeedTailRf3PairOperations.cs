@@ -27,7 +27,9 @@ internal static class EventFeedTailRf3PairOperations
                 terminals++;
             }
             else
-            { throw new InvalidOperationException(Invalid); }
+            {
+                throw new InvalidOperationException(Invalid);
+            }
         }
         await Assert.That(terminals).IsEqualTo(OneTerminal);
         return terminal ?? throw new InvalidOperationException(Invalid);

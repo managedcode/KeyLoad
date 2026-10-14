@@ -68,11 +68,20 @@ internal static class QueueLeaseAuthoritySetup
         if (fault == QueueLeaseAuthorityFault.ForeignBodyIdentity)
         {
             var body = NativeSerialization.Deserialize<MessageBody>(state.OriginalBytes);
-            return NativeSerialization.Serialize(body with { Id = QueueLeaseAuthorityProtocol.Foreign });
+            return NativeSerialization.Serialize(body with
+            {
+                Id = QueueLeaseAuthorityProtocol.Foreign
+            });
         }
         var metadata = NativeSerialization.Deserialize<MessageMetadata>(state.OriginalBytes);
         return NativeSerialization.Serialize(fault == QueueLeaseAuthorityFault.ForeignMetadataIdentity
-            ? metadata with { Id = QueueLeaseAuthorityProtocol.Foreign } : metadata with { LeaseUntil = null });
+            ? metadata with
+            {
+                Id = QueueLeaseAuthorityProtocol.Foreign
+            } : metadata with
+            {
+                LeaseUntil = null
+            });
     }
 
     internal static ReplicatedOperation Create<T>(OperationKind kind, T value, Guid id, DateTimeOffset time)

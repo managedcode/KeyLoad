@@ -1,4 +1,4 @@
-using KeyLoad.Orleans.Features.ResourceExecution;
+using KeyLoad.Clustering.Features.ResourceExecution;
 
 namespace KeyLoad.UnitTests.Features.ResourceExecution;
 
@@ -11,7 +11,10 @@ internal sealed class CacheControlWireRefreshShapeTests
         var emptySessionAndRound = hint;
         var sessionWithoutRound = hint with
         {
-            Header = hint.Header with { CoordinatorSessionId = CacheControlWireTestData.SessionId }
+            Header = hint.Header with
+            {
+                CoordinatorSessionId = CacheControlWireTestData.SessionId
+            }
         };
         var sessionAndRound = hint with
         {
@@ -23,7 +26,10 @@ internal sealed class CacheControlWireRefreshShapeTests
         };
         var emptySessionWithRound = hint with
         {
-            Header = hint.Header with { RoundNonce = CacheControlWireTestData.RoundNonce }
+            Header = hint.Header with
+            {
+                RoundNonce = CacheControlWireTestData.RoundNonce
+            }
         };
 
         await Assert.That(Encode(emptySessionAndRound)).IsTrue();

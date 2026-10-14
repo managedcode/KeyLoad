@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
 
@@ -41,7 +41,9 @@ internal static class ControlledPartitionMovementTargetInstallFlow
             var actual = staged.Get<PartitionMovePhaseResult>();
             await Assert.That(actual.Stage).IsEqualTo(PartitionMovePeerStage.Install);
             if (ordinal < originalHandle.PageCount)
-            { await Assert.That(actual.InstalledReceipt).IsNull(); }
+            {
+                await Assert.That(actual.InstalledReceipt).IsNull();
+            }
             else
             {
                 await Assert.That(actual.InstalledReceipt).IsNotNull();

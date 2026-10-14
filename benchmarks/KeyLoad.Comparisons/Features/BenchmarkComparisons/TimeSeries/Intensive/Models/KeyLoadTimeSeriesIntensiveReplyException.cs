@@ -26,5 +26,8 @@ internal sealed class KeyLoadTimeSeriesIntensiveReplyException : InvalidOperatio
         ObservedSequence = observedSequence;
     }
 
-    internal long? ObservedSequence { get; }
+    internal long? ObservedSequence
+    {
+        get;
+    }
 }

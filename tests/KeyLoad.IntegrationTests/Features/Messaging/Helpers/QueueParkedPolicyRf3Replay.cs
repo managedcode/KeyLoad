@@ -43,10 +43,16 @@ internal static class QueueParkedPolicyRf3Replay
     {
         Func<Task> current = () => QueueParkedPolicyRf3Assertions.CurrentAsync(admin, worker, state, token);
         foreach (var row in state.Commands)
-        { await CommandAsync(worker, row.Request, row.Result, current, token); }
+        {
+            await CommandAsync(worker, row.Request, row.Result, current, token);
+        }
         foreach (var row in state.Completions)
-        { await CompletionAsync(worker, row.Request, row.Result, current, token); }
+        {
+            await CompletionAsync(worker, row.Request, row.Result, current, token);
+        }
         foreach (var row in state.Configurations)
-        { await QueueParkedPolicyRf3Policy.ReplayAsync(admin, row.Id, row.Request, row.Result, current, token); }
+        {
+            await QueueParkedPolicyRf3Policy.ReplayAsync(admin, row.Id, row.Request, row.Result, current, token);
+        }
     }
 }

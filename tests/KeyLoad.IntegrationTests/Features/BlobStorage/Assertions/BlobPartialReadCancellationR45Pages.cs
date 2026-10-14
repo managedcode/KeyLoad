@@ -22,7 +22,10 @@ internal static class BlobPartialReadCancellationR45Pages
         await RangeAsync(admin, state, 0L, 65536, null, token);
         await RangeAsync(admin, state, 65536L, 17, null, token);
         var upload = new BlobUploadInfoRequest(p.Begin.Blob, p.Begin.UploadId);
-        var expectedUpload = p.Written[1].Value with { Status = BlobUploadStatus.Complete };
+        var expectedUpload = p.Written[1].Value with
+        {
+            Status = BlobUploadStatus.Complete
+        };
         await SqlRf3Protocol.EqualAsync(expectedUpload,
             (await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.GetBlobUploadInfoAsync(upload, token))).Upload);
         await SqlRf3Protocol.EqualAsync(expectedUpload,
@@ -45,7 +48,9 @@ internal static class BlobPartialReadCancellationR45Pages
     {
         Task Observe() => CurrentAsync(owner.Administrator, state, token);
         foreach (var window in Windows)
-        { await RangeAsync(owner.Caller, state, window.Offset, window.Count, Observe, token); }
+        {
+            await RangeAsync(owner.Caller, state, window.Offset, window.Count, Observe, token);
+        }
     }
     private static async Task RangeAsync(RequestCqrsRf3Callers caller,
         BlobPartialReadCancellationR45State state, long offset, int count,
@@ -57,10 +62,14 @@ internal static class BlobPartialReadCancellationR45Pages
         await SqlRf3Protocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(
             await caller.Sdk.ReadBlobRangeAsync(request, token)));
         if (observe is not null)
-        { await observe(); }
+        {
+            await observe();
+        }
         await SqlRf3Protocol.EqualAsync(expected, (await McpCallerAssertions.SuccessAsync<BlobReadResult>(
             await caller.Mcp.CallAsync(RangeTool, request, token))).Value);
         if (observe is not null)
-        { await observe(); }
+        {
+            await observe();
+        }
     }
 }

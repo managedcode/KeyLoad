@@ -58,7 +58,9 @@ internal static class PartitionQueryMerge
         long retained = NoRetainedBytes;
         var policies = new Dictionary<Guid, (long PolicyEpoch, Guid NodeId, long ReadGeneration)>();
         if (!physicalOwners.IsDefault && physicalOwners.Length != leaves.Length)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, IncompleteMessage); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, IncompleteMessage);
+        }
         for (var index = FirstElementIndex; index < leaves.Length; index++)
         {
             budget.Check();
@@ -67,7 +69,9 @@ internal static class PartitionQueryMerge
             ValidateLeaf(plan.Leaves[index], leaf, partitions[index], owner, budget, physical);
             var policyOwner = physical?.PhysicalShardId ?? owner.NodeId;
             if (!policies.TryGetValue(policyOwner, out var policyEpoch))
-            { policies.Add(policyOwner, (leaf.PolicyEpoch, leaf.NodeId, leaf.ReadGeneration)); }
+            {
+                policies.Add(policyOwner, (leaf.PolicyEpoch, leaf.NodeId, leaf.ReadGeneration));
+            }
             else if (policyEpoch != (leaf.PolicyEpoch, leaf.NodeId, leaf.ReadGeneration))
             {
                 throw Errors.Fail(ErrorCode.OwnershipLost, InconsistentOwnerMessage);

@@ -19,8 +19,14 @@ internal static class ScriptDomSelectPages
             var expected = engine.ExecuteAst(SqlOffsetProtocol.Reader, ast);
             await PageAsync(actual, id, json, position, final);
             await PageAsync(expected, id, json, position, final);
-            sql = sql with { Cursor = actual.Cursor };
-            ast = ast with { Cursor = expected.Cursor };
+            sql = sql with
+            {
+                Cursor = actual.Cursor
+            };
+            ast = ast with
+            {
+                Cursor = expected.Cursor
+            };
         }
         await ScriptDomSelectPredicatePages.RequireAsync(engine, partition, position);
         await ScriptDomSelectJoinPages.RequireAsync(engine, partition, position);
@@ -29,9 +35,13 @@ internal static class ScriptDomSelectPages
     internal static async Task PageAsync(QueryPage page, string id, string json, long position, bool final)
     {
         if (final)
-        { await Assert.That(page.Cursor).IsNull(); }
+        {
+            await Assert.That(page.Cursor).IsNull();
+        }
         else
-        { await Assert.That(page.Cursor).IsNotNull(); }
+        {
+            await Assert.That(page.Cursor).IsNotNull();
+        }
         await SqlOffsetPages.ExactAsync(page, new([new(id, InitialRevision, json, false, [])],
             page.Cursor, position, FullScan));
     }

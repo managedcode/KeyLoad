@@ -18,7 +18,9 @@ internal sealed class AtomicPartitionPlacementAuthorityFlowTests
         finally
         {
             if (fixture is not null)
-            { KeyLoad.Server.ServerFailureObserver.Observe(fixture.Dispose, failures); }
+            {
+                KeyLoad.Server.ServerFailureObserver.Observe(fixture.Dispose, failures);
+            }
         }
         KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }

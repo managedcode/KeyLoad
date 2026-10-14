@@ -87,7 +87,9 @@ internal sealed class PartitionMovementParentAbortContinuation
         var cleanup = PartitionMovementParentAuthority.RequireObserved(original, PartitionMovePeerStage.Abort).Cleanup
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
         if (cleanup.Role != PartitionMoveCleanupRole.Target)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+        }
         if (cleanup.Completion is null)
         {
             return await TargetAbortNextAsync(principalId, request, state, cleanup.NextFamily,

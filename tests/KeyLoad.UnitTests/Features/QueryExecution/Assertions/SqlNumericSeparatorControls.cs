@@ -92,14 +92,19 @@ internal static class SqlNumericSeparatorControls
         var position = store.Position;
         var identity = JsonDefaults.Serialize(store.Identity);
         var parameters = new Dictionary<string, global::System.Text.Json.JsonElement>
-        { [Argument] = global::System.Text.Json.JsonSerializer.SerializeToElement(UnitValue) };
+        {
+            [Argument] = global::System.Text.Json.JsonSerializer.SerializeToElement(UnitValue)
+        };
         var item = new SqlNullDistinctCase(ParameterClause, new global::KeyLoad.Query.Logical(
             new global::KeyLoad.Query.Comparison(SqlNullDistinctCases.Score, "=", global::KeyLoad.Query.ValueOperand.Create(UnitValue)), "AND",
             new global::KeyLoad.Query.Comparison(new global::KeyLoad.Query.ParameterOperand(Argument), "=", global::KeyLoad.Query.ValueOperand.Create(UnitValue))), [Low]);
         await SqlNullOrderingPages.EqualAsync(Page(position, lowRevision), engine.Execute(SqlNullOrderingProtocol.Reader,
             new(partition, SqlNullDistinctCases.Prefix + ParameterClause + SqlNullDistinctCases.Tail, parameters, AllowFullScan: true)));
         await SqlNullOrderingPages.EqualAsync(Page(position, lowRevision), engine.ExecuteAst(SqlNullOrderingProtocol.Reader,
-            SqlNullDistinctCases.Ast(partition, item) with { Parameters = parameters }));
+            SqlNullDistinctCases.Ast(partition, item) with
+            {
+                Parameters = parameters
+            }));
         await SqlNullOrderingRefusals.UnchangedAsync(store, image, position, identity);
         await WindowsAsync(engine, store, partition, lowRevision);
     }

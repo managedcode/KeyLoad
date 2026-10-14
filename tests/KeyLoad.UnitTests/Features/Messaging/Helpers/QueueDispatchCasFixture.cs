@@ -18,9 +18,18 @@ internal sealed class QueueDispatchCasFixture : IDisposable
     private const string SetupAndCleanupFailed = "Queue dispatch fixture setup and cleanup both failed.";
     private readonly ResourcePolicyUpdateFixture owner = new();
 
-    internal ResourceDefinition Definition { get; }
-    internal byte[] OriginalDocument { get; }
-    internal byte[] OriginalCollection { get; }
+    internal ResourceDefinition Definition
+    {
+        get;
+    }
+    internal byte[] OriginalDocument
+    {
+        get;
+    }
+    internal byte[] OriginalCollection
+    {
+        get;
+    }
 
     internal QueueDispatchCasFixture(long version = InitialVersion)
     {
@@ -29,7 +38,10 @@ internal sealed class QueueDispatchCasFixture : IDisposable
             SchemaVersion = version,
             FieldPolicies = [new(PrivatePath, Classification)],
             HeaderPolicies = [new(HeaderPath, Classification)],
-            QueuePolicy = new() { MaxAttempts = Attempts }
+            QueuePolicy = new()
+            {
+                MaxAttempts = Attempts
+            }
         };
         try
         {
@@ -44,7 +56,9 @@ internal sealed class QueueDispatchCasFixture : IDisposable
         catch (Exception primary)
         {
             try
-            { owner.Dispose(); }
+            {
+                owner.Dispose();
+            }
             catch (Exception cleanup) { throw new AggregateException(SetupAndCleanupFailed, primary, cleanup); }
             throw;
         }
@@ -69,7 +83,11 @@ internal sealed class QueueDispatchCasFixture : IDisposable
     internal byte[]? Outcome(Guid id) => owner.OutcomeBytes(id);
     internal void Reopen() => owner.Reopen();
     internal OperationResult PolicyPauseAttempt() => owner.Apply(owner.ConfigureResource(
-        Current() with { Paused = true, SchemaVersion = Current().SchemaVersion + VersionStep }, Current().SchemaVersion));
+        Current() with
+        {
+            Paused = true,
+            SchemaVersion = Current().SchemaVersion + VersionStep
+        }, Current().SchemaVersion));
     internal static KeyLoadException Failure(OperationResult result) => ResourcePolicyUpdateFixture.Failure(result);
     public void Dispose() => owner.Dispose();
 }

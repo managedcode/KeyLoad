@@ -28,7 +28,9 @@ internal static class SubscriptionParkedRecoveryFlow
         { (firstOperation, firstResult, SubscriptionProcessingAtomicAssertions.OutcomeBytes(fixture.Store, group, first.RequestId)) };
         var receipts = new List<(ReplicatedOperation Operation, OperationResult Result, byte[] Saved)>();
         foreach (var delivery in deliveries.Skip(1))
-        { await AckAsync(fixture.Database, fixture.Store, group, delivery, time.AddMilliseconds(500), receipts); }
+        {
+            await AckAsync(fixture.Database, fixture.Store, group, delivery, time.AddMilliseconds(500), receipts);
+        }
         var retry = new ReceiveSubscriptionRequest(Guid.NewGuid(), group, MaxEvents: 3, LeaseSeconds: 1);
         var retryOperation = Create(OperationKind.ReceiveSubscription, retry, retry.RequestId, time.AddSeconds(2));
         var retryResult = fixture.Database.Apply(retryOperation);
@@ -59,7 +61,9 @@ internal static class SubscriptionParkedRecoveryFlow
         await SubscriptionCheckpointAuthorityAssertions.SourceAsync(db, cold, group.Source, source);
         await SubscriptionParkedRecoveryAssertions.ReplayAsync(db, cold, group, parkOperation, parked, history);
         foreach (var receipt in receipts)
-        { await SubscriptionParkedRecoveryAssertions.ReplayAsync(db, cold, group, receipt.Operation, receipt.Result, receipt.Saved); }
+        {
+            await SubscriptionParkedRecoveryAssertions.ReplayAsync(db, cold, group, receipt.Operation, receipt.Result, receipt.Saved);
+        }
         await RecoverAsync(db, cold, fixture.Directory, group, policy, parkOperation, parked,
             history, deliveries, receipts, claims, time, source, token);
     }

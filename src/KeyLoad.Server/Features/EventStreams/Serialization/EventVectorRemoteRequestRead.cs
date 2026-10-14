@@ -14,16 +14,22 @@ internal static class EventVectorRemoteRequestRead
         ArgumentNullException.ThrowIfNull(encoding);
         originalCancellationToken.ThrowIfCancellationRequested();
         if (originalPayload.IsEmpty || originalPayload.Length > encoding.MaximumBytes)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, EventVectorRemoteProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, EventVectorRemoteProtocol.Invalid);
+        }
         if (originalSignature is not { Length: RemoteDocumentProtocol.SignatureCharacters })
-        { throw Errors.Fail(ErrorCode.Unauthenticated, EventVectorRemoteProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, EventVectorRemoteProtocol.Invalid);
+        }
         var originalBytes = originalPayload.ToArray();
         EventVectorRemoteCall? call = null;
         var transferred = false;
         try
         {
             if (!actualCallerMac.Verify(originalBytes, originalSignature, reply: false))
-            { throw Errors.Fail(ErrorCode.Unauthenticated, EventVectorRemoteProtocol.Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Unauthenticated, EventVectorRemoteProtocol.Invalid);
+            }
             call = encoding.DecodeAuthenticatedCall(originalBytes);
             originalCancellationToken.ThrowIfCancellationRequested();
             var result = new EventVectorMacCheckedCall(call, originalBytes, originalSignature);
@@ -36,7 +42,9 @@ internal static class EventVectorRemoteRequestRead
             {
                 CryptographicOperations.ZeroMemory(originalBytes);
                 if (call is not null)
-                { CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(call.OriginalNativeRequest).Span); }
+                {
+                    CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(call.OriginalNativeRequest).Span);
+                }
             }
         }
     }

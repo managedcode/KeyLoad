@@ -13,17 +13,25 @@ internal static class QueueParkedPolicyRf3Policy
         await Assert.That(sdk.Value).IsNull();
         var problem = System.Text.Json.JsonSerializer.SerializeToElement(sdk.Problem, JsonDefaults.Options);
         if (state.RefusedProblem is { } original)
-        { await QueueParkedPolicyRf3Assertions.EqualAsync(problem, original); }
+        {
+            await QueueParkedPolicyRf3Assertions.EqualAsync(problem, original);
+        }
         else
-        { state.RefusedProblem = problem; }
+        {
+            state.RefusedProblem = problem;
+        }
         await QueueParkedPolicyRf3Assertions.CurrentAsync(admin, worker, state, token);
         var mcp = await InvokeAsync(admin, state.RefusedPolicy, state.Replacement, token);
         await McpCallerAssertions.ErrorAsync(mcp, ErrorCode.Conflict, dispatched: true);
         var error = (mcp.StructuredContent ?? throw new InvalidOperationException(McpCallerProtocol.MissingStructuredResult)).GetProperty(McpCallerProtocol.Error).Clone();
         if (state.RefusedMcpError is { } originalError)
-        { await QueueParkedPolicyRf3Assertions.EqualAsync(error, originalError); }
+        {
+            await QueueParkedPolicyRf3Assertions.EqualAsync(error, originalError);
+        }
         else
-        { state.RefusedMcpError = error; }
+        {
+            state.RefusedMcpError = error;
+        }
         await QueueParkedPolicyRf3Assertions.CurrentAsync(admin, worker, state, token);
     }
 

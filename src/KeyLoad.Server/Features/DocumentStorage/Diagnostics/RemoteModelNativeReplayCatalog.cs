@@ -29,7 +29,9 @@ internal static class RemoteModelNativeReplayCatalog
     internal static RemoteModelNativeReplayVariation At(RemoteModelNativeReplayVariation planMode, int ordinal)
     {
         if (ordinal < FirstWitnessOrdinal || ordinal > Count(planMode))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         return planMode == RemoteModelNativeReplayVariation.AllWireFaults6 ? WireFaults[ordinal - FirstWitnessOrdinal] : planMode;
     }
 
@@ -37,7 +39,9 @@ internal static class RemoteModelNativeReplayCatalog
     internal static int MaximumWitnessOrdinal(RemoteModelNativeReplayVariation individual)
     {
         if (!IsIndividual(individual))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         return individual == RemoteModelNativeReplayVariation.Original2 ? OriginalReplayCount : WireFaults.Length;
     }
 

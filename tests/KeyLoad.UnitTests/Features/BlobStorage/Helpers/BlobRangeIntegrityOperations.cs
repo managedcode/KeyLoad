@@ -29,12 +29,22 @@ internal static class BlobRangeIntegrityOperations
         var first = await Write(database.Database, blob, upload, BlobRangeIntegrityFixture.FirstOrdinal, firstBytes);
         var firstHash = BlobRangeIntegrityOracle.Next(initialHash, BlobRangeIntegrityFixture.FirstOrdinal, firstBytes.Span);
         await BlobWholeFlowAssertions.Exact(first.Original.Get<BlobCommitResult<BlobUploadInfo>>().Value,
-            expected with { NextOrdinal = BlobRangeIntegrityFixture.SingleCount, StoredBytes = firstBytes.Length, IntegrityHash = firstHash });
+            expected with
+            {
+                NextOrdinal = BlobRangeIntegrityFixture.SingleCount,
+                StoredBytes = firstBytes.Length,
+                IntegrityHash = firstHash
+            });
         var tailBytes = BlobRangeIntegrityFixture.Payload.AsMemory(BlobRangeIntegrityFixture.RawPartBytes);
         var second = await Write(database.Database, blob, upload, BlobRangeIntegrityFixture.SecondOrdinal, tailBytes);
         var hash = BlobRangeIntegrityOracle.Next(firstHash, BlobRangeIntegrityFixture.SecondOrdinal, tailBytes.Span);
         await BlobWholeFlowAssertions.Exact(second.Original.Get<BlobCommitResult<BlobUploadInfo>>().Value,
-            expected with { NextOrdinal = BlobRangeIntegrityFixture.Parts, StoredBytes = BlobRangeIntegrityFixture.PayloadBytes, IntegrityHash = hash });
+            expected with
+            {
+                NextOrdinal = BlobRangeIntegrityFixture.Parts,
+                StoredBytes = BlobRangeIntegrityFixture.PayloadBytes,
+                IntegrityHash = hash
+            });
         var complete = new CompleteBlobUploadRequest(Guid.NewGuid(), blob, upload, hash);
         var publishedAt = database.Database.EvaluationClock.GetUtcNow();
         var publication = Send(database.Database, OperationKind.CompleteBlobUpload, complete, complete.CommandId, publishedAt);

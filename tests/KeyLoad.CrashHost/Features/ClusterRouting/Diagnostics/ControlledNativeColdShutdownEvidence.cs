@@ -22,6 +22,9 @@ internal static class ControlledNativeColdShutdownEvidence
     private const string ObservationMatches = "KeyLoad.NativeCold.MatchesObservationToken";
     private const string CallerMatches = "KeyLoad.NativeCold.MatchesCallerToken";
     private const string Prefix = "KEYLOAD_NATIVE_COLD";
+    private const string OwnerStatePrefix = "KEYLOAD_NATIVE_COLD_OWNER_STATE";
+    private const string JoinedRequestWorkField = " joinedRequestWork=";
+    private const string DiscoveryPresentField = " discoveryPresent=";
     private const string NodeField = " node=";
     private const string StageField = " stage=";
     private const string PhaseField = " phase=";
@@ -69,7 +72,9 @@ internal static class ControlledNativeColdShutdownEvidence
                 var status = (int)original.Status;
                 if (error.Data[Phase] is int captured && captured == (int)observedStage
                     && error.Data[TaskIdentity] is int capturedTask && capturedTask == original.Id)
-                { error.Data[After] = status; }
+                {
+                    error.Data[After] = status;
+                }
                 return Console.Error.WriteLineAsync(FormattableString.Invariant($"{Prefix}{NodeField}{node}{StageField}{(int)observedStage}{PhaseField}{JoinedPhase}{TaskField}{original.Id}{StatusField}{status}"));
             }, failures).ConfigureAwait(false);
         }
@@ -97,4 +102,8 @@ internal static class ControlledNativeColdShutdownEvidence
         }
         return Console.Error.WriteLineAsync(FormattableString.Invariant($"{Prefix}{NodeField}{node}{StageField}{(int)stage}{PhaseField}{CapturePhase}{TaskField}{taskId}{StatusField}{status}{ObserverRequestedField}{observerRequested}{CallerRequestedField}{callerRequested}{CanceledField}{canceled is not null}{MatchesObserverField}{matchesObserver}{MatchesCallerField}{matchesCaller}"));
     }
+    internal static Task CaptureNodeStopOwnerStateAsync(int node, Task original,
+        bool joinedRequestWork, bool discoveryPresent)
+        => Console.Error.WriteLineAsync(FormattableString.Invariant($"{OwnerStatePrefix}{NodeField}{node}{TaskField}{original.Id}{StatusField}{(int)original.Status}{JoinedRequestWorkField}{joinedRequestWork}{DiscoveryPresentField}{discoveryPresent}"));
+
 }

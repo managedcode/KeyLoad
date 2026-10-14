@@ -169,7 +169,11 @@ internal sealed class ClusterPrincipalAuthorizationTests
             new CommandRequest(commandId, database.Partition, [new PutDocument(CollectionName, ProtectedDocumentId, EmptyJson, 0)]),
             ClusterPrincipalPolicy.InternalPrincipalId);
         var principalResult = Apply(database.Database, OperationKind.ConfigurePrincipal,
-            new ConfigurePrincipalRequest(ordinary with { Revoked = true, PolicyEpoch = ordinary.PolicyEpoch + 1 }),
+            new ConfigurePrincipalRequest(ordinary with
+            {
+                Revoked = true,
+                PolicyEpoch = ordinary.PolicyEpoch + 1
+            }),
             ClusterPrincipalPolicy.InternalPrincipalId);
         var credentialResult = Apply(database.Database, OperationKind.ConfigureApiKey,
             new ConfigureApiKeyRequest(new ApiKeyRecord(ForbiddenCredentialId, RootPrincipalId, ValidVerifier)),
@@ -196,7 +200,11 @@ internal sealed class ClusterPrincipalAuthorizationTests
         ClusterPrincipalPolicy.Initialize(database.Database);
         var root = database.Database.Store.Read(view => view.GetRecord<PrincipalRecord>(KeySpace.Principal(RootPrincipalId)))!;
         var revokeResult = Apply(database.Database, OperationKind.ConfigurePrincipal,
-            new ConfigurePrincipalRequest(root with { Revoked = true, PolicyEpoch = root.PolicyEpoch + 1 }), RootPrincipalId, 1);
+            new ConfigurePrincipalRequest(root with
+            {
+                Revoked = true,
+                PolicyEpoch = root.PolicyEpoch + 1
+            }), RootPrincipalId, 1);
         await Assert.That(revokeResult.Error).IsNull();
 
         var membershipResult = Apply(database.Database, OperationKind.Membership,
@@ -253,7 +261,10 @@ internal sealed class ClusterPrincipalInitializationIntegrityTests
         {
             var key = KeySpace.Principal(ClusterPrincipalPolicy.InternalPrincipalId);
             var principal = transaction.GetRecord<PrincipalRecord>(key)!;
-            transaction.PutRecord(key, principal with { PolicyEpoch = principal.PolicyEpoch + 1 });
+            transaction.PutRecord(key, principal with
+            {
+                PolicyEpoch = principal.PolicyEpoch + 1
+            });
             return true;
         });
 

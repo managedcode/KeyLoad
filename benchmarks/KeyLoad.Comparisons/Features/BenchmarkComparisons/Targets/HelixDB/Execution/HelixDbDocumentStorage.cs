@@ -39,7 +39,16 @@ internal static class HelixDbDocumentStorage
             var to = HelixDbNativeTokens.TokenToVariablePrefix + suffix;
             entries.Add(HelixDbProtocol.Entry(HelixDbDocumentAst.Lookup(label, edge.From), from));
             entries.Add(HelixDbProtocol.Entry(HelixDbDocumentAst.Lookup(label, edge.To), to));
-            var relation = HelixDbProtocol.Node(HelixDbNativeTokens.TokenAddE, new() { [HelixDbNativeTokens.TokenInput] = HelixDbProtocol.Node(HelixDbNativeTokens.TokenNodes, new() { [HelixDbNativeTokens.TokenReference] = new JsonObject { [HelixDbNativeTokens.TokenVar] = from } }), [HelixDbNativeTokens.TokenLabel] = label + HelixDbNativeTokens.TokenLinks, [HelixDbNativeTokens.TokenTo] = new JsonObject { [HelixDbNativeTokens.TokenVar] = to }, [HelixDbNativeTokens.TokenProperties] = new JsonArray() });
+            var relation = HelixDbProtocol.Node(HelixDbNativeTokens.TokenAddE, new()
+            {
+                [HelixDbNativeTokens.TokenInput] = HelixDbProtocol.Node(HelixDbNativeTokens.TokenNodes, new()
+                {
+                    [HelixDbNativeTokens.TokenReference] = new JsonObject { [HelixDbNativeTokens.TokenVar] = from }
+                }),
+                [HelixDbNativeTokens.TokenLabel] = label + HelixDbNativeTokens.TokenLinks,
+                [HelixDbNativeTokens.TokenTo] = new JsonObject { [HelixDbNativeTokens.TokenVar] = to },
+                [HelixDbNativeTokens.TokenProperties] = new JsonArray()
+            });
             entries.Add(HelixDbProtocol.Entry(relation, suffix));
             names.Add(suffix);
         }

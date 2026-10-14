@@ -15,9 +15,13 @@ internal sealed class MovementFrameReplicaObservationScope(MovementFrameReplicaO
     internal void Observe(CommitStage stage, long actualPrefix, int actualCap)
     {
         if (stage != CommitStage.EncodedFrameRejected)
-        { return; }
+        {
+            return;
+        }
         if (rejected || Volatile.Read(ref disposed) != Open)
-        { throw new InvalidOperationException(MovementFrameObservationProtocol.Invalid); }
+        {
+            throw new InvalidOperationException(MovementFrameObservationProtocol.Invalid);
+        }
         rejected = true;
         prefix = actualPrefix;
         cap = actualCap;
@@ -25,12 +29,18 @@ internal sealed class MovementFrameReplicaObservationScope(MovementFrameReplicaO
     public void Dispose()
     {
         if (Interlocked.Exchange(ref disposed, Closed) != Open)
-        { return; }
+        {
+            return;
+        }
         var failures = new List<Exception>();
         if (rejected && prefix == checked((long)cap + MovementFrameObservationProtocol.PrefixStep))
         {
             ServerFailureObserver.Observe(() => owner.Complete(entry,
-                identity with { RejectedPrefixBytes = prefix, MaximumFrameBytes = cap }), failures);
+                identity with
+                {
+                    RejectedPrefixBytes = prefix,
+                    MaximumFrameBytes = cap
+                }), failures);
         }
         ServerFailureObserver.Observe(() => owner.Exit(this), failures);
         ServerFailureObserver.ThrowIfAny(failures);

@@ -22,12 +22,16 @@ internal static class C1OutcomeInspectionProcessStartInfo
         if (mode is not C1OutcomeInspectionProtocol.Mode and not NativeInstallFrameInspectionProtocol.Mode
             and not C1SubmissionOutcomeInspectionProtocol.Mode
             and not global::KeyLoad.CrashHost.Features.ClusterReplication.C1SubmissionJournalInspectionProtocol.Mode)
-        { throw new ArgumentException(C1OutcomeInspectionProtocol.InvalidRequest, nameof(mode)); }
+        {
+            throw new ArgumentException(C1OutcomeInspectionProtocol.InvalidRequest, nameof(mode));
+        }
         var root = FindRepositoryRoot();
         var assembly = Path.Combine(root, TestsDirectory, CrashHostDirectory, CreateResultText, ReleaseDirectory,
             FrameworkDirectory, AssemblyName);
         if (!File.Exists(assembly))
-        { throw new FileNotFoundException(MissingHostMessage); }
+        {
+            throw new FileNotFoundException(MissingHostMessage);
+        }
         var start = new ProcessStartInfo(DotnetCommand)
         {
             WorkingDirectory = root,
@@ -49,7 +53,9 @@ internal static class C1OutcomeInspectionProcessStartInfo
             {
                 if (File.Exists(Path.Combine(current.FullName, SolutionName))
                     && File.Exists(Path.Combine(current.FullName, TestsDirectory, CrashHostDirectory, ProjectName)))
-                { return current.FullName; }
+                {
+                    return current.FullName;
+                }
             }
         }
         throw new DirectoryNotFoundException(RepositoryMissingMessage);

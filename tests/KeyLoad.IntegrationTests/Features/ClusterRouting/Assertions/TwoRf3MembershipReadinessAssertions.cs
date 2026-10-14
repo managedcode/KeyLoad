@@ -21,7 +21,9 @@ internal static class TwoRf3MembershipReadinessAssertions
     internal static async Task VerifyAllNodesAsync(DistributedApplication app, CancellationToken cancellationToken)
     {
         foreach (var node in TwoRf3MembershipProtocol.Nodes)
-        { await VerifyNodeAsync(app, node, cancellationToken).ConfigureAwait(false); }
+        {
+            await VerifyNodeAsync(app, node, cancellationToken).ConfigureAwait(false);
+        }
     }
 
     private static async Task VerifyNodeAsync(DistributedApplication app, string node,
@@ -72,7 +74,9 @@ internal static class TwoRf3MembershipReadinessAssertions
             await RequireNativeAdmissionProblemAsync(failure).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
         if (unexpected is { } owner)
-        { await ServerFailureObserver.ObserveAsync(() => owner.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => owner.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 

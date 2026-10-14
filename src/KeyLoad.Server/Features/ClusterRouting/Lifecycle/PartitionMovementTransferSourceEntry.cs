@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
+using KeyLoad.Clustering;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.Server;
 
@@ -23,7 +23,9 @@ internal sealed class PartitionMovementTransferSourceEntry(PartitionRef partitio
     {
         var failures = await PartitionMovementSourceEntryDisposal.ObserveSessionAsync(Session).ConfigureAwait(false);
         try
-        { retainedWork.Dispose(); }
+        {
+            retainedWork.Dispose();
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         ServerFailureObserver.ThrowIfAny(failures);
@@ -34,6 +36,8 @@ internal sealed class PartitionMovementTransferSourceEntry(PartitionRef partitio
         if (currentPrincipalId != principalId || actual.OriginalAuthoritySignature != query.OriginalAuthoritySignature
             || actual.OriginalAuthorityReplyBytes.Length != query.OriginalAuthorityReplyBytes.Length
             || Convert.ToHexStringLower(SHA256.HashData(actual.OriginalAuthorityReplyBytes.Span)) != authorityDigest)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
     }
 }

@@ -60,7 +60,10 @@ internal sealed class RemoteTransferDestinationTests
             [new("database", RemoteTransferDatabase.SourceQueueName, Capability.QueuePublish),
              new("database", RemoteTransferDatabase.SourceQueueName, Capability.QueueInspect),
              new("database", RemoteTransferDatabase.DestinationQueueName, Capability.QueueInspect)], ["*"])
-        { ClusterAdministrator = true, PolicyEpoch = 2 });
+        {
+            ClusterAdministrator = true,
+            PolicyEpoch = 2
+        });
 
         var rejected = fixture.Apply(OperationKind.Batch,
             new CommandRequest(Guid.NewGuid(), fixture.DestinationPartition,
@@ -77,7 +80,10 @@ internal sealed class RemoteTransferDestinationTests
     [Test]
     public async Task QueueQuotaFailureRollsBackBothDestinationEffectAndDedupReceipt()
     {
-        using var fixture = new RemoteTransferDatabase(destinationPolicy: new() { MaxStoredMessages = 1 });
+        using var fixture = new RemoteTransferDatabase(destinationPolicy: new()
+        {
+            MaxStoredMessages = 1
+        });
         fixture.Commit(fixture.DestinationPartition,
             new EnqueueMessage(fixture.DestinationQueue.Queue, "already-present", "{}"));
         var transferId = Guid.NewGuid();

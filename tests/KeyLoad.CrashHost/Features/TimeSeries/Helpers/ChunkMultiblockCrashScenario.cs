@@ -10,14 +10,19 @@ internal static class ChunkMultiblockCrashScenario
     internal static async Task<bool> TryRunAsync(string[] args)
     {
         if (args.Length != ChunkMultiblockCrashProtocol.Arguments || !ChunkMultiblockCrashProtocol.IsMode(args[ChunkMultiblockCrashProtocol.ModeArgument]))
-        { return false; }
+        {
+            return false;
+        }
         _ = SerializationExecutionRegistration.Process.Value;
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             var boundary = new CanonicalCrashBoundary(Enum.Parse<CommitStage>(args[ChunkMultiblockCrashProtocol.StageArgument]),
                 int.Parse(args[ChunkMultiblockCrashProtocol.MutationArgument], CultureInfo.InvariantCulture), false);
-            using var store = new ZoneTreeStore(new(args[ChunkMultiblockCrashProtocol.DirectoryArgument]) { FaultObserver = boundary.Observe },
+            using var store = new ZoneTreeStore(new(args[ChunkMultiblockCrashProtocol.DirectoryArgument])
+            {
+                FaultObserver = boundary.Observe
+            },
                 CrashExecutionOptions.StorageExecution(), CrashExecutionOptions.PointCacheExecution());
             await ServerFailureObserver.ObserveAsync(() => RunAsync(args, store, boundary), failures);
         }, failures);
@@ -40,11 +45,17 @@ internal static class ChunkMultiblockCrashScenario
             await CrashHostPause.WaitForKillAsync();
         }
         else if (ChunkMultiblockCrashProtocol.IsFault(mode))
-        { await FaultAsync(root, database, boundary, merge).ConfigureAwait(false); }
+        {
+            await FaultAsync(root, database, boundary, merge).ConfigureAwait(false);
+        }
         else if (ChunkMultiblockCrashProtocol.IsVerify(mode))
-        { await ChunkMultiblockCrashRecovery.VerifyAsync(root, database, mode, merge).ConfigureAwait(false); }
+        {
+            await ChunkMultiblockCrashRecovery.VerifyAsync(root, database, mode, merge).ConfigureAwait(false);
+        }
         else
-        { await ChunkMultiblockCrashRecovery.RecoverAsync(root, database, merge).ConfigureAwait(false); }
+        {
+            await ChunkMultiblockCrashRecovery.RecoverAsync(root, database, merge).ConfigureAwait(false);
+        }
     }
 
     private static async Task FaultAsync(string root, DatabaseEngine database, CanonicalCrashBoundary boundary, bool merge)

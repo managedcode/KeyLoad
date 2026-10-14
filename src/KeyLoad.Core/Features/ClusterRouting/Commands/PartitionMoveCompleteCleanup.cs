@@ -21,7 +21,9 @@ public sealed partial class DatabaseEngine
             || JsonData.Fingerprint(current) != JsonData.Fingerprint(body.Control)
             || current.Phase != (abort ? PartitionMovePhase.Aborting : PartitionMovePhase.Published)
             || phase.ControlIntentDigest != PartitionMoveIntentIdentity.Digest(current))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
         PartitionMoveCleanupSettlement.Require(transaction, current,
             abort ? PartitionMovePeerStage.Abort : PartitionMovePeerStage.Retire,
             PartitionMoveCleanupRole.Source, body.SourceGrantId, body.SourceSettlement,
@@ -29,14 +31,19 @@ public sealed partial class DatabaseEngine
         if (abort)
         {
             if (body.TargetGrantId is null || body.TargetSettlement is null)
-            { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
+            {
+                throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+            }
             PartitionMoveCleanupSettlement.Require(transaction, current, PartitionMovePeerStage.Abort,
                 PartitionMoveCleanupRole.Target, body.TargetGrantId.Value, body.TargetSettlement,
                 body.TargetBody, Limits.MaxBatchBytes);
 
         }
         RequireNoUnsettledMoveGrants(transaction, current);
-        var completed = current with { Phase = abort ? PartitionMovePhase.Aborted : PartitionMovePhase.Retired };
+        var completed = current with
+        {
+            Phase = abort ? PartitionMovePhase.Aborted : PartitionMovePhase.Retired
+        };
         PartitionMoveControlStorage.Write(transaction, completed, Limits.MaxBatchBytes);
         PartitionMoveGrantStorage.ChangeOutstanding(transaction, principal.Id, false, Limits.MaxBatchMutations);
         PartitionMoveGrantStorage.ChangeOutstanding(transaction,

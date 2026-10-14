@@ -15,7 +15,10 @@ internal sealed class ReplicaAppendBoundaryTests
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.Validation);
         await Assert.That(boundary.IsStarted).IsFalse();
         await before.RequireAsync(ReplicaAppendBoundaryCut.Read(fixture));
-        await RequireHealthyAsync(fixture, entry with { Index = 1 });
+        await RequireHealthyAsync(fixture, entry with
+        {
+            Index = 1
+        });
     }
 
     [Test]
@@ -59,7 +62,10 @@ internal sealed class ReplicaAppendBoundaryTests
         using var fixture = new ReplicaAppendBoundaryFixture(stage =>
         {
             if (stage == ReplicaCrashBoundary.EntryAcknowledged && armed)
-            { armed = false; throw injected; }
+            {
+                armed = false;
+                throw injected;
+            }
         });
         var entry = fixture.Create("actually-appended", 1);
         var before = ReplicaAppendBoundaryCut.Read(fixture);
@@ -71,7 +77,10 @@ internal sealed class ReplicaAppendBoundaryTests
         var appended = ReplicaAppendBoundaryCut.Read(fixture);
         await before.RequireCanonicalAsync(appended);
         await Assert.That(appended.ReplicaPosition > before.ReplicaPosition).IsTrue();
-        await ReplicaAppendBoundaryCut.RequireBytesAsync(NativeSerialization.Serialize(state with { LastIndex = entry.Index }),
+        await ReplicaAppendBoundaryCut.RequireBytesAsync(NativeSerialization.Serialize(state with
+        {
+            LastIndex = entry.Index
+        }),
             appended.HardState);
         await RequireEntryAsync(fixture, entry);
         fixture.Reopen();

@@ -16,10 +16,14 @@ internal static class QueueEmptyReceiveReplayWholeFlow
             await KeyLoad.Server.ServerFailureObserver.ObserveAsync(
                 () => CompleteAsync(fixture, failures, token), failures);
         }
-        catch (Exception error) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
-        catch (Exception error) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
+        catch (Exception error) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
+        catch (Exception error) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
         KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }
 

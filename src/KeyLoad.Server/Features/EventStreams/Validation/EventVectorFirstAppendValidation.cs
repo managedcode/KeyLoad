@@ -25,7 +25,9 @@ internal static class EventVectorFirstAppendValidation
             || original.Issuance.OriginalParentRequestId != appended.OriginalParentRequestId
             || EventVectorControlOperationIdentity.Create(phase, original.Issuance.PrincipalId,
                 admission).CommandId != appended.OperationId)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         return original;
     }
 }

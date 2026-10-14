@@ -15,9 +15,18 @@ internal sealed class CacheReadPermitAcceptanceTests
 
         await Assert.That(first).IsEqualTo(new CacheReadPermitAcceptance(1, 0, false));
         await Assert.That(permit.IsCurrentAcceptance(first)).IsTrue();
-        await Assert.That(permit.IsCurrentAcceptance(first with { Revision = 2 })).IsFalse();
-        await Assert.That(permit.IsCurrentAcceptance(first with { PreviousRevision = 1 })).IsFalse();
-        await Assert.That(permit.IsCurrentAcceptance(first with { Continuous = true })).IsFalse();
+        await Assert.That(permit.IsCurrentAcceptance(first with
+        {
+            Revision = 2
+        })).IsFalse();
+        await Assert.That(permit.IsCurrentAcceptance(first with
+        {
+            PreviousRevision = 1
+        })).IsFalse();
+        await Assert.That(permit.IsCurrentAcceptance(first with
+        {
+            Continuous = true
+        })).IsFalse();
 
         var secondGrant = Guid.NewGuid();
         await Assert.That(permit.TryAccept(secondGrant, 2, TimeProvider.System.GetTimestamp(), out var second)).IsTrue();
@@ -26,8 +35,14 @@ internal sealed class CacheReadPermitAcceptanceTests
         await Assert.That(permit.IsCurrentAcceptance(second)).IsTrue();
         await Assert.That(permit.TryWithdraw(firstGrant, first.Revision)).IsFalse();
         await Assert.That(permit.IsCurrentAcceptance(second)).IsTrue();
-        await Assert.That(permit.IsCurrentAcceptance(second with { PreviousRevision = 0 })).IsFalse();
-        await Assert.That(permit.IsCurrentAcceptance(second with { Continuous = false })).IsFalse();
+        await Assert.That(permit.IsCurrentAcceptance(second with
+        {
+            PreviousRevision = 0
+        })).IsFalse();
+        await Assert.That(permit.IsCurrentAcceptance(second with
+        {
+            Continuous = false
+        })).IsFalse();
         await Assert.That(permit.TryWithdraw(secondGrant, second.Revision)).IsTrue();
         await Assert.That(permit.IsCurrentAcceptance(second)).IsFalse();
 
@@ -80,7 +95,9 @@ internal sealed class CacheReadPermitAcceptanceTests
             cancellationToken.ThrowIfCancellationRequested();
             var remaining = minimumAge - clock.GetElapsedTime(prepared, clock.GetTimestamp());
             if (remaining <= TimeSpan.Zero)
-            { return; }
+            {
+                return;
+            }
             await Task.Delay(remaining < MinimumWait ? MinimumWait : remaining, clock, cancellationToken);
         }
     }

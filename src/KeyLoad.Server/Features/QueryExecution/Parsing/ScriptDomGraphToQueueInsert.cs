@@ -8,7 +8,9 @@ internal static class ScriptDomGraphToQueueInsert
         ScriptDomCompositionParameters parameters, int version)
     {
         if (version != DefaultVersion)
-        { throw ScriptDomOperationErrors.Unsupported(); }
+        {
+            throw ScriptDomOperationErrors.Unsupported();
+        }
         var values = ScriptDomInsertShape.Values(query, ValueCount);
         var id = parameters.Read<Guid>(values[CommandIndex]);
         var queue = parameters.Read<string>(values[QueueIndex]);

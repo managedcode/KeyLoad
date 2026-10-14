@@ -44,7 +44,9 @@ internal static class ReplicaIsolationFlowAssertions
         await Assert.That(failed.Value).IsNull();
         CommitToken?[] minima = [null, original, minimum];
         foreach (var token in minima)
-        { await DocumentSessionReadRf3NoQuorum.VerifyAsync(sdk, mcp, reference, token, secret, cancellationToken); }
+        {
+            await DocumentSessionReadRf3NoQuorum.VerifyAsync(sdk, mcp, reference, token, secret, cancellationToken);
+        }
     }
 
     internal static async Task ReplayedAsync(KeyLoadClient client, McpOfficialClient official,

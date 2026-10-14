@@ -54,13 +54,17 @@ internal static class GraphCrossAuthorityR41Assertions
         await SqlRf3Protocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(
             await callers.Sdk.TraverseAsync(request, token)));
         if (observe is not null)
-        { await observe(); }
+        {
+            await observe();
+        }
         var reply = await callers.Mcp.CallAsync(McpCallerTools.GraphTraverse, request, token);
         await SqlRf3Protocol.EqualAsync(expected,
             (await McpCallerAssertions.SuccessAsync<global::KeyLoad.GraphTraversal>(reply)).Value);
         await McpCallerAssertions.DoesNotDiscloseAsync(reply, credential,
             GraphIncomingRf3Scenario.PrivateMarker);
         if (observe is not null)
-        { await observe(); }
+        {
+            await observe();
+        }
     }
 }

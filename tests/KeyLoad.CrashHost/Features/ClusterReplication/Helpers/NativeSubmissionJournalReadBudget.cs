@@ -17,14 +17,18 @@ internal sealed class NativeSubmissionJournalReadBudget(StorageReadObserver? add
         byte[]? original = null;
         var found = view.ReadValue(key, bytes => original = bytes.ToArray(), Observe);
         if (!found || original is null)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, ReplicaProtocol.CorruptLog); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, ReplicaProtocol.CorruptLog);
+        }
         return original;
     }
 
     private void Observe(long byteCount)
     {
         if (byteCount < NoReadBytes || byteCount > MaximumRecordBytes || byteCount > MaximumReadBytes - examined)
-        { throw new InvalidDataException(Exceeded); }
+        {
+            throw new InvalidDataException(Exceeded);
+        }
         examined += byteCount;
         additionalReadObserver?.Invoke(byteCount);
     }

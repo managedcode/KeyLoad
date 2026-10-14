@@ -14,16 +14,25 @@ internal static class PartitionMovementCleanupMatrixByteFault
             || original.ArmId != primary.ArmId || original.CommandId != primary.CommandId
             || original.Phase != primary.Phase || !RequestCqrsProbeFixtureProtocol.Nodes.Any(node =>
                 RequestCqrsProbeFileNames.OriginForNode(node) == primary.Voter))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         var changedId = Guid.NewGuid();
         if (changedId == original.CommandId)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         var changed = RequestCqrsProbeJsonWriter.Arm(original.SessionId, original.ArmId, original.PrincipalId,
             changedId, original.ReadKind, original.Phase, original.Action, original.Partition?.ToPartition(),
             original.SourceRequestId, original.TargetVoter, original.SourceArmId);
-        if (controls.Json.ReadArm(changed) != (original with { CommandId = changedId })
+        if (controls.Json.ReadArm(changed) != (original with
+        {
+            CommandId = changedId
+        })
             || changed.AsSpan().SequenceEqual(state.Bytes))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         var name = RequestCqrsProbeFileNames.Arm(primary.ArmId);
         foreach (var node in RequestCqrsProbeFixtureProtocol.Nodes)
         {

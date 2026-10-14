@@ -14,7 +14,9 @@ internal sealed class ControlledDocumentTargetEffect(ControlledDocumentPhaseExec
             ?? throw Errors.Fail(ErrorCode.Corruption, RemoteDocumentProtocol.Unavailable);
         var body = admission.TargetBody;
         if (body.IsEmpty)
-        { throw Errors.Fail(ErrorCode.Corruption, RemoteDocumentProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, RemoteDocumentProtocol.Unavailable);
+        }
         var grantId = ControlledDocumentTechnicalIdentity.Derive(original, ControlledDocumentTechnicalIdentity.Authorize);
         var proposed = phases.ProposeEncoded(context, PartitionMovePeerStage.ControlApplyCommand, body);
         var originalAuthorization = new PartitionMoveAuthorizeBody(grantId, admission.EffectId,

@@ -38,7 +38,10 @@ public sealed partial class RedisTarget
         var evidence = await RedisDocumentCopyProof.VerifyAsync(connection, replicaEndpoints, configuredTopology, Profile,
             prefix.TrimEnd(NamespaceSeparator) + FinalFenceSuffix, schedule, lifecycleOptions, timeProvider,
             (replica, token) => documentNamespace!.ReadAsync(replica, token, CommandFlags.DemandReplica), cancellationToken).ConfigureAwait(false);
-        Profile = Profile with { Cluster = evidence };
+        Profile = Profile with
+        {
+            Cluster = evidence
+        };
     }
     private Task CleanupDocumentNamespaceAsync()
         => documentNamespace is null || connection is null ? Task.CompletedTask

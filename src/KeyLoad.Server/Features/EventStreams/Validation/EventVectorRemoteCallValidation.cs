@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 using Microsoft.Extensions.Options;
 
@@ -23,10 +23,14 @@ internal sealed class EventVectorRemoteCallValidation(PartitionHost partition,
             const int DestinationGroupOrdinal = 1;
             var local = LocalOwner.Owner;
             if (PhysicalOwnerEntryValidation.SameOwner(local, ControlOwner.Owner))
-            { return ControlGroupOrdinal; }
+            {
+                return ControlGroupOrdinal;
+            }
             var destination = PhysicalOwnerConfiguredTuples.Destination(nodeOptions.Value, partition);
             if (PhysicalOwnerEntryValidation.SameOwner(local, destination.Owner))
-            { return DestinationGroupOrdinal; }
+            {
+                return DestinationGroupOrdinal;
+            }
             throw Errors.Fail(ErrorCode.OwnershipLost, EventVectorRemoteProtocol.Unavailable);
         }
     }
@@ -48,6 +52,8 @@ internal sealed class EventVectorRemoteCallValidation(PartitionHost partition,
             || !global::KeyLoad.Server.Features.ClusterRouting.PhysicalGroupAddress.CanonicalAddress(call.CallerSiloAddress, membershipOptions)
             || call.ExpiresAt <= now || call.ExpiresAt > now + routingOptions.Value.RequestLifetime
             || call.Source is null || !PhysicalOwnerEntryValidation.SameOwner(call.Source, control.Owner))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, EventVectorRemoteProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, EventVectorRemoteProtocol.Invalid);
+        }
     }
 }

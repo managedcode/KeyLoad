@@ -24,14 +24,18 @@ internal static class EventVectorOriginalPinOutcome
             release.OriginalPinCommandId,
             new CommandOutcomePartitionScope(CommandOutcomeScopeKind.Partition, release.Source.Partition));
         if (selection.Outcome is not { } outcome)
-        { return (null, ReadOnlyMemory<byte>.Empty); }
+        {
+            return (null, ReadOnlyMemory<byte>.Empty);
+        }
         var original = NativeSerialization.Deserialize<EventVectorSourceMutation>(release.OriginalPinNativeBody.Span);
         var json = JsonSerializer.SerializeToUtf8Bytes(original, JsonDefaults.Options);
         var fingerprint = NativeOperationFingerprint.Compute(release.OriginalPinCommandId,
             OperationKind.EventFeedSourcePhase, release.PrincipalId, json);
         if (outcome.Fingerprint != fingerprint || outcome.Incarnation != original.SourceOwner.Incarnation
             || outcome.PolicyEpoch != original.SourcePolicyEpoch)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidOutcome); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidOutcome);
+        }
         var digest = ReadOnlyMemory<byte>.Empty;
         var found = view.ReadValue(selection.Key, bytes =>
         {
@@ -39,7 +43,9 @@ internal static class EventVectorOriginalPinOutcome
             digest = SHA256.HashData(bytes);
         });
         if (!found)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidOutcome); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidOutcome);
+        }
         return (outcome, digest);
     }
 }

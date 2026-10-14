@@ -27,7 +27,10 @@ internal static class McpBlobCatalogExpectations
     private const string Count = "count";
     private const string Resource = "resource";
 
-    internal static ImmutableArray<McpToolExpectation> Entries { get; } =
+    internal static ImmutableArray<McpToolExpectation> Entries
+    {
+        get;
+    } =
     [
         Command(BeginUpload, false, [McpCallerProtocol.CommandId, Blob, UploadId, Length, ExpectedRevision]),
         Command(WritePart, false, [McpCallerProtocol.CommandId, Blob, UploadId, Ordinal, Bytes, Sha256]),

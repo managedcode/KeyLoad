@@ -1,7 +1,7 @@
 using KeyLoad.Client;
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.IntegrationTests.Features.DocumentStorage;
@@ -36,10 +36,19 @@ internal sealed class FollowerDocumentRf3HeldFlow(FollowerDocumentRf3State state
     {
         var sdk = state.Administrator!.Sdk;
         if (state.Change == FollowerDocumentChange.Credential)
-        { await McpCallerAssertions.SdkStatusAsync(await sdk.ConfigureApiKeyAsync(Guid.NewGuid(), state.Credential with { Revoked = true }, token).ConfigureAwait(false)).ConfigureAwait(false); }
+        {
+            await McpCallerAssertions.SdkStatusAsync(await sdk.ConfigureApiKeyAsync(Guid.NewGuid(), state.Credential with
+            {
+                Revoked = true
+            }, token).ConfigureAwait(false)).ConfigureAwait(false);
+        }
         if (state.Change == FollowerDocumentChange.Grant)
         {
-            state.Principal = state.Principal with { Grants = [], PolicyEpoch = state.Principal.PolicyEpoch + 1 };
+            state.Principal = state.Principal with
+            {
+                Grants = [],
+                PolicyEpoch = state.Principal.PolicyEpoch + 1
+            };
             state.Principal = await McpCallerAssertions.SdkSuccessAsync(await sdk.ConfigurePrincipalAsync(Guid.NewGuid(), state.Principal, token).ConfigureAwait(false)).ConfigureAwait(false);
         }
         if (state.Change == FollowerDocumentChange.FieldPolicy)
@@ -53,7 +62,9 @@ internal sealed class FollowerDocumentRf3HeldFlow(FollowerDocumentRf3State state
             };
             await McpCallerAssertions.SdkSuccessAsync(await sdk.ConfigureResourceAsync(Guid.NewGuid(),
                 new ConfigureResourceRequest(state.Identity.Partition.TenantId, state.Identity.Partition.DatabaseId, resource)
-                { ExpectedSchemaVersion = FollowerDocumentRf3Protocol.FirstRevision }, token).ConfigureAwait(false)).ConfigureAwait(false);
+                {
+                    ExpectedSchemaVersion = FollowerDocumentRf3Protocol.FirstRevision
+                }, token).ConfigureAwait(false)).ConfigureAwait(false);
         }
         var command = RequestCqrsPhaseFaultProvisioning.UpdateCommand(state.Identity, Guid.NewGuid());
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(command, token).ConfigureAwait(false)).ConfigureAwait(false);
@@ -67,9 +78,14 @@ internal sealed class FollowerDocumentRf3HeldFlow(FollowerDocumentRf3State state
         await Assert.That(state.Changed.Applied).IsGreaterThanOrEqualTo(receipt.Token.Position);
         await Assert.That(state.Changed.ConsensusTerm).IsEqualTo(state.Before.ConsensusTerm);
         if (state.Change == FollowerDocumentChange.Cancellation)
-        { await state.CallLifetime!.CancelAsync().ConfigureAwait(false); return; }
+        {
+            await state.CallLifetime!.CancelAsync().ConfigureAwait(false);
+            return;
+        }
         if (state.Change == FollowerDocumentChange.NoQuorum)
-        { await new FollowerDocumentRf3QuorumFlow(state).RemoveOtherVotersAsync(token).ConfigureAwait(false); }
+        {
+            await new FollowerDocumentRf3QuorumFlow(state).RemoveOtherVotersAsync(token).ConfigureAwait(false);
+        }
         state.Controls!.WriteRelease(state.ArmId, state.Observed.RequestId);
     }
 
@@ -85,7 +101,9 @@ internal sealed class FollowerDocumentRf3HeldFlow(FollowerDocumentRf3State state
             await FollowerDocumentRf3Assertions.RejectedAsync(original, code, state.Identity.Secret);
         }
         else if (state.Change == FollowerDocumentChange.Cancellation)
-        { await FollowerDocumentRf3Assertions.CancelledAsync(original, state.Identity.Secret, state.Mode, state.CallLifetime!.Token); }
+        {
+            await FollowerDocumentRf3Assertions.CancelledAsync(original, state.Identity.Secret, state.Mode, state.CallLifetime!.Token);
+        }
         else
         {
             var redacted = state.Change == FollowerDocumentChange.FieldPolicy;
@@ -94,9 +112,13 @@ internal sealed class FollowerDocumentRf3HeldFlow(FollowerDocumentRf3State state
                 FollowerDocumentRf3Protocol.FirstRevision, state.Principal.PolicyEpoch, redacted);
         }
         if (state.Change == FollowerDocumentChange.NoQuorum)
-        { await new FollowerDocumentRf3QuorumFlow(state).RestoreVotersAndVerifyAsync(token).ConfigureAwait(false); }
+        {
+            await new FollowerDocumentRf3QuorumFlow(state).RestoreVotersAndVerifyAsync(token).ConfigureAwait(false);
+        }
         else
-        { await RestoreAndContinueAsync(token).ConfigureAwait(false); }
+        {
+            await RestoreAndContinueAsync(token).ConfigureAwait(false);
+        }
     }
 
     private static ErrorCode RefusalCode(FollowerDocumentChange change) => change switch
@@ -114,7 +136,10 @@ internal sealed class FollowerDocumentRf3HeldFlow(FollowerDocumentRf3State state
         state.Principal = new(state.Identity.PrincipalId, state.Identity.Partition.TenantId,
             [new(state.Identity.Partition.DatabaseId, RequestCqrsRf3Protocol.AdminCollection,
                 Capability.DocumentsRead | Capability.DocumentsWrite)], [FollowerDocumentRf3Protocol.FieldGrant])
-        { ClusterAdministrator = false, PolicyEpoch = state.Principal.PolicyEpoch + 1 };
+        {
+            ClusterAdministrator = false,
+            PolicyEpoch = state.Principal.PolicyEpoch + 1
+        };
         state.Principal = await McpCallerAssertions.SdkSuccessAsync(await sdk.ConfigurePrincipalAsync(Guid.NewGuid(), state.Principal, token).ConfigureAwait(false)).ConfigureAwait(false);
         await new FollowerDocumentRf3Continuation(state).VerifyHealthyAsync(sdk, state.Caller!, state.ReplicaId, token).ConfigureAwait(false);
     }

@@ -17,12 +17,18 @@ internal static class CanonicalApplyNetworkMarkers
             {
                 var name = Path.GetFileName(path);
                 if (!name.StartsWith(RequestCqrsProbeFixtureProtocol.MarkerFilePrefix + arm.ToString(GuidFormat) + Separator, StringComparison.Ordinal))
-                { continue; }
+                {
+                    continue;
+                }
                 var marker = controls.Json.ReadMarker(RequestCqrsProbeFileStore.ReadRecord(path));
                 if (marker.ArmId != arm)
-                { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch); }
+                {
+                    throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch);
+                }
                 if (marker.Phase == RequestCqrsProbePhase.CanonicalOutboundObserved)
-                { throw new InvalidOperationException(OutboundFailure); }
+                {
+                    throw new InvalidOperationException(OutboundFailure);
+                }
             }
         }
     }

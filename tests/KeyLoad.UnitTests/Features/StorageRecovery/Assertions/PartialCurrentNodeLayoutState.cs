@@ -12,7 +12,9 @@ internal static class PartialCurrentNodeLayoutState
     {
         var page = view.Scan([], MaximumRecords);
         if (page.HasMore)
-        { throw new InvalidOperationException(Overflow); }
+        {
+            throw new InvalidOperationException(Overflow);
+        }
         return page.Records.Select(row => Convert.ToHexString(row.Key.Span)
             + Separator + Convert.ToHexString(row.Value.Span)).Order(StringComparer.Ordinal).ToArray();
     });

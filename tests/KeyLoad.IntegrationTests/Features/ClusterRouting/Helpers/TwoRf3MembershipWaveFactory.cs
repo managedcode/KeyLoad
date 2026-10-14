@@ -31,7 +31,10 @@ internal static class TwoRf3MembershipWaveFactory
         Action<string>? observe = null, KeyLoad.IntegrationTests.Features.Messaging.RemoteTransferStartupCallbacks? callbacks = null)
         => TwoRf3MembershipWaveStartup.StartOwnedAsync(new TwoRf3MembershipWave(selection, register: true, remote: true, query: true,
             probe: true, protectedDocument: true)
-        { nativeDiscoveryOmissionSelected = true, startupCallbacks = callbacks }, token, observe);
+        {
+            nativeDiscoveryOmissionSelected = true,
+            startupCallbacks = callbacks
+        }, token, observe);
 
     internal static Task<TwoRf3MembershipWave> StartActivationIsolationAsync(CancellationToken token)
         => TwoRf3MembershipWave.StartOwnedAsync(new TwoRf3MembershipWave(null, register: true, remote: true, query: true,
@@ -49,7 +52,9 @@ internal static class TwoRf3MembershipWaveFactory
         new KeyLoad.Storage.ZoneTree.ZoneTreeStorageExecutionOptions { MaxFrameBytes = maxFrameBytes }.Validate();
         var wave = new TwoRf3MembershipWave(null, register: true, remote: true, query: true,
             probe: true, protectedDocument: true)
-        { movementMaxFrameBytes = maxFrameBytes };
+        {
+            movementMaxFrameBytes = maxFrameBytes
+        };
         return TwoRf3MembershipWave.StartOwnedAsync(wave, token);
     }
 

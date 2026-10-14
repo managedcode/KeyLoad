@@ -88,7 +88,9 @@ internal static class PartitionQueryOrder
             var leftNull = left.SequenceEqual(NullKey);
             var rightNull = right.SequenceEqual(NullKey);
             if (leftNull != rightNull)
-            { return leftNull == first ? BeforeOrder : AfterOrder; }
+            {
+                return leftNull == first ? BeforeOrder : AfterOrder;
+            }
         }
         var comparison = left.SequenceCompareTo(right);
         return order.Descending ? -Math.Sign(comparison) : Math.Sign(comparison);

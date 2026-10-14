@@ -32,7 +32,9 @@ public sealed partial class DatabaseEngine
     {
         if (frame is null || frame.Reference is null || frame.Reference.Partition is null
             || frame.Principal is null || frame.Resource is null || frame.Control is null || frame.Publication is null)
-        { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid);
+        }
         ValidatePartition(frame.Reference.Partition);
         JsonData.Identifier(frame.Reference.Collection);
         JsonData.Identifier(frame.Reference.Id);
@@ -53,12 +55,18 @@ public sealed partial class DatabaseEngine
             || JsonData.Fingerprint(frame.Publication) != JsonData.Fingerprint(publication)
             || frame.Publication.Destination.Incarnation != Store.Identity.Incarnation
             || frame.Resource.Name != frame.Reference.Collection)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
         var baseline = stage.Descriptor.Resources.SingleOrDefault(value => value.Name == frame.Resource.Name);
         if (baseline is null || !ResourcePolicyUpdates.SameNonPolicyDefinition(baseline, frame.Resource))
-        { throw Errors.Fail(ErrorCode.UnsupportedCapability, PartitionMoveProtocol.InvalidImage); }
+        {
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, PartitionMoveProtocol.InvalidImage);
+        }
         if (!frame.Principal.ClusterAdministrator && frame.Principal.TenantId != frame.Reference.Partition.TenantId)
-        { throw Errors.Fail(ErrorCode.PermissionDenied, RemoteDocumentTenantDenied); }
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, RemoteDocumentTenantDenied);
+        }
         Authorization.Require(frame.Principal, frame.Reference.Partition, frame.Reference.Collection, Capability.DocumentsRead);
     }
 }

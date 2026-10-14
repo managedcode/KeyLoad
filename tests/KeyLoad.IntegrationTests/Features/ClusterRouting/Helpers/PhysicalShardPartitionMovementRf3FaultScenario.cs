@@ -25,15 +25,23 @@ internal static class PhysicalShardPartitionMovementRf3FaultScenario
             wave = await TwoRf3MembershipWave.StartProtectedDocumentsAsync(caller.Token);
             seeds.Add(await PartitionMovementPublicParentRf3Seed.CreateAsync(wave, caller.Token));
             while (seeds.Count < ExactSeeds)
-            { seeds.Add(await PartitionMovementPublicParentRf3Seed.CreateAsync(wave, seeds[FirstSeed].Credential, caller.Token)); }
+            {
+                seeds.Add(await PartitionMovementPublicParentRf3Seed.CreateAsync(wave, seeds[FirstSeed].Credential, caller.Token));
+            }
             await PhysicalShardPartitionMovementRf3FaultFlow.RunAsync(wave, seeds.ToArray(), role, caller.Token, recovery);
         }, failures);
         if (failures.Count > 0 && wave is { } failedWave)
-        { failedWave.QueryControls.RetainEvidence(); }
+        {
+            failedWave.QueryControls.RetainEvidence();
+        }
         foreach (var seed in seeds)
-        { await ServerFailureObserver.ObserveAsync(() => seed.DisposeAsync().AsTask(), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => seed.DisposeAsync().AsTask(), failures);
+        }
         if (wave is { } owned)
-        { await ServerFailureObserver.ObserveAsync(() => owned.DisposeAsync().AsTask(), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => owned.DisposeAsync().AsTask(), failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

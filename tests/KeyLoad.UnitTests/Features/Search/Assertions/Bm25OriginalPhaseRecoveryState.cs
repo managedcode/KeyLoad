@@ -16,7 +16,9 @@ internal sealed record Bm25OriginalPhaseRecoveryState(Guid NodeId, Guid Incarnat
                     return true;
                 }, observer: work.ChargeBytes, cancellationToken: Bm25OriginalPhaseRecoveryFlow.Token);
             if (scan.HasMore)
-            { throw new InvalidOperationException("The complete original canonical image exceeded the native record bound."); }
+            {
+                throw new InvalidOperationException("The complete original canonical image exceeded the native record bound.");
+            }
             return (Position: owner.Store.Position, Rows: NativeSerialization.Serialize(rows.ToArray()));
         });
         var journal = owner.JournalCut();

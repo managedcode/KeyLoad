@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
@@ -19,14 +19,20 @@ internal static class TenantCapacityPlacementRf3SecondOwnerLossRecovery
         await wave.RestartJoinedAsync(token);
         await wave.WaitForSixHealthyAsync(token);
         foreach (var seed in seeds)
-        { await seed.ReconnectAsync(wave, token); }
+        {
+            await seed.ReconnectAsync(wave, token);
+        }
         var discovery = await TwoRf3MembershipFingerprintOracle.ObserveSixAsync(wave.Application, wave.Profile, token);
         await FreshOwnerAsync(held, discovery);
         await TenantCapacityPlacementRf3MultiAssertions.PlacementsAsync(seeds[First], state, moves, CompletedFirst, token);
         await Assert.That(held.Applying.Claim!.ExpiresAt).IsGreaterThan(TimeProvider.System.GetUtcNow());
         var completed = (await McpCallerAssertions.SuccessAsync<PlacementIntentV1>(
             await seeds[First].Official.CallAsync(TenantPlacementPublicProtocol.ApplyTool,
-                new { commandId = id, request }, token))).Value;
+                new
+                {
+                    commandId = id,
+                    request
+                }, token))).Value;
         await Assert.That(completed.Status).IsEqualTo(PlacementIntentStatus.Completed);
         await Assert.That(completed.Revision).IsEqualTo(checked(held.Applying.Revision + ReclaimAndComplete));
         await Assert.That(completed.CompletedMoves).IsEqualTo(AllCompleted);

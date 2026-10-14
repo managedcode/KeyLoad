@@ -39,7 +39,10 @@ internal static class BlobArchiveActivePublicAssertions
         BlobArchiveActivePublicVersion active, bool restored, CancellationToken token)
     {
         var request = new BlobUploadInfoRequest(active.Begin.Blob, active.Begin.UploadId);
-        var expected = active.Written.Last().Value with { Status = restored ? BlobUploadStatus.Aborted : BlobUploadStatus.Active };
+        var expected = active.Written.Last().Value with
+        {
+            Status = restored ? BlobUploadStatus.Aborted : BlobUploadStatus.Active
+        };
         await SqlRf3Protocol.EqualAsync(expected, await PublicReadAssertions.UploadAsync(await sdk.GetBlobUploadInfoAsync(request, token)));
         await SqlRf3Protocol.EqualAsync(expected, (await PublicReadAssertions.RequiredUploadAsync(
             await official.CallAsync("keyload_blobs_upload_info", request, token))).Value);

@@ -5,7 +5,10 @@ namespace KeyLoad.CrashHost;
 
 internal static class ProjectionCrashScenario
 {
-    internal static PartitionRef Partition { get; } = new(CrashFixtureValues.Tenant, CrashFixtureValues.Database,
+    internal static PartitionRef Partition
+    {
+        get;
+    } = new(CrashFixtureValues.Tenant, CrashFixtureValues.Database,
         CrashFixtureValues.Orders, CrashFixtureValues.Partition);
     internal static ProjectionConsumerRef Consumer { get; } = new(Partition, CrashFixtureValues.ProjectionConsumer);
     internal static Guid CommandId { get; } = new(CrashFixtureValues.ProjectionCommandId);

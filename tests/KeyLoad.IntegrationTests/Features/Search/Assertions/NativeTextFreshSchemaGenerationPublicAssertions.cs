@@ -13,7 +13,11 @@ internal static class NativeTextFreshSchemaGenerationPublicAssertions
         await Assert.That(actual.Source!.SchemaVersion).IsEqualTo(2L);
         await Assert.That(actual.IndexedThroughSequence).IsEqualTo(original.Built.IndexedThroughSequence);
         var digest = Convert.ToHexStringLower(SHA256.HashData(NativeSerialization.Serialize(schema)));
-        var authority = original.Built.Source! with { SchemaVersion = 2L, ResourceSha256 = digest };
+        var authority = original.Built.Source! with
+        {
+            SchemaVersion = 2L,
+            ResourceSha256 = digest
+        };
         await NativeTextMaintenanceRf3ReplayAssertions.SourceAsync(actual.Source!, authority, before, after);
         await Assert.That(actual.IndexedThroughSequence).IsEqualTo(actual.Source!.ThroughSequence);
     }

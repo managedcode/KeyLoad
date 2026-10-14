@@ -1,5 +1,5 @@
 using System.Diagnostics;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using ManagedCode.Communication.CQRS;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
@@ -140,7 +140,11 @@ internal static class OrleansRuntimeTelemetryWorkflows
         var requestId = Guid.NewGuid();
         var commandId = Guid.NewGuid();
         var signed = SignWrite(fixture, principal, requestId, commandId, documentId);
-        var revoked = principal with { Revoked = true, PolicyEpoch = principal.PolicyEpoch + 1 };
+        var revoked = principal with
+        {
+            Revoked = true,
+            PolicyEpoch = principal.PolicyEpoch + 1
+        };
         fixture.Database.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(revoked));
         var reply = await RequestCqrsNativeCommandStream.InvokeAsync(fixture, signed, principal, requestId,
             commandId, OrleansRuntimeTelemetryTokens.FailedTerminalSequence,

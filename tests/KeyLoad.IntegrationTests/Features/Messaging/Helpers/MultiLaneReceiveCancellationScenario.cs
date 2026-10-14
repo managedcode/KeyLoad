@@ -1,8 +1,8 @@
 using KeyLoad.Client;
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
 using KeyLoad.IntegrationTests.Features.StorageRecovery;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
 using ManagedCode.Communication;
@@ -89,9 +89,13 @@ internal sealed class MultiLaneReceiveCancellationScenario(bool useMcp)
             RequestCqrsProbePhase.SubmitReturned, RequestCqrsProbeAction.Hold);
         originalCancellation = CancellationTokenSource.CreateLinkedTokenSource(token);
         if (useMcp)
-        { mcpCall = MultiLaneReceiveCancellationCallers.CallAsync(caller, request, originalCancellation.Token); }
+        {
+            mcpCall = MultiLaneReceiveCancellationCallers.CallAsync(caller, request, originalCancellation.Token);
+        }
         else
-        { sdkCall = caller.Sdk.ReceiveAcrossLanesAsync(request, originalCancellation.Token); }
+        {
+            sdkCall = caller.Sdk.ReceiveAcrossLanesAsync(request, originalCancellation.Token);
+        }
     }
 
     private async Task ObserveAndCancelAsync(CancellationToken token)

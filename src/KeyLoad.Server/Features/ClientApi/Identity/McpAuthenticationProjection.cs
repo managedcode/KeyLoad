@@ -34,7 +34,9 @@ internal sealed class McpAuthenticationProjection(bool enforceMcpBounds, IOption
         if (enforceMcpBounds && (shape.TokenCount > settings.MaximumTokens
             || shape.PropertyCount > settings.MaximumProperties
             || shape.Depth > settings.MaximumDepth))
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, McpFramingProtocol.FrameBudgetExceeded); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, McpFramingProtocol.FrameBudgetExceeded);
+        }
         return shape;
     }
 
@@ -45,7 +47,9 @@ internal sealed class McpAuthenticationProjection(bool enforceMcpBounds, IOption
         var tokens = PrincipalMinimumTokens + (long)count * (typeof(T) == typeof(ScopeGrant) ? GrantMinimumTokens : ScalarTokens);
         var properties = PrincipalProperties + (typeof(T) == typeof(ScopeGrant) ? (long)count * GrantProperties : RequireCountAbsentCount);
         if (enforceMcpBounds && (tokens > settings.MaximumTokens || properties > settings.MaximumProperties))
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, McpFramingProtocol.FrameBudgetExceeded); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, McpFramingProtocol.FrameBudgetExceeded);
+        }
     }
 }
 

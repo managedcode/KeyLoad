@@ -46,7 +46,10 @@ internal sealed class NativeQueryCursorTests
         await Assert.That(claims.NodeId).IsEqualTo(fixture.Store.Identity.NodeId);
         await Assert.That(claims.PrincipalId).IsEqualTo(Root);
         await Assert.That(claims.Offset).IsEqualTo(One);
-        var second = engine.Execute(Root, request with { Cursor = cursor });
+        var second = engine.Execute(Root, request with
+        {
+            Cursor = cursor
+        });
         await Assert.That(second.Rows.Single().EntityId).IsEqualTo(Second);
         await Assert.That(second.Rows.Single().Json).IsEqualTo(fixture.Database.GetDocument(Root, new(fixture.Partition, Collection, Second))!.Json);
         await Assert.That(second.Cursor).IsNull();
@@ -69,9 +72,15 @@ internal sealed class NativeQueryCursorTests
         foreach (var invalid in cases)
         {
             await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() =>
-                engine.Execute(Root, request with { Cursor = invalid })).Code).IsEqualTo(ErrorCode.CursorExpired);
+                engine.Execute(Root, request with
+                {
+                    Cursor = invalid
+                })).Code).IsEqualTo(ErrorCode.CursorExpired);
         }
-        await Assert.That(engine.Execute(Root, request with { Cursor = cursor }).Rows.Single().EntityId).IsEqualTo(Second);
+        await Assert.That(engine.Execute(Root, request with
+        {
+            Cursor = cursor
+        }).Rows.Single().EntityId).IsEqualTo(Second);
     }
 
     [Test]

@@ -171,3 +171,12 @@ All11,500 Git-visible inputs and captured KeyLoad DLL/PDB images stayed unchange
 The authenticated preceding R51 Linux cohort at319c719e/run38578269537 reports3791Unitrows (3779PASS/12FAIL) with actual session abort/testhostPID5004; it is not a completed full Unit gate. Recovery355/351/4 and cancelled RF3 with no complete structured census remain original failures. All8originalZIP/66TRX/65TUnitJSON and37failed report rows are reconciled separately, not admitted as current-source qualification.
 
 Original completion/failure/closure hashes are recorded in `status.json` under `STAGE64-PUBLIC-MODELS-001.currentStageR52`. The owner's next project name is `KeyLoad.Clustering`; its semantic rename and the Prostir formatting baseline were only prepared during this frozen checkpoint and receive no current runtime credit.
+
+
+## R53 — owner-requested whole working-tree code checkpoint
+
+The complete visible working tree is committed on the current main at the owner's explicit request, including every completed parallel source boundary. `KeyLoad.Clustering` replaces the project/directory/root namespace while retaining native aliases, field IDs, signed identities and storage formats. The Prostir EditorConfig baseline requires multiline executable blocks; coherent responsibility extraction preserves64/200/400/nesting3 rather than increasing limits.
+
+This checkpoint is not a passed build or task acceptance. Earlier formatter applications completed, but the final integrated formatter verification and analyzer-enabled Release build have not passed. The latest full Release attempt reported seven Query/Replication numeric errors before later repairs; the130-row native whole-solution inventory predates concurrent repairs and must not be presented as the current residual count. No R53 runtime or coverage result is claimed.
+
+The original plan remains20/104accepted and84inprogress; KL105 is additional and open. Functional coverage is UNMEASURED. Complete exact-source Linux, Unit, process recovery, genuine Docker/Aspire RF3 through SDK/MCP, fault/endurance and matched performance gates remain mandatory.

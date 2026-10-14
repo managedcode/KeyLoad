@@ -16,9 +16,13 @@ internal static class RequestCqrsMovementJournalReader
             foreach (var path in RequestCqrsProbeFileValidation.ValidateContents(owned.Directory))
             {
                 if (Path.GetFileName(path) != expectedName)
-                { continue; }
+                {
+                    continue;
+                }
                 if (selected is not null)
-                { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch); }
+                {
+                    throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch);
+                }
                 var value = fixture.Json.Read(RequestCqrsProbeFileStore.ReadRecord(path),
                     RequestCqrsMovementJournalInventory.Fields, fixture.Json.MovementJournalTypeInfo);
                 RequestCqrsMovementJournalInventory.Require(value);
@@ -26,7 +30,9 @@ internal static class RequestCqrsMovementJournalReader
                 RequestCqrsMovementJournalInventory.RequireArm(value,
                     fixture.Json.ReadArm(fixture.ArmFor(marker.ArmId).Bytes));
                 if (fixture.ArmFor(marker.ArmId).GateVoter != node)
-                { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch); }
+                {
+                    throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch);
+                }
                 selected = value;
             }
         }

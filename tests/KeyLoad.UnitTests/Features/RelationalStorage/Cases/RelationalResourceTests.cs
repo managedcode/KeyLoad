@@ -19,7 +19,10 @@ internal sealed class RelationalResourceTests
     {
         var row = unicode ? RelationalTestData.Row().Replace(Alpha, UnicodeValue, StringComparison.Ordinal) : RelationalTestData.Row();
         var byteLimit = unicode ? row.Length : Encoding.UTF8.GetByteCount(row) - 1;
-        using var database = new TestDatabase(new() { MaxDocumentBytes = byteLimit });
+        using var database = new TestDatabase(new()
+        {
+            MaxDocumentBytes = byteLimit
+        });
         RelationalTestData.Configure(database);
         var rejected = RelationalTestData.Submit(database, new PutDocument(RelationalTestData.Table, RelationalTestData.First, row));
         await Assert.That(rejected.Error).IsEqualTo(ErrorCode.ResourceExhausted);

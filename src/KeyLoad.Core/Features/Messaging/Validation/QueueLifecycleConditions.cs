@@ -19,7 +19,9 @@ public sealed partial class DatabaseEngine
         var (_, id, version, generation) = QueueLifecycleOperands(mutation);
         JsonData.Identifier(id);
         if (version <= QueueLifecycleProtocol.Initial || generation <= QueueLifecycleProtocol.Initial)
-        { throw Errors.Fail(ErrorCode.Validation, QueueLifecycleProtocol.InvalidShape); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, QueueLifecycleProtocol.InvalidShape);
+        }
     }
 
     private static (MessageMetadata Metadata, StoredMessageBody Body) RequireQueueLifecycleState(IKeyValueView view,
@@ -29,19 +31,31 @@ public sealed partial class DatabaseEngine
         var metadata = view.GetRecord<MessageMetadata>(QueueKey(MessageMetadataSpace, lane, id))
             ?? throw Errors.Fail(ErrorCode.NotFound, QueueLifecycleProtocol.MissingMetadata);
         if (metadata.StateVersion != version || metadata.DeliveryGeneration != generation)
-        { throw Errors.Fail(ErrorCode.RevisionConflict, QueueLifecycleProtocol.StaleCondition); }
+        {
+            throw Errors.Fail(ErrorCode.RevisionConflict, QueueLifecycleProtocol.StaleCondition);
+        }
         if (metadata.State is MessageState.Acked or MessageState.Cancelled or MessageState.Expired)
-        { throw Errors.Fail(ErrorCode.Conflict, QueueLifecycleProtocol.InvalidState); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, QueueLifecycleProtocol.InvalidState);
+        }
         if (metadata.Id != id)
-        { throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.MissingReference); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.MissingReference);
+        }
         var body = StoredMessageBody.Read(view, QueueKey(MessageBodySpace, lane, id))
             ?? throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.MissingBody);
         if (body.Body.Id != metadata.Id)
-        { throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.MissingBody); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.MissingBody);
+        }
         if (metadata.State == MessageState.DeadLettered)
-        { RequireQueueParkedAuthority(view, lane, metadata); }
+        {
+            RequireQueueParkedAuthority(view, lane, metadata);
+        }
         if (metadata.State == MessageState.PendingDeadLetter)
-        { RequireQueuePendingAuthority(view, lane, metadata); }
+        {
+            RequireQueuePendingAuthority(view, lane, metadata);
+        }
         return (metadata, body);
     }
 }

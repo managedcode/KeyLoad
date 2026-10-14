@@ -29,8 +29,12 @@ internal static class QueueOrderedRetryPublicInitial
                 QueueOrderedRetryPublicProtocol.Seven, QueueOrderedRetryPublicProtocol.Three, null, null,
                 LeaseVersion: QueueOrderedRetryPublicProtocol.Two, SafeFailureCode: "AttemptsExhausted", ParkedSequence: QueueOrderedRetryPublicProtocol.One), true, token);
         if (state.ParkedHead == QueueParkedHeadPolicy.Continue)
-        { state.Second = await QueueOrderedRetryPublicOperations.ClaimAsync(callers, state, QueueOrderedRetryPublicProtocol.Second, token); }
+        {
+            state.Second = await QueueOrderedRetryPublicOperations.ClaimAsync(callers, state, QueueOrderedRetryPublicProtocol.Second, token);
+        }
         else
-        { await Assert.That((await QueueOrderedRetryPublicOperations.ReceiveAsync(callers, state, token)).Deliveries).IsEmpty(); }
+        {
+            await Assert.That((await QueueOrderedRetryPublicOperations.ReceiveAsync(callers, state, token)).Deliveries).IsEmpty();
+        }
     }
 }

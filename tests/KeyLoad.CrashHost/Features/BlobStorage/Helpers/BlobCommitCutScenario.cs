@@ -22,7 +22,9 @@ internal static class BlobCommitCutScenario
     internal static async Task<bool> TryRunAsync(string[] args)
     {
         if (args.Length != RequiredArgumentCount || args[ModeArgumentIndex] is not (BlobCommitCutProtocol.CompleteMode or BlobCommitCutProtocol.DeleteMode))
-        { return false; }
+        {
+            return false;
+        }
         var root = args[RootArgumentIndex];
         var cut = Enum.Parse<BlobCommitCutKind>(args[CutArgumentIndex]);
         var complete = args[ModeArgumentIndex] == BlobCommitCutProtocol.CompleteMode;
@@ -33,7 +35,9 @@ internal static class BlobCommitCutScenario
         void Observe(CommitStage stage, long position, int index)
         {
             if (position != selectedPosition || selectedPosition == UnselectedPosition)
-            { return; }
+            {
+                return;
+            }
             if (cut == BlobCommitCutKind.UnknownAfterJournalFlush && stage == CommitStage.JournalFlushed)
             {
                 injected = true;
@@ -43,9 +47,14 @@ internal static class BlobCommitCutScenario
             }
             if ((cut == BlobCommitCutKind.HeaderWritten && stage == CommitStage.HeaderWritten)
                 || (cut == BlobCommitCutKind.JournalFlushed && stage == CommitStage.JournalFlushed))
-            { CrashHostPause.AtBoundary(); }
+            {
+                CrashHostPause.AtBoundary();
+            }
         }
-        using var store = new ZoneTreeStore(new(root) { FaultObserver = Observe },
+        using var store = new ZoneTreeStore(new(root)
+        {
+            FaultObserver = Observe
+        },
             CrashExecutionOptions.StorageExecution(), CrashExecutionOptions.PointCacheExecution());
         var database = await BlobCommitCutSeed.WriteAsync(root, store, complete).ConfigureAwait(false);
         var operation = Selected(database, complete);
@@ -95,17 +104,25 @@ internal static class BlobCommitCutScenario
     {
         KeyLoadException? observed = null;
         try
-        { _ = database.Apply(operation); }
+        {
+            _ = database.Apply(operation);
+        }
         catch (KeyLoadException failure) when (failure.Code == ErrorCode.UnknownWriteOutcome) { observed = failure; }
         var fault = injected();
         if (!fault.Injected || fault.Stage is null || observed is null)
-        { throw new InvalidOperationException(UnknownOutcomeAbsent); }
+        {
+            throw new InvalidOperationException(UnknownOutcomeAbsent);
+        }
         KeyLoadException? poison = null;
         try
-        { _ = store.Read(view => view.Scan([], PoisonProbeRecordLimit)); }
+        {
+            _ = store.Read(view => view.Scan([], PoisonProbeRecordLimit));
+        }
         catch (KeyLoadException failure) when (failure.Code == ErrorCode.RecoveryRequired) { poison = failure; }
         if (poison is null)
-        { throw new InvalidOperationException(PoisonAbsent); }
+        {
+            throw new InvalidOperationException(PoisonAbsent);
+        }
         await File.WriteAllBytesAsync(Path.Combine(root, BlobCommitCutProtocol.FaultFile),
             JsonDefaults.Serialize(new BlobCommitCutObservedFault(observed.Code, observed.Message,
                 poison.Code, poison.Message, fault.Stage.Value, fault.Position, fault.Injected))).ConfigureAwait(false);

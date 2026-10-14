@@ -16,7 +16,9 @@ public static class ClusterRestoreMappingValidation
     public static void RequireSourceCount(int count)
     {
         if (count < RequiredOwnerCount || count > PhysicalOwnerDirectoryProtocol.MaximumOwners)
-        { throw Errors.Fail(ErrorCode.Validation, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, Invalid);
+        }
     }
 
     /// <summary>Requires one bounded, fresh, complete target tuple per verified original owner.</summary>
@@ -28,7 +30,9 @@ public static class ClusterRestoreMappingValidation
     {
         ClusterBackupOwnerClosureValidation.Require(captureId, cuts);
         if (mappings.IsDefault || mappings.Length != cuts.Length)
-        { throw Errors.Fail(ErrorCode.Validation, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, Invalid);
+        }
         var sources = cuts.ToDictionary(cut => cut.Owner.PhysicalShardId);
         var sourceIncarnations = cuts.Select(cut => cut.Owner.Incarnation).ToHashSet();
         var mappedSources = new HashSet<Guid>();
@@ -52,7 +56,9 @@ public static class ClusterRestoreMappingValidation
             || !seen.Add(mapping.Source.PhysicalShardId)
             || !sources.TryGetValue(mapping.Source.PhysicalShardId, out var source)
             || !PhysicalOwnerEntryValidation.SameOwner(mapping.Source, source.Owner))
-        { throw Errors.Fail(ErrorCode.Validation, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, Invalid);
+        }
     }
 
     private static void RequireTarget(PhysicalShardRecord target,
@@ -64,23 +70,31 @@ public static class ClusterRestoreMappingValidation
             || target.PlacementEpoch != PhysicalShardCatalogProtocol.InitialPlacementEpoch
             || sources.ContainsKey(target.PhysicalShardId) || originalIncarnations.Contains(target.Incarnation)
             || !targetIds.Add(target.PhysicalShardId) || !incarnations.Add(target.Incarnation))
-        { throw Errors.Fail(ErrorCode.Validation, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, Invalid);
+        }
     }
 
     private static void RequireMembers(ClusterRestoreOwnerMapping mapping, HashSet<string> voters,
         HashSet<string> endpoints)
     {
         if (!PhysicalOwnerEntryValidation.Valid(new RegisteredPhysicalOwnerV1(mapping.Target, mapping.Endpoints)))
-        { throw Errors.Fail(ErrorCode.Validation, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, Invalid);
+        }
         foreach (var voter in mapping.Target.VoterIds)
         {
             if (!voters.Add(voter))
-            { throw Errors.Fail(ErrorCode.Validation, Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Validation, Invalid);
+            }
         }
         foreach (var endpoint in mapping.Endpoints)
         {
             if (!endpoints.Add(endpoint))
-            { throw Errors.Fail(ErrorCode.Validation, Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Validation, Invalid);
+            }
         }
     }
 }

@@ -11,7 +11,10 @@ internal sealed class NativeReadCutFixture : IDisposable
     private readonly TimeProvider clock;
 
     internal string DirectoryPath { get; } = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString("N"));
-    internal ZoneTreeStore Store { get; private set; }
+    internal ZoneTreeStore Store
+    {
+        get; private set;
+    }
 
     internal NativeReadCutFixture(TimeProvider? timeProvider = null)
     {

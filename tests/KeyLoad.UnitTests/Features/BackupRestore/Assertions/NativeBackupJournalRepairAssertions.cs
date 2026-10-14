@@ -28,13 +28,17 @@ internal static class NativeBackupJournalRepairAssertions
                 token.ThrowIfCancellationRequested();
                 var page = view.Scan([], MaximumFixtureRows);
                 if (page.HasMore)
-                { throw new InvalidOperationException("The original backup fixture exceeded its complete-row bound."); }
+                {
+                    throw new InvalidOperationException("The original backup fixture exceeded its complete-row bound.");
+                }
                 return (opened.Identity, opened.Position, page.Records.Select(row =>
                     Convert.ToHexString(row.Key.Span) + ":" + Convert.ToHexString(row.Value.Span)).ToArray());
             });
         }, failures);
         if (store is not null)
-        { ServerFailureObserver.Observe(store.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(store.Dispose, failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
         return result;
     }
@@ -49,7 +53,9 @@ internal static class NativeBackupJournalRepairAssertions
             token.ThrowIfCancellationRequested();
             bytes = checked(bytes + new FileInfo(file).Length);
             if (result.Count >= MaximumArchiveFiles || bytes > MaximumArchiveBytes)
-            { throw new InvalidOperationException("The original backup archive exceeded its fixture bound."); }
+            {
+                throw new InvalidOperationException("The original backup archive exceeded its fixture bound.");
+            }
             result.Add(Path.GetRelativePath(directory, file), await File.ReadAllBytesAsync(file, token));
         }
         return result;

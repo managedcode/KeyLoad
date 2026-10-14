@@ -43,7 +43,9 @@ internal sealed class PhysicalShardClusterProfileTests
     public async Task CurrentProfileSymlinkIsRejectedWithoutChangingSource()
     {
         if (OperatingSystem.IsWindows())
-        { return; }
+        {
+            return;
+        }
         using var fixture = ProfileFixture.Create();
         var outside = Path.Combine(fixture.Root, "outside-profile.json");
         var original = await fixture.WriteCurrentAsync();
@@ -58,7 +60,9 @@ internal sealed class PhysicalShardClusterProfileTests
     public async Task CurrentProfileWithUnsafePermissionsIsRejectedWithoutRewrite()
     {
         if (OperatingSystem.IsWindows())
-        { return; }
+        {
+            return;
+        }
         foreach (var mode in new[] { UnixFileMode.UserRead | UnixFileMode.GroupRead,
             UnixFileMode.UserRead | UnixFileMode.OtherRead, UnixFileMode.UserWrite })
         {
@@ -77,7 +81,9 @@ internal sealed class PhysicalShardClusterProfileTests
         var names = document.RootElement.EnumerateObject().Select(property => property.Name).ToArray();
         await Assert.That(names.Length).IsEqualTo(6);
         foreach (var name in new[] { "Version", "PhysicalShardId", "Incarnation", "SigningKey", "PeerSecret", "AdminKey" })
-        { await Assert.That(names.Contains(name, StringComparer.Ordinal)).IsTrue(); }
+        {
+            await Assert.That(names.Contains(name, StringComparer.Ordinal)).IsTrue();
+        }
     }
 
     private static string[] TemporaryFiles(string root)
@@ -88,14 +94,19 @@ internal sealed class PhysicalShardClusterProfileTests
     private static async Task AssertPrivateModeAsync(string path, UnixFileMode expected)
     {
         if (!OperatingSystem.IsWindows())
-        { await Assert.That(File.GetUnixFileMode(path)).IsEqualTo(expected); }
+        {
+            await Assert.That(File.GetUnixFileMode(path)).IsEqualTo(expected);
+        }
     }
 
     private sealed class ProfileFixture : IDisposable
     {
         private ProfileFixture(string root) => Root = root;
 
-        internal string Root { get; }
+        internal string Root
+        {
+            get;
+        }
         internal string ProfilePath => Path.Combine(Root, ClusterProfileStore.ProfileName);
 
         internal static ProfileFixture Create()
@@ -103,7 +114,9 @@ internal sealed class PhysicalShardClusterProfileTests
             var root = Path.Combine(Path.GetTempPath(), "keyload-physical-shard-profile-" + Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(root);
             if (!OperatingSystem.IsWindows())
-            { File.SetUnixFileMode(root, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute); }
+            {
+                File.SetUnixFileMode(root, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+            }
             return new ProfileFixture(root);
         }
 
@@ -112,7 +125,9 @@ internal sealed class PhysicalShardClusterProfileTests
             _ = ClusterProfileStore.Open(Root, UnitProfileOptions.Execution());
             var bytes = await File.ReadAllBytesAsync(ProfilePath);
             if (!OperatingSystem.IsWindows())
-            { File.SetUnixFileMode(ProfilePath, mode ?? PrivateFile); }
+            {
+                File.SetUnixFileMode(ProfilePath, mode ?? PrivateFile);
+            }
             return bytes;
         }
 

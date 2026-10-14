@@ -18,10 +18,14 @@ internal static class DistributedTextStatisticsMerge
         ArgumentNullException.ThrowIfNull(budget);
         budget.Check();
         if (leaves.IsDefaultOrEmpty || leaves.Length > options.Value.MaximumPartitions)
-        { throw Errors.Fail(ErrorCode.Validation, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, Invalid);
+        }
         var first = leaves[Empty] ?? throw Errors.Fail(ErrorCode.Corruption, Invalid);
         if (first.Terms.IsDefault)
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
         var admission = new GlobalBranchByteAdmission(budget.MaximumResultBytes, budget);
         var frequenciesBytes = checked(PartitionQueryRetention.ArrayDescriptorBytes
             + (long)sizeof(int) * first.Terms.Length);
@@ -33,7 +37,10 @@ internal static class DistributedTextStatisticsMerge
         }
         var frequencies = ImmutableArray.CreateBuilder<int>(first.Terms.Length);
         for (var index = Empty; index < first.Terms.Length; index++)
-        { budget.Check(); frequencies.Add(Empty); }
+        {
+            budget.Check();
+            frequencies.Add(Empty);
+        }
         var documents = Empty;
         long length = Empty;
         try
@@ -44,11 +51,16 @@ internal static class DistributedTextStatisticsMerge
                 documents = checked(documents + leaf.DocumentCount);
                 length = checked(length + leaf.TotalLength);
                 for (var index = Empty; index < frequencies.Count; index++)
-                { budget.Check(); frequencies[index] = checked(frequencies[index] + leaf.DocumentFrequencies[index]); }
+                {
+                    budget.Check();
+                    frequencies[index] = checked(frequencies[index] + leaf.DocumentFrequencies[index]);
+                }
             }
         }
         catch (OverflowException)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, Exhausted); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, Exhausted);
+        }
         var result = new DistributedTextStatisticsV1(first.Terms, documents, length, frequencies.MoveToImmutable());
         admission.Accept(NativeSerialization.Measure(result));
         DistributedTextStatisticsValidation.Require(result, first.Terms, budget);

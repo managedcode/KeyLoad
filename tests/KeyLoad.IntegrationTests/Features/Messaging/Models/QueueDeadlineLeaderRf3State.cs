@@ -8,8 +8,14 @@ internal sealed class QueueDeadlineLeaderRf3State(QueueLaneRef lane, MessagingRf
     internal DateTimeOffset Due { get; } = due;
     internal AtomicPartitionPlacementResolution Placement { get; } = placement;
     internal OutboxStatus Baseline { get; } = baseline;
-    internal MessageInspection? Original { get; set; }
-    internal MessageInspection? Healthy { get; set; }
+    internal MessageInspection? Original
+    {
+        get; set;
+    }
+    internal MessageInspection? Healthy
+    {
+        get; set;
+    }
     internal List<(CommandRequest Command, CommitReceipt Receipt)> Producers { get; } = [];
     internal List<(DeliveryCommand Command, CommitReceipt Receipt)> Acks { get; } = [];
 }

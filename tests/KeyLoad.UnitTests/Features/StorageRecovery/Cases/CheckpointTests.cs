@@ -58,12 +58,20 @@ internal sealed class CheckpointTests
         var signing = RandomNumberGenerator.GetBytes(32);
         try
         {
-            using var source = new ZoneTreeStore(new(Path.Combine(root, "source")) { Incarnation = incarnation, SigningKey = signing }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+            using var source = new ZoneTreeStore(new(Path.Combine(root, "source"))
+            {
+                Incarnation = incarnation,
+                SigningKey = signing
+            }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
             source.Commit((tx, _) => { tx.PutRecord(KeyCodec.Encode("system", "last-applied"), 7L); tx.PutRecord(KeyCodec.Encode("new"), "value"); return true; });
             var snapshot = Path.Combine(root, "snapshot");
             source.CreateSnapshot(snapshot, 7);
             StoreIdentity retained;
-            using (var target = new ZoneTreeStore(new(Path.Combine(root, "target")) { Incarnation = incarnation, SigningKey = signing }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
+            using (var target = new ZoneTreeStore(new(Path.Combine(root, "target"))
+            {
+                Incarnation = incarnation,
+                SigningKey = signing
+            }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
             {
                 target.Commit((tx, _) => { tx.PutRecord(KeyCodec.Encode("obsolete"), "old"); return true; });
                 var identity = target.Identity;

@@ -18,16 +18,22 @@ public sealed partial class DatabaseEngine
             var charged = work.CreateView(view, grant);
             var principal = Principal(charged, principalId, EvaluationClock.GetUtcNow());
             if (!principal.ClusterAdministrator)
-            { throw Errors.Fail(ErrorCode.PermissionDenied, ClusterAdministrationRequiredMessage); }
+            {
+                throw Errors.Fail(ErrorCode.PermissionDenied, ClusterAdministrationRequiredMessage);
+            }
             var directory = RequireMoveDirectory(charged);
             var header = PartitionMoveParentStorage.Header(charged, request.Partition, request.MoveId, Limits.MaxBatchBytes);
             if (header is not null)
             {
                 if (header.OperatorPrincipalId != principal.Id)
-                { throw Errors.Fail(ErrorCode.PermissionDenied, ClusterAdministrationRequiredMessage); }
+                {
+                    throw Errors.Fail(ErrorCode.PermissionDenied, ClusterAdministrationRequiredMessage);
+                }
                 PartitionMoveParentValidation.RequireReplayScope(header, principal.Id, request);
                 if (!PhysicalOwnerEntryValidation.SameOwner(header.ControlOwner, directory.ControlOwner))
-                { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+                {
+                    throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+                }
             }
             var pending = ReadParentStatePhase(charged, request, header?.PendingOriginalPhaseCommandId ?? Guid.Empty);
             var last = ReadSharedParentStatePhase(charged, request, header?.LastOriginalPhaseCommandId ?? Guid.Empty, pending);
@@ -61,20 +67,30 @@ public sealed partial class DatabaseEngine
         Guid id, PartitionMoveParentPhase? first, PartitionMoveParentPhase? second = null, PartitionMoveParentPhase? third = null)
     {
         if (id == Guid.Empty)
-        { return null; }
+        {
+            return null;
+        }
         if (first?.OriginalPhaseCommandId == id)
-        { return first; }
+        {
+            return first;
+        }
         if (second?.OriginalPhaseCommandId == id)
-        { return second; }
+        {
+            return second;
+        }
         if (third?.OriginalPhaseCommandId == id)
-        { return third; }
+        {
+            return third;
+        }
         return ReadParentStatePhase(view, request, id);
     }
 
     private PartitionMoveParentPhase? ReadParentStatePhase(IKeyValueView view, PartitionMoveRequest request, Guid id)
     {
         if (id == Guid.Empty)
-        { return null; }
+        {
+            return null;
+        }
         return PartitionMoveParentStorage.Phase(view, request.Partition, request.MoveId, id, Limits.MaxBatchBytes)
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
     }

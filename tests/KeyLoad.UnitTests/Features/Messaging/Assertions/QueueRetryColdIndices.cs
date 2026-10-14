@@ -17,7 +17,9 @@ internal static class QueueRetryColdIndices
             state.Start.AddSeconds(QueueRetryColdProtocol.ScheduledSeconds)));
         }
         if (retry is { } due)
-        { expected.Add(Row(state.Lane, QueueRetryColdProtocol.Scheduled, QueueRetryColdProtocol.Retry, due)); }
+        {
+            expected.Add(Row(state.Lane, QueueRetryColdProtocol.Scheduled, QueueRetryColdProtocol.Retry, due));
+        }
         else
         {
             expected.Add(Row(state.Lane, QueueRetryColdProtocol.DeadLetter, QueueRetryColdProtocol.Retry));

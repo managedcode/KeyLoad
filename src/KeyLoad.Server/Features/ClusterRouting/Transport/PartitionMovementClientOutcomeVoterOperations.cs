@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
@@ -26,13 +26,17 @@ internal static class PartitionMovementClientOutcomeVoterOperations
             maximumBytes, maximumRecords, work.MaximumResultBytes);
         var size = NativeSerialization.Measure(query);
         if (size < PartitionMovementClient.MinimumBodyBytes || size > limits.MaxBatchBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMovementProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMovementProtocol.Unavailable);
+        }
         var body = NativeSerialization.Serialize(query);
         var reply = await owner.transport.ExchangeOutcomeAsync(voter, selected, query, body, local,
             cancellationToken).ConfigureAwait(false);
         work.Check();
         if (reply.Value.Reply.Error is { } code)
-        { throw Errors.Fail(code, reply.Value.Reply.SafeDetail ?? PartitionMovementProtocol.Unavailable); }
+        {
+            throw Errors.Fail(code, reply.Value.Reply.SafeDetail ?? PartitionMovementProtocol.Unavailable);
+        }
         var witness = GrainNativePayload.Read<GrainValue>(reply.Value.Reply.Payload).Value as PartitionMovementOutcomeWitness
             ?? throw Errors.Fail(ErrorCode.Corruption, PartitionMovementProtocol.InvalidProof);
         witness = witness with

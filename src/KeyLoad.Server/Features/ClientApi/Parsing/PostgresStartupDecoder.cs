@@ -8,7 +8,9 @@ internal static class PostgresStartupDecoder
     {
         var reader = new PostgresPayloadReader(payload);
         if (reader.Int32() != PostgresProtocol.Version)
-        { throw Errors.Fail(ErrorCode.UnsupportedCapability, PostgresProtocol.Unsupported); }
+        {
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, PostgresProtocol.Unsupported);
+        }
         string? user = null;
         string? database = null;
         var seen = new HashSet<string>(StringComparer.Ordinal);
@@ -16,9 +18,13 @@ internal static class PostgresStartupDecoder
         {
             var key = reader.Text(options.MaximumStartupBytes);
             if (key.Length == PostgresProtocol.AllRows)
-            { break; }
+            {
+                break;
+            }
             if (!seen.Add(key))
-            { throw Errors.Fail(ErrorCode.Validation, PostgresProtocol.Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Validation, PostgresProtocol.Invalid);
+            }
             var value = reader.Text(options.MaximumStartupBytes);
             switch (key)
             {
@@ -30,7 +36,9 @@ internal static class PostgresStartupDecoder
                     break;
                 case Encoding:
                     if (!StringComparer.Ordinal.Equals(value, Utf8))
-                    { throw Errors.Fail(ErrorCode.UnsupportedCapability, PostgresProtocol.Unsupported); }
+                    {
+                        throw Errors.Fail(ErrorCode.UnsupportedCapability, PostgresProtocol.Unsupported);
+                    }
                     break;
                 case Application:
                     break;
@@ -40,7 +48,9 @@ internal static class PostgresStartupDecoder
         }
         reader.Complete();
         if (string.IsNullOrEmpty(user) || database is null || !options.Databases.TryGetValue(database, out var partition))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, ServerProtocol.MissingCredential); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, ServerProtocol.MissingCredential);
+        }
         return new(user, partition);
     }
 

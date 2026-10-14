@@ -23,7 +23,9 @@ internal static class SqlFetchCountRf3Pages
                 await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
                 {
                     foreach (var item in SqlFetchCountRf3Protocol.Cases)
-                    { await CaseAsync(caller, wire, item.Sql, item.Count, token); }
+                    {
+                        await CaseAsync(caller, wire, item.Sql, item.Count, token);
+                    }
                     await WindowAsync(caller, wire, token);
                 }, failures);
             }, failures);
@@ -40,7 +42,13 @@ internal static class SqlFetchCountRf3Pages
     {
         var operation = SqlFetchCountRf3Protocol.Operation(CombinedWindow);
         var ast = SqlFetchCountRf3Protocol.Ast(WindowCount);
-        ast = ast with { Query = ast.Query with { Offset = WindowOffset } };
+        ast = ast with
+        {
+            Query = ast.Query with
+            {
+                Offset = WindowOffset
+            }
+        };
         var pages = new[]
         {
             await SqlRf3Protocol.SdkAsync<QueryPage>(caller.Sdk, operation, token),
@@ -63,7 +71,9 @@ internal static class SqlFetchCountRf3Pages
     {
         var sdk = await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.QueryCapabilitiesAsync(token));
         var mcp = (await McpCallerAssertions.SuccessAsync<QueryCapabilityManifest>(
-            await caller.Mcp.CallAsync(McpCallerTools.QueryCapabilities, new { }, token))).Value;
+            await caller.Mcp.CallAsync(McpCallerTools.QueryCapabilities, new
+            {
+            }, token))).Value;
         await global::TUnit.Assertions.Assert.That(sdk.ReadProfiles.Contains(SqlFetchCountRf3Protocol.Profile)).IsTrue();
         await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlFetchCountRf3Protocol.Profile)).IsTrue();
     }

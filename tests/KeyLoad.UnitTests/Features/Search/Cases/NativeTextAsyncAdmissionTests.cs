@@ -34,7 +34,10 @@ internal sealed class NativeTextAsyncAdmissionTests
     [Test]
     public async Task AcFts007NativePostingPauseKeepsAdmissionUntilCancellationCleanupJoins()
     {
-        using var database = CreateDatabase(new() { MaxConcurrentQueries = 1 });
+        using var database = CreateDatabase(new()
+        {
+            MaxConcurrentQueries = 1
+        });
         var postingObserved = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var releasePosting = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var pauseOnce = 1;

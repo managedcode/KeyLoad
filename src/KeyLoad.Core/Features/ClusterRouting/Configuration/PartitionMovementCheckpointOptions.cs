@@ -40,6 +40,8 @@ public sealed record PartitionMovementCheckpointOptions
     public void Validate()
     {
         if (!IsValid())
-        { throw new InvalidOperationException(ValidationMessage); }
+        {
+            throw new InvalidOperationException(ValidationMessage);
+        }
     }
 }

@@ -32,7 +32,9 @@ internal static class CompositeIndexReplayAssertions
         var before = CompositeIndexCrashOperations.Capture(database);
         var failure = ApplyConflict(database);
         if (failure.Error != ErrorCode.Conflict)
-        { throw new InvalidOperationException(Invalid); }
+        {
+            throw new InvalidOperationException(Invalid);
+        }
         File.WriteAllBytes(Path.Combine(directory, FailureFile), NativeSerialization.Serialize(failure));
         RequireEffectsUnchanged(database, before);
         Verify(directory, database);
@@ -44,11 +46,15 @@ internal static class CompositeIndexReplayAssertions
         var position = database.Store.Position;
         var original = NativeSerialization.Serialize(ReplaySuccess(database).Get<CommitReceipt>());
         if (!original.AsSpan().SequenceEqual(File.ReadAllBytes(Path.Combine(directory, OriginalFile))))
-        { throw new InvalidOperationException(Invalid); }
+        {
+            throw new InvalidOperationException(Invalid);
+        }
         var failed = NativeSerialization.Serialize(ApplyConflict(database));
         if (!failed.AsSpan().SequenceEqual(File.ReadAllBytes(Path.Combine(directory, FailureFile))) ||
             database.Store.Position != position || !before.AsSpan().SequenceEqual(CaptureAll(database)))
-        { throw new InvalidOperationException(Invalid); }
+        {
+            throw new InvalidOperationException(Invalid);
+        }
         RequireEffectsUnchanged(database, CompositeIndexCrashOperations.Capture(database));
     }
 
@@ -75,14 +81,18 @@ internal static class CompositeIndexReplayAssertions
         if (!JsonDefaults.Serialize(CompositeIndexCrashOperations.Capture(database)).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected)) ||
             database.ReadStream(CrashFixtureValues.Principal, new StreamRef(CompositeIndexCrashContract.Partition, Stream, EventId)).Events.Length != NoStreamEvents ||
             database.InspectMessage(CrashFixtureValues.Principal, new(CompositeIndexCrashContract.Partition, Queue), MessageId) is not null)
-        { throw new InvalidOperationException(Invalid); }
+        {
+            throw new InvalidOperationException(Invalid);
+        }
     }
 
     private static byte[] CaptureAll(DatabaseEngine database) => database.Store.Read(view =>
     {
         var page = view.Scan([], MaximumRecords);
         if (page.HasMore)
-        { throw new InvalidOperationException(Invalid); }
+        {
+            throw new InvalidOperationException(Invalid);
+        }
         return JsonDefaults.Serialize(page.Records);
     });
 }

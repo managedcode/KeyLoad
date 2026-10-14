@@ -44,7 +44,9 @@ internal sealed class PhysicalOwnerRegistrationRf3Tests
             TestContext.Current!.Execution.CancellationToken), failures);
         }
         if (wave is { } owned)
-        { await ServerFailureObserver.ObserveAsync(() => owned.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => owned.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

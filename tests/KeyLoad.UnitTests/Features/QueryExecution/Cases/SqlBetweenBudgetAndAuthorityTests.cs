@@ -31,11 +31,17 @@ internal sealed class SqlBetweenBudgetAndAuthorityTests
         var tokens = parser.GetTokenStream(reader, out var errors);
         await Assert.That(errors.Count).IsEqualTo(0);
         global::KeyLoad.Features.QueryExecution.ScriptDomTokenBounds.Require(tokens,
-            exact with { MaxQueryTokens = 10 }, budget.Check);
+            exact with
+            {
+                MaxQueryTokens = 10
+            }, budget.Check);
         await Assert.That(new SqlParser(RangeSql, UnitExecutionOptions.DatabaseLimits(exact), UnitExecutionOptions.QueryExecution()).Parse().Filter).IsTypeOf<Logical>();
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => new SqlParser(RangeSql, UnitExecutionOptions.DatabaseLimits(exact with { MaxQueryBytes = byteCount - 1 }), UnitExecutionOptions.QueryExecution()).Parse()).Code).IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => global::KeyLoad.Features.QueryExecution.ScriptDomTokenBounds.Require(tokens,
-            exact with { MaxQueryTokens = 9 }, budget.Check)).Code).IsEqualTo(ErrorCode.BudgetExceeded);
+            exact with
+            {
+                MaxQueryTokens = 9
+            }, budget.Check)).Code).IsEqualTo(ErrorCode.BudgetExceeded);
     }
 
     [Test]
@@ -57,23 +63,45 @@ internal sealed class SqlBetweenBudgetAndAuthorityTests
             MaxQueryDepth = NegatedDepth
         }, UnitExecutionOptions.QueryExecution().Value).Query.Filter).SequenceEqual(JsonDefaults.Serialize(negativeTree))).IsTrue();
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => QueryValidation.Normalize(positive,
-            new() { MaxQueryTokens = ExpandedNodes - 1, MaxQueryDepth = ExpandedDepth }, UnitExecutionOptions.QueryExecution().Value)).Code)
+            new()
+            {
+                MaxQueryTokens = ExpandedNodes - 1,
+                MaxQueryDepth = ExpandedDepth
+            }, UnitExecutionOptions.QueryExecution().Value)).Code)
             .IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => QueryValidation.Normalize(positive,
-            new() { MaxQueryTokens = ExpandedNodes, MaxQueryDepth = ExpandedDepth - 1 }, UnitExecutionOptions.QueryExecution().Value)).Code)
+            new()
+            {
+                MaxQueryTokens = ExpandedNodes,
+                MaxQueryDepth = ExpandedDepth - 1
+            }, UnitExecutionOptions.QueryExecution().Value)).Code)
             .IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => QueryValidation.Normalize(negative,
-            new() { MaxQueryTokens = NegatedNodes - 1, MaxQueryDepth = NegatedDepth }, UnitExecutionOptions.QueryExecution().Value)).Code)
+            new()
+            {
+                MaxQueryTokens = NegatedNodes - 1,
+                MaxQueryDepth = NegatedDepth
+            }, UnitExecutionOptions.QueryExecution().Value)).Code)
             .IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => QueryValidation.Normalize(negative,
-            new() { MaxQueryTokens = NegatedNodes, MaxQueryDepth = NegatedDepth - 1 }, UnitExecutionOptions.QueryExecution().Value)).Code)
+            new()
+            {
+                MaxQueryTokens = NegatedNodes,
+                MaxQueryDepth = NegatedDepth - 1
+            }, UnitExecutionOptions.QueryExecution().Value)).Code)
             .IsEqualTo(ErrorCode.BudgetExceeded);
 
         var serializedSize = JsonDefaults.Serialize(QueryValidation.Normalize(positive, new(), UnitExecutionOptions.QueryExecution().Value)).Length;
-        await Assert.That(QueryValidation.Normalize(positive, new() { MaxQueryBytes = serializedSize }, UnitExecutionOptions.QueryExecution().Value).Query.Filter)
+        await Assert.That(QueryValidation.Normalize(positive, new()
+        {
+            MaxQueryBytes = serializedSize
+        }, UnitExecutionOptions.QueryExecution().Value).Query.Filter)
             .IsNotNull();
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => QueryValidation.Normalize(positive,
-            new() { MaxQueryBytes = serializedSize - 1 }, UnitExecutionOptions.QueryExecution().Value)).Code).IsEqualTo(ErrorCode.BudgetExceeded);
+            new()
+            {
+                MaxQueryBytes = serializedSize - 1
+            }, UnitExecutionOptions.QueryExecution().Value)).Code).IsEqualTo(ErrorCode.BudgetExceeded);
     }
 
     [Test]
@@ -114,14 +142,22 @@ internal sealed class SqlBetweenBudgetAndAuthorityTests
                 await SqlBetweenAuthorityContinuation.RunAsync(database);
             }
             catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
-            { failures.Add(error); }
+            {
+                failures.Add(error);
+            }
             catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null)
-            { failures.Add(error); }
+            {
+                failures.Add(error);
+            }
         }
         catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null)
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 

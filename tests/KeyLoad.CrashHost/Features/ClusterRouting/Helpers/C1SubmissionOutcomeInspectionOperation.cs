@@ -19,7 +19,10 @@ internal static class C1SubmissionOutcomeInspectionOperation
         ServerFailureObserver.Observe(() =>
         {
             evidence?.SetPhase(C1OutcomeInspectionFailurePhase.OpenStore);
-            var opened = ZoneTreeExistingStore.Open(new(request.Directory) { Incarnation = request.Incarnation },
+            var opened = ZoneTreeExistingStore.Open(new(request.Directory)
+            {
+                Incarnation = request.Incarnation
+            },
                 request.ExpectedNodeId, CrashExecutionOptions.StorageExecution());
             store = opened;
             evidence?.SetPhase(C1OutcomeInspectionFailurePhase.ReadOutcome);
@@ -29,7 +32,9 @@ internal static class C1SubmissionOutcomeInspectionOperation
                 var scope = new CommandOutcomePartitionScope(CommandOutcomeScopeKind.Partition, request.Partition);
                 var selected = CommandOutcomeKeyResolver.Select(view, request.PrincipalId, request.CommandId, scope);
                 if (selected.Outcome is null)
-                { throw C1SubmissionOutcomeInspectionValidation.Invalid(); }
+                {
+                    throw C1SubmissionOutcomeInspectionValidation.Invalid();
+                }
                 var raw = view.ReadOwnedValue(selected.Key) ?? throw C1SubmissionOutcomeInspectionValidation.Invalid();
                 return new C1SubmissionOutcomeInspectionReceipt(C1SubmissionOutcomeInspectionProtocol.Version,
                     opened.Identity.NodeId, opened.Identity.Incarnation, opened.Identity.FormatVersion,
@@ -37,11 +42,15 @@ internal static class C1SubmissionOutcomeInspectionOperation
             });
         }, failures);
         if (failures.Count > NoFailures)
-        { evidence?.Capture(failures[FirstFailureIndex]); }
+        {
+            evidence?.Capture(failures[FirstFailureIndex]);
+        }
         evidence?.SetPhase(C1OutcomeInspectionFailurePhase.DisposeStore);
         ServerFailureObserver.Observe(() => store?.Dispose(), failures);
         if (failures.Count > NoFailures)
-        { evidence?.Capture(failures[FirstFailureIndex]); }
+        {
+            evidence?.Capture(failures[FirstFailureIndex]);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
         return receipt ?? throw C1SubmissionOutcomeInspectionValidation.Invalid();
     }

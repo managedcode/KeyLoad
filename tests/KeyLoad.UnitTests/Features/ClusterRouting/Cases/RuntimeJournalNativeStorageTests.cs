@@ -1,7 +1,7 @@
 #pragma warning disable ORLEANSEXP005
 using System.Buffers;
+using KeyLoad.Clustering;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Orleans;
 using Orleans.Journaling;
 using Orleans.Storage;
 

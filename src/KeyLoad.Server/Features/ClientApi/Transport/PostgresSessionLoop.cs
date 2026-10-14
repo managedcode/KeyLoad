@@ -18,11 +18,18 @@ internal sealed class PostgresSessionLoop(IServiceProvider services, global::Mic
             using var frame = await PostgresFrameReader.ReadAsync(context.Transport.Input, false,
                 Options.MaximumFrameBytes, admission, context.ConnectionClosed).ConfigureAwait(false);
             if (frame is null)
-            { return; }
+            {
+                return;
+            }
             if (frame.Type == PostgresMessageProtocol.Terminate)
-            { Empty(frame.Payload); return; }
+            {
+                Empty(frame.Payload);
+                return;
+            }
             if (draining && frame.Type != PostgresMessageProtocol.Sync)
-            { continue; }
+            {
+                continue;
+            }
             try
             {
                 switch (frame.Type)
@@ -52,7 +59,7 @@ internal sealed class PostgresSessionLoop(IServiceProvider services, global::Mic
                         break;
                 }
             }
-            catch (Exception error) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error) && !context.ConnectionClosed.IsCancellationRequested)
+            catch (Exception error) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error) && !context.ConnectionClosed.IsCancellationRequested)
             {
                 var simple = frame.Type == PostgresMessageProtocol.SimpleQuery;
                 draining = !simple;
@@ -66,7 +73,9 @@ internal sealed class PostgresSessionLoop(IServiceProvider services, global::Mic
         Empty(payload);
         catalog.Sync();
         if (errorRecovery)
-        { catalog.ClearMutationIdentity(); }
+        {
+            catalog.ClearMutationIdentity();
+        }
     }
 
     private async Task FailureAsync(Exception original, bool simple, ServerConnectionFeature owner,
@@ -79,7 +88,9 @@ internal sealed class PostgresSessionLoop(IServiceProvider services, global::Mic
         {
             PostgresErrorReply.Write(writer, original);
             if (simple)
-            { writer.Ready(); }
+            {
+                writer.Ready();
+            }
             await PostgresControlFlush.RunAsync(services, writer, closed,
                 probe?.BeforeFlush(owner, identity, original, closed)).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
@@ -96,7 +107,10 @@ internal sealed class PostgresSessionLoop(IServiceProvider services, global::Mic
     {
         var sql = SimpleSql(payload);
         if (string.IsNullOrWhiteSpace(sql))
-        { writer.Empty(PostgresWireWriter.EmptyQueryResponse); return; }
+        {
+            writer.Empty(PostgresWireWriter.EmptyQueryResponse);
+            return;
+        }
         var inspection = PostgresPreparedDecoder.Inspect(sql, PostgresProtocol.AllRows,
             services.GetRequiredService<IOptions<DatabaseLimits>>(), closed);
         var statement = new PostgresPreparedStatement(sql, [], inspection.Rows,

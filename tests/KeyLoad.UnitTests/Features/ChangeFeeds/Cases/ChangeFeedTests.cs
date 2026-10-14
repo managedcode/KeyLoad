@@ -22,7 +22,11 @@ internal static class ChangeFeedTestActions
     internal static void Reader(TestDatabase db, string id = "reader", string? owner = null, string[]? grants = null, long epoch = 1)
         => db.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(new(id, "tenant",
             [new("database", "orders", Capability.DocumentsRead | Capability.ChangesRead | Capability.Query)], [.. (grants ?? [])])
-        { OwnerId = owner, RestrictRows = owner is not null, PolicyEpoch = epoch })).Get<PrincipalRecord>();
+        {
+            OwnerId = owner,
+            RestrictRows = owner is not null,
+            PolicyEpoch = epoch
+        })).Get<PrincipalRecord>();
 }
 
 internal sealed class ChangeFeedTests

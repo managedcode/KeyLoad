@@ -15,7 +15,10 @@ internal sealed class QueueLeaseReuseTests
     public async Task AcMp006_RenewForeignExpiredAndStaleTokensPreserveLeaseFencing()
     {
         using var db = new TestDatabase();
-        db.Configure(QueueName, ResourceKind.WorkQueue, queuePolicy: new() { MaxLeaseSeconds = 30 });
+        db.Configure(QueueName, ResourceKind.WorkQueue, queuePolicy: new()
+        {
+            MaxLeaseSeconds = 30
+        });
         db.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(new(Worker, "tenant",
             [new("database", QueueName, Capability.QueueAck | Capability.QueueRenew)], []))).Get<PrincipalRecord>();
         var now = TimeProvider.System.GetUtcNow().AddSeconds(1);
@@ -70,7 +73,10 @@ internal sealed class QueueLeaseReuseTests
     public async Task AcMp006_ProcessingReusesLeaseAndReleasesQuotaBeforeEffects()
     {
         using var db = new TestDatabase();
-        db.Configure(QueueName, ResourceKind.WorkQueue, queuePolicy: new() { MaxStoredMessages = 1 });
+        db.Configure(QueueName, ResourceKind.WorkQueue, queuePolicy: new()
+        {
+            MaxStoredMessages = 1
+        });
         db.Configure("orders", ResourceKind.Collection);
         db.Commit(new EnqueueMessage(QueueName, MessageId, "{}"));
         var lane = new QueueLaneRef(db.Partition, QueueName);
@@ -93,7 +99,10 @@ internal sealed class QueueLeaseReuseTests
         await Assert.That(db.Database.InspectMessage(Root, lane, MessageId)!.Metadata.State).IsEqualTo(MessageState.Acked);
         await Assert.That(db.Database.InspectMessage(Root, lane, "output")!.Metadata.State).IsEqualTo(MessageState.Ready);
         var replayId = Guid.NewGuid();
-        await Assert.That(db.Submit(OperationKind.Processing, success with { CommandId = replayId }, id: replayId)
+        await Assert.That(db.Submit(OperationKind.Processing, success with
+        {
+            CommandId = replayId
+        }, id: replayId)
             .Get<CommitReceipt>().Token).IsEqualTo(receipt.Token);
         var nextId = Guid.NewGuid();
         await Assert.That(db.Submit(OperationKind.Receive,

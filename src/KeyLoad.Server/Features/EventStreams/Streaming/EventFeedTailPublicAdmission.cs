@@ -14,7 +14,9 @@ internal static class EventFeedTailPublicAdmission
         await using (owner.ConfigureAwait(false))
         {
             while (await owner.MoveNextAsync().ConfigureAwait(false))
-            { yield return owner.Current; }
+            {
+                yield return owner.Current;
+            }
         }
         if (owner.Quota is not null)
         {

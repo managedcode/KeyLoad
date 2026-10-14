@@ -45,7 +45,9 @@ internal static class SqlCreateTableRefusals
         var cut = fixture.Store.Position;
         KeyLoadException? refusal = null;
         try
-        { SqlCreateTableLiteral.Compile(fixture.Partition, id, sql, token); }
+        {
+            SqlCreateTableLiteral.Compile(fixture.Partition, id, sql, token);
+        }
         catch (KeyLoadException failure) { refusal = failure; }
         await RequireAsync(refusal, expected);
         await SqlCreateTableAssertions.UnchangedAsync(fixture.Store, image, cut);
@@ -67,7 +69,9 @@ internal static class SqlCreateTableRefusals
                 await cancelled.CancelAsync();
                 OperationCanceledException? refusal = null;
                 try
-                { SqlCreateTableLiteral.Compile(fixture.Partition, id, cancelled.Token); }
+                {
+                    SqlCreateTableLiteral.Compile(fixture.Partition, id, cancelled.Token);
+                }
                 catch (OperationCanceledException failure) { refusal = failure; }
                 await Assert.That(refusal).IsNotNull();
                 await Assert.That(refusal!.GetType()).IsEqualTo(typeof(OperationCanceledException));

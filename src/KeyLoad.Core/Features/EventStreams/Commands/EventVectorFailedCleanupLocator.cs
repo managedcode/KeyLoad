@@ -13,16 +13,22 @@ internal static class EventVectorFailedCleanupLocator
         IAuthorizationPolicy authorization, IOptions<DatabaseLimits> options)
     {
         if (operation.Kind != OperationKind.EventFeedControl)
-        { return null; }
+        {
+            return null;
+        }
         var phase = NativeCommandPayload.Read<EventVectorControlPhase>(operation);
         if (phase.Action is not (EventVectorControlAction.AbandonFirstIssuance
             or EventVectorControlAction.CleanupAbandonedIssuance))
-        { return null; }
+        {
+            return null;
+        }
         var admission = new EventVectorAdmissionPolicy(options);
         EventVectorControlFields.Require(phase, admission);
         if (EventVectorParentLookup.ReadTerminal(transaction, authorization, principal,
             phase.OriginalRequest, incarnation, options, CancellationToken.None) is not null)
-        { throw Errors.Fail(ErrorCode.Conflict, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, Invalid);
+        }
         // Authorize every actual retained scope and validate the charged original target
         // before retaining eligibility. The clock/expiry rejection occurs in Execute.
         var original = EventVectorFirstReleaseAdmission.Require(transaction, principal, phase,
@@ -35,10 +41,14 @@ internal static class EventVectorFailedCleanupLocator
         StoredOutcome actualOutcome, IOptions<DatabaseLimits> options)
     {
         if (eligible is null || actualOutcome.Result.Error is null)
-        { return; }
+        {
+            return;
+        }
         if (actualOutcome.Incarnation != eligible.Incarnation || actualOutcome.PolicyEpoch != eligible.PolicyEpoch
             || actualOutcome.Fingerprint != eligible.Index.ActualTerminalOutcomeFingerprint)
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
         EventVectorFirstCleanupLocator.Write(transaction, eligible.Index, new EventVectorAdmissionPolicy(options));
     }
 }

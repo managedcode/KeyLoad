@@ -67,7 +67,10 @@ internal sealed class VectorMetricGoldenTests
         var best = Enumerable.Repeat(2f, query.Length).ToArray();
         var middle = Enumerable.Repeat(0.5f, query.Length).ToArray();
         var last = Enumerable.Repeat(-1f, query.Length).ToArray();
-        var space = GoldenSpace with { Dimension = query.Length };
+        var space = GoldenSpace with
+        {
+            Dimension = query.Length
+        };
         database.Commit(
             new PutDocument(Collection, BestId, DocumentJson),
             new PutDocument(Collection, MiddleId, DocumentJson),

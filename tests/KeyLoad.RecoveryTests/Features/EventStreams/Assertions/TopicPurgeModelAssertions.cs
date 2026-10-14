@@ -20,7 +20,9 @@ internal static class TopicPurgeModelAssertions
         await Assert.That(page.Events).IsEquivalentTo(records, CollectionOrdering.Matching);
         await Assert.That(page.HasMore).IsFalse();
         for (var position = 1L; position <= 3; position++)
-        { await IdentityAsync(store, position, position < first); }
+        {
+            await IdentityAsync(store, position, position < first);
+        }
         var pin = database.GetSubscription("root", TopicPurgeCrashContract.Subscription);
         await Assert.That(pin.Checkpoint).IsEqualTo(pinned ? 1L : 3L);
         await Assert.That(pin.Generation).IsEqualTo(1L);
@@ -50,7 +52,10 @@ internal static class TopicPurgeModelAssertions
         await Assert.That(store.Read(view => view.ReadOwnedValue(pointer)) is null).IsEqualTo(removed);
         var identity = store.Read(view => view.GetRecord<RetainedTopicEventIdentity>(digest));
         if (!removed)
-        { await Assert.That(identity).IsNull(); return; }
+        {
+            await Assert.That(identity).IsNull();
+            return;
+        }
         await Assert.That(identity!.Position).IsEqualTo(position);
         await Assert.That(identity.Generation).IsEqualTo(1L);
         var canonical = """{"causationId":null,"correlationId":null,"eventId":"eventPOSITION","eventType":"Created","headersJson":"{}","occurredAt":null,"payloadJson":"{\u0022n\u0022:POSITION}","schemaVersion":1}""";

@@ -72,11 +72,17 @@ internal static class AdminStaticAssets
             [RootPath + Logo] = (Logo, Svg)
         };
         foreach (var icon in Icons)
-        { assets[RootPath + icon.File] = (icon.File, icon.Type); }
+        {
+            assets[RootPath + icon.File] = (icon.File, icon.Type);
+        }
         foreach (var file in Stylesheets)
-        { assets[RootPath + file] = (file, Css); }
+        {
+            assets[RootPath + file] = (file, Css);
+        }
         foreach (var file in Scripts)
-        { assets[RootPath + file] = (file, JavaScript); }
+        {
+            assets[RootPath + file] = (file, JavaScript);
+        }
         return assets;
     }
 
@@ -91,7 +97,9 @@ internal static class AdminStaticAssets
         foreach (var path in Assets.Keys)
         {
             if (string.Equals(path, RootPath, StringComparison.Ordinal))
-            { continue; }
+            {
+                continue;
+            }
             app.MapMethods(path, Methods, (Func<HttpContext, IResult>)Serve);
         }
     }
@@ -99,7 +107,9 @@ internal static class AdminStaticAssets
     private static IResult ServeEntry(HttpContext context)
     {
         if (string.Equals(context.Request.Path.Value, EntryPath, StringComparison.Ordinal))
-        { return Results.Redirect(RootPath); }
+        {
+            return Results.Redirect(RootPath);
+        }
         return string.Equals(context.Request.Path.Value, RootPath, StringComparison.Ordinal)
             ? Serve(context) : Results.NotFound();
     }
@@ -107,10 +117,14 @@ internal static class AdminStaticAssets
     private static IResult Serve(HttpContext context)
     {
         if (!Assets.TryGetValue(context.Request.Path.Value ?? string.Empty, out var asset))
-        { return Results.NotFound(); }
+        {
+            return Results.NotFound();
+        }
         var content = typeof(AdminStaticAssets).Assembly.GetManifestResourceStream(ResourcePrefix + asset.File);
         if (content is null)
-        { return Results.NotFound(); }
+        {
+            return Results.NotFound();
+        }
         context.Response.Headers.CacheControl = NoStore;
         context.Response.Headers.XContentTypeOptions = NoSniff;
         context.Response.Headers[CspHeader] = ContentPolicy;

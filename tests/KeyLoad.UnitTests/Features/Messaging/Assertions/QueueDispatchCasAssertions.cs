@@ -5,7 +5,11 @@ internal static class QueueDispatchCasAssertions
 {
     internal static async Task CurrentAsync(QueueDispatchCasFixture fixture, bool paused, long version)
     {
-        var expected = fixture.Definition with { Paused = paused, SchemaVersion = version };
+        var expected = fixture.Definition with
+        {
+            Paused = paused,
+            SchemaVersion = version
+        };
         await Assert.That(NativeSerialization.Serialize(fixture.Current())
             .SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
         await Assert.That(fixture.Document()!.SequenceEqual(fixture.OriginalDocument)).IsTrue();

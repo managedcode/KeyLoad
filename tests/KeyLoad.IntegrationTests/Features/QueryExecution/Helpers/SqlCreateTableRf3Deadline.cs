@@ -11,7 +11,9 @@ internal static class SqlCreateTableRf3Deadline
         {
             using var deadline = McpCallerDeadline.Create();
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
-            { result = await operation(deadline.Token); }, failures);
+            {
+                result = await operation(deadline.Token);
+            }, failures);
         }, failures);
         global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
         return result;

@@ -15,8 +15,14 @@ internal static class NativeTextPartitionGenerationPublicSeed
     internal static async Task<NativeTextPartitionGenerationPublicState[]> CreateAsync(
         RequestCqrsRf3Callers caller, CancellationToken token)
     {
-        var left = NativeTextMaintenanceRf3Scenario.CreatePartition() with { PartitionKey = "left" };
-        var right = left with { PartitionKey = "right" };
+        var left = NativeTextMaintenanceRf3Scenario.CreatePartition() with
+        {
+            PartitionKey = "left"
+        };
+        var right = left with
+        {
+            PartitionKey = "right"
+        };
         await Assert.That(left.AtomicPartitionId).IsNotEqualTo(right.AtomicPartitionId);
         var resource = new ResourceDefinition(NativeTextMaintenanceRf3Scenario.Collection,
             ResourceKind.Collection, left.TransactionDomainId);

@@ -10,7 +10,9 @@ internal static class SubscriptionIndependentCheckpointR52Repair
     {
         await PauseAsync(state, true, sdk, mcp, admin, official, token);
         var definition = state.IndependentDefinition with
-        { EventTypes = [SubscriptionFilterRf3Protocol.Created, SubscriptionFilterRf3Protocol.Changed] };
+        {
+            EventTypes = [SubscriptionFilterRf3Protocol.Created, SubscriptionFilterRf3Protocol.Changed]
+        };
         var request = new ConfigureSubscriptionRequest(Guid.NewGuid(), state.Seed.Independent, definition,
             ExpectedGeneration: 1);
         var result = await McpCallerAssertions.SdkSuccessAsync(await sdk.ConfigureSubscriptionAsync(request, token));

@@ -16,7 +16,10 @@ internal sealed class AdminBrowserNetwork
     private const int MaximumTrackedRequests = 256;
     private readonly HashSet<string> active = new(StringComparer.Ordinal);
 
-    internal int MaximumConcurrent { get; private set; }
+    internal int MaximumConcurrent
+    {
+        get; private set;
+    }
     internal int ActiveRequests => active.Count;
 
     internal void Observe(JsonElement message)
@@ -24,20 +27,28 @@ internal sealed class AdminBrowserNetwork
         if (!message.TryGetProperty(MethodProperty, out var method)
             || !message.TryGetProperty(ParamsProperty, out var arguments)
             || !arguments.TryGetProperty(RequestIdProperty, out var identifier))
-        { return; }
+        {
+            return;
+        }
         var id = identifier.GetString()!;
         if (method.GetString() == RequestStarted)
         {
             var url = arguments.GetProperty(RequestProperty).GetProperty(UrlProperty).GetString();
             if (!Uri.TryCreate(url, UriKind.Absolute, out var target)
                 || !target.AbsolutePath.StartsWith(ApiPath, StringComparison.Ordinal))
-            { return; }
+            {
+                return;
+            }
             if (active.Count >= MaximumTrackedRequests)
-            { throw new InvalidOperationException(AdminBrowserProtocol.BrowserFailure); }
+            {
+                throw new InvalidOperationException(AdminBrowserProtocol.BrowserFailure);
+            }
             active.Add(id);
             MaximumConcurrent = Math.Max(MaximumConcurrent, active.Count);
         }
         else if (method.GetString() is RequestFinished or RequestFailed)
-        { active.Remove(id); }
+        {
+            active.Remove(id);
+        }
     }
 }

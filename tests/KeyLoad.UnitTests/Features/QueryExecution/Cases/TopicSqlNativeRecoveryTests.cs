@@ -18,7 +18,10 @@ internal sealed class TopicSqlNativeRecoveryTests
         await RefuseAsync(database, ErrorCode.HistoryUnavailable);
         database.Store.Commit((transaction, _) => { transaction.Put(key, original); return true; });
         var record = NativeSerialization.Deserialize<SourceEventRecord>(original);
-        var changed = NativeSerialization.Serialize(record with { Position = TopicSqlProtocol.FirstPosition });
+        var changed = NativeSerialization.Serialize(record with
+        {
+            Position = TopicSqlProtocol.FirstPosition
+        });
         database.Store.Commit((transaction, _) => { transaction.Put(key, changed); return true; });
         await RefuseAsync(database, ErrorCode.Corruption);
         database.Store.Commit((transaction, _) => { transaction.Put(key, original); return true; });
@@ -31,7 +34,10 @@ internal sealed class TopicSqlNativeRecoveryTests
     [Test]
     public async Task ActualTopicCompleteHistoryScanOverflowAndOriginalCancellationRejectThenPurgeMakesReadHealthy()
     {
-        using var database = TopicSqlNativeSeed.Create(new() { MaxScanRecords = TopicSqlProtocol.FirstPosition });
+        using var database = TopicSqlNativeSeed.Create(new()
+        {
+            MaxScanRecords = TopicSqlProtocol.FirstPosition
+        });
         TopicSqlNativeSeed.Publish(database, TopicSqlNativeSeed.Command(database));
         await RefuseAsync(database, ErrorCode.BudgetExceeded);
         var engine = TopicSqlNativeSeed.Engine(database);

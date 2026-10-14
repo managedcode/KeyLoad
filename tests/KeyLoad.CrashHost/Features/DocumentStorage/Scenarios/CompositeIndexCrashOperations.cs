@@ -62,7 +62,9 @@ internal static class CompositeIndexCrashOperations
 
     internal static void InsertEqualValueInOtherPartition(DatabaseEngine database)
         => _ = Apply(database, CompositeIndexCrashContract.Partition with
-        { PartitionKey = CompositeIndexCrashContract.OtherPartitionKey }, CompositeIndexCrashContract.OtherPartitionCommandText,
+        {
+            PartitionKey = CompositeIndexCrashContract.OtherPartitionKey
+        }, CompositeIndexCrashContract.OtherPartitionCommandText,
             new PutDocument(CompositeIndexCrashContract.Collection, CompositeIndexCrashContract.OtherPartitionId,
                 CompositeIndexCrashContract.ReplacedJson, EmptyRevision)).Get<CommitReceipt>();
 

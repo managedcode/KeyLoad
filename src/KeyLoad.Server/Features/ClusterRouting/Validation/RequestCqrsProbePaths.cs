@@ -11,7 +11,9 @@ internal static class RequestCqrsProbePaths
         RequirePathAncestors(path, expectedRoot);
         var info = new DirectoryInfo(path);
         if (!info.Exists || (info.Attributes & FileAttributes.ReparsePoint) != EmptyInfoAttributesFileAttributesReparsePoint)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         RequirePrivateMode(path, RequestCqrsProbeProtocol.PrivateDirectoryMode);
     }
 
@@ -20,23 +22,31 @@ internal static class RequestCqrsProbePaths
         const int EmptyInfoAttributesFileAttributesReparsePoint = 0;
 
         if (!Path.IsPathFullyQualified(path) || Path.GetFullPath(path) != expectedRoot)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         var info = new DirectoryInfo(path);
         if ((info.Attributes & FileAttributes.ReparsePoint) != EmptyInfoAttributesFileAttributesReparsePoint)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
     }
 
     internal static void RequirePrivateMode(string path, UnixFileMode expected)
     {
         if (OperatingSystem.IsWindows() || File.GetUnixFileMode(path) != expected)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
     }
 
     internal static string RequireRoot(RequestCqrsProbeOptions options)
     {
         if (!options.Enabled || options.Root != RequestCqrsProbeProtocol.FixedRoot
             || !RequestCqrsProbeOptionsReader.IsSessionId(options.SessionId))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         return options.Root;
     }
 

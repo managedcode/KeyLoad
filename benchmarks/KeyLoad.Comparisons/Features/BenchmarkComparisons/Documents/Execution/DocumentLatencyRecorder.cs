@@ -15,7 +15,10 @@ internal sealed class DocumentLatencyRecorder
             count++;
             maximum = Math.Max(maximum, milliseconds);
             if (!double.IsFinite(milliseconds) || milliseconds < DocumentMeasurementValues.NoObservedItems || milliseconds > policy.MaximumMilliseconds)
-            { overflow++; return; }
+            {
+                overflow++;
+                return;
+            }
             var bucket = checked((int)Math.Ceiling(milliseconds * DocumentMeasurementValues.MicrosecondsPerMillisecond / policy.ResolutionMicroseconds));
             bins[bucket] = bins.GetValueOrDefault(bucket) + DocumentMeasurementValues.SingleItemCount;
         }

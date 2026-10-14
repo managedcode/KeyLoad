@@ -120,5 +120,8 @@ internal sealed class DocumentMutationImageReadTests
 
     private static string LargeJson() => "{\"value\":\"" + new string('x', LargeValueLength) + "\"}";
 
-    private enum ImageAction { Replace, Patch, Delete }
+    private enum ImageAction
+    {
+        Replace, Patch, Delete
+    }
 }

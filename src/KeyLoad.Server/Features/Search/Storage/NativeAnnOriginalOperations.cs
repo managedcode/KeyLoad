@@ -13,30 +13,22 @@ internal static class NativeAnnOriginalOperations
         NativeAnnOriginalResults.RequireRequest(key, request);
         if (configured.Consumer != request.Consumer || configured.Definition.IndexGeneration != request.IndexGeneration
             || configured.Released || configured.Definition.AnnMaintenance != request.MaintenanceProfile)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, NativeAnnProtocol.InvalidSource); }
-        var entry = receipt.OriginalOperations.SingleOrDefault(value => value.Key == key);
-        if (configured.InitialAnnMaintenance is { } reserved)
         {
-            NativeAnnOriginalResults.RequireRequest(key, reserved);
-            if (request.CommandId == reserved.CommandId)
-            {
-                RequireSame(reserved, request);
-                if (entry is null && configured.InitialAnnMaintenanceSettled)
-                { throw Errors.Fail(ErrorCode.HistoryUnavailable, NativeAnnProtocol.MissingDependencyHistory); }
-            }
-            if (!configured.InitialAnnMaintenanceSettled && !NativeAnnOriginalResults.SameRequest(reserved, request))
-            { throw Errors.Fail(ErrorCode.RecoveryRequired, NativeAnnProtocol.Interrupted); }
-            if (entry is not null && !configured.InitialAnnMaintenanceSettled
-                && !NativeAnnOriginalResults.SameRequest(reserved, entry.InitialRequest))
-            { throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Corrupt); }
+            throw Errors.Fail(ErrorCode.TokenInvalidated, NativeAnnProtocol.InvalidSource);
         }
+        var entry = receipt.OriginalOperations.SingleOrDefault(value => value.Key == key);
+        NativeAnnReservedOperationAdmission.Require(configured, key, entry, request);
         if (entry is null && (receipt.Published.Any(value => value.Key == key)
             || receipt.Pending.Any(value => value.Key == key)))
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, NativeAnnProtocol.Interrupted); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, NativeAnnProtocol.Interrupted);
+        }
         if (entry is not null)
         {
             if (entry.Released)
-            { throw Errors.Fail(ErrorCode.TokenInvalidated, NativeAnnProtocol.InvalidSource); }
+            {
+                throw Errors.Fail(ErrorCode.TokenInvalidated, NativeAnnProtocol.InvalidSource);
+            }
             NativeAnnOriginalResults.RequireCurrent(entry, principal, request, current);
             if (entry.LastRequest is { } last && last.CommandId == request.CommandId)
             {
@@ -47,17 +39,25 @@ internal static class NativeAnnOriginalOperations
             if (entry.PendingRequest is { } pending)
             {
                 if (pending.CommandId != request.CommandId)
-                { throw Errors.Fail(ErrorCode.RecoveryRequired, NativeAnnProtocol.Interrupted); }
+                {
+                    throw Errors.Fail(ErrorCode.RecoveryRequired, NativeAnnProtocol.Interrupted);
+                }
                 RequireSame(pending, request);
                 if (entry.PendingStarted)
-                { throw Errors.Fail(ErrorCode.RecoveryRequired, NativeAnnProtocol.Interrupted); }
+                {
+                    throw Errors.Fail(ErrorCode.RecoveryRequired, NativeAnnProtocol.Interrupted);
+                }
                 return (receipt, null);
             }
         }
         if (configured.Checkpoint < current.ProjectionCheckpoint)
-        { throw Errors.Fail(ErrorCode.HistoryUnavailable, NativeAnnProtocol.MissingDependencyHistory); }
+        {
+            throw Errors.Fail(ErrorCode.HistoryUnavailable, NativeAnnProtocol.MissingDependencyHistory);
+        }
         if (entry is null && receipt.OriginalOperations.Length >= options.MaximumOwnedGenerations)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, NativeAnnProtocol.Bound); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, NativeAnnProtocol.Bound);
+        }
         var next = new NativeAnnOriginalOperation(key, principal.Id, current.Scope.PolicyEpoch,
             request, false, entry?.LastRequest, entry?.LastResult, false,
             entry?.InitialRequest ?? request, entry?.InitialSettled ?? false, entry?.InitialSettlementIntent, entry?.RetiredOriginals ?? []);
@@ -71,14 +71,21 @@ internal static class NativeAnnOriginalOperations
         if (entry is null)
         {
             if (request.MaintenanceProfile is not null)
-            { throw Errors.Fail(ErrorCode.RecoveryRequired, NativeAnnProtocol.Interrupted); }
+            {
+                throw Errors.Fail(ErrorCode.RecoveryRequired, NativeAnnProtocol.Interrupted);
+            }
             return receipt;
         }
         RequireSame(entry.PendingRequest ?? throw Errors.Fail(ErrorCode.HistoryUnavailable,
             NativeAnnProtocol.MissingDependencyHistory), request);
         if (entry.PendingStarted)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, NativeAnnProtocol.Interrupted); }
-        return Replace(receipt, entry with { PendingStarted = true });
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, NativeAnnProtocol.Interrupted);
+        }
+        return Replace(receipt, entry with
+        {
+            PendingStarted = true
+        });
     }
 
     internal static NativeAnnRootReceipt Settle(NativeAnnRootReceipt receipt, PrincipalRecord principal,
@@ -96,13 +103,17 @@ internal static class NativeAnnOriginalOperations
             var settledResult = entry.LastResult ?? throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Corrupt);
             if (!global::KeyLoad.NativeSerialization.Serialize(settledResult).AsSpan()
                 .SequenceEqual(global::KeyLoad.NativeSerialization.Serialize(result)))
-            { throw Errors.Fail(ErrorCode.Conflict, NativeAnnProtocol.InvalidSource); }
+            {
+                throw Errors.Fail(ErrorCode.Conflict, NativeAnnProtocol.InvalidSource);
+            }
             return receipt;
         }
         RequireSame(entry.PendingRequest ?? throw Errors.Fail(ErrorCode.RecoveryRequired,
             NativeAnnProtocol.Interrupted), request);
         if (!entry.PendingStarted || result.Source is not { } source || current.ProjectionCheckpoint != source.ThroughSequence)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, NativeAnnProtocol.Interrupted); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, NativeAnnProtocol.Interrupted);
+        }
         return Replace(receipt, entry with
         {
             PendingRequest = null,
@@ -119,10 +130,14 @@ internal static class NativeAnnOriginalOperations
         NativeAnnExecutionOptions options)
     {
         if (entry.LastRequest is not { } previous)
-        { return entry.RetiredOriginals; }
+        {
+            return entry.RetiredOriginals;
+        }
         if (checked(((long)entry.RetiredOriginals.Length + NewRetiredOriginalCount) * System.Security.Cryptography.SHA256.HashSizeInBytes)
             > options.MaximumManifestBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, NativeAnnProtocol.Bound); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, NativeAnnProtocol.Bound);
+        }
         var retired = new NativeAnnRetiredOriginalIdentity(previous.CommandId,
             System.Security.Cryptography.SHA256.HashData(global::KeyLoad.NativeSerialization.Serialize(previous)));
         return [.. entry.RetiredOriginals, retired];
@@ -132,10 +147,14 @@ internal static class NativeAnnOriginalOperations
     {
         var retired = entry.RetiredOriginals.SingleOrDefault(value => value.CommandId == request.CommandId);
         if (retired is null)
-        { return; }
+        {
+            return;
+        }
         var digest = System.Security.Cryptography.SHA256.HashData(global::KeyLoad.NativeSerialization.Serialize(request));
         if (!System.Security.Cryptography.CryptographicOperations.FixedTimeEquals(retired.RequestSha256, digest))
-        { throw Errors.Fail(ErrorCode.Conflict, NativeAnnProtocol.InvalidSource); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, NativeAnnProtocol.InvalidSource);
+        }
         throw Errors.Fail(ErrorCode.HistoryUnavailable, NativeAnnProtocol.MissingDependencyHistory);
     }
 
@@ -146,16 +165,26 @@ internal static class NativeAnnOriginalOperations
     {
         if (receipt.Published.Any(item => item.Key == key) || receipt.Pending.Any(item => item.Key == key)
             || receipt.OriginalOperations.Any(entry => entry.Key == key && !entry.Released))
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, NativeAnnProtocol.Interrupted); }
-        return receipt with { OriginalOperations = receipt.OriginalOperations.Where(entry => entry.Key != key).ToArray() };
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, NativeAnnProtocol.Interrupted);
+        }
+        return receipt with
+        {
+            OriginalOperations = receipt.OriginalOperations.Where(entry => entry.Key != key).ToArray()
+        };
     }
 
     private static NativeAnnRootReceipt Replace(NativeAnnRootReceipt receipt, NativeAnnOriginalOperation next)
-        => receipt with { OriginalOperations = receipt.OriginalOperations.Where(value => value.Key != next.Key).Append(next).ToArray() };
+        => receipt with
+        {
+            OriginalOperations = receipt.OriginalOperations.Where(value => value.Key != next.Key).Append(next).ToArray()
+        };
 
     private static void RequireSame(AnnMaintenanceRequest original, AnnMaintenanceRequest request)
     {
         if (!NativeAnnOriginalResults.SameRequest(original, request))
-        { throw Errors.Fail(ErrorCode.Conflict, NativeAnnProtocol.InvalidSource); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, NativeAnnProtocol.InvalidSource);
+        }
     }
 }

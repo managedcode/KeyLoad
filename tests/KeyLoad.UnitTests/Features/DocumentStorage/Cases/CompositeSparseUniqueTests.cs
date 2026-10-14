@@ -24,9 +24,13 @@ internal sealed class CompositeSparseUniqueTests
         await CompositeSparseUniqueAssertions.DocumentAsync(db, CompositeSparseUniqueAssertions.MissingId, CompositeSparseUniqueAssertions.MissingJson, 1);
         var included = new List<(string Id, object? Rank)>();
         if (includeNull)
-        { included.Add((CompositeSparseUniqueAssertions.NullId, null)); }
+        {
+            included.Add((CompositeSparseUniqueAssertions.NullId, null));
+        }
         if (includeMissing)
-        { included.Add((CompositeSparseUniqueAssertions.MissingId, MissingValue.Instance)); }
+        {
+            included.Add((CompositeSparseUniqueAssertions.MissingId, MissingValue.Instance));
+        }
         await CompositeSparseUniqueAssertions.ImagesAsync(db, [.. included]);
         await CompositeSparseUniqueAssertions.DuplicateAsync(db, CompositeSparseUniqueAssertions.NullDuplicate,
             CompositeSparseUniqueAssertions.NullJson, includeNull);

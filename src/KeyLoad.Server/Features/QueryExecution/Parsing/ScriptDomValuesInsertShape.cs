@@ -16,9 +16,13 @@ internal static class ScriptDomValuesInsertShape
             || target.TableSampleClause is not null || target.TemporalClause is not null
             || target.SchemaObject.Identifiers.Count != One
             || insert.InsertSource is not Dom.ValuesInsertSource { IsDefaultValues: false } values)
-        { throw ScriptDomOperationErrors.Unsupported(); }
+        {
+            throw ScriptDomOperationErrors.Unsupported();
+        }
         if (insert.Columns.Count == Empty || values.RowValues.Count == Empty)
-        { throw ScriptDomOperationErrors.Invalid(); }
+        {
+            throw ScriptDomOperationErrors.Invalid();
+        }
         var columns = new string[insert.Columns.Count];
         var unique = new HashSet<string>(StringComparer.Ordinal);
         for (var index = Empty; index < columns.Length; index++)
@@ -27,11 +31,15 @@ internal static class ScriptDomValuesInsertShape
             token.ThrowIfCancellationRequested();
             var column = insert.Columns[index];
             if (column.ColumnType != Dom.ColumnType.Regular || column.MultiPartIdentifier is not { Identifiers.Count: One } name)
-            { throw ScriptDomOperationErrors.Unsupported(); }
+            {
+                throw ScriptDomOperationErrors.Unsupported();
+            }
             var selected = name.Identifiers[Empty].Value;
             global::KeyLoad.Core.JsonData.Identifier(selected);
             if (!unique.Add(selected))
-            { throw ScriptDomOperationErrors.Invalid(); }
+            {
+                throw ScriptDomOperationErrors.Invalid();
+            }
             columns[index] = selected;
         }
         var table = target.SchemaObject.Identifiers[Empty].Value;

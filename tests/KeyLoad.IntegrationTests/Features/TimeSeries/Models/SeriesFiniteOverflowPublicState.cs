@@ -12,7 +12,13 @@ internal sealed class SeriesFiniteOverflowPublicState(TimeSeriesRf3Scenario scen
     internal CommandRequest Seed { get; } = seed;
     internal CommitReceipt SeedReceipt { get; } = seedReceipt;
     internal CommandRequest Expiry { get; } = expiry;
-    internal CommitReceipt? ExpiryReceipt { get; set; }
+    internal CommitReceipt? ExpiryReceipt
+    {
+        get; set;
+    }
     internal OutboxStatus CurrentOutbox { get; set; } = outbox;
-    internal bool Purged { get; set; }
+    internal bool Purged
+    {
+        get; set;
+    }
 }

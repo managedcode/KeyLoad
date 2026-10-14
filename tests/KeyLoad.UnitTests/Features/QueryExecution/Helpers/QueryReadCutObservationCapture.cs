@@ -6,7 +6,10 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 internal sealed class QueryReadCutObservationCapture : IQueryReadCutObserver
 {
     internal List<QueryReadCutObservation> Values { get; } = [];
-    internal Action? AfterCapture { get; init; }
+    internal Action? AfterCapture
+    {
+        get; init;
+    }
     public void Observe(QueryReadCutObservation observation, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -18,7 +21,9 @@ internal sealed class QueryReadCutObservationCapture : IQueryReadCutObserver
     {
         var page = view.Scan([], 256);
         if (page.HasMore)
-        { throw new InvalidOperationException("The complete query fixture cut exceeded its bound."); }
+        {
+            throw new InvalidOperationException("The complete query fixture cut exceeded its bound.");
+        }
         return db.Store.Position + "\n" + string.Join("\n", page.Records.Select(row =>
             Convert.ToHexString(row.Key.Span) + ":" + Convert.ToHexString(row.Value.Span)));
     });
@@ -31,15 +36,22 @@ internal sealed class QueryReadCutObservationCapture : IQueryReadCutObserver
             using var db = new TestDatabase(nativeReplicaAdmission: true);
             await ServerFailureObserver.ObserveAsync(() => body(db), failures);
         }
-        catch (Exception failure) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(failure))
-        { failures.Add(failure); }
-        catch (Exception failure) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(failure))
-        { failures.Add(failure); }
+        catch (Exception failure) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            failures.Add(failure);
+        }
+        catch (Exception failure) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            failures.Add(failure);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
     internal static PrincipalRecord Reader(TestDatabase db, long epoch, bool revoked = false) =>
         db.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(new("reader", "tenant",
             [new("database", "orders", Capability.DocumentsRead | Capability.Query)], [])
-        { PolicyEpoch = epoch, Revoked = revoked })).Get<PrincipalRecord>();
+        {
+            PolicyEpoch = epoch,
+            Revoked = revoked
+        })).Get<PrincipalRecord>();
 }

@@ -39,7 +39,10 @@ internal static class GuideLifecyclePublicTrial
                 await GuideLifecyclePublicValues.DocumentAsync(reader, state, token);
                 await GuideLifecyclePublicControls.RefusalsAndCancellationAsync(root, reader, state, token);
                 await McpCallerAssertions.SdkStatusAsync(await root.Sdk.ConfigureApiKeyAsync(Guid.NewGuid(),
-                    state.Identity.Credential with { Revoked = true }, token));
+                    state.Identity.Credential with
+                    {
+                        Revoked = true
+                    }, token));
                 await GuideLifecyclePublicControls.RevokedAsync(root, reader, state, token);
                 return true;
             }, token);

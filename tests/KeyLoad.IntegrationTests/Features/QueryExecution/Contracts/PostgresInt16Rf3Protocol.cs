@@ -23,7 +23,10 @@ internal static class PostgresInt16Rf3Protocol
     internal const string LowJson = """{"label":"low"}""";
     internal static readonly short[] Thresholds = [short.MinValue, -1, 0, OneValue, HighScore, short.MaxValue];
     internal static Dictionary<string, JsonElement> Parameters(short value)
-        => new() { [Parameter] = JsonSerializer.SerializeToElement(value, JsonDefaults.Options) };
+        => new()
+        {
+            [Parameter] = JsonSerializer.SerializeToElement(value, JsonDefaults.Options)
+        };
     internal static SqlOperationRequest Operation(short value)
         => new(PostgresRf3State.Partition, Sql, Parameters(value), AllowFullScan: true);
     internal static AstQueryRequest Ast(short value)

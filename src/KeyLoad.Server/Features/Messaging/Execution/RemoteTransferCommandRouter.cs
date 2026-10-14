@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Messaging;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.DocumentStorage;
 using Microsoft.Extensions.Options;
 
@@ -50,7 +50,9 @@ internal sealed class RemoteTransferCommandRouter(OrleansNode node, PartitionHos
             envelope.CommandId, principal.Id, clock.GetUtcNow(), payload);
         var context = partition.Database.CaptureRemoteTransferDispatch(principal.Id, original, work);
         if (context is null)
-        { return null; }
+        {
+            return null;
+        }
         var call = RemoteTransferSourceCall.Create(node, partition, options.Value, envelope,
             context, RemoteQueueTransferPeerStage.Accept, limits.Value.MaxBatchBytes);
         var result = await client.TransferAsync(call, token).ConfigureAwait(false);
@@ -79,7 +81,9 @@ internal sealed class RemoteTransferCommandRouter(OrleansNode node, PartitionHos
     {
         var remaining = expiresAt - clock.GetUtcNow();
         if (remaining <= TimeSpan.Zero)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteTransferPeerProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteTransferPeerProtocol.Invalid);
+        }
         return new(remaining, clock);
     }
 }

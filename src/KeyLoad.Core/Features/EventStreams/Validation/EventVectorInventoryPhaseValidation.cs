@@ -18,11 +18,17 @@ internal static class EventVectorInventoryPhaseValidation
                     ? checked(header.CoverageGeneration + NextCoverage) : header.CoverageGeneration))
             || phase.CleanupGeneration > header.CleanupGeneration || !row.Key.Span.SequenceEqual(
                 EventVectorKeys.Phase(header.ControlPartition, header.MapId, phase.PhaseCommandId)))
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidPhase); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidPhase);
+        }
         if (phase.Disposition == EventVectorSourcePhaseDisposition.Admitted)
-        { _ = EventVectorSourceMutationValidation.ReadOriginal(phase, admission); }
+        {
+            _ = EventVectorSourceMutationValidation.ReadOriginal(phase, admission);
+        }
         else
-        { _ = EventVectorSourceMutationValidation.ReadObserved(phase, admission); }
+        {
+            _ = EventVectorSourceMutationValidation.ReadObserved(phase, admission);
+        }
         return phase;
     }
 
@@ -35,6 +41,8 @@ internal static class EventVectorInventoryPhaseValidation
                 || admitted.Disposition != EventVectorSourcePhaseDisposition.Admitted)
             || header.LastSettledPhaseId is { } settled && (!phases.TryGetValue(settled, out var observed)
                 || observed.Disposition != EventVectorSourcePhaseDisposition.Observed))
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidPhase); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidPhase);
+        }
     }
 }

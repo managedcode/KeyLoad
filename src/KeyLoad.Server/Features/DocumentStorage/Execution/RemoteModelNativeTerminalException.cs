@@ -4,7 +4,9 @@ namespace KeyLoad.Server.Features.DocumentStorage;
 internal sealed class RemoteModelNativeTerminalException : Exception
 {
     /// <summary>Creates an exception without observed native terminal provenance.</summary>
-    public RemoteModelNativeTerminalException() { }
+    public RemoteModelNativeTerminalException()
+    {
+    }
 
     /// <summary>Creates an exception without observed native terminal provenance.</summary>
     /// <param name="message">The diagnostic message.</param>
@@ -18,7 +20,12 @@ internal sealed class RemoteModelNativeTerminalException : Exception
 
     internal RemoteModelNativeTerminalException(KeyLoadException original)
         : base(original?.Message ?? throw new ArgumentNullException(nameof(original)), original)
-    { Original = original; }
+    {
+        Original = original;
+    }
 
-    internal KeyLoadException? Original { get; }
+    internal KeyLoadException? Original
+    {
+        get;
+    }
 }

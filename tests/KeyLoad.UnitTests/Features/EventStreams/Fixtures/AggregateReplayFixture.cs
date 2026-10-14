@@ -59,7 +59,9 @@ internal sealed class AggregateReplayFixture : IDisposable
         {
             Open(limits, timeProvider);
             database.Bootstrap(new(RootId, SystemTenant, [new(Wildcard, Wildcard, Capability.All)], [Wildcard])
-            { ClusterAdministrator = true }, DatabaseEngine.Credential(RootId, RootId, RootCredential));
+            {
+                ClusterAdministrator = true
+            }, DatabaseEngine.Credential(RootId, RootId, RootCredential));
             PhysicalShardTestBootstrap.Bootstrap(database, RootId);
             ConfigureResource(protectedFields);
             ConfigurePrincipal(WorkerId, Capability.EventsReplay | Capability.EventsRead | Capability.EventsSnapshotsManage,
@@ -87,7 +89,10 @@ internal sealed class AggregateReplayFixture : IDisposable
     {
         var principal = new PrincipalRecord(id, Partition.TenantId,
             [new(Partition.DatabaseId, StreamSet, capabilities)], [.. fieldGrants])
-        { PolicyEpoch = policyEpoch, Revoked = revoked };
+        {
+            PolicyEpoch = policyEpoch,
+            Revoked = revoked
+        };
         Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(principal));
     }
 
@@ -149,7 +154,10 @@ internal sealed class AggregateReplayFixture : IDisposable
         {
             var headKey = KeySpace.Partition(StreamHeadSpace, Partition, StreamSet, StreamId);
             var head = transaction.GetRecord<StreamHead>(headKey) ?? throw new InvalidOperationException();
-            transaction.PutRecord(headKey, head with { FirstAvailableRevision = firstAvailableRevision });
+            transaction.PutRecord(headKey, head with
+            {
+                FirstAvailableRevision = firstAvailableRevision
+            });
             return true;
         });
 

@@ -1,5 +1,5 @@
 using System.Runtime.ExceptionServices;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.Server;
 
@@ -16,11 +16,19 @@ internal static class ServerFailureObserver
         ArgumentNullException.ThrowIfNull(failures);
         Task terminal;
         try
-        { terminal = stage(); }
+        {
+            terminal = stage();
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); return; }
+        {
+            failures.Add(error);
+            return;
+        }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); return; }
+        {
+            failures.Add(error);
+            return;
+        }
         await terminal.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
         if (terminal.Exception is { } terminalFailure)
         {
@@ -29,9 +37,13 @@ internal static class ServerFailureObserver
         else if (terminal.IsCanceled)
         {
             try
-            { await terminal.ConfigureAwait(false); }
+            {
+                await terminal.ConfigureAwait(false);
+            }
             catch (OperationCanceledException error)
-            { failures.Add(error); }
+            {
+                failures.Add(error);
+            }
         }
     }
 
@@ -43,11 +55,17 @@ internal static class ServerFailureObserver
         ArgumentNullException.ThrowIfNull(stage);
         ArgumentNullException.ThrowIfNull(failures);
         try
-        { stage(); }
+        {
+            stage();
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
     }
 
     /// <summary>Returns for no failures, rethrows one original failure, or emits every ordered failure as an aggregate.</summary>

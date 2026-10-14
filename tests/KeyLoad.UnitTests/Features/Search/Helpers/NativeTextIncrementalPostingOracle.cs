@@ -33,7 +33,9 @@ internal static class NativeTextIncrementalPostingOracle
                         while (iterator.Next())
                         {
                             if (observed.Count >= ExpectedPostings)
-                            { throw new InvalidOperationException(); }
+                            {
+                                throw new InvalidOperationException();
+                            }
                             var key = iterator.CurrentKey;
                             observed.Add((key.Token, key.Record, key.PreviousToken));
                         }
@@ -52,7 +54,9 @@ internal static class NativeTextIncrementalPostingOracle
         finally
         {
             if (index is not null)
-            { ServerFailureObserver.Observe(index.Dispose, failures); }
+            {
+                ServerFailureObserver.Observe(index.Dispose, failures);
+            }
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }

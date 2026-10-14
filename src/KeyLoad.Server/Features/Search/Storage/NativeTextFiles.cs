@@ -21,7 +21,9 @@ internal static class NativeTextFiles
             budget?.Check();
             NativeTextFileIO.VerifyDirectory(fullRoot);
             if (initialized)
-            { NativeTextRootFiles.VerifyReceipt(fullRoot, sourceNodeId, executionOptions); }
+            {
+                NativeTextRootFiles.VerifyReceipt(fullRoot, sourceNodeId, executionOptions);
+            }
         });
         NativeTextRootFiles.InitializeReceipt(fullRoot, sourceNodeId, executionOptions: executionOptions, resources: resources);
         initialized = true;
@@ -78,9 +80,13 @@ internal static class NativeTextFiles
         void Publish() => File.Move(Path.Combine(root, leaf, NativeTextProtocol.PendingManifestFile),
             Path.Combine(root, leaf, NativeTextProtocol.ManifestFile), true);
         if (resources is null)
-        { Publish(); }
+        {
+            Publish();
+        }
         else
-        { resources.MutatePhysical(Publish); }
+        {
+            resources.MutatePhysical(Publish);
+        }
     }
 
     internal static NativeTextManifest ReadManifest(string path, TextProjectionScope scope, DatabaseLimits limits, IOptions<NativeTextExecutionOptions> executionOptions)

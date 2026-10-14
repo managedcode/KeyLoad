@@ -8,8 +8,14 @@ internal sealed class ExistingStoreInspectorInputs(ExistingStoreInspectionReques
 {
     private const string RelativeDirectory = "relative-existing-store";
     private const string DotSegment = ".";
-    internal CacheMemoryBudget? Budget { get; private set; }
-    internal int ObservedStages { get; private set; }
+    internal CacheMemoryBudget? Budget
+    {
+        get; private set;
+    }
+    internal int ObservedStages
+    {
+        get; private set;
+    }
     internal Guid NodeId => request.Variant == ExistingStoreInspectionVariant.EmptyNodeId ? Guid.Empty : request.ExpectedNodeId;
 
     internal ZoneTreeStoreOptions? CreateOptions()
@@ -37,6 +43,9 @@ internal sealed class ExistingStoreInspectorInputs(ExistingStoreInspectionReques
     private ZoneTreeStoreOptions ConfigureCache(ZoneTreeStoreOptions options)
     {
         Budget = new(CrashExecutionOptions.CacheMemory());
-        return options with { EmbeddedPointCache = new ZoneTreePointCacheOptions(Budget) };
+        return options with
+        {
+            EmbeddedPointCache = new ZoneTreePointCacheOptions(Budget)
+        };
     }
 }

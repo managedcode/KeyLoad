@@ -20,7 +20,9 @@ public sealed partial class DatabaseEngine
             }
         }
         else if (phase.Stage == PartitionMovePeerStage.Abort)
-        { transaction.Delete(PartitionMoveSourceFenceStorage.Key(phase.Partition)); }
+        {
+            transaction.Delete(PartitionMoveSourceFenceStorage.Key(phase.Partition));
+        }
         else
         {
             var publication = body.Publication
@@ -29,6 +31,10 @@ public sealed partial class DatabaseEngine
             transaction.Delete(PartitionMoveTargetStorage.Key(phase.Partition));
         }
         // Retired source retains its fence: obsolete physical source never regains write admission.
-        return state with { Completion = journal, NextBatch = checked(state.NextBatch + PartitionMoveProtocol.SequenceStep) };
+        return state with
+        {
+            Completion = journal,
+            NextBatch = checked(state.NextBatch + PartitionMoveProtocol.SequenceStep)
+        };
     }
 }

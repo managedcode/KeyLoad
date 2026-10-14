@@ -64,7 +64,10 @@ internal sealed class ScaledCorpusReadbackTests
 
     private sealed class CancellationEvidence
     {
-        internal bool Disposed { get; private set; }
+        internal bool Disposed
+        {
+            get; private set;
+        }
 
         internal async IAsyncEnumerable<FoundDocument> Read(ScaledComparisonCorpus corpus, CancellationTokenSource source,
             [EnumeratorCancellation] CancellationToken cancellationToken = default)

@@ -9,9 +9,12 @@ internal static class SearchMcpCatalogEntries
     private const string TextMaintain = "keyload_search_text_maintain";
     private const string TextMaintainRoute = "/v1/search/text/maintain";
 
-    internal static System.Collections.Immutable.ImmutableArray<(string Name, string Route, KeyLoad.Orleans.GrainReadKind? ReadKind, OperationKind? CommandKind)> All { get; } =
+    internal static System.Collections.Immutable.ImmutableArray<(string Name, string Route, KeyLoad.Clustering.GrainReadKind? ReadKind, OperationKind? CommandKind)> All
+    {
+        get;
+    } =
     [
-        (AnnRead, AnnReadRoute, KeyLoad.Orleans.GrainReadKind.ApproximateSearch, null),
+        (AnnRead, AnnReadRoute, KeyLoad.Clustering.GrainReadKind.ApproximateSearch, null),
         (AnnMaintain, AnnMaintainRoute, null, OperationKind.MaintainAnnIndex),
         (TextMaintain, TextMaintainRoute, null, OperationKind.MaintainTextIndex),
     ];

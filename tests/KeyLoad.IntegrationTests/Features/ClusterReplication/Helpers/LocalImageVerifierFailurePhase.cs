@@ -10,7 +10,9 @@ internal static class LocalImageVerifierFailurePhase
         List<Exception> failures)
     {
         if (observe is null)
-        { return; }
+        {
+            return;
+        }
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             var phase = exit.IsCompletedSuccessfully && output.IsCompletedSuccessfully && error.IsCompletedSuccessfully
@@ -23,7 +25,9 @@ internal static class LocalImageVerifierFailurePhase
     {
         var markers = output.Split('\n').Where(line => line.StartsWith(Marker, StringComparison.Ordinal)).ToArray();
         if (markers.Length != 1)
-        { return LocalImageVerifierPhase.Unobserved; }
+        {
+            return LocalImageVerifierPhase.Unobserved;
+        }
         return markers[0][Marker.Length..].TrimEnd('\r') switch
         {
             nameof(LocalImageVerifierPhase.DockerContext) => LocalImageVerifierPhase.DockerContext,

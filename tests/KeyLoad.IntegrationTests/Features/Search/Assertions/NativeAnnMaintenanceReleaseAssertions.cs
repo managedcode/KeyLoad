@@ -12,7 +12,11 @@ internal static class NativeAnnMaintenanceReleaseAssertions
     internal static async Task AssertAsync(KeyLoadClient sdk, McpOfficialClient mcp,
         NativeAnnMaintenanceRf3Scenario scenario, AnnMaintenanceRequest request, CancellationToken token)
     {
-        var release = request with { CommandId = Guid.NewGuid(), Mode = AnnMaintenanceMode.Release };
+        var release = request with
+        {
+            CommandId = Guid.NewGuid(),
+            Mode = AnnMaintenanceMode.Release
+        };
         var result = (await McpCallerAssertions.SuccessAsync<AnnMaintenanceResult>(await mcp.CallAsync(
             NativeAnnMaintenanceRf3Scenario.Tool, release, token))).Value;
         await Assert.That(result.CommandId).IsEqualTo(release.CommandId);
@@ -23,7 +27,11 @@ internal static class NativeAnnMaintenanceReleaseAssertions
         await Assert.That(result.Source).IsNull();
         await Assert.That(result.IndexSha256).IsNull();
         await Assert.That(result.Checkpoint).IsNull();
-        var old = request with { CommandId = Guid.NewGuid(), Mode = AnnMaintenanceMode.Restore };
+        var old = request with
+        {
+            CommandId = Guid.NewGuid(),
+            Mode = AnnMaintenanceMode.Restore
+        };
         var denied = await sdk.MaintainAnnIndexAsync(old, token);
         await Assert.That(denied.IsSuccess).IsFalse();
         await Assert.That(denied.Value).IsNull();
@@ -33,7 +41,9 @@ internal static class NativeAnnMaintenanceReleaseAssertions
         {
             CommandId = Guid.NewGuid(),
             Consumer = request.Consumer with
-            { Name = FreshConsumerPrefix + Guid.NewGuid().ToString(GuidFormat) },
+            {
+                Name = FreshConsumerPrefix + Guid.NewGuid().ToString(GuidFormat)
+            },
             Mode = AnnMaintenanceMode.Build
         };
         var healthy = await McpCallerAssertions.SdkSuccessAsync(await sdk.MaintainAnnIndexAsync(fresh, token));

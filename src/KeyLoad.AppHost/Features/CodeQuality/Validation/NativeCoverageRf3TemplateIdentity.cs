@@ -22,10 +22,14 @@ internal static class NativeCoverageRf3TemplateIdentity
     private static string Require(string? declaredSha256, ReadOnlySpan<byte> selectedSourceBytes)
     {
         if (selectedSourceBytes.IsEmpty)
-        { throw new InvalidOperationException(InvalidTemplate); }
+        {
+            throw new InvalidOperationException(InvalidTemplate);
+        }
         var expected = Convert.ToHexStringLower(SHA256.HashData(selectedSourceBytes));
         if (!string.Equals(declaredSha256, expected, StringComparison.Ordinal))
-        { throw new InvalidOperationException(InvalidTemplate); }
+        {
+            throw new InvalidOperationException(InvalidTemplate);
+        }
         return expected;
     }
 }

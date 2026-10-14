@@ -84,7 +84,9 @@ internal static class NativeProcessEvidenceWholeFlow
             CreateNoWindow = true
         };
         foreach (var argument in new[] { "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", Command })
-        { start.ArgumentList.Add(argument); }
+        {
+            start.ArgumentList.Add(argument);
+        }
         start.Environment[EvidenceRootEnvironmentKey] = ProductionSourceManifestProcess.RepositoryRoot;
         start.Environment[EvidenceLimitsEnvironmentKey] = JsonSerializer.Serialize(new
         {

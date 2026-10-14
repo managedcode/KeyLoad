@@ -5,10 +5,10 @@ namespace KeyLoad.IntegrationTests.Features.TimeSeries;
 
 internal static class SampleChunkSchedulingRf3Stages
 {
-    internal static async Task<IReadOnlyList<KeyLoad.Orleans.ReplicaSiloDiscovery>> DiscoveryAsync(
+    internal static async Task<IReadOnlyList<KeyLoad.Clustering.ReplicaSiloDiscovery>> DiscoveryAsync(
         TwoRf3MembershipWave wave, CancellationToken token)
     {
-        var result = new List<KeyLoad.Orleans.ReplicaSiloDiscovery>();
+        var result = new List<KeyLoad.Clustering.ReplicaSiloDiscovery>();
         foreach (var node in new[] { RequestCqrsRf3Protocol.Node1, RequestCqrsRf3Protocol.Node2,
             RequestCqrsRf3Protocol.Node3 })
         {
@@ -19,7 +19,7 @@ internal static class SampleChunkSchedulingRf3Stages
     }
 
     internal static async Task RequireCancelledAndDisposedAsync(RequestCqrsProbeFixture controls,
-        IReadOnlyList<KeyLoad.Orleans.ReplicaSiloDiscovery> originalDiscovery, Guid arm,
+        IReadOnlyList<KeyLoad.Clustering.ReplicaSiloDiscovery> originalDiscovery, Guid arm,
         RequestCqrsProbeMarkerRecord original, CancellationToken token)
     {
         var cancelled = await controls.WaitForMarkerAsync(arm, original.Phase,

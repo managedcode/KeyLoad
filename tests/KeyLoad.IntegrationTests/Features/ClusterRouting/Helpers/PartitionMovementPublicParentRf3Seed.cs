@@ -26,9 +26,18 @@ internal sealed class PartitionMovementPublicParentRf3Seed : IAsyncDisposable
     }
 
     // Borrowed by restored callers only; never diagnostics, a DTO, or trusted role input.
-    internal string Credential { get; }
-    internal KeyLoadClient Source { get; }
-    internal KeyLoadClient Target { get; }
+    internal string Credential
+    {
+        get;
+    }
+    internal KeyLoadClient Source
+    {
+        get;
+    }
+    internal KeyLoadClient Target
+    {
+        get;
+    }
     internal McpOfficialClient Official => official ?? throw new InvalidOperationException(MissingState);
     internal RelationalSqlRf3Scenario Models { get => field ?? throw new InvalidOperationException(MissingState); private set; } = null!;
     internal PartitionRef Partition => Models.Partition;
@@ -66,7 +75,12 @@ internal sealed class PartitionMovementPublicParentRf3Seed : IAsyncDisposable
     internal static Task<PartitionMovementPublicParentRf3Seed> CreateSiblingAsync(TwoRf3MembershipWave wave,
         PartitionMovementPublicParentRf3Seed original, CancellationToken cancellationToken)
         => CreateCoreAsync(wave, original.Credential, original.Models with
-        { Partition = original.Partition with { PartitionKey = Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat) } },
+        {
+            Partition = original.Partition with
+            {
+                PartitionKey = Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat)
+            }
+        },
             cancellationToken);
 
     private static async Task<PartitionMovementPublicParentRf3Seed> CreateCoreAsync(TwoRf3MembershipWave wave,
@@ -96,7 +110,9 @@ internal sealed class PartitionMovementPublicParentRf3Seed : IAsyncDisposable
         catch (Exception primary)
         {
             try
-            { await seed.DisposeAsync().ConfigureAwait(false); }
+            {
+                await seed.DisposeAsync().ConfigureAwait(false);
+            }
             catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
             throw;
         }
@@ -134,7 +150,9 @@ internal sealed class PartitionMovementPublicParentRf3Seed : IAsyncDisposable
     {
         await PartitionMovementPublicParentRf3Cut.RequireModelsAsync(this, cancellationToken).ConfigureAwait(false);
         foreach (var replay in blobReplays)
-        { await replay(cancellationToken).ConfigureAwait(false); }
+        {
+            await replay(cancellationToken).ConfigureAwait(false);
+        }
     }
 
     private async Task BlobAsync(CancellationToken cancellationToken)
@@ -184,19 +202,33 @@ internal sealed class PartitionMovementPublicParentRf3Seed : IAsyncDisposable
     {
         var failures = new List<Exception>();
         if (official is { } session)
-        { await ServerFailureObserver.ObserveAsync(() => session.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => session.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         try
-        { sourceHttp.Dispose(); }
+        {
+            sourceHttp.Dispose();
+        }
         catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null)
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         try
-        { targetHttp.Dispose(); }
+        {
+            targetHttp.Dispose();
+        }
         catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null)
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

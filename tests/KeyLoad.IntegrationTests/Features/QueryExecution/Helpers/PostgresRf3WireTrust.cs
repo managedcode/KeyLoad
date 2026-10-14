@@ -20,7 +20,10 @@ internal static class PostgresRf3WireTrust
                 };
                 trust.CustomTrustStore.Add(authority);
                 await stream.AuthenticateAsClientAsync(new SslClientAuthenticationOptions
-                { TargetHost = host, CertificateChainPolicy = trust }, token).ConfigureAwait(false);
+                {
+                    TargetHost = host,
+                    CertificateChainPolicy = trust
+                }, token).ConfigureAwait(false);
                 await global::TUnit.Assertions.Assert.That(stream.IsAuthenticated).IsTrue();
                 await global::TUnit.Assertions.Assert.That(stream.IsEncrypted).IsTrue();
             }, failures).ConfigureAwait(false);

@@ -1,7 +1,7 @@
 using System.Net;
 using KeyLoad.Client;
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 using ManagedCode.Communication;
 
@@ -53,7 +53,9 @@ internal static class RequestCqrsAuthorityFaultAssertions
     {
         await Assert.That((observation.ToolResult is not null) ^ (observation.TransportFailure is not null)).IsTrue();
         if (observation.ToolResult is not { } result)
-        { throw new InvalidOperationException("The actual MCP operation did not return a typed unauthorized result."); }
+        {
+            throw new InvalidOperationException("The actual MCP operation did not return a typed unauthorized result.");
+        }
         return await McpCallerAssertions.ErrorAsync(result, ErrorCode.Unauthenticated, dispatched: true)
             .ConfigureAwait(false);
     }

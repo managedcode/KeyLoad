@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Query;
 using KeyLoad.Server;
 using Microsoft.Extensions.Configuration;
@@ -54,7 +54,10 @@ internal static class AnnPublicWholeFlow
     internal static SearchEngine Engine(TestDatabase database, NativeAnnMaintenanceTestRuntime runtime,
         bool enabled = true, int? bytes = null)
         => new(database.Database, Options.Create(new QueryExecutionOptions
-        { EnableApproximateSearch = enabled, MaximumResultBytes = bytes }), null, runtime.Owner);
+        {
+            EnableApproximateSearch = enabled,
+            MaximumResultBytes = bytes
+        }), null, runtime.Owner);
 
     internal static async Task PageAsync(AnnSearchPage page, TestDatabase database, long cut, AnnPageMode mode, bool empty = false, bool redacted = false)
     {

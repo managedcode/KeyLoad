@@ -69,7 +69,10 @@ internal sealed class TombstoneValueTests
         try
         {
             var directory = Path.Combine(root, "exact");
-            using (var store = new ZoneTreeStore(new(directory) { MaxFrameBytes = payload.Length }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
+            using (var store = new ZoneTreeStore(new(directory)
+            {
+                MaxFrameBytes = payload.Length
+            }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
             {
                 store.Commit((tx, _) =>
                 {
@@ -84,7 +87,9 @@ internal sealed class TombstoneValueTests
             }
 
             using var tooSmall = new ZoneTreeStore(new(Path.Combine(root, "short"))
-            { MaxFrameBytes = payload.Length - 1 }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+            {
+                MaxFrameBytes = payload.Length - 1
+            }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
             var failure = Assert.ThrowsExactly<KeyLoadException>(() => tooSmall.Commit((tx, _) =>
             {
                 tx.Put(emptyKey, []);

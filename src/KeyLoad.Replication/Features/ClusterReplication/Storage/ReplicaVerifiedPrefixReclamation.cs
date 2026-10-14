@@ -12,7 +12,9 @@ internal static class ReplicaVerifiedPrefixReclamation
         cancellationToken.ThrowIfCancellationRequested();
         var published = log.State.Snapshot;
         if (published is null)
-        { return NoReclaimedEntries; }
+        {
+            return NoReclaimedEntries;
+        }
         ReplicaPersistence.ValidateSnapshot(published, configuration);
         ReplicaPersistence.VerifyImage(canonical, files.ImagePath(published), published);
         return log.ReclaimCheckpointPrefix(published, cancellationToken);

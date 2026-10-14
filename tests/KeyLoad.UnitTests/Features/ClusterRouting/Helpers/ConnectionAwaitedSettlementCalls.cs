@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using ManagedCode.Communication.CQRS;
 using ManagedCode.Orleans.Identity.Core.Constants;
 using Microsoft.Extensions.DependencyInjection;
@@ -32,7 +32,9 @@ internal static class ConnectionAwaitedSettlementCalls
         {
             var restoration = await NativeRequestWorkSettlement.JoinAsync(RequireRestoredAsync(before));
             if (restoration is not null)
-            { NativeRequestWorkSettlement.Rethrow(NativeRequestWorkSettlement.Preserve(primary, restoration)); }
+            {
+                NativeRequestWorkSettlement.Rethrow(NativeRequestWorkSettlement.Preserve(primary, restoration));
+            }
         }
     }
 
@@ -58,14 +60,19 @@ internal static class ConnectionAwaitedSettlementCalls
         {
             var restoration = await NativeRequestWorkSettlement.JoinAsync(RequireRestoredAsync(before));
             if (restoration is not null)
-            { NativeRequestWorkSettlement.Rethrow(NativeRequestWorkSettlement.Preserve(primary, restoration)); }
+            {
+                NativeRequestWorkSettlement.Rethrow(NativeRequestWorkSettlement.Preserve(primary, restoration));
+            }
         }
     }
 
     internal static async Task<Exception?> FailureAsync(Task<GrainOperationReply> original)
     {
         try
-        { await original; return null; }
+        {
+            await original;
+            return null;
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { return error; }
     }
     internal static async Task JoinOriginalAsync(Task original, Exception? primary,
@@ -73,7 +80,9 @@ internal static class ConnectionAwaitedSettlementCalls
     {
         var cleanup = await NativeRequestWorkSettlement.JoinAsync(original);
         if (allowCancellation && cleanup is OperationCanceledException || expectedFailure && primary is null)
-        { cleanup = null; }
+        {
+            cleanup = null;
+        }
         NativeRequestWorkSettlement.Rethrow(NativeRequestWorkSettlement.Preserve(primary, cleanup));
     }
 

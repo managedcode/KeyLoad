@@ -13,9 +13,18 @@ internal readonly record struct KurrentCleanupCounts(int Tracked, int Submitted,
     internal bool IsComplete => IsValid && Submitted == Tracked && Acknowledged == Tracked && Faulted == NoObservedItems && Pending == NoObservedItems;
 }
 
-internal enum KurrentCleanupStage { Delete, NativeDispose, HttpDispose, Drain, Complete }
-internal enum KurrentCleanupOutcome { Succeeded, Failed }
-internal enum KurrentCleanupFailureReason { None, Cancelled, NativeRpc, NativeFailure, Incomplete, DrainTimeout, Unknown }
+internal enum KurrentCleanupStage
+{
+    Delete, NativeDispose, HttpDispose, Drain, Complete
+}
+internal enum KurrentCleanupOutcome
+{
+    Succeeded, Failed
+}
+internal enum KurrentCleanupFailureReason
+{
+    None, Cancelled, NativeRpc, NativeFailure, Incomplete, DrainTimeout, Unknown
+}
 
 internal sealed record KurrentCleanupDiagnostic(int SchemaVersion, KurrentCleanupStage Stage, KurrentCleanupOutcome Outcome,
     KurrentCleanupFailureReason Reason, KurrentCleanupCounts Counts, long ElapsedMilliseconds, bool CancellationRequested,

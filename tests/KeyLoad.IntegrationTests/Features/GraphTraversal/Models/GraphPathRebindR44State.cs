@@ -43,9 +43,13 @@ internal sealed class GraphPathRebindR44State(GraphPathRf3Seed seed, McpPersiste
     internal global::KeyLoad.GraphTraversal Outgoing(EntityRef source)
     {
         if (source == S)
-        { return Stage == 1 ? new([A, B, S], [Edges[0], Edges[1]]) : new([B, S], [Edges[1]]); }
+        {
+            return Stage == 1 ? new([A, B, S], [Edges[0], Edges[1]]) : new([B, S], [Edges[1]]);
+        }
         if (source == A)
-        { return new([A, T], [Edges[2]]); }
+        {
+            return new([A, T], [Edges[2]]);
+        }
         if (source == B)
         {
             return Stage == 1 ? new([B, T], [Edges[3]])

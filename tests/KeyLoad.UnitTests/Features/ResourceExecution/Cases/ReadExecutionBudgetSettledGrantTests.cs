@@ -14,7 +14,10 @@ internal sealed class ReadExecutionBudgetSettledGrantTests
         var firstBytes = ReadExecutionBudgetGrantSeed.FirstKey.Length + ReadExecutionBudgetGrantSeed.FirstValue.Length;
         var secondBytes = ReadExecutionBudgetGrantSeed.SecondKey.Length + ReadExecutionBudgetGrantSeed.SecondValue.Length;
         var maximum = firstBytes + secondBytes;
-        using var database = ReadExecutionBudgetGrantSeed.CreateDatabase(new() { MaxQueryReadBytes = maximum });
+        using var database = ReadExecutionBudgetGrantSeed.CreateDatabase(new()
+        {
+            MaxQueryReadBytes = maximum
+        });
         var result = database.Store.Read(view =>
         {
             var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits));
@@ -63,7 +66,10 @@ internal sealed class ReadExecutionBudgetSettledGrantTests
     public async Task CompletionDoesNotReleaseAnotherUnsettledNativeChildReservation()
     {
         var maximum = ReadExecutionBudgetGrantSeed.FirstKey.Length + ReadExecutionBudgetGrantSeed.FirstValue.Length;
-        using var database = ReadExecutionBudgetGrantSeed.CreateDatabase(new() { MaxQueryReadBytes = maximum });
+        using var database = ReadExecutionBudgetGrantSeed.CreateDatabase(new()
+        {
+            MaxQueryReadBytes = maximum
+        });
         var result = database.Store.Read(view =>
         {
             var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits));

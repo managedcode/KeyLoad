@@ -24,7 +24,10 @@ internal sealed class RemoteTransferNativeParentSeed(RemoteTransferNativeAdminis
     internal PartitionMoveRequest Request { get; private set; } = null!;
     internal static string DocumentCollection => DocumentResource;
     internal BlobMetadata Metadata { get; private set; } = null!;
-    internal NativeBlobWireSeedCommands? BlobWireSeedCommands { get; private set; }
+    internal NativeBlobWireSeedCommands? BlobWireSeedCommands
+    {
+        get; private set;
+    }
     private readonly List<Func<CancellationToken, Task>> replays = [];
 
     internal async Task CreateAsync(Guid destination, CancellationToken token)
@@ -65,7 +68,9 @@ internal sealed class RemoteTransferNativeParentSeed(RemoteTransferNativeAdminis
     internal async Task RequireAsync(CancellationToken token)
     {
         foreach (var replay in replays)
-        { await replay(token); }
+        {
+            await replay(token);
+        }
         var document = await PublicReadAssertions.DocumentAsync(await callers.Source.GetAsync(new(Partition, DocumentResource, DocumentId), token));
         await Assert.That(document!.Json).IsEqualTo(DocumentJson);
         var bytes = Enumerable.Repeat(Content, Length).ToArray();

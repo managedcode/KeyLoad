@@ -17,7 +17,9 @@ internal static class PlacementPersistenceCohort
             if (witness is null || sample.SiloAddress != witness.OriginalSiloAddress
                 || sample.Owner.Incarnation != witness.Incarnation
                 || sample.Owner.PhysicalShardId != witness.PhysicalShardId)
-            { throw Errors.Fail(ErrorCode.OwnershipLost, TenantPlacementCapacityProtocol.WrongCohort); }
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, TenantPlacementCapacityProtocol.WrongCohort);
+            }
         }
     }
 }

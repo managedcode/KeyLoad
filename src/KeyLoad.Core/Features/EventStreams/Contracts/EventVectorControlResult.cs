@@ -12,11 +12,17 @@ internal sealed record EventVectorControlResult(
 {
     internal const int PublicResultField = 7;
     [Orleans.Id(PublicResultField)]
-    public ReadOnlyMemory<byte> OriginalPublicResultBytes { get; init; }
+    public ReadOnlyMemory<byte> OriginalPublicResultBytes
+    {
+        get; init;
+    }
 
     internal const int SourcePageField = 6;
     [Orleans.Id(SourcePageField)]
-    public ReadOnlyMemory<byte> OriginalSourcePageBytes { get; init; }
+    public ReadOnlyMemory<byte> OriginalSourcePageBytes
+    {
+        get; init;
+    }
 
     internal const string SerializerAlias = "keyload.core.event-vector-control-result.v1";
     internal const int VersionField = 0;

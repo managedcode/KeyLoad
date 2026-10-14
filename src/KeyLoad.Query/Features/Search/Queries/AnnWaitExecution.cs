@@ -20,7 +20,9 @@ internal static class AnnWaitExecution
         ArgumentNullException.ThrowIfNull(request);
         var execution = configured.Value;
         if (!execution.EnableApproximateSearch)
-        { throw Errors.Fail(ErrorCode.UnsupportedCapability, AnnSearchProtocol.Disabled); }
+        {
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, AnnSearchProtocol.Disabled);
+        }
         var budget = new ReadExecutionBudget(database.OperationLimitsOptions, database.EvaluationClock, cancellationToken);
         QueryResultBudgetPolicy.Constrain(budget, execution);
         budget.Check();
@@ -36,7 +38,9 @@ internal static class AnnWaitExecution
         ArgumentNullException.ThrowIfNull(budget);
         var execution = configured.Value;
         if (!execution.EnableApproximateSearch)
-        { throw Errors.Fail(ErrorCode.UnsupportedCapability, AnnSearchProtocol.Disabled); }
+        {
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, AnnSearchProtocol.Disabled);
+        }
         QueryResultBudgetPolicy.Constrain(budget, execution);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
@@ -53,7 +57,9 @@ internal static class AnnWaitExecution
             if (string.IsNullOrEmpty(request.VectorField) || request.Space is null || request.Consumer is null
                 || request.Consumer.Partition != request.Partition || request.IndexGeneration <= InitialPosition
                 || request.MinimumToken is null)
-            { throw Errors.Fail(ErrorCode.Validation, Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Validation, Invalid);
+            }
             database.Authorization.RequireFieldUse(principal, resource, request.VectorField);
             JsonData.Identifier(request.Consumer.Name);
             var authority = new BudgetedReadView(view, budget);
@@ -61,9 +67,13 @@ internal static class AnnWaitExecution
             var raw = authority.ReadOwnedValue(KeySpace.AppliedBytes) ?? throw Errors.Fail(ErrorCode.Corruption, Corrupt);
             var applied = NativeSerialization.Deserialize<long>(raw);
             if (applied < InitialPosition)
-            { throw Errors.Fail(ErrorCode.Corruption, Corrupt); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, Corrupt);
+            }
             if (request.MinimumToken.Position > applied)
-            { throw Errors.Fail(ErrorCode.TokenInvalidated, Future); }
+            {
+                throw Errors.Fail(ErrorCode.TokenInvalidated, Future);
+            }
             var owner = projection ?? throw Errors.Fail(ErrorCode.HistoryUnavailable, Missing);
             var lease = owner.Acquire(view, new(request.Partition, request.Collection, request.VectorField,
                 request.Space, request.Consumer, request.IndexGeneration), budget);
@@ -73,9 +83,13 @@ internal static class AnnWaitExecution
             {
                 var indexed = lease.IndexedAppliedPosition;
                 if (indexed < InitialPosition || indexed > applied || lease.IndexGeneration != request.IndexGeneration)
-                { throw Errors.Fail(ErrorCode.Corruption, Corrupt); }
+                {
+                    throw Errors.Fail(ErrorCode.Corruption, Corrupt);
+                }
                 if (indexed < request.MinimumToken.Position)
-                { throw Errors.Fail(ErrorCode.HistoryUnavailable, Missing); }
+                {
+                    throw Errors.Fail(ErrorCode.HistoryUnavailable, Missing);
+                }
                 result = new(DatabaseEngine.Token(authority, request.Partition, indexed), lease.IndexGeneration,
                     resource.SchemaVersion, principal.PolicyEpoch);
                 budget.CheckResult(result);
@@ -89,11 +103,15 @@ internal static class AnnWaitExecution
     private static void Dispose(IAnnProjectionLease lease, Exception? primary)
     {
         try
-        { lease.Dispose(); }
+        {
+            lease.Dispose();
+        }
         catch (Exception cleanup)
         {
             if (primary is not null)
-            { throw new AggregateException(primary, cleanup); }
+            {
+                throw new AggregateException(primary, cleanup);
+            }
             throw;
         }
     }

@@ -1,5 +1,5 @@
 using System.Runtime.ExceptionServices;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Replication;
 using KeyLoad.Storage.ZoneTree;
 
@@ -17,12 +17,16 @@ internal sealed class RequestCqrsCanonicalApplyBridge(string voter) : IReplicaTr
     {
         ArgumentNullException.ThrowIfNull(owner);
         if (Interlocked.CompareExchange(ref observer, owner, null) is not null)
-        { throw new InvalidOperationException(RequestCqrsProbeProtocol.InvalidOptions); }
+        {
+            throw new InvalidOperationException(RequestCqrsProbeProtocol.InvalidOptions);
+        }
     }
     internal void AttachFrameObservation(MovementFrameReplicaObservation owner)
     {
         if (Interlocked.CompareExchange(ref frameObservation, owner, null) is not null)
-        { throw new InvalidOperationException(MovementFrameObservationProtocol.Invalid); }
+        {
+            throw new InvalidOperationException(MovementFrameObservationProtocol.Invalid);
+        }
     }
     internal void CloseFrameObservation() => frameObservation?.Close();
     internal void ObserveReplicaEntry(ReplicaEntry entry) => Volatile.Read(ref observer)?.ReplicaLog.Observe(entry);
@@ -30,11 +34,17 @@ internal sealed class RequestCqrsCanonicalApplyBridge(string voter) : IReplicaTr
     {
         var operation = entry.Operation!;
         if (operation.Kind == OperationKind.PartitionMovementPhase)
-        { return frameObservation?.Enter(entry); }
+        {
+            return frameObservation?.Enter(entry);
+        }
         if (operation.Kind != OperationKind.Batch || Volatile.Read(ref observer) is not { } owner)
-        { return null; }
+        {
+            return null;
+        }
         if (current.Value is not null)
-        { throw new InvalidOperationException(RequestCqrsProbeProtocol.InvalidFiles); }
+        {
+            throw new InvalidOperationException(RequestCqrsProbeProtocol.InvalidFiles);
+        }
         var partition = JsonDefaults.Deserialize<CommandRequest>(operation.PayloadJson).Partition;
         RequestCqrsCanonicalApplyScope? scope = null;
         RequestCqrsCanonicalApplyScope? transferred = null;
@@ -53,9 +63,13 @@ internal sealed class RequestCqrsCanonicalApplyBridge(string voter) : IReplicaTr
                 }
             }
             catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-            { primary = error; }
+            {
+                primary = error;
+            }
             catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-            { primary = error; }
+            {
+                primary = error;
+            }
         }
         finally
         {
@@ -64,9 +78,13 @@ internal sealed class RequestCqrsCanonicalApplyBridge(string voter) : IReplicaTr
                 scope?.Dispose();
             }
             catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-            { cleanup = error; }
+            {
+                cleanup = error;
+            }
             catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-            { cleanup = error; }
+            {
+                cleanup = error;
+            }
         }
         ThrowTransferFailure(primary, cleanup);
         return transferred;
@@ -74,52 +92,74 @@ internal sealed class RequestCqrsCanonicalApplyBridge(string voter) : IReplicaTr
     private static void ThrowTransferFailure(Exception? primary, Exception? cleanup)
     {
         if (primary is not null && cleanup is not null)
-        { throw new AggregateException(primary, cleanup); }
+        {
+            throw new AggregateException(primary, cleanup);
+        }
         if (primary is not null)
-        { ExceptionDispatchInfo.Capture(primary).Throw(); }
+        {
+            ExceptionDispatchInfo.Capture(primary).Throw();
+        }
         if (cleanup is not null)
-        { ExceptionDispatchInfo.Capture(cleanup).Throw(); }
+        {
+            ExceptionDispatchInfo.Capture(cleanup).Throw();
+        }
     }
     private void SetHolding(RequestCqrsCanonicalApplyScope scope, bool holding)
     {
         lock (sync)
         {
             if (holding && held is not null || !holding && !ReferenceEquals(held, scope))
-            { throw new InvalidOperationException(RequestCqrsProbeProtocol.InvalidFiles); }
+            {
+                throw new InvalidOperationException(RequestCqrsProbeProtocol.InvalidFiles);
+            }
             held = holding ? scope : null;
         }
     }
     public Action<ReadOnlyMemory<byte>, ReadOnlyMemory<byte>>? BeginIncoming(ReplicaRpc method)
     {
         if (method != ReplicaRpc.Append)
-        { return null; }
+        {
+            return null;
+        }
         RequestCqrsCanonicalApplyScope? original;
         lock (sync)
-        { original = held; }
+        {
+            original = held;
+        }
         if (original is null)
-        { return null; }
+        {
+            return null;
+        }
         return (request, reply) => CompleteIncoming(original, request, reply);
     }
     private void CompleteIncoming(RequestCqrsCanonicalApplyScope original, ReadOnlyMemory<byte> payload, ReadOnlyMemory<byte> bytes)
     {
         var request = ReplicaProtocolCodec.Deserialize<AppendRequest>(payload.Span);
         if (!original.Matches(request))
-        { return; }
+        {
+            return;
+        }
         var reply = ReplicaProtocolCodec.Deserialize<AppendReply>(bytes.Span);
         if (!reply.Accepted || reply.Term != request.Term || reply.MatchedIndex != request.PreviousIndex
             || reply.NextIndex != checked(request.PreviousIndex + ContiguousIndexStep))
-        { return; }
+        {
+            return;
+        }
         lock (sync)
         {
             if (ReferenceEquals(held, original))
-            { original.IndependentAppendCompleted(); }
+            {
+                original.IndependentAppendCompleted();
+            }
         }
     }
     internal Action<CommitStage, long, int> StorageObserver => ObserveStorage;
     private void ObserveStorage(CommitStage stage, long position, int ordinal)
     {
         if (stage == CommitStage.JournalFlushed)
-        { current.Value?.JournalFlushed(); }
+        {
+            current.Value?.JournalFlushed();
+        }
         frameObservation?.Observe(stage, position, ordinal);
     }
 }

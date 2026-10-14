@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
@@ -13,24 +13,63 @@ internal sealed class RequestCqrsProbeArmState(string principalId, Guid commandI
     internal GrainReadKind? ReadKind { get; } = readKind;
     internal RequestCqrsProbePhase Phase { get; } = phase;
     internal RequestCqrsProbeAction Action { get; } = action;
-    internal Guid ArmId { get; set; }
-    internal Guid? RequestId { get; set; }
-    internal bool ReleaseWritten { get; set; }
-    internal bool Settled { get; set; }
-    internal bool DisposedGateJoined { get; set; }
-    internal bool Retired { get; set; }
-    internal bool ProcessOwnerJoined { get; set; }
-    internal bool ProducerDisposedSeen { get; set; }
-    internal bool CanonicalOwnerDisposedSeen { get; set; }
-    internal bool ReplicaEntryObserverDisposedSeen { get; set; }
+    internal Guid ArmId
+    {
+        get; set;
+    }
+    internal Guid? RequestId
+    {
+        get; set;
+    }
+    internal bool ReleaseWritten
+    {
+        get; set;
+    }
+    internal bool Settled
+    {
+        get; set;
+    }
+    internal bool DisposedGateJoined
+    {
+        get; set;
+    }
+    internal bool Retired
+    {
+        get; set;
+    }
+    internal bool ProcessOwnerJoined
+    {
+        get; set;
+    }
+    internal bool ProducerDisposedSeen
+    {
+        get; set;
+    }
+    internal bool CanonicalOwnerDisposedSeen
+    {
+        get; set;
+    }
+    internal bool ReplicaEntryObserverDisposedSeen
+    {
+        get; set;
+    }
     internal bool OwnerDisposedSeen => Phase switch
     {
         RequestCqrsProbePhase.CanonicalJournalFlushed => CanonicalOwnerDisposedSeen,
         RequestCqrsProbePhase.ReplicaEntryAcknowledged => ReplicaEntryObserverDisposedSeen,
         _ => ProducerDisposedSeen
     };
-    internal string? GateVoter { get; set; }
-    internal RequestCqrsProbeMarkerRecord?[] MarkerRecords { get; } = new RequestCqrsProbeMarkerRecord?[
+    internal string? GateVoter
+    {
+        get; set;
+    }
+    internal RequestCqrsProbeMarkerRecord?[] MarkerRecords
+    {
+        get;
+    } = new RequestCqrsProbeMarkerRecord?[
         RequestCqrsProbeFixtureProtocol.MaximumMarkerRecordsPerArm];
-    internal int MarkerRecordCount { get; set; }
+    internal int MarkerRecordCount
+    {
+        get; set;
+    }
 }

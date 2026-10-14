@@ -56,10 +56,20 @@ internal static class AggregateReplayAuthorizationRoutes
         await Assert.That(receipt.Token.Position).IsGreaterThan(original.Receipt.Token.Position);
         await SqlRf3Protocol.EqualAsync(new MutationReceipt(SnapshotMutation, previous.Stream.StreamSet,
             previous.Stream.StreamId, previous.SnapshotVersion + SnapshotVersionStep), receipt.Mutations.Single());
-        var expected = previous with { SnapshotVersion = previous.SnapshotVersion + SnapshotVersionStep, Checksum = string.Empty };
-        expected = expected with { Checksum = JsonData.Fingerprint(expected) };
+        var expected = previous with
+        {
+            SnapshotVersion = previous.SnapshotVersion + SnapshotVersionStep,
+            Checksum = string.Empty
+        };
+        expected = expected with
+        {
+            Checksum = JsonData.Fingerprint(expected)
+        };
         var page = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.ReadAggregateReplayAsync(original.Request, token));
-        await PageAsync(original.Page with { Snapshot = expected }, page);
+        await PageAsync(original.Page with
+        {
+            Snapshot = expected
+        }, page);
         return new(original.Request, command, receipt, page);
     }
 
@@ -113,7 +123,10 @@ internal static class AggregateReplayAuthorizationRoutes
     private static async Task PageAsync(AggregateReplayPage original, AggregateReplayPage actual)
     {
         await Assert.That(actual.CutPosition).IsGreaterThanOrEqualTo(original.CutPosition);
-        await SqlRf3Protocol.EqualAsync(original, actual with { CutPosition = original.CutPosition });
+        await SqlRf3Protocol.EqualAsync(original, actual with
+        {
+            CutPosition = original.CutPosition
+        });
         await AggregateReplayRf3Assertions.SamePageAsync(actual, original,
             AggregateReplayRf3Tokens.InitialReducedCount, AggregateReplayRf3Tokens.TailCount,
             [AggregateReplayRf3Tokens.PaidEventId, AggregateReplayRf3Tokens.ShippedEventId],

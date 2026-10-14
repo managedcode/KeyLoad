@@ -6,13 +6,19 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
 internal sealed class PlacementCapacityAdmissionOwner : IAsyncDisposable
 {
-    internal PlacementIntentAdmissions Admission { get; } = new(
+    internal PlacementIntentAdmissions Admission
+    {
+        get;
+    } = new(
         Options.Create(new TenantPlacementExecutionOptions { Enabled = true }));
     internal List<PlacementIntentAdmissionLease> Leases { get; } = [];
     internal List<Task<PlacementIntentAdmissionLease>> Waiting { get; } = [];
     internal HashSet<Task<PlacementIntentAdmissionLease>> Observed { get; } = [];
     internal List<CancellationTokenSource> Callers { get; } = [];
-    internal Task? Shutdown { get; set; }
+    internal Task? Shutdown
+    {
+        get; set;
+    }
 
     internal async Task ActiveAsync()
     {
@@ -38,7 +44,9 @@ internal sealed class PlacementCapacityAdmissionOwner : IAsyncDisposable
         var failures = new List<Exception>();
         ServerFailureObserver.Observe(Admission.CloseAdmission, failures);
         foreach (var lease in Leases)
-        { ServerFailureObserver.Observe(lease.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(lease.Dispose, failures);
+        }
         foreach (var original in Waiting.Where(item => !Observed.Contains(item)))
         {
             await ServerFailureObserver.ObserveAsync(async () =>
@@ -48,11 +56,17 @@ internal sealed class PlacementCapacityAdmissionOwner : IAsyncDisposable
             }, failures);
         }
         if (Shutdown is { } shutdown)
-        { await ServerFailureObserver.ObserveAsync(() => shutdown, failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => shutdown, failures);
+        }
         else
-        { await ServerFailureObserver.ObserveAsync(() => Admission.DisposeAsync().AsTask(), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => Admission.DisposeAsync().AsTask(), failures);
+        }
         foreach (var caller in Callers)
-        { ServerFailureObserver.Observe(caller.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(caller.Dispose, failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

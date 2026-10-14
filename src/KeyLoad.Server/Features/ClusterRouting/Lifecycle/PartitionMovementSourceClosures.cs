@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.Server;
 
@@ -32,15 +32,23 @@ internal sealed class PartitionMovementSourceClosures(
         }
         var failures = new List<Exception>();
         foreach (var original in pending)
-        { await ServerFailureObserver.ObserveAsync(original.StopAsync, failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(original.StopAsync, failures).ConfigureAwait(false);
+        }
         foreach (var original in pending)
-        { await ServerFailureObserver.ObserveAsync(() => original.CompletionTask, failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => original.CompletionTask, failures).ConfigureAwait(false);
+        }
         foreach (var entry in retained)
-        { await ServerFailureObserver.ObserveAsync(() => entry.Session.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => entry.Session.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         lock (gate)
         {
             foreach (var entry in retained)
-            { sessions.Remove(entry.HandleId); }
+            {
+                sessions.Remove(entry.HandleId);
+            }
 
         }
         ServerFailureObserver.ThrowIfAny(failures);
@@ -53,7 +61,9 @@ internal sealed class PartitionMovementSourceClosures(
             requireOpen();
             if (captures.Values.Any(value => value.MoveId == moveId && value.Partition == partition)
                 || sessions.Values.Any(value => value.MoveId == moveId && value.Partition == partition))
-            { throw Errors.Fail(ErrorCode.OwnershipLost, ClosedDetail); }
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, ClosedDetail);
+            }
         }
     }
 
@@ -64,22 +74,31 @@ internal sealed class PartitionMovementSourceClosures(
         lock (gate)
         {
             if (!closedMoves.TryGetValue(new(partition, moveId), out retained!))
-            { return; }
+            {
+                return;
+            }
         }
         var failures = new List<Exception>();
         foreach (var entry in retained)
-        { ServerFailureObserver.Observe(entry.ReleaseWork, failures); }
+        {
+            ServerFailureObserver.Observe(entry.ReleaseWork, failures);
+        }
         NativeRequestWorkLease? admission = null;
         lock (gate)
         {
             if (closedAdmissions.TryGetValue(new(partition, moveId), out var retainedAdmission))
-            { admission = retainedAdmission; closedAdmissions.Remove(new(partition, moveId)); }
+            {
+                admission = retainedAdmission;
+                closedAdmissions.Remove(new(partition, moveId));
+            }
             closedMoves.Remove(new(partition, moveId));
         }
         if (admission is not null)
         {
             try
-            { admission.Dispose(); }
+            {
+                admission.Dispose();
+            }
             catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
             catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         }
@@ -91,7 +110,9 @@ internal sealed class PartitionMovementSourceClosures(
         try
         {
             if (retained.Length == NoRetainedCaptures)
-            { admission = workOwner.Acquire(Guid.NewGuid(), NativeRequestWorkKind.ReadCapability); }
+            {
+                admission = workOwner.Acquire(Guid.NewGuid(), NativeRequestWorkKind.ReadCapability);
+            }
             closedMoves.Add(scope, retained);
             if (admission is not null)
             {
@@ -106,7 +127,9 @@ internal sealed class PartitionMovementSourceClosures(
             if (admission is not null)
             {
                 try
-                { admission.Dispose(); }
+                {
+                    admission.Dispose();
+                }
                 catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
                 catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
             }

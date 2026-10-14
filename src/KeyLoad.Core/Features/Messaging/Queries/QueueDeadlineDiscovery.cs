@@ -14,7 +14,9 @@ internal static class QueueDeadlineDiscovery
         DateTimeOffset now, CancellationToken cancellationToken)
     {
         if (now.Offset != TimeSpan.Zero)
-        { throw Errors.Fail(ErrorCode.Validation, DueWorkProtocol.InvalidWakeInstant); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, DueWorkProtocol.InvalidWakeInstant);
+        }
         var page = new DuePageState(database.OperationLimitsOptions, now, database.EvaluationClock,
             database.DueDiscoveryDeadline, database.DueExecution.MaximumRecordsPerPage,
             database.DueExecution.MaximumRangeBytes, cancellationToken);
@@ -48,15 +50,21 @@ internal static class QueueDeadlineDiscovery
             bounds = upper is null ? DuePrefixCursor.Empty : new(true, upper, null);
         }
         if (!bounds.HasUpperBound)
-        { return new([], [], cursor.Advance(DuePrefixCursor.Empty), page.ExaminedRecords, page.ExaminedBytes); }
+        {
+            return new([], [], cursor.Advance(DuePrefixCursor.Empty), page.ExaminedRecords, page.ExaminedBytes);
+        }
         var state = new QueueDeadlineScan(database, view, cursor, bounds, page);
         var remaining = page.MaximumRecordsPerPage - page.ExaminedRecords - LookaheadRecord;
         if (remaining <= Initial)
-        { return state.Complete(false); }
+        {
+            return state.Complete(false);
+        }
         var result = view.VisitRange(prefix, remaining, state.Visit, bounds.LastKey,
             observer: page.ObserveBytes, cancellationToken: page.CancellationToken);
         if (result.HasMore && !result.StoppedByVisitor)
-        { page.ExamineRecord(); }
+        {
+            page.ExamineRecord();
+        }
         page.Check();
         return state.Complete(!result.HasMore && !result.StoppedByVisitor);
     }

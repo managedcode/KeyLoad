@@ -25,7 +25,9 @@ internal sealed class ReplicaNativeInspectionTests
         using var database = new TestDatabase();
         var operation = database.Database.NormalizeOperation(new(Guid.NewGuid(), OperationKind.SetDispatch, Principal,
             DateTimeOffset.UnixEpoch, BooleanPayload));
-        var copy = sharedOperation ? operation : operation with { };
+        var copy = sharedOperation ? operation : operation with
+        {
+        };
         ImmutableArray<ReplicaEntry> entries = [new(1, 1, operation), new(2, 1, copy)];
         var request = new AppendRequest(Voter, 1, 0, 0, 0, entries);
         var inspected = ReplicaNativeInspection.Inspect<AppendRequest>(ReplicaProtocolCodec.Serialize(request), MaximumEntries);
@@ -88,8 +90,14 @@ internal sealed class ReplicaNativeInspectionTests
     }
 }
 
-internal enum ReplicaMalformedVoteShape { Duplicate, Missing, Unknown, WrongType }
-internal enum ReplicaMalformedArrayShape { Underfilled, Overfilled, Null }
+internal enum ReplicaMalformedVoteShape
+{
+    Duplicate, Missing, Unknown, WrongType
+}
+internal enum ReplicaMalformedArrayShape
+{
+    Underfilled, Overfilled, Null
+}
 
 /// <summary>Malformed fixtures are authored by native codecs inside the authoritative shared envelope.</summary>
 internal static class ReplicaNativeFixtureWriter
@@ -116,7 +124,9 @@ internal sealed class ReplicaMalformedHardStateCodec(ReplicaMalformedVoteShape s
         [AllowNull] Type expectedType, [AllowNull] ReplicaHardState value) where TBufferWriter : IBufferWriter<byte>
     {
         if (ReferenceCodec.TryWriteReferenceField(ref writer, fieldIdDelta, expectedType, value))
-        { return; }
+        {
+            return;
+        }
         writer.WriteFieldHeader(fieldIdDelta, expectedType, typeof(ReplicaHardState), WireType.TagDelimited);
         writer.WriteEndBase();
         writer.Session.CodecProvider.GetCodec<int>().WriteField(ref writer, 0, typeof(int), value.Version);
@@ -154,21 +164,33 @@ internal sealed class ReplicaMalformedVoteCodec(ReplicaMalformedVoteShape shape)
         [AllowNull] Type expectedType, [AllowNull] VoteRequest value) where TBufferWriter : IBufferWriter<byte>
     {
         if (ReferenceCodec.TryWriteReferenceField(ref writer, delta, expectedType, value))
-        { return; }
+        {
+            return;
+        }
         writer.WriteFieldHeader(delta, expectedType, typeof(VoteRequest), WireType.TagDelimited);
         writer.WriteEndBase();
         StringCodec.WriteField(ref writer, 0, value.CandidateId);
         if (shape == ReplicaMalformedVoteShape.Duplicate)
-        { StringCodec.WriteField(ref writer, 0, value.CandidateId); }
+        {
+            StringCodec.WriteField(ref writer, 0, value.CandidateId);
+        }
         if (shape == ReplicaMalformedVoteShape.WrongType)
-        { StringCodec.WriteField(ref writer, 1, value.CandidateId); }
+        {
+            StringCodec.WriteField(ref writer, 1, value.CandidateId);
+        }
         else
-        { Int64Codec.WriteField(ref writer, 1, value.Term); }
+        {
+            Int64Codec.WriteField(ref writer, 1, value.Term);
+        }
         Int64Codec.WriteField(ref writer, 1, value.LastIndex);
         if (shape != ReplicaMalformedVoteShape.Missing)
-        { Int64Codec.WriteField(ref writer, 1, value.LastTerm); }
+        {
+            Int64Codec.WriteField(ref writer, 1, value.LastTerm);
+        }
         if (shape == ReplicaMalformedVoteShape.Unknown)
-        { BoolCodec.WriteField(ref writer, 1, true); }
+        {
+            BoolCodec.WriteField(ref writer, 1, true);
+        }
         writer.WriteEndObject();
     }
 }
@@ -181,7 +203,9 @@ internal sealed class ReplicaMalformedBatchCodec(ReplicaMalformedArrayShape shap
         [AllowNull] Type expectedType, [AllowNull] ReplicaEntryBatch value) where TBufferWriter : IBufferWriter<byte>
     {
         if (ReferenceCodec.TryWriteReferenceField(ref writer, delta, expectedType, value))
-        { return; }
+        {
+            return;
+        }
         writer.WriteFieldHeader(delta, expectedType, typeof(ReplicaEntryBatch), WireType.TagDelimited);
         writer.WriteEndBase();
         ReferenceCodec.MarkValueField(writer.Session);
@@ -203,7 +227,9 @@ internal sealed class ReplicaMalformedBatchCodec(ReplicaMalformedArrayShape shap
     {
         var values = entries.ToArray();
         if (ReferenceCodec.TryWriteReferenceField(ref writer, 0, typeof(ReplicaEntry[]), values))
-        { return; }
+        {
+            return;
+        }
         writer.WriteFieldHeader(0, typeof(ReplicaEntry[]), typeof(ReplicaEntry[]), WireType.TagDelimited);
         var declared = shape == ReplicaMalformedArrayShape.Underfilled ? values.Length : values.Length - 1;
         UInt32Codec.WriteField(ref writer, 0, checked((uint)declared));

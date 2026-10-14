@@ -20,7 +20,9 @@ internal static class PartitionMovementImageReservation
         if (maximumImageBytes <= EmptyBytes || maximumImageBytes > limits.MaxQueryReadBytes
             || maximumRecords <= EmptyBytes || maximumRecords > limits.MaxScanRecords
             || resourceMetadataBytes < EmptyBytes || resourceMetadataBytes > limits.MaxBatchBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, CapacityDetail); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, CapacityDetail);
+        }
         long charge;
         try
         {
@@ -30,9 +32,13 @@ internal static class PartitionMovementImageReservation
                 + resourceMetadataBytes * ConstructionRawCopies + SessionMetadataBytes);
         }
         catch (OverflowException)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, CapacityDetail); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, CapacityDetail);
+        }
         if (!memory.TryReserve(charge, maximumRecords, out var reservation) || reservation is null)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, CapacityDetail); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, CapacityDetail);
+        }
         return reservation;
     }
 }

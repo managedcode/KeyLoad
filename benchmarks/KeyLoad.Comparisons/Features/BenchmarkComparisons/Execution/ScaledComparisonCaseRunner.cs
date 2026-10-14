@@ -34,7 +34,11 @@ internal static class ScaledComparisonCaseRunner
         var sessions = await ScaledComparisonOperationSetup.OpenSessionsAsync(target, settings.Concurrency, executionOptions, token: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
         var run = await RunSessionsAsync(target: target, scenario: scenario, sessions: sessions, inputs: inputs, settings: settings,
             progress: progress, cancellationToken: cancellationToken, executionOptions: executionOptions, timeProvider: timeProvider).ConfigureAwait(false);
-        var result = run.Closed ? run.Result : run.Result with { Status = ComparisonStatuses.Failed, Detail = ComparisonSessionCleanup.Failure };
+        var result = run.Closed ? run.Result : run.Result with
+        {
+            Status = ComparisonStatuses.Failed,
+            Detail = ComparisonSessionCleanup.Failure
+        };
         if (result.Status == ComparisonStatuses.Failed && !cancellationToken.IsCancellationRequested)
         {
             await ComparisonFailureDiagnostics.ObserveAsync(target, result, cancellationToken).ConfigureAwait(false);
@@ -75,7 +79,11 @@ internal static class ScaledComparisonCaseRunner
             token: cancellationToken, executionOptions: executionOptions, timeProvider: timeProvider).ConfigureAwait(false);
         var result = CreateCase(target, scenario, settings, measured, cancellationToken.IsCancellationRequested);
         var validationFailure = await ValidateMutationResultsAsync(sessions, inputs, settings, cancellationToken).ConfigureAwait(false);
-        return validationFailure is null ? result : result with { Status = ComparisonStatuses.Failed, Detail = validationFailure };
+        return validationFailure is null ? result : result with
+        {
+            Status = ComparisonStatuses.Failed,
+            Detail = validationFailure
+        };
     }
 
     private static async Task<string?> ValidateMutationResultsAsync(List<IComparisonSession> sessions,
@@ -125,7 +133,9 @@ internal static class ScaledComparisonCaseRunner
         var failed = measured.Failures != NoObservedItems || accounting.Unfinished != NoObservedItems || accounting.MissingSamples != NoObservedItems || cancelled;
         return new(target.Profile.Name, scenario, NoObservedItems, failed ? ComparisonStatuses.Failed : ComparisonStatuses.Measured,
             failed ? FailureDetail : null, measurement, measured.Samples.ToImmutableArray())
-        { Scaled = accounting };
+        {
+            Scaled = accounting
+        };
     }
 
     private static ComparisonCase Failed(IComparisonTarget target, Scenario scenario, string detail,
@@ -141,6 +151,9 @@ internal static class ScaledComparisonCaseRunner
 
         var accounting = new ScaledOperationAccounting(settings.Operations, NoObservedItems, NoObservedItems, NoObservedItems, EmptyCount, NoObservedItems,
             settings.Operations, SampleAlgorithm, RequiredLatencySampleCount, NoObservedItems, RequiredLatencySampleCount);
-        return new(target.Profile.Name, scenario, NoObservedItems, ComparisonStatuses.Failed, detail, null, []) { Scaled = accounting };
+        return new(target.Profile.Name, scenario, NoObservedItems, ComparisonStatuses.Failed, detail, null, [])
+        {
+            Scaled = accounting
+        };
     }
 }

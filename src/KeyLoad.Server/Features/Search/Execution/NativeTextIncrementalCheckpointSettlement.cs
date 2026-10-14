@@ -32,9 +32,13 @@ internal static class NativeTextIncrementalCheckpointSettlement
             || fresh.PolicyEpoch != manifest.Scope.PolicyEpoch
             || fresh.SchemaVersion != manifest.Scope.SchemaVersion
             || fresh.ResourceSha256 != manifest.ResourceSha256)
-        { throw NativeTextErrors.Corrupt(); }
+        {
+            throw NativeTextErrors.Corrupt();
+        }
         if (manifest.ThroughSequence == fresh.UpperSequence)
-        { NativeTextIncrementalSourceValidation.CompleteCorpus(manifest, fresh, budget); }
+        {
+            NativeTextIncrementalSourceValidation.CompleteCorpus(manifest, fresh, budget);
+        }
         RequireOriginal(generationPath, intent, budget, options);
         var owner = NativeTextOwnerFiles.ReadOwner(Path.Combine(generationPath, NativeTextProtocol.OwnerFile),
             Path.GetDirectoryName(generationPath) ?? throw NativeTextErrors.Ownership(),
@@ -53,9 +57,13 @@ internal static class NativeTextIncrementalCheckpointSettlement
         budget.Check();
         var retiredIntent = Path.Combine(generationPath, NativeTextIncrementalProtocol.IntentFile);
         if (resources is null)
-        { File.Delete(retiredIntent); }
+        {
+            File.Delete(retiredIntent);
+        }
         else
-        { resources.DeleteOwnedFile(retiredIntent, () => File.Delete(retiredIntent)); }
+        {
+            resources.DeleteOwnedFile(retiredIntent, () => File.Delete(retiredIntent));
+        }
         observer?.Invoke(NativeTextFaultStage.PendingIntentRetired);
         budget.Check();
         return completed;
@@ -72,6 +80,8 @@ internal static class NativeTextIncrementalCheckpointSettlement
         var actualBytes = NativeSerialization.Serialize(actual);
         budget.Check();
         if (!expectedBytes.AsSpan().SequenceEqual(actualBytes))
-        { throw NativeTextErrors.Corrupt(); }
+        {
+            throw NativeTextErrors.Corrupt();
+        }
     }
 }

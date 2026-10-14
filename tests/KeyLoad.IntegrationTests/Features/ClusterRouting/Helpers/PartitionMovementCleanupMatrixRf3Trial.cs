@@ -18,11 +18,17 @@ internal static class PartitionMovementCleanupMatrixRf3Trial
             await ExecuteAsync(wave, seed, role, caller.Token).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
         if (failures.Count > PartitionMovementCleanupMatrixProtocol.EmptyFailureLedger)
-        { wave?.RetainRoots(); }
+        {
+            wave?.RetainRoots();
+        }
         if (seed is { } clients)
-        { await ServerFailureObserver.ObserveAsync(() => clients.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => clients.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         if (wave is { } owners)
-        { await ServerFailureObserver.ObserveAsync(() => owners.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => owners.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 

@@ -17,11 +17,15 @@ internal static class TenantDedicatedOwnerRf3Scenario
             await TenantDedicatedOwnerRf3Flow.RunAsync(wave, seed, state, token);
         }, failures);
         if (seed is { } owned)
-        { await ServerFailureObserver.ObserveAsync(() => owned.DisposeAsync().AsTask(), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => owned.DisposeAsync().AsTask(), failures);
+        }
         if (wave is { } resources)
         {
             if (failures.Count != 0)
-            { resources.RetainRoots(); }
+            {
+                resources.RetainRoots();
+            }
             await ServerFailureObserver.ObserveAsync(() => resources.DisposeAsync().AsTask(), failures);
         }
         ServerFailureObserver.ThrowIfAny(failures);

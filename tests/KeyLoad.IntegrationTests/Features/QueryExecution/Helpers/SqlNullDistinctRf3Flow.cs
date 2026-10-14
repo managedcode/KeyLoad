@@ -44,7 +44,9 @@ internal static class SqlNullDistinctRf3Flow
             await SqlNullOrderingRf3Pages.ReplayAsync(fixture, state.Seed, deadline.Token);
             await global::TUnit.Assertions.Assert.That(await SqlNullDistinctRf3Image.ReadAsync(root, state, deadline.Token)).IsEqualTo(before);
             if (!faults)
-            { return state; }
+            {
+                return state;
+            }
             await SqlNullDistinctRf3Refusals.InvalidAsync(fixture, state, root, deadline.Token);
             await SqlNullDistinctRf3Cancellation.RunAsync(fixture, state, root, deadline.Token);
             await SqlNullDistinctRf3Policy.RunAsync(fixture, state, root, deadline.Token);

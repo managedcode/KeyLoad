@@ -16,7 +16,9 @@ internal static class PostgresControlFlush
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 if (beforeFlush is not null)
-                { await beforeFlush(deadline.Token).ConfigureAwait(false); }
+                {
+                    await beforeFlush(deadline.Token).ConfigureAwait(false);
+                }
                 await writer.FlushAsync(deadline.Token).ConfigureAwait(false);
             },
                 failures).ConfigureAwait(false);

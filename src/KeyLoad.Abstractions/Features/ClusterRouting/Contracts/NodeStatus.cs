@@ -17,7 +17,10 @@ public sealed record NodeStatus([property: Orleans.Id(0)] string NodeId, [proper
 {
     /// <summary>Gets the current native consensus term from the same locked status snapshot.</summary>
     [Orleans.Id(9)]
-    public long ConsensusTerm { get; init; }
+    public long ConsensusTerm
+    {
+        get; init;
+    }
 
     private const int DefaultReadGeneration = 0;
 }

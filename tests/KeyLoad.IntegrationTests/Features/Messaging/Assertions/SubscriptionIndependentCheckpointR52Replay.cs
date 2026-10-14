@@ -24,13 +24,19 @@ internal static class SubscriptionIndependentCheckpointR52Replay
                 await sdk.CommitAsync(state.Seed.Publish, token)), state.Seed.PublishReceipt);
         }
         else
-        { await ChangedAsync(await sdk.CommitAsync(state.Seed.Publish, token)); }
+        {
+            await ChangedAsync(await sdk.CommitAsync(state.Seed.Publish, token));
+        }
         await SubscriptionIndependentCheckpointR52Current.RunAsync(state, sdk, mcp, admin, official, token);
         var reply = await mcp.CallAsync(McpCallerTools.DocumentsCommit, state.Seed.Publish, token);
         if (state.PolicyEpoch == 1)
-        { await SubscriptionFilterRf3Assertions.EqualAsync((await McpCallerAssertions.SuccessAsync<CommitReceipt>(reply)).Value, state.Seed.PublishReceipt); }
+        {
+            await SubscriptionFilterRf3Assertions.EqualAsync((await McpCallerAssertions.SuccessAsync<CommitReceipt>(reply)).Value, state.Seed.PublishReceipt);
+        }
         else
-        { await SubscriptionIndependentCheckpointR52Refusals.McpAsync(reply, ErrorCode.PermissionDenied); }
+        {
+            await SubscriptionIndependentCheckpointR52Refusals.McpAsync(reply, ErrorCode.PermissionDenied);
+        }
         await SubscriptionIndependentCheckpointR52Current.RunAsync(state, sdk, mcp, admin, official, token);
         if (state.HealthyPublish is { } publish)
         {
@@ -50,15 +56,23 @@ internal static class SubscriptionIndependentCheckpointR52Replay
         {
             var result = await sdk.CompleteSubscriptionAsync(saved.Request, token);
             if (saved.Epoch == state.PolicyEpoch)
-            { await SubscriptionFilterRf3Assertions.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(result), saved.Receipt); }
+            {
+                await SubscriptionFilterRf3Assertions.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(result), saved.Receipt);
+            }
             else
-            { await ChangedAsync(result); }
+            {
+                await ChangedAsync(result);
+            }
             await SubscriptionIndependentCheckpointR52Current.RunAsync(state, sdk, mcp, admin, official, token);
             var reply = await mcp.CallAsync(McpCallerTools.SubscriptionsComplete, saved.Request, token);
             if (saved.Epoch == state.PolicyEpoch)
-            { await SubscriptionFilterRf3Assertions.EqualAsync((await McpCallerAssertions.SuccessAsync<CommitReceipt>(reply)).Value, saved.Receipt); }
+            {
+                await SubscriptionFilterRf3Assertions.EqualAsync((await McpCallerAssertions.SuccessAsync<CommitReceipt>(reply)).Value, saved.Receipt);
+            }
             else
-            { await SubscriptionIndependentCheckpointR52Refusals.McpAsync(reply, ErrorCode.PermissionDenied); }
+            {
+                await SubscriptionIndependentCheckpointR52Refusals.McpAsync(reply, ErrorCode.PermissionDenied);
+            }
             await SubscriptionIndependentCheckpointR52Current.RunAsync(state, sdk, mcp, admin, official, token);
         }
     }
@@ -70,7 +84,9 @@ internal static class SubscriptionIndependentCheckpointR52Replay
         {
             var result = await sdk.CompleteSubscriptionAsync(saved.Request, token);
             if (saved.Epoch != state.PolicyEpoch)
-            { await ChangedAsync(result); }
+            {
+                await ChangedAsync(result);
+            }
             else
             {
                 await Assert.That(result.IsFailed).IsTrue();
@@ -94,10 +110,14 @@ internal static class SubscriptionIndependentCheckpointR52Replay
             var settled = state.Receipts.Any(x => x.Request.Subscription == saved.Request.Subscription
                 && saved.Result.Deliveries.Any(d => d.Token == x.Request.Token));
             if (!changed && !settled)
-            { continue; }
+            {
+                continue;
+            }
             var result = await sdk.ReceiveSubscriptionAsync(saved.Request, token);
             if (changed)
-            { await ChangedAsync(result); }
+            {
+                await ChangedAsync(result);
+            }
             else
             {
                 await SubscriptionIndependentCheckpointR52Refusals.FailureAsync(result,

@@ -4,7 +4,9 @@ namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
 [KeyLoad.ConfigurationOptions]
 internal sealed class TypedOptionsFlowSettings
 {
-    public TypedOptionsFlowSettings() { }
+    public TypedOptionsFlowSettings()
+    {
+    }
 
     /// <summary>Maximum concurrent admissions captured by the consumer.</summary>
     public int AdmissionCapacity { get; set; } = 64;

@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server.Features.ClusterRouting;
 using Microsoft.AspNetCore.Http.Features;
 
@@ -17,9 +17,13 @@ internal static class NativeCanonicalModelCutBody
             || !string.Equals(request.ContentType, NativeCanonicalModelCutDiagnosticProtocol.ContentType, StringComparison.OrdinalIgnoreCase)
             || request.ContentLength is <= EmptyBodyBytes
             || request.HttpContext.Features.Get<IHttpRequestBodyDetectionFeature>()?.CanHaveBody == false)
-        { throw NativeCanonicalModelCutCodec.Invalid(); }
+        {
+            throw NativeCanonicalModelCutCodec.Invalid();
+        }
         if (request.ContentLength > NativeCanonicalModelCutCodec.MaximumRecordBytes)
-        { throw NativeCanonicalModelCutCodec.Exhausted(); }
+        {
+            throw NativeCanonicalModelCutCodec.Exhausted();
+        }
         var buffer = new byte[NativeCanonicalModelCutCodec.MaximumRecordBytes + OverflowProbeBytes];
         var length = EmptyBodyBytes;
         while (length < buffer.Length)
@@ -27,14 +31,20 @@ internal static class NativeCanonicalModelCutBody
             token.ThrowIfCancellationRequested();
             var read = await request.Body.ReadAsync(buffer.AsMemory(length), token).ConfigureAwait(false);
             if (read == EmptyBodyBytes)
-            { break; }
+            {
+                break;
+            }
             length += read;
         }
         token.ThrowIfCancellationRequested();
         if (length == buffer.Length)
-        { throw NativeCanonicalModelCutCodec.Exhausted(); }
+        {
+            throw NativeCanonicalModelCutCodec.Exhausted();
+        }
         if (length == EmptyBodyBytes)
-        { throw NativeCanonicalModelCutCodec.Invalid(); }
+        {
+            throw NativeCanonicalModelCutCodec.Invalid();
+        }
         NativeCanonicalModelCutRequest decoded;
         try
         {
@@ -43,7 +53,9 @@ internal static class NativeCanonicalModelCutBody
         }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)
             && error is not OperationCanceledException && error is not KeyLoadException)
-        { throw NativeCanonicalModelCutCodec.Invalid(); }
+        {
+            throw NativeCanonicalModelCutCodec.Invalid();
+        }
         NativeCanonicalModelCutCodec.ValidateRequest(decoded);
         token.ThrowIfCancellationRequested();
         return decoded;

@@ -43,12 +43,21 @@ internal static class AdminBrowserAssertions
         CancellationToken cancellationToken)
     {
         await browser.CommandAsync(AdminBrowserProtocol.SetMetrics,
-            new { width, height = AdminBrowserProtocol.Height, deviceScaleFactor = 1, mobile = width == AdminBrowserProtocol.MobileWidth }, cancellationToken);
+            new
+            {
+                width,
+                height = AdminBrowserProtocol.Height,
+                deviceScaleFactor = 1,
+                mobile = width == AdminBrowserProtocol.MobileWidth
+            }, cancellationToken);
         await Assert.That((await browser.EvaluateAsync(NoOverflow, cancellationToken)).GetBoolean()).IsTrue();
         var outputDirectory = Path.Combine(ClusterFixtureDiagnostics.FindRepositoryRoot().FullName,
             AdminBrowserProtocol.EvidenceDirectory);
         Directory.CreateDirectory(outputDirectory);
-        var reply = await browser.CommandAsync(AdminBrowserProtocol.CaptureScreenshot, new { format = "png" }, cancellationToken);
+        var reply = await browser.CommandAsync(AdminBrowserProtocol.CaptureScreenshot, new
+        {
+            format = "png"
+        }, cancellationToken);
         await File.WriteAllBytesAsync(Path.Combine(outputDirectory, name + ".png"),
             Convert.FromBase64String(reply.GetProperty(ScreenshotData).GetString()!), cancellationToken);
     }

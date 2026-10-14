@@ -35,14 +35,24 @@ internal sealed record RemoteAnnPublicationRf3Reader(PrincipalRecord Principal, 
     }
 
     internal PrincipalRecord Denied() => Principal with
-    { Grants = [], PolicyEpoch = RemoteAnnPublicationRf3Protocol.DeniedEpoch };
+    {
+        Grants = [],
+        PolicyEpoch = RemoteAnnPublicationRf3Protocol.DeniedEpoch
+    };
 
     internal PrincipalRecord FieldDenied() => Principal with
-    { FieldGrants = [], PolicyEpoch = RemoteAnnPublicationRf3Protocol.FieldDeniedEpoch };
+    {
+        FieldGrants = [],
+        PolicyEpoch = RemoteAnnPublicationRf3Protocol.FieldDeniedEpoch
+    };
 
     internal PrincipalRecord FieldRepaired() => Principal with
-    { PolicyEpoch = RemoteAnnPublicationRf3Protocol.FieldRepairedEpoch };
+    {
+        PolicyEpoch = RemoteAnnPublicationRf3Protocol.FieldRepairedEpoch
+    };
 
     internal PrincipalRecord Repaired() => Principal with
-    { PolicyEpoch = RemoteAnnPublicationRf3Protocol.RepairedEpoch };
+    {
+        PolicyEpoch = RemoteAnnPublicationRf3Protocol.RepairedEpoch
+    };
 }

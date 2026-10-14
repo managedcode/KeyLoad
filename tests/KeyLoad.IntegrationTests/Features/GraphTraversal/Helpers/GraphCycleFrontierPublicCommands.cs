@@ -19,7 +19,11 @@ internal static class GraphCycleFrontierPublicCommands
             await admin.Mcp.CallAsync(McpCallerTools.AdminPartitionPlacementRead,
                 new AtomicPartitionPlacementReadRequest(1, state.Seed.TargetPartition), token))).Value);
         var desired = state.Seed.Reader.Principal with
-        { RestrictRows = true, OwnerId = GraphCycleFrontierPublicState.Owner, PolicyEpoch = 2L };
+        {
+            RestrictRows = true,
+            OwnerId = GraphCycleFrontierPublicState.Owner,
+            PolicyEpoch = 2L
+        };
         await SqlRf3Protocol.EqualAsync(desired, await McpCallerAssertions.SdkSuccessAsync(
             await admin.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), desired, token)));
         Mutation[] mutations = [.. state.Vertices.Select(vertex => (Mutation)new PutDocument(vertex.Collection,

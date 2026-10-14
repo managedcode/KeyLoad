@@ -17,7 +17,10 @@ internal static class GraphVertexAuthorityFlow
         await GraphVertexAuthorityAssertions.ReadsRefuse(database.Database, database.Store, state, token);
         var upsert = GraphStorageReferenceFixture.Command(database.Partition,
             new PutDocument(GraphTraversalIntegrityFixture.Nodes, Witness, Payload),
-            GraphTraversalIntegrityFixture.Mutation(state.DamagedEdge) with { ExpectedRevision = 1L });
+            GraphTraversalIntegrityFixture.Mutation(state.DamagedEdge) with
+            {
+                ExpectedRevision = 1L
+            });
         var remove = GraphStorageReferenceFixture.Command(database.Partition,
             new PutDocument(GraphTraversalIntegrityFixture.Nodes, Witness, Payload),
             new DeleteEdge(GraphTraversalIntegrityFixture.Graph, state.DamagedEdge.Id, 1L));
@@ -43,7 +46,13 @@ internal static class GraphVertexAuthorityFlow
             await GraphTraversalIntegrityAssertions.Replay(owner, cold, state.SeedCommand, state.SeedReceipt);
             recovered = GraphStorageReferenceFixture.Submit(owner, upsert).Get<CommitReceipt>();
             await GraphVertexAuthorityAssertions.RepairedReceipt(owner, state, upsert, recovered);
-            state = state with { DamagedEdge = state.DamagedEdge with { Revision = 2L } };
+            state = state with
+            {
+                DamagedEdge = state.DamagedEdge with
+                {
+                    Revision = 2L
+                }
+            };
             await GraphTraversalIntegrityAssertions.Replay(owner, cold, upsert, recovered);
             continuation = GraphTraversalIntegrityFixture.Continue(owner, state);
             await GraphVertexAuthorityAssertions.Healthy(owner, cold, state, continuation, token);

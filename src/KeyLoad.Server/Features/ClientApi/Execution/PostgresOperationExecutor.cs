@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Query;
 using Microsoft.Extensions.Options;
 
@@ -12,9 +12,13 @@ internal static class PostgresOperationExecutor
     {
         var mutationIdentity = catalog.TakeMutationIdentity();
         if (maximumRows < PostgresProtocol.AllRows)
-        { throw Errors.Fail(ErrorCode.Validation, PostgresProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, PostgresProtocol.Invalid);
+        }
         if (portal.Completed)
-        { throw Errors.Fail(ErrorCode.UnsupportedCapability, PostgresProtocol.Unsupported); }
+        {
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, PostgresProtocol.Unsupported);
+        }
         PostgresEncodedReply? result = null;
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
@@ -33,12 +37,16 @@ internal static class PostgresOperationExecutor
                 options.MaximumCanonicalPayloadBytes, services.GetRequiredService<IOptions<QueryExecutionOptions>>(),
                 portal.Statement.ParameterOids.Length, token);
             if (TryCompleteControl(compilation, catalog, result, maximumJsonBytes, portal, token))
-            { return; }
+            {
+                return;
+            }
             var operation = compilation.Operation ?? throw ScriptDomOperationErrors.Unsupported();
             if (operation.ReadKind is not (GrainReadKind.Query or GrainReadKind.AstQuery
                 or GrainReadKind.Document or GrainReadKind.Message or GrainReadKind.Traverse)
                 && operation.CommandKind is not (OperationKind.Batch or OperationKind.CreateTable))
-            { throw Errors.Fail(ErrorCode.UnsupportedCapability, PostgresProtocol.Unsupported); }
+            {
+                throw Errors.Fail(ErrorCode.UnsupportedCapability, PostgresProtocol.Unsupported);
+            }
             result.PossibleWrite = operation.CommandKind is OperationKind.Batch or OperationKind.CreateTable;
             var value = await CanonicalConnectionDispatch.ExecuteAsync(services, owner, principal, operation, token).ConfigureAwait(false);
             try
@@ -46,15 +54,19 @@ internal static class PostgresOperationExecutor
                 result.Payload = McpBoundedJson.Serialize(value, maximumJsonBytes);
                 token.ThrowIfCancellationRequested();
             }
-            catch (Exception failure) when (result.PossibleWrite && global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(failure))
-            { throw Errors.Fail(ErrorCode.UnknownWriteOutcome, PostgresProtocol.InterruptedReply, failure); }
+            catch (Exception failure) when (result.PossibleWrite && global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+            {
+                throw Errors.Fail(ErrorCode.UnknownWriteOutcome, PostgresProtocol.InterruptedReply, failure);
+            }
             portal.Completed = true;
         }, failures).ConfigureAwait(false);
         if (failures.Count != PostgresProtocol.AllRows)
         {
             ServerFailureObserver.Observe(catalog.ClearMutationIdentity, failures);
             if (result is not null)
-            { ServerFailureObserver.Observe(result.Dispose, failures); }
+            {
+                ServerFailureObserver.Observe(result.Dispose, failures);
+            }
             ServerFailureObserver.ThrowIfAny(failures);
         }
         return result ?? throw Errors.Fail(ErrorCode.Corruption, PostgresProtocol.Invalid);
@@ -63,7 +75,9 @@ internal static class PostgresOperationExecutor
         PostgresEncodedReply reply, int maximumJsonBytes, PostgresBoundPortal portal, CancellationToken token)
     {
         if (compilation.ContextCommandId is not { } contextId)
-        { return false; }
+        {
+            return false;
+        }
         catalog.ArmMutationIdentity(contextId);
         reply.Payload = McpBoundedJson.Serialize(true, maximumJsonBytes);
         token.ThrowIfCancellationRequested();

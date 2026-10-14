@@ -17,14 +17,18 @@ internal static class NativeTextProtectedRebuildColdTrial
         NativeTextProtectedRebuildColdSeed.Policy(owner, 3L, allowed: true);
         await NativeTextProtectedRebuildColdAssertions.CurrentAsync(owner, token);
         foreach (var original in originals)
-        { await NativeTextProtectedRebuildColdAssertions.ReplayAsync(owner, original, token); }
+        {
+            await NativeTextProtectedRebuildColdAssertions.ReplayAsync(owner, original, token);
+        }
         var repaired = QueueWholeFlowStorage.Bytes(owner.Store);
         var repairedCut = owner.Store.Position;
         owner.Reopen(removeProjection: false);
         await NativeTextProtectedRebuildColdAssertions.UnchangedAsync(owner, repaired, repairedCut);
         await NativeTextProtectedRebuildColdAssertions.CurrentAsync(owner, token);
         foreach (var original in originals)
-        { await NativeTextProtectedRebuildColdAssertions.ReplayAsync(owner, original, token); }
+        {
+            await NativeTextProtectedRebuildColdAssertions.ReplayAsync(owner, original, token);
+        }
         var healthy = NativeTextProtectedRebuildColdSeed.Batch(owner,
             new PutDocument(NativeTextProtectedRebuildColdSeed.Collection, "gamma",
                 NativeTextProtectedRebuildColdSeed.HealthyJson, Access: new(NativeTextProtectedRebuildColdSeed.Reader)));

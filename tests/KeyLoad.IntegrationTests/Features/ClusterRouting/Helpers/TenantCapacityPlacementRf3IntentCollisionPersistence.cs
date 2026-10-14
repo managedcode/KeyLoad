@@ -19,7 +19,10 @@ internal static class TenantCapacityPlacementRf3IntentCollisionPersistence
             seed.Partition.DatabaseId, [seed.Partition], state.Control);
         var sdk = await McpCallerAssertions.SdkSuccessAsync(await seed.Source.PlanTenantPlacementAsync(request, token));
         var mcp = (await McpCallerAssertions.SuccessAsync<TenantPlacementPlanResultV1>(
-            await seed.Official.CallAsync(TenantPlacementPublicProtocol.PlanTool, new { request }, token))).Value;
+            await seed.Official.CallAsync(TenantPlacementPublicProtocol.PlanTool, new
+            {
+                request
+            }, token))).Value;
         await TenantCapacityPlacementRf3Assertions.RequirePlanAsync(seed, state, sdk, token);
         await TenantCapacityPlacementRf3Assertions.RequirePlanAsync(seed, state, mcp, token);
         return sdk;
@@ -38,7 +41,11 @@ internal static class TenantCapacityPlacementRf3IntentCollisionPersistence
         await SqlRf3Protocol.EqualAsync(expected, pending);
         await SqlRf3Protocol.EqualAsync(pending, (await McpCallerAssertions.SuccessAsync<PlacementIntentV1>(
             await seed.Official.CallAsync(TenantPlacementPublicProtocol.PersistTool,
-                new { commandId, request }, token))).Value);
+                new
+                {
+                    commandId,
+                    request
+                }, token))).Value);
         return pending;
     }
 

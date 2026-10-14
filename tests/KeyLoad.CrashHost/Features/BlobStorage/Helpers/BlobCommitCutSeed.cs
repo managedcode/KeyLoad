@@ -38,7 +38,9 @@ internal static class BlobCommitCutSeed
         Submit(database, OperationKind.CompleteBlobUpload, id,
             new CompleteBlobUploadRequest(id, BlobCommitCutProtocol.Blob, BlobCommitCutProtocol.OriginalUpload, originalHash), operations, results);
         if (complete)
-        { _ = Upload(database, BlobCommitCutProtocol.NewUpload, BlobCommitCutPayload.MultipartBytes(), PublishedRevision, operations, results); }
+        {
+            _ = Upload(database, BlobCommitCutProtocol.NewUpload, BlobCommitCutPayload.MultipartBytes(), PublishedRevision, operations, results);
+        }
         var identity = store.Identity;
         var state = new
         {
@@ -55,7 +57,9 @@ internal static class BlobCommitCutSeed
         };
         var bytes = JsonDefaults.Serialize(state);
         if (bytes.Length > BlobCommitCutProtocol.MaximumSidecarBytes)
-        { throw new InvalidOperationException(SeedSidecarExceeded); }
+        {
+            throw new InvalidOperationException(SeedSidecarExceeded);
+        }
         await File.WriteAllBytesAsync(Path.Combine(root, BlobCommitCutProtocol.SeedFile), bytes).ConfigureAwait(false);
         return database;
     }
@@ -89,7 +93,9 @@ internal static class BlobCommitCutSeed
             database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request));
         var result = database.Apply(operation);
         if (result.Error is not null)
-        { throw new InvalidOperationException(SeedRejected); }
+        {
+            throw new InvalidOperationException(SeedRejected);
+        }
         operations.Add(NativeSerialization.Serialize(operation));
         results.Add(NativeSerialization.Serialize(result));
     }
@@ -98,7 +104,9 @@ internal static class BlobCommitCutSeed
     {
         var page = view.Scan([], BlobCommitCutProtocol.MaximumRecords);
         if (page.HasMore)
-        { throw new InvalidOperationException(SeedImageIncomplete); }
+        {
+            throw new InvalidOperationException(SeedImageIncomplete);
+        }
         return Convert.ToHexString(JsonDefaults.Serialize(page.Records));
     });
 }

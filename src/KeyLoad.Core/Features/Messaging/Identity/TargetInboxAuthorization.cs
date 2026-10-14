@@ -12,7 +12,9 @@ public sealed partial class DatabaseEngine
         var resource = Resource(view, request.Target.Partition, request.Target.Queue, ResourceKind.WorkQueue);
         ValidateInboxPolicy(resource);
         if (resource.InboxPolicy is null)
-        { throw Errors.Fail(ErrorCode.UnsupportedCapability, TargetInboxProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, TargetInboxProtocol.Unavailable);
+        }
         _ = AuthorizeBatch(view, principal, new(request.CommandId, request.Target.Partition, request.Effects), allowEmpty: true);
     }
 }

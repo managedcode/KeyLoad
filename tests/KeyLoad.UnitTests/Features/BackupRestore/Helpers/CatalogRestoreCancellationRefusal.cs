@@ -16,7 +16,9 @@ internal static class CatalogRestoreCancellationRefusal
             {
                 var work = fixture.Source.CreateReadWork(selected.Token);
                 if (!afterReconcile)
-                { await selected.CancelAsync(); }
+                {
+                    await selected.CancelAsync();
+                }
                 token.ThrowIfCancellationRequested();
                 OperationCanceledException? originalFailure = null;
                 try
@@ -31,7 +33,9 @@ internal static class CatalogRestoreCancellationRefusal
                 await Assert.That(originalFailure!.CancellationToken).IsEqualTo(selected.Token);
                 await Assert.That(Directory.Exists(target)).IsEqualTo(existingEmpty);
                 if (existingEmpty)
-                { await Assert.That(Directory.EnumerateFileSystemEntries(target).Any()).IsFalse(); }
+                {
+                    await Assert.That(Directory.EnumerateFileSystemEntries(target).Any()).IsFalse();
+                }
                 await Assert.That(Directory.EnumerateDirectories(fixture.Root, StagingPrefix).Any()).IsFalse();
             }, failures);
         }, failures);

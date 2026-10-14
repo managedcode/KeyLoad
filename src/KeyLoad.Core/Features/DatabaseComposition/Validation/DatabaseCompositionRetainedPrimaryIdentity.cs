@@ -11,16 +11,22 @@ public sealed partial class DatabaseEngine
                 new global::System.Text.Json.JsonDocumentOptions { MaxDepth = Limits.MaxJsonDepth });
         }
         catch (global::System.Text.Json.JsonException)
-        { throw Errors.Fail(ErrorCode.Corruption, TypedJoinRecordMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, TypedJoinRecordMismatch);
+        }
         using (document)
         {
             var row = document.RootElement;
             if (row.ValueKind != global::System.Text.Json.JsonValueKind.Object)
-            { throw Errors.Fail(ErrorCode.Corruption, TypedJoinRecordMismatch); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, TypedJoinRecordMismatch);
+            }
             var value = FindUniqueTypedEndpointPrimaryValue(row, primaryKey);
             if (value is not { ValueKind: global::System.Text.Json.JsonValueKind.String } primary
                 || !StringComparer.Ordinal.Equals(primary.GetString(), record.Reference.Id))
-            { throw Errors.Fail(ErrorCode.Corruption, TypedJoinRecordMismatch); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, TypedJoinRecordMismatch);
+            }
         }
     }
 
@@ -30,9 +36,13 @@ public sealed partial class DatabaseEngine
         foreach (var property in row.EnumerateObject())
         {
             if (!property.NameEquals(primaryKey))
-            { continue; }
+            {
+                continue;
+            }
             if (primary is not null)
-            { throw Errors.Fail(ErrorCode.Corruption, TypedJoinRecordMismatch); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, TypedJoinRecordMismatch);
+            }
             primary = property.Value;
         }
         return primary;

@@ -19,7 +19,9 @@ internal static class NativeTextIncrementalPagePreparation
             || page.ThroughSequence > session.CurrentReplayUpperSequence
             || command.CommandId == Guid.Empty || command.Consumer != session.Request.Consumer
             || command.Token != page.Token || command.Effects.IsDefault || !command.Effects.IsEmpty)
-        { throw NativeTextErrors.Corrupt(); }
+        {
+            throw NativeTextErrors.Corrupt();
+        }
         var bootstrap = session.Manifest is null || session.Manifest.Bootstrap;
         var plan = Plan(session, page, bootstrap, maximumRecords, budget, query);
         var through = bootstrap ? session.CurrentReplayUpperSequence : page.ThroughSequence;
@@ -58,7 +60,9 @@ internal static class NativeTextIncrementalPagePreparation
             return new(changes, seed.Records, seed.NextRecord);
         }
         if (bootstrap)
-        { return new([], session.Manifest.Records, session.Manifest.NextRecord); }
+        {
+            return new([], session.Manifest.Records, session.Manifest.NextRecord);
+        }
         return NativeTextIncrementalPagePlanner.Plan(page, session.Manifest.Records,
             session.Manifest.NextRecord, session.Request.Collection, session.Request.Field,
             maximumRecords, budget, query);

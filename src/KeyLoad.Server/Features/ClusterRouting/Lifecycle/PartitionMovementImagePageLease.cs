@@ -12,8 +12,13 @@ internal sealed class PartitionMovementImagePageLease : IDisposable
         Page = page;
     }
 
-    internal PartitionMoveImagePage Page { get; }
+    internal PartitionMoveImagePage Page
+    {
+        get;
+    }
 
     public void Dispose()
-    { Interlocked.Exchange(ref owner, null)?.Return(); }
+    {
+        Interlocked.Exchange(ref owner, null)?.Return();
+    }
 }

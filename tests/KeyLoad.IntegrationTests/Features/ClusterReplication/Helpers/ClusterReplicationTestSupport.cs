@@ -32,7 +32,9 @@ internal static class ClusterReplicationTestSupport
     internal static Result Success(Result result)
     {
         if (!result.IsSuccess)
-        { Assert.Fail($"{result.Problem?.ErrorCode ?? "MissingProblem"}: {result.Problem?.Detail ?? "The client operation failed."}"); }
+        {
+            Assert.Fail($"{result.Problem?.ErrorCode ?? "MissingProblem"}: {result.Problem?.Detail ?? "The client operation failed."}");
+        }
         return result;
     }
 
@@ -43,7 +45,9 @@ internal static class ClusterReplicationTestSupport
         {
             var result = await action();
             if (result.IsSuccess)
-            { return result; }
+            {
+                return result;
+            }
             var code = result.Problem?.ErrorCode ?? "MissingProblem";
             await Assert.That(new[] { nameof(ErrorCode.UnknownWriteOutcome), nameof(ErrorCode.OwnershipLost) }).Contains(code)
                 .Because($"Unexpected election retry result: {code}; {result.Problem?.Detail ?? "No safe detail."}");

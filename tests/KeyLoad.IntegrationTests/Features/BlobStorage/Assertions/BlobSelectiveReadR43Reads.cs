@@ -25,7 +25,9 @@ internal static class BlobSelectiveReadR43Reads
                 await SqlRf3Protocol.EqualAsync(Errors.Problem(ErrorCode.PermissionDenied, Detail), sdk.Problem);
             }
             else
-            { await SqlRf3Protocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(sdk)); }
+            {
+                await SqlRf3Protocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(sdk));
+            }
             await CurrentAsync(admin, state, token);
             var reply = await reader.Mcp.CallAsync(Tool, request, token);
             if (index == 0 && firstDenied)
@@ -37,7 +39,9 @@ internal static class BlobSelectiveReadR43Reads
                     Convert.ToBase64String(BlobSelectiveReadR43State.Bytes(index)));
             }
             else
-            { await SqlRf3Protocol.EqualAsync(expected, (await McpCallerAssertions.SuccessAsync<BlobReadResult>(reply)).Value); }
+            {
+                await SqlRf3Protocol.EqualAsync(expected, (await McpCallerAssertions.SuccessAsync<BlobReadResult>(reply)).Value);
+            }
             await CurrentAsync(admin, state, token);
         }
     }

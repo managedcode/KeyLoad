@@ -16,7 +16,9 @@ internal sealed record ReplicaCoordinatorAdmissionCut(long CanonicalPosition, lo
         {
             var page = view.Scan([], MaximumFixtureRows, null);
             if (page.HasMore)
-            { throw new InvalidOperationException("The complete fixture cut exceeded its bounded row inventory."); }
+            {
+                throw new InvalidOperationException("The complete fixture cut exceeded its bounded row inventory.");
+            }
             return NativeSerialization.Serialize(page);
         });
 

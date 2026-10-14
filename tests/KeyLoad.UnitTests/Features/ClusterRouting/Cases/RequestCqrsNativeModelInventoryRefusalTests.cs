@@ -23,7 +23,9 @@ internal sealed class RequestCqrsNativeModelInventoryRefusalTests
             marker with { Outcome = RequestCqrsProbeOutcome.Released }
         };
         foreach (var candidate in changed)
-        { Assert.ThrowsExactly<InvalidOperationException>(() => RequestCqrsNativeModelInventory.RequireMarkers([original], [candidate])); }
+        {
+            Assert.ThrowsExactly<InvalidOperationException>(() => RequestCqrsNativeModelInventory.RequireMarkers([original], [candidate]));
+        }
         Assert.ThrowsExactly<InvalidOperationException>(() => RequestCqrsNativeModelInventory.RequireMarkers([original], []));
         RequestCqrsNativeModelInventory.RequireMarkers([original], [marker]);
     }
@@ -65,6 +67,8 @@ internal sealed class RequestCqrsNativeModelInventoryRefusalTests
         await Assert.That(RequestCqrsNativeModelInventory.IsName(name)).IsTrue();
         foreach (var bad in new[] { "../" + name, name + ".tmp", name.Replace(witness.ArmId.ToString("N"), Guid.Empty.ToString("N"), StringComparison.Ordinal),
             name.Replace(witness.Phase.ToString(), nameof(RequestCqrsProbePhase.RequestStarted), StringComparison.Ordinal), name.Replace(witness.RequestId.ToString("N"), witness.RequestId.ToString("D"), StringComparison.Ordinal) })
-        { await Assert.That(RequestCqrsNativeModelInventory.IsName(bad)).IsFalse(); }
+        {
+            await Assert.That(RequestCqrsNativeModelInventory.IsName(bad)).IsFalse();
+        }
     }
 }

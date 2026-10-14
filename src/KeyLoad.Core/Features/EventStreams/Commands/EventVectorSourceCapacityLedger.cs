@@ -21,10 +21,17 @@ internal static class EventVectorSourceCapacityLedger
         {
             RequireNoPins(transaction, partition);
             current = new EventVectorSourceCapacity
-            { Version = Version, SourcePartition = partition, OpenPins = EmptyCount, RetainedBytes = EmptyCount };
+            {
+                Version = Version,
+                SourcePartition = partition,
+                OpenPins = EmptyCount,
+                RetainedBytes = EmptyCount
+            };
         }
         if (current.Version != Version || current.SourcePartition != partition)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidCapacity); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidCapacity);
+        }
         admission.Require(current.OpenPins, current.RetainedBytes, slotDelta, byteDelta);
         var changed = current with
         {
@@ -40,6 +47,8 @@ internal static class EventVectorSourceCapacityLedger
         view.VisitRange(EventVectorKeys.Pins(partition), ExistenceProbeRecords,
             (_, _) => { found = true; return false; });
         if (found)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidCapacity); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidCapacity);
+        }
     }
 }

@@ -28,6 +28,8 @@ public sealed class RawStorageExecutionOptions
     public void Validate()
     {
         if (!IsValid())
-        { throw new ArgumentOutOfRangeException(nameof(MaximumWrites), ValidationMessage); }
+        {
+            throw new ArgumentOutOfRangeException(nameof(MaximumWrites), ValidationMessage);
+        }
     }
 }

@@ -38,7 +38,10 @@ public sealed class ScaledComparisonCorpus : IComparisonCorpus
     /// <inheritdoc />
     public int GraphVertexCount => NoObservedItems;
     /// <inheritdoc />
-    public string Sha256 { get; }
+    public string Sha256
+    {
+        get;
+    }
 
     /// <inheritdoc />
     public BenchmarkDocument CreateDocument(int number)
@@ -55,7 +58,13 @@ public sealed class ScaledComparisonCorpus : IComparisonCorpus
         var id = Id(number);
         var empty = EmptyJson(id, number);
         var paddingLength = profile.PayloadBytes - Encoding.UTF8.GetByteCount(empty);
-        var json = JsonSerializer.Serialize(new { id, number, text = SharedCorpusText, padding = new string(PayloadPaddingCharacter, paddingLength) });
+        var json = JsonSerializer.Serialize(new
+        {
+            id,
+            number,
+            text = SharedCorpusText,
+            padding = new string(PayloadPaddingCharacter, paddingLength)
+        });
         if (Encoding.UTF8.GetByteCount(json) != profile.PayloadBytes)
         {
             throw new InvalidOperationException(ScaledCorpusPayloadSizeMismatchDetail);
@@ -116,7 +125,13 @@ public sealed class ScaledComparisonCorpus : IComparisonCorpus
 
         var id = Id(number);
         var empty = EmptyJson(id, number);
-        var json = JsonSerializer.Serialize(new { id, number, text = SharedCorpusText, padding = new string(PayloadPaddingCharacter, profile.PayloadBytes - Encoding.UTF8.GetByteCount(empty)) });
+        var json = JsonSerializer.Serialize(new
+        {
+            id,
+            number,
+            text = SharedCorpusText,
+            padding = new string(PayloadPaddingCharacter, profile.PayloadBytes - Encoding.UTF8.GetByteCount(empty))
+        });
         if (Encoding.UTF8.GetByteCount(json) != profile.PayloadBytes)
         {
             throw new InvalidOperationException(ScaledMutationPayloadSizeMismatchDetail);

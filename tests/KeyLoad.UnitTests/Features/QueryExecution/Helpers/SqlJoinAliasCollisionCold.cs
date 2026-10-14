@@ -21,7 +21,10 @@ internal static class SqlJoinAliasCollisionCold
             var failures = new List<Exception>();
             try
             {
-                using var reopened = ZoneTreeExistingStore.Open(new(database.Directory) { Incarnation = identity.Incarnation },
+                using var reopened = ZoneTreeExistingStore.Open(new(database.Directory)
+                {
+                    Incarnation = identity.Incarnation
+                },
                     identity.NodeId, database.StorageExecution);
                 await ServerFailureObserver.ObserveAsync(async () =>
                 {
@@ -38,11 +41,11 @@ internal static class SqlJoinAliasCollisionCold
                     await Assert.That(reopened.Position).IsEqualTo(position);
                 }, failures);
             }
-            catch (Exception error) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
+            catch (Exception error) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
             {
                 failures.Add(error);
             }
-            catch (Exception error) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
+            catch (Exception error) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
             {
                 failures.Add(error);
             }
@@ -71,7 +74,9 @@ internal static class SqlInnerJoinRetainedIdentityFlow
             database.Partition, seed, receipt);
         database.Store.Dispose();
         foreach (var fault in faults)
-        { await FaultAsync(database, seed, receipt, fault); }
+        {
+            await FaultAsync(database, seed, receipt, fault);
+        }
     }
 
     private static SqlInnerJoinIdentityFault[] Capture(TestDatabase database)
@@ -95,7 +100,12 @@ internal static class SqlInnerJoinRetainedIdentityFlow
                 new(database.Partition, collection, Foreign)
             };
             foreach (var identity in identities)
-            { faults.Add(new(key, bytes, NativeSerialization.Serialize(row with { Reference = identity }), left)); }
+            {
+                faults.Add(new(key, bytes, NativeSerialization.Serialize(row with
+                {
+                    Reference = identity
+                }), left));
+            }
         }
         return faults.ToArray();
     }
@@ -124,7 +134,10 @@ internal static class SqlInnerJoinRetainedIdentityFlow
                 database.Partition, damaged, checked(position + FaultCommit), identity, fault.LeftFault);
         }, failures);
         if (!committed)
-        { global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures); return; }
+        {
+            global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
+            return;
+        }
         await DirtyAsync(database, fault, damaged, checked(position + FaultCommit), identity, failures);
         await InOwnerAsync(database, store =>
         {
@@ -168,12 +181,17 @@ internal static class SqlInnerJoinRetainedIdentityFlow
         await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
         {
             store = global::KeyLoad.Storage.ZoneTree.ZoneTreeExistingStore.Open(
-                new(database.Directory) { Incarnation = database.Store.Identity.Incarnation },
+                new(database.Directory)
+                {
+                    Incarnation = database.Store.Identity.Incarnation
+                },
                 database.Store.Identity.NodeId, database.StorageExecution);
             await use(store);
         }, failures);
         if (store is not null)
-        { global::KeyLoad.Server.ServerFailureObserver.Observe(store.Dispose, failures); }
+        {
+            global::KeyLoad.Server.ServerFailureObserver.Observe(store.Dispose, failures);
+        }
     }
 
     internal static string[] Image(global::KeyLoad.Storage.ZoneTree.ZoneTreeStore store)
@@ -260,7 +278,10 @@ internal static class SqlInnerJoinRetainedIdentityPages
         }
         if (!leftFault)
         {
-            await ExactAsync(engine.Execute(Root, sql with { Sql = FalseSql }), new([], null, position, AccessPath));
+            await ExactAsync(engine.Execute(Root, sql with
+            {
+                Sql = FalseSql
+            }), new([], null, position, AccessPath));
             await UnchangedAsync(store, image, position, identity);
             await ExactAsync(engine.ExecuteAst(Root, falseAst), new([], null, position, AccessPath));
             await UnchangedAsync(store, image, position, identity);

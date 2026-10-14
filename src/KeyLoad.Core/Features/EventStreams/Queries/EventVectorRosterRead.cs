@@ -36,21 +36,29 @@ internal static class EventVectorRosterRead
                 if (parts.Length != ComponentCount
                     || parts[TenantComponent] is not string || parts[DatabaseComponent] is not string
                     || parts[DomainComponent] is not string || parts[PartitionComponent] is not string)
-                { throw Errors.Fail(ErrorCode.Corruption, InvalidRoster); }
+                {
+                    throw Errors.Fail(ErrorCode.Corruption, InvalidRoster);
+                }
                 if (!Equals(parts[TenantComponent], control.TenantId)
                     || !Equals(parts[DatabaseComponent], control.DatabaseId) || !Equals(parts[DomainComponent], domain))
-                { return true; }
+                {
+                    return true;
+                }
                 var entry = NativeSerialization.Deserialize<AtomicPartitionCatalogEntryV1>(value);
                 RequireEntry(boundedView, entry, key, value, currentIncarnation, storeCut, appliedCut);
                 if (!seen.Add(entry.Partition))
-                { throw Errors.Fail(ErrorCode.Corruption, InvalidRoster); }
+                {
+                    throw Errors.Fail(ErrorCode.Corruption, InvalidRoster);
+                }
                 entries.Add(entry);
                 rows.Add(new EventVectorCoverageRow { Key = key.ToArray(), Value = value.ToArray() });
                 ReadOrigin(boundedView, entry.Partition, origins, budget);
                 return true;
             }, observer: budget.Observe, cancellationToken: cancellationToken);
         if (scan.HasMore || scan.StoppedByVisitor)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, InvalidRoster); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, InvalidRoster);
+        }
         var identity = ReadIdentity(boundedView, origins.Count, budget);
         return new(entries.ToImmutable(), rows.ToImmutable(), origins.ToImmutable(), identity);
     }
@@ -60,7 +68,9 @@ internal static class EventVectorRosterRead
     {
         if (entry is null || entry.Partition is null
             || !key.SequenceEqual(AtomicPartitionRosterKeys.Partition(entry.Partition)))
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidRoster); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidRoster);
+        }
         var historical = AtomicPartitionRosterOriginValidation.ReadBound(view, entry, value.ToArray(), incarnation);
         AtomicPartitionRosterEntryValidation.Validate(entry, entry.Partition, storeCut, Math.Max(appliedCut, historical));
     }
@@ -70,18 +80,26 @@ internal static class EventVectorRosterRead
     {
         var key = AtomicPartitionRosterRestoreOriginSerialization.OriginKey(partition);
         view.ReadValue(key, value => origins.Add(new EventVectorCoverageRow
-        { Key = key, Value = value.ToArray() }), budget.Observe);
+        {
+            Key = key,
+            Value = value.ToArray()
+        }), budget.Observe);
     }
 
     private static EventVectorCoverageRow? ReadIdentity(IKeyValueView view, int originCount,
         EventVectorInventoryReadBudget budget)
     {
         if (originCount == NoOrigins)
-        { return null; }
+        {
+            return null;
+        }
         var key = AtomicPartitionRosterRestoreOriginSerialization.IdentityKey();
         EventVectorCoverageRow? result = null;
         view.ReadValue(key, value => result = new EventVectorCoverageRow
-        { Key = key, Value = value.ToArray() }, budget.Observe);
+        {
+            Key = key,
+            Value = value.ToArray()
+        }, budget.Observe);
         return result ?? throw Errors.Fail(ErrorCode.Corruption, InvalidRoster);
     }
 }

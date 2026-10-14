@@ -19,15 +19,22 @@ internal sealed class RequestCqrsNativeCaptureEvidence
         last = now;
         Increment(ref lines);
         if (line.Length > RequestCqrsRf3McpRejectionNodeCapture.MaximumLineCharacters)
-        { Increment(ref oversized); return; }
+        {
+            Increment(ref oversized);
+            return;
+        }
         if (line.Contains(RequestCqrsRf3McpRejectionNodeCapture.MessagePrefix, StringComparison.Ordinal))
         {
             Increment(ref candidates);
             if (!parsed)
-            { Increment(ref malformed); }
+            {
+                Increment(ref malformed);
+            }
         }
         if (parsed)
-        { Increment(ref accepted); }
+        {
+            Increment(ref accepted);
+        }
     }
 
     internal RequestCqrsNativeCaptureSnapshot Snapshot(string node)
@@ -36,9 +43,13 @@ internal sealed class RequestCqrsNativeCaptureEvidence
     private void Increment(ref int count)
     {
         if (count == int.MaxValue)
-        { saturated = true; }
+        {
+            saturated = true;
+        }
         else
-        { count++; }
+        {
+            count++;
+        }
     }
 }
 

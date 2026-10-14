@@ -18,7 +18,9 @@ internal static class ClusterRestoreRf3RetainedCut
         var maximumBytes = IntegrationExecutionOptions.StorageExecution().Value.MaximumBackupManifestBytes;
         var file = new FileInfo(path);
         if (!file.Exists || file.Length > maximumBytes || (file.Attributes & FileAttributes.ReparsePoint) != default)
-        { throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid); }
+        {
+            throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid);
+        }
         using var original = file.Open(FileMode.Open, FileAccess.Read, FileShare.None);
         return SHA256.HashData(original);
     }
@@ -36,15 +38,21 @@ internal static class ClusterRestoreRf3RetainedCut
     private static void Visit(string root, string directory, IncrementalHash hash)
     {
         if ((File.GetAttributes(directory) & FileAttributes.ReparsePoint) != default)
-        { throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid); }
+        {
+            throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid);
+        }
         Append(hash, Encoding.UTF8.GetBytes(Path.GetRelativePath(root, directory)));
         foreach (var path in Directory.EnumerateFileSystemEntries(directory).Order(StringComparer.Ordinal))
         {
             var attributes = File.GetAttributes(path);
             if ((attributes & FileAttributes.ReparsePoint) != default)
-            { throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid); }
+            {
+                throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid);
+            }
             if ((attributes & FileAttributes.Directory) != default)
-            { Visit(root, path, hash); }
+            {
+                Visit(root, path, hash);
+            }
             else
             {
                 Append(hash, Encoding.UTF8.GetBytes(Path.GetRelativePath(root, path)));

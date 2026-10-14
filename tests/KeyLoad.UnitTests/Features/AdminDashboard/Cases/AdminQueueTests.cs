@@ -54,7 +54,10 @@ internal sealed class AdminQueueTests
         await Assert.That(page.Counters.StoredMessages).IsEqualTo(0);
         await Assert.That(page.NextAfterId).IsNull();
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => reader.Read(Administrator,
-            request with { Limit = 0 }, CancellationToken.None)).Code).IsEqualTo(ErrorCode.Validation);
+            request with
+            {
+                Limit = 0
+            }, CancellationToken.None)).Code).IsEqualTo(ErrorCode.Validation);
     }
 
     private static QueueLaneRef SeedOverdueQueue(TestDatabase db)

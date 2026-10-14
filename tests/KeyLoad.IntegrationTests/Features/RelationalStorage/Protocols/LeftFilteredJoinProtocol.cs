@@ -18,7 +18,10 @@ internal static class LeftFilteredJoinProtocol
     internal const string RightB = "{\"id\":\"c2\",\"name\":\"Lin\"}";
 
     internal static Dictionary<string, System.Text.Json.JsonElement> Parameters()
-        => new() { [MinimumFieldKey] = System.Text.Json.JsonSerializer.SerializeToElement(7) };
+        => new()
+        {
+            [MinimumFieldKey] = System.Text.Json.JsonSerializer.SerializeToElement(7)
+        };
     internal static QueryRequest Query(PartitionRef partition)
         => new(partition, Sql, Parameters(), AllowFullScan: true, QueryDialectVersion: 2);
     internal static SqlOperationRequest Request(PartitionRef partition)

@@ -12,7 +12,9 @@ public sealed partial class DatabaseEngine
         RemoteTransferRepairIdentity.RequireGenerations(request.ExpectedCapacityGeneration,
             request.ExpectedPolicyGeneration, request.ExpectedCompleteGeneration);
         if (!Enum.IsDefined(request.Stage) || string.IsNullOrEmpty(request.FailureWitness))
-        { throw Errors.Fail(ErrorCode.Validation, RemoteTransferRepairProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, RemoteTransferRepairProtocol.Invalid);
+        }
         RequireTransferAdministrator(principal);
         var resource = Resource(view, partition, request.SourceQueue.Queue, ResourceKind.WorkQueue);
         RequireTransferInspector(principal, request.SourceQueue, resource);
@@ -32,6 +34,8 @@ public sealed partial class DatabaseEngine
                 && item.PolicyGeneration == request.ExpectedPolicyGeneration
                 && item.CompleteGeneration == request.ExpectedCompleteGeneration
                 && item.WitnessToken == request.FailureWitness))
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, RemoteTransferRepairProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, RemoteTransferRepairProtocol.Invalid);
+        }
     }
 }

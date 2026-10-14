@@ -21,7 +21,10 @@ internal sealed class NativeAnnMaintenanceRf3Tests(ClusterFixture fixture)
         var scenario = new NativeAnnMaintenanceRf3Scenario();
         await scenario.SeedAsync(sdk, deadline.Token);
         var request = await scenario.RequestAsync(sdk, mcp, deadline.Token);
-        var wrong = request with { NodeId = Guid.NewGuid() };
+        var wrong = request with
+        {
+            NodeId = Guid.NewGuid()
+        };
         var denied = await sdk.MaintainAnnIndexAsync(wrong, deadline.Token);
         await Assert.That(denied.IsSuccess).IsFalse();
         await Assert.That(denied.Value).IsNull();
@@ -34,7 +37,11 @@ internal sealed class NativeAnnMaintenanceRf3Tests(ClusterFixture fixture)
             : await McpCallerAssertions.SdkSuccessAsync(await sdk.MaintainAnnIndexAsync(request, deadline.Token));
         await NativeAnnMaintenanceRf3Assertions.ResultAsync(built, request);
         await NativeAnnMaintenanceRf3Assertions.CanonicalAsync(sdk, mcp, scenario, deadline.Token);
-        var restore = request with { CommandId = Guid.NewGuid(), Mode = AnnMaintenanceMode.Restore };
+        var restore = request with
+        {
+            CommandId = Guid.NewGuid(),
+            Mode = AnnMaintenanceMode.Restore
+        };
         var restored = officialBuild
             ? await McpCallerAssertions.SdkSuccessAsync(await sdk.MaintainAnnIndexAsync(restore, deadline.Token))
             : (await McpCallerAssertions.SuccessAsync<AnnMaintenanceResult>(await mcp.CallAsync(NativeAnnMaintenanceRf3Scenario.Tool, restore, deadline.Token))).Value;

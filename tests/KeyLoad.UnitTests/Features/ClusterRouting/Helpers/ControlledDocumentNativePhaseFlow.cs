@@ -28,7 +28,9 @@ internal sealed class ControlledDocumentNativePhaseFlow(ControlledPartitionMovem
         PartitionMoveJournalReceipt? authorization, CancellationToken token)
     {
         if (body.IsEmpty)
-        { throw new InvalidOperationException(PartitionMoveProtocol.Invalid); }
+        {
+            throw new InvalidOperationException(PartitionMoveProtocol.Invalid);
+        }
         var envelope = new PartitionMovePeerEnvelope(context.Control.Version, context.Control.MoveId,
             context.Control.Partition, corpus.Control.Owner, context.Control.SourcePlacement,
             context.Control.DestinationOwner, PartitionMoveIntentIdentity.Digest(context.Control), stage,

@@ -69,7 +69,10 @@ internal static class FilteredPolicyColdContinuation
         var engine = database.CreateConfiguredDatabase(store);
         var denied = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
             new SearchEngine(engine, UnitExecutionOptions.QueryExecution()).SearchAsync(revokedReader,
-                request with { AllowedIds = ImmutableArray<string>.Empty }, cancellationToken)))!;
+                request with
+                {
+                    AllowedIds = ImmutableArray<string>.Empty
+                }, cancellationToken)))!;
         await Assert.That(denied.Code).IsEqualTo(ErrorCode.Unauthenticated);
         await UnchangedAsync(store, expected);
         await HealthyAsync(engine, reader, request, cancellationToken);
@@ -81,7 +84,10 @@ internal static class FilteredPolicyColdContinuation
     {
         var engine = new SearchEngine(database, UnitExecutionOptions.QueryExecution());
         var empty = await engine.SearchAsync(reader,
-            request with { AllowedIds = ImmutableArray<string>.Empty }, cancellationToken);
+            request with
+            {
+                AllowedIds = ImmutableArray<string>.Empty
+            }, cancellationToken);
         await Assert.That(empty).IsEmpty();
         var rows = await engine.SearchAsync(reader, request, cancellationToken);
         await Assert.That(rows).HasSingleItem();

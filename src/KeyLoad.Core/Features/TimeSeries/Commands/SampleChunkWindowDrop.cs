@@ -15,7 +15,9 @@ internal static class SampleChunkWindowDrop
             request.WindowId, request.ExpectedRevision, options, charge);
         var watermark = SampleRollupRecords.Watermark(tx, partition, request.SeriesSet, request.SeriesId, charge.Charge);
         if (watermark.Floor is not { } floor || floor < previous.UntilUtcTicks)
-        { throw Errors.Fail(ErrorCode.RevisionConflict, SampleChunkLifecycleProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RevisionConflict, SampleChunkLifecycleProtocol.Invalid);
+        }
         if (previous.State == SampleChunkWindowState.Sealed)
         {
             var manifest = SampleChunkManifestReader.Read(tx, partition, request.SeriesSet, request.SeriesId,

@@ -16,7 +16,9 @@ internal static class AnnPublicSearchExecutor
         ArgumentNullException.ThrowIfNull(request);
         var execution = configured.Value;
         if (!execution.EnableApproximateSearch)
-        { throw Errors.Fail(ErrorCode.UnsupportedCapability, AnnSearchProtocol.Disabled); }
+        {
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, AnnSearchProtocol.Disabled);
+        }
         var budget = new ReadExecutionBudget(database.OperationLimitsOptions, database.EvaluationClock, cancellationToken);
         QueryResultBudgetPolicy.Constrain(budget, execution);
         budget.Check();
@@ -33,7 +35,9 @@ internal static class AnnPublicSearchExecutor
         ArgumentNullException.ThrowIfNull(budget);
         var execution = configured.Value;
         if (!execution.EnableApproximateSearch)
-        { throw Errors.Fail(ErrorCode.UnsupportedCapability, AnnSearchProtocol.Disabled); }
+        {
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, AnnSearchProtocol.Disabled);
+        }
         QueryResultBudgetPolicy.Constrain(budget, execution);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
@@ -91,11 +95,15 @@ internal static class AnnPublicSearchExecutor
     private static void Dispose(IAnnProjectionLease lease, Exception? primary)
     {
         try
-        { lease.Dispose(); }
+        {
+            lease.Dispose();
+        }
         catch (Exception cleanup)
         {
             if (primary is not null)
-            { throw new AggregateException(primary, cleanup); }
+            {
+                throw new AggregateException(primary, cleanup);
+            }
             throw;
         }
     }

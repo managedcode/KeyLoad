@@ -20,7 +20,9 @@ internal static class SampleRollupFold
             SampleReadKeys.UntilExclusive(partition, request.SeriesSet, request.SeriesId, request.UntilExclusive),
             observer: charge.Charge);
         if (scan.HasMore)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, SampleAggregateReader.SampleBudgetExceeded); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, SampleAggregateReader.SampleBudgetExceeded);
+        }
         return accumulator.Complete();
     }
     private static void Validate(ReadOnlySpan<byte> key, SampleRecord record, PartitionRef partition,
@@ -30,10 +32,14 @@ internal static class SampleRollupFold
             || record.Sequence < FirstSequence || record.Sequence > sequence || !double.IsFinite(record.Sample.Value)
             || record.Sample.Timestamp.UtcTicks < request.From.UtcTicks
             || record.Sample.Timestamp.UtcTicks >= request.UntilExclusive.UtcTicks)
-        { throw Errors.Fail(ErrorCode.Corruption, SampleRollupProtocol.Corrupt); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, SampleRollupProtocol.Corrupt);
+        }
         var canonical = KeySpace.Partition(KeyLoad.Core.Features.ClusterRouting.Contracts.PartitionRecordFamilies.Sample, partition,
             request.SeriesSet, request.SeriesId, record.Sample.Timestamp, record.Sequence);
         if (!key.SequenceEqual(canonical))
-        { throw Errors.Fail(ErrorCode.Corruption, SampleRollupProtocol.Corrupt); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, SampleRollupProtocol.Corrupt);
+        }
     }
 }

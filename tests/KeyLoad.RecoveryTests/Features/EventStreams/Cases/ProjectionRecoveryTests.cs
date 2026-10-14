@@ -33,14 +33,20 @@ internal sealed class ProjectionProcessRecoveryTests
             await process.WaitForExitAsync(timeout.Token);
             await StorageRecoveryProcessTests.WaitForKilledProcessFilesAsync(root, timeout.Token);
             using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
-            var database = new DatabaseEngine(store, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(new() { MaxOutboxRecords = 1 }), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource(), RecoveryExecutionOptions.Messaging(), RecoveryExecutionOptions.GraphExecution(), RecoveryExecutionOptions.ChangeFeedExecution(), RecoveryExecutionOptions.BlobExecution(), RecoveryExecutionOptions.NativeClaimsExecution(), RecoveryExecutionOptions.TimeSeriesExecution(), RecoveryExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
+            var database = new DatabaseEngine(store, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(new()
+            {
+                MaxOutboxRecords = 1
+            }), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource(), RecoveryExecutionOptions.Messaging(), RecoveryExecutionOptions.GraphExecution(), RecoveryExecutionOptions.ChangeFeedExecution(), RecoveryExecutionOptions.BlobExecution(), RecoveryExecutionOptions.NativeClaimsExecution(), RecoveryExecutionOptions.TimeSeriesExecution(), RecoveryExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
             await AssertRecoveredProcessCutAsync(database, stage);
             await RetryRecoveredCommandAsync(root, database, timeout.Token);
         }
         finally
         {
             if (!process.HasExited)
-            { process.Kill(); await process.WaitForExitAsync(cancellationToken); }
+            {
+                process.Kill();
+                await process.WaitForExitAsync(cancellationToken);
+            }
             if (Directory.Exists(root))
             {
                 await StoragePublicationRecoveryTests.DeleteTrialAsync(root, cancellationToken);
@@ -82,7 +88,10 @@ internal sealed class ProjectionProcessRecoveryTests
     {
         var commandPath = Path.Combine(root, "processing-command.json");
         var original = JsonDefaults.Deserialize<ReplicatedOperation>(await File.ReadAllBytesAsync(commandPath, cancellationToken));
-        var recovered = database.Apply(original with { EvaluatedAt = TimeProvider.System.GetUtcNow() }).Get<ProjectionBatchResult>();
+        var recovered = database.Apply(original with
+        {
+            EvaluatedAt = TimeProvider.System.GetUtcNow()
+        }).Get<ProjectionBatchResult>();
         await AssertRetryReceiptAsync(database, original, recovered);
     }
 
@@ -92,7 +101,10 @@ internal sealed class ProjectionProcessRecoveryTests
         var request = JsonDefaults.Deserialize<CommitProjectionBatchRequest>(System.Text.Encoding.UTF8.GetBytes(original.PayloadJson));
         var retryId = Guid.NewGuid();
         var retried = database.Apply(new(retryId, OperationKind.CommitProjectionBatch, "root", TimeProvider.System.GetUtcNow(),
-            JsonSerializer.Serialize(request with { CommandId = retryId }, JsonDefaults.Options))).Get<ProjectionBatchResult>();
+            JsonSerializer.Serialize(request with
+            {
+                CommandId = retryId
+            }, JsonDefaults.Options))).Get<ProjectionBatchResult>();
         var status = database.GetOutboxStatus("root", ProjectionCrashScenario.Partition);
         await Assert.That(retried.AlreadyProcessed).IsTrue();
         await Assert.That(retried.Receipt.Token).IsEqualTo(recovered.Receipt.Token);

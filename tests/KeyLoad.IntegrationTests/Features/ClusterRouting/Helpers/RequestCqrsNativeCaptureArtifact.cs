@@ -14,7 +14,9 @@ internal static class RequestCqrsNativeCaptureArtifact
     {
         var bytes = JsonSerializer.SerializeToUtf8Bytes(new RequestCqrsNativeCaptureArtifactRecord(Version, waveId, nodes));
         if (bytes.Length > MaximumBytes)
-        { throw new InvalidDataException("Native C1 capture evidence exceeds its existing artifact budget."); }
+        {
+            throw new InvalidDataException("Native C1 capture evidence exceeds its existing artifact budget.");
+        }
         using var file = new FileStream(PathFor(originalArtifact), FileMode.CreateNew, FileAccess.Write, FileShare.None);
         file.Write(bytes);
         file.Flush(true);

@@ -22,13 +22,19 @@ internal static class ControlledPartitionMovementNativeEntryReader
         {
             work.Check();
             if (examined >= owner.Database.Limits.MaxScanRecords)
-            { throw Errors.Fail(ErrorCode.BudgetExceeded, "The original movement entry inspection exhausted its record bound."); }
+            {
+                throw Errors.Fail(ErrorCode.BudgetExceeded, "The original movement entry inspection exhausted its record bound.");
+            }
             examined++;
             var entry = owner.Log.ReadEntry(index, work.ChargeBytes);
             if (entry?.Operation?.Id != originalCommand)
-            { continue; }
+            {
+                continue;
+            }
             if (found is not null)
-            { throw new InvalidOperationException("The original movement command has multiple committed entries."); }
+            {
+                throw new InvalidOperationException("The original movement command has multiple committed entries.");
+            }
             found = entry;
         }
         work.Check();

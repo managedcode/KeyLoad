@@ -28,14 +28,20 @@ public static class ReplicaCanonicalApplyObservation
         internal void Observe()
         {
             if (Volatile.Read(ref closed) == Open)
-            { outbound(); }
+            {
+                outbound();
+            }
         }
         public void Dispose()
         {
             if (Interlocked.Exchange(ref closed, Closed) != Open)
-            { return; }
+            {
+                return;
+            }
             if (!ReferenceEquals(Current.Value, this))
-            { throw new InvalidOperationException(OwnershipChanged); }
+            {
+                throw new InvalidOperationException(OwnershipChanged);
+            }
             Current.Value = previous;
         }
     }

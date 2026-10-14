@@ -25,7 +25,9 @@ internal static class NativeAnnWaitObservedSdk
             http = new HttpClient(handler, disposeHandler: false);
             var options = app.Services.GetRequiredService<IOptionsMonitor<HttpClientFactoryOptions>>().Get(string.Empty);
             foreach (var configure in options.HttpClientActions)
-            { configure(http); }
+            {
+                configure(http);
+            }
             http.BaseAddress = endpoint;
             http.Timeout = Timeout.InfiniteTimeSpan;
             return http;
@@ -34,7 +36,9 @@ internal static class NativeAnnWaitObservedSdk
         {
             var failures = new List<Exception> { original };
             if (http is not null)
-            { ServerFailureObserver.Observe(http.Dispose, failures); }
+            {
+                ServerFailureObserver.Observe(http.Dispose, failures);
+            }
             ServerFailureObserver.Observe(handler.Dispose, failures);
             handler = null;
             ServerFailureObserver.ThrowIfAny(failures);

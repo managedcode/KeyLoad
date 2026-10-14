@@ -3,8 +3,14 @@ namespace KeyLoad.Comparisons;
 
 internal sealed class DocumentInitializationTiming
 {
-    internal double? LoadSeconds { get; private set; }
-    internal double? IndexBuildSeconds { get; private set; }
+    internal double? LoadSeconds
+    {
+        get; private set;
+    }
+    internal double? IndexBuildSeconds
+    {
+        get; private set;
+    }
     internal bool IndexBuildApplicable { get; private set; } = true;
     internal bool Complete => LoadSeconds.HasValue && IndexBuildSeconds.HasValue;
     internal IDisposable MeasureLoad() => new Measurement(value => LoadSeconds = (LoadSeconds ?? DocumentMeasurementValues.NoObservedItems) + value);

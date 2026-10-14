@@ -68,9 +68,13 @@ internal static class NativeTextSelectedShutdownAssertions
             release.Set();
             clock.Disarm();
             if (original is not null)
-            { await ServerFailureObserver.ObserveAsync(async () => await LiteralAsync(database, await original), failures); }
+            {
+                await ServerFailureObserver.ObserveAsync(async () => await LiteralAsync(database, await original), failures);
+            }
             if (shutdown is not null)
-            { await ServerFailureObserver.ObserveAsync(() => shutdown, failures); }
+            {
+                await ServerFailureObserver.ObserveAsync(() => shutdown, failures);
+            }
         }
         ServerFailureObserver.ThrowIfAny(failures);
         await Assert.That(clock.Triggered).IsTrue();
@@ -81,7 +85,9 @@ internal static class NativeTextSelectedShutdownAssertions
     private static SearchRequest Request(TestDatabase database, TextIndexMaintenanceRequest maintenance)
         => NativeTextBilingualAudit.Request(database.Partition, NativeTextBilingualAudit.EnglishQuery)
             with
-        { TextIndex = new(maintenance.Consumer, maintenance.IndexGeneration) };
+        {
+            TextIndex = new(maintenance.Consumer, maintenance.IndexGeneration)
+        };
 
     private static async Task LiteralAsync(TestDatabase database, RankedDocument[] actual)
     {

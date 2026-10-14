@@ -37,11 +37,15 @@ public static class ClusterRestoreCatalogReconciliation
         ClusterRestoreMappingValidation.Require(original.CaptureId, cuts, mappings);
         var claimed = cuts.SingleOrDefault(cut => cut.Owner.PhysicalShardId == original.Owner.PhysicalShardId);
         if (claimed is null || !ClusterBackupMetadataEquality.OwnerCut(claimed, original))
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidVector); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidVector);
+        }
         var marker = NativeSerialization.Serialize(new ClusterRestoreMarker(ClusterRestoreMarker.CurrentVersion,
             original, mappings));
         if (marker.Length > limits.Value.MaxBatchBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, MarkerTooLarge); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, MarkerTooLarge);
+        }
         var selected = mappings.Single(mapping => mapping.Source.PhysicalShardId == original.Owner.PhysicalShardId);
         work.Check();
         StageCatalog(transaction, original, mappings, selected.Target);
@@ -78,12 +82,16 @@ public static class ClusterRestoreCatalogReconciliation
         ArgumentNullException.ThrowIfNull(work);
         ClusterRestoreSlotValidation.RequireSource(context, identity, position, mappings);
         if (commitPosition <= position)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidVector); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidVector);
+        }
         var original = Reconcile(transaction, identity, position, metadata, secret, cuts, mappings, limits, clock, work);
         var marker = NativeSerialization.Serialize(new ClusterRestoreMarker(ClusterRestoreMarker.CurrentVersion,
             original, mappings, context));
         if (marker.Length > limits.Value.MaxBatchBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, MarkerTooLarge); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, MarkerTooLarge);
+        }
         transaction.Put(KeyCodec.Encode(MarkerSpace, MarkerVersion), marker);
         // Historical rows are discarded only inside the verified, unchanged source-cut transaction.
         transaction.Delete(ClusterRestoreSlotKeys.AuthorityReset());
@@ -118,7 +126,9 @@ public static class ClusterRestoreCatalogReconciliation
         {
             work.Check();
             if (partition.Placement.IsFallback)
-            { continue; }
+            {
+                continue;
+            }
             var target = mappings.Single(mapping => mapping.Source.PhysicalShardId == partition.Placement.PhysicalShardId).Target;
             var row = new AtomicPartitionPlacementV1(AtomicPartitionPlacementProtocol.CurrentVersion,
                 partition.Roster.Partition, target.PhysicalShardId, partition.Placement.Revision,

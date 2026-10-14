@@ -16,20 +16,33 @@ internal sealed class HttpTelemetryPrivacyProcessor(IOptions<HttpTelemetryPrivac
     public override void OnStart(Activity data)
     {
         if (HttpTelemetryPrivacyPolicy.IsHttp(data.Source.Name))
-        { data.TraceStateString = null; }
+        {
+            data.TraceStateString = null;
+        }
     }
     public override void OnEnd(Activity data)
     {
         if (!HttpTelemetryPrivacyPolicy.IsHttp(data.Source.Name) || !data.Recorded)
-        { return; }
+        {
+            return;
+        }
         data.TraceStateString = null;
         var linkReason = HttpTelemetryPrivacyPolicy.LinkSuppressionReason(data);
         if (linkReason is not null)
-        { Suppress(data, linkReason); return; }
+        {
+            Suppress(data, linkReason);
+            return;
+        }
         if (data.Events.Any())
-        { Suppress(data, HttpTelemetryPrivacyPolicy.UnsafeStateReason); return; }
+        {
+            Suppress(data, HttpTelemetryPrivacyPolicy.UnsafeStateReason);
+            return;
+        }
         if (!ClearBaggage(data) || !ScrubTags(data))
-        { Suppress(data, HttpTelemetryPrivacyPolicy.ExcessStateReason); return; }
+        {
+            Suppress(data, HttpTelemetryPrivacyPolicy.ExcessStateReason);
+            return;
+        }
         data.DisplayName = data.Source.Name == HttpTelemetryPrivacyPolicy.ServerSource
             ? HttpTelemetryPrivacyPolicy.ServerDisplay : HttpTelemetryPrivacyPolicy.ClientDisplay;
         data.SetStatus(data.Status, null);
@@ -40,16 +53,22 @@ internal sealed class HttpTelemetryPrivacyProcessor(IOptions<HttpTelemetryPrivac
     private bool ClearBaggage(Activity data)
     {
         if (!HasBoundedAncestry(data))
-        { return false; }
+        {
+            return false;
+        }
         var keys = new List<string>(options.Value.MaximumBaggageItems);
         foreach (var item in data.Baggage)
         {
             if (keys.Count == options.Value.MaximumBaggageItems)
-            { return false; }
+            {
+                return false;
+            }
             keys.Add(item.Key);
         }
         foreach (var key in keys)
-        { data.SetBaggage(key, null); }
+        {
+            data.SetBaggage(key, null);
+        }
         using var remaining = data.Baggage.GetEnumerator();
         return !remaining.MoveNext();
     }
@@ -59,7 +78,9 @@ internal sealed class HttpTelemetryPrivacyProcessor(IOptions<HttpTelemetryPrivac
         for (var parent = data.Parent; parent is not null; parent = parent.Parent)
         {
             if (++examined > options.Value.MaximumParentLinks)
-            { return false; }
+            {
+                return false;
+            }
         }
         return true;
     }
@@ -69,19 +90,27 @@ internal sealed class HttpTelemetryPrivacyProcessor(IOptions<HttpTelemetryPrivac
         foreach (var item in data.TagObjects)
         {
             if (keys.Count == options.Value.MaximumTags)
-            { return false; }
+            {
+                return false;
+            }
             keys.Add(item.Key);
         }
         var method = HttpTelemetryPrivacyPolicy.NormalizeMethod(data.GetTagItem(HttpTelemetryPrivacyPolicy.MethodTag));
         var status = data.GetTagItem(HttpTelemetryPrivacyPolicy.StatusTag);
         var protocol = HttpTelemetryPrivacyPolicy.NormalizeProtocol(data.GetTagItem(HttpTelemetryPrivacyPolicy.ProtocolTag));
         foreach (var key in keys)
-        { data.SetTag(key, null); }
+        {
+            data.SetTag(key, null);
+        }
         data.SetTag(HttpTelemetryPrivacyPolicy.MethodTag, method);
         if (status is int code and >= HttpTelemetryPrivacyPolicy.MinimumStatus and <= HttpTelemetryPrivacyPolicy.MaximumStatus)
-        { data.SetTag(HttpTelemetryPrivacyPolicy.StatusTag, code); }
+        {
+            data.SetTag(HttpTelemetryPrivacyPolicy.StatusTag, code);
+        }
         if (protocol is not null)
-        { data.SetTag(HttpTelemetryPrivacyPolicy.ProtocolTag, protocol); }
+        {
+            data.SetTag(HttpTelemetryPrivacyPolicy.ProtocolTag, protocol);
+        }
         return true;
     }
     private static void Suppress(Activity data, string reason)

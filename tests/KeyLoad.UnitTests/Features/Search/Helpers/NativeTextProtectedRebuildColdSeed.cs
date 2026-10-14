@@ -32,10 +32,16 @@ internal static class NativeTextProtectedRebuildColdSeed
     {
         var principal = new PrincipalRecord(Reader, owner.Source.Partition.TenantId,
             [new("database", Collection, Capability.Query | Capability.DocumentsRead)], allowed ? [Use] : [])
-        { OwnerId = Reader, RestrictRows = true, PolicyEpoch = epoch };
+        {
+            OwnerId = Reader,
+            RestrictRows = true,
+            PolicyEpoch = epoch
+        };
         var actual = owner.Send(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(principal))
             .Result.Get<PrincipalRecord>();
         if (actual.PolicyEpoch != epoch)
-        { throw new InvalidOperationException("The genuine persisted reader epoch differs."); }
+        {
+            throw new InvalidOperationException("The genuine persisted reader epoch differs.");
+        }
     }
 }

@@ -15,7 +15,9 @@ internal static class TenantCapacityPlacementRf3PolicyWeightsOperation
     {
         var plan = await TenantCapacityPlacementRf3PolicyRevisionSetup.RequireAsync(wave, seed, state, token);
         foreach (var owner in state.HealthyPolicy.OwnerWeights)
-        { await Assert.That(owner.Weight).IsEqualTo(AcceptedMinimumWeight); }
+        {
+            await Assert.That(owner.Weight).IsEqualTo(AcceptedMinimumWeight);
+        }
         var refused = new List<Refused>();
         foreach (var invalid in new[] { BelowMinimumWeight, AboveMaximumWeight })
         {
@@ -24,7 +26,10 @@ internal static class TenantCapacityPlacementRf3PolicyWeightsOperation
                 Revision = NextPolicyRevision,
                 OwnerWeights = state.HealthyPolicy.OwnerWeights.Select(owner =>
                     owner.PhysicalShardId == seed.FirstRequest.DestinationPhysicalShardId
-                        ? owner with { Weight = invalid } : owner).ToImmutableArray()
+                        ? owner with
+                        {
+                            Weight = invalid
+                        } : owner).ToImmutableArray()
             };
             refused.Add(new(Guid.NewGuid(), new(state.HealthyPolicy.Revision, candidate, state.Control)));
         }
@@ -38,7 +43,10 @@ internal static class TenantCapacityPlacementRf3PolicyWeightsOperation
             Revision = NextPolicyRevision,
             OwnerWeights = state.HealthyPolicy.OwnerWeights.Select(owner =>
                 owner.PhysicalShardId == seed.FirstRequest.DestinationPhysicalShardId
-                    ? owner with { Weight = AcceptedMaximumWeight } : owner).ToImmutableArray()
+                    ? owner with
+                    {
+                        Weight = AcceptedMaximumWeight
+                    } : owner).ToImmutableArray()
         };
         var accepted = await TenantCapacityPlacementRf3PolicyWeightsAuthority.ConfigureAsync(seed, state.Control, repaired, token);
         await TenantCapacityPlacementRf3PolicyWeightsAssertions.RefuseAsync(seed, refused, token);

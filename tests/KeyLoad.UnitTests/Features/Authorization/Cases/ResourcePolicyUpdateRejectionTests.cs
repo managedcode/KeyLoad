@@ -35,7 +35,9 @@ internal sealed class ResourcePolicyUpdateRejectionTests
         using var fixture = new ResourcePolicyUpdateFixture();
         var operation = fixture.ConfigureResource(new("missing-policy-resource", ResourceKind.Collection,
             ResourcePolicyUpdateFixture.DomainId)
-        { SchemaVersion = 2 }, 1);
+        {
+            SchemaVersion = 2
+        }, 1);
 
         var failure = ResourcePolicyUpdateFixture.Failure(fixture.Apply(operation));
 
@@ -56,7 +58,9 @@ internal sealed class ResourcePolicyUpdateRejectionTests
             SchemaVersion = previous.SchemaVersion + 2
         }, previous.SchemaVersion));
         var noChange = fixture.Apply(fixture.ConfigureResource(previous with
-        { SchemaVersion = previous.SchemaVersion + 1 }, previous.SchemaVersion));
+        {
+            SchemaVersion = previous.SchemaVersion + 1
+        }, previous.SchemaVersion));
         using var overflowFixture = new ResourcePolicyUpdateFixture(long.MaxValue);
         var maximum = overflowFixture.Resource();
         var overflow = overflowFixture.Apply(overflowFixture.ConfigureResource(maximum with
@@ -115,7 +119,9 @@ internal sealed class ResourcePolicyUpdateRejectionTests
             SchemaVersion = previous.SchemaVersion + 1
         }, previous.SchemaVersion));
         var changedWithoutCas = fixture.Apply(fixture.ConfigureResource(previous with
-        { FieldPolicies = [new(ResourcePolicyUpdateFixture.SecretField, NewClassification)] }));
+        {
+            FieldPolicies = [new(ResourcePolicyUpdateFixture.SecretField, NewClassification)]
+        }));
         var resourceBytes = fixture.ResourceBytes()!;
         var documentBytes = fixture.DocumentBytes()!;
 
@@ -154,11 +160,16 @@ internal sealed class ResourcePolicyUpdateRejectionTests
     {
         var previous = new ResourceDefinition("blob-policy", ResourceKind.BlobStore,
             ResourcePolicyUpdateFixture.DomainId)
-        { BlobPolicy = new() };
+        {
+            BlobPolicy = new()
+        };
         var previousPolicy = previous.BlobPolicy!;
         var replacement = previous with
         {
-            BlobPolicy = previousPolicy with { MaxBlobBytes = previousPolicy.MaxBlobBytes + 1 },
+            BlobPolicy = previousPolicy with
+            {
+                MaxBlobBytes = previousPolicy.MaxBlobBytes + 1
+            },
             SchemaVersion = previous.SchemaVersion + 1
         };
 

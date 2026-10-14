@@ -37,7 +37,11 @@ internal static class ControlledPartitionMovementFinalizeFlow
         var expectedRow = new AtomicPartitionPlacementV1(Version, control.Partition,
             corpus.Destination.Owner.PhysicalShardId, FirstDirectoryRevision,
             corpus.Destination.Owner.Incarnation, corpus.Destination.Owner.VoterIds, PublishedOwnershipEpoch);
-        var expected = control with { Phase = PartitionMovePhase.Published, PublishedPlacement = expectedRow };
+        var expected = control with
+        {
+            Phase = PartitionMovePhase.Published,
+            PublishedPlacement = expectedRow
+        };
         await Assert.That(JsonDefaults.Serialize(actual.Control)
             .SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
         await Assert.That(JsonDefaults.Serialize(actual.PublishedPlacement)

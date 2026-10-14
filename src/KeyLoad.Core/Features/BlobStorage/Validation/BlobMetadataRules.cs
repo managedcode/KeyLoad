@@ -7,44 +7,64 @@ internal static class BlobMetadataRules
     internal static void Access(RowAccess? access, bool persisted)
     {
         if (access is null)
-        { throw persisted ? BlobErrors.Corruption() : BlobErrors.Validation(); }
+        {
+            throw persisted ? BlobErrors.Corruption() : BlobErrors.Validation();
+        }
         try
         {
             if (access.OwnerId is { } owner)
-            { JsonData.Identifier(owner); }
+            {
+                JsonData.Identifier(owner);
+            }
             if (access.ProjectId is { } project)
-            { JsonData.Identifier(project); }
+            {
+                JsonData.Identifier(project);
+            }
             if (access.TeamId is { } team)
-            { JsonData.Identifier(team); }
+            {
+                JsonData.Identifier(team);
+            }
         }
         catch (KeyLoadException) when (persisted)
-        { throw BlobErrors.Corruption(); }
+        {
+            throw BlobErrors.Corruption();
+        }
     }
 
     internal static void EncodedLength(int length)
     {
         if (length > BlobLimits.MaxMetadataRecordBytes)
-        { throw BlobErrors.Corruption(); }
+        {
+            throw BlobErrors.Corruption();
+        }
     }
 
     internal static void BeforeDecode<T>(ReadOnlySpan<byte> bytes)
     {
         if (typeof(T) == typeof(BlobHead) || typeof(T) == typeof(BlobState))
-        { EncodedLength(bytes.Length); }
+        {
+            EncodedLength(bytes.Length);
+        }
     }
 
     internal static void AfterDecode<T>(T record)
     {
         if (record is BlobHead head)
-        { Access(head.Metadata?.Access, true); }
+        {
+            Access(head.Metadata?.Access, true);
+        }
         if (record is BlobState state)
-        { Access(state.Access, true); }
+        {
+            Access(state.Access, true);
+        }
     }
 
     internal static byte[] Encode<T>(T record)
     {
         if (NativeSerialization.Measure(record) > BlobLimits.MaxMetadataRecordBytes)
-        { throw BlobErrors.Validation(); }
+        {
+            throw BlobErrors.Validation();
+        }
         return NativeSerialization.Serialize(record);
     }
 

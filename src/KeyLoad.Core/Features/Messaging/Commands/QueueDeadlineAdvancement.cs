@@ -9,14 +9,20 @@ public sealed partial class DatabaseEngine
         AdvanceQueueDeadline request, DateTimeOffset now, ReplicatedOperation? operation)
     {
         if (operation is null || operation.Kind != OperationKind.Batch || operation.EvaluatedAt != now)
-        { throw Errors.Fail(ErrorCode.UnsupportedCapability, QueueDeadlineProtocol.BatchRequired); }
+        {
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, QueueDeadlineProtocol.BatchRequired);
+        }
         var lane = new QueueLaneRef(partition, request.Queue);
         var resource = Resource(tx, partition, request.Queue, ResourceKind.WorkQueue);
         if (resource.Paused || DispatchPaused(tx))
-        { throw Errors.Fail(ErrorCode.DispatchPaused, DispatchPausedMessage); }
+        {
+            throw Errors.Fail(ErrorCode.DispatchPaused, DispatchPausedMessage);
+        }
         var metadata = RequireQueueDeadlineState(tx, lane, request, now);
         if (request.Kind == QueueDeadlineKind.ExpireMessage)
-        { return ExpireQueueDeadlineMessage(tx, lane, resource.QueuePolicy, metadata); }
+        {
+            return ExpireQueueDeadlineMessage(tx, lane, resource.QueuePolicy, metadata);
+        }
         var leased = request.Kind == QueueDeadlineKind.ExpireLease;
         var key = QueueKey(leased ? LeasedQueueSpace : ScheduledQueueSpace, lane, request.ExpectedDeadline, metadata.Id);
         var value = tx.ReadOwnedValue(key) ?? throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.MissingReference);
@@ -34,7 +40,9 @@ public sealed partial class DatabaseEngine
         var body = StoredMessageBody.Read(tx, QueueKey(MessageBodySpace, lane, metadata.Id))
             ?? throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.MissingBody);
         if (body.Body.Id != metadata.Id)
-        { throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.MissingBody); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.MissingBody);
+        }
         var counters = RemoveQueueLifecycleReferences(tx, lane, metadata, RequireQueueLifecycleCounters(tx, lane), body.Bytes);
         counters = ReleaseQueueStored(counters, body.Bytes);
         RemoveQueueOrder(tx, lane, policy, body.Body, metadata);

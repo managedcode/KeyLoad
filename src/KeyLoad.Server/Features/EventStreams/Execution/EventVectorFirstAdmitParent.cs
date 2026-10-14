@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.DocumentStorage;
 using Microsoft.Extensions.Options;
 
@@ -26,7 +26,9 @@ internal sealed class EventVectorFirstAdmitParent(OrleansNode node, PartitionHos
             options.Value, request, principal.Id, directory, original.Envelope.ExpiresAt,
             admission, encoding, routing, work, originalCancellationToken).ConfigureAwait(false);
         if (terminal is not null)
-        { return terminal; }
+        {
+            return terminal;
+        }
         if (request.Action == EventFeedControlAction.Offer)
         {
             return await EventVectorOfferParent.ExecuteAsync(runtime, node, partition, options,
@@ -63,7 +65,9 @@ internal sealed class EventVectorFirstAdmitParent(OrleansNode node, PartitionHos
         var principal = GrainRequestAuthority.ReloadForRequest(database, original.Envelope, clock);
         var request = GrainNativePayload.ReadCommand<EventFeedControlRequest>(original.Payload);
         if (request.Action != EventFeedControlAction.Tail)
-        { throw Errors.Fail(ErrorCode.Validation, EventVectorRemoteProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, EventVectorRemoteProtocol.Invalid);
+        }
         var directory = database.ReadEventVectorConfiguredOwners(principal.Id, request, work, originalCancellationToken);
         return EventVectorTailObservation.ReadAsync(runtime, node, partition, options.Value, directory,
             original, request, principal.Id, clock, new EventVectorAdmissionPolicy(limits),
@@ -107,7 +111,12 @@ internal sealed class EventVectorFirstAdmitParent(OrleansNode node, PartitionHos
         finally
         {
             foreach (var capture in captures)
-            { if (capture is not null) { ServerFailureObserver.Observe(capture.Dispose, failures); } }
+            {
+                if (capture is not null)
+                {
+                    ServerFailureObserver.Observe(capture.Dispose, failures);
+                }
+            }
         }
         ServerFailureObserver.ThrowIfAny(failures);
         return result ?? throw Errors.Fail(ErrorCode.Corruption, EventVectorRemoteProtocol.Invalid);

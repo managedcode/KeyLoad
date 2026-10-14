@@ -49,7 +49,9 @@ internal static class QueueOrderedRetryAssertions
         await AckedAsync(database, state, QueueOrderedRetryProtocol.Other, QueueOrderedRetryProtocol.Three, QueueOrderedRetryProtocol.Three);
         var order = state.ParkedHead == QueueParkedHeadPolicy.Block ? QueueOrderedRetryProtocol.Three : QueueOrderedRetryProtocol.Four;
         if (healthy)
-        { await AckedAsync(database, state, QueueOrderedRetryProtocol.Healthy, QueueOrderedRetryProtocol.Six, ++order); }
+        {
+            await AckedAsync(database, state, QueueOrderedRetryProtocol.Healthy, QueueOrderedRetryProtocol.Six, ++order);
+        }
         var counters = database.Store.Read(view => view.GetRecord<QueueCounters>(KeySpace.Partition("queue-counters", state.Partition, state.Lane.Queue)));
         await Assert.That(counters).IsEqualTo(new QueueCounters(QueueOrderedRetryProtocol.Initial, QueueOrderedRetryProtocol.Initial,
             QueueOrderedRetryProtocol.Initial, QueueOrderedRetryProtocol.Initial, healthy ? QueueOrderedRetryProtocol.Six : QueueOrderedRetryProtocol.Five,

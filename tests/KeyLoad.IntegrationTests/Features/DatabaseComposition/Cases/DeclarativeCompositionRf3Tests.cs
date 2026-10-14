@@ -70,7 +70,10 @@ internal sealed class DeclarativeCompositionRf3Tests(ClusterFixture fixture)
             await Assert.That(state.Derived.Metadata.LeaseOwner).IsNull();
             await Assert.That(JsonSerializer.Deserialize<QueueGraphLink>(state.Derived.PayloadJson!, JsonDefaults.Options)).IsEqualTo(link);
 
-            var changed = DeclarativeCompositionSql.Forward(forward, forwardMutation with { EdgeIdPrefix = ConflictPrefix });
+            var changed = DeclarativeCompositionSql.Forward(forward, forwardMutation with
+            {
+                EdgeIdPrefix = ConflictPrefix
+            });
             var conflict = await sdk.ExecuteSqlAsync(changed, deadline.Token);
             await Assert.That(conflict.IsFailed).IsTrue();
             await Assert.That(conflict.Problem!.ErrorCode).IsEqualTo(nameof(ErrorCode.Conflict));
@@ -99,7 +102,10 @@ internal sealed class DeclarativeCompositionRf3Tests(ClusterFixture fixture)
             await sdk.InspectAsync(scenario.Inspect(Message), cancellationToken)));
         var budgetState = await DeclarativeCompositionBudgetFlow.RunAsync(sdk, mcp, scenario, link, cancellationToken);
 
-        var invalid = forwardSql with { Sql = forwardSql.Sql + "; SELECT" };
+        var invalid = forwardSql with
+        {
+            Sql = forwardSql.Sql + "; SELECT"
+        };
         var rejected = await sdk.ExecuteSqlAsync(invalid, cancellationToken);
         await Assert.That(rejected.IsFailed).IsTrue();
         await Assert.That(rejected.Problem!.ErrorCode).IsEqualTo(nameof(ErrorCode.Validation));

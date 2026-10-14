@@ -39,7 +39,9 @@ internal static class ScriptDomPredicateLowering
     private static Predicate Range(Dom.BooleanTernaryExpression range, Func<Dom.ScalarExpression, Operand> operand)
     {
         if (range.TernaryExpressionType is not (Dom.BooleanTernaryExpressionType.Between or Dom.BooleanTernaryExpressionType.NotBetween))
-        { throw ScriptDomErrors.Unsupported(); }
+        {
+            throw ScriptDomErrors.Unsupported();
+        }
         return SqlBetweenPredicate.Lower(operand(range.FirstExpression), operand(range.SecondExpression),
             operand(range.ThirdExpression), range.TernaryExpressionType == Dom.BooleanTernaryExpressionType.NotBetween, false);
     }
@@ -47,9 +49,13 @@ internal static class ScriptDomPredicateLowering
         ScriptDomLoweringContext context)
     {
         if (membership.Subquery is not null)
-        { throw ScriptDomErrors.Unsupported(); }
+        {
+            throw ScriptDomErrors.Unsupported();
+        }
         if (membership.Values.Count == EmptyCount || membership.Values.Count > context.Execution.MaximumInValues)
-        { throw ScriptDomErrors.Invalid(); }
+        {
+            throw ScriptDomErrors.Invalid();
+        }
         return new InPredicate(operand(membership.Expression), [.. membership.Values.Select(operand)], membership.NotDefined);
     }
     internal static string Comparison(Dom.BooleanComparisonType type) => type switch

@@ -54,6 +54,8 @@ internal static class NativeAnnLineageTestData
         };
         _ = database.Submit(OperationKind.ConfigureResource,
             new ConfigureResourceRequest(database.Partition.TenantId, database.Partition.DatabaseId, definition)
-            { ExpectedSchemaVersion = current.SchemaVersion }).Get<ResourceDefinition>();
+            {
+                ExpectedSchemaVersion = current.SchemaVersion
+            }).Get<ResourceDefinition>();
     }
 }

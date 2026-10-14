@@ -29,7 +29,9 @@ internal static class NativeTextIncrementalBegin
             if (leaf is null)
             {
                 if (request.Mode != TextIndexMaintenanceMode.Build)
-                { throw NativeTextErrors.Mismatch(); }
+                {
+                    throw NativeTextErrors.Mismatch();
+                }
                 return Create(root, sessionId, request, admitted, budget, options, faultObserver,
                     resources, retainGeneration, CaptureOwnership);
             }
@@ -40,9 +42,13 @@ internal static class NativeTextIncrementalBegin
         {
             var failures = new List<Exception> { primary };
             if (captured is not null)
-            { ServerFailureObserver.Observe(() => NativeTextIncrementalSessionLifetime.DisposeNative(captured), failures); }
+            {
+                ServerFailureObserver.Observe(() => NativeTextIncrementalSessionLifetime.DisposeNative(captured), failures);
+            }
             else if (reservation is not null)
-            { ServerFailureObserver.Observe(reservation.CompleteAfterJoinedCleanup, failures); }
+            {
+                ServerFailureObserver.Observe(reservation.CompleteAfterJoinedCleanup, failures);
+            }
             ServerFailureObserver.ThrowIfAny(failures);
             throw;
         }
@@ -60,7 +66,9 @@ internal static class NativeTextIncrementalBegin
         if (resources is not null)
         {
             if (retainGeneration is null)
-            { throw NativeTextErrors.Ownership(); }
+            {
+                throw NativeTextErrors.Ownership();
+            }
             var reserved = resources.ReserveGeneration(root, leaf, budget);
             retainGeneration(leaf, reserved);
         }
@@ -90,7 +98,9 @@ internal static class NativeTextIncrementalBegin
             admitted, hasManifest || hasIntent, budget);
         var session = new NativeTextIncrementalSession(sessionId, request, admitted,
             through, budget, enrolled.Scope)
-        { GenerationLeaf = leaf };
+        {
+            GenerationLeaf = leaf
+        };
         captureOwnership(session);
         session.NativeOwner = new(root, leaf, request.NodeId, options, faultObserver, resources);
         if (hasManifest)
@@ -110,7 +120,9 @@ internal static class NativeTextIncrementalBegin
         if (!hasIntent && session.Manifest is { } complete)
         {
             if (!complete.Bootstrap && complete.LastSettledCheckpointRequest is null)
-            { throw NativeTextErrors.Corrupt(); }
+            {
+                throw NativeTextErrors.Corrupt();
+            }
             NativeTextIncrementalPublishedInventory.Require(session.NativeOwner, complete, budget, options);
         }
         budget.Check();

@@ -26,7 +26,9 @@ internal static class QueueOrderedRetryEmptyProfile
         var image = QueueOrderedRetryImage.Capture(store, state.Lane);
         var result = state.Execute(database, OperationKind.ConfigureResource, new ConfigureResourceRequest(
             state.Partition.TenantId, state.Partition.DatabaseId, expected)
-        { ExpectedSchemaVersion = original.SchemaVersion }, Guid.NewGuid()).Get<ResourceDefinition>();
+        {
+            ExpectedSchemaVersion = original.SchemaVersion
+        }, Guid.NewGuid()).Get<ResourceDefinition>();
         await Assert.That(result).IsEqualTo(expected);
         await QueueOrderedRetryImage.SameAsync(store, state.Lane, image);
         state.Batch(database, QueueOrderedRetryOperations.Literal(QueueOrderedRetryProtocol.ProfileHealthy, null)).Get<CommitReceipt>();

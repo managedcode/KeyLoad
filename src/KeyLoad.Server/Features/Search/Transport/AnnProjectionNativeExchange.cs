@@ -1,7 +1,7 @@
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.Server.Features.DocumentStorage;
 using Microsoft.Extensions.Options;
@@ -19,7 +19,9 @@ internal sealed class AnnProjectionNativeExchange(OrleansNode node, PartitionHos
         work.Check();
         cancellationToken.ThrowIfCancellationRequested();
         if (expiry <= clock.GetUtcNow())
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, AnnProjectionObservationProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, AnnProjectionObservationProtocol.Invalid);
+        }
         var encoded = AnnProjectionNativeEncoding.EncodeCall(
             new(AnnProjectionObservationProtocol.Version, principalId, request, expiry),
             work, RemoteDocumentProtocol.MaximumBodyBytes);
@@ -41,7 +43,9 @@ internal sealed class AnnProjectionNativeExchange(OrleansNode node, PartitionHos
                 using var destinationMac = RemoteDocumentMac.FromConfiguredSecret(
                     RemoteModelNativeIdentity.Secret(options.Value, partition, destination.Owner));
                 if (!destinationMac.Verify(reply.Payload.Span, reply.Signature, reply: true))
-                { throw Errors.Fail(ErrorCode.Unauthenticated, AnnProjectionObservationProtocol.Invalid); }
+                {
+                    throw Errors.Fail(ErrorCode.Unauthenticated, AnnProjectionObservationProtocol.Invalid);
+                }
                 AnnProjectionObservationSource.RequireSame(partition, capturedSource, originalRequest, work);
                 var grant = work.CreateReadGrant(work.RemainingReadGrantBytes, work.RemainingReadGrantRecords);
                 try
@@ -53,7 +57,9 @@ internal sealed class AnnProjectionNativeExchange(OrleansNode node, PartitionHos
                         || result.ExaminedRecords < AnnProjectionObservationProtocol.NoReadWork
                         || result.AcceptedReadBytes > call.Observation.MaximumReadBytes
                         || result.ExaminedRecords > call.Observation.MaximumRecords)
-                    { throw Errors.Fail(ErrorCode.Unauthenticated, AnnProjectionObservationProtocol.Invalid); }
+                    {
+                        throw Errors.Fail(ErrorCode.Unauthenticated, AnnProjectionObservationProtocol.Invalid);
+                    }
                     work.ImportReadGrant(grant, result.AcceptedReadBytes, result.ExaminedRecords);
                     work.Check();
                     observed = new(result, reply.DispatchSiloAddress);
@@ -74,18 +80,24 @@ internal sealed class AnnProjectionNativeExchange(OrleansNode node, PartitionHos
         if (!global::KeyLoad.Core.Features.ClusterRouting.Validation.PhysicalOwnerEntryValidation.SameOwner(
                 destination.Owner, capturedSource.ConfiguredLocal.Owner)
             || destination.Owner.VoterIds[voterIndex] != partition.Configuration.LocalId)
-        { return false; }
+        {
+            return false;
+        }
         AnnProjectionObservationSource.RequireSame(partition, capturedSource, originalRequest, work);
         if (capturedSource.SourceNodeId != partition.Database.Store.Identity.NodeId
             || capturedSource.SourceNodeId == originalRequest.NodeId)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, AnnProjectionObservationProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, AnnProjectionObservationProtocol.Invalid);
+        }
         return true;
     }
 
     private static void ClearOwned(ReadOnlyMemory<byte> original)
     {
         if (!MemoryMarshal.TryGetArray(original, out var buffer))
-        { throw Errors.Fail(ErrorCode.Corruption, AnnProjectionObservationProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, AnnProjectionObservationProtocol.Invalid);
+        }
         CryptographicOperations.ZeroMemory(buffer.AsSpan());
     }
 }

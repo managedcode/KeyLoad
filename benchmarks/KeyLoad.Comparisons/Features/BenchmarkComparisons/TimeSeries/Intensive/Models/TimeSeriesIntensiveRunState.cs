@@ -7,12 +7,24 @@ internal sealed class TimeSeriesIntensiveRunState(TimeSeriesIntensiveScenario sc
     private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
     internal TimeSeriesIntensiveAttempt[] Storage { get; } = TimeSeriesIntensiveAttemptLedger.CreateMeasuredStorage();
     internal TimeSeriesIntensiveAttempt[] WarmupStorage { get; } = TimeSeriesIntensiveAttemptLedger.CreateWarmupStorage();
-    internal ImmutableArray<TimeSeriesIntensiveRepetitionResult>.Builder Repetitions { get; } =
+    internal ImmutableArray<TimeSeriesIntensiveRepetitionResult>.Builder Repetitions
+    {
+        get;
+    } =
         ImmutableArray.CreateBuilder<TimeSeriesIntensiveRepetitionResult>(TimeSeriesIntensiveProfile.RepetitionCount);
     internal TimeSeriesIntensiveRunStage Stage { get; set; } = TimeSeriesIntensiveRunStage.Preparation;
-    internal bool SeedVerified { get; set; }
-    internal int Repetition { get; set; }
-    internal TimeSeriesIntensiveRepetitionExecutor? Executor { get; set; }
+    internal bool SeedVerified
+    {
+        get; set;
+    }
+    internal int Repetition
+    {
+        get; set;
+    }
+    internal TimeSeriesIntensiveRepetitionExecutor? Executor
+    {
+        get; set;
+    }
 
     internal TimeSeriesIntensiveRunResult Finish(Exception? error = null)
     {

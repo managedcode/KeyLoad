@@ -41,13 +41,17 @@ internal sealed class NativeTextWaitObservedWorkTests
             if (cancel)
             {
                 var failure = await Assert.ThrowsExactlyAsync<OperationCanceledException>(async () =>
-                    { partial = await search.WaitForIndexAsync(Root, request, cancellation.Token); }) ?? throw new InvalidOperationException();
+                    {
+                        partial = await search.WaitForIndexAsync(Root, request, cancellation.Token);
+                    }) ?? throw new InvalidOperationException();
                 await Assert.That(failure.CancellationToken).IsEqualTo(cancellation.Token);
             }
             else
             {
                 var failure = await Assert.ThrowsExactlyAsync<KeyLoadException>(async () =>
-                    { partial = await search.WaitForIndexAsync(Root, request, cancellation.Token); }) ?? throw new InvalidOperationException();
+                    {
+                        partial = await search.WaitForIndexAsync(Root, request, cancellation.Token);
+                    }) ?? throw new InvalidOperationException();
                 await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
                 await Assert.That(failure.Message).IsEqualTo(DeadlineDetail);
             }

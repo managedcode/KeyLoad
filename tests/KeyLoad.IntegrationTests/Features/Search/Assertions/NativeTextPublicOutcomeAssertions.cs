@@ -35,7 +35,9 @@ internal static class NativeTextPublicOutcomeAssertions
         if (reply.StructuredContent is not { } envelope || envelope.ValueKind != JsonValueKind.Object
             || !envelope.TryGetProperty(McpCallerProtocol.Error, out var problem)
             || problem.ValueKind != JsonValueKind.Object)
-        { return UnclassifiedMcpError; }
+        {
+            return UnclassifiedMcpError;
+        }
         var code = problem.TryGetProperty(McpCallerProtocol.ProblemCode, out var errorCode)
             && errorCode.ValueKind == JsonValueKind.String ? ClosedErrorCode(errorCode.GetString()) : "Unclassified";
         var reason = UnclassifiedMcpError;
@@ -44,7 +46,9 @@ internal static class NativeTextPublicOutcomeAssertions
             var classified = string.Concat("MCP safe error code ", code, " status ",
                 Errors.Status(parsed).ToString(CultureInfo.InvariantCulture), ".");
             if (Encoding.UTF8.GetByteCount(classified) < FailureReasonUtf8ByteLimit)
-            { reason = classified; }
+            {
+                reason = classified;
+            }
         }
         var detail = problem.TryGetProperty(McpCallerProtocol.ProblemDetail, out var value)
             && value.ValueKind == JsonValueKind.String ? value.GetString() ?? string.Empty : string.Empty;

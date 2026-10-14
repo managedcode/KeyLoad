@@ -1,5 +1,5 @@
 using KeyLoad.Client;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
 using ManagedCode.Communication;
@@ -31,7 +31,9 @@ internal static class PartitionMovementReceiverIssueFailoverRf3Producer
         {
             _ = await Task.WhenAny(issue, call).ConfigureAwait(false);
             if (!issue.IsCompletedSuccessfully)
-            { throw new InvalidOperationException(MissingIssue); }
+            {
+                throw new InvalidOperationException(MissingIssue);
+            }
             var marker = await issue.ConfigureAwait(false);
             await RequestCqrsPhaseFaultAssertions.VerifyMarkerAsync(marker, acknowledged, seed.FirstRequest.MoveId,
                 RequestCqrsProbePhase.ParentReceiverIssueAcknowledged, discovery).ConfigureAwait(false);
@@ -42,20 +44,28 @@ internal static class PartitionMovementReceiverIssueFailoverRf3Producer
                     RequestCqrsProbeAction.Hold, sourceRequestId: marker.RequestId, sourceArmId: acknowledged);
             }
             foreach (var node in Receivers(allReceivers))
-            { await wave.RemoteRuntime.KillAsync(node, FaultReason, cancellationToken).ConfigureAwait(false); }
+            {
+                await wave.RemoteRuntime.KillAsync(node, FaultReason, cancellationToken).ConfigureAwait(false);
+            }
             wave.QueryControls.WriteRelease(acknowledged, marker.RequestId);
             if (!allReceivers)
-            { await ReleaseObservedAsync(wave, seed, observed, discovery, call, cancellationToken).ConfigureAwait(false); }
+            {
+                await ReleaseObservedAsync(wave, seed, observed, discovery, call, cancellationToken).ConfigureAwait(false);
+            }
             terminal = await call.ConfigureAwait(false);
             if (allReceivers)
-            { await RequireNoObservedMarkerAsync(wave, seed.FirstRequest.MoveId); }
+            {
+                await RequireNoObservedMarkerAsync(wave, seed.FirstRequest.MoveId);
+            }
         }, failures).ConfigureAwait(false);
         await ServerFailureObserver.ObserveAsync(originalCaller.CancelAsync, failures).ConfigureAwait(false);
         await ServerFailureObserver.ObserveAsync(async () => { _ = await call.ConfigureAwait(false); }, failures).ConfigureAwait(false);
         await ServerFailureObserver.ObserveAsync(async () => { _ = await issue.ConfigureAwait(false); }, failures).ConfigureAwait(false);
         // Retire the linked arm first; its actual primary remains active until both producers are joined.
         if (observed != Guid.Empty)
-        { await JoinArmAsync(wave, observed, discovery, failures, cancellationToken).ConfigureAwait(false); }
+        {
+            await JoinArmAsync(wave, observed, discovery, failures, cancellationToken).ConfigureAwait(false);
+        }
         await JoinArmAsync(wave, acknowledged, discovery, failures, cancellationToken).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny(failures);
         return terminal ?? throw new InvalidOperationException(MissingObservation);
@@ -82,7 +92,9 @@ internal static class PartitionMovementReceiverIssueFailoverRf3Producer
         {
             _ = await Task.WhenAny(observation, call).ConfigureAwait(false);
             if (!observation.IsCompletedSuccessfully)
-            { throw new InvalidOperationException(MissingObservation); }
+            {
+                throw new InvalidOperationException(MissingObservation);
+            }
             var marker = await observation.ConfigureAwait(false);
             await RequestCqrsPhaseFaultAssertions.VerifyMarkerAsync(marker, arm, seed.FirstRequest.MoveId,
                 RequestCqrsProbePhase.ParentReceiverIssueObserved, discovery).ConfigureAwait(false);
@@ -101,7 +113,9 @@ internal static class PartitionMovementReceiverIssueFailoverRf3Producer
         CancellationToken ownedWait)
     {
         try
-        { _ = await observation.ConfigureAwait(false); }
+        {
+            _ = await observation.ConfigureAwait(false);
+        }
         catch (OperationCanceledException) when (ownedWait.IsCancellationRequested) { }
     }
 

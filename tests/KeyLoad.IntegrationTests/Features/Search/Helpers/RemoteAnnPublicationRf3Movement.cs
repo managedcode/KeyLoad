@@ -31,7 +31,10 @@ internal static class RemoteAnnPublicationRf3Movement
             state.Scenario.Partition, PartitionMovePhase.Retired, directory.ControlOwner, target,
             actual.SourceCut, installed, expected), actual);
         var wrong = await sdk.MaintainAnnIndexAsync(state.Original with
-        { CommandId = Guid.NewGuid(), Mode = AnnMaintenanceMode.Restore }, token);
+        {
+            CommandId = Guid.NewGuid(),
+            Mode = AnnMaintenanceMode.Restore
+        }, token);
         await Assert.That(wrong.IsSuccess).IsFalse();
         await Assert.That(wrong.Value).IsNull();
         await Assert.That(wrong.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.OwnershipLost));

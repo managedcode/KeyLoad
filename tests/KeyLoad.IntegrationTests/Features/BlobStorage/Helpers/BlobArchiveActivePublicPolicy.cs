@@ -15,10 +15,17 @@ internal static class BlobArchiveActivePublicPolicy
             {
                 await BlobArchiveActivePublicFences.RequireAsync(sdk, official, state, token);
                 await ReaderAsync(target, state, token);
-                var denied = state.Reader with { Grants = [], PolicyEpoch = 2L };
+                var denied = state.Reader with
+                {
+                    Grants = [],
+                    PolicyEpoch = 2L
+                };
                 await SqlRf3Protocol.EqualAsync(denied, await McpCallerAssertions.SdkSuccessAsync(await sdk.ConfigurePrincipalAsync(Guid.NewGuid(), denied, token)));
                 await DeniedAsync(target, state, sdk, official, token);
-                var repaired = state.Reader with { PolicyEpoch = 3L };
+                var repaired = state.Reader with
+                {
+                    PolicyEpoch = 3L
+                };
                 await SqlRf3Protocol.EqualAsync(repaired, await McpCallerAssertions.SdkSuccessAsync(await sdk.ConfigurePrincipalAsync(Guid.NewGuid(), repaired, token)));
                 state.Reader = repaired;
                 await ReaderAsync(target, state, token);
@@ -33,7 +40,10 @@ internal static class BlobArchiveActivePublicPolicy
     internal static Task ReaderAsync(ClusterRestoreRf3Fixture target, BlobArchiveActivePublicState state, CancellationToken token)
         => ClusterRestoreRf3CallerOwner.RunAsync(target.Application, BlobArchiveActivePublicCold.Node(target, state), state.Key,
             async (sdk, official) =>
-            { await BlobArchiveActivePublicAssertions.CurrentAsync(sdk, official, state.Published, token); return true; }, token);
+            {
+                await BlobArchiveActivePublicAssertions.CurrentAsync(sdk, official, state.Published, token);
+                return true;
+            }, token);
 
     private static Task<bool> DeniedAsync(ClusterRestoreRf3Fixture target, BlobArchiveActivePublicState state,
         KeyLoad.Client.KeyLoadClient administrator, McpOfficialClient adminMcp, CancellationToken token)

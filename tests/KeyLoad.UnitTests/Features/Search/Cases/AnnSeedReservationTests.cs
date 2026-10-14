@@ -22,14 +22,29 @@ internal sealed class AnnSeedReservationTests
         await Assert.That(accepted.PeakBytesUpperBound).IsEqualTo(observed.PeakBytesUpperBound);
         await Assert.That(accepted.WorkUnits).IsEqualTo(observed.WorkUnits);
 
-        await AssertBudgetExceeded(database, exact with { MaxOwnedBytes = observed.OwnedBytesUpperBound - 1 });
-        await AssertBudgetExceeded(database, exact with { MaxPeakBytes = observed.PeakBytesUpperBound - 1 });
-        await AssertBudgetExceeded(database, exact with { MaxWorkUnits = observed.WorkUnits - 1 });
+        await AssertBudgetExceeded(database, exact with
+        {
+            MaxOwnedBytes = observed.OwnedBytesUpperBound - 1
+        });
+        await AssertBudgetExceeded(database, exact with
+        {
+            MaxPeakBytes = observed.PeakBytesUpperBound - 1
+        });
+        await AssertBudgetExceeded(database, exact with
+        {
+            MaxWorkUnits = observed.WorkUnits - 1
+        });
 
         var exactRecordLimit = AnnSeedTestSupport.Capture(database,
-            options: new() { MaxRecords = observed.Records.Length });
+            options: new()
+            {
+                MaxRecords = observed.Records.Length
+            });
         await Assert.That(exactRecordLimit.Records.Length).IsEqualTo(observed.Records.Length);
-        await AssertBudgetExceeded(database, new() { MaxRecords = observed.Records.Length - 1 });
+        await AssertBudgetExceeded(database, new()
+        {
+            MaxRecords = observed.Records.Length - 1
+        });
     }
 
     [Test]
@@ -67,7 +82,11 @@ internal sealed class AnnSeedReservationTests
     {
         using var database = AnnSeedTestSupport.Create(1);
         var failure = AnnSeedTestSupport.CaptureFailure(database, AnnSeedTestSupport.Principal,
-            options: new() { MaxOwnedBytes = 4096, MaxPeakBytes = 2048 });
+            options: new()
+            {
+                MaxOwnedBytes = 4096,
+                MaxPeakBytes = 2048
+            });
 
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.Validation);
     }

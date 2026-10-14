@@ -15,13 +15,19 @@ internal static class DatabaseCredentialValidation
         var key = view.GetRecord<ApiKeyRecord>(KeySpace.ApiKey(witness.CredentialId));
         byte[] verifier;
         try
-        { verifier = key is null ? new byte[NativeCredentialDigestBytes] : Convert.FromHexString(key.Verifier); }
+        {
+            verifier = key is null ? new byte[NativeCredentialDigestBytes] : Convert.FromHexString(key.Verifier);
+        }
         catch (FormatException)
-        { throw Errors.Fail(ErrorCode.Corruption, NativeCredentialVerifierInvalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, NativeCredentialVerifierInvalid);
+        }
         if (witness.Digest.Length != NativeCredentialDigestBytes || key is null
             || !CryptographicOperations.FixedTimeEquals(witness.Digest.Span, verifier)
             || key.Revoked || key.ExpiresAt <= now || expectedPrincipal is not null && key.PrincipalId != expectedPrincipal)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, UnavailableCredentialDetail); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, UnavailableCredentialDetail);
+        }
         return ReadPrincipal(view, key.PrincipalId, now);
     }
 

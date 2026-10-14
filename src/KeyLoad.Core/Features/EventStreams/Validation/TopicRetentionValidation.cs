@@ -18,18 +18,24 @@ public sealed partial class DatabaseEngine
             var parts = KeyCodec.Decode(key);
             if (parts.Length != TopicPurgeGroupKeyComponents || parts[TopicPurgeGroupIdIndex] is not string id
                 || !KeyCodec.Encode(parts).AsSpan().SequenceEqual(key))
-            { throw Errors.Fail(ErrorCode.Corruption, EventSourceRetainedHistoryDetail); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, EventSourceRetainedHistoryDetail);
+            }
             JsonData.Identifier(id);
             var group = NativeSerialization.Deserialize<GroupState>(value);
             if (group.Generation < TopicPurgePositiveIdentity || group.OwnershipEpoch < TopicPurgePositiveIdentity
                 || group.Checkpoint < TopicPurgeInitialCheckpoint || group.IssuedPosition < group.Checkpoint || group.IssuedPosition > tail
                 || group.Definition is null || group.Definition.Policy is null)
-            { throw Errors.Fail(ErrorCode.Corruption, EventSourceRetainedHistoryDetail); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, EventSourceRetainedHistoryDetail);
+            }
             ValidateTopicPurgeDefinition(group.Definition);
             return group;
         }
         catch (KeyLoadException failure) when (failure.Code is ErrorCode.Validation or ErrorCode.Corruption or ErrorCode.FormatUnsupported)
-        { throw Errors.Fail(ErrorCode.Corruption, EventSourceRetainedHistoryDetail); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, EventSourceRetainedHistoryDetail);
+        }
     }
     private static void ValidateTopicPurgeDefinition(SubscriptionDefinition definition)
     {
@@ -41,9 +47,13 @@ public sealed partial class DatabaseEngine
             || policy.RetryBaseMilliseconds < SubscriptionGroupsMinimumPositiveCount || policy.RetryMaxMilliseconds < policy.RetryBaseMilliseconds
             || definition.EventTypes.IsDefault || definition.EventTypes.Length > SubscriptionGroupsMaximumSubscriptionEventTypes
             || definition.EventTypes.Distinct(StringComparer.Ordinal).Count() != definition.EventTypes.Length)
-        { throw Errors.Fail(ErrorCode.Corruption, EventSourceRetainedHistoryDetail); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, EventSourceRetainedHistoryDetail);
+        }
         foreach (var type in definition.EventTypes)
-        { JsonData.Identifier(type); }
+        {
+            JsonData.Identifier(type);
+        }
     }
     private static RetainedTopicEventIdentity ReadPurgedTopicIdentity(ReadOnlySpan<byte> value,
         EventSourceRef source, long firstAvailablePosition)
@@ -55,10 +65,14 @@ public sealed partial class DatabaseEngine
                 || identity.Position >= firstAvailablePosition || identity.ContentDigest is null
                 || identity.ContentDigest.Length != RetainedTopicDigestCharacters
                 || identity.ContentDigest.AsSpan().IndexOfAnyExcept(RetainedDigestCharacters) >= FirstRetainedDigestCharacter)
-            { throw Errors.Fail(ErrorCode.Corruption, EventSourceRetainedHistoryDetail); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, EventSourceRetainedHistoryDetail);
+            }
             return identity;
         }
         catch (KeyLoadException failure) when (failure.Code is ErrorCode.Corruption or ErrorCode.FormatUnsupported)
-        { throw Errors.Fail(ErrorCode.Corruption, EventSourceRetainedHistoryDetail); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, EventSourceRetainedHistoryDetail);
+        }
     }
 }

@@ -9,7 +9,12 @@ internal static class RequestCqrsAnnGraphIdentityReplay
         await Assert.That(ReferenceEquals(original.Space, profile.Space)).IsTrue();
         var independent = original with
         {
-            MaintenanceProfile = profile with { Space = profile.Space with { } }
+            MaintenanceProfile = profile with
+            {
+                Space = profile.Space with
+                {
+                }
+            }
         };
         await Assert.That(independent.Space == independent.MaintenanceProfile!.Space).IsTrue();
         await Assert.That(ReferenceEquals(independent.Space, independent.MaintenanceProfile.Space)).IsFalse();

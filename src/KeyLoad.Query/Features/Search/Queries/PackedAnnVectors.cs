@@ -23,7 +23,10 @@ internal sealed class PackedAnnVectors
         this.dimension = dimension;
     }
 
-    internal int Count { get; }
+    internal int Count
+    {
+        get;
+    }
     internal int Dimension => dimension;
 
     internal ReadOnlySpan<float> Span(int ordinal)

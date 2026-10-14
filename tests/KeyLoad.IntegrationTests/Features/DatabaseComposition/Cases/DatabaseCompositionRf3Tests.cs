@@ -57,7 +57,10 @@ internal sealed class DatabaseCompositionRf3Tests(ClusterFixture fixture)
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
         var sdk = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         var scenario = await RelationalSqlRf3Scenario.CreateAsync(sdk, deadline.Token);
-        var link = new QueueGraphLink(scenario.First, scenario.Second with { Id = Missing }, RelationalSqlRf3Tokens.EdgeLabel);
+        var link = new QueueGraphLink(scenario.First, scenario.Second with
+        {
+            Id = Missing
+        }, RelationalSqlRf3Tokens.EdgeLabel);
         var command = scenario.Command(
             new PutDocument(RelationalSqlRf3Tokens.Table, RelationalSqlRf3Tokens.FirstId, RelationalSqlRf3Tokens.FirstRow),
             new PutDocument(RelationalSqlRf3Tokens.Documents, Marker, RelationalSqlRf3Tokens.EmptyJson),

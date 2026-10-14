@@ -1,6 +1,6 @@
 using System.Text;
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.IntegrationTests.Features.QueryExecution;
@@ -35,7 +35,10 @@ internal static class PostgresRf3BackpressureTrial
                     controls.WriteRelease(arm, held.RequestId);
                     var disposed = await controls.WaitForMarkerAsync(arm, RequestCqrsProbePhase.ProducerDisposed,
                         RequestCqrsProbeOutcome.Observed, discovery, token);
-                    await SqlRf3Protocol.EqualAsync(held with { Phase = RequestCqrsProbePhase.ProducerDisposed }, disposed);
+                    await SqlRf3Protocol.EqualAsync(held with
+                    {
+                        Phase = RequestCqrsProbePhase.ProducerDisposed
+                    }, disposed);
                     _ = await header.Task.WaitAsync(token);
                     await global::TUnit.Assertions.Assert.That(original.IsCompleted).IsFalse();
                     await PostgresRf3WireAuthentication.CancelAsync(fixture, backend, token);
@@ -46,7 +49,9 @@ internal static class PostgresRf3BackpressureTrial
                 await PostgresRf3BackpressureCleanup.RunAsync(controls, arm, discovery, wire, resume, header.Task, original,
                     joined, operationFailures);
                 if (operationFailures.Count != PostgresRf3Protocol.FirstColumn)
-                { selection.RetainEvidence(); }
+                {
+                    selection.RetainEvidence();
+                }
                 global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(operationFailures);
             }, failures);
         }, failures);

@@ -68,11 +68,15 @@ internal static class ProjectionOriginalPolicyContinuation
             UnitExecutionOptions.DatabaseLimits(fixture.Database.Limits), fixture.Harness.Store.Identity.NodeId,
             UnitNativeTextOptions.Execution());
         try
-        { await ClassificationLineageWholeAssertions.HealthyAsync(fixture, projection); }
+        {
+            await ClassificationLineageWholeAssertions.HealthyAsync(fixture, projection);
+        }
         catch (Exception primary)
         {
             try
-            { projection.Dispose(); }
+            {
+                projection.Dispose();
+            }
             catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
             throw;
         }

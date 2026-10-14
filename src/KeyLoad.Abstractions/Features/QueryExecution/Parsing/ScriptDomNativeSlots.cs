@@ -11,12 +11,16 @@ internal static class ScriptDomNativeSlots
         var stream = literal.ScriptTokenStream;
         if (stream is not ScriptDomCheckedTokens || literal.FirstTokenIndex < FirstIndex
             || literal.FirstTokenIndex >= stream.Count)
-        { return false; }
+        {
+            return false;
+        }
         var text = stream[literal.FirstTokenIndex].Text;
         if (text.Length < MinimumSlotText || text[FirstIndex] != SlotPrefix
             || !int.TryParse(text.AsSpan(PrefixLength), NumberStyles.None, CultureInfo.InvariantCulture, out var position)
             || position < FirstSlot || position > count)
-        { return false; }
+        {
+            return false;
+        }
         canonicalName = CanonicalPrefix + position.ToString(CultureInfo.InvariantCulture);
         return true;
     }

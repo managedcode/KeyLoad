@@ -41,7 +41,9 @@ internal static class SqlQueueReferenceJoinOperation
             () => engine.ExecuteAst("root", SqlQueueReferenceJoinFixture.Ast(database.Partition) with
             {
                 Query = SqlQueueReferenceJoinFixture.Ast(database.Partition).Query with
-                { InnerJoin = new("missingcustomers", "d", "/payload/to", "/entity_ref") }
+                {
+                    InnerJoin = new("missingcustomers", "d", "/payload/to", "/entity_ref")
+                }
             }), ErrorCode.NotFound);
         using var cancellation = new CancellationTokenSource();
         await cancellation.CancelAsync();

@@ -15,7 +15,9 @@ internal sealed partial class NativeTextOnlineCatalogOwner
         var current = database.ReadOnlineTextImplicitCurrent(view, principal, request.Partition,
             request.Collection, request.TextField ?? throw NativeTextErrors.Mismatch(), database.Store.Identity.NodeId, budget);
         if (current is null)
-        { return null; }
+        {
+            return null;
+        }
         var maintenance = new OnlineTextIndexMaintenanceRequest(current.CommandId, current.Consumer,
             current.Authority.Collection, current.Authority.Field, current.ConsumerGeneration,
             current.PublishedCut.NodeId, current.Authority.Placement);
@@ -31,7 +33,9 @@ internal sealed partial class NativeTextOnlineCatalogOwner
                 NativeTextOnlineCatalogFiles.RequireCurrentCatalog(root.Directory, proof.Catalog, budget, options.NativeText);
                 var scope = TextProjectionLifecycle.CreateScope(database, principal, resource, request);
                 if (proof.Catalog.Scope != scope)
-                { throw NativeTextErrors.Mismatch(); }
+                {
+                    throw NativeTextErrors.Mismatch();
+                }
                 actual = new NativeTextSelectedProjectionLease(OnlineReadAdmission,
                     () => (generation, generation.Manifest), budget, options.Core.DatabaseLimits);
             }
@@ -43,10 +47,14 @@ internal sealed partial class NativeTextOnlineCatalogOwner
         {
             var failures = new List<Exception>();
             if (primary is not null && !ReferenceEquals(primary, cleanup))
-            { failures.Add(primary); }
+            {
+                failures.Add(primary);
+            }
             failures.Add(cleanup);
             if (actual is not null)
-            { ServerFailureObserver.Observe(actual.Dispose, failures); }
+            {
+                ServerFailureObserver.Observe(actual.Dispose, failures);
+            }
             ServerFailureObserver.ThrowIfAny(failures);
             throw;
         }

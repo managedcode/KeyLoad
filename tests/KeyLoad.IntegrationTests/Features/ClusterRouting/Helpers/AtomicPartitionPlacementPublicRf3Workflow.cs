@@ -85,7 +85,10 @@ internal sealed class AtomicPartitionPlacementPublicRf3Workflow(ClusterFixture f
         PartitionRef partition, CancellationToken cancellationToken)
     {
         await BindMcpAsync(commandId, request, cancellationToken).ConfigureAwait(false);
-        var changed = request with { PhysicalShardId = Guid.NewGuid() };
+        var changed = request with
+        {
+            PhysicalShardId = Guid.NewGuid()
+        };
         await BindMcpErrorAsync(commandId, changed, ErrorCode.Conflict, cancellationToken).ConfigureAwait(false);
         await BindMcpErrorAsync(Guid.NewGuid(), request with
         {
@@ -140,7 +143,9 @@ internal sealed class AtomicPartitionPlacementPublicRf3Workflow(ClusterFixture f
         }
 
         foreach (var node in AtomicPartitionPlacementPublicRf3Protocol.Nodes)
-        { await VerifyVoterAsync(node, partition, expected, cancellationToken).ConfigureAwait(false); }
+        {
+            await VerifyVoterAsync(node, partition, expected, cancellationToken).ConfigureAwait(false);
+        }
     }
 
     private async Task VerifyVoterAsync(string node, PartitionRef partition,
@@ -177,7 +182,10 @@ internal sealed class AtomicPartitionPlacementPublicRf3Workflow(ClusterFixture f
         ErrorCode error, CancellationToken cancellationToken, McpOfficialClient? connected = null)
     {
         if (connected is not null)
-        { await BindMcpErrorOnAsync(connected, commandId, request, error, cancellationToken).ConfigureAwait(false); return; }
+        {
+            await BindMcpErrorOnAsync(connected, commandId, request, error, cancellationToken).ConfigureAwait(false);
+            return;
+        }
         await using var client = await McpOfficialClient.ConnectAsync(fixture.App, RequestCqrsRf3Protocol.Node1,
             fixture.AdminKey, cancellationToken).ConfigureAwait(false);
         await BindMcpErrorOnAsync(client, commandId, request, error, cancellationToken).ConfigureAwait(false);

@@ -16,7 +16,10 @@ internal sealed class GovernanceRootFixture : IDisposable
 
     private GovernanceRootFixture(string root) => Root = root;
 
-    internal string Root { get; }
+    internal string Root
+    {
+        get;
+    }
 
     internal static async Task<GovernanceRootFixture> CreateAsync(CancellationToken cancellationToken)
     {

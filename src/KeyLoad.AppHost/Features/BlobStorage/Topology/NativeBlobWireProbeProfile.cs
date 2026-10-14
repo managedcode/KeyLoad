@@ -20,7 +20,9 @@ internal static class NativeBlobWireProbeProfile
         var control = AppHostOptionsRegistration.Get(builder).Control.Value;
         var selected = control.NativeBlobWireProbe;
         if (selected is null)
-        { return; }
+        {
+            return;
+        }
         var root = selected.Root;
         var session = selected.SessionId;
         var expected = Path.Combine(Path.GetFullPath(dataRoot), DirectoryName);
@@ -29,12 +31,16 @@ internal static class NativeBlobWireProbeProfile
             || control.RequestProbe is null || session != control.RequestProbe.SessionId
             || string.IsNullOrEmpty(root) || !Path.IsPathFullyQualified(root)
             || Path.GetFullPath(root) != expected || resources.Count != TotalMembers)
-        { throw new InvalidOperationException(Invalid); }
+        {
+            throw new InvalidOperationException(Invalid);
+        }
         var directory = new DirectoryInfo(root);
         if (!directory.Exists || (directory.Attributes & FileAttributes.ReparsePoint) != default
             || OperatingSystem.IsWindows() || File.GetUnixFileMode(root)
                 != (UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute))
-        { throw new InvalidOperationException(Invalid); }
+        {
+            throw new InvalidOperationException(Invalid);
+        }
         for (var index = FirstSourceMember; index < SourceMembers; index++)
         {
             resources[index].WithBindMount(root, Mount)

@@ -54,7 +54,9 @@ internal sealed class SampleAggregateAccumulator
     internal static SampleAggregate Reconstruct(long count, double total, double? minimum, double? maximum)
     {
         if (count == EmptySampleCount)
-        { return Empty; }
+        {
+            return Empty;
+        }
         var average = total / count;
         if (!double.IsFinite(average))
         {

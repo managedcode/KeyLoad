@@ -20,7 +20,10 @@ internal sealed class TimescaleTimeSeriesTarget(string connectionString, IOption
     private string schemaName = string.Empty;
     private int ownsSchema;
 
-    public TimeSeriesTargetMetadata Metadata { get; } = new(TargetName, PersistedTimescaleDBHypertableToken,
+    public TimeSeriesTargetMetadata Metadata
+    {
+        get;
+    } = new(TargetName, PersistedTimescaleDBHypertableToken,
         StorageGuarantee, AcknowledgementGuarantee, image, null);
 
     public async Task InitializeAsync(TimeSeriesComparisonWorkload workload, CancellationToken cancellationToken)

@@ -92,9 +92,15 @@ internal sealed class ReadBudgetAllocationTests
     {
         var result = new JsonRecord(EscapedUnicode);
         var bytes = JsonDefaults.Serialize(result).Length;
-        new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new() { MaxBatchBytes = bytes })).CheckResult(result);
+        new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new()
+        {
+            MaxBatchBytes = bytes
+        })).CheckResult(result);
         var error = Assert.ThrowsExactly<KeyLoadException>(() =>
-            new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new() { MaxBatchBytes = bytes - 1 })).CheckResult(result));
+            new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new()
+            {
+                MaxBatchBytes = bytes - 1
+            })).CheckResult(result));
 
         await Assert.That(error.Code).IsEqualTo(ErrorCode.BudgetExceeded);
     }
@@ -140,7 +146,10 @@ internal sealed class ReadBudgetAllocationTests
     private sealed class StoreFixture : IDisposable
     {
         private readonly string directory = Path.Combine(Path.GetTempPath(), TemporaryDirectoryPrefix + Guid.NewGuid().ToString("N"));
-        public ZoneTreeStore Store { get; }
+        public ZoneTreeStore Store
+        {
+            get;
+        }
         public StoreFixture() => Store = new(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         public void Dispose()
         {

@@ -9,8 +9,17 @@ internal static class QueueTerminalPolicyRf3Policy
         QueueTerminalPolicyRf3State state, CancellationToken token)
     {
         var request = new ConfigureResourceRequest(state.Partition.TenantId, state.Partition.DatabaseId,
-            state.Definition with { SchemaVersion = 2L, QueuePolicy = state.Definition.QueuePolicy with { MaxAttempts = 1 } })
-        { ExpectedSchemaVersion = 1L };
+            state.Definition with
+            {
+                SchemaVersion = 2L,
+                QueuePolicy = state.Definition.QueuePolicy with
+                {
+                    MaxAttempts = 1
+                }
+            })
+        {
+            ExpectedSchemaVersion = 1L
+        };
         await SagaTimeoutRf3Assertions.AssertSdkErrorAsync(await admin.Sdk.ConfigureResourceAsync(
             state.RefusedPolicy, request, token), ErrorCode.UnsupportedCapability);
         await QueueTerminalPolicyRf3Assertions.CurrentAsync(admin, worker, state, token);

@@ -10,27 +10,48 @@ public sealed class EventVectorFirstAdmitProbe : IDisposable
     private bool disposed;
 
     internal EventVectorFirstAdmitProbe(ReadExecutionBudget budget, ReadExecutionBudgetReadGrant grant)
-    { this.budget = budget; this.grant = grant; }
+    {
+        this.budget = budget;
+        this.grant = grant;
+    }
 
     /// <summary>Gets the canonical applied position read in the authorized bounded view.</summary>
-    public long AppliedPosition { get; internal set; }
+    public long AppliedPosition
+    {
+        get; internal set;
+    }
     /// <summary>Gets the original request ID from the same verified and authorized first-Admit phase.</summary>
-    public Guid OriginalParentRequestId { get; internal set; }
+    public Guid OriginalParentRequestId
+    {
+        get; internal set;
+    }
     /// <summary>Gets the genuine reauthorized immutable outcome, if already committed.</summary>
-    public OperationResult? OriginalOutcome { get; internal set; }
+    public OperationResult? OriginalOutcome
+    {
+        get; internal set;
+    }
 
     /// <summary>Checks the original caller and original expiry before more journal work.</summary>
-    public void Check() { ObjectDisposedException.ThrowIf(disposed, this); budget.Check(); }
+    public void Check()
+    {
+        ObjectDisposedException.ThrowIf(disposed, this);
+        budget.Check();
+    }
 
     /// <summary>Charges one actual stored native key/value lookup before copy or decode, including absence.</summary>
     /// <param name="encodedBytes">The storage observer's actual encoded key/value byte count.</param>
     public void AcceptNativeRecord(long encodedBytes)
-    { Check(); budget.ChargeReadGrant(grant, encodedBytes); }
+    {
+        Check();
+        budget.ChargeReadGrant(grant, encodedBytes);
+    }
 
     internal void DisposeAfterFailure(Exception primary)
     {
         try
-        { Dispose(); }
+        {
+            Dispose();
+        }
         catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
     }
 
@@ -38,7 +59,9 @@ public sealed class EventVectorFirstAdmitProbe : IDisposable
     public void Dispose()
     {
         if (disposed)
-        { return; }
+        {
+            return;
+        }
         budget.CompleteSettledReadGrant(grant);
         disposed = true;
     }

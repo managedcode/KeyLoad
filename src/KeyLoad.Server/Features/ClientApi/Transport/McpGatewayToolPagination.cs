@@ -13,10 +13,14 @@ internal static class McpGatewayToolPagination
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maximumBytes);
         if (!string.IsNullOrEmpty(cursor))
-        { throw Errors.Fail(ErrorCode.Validation, McpGatewayMetaProtocol.InvalidCursor); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, McpGatewayMetaProtocol.InvalidCursor);
+        }
         var page = new ListToolsResult();
         foreach (var tool in McpGatewayMetaProtocol.CreateTools())
-        { page.Tools.Add(tool); }
+        {
+            page.Tools.Add(tool);
+        }
         using var stream = new McpBoundedWriteStream(maximumBytes);
         try
         {
@@ -24,6 +28,8 @@ internal static class McpGatewayToolPagination
             return page;
         }
         catch (KeyLoadException error) when (error.Code == ErrorCode.ResourceExhausted)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, PageExceeded); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, PageExceeded);
+        }
     }
 }

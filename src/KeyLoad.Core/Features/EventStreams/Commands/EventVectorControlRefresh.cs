@@ -25,7 +25,9 @@ internal static class EventVectorControlRefresh
             || map.State is not (EventVectorMapState.Refreshing or EventVectorMapState.Active)
             || inventory.PayloadRows.Any(row => row.Key.Span.SequenceEqual(
                 EventVectorKeys.Offer(map.ControlPartition, map.MapId))))
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidRefresh); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidRefresh);
+        }
         var proofRow = ProofRow(map, inventory, control, admission);
         var proof = EventVectorCoverageProofValidation.Read(proofRow, map, admission);
         var prior = EventVectorControlPages.Entries(inventory, admission);
@@ -34,7 +36,9 @@ internal static class EventVectorControlRefresh
             control.OriginalEntryChecksum, admission);
         if (!candidate.SequenceEqual(supplied)
             || map.State == EventVectorMapState.Active && (!prior.IsEmpty || !candidate.IsEmpty))
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidRefresh); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidRefresh);
+        }
         EventVectorRefreshSettlement.Require(inventory, candidate, admission);
         var page = new EventVectorPage
         {
@@ -70,12 +74,16 @@ internal static class EventVectorControlRefresh
         if (row.Key.IsEmpty)
         {
             if (map.State != EventVectorMapState.Active)
-            { throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidRefresh); }
+            {
+                throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidRefresh);
+            }
             return EventVectorEncodedRow.Create(key, candidate, admission);
         }
         var original = EventVectorCoverageProofValidation.Read(row, map, admission);
         if (!original.OriginalSemanticProjectionBytes.Span.SequenceEqual(candidate.OriginalSemanticProjectionBytes.Span))
-        { throw Errors.Fail(ErrorCode.Conflict, InvalidRefresh); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, InvalidRefresh);
+        }
         return row;
     }
 }

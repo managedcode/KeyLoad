@@ -23,7 +23,12 @@ internal static class ControlledMovementOwnerAdmissionAssertions
                 await ServerFailureObserver.ObserveAsync(async () =>
                 {
                     var bytes = NativeSerialization.Serialize(request with
-                    { Envelope = request.Envelope with { Nonce = Guid.NewGuid() } });
+                    {
+                        Envelope = request.Envelope with
+                        {
+                            Nonce = Guid.NewGuid()
+                        }
+                    });
                     var verified = await admission.VerifyAsync(bytes, mac.Sign(bytes, reply: false), token);
                     var engine = retained = ControlledMovementUnconfiguredEngine.Create(source.Store);
                     var issue = Assert.ThrowsExactly<KeyLoadException>(() => engine.CreateVerifiedPartitionMovementOperation(

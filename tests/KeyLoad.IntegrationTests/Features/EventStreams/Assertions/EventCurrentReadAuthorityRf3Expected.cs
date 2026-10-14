@@ -10,7 +10,10 @@ internal static class EventCurrentReadAuthorityRf3Expected
     private const string FourthId = "r42-current-read-fourth";
     private const string FourthPayload = "{\"step\":4}";
     internal static EventData Fourth => McpEventStreamScenario.ExpectedEvents[0] with
-    { EventId = FourthId, PayloadJson = FourthPayload };
+    {
+        EventId = FourthId,
+        PayloadJson = FourthPayload
+    };
 
     internal static EventData[] Data(bool updated) => updated
         ? [.. McpEventStreamScenario.ExpectedEvents, Fourth]

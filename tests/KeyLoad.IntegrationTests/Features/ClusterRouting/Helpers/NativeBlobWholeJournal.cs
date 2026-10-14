@@ -15,9 +15,13 @@ internal static class NativeBlobWholeJournal
         ReplicaBenchmarkMembership.Validate(NativeBlobWholeRows.Required(rows,
             ReplicaBenchmarkMembership.StorageKey, budget), true, configuration);
         if (state.Snapshot is not null)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, "The full original Blob journal is compacted; no missing authority is inferred."); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, "The full original Blob journal is compacted; no missing authority is inferred.");
+        }
         if (applied < 0 || applied != state.CommittedIndex || state.LastIndex > NativeBlobWholeRows.MaximumRecords)
-        { throw Errors.Fail(ErrorCode.Corruption, "The complete original Blob journal/applied positions disagree."); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, "The complete original Blob journal/applied positions disagree.");
+        }
         var entries = new List<ReplicaEntry>();
         long previousTerm = 0;
         for (long index = 1; index <= state.LastIndex; index++)
@@ -27,7 +31,9 @@ internal static class NativeBlobWholeJournal
             var entry = ReplicaAdmittedEntryRead.Decode(bytes, index, state.Term,
                 configuration.MaxAppendEntries, canonical);
             if (entry.Term < previousTerm || bytes.Length > configuration.MaxAppendBytes)
-            { throw Errors.Fail(ErrorCode.Corruption, "The complete original Blob journal term or append budget is invalid."); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, "The complete original Blob journal term or append budget is invalid.");
+            }
             previousTerm = entry.Term;
             entries.Add(entry);
         }

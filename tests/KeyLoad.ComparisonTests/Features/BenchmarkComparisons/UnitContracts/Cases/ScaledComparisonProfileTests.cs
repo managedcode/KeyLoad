@@ -57,6 +57,8 @@ internal sealed class ScaledComparisonProfileTests
     private static ComparisonReport Report(ComparisonOptions? options, ScaledComparisonProfile? profile)
         => new(3, Guid.NewGuid(), DateTimeOffset.UnixEpoch, options, "digest", "load", "linux", "x64", 1,
             ".NET 10", "native", null, ImmutableArray<TargetProfile>.Empty, ImmutableArray<ComparisonCase>.Empty)
-        { ScaledProfile = profile };
+        {
+            ScaledProfile = profile
+        };
 
 }

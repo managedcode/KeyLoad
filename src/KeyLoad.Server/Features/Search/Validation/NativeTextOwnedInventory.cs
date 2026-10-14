@@ -112,10 +112,22 @@ internal static class NativeTextOwnedInventory
 
     private sealed class LayoutCounts
     {
-        internal int Entries { get; set; }
-        internal int Files { get; set; }
-        internal int Directories { get; set; }
-        internal long Bytes { get; set; }
+        internal int Entries
+        {
+            get; set;
+        }
+        internal int Files
+        {
+            get; set;
+        }
+        internal int Directories
+        {
+            get; set;
+        }
+        internal long Bytes
+        {
+            get; set;
+        }
     }
 }
 

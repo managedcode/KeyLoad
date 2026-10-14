@@ -31,7 +31,9 @@ internal static class QueueDispatchCasRf3Commands
                 await ResultAsync(reply.Value, expected);
             }
             else
-            { await ResultAsync(await McpCallerAssertions.SdkSuccessAsync(await sdk.SetQueueDispatchAsync(id, request, token)), expected); }
+            {
+                await ResultAsync(await McpCallerAssertions.SdkSuccessAsync(await sdk.SetQueueDispatchAsync(id, request, token)), expected);
+            }
             await QueueDispatchCasRf3Current.RunAsync(fixture, state, currentVersion, currentPaused, token);
             return true;
         }, token);
@@ -43,9 +45,13 @@ internal static class QueueDispatchCasRf3Commands
         {
             var request = state.Request(expectedVersion, paused);
             if (mcpFirst)
-            { await McpCallerAssertions.ErrorAsync(await McpAsync(mcp, id, request, token), code, dispatched: true); }
+            {
+                await McpCallerAssertions.ErrorAsync(await McpAsync(mcp, id, request, token), code, dispatched: true);
+            }
             else
-            { await QueueLeaseRf3Assertions.DeniedAsync(await sdk.SetQueueDispatchAsync(id, request, token), code); }
+            {
+                await QueueLeaseRf3Assertions.DeniedAsync(await sdk.SetQueueDispatchAsync(id, request, token), code);
+            }
             await QueueDispatchCasRf3Current.RunAsync(fixture, state, currentVersion, currentPaused, token);
             return true;
         }, token);

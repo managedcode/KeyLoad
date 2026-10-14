@@ -17,36 +17,48 @@ internal static class ScriptDomInsertShape
             || target.Alias is not null || target.ForPath || target.TableHints.Count != EmptyCount
             || target.TableSampleClause is not null || target.TemporalClause is not null
             || insert.InsertSource is not Dom.SelectInsertSource { Select: Dom.QuerySpecification query })
-        { throw ScriptDomOperationErrors.Unsupported(); }
+        {
+            throw ScriptDomOperationErrors.Unsupported();
+        }
         if (query.TopRowFilter is not null || query.UniqueRowFilter == Dom.UniqueRowFilter.Distinct
             || query.WhereClause is not null || query.GroupByClause is not null || query.HavingClause is not null
             || query.WindowClause is not null || query.OrderByClause is not null || query.OffsetClause is not null
             || query.ForClause is not null || query.FromClause is null || query.FromClause.TableReferences.Count != One)
-        { throw ScriptDomOperationErrors.Unsupported(); }
+        {
+            throw ScriptDomOperationErrors.Unsupported();
+        }
         var name = ObjectName(target.SchemaObject);
         var columns = name.Equals(GraphEdges, StringComparison.OrdinalIgnoreCase) ? ForwardColumns
             : name.Equals(QueueMessages, StringComparison.OrdinalIgnoreCase) ? ReverseColumns
             : throw ScriptDomOperationErrors.Unsupported();
         if (insert.Columns.Count != columns.Length)
-        { throw ScriptDomOperationErrors.Invalid(); }
+        {
+            throw ScriptDomOperationErrors.Invalid();
+        }
         for (var index = EmptyCount; index < columns.Length; index++)
         {
             var column = insert.Columns[index].MultiPartIdentifier;
             if (column is null || column.Identifiers.Count != One
                 || !column.Identifiers[EmptyCount].Value.Equals(columns[index], StringComparison.OrdinalIgnoreCase))
-            { throw ScriptDomOperationErrors.Unsupported(); }
+            {
+                throw ScriptDomOperationErrors.Unsupported();
+            }
         }
         return (name, query);
     }
     internal static Dom.ScalarExpression[] Values(Dom.QuerySpecification query, int count)
     {
         if (query.SelectElements.Count != count)
-        { throw ScriptDomOperationErrors.Invalid(); }
+        {
+            throw ScriptDomOperationErrors.Invalid();
+        }
         var result = new Dom.ScalarExpression[count];
         for (var index = EmptyCount; index < count; index++)
         {
             if (query.SelectElements[index] is not Dom.SelectScalarExpression { ColumnName: null } scalar)
-            { throw ScriptDomOperationErrors.Unsupported(); }
+            {
+                throw ScriptDomOperationErrors.Unsupported();
+            }
             result[index] = scalar.Expression;
         }
         return result;
@@ -56,9 +68,13 @@ internal static class ScriptDomInsertShape
         if (table is not Dom.SchemaObjectFunctionTableReference function || function.ForPath || function.Columns.Count != EmptyCount
             || !ObjectName(function.SchemaObject).Equals(name, StringComparison.OrdinalIgnoreCase)
             || !StringComparer.OrdinalIgnoreCase.Equals(function.Alias?.Value, alias))
-        { throw ScriptDomOperationErrors.Unsupported(); }
+        {
+            throw ScriptDomOperationErrors.Unsupported();
+        }
         if (function.Parameters.Count != count)
-        { throw ScriptDomOperationErrors.Invalid(); }
+        {
+            throw ScriptDomOperationErrors.Invalid();
+        }
         return function;
     }
     private static string ObjectName(Dom.SchemaObjectName name)

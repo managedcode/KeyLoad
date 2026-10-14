@@ -13,12 +13,16 @@ internal sealed class RemoteTransferPeerOwner(
     {
         if (Volatile.Read(ref closed) != RemoteTransferPeerProtocol.EmptyEncodedBytes
             || string.IsNullOrWhiteSpace(TechnicalPrincipal) || proof.TechnicalPrincipalId != TechnicalPrincipal)
-        { throw Errors.Fail(ErrorCode.UnsupportedCapability, RemoteTransferPeerProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, RemoteTransferPeerProtocol.Unavailable);
+        }
         var decoded = verify(proof.OriginalEnvelope, proof.OriginalSignature);
         if (!PhysicalOwnerEntryValidation.Same(source, decoded.SourceOwner)
             || !PhysicalOwnerEntryValidation.Same(destination, decoded.DestinationOwner)
             || !NativeSerialization.Serialize(decoded).AsSpan().SequenceEqual(NativeSerialization.Serialize(proof.Call)))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteTransferPeerProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, RemoteTransferPeerProtocol.Invalid);
+        }
     }
 
     internal void Close() => Interlocked.Exchange(ref closed, RemoteTransferPeerProtocol.Version);

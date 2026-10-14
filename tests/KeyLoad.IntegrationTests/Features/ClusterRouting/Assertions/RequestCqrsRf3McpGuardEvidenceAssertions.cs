@@ -22,7 +22,9 @@ internal static class RequestCqrsRf3McpGuardEvidenceAssertions
         await Assert.That(artifact.Version).IsEqualTo(ArtifactVersion);
         await Assert.That(artifact.WaveId).IsNotEqualTo(Guid.Empty);
         if (artifact.Rejections is not { Length: 1 } records)
-        { throw new InvalidDataException("The MCP guard artifact does not contain exactly one closed rejection."); }
+        {
+            throw new InvalidDataException("The MCP guard artifact does not contain exactly one closed rejection.");
+        }
         await VerifyRecordAsync(records[0], artifact.WaveId).ConfigureAwait(false);
         await VerifyNativeCaptureAsync(path, artifact.WaveId, cancellationToken).ConfigureAwait(false);
         var text = Encoding.UTF8.GetString(bytes);
@@ -62,7 +64,9 @@ internal static class RequestCqrsRf3McpGuardEvidenceAssertions
             .ConfigureAwait(false);
         var rows = artifact.GetProperty(nameof(RequestCqrsRf3McpRejectionArtifact.Rejections));
         if (rows.ValueKind != JsonValueKind.Array || rows.GetArrayLength() != 1)
-        { throw new InvalidDataException("The MCP guard artifact rejection array is invalid."); }
+        {
+            throw new InvalidDataException("The MCP guard artifact rejection array is invalid.");
+        }
         await VerifyFieldsAsync(rows[0], nameof(RequestCqrsRf3McpRejectionRecord.WaveId),
             nameof(RequestCqrsRf3McpRejectionRecord.Node), nameof(RequestCqrsRf3McpRejectionRecord.Stage),
             nameof(RequestCqrsRf3McpRejectionRecord.MethodCategory)).ConfigureAwait(false);
@@ -71,7 +75,9 @@ internal static class RequestCqrsRf3McpGuardEvidenceAssertions
     private static async Task VerifyFieldsAsync(JsonElement value, params string[] expected)
     {
         if (value.ValueKind != JsonValueKind.Object)
-        { throw new InvalidDataException("The MCP guard artifact contains a non-object record."); }
+        {
+            throw new InvalidDataException("The MCP guard artifact contains a non-object record.");
+        }
         var names = value.EnumerateObject().Select(property => property.Name).ToArray();
         await Assert.That(names.Length).IsEqualTo(expected.Length);
         await Assert.That(names.ToHashSet(StringComparer.Ordinal).SetEquals(expected)).IsTrue();
@@ -91,18 +97,24 @@ internal static class RequestCqrsRf3McpGuardEvidenceAssertions
             MaximumArtifactBytes, FileOptions.Asynchronous | FileOptions.SequentialScan);
         var expectedLength = stream.Length;
         if (expectedLength is < 1 or > MaximumArtifactBytes)
-        { throw new InvalidDataException("The MCP guard artifact exceeds its bounded size."); }
+        {
+            throw new InvalidDataException("The MCP guard artifact exceeds its bounded size.");
+        }
         var buffer = new byte[MaximumArtifactBytes + 1];
         var total = 0;
         while (total < buffer.Length)
         {
             var count = await stream.ReadAsync(buffer.AsMemory(total), cancellationToken).ConfigureAwait(false);
             if (count == 0)
-            { break; }
+            {
+                break;
+            }
             total += count;
         }
         if (total != expectedLength || total > MaximumArtifactBytes || stream.Length != expectedLength)
-        { throw new InvalidDataException("The MCP guard artifact changed while being read."); }
+        {
+            throw new InvalidDataException("The MCP guard artifact changed while being read.");
+        }
         return buffer[..total];
     }
 }

@@ -35,7 +35,10 @@ internal static class SampleRangeBudgetWholeFlow
 
     internal static DatabaseEngine BoundedOwner(SampleRawIntegrityFixture fixture, int maximumBytes)
         => new(fixture.Store, fixture.Owner.Authorization,
-            UnitExecutionOptions.DatabaseLimits(new() { MaxBatchBytes = maximumBytes }),
+            UnitExecutionOptions.DatabaseLimits(new()
+            {
+                MaxBatchBytes = maximumBytes
+            }),
             UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(),
             UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(),
             UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(),

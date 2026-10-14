@@ -22,7 +22,10 @@ internal static class CanonicalApplyNetworkAssertions
         await EqualAsync(sdk, original);
         await EqualAsync(mcp.Value, original);
         await EqualReadAsync(await ReadAsync(caller, command.Partition, token), before);
-        var changed = command with { Mutations = [new EnqueueMessage(CanonicalApplyNetworkData.Queue, "wrong", "{}", "{}")] };
+        var changed = command with
+        {
+            Mutations = [new EnqueueMessage(CanonicalApplyNetworkData.Queue, "wrong", "{}", "{}")]
+        };
         var denied = await caller.Sdk.CommitAsync(changed, token);
         await Assert.That(denied.IsFailed).IsTrue();
         await Assert.That(denied.Problem!.ErrorCode).IsEqualTo(ErrorCode.Conflict.ToString());

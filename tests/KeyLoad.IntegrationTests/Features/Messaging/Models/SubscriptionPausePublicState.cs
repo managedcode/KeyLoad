@@ -6,6 +6,12 @@ internal sealed record SubscriptionPausePublicState(ReceiveSubscriptionRequest C
     ReceiveSubscriptionRequest Denied, string DeniedProblem, EventSourcePage Source)
 {
     internal List<(SubscriptionDeliveryCommand Request, CommitReceipt Receipt)> History { get; } = [];
-    internal SetSubscriptionPausedRequest? Resume { get; set; }
-    internal SubscriptionInfo? Resumed { get; set; }
+    internal SetSubscriptionPausedRequest? Resume
+    {
+        get; set;
+    }
+    internal SubscriptionInfo? Resumed
+    {
+        get; set;
+    }
 }

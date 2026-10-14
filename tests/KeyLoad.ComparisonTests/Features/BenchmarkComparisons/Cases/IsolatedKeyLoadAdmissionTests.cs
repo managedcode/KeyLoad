@@ -57,7 +57,10 @@ internal sealed class IsolatedKeyLoadAdmissionTests
             () => IsolatedKeyLoadAdmissionProfile.Verify(new HttpAdmissionGovernor(NativeExecutionPolicyFixture.Http()).Status(), options))).IsNotNull();
         await Assert.That(Assert.ThrowsExactly<ComparisonFailureException>(
             () => IsolatedKeyLoadAdmissionProfile.Verify(
-                new HttpAdmissionGovernor(NativeExecutionPolicyFixture.Http(limits with { MaxBodyBytes = ChangedBodyBytes })).Status(), options))).IsNotNull();
+                new HttpAdmissionGovernor(NativeExecutionPolicyFixture.Http(limits with
+                {
+                    MaxBodyBytes = ChangedBodyBytes
+                })).Status(), options))).IsNotNull();
     }
 
     [Test]

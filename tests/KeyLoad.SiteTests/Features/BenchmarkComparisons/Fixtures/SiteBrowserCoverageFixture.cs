@@ -21,11 +21,26 @@ internal sealed class SiteBrowserCoverageFixture : IDisposable
         NodeBytes = nodeBytes;
         SessionId = sessionId;
     }
-    public string Root { get; }
-    public SiteCoverageSourceManifest Manifest { get; }
-    public string SessionId { get; }
-    public string NodeName { get; }
-    public byte[] NodeBytes { get; }
+    public string Root
+    {
+        get;
+    }
+    public SiteCoverageSourceManifest Manifest
+    {
+        get;
+    }
+    public string SessionId
+    {
+        get;
+    }
+    public string NodeName
+    {
+        get;
+    }
+    public byte[] NodeBytes
+    {
+        get;
+    }
     public IReadOnlyDictionary<string, byte[]> BrowserFiles => browserFiles;
     public byte[] MetadataBytes { get; private set; } = [];
 
@@ -128,7 +143,10 @@ internal sealed class SiteBrowserCoverageFixture : IDisposable
         var id = SiteBrowserCoverageTokens.SecondSessionPrefix + Guid.NewGuid().ToString(SiteCoverageTokens.CompactGuidFormat);
         var path = SessionPath(id);
         Directory.CreateDirectory(path);
-        var controlled = metadata with { CoverageFiles = [SiteBrowserCoverageTokens.RejectionFile] };
+        var controlled = metadata with
+        {
+            CoverageFiles = [SiteBrowserCoverageTokens.RejectionFile]
+        };
         File.WriteAllBytes(Path.Combine(path, SiteCoverageTokens.MetadataFile),
             JsonSerializer.SerializeToUtf8Bytes(controlled, SiteCoverageTokens.JsonOptions));
         File.WriteAllBytes(Path.Combine(path, SiteBrowserCoverageTokens.RejectionFile), bytes);

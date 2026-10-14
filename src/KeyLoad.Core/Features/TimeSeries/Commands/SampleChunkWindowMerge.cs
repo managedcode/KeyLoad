@@ -14,7 +14,9 @@ internal static class SampleChunkWindowMerge
         var previous = SampleChunkWindowScope.Load(tx, partition, request.SeriesSet, request.SeriesId,
             request.WindowId, request.ExpectedRevision, options, charge);
         if (previous.State != SampleChunkWindowState.Sealed || previous.CorrectionSequences.IsEmpty)
-        { throw Errors.Fail(ErrorCode.Conflict, SampleChunkLifecycleProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, SampleChunkLifecycleProtocol.Invalid);
+        }
         var manifest = SampleChunkManifestReader.Read(tx, partition, request.SeriesSet, request.SeriesId,
             previous, options.Value.MaximumChunkWindowRecords, charge, options);
         var records = SampleChunkGenerationReader.Read(tx, partition, request.SeriesSet, request.SeriesId, previous,

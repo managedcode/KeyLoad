@@ -20,7 +20,9 @@ internal static class BlobPortableBackupSeed
             database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request));
         var result = database.ApplyEmbedded(operation, token);
         if (result.Error is not null)
-        { throw new InvalidOperationException("The genuine portable blob seed operation was rejected."); }
+        {
+            throw new InvalidOperationException("The genuine portable blob seed operation was rejected.");
+        }
         return (operation, result);
     }
 

@@ -11,10 +11,22 @@ internal sealed class IsolatedNativeOwnedWork
     private const string RunnerCancelFailureStage = "runner-cancel";
     private const string RunnerJoinFailureStage = "runner-join";
     private const string RunnerDisposeFailureStage = "runner-lifetime-dispose";
-    internal ScaleServerResourceEvidenceCollector? Collector { get; set; }
-    internal Task? Observation { get; set; }
-    internal Task? CollectorSettlement { get; private set; }
-    internal OpenLoopNativeCancellationControl? CancellationControl { get; set; }
+    internal ScaleServerResourceEvidenceCollector? Collector
+    {
+        get; set;
+    }
+    internal Task? Observation
+    {
+        get; set;
+    }
+    internal Task? CollectorSettlement
+    {
+        get; private set;
+    }
+    internal OpenLoopNativeCancellationControl? CancellationControl
+    {
+        get; set;
+    }
     private readonly System.Threading.Lock stopGate = new();
     private CancellationTokenSource? runnerLifetime;
     private Task<int>? runnerCompletion;
@@ -27,7 +39,10 @@ internal sealed class IsolatedNativeOwnedWork
         ExecutionOptions = executionOptions;
     }
 
-    internal IOptions<NativeComparisonHarnessOptions> ExecutionOptions { get; }
+    internal IOptions<NativeComparisonHarnessOptions> ExecutionOptions
+    {
+        get;
+    }
 
     internal async Task<int> RunAsync(DistributedApplication app, string resourceName, CancellationToken token)
     {
@@ -37,7 +52,9 @@ internal sealed class IsolatedNativeOwnedWork
         {
             var first = await Task.WhenAny(runnerCompletion, control.Completion);
             if (ReferenceEquals(first, control.Completion))
-            { await control.Completion; }
+            {
+                await control.Completion;
+            }
             var exit = await runnerCompletion;
             control.RequirePublishedRequest();
             await control.Completion;
@@ -66,7 +83,9 @@ internal sealed class IsolatedNativeOwnedWork
         var lifetime = runnerLifetime;
         var original = runnerCompletion;
         if (lifetime is null && original is null)
-        { return; }
+        {
+            return;
+        }
         if (lifetime is null || original is null)
         {
             throw new InvalidOperationException(IncompleteRunnerOwnership);

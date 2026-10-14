@@ -6,7 +6,10 @@ using Orleans.Serialization.WireProtocol;
 
 namespace KeyLoad.UnitTests.Features.InternalSerialization;
 
-internal enum NativeUnknownWellKnownHeaderScope { Envelope, Value, Member, UnknownMember }
+internal enum NativeUnknownWellKnownHeaderScope
+{
+    Envelope, Value, Member, UnknownMember
+}
 
 // The same official writer authors complete valid controls and unknown type metadata.
 internal static class NativeUnknownWellKnownHeaderFixture

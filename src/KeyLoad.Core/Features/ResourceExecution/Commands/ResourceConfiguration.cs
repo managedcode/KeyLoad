@@ -41,7 +41,9 @@ public sealed partial class DatabaseEngine
     {
         if (PartitionMoveGrantStorage.Outstanding(transaction,
             PartitionMoveGrantStorage.DatabaseKey(tenantId, databaseId)) > PartitionMoveProtocol.EmptyCount)
-        { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.PolicyBusy); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.PolicyBusy);
+        }
     }
 
     private static void ValidateResource(ConfigureResourceRequest request)

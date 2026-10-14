@@ -9,7 +9,10 @@ internal sealed class RequestCqrsAnnEnrollmentAckTests(RequestCqrsClusterFixture
     {
         var token = TestContext.Current!.Execution.CancellationToken;
         var seed = await RequestCqrsAnnTestData.SeedAsync(fixture, token);
-        var original = seed with { MaintenanceProfile = new(seed.Collection, seed.Field, seed.Space) };
+        var original = seed with
+        {
+            MaintenanceProfile = new(seed.Collection, seed.Field, seed.Space)
+        };
         var before = fixture.Database.Store.Position;
         var built = await RequestCqrsAnnInvocation.RunAsync(fixture, original, token);
         await RequestCqrsAnnResultAssertions.RequireAsync(fixture, original, built.Result, before, changed: false, token);
@@ -24,7 +27,10 @@ internal sealed class RequestCqrsAnnEnrollmentAckTests(RequestCqrsClusterFixture
             fixture.Database.Database.GetOutboxStatus(RequestCqrsAnnTestData.Principal,
                 original.Consumer.Partition).Consumers.Single(value => value.Consumer == original.Consumer));
         await RequestCqrsAnnSettlementReplayFlow.RunAsync(fixture, original, built.Result, token);
-        var ordinary = original with { CommandId = Guid.NewGuid() };
+        var ordinary = original with
+        {
+            CommandId = Guid.NewGuid()
+        };
         var healthy = await RequestCqrsAnnInvocation.RunAsync(fixture, ordinary, token);
         await Assert.That(healthy.Result.CommandId).IsEqualTo(ordinary.CommandId);
         await Assert.That(healthy.Result.Phase).IsEqualTo(AnnMaintenancePhase.Completed);

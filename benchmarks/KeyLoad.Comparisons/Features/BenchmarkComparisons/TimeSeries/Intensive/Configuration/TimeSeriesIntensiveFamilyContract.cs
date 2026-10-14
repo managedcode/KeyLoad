@@ -46,32 +46,110 @@ internal sealed class TimeSeriesIntensiveFamilyContract
         ContractSha256 = contractSha256;
     }
 
-    public int SchemaVersion { get; }
-    public string Family { get; }
-    public string EvidenceProfile { get; }
-    public ImmutableArray<TimeSeriesIntensiveTargetKind> Targets { get; }
-    public ImmutableArray<int> NodeCounts { get; }
-    public ImmutableArray<TimeSeriesIntensiveScenario> Scenarios { get; }
-    public int SampleCount { get; }
-    public int OperationCount { get; }
-    public int WarmupCount { get; }
-    public int Repetitions { get; }
-    public int Concurrency { get; }
-    public int OperationTimeoutSeconds { get; }
-    public int CellTimeoutMinutes { get; }
-    public int PreflightTimeoutMinutes { get; }
-    public int TeardownTimeoutSeconds { get; }
-    public int ClientDecodedResponseLimit { get; }
-    public int RawAttemptCount { get; }
-    public int ExpectedPreflightCells { get; }
-    public int ExpectedIntensiveCells { get; }
-    public string TimestampUnit { get; }
-    public string ThroughputDenominator { get; }
-    public string PercentileMethod { get; }
-    public int MeasuredRetries { get; }
-    public ImmutableArray<int> QuorumAcknowledgements { get; }
-    public ImmutableArray<int> DataCopies { get; }
-    public string ContractSha256 { get; }
+    public int SchemaVersion
+    {
+        get;
+    }
+    public string Family
+    {
+        get;
+    }
+    public string EvidenceProfile
+    {
+        get;
+    }
+    public ImmutableArray<TimeSeriesIntensiveTargetKind> Targets
+    {
+        get;
+    }
+    public ImmutableArray<int> NodeCounts
+    {
+        get;
+    }
+    public ImmutableArray<TimeSeriesIntensiveScenario> Scenarios
+    {
+        get;
+    }
+    public int SampleCount
+    {
+        get;
+    }
+    public int OperationCount
+    {
+        get;
+    }
+    public int WarmupCount
+    {
+        get;
+    }
+    public int Repetitions
+    {
+        get;
+    }
+    public int Concurrency
+    {
+        get;
+    }
+    public int OperationTimeoutSeconds
+    {
+        get;
+    }
+    public int CellTimeoutMinutes
+    {
+        get;
+    }
+    public int PreflightTimeoutMinutes
+    {
+        get;
+    }
+    public int TeardownTimeoutSeconds
+    {
+        get;
+    }
+    public int ClientDecodedResponseLimit
+    {
+        get;
+    }
+    public int RawAttemptCount
+    {
+        get;
+    }
+    public int ExpectedPreflightCells
+    {
+        get;
+    }
+    public int ExpectedIntensiveCells
+    {
+        get;
+    }
+    public string TimestampUnit
+    {
+        get;
+    }
+    public string ThroughputDenominator
+    {
+        get;
+    }
+    public string PercentileMethod
+    {
+        get;
+    }
+    public int MeasuredRetries
+    {
+        get;
+    }
+    public ImmutableArray<int> QuorumAcknowledgements
+    {
+        get;
+    }
+    public ImmutableArray<int> DataCopies
+    {
+        get;
+    }
+    public string ContractSha256
+    {
+        get;
+    }
 
     internal static TimeSeriesIntensiveFamilyContract Current
     {

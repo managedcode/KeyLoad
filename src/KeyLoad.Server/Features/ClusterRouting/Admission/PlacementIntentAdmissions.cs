@@ -40,7 +40,9 @@ internal sealed class PlacementIntentAdmissions : IAsyncDisposable
         {
             native = await limiter.AcquireAsync(SinglePermit, token).ConfigureAwait(false);
             if (!native.IsAcquired)
-            { throw Errors.Fail(ErrorCode.ResourceExhausted, Bound); }
+            {
+                throw Errors.Fail(ErrorCode.ResourceExhausted, Bound);
+            }
             token.ThrowIfCancellationRequested();
             result = new PlacementIntentAdmissionLease(this, native);
         }, failures).ConfigureAwait(false);
@@ -58,10 +60,14 @@ internal sealed class PlacementIntentAdmissions : IAsyncDisposable
         lock (gate)
         {
             if (calls <= NoCalls)
-            { throw Errors.Fail(ErrorCode.Corruption, Bound); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, Bound);
+            }
             calls--;
             if (closed && calls == NoCalls)
-            { joined.TrySetResult(); }
+            {
+                joined.TrySetResult();
+            }
         }
     }
 
@@ -75,11 +81,15 @@ internal sealed class PlacementIntentAdmissions : IAsyncDisposable
                 closed = true;
                 dispose = true;
                 if (calls == NoCalls)
-                { joined.TrySetResult(); }
+                {
+                    joined.TrySetResult();
+                }
             }
         }
         if (dispose)
-        { limiter.Dispose(); }
+        {
+            limiter.Dispose();
+        }
     }
 
     public async ValueTask DisposeAsync()

@@ -38,7 +38,9 @@ internal static class C1SubmissionJournalInspectionJson
     {
         ValidateRequestShape(bytes);
         try
-        { return C1SubmissionJournalInspectionValidation.Request(JsonSerializer.Deserialize(bytes, Context.C1SubmissionJournalInspectionRequest)); }
+        {
+            return C1SubmissionJournalInspectionValidation.Request(JsonSerializer.Deserialize(bytes, Context.C1SubmissionJournalInspectionRequest));
+        }
         catch (JsonException) { throw C1SubmissionJournalInspectionValidation.Invalid(); }
     }
     internal static byte[] SerializeRequest(C1SubmissionJournalInspectionRequest request)
@@ -46,7 +48,9 @@ internal static class C1SubmissionJournalInspectionJson
         _ = C1SubmissionJournalInspectionValidation.Request(request);
         var bytes = JsonSerializer.SerializeToUtf8Bytes(request, Context.C1SubmissionJournalInspectionRequest);
         if (bytes.Length > C1SubmissionJournalInspectionProtocol.MaximumRequestBytes)
-        { throw C1SubmissionJournalInspectionValidation.Invalid(); }
+        {
+            throw C1SubmissionJournalInspectionValidation.Invalid();
+        }
         return bytes;
     }
     internal static C1SubmissionJournalInspectionReceipt ReadReceipt(ReadOnlySpan<byte> bytes)
@@ -54,7 +58,9 @@ internal static class C1SubmissionJournalInspectionJson
         C1OutcomeInspectionJson.ValidateShape(bytes, ReceiptFields,
             C1SubmissionJournalInspectionProtocol.MaximumReceiptBytes, C1SubmissionJournalInspectionValidation.Invalid);
         try
-        { return C1SubmissionJournalInspectionValidation.Receipt(JsonSerializer.Deserialize(bytes, Context.C1SubmissionJournalInspectionReceipt)); }
+        {
+            return C1SubmissionJournalInspectionValidation.Receipt(JsonSerializer.Deserialize(bytes, Context.C1SubmissionJournalInspectionReceipt));
+        }
         catch (JsonException) { throw C1SubmissionJournalInspectionValidation.Invalid(); }
     }
     internal static byte[] SerializeReceipt(C1SubmissionJournalInspectionReceipt receipt)
@@ -63,10 +69,14 @@ internal static class C1SubmissionJournalInspectionJson
         var ceiling = checked(EncodedBytes(receipt.NativeHardState.Length) + EncodedBytes(receipt.NativeEntry.Length)
             + C1SubmissionJournalInspectionProtocol.MaximumMetadataBytes + LineFeedBytes);
         if (ceiling > C1SubmissionJournalInspectionProtocol.MaximumReceiptBytes)
-        { throw C1SubmissionJournalInspectionValidation.Invalid(); }
+        {
+            throw C1SubmissionJournalInspectionValidation.Invalid();
+        }
         var json = JsonSerializer.SerializeToUtf8Bytes(receipt, Context.C1SubmissionJournalInspectionReceipt);
         if (json.Length + LineFeedBytes > C1SubmissionJournalInspectionProtocol.MaximumReceiptBytes)
-        { throw C1SubmissionJournalInspectionValidation.Invalid(); }
+        {
+            throw C1SubmissionJournalInspectionValidation.Invalid();
+        }
         var line = new byte[json.Length + LineFeedBytes];
         json.CopyTo(line, NoItems);
         line[^LineFeedBytes] = LineFeed;
@@ -77,7 +87,9 @@ internal static class C1SubmissionJournalInspectionJson
     private static void ValidateRequestShape(ReadOnlySpan<byte> bytes)
     {
         if (bytes.IsEmpty || bytes.Length > C1SubmissionJournalInspectionProtocol.MaximumRequestBytes)
-        { throw C1SubmissionJournalInspectionValidation.Invalid(); }
+        {
+            throw C1SubmissionJournalInspectionValidation.Invalid();
+        }
         try
         {
             _ = StrictUtf8.GetCharCount(bytes);
@@ -89,39 +101,57 @@ internal static class C1SubmissionJournalInspectionJson
     private static void ValidateRequestFields(ReadOnlySpan<byte> bytes)
     {
         var reader = new Utf8JsonReader(bytes, new JsonReaderOptions
-        { MaxDepth = C1SubmissionJournalInspectionProtocol.MaximumJsonDepth });
+        {
+            MaxDepth = C1SubmissionJournalInspectionProtocol.MaximumJsonDepth
+        });
         if (!reader.Read() || reader.TokenType != JsonTokenType.StartObject)
-        { throw C1SubmissionJournalInspectionValidation.Invalid(); }
+        {
+            throw C1SubmissionJournalInspectionValidation.Invalid();
+        }
         var seen = new HashSet<string>(StringComparer.Ordinal);
         while (reader.Read() && reader.TokenType != JsonTokenType.EndObject)
         {
             if (reader.TokenType != JsonTokenType.PropertyName || reader.ValueIsEscaped)
-            { throw C1SubmissionJournalInspectionValidation.Invalid(); }
+            {
+                throw C1SubmissionJournalInspectionValidation.Invalid();
+            }
             var name = reader.GetString();
             if (name is null || Array.IndexOf(RequestFields, name) < NoItems || !seen.Add(name) || !reader.Read())
-            { throw C1SubmissionJournalInspectionValidation.Invalid(); }
+            {
+                throw C1SubmissionJournalInspectionValidation.Invalid();
+            }
             ValidateValue(ref reader, name);
         }
         if (reader.TokenType != JsonTokenType.EndObject || reader.Read() || seen.Count != RequestFields.Length)
-        { throw C1SubmissionJournalInspectionValidation.Invalid(); }
+        {
+            throw C1SubmissionJournalInspectionValidation.Invalid();
+        }
     }
     private static void ValidateValue(ref Utf8JsonReader reader, string name)
     {
         if (name != nameof(C1SubmissionJournalInspectionRequest.Voters))
         {
             if (reader.TokenType is not (JsonTokenType.Number or JsonTokenType.String))
-            { throw C1SubmissionJournalInspectionValidation.Invalid(); }
+            {
+                throw C1SubmissionJournalInspectionValidation.Invalid();
+            }
             return;
         }
         if (reader.TokenType != JsonTokenType.StartArray)
-        { throw C1SubmissionJournalInspectionValidation.Invalid(); }
+        {
+            throw C1SubmissionJournalInspectionValidation.Invalid();
+        }
         var count = NoItems;
         while (reader.Read() && reader.TokenType != JsonTokenType.EndArray)
         {
             if (reader.TokenType != JsonTokenType.String || ++count > C1SubmissionJournalInspectionProtocol.RequiredVoters)
-            { throw C1SubmissionJournalInspectionValidation.Invalid(); }
+            {
+                throw C1SubmissionJournalInspectionValidation.Invalid();
+            }
         }
         if (reader.TokenType != JsonTokenType.EndArray || count != C1SubmissionJournalInspectionProtocol.RequiredVoters)
-        { throw C1SubmissionJournalInspectionValidation.Invalid(); }
+        {
+            throw C1SubmissionJournalInspectionValidation.Invalid();
+        }
     }
 }

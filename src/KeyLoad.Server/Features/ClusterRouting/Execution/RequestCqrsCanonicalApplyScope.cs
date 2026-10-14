@@ -27,7 +27,9 @@ internal sealed class RequestCqrsCanonicalApplyScope : IDisposable
     {
         holding(this, true);
         try
-        { owner.HoldCanonical(claim); }
+        {
+            owner.HoldCanonical(claim);
+        }
         finally { holding(this, false); }
     }
     internal bool Matches(AppendRequest request)
@@ -36,17 +38,23 @@ internal sealed class RequestCqrsCanonicalApplyScope : IDisposable
     internal void IndependentAppendCompleted()
     {
         if (Interlocked.Exchange(ref appendObserved, Closed) == Open)
-        { owner.ObserveIndependentAppend(claim); }
+        {
+            owner.ObserveIndependentAppend(claim);
+        }
     }
     private void ObserveOutbound()
     {
         if (Interlocked.Exchange(ref outboundObserved, Closed) == Open)
-        { owner.ObserveCanonicalOutbound(claim); }
+        {
+            owner.ObserveCanonicalOutbound(claim);
+        }
     }
     public void Dispose()
     {
         if (Interlocked.Exchange(ref closed, Closed) != Open)
-        { return; }
+        {
+            return;
+        }
         try
         {
             network.Dispose();

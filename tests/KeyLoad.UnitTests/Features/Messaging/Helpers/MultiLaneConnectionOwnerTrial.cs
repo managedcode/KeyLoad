@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.UnitTests.Features.ClusterRouting;
 using TUnit.Assertions.Enums;
 
@@ -25,7 +25,9 @@ internal static class MultiLaneConnectionOwnerTrial
         await Assert.That(result.Outcomes.Length).IsEqualTo(LaneCount);
         await RequireOwnersAsync(scenario, request, token);
         for (var index = 0; index < LaneCount; index++)
-        { await MultiLaneReceiveNativeFlow.CommittedAsync(result.Outcomes[index], request.Requests[index]); }
+        {
+            await MultiLaneReceiveNativeFlow.CommittedAsync(result.Outcomes[index], request.Requests[index]);
+        }
         await ReplayAsync(scenario, request, result, token);
         await AckAsync(scenario, request, result, token);
         await HealthyAsync(scenario, token);
@@ -69,7 +71,10 @@ internal static class MultiLaneConnectionOwnerTrial
         var store = scenario.Fixture.Database.Store;
         var bytes = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
-        var retry = request with { RequestId = Guid.NewGuid() };
+        var retry = request with
+        {
+            RequestId = Guid.NewGuid()
+        };
         var reply = await InvokeAsync(scenario, OperationKind.ReceiveAcrossLanes, retry.RequestId, retry, token);
         await Assert.That(reply.Error).IsNull();
         await Assert.That(NativeSerialization.Serialize(MultiLaneReceiveNativeFlow.Value(reply).Outcomes)

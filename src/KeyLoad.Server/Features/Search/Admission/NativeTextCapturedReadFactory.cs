@@ -19,7 +19,9 @@ internal static class NativeTextCapturedReadFactory
         PrincipalRecord principal, ResourceDefinition resource, SearchRequest request, ReadExecutionBudget budget)
     {
         if (database.Store is not ZoneTreeStore owner)
-        { throw Errors.Fail(ErrorCode.UnsupportedCapability, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, Invalid);
+        }
         var authority = NativeSearchTerminalPrivacy.Capture(database, raw, principal, resource, request.Partition, budget);
         var projection = SelectedTextProjectionAdmission.Acquire(database, provider, raw, principal, resource, request, budget)
             ?? throw Errors.Fail(ErrorCode.HistoryUnavailable, Invalid);
@@ -44,7 +46,9 @@ internal static class NativeTextCapturedReadFactory
             budget.Check();
         }, failures);
         if (failures.Count != NoFailures)
-        { SettleFailedCapture(budget, grant, native, projection, captureUncertain, failures); }
+        {
+            SettleFailedCapture(budget, grant, native, projection, captureUncertain, failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
         return result!;
     }
@@ -64,7 +68,9 @@ internal static class NativeTextCapturedReadFactory
         if (cut.NodeId != original.NodeId || cut.Incarnation != original.Incarnation
             || cut.FormatVersion != original.DataEpoch || cut.ReadGeneration != original.ReadGeneration
             || cut.Position != original.Position)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, Invalid);
+        }
     }
 
     private static void SettleFailedCapture(ReadExecutionBudget budget, ReadExecutionBudgetReadGrant? grant,
@@ -72,9 +78,13 @@ internal static class NativeTextCapturedReadFactory
     {
         var beforeNative = failures.Count;
         if (native is not null)
-        { ServerFailureObserver.Observe(native.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(native.Dispose, failures);
+        }
         if (!uncertain && failures.Count == beforeNative && grant is { IsCompleted: false })
-        { ServerFailureObserver.Observe(() => budget.CompleteSettledReadGrant(grant), failures); }
+        {
+            ServerFailureObserver.Observe(() => budget.CompleteSettledReadGrant(grant), failures);
+        }
         ServerFailureObserver.Observe(projection.Dispose, failures);
     }
 }

@@ -12,13 +12,21 @@ internal static class RequestCqrsProbeJsonShape
         const int IndexOfValidationBoundary = 0;
 
         if (bytes.IsEmpty || bytes.Length > executionOptions.Value.MaximumRecordBytes)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         try
-        { _ = strictUtf8.GetCharCount(bytes); }
+        {
+            _ = strictUtf8.GetCharCount(bytes);
+        }
         catch (EncoderFallbackException)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         catch (DecoderFallbackException)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         var reader = new Utf8JsonReader(bytes, new JsonReaderOptions
         {
             MaxDepth = executionOptions.Value.MaximumJsonDepth,
@@ -26,23 +34,35 @@ internal static class RequestCqrsProbeJsonShape
             AllowTrailingCommas = false
         });
         if (!reader.Read() || reader.TokenType != JsonTokenType.StartObject)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         var seen = new HashSet<string>(StringComparer.Ordinal);
         while (reader.Read() && reader.TokenType != JsonTokenType.EndObject)
         {
             if (reader.TokenType != JsonTokenType.PropertyName || reader.ValueIsEscaped)
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             var name = reader.GetString();
             if (name is null || fields.IndexOf(name) < IndexOfValidationBoundary || !seen.Add(name) || !reader.Read())
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             if (name == nameof(RequestCqrsProbeArmRecord.Partition) && reader.TokenType == JsonTokenType.StartObject)
-            { RequestCqrsProbePartitionShape.Read(ref reader, executionOptions.Value.MaximumPrincipalBytes); }
+            {
+                RequestCqrsProbePartitionShape.Read(ref reader, executionOptions.Value.MaximumPrincipalBytes);
+            }
             else if (reader.TokenType is JsonTokenType.StartArray or JsonTokenType.StartObject
                 or JsonTokenType.EndArray or JsonTokenType.EndObject)
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
         }
         if (reader.TokenType != JsonTokenType.EndObject || reader.Read() || seen.Count != fields.Length)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
     }
 
     private static InvalidOperationException Invalid() => new(RequestCqrsProbeJson.InvalidRecord);

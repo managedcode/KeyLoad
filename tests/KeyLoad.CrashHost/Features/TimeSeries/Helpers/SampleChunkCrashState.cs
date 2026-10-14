@@ -15,7 +15,9 @@ internal static class SampleChunkCrashState
     {
         var receiptPath = Path.Combine(root, SampleChunkCrashContract.OriginalReceiptFile);
         if (new FileInfo(receiptPath).Length > database.Limits.MaxBatchBytes)
-        { throw new InvalidOperationException(SampleChunkCrashContract.Invalid); }
+        {
+            throw new InvalidOperationException(SampleChunkCrashContract.Invalid);
+        }
         var receipt = await File.ReadAllBytesAsync(receiptPath).ConfigureAwait(false);
         var window = database.ReadSampleChunkWindow(CrashFixtureValues.Principal,
             new(SampleChunkCrashContract.Partition, SampleChunkCrashContract.Set, SampleChunkCrashContract.Series,
@@ -38,7 +40,9 @@ internal static class SampleChunkCrashState
                 SampleChunkCrashContract.Set, SampleChunkCrashContract.Series);
             var page = view.Scan(prefix, SampleChunkCrashContract.MaximumRecords);
             if (page.HasMore)
-            { throw new InvalidOperationException(SampleChunkCrashContract.Invalid); }
+            {
+                throw new InvalidOperationException(SampleChunkCrashContract.Invalid);
+            }
             rows.AddRange(page.Records.Select(row =>
                 new[] { Convert.ToHexString(row.Key.Span), Convert.ToHexString(row.Value.Span) }));
         }
@@ -49,7 +53,9 @@ internal static class SampleChunkCrashState
     {
         var page = view.Scan([], SampleChunkCrashContract.MaximumRecords);
         if (page.HasMore)
-        { throw new InvalidOperationException(SampleChunkCrashContract.Invalid); }
+        {
+            throw new InvalidOperationException(SampleChunkCrashContract.Invalid);
+        }
         return Convert.ToHexString(JsonDefaults.Serialize(page.Records));
     });
 }

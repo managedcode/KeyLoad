@@ -45,7 +45,10 @@ internal static class NativeAnnPublicReservationFlow
                     _ = await owner.RunAsync(_ => owner.BuildAndPublish(pin, source, intent,
                         new AnnWorkBudget(read, seeds.Value.MaxWorkUnits)));
                     _ = await NativeAnnMaintenancePhaseAssertions.CommitReplayAsync(database, intent);
-                    var restore = pin with { Mode = AnnMaintenanceMode.Restore };
+                    var restore = pin with
+                    {
+                        Mode = AnnMaintenanceMode.Restore
+                    };
                     var current = AnnSeedCollector.CapturePinned(database.Database, NativeAnnWaitWholeFlow.Root,
                         restore, seeds, Read(database));
                     var index = owner.Acquire(restore, current);
@@ -111,7 +114,12 @@ internal static class NativeAnnPublicReservationFlow
             }, failures);
         }
         finally
-        { if (unexpected is not null) { ServerFailureObserver.Observe(unexpected.Dispose, failures); } }
+        {
+            if (unexpected is not null)
+            {
+                ServerFailureObserver.Observe(unexpected.Dispose, failures);
+            }
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

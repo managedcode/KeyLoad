@@ -27,9 +27,13 @@ internal static class DocumentSessionAuthorityFault
         fixture.Destination.Store.Commit((tx, _) =>
         {
             if (changed is null)
-            { tx.Delete(KeySpace.AppliedBytes); }
+            {
+                tx.Delete(KeySpace.AppliedBytes);
+            }
             else
-            { tx.Put(KeySpace.AppliedBytes, changed); }
+            {
+                tx.Put(KeySpace.AppliedBytes, changed);
+            }
             return true;
         });
     }

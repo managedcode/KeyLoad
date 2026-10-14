@@ -29,7 +29,13 @@ internal static class ControlledPartitionMovementPrepareFlow
         var position = source.Store.Position;
         var index = source.Journal.Log.State.LastIndex;
         var replay = await ControlledPartitionMovementVerifiedSubmit.SubmitAsync(source, runtime, admission,
-            request with { Envelope = request.Envelope with { Nonce = Guid.NewGuid() } }, cancellationToken);
+            request with
+            {
+                Envelope = request.Envelope with
+                {
+                    Nonce = Guid.NewGuid()
+                }
+            }, cancellationToken);
         await Assert.That(NativeSerialization.Serialize(replay).SequenceEqual(receipt)).IsTrue();
         await UnchangedAsync(source, target, sourceImage, targetImage, position, index);
         var changed = ControlledPartitionMovementPrepareRequest.Create(source, runtime, corpus, placement,

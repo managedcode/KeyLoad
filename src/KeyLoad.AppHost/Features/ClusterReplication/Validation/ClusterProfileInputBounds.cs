@@ -10,7 +10,9 @@ internal static class ClusterProfileInputBounds
         var root = Path.GetFullPath(dataRoot);
         var policy = Validated(options);
         if (root.Length > policy.MaximumPathCharacters)
-        { throw new InvalidOperationException(ClusterProfileStore.InvalidProfile); }
+        {
+            throw new InvalidOperationException(ClusterProfileStore.InvalidProfile);
+        }
         return root;
     }
 
@@ -18,14 +20,18 @@ internal static class ClusterProfileInputBounds
     {
         var policy = Validated(options);
         if (bytes.Length == EmptyProfileBytes || bytes.Length > policy.MaximumProfileBytes)
-        { throw new InvalidOperationException(ClusterProfileStore.InvalidProfile); }
+        {
+            throw new InvalidOperationException(ClusterProfileStore.InvalidProfile);
+        }
     }
 
     private static ClusterProfileExecutionOptions Validated(IOptions<ClusterProfileExecutionOptions> options)
     {
         var policy = options.Value;
         if (!policy.IsValid())
-        { throw new OptionsValidationException(Options.DefaultName, typeof(ClusterProfileExecutionOptions), [ClusterProfileExecutionOptions.ValidationMessage]); }
+        {
+            throw new OptionsValidationException(Options.DefaultName, typeof(ClusterProfileExecutionOptions), [ClusterProfileExecutionOptions.ValidationMessage]);
+        }
         return policy;
     }
 }

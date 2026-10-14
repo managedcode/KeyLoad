@@ -33,10 +33,14 @@ internal static class ControlledPartitionMovementRetireRequest
             ?? throw new InvalidOperationException("The actual original A source-retire grant is absent.");
         if (grant.GrantId != ControlledPartitionMovementRetirePhaseIds.Grant(batchOrdinal)
             || grant.PhaseCommandId != ControlledPartitionMovementRetirePhaseIds.Command(batchOrdinal))
-        { throw new InvalidOperationException("The original source-retire grant identity does not match."); }
+        {
+            throw new InvalidOperationException("The original source-retire grant identity does not match.");
+        }
         var envelope = Envelope(phase, phase.Stage, phase.PageOrdinal, originalExpiry, phase.Body)
             with
-        { Grant = grant };
+        {
+            Grant = grant
+        };
         return new(grant.PhaseCommandId, envelope, actualAuthorization.Journal,
             corpus.Control.Owner.VoterIds.First(), callerAddress, PartitionMovementTransportAction.Apply,
             Guid.Empty, ControlOrdinal);

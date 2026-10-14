@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Query;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.Search;
@@ -67,7 +67,9 @@ internal static class NativeTextIncrementalIntentContinuation
         finally
         {
             if (projection is not null)
-            { ServerFailureObserver.Observe(projection.Dispose, failures); }
+            {
+                ServerFailureObserver.Observe(projection.Dispose, failures);
+            }
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -77,7 +79,9 @@ internal static class NativeTextIncrementalIntentContinuation
     {
         var query = NativeTextBilingualAudit.Request(request.Consumer.Partition, text)
             with
-        { TextIndex = new(request.Consumer, request.IndexGeneration) };
+        {
+            TextIndex = new(request.Consumer, request.IndexGeneration)
+        };
         var actual = await search.SearchAsync(Root, query, token);
         RankedDocument[] expected = [new(new(new(request.Consumer.Partition, request.Collection, id), OriginalRevision, json, false, []), Score)];
         await Assert.That(JsonDefaults.Serialize(actual).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();

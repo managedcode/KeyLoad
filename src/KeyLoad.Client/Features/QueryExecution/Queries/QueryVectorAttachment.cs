@@ -24,11 +24,17 @@ internal static class QueryVectorAttachment
             || query.Projection.Length != AllFieldsCount
             || query.Projection[FirstSelection].Path != QueryPredicateTokens.Wildcard
             || query.Projection[FirstSelection].Alias != QueryPredicateTokens.Wildcard)
-        { throw QueryExpressions.Unsupported(); }
+        {
+            throw QueryExpressions.Unsupported();
+        }
         if (vector.IsDefaultOrEmpty)
-        { throw Errors.Fail(ErrorCode.Validation, InvalidVectorDetail); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, InvalidVectorDetail);
+        }
         if (vector.Length > context.Limits.MaximumConstantArrayItems)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, AttachmentLimitDetail); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, AttachmentLimitDetail);
+        }
         var path = context.Expressions.Field(field.Body, field.Parameters[QueryPredicateTokens.ParameterIndex]);
         return new(Version, new(partition, query.Collection, VectorField: path, Vector: vector,
             Space: space, Limit: query.Limit), Scope: scope);

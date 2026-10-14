@@ -6,8 +6,7 @@ namespace KeyLoad.UnitTests.Features.CodeQuality;
 
 internal static class NativeCoverageLineUnionAssertions
 {
-    private const string RootName = "coverage";
-    private const string PackageName = "name";
+        private const string PackageName = "name";
     private const string FileName = "filename";
     private const string ClassName = "name";
     private const string XmlLineElementName = "line";
@@ -28,14 +27,14 @@ internal static class NativeCoverageLineUnionAssertions
     private const string JsonLinesCoveredProperty = "linesCovered";
     private const string JsonLineProperty = "line";
     private const string BranchUnionValue = "unmeasured; Cobertura branch pairs do not identify individual native branch outcomes";
-    private const string InvalidReport = "The native Cobertura line-union output is invalid.";
+    internal const string InvalidReport = "The native Cobertura line-union output is invalid.";
 
     internal static async Task AssertMatchesNativeToolingProofAsync(string reportPath, long maximumBytes,
         JsonElement proof)
     {
         NativeCoverageOriginalInputUnionAssertions.AssertMatches(reportPath,
             proof.GetProperty(InputCountProperty).GetInt32(), maximumBytes);
-        var root = LoadRoot(reportPath, maximumBytes);
+        var root = NativeCoverageReportXmlRoot.LoadRoot(reportPath, maximumBytes);
         var summary = ReadUniqueLines(root);
         await Assert.That(ReadCount(root, LinesValidAttribute)).IsEqualTo(summary.RawCount);
         await Assert.That(ReadCount(root, LinesCoveredAttribute)).IsEqualTo(summary.RawCovered);
@@ -48,31 +47,18 @@ internal static class NativeCoverageLineUnionAssertions
         AssertUncovered(proof.GetProperty(UncoveredLocationsName), summary.Uncovered);
     }
 
-    private static XmlElement LoadRoot(string path, long maximumBytes)
-    {
-        var info = new FileInfo(path);
-        if (!info.Exists || info.Length <= 0 || info.Length > maximumBytes || info.LinkTarget is not null)
-        { throw new InvalidDataException(InvalidReport); }
-        var settings = new XmlReaderSettings
-        {
-            DtdProcessing = DtdProcessing.Prohibit,
-            XmlResolver = null,
-            MaxCharactersInDocument = maximumBytes
-        };
-        using var reader = XmlReader.Create(path, settings);
-        var document = new XmlDocument { XmlResolver = null };
-        document.Load(reader);
-        return document.DocumentElement is { LocalName: RootName } root ? root : throw new InvalidDataException(InvalidReport);
-    }
-
     private static LineSummary ReadUniqueLines(XmlElement root)
     {
         var all = new HashSet<LineIdentity>();
         var covered = new HashSet<LineIdentity>();
         foreach (XmlNode package in root.SelectNodes("./packages/package") ?? throw new InvalidDataException(InvalidReport))
-        { ReadPackage(package, all, covered); }
+        {
+            ReadPackage(package, all, covered);
+        }
         if (all.Count == 0)
-        { throw new InvalidDataException(InvalidReport); }
+        {
+            throw new InvalidDataException(InvalidReport);
+        }
         return new LineSummary(all.Count, covered.Count, CountClassLines(root), CountCoveredClassLines(root),
             BuildFileCounts(all, covered), all.Where(identity => !covered.Contains(identity)).ToHashSet());
     }
@@ -85,10 +71,15 @@ internal static class NativeCoverageLineUnionAssertions
         {
             var identity = new FileIdentity(line.Package, line.File);
             if (!files.TryGetValue(identity, out var counts))
-            { counts = new FileLineCounts(); files.Add(identity, counts); }
+            {
+                counts = new FileLineCounts();
+                files.Add(identity, counts);
+            }
             counts.Valid++;
             if (covered.Contains(line))
-            { counts.Covered++; }
+            {
+                counts.Covered++;
+            }
         }
         return files;
     }
@@ -105,13 +96,17 @@ internal static class NativeCoverageLineUnionAssertions
             var hits = file.GetProperty(JsonLinesCoveredProperty).GetInt64();
             if (!seen.Add(identity) || !expected.TryGetValue(identity, out var expectedCounts) ||
                 counts != expectedCounts.Valid || hits != expectedCounts.Covered)
-            { throw new InvalidDataException(InvalidReport); }
+            {
+                throw new InvalidDataException(InvalidReport);
+            }
             valid += counts;
             covered += hits;
         }
         if (seen.Count != expected.Count || valid != expected.Values.Sum(value => value.Valid) ||
             covered != expected.Values.Sum(value => value.Covered))
-        { throw new InvalidDataException(InvalidReport); }
+        {
+            throw new InvalidDataException(InvalidReport);
+        }
     }
 
     private static void AssertUncovered(JsonElement actual, HashSet<LineIdentity> expected)
@@ -122,19 +117,27 @@ internal static class NativeCoverageLineUnionAssertions
             var identity = new LineIdentity(location.GetProperty(ModuleName).GetString()!,
                 location.GetProperty(SourceName).GetString()!, location.GetProperty(JsonLineProperty).GetInt32());
             if (!seen.Add(identity) || !expected.Contains(identity))
-            { throw new InvalidDataException(InvalidReport); }
+            {
+                throw new InvalidDataException(InvalidReport);
+            }
         }
         if (!seen.SetEquals(expected))
-        { throw new InvalidDataException(InvalidReport); }
+        {
+            throw new InvalidDataException(InvalidReport);
+        }
     }
 
     private static void ReadPackage(XmlNode package, HashSet<LineIdentity> all, HashSet<LineIdentity> covered)
     {
         var packageName = package.Attributes?[PackageName]?.Value;
         if (string.IsNullOrWhiteSpace(packageName))
-        { throw new InvalidDataException(InvalidReport); }
+        {
+            throw new InvalidDataException(InvalidReport);
+        }
         foreach (XmlNode type in package.SelectNodes("./classes/class") ?? throw new InvalidDataException(InvalidReport))
-        { ReadClass(packageName, type, all, covered); }
+        {
+            ReadClass(packageName, type, all, covered);
+        }
     }
 
     private static void ReadClass(string packageName, XmlNode type, HashSet<LineIdentity> all,
@@ -142,7 +145,9 @@ internal static class NativeCoverageLineUnionAssertions
     {
         var fileName = type.Attributes?[FileName]?.Value;
         if (string.IsNullOrWhiteSpace(type.Attributes?[ClassName]?.Value) || string.IsNullOrWhiteSpace(fileName))
-        { throw new InvalidDataException(InvalidReport); }
+        {
+            throw new InvalidDataException(InvalidReport);
+        }
         foreach (XmlNode line in type.SelectNodes("./lines/" + XmlLineElementName) ?? throw new InvalidDataException(InvalidReport))
         {
             var number = ParsePositive(line.Attributes?[NumberName]?.Value);
@@ -150,7 +155,9 @@ internal static class NativeCoverageLineUnionAssertions
             var identity = new LineIdentity(packageName, fileName, number);
             all.Add(identity);
             if (hits > 0)
-            { covered.Add(identity); }
+            {
+                covered.Add(identity);
+            }
         }
     }
 
@@ -162,7 +169,12 @@ internal static class NativeCoverageLineUnionAssertions
         long covered = 0;
         foreach (XmlNode line in root.SelectNodes("./packages/package/classes/class/lines/" + XmlLineElementName)
             ?? throw new InvalidDataException(InvalidReport))
-        { if (ParseCount(line.Attributes?[HitsName]?.Value) > 0) { covered++; } }
+        {
+            if (ParseCount(line.Attributes?[HitsName]?.Value) > 0)
+            {
+                covered++;
+            }
+        }
         return covered;
     }
 
@@ -171,20 +183,34 @@ internal static class NativeCoverageLineUnionAssertions
     private static int ParsePositive(string? value)
     {
         if (!int.TryParse(value, NumberStyles.None, CultureInfo.InvariantCulture, out var result) || result <= 0)
-        { throw new InvalidDataException(InvalidReport); }
+        {
+            throw new InvalidDataException(InvalidReport);
+        }
         return result;
     }
 
     private static long ParseCount(string? value)
     {
         if (!long.TryParse(value, NumberStyles.None, CultureInfo.InvariantCulture, out var result) || result < 0)
-        { throw new InvalidDataException(InvalidReport); }
+        {
+            throw new InvalidDataException(InvalidReport);
+        }
         return result;
     }
 
     private readonly record struct LineIdentity(string Package, string File, int Number);
     private readonly record struct FileIdentity(string Package, string File);
-    private sealed class FileLineCounts { internal long Valid { get; set; } internal long Covered { get; set; } }
+    private sealed class FileLineCounts
+    {
+        internal long Valid
+        {
+            get; set;
+        }
+        internal long Covered
+        {
+            get; set;
+        }
+    }
     private sealed record LineSummary(long UniqueCount, long UniqueCovered, long RawCount, long RawCovered,
         Dictionary<FileIdentity, FileLineCounts> Files, HashSet<LineIdentity> Uncovered);
 }

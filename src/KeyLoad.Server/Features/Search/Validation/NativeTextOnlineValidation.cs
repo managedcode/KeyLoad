@@ -26,12 +26,16 @@ internal static class NativeTextOnlineValidation
         var checkpoint = session.Checkpoint ?? throw NativeTextErrors.Ownership();
         if (session.Intent is not null || session.Target is not null || session.CheckpointWork is not null
             || manifest.Bootstrap)
-        { throw NativeTextErrors.Mismatch(); }
+        {
+            throw NativeTextErrors.Mismatch();
+        }
         var fresh = CaptureFull(database, session);
         NativeTextOnlineCapture.RequireSameAuthority(session, fresh);
         if (checkpoint.Checkpoint != fresh.Checkpoint || checkpoint.Checkpoint != fresh.UpperSequence
             || manifest.ThroughSequence != fresh.UpperSequence)
-        { throw NativeTextErrors.Mismatch(); }
+        {
+            throw NativeTextErrors.Mismatch();
+        }
         NativeTextIncrementalSourceValidation.CompleteCorpus(manifest, fresh, session.Budget);
         NativeTextIncrementalPublishedInventory.Require(NativeTextOnlinePagePreparation.RequireOwner(session),
             manifest, session.Budget, options.NativeText);

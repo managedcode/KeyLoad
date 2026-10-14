@@ -34,7 +34,9 @@ internal static class EventVectorCoverageCaptureAdmission
                 || capture.RegisteredOwnerRows is null || capture.PlacementRows is null
                 || capture.AtomicPartitionRosterRows is null || capture.SourceHeadRows is null
                 || capture.RosterOriginRows is null)
-            { throw Errors.Fail(ErrorCode.OwnershipLost, EventVectorRemoteProtocol.Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, EventVectorRemoteProtocol.Invalid);
+            }
             _ = EventVectorEntryEncoding.Decode(capture.OriginalEncodedEntries, capture.EntryChecksum, admission);
             work.Check();
             admitted = true;
@@ -43,7 +45,9 @@ internal static class EventVectorCoverageCaptureAdmission
         finally
         {
             if (!admitted)
-            { EventVectorCaptureBuffers.Clear(capture); }
+            {
+                EventVectorCaptureBuffers.Clear(capture);
+            }
         }
     }
 }

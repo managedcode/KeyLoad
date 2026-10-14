@@ -15,10 +15,14 @@ internal static class QueueUnknownStateInspectionWholeFlow
             await KeyLoad.Server.ServerFailureObserver.ObserveAsync(
                 () => CompleteAsync(fixture, persistedState, failures, token), failures);
         }
-        catch (Exception error) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
-        catch (Exception error) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
+        catch (Exception error) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
+        catch (Exception error) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
         KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }
 
@@ -26,7 +30,9 @@ internal static class QueueUnknownStateInspectionWholeFlow
         List<Exception> failures, CancellationToken token)
     {
         if (persistedState is not (-1 or 8))
-        { throw new ArgumentOutOfRangeException(nameof(persistedState)); }
+        {
+            throw new ArgumentOutOfRangeException(nameof(persistedState));
+        }
         var state = QueueLifecycleConditionOperations.Seed(fixture);
         await QueueLifecycleConditionAssertions.Ready(fixture.Database, fixture.Store, state);
         var original = QueueLifecycleConditionAssertions.Capture(fixture.Store);
@@ -35,7 +41,10 @@ internal static class QueueUnknownStateInspectionWholeFlow
         var row = fixture.Store.Read(view => view.ReadOwnedValue(key))!;
         var metadata = NativeSerialization.Deserialize<MessageMetadata>(row);
         QueueLifecycleConditionOperations.Restore(fixture.Store, key,
-            NativeSerialization.Serialize(metadata with { State = (MessageState)persistedState }));
+            NativeSerialization.Serialize(metadata with
+            {
+                State = (MessageState)persistedState
+            }));
         var damaged = QueueLifecycleConditionAssertions.Capture(fixture.Store);
         await Assert.That(damaged.Position).IsEqualTo(original.Position + 1);
         await RefusalAsync(fixture.Database, fixture.Store, state, damaged);
@@ -50,7 +59,10 @@ internal static class QueueUnknownStateInspectionWholeFlow
                 await QueueLifecycleConditionAssertions.Same(cold, damaged);
                 await RefusalAsync(owner, cold, state, damaged);
                 QueueLifecycleConditionOperations.Restore(cold, key, row);
-                await QueueLifecycleConditionAssertions.Same(cold, original with { Position = original.Position + 2 });
+                await QueueLifecycleConditionAssertions.Same(cold, original with
+                {
+                    Position = original.Position + 2
+                });
                 await QueueLifecycleConditionAssertions.Ready(owner, cold, state);
                 await QueueTerminalInspectionAssertions.ReplayAsync(owner, cold, state);
                 await FinishAsync(owner, cold, state);

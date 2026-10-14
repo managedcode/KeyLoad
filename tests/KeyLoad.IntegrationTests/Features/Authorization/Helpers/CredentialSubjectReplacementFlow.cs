@@ -38,7 +38,9 @@ internal static class CredentialSubjectReplacementFlow
         global::ManagedCode.Communication.Result? original, CancellationToken token)
     {
         if (original is not { IsSuccess: true, Problem: null })
-        { throw new InvalidOperationException("The original credential configuration outcome is absent."); }
+        {
+            throw new InvalidOperationException("The original credential configuration outcome is absent.");
+        }
         var actual = await McpCallerAssertions.SdkStatusAsync(await root.ConfigureApiKeyAsync(command, credential, token));
         await SqlRf3Protocol.EqualAsync(original, actual);
     }

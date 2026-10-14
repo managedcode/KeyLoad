@@ -78,40 +78,58 @@ public sealed partial class DatabaseEngine
 
     private void RequireScheduleCapability(PrincipalRecord principal, QueueLaneRef lane)
     {
-        var dataPrincipal = principal with { ClusterAdministrator = false };
+        var dataPrincipal = principal with
+        {
+            ClusterAdministrator = false
+        };
         Authorization.Require(dataPrincipal, lane.Partition, lane.Queue,
             Capability.SchedulerManage | Capability.QueuePublish);
     }
 
     private void RequireQueueInspector(PrincipalRecord principal, QueueLaneRef lane)
     {
-        var dataPrincipal = principal with { ClusterAdministrator = false };
+        var dataPrincipal = principal with
+        {
+            ClusterAdministrator = false
+        };
         Authorization.Require(dataPrincipal, lane.Partition, lane.Queue, Capability.QueueInspect);
     }
 
     private void RequireQueueFieldWrites(PrincipalRecord principal, ResourceDefinition resource)
     {
-        var dataPrincipal = principal with { ClusterAdministrator = false };
+        var dataPrincipal = principal with
+        {
+            ClusterAdministrator = false
+        };
         foreach (var policy in resource.FieldPolicies)
         {
             Authorization.RequireFieldWrite(dataPrincipal, resource, policy.Path);
         }
         foreach (var policy in resource.HeaderPolicies)
         {
-            Authorization.RequireFieldWrite(dataPrincipal, resource with { FieldPolicies = resource.HeaderPolicies }, policy.Path);
+            Authorization.RequireFieldWrite(dataPrincipal, resource with
+            {
+                FieldPolicies = resource.HeaderPolicies
+            }, policy.Path);
         }
     }
 
     private void RequireQueueFieldUses(PrincipalRecord principal, ResourceDefinition resource)
     {
-        var dataPrincipal = principal with { ClusterAdministrator = false };
+        var dataPrincipal = principal with
+        {
+            ClusterAdministrator = false
+        };
         foreach (var policy in resource.FieldPolicies)
         {
             Authorization.RequireFieldUse(dataPrincipal, resource, policy.Path);
         }
         foreach (var policy in resource.HeaderPolicies)
         {
-            Authorization.RequireFieldUse(dataPrincipal, resource with { FieldPolicies = resource.HeaderPolicies }, policy.Path);
+            Authorization.RequireFieldUse(dataPrincipal, resource with
+            {
+                FieldPolicies = resource.HeaderPolicies
+            }, policy.Path);
         }
     }
 

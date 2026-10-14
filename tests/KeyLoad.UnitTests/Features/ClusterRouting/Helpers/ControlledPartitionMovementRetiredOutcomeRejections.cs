@@ -17,7 +17,10 @@ internal static class ControlledPartitionMovementRetiredOutcomeRejections
             Mutations = [new PutDocument(ControlledPartitionMovementCorpus.Collection,
             ControlledPartitionMovementCorpus.DocumentId, ChangedDocumentJson), .. original.Mutations.Skip(1)]
         };
-        var changedEpoch = original with { OwnershipEpoch = checked(original.OwnershipEpoch + ChangedEpochStep) };
+        var changedEpoch = original with
+        {
+            OwnershipEpoch = checked(original.OwnershipEpoch + ChangedEpochStep)
+        };
         var before = ControlledPartitionMovementRawImage.Bytes(source.Store);
         var position = source.Store.Position;
         var index = source.Journal.Log.State.LastIndex;

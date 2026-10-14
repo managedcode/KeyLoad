@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
@@ -14,7 +14,10 @@ internal sealed class NativeAuthenticationReaderFailureTests
     public async Task GenuinePrincipalReplyRetainsTypedIdentityAndAuthorityFields()
     {
         using var database = new TestDatabase();
-        var principal = McpNativeAuthenticationTests.Principal(database) with { Id = PrivateMarker };
+        var principal = McpNativeAuthenticationTests.Principal(database) with
+        {
+            Id = PrivateMarker
+        };
         var payload = NativeSerialization.Serialize(new GrainValue(principal));
 
         var shape = McpNativeAuthentication.Inspect(payload, UnitMcpOptions.Execution(), CancellationToken.None);
@@ -38,7 +41,10 @@ internal sealed class NativeAuthenticationReaderFailureTests
     public async Task OneByteTruncationReturnsFixedValidationFromInspectAndReadPrincipal()
     {
         using var database = new TestDatabase();
-        var principal = McpNativeAuthenticationTests.Principal(database) with { Id = PrivateMarker };
+        var principal = McpNativeAuthenticationTests.Principal(database) with
+        {
+            Id = PrivateMarker
+        };
         var valid = NativeSerialization.Serialize(new GrainValue(principal));
         var truncated = valid[..^TruncatedByteCount];
 
@@ -50,7 +56,10 @@ internal sealed class NativeAuthenticationReaderFailureTests
     public async Task OneByteTruncationReleasesAllRequestPoolsAfterAuthenticationFailure()
     {
         using var database = new TestDatabase();
-        var principal = McpNativeAuthenticationTests.Principal(database) with { Id = PrivateMarker };
+        var principal = McpNativeAuthenticationTests.Principal(database) with
+        {
+            Id = PrivateMarker
+        };
         var valid = NativeSerialization.Serialize(new GrainValue(principal));
         var truncated = valid[..^TruncatedByteCount];
         var limits = new McpMemoryLimits();

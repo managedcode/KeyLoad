@@ -1,8 +1,8 @@
 using System.Collections.Immutable;
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
-using KeyLoad.Orleans;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
@@ -24,7 +24,10 @@ internal sealed class PlacementIntentPersistenceExecution(PartitionHost partitio
             var prepared = partition.Database.CreateVerifiedPlacementIntentPersistence(trusted.CommandId,
                 principal.Id, request, empty, null);
             if (!partition.Database.RequiresFreshPlacementPersistence(prepared, work))
-            { result = prepared; return; }
+            {
+                result = prepared;
+                return;
+            }
             var claims = partition.Database.Verify<TenantPlacementPlanClaims>(request.SignedPlan,
                 partition.Database.Limits.MaxBatchBytes);
             PlacementCapacityWitnessValidation.Require(claims, clock.GetUtcNow());

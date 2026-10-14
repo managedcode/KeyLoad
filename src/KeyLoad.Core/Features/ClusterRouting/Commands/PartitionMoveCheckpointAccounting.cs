@@ -12,7 +12,9 @@ public sealed partial class DatabaseEngine
         if (admitted.Stage == PartitionMovePeerStage.Capture
             && header.OriginalCapturePhaseCommandId is { } captureId
             && captureId != admitted.OriginalPhaseCommandId)
-        { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict);
+        }
         var phaseBytes = checked((long)PartitionMoveParentKeys.Phase(header.Partition, header.MoveId,
             admitted.OriginalPhaseCommandId).Length + NativeSerialization.Measure(admitted));
         var infrastructureBytes = previous is null
@@ -37,12 +39,16 @@ public sealed partial class DatabaseEngine
         updated = MeasureMoveParentHeader(updated, baseBytes);
         if (updated.RetainedPhaseCount > movementCheckpoints.MaxPhaseRecordsPerMove
             || updated.RetainedMetadataBytes > movementCheckpoints.MaxRetainedMetadataBytesPerMove)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
+        }
         var payloadBytes = checked(phaseBytes + PartitionMoveParentKeys.Header(header.Partition, header.MoveId).Length
             + NativeSerialization.Measure(updated));
         payloadBytes = checked(payloadBytes + infrastructureBytes);
         if (payloadBytes > Limits.MaxBatchBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
+        }
         PartitionMoveParentStorage.WritePhase(transaction, admitted, Limits.MaxBatchBytes);
         PartitionMoveParentStorage.WriteHeader(transaction, updated, Limits.MaxBatchBytes);
         return updated;
@@ -55,8 +61,13 @@ public sealed partial class DatabaseEngine
         {
             var measured = checked(baseBytes + NativeSerialization.Measure(header));
             if (measured == header.RetainedMetadataBytes)
-            { return header; }
-            header = header with { RetainedMetadataBytes = measured };
+            {
+                return header;
+            }
+            header = header with
+            {
+                RetainedMetadataBytes = measured
+            };
         }
         throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority);
     }

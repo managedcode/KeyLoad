@@ -29,20 +29,27 @@ public sealed partial class DatabaseEngine
     private void RequireConfiguredMovementOwner()
     {
         if (configuredPhysicalOwner is null)
-        { throw PartitionMoveOwnerDiagnostic.Fail(PartitionMoveOwnerGuard.ConfiguredReceiver); }
+        {
+            throw PartitionMoveOwnerDiagnostic.Fail(PartitionMoveOwnerGuard.ConfiguredReceiver);
+        }
     }
 
     private void RequireUnconfiguredMovementAbsent(IKeyValueView view)
     {
         if (view is IPartitionMovementReadScope { MovementAuthorityAbsent: true })
-        { return; }
+        {
+            return;
+        }
         var scope = view as IPartitionMovementReadScope;
         var canReuse = scope?.CanReuseCommittedMovementAbsence ?? view is not IAtomicTransaction;
         var canPublish = scope?.CanPublishCommittedMovementAbsence ?? view is not IAtomicTransaction;
         var identity = Store.Identity;
         var cut = new MovementAuthorityCut(identity.NodeId, identity.Incarnation, identity.ReadGeneration, Store.Position);
         if (canReuse && HasMovementAbsence(cut))
-        { scope?.MovementAuthorityAbsent = true; return; }
+        {
+            scope?.MovementAuthorityAbsent = true;
+            return;
+        }
         foreach (var prefix in MovementAuthorityPrefixes)
         {
             view.VisitRange(prefix, MovementFirstAuthorityRecord, static (_, _) =>
@@ -50,7 +57,9 @@ public sealed partial class DatabaseEngine
         }
         scope?.MovementAuthorityAbsent = true;
         if (canPublish)
-        { PublishMovementAbsence(cut); }
+        {
+            PublishMovementAbsence(cut);
+        }
     }
 
     private void ValidateMovementRestoration()

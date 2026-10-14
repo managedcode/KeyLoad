@@ -23,22 +23,32 @@ internal static class SampleChunkGenerationReader
                         work.Check();
                         SampleChunkWindowValidation.Record(record, window, series);
                         if (record.Sequence > manifest.SourceSequence)
-                        { throw Errors.Fail(ErrorCode.Corruption, SampleChunkLifecycleProtocol.Corrupt); }
+                        {
+                            throw Errors.Fail(ErrorCode.Corruption, SampleChunkLifecycleProtocol.Corrupt);
+                        }
                     }
                     records.AddRange(decoded);
                 }, charge.Charge);
             if (!present)
-            { throw Errors.Fail(ErrorCode.Corruption, SampleChunkLifecycleProtocol.Corrupt); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, SampleChunkLifecycleProtocol.Corrupt);
+            }
         }
         if (records.Count != manifest.RecordCount)
-        { throw Errors.Fail(ErrorCode.Corruption, SampleChunkLifecycleProtocol.Corrupt); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, SampleChunkLifecycleProtocol.Corrupt);
+        }
         if (!records.Select(record => record.TagsJson).Distinct(StringComparer.Ordinal)
             .ToHashSet(StringComparer.Ordinal).SetEquals(manifest.TagJsonValues))
-        { throw Errors.Fail(ErrorCode.Corruption, SampleChunkLifecycleProtocol.Corrupt); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, SampleChunkLifecycleProtocol.Corrupt);
+        }
         AddCorrections(view, partition, set, series, window, manifest, options.Value.MaximumChunkWindowRecords, charge, records, work);
         if (records.Select(record => record.Sequence).Distinct().Count() != records.Count
             || records.Select(record => record.Sample.EventId).Distinct(StringComparer.Ordinal).Count() != records.Count)
-        { throw Errors.Fail(ErrorCode.Corruption, SampleChunkLifecycleProtocol.Corrupt); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, SampleChunkLifecycleProtocol.Corrupt);
+        }
         return records.OrderBy(record => record.Sample.Timestamp.UtcTicks).ThenBy(record => record.Sequence).ToArray();
     }
 
@@ -47,7 +57,9 @@ internal static class SampleChunkGenerationReader
         SampleChunkReadCharge charge, List<SampleRecord> records, SampleChunkWork work)
     {
         if (manifest.RecordCount + window.CorrectionSequences.Length > maximumRecords)
-        { throw Errors.Fail(ErrorCode.Corruption, SampleChunkLifecycleProtocol.Corrupt); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, SampleChunkLifecycleProtocol.Corrupt);
+        }
         foreach (var sequence in window.CorrectionSequences)
         {
             work.Check();
@@ -55,7 +67,9 @@ internal static class SampleChunkGenerationReader
                 SampleChunkKeys.Correction(partition, set, series, window.WindowId, sequence), charge);
             SampleChunkWindowValidation.Record(record, window, series);
             if (record.Sequence != sequence || sequence <= manifest.SourceSequence)
-            { throw Errors.Fail(ErrorCode.Corruption, SampleChunkLifecycleProtocol.Corrupt); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, SampleChunkLifecycleProtocol.Corrupt);
+            }
             records.Add(record);
         }
     }

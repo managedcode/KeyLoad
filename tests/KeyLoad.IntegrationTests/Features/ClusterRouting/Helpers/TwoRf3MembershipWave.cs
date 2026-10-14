@@ -10,7 +10,10 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
     internal readonly TwoRf3MembershipCapacity capacity = new();
     internal DistributedApplication? application;
     internal KeyLoad.IntegrationTests.Features.Messaging.RemoteTransferStartupCallbacks? startupCallbacks;
-    internal ContainerRuntimeControl? RemoteRuntimeOwner { get; set; }
+    internal ContainerRuntimeControl? RemoteRuntimeOwner
+    {
+        get; set;
+    }
     internal string? dataRoot;
     private bool dataRootOwned;
     internal bool startAttempted;
@@ -23,12 +26,18 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
     internal readonly bool remotePartitionQueries;
     internal readonly bool queryProbe;
     internal readonly bool nativeMembershipDiagnostics;
-    internal Microsoft.Extensions.Options.IOptions<KeyLoad.Query.QueryExecutionOptions>? AnnReadExecution { get; init; }
+    internal Microsoft.Extensions.Options.IOptions<KeyLoad.Query.QueryExecutionOptions>? AnnReadExecution
+    {
+        get; init;
+    }
     internal NativeMembershipDiagnosticFixture? nativeMembershipControls;
     internal bool nativeCanonicalCutsSelected;
     internal NativeCanonicalModelCutFixture? canonicalCutControls;
     internal readonly bool protectedDocuments;
-    internal bool TenantCapacityPlacement { get; init; }
+    internal bool TenantCapacityPlacement
+    {
+        get; init;
+    }
     internal readonly bool activationIsolation;
     internal ReplicaIsolationOwner? IsolationOwner;
     internal string? remoteTransferPrincipalId;
@@ -39,7 +48,10 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
     internal NativeBlobWireProbeFixture? nativeBlobWireControls;
     internal MovementFrameObservationFixture? frameObservation;
     internal bool nativeDiscoveryOmissionSelected;
-    internal bool EventVectorReservedProbe { get; set; }
+    internal bool EventVectorReservedProbe
+    {
+        get; set;
+    }
     internal KeyLoad.IntegrationTests.Features.StorageRecovery.NativeCapabilityOmissionRf3Fixture? nativeDiscoveryOmission;
     internal readonly LocalRf3ImageSelection.Selection? localImageSelection;
     internal LocalRf3ImageIdentity.Identity? localImageIdentity;
@@ -49,7 +61,9 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
     {
         if (nativeMembershipDiagnostics && (remote || query || probe || protectedDocument
             || isolateActivation || maximumBatchBytes is not null))
-        { throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState); }
+        {
+            throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState);
+        }
         localImageSelection = selection;
         registerPhysicalOwners = register;
         remoteDocumentReads = remote;
@@ -64,7 +78,10 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
     internal string OwnedDataRoot => dataRoot
         ?? throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState);
 
-    internal string? MovementTargetPeerKey { get; set; }
+    internal string? MovementTargetPeerKey
+    {
+        get; set;
+    }
 
     internal NodeEpochRf3Profile Profile
     {
@@ -130,26 +147,38 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
     {
         var failures = new List<Exception>();
         if (queryControls is { } controls)
-        { ServerFailureObserver.Observe(controls.StopAdmission, failures); }
+        {
+            ServerFailureObserver.Observe(controls.StopAdmission, failures);
+        }
         NativeMembershipDiagnosticWaveLifecycle.StopAdmission(this, failures);
         NativeBlobWireWaveLifecycle.StopAdmission(this, failures);
         if (IsolationOwner is { } namespaceOwner)
-        { await ServerFailureObserver.ObserveAsync(() => namespaceOwner.RestoreAsync(CancellationToken.None), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => namespaceOwner.RestoreAsync(CancellationToken.None), failures);
+        }
         await DisposeApplicationAsync(failures).ConfigureAwait(false);
         if (CanCheckLocks)
-        { ServerFailureObserver.Observe(AssertAllNodeLocksReleased, failures); }
+        {
+            ServerFailureObserver.Observe(AssertAllNodeLocksReleased, failures);
+        }
         await NativeCanonicalModelCutWaveLifecycle.JoinAsync(this, failures).ConfigureAwait(false);
         if (applicationDisposed && nodeLocksReleased && queryControls is { } joinedControls)
-        { await ServerFailureObserver.ObserveAsync(joinedControls.DisposeAfterResourcesJoinedAsync, failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(joinedControls.DisposeAfterResourcesJoinedAsync, failures).ConfigureAwait(false);
+        }
         if (IsolationOwner is { } retiredNamespace)
         {
             await ServerFailureObserver.ObserveAsync(() => retiredNamespace.SettleAfterStopAsync(
             applicationDisposed && nodeLocksReleased, CancellationToken.None), failures);
         }
         if (applicationDisposed && nodeLocksReleased && frameObservation is { } joinedFrames)
-        { ServerFailureObserver.Observe(() => joinedFrames.DeleteAfterOwnerJoin(this), failures); }
+        {
+            ServerFailureObserver.Observe(() => joinedFrames.DeleteAfterOwnerJoin(this), failures);
+        }
         if (applicationDisposed && nodeLocksReleased && nativeDiscoveryOmission is { } joinedDiscovery)
-        { await ServerFailureObserver.ObserveAsync(() => joinedDiscovery.DisposeAfterOwnersJoinedAsync(this), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => joinedDiscovery.DisposeAfterOwnersJoinedAsync(this), failures).ConfigureAwait(false);
+        }
         await NativeMembershipDiagnosticWaveLifecycle.JoinAsync(this, failures).ConfigureAwait(false);
         NativeBlobWireWaveLifecycle.DeleteJoined(this, failures);
         await TwoRf3MembershipLocalImageLifetime.JoinAsync(this, failures).ConfigureAwait(false);
@@ -158,7 +187,10 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
             var root = dataRoot!;
             ServerFailureObserver.Observe(() => Directory.Delete(root, recursive: true), failures);
             if (failures.Count == 0)
-            { dataRoot = null; dataRootOwned = false; }
+            {
+                dataRoot = null;
+                dataRootOwned = false;
+            }
         }
         MovementTargetPeerKey = null;
         cleanupFailed |= failures.Count > 0;
@@ -173,17 +205,26 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
         NativeCanonicalModelCutWaveLifecycle.StopAdmission(this, failures);
         var owned = application;
         if (owned is null)
-        { return; }
+        {
+            return;
+        }
         var before = failures.Count;
         using var deadline = new CancellationTokenSource(TwoRf3MembershipProtocol.CleanupDeadline, TimeProvider.System);
         await ServerFailureObserver.ObserveAsync(() => owned.StopAsync(deadline.Token), failures).ConfigureAwait(false);
         await ServerFailureObserver.ObserveAsync(() => owned.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         if (failures.Count == before)
-        { application = null; applicationDisposed = true; }
+        {
+            application = null;
+            applicationDisposed = true;
+        }
         else
-        { cleanupFailed = true; }
+        {
+            cleanupFailed = true;
+        }
         if (startupCallbacks is { } capture)
-        { await ServerFailureObserver.ObserveAsync(capture.Join, failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(capture.Join, failures).ConfigureAwait(false);
+        }
     }
 
     internal bool CanCheckLocks => startAttempted && applicationDisposed && !nodeLocksReleased
@@ -212,7 +253,9 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
         dataRoot = path;
         dataRootOwned = true;
         if (!OperatingSystem.IsWindows())
-        { File.SetUnixFileMode(path, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute); }
+        {
+            File.SetUnixFileMode(path, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+        }
         return path;
     }
     internal Task RestartJoinedAsync(CancellationToken cancellationToken)

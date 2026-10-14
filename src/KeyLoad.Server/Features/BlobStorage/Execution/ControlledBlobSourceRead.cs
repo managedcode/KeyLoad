@@ -1,7 +1,7 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.BlobStorage;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.Server.Features.DocumentStorage;
 using Microsoft.Extensions.Options;
@@ -22,10 +22,14 @@ internal sealed class ControlledBlobSourceRead(OrleansNode node, PartitionHost p
         var work = new ReadExecutionBudget(limits, clock, token);
         var expiry = clock.GetUtcNow() + TimeSpan.FromSeconds(limits.Value.QueryDeadlineSeconds);
         if (expiry > envelope.ExpiresAt)
-        { expiry = envelope.ExpiresAt; }
+        {
+            expiry = envelope.ExpiresAt;
+        }
         var frame = partition.Database.TryCaptureControlledBlobRead(principalId, purpose, nativeRequest, expiry, work);
         if (frame is null)
-        { return (false, null); }
+        {
+            return (false, null);
+        }
         var observed = await ReadFrameAsync(envelope.RequestId, frame, work, token).ConfigureAwait(false);
         await partition.Coordinator.ReadBarrierAsync(token).ConfigureAwait(false);
         partition.Database.ValidateControlledBlobRead(frame, work);
@@ -38,7 +42,9 @@ internal sealed class ControlledBlobSourceRead(OrleansNode node, PartitionHost p
     {
         var observed = await ReadFrameAsync(ingressRequestId, frame, work, token).ConfigureAwait(false);
         if (!observed.OutcomeValidated || observed.NativeValue is not null || frame.OriginalOutcome is null)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof);
+        }
         await partition.Coordinator.ReadBarrierAsync(token).ConfigureAwait(false);
         partition.Database.ValidateControlledBlobOutcome(frame, work);
         work.Check();
@@ -53,7 +59,9 @@ internal sealed class ControlledBlobSourceRead(OrleansNode node, PartitionHost p
         var maximumBytes = Math.Min(limits.Value.MaxBatchBytes,
             limits.Value.MaxQueryReadBytes - checked(metadata * RevalidationPasses));
         if (maximumBytes <= MinimumBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, RemoteDocumentProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, RemoteDocumentProtocol.Unavailable);
+        }
         var maximumRecords = Math.Min(limits.Value.MaxBatchMutations, limits.Value.MaxScanRecords);
         var grant = work.CreateReadGrant(maximumBytes, maximumRecords);
         var maximumReply = Math.Min(limits.Value.MaxBatchBytes, RemoteDocumentProtocol.MaximumBodyBytes);
@@ -76,7 +84,9 @@ internal sealed class ControlledBlobSourceRead(OrleansNode node, PartitionHost p
         if (!settings.RemoteDocumentReads || !settings.RegisterPhysicalOwners
             || settings.Role != PhysicalGroupTrustRole.Control
             || !PhysicalOwnerEntryValidation.SameOwner(frame.Publication.Destination, destination.Owner))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentProtocol.Unavailable);
+        }
         return destination;
     }
 }

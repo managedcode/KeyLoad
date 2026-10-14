@@ -10,9 +10,13 @@ internal static class ScriptDomInsertScalar
         checkBudget();
         token.ThrowIfCancellationRequested();
         if (depth > maximumDepth)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, DepthExceeded); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, DepthExceeded);
+        }
         if (value is Dom.PrimaryExpression { Collation: not null })
-        { throw ScriptDomOperationErrors.Unsupported(); }
+        {
+            throw ScriptDomOperationErrors.Unsupported();
+        }
         switch (value)
         {
             case Dom.StringLiteral text:
@@ -41,7 +45,9 @@ internal static class ScriptDomInsertScalar
     {
         if (value.ValueKind is not (JsonValueKind.String or JsonValueKind.Number or JsonValueKind.True
             or JsonValueKind.False or JsonValueKind.Null))
-        { throw ScriptDomOperationErrors.Invalid(); }
+        {
+            throw ScriptDomOperationErrors.Invalid();
+        }
         value.WriteTo(writer);
     }
     private static void Unary(Utf8JsonWriter writer, Dom.UnaryExpression unary)
@@ -49,7 +55,9 @@ internal static class ScriptDomInsertScalar
         if (unary.Expression is not (Dom.IntegerLiteral or Dom.NumericLiteral or Dom.RealLiteral)
             || unary.Expression is not Dom.Literal number
             || unary.UnaryExpressionType is not (Dom.UnaryExpressionType.Positive or Dom.UnaryExpressionType.Negative))
-        { throw ScriptDomOperationErrors.Unsupported(); }
+        {
+            throw ScriptDomOperationErrors.Unsupported();
+        }
         Number(writer, (unary.UnaryExpressionType == Dom.UnaryExpressionType.Negative ? Negative : string.Empty) + number.Value);
     }
     private static void Number(Utf8JsonWriter writer, string value)
@@ -63,11 +71,17 @@ internal static class ScriptDomInsertScalar
         var significant = prefix;
         while (significant + NextDigit < text.Length && text[significant] == ZeroDigit
             && char.IsAsciiDigit(text[significant + NextDigit]))
-        { significant++; }
+        {
+            significant++;
+        }
         if (significant > prefix)
-        { text = prefix == Empty ? text[significant..] : Negative + text[significant..]; }
+        {
+            text = prefix == Empty ? text[significant..] : Negative + text[significant..];
+        }
         try
-        { writer.WriteRawValue(text, skipInputValidation: false); }
+        {
+            writer.WriteRawValue(text, skipInputValidation: false);
+        }
         catch (JsonException) { throw ScriptDomOperationErrors.Invalid(); }
     }
     private const int Empty = 0;

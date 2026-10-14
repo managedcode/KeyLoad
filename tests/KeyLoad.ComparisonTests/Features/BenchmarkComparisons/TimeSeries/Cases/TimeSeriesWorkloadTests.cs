@@ -35,7 +35,10 @@ internal sealed class TimeSeriesWorkloadTests
     public async Task BucketOracleMatchesOutOfOrderLibraryInputAndInclusiveBucketBoundaries()
     {
         var workload = TimeSeriesComparisonWorkloadFactory.Create("oracle-run");
-        var reordered = workload with { Samples = [.. workload.Samples.Reverse()] };
+        var reordered = workload with
+        {
+            Samples = [.. workload.Samples.Reverse()]
+        };
         var actual = ManagedCodeTimeSeriesAggregation.Aggregate(reordered);
         var expected = Oracle(reordered.Samples, workload.BucketWidth);
 

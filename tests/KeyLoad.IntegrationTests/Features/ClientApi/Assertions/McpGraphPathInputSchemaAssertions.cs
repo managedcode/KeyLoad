@@ -33,9 +33,13 @@ internal static class McpGraphPathInputSchemaAssertions
     internal static async Task VerifyAsync(string toolName, JsonElement request, JsonElement root)
     {
         if (toolName == DirectTool)
-        { await VerifyDirectAsync(request, root); }
+        {
+            await VerifyDirectAsync(request, root);
+        }
         else
-        { await VerifySqlAsync(request, root); }
+        {
+            await VerifySqlAsync(request, root);
+        }
     }
 
     private static async Task VerifyDirectAsync(JsonElement request, JsonElement root)
@@ -48,7 +52,9 @@ internal static class McpGraphPathInputSchemaAssertions
         await VerifyEntityAsync(properties.GetProperty(McpDiscoveryProtocol.FromEntity), root);
         await VerifyEntityAsync(properties.GetProperty(McpDiscoveryProtocol.To), root);
         foreach (var field in new[] { McpDiscoveryProtocol.MaxDepth, McpDiscoveryProtocol.MaxVertices, McpDiscoveryProtocol.MaxEdges })
-        { await VerifyTypeAsync(properties.GetProperty(field), McpDiscoveryProtocol.Integer, root); }
+        {
+            await VerifyTypeAsync(properties.GetProperty(field), McpDiscoveryProtocol.Integer, root);
+        }
         var labels = Resolve(root, properties.GetProperty(McpDiscoveryProtocol.Labels));
         await VerifyExactTypeSetAsync(labels, root, McpDiscoveryProtocol.Array, McpDiscoveryProtocol.Null);
         var array = FindType(labels, McpDiscoveryProtocol.Array, root);
@@ -93,7 +99,9 @@ internal static class McpGraphPathInputSchemaAssertions
         await VerifyFieldsAsync(root, schema, PartitionProperties, PartitionRequired);
         var properties = schema.GetProperty(McpDiscoveryProtocol.Properties);
         foreach (var field in PartitionRequired)
-        { await VerifyScalarTypeAsync(properties.GetProperty(field), McpDiscoveryProtocol.String, root); }
+        {
+            await VerifyScalarTypeAsync(properties.GetProperty(field), McpDiscoveryProtocol.String, root);
+        }
         await VerifyExactTypeSetAsync(properties.GetProperty(McpDiscoveryProtocol.AtomicPartitionId), root,
             McpDiscoveryProtocol.String, McpDiscoveryProtocol.Null);
     }
@@ -150,12 +158,16 @@ internal static class McpGraphPathInputSchemaAssertions
         if (schema.TryGetProperty(McpDiscoveryProtocol.Type, out var type)
             && ((type.ValueKind == JsonValueKind.String && type.GetString() == expected)
                 || (type.ValueKind == JsonValueKind.Array && type.EnumerateArray().Any(item => item.GetString() == expected))))
-        { return true; }
+        {
+            return true;
+        }
         foreach (var keyword in new[] { McpDiscoveryProtocol.AnyOf, McpDiscoveryProtocol.OneOf })
         {
             if (schema.TryGetProperty(keyword, out var variants) && variants.ValueKind == JsonValueKind.Array
                 && variants.EnumerateArray().Any(variant => ContainsType(variant, expected, root)))
-            { return true; }
+            {
+                return true;
+            }
         }
         return false;
     }
@@ -167,15 +179,21 @@ internal static class McpGraphPathInputSchemaAssertions
             && ((type.ValueKind == JsonValueKind.String && type.GetString() == expected)
                 || (type.ValueKind == JsonValueKind.Array && type.EnumerateArray()
                     .Any(item => item.ValueKind == JsonValueKind.String && item.GetString() == expected))))
-        { return schema; }
+        {
+            return schema;
+        }
         foreach (var keyword in new[] { McpDiscoveryProtocol.AnyOf, McpDiscoveryProtocol.OneOf })
         {
             if (!schema.TryGetProperty(keyword, out var variants) || variants.ValueKind != JsonValueKind.Array)
-            { continue; }
+            {
+                continue;
+            }
             foreach (var variant in variants.EnumerateArray())
             {
                 if (ContainsType(variant, expected, root))
-                { return FindType(variant, expected, root); }
+                {
+                    return FindType(variant, expected, root);
+                }
             }
         }
         throw new InvalidOperationException(InvalidSchemaType);
@@ -199,13 +217,19 @@ internal static class McpGraphPathInputSchemaAssertions
         {
             var pointer = reference.GetString();
             if (pointer is null || !pointer.StartsWith("#/", StringComparison.Ordinal))
-            { throw new InvalidOperationException("The path schema reference is not local."); }
+            {
+                throw new InvalidOperationException("The path schema reference is not local.");
+            }
             schema = root;
             foreach (var segment in pointer[2..].Split('/'))
-            { schema = schema.GetProperty(segment.Replace("~1", "/", StringComparison.Ordinal).Replace("~0", "~", StringComparison.Ordinal)); }
+            {
+                schema = schema.GetProperty(segment.Replace("~1", "/", StringComparison.Ordinal).Replace("~0", "~", StringComparison.Ordinal));
+            }
         }
         if (schema.TryGetProperty(ReferenceKeyword, out _))
-        { throw new InvalidOperationException("The path schema reference is too deep."); }
+        {
+            throw new InvalidOperationException("The path schema reference is too deep.");
+        }
         return schema;
     }
 }

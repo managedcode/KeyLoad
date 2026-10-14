@@ -23,9 +23,18 @@ internal sealed class AtomicPartitionPlacementCommandTests
             AtomicPartitionPlacementTestSupport.RowKey(Partition));
         var retry = fixture.Database.Apply(original);
         var changed = fixture.Database.Apply(Operation(fixture,
-            request with { PhysicalShardId = Guid.NewGuid() }, commandId));
-        var stale = Apply(fixture, request with { ExpectedRevision = 0 }, Guid.NewGuid());
-        var exactNoop = Apply(fixture, request with { ExpectedRevision = 1 }, Guid.NewGuid());
+            request with
+            {
+                PhysicalShardId = Guid.NewGuid()
+            }, commandId));
+        var stale = Apply(fixture, request with
+        {
+            ExpectedRevision = 0
+        }, Guid.NewGuid());
+        var exactNoop = Apply(fixture, request with
+        {
+            ExpectedRevision = 1
+        }, Guid.NewGuid());
         var after = AtomicPartitionPlacementTestSupport.ReadValue(fixture,
             AtomicPartitionPlacementTestSupport.DirectoryKey());
         var rowAfter = AtomicPartitionPlacementTestSupport.ReadValue(fixture,
@@ -74,7 +83,10 @@ internal sealed class AtomicPartitionPlacementCommandTests
         var before = AtomicPartitionPlacementTestSupport.ReadValue(fixture,
             AtomicPartitionPlacementTestSupport.DirectoryKey());
 
-        var result = Apply(fixture, Request(0, AtomicPartitionPlacementTestSupport.ShardId) with { Version = 2 },
+        var result = Apply(fixture, Request(0, AtomicPartitionPlacementTestSupport.ShardId) with
+        {
+            Version = 2
+        },
             Guid.NewGuid());
         var after = AtomicPartitionPlacementTestSupport.ReadValue(fixture,
             AtomicPartitionPlacementTestSupport.DirectoryKey());
@@ -93,7 +105,9 @@ internal sealed class AtomicPartitionPlacementCommandTests
         var finalPartition = new PartitionRef("tenant-final", "db", "domain", FinalPartitionKey);
         var final = Apply(fixture, Request(AtomicPartitionPlacementTestSupport.MaximumAssignments - 1,
             AtomicPartitionPlacementTestSupport.ShardId) with
-        { Partition = finalPartition }, Guid.NewGuid());
+        {
+            Partition = finalPartition
+        }, Guid.NewGuid());
         var directoryBytes = AtomicPartitionPlacementTestSupport.ReadValue(fixture,
             AtomicPartitionPlacementTestSupport.DirectoryKey());
         var directory = fixture.Store.Read(view => view.GetRecord<AtomicPartitionPlacementDirectoryV1>(
@@ -101,7 +115,9 @@ internal sealed class AtomicPartitionPlacementCommandTests
         var overLimitPartition = new PartitionRef("tenant-over", "db", "domain", OverLimitPartitionKey);
         var overLimit = Apply(fixture, Request(AtomicPartitionPlacementTestSupport.MaximumAssignments,
             AtomicPartitionPlacementTestSupport.ShardId) with
-        { Partition = overLimitPartition }, Guid.NewGuid());
+        {
+            Partition = overLimitPartition
+        }, Guid.NewGuid());
         var after = AtomicPartitionPlacementTestSupport.ReadValue(fixture,
             AtomicPartitionPlacementTestSupport.DirectoryKey());
         var absentRow = AtomicPartitionPlacementTestSupport.ReadValue(fixture,
@@ -157,7 +173,12 @@ internal sealed class AtomicPartitionPlacementCommandTests
 
                 var healthy = Apply(fixture, request, commandId);
                 await Assert.That(healthy.Error).IsNull();
-                var expected = witnessBefore with { DirectoryRevision = 1, Revision = 1, IsFallback = false };
+                var expected = witnessBefore with
+                {
+                    DirectoryRevision = 1,
+                    Revision = 1,
+                    IsFallback = false
+                };
                 var bound = fixture.Database.ReadAtomicPartitionPlacement(PhysicalShardCatalogFixture.RootPrincipalId,
                     AtomicPartitionPlacementTestSupport.Read(Partition));
                 await Assert.That(NativeSerialization.Serialize(bound)
@@ -172,7 +193,9 @@ internal sealed class AtomicPartitionPlacementCommandTests
         finally
         {
             if (fixture is not null)
-            { KeyLoad.Server.ServerFailureObserver.Observe(fixture.Dispose, failures); }
+            {
+                KeyLoad.Server.ServerFailureObserver.Observe(fixture.Dispose, failures);
+            }
         }
         KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }

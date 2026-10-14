@@ -18,7 +18,10 @@ internal static class SampleChunkRetentionRf3ReadOracle
         foreach (var actual in new[] { direct, official, sql, sqlOfficial })
         {
             await Assert.That(actual.CutPosition >= minimum.Token.Position).IsTrue();
-            await EqualAsync(actual, expected with { CutPosition = actual.CutPosition });
+            await EqualAsync(actual, expected with
+            {
+                CutPosition = actual.CutPosition
+            });
         }
     }
 
@@ -32,7 +35,9 @@ internal static class SampleChunkRetentionRf3ReadOracle
         var sql = await SqlRf3Protocol.SdkAsync<SampleRollupResult>(sdk, call, token).ConfigureAwait(false);
         var sqlOfficial = await SqlRf3Protocol.McpAsync<SampleRollupResult>(mcp, call, token).ConfigureAwait(false);
         foreach (var actual in new[] { direct, official, sql, sqlOfficial })
-        { await EqualAsync(actual, expected); }
+        {
+            await EqualAsync(actual, expected);
+        }
     }
 
     internal static async Task RawAsync(KeyLoadClient sdk, McpOfficialClient mcp, ReadSamplesRequest request,
@@ -45,7 +50,9 @@ internal static class SampleChunkRetentionRf3ReadOracle
         var sql = await SqlRf3Protocol.SdkAsync<SampleRecord[]>(sdk, call, token).ConfigureAwait(false);
         var sqlOfficial = await SqlRf3Protocol.McpAsync<SampleRecord[]>(mcp, call, token).ConfigureAwait(false);
         foreach (var actual in new[] { direct, official, sql, sqlOfficial })
-        { await EqualAsync(actual, expected); }
+        {
+            await EqualAsync(actual, expected);
+        }
     }
 
     internal static async Task EqualAsync<T>(T actual, T expected)

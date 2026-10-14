@@ -5,10 +5,16 @@ namespace KeyLoad.Comparisons;
 internal sealed class DocumentHttpClient : IDisposable
 {
     private readonly SocketsHttpHandler handler;
-    internal HttpClient Client { get; }
+    internal HttpClient Client
+    {
+        get;
+    }
     internal DocumentHttpClient(HttpClient source, IOptions<NativeComparisonExecutionOptions> options)
     {
-        handler = new() { MaxConnectionsPerServer = NativeComparisonExecutionOptions.Require(options).Value.DocumentClientMaxConnections };
+        handler = new()
+        {
+            MaxConnectionsPerServer = NativeComparisonExecutionOptions.Require(options).Value.DocumentClientMaxConnections
+        };
         try
         {
             Client = new(handler, disposeHandler: false)
@@ -25,5 +31,12 @@ internal sealed class DocumentHttpClient : IDisposable
         }
         catch (Exception) { handler.Dispose(); throw; }
     }
-    public void Dispose() { try { Client.Dispose(); } finally { handler.Dispose(); } }
+    public void Dispose()
+    {
+        try
+        {
+            Client.Dispose();
+        }
+        finally { handler.Dispose(); }
+    }
 }

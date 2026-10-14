@@ -25,10 +25,16 @@ internal sealed class AuthenticationExecutionTests
                     await AuthenticationExecutionChanges.WarmAsync(hosts.Source, state, collector, token);
                     await AuthenticationExecutionCold.RunAsync(hosts, state, collector, token);
                 }
-                catch (Exception original) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(original))
-                { hosts.RetainRoots(); throw; }
-                catch (Exception original) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(original))
-                { hosts.RetainRoots(); throw; }
+                catch (Exception original) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(original))
+                {
+                    hosts.RetainRoots();
+                    throw;
+                }
+                catch (Exception original) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(original))
+                {
+                    hosts.RetainRoots();
+                    throw;
+                }
             }, failures);
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);

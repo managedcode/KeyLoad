@@ -15,16 +15,22 @@ internal static class PartitionMovementCleanupMatrixRf3Session
         var evidence = Path.GetFullPath(Path.Combine(ClusterFixtureProtocol.ArtifactDirectory,
             ClusterFixtureProtocol.QualificationDirectory, original.SessionId + PartitionMovementCleanupMatrixProtocol.EvidenceSuffix));
         if (Directory.Exists(evidence) || File.Exists(evidence))
-        { throw new InvalidOperationException(PartitionMovementCleanupMatrixProtocol.FaultMismatch); }
+        {
+            throw new InvalidOperationException(PartitionMovementCleanupMatrixProtocol.FaultMismatch);
+        }
         _ = await NodeEpochRf3Inventory.CopyTreeAsync(original.Root, evidence, cancellationToken).ConfigureAwait(false);
         var failures = new List<Exception>();
         foreach (var fault in faults)
-        { ServerFailureObserver.Observe(() => fault.RestoreAfterJoin(wave, original), failures); }
+        {
+            ServerFailureObserver.Observe(() => fault.RestoreAfterJoin(wave, original), failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
         await RequireOriginalCleanupRefusalAsync(original).ConfigureAwait(false);
         var replacement = RequestCqrsProbeFixture.Create(wave.OwnedDataRoot, Guid.NewGuid());
         if (replacement.SessionId == original.SessionId || replacement.Root == original.Root)
-        { throw new InvalidOperationException(PartitionMovementCleanupMatrixProtocol.FaultMismatch); }
+        {
+            throw new InvalidOperationException(PartitionMovementCleanupMatrixProtocol.FaultMismatch);
+        }
         wave.queryControls = replacement;
         await wave.RestartJoinedAsync(cancellationToken).ConfigureAwait(false);
     }

@@ -1,5 +1,5 @@
 using System.Text.Json;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using ManagedCode.Communication;
 using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.Options;
@@ -29,7 +29,9 @@ internal sealed class EventFeedTailJsonGrant
         this.serializer = serializer;
         terminalBytes = EventFeedTailJsonMeasurement.Measure(Failure(maximumFrames), frameLimit, serializer);
         if (maximumFrames < TerminalFrames || terminalBytes > totalLimit)
-        { throw Refusal(); }
+        {
+            throw Refusal();
+        }
     }
 
     internal static EventFeedTailJsonGrant Create(HttpContext context)
@@ -52,10 +54,14 @@ internal sealed class EventFeedTailJsonGrant
         var reservedFrames = frame.IsTerminal ? EmptyFrames : TerminalFrames;
         var reservedBytes = frame.IsTerminal ? EmptyBytes : terminalBytes;
         if (frames >= maximumFrames - reservedFrames)
-        { throw Refusal(); }
+        {
+            throw Refusal();
+        }
         var measured = EventFeedTailJsonMeasurement.Measure(frame, frameLimit, serializer);
         if (measured > totalLimit - bytes - reservedBytes)
-        { throw Refusal(); }
+        {
+            throw Refusal();
+        }
         bytes += measured;
         frames++;
     }

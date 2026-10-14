@@ -11,7 +11,9 @@ internal static class QueueLifecycleProvisioning
         var body = new MessageBody(literal.MessageId, literal.PayloadJson, literal.HeadersJson, literal.OrderingKey, JsonData.Fingerprint(literal));
         var bytes = NativeSerialization.Serialize(body).LongLength;
         if (QueueLifecycleAccountingAssertions.BodyBytes(QueueLifecycleTestProtocol.Pending) != bytes)
-        { throw new InvalidOperationException(QueueLifecycleTestProtocol.BodyFixtureMismatch); }
+        {
+            throw new InvalidOperationException(QueueLifecycleTestProtocol.BodyFixtureMismatch);
+        }
         fixture.Configure(QueueLifecycleTestProtocol.Collection, ResourceKind.Collection);
         fixture.Configure(QueueLifecycleTestProtocol.Queue, ResourceKind.WorkQueue, fields: [new("/knowledge", "private-lifecycle")], queuePolicy: new()
         {
@@ -24,9 +26,14 @@ internal static class QueueLifecycleProvisioning
             [new(fixture.Partition.DatabaseId, QueueLifecycleTestProtocol.Queue, Capability.QueuePublish | Capability.QueueConsume
                 | Capability.QueueAck | Capability.QueueInspect | Capability.DeadLettersRead | Capability.DeadLettersRedrive | Capability.QueueCancel),
              new(fixture.Partition.DatabaseId, QueueLifecycleTestProtocol.Collection, Capability.DocumentsWrite | Capability.DocumentsRead)], ["*"])
-        { ClusterAdministrator = true };
+        {
+            ClusterAdministrator = true
+        };
         fixture.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(principal)).Get<PrincipalRecord>();
         fixture.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(principal with
-        { Id = QueueLifecycleTestProtocol.DeniedAdministrator, FieldGrants = [] })).Get<PrincipalRecord>();
+        {
+            Id = QueueLifecycleTestProtocol.DeniedAdministrator,
+            FieldGrants = []
+        })).Get<PrincipalRecord>();
     }
 }

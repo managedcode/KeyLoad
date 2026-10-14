@@ -4,7 +4,10 @@ namespace KeyLoad.CrashHost.Features.Messaging;
 
 internal static class TargetInboxCrashScenario
 {
-    internal static PartitionRef Target { get; } = new(CrashFixtureValues.Tenant, CrashFixtureValues.Database,
+    internal static PartitionRef Target
+    {
+        get;
+    } = new(CrashFixtureValues.Tenant, CrashFixtureValues.Database,
         CrashFixtureValues.Orders, TargetInboxCrashProtocol.TargetKey);
     internal static QueueLaneRef Source { get; } = new(Target with { PartitionKey = TargetInboxCrashProtocol.SourceKey }, TargetInboxCrashProtocol.Input);
     internal static async Task RunAsync(string directory, ZoneTreeStore store, CanonicalCrashBoundary boundary)
@@ -35,7 +38,12 @@ internal static class TargetInboxCrashScenario
         {
             var resource = new ResourceDefinition(name, ResourceKind.WorkQueue, Target.TransactionDomainId);
             if (name == TargetInboxCrashProtocol.Target)
-            { resource = resource with { InboxPolicy = new(TargetInboxCrashProtocol.ReceiptLimit, TargetInboxCrashProtocol.ByteLimit) }; }
+            {
+                resource = resource with
+                {
+                    InboxPolicy = new(TargetInboxCrashProtocol.ReceiptLimit, TargetInboxCrashProtocol.ByteLimit)
+                };
+            }
             _ = CrashDatabase.Submit(database, OperationKind.ConfigureResource,
                 new ConfigureResourceRequest(Target.TenantId, Target.DatabaseId, resource), Guid.NewGuid()).Get<ResourceDefinition>();
         }

@@ -1,7 +1,7 @@
 using KeyLoad.Client;
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
@@ -27,7 +27,11 @@ internal static class TenantCapacityPlacementRf3OwnerLossRecovery
         await Assert.That(held.Applying.Claim!.ExpiresAt).IsGreaterThan(TimeProvider.System.GetUtcNow());
         var completed = (await McpCallerAssertions.SuccessAsync<PlacementIntentV1>(
             await seed.Official.CallAsync(TenantPlacementPublicProtocol.ApplyTool,
-                new { commandId = id, request }, token))).Value!;
+                new
+                {
+                    commandId = id,
+                    request
+                }, token))).Value!;
         await Assert.That(completed.Status).IsEqualTo(PlacementIntentStatus.Completed);
         await Assert.That(completed.Revision).IsEqualTo(checked(held.Applying.Revision + ReclaimAndComplete));
         await Assert.That(completed.CompletedMoves).IsEqualTo(OneMove);
@@ -52,7 +56,10 @@ internal static class TenantCapacityPlacementRf3OwnerLossRecovery
         await Assert.That(receipt.Phase).IsEqualTo(PartitionMovePhase.Retired);
         await TenantCapacityPlacementRf3OwnerLossReplay.RequireAsync(seed, state, move, identity, completed, token);
         await TenantCapacityPlacementRf3Assertions.RefusalAsync(await seed.Source.ApplyPlacementIntentAsync(
-            id, request with { ExpectedRevision = completed.Revision }, token), ErrorCode.Conflict);
+            id, request with
+            {
+                ExpectedRevision = completed.Revision
+            }, token), ErrorCode.Conflict);
         await TenantCapacityPlacementRf3OwnerLossReplay.RequireAsync(seed, state, move, identity, completed, token);
         await TenantCapacityPlacementRf3OwnerLossCold.HealthyAsync(wave, seed, state, move, identity, completed, token);
         await TenantCapacityPlacementRf3MultiContinuation.RequireAsync(seed, token);

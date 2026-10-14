@@ -21,7 +21,9 @@ public sealed partial class DatabaseEngine
             var captured = ReadEventVectorTopicCapture(bounded, principal.Id, request.ControlPartition,
                 partition, scope.Resource, sourceOwner, work, cancellationToken);
             if (captured.Head is not { } head)
-            { return; }
+            {
+                return;
+            }
             var source = new EventSourceRef(partition, scope.Resource, EventSourceKind.Topic,
                 Generation: head.Generation);
             RequireEventVectorCapturedSourceCount(entries.Count);
@@ -52,7 +54,9 @@ public sealed partial class DatabaseEngine
     {
         const int AddedCapturedSource = 1;
         if (checked(currentCount + AddedCapturedSource) > Limits.MaxResults)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, MissingEventVectorCoverageHead); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, MissingEventVectorCoverageHead);
+        }
     }
 
     private const string MissingEventVectorCoverageHead = "The actual native event vector source head is missing.";

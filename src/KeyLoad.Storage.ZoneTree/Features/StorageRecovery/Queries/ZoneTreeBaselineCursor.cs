@@ -45,8 +45,14 @@ internal sealed class ZoneTreeBaselineCursor : IDisposable
         this.reverse = reverse;
     }
 
-    internal Memory<byte> Key { get; private set; }
-    internal ReadOnlyMemory<byte> Value { get; private set; }
+    internal Memory<byte> Key
+    {
+        get; private set;
+    }
+    internal ReadOnlyMemory<byte> Value
+    {
+        get; private set;
+    }
 
     internal bool MoveNext()
     {

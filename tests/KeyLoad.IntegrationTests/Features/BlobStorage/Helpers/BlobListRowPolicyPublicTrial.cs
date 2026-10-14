@@ -21,7 +21,11 @@ internal static class BlobListRowPolicyPublicTrial
         var identity = await McpPersistedIdentity.CreateAsync(fixture, scenario.Partition,
             RelationalSqlRf3Tokens.Blobs, Capability.BlobRead, token);
         var principal = await PersistAsync(admin, identity.Principal with
-        { OwnerId = OwnerA, RestrictRows = true, PolicyEpoch = 2L }, token);
+        {
+            OwnerId = OwnerA,
+            RestrictRows = true,
+            PolicyEpoch = 2L
+        }, token);
         return await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, identity.Secret,
             reader => ExerciseAsync(admin, reader, principal, versions, token), token);
     }
@@ -30,13 +34,26 @@ internal static class BlobListRowPolicyPublicTrial
         PrincipalRecord principal, BlobSupersessionPublicTrial.Version[] versions, CancellationToken token)
     {
         await BlobListRowPolicyPublicAssertions.OwnerAAsync(reader, versions, token);
-        var repaired = await PersistAsync(admin, principal with { OwnerId = OwnerB, PolicyEpoch = 3L }, token);
+        var repaired = await PersistAsync(admin, principal with
+        {
+            OwnerId = OwnerB,
+            PolicyEpoch = 3L
+        }, token);
         await BlobListRowPolicyPublicAssertions.PageAsync(reader, versions, null, versions[0].Completed.Value, "a-hidden", token);
         await BlobListRowPolicyPublicAssertions.PageAsync(reader, versions, "b-visible", versions[2].Completed.Value, "c-hidden", token);
         await BlobListRowPolicyPublicAssertions.PageAsync(reader, versions, "c-hidden", null, null, token);
-        var denied = await PersistAsync(admin, repaired with { Grants = [], PolicyEpoch = 4L }, token);
+        var denied = await PersistAsync(admin, repaired with
+        {
+            Grants = [],
+            PolicyEpoch = 4L
+        }, token);
         await BlobListRowPolicyPublicAssertions.DeniedAsync(admin, reader, versions, token);
-        _ = await PersistAsync(admin, denied with { Grants = principal.Grants, OwnerId = OwnerA, PolicyEpoch = 5L }, token);
+        _ = await PersistAsync(admin, denied with
+        {
+            Grants = principal.Grants,
+            OwnerId = OwnerA,
+            PolicyEpoch = 5L
+        }, token);
         await BlobListRowPolicyPublicAssertions.OwnerAAsync(reader, versions, token);
         await BlobListRowPolicyPublicReplay.RunAsync(admin, reader, versions, token);
         return true;

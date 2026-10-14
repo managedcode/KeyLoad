@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.Search;
 using Microsoft.Extensions.Configuration;
@@ -9,7 +9,10 @@ namespace KeyLoad.UnitTests.Features.Search;
 internal sealed class NativeAnnMaintenanceTestRuntime : IAsyncDisposable
 {
     private readonly ServiceProvider services;
-    internal NativeAnnMaintenanceService Owner { get; }
+    internal NativeAnnMaintenanceService Owner
+    {
+        get;
+    }
     internal Guid SessionId { get; } = Guid.NewGuid();
     internal NativeAnnMaintenanceTestRuntime(TestDatabase database, TimeProvider? phaseClock = null, IConfiguration? configuration = null)
     {
@@ -23,7 +26,9 @@ internal sealed class NativeAnnMaintenanceTestRuntime : IAsyncDisposable
         catch (Exception primary)
         {
             try
-            { services.Dispose(); }
+            {
+                services.Dispose();
+            }
             catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
             throw;
         }
@@ -39,11 +44,15 @@ internal sealed class NativeAnnMaintenanceTestRuntime : IAsyncDisposable
     public async ValueTask DisposeAsync()
     {
         try
-        { await Owner.DisposeAsync().ConfigureAwait(false); }
+        {
+            await Owner.DisposeAsync().ConfigureAwait(false);
+        }
         catch (Exception primary)
         {
             try
-            { await services.DisposeAsync().ConfigureAwait(false); }
+            {
+                await services.DisposeAsync().ConfigureAwait(false);
+            }
             catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
             throw;
         }

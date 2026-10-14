@@ -17,6 +17,8 @@ internal sealed class NativeProcessReadinessOptions
             || OwnershipPollInterval <= TimeSpan.Zero
             || OwnershipPollInterval > TimeSpan.FromMilliseconds(MaximumPollMilliseconds)
             || OwnershipPollInterval >= OwnershipTimeout)
-        { throw new InvalidOperationException(Invalid); }
+        {
+            throw new InvalidOperationException(Invalid);
+        }
     }
 }

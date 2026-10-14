@@ -34,10 +34,16 @@ internal sealed class RemoteGraphNodeResources
     internal async Task JoinAsync(List<Exception> failures)
     {
         if (Runtime is { } originalRuntime)
-        { await ServerFailureObserver.ObserveAsync(() => originalRuntime.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => originalRuntime.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         if (Volatile.Read(ref receiver) is { } originalReceiver)
-        { await ServerFailureObserver.ObserveAsync(originalReceiver.StopAsync, failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(originalReceiver.StopAsync, failures).ConfigureAwait(false);
+        }
         if (Volatile.Read(ref client) is { } originalClient)
-        { await ServerFailureObserver.ObserveAsync(originalClient.StopAsync, failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(originalClient.StopAsync, failures).ConfigureAwait(false);
+        }
     }
 }

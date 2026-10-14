@@ -52,7 +52,9 @@ internal static class SampleChunkProcessRecovery
             }
         }
         catch (Exception failure) when (CommandIdempotencyProcessFailureHandling.IsNonFatal(failure))
-        { primary = failure; }
+        {
+            primary = failure;
+        }
         catch (Exception fatal)
         {
             await CommandIdempotencyProcessCleanup.CleanupActiveTrialAsync(root, active, fatal).ConfigureAwait(false);
@@ -65,12 +67,17 @@ internal static class SampleChunkProcessRecovery
         bool killed, CancellationToken token)
     {
         if (killed)
-        { await child.WaitForAcknowledgementAsync(token); await child.StopAndJoinAsync(token); }
+        {
+            await child.WaitForAcknowledgementAsync(token);
+            await child.StopAndJoinAsync(token);
+        }
         else
         {
             await child.WaitAndJoinAsync(token);
             if (child.ExitCode != SuccessExit)
-            { throw new InvalidOperationException(FailedChild); }
+            {
+                throw new InvalidOperationException(FailedChild);
+            }
         }
         await KilledProcessFileReadiness.WaitAsync(root, token);
         RecoveryFileInventory.AssertNativeHandlesReleased(root);
@@ -80,10 +87,16 @@ internal static class SampleChunkProcessRecovery
     private static ProcessStartInfo CreateStart(string root, string mode, CommitStage stage)
     {
         var start = new ProcessStartInfo(DotnetHost)
-        { RedirectStandardOutput = true, RedirectStandardError = true, UseShellExecute = false };
+        {
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false
+        };
         foreach (var argument in new[] { typeof(CrashHostMarker).Assembly.Location, root,
             stage.ToString(), SampleChunkCrashContract.MutationIndex.ToString(CultureInfo.InvariantCulture), mode })
-        { start.ArgumentList.Add(argument); }
+        {
+            start.ArgumentList.Add(argument);
+        }
         return start;
     }
 }

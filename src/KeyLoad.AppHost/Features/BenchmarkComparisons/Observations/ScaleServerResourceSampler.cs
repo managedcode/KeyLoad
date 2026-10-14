@@ -36,7 +36,10 @@ internal sealed class ScaleServerResourceSampler(string resourceName, string[] e
 
     internal string ResourceName => resourceName;
     internal bool Invalidated => _invalid;
-    internal bool StorageUnavailable { get; private set; }
+    internal bool StorageUnavailable
+    {
+        get; private set;
+    }
 
     internal void MarkReadyBoundary() => _readyBoundary = true;
 

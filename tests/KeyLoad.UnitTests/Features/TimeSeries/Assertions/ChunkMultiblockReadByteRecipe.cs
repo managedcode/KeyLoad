@@ -31,11 +31,15 @@ internal sealed record ChunkMultiblockReadByteRecipe(long FirstBytes, long Total
         {
             var payload = NativeSerialization.Deserialize<SampleChunkPayload>(value);
             if (payload.RecordCount != expectedCount)
-            { throw new InvalidOperationException(CountMismatch); }
+            {
+                throw new InvalidOperationException(CountMismatch);
+            }
             bytes = checked((long)key.Length + value.Length);
         });
         if (!present)
-        { throw new InvalidOperationException(MissingBlock); }
+        {
+            throw new InvalidOperationException(MissingBlock);
+        }
         return bytes;
     }
 }

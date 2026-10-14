@@ -20,7 +20,10 @@ internal sealed class PartitionMovementNativeMembershipRf3Cut
     private readonly Guid incarnation;
     private readonly byte[] membershipKey = KeyCodec.Encode(MembershipSpace, MembershipTableKey);
     private MembershipRecord? expected;
-    internal DateTimeOffset ExpectedClock { get; private set; }
+    internal DateTimeOffset ExpectedClock
+    {
+        get; private set;
+    }
 
     internal PartitionMovementNativeMembershipRf3Cut(PartitionMovementPublicParentRf3NativeCut before,
         PartitionMovementPublicParentRf3NativeCut after, HashSet<string> allowed)
@@ -29,7 +32,9 @@ internal sealed class PartitionMovementNativeMembershipRf3Cut
         this.allowed = allowed;
         var rows = PartitionMovementCapturePointerRf3Fault.Rows(before);
         if (rows.TryGetValue(Convert.ToHexString(membershipKey), out var bytes))
-        { expected = NativeSerialization.Deserialize<MembershipRecord>(Convert.FromHexString(bytes)); }
+        {
+            expected = NativeSerialization.Deserialize<MembershipRecord>(Convert.FromHexString(bytes));
+        }
         principal = PartitionMovementCapturePointerRf3Fault.Read<PrincipalRecord>(before,
             KeySpace.Principal(PartitionStoreProtocol.AdministratorId));
         incarnation = PartitionMovementCapturePointerRf3Fault.Read<PhysicalShardCatalog>(before,
@@ -40,14 +45,18 @@ internal sealed class PartitionMovementNativeMembershipRf3Cut
     internal void ObserveClock(ReplicatedOperation operation)
     {
         if (operation.EvaluatedAt > ExpectedClock)
-        { ExpectedClock = operation.EvaluatedAt; }
+        {
+            ExpectedClock = operation.EvaluatedAt;
+        }
         allowed.Add(Convert.ToHexString(KeySpace.ClockBytes));
     }
 
     internal async Task<bool> TryApplyAsync(ReplicatedOperation operation)
     {
         if (operation.Kind != OperationKind.Membership)
-        { return false; }
+        {
+            return false;
+        }
         await Assert.That(operation.PrincipalId).IsEqualTo(PartitionStoreProtocol.AdministratorId);
         await Assert.That(principal.Id).IsEqualTo(operation.PrincipalId);
         await Assert.That(principal.ClusterAdministrator).IsTrue();
@@ -66,7 +75,9 @@ internal sealed class PartitionMovementNativeMembershipRf3Cut
         var applied = mutation.ExpectedVersion == (expected?.Version ?? InitialVersion);
         await Assert.That(outcome.Result.Get<bool>()).IsEqualTo(applied);
         if (applied)
-        { expected = new(checked((expected?.Version ?? InitialVersion) + VersionStep), mutation.Payload); }
+        {
+            expected = new(checked((expected?.Version ?? InitialVersion) + VersionStep), mutation.Payload);
+        }
         allowed.Add(Convert.ToHexString(key));
         allowed.Add(Convert.ToHexString(membershipKey));
         ObserveClock(operation);

@@ -19,7 +19,9 @@ internal static class BlobScopedBytesR42Assertions
             if (state.Published is not null)
             {
                 foreach (var range in new (long Offset, int Count)[] { (0L, 4), (65534L, 6), (65536L, 17), (65553L, 0) })
-                { await RangeAsync(callers, state, range.Offset, range.Count, token); }
+                {
+                    await RangeAsync(callers, state, range.Offset, range.Count, token);
+                }
             }
         }
     }

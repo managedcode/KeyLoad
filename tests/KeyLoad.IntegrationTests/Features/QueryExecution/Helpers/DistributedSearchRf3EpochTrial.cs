@@ -1,7 +1,7 @@
 using KeyLoad.Client;
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
 using ManagedCode.Communication;
@@ -55,9 +55,13 @@ internal sealed class DistributedSearchRf3EpochTrial
             GrainReadKind.DistributedSearch, RequestCqrsProbePhase.DistributedSearchStatisticsCaptured,
             RequestCqrsProbeAction.Hold);
         if (useMcp)
-        { mcp = official.CallAsync(DistributedSearchProtocol.Tool, DistributedSearchRf3Seed.Request(), token); }
+        {
+            mcp = official.CallAsync(DistributedSearchProtocol.Tool, DistributedSearchRf3Seed.Request(), token);
+        }
         else
-        { sdk = reader.DistributedSearchAsync(DistributedSearchRf3Seed.Request(), token); }
+        {
+            sdk = reader.DistributedSearchAsync(DistributedSearchRf3Seed.Request(), token);
+        }
         var marker = await controls.WaitForMarkerAsync(arm, RequestCqrsProbePhase.DistributedSearchStatisticsCaptured,
             RequestCqrsProbeOutcome.Observed, discovery, token).ConfigureAwait(false);
         requestId = marker.RequestId;
@@ -106,12 +110,20 @@ internal sealed class DistributedSearchRf3EpochTrial
     {
         using var cleanup = new CancellationTokenSource(TwoRf3MembershipProtocol.CleanupDeadline, TimeProvider.System);
         if (discovery.All(value => value is not null))
-        { await ServerFailureObserver.ObserveAsync(() => controls.ReleaseOpenArmsAsync(discovery, cleanup.Token), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => controls.ReleaseOpenArmsAsync(discovery, cleanup.Token), failures).ConfigureAwait(false);
+        }
         if (sdk is { } actualSdk)
-        { await ServerFailureObserver.ObserveAsync(async () => { _ = await actualSdk.ConfigureAwait(false); }, failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(async () => { _ = await actualSdk.ConfigureAwait(false); }, failures).ConfigureAwait(false);
+        }
         if (mcp is { } actualMcp)
-        { await ServerFailureObserver.ObserveAsync(async () => { _ = await actualMcp.ConfigureAwait(false); }, failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(async () => { _ = await actualMcp.ConfigureAwait(false); }, failures).ConfigureAwait(false);
+        }
         if (requestId != Guid.Empty && discovery.All(value => value is not null))
-        { await ServerFailureObserver.ObserveAsync(() => DisposedAsync(controls, discovery, cleanup.Token), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => DisposedAsync(controls, discovery, cleanup.Token), failures).ConfigureAwait(false);
+        }
     }
 }

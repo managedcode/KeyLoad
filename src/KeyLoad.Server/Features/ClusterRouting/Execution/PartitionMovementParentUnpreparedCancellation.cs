@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Orleans;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
@@ -27,12 +27,16 @@ internal sealed class PartitionMovementParentUnpreparedCancellation(PartitionMov
         var ownOutcome = state.CancellationOutcome
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
         if (ownOutcome.Error is { } failure)
-        { throw Errors.Fail(failure, ownOutcome.SafeDetail ?? PartitionMovementProtocol.Unavailable); }
+        {
+            throw Errors.Fail(failure, ownOutcome.SafeDetail ?? PartitionMovementProtocol.Unavailable);
+        }
         var actual = ownOutcome.Get<PartitionMovePhaseResult>();
         if (actual.Stage != PartitionMovePeerStage.ControlCheckpoint
             || state.CurrentReadCut < cancellation.CancellationReceipt.AppliedPosition
             || !NativeSerialization.Serialize(actual.Journal).AsSpan().SequenceEqual(NativeSerialization.Serialize(cancellation.CancellationReceipt)))
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+        }
         var observed = Body(principalId, request, state, first, PartitionMoveCheckpointAction.ObserveCancellation, ownOutcome);
         await checkpoints.SubmitAsync(state, observed, first.OriginalPhase!, work, cancellationToken).ConfigureAwait(false);
         var terminal = await ReadAsync(principalId, request, first.OriginalPhaseCommandId, work,
@@ -40,7 +44,9 @@ internal sealed class PartitionMovementParentUnpreparedCancellation(PartitionMov
         if (terminal.Header is not { TerminalResult.Phase: PartitionMovePhase.Aborted, TerminalObservationReceipt: not null }
             || terminal.Pending is not null || terminal.Interrupted?.OriginalPhaseCommandId != first.OriginalPhaseCommandId
             || terminal.Interrupted.OriginalResult is not null || terminal.Interrupted.Cancellation is null)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+        }
         return terminal;
     }
 
@@ -58,7 +64,9 @@ internal sealed class PartitionMovementParentUnpreparedCancellation(PartitionMov
                 Stage: PartitionMovePeerStage.ControlPrepare, OriginalPhase: not null,
                 OriginalResult: null, OriginalGrant: null
             } original)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+        }
         return original;
     }
 

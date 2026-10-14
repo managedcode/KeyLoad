@@ -32,7 +32,12 @@ internal static class PhysicalOwnerRegistrationIdentityOutcomeFlow
         var changed = request with
         {
             Destination = request.Destination with
-            { Owner = request.Destination.Owner with { Incarnation = ForeignIncarnation } }
+            {
+                Owner = request.Destination.Owner with
+                {
+                    Incarnation = ForeignIncarnation
+                }
+            }
         };
         var refused = Operation(fixture, changed, RefusedId);
         var refusal = fixture.Database.Apply(refused);

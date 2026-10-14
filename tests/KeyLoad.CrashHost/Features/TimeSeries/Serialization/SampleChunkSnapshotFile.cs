@@ -9,11 +9,15 @@ internal static class SampleChunkSnapshotFile
     {
         cancellationToken.ThrowIfCancellationRequested();
         using (var counting = new SampleChunkSnapshotCountingStream(maximumBytes))
-        { JsonSerializer.Serialize(counting, snapshot, JsonDefaults.Options); }
+        {
+            JsonSerializer.Serialize(counting, snapshot, JsonDefaults.Options);
+        }
         cancellationToken.ThrowIfCancellationRequested();
         var bytes = JsonDefaults.Serialize(snapshot);
         if (bytes.Length > maximumBytes)
-        { throw new InvalidOperationException(SampleChunkCrashContract.Invalid); }
+        {
+            throw new InvalidOperationException(SampleChunkCrashContract.Invalid);
+        }
         await File.WriteAllBytesAsync(path, bytes, cancellationToken).ConfigureAwait(false);
     }
 
@@ -21,10 +25,14 @@ internal static class SampleChunkSnapshotFile
     {
         cancellationToken.ThrowIfCancellationRequested();
         if (new FileInfo(path).Length > maximumBytes)
-        { throw new InvalidOperationException(SampleChunkCrashContract.Invalid); }
+        {
+            throw new InvalidOperationException(SampleChunkCrashContract.Invalid);
+        }
         var bytes = await File.ReadAllBytesAsync(path, cancellationToken).ConfigureAwait(false);
         if (bytes.Length > maximumBytes)
-        { throw new InvalidOperationException(SampleChunkCrashContract.Invalid); }
+        {
+            throw new InvalidOperationException(SampleChunkCrashContract.Invalid);
+        }
         return bytes;
     }
 }

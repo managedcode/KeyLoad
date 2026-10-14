@@ -29,6 +29,8 @@ public sealed record BlobExecutionOptions
     public void Validate()
     {
         if (!IsValid())
-        { throw new InvalidOperationException(ValidationMessage); }
+        {
+            throw new InvalidOperationException(ValidationMessage);
+        }
     }
 }

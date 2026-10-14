@@ -14,7 +14,10 @@ internal static class NativeAnnPublicColdReader
         NativeAnnPublicColdSeed seed, AnnMaintenanceRequest pin, CancellationToken token)
     {
         var denied = seed.Reader.Principal with
-        { PolicyEpoch = checked(seed.Reader.Principal.PolicyEpoch + McpCallerProtocol.EpochIncrement), Grants = [new(seed.Scenario.Partition.DatabaseId, NativeAnnMaintenanceRf3Scenario.Collection, Denied)] };
+        {
+            PolicyEpoch = checked(seed.Reader.Principal.PolicyEpoch + McpCallerProtocol.EpochIncrement),
+            Grants = [new(seed.Scenario.Partition.DatabaseId, NativeAnnMaintenanceRf3Scenario.Collection, Denied)]
+        };
         var persistedDenied = await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.ConfigurePrincipalAsync(
             Guid.NewGuid(), denied, token));
         await Assert.That(NativeSerialization.Serialize(persistedDenied).AsSpan()
@@ -33,7 +36,10 @@ internal static class NativeAnnPublicColdReader
             }, token);
         await NativeAnnPublicColdAssertions.StateAsync(administrator, seed, token);
         var repaired = persistedDenied with
-        { PolicyEpoch = checked(persistedDenied.PolicyEpoch + McpCallerProtocol.EpochIncrement), Grants = [new(seed.Scenario.Partition.DatabaseId, NativeAnnMaintenanceRf3Scenario.Collection, Healthy)] };
+        {
+            PolicyEpoch = checked(persistedDenied.PolicyEpoch + McpCallerProtocol.EpochIncrement),
+            Grants = [new(seed.Scenario.Partition.DatabaseId, NativeAnnMaintenanceRf3Scenario.Collection, Healthy)]
+        };
         var persistedRepaired = await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.ConfigurePrincipalAsync(
             Guid.NewGuid(), repaired, token));
         await Assert.That(NativeSerialization.Serialize(persistedRepaired).AsSpan()
@@ -46,6 +52,12 @@ internal static class NativeAnnPublicColdReader
                 return true;
             }, token);
         await NativeAnnPublicColdAssertions.StateAsync(administrator, seed, token);
-        return seed with { Reader = seed.Reader with { Principal = persistedRepaired } };
+        return seed with
+        {
+            Reader = seed.Reader with
+            {
+                Principal = persistedRepaired
+            }
+        };
     }
 }

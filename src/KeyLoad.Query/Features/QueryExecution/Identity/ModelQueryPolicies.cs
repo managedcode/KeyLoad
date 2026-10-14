@@ -15,7 +15,11 @@ internal static class ModelQueryPolicies
         var fields = resource.FieldPolicies.Select(policy => policy with { Path = Rebase(PayloadModelField, policy.Path) })
             .Concat(resource.HeaderPolicies.Select(policy => policy with { Path = Rebase(HeadersModelField, policy.Path) }))
             .ToImmutableArray();
-        return resource with { FieldPolicies = fields, HeaderPolicies = [] };
+        return resource with
+        {
+            FieldPolicies = fields,
+            HeaderPolicies = []
+        };
     }
 
     private static string Rebase(string root, string path)

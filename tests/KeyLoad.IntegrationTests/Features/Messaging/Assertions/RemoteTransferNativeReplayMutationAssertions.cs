@@ -12,7 +12,9 @@ internal static class RemoteTransferNativeReplayMutationAssertions
         var envelope = NativeSerialization.Deserialize<RemoteDocumentTransportEnvelope>(original.Payload.Span);
         var call = envelope.QueueTransfer ?? throw Missing();
         if (call.Stage != RemoteQueueTransferPeerStage.Accept || !Enum.IsDefined(mode))
-        { throw Missing(); }
+        {
+            throw Missing();
+        }
         var expected = mode switch
         {
             RemoteModelNativeReplayVariation.Original2 => envelope,
@@ -24,7 +26,15 @@ internal static class RemoteTransferNativeReplayMutationAssertions
             RemoteModelNativeReplayVariation.EmptyDestinationIncarnation => envelope with
             {
                 QueueTransfer = call with
-                { DestinationOwner = call.DestinationOwner with { Owner = call.DestinationOwner.Owner with { Incarnation = Guid.Empty } } }
+                {
+                    DestinationOwner = call.DestinationOwner with
+                    {
+                        Owner = call.DestinationOwner.Owner with
+                        {
+                            Incarnation = Guid.Empty
+                        }
+                    }
+                }
             },
             _ => throw Missing()
         };
@@ -32,10 +42,19 @@ internal static class RemoteTransferNativeReplayMutationAssertions
             ? original.Payload : NativeSerialization.Serialize(expected);
         if (!expectedPayload.Span.SequenceEqual(actual.Payload.Span) || original.Signature != actual.Signature
             || original.Nonce == actual.Nonce || actual.Nonce == Guid.Empty)
-        { throw Missing(); }
-        var expectedOuter = original with { Payload = actual.Payload, Nonce = actual.Nonce, SenderSignature = actual.SenderSignature };
+        {
+            throw Missing();
+        }
+        var expectedOuter = original with
+        {
+            Payload = actual.Payload,
+            Nonce = actual.Nonce,
+            SenderSignature = actual.SenderSignature
+        };
         if (!NativeSerialization.Serialize(expectedOuter).AsSpan().SequenceEqual(NativeSerialization.Serialize(actual)))
-        { throw Missing(); }
+        {
+            throw Missing();
+        }
     }
 
     private static InvalidOperationException Missing() => new(RemoteTransferDistinctProtocol.Missing);

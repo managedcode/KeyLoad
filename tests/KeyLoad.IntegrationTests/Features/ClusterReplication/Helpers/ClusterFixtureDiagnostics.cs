@@ -98,7 +98,9 @@ internal sealed class ClusterFixtureDiagnostics : IAsyncDisposable
         var bounded = BoundedDiagnosticLog.BoundNodes(nodeGroups);
         var output = ownedOutput ?? failureReceipts.RequireRunOutput(TestContext.ResultsDirectory);
         if (ownedOutput is null)
-        { Directory.CreateDirectory(output); }
+        {
+            Directory.CreateDirectory(output);
+        }
         var path = ownedOutput is null ? failureReceipts.Save(output, bounded)
             : ClusterFailureReceipts.SaveImmutable(ownedOutput, bounded);
         app.Services.GetRequiredService<ClusterFixtureStartupEvidence>().Save(output);
@@ -125,21 +127,31 @@ internal sealed class ClusterFixtureDiagnostics : IAsyncDisposable
         var failures = new List<Exception>();
         var cancelFailure = await OwnedProcessFailureObserver.CaptureAsync(lifetime.CancelAsync()).ConfigureAwait(false);
         if (cancelFailure is not null)
-        { failures.Add(cancelFailure); }
+        {
+            failures.Add(cancelFailure);
+        }
         if (resourceCapture is not null)
         {
             var resourceFailure = await OwnedProcessFailureObserver.CaptureAsync(resourceCapture).ConfigureAwait(false);
             if (resourceFailure is not null)
-            { failures.Add(resourceFailure); }
+            {
+                failures.Add(resourceFailure);
+            }
         }
         var logsFailure = await OwnedProcessFailureObserver.CaptureAsync(Task.WhenAll(logCapture.Values)).ConfigureAwait(false);
         if (logsFailure is not null)
-        { failures.Add(logsFailure); }
+        {
+            failures.Add(logsFailure);
+        }
         lifetime.Dispose();
         if (failures.Count == 1)
-        { ExceptionDispatchInfo.Capture(failures[0]).Throw(); }
+        {
+            ExceptionDispatchInfo.Capture(failures[0]).Throw();
+        }
         if (failures.Count > 1)
-        { throw new AggregateException("Native diagnostic subscriptions and disposal failed.", failures); }
+        {
+            throw new AggregateException("Native diagnostic subscriptions and disposal failed.", failures);
+        }
     }
 
     private async Task CaptureResourcesAsync(ResourceLoggerService logs)
@@ -177,14 +189,18 @@ internal sealed class ClusterFixtureDiagnostics : IAsyncDisposable
             }
         }
         catch (OperationCanceledException) when (lifetime.IsCancellationRequested)
-        { observation.Terminal(NativeLogSubscriptionPhase.Canceled); }
+        {
+            observation.Terminal(NativeLogSubscriptionPhase.Canceled);
+        }
         catch (Exception)
         {
             observation.Terminal(NativeLogSubscriptionPhase.Faulted);
             throw;
         }
         finally
-        { observation.Terminal(NativeLogSubscriptionPhase.Completed); }
+        {
+            observation.Terminal(NativeLogSubscriptionPhase.Completed);
+        }
     }
 
     private string[] ReadTail(string name) => nodeLogs.TryGetValue(name, out var buffer) ? buffer.ToArray() : [];

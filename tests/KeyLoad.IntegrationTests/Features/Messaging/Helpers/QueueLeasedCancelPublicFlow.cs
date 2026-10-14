@@ -149,9 +149,13 @@ internal static class QueueLeasedCancelPublicFlow
         var problem = await QueueLeasedCancelPublicAssertions.RefusedAsync(callers, state.Owner,
             state.Denied, ErrorCode.PermissionDenied, token);
         if (state.DeniedProblem is { } original)
-        { await Assert.That(JsonDefaults.Serialize(problem).SequenceEqual(JsonDefaults.Serialize(original))).IsTrue(); }
+        {
+            await Assert.That(JsonDefaults.Serialize(problem).SequenceEqual(JsonDefaults.Serialize(original))).IsTrue();
+        }
         else
-        { state.DeniedProblem = problem; }
+        {
+            state.DeniedProblem = problem;
+        }
         return true;
     }, token);
 

@@ -24,7 +24,9 @@ internal sealed class GraphStorageAtomicEffectsTests
             new EnqueueMessage(GraphStorageReferenceFixture.Queue, Message, "{}"));
         var committed = GraphStorageReferenceFixture.Submit(database.Database, command).Get<CommitReceipt>();
         var reference = new Dictionary<string, GraphStorageExpectedEdge>(StringComparer.Ordinal)
-        { [Edge] = new(Edge, NewVertex, target.Id, GraphStorageReferenceFixture.Label, "{}", 1) };
+        {
+            [Edge] = new(Edge, NewVertex, target.Id, GraphStorageReferenceFixture.Label, "{}", 1)
+        };
         await GraphStorageReferenceAssertions.VerifyAsync(database.Database, database.Partition, reference, [NewVertex]);
         var position = database.Store.Position;
         var retried = GraphStorageReferenceFixture.Submit(database.Database, command).Get<CommitReceipt>();

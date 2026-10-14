@@ -18,7 +18,10 @@ internal sealed class EqualityAccessPathBudgetTests
     [Arguments(true, true)]
     public async Task AcAisql008ReversedNativeLookupChargesTheSameRawDocumentAndIndexReadBudget(bool indexed, bool parameterized)
     {
-        using var db = new TestDatabase(new() { MaxQueryReadBytes = ReadBudgetBytes });
+        using var db = new TestDatabase(new()
+        {
+            MaxQueryReadBytes = ReadBudgetBytes
+        });
         db.Configure(EqualityAccessPathSupport.Collection, ResourceKind.Collection,
             indexes: [new(EqualityAccessPathSupport.StatusIndex, [EqualityAccessPathSupport.StatusPath])]);
         db.Commit(new PutDocument(EqualityAccessPathSupport.Collection, EqualityAccessPathSupport.PrimaryId,
@@ -36,7 +39,10 @@ internal sealed class EqualityAccessPathBudgetTests
     [Arguments(true)]
     public async Task AcAisql008ReversedIndexCandidatesPreserveTheSharedLimitAndPointFollowup(bool parameterized)
     {
-        using var db = EqualityAccessPathSupport.Create(new() { MaxScanRecords = OneCandidate });
+        using var db = EqualityAccessPathSupport.Create(new()
+        {
+            MaxScanRecords = OneCandidate
+        });
         var engine = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
         foreach (var reversed in new[] { false, true })
         {

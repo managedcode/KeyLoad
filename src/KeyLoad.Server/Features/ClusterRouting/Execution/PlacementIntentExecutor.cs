@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
@@ -41,9 +41,13 @@ internal sealed partial class PlacementIntentExecutor(OrleansNode node, Partitio
                 ? retainedRequest != request : request.ExpectedRevision != intent.Revision)
             || trusted.CommandId == Guid.Empty
             || intent.OriginalApplyCommandId is { } originalApply && trusted.CommandId != originalApply)
-        { throw Errors.Fail(ErrorCode.Conflict, TenantPlacementPolicyProtocol.Stale); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, TenantPlacementPolicyProtocol.Stale);
+        }
         if (intent.Status == PlacementIntentStatus.Completed)
-        { return intent; }
+        {
+            return intent;
+        }
         intent = await ClaimAsync(trusted, principal.Id, intent, request, work, token).ConfigureAwait(false);
         while (intent.CompletedMoves < intent.Plan.Moves.Length)
         {
@@ -52,7 +56,9 @@ internal sealed partial class PlacementIntentExecutor(OrleansNode node, Partitio
             intent = await ApplyNextAsync(trusted, intent, work, token).ConfigureAwait(false);
             await progress(intent).ConfigureAwait(false);
             if (intent.Status == PlacementIntentStatus.Completed)
-            { break; }
+            {
+                break;
+            }
             intent = await ClaimAsync(trusted, principal.Id, intent, request, work, token).ConfigureAwait(false);
         }
         return intent;

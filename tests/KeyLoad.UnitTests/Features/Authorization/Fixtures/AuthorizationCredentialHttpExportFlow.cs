@@ -19,8 +19,14 @@ internal static class AuthorizationCredentialHttpExportFlow
             view, global::KeyLoad.Core.KeySpace.ApiKey(AuthorizationTelemetryTestProtocol.Member)))
             ?? throw new InvalidOperationException(AuthorizationCredentialHttpExportProtocol.MissingOriginalCredential);
         var refusedKey = expired
-            ? originalKey with { ExpiresAt = TimeProvider.System.GetUtcNow() - AuthorizationCredentialHttpExportProtocol.ExpiredOffset }
-            : originalKey with { Revoked = true };
+            ? originalKey with
+            {
+                ExpiresAt = TimeProvider.System.GetUtcNow() - AuthorizationCredentialHttpExportProtocol.ExpiredOffset
+            }
+            : originalKey with
+            {
+                Revoked = true
+            };
         _ = await AuthorizationCredentialHttpExportAssertions.ConfigureAsync(fixture.Database, refusedKey);
         var revoked = AuthorizationTelemetryPolicyRepair.Capture(fixture.Database);
         var partition = fixture.Database.Partition;
@@ -40,7 +46,10 @@ internal static class AuthorizationCredentialHttpExportFlow
         using (var caller = new AuthorizationTelemetryCallerActivities(AuthorizationUnsafeSpanState.None))
         {
             await AuthorizationTelemetryNativeAssertions.CallerAsync(caller);
-            using var healthy = await SendAsync(fixture, payload with { AfterName = null }, deadline.Token);
+            using var healthy = await SendAsync(fixture, payload with
+            {
+                AfterName = null
+            }, deadline.Token);
             await Assert.That(healthy.StatusCode).IsEqualTo(HttpStatusCode.OK);
             var catalog = await healthy.Content.ReadFromJsonAsync<AdminResourcesPage>(JsonDefaults.Options, deadline.Token);
             await AuthorizationTelemetryAssertions.CatalogAsync(catalog!, partition, position);

@@ -222,9 +222,13 @@ public sealed class ComparisonRunner
 
         ComparisonCase result;
         try
-        { result = await new ComparisonMeasurer(workloadOptions!, observer, executionOptions, timeProvider).MeasureAsync(target, dataset, scenario, repetition, cancellationToken); }
+        {
+            result = await new ComparisonMeasurer(workloadOptions!, observer, executionOptions, timeProvider).MeasureAsync(target, dataset, scenario, repetition, cancellationToken);
+        }
         catch (Exception error) when (!cancellationToken.IsCancellationRequested)
-        { result = new(target.Profile.Name, scenario, repetition, ComparisonStatuses.Failed, ComparisonErrors.Safe(error), null, []); }
+        {
+            result = new(target.Profile.Name, scenario, repetition, ComparisonStatuses.Failed, ComparisonErrors.Safe(error), null, []);
+        }
         await ComparisonFailureDiagnostics.ObserveAsync(target, result, cancellationToken);
         return result;
     }

@@ -19,7 +19,9 @@ internal class PartitionControlResourceView : IKeyValueView
         ArgumentNullException.ThrowIfNull(inner);
         ArgumentNullException.ThrowIfNull(partition);
         if (definitions.IsDefault || (work is null) != (grant is null))
-        { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid);
+        }
         this.inner = inner;
         this.work = work;
         this.grant = grant;
@@ -32,13 +34,18 @@ internal class PartitionControlResourceView : IKeyValueView
             var value = NativeSerialization.Serialize(definition);
             retained = checked(retained + key.Length + value.Length);
             if (retained > maximumBytes)
-            { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity); }
+            {
+                throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
+            }
             entries.Add((key, value));
         }
         resources = entries.MoveToImmutable();
     }
 
-    internal PartitionRef Partition { get; }
+    internal PartitionRef Partition
+    {
+        get;
+    }
 
     public byte[]? ReadOwnedValue(byte[] key)
     {
@@ -54,10 +61,14 @@ internal class PartitionControlResourceView : IKeyValueView
         foreach (var resource in resources)
         {
             if (!key.AsSpan().SequenceEqual(resource.Key))
-            { continue; }
+            {
+                continue;
+            }
             var count = checked(resource.Key.Length + resource.Value.Length);
             if (grant is not null)
-            { work!.ChargeReadGrant(grant, count); }
+            {
+                work!.ChargeReadGrant(grant, count);
+            }
             observer?.Invoke(count);
             reader(resource.Value);
             return true;

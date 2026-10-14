@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
@@ -19,7 +19,9 @@ internal static class NativeCanonicalModelCutCodec
         var bytes = NativeSerialization.Serialize(witness);
         token.ThrowIfCancellationRequested();
         if (bytes.Length > MaximumRecordBytes)
-        { throw Exhausted(); }
+        {
+            throw Exhausted();
+        }
         return bytes;
     }
 
@@ -28,7 +30,9 @@ internal static class NativeCanonicalModelCutCodec
         token.ThrowIfCancellationRequested();
         ValidateWitness(witness);
         if (NativeSerialization.Measure(witness) > MaximumRecordBytes)
-        { throw Exhausted(); }
+        {
+            throw Exhausted();
+        }
         token.ThrowIfCancellationRequested();
     }
 
@@ -36,7 +40,9 @@ internal static class NativeCanonicalModelCutCodec
     {
         token.ThrowIfCancellationRequested();
         if (payload.Length is <= EmptyPayloadBytes or > MaximumRecordBytes)
-        { throw Exhausted(); }
+        {
+            throw Exhausted();
+        }
         var witness = NativeSerialization.Deserialize<NativeCanonicalModelCutWitness>(payload.ToArray())
             ?? throw Invalid();
         ValidateWitness(witness);
@@ -62,7 +68,9 @@ internal static class NativeCanonicalModelCutCodec
             || request.DestinationPartition is null || request.SourcePartition == request.DestinationPartition
             || request.SourceQueue?.Partition != request.SourcePartition
             || request.DestinationQueue?.Partition != request.DestinationPartition)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         ValidatePartition(request.SourcePartition);
         ValidatePartition(request.DestinationPartition);
         JsonData.Identifier(request.SourceQueue.Queue);
@@ -70,7 +78,9 @@ internal static class NativeCanonicalModelCutCodec
         JsonData.Identifier(request.LogicalPrincipalId);
         JsonData.Identifier(request.TechnicalPrincipalId);
         if (NativeSerialization.Measure(request) > MaximumRecordBytes)
-        { throw Exhausted(); }
+        {
+            throw Exhausted();
+        }
     }
 
     private static void ValidateWitness(NativeCanonicalModelCutWitness witness)
@@ -78,27 +88,35 @@ internal static class NativeCanonicalModelCutCodec
         if (witness is null || witness.Owner is null || witness.StorePosition < InitialStorePosition || witness.Rows.IsDefault
             || witness.Rows.Length > MaximumRecordBytes || witness.Owner.Incarnation == Guid.Empty
             || !witness.Owner.TransportReady)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         ValidateRequest(witness.Request);
         JsonData.Identifier(witness.Owner.VoterId);
         JsonData.Identifier(witness.Owner.ClusterId);
         if (string.IsNullOrWhiteSpace(witness.Owner.SiloAddress)
             || witness.Owner.SiloAddress.Length > ReplicaTransportProtocol.MaximumAddressCharacters
             || global::Orleans.Runtime.SiloAddress.FromParsableString(witness.Owner.SiloAddress).ToParsableString() != witness.Owner.SiloAddress)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         var prefixes = PartitionRecordFamilies.All.SelectMany(family => new[]
         { KeySpace.Partition(family, witness.Request.SourcePartition), KeySpace.Partition(family, witness.Request.DestinationPartition) }).ToArray();
         foreach (var row in witness.Rows)
         {
             if (row is null || row.Key.IsEmpty || row.Key.Length > MaximumRecordBytes || row.Value.Length > MaximumRecordBytes
                 || !prefixes.Any(prefix => row.Key.Span.StartsWith(prefix)))
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
         }
         foreach (var bytes in new[] { witness.LogicalOutcome, witness.TechnicalOutcome, witness.TargetReceipt,
             witness.TargetCounter, witness.SourceIntent, witness.SourceCounter })
         {
             if (bytes is { } value && (value.IsEmpty || value.Length > MaximumRecordBytes))
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
         }
     }
 

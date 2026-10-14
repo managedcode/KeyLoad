@@ -22,7 +22,9 @@ internal static class McpMovementCatalogDecode
         var original = JsonDefaults.Serialize(expected);
         await DeniedAsync(descriptor, new Dictionary<string, JsonElement>(StringComparer.Ordinal), expected);
         await DeniedAsync(descriptor, new Dictionary<string, JsonElement>(StringComparer.Ordinal)
-        { [McpMovementCatalogProtocol.Request] = JsonSerializer.SerializeToElement<object?>(null) }, expected);
+        {
+            [McpMovementCatalogProtocol.Request] = JsonSerializer.SerializeToElement<object?>(null)
+        }, expected);
         var unknown = Arguments(original);
         unknown[McpCanonicalTestData.UnknownKey] = JsonSerializer.SerializeToElement(Tenant);
         await DeniedAsync(descriptor, unknown, expected);
@@ -37,7 +39,9 @@ internal static class McpMovementCatalogDecode
         using (var document = JsonDocument.Parse(original))
         {
             decoded = descriptor.Decode(new Dictionary<string, JsonElement>(StringComparer.Ordinal)
-            { [McpMovementCatalogProtocol.Request] = document.RootElement });
+            {
+                [McpMovementCatalogProtocol.Request] = document.RootElement
+            });
         }
         await HealthyAsync(decoded, expected);
     }
@@ -75,6 +79,8 @@ internal static class McpMovementCatalogDecode
     {
         using var document = JsonDocument.Parse(body);
         return new Dictionary<string, JsonElement>(StringComparer.Ordinal)
-        { [McpMovementCatalogProtocol.Request] = document.RootElement.Clone() };
+        {
+            [McpMovementCatalogProtocol.Request] = document.RootElement.Clone()
+        };
     }
 }

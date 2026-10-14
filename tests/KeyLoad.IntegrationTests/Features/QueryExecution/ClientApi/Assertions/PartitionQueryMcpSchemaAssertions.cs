@@ -63,7 +63,9 @@ internal static class PartitionQueryMcpSchemaAssertions
         await VerifyObjectAsync(leaves, WitnessFields, WitnessFields);
         await VerifyPartitionAsync(root, leaves.GetProperty(McpDiscoveryProtocol.Properties).GetProperty(McpDiscoveryProtocol.Partition));
         foreach (var field in new[] { PartitionQueryMcpProtocol.CutPosition, PartitionQueryMcpProtocol.PolicyEpoch, PartitionQueryMcpProtocol.SchemaVersion })
-        { await VerifyPrimitiveAsync(root, leaves.GetProperty(McpDiscoveryProtocol.Properties).GetProperty(field), McpDiscoveryProtocol.Integer); }
+        {
+            await VerifyPrimitiveAsync(root, leaves.GetProperty(McpDiscoveryProtocol.Properties).GetProperty(field), McpDiscoveryProtocol.Integer);
+        }
         await VerifyPrimitiveAsync(root, leaves.GetProperty(McpDiscoveryProtocol.Properties).GetProperty(PartitionQueryMcpProtocol.AccessPath), McpDiscoveryProtocol.String);
     }
 
@@ -90,7 +92,9 @@ internal static class PartitionQueryMcpSchemaAssertions
         await VerifyExactTypeSetAsync(root, schema.GetProperty(McpDiscoveryProtocol.Properties)
             .GetProperty(PartitionQueryMcpProtocol.AtomicPartitionId), McpDiscoveryProtocol.String, McpDiscoveryProtocol.Null);
         foreach (var field in PartitionFields)
-        { await VerifyPrimitiveAsync(root, schema.GetProperty(McpDiscoveryProtocol.Properties).GetProperty(field), McpDiscoveryProtocol.String); }
+        {
+            await VerifyPrimitiveAsync(root, schema.GetProperty(McpDiscoveryProtocol.Properties).GetProperty(field), McpDiscoveryProtocol.String);
+        }
     }
 
     private static async Task VerifyDictionaryAsync(JsonElement root, JsonElement schema)
@@ -139,26 +143,38 @@ internal static class PartitionQueryMcpSchemaAssertions
         {
             var pointer = reference.GetString();
             if (pointer is null || !pointer.StartsWith("#/", StringComparison.Ordinal))
-            { throw new InvalidOperationException(MaximumReferenceDepthMessage); }
+            {
+                throw new InvalidOperationException(MaximumReferenceDepthMessage);
+            }
             schema = root;
             foreach (var segment in pointer[2..].Split('/'))
-            { schema = schema.GetProperty(segment.Replace("~1", "/", StringComparison.Ordinal).Replace("~0", "~", StringComparison.Ordinal)); }
+            {
+                schema = schema.GetProperty(segment.Replace("~1", "/", StringComparison.Ordinal).Replace("~0", "~", StringComparison.Ordinal));
+            }
         }
         if (schema.TryGetProperty(McpDiscoveryProtocol.ReferenceKeyword, out _))
-        { throw new InvalidOperationException(MaximumReferenceDepthMessage); }
+        {
+            throw new InvalidOperationException(MaximumReferenceDepthMessage);
+        }
         return schema;
     }
 
     internal static bool HasType(JsonElement schema, string expected)
     {
         if (expected == McpDiscoveryProtocol.Integer)
-        { return HasDirectType(schema, expected, allowNullType: false); }
+        {
+            return HasDirectType(schema, expected, allowNullType: false);
+        }
         if (HasDirectType(schema, expected, allowNullType: false))
-        { return true; }
+        {
+            return true;
+        }
         foreach (var keyword in new[] { McpDiscoveryProtocol.AnyOf, McpDiscoveryProtocol.OneOf })
         {
             if (schema.TryGetProperty(keyword, out var variants) && variants.EnumerateArray().Any(item => HasType(item, expected)))
-            { return true; }
+            {
+                return true;
+            }
         }
         return false;
     }
@@ -166,15 +182,21 @@ internal static class PartitionQueryMcpSchemaAssertions
     private static JsonElement FindBranch(JsonElement schema, string expectedType, bool allowNullType = false)
     {
         if (HasDirectType(schema, expectedType, allowNullType))
-        { return schema; }
+        {
+            return schema;
+        }
         foreach (var keyword in new[] { McpDiscoveryProtocol.AnyOf, McpDiscoveryProtocol.OneOf })
         {
             if (!schema.TryGetProperty(keyword, out var variants))
-            { continue; }
+            {
+                continue;
+            }
             foreach (var variant in variants.EnumerateArray())
             {
                 if (HasDirectType(variant, expectedType, allowNullType))
-                { return variant; }
+                {
+                    return variant;
+                }
             }
         }
         throw new InvalidOperationException(MaximumReferenceDepthMessage);
@@ -183,11 +205,17 @@ internal static class PartitionQueryMcpSchemaAssertions
     private static bool HasDirectType(JsonElement schema, string expected, bool allowNullType)
     {
         if (!schema.TryGetProperty(McpDiscoveryProtocol.Type, out var actual))
-        { return false; }
+        {
+            return false;
+        }
         if (actual.ValueKind == JsonValueKind.String)
-        { return actual.GetString() == expected; }
+        {
+            return actual.GetString() == expected;
+        }
         if (actual.ValueKind != JsonValueKind.Array)
-        { return false; }
+        {
+            return false;
+        }
 
         var types = actual.EnumerateArray().ToArray();
         if (!allowNullType && expected == McpDiscoveryProtocol.Integer)
@@ -197,7 +225,9 @@ internal static class PartitionQueryMcpSchemaAssertions
                 && types.Count(item => item.GetString() == McpDiscoveryProtocol.String) == 1;
         }
         if (types.Length == 1)
-        { return types[0].ValueKind == JsonValueKind.String && types[0].GetString() == expected; }
+        {
+            return types[0].ValueKind == JsonValueKind.String && types[0].GetString() == expected;
+        }
         return allowNullType && types.Length == 2
             && types.All(item => item.ValueKind == JsonValueKind.String)
             && types.Count(item => item.GetString() == expected) == 1

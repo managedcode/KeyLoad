@@ -61,13 +61,20 @@ internal static class RuntimeJournalBootstrapAdmissionFlow
             [new PutDocument(CollectionName, DocumentId, DocumentJson)]);
         var dataOperation = CreateNative(database, OperationKind.Batch, dataId, request);
         var malformed = CreateNative(database, OperationKind.RuntimeJournal, Guid.NewGuid(),
-            RuntimeJournalMutationFor(RuntimeJournalAction.BootstrapIdentity) with { JournalName = JournalName });
+            RuntimeJournalMutationFor(RuntimeJournalAction.BootstrapIdentity) with
+            {
+                JournalName = JournalName
+            });
         var oversized = CreateNative(database, OperationKind.RuntimeJournal, Guid.NewGuid(),
             RuntimeJournalMutationFor(RuntimeJournalAction.BootstrapIdentity) with
-            { Data = new byte[maximumControlPayloadBytes + 1] });
+            {
+                Data = new byte[maximumControlPayloadBytes + 1]
+            });
         var oversizedNativeWithEmptyJson = new ReplicatedOperation(Guid.NewGuid(), OperationKind.RuntimeJournal,
             RootPrincipalId, database.Database.EvaluationClock.GetUtcNow(), string.Empty)
-        { NativePayload = new byte[maximumControlPayloadBytes + 1] };
+        {
+            NativePayload = new byte[maximumControlPayloadBytes + 1]
+        };
         var data = inbox.Enqueue(dataOperation, principal, PayloadBytes(dataOperation));
         var saturated = governor.Snapshot();
 
@@ -100,7 +107,10 @@ internal static class RuntimeJournalBootstrapAdmissionFlow
         ReplicatedOperation oversized, CommandAdmissionSnapshot expected)
     {
         await AssertResourceExhausted(inbox, database, principal, OperationKind.Batch,
-            request with { CommandId = Guid.NewGuid() });
+            request with
+            {
+                CommandId = Guid.NewGuid()
+            });
         await AssertResourceExhaustedAsync(inbox, principal, malformed);
         await AssertResourceExhaustedAsync(inbox, principal, oversizedNativeWithEmptyJson);
         await AssertResourceExhaustedAsync(inbox, principal, oversized);
@@ -136,19 +146,27 @@ internal static class RuntimeJournalBootstrapAdmissionFlow
     private static async Task AssertPreAdmissionAuthorityRejectionsAsync(TestDatabase database,
         CommandAdmissionGovernor governor, ReplicatedOperation operation, CommandAdmissionSnapshot expected)
     {
-        var wrongPrincipal = operation with { PrincipalId = NativeAuthorityFixture.OtherPrincipal };
+        var wrongPrincipal = operation with
+        {
+            PrincipalId = NativeAuthorityFixture.OtherPrincipal
+        };
         var wrongPrincipalFailure = Assert.ThrowsExactly<KeyLoadException>(() =>
             database.Database.NormalizeOperation(wrongPrincipal));
         await Assert.That(wrongPrincipalFailure.Code).IsEqualTo(ErrorCode.Corruption);
         var payload = NativeAuthorityFixture.Read(operation);
         var invalidSignature = NativeAuthorityFixture.Wrap(operation, payload with
-        { Signature = new byte[NativeAuthorityContract.DigestBytes] });
+        {
+            Signature = new byte[NativeAuthorityContract.DigestBytes]
+        });
         var invalidSignatureFailure = Assert.ThrowsExactly<KeyLoadException>(() =>
             database.Database.NormalizeOperation(invalidSignature));
         await Assert.That(invalidSignatureFailure.Code).IsEqualTo(ErrorCode.Corruption);
         var claims = NativeSerialization.Deserialize<NativeCommandAuthority>(payload.Authority.Span);
         var wrongPurpose = NativeAuthorityFixture.Resign(database, operation,
-            claims with { Purpose = NativeAuthorityFixture.WrongPurpose });
+            claims with
+            {
+                Purpose = NativeAuthorityFixture.WrongPurpose
+            });
         var wrongPurposeFailure = Assert.ThrowsExactly<KeyLoadException>(() =>
             database.Database.NormalizeOperation(wrongPurpose));
         await Assert.That(wrongPurposeFailure.Code).IsEqualTo(ErrorCode.Corruption);
@@ -184,7 +202,10 @@ internal static class RuntimeJournalBootstrapAdmissionJournalFlow
         AdmittedCommandInbox inbox, CommandAdmissionGovernor governor, PrincipalRecord journalPrincipal)
     {
         var create = RuntimeJournalBootstrapAdmissionFlow.RuntimeJournalMutationFor(RuntimeJournalAction.Create) with
-        { JournalName = RuntimeJournalBootstrapAdmissionFlow.JournalName, InstanceId = Guid.NewGuid() };
+        {
+            JournalName = RuntimeJournalBootstrapAdmissionFlow.JournalName,
+            InstanceId = Guid.NewGuid()
+        };
         var operation = RuntimeJournalBootstrapAdmissionFlow.CreateNative(database, OperationKind.RuntimeJournal, Guid.NewGuid(), create,
             RuntimeJournalIdentity.ProtectedPrincipalId);
         var command = inbox.Enqueue(operation, journalPrincipal, RuntimeJournalBootstrapAdmissionFlow.PayloadBytes(operation));

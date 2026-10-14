@@ -27,7 +27,9 @@ public sealed partial class DatabaseEngine
         if (requests.IsDefaultOrEmpty || requests.Length > Limits.MaxResults
             || requests.Any(static request => request is null || request.Source is null)
             || requests.Select(static request => request.Source).Distinct().Count() != requests.Length)
-        { throw Errors.Fail(ErrorCode.Validation, InvalidVectorSources); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, InvalidVectorSources);
+        }
         return Store.Read(view => ReadEventVectorSources(view, principalId, requests, configuredOwner, budget));
     }
 
@@ -55,7 +57,9 @@ public sealed partial class DatabaseEngine
             eventCount = checked(eventCount + page.Events.Length);
             resultBytes = checked(resultBytes + budget.MeasureResult(page));
             if (eventCount > Limits.MaxResults || resultBytes > budget.MaximumResultBytes)
-            { throw Errors.Fail(ErrorCode.BudgetExceeded, VectorResultExceeded); }
+            {
+                throw Errors.Fail(ErrorCode.BudgetExceeded, VectorResultExceeded);
+            }
             pages.Add(page);
         }
         var result = pages.MoveToImmutable();

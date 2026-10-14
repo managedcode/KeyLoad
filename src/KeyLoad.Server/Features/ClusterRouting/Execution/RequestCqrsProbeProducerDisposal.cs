@@ -1,5 +1,5 @@
 using System.Security.Cryptography;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
@@ -15,14 +15,18 @@ internal sealed class RequestCqrsProbeProducerDisposal(RequestCqrsProbeFiles fil
     {
         ArgumentNullException.ThrowIfNull(value);
         if (Interlocked.CompareExchange(ref relay, value, null) is not null)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
     }
 
     internal ValueTask CompleteAsync(GrainRequestProbeIdentity identity, Guid connectionId, IGrainContext context)
     {
         ArgumentNullException.ThrowIfNull(context);
         if (context.GrainInstance is not ConnectionGrain producer || producer.GetPrimaryKey() != connectionId)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         var original = new RequestCqrsProbeNativeIdentity(identity.RequestId, identity.CommandId, identity.PrincipalId,
             identity.ReadKind, identity.CommandKind, identity.OriginalExpiresAt, connectionId);
         var producerAddress = context.Address.SiloAddress ?? throw Invalid();
@@ -34,9 +38,13 @@ internal sealed class RequestCqrsProbeProducerDisposal(RequestCqrsProbeFiles fil
     {
         var claim = lifecycle.FindClaim(identity.RequestId);
         if (claim is null)
-        { return null; }
+        {
+            return null;
+        }
         if (!Matches(claim, identity))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         return new(claim.Arm.Record.SessionId, claim.Arm.Record.ArmId, identity, owner, voter, address,
             Convert.ToHexStringLower(SHA256.HashData(claim.Arm.ExactBytes)));
     }
@@ -47,10 +55,14 @@ internal sealed class RequestCqrsProbeProducerDisposal(RequestCqrsProbeFiles fil
         {
             var actual = Locate(receipt.Identity, owner, voter, address);
             if (!RequestCqrsProbeNativeAuthentication.SameClaim(actual, receipt))
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             var identity = receipt.Identity;
             Complete(new(identity.RequestId, identity.CommandId, identity.PrincipalId, identity.ReadKind, identity.CommandKind)
-            { OriginalExpiresAt = identity.OriginalExpiresAt });
+            {
+                OriginalExpiresAt = identity.OriginalExpiresAt
+            });
         }
     }
 
@@ -60,12 +72,16 @@ internal sealed class RequestCqrsProbeProducerDisposal(RequestCqrsProbeFiles fil
         {
             var claim = lifecycle.FindClaim(identity.RequestId);
             if (claim is null)
-            { return; }
+            {
+                return;
+            }
             lifecycle.EnterClaimedCallback();
             try
             {
                 if (claim.Identity != identity)
-                { throw Invalid(); }
+                {
+                    throw Invalid();
+                }
                 var failures = new List<Exception>();
                 ServerFailureObserver.Observe(() => files.WriteClaimedProducerDisposed(
                     marker(claim, RequestCqrsProbePhase.ProducerDisposed, RequestCqrsProbeOutcome.Observed), claim.Arm), failures);

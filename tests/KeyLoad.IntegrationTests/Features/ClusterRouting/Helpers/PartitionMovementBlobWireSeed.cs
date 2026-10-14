@@ -61,7 +61,9 @@ internal sealed class PartitionMovementBlobWireSeed(PartitionMovementBlobWireCal
     internal async Task RequireAsync(CancellationToken token)
     {
         foreach (var replay in replays)
-        { await replay(token); }
+        {
+            await replay(token);
+        }
         var document = await PublicReadAssertions.DocumentAsync(await callers.Source.GetAsync(new(Partition, DocumentResource, DocumentId), token));
         await Assert.That(document!.Json).IsEqualTo(DocumentJson);
         var bytes = Enumerable.Repeat(Content, Length).ToArray();

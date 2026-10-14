@@ -16,11 +16,15 @@ internal static class TopicModelQueryValidation
     {
         if (head.TailPosition < EmptyTail || head.FirstAvailablePosition < FirstPosition
             || head.TailPosition < long.MaxValue && head.FirstAvailablePosition > head.TailPosition + FirstPosition)
-        { throw Errors.Fail(ErrorCode.Corruption, Corrupt); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Corrupt);
+        }
         var count = head.TailPosition < head.FirstAvailablePosition ? EmptyCount
             : (ulong)head.TailPosition - (ulong)head.FirstAvailablePosition + InclusivePosition;
         if (count > (ulong)maximumScanRecords)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, ScanExceeded); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, ScanExceeded);
+        }
     }
 
     internal static void Accept(PartitionRef partition, ResourceDefinition resource,
@@ -29,7 +33,9 @@ internal static class TopicModelQueryValidation
         if (record.Data is null || record.Data.SchemaVersion < InitialSchemaVersion
             || !ModelQueryReadRows.IsIdentifier(record.Data.EventId)
             || !ModelQueryReadRows.IsIdentifier(record.Data.EventType))
-        { throw Errors.Fail(ErrorCode.Corruption, Corrupt); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Corrupt);
+        }
         using var payload = ModelQueryReadRows.ParseObject(record.Data.PayloadJson, Corrupt);
         using var headers = ModelQueryReadRows.ParseObject(record.Data.HeadersJson, Corrupt);
         var json = JsonSerializer.Serialize(new

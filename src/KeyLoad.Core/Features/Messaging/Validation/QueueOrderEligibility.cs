@@ -9,13 +9,17 @@ public sealed partial class DatabaseEngine
         MessageBody body, MessageMetadata metadata)
     {
         if (policy.OrderingProfile != QueueOrderingProfile.StrictPerKey)
-        { return true; }
+        {
+            return true;
+        }
         var orderingKey = RequireQueueOrderingKey(body);
         RequireQueueOrderReference(view, lane, orderingKey, metadata);
         var prefix = QueueKey(QueueOrderProtocol.Space, lane, orderingKey);
         var page = view.Scan(prefix, QueueOrderProtocol.Step);
         if (page.Records.IsEmpty)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, QueueOrderProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, QueueOrderProtocol.MissingAuthority);
+        }
         var first = page.Records[QueueOrderProtocol.Initial];
         var reference = view.GetRecord<QueueOrderReference>(first.Key.ToArray())
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, QueueOrderProtocol.MissingAuthority);
@@ -28,14 +32,20 @@ public sealed partial class DatabaseEngine
                 or MessageState.PendingDeadLetter or MessageState.DeadLettered)
             || policy.ParkedHeadPolicy == QueueParkedHeadPolicy.Continue
                 && head.State is MessageState.PendingDeadLetter or MessageState.DeadLettered)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, QueueOrderProtocol.InvalidAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, QueueOrderProtocol.InvalidAuthority);
+        }
         RequireQueueOrderReference(view, lane, orderingKey, head);
         if (Counters(view, lane).NextOrderSequence < head.ActiveOrderSequence)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, QueueOrderProtocol.InvalidAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, QueueOrderProtocol.InvalidAuthority);
+        }
         if (reference != new QueueOrderReference(head.Id, head.ActiveOrderSequence, head.DeliveryGeneration)
             || !first.Key.Span.SequenceEqual(QueueKey(QueueOrderProtocol.Space, lane,
                 orderingKey, head.ActiveOrderSequence, head.Id)))
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, QueueOrderProtocol.InvalidAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, QueueOrderProtocol.InvalidAuthority);
+        }
         return head.Id == metadata.Id;
     }
 
@@ -43,11 +53,15 @@ public sealed partial class DatabaseEngine
         string orderingKey, MessageMetadata metadata)
     {
         if (metadata.EnqueueSequence <= QueueOrderProtocol.Initial || metadata.ActiveOrderSequence < metadata.EnqueueSequence)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, QueueOrderProtocol.InvalidAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, QueueOrderProtocol.InvalidAuthority);
+        }
         var key = QueueKey(QueueOrderProtocol.Space, lane, orderingKey, metadata.ActiveOrderSequence, metadata.Id);
         var expected = new QueueOrderReference(metadata.Id, metadata.ActiveOrderSequence, metadata.DeliveryGeneration);
         if (view.GetRecord<QueueOrderReference>(key) != expected)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, QueueOrderProtocol.InvalidAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, QueueOrderProtocol.InvalidAuthority);
+        }
         return key;
     }
 }

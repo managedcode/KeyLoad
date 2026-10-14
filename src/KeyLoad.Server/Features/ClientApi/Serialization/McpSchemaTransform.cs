@@ -32,7 +32,9 @@ internal static class McpSchemaTransform
     private static void ValidateOpaqueShape(Type type, JsonNode schema)
     {
         if (type == typeof(JsonElement))
-        { return; }
+        {
+            return;
+        }
         if (schema is JsonValue value && value.TryGetValue<bool>(out var open) && open)
         {
             throw new InvalidOperationException(McpCatalogProtocol.UnsupportedSchema);

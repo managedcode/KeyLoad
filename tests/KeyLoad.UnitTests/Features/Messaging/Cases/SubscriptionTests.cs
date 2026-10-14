@@ -13,7 +13,11 @@ internal static class SubscriptionTestActions
         var subscription = new SubscriptionRef(Topic(db), group);
         var id = Guid.NewGuid();
         db.Submit(OperationKind.ConfigureSubscription, new ConfigureSubscriptionRequest(id, subscription,
-            new(dataPrincipal) { Policy = policy ?? new(), EventTypes = [.. (types ?? [])] }, start, cursor), id: id).Get<SubscriptionInfo>();
+            new(dataPrincipal)
+            {
+                Policy = policy ?? new(),
+                EventTypes = [.. (types ?? [])]
+            }, start, cursor), id: id).Get<SubscriptionInfo>();
         return subscription;
     }
     internal static void Publish(TestDatabase db, int count = 3, string prefix = "event", string type = "Created")
@@ -63,7 +67,10 @@ internal sealed class SubscriptionTests
         using var db = new TestDatabase();
         db.Configure("topic", ResourceKind.Topic);
         Publish(db, 5);
-        var subscription = Configure(db, policy: new() { MaxWindow = 2 });
+        var subscription = Configure(db, policy: new()
+        {
+            MaxWindow = 2
+        });
         var received = Receive(db, subscription);
         await Assert.That(received.Deliveries.Length).IsEqualTo(2);
         Complete(db, subscription, received.Deliveries[1]);
@@ -110,7 +117,11 @@ internal sealed class SubscriptionTests
         using var db = new TestDatabase();
         db.Configure("topic", ResourceKind.Topic);
         Publish(db, 1);
-        var subscription = Configure(db, policy: new() { MaxAttempts = 2, MaxLeaseSeconds = 1 });
+        var subscription = Configure(db, policy: new()
+        {
+            MaxAttempts = 2,
+            MaxLeaseSeconds = 1
+        });
         var time = TimeProvider.System.GetUtcNow();
         var first = await Assert.That(Receive(db, subscription, lease: 1, time: time).Deliveries).HasSingleItem();
         var second = await Assert.That(Receive(db, subscription, lease: 1, time: time.AddSeconds(2)).Deliveries).HasSingleItem();
@@ -139,12 +150,19 @@ internal sealed class SubscriptionTests
         await Assert.That(db.Submit(OperationKind.SubscriptionProcessing, failed, id: failedId).Error).IsEqualTo(ErrorCode.RevisionConflict);
         await Assert.That(db.Database.GetSubscription("root", subscription).Checkpoint).IsEqualTo(0);
         var id = Guid.NewGuid();
-        var request = failed with { CommandId = id, Effects = [new PutDocument("orders", "o1", "{}", 0)] };
+        var request = failed with
+        {
+            CommandId = id,
+            Effects = [new PutDocument("orders", "o1", "{}", 0)]
+        };
         var result = db.Submit(OperationKind.SubscriptionProcessing, request, id: id).Get<SubscriptionProcessingResult>();
         await Assert.That(result.AlreadyProcessed).IsFalse();
         await Assert.That(db.Database.GetSubscription("root", subscription).Checkpoint).IsEqualTo(1);
         var replayId = Guid.NewGuid();
-        var replay = db.Submit(OperationKind.SubscriptionProcessing, request with { CommandId = replayId }, id: replayId).Get<SubscriptionProcessingResult>();
+        var replay = db.Submit(OperationKind.SubscriptionProcessing, request with
+        {
+            CommandId = replayId
+        }, id: replayId).Get<SubscriptionProcessingResult>();
         await Assert.That(replay.AlreadyProcessed).IsTrue();
         await Assert.That(replay.OriginalEffectsToken).IsEqualTo(result.OriginalEffectsToken);
         var seekId = Guid.NewGuid();
@@ -155,7 +173,11 @@ internal sealed class SubscriptionTests
         db.Submit(OperationKind.SetSubscriptionPaused, new SetSubscriptionPausedRequest(resumeId, subscription, sought.Generation, false), id: resumeId).Get<SubscriptionInfo>();
         var repeated = await Assert.That(Receive(db, subscription).Deliveries).HasSingleItem();
         var processingId = Guid.NewGuid();
-        var processed = db.Submit(OperationKind.SubscriptionProcessing, request with { CommandId = processingId, Token = repeated.Token }, id: processingId).Get<SubscriptionProcessingResult>();
+        var processed = db.Submit(OperationKind.SubscriptionProcessing, request with
+        {
+            CommandId = processingId,
+            Token = repeated.Token
+        }, id: processingId).Get<SubscriptionProcessingResult>();
         await Assert.That(processed.AlreadyProcessed).IsTrue();
         await Assert.That(processed.OriginalEffectsToken).IsEqualTo(result.OriginalEffectsToken);
         await Assert.That(db.Database.GetSubscription("root", subscription).Checkpoint).IsEqualTo(1);
@@ -190,7 +212,9 @@ internal sealed class SubscriptionTests
         using var db = new TestDatabase();
         db.Configure("orders", ResourceKind.Collection);
         var definition = new ResourceDefinition("topic", ResourceKind.Topic, db.Partition.TransactionDomainId)
-        { EventRetention = new() { MaxEvents = 1 } };
+        {
+            EventRetention = new() { MaxEvents = 1 }
+        };
         db.Submit(OperationKind.ConfigureResource, new ConfigureResourceRequest(db.Partition.TenantId, db.Partition.DatabaseId, definition)).Get<ResourceDefinition>();
         Publish(db, 1);
         var id = Guid.NewGuid();

@@ -3,7 +3,10 @@ namespace KeyLoad.Server.Features.EventStreams;
 internal sealed class EventVectorAdmittedCall
 {
     private EventVectorAdmittedCall(EventVectorMacCheckedCall original) => Original = original;
-    internal EventVectorMacCheckedCall Original { get; }
+    internal EventVectorMacCheckedCall Original
+    {
+        get;
+    }
 
     internal static EventVectorAdmittedCall Admit(EventVectorMacCheckedCall original,
         EventVectorRemoteCallValidation authority, EventVectorReplayCache replay,
@@ -14,7 +17,9 @@ internal sealed class EventVectorAdmittedCall
         ArgumentNullException.ThrowIfNull(replay);
         authority.Require(original.Call, originalCancellationToken);
         if (!replay.TryUse(original.Call.Nonce, original.Call.ExpiresAt))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, EventVectorRemoteProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, EventVectorRemoteProtocol.Invalid);
+        }
         authority.Require(original.Call, originalCancellationToken);
         return new(original);
     }

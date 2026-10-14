@@ -69,7 +69,10 @@ internal static class CurrentCheckpointRepairContinuation
         await Assert.That(cold.Position).IsEqualTo(originalPosition + HealthyIncrement);
         await RequireRowsAsync(cold, restored: false);
         cold.SetDispatchPaused(true);
-        await RequireIdentityAsync(originalIdentity with { DispatchPaused = true }, cold.Identity);
+        await RequireIdentityAsync(originalIdentity with
+        {
+            DispatchPaused = true
+        }, cold.Identity);
         var cut = cold.CreateBackup(destinations.Backup);
         await Assert.That(cut).IsEqualTo(originalPosition + HealthyIncrement);
         return cut;
@@ -87,7 +90,10 @@ internal static class CurrentCheckpointRepairContinuation
         long position)
     {
         using var source = Open(directory);
-        await RequireIdentityAsync(originalIdentity with { DispatchPaused = true }, source.Identity);
+        await RequireIdentityAsync(originalIdentity with
+        {
+            DispatchPaused = true
+        }, source.Identity);
         await Assert.That(source.Position).IsEqualTo(position);
         await RequireRowsAsync(source, restored: false);
     }

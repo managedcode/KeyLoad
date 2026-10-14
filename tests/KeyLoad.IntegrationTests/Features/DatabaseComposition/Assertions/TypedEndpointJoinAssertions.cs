@@ -81,9 +81,13 @@ internal static class TypedEndpointJoinAssertions
         var to = TypedEndpointJoinProtocol.To(partition);
         var edges = ImmutableArray.CreateBuilder<EdgeRecord>();
         if (continued)
-        { edges.Add(Edge(ContinuedPrefix + TypedEndpointJoinProtocol.MatchedMessage, from, to)); }
+        {
+            edges.Add(Edge(ContinuedPrefix + TypedEndpointJoinProtocol.MatchedMessage, from, to));
+        }
         if (joined)
-        { edges.Add(Edge(TypedEndpointJoinProtocol.Prefix + TypedEndpointJoinProtocol.MatchedMessage, from, to)); }
+        {
+            edges.Add(Edge(TypedEndpointJoinProtocol.Prefix + TypedEndpointJoinProtocol.MatchedMessage, from, to));
+        }
         await SqlRf3Protocol.EqualAsync(new global::KeyLoad.GraphTraversal(
             joined ? [from, to] : [from], edges.ToImmutable()), models.Graph);
         await SqlRf3Protocol.EqualAsync(new global::KeyLoad.GraphTraversal(
@@ -132,7 +136,10 @@ internal static class TypedEndpointJoinAssertions
     private static async Task MalformedSourceAsync(TypedEndpointJoinModels models, PartitionRef partition, bool continued)
     {
         if (!continued)
-        { await Assert.That(models.MalformedSource).IsNull(); return; }
+        {
+            await Assert.That(models.MalformedSource).IsNull();
+            return;
+        }
         await Assert.That(models.MalformedSource).IsNotNull();
         var actual = models.MalformedSource!;
         await Assert.That(actual.Metadata.Id).IsEqualTo(TypedEndpointJoinProtocol.MalformedMessage);

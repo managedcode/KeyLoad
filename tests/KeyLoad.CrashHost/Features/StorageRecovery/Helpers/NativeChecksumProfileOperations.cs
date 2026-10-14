@@ -30,7 +30,9 @@ internal static class NativeChecksumProfileOperations
         RequireReceipt(receipt, append);
         CommandIdempotencyCrashAssertions.RequireSameReceipt(database.Apply(operation).Get<CommitReceipt>(), receipt);
         if (database.Apply(CommandIdempotencyCrashData.CreateChangedOperation(operation)).Error != ErrorCode.Conflict)
-        { throw new InvalidOperationException(NativeChecksumProfileProtocol.Invalid); }
+        {
+            throw new InvalidOperationException(NativeChecksumProfileProtocol.Invalid);
+        }
         await CommandIdempotencyCrashData.SaveEvidenceAsync(root, CommandFile(append), operation);
         await CommandIdempotencyCrashData.SaveEvidenceAsync(root, ReceiptFile(append), receipt);
         await RequireAppendAsync(root, database, store, append);
@@ -64,17 +66,23 @@ internal static class NativeChecksumProfileOperations
             || entry.Mutation is not PutDocument document || document.Json != Json(append)
             || document.Collection != CommandIdempotencyCrashContract.Collection || document.Id != DocumentId(append)
             || document.ExpectedRevision != NativeChecksumProfileProtocol.EmptyRevision)
-        { throw new InvalidOperationException(NativeChecksumProfileProtocol.Invalid); }
+        {
+            throw new InvalidOperationException(NativeChecksumProfileProtocol.Invalid);
+        }
     }
 
     private static void RequireReceipt(CommitReceipt receipt, int append)
     {
         if (receipt.CommandId != CommandId(append) || receipt.Mutations.Length != NativeChecksumProfileProtocol.OneAppend)
-        { throw new InvalidOperationException(NativeChecksumProfileProtocol.Invalid); }
+        {
+            throw new InvalidOperationException(NativeChecksumProfileProtocol.Invalid);
+        }
         var mutation = receipt.Mutations[NativeChecksumProfileProtocol.EmptyRevision];
         if (mutation.Kind != NativeChecksumProfileProtocol.PutDocumentKind || mutation.Resource != CommandIdempotencyCrashContract.Collection
             || mutation.Id != DocumentId(append) || mutation.Revision != NativeChecksumProfileProtocol.InitialRevision)
-        { throw new InvalidOperationException(NativeChecksumProfileProtocol.Invalid); }
+        {
+            throw new InvalidOperationException(NativeChecksumProfileProtocol.Invalid);
+        }
     }
 
     private static ReplicatedOperation Create(int append)

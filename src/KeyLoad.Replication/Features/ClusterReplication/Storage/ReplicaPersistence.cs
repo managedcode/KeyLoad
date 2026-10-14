@@ -59,7 +59,9 @@ internal static class ReplicaPersistence
         }
         StorageSnapshot cut;
         try
-        { cut = store.VerifySnapshot(path); }
+        {
+            cut = store.VerifySnapshot(path);
+        }
         catch (KeyLoadException error) when (error.Code == ErrorCode.Corruption)
         {
             throw Errors.Fail(ErrorCode.Corruption, ReplicaProtocol.InvalidSnapshot);

@@ -16,7 +16,10 @@ internal static class TenantDedicatedOwnerRf3Assertions
         _ = await RequestCqrsRf3Callers.RunOwnedAsync(wave.Application, TwoRf3MembershipProtocol.Node1,
             wave.Profile.AdminKey, async root =>
             {
-                await SqlRf3Protocol.EqualAsync(state.SiblingPlacement with { DirectoryRevision = directoryRevision },
+                await SqlRf3Protocol.EqualAsync(state.SiblingPlacement with
+                {
+                    DirectoryRevision = directoryRevision
+                },
                     await TenantPackingActivationRf3Admission.ReadAsync(root, state.Sibling.Partition, token));
                 return state.SiblingPlacement;
             }, token);

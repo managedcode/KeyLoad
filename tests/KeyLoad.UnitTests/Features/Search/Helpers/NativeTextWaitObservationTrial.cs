@@ -16,10 +16,14 @@ internal static class NativeTextWaitObservationTrial
             await using var fixture = new ReplicaAppliedPositionWaitFixture();
             await ExecuteAsync(fixture, future, failures, token);
         }
-        catch (Exception failure) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(failure))
-        { failures.Add(failure); }
-        catch (Exception failure) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(failure))
-        { failures.Add(failure); }
+        catch (Exception failure) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            failures.Add(failure);
+        }
+        catch (Exception failure) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            failures.Add(failure);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
@@ -41,14 +45,22 @@ internal static class NativeTextWaitObservationTrial
                 "/text", receipt.Token);
             var principal = future is null ? NativeTextWaitObservationPermission.Reader : "root";
             if (future is null)
-            { NativeTextWaitObservationPermission.Configure(database, allowField: false); }
+            {
+                NativeTextWaitObservationPermission.Configure(database, allowField: false);
+            }
             var image = QueueWholeFlowStorage.Bytes(database.Store);
             var position = database.Store.Position;
             var invalid = future is null ? request : request with
             {
                 MinimumToken = future.Value
-                ? receipt.Token with { Position = checked(receipt.Token.Position + 1L) }
-                : receipt.Token with { Incarnation = Guid.NewGuid() }
+                ? receipt.Token with
+                {
+                    Position = checked(receipt.Token.Position + 1L)
+                }
+                : receipt.Token with
+                {
+                    Incarnation = Guid.NewGuid()
+                }
             };
             var failure = await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
                 search.WaitForIndexAsync(principal, invalid, token)) ?? throw new InvalidOperationException();
@@ -78,6 +90,8 @@ internal static class NativeTextWaitObservationTrial
             await NativeTextWaitObservationAssertions.RequireImageAsync(database, image, position);
         }, failures);
         if (projection is not null)
-        { ServerFailureObserver.Observe(projection.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(projection.Dispose, failures);
+        }
     }
 }

@@ -20,7 +20,9 @@ internal static class NativeTextAuthorizedQueryR39Seed
         var scenario = new NativeTextMaintenanceRf3Scenario(NativeTextMaintenanceRf3Scenario.CreatePartition());
         var resource = new ResourceDefinition(NativeTextMaintenanceRf3Scenario.Collection,
             ResourceKind.Collection, scenario.Partition.TransactionDomainId)
-        { FieldPolicies = [new(NativeTextMaintenanceRf3Scenario.Field, "private", ReadGrant, UseGrant)] };
+        {
+            FieldPolicies = [new(NativeTextMaintenanceRf3Scenario.Field, "private", ReadGrant, UseGrant)]
+        };
         await SqlRf3Protocol.EqualAsync(resource, await McpCallerAssertions.SdkSuccessAsync(
             await admin.Sdk.ConfigureResourceAsync(Guid.NewGuid(), new(scenario.Partition.TenantId,
                 scenario.Partition.DatabaseId, resource), token)));
@@ -53,7 +55,11 @@ internal static class NativeTextAuthorizedQueryR39Seed
         var principal = new PrincipalRecord("authorized-text-reader-" + Guid.NewGuid().ToString("N"),
             scenario.Partition.TenantId, [new(scenario.Partition.DatabaseId, resource.Name,
                 Capability.Query | Capability.DocumentsRead)], [ReadGrant, UseGrant])
-        { OwnerId = OwnerA, RestrictRows = true, PolicyEpoch = 1L };
+        {
+            OwnerId = OwnerA,
+            RestrictRows = true,
+            PolicyEpoch = 1L
+        };
         var identity = await NativeTextRf3Scenario.ConfigureIdentityAsync(fixture, principal, token);
         await SqlRf3Protocol.EqualAsync(principal, identity.Principal);
         return new(new(scenario, resource, command, receipt, request, built), identity);

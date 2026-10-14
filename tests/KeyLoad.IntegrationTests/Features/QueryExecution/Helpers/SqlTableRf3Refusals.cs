@@ -54,7 +54,10 @@ internal static class SqlTableRf3Refusals
         global::KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsRf3Callers reader,
         PostgresRf3Caller wire, string sql, ErrorCode code, string sqlState, CancellationToken token)
     {
-        var query = state.Query with { Sql = sql };
+        var query = state.Query with
+        {
+            Sql = sql
+        };
         var sdk = await reader.Sdk.QueryAsync(query, token);
         await global::TUnit.Assertions.Assert.That(sdk.IsSuccess).IsFalse();
         await global::TUnit.Assertions.Assert.That(sdk.Value).IsNull();
@@ -62,7 +65,10 @@ internal static class SqlTableRf3Refusals
         await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.ErrorAsync(
             await reader.Mcp.CallAsync(global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerTools.QueryExecute,
                 query, token), code, dispatched: true);
-        var operation = state.Operation with { Sql = sql };
+        var operation = state.Operation with
+        {
+            Sql = sql
+        };
         var executed = await reader.Sdk.ExecuteSqlAsync(operation, token);
         await global::TUnit.Assertions.Assert.That(executed.IsSuccess).IsFalse();
         await global::TUnit.Assertions.Assert.That(executed.Value.ValueKind)
@@ -72,7 +78,9 @@ internal static class SqlTableRf3Refusals
             await reader.Mcp.CallAsync(SqlOperationProtocol.ToolName,
                 operation, token), code, dispatched: true);
         foreach (var prepared in new[] { false, true })
-        { await PostgresRf3Assertions.ErrorAsync(wire.ExecuteAsync<QueryPage>(sql, [], prepared, token), sqlState, code); }
+        {
+            await PostgresRf3Assertions.ErrorAsync(wire.ExecuteAsync<QueryPage>(sql, [], prepared, token), sqlState, code);
+        }
     }
 
     private const string ValidationState = "22023";

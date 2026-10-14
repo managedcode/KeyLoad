@@ -59,7 +59,10 @@ internal sealed class PreparedQuery
     }
 
     internal IReadOnlyDictionary<string, string[]> Paths => paths;
-    internal int EligibleCount { get; private set; }
+    internal int EligibleCount
+    {
+        get; private set;
+    }
 
     internal void Consider(DocumentRecord document, JsonElement json)
     {

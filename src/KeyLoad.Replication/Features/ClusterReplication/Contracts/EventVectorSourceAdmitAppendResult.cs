@@ -16,15 +16,35 @@ public sealed class EventVectorSourceAdmitAppendResult
             OriginalOutcome = originalOutcome
         };
     /// <summary>Gets the genuine appended native operation identity.</summary>
-    [Orleans.Id(0)] public Guid OperationId { get; private init; }
+    [Orleans.Id(0)]
+    public Guid OperationId
+    {
+        get; private init;
+    }
     /// <summary>Gets the same verified authenticated original parent request identity.</summary>
-    [Orleans.Id(1)] public Guid OriginalParentRequestId { get; private init; }
+    [Orleans.Id(1)]
+    public Guid OriginalParentRequestId
+    {
+        get; private init;
+    }
     /// <summary>Gets the exact admitted original source phase identity.</summary>
-    [Orleans.Id(2)] public Guid OriginalSourcePhaseCommandId { get; private init; }
+    [Orleans.Id(2)]
+    public Guid OriginalSourcePhaseCommandId
+    {
+        get; private init;
+    }
     /// <summary>Gets the actual appended entry index acknowledged and applied.</summary>
-    [Orleans.Id(3)] public long AppendedIndex { get; private init; }
+    [Orleans.Id(3)]
+    public long AppendedIndex
+    {
+        get; private init;
+    }
     /// <summary>Gets the actual term of that same appended entry.</summary>
-    [Orleans.Id(4)] public long AppendedTerm { get; private init; }
+    [Orleans.Id(4)]
+    public long AppendedTerm
+    {
+        get; private init;
+    }
     /// <summary>Gets the genuine unchanged successful domain outcome.</summary>
     [Orleans.Id(5)] public OperationResult OriginalOutcome { get; private init; } = null!;
 }

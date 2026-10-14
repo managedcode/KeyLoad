@@ -17,9 +17,14 @@ internal sealed class C1OutcomeInspectionScopeTests
             await C1OutcomeInspectionAssertions.AssertOutcomeAsync(fixture, expected: true);
             await C1OutcomeInspectionAssertions.AssertOutcomeAsync(fixture, expected: true,
                 partition: fixture.OtherPartition);
-            var absentPartition = fixture.Partition with { PartitionKey = "unseeded-partition" };
+            var absentPartition = fixture.Partition with
+            {
+                PartitionKey = "unseeded-partition"
+            };
             using (var reopenedStore = ZoneTreeExistingStore.Open(new ZoneTreeStoreOptions(fixture.DirectoryPath)
-            { Incarnation = fixture.Incarnation }, fixture.Identity.NodeId, UnitExecutionOptions.StorageExecution()))
+            {
+                Incarnation = fixture.Incarnation
+            }, fixture.Identity.NodeId, UnitExecutionOptions.StorageExecution()))
             {
                 await Assert.That(reopenedStore.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(
                     absentPartition, C1OutcomeInspectionAssertions.AdminId, fixture.CommandId)))).IsNull();

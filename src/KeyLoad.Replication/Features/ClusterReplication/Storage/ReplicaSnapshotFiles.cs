@@ -9,7 +9,10 @@ internal sealed class ReplicaSnapshotFiles
 
     private readonly ReplicaConfiguration configuration;
     private readonly ReplicaExecutionOptions execution;
-    internal string DirectoryPath { get; }
+    internal string DirectoryPath
+    {
+        get;
+    }
 
     internal ReplicaSnapshotFiles(IOptions<ReplicaConfiguration> configurationOptions,
         IOptions<ReplicaExecutionOptions> executionOptions)
@@ -106,7 +109,9 @@ internal sealed class ReplicaSnapshotFiles
     {
         var path = ManifestPath;
         if (!File.Exists(path))
-        { return null; }
+        {
+            return null;
+        }
         using var file = File.OpenRead(path);
         if (file.Length > execution.MaximumManifestBytes)
         {

@@ -16,7 +16,9 @@ internal sealed class RequestCqrsWaitForIndexReadCutFiles(string root, string se
             RequestCqrsWaitForIndexReadCutInventory.Require(value);
             RequestCqrsWaitForIndexReadCutInventory.RequireArm(value, claim.Arm.Record);
             if (value.SessionId != sessionId)
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             RequestCqrsWaitForIndexReadCutInventory.RequireSource(value, snapshot.Markers);
             var marker = new RequestCqrsProbeMarkerRecord(RequestCqrsProbeProtocol.Version,
                 RequestCqrsProbeProtocol.MarkerKind, value.SessionId, value.ArmId, value.RequestId,
@@ -26,7 +28,9 @@ internal sealed class RequestCqrsWaitForIndexReadCutFiles(string root, string se
             var name = RequestCqrsWaitForIndexReadCutInventory.Name(value.ArmId, value.RequestId);
             var bytes = JsonSerializer.SerializeToUtf8Bytes(value, json.WaitCutTypeInfo);
             if (bytes.Length > options.Value.MaximumRecordBytes)
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             var markerName = RequestCqrsProbeFiles.MarkerName(marker);
             RequestCqrsProbeBatchPublication.Write(root, [(name, bytes), (markerName, json.WriteMarker(marker))],
                 options, readSnapshot);
@@ -42,7 +46,9 @@ internal sealed class RequestCqrsWaitForIndexReadCutFiles(string root, string se
         var value = json.Read(bytes, RequestCqrsWaitForIndexReadCutInventory.Fields, json.WaitCutTypeInfo);
         RequestCqrsWaitForIndexReadCutInventory.Require(value);
         if (value.SessionId != sessionId || RequestCqrsWaitForIndexReadCutInventory.Name(value.ArmId, value.RequestId) != name)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         records.RegisterImmutable(name, bytes);
         presentControls.Add(name);
         values.Add(value);

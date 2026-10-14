@@ -26,7 +26,10 @@ internal sealed class ResourcePolicyUpdateFixture : IDisposable
     private const string Wildcard = "*";
     private bool opened;
 
-    internal string DirectoryPath { get; }
+    internal string DirectoryPath
+    {
+        get;
+    }
     internal PartitionRef Partition { get; } = new(TenantId, DatabaseId, DomainId, PartitionKey);
     internal ZoneTreeStore Store { get; private set; } = null!;
     internal DatabaseEngine Database { get; private set; } = null!;
@@ -36,10 +39,14 @@ internal sealed class ResourcePolicyUpdateFixture : IDisposable
         DirectoryPath = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString("N"));
         Open();
         Database.Bootstrap(new(RootId, SystemTenant, [new(Wildcard, Wildcard, Capability.All)], [Wildcard])
-        { ClusterAdministrator = true }, DatabaseEngine.Credential(RootId, RootId, RootCredential));
+        {
+            ClusterAdministrator = true
+        }, DatabaseEngine.Credential(RootId, RootId, RootCredential));
         PhysicalShardTestBootstrap.Bootstrap(Database, RootId);
         Apply(ConfigureResource(new(Collection, ResourceKind.Collection, DomainId)
-        { SchemaVersion = initialSchemaVersion })).Get<ResourceDefinition>();
+        {
+            SchemaVersion = initialSchemaVersion
+        })).Get<ResourceDefinition>();
         Commit(new PutDocument(Collection, DocumentId, PublicDocument));
         ConfigureReader();
     }
@@ -60,7 +67,9 @@ internal sealed class ResourcePolicyUpdateFixture : IDisposable
         Guid? operationId = null, string principalId = RootId)
     {
         var payload = new ConfigureResourceRequest(Partition.TenantId, Partition.DatabaseId, definition)
-        { ExpectedSchemaVersion = expectedSchemaVersion };
+        {
+            ExpectedSchemaVersion = expectedSchemaVersion
+        };
         return new(operationId ?? Guid.NewGuid(), OperationKind.ConfigureResource, principalId,
             TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(payload, JsonDefaults.Options));
     }
@@ -90,7 +99,9 @@ internal sealed class ResourcePolicyUpdateFixture : IDisposable
         Store.Dispose();
         Open();
         Database.Bootstrap(new(RootId, SystemTenant, [new(Wildcard, Wildcard, Capability.All)], [Wildcard])
-        { ClusterAdministrator = true }, DatabaseEngine.Credential(RootId, RootId, RootCredential));
+        {
+            ClusterAdministrator = true
+        }, DatabaseEngine.Credential(RootId, RootId, RootCredential));
     }
 
     internal static KeyLoadException Failure(OperationResult result)

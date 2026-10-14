@@ -68,7 +68,10 @@ internal static class ClusterRestoreMixedRetentionRf3Seed
             partition, target.PhysicalShardId, target.Incarnation, target.VoterIds, target.PlacementEpoch,
             before.DirectoryRevision + ClusterRestoreMixedRetentionRf3Protocol.FirstRevision,
             ClusterRestoreMixedRetentionRf3Protocol.FirstRevision, false), actual);
-        var sourcePartition = partition with { PartitionKey = ClusterRestoreMixedRetentionRf3Protocol.SourceKey };
+        var sourcePartition = partition with
+        {
+            PartitionKey = ClusterRestoreMixedRetentionRf3Protocol.SourceKey
+        };
         var sourcePlacement = await McpCallerAssertions.SdkSuccessAsync(await root.ReadAtomicPartitionPlacementAsync(
             new(ClusterRestoreMixedRetentionRf3Protocol.CurrentVersion, sourcePartition), token));
         var sourceOwner = original.Directory.ControlOwner;
@@ -94,7 +97,9 @@ internal static class ClusterRestoreMixedRetentionRf3Seed
              new(partition.DatabaseId, ClusterRestoreMixedRetentionRf3Protocol.Events, Capability.EventsRead | Capability.EventsAppend | Capability.Query),
              new(partition.DatabaseId, ClusterRestoreMixedRetentionRf3Protocol.Filtered, topic),
              new(partition.DatabaseId, ClusterRestoreMixedRetentionRf3Protocol.Purged, topic)], ["*"])
-        { ClusterAdministrator = true };
+        {
+            ClusterAdministrator = true
+        };
     }
 
     private static async Task ResourcesAsync(KeyLoadClient root, PartitionRef partition, CancellationToken token)
@@ -111,7 +116,9 @@ internal static class ClusterRestoreMixedRetentionRf3Seed
             HeaderPolicies = [new("/source", ClusterRestoreMixedRetentionRf3Protocol.PrivateGrant)]
         };
         var inbox = new ResourceDefinition(ClusterRestoreMixedRetentionRf3Protocol.Inbox, ResourceKind.WorkQueue, partition.TransactionDomainId)
-        { InboxPolicy = new(TargetInboxRf3Protocol.ReceiptCapacity, TargetInboxRf3Protocol.ByteCapacity) };
+        {
+            InboxPolicy = new(TargetInboxRf3Protocol.ReceiptCapacity, TargetInboxRf3Protocol.ByteCapacity)
+        };
         var resources = new[]
         {
             lifecycle, inbox,

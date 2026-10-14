@@ -49,7 +49,9 @@ public sealed partial class DatabaseEngine
             || !PhysicalOwnerEntryValidation.SameOwner(directory.ControlOwner, phase.ControlOwner)
             || !directory.Owners.Any(owner => PhysicalOwnerEntryValidation.SameOwner(owner.Owner, body.ReceiverOwner))
             || !MatchesMoveReceiver(body.Phase, body.ReceiverOwner))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
         RequireMovePhaseIdentity(body.Phase, control);
         PartitionMoveGrantStageAdmission.Require(transaction, body.Phase, control, Limits.MaxBatchBytes);
         var digest = Convert.ToHexStringLower(SHA256.HashData(body.Phase.Body.Span));
@@ -71,23 +73,33 @@ public sealed partial class DatabaseEngine
                 || previous.OperatorPolicyEpoch != grant.OperatorPolicyEpoch
                 || previous.RequireReceiverIssuance != grant.RequireReceiverIssuance
                 || !PhysicalOwnerEntryValidation.SameOwner(previous.ReceiverOwner, grant.ReceiverOwner))
-            { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict); }
+            {
+                throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict);
+            }
             grant = previous;
         }
         else
         {
-            if (grant.RequireReceiverIssuance)
-            { RequireMoveReceiverIssueCapacity(transaction, principal, commandId, body.Phase, grant); }
-            PartitionMoveGrantStorage.ChangeOutstanding(transaction,
-                PartitionMoveGrantStorage.MoveCountKey(phase.Partition, phase.MoveId), true, Limits.MaxBatchMutations);
-            PartitionMoveGrantStorage.ChangeOutstanding(transaction, principal.Id, true, Limits.MaxBatchMutations);
-            PartitionMoveGrantStorage.ChangeOutstanding(transaction,
-                PartitionMoveGrantStorage.DatabaseKey(phase.Partition.TenantId, phase.Partition.DatabaseId),
-                true, Limits.MaxBatchMutations);
-            PartitionMoveGrantStorage.Write(transaction, grant, Limits.MaxBatchBytes);
+            PublishMoveGrant(transaction, principal, commandId, phase, body.Phase, grant);
         }
         return new(phase.MoveId, phase.Stage, MoveJournalReceipt(transaction, commandId,
             grant.AdmissionPosition, grant.ControlIntentDigest), control, null, null, null, grant);
+    }
+
+    private void PublishMoveGrant(IAtomicTransaction transaction, PrincipalRecord principal, Guid commandId,
+        PartitionMovePhaseCommand phase, PartitionMovePhaseCommand effect, PartitionMovePhaseGrant grant)
+    {
+        if (grant.RequireReceiverIssuance)
+        {
+            RequireMoveReceiverIssueCapacity(transaction, principal, commandId, effect, grant);
+        }
+        PartitionMoveGrantStorage.ChangeOutstanding(transaction,
+            PartitionMoveGrantStorage.MoveCountKey(phase.Partition, phase.MoveId), true, Limits.MaxBatchMutations);
+        PartitionMoveGrantStorage.ChangeOutstanding(transaction, principal.Id, true, Limits.MaxBatchMutations);
+        PartitionMoveGrantStorage.ChangeOutstanding(transaction,
+            PartitionMoveGrantStorage.DatabaseKey(phase.Partition.TenantId, phase.Partition.DatabaseId),
+            true, Limits.MaxBatchMutations);
+        PartitionMoveGrantStorage.Write(transaction, grant, Limits.MaxBatchBytes);
     }
 
     private static PartitionMovePhaseGrant BindMoveCleanupGrant(PartitionMovePhaseCommand phase,
@@ -95,7 +107,9 @@ public sealed partial class DatabaseEngine
     {
         if (phase.Stage is not (PartitionMovePeerStage.Abort or PartitionMovePeerStage.Retire
             or PartitionMovePeerStage.SourceBeginAbort))
-        { return grant; }
+        {
+            return grant;
+        }
         var cleanup = NativeSerialization.Deserialize<PartitionMoveCleanupBody>(phase.Body.Span);
         return grant with
         {

@@ -22,7 +22,9 @@ internal static class RequestCqrsConnectionCancellationArtifactWriter
         var original = new RequestCqrsConnectionCancellationArtifact(ArtifactVersion, waveId, nodes);
         var bytes = JsonSerializer.SerializeToUtf8Bytes(original);
         if (bytes.Length > MaximumArtifactBytes)
-        { throw new InvalidOperationException(InvalidArtifact); }
+        {
+            throw new InvalidOperationException(InvalidArtifact);
+        }
         var directory = Path.Combine(ClusterFixtureDiagnostics.FindRepositoryRoot().FullName,
             RootDirectory, DirectoryName);
         Directory.CreateDirectory(directory);
@@ -44,16 +46,22 @@ internal static class RequestCqrsConnectionCancellationArtifactWriter
         {
             stream.ReadExactly(actualBytes);
             if (stream.ReadByte() != EndOfStream)
-            { throw new InvalidOperationException(InvalidArtifact); }
+            {
+                throw new InvalidOperationException(InvalidArtifact);
+            }
         }
         if (!actualBytes.AsSpan().SequenceEqual(originalBytes))
-        { throw new InvalidOperationException(InvalidArtifact); }
+        {
+            throw new InvalidOperationException(InvalidArtifact);
+        }
         var actual = JsonSerializer.Deserialize<RequestCqrsConnectionCancellationArtifact>(actualBytes)
             ?? throw new InvalidOperationException(InvalidArtifact);
         if (actual.Version != original.Version || actual.WaveId != original.WaveId
             || actual.Nodes is null || actual.Nodes.Length != original.Nodes.Length
             || !actual.Nodes.Zip(original.Nodes).All(pair => Same(pair.First, pair.Second)))
-        { throw new InvalidOperationException(InvalidArtifact); }
+        {
+            throw new InvalidOperationException(InvalidArtifact);
+        }
     }
     private static bool Same(RequestCqrsConnectionCancellationNodeSnapshot actual,
         RequestCqrsConnectionCancellationNodeSnapshot original)

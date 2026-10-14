@@ -13,11 +13,20 @@ public sealed class AdmittedCommand : IDisposable
     private int dequeued;
 
     /// <summary>Gets the admitted immutable operation.</summary>
-    public ReplicatedOperation Operation { get; }
+    public ReplicatedOperation Operation
+    {
+        get;
+    }
 
-    internal bool Control { get; }
+    internal bool Control
+    {
+        get;
+    }
 
-    internal string Tenant { get; }
+    internal string Tenant
+    {
+        get;
+    }
 
     /// <summary>Gets the task completed when the consumer records the operation outcome.</summary>
     public Task<OperationResult> Completion => completion.Task;

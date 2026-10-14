@@ -14,14 +14,18 @@ public sealed partial class DatabaseEngine
         {
             var principal = Principal(view, principalId, EvaluationClock.GetUtcNow());
             if (!principal.ClusterAdministrator)
-            { throw Errors.Fail(ErrorCode.PermissionDenied, PhysicalOwnerDirectoryProtocol.AdministratorRequired); }
+            {
+                throw Errors.Fail(ErrorCode.PermissionDenied, PhysicalOwnerDirectoryProtocol.AdministratorRequired);
+            }
             var catalog = PhysicalShardCatalogRecordSerialization.Read(view)
                 ?? throw Errors.Fail(ErrorCode.NotFound, PhysicalOwnerDirectoryProtocol.Missing);
             PhysicalShardCatalogValidation.ValidateCatalog(catalog);
             var result = PhysicalOwnerDirectorySerialization.Read(view)
                 ?? throw Errors.Fail(ErrorCode.NotFound, PhysicalOwnerDirectoryProtocol.Missing);
             if (!PhysicalOwnerEntryValidation.SameOwner(result.ControlOwner, catalog.DefaultShard))
-            { throw Errors.Fail(ErrorCode.Corruption, PhysicalOwnerDirectoryProtocol.ControlMismatch); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, PhysicalOwnerDirectoryProtocol.ControlMismatch);
+            }
             return result;
         });
 }

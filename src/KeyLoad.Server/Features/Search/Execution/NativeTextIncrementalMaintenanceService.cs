@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 using KeyLoad.Query.Features.Search;
 using KeyLoad.Storage;
 
@@ -126,7 +126,9 @@ internal sealed class NativeTextIncrementalMaintenanceService : INativeTextMaint
         lock (selectedGate)
         {
             foreach (var slot in selectedSlots.Values)
-            { slot.RequireSettled(); }
+            {
+                slot.RequireSettled();
+            }
             selectedSlots.Clear();
             selectedWork.Clear();
         }
@@ -138,16 +140,22 @@ internal sealed class NativeTextIncrementalMaintenanceService : INativeTextMaint
         var originalReaders = selectedAdmission.CloseAndJoinReaders();
         var failures = new List<Exception>();
         try
-        { await worker.DisposeAsync().ConfigureAwait(false); }
+        {
+            await worker.DisposeAsync().ConfigureAwait(false);
+        }
         catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null) { failures.Add(error); }
         catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null) { failures.Add(error); }
         await ServerFailureObserver.ObserveAsync(() => originalReaders, failures).ConfigureAwait(false);
         ServerFailureObserver.Observe(selectedAdmission.ThrowRetained, failures);
         NativeTextSelectedIndexSlot[] originals;
         lock (selectedGate)
-        { originals = selectedSlots.Values.ToArray(); }
+        {
+            originals = selectedSlots.Values.ToArray();
+        }
         foreach (var original in originals)
-        { ServerFailureObserver.Observe(original.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(original.Dispose, failures);
+        }
         ServerFailureObserver.Observe(sessions.DisposeAfterWorkerJoin, failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -169,7 +177,9 @@ internal sealed class NativeTextIncrementalMaintenanceService : INativeTextMaint
             var failures = new List<Exception> { primary };
             // The native lease constructor joins its partial reader before a single original failure escapes.
             if (primary is not AggregateException && reservation is not null)
-            { ServerFailureObserver.Observe(reservation.CompleteAfterJoinedCleanup, failures); }
+            {
+                ServerFailureObserver.Observe(reservation.CompleteAfterJoinedCleanup, failures);
+            }
             ServerFailureObserver.ThrowIfAny(failures);
             throw;
         }
@@ -196,7 +206,9 @@ internal sealed class NativeTextIncrementalMaintenanceService : INativeTextMaint
     {
         // The worker owns this registry; every entry corresponds to prospective or actual retained files.
         if (!generationReservations.TryAdd(leaf, original))
-        { throw NativeTextErrors.Ownership(); }
+        {
+            throw NativeTextErrors.Ownership();
+        }
     }
 
     private void ReleaseGeneration(string leaf)

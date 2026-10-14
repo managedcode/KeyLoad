@@ -20,7 +20,9 @@ internal static class PostgresPortalOwnershipFlow
                     for (var cold = PostgresRf3Protocol.FirstColumn; cold < PostgresPortalOwnershipProtocol.ColdCuts; cold++)
                     {
                         using (var deadline = McpCallerDeadline.Create())
-                        { await ModelSqlRf3Cold.RunAsync(fixture, deadline.Token); }
+                        {
+                            await ModelSqlRf3Cold.RunAsync(fixture, deadline.Token);
+                        }
                         await PostgresPortalOwnershipWave.RunAsync(fixture, state, policyControls: false);
                     }
                 }

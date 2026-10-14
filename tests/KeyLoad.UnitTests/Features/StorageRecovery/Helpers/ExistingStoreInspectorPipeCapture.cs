@@ -14,7 +14,10 @@ internal sealed class ExistingStoreInspectorPipeCapture
 
     internal const string ReadyMarker = ExistingStoreInspectorProtocol.ReadyMarker;
     internal string Text => retained.ToString();
-    internal long CharacterCount { get; private set; }
+    internal long CharacterCount
+    {
+        get; private set;
+    }
     internal Task ReadyTask => ready.Task;
 
     internal async Task DrainAsync(TextReader reader)

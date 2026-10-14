@@ -19,11 +19,15 @@ internal static class EventVectorOriginalEntryOwner
                 var entries = EventVectorEntryEncoding.Decode(capture.OriginalEncodedEntries,
                     capture.EntryChecksum, admission);
                 if (!entries.Any(original => original.Source == entry.Source))
-                { continue; }
+                {
+                    continue;
+                }
                 if (!entries.Any(original => original == entry) || found is not null || capture.SourceOwner is null
                     || capture.SourceOwner.Incarnation != entry.Incarnation
                     || capture.SourceOwner.PlacementEpoch != entry.PlacementEpoch)
-                { throw Errors.Fail(ErrorCode.OwnershipLost, Invalid); }
+                {
+                    throw Errors.Fail(ErrorCode.OwnershipLost, Invalid);
+                }
                 found = capture.SourceOwner;
             }
             finally { EventVectorCoverageCaptureBuffers.Clear(capture); }

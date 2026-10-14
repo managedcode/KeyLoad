@@ -47,7 +47,10 @@ internal static class TenantCapacityPlacementRf3MultiCold
     {
         await PartitionMovementPublicParentRf3Cut.RestartAsync(wave, token);
         foreach (var seed in seeds)
-        { await seed.ReconnectAsync(wave, token); await seed.VerifyAsync(token); }
+        {
+            await seed.ReconnectAsync(wave, token);
+            await seed.VerifyAsync(token);
+        }
     }
 
     private static async Task ReplayAsync(PartitionMovementPublicParentRf3Seed[] seeds,
@@ -61,6 +64,8 @@ internal static class TenantCapacityPlacementRf3MultiCold
             return;
         }
         foreach (var seed in seeds)
-        { await TenantCapacityPlacementRf3Assertions.RequirePolicyReplayAsync(seed, state, token); }
+        {
+            await TenantCapacityPlacementRf3Assertions.RequirePolicyReplayAsync(seed, state, token);
+        }
     }
 }

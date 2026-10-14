@@ -71,7 +71,9 @@ internal static class BlobRestoredReclaimPublicOperations
             await official.CallAsync("keyload_blobs_reclaim", request, token))).Value);
         await BlobRestoredReclaimPublicAssertions.CurrentAsync(sdk, official, state, final, token);
         if (state.Healthy is not null)
-        { await HealthyReplayAsync(sdk, official, state, final, token); }
+        {
+            await HealthyReplayAsync(sdk, official, state, final, token);
+        }
         if (final)
         {
             await ClusterRestoreRf3AuthorityTrial.ErrorAsync(await sdk.ReclaimBlobAsync(state.First, token), ErrorCode.TokenInvalidated);

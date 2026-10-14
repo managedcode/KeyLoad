@@ -12,7 +12,9 @@ internal static class TimeSeriesResourceTagPolicyRf3Policy
     internal static ConfigureResourceRequest Request(TimeSeriesResourceTagPolicyRf3State state,
         ResourceDefinition definition, long? expected = null) => new(state.Scenario.Partition.TenantId,
             state.Scenario.Partition.DatabaseId, definition)
-        { ExpectedSchemaVersion = expected };
+        {
+            ExpectedSchemaVersion = expected
+        };
 
     internal static async Task ChangeAsync(RequestCqrsRf3Callers administrator,
         TimeSeriesResourceTagPolicyRf3State state, string grant, CancellationToken token)
@@ -32,7 +34,9 @@ internal static class TimeSeriesResourceTagPolicyRf3Policy
         state.Configurations.Add((id, request, actual));
         state.Current = next;
         if (next.SchemaVersion == 2L)
-        { state.Stale = Request(state, next, 1L); }
+        {
+            state.Stale = Request(state, next, 1L);
+        }
         await TimeSeriesResourceTagPolicyRf3Assertions.CurrentAsync(administrator, state, token);
     }
 

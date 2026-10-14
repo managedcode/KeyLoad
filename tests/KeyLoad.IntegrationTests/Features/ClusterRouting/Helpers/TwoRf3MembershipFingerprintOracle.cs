@@ -2,8 +2,8 @@ using System.Globalization;
 using System.Security.Cryptography;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.StorageRecovery;
-using KeyLoad.Orleans;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
@@ -38,9 +38,13 @@ internal static class TwoRf3MembershipFingerprintOracle
         finally
         {
             if (firstSecret is not null)
-            { CryptographicOperations.ZeroMemory(firstSecret); }
+            {
+                CryptographicOperations.ZeroMemory(firstSecret);
+            }
             if (secondSecret is not null)
-            { CryptographicOperations.ZeroMemory(secondSecret); }
+            {
+                CryptographicOperations.ZeroMemory(secondSecret);
+            }
         }
     }
 
@@ -66,7 +70,9 @@ internal static class TwoRf3MembershipFingerprintOracle
         {
             CryptographicOperations.ZeroMemory(firstSecret);
             if (secondSecret is not null)
-            { CryptographicOperations.ZeroMemory(secondSecret); }
+            {
+                CryptographicOperations.ZeroMemory(secondSecret);
+            }
         }
     }
 
@@ -81,7 +87,9 @@ internal static class TwoRf3MembershipFingerprintOracle
             || physicalId == profile.PhysicalShardId || !Guid.TryParseExact(incarnation, "D", out var incarnationId)
             || incarnationId == Guid.Empty || incarnationId.ToString("D") != incarnation
             || incarnationId == profile.Incarnation || secret.Length == 0)
-        { throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState); }
+        {
+            throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState);
+        }
         return new(incarnationId, secret);
     }
 

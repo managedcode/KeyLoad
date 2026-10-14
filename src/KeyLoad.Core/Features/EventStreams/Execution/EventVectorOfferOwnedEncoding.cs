@@ -19,7 +19,9 @@ internal static class EventVectorOfferOwnedEncoding
         {
             encodedWitness = Encode(witness, admission, work);
             foreach (var pin in pins)
-            { encodedPins.Add(Encode(pin, admission, work)); }
+            {
+                encodedPins.Add(Encode(pin, admission, work));
+            }
             work.Check();
             var prepared = new EventVectorPreparedOffer(map, entries, encodedWitness, encodedPins.ToImmutable());
             transferred = true;
@@ -31,7 +33,9 @@ internal static class EventVectorOfferOwnedEncoding
             {
                 Clear(encodedWitness);
                 foreach (var pin in encodedPins)
-                { Clear(pin); }
+                {
+                    Clear(pin);
+                }
             }
         }
     }
@@ -44,7 +48,9 @@ internal static class EventVectorOfferOwnedEncoding
         work.ChargeBytes(length);
         var encoded = NativeSerialization.Serialize(value);
         if (encoded.Length == length)
-        { return encoded; }
+        {
+            return encoded;
+        }
         Clear(encoded);
         throw Errors.Fail(ErrorCode.Corruption, Invalid);
     }

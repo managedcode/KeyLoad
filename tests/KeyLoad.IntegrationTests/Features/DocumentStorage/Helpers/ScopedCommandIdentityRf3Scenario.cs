@@ -16,7 +16,10 @@ internal sealed record ScopedCommandIdentityRf3Scenario(PartitionRef FirstPartit
         var collection = "documents-" + Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat);
         var queue = "queue-" + Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat);
         var first = new PartitionRef(tenant, McpDocumentProtocol.Database, domain, FirstPartitionKey);
-        var second = first with { PartitionKey = "partition-b" };
+        var second = first with
+        {
+            PartitionKey = "partition-b"
+        };
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
         var administrator = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         var definition = new ResourceDefinition(collection, ResourceKind.Collection, domain);

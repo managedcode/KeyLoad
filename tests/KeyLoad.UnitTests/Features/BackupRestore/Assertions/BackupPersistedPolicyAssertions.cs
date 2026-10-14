@@ -15,7 +15,9 @@ internal static class BackupPersistedPolicyAssertions
         {
             var page = view.Scan([], MaximumFixtureRows);
             if (page.HasMore)
-            { throw new InvalidOperationException("Whole store state exceeded the fixture bound."); }
+            {
+                throw new InvalidOperationException("Whole store state exceeded the fixture bound.");
+            }
             return (page.Records.Select(record => Convert.ToHexString(record.Key.Span) + ":" +
                 Convert.ToHexString(record.Value.Span)).ToArray(), store.Position);
         });

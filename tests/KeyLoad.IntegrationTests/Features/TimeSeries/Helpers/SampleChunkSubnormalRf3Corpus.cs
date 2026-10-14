@@ -6,9 +6,15 @@ internal static class SampleChunkSubnormalRf3Corpus
     internal const long EmptySequence = 0;
 
     internal static SampleData First(SampleChunkRf3Scenario scenario)
-        => scenario.First with { Value = double.Epsilon };
+        => scenario.First with
+        {
+            Value = double.Epsilon
+        };
     internal static SampleData Equal(SampleChunkRf3Scenario scenario)
-        => scenario.Equal with { Value = -double.Epsilon };
+        => scenario.Equal with
+        {
+            Value = -double.Epsilon
+        };
     internal static SampleData Healthy(SampleChunkRf3Scenario scenario)
         => new(HealthyId, scenario.From.AddTicks(SampleChunkRf3Protocol.CorrectedSequence), double.Epsilon);
 

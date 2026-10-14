@@ -45,7 +45,11 @@ internal static class SiteIsolatedGitHubInputCorruption
             await File.WriteAllBytesAsync(path, bytes, token);
             await File.WriteAllTextAsync(receipt.ReceiptPath, changed.ToJsonString(), token);
             var result = await SiteIsolatedGitHubScope.RunAsync(SiteIsolatedGitHubFields.InputsOperation,
-                new { input = receipt.Capture, receipt = receipt.ReceiptPath }, token);
+                new
+                {
+                    input = receipt.Capture,
+                    receipt = receipt.ReceiptPath
+                }, token);
             await Assert.That(result.GetProperty(SiteIsolatedGitHubFields.Ok).GetBoolean()).IsFalse();
             var error = await Assert.ThrowsExactlyAsync<InvalidDataException>(() =>
                 SiteIsolatedGitHubArchiveSetup.VerifyUnchangedAsync(receipt, token));
@@ -61,7 +65,10 @@ internal static class SiteIsolatedGitHubInputCorruption
     private static async Task DetachAsync(string path, CancellationToken token)
     {
         var result = await SiteIsolatedGitHubScope.RunAsync(SiteIsolatedGitHubFields.DetachOperation,
-            new { path }, token);
+            new
+            {
+                path
+            }, token);
         if (!result.GetProperty(SiteIsolatedGitHubFields.Ok).GetBoolean())
         {
             throw new InvalidDataException(SiteIsolatedGitHubTokens.Changed);

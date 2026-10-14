@@ -16,17 +16,23 @@ public sealed partial class DatabaseEngine
         {
             cancellationToken.ThrowIfCancellationRequested();
             if (Store.Identity.Incarnation != owner.Incarnation)
-            { throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalCommandOwnerUnavailable); }
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalCommandOwnerUnavailable);
+            }
             var catalog = PhysicalShardCatalogRecordSerialization.Read(view);
             if (catalog is null)
             {
                 if (!bootstrap)
-                { throw Errors.Fail(ErrorCode.RecoveryRequired, PhysicalCommandOwnerUnavailable); }
+                {
+                    throw Errors.Fail(ErrorCode.RecoveryRequired, PhysicalCommandOwnerUnavailable);
+                }
                 return true;
             }
             PhysicalShardCatalogValidation.ValidateCatalog(catalog);
             if (!PhysicalOwnerEntryValidation.SameOwner(catalog.DefaultShard, owner))
-            { throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalCommandOwnerUnavailable); }
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalCommandOwnerUnavailable);
+            }
             cancellationToken.ThrowIfCancellationRequested();
             return true;
         });

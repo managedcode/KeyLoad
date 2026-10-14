@@ -26,7 +26,9 @@ internal static class ChunkMultiblockRf3Writes
             state.Outbox = await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.OutboxStatusAsync(command.Partition, token));
             await ChunkMultiblockRf3Current.RequireAsync(administrator, administrator, state, token);
             if (phase is ChunkMultiblockRf3Phase.OriginalPending or ChunkMultiblockRf3Phase.HealthyPending)
-            { await WaitAsync(administrator, state, healthy: phase == ChunkMultiblockRf3Phase.HealthyPending, token); }
+            {
+                await WaitAsync(administrator, state, healthy: phase == ChunkMultiblockRf3Phase.HealthyPending, token);
+            }
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
         await ChunkMultiblockRf3Replay.RunAsync(administrator, state, command, receipt!, token);
@@ -38,7 +40,9 @@ internal static class ChunkMultiblockRf3Writes
         token.ThrowIfCancellationRequested();
         var settled = healthy ? ChunkMultiblockRf3Phase.HealthyStable : ChunkMultiblockRf3Phase.OriginalStable;
         if (state.Phase == settled)
-        { return; }
+        {
+            return;
+        }
         while (true)
         {
             token.ThrowIfCancellationRequested();
@@ -60,6 +64,8 @@ internal static class ChunkMultiblockRf3Writes
     internal static async Task ReplayAsync(RequestCqrsRf3Callers administrator, ChunkMultiblockRf3State state, CancellationToken token)
     {
         foreach (var original in state.Originals)
-        { await ChunkMultiblockRf3Replay.RunAsync(administrator, state, original.Command, original.Receipt, token); }
+        {
+            await ChunkMultiblockRf3Replay.RunAsync(administrator, state, original.Command, original.Receipt, token);
+        }
     }
 }

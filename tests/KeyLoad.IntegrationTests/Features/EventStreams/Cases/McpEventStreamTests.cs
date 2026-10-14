@@ -131,7 +131,12 @@ internal sealed class McpEventStreamTests(ClusterFixture fixture)
         var foreign = request with
         {
             Stream = request.Stream with
-            { Partition = request.Stream.Partition with { TenantId = McpEventStreamTokens.ForeignTenant } }
+            {
+                Partition = request.Stream.Partition with
+                {
+                    TenantId = McpEventStreamTokens.ForeignTenant
+                }
+            }
         };
         var mcp = await session.CallAsync(McpCallerTools.StreamsRead, foreign, cancellationToken);
         var requestId = await McpCallerAssertions.ErrorAsync(mcp, ErrorCode.PermissionDenied, dispatched: true);

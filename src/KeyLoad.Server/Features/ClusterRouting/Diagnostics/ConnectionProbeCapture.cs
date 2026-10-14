@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
@@ -15,7 +15,9 @@ internal sealed class ConnectionProbeCapture(RequestCqrsProbeFiles files,
     {
         if (marker.Phase != RequestCqrsProbePhase.RequestStarted
             || marker.Outcome != RequestCqrsProbeOutcome.Observed || context.GrainInstance is not ConnectionGrain grain)
-        { return; }
+        {
+            return;
+        }
         files.RequireActiveArm(files.ReadSnapshot().Arms.Single(arm => arm.Record.ArmId == marker.ArmId));
         var management = context.ActivationServices.GetRequiredService<IGrainFactory>()
             .GetGrain<IManagementGrain>(ConnectionProbeProtocol.ManagementGrainKey);
@@ -29,7 +31,9 @@ internal sealed class ConnectionProbeCapture(RequestCqrsProbeFiles files,
         lock (gate)
         {
             if (watchers.Count >= options.Value.MaximumArms || watchers.ContainsKey(marker.ArmId))
-            { throw new InvalidOperationException(ConnectionProbeProtocol.Invalid); }
+            {
+                throw new InvalidOperationException(ConnectionProbeProtocol.Invalid);
+            }
             watchers.Add(marker.ArmId, Task.Run(() => ObserveClosedAsync(context, management, witness), stopping.Token));
         }
     }
@@ -51,7 +55,9 @@ internal sealed class ConnectionProbeCapture(RequestCqrsProbeFiles files,
                 active = await management.GetActiveGrains(GrainType.Create(GrainRoutingProtocol.RequestAlias), token)
                     .ConfigureAwait(false);
                 if (active.Contains(selected))
-                { await Task.Delay(options.Value.PollInterval, token).ConfigureAwait(false); }
+                {
+                    await Task.Delay(options.Value.PollInterval, token).ConfigureAwait(false);
+                }
             } while (active.Contains(selected));
             files.WriteConnection(witness with
             {
@@ -61,7 +67,8 @@ internal sealed class ConnectionProbeCapture(RequestCqrsProbeFiles files,
             });
         }
         catch (OperationCanceledException) when (stopping.IsCancellationRequested)
-        { }
+        {
+        }
     }
 
     public async ValueTask DisposeAsync()
@@ -69,10 +76,16 @@ internal sealed class ConnectionProbeCapture(RequestCqrsProbeFiles files,
         await stopping.CancelAsync().ConfigureAwait(false);
         Task[] pending;
         lock (gate)
-        { pending = watchers.Values.ToArray(); }
+        {
+            pending = watchers.Values.ToArray();
+        }
         try
-        { await Task.WhenAll(pending).ConfigureAwait(false); }
+        {
+            await Task.WhenAll(pending).ConfigureAwait(false);
+        }
         finally
-        { stopping.Dispose(); }
+        {
+            stopping.Dispose();
+        }
     }
 }

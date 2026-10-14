@@ -13,8 +13,13 @@ internal sealed class EventFeedTailJsonMeasurement(int maximumBytes) : Stream
     public override bool CanSeek => false;
     public override bool CanWrite => true;
     public override long Length => bytes;
-    public override long Position { get => bytes; set => throw new NotSupportedException(Unsupported); }
-    public override void Flush() { }
+    public override long Position
+    {
+        get => bytes; set => throw new NotSupportedException(Unsupported);
+    }
+    public override void Flush()
+    {
+    }
     public override int Read(byte[] buffer, int offset, int count) => throw new NotSupportedException(Unsupported);
     public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException(Unsupported);
     public override void SetLength(long value) => throw new NotSupportedException(Unsupported);
@@ -26,7 +31,9 @@ internal sealed class EventFeedTailJsonMeasurement(int maximumBytes) : Stream
     public override void Write(ReadOnlySpan<byte> buffer)
     {
         if (buffer.Length > maximumBytes - bytes)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, Invalid);
+        }
         bytes += buffer.Length;
     }
     internal static long Measure<T>(T value, int maximumBytes, JsonSerializerOptions options)

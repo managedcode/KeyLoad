@@ -30,11 +30,25 @@ internal static class EventMessageSensitiveReplayOperations
     {
         var policies = state.Header ? state.Resource.HeaderPolicies : state.Resource.FieldPolicies;
         var replaced = policies.Select(policy => policy with
-        { RawReadGrant = EventMessageSensitiveReplayProtocol.GrantAfter, RequiredForProcessing = required }).ToImmutableArray();
-        var definition = state.Header ? state.Resource with { HeaderPolicies = replaced } : state.Resource with { FieldPolicies = replaced };
-        definition = definition with { SchemaVersion = checked(state.Resource.SchemaVersion + EventMessageSensitiveReplayProtocol.SchemaVersionStep) };
+        {
+            RawReadGrant = EventMessageSensitiveReplayProtocol.GrantAfter,
+            RequiredForProcessing = required
+        }).ToImmutableArray();
+        var definition = state.Header ? state.Resource with
+        {
+            HeaderPolicies = replaced
+        } : state.Resource with
+        {
+            FieldPolicies = replaced
+        };
+        definition = definition with
+        {
+            SchemaVersion = checked(state.Resource.SchemaVersion + EventMessageSensitiveReplayProtocol.SchemaVersionStep)
+        };
         var request = new ConfigureResourceRequest(state.Partition.TenantId, state.Partition.DatabaseId, definition)
-        { ExpectedSchemaVersion = state.Resource.SchemaVersion };
+        {
+            ExpectedSchemaVersion = state.Resource.SchemaVersion
+        };
         return Apply(database, OperationKind.ConfigureResource, request, EventMessageSensitiveReplayProtocol.Root,
             Guid.NewGuid(), token).Get<ResourceDefinition>();
     }

@@ -16,7 +16,10 @@ internal sealed class KeyLoadTimeSeriesIntensiveTopologyTests
         {
             var voters = Voters(count);
             var statuses = Statuses(voters, voters[0]).Select((status, index) =>
-                status with { NodeId = "node-" + (index + 1) }).ToImmutableArray();
+                status with
+                {
+                    NodeId = "node-" + (index + 1)
+                }).ToImmutableArray();
             KeyLoadTimeSeriesIntensiveTopology.ValidateStatuses(statuses, voters, Incarnation);
             await Assert.That(statuses.Length).IsEqualTo(count);
             await Assert.That(statuses[0].Voters).IsEqualTo(count);
@@ -112,5 +115,8 @@ internal sealed class KeyLoadTimeSeriesIntensiveTopologyTests
 
     private static AdminNodeSnapshot Snapshot(NodeStatus status, string localVoter,
         ImmutableArray<string> voters) => new(DateTimeOffset.UnixEpoch, status, null!, null!, null!)
-        { LocalVoter = localVoter, Voters = voters };
+        {
+            LocalVoter = localVoter,
+            Voters = voters
+        };
 }

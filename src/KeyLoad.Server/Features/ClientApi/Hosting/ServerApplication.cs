@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
@@ -60,9 +60,13 @@ internal static class ServerApplication
         }
         await ServerFailureObserver.ObserveAsync(() => app.StopAsync(deadline.Token), failures).ConfigureAwait(false);
         if (administration is IAsyncDisposable borrowed)
-        { await ServerFailureObserver.ObserveAsync(() => borrowed.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => borrowed.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         await ServerFailureObserver.ObserveAsync(() => app.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         if (partition is not null)
-        { await ServerFailureObserver.ObserveAsync(() => partition.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => partition.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
     }
 }

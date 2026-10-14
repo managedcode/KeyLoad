@@ -44,7 +44,10 @@ internal static class PartitionMovementObservedFailureColdRf3Assertions
             await Assert.That(actual.Header.InterruptedOriginalPhaseCommandId).IsNull();
             await Assert.That(grant.Settlement).IsNull();
             await Assert.That(grant.AbortDisposition).IsNotNull();
-            await SqlRf3Protocol.EqualAsync(original.OriginalControlGrant, grant with { AbortDisposition = null });
+            await SqlRf3Protocol.EqualAsync(original.OriginalControlGrant, grant with
+            {
+                AbortDisposition = null
+            });
             await Assert.That(actual.OutstandingMoveGrants).IsEqualTo((long)PartitionMoveProtocol.EmptyCount);
             await Assert.That(actual.OutstandingPrincipalGrants).IsEqualTo((long?)PartitionMoveProtocol.EmptyCount);
             await Assert.That(actual.OutstandingDatabaseGrants).IsEqualTo((long)PartitionMoveProtocol.EmptyCount);

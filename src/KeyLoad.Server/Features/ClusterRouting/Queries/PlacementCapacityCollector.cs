@@ -16,7 +16,9 @@ internal sealed class PlacementCapacityCollector(OrleansNode node, PartitionHost
     {
         var membership = await node.MembershipReadyAsync(token).ConfigureAwait(false);
         if (membership is null || membership.ActiveSilos != CompleteCohort)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, TenantPlacementCapacityProtocol.WrongCohort); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, TenantPlacementCapacityProtocol.WrongCohort);
+        }
         var owners = new[]
         {
             PhysicalOwnerConfiguredTuples.Control(movement.Options, movement.Configuration),
@@ -46,7 +48,9 @@ internal sealed class PlacementCapacityCollector(OrleansNode node, PartitionHost
         var after = await node.MembershipReadyAsync(token).ConfigureAwait(false);
         if (after is null || after.ActiveSilos != CompleteCohort
             || after.ActiveFingerprint != membership.ActiveFingerprint || originalExpiry <= clock.GetUtcNow())
-        { throw Errors.Fail(ErrorCode.OwnershipLost, TenantPlacementCapacityProtocol.WrongCohort); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, TenantPlacementCapacityProtocol.WrongCohort);
+        }
         return PlacementCapacityCohort.Require(result.MoveToImmutable(), after.ActiveFingerprint, clock.GetUtcNow());
     }
 }

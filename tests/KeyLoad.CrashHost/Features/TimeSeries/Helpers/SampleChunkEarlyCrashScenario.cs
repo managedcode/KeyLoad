@@ -14,7 +14,10 @@ internal static class SampleChunkEarlyCrashScenario
         _ = SerializationExecutionRegistration.Process.Value;
         var boundary = new CanonicalCrashBoundary(Enum.Parse<CommitStage>(args[SampleChunkEarlyCrashProtocol.StageArgument]),
             int.Parse(args[SampleChunkEarlyCrashProtocol.MutationArgument], CultureInfo.InvariantCulture), false);
-        using var store = new ZoneTreeStore(new(root) { FaultObserver = boundary.Observe },
+        using var store = new ZoneTreeStore(new(root)
+        {
+            FaultObserver = boundary.Observe
+        },
             CrashExecutionOptions.StorageExecution(), CrashExecutionOptions.PointCacheExecution());
         var database = SampleChunkEarlyCrashProtocol.IsPrepare(mode)
             ? CrashDatabase.Create(store) : SampleChunkCrashScenario.OpenExisting(store);
@@ -27,9 +30,13 @@ internal static class SampleChunkEarlyCrashScenario
             await CrashHostPause.WaitForKillAsync();
         }
         else if (SampleChunkEarlyCrashProtocol.IsFault(mode))
-        { await FaultAsync(root, database, boundary, cut).ConfigureAwait(false); }
+        {
+            await FaultAsync(root, database, boundary, cut).ConfigureAwait(false);
+        }
         else
-        { await RecoverAsync(root, database, cut, SampleChunkEarlyCrashProtocol.IsVerify(mode)).ConfigureAwait(false); }
+        {
+            await RecoverAsync(root, database, cut, SampleChunkEarlyCrashProtocol.IsVerify(mode)).ConfigureAwait(false);
+        }
     }
 
     private static async Task FaultAsync(string root, DatabaseEngine database, CanonicalCrashBoundary boundary,

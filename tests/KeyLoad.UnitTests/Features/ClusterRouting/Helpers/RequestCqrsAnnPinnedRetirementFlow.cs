@@ -56,7 +56,11 @@ internal static class RequestCqrsAnnPinnedRetirementFlow
     private static async Task ReleaseAsync(RequestCqrsClusterFixture fixture,
         AnnMaintenanceRequest current, CancellationToken token)
     {
-        var release = current with { CommandId = Guid.NewGuid(), Mode = AnnMaintenanceMode.Release };
+        var release = current with
+        {
+            CommandId = Guid.NewGuid(),
+            Mode = AnnMaintenanceMode.Release
+        };
         var released = await RequestCqrsAnnInvocation.RunAsync(fixture, release, token);
         await RequestCqrsAnnAssertions.EqualAsync(new AnnMaintenanceResult(release.CommandId, release.Consumer,
             release.IndexGeneration, AnnMaintenancePhase.Completed, null, RequestCqrsAnnTestData.EmptyCount, null, null), released.Result);
@@ -69,7 +73,10 @@ internal static class RequestCqrsAnnPinnedRetirementFlow
         var receipt = Receipt(fixture);
         await Assert.That(receipt.Published.Any(row => row.Key == original.Key)).IsFalse();
         await Assert.That(receipt.Pending.Any(row => row.Key == original.Key)).IsFalse();
-        await RequestCqrsAnnAssertions.EqualAsync(original with { Released = true },
+        await RequestCqrsAnnAssertions.EqualAsync(original with
+        {
+            Released = true
+        },
             receipt.OriginalOperations.Single(row => row.Key == original.Key));
         await Assert.That(Directory.Exists(Path.Combine(fixture.Database.Directory, NativeAnnProtocol.RootDirectory, leaf))).IsTrue();
         await Assert.That(NativeAnnFixtureFileSnapshot.Capture(fixture.Database.Directory)

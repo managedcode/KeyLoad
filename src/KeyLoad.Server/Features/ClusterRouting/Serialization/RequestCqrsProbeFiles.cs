@@ -12,7 +12,10 @@ internal sealed class RequestCqrsProbeFiles
     private readonly RequestCqrsProbeJson json;
     private readonly Lock sync = new();
     private readonly string root;
-    internal string SessionId { get; }
+    internal string SessionId
+    {
+        get;
+    }
     private readonly byte[] ownerBytes;
     private readonly RequestCqrsProbeRecords records;
     private readonly RequestCqrsProbeActivationInventory activations;
@@ -60,7 +63,9 @@ internal sealed class RequestCqrsProbeFiles
         var ownerBytes = ReadRecord(Path.Combine(root, RequestCqrsProbeProtocol.OwnerFile), executionOptions);
         var owner = json.ReadOwner(ownerBytes);
         if (owner.SessionId != options.SessionId || owner.Voter != voter)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         var files = new RequestCqrsProbeFiles(root, options.SessionId, voter, ownerBytes.ToArray(), executionOptions, json);
         _ = files.ReadSnapshot();
         return files;
@@ -69,7 +74,9 @@ internal sealed class RequestCqrsProbeFiles
     internal RequestCqrsProbeSnapshot ReadSnapshot()
     {
         lock (sync)
-        { return ReadSnapshotLocked(); }
+        {
+            return ReadSnapshotLocked();
+        }
     }
 
     internal void RequireActiveArm(RequestCqrsProbeLoadedArm arm)
@@ -79,7 +86,9 @@ internal sealed class RequestCqrsProbeFiles
     {
         var current = snapshot.Arms.SingleOrDefault(candidate => candidate.Record.ArmId == arm.Record.ArmId);
         if (current is null || !CryptographicOperations.FixedTimeEquals(arm.ExactBytes, current.ExactBytes))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
     }
 
     internal void RequireClaimArmActiveOrRetired(RequestCqrsProbeLoadedArm arm)
@@ -88,9 +97,13 @@ internal sealed class RequestCqrsProbeFiles
         {
             var current = ReadSnapshotLocked().Arms.SingleOrDefault(candidate => candidate.Record.ArmId == arm.Record.ArmId);
             if (current is not null && CryptographicOperations.FixedTimeEquals(arm.ExactBytes, current.ExactBytes))
-            { return; }
+            {
+                return;
+            }
             if (current is null && records.IsRetiredArm(arm.Record.ArmId, arm.ExactBytes))
-            { return; }
+            {
+                return;
+            }
             throw Invalid();
         }
     }
@@ -151,27 +164,60 @@ internal sealed class RequestCqrsProbeFiles
             var name = Path.GetFileName(path);
             aggregateBytes = RequestCqrsProbeSnapshotFiles.ChargeEntry(path, name, aggregateBytes, executionOptions);
             if (RequestCqrsMovementJournalInventory.IsName(name))
-            { MovementJournals.Read(path, name, movementJournals, presentControls); continue; }
+            {
+                MovementJournals.Read(path, name, movementJournals, presentControls);
+                continue;
+            }
             if (RequestCqrsWaitForIndexReadCutInventory.IsName(name))
-            { WaitCuts.Read(path, name, waitCuts, presentControls); continue; }
+            {
+                WaitCuts.Read(path, name, waitCuts, presentControls);
+                continue;
+            }
             if (RequestCqrsQueryReadCutInventory.IsName(name))
-            { QueryCuts.Read(path, name, queryCuts, presentControls); continue; }
+            {
+                QueryCuts.Read(path, name, queryCuts, presentControls);
+                continue;
+            }
             if (RequestCqrsNativeReplayInventory.IsPlanName(name) || RequestCqrsNativeReplayInventory.IsWitnessName(name))
-            { Replay.Read(path, name, replayPlans, replayWitnesses, presentControls); continue; }
+            {
+                Replay.Read(path, name, replayPlans, replayWitnesses, presentControls);
+                continue;
+            }
             if (RequestCqrsNativeModelInventory.IsName(name))
-            { NativeModel.Read(path, name, nativeModels, presentControls); continue; }
+            {
+                NativeModel.Read(path, name, nativeModels, presentControls);
+                continue;
+            }
             if (RequestCqrsEventVectorExpiryJson.IsName(name))
-            { EventVectorExpiry.Read(path, name, eventVectorExpiries, presentControls); continue; }
+            {
+                EventVectorExpiry.Read(path, name, eventVectorExpiries, presentControls);
+                continue;
+            }
             if (RequestCqrsReplicaSnapshotJson.IsName(name))
-            { ReplicaSnapshot.Read(path, name, replicaSnapshots, presentControls); continue; }
+            {
+                ReplicaSnapshot.Read(path, name, replicaSnapshots, presentControls);
+                continue;
+            }
             if (ConnectionProbeInventory.IsName(name))
-            { connectionFiles.Read(path, name, connections, presentControls); continue; }
+            {
+                connectionFiles.Read(path, name, connections, presentControls);
+                continue;
+            }
             if (RequestCqrsProbeMigrationValidation.IsName(name))
-            { Migration.Read(path, name, migration, presentControls); continue; }
+            {
+                Migration.Read(path, name, migration, presentControls);
+                continue;
+            }
             if (RequestCqrsProbeLiveValidation.IsName(name))
-            { Live.Read(path, name, live, presentControls); continue; }
+            {
+                Live.Read(path, name, live, presentControls);
+                continue;
+            }
             if (RequestCqrsProbeActivationValidation.IsName(name))
-            { activations.Read(path, name, witnesses, presentControls); continue; }
+            {
+                activations.Read(path, name, witnesses, presentControls);
+                continue;
+            }
             records.ReadControl(path, name, arms, releases, markers, presentControls);
         }
         RequestCqrsWaitForIndexReadCutInventory.RequireInventory(waitCuts, markers);

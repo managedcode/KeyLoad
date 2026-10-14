@@ -76,7 +76,9 @@ internal static class IsolatedNativeCase
                 IsolatedNativeTeardown.CompleteAsync(app, null, output, evidence, root, containers, work, primary), failures);
         }
         if (OpenLoopFailure.Combine(null, failures.ToImmutableArray()) is { } failure)
-        { ExceptionDispatchInfo.Capture(failure).Throw(); }
+        {
+            ExceptionDispatchInfo.Capture(failure).Throw();
+        }
     }
 
     private static string[] CreateArguments(IsolatedNativeCasePlan plan, string root, string output)

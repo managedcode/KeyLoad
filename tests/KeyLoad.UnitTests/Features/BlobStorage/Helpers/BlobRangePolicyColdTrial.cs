@@ -21,11 +21,17 @@ internal static class BlobRangePolicyColdTrial
             var published = await BlobRangeIntegrityOperations.Publish(fixture);
             var principal = new PrincipalRecord(Reader, fixture.Partition.TenantId,
                 [new(fixture.Partition.DatabaseId, BlobRangeIntegrityFixture.Resource, Capability.BlobRead)], [])
-            { PolicyEpoch = 1L };
+            {
+                PolicyEpoch = 1L
+            };
             await ConfigureAsync(fixture.Database, principal, token);
             await BlobRangePolicyColdAssertions.Healthy(fixture.Database, fixture.Store, published, token);
             await BlobRangeIntegrityAssertions.Healthy(fixture.Database, fixture.Store, published);
-            await ConfigureAsync(fixture.Database, principal with { Revoked = true, PolicyEpoch = 2L }, token);
+            await ConfigureAsync(fixture.Database, principal with
+            {
+                Revoked = true,
+                PolicyEpoch = 2L
+            }, token);
             await BlobRangePolicyColdAssertions.Denied(fixture.Database, fixture.Store, published, token);
             var revokedPosition = fixture.Store.Position;
             var revokedImage = QueueWholeFlowStorage.Bytes(fixture.Store);
@@ -34,7 +40,10 @@ internal static class BlobRangePolicyColdTrial
             var owner = fixture.CreateConfiguredDatabase(cold);
             await BlobWholeFlowAssertions.Unchanged(cold, revokedPosition, revokedImage);
             await BlobRangePolicyColdAssertions.Denied(owner, cold, published, token);
-            await ConfigureAsync(owner, principal with { PolicyEpoch = 3L }, token);
+            await ConfigureAsync(owner, principal with
+            {
+                PolicyEpoch = 3L
+            }, token);
             await Assert.That(cold.Position).IsEqualTo(revokedPosition + 1L);
             await BlobRangePolicyColdAssertions.Healthy(owner, cold, published, token);
             await BlobRangeIntegrityAssertions.Healthy(owner, cold, published);

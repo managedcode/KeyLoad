@@ -49,7 +49,9 @@ internal sealed class CanonicalVectorPublicMetricTests
         await canceled.CancelAsync();
         OperationCanceledException? failure = null;
         try
-        { _ = await search.SearchAsync(Root, request, canceled.Token); }
+        {
+            _ = await search.SearchAsync(Root, request, canceled.Token);
+        }
         catch (OperationCanceledException exception) { failure = exception; }
         await Assert.That(failure).IsNotNull();
         await Assert.That(failure!.CancellationToken).IsEqualTo(canceled.Token);
@@ -62,7 +64,10 @@ internal sealed class CanonicalVectorPublicMetricTests
             await Assert.That(current.Json).IsEqualTo("{\"label\":\"" + document.Reference.Id + "\"}");
             await Assert.That(current.Revision).IsEqualTo(1L);
         }
-        var healthy = await search.SearchAsync(Root, request with { Limit = 3 },
+        var healthy = await search.SearchAsync(Root, request with
+        {
+            Limit = 3
+        },
             TestContext.Current!.Execution.CancellationToken);
         await Assert.That(healthy.Select(row => row.Document.Reference.Id)).IsEquivalentTo(
             expected.Concat(["c"]), CollectionOrdering.Matching);

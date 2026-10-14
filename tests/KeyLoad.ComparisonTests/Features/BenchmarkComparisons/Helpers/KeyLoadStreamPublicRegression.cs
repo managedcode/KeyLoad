@@ -84,7 +84,10 @@ internal static class KeyLoadStreamPublicRegression
         CancellationToken cancellationToken)
     {
         var appended = dataset.CreateDocument(dataset.Options.Documents + NewStreamOffset);
-        var conflicting = appended with { Json = ConflictingJson };
+        var conflicting = appended with
+        {
+            Json = ConflictingJson
+        };
         var duplicateFailure = await CaptureConflictAsync(() => session.ExecuteAsync(
             Scenario.StreamAppend, conflicting, cancellationToken));
         await Assert.That(duplicateFailure?.Message).IsEqualTo(ConflictCode);

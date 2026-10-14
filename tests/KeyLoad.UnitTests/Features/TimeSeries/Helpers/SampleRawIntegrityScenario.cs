@@ -38,11 +38,21 @@ internal static class SampleRawIntegrityScenario
         {
             SampleRawIntegrityFault.Series => NativeSerialization.Serialize(expected with { SeriesId = OtherSeries }),
             SampleRawIntegrityFault.Timestamp => NativeSerialization.Serialize(expected with
-            { Sample = expected.Sample with { Timestamp = expected.Sample.Timestamp.AddTicks(NextTimestampTick) } }),
+            {
+                Sample = expected.Sample with
+                {
+                    Timestamp = expected.Sample.Timestamp.AddTicks(NextTimestampTick)
+                }
+            }),
             SampleRawIntegrityFault.Sequence => NativeSerialization.Serialize(expected with { Sequence = NextSequence }),
             SampleRawIntegrityFault.NonpositiveSequence => NativeSerialization.Serialize(expected with { Sequence = InvalidSequence }),
             SampleRawIntegrityFault.NonfiniteValue => NativeSerialization.Serialize(expected with
-            { Sample = expected.Sample with { Value = double.NaN } }),
+            {
+                Sample = expected.Sample with
+                {
+                    Value = double.NaN
+                }
+            }),
             SampleRawIntegrityFault.MissingSample => NativeGraphFixtures.EncodeUnchecked(expected with { Sample = null! }),
             SampleRawIntegrityFault.WrongNativeRoot => NativeSerialization.Serialize(WrongRoot),
             SampleRawIntegrityFault.MalformedNative => [byte.MaxValue],

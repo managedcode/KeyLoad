@@ -15,7 +15,10 @@ internal static class QueueGraphReplayFlow
 
     internal static async Task RunSeededAsync(QueueGraphIdentityState source, bool from, int component)
     {
-        source = source with { FailureDetail = CanonicalVertexMismatch };
+        source = source with
+        {
+            FailureDetail = CanonicalVertexMismatch
+        };
         var db = source.Fixture;
         await QueueGraphIdentityAssertions.HealthyAsync(source, db.Database, db.Store);
         var reverseCommand = new CommandRequest(Guid.NewGuid(), db.Partition,
@@ -43,7 +46,13 @@ internal static class QueueGraphReplayFlow
         };
         var record = from ? source.First : source.Second;
         db.Store.Commit((tx, _) =>
-        { tx.Put(source.EndpointKey, NativeSerialization.Serialize(record with { Reference = mismatched })); return true; });
+        {
+            tx.Put(source.EndpointKey, NativeSerialization.Serialize(record with
+            {
+                Reference = mismatched
+            }));
+            return true;
+        });
         await QueueGraphReplayAssertions.RefusesAsync(state, db.Database, db.Store);
         source.ColdImage = global::KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(db.Store);
         source.ColdPosition = db.Store.Position;

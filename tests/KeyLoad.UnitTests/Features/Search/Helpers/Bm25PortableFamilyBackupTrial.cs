@@ -64,7 +64,13 @@ internal static class Bm25PortableFamilyBackupTrial
         {
             repairRequired = true;
             fixture.Source.Store.Commit((transaction, _) =>
-            { transaction.Put(key, NativeSerialization.Serialize(current with { FormatVersion = 0 })); return true; });
+            {
+                transaction.Put(key, NativeSerialization.Serialize(current with
+                {
+                    FormatVersion = 0
+                }));
+                return true;
+            });
             var before = Bm25PortableFamilyBytes.Complete(fixture.Source.Store,
                 fixture.Source.Database.EvaluationClock, token);
             var position = fixture.Source.Store.Position;
@@ -81,7 +87,10 @@ internal static class Bm25PortableFamilyBackupTrial
         if (repairRequired)
         {
             ServerFailureObserver.Observe(() => fixture.Source.Store.Commit((transaction, _) =>
-            { transaction.Put(key, original); return true; }), failures);
+            {
+                transaction.Put(key, original);
+                return true;
+            }), failures);
         }
         ServerFailureObserver.ThrowIfAny(failures);
         await Bm25PortableFamilyBytes.RequireHeadsAsync(fixture.Source.Store, [current], [original],

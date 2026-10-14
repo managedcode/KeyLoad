@@ -98,6 +98,8 @@ internal static class FeedDeleteClassificationAssertions
             source.UpdateReceipt ?? throw new InvalidOperationException(FeedDeleteClassificationFixture.MissingEntry), source.CommittedAt, token);
         await FeedVertexAuthorityAssertions.ReplayAsync(owner, store, state.Delete, state.Deleted, source.CommittedAt, token);
         if (resurrection is not null && restored is not null)
-        { await FeedVertexAuthorityAssertions.ReplayAsync(owner, store, resurrection, restored, source.CommittedAt, token); }
+        {
+            await FeedVertexAuthorityAssertions.ReplayAsync(owner, store, resurrection, restored, source.CommittedAt, token);
+        }
     }
 }

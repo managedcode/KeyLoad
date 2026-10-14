@@ -62,7 +62,10 @@ internal static class NullQueueDeadlineRf3Observation
                 new(definition.Lane, definition.ScheduleId), token));
             await Assert.That(actual).IsNotNull();
             if (actual!.NextOrdinal == NextOrdinal)
-            { await Assert.That(TimeProvider.System.GetUtcNow() >= definition.FirstDueAt).IsTrue(); return; }
+            {
+                await Assert.That(TimeProvider.System.GetUtcNow() >= definition.FirstDueAt).IsTrue();
+                return;
+            }
             await Assert.That(actual.NextOrdinal).IsEqualTo(FirstOrdinal);
             await Task.Delay(DueRecurringRf3Protocol.PollInterval, TimeProvider.System, token);
         }

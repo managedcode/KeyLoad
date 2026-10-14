@@ -23,13 +23,19 @@ internal static class TenantCapacityPlacementRf3MultiScenario
                 committedSecondOwnerLoss, token);
         }, failures);
         if (second is not null)
-        { await ServerFailureObserver.ObserveAsync(() => second.DisposeAsync().AsTask(), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => second.DisposeAsync().AsTask(), failures);
+        }
         if (first is not null)
-        { await ServerFailureObserver.ObserveAsync(() => first.DisposeAsync().AsTask(), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => first.DisposeAsync().AsTask(), failures);
+        }
         if (wave is not null)
         {
             if (failures.Count != 0)
-            { wave.RetainRoots(); }
+            {
+                wave.RetainRoots();
+            }
             await ServerFailureObserver.ObserveAsync(() => wave.DisposeAsync().AsTask(), failures);
         }
         ServerFailureObserver.ThrowIfAny(failures);

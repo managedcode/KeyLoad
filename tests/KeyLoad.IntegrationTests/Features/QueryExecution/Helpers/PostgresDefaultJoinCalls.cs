@@ -16,11 +16,15 @@ internal static class PostgresDefaultJoinCalls
         RequestCqrsRf3Callers reader, KeyLoadClient root, CancellationToken token)
     {
         if (state.Dialect != PostgresRf3Protocol.JoinDialect)
-        { return; }
+        {
+            return;
+        }
         var plain = state.Sql.Replace(ExplicitJoin, DefaultJoin, StringComparison.Ordinal);
         var on = plain.IndexOf(On, StringComparison.Ordinal);
         if (on < default(int))
-        { throw new InvalidOperationException(MissingOn); }
+        {
+            throw new InvalidOperationException(MissingOn);
+        }
         var before = await PostgresRf3Assertions.ImageAsync(root, token);
         foreach (var bad in new[] { plain[..on], plain.Replace(On, Where, StringComparison.Ordinal) })
         {
@@ -44,7 +48,9 @@ internal static class PostgresDefaultJoinCalls
         PostgresRf3Caller wire, CancellationToken token)
     {
         if (state.Dialect != PostgresRf3Protocol.JoinDialect)
-        { return; }
+        {
+            return;
+        }
         var plain = state.Sql.Replace(ExplicitJoin, DefaultJoin, StringComparison.Ordinal);
         var operation = new SqlOperationRequest(PostgresRf3State.Partition, plain,
             AllowFullScan: true, QueryDialectVersion: state.Dialect);
@@ -62,7 +68,9 @@ internal static class PostgresDefaultJoinCalls
         PostgresRf3Caller wire, CancellationToken token)
     {
         if (state.Dialect != PostgresRf3Protocol.JoinDialect)
-        { return; }
+        {
+            return;
+        }
         var plain = state.Sql.Replace(ExplicitJoin, DefaultJoin, StringComparison.Ordinal);
         var operation = new SqlOperationRequest(PostgresRf3State.Partition, plain,
             AllowFullScan: true, QueryDialectVersion: state.Dialect);

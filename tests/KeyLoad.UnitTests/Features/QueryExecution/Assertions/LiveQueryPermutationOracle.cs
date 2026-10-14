@@ -39,9 +39,13 @@ internal sealed class LiveQueryPermutationOracle(TestDatabase db, QueryEngine en
             or LiveQueryTestSchedule.DeleteRound or LiveQueryTestSchedule.NonmatchingInsertRound;
         QueryRow? row = removed ? null : new(id, revision, body, false, []);
         if (row is null)
-        { expectedRows.Remove(id); }
+        {
+            expectedRows.Remove(id);
+        }
         else
-        { expectedRows[id] = row; }
+        {
+            expectedRows[id] = row;
+        }
         var filtered = round is LiveQueryTestSchedule.NonmatchingUpdateRound or LiveQueryTestSchedule.NonmatchingInsertRound;
         var kind = removed ? LiveQueryChangeKind.Remove : LiveQueryChangeKind.Upsert;
         LiveQueryChange[] changes = filtered ? [] : [new(trial + RevisionAdvance, receipt.Token, kind,
@@ -67,7 +71,9 @@ internal sealed class LiveQueryPermutationOracle(TestDatabase db, QueryEngine en
     internal static void Visit(int[] visits, int index, int round)
     {
         if (round < LiveQueryTestSchedule.FullRounds)
-        { visits[round * LiveQueryTestSchedule.IdentityCount + index]++; }
+        {
+            visits[round * LiveQueryTestSchedule.IdentityCount + index]++;
+        }
     }
 
     internal static void Apply(Dictionary<string, QueryRow> rows, LiveQueryPage page)

@@ -12,7 +12,10 @@ internal static class QueueRetainedInboxAuthorityTrial
         var state = await QueuePendingAuthorityOperations.SeedAsync(fixture);
         await QueuePendingAuthorityImage.RequireAsync(fixture.Database, fixture.Store, state, QueuePendingAuthorityPhase.Pending);
         var history = state.Processed.Single();
-        var equivalent = Operation(state, history.Request with { CommandId = Guid.NewGuid() });
+        var equivalent = Operation(state, history.Request with
+        {
+            CommandId = Guid.NewGuid()
+        });
         var key = QueuePendingAuthorityOperations.Key(state.Flow, QueuePendingAuthorityProtocol.Inbox,
             history.Id, history.Request.HandlerScope, history.Request.ExecutionGeneration);
         var exact = fixture.Store.Read(view => view.ReadOwnedValue(key))!;
@@ -35,10 +38,17 @@ internal static class QueueRetainedInboxAuthorityTrial
                 QueuePendingAuthorityHistory.Capture(cold), key, malformed);
             await QueueRetainedInboxAuthorityAssertions.RefuseAsync(owner, cold, state, equivalent, damaged);
             Put(cold, key, exact);
-            await QueuePendingAuthorityHistory.SameAsync(cold, original with { Position = original.Position + 2 });
+            await QueuePendingAuthorityHistory.SameAsync(cold, original with
+            {
+                Position = original.Position + 2
+            });
             await QueuePendingAuthorityImage.RequireAsync(owner, cold, state, QueuePendingAuthorityPhase.Pending);
             await QueueRetainedInboxAuthorityAssertions.EquivalentAsync(owner, cold, state, equivalent, history, key, exact);
-            refusedGeneration = Operation(state, history.Request with { CommandId = Guid.NewGuid(), ExecutionGeneration = 2 });
+            refusedGeneration = Operation(state, history.Request with
+            {
+                CommandId = Guid.NewGuid(),
+                ExecutionGeneration = 2
+            });
             failedGeneration = await QueueRetainedInboxAuthorityAssertions.NewGenerationAsync(owner, cold, state, refusedGeneration);
             await QueuePendingAuthorityOperations.ParkAsync(owner, cold, state);
             await QueuePendingAuthorityImage.RequireAsync(owner, cold, state, QueuePendingAuthorityPhase.Parked);

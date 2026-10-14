@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.Search;
 using KeyLoad.UnitTests.Features.Messaging;
@@ -39,7 +39,9 @@ internal static class NativeTextIncrementalIntentCorruptionTrial
             await ServerFailureObserver.ObserveAsync(() => DeniedAsync(database, request, path, damaged, image, position, token), failures);
         }
         finally
-        { await ServerFailureObserver.ObserveAsync(() => File.WriteAllBytesAsync(path, bytes, token), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => File.WriteAllBytesAsync(path, bytes, token), failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
         await NativeTextIncrementalIntentContinuation.RunAsync(database, request, original, token);
     }

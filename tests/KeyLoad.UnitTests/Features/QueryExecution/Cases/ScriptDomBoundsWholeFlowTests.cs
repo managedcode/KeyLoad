@@ -9,7 +9,11 @@ internal sealed class ScriptDomBoundsWholeFlowTests
         await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
         {
             using var database = new TestDatabase(new()
-            { MaxQueryBytes = ByteBound, MaxQueryTokens = TokenBound, MaxQueryDepth = DepthBound });
+            {
+                MaxQueryBytes = ByteBound,
+                MaxQueryTokens = TokenBound,
+                MaxQueryDepth = DepthBound
+            });
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {
                 var (seed, receipt) = SqlOffsetFixture.Seed(database);

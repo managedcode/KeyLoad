@@ -26,7 +26,9 @@ internal static class BlobRejectedContentPublicAssertions
     {
         var digest = Convert.FromHexString(previous);
         if (digest.Length != PreviousDigestBytes)
-        { throw new InvalidOperationException("The original public chain seed has invalid digest length."); }
+        {
+            throw new InvalidOperationException("The original public chain seed has invalid digest length.");
+        }
         Span<byte> preimage = stackalloc byte[ChainPreimageBytes];
         digest.AsSpan().CopyTo(preimage);
         BinaryPrimitives.WriteInt32BigEndian(preimage[OrdinalOffset..], 0);
@@ -90,6 +92,10 @@ internal static class BlobRejectedContentPublicAssertions
         await Assert.That(before.StoredBytes).IsEqualTo(0L);
         await Assert.That(before.NextOrdinal).IsEqualTo(0);
         await SqlRf3Protocol.EqualAsync(before with
-        { StoredBytes = request.Length, NextOrdinal = 1, IntegrityHash = chain }, actual);
+        {
+            StoredBytes = request.Length,
+            NextOrdinal = 1,
+            IntegrityHash = chain
+        }, actual);
     }
 }

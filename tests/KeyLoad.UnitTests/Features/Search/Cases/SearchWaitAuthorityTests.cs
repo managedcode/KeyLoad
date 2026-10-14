@@ -6,17 +6,23 @@ internal sealed class SearchWaitAuthorityTests
     [Test]
     public Task WrongAtomicPartitionCannotPublishIndexAndOriginalAuthorityReturnsLiteralHealthy()
         => SearchWaitAuthorityTrial.TokenAsync(static token => token with
-        { AtomicPartitionId = SearchWaitAuthorityState.ForeignAtomicPartition }, TestContext.Current!.Execution.CancellationToken);
+        {
+            AtomicPartitionId = SearchWaitAuthorityState.ForeignAtomicPartition
+        }, TestContext.Current!.Execution.CancellationToken);
 
     [Test]
     public Task ChangedPlacementEpochCannotPublishIndexAndOriginalAuthorityReturnsLiteralHealthy()
         => SearchWaitAuthorityTrial.TokenAsync(static token => token with
-        { OwnershipEpoch = checked(token.OwnershipEpoch + SearchWaitAuthorityState.DifferentEpoch) }, TestContext.Current!.Execution.CancellationToken);
+        {
+            OwnershipEpoch = checked(token.OwnershipEpoch + SearchWaitAuthorityState.DifferentEpoch)
+        }, TestContext.Current!.Execution.CancellationToken);
 
     [Test]
     public Task ZeroMinimumPositionCannotPublishIndexAndOriginalAuthorityReturnsLiteralHealthy()
         => SearchWaitAuthorityTrial.TokenAsync(static token => token with
-        { Position = SearchWaitAuthorityState.InvalidPosition }, TestContext.Current!.Execution.CancellationToken);
+        {
+            Position = SearchWaitAuthorityState.InvalidPosition
+        }, TestContext.Current!.Execution.CancellationToken);
 
     [Test]
     [Arguments(false)]

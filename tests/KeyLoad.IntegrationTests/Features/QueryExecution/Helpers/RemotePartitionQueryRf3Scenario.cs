@@ -13,7 +13,10 @@ internal sealed class RemotePartitionQueryRf3Scenario : IAsyncDisposable
     private readonly TwoRf3MembershipWave wave;
     private readonly bool useMcp;
     internal RemotePartitionQueryRf3Scenario(TwoRf3MembershipWave wave, bool useMcp)
-    { this.wave = wave; this.useMcp = useMcp; }
+    {
+        this.wave = wave;
+        this.useMcp = useMcp;
+    }
 
     private KeyLoadClient Sdk(string node, string secret)
     {
@@ -112,9 +115,13 @@ internal sealed class RemotePartitionQueryRf3Scenario : IAsyncDisposable
     {
         var failures = new List<Exception>();
         foreach (var session in sessions)
-        { await ServerFailureObserver.ObserveAsync(() => session.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => session.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         foreach (var http in connections)
-        { ServerFailureObserver.Observe(http.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(http.Dispose, failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

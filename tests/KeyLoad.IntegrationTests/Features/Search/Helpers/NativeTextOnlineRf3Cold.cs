@@ -18,7 +18,9 @@ internal static class NativeTextOnlineRf3Cold
         var restarted = await Task.WhenAll(Nodes.Select(node => ObserveAsync(() => fixture.RestartContainerAsync(node, token))));
         ServerFailureObserver.ThrowIfAny([.. killed.SelectMany(row => row), .. restarted.SelectMany(row => row)]);
         foreach (var node in Nodes)
-        { await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(node, WaitBehavior.WaitOnResourceUnavailable, token); }
+        {
+            await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(node, WaitBehavior.WaitOnResourceUnavailable, token);
+        }
         var failures = new List<Exception>();
         RequestCqrsRf3Callers? fresh = null;
         await ServerFailureObserver.ObserveAsync(async () =>
@@ -35,7 +37,9 @@ internal static class NativeTextOnlineRf3Cold
             await NativeTextOnlineRf3Assertions.LiteralAllAsync(fresh.Sdk, fresh.Mcp, scenario, true, token);
         }, failures);
         if (fresh is not null)
-        { await ServerFailureObserver.ObserveAsync(() => fresh.DisposeAsync().AsTask(), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => fresh.DisposeAsync().AsTask(), failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
     private static async Task<Exception[]> ObserveAsync(Func<Task> operation)

@@ -16,7 +16,9 @@ internal static class SampleChunkCorrectionBoundColdAssertions
     {
         var scan = view.Scan([], ImageLimit);
         if (scan.HasMore)
-        { throw new InvalidOperationException(ImageBound); }
+        {
+            throw new InvalidOperationException(ImageBound);
+        }
         return Convert.ToHexString(JsonDefaults.Serialize(scan.Records.Select(record =>
             new[] { Convert.ToHexString(record.Key.Span), Convert.ToHexString(record.Value.Span) }).ToArray()));
     });
@@ -37,7 +39,10 @@ internal static class SampleChunkCorrectionBoundColdAssertions
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            var request = fixture.Request with { Limit = ResultLimit };
+            var request = fixture.Request with
+            {
+                Limit = ResultLimit
+            };
             var expected = new SampleChunkWindowResult(fixture.WindowId, SampleChunkCanonicalFixture.Start,
                 SampleChunkCanonicalFixture.Until, Generation, revision, rows.Length, null, rows, store.Position);
             var actual = database.ReadSampleChunkWindow(SampleChunkCanonicalFixture.Principal, request);

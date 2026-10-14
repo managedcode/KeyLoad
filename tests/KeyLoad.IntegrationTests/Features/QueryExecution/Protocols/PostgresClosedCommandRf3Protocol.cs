@@ -24,7 +24,9 @@ internal static class PostgresClosedCommandRf3Protocol
     internal static SqlOperationRequest Operation(PostgresClosedCommandRf3State state)
         => new(PostgresRf3State.Partition, NamedSql,
             Parameters: new(StringComparer.Ordinal)
-            { [Binding] = JsonSerializer.SerializeToElement(Envelope(state), JsonDefaults.Options) });
+            {
+                [Binding] = JsonSerializer.SerializeToElement(Envelope(state), JsonDefaults.Options)
+            });
 
     private static Dictionary<string, JsonElement> Envelope(PostgresClosedCommandRf3State state)
         => new(StringComparer.Ordinal)

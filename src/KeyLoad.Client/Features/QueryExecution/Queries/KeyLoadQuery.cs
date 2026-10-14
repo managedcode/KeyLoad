@@ -31,7 +31,10 @@ public sealed class KeyLoadQuery<T>
     {
         ArgumentNullException.ThrowIfNull(expression);
         var filter = QueryPredicateExpression.Filter(expression.Body, expression.Parameters[QueryPredicateTokens.ParameterIndex], context);
-        return With(query with { Filter = query.Filter is null ? filter : new Logical(query.Filter, QueryPredicateTokens.And, filter) });
+        return With(query with
+        {
+            Filter = query.Filter is null ? filter : new Logical(query.Filter, QueryPredicateTokens.And, filter)
+        });
     }
     /// <summary>Orders the query by one field in ascending order.</summary>
     /// <typeparam name="TValue">Field value type.</typeparam>
@@ -72,7 +75,10 @@ public sealed class KeyLoadQuery<T>
     private KeyLoadQuery<T> Order(LambdaExpression field, bool descending, bool append)
     {
         var item = new Ordering(context.Expressions.Field(field.Body, field.Parameters[QueryPredicateTokens.ParameterIndex]), descending);
-        return With(query with { Order = append ? [.. query.Order, item] : [item] });
+        return With(query with
+        {
+            Order = append ? [.. query.Order, item] : [item]
+        });
     }
     /// <summary>Selects supported fields into the query projection.</summary>
     /// <typeparam name="TProjection">Application projection shape used for expression translation.</typeparam>
@@ -81,7 +87,10 @@ public sealed class KeyLoadQuery<T>
     public KeyLoadQuery<T> Select<TProjection>(Expression<Func<T, TProjection>> expression)
     {
         ArgumentNullException.ThrowIfNull(expression);
-        return With(query with { Projection = context.Expressions.Projection(expression.Body, expression.Parameters[QueryPredicateTokens.ParameterIndex]) });
+        return With(query with
+        {
+            Projection = context.Expressions.Projection(expression.Body, expression.Parameters[QueryPredicateTokens.ParameterIndex])
+        });
     }
     /// <summary>Sets the maximum result page size.</summary>
     /// <param name="limit">Positive maximum number of query rows.</param>
@@ -93,7 +102,10 @@ public sealed class KeyLoadQuery<T>
             throw Errors.Fail(ErrorCode.Validation, QueryPredicateTokens.PositiveLimitMessage);
         }
 
-        return With(query with { Limit = limit });
+        return With(query with
+        {
+            Limit = limit
+        });
     }
     /// <summary>Requests the supported query plan description.</summary>
     /// <returns>A new builder whose request includes an explain flag.</returns>
@@ -176,7 +188,12 @@ internal sealed class QueryExpressions(IOptions<QueryTranslationOptions> options
         if (expression is MethodCallExpression marker && marker.Method.DeclaringType == typeof(QueryFunctions)
             && marker.Arguments.Count == QueryPredicateTokens.MarkerArgumentCount && marker.Arguments[QueryPredicateTokens.ParameterIndex] == parameter)
         {
-            return marker.Method.Name switch { nameof(QueryFunctions.DocumentId) => QueryPredicateTokens.IdentifierPath, nameof(QueryFunctions.DocumentRevision) => QueryPredicateTokens.RevisionPath, _ => throw Unsupported() };
+            return marker.Method.Name switch
+            {
+                nameof(QueryFunctions.DocumentId) => QueryPredicateTokens.IdentifierPath,
+                nameof(QueryFunctions.DocumentRevision) => QueryPredicateTokens.RevisionPath,
+                _ => throw Unsupported()
+            };
         }
 
         var parts = new List<string>();
@@ -227,7 +244,10 @@ internal sealed class QueryExpressions(IOptions<QueryTranslationOptions> options
         if (node is BinaryExpression { NodeType: ExpressionType.ArrayIndex } index
             && Constant(index.Right, out var value) && value is int ordinal && ordinal >= QueryPredicateTokens.MinimumArrayOrdinal
             && WalkFieldPath(index.Left, parameter, depth + QueryPredicateTokens.DepthIncrement, parts))
-        { parts.Add(ordinal.ToString(System.Globalization.CultureInfo.InvariantCulture)); return true; }
+        {
+            parts.Add(ordinal.ToString(System.Globalization.CultureInfo.InvariantCulture));
+            return true;
+        }
         return false;
     }
     internal bool Constant(Expression expression, out object? value, int depth = QueryPredicateTokens.FirstDepth)
@@ -239,9 +259,15 @@ internal sealed class QueryExpressions(IOptions<QueryTranslationOptions> options
 
         expression = Unwrap(expression);
         if (expression is ConstantExpression constant)
-        { value = constant.Value; return true; }
+        {
+            value = constant.Value;
+            return true;
+        }
         if (expression is MemberExpression { Member: FieldInfo field, Expression: { } target } && Constant(target, out var instance, depth + QueryPredicateTokens.DepthIncrement))
-        { value = field.GetValue(instance); return true; }
+        {
+            value = field.GetValue(instance);
+            return true;
+        }
         if (expression is NewArrayExpression array && array.NodeType == ExpressionType.NewArrayInit)
         {
             if (array.Expressions.Count > limits.MaximumConstantArrayItems)
@@ -251,7 +277,14 @@ internal sealed class QueryExpressions(IOptions<QueryTranslationOptions> options
 
             var items = new List<object?>();
             foreach (var item in array.Expressions)
-            { if (!Constant(item, out var element, depth + QueryPredicateTokens.DepthIncrement)) { value = null; return false; } items.Add(element); }
+            {
+                if (!Constant(item, out var element, depth + QueryPredicateTokens.DepthIncrement))
+                {
+                    value = null;
+                    return false;
+                }
+                items.Add(element);
+            }
             value = items.ToArray();
             return true;
         }

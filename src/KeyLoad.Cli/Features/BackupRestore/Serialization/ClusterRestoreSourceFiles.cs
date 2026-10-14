@@ -27,16 +27,23 @@ internal static class ClusterRestoreSourceFiles
     {
         var path = Path.Combine(directory, name);
         if ((File.GetAttributes(path) & (FileAttributes.ReparsePoint | FileAttributes.Directory)) != NoBytes)
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
         using var input = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, policy.StreamBufferBytes);
         var bound = name == IdentityName ? policy.MaximumIdentityFileBytes : policy.MaximumBackupManifestBytes;
         if (input.Length <= NoBytes || name != JournalName && input.Length > bound)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, Invalid);
+        }
         using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         var buffer = new byte[policy.FileBufferBytes];
         int read;
         while ((read = input.Read(buffer)) > NoBytes)
-        { ct.ThrowIfCancellationRequested(); hash.AppendData(buffer, BufferStart, read); }
+        {
+            ct.ThrowIfCancellationRequested();
+            hash.AppendData(buffer, BufferStart, read);
+        }
         ct.ThrowIfCancellationRequested();
         return new(name, input.Length, Convert.ToHexStringLower(hash.GetHashAndReset()));
     }

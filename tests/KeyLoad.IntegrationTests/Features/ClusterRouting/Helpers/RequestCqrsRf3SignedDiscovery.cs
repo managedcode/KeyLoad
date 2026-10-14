@@ -2,9 +2,9 @@ using System.Globalization;
 using System.Net;
 using System.Security.Cryptography;
 using Aspire.Hosting;
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.StorageRecovery;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 using KeyLoad.Storage;
 
@@ -23,7 +23,9 @@ internal static class RequestCqrsRf3SignedDiscovery
     {
         ArgumentNullException.ThrowIfNull(app);
         if (peerSecret.Length != ReplicaTransportProtocol.SecretBytes)
-        { throw new InvalidOperationException(InvalidSignedObservation); }
+        {
+            throw new InvalidOperationException(InvalidSignedObservation);
+        }
         return await ReadOwnedAsync(app, nodeName, incarnation, peerSecret, adminCredential, cancellationToken).ConfigureAwait(false);
     }
 
@@ -32,9 +34,13 @@ internal static class RequestCqrsRf3SignedDiscovery
     {
         var credential = Convert.FromBase64String(profile.PeerSecret);
         try
-        { return await ReadAsync(app, nodeName, profile.Incarnation, credential, profile.AdminKey, cancellationToken).ConfigureAwait(false); }
+        {
+            return await ReadAsync(app, nodeName, profile.Incarnation, credential, profile.AdminKey, cancellationToken).ConfigureAwait(false);
+        }
         finally
-        { CryptographicOperations.ZeroMemory(credential); }
+        {
+            CryptographicOperations.ZeroMemory(credential);
+        }
     }
 
     private static async Task<ReplicaSiloDiscovery> ReadOwnedAsync(DistributedApplication app, string nodeName,
@@ -49,9 +55,13 @@ internal static class RequestCqrsRf3SignedDiscovery
         using var response = await http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken)
             .ConfigureAwait(false);
         if (response.StatusCode != HttpStatusCode.OK)
-        { throw new InvalidOperationException(InvalidSignedObservation); }
+        {
+            throw new InvalidOperationException(InvalidSignedObservation);
+        }
         if (response.Content.Headers.ContentType?.MediaType != NativeSiloDiscoveryDiagnosticProtocol.ContentType)
-        { throw new InvalidOperationException(InvalidSignedObservation); }
+        {
+            throw new InvalidOperationException(InvalidSignedObservation);
+        }
         var payload = await ReadBoundedPayloadAsync(response, cancellationToken).ConfigureAwait(false);
         VerifySignature(response, incarnation, nodeName, nonce, credential, payload);
         return ValidateNativeRecord(incarnation, nodeName, payload);
@@ -62,7 +72,9 @@ internal static class RequestCqrsRf3SignedDiscovery
     {
         var maximum = ReplicaTransportProtocol.MaximumDiscoveryBytes;
         if (response.Content.Headers.ContentLength is { } length && length > maximum)
-        { throw new InvalidDataException(BodyTooLarge); }
+        {
+            throw new InvalidDataException(BodyTooLarge);
+        }
         await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
         var bytes = new byte[maximum + 1];
         var count = 0;
@@ -71,11 +83,15 @@ internal static class RequestCqrsRf3SignedDiscovery
             cancellationToken.ThrowIfCancellationRequested();
             var read = await stream.ReadAsync(bytes.AsMemory(count), cancellationToken).ConfigureAwait(false);
             if (read == 0)
-            { break; }
+            {
+                break;
+            }
             count += read;
         }
         if (count > maximum || response.Content.Headers.ContentLength is { } expected && expected != count)
-        { throw new InvalidDataException(BodyTooLarge); }
+        {
+            throw new InvalidDataException(BodyTooLarge);
+        }
         return bytes.AsSpan(0, count).ToArray();
     }
 
@@ -83,24 +99,36 @@ internal static class RequestCqrsRf3SignedDiscovery
         Guid nonce, ReadOnlyMemory<byte> credential, byte[] payload)
     {
         if (!response.Headers.TryGetValues(NativeSiloDiscoveryDiagnosticProtocol.SignatureHeader, out var values))
-        { throw new InvalidOperationException(InvalidSignedObservation); }
+        {
+            throw new InvalidOperationException(InvalidSignedObservation);
+        }
         using var iterator = values.GetEnumerator();
         if (!iterator.MoveNext())
-        { throw new InvalidOperationException(InvalidSignedObservation); }
+        {
+            throw new InvalidOperationException(InvalidSignedObservation);
+        }
         var text = iterator.Current;
         if (iterator.MoveNext() || text.Length != SignatureCharacters)
-        { throw new InvalidOperationException(InvalidSignedObservation); }
+        {
+            throw new InvalidOperationException(InvalidSignedObservation);
+        }
         byte[] supplied;
         try
-        { supplied = Convert.FromHexString(text); }
+        {
+            supplied = Convert.FromHexString(text);
+        }
         catch (FormatException)
-        { throw new InvalidOperationException(InvalidSignedObservation); }
+        {
+            throw new InvalidOperationException(InvalidSignedObservation);
+        }
         using var mac = new ReplicaMessageMac(credential, ClusterPrefix + incarnation.ToString("N", CultureInfo.InvariantCulture));
         var expected = mac.Discovery(incarnation, VoterOrigin(nodeName), nonce, payload);
         try
         {
             if (!CryptographicOperations.FixedTimeEquals(expected, supplied))
-            { throw new InvalidOperationException(InvalidSignedObservation); }
+            {
+                throw new InvalidOperationException(InvalidSignedObservation);
+            }
         }
         finally
         {
@@ -119,14 +147,22 @@ internal static class RequestCqrsRf3SignedDiscovery
             || value.RuntimeJournalReaderContract != StoreReaderContract.RuntimeJournal
             || string.IsNullOrEmpty(value.SiloAddress)
             || value.SiloAddress.Length > ReplicaTransportProtocol.MaximumAddressCharacters)
-        { throw new InvalidOperationException(InvalidSignedObservation); }
+        {
+            throw new InvalidOperationException(InvalidSignedObservation);
+        }
         SiloAddress address;
         try
-        { address = SiloAddress.FromParsableString(value.SiloAddress); }
+        {
+            address = SiloAddress.FromParsableString(value.SiloAddress);
+        }
         catch (Exception error) when (error is FormatException or ArgumentException)
-        { throw new InvalidOperationException(InvalidSignedObservation); }
+        {
+            throw new InvalidOperationException(InvalidSignedObservation);
+        }
         if (address.Endpoint.Port <= 0 || address.ToParsableString() != value.SiloAddress)
-        { throw new InvalidOperationException(InvalidSignedObservation); }
+        {
+            throw new InvalidOperationException(InvalidSignedObservation);
+        }
         return value;
     }
 

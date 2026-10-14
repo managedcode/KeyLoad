@@ -24,7 +24,11 @@ internal static class ColdBootstrapCliStatus
     {
         var policy = fixture.App.Services.GetRequiredService<IOptions<TestExecutionOptions>>();
         var start = new ProcessStartInfo(Dotnet)
-        { UseShellExecute = false, RedirectStandardOutput = true, RedirectStandardError = true };
+        {
+            UseShellExecute = false,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true
+        };
         start.ArgumentList.Add(Path.Combine(ClusterFixtureDiagnostics.FindRepositoryRoot().FullName, CliAssembly));
         start.ArgumentList.Add(StatusCommand);
         start.ArgumentList.Add(fixture.App.GetEndpoint(McpCallerProtocol.Node1, McpCallerProtocol.HttpEndpoint).AbsoluteUri);
@@ -35,7 +39,9 @@ internal static class ColdBootstrapCliStatus
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             if (!process.Start())
-            { throw new InvalidOperationException(Missing); }
+            {
+                throw new InvalidOperationException(Missing);
+            }
             await VerifyStartedAsync(process, fixture, expected, policy, token).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
         ServerFailureObserver.Observe(process.Dispose, failures);
@@ -52,7 +58,9 @@ internal static class ColdBootstrapCliStatus
         await ServerFailureObserver.ObserveAsync(() => LocalRf3OwnedProcessLifetime.ObserveAsync(exit, output, error,
             TimeProvider.System, token), failures).ConfigureAwait(false);
         if (failures.Count != Success || !exit.IsCompleted || !output.IsCompleted || !error.IsCompleted)
-        { await LocalRf3OwnedProcessLifetime.TerminateAndJoinAsync(process, exit, output, error, failures, policy, TimeProvider.System).ConfigureAwait(false); }
+        {
+            await LocalRf3OwnedProcessLifetime.TerminateAndJoinAsync(process, exit, output, error, failures, policy, TimeProvider.System).ConfigureAwait(false);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
         await Assert.That(process.ExitCode).IsEqualTo(Success);
         await Assert.That(await error.ConfigureAwait(false)).IsEqualTo(string.Empty);

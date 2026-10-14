@@ -23,7 +23,9 @@ internal static class SqlCreateTableRf3Healthy
             await SqlRf3Protocol.EqualAsync(receipt, await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.CommitAsync(command, token)));
             var sql = SqlRf3Protocol.Call(SqlCreateTableRf3Literal.Partition, SqlCreateTableRf3Literal.CommitOperation, command)
                 with
-            { CommandId = id };
+            {
+                CommandId = id
+            };
             await SqlRf3Protocol.EqualAsync(receipt, await SqlRf3Protocol.McpAsync<CommitReceipt>(caller.Mcp, sql, token));
             await SqlCreateTableRf3Images.RequireAsync(caller.Sdk, image, token);
             var next = state with

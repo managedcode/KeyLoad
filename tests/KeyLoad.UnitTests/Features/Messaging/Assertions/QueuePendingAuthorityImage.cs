@@ -64,7 +64,9 @@ internal static class QueuePendingAuthorityImage
     {
         foreach (var family in new[] { QueueLifecycleTestProtocol.ReadySpace, QueueLifecycleTestProtocol.ScheduledSpace,
             QueueLifecycleTestProtocol.LeaseSpace, QueuePendingAuthorityProtocol.Order })
-        { await EmptyAsync(store, state, family); }
+        {
+            await EmptyAsync(store, state, family);
+        }
         if (phase == QueuePendingAuthorityPhase.Pending)
         {
             await Assert.That(store.Read(view => view.GetRecord<QueuePendingDeadLetterReference>(state.MarkerKey)))
@@ -72,7 +74,9 @@ internal static class QueuePendingAuthorityImage
             await CountAsync(store, state, QueueLifecycleTestProtocol.PendingSpace, 1);
         }
         else
-        { await EmptyAsync(store, state, QueueLifecycleTestProtocol.PendingSpace); }
+        {
+            await EmptyAsync(store, state, QueueLifecycleTestProtocol.PendingSpace);
+        }
         if (phase == QueuePendingAuthorityPhase.Parked)
         {
             await Assert.That(store.Read(view => view.GetRecord<string>(QueuePendingAuthorityOperations.Key(state.Flow,

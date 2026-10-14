@@ -11,7 +11,10 @@ internal static class SubscriptionPausedDrainFlow
     {
         using var fixture = new TestDatabase();
         fixture.Configure("topic", ResourceKind.Topic);
-        var group = SubscriptionTestActions.Configure(fixture, policy: new() { MaxWindow = 3 });
+        var group = SubscriptionTestActions.Configure(fixture, policy: new()
+        {
+            MaxWindow = 3
+        });
         var history = new List<(ReplicatedOperation Operation, OperationResult Result, byte[] Saved)>();
         var time = QueueWholeFlowStorage.Clock(fixture.Store).AddSeconds(1);
         var publish = new CommandRequest(Guid.NewGuid(), group.Source.Partition,

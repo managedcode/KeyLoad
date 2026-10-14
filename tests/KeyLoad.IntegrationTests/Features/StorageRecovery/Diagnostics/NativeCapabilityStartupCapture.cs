@@ -16,7 +16,9 @@ internal sealed class NativeCapabilityStartupCapture(Action<Exception, bool> ori
     private void Attach(DistributedApplication application, ContainerResource[] resources)
     {
         if (attached)
-        { return; }
+        {
+            return;
+        }
         capture.Callbacks.Attach(application, resources);
         attached = true;
     }
@@ -24,7 +26,9 @@ internal sealed class NativeCapabilityStartupCapture(Action<Exception, bool> ori
     private async Task ReadyAsync()
     {
         if (readinessReturned)
-        { return; }
+        {
+            return;
+        }
         await capture.Callbacks.Ready().ConfigureAwait(false);
         readinessReturned = true;
     }
@@ -34,7 +38,9 @@ internal sealed class NativeCapabilityStartupCapture(Action<Exception, bool> ori
         var failures = new List<Exception>();
         ServerFailureObserver.Observe(() => originalFailure(failure, cancelled), failures);
         if (!readinessReturned)
-        { ServerFailureObserver.Observe(() => capture.Callbacks.Failed(failure, cancelled), failures); }
+        {
+            ServerFailureObserver.Observe(() => capture.Callbacks.Failed(failure, cancelled), failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 

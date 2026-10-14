@@ -26,7 +26,10 @@ internal sealed class SqlRf3AdmissionTests
     public async Task AcAisql007InsufficientDataBytesRejectSdkAndOfficialSqlBeforeIdClaimWhileDirectControlKeepsRf3Healthy()
     {
         var fixture = new ClusterFixture(new HttpAdmissionLimits
-        { MaxReservedBytes = DataBytes, HeavyReadReservedBytes = HeavyReadBytes });
+        {
+            MaxReservedBytes = DataBytes,
+            HeavyReadReservedBytes = HeavyReadBytes
+        });
         try
         {
             await fixture.InitializeAsync();

@@ -39,8 +39,14 @@ internal sealed class RemoteDocumentMacLifecycleTests
         {
             var request = fixture.Request();
             var reply = fixture.Reply(request);
-            request = request with { SenderSignature = fixture.Mac.SignNativeRequest(request) };
-            reply = reply with { SenderSignature = fixture.Mac.SignNativeReply(reply) };
+            request = request with
+            {
+                SenderSignature = fixture.Mac.SignNativeRequest(request)
+            };
+            reply = reply with
+            {
+                SenderSignature = fixture.Mac.SignNativeReply(reply)
+            };
             fixture.Mac.Dispose();
             Assert.ThrowsExactly<ObjectDisposedException>(() => fixture.Mac.Sign(request.Payload.Span, false));
             Assert.ThrowsExactly<ObjectDisposedException>(() => fixture.Mac.Verify(request.Payload.Span, request.Signature, false));
@@ -84,7 +90,9 @@ internal sealed class RemoteDocumentMacLifecycleTests
             start.SetResult();
             List<Exception> failures = [];
             foreach (var task in original)
-            { await ServerFailureObserver.ObserveAsync(() => task, failures); }
+            {
+                await ServerFailureObserver.ObserveAsync(() => task, failures);
+            }
             await ServerFailureObserver.ObserveAsync(() => close, failures);
             ServerFailureObserver.ThrowIfAny(failures);
             await Assert.That(outcomes).IsEqualTo(32 * 128);

@@ -19,7 +19,10 @@ internal static class NativeTextCapturedSnapshotFlow
         var original = Task.Run(async () =>
         {
             using var observation = NativeTextPostingObservation.Enter(async current =>
-            { entered.TrySetResult(); await release.Task.WaitAsync(current); });
+            {
+                entered.TrySetResult();
+                await release.Task.WaitAsync(current);
+            });
             return await runtime.Search.SearchAsync(NativeTextMaintenanceTestValues.Principal,
                 NativeTextBilingualAudit.Request(fixture.Partition, "ПРИВІТ"), cancellation.Token);
         }, token);
@@ -31,7 +34,9 @@ internal static class NativeTextCapturedSnapshotFlow
         {
             await NativeTextCapturedPublicFlow.AwaitOriginalPostingAsync(entered, original, token);
             if (Directory.Exists(root))
-            { throw new IOException("The fixture snapshot root already exists."); }
+            {
+                throw new IOException("The fixture snapshot root already exists.");
+            }
             Directory.CreateDirectory(root);
             ownedRoot = true;
             var before = fixture.Store.Identity;
@@ -53,11 +58,17 @@ internal static class NativeTextCapturedSnapshotFlow
         }, failures);
         release.TrySetResult();
         if (!original.IsCompleted)
-        { await ServerFailureObserver.ObserveAsync(cancellation.CancelAsync, failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(cancellation.CancelAsync, failures);
+        }
         if (!observed)
-        { await ServerFailureObserver.ObserveAsync(async () => { _ = await original; }, failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(async () => { _ = await original; }, failures);
+        }
         if (ownedRoot)
-        { ServerFailureObserver.Observe(() => Directory.Delete(root, recursive: true), failures); }
+        {
+            ServerFailureObserver.Observe(() => Directory.Delete(root, recursive: true), failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
         await runtime.DisposeAsync();
         await using var cold = new NativeTextOnlineTestRuntime(fixture);

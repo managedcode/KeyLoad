@@ -21,7 +21,9 @@ internal static class NativeAnnOwnership
         catch (Exception primary)
         {
             try
-            { lease?.Dispose(); }
+            {
+                lease?.Dispose();
+            }
             catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
             throw;
         }

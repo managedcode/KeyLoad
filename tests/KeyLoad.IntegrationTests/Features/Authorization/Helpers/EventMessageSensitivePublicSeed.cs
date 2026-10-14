@@ -31,7 +31,11 @@ internal static class EventMessageSensitivePublicSeed
         await Assert.That((await McpCallerAssertions.SdkStatusAsync(await root.Sdk.ConfigureApiKeyAsync(Guid.NewGuid(),
             KeyLoad.Core.DatabaseEngine.Credential(id, id, key), token))).IsSuccess).IsTrue();
         var state = new EventMessageSensitivePublicState(partition, resource, worker, key, subscription, dataAuthority, header);
-        var inspector = worker with { Id = state.InspectorId, FieldGrants = [] };
+        var inspector = worker with
+        {
+            Id = state.InspectorId,
+            FieldGrants = []
+        };
         await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), inspector, token));
         await Assert.That((await McpCallerAssertions.SdkStatusAsync(await root.Sdk.ConfigureApiKeyAsync(Guid.NewGuid(),
             KeyLoad.Core.DatabaseEngine.Credential(inspector.Id, inspector.Id, state.InspectorKey), token))).IsSuccess).IsTrue();

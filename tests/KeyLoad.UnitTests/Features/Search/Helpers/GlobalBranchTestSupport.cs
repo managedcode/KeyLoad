@@ -52,7 +52,10 @@ internal static class GlobalBranchTestSupport
         var bytes = NativeSerialization.Measure(request);
         foreach (var window in windows)
         {
-            bytes = checked(bytes + NativeSerialization.Measure(window with { Candidates = [] }));
+            bytes = checked(bytes + NativeSerialization.Measure(window with
+            {
+                Candidates = []
+            }));
             foreach (var candidate in window.Candidates)
             {
                 bytes = checked(bytes + NativeSerialization.Measure(candidate));

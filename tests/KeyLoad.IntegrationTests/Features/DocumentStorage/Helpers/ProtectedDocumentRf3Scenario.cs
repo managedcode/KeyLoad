@@ -75,7 +75,9 @@ internal sealed class ProtectedDocumentRf3Scenario(TwoRf3MembershipWave wave) : 
         }
         await ReadsAsync(source, target, reader, readMcp, seed, 4, null, token).ConfigureAwait(false);
         foreach (var retained in receipts)
-        { await ReplayAsync(source, target, commandMcp, retained.Command, retained.Receipt, token).ConfigureAwait(false); }
+        {
+            await ReplayAsync(source, target, commandMcp, retained.Command, retained.Receipt, token).ConfigureAwait(false);
+        }
     }
 
     private async Task DeniedAsync(KeyLoadClient source, KeyLoadClient target,
@@ -184,9 +186,13 @@ internal sealed class ProtectedDocumentRf3Scenario(TwoRf3MembershipWave wave) : 
     {
         var failures = new List<Exception>();
         foreach (var client in sessions)
-        { await ServerFailureObserver.ObserveAsync(() => client.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => client.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         foreach (var connection in connections)
-        { ServerFailureObserver.Observe(connection.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(connection.Dispose, failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

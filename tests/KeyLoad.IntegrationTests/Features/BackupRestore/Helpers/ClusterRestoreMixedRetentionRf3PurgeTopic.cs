@@ -39,7 +39,10 @@ internal static class ClusterRestoreMixedRetentionRf3PurgeTopic
             ClusterRestoreMixedRetentionRf3Protocol.PurgedTail, ClusterRestoreMixedRetentionRf3Protocol.PurgedTail,
             ClusterRestoreMixedRetentionRf3Protocol.PurgedTail, true, null), state.PurgeInfo);
         await global::KeyLoad.IntegrationTests.Features.EventStreams.RetentionAckArchiveR53Seed.BeginAsync(callers, state, token);
-        state.Purge = refused with { CommandId = Guid.NewGuid() };
+        state.Purge = refused with
+        {
+            CommandId = Guid.NewGuid()
+        };
         state.PurgeReceipt = await QueueLifecyclePublicRoutes.CallAsync(callers, state.OriginalQueue.Route, state.Partition,
             McpCallerTools.DocumentsCommit, state.Purge, () => callers.Sdk.CommitAsync(state.Purge, token), token);
         state.PurgedPage = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.ReadEventSourceAsync(

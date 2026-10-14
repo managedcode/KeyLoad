@@ -3,7 +3,10 @@ namespace KeyLoad.ComparisonTests.Features.TestInfrastructure;
 internal sealed class AspireFailureDeadline : IDisposable
 {
     private readonly CancellationTokenSource timeout;
-    internal CancellationTokenSource Source { get; }
+    internal CancellationTokenSource Source
+    {
+        get;
+    }
     internal CancellationToken Token => Source.Token;
 
     internal AspireFailureDeadline(TimeSpan duration, CancellationToken caller)

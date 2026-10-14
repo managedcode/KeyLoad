@@ -49,7 +49,10 @@ internal static class GraphPathFieldUseR43Commands
         var persisted = await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.ConfigurePrincipalAsync(
             Guid.NewGuid(), expected, token));
         await SqlRf3Protocol.EqualAsync(expected, persisted);
-        state.Identity = state.Identity with { Principal = persisted };
+        state.Identity = state.Identity with
+        {
+            Principal = persisted
+        };
         state.Allowed = allowed;
         state.Outbox = await GraphPathFieldUseR43Current.OutboxAsync(admin, state, token);
     }

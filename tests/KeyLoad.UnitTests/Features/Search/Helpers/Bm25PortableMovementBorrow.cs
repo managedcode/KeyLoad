@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.InternalSerialization;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.UnitTests.Features.Search;
 
@@ -20,15 +20,21 @@ internal sealed class Bm25PortableMovementBorrow : IGrainPartitionMovementSealed
     {
         var phase = NativeCommandPayload.Read<PartitionMovePhaseCommand>(operation);
         if (phase.Stage != PartitionMovePeerStage.Retire || phase.ReceiverEffectAdmission is null)
-        { throw new InvalidOperationException("The original native Retire authority is absent."); }
+        {
+            throw new InvalidOperationException("The original native Retire authority is absent.");
+        }
         if (Interlocked.CompareExchange(ref selected, 1, 0) != 0)
-        { return; }
+        {
+            return;
+        }
         try
         {
             entered.SetResult(operation);
             await released.Task.WaitAsync(cancellationToken).ConfigureAwait(false);
         }
         finally
-        { joined.TrySetResult(); }
+        {
+            joined.TrySetResult();
+        }
     }
 }

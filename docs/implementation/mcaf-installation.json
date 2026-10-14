@@ -24,7 +24,7 @@
     "src/KeyLoad.Client/KeyLoad.Client.csproj",
     "src/KeyLoad.Core/KeyLoad.Core.csproj",
     "src/KeyLoad.Diagnostics/KeyLoad.Diagnostics.csproj",
-    "src/KeyLoad.Orleans/KeyLoad.Orleans.csproj",
+    "src/KeyLoad.Clustering/KeyLoad.Clustering.csproj",
     "src/KeyLoad.Query/KeyLoad.Query.csproj",
     "src/KeyLoad.Replication/KeyLoad.Replication.csproj",
     "src/KeyLoad.Security/KeyLoad.Security.csproj",

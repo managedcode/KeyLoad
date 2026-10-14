@@ -14,7 +14,10 @@ internal static class SubscriptionProcessingAtomicFlow
         fixture.Configure("topic", ResourceKind.Topic);
         fixture.Configure("orders", ResourceKind.Collection);
         SubscriptionTestActions.Publish(fixture);
-        var group = SubscriptionTestActions.Configure(fixture, policy: new() { MaxWindow = 3 });
+        var group = SubscriptionTestActions.Configure(fixture, policy: new()
+        {
+            MaxWindow = 3
+        });
         var source = SubscriptionCheckpointAuthorityAssertions.SourceImage(fixture.Store, group.Source.Partition);
         var time = QueueWholeFlowStorage.Clock(fixture.Store).AddSeconds(1);
         var receive = new ReceiveSubscriptionRequest(Guid.NewGuid(), group, MaxEvents: 3);
@@ -69,7 +72,10 @@ internal static class SubscriptionProcessingAtomicFlow
         var saved = SubscriptionProcessingAtomicAssertions.OutcomeBytes(store, group, operation.Id);
         await SubscriptionProcessingAtomicAssertions.SuccessReplayAsync(db, store, group, operation, result, saved);
         await SubscriptionProcessingAtomicAssertions.FailureReplayAsync(db, store, group, failed, failure, failureBytes);
-        var once = repaired with { CommandId = Guid.NewGuid() };
+        var once = repaired with
+        {
+            CommandId = Guid.NewGuid()
+        };
         var onceOperation = Create(OperationKind.SubscriptionProcessing, once, once.CommandId, time.AddSeconds(3));
         var beforeOnce = SubscriptionProcessingAtomicAssertions.DomainImage(store, group, onceOperation.Id);
         var oncePosition = store.Position;
@@ -126,7 +132,9 @@ internal static class SubscriptionProcessingAtomicFlow
             receipt.Operation, receipt.Result, receipt.Saved);
         }
         foreach (var ack in ackReceipts)
-        { await SubscriptionCheckpointAuthorityAssertions.ReplayAsync(cold, second, ack.Command, ack.Result, token); }
+        {
+            await SubscriptionCheckpointAuthorityAssertions.ReplayAsync(cold, second, ack.Command, ack.Result, token);
+        }
         await SubscriptionCheckpointAuthorityAssertions.SettledClaimAsync(cold, second, receive, originalClaim, token);
         await SubscriptionProcessingAtomicAssertions.DocumentsAsync(cold, group);
         await SubscriptionCheckpointAuthorityAssertions.StatusAsync(cold, group, 3, 3, 3);

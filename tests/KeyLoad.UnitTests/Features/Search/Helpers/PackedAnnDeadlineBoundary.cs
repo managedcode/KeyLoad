@@ -12,12 +12,30 @@ internal readonly record struct PackedAnnDeadlineSearch(
 internal sealed class PackedAnnDeadlineObservation
 {
     internal TestElapsedClock StartedTimestamp { get; private set; } = null!;
-    internal int CompletedSearches { get; private set; }
-    internal long FailedInvocationEdgeVisits { get; private set; }
-    internal AnnSearchResult? LastResult { get; private set; }
-    internal long LastWorkDelta { get; private set; }
-    internal long LastDistanceDelta { get; private set; }
-    internal long LastEdgeDelta { get; private set; }
+    internal int CompletedSearches
+    {
+        get; private set;
+    }
+    internal long FailedInvocationEdgeVisits
+    {
+        get; private set;
+    }
+    internal AnnSearchResult? LastResult
+    {
+        get; private set;
+    }
+    internal long LastWorkDelta
+    {
+        get; private set;
+    }
+    internal long LastDistanceDelta
+    {
+        get; private set;
+    }
+    internal long LastEdgeDelta
+    {
+        get; private set;
+    }
     internal bool SuccessfulDeltasMatch { get; private set; } = true;
 
     internal void Start(TestElapsedClock timestamp) => StartedTimestamp = timestamp;

@@ -75,10 +75,14 @@ internal static class NativeCoverageImagePackageOracle
     private static HashSet<string> ReadAssets(string depsPath, string version, int maximumManifestBytes)
     {
         if (new FileInfo(depsPath).Length > maximumManifestBytes)
-        { throw new InvalidDataException("The native coverage dependency manifest exceeds its configured bound."); }
+        {
+            throw new InvalidDataException("The native coverage dependency manifest exceeds its configured bound.");
+        }
         using var stream = File.OpenRead(depsPath);
         using var document = JsonDocument.Parse(stream, new JsonDocumentOptions
-        { MaxDepth = NativeCoverageImageConstants.MaximumJsonDepth });
+        {
+            MaxDepth = NativeCoverageImageConstants.MaximumJsonDepth
+        });
         var target = document.RootElement.GetProperty(NativeCoverageImageFields.Targets)
             .GetProperty(NativeCoverageImageConstants.DotnetCoverageTargetFramework);
         var packageEntry = target.GetProperty($"{NativeCoverageImageConstants.CoveragePackageId}/{version}");

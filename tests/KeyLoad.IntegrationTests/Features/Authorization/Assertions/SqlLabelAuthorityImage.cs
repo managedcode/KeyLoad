@@ -25,9 +25,15 @@ internal static class SqlLabelAuthorityImage
             await SqlRf3Protocol.EqualAsync(new DocumentResult(reference, McpCallerProtocol.FirstRevision,
                 row.Json, false, []), actual);
             if (actual is not null)
-            { documents.Add(actual); }
+            {
+                documents.Add(actual);
+            }
         }
         var outbox = await McpCallerAssertions.SdkSuccessAsync(await root.OutboxStatusAsync(partition, token));
-        return JsonSerializer.SerializeToElement(new { Documents = documents, Outbox = outbox }, JsonDefaults.Options);
+        return JsonSerializer.SerializeToElement(new
+        {
+            Documents = documents,
+            Outbox = outbox
+        }, JsonDefaults.Options);
     }
 }

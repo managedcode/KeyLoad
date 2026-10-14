@@ -111,7 +111,9 @@ internal static class ScaleServerMountReader
 
         string canonicalSource;
         try
-        { canonicalSource = Path.GetFullPath(source); }
+        {
+            canonicalSource = Path.GetFullPath(source);
+        }
         catch (ArgumentException) { return null; }
         if (!Directory.Exists(canonicalSource) && !File.Exists(canonicalSource))
         {

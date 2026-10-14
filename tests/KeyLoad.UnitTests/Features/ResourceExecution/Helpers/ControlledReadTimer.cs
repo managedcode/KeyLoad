@@ -14,7 +14,9 @@ internal sealed class ControlledReadTimer(ControlledReadClock clock, TimerCallba
         lock (clock.Gate)
         {
             if (disposed)
-            { return false; }
+            {
+                return false;
+            }
             interval = period;
             dueAt = dueTime == Timeout.InfiniteTimeSpan
                 ? long.MaxValue : checked(clock.CurrentTimestamp + dueTime.Ticks);
@@ -26,7 +28,9 @@ internal sealed class ControlledReadTimer(ControlledReadClock clock, TimerCallba
         lock (clock.Gate)
         {
             if (disposed || dueAt == long.MaxValue || clock.CurrentTimestamp < dueAt)
-            { return; }
+            {
+                return;
+            }
             dueAt = interval > TimeSpan.Zero ? checked(clock.CurrentTimestamp + interval.Ticks) : long.MaxValue;
         }
         callback(state);
@@ -36,10 +40,16 @@ internal sealed class ControlledReadTimer(ControlledReadClock clock, TimerCallba
         lock (clock.Gate)
         {
             if (disposed)
-            { return; }
+            {
+                return;
+            }
             disposed = true;
             clock.Remove(this);
         }
     }
-    public ValueTask DisposeAsync() { Dispose(); return ValueTask.CompletedTask; }
+    public ValueTask DisposeAsync()
+    {
+        Dispose();
+        return ValueTask.CompletedTask;
+    }
 }

@@ -83,14 +83,18 @@ internal sealed class RequestCqrsRf3Wave : IAsyncDisposable
     internal Task KillLeaderAsync(string node, CancellationToken cancellationToken)
     {
         if (!IsNode(node))
-        { throw new ArgumentOutOfRangeException(nameof(node)); }
+        {
+            throw new ArgumentOutOfRangeException(nameof(node));
+        }
         return runtime.KillAsync(node, DueLeaderLossScenario, cancellationToken);
     }
 
     internal Task KillDueNoQuorumAsync(string node, CancellationToken cancellationToken)
     {
         if (!IsNode(node))
-        { throw new ArgumentOutOfRangeException(nameof(node)); }
+        {
+            throw new ArgumentOutOfRangeException(nameof(node));
+        }
         return runtime.KillAsync(node, DueNoQuorumScenario, cancellationToken);
     }
 
@@ -109,13 +113,17 @@ internal sealed class RequestCqrsRf3Wave : IAsyncDisposable
     {
         var owned = application;
         if (owned is null)
-        { return; }
+        {
+            return;
+        }
         var failures = new List<Exception>();
         await RequestCqrsLifecycleFailureObserver.ObserveAsync(() => nativeAdmission.DisposeAsync().AsTask(), failures,
             FailureObserver, RequestCqrsLifecycleStage.ObserverJoin).ConfigureAwait(false);
         await CompleteAsync(owned, diagnostics, failures, lifecycleEvidence).ConfigureAwait(false);
         if (await RequestCqrsRf3BuilderCleanup.DisposeAsync(testingBuilder, failures, FailureObserver).ConfigureAwait(false))
-        { testingBuilder = null; }
+        {
+            testingBuilder = null;
+        }
         if (failures.Count == 0)
         {
             RequestCqrsLifecycleFailureObserver.Observe(() => AssertNodeLocksReleased(dataRoot), failures,
@@ -167,7 +175,9 @@ internal sealed class RequestCqrsRf3Wave : IAsyncDisposable
     internal static void SaveFailureEvidence(RequestCqrsRf3Diagnostics? diagnostics, List<Exception> failures)
     {
         if (diagnostics is not null && failures.Count > 0)
-        { ServerFailureObserver.Observe(() => diagnostics.SaveFailureEvidence(failures[0]), failures); }
+        {
+            ServerFailureObserver.Observe(() => diagnostics.SaveFailureEvidence(failures[0]), failures);
+        }
     }
 
     private static void AssertNodeLocksReleased(string root)

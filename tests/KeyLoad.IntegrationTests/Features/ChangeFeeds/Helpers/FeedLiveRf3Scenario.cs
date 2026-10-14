@@ -23,13 +23,18 @@ internal sealed record FeedLiveRf3Scenario(PartitionRef Partition, McpPersistedI
             FeedLiveRf3Protocol.Database, FeedLiveRf3Protocol.Domain, Guid.NewGuid().ToString("N"));
         var resource = new ResourceDefinition(FeedLiveRf3Protocol.Collection, ResourceKind.Collection,
             partition.TransactionDomainId)
-        { FieldPolicies = [new(FeedLiveRf3Protocol.SecretField, FeedLiveRf3Protocol.SecretTag, RawReadGrant: FeedLiveRf3Protocol.SecretGrant)] };
+        {
+            FieldPolicies = [new(FeedLiveRf3Protocol.SecretField, FeedLiveRf3Protocol.SecretTag, RawReadGrant: FeedLiveRf3Protocol.SecretGrant)]
+        };
         await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.ConfigureResourceAsync(Guid.NewGuid(),
             new(partition.TenantId, partition.DatabaseId, resource), token));
         var principal = new PrincipalRecord(FeedLiveRf3Protocol.PrincipalPrefix + Guid.NewGuid().ToString("N"), partition.TenantId,
             [new(partition.DatabaseId, FeedLiveRf3Protocol.Collection,
                 Capability.Query | Capability.DocumentsRead | Capability.ChangesRead)], [])
-        { RestrictRows = true, OwnerId = FeedLiveRf3Protocol.Owner };
+        {
+            RestrictRows = true,
+            OwnerId = FeedLiveRf3Protocol.Owner
+        };
         var identity = await NativeTextRf3Scenario.ConfigureIdentityAsync(fixture, principal, token);
         var original = new CommandRequest(Guid.NewGuid(), partition,
         [new PutDocument(FeedLiveRf3Protocol.Collection, FeedLiveRf3Protocol.First,

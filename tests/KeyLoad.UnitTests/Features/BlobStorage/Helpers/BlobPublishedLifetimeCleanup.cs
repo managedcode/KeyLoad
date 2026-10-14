@@ -14,7 +14,15 @@ internal static class BlobPublishedLifetimeCleanup
         var deleted = BlobPublishedLifetimeOperations.Send(owner, OperationKind.DeleteBlob, deletion.CommandId, deletion, deletedAt);
         var tombstone = deleted.Original.Get<BlobCommitResult<BlobMetadata>>().Value;
         await BlobWholeFlowAssertions.Exact(tombstone, fixture.Metadata with
-        { Revision = 2, VersionId = null, Length = 0, PartCount = 0, IntegrityHash = null, Deleted = true, UpdatedAt = deletedAt });
+        {
+            Revision = 2,
+            VersionId = null,
+            Length = 0,
+            PartCount = 0,
+            IntegrityHash = null,
+            Deleted = true,
+            UpdatedAt = deletedAt
+        });
         await BlobWholeFlowAssertions.Receipt(owner, deleted.Original.Get<BlobCommitResult<BlobMetadata>>().Receipt, deletion.CommandId, fixture.Blob);
         await BlobWholeFlowAssertions.Quotas(owner, fixture.Blob, 65_553, 1, 0);
         var state = owner.Store.Read(view => view.GetRecord<BlobState>(BlobRangeIntegrityOracle.Key("blob-state-v1", fixture)));
@@ -34,7 +42,9 @@ internal static class BlobPublishedLifetimeCleanup
         foreach (var prefix in new[] { "blob-part-v1", "blob-partmeta-v1" })
         {
             for (var ordinal = 0; ordinal < 2; ordinal++)
-            { await Assert.That(store.Read(view => view.ReadOwnedValue(BlobRangeIntegrityOracle.Key(prefix, fixture, ordinal)))).IsNull(); }
+            {
+                await Assert.That(store.Read(view => view.ReadOwnedValue(BlobRangeIntegrityOracle.Key(prefix, fixture, ordinal)))).IsNull();
+            }
         }
         await BlobPublishedLifetimeAssertions.Replay(owner, store, reclaimed);
         await BlobPublishedLifetimeAssertions.Invalidated(owner, store, fixture.Commands[3]);

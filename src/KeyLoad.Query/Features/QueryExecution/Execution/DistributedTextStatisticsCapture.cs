@@ -18,7 +18,9 @@ internal static class DistributedTextStatisticsCapture
             + (long)terms.Length * PartitionQueryRetention.PointerBytes
             + (long)frequencies.Length * sizeof(int));
         if (bytes > budget.MaximumResultBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, Exhausted); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, Exhausted);
+        }
         budget.ChargeBytes(bytes);
         var result = new DistributedTextStatisticsV1([.. terms], documents, length, [.. frequencies]);
         DistributedTextStatisticsValidation.Require(result, terms, budget);

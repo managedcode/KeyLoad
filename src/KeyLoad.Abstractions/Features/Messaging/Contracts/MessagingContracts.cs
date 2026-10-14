@@ -50,19 +50,34 @@ public sealed record QueuePolicy
     public int RetryMaxMilliseconds { get; init; } = DefaultRetryMaxMilliseconds;
     /// <summary>Gets the optional dead-letter message sublimit of the stored grant.</summary>
     [Orleans.Id(8)]
-    public long? MaxDeadLetterMessages { get; init; }
+    public long? MaxDeadLetterMessages
+    {
+        get; init;
+    }
     /// <summary>Gets the optional dead-letter byte sublimit of the stored grant.</summary>
     [Orleans.Id(9)]
-    public long? MaxDeadLetterBytes { get; init; }
+    public long? MaxDeadLetterBytes
+    {
+        get; init;
+    }
     /// <summary>Gets the canonical message ordering profile.</summary>
     [Orleans.Id(10)]
-    public QueueOrderingProfile OrderingProfile { get; init; }
+    public QueueOrderingProfile OrderingProfile
+    {
+        get; init;
+    }
     /// <summary>Gets whether a parked strict head blocks its successors.</summary>
     [Orleans.Id(11)]
-    public QueueParkedHeadPolicy ParkedHeadPolicy { get; init; }
+    public QueueParkedHeadPolicy ParkedHeadPolicy
+    {
+        get; init;
+    }
     /// <summary>Gets the recorded retry jitter selection profile.</summary>
     [Orleans.Id(12)]
-    public QueueRetryJitter RetryJitter { get; init; }
+    public QueueRetryJitter RetryJitter
+    {
+        get; init;
+    }
     /// <summary>Gets the saturating retry exponential factor.</summary>
     [Orleans.Id(13)]
     public int RetryExponentialFactor { get; init; } = DefaultRetryExponentialFactor;

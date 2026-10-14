@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using ManagedCode.Orleans.Graph.Extensions;
 
 namespace KeyLoad.Server;

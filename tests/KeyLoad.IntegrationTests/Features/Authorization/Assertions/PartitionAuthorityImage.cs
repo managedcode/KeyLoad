@@ -22,7 +22,11 @@ internal static class PartitionAuthorityImage
             await SqlRf3Protocol.EqualAsync(new DocumentResult(reference, PartitionQueryRf3Protocol.RowRevision,
                 row.Item3, false, []), document);
             var outbox = await McpCallerAssertions.SdkSuccessAsync(await root.OutboxStatusAsync(partition, token));
-            images.Add(JsonSerializer.SerializeToElement(new { Document = document, Outbox = outbox }, JsonDefaults.Options));
+            images.Add(JsonSerializer.SerializeToElement(new
+            {
+                Document = document,
+                Outbox = outbox
+            }, JsonDefaults.Options));
         }
         return JsonSerializer.SerializeToElement(images, JsonDefaults.Options);
     }

@@ -116,10 +116,16 @@ internal static class ClusterRestoreMixedRetentionRf3Inbox
     private static async Task ReconcileOriginalInputAsync(RequestCqrsRf3Callers callers,
         ClusterRestoreMixedRetentionRf3State state, CancellationToken token)
     {
-        var duplicate = state.Inbox with { CommandId = Guid.NewGuid() };
+        var duplicate = state.Inbox with
+        {
+            CommandId = Guid.NewGuid()
+        };
         var duplicated = await QueueLifecyclePublicRoutes.CallAsync(callers, state.CurrentQueue.Route, state.Partition,
             TargetInboxRf3Protocol.Tool, duplicate, () => callers.Sdk.CommitInboxAsync(duplicate, token), token);
-        await SqlRf3Protocol.EqualAsync(state.InboxResult with { AlreadyProcessed = true }, duplicated);
+        await SqlRf3Protocol.EqualAsync(state.InboxResult with
+        {
+            AlreadyProcessed = true
+        }, duplicated);
         await ClusterRestoreMixedRetentionRf3Literal.InboxAsync(callers, state, token);
         var current = (await PublicReadAssertions.MessageAsync(await callers.Sdk.InspectAsync(
             new(state.Source, ClusterRestoreMixedRetentionRf3Protocol.OriginalInput), token)))!;

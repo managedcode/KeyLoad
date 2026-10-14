@@ -37,7 +37,9 @@ internal sealed class ClusterFailureReceipts
         lock (writeGate)
         {
             if (runRoot is not null && !string.Equals(runRoot, root, StringComparison.Ordinal))
-            { throw new InvalidOperationException(RunOwnerMismatch); }
+            {
+                throw new InvalidOperationException(RunOwnerMismatch);
+            }
             runRoot ??= root;
             return runOutput ??= Path.Combine(root, ClusterFixtureProtocol.QualificationDirectory,
                 Guid.NewGuid().ToString(ClusterFixtureProtocol.GuidFormat));
@@ -54,7 +56,9 @@ internal sealed class ClusterFailureReceipts
         using var stream = new FileStream(path, FileMode.CreateNew, FileAccess.Write, FileShare.None);
         using var writer = new StreamWriter(stream, leaveOpen: true);
         foreach (var line in bounded)
-        { writer.WriteLine(line); }
+        {
+            writer.WriteLine(line);
+        }
         return path;
     }
 

@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.Server.Features.Search;
 
@@ -8,7 +8,9 @@ internal sealed partial class NativeTextOnlineSession
     {
         Budget.Check();
         if (CheckpointWork is not null || Intent != original)
-        { throw NativeTextErrors.Mismatch(); }
+        {
+            throw NativeTextErrors.Mismatch();
+        }
         CheckpointWork = new(Id, original.CheckpointCommand, PrincipalId, OriginalExpiry,
             original.ThroughSequence, Budget);
     }
@@ -25,7 +27,9 @@ internal sealed partial class NativeTextOnlineSession
     {
         Budget.Check();
         if (Intent is not null || Target is not null || CheckpointWork is null)
-        { throw NativeTextErrors.Mismatch(); }
+        {
+            throw NativeTextErrors.Mismatch();
+        }
         _ = CheckpointWork.Work.CloseAdmissionAndCaptureOriginal();
         CheckpointWork = null;
     }

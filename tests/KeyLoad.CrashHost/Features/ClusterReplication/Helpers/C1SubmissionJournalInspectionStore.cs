@@ -22,5 +22,7 @@ internal sealed class C1SubmissionJournalInspectionStore(IAtomicStore original,
     public StorageSnapshot InstallSnapshot(string path, long expectedAppliedPosition)
         => throw C1SubmissionJournalInspectionValidation.Invalid();
     public StorageSnapshot Compact() => throw C1SubmissionJournalInspectionValidation.Invalid();
-    public void Dispose() { }
+    public void Dispose()
+    {
+    }
 }

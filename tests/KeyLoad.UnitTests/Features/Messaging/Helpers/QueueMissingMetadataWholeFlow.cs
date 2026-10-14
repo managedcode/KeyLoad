@@ -16,10 +16,14 @@ internal static class QueueMissingMetadataWholeFlow
             await KeyLoad.Server.ServerFailureObserver.ObserveAsync(
                 () => CompleteAsync(fixture, failures, token), failures);
         }
-        catch (Exception error) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
-        catch (Exception error) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
+        catch (Exception error) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
+        catch (Exception error) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
         KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }
 
@@ -51,7 +55,10 @@ internal static class QueueMissingMetadataWholeFlow
                 await QueueLifecycleConditionAssertions.Same(cold, damaged);
                 await QueueMissingMetadataAssertions.RefusalAsync(owner, cold, state, operation, damaged);
                 QueueLifecycleConditionOperations.Restore(cold, key, row);
-                await QueueLifecycleConditionAssertions.Same(cold, original with { Position = original.Position + 2 });
+                await QueueLifecycleConditionAssertions.Same(cold, original with
+                {
+                    Position = original.Position + 2
+                });
                 await QueueLifecycleConditionAssertions.Ready(owner, cold, state);
                 await QueueTerminalInspectionAssertions.ReplayAsync(owner, cold, state);
                 await FinishAsync(owner, cold, state, operation);

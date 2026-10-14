@@ -30,12 +30,21 @@ internal static class SqlNullDistinctRefusals
             await SqlNullDistinctPages.HealthyAsync(database.Database, database.Store, database.Partition, InitialRevision);
             await SqlNullOrderingRefusals.UnchangedAsync(database.Store, before, position, identity);
         }
-        foreach (var window in new[] { "LIMIT +1", "OFFSET +1 LIMIT 1", "FETCH FIRST +1 ROW ONLY",
-            "LIMIT .5", "OFFSET .5 LIMIT 1", "FETCH FIRST .5 ROW ONLY",
-            "LIMIT 0x1", "OFFSET 0x1 LIMIT 1", "FETCH FIRST 0x1 ROW ONLY" })
+        foreach (var window in new[]
         {
-            var request = new QueryRequest(database.Partition, SqlNullDistinctCases.Prefix
-                + SqlNullDistinctCases.PositiveClause + " ORDER BY label ASC " + window, AllowFullScan: true);
+            "OFFSET -1 ROWS FETCH NEXT 1 ROWS ONLY",
+            "OFFSET 0 ROWS FETCH NEXT +0 ROWS ONLY",
+            "OFFSET 0 ROWS FETCH NEXT -1 ROWS ONLY",
+            "OFFSET .5 ROWS FETCH NEXT 1 ROWS ONLY",
+            "OFFSET 0 ROWS FETCH NEXT .5 ROWS ONLY",
+            "OFFSET 0 ROWS FETCH NEXT 1e0 ROWS ONLY",
+            "OFFSET 0x1 ROWS FETCH NEXT 1 ROWS ONLY",
+            "OFFSET 0 ROWS FETCH NEXT 0x1 ROWS ONLY",
+            "OFFSET 0 ROWS FETCH NEXT 0x0 ROWS ONLY"
+        })
+        {
+            var request = new QueryRequest(database.Partition, SqlNullDistinctCases.WindowPrefix
+                + SqlNullDistinctCases.PositiveClause + SqlNullDistinctCases.Tail + " " + window, AllowFullScan: true);
             await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute(SqlNullOrderingProtocol.Reader,
                 request)).Code).IsEqualTo(ErrorCode.Validation);
             await SqlNullOrderingRefusals.UnchangedAsync(database.Store, before, position, identity);
@@ -63,6 +72,10 @@ internal static class SqlNullDistinctRefusals
             null, position, FullScan);
         await SqlNullOrderingPages.EqualAsync(spacedPositive, engine.Execute(SqlNullOrderingProtocol.Reader,
             new(database.Partition, SqlNullDistinctCases.Prefix + "score = + 1" + SqlNullDistinctCases.Tail, AllowFullScan: true)));
+        await SqlNullOrderingRefusals.UnchangedAsync(database.Store, before, position, identity);
+        await SqlNullOrderingPages.EqualAsync(spacedPositive, engine.Execute(SqlNullOrderingProtocol.Reader,
+            new(database.Partition, SqlNullDistinctCases.WindowPrefix + SqlNullDistinctCases.PositiveClause
+                + SqlNullDistinctCases.Tail + " OFFSET +0 ROWS FETCH NEXT +1 ROWS ONLY", AllowFullScan: true)));
         await SqlNullOrderingRefusals.UnchangedAsync(database.Store, before, position, identity);
         using var cancelled = new CancellationTokenSource();
         await cancelled.CancelAsync();

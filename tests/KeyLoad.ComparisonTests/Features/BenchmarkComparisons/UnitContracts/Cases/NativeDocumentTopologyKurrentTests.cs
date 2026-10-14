@@ -29,12 +29,21 @@ internal sealed class NativeDocumentTopologyKurrentTests
     {
         await Assert.That(KurrentClusterMembers.IsReady(Views(2), ComparisonTopology.Replicated)).IsFalse();
         var views = Views(3);
-        views[1] = views[1] with { LocalMember = views[0].LocalMember };
+        views[1] = views[1] with
+        {
+            LocalMember = views[0].LocalMember
+        };
         await Assert.That(KurrentClusterMembers.IsReady(views, ComparisonTopology.Replicated)).IsFalse();
         views = Views(3);
         var members = views[1].Members.ToArray();
-        members[1] = members[1] with { HttpEndpointIp = HostPrefix + 9 };
-        views[1] = views[1] with { Members = members };
+        members[1] = members[1] with
+        {
+            HttpEndpointIp = HostPrefix + 9
+        };
+        views[1] = views[1] with
+        {
+            Members = members
+        };
         await Assert.That(KurrentClusterMembers.IsReady(views, ComparisonTopology.Replicated)).IsFalse();
     }
 

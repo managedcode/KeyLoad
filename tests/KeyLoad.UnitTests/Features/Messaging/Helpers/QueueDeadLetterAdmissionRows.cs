@@ -16,7 +16,9 @@ internal static class QueueDeadLetterAdmissionRows
         store.Commit((transaction, _) =>
         {
             if (fault is QueueDeadLetterAdmissionFault.MissingCounters or QueueDeadLetterAdmissionFault.MissingWitnessMetadata)
-            { transaction.Delete(key); }
+            {
+                transaction.Delete(key);
+            }
             else
             {
                 var counters = NativeSerialization.Deserialize<QueueCounters>(original);

@@ -33,7 +33,9 @@ internal static class PhysicalShardPartitionMovementRf3Healthy
         var before = await PhysicalShardPartitionMovementRf3Cold.StopAndReadAsync(wave, requests, token);
         await PartitionMovementPublicParentRf3Cut.RestartAsync(wave, token);
         for (var index = FirstEntry; index < seeds.Length; index++)
-        { await RequireResultAsync(seeds[index], commands[index], receipts[index], token); }
+        {
+            await RequireResultAsync(seeds[index], commands[index], receipts[index], token);
+        }
         await PhysicalShardPartitionMovementRf3Flow.VerifyAsync(seeds, token);
         var after = await PhysicalShardPartitionMovementRf3Cold.StopAndReadAsync(wave, requests, token);
         await SqlRf3Protocol.EqualAsync(before, after);

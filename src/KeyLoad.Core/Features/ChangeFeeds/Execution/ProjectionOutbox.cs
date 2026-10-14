@@ -40,7 +40,10 @@ public sealed partial class DatabaseEngine
         const int AppendedRecordCount = 1;
 
         var head = ReadOutboxHead(tx, partition);
-        entry = entry with { Sequence = checked(head.Tail + TailStep) };
+        entry = entry with
+        {
+            Sequence = checked(head.Tail + TailStep)
+        };
         var payload = NativeSerialization.Serialize(entry);
         var maxRecords = checked(Limits.MaxOutboxRecords + (allowProgressReserve ? Limits.ReservedOutboxRecords : NoProgressReserveRecords));
         var maxBytes = checked(Limits.MaxOutboxBytes + (allowProgressReserve ? Limits.ReservedOutboxBytes : NoProgressReserveRecords));
@@ -51,7 +54,11 @@ public sealed partial class DatabaseEngine
 
         tx.Put(OutboxKey(partition, entry.Sequence), payload);
         tx.PutRecord(KeySpace.Partition(AppendOutboxSpaceText, partition), head with
-        { Tail = entry.Sequence, StoredRecords = head.StoredRecords + AppendedRecordCount, StoredBytes = head.StoredBytes + payload.Length });
+        {
+            Tail = entry.Sequence,
+            StoredRecords = head.StoredRecords + AppendedRecordCount,
+            StoredBytes = head.StoredBytes + payload.Length
+        });
     }
 
     private ProjectionConsumerInfo ConfigureProjectionConsumer(IAtomicTransaction tx, ConfigureProjectionConsumerRequest request,
@@ -72,7 +79,10 @@ public sealed partial class DatabaseEngine
         }
 
         foreach (var resource in definition.Resources)
-        { JsonData.Identifier(resource); Resource(tx, request.Consumer.Partition, resource); }
+        {
+            JsonData.Identifier(resource);
+            Resource(tx, request.Consumer.Partition, resource);
+        }
         foreach (var kind in definition.MutationKinds)
         {
             if (kind is not (MutationDiscriminatorNames.PutDocument or MutationDiscriminatorNames.PatchDocument
@@ -109,9 +119,14 @@ public sealed partial class DatabaseEngine
         var checkpoint = request.StartAfter ?? head.FirstAvailable - FirstAvailableStep;
         CheckOutboxPosition(head, checkpoint);
         var state = new ProjectionConsumerInfo(request.Consumer, definition, checkpoint, false)
-        { MaintenanceAuthority = authority, InitialAnnMaintenance = request.InitialAnnMaintenance };
+        {
+            MaintenanceAuthority = authority,
+            InitialAnnMaintenance = request.InitialAnnMaintenance
+        };
         if (NativeSerialization.Measure(state) > Limits.MaxBatchBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidMaintenanceProfile); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidMaintenanceProfile);
+        }
         tx.PutRecord(key, state);
         return state;
     }
@@ -280,9 +295,14 @@ public sealed partial class DatabaseEngine
             var emptyReceipt = new CommitReceipt(request.CommandId, Token(tx, request.Consumer.Partition, position), [], Durability);
             if (enrollment is not null)
             {
-                var settled = enrollment with { InitialAnnMaintenanceSettled = true };
+                var settled = enrollment with
+                {
+                    InitialAnnMaintenanceSettled = true
+                };
                 if (NativeSerialization.Measure(settled) > Limits.MaxBatchBytes)
-                { throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidAnnSettlement); }
+                {
+                    throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidAnnSettlement);
+                }
                 tx.PutRecord(ConsumerKey(request.Consumer), settled);
                 tx.PutRecord(key, new ProjectionReceipt(fingerprint, emptyReceipt, state.Checkpoint));
             }
@@ -311,7 +331,10 @@ public sealed partial class DatabaseEngine
             throw Errors.Fail(ErrorCode.TokenInvalidated, ReleaseProjectionConsumerDetailText);
         }
 
-        state = state with { Released = true };
+        state = state with
+        {
+            Released = true
+        };
         tx.PutRecord(ConsumerKey(request.Consumer), state);
         return state;
     }
@@ -340,7 +363,9 @@ public sealed partial class DatabaseEngine
 
         var consumers = ProjectionConsumers(tx, request.Partition);
         foreach (var consumer in consumers)
-        { RequireProjectionRetentionCheckpoint(consumer, head); }
+        {
+            RequireProjectionRetentionCheckpoint(consumer, head);
+        }
         var pinned = consumers.Where(consumer => !consumer.Released).Select(consumer => consumer.Checkpoint)
             .DefaultIfEmpty(head.Tail).Min();
         if (request.ThroughSequence > pinned)
@@ -375,7 +400,9 @@ public sealed partial class DatabaseEngine
         var head = ReadOutboxHead(view, partition);
         var consumers = ProjectionConsumers(view, partition);
         foreach (var consumer in consumers)
-        { RequireProjectionRetentionCheckpoint(consumer, head); }
+        {
+            RequireProjectionRetentionCheckpoint(consumer, head);
+        }
         return new(head, consumers);
     });
 }

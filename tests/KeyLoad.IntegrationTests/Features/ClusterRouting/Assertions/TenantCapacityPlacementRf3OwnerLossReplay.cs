@@ -20,7 +20,11 @@ internal static class TenantCapacityPlacementRf3OwnerLossReplay
             await seed.Source.PersistPlacementIntentAsync(identity.PersistId, identity.Persist, token)));
         await SqlRf3Protocol.EqualAsync(identity.Pending, (await McpCallerAssertions.SuccessAsync<PlacementIntentV1>(
             await seed.Official.CallAsync(TenantPlacementPublicProtocol.PersistTool,
-                new { commandId = identity.PersistId, request = identity.Persist }, token))).Value);
+                new
+                {
+                    commandId = identity.PersistId,
+                    request = identity.Persist
+                }, token))).Value);
         await SqlRf3Protocol.EqualAsync(completed, await McpCallerAssertions.SdkSuccessAsync(
             await seed.Source.ReadPlacementIntentAsync(new(new(identity.Apply.TenantId, identity.Apply.DatabaseId,
                 identity.Apply.ControlPartition), identity.Apply.IntentId), token)));

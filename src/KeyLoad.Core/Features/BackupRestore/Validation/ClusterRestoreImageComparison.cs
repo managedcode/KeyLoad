@@ -47,18 +47,24 @@ public static class ClusterRestoreImageComparison
         var sourcePrincipal = ClusterRestoreOperatorValidation.RequireAdministrator(admittedSource, secret, clock.GetUtcNow());
         var targetPrincipal = ClusterRestoreOperatorValidation.RequireAdministrator(admittedTarget, secret, clock.GetUtcNow());
         if (sourcePrincipal.Id != targetPrincipal.Id || sourcePrincipal.PolicyEpoch != targetPrincipal.PolicyEpoch)
-        { throw Errors.Fail(ErrorCode.PermissionDenied, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, Invalid);
+        }
         var reset = ClusterRestoreImageCommits.Require(admittedTarget, original, context,
             ClusterRestoreMappingDigest.Compute(mappings), position);
         var sourceFile = targetIdentity.NodeId == context.SourceNodeId && targetIdentity.Incarnation == context.SourceIncarnation;
         var targetFile = targetIdentity.NodeId == context.TargetNodeId && targetIdentity.Incarnation == context.TargetIncarnation;
         if (!sourceFile && !targetFile || reset && !targetFile || targetFile && !targetIdentity.DispatchPaused)
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
         var state = new ClusterRestoreImageState(admittedSource, admittedTarget, original, mappings,
             context, position, reset, limits, work);
         ClusterRestoreImageMetadata.Require(state);
         if (reset)
-        { ClusterRestoreImageOrigins.Require(state); }
+        {
+            ClusterRestoreImageOrigins.Require(state);
+        }
         ClusterRestoreImageRows.Require(state, ClusterRestoreImageMetadata.ChangedKeys(state));
         work.Check();
     }

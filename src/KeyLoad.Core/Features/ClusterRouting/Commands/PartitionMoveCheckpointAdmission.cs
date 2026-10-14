@@ -33,10 +33,14 @@ public sealed partial class DatabaseEngine
             || (original.Stage == PartitionMovePeerStage.Capture) != (body.OriginalCaptureReleaseNonce != Guid.Empty)
             || original.Stage == PartitionMovePeerStage.Capture && body.OriginalCaptureReleaseNonce == body.OriginalRequestNonce
             || (!PartitionMoveGrantValidation.IsLocalControl(original.Stage)) != (body.OriginalRequestNonce != Guid.Empty))
-        { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict);
+        }
         if (PartitionMoveParentStorage.Phase(transaction, header.Partition, header.MoveId,
             body.OriginalPhaseCommandId, Limits.MaxBatchBytes) is not null)
-        { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict);
+        }
         var grant = RequireCheckpointOriginalGrant(transaction, principal, body, header);
         var receiver = grant?.ReceiverOwner ?? header.ControlOwner;
         return new(PartitionMoveProtocol.Version, header.MoveId, header.Partition, body.OriginalPhaseCommandId,
@@ -55,7 +59,9 @@ public sealed partial class DatabaseEngine
         {
             if (original.GrantId is not null || body.OriginalAuthorization is not null
                 || original.Resources.IsDefault || !original.Resources.IsEmpty)
-            { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+            }
             return null;
         }
         var grantId = original.GrantId
@@ -75,7 +81,9 @@ public sealed partial class DatabaseEngine
             || !PhysicalOwnerEntryValidation.SameOwner(grant.ControlOwner, header.ControlOwner)
             || !PhysicalOwnerEntryValidation.SameOwner(authorization.PhysicalOwner, header.ControlOwner)
             || !NativeSerialization.Serialize(grant.Resources).AsSpan().SequenceEqual(NativeSerialization.Serialize(original.Resources)))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
         return grant;
     }
 }

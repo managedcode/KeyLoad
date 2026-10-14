@@ -40,9 +40,13 @@ internal static class RemoteTransferNativeCutLifecycle
         IReadOnlyDictionary<string, NativeCanonicalModelCutWitness> after, CancellationToken token)
     {
         if (before.Count != TwoRf3MembershipProtocol.NodeCount || after.Count != before.Count)
-        { throw new InvalidOperationException(RemoteTransferDistinctProtocol.Missing); }
+        {
+            throw new InvalidOperationException(RemoteTransferDistinctProtocol.Missing);
+        }
         foreach (var node in TwoRf3MembershipProtocol.Nodes)
-        { NativeCanonicalModelCutAssertions.RequireUnchanged(before[node], after[node], token); }
+        {
+            NativeCanonicalModelCutAssertions.RequireUnchanged(before[node], after[node], token);
+        }
     }
 
     internal static async Task RequireTargetAsync(IReadOnlyDictionary<string, NativeCanonicalModelCutWitness> cuts,
@@ -50,6 +54,8 @@ internal static class RemoteTransferNativeCutLifecycle
         RemoteTransferPostAwaitNativeCut committed)
     {
         foreach (var node in TwoRf3MembershipProtocol.Nodes[3..])
-        { await committed.RequireAsync(RemoteTransferNativeCommittedCut.Read(cuts[node], seed, accept, original)); }
+        {
+            await committed.RequireAsync(RemoteTransferNativeCommittedCut.Read(cuts[node], seed, accept, original));
+        }
     }
 }

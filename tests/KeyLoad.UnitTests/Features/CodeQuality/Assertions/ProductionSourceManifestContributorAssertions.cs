@@ -91,7 +91,9 @@ internal static class ProductionSourceManifestContributorAssertions
             await AssertFieldsAsync(actual[index], FieldNames);
             await AssertFieldsAsync(expected[index], FieldNames);
             foreach (var field in FieldNames)
-            { await AssertJsonValueEqualAsync(expected[index].GetProperty(field), actual[index].GetProperty(field)); }
+            {
+                await AssertJsonValueEqualAsync(expected[index].GetProperty(field), actual[index].GetProperty(field));
+            }
         }
     }
 
@@ -146,12 +148,18 @@ internal static class ProductionSourceManifestContributorAssertions
                     row.GetProperty(InstanceNameProperty).GetString() == sourceCase.GetProperty(InstanceNameProperty).GetString());
                 await Assert.That(actual.GetProperty(SuiteProperty).GetString()).IsEqualTo(suite);
                 foreach (var field in FieldNames.Where(name => name != SuiteProperty && name != OperationProperty))
-                { await AssertJsonValueEqualAsync(sourceCase.GetProperty(field), actual.GetProperty(field)); }
+                {
+                    await AssertJsonValueEqualAsync(sourceCase.GetProperty(field), actual.GetProperty(field));
+                }
                 var methodName = sourceCase.GetProperty(MethodNameProperty).GetString()!;
                 if (StrengthenedQueryOperations.TryGetValue(methodName, out var operation))
-                { await Assert.That(actual.GetProperty(OperationProperty).GetString()).IsEqualTo(operation); }
+                {
+                    await Assert.That(actual.GetProperty(OperationProperty).GetString()).IsEqualTo(operation);
+                }
                 else
-                { await AssertJsonValueEqualAsync(sourceCase.GetProperty(OperationProperty), actual.GetProperty(OperationProperty)); }
+                {
+                    await AssertJsonValueEqualAsync(sourceCase.GetProperty(OperationProperty), actual.GetProperty(OperationProperty));
+                }
             }
         }
     }
@@ -179,7 +187,9 @@ internal static class ProductionSourceManifestContributorAssertions
             await Assert.That(value).IsNotEmpty();
             await Assert.That(seen.Add(value!)).IsTrue();
             if (allowed is not null)
-            { await Assert.That(allowed.Contains(value!)).IsTrue(); }
+            {
+                await Assert.That(allowed.Contains(value!)).IsTrue();
+            }
         }
     }
 
@@ -191,7 +201,10 @@ internal static class ProductionSourceManifestContributorAssertions
     {
         await Assert.That(actual.ValueKind).IsEqualTo(expected.ValueKind);
         if (expected.ValueKind == JsonValueKind.String)
-        { await Assert.That(actual.GetString()).IsEqualTo(expected.GetString()); return; }
+        {
+            await Assert.That(actual.GetString()).IsEqualTo(expected.GetString());
+            return;
+        }
         var expectedItems = expected.EnumerateArray().Select(item => item.GetString()).ToArray();
         var actualItems = actual.EnumerateArray().Select(item => item.GetString()).ToArray();
         await Assert.That(actualItems).IsEquivalentTo(expectedItems, TUnit.Assertions.Enums.CollectionOrdering.Matching);

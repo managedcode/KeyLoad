@@ -65,7 +65,9 @@ internal static class PartitionQueryExecution
         {
             budget.Check();
             results.Add(executor.Execute(principalId, plan.Leaves[index], normalized with
-            { Partition = plan.Leaves[index].Partition }, grants[index]));
+            {
+                Partition = plan.Leaves[index].Partition
+            }, grants[index]));
         }
         var result = PartitionQueryMerge.Complete(plan, results.MoveToImmutable(), identity, database.Limits, budget, engine.Execution);
         if (measureInternalResult)

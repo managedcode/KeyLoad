@@ -43,7 +43,9 @@ internal static class ControlledDocumentNativeCommandStages
             ?? throw new InvalidOperationException(PartitionMoveProtocol.MissingAuthority);
         var body = record.TargetBody;
         if (body.IsEmpty)
-        { throw new InvalidOperationException(PartitionMoveProtocol.Invalid); }
+        {
+            throw new InvalidOperationException(PartitionMoveProtocol.Invalid);
+        }
         var grantId = ControlledDocumentTechnicalIdentity.Derive(original, ControlledDocumentTechnicalIdentity.Authorize);
         var authorized = await phases.ApplyAsync(grantId, context, PartitionMovePeerStage.ControlAuthorize,
             new PartitionMoveAuthorizeBody(grantId, record.EffectId, context.OperatorPrincipalId,

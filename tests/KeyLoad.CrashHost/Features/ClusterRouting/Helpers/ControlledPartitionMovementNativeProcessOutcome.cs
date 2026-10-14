@@ -26,10 +26,14 @@ internal static class ControlledPartitionMovementNativeProcessOutcome
             Math.Min(limits.MaxBatchMutations, limits.MaxScanRecords), limits.MaxBatchBytes);
         var maximumBytes = Math.Min(limits.MaxBatchBytes, limits.MaxQueryReadBytes);
         if (NativeSerialization.Measure(query) > maximumBytes)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, PartitionMovementProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, PartitionMovementProtocol.Unavailable);
+        }
         var bytes = NativeSerialization.Serialize(query);
         if (bytes.Length > maximumBytes)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, PartitionMovementProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, PartitionMovementProtocol.Unavailable);
+        }
         PartitionMovementAuthenticatedReply? reply = null;
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>

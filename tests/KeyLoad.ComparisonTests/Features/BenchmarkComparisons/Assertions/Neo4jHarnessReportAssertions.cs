@@ -24,7 +24,11 @@ internal static class Neo4jHarnessReportAssertions
 
     public static async Task VerifyMismatchRunAsync(ComparisonReport report, Neo4jHarnessMismatchObserver observer)
     {
-        var expectedOptions = Neo4jHarnessConstants.SmallOptions() with { Warmup = 0, Repetitions = 1 };
+        var expectedOptions = Neo4jHarnessConstants.SmallOptions() with
+        {
+            Warmup = 0,
+            Repetitions = 1
+        };
         await Assert.That(observer.CorruptedBeforePointRead && observer.RestoredBeforeDocumentWrite).IsTrue();
         await Assert.That(report.SchemaVersion == 3 && report.Options == expectedOptions).IsTrue();
         await Assert.That(report.Cases.Length == Neo4jHarnessConstants.TotalCaseCount / Neo4jHarnessConstants.SmallRepetitions).IsTrue();

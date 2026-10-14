@@ -14,7 +14,9 @@ internal static class SeriesPortableBackupAssertions
             var page = view.Scan(SampleReadKeys.Prefix(partition, SeriesPortableBackupSeed.Set,
                 SeriesPortableBackupSeed.Series), MaximumSampleRows);
             if (page.HasMore)
-            { throw new InvalidOperationException("The portable sample fixture exceeded its row bound."); }
+            {
+                throw new InvalidOperationException("The portable sample fixture exceeded its row bound.");
+            }
             return page.Records.Select(row => Convert.ToHexString(row.Key.Span) + ":" +
                 Convert.ToHexString(row.Value.Span)).ToArray();
         });
@@ -80,7 +82,9 @@ internal static class SeriesPortableBackupAssertions
         var offset = 0;
         while (offset < Math.Min(expectedBytes.Length, actualBytes.Length)
             && expectedBytes[offset] == actualBytes[offset])
-        { offset++; }
+        {
+            offset++;
+        }
         return $"Series count expected={expected.Length} actual={actual.Length}; bytes expected={expectedBytes.Length} actual={actualBytes.Length} firstDifference={offset}; "
             + $"series={series} event={events} timestampExact={timestamps} valueBits={values} sequence={sequences} tags={tags}; "
             + $"expectedSeriesAliases={expectedSeriesAliases} actualSeriesAliases={actualSeriesAliases} expectedTagsAliases={expectedTagsAliases} actualTagsAliases={actualTagsAliases}.";
@@ -119,7 +123,9 @@ internal static class SeriesPortableBackupAssertions
         (ReplicatedOperation Operation, OperationResult Result)[] operations, CancellationToken token)
     {
         foreach (var original in operations)
-        { await BackupPersistedPolicyAssertions.ReplayAsync(database, original.Operation, original.Result, token); }
+        {
+            await BackupPersistedPolicyAssertions.ReplayAsync(database, original.Operation, original.Result, token);
+        }
     }
 
     internal static async Task SourceOutcomesAsync(BackupIndexedDocumentDedupFixture fixture, byte[][] originals,

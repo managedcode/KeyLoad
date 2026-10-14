@@ -20,11 +20,15 @@ internal static class TenantPlacementPolicyStorage
         view.ReadValue(PolicyKey(tenant, database), bytes =>
         {
             if (bytes.Length > maximumBytes)
-            { throw Errors.Fail(ErrorCode.Corruption, TenantPlacementPolicyProtocol.Malformed); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, TenantPlacementPolicyProtocol.Malformed);
+            }
             result = NativeSerialization.Deserialize<TenantPlacementPolicyV1>(bytes);
             TenantPlacementPolicyValidation.Require(result, ErrorCode.Corruption);
             if (result.TenantId != tenant || result.DatabaseId != database)
-            { throw Errors.Fail(ErrorCode.Corruption, TenantPlacementPolicyProtocol.Malformed); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, TenantPlacementPolicyProtocol.Malformed);
+            }
         });
         return result;
     }
@@ -40,7 +44,9 @@ internal static class TenantPlacementPolicyStorage
     {
         var bytes = NativeSerialization.Serialize(value);
         if (bytes.Length > maximumBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, TenantPlacementPolicyProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, TenantPlacementPolicyProtocol.Invalid);
+        }
         return bytes;
     }
 }

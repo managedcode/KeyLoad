@@ -21,7 +21,10 @@ internal sealed class NativeTextMaintenanceFlowObservation
         var sample = Begin(phase);
         var completed = false;
         try
-        { await operation().ConfigureAwait(false); completed = true; }
+        {
+            await operation().ConfigureAwait(false);
+            completed = true;
+        }
         finally { End(sample, completed); }
     }
 

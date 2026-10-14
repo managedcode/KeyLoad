@@ -15,7 +15,9 @@ internal static class BlobCommitCutPayload
     {
         var bytes = new byte[BlobCommitCutProtocol.MultipartLength];
         for (var i = FirstByteOffset; i < bytes.Length; i++)
-        { bytes[i] = (byte)(i % PayloadCycleLength); }
+        {
+            bytes[i] = (byte)(i % PayloadCycleLength);
+        }
         return bytes;
     }
 }

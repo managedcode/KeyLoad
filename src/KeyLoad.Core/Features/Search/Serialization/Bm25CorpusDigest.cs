@@ -19,8 +19,13 @@ internal static class Bm25CorpusDigest
         long maximumBytes)
     {
         if (Measure(current, placement) > maximumBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, Bm25CorpusProtocol.Capacity); }
-        var bytes = NativeSerialization.Serialize(current with { PayloadDigest = string.Empty });
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, Bm25CorpusProtocol.Capacity);
+        }
+        var bytes = NativeSerialization.Serialize(current with
+        {
+            PayloadDigest = string.Empty
+        });
         byte[]? placementBytes = null;
         try
         {
@@ -35,7 +40,9 @@ internal static class Bm25CorpusDigest
         {
             CryptographicOperations.ZeroMemory(bytes);
             if (placementBytes is not null)
-            { CryptographicOperations.ZeroMemory(placementBytes); }
+            {
+                CryptographicOperations.ZeroMemory(placementBytes);
+            }
         }
     }
 
@@ -49,15 +56,22 @@ internal static class Bm25CorpusDigest
     internal static string Resource(ResourceDefinition resource, long maximumBytes)
     {
         if (checked(NativeSerialization.Measure(resource) + SHA256.HashSizeInBytes) > maximumBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, Bm25CorpusProtocol.Capacity); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, Bm25CorpusProtocol.Capacity);
+        }
         var bytes = NativeSerialization.Serialize(resource);
         try
-        { return Convert.ToHexStringLower(SHA256.HashData(bytes)); }
+        {
+            return Convert.ToHexStringLower(SHA256.HashData(bytes));
+        }
         finally { CryptographicOperations.ZeroMemory(bytes); }
     }
 
     private static long Measure(Bm25CorpusCurrentV1 current, AtomicPartitionPlacementResolution placement)
-        => checked(NativeSerialization.Measure(current with { PayloadDigest = string.Empty })
+        => checked(NativeSerialization.Measure(current with
+        {
+            PayloadDigest = string.Empty
+        })
             + NativeSerialization.Measure(placement) + SourceDigestDomainBytes.Length
             + SHA256.HashSizeInBytes);
 }

@@ -147,12 +147,22 @@ internal sealed class RedisReplicaDiagnostics(IOptions<NativeComparisonDiagnosti
 
     private static string? Host(EndPoint endpoint)
     {
-        var host = endpoint switch { DnsEndPoint dns => dns.Host, IPEndPoint ip => ip.Address.ToString(), _ => null };
+        var host = endpoint switch
+        {
+            DnsEndPoint dns => dns.Host,
+            IPEndPoint ip => ip.Address.ToString(),
+            _ => null
+        };
         return ValidHost(host) ? host : null;
     }
 
     private static int? Port(EndPoint endpoint)
-        => endpoint switch { DnsEndPoint dns => ValidPort(dns.Port), IPEndPoint ip => ValidPort(ip.Port), _ => null };
+        => endpoint switch
+        {
+            DnsEndPoint dns => ValidPort(dns.Port),
+            IPEndPoint ip => ValidPort(ip.Port),
+            _ => null
+        };
 
     private static int? ValidPort(int value) => value is >= MinimumPort and <= MaximumPort ? value : null;
 }

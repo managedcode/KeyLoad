@@ -17,7 +17,10 @@ internal static class ClusterRestoreRf3SecondaryPartition
     internal static async Task<ClusterRestoreRf3SecondaryState> SeedAsync(TwoRf3MembershipWave source,
         PartitionMovementPublicParentRf3Seed seed, CancellationToken cancellationToken)
     {
-        var partition = seed.Partition with { PartitionKey = Guid.NewGuid().ToString(ClusterRestoreRf3Protocol.ArchiveFormat) };
+        var partition = seed.Partition with
+        {
+            PartitionKey = Guid.NewGuid().ToString(ClusterRestoreRf3Protocol.ArchiveFormat)
+        };
         var command = new CommandRequest(Guid.NewGuid(), partition,
             [new PutDocument(RelationalSqlRf3Tokens.Documents, DocumentId, DocumentJson)]);
         return await ClusterRestoreRf3CallerOwner.RunAsync(source.Application, TwoRf3MembershipProtocol.Node1,
@@ -51,7 +54,9 @@ internal static class ClusterRestoreRf3SecondaryPartition
         var effective = cuts[FirstOwnerIndex].Placement.PhysicalShardId;
         var index = Array.FindIndex(target.Mappings.ToArray(), mapping => mapping.Source.PhysicalShardId == effective);
         if (index < FirstOwnerIndex)
-        { throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid); }
+        {
+            throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid);
+        }
         var node = index == FirstOwnerIndex ? TwoRf3MembershipProtocol.Node1 : TwoRf3MembershipProtocol.Node4;
         _ = await ClusterRestoreRf3CallerOwner.RunAsync(target.Application, node, actualCredential,
             async (sdk, official) =>

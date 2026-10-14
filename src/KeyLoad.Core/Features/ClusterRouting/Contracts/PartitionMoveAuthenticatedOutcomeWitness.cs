@@ -1,7 +1,10 @@
 namespace KeyLoad.Core.Features.ClusterRouting.Contracts;
 
 [Orleans.GenerateSerializer, Orleans.Alias(PartitionMoveParentContractNames.PartitionMoveOutcomeProofPurposeAlias)]
-internal enum PartitionMoveOutcomeProofPurpose { EffectReply = 1, OutcomeReadReply = 2 }
+internal enum PartitionMoveOutcomeProofPurpose
+{
+    EffectReply = 1, OutcomeReadReply = 2
+}
 
 /// <summary>Exact signed full native outcome under its original admitted effect or independent outcome-read MAC domain.</summary>
 [Orleans.GenerateSerializer, Orleans.Alias(PartitionMoveParentContractNames.PartitionMoveOutcomeWitnessAlias)]

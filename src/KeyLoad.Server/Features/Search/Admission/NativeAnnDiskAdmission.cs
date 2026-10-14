@@ -18,15 +18,21 @@ internal static class NativeAnnDiskAdmission
         {
             var directory = NativeAnnPaths.Generation(root, leaf);
             if (!Directory.Exists(directory))
-            { continue; }
+            {
+                continue;
+            }
             foreach (var path in Directory.EnumerateFiles(directory))
-            { bytes = checked(bytes + new FileInfo(path).Length); }
+            {
+                bytes = checked(bytes + new FileInfo(path).Length);
+            }
         }
         var overhead = checked((long)ReceiptReservations * options.MaximumManifestBytes
             + new FileInfo(Path.Combine(root, NativeAnnProtocol.RootLock)).Length);
         var remaining = options.MaximumDiskBytes - bytes - overhead;
         if (remaining < MinimumFileBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, NativeAnnProtocol.Bound); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, NativeAnnProtocol.Bound);
+        }
         return NativeAnnStorageOptionsFactory.ForFile(storage, remaining);
     }
 }

@@ -14,7 +14,9 @@ public sealed partial class DatabaseEngine
     {
         var key = EdgeKey(original.SourcePartition, graph, edgeId);
         if (next is not null)
-        { PersistCanonicalEdge(tx, original.SourcePartition, original.Upsert!, key, previous, next); }
+        {
+            PersistCanonicalEdge(tx, original.SourcePartition, original.Upsert!, key, previous, next);
+        }
         else
         {
             RemoveAdjacency(tx, original.SourcePartition, graph, previous!);

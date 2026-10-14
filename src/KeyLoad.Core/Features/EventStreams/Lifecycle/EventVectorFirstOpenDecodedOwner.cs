@@ -6,7 +6,10 @@ namespace KeyLoad.Core;
 internal sealed class EventVectorFirstOpenDecodedOwner : IDisposable
 {
     private readonly EventVectorCoverageWitness witness;
-    internal EventVectorCoverageSemanticIdentity Projection { get; }
+    internal EventVectorCoverageSemanticIdentity Projection
+    {
+        get;
+    }
 
     internal EventVectorFirstOpenDecodedOwner(EventVectorCoverageWitness witness)
     {
@@ -23,7 +26,9 @@ internal sealed class EventVectorFirstOpenDecodedOwner : IDisposable
     {
         Clear(Projection.OriginalEncodedEntries);
         foreach (var capture in Projection.OriginalCaptureBytes)
-        { Clear(capture); }
+        {
+            Clear(capture);
+        }
         ClearWitness();
     }
 
@@ -32,9 +37,13 @@ internal sealed class EventVectorFirstOpenDecodedOwner : IDisposable
         Clear(witness.OriginalSemanticDigest);
         Clear(witness.OriginalSemanticProjectionBytes);
         foreach (var packet in witness.OriginalPackets)
-        { ClearPacket(packet); }
+        {
+            ClearPacket(packet);
+        }
         foreach (var packet in witness.FreshPackets)
-        { ClearPacket(packet); }
+        {
+            ClearPacket(packet);
+        }
     }
 
     private static void ClearPacket(EventVectorCoveragePacket packet)

@@ -89,7 +89,11 @@ public sealed partial class DatabaseEngine
         var payload = Authorization.Project(principal, resource.FieldPolicies, record.Definition.PayloadJson, out var payloadOmitted);
         var headers = Authorization.Project(principal, resource.HeaderPolicies, record.Definition.HeadersJson, out var headerOmitted);
         var redactedFields = ProjectRedactedPaths(payloadOmitted, headerOmitted);
-        var definition = record.Definition with { PayloadJson = payload, HeadersJson = headers };
+        var definition = record.Definition with
+        {
+            PayloadJson = payload,
+            HeadersJson = headers
+        };
         return new(definition, record.Revision, record.Generation, record.NextOrdinal, record.Cancelled,
             redactedFields.Length != RecurringSagaInspectionEmptyElementCount, redactedFields);
     }

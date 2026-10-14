@@ -29,9 +29,13 @@ internal static class DocumentPatchAtomicityAssertions
         await Assert.That(stored.Error).IsEqualTo(result.Error);
         await Assert.That(stored.SafeDetail).IsEqualTo(result.SafeDetail);
         if (result.Error is null)
-        { await BytesAsync(NativeSerialization.Serialize(result.Get<CommitReceipt>()), NativeSerialization.Serialize(stored.Get<CommitReceipt>())); }
+        {
+            await BytesAsync(NativeSerialization.Serialize(result.Get<CommitReceipt>()), NativeSerialization.Serialize(stored.Get<CommitReceipt>()));
+        }
         else
-        { await Assert.That(stored.NativeValue).IsNull(); }
+        {
+            await Assert.That(stored.NativeValue).IsNull();
+        }
         var entryBytes = NativeSerialization.Serialize(original);
         var resultBytes = NativeSerialization.Serialize(result);
         await BytesAsync(resultBytes, NativeSerialization.Serialize(owner.Submit(operation)));

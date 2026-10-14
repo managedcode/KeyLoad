@@ -23,7 +23,9 @@ internal static class ClusterBackupOwnerArchive
         var archiveId = request.CaptureId.ToString(GuidFormat);
         var directory = Path.Combine(partition.DirectoryPath, DirectoryName, archiveId);
         if (database.Store is not INativeCatalogBackupStore owner)
-        { throw Errors.Fail(ErrorCode.UnsupportedCapability, InvalidArchive); }
+        {
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, InvalidArchive);
+        }
         ClusterBackupOwnerCut? cut = null;
         var captured = owner.CaptureOrReadCatalogBackup(directory,
             view => database.AuthorizeClusterBackupOwner(work.CreateView(view), principalId, capability, work),
@@ -31,7 +33,9 @@ internal static class ClusterBackupOwnerArchive
                 principalId, request.CaptureId, position, identity, work)),
             original => cut = RequireCaptured(original, request), work.Cancellation);
         if (cut is null)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidArchive); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidArchive);
+        }
         database.Store.Read(view =>
         {
             database.AuthorizeClusterBackupOwner(work.CreateView(view), principalId, capability, work);
@@ -52,7 +56,9 @@ internal static class ClusterBackupOwnerArchive
             || cut.CaptureId != request.CaptureId || cut.SourceNodeId != request.ExpectedNodeId
             || cut.StorePosition != captured.Position
             || !PhysicalOwnerEntryValidation.SameOwner(cut.Owner, request.ExpectedOwner))
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidArchive); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidArchive);
+        }
         return cut;
     }
 }

@@ -12,7 +12,9 @@ public sealed partial class DatabaseEngine
         RemoteTransferIntentClaims intent)
     {
         if (record.Repairs is not { } state)
-        { return; }
+        {
+            return;
+        }
         RemoteTransferRepairStateValidation.Require(state);
         foreach (var reference in state.History)
         {
@@ -26,7 +28,9 @@ public sealed partial class DatabaseEngine
                 || claims.CommandFingerprint != reference.Fingerprint || claims.OutcomeDigest != reference.OutcomeDigest
                 || claims.OwnerCut.Incarnation != intent.Incarnation
                 || reference.CapacityGeneration > (record.Attempts?.Generation ?? RemoteTransferRepairProtocol.InitialGeneration))
-            { throw Errors.Fail(ErrorCode.Corruption, RemoteTransferRepairProtocol.Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, RemoteTransferRepairProtocol.Invalid);
+            }
             RequireRetainedRemoteTransferRepairOutcome(view, claims);
         }
     }
@@ -42,6 +46,8 @@ public sealed partial class DatabaseEngine
             || outcome.PolicyEpoch != claims.OriginalPolicyEpoch || outcome.Fingerprint != claims.CommandFingerprint
             || outcome.Result is null || outcome.Result.Error != ErrorCode.PermissionDenied || outcome.Result.Json is not null
             || outcome.Result.NativeValue is not null || Convert.ToHexString(SHA256.HashData(bytes)) != claims.OutcomeDigest)
-        { throw Errors.Fail(ErrorCode.Corruption, RemoteTransferRepairProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, RemoteTransferRepairProtocol.Invalid);
+        }
     }
 }

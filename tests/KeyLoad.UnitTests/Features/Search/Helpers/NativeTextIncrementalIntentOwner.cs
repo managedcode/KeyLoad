@@ -20,7 +20,9 @@ internal static class NativeTextIncrementalIntentOwner
         finally
         {
             if (runtime is not null)
-            { await ServerFailureObserver.ObserveAsync(() => runtime.DisposeAsync().AsTask(), failures); }
+            {
+                await ServerFailureObserver.ObserveAsync(() => runtime.DisposeAsync().AsTask(), failures);
+            }
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }

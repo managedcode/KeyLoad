@@ -18,8 +18,14 @@ internal sealed class SiteStaticFileHost : IAsyncDisposable
         serving = ServeRequests(cancellation.Token);
     }
 
-    public string Root { get; }
-    public string BaseUrl { get; }
+    public string Root
+    {
+        get;
+    }
+    public string BaseUrl
+    {
+        get;
+    }
 
     public static SiteStaticFileHost Start(string root)
     {

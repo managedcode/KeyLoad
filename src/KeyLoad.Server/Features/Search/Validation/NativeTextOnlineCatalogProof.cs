@@ -28,7 +28,10 @@ internal sealed class NativeTextOnlineCatalogProof : IDisposable
         Catalog = catalog;
     }
 
-    internal NativeTextOnlineCatalog Catalog { get; }
+    internal NativeTextOnlineCatalog Catalog
+    {
+        get;
+    }
 
     internal static NativeTextOnlineCatalogProof Capture(DatabaseEngine database, string principalId,
         OnlineTextIndexMaintenanceRequest request, NativeTextOnlineGeneration generation,
@@ -112,7 +115,9 @@ internal sealed class NativeTextOnlineCatalogProof : IDisposable
         var current = ReadCurrent(database, principalId, request, budget, clock);
         budget.ChargeBytes(NativeSerialization.Measure(current));
         if (!NativeSerialization.Serialize(current).AsSpan().SequenceEqual(immutableCurrent))
-        { throw NativeTextErrors.Mismatch(); }
+        {
+            throw NativeTextErrors.Mismatch();
+        }
         budget.Check();
     }
 
@@ -121,7 +126,9 @@ internal sealed class NativeTextOnlineCatalogProof : IDisposable
         retained.RequireActive();
         budget.ChargeBytes(NativeSerialization.Measure(catalog));
         if (!NativeSerialization.Serialize(catalog).AsSpan().SequenceEqual(immutableCatalog))
-        { throw NativeTextErrors.Mismatch(); }
+        {
+            throw NativeTextErrors.Mismatch();
+        }
         budget.Check();
     }
 
@@ -141,7 +148,9 @@ internal sealed class NativeTextOnlineCatalogProof : IDisposable
         budget.ChargeBytes(NativeSerialization.Measure(current));
         budget.ChargeBytes(NativeSerialization.Measure(expected));
         if (!NativeSerialization.Serialize(current).AsSpan().SequenceEqual(NativeSerialization.Serialize(expected)))
-        { throw NativeTextErrors.Mismatch(); }
+        {
+            throw NativeTextErrors.Mismatch();
+        }
     }
 
     private static NativeTextSeedCapture CaptureSeed(DatabaseEngine database, string principalId,
@@ -158,7 +167,9 @@ internal sealed class NativeTextOnlineCatalogProof : IDisposable
             fresh = native.ReadSeed();
         }, failures);
         if (native is not null)
-        { ServerFailureObserver.Observe(native.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(native.Dispose, failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
         return fresh ?? throw NativeTextErrors.Corrupt();
     }

@@ -23,7 +23,9 @@ internal static class NativeAnnPaths
             throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Ownership);
         }
         if (Directory.Exists(path))
-        { RequireDirectory(path); }
+        {
+            RequireDirectory(path);
+        }
         return path;
     }
 
@@ -64,6 +66,8 @@ internal static class NativeAnnPaths
             count++;
         }
         if (count != NativeAnnFileBounds.FilesPerGeneration)
-        { throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Corrupt); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Corrupt);
+        }
     }
 }

@@ -11,7 +11,9 @@ internal static class QueueReadyAuthorityColdContinuation
     {
         var receipts = new List<(DeliveryCommand Command, OperationResult Receipt)>();
         if (expired)
-        { await Assert.That(original.Deliveries).IsEmpty(); }
+        {
+            await Assert.That(original.Deliveries).IsEmpty();
+        }
         else
         {
             var delivery = await Assert.That(original.Deliveries).HasSingleItem();

@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ResourceExecution.Execution;
-using KeyLoad.Orleans;
 using KeyLoad.Query;
 using KeyLoad.Query.Features.QueryExecution;
 using KeyLoad.Server.Features.ClusterRouting;
@@ -37,16 +37,26 @@ internal sealed class RemotePartitionQueryLeafRead(OrleansNode node, PartitionHo
             MaxExaminedRecords = grant.RemainingRecords - checked(metadataRecords * MetadataPassesRemaining)
         };
         if (child.MaxReadBytes < EmptyGrant || child.MaxExaminedRecords < EmptyGrant)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, FenceChanged); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, FenceChanged);
+        }
         var local = PhysicalOwnerConfiguredTuples.Local(Options, partition);
         var request = new PartitionQueryOwnedLeafRequest(child, fence.Destination.Owner, fence.Tenant);
         var call = PrepareCall(envelope, request, fence, local);
         var wireBytes = call is null ? NativeSerialization.Measure(request) : NativeSerialization.Measure(call);
         child = PartitionQueryParallelRetention.Child(child, wireBytes);
-        request = request with { Plan = child };
-        call = call is null ? null : call with { QueryLeaf = request };
+        request = request with
+        {
+            Plan = child
+        };
+        call = call is null ? null : call with
+        {
+            QueryLeaf = request
+        };
         if ((call is null ? NativeSerialization.Measure(request) : NativeSerialization.Measure(call)) > wireBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, FenceChanged); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, FenceChanged);
+        }
         return new(actualToken => RunAsync(envelope.ExpiresAt, principalId, request, call, actualToken),
             (actual, actualToken) =>
             {
@@ -64,10 +74,14 @@ internal sealed class RemotePartitionQueryLeafRead(OrleansNode node, PartitionHo
         PartitionQueryOwnedLeafRequest request, RemoteDocumentReadFenceV1 fence, RegisteredPhysicalOwnerV1 local)
     {
         if (fence.Destination.Owner.PhysicalShardId == local.Owner.PhysicalShardId)
-        { return null; }
+        {
+            return null;
+        }
         if (!KeyLoad.Core.Features.ClusterRouting.Validation.PhysicalOwnerEntryValidation.Same(fence.Destination,
             PhysicalOwnerConfiguredTuples.Destination(Options, partition)))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, FenceChanged); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, FenceChanged);
+        }
         var discovery = node.Discovery?.Read() ?? throw Errors.Fail(ErrorCode.OwnershipLost, FenceChanged);
         return new(RemoteDocumentProtocol.Version, Guid.NewGuid(), Guid.NewGuid().ToString(NonceFormat),
             envelope.ExpiresAt, partition.Configuration.LocalId, discovery.SiloAddress, local.Owner, fence, null, request);
@@ -86,7 +100,10 @@ internal sealed class RemotePartitionQueryLeafRead(OrleansNode node, PartitionHo
     {
         await partition.Coordinator.ReadBarrierAsync(token).ConfigureAwait(false);
         foreach (var item in original)
-        { token.ThrowIfCancellationRequested(); RequireSame(item.Fence, Capture(principalId, item.Plan, item.Grant)); }
+        {
+            token.ThrowIfCancellationRequested();
+            RequireSame(item.Fence, Capture(principalId, item.Plan, item.Grant));
+        }
     }
 
     private PartitionQuerySourceFence Capture(string principalId, PartitionQueryLeafPlanV1 plan,
@@ -102,7 +119,9 @@ internal sealed class RemotePartitionQueryLeafRead(OrleansNode node, PartitionHo
     private static void RequireSame(PartitionQuerySourceFence expected, PartitionQuerySourceFence actual)
     {
         if (!JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected)))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, FenceChanged); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, FenceChanged);
+        }
     }
 
     private async Task<PartitionQueryLeafResultV1> ReadLocalAsync(PartitionQueryOwnedLeafRequest request,

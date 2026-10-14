@@ -12,10 +12,17 @@ internal static class BlobRowCreatorPublicPolicy
         var identity = await McpPersistedIdentity.CreateAsync(fixture, blob.Partition, blob.Resource,
             Capability.BlobRead | Capability.BlobWrite, token);
         var expected = identity.Principal with
-        { OwnerId = "blob-owner-" + Guid.NewGuid().ToString("N"), RestrictRows = true, PolicyEpoch = 2L };
+        {
+            OwnerId = "blob-owner-" + Guid.NewGuid().ToString("N"),
+            RestrictRows = true,
+            PolicyEpoch = 2L
+        };
         var actual = await PersistAsync(administrator, expected, token);
         await Assert.That(actual.ClusterAdministrator).IsFalse();
-        return identity with { Principal = actual };
+        return identity with
+        {
+            Principal = actual
+        };
     }
 
     internal static async Task<PrincipalRecord> PersistAsync(RequestCqrsRf3Callers administrator,

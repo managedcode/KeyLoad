@@ -13,6 +13,8 @@ internal static class RequestCqrsReplicaLogSourceMarkerValidation
             && marker.SiloAddress == actualSiloAddress && marker.Phase == RequestCqrsProbePhase.BeforeSubmit
             && marker.Outcome == RequestCqrsProbeOutcome.Observed);
         if (count != SingleSourceMarker)
-        { throw new InvalidOperationException(RequestCqrsProbeProtocol.InvalidFiles); }
+        {
+            throw new InvalidOperationException(RequestCqrsProbeProtocol.InvalidFiles);
+        }
     }
 }

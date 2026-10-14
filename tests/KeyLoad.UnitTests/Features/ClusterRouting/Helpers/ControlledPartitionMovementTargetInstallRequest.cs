@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
@@ -36,10 +36,14 @@ internal static class ControlledPartitionMovementTargetInstallRequest
             ?? throw new InvalidOperationException("The actual original A target-install grant is absent.");
         if (grant.GrantId != ControlledPartitionMovementTargetPhaseIds.InstallGrant(originalOrdinal)
             || grant.PhaseCommandId != ControlledPartitionMovementTargetPhaseIds.InstallCommand(originalOrdinal))
-        { throw new InvalidOperationException("The original target-install grant identity does not match."); }
+        {
+            throw new InvalidOperationException("The original target-install grant identity does not match.");
+        }
         var envelope = Envelope(phase, phase.Stage, phase.PageOrdinal, originalExpiry, phase.Body)
             with
-        { Grant = grant };
+        {
+            Grant = grant
+        };
         return new(grant.PhaseCommandId, envelope, actualAuthorization.Journal,
             corpus.Control.Owner.VoterIds.First(), callerAddress, PartitionMovementTransportAction.Apply,
             Guid.Empty, ControlOrdinal);

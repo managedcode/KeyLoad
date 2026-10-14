@@ -17,7 +17,9 @@ internal static class BlobPriorPublicationLifetime
         await BlobPriorPublicationImage.ReceiptAsync(owner, result.Receipt, reclaim.Id, seed.Blob);
         await BlobPriorPublicationAssertions.QuotasAsync(owner, seed, 0, 0);
         foreach (var family in new[] { "blob-state-v1", "blob-part-v1", "blob-partmeta-v1" })
-        { await Assert.That(owner.Store.Read(view => view.ReadOwnedValue(BlobPriorPublicationOracle.Key(family, seed)))).IsNull(); }
+        {
+            await Assert.That(owner.Store.Read(view => view.ReadOwnedValue(BlobPriorPublicationOracle.Key(family, seed)))).IsNull();
+        }
         await Assert.That(new BlobStorageOperations(owner).UploadInfo("root", new(seed.Blob, seed.Upload))).IsNull();
         await BlobPriorPublicationImage.ExactAsync(new BlobStorageOperations(owner).Metadata("root", new(seed.Blob)), tombstone);
         await BlobPriorPublicationImage.ReplayAsync(owner, reclaimed);
@@ -41,7 +43,10 @@ internal static class BlobPriorPublicationLifetime
         await BlobPriorPublicationImage.ReceiptAsync(owner, deleted.Result.Get<BlobCommitResult<BlobMetadata>>().Receipt, delete.Id, seed.Blob);
         await BlobPriorPublicationImage.ExactAsync(new BlobStorageOperations(owner).Metadata("root", new(seed.Blob)), tombstone);
         await BlobPriorPublicationImage.ExactAsync(owner.Store.Read(view => view.GetRecord<BlobState>(
-            BlobPriorPublicationOracle.Key("blob-state-v1", seed))), seed.State with { Retired = true });
+            BlobPriorPublicationOracle.Key("blob-state-v1", seed))), seed.State with
+            {
+                Retired = true
+            });
         await BlobPriorPublicationImage.ExactAsync(owner.Store.Read(view => view.GetRecord<BlobHead>(
             BlobPriorPublicationOracle.Key("blob-head-v1", seed))), new BlobHead(1, owner.Store.Identity.Incarnation, tombstone));
         await Assert.That(owner.Store.Read(view => view.ReadOwnedValue(BlobPriorPublicationOracle.Key("blob-part-v1", seed)))!

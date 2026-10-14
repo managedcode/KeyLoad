@@ -26,7 +26,10 @@ internal sealed class ReplicaTermMetadataFixture : IDisposable
     internal const string LargeDocumentSuffix = "\"}";
     internal const string TestDirectoryPrefix = "keyload-replica-term-metadata-";
     internal const int LargeDocumentCharacters = 1_000_000;
-    internal string DirectoryPath { get; }
+    internal string DirectoryPath
+    {
+        get;
+    }
     internal ZoneTreeStore Store => lifetime.BorrowReplica();
     internal DurableReplicaLog Log => lifetime.BorrowLog();
     internal DatabaseEngine Database => lifetime.Database;
@@ -112,7 +115,9 @@ internal sealed class ReplicaTermMetadataFixture : IDisposable
     public void Dispose()
     {
         if (disposed)
-        { return; }
+        {
+            return;
+        }
         disposed = true;
         List<Exception> failures = [];
         for (var ownerIndex = subordinateOwners.Count - 1; ownerIndex >= 0; ownerIndex--)
@@ -120,9 +125,13 @@ internal sealed class ReplicaTermMetadataFixture : IDisposable
             AttemptOwner(subordinateOwners[ownerIndex], failures);
         }
         try
-        { lifetime.Dispose(); }
+        {
+            lifetime.Dispose();
+        }
         catch (AggregateException wrapper)
-        { ReplicaMaterializerLifecycleErrors.AddWrapped(wrapper, failures); }
+        {
+            ReplicaMaterializerLifecycleErrors.AddWrapped(wrapper, failures);
+        }
         ReplicaMaterializerLifecycleErrors.Attempt(() => Directory.Delete(DirectoryPath, true), failures);
         ReplicaMaterializerLifecycleErrors.Throw(failures);
     }

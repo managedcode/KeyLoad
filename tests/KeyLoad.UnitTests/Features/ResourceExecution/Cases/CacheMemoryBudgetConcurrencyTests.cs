@@ -58,7 +58,11 @@ internal sealed class CacheMemoryBudgetConcurrencyTests
     public async Task ConcurrentRepeatedDisposalReleasesOneReservationExactlyOnce()
     {
         const int Disposers = 32;
-        using var budget = new CacheMemoryBudget(UnitAdmissionOptions.Cache(new() { MaxRetainedBytes = 64, MaxRetainedEntries = 64 }));
+        using var budget = new CacheMemoryBudget(UnitAdmissionOptions.Cache(new()
+        {
+            MaxRetainedBytes = 64,
+            MaxRetainedEntries = 64
+        }));
         using var reservation = Reserve(budget, 17, 3);
         using var ready = new CountdownEvent(Disposers);
         var allReady = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -92,7 +96,11 @@ internal sealed class CacheMemoryBudgetConcurrencyTests
     [Test]
     public async Task ClosingPoolRejectsAdmissionAndKeepsOutstandingChargeVisibleUntilRelease()
     {
-        using var budget = new CacheMemoryBudget(UnitAdmissionOptions.Cache(new() { MaxRetainedBytes = 8, MaxRetainedEntries = 2 }));
+        using var budget = new CacheMemoryBudget(UnitAdmissionOptions.Cache(new()
+        {
+            MaxRetainedBytes = 8,
+            MaxRetainedEntries = 2
+        }));
         using var reservation = Reserve(budget, 4, 1);
         budget.Dispose();
         budget.Dispose();

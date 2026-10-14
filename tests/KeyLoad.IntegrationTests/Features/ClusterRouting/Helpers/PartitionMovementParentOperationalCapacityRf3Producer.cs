@@ -1,6 +1,6 @@
 using KeyLoad.Client;
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
 
@@ -19,7 +19,10 @@ internal static class PartitionMovementParentOperationalCapacityRf3Producer
 
     internal static Task HoldStageGrantAsync(TwoRf3MembershipWave wave,
         PartitionMovementPublicParentRf3Seed seed, CancellationToken cancellationToken)
-        => HoldAsync(wave, seed, seed.FirstRequest with { Mode = PartitionMoveMode.Resume },
+        => HoldAsync(wave, seed, seed.FirstRequest with
+        {
+            Mode = PartitionMoveMode.Resume
+        },
             StageGrantId(seed.FirstRequest), RequestCqrsProbePhase.BeforeSubmit, cancellationToken);
 
     internal static Guid StageGrantId(PartitionMoveRequest request)
@@ -65,7 +68,10 @@ internal static class PartitionMovementParentOperationalCapacityRf3Producer
         using var caller = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         var markerTask = wave.QueryControls.WaitForMarkerAsync(arm, RequestCqrsProbePhase.ParentStagePreflight,
             RequestCqrsProbeOutcome.Observed, signed, caller.Token);
-        var call = seed.Source.MovePartitionAsync(seed.FirstRequest with { Mode = PartitionMoveMode.Resume }, caller.Token);
+        var call = seed.Source.MovePartitionAsync(seed.FirstRequest with
+        {
+            Mode = PartitionMoveMode.Resume
+        }, caller.Token);
         var failures = new List<Exception>();
         PartitionMoveResult? terminal = null;
         await ServerFailureObserver.ObserveAsync(async () =>
@@ -90,7 +96,9 @@ internal static class PartitionMovementParentOperationalCapacityRf3Producer
                 await Assert.That(actual.Problem?.ErrorCode).IsEqualTo(error.ToString());
             }
             else
-            { terminal = await McpCallerAssertions.SdkSuccessAsync(actual); }
+            {
+                terminal = await McpCallerAssertions.SdkSuccessAsync(actual);
+            }
             await RequestCqrsPhaseFaultAssertions.VerifySettledAsync(wave.QueryControls, arm, marker.RequestId,
                 seed.FirstRequest.MoveId, signed, cancellationToken).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);

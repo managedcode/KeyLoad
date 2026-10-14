@@ -99,7 +99,10 @@ internal sealed class ReplicaTermMetadataFailureTests
             {
                 Incarnation = fixture.Configuration.Incarnation
             }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution()));
-            var sourceLog = fixture.Own(new DurableReplicaLog(sourceStore, RecoveryExecutionOptions.Configuration(fixture.Configuration with { Directory = sourceDirectory })));
+            var sourceLog = fixture.Own(new DurableReplicaLog(sourceStore, RecoveryExecutionOptions.Configuration(fixture.Configuration with
+            {
+                Directory = sourceDirectory
+            })));
             ReplicaTermMetadataFixture.PrepareLog(fixture.Log, EntryTerm, LogTerm);
             ReplicaTermMetadataFixture.PrepareLog(sourceLog, EntryTerm, LogTerm);
             ReplicaTermMetadataFixture.WriteAppliedCut(fixture.Store, AppliedCut);

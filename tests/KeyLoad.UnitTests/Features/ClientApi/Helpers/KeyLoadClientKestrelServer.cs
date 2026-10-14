@@ -23,8 +23,14 @@ internal sealed class KeyLoadClientKestrelServer : IAsyncDisposable
         AuthorizationHeaders = authorizationHeaders;
     }
 
-    public HttpClient Client { get; }
-    public ConcurrentQueue<string> AuthorizationHeaders { get; }
+    public HttpClient Client
+    {
+        get;
+    }
+    public ConcurrentQueue<string> AuthorizationHeaders
+    {
+        get;
+    }
 
     public static async Task<KeyLoadClientKestrelServer> StartAsync(RequestDelegate handler,
         KeyLoadClientKestrelObservation? observation = null)
@@ -32,7 +38,9 @@ internal sealed class KeyLoadClientKestrelServer : IAsyncDisposable
         var builder = WebApplication.CreateBuilder();
         builder.Logging.ClearProviders();
         if (observation is not null)
-        { builder.Services.AddSingleton<ILoggerProvider>(_ => new KeyLoadClientKestrelLogObservationProvider(observation)); }
+        {
+            builder.Services.AddSingleton<ILoggerProvider>(_ => new KeyLoadClientKestrelLogObservationProvider(observation));
+        }
         builder.WebHost.ConfigureKestrel(options => options.Listen(IPAddress.Loopback, 0));
         var app = builder.Build();
         var authorizationHeaders = new ConcurrentQueue<string>();
@@ -62,12 +70,12 @@ internal sealed class KeyLoadClientKestrelServer : IAsyncDisposable
             var addresses = app.Services.GetRequiredService<IServer>().Features.Get<IServerAddressesFeature>()!;
             return new KeyLoadClientKestrelServer(app, new Uri(addresses.Addresses.Single()), authorizationHeaders, observation);
         }
-        catch (Exception error) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        catch (Exception error) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
             await FailStartupAsync(app, error);
             throw;
         }
-        catch (Exception error) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        catch (Exception error) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
             await FailStartupAsync(app, error);
             throw;

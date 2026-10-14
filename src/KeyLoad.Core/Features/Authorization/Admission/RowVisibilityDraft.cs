@@ -15,13 +15,17 @@ internal sealed class RowVisibilityDraft : IDisposable
     internal void AddVisible(string id)
     {
         if (owned is { } current && !current.Add(id))
-        { Dispose(); }
+        {
+            Dispose();
+        }
     }
 
     internal void Complete()
     {
         if (owned is { } current && owner.Publish(current))
-        { owned = null; }
+        {
+            owned = null;
+        }
     }
 
     public void Dispose()

@@ -16,7 +16,12 @@ internal sealed class RuntimeJournalQuotaAndIdentityTests
     public async Task CapacityRejectionLeavesBodyAndCatalogUnchanged()
     {
         using var fixture = new RuntimeJournalFixture(new RuntimeJournalOptions
-        { MaximumJournals = 1, MaximumJournalBytes = 8, MaximumTotalBytes = 8, ChunkBytes = 4 });
+        {
+            MaximumJournals = 1,
+            MaximumJournalBytes = 8,
+            MaximumTotalBytes = 8,
+            ChunkBytes = 4
+        });
         var header = fixture.Create(FirstName, FirstInstance);
         var filled = fixture.Submit(RuntimeJournalFixture.Mutation(RuntimeJournalAction.Append, header, [1, 2, 3, 4])).Snapshot!;
         var rejected = RuntimeJournalFixture.Mutation(RuntimeJournalAction.Append, filled, [5, 6, 7, 8, 9]);

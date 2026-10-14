@@ -36,7 +36,9 @@ internal sealed class RuntimeJournalReaderFixture : IDisposable
         var bytes = await File.ReadAllBytesAsync(path);
         var envelope = NativeSerialization.Deserialize<ZoneTreeIdentityEnvelope>(bytes.AsSpan(sizeof(ulong)));
         var identity = NativeSerialization.Deserialize<StoreIdentity>(envelope.Payload) with
-        { MinimumReaderContract = capability };
+        {
+            MinimumReaderContract = capability
+        };
         var payload = NativeSerialization.Serialize(identity);
         var changed = ZoneTreeMetadataBinary.Write(new ZoneTreeIdentityEnvelope(payload, SHA256.HashData(payload)),
             ZoneTreeMetadataBinary.IdentityMagic);

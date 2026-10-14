@@ -34,9 +34,14 @@ internal static class SubscriptionFilterProcessTrial
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             if (!process.HasExited)
-            { process.Kill(); await process.WaitForExitAsync(token); }
+            {
+                process.Kill();
+                await process.WaitForExitAsync(token);
+            }
             if (Directory.Exists(root))
-            { await StoragePublicationRecoveryTests.DeleteTrialAsync(root, token); }
+            {
+                await StoragePublicationRecoveryTests.DeleteTrialAsync(root, token);
+            }
         }, failures).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -46,7 +51,9 @@ internal static class SubscriptionFilterProcessTrial
         var start = new ProcessStartInfo(Dotnet) { RedirectStandardOutput = true, RedirectStandardError = true, UseShellExecute = false };
         foreach (var argument in new[] { typeof(CrashHostMarker).Assembly.Location, root, stage.ToString(),
             index.ToString(CultureInfo.InvariantCulture), SubscriptionFilterCrashScenario.Mode })
-        { start.ArgumentList.Add(argument); }
+        {
+            start.ArgumentList.Add(argument);
+        }
         return start;
     }
 }

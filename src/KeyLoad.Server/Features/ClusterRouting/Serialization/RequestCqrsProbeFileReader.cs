@@ -21,11 +21,15 @@ internal static class RequestCqrsProbeFileReader
         {
             var count = stream.Read(bytes, read, bytes.Length - read);
             if (count == EmptyCount)
-            { break; }
+            {
+                break;
+            }
             read += count;
         }
         if (read == bytes.Length)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         return bytes.AsSpan(StartEmptyCount, read).ToArray();
     }
 

@@ -1,5 +1,5 @@
 using KeyLoad.Client;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
 using ManagedCode.Communication;
@@ -32,7 +32,9 @@ internal static class PartitionMovementTransferCloseRf3Producer
         {
             _ = await Task.WhenAny(observedPage, call).ConfigureAwait(false);
             if (!observedPage.IsCompletedSuccessfully)
-            { throw new InvalidOperationException(MissingPage); }
+            {
+                throw new InvalidOperationException(MissingPage);
+            }
             var page = await observedPage.ConfigureAwait(false);
             await RequestCqrsPhaseFaultAssertions.VerifyMarkerAsync(page, pageArm, Guid.Empty,
                 RequestCqrsProbePhase.TransferPageReturned, discovery).ConfigureAwait(false);
@@ -68,7 +70,9 @@ internal static class PartitionMovementTransferCloseRf3Producer
         }
         catch (OperationCanceledException) when (originalCaller.IsCancellationRequested) { return; }
         if (!originalCaller.IsCancellationRequested)
-        { throw new InvalidOperationException(UnexpectedSuccess); }
+        {
+            throw new InvalidOperationException(UnexpectedSuccess);
+        }
     }
 
     private static async Task RequireCancelledAsync(TwoRf3MembershipWave wave, Guid arm, Guid request,

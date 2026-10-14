@@ -18,16 +18,27 @@ internal sealed class MessagingTests
         await Assert.That(db.Database.InspectMessage("root", lane, "m1")!.Metadata.State).IsEqualTo(MessageState.Acked);
         await Assert.That(db.Submit(OperationKind.Processing, process, id: id).Get<CommitReceipt>().Token).IsEqualTo(receipt.Token);
         var secondId = Guid.NewGuid();
-        await Assert.That(db.Submit(OperationKind.Processing, process with { CommandId = secondId }, id: secondId).Get<CommitReceipt>().Token).IsEqualTo(receipt.Token);
+        await Assert.That(db.Submit(OperationKind.Processing, process with
+        {
+            CommandId = secondId
+        }, id: secondId).Get<CommitReceipt>().Token).IsEqualTo(receipt.Token);
         var changedId = Guid.NewGuid();
-        await Assert.That(db.Submit(OperationKind.Processing, process with { CommandId = changedId, Effects = [new PutDocument("orders", "o2", "{}", 0)] }, id: changedId).Error).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(db.Submit(OperationKind.Processing, process with
+        {
+            CommandId = changedId,
+            Effects = [new PutDocument("orders", "o2", "{}", 0)]
+        }, id: changedId).Error).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(db.Database.GetDocument("root", new(db.Partition, "orders", "o2"))).IsNull();
     }
     [Test]
     public async Task ExpiredWorkerCannotAckAfterReclaimAndAttemptsReachDeadLetter()
     {
         using var db = new TestDatabase();
-        db.Configure("jobs", ResourceKind.WorkQueue, queuePolicy: new() { MaxAttempts = 2, MaxLeaseSeconds = 1 });
+        db.Configure("jobs", ResourceKind.WorkQueue, queuePolicy: new()
+        {
+            MaxAttempts = 2,
+            MaxLeaseSeconds = 1
+        });
         db.Commit(new EnqueueMessage("jobs", "m1", "{}"));
         var now = TimeProvider.System.GetUtcNow();
         var lane = new QueueLaneRef(db.Partition, "jobs");
@@ -48,7 +59,10 @@ internal sealed class MessagingTests
     {
         using var db = new TestDatabase();
         db.Configure("orders", ResourceKind.Collection);
-        db.Configure("jobs", ResourceKind.WorkQueue, queuePolicy: new() { MaxStoredMessages = 1 });
+        db.Configure("jobs", ResourceKind.WorkQueue, queuePolicy: new()
+        {
+            MaxStoredMessages = 1
+        });
         db.Commit(new EnqueueMessage("jobs", "first", "{}"));
         var id = Guid.NewGuid();
         await Assert.That(db.Submit(OperationKind.Batch, new CommandRequest(id, db.Partition,
@@ -60,7 +74,10 @@ internal sealed class MessagingTests
     {
         using var db = new TestDatabase();
         db.Configure("orders", ResourceKind.Collection);
-        db.Configure("jobs", ResourceKind.WorkQueue, queuePolicy: new() { MaxStoredMessages = 1 });
+        db.Configure("jobs", ResourceKind.WorkQueue, queuePolicy: new()
+        {
+            MaxStoredMessages = 1
+        });
         db.Commit(new EnqueueMessage("jobs", "input", "{}"));
         var lane = new QueueLaneRef(db.Partition, "jobs");
         var receiveId = Guid.NewGuid();

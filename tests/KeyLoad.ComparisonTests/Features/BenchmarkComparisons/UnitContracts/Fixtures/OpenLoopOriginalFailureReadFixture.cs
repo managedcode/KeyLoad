@@ -15,10 +15,16 @@ internal sealed class OpenLoopOriginalFailureReadFixture : IAsyncDisposable
         Completion = OpenLoopHealthyReadVerifier.SettleReadAsync(read.Task, StartDispose);
     }
 
-    internal Task<OpenLoopCancellationHealthRead> Completion { get; }
+    internal Task<OpenLoopCancellationHealthRead> Completion
+    {
+        get;
+    }
     internal Task DisposalStarted => disposalStarted.Task;
     internal int DisposeCalls => Volatile.Read(ref disposeCalls);
-    internal bool ReadCompletedBeforeDispose { get; private set; }
+    internal bool ReadCompletedBeforeDispose
+    {
+        get; private set;
+    }
     internal bool ReadWasCanceled => read.Task.IsCanceled;
     internal bool DisposalCompleted => disposal.Task.IsCompleted;
 

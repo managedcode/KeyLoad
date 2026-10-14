@@ -81,7 +81,10 @@ internal static class PartitionMovementReceiverIssueFailoverRf3NativeCut
             await Assert.That(control.OriginalControlGrant!.Settlement).IsNull();
             await Assert.That(control.OriginalControlGrant.AbortDisposition).IsNotNull();
             await SqlRf3Protocol.EqualAsync(original.OriginalGrant,
-                control.OriginalControlGrant with { AbortDisposition = null });
+                control.OriginalControlGrant with
+                {
+                    AbortDisposition = null
+                });
             await Assert.That(control.OutstandingMoveGrants).IsEqualTo((long)PartitionMoveProtocol.EmptyCount);
             await Assert.That(control.OutstandingPrincipalGrants).IsEqualTo((long?)PartitionMoveProtocol.EmptyCount);
             await Assert.That(control.OutstandingDatabaseGrants).IsEqualTo((long)PartitionMoveProtocol.EmptyCount);

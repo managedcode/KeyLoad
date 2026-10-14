@@ -27,7 +27,9 @@ internal static class EventVectorCoverageCatalogRead
         if (catalog is null || !PhysicalOwnerEntryValidation.SameOwner(catalog.DefaultShard, configuredControl)
             || !PhysicalOwnerEntryValidation.SameOwner(owners.ControlOwner, configuredControl)
             || !owners.Owners.Any(entry => PhysicalOwnerEntryValidation.SameOwner(entry.Owner, configuredOwner)))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, InvalidOwner); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, InvalidOwner);
+        }
         return new(catalog, owners, catalogRow, ownersRow);
     }
 }

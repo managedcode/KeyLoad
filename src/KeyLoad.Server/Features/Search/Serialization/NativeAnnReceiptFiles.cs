@@ -12,7 +12,9 @@ internal static class NativeAnnReceiptFiles
     {
         var bytes = NativeSerialization.Serialize(value);
         if (bytes.Length <= Empty || bytes.Length > options.MaximumManifestBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, NativeAnnProtocol.Bound); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, NativeAnnProtocol.Bound);
+        }
         FileStream? file = null;
         try
         {
@@ -21,12 +23,16 @@ internal static class NativeAnnReceiptFiles
             file.Write(bytes);
             file.Flush(flushToDisk: true);
             if (!OperatingSystem.IsWindows())
-            { File.SetUnixFileMode(path, PrivateFile); }
+            {
+                File.SetUnixFileMode(path, PrivateFile);
+            }
         }
         catch (Exception primary)
         {
             try
-            { file?.Dispose(); }
+            {
+                file?.Dispose();
+            }
             catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
             throw;
         }
@@ -43,7 +49,9 @@ internal static class NativeAnnReceiptFiles
         {
             file = OfflineRegularFile.Open(path, FileAccess.Read, FileShare.Read, options.FileBufferBytes);
             if (file.Length <= Empty || file.Length > options.MaximumManifestBytes)
-            { throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Corrupt); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Corrupt);
+            }
             var bytes = new byte[checked((int)file.Length)];
             file.ReadExactly(bytes);
             value = NativeSerialization.Deserialize<T>(bytes);
@@ -52,7 +60,9 @@ internal static class NativeAnnReceiptFiles
         catch (Exception primary)
         {
             try
-            { file?.Dispose(); }
+            {
+                file?.Dispose();
+            }
             catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
             throw;
         }

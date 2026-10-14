@@ -18,7 +18,10 @@ internal sealed class Bm25OriginalPhaseRecoveryOwner
     private ZoneTreeStore? coldStore;
     private DatabaseEngine? coldDatabase;
     private TestDatabaseReplicaAdmission? coldAdmission;
-    internal TestDatabase Source { get; }
+    internal TestDatabase Source
+    {
+        get;
+    }
     private string ReplicaDirectory => Source.Directory + TestDatabaseReplicaDirectory.Suffix;
 
     private Bm25OriginalPhaseRecoveryOwner()
@@ -49,7 +52,9 @@ internal sealed class Bm25OriginalPhaseRecoveryOwner
         {
             ServerFailureObserver.Observe(owner.Join, failures);
             if (failures.Count == 0)
-            { ServerFailureObserver.Observe(owner.DeleteJoinedDirectories, failures); }
+            {
+                ServerFailureObserver.Observe(owner.DeleteJoinedDirectories, failures);
+            }
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -74,15 +79,24 @@ internal sealed class Bm25OriginalPhaseRecoveryOwner
             configuredLimits.Validate();
             var original = Source.Database.Limits;
             if (configuredLimits.MaxScanRecords > original.MaxScanRecords
-                || configuredLimits != (original with { MaxScanRecords = configuredLimits.MaxScanRecords }))
-            { throw new ArgumentException("Only the original fixture's validated lower record limit can change.", nameof(configuredLimits)); }
+                || configuredLimits != (original with
+                {
+                    MaxScanRecords = configuredLimits.MaxScanRecords
+                }))
+            {
+                throw new ArgumentException("Only the original fixture's validated lower record limit can change.", nameof(configuredLimits));
+            }
         }
         Join();
         var replica = ReadReplicaIdentity();
         if (originalReplicaId == Guid.Empty || replica.NodeId != originalReplicaId)
-        { throw new InvalidOperationException("The cold replica is not its original owned native identity."); }
+        {
+            throw new InvalidOperationException("The cold replica is not its original owned native identity.");
+        }
         coldStore = ZoneTreeExistingStore.Open(new(Source.Directory)
-        { Incarnation = originalIdentity.Incarnation }, originalIdentity.NodeId, Source.StorageExecution);
+        {
+            Incarnation = originalIdentity.Incarnation
+        }, originalIdentity.NodeId, Source.StorageExecution);
         coldDatabase = CreateColdDatabase(coldStore, configuredLimits);
         coldAdmission = Source.CreateTargetAdmission(coldDatabase, coldStore,
             Source.Directory, ReplicaDirectory, replica.NodeId);
@@ -91,7 +105,9 @@ internal sealed class Bm25OriginalPhaseRecoveryOwner
     private DatabaseEngine CreateColdDatabase(ZoneTreeStore store, DatabaseLimits? configuredLimits)
     {
         if (configuredLimits is null)
-        { return Source.CreateConfiguredDatabase(store); }
+        {
+            return Source.CreateConfiguredDatabase(store);
+        }
         var owner = store.Read(view => PhysicalShardCatalogRecordSerialization.Read(view)?.DefaultShard)
             ?? throw new InvalidOperationException("The original committed native catalog owner is missing.");
         var create = TestDatabaseEngineFactory.Capture(UnitExecutionOptions.DatabaseLimits(configuredLimits),
@@ -109,7 +125,9 @@ internal sealed class Bm25OriginalPhaseRecoveryOwner
             limits.MaximumIdentityFileBytes, limits.StreamBufferBytes);
         if (replica.NodeId == originalIdentity.NodeId || replica.Incarnation != originalIdentity.Incarnation
             || !CryptographicOperations.FixedTimeEquals(replica.SigningKey.Span, originalIdentity.SigningKey.Span))
-        { throw new InvalidOperationException("The original native replica identity is not the canonical owner's distinct replica."); }
+        {
+            throw new InvalidOperationException("The original native replica identity is not the canonical owner's distinct replica.");
+        }
         return replica;
     }
 
@@ -128,9 +146,13 @@ internal sealed class Bm25OriginalPhaseRecoveryOwner
         coldDatabase = null;
         var failures = new List<Exception>();
         if (admission is not null)
-        { ServerFailureObserver.Observe(admission.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(admission.Dispose, failures);
+        }
         if (store is not null)
-        { ServerFailureObserver.Observe(store.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(store.Dispose, failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 

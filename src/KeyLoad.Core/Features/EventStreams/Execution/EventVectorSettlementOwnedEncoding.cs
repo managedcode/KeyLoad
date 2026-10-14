@@ -16,7 +16,9 @@ internal static class EventVectorSettlementOwnedEncoding
         {
             encodedWitness = EventVectorOfferOwnedEncoding.Encode(witness, admission, work);
             foreach (var pin in pins)
-            { encodedPins.Add(EventVectorOfferOwnedEncoding.Encode(pin, admission, work)); }
+            {
+                encodedPins.Add(EventVectorOfferOwnedEncoding.Encode(pin, admission, work));
+            }
             work.Check();
             var result = new EventVectorPreparedSettlement(map, entries, encodedWitness, encodedPins.ToImmutable(),
                 targets, targetBytes, targetDigest, currentSourcePolicyEpochs);
@@ -29,7 +31,9 @@ internal static class EventVectorSettlementOwnedEncoding
             {
                 EventVectorSettlementTargetEncoding.Clear(encodedWitness);
                 foreach (var pin in encodedPins)
-                { EventVectorSettlementTargetEncoding.Clear(pin); }
+                {
+                    EventVectorSettlementTargetEncoding.Clear(pin);
+                }
             }
         }
     }

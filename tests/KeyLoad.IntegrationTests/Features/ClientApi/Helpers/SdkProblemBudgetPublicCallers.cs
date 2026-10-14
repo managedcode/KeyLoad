@@ -9,11 +9,25 @@ internal sealed class SdkProblemBudgetPublicCallers : IAsyncDisposable
     private readonly HttpClient http;
     private SdkProblemBudgetPublicCallers(HttpClient http, KeyLoadClient minimum,
         KeyLoadClient normal, McpOfficialClient mcp)
-    { this.http = http; Minimum = minimum; Normal = normal; Mcp = mcp; }
+    {
+        this.http = http;
+        Minimum = minimum;
+        Normal = normal;
+        Mcp = mcp;
+    }
 
-    internal KeyLoadClient Minimum { get; }
-    internal KeyLoadClient Normal { get; }
-    internal McpOfficialClient Mcp { get; }
+    internal KeyLoadClient Minimum
+    {
+        get;
+    }
+    internal KeyLoadClient Normal
+    {
+        get;
+    }
+    internal McpOfficialClient Mcp
+    {
+        get;
+    }
 
     private static async Task<SdkProblemBudgetPublicCallers> ConnectAsync(ClusterFixture fixture,
         string secret, CancellationToken token)

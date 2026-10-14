@@ -14,7 +14,10 @@ internal sealed class PartitionQueryPublicBudgetTests
     [Test]
     public async Task OversizedRequestAndPublicPageRetentionFailAtTheirExactBoundaries()
     {
-        using var oversizedFixture = new PartitionQueryPublicTestSupport(new() { MaxQueryBytes = 128 });
+        using var oversizedFixture = new PartitionQueryPublicTestSupport(new()
+        {
+            MaxQueryBytes = 128
+        });
         var oversized = PartitionQueryPublicTestSupport.Request([oversizedFixture.First], 1);
         var position = oversizedFixture.Position;
         var requestFailure = Assert.ThrowsExactly<KeyLoadException>(() => Run(oversizedFixture, oversized));
@@ -29,12 +32,18 @@ internal sealed class PartitionQueryPublicBudgetTests
                 leaf.CutPosition, leaf.PolicyEpoch, leaf.SchemaVersion, leaf.AccessPath))], true);
         var exactBytes = checked((int)Math.Max(measured.RetainedBytes + mapBytes,
             JsonDefaults.Serialize(projected).Length));
-        using var exact = new PartitionQueryPublicTestSupport(new() { MaxBatchBytes = exactBytes });
+        using var exact = new PartitionQueryPublicTestSupport(new()
+        {
+            MaxBatchBytes = exactBytes
+        });
         SeedOne(exact);
         var page = Run(exact, PartitionQueryPublicTestSupport.Request([exact.First], 1));
         await Assert.That(page.Complete).IsTrue();
 
-        using var below = new PartitionQueryPublicTestSupport(new() { MaxBatchBytes = exactBytes - 1 });
+        using var below = new PartitionQueryPublicTestSupport(new()
+        {
+            MaxBatchBytes = exactBytes - 1
+        });
         SeedOne(below);
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => Run(below, PartitionQueryPublicTestSupport.Request([below.First], 1)));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);

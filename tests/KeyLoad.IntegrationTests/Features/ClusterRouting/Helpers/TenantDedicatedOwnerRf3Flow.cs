@@ -62,7 +62,9 @@ internal static class TenantDedicatedOwnerRf3Flow
         await seed.ReconnectAsync(wave, token);
         await StableAsync(wave, seed, state, moved, directoryRevision, token);
         if (healthy is not null && receipt is not null)
-        { await HealthyAsync(seed, healthy, receipt, token); }
+        {
+            await HealthyAsync(seed, healthy, receipt, token);
+        }
         var after = await PartitionMovementPublicParentRf3Cut.StopAndReadAsync(wave, state.Move, token);
         await TenantDedicatedOwnerRf3Assertions.NoSiblingParentAsync(wave, state);
         await SqlRf3Protocol.EqualAsync(before, after);

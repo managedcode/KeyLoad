@@ -81,7 +81,10 @@ internal sealed class PreparedTransactionTests
 
         try
         {
-            using var store = new ZoneTreeStore(new(root) { MaxFrameBytes = expectedFrame.Length - HeaderLength }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+            using var store = new ZoneTreeStore(new(root)
+            {
+                MaxFrameBytes = expectedFrame.Length - HeaderLength
+            }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
             store.Commit((transaction, _) =>
             {
                 transaction.Put(key, value);

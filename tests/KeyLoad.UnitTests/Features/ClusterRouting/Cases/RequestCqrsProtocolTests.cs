@@ -1,5 +1,5 @@
 using System.Globalization;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Constants;
 using ManagedCode.Communication.CQRS;

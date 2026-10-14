@@ -1,6 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 
 namespace KeyLoad.UnitTests.Features.EventStreams;
@@ -71,6 +71,9 @@ internal sealed class StreamTraversalMcpSchemaTests
     private static Dictionary<string, JsonElement> Arguments(byte[] bytes)
     {
         using var body = JsonDocument.Parse(bytes);
-        return new(StringComparer.Ordinal) { [Request] = body.RootElement.Clone() };
+        return new(StringComparer.Ordinal)
+        {
+            [Request] = body.RootElement.Clone()
+        };
     }
 }

@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Replication;
 using Microsoft.Extensions.Options;
 
@@ -16,15 +16,30 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IGr
     private Task? shutdown;
     private readonly RequestCqrsProbeHeldCallback hold;
     private readonly NativeCanonicalModelCutAdmission canonicalCuts;
-    internal RequestCqrsCanonicalApplyObserver Canonical { get; }
-    internal RequestCqrsQueryReadCutObservation QueryCuts { get; }
-    internal RequestCqrsReplicaLogObserver ReplicaLog { get; }
-    internal RequestCqrsReplicaSnapshotObserver ReplicaSnapshot { get; }
+    internal RequestCqrsCanonicalApplyObserver Canonical
+    {
+        get;
+    }
+    internal RequestCqrsQueryReadCutObservation QueryCuts
+    {
+        get;
+    }
+    internal RequestCqrsReplicaLogObserver ReplicaLog
+    {
+        get;
+    }
+    internal RequestCqrsReplicaSnapshotObserver ReplicaSnapshot
+    {
+        get;
+    }
     private readonly RequestCqrsReceiverIssueAdjunct receiverIssueAdjunct;
     private readonly RequestCqrsNativeModelObservation nativeModel;
     private readonly RequestCqrsNativeReplayObservation nativeReplay;
     private readonly Lazy<ConnectionProbeCapture> connections;
-    internal RequestCqrsProbeProducerDisposal ProducerDisposal { get; }
+    internal RequestCqrsProbeProducerDisposal ProducerDisposal
+    {
+        get;
+    }
 
     internal RequestCqrsProbeObserver(RequestCqrsProbeFiles files, IOptions<ReplicaConfiguration> replicaOptions,
         string siloAddress, IHostApplicationLifetime applicationLifetime, IOptions<RequestProbeExecutionOptions> executionOptions, TimeProvider? clock = null)
@@ -100,7 +115,9 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IGr
         lock (disposeSync)
         {
             if (shutdown is not null)
-            { return new ValueTask(shutdown); }
+            {
+                return new ValueTask(shutdown);
+            }
             // OrleansNode drains admitted work before silo stop; this joins callbacks before disposing observer state.
             var join = lifecycle.StopAdmissionAndJoin();
             start = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -121,13 +138,21 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IGr
             claim = Claim(identity, phase, files.ReadSnapshot());
             if (claim is not null && identity.ReadKind is GrainReadKind.AstQuery or GrainReadKind.WaitForIndex
                 && phase == GrainRequestPhase.AuthorizationReload)
-            { claim.QueryReadContext = context; }
+            {
+                claim.QueryReadContext = context;
+            }
             if (claim is null)
-            { return; }
+            {
+                return;
+            }
             if (await receiverIssueAdjunct.TryObserveAsync(claim, phase, context, requestCancellation).ConfigureAwait(true))
-            { return; }
+            {
+                return;
+            }
             if (!TryGetPhase(phase, out var selectedPhase) || claim.Arm.Record.Phase != selectedPhase)
-            { return; }
+            {
+                return;
+            }
             files.RequireActiveArm(claim.Arm);
             if (claim.Arm.Record.Action == RequestCqrsProbeAction.Hold)
             {
@@ -137,19 +162,27 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IGr
             var outcome = gate ? RequestCqrsProbeOutcome.Observed : RequestCqrsProbeOutcome.FaultRequested;
             var marker = CreateMarker(claim, selectedPhase, outcome);
             if (selectedPhase == RequestCqrsProbePhase.EventVectorFirstDispatchReserved)
-            { files.EventVectorExpiry.Publish(claim); }
+            {
+                files.EventVectorExpiry.Publish(claim);
+            }
             RequestCqrsMovementJournalCapture.PublishReturned(files, claim, marker);
             RequestCqrsProbeActivationCapture.Observe(files, marker, context);
             if (gate && selectedPhase == RequestCqrsProbePhase.RequestStarted)
-            { await connections.Value.ObserveAsync(marker, context, requestCancellation).ConfigureAwait(true); }
+            {
+                await connections.Value.ObserveAsync(marker, context, requestCancellation).ConfigureAwait(true);
+            }
             if (!gate)
-            { ThrowOrdinary(); }
+            {
+                ThrowOrdinary();
+            }
             await HoldAsync(claim, selectedPhase, context, requestCancellation).ConfigureAwait(true);
         }
         finally
         {
             if (gate)
-            { lifecycle.ExitGate(); }
+            {
+                lifecycle.ExitGate();
+            }
             lifecycle.ExitCallback();
         }
     }
@@ -188,27 +221,7 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IGr
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
     private static void ThrowPrivateProbeStackCanary(IOException error) => throw error;
 
-    private async Task DisposeAfterJoinAsync(Task start, Task join)
-    {
-        await start.ConfigureAwait(false);
-        var failures = new List<Exception>();
-        ServerFailureObserver.Observe(stopping.Cancel, failures);
-        await ServerFailureObserver.ObserveAsync(() => join, failures).ConfigureAwait(false);
-        if (connections.IsValueCreated)
-        { await ServerFailureObserver.ObserveAsync(() => connections.Value.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
-        try
-        {
-            stopping.Dispose();
-        }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        {
-            failures.Add(error);
-        }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        {
-            failures.Add(error);
-        }
-        ServerFailureObserver.ThrowIfAny(failures);
-    }
+    private Task DisposeAfterJoinAsync(Task start, Task join)
+        => RequestCqrsProbeObserverShutdown.JoinAsync(start, join, stopping, connections);
 
 }

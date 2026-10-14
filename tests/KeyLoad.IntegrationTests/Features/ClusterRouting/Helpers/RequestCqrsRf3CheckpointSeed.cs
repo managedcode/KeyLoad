@@ -99,5 +99,9 @@ internal static class RequestCqrsRf3CheckpointSeed
         => DocumentPrefix + ordinal.ToString("D2", System.Globalization.CultureInfo.InvariantCulture);
 
     private static string Json(int ordinal)
-        => JsonSerializer.Serialize(new { cohort = PayloadCohort, ordinal });
+        => JsonSerializer.Serialize(new
+        {
+            cohort = PayloadCohort,
+            ordinal
+        });
 }

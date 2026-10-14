@@ -48,7 +48,10 @@ internal static class SqlNullDistinctRf3Policy
         await SqlNullDistinctRf3Refusals.RejectAsync(fixture, state, hex.Clause, ErrorCode.PermissionDenied,
             token, ast: true, astCase: hex);
         await global::TUnit.Assertions.Assert.That(await SqlNullDistinctRf3Image.ReadAsync(root, state, token)).IsEqualTo(before);
-        var repaired = original with { PolicyEpoch = original.PolicyEpoch + SqlNullOrderingRf3Protocol.RepairAdvance };
+        var repaired = original with
+        {
+            PolicyEpoch = original.PolicyEpoch + SqlNullOrderingRf3Protocol.RepairAdvance
+        };
         await SqlRf3Protocol.EqualAsync(repaired, await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.SdkSuccessAsync(
             await root.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), repaired, token)));
         await SqlNullDistinctRf3Pages.HealthyAsync(fixture, state, token);

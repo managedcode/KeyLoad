@@ -31,7 +31,9 @@ internal sealed class RemoteTransferStartupCapture : IAsyncDisposable
         if (window is not null || completedWindows == MaximumWindows || resources.Length != TwoRf3MembershipProtocol.Nodes.Length
             || !resources.Select(resource => resource.Name).Order(StringComparer.Ordinal)
                 .SequenceEqual(TwoRf3MembershipProtocol.Nodes.Order(StringComparer.Ordinal), StringComparer.Ordinal))
-        { throw new InvalidOperationException(Missing); }
+        {
+            throw new InvalidOperationException(Missing);
+        }
         var logger = app.Services.GetRequiredService<ResourceLoggerService>();
         var notifications = app.ResourceNotifications;
         var buffers = resources.ToDictionary(resource => resource.Name,
@@ -42,7 +44,9 @@ internal sealed class RemoteTransferStartupCapture : IAsyncDisposable
     private void Failed(Exception error, bool callerCancelled)
     {
         if (primary != NoFailure)
-        { return; }
+        {
+            return;
+        }
         primary = error is OperationCanceledException ? CancelledFailure
             : error is KeyLoadException ? DomainFailure : UnexpectedFailure;
         code = (error as KeyLoadException)?.Code;
@@ -56,20 +60,27 @@ internal sealed class RemoteTransferStartupCapture : IAsyncDisposable
     private async Task CloseAsync(string boundary)
     {
         if (window is null)
-        { return; }
+        {
+            return;
+        }
         var original = window;
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(() => original.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         ServerFailureObserver.Observe(() => RemoteTransferStartupArtifacts.Save(session, original, boundary,
             primary, code, cancelled), failures);
         if (failures.Count == 0)
-        { window = null; completedWindows++; }
+        {
+            window = null;
+            completedWindows++;
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
     public async ValueTask DisposeAsync()
     {
         if (window is not null)
-        { await window.DisposeAsync().ConfigureAwait(false); }
+        {
+            await window.DisposeAsync().ConfigureAwait(false);
+        }
     }
 }

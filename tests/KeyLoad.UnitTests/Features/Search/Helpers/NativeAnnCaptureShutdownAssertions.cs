@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 using KeyLoad.UnitTests.Features.QueryExecution;
 
@@ -43,7 +43,9 @@ internal static class NativeAnnCaptureShutdownAssertions
                 await ServerFailureObserver.ObserveAsync(() => AssertOriginalCaptureClosedAsync(originalCapture), failures);
             }
             if (shutdown is not null)
-            { await ServerFailureObserver.ObserveAsync(() => shutdown, failures); }
+            {
+                await ServerFailureObserver.ObserveAsync(() => shutdown, failures);
+            }
         }
         ServerFailureObserver.ThrowIfAny(failures);
         await Assert.That(clock.Triggered).IsTrue();
@@ -70,8 +72,8 @@ internal static class NativeAnnCaptureShutdownAssertions
                 await Assert.That(result.IndexSha256).IsNotNull();
             }, failures);
         }
-        catch (Exception cleanup) when (KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
-        catch (Exception cleanup) when (!KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
+        catch (Exception cleanup) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
+        catch (Exception cleanup) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

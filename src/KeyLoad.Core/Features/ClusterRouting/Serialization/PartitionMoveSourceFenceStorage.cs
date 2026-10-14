@@ -16,7 +16,9 @@ internal static class PartitionMoveSourceFenceStorage
         view.ReadValue(Key(partition), bytes =>
         {
             if (bytes.Length > maximumEncodedBytes)
-            { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid);
+            }
             record = NativeSerialization.Deserialize<PartitionMoveSourceFenceRecord>(bytes);
             PartitionMoveSourceFenceValidation.Require(record, partition);
         });
@@ -28,7 +30,9 @@ internal static class PartitionMoveSourceFenceStorage
     {
         PartitionMoveSourceFenceValidation.Require(record, record.Partition);
         if (NativeSerialization.Measure(record) > maximumEncodedBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
+        }
         transaction.Put(Key(record.Partition), NativeSerialization.Serialize(record));
     }
 }

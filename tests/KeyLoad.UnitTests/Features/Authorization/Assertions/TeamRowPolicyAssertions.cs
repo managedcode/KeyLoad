@@ -100,7 +100,11 @@ internal static class TeamRowPolicyAssertions
         var key = KeySpace.Principal(principal.Id);
         var bytes = db.Store.Read(view => view.ReadOwnedValue(key))!;
         var forged = db.Submit(OperationKind.ConfigurePrincipal,
-            new ConfigurePrincipalRequest(principal with { Teams = [TeamRowPolicyFlow.ForeignTeam], PolicyEpoch = ForgedPolicyEpoch }), principal.Id);
+            new ConfigurePrincipalRequest(principal with
+            {
+                Teams = [TeamRowPolicyFlow.ForeignTeam],
+                PolicyEpoch = ForgedPolicyEpoch
+            }), principal.Id);
         await Assert.That(forged.Error).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(db.Store.Read(view => view.ReadOwnedValue(key))!.AsSpan().SequenceEqual(bytes)).IsTrue();
         var command = new CommandRequest(Guid.NewGuid(), db.Partition,
@@ -114,7 +118,10 @@ internal static class TeamRowPolicyAssertions
         var image = Image(db.Store);
         var cut = db.Store.Position;
         var foreign = Assert.ThrowsExactly<KeyLoadException>(() => db.Database.GetDocument(principal.Id,
-            new(db.Partition with { TenantId = ForeignTenant }, TeamRowPolicyFlow.Collection, TeamRowPolicyFlow.Row), cancellationToken: token));
+            new(db.Partition with
+            {
+                TenantId = ForeignTenant
+            }, TeamRowPolicyFlow.Collection, TeamRowPolicyFlow.Row), cancellationToken: token));
         await Assert.That(foreign.Code).IsEqualTo(ErrorCode.PermissionDenied);
         await UnchangedAsync(db.Store, image, cut);
     }

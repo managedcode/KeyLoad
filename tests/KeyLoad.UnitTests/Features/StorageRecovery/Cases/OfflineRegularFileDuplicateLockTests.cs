@@ -136,6 +136,8 @@ internal sealed class OfflineRegularFileDuplicateLockTests
             await action(path);
         }
         finally
-        { Directory.Delete(root, recursive: true); }
+        {
+            Directory.Delete(root, recursive: true);
+        }
     }
 }

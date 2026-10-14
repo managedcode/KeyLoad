@@ -16,9 +16,14 @@ internal static class EventSchemaCursorPublicPolicy
                 HeaderPolicies = [new(EventSchemaCursorPublicExpected.HeaderPath,
                 EventSchemaCursorPublicExpected.Classification, EventSchemaCursorPublicExpected.RawReadGrant)]
             }
-            : state.Initial with { SchemaVersion = 3L };
+            : state.Initial with
+            {
+                SchemaVersion = 3L
+            };
         var request = new ConfigureResourceRequest(state.Scenario.Partition.TenantId, state.Scenario.Partition.DatabaseId, desired)
-        { ExpectedSchemaVersion = schema == 2L ? 1L : 2L };
+        {
+            ExpectedSchemaVersion = schema == 2L ? 1L : 2L
+        };
         await ApplyAsync(admin, reader, state, request, desired, token);
     }
 
@@ -43,7 +48,9 @@ internal static class EventSchemaCursorPublicPolicy
         EventSchemaCursorPublicState state, CancellationToken token)
     {
         foreach (var original in state.Configurations)
-        { await ReplayOneAsync(admin, reader, state, original.Id, original.Request, original.Result, token); }
+        {
+            await ReplayOneAsync(admin, reader, state, original.Id, original.Request, original.Result, token);
+        }
     }
 
     private static async Task ReplayOneAsync(RequestCqrsRf3Callers admin, RequestCqrsRf3Callers reader,

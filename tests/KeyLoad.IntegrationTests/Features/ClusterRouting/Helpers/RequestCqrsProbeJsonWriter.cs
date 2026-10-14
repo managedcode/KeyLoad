@@ -1,5 +1,5 @@
 using System.Text.Json;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server.Features.ClusterRouting;
 
 using static KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsProbeFixtureProtocol;
@@ -32,14 +32,20 @@ internal static class RequestCqrsProbeJsonWriter
             writer.WriteString(PrincipalField, principalId);
             writer.WriteString(CommandIdField, commandId);
             if (readKind is { } kind)
-            { writer.WriteString(ReadKindField, kind.ToString()); }
+            {
+                writer.WriteString(ReadKindField, kind.ToString());
+            }
             else
-            { writer.WriteNull(ReadKindField); }
+            {
+                writer.WriteNull(ReadKindField);
+            }
             writer.WriteString(PhaseField, phase.ToString());
             writer.WriteString(ActionField, action.ToString());
             writer.WritePropertyName(nameof(RequestCqrsProbeArmRecord.Partition));
             if (partition is null)
-            { writer.WriteNullValue(); }
+            {
+                writer.WriteNullValue();
+            }
             else
             {
                 writer.WriteStartObject();
@@ -50,17 +56,29 @@ internal static class RequestCqrsProbeJsonWriter
                 writer.WriteEndObject();
             }
             if (sourceRequestId is { } source)
-            { writer.WriteString(nameof(RequestCqrsProbeArmRecord.SourceRequestId), source); }
+            {
+                writer.WriteString(nameof(RequestCqrsProbeArmRecord.SourceRequestId), source);
+            }
             else
-            { writer.WriteNull(nameof(RequestCqrsProbeArmRecord.SourceRequestId)); }
+            {
+                writer.WriteNull(nameof(RequestCqrsProbeArmRecord.SourceRequestId));
+            }
             if (sourceArmId is { } sourceArm)
-            { writer.WriteString(nameof(RequestCqrsProbeArmRecord.SourceArmId), sourceArm); }
+            {
+                writer.WriteString(nameof(RequestCqrsProbeArmRecord.SourceArmId), sourceArm);
+            }
             else
-            { writer.WriteNull(nameof(RequestCqrsProbeArmRecord.SourceArmId)); }
+            {
+                writer.WriteNull(nameof(RequestCqrsProbeArmRecord.SourceArmId));
+            }
             if (targetVoter is not null)
-            { writer.WriteString(nameof(RequestCqrsProbeArmRecord.TargetVoter), targetVoter); }
+            {
+                writer.WriteString(nameof(RequestCqrsProbeArmRecord.TargetVoter), targetVoter);
+            }
             else
-            { writer.WriteNull(nameof(RequestCqrsProbeArmRecord.TargetVoter)); }
+            {
+                writer.WriteNull(nameof(RequestCqrsProbeArmRecord.TargetVoter));
+            }
             writer.WriteEndObject();
         });
 
@@ -80,10 +98,14 @@ internal static class RequestCqrsProbeJsonWriter
     {
         using var stream = new MemoryStream(InitialRecordCapacity);
         using (var writer = new Utf8JsonWriter(stream))
-        { write(writer); }
+        {
+            write(writer);
+        }
         var bytes = stream.ToArray();
         if (bytes.Length > MaximumRecordBytes)
-        { throw new InvalidOperationException(RecordLimitExceeded); }
+        {
+            throw new InvalidOperationException(RecordLimitExceeded);
+        }
         return bytes;
     }
 }

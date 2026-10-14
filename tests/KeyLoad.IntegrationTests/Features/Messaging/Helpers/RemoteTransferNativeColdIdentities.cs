@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.IntegrationTests.Features.Messaging;
 
@@ -26,7 +26,9 @@ internal static class RemoteTransferNativeColdIdentities
                 || !Guid.TryParseExact(status.NodeId, GuidFormat, out var originalNodeId)
                 || originalNodeId == Guid.Empty || originalNodeId.ToString(GuidFormat) != status.NodeId
                 || !distinct.Add(originalNodeId))
-            { throw new InvalidOperationException(Invalid); }
+            {
+                throw new InvalidOperationException(Invalid);
+            }
             nodes.Add(node, originalNodeId);
         }
         return nodes;

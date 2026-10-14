@@ -43,7 +43,9 @@ internal sealed record NativeAnnMaintenanceRf3Scenario(PartitionRef Partition)
         await Assert.That(official.NodeId).IsEqualTo(status.NodeId);
         await Assert.That(official.Incarnation).IsEqualTo(status.Incarnation);
         if (!Guid.TryParse(status.NodeId, out var owner) || owner == Guid.Empty)
-        { throw new InvalidOperationException("The actual administrative status does not expose a canonical physical owner."); }
+        {
+            throw new InvalidOperationException("The actual administrative status does not expose a canonical physical owner.");
+        }
         var placement = await McpCallerAssertions.SdkSuccessAsync(await sdk.ReadAtomicPartitionPlacementAsync(new(1, Partition), token));
         return new(Guid.NewGuid(), new(Partition, Consumer), Collection, Field, Space, Generation, owner,
             new(placement.PhysicalShardId, placement.Incarnation, placement.VoterIds, placement.PlacementEpoch), AnnMaintenanceMode.Build);

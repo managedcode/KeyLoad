@@ -18,7 +18,10 @@ internal static class ClusterRestoreRf3EventingReadOracle
         await FourAsync(group, await McpCallerAssertions.SdkSuccessAsync(await sdk.SubscriptionStatusAsync(state.Group,
             cancellationToken).ConfigureAwait(false)), sdk, official, state.Partition, McpCallerTools.SubscriptionsStatus,
             new GetSubscriptionRequest(state.Group), cancellationToken).ConfigureAwait(false);
-        var other = ClusterRestoreRf3EventingSourceOracle.Group(state, other: true) with { TailPosition = tail };
+        var other = ClusterRestoreRf3EventingSourceOracle.Group(state, other: true) with
+        {
+            TailPosition = tail
+        };
         await FourAsync(other, await McpCallerAssertions.SdkSuccessAsync(await sdk.SubscriptionStatusAsync(state.Other,
             cancellationToken).ConfigureAwait(false)), sdk, official, state.Partition, McpCallerTools.SubscriptionsStatus,
             new GetSubscriptionRequest(state.Other), cancellationToken).ConfigureAwait(false);

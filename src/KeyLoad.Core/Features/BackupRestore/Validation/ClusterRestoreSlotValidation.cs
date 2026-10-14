@@ -23,6 +23,8 @@ internal static class ClusterRestoreSlotValidation
             || string.IsNullOrWhiteSpace(context.TargetSignerFingerprint) || mappings.IsDefault
             || !mappings.Any(mapping => mapping.Source.Incarnation == identity.Incarnation
                 && mapping.Target.Incarnation == context.TargetIncarnation))
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
     }
 }

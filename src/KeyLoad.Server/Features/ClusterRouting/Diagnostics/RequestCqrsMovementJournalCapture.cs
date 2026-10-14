@@ -5,27 +5,33 @@ namespace KeyLoad.Server.Features.ClusterRouting;
 internal static class RequestCqrsMovementJournalCapture
 {
     internal static void CaptureReturned(RequestCqrsProbeLifecycle lifecycle, RequestCqrsProbeFiles files,
-        global::KeyLoad.Orleans.GrainRequestProbeIdentity identity, OperationResult actual,
+        global::KeyLoad.Clustering.GrainRequestProbeIdentity identity, OperationResult actual,
         global::Orleans.Runtime.IGrainContext context, string voter, string siloAddress)
     {
         var claim = lifecycle.FindClaim(identity.RequestId);
         if (claim?.Arm.Record.Partition is null || claim.Arm.Record.Phase != RequestCqrsProbePhase.SubmitReturned)
-        { return; }
+        {
+            return;
+        }
         ArgumentNullException.ThrowIfNull(context);
         lifecycle.EnterCallback();
         try
         {
             files.RequireActiveArm(claim.Arm);
             if (claim.Identity != identity || claim.MovementJournal is not null
-                || global::Orleans.Runtime.RequestContext.Get(global::KeyLoad.Orleans.GrainRequestStreamProtocol.ContextKey)
-                    is not global::KeyLoad.Orleans.GrainRequestContextState request
+                || global::Orleans.Runtime.RequestContext.Get(global::KeyLoad.Clustering.GrainRequestStreamProtocol.ContextKey)
+                    is not global::KeyLoad.Clustering.GrainRequestContextState request
                 || request.RequestId != identity.RequestId || request.CommandId != identity.CommandId
                 || request.ConnectionId != claim.ConnectionId)
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             claim.MovementJournal = Capture(claim, actual, voter, siloAddress);
         }
         finally
-        { lifecycle.ExitCallback(); }
+        {
+            lifecycle.ExitCallback();
+        }
     }
 
     internal static RequestCqrsMovementJournalRecord Capture(RequestCqrsProbeClaim claim,
@@ -36,16 +42,22 @@ internal static class RequestCqrsMovementJournalCapture
             || arm.Partition is not { } scoped || arm.ReadKind is not null
             || claim.Identity.CommandKind != OperationKind.PartitionMovementPhase
             || arm.CommandId != claim.Identity.CommandId || arm.PrincipalId != claim.Identity.PrincipalId)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         var partition = scoped.ToPartition();
         if (actual.Error is { } error)
-        { return Record(claim, voter, siloAddress, partition, Guid.Empty, null, null, error); }
+        {
+            return Record(claim, voter, siloAddress, partition, Guid.Empty, null, null, error);
+        }
         if (actual.NativeValue is not PartitionMovePhaseResult phase
             || !RequestCqrsMovementJournalInventory.IsObservedControlStage(phase.Stage) || phase.Control is not { } control
             || control.Partition != partition || control.MoveId != phase.MoveId
             || control.PrincipalId != arm.PrincipalId || phase.Journal.CommandId != arm.CommandId
             || !HasCommittedControlShape(phase))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         return Record(claim, voter, siloAddress, partition, phase.MoveId, phase.Stage, phase.Journal, null);
     }
 
@@ -66,7 +78,9 @@ internal static class RequestCqrsMovementJournalCapture
             claim.MovementJournal = null;
         }
         else
-        { files.WriteMarker(marker); }
+        {
+            files.WriteMarker(marker);
+        }
     }
 
     private static bool HasCommittedControlShape(PartitionMovePhaseResult phase)

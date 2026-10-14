@@ -21,7 +21,10 @@ internal static class PolicyEpochPublicAssertions
             await ImageAsync(root, scenario, token);
             await Assert.That(first.Cursor).IsNotNull();
             cursors[route] = first.Cursor!;
-            var second = await PolicyEpochPublicCalls.ReadAsync(reader, request with { Cursor = first.Cursor }, route, token);
+            var second = await PolicyEpochPublicCalls.ReadAsync(reader, request with
+            {
+                Cursor = first.Cursor
+            }, route, token);
             await RowAsync(second, PolicyEpochPublicProtocol.SecondId,
                 redacted ? PolicyEpochPublicProtocol.SecondSafeJson : PolicyEpochPublicProtocol.SecondJson, redacted);
             await Assert.That(second.Cursor).IsNull();

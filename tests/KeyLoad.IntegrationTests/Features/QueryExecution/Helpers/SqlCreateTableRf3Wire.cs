@@ -17,9 +17,13 @@ internal static class SqlCreateTableRf3Wire
                 await RefuseAsync(root, wire, SqlCreateTableRf3Literal.InvalidIdentity, SqlCreateTableRf3Literal.ValidationState, token);
                 await ArmAsync(wire, state.CreatedId, token);
                 if (state.EpochFenced)
-                { await RefuseAsync(root, wire, SqlCreateTableRf3Literal.Sql, SqlCreateTableRf3Literal.PermissionState, token); }
+                {
+                    await RefuseAsync(root, wire, SqlCreateTableRf3Literal.Sql, SqlCreateTableRf3Literal.PermissionState, token);
+                }
                 else
-                { await SqlRf3Protocol.EqualAsync(state.Definition, await wire.ExecuteAsync<ResourceDefinition>(SqlCreateTableRf3Literal.Sql, [], prepared: true, token)); }
+                {
+                    await SqlRf3Protocol.EqualAsync(state.Definition, await wire.ExecuteAsync<ResourceDefinition>(SqlCreateTableRf3Literal.Sql, [], prepared: true, token));
+                }
                 await RefuseAsync(root, wire, SqlCreateTableRf3Literal.Sql, SqlCreateTableRf3Literal.ValidationState, token);
                 await ArmAsync(wire, state.FailedId, token);
                 await RefuseAsync(root, wire, SqlCreateTableRf3Literal.Sql, state.EpochFenced ? SqlCreateTableRf3Literal.PermissionState : SqlCreateTableRf3Literal.ConflictState, token);
@@ -30,9 +34,13 @@ internal static class SqlCreateTableRf3Wire
                 await SqlCreateTableRf3Failures.WireCommandAsync(wire, state.Seed, token);
                 await SqlCreateTableRf3Images.RequireAsync(root, image, token);
                 if (state.SeedEpoch != state.Identity.Principal.PolicyEpoch)
-                { await SqlCreateTableRf3Failures.WireCommandAsync(wire, state.Seed, SqlCreateTableRf3Literal.PermissionState, token); }
+                {
+                    await SqlCreateTableRf3Failures.WireCommandAsync(wire, state.Seed, SqlCreateTableRf3Literal.PermissionState, token);
+                }
                 else
-                { await SqlRf3Protocol.EqualAsync(state.Receipt, await wire.CommitAsync(state.Seed, prepared: true, token)); }
+                {
+                    await SqlRf3Protocol.EqualAsync(state.Receipt, await wire.CommitAsync(state.Seed, prepared: true, token));
+                }
                 await SqlCreateTableRf3Images.RequireAsync(root, image, token);
                 if (state.RepairId is { } repairId)
                 {

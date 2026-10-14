@@ -30,7 +30,9 @@ internal static class ZoneTreeCatalogBackupPublication
             cancellationToken.ThrowIfCancellationRequested();
             RequireClean(target);
             if (Directory.Exists(target))
-            { Directory.Delete(target, recursive: false); }
+            {
+                Directory.Delete(target, recursive: false);
+            }
             Directory.Move(staging, target);
             return result;
         }
@@ -47,9 +49,13 @@ internal static class ZoneTreeCatalogBackupPublication
         try
         {
             if (Directory.Exists(staging))
-            { Directory.Delete(staging, recursive: true); }
+            {
+                Directory.Delete(staging, recursive: true);
+            }
             if (existed && !Directory.Exists(target))
-            { RestoreOriginalEmpty(target, originalMode); }
+            {
+                RestoreOriginalEmpty(target, originalMode);
+            }
         }
         catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
     }
@@ -58,7 +64,9 @@ internal static class ZoneTreeCatalogBackupPublication
     {
         Directory.CreateDirectory(target);
         if (!OperatingSystem.IsWindows() && originalMode is { } mode)
-        { File.SetUnixFileMode(target, mode); }
+        {
+            File.SetUnixFileMode(target, mode);
+        }
     }
 
     private static void RequireClean(string target)
@@ -67,7 +75,9 @@ internal static class ZoneTreeCatalogBackupPublication
         if (File.Exists(target) || Directory.Exists(target)
             && ((File.GetAttributes(target) & FileAttributes.ReparsePoint) != NoFileAttributes
                 || Directory.EnumerateFileSystemEntries(target).Any()))
-        { throw Errors.Fail(ErrorCode.Conflict, InvalidTarget); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, InvalidTarget);
+        }
     }
 
     internal static void RequirePath(string target)
@@ -77,7 +87,9 @@ internal static class ZoneTreeCatalogBackupPublication
         {
             if (File.Exists(ancestor.FullName) || ancestor.Exists
                 && (ancestor.Attributes & FileAttributes.ReparsePoint) != NoFileAttributes)
-            { throw Errors.Fail(ErrorCode.Conflict, InvalidTarget); }
+            {
+                throw Errors.Fail(ErrorCode.Conflict, InvalidTarget);
+            }
             ancestor = ancestor.Parent;
         }
 

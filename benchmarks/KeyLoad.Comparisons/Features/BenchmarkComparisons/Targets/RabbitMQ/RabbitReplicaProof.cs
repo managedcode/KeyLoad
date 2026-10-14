@@ -25,9 +25,13 @@ internal static class RabbitReplicaProof
             catch (HttpRequestException) when (!deadline.IsCancellationRequested) { }
             catch (JsonException) when (!deadline.IsCancellationRequested) { }
             try
-            { await Task.Delay(lifecycle.HttpReadinessPollInterval, timeProvider, deadline.Token); }
+            {
+                await Task.Delay(lifecycle.HttpReadinessPollInterval, timeProvider, deadline.Token);
+            }
             catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
-            { throw new ComparisonFailureException(RabbitReplicaReadinessTimeoutDetail); }
+            {
+                throw new ComparisonFailureException(RabbitReplicaReadinessTimeoutDetail);
+            }
         }
     }
 

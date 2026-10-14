@@ -19,7 +19,9 @@ internal static class PartitionMovementPolicyBusyColdRf3Assertions
             var mutations = entries.Where(entry => entry.Operation is not null).ToArray();
             var allowed = new HashSet<string>(StringComparer.Ordinal);
             if (entries.Length != PartitionMoveProtocol.EmptyCount)
-            { allowed.Add(Convert.ToHexString(KeySpace.AppliedBytes)); }
+            {
+                allowed.Add(Convert.ToHexString(KeySpace.AppliedBytes));
+            }
             if (original.Header is not null)
             {
                 await Assert.That(mutations.Length).IsGreaterThan(PartitionMoveProtocol.EmptyCount);
@@ -27,14 +29,18 @@ internal static class PartitionMovementPolicyBusyColdRf3Assertions
                     ?? throw new InvalidOperationException(PartitionMoveProtocol.MissingAuthority);
                 await Assert.That(outstanding).IsGreaterThan((long)PartitionMoveProtocol.EmptyCount);
                 foreach (var entry in mutations)
-                { await RequireFailedCommandAsync(original, actual, entry, commandId, requested, allowed); }
+                {
+                    await RequireFailedCommandAsync(original, actual, entry, commandId, requested, allowed);
+                }
                 var clock = mutations.Select(entry => entry.Operation!.EvaluatedAt)
                     .Append(PartitionMovementCapturePointerRf3Fault.Read<DateTimeOffset>(original, KeySpace.ClockBytes)).Max();
                 await Assert.That(PartitionMovementCapturePointerRf3Fault.Read<DateTimeOffset>(actual,
                     KeySpace.ClockBytes)).IsEqualTo(clock);
             }
             else
-            { await Assert.That(mutations.Length).IsEqualTo(PartitionMoveProtocol.EmptyCount); }
+            {
+                await Assert.That(mutations.Length).IsEqualTo(PartitionMoveProtocol.EmptyCount);
+            }
             await PartitionMovementCapturePointerRf3Cut.RequireExactRemainingRowsAsync(original, actual, allowed);
             await Assert.That(actual.StorePosition - original.StorePosition).IsEqualTo((long)entries.Length);
             await SqlRf3Protocol.EqualAsync(original.Header, actual.Header);
@@ -62,7 +68,12 @@ internal static class PartitionMovementPolicyBusyColdRf3Assertions
         await Assert.That(stored.Partition).IsNull();
         await Assert.That(stored.PolicyEpoch).IsEqualTo(actualRoot.PolicyEpoch);
         await Assert.That(stored.Fingerprint).IsEqualTo(JsonData.Fingerprint(new
-        { operation.Id, operation.Kind, operation.PrincipalId, operation.PayloadJson }));
+        {
+            operation.Id,
+            operation.Kind,
+            operation.PrincipalId,
+            operation.PayloadJson
+        }));
         await Assert.That(stored.Result.Error).IsEqualTo((ErrorCode?)ErrorCode.Conflict);
         await Assert.That(stored.Result.SafeDetail).IsEqualTo(PartitionMoveProtocol.PolicyBusy);
         var principal = PartitionMovementCapturePointerRf3Fault.Read<PrincipalRecord>(after, KeySpace.Principal(requested.Id));

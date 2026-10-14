@@ -16,7 +16,9 @@ public sealed partial class DatabaseEngine
         work.Check();
         var original = VerifyOperationAuthority(operation);
         if (original.PrincipalId != principalId)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, ClusterAdministrationRequiredMessage); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, ClusterAdministrationRequiredMessage);
+        }
         var frame = Store.Read(view => CaptureControlledBlobOutcomeView(work.CreateView(view),
             principalId, original, requestExpiry, Guid.NewGuid()));
         work.MeasureResult(frame);
@@ -34,19 +36,29 @@ public sealed partial class DatabaseEngine
         BlobKeys.Validate(blob);
         Authorization.Require(principal, blob.Partition, blob.Resource, BlobCommandScope.RequiredCapability(original.Kind));
         if (PartitionMovePublishedPlacementStorage.Read(view, blob.Partition) is null)
-        { return null; }
+        {
+            return null;
+        }
         var resources = PartitionMoveResources.Capture(view, blob.Partition, Limits);
         _ = RequireControlledBlobPolicies(principal, original, resources);
         var scope = CommandOutcomePartitionIdentity.Resolve(original);
         var selected = CommandOutcomeKeyResolver.Select(view, principalId, original.Id, scope);
         if (selected.Outcome is not { } previous)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, MissingDurableOutcomeMessage); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, MissingDurableOutcomeMessage);
+        }
         if (previous.PolicyEpoch != principal.PolicyEpoch)
-        { throw Errors.Fail(ErrorCode.PermissionDenied, ChangedOutcomePrincipalPolicyMessage); }
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, ChangedOutcomePrincipalPolicyMessage);
+        }
         if (previous.Incarnation != Store.Identity.Incarnation)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, EarlierOutcomeIncarnationMessage); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, EarlierOutcomeIncarnationMessage);
+        }
         if (previous.Fingerprint != CommandFingerprint(original))
-        { throw Errors.Fail(ErrorCode.Conflict, CommandContentConflictMessage); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, CommandContentConflictMessage);
+        }
         CommandOutcomeKeyResolver.ValidateSelectedScope(view, original, selected);
         return CaptureControlledBlobFrame(view, principal, blob, ControlledBlobReadPurpose.Outcome,
             original, previous, default, expiry, queryId);
@@ -58,7 +70,9 @@ public sealed partial class DatabaseEngine
         var current = Store.Read(view => CaptureControlledBlobOutcomeView(work.CreateView(view),
             original.Principal.Id, original.Original!, original.ExpiresAt, original.QueryId));
         if (current is null || JsonData.Fingerprint(current) != JsonData.Fingerprint(original))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
         work.Check();
     }
 }

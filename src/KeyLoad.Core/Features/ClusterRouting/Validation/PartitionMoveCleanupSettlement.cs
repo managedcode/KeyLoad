@@ -13,7 +13,9 @@ internal static class PartitionMoveCleanupSettlement
         PartitionMoveJournalReceipt receipt, ReadOnlyMemory<byte> bodyBytes, int maximumBytes)
     {
         if (bodyBytes.IsEmpty || bodyBytes.Length > maximumBytes)
-        { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid);
+        }
         var grant = PartitionMoveGrantStorage.Read(view, control.Partition, grantId, maximumBytes)
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
         var body = NativeSerialization.Deserialize<PartitionMoveCleanupBody>(bodyBytes.Span);
@@ -26,7 +28,9 @@ internal static class PartitionMoveCleanupSettlement
             || body.OperatorPrincipalId != control.PrincipalId
             || JsonData.Fingerprint(body.Control) != JsonData.Fingerprint(control)
             || receipt.AppliedPosition <= PartitionMoveProtocol.EmptyCount)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
         return grant;
     }
 }

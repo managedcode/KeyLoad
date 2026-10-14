@@ -35,7 +35,10 @@ public sealed partial class SurrealDbTarget(HttpClient http, string runId, strin
     private int topK;
     private bool ownsData;
     /// <inheritdoc/>
-    public TargetProfile Profile { get; private set; } = new(SurrealDbNativeTokens.TokenSurrealDB, SurrealDbNativeTokens.TokenUnverified, OnePersistentRocksDBNativeNode, SingleNativeCommittedWriteNotFaultQualified, CommittedPrimaryNativeDirectedGraphAndExactCosine, POSTSqlJSON, RootBasicAuthentication, image)
+    public TargetProfile Profile
+    {
+        get; private set;
+    } = new(SurrealDbNativeTokens.TokenSurrealDB, SurrealDbNativeTokens.TokenUnverified, OnePersistentRocksDBNativeNode, SingleNativeCommittedWriteNotFaultQualified, CommittedPrimaryNativeDirectedGraphAndExactCosine, POSTSqlJSON, RootBasicAuthentication, image)
     {
         Cluster = new(SingleResultCardinality, SingleResultCardinality, SingleCommunityNode, [PersistentRocksDBDirectory])
     };

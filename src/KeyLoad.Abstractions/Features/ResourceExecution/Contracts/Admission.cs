@@ -83,5 +83,8 @@ public sealed record NodeAdmissionStatus([property: Orleans.Id(0)] CommandAdmiss
 {
     /// <summary>Gets or initializes the HTTP admission status when HTTP admission is configured.</summary>
     [Orleans.Id(2)]
-    public HttpAdmissionStatus? Http { get; init; }
+    public HttpAdmissionStatus? Http
+    {
+        get; init;
+    }
 }

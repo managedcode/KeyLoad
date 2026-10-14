@@ -12,7 +12,10 @@ internal sealed class ZoneTreePointCacheFileFixture : IDisposable
     private readonly List<string> directories = [];
     private int disposeStarted;
 
-    internal CacheMemoryBudget Budget { get; }
+    internal CacheMemoryBudget Budget
+    {
+        get;
+    }
 
     internal ZoneTreePointCacheFileFixture(CacheMemoryLimits? limits = null)
         => Budget = new CacheMemoryBudget(UnitAdmissionOptions.Cache(limits ?? new CacheMemoryLimits()));

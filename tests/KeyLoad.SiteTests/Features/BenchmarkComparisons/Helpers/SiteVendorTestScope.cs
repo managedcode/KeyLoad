@@ -6,8 +6,14 @@ internal sealed class SiteVendorTestScope : IAsyncDisposable
 {
     private SiteTempDirectory? _temporary;
     private readonly SiteTestInputs _sourceInputs;
-    private SiteTestInputs? InputState { get; set; }
-    private SiteIsolatedFixture? FixtureState { get; set; }
+    private SiteTestInputs? InputState
+    {
+        get; set;
+    }
+    private SiteIsolatedFixture? FixtureState
+    {
+        get; set;
+    }
 
     private SiteVendorTestScope(SiteTestInputs sourceInputs)
     {

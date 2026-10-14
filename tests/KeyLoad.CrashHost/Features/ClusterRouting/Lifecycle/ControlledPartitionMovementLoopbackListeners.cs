@@ -42,9 +42,15 @@ internal sealed class ControlledPartitionMovementLoopbackListeners : IDisposable
     }
 
     /// <summary>Three distinct original control-owner origins in immutable voter order.</summary>
-    public ImmutableArray<string> ControlOrigins { get; }
+    public ImmutableArray<string> ControlOrigins
+    {
+        get;
+    }
     /// <summary>Three distinct original destination-owner origins in immutable voter order.</summary>
-    public ImmutableArray<string> DestinationOrigins { get; }
+    public ImmutableArray<string> DestinationOrigins
+    {
+        get;
+    }
     /// <summary>The original native primary endpoint reservation; no generation is inferred.</summary>
     public IPEndPoint SiloEndpoint => NativeEndpoint(FirstControlVoter);
 
@@ -67,7 +73,9 @@ internal sealed class ControlledPartitionMovementLoopbackListeners : IDisposable
     public void Dispose()
     {
         if (closed)
-        { return; }
+        {
+            return;
+        }
         closed = true;
         ports.Dispose();
     }

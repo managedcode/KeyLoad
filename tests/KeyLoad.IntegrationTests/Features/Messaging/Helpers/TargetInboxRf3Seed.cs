@@ -9,7 +9,10 @@ internal static class TargetInboxRf3Seed
     {
         var tenant = TargetInboxRf3Protocol.Tenant + Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat);
         var source = new PartitionRef(tenant, TargetInboxRf3Protocol.Database, TargetInboxRf3Protocol.Domain, TargetInboxRf3Protocol.SourcePartition);
-        var target = source with { PartitionKey = TargetInboxRf3Protocol.TargetPartition };
+        var target = source with
+        {
+            PartitionKey = TargetInboxRf3Protocol.TargetPartition
+        };
         foreach (var name in new[] { TargetInboxRf3Protocol.Input, TargetInboxRf3Protocol.Output })
         {
             _ = await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigureResourceAsync(Guid.NewGuid(),
@@ -17,7 +20,9 @@ internal static class TargetInboxRf3Seed
         }
         _ = await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigureResourceAsync(Guid.NewGuid(),
             new(tenant, target.DatabaseId, new(TargetInboxRf3Protocol.Target, ResourceKind.WorkQueue, target.TransactionDomainId)
-            { InboxPolicy = new(TargetInboxRf3Protocol.ReceiptCapacity, TargetInboxRf3Protocol.ByteCapacity) }), token));
+            {
+                InboxPolicy = new(TargetInboxRf3Protocol.ReceiptCapacity, TargetInboxRf3Protocol.ByteCapacity)
+            }), token));
         _ = await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigureResourceAsync(Guid.NewGuid(),
             new(tenant, target.DatabaseId, new(TargetInboxRf3Protocol.Collection, ResourceKind.Collection, target.TransactionDomainId)), token));
         var identity = await MessagingRf3Identity.CreateAsync(fixture, tenant,

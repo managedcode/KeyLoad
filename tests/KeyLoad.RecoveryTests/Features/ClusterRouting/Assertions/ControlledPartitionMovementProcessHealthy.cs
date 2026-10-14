@@ -38,7 +38,10 @@ internal static class ControlledPartitionMovementProcessHealthy
                 var expectedAck = new PartitionMovePhaseResult(actualFence.MoveId,
                     PartitionMovePeerStage.ControlAcknowledge, new(acknowledge.CommandId, owners.Control.Owner,
                         AcknowledgeIndex, actualFence.Journal.ControlIntentDigest), null, null, null, null,
-                    grant with { Settlement = actualFence.Journal });
+                    grant with
+                    {
+                        Settlement = actualFence.Journal
+                    });
                 await Assert.That(JsonDefaults.Serialize(ack).SequenceEqual(JsonDefaults.Serialize(expectedAck))).IsTrue();
                 var accept = ControlledPartitionMovementProcessFenceSettlementRequest.Accept(prepared.Prepared,
                     actualFence, owners, prepared.OriginalCallerAddress, prepared.OriginalExpiry);
@@ -48,7 +51,11 @@ internal static class ControlledPartitionMovementProcessHealthy
                     ?? throw new InvalidOperationException(ControlledPartitionMovementProcessProtocol.Invalid);
                 var expected = new PartitionMovePhaseResult(control.MoveId, PartitionMovePeerStage.ControlAcceptFence,
                     new(accept.CommandId, owners.Control.Owner, AcceptIndex, expectedFence.Journal.ControlIntentDigest),
-                    control with { Phase = PartitionMovePhase.Fenced, SourceCut = FenceIndex }, expectedFence.Fence, null, null);
+                    control with
+                    {
+                        Phase = PartitionMovePhase.Fenced,
+                        SourceCut = FenceIndex
+                    }, expectedFence.Fence, null, null);
                 await Assert.That(JsonDefaults.Serialize(accepted).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
                 await Assert.That(source.Journal.Log.State.LastIndex).IsEqualTo(AcceptIndex);
                 await Assert.That(source.Store.Position).IsEqualTo(AcceptedPosition);

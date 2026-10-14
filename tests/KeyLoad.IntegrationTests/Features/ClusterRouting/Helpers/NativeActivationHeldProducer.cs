@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
 
@@ -14,8 +14,14 @@ internal sealed class NativeActivationHeldProducer<T> : IAsyncDisposable
     private RequestCqrsProbeMarkerRecord? observed;
     private Task<RequestCqrsProbeMarkerRecord>? markerReader;
     private Task<RequestCqrsProbeActivationRecord>? witnessReader;
-    internal Guid Arm { get; }
-    internal Task<T> Producer { get; }
+    internal Guid Arm
+    {
+        get;
+    }
+    internal Task<T> Producer
+    {
+        get;
+    }
 
     internal NativeActivationHeldProducer(RequestCqrsProbeFixture controls,
         IReadOnlyList<ReplicaSiloDiscovery> discovery, string principal, Guid command,
@@ -48,12 +54,16 @@ internal sealed class NativeActivationHeldProducer<T> : IAsyncDisposable
             RequestCqrsProbeOutcome.Observed, discovery, caller.Token);
         _ = await Task.WhenAny(marker, Producer).ConfigureAwait(false);
         if (Producer.IsCompleted)
-        { throw new InvalidOperationException(NativeActivationRf3Protocol.Missing); }
+        {
+            throw new InvalidOperationException(NativeActivationRf3Protocol.Missing);
+        }
         observed = await marker.ConfigureAwait(false);
         var witness = witnessReader = NativeActivationRf3Witness.ReadAsync(controls, observed.Value, discovery, caller.Token);
         _ = await Task.WhenAny(witness, Producer).ConfigureAwait(false);
         if (Producer.IsCompleted)
-        { throw new InvalidOperationException(NativeActivationRf3Protocol.Missing); }
+        {
+            throw new InvalidOperationException(NativeActivationRf3Protocol.Missing);
+        }
         return await witness.ConfigureAwait(false);
     }
 
@@ -66,9 +76,13 @@ internal sealed class NativeActivationHeldProducer<T> : IAsyncDisposable
         using var cleanup = new CancellationTokenSource(RequestCqrsRf3Protocol.CleanupDeadline, TimeProvider.System);
         await ServerFailureObserver.ObserveAsync(async () => { _ = await Producer.WaitAsync(cleanup.Token).ConfigureAwait(false); }, failures);
         if (markerReader is { } originalMarker)
-        { await ServerFailureObserver.ObserveAsync(async () => { _ = await originalMarker.WaitAsync(cleanup.Token); }, failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(async () => { _ = await originalMarker.WaitAsync(cleanup.Token); }, failures);
+        }
         if (witnessReader is { } originalWitness)
-        { await ServerFailureObserver.ObserveAsync(async () => { _ = await originalWitness.WaitAsync(cleanup.Token); }, failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(async () => { _ = await originalWitness.WaitAsync(cleanup.Token); }, failures);
+        }
         if (observed is { } marker)
         {
             await ServerFailureObserver.ObserveAsync(() => RequestCqrsPhaseFaultAssertions.VerifySettledAsync(controls,
@@ -79,11 +93,15 @@ internal sealed class NativeActivationHeldProducer<T> : IAsyncDisposable
             && (witnessReader is null || witnessReader.IsCompleted))
         {
             try
-            { caller.Dispose(); }
+            {
+                caller.Dispose();
+            }
             catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
             catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         }
         else
-        { failures.Add(new InvalidOperationException(NativeActivationRf3Protocol.Missing)); }
+        {
+            failures.Add(new InvalidOperationException(NativeActivationRf3Protocol.Missing));
+        }
     }
 }

@@ -24,10 +24,19 @@ internal sealed class BlobQuotaIsolationTests
         var bounded = Policy(SmallLimit, SmallLimit);
         Configure(db, FirstResource, bounded);
         Configure(db, SecondResource, bounded);
-        var first = new BlobRef(db.Partition with { PartitionKey = FirstPartitionKey }, FirstResource, "first");
+        var first = new BlobRef(db.Partition with
+        {
+            PartitionKey = FirstPartitionKey
+        }, FirstResource, "first");
         var sameResourceOtherPartition = new BlobRef(
-            db.Partition with { PartitionKey = SecondPartitionKey }, FirstResource, "second");
-        var separateResource = sameResourceOtherPartition with { Resource = SecondResource };
+            db.Partition with
+            {
+                PartitionKey = SecondPartitionKey
+            }, FirstResource, "second");
+        var separateResource = sameResourceOtherPartition with
+        {
+            Resource = SecondResource
+        };
         Begin(db, first, SmallLimit, Guid.NewGuid()).Get<BlobCommitResult<BlobUploadInfo>>();
 
         var sameResourceFailure = Begin(db, sameResourceOtherPartition, 1, Guid.NewGuid());
@@ -66,7 +75,9 @@ internal sealed class BlobQuotaIsolationTests
     {
         var definition = new ResourceDefinition(resource, ResourceKind.BlobStore,
             database.Partition.TransactionDomainId)
-        { BlobPolicy = policy };
+        {
+            BlobPolicy = policy
+        };
         database.Submit(OperationKind.ConfigureResource,
             new ConfigureResourceRequest(database.Partition.TenantId, database.Partition.DatabaseId, definition))
             .Get<ResourceDefinition>();

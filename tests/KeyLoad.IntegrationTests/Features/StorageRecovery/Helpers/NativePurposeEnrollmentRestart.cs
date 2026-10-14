@@ -37,13 +37,17 @@ internal static class NativePurposeEnrollmentRestart
     {
         using var lease = OpenWriter(path);
         if (lease.Length != NativeDiscoveryOmissionProtocol.EmptyCount)
-        { throw new IOException(NativeDiscoveryOmissionProtocol.Invalid); }
+        {
+            throw new IOException(NativeDiscoveryOmissionProtocol.Invalid);
+        }
     }
 
     private static FileStream OpenWriter(string path)
     {
         if (OperatingSystem.IsWindows())
-        { throw new PlatformNotSupportedException(RequestCqrsProbeFixtureProtocol.PrivatePermissionsUnsupported); }
+        {
+            throw new PlatformNotSupportedException(RequestCqrsProbeFixtureProtocol.PrivatePermissionsUnsupported);
+        }
         return new FileStream(path, new FileStreamOptions
         {
             Mode = FileMode.OpenOrCreate,
@@ -61,7 +65,9 @@ internal static class NativePurposeEnrollmentRestart
         {
             using var forbidden = TryOpenWriter(path);
             if (forbidden is not null)
-            { failures.Add(new InvalidOperationException("The original publication writer lease did not exclude another writer.")); }
+            {
+                failures.Add(new InvalidOperationException("The original publication writer lease did not exclude another writer."));
+            }
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -69,8 +75,12 @@ internal static class NativePurposeEnrollmentRestart
     private static FileStream? TryOpenWriter(string path)
     {
         try
-        { return OpenWriter(path); }
+        {
+            return OpenWriter(path);
+        }
         catch (IOException)
-        { return null; }
+        {
+            return null;
+        }
     }
 }

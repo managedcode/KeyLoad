@@ -14,7 +14,9 @@ internal static class PartitionQueryRf3Assertions
         var expected = scenario.ExpectedRows(selected);
         await Assert.That(page.Rows.Length).IsEqualTo(expected.Length);
         for (var index = 0; index < expected.Length; index++)
-        { await AssertRowAsync(page.Rows[index], expected[index]); }
+        {
+            await AssertRowAsync(page.Rows[index], expected[index]);
+        }
         await AssertLeavesAsync(page.Leaves, selected);
         var expectedDuplicates = expected.Where(row => row.Id == PartitionQueryRf3Protocol.DuplicateTextId)
             .Select(row => row.Partition).Distinct().Count();

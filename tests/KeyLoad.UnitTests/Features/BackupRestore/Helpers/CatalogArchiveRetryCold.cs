@@ -27,7 +27,9 @@ internal static class CatalogArchiveRetryCold
         {
             token.ThrowIfCancellationRequested();
             if (cold != 0)
-            { fixture.ReopenTarget(target); }
+            {
+                fixture.ReopenTarget(target);
+            }
             var current = fixture.Target!;
             await Assert.That(current.Position).IsEqualTo(restoredPosition + 1L);
             await Assert.That(JsonSerializer.Serialize(current.Identity, JsonDefaults.Options)).IsEqualTo(identity);

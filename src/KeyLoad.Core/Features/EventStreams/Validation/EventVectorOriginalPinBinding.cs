@@ -15,7 +15,9 @@ internal static class EventVectorOriginalPinBinding
         ArgumentNullException.ThrowIfNull(admission);
         admission.RequireEncodedBytes(request.OriginalPinNativeBody.Length);
         if (request.OriginalPinCommandId == Guid.Empty || request.OriginalPinNativeBody.IsEmpty)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidIdentity); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidIdentity);
+        }
         var original = NativeSerialization.Deserialize<EventVectorSourceMutation>(request.OriginalPinNativeBody.Span);
         if (original.Version != Version || original.Role != EventVectorSourcePhaseRole.Pin
             || original.MapId != request.MapId || original.ControlPartition != request.ControlPartition
@@ -23,7 +25,9 @@ internal static class EventVectorOriginalPinBinding
             || original.PrincipalId != request.PrincipalId || original.OriginalPinCommandId != Guid.Empty
             || !original.OriginalPinNativeBody.IsEmpty || original.ExpectedPinRevision != InitialRevision
             || original.ExpectedCoverageGeneration != InitialRevision)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidIdentity); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidIdentity);
+        }
         return original;
     }
 
@@ -42,6 +46,8 @@ internal static class EventVectorOriginalPinBinding
             || current.OriginalPinExpiresAt != original.FirstExpiresAt || current.Position < original.Position
             || !CryptographicOperations.FixedTimeEquals(current.OriginalPinBodyDigest.Span,
                 SHA256.HashData(request.OriginalPinNativeBody.Span)))
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidIdentity); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidIdentity);
+        }
     }
 }

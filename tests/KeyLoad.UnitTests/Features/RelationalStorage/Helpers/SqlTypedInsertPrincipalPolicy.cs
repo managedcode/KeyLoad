@@ -18,7 +18,10 @@ internal static class SqlTypedInsertPrincipalPolicy
         await FenceAsync(fixture, state, SqlTypedInsertLiteral.ScopeDenied);
         await SqlTypedInsertAssertions.UnchangedAsync(fixture.Store, image, cut);
         await SqlTypedInsertResourcePolicy.BytesAsync(fixture, state);
-        var repaired = state.Principal with { PolicyEpoch = RepairedEpoch };
+        var repaired = state.Principal with
+        {
+            PolicyEpoch = RepairedEpoch
+        };
         await ConfigureAsync(fixture, repaired);
         image = QueueWholeFlowStorage.Bytes(fixture.Store);
         cut = fixture.Store.Position;
@@ -31,7 +34,12 @@ internal static class SqlTypedInsertPrincipalPolicy
         await SqlTypedInsertAssertions.ImageAsync(fixture, fixture.Store, fixture.Database, repaired: true);
         await SqlTypedInsertHot.ReplayAsync(fixture, healthy);
         await SqlTypedInsertResourcePolicy.BytesAsync(fixture, state);
-        return state with { Principal = repaired, Repaired = healthy, EpochFenced = true };
+        return state with
+        {
+            Principal = repaired,
+            Repaired = healthy,
+            EpochFenced = true
+        };
     }
     internal static async Task FenceAsync(TestDatabase fixture, SqlTypedInsertState state,
         string safeDetail = SqlTypedInsertLiteral.EpochChanged)

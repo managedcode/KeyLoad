@@ -14,13 +14,21 @@ internal sealed class ControlledPartitionMovementTerminalProcessChild(NativeMove
     private Task? stderr;
     private ControlledPartitionMovementTerminalProcessPipe? output;
     private bool started;
-    internal bool Settled { get; private set; }
+    internal bool Settled
+    {
+        get; private set;
+    }
 
     internal void Start(ProcessStartInfo start)
     {
-        process = new() { StartInfo = start };
+        process = new()
+        {
+            StartInfo = start
+        };
         if (!process.Start())
-        { throw new IOException("The original movement child did not start."); }
+        {
+            throw new IOException("The original movement child did not start.");
+        }
         started = true;
         exit = process.WaitForExitAsync(CancellationToken.None);
         output = new(signal, options);
@@ -36,14 +44,19 @@ internal sealed class ControlledPartitionMovementTerminalProcessChild(NativeMove
         {
             var first = await Task.WhenAny(output!.Signal, joined).WaitAsync(token);
             if (first != output.Signal)
-            { await joined; throw new IOException("The original child marker is absent."); }
+            {
+                await joined;
+                throw new IOException("The original child marker is absent.");
+            }
             await output.Signal;
             Kill();
         }
         await joined.WaitAsync(token);
         Settled = process!.HasExited && exit!.IsCompleted && stdout!.IsCompleted && stderr!.IsCompleted;
         if (signal is null && process!.ExitCode != SuccessfulExit)
-        { throw new IOException("The original movement child failed."); }
+        {
+            throw new IOException("The original movement child failed.");
+        }
     }
 
     internal async Task JoinCleanupAsync(List<Exception> failures, CancellationToken token)
@@ -67,7 +80,9 @@ internal sealed class ControlledPartitionMovementTerminalProcessChild(NativeMove
     public void Dispose()
     {
         if (!Settled)
-        { throw new IOException("The original child or its readers have not joined."); }
+        {
+            throw new IOException("The original child or its readers have not joined.");
+        }
         process?.Dispose();
         GC.SuppressFinalize(this);
     }
@@ -75,12 +90,16 @@ internal sealed class ControlledPartitionMovementTerminalProcessChild(NativeMove
     private void Kill()
     {
         if (!process!.HasExited)
-        { process.Kill(entireProcessTree: true); }
+        {
+            process.Kill(entireProcessTree: true);
+        }
     }
 
     private static async Task ObserveAsync(Task? original, List<Exception> failures, CancellationToken token)
     {
         if (original is not null)
-        { await ServerFailureObserver.ObserveAsync(() => original.WaitAsync(token), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => original.WaitAsync(token), failures);
+        }
     }
 }

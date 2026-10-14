@@ -23,10 +23,14 @@ internal static class Bm25PrivateAdmissionFlow
             using var database = new TestDatabase(nativeReplicaAdmission: true);
             await KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => ExecuteAsync(database), failures);
         }
-        catch (Exception error) when (KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
-        catch (Exception error) when (!KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
+        catch (Exception error) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
+        catch (Exception error) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
         KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }
 
@@ -92,21 +96,21 @@ internal static class Bm25PrivateAdmissionFlow
         CancellationToken token)
     {
         var routing = UnitRoutingOptions.Routing();
-        var codec = new KeyLoad.Orleans.GrainRequestCodec(database.Database, database.Database.EvaluationClock, routing);
+        var codec = new KeyLoad.Clustering.GrainRequestCodec(database.Database, database.Database.EvaluationClock, routing);
         var expiry = database.Database.EvaluationClock.GetUtcNow().Add(routing.Value.RequestLifetime);
         var signed = codec.CreateBm25CorpusPublication(Guid.NewGuid(), operation, expiry);
         var decoded = codec.Verify(signed);
         await Assert.That(decoded.Envelope.CommandId).IsEqualTo(operation.Id);
         await Assert.That(decoded.Envelope.PrincipalId).IsEqualTo(Root);
-        await Assert.That(decoded.Envelope.Purpose).IsEqualTo(KeyLoad.Orleans.Bm25RequestScope.Purpose);
+        await Assert.That(decoded.Envelope.Purpose).IsEqualTo(KeyLoad.Clustering.Bm25RequestScope.Purpose);
         await Assert.That(decoded.Envelope.ExpiresAt).IsEqualTo(expiry);
-        await Assert.That(KeyLoad.Orleans.GrainBm25CorpusPublicationCommand.Resolve(decoded))
+        await Assert.That(KeyLoad.Clustering.GrainBm25CorpusPublicationCommand.Resolve(decoded))
             .IsEqualTo(database.Partition.AtomicPartitionId);
         var phase = NativeCommandPayload.Read<Bm25CorpusPublicationPhaseCommand>(operation);
         await Assert.That(decoded.Envelope.ExpiresAt > phase.OriginalExpiry).IsTrue();
         var principal = database.Store.Read(view =>
             database.Database.Principal(view, Root, database.Database.EvaluationClock.GetUtcNow()));
-        return await KeyLoad.Orleans.GrainBm25CorpusPublicationCommand.SubmitAsync(database.Database,
+        return await KeyLoad.Clustering.GrainBm25CorpusPublicationCommand.SubmitAsync(database.Database,
             new KeyLoad.UnitTests.Features.ClusterRouting.RequestCqrsNativeCommitCoordinator(database), decoded, principal, token);
     }
 }

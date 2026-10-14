@@ -66,7 +66,11 @@ internal sealed class NativeQuorumTopologyRabbitTests
         {
             "missing-node" => () => brokers.RemoveAt(1),
             "extra-offline-node" => () => brokers.Add(new JsonObject
-            { [T.Name] = "rabbit@extra", [T.Running] = false, [T.Type] = T.Disc }),
+            {
+                [T.Name] = "rabbit@extra",
+                [T.Running] = false,
+                [T.Type] = T.Disc
+            }),
             "duplicate-node" => () => brokers[1]![T.Name] = brokers[0]![T.Name]!.DeepClone(),
             "offline-member" => () => brokers[1]![T.Running] = false,
             "ram-node" => () => brokers[1]![T.Type] = T.Ram,

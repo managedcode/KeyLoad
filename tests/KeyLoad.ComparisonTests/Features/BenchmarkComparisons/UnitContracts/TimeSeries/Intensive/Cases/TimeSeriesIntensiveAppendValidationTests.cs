@@ -17,7 +17,10 @@ internal sealed class TimeSeriesIntensiveAppendValidationTests
         var ledger = new TimeSeriesIntensiveAttemptLedger(new TimeSeriesIntensiveAttempt[10000], 0, 10000, 2);
         for (var index = 0; index < 10000; index++)
         {
-            ledger.Publish(TimeSeriesIntensiveAttemptValues.Success(2, index) with { ReceiptSequence = index * 7919L % 10000 + 1 });
+            ledger.Publish(TimeSeriesIntensiveAttemptValues.Success(2, index) with
+            {
+                ReceiptSequence = index * 7919L % 10000 + 1
+            });
         }
 
         var view = new TimeSeriesIntensiveReceiptView(commands, ledger.Attempts);

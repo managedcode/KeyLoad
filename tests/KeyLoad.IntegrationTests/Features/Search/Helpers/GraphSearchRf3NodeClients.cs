@@ -9,9 +9,18 @@ internal sealed class GraphSearchRf3NodeClients : IDisposable
     private readonly HttpClient[] adminHttp;
     private readonly HttpClient[] readerHttp;
 
-    internal KeyLoadClient[] Administrators { get; }
-    internal KeyLoadClient[] Readers { get; }
-    internal string ReaderSecret { get; }
+    internal KeyLoadClient[] Administrators
+    {
+        get;
+    }
+    internal KeyLoadClient[] Readers
+    {
+        get;
+    }
+    internal string ReaderSecret
+    {
+        get;
+    }
 
     internal GraphSearchRf3NodeClients(ClusterFixture fixture, string readerSecret, string[] nodes)
     {

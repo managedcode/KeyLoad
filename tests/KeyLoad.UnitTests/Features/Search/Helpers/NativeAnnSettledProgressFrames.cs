@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using ManagedCode.Communication;
 using ManagedCode.Communication.CQRS;
 
@@ -16,11 +16,15 @@ internal static class NativeAnnSettledProgressFrames
         {
             await writer.StartedAsync(new GrainRequestProgress(requestId));
             foreach (var phase in phases)
-            { await AnnMaintenanceProgress.WriteAsync(writer, requestId, phase); }
+            {
+                await AnnMaintenanceProgress.WriteAsync(writer, requestId, phase);
+            }
             return Result<GrainOperationReply>.Succeed(new GrainOperationReply());
         }, TestContext.Current!.Execution.CancellationToken);
         await foreach (var frame in stream)
-        { frames.Add(frame); }
+        {
+            frames.Add(frame);
+        }
         await Assert.That(frames.Count(value => value.Kind == CqrsStreamChunkKind.Completed)).IsEqualTo(OneFinal);
         return frames.Where(value => value.Kind == CqrsStreamChunkKind.Progress).ToArray();
     }

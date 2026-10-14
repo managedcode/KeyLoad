@@ -1,5 +1,5 @@
 using System.Collections.Concurrent;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.UnitTests.Features.ClusterReplication;
 
@@ -13,8 +13,14 @@ internal sealed class RequestCqrsCohortEndpoint : IReplicaNativeDiscoveryObserve
     private volatile bool unavailable;
     private volatile bool malformed;
     private long count;
-    internal ReplicaNativeDiscoveryRuntime? Runtime { get; set; }
-    internal bool Stopped { get; private set; }
+    internal ReplicaNativeDiscoveryRuntime? Runtime
+    {
+        get; set;
+    }
+    internal bool Stopped
+    {
+        get; private set;
+    }
     internal long Requests => Interlocked.Read(ref count);
 
     internal void BeforeSend(ReplicaNativeDiscoveryRequest request, CancellationToken token)
@@ -79,7 +85,10 @@ internal sealed class RequestCqrsCohortEndpoint : IReplicaNativeDiscoveryObserve
         }
 
         copy[0] ^= 1;
-        return reply with { Payload = copy };
+        return reply with
+        {
+            Payload = copy
+        };
     }
     internal void SetDiscovery(ReplicaEnvelopeAuthenticator authentication, ReplicaSiloDiscovery discovery)
     {
@@ -94,7 +103,13 @@ internal sealed class RequestCqrsCohortEndpoint : IReplicaNativeDiscoveryObserve
     internal void SetTamperedPayload() => malformed = true;
     internal void SetHeaderGate(RequestCqrsCohortNativeGate gate) => dispatchGate = gate;
     internal void SetBodyGate(RequestCqrsCohortNativeGate gate) => payloadGate = gate;
-    internal void SetUnavailable() { unavailable = true; ReleaseAll(); dispatchGate = null; payloadGate = null; }
+    internal void SetUnavailable()
+    {
+        unavailable = true;
+        ReleaseAll();
+        dispatchGate = null;
+        payloadGate = null;
+    }
     internal async Task StopListeningAsync(CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
@@ -102,8 +117,22 @@ internal sealed class RequestCqrsCohortEndpoint : IReplicaNativeDiscoveryObserve
         Stopped = true;
         token.ThrowIfCancellationRequested();
     }
-    internal void ReleaseAll() { dispatchGate?.Release(); payloadGate?.Release(); }
-    internal void Reset() { ReleaseAll(); selected = null; dispatchGate = null; payloadGate = null; unavailable = false; malformed = false; requests.Clear(); Interlocked.Exchange(ref count, 0); }
+    internal void ReleaseAll()
+    {
+        dispatchGate?.Release();
+        payloadGate?.Release();
+    }
+    internal void Reset()
+    {
+        ReleaseAll();
+        selected = null;
+        dispatchGate = null;
+        payloadGate = null;
+        unavailable = false;
+        malformed = false;
+        requests.Clear();
+        Interlocked.Exchange(ref count, 0);
+    }
 }
 
 internal sealed class RequestCqrsCohortNativeGate
@@ -117,7 +146,9 @@ internal sealed class RequestCqrsCohortNativeGate
     {
         entered.TrySetResult();
         try
-        { await released.Task.WaitAsync(token); }
+        {
+            await released.Task.WaitAsync(token);
+        }
         catch (OperationCanceledException) when (token.IsCancellationRequested) { aborted.TrySetResult(); throw; }
     }
     internal void Release() => released.TrySetResult();

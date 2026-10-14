@@ -40,7 +40,10 @@ internal sealed class QueueLostResponseWholeFlowTests
             UnitExecutionOptions.PointCacheExecution());
         var database = QueueWholeFlowStorage.Open(reopened);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(reopened, leased, leasedPosition, identity);
-        await RefuseChangedContentAsync(database, reopened, OperationKind.Receive, claim with { LeaseSeconds = 31 }, claimId, time);
+        await RefuseChangedContentAsync(database, reopened, OperationKind.Receive, claim with
+        {
+            LeaseSeconds = 31
+        }, claimId, time);
         var retried = QueueWholeFlowStorage.Apply(database, OperationKind.Receive, claim, claimId, time);
         await NativeReplayResultAssertions.Same<ReceiveResult>(retried, originalResult);
         await Assert.That(QueueWholeFlowStorage.Bytes(reopened)).IsEquivalentTo(leased, CollectionOrdering.Matching);
@@ -56,7 +59,10 @@ internal sealed class QueueLostResponseWholeFlowTests
             UnitExecutionOptions.PointCacheExecution());
         var restored = QueueWholeFlowStorage.Open(second);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(second, acked, ackedPosition, identity);
-        await RefuseChangedContentAsync(restored, second, OperationKind.Delivery, ack with { Action = DeliveryAction.Renew }, ackId, time);
+        await RefuseChangedContentAsync(restored, second, OperationKind.Delivery, ack with
+        {
+            Action = DeliveryAction.Renew
+        }, ackId, time);
         var repeated = QueueWholeFlowStorage.Apply(restored, OperationKind.Delivery, ack, ackId, time);
         await NativeReplayResultAssertions.Same<CommitReceipt>(repeated, acknowledged);
         await Assert.That(QueueWholeFlowStorage.Bytes(second)).IsEquivalentTo(acked, CollectionOrdering.Matching);

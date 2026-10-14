@@ -33,7 +33,9 @@ internal sealed record McpDocumentScenario(PartitionRef Partition)
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
         var administrator = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         var definition = new ResourceDefinition(McpDocumentProtocol.Collection, ResourceKind.Collection, partition.TransactionDomainId)
-        { FieldPolicies = policies };
+        {
+            FieldPolicies = policies
+        };
         await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigureResourceAsync(Guid.NewGuid(),
             new(partition.TenantId, partition.DatabaseId, definition),
             cancellationToken));

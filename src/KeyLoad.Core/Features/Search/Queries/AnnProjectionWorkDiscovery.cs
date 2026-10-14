@@ -23,9 +23,13 @@ public sealed partial class DatabaseEngine
             {
                 var current = NativeSerialization.Deserialize<ProjectionConsumerInfo>(row.Value.Span);
                 if (!row.Key.Span.SequenceEqual(ConsumerKey(current.Consumer)))
-                { throw Errors.Fail(ErrorCode.Corruption, InvalidMaintenanceAuthority); }
+                {
+                    throw Errors.Fail(ErrorCode.Corruption, InvalidMaintenanceAuthority);
+                }
                 if (current.Released || current.Definition.AnnMaintenance is null)
-                { continue; }
+                {
+                    continue;
+                }
                 try
                 {
                     items.Add(ReadAnnProjectionWork(bounded, current.Consumer,
@@ -33,7 +37,9 @@ public sealed partial class DatabaseEngine
                 }
                 catch (KeyLoadException refusal) when (refusal.Code is ErrorCode.PermissionDenied
                     or ErrorCode.Unauthenticated or ErrorCode.TokenInvalidated)
-                { rejected.Add(refusal.Code); }
+                {
+                    rejected.Add(refusal.Code);
+                }
             }
             return new(items.ToImmutable(), page.HasMore ? page.Records[^LastConsumerRecordOffset].Key.ToArray() : null,
                 rejected.ToImmutable());
@@ -54,7 +60,9 @@ public sealed partial class DatabaseEngine
         var physical = new PhysicalShardRecord(placement.PhysicalShardId, placement.Incarnation,
             placement.VoterIds, placement.PlacementEpoch);
         if (physical.Incarnation != Store.Identity.Incarnation)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, InvalidMaintenanceAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, InvalidMaintenanceAuthority);
+        }
         return new(current, principal, Store.Identity.NodeId, physical, ReadOutboxHead(bounded, consumer.Partition).Tail);
     }
 }

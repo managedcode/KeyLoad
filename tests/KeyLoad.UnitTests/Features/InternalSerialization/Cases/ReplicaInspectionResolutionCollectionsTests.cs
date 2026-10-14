@@ -34,7 +34,10 @@ internal sealed class ReplicaInspectionResolutionCollectionsTests
         await Assert.That(ReferenceEquals(inspected.Value.VoterIds[0], inspected.Value.VoterIds[1])).IsTrue();
         await Assert.That(inspected.Metadata(inspected.Value.VoterIds[0], 64)).IsEqualTo(voter);
         await Assert.That(inspected.Metadata(inspected.Value.VoterIds[1], 64)).IsEqualTo(voter);
-        var empty = ReplicaProtocolCodec.Serialize(record with { VoterIds = [] });
+        var empty = ReplicaProtocolCodec.Serialize(record with
+        {
+            VoterIds = []
+        });
         var heartbeat = ReplicaNativeInspection.Inspect<ReplicaBenchmarkMembershipRecord>(empty, 0);
         await Assert.That(heartbeat.Value.VoterIds.IsDefault).IsFalse();
         await Assert.That(heartbeat.Value.VoterIds.IsEmpty).IsTrue();

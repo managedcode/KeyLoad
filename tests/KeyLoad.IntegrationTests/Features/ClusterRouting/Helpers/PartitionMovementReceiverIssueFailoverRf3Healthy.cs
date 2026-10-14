@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 using Aspire.Hosting.ApplicationModel;
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.Orleans;
 using ManagedCode.Communication;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -42,7 +42,9 @@ internal static class PartitionMovementReceiverIssueFailoverRf3Healthy
         var incarnation = await model.Resources.OfType<ParameterResource>()
             .Single(resource => resource.Name == ReceiverIncarnationParameter).GetValueAsync(cancellationToken).ConfigureAwait(false);
         if (!Guid.TryParseExact(incarnation, ReceiverIncarnationFormat, out var actualIncarnation) || actualIncarnation == Guid.Empty)
-        { throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState); }
+        {
+            throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState);
+        }
         var secret = Convert.FromBase64String(wave.MovementTargetPeerKey
             ?? throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState));
         try

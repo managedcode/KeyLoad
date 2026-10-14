@@ -21,17 +21,25 @@ internal static class NativeTextSelectedSourceAdmission
             budget.Check();
             var actual = NativeTextIncrementalEnrollmentFiles.Read(path, node, budget, options);
             if (actual.Consumer != selection.Consumer || actual.Generation != selection.Generation)
-            { continue; }
+            {
+                continue;
+            }
             if (selected is not null || actual.Scope.Collection != request.Collection || actual.Scope.Field != request.TextField)
-            { throw NativeTextErrors.Corrupt(); }
+            {
+                throw NativeTextErrors.Corrupt();
+            }
             selected = Path.GetFileName(path);
             enrollment = actual;
         }
         if (selected is null || enrollment is null)
-        { throw NativeTextErrors.Mismatch(); }
+        {
+            throw NativeTextErrors.Mismatch();
+        }
         var generationPath = Path.Combine(root, selected);
         if (File.Exists(Path.Combine(generationPath, NativeTextIncrementalProtocol.IntentFile)))
-        { throw NativeTextErrors.Mismatch(); }
+        {
+            throw NativeTextErrors.Mismatch();
+        }
         var maintenance = new TextIndexMaintenanceRequest(enrollment.BuildCommandId, selection.Consumer,
             request.Collection, request.TextField!, selection.Generation, node, enrollment.Placement,
             TextIndexMaintenanceMode.Restore);
@@ -39,7 +47,9 @@ internal static class NativeTextSelectedSourceAdmission
         NativeTextIncrementalValidation.Manifest(manifest, enrollment.Scope, selection.Consumer,
             selection.Generation, enrollment.Placement, database.Limits.MaxScanRecords, budget, options);
         if (manifest.Bootstrap)
-        { throw NativeTextErrors.Mismatch(); }
+        {
+            throw NativeTextErrors.Mismatch();
+        }
         var source = NativeTextSeedCollector.CaptureView(database, view, manifest.Scope.PrincipalId,
             new(selection.Consumer, selection.Generation, request.Collection, request.TextField!, node, enrollment.Placement), budget);
         NativeTextIncrementalSourceValidation.Authority(manifest, maintenance, source, budget);

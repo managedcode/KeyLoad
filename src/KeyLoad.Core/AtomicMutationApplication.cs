@@ -22,7 +22,13 @@ public sealed partial class DatabaseEngine
         TopicPurgeReadBudget? purgeBudget = null;
         foreach (var (mutation, derived) in ExpandCommandMutations(tx, principal, partition, mutations, now))
         {
-            var documentId = mutation switch { PutDocument put => put.Id, PatchDocument patch => patch.Id, DeleteDocument delete => delete.Id, _ => null };
+            var documentId = mutation switch
+            {
+                PutDocument put => put.Id,
+                PatchDocument patch => patch.Id,
+                DeleteDocument delete => delete.Id,
+                _ => null
+            };
             var key = documentId is null ? null : DocumentKey(partition, mutation.Resource, documentId);
             var before = key is null ? null : tx.GetRecord<DocumentRecord>(key);
             var context = new DocumentMutationContext(key!, before);
@@ -34,11 +40,16 @@ public sealed partial class DatabaseEngine
                 _ => null
             };
             if (mutation is PurgeTopic)
-            { purgeBudget ??= new TopicPurgeReadBudget(OperationLimitsOptions); }
+            {
+                purgeBudget ??= new TopicPurgeReadBudget(OperationLimitsOptions);
+            }
             var receipt = image?.Receipt ?? ApplyNonDocumentMutation(tx, principal, partition, mutation, now, position, purgeBudget, operation);
             if (derived)
             {
-                receipt = receipt with { CompositionReferences = CompositionMutationReferences(mutation) };
+                receipt = receipt with
+                {
+                    CompositionReferences = CompositionMutationReferences(mutation)
+                };
             }
             receipts.Add(receipt);
             var after = image?.After;

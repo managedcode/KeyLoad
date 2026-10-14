@@ -16,12 +16,16 @@ public sealed partial class DatabaseEngine
         ReadExecutionBudgetReadGrant? grant = null)
     {
         if (selectedOwner == control.PhysicalShardId)
-        { return control; }
+        {
+            return control;
+        }
         var owners = (grant is null ? PhysicalOwnerDirectorySerialization.Read(view)
             : PhysicalOwnerDirectorySerialization.Read(view, grant))
             ?? throw Errors.Fail(missingOwnerCode, UnregisteredPlacementOwner);
         if (!PhysicalOwnerEntryValidation.SameOwner(owners.ControlOwner, control))
-        { throw Errors.Fail(ErrorCode.Corruption, OwnerDirectoryControlMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, OwnerDirectoryControlMismatch);
+        }
         var selected = owners.Owners.SingleOrDefault(entry => entry.Owner.PhysicalShardId == selectedOwner);
         return selected?.Owner ?? throw Errors.Fail(missingOwnerCode, UnregisteredPlacementOwner);
     }
@@ -31,7 +35,9 @@ public sealed partial class DatabaseEngine
     {
         var row = AtomicPartitionPlacementSerialization.ReadRow(view, partition);
         if (row is not null)
-        { AtomicPartitionPlacementValidation.ValidateRowShape(row, partition); }
+        {
+            AtomicPartitionPlacementValidation.ValidateRowShape(row, partition);
+        }
         var owner = row is null ? control
             : ResolveRegisteredPlacementOwner(view, control, row.PhysicalShardId, ErrorCode.Corruption);
         var directory = AtomicPartitionPlacementSerialization.ReadDirectory(view);

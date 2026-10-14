@@ -11,7 +11,9 @@ internal static class ContainerRuntimeKilledOwnerValidation
     {
         if (!ReferenceEquals(owner, actualOriginal) || names.Count != originalReceipts.Count
             || names.Keys.Any(name => !originalReceipts.ContainsKey(name)))
-        { throw new InvalidOperationException(ContainerRestartOwnership.PendingFailure); }
+        {
+            throw new InvalidOperationException(ContainerRestartOwnership.PendingFailure);
+        }
         foreach (var pair in names)
         {
             var original = originalReceipts[pair.Key];
@@ -24,7 +26,9 @@ internal static class ContainerRuntimeKilledOwnerValidation
                 || original.Before.ConfigImage != original.Stopped.ConfigImage
                 || original.Before.ImageId != original.Stopped.ImageId
                 || original.Before.StartedAt != original.Stopped.StartedAt)
-            { throw new InvalidOperationException(ContainerRestartOwnership.PendingFailure); }
+            {
+                throw new InvalidOperationException(ContainerRestartOwnership.PendingFailure);
+            }
         }
         return originalReceipts;
     }

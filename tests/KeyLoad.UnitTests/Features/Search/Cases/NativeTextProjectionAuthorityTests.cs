@@ -39,20 +39,29 @@ internal sealed class NativeTextProjectionAuthorityTests
 
         PatchVisibleSecret(database);
         var updated = await Assert.That(await search.SearchAsync(ReaderId,
-            request with { Text = "changed" }, token)).HasSingleItem();
+            request with
+            {
+                Text = "changed"
+            }, token)).HasSingleItem();
         await Assert.That(updated.Document.Reference.Id).IsEqualTo(VisibleId);
         await Assert.That(updated.Document.Json).IsEqualTo("{\"other\":\"visible\"}");
         var updatedGeneration = CurrentGeneration(database);
         await Assert.That(updatedGeneration).IsNotEqualTo(firstGeneration);
 
         database.Commit(new DeleteDocument(Collection, VisibleId, 2));
-        var afterDelete = await search.SearchAsync(ReaderId, request with { Text = "changed" }, token);
+        var afterDelete = await search.SearchAsync(ReaderId, request with
+        {
+            Text = "changed"
+        }, token);
         await Assert.That(afterDelete).IsEmpty();
         var deletedGeneration = CurrentGeneration(database);
         await Assert.That(deletedGeneration).IsNotEqualTo(updatedGeneration);
 
         AdvanceReaderPolicyEpoch(database);
-        _ = await search.SearchAsync(ReaderId, request with { Text = "changed" }, token);
+        _ = await search.SearchAsync(ReaderId, request with
+        {
+            Text = "changed"
+        }, token);
         var policyGeneration = CurrentGeneration(database);
         await Assert.That(policyGeneration).IsNotEqualTo(deletedGeneration);
 
@@ -60,7 +69,10 @@ internal sealed class NativeTextProjectionAuthorityTests
         var revokedImage = KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(database.Store);
         var revokedCut = database.Store.Position;
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() =>
-            search.Search(ReaderId, request with { Text = "changed" }, token)).Code)
+            search.Search(ReaderId, request with
+            {
+                Text = "changed"
+            }, token)).Code)
             .IsEqualTo(ErrorCode.Unauthenticated);
         await Assert.That(database.Store.Position).IsGreaterThan(0L);
         await NativeTextAuthorityContinuation.RunAsync(database, projection, search, request,
@@ -82,7 +94,10 @@ internal sealed class NativeTextProjectionAuthorityTests
     {
         var reader = new PrincipalRecord(principalId, database.Partition.TenantId,
             [new("database", Collection, Capability.Query | Capability.DocumentsRead)], [.. fieldGrants])
-        { OwnerId = ReaderId, RestrictRows = true };
+        {
+            OwnerId = ReaderId,
+            RestrictRows = true
+        };
         database.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(reader)).Get<PrincipalRecord>();
     }
 
@@ -100,7 +115,10 @@ internal sealed class NativeTextProjectionAuthorityTests
     {
         var principal = database.Store.Read(view => view.GetRecord<PrincipalRecord>(KeySpace.Principal(ReaderId)))!;
         database.Submit(OperationKind.ConfigurePrincipal,
-            new ConfigurePrincipalRequest(update(principal) with { PolicyEpoch = principal.PolicyEpoch + 1 }))
+            new ConfigurePrincipalRequest(update(principal) with
+            {
+                PolicyEpoch = principal.PolicyEpoch + 1
+            }))
             .Get<PrincipalRecord>();
     }
 

@@ -1,4 +1,4 @@
-using KeyLoad.Orleans.Features.ResourceExecution;
+using KeyLoad.Clustering.Features.ResourceExecution;
 using static KeyLoad.UnitTests.Features.ResourceExecution.CacheControlWireAuthenticatorSupport;
 
 namespace KeyLoad.UnitTests.Features.ResourceExecution;
@@ -58,16 +58,28 @@ internal sealed class CacheControlWireTargetCorrelationTests
         };
         return request with
         {
-            Header = request.Header with { TargetSlot = target },
+            Header = request.Header with
+            {
+                TargetSlot = target
+            },
             TargetBinding = proof.Binding
         };
     }
 
     private static async Task AssertProofMetadataPreservedAsync(CacheGrantRequest before, CacheGrantRequest after)
     {
-        await Assert.That(after.Slot0Proof with { Mac = before.Slot0Proof.Mac }).IsEqualTo(before.Slot0Proof);
-        await Assert.That(after.Slot1Proof with { Mac = before.Slot1Proof.Mac }).IsEqualTo(before.Slot1Proof);
-        await Assert.That(after.Slot2Proof with { Mac = before.Slot2Proof.Mac }).IsEqualTo(before.Slot2Proof);
+        await Assert.That(after.Slot0Proof with
+        {
+            Mac = before.Slot0Proof.Mac
+        }).IsEqualTo(before.Slot0Proof);
+        await Assert.That(after.Slot1Proof with
+        {
+            Mac = before.Slot1Proof.Mac
+        }).IsEqualTo(before.Slot1Proof);
+        await Assert.That(after.Slot2Proof with
+        {
+            Mac = before.Slot2Proof.Mac
+        }).IsEqualTo(before.Slot2Proof);
     }
 
     private static long SignedTargetSequence(CacheGrantRequest request)

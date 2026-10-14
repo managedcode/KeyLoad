@@ -27,14 +27,32 @@ internal static class RemoteTransferPendingDiscovery
         if (upper is null)
         {
             _ = view.VisitReverseRange(Prefix, RemoteTransferCoordinationProtocol.SingleRecord, (key, _) =>
-            { budget.Check(); upper = DueWorkRecordDecoder.CopyKey(key); return false; },
+            {
+                budget.Check();
+                upper = DueWorkRecordDecoder.CopyKey(key);
+                return false;
+            },
                 observer: budget.Observe, cancellationToken: token);
         }
         if (upper is null)
-        { return new(null, cursor with { UpperKey = null, LastKey = null }); }
+        {
+            return new(null, cursor with
+            {
+                UpperKey = null,
+                LastKey = null
+            });
+        }
         if (budget.Remaining <= RemoteTransferCoordinationProtocol.SingleRecord)
-        { return new(null, cursor with { UpperKey = upper }); }
-        return ReadForward(database, view, subject, cursor with { UpperKey = upper }, budget, token);
+        {
+            return new(null, cursor with
+            {
+                UpperKey = upper
+            });
+        }
+        return ReadForward(database, view, subject, cursor with
+        {
+            UpperKey = upper
+        }, budget, token);
     }
 
     private static RemoteTransferPendingPage ReadForward(DatabaseEngine database, IKeyValueView view, string subject,
@@ -47,13 +65,23 @@ internal static class RemoteTransferPendingDiscovery
         {
             budget.Check();
             if (key.SequenceCompareTo(cursor.UpperKey) > RemoteTransferCoordinationProtocol.FirstIndex)
-            { reachedTail = true; return false; }
+            {
+                reachedTail = true;
+                return false;
+            }
             last = DueWorkRecordDecoder.CopyKey(key);
             hint = database.ReadTransferCoordinationHint(budget.View(view), key, value, subject);
             reachedTail = key.SequenceEqual(cursor.UpperKey);
             return hint is null && !reachedTail;
         }, cursor.LastKey, observer: budget.Observe, cancellationToken: token);
         var completed = reachedTail || !scanned.HasMore && !scanned.StoppedByVisitor;
-        return new(hint, completed ? cursor with { UpperKey = null, LastKey = null } : cursor with { LastKey = last });
+        return new(hint, completed ? cursor with
+        {
+            UpperKey = null,
+            LastKey = null
+        } : cursor with
+        {
+            LastKey = last
+        });
     }
 }

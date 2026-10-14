@@ -5,7 +5,6 @@ namespace KeyLoad.Replication;
 internal sealed class ReplicaLeader(ReplicaState state, ReplicaFollowerSender followers) : IDisposable
 {
     private const int ExclusiveRoundPermit = 1;
-    private const int ContiguousIndexStep = 1;
     private const int UnelectedTerm = 0;
 
     private const int HeartbeatAdmissionWaitMilliseconds = 0;
@@ -28,13 +27,22 @@ internal sealed class ReplicaLeader(ReplicaState state, ReplicaFollowerSender fo
                 terminal = await SubmitOwnedAsync(operation, boundary, cancellationToken).ConfigureAwait(false);
                 return terminal;
             }
-            catch (Exception error) { primary = error; throw; }
-            finally { ReleaseRound(primary); }
+            catch (Exception error)
+            {
+                primary = error;
+                throw;
+            }
+            finally
+            {
+                ReleaseRound(primary);
+            }
         }
         catch (Exception error) when ((terminal is not null || boundary.IsStarted) && CqrsRuntimeFailures.FindFatal(error) is null)
         {
             if (terminal is not null)
-            { return terminal; }
+            {
+                return terminal;
+            }
             throw Errors.Fail(ErrorCode.UnknownWriteOutcome, ReplicaProtocol.InterruptedWrite, error);
         }
     }
@@ -42,12 +50,16 @@ internal sealed class ReplicaLeader(ReplicaState state, ReplicaFollowerSender fo
     private void ReleaseRound(Exception? primary)
     {
         try
-        { rounds.Release(); }
+        {
+            rounds.Release();
+        }
         catch (Exception cleanup)
         {
             state.Poison(cleanup);
             if (primary is not null)
-            { throw new AggregateException(primary, cleanup); }
+            {
+                throw new AggregateException(primary, cleanup);
+            }
             throw;
         }
     }
@@ -56,38 +68,22 @@ internal sealed class ReplicaLeader(ReplicaState state, ReplicaFollowerSender fo
         ReplicaSubmissionBoundary boundary, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        if (operation.Kind == OperationKind.PartitionMovementPhase)
-        {
-            await ReplicaMovementSubmissionAdmission.ValidateAsync(state, operation, cancellationToken)
-                .ConfigureAwait(false);
-        }
-        if (state.Materializer.Database.TryReadOrdinaryDocumentSubmission(operation) is { } command)
-        {
-            await state.LockedAsync(() =>
-            { state.RequireReadyLeader(); return true; }, cancellationToken).ConfigureAwait(false);
-            try
-            { state.Materializer.Database.ValidateSubmissionAdmission(operation, command); }
-            catch (KeyLoadException refusal) when (refusal.Code == ErrorCode.Conflict)
-            {
-                await state.LockedAsync(() =>
-                {
-                    state.RequireReadyLeader();
-                    System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(refusal).Throw();
-                    return false;
-                }, cancellationToken).ConfigureAwait(false);
-                throw;
-            }
-        }
+        await ReplicaLeaderSubmissionAdmission.ValidateAsync(state, operation, cancellationToken).ConfigureAwait(false);
         cancellationToken.ThrowIfCancellationRequested();
-        var admission = await state.LockedAsync(() => AppendOwned(operation, boundary, cancellationToken), cancellationToken).ConfigureAwait(false);
+        var admission = await state.LockedAsync(() => ReplicaLeaderSubmissionAdmission.AppendOwned(state, operation, boundary, cancellationToken), cancellationToken).ConfigureAwait(false);
         if (admission.Outcome is { } originalOutcome)
-        { return originalOutcome; }
+        {
+            return originalOutcome;
+        }
         var entry = admission.Entry ?? throw Errors.Fail(ErrorCode.RecoveryRequired, ReplicaProtocol.CorruptLog);
         while (true)
         {
             await RoundAsync(entry.Term, ReplicaReadRoundPurpose.Control, cancellationToken).ConfigureAwait(false);
             var committed = await state.LockedAsync(() =>
-            { state.RequireLeader(entry.Term); return state.Log.State.CommittedIndex >= entry.Index; }, cancellationToken).ConfigureAwait(false);
+            {
+                state.RequireLeader(entry.Term);
+                return state.Log.State.CommittedIndex >= entry.Index;
+            }, cancellationToken).ConfigureAwait(false);
             if (committed)
             {
                 break;
@@ -115,27 +111,6 @@ internal sealed class ReplicaLeader(ReplicaState state, ReplicaFollowerSender fo
             : outcome;
     }
 
-    private (ReplicaEntry? Entry, OperationResult? Outcome, Guid OriginalRequestId, Guid SourcePhaseId)
-        AppendOwned(ReplicatedOperation operation, ReplicaSubmissionBoundary boundary, CancellationToken cancellationToken)
-    {
-        state.RequireReadyLeader();
-        using var firstAdmit = state.Materializer.Database.OpenEventVectorFirstAdmitProbe(operation, cancellationToken);
-        if (firstAdmit?.OriginalOutcome is { } original)
-        { return (null, original, Guid.Empty, Guid.Empty); }
-        using var sourceAdmit = state.Materializer.Database.OpenEventVectorSourceAdmitProbe(operation, cancellationToken);
-        if (sourceAdmit?.OriginalOutcome is { } sourceOriginal)
-        { return (null, sourceOriginal, Guid.Empty, Guid.Empty); }
-        ReplicaFirstEventVectorAdmit.RequireAbsent(state, firstAdmit, operation);
-        ReplicaEventVectorSourceAdmit.RequireAbsent(state, sourceAdmit, operation);
-        var admitted = state.Materializer.Database.PrepareQueueRetryOperation(operation with { EvaluatedAt = state.Clock.GetUtcNow() });
-        var next = new ReplicaEntry(checked(state.Log.State.LastIndex + ContiguousIndexStep), state.Log.State.Term, admitted);
-        var nativeLog = state.Log as DurableReplicaLog
-            ?? throw Errors.Fail(ErrorCode.RecoveryRequired, ReplicaProtocol.CorruptLog);
-        nativeLog.Append([next], boundary, cancellationToken);
-        return (next, null, firstAdmit?.OriginalParentRequestId ?? sourceAdmit?.OriginalParentRequestId ?? Guid.Empty,
-            sourceAdmit?.OriginalSourcePhaseCommandId ?? Guid.Empty);
-    }
-
     internal async Task<ReadBarrierReceipt> BarrierAsync(ReplicaReadRoundPurpose purpose, CancellationToken cancellationToken)
     {
         var diagnosticStage = ReplicaReadFailureMetadata.LeaderRound;
@@ -147,7 +122,11 @@ internal sealed class ReplicaLeader(ReplicaState state, ReplicaFollowerSender fo
             try
             {
                 diagnosticStage = ReplicaReadFailureMetadata.LeaderReady;
-                term = await state.LockedAsync(() => { state.RequireReadyLeader(); return state.Log.State.Term; }, cancellationToken).ConfigureAwait(false);
+                term = await state.LockedAsync(() =>
+                {
+                    state.RequireReadyLeader();
+                    return state.Log.State.Term;
+                }, cancellationToken).ConfigureAwait(false);
                 diagnosticStage = ReplicaReadFailureMetadata.LeaderQuorum;
                 if (!await RoundAsync(term, purpose, cancellationToken).ConfigureAwait(false))
                 {
@@ -155,13 +134,23 @@ internal sealed class ReplicaLeader(ReplicaState state, ReplicaFollowerSender fo
                 }
                 diagnosticStage = ReplicaReadFailureMetadata.LeaderTerm;
                 cut = await state.LockedAsync(() =>
-                { state.RequireLeader(term); return state.Log.State.CommittedIndex; }, cancellationToken).ConfigureAwait(false);
+                {
+                    state.RequireLeader(term);
+                    return state.Log.State.CommittedIndex;
+                }, cancellationToken).ConfigureAwait(false);
             }
-            finally { rounds.Release(); }
+            finally
+            {
+                rounds.Release();
+            }
             diagnosticStage = ReplicaReadFailureMetadata.Apply;
             await state.Materializer.WaitForApplyAsync(cut, cancellationToken).ConfigureAwait(false);
             diagnosticStage = ReplicaReadFailureMetadata.LeaderTerm;
-            await state.LockedAsync(() => { state.RequireLeader(term); return true; }, cancellationToken).ConfigureAwait(false);
+            await state.LockedAsync(() =>
+            {
+                state.RequireLeader(term);
+                return true;
+            }, cancellationToken).ConfigureAwait(false);
             return new(state.Configuration.Incarnation, cut, term);
         }
         catch (Exception error) when (error is KeyLoadException or OperationCanceledException)
@@ -180,13 +169,18 @@ internal sealed class ReplicaLeader(ReplicaState state, ReplicaFollowerSender fo
         try
         {
             var term = await state.LockedAsync(() =>
-            { return state.Role == ReplicaRole.Leader ? state.Log.State.Term : UnelectedTerm; }, cancellationToken).ConfigureAwait(false);
+            {
+                return state.Role == ReplicaRole.Leader ? state.Log.State.Term : UnelectedTerm;
+            }, cancellationToken).ConfigureAwait(false);
             if (term > UnelectedTerm)
             {
                 await RoundAsync(term, ReplicaReadRoundPurpose.Control, cancellationToken).ConfigureAwait(false);
             }
         }
-        finally { rounds.Release(); }
+        finally
+        {
+            rounds.Release();
+        }
     }
 
     private Task<bool> RoundAsync(long term, ReplicaReadRoundPurpose purpose, CancellationToken cancellationToken)

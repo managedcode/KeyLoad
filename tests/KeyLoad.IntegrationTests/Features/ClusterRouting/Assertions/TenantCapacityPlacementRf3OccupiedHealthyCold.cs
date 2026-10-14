@@ -17,7 +17,9 @@ internal static class TenantCapacityPlacementRf3OccupiedHealthyCold
             await PartitionMovementPublicParentRf3Cut.RequireCompactedAsync(cuts);
             await TenantCapacityPlacementRf3Cold.RequireFullColdOpenAsync(wave, reverse, cuts);
             if (original is not null)
-            { await TenantCapacityPlacementRf3OccupiedRows.RequireAsync(capacity, packed, original, cuts, reverse, token); }
+            {
+                await TenantCapacityPlacementRf3OccupiedRows.RequireAsync(capacity, packed, original, cuts, reverse, token);
+            }
             original = cuts;
             await PartitionMovementPublicParentRf3Cut.RestartAsync(wave, token);
             await seed.ReconnectAsync(wave, token);

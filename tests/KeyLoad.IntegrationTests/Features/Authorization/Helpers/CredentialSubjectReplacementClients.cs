@@ -45,7 +45,9 @@ internal static class CredentialSubjectReplacementClients
                 {
                     await CredentialSubjectReplacementFlow.ReplayedAsync(root, reader, session, state, token);
                     if (state.Verifier is { Active: true })
-                    { await CredentialVerifierR53Flow.ContextAsync(fixture, root, reader, session, state, token); }
+                    {
+                        await CredentialVerifierR53Flow.ContextAsync(fixture, root, reader, session, state, token);
+                    }
                 }
             }, failures);
         }, failures);

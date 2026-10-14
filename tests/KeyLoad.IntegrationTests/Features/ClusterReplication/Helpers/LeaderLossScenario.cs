@@ -56,7 +56,10 @@ internal static class LeaderLossScenario
         KeyLoadClient[] clients, PartitionRef partition, CancellationToken cancellationToken)
     {
         Success(await clients[0].ConfigureResourceAsync(Guid.NewGuid(), new(partition.TenantId, partition.DatabaseId,
-            new(Collection, ResourceKind.Collection, Collection) { Indexes = [new("number", ["/number"], true)] }), cancellationToken));
+            new(Collection, ResourceKind.Collection, Collection)
+            {
+                Indexes = [new("number", ["/number"], true)]
+            }), cancellationToken));
         Success(await clients[1].ConfigureResourceAsync(Guid.NewGuid(), new(partition.TenantId, partition.DatabaseId,
             new(Events, ResourceKind.StreamSet, Collection)), cancellationToken));
         Success(await clients[2].ConfigureResourceAsync(Guid.NewGuid(), new(partition.TenantId, partition.DatabaseId,
@@ -112,15 +115,22 @@ internal static class LeaderLossScenario
         var survivors = Enumerable.Range(0, NodeCount).Where(index => index != leaderIndex).ToArray();
         var surviving = state.Clients[survivors[0]];
         await EventuallyAsync(async () => (await surviving.StatusAsync(cancellationToken)).IsSuccess, cancellationToken);
-        return state with { Survivors = survivors };
+        return state with
+        {
+            Survivors = survivors
+        };
     }
 
     private static async Task SaveFailureDiagnosticsAsync(ClusterFixture fixture, Exception failure)
     {
         try
-        { await fixture.SaveFailureDiagnosticsAsync(); }
+        {
+            await fixture.SaveFailureDiagnosticsAsync();
+        }
         catch (Exception diagnosticsFailure) when (IsNonFatalCleanupFailure(diagnosticsFailure))
-        { failure.Data[Rf3DiagnosticsFailureKey] = diagnosticsFailure; }
+        {
+            failure.Data[Rf3DiagnosticsFailureKey] = diagnosticsFailure;
+        }
     }
 
     private static async Task RestoreFailedClusterAsync(ClusterFixture fixture, KeyLoadClient[]? clients,
@@ -130,13 +140,19 @@ internal static class LeaderLossScenario
         foreach (var node in stoppedContainers.Order(StringComparer.Ordinal))
         {
             try
-            { await fixture.RestartContainerAsync(node, recoveryTimeout.Token); }
+            {
+                await fixture.RestartContainerAsync(node, recoveryTimeout.Token);
+            }
             catch (Exception restartFailure) when (IsNonFatalCleanupFailure(restartFailure))
-            { failure.Data[Rf3RestartFailureKeyPrefix + node] = restartFailure; }
+            {
+                failure.Data[Rf3RestartFailureKeyPrefix + node] = restartFailure;
+            }
         }
 
         if (clients is null)
-        { return; }
+        {
+            return;
+        }
         foreach (var client in clients)
         {
             try
@@ -148,7 +164,9 @@ internal static class LeaderLossScenario
                 }, recoveryTimeout.Token);
             }
             catch (Exception readinessFailure) when (IsNonFatalCleanupFailure(readinessFailure))
-            { failure.Data[Rf3ReadinessFailureKey] = readinessFailure; }
+            {
+                failure.Data[Rf3ReadinessFailureKey] = readinessFailure;
+            }
         }
     }
 
@@ -171,7 +189,10 @@ internal static class LeaderLossScenario
             [new PatchDocument(Collection, "o1", [new("/projected", PatchKind.Set, "true")], 2)]);
         var projected = Success(await RetryDuringElectionAsync(() => surviving.CommitSubscriptionProcessingAsync(groupProcessing, cancellationToken),
             cancellationToken));
-        var replay = groupProcessing with { CommandId = Guid.NewGuid() };
+        var replay = groupProcessing with
+        {
+            CommandId = Guid.NewGuid()
+        };
         var replayed = Success(await RetryDuringElectionAsync(() => surviving.CommitSubscriptionProcessingAsync(replay, cancellationToken),
             cancellationToken));
         await Assert.That(replayed.AlreadyProcessed).IsTrue();
@@ -195,7 +216,10 @@ internal static class LeaderLossScenario
             [new PutDocument(Materialized, "o1", "{\"projected\":true}", 0)]);
         var outboxEffect = Success(await RetryDuringElectionAsync(() => surviving.CommitProjectionAsync(projectionRequest, cancellationToken),
             cancellationToken));
-        var replay = projectionRequest with { CommandId = Guid.NewGuid() };
+        var replay = projectionRequest with
+        {
+            CommandId = Guid.NewGuid()
+        };
         var duplicateEffect = Success(await RetryDuringElectionAsync(() => surviving.CommitProjectionAsync(replay, cancellationToken),
             cancellationToken));
         await Assert.That(duplicateEffect.AlreadyProcessed).IsTrue();

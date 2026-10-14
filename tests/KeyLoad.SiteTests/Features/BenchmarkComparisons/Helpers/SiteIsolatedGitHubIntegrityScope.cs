@@ -12,7 +12,10 @@ internal sealed class SiteIsolatedGitHubIntegrityScope : IAsyncDisposable
         temporary = SiteTempDirectory.Create();
     }
 
-    public SiteIsolatedGitHubArchiveReceipt Original { get; }
+    public SiteIsolatedGitHubArchiveReceipt Original
+    {
+        get;
+    }
 
     public SiteIsolatedGitHubArchiveReceipt PrivateReceipt { get; private set; } = null!;
 
@@ -25,7 +28,11 @@ internal sealed class SiteIsolatedGitHubIntegrityScope : IAsyncDisposable
         {
             var capture = Path.Combine(scope.temporary.Path, SiteIsolatedGitHubFields.Capture);
             var result = await SiteIsolatedGitHubScope.RunAsync(SiteIsolatedGitHubFields.CloneOperation,
-                new { input = inputs.Capture, output = capture }, token);
+                new
+                {
+                    input = inputs.Capture,
+                    output = capture
+                }, token);
             if (!result.GetProperty(SiteIsolatedGitHubFields.Ok).GetBoolean() ||
                 result.GetProperty(SiteIsolatedGitHubFields.Result).GetProperty(SiteIsolatedGitHubTokens.FileCountField).GetInt32() !=
                     SiteIsolatedGitHubTokens.FileCount)

@@ -24,13 +24,17 @@ internal static class EventVectorCleanupValidation
             || call.ReleaseRequestDigest.Length != SHA256.HashSizeInBytes
             || call.FrontierChecksum.Length != SHA256.HashSizeInBytes
             || !row.Key.Span.SequenceEqual(EventVectorKeys.CleanupCall(map.ControlPartition, map.MapId)))
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         admission.RequireEntryCount(call.OriginalAuthorizedSourceScopes.Length);
         var request = NativeSerialization.Deserialize<EventFeedControlRequest>(call.OriginalReleaseRequestBytes.Span);
         RequireRequest(call, request, admission);
         if (!CryptographicOperations.FixedTimeEquals(SHA256.HashData(call.AuthenticatedFrontierBytes.Span),
             call.FrontierChecksum.Span))
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         return call;
     }
 
@@ -41,7 +45,9 @@ internal static class EventVectorCleanupValidation
             || request.MapId != call.MapId || request.ControlPartition != call.ControlPartition
             || !CryptographicOperations.FixedTimeEquals(EventVectorControlBodyProjection.RequestDigest(request,
                 admission).Span, call.ReleaseRequestDigest.Span))
-        { throw Errors.Fail(ErrorCode.Conflict, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, Invalid);
+        }
     }
 
     internal static EventVectorControlPhase ReadPhase(EventVectorCleanupCall call, PrincipalRecord principal,
@@ -52,7 +58,9 @@ internal static class EventVectorCleanupValidation
             || !CryptographicOperations.FixedTimeEquals(originalParent.OriginalPublicRequestDigest.Span,
                 call.OriginalParentRequestDigest.Span)
             || !originalParent.OriginalAdmittedControlPhaseBytes.Span.SequenceEqual(call.OriginalAdmittedPhaseBytes.Span))
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         var phase = NativeSerialization.Deserialize<EventVectorControlPhase>(call.LastAdmittedCleanupPhaseBytes.Span);
         RequireRequest(call, phase.OriginalRequest, admission);
         if (phase.OriginalParentExpiresAt != call.ReleaseExpiresAt
@@ -60,7 +68,9 @@ internal static class EventVectorCleanupValidation
             || EventVectorControlPhaseIds.For(phase, principal.Id,
                 EventVectorControlPhaseIds.Project(phase, principal.Id, admission).OriginalBodyDigest, admission)
                 != call.LastAdmittedCleanupPhaseId)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         return phase;
     }
 }

@@ -95,7 +95,10 @@ public sealed class QdrantTarget : IComparisonTarget, IVectorComparisonTarget
     }
 
     /// <summary>Gets the server version, native topology, write acknowledgement, exact-read, transport, and replica evidence.</summary>
-    public TargetProfile Profile { get; private set; } = new(QdrantVectorProtocol.TargetName, QdrantVectorProtocol.Unverified,
+    public TargetProfile Profile
+    {
+        get; private set;
+    } = new(QdrantVectorProtocol.TargetName, QdrantVectorProtocol.Unverified,
         QdrantControlProtocol.UnverifiedTopology, QdrantControlProtocol.InitialWriteContract,
         QdrantControlProtocol.InitialReadContract, QdrantVectorProtocol.Transport, QdrantControlProtocol.Authentication, null);
     /// <summary>Reports support only for exact vector search.</summary>
@@ -146,11 +149,18 @@ public sealed class QdrantTarget : IComparisonTarget, IVectorComparisonTarget
             {
                 id = document.Number + QdrantVectorProtocol.PointOrdinalOffset,
                 vector = document.Vector,
-                payload = new { id = document.Id, document = JsonSerializer.Deserialize<JsonElement>(document.Json) }
+                payload = new
+                {
+                    id = document.Id,
+                    document = JsonSerializer.Deserialize<JsonElement>(document.Json)
+                }
             });
             using var response = await client.PutAsJsonAsync(QdrantVectorProtocol.CollectionPrefix + collection
                 + QdrantVectorProtocol.PointsPath + QdrantVectorProtocol.WaitForApply + seedSuffix,
-                new { points }, cancellationToken);
+                new
+                {
+                    points
+                }, cancellationToken);
             response.EnsureSuccessStatusCode();
         }
     }
@@ -201,7 +211,17 @@ public sealed class QdrantTarget : IComparisonTarget, IVectorComparisonTarget
 
             using var response = await target.client.PostAsJsonAsync(QdrantVectorProtocol.CollectionPrefix + target.collection
                 + QdrantVectorProtocol.QueryPath + target.querySuffix,
-                new { query = document.Vector, limit = target.topK, @params = new { exact = true }, with_payload = true, with_vector = false }, cancellationToken);
+                new
+                {
+                    query = document.Vector,
+                    limit = target.topK,
+                    @params = new
+                    {
+                        exact = true
+                    },
+                    with_payload = true,
+                    with_vector = false
+                }, cancellationToken);
             response.EnsureSuccessStatusCode();
             using var result = await response.Content.ReadFromJsonAsync<JsonDocument>(cancellationToken);
             return new(Neighbors: ImmutableCollectionsMarshal.AsImmutableArray(result!.RootElement.GetProperty(ResultProperty).GetProperty(PointsProperty).EnumerateArray().Select(point =>

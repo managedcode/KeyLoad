@@ -16,20 +16,11 @@ internal sealed partial class PartitionMovementMac
         => Convert.ToHexStringLower(DigestDomain(body, query ? RetireCancellationQueryDomain : RetireCancellationRequestDomain));
 
     internal bool VerifyRetireCancellationRequest(ReadOnlySpan<byte> body, string signature, bool query)
-    {
-        if (signature.Length != SignatureCharacters || signature.Any(character => !char.IsAsciiHexDigitLower(character)))
-        { return false; }
-        return CryptographicOperations.FixedTimeEquals(Convert.FromHexString(signature),
-            DigestDomain(body, query ? RetireCancellationQueryDomain : RetireCancellationRequestDomain));
-    }
+        => PartitionMovementSignatureVerification.Verify(this, body, signature, query ? RetireCancellationQueryDomain : RetireCancellationRequestDomain);
 
     internal string SignRetireCancellationReply(ReadOnlySpan<byte> body)
         => Convert.ToHexStringLower(DigestDomain(body, RetireCancellationReplyDomain));
 
     internal bool VerifyRetireCancellationReply(ReadOnlySpan<byte> body, string signature)
-    {
-        if (signature.Length != SignatureCharacters || signature.Any(character => !char.IsAsciiHexDigitLower(character)))
-        { return false; }
-        return CryptographicOperations.FixedTimeEquals(Convert.FromHexString(signature), DigestDomain(body, RetireCancellationReplyDomain));
-    }
+        => PartitionMovementSignatureVerification.Verify(this, body, signature, RetireCancellationReplyDomain);
 }

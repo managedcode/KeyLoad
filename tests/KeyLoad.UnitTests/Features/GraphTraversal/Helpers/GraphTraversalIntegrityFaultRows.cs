@@ -30,13 +30,24 @@ internal static class GraphTraversalIntegrityFaultRows
         store.Commit((transaction, _) =>
         {
             if (fault == GraphTraversalIntegrityFault.MissingEdge)
-            { transaction.Delete(key); }
+            {
+                transaction.Delete(key);
+            }
             else if (fault == GraphTraversalIntegrityFault.NullTarget)
-            { transaction.Put(key, NativeGraphFixtures.EncodeUnchecked(edge with { To = null! })); }
+            {
+                transaction.Put(key, NativeGraphFixtures.EncodeUnchecked(edge with
+                {
+                    To = null!
+                }));
+            }
             else if (adjacency)
-            { transaction.Put(key, AdjacencyBytes(state, fault)); }
+            {
+                transaction.Put(key, AdjacencyBytes(state, fault));
+            }
             else
-            { transaction.PutRecord(key, DamagedEdge(edge, fault)); }
+            {
+                transaction.PutRecord(key, DamagedEdge(edge, fault));
+            }
             return true;
         });
         return new(key, original);

@@ -22,7 +22,9 @@ internal static class SqlNullOrderingFixture
         var expected = new PrincipalRecord(SqlNullOrderingProtocol.Reader, database.Partition.TenantId,
             allow ? [new(database.Partition.DatabaseId, SqlNullOrderingProtocol.Collection,
                 Capability.Query | Capability.DocumentsRead)] : [], [])
-        { PolicyEpoch = epoch };
+        {
+            PolicyEpoch = epoch
+        };
         var actual = database.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(expected)).Get<PrincipalRecord>();
         await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
     }

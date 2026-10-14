@@ -10,7 +10,10 @@ internal sealed class AtomicPartitionRosterTransaction : IAtomicTransaction, IPa
 {
     private const int NoCandidates = 0;
     private readonly IAtomicTransaction inner;
-    bool IPartitionMovementReadScope.MovementAuthorityAbsent { get; set; }
+    bool IPartitionMovementReadScope.MovementAuthorityAbsent
+    {
+        get; set;
+    }
     private bool movementViewChanged;
     bool IPartitionMovementReadScope.CanReuseCommittedMovementAbsence => !movementViewChanged;
     bool IPartitionMovementReadScope.CanPublishCommittedMovementAbsence => false;
@@ -101,7 +104,9 @@ internal sealed class AtomicPartitionRosterTransaction : IAtomicTransaction, IPa
 
             if (existingBytes is not null || inner.ReadOwnedValue(
                 AtomicPartitionRosterRestoreOriginSerialization.OriginKey(candidate.Key)) is not null)
-            { throw Errors.Fail(ErrorCode.Corruption, AtomicPartitionRosterProtocol.InvalidEntry); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, AtomicPartitionRosterProtocol.InvalidEntry);
+            }
 
             var firstSeenStorePosition = appliedIndex > AtomicPartitionRosterProtocol.NoReplicatedAppliedIndex
                 ? AtomicPartitionRosterProtocol.NoReplicatedStorePosition : storePosition;

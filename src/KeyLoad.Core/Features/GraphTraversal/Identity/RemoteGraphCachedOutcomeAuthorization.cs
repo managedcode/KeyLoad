@@ -10,14 +10,18 @@ public sealed partial class DatabaseEngine
         ReplicatedOperation operation, StoredOutcome previous)
     {
         if (previous.Result.Error is not null)
-        { return; }
+        {
+            return;
+        }
         switch (operation.Kind)
         {
             case OperationKind.RemoteGraphSource:
             {
                 var retained = previous.Result.Get<RemoteGraphSourceResultV1>();
                 if (retained?.Original is null)
-                { throw Errors.Fail(ErrorCode.Corruption, RemoteGraphProtocol.Invalid); }
+                {
+                    throw Errors.Fail(ErrorCode.Corruption, RemoteGraphProtocol.Invalid);
+                }
                 _ = RequireRemoteGraphSource(view, principal, retained.Original);
                 break;
             }
@@ -25,7 +29,9 @@ public sealed partial class DatabaseEngine
             {
                 var retained = previous.Result.Get<RemoteGraphReceiverResultV1>();
                 if (retained?.Original?.SourceProof is null)
-                { throw Errors.Fail(ErrorCode.Corruption, RemoteGraphProtocol.Invalid); }
+                {
+                    throw Errors.Fail(ErrorCode.Corruption, RemoteGraphProtocol.Invalid);
+                }
                 _ = RequireRemoteGraphReceiver(view, principal, retained.Original.SourceProof);
                 break;
             }
@@ -33,7 +39,9 @@ public sealed partial class DatabaseEngine
             {
                 var retained = previous.Result.Get<RemoteGraphCompletionResultV1>();
                 if (retained?.Original?.Receipt is null)
-                { throw Errors.Fail(ErrorCode.Corruption, RemoteGraphProtocol.Invalid); }
+                {
+                    throw Errors.Fail(ErrorCode.Corruption, RemoteGraphProtocol.Invalid);
+                }
                 _ = RequireRemoteGraphCompletion(view, principal, retained.Original.Receipt);
                 break;
             }

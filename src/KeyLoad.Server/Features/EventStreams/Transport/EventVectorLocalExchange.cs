@@ -17,7 +17,9 @@ internal sealed class EventVectorLocalExchange(OrleansNode node, EventVectorRemo
         if (originalCall.Action is not (EventVectorRemoteAction.Coverage or EventVectorRemoteAction.OriginalOutcome
             or EventVectorRemoteAction.ParentOutcome or EventVectorRemoteAction.FirstIssuanceOutcome
             or EventVectorRemoteAction.SourceRead or EventVectorRemoteAction.SourceEffect))
-        { throw Errors.Fail(ErrorCode.UnsupportedCapability, EventVectorRemoteProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, EventVectorRemoteProtocol.Invalid);
+        }
         work.ChargeBytes(RemoteDocumentProtocol.SignatureCharacters);
         var originalBytes = EventVectorWorkEncoding.Encode(originalCall, encoding, work);
         EventVectorRemoteCall? decoded = null;
@@ -27,7 +29,9 @@ internal sealed class EventVectorLocalExchange(OrleansNode node, EventVectorRemo
         {
             var signature = originalLocalMac.Sign(originalBytes, reply: false);
             if (!originalLocalMac.Verify(originalBytes, signature, reply: false))
-            { throw Errors.Fail(ErrorCode.Unauthenticated, EventVectorRemoteProtocol.Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Unauthenticated, EventVectorRemoteProtocol.Invalid);
+            }
             decoded = encoding.DecodeAuthenticatedCall(originalBytes);
             var admitted = EventVectorAdmittedCall.AdmitLocal(new(decoded, originalBytes, signature),
                 authority, node, originalReplay, originalCancellationToken);
@@ -40,7 +44,9 @@ internal sealed class EventVectorLocalExchange(OrleansNode node, EventVectorRemo
         finally
         {
             if (decoded is not null)
-            { CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(decoded.OriginalNativeRequest).Span); }
+            {
+                CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(decoded.OriginalNativeRequest).Span);
+            }
             if (!transferred)
             {
                 CryptographicOperations.ZeroMemory(originalBytes);

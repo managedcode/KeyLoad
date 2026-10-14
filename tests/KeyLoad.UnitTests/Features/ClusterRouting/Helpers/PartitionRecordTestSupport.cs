@@ -67,7 +67,9 @@ internal sealed class PartitionRecordNativeFixture : IDisposable
         => target.Commit((transaction, _) =>
         {
             foreach (var row in rows)
-            { transaction.Put(row.Key, row.Value); }
+            {
+                transaction.Put(row.Key, row.Value);
+            }
             return true;
         });
 
@@ -97,6 +99,8 @@ internal sealed class PartitionRecordNativeFixture : IDisposable
         store?.Dispose();
         store = null;
         if (Directory.Exists(directory))
-        { Directory.Delete(directory, recursive: true); }
+        {
+            Directory.Delete(directory, recursive: true);
+        }
     }
 }

@@ -18,7 +18,9 @@ internal static class LiveReadCancellationR49Seed
         var principal = new PrincipalRecord(owner.Identity.PrincipalId, partition.TenantId,
             [new(partition.DatabaseId, LiveReadCancellationR49Protocol.Collection,
                 Capability.Query | Capability.DocumentsRead | Capability.ChangesRead)], [])
-        { PolicyEpoch = RequestCqrsPhaseFaultProvisioning.InitialPolicyEpoch + 1 };
+        {
+            PolicyEpoch = RequestCqrsPhaseFaultProvisioning.InitialPolicyEpoch + 1
+        };
         await SqlRf3Protocol.EqualAsync(principal, await McpCallerAssertions.SdkSuccessAsync(
             await owner.Administrator.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), principal, token)));
         var placement = new AtomicPartitionPlacementReadRequest(1, partition);

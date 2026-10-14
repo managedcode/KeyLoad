@@ -6,7 +6,10 @@ namespace KeyLoad.Server;
 /// <summary>Explicit typed bindings for the frozen subscription commands.</summary>
 internal static class McpSubscriptionCatalog
 {
-    internal static ImmutableArray<McpOperationDescriptor> Entries { get; } =
+    internal static ImmutableArray<McpOperationDescriptor> Entries
+    {
+        get;
+    } =
     [
         EventFeedTailMcpDescriptor.Create(),
         McpOperationFactory.Command<EventFeedControlRequest, EventFeedControlResult>(EventFeedOpenProtocol.Tool, EventFeedOpenProtocol.Route, OperationKind.EventFeedControl, EventFeedParentArguments.Open),

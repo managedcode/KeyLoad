@@ -23,7 +23,9 @@ internal sealed record PartitionMovementBlobWireCold(PartitionMovementBlobWireNa
                 var cut = PartitionMovementBlobWireNativeCut.Read(node);
                 var limit = node.Application.Services.GetRequiredService<ServerRuntimeOptions>().Core.DatabaseLimits.Value.MaxScanRecords;
                 if (cut.Applied > limit)
-                { throw new InvalidOperationException("The complete original cold journal exceeded its native record budget."); }
+                {
+                    throw new InvalidOperationException("The complete original cold journal exceeded its native record budget.");
+                }
                 var entries = new List<ReplicaEntry>();
                 for (var entry = FirstEntry; entry <= cut.Applied; entry++)
                 {

@@ -34,7 +34,10 @@ public sealed partial class PostgresTarget(string connectionString, string runId
     private int corpusCount;
 
     /// <summary>Gets the observed PostgreSQL and topology profile.</summary>
-    public TargetProfile Profile { get; private set; } = new(PostgreSQLPgvectorToken, UnverifiedToken, SinglePrimaryNoReplicasToken,
+    public TargetProfile Profile
+    {
+        get; private set;
+    } = new(PostgreSQLPgvectorToken, UnverifiedToken, SinglePrimaryNoReplicasToken,
         FsyncOnSynchronousCommitOnLocalWALFlushToken, READCOMMITTEDOnPrimaryStreamsEmulateTheNarrowAtomicOneEventContractContractText, PooledPreparedSQLTCPToken, DatabaseOwnerNoRLSMaskingToken, image);
 
     /// <summary>Reports support for the target's document, vector, queue, graph, and stream scenarios.</summary>
@@ -57,7 +60,10 @@ public sealed partial class PostgresTarget(string connectionString, string runId
         graphDepth = dataset.Settings.GraphDepth;
         if ((dataset.Settings is ScaledComparisonProfile || dataset is DocumentComparisonCorpus))
         {
-            Profile = Profile with { ReadContract = DocumentOnlyReadCommittedContract };
+            Profile = Profile with
+            {
+                ReadContract = DocumentOnlyReadCommittedContract
+            };
         }
         corpusCount = dataset.Documents.Count;
         var execution = executionOptions.Value;

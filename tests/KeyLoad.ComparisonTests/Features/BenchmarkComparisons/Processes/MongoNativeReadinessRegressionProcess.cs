@@ -18,7 +18,11 @@ internal sealed class MongoNativeReadinessRegressionProcess : IDisposable
     internal MongoNativeReadinessRegressionProcess(IEnumerable<string> arguments, IReadOnlyDictionary<string, string>? environment = null)
     {
         var start = new ProcessStartInfo(MongoNativeReadinessRegressionProtocol.Docker)
-        { UseShellExecute = false, RedirectStandardOutput = true, RedirectStandardError = true };
+        {
+            UseShellExecute = false,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true
+        };
         foreach (var argument in arguments)
         {
             start.ArgumentList.Add(argument);

@@ -17,7 +17,9 @@ internal static class BlobRestoredReclaimPublicSeed
             seed.Credential, async (sdk, official) =>
             {
                 var definition = new ResourceDefinition(Resource, ResourceKind.BlobStore, seed.Partition.TransactionDomainId)
-                { BlobPolicy = new() { MaxBlobBytes = 196625, MaxReservedBytes = 327714 } };
+                {
+                    BlobPolicy = new() { MaxBlobBytes = 196625, MaxReservedBytes = 327714 }
+                };
                 var request = new ConfigureResourceRequest(seed.Partition.TenantId, seed.Partition.DatabaseId, definition);
                 var id = Guid.NewGuid();
                 await SqlRf3Protocol.EqualAsync(definition, await McpCallerAssertions.SdkSuccessAsync(await sdk.ConfigureResourceAsync(id, request, token)));

@@ -11,9 +11,18 @@ internal sealed class NativeSerializationBenchmarkState<T>
         RequireContent(JsonDecode());
     }
 
-    internal T Input { get; }
-    internal byte[] NativeBytes { get; }
-    internal byte[] JsonBytes { get; }
+    internal T Input
+    {
+        get;
+    }
+    internal byte[] NativeBytes
+    {
+        get;
+    }
+    internal byte[] JsonBytes
+    {
+        get;
+    }
 
     internal byte[] NativeEncode() => NativeSerialization.Serialize(Input);
     internal T NativeDecode() => NativeSerialization.Deserialize<T>(NativeBytes);

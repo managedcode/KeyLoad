@@ -20,7 +20,9 @@ internal static class OnlineTextPublicationValidation
             || current.FirstAvailableSequence != validated.FirstAvailableSequence || current.Checkpoint != validated.Checkpoint
             || current.Incarnation != validated.Incarnation || current.DataEpoch != validated.DataEpoch
             || current.ReadGeneration != validated.ReadGeneration || current.ResourceSha256 != validated.ResourceSha256)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, OnlineTextPublicationProtocol.InvalidPublication); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, OnlineTextPublicationProtocol.InvalidPublication);
+        }
     }
 
     internal static OnlineTextOutcomeAuthority Authority(string principalId, OnlineTextPublicationPhaseCommand command)

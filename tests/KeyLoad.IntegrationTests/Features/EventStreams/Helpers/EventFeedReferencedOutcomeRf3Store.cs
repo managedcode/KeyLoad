@@ -48,7 +48,9 @@ internal static class EventFeedReferencedOutcomeRf3Store
         finally
         {
             if (store is { } owned)
-            { ServerFailureObserver.Observe(owned.Dispose, failures); }
+            {
+                ServerFailureObserver.Observe(owned.Dispose, failures);
+            }
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -95,7 +97,9 @@ internal static class EventFeedReferencedOutcomeRf3Store
         var prefix = Convert.ToHexString(key) + ":";
         var expected = prefix + Convert.ToHexString(original);
         if (rows.Count(row => row == expected) != OneCommit)
-        { throw new InvalidOperationException(Missing); }
+        {
+            throw new InvalidOperationException(Missing);
+        }
         return fault is null ? rows.Where(row => row != expected).ToArray()
             : rows.Select(row => row == expected ? prefix + Convert.ToHexString(fault) : row).ToArray();
     }
@@ -105,11 +109,17 @@ internal static class EventFeedReferencedOutcomeRf3Store
         {
             var current = transaction.ReadOwnedValue(key);
             if (current is null || !current.AsSpan().SequenceEqual(original))
-            { throw new InvalidOperationException(Missing); }
+            {
+                throw new InvalidOperationException(Missing);
+            }
             if (fault is null)
-            { transaction.Delete(key); }
+            {
+                transaction.Delete(key);
+            }
             else
-            { transaction.Put(key, fault); }
+            {
+                transaction.Put(key, fault);
+            }
             return true;
         });
 
@@ -118,9 +128,13 @@ internal static class EventFeedReferencedOutcomeRf3Store
         {
             var current = transaction.ReadOwnedValue(key);
             if (current is not null && current.AsSpan().SequenceEqual(original))
-            { return false; }
+            {
+                return false;
+            }
             if (fault is null ? current is not null : current is null || !current.AsSpan().SequenceEqual(fault))
-            { throw new InvalidOperationException(Missing); }
+            {
+                throw new InvalidOperationException(Missing);
+            }
             transaction.Put(key, original);
             return true;
         });
@@ -146,7 +160,9 @@ internal static class EventFeedReferencedOutcomeRf3Store
     private static KeyLoadException? ReadRefusal(ZoneTreeStore store, EventFeedControlRequest request, CancellationToken token)
     {
         try
-        { _ = ReadRequired(store, request, token); }
+        {
+            _ = ReadRequired(store, request, token);
+        }
         catch (KeyLoadException failure) { return failure; }
         return null;
     }
@@ -167,7 +183,9 @@ internal static class EventFeedReferencedOutcomeRf3Store
                 || !System.Security.Cryptography.CryptographicOperations.FixedTimeEquals(
                     EventVectorControlBodyProjection.RequestDigest(request, admission).Span,
                     index.OriginalPublicRequestDigest.Span))
-            { throw new InvalidOperationException(Missing); }
+            {
+                throw new InvalidOperationException(Missing);
+            }
             EventVectorParentScopes.Authorize(new AuthorizationPolicy(), principal, index.OriginalAuthorizedSourceScopes, admission);
             admission.RequireEncodedBytes(index.OriginalNativeTerminalPhaseBytes.Length);
             var phase = NativeSerialization.Deserialize<EventVectorControlPhase>(index.OriginalNativeTerminalPhaseBytes.Span);

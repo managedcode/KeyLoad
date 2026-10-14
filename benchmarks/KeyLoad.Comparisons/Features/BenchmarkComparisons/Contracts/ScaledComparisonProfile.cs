@@ -13,9 +13,15 @@ public sealed record ScaledComparisonProfile : IComparisonSettings
     }
 
     /// <summary>Gets the exact accepted profile identifier.</summary>
-    public string Id { get; }
+    public string Id
+    {
+        get;
+    }
     /// <inheritdoc />
-    public int Documents { get; }
+    public int Documents
+    {
+        get;
+    }
     /// <inheritdoc />
     public int Operations => ScaledComparisonProfileValues.Scale100kCount;
     /// <inheritdoc />

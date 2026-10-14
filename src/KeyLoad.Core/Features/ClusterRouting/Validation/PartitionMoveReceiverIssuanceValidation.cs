@@ -39,7 +39,9 @@ internal static class PartitionMoveReceiverIssuanceValidation
             || originalAuthorization.CommandId != grant.GrantId
             || originalAuthorization.AppliedPosition != grant.AdmissionPosition
             || !PhysicalOwnerEntryValidation.SameOwner(originalAuthorization.PhysicalOwner, grant.ControlOwner))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.MissingAuthority);
+        }
     }
 
     internal static void RequireStoredResult(PartitionMoveReceiverIssuance value, StoredOutcome actual,
@@ -48,7 +50,9 @@ internal static class PartitionMoveReceiverIssuanceValidation
         if (actual.Incarnation != incarnation || actual.PolicyEpoch != value.ReceiverIssuancePolicyEpoch
             || actual.Fingerprint != value.IssuanceFingerprint || actual.Result.Error is not null
             || currentReadCut < value.IssuanceAppliedPosition)
-        { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority);
+        }
         var result = actual.Result.Get<PartitionMovePhaseResult>();
         if (result.Stage != PartitionMovePeerStage.ReceiverIssue || result.MoveId != value.MoveId
             || result.Journal.CommandId != value.IssuanceCommandId
@@ -57,6 +61,8 @@ internal static class PartitionMoveReceiverIssuanceValidation
             || !PhysicalOwnerEntryValidation.SameOwner(result.Journal.PhysicalOwner, value.ReceiverOwner)
             || !NativeSerialization.Serialize(result.ReceiverIssuance).AsSpan()
                 .SequenceEqual(NativeSerialization.Serialize(value)))
-        { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority);
+        }
     }
 }

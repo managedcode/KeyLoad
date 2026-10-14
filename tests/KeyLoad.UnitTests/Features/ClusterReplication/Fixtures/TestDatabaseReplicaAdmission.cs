@@ -35,7 +35,10 @@ internal sealed class TestDatabaseReplicaAdmission : IDisposable
         ExecutionOptions = options;
         execution = options.Value;
         replica = new(new(configuration.Value.Directory)
-        { Incarnation = configuration.Value.Incarnation, SigningKey = canonicalStore.Identity.SigningKey },
+        {
+            Incarnation = configuration.Value.Incarnation,
+            SigningKey = canonicalStore.Identity.SigningKey
+        },
             UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         try
         {
@@ -49,7 +52,9 @@ internal sealed class TestDatabaseReplicaAdmission : IDisposable
             catch (Exception primary)
             {
                 try
-                { log.Dispose(); }
+                {
+                    log.Dispose();
+                }
                 catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
                 throw;
             }
@@ -57,13 +62,18 @@ internal sealed class TestDatabaseReplicaAdmission : IDisposable
         catch (Exception primary)
         {
             try
-            { replica.Dispose(); }
+            {
+                replica.Dispose();
+            }
             catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
             throw;
         }
     }
 
-    internal IOptions<ReplicaExecutionOptions> ExecutionOptions { get; }
+    internal IOptions<ReplicaExecutionOptions> ExecutionOptions
+    {
+        get;
+    }
     internal Guid JournalNodeId => replica.Identity.NodeId;
 
     internal OperationResult Submit(ReplicatedOperation operation, bool explicitTime, CancellationToken cancellationToken = default)
@@ -78,16 +88,23 @@ internal sealed class TestDatabaseReplicaAdmission : IDisposable
             using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(
                 caller?.Token ?? contextToken, timeout.Token);
             var actual = database.NormalizeOperation(explicitTime ? operation
-                : operation with { EvaluatedAt = database.EvaluationClock.GetUtcNow() });
+                : operation with
+                {
+                    EvaluatedAt = database.EvaluationClock.GetUtcNow()
+                });
             if (RetainedCommandIndex(actual) is { } originalIndex)
             {
                 if (originalIndex > log.State.CommittedIndex)
-                { RequireMaterializer().Commit(originalIndex); }
+                {
+                    RequireMaterializer().Commit(originalIndex);
+                }
                 RequireMaterializer().WaitForApplyAsync(originalIndex, cancellation.Token).GetAwaiter().GetResult();
                 return database.ResolveOutcome(actual);
             }
             if (log.State.Term < FirstTerm)
-            { log.SaveTermAndVote(FirstTerm, Voter); }
+            {
+                log.SaveTermAndVote(FirstTerm, Voter);
+            }
             var index = checked(log.State.LastIndex + IndexStep);
             log.Append([new(index, log.State.Term, actual)]);
             RequireMaterializer().Commit(index);
@@ -114,7 +131,9 @@ internal sealed class TestDatabaseReplicaAdmission : IDisposable
     internal (long LastIndex, long CommittedIndex, long Term) ReadJournalCut()
     {
         lock (admission)
-        { return (log.State.LastIndex, log.State.CommittedIndex, log.State.Term); }
+        {
+            return (log.State.LastIndex, log.State.CommittedIndex, log.State.Term);
+        }
     }
 
     internal ReplicaEntry ReadRetainedEntry(Guid originalId)
@@ -167,20 +186,32 @@ internal sealed class TestDatabaseReplicaAdmission : IDisposable
         var failures = new List<Exception>();
         Exception? fatal = null;
         try
-        { materializer?.DisposeAsync().AsTask().GetAwaiter().GetResult(); }
+        {
+            materializer?.DisposeAsync().AsTask().GetAwaiter().GetResult();
+        }
         catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is null) { failures.Add(error); }
         catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is not null)
-        { fatal = TestDatabaseJoinedLifetime.RetainFatal(failures, fatal, error); }
+        {
+            fatal = TestDatabaseJoinedLifetime.RetainFatal(failures, fatal, error);
+        }
         try
-        { log.Dispose(); }
+        {
+            log.Dispose();
+        }
         catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is null) { failures.Add(error); }
         catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is not null)
-        { fatal = TestDatabaseJoinedLifetime.RetainFatal(failures, fatal, error); }
+        {
+            fatal = TestDatabaseJoinedLifetime.RetainFatal(failures, fatal, error);
+        }
         try
-        { replica.Dispose(); }
+        {
+            replica.Dispose();
+        }
         catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is null) { failures.Add(error); }
         catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is not null)
-        { fatal = TestDatabaseJoinedLifetime.RetainFatal(failures, fatal, error); }
+        {
+            fatal = TestDatabaseJoinedLifetime.RetainFatal(failures, fatal, error);
+        }
         TestDatabaseJoinedLifetime.ThrowIfAny(failures, fatal);
     }
 }

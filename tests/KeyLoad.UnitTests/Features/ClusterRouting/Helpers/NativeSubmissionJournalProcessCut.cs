@@ -23,18 +23,24 @@ internal sealed record NativeSubmissionJournalProcessCut(long CanonicalPosition,
             void Observe(long bytes)
             {
                 if (bytes < 0 || bytes > MaximumBytes - examined)
-                { throw new InvalidDataException("The complete original both-store cut exceeds its byte budget."); }
+                {
+                    throw new InvalidDataException("The complete original both-store cut exceeds its byte budget.");
+                }
                 examined += bytes;
             }
         }));
 
     internal static T WithCanonical<T>(C1OutcomeInspectionFixture fixture, Func<ZoneTreeStore, T> body)
         => UseStore(() => ZoneTreeExistingStore.Open(new(fixture.DirectoryPath)
-        { Incarnation = fixture.Incarnation }, fixture.Identity.NodeId, UnitExecutionOptions.StorageExecution()), body);
+        {
+            Incarnation = fixture.Incarnation
+        }, fixture.Identity.NodeId, UnitExecutionOptions.StorageExecution()), body);
 
     private static T WithReplica<T>(NativeSubmissionJournalProcessFixture fixture, Func<ZoneTreeStore, T> body)
         => UseStore(() => ZoneTreeExistingStore.Open(new(fixture.ReplicaDirectory)
-        { Incarnation = fixture.Canonical.Incarnation }, fixture.ReplicaIdentity.NodeId,
+        {
+            Incarnation = fixture.Canonical.Incarnation
+        }, fixture.ReplicaIdentity.NodeId,
             UnitExecutionOptions.StorageExecution()), body);
 
     private static T UseStore<T>(Func<ZoneTreeStore> open, Func<ZoneTreeStore, T> body)
@@ -52,15 +58,22 @@ internal sealed record NativeSubmissionJournalProcessCut(long CanonicalPosition,
     {
         var remaining = MaximumRecords - records;
         if (remaining <= 0)
-        { throw new InvalidDataException("The complete both-store record budget is exhausted."); }
+        {
+            throw new InvalidDataException("The complete both-store record budget is exhausted.");
+        }
         var rows = new List<KeyValueRecord>();
         store.Read(view =>
         {
             var scan = view.VisitRange([], remaining, (key, value) =>
-            { rows.Add(new(key.ToArray(), value.ToArray())); return true; }, observer: observe,
+            {
+                rows.Add(new(key.ToArray(), value.ToArray()));
+                return true;
+            }, observer: observe,
                 cancellationToken: TestContext.Current!.Execution.CancellationToken);
             if (scan.HasMore || scan.StoppedByVisitor)
-            { throw new InvalidDataException("The complete original both-store cut exceeds its record budget."); }
+            {
+                throw new InvalidDataException("The complete original both-store cut exceeds its record budget.");
+            }
             return true;
         });
         records += rows.Count;
@@ -78,7 +91,10 @@ internal sealed record NativeSubmissionJournalProcessCut(long CanonicalPosition,
 
     internal static void ReplaceEntry(NativeSubmissionJournalProcessFixture fixture, byte[] bytes)
         => WithReplica(fixture, store => store.Commit((tx, _) =>
-        { tx.Put(ReplicaProtocol.EntryStorageKey(fixture.Seed.Entry.Index), bytes); return true; }));
+        {
+            tx.Put(ReplicaProtocol.EntryStorageKey(fixture.Seed.Entry.Index), bytes);
+            return true;
+        }));
 
     public override string ToString() => nameof(NativeSubmissionJournalProcessCut);
 }

@@ -17,7 +17,10 @@ internal static class SqlBooleanTruthCases
     private static readonly Predicate False = new Comparison(Score, "=", ValueOperand.Create(false));
     private static readonly Predicate Null = new NullTest(Score, false, false);
     private static readonly Predicate Present = new NullTest(Score, true, true);
-    internal static IReadOnlyList<SqlBooleanTruthCase> All { get; } =
+    internal static IReadOnlyList<SqlBooleanTruthCase> All
+    {
+        get;
+    } =
     [
         new("score = @truth", True, ["low"]),
         new("score = @false", False, ["high"]),

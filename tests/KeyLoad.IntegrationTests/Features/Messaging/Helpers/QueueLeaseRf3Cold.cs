@@ -15,9 +15,13 @@ internal static class QueueLeaseRf3Cold
                 QueueLeaseRf3Protocol.ColdScenario, token), failures).ConfigureAwait(false);
         }
         foreach (var node in QueueLeaseRf3Protocol.Nodes)
-        { await ServerFailureObserver.ObserveAsync(() => fixture.BeginContainerRestartAsync(node, token), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => fixture.BeginContainerRestartAsync(node, token), failures).ConfigureAwait(false);
+        }
         foreach (var node in QueueLeaseRf3Protocol.Nodes)
-        { await ServerFailureObserver.ObserveAsync(() => fixture.RestartContainerAsync(node, token), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => fixture.RestartContainerAsync(node, token), failures).ConfigureAwait(false);
+        }
         foreach (var node in QueueLeaseRf3Protocol.Nodes)
         {
             await ServerFailureObserver.ObserveAsync(async () => await fixture.App.ResourceNotifications

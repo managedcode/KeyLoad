@@ -42,7 +42,9 @@ public sealed partial class DatabaseEngine
 
         var access = put.Access ?? previous?.Access ?? new RowAccess();
         if (access.TeamId is { } team)
-        { JsonData.Identifier(team); }
+        {
+            JsonData.Identifier(team);
+        }
         Authorization.RequireWriteRow(principal, access);
         var document = new DocumentRecord(new(partition, put.Collection, put.Id),
             checked((previous?.Revision ?? PreviousRevisionValidationBoundary) + PreviousRevisionStep), json, access, now);

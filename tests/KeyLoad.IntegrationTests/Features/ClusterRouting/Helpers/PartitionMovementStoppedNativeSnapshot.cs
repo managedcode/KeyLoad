@@ -21,7 +21,9 @@ internal sealed class PartitionMovementStoppedNativeSnapshot
         evidenceRoot = Path.Combine(Path.GetTempPath(), "keyload-retire-disposition-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(evidenceRoot);
         if (!OperatingSystem.IsWindows())
-        { File.SetUnixFileMode(evidenceRoot, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute); }
+        {
+            File.SetUnixFileMode(evidenceRoot, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+        }
     }
 
     internal static async Task<PartitionMovementStoppedNativeSnapshot> CaptureAsync(TwoRf3MembershipWave wave,
@@ -49,7 +51,9 @@ internal sealed class PartitionMovementStoppedNativeSnapshot
                 var copied = await NodeEpochRf3Inventory.CopyTreeAsync(source, destination, cancellationToken).ConfigureAwait(false);
                 RestoreModes(destination, snapshot.directoryModes[Path.Combine(node, storage)]);
                 if (!snapshot.originals[Path.Combine(node, storage)].Equivalent(copied))
-                { throw new IOException("The original stopped native cohort changed during snapshot capture."); }
+                {
+                    throw new IOException("The original stopped native cohort changed during snapshot capture.");
+                }
             }
         }
         return snapshot;
@@ -63,7 +67,9 @@ internal sealed class PartitionMovementStoppedNativeSnapshot
         foreach (var node in TwoRf3MembershipProtocol.Nodes)
         {
             foreach (var storage in NativeDirectories)
-            { await ServerFailureObserver.ObserveAsync(() => RestoreNativeDirectoryAsync(wave, node, storage, cancellationToken), failures).ConfigureAwait(false); }
+            {
+                await ServerFailureObserver.ObserveAsync(() => RestoreNativeDirectoryAsync(wave, node, storage, cancellationToken), failures).ConfigureAwait(false);
+            }
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -75,7 +81,9 @@ internal sealed class PartitionMovementStoppedNativeSnapshot
         var corrupt = Path.Combine(evidenceRoot, CorruptDirectory, node, storage);
         var originalInventory = await NodeEpochRf3Inventory.CaptureAsync(original, cancellationToken).ConfigureAwait(false);
         if (!originals[Path.Combine(node, storage)].Equivalent(originalInventory))
-        { throw new IOException("The original stopped native snapshot changed before restore."); }
+        {
+            throw new IOException("The original stopped native snapshot changed before restore.");
+        }
         RequireModes(original, directoryModes[Path.Combine(node, storage)]);
         var corruptInventory = await NodeEpochRf3Inventory.CaptureAsync(destination, cancellationToken).ConfigureAwait(false);
         var corruptModes = CaptureModes(destination, corruptInventory);
@@ -84,53 +92,73 @@ internal sealed class PartitionMovementStoppedNativeSnapshot
         var retained = await NodeEpochRf3Inventory.CaptureAsync(corrupt, cancellationToken).ConfigureAwait(false);
         RequireModes(corrupt, corruptModes);
         if (!corruptInventory.Equivalent(retained))
-        { throw new IOException("The original corrupt native tree changed while retained."); }
+        {
+            throw new IOException("The original corrupt native tree changed while retained.");
+        }
         var restored = await NodeEpochRf3Inventory.CopyTreeAsync(original, destination, cancellationToken).ConfigureAwait(false);
         RestoreModes(destination, directoryModes[Path.Combine(node, storage)]);
         if (!originals[Path.Combine(node, storage)].Equivalent(restored))
-        { throw new IOException("The restored native database differs from its original stopped snapshot."); }
+        {
+            throw new IOException("The restored native database differs from its original stopped snapshot.");
+        }
     }
 
     private static Dictionary<string, UnixFileMode> CaptureModes(string root, NodeEpochRf3Inventory inventory)
     {
         var modes = new Dictionary<string, UnixFileMode>(StringComparer.Ordinal);
         if (OperatingSystem.IsWindows())
-        { return modes; }
+        {
+            return modes;
+        }
         modes.Add(string.Empty, File.GetUnixFileMode(root));
         foreach (var relative in inventory.Directories)
-        { modes.Add(relative, File.GetUnixFileMode(ResolveKnownDirectory(root, relative))); }
+        {
+            modes.Add(relative, File.GetUnixFileMode(ResolveKnownDirectory(root, relative)));
+        }
         return modes;
     }
 
     private static void RestoreModes(string root, Dictionary<string, UnixFileMode> modes)
     {
         if (OperatingSystem.IsWindows())
-        { return; }
+        {
+            return;
+        }
         foreach (var pair in modes)
-        { File.SetUnixFileMode(ResolveKnownDirectory(root, pair.Key), pair.Value); }
+        {
+            File.SetUnixFileMode(ResolveKnownDirectory(root, pair.Key), pair.Value);
+        }
         RequireModes(root, modes);
     }
 
     private static void RequireModes(string root, Dictionary<string, UnixFileMode> modes)
     {
         if (OperatingSystem.IsWindows())
-        { return; }
+        {
+            return;
+        }
         foreach (var pair in modes)
         {
             if (File.GetUnixFileMode(ResolveKnownDirectory(root, pair.Key)) != pair.Value)
-            { throw new IOException("The exact owned native directory mode changed."); }
+            {
+                throw new IOException("The exact owned native directory mode changed.");
+            }
         }
     }
 
     private static string ResolveKnownDirectory(string root, string relative)
     {
         if (relative.Length == EmptyInventoryCount)
-        { return root; }
+        {
+            return root;
+        }
         var candidate = Path.GetFullPath(Path.Combine(root, relative));
         var prefix = Path.TrimEndingDirectorySeparator(Path.GetFullPath(root)) + Path.DirectorySeparatorChar;
         if (Path.IsPathRooted(relative) || !candidate.StartsWith(prefix, StringComparison.Ordinal)
             || (File.GetAttributes(candidate) & FileAttributes.ReparsePoint) != EmptyInventoryCount)
-        { throw new InvalidDataException("The captured native directory escaped its closed owned tree."); }
+        {
+            throw new InvalidDataException("The captured native directory escaped its closed owned tree.");
+        }
         return candidate;
     }
 
@@ -147,14 +175,18 @@ internal sealed class PartitionMovementStoppedNativeSnapshot
         }
         if (bytes > NodeEpochRf3Protocol.MaximumInventoryBytes || files > NodeEpochRf3Protocol.MaximumFiles
             || directories > NodeEpochRf3Protocol.MaximumDirectories)
-        { throw new InvalidDataException("The six stopped native databases exceed the central inventory bounds."); }
+        {
+            throw new InvalidDataException("The six stopped native databases exceed the central inventory bounds.");
+        }
     }
 
     private static void RequireStopped(TwoRf3MembershipWave wave, PartitionMovementPublicParentRf3NativeCut[] stopped)
     {
         if (!stopped.Select(cut => cut.Node).Order(StringComparer.Ordinal)
             .SequenceEqual(TwoRf3MembershipProtocol.Nodes.Order(StringComparer.Ordinal), StringComparer.Ordinal))
-        { throw new InvalidOperationException("All six exact owned native stopped cuts are required."); }
+        {
+            throw new InvalidOperationException("All six exact owned native stopped cuts are required.");
+        }
         foreach (var node in TwoRf3MembershipProtocol.Nodes)
         {
             var root = Path.Combine(wave.OwnedDataRoot, node);

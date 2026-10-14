@@ -39,7 +39,9 @@ internal static class NativeTextNormalizationPublicAssertions
             _ => throw new ArgumentOutOfRangeException(nameof(stage))
         };
         foreach (var query in new[] { "café", "ＣＡＦÉ", "café CAFÉ ＣＡＦÉ café" })
-        { await PageAsync(caller, scenario.Text(query), expected, token); }
+        {
+            await PageAsync(caller, scenario.Text(query), expected, token);
+        }
         await PageAsync(caller, scenario.Text("cafe"),
             [Row(scenario, NativeTextNormalizationPublicScenario.Plain, 1L,
                 NativeTextNormalizationPublicScenario.PlainJson, 1d / 61d)], token);

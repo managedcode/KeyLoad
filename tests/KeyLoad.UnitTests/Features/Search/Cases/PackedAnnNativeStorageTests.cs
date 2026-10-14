@@ -72,7 +72,10 @@ internal sealed class PackedAnnNativeStorageTests
             UnitExecutionOptions.PackedAnn(policy), storage, PackedAnnIndexTestSupport.Budget(db)));
         await Assert.That(truncated.Code).IsEqualTo(ErrorCode.Corruption);
         var wrongProfile = Assert.ThrowsExactly<KeyLoadException>(() => PackedAnnIndex.Load(file, digest,
-            UnitExecutionOptions.PackedAnn(policy with { Seed = policy.Seed + Step }), storage, PackedAnnIndexTestSupport.Budget(db)));
+            UnitExecutionOptions.PackedAnn(policy with
+            {
+                Seed = policy.Seed + Step
+            }), storage, PackedAnnIndexTestSupport.Budget(db)));
         await Assert.That(wrongProfile.Code).IsEqualTo(ErrorCode.Corruption);
         var healthy = PackedAnnIndex.Load(file, digest, UnitExecutionOptions.PackedAnn(policy), storage, PackedAnnIndexTestSupport.Budget(db));
         await AssertResultsAsync(db, index, healthy);
@@ -97,11 +100,17 @@ internal sealed class PackedAnnNativeStorageTests
         var digest = index.Save(file, storage, PackedAnnIndexTestSupport.Budget(db));
         await Assert.That(file.Length).IsGreaterThan(MinimumFileBytes);
         using var exact = Open(db, RestoredFile);
-        var bounded = Options.Create(storage.Value with { MaxFileBytes = file.Length });
+        var bounded = Options.Create(storage.Value with
+        {
+            MaxFileBytes = file.Length
+        });
         await Assert.That(index.Save(exact, bounded, PackedAnnIndexTestSupport.Budget(db))).IsEquivalentTo(digest, CollectionOrdering.Matching);
         using var below = new MemoryStream();
         var excess = Assert.ThrowsExactly<KeyLoadException>(() => index.Save(below,
-            Options.Create(storage.Value with { MaxFileBytes = file.Length - Step }), PackedAnnIndexTestSupport.Budget(db)));
+            Options.Create(storage.Value with
+            {
+                MaxFileBytes = file.Length - Step
+            }), PackedAnnIndexTestSupport.Budget(db)));
         await Assert.That(excess.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         using var cancelled = new CancellationTokenSource();
         await cancelled.CancelAsync();
@@ -154,7 +163,9 @@ internal sealed class PackedAnnNativeStorageTests
     {
         var page = view.Scan([], SnapshotBound);
         if (page.HasMore)
-        { throw new InvalidOperationException("The native ANN storage fixture exceeds its complete snapshot bound."); }
+        {
+            throw new InvalidOperationException("The native ANN storage fixture exceeds its complete snapshot bound.");
+        }
         return page.Records.Select(row => (Convert.ToHexString(row.Key.Span), Convert.ToHexString(row.Value.Span))).ToArray();
     });
 }

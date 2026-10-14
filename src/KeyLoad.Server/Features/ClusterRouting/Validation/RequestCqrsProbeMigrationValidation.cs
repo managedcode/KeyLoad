@@ -11,15 +11,21 @@ internal static class RequestCqrsProbeMigrationValidation
         RequestCqrsProbeActivationValidation.Require(Witness(value));
         if (value.Kind is not (RequestCqrsProbeMigrationProtocol.RequestKind or RequestCqrsProbeMigrationProtocol.RequestedKind)
             || string.IsNullOrWhiteSpace(value.TargetVoter) || string.IsNullOrWhiteSpace(value.TargetSiloAddress))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         try
         {
             var address = SiloAddress.FromParsableString(value.TargetSiloAddress);
             if (address.ToParsableString() != value.TargetSiloAddress)
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
         }
         catch (Exception error) when (error is ArgumentException or FormatException)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
     }
 
     internal static string Name(RequestCqrsProbeMigrationRecord value)
@@ -33,7 +39,9 @@ internal static class RequestCqrsProbeMigrationValidation
         var prefix = name.StartsWith(RequestCqrsProbeMigrationProtocol.RequestedPrefix, StringComparison.Ordinal)
             ? RequestCqrsProbeMigrationProtocol.RequestedPrefix : RequestCqrsProbeMigrationProtocol.RequestPrefix;
         if (!name.StartsWith(prefix, StringComparison.Ordinal) || !name.EndsWith(RequestCqrsProbeProtocol.JsonFileSuffix, StringComparison.Ordinal))
-        { return false; }
+        {
+            return false;
+        }
         var parts = name[prefix.Length..^RequestCqrsProbeProtocol.JsonFileSuffix.Length].Split(RequestCqrsProbeActivationProtocol.Separator);
         return parts.Length == RequestCqrsProbeActivationProtocol.IdentityParts
             && CanonicalGuid(parts[RequestCqrsProbeActivationProtocol.FirstPart])

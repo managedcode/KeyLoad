@@ -32,12 +32,19 @@ internal static class QueueLifecycleRecoveryContinuation
         var commandId = Guid.NewGuid();
         _ = CrashDatabase.Submit(cold, OperationKind.Batch, new CommandRequest(commandId, lane.Partition,
             [QueueLifecycleCrashSeed.Enqueue(QueueLifecycleCrashProtocol.Healthy)]), commandId).Get<CommitReceipt>();
-        var fresh = request with { RequestId = Guid.NewGuid() };
+        var fresh = request with
+        {
+            RequestId = Guid.NewGuid()
+        };
         var healthy = await Assert.That(CrashDatabase.Submit(cold, OperationKind.Receive, fresh, fresh.RequestId).Get<ReceiveResult>().Deliveries).HasSingleItem();
         await Assert.That(healthy.Id).IsEqualTo(QueueLifecycleCrashProtocol.Healthy);
         await Assert.That(healthy.PayloadJson).IsEqualTo(QueueLifecycleCrashProtocol.Payload);
         await Assert.That(healthy.HeadersJson).IsEqualTo(QueueLifecycleCrashProtocol.Headers);
-        var completed = ack with { CommandId = Guid.NewGuid(), Token = healthy.Token };
+        var completed = ack with
+        {
+            CommandId = Guid.NewGuid(),
+            Token = healthy.Token
+        };
         _ = CrashDatabase.Submit(cold, OperationKind.Delivery, completed, completed.CommandId).Get<CommitReceipt>();
     }
 
@@ -46,7 +53,9 @@ internal static class QueueLifecycleRecoveryContinuation
         {
             var page = view.Scan(KeySpace.Partition(family, lane.Partition, lane.Queue), QueueLifecycleCrashProtocol.ImageRecords);
             if (page.HasMore)
-            { throw new InvalidOperationException("The lifecycle recovery image exceeded its bound."); }
+            {
+                throw new InvalidOperationException("The lifecycle recovery image exceeded its bound.");
+            }
             return page.Records.Select(row => Convert.ToHexString(row.Key.Span) + ":" + Convert.ToHexString(row.Value.Span));
         }).ToArray());
 }

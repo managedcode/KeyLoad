@@ -28,7 +28,11 @@ internal static class AuthenticationExecutionValues
         var document = await PublicReadAssertions.DocumentAsync(await root.GetAsync(state.Document.Reference, token));
         await SqlRf3Protocol.EqualAsync<DocumentResult?>(state.Expected, document);
         var outbox = await McpCallerAssertions.SdkSuccessAsync(await root.OutboxStatusAsync(state.Document.Partition, token));
-        return System.Text.Json.JsonSerializer.Serialize(new { Document = document, Outbox = outbox }, JsonDefaults.Options);
+        return System.Text.Json.JsonSerializer.Serialize(new
+        {
+            Document = document,
+            Outbox = outbox
+        }, JsonDefaults.Options);
     }
 
     internal static async Task ReplayAsync(KeyLoadClient root, AuthenticationExecutionState state, CancellationToken token)

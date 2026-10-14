@@ -27,9 +27,16 @@ internal static class BlobPriorPublicationDamage
         store.Commit((tx, _) =>
         {
             if (missing)
-            { tx.Delete(key); }
+            {
+                tx.Delete(key);
+            }
             else
-            { tx.PutRecord(key, seed.State with { Retired = true }); }
+            {
+                tx.PutRecord(key, seed.State with
+                {
+                    Retired = true
+                });
+            }
             return true;
         });
         var damaged = BlobPriorPublicationImage.Capture(store);

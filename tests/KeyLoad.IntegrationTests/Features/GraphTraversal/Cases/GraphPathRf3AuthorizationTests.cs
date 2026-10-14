@@ -49,7 +49,10 @@ internal sealed class GraphPathRf3AuthorizationTests(ClusterFixture fixture)
 
         var deniedGrants = GraphPathRf3Scenario.FullGraphGrants(seed.Partition)
             .Select(grant => grant.Resource == GraphPathRf3Scenario.Graph
-                ? grant with { Capabilities = grant.Capabilities & ~Capability.GraphRead } : grant)
+                ? grant with
+                {
+                    Capabilities = grant.Capabilities & ~Capability.GraphRead
+                } : grant)
             .ToArray();
         identity = await GraphPathRf3Scenario.ReplaceGrantsAsync(fixture, identity, deniedGrants,
             [GraphPathRf3Scenario.LabelUseGrant, GraphPathRf3Scenario.LabelReadGrant], deadline.Token);

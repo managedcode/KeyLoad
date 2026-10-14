@@ -16,7 +16,9 @@ internal sealed class SqlOperationCompilerTests
                      SqlOperationTestData.InvalidSelect })
         {
             var parameters = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
-            { [SqlOperationTestData.Status] = JsonSerializer.SerializeToElement(SqlOperationTestData.Open) };
+            {
+                [SqlOperationTestData.Status] = JsonSerializer.SerializeToElement(SqlOperationTestData.Open)
+            };
             var request = new SqlOperationRequest(McpCanonicalTestData.Partition, sql, parameters,
                 AllowFullScan: true, Cursor: SqlOperationTestData.Cursor);
             var expected = SqlOperationTestData.Find(McpCatalogExpectations.QueryExecute).Decode(
@@ -28,7 +30,9 @@ internal sealed class SqlOperationCompilerTests
             await SqlOperationTestData.Same(SqlOperationTestData.Compile(request), expected);
         }
         await SqlOperationTestData.Reject(SqlOperationTestData.Call(McpCatalogExpectations.QueryCapabilities) with
-        { Sql = "SELECT TOP () * FROM orders" }, ErrorCode.Validation);
+        {
+            Sql = "SELECT TOP () * FROM orders"
+        }, ErrorCode.Validation);
     }
 
     [Test]
@@ -67,7 +71,10 @@ internal sealed class SqlOperationCompilerTests
     public async Task AcJoinUnifiedCallRejectsTheNondefaultQueryDialectAsUnsupported()
     {
         var supported = SqlOperationTestData.Call(McpCatalogExpectations.QueryCapabilities);
-        var request = supported with { QueryDialectVersion = 2 };
+        var request = supported with
+        {
+            QueryDialectVersion = 2
+        };
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => SqlOperationTestData.Compile(request));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.UnsupportedCapability);
         await SqlOperationTestData.Same(SqlOperationTestData.Compile(supported),

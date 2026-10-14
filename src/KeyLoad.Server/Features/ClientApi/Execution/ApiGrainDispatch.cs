@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Features.InternalSerialization;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.Server;
 
@@ -30,7 +30,9 @@ internal static class ApiGrainDispatch
         HttpContext context, OperationKind kind, Guid commandId, T payload)
     {
         if (kind != OperationKind.ConfigureApiKey)
-        { throw Errors.Fail(ErrorCode.Validation, GrainRoutingProtocol.InvalidRequest); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, GrainRoutingProtocol.InvalidRequest);
+        }
         await CanonicalOperationGateway.ExecuteAsync(context, null, kind, commandId,
             NativeSerialization.Serialize(payload, NativeValidationProfile.PublicInputElements),
             context.RequestAborted).ConfigureAwait(false);

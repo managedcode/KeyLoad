@@ -24,20 +24,30 @@ internal static class PartitionMoveGrantStageAdmission
             _ => false
         };
         if (!admitted)
-        { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict);
+        }
         if (phase.Stage is PartitionMovePeerStage.Abort or PartitionMovePeerStage.Retire or PartitionMovePeerStage.SourceBeginAbort)
-        { RequireCleanup(view, phase, control, maximumBytes); }
+        {
+            RequireCleanup(view, phase, control, maximumBytes);
+        }
         if (phase.Stage == PartitionMovePeerStage.ControlApplyCommand)
-        { PartitionControlEffectGrantAdmission.Require(view, phase, control, maximumBytes); }
+        {
+            PartitionControlEffectGrantAdmission.Require(view, phase, control, maximumBytes);
+        }
         if (phase.Stage == PartitionMovePeerStage.PublishWitness)
-        { RequirePublication(view, phase, control); }
+        {
+            RequirePublication(view, phase, control);
+        }
         if (phase.Stage == PartitionMovePeerStage.Fence)
         {
             var body = NativeSerialization.Deserialize<PartitionMoveControlBody>(phase.Body.Span);
             if (body.OperatorPrincipalId != control.PrincipalId
                 || JsonData.Fingerprint(body.Control) != JsonData.Fingerprint(control)
                 || PartitionMoveIntentIdentity.Digest(body.Control) != phase.ControlIntentDigest)
-            { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+            }
         }
     }
 
@@ -50,17 +60,23 @@ internal static class PartitionMoveGrantStageAdmission
             || body.FamilyOrdinal > PartitionMoveCleanupFamilies.All.Length
             || phase.Stage is PartitionMovePeerStage.Retire or PartitionMovePeerStage.SourceBeginAbort
                 && body.Role != PartitionMoveCleanupRole.Source)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
         if (phase.Stage == PartitionMovePeerStage.Retire)
         {
             var publication = PartitionMovePublishedPlacementStorage.Read(view, control.Partition)
                 ?? throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority);
             if (body.Publication is null
                 || JsonData.Fingerprint(body.Publication) != JsonData.Fingerprint(publication))
-            { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+            }
         }
         if (body.Role == PartitionMoveCleanupRole.Source)
-        { RequirePrecedingCleanup(view, body, phase, maximumBytes); }
+        {
+            RequirePrecedingCleanup(view, body, phase, maximumBytes);
+        }
     }
 
     private static void RequirePrecedingCleanup(IKeyValueView view, PartitionMoveCleanupBody body,
@@ -76,7 +92,9 @@ internal static class PartitionMoveGrantStageAdmission
             || phase.Stage is PartitionMovePeerStage.Abort or PartitionMovePeerStage.SourceBeginAbort
                 && (grant.Stage != PartitionMovePeerStage.Abort || grant.CleanupRole != PartitionMoveCleanupRole.Target
                     || grant.CleanupFamily != PartitionMoveCleanupFamilies.All.Length))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
     }
 
     private static void RequirePublication(IKeyValueView view, PartitionMovePhaseCommand phase,
@@ -88,6 +106,8 @@ internal static class PartitionMoveGrantStageAdmission
         if (body.OperatorPrincipalId != control.PrincipalId
             || JsonData.Fingerprint(body.Control) != JsonData.Fingerprint(control)
             || JsonData.Fingerprint(body.Publication) != JsonData.Fingerprint(publication))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
     }
 }

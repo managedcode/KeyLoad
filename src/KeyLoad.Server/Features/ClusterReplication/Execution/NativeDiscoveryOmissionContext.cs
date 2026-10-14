@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using ManagedCode.Orleans.Identity.Core.Constants;
 
 namespace KeyLoad.Server;
@@ -28,13 +28,18 @@ internal static class NativeDiscoveryOmissionContext
             || state.RequestId == Guid.Empty || state.CommandId != Guid.Empty
             || context.Features.Get<ServerConnectionFeature>() is not { } connection
             || state.ConnectionId != connection.Id || !Route(context.Request.Path, arm.Route))
-        { return null; }
+        {
+            return null;
+        }
         context.RequestAborted.ThrowIfCancellationRequested();
         return new(NativeDiscoveryOmissionProtocol.Version, arm.SessionId, arm.ArmId,
             arm.SourceVoter, arm.TargetVoter, arm.Route, context.TraceIdentifier, connection.Id,
             state.RequestId, state.CommandId, nonce, NativeDiscoveryOmissionProtocol.SourceStage,
             null, null)
-        { SourceSiloAddress = sourceSiloAddress, TargetSiloAddress = targetSiloAddress };
+        {
+            SourceSiloAddress = sourceSiloAddress,
+            TargetSiloAddress = targetSiloAddress
+        };
     }
     private static bool Route(PathString path, string route) => route switch
     {

@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
@@ -20,7 +20,9 @@ internal static class PhysicalOwnerProbeNativeIdentity
     {
         if (value is not { Length: NonceCharacters }
             || value.Any(character => !char.IsAsciiLetterOrDigit(character) && character is not UrlDash and not UrlUnderscore))
-        { return false; }
+        {
+            return false;
+        }
         Span<byte> bytes = stackalloc byte[NonceBytes];
         var encoded = value.Replace(UrlDash, Base64Plus).Replace(UrlUnderscore, Base64Slash) + NoncePadding;
         return Convert.TryFromBase64String(encoded, bytes, out var count) && count == bytes.Length
@@ -31,7 +33,9 @@ internal static class PhysicalOwnerProbeNativeIdentity
     {
         var matches = node.ReadActiveNativeMembership().Where(row => row.SiloName == voter).Take(AmbiguousMatchCount).ToArray();
         if (matches.Length != UniqueMatchCount || !PhysicalGroupAddress.CanonicalAddress(matches[FirstMatchIndex].SiloAddress, membership))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalOwnerProbeProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalOwnerProbeProtocol.Unavailable);
+        }
         return SiloAddress.FromParsableString(matches[FirstMatchIndex].SiloAddress);
     }
     internal static void RequireCurrent(OrleansNode node, string voter, string address,
@@ -40,6 +44,8 @@ internal static class PhysicalOwnerProbeNativeIdentity
         token.ThrowIfCancellationRequested();
         if (!PhysicalGroupAddress.CanonicalAddress(address, membership)
             || Resolve(node, voter, membership).ToParsableString() != address)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PhysicalOwnerProbeProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, PhysicalOwnerProbeProtocol.InvalidProof);
+        }
     }
 }

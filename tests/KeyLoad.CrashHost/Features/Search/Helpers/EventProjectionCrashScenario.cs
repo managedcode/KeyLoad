@@ -58,9 +58,15 @@ internal static class EventProjectionCrashScenario
     internal const string SourcePrivateValue = "projection-document-private-canary";
     internal const string EventPrivateValue = "projection-event-private-canary";
     internal const int SpaceDimension = 2;
-    internal static PartitionRef Partition { get; } = new(CrashFixtureValues.Tenant,
+    internal static PartitionRef Partition
+    {
+        get;
+    } = new(CrashFixtureValues.Tenant,
         CrashFixtureValues.Database, CrashFixtureValues.Orders, CrashFixtureValues.Partition);
-    internal static VectorSpace Space { get; } = new(SpaceId, SpaceDimension, DistanceMetric.Cosine,
+    internal static VectorSpace Space
+    {
+        get;
+    } = new(SpaceId, SpaceDimension, DistanceMetric.Cosine,
         SpaceModel, SpaceVersion);
     internal static StreamRef Stream { get; } = new(Partition, StreamSet, StreamId, Generation);
 

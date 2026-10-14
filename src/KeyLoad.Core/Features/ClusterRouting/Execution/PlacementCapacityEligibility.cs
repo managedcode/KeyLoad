@@ -15,7 +15,9 @@ internal static class PlacementCapacityEligibility
         if (voters.Length != owner.VoterIds.Length
             || policy.RequireDistinctHosts && voters.Select(item => item.Resource.HostDomain)
                 .Distinct(StringComparer.Ordinal).Count() != voters.Length)
-        { return false; }
+        {
+            return false;
+        }
         return voters.All(item => Fits(policy, item.Resource, incomingBytes));
     }
 

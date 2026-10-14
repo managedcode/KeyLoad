@@ -35,7 +35,11 @@ internal static class TenantCapacityPlacementRf3Assertions
         await SqlRf3Protocol.EqualAsync(state.OriginalPolicy.Policy,
             (await McpCallerAssertions.SuccessAsync<TenantPlacementPolicyV1>(
                 await seed.Official.CallAsync(TenantPlacementPublicProtocol.ConfigureTool,
-                    new { commandId = state.OriginalPolicyCommand, request = state.OriginalPolicy }, token))).Value);
+                    new
+                    {
+                        commandId = state.OriginalPolicyCommand,
+                        request = state.OriginalPolicy
+                    }, token))).Value);
         await RequireOriginalModelsAsync(seed, state, token);
     }
 

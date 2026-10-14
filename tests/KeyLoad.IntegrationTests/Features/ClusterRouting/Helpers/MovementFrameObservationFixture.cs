@@ -11,34 +11,57 @@ internal sealed class MovementFrameObservationFixture
     private readonly Dictionary<string, MovementFrameObservationNodeFiles> nodes;
     private readonly PhysicalShardRecord target;
     private readonly IOptions<RequestProbeExecutionOptions> options;
-    internal string Root { get; }
-    internal string SessionId { get; }
+    internal string Root
+    {
+        get;
+    }
+    internal string SessionId
+    {
+        get;
+    }
     private bool closed;
     private bool evidencePreserved;
-    internal bool RequiresEvidence { get; private set; }
+    internal bool RequiresEvidence
+    {
+        get; private set;
+    }
     internal Guid SelectionId { get; } = Guid.NewGuid();
     internal MovementFrameObservationFixture(string root, string session,
         PhysicalShardRecord target, Dictionary<string, MovementFrameObservationNodeFiles> nodes,
         IOptions<RequestProbeExecutionOptions> options)
-    { Root = root; SessionId = session; this.target = target; this.nodes = nodes; this.options = options; }
+    {
+        Root = root;
+        SessionId = session;
+        this.target = target;
+        this.nodes = nodes;
+        this.options = options;
+    }
 
     internal void Select(PartitionMovementPublicParentRf3Seed seed, MovementFrameObservationSelectionMode mode)
     {
         if (mode == MovementFrameObservationSelectionMode.Absent)
-        { return; }
+        {
+            return;
+        }
         if (!Enum.IsDefined(mode))
-        { throw new ArgumentOutOfRangeException(nameof(mode)); }
+        {
+            throw new ArgumentOutOfRangeException(nameof(mode));
+        }
         RequiresEvidence = mode == MovementFrameObservationSelectionMode.Exact;
         var moveId = RequiresEvidence ? seed.FirstRequest.MoveId : Guid.NewGuid();
         if (!RequiresEvidence && moveId == seed.FirstRequest.MoveId)
-        { throw new InvalidOperationException(MovementFrameObservationFixtureProtocol.Invalid); }
+        {
+            throw new InvalidOperationException(MovementFrameObservationFixtureProtocol.Invalid);
+        }
         var selection = new MovementFrameObservationSelection(MovementFrameObservationProtocol.Version,
             MovementFrameObservationProtocol.SelectionKind, SessionId, SelectionId, moveId,
             new(seed.Partition.TenantId, seed.Partition.DatabaseId, seed.Partition.TransactionDomainId,
                 seed.Partition.PartitionKey), PartitionMovementPublicParentRf3Administrator.PrincipalId,
             target.PhysicalShardId, target.Incarnation);
         foreach (var node in nodes.Values)
-        { node.Select(selection); }
+        {
+            node.Select(selection);
+        }
     }
 
     internal async Task<MovementFrameObservationRecord> WaitFirstAsync(CancellationToken cancellationToken)
@@ -49,7 +72,9 @@ internal sealed class MovementFrameObservationFixture
             foreach (var node in nodes.Values)
             {
                 if (node.Read() is { } observed)
-                { return observed; }
+                {
+                    return observed;
+                }
             }
             await Task.Delay(options.Value.PollInterval, TimeProvider.System, cancellationToken).ConfigureAwait(false);
         }
@@ -61,7 +86,9 @@ internal sealed class MovementFrameObservationFixture
             cancellationToken.ThrowIfCancellationRequested();
             var results = nodes.Values.Select(node => node.Read()).ToArray();
             if (results.All(result => result.HasValue))
-            { return results.Select(result => result!.Value).ToArray(); }
+            {
+                return results.Select(result => result!.Value).ToArray();
+            }
             await Task.Delay(options.Value.PollInterval, TimeProvider.System, cancellationToken).ConfigureAwait(false);
         }
     }
@@ -72,7 +99,9 @@ internal sealed class MovementFrameObservationFixture
     internal async Task RequireAbsentAsync()
     {
         foreach (var node in nodes.Values)
-        { await Assert.That(node.Read()).IsNull(); }
+        {
+            await Assert.That(node.Read()).IsNull();
+        }
     }
 
     internal void RetireAfterJoinedStop(TwoRf3MembershipWave wave)
@@ -80,14 +109,20 @@ internal sealed class MovementFrameObservationFixture
         RequireStopped(wave);
         PreserveEvidence();
         foreach (var node in nodes.Values)
-        { node.RetireSelection(); }
+        {
+            node.RetireSelection();
+        }
     }
     internal void DeleteAfterOwnerJoin(TwoRf3MembershipWave wave)
     {
         if (closed)
-        { return; }
+        {
+            return;
+        }
         if (!wave.applicationDisposed || !wave.nodeLocksReleased)
-        { throw new InvalidOperationException(MovementFrameObservationFixtureProtocol.Invalid); }
+        {
+            throw new InvalidOperationException(MovementFrameObservationFixtureProtocol.Invalid);
+        }
         RequireStopped(wave);
         var failures = new List<Exception>();
         ServerFailureObserver.Observe(PreserveEvidence, failures);
@@ -97,26 +132,36 @@ internal sealed class MovementFrameObservationFixture
             ServerFailureObserver.Observe(node.DeleteOwner, failures);
         }
         if (failures.Count == PartitionMoveProtocol.EmptyCount)
-        { ServerFailureObserver.Observe(() => Directory.Delete(Root, recursive: false), failures); }
+        {
+            ServerFailureObserver.Observe(() => Directory.Delete(Root, recursive: false), failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
         closed = true;
     }
     private void PreserveEvidence()
     {
         if (evidencePreserved)
-        { return; }
+        {
+            return;
+        }
         if (OperatingSystem.IsWindows())
-        { throw new PlatformNotSupportedException(MovementFrameObservationFixtureProtocol.Invalid); }
+        {
+            throw new PlatformNotSupportedException(MovementFrameObservationFixtureProtocol.Invalid);
+        }
         var qualification = Path.Combine(ClusterFixtureDiagnostics.FindRepositoryRoot().FullName,
             global::KeyLoad.IntegrationTests.Features.ClusterReplication.ContainerRuntimeProtocol.ArtifactsDirectory,
             global::KeyLoad.IntegrationTests.Features.ClusterReplication.ContainerRuntimeProtocol.QualificationDirectory);
         Directory.CreateDirectory(qualification);
         var proof = Path.Combine(qualification, Path.GetFileName(Root) + MovementFrameObservationFixtureProtocol.ProofSuffix);
         if (Directory.Exists(proof) || File.Exists(proof))
-        { throw new InvalidOperationException(MovementFrameObservationFixtureProtocol.Invalid); }
+        {
+            throw new InvalidOperationException(MovementFrameObservationFixtureProtocol.Invalid);
+        }
         Directory.CreateDirectory(proof, RequestCqrsProbeFileValidation.PrivateDirectoryMode);
         foreach (var pair in nodes)
-        { pair.Value.PreserveTo(Path.Combine(proof, pair.Key)); }
+        {
+            pair.Value.PreserveTo(Path.Combine(proof, pair.Key));
+        }
         evidencePreserved = true;
     }
     private static void RequireStopped(TwoRf3MembershipWave wave)

@@ -40,7 +40,11 @@ internal sealed class ComparisonHarnessTests
     [Test]
     public async Task RunnerRejectsIncorrectPayloadAndPreservesUnsupportedAndSetupFailures()
     {
-        var options = Small with { Warmup = 0, Repetitions = 1 };
+        var options = Small with
+        {
+            Warmup = 0,
+            Repetitions = 1
+        };
         await using var correct = new ReadTarget("correct");
         await using var incorrect = new ReadTarget("incorrect", wrongPayload: true);
         await using var setupFailed = new ReadTarget("setup-failed", failSetup: true);
@@ -101,7 +105,10 @@ internal sealed class ComparisonHarnessTests
         public Task<FoundDocument?> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)
             => Task.FromResult<FoundDocument?>(new(document.Id, wrongPayload ? "{}" : document.Json));
         public async Task<KeyLoad.Comparisons.OperationResult> ExecuteAsync(Scenario scenario, BenchmarkDocument document, CancellationToken cancellationToken)
-        { Interlocked.Increment(ref executions); return new(Document: await ReadAsync(document, cancellationToken)); }
+        {
+            Interlocked.Increment(ref executions);
+            return new(Document: await ReadAsync(document, cancellationToken));
+        }
         public ValueTask DisposeAsync() => ValueTask.CompletedTask;
     }
 }

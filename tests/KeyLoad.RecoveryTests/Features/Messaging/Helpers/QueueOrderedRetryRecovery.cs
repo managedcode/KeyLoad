@@ -20,11 +20,15 @@ internal static class QueueOrderedRetryRecovery
         await QueueOrderedRetryRecoveryChoice.AssertAsync(store, operation, payload, decisions);
         var outcome = OutcomeStoreOracle.Read(store, operation);
         if (stage >= CommitStage.JournalFlushed)
-        { await Assert.That(outcome).IsNotNull(); }
+        {
+            await Assert.That(outcome).IsNotNull();
+        }
         await QueueOrderedRetryRecoveryImage.AssertAsync(database, delivery, decisions.Items.Single(), outcome is not null);
         var receipt = database.Apply(operation).Get<CommitReceipt>();
         if (outcome is not null)
-        { await MessagingRecoveryReceiptAssertions.AssertSameNativeValueAsync(outcome.Get<CommitReceipt>(), receipt); }
+        {
+            await MessagingRecoveryReceiptAssertions.AssertSameNativeValueAsync(outcome.Get<CommitReceipt>(), receipt);
+        }
         await QueueOrderedRetryRecoveryImage.AssertAsync(database, delivery, decisions.Items.Single(), committed: true);
         await MessagingRecoveryReceiptAssertions.AssertSameNativeValueAsync(receipt, database.Apply(operation).Get<CommitReceipt>());
         await MessagingRecoveryReceiptAssertions.AssertSameNativeValueAsync(receipt, database.ResolveOutcome(operation).Get<CommitReceipt>());

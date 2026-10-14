@@ -16,9 +16,13 @@ internal sealed partial class NativeTextFileStreamProvider(string root, string l
     {
         var full = pathAccess.Resolve(path);
         if (allowReadOnlyInventory && share == FileShare.None)
-        { share = FileShare.Read; }
+        {
+            share = FileShare.Read;
+        }
         if (resources is null)
-        { return OpenOwned(full, mode, access, share, bufferSize, options); }
+        {
+            return OpenOwned(full, mode, access, share, bufferSize, options);
+        }
         return resources.MutatePhysical(() => OpenOwned(full, mode, access, share, bufferSize, options));
     }
 
@@ -59,9 +63,13 @@ internal sealed partial class NativeTextFileStreamProvider(string root, string l
             pathAccess.Require(full, directory: false);
         }
         if (resources is null)
-        { inner.DeleteFile(full); }
+        {
+            inner.DeleteFile(full);
+        }
         else
-        { resources.DeleteOwnedFile(full, () => inner.DeleteFile(full)); }
+        {
+            resources.DeleteOwnedFile(full, () => inner.DeleteFile(full));
+        }
     }
 
     public void DeleteDirectory(string path, bool recursive)
@@ -74,9 +82,13 @@ internal sealed partial class NativeTextFileStreamProvider(string root, string l
                 NativeTextFiles.ReadOwnerForProvider(root, leaf, sourceNodeId, executionOptions: executionOptions), executionOptions: executionOptions);
         }
         if (resources is null)
-        { inner.DeleteDirectory(full, recursive); }
+        {
+            inner.DeleteDirectory(full, recursive);
+        }
         else
-        { resources.DeleteOwnedDirectory(full, () => inner.DeleteDirectory(full, recursive)); }
+        {
+            resources.DeleteOwnedDirectory(full, () => inner.DeleteDirectory(full, recursive));
+        }
     }
 
     public string ReadAllText(string path)
@@ -113,9 +125,13 @@ internal sealed partial class NativeTextFileStreamProvider(string root, string l
             pathAccess.PrepareReplaceTarget(backup);
         }
         if (resources is null)
-        { inner.Replace(source, destination, backup); }
+        {
+            inner.Replace(source, destination, backup);
+        }
         else
-        { resources.ReplaceOwnedFiles(source, destination, backup, () => inner.Replace(source, destination, backup)); }
+        {
+            resources.ReplaceOwnedFiles(source, destination, backup, () => inner.Replace(source, destination, backup));
+        }
     }
 
     public DurableFileWriter GetDurableFileWriter() => new(this);

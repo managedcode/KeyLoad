@@ -31,7 +31,10 @@ internal static class QueueProducerRf3Policy
             await QueueProducerRf3Assertions.AbsentAsync(publisher, seed, QueueProducerRf3Protocol.Refused, QueueProducerRf3Protocol.Refused, token);
             await QueueProducerRf3Assertions.EqualAsync(await QueueProducerRf3Assertions.ImageAsync(publisher, seed,
                 QueueProducerRf3Protocol.Original, token), original.Image);
-            await MessagingRf3Identity.UpdateAsync(fixture, seed.Identity.Principal with { PolicyEpoch = checked(demoted.PolicyEpoch + QueueProducerRf3Protocol.PolicyEpochAdvance) }, token);
+            await MessagingRf3Identity.UpdateAsync(fixture, seed.Identity.Principal with
+            {
+                PolicyEpoch = checked(demoted.PolicyEpoch + QueueProducerRf3Protocol.PolicyEpochAdvance)
+            }, token);
             await QueueProducerRf3Assertions.DeniedAsync(await publisher.CommitAsync(seed.Original, token), ErrorCode.PermissionDenied);
             await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit, seed.Original, token), ErrorCode.PermissionDenied, true);
             await AtomicProducerRf3Routes.RefusedAsync(publisher, mcp, seed.Original, ErrorCode.PermissionDenied, token);

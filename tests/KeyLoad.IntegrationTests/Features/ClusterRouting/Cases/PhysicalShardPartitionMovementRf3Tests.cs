@@ -25,9 +25,13 @@ internal sealed class PhysicalShardPartitionMovementRf3Tests
             await PhysicalShardPartitionMovementRf3Flow.RunAsync(wave, seeds.ToArray(), caller.Token).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
         foreach (var seed in seeds)
-        { await ServerFailureObserver.ObserveAsync(() => seed.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => seed.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         if (wave is { } resources)
-        { await ServerFailureObserver.ObserveAsync(() => resources.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => resources.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
@@ -70,9 +74,13 @@ internal sealed class PhysicalShardPartitionMovementRf3Tests
             await PhysicalShardPartitionMovementRf3FailureFlow.RunAsync(wave, seeds.ToArray(), caller.Token).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
         foreach (var seed in seeds)
-        { await ServerFailureObserver.ObserveAsync(() => seed.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => seed.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         if (wave is { } resources)
-        { await ServerFailureObserver.ObserveAsync(() => resources.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => resources.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

@@ -28,9 +28,16 @@ internal static class BlobPublishedLifetimeOperations
         store.Commit((transaction, _) =>
         {
             if (missing)
-            { transaction.Delete(key); }
+            {
+                transaction.Delete(key);
+            }
             else
-            { transaction.PutRecord(key, state with { Retired = true }); }
+            {
+                transaction.PutRecord(key, state with
+                {
+                    Retired = true
+                });
+            }
             return true;
         });
         return new(key, bytes);

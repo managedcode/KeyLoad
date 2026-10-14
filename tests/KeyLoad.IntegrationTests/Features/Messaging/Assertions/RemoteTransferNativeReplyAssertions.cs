@@ -11,7 +11,9 @@ internal static class RemoteTransferNativeReplyAssertions
         if (original.Channel != RemoteModelNativeChannel.DocumentEnvelope
             || original.Nonce == Guid.Empty || string.IsNullOrEmpty(original.SenderSignature)
             || actual.Nonce != original.Nonce || actual.Error is not null || actual.SafeDetail is not null)
-        { throw new InvalidOperationException(RemoteTransferDistinctProtocol.Missing); }
+        {
+            throw new InvalidOperationException(RemoteTransferDistinctProtocol.Missing);
+        }
         var envelope = NativeSerialization.Deserialize<RemoteDocumentTransportEnvelope>(original.Payload.Span);
         var call = envelope.QueueTransfer
             ?? throw new InvalidOperationException(RemoteTransferDistinctProtocol.Missing);
@@ -19,7 +21,9 @@ internal static class RemoteTransferNativeReplyAssertions
             || call.OriginalCommandId == Guid.Empty || call.MaximumReplyBytes <= 0
             || call.MaximumReplyBytes > RemoteDocumentProtocol.MaximumBodyBytes
             || actual.Payload.IsEmpty || actual.Payload.Length > call.MaximumReplyBytes)
-        { throw new InvalidOperationException(RemoteTransferDistinctProtocol.Missing); }
+        {
+            throw new InvalidOperationException(RemoteTransferDistinctProtocol.Missing);
+        }
         using var source = RemoteDocumentMac.FromConfiguredSecret(configuredSourceSecret);
         await Assert.That(source.VerifyNativeRequest(original)).IsTrue();
         await Assert.That(source.Verify(original.Payload.Span, original.Signature, reply: false)).IsTrue();
@@ -35,7 +39,9 @@ internal static class RemoteTransferNativeReplyAssertions
                 Stage: RemoteQueueTransferPeerStage.Accept, Receipt: null,
                 OriginalOutcome: { } outcome
             })
-        { throw new InvalidOperationException(RemoteTransferDistinctProtocol.Missing); }
+        {
+            throw new InvalidOperationException(RemoteTransferDistinctProtocol.Missing);
+        }
         await Assert.That(Convert.ToHexString(NativeSerialization.Serialize(outcome))).IsEqualTo(committed.Outcome);
     }
 }

@@ -1,5 +1,5 @@
 using System.Text.Json;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Query;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
@@ -14,7 +14,9 @@ internal static class SqlModelEventRecordIntegrityCold
     internal static async Task RunAsync(TestDatabase database, byte[] key, byte[] original, EventRecord[] damaged)
     {
         foreach (var record in damaged)
-        { await FaultAsync(database, key, original, NativeSerialization.Serialize(record)); }
+        {
+            await FaultAsync(database, key, original, NativeSerialization.Serialize(record));
+        }
     }
 
     private static async Task FaultAsync(TestDatabase database, byte[] key, byte[] original, byte[] damaged)
@@ -36,7 +38,10 @@ internal static class SqlModelEventRecordIntegrityCold
             committed = true;
         }, failures);
         if (!committed)
-        { ServerFailureObserver.ThrowIfAny(failures); return; }
+        {
+            ServerFailureObserver.ThrowIfAny(failures);
+            return;
+        }
         var expected = before.Select(row => row == originalRow
             ? prefix + Convert.ToHexString(damaged) : row).ToArray();
         for (var cut = 0; cut < ColdCuts; cut++)
@@ -79,11 +84,16 @@ internal static class SqlModelEventRecordIntegrityCold
             await use(store);
         }, failures);
         if (store is not null)
-        { ServerFailureObserver.Observe(store.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(store.Dispose, failures);
+        }
     }
 
     private static global::KeyLoad.Storage.ZoneTree.ZoneTreeStore Open(TestDatabase database)
-        => ZoneTreeExistingStore.Open(new(database.Directory) { Incarnation = database.Store.Identity.Incarnation },
+        => ZoneTreeExistingStore.Open(new(database.Directory)
+        {
+            Incarnation = database.Store.Identity.Incarnation
+        },
             database.Store.Identity.NodeId, database.StorageExecution);
 }
 
@@ -103,7 +113,10 @@ internal static class SqlEventReferenceJoinCold
             var failures = new List<Exception>();
             try
             {
-                using var reopened = ZoneTreeExistingStore.Open(new(database.Directory) { Incarnation = identity.Incarnation },
+                using var reopened = ZoneTreeExistingStore.Open(new(database.Directory)
+                {
+                    Incarnation = identity.Incarnation
+                },
                     identity.NodeId, database.StorageExecution);
                 try
                 {
@@ -131,14 +144,22 @@ internal static class SqlEventReferenceJoinCold
                     await Assert.That(reopened.Position).IsEqualTo(position);
                 }
                 catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-                { failures.Add(error); }
+                {
+                    failures.Add(error);
+                }
                 catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-                { failures.Add(error); }
+                {
+                    failures.Add(error);
+                }
             }
             catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-            { failures.Add(error); }
+            {
+                failures.Add(error);
+            }
             catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-            { failures.Add(error); }
+            {
+                failures.Add(error);
+            }
             ServerFailureObserver.ThrowIfAny(failures);
         }
     }

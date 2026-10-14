@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.InternalSerialization;
-using KeyLoad.Orleans;
 using KeyLoad.Replication;
 using KeyLoad.Server.Features.DocumentStorage;
 using Microsoft.Extensions.Options;
@@ -19,15 +19,21 @@ internal static class EventVectorFreshOpenCompletion
         ReadExecutionBudget work, CancellationToken cancellationToken)
     {
         if (actualReply.Error is not null)
-        { return actualReply; }
+        {
+            return actualReply;
+        }
         work.Check();
         admission.RequireEncodedBytes(actualReply.Payload.Length);
         work.ChargeBytes(actualReply.Payload.Length);
         var value = GrainNativePayload.Read<GrainValue>(actualReply.Payload).Value;
         if (value is EventVectorFirstIssuanceResult)
-        { throw Errors.Fail(ErrorCode.UnknownWriteOutcome, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.UnknownWriteOutcome, Invalid);
+        }
         if (value is not EventVectorFirstAdmitAppendResult appended)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         var phase = NativeCommandPayload.Read<EventVectorControlPhase>(originalAdmit);
         _ = await EventVectorFirstOpenExecution.ExecuteAfterFreshAdmitAsync(node, runtime, options, limits,
             partition, clock, parent, codec, context, phase, appended, admission, work, cancellationToken).ConfigureAwait(false);

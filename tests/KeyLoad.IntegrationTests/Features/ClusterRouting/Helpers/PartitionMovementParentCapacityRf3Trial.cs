@@ -23,9 +23,13 @@ internal sealed class PartitionMovementParentCapacityRf3Trial
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(() => trial.ExecuteAsync(caller.Token), failures).ConfigureAwait(false);
         if (trial.seed is { } clients)
-        { await ServerFailureObserver.ObserveAsync(() => clients.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => clients.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         if (trial.wave is { } resources)
-        { await ServerFailureObserver.ObserveAsync(() => resources.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => resources.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
@@ -54,7 +58,10 @@ internal sealed class PartitionMovementParentCapacityRf3Trial
             .Max(row => (row.Length - row.IndexOf(':', StringComparison.Ordinal) - OneByte) / HexCharactersPerByte) + OneByte);
         await Assert.That((long)deniedLimit).IsLessThan(structuralBoundary);
         await wave.ReconfigureMovementCapacityAsync(deniedLimit, cancellationToken).ConfigureAwait(false);
-        var rejected = seed.FirstRequest with { MoveId = Guid.NewGuid() };
+        var rejected = seed.FirstRequest with
+        {
+            MoveId = Guid.NewGuid()
+        };
         var actual = await seed.Source.MovePartitionAsync(rejected, cancellationToken).ConfigureAwait(false);
         await Assert.That(actual.IsFailed).IsTrue();
         await Assert.That(actual.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.BudgetExceeded));
@@ -66,13 +73,19 @@ internal sealed class PartitionMovementParentCapacityRf3Trial
         await wave.ReconfigureMovementCapacityAsync(legal, cancellationToken).ConfigureAwait(false);
         await AbortAsync(rejected, cancellationToken).ConfigureAwait(false);
         await seed.VerifyAsync(cancellationToken).ConfigureAwait(false);
-        await HealthyAsync(seed.FirstRequest with { MoveId = Guid.NewGuid() }, cancellationToken).ConfigureAwait(false);
+        await HealthyAsync(seed.FirstRequest with
+        {
+            MoveId = Guid.NewGuid()
+        }, cancellationToken).ConfigureAwait(false);
     }
 
     private async Task AbortAsync(PartitionMoveRequest request, CancellationToken cancellationToken)
     {
         var result = await McpCallerAssertions.SdkSuccessAsync(await seed!.Source.MovePartitionAsync(
-            request with { Mode = PartitionMoveMode.Abort }, cancellationToken).ConfigureAwait(false));
+            request with
+            {
+                Mode = PartitionMoveMode.Abort
+            }, cancellationToken).ConfigureAwait(false));
         await Assert.That(result.MoveId).IsEqualTo(request.MoveId);
         await Assert.That(result.Partition).IsEqualTo(request.Partition);
         await Assert.That(result.Phase).IsEqualTo(PartitionMovePhase.Aborted);

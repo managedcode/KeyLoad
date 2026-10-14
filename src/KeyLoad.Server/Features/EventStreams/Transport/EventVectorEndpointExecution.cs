@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server.Features.DocumentStorage;
 using Microsoft.Extensions.Options;
 
@@ -35,10 +35,14 @@ internal sealed class EventVectorEndpointExecution(EventVectorRemoteReceiver rec
         finally
         {
             if (operation is not null)
-            { ServerFailureObserver.Observe(operation.Dispose, failures); }
+            {
+                ServerFailureObserver.Observe(operation.Dispose, failures);
+            }
         }
         if (failures.Count != NoCleanupFailures && result is { } abandoned)
-        { CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(abandoned.Payload).Span); }
+        {
+            CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(abandoned.Payload).Span);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
         return result ?? throw Errors.Fail(ErrorCode.Corruption, EventVectorRemoteProtocol.Invalid);
     }
@@ -59,7 +63,9 @@ internal sealed class EventVectorEndpointExecution(EventVectorRemoteReceiver rec
             var admitted = EventVectorAdmittedCall.Admit(verified, authority, originalReplay, linked.Token);
             var remaining = admitted.Original.Call.ExpiresAt - clock.GetUtcNow();
             if (remaining <= TimeSpan.Zero)
-            { throw Errors.Fail(ErrorCode.TokenInvalidated, EventVectorRemoteProtocol.Unavailable); }
+            {
+                throw Errors.Fail(ErrorCode.TokenInvalidated, EventVectorRemoteProtocol.Unavailable);
+            }
             using var expiry = new CancellationTokenSource(remaining, clock);
             using var original = CancellationTokenSource.CreateLinkedTokenSource(linked.Token, expiry.Token);
             return await EventVectorEndpointReply.CreateAsync(admitted, receiver, authority,

@@ -24,7 +24,13 @@ internal sealed class ThreeWayHybridRf3Tests(ClusterFixture fixture)
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3,
             identity.Secret, deadline.Token);
         var original = scenario.Request(restricted, expansion: false);
-        var request = original with { Search = original.Search with { Explain = true } };
+        var request = original with
+        {
+            Search = original.Search with
+            {
+                Explain = true
+            }
+        };
         var direct = await McpCallerAssertions.SdkSuccessAsync(await sdk.GraphSearchAsync(request, deadline.Token));
         var official = await McpCallerAssertions.SuccessAsync<GraphSearchResult>(await mcp.CallAsync(
             ThreeWayHybridRf3Scenario.SearchGraphTool, request, deadline.Token));
@@ -102,7 +108,12 @@ internal sealed class ThreeWayHybridRf3Tests(ClusterFixture fixture)
         await using var deniedMcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node1,
             denied.Secret, deadline.Token);
         var zeroDirect = scenario.Request(allZero: true, expansion: false) with
-        { Search = scenario.Request(allZero: true, expansion: false).Search with { AllowedIds = ImmutableArray<string>.Empty } };
+        {
+            Search = scenario.Request(allZero: true, expansion: false).Search with
+            {
+                AllowedIds = ImmutableArray<string>.Empty
+            }
+        };
         var zeroSql = scenario.SqlRequest(allZero: true, expansion: false);
         var authorized = await McpCallerAssertions.SdkSuccessAsync(await allowedSdk.GraphSearchAsync(zeroDirect, deadline.Token));
         await Assert.That(authorized.Hits).IsEmpty();
@@ -170,7 +181,12 @@ internal sealed class ThreeWayHybridRf3Tests(ClusterFixture fixture)
         ThreeWayHybridRf3Scenario scenario, CancellationToken cancellationToken)
     {
         var direct = scenario.Request(allZero: true, expansion: false) with
-        { Search = scenario.Request(allZero: true, expansion: false).Search with { AllowedIds = ImmutableArray<string>.Empty } };
+        {
+            Search = scenario.Request(allZero: true, expansion: false).Search with
+            {
+                AllowedIds = ImmutableArray<string>.Empty
+            }
+        };
         var sdkDirect = await sdk.GraphSearchAsync(direct, cancellationToken);
         await Assert.That(sdkDirect.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
         await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(ThreeWayHybridRf3Scenario.SearchGraphTool,

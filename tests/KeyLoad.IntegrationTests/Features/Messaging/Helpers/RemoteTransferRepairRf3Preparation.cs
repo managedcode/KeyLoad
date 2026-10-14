@@ -17,7 +17,9 @@ internal static class RemoteTransferRepairRf3Preparation
             var intent = await RemoteTransferColdAssertions.SourceAsync(sdk, mcp, seed, null, token);
             await Assert.That(intent.State).IsEqualTo(QueueTransferState.OutputPending);
             var hint = RemoteTransferCoordinatorRf3Assertions.Hint(seed, created, intent) with
-            { RepairCeiling = RemoteTransferRepairRf3Protocol.Ceiling };
+            {
+                RepairCeiling = RemoteTransferRepairRf3Protocol.Ceiling
+            };
             var deniedLane = stage == QueueTransferRepairStage.Accept ? seed.Scenario.DestinationQueue : seed.Scenario.SourceQueue;
             await MessagingRf3Identity.UpdateAsync(fixture, MessagingRf3Identity.WithCapability(seed.Identity.Principal,
                 deniedLane, Capability.QueueInspect), token);

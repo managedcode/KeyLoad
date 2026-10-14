@@ -20,16 +20,46 @@ internal sealed class SampleChunkEncodingPlan
         ColumnsBytes = columnsBytes;
     }
 
-    internal Dictionary<string, int> TagIndexes { get; }
-    internal string[] TagDictionary { get; }
-    internal int UtcTicksBytes { get; }
-    internal int OffsetsBytes { get; }
-    internal int SequencesBytes { get; }
-    internal int ValuesBytes { get; }
-    internal int SeriesBytes { get; }
-    internal int EventIdsBytes { get; }
-    internal int TagsBytes { get; }
-    internal long ColumnsBytes { get; }
+    internal Dictionary<string, int> TagIndexes
+    {
+        get;
+    }
+    internal string[] TagDictionary
+    {
+        get;
+    }
+    internal int UtcTicksBytes
+    {
+        get;
+    }
+    internal int OffsetsBytes
+    {
+        get;
+    }
+    internal int SequencesBytes
+    {
+        get;
+    }
+    internal int ValuesBytes
+    {
+        get;
+    }
+    internal int SeriesBytes
+    {
+        get;
+    }
+    internal int EventIdsBytes
+    {
+        get;
+    }
+    internal int TagsBytes
+    {
+        get;
+    }
+    internal long ColumnsBytes
+    {
+        get;
+    }
 
     internal static SampleChunkEncodingPlan Create(ReadOnlySpan<SampleRecord> records,
         SampleChunkWork budget, int textCancellationCheckIntervalCodeUnits)

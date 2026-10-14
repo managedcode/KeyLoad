@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 using KeyLoad.Replication;
 
 namespace KeyLoad.Server.Features.EventStreams;
@@ -20,7 +20,9 @@ internal static class EventVectorIssuedAdmitCall
             cancellationToken: cancellationToken).ConfigureAwait(false);
         work.Check();
         if (reply.Error is not null)
-        { return reply; }
+        {
+            return reply;
+        }
         work.ChargeBytes(reply.Payload.Length);
         var value = GrainNativePayload.Read<GrainValue>(reply.Payload).Value;
         var original = value switch
@@ -31,7 +33,9 @@ internal static class EventVectorIssuedAdmitCall
         };
         if (original.NativeCommandId != issued.Id || original.Receipt is null
             || original.Receipt.CommandId != issued.Id || original.Issuance is null)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, EventVectorRemoteProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, EventVectorRemoteProtocol.Invalid);
+        }
         return reply;
     }
 
@@ -45,7 +49,9 @@ internal static class EventVectorIssuedAdmitCall
             || original.Issuance is null || original.Receipt is null
             || original.Issuance.OriginalParentRequestId != originalParentRequestId
             || original.Receipt.Token.Position != appended.AppendedIndex)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, EventVectorRemoteProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, EventVectorRemoteProtocol.Invalid);
+        }
         return original;
     }
 }

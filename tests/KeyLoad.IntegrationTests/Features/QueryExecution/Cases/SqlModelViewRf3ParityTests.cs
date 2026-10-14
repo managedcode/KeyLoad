@@ -65,7 +65,10 @@ internal sealed class SqlModelViewRf3ParityTests(ClusterFixture fixture)
     private static async Task AssertExplainAsync(KeyLoadClient sdk, McpOfficialClient mcp,
         SqlModelViewRf3Scenario scenario, CancellationToken cancellationToken)
     {
-        var request = scenario.QueueSql() with { Sql = "EXPLAIN " + scenario.QueueSql().Sql };
+        var request = scenario.QueueSql() with
+        {
+            Sql = "EXPLAIN " + scenario.QueueSql().Sql
+        };
         var page = await McpCallerAssertions.SdkSuccessAsync(await sdk.QueryAsync(request, cancellationToken));
         var mcpPage = await McpCallerAssertions.SuccessAsync<QueryPage>(await mcp.CallAsync(
             McpCallerTools.QueryExecute, request, cancellationToken));

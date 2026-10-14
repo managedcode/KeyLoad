@@ -1,9 +1,9 @@
 using System.Security.Cryptography;
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Identity;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
@@ -26,7 +26,9 @@ internal sealed class PartitionMovementReceiverIssuance(PartitionMovementReceive
         var terminal = await context.ExecuteSignedAsync(principal, requestId, Guid.Empty, signed, command: false,
             cancellationToken).ConfigureAwait(false);
         if (terminal.Error is { } code)
-        { throw Errors.Fail(code, terminal.SafeDetail ?? PartitionMovementProtocol.Unavailable); }
+        {
+            throw Errors.Fail(code, terminal.SafeDetail ?? PartitionMovementProtocol.Unavailable);
+        }
         var actual = GrainNativePayload.Read<GrainValue>(terminal.Payload).Value as PartitionMovementReceiverIssuanceResult
             ?? throw Errors.Fail(ErrorCode.Corruption, PartitionMovementProtocol.InvalidProof);
         work.ImportReadGrant(grant, actual.ReadBytes, actual.ExaminedRecords);
@@ -35,7 +37,9 @@ internal sealed class PartitionMovementReceiverIssuance(PartitionMovementReceive
             context.LocalOwner(), context.Discovery(), terminal, actual.Snapshot.Issuance.OriginalPhaseIdentityDigest);
         var encoded = NativeSerialization.Serialize(reply);
         if (encoded.Length > context.Partition.Database.Limits.MaxBatchBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMovementProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMovementProtocol.InvalidProof);
+        }
         return SignReceiverIssuanceProof(requested, encoded, work);
     }
 
@@ -98,12 +102,16 @@ internal sealed class PartitionMovementReceiverIssuance(PartitionMovementReceive
             || pending.OriginalGrant is not { RequireReceiverIssuance: true } grant
             || state.CurrentOperatorPolicyEpoch != grant.OperatorPolicyEpoch
             || grant.ExpiresAt <= context.Clock.GetUtcNow())
-        { throw Errors.Fail(ErrorCode.PermissionDenied, PartitionMovementProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, PartitionMovementProtocol.InvalidProof);
+        }
         PartitionMovementIssuerSourceAckVerifier.Require(context.Partition.Database, principalId, state, pending, work);
         var first = CreateReceiverIssuerRequest(pending);
         var bytes = NativeSerialization.Serialize(first);
         if (bytes.Length > context.Partition.Database.Limits.MaxBatchBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMovementProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMovementProtocol.InvalidProof);
+        }
         return SignReceiverIssuerPacket(first, bytes, work);
     }
 
@@ -125,7 +133,9 @@ internal sealed class PartitionMovementReceiverIssuance(PartitionMovementReceive
         if (nonce == pending.OriginalRequestNonce || nonce == sourceWitness.QueryNonce
             || sourceAck.AppliedPosition <= PartitionMovementProtocol.NoAppliedPosition || !phase.ControlOwner.VoterIds.Contains(discovery.VoterId)
             || !PhysicalOwnerEntryValidation.SameOwner(sourceAck.PhysicalOwner, phase.ControlOwner))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMovementProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMovementProtocol.InvalidProof);
+        }
         return new(PartitionMoveProtocol.Version, PartitionMoveReceiverIssuanceIdentity.For(pending.OriginalPhaseCommandId),
             pending.OriginalPhaseCommandId, envelope, sourceWitness, authorization, discovery.VoterId,
             discovery.SiloAddress, nonce, sourceAck);

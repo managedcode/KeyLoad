@@ -9,9 +9,18 @@ internal sealed class SampleChunkJobRevocationScenario(SampleChunkRf3Scenario wi
     internal SampleChunkRf3Scenario Window { get; } = window;
     internal PrincipalRecord Creator { get; } = creator;
     internal string Secret { get; } = secret;
-    internal CommandRequest? OriginalSeal { get; set; }
-    internal CommitReceipt? OriginalReceipt { get; set; }
-    internal CommitReceipt? Correction { get; set; }
+    internal CommandRequest? OriginalSeal
+    {
+        get; set;
+    }
+    internal CommitReceipt? OriginalReceipt
+    {
+        get; set;
+    }
+    internal CommitReceipt? Correction
+    {
+        get; set;
+    }
 
     internal static async Task<SampleChunkJobRevocationScenario> CreateAsync(KeyLoadClient administrator,
         CancellationToken token)

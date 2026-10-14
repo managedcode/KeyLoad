@@ -17,7 +17,9 @@ public sealed partial class DatabaseEngine
         if (owned.Grant is not { RequireReceiverIssuance: true }
             || owned.ReceiverIssuanceProof is null || owned.SourceDispatchWitness is null
             || PartitionMoveGrantValidation.IsLocalControl(owned.Stage))
-        { throw Errors.Fail(ErrorCode.PermissionDenied, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, PartitionMoveProtocol.MissingAuthority);
+        }
         var admission = VerifyMoveReceiverEffectProof(principalId, commandId, owned, ownedBytes, work);
         work.Check();
         return CreateMovementOperationCore(commandId, principalId, EvaluationClock.GetUtcNow(), owned, admission);
@@ -31,10 +33,14 @@ public sealed partial class DatabaseEngine
         var receiver = owned.ReceiverIssuanceProof;
         var source = owned.SourceDispatchWitness;
         if (grant is not { RequireReceiverIssuance: true } || receiver is null || source is null)
-        { throw Errors.Fail(ErrorCode.PermissionDenied, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, PartitionMoveProtocol.MissingAuthority);
+        }
         var verified = movementCheckpointVerifier.VerifyReceiverEffect(this, principalId, commandId, ownedBytes, work);
         if (verified != Convert.ToHexStringLower(SHA256.HashData(ownedBytes.Span)))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMoveProtocol.MissingAuthority);
+        }
         return new PartitionMoveReceiverEffectAdmission(PartitionMoveProtocol.Version,
             ReadMoveReceiverFirstNonce(principalId, commandId, owned, work),
             owned.ExpiresAt, grant, receiver, source);

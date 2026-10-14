@@ -10,9 +10,13 @@ internal static class SqlCompositionInsert
         checkBudget();
         token.ThrowIfCancellationRequested();
         if (request.AllowFullScan || request.Cursor is not null || request.Partition is null)
-        { throw ScriptDomOperationErrors.Invalid(); }
+        {
+            throw ScriptDomOperationErrors.Invalid();
+        }
         if (request.QueryDialectVersion is not (DefaultVersion or JoinedVersion))
-        { throw ScriptDomOperationErrors.Unsupported(); }
+        {
+            throw ScriptDomOperationErrors.Unsupported();
+        }
         var (target, query) = ScriptDomInsertShape.Read(statement);
         var parameters = new ScriptDomCompositionParameters(request.Parameters, positionalParameterCount, checkBudget, token);
         var (id, mutation) = target.Equals(ScriptDomInsertShape.GraphEdges, StringComparison.OrdinalIgnoreCase)
@@ -21,7 +25,9 @@ internal static class SqlCompositionInsert
                 ? ScriptDomGraphToQueueInsert.Read(query, parameters, request.QueryDialectVersion)
                 : throw ScriptDomOperationErrors.Unsupported();
         if (id == Guid.Empty)
-        { throw ScriptDomOperationErrors.Invalid(); }
+        {
+            throw ScriptDomOperationErrors.Invalid();
+        }
         parameters.Complete();
         checkBudget();
         token.ThrowIfCancellationRequested();

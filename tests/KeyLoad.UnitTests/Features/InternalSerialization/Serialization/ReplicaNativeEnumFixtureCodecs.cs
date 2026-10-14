@@ -40,7 +40,9 @@ internal sealed class ReplicaWrongOperationEnumCodec(ReplicaWrongEnumScalar scal
         [AllowNull] Type expectedType, [AllowNull] ReplicatedOperation value) where TBufferWriter : IBufferWriter<byte>
     {
         if (ReferenceCodec.TryWriteReferenceField(ref writer, fieldIdDelta, expectedType, value))
-        { return; }
+        {
+            return;
+        }
         writer.WriteFieldHeader(fieldIdDelta, expectedType, typeof(ReplicatedOperation), WireType.TagDelimited);
         writer.WriteEndBase();
         writer.Session.CodecProvider.GetCodec<Guid>().WriteField(ref writer, 0, typeof(Guid), value.Id);
@@ -61,7 +63,9 @@ internal sealed class ReplicaWrongErrorEnumCodec(ReplicaWrongEnumScalar scalar) 
         [AllowNull] Type expectedType, [AllowNull] NativeCommandPayload value) where TBufferWriter : IBufferWriter<byte>
     {
         if (ReferenceCodec.TryWriteReferenceField(ref writer, fieldIdDelta, expectedType, value))
-        { return; }
+        {
+            return;
+        }
         writer.WriteFieldHeader(fieldIdDelta, expectedType, typeof(NativeCommandPayload), WireType.TagDelimited);
         writer.WriteEndBase();
         writer.Session.CodecProvider.GetCodec<ReadOnlyMemory<byte>>().WriteField(ref writer, 0, typeof(ReadOnlyMemory<byte>), value.Value);

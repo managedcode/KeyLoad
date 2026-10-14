@@ -61,7 +61,9 @@ internal static class SearchBranchExecution
         TextRanker ranker, ITextProjectionLease? original)
     {
         if (original is not null)
-        { ranker.AttachProjection(original); }
+        {
+            ranker.AttachProjection(original);
+        }
         database.VisitVisibleDocuments(captured, principal, request.Partition, request.Collection, budget, ranker.Visit);
         var scores = global::KeyLoad.Query.Features.Search.Bm25CorpusReuse.Rank(
             database, captured, principal, request, budget, ranker);

@@ -6,7 +6,9 @@ internal static class OrleansNodeStartupWait
     {
         Task original;
         lock (lifecycle)
-        { original = startup ?? throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalOwnerProbeProtocol.Unavailable); }
+        {
+            original = startup ?? throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalOwnerProbeProtocol.Unavailable);
+        }
         return original.WaitAsync(cancellationToken);
     }
 }

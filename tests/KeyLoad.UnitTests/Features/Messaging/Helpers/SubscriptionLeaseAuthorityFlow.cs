@@ -13,7 +13,10 @@ internal static class SubscriptionLeaseAuthorityFlow
         using var fixture = new TestDatabase();
         fixture.Configure("topic", ResourceKind.Topic);
         SubscriptionTestActions.Publish(fixture);
-        var group = SubscriptionTestActions.Configure(fixture, policy: new() { MaxWindow = 3 });
+        var group = SubscriptionTestActions.Configure(fixture, policy: new()
+        {
+            MaxWindow = 3
+        });
         var source = SubscriptionCheckpointAuthorityAssertions.SourceImage(fixture.Store, group.Source.Partition);
         var time = QueueWholeFlowStorage.Clock(fixture.Store).AddSeconds(1);
         var request = new ReceiveSubscriptionRequest(Guid.NewGuid(), group, MaxEvents: 3, LeaseSeconds: 30);
@@ -89,9 +92,13 @@ internal static class SubscriptionLeaseAuthorityFlow
             await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(db.Apply(reclaimed), reclaimResult);
         }
         else if (action == DeliveryAction.Renew)
-        { await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(db.Apply(claim), original); }
+        {
+            await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(db.Apply(claim), original);
+        }
         if (action != DeliveryAction.Ack)
-        { await AckAsync(db, group, second.Token, time.AddSeconds(3), 2L, action == DeliveryAction.Nack ? 2L : 1L, receipts); }
+        {
+            await AckAsync(db, group, second.Token, time.AddSeconds(3), 2L, action == DeliveryAction.Nack ? 2L : 1L, receipts);
+        }
         await AckAsync(db, group, original.Get<ReceiveSubscriptionResult>().Deliveries[2].Token, time.AddSeconds(3), 3L, 1L, receipts);
         await SubscriptionCheckpointAuthorityAssertions.StatusAsync(db, group, 0, 3, 3);
         await AckAsync(db, group, original.Get<ReceiveSubscriptionResult>().Deliveries[0].Token, time.AddSeconds(3), 1L, 1L, receipts);

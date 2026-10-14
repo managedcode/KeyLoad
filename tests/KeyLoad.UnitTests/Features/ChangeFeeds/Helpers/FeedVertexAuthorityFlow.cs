@@ -45,7 +45,9 @@ internal static class FeedVertexAuthorityFlow
             await FeedVertexAuthorityAssertions.ReplayAsync(owner, secondCold, state.Seed, state.Receipt, state.CommittedAt, token);
             await FeedVertexAuthorityAssertions.ReplayAsync(owner, secondCold, continued.Command, continued.Receipt, state.CommittedAt, token);
             if (state.Update is { } coldUpdate && state.UpdateReceipt is { } coldUpdateReceipt)
-            { await FeedVertexAuthorityAssertions.ReplayAsync(owner, secondCold, coldUpdate, coldUpdateReceipt, state.CommittedAt, token); }
+            {
+                await FeedVertexAuthorityAssertions.ReplayAsync(owner, secondCold, coldUpdate, coldUpdateReceipt, state.CommittedAt, token);
+            }
             return continued;
         });
     }
@@ -64,7 +66,9 @@ internal static class FeedVertexAuthorityFlow
         await FeedVertexAuthorityAssertions.HealthyAsync(owner, cold, state, null, token);
         await FeedVertexAuthorityAssertions.ReplayAsync(owner, cold, state.Seed, state.Receipt, state.CommittedAt, token);
         if (state.Update is { } update && state.UpdateReceipt is { } updateReceipt)
-        { await FeedVertexAuthorityAssertions.ReplayAsync(owner, cold, update, updateReceipt, state.CommittedAt, token); }
+        {
+            await FeedVertexAuthorityAssertions.ReplayAsync(owner, cold, update, updateReceipt, state.CommittedAt, token);
+        }
         var command = new CommandRequest(Guid.NewGuid(), database.Partition,
             [new PutDocument(FeedVertexAuthorityFixture.Collection, "c", "{\"n\":3}", 0L)]);
         token.ThrowIfCancellationRequested();
@@ -97,9 +101,13 @@ internal static class FeedVertexAuthorityFlow
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () => { result = await action(cold); }, failures);
         }
         catch (Exception error) when (global::ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         catch (Exception error) when (global::ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null)
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
         return result ?? throw new InvalidOperationException(MissingColdResult);
     }

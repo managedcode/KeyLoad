@@ -10,7 +10,9 @@ internal static class RemoteTransferDistinctStages
         var seed = setup.Transfer;
         (CommitReceipt Receipt, QueueTransferInspection Intent)? original = null;
         await RemoteTransferDistinctCallers.WithAsync(wave, seed, async (sdk, mcp) =>
-        { original = await RemoteTransferColdStages.CreateAsync(sdk, mcp, seed, token); }, token);
+        {
+            original = await RemoteTransferColdStages.CreateAsync(sdk, mcp, seed, token);
+        }, token);
         var created = original ?? throw new InvalidOperationException(RemoteTransferDistinctProtocol.Missing);
         var accept = seed.Accept(created.Intent);
         (CommitReceipt Receipt, QueueTransferReceiptInspection Proof)? accepted = null;
@@ -44,7 +46,10 @@ internal static class RemoteTransferDistinctStages
             await QueueProducerRf3Assertions.ReplayAsync(sdk, mcp, accept, target.Receipt, token);
             await QueueProducerRf3Assertions.ReplayAsync(sdk, mcp, complete, completed, token);
             await RemoteTransferColdAssertions.SourceAsync(sdk, mcp, seed, created.Intent with
-            { State = QueueTransferState.Delivered, ReceiptToken = target.Proof.ReceiptToken }, token);
+            {
+                State = QueueTransferState.Delivered,
+                ReceiptToken = target.Proof.ReceiptToken
+            }, token);
             await RemoteTransferColdAssertions.ReceiptAsync(sdk, mcp, seed, target.Proof, token);
             await RemoteTransferColdAssertions.MessageAsync(sdk, mcp, seed,
                 RemoteTransferColdAssertions.Ready(seed, RemoteTransferColdProtocol.OriginalReadySequence), token);

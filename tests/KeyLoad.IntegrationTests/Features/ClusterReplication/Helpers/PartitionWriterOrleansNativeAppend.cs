@@ -11,7 +11,13 @@ internal static class PartitionWriterOrleansNativeAppend
         {
             cancellationToken.ThrowIfCancellationRequested();
             var operation = original.Entry.Operation!;
-            var changed = original.Entry with { Operation = operation with { Id = changedIdentity } };
+            var changed = original.Entry with
+            {
+                Operation = operation with
+                {
+                    Id = changedIdentity
+                }
+            };
             var refusal = Assert.ThrowsExactly<KeyLoadException>(() => log.Append([changed]));
             await Assert.That(refusal.Code).IsEqualTo(ErrorCode.Corruption);
             await Assert.That(refusal.Message).IsEqualTo(PartitionWriterOrleansProtocol.AuthorityDetail);

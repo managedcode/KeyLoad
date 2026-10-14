@@ -56,7 +56,10 @@ internal sealed class C1OutcomeInspectionProcessLifetime : IAsyncDisposable
         stderr = new(executionOptions);
     }
 
-    internal bool DisposalAttemptCompleted { get; private set; }
+    internal bool DisposalAttemptCompleted
+    {
+        get; private set;
+    }
 
     internal C1OutcomeInspectionProcessResult Result => new(processId, exitCode, stdout.Bytes, stderr.Bytes,
         stdout.Exceeded, stderr.Exceeded, reaped, inputTask?.IsCompleted ?? true,
@@ -66,7 +69,9 @@ internal sealed class C1OutcomeInspectionProcessLifetime : IAsyncDisposable
     {
         ServerFailureObserver.Observe(Start, failures);
         if (started)
-        { await ServerFailureObserver.ObserveAsync(() => SettleAsync(cancellationToken), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => SettleAsync(cancellationToken), failures).ConfigureAwait(false);
+        }
     }
 
     private void Start()
@@ -75,7 +80,9 @@ internal sealed class C1OutcomeInspectionProcessLifetime : IAsyncDisposable
             settings.InspectionReadBufferBytes);
         process.StartInfo = C1OutcomeInspectionProcessStartInfo.Create(mode);
         if (!process.Start())
-        { throw new InvalidOperationException(StartFailureMessage); }
+        {
+            throw new InvalidOperationException(StartFailureMessage);
+        }
         started = true;
         processId = process.Id;
         exitTask = process.WaitForExitAsync();
@@ -98,13 +105,17 @@ internal sealed class C1OutcomeInspectionProcessLifetime : IAsyncDisposable
             reaped = process.HasExited;
         }
         if (!reaped)
-        { ReportUnreapedProcess(); }
+        {
+            ReportUnreapedProcess();
+        }
     }
 
     public async ValueTask DisposeAsync()
     {
         if (DisposalAttemptCompleted)
-        { return; }
+        {
+            return;
+        }
         await JoinOriginalTasksBeforeReleaseAsync().ConfigureAwait(false);
         if ((!started || reaped && originalTasksJoined) && !processClosed)
         {
@@ -121,7 +132,9 @@ internal sealed class C1OutcomeInspectionProcessLifetime : IAsyncDisposable
             }
         }
         if (started && reaped && originalTasksJoined && !processClosed)
-        { ReportProcessHandleCloseFailure(); }
+        {
+            ReportProcessHandleCloseFailure();
+        }
         if (owner is not null && !ownerReleased && (!started || reaped && originalTasksJoined && processClosed))
         {
             var handle = owner.SafeFileHandle;
@@ -137,7 +150,9 @@ internal sealed class C1OutcomeInspectionProcessLifetime : IAsyncDisposable
             }
         }
         if (owner is not null && !ownerReleased && started && reaped && originalTasksJoined && processClosed)
-        { ReportOwnerReleaseFailure(); }
+        {
+            ReportOwnerReleaseFailure();
+        }
         DisposalAttemptCompleted = (!started || reaped && originalTasksJoined)
             && processClosed && (owner is null || ownerReleased);
     }
@@ -158,16 +173,22 @@ internal sealed class C1OutcomeInspectionProcessLifetime : IAsyncDisposable
             await ServerFailureObserver.ObserveAsync(() => process.WaitForExitAsync(), failures).ConfigureAwait(false);
             reaped = process.HasExited;
             if (!reaped)
-            { ReportUnreapedProcess(); }
+            {
+                ReportUnreapedProcess();
+            }
         }
         if (started && reaped)
-        { exitCode = process.ExitCode; }
+        {
+            exitCode = process.ExitCode;
+        }
     }
 
     private void ReportUnreapedProcess()
     {
         if (unreapedProcessReported)
-        { return; }
+        {
+            return;
+        }
         unreapedProcessReported = true;
         failures.Add(new InvalidOperationException(UnreapedProcessMessage));
     }
@@ -175,7 +196,9 @@ internal sealed class C1OutcomeInspectionProcessLifetime : IAsyncDisposable
     private void ReportProcessHandleCloseFailure()
     {
         if (processHandleCloseReported)
-        { return; }
+        {
+            return;
+        }
         processHandleCloseReported = true;
         failures.Add(new InvalidOperationException(ProcessHandleCloseMessage));
     }
@@ -183,7 +206,9 @@ internal sealed class C1OutcomeInspectionProcessLifetime : IAsyncDisposable
     private void ReportOwnerReleaseFailure()
     {
         if (ownerReleaseReported)
-        { return; }
+        {
+            return;
+        }
         ownerReleaseReported = true;
         failures.Add(new InvalidOperationException(OwnerReleaseMessage));
     }

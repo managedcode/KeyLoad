@@ -74,7 +74,10 @@ internal static class DocumentSessionReadRf3Flow
         await fixture.KillContainerAsync(survivors[First], KillScenario, token);
         await DocumentSessionReadRf3NoQuorum.VerifyAsync(sdk, mcp, reference, receipt.Token, identity.Secret, token);
         foreach (var node in stopped.ToArray())
-        { await fixture.RestartContainerAsync(node, token); stopped.Remove(node); }
+        {
+            await fixture.RestartContainerAsync(node, token);
+            stopped.Remove(node);
+        }
         await using var restoredAdminMcp = await McpOfficialClient.ConnectAsync(fixture, survivors[Zero], fixture.AdminKey, token);
         await ReplicaIsolationFlowAssertions.ReplayedAsync(admin, restoredAdminMcp, command, receipt, token);
         await ReplicaIsolationFlowAssertions.ReplayedAsync(admin, restoredAdminMcp, nextCommand, next, token);

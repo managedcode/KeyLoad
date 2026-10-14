@@ -19,8 +19,14 @@ internal sealed class RequestCqrsNativeModelWitnessCodecTests
         await Assert.That(fixture.Mac.VerifyNativeReply(reply)).IsTrue();
         await Assert.That(fixture.Mac.Verify(request.Payload.Span, request.Signature, false)).IsTrue();
         await Assert.That(fixture.Mac.Verify(reply.Payload.Span, reply.Signature, true)).IsTrue();
-        await Assert.That(fixture.Mac.VerifyNativeRequest(request with { Nonce = Guid.NewGuid() })).IsFalse();
-        await Assert.That(fixture.Mac.VerifyNativeReply(reply with { Nonce = Guid.NewGuid() })).IsFalse();
+        await Assert.That(fixture.Mac.VerifyNativeRequest(request with
+        {
+            Nonce = Guid.NewGuid()
+        })).IsFalse();
+        await Assert.That(fixture.Mac.VerifyNativeReply(reply with
+        {
+            Nonce = Guid.NewGuid()
+        })).IsFalse();
         RequestCqrsNativeModelInventory.RequireMarkers([restored], [RequestCqrsNativeModelWitnessCase.Marker(original)]);
     }
 
@@ -36,7 +42,10 @@ internal sealed class RequestCqrsNativeModelWitnessCodecTests
         Assert.ThrowsExactly<InvalidOperationException>(() => RequestCqrsNativeModelInventory.Write(before with { NativeReply = after.NativeReply }));
         Assert.ThrowsExactly<InvalidOperationException>(() => RequestCqrsNativeModelInventory.Write(after with { NativeReply = null }));
         Assert.ThrowsExactly<InvalidOperationException>(() => RequestCqrsNativeModelInventory.Write(after with { NativeReply = [] }));
-        var changedReply = RequestCqrsNativeModelInventory.Reply(after) with { Nonce = Guid.NewGuid() };
+        var changedReply = RequestCqrsNativeModelInventory.Reply(after) with
+        {
+            Nonce = Guid.NewGuid()
+        };
         Assert.ThrowsExactly<InvalidOperationException>(() => RequestCqrsNativeModelInventory.Write(after with { NativeReply = NativeSerialization.Serialize(changedReply) }));
     }
 
@@ -49,7 +58,10 @@ internal sealed class RequestCqrsNativeModelWitnessCodecTests
         var refusal = new KeyLoad.Server.Features.DocumentStorage.RemoteModelNativeReply(ReadOnlyMemory<byte>.Empty,
             string.Empty, ErrorCode.UnsupportedCapability, null, request.Nonce, string.Empty);
         var retained = RequestCqrsNativeModelInventory.Read(RequestCqrsNativeModelInventory.Write(
-            original with { NativeReply = NativeSerialization.Serialize(refusal) }));
+            original with
+            {
+                NativeReply = NativeSerialization.Serialize(refusal)
+            }));
         var actual = RequestCqrsNativeModelInventory.Reply(retained);
         await Assert.That(fixture.Mac.VerifyNativeReply(actual)).IsFalse();
         await Assert.That(actual.Payload.IsEmpty).IsTrue();
@@ -71,7 +83,9 @@ internal sealed class RequestCqrsNativeModelWitnessCodecTests
             original with { Phase = RequestCqrsProbePhase.RequestStarted }, original with { NativeRequest = [] }
         };
         foreach (var value in invalid)
-        { Assert.ThrowsExactly<InvalidOperationException>(() => RequestCqrsNativeModelInventory.Write(value)); }
+        {
+            Assert.ThrowsExactly<InvalidOperationException>(() => RequestCqrsNativeModelInventory.Write(value));
+        }
         _ = RequestCqrsNativeModelInventory.Read(RequestCqrsNativeModelInventory.Write(original));
     }
 }

@@ -1,4 +1,4 @@
-using KeyLoad.Orleans.Features.ResourceExecution;
+using KeyLoad.Clustering.Features.ResourceExecution;
 
 namespace KeyLoad.UnitTests.Features.ResourceExecution;
 
@@ -21,7 +21,12 @@ internal static class CacheControlWireAuthenticatorSupport
         var slot0 = SignProof(authenticator, request.Slot0Proof);
         var slot1 = SignProof(authenticator, request.Slot1Proof);
         var slot2 = SignProof(authenticator, request.Slot2Proof);
-        var withProofs = request with { Slot0Proof = slot0, Slot1Proof = slot1, Slot2Proof = slot2 };
+        var withProofs = request with
+        {
+            Slot0Proof = slot0,
+            Slot1Proof = slot1,
+            Slot2Proof = slot2
+        };
         var success = authenticator.TrySign(withProofs, out var signed);
         return RequireSigned(success, signed);
     }

@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Orleans;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
@@ -10,7 +10,10 @@ internal sealed class PartitionMovementParentReceiverProofRunner(PartitionMoveme
     PartitionMovementClient client, PartitionMovementParentCheckpointOwner checkpoints,
     TimeProvider clock, IOptions<GrainRoutingOptions> routing)
 {
-    private enum ProofStep { Source, Packet, Receiver }
+    private enum ProofStep
+    {
+        Source, Packet, Receiver
+    }
 
     internal async Task<PartitionMoveParentState> IssueFirstAsync(string principalId, PartitionMoveParentState state,
         ReadExecutionBudget work, CancellationToken cancellationToken)
@@ -25,15 +28,23 @@ internal sealed class PartitionMovementParentReceiverProofRunner(PartitionMoveme
             || pending.OriginalReceiverSourceWitness is not null || pending.ReceiverSourceCheckpointReceipt is not null
             || pending.OriginalReceiverIssuePacket is not null || pending.ReceiverIssuePacketCheckpointReceipt is not null
             || pending.OriginalReceiverIssuanceWitness is not null || pending.ReceiverIssuanceCheckpointReceipt is not null)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMovementProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMovementProtocol.InvalidProof);
+        }
         var request = state.Header!.OriginalTransferRequest;
         var source = await receiver.ReadReceiverSourcePendingAsync(principalId, request, pending.OriginalPhaseCommandId,
             PartitionMovementParentDeadline.Expiry(work, clock, routing), work, cancellationToken).ConfigureAwait(false);
-        var sourceBody = ProofBody(principalId, state) with { OriginalReceiverSourceWitness = source };
+        var sourceBody = ProofBody(principalId, state) with
+        {
+            OriginalReceiverSourceWitness = source
+        };
         var sourceState = await JoinProofAsync(state, sourceBody, ProofStep.Source, work, cancellationToken).ConfigureAwait(false);
         var packet = await receiver.CreateReceiverIssuePacketAsync(principalId, request, pending.OriginalPhaseCommandId,
             PartitionMovementParentDeadline.Expiry(work, clock, routing), work, cancellationToken).ConfigureAwait(false);
-        var packetBody = ProofBody(principalId, sourceState) with { OriginalReceiverIssuePacket = packet };
+        var packetBody = ProofBody(principalId, sourceState) with
+        {
+            OriginalReceiverIssuePacket = packet
+        };
         var packetState = await JoinProofAsync(sourceState, packetBody, ProofStep.Packet, work, cancellationToken).ConfigureAwait(false);
         return await JoinFirstReceiverAsync(principalId, packetState, work, phaseObservation,
             cancellationToken).ConfigureAwait(false);
@@ -84,12 +95,19 @@ internal sealed class PartitionMovementParentReceiverProofRunner(PartitionMoveme
         var pending = RequirePending(state);
         if (pending.OriginalReceiverSourceWitness is null || pending.ReceiverSourceCheckpointReceipt is null
             || pending.OriginalReceiverIssuePacket is null || pending.ReceiverIssuePacketCheckpointReceipt is null)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMovementProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMovementProtocol.InvalidProof);
+        }
         if (pending.OriginalReceiverIssuanceWitness is not null && pending.ReceiverIssuanceCheckpointReceipt is not null)
-        { return state; }
+        {
+            return state;
+        }
         var proof = await client.QueryReceiverIssueAsync(pending,
             PartitionMovementParentDeadline.Expiry(work, clock, routing), work, cancellationToken).ConfigureAwait(false);
-        var body = ProofBody(principalId, state) with { OriginalReceiverIssuanceWitness = proof };
+        var body = ProofBody(principalId, state) with
+        {
+            OriginalReceiverIssuanceWitness = proof
+        };
         return await JoinProofAsync(state, body, ProofStep.Receiver, work, cancellationToken).ConfigureAwait(false);
     }
 
@@ -113,7 +131,9 @@ internal sealed class PartitionMovementParentReceiverProofRunner(PartitionMoveme
         if (retained.OriginalPhaseCommandId != pending.OriginalPhaseCommandId || receipt is null
             || !NativeSerialization.Serialize(receipt).AsSpan().SequenceEqual(NativeSerialization.Serialize(actual.Journal))
             || !SameProof(body, retained, step))
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMovementProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMovementProtocol.InvalidProof);
+        }
         work.Check();
         return joined;
     }
@@ -143,7 +163,9 @@ internal sealed class PartitionMovementParentReceiverProofRunner(PartitionMoveme
     {
         if (state.Header is null || state.Header.TerminalResult is not null || state.Pending is not { } pending
             || pending.OriginalPhase is null || pending.OriginalResult is not null)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMovementProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMovementProtocol.InvalidProof);
+        }
         return pending;
     }
 }

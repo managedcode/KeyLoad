@@ -7,8 +7,14 @@ internal sealed class GraphIncomingSortCancellationTimeProvider(CancellationToke
     private int deadlineCountdown = -1;
     private long timestamp;
 
-    internal bool CancellationTriggered { get; private set; }
-    internal bool DeadlineTriggered { get; private set; }
+    internal bool CancellationTriggered
+    {
+        get; private set;
+    }
+    internal bool DeadlineTriggered
+    {
+        get; private set;
+    }
 
     public override long TimestampFrequency => TimeSpan.TicksPerSecond;
 

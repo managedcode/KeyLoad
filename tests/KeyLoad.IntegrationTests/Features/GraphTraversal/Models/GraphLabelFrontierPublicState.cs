@@ -10,7 +10,10 @@ internal sealed class GraphLabelFrontierPublicState(GraphIncomingRf3Seed seed)
     internal EntityRef B => Vertex("r43-b");
     internal EntityRef Target => Vertex("r43-t");
     internal EntityRef[] Vertices => [A, B, Start, Target];
-    internal bool Replaced { get; set; }
+    internal bool Replaced
+    {
+        get; set;
+    }
     internal AtomicPartitionPlacementResolution Placement { get; set; } = null!;
     internal OutboxStatus Outbox { get; set; } = null!;
     internal List<(CommandRequest Command, CommitReceipt Receipt)> Originals { get; } = [];
@@ -26,7 +29,9 @@ internal sealed class GraphLabelFrontierPublicState(GraphIncomingRf3Seed seed)
     internal global::KeyLoad.GraphTraversal Expected(int depth, int profile)
     {
         if (profile >= 5 || (profile == 4 && Replaced))
-        { return new([Start], []); }
+        {
+            return new([Start], []);
+        }
         return new([.. ExpectedVertices(depth, profile)], [.. ExpectedEdgeIndices(depth, profile).Select(index => Edges[index])]);
     }
 
@@ -37,43 +42,61 @@ internal sealed class GraphLabelFrontierPublicState(GraphIncomingRf3Seed seed)
             return depth == 1 ? [A, B, Start] : [A, B, Start, Target];
         }
         if (profile == 4)
-        { return [A, Start]; }
+        {
+            return [A, Start];
+        }
         return depth == 1 ? [B, Start] : [B, Start, Target];
     }
 
     private int[] ExpectedEdgeIndices(int depth, int profile)
     {
         if (profile <= 1)
-        { return AllEdgeIndices(depth); }
+        {
+            return AllEdgeIndices(depth);
+        }
         if (profile == 4)
-        { return [0]; }
+        {
+            return [0];
+        }
         if (Replaced)
-        { return depth == 1 ? [0, 1] : [0, 1, 2, 3]; }
+        {
+            return depth == 1 ? [0, 1] : [0, 1, 2, 3];
+        }
         return depth == 1 ? [1] : [1, 3];
     }
 
     private static int[] AllEdgeIndices(int depth)
     {
         if (depth == 1)
-        { return [0, 1]; }
+        {
+            return [0, 1];
+        }
         return depth == 2 ? [0, 1, 2, 3] : [0, 1, 2, 3, 4];
     }
 
     internal int Candidates(int depth, int profile)
     {
         if (profile >= 5 || (profile == 4 && Replaced))
-        { return 2; }
+        {
+            return 2;
+        }
         if (profile == 4)
-        { return depth == 1 ? 2 : 3; }
+        {
+            return depth == 1 ? 2 : 3;
+        }
         if (profile <= 1 || Replaced)
-        { return AllCandidates(depth); }
+        {
+            return AllCandidates(depth);
+        }
         return depth + 1;
     }
 
     private static int AllCandidates(int depth)
     {
         if (depth == 1)
-        { return 2; }
+        {
+            return 2;
+        }
         return depth == 2 ? 4 : 5;
     }
     internal TraverseRequest Request(int depth, int profile, int vertices, int edges)

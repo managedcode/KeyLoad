@@ -12,7 +12,9 @@ internal static class SqlBooleanTruthRf3Pages
             await global::TUnit.Assertions.Assert.That(capabilities.ReadProfiles.Contains(SqlBooleanTruthRf3Cases.Profile)).IsTrue();
             await global::TUnit.Assertions.Assert.That(capabilities.ReadProfiles.Contains(SqlBooleanTruthRf3Cases.OperandProfile)).IsTrue();
             var mcp = (await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.SuccessAsync<QueryCapabilityManifest>(
-                await caller.Mcp.CallAsync(global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerTools.QueryCapabilities, new { }, token))).Value;
+                await caller.Mcp.CallAsync(global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerTools.QueryCapabilities, new
+                {
+                }, token))).Value;
             await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlBooleanTruthRf3Cases.Profile)).IsTrue();
             await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlBooleanTruthRf3Cases.OperandProfile)).IsTrue();
             var failures = new List<Exception>();
@@ -23,7 +25,9 @@ internal static class SqlBooleanTruthRf3Pages
                 await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
                 {
                     foreach (var item in SqlBooleanTruthRf3Cases.All)
-                    { await CaseAsync(caller, wire, item, state.LowRevision, token); }
+                    {
+                        await CaseAsync(caller, wire, item, state.LowRevision, token);
+                    }
                 }, failures);
             }, failures);
             global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
@@ -45,6 +49,8 @@ internal static class SqlBooleanTruthRf3Pages
         await SqlBooleanTruthRf3Image.PageAsync(await wire.ExecuteAsync<QueryPage>(sql, [], prepared: true, token), item, revision);
         await SqlBooleanTruthRf3Image.PageAsync(await wire.ExecuteAsync<QueryPage>(sql, [], prepared: false, token), item, revision);
         if (item.Clause == SqlBooleanTruthRf3Cases.BareClause)
-        { await SqlBooleanOperandRf3Parameters.RequireAsync(caller, wire, revision, token); }
+        {
+            await SqlBooleanOperandRf3Parameters.RequireAsync(caller, wire, revision, token);
+        }
     }
 }

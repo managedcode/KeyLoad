@@ -18,7 +18,10 @@ internal static class TenantCapacityPlacementRf3OccupiedPlan
             seed.Partition.DatabaseId, [seed.Partition], capacity.Control);
         var sdk = await McpCallerAssertions.SdkSuccessAsync(await seed.Source.PlanTenantPlacementAsync(request, token));
         var mcp = (await McpCallerAssertions.SuccessAsync<TenantPlacementPlanResultV1>(
-            await seed.Official.CallAsync(TenantPlacementPublicProtocol.PlanTool, new { request }, token))).Value;
+            await seed.Official.CallAsync(TenantPlacementPublicProtocol.PlanTool, new
+            {
+                request
+            }, token))).Value;
         await RequireAsync(seed, capacity, sdk);
         await RequireAsync(seed, capacity, mcp);
         return sdk;

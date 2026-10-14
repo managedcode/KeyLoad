@@ -60,7 +60,9 @@ internal static class ReplicaProcessFiles
         while (Directory.Exists(root))
         {
             try
-            { Directory.Delete(root, true); }
+            {
+                Directory.Delete(root, true);
+            }
             catch (IOException) when (TimeProvider.System.GetElapsedTime(started) < RetryWindow)
             {
                 await Task.Delay(RetryDelay, TimeProvider.System, cancellationToken);

@@ -30,7 +30,10 @@ internal static class TenantPlacementPolicyOutcomeFlow
         var configured = fixture.Database.Apply(Operation(fixture, First, new(0, original, ControlPartition)));
         await Assert.That(configured.Error).IsNull();
         await Assert.That(JsonData.Fingerprint(configured.Get<TenantPlacementPolicyV1>())).IsEqualTo(JsonData.Fingerprint(original));
-        var stale = Operation(fixture, Refused, new(0, original with { PromotionBytes = 96 * 1024 * 1024 }, ControlPartition));
+        var stale = Operation(fixture, Refused, new(0, original with
+        {
+            PromotionBytes = 96 * 1024 * 1024
+        }, ControlPartition));
         var refusal = fixture.Database.Apply(stale);
         await Assert.That(refusal.Error).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(refusal.SafeDetail).IsEqualTo("The tenant placement authority revision changed.");

@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 using KeyLoad.Query.Features.Search;
 using Microsoft.Extensions.Options;
 
@@ -40,7 +40,9 @@ internal sealed class NativeTextSelectedProjectionLease : ITextProjectionLease, 
         {
             var failures = new List<Exception> { primary };
             try
-            { Dispose(); }
+            {
+                Dispose();
+            }
             catch (Exception cleanup) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
             catch (Exception cleanup) when (!NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
             ServerFailureObserver.ThrowIfAny(failures);
@@ -52,7 +54,9 @@ internal sealed class NativeTextSelectedProjectionLease : ITextProjectionLease, 
     {
         ArgumentNullException.ThrowIfNull(callback);
         if (disposed || completed || postingObservation is not null)
-        { throw NativeTextErrors.Corrupt(); }
+        {
+            throw NativeTextErrors.Corrupt();
+        }
         postingObservation = callback;
     }
 
@@ -60,7 +64,9 @@ internal sealed class NativeTextSelectedProjectionLease : ITextProjectionLease, 
     {
         var callback = postingObservation;
         if (callback is null || postingObserved)
-        { return; }
+        {
+            return;
+        }
         postingObserved = true;
         var failures = new List<Exception>();
         ServerFailureObserver.ObserveAsync(() => callback(budget.Cancellation).AsTask(), failures).GetAwaiter().GetResult();
@@ -72,25 +78,35 @@ internal sealed class NativeTextSelectedProjectionLease : ITextProjectionLease, 
         budget.Check();
         budget.ChargeBytes(NativeSerialization.Measure(reference));
         if (disposed || completed || !visited.Add(reference))
-        { throw NativeTextErrors.Corrupt(); }
+        {
+            throw NativeTextErrors.Corrupt();
+        }
         if (!byReference.TryGetValue(reference, out var record) || record.Deleted || record.Revision != revision)
-        { throw NativeTextErrors.Mismatch(); }
+        {
+            throw NativeTextErrors.Mismatch();
+        }
     }
 
     public void ObserveToken(string token)
     {
         budget.Check();
         if (disposed || completed || string.IsNullOrEmpty(token))
-        { throw NativeTextErrors.Corrupt(); }
+        {
+            throw NativeTextErrors.Corrupt();
+        }
     }
 
     public void VerifyCandidates(IReadOnlyList<string> terms, IReadOnlyList<EntityRef> references,
         ReadExecutionBudget verificationBudget)
     {
         if (disposed || completed || verificationBudget != budget)
-        { throw NativeTextErrors.Corrupt(); }
+        {
+            throw NativeTextErrors.Corrupt();
+        }
         if (references.Count > limits.Value.MaxScanRecords || terms.Count > limits.Value.MaxSearchTextTokens)
-        { throw NativeTextErrors.BoundExceeded(); }
+        {
+            throw NativeTextErrors.BoundExceeded();
+        }
         var candidates = new HashSet<EntityRef>();
         foreach (var term in terms)
         {
@@ -101,7 +117,9 @@ internal sealed class NativeTextSelectedProjectionLease : ITextProjectionLease, 
         {
             budget.Check();
             if (!visited.Contains(reference) || !candidates.Contains(reference))
-            { throw NativeTextErrors.Corrupt(); }
+            {
+                throw NativeTextErrors.Corrupt();
+            }
         }
         budget.Check();
         completed = true;
@@ -120,20 +138,28 @@ internal sealed class NativeTextSelectedProjectionLease : ITextProjectionLease, 
                 {
                     budget.ChargeBytes(NativeTextProtocol.PostingBytes);
                     if (!iterator.Next())
-                    { return; }
+                    {
+                        return;
+                    }
                     slot.ObserveOriginalPostingRead();
                     ObserveOriginalPosting();
                     budget.Check();
                     budget.Cancellation.ThrowIfCancellationRequested();
                     if (iterator.CurrentKey.Token != token)
-                    { return; }
+                    {
+                        return;
+                    }
                     var id = iterator.CurrentKey.Record;
                     if (!byId.TryGetValue(id, out var record) || record.Deleted)
-                    { throw NativeTextErrors.Corrupt(); }
+                    {
+                        throw NativeTextErrors.Corrupt();
+                    }
                     budget.ChargeBytes(NativeSerialization.Measure(record.Reference));
                     candidates.Add(record.Reference);
                     if (candidates.Count > limits.Value.MaxScanRecords)
-                    { throw NativeTextErrors.BoundExceeded(); }
+                    {
+                        throw NativeTextErrors.BoundExceeded();
+                    }
                 }
             }, failures);
         }, failures);
@@ -143,16 +169,24 @@ internal sealed class NativeTextSelectedProjectionLease : ITextProjectionLease, 
     public void Dispose()
     {
         if (disposed)
-        { return; }
+        {
+            return;
+        }
         disposed = true;
         postingObservation = null;
         var failures = new List<Exception>();
         if (entered)
-        { ServerFailureObserver.Observe(() => slot.Exit(this), failures); }
+        {
+            ServerFailureObserver.Observe(() => slot.Exit(this), failures);
+        }
         foreach (var failure in failures)
-        { admission?.RetainFailure(failure); }
+        {
+            admission?.RetainFailure(failure);
+        }
         try
-        { admission?.Dispose(); }
+        {
+            admission?.Dispose();
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         ServerFailureObserver.ThrowIfAny(failures);

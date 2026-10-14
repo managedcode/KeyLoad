@@ -20,7 +20,10 @@ internal static class NativeTextOnlineRf3Flow
         var originalOutbox = JsonDefaults.Serialize(await McpCallerAssertions.SdkSuccessAsync(await sdk.OutboxStatusAsync(scenario.Partition, token)));
         foreach (var candidate in NativeTextOnlineRf3Assertions.Paths)
         {
-            await NativeTextOnlineRf3Call.RejectedAsync(sdk, mcp, request with { NodeId = Guid.NewGuid() }, candidate, token);
+            await NativeTextOnlineRf3Call.RejectedAsync(sdk, mcp, request with
+            {
+                NodeId = Guid.NewGuid()
+            }, candidate, token);
             var after = await McpCallerAssertions.SdkSuccessAsync(await sdk.OutboxStatusAsync(scenario.Partition, token));
             await Assert.That(JsonDefaults.Serialize(after).SequenceEqual(originalOutbox)).IsTrue();
         }
@@ -29,7 +32,10 @@ internal static class NativeTextOnlineRf3Flow
         await NativeTextOnlineRf3Assertions.LiteralAllAsync(sdk, mcp, scenario, false, token);
         await NativeTextOnlineRf3Assertions.ReplayAllAsync(sdk, mcp, request, original, token);
         var mutation = await NativeTextMaintenanceRf3Mutation.CommitAsync(sdk, scenario, token);
-        var successor = request with { CommandId = Guid.NewGuid() };
+        var successor = request with
+        {
+            CommandId = Guid.NewGuid()
+        };
         var changed = await NativeTextOnlineRf3Call.ExecuteAsync(sdk, mcp, successor, path, token);
         await NativeTextOnlineRf3Assertions.ResultAsync(changed, successor, true);
         await Assert.That(changed.BaseCut.ThroughSequence).IsGreaterThan(original.PublishedCut.ThroughSequence);

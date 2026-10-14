@@ -15,7 +15,10 @@ internal static class TopicSqlScanBudgetFlow
 
     internal static async Task RunAsync()
     {
-        using var database = TopicSqlNativeSeed.Create(new() { MaxScanRecords = ScanRecords });
+        using var database = TopicSqlNativeSeed.Create(new()
+        {
+            MaxScanRecords = ScanRecords
+        });
         var command = TopicSqlNativeSeed.Command(database);
         var receipt = TopicSqlNativeSeed.Publish(database, command);
         var append = new CommandRequest(Guid.NewGuid(), database.Partition,

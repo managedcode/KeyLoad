@@ -28,7 +28,10 @@ internal sealed class SqlInnerJoinRowAuthorizationTests
         var reader = new PrincipalRecord("reader", database.Partition.TenantId,
             [new(database.Partition.DatabaseId, Left, Capability.Query | Capability.DocumentsRead),
                 new(database.Partition.DatabaseId, Right, Capability.Query | Capability.DocumentsRead)], [])
-        { RestrictRows = true, OwnerId = "reader" };
+        {
+            RestrictRows = true,
+            OwnerId = "reader"
+        };
         database.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(reader));
         var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
 
@@ -64,9 +67,13 @@ internal sealed class SqlInnerJoinRowAuthorizationTests
     {
         database.Submit(OperationKind.ConfigureResource, new ConfigureResourceRequest(database.Partition.TenantId,
             database.Partition.DatabaseId, new ResourceDefinition(Left, ResourceKind.Collection, database.Partition.TransactionDomainId)
-            { RelationalSchema = new(OrderIdColumn, [new(OrderIdColumn, RelationalColumnType.Text), new(CustomerIdColumn, RelationalColumnType.Text)]) }));
+            {
+                RelationalSchema = new(OrderIdColumn, [new(OrderIdColumn, RelationalColumnType.Text), new(CustomerIdColumn, RelationalColumnType.Text)])
+            }));
         database.Submit(OperationKind.ConfigureResource, new ConfigureResourceRequest(database.Partition.TenantId,
             database.Partition.DatabaseId, new ResourceDefinition(Right, ResourceKind.Collection, database.Partition.TransactionDomainId)
-            { RelationalSchema = new(CustomerPrimaryKeyColumn, [new(CustomerPrimaryKeyColumn, RelationalColumnType.Text), new(CustomerNameColumn, RelationalColumnType.Text)]) }));
+            {
+                RelationalSchema = new(CustomerPrimaryKeyColumn, [new(CustomerPrimaryKeyColumn, RelationalColumnType.Text), new(CustomerNameColumn, RelationalColumnType.Text)])
+            }));
     }
 }

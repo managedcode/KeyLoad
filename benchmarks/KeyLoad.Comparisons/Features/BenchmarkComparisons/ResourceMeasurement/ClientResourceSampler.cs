@@ -51,7 +51,10 @@ internal sealed class ClientResourceSampler : IAsyncDisposable
         var bytes = GC.GetTotalAllocatedBytes(precise: true) - allocated;
         TimeSpan elapsedCpu;
         lock (gate)
-        { process.Refresh(); elapsedCpu = process.TotalProcessorTime - cpu; }
+        {
+            process.Refresh();
+            elapsedCpu = process.TotalProcessorTime - cpu;
+        }
         await lifetime.CancelAsync();
         await sampler;
         process.Refresh();

@@ -1,8 +1,8 @@
 using System.Security.Cryptography;
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
-using KeyLoad.Orleans;
 using KeyLoad.Replication;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
@@ -17,7 +17,9 @@ internal static class PartitionMovementTransferProofVerifier
         work.Check();
         if (originalReply.IsEmpty || originalReply.Length > database.Limits.MaxBatchBytes
             || string.IsNullOrWhiteSpace(signature))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof);
+        }
         database.Store.Read(view =>
         {
             var principal = database.Principal(work.CreateView(view), principalId, database.EvaluationClock.GetUtcNow());
@@ -37,7 +39,9 @@ internal static class PartitionMovementTransferProofVerifier
             || !PhysicalOwnerEntryValidation.SameOwner(authority.Header.OriginalSourceOwner!, source)
             || reply.Nonce == authority.CapturePhase.OriginalRequestNonce
             || reply.Nonce == authority.CapturePhase.OriginalCaptureReleaseNonce)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof);
+        }
         PartitionMovementRetainedCaptureProofVerifier.Require(database, authority, work, options);
         work.CheckResult(reply);
         return NativeSerialization.Serialize(authority);
@@ -55,7 +59,9 @@ internal static class PartitionMovementTransferProofVerifier
             || !PhysicalOwnerEntryValidation.SameOwner(reply.SourceOwner, source)
             || reply.Discovery.Incarnation != control.Incarnation || reply.Discovery.ClusterId != options.ClusterId
             || !control.VoterIds.Contains(reply.Discovery.VoterId, StringComparer.Ordinal) || reply.Reply.Error is not null)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof);
+        }
     }
 
     private static void RequireTransferAuthorityMac(DatabaseEngine database, PhysicalShardRecord control,
@@ -68,7 +74,9 @@ internal static class PartitionMovementTransferProofVerifier
         {
             using var mac = new PartitionMovementMac(key, database.Limits.MaxBatchBytes);
             if (!mac.VerifyTransferAuthority(originalReply, signature))
-            { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof); }
+            {
+                throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof);
+            }
         }
         finally { CryptographicOperations.ZeroMemory(key); }
     }

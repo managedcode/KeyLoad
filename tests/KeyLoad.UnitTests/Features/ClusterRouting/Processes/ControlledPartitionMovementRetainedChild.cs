@@ -12,7 +12,9 @@ internal static class ControlledPartitionMovementRetainedChild
         List<Exception> failures)
     {
         lock (Gate)
-        { Retained.Add(original); }
+        {
+            Retained.Add(original);
+        }
         var failure = new IOException("The original movement child exit or readers did not join within cleanup.");
         failure.Data[UnsettledKey] = true;
         failure.Data[RootKey] = root;

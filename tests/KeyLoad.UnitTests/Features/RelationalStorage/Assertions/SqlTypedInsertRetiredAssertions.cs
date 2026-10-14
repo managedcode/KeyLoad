@@ -15,7 +15,9 @@ internal static class SqlTypedInsertRetiredAssertions
         {
             await PlacementAsync(source, target, state, token);
             if (state.EpochFenced)
-            { await FencedAsync(source, state, SqlTypedInsertLiteral.EpochChanged, token); }
+            {
+                await FencedAsync(source, state, SqlTypedInsertLiteral.EpochChanged, token);
+            }
             else
             {
                 await SqlTypedInsertAssertions.SameAsync(state.Receipt, source.Database.ResolveOutcome(state.Original).Get<CommitReceipt>());
@@ -27,7 +29,9 @@ internal static class SqlTypedInsertRetiredAssertions
                     source.Database.ResolveOutcome(state.Failed));
             }
             if (state.Healthy is { } healthy)
-            { await SqlTypedInsertAssertions.SameAsync(state.HealthyReceipt, target.Journal.Submit(healthy, token).Get<CommitReceipt>()); }
+            {
+                await SqlTypedInsertAssertions.SameAsync(state.HealthyReceipt, target.Journal.Submit(healthy, token).Get<CommitReceipt>());
+            }
         }, () => state.Authority.RemainsControlOwnedAsync(source, target),
             () => state.FailedAuthority.RemainsControlOwnedAsync(source, target));
     }
@@ -64,7 +68,9 @@ internal static class SqlTypedInsertRetiredAssertions
             }
             var rows = new List<QueryRow> { new(SqlTypedInsertRetiredLiteral.One, SqlTypedInsertRetiredLiteral.Revision, OneProjection, false, []) };
             if (repaired)
-            { rows.Add(new(SqlTypedInsertRetiredLiteral.Two, SqlTypedInsertRetiredLiteral.Revision, TwoProjection, false, [])); }
+            {
+                rows.Add(new(SqlTypedInsertRetiredLiteral.Two, SqlTypedInsertRetiredLiteral.Revision, TwoProjection, false, []));
+            }
             var expected = new QueryPage(global::System.Collections.Immutable.ImmutableArray.CreateRange(rows), null, cut, FullScan);
             var engine = new QueryEngine(target.Database, UnitExecutionOptions.QueryExecution());
             await SqlTypedInsertAssertions.SameAsync(expected, engine.Execute(SqlTypedInsertRetiredLiteral.Writer,

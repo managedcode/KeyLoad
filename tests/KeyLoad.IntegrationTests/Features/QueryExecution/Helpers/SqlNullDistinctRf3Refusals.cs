@@ -58,7 +58,9 @@ internal static class SqlNullDistinctRf3Refusals
                             || item.Clause == SqlNullDistinctRf3Cases.DollarClause
                             || item.Clause == SqlNullDistinctRf3Cases.BinaryClause
                             || item.Clause == SqlNullDistinctRf3Cases.OctalClause || SqlUnicodeIdentifierRf3Controls.IsSelected(item)))
-                        { await SqlNullDistinctRf3Pages.CaseAsync(caller, wire, item, state.LowRevision, token); }
+                        {
+                            await SqlNullDistinctRf3Pages.CaseAsync(caller, wire, item, state.LowRevision, token);
+                        }
                     }
                 }, failures);
             }, failures);

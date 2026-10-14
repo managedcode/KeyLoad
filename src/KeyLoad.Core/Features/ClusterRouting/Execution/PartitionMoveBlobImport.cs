@@ -18,16 +18,24 @@ internal static class PartitionMoveBlobImport
             var blob = BlobKeys.DecodeScope(record.Key.Span, BlobKeys.HeadSpace, BlobKeys.ScopeComponents);
             var head = BlobRecordReader.Decode<BlobHead>(record.Value.Span);
             BlobRecordReader.ValidateHead(head, blob, source);
-            return NativeSerialization.Serialize(head with { Incarnation = destination });
+            return NativeSerialization.Serialize(head with
+            {
+                Incarnation = destination
+            });
         }
         if (page.Family == PartitionRecordFamilies.BlobState)
         {
             var blob = BlobKeys.DecodeScope(record.Key.Span, BlobKeys.StateSpace, BlobKeys.StateComponents);
             var state = BlobRecordReader.Decode<BlobState>(record.Value.Span);
             if (!record.Key.Span.SequenceEqual(BlobKeys.State(blob, state.UploadId)))
-            { throw BlobErrors.Corruption(); }
+            {
+                throw BlobErrors.Corruption();
+            }
             BlobRecordReader.ValidateState(state, blob, state.UploadId, source);
-            return NativeSerialization.Serialize(state with { Incarnation = destination });
+            return NativeSerialization.Serialize(state with
+            {
+                Incarnation = destination
+            });
         }
         return record.Value.ToArray();
     }
@@ -72,7 +80,9 @@ internal static class PartitionMoveBlobImport
             uploads = state.Status == BlobUploadStatus.Active ? -SingleCounter : EmptyCounter;
         }
         else
-        { return; }
+        {
+            return;
+        }
         var resource = resources.SingleOrDefault(value => value.Name == blob.Resource
             && value.TransactionDomainId == blob.Partition.TransactionDomainId)
             ?? throw BlobErrors.Corruption();
@@ -88,7 +98,9 @@ internal static class PartitionMoveBlobImport
             && value.TransactionDomainId == blob.Partition.TransactionDomainId)
             ?? throw BlobErrors.Corruption();
         if (resource.Kind != ResourceKind.BlobStore)
-        { throw BlobErrors.Corruption(); }
+        {
+            throw BlobErrors.Corruption();
+        }
         BlobQuotaOperations.ValidatePolicy(resource);
         if (BlobRecordReader.Get<BlobQuota>(transaction, BlobKeys.Global) is null)
         {
@@ -97,7 +109,9 @@ internal static class PartitionMoveBlobImport
         }
         var quotaKey = BlobKeys.Quota(blob);
         if (BlobRecordReader.Get<BlobQuota>(transaction, quotaKey) is null)
-        { transaction.PutRecord(quotaKey, BlobQuota.Empty(destination)); }
+        {
+            transaction.PutRecord(quotaKey, BlobQuota.Empty(destination));
+        }
         BlobQuotaOperations.Change(transaction, blob, destination, resource.BlobPolicy ?? new BlobPolicy(),
             bytes, keys, versions, uploads);
     }

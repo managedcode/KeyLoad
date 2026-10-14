@@ -81,7 +81,9 @@ internal sealed class ZoneTreeReadCutLease : IDisposable
             var found = source.Next();
             work.Check(CancellationToken);
             if (!found)
-            { return false; }
+            {
+                return false;
+            }
             if (!source.CurrentKey.Span.SequenceEqual(key))
             {
                 work.ChargeExaminedKey(source.CurrentKey.Length, CancellationToken);
@@ -108,7 +110,9 @@ internal sealed class ZoneTreeReadCutLease : IDisposable
         var raw = source.CurrentValue;
         work.ChargeRecord(source.CurrentKey.Length, raw.Length, CancellationToken);
         if (raw.IsEmpty || raw.Span[ValueMarkerOffset] != LiveValueMarker)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidValueHeaderMessage); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidValueHeaderMessage);
+        }
         admitBeforeRead((long)source.CurrentKey.Length + raw.Length, VisitedRecordCount);
         reader(raw.Span[StorageValueHeaderBytes..]);
         work.Check(CancellationToken);

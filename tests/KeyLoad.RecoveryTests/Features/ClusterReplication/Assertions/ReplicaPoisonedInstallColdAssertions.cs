@@ -14,7 +14,11 @@ internal static class ReplicaPoisonedInstallColdAssertions
         long position, ReplicaHardState originalState, byte[] originalImage)
     {
         byte[]? healthyImage = null;
-        var healthyState = originalState with { LastIndex = TailIndex, CommittedIndex = TailIndex };
+        var healthyState = originalState with
+        {
+            LastIndex = TailIndex,
+            CommittedIndex = TailIndex
+        };
         await WithOwnerAsync(configuration, async (store, log) =>
         {
             await VerifyAsync(store, log, identity, position, originalState, originalImage, 4);
@@ -64,7 +68,10 @@ internal static class ReplicaPoisonedInstallColdAssertions
         List<Exception> failures = [];
         await ReplicaMaterializerLifecycleErrors.AttemptAsync(async () =>
         {
-            store = new(new(configuration.Directory) { Incarnation = configuration.Incarnation },
+            store = new(new(configuration.Directory)
+            {
+                Incarnation = configuration.Incarnation
+            },
                 RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
             log = new(store, RecoveryExecutionOptions.Configuration(configuration));
             await operation(store, log);

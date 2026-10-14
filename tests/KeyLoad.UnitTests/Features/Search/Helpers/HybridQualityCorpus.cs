@@ -20,16 +20,25 @@ internal static class HybridQualityCorpus
     internal const string StatisticsEpoch = "fixture-cut-v1";
     internal const string WindowId = "complete-observation";
 
-    internal static VectorSpace Space { get; } = new("hybrid-quality-space", 4,
+    internal static VectorSpace Space
+    {
+        get;
+    } = new("hybrid-quality-space", 4,
         DistanceMetric.Cosine, "fixed-fixture-embedding", "1");
 
-    internal static ImmutableArray<string> AllIds { get; } =
+    internal static ImmutableArray<string> AllIds
+    {
+        get;
+    } =
     ["d00", "d01", "d02", "d03", "d04", "d05", "d06", "d07",
      "d08", "d09", "d10", "d11", "d12", "d13", "d14", "d15",
      "d16", "d17", "d18", "d19", "d20", "d21", "d22", "d23",
      "d24", "d25", "d26", "d27", "d28", "d29", "d30", "d31"];
 
-    internal static ImmutableArray<HybridQualityDocument> Documents { get; } =
+    internal static ImmutableArray<HybridQualityDocument> Documents
+    {
+        get;
+    } =
     [
         new("d00", "{\"body\":\"amber reactor signal\"}", [1f, 0f, 0f, 0f]),
         new("d01", "{\"body\":\"amber reactor fuel\"}", [0.9f, 0.1f, 0f, 0f]),
@@ -65,7 +74,10 @@ internal static class HybridQualityCorpus
         new("d31", "{\"body\":\"archive root\"}", [0.7f, 0f, 0f, 0.3f])
     ];
 
-    internal static ImmutableArray<HybridQualityQuery> Queries { get; } =
+    internal static ImmutableArray<HybridQualityQuery> Queries
+    {
+        get;
+    } =
     [
         new("english", "amber reactor", [1f, 0f, 0f, 0f], AllIds,
             [3, 2, 2, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -87,7 +99,10 @@ internal static class HybridQualityCorpus
              0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], true)
     ];
 
-    private static ImmutableArray<string> GraphTargets { get; } =
+    private static ImmutableArray<string> GraphTargets
+    {
+        get;
+    } =
     ["d00", "d01", "d02", "d03", "d04", "d05", "d06", "d07",
      "d08", "d09", "d10", "d11", "d12", "d13", "d14", "d15",
      "d16", "d17", "d18", "d19", "d20", "d21", "d22", "d23",

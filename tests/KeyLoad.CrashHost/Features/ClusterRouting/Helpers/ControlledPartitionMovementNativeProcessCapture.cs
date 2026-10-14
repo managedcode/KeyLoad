@@ -23,14 +23,18 @@ internal static class ControlledPartitionMovementNativeProcessCapture
         {
             var state = owner.Log.State;
             if (state.CommittedIndex != observedCut || owner.Database.LastApplied != observedCut)
-            { throw Errors.Fail(ErrorCode.OwnershipLost, ControlledPartitionMovementNativeProcessProtocol.Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, ControlledPartitionMovementNativeProcessProtocol.Invalid);
+            }
             var work = new ReadExecutionBudget(owner.Runtime.Core.DatabaseLimits, owner.Clock, cancellationToken);
             var entries = ImmutableArray.CreateBuilder<ReplicaEntry>();
             for (var index = FirstIndex; index <= state.CommittedIndex; index++)
             {
                 work.Check();
                 if (entries.Count >= owner.Database.Limits.MaxScanRecords)
-                { throw Errors.Fail(ErrorCode.BudgetExceeded, ControlledPartitionMovementNativeProcessProtocol.Invalid); }
+                {
+                    throw Errors.Fail(ErrorCode.BudgetExceeded, ControlledPartitionMovementNativeProcessProtocol.Invalid);
+                }
                 entries.Add(owner.Log.ReadEntry(index, work.ChargeBytes)
                     ?? throw Errors.Fail(ErrorCode.RecoveryRequired, ControlledPartitionMovementNativeProcessProtocol.Invalid));
             }
@@ -50,14 +54,20 @@ internal static class ControlledPartitionMovementNativeProcessCapture
             foreach (var row in result.Records)
             {
                 if (after is not null && row.Key.Span.SequenceCompareTo(after) <= FirstRecord)
-                { throw new InvalidOperationException(ControlledPartitionMovementNativeProcessProtocol.Invalid); }
+                {
+                    throw new InvalidOperationException(ControlledPartitionMovementNativeProcessProtocol.Invalid);
+                }
                 rows.Add(Convert.ToHexString(row.Key.Span) + RowSeparator + Convert.ToHexString(row.Value.Span));
                 after = row.Key.ToArray();
             }
             if (!result.HasMore)
-            { return rows.ToImmutable(); }
+            {
+                return rows.ToImmutable();
+            }
             if (result.Records.IsEmpty)
-            { throw new InvalidOperationException(ControlledPartitionMovementNativeProcessProtocol.Invalid); }
+            {
+                throw new InvalidOperationException(ControlledPartitionMovementNativeProcessProtocol.Invalid);
+            }
         }
         throw Errors.Fail(ErrorCode.BudgetExceeded, ControlledPartitionMovementNativeProcessProtocol.Invalid);
     }

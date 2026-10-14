@@ -7,7 +7,12 @@ internal static class TargetInboxNativeQuota
     internal static async Task ContinueAsync(DatabaseEngine database, ZoneTreeStore store, CommitInboxRequest original,
         CancellationToken token)
     {
-        var second = original with { CommandId = Guid.NewGuid(), ExecutionGeneration = TargetInboxUnitProtocol.ReceiptCapacity, Effects = [] };
+        var second = original with
+        {
+            CommandId = Guid.NewGuid(),
+            ExecutionGeneration = TargetInboxUnitProtocol.ReceiptCapacity,
+            Effects = []
+        };
         var actual = TargetInboxNativeSetup.Apply(database, second, token).Get<CommitInboxResult>();
         await Assert.That(actual.AlreadyProcessed).IsFalse();
         var third = second with
@@ -19,7 +24,10 @@ internal static class TargetInboxNativeQuota
         await TargetInboxNativeAssertions.RefusedAsync(database, store, third, ErrorCode.ResourceExhausted, token);
         await Assert.That(database.GetDocument(TargetInboxUnitProtocol.Root,
             new(original.Target.Partition, TargetInboxUnitProtocol.Collection, TargetInboxUnitProtocol.Changed), cancellationToken: token)).IsNull();
-        var replay = TargetInboxNativeSetup.Apply(database, original with { CommandId = Guid.NewGuid() }, token).Get<CommitInboxResult>();
+        var replay = TargetInboxNativeSetup.Apply(database, original with
+        {
+            CommandId = Guid.NewGuid()
+        }, token).Get<CommitInboxResult>();
         await Assert.That(replay.AlreadyProcessed).IsTrue();
         await TargetInboxNativeAssertions.CapacityAsync(store, original, TargetInboxUnitProtocol.ReceiptCapacity);
         await TargetInboxNativeAssertions.EffectsAsync(database, original);

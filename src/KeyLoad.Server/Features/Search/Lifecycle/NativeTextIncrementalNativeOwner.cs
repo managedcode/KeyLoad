@@ -47,7 +47,9 @@ internal sealed class NativeTextIncrementalNativeOwner : IDisposable
         budget.Check();
         ObjectDisposedException.ThrowIf(disposed, this);
         if (index is not null)
-        { throw NativeTextErrors.Ownership(); }
+        {
+            throw NativeTextErrors.Ownership();
+        }
         var owner = NativeTextOwnerFiles.ReadOwner(System.IO.Path.Combine(Path, NativeTextProtocol.OwnerFile),
             root, leaf, sourceNodeId, executionOptions);
         NativeTextOwnedInventory.ValidateTrackedLayout(Path, owner.OwnedPaths, budget,
@@ -61,7 +63,9 @@ internal sealed class NativeTextIncrementalNativeOwner : IDisposable
     {
         budget.Check();
         if (seed.Postings.Length != seed.Records.Length)
-        { throw NativeTextErrors.Corrupt(); }
+        {
+            throw NativeTextErrors.Corrupt();
+        }
         var current = index ?? throw NativeTextErrors.Ownership();
         foreach (var postings in seed.Postings)
         {
@@ -109,7 +113,9 @@ internal sealed class NativeTextIncrementalNativeOwner : IDisposable
         var actualBytes = NativeSerialization.Serialize(actual);
         budget.Check();
         if (!expectedBytes.AsSpan().SequenceEqual(actualBytes))
-        { throw NativeTextErrors.Corrupt(); }
+        {
+            throw NativeTextErrors.Corrupt();
+        }
     }
 
     internal Action<NativeTextFaultStage>? FaultObserver => faultObserver;
@@ -119,7 +125,9 @@ internal sealed class NativeTextIncrementalNativeOwner : IDisposable
     private void ObservePosting()
     {
         if (postingObserved)
-        { return; }
+        {
+            return;
+        }
         postingObserved = true;
         Observe(NativeTextFaultStage.NativePostingWritten);
     }
@@ -127,7 +135,9 @@ internal sealed class NativeTextIncrementalNativeOwner : IDisposable
     private void ObserveDeletion()
     {
         if (deletionObserved)
-        { return; }
+        {
+            return;
+        }
         deletionObserved = true;
         Observe(NativeTextFaultStage.NativeDeletionWritten);
     }
@@ -135,7 +145,9 @@ internal sealed class NativeTextIncrementalNativeOwner : IDisposable
     private void ObserveAddition()
     {
         if (additionObserved)
-        { return; }
+        {
+            return;
+        }
         additionObserved = true;
         Observe(NativeTextFaultStage.NativeAdditionWritten);
     }
@@ -145,7 +157,9 @@ internal sealed class NativeTextIncrementalNativeOwner : IDisposable
     public void Dispose()
     {
         if (disposed)
-        { return; }
+        {
+            return;
+        }
         Close();
         disposed = true;
     }
@@ -153,18 +167,24 @@ internal sealed class NativeTextIncrementalNativeOwner : IDisposable
     private void Close()
     {
         if (index is not { } current)
-        { return; }
+        {
+            return;
+        }
         var failures = new List<Exception>();
         ServerFailureObserver.Observe(current.EvictToDisk, failures);
         ServerFailureObserver.Observe(current.WaitForBackgroundThreads, failures);
         ServerFailureObserver.Observe(current.ZoneTree1.Maintenance.SaveMetaData, failures);
         var beforeDispose = failures.Count;
         try
-        { index.Dispose(); }
+        {
+            index.Dispose();
+        }
         catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is null) { failures.Add(error); }
         catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is not null) { failures.Add(error); }
         if (failures.Count == beforeDispose)
-        { index = null; }
+        {
+            index = null;
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

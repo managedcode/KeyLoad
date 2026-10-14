@@ -1,5 +1,5 @@
 using Aspire.Hosting.ApplicationModel;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 using Microsoft.Extensions.Logging;
 
@@ -80,13 +80,19 @@ internal sealed class RequestCqrsRf3DiagnosticsIndependentConsumer : IAsyncDispo
             lastMove = move;
             pendingMove = null;
             if (!moved)
-            { throw new InvalidOperationException("The independent native log stream completed before its marker."); }
+            {
+                throw new InvalidOperationException("The independent native log stream completed before its marker.");
+            }
             var found = false;
             foreach (var line in enumerator!.Current)
-            { found |= line.Content.Contains(marker, StringComparison.Ordinal); }
+            {
+                found |= line.Content.Contains(marker, StringComparison.Ordinal);
+            }
             pendingMove = enumerator.MoveNextAsync().AsTask();
             if (found)
-            { return; }
+            {
+                return;
+            }
         }
     }
 
@@ -106,7 +112,9 @@ internal sealed class RequestCqrsRf3DiagnosticsIndependentConsumer : IAsyncDispo
     {
         var actual = pendingMove;
         if (actual is null)
-        { return; }
+        {
+            return;
+        }
         await RequestCqrsLifecycleFailureObserver.ObserveAsync(() => actual, failures,
             observer ?? failureObserver, RequestCqrsLifecycleStage.IndependentJoin).ConfigureAwait(false);
         lastMove = actual;
@@ -118,10 +126,14 @@ internal sealed class RequestCqrsRf3DiagnosticsIndependentConsumer : IAsyncDispo
     {
         var actual = enumerator;
         if (actual is null)
-        { return; }
+        {
+            return;
+        }
         var before = failures.Count;
         try
-        { await enumerator!.DisposeAsync().ConfigureAwait(false); }
+        {
+            await enumerator!.DisposeAsync().ConfigureAwait(false);
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
             RequestCqrsLifecycleFailureObserver.Append(failures, error, observer ?? failureObserver,
@@ -133,13 +145,17 @@ internal sealed class RequestCqrsRf3DiagnosticsIndependentConsumer : IAsyncDispo
             RequestCqrsLifecycleStage.IndependentEnumeratorDispose);
         }
         if (failures.Count == before)
-        { enumerator = null; }
+        {
+            enumerator = null;
+        }
     }
 
     private void DisposeLifetime(List<Exception> failures, Action<RequestCqrsLifecycleStage>? observer = null)
     {
         if (lifetimeDisposed)
-        { return; }
+        {
+            return;
+        }
         try
         {
             lifetime.Dispose();
@@ -161,12 +177,17 @@ internal sealed class RequestCqrsRf3DiagnosticsIndependentConsumer : IAsyncDispo
     {
         var fatalIndex = failures.FindIndex(error => !NativeCqrsBoundaryErrors.IsNonFatal(error));
         if (fatalIndex < 0)
-        { ServerFailureObserver.ThrowIfAny(failures); return; }
+        {
+            ServerFailureObserver.ThrowIfAny(failures);
+            return;
+        }
         var prioritized = new List<Exception>(failures.Count) { failures[fatalIndex] };
         for (var index = 0; index < failures.Count; index++)
         {
             if (index != fatalIndex)
-            { prioritized.Add(failures[index]); }
+            {
+                prioritized.Add(failures[index]);
+            }
         }
         ServerFailureObserver.ThrowIfAny(prioritized);
     }

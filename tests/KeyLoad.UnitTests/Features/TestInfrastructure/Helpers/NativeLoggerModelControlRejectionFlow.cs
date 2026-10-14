@@ -51,8 +51,12 @@ internal static class NativeLoggerModelControlRejectionFlow
     private static void DeleteOwnedRootIfPresent(string root)
     {
         if (Directory.Exists(root))
-        { Directory.Delete(root, recursive: true); }
+        {
+            Directory.Delete(root, recursive: true);
+        }
         else if (File.Exists(root))
-        { File.Delete(root); }
+        {
+            File.Delete(root);
+        }
     }
 }

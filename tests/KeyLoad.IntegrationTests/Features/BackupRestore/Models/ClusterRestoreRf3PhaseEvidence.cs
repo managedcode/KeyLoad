@@ -12,7 +12,10 @@ internal enum ClusterRestoreRf3Phase
 }
 
 [JsonConverter(typeof(JsonStringEnumConverter<ClusterRestoreRf3FailureCause>))]
-internal enum ClusterRestoreRf3FailureCause { Unknown }
+internal enum ClusterRestoreRf3FailureCause
+{
+    Unknown
+}
 
 internal sealed record ClusterRestoreRf3PhaseEvidence(ClusterRestoreRf3Phase BodyPhase,
     ClusterRestoreRf3Phase CleanupPhase, int FailureCount, bool CallerCanceled, bool DeadlineCanceled,

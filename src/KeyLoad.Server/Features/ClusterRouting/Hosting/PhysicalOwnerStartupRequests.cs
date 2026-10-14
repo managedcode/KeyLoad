@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
+using KeyLoad.Clustering;
 using KeyLoad.Core.Features.ClusterRouting.Identity;
-using KeyLoad.Orleans;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
@@ -18,15 +18,21 @@ internal sealed class PhysicalOwnerStartupRequests(OrleansNode node, IOptions<No
         var payload = NativeSerialization.Serialize(nodeOptions.Value.AdminKey);
         string signed;
         try
-        { signed = node.CatalogRequestCodec().CreateRead(requestId, null, GrainReadKind.Authenticate, payload); }
+        {
+            signed = node.CatalogRequestCodec().CreateRead(requestId, null, GrainReadKind.Authenticate, payload);
+        }
         finally
-        { CryptographicOperations.ZeroMemory(payload); }
+        {
+            CryptographicOperations.ZeroMemory(payload);
+        }
         using var identity = node.OpenRequestContext(null, requestId, Guid.Empty, cancellationToken);
         var reply = await node.ExecutePhysicalShardStartupRequestAsync(requestId, signed, command: false,
             cancellationToken: cancellationToken).ConfigureAwait(false);
         var principal = McpNativeAuthentication.ReadPrincipal(reply.Payload.Span, authenticationOptions, cancellationToken);
         if (!principal.ClusterAdministrator)
-        { throw Errors.Fail(ErrorCode.PermissionDenied, AdministratorRequired); }
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, AdministratorRequired);
+        }
         return principal;
     }
 

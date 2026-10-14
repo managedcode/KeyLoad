@@ -17,7 +17,10 @@ internal static class ControlledPartitionMovementNativeRetireContinuation
         await ControlledPartitionMovementNativeBlobAssertions.ReadAsync(owners.Target, blob.Expected.Value, cancellationToken);
         await ControlledPartitionMovementNativeRetireProducer.ExpiredAsync(owners, captured, cancellationToken);
         await ControlledPartitionMovementNativeRetireProducer.CompleteAsync(owners,
-            request with { Mode = PartitionMoveMode.Resume }, expected, cancellationToken);
+            request with
+            {
+                Mode = PartitionMoveMode.Resume
+            }, expected, cancellationToken);
         await OriginalAsync(owners, seedReceipt, recordedAt, blob, cancellationToken);
         var healthy = await ControlledPartitionMovementNativeHealthy.SubmitAsync(owners.Target, cancellationToken);
         await owners.RestartAsync(cancellationToken);

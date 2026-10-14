@@ -25,7 +25,9 @@ internal static class NativeAnnPublicFrameAdmission
     {
         var available = checked(reserved - Scratch(configured, budget));
         if (available <= Empty)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, NativeAnnProtocol.Bound); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, NativeAnnProtocol.Bound);
+        }
         return NativeAnnMaintenanceAdmission.Seeds(configured.Core.AnnSeed, available / CaptureCount);
     }
 

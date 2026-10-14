@@ -11,9 +11,13 @@ internal static partial class RequestCqrsProbeNativeFifo
     internal static void Create(string path)
     {
         if (!OperatingSystem.IsLinux() && !OperatingSystem.IsMacOS())
-        { throw new PlatformNotSupportedException("Private FIFO tests require the supported Unix test host."); }
+        {
+            throw new PlatformNotSupportedException("Private FIFO tests require the supported Unix test host.");
+        }
         if (MakeFifo(path, PrivateFifoMode) == CreateFailure)
-        { throw new IOException("The owned private FIFO fixture could not be created.", new Win32Exception(Marshal.GetLastPInvokeError())); }
+        {
+            throw new IOException("The owned private FIFO fixture could not be created.", new Win32Exception(Marshal.GetLastPInvokeError()));
+        }
     }
 
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]

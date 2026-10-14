@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.BlobStorage;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.BlobStorage;
 using KeyLoad.Server.Features.ClusterRouting;
 using Microsoft.Extensions.Options;
@@ -19,7 +19,9 @@ internal sealed class ControlledDocumentCommandRouter(OrleansNode node, Partitio
         cancellationToken.ThrowIfCancellationRequested();
         if (envelope.CommandKind != OperationKind.Batch
             && (envelope.CommandKind is not { } kind || !BlobStorageOperations.Handles(kind)))
-        { throw Errors.Fail(ErrorCode.UnsupportedCapability, RemoteDocumentProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, RemoteDocumentProtocol.Unavailable);
+        }
         var runtime = node.Movement
             ?? throw Errors.Fail(ErrorCode.UnsupportedCapability, RemoteDocumentProtocol.Unavailable);
         node.CatalogRequestCodec().ValidateScope(envelope);
@@ -53,7 +55,9 @@ internal sealed class ControlledDocumentCommandRouter(OrleansNode node, Partitio
             envelope.CommandId, principal.Id, clock.GetUtcNow(), payload);
         var context = partition.Database.TryCaptureControlledDocumentCommand(principal.Id, original, work);
         if (context is null)
-        { return null; }
+        {
+            return null;
+        }
         var control = PhysicalOwnerConfiguredTuples.Control(options.Value, partition).Owner;
         var phases = new ControlledDocumentPhaseExecution(runtime, control, partition, grantSettled, outcomeObserved);
         var flow = new ControlledDocumentCommandFlow(partition, phases, blobReads, envelope.RequestId, limits, clock);

@@ -50,7 +50,11 @@ internal static class TenantCapacityPlacementRf3DemotionAssertions
         await SqlRf3Protocol.EqualAsync(Errors.Problem(ErrorCode.Validation,
             TenantPlacementPolicyProtocol.Invalid), sdk.Problem!);
         var mcp = await seed.Official.CallAsync(TenantPlacementPublicProtocol.PersistTool,
-            new { commandId = id, request }, token);
+            new
+            {
+                commandId = id,
+                request
+            }, token);
         await McpCallerAssertions.ErrorAsync(mcp, ErrorCode.Validation, dispatched: true);
         await Assert.That(mcp.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
             .GetProperty(McpCallerProtocol.ProblemDetail).GetString()).IsEqualTo(McpInvalidDetail);

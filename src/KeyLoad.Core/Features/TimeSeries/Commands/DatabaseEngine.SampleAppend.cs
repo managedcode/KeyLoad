@@ -45,7 +45,11 @@ public sealed partial class DatabaseEngine
             }
 
             var idKey = KeySpace.Partition(SampleIdentitySpace, partition, append.SeriesSet, append.SeriesId, sample.EventId);
-            var fingerprint = JsonData.Fingerprint(new { sample, Tags = tags });
+            var fingerprint = JsonData.Fingerprint(new
+            {
+                sample,
+                Tags = tags
+            });
             if (tx.ReadOwnedValue(idKey) is { } existing)
             {
                 if (NativeSerialization.Deserialize<string>(existing) != fingerprint)

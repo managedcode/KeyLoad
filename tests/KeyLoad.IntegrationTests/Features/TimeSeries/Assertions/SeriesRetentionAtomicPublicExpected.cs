@@ -30,9 +30,13 @@ internal static class SeriesRetentionAtomicPublicExpected
     internal static SampleRecord[] Rows(SeriesRetentionAtomicPublicState state)
     {
         if (state.Advanced)
-        { return [new(Series, Floor(), 2L, Tags), new(Series, Fresh(), 3L, Tags)]; }
+        {
+            return [new(Series, Floor(), 2L, Tags), new(Series, Fresh(), 3L, Tags)];
+        }
         if (state.Purged)
-        { return [new(Series, Floor(), 2L, Tags)]; }
+        {
+            return [new(Series, Floor(), 2L, Tags)];
+        }
         return [new(Series, Known(), 1L, Tags), new(Series, Floor(), 2L, Tags)];
     }
 
@@ -43,9 +47,13 @@ internal static class SeriesRetentionAtomicPublicExpected
     internal static SampleAggregate Aggregate(SeriesRetentionAtomicPublicState state)
     {
         if (state.Advanced)
-        { return new(2L, 12D, 5D, 7D, 6D); }
+        {
+            return new(2L, 12D, 5D, 7D, 6D);
+        }
         if (state.Purged)
-        { return new(1L, 5D, 5D, 5D, 5D); }
+        {
+            return new(1L, 5D, 5D, 5D, 5D);
+        }
         return new(2L, 8D, 3D, 5D, 4D);
     }
 

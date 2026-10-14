@@ -13,7 +13,9 @@ internal static class RemoteTransferCoordinatorRf3Wait
         {
             var current = await PublicReadAssertions.TransferAsync(await sdk.InspectQueueTransferAsync(seed.SourceRequest, token));
             if (current?.State == QueueTransferState.Delivered)
-            { return current; }
+            {
+                return current;
+            }
             await Task.Delay(DueRecurringRf3Protocol.PollInterval, TimeProvider.System, token);
         }
         throw new TimeoutException(RemoteTransferCoordinatorRf3Protocol.Missing);

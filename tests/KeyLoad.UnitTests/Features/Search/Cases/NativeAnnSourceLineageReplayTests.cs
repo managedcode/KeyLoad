@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 using TUnit.Assertions.Enums;
 
@@ -30,7 +30,10 @@ internal sealed class NativeAnnSourceLineageReplayTests
                     AnnProjectionPinTestSupport.Principal), NativeAnnLineageReplayOracle.Stage.Initial);
                 await actual.Owner.AbortAsync(actual.SessionId);
                 NativeAnnLineageTestData.ChangeSource(database);
-                request = request with { Mode = AnnMaintenanceMode.Restore };
+                request = request with
+                {
+                    Mode = AnnMaintenanceMode.Restore
+                };
                 var hidden = await CompleteAsync(database, actual, request);
                 await Assert.That(hidden.Count).IsEqualTo(HiddenCount);
                 var seed = AnnSeedTestSupport.Capture(database, AnnProjectionPinTestSupport.Principal);
@@ -49,8 +52,8 @@ internal sealed class NativeAnnSourceLineageReplayTests
                 publication = healthy;
             }, failures);
         }
-        catch (Exception cleanup) when (KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
-        catch (Exception cleanup) when (!KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
+        catch (Exception cleanup) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
+        catch (Exception cleanup) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
         ServerFailureObserver.ThrowIfAny(failures);
         await NativeAnnLineageColdContinuation.RunAsync(database, request, publication
             ?? throw new InvalidOperationException("The native lineage publication did not complete."));

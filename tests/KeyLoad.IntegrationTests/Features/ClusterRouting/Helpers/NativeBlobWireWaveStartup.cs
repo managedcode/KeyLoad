@@ -9,7 +9,9 @@ internal static class NativeBlobWireWaveStartup
     {
         var wave = new TwoRf3MembershipWave(selection, register: true, remote: true, query: true,
             probe: true, protectedDocument: true)
-        { nativeBlobWireProbeSelected = true };
+        {
+            nativeBlobWireProbeSelected = true
+        };
         return TwoRf3MembershipWaveStartup.StartOwnedAsync(wave, token, observe);
     }
 }

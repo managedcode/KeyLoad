@@ -1,6 +1,6 @@
 #pragma warning disable ORLEANSEXP005
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.Options;
 using Orleans.DurableJobs;

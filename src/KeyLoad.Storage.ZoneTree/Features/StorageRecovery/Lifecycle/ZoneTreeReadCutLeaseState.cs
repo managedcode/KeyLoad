@@ -92,7 +92,9 @@ internal sealed class ZoneTreeReadCutLeaseState
         lock (sync)
         {
             if (traversing || !captureFinished.Task.IsCompleted)
-            { throw new InvalidOperationException(ConcurrentTraversalMessage); }
+            {
+                throw new InvalidOperationException(ConcurrentTraversalMessage);
+            }
         }
     }
 

@@ -54,9 +54,13 @@ internal static class ProjectionEmptyTailFlow
                 () => VerifyAsync(database.CreateConfiguredDatabase(cold), cold, state, token), failures);
         }
         catch (Exception error) when (global::ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         catch (Exception error) when (global::ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null)
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }
 }

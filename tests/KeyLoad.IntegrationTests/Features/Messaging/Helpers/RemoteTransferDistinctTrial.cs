@@ -46,12 +46,18 @@ internal static class RemoteTransferDistinctTrial
             await RemoteTransferDistinctStages.ExecuteAsync(wave, setup, parent, token);
         }, failures);
         if (parent is { } calls)
-        { await ServerFailureObserver.ObserveAsync(() => calls.DisposeAsync().AsTask(), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => calls.DisposeAsync().AsTask(), failures);
+        }
         var beforeWaveCleanup = failures.Count;
         if (wave is { } resources)
-        { await ServerFailureObserver.ObserveAsync(() => resources.DisposeAsync().AsTask(), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => resources.DisposeAsync().AsTask(), failures);
+        }
         var waveCleanupSucceeded = wave is not null && failures.Count == beforeWaveCleanup;
         if (localImage is { } ownedImage)
-        { await ServerFailureObserver.ObserveAsync(() => ownedImage.DisposeAsync(removeImage: waveCleanupSucceeded).AsTask(), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => ownedImage.DisposeAsync(removeImage: waveCleanupSucceeded).AsTask(), failures);
+        }
     }
 }

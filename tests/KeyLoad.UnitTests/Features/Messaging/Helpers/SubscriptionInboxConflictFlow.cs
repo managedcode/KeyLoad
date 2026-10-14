@@ -12,7 +12,10 @@ internal static class SubscriptionInboxConflictFlow
         using var fixture = new TestDatabase();
         fixture.Configure("topic", ResourceKind.Topic);
         fixture.Configure("orders", ResourceKind.Collection);
-        var group = SubscriptionTestActions.Configure(fixture, policy: new() { MaxWindow = 3 });
+        var group = SubscriptionTestActions.Configure(fixture, policy: new()
+        {
+            MaxWindow = 3
+        });
         var producedAt = QueueWholeFlowStorage.Clock(fixture.Store).AddSeconds(1);
         var publish = new CommandRequest(Guid.NewGuid(), group.Source.Partition,
             [new PublishTopic("topic", [new("event1", "Created", "{\"n\":1}"),
@@ -42,10 +45,16 @@ internal static class SubscriptionInboxConflictFlow
         await SubscriptionInboxConflictAssertions.ReplayAsync(fixture.Database, fixture.Store, group, history[0]);
         var seek = new SeekSubscriptionRequest(Guid.NewGuid(), group, 1, SubscriptionStart.FromBeginning);
         Add(fixture.Database, fixture.Store, group, Create(OperationKind.SeekSubscription, seek, seek.CommandId, time.AddSeconds(2)), history);
-        await SubscriptionParkedRecoveryAssertions.StatusAsync(fixture.Database, group, new() { MaxWindow = 3 }, 2, 0, 0, 3, true, null);
+        await SubscriptionParkedRecoveryAssertions.StatusAsync(fixture.Database, group, new()
+        {
+            MaxWindow = 3
+        }, 2, 0, 0, 3, true, null);
         var resume = new SetSubscriptionPausedRequest(Guid.NewGuid(), group, 2, false);
         Add(fixture.Database, fixture.Store, group, Create(OperationKind.SetSubscriptionPaused, resume, resume.CommandId, time.AddSeconds(2)), history);
-        await SubscriptionParkedRecoveryAssertions.StatusAsync(fixture.Database, group, new() { MaxWindow = 3 }, 2, 0, 0, 3, false, null);
+        await SubscriptionParkedRecoveryAssertions.StatusAsync(fixture.Database, group, new()
+        {
+            MaxWindow = 3
+        }, 2, 0, 0, 3, false, null);
         var current = new ReceiveSubscriptionRequest(Guid.NewGuid(), group, MaxEvents: 3);
         var currentOperation = Create(OperationKind.ReceiveSubscription, current, current.RequestId, time.AddSeconds(3));
         var currentResult = fixture.Database.Apply(currentOperation);
@@ -79,12 +88,18 @@ internal static class SubscriptionInboxConflictFlow
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, cut, position, identity);
         await SubscriptionInboxConflictAssertions.PreservedAsync(db, cold, group, inbox, source);
         foreach (var entry in history.Skip(1))
-        { await SubscriptionInboxConflictAssertions.ReplayAsync(db, cold, group, entry); }
+        {
+            await SubscriptionInboxConflictAssertions.ReplayAsync(db, cold, group, entry);
+        }
         await SubscriptionInboxConflictAssertions.FencedOriginalProcessingAsync(db, cold, group, history[0]);
         await SubscriptionParkedRecoveryAssertions.OldReceiveAsync(db, cold, group, claims[0].Operation, claims[0].Result, claims[0].Saved);
         await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(db.Apply(claims[1].Operation), claims[1].Result);
         var deliveries = claims[1].Result.Get<ReceiveSubscriptionResult>().Deliveries;
-        var repair = original with { CommandId = Guid.NewGuid(), Token = deliveries[0].Token };
+        var repair = original with
+        {
+            CommandId = Guid.NewGuid(),
+            Token = deliveries[0].Token
+        };
         var repairedOperation = Create(OperationKind.SubscriptionProcessing, repair, repair.CommandId,
             QueueWholeFlowStorage.Clock(cold).AddSeconds(1));
         var repaired = db.Apply(repairedOperation);
@@ -98,7 +113,10 @@ internal static class SubscriptionInboxConflictFlow
             var result = db.Apply(operation);
             await SubscriptionCheckpointAuthorityAssertions.ReceiptAsync(result, ack, deliveries[index].Event.Position);
             history.Add((operation, result, SubscriptionProcessingAtomicAssertions.OutcomeBytes(cold, group, operation.Id)));
-            await SubscriptionParkedRecoveryAssertions.StatusAsync(db, group, new() { MaxWindow = 3 }, 2, index == 2 ? 1 : 3, 3, 3, false, null);
+            await SubscriptionParkedRecoveryAssertions.StatusAsync(db, group, new()
+            {
+                MaxWindow = 3
+            }, 2, index == 2 ? 1 : 3, 3, 3, false, null);
         }
         await SubscriptionParkedRecoveryAssertions.NoWindowAsync(cold, group);
         var current = JsonSerializer.Deserialize<ReceiveSubscriptionRequest>(claims[1].Operation.PayloadJson, JsonDefaults.Options)
@@ -122,11 +140,16 @@ internal static class SubscriptionInboxConflictFlow
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, cut, position, identity);
         await SubscriptionInboxConflictAssertions.PreservedAsync(db, cold, group, inbox, source);
         foreach (var entry in history.Skip(1))
-        { await SubscriptionInboxConflictAssertions.ReplayAsync(db, cold, group, entry); }
+        {
+            await SubscriptionInboxConflictAssertions.ReplayAsync(db, cold, group, entry);
+        }
         await SubscriptionInboxConflictAssertions.FencedOriginalProcessingAsync(db, cold, group, history[0]);
         await SubscriptionParkedRecoveryAssertions.OldReceiveAsync(db, cold, group, claims[0].Operation, claims[0].Result, claims[0].Saved);
         await SubscriptionCheckpointAuthorityAssertions.SettledClaimAsync(db, cold, current, claims[1].Result, token);
-        await SubscriptionParkedRecoveryAssertions.StatusAsync(db, group, new() { MaxWindow = 3 }, 2, 3, 3, 3, false, null);
+        await SubscriptionParkedRecoveryAssertions.StatusAsync(db, group, new()
+        {
+            MaxWindow = 3
+        }, 2, 3, 3, 3, false, null);
         await SubscriptionParkedRecoveryAssertions.NoWindowAsync(cold, group);
         await HealthyAsync(db, cold, group, token);
         await SubscriptionInboxConflictAssertions.PreservedDocumentsAndInboxAsync(db, cold, group, inbox);
@@ -152,7 +175,10 @@ internal static class SubscriptionInboxConflictFlow
         var ackOperation = Create(OperationKind.SubscriptionDelivery, ack, ack.CommandId, time.AddSeconds(1));
         var receipt = db.Apply(ackOperation);
         await SubscriptionCheckpointAuthorityAssertions.ReceiptAsync(receipt, ack, 4);
-        await SubscriptionParkedRecoveryAssertions.StatusAsync(db, group, new() { MaxWindow = 3 }, 2, 4, 4, 4, false, null);
+        await SubscriptionParkedRecoveryAssertions.StatusAsync(db, group, new()
+        {
+            MaxWindow = 3
+        }, 2, 4, 4, 4, false, null);
         await SubscriptionParkedRecoveryAssertions.NoWindowAsync(store, group);
         await SubscriptionCheckpointAuthorityAssertions.SettledClaimAsync(db, store, request, original, token);
         await SubscriptionCheckpointAuthorityAssertions.ReplayAsync(db, store, ack, receipt, token);

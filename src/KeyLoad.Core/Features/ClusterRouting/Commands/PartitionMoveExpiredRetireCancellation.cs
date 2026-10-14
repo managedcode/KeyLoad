@@ -17,13 +17,19 @@ public sealed partial class DatabaseEngine
         movementCheckpointVerifier.RequireReceiverAdministrator(this, principalId, work);
         if (incoming.ActualReceiverPrincipalId is not null
             || incoming.ActualReceiverPolicyEpoch != PartitionMoveProtocol.EmptyCount)
-        { throw Errors.Fail(ErrorCode.PermissionDenied, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, PartitionMoveProtocol.MissingAuthority);
+        }
         var ownedBytes = NativeSerialization.Serialize(incoming);
         RequireNativeBudget(ownedBytes.Length);
         var owned = NativeSerialization.Deserialize<PartitionMoveRetireCancellationBody>(ownedBytes);
         var principal = Store.Read(view => RequireMoveDispatchPrincipal(work.CreateView(view), principalId,
             EvaluationClock.GetUtcNow()));
-        owned = owned with { ActualReceiverPrincipalId = principal.Id, ActualReceiverPolicyEpoch = principal.PolicyEpoch };
+        owned = owned with
+        {
+            ActualReceiverPrincipalId = principal.Id,
+            ActualReceiverPolicyEpoch = principal.PolicyEpoch
+        };
         Store.Read(view =>
         {
             RequireMoveRetireCancellationScope(work.CreateView(view), owned, principal.Id,
@@ -34,7 +40,9 @@ public sealed partial class DatabaseEngine
         RequireNativeBudget(payload.Length);
         var verified = movementCheckpointVerifier.VerifyRetireCancellation(this, principal.Id, payload, work);
         if (verified != Convert.ToHexStringLower(SHA256.HashData(payload)))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMoveProtocol.MissingAuthority);
+        }
         var original = owned.OriginalEnvelope;
         var phase = new PartitionMovePhaseCommand(original.Version, original.MoveId, original.Partition,
             original.ControlOwner, original.SourcePlacement, original.DestinationOwner, original.ControlIntentDigest,
@@ -55,16 +63,22 @@ public sealed partial class DatabaseEngine
             || phase.Partition != original.Partition || phase.PageOrdinal != original.PageOrdinal
             || phase.ControlIntentDigest != original.ControlIntentDigest || phase.GrantId is not null
             || phase.Resources.IsDefault || !phase.Resources.IsEmpty)
-        { throw Errors.Fail(ErrorCode.PermissionDenied, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, PartitionMoveProtocol.MissingAuthority);
+        }
         RequireMoveRetireCancellationScope(transaction, body, principal.Id, principal.PolicyEpoch, operation.EvaluatedAt);
         var previous = PartitionMoveRetireCancellationStorage.Read(transaction, original.Partition,
             original.MoveId, body.OriginalPhaseCommandId, Limits.MaxBatchBytes);
         if (previous is not null)
-        { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict);
+        }
         var outcome = CommandOutcomeKeyResolver.Select(transaction, principal.Id, body.OriginalPhaseCommandId,
             new CommandOutcomePartitionScope(CommandOutcomeScopeKind.Partition, original.Partition)).Outcome;
         if (outcome is not null)
-        { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict);
+        }
         var originalPhase = new PartitionMovePhaseCommand(original.Version, original.MoveId, original.Partition,
             original.ControlOwner, original.SourcePlacement, original.DestinationOwner, original.ControlIntentDigest,
             original.Stage, original.PageOrdinal, original.Body, original.Grant!.GrantId, original.Grant.Resources);
@@ -77,7 +91,9 @@ public sealed partial class DatabaseEngine
             : retained.Stage != PartitionMovePeerStage.Retire || retained.Role != PartitionMoveCleanupRole.Source
                 || retained.ControlIntentDigest != original.ControlIntentDigest || retained.Completion is not null
                 || retained.NextFamily != cleanup.FamilyOrdinal || retained.NextBatch != original.PageOrdinal)
-        { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict);
+        }
         var receipt = MoveJournalReceipt(transaction, operation.Id, position, phase.ControlIntentDigest);
         var cancellation = new PartitionMoveExpiredRetireCancellation(PartitionMoveProtocol.Version,
             body.OriginalPhaseCommandId, PartitionMoveOriginalDispatchIdentity.Digest(body.OriginalPhaseCommandId, original),

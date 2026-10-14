@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
 using Microsoft.Extensions.DependencyInjection;
@@ -71,7 +71,9 @@ internal static class NativeMembershipAddressAdmissionFlow
         }).ToArray();
         var joined = Task.WhenAll(calls);
         try
-        { await joined.ConfigureAwait(false); }
+        {
+            await joined.ConfigureAwait(false);
+        }
         catch (Exception primary) { throw joined.Exception ?? new AggregateException(primary); }
         await Assert.That(calls.Length).IsEqualTo(ConcurrentCalls);
         await Assert.That(JsonDefaults.Serialize(before).AsSpan().SequenceEqual(JsonDefaults.Serialize(membership.ReadActive()))).IsTrue();

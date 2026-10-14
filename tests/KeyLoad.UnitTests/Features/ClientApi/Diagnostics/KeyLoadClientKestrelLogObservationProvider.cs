@@ -32,7 +32,9 @@ internal sealed class KeyLoadClientKestrelLogObservationProvider(KeyLoadClientKe
             Exception? exception, Func<TState, Exception?, string> formatter)
         {
             if (IsEnabled(logLevel))
-            { observation.RecordNativeServerEvent(category, eventId.Id, logLevel.ToString()); }
+            {
+                observation.RecordNativeServerEvent(category, eventId.Id, logLevel.ToString());
+            }
         }
     }
 }

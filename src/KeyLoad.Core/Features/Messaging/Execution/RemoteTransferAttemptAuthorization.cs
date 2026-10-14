@@ -10,7 +10,9 @@ public sealed partial class DatabaseEngine
     {
         ValidateTransferSource(request.SourceQueue, request.TransferId, partition);
         if (request.ExpectedGeneration < RemoteTransferAttemptProtocol.FirstGeneration || string.IsNullOrEmpty(request.FailureWitness))
-        { throw Errors.Fail(ErrorCode.Validation, RemoteTransferAttemptProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, RemoteTransferAttemptProtocol.Invalid);
+        }
         RequireTransferAdministrator(principal);
         var resource = Resource(view, partition, request.SourceQueue.Queue, ResourceKind.WorkQueue);
         RequireTransferInspector(principal, request.SourceQueue, resource);
@@ -26,6 +28,8 @@ public sealed partial class DatabaseEngine
         ValidateIntentRecord(view, record, request.SourceQueue, request.TransferId);
         if (record.PrincipalId != principal.Id || record.Attempts is not { } state
             || !state.History.Any(item => item.Generation == request.ExpectedGeneration && item.WitnessToken == request.FailureWitness))
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, RemoteTransferAttemptProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, RemoteTransferAttemptProtocol.Invalid);
+        }
     }
 }

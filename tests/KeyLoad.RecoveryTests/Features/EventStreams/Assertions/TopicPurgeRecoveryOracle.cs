@@ -24,14 +24,18 @@ internal static class TopicPurgeRecoveryOracle
             var recovered = OutcomeStoreOracle.Read(store, operation);
             await Assert.That(store.Position).IsEqualTo(seedPosition + (recovered is null ? 0 : 1));
             if (stage is CommitStage.JournalFlushed or CommitStage.MutationApplied or CommitStage.ApplyCompleted)
-            { await Assert.That(recovered).IsNotNull(); }
+            {
+                await Assert.That(recovered).IsNotNull();
+            }
             await TopicPurgeModelAssertions.VerifyAsync(database, await ReadAsync<ReplicatedOperation>(root,
                 TopicPurgeCrashContract.PublishOperationFile, cancellationToken), pinned || recovered is null ? 2 : 3, pinned, cursor);
             await Assert.That(TopicPurgeCrashScenario.ProtectedBytes(store)).IsEquivalentTo(protectedBytes, CollectionOrdering.Matching);
             var outcome = database.Apply(operation);
             await TopicPurgeReceiptAssertions.VerifyAsync(store, operation, outcome, seedPosition + 1, pinned);
             if (recovered is not null)
-            { await EventAppendReceiptAssertions.SameResultAsync(recovered, outcome); }
+            {
+                await EventAppendReceiptAssertions.SameResultAsync(recovered, outcome);
+            }
             await TopicPurgeModelAssertions.VerifyAsync(database, await ReadAsync<ReplicatedOperation>(root,
                 TopicPurgeCrashContract.PublishOperationFile, cancellationToken), pinned ? 2 : 3, pinned, cursor);
             await Assert.That(TopicPurgeCrashScenario.ProtectedBytes(store)).IsEquivalentTo(protectedBytes, CollectionOrdering.Matching);
@@ -58,7 +62,10 @@ internal static class TopicPurgeRecoveryOracle
         var bytes = EventAppendStateAssertions.Bytes(database.Store);
         var position = database.Store.Position;
         var changed = TopicPurgeCrashContract.Purge(operation.Id, 3);
-        var result = database.Apply(operation with { PayloadJson = JsonSerializer.Serialize(changed, JsonDefaults.Options) });
+        var result = database.Apply(operation with
+        {
+            PayloadJson = JsonSerializer.Serialize(changed, JsonDefaults.Options)
+        });
         await Assert.That(result.Error).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(result.SafeDetail).IsEqualTo("The command ID was already used with different content.");
         await Assert.That(database.Store.Position).IsEqualTo(position);

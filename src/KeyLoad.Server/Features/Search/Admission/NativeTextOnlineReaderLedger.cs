@@ -17,9 +17,13 @@ internal static class NativeTextOnlineReaderLedger
     {
         budget.Check();
         if (readers?.ContainsKey(reader) == true)
-        { throw NativeTextErrors.Ownership(); }
+        {
+            throw NativeTextErrors.Ownership();
+        }
         if (readers is not null)
-        { return readers; }
+        {
+            return readers;
+        }
         budget.ChargeBytes(checked(NativeTextIncrementalSourceProtocol.MapSlotBytes
             + (long)ReferenceLedgerNativeCapacity * (sizeof(int)
             + Unsafe.SizeOf<(int Hash, int Next, NativeTextSelectedProjectionLease Reader,

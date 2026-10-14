@@ -21,7 +21,10 @@ internal sealed class TransactionTests
         await Assert.That(db.Database.GetDocument("root", new(db.Partition, "orders", "o1"))!.Revision).IsEqualTo(1);
         await Assert.That(db.Database.ReadStream("root", new StreamRef(db.Partition, "events", "o1")).Events).HasSingleItem();
         await Assert.That(db.Database.InspectMessage("root", new(db.Partition, "jobs"), "m1")!.Metadata.State).IsEqualTo(MessageState.Ready);
-        await Assert.That(db.Submit(OperationKind.Batch, command with { Mutations = [new PutDocument("orders", "o2", "{}")] }, id: id).Error).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(db.Submit(OperationKind.Batch, command with
+        {
+            Mutations = [new PutDocument("orders", "o2", "{}")]
+        }, id: id).Error).IsEqualTo(ErrorCode.Conflict);
     }
     [Test]
     public async Task UniqueConflictRollsBackDocumentIndexEventAndEnqueue()

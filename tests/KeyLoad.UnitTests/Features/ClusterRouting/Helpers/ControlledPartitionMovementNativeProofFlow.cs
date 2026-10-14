@@ -9,7 +9,7 @@ internal static class ControlledPartitionMovementNativeProofFlow
     private const string InvalidInnerProof = "not-a-native-mac";
     private const string OuterSignatureLengthStage = "outer-signature-length";
     private const int FirstVoter = 0;
-    private static readonly string InvalidMac = new('0', KeyLoad.Orleans.ReplicaTransportProtocol.HashHexCharacters);
+    private static readonly string InvalidMac = new('0', KeyLoad.Clustering.ReplicaTransportProtocol.HashHexCharacters);
 
     internal static async Task RejectAsync(ControlledPartitionMovementNativeHost source,
         ControlledPartitionMovementNativeHost target, RegisteredPhysicalOwnerV1 receiver,
@@ -41,9 +41,13 @@ internal static class ControlledPartitionMovementNativeProofFlow
             {
                 KeyLoadException? refusal = null;
                 try
-                { await sender.ExchangeAsync(address, request, cancellationToken); }
+                {
+                    await sender.ExchangeAsync(address, request, cancellationToken);
+                }
                 catch (KeyLoadException error)
-                { refusal = error; }
+                {
+                    refusal = error;
+                }
                 await Assert.That(refusal).IsNotNull();
                 await Assert.That(refusal?.Code).IsEqualTo((ErrorCode?)ErrorCode.Unauthenticated);
                 await Assert.That(refusal?.Message).IsEqualTo(

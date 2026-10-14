@@ -13,10 +13,14 @@ public sealed partial class DatabaseEngine
         ArgumentNullException.ThrowIfNull(request);
         ValidatePartition(request.Partition);
         if (!principal.ClusterAdministrator)
-        { throw Errors.Fail(ErrorCode.PermissionDenied, ClusterAdministrationRequiredMessage); }
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, ClusterAdministrationRequiredMessage);
+        }
         if (request.MoveId == Guid.Empty || request.DestinationPhysicalShardId == Guid.Empty
             || request.Mode != PartitionMoveMode.Transfer || position <= PartitionMoveProtocol.EmptyCount)
-        { throw Errors.Fail(ErrorCode.Validation, PartitionMoveProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, PartitionMoveProtocol.Invalid);
+        }
         var directory = RequireMoveDirectory(transaction);
         var destination = RequireMoveDestination(directory, request);
         var history = PartitionMoveControlStorage.ReadHistory(transaction, request.Partition,
@@ -24,12 +28,16 @@ public sealed partial class DatabaseEngine
         if (history is not null)
         {
             if (history.ParentCheckpointRequired != parentRequired)
-            { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.MissingAuthority); }
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.MissingAuthority);
+            }
             return RequireExistingMove(history, principal, request, destination);
         }
         var placement = ResolveRegisteredPlacement(transaction, request.Partition, directory.ControlOwner);
         if (placement.Revision != request.ExpectedPlacementRevision)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
         var source = directory.Owners.SingleOrDefault(owner =>
             owner.Owner.PhysicalShardId == placement.PhysicalShardId)?.Owner
             ?? throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority);
@@ -38,10 +46,14 @@ public sealed partial class DatabaseEngine
             || destination.PhysicalShardId == source.PhysicalShardId
             || destination.Incarnation == source.Incarnation
             || destination.VoterIds.Intersect(source.VoterIds, StringComparer.Ordinal).Any())
-        { throw Errors.Fail(ErrorCode.Validation, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, PartitionMoveProtocol.OwnerMismatch);
+        }
         var active = PartitionMoveControlStorage.Read(transaction, request.Partition, Limits.MaxBatchBytes);
         if (active is not null && active.Phase is not (PartitionMovePhase.Retired or PartitionMovePhase.Aborted))
-        { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict);
+        }
         var record = new PartitionMoveControlRecord(PartitionMoveProtocol.Version, request.MoveId,
             request.Partition, principal.Id, principal.PolicyEpoch, placement, destination,
             PartitionMovePhase.Prepared, PartitionMoveProtocol.EmptyCount, position, null, null, null, parentRequired);
@@ -63,7 +75,9 @@ public sealed partial class DatabaseEngine
         PhysicalShardCatalogValidation.ValidateCatalog(catalog);
         if (directory.ControlOwner.Incarnation != Store.Identity.Incarnation
             || !PhysicalOwnerEntryValidation.SameOwner(directory.ControlOwner, catalog.DefaultShard))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
         return directory;
     }
 
@@ -79,9 +93,13 @@ public sealed partial class DatabaseEngine
         if (existing.MoveId != request.MoveId || existing.PrincipalId != principal.Id
             || existing.SourcePlacement.Revision != request.ExpectedPlacementRevision
             || !PhysicalOwnerEntryValidation.SameOwner(existing.DestinationOwner, destination))
-        { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict);
+        }
         if (existing.Phase == PartitionMovePhase.Aborted)
-        { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict);
+        }
         return existing;
     }
 }

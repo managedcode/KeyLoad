@@ -18,7 +18,9 @@ internal static class ReplicaPrefixGcOwners
             result = await operation(node).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
         if (node is { } original)
-        { ServerFailureObserver.Observe(original.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(original.Dispose, failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
         return result;
     }
@@ -26,7 +28,10 @@ internal static class ReplicaPrefixGcOwners
     internal static Task NodeAsync(string root, Guid incarnation, Func<ReplicaCrashNode, Task> operation,
         ReadOnlyMemory<byte>? canonicalSigningKey = null)
         => NodeAsync(root, incarnation, async node =>
-        { await operation(node).ConfigureAwait(false); return true; }, canonicalSigningKey);
+        {
+            await operation(node).ConfigureAwait(false);
+            return true;
+        }, canonicalSigningKey);
 
     internal static async Task MaterializerAsync(ReplicaCrashNode node, Func<ReplicaMaterializer, Task> operation)
     {
@@ -38,7 +43,9 @@ internal static class ReplicaPrefixGcOwners
             await operation(materializer).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
         if (materializer is { } original)
-        { await ServerFailureObserver.ObserveAsync(() => original.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => original.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

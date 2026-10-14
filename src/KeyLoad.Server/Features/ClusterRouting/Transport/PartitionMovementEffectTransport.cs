@@ -16,7 +16,13 @@ internal sealed class PartitionMovementEffectTransport(PartitionMovementTranspor
             readOnly: true, cancellationToken).ConfigureAwait(false);
         var reply = replyVerifier.ReadReplyMacPurpose(response, local, PartitionMovementTransportReplyVerifier.ReceiverReplyPurpose.Outcome);
         await replyVerifier.VerifyReplyAsync(index, receiver, query.Original with
-        { Envelope = query.Original.Envelope with { ExpiresAt = query.ExpiresAt, Nonce = query.Nonce } },
+        {
+            Envelope = query.Original.Envelope with
+            {
+                ExpiresAt = query.ExpiresAt,
+                Nonce = query.Nonce
+            }
+        },
             reply.Value, address, PartitionMoveOriginalDispatchIdentity.Digest(query.Original.CommandId, query.Original.Envelope),
             cancellationToken).ConfigureAwait(false);
         return reply;

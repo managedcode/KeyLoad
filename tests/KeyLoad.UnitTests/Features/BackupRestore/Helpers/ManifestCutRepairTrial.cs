@@ -66,7 +66,10 @@ internal static class ManifestCutRepairTrial
             token.ThrowIfCancellationRequested();
             var position = declaredCutMismatch ? checked(manifest.Position + 1L) : -1L;
             repairRequired = true;
-            await MetadataTestFiles.WriteManifestAsync(fixture.Backup, manifest with { Position = position });
+            await MetadataTestFiles.WriteManifestAsync(fixture.Backup, manifest with
+            {
+                Position = position
+            });
             var faulted = await NativeBackupJournalRepairAssertions.ArchiveAsync(fixture.Backup, token);
             await RefusedAsync(options, fixture, faulted, source, declaredCutMismatch, token);
             await RefusedAsync(options, fixture, faulted, source, declaredCutMismatch, token);

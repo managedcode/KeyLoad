@@ -19,19 +19,27 @@ internal static class ClusterBackupRosterCapture
             (key, value) =>
             {
                 if (value.Length > limits.MaxBatchBytes)
-                { throw Errors.Fail(ErrorCode.Corruption, InvalidRoster); }
+                {
+                    throw Errors.Fail(ErrorCode.Corruption, InvalidRoster);
+                }
                 var entry = NativeSerialization.Deserialize<AtomicPartitionCatalogEntryV1>(value);
                 if (entry is null || entry.Partition is null
                     || !key.SequenceEqual(AtomicPartitionRosterKeys.Partition(entry.Partition)))
-                { throw Errors.Fail(ErrorCode.Corruption, InvalidRoster); }
+                {
+                    throw Errors.Fail(ErrorCode.Corruption, InvalidRoster);
+                }
                 var bound = AtomicPartitionRosterOriginValidation.ReadBound(view, entry, value.ToArray(), incarnation);
                 AtomicPartitionRosterEntryValidation.Validate(entry, entry.Partition, position, Math.Max(applied, bound));
                 if (!result.TryAdd(entry.Partition, new(entry, Convert.ToHexString(SHA256.HashData(value)))))
-                { throw Errors.Fail(ErrorCode.Corruption, InvalidRoster); }
+                {
+                    throw Errors.Fail(ErrorCode.Corruption, InvalidRoster);
+                }
                 return true;
             });
         if (range.HasMore || range.StoppedByVisitor)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidRoster); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidRoster);
+        }
         return result;
     }
 }

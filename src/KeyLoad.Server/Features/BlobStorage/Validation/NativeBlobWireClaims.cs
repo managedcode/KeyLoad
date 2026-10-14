@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server.Features.ClusterRouting;
 using Microsoft.Extensions.Options;
 
@@ -28,14 +28,18 @@ internal sealed class NativeBlobWireClaims(IOptions<OrleansMembershipOptions> me
             || !PhysicalGroupAddress.CanonicalAddress(claim.CallerSiloAddress, membership)
             || !Guid.TryParseExact(claim.Nonce, CompactNonceFormat, out var nonce) || nonce == Guid.Empty
             || claim.ExpiresAt.Offset != TimeSpan.Zero || !NativeBlobWireShape.IsDigest(claim.OriginalCallDigest))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         shape.Text(claim.CallerVoter);
     }
 
     internal static string Digest(RemoteControlledBlobCall call)
     {
         if (NativeSerialization.Measure(call) > RequestCqrsProbeProtocol.MaximumRecordBytes)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         return NativeBlobWireCodec.Digest(NativeSerialization.Serialize(call));
     }
 
@@ -45,7 +49,9 @@ internal sealed class NativeBlobWireClaims(IOptions<OrleansMembershipOptions> me
             || claim.CallerSiloAddress != call.CallerSiloAddress || claim.RequestId != call.RequestId
             || claim.QueryId != call.Request.Frame.QueryId || claim.Nonce != call.Nonce
             || claim.ExpiresAt != call.Request.Frame.ExpiresAt)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
     }
     private static InvalidOperationException Invalid() => new(NativeBlobWireProbeProtocol.InvalidEvidence);
 }

@@ -23,7 +23,12 @@ internal static class MongoCorpusSeed
     }
 
     private static BsonDocument CreateEdge(BenchmarkEdge edge)
-        => new() { [MongoSchema.IdField] = edge.Id, [MongoSchema.FromField] = edge.From, [MongoSchema.ToField] = edge.To };
+        => new()
+        {
+            [MongoSchema.IdField] = edge.Id,
+            [MongoSchema.FromField] = edge.From,
+            [MongoSchema.ToField] = edge.To
+        };
 
     private static async Task InsertBatchesAsync(IEnumerable<BsonDocument> values,
         IMongoCollection<BsonDocument> collection, int batchSize, CancellationToken cancellationToken)

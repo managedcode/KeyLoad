@@ -16,7 +16,10 @@ internal sealed class McpGatewayReplyTests
     [Test]
     public async Task MetadataSuccessHasNullExecutionIdentityAndOwnerLifetime()
     {
-        var canonical = JsonSerializer.SerializeToUtf8Bytes(new { tools = Array.Empty<object>() });
+        var canonical = JsonSerializer.SerializeToUtf8Bytes(new
+        {
+            tools = Array.Empty<object>()
+        });
         using var expectedDocument = JsonDocument.Parse(canonical);
         var expected = expectedDocument.RootElement.Clone();
         using var owner = McpReplyOwner.Success(canonical, null, canonical.Length + McpFramingProtocol.EnvelopeAllowanceBytes, UnitMcpOptions.Execution());
@@ -33,11 +36,17 @@ internal sealed class McpGatewayReplyTests
         using var document = JsonDocument.Parse("{\"secret\":\"" + Marker + "\"}");
         var expected = new CallToolResult { IsError = true, StructuredContent = document.RootElement.Clone() };
         var gatewayResult = new McpGatewayInvokeResult(true, ToolName, "local", ToolName, expected.StructuredContent)
-        { McpResult = expected, Outcome = global::ManagedCode.MCPGateway.McpGatewayInvocationOutcome.ToolError };
+        {
+            McpResult = expected,
+            Outcome = global::ManagedCode.MCPGateway.McpGatewayInvocationOutcome.ToolError
+        };
         var actual = McpGatewayNativeResult.GetOriginal(gatewayResult);
         await Assert.That(ReferenceEquals(actual, expected)).IsTrue();
         await Assert.That(actual!.IsError).IsTrue();
-        await Assert.That(McpGatewayNativeResult.GetOriginal(gatewayResult with { IsSuccess = false })).IsNull();
+        await Assert.That(McpGatewayNativeResult.GetOriginal(gatewayResult with
+        {
+            IsSuccess = false
+        })).IsNull();
     }
 
     [Test]

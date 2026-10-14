@@ -22,7 +22,9 @@ internal sealed class NativeBlobWireProbeFixture
         Root = Path.Combine(Path.GetFullPath(dataRoot), "native-blob-wire-probes");
         SessionId = sessionId;
         if (OperatingSystem.IsWindows() || Directory.Exists(Root))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         Directory.CreateDirectory(Root, RequestCqrsProbeProtocol.PrivateDirectoryMode);
         var limits = Options.Create(new RequestProbeExecutionOptions());
         limits.Value.Validate();
@@ -44,16 +46,29 @@ internal sealed class NativeBlobWireProbeFixture
                 });
             global::KeyLoad.Server.ServerFailureObserver.Observe(() => publication.Flush(flushToDisk: true), failures);
         }
-        catch (Exception failure) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(failure))
-        { failures.Add(failure); }
-        catch (Exception failure) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(failure))
-        { failures.Add(failure); }
+        catch (Exception failure) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            failures.Add(failure);
+        }
+        catch (Exception failure) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            failures.Add(failure);
+        }
         global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    internal string Root { get; }
-    internal string SessionId { get; }
-    internal NativeBlobWireCodec Codec { get; }
+    internal string Root
+    {
+        get;
+    }
+    internal string SessionId
+    {
+        get;
+    }
+    internal NativeBlobWireCodec Codec
+    {
+        get;
+    }
     internal NativeBlobWireOwner Owner { get; private set; } = null!;
     internal NativeBlobWireArms Arms { get; private set; } = null!;
 
@@ -62,7 +77,9 @@ internal sealed class NativeBlobWireProbeFixture
     {
         token.ThrowIfCancellationRequested();
         if (stopped)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         var resources = parameters.ToArray();
         var physical = await ReadGuidAsync(resources, "membership-physical-b", token).ConfigureAwait(false);
         var incarnation = await ReadGuidAsync(resources, "membership-incarnation-b", token).ConfigureAwait(false);
@@ -74,7 +91,9 @@ internal sealed class NativeBlobWireProbeFixture
         if (ownerBytes is not null)
         {
             if (!ownerBytes.AsSpan().SequenceEqual(bytes))
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             RequireExact(NativeBlobWireProbeProtocol.OwnerFile, ownerBytes);
             return;
         }
@@ -88,13 +107,17 @@ internal sealed class NativeBlobWireProbeFixture
     {
         token.ThrowIfCancellationRequested();
         if (stopped || armsBytes is not null || ownerBytes is null || wave.queryControls?.SessionId != SessionId)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         await PhysicalOwnerRegistrationRf3Observation.WaitAsync(wave.Application, token).ConfigureAwait(false);
         var expected = await PhysicalOwnerDirectoryRf3Assertions.ExpectedAsync(wave.Application, wave.Profile, token).ConfigureAwait(false);
         var target = expected.Owners.Single(entry => entry.Owner.PhysicalShardId != expected.ControlOwner.PhysicalShardId).Owner;
         if (!NativeBlobWireShape.Same(Owner.SourceOwner, expected.ControlOwner)
             || !NativeBlobWireShape.Same(Owner.DestinationOwner, target) || seed.Request.DestinationPhysicalShardId != target.PhysicalShardId)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         var commands = seed.BlobWireSeedCommands ?? throw Invalid();
         Arms = NativeBlobWireArmsFactory.Create(Owner, NativeBlobWireCodec.Digest(ownerBytes), seed, commands, plan);
         shape.RequireArms(Owner, NativeBlobWireCodec.Digest(ownerBytes), Arms);
@@ -110,7 +133,9 @@ internal sealed class NativeBlobWireProbeFixture
     internal byte[] Read(string name)
     {
         if (ownerBytes is null || armsBytes is null || deleted)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         RequireExact(NativeBlobWireProbeProtocol.OwnerFile, ownerBytes);
         RequireExact(NativeBlobWireProbeProtocol.ArmsFile, armsBytes);
         return files.Read(name);
@@ -122,23 +147,41 @@ internal sealed class NativeBlobWireProbeFixture
     {
         stopped = true;
         if (!wave.applicationDisposed || !wave.nodeLocksReleased)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         wave.AssertAllNodeLocksReleased();
         if (deleted)
-        { return; }
+        {
+            return;
+        }
         if (ownerBytes is not null)
-        { RequireExact(NativeBlobWireProbeProtocol.OwnerFile, ownerBytes); }
+        {
+            RequireExact(NativeBlobWireProbeProtocol.OwnerFile, ownerBytes);
+        }
         if (armsBytes is not null)
-        { RequireExact(NativeBlobWireProbeProtocol.ArmsFile, armsBytes); }
+        {
+            RequireExact(NativeBlobWireProbeProtocol.ArmsFile, armsBytes);
+        }
         for (var slot = 0; slot < slots; slot++)
-        { if (files.Exists(NativeBlobWireNames.Slot(slot))) { throw Invalid(); } }
+        {
+            if (files.Exists(NativeBlobWireNames.Slot(slot)))
+            {
+                throw Invalid();
+            }
+        }
         files.WithPublication(() => { });
         Directory.Delete(Root, recursive: true);
         deleted = true;
     }
 
     private void RequireExact(string name, byte[] expected)
-    { if (!files.Read(name).AsSpan().SequenceEqual(expected)) { throw Invalid(); } }
+    {
+        if (!files.Read(name).AsSpan().SequenceEqual(expected))
+        {
+            throw Invalid();
+        }
+    }
     private static string[] Voters(int offset)
         => TwoRf3MembershipProtocol.Nodes.Skip(offset).Take(TwoRf3MembershipProtocol.MembersPerGroup)
             .Select(node => "http://" + node + ":8080").ToArray();

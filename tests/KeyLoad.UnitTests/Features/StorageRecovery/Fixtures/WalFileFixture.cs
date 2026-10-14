@@ -24,7 +24,10 @@ internal sealed class WalFileFixture : IDisposable
     private const string TreeDirectoryName = "tree";
     private const string AllFilesPattern = "*";
 
-    internal string DirectoryPath { get; } = Path.Combine(Path.GetTempPath(),
+    internal string DirectoryPath
+    {
+        get;
+    } = Path.Combine(Path.GetTempPath(),
         DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
     internal string JournalPath => Path.Combine(DirectoryPath, JournalFileName);
     internal string IdentityPath => Path.Combine(DirectoryPath, IdentityFileName);

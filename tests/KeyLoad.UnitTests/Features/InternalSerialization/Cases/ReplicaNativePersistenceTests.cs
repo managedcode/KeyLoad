@@ -75,7 +75,10 @@ internal sealed class ReplicaNativePersistenceTests
         using var files = new ReplicaNativeFiles();
         ImmutableArray<ReplicaEntry> entries = [new(1, 1, null), new(2, 1, null)];
         var bytes = checked((int)ReplicaProtocolCodec.MeasureEntries(entries));
-        var configuration = files.Configuration with { MaxAppendBytes = bytes };
+        var configuration = files.Configuration with
+        {
+            MaxAppendBytes = bytes
+        };
         using var store = files.Open();
         using var log = new DurableReplicaLog(store, UnitExecutionOptions.ReplicaConfiguration(configuration));
         log.SaveTermAndVote(1, null);
@@ -89,7 +92,10 @@ internal sealed class ReplicaNativePersistenceTests
             .IsEqualTo(ErrorCode.ResourceExhausted);
         using var rejectedFiles = new ReplicaNativeFiles();
         using var rejectedStore = rejectedFiles.Open();
-        using var rejected = new DurableReplicaLog(rejectedStore, UnitExecutionOptions.ReplicaConfiguration(rejectedFiles.Configuration with { MaxAppendBytes = bytes - 1 }));
+        using var rejected = new DurableReplicaLog(rejectedStore, UnitExecutionOptions.ReplicaConfiguration(rejectedFiles.Configuration with
+        {
+            MaxAppendBytes = bytes - 1
+        }));
         rejected.SaveTermAndVote(1, null);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => rejected.Append(entries)).Code)
             .IsEqualTo(ErrorCode.ResourceExhausted);
@@ -116,7 +122,8 @@ internal sealed class ReplicaNativePersistenceTests
         using (var store = files.Open())
         {
             using (var initialized = new DurableReplicaLog(store, UnitExecutionOptions.ReplicaConfiguration(files.Configuration)))
-            { }
+            {
+            }
             var identity = store.Identity;
             originalState = store.Read(view => view.ReadOwnedValue(stateKey))!;
             originalMembership = store.Read(view => view.ReadOwnedValue(membershipKey))!;
@@ -145,7 +152,10 @@ internal sealed class ReplicaNativePersistenceTests
     public async Task NativeBenchmarkAuthorityReopensAndRejectsDifferentMembership()
     {
         using var files = new ReplicaNativeFiles();
-        var configuration = files.Configuration with { BenchmarkTopology = true };
+        var configuration = files.Configuration with
+        {
+            BenchmarkTopology = true
+        };
         using (var store = files.Open())
         using (var log = new DurableReplicaLog(store, UnitExecutionOptions.ReplicaConfiguration(configuration)))
         {
@@ -156,7 +166,10 @@ internal sealed class ReplicaNativePersistenceTests
         {
             await Assert.That(accepted.State.Term).IsEqualTo(1);
         }
-        var other = configuration with { VoterIds = [configuration.VoterIds[0], configuration.VoterIds[2], configuration.VoterIds[1]] };
+        var other = configuration with
+        {
+            VoterIds = [configuration.VoterIds[0], configuration.VoterIds[2], configuration.VoterIds[1]]
+        };
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() =>
         {
             using var rejected = new DurableReplicaLog(reopened, UnitExecutionOptions.ReplicaConfiguration(other));
@@ -175,20 +188,31 @@ internal sealed class ReplicaNativeFiles : IDisposable
     private const int AppendBytes = 4_096;
     private const int SigningKeyBytes = 32;
     private readonly string directory = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
-    internal ReplicaConfiguration Configuration { get; }
-    internal ReadOnlyMemory<byte> SigningKey { get; }
+    internal ReplicaConfiguration Configuration
+    {
+        get;
+    }
+    internal ReadOnlyMemory<byte> SigningKey
+    {
+        get;
+    }
     internal string JournalPath => Path.Combine(Configuration.Directory, JournalFileName);
 
     internal ReplicaNativeFiles(Guid? incarnation = null, ReadOnlyMemory<byte>? signingKey = null)
     {
         Configuration = new(VoterA, [VoterA, VoterB, VoterC], Path.Combine(directory, ReplicaProtocol.ReplicaDirectory),
             incarnation ?? Guid.NewGuid())
-        { MaxAppendBytes = AppendBytes };
+        {
+            MaxAppendBytes = AppendBytes
+        };
         SigningKey = signingKey?.ToArray() ?? RandomNumberGenerator.GetBytes(SigningKeyBytes);
     }
 
     internal ZoneTreeStore Open() => new(new(Configuration.Directory) { Incarnation = Configuration.Incarnation, SigningKey = SigningKey }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
     internal ZoneTreeStore Open(string name) => new(new(Path.Combine(directory, name))
-    { Incarnation = Configuration.Incarnation, SigningKey = SigningKey }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+    {
+        Incarnation = Configuration.Incarnation,
+        SigningKey = SigningKey
+    }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
     public void Dispose() => Directory.Delete(directory, true);
 }

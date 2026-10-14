@@ -17,7 +17,9 @@ public sealed partial class DatabaseEngine
             var view = work.CreateView(raw);
             var administrator = Principal(view, administratorId, evaluatedAt);
             if (!administrator.ClusterAdministrator)
-            { throw Errors.Fail(ErrorCode.PermissionDenied, Bm25CorpusProtocol.Administrator); }
+            {
+                throw Errors.Fail(ErrorCode.PermissionDenied, Bm25CorpusProtocol.Administrator);
+            }
             work.ChargeBytes(NativeSerialization.Measure(phase));
             RequireBm25Subject(view, administrator, phase, evaluatedAt);
             work.ChargeBytes(NativeSerialization.Measure(phase));
@@ -33,7 +35,9 @@ public sealed partial class DatabaseEngine
         Bm25CorpusPublicationPhaseCommand phase, DateTimeOffset evaluatedAt)
     {
         if (!administrator.ClusterAdministrator)
-        { throw Errors.Fail(ErrorCode.PermissionDenied, Bm25CorpusProtocol.Administrator); }
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, Bm25CorpusProtocol.Administrator);
+        }
         Bm25CorpusShape.RequirePhase(phase, Limits);
         var current = phase.Current;
         var principal = Principal(view, current.PrincipalId, evaluatedAt);
@@ -42,7 +46,9 @@ public sealed partial class DatabaseEngine
         var resource = Resource(view, current.Partition, current.Collection, ResourceKind.Collection);
         Authorization.RequireFieldUse(principal, resource, current.Field);
         if (principal.PolicyEpoch != current.PolicyEpoch)
-        { throw Errors.Fail(ErrorCode.PermissionDenied, Bm25CorpusProtocol.Administrator); }
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, Bm25CorpusProtocol.Administrator);
+        }
         return principal;
     }
 

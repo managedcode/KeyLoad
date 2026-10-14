@@ -25,7 +25,10 @@ internal static class EventReferenceSelectFlow
                 await EventReferenceSelectAssertions.SamePageAsync(empty,
                     await SqlRf3Protocol.McpAsync<QueryPage>(callers.Mcp,
                         EventReferenceSelectProtocol.Operation(state.Partition, EventReferenceSelectProtocol.EmptyStreamSet), token));
-                await FailureAsync(callers, EventReferenceSelectProtocol.Operation(state.Partition) with { Parameters = null }, ErrorCode.Validation, token);
+                await FailureAsync(callers, EventReferenceSelectProtocol.Operation(state.Partition) with
+                {
+                    Parameters = null
+                }, ErrorCode.Validation, token);
                 await EventReferenceSelectAssertions.PageAsync(callers, state, masked, token);
             }
         }, token);

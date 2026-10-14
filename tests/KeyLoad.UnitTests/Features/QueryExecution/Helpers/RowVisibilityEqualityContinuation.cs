@@ -67,7 +67,9 @@ internal static class RowVisibilityEqualityContinuation
             var explain = engine.ExecuteAst(owner, new AstQueryRequest(request.Partition,
                 new SqlParser(request.Sql, UnitExecutionOptions.DatabaseLimits(db.Database.Limits),
                     UnitExecutionOptions.QueryExecution()).Parse() with
-                { Explain = true },
+                {
+                    Explain = true
+                },
                 request.Parameters, AllowFullScan: request.AllowFullScan));
             var plan = JsonSerializer.Serialize(new
             {

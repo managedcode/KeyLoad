@@ -1,3 +1,6 @@
 namespace KeyLoad.RecoveryTests.Features.BlobStorage;
 
-internal enum BlobExtraPartFault { ExtraRaw, ExtraManifest }
+internal enum BlobExtraPartFault
+{
+    ExtraRaw, ExtraManifest
+}

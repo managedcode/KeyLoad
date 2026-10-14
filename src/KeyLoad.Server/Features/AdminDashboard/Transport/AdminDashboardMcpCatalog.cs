@@ -1,5 +1,5 @@
 using System.Collections.Immutable;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.Server;
 
@@ -13,7 +13,10 @@ internal static class AdminDashboardMcpCatalog
     private const string QueueDescription = "Browse persisted queue counters and bounded lifecycle metadata as a persisted "
         + "administrator without receiving, sweeping, claiming or acknowledging messages; continue using nextAfterId.";
 
-    internal static ImmutableArray<McpOperationDescriptor> Entries { get; } =
+    internal static ImmutableArray<McpOperationDescriptor> Entries
+    {
+        get;
+    } =
     [
         McpOperationFactory.Read<AdminNodeSnapshot>(AdminDashboardProtocol.SnapshotTool,
             AdminDashboardProtocol.SnapshotPath, GrainReadKind.AdminDashboard),

@@ -12,7 +12,11 @@ internal static class TenantCapacityPlacementRf3PolicyRevision
         TenantCapacityPlacementRf3Provisioning.State state, TenantPlacementPlanResultV1 plan, CancellationToken token)
     {
         await Assert.That(plan.Plan.PolicyRevision).IsEqualTo(state.HealthyPolicy.Revision);
-        var disabled = state.HealthyPolicy with { Revision = checked(state.HealthyPolicy.Revision + 1), Enabled = false };
+        var disabled = state.HealthyPolicy with
+        {
+            Revision = checked(state.HealthyPolicy.Revision + 1),
+            Enabled = false
+        };
         await ConfigureAsync(seed, state.Control, disabled, token);
         await Assert.That(plan.Plan.ExpiresAt).IsGreaterThan(TimeProvider.System.GetUtcNow());
         var original = new Refused(Guid.NewGuid(),
@@ -20,14 +24,20 @@ internal static class TenantCapacityPlacementRf3PolicyRevision
         await TenantCapacityPlacementRf3PolicyRevisionAssertions.RefuseAsync(seed, original, token);
         var retained = await TenantCapacityPlacementRf3PolicyRevisionCold.RequireAsync(
             wave, seed, state, disabled, original, null, token);
-        var repaired = state.HealthyPolicy with { Revision = checked(disabled.Revision + 1) };
+        var repaired = state.HealthyPolicy with
+        {
+            Revision = checked(disabled.Revision + 1)
+        };
         await ConfigureAsync(seed, state.Control, repaired, token);
         await TenantCapacityPlacementRf3PolicyRevisionAssertions.RefuseAsync(seed, original, token);
         _ = await TenantCapacityPlacementRf3PolicyRevisionCold.RequireAsync(
             wave, seed, state, repaired, original, retained, token);
         var query = new TenantPlacementPlanRequest(seed.Partition.TenantId, seed.Partition.DatabaseId, [seed.Partition], state.Control);
         var official = (await McpCallerAssertions.SuccessAsync<TenantPlacementPlanResultV1>(
-            await seed.Official.CallAsync(TenantPlacementPublicProtocol.PlanTool, new { request = query }, token))).Value;
+            await seed.Official.CallAsync(TenantPlacementPublicProtocol.PlanTool, new
+            {
+                request = query
+            }, token))).Value;
         var fresh = await McpCallerAssertions.SdkSuccessAsync(await seed.Source.PlanTenantPlacementAsync(query, token));
         foreach (var current in new[] { official, fresh })
         {
@@ -49,6 +59,10 @@ internal static class TenantCapacityPlacementRf3PolicyRevision
             await seed.Source.ConfigurePlacementPolicyAsync(id, request, token)));
         await SqlRf3Protocol.EqualAsync(policy, (await McpCallerAssertions.SuccessAsync<TenantPlacementPolicyV1>(
             await seed.Official.CallAsync(TenantPlacementPublicProtocol.ConfigureTool,
-                new { commandId = id, request }, token))).Value);
+                new
+                {
+                    commandId = id,
+                    request
+                }, token))).Value);
     }
 }

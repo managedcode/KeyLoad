@@ -18,7 +18,10 @@ internal static class PackedAnnConstructionValueTraversal
         var before = GC.GetAllocatedBytesForCurrentThread();
         var traversed = Run(state, similarity, buffers, budget, 1);
         var allocated = GC.GetAllocatedBytesForCurrentThread() - before;
-        return traversed with { AllocatedBytes = allocated };
+        return traversed with
+        {
+            AllocatedBytes = allocated
+        };
     }
 
     private static PackedAnnConstructionValueObservation Run(PackedAnnState state,

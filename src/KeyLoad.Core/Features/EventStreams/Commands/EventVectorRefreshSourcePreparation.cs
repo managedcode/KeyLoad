@@ -19,7 +19,10 @@ internal static class EventVectorRefreshSourcePreparation
                 prepared.Request, admission);
             using var decoded = new EventVectorFirstOpenDecodedOwner(witness);
             var sourceOwner = EventVectorOriginalEntryOwner.Require(witness, target, admission, work);
-            var next = prepared.Map with { CoverageGeneration = checked(prepared.Map.CoverageGeneration + CoverageStep) };
+            var next = prepared.Map with
+            {
+                CoverageGeneration = checked(prepared.Map.CoverageGeneration + CoverageStep)
+            };
             var mutation = EventVectorOpenPinMutation.Create(next, target, sourceOwner, prepared.ControlOwner, expiry);
             return Encode(prepared.Map, ordinal, target, mutation, admission, work);
         }
@@ -30,7 +33,9 @@ internal static class EventVectorRefreshSourcePreparation
         {
             advance = EventVectorSettledSourceMutation.Create(prepared.Map, prior, target, settled,
                 EventVectorSourcePhaseRole.Advance, expiry, target.PolicyEpoch, admission) with
-            { CoverageGeneration = checked(prepared.Map.CoverageGeneration + CoverageStep) };
+            {
+                CoverageGeneration = checked(prepared.Map.CoverageGeneration + CoverageStep)
+            };
             return Encode(prepared.Map, ordinal, prior, advance, admission, work);
         }
         finally { Clear(settled, advance); }
@@ -41,7 +46,9 @@ internal static class EventVectorRefreshSourcePreparation
     {
         var prior = prepared.Original.Entries[ordinal];
         if (prepared.Candidates.Any(entry => entry.Source == prior.Source))
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
         var settled = ReadPin(prepared, ordinal, admission, work);
         EventVectorSourceMutation? release = null;
         try
@@ -69,7 +76,10 @@ internal static class EventVectorRefreshSourcePreparation
         work.Check();
         work.ChargeBytes(NativeSerialization.Measure(mutation));
         work.ChargeBytes(System.Security.Cryptography.SHA256.HashSizeInBytes);
-        return EventVectorPhasePreparation.Prepare(map with { State = EventVectorMapState.Refreshing },
+        return EventVectorPhasePreparation.Prepare(map with
+        {
+            State = EventVectorMapState.Refreshing
+        },
             ordinal, original, mutation, admission);
     }
 
@@ -88,9 +98,13 @@ internal static class EventVectorRefreshSourcePreparation
             try
             {
                 if (!PhysicalOwnerEntryValidation.SameOwner(capture.SourceOwner, settled.SourceOwner))
-                { continue; }
+                {
+                    continue;
+                }
                 if (epoch is not null || capture.PrincipalId != prepared.Map.PrincipalId || capture.PolicyEpoch <= EmptyPolicyEpoch)
-                { throw Errors.Fail(ErrorCode.PermissionDenied, Invalid); }
+                {
+                    throw Errors.Fail(ErrorCode.PermissionDenied, Invalid);
+                }
                 epoch = capture.PolicyEpoch;
             }
             finally { EventVectorCoverageCaptureBuffers.Clear(capture); }
@@ -105,6 +119,8 @@ internal static class EventVectorRefreshSourcePreparation
         EventVectorSettlementTargetEncoding.Clear(settled.SourceObservationWitness);
         EventVectorSettlementTargetEncoding.Clear(settled.SourceOriginalOutcomeDigest);
         if (mutation is not null)
-        { EventVectorSettlementTargetEncoding.Clear(mutation.OriginalPinNativeBody); }
+        {
+            EventVectorSettlementTargetEncoding.Clear(mutation.OriginalPinNativeBody);
+        }
     }
 }

@@ -19,7 +19,9 @@ internal static class ClusterRestorePlanBuilder
         TimeProvider clock, ClusterRestorePlan? previous)
     {
         if (options.OperationId == Guid.Empty)
-        { throw Errors.Fail(ErrorCode.Validation, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, Invalid);
+        }
         var cuts = original.Sources.Select(source => source.OriginalCut).ToImmutableArray();
         var mappings = options.Mappings.Select(mapping => mapping.ToNative()).ToImmutableArray();
         ClusterRestoreMappingValidation.Require(cuts.First().CaptureId, cuts, mappings);
@@ -46,7 +48,9 @@ internal static class ClusterRestorePlanBuilder
             var key = signing[mapping.Source.PhysicalShardId];
             var fingerprint = Convert.ToHexStringLower(SHA256.HashData(key));
             if (key.Length != SigningKeyBytes || original.SourceSignerFingerprints.Contains(fingerprint, StringComparer.Ordinal))
-            { throw Errors.Fail(ErrorCode.Validation, Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Validation, Invalid);
+            }
             foreach (var voter in mapping.Target.VoterIds)
             {
                 var node = options.Nodes.Single(value => value.SourceOwnerId == mapping.Source.PhysicalShardId
@@ -65,7 +69,9 @@ internal static class ClusterRestorePlanBuilder
     {
         if (plan.Slots.IsDefault || ordinal >= plan.Slots.Length || plan.Slots[ordinal].SlotOrdinal != ordinal
             || plan.Slots[ordinal].TargetNodeId == Guid.Empty)
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
         return plan.Slots[ordinal].TargetNodeId;
     }
 }

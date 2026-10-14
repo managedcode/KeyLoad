@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Features.InternalSerialization;
-using KeyLoad.Orleans;
 using Microsoft.Extensions.Options;
 using Orleans.Serialization.Buffers;
 using Orleans.Serialization.Codecs;
@@ -25,7 +25,9 @@ internal sealed class McpNativeAuthenticationReader(bool enforceMcpBounds, IOpti
         var reference = ReferenceCodec.CreateRecordPlaceholder(reader.Session);
         var version = McpAuthenticationNativeFields.Scalar<uint, TInput>(ref reader, FirstField);
         if (version != NativePayloadVersion.Current)
-        { throw Errors.Fail(ErrorCode.FormatUnsupported, NativePayloadVersion.UnsupportedVersion); }
+        {
+            throw Errors.Fail(ErrorCode.FormatUnsupported, NativePayloadVersion.UnsupportedVersion);
+        }
         var field = McpAuthenticationNativeFields.Field(ref reader, NativePayloadValueDelta, typeof(GrainValue));
         McpAuthenticationNativeFields.Require(field.FieldType == typeof(GrainValue));
         var shape = Grain(ref reader, field);
@@ -86,7 +88,9 @@ internal sealed class McpNativeAuthenticationReader(bool enforceMcpBounds, IOpti
     {
         var field = McpAuthenticationNativeFields.Field(ref reader, NextField, typeof(DateTimeOffset));
         if (field.IsReference)
-        { _ = reader.Session.CodecProvider.GetCodec<DateTimeOffset?>().ReadValue(ref reader, field); }
+        {
+            _ = reader.Session.CodecProvider.GetCodec<DateTimeOffset?>().ReadValue(ref reader, field);
+        }
         else
         {
             // The native DateTimeOffset codec permits unknown subfields. Admission requires its

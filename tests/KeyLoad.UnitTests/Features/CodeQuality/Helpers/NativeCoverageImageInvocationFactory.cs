@@ -76,7 +76,9 @@ internal static partial class NativeCoverageImageInvocationFactory
     {
         var path = Path.Combine(NativeCoverageImageFixture.RepositoryRoot, NativeCoverageImageConstants.Dockerfile);
         if (new FileInfo(path).Length > maximumBytes)
-        { throw new InvalidDataException("The source Dockerfile exceeds its configured metadata bound."); }
+        {
+            throw new InvalidDataException("The source Dockerfile exceeds its configured metadata bound.");
+        }
         var lines = System.Text.Encoding.UTF8.GetString(NativeCoverageImageOracleSupport.ReadBounded(path, maximumBytes))
             .Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
         var matches = lines.Select(line => DockerfilePin().Match(line)).Where(match => match.Success).ToArray();
@@ -112,7 +114,11 @@ internal static partial class NativeCoverageImageInvocationFactory
                 sourceReceiptPath = baseReceipt,
                 sourceReceiptSha256 = Hash(baseReceipt, options.MaximumManifestBytes)
             },
-            tool = new { version = fixture.Tool.Version, packageRoot = fixture.Tool.PackageRoot },
+            tool = new
+            {
+                version = fixture.Tool.Version,
+                packageRoot = fixture.Tool.PackageRoot
+            },
             bounds = new
             {
                 maximumFiles = options.MaximumFiles,
@@ -128,7 +134,9 @@ internal static partial class NativeCoverageImageInvocationFactory
         };
         var bytes = JsonSerializer.SerializeToUtf8Bytes(descriptor, JsonOptions);
         if (bytes.Length > options.MaximumDescriptorBytes)
-        { throw new InvalidDataException("The test image invocation exceeds its admitted descriptor bound."); }
+        {
+            throw new InvalidDataException("The test image invocation exceeds its admitted descriptor bound.");
+        }
         await NativeCoverageRf3InvocationWriter.WriteCreateOnlyAsync(path, bytes, options.ReadBufferBytes,
             TestContext.Current!.Execution.CancellationToken).ConfigureAwait(false);
     }
@@ -137,7 +145,9 @@ internal static partial class NativeCoverageImageInvocationFactory
     {
         using var stream = File.OpenRead(path);
         if (stream.Length > maximumBytes)
-        { throw new InvalidDataException("The observed Server assembly exceeds its configured file bound."); }
+        {
+            throw new InvalidDataException("The observed Server assembly exceeds its configured file bound.");
+        }
         using var pe = new PEReader(stream);
         var metadata = pe.GetMetadataReader();
         return metadata.GetGuid(metadata.GetModuleDefinition().Mvid).ToString("D");
@@ -158,9 +168,13 @@ internal static partial class NativeCoverageImageInvocationFactory
     {
         var info = new FileInfo(path);
         if (!info.Exists || info.Length > maximumBytes)
-        { throw new InvalidDataException("The image invocation exceeds its descriptor bound."); }
+        {
+            throw new InvalidDataException("The image invocation exceeds its descriptor bound.");
+        }
         using var document = JsonDocument.Parse(NativeCoverageImageOracleSupport.ReadBounded(path, maximumBytes), new JsonDocumentOptions
-        { MaxDepth = NativeCoverageImageConstants.MaximumJsonDepth });
+        {
+            MaxDepth = NativeCoverageImageConstants.MaximumJsonDepth
+        });
         return document.RootElement.GetProperty(NativeCoverageImageFields.InvocationId).GetString()
             ?? throw new InvalidDataException("The image invocation identifier is missing.");
     }
@@ -172,7 +186,9 @@ internal static partial class NativeCoverageImageInvocationFactory
             throw new PlatformNotSupportedException("Native coverage image permissions require a Unix filesystem.");
         }
         if (bytes.Length > maximumBytes)
-        { throw new InvalidDataException("A source-bound test receipt exceeds its captured bound."); }
+        {
+            throw new InvalidDataException("A source-bound test receipt exceeds its captured bound.");
+        }
         using (var stream = new FileStream(path, FileMode.CreateNew, FileAccess.Write, FileShare.None))
         {
             stream.Write(bytes);

@@ -18,7 +18,9 @@ public sealed partial class DatabaseEngine
             ValidatePartition(partition);
             var principal = ReadPartitionQueryAuthority<PrincipalRecord>(view, KeySpace.Principal(principalId), grant);
             if (principal is null || principal.Revoked || principal.ExpiresAt <= Clock.GetUtcNow())
-            { throw Errors.Fail(ErrorCode.Unauthenticated, UnavailableCredentialDetail); }
+            {
+                throw Errors.Fail(ErrorCode.Unauthenticated, UnavailableCredentialDetail);
+            }
             Authorization.Require(principal, partition, collection, Capability.Query | Capability.DocumentsRead);
             ResourceDefinition? resource = null;
             string? digest = null;
@@ -28,11 +30,17 @@ public sealed partial class DatabaseEngine
                 digest = Convert.ToHexStringLower(SHA256.HashData(bytes));
             });
             if (resource is null || digest is null)
-            { throw Errors.Fail(ErrorCode.NotFound, DatabaseEngineResourceIsNotConfiguredDetail); }
+            {
+                throw Errors.Fail(ErrorCode.NotFound, DatabaseEngineResourceIsNotConfiguredDetail);
+            }
             if (resource.TransactionDomainId != partition.TransactionDomainId)
-            { throw Errors.Fail(ErrorCode.Conflict, DatabaseEngineResourceBelongsToADifferentTransactionDomainDetail); }
+            {
+                throw Errors.Fail(ErrorCode.Conflict, DatabaseEngineResourceBelongsToADifferentTransactionDomainDetail);
+            }
             if (resource.Kind != ResourceKind.Collection)
-            { throw Errors.Fail(ErrorCode.Validation, DatabaseEngineResourceHasADifferentKindDetail); }
+            {
+                throw Errors.Fail(ErrorCode.Validation, DatabaseEngineResourceHasADifferentKindDetail);
+            }
             return read(view, principal, resource, digest);
         });
 

@@ -51,15 +51,21 @@ internal static class SiteAnalyzerCoverageProcess
             UseShellExecute = false
         };
         foreach (var argument in arguments)
-        { start.ArgumentList.Add(argument); }
+        {
+            start.ArgumentList.Add(argument);
+        }
         if (environmentOverrides is not null)
         {
             foreach (var (name, value) in environmentOverrides)
             {
                 if (value is null)
-                { start.Environment.Remove(name); }
+                {
+                    start.Environment.Remove(name);
+                }
                 else
-                { start.Environment[name] = value; }
+                {
+                    start.Environment[name] = value;
+                }
             }
         }
 
@@ -95,14 +101,22 @@ internal static class SiteAnalyzerCoverageProcess
         {
             var tasks = new List<Task> { exit };
             if (!standardOutput.IsCompleted)
-            { tasks.Add(standardOutput); }
+            {
+                tasks.Add(standardOutput);
+            }
             if (!standardError.IsCompleted)
-            { tasks.Add(standardError); }
+            {
+                tasks.Add(standardError);
+            }
             var completed = await Task.WhenAny(tasks);
             if (completed == standardOutput)
-            { await standardOutput; }
+            {
+                await standardOutput;
+            }
             if (completed == standardError)
-            { await standardError; }
+            {
+                await standardError;
+            }
         }
 
         await exit;
@@ -126,7 +140,9 @@ internal static class SiteAnalyzerCoverageProcess
         {
             var count = await reader.ReadAsync(buffer, cancellationToken);
             if (count == 0)
-            { return output.ToString(); }
+            {
+                return output.ToString();
+            }
             if (output.Length + count > SiteAnalyzerCoverageTokens.MaximumProcessOutputCharacters)
             {
                 throw new InvalidOperationException(SiteAnalyzerCoverageTokens.ProcessOutputLimitMessage);

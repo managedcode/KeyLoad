@@ -9,7 +9,10 @@ internal static class ChunkMultiblockPagedRetentionRefusal
         fixture.Commit(new AppendSamples(SampleChunkCanonicalFixture.Set, SampleChunkCanonicalFixture.Series,
             SampleChunkCanonicalFixture.Initial, SampleChunkCanonicalFixture.Tags));
         await ChunkMultiblockPagedRetentionRows.RequireAsync(fixture, expired: true, healthy: false);
-        var changed = SampleChunkCanonicalFixture.Initial[FirstIndex] with { Value = SampleChunkPartialRetentionFixture.FreshValue };
+        var changed = SampleChunkCanonicalFixture.Initial[FirstIndex] with
+        {
+            Value = SampleChunkPartialRetentionFixture.FreshValue
+        };
         var result = fixture.Apply(fixture.Operation(new AppendSamples(SampleChunkCanonicalFixture.Set,
             SampleChunkCanonicalFixture.Series, [changed], SampleChunkCanonicalFixture.Tags)));
         await Assert.That(result.Error).IsEqualTo(ErrorCode.Conflict);

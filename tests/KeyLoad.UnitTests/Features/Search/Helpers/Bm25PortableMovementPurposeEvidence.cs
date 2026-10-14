@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.UnitTests.Features.ClusterRouting;
 
 namespace KeyLoad.UnitTests.Features.Search;
@@ -24,14 +24,18 @@ internal sealed class Bm25PortableMovementPurposeEvidence(int node,
     public string? BeforeSign(GrainRequestEnvelope actual)
     {
         lock (gate)
-        { issued = Scope.Read(actual); }
+        {
+            issued = Scope.Read(actual);
+        }
         return null;
     }
 
     public void RejectedAfterMac(GrainRequestEnvelope actual, KeyLoadException failure, GrainRequestScopeCut cut)
     {
         lock (gate)
-        { rejected ??= new(Scope.Read(actual), failure.Code, cut); }
+        {
+            rejected ??= new(Scope.Read(actual), failure.Code, cut);
+        }
     }
 
     internal void Write(TextWriter output, Exception primary)
@@ -39,7 +43,10 @@ internal sealed class Bm25PortableMovementPurposeEvidence(int node,
         Scope? last;
         Rejection? first;
         lock (gate)
-        { last = issued; first = rejected; }
+        {
+            last = issued;
+            first = rejected;
+        }
         var error = primary is KeyLoadException typed ? typed.Code.ToString() : primary.GetType().Name;
         var detail = primary is KeyLoadException failure && failure.Message == GrainRoutingProtocol.InvalidRequest
             ? GrainRoutingProtocol.InvalidRequest : "Other safe failure detail (not printed).";

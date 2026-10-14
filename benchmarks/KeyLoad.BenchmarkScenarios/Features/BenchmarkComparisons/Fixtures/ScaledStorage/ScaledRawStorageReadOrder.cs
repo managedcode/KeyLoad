@@ -41,13 +41,19 @@ internal sealed class ScaledRawStorageReadOrder
     }
 
     /// <summary>Gets the number of distinct indices in one traversal.</summary>
-    public int RecordCount { get; }
+    public int RecordCount
+    {
+        get;
+    }
 
     /// <summary>Gets bytes retained by the single permutation array.</summary>
     public long RetainedOrderBytes => (long)permutation.Length * EncodedIndexBytes;
 
     /// <summary>Gets lowercase SHA-256 over the permutation's little-endian Int32 values.</summary>
-    public string PermutationDigest { get; }
+    public string PermutationDigest
+    {
+        get;
+    }
 
     /// <summary>Returns the next ascending index and wraps after the last record.</summary>
     public int NextSequential()

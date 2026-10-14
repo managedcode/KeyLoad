@@ -69,7 +69,9 @@ internal static class EmptyReplicaSnapshotScenario
             await EmptyReplicaSnapshotAssertions.HealthyAsync(fixture, node, state, tailCommand, tail, timeout.Token);
         }, failures);
         if (mcp is not null)
-        { await ServerFailureObserver.ObserveAsync(() => mcp.DisposeAsync().AsTask(), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => mcp.DisposeAsync().AsTask(), failures);
+        }
         if (!running && stopped is not null)
         {
             using var cleanup = new CancellationTokenSource(RequestCqrsRf3Protocol.CleanupDeadline, TimeProvider.System);
@@ -127,12 +129,12 @@ internal static class EmptyReplicaSnapshotScenario
             await Assert.That(actual.Tail.Operation!.Id).IsEqualTo(tailCommand.CommandId);
             await Assert.That(actual.Tail.Term).IsGreaterThanOrEqualTo(recovered.Snapshot.Term);
         }
-        catch (Exception failure) when (KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        catch (Exception failure) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
         {
             EmptyReplicaSnapshotStorage.RetainCutFailure(failure, installedSnapshot, recovered, tail.Token.Position, hasEntry: true);
             throw;
         }
-        catch (Exception failure) when (!KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        catch (Exception failure) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
         {
             EmptyReplicaSnapshotStorage.RetainCutFailure(failure, installedSnapshot, recovered, tail.Token.Position, hasEntry: true);
             throw;

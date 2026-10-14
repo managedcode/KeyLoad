@@ -25,7 +25,9 @@ public sealed partial class DatabaseEngine
         var receipt = new CommitReceipt(operation.Id, token, [mutation], Store.Identity.Durability);
         var complete = new RemoteGraphSourceResultV1(receipt, intents, command);
         if (NativeSerialization.Measure(complete) > Limits.MaxBatchBytes)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, RemoteGraphProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, RemoteGraphProtocol.Invalid);
+        }
         PersistRemoteGraphSource(tx, original, previous, next, graph, edgeId, revision, intents);
         AppendOutbox(tx, original.SourcePartition, new(RemoteGraphInitialOutboxSequence,
             RemoteGraphInitialMutationIndex, token, operation.EvaluatedAt,

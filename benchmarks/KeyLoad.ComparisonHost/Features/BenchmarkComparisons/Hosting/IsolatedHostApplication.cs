@@ -104,7 +104,11 @@ internal static class IsolatedHostApplication
             : new ComparisonRunner(settings.Selection.CreateExecutionOptions(), policy, Console.WriteLine, timeProvider);
         var report = await runner.RunAsync([target], settings.Worker.SourceRevision, cancellationToken,
             settings.Storage, settings.Selection.Scenario);
-        report = report with { Provenance = settings.Identity.Provenance, LoadGeneratorImage = settings.Identity.LoadGeneratorImage };
+        report = report with
+        {
+            Provenance = settings.Identity.Provenance,
+            LoadGeneratorImage = settings.Identity.LoadGeneratorImage
+        };
         ValidateNativeReport(report, settings);
         var envelope = new IsolatedComparisonReport(IsolatedComparisonContract.Current.WorkerSchemaVersion,
             settings.Worker, IsolatedHostConstants.Measured, null, report);

@@ -18,7 +18,9 @@ internal static class TenantCapacityPlacementRf3BoundedSelectionCold
             await Assert.That(cut.OutstandingDatabaseGrants).IsEqualTo(0L);
         }
         if (retained is not null)
-        { await TenantCapacityPlacementRf3Cold.RequireCanonicalRowsAsync(capacity, retained, cuts, null, seed.FirstRequest); }
+        {
+            await TenantCapacityPlacementRf3Cold.RequireCanonicalRowsAsync(capacity, retained, cuts, null, seed.FirstRequest);
+        }
         await TenantCapacityPlacementRf3Cold.RequireFullColdOpenAsync(wave, seed.FirstRequest, cuts);
         await PartitionMovementPublicParentRf3Cut.RequireCompactedAsync(cuts);
         await TenantCapacityPlacementRf3Cold.ReopenAsync(wave, seed, token);

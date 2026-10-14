@@ -71,8 +71,14 @@ internal sealed class ReplicaMaterializerShutdownFixture : IAsyncDisposable
 
     internal CancellationTokenSource Lifetime { get; } = new();
     internal SemaphoreSlim ApplyGate { get; } = new(SingleOwner, SingleOwner);
-    internal string MissingFilePath { get; }
-    internal Task Worker { get; }
+    internal string MissingFilePath
+    {
+        get;
+    }
+    internal Task Worker
+    {
+        get;
+    }
     internal Task Entered => entered.Task;
     internal Task<bool> TerminalPublished => published.Task;
     internal ChannelWriter<bool> Writer => work.Writer;
@@ -164,7 +170,9 @@ internal sealed class ReplicaMaterializerShutdownFixture : IAsyncDisposable
     private void Attempt(Action action)
     {
         try
-        { action(); }
+        {
+            action();
+        }
         catch (IOException error) { AddFailure(error); }
         catch (UnauthorizedAccessException error) { AddFailure(error); }
         catch (ObjectDisposedException error) { AddFailure(error); }

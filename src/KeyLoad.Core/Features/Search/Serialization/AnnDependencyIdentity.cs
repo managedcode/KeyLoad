@@ -22,7 +22,9 @@ internal static class AnnDependencyIdentity
                 work.Charge();
                 var resource = NativeSerialization.Deserialize<ResourceDefinition>(value);
                 if (!key.SequenceEqual(KeySpace.Resource(partition.TenantId, partition.DatabaseId, resource.Name)))
-                { throw Errors.Fail(ErrorCode.Corruption, InvalidIdentity); }
+                {
+                    throw Errors.Fail(ErrorCode.Corruption, InvalidIdentity);
+                }
                 if (resource.TransactionDomainId == partition.TransactionDomainId)
                 {
                     Append(hash, key, work);
@@ -31,11 +33,15 @@ internal static class AnnDependencyIdentity
                 return true;
             });
         if (scanned.HasMore)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, ScanExceeded); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, ScanExceeded);
+        }
         work.Check();
         Span<byte> digest = stackalloc byte[DigestBytes];
         if (!hash.TryGetHashAndReset(digest, out var written) || written != DigestBytes)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidIdentity); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidIdentity);
+        }
         return Convert.ToHexStringLower(digest);
     }
 

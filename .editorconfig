@@ -78,7 +78,7 @@ csharp_space_between_square_brackets = false
 
 # Wrapping settings
 csharp_preserve_single_line_statements = false
-csharp_preserve_single_line_blocks = true
+csharp_preserve_single_line_blocks = false
 max_line_length = 240
 
 # ReSharper/Rider invocation wrapping
@@ -462,7 +462,7 @@ dotnet_diagnostic.IDE0044.severity = warning
 dotnet_diagnostic.IDE0051.severity = warning
 
 # IDE0055: All formatting rules
-dotnet_diagnostic.IDE0055.severity = suggestion
+dotnet_diagnostic.IDE0055.severity = error
 
 # IDE0059: Unnecessary assignment to a value
 dotnet_diagnostic.IDE0059.severity = warning
@@ -491,6 +491,13 @@ dotnet_diagnostic.IDE2000.severity = warning
 # do not always observe. Keep dotnet format from making @ref/@bind fields readonly, deleting markup-
 # referenced members, or making localization helpers static.
 [**/*.razor.cs]
+dotnet_diagnostic.CA1822.severity = none
+dotnet_diagnostic.CA1823.severity = none
+dotnet_diagnostic.IDE0044.severity = none
+dotnet_diagnostic.IDE0051.severity = none
+
+# These Razor partials reference generated instance members and mutable fields too.
+[src/Apps/Prostir.WebApp/**/{MainLayout.PlaceNavigation.cs,AgentResourcesPanel.Rows.cs,FlowCanvasEditor.Canvas.cs}]
 dotnet_diagnostic.CA1822.severity = none
 dotnet_diagnostic.CA1823.severity = none
 dotnet_diagnostic.IDE0044.severity = none

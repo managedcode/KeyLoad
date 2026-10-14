@@ -25,7 +25,9 @@ internal static class TenantCapacityPlacementRf3OccupiedCold
                 await Assert.That(cut.OutstandingDatabaseGrants).IsEqualTo(NoOutstandingGrants);
             }
             if (original is not null)
-            { await TenantCapacityPlacementRf3OccupiedRows.RequireAsync(capacity, packed, original, cuts, move, token); }
+            {
+                await TenantCapacityPlacementRf3OccupiedRows.RequireAsync(capacity, packed, original, cuts, move, token);
+            }
             original = cuts;
             await PartitionMovementPublicParentRf3Cut.RestartAsync(wave, token);
             await seed.ReconnectAsync(wave, token);

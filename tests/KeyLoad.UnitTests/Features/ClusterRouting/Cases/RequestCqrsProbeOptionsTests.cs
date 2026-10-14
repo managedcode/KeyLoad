@@ -49,9 +49,15 @@ internal sealed class RequestCqrsProbeOptionsTests
                 [SessionKey] = "not-a-canonical-guid"
             }
         })
-        { await AssertRejectedAsync(Configuration(values), replica); }
+        {
+            await AssertRejectedAsync(Configuration(values), replica);
+        }
         await AssertRejectedAsync(Configuration(new Dictionary<string, string?>
-        { [EnabledKey] = "true", [RootKey] = RequestCqrsProbeProtocol.FixedRoot, [SessionKey] = Session }),
+        {
+            [EnabledKey] = "true",
+            [RootKey] = RequestCqrsProbeProtocol.FixedRoot,
+            [SessionKey] = Session
+        }),
             replica, allowPrivateHttp: false);
     }
 

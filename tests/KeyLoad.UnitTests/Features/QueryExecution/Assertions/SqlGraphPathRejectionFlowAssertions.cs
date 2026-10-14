@@ -20,7 +20,9 @@ internal static class SqlGraphPathRejectionFlowAssertions
             invalidRequest, cancellationToken: cancellationToken));
         await Assert.That(failure.Code).IsEqualTo(expectedCode);
         if (expectedDetail is not null)
-        { await Assert.That(failure.Message).IsEqualTo(expectedDetail); }
+        {
+            await Assert.That(failure.Message).IsEqualTo(expectedDetail);
+        }
         await Assert.That(database.Store.Position).IsEqualTo(committedPosition);
 
         var healthy = engine.ShortestPathSql(Principal,

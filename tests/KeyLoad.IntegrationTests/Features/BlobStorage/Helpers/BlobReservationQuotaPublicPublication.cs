@@ -15,7 +15,9 @@ internal static class BlobReservationQuotaPublicPublication
         var partition = new PartitionRef("blob-quota-" + Guid.NewGuid().ToString("N"),
             "public-quota", "domain", Guid.NewGuid().ToString("N"));
         var resource = new ResourceDefinition("bounded-blobs", ResourceKind.BlobStore, partition.TransactionDomainId)
-        { BlobPolicy = new() { MaxBlobBytes = 4L, MaxReservedBytes = 4L } };
+        {
+            BlobPolicy = new() { MaxBlobBytes = 4L, MaxReservedBytes = 4L }
+        };
         var configured = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.ConfigureResourceAsync(
             Guid.NewGuid(), new(partition.TenantId, partition.DatabaseId, resource), token));
         await SqlRf3Protocol.EqualAsync(resource, configured);
@@ -28,13 +30,19 @@ internal static class BlobReservationQuotaPublicPublication
         await Assert.That(begun.Value.StoredBytes).IsEqualTo(0L);
         await Assert.That(begun.Value.NextOrdinal).IsEqualTo(0);
         await Assert.That(begun.Value.Status).IsEqualTo(BlobUploadStatus.Active);
-        return new(first, begun, new(Guid.NewGuid(), first.Blob with { Id = "healthy-target" }, Guid.NewGuid(), 1L, 0L));
+        return new(first, begun, new(Guid.NewGuid(), first.Blob with
+        {
+            Id = "healthy-target"
+        }, Guid.NewGuid(), 1L, 0L));
     }
 
     internal static async Task<BlobSupersessionPublicTrial.Version> PublishAsync(RequestCqrsRf3Callers callers,
         BeginBlobUploadRequest refused, CancellationToken token)
     {
-        var begin = refused with { CommandId = Guid.NewGuid() };
+        var begin = refused with
+        {
+            CommandId = Guid.NewGuid()
+        };
         var begun = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.BeginBlobUploadAsync(begin, token));
         byte[] bytes = [71];
         var part = new WriteBlobPartRequest(Guid.NewGuid(), begin.Blob, begin.UploadId, 0, bytes, BlobIntegrity.PartHash(bytes));

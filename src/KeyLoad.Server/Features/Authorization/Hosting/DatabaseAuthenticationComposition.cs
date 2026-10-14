@@ -30,7 +30,9 @@ internal static class DatabaseAuthenticationComposition
             || context.Features.Get<DatabaseAuthenticatedPrincipal>() is not { } admitted
             || !string.Equals(result.Principal.FindFirstValue(ClaimTypes.NameIdentifier),
                 admitted.Principal.Id, StringComparison.Ordinal))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, ServerProtocol.MissingCredential); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, ServerProtocol.MissingCredential);
+        }
         context.User = result.Principal;
         return admitted.Principal;
     }

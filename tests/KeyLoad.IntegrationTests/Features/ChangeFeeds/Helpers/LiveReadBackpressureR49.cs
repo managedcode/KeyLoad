@@ -16,7 +16,10 @@ internal static class LiveReadBackpressureR49
         RequestCqrsRf3Callers reader, FeedLiveRf3Scenario scenario, ReadLiveQueryRequest original,
         CommitReceipt deletion, CancellationToken token)
     {
-        var refused = original with { MaxBytes = OneByte };
+        var refused = original with
+        {
+            MaxBytes = OneByte
+        };
         await CurrentAsync(administrator, scenario, async () =>
         {
             var result = await reader.Sdk.ReadLiveQueryAsync(refused, token);
@@ -47,7 +50,10 @@ internal static class LiveReadBackpressureR49
             await PageAsync(delivered, [new(FeedLiveRf3Protocol.DeletedSequence, deletion.Token,
                 LiveQueryChangeKind.Remove, scenario.Reference, FeedLiveRf3Protocol.DeletedRevision, null)]);
         }, token);
-        var consumed = original with { Cursor = delivered!.Cursor };
+        var consumed = original with
+        {
+            Cursor = delivered!.Cursor
+        };
         await CurrentAsync(administrator, scenario, async () =>
             await PageAsync(await ReadAsync(reader, scenario, consumed, useMcp, token), []), token);
     }
@@ -56,7 +62,9 @@ internal static class LiveReadBackpressureR49
         FeedLiveRf3Scenario scenario, ReadLiveQueryRequest request, bool useMcp, CancellationToken token)
     {
         if (!useMcp)
-        { return await McpCallerAssertions.SdkSuccessAsync(await reader.Sdk.ReadLiveQueryAsync(request, token)); }
+        {
+            return await McpCallerAssertions.SdkSuccessAsync(await reader.Sdk.ReadLiveQueryAsync(request, token));
+        }
         var reply = await reader.Mcp.CallAsync(FeedLiveRf3Protocol.LiveRead, request, token);
         await McpCallerAssertions.DoesNotDiscloseAsync(reply, scenario.Identity.Secret, FeedLiveRf3Protocol.Secret);
         return (await McpCallerAssertions.SuccessAsync<LiveQueryPage>(reply)).Value;

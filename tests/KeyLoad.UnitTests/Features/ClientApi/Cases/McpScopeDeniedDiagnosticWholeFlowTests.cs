@@ -33,7 +33,10 @@ internal sealed class McpScopeDeniedDiagnosticWholeFlowTests
         var before = QueueWholeFlowStorage.Bytes(database.Store);
         var position = database.Store.Position;
         var denied = Assert.ThrowsExactly<KeyLoadException>(() => database.Database.GetDocument(Reader,
-            reference, receipt.Token with { Incarnation = Guid.NewGuid() }));
+            reference, receipt.Token with
+            {
+                Incarnation = Guid.NewGuid()
+            }));
         await Assert.That(denied.Code).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(denied.Message).IsEqualTo(ScopeDenied);
         await McpOwnedDiagnosticAssertions.ReplyAsync(denied.Code, denied.Message, ScopeDenied);

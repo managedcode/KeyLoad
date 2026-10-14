@@ -15,7 +15,9 @@ public sealed partial class DatabaseEngine
         ArgumentNullException.ThrowIfNull(work);
         work.Check();
         if (verifiedPhase.Source is null || verifiedPhase.SourceOwner is null || verifiedPhase.ControlOwner is null)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, MissingEventVectorSourceAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, MissingEventVectorSourceAuthority);
+        }
         var now = EvaluationClock.GetUtcNow();
         var admission = new EventVectorAdmissionPolicy(OperationLimitsOptions);
         admission.RequireEncodedBytes(NativeSerialization.Measure(verifiedPhase));
@@ -34,12 +36,18 @@ public sealed partial class DatabaseEngine
                 ?? throw Errors.Fail(ErrorCode.OwnershipLost, MissingEventVectorSourceAuthority);
             if (!PhysicalOwnerEntryValidation.SameOwner(command.ControlOwner, catalog.DefaultShard)
                 || command.ControlIncarnation != command.ControlOwner.Incarnation)
-            { throw Errors.Fail(ErrorCode.OwnershipLost, MissingEventVectorSourceAuthority); }
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, MissingEventVectorSourceAuthority);
+            }
             var resource = SourceResource(bounded, command.Source);
             if (resource.SchemaVersion != command.SourceSchemaVersion)
-            { throw Errors.Fail(ErrorCode.TokenInvalidated, MissingEventVectorSourceAuthority); }
+            {
+                throw Errors.Fail(ErrorCode.TokenInvalidated, MissingEventVectorSourceAuthority);
+            }
             if (command.Role != EventVectorSourcePhaseRole.Release)
-            { _ = EventVectorStoredSourceHead(bounded, command.Source); }
+            {
+                _ = EventVectorStoredSourceHead(bounded, command.Source);
+            }
             return command;
         });
         work.Check();

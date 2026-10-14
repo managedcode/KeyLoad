@@ -93,9 +93,13 @@ internal static class ProjectionConsumerIdentityFlow
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () => { result = await action(cold); }, failures);
         }
         catch (Exception error) when (global::ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         catch (Exception error) when (global::ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null)
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
         return result ?? throw new InvalidOperationException(MissingResult);
     }

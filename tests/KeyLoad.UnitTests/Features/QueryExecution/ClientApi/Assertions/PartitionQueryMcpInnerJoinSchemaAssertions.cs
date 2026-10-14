@@ -40,7 +40,9 @@ internal static class PartitionQueryMcpInnerJoinSchemaAssertions
         await VerifyObjectShapeAsync(join, fields, fields);
         var properties = join.GetProperty(McpSchemaInspector.Properties);
         foreach (var field in fields)
-        { await VerifyPrimitiveAsync(root, properties.GetProperty(field), StringType); }
+        {
+            await VerifyPrimitiveAsync(root, properties.GetProperty(field), StringType);
+        }
     }
 
     internal static async Task VerifySourcesAsync(JsonElement root, JsonElement schema)
@@ -79,12 +81,16 @@ internal static class PartitionQueryMcpInnerJoinSchemaAssertions
     private static JsonElement FindTypeBranch(JsonElement root, JsonElement schema, string type)
     {
         if (!schema.TryGetProperty(McpSchemaInspector.AnyOf, out var variants))
-        { return schema; }
+        {
+            return schema;
+        }
         foreach (var variant in variants.EnumerateArray())
         {
             var branch = Resolve(root, variant);
             if (HasExactType(branch, type))
-            { return branch; }
+            {
+                return branch;
+            }
         }
         throw new InvalidOperationException(MissingExpectedBranchMessage);
     }
@@ -92,7 +98,9 @@ internal static class PartitionQueryMcpInnerJoinSchemaAssertions
     private static bool HasExactType(JsonElement schema, string type)
     {
         if (!schema.TryGetProperty(McpSchemaInspector.Type, out var actual))
-        { return false; }
+        {
+            return false;
+        }
         return actual.ValueKind == JsonValueKind.String
             ? actual.GetString() == type
             : actual.ValueKind == JsonValueKind.Array && actual.GetArrayLength() == 1 &&
@@ -127,7 +135,9 @@ internal static class PartitionQueryMcpInnerJoinSchemaAssertions
     {
         schema = Resolve(root, schema);
         if (HasExactType(schema, IntegerType))
-        { return; }
+        {
+            return;
+        }
         var type = schema.GetProperty(McpSchemaInspector.Type);
         await Assert.That(type.ValueKind).IsEqualTo(JsonValueKind.Array);
         var types = type.EnumerateArray().ToArray();

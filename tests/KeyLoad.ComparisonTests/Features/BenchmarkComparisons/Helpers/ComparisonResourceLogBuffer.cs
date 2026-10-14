@@ -29,7 +29,9 @@ internal sealed class ComparisonResourceLogBuffer(int maximumLines, int maximumB
                 protectedLines[accepted.Key] = node;
                 protectedBytes += retained.Bytes;
                 if (accepted.Key == 0)
-                { DemoteMismatches(accepted); }
+                {
+                    DemoteMismatches(accepted);
+                }
             }
             Trim();
         }
@@ -55,7 +57,10 @@ internal sealed class ComparisonResourceLogBuffer(int maximumLines, int maximumB
             if (node?.Value.Diagnostic is { } quota && !quota.Matches(configuration))
             {
                 protectedBytes -= node.Value.Bytes;
-                node.Value = node.Value with { Diagnostic = null };
+                node.Value = node.Value with
+                {
+                    Diagnostic = null
+                };
                 protectedLines[key] = null;
             }
         }

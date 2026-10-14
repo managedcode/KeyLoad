@@ -16,25 +16,35 @@ internal static class PartitionMoveResources
             {
                 var definition = NativeSerialization.Deserialize<ResourceDefinition>(value);
                 if (!key.SequenceEqual(KeySpace.Resource(partition.TenantId, partition.DatabaseId, definition.Name)))
-                { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.InvalidImage); }
+                {
+                    throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.InvalidImage);
+                }
                 if (definition.TransactionDomainId == partition.TransactionDomainId)
                 {
                     if (resources.Count >= limits.MaxBatchMutations)
-                    { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity); }
+                    {
+                        throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
+                    }
                     resources.Add(definition);
                 }
                 return true;
             }, observer: observed =>
             {
                 if (observed > limits.MaxBatchBytes - bytes)
-                { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity); }
+                {
+                    throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
+                }
                 bytes += observed;
             });
         if (scanned.HasMore)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
+        }
         var result = resources.ToImmutable();
         if (NativeSerialization.Measure(result) > limits.MaxBatchBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
+        }
         return result;
     }
 }

@@ -8,11 +8,26 @@ internal sealed class CreatedSiloEarlierService(string path,
     private readonly Lock sync = new();
     private FileStream? owned;
     private Task? closing;
-    internal CancellationToken StartupToken { get; private set; }
-    internal bool Opened { get; private set; }
-    internal bool FileReleased { get; private set; }
-    internal bool StopEntered { get; private set; }
-    internal bool StartEntered { get; private set; }
+    internal CancellationToken StartupToken
+    {
+        get; private set;
+    }
+    internal bool Opened
+    {
+        get; private set;
+    }
+    internal bool FileReleased
+    {
+        get; private set;
+    }
+    internal bool StopEntered
+    {
+        get; private set;
+    }
+    internal bool StartEntered
+    {
+        get; private set;
+    }
 
     public async Task StartingAsync(CancellationToken cancellationToken)
     {
@@ -51,7 +66,9 @@ internal sealed class CreatedSiloEarlierService(string path,
     private async Task CloseOriginalAsync()
     {
         if (owned is not null)
-        { await owned.DisposeAsync().ConfigureAwait(false); }
+        {
+            await owned.DisposeAsync().ConfigureAwait(false);
+        }
         owned = null;
         FileReleased = true;
     }

@@ -50,7 +50,9 @@ internal static class NativeTextDistinctTermsPublicAssertions
             _ => throw new ArgumentOutOfRangeException(nameof(stage))
         };
         foreach (var query in new[] { "rare common", "common rare" })
-        { await PageAsync(caller, scenario.Text(query), expected, token); }
+        {
+            await PageAsync(caller, scenario.Text(query), expected, token);
+        }
     }
 
     private static RankedDocument Row(NativeTextRf3Scenario scenario, string id, long revision, string json, double score)

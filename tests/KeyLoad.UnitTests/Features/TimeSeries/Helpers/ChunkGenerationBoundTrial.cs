@@ -19,7 +19,10 @@ internal static class ChunkGenerationBoundTrial
         await SampleRawIntegrityAssertions.UnchangedAsync(fixture.Store, damaged);
         await ChunkSelectedIntegrityDamage.Refuse(fixture);
         ChunkSelectedIntegrityDamage.Put(fixture, original);
-        await SampleRawIntegrityAssertions.UnchangedAsync(fixture.Store, originalCut with { Position = originalCut.Position + 2 });
+        await SampleRawIntegrityAssertions.UnchangedAsync(fixture.Store, originalCut with
+        {
+            Position = originalCut.Position + 2
+        });
         await ChunkSelectedIntegrityAssertions.Healthy(fixture, final: false);
         await ChunkSelectedIntegrityAssertions.Replay(fixture);
         fixture.Apply(fixture.Merge);
@@ -45,7 +48,10 @@ internal static class ChunkGenerationBoundTrial
         var envelope = NativeSerialization.Deserialize<SampleChunkManifestEnvelope>(original);
         var manifest = NativeSerialization.Deserialize<SampleChunkManifest>(envelope.Encoded.Span);
         await Assert.That(manifest.SourceSequence).IsEqualTo(2);
-        var bytes = NativeSerialization.Serialize(manifest with { SourceSequence = 1 });
+        var bytes = NativeSerialization.Serialize(manifest with
+        {
+            SourceSequence = 1
+        });
         ChunkSelectedIntegrityDamage.Put(fixture,
             NativeSerialization.Serialize(new SampleChunkManifestEnvelope(bytes, SHA256.HashData(bytes))));
         return original;

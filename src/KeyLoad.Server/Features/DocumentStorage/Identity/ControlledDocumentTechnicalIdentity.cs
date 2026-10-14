@@ -21,7 +21,9 @@ internal static class ControlledDocumentTechnicalIdentity
         var digest = SHA256.HashData(bytes);
         var selected = new Guid(digest.AsSpan(default, GuidBytes));
         if (selected == Guid.Empty || selected == original.Id)
-        { throw Errors.Fail(ErrorCode.Corruption, RemoteDocumentProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, RemoteDocumentProtocol.Unavailable);
+        }
         return selected;
     }
 }

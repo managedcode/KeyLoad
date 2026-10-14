@@ -17,7 +17,9 @@ internal sealed class NativeCapabilityOperationFailureEvidence
         CancellationToken timeout, CancellationToken lifetime, CancellationToken caller)
     {
         if (originalAttempted)
-        { return; }
+        {
+            return;
+        }
         originalAttempted = true;
         Save(phase, official, terminal: false, failures, timeout, lifetime, caller);
     }

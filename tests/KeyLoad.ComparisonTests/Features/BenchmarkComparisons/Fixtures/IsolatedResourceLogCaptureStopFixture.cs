@@ -16,10 +16,22 @@ internal sealed class IsolatedResourceLogCaptureStopFixture : IAsyncDisposable
         Capture = new ComparisonTestLogCapture(Application, NativeExecutionPolicyFixture.Harness(), [resourceName]);
     }
 
-    internal DistributedApplication Application { get; }
-    internal ComparisonTestLogCapture Capture { get; }
-    internal ContainerResource Resource { get; }
-    internal ContainerResource ComparisonResource { get; }
+    internal DistributedApplication Application
+    {
+        get;
+    }
+    internal ComparisonTestLogCapture Capture
+    {
+        get;
+    }
+    internal ContainerResource Resource
+    {
+        get;
+    }
+    internal ContainerResource ComparisonResource
+    {
+        get;
+    }
 
     internal static async Task<IsolatedResourceLogCaptureStopFixture> CreateAsync(
         string resourceName, string comparisonResourceName, string containerImage)

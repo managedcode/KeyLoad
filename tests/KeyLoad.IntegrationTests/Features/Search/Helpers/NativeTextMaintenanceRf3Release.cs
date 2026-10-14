@@ -13,7 +13,11 @@ internal static class NativeTextMaintenanceRf3Release
         NativeTextMaintenanceRf3Scenario scenario, TextIndexMaintenanceRequest originalRestore,
         NativeTextMaintenancePath path, CancellationToken token)
     {
-        var release = originalRestore with { CommandId = Guid.NewGuid(), Mode = TextIndexMaintenanceMode.Release };
+        var release = originalRestore with
+        {
+            CommandId = Guid.NewGuid(),
+            Mode = TextIndexMaintenanceMode.Release
+        };
         var actual = await NativeTextMaintenanceRf3Call.ExecuteAsync(sdk, mcp, release, path, token);
         await Assert.That(actual.CommandId).IsEqualTo(release.CommandId);
         await Assert.That(actual.Consumer).IsEqualTo(release.Consumer);

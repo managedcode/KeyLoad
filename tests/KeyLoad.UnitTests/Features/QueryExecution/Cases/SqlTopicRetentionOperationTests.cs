@@ -14,7 +14,9 @@ internal sealed class SqlTopicRetentionOperationTests
         fixture.ReleasePins();
         var command = fixture.Purge();
         var arguments = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
-        { [RequestKey] = JsonSerializer.SerializeToElement(command, JsonDefaults.Options) };
+        {
+            [RequestKey] = JsonSerializer.SerializeToElement(command, JsonDefaults.Options)
+        };
         var decoded = SqlOperationTestData.Compile(SqlOperationTestData.Call("keyload_documents_commit", arguments));
         await Assert.That(decoded.CommandKind).IsEqualTo(OperationKind.Batch);
         await Assert.That(decoded.CommandId).IsEqualTo(command.CommandId);

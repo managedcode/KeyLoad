@@ -9,12 +9,16 @@ internal static class NativeBlobWholePaths
     internal static string RequireNode(string root, string node)
     {
         if (!TwoRf3MembershipProtocol.Nodes.Contains(node, StringComparer.Ordinal))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         var directory = ExistingDirectory(Path.Combine(root, node));
         var owner = Path.Combine(directory, PartitionStoreProtocol.OwnershipFile);
         RequireRegular(owner);
         if (new FileInfo(owner).Length != 0)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         return directory;
     }
     internal static string Canonical(string node)
@@ -30,18 +34,24 @@ internal static class NativeBlobWholePaths
     private static string ExistingDirectory(string path)
     {
         if (!Path.IsPathFullyQualified(path) || Path.GetFullPath(path) != path)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         for (var current = new DirectoryInfo(path); current is not null; current = current.Parent)
         {
             if (!current.Exists || (current.Attributes & FileAttributes.ReparsePoint) != 0)
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
         }
         return path;
     }
     private static void RequireRegular(string path)
     {
         if (!File.Exists(path) || (File.GetAttributes(path) & (FileAttributes.Directory | FileAttributes.ReparsePoint)) != 0)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
     }
     private static InvalidOperationException Invalid() => new("The stopped original Blob owner path is invalid.");
 }

@@ -31,7 +31,9 @@ internal static class EventVectorFirstIssuanceIds
             || string.IsNullOrWhiteSpace(originalIdentity.PrincipalId)
             || originalIdentity.OriginalPublicRequestDigest.Length != SHA256.HashSizeInBytes
             || !originalIdentity.OriginalCapturedFirstPhaseDigest.IsEmpty)
-        { throw Errors.Fail(ErrorCode.Validation, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, Invalid);
+        }
         var identity = new EventVectorFirstIssuanceIdentity(originalIdentity.Version,
             originalIdentity.Action, EventVectorIdentityInputs.Text(originalIdentity.PrincipalId),
             originalIdentity.OriginalPublicCommandId,

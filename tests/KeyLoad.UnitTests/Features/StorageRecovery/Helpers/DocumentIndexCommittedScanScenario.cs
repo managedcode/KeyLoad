@@ -126,7 +126,10 @@ internal sealed class DocumentIndexCommittedScanScenario : IAsyncDisposable
 
     private async Task ReopenAndVerifyHealthyCommandAsync()
     {
-        var expectedIdentity = database.Store.Identity with { SigningKey = database.Store.Identity.SigningKey.ToArray() };
+        var expectedIdentity = database.Store.Identity with
+        {
+            SigningKey = database.Store.Identity.SigningKey.ToArray()
+        };
         var committedPosition = (await writerTask!).Token.Position;
         database.Store.Dispose();
         originalStoreOpen = false;

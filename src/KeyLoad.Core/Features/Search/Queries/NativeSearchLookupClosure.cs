@@ -11,9 +11,13 @@ internal static class NativeSearchLookupClosure
         source.CapturePrefix(DocumentStorageKeys.Prefix(partition, collection));
         source.CaptureExact(KeySpace.Resource(partition.TenantId, partition.DatabaseId, collection));
         if (textField is not null)
-        { DatabaseEngine.CaptureBm25CorpusReadLookups(source, principal, partition, collection, textField, tokenizer); }
+        {
+            DatabaseEngine.CaptureBm25CorpusReadLookups(source, principal, partition, collection, textField, tokenizer);
+        }
         if (vectorField is null)
-        { return; }
+        {
+            return;
+        }
         var prefix = KeySpace.Partition(VisibleVectorReads.VectorKeySpace, partition, collection, vectorField);
         source.CapturePrefix(prefix);
         source.VisitCapturedPrefix(prefix, (_, bytes) =>
@@ -33,11 +37,15 @@ internal static class NativeSearchLookupClosure
         var document = Read<DocumentRecord>(source, DocumentStorageKeys.RecordKey(partition, collection, vector.DocumentId));
         if (document is not { Deleted: false } || document.Revision != vector.DocumentRevision
             || !database.Authorization.CanReadRow(principal, document.Access))
-        { return; }
+        {
+            return;
+        }
         var lineage = Read<VectorProjectionLineage>(source,
             VectorProjectionKeys.Lineage(partition, collection, vector.Field, vector.DocumentId));
         if (lineage is null)
-        { return; }
+        {
+            return;
+        }
         VectorProjectionEligibility.ValidateLineage(lineage, partition, document, vector);
         source.CaptureExact(VectorProjectionKeys.Effect(partition, lineage));
         source.CaptureExact(KeySpace.Resource(partition.TenantId, partition.DatabaseId, lineage.SourceDocument.Collection));

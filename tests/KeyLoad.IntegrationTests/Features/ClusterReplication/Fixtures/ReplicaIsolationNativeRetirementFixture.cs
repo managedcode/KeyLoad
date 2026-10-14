@@ -35,7 +35,9 @@ internal sealed class ReplicaIsolationNativeRetirementFixture : IDisposable
         Directory.CreateDirectory(root);
         rootCreated = true;
         if (!OperatingSystem.IsWindows())
-        { File.SetUnixFileMode(root, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute); }
+        {
+            File.SetUnixFileMode(root, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+        }
     }
 
     internal async Task VerifyHeldOwnersAsync()
@@ -72,9 +74,13 @@ internal sealed class ReplicaIsolationNativeRetirementFixture : IDisposable
         stores.Clear();
         nodes.Clear();
         foreach (var store in ownedStores)
-        { ServerFailureObserver.Observe(store.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(store.Dispose, failures);
+        }
         foreach (var node in ownedNodes)
-        { ServerFailureObserver.Observe(node.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(node.Dispose, failures);
+        }
         ownerCloseFailed |= failures.Count > ReplicaIsolationFlowProtocol.Zero;
         ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -99,7 +105,9 @@ internal sealed class ReplicaIsolationNativeRetirementFixture : IDisposable
                 await Assert.That(reopened.Position).IsEqualTo(CommittedPosition);
             }, failures);
             if (reopened is { } owned)
-            { ServerFailureObserver.Observe(owned.Dispose, failures); }
+            {
+                ServerFailureObserver.Observe(owned.Dispose, failures);
+            }
             ServerFailureObserver.ThrowIfAny(failures);
         }
     }
@@ -110,15 +118,21 @@ internal sealed class ReplicaIsolationNativeRetirementFixture : IDisposable
     public void Dispose()
     {
         if (disposed)
-        { return; }
+        {
+            return;
+        }
         disposed = true;
         var failures = new List<Exception>();
         ServerFailureObserver.Observe(CloseOwners, failures);
         if (!ownerCloseFailed && paths.Count == ReplicaIsolationFlowProtocol.Voters * StoresPerNode
             && failures.Count == ReplicaIsolationFlowProtocol.Zero)
-        { ServerFailureObserver.Observe(() => ReplicaIsolationRetirement.AssertLocks(root, []), failures); }
+        {
+            ServerFailureObserver.Observe(() => ReplicaIsolationRetirement.AssertLocks(root, []), failures);
+        }
         if (rootCreated && !ownerCloseFailed && failures.Count == ReplicaIsolationFlowProtocol.Zero)
-        { ServerFailureObserver.Observe(() => Directory.Delete(root, recursive: true), failures); }
+        {
+            ServerFailureObserver.Observe(() => Directory.Delete(root, recursive: true), failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

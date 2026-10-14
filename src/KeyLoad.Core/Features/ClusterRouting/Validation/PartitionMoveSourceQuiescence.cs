@@ -17,19 +17,27 @@ internal static class PartitionMoveSourceQuiescence
         foreach (var family in Families)
         {
             if (remaining <= PartitionMoveProtocol.EmptyCount)
-            { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity); }
+            {
+                throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
+            }
             var scan = view.VisitRange(KeySpace.Partition(family, partition), remaining, (key, value) =>
             {
                 bytes = checked(bytes + key.Length + value.Length);
                 if (bytes > limits.MaxQueryReadBytes || value.Length > limits.MaxBatchBytes)
-                { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity); }
+                {
+                    throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
+                }
                 if (!Settled(family, value, partition))
-                { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.QuiescenceRequired); }
+                {
+                    throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.QuiescenceRequired);
+                }
                 return true;
             });
             remaining = checked(remaining - scan.Records);
             if (scan.HasMore)
-            { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity); }
+            {
+                throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
+            }
         }
     }
 
@@ -39,14 +47,18 @@ internal static class PartitionMoveSourceQuiescence
         {
             var state = BlobRecordReader.Decode<BlobState>(bytes);
             if (state.Blob.Partition != partition)
-            { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.InvalidImage); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.InvalidImage);
+            }
             return state.Status != BlobUploadStatus.Active;
         }
         if (family == PartitionRecordFamilies.ProjectionConsumer)
         {
             var state = NativeSerialization.Deserialize<ProjectionConsumerInfo>(bytes);
             if (state.Consumer.Partition != partition || state.Checkpoint < PartitionMoveProtocol.EmptyCount)
-            { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.InvalidImage); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.InvalidImage);
+            }
             return state.Released;
         }
         return false;

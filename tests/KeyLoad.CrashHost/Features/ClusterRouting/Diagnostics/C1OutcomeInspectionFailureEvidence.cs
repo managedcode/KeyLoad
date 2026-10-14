@@ -41,14 +41,19 @@ internal sealed class C1OutcomeInspectionFailureEvidence
     internal const int MaximumBytes = 256;
     private static readonly UTF8Encoding StrictUtf8 = new(false, true);
     private C1OutcomeInspectionFailurePhase phase = C1OutcomeInspectionFailurePhase.ReadInput;
-    internal C1OutcomeInspectionFailureRecord? FirstFailure { get; private set; }
+    internal C1OutcomeInspectionFailureRecord? FirstFailure
+    {
+        get; private set;
+    }
 
     internal void SetPhase(C1OutcomeInspectionFailurePhase value) => phase = value;
 
     internal void Capture(Exception error)
     {
         if (FirstFailure is not null)
-        { return; }
+        {
+            return;
+        }
         var cause = FirstCause(error);
         FirstFailure = new(phase, Kind(cause), SafeCode(cause));
     }
@@ -59,23 +64,31 @@ internal sealed class C1OutcomeInspectionFailureEvidence
     internal static C1OutcomeInspectionFailureRecord Read(ReadOnlySpan<byte> bytes)
     {
         if (bytes.Length is <= EmptyCount or > MaximumBytes)
-        { throw new InvalidDataException(InvalidEvidence); }
+        {
+            throw new InvalidDataException(InvalidEvidence);
+        }
         var fields = ReadText(bytes).Split(FieldSeparator, StringSplitOptions.None);
         if (fields.Length is < MinimumFields or > MaximumFields || fields[PrefixIndex] != PrefixField || fields[VersionIndex] != VersionField
             || !ReadPhase(fields[PhaseIndex], out var failurePhase) || !ReadKind(fields[KindIndex], out var failureKind))
-        { throw new InvalidDataException(InvalidEvidence); }
+        {
+            throw new InvalidDataException(InvalidEvidence);
+        }
         int? code = null;
         if (fields.Length == MaximumFields)
         {
             if (!fields[CodeIndex].StartsWith(CodeField, StringComparison.Ordinal)
                 || !int.TryParse(fields[CodeIndex].AsSpan(CodeField.Length).TrimEnd(), NumberStyles.None,
                     CultureInfo.InvariantCulture, out var parsed) || !AllowedCode(failureKind, parsed))
-            { throw new InvalidDataException(InvalidEvidence); }
+            {
+                throw new InvalidDataException(InvalidEvidence);
+            }
             code = parsed;
         }
         var result = new C1OutcomeInspectionFailureRecord(failurePhase, failureKind, code);
         if (!bytes.SequenceEqual(Encode(result)))
-        { throw new InvalidDataException(InvalidEvidence); }
+        {
+            throw new InvalidDataException(InvalidEvidence);
+        }
         return result;
     }
 
@@ -91,9 +104,13 @@ internal sealed class C1OutcomeInspectionFailureEvidence
     private static string ReadText(ReadOnlySpan<byte> bytes)
     {
         try
-        { return StrictUtf8.GetString(bytes); }
+        {
+            return StrictUtf8.GetString(bytes);
+        }
         catch (DecoderFallbackException)
-        { throw new InvalidDataException(InvalidEvidence); }
+        {
+            throw new InvalidDataException(InvalidEvidence);
+        }
     }
 
     private static bool ReadPhase(string field, out C1OutcomeInspectionFailurePhase value)
@@ -123,7 +140,9 @@ internal sealed class C1OutcomeInspectionFailureEvidence
                 _ => null
             };
             if (next is null)
-            { return error; }
+            {
+                return error;
+            }
             error = next;
         }
         return error;
@@ -168,9 +187,13 @@ internal sealed class C1OutcomeInspectionFailureEvidence
     private static int? SafeCode(Exception error)
     {
         if (error is KeyLoadException keyLoad && Enum.IsDefined(keyLoad.Code))
-        { return (int)keyLoad.Code; }
+        {
+            return (int)keyLoad.Code;
+        }
         if (error.InnerException is Win32Exception native && AllowedNativeCode(native.NativeErrorCode))
-        { return native.NativeErrorCode; }
+        {
+            return native.NativeErrorCode;
+        }
         return null;
     }
 

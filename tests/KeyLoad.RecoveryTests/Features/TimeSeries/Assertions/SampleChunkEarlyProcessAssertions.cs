@@ -8,7 +8,9 @@ internal static class SampleChunkEarlyProcessAssertions
     internal static async Task VerifyAsync(string root, string mode, SampleChunkEarlyCut cut, CancellationToken token)
     {
         if (SampleChunkEarlyCrashProtocol.IsFault(mode))
-        { return; }
+        {
+            return;
+        }
         var prepared = await ReadAsync(root, SampleChunkCrashContract.PreparedFile, token);
         if (SampleChunkEarlyCrashProtocol.IsPrepare(mode))
         {
@@ -22,7 +24,9 @@ internal static class SampleChunkEarlyProcessAssertions
         await RecoveredAsync(recovered, cut);
         await Assert.That(recovered.OriginalInflightResult).IsNotNull();
         if (cut == SampleChunkEarlyCut.Open)
-        { await Assert.That(recovered.RawImage).IsEqualTo(prepared.RawImage); }
+        {
+            await Assert.That(recovered.RawImage).IsEqualTo(prepared.RawImage);
+        }
         var result = NativeSerialization.Deserialize<OperationResult>(Convert.FromHexString(recovered.OriginalInflightResult!));
         var receipt = result.Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(SampleChunkCrashContract.InflightId);
@@ -33,7 +37,9 @@ internal static class SampleChunkEarlyProcessAssertions
         await Assert.That(healthy.OriginalAcknowledgedResult).IsEqualTo(prepared.OriginalAcknowledgedResult);
         await Assert.That(healthy.OriginalInflightResult).IsEqualTo(recovered.OriginalInflightResult);
         if (!SampleChunkEarlyCrashProtocol.IsVerify(mode))
-        { return; }
+        {
+            return;
+        }
         var final = await ReadAsync(root, SampleChunkCrashContract.FinalFile, token);
         await Assert.That(Convert.ToHexString(JsonDefaults.Serialize(final)))
             .IsEqualTo(Convert.ToHexString(JsonDefaults.Serialize(healthy)));
@@ -86,7 +92,9 @@ internal static class SampleChunkEarlyProcessAssertions
                 SampleChunkEarlyCrashProtocol.InitialSequence, SampleChunkCrashContract.Tags));
         }
         if (sequence == SampleChunkEarlyCrashProtocol.CorrectedSequence)
-        { rows.Add(new(SampleChunkCrashContract.Series, SampleChunkCrashContract.Late, sequence, SampleChunkCrashContract.Tags)); }
+        {
+            rows.Add(new(SampleChunkCrashContract.Series, SampleChunkCrashContract.Late, sequence, SampleChunkCrashContract.Tags));
+        }
         var expected = new SampleChunkWindowResult(SampleChunkCrashContract.WindowId, SampleChunkCrashContract.From,
             SampleChunkCrashContract.Until, generation, revision, sequence, null, [.. rows], actual.Position);
         await Assert.That(Convert.ToHexString(JsonDefaults.Serialize(actual.Window)))

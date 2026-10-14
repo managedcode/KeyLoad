@@ -1,5 +1,5 @@
-using KeyLoad.Orleans;
-using KeyLoad.Orleans.Features.Search;
+using KeyLoad.Clustering;
+using KeyLoad.Clustering.Features.Search;
 
 namespace KeyLoad.UnitTests.Features.Search;
 
@@ -13,10 +13,14 @@ internal static class NativeTextOnlineWholeFlow
         var expiry = runtime.FreshExpiry(fixture);
         var original = await runtime.PhaseAsync(fixture, session, request, OnlineTextCapabilityKind.ResolveOriginal, expiry, token);
         if (original.OriginalResult is { } replay)
-        { return replay; }
+        {
+            return replay;
+        }
         _ = await runtime.PhaseAsync(fixture, session, request, OnlineTextCapabilityKind.Capture, expiry, token);
         if (whileNativeSnapshotPinned is not null)
-        { await whileNativeSnapshotPinned(); }
+        {
+            await whileNativeSnapshotPinned();
+        }
         var state = await runtime.PhaseAsync(fixture, session, request, OnlineTextCapabilityKind.Seed, expiry, token);
         state = await ReplayAsync(fixture, runtime, session, request, state, expiry, token);
         _ = await runtime.PhaseAsync(fixture, session, request, OnlineTextCapabilityKind.Validate, expiry, token);
@@ -51,7 +55,9 @@ internal static class NativeTextOnlineWholeFlow
             await Assert.That(receipt.Receipt.Mutations).IsEmpty();
             state = await runtime.PhaseAsync(fixture, session, request, OnlineTextCapabilityKind.SettleCheckpoint, expiry, token, receipt: receipt);
             if (!page.HasMore)
-            { return state; }
+            {
+                return state;
+            }
         }
         throw new InvalidOperationException("Actual native replay did not settle within its original centrally configured page bound.");
     }

@@ -29,6 +29,8 @@ internal sealed class AdminObservationOptions
     internal void Validate()
     {
         if (!IsValid())
-        { throw new OptionsValidationException(SectionName, typeof(AdminObservationOptions), [ValidationMessage]); }
+        {
+            throw new OptionsValidationException(SectionName, typeof(AdminObservationOptions), [ValidationMessage]);
+        }
     }
 }

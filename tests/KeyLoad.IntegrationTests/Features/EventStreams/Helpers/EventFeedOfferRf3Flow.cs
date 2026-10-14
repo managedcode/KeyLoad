@@ -35,9 +35,15 @@ internal static class EventFeedOfferRf3Flow
         await RequestCqrsRf3Callers.RunOwnedAsync(wave.Application, TwoRf3MembershipProtocol.Node1, credential,
             async callers =>
             {
-                await EventFeedOfferRf3Assertions.DeniedAsync(callers, request with { CommandId = Guid.NewGuid() },
+                await EventFeedOfferRf3Assertions.DeniedAsync(callers, request with
+                {
+                    CommandId = Guid.NewGuid()
+                },
                     ErrorCode.Conflict, token).ConfigureAwait(false);
-                await EventFeedOfferRf3Assertions.DeniedAsync(callers, request with { Limit = checked(Limit + Limit) },
+                await EventFeedOfferRf3Assertions.DeniedAsync(callers, request with
+                {
+                    Limit = checked(Limit + Limit)
+                },
                     ErrorCode.Conflict, token).ConfigureAwait(false);
                 return request;
             }, token).ConfigureAwait(false);

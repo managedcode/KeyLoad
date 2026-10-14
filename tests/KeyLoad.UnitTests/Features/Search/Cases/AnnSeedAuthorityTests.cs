@@ -83,7 +83,10 @@ internal sealed class AnnSeedAuthorityTests
         await Assert.That(administratorSeed.Scope.Partition).IsEqualTo(foreignPartition);
         await Assert.That(administratorSeed.Records).IsEmpty();
 
-        var wrongDomain = database.Partition with { TransactionDomainId = OtherDomain };
+        var wrongDomain = database.Partition with
+        {
+            TransactionDomainId = OtherDomain
+        };
         var domainFailure = Assert.ThrowsExactly<KeyLoadException>(() => AnnSeedCollector.Capture(
             database.Database, AnnSeedTestSupport.Principal, wrongDomain, AnnSeedTestSupport.Collection,
             AnnSeedTestSupport.Field, AnnSeedTestSupport.Space(), UnitAnnSeedOptions.Execution(new()), new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits))));

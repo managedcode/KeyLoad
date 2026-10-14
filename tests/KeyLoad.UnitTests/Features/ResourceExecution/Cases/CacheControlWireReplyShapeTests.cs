@@ -1,4 +1,4 @@
-using KeyLoad.Orleans.Features.ResourceExecution;
+using KeyLoad.Clustering.Features.ResourceExecution;
 
 namespace KeyLoad.UnitTests.Features.ResourceExecution;
 
@@ -141,8 +141,14 @@ internal sealed class CacheControlWireReplyShapeTests
             var empty = new CacheRefreshReceipt(correlation, status, Guid.Empty, Guid.Empty, null,
                 CacheControlWireTestData.NondefaultMac);
             await Assert.That(Encode(empty)).IsTrue();
-            await Assert.That(Encode(empty with { ActualCoordinatorSessionId = CacheControlWireTestData.SessionId })).IsFalse();
-            await Assert.That(Encode(empty with { CurrentRoundNonce = CacheControlWireTestData.RoundNonce })).IsFalse();
+            await Assert.That(Encode(empty with
+            {
+                ActualCoordinatorSessionId = CacheControlWireTestData.SessionId
+            })).IsFalse();
+            await Assert.That(Encode(empty with
+            {
+                CurrentRoundNonce = CacheControlWireTestData.RoundNonce
+            })).IsFalse();
             await Assert.That(Encode(empty with
             {
                 ActualCoordinatorSiloAddress = CacheControlWireTestData.Address(CacheVoterSlot.Slot0)

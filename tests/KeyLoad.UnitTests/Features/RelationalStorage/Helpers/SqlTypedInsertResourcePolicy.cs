@@ -21,7 +21,10 @@ internal static class SqlTypedInsertResourcePolicy
             .IsEqualTo(ErrorCode.PermissionDenied);
         await SqlTypedInsertAssertions.UnchangedAsync(fixture.Store, image, cut);
         await BytesAsync(fixture, state);
-        await ConfigureAsync(fixture, original with { SchemaVersion = RepairedVersion }, denied.SchemaVersion);
+        await ConfigureAsync(fixture, original with
+        {
+            SchemaVersion = RepairedVersion
+        }, denied.SchemaVersion);
         await SqlTypedInsertHot.ReplayAsync(fixture, state.Created);
         await SqlTypedInsertHot.ReplayAsync(fixture, state.Failed);
         await SqlTypedInsertAssertions.ImageAsync(fixture, fixture.Store, fixture.Database, repaired: false);

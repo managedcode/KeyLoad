@@ -10,8 +10,14 @@ internal static class ClusterRestoreMixedRetentionRf3Queue
     {
         var queue = state.CurrentQueue;
         await QueueLifecyclePublicAssertions.InitialAsync(callers, queue, token);
-        queue.FullRefusal = state.OriginalQueue.FullRefusal! with { CommandId = Guid.NewGuid() };
-        queue.MixedRefusal = state.OriginalQueue.MixedRefusal! with { CommandId = Guid.NewGuid() };
+        queue.FullRefusal = state.OriginalQueue.FullRefusal! with
+        {
+            CommandId = Guid.NewGuid()
+        };
+        queue.MixedRefusal = state.OriginalQueue.MixedRefusal! with
+        {
+            CommandId = Guid.NewGuid()
+        };
         await QueueLifecyclePublicRoutes.RefusedAsync(callers, queue, queue.FullRefusal, ErrorCode.ResourceExhausted, token);
         await QueueLifecyclePublicRoutes.RefusedAsync(callers, queue, queue.MixedRefusal, ErrorCode.RevisionConflict, token);
         await QueueLifecyclePublicAssertions.InitialAsync(callers, queue, token);

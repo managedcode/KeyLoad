@@ -27,7 +27,9 @@ public sealed partial class DatabaseEngine
         {
             if (!view.Scan(QueueKey(MessagingMessageMetadataKeySpace, lane), MessagingSingleElementCount).Records.IsEmpty
                 || !view.Scan(QueueKey(MessagingMessageBodyKeySpace, lane), MessagingSingleElementCount).Records.IsEmpty)
-            { throw Errors.Fail(ErrorCode.RecoveryRequired, QueueLifecycleProtocol.InvalidCounter); }
+            {
+                throw Errors.Fail(ErrorCode.RecoveryRequired, QueueLifecycleProtocol.InvalidCounter);
+            }
             counters = new(MessagingInitialSequence, MessagingInitialSequence, MessagingInitialSequence, MessagingInitialSequence, MessagingInitialSequence);
         }
         RequireQueueDeadLetterAuthority(view, lane, counters);
@@ -58,7 +60,10 @@ public sealed partial class DatabaseEngine
         }
         foreach (var policy in resource.HeaderPolicies)
         {
-            Authorization.RequireFieldWrite(principal, resource with { FieldPolicies = resource.HeaderPolicies }, policy.Path);
+            Authorization.RequireFieldWrite(principal, resource with
+            {
+                FieldPolicies = resource.HeaderPolicies
+            }, policy.Path);
         }
         var body = new MessageBody(message.MessageId, JsonData.Validate(message.PayloadJson, Limits),
             JsonData.Validate(message.HeadersJson, Limits), message.OrderingKey, JsonData.Fingerprint(message));
@@ -180,7 +185,15 @@ public sealed partial class DatabaseEngine
             throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidDeliveryTokenScope);
         }
         var inboxKey = QueueKey(InboxQueueSpace, request.Lane, claims.MessageId, request.HandlerScope, request.ExecutionGeneration);
-        var fingerprint = JsonData.Fingerprint(new { request.Lane, claims.MessageId, request.HandlerScope, request.ExecutionGeneration, request.Effects, principal.Id });
+        var fingerprint = JsonData.Fingerprint(new
+        {
+            request.Lane,
+            claims.MessageId,
+            request.HandlerScope,
+            request.ExecutionGeneration,
+            request.Effects,
+            principal.Id
+        });
         if (tx.GetRecord<InboxRecord>(inboxKey) is { } completed)
         {
             if (completed.Fingerprint != fingerprint)
@@ -194,7 +207,10 @@ public sealed partial class DatabaseEngine
         var ack = ApplyDeliveryTransition(tx,
             new(request.CommandId, request.Lane, request.Token, DeliveryAction.Ack), resource, lease, now, position);
         var effects = ApplyMutations(tx, principal, request.Lane.Partition, request.Effects, now, position);
-        var receipt = ack with { Mutations = effects.Concat(ack.Mutations).ToImmutableArray() };
+        var receipt = ack with
+        {
+            Mutations = effects.Concat(ack.Mutations).ToImmutableArray()
+        };
         tx.PutRecord(inboxKey, new InboxRecord(fingerprint, receipt));
         return receipt;
     }
@@ -213,26 +229,38 @@ public sealed partial class DatabaseEngine
         if (metadata is null)
         {
             if (view.ReadOwnedValue(QueueKey(MessagingMessageBodyKeySpace, lane, id)) is not null)
-            { throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.MissingMetadata); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.MissingMetadata);
+            }
             return null;
         }
 
         var retainedDeadLetter = metadata.State is MessageState.DeadLettered or MessageState.PendingDeadLetter;
         if (retainedDeadLetter)
-        { Authorization.Require(principal, lane.Partition, lane.Queue, Capability.DeadLettersRead); }
+        {
+            Authorization.Require(principal, lane.Partition, lane.Queue, Capability.DeadLettersRead);
+        }
         if (metadata.Id != id)
-        { throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.MissingReference); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.MissingReference);
+        }
         if (metadata.State is not (MessageState.Scheduled or MessageState.Ready or MessageState.Leased
             or MessageState.Acked or MessageState.DeadLettered or MessageState.Cancelled
             or MessageState.Expired or MessageState.PendingDeadLetter))
-        { throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.InvalidPersistedState); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.InvalidPersistedState);
+        }
         if (retainedDeadLetter)
         {
             _ = RequireQueueLifecycleCounters(view, lane);
             if (metadata.State == MessageState.DeadLettered)
-            { RequireQueueParkedAuthority(view, lane, metadata); }
+            {
+                RequireQueueParkedAuthority(view, lane, metadata);
+            }
             else
-            { RequireQueuePendingAuthority(view, lane, metadata); }
+            {
+                RequireQueuePendingAuthority(view, lane, metadata);
+            }
         }
 
         var body = view.GetRecord<MessageBody>(QueueKey(MessagingMessageBodyKeySpace, lane, id));
@@ -240,7 +268,9 @@ public sealed partial class DatabaseEngine
             or MessageState.DeadLettered or MessageState.PendingDeadLetter;
         var terminalState = metadata.State is MessageState.Acked or MessageState.Cancelled or MessageState.Expired;
         if (retainedBody && (body is null || body.Id != id) || terminalState && body is not null)
-        { throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.MissingBody); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.MissingBody);
+        }
         return new MessageInspection(metadata, body is null ? null : Authorization.Project(principal, resource.FieldPolicies, body.PayloadJson, out _),
             body is null ? null : Authorization.Project(principal, resource.HeaderPolicies, body.HeadersJson, out _));
     });

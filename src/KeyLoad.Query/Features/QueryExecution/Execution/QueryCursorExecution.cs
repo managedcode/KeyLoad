@@ -24,9 +24,13 @@ internal static class QueryCursorExecution
         {
             QueryCursorClaims claims;
             try
-            { claims = database.Verify<QueryCursorClaims>(cursor); }
+            {
+                claims = database.Verify<QueryCursorClaims>(cursor);
+            }
             catch (KeyLoadException exception) when (exception.Code == ErrorCode.TokenInvalidated)
-            { throw Errors.Fail(ErrorCode.CursorExpired, QueryCursorIsInvalidDetail); }
+            {
+                throw Errors.Fail(ErrorCode.CursorExpired, QueryCursorIsInvalidDetail);
+            }
             if (claims.Purpose != CursorPurpose || claims.Incarnation != database.Store.Identity.Incarnation
                 || claims.NodeId != database.Store.Identity.NodeId || claims.ReadGeneration != database.Store.Identity.ReadGeneration
                 || claims.PrincipalId != principal.Id || claims.PolicyEpoch != principal.PolicyEpoch || claims.SchemaVersion != resource.SchemaVersion

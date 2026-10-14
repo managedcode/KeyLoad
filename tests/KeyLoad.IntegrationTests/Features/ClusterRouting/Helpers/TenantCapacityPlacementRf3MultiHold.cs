@@ -1,7 +1,7 @@
 using KeyLoad.Client;
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
 using ManagedCode.Communication;
@@ -37,7 +37,10 @@ internal static class TenantCapacityPlacementRf3MultiHold
                 id, request, controls, discovery, original, marker, token);
         }, failures);
         if (failures.Count != 0)
-        { wave.RetainRoots(); controls.RetainEvidence(); }
+        {
+            wave.RetainRoots();
+            controls.RetainEvidence();
+        }
         using var cleanup = new CancellationTokenSource(TwoRf3MembershipProtocol.CleanupDeadline, TimeProvider.System);
         await TenantCapacityPlacementRf3ClaimLifetime.JoinAsync(controls, arm, discovery,
             original, marker, cancellation, markerCancellation, failures, cleanup.Token);

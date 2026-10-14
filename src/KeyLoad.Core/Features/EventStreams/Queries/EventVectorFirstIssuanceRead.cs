@@ -27,7 +27,9 @@ public sealed partial class DatabaseEngine
         if (request.ControlPartition is null || request.Scope is null
             || request.Action != EventFeedControlAction.Open
             || request.OriginalFirstIssuancePublicCommandId != Guid.Empty)
-        { throw Errors.Fail(ErrorCode.Validation, InvalidEventVectorFirstRead); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, InvalidEventVectorFirstRead);
+        }
         Authorization.Require(principal, request.ControlPartition, request.Scope.Resource,
             Capability.SubscriptionsManage);
         _ = StreamTraversalPlacement(bounded, request.ControlPartition, controlOwner);

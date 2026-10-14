@@ -30,7 +30,10 @@ internal sealed class OpenLoopNativeCancellationControl : IAsyncDisposable
         Completion = PublishAsync(output);
     }
 
-    internal Task Completion { get; }
+    internal Task Completion
+    {
+        get;
+    }
     internal Task<OpenLoopNativeCompletionV1> ObservedMarker => marker.Task;
 
     internal void Observe(string line)
@@ -101,19 +104,26 @@ internal sealed class OpenLoopNativeCancellationControl : IAsyncDisposable
     private async Task JoinPublicationAsync(IsolatedNativeTeardownFailures failures)
     {
         try
-        { await Completion; }
+        {
+            await Completion;
+        }
         catch (OperationCanceledException failure) when (lifetime.IsCancellationRequested
             && failure.CancellationToken == lifetime.Token)
-        { }
+        {
+        }
         catch (Exception failure) when (Completion.IsFaulted || Completion.IsCanceled)
-        { RecordPublicationFailures(failure, failures); }
+        {
+            RecordPublicationFailures(failure, failures);
+        }
     }
 
     private void RecordPublicationFailures(Exception failure, IsolatedNativeTeardownFailures failures)
     {
         failures.Record(JoinFailureStage, failure);
         if (Completion.Exception is not { } aggregate)
-        { return; }
+        {
+            return;
+        }
         AddPublicationFailures(aggregate.InnerExceptions, failures);
     }
 
@@ -121,7 +131,9 @@ internal sealed class OpenLoopNativeCancellationControl : IAsyncDisposable
         IsolatedNativeTeardownFailures failures)
     {
         foreach (var original in originals)
-        { failures.Record(JoinFailureStage, original); }
+        {
+            failures.Record(JoinFailureStage, original);
+        }
     }
 
 }

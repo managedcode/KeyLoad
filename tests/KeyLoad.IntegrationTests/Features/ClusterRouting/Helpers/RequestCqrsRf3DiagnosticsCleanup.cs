@@ -1,7 +1,7 @@
 using System.Runtime.ExceptionServices;
 using Aspire.Hosting.ApplicationModel;
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClusterRouting.Helpers;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
@@ -170,14 +170,18 @@ internal sealed class RequestCqrsRf3DiagnosticsCleanup : IAsyncDisposable
                 .WithCancellation(lifetime.Token).ConfigureAwait(false))
             {
                 foreach (var line in batch)
-                { node.TryCapture(line.Content, waveId); }
+                {
+                    node.TryCapture(line.Content, waveId);
+                }
             }
         }
         catch (OperationCanceledException) when (lifetime.IsCancellationRequested)
         {
         }
         finally
-        { node.Complete(); }
+        {
+            node.Complete();
+        }
     }
 
     private Task ObserveCleanupAsync(Func<Task> operation, List<Exception> failures,
@@ -188,14 +192,21 @@ internal sealed class RequestCqrsRf3DiagnosticsCleanup : IAsyncDisposable
     {
         var fatalIndex = failures.FindIndex(error => !NativeCqrsBoundaryErrors.IsNonFatal(error));
         if (fatalIndex < 0)
-        { ServerFailureObserver.ThrowIfAny(failures); return; }
+        {
+            ServerFailureObserver.ThrowIfAny(failures);
+            return;
+        }
         if (failures.Count == 1)
-        { ExceptionDispatchInfo.Capture(failures[0]).Throw(); }
+        {
+            ExceptionDispatchInfo.Capture(failures[0]).Throw();
+        }
         var prioritized = new List<Exception>(failures.Count) { failures[fatalIndex] };
         for (var index = 0; index < failures.Count; index++)
         {
             if (index != fatalIndex)
-            { prioritized.Add(failures[index]); }
+            {
+                prioritized.Add(failures[index]);
+            }
         }
         ServerFailureObserver.ThrowIfAny(prioritized);
     }

@@ -24,7 +24,9 @@ internal static class PlacementIntentValidation
             || value.Status == PlacementIntentStatus.Applying && (value.OriginalApplyCommandId is null || value.Claim is null)
             || value.Claim is { } claim && (claim.Nonce == Guid.Empty || string.IsNullOrWhiteSpace(claim.VoterId)
                 || string.IsNullOrWhiteSpace(claim.SiloAddress) || string.IsNullOrWhiteSpace(claim.CohortFingerprint)))
-        { throw Errors.Fail(error, TenantPlacementPolicyProtocol.Malformed); }
+        {
+            throw Errors.Fail(error, TenantPlacementPolicyProtocol.Malformed);
+        }
         TenantPlacementPolicyValidation.RequirePlan(value.Plan, error);
         for (var index = NoCompletedMoves; index < value.Receipts.Length; index++)
         {
@@ -33,7 +35,9 @@ internal static class PlacementIntentValidation
             if (receipt.MoveId != original.MoveId || receipt.Partition != original.Partition
                 || receipt.DestinationOwner.PhysicalShardId != original.DestinationPhysicalShardId
                 || receipt.Phase != PartitionMovePhase.Retired || receipt.PublishedPlacement is null)
-            { throw Errors.Fail(error, TenantPlacementPolicyProtocol.Malformed); }
+            {
+                throw Errors.Fail(error, TenantPlacementPolicyProtocol.Malformed);
+            }
         }
     }
 }

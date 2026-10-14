@@ -17,7 +17,9 @@ internal static class ClassificationLineageWholeFlow
         catch (Exception primary)
         {
             try
-            { fixture.Dispose(); }
+            {
+                fixture.Dispose();
+            }
             catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
             throw;
         }
@@ -60,11 +62,15 @@ internal static class ClassificationLineageWholeFlow
             UnitExecutionOptions.DatabaseLimits(fixture.Database.Limits), fixture.Harness.Store.Identity.NodeId,
             UnitNativeTextOptions.Execution());
         try
-        { await action(projection); }
+        {
+            await action(projection);
+        }
         catch (Exception primary)
         {
             try
-            { projection.Dispose(); }
+            {
+                projection.Dispose();
+            }
             catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
             throw;
         }

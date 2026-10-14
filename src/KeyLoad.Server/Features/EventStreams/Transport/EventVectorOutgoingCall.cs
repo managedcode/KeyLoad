@@ -15,7 +15,10 @@ internal sealed class EventVectorOutgoingCall : IDisposable
 
     private EventVectorRemoteCall? call;
 
-    private EventVectorOutgoingCall(EventVectorRemoteCall call) { this.call = call; }
+    private EventVectorOutgoingCall(EventVectorRemoteCall call)
+    {
+        this.call = call;
+    }
 
     internal EventVectorRemoteCall OriginalCall => call
         ?? throw new ObjectDisposedException(nameof(EventVectorOutgoingCall));
@@ -31,7 +34,9 @@ internal sealed class EventVectorOutgoingCall : IDisposable
             ?? throw Errors.Fail(ErrorCode.OwnershipLost, EventVectorRemoteProtocol.Unavailable);
         if (!discovery.TransportReady || discovery.Incarnation != control.Owner.Incarnation
             || !control.Owner.VoterIds.Contains(discovery.VoterId, StringComparer.Ordinal))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, EventVectorRemoteProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, EventVectorRemoteProtocol.Unavailable);
+        }
         var measured = NativeSerialization.Measure(originalPayload);
         work.ChargeBytes(measured);
         var payload = encoding.Encode(originalPayload);
@@ -56,14 +61,18 @@ internal sealed class EventVectorOutgoingCall : IDisposable
         finally
         {
             if (!transferred)
-            { CryptographicOperations.ZeroMemory(payload); }
+            {
+                CryptographicOperations.ZeroMemory(payload);
+            }
         }
     }
 
     public void Dispose()
     {
         if (call is not { } owned)
-        { return; }
+        {
+            return;
+        }
         call = null;
         CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(owned.OriginalNativeRequest).Span);
     }

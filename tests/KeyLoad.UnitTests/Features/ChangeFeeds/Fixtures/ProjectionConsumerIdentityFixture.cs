@@ -33,7 +33,9 @@ internal static class ProjectionConsumerIdentityFixture
         var time = FeedAuthorityClock.Epoch;
         var seed = Operation(OperationKind.Batch, seedId, new CommandRequest(seedId, database.Partition,
             [new PutDocument(Source, "a", "{\"n\":1}", 0L), new PutDocument(Source, "b", "{\"n\":2}", 0L)])) with
-        { EvaluatedAt = time };
+        {
+            EvaluatedAt = time
+        };
         token.ThrowIfCancellationRequested();
         var seeded = database.Database.Apply(seed);
         var receipt = seeded.Get<CommitReceipt>();
@@ -55,8 +57,14 @@ internal static class ProjectionConsumerIdentityFixture
     internal static void Damage(TestDatabase database, ProjectionConsumerIdentityState state, bool foreignPartition)
     {
         var refKey = foreignPartition
-            ? state.Consumer with { Partition = new("foreign-tenant", "foreign-db", "orders", ForeignPartition) }
-            : state.Consumer with { Name = "foreign-consumer" };
+            ? state.Consumer with
+            {
+                Partition = new("foreign-tenant", "foreign-db", "orders", ForeignPartition)
+            }
+            : state.Consumer with
+            {
+                Name = "foreign-consumer"
+            };
         var damaged = new ProjectionConsumerInfo(refKey, state.Definition, 0L, false);
         database.Store.Commit((transaction, _) => { transaction.PutRecord(state.Key, damaged); return true; });
     }

@@ -18,5 +18,8 @@ internal sealed class BlobActivePolicyPublicState(BlobRef blob, McpPersistedIden
     internal WriteBlobPartRequest Part { get; set; } = null!;
     internal BlobCommitResult<BlobUploadInfo> Written { get; set; } = null!;
     internal CompleteBlobUploadRequest Complete { get; set; } = null!;
-    internal BlobCommitResult<BlobMetadata>? Completed { get; set; }
+    internal BlobCommitResult<BlobMetadata>? Completed
+    {
+        get; set;
+    }
 }

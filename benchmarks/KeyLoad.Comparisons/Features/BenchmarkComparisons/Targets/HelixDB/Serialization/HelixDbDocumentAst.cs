@@ -16,7 +16,10 @@ internal static class HelixDbDocumentAst
     {
         var fields = Index(label, property, range, unique)[HelixDbNativeTokens.TokenCreateIndex]!.AsObject();
         return HelixDbProtocol.Node(HelixDbNativeTokens.TokenDropIndex,
-            new() { [HelixDbNativeTokens.TokenSpec] = fields[HelixDbNativeTokens.TokenSpec]!.DeepClone() });
+            new()
+            {
+                [HelixDbNativeTokens.TokenSpec] = fields[HelixDbNativeTokens.TokenSpec]!.DeepClone()
+            });
     }
 
     internal static JsonObject Graph(string label, string id, int depth)
@@ -27,15 +30,30 @@ internal static class HelixDbDocumentAst
             JsonNode traversal = JsonValue.Create(HelixDbNativeTokens.TokenContext)!;
             for (var hop = EmptyResultCount; hop < hops; hop++)
             {
-                traversal = HelixDbProtocol.Node(HelixDbNativeTokens.TokenOut, new() { [HelixDbNativeTokens.TokenInput] = traversal, [HelixDbNativeTokens.TokenLabel] = label + HelixDbNativeTokens.TokenLinks });
+                traversal = HelixDbProtocol.Node(HelixDbNativeTokens.TokenOut, new()
+                {
+                    [HelixDbNativeTokens.TokenInput] = traversal,
+                    [HelixDbNativeTokens.TokenLabel] = label + HelixDbNativeTokens.TokenLinks
+                });
             }
 
             branches.Add(new JsonObject { [HelixDbNativeTokens.TokenRoot] = traversal });
         }
 
-        var union = HelixDbProtocol.Node(HelixDbNativeTokens.TokenUnion, new() { [HelixDbNativeTokens.TokenInput] = Lookup(label, id), [HelixDbNativeTokens.TokenTraversals] = branches });
-        var distinct = HelixDbProtocol.Node(HelixDbNativeTokens.TokenDedup, new() { [HelixDbNativeTokens.TokenInput] = union });
-        var filtered = HelixDbProtocol.Node(HelixDbNativeTokens.TokenWhere, new() { [HelixDbNativeTokens.TokenInput] = distinct, [HelixDbNativeTokens.TokenPredicate] = HelixDbProtocol.Compare(HelixDbNativeTokens.TokenNeq, HelixDbNativeTokens.TokenId, HelixDbNativeTokens.TokenString, id) });
+        var union = HelixDbProtocol.Node(HelixDbNativeTokens.TokenUnion, new()
+        {
+            [HelixDbNativeTokens.TokenInput] = Lookup(label, id),
+            [HelixDbNativeTokens.TokenTraversals] = branches
+        });
+        var distinct = HelixDbProtocol.Node(HelixDbNativeTokens.TokenDedup, new()
+        {
+            [HelixDbNativeTokens.TokenInput] = union
+        });
+        var filtered = HelixDbProtocol.Node(HelixDbNativeTokens.TokenWhere, new()
+        {
+            [HelixDbNativeTokens.TokenInput] = distinct,
+            [HelixDbNativeTokens.TokenPredicate] = HelixDbProtocol.Compare(HelixDbNativeTokens.TokenNeq, HelixDbNativeTokens.TokenId, HelixDbNativeTokens.TokenString, id)
+        });
         return HelixDbProtocol.Project(HelixDbProtocol.Ordered(filtered, HelixDbNativeTokens.TokenId), HelixDbNativeTokens.TokenId);
     }
 }

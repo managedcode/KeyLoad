@@ -7,8 +7,16 @@ namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
 [ConfigurationOptions]
 internal sealed class ComparisonStartupOptions
 {
-    [ConfigurationKeyName(ComparisonWorkerSelection.TargetSetting)] public string? Target { get; set; }
-    [ConfigurationKeyName(ComparisonHostConstants.Profile)] public string? Profile { get; set; }
+    [ConfigurationKeyName(ComparisonWorkerSelection.TargetSetting)]
+    public string? Target
+    {
+        get; set;
+    }
+    [ConfigurationKeyName(ComparisonHostConstants.Profile)]
+    public string? Profile
+    {
+        get; set;
+    }
 }
 
 [ConfigurationBinding]

@@ -23,7 +23,9 @@ internal sealed class SqlOperationParameterBounds(IOptions<DatabaseLimits> limit
                 break;
             case JsonValueKind.Array:
                 foreach (var item in value.EnumerateArray())
-                { Visit(item, depth + DepthStep); }
+                {
+                    Visit(item, depth + DepthStep);
+                }
                 Count(depth);
                 break;
             case JsonValueKind.Undefined:
@@ -40,7 +42,9 @@ internal sealed class SqlOperationParameterBounds(IOptions<DatabaseLimits> limit
         {
             Count(depth);
             if (!names.Add(property.Name))
-            { throw SqlOperationSyntax.InvalidInput(); }
+            {
+                throw SqlOperationSyntax.InvalidInput();
+            }
             Visit(property.Value, depth + DepthStep);
         }
         Count(depth);
@@ -50,6 +54,8 @@ internal sealed class SqlOperationParameterBounds(IOptions<DatabaseLimits> limit
     {
         cancellationToken.ThrowIfCancellationRequested();
         if (depth > limits.MaxJsonDepth || ++tokens > limits.MaxQueryTokens)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, SqlOperationSyntax.StructureExceeded); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, SqlOperationSyntax.StructureExceeded);
+        }
     }
 }

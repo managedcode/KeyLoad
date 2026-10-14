@@ -12,7 +12,9 @@ internal static class RequestCqrsProbeObserverFactory
         ArgumentNullException.ThrowIfNull(replicaOptions);
         RequestCqrsProbeOptionsReader.Validate(options, replicaOptions.Value, allowPrivateNetworkHttp);
         if (!options.Enabled)
-        { return null; }
+        {
+            return null;
+        }
         ArgumentNullException.ThrowIfNull(localSilo);
         ArgumentNullException.ThrowIfNull(applicationLifetime);
         var address = localSilo.SiloAddress.ToParsableString();

@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 using System.Text.Json;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.UnitTests.Features.BlobStorage;
 

@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using Microsoft.AspNetCore.Connections;
 using Microsoft.Extensions.Options;
 
@@ -31,12 +31,18 @@ internal sealed class ServerConnectionRegistry(IServiceProvider services,
         await ServerFailureObserver.ObserveAsync(() => feature.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         ServerFailureObserver.Observe(() => transport.Features.Set<ServerConnectionFeature>(null), failures);
         lock (gate)
-        { connections.Remove(feature.Id); }
+        {
+            connections.Remove(feature.Id);
+        }
         ServerFailureObserver.Observe(() => errorProbe?.Joined(feature.Id, failures), failures);
         if (failures.Count == ServerConnectionProtocol.NoFailures)
-        { feature.Completion.TrySetResult(); }
+        {
+            feature.Completion.TrySetResult();
+        }
         else
-        { feature.Completion.TrySetException(failures); }
+        {
+            feature.Completion.TrySetException(failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
@@ -49,7 +55,9 @@ internal sealed class ServerConnectionRegistry(IServiceProvider services,
             owned = [.. connections.Values];
         }
         foreach (var connection in owned)
-        { connection.RequestClose(); }
+        {
+            connection.RequestClose();
+        }
         await Task.WhenAll(owned.Select(connection => connection.Completion.Task))
             .WaitAsync(cancellationToken).ConfigureAwait(false);
     }

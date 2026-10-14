@@ -10,7 +10,11 @@ public sealed partial class DatabaseEngine
         PartitionMoveAuthorizeBody body, PartitionMovePhaseGrant grant,
         PartitionMovePhaseResult first, PrincipalRecord principal)
     {
-        var immutable = grant with { Settlement = null, AbortDisposition = null };
+        var immutable = grant with
+        {
+            Settlement = null,
+            AbortDisposition = null
+        };
         if (first.Stage != PartitionMovePeerStage.ControlAuthorize || first.MoveId != original.MoveId
             || first.Grant is null || JsonData.Fingerprint(first.Grant) != JsonData.Fingerprint(immutable)
             || grant.OperatorPrincipalId != principal.Id || grant.OperatorPolicyEpoch != principal.PolicyEpoch
@@ -24,6 +28,8 @@ public sealed partial class DatabaseEngine
             || first.Journal.CommandId != grant.GrantId || first.Journal.AppliedPosition != grant.AdmissionPosition
             || first.Journal.ControlIntentDigest != grant.ControlIntentDigest
             || !PhysicalOwnerEntryValidation.SameOwner(first.Journal.PhysicalOwner, grant.ControlOwner))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
     }
 }

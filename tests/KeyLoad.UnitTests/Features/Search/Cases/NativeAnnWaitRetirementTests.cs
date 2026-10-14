@@ -29,7 +29,10 @@ internal sealed class NativeAnnWaitRetirementTests
                         .Where(row => Path.GetFileName(row.Path) == NativeAnnProtocol.IndexFile).ToArray();
                     await Assert.That(original).IsNotEmpty();
                     _ = AnnProjectionPinTestSupport.Release(database, pin.Consumer, generation: pin.IndexGeneration).Get<ProjectionConsumerInfo>();
-                    _ = await runtime.PhaseAsync(database, pin with { Mode = AnnMaintenanceMode.Release }, KeyLoad.Orleans.AnnMaintenanceCapabilityKind.Release);
+                    _ = await runtime.PhaseAsync(database, pin with
+                    {
+                        Mode = AnnMaintenanceMode.Release
+                    }, KeyLoad.Clustering.AnnMaintenanceCapabilityKind.Release);
                     await Assert.That(NativeAnnFixtureFileSnapshot.Capture(database.Directory)
                         .Where(row => Path.GetFileName(row.Path) == NativeAnnProtocol.IndexFile).ToArray())
                         .IsEquivalentTo(original, TUnit.Assertions.Enums.CollectionOrdering.Matching);
@@ -49,7 +52,7 @@ internal sealed class NativeAnnWaitRetirementTests
                 .Any(row => Path.GetFileName(row.Path) == NativeAnnProtocol.IndexFile)).IsFalse();
             await runtime.Owner.AbortAsync(runtime.SessionId);
             var next = ConfigureNext(database, pin);
-            var began = await runtime.PhaseAsync(database, next, KeyLoad.Orleans.AnnMaintenanceCapabilityKind.Begin);
+            var began = await runtime.PhaseAsync(database, next, KeyLoad.Clustering.AnnMaintenanceCapabilityKind.Begin);
             _ = await NativeAnnMaintenancePhaseAssertions.FinishAsync(database, runtime, next, began.Source!.ThroughSequence);
             await NativeAnnWaitWholeFlow.HealthyAsync(database, runtime, NativeAnnWaitWholeFlow.Request(database, next, receipt),
                 TestContext.Current!.Execution.CancellationToken);
@@ -73,6 +76,11 @@ internal sealed class NativeAnnWaitRetirementTests
         var id = Guid.NewGuid();
         _ = database.Submit(OperationKind.ConfigureProjectionConsumer,
             new ConfigureProjectionConsumerRequest(id, consumer, new(NextGeneration, [], [.. Kinds]), StartAfter), id: id).Get<ProjectionConsumerInfo>();
-        return original with { CommandId = Guid.NewGuid(), Consumer = consumer, IndexGeneration = NextGeneration };
+        return original with
+        {
+            CommandId = Guid.NewGuid(),
+            Consumer = consumer,
+            IndexGeneration = NextGeneration
+        };
     }
 }

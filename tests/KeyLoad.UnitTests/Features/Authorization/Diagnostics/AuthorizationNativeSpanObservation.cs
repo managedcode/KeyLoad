@@ -13,7 +13,9 @@ internal sealed class AuthorizationNativeSpanObservation(IOptions<AuthorizationT
     public override void OnEnd(Activity activity)
     {
         if (activity.Source.Name is not (AuthorizationTelemetryTestProtocol.HttpClientSource or AuthorizationTelemetryTestProtocol.HttpServerSource))
-        { return; }
+        {
+            return;
+        }
         var parents = Parents(activity, Privacy.MaximumParentLinks);
         Bank.Add(new(activity.Source.Name, activity.Recorded, activity.TraceId.ToHexString(),
             activity.SpanId.ToHexString(), activity.ParentSpanId.ToHexString(),
@@ -35,7 +37,9 @@ internal sealed class AuthorizationNativeSpanObservation(IOptions<AuthorizationT
         {
             parents.Add(parent.OperationName);
             if (parents.Count > maximum)
-            { break; }
+            {
+                break;
+            }
         }
         return [.. parents];
     }

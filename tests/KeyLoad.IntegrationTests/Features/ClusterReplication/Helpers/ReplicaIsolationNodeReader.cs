@@ -30,11 +30,13 @@ internal sealed class ReplicaIsolationNodeReader(ReplicaIsolationBuildPlan plan,
             : await ReadSixAsync(app, target.ResourceName, cancellationToken);
         var endpoint = SiloAddress.FromParsableString(discovery.SiloAddress).Endpoint;
         if (!discovery.TransportReady || endpoint.Port != SiloPort || endpoint.Address.ToString() != container.IpAddress)
-        { throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState); }
+        {
+            throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState);
+        }
         return new(target.ResourceName, container, discovery.SiloAddress);
     }
 
-    private async Task<KeyLoad.Orleans.ReplicaSiloDiscovery> ReadSixAsync(DistributedApplication app,
+    private async Task<KeyLoad.Clustering.ReplicaSiloDiscovery> ReadSixAsync(DistributedApplication app,
         string resource, CancellationToken cancellationToken)
     {
         var profile = six!.Profile;
@@ -44,7 +46,9 @@ internal sealed class ReplicaIsolationNodeReader(ReplicaIsolationBuildPlan plan,
             .Single(value => value.Name == TargetIncarnation).GetValueAsync(cancellationToken);
         if (!Guid.TryParseExact(incarnationText, DashedGuid, out var incarnation) || incarnation == Guid.Empty
             || !source && incarnation == profile.Incarnation)
-        { throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState); }
+        {
+            throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState);
+        }
         var secretText = source ? profile.PeerSecret : await model.Resources.OfType<ParameterResource>()
             .Single(value => value.Name == TargetSecret).GetValueAsync(cancellationToken);
         var secret = Convert.FromBase64String(secretText ?? throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState));

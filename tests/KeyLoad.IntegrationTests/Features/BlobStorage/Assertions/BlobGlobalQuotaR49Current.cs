@@ -12,7 +12,9 @@ internal static class BlobGlobalQuotaR49Current
         await SqlRf3Protocol.EqualAsync(state.Placement, await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.ReadAtomicPartitionPlacementAsync(placement, token)));
         await SqlRf3Protocol.EqualAsync(state.Placement, (await McpCallerAssertions.SuccessAsync<AtomicPartitionPlacementResolution>(await callers.Mcp.CallAsync(McpCallerTools.AdminPartitionPlacementRead, placement, token))).Value);
         foreach (var upload in state.CurrentUploads.Where(upload => state.ConfiguredResources.Contains(upload.Blob.Resource)))
-        { await UploadAsync(callers, state, upload, token); }
+        {
+            await UploadAsync(callers, state, upload, token);
+        }
         await SqlRf3Protocol.EqualAsync(state.Outbox, await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.OutboxStatusAsync(state.Partition, token)));
         await SqlRf3Protocol.EqualAsync(state.Outbox, (await McpCallerAssertions.SuccessAsync<OutboxStatus>(await callers.Mcp.CallAsync(McpCallerTools.OutboxStatus, new GetOutboxStatusRequest(state.Partition), token))).Value);
     }

@@ -40,7 +40,13 @@ internal sealed class SerializationExecutionPolicyTests
             NativeSerialization.Serialize(payload))).IsTrue();
         var operation = new ReplicatedOperation(new Guid(NativeFingerprintFixtures.Id), OperationKind.Batch,
             "root界\\\"😀", DateTimeOffset.UnixEpoch, payload + "\uD800");
-        var fingerprint = JsonData.Fingerprint(new { operation.Id, operation.Kind, operation.PrincipalId, operation.PayloadJson });
+        var fingerprint = JsonData.Fingerprint(new
+        {
+            operation.Id,
+            operation.Kind,
+            operation.PrincipalId,
+            operation.PayloadJson
+        });
         await Assert.That(NativeOperationFingerprint.Compute(operation, options)).IsEqualTo(fingerprint);
         await Assert.That(NativeOperationFingerprint.Compute(operation.Id, operation.Kind, operation.PrincipalId,
             Encoding.UTF8.GetBytes(operation.PayloadJson), options)).IsEqualTo(fingerprint);

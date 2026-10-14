@@ -37,7 +37,9 @@ internal static class DistributedSearchHybridNativeSeed
         var principal = new PrincipalRecord(RemoteDocumentNativeFixture.Reader, RemoteDocumentNativeFixture.Tenant,
             [new(RemoteDocumentNativeFixture.Partition.DatabaseId, RemoteDocumentNativeFixture.Collection,
                 Capability.Query | Capability.DocumentsRead | Capability.VectorSearch)], [])
-        { PolicyEpoch = CurrentEpoch };
+        {
+            PolicyEpoch = CurrentEpoch
+        };
         _ = owner.Database.Apply(RemoteDocumentNativeFixture.Operation(owner, OperationKind.ConfigurePrincipal,
             Guid.NewGuid(), new ConfigurePrincipalRequest(principal))).Get<PrincipalRecord>();
     }

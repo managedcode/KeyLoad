@@ -45,16 +45,26 @@ internal sealed class PartitionStores : IDisposable
         {
             var failures = new List<Exception> { error };
             if (canonical is not null)
-            { ServerFailureObserver.Observe(() => canonical.Dispose(), failures); }
+            {
+                ServerFailureObserver.Observe(() => canonical.Dispose(), failures);
+            }
             ServerFailureObserver.Observe(() => ownership.Dispose(), failures);
             if (failures.Count > FailuresCountValidationBoundary)
-            { throw new AggregateException(failures); }
+            {
+                throw new AggregateException(failures);
+            }
             throw;
         }
     }
 
-    internal ZoneTreeStore Canonical { get; }
-    internal ZoneTreeStore Replica { get; }
+    internal ZoneTreeStore Canonical
+    {
+        get;
+    }
+    internal ZoneTreeStore Replica
+    {
+        get;
+    }
 
     private static ZoneTreeStoreOptions StoreOptions(NodeOptions options, string directory,
         Action<CommitStage, long, int>? observer = null) => new(directory)
@@ -70,7 +80,9 @@ internal sealed class PartitionStores : IDisposable
         const int EmptyExchange = 0;
 
         if (Interlocked.Exchange(ref disposed, ValueSingleItemCount) != EmptyExchange)
-        { return; }
+        {
+            return;
+        }
         var failures = new List<Exception>();
         var closingStores = CloseStoresAsync(failures);
         ServerFailureObserver.ObserveAsync(() => closingStores, failures).GetAwaiter().GetResult();

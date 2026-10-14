@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using System.Net;
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 using KeyLoad.Query;
 using KeyLoad.Replication;
 using KeyLoad.Server.Features.ClusterRouting;
@@ -30,28 +30,8 @@ internal static class OrleansSiloConfiguration
         var builder = Host.CreateApplicationBuilder();
         OrleansNativePeerServices.RegisterSiloOwners(builder, loggerFactory, connectionOwner,
             discoveryOmission, sealedObserver, localhostClustering);
-        if (options.PhysicalGroupTrust.RemoteDocumentReads)
-        {
-            builder.Services.AddSingleton<IPhysicalRequestPlacement, PhysicalDocumentRequestPlacement>();
-            if (remoteDocuments is not null)
-            { builder.Services.AddSingleton(remoteDocuments); }
-            if (remoteBlobs is not null)
-            { builder.Services.AddSingleton(remoteBlobs); }
-            if (remoteQueries is not null)
-            { builder.Services.AddSingleton(remoteQueries); }
-            if (distributedSearch is not null)
-            { builder.Services.AddSingleton(distributedSearch); }
-        }
-        if (controlledDocuments is not null)
-        { builder.Services.AddSingleton(controlledDocuments); }
-        if (movementCapture is not null)
-        { builder.Services.AddSingleton(movementCapture); }
-        if (movementCapture is PartitionMovementSourceOwner sourceOwner)
-        { builder.Services.AddSingleton(sourceOwner.TransferReads); }
-        if (movementDispatcher is not null)
-        { builder.Services.AddSingleton(movementDispatcher); }
-        if (movementDispatcher is PartitionMovementRuntime { NativeReceiver: { } nativeMovement })
-        { builder.Services.AddSingleton(nativeMovement); }
+        OrleansMovementServiceRegistration.Register(builder, options, remoteDocuments, remoteBlobs,
+            remoteQueries, distributedSearch, controlledDocuments, movementCapture, movementDispatcher);
         OrleansNativePeerServices.RegisterPhysicalProbe(builder.Services, physicalProbe);
         builder.Services.AddSingleton(provider => new PartitionMovementGrainServiceClient(provider, partition,
             runtimeOptions.Node, runtimeOptions.Membership, runtimeOptions.GrainRouting,
@@ -66,14 +46,20 @@ internal static class OrleansSiloConfiguration
         global::KeyLoad.Server.Features.GraphTraversal.RemoteGraphNativeHosting.Register(
             builder.Services, partition, runtimeOptions, clock, remoteGraphs);
         if (movementDispatcher is IPartitionMovementParent movementParent)
-        { builder.Services.AddSingleton(movementParent); }
+        {
+            builder.Services.AddSingleton(movementParent);
+        }
         if (eventVectorParent is not null)
-        { builder.Services.AddSingleton(eventVectorParent); }
+        {
+            builder.Services.AddSingleton(eventVectorParent);
+        }
         tenantPlacement?.RegisterBorrowed(builder.Services);
         runtimeOptions.RegisterBorrowed(builder.Services);
         RegisterBorrowedServices(builder.Services, partition, administration, options, requestWork, runtimeOptions, clock);
         if (remoteAnnReads is not null)
-        { builder.Services.AddSingleton(remoteAnnReads); }
+        {
+            builder.Services.AddSingleton(remoteAnnReads);
+        }
         builder.UseOrleans(silo => Configure(silo, options, partition.Configuration, address, runtimeOptions.Membership.Value,
             runtimeOptions.Core.RuntimeJournal, runtimeOptions.DurableJobs, runtimeOptions.GrainRouting, runtimeOptions.Core.DatabaseLimits, localhostClustering));
         global::KeyLoad.Server.Features.ClusterRouting.OrleansNativeHostedServiceRegistration.Guard(builder.Services);
@@ -105,7 +91,7 @@ internal static class OrleansSiloConfiguration
         services.AddSingleton(provider => new SearchEngine(partition.Database, runtimeOptions.Core.QueryExecution,
             partition.TextProjection, partition.AnnMaintenance, provider.GetService<IQueryReadCutObserver>()));
         global::KeyLoad.Server.Features.BlobStorage.NativeBlobWireProbeRegistration.Register(services, partition, options);
-        RegisterRequestCodec(services, partition, options);
+        OrleansRequestServiceRegistration.Register(services, partition, options);
         services.AddSerializer(serialization => serialization
             .AddAssembly(typeof(GrainRequestProgress).Assembly)
             .AddAssembly(typeof(CqrsStreamChunkSurrogateConverter<GrainRequestProgress, GrainOperationReply>).Assembly)
@@ -125,49 +111,9 @@ internal static class OrleansSiloConfiguration
         services.AddSingleton<ILifecycleParticipant<ISiloLifecycle>, ReplicaTransportLifecycle>();
     }
 
-    private static void RegisterRequestCodec(IServiceCollection services, PartitionHost partition, NodeOptions options)
-    {
-        if (options.RequestCqrsProbe.Enabled)
-        {
-            services.AddSingleton<IReplicaTransportObservation>(provider =>
-            {
-                _ = provider.GetRequiredService<RequestCqrsProbeObserver>();
-                return partition.ApplyProbe;
-            });
-            services.AddSingleton(provider => AttachApplyObserver(partition, RequestCqrsProbeObserverFactory.Create(
-                options.RequestCqrsProbe, provider.GetRequiredService<IOptions<ReplicaConfiguration>>(), options.AllowPrivateNetworkHttp,
-                provider.GetRequiredService<ILocalSiloDetails>(), provider.GetRequiredService<IHostApplicationLifetime>(),
-                provider.GetRequiredService<IOptions<RequestProbeExecutionOptions>>(), provider.GetRequiredService<TimeProvider>())
-                ?? throw new InvalidOperationException(RequestCqrsProbeProtocol.InvalidOptions)));
-            services.AddSingleton<IGrainRequestPhaseObserver>(provider => provider.GetRequiredService<RequestCqrsProbeObserver>());
-            services.AddSingleton<IQueryReadCutObserver>(provider =>
-                provider.GetRequiredService<RequestCqrsProbeObserver>().QueryCuts);
-            services.AddSingleton<global::KeyLoad.Server.Features.DocumentStorage.IRemoteModelNativeFaultObserver>(
-                provider => provider.GetRequiredService<RequestCqrsProbeObserver>());
-            services.AddSingleton<global::KeyLoad.Server.Features.DocumentStorage.IRemoteModelNativeReplayObserver>(
-                provider => provider.GetRequiredService<RequestCqrsProbeObserver>());
-            services.AddSingleton<IGrainRequestProducerDisposedObserver>(provider => provider.GetRequiredService<RequestCqrsProbeObserver>());
-            services.AddSingleton(provider => new RequestCqrsProbeNativeRelay(provider,
-                provider.GetRequiredService<IOptions<NodeOptions>>(), provider.GetRequiredService<IOptions<ReplicaConfiguration>>(),
-                provider.GetRequiredService<ILocalSiloDetails>(), provider.GetRequiredService<ISiloStatusOracle>(),
-                provider.GetRequiredService<IOptions<OrleansMembershipOptions>>(),
-                provider.GetRequiredService<IOptions<RequestProbeExecutionOptions>>(), provider.GetRequiredService<TimeProvider>()));
-            services.AddSingleton<IGrainActivationMigrationObserver>(provider => provider.GetRequiredService<RequestCqrsProbeObserver>()
-                .CreateMigration(provider.GetRequiredService<ReplicaSiloDiscoveryClient>()));
-        }
-        services.AddSingleton(provider => new GrainRequestCodec(partition.Database, provider.GetRequiredService<TimeProvider>(),
-            provider.GetRequiredService<IOptions<GrainRoutingOptions>>())
-        {
-            PhaseObserver = provider.GetService<IGrainRequestPhaseObserver>(),
-            PurposeObserver = provider.GetService<IGrainRequestPurposeObserver>()
-        });
-    }
 
-    private static RequestCqrsProbeObserver AttachApplyObserver(PartitionHost partition, RequestCqrsProbeObserver observer)
-    {
-        partition.ApplyProbe.Attach(observer);
-        return observer;
-    }
+
+
 
     private static void Configure(ISiloBuilder silo, NodeOptions options, ReplicaConfiguration replica, IPAddress address,
         OrleansMembershipOptions membershipOptions, IOptions<RuntimeJournalOptions> journal,
@@ -196,7 +142,9 @@ internal static class OrleansSiloConfiguration
         silo.AddGrainService<global::KeyLoad.Server.Features.DocumentStorage.RemoteModelGrainService>();
         silo.AddGrainService<global::KeyLoad.Server.Features.GraphTraversal.RemoteGraphGrainService>();
         if (options.RequestCqrsProbe.Enabled)
-        { silo.AddGrainService<RequestCqrsProbeGrainService>(); }
+        {
+            silo.AddGrainService<RequestCqrsProbeGrainService>();
+        }
         silo.AddGrainService<RecurringDueGrainService>();
         silo.AddGrainService<SampleChunkGrainService>();
         silo.AddGrainService<AnnProjectionGrainService>();

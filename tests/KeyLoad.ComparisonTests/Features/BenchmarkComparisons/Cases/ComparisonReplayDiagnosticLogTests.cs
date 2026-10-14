@@ -118,7 +118,10 @@ internal sealed class ComparisonReplayDiagnosticLogTests
     }
 }
 
-internal enum ComparisonReplayDiagnosticNumericToken { TrailingNull, EmbeddedNull, Tab, NonAscii }
+internal enum ComparisonReplayDiagnosticNumericToken
+{
+    TrailingNull, EmbeddedNull, Tab, NonAscii
+}
 
 /// <summary>AC-ISO-006L: bounded retention preserves original bytes and chronological capture order.</summary>
 internal sealed class ComparisonReplayDiagnosticRetentionTests
@@ -185,7 +188,9 @@ internal sealed class ComparisonReplayDiagnosticRetentionTests
         var currentQuota = ComparisonReplayDiagnosticLogData.Quota(0, 2, 3);
         var config = ComparisonReplayDiagnosticLogData.Config(3);
         if (replace)
-        { buffer.Add(ComparisonReplayDiagnosticLogData.Config(1)); }
+        {
+            buffer.Add(ComparisonReplayDiagnosticLogData.Config(1));
+        }
         buffer.Add(oldQuota);
         buffer.Add(config);
         await Assert.That(buffer.Snapshot().SequenceEqual(new[] { oldQuota, config })).IsTrue();

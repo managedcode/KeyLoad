@@ -20,7 +20,9 @@ internal static class EventVectorReservedProbeProfile
         var section = configuration.GetSection(Setting);
         var nested = section.GetChildren().Take(SectionPresence).Any();
         if (section.Value is null && !nested)
-        { return false; }
+        {
+            return false;
+        }
         if (section.Value != Enabled || nested || !options.TwoRf3 || !options.Ephemeral
             || !options.RemoteDocumentReads || !options.RemotePartitionQueries
             || !options.ProtectedDocumentMovement || options.RequestProbe is null
@@ -29,7 +31,9 @@ internal static class EventVectorReservedProbeProfile
             || options.ProtocolCohortConfigured || options.TargetSelected
             || options.ComparisonSelectorsPresent || options.ScaleSelected
             || configuration[Registration] != Enabled)
-        { throw new InvalidOperationException(Invalid); }
+        {
+            throw new InvalidOperationException(Invalid);
+        }
         return true;
     }
 }

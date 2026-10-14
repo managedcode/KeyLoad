@@ -1,7 +1,7 @@
 using KeyLoad.Client;
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
 using ManagedCode.Communication;
@@ -49,9 +49,13 @@ internal sealed class DistributedSearchRf3Cancellation
             RequestCqrsProbePhase.AuthorizationReload, RequestCqrsProbeAction.Hold, RemotePartitionQueryRf3Seed.Local);
         caller = CancellationTokenSource.CreateLinkedTokenSource(token);
         if (useMcp)
-        { mcp = CallMcpAsync(official, caller.Token); }
+        {
+            mcp = CallMcpAsync(official, caller.Token);
+        }
         else
-        { sdk = reader.DistributedSearchAsync(DistributedSearchRf3Seed.Request(), caller.Token); }
+        {
+            sdk = reader.DistributedSearchAsync(DistributedSearchRf3Seed.Request(), caller.Token);
+        }
         var parent = await controls.WaitForMarkerAsync(parentArm, RequestCqrsProbePhase.AuthorizationReload,
             RequestCqrsProbeOutcome.Observed, discovery, token).ConfigureAwait(false);
         parentRequest = parent.RequestId;
@@ -106,23 +110,37 @@ internal sealed class DistributedSearchRf3Cancellation
     {
         using var cleanup = new CancellationTokenSource(TwoRf3MembershipProtocol.CleanupDeadline, TimeProvider.System);
         if (caller is { } actualCaller)
-        { await ServerFailureObserver.ObserveAsync(actualCaller.CancelAsync, failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(actualCaller.CancelAsync, failures).ConfigureAwait(false);
+        }
         if (failures.Count != NoFailures && discovery.All(value => value is not null))
-        { await ServerFailureObserver.ObserveAsync(() => controls.ReleaseOpenArmsAsync(discovery, cleanup.Token), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => controls.ReleaseOpenArmsAsync(discovery, cleanup.Token), failures).ConfigureAwait(false);
+        }
         if (sdk is { } actualSdk)
-        { await ServerFailureObserver.ObserveAsync(async () => { _ = await actualSdk.ConfigureAwait(false); }, failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(async () => { _ = await actualSdk.ConfigureAwait(false); }, failures).ConfigureAwait(false);
+        }
         if (mcp is { } actualMcp)
-        { await ServerFailureObserver.ObserveAsync(async () => { _ = await actualMcp.ConfigureAwait(false); }, failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(async () => { _ = await actualMcp.ConfigureAwait(false); }, failures).ConfigureAwait(false);
+        }
         if (parentRequest != Guid.Empty && discovery.All(value => value is not null))
-        { await ServerFailureObserver.ObserveAsync(() => ParentDisposedAsync(controls, discovery, cleanup.Token), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => ParentDisposedAsync(controls, discovery, cleanup.Token), failures).ConfigureAwait(false);
+        }
         if (caller is { } disposedCaller)
-        { ServerFailureObserver.Observe(disposedCaller.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(disposedCaller.Dispose, failures);
+        }
     }
 
     private static async Task<RequestCqrsFaultMcpObservation> CallMcpAsync(McpOfficialClient official, CancellationToken token)
     {
         try
-        { return new(await official.CallAsync(DistributedSearchProtocol.Tool, DistributedSearchRf3Seed.Request(), token).ConfigureAwait(false), null); }
+        {
+            return new(await official.CallAsync(DistributedSearchProtocol.Tool, DistributedSearchRf3Seed.Request(), token).ConfigureAwait(false), null);
+        }
         catch (OperationCanceledException error) { return new(null, error); }
         catch (HttpRequestException error) { return new(null, error); }
         catch (IOException error) { return new(null, error); }

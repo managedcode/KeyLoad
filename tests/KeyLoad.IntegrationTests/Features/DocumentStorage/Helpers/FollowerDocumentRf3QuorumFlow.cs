@@ -44,10 +44,15 @@ internal sealed class FollowerDocumentRf3QuorumFlow(FollowerDocumentRf3State sta
             var current = await RequestCqrsRf3SignedDiscovery.ReadForProfileAsync(state.Wave!.App,
                 RequestCqrsRf3Protocol.NodeName(index), state.Profile, token).ConfigureAwait(false);
             if (indexOfFollower < 0 && current.VoterId != status.Leader)
-            { indexOfFollower = index; follower = current.VoterId; }
+            {
+                indexOfFollower = index;
+                follower = current.VoterId;
+            }
         }
         if (indexOfFollower < 0)
-        { throw new InvalidOperationException(FollowerDocumentRf3Protocol.MissingOwner); }
+        {
+            throw new InvalidOperationException(FollowerDocumentRf3Protocol.MissingOwner);
+        }
         var node = RequestCqrsRf3Protocol.NodeName(indexOfFollower);
         var beforeCold = await VerifyResumedOwnersAsync(node, follower, token).ConfigureAwait(false);
         state.Stage = FollowerDocumentRf3FailureStage.KillingRestoredFollower;

@@ -14,7 +14,9 @@ internal static class PostgresPreparedDecoder
         var sql = reader.Text(Math.Min(options.MaximumRetainedBytes, limitsOptions.Value.MaxQueryBytes));
         var count = reader.Int16();
         if (count < PostgresProtocol.AllRows || count > PostgresProtocol.MaximumParameters)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, PostgresProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, PostgresProtocol.Invalid);
+        }
         var oids = new int[count];
         for (var index = PostgresProtocol.AllRows; index < count; index++)
         {
@@ -39,18 +41,24 @@ internal static class PostgresPreparedDecoder
         if (syntax is global::Microsoft.SqlServer.TransactSql.ScriptDom.CreateTableStatement table)
         {
             if (positionalParameterCount != PostgresProtocol.AllRows)
-            { throw Errors.Fail(ErrorCode.Validation, PostgresProtocol.Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Validation, PostgresProtocol.Invalid);
+            }
             _ = ScriptDomCreateTableSyntax.Read(table, limitsOptions, token.ThrowIfCancellationRequested, token);
         }
         else if (syntax is global::Microsoft.SqlServer.TransactSql.ScriptDom.SetCommandStatement control)
         {
             if (positionalParameterCount != PostgresProtocol.AllRows)
-            { throw Errors.Fail(ErrorCode.Validation, PostgresProtocol.Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Validation, PostgresProtocol.Invalid);
+            }
             _ = ScriptDomContextIdentity.Read(control, token.ThrowIfCancellationRequested, token);
         }
         else if (!rows && syntax is not (global::Microsoft.SqlServer.TransactSql.ScriptDom.ExecuteStatement
             or global::Microsoft.SqlServer.TransactSql.ScriptDom.InsertStatement))
-        { throw Errors.Fail(ErrorCode.UnsupportedCapability, PostgresProtocol.Unsupported); }
+        {
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, PostgresProtocol.Unsupported);
+        }
         var joinedInsert = syntax is global::Microsoft.SqlServer.TransactSql.ScriptDom.InsertStatement
         {
             InsertSpecification.InsertSource: global::Microsoft.SqlServer.TransactSql.ScriptDom.SelectInsertSource
@@ -71,7 +79,9 @@ internal static class PostgresPreparedDecoder
         var formats = Formats(ref reader, statement.ParameterOids.Length);
         var count = reader.Int16();
         if (count != statement.ParameterOids.Length)
-        { throw Errors.Fail(ErrorCode.Validation, PostgresProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, PostgresProtocol.Invalid);
+        }
         var values = new Dictionary<string, JsonElement>(count, StringComparer.Ordinal);
         var retained = checked(name.Length * sizeof(char) + statement.Sql.Length * sizeof(char)
             + statement.ParameterOids.Length * sizeof(int));
@@ -80,9 +90,13 @@ internal static class PostgresPreparedDecoder
             token.ThrowIfCancellationRequested();
             var length = reader.Int32();
             if (length < PostgresProtocol.NullLength)
-            { throw Errors.Fail(ErrorCode.Validation, PostgresProtocol.Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Validation, PostgresProtocol.Invalid);
+            }
             if (length > options.MaximumRetainedBytes - retained)
-            { throw Errors.Fail(ErrorCode.ResourceExhausted, PostgresProtocol.Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.ResourceExhausted, PostgresProtocol.Invalid);
+            }
             var key = PostgresProtocol.ParameterPrefix + (index + sizeof(byte)).ToString(CultureInfo.InvariantCulture);
             var format = formats.Length == PostgresProtocol.AllRows ? PostgresProtocol.TextFormat
                 : formats.Length == sizeof(byte) ? formats[PostgresProtocol.AllRows] : formats[index];
@@ -91,7 +105,9 @@ internal static class PostgresPreparedDecoder
             values.Add(key, value);
             retained = checked(retained + key.Length * sizeof(char) + value.GetRawText().Length * sizeof(char));
             if (retained > options.MaximumRetainedBytes)
-            { throw Errors.Fail(ErrorCode.ResourceExhausted, PostgresProtocol.Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.ResourceExhausted, PostgresProtocol.Invalid);
+            }
         }
         var resultFormats = Formats(ref reader, sizeof(byte));
         reader.Complete();
@@ -103,13 +119,17 @@ internal static class PostgresPreparedDecoder
     {
         var count = reader.Int16();
         if (count != PostgresProtocol.AllRows && count != sizeof(byte) && count != columns)
-        { throw Errors.Fail(ErrorCode.Validation, PostgresProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, PostgresProtocol.Invalid);
+        }
         var result = new short[count];
         for (var index = PostgresProtocol.AllRows; index < count; index++)
         {
             result[index] = reader.Int16();
             if (result[index] is not (PostgresProtocol.TextFormat or PostgresProtocol.BinaryFormat))
-            { throw Errors.Fail(ErrorCode.UnsupportedCapability, PostgresProtocol.Unsupported); }
+            {
+                throw Errors.Fail(ErrorCode.UnsupportedCapability, PostgresProtocol.Unsupported);
+            }
         }
         return result;
     }
@@ -118,6 +138,8 @@ internal static class PostgresPreparedDecoder
     {
         if (oid is not (PostgresProtocol.Int16Oid or PostgresProtocol.Int32Oid or PostgresProtocol.Int64Oid or PostgresProtocol.BooleanOid
             or PostgresProtocol.TextOid or PostgresProtocol.JsonOid or PostgresProtocol.JsonbOid or PostgresNumericProtocol.Oid))
-        { throw Errors.Fail(ErrorCode.UnsupportedCapability, PostgresProtocol.Unsupported); }
+        {
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, PostgresProtocol.Unsupported);
+        }
     }
 }

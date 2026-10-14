@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClusterRouting.Helpers;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 using ManagedCode.Communication;
 
@@ -107,7 +107,9 @@ internal static class RequestCqrsAuthorityFaultCleanup
         {
             if (controls is null || armId == Guid.Empty || !originalStarted
                 || controls.ArmFor(armId).ProducerDisposedSeen || discovery is null)
-            { return; }
+            {
+                return;
+            }
             _ = await controls.WaitForMarkerAsync(armId, RequestCqrsProbePhase.ProducerDisposed,
                 RequestCqrsProbeOutcome.Observed, discovery, cancellationToken).ConfigureAwait(false);
         }, failures, failureObserver, RequestCqrsLifecycleStage.AuthorityProducerDispose).ConfigureAwait(false);
@@ -133,7 +135,9 @@ internal static class RequestCqrsAuthorityFaultCleanup
         List<Exception> failures, Action<RequestCqrsLifecycleStage>? failureObserver)
     {
         if (wave is null)
-        { return !startupAttempted; }
+        {
+            return !startupAttempted;
+        }
         var prior = failures.Count;
         await ObserveAsync(wave.StopAsync, failures, failureObserver,
             RequestCqrsLifecycleStage.AuthorityWaveStop).ConfigureAwait(false);
@@ -158,7 +162,9 @@ internal static class RequestCqrsAuthorityFaultCleanup
         CancellationToken cancellationToken)
     {
         if (!controls.ArmFor(armId).Retired)
-        { await controls.RetireArmAsync(armId, cancellationToken).ConfigureAwait(false); }
+        {
+            await controls.RetireArmAsync(armId, cancellationToken).ConfigureAwait(false);
+        }
     }
 
     private static Task InspectIfReadyAsync(RequestCqrsAuthorityOutcomeOracle outcomeOracle,

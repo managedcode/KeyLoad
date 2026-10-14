@@ -46,7 +46,9 @@ internal static class TimeSeriesAggregateScanBoundRf3Trial
                 await TimeSeriesAggregateScanBoundRf3Refusal.RunAsync(reader, state, current, token);
                 await TimeSeriesAggregateScanBoundRf3Seed.ReplayAsync(administrator, state.Command, state.Receipt, current, token);
                 if (state.FreshCommand is not null)
-                { await TimeSeriesAggregateScanBoundRf3Seed.ReplayAsync(administrator, state.FreshCommand, state.FreshReceipt!, current, token); }
+                {
+                    await TimeSeriesAggregateScanBoundRf3Seed.ReplayAsync(administrator, state.FreshCommand, state.FreshReceipt!, current, token);
+                }
                 await current();
                 return true;
             }, token);

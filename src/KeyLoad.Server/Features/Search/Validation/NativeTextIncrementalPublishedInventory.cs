@@ -16,11 +16,15 @@ internal static class NativeTextIncrementalPublishedInventory
         budget.ChargeBytes(NativeSerialization.Measure(manifest));
         if (!NativeSerialization.Serialize(original).AsSpan()
             .SequenceEqual(NativeSerialization.Serialize(manifest)))
-        { throw NativeTextErrors.Corrupt(); }
+        {
+            throw NativeTextErrors.Corrupt();
+        }
         var owner = NativeTextOwnerFiles.ReadOwner(Path.Combine(actual.Path, NativeTextProtocol.OwnerFile),
             actual.Root, actual.Leaf, manifest.Scope.NodeId, options);
         if (owner.Scope != manifest.Scope)
-        { throw NativeTextErrors.Corrupt(); }
+        {
+            throw NativeTextErrors.Corrupt();
+        }
         NativeTextInventory.Verify(actual.Path, owner.OwnedPaths, manifest.Files, options, budget, retained);
         budget.Check();
     }

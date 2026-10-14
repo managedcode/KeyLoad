@@ -16,7 +16,9 @@ internal static class QueueReceiveReplayAssertions
         await NativeReplayResultAssertions.Same<ReceiveResult>(stored.Result, original);
         var actual = replay();
         if (original.Get<ReceiveResult>().Deliveries.IsEmpty || leaseCurrent)
-        { await NativeReplayResultAssertions.Same<ReceiveResult>(actual, original); }
+        {
+            await NativeReplayResultAssertions.Same<ReceiveResult>(actual, original);
+        }
         else
         {
             await Assert.That(actual.Error).IsEqualTo(ErrorCode.StaleLease);

@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.Server.Features.Search;
 
@@ -16,9 +16,13 @@ internal sealed class NativeTextOnlineSessions(int maximumSessions)
         {
             ObjectDisposedException.ThrowIf(closed, this);
             if (maximumSessions <= EmptySessionCapacity || sessions.Count >= maximumSessions)
-            { throw NativeTextErrors.Busy(); }
+            {
+                throw NativeTextErrors.Busy();
+            }
             if (!sessions.TryAdd(session.Id, session))
-            { throw NativeTextErrors.Mismatch(); }
+            {
+                throw NativeTextErrors.Mismatch();
+            }
         }
     }
 
@@ -40,7 +44,9 @@ internal sealed class NativeTextOnlineSessions(int maximumSessions)
             {
                 var matched = TryMatchOriginal(session, command, principalId, originalExpiry);
                 if (matched is not null)
-                { return matched; }
+                {
+                    return matched;
+                }
             }
             return null;
         }
@@ -56,7 +62,9 @@ internal sealed class NativeTextOnlineSessions(int maximumSessions)
             foreach (var session in sessions.Values)
             {
                 if (MatchesOriginal(session, principalId, request, budget))
-                { originals.Add(session); }
+                {
+                    originals.Add(session);
+                }
             }
             budget.Check();
             return originals.ToArray();
@@ -70,7 +78,9 @@ internal sealed class NativeTextOnlineSessions(int maximumSessions)
         {
             var matched = session.TryMatchCheckpoint(command, principalId, originalExpiry);
             if (matched is not null)
-            { ObjectDisposedException.ThrowIf(closed, this); }
+            {
+                ObjectDisposedException.ThrowIf(closed, this);
+            }
             return matched;
         }
     }
@@ -81,11 +91,15 @@ internal sealed class NativeTextOnlineSessions(int maximumSessions)
         lock (session.Gate)
         {
             if (session.PrincipalId != principalId || session.Request.CommandId != request.CommandId)
-            { return false; }
+            {
+                return false;
+            }
             budget.ChargeBytes(NativeSerialization.Measure(session.Request));
             budget.ChargeBytes(NativeSerialization.Measure(request));
             if (!NativeSerialization.Serialize(session.Request).AsSpan().SequenceEqual(NativeSerialization.Serialize(request)))
-            { throw NativeTextErrors.Mismatch(); }
+            {
+                throw NativeTextErrors.Mismatch();
+            }
             return true;
         }
     }
@@ -93,7 +107,9 @@ internal sealed class NativeTextOnlineSessions(int maximumSessions)
     internal NativeTextOnlineSession? FindForCleanup(Guid id)
     {
         lock (gate)
-        { return sessions.GetValueOrDefault(id); }
+        {
+            return sessions.GetValueOrDefault(id);
+        }
     }
 
     internal void RemoveAfterJoinedCleanup(NativeTextOnlineSession original)
@@ -101,7 +117,9 @@ internal sealed class NativeTextOnlineSessions(int maximumSessions)
         lock (gate)
         {
             if (!sessions.TryGetValue(original.Id, out var actual) || !ReferenceEquals(actual, original))
-            { throw NativeTextErrors.Ownership(); }
+            {
+                throw NativeTextErrors.Ownership();
+            }
             sessions.Remove(original.Id);
         }
     }
@@ -109,6 +127,9 @@ internal sealed class NativeTextOnlineSessions(int maximumSessions)
     internal NativeTextOnlineSession[] CloseAndCapture()
     {
         lock (gate)
-        { closed = true; return sessions.Values.ToArray(); }
+        {
+            closed = true;
+            return sessions.Values.ToArray();
+        }
     }
 }

@@ -37,7 +37,9 @@ internal static class PackedBackupNativeCutRefusal
         await Assert.That(JsonElement.DeepEquals(actual.RootElement,
             JsonSerializer.SerializeToElement(expected, JsonDefaults.Options))).IsTrue();
         foreach (var path in new[] { target, cliTarget })
-        { await Assert.That(File.Exists(path) || Directory.Exists(path)).IsFalse(); }
+        {
+            await Assert.That(File.Exists(path) || Directory.Exists(path)).IsFalse();
+        }
         await Assert.That(Directory.EnumerateDirectories(root, Staging, SearchOption.AllDirectories).Any()).IsFalse();
     }
 

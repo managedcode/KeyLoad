@@ -12,20 +12,28 @@ internal sealed partial class RequestCqrsClusterFixture
         if (NativeMaintenance is not null)
         {
             if (!clusterStopped)
-            { return; }
+            {
+                return;
+            }
             var before = failures.Count;
             await KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => NativeMaintenance.DisposeAsync().AsTask(), failures);
             if (failures.Count != before)
-            { return; }
+            {
+                return;
+            }
         }
         if (NativeAnnMaintenance is not null)
         {
             if (!clusterStopped)
-            { return; }
+            {
+                return;
+            }
             var before = failures.Count;
             await KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => NativeAnnMaintenance.DisposeAsync().AsTask(), failures);
             if (failures.Count != before)
-            { return; }
+            {
+                return;
+            }
         }
         try
         {

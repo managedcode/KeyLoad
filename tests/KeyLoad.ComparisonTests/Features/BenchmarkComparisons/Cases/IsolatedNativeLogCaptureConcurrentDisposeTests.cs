@@ -62,7 +62,9 @@ internal sealed class IsolatedNativeLogCaptureConcurrentDisposeTests
             await IsolatedNativeOriginalTaskSettlement.RunAsync(RunBodyAsync, BodyFailureStage, failures, execution);
         }
         finally
-        { release.TrySetResult(); }
+        {
+            release.TrySetResult();
+        }
     }
 
     private static void BlockMarker(string line, TaskCompletionSource entered, TaskCompletionSource release)

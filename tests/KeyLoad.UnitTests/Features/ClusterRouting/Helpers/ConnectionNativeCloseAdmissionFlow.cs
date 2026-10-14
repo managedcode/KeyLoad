@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
@@ -37,16 +37,22 @@ internal static class ConnectionNativeCloseAdmissionFlow
             await scenario.AssertActivationCountAsync(ConnectionNativeProtocol.AbsentActivations, token);
             await FreshOwnerAsync(scenario, observer, second, requestId, token);
         }
-        catch (Exception primary) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(primary))
-        { failures.Add(primary); }
-        catch (Exception primary) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(primary))
-        { failures.Add(primary); }
+        catch (Exception primary) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(primary))
+        {
+            failures.Add(primary);
+        }
+        catch (Exception primary) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(primary))
+        {
+            failures.Add(primary);
+        }
         finally
         {
             callback.Release.TrySetResult();
             await KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => original, failures);
             if (close is not null)
-            { await KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => close, failures); }
+            {
+                await KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => close, failures);
+            }
         }
         KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -107,10 +113,14 @@ internal static class ConnectionNativeCloseAdmissionFlow
             await Assert.That(replay.Payload.Span.SequenceEqual(created.Payload.Span)).IsTrue();
             await Assert.That(scenario.Fixture.Database.Store.Position).IsEqualTo(position);
         }
-        catch (Exception primary) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(primary))
-        { failures.Add(primary); }
-        catch (Exception primary) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(primary))
-        { failures.Add(primary); }
+        catch (Exception primary) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(primary))
+        {
+            failures.Add(primary);
+        }
+        catch (Exception primary) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(primary))
+        {
+            failures.Add(primary);
+        }
         finally
         {
             await KeyLoad.Server.ServerFailureObserver.ObserveAsync(

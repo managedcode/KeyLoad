@@ -17,7 +17,10 @@ internal static class BlobGlobalQuotaR49Trial
             await BlobGlobalQuotaR49Operations.AbortAsync(callers, state, state.Held, token);
             await BlobGlobalQuotaR49Replay.RefusedAsync(callers, state, token);
             await BlobGlobalQuotaR49Replay.UploadAsync(callers, state, state.Held, token);
-            var accepted = state.Attempt.Begin with { CommandId = Guid.NewGuid() };
+            var accepted = state.Attempt.Begin with
+            {
+                CommandId = Guid.NewGuid()
+            };
             await BlobGlobalQuotaR49Operations.BeginAsync(callers, state, state.Attempt, accepted, token);
             await BlobGlobalQuotaR49Replay.RefusedAsync(callers, state, token);
             await BlobGlobalQuotaR49Operations.AbortAsync(callers, state, state.Attempt, token);
@@ -38,6 +41,9 @@ internal static class BlobGlobalQuotaR49Trial
         }, token);
         await NativeTextProtectedPublicColdRestart.RunAsync(fixture, token);
         _ = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey, async callers =>
-        { await BlobGlobalQuotaR49Replay.AllAsync(callers, state, token); return true; }, token);
+        {
+            await BlobGlobalQuotaR49Replay.AllAsync(callers, state, token);
+            return true;
+        }, token);
     }
 }

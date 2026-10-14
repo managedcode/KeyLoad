@@ -87,7 +87,12 @@ internal static class AnnProjectionPinTestSupport
             new ConfigurePrincipalRequest(principal)).Get<PrincipalRecord>();
 
     internal static PrincipalRecord Administrator(string id, string tenant, bool revoked = false, long epoch = 1)
-        => new(id, tenant, [], []) { ClusterAdministrator = true, Revoked = revoked, PolicyEpoch = epoch };
+        => new(id, tenant, [], [])
+        {
+            ClusterAdministrator = true,
+            Revoked = revoked,
+            PolicyEpoch = epoch
+        };
 
     internal static PrincipalRecord OrdinaryPrincipal(string id, string tenant)
         => new(id, tenant, [], []);

@@ -171,9 +171,18 @@ internal sealed class NativeTextRf3LeaderLossTests(ClusterFixture fixture)
     {
         private readonly HttpClient[] callerHttp;
         private readonly HttpClient[] adminHttp;
-        internal KeyLoadClient[] Callers { get; }
-        internal KeyLoadClient[] Administrators { get; }
-        internal string Secret { get; }
+        internal KeyLoadClient[] Callers
+        {
+            get;
+        }
+        internal KeyLoadClient[] Administrators
+        {
+            get;
+        }
+        internal string Secret
+        {
+            get;
+        }
 
         internal NativeTextRf3Clients(ClusterFixture fixture, string secret, string[] nodes)
         {

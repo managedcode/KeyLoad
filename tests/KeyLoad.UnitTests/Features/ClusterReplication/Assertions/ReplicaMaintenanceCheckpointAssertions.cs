@@ -39,9 +39,13 @@ internal static class ReplicaMaintenanceCheckpointAssertions
         {
             token.ThrowIfCancellationRequested();
             try
-            { _ = await consensus.ReadCheckpointStateAsync(token); }
+            {
+                _ = await consensus.ReadCheckpointStateAsync(token);
+            }
             catch (global::KeyLoad.KeyLoadException failure) when (failure.Code == global::KeyLoad.ErrorCode.RecoveryRequired)
-            { break; }
+            {
+                break;
+            }
             await Task.Yield();
         }
         try
@@ -56,7 +60,9 @@ internal static class ReplicaMaintenanceCheckpointAssertions
     {
         await Assert.That(failures.Count).IsGreaterThan(0);
         foreach (var failure in failures)
-        { await RequireNativeFailureAsync(failure); }
+        {
+            await RequireNativeFailureAsync(failure);
+        }
     }
 
     private static async Task RequireNativeFailureAsync(Exception failure)

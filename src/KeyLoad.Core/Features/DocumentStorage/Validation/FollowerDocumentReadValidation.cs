@@ -18,7 +18,9 @@ public sealed partial class DatabaseEngine
         ArgumentNullException.ThrowIfNull(request.Reference);
         if (request.Version != FollowerReadVersion || string.IsNullOrWhiteSpace(request.ReplicaId)
             || request.MaximumLagPositions < FollowerReadInitialPosition)
-        { throw Errors.Fail(ErrorCode.Validation, FollowerReadInvalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, FollowerReadInvalid);
+        }
         ValidatePartition(request.Reference.Partition);
     }
 
@@ -28,12 +30,16 @@ public sealed partial class DatabaseEngine
         if (placement.PhysicalShardId != expectedOwner.PhysicalShardId
             || placement.Incarnation != expectedOwner.Incarnation || placement.PlacementEpoch != expectedOwner.PlacementEpoch
             || !placement.VoterIds.SequenceEqual(expectedOwner.VoterIds, StringComparer.Ordinal))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, FollowerReadOwnerChanged); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, FollowerReadOwnerChanged);
+        }
         var bytes = view.ReadOwnedValue(KeySpace.AppliedBytes)
             ?? throw Errors.Fail(ErrorCode.Corruption, DocumentTokenCorruptPosition);
         var applied = NativeSerialization.Deserialize<long>(bytes);
         if (applied <= FollowerReadInitialPosition)
-        { throw Errors.Fail(ErrorCode.Corruption, DocumentTokenCorruptPosition); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, DocumentTokenCorruptPosition);
+        }
         return new(placement.Incarnation, partition.AtomicPartitionId, applied, placement.PlacementEpoch);
     }
 
@@ -44,12 +50,18 @@ public sealed partial class DatabaseEngine
             || snapshot.ReplicaId != request.ReplicaId || snapshot.Token.Incarnation != authority.Incarnation
             || snapshot.Token.AtomicPartitionId != authority.AtomicPartitionId
             || snapshot.Token.OwnershipEpoch != authority.OwnershipEpoch || snapshot.Token.Position > authority.Position)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, FollowerReadOwnerChanged); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, FollowerReadOwnerChanged);
+        }
         if (request.MinimumToken is { } minimum && snapshot.Token.Position < minimum.Position)
-        { throw Errors.Fail(ErrorCode.HistoryUnavailable, FollowerReadMinimumUnavailable); }
+        {
+            throw Errors.Fail(ErrorCode.HistoryUnavailable, FollowerReadMinimumUnavailable);
+        }
         var lag = authority.Position - snapshot.Token.Position;
         if (lag > request.MaximumLagPositions)
-        { throw Errors.Fail(ErrorCode.HistoryUnavailable, FollowerReadLagExceeded); }
+        {
+            throw Errors.Fail(ErrorCode.HistoryUnavailable, FollowerReadLagExceeded);
+        }
         return lag;
     }
 }

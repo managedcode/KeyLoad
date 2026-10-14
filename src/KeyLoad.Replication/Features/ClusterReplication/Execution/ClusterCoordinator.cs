@@ -75,7 +75,9 @@ public sealed class ClusterCoordinator : ICommitCoordinator, IHostedService, IAs
     {
         ArgumentNullException.ThrowIfNull(operation);
         if (operation.Kind != OperationKind.OnlineTextPublicationPhase)
-        { throw Errors.Fail(ErrorCode.PermissionDenied, ReplicaProtocol.InvalidAppend); }
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, ReplicaProtocol.InvalidAppend);
+        }
         return Enqueue(database.VerifyOperationAuthority(operation), cancellationToken).Completion;
     }
 
@@ -84,7 +86,9 @@ public sealed class ClusterCoordinator : ICommitCoordinator, IHostedService, IAs
     {
         ArgumentNullException.ThrowIfNull(operation);
         if (operation.Kind != OperationKind.CommitProjectionBatch)
-        { throw Errors.Fail(ErrorCode.PermissionDenied, ReplicaProtocol.InvalidAppend); }
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, ReplicaProtocol.InvalidAppend);
+        }
         return Enqueue(database.VerifyOperationAuthority(operation), cancellationToken).Completion;
     }
 
@@ -92,9 +96,13 @@ public sealed class ClusterCoordinator : ICommitCoordinator, IHostedService, IAs
     {
         var pending = Enqueue(operation, cancellationToken);
         try
-        { return await pending.Completion.WaitAsync(cancellationToken).ConfigureAwait(false); }
+        {
+            return await pending.Completion.WaitAsync(cancellationToken).ConfigureAwait(false);
+        }
         catch (OperationCanceledException)
-        { throw Errors.Fail(ErrorCode.UnknownWriteOutcome, ReplicaProtocol.InterruptedWrite); }
+        {
+            throw Errors.Fail(ErrorCode.UnknownWriteOutcome, ReplicaProtocol.InterruptedWrite);
+        }
     }
 
     private AdmittedCommand Enqueue(ReplicatedOperation operation, CancellationToken cancellationToken)
@@ -102,11 +110,18 @@ public sealed class ClusterCoordinator : ICommitCoordinator, IHostedService, IAs
         ArgumentNullException.ThrowIfNull(operation.PrincipalId);
         cancellationToken.ThrowIfCancellationRequested();
         if (worker is null || worker.IsCompleted)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaProtocol.NoLeader); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaProtocol.NoLeader);
+        }
         var bytes = Math.Max(Encoding.UTF8.GetByteCount(operation.PayloadJson), operation.NativePayload.Length);
         if (operation.Id == Guid.Empty || bytes > database.Limits.MaxBatchBytes)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, ReplicaProtocol.InvalidAppend); }
-        var evaluated = operation with { EvaluatedAt = clock.GetUtcNow() };
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, ReplicaProtocol.InvalidAppend);
+        }
+        var evaluated = operation with
+        {
+            EvaluatedAt = clock.GetUtcNow()
+        };
         var principal = database.Store.Read(view => database.Principal(view, evaluated.PrincipalId, evaluated.EvaluatedAt));
         return commands.Enqueue(evaluated, principal, bytes, cancellationToken);
     }
@@ -208,7 +223,9 @@ public sealed class ClusterCoordinator : ICommitCoordinator, IHostedService, IAs
         commands.Stop();
         await lifetime.CancelAsync().ConfigureAwait(false);
         if (worker is not null)
-        { await worker.ConfigureAwait(false); }
+        {
+            await worker.ConfigureAwait(false);
+        }
     }
 
     /// <summary>Drains the queue once; DI aliases do not dispose its lifetime source twice.</summary>
@@ -223,7 +240,9 @@ public sealed class ClusterCoordinator : ICommitCoordinator, IHostedService, IAs
         {
             await commands.DisposeAsync().ConfigureAwait(false);
             if (Interlocked.Exchange(ref disposed, DisposalClaimed) == DisposalUnclaimed)
-            { lifetime.Dispose(); }
+            {
+                lifetime.Dispose();
+            }
         }
     }
 }

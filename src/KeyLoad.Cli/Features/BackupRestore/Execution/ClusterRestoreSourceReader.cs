@@ -26,21 +26,29 @@ internal static class ClusterRestoreSourceReader
         {
             work.Check();
             if (input is null || !seen.Add(input.OwnerId))
-            { throw Errors.Fail(ErrorCode.Validation, Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Validation, Invalid);
+            }
             var path = Path.TrimEndingDirectorySeparator(Path.GetFullPath(input.ArchiveDirectory));
             ClusterRestorePathValidation.RequireAncestors(path);
             var candidates = options.Credentials.Where(value => value.SourceOwnerId == input.OwnerId).ToArray();
             if (candidates.Length != SingleCredential || string.IsNullOrWhiteSpace(candidates.First().Credential))
-            { throw Errors.Fail(ErrorCode.PermissionDenied, Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.PermissionDenied, Invalid);
+            }
             var archive = ZoneTreeStore.ReadVerifiedCatalogBackup(path, storage, cancellationToken);
             if (archive.ManifestDigest != input.ExpectedManifestDigest)
-            { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, Invalid);
+            }
             var actual = ZoneTreeStore.ReadVerifiedCatalogBackup(path, storage, (view, identity, position, metadata) =>
             {
                 var cut = ClusterBackupNativeCutVerification.Require(view, identity, position, metadata,
                     candidates.First().Credential, limits, clock, work);
                 if (cut.Owner.PhysicalShardId != input.OwnerId)
-                { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+                {
+                    throw Errors.Fail(ErrorCode.Corruption, Invalid);
+                }
                 var subject = ClusterRestoreOperatorSubjects.Read(view, input.OwnerId, candidates.First().Credential, clock);
                 return (Cut: cut, Subject: subject, Fingerprint: Convert.ToHexStringLower(SHA256.HashData(identity.SigningKey.Span)));
             }, cancellationToken);

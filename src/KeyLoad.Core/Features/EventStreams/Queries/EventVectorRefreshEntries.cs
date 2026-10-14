@@ -15,20 +15,33 @@ internal static class EventVectorRefreshEntries
             captured.EntryChecksum, admission);
         if (acknowledged.IsDefault || acknowledged.Select(static entry => entry.Source).Distinct().Count() != acknowledged.Length
             || coverage.Select(static entry => entry.Source).Distinct().Count() != coverage.Length)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidRefresh); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidRefresh);
+        }
         var prior = acknowledged.ToDictionary(static entry => entry.Source);
         var result = ImmutableArray.CreateBuilder<EventVectorEntry>(coverage.Length);
         for (var ordinal = FirstOrdinal; ordinal < coverage.Length; ordinal++)
         {
             var current = coverage[ordinal];
             if (!prior.TryGetValue(current.Source, out var original))
-            { result.Add(current); continue; }
+            {
+                result.Add(current);
+                continue;
+            }
             RequireAuthority(original, current);
             if (current.CapturedCut < original.CapturedCut || current.CapturedTailPosition < original.Position)
-            { throw Errors.Fail(ErrorCode.Corruption, InvalidRefresh); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, InvalidRefresh);
+            }
             if (current.FirstAvailablePosition > checked(original.Position + PositionStep))
-            { throw Errors.Fail(ErrorCode.HistoryUnavailable, InvalidRefresh); }
-            result.Add(current with { Position = original.Position, EventSequence = original.EventSequence });
+            {
+                throw Errors.Fail(ErrorCode.HistoryUnavailable, InvalidRefresh);
+            }
+            result.Add(current with
+            {
+                Position = original.Position,
+                EventSequence = original.EventSequence
+            });
         }
         return result.MoveToImmutable();
     }
@@ -40,6 +53,8 @@ internal static class EventVectorRefreshEntries
             || current.SchemaVersion != original.SchemaVersion
             || current.LogicalPlacementRevision != original.LogicalPlacementRevision
             || current.DirectoryFence != original.DirectoryFence)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidRefresh); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidRefresh);
+        }
     }
 }

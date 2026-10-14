@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.Search;
 using Microsoft.Extensions.Configuration;
@@ -23,7 +23,9 @@ internal sealed class NativeAnnCrashRuntime : IAsyncDisposable
         catch (Exception primary)
         {
             try
-            { services.Dispose(); }
+            {
+                services.Dispose();
+            }
             catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
             throw;
         }
@@ -37,11 +39,15 @@ internal sealed class NativeAnnCrashRuntime : IAsyncDisposable
     public async ValueTask DisposeAsync()
     {
         try
-        { await owner.DisposeAsync().ConfigureAwait(false); }
+        {
+            await owner.DisposeAsync().ConfigureAwait(false);
+        }
         catch (Exception primary)
         {
             try
-            { await services.DisposeAsync().ConfigureAwait(false); }
+            {
+                await services.DisposeAsync().ConfigureAwait(false);
+            }
             catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
             throw;
         }

@@ -27,15 +27,22 @@ internal static class QueueEmptyHistoryPublicAssertions
     internal static async Task ChangedAsync(RequestCqrsRf3Callers callers,
         QueueEmptyHistoryPublicState state, CancellationToken token)
     {
-        var changed = state.EmptyRequest with { MaxMessages = 2 };
+        var changed = state.EmptyRequest with
+        {
+            MaxMessages = 2
+        };
         var refusal = await callers.Sdk.ReceiveAsync(changed, token);
         await SagaTimeoutRf3Assertions.AssertSdkErrorAsync(refusal, ErrorCode.Conflict);
         await Assert.That(refusal.Value).IsNull();
         var problem = JsonSerializer.SerializeToElement(refusal.Problem, JsonDefaults.Options);
         if (state.ChangedProblem is { } saved)
-        { await Assert.That(JsonDefaults.Serialize(problem).SequenceEqual(JsonDefaults.Serialize(saved))).IsTrue(); }
+        {
+            await Assert.That(JsonDefaults.Serialize(problem).SequenceEqual(JsonDefaults.Serialize(saved))).IsTrue();
+        }
         else
-        { state.ChangedProblem = problem; }
+        {
+            state.ChangedProblem = problem;
+        }
         await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(
             McpCallerTools.MessagesReceive, changed, token), ErrorCode.Conflict, true);
     }

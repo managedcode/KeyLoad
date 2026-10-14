@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Query.Features.QueryExecution;
 using KeyLoad.Server.Features.BlobStorage;
 using KeyLoad.Server.Features.ClusterRouting;
@@ -43,12 +43,16 @@ internal sealed class RemoteDocumentClient : IAsyncDisposable
             token.ThrowIfCancellationRequested();
             if (!PhysicalGroupAddress.CanonicalAddress(innerAddress, membership)
                 || !string.Equals(original.DispatchSiloAddress, innerAddress, StringComparison.Ordinal))
-            { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof); }
+            {
+                throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof);
+            }
             await Native.RequireCurrentAsync(destination, original.DispatchSiloAddress, token).ConfigureAwait(false);
             token.ThrowIfCancellationRequested();
         }
         catch (Exception error) when (original.MayHaveEffects && NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { throw Errors.Fail(ErrorCode.UnknownWriteOutcome, RemoteModelNativeProtocol.Unavailable, error); }
+        {
+            throw Errors.Fail(ErrorCode.UnknownWriteOutcome, RemoteModelNativeProtocol.Unavailable, error);
+        }
     }
 
     internal async Task<OwnedDocumentReadResultV1> ReadAsync(RemoteDocumentCallV1 call,
@@ -103,13 +107,17 @@ internal sealed class RemoteDocumentClient : IAsyncDisposable
             cancellationToken).ConfigureAwait(false);
         using var targetMac = RemoteDocumentMac.FromConfiguredSecret(options.PhysicalGroupTrust.ForeignPeerSecret);
         if (!targetMac.Verify(original.Payload.Span, original.Signature, reply: true))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof);
+        }
         var reply = NativeSerialization.Deserialize<RemoteDocumentReplyV1>(original.Payload.Span);
         Verify(call, reply, cancellationToken);
         await RequireCurrentReplyAsync(destination, original, reply.EndpointDiscovery.SiloAddress,
             cancellationToken).ConfigureAwait(false);
         if (reply.Error is { } error)
-        { throw Errors.Fail(error, reply.SafeDetail ?? RemoteDocumentProtocol.Unavailable); }
+        {
+            throw Errors.Fail(error, reply.SafeDetail ?? RemoteDocumentProtocol.Unavailable);
+        }
         return reply;
     }
 
@@ -133,23 +141,33 @@ internal sealed class RemoteDocumentClient : IAsyncDisposable
             || reply.SearchLeaf is not null && (call.SearchLeaf is null || reply.Result is not null || reply.QueryLeaf is not null)
             || reply.Error is not null && (reply.Result is not null || reply.QueryLeaf is not null || reply.SearchLeaf is not null)
             || reply.Error is null && reply.SafeDetail is not null)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof);
+        }
         if (reply.Result is { } result && (result.NodeId == Guid.Empty || result.Incarnation != owner.Incarnation
             || result.AppliedPosition < EmptyApplied || result.StorePosition < EmptyApplied
             || result.Placement.PhysicalShardId != owner.PhysicalShardId
             || result.Placement.Incarnation != owner.Incarnation || result.Placement.Partition != RemotePartitionQueryScope.Partition(call)
             || result.Placement.PlacementEpoch != owner.PlacementEpoch
             || !result.Placement.VoterIds.SequenceEqual(owner.VoterIds, StringComparer.Ordinal)))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentProtocol.Unavailable);
+        }
         if (reply.QueryLeaf is { } leaf && (leaf.NodeId == Guid.Empty || leaf.Incarnation != owner.Incarnation
             || leaf.ReadGeneration < EmptyApplied || leaf.Partition != RemotePartitionQueryScope.Partition(call)))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentProtocol.Unavailable);
+        }
         if (reply.SearchLeaf is { } search && (search.Witness is null || search.Witness.NodeId == Guid.Empty
             || search.Witness.Incarnation != owner.Incarnation || search.Witness.ReadGeneration < EmptyApplied
             || search.Witness.Partition != RemotePartitionQueryScope.Partition(call)))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentProtocol.Unavailable);
+        }
         if (reply.Error is { } error && (!Enum.IsDefined(error) || string.IsNullOrWhiteSpace(reply.SafeDetail)))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof);
+        }
     }
 
     private RemoteModelNativeClient Native
@@ -158,7 +176,9 @@ internal sealed class RemoteDocumentClient : IAsyncDisposable
         {
             var existing = Volatile.Read(ref native);
             if (existing is not null)
-            { return existing; }
+            {
+                return existing;
+            }
             var borrowed = borrowNative();
             return Interlocked.CompareExchange(ref native, borrowed, null) ?? borrowed;
         }

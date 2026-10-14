@@ -11,7 +11,9 @@ public sealed partial class DatabaseEngine
     {
         budget.Check();
         if (!principal.ClusterAdministrator)
-        { return null; }
+        {
+            return null;
+        }
         OnlineTextCurrentPublication? selected = null;
         var view = budget.CreateView(raw);
         var scan = budget.VisitRange(raw, OnlineTextPublicationKeys.Prefix(partition, collection, field),
@@ -25,21 +27,31 @@ public sealed partial class DatabaseEngine
                 if (!key.SequenceEqual(OnlineTextPublicationKeys.Current(request))
                     || current.Consumer.Partition != partition || current.Authority.Collection != collection
                     || current.Authority.Field != field)
-                { throw Errors.Fail(ErrorCode.Corruption, OnlineTextPublicationProtocol.InvalidPublication); }
+                {
+                    throw Errors.Fail(ErrorCode.Corruption, OnlineTextPublicationProtocol.InvalidPublication);
+                }
                 if (current.PrincipalId != principal.Id || current.PublishedCut.NodeId != nodeId)
-                { return true; }
+                {
+                    return true;
+                }
                 var configured = ProjectionConsumer(view, current.Consumer);
                 if (configured.Released || configured.Definition.IndexGeneration != current.ConsumerGeneration)
-                { return true; }
+                {
+                    return true;
+                }
                 var actual = ReadOnlineTextCurrentPublication(view, principal, request, budget)
                     ?? throw Errors.Fail(ErrorCode.Corruption, OnlineTextPublicationProtocol.MissingAuthority);
                 if (selected is not null)
-                { throw Errors.Fail(ErrorCode.Conflict, OnlineTextPublicationProtocol.InvalidPublication); }
+                {
+                    throw Errors.Fail(ErrorCode.Conflict, OnlineTextPublicationProtocol.InvalidPublication);
+                }
                 selected = actual;
                 return true;
             });
         if (scan.HasMore)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, OnlineTextPublicationProtocol.InvalidPublication); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, OnlineTextPublicationProtocol.InvalidPublication);
+        }
         return selected;
     }
 }

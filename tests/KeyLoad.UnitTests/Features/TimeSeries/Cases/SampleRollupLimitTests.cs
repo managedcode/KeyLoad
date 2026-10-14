@@ -17,12 +17,18 @@ internal sealed class SampleRollupLimitTests
     {
         using var db = new TestDatabase();
         SampleRollupWholeFlow.Seed(db);
-        var engine = Engine(db, UnitExecutionOptions.TimeSeriesExecution().Value with { MaximumRollupBuckets = OneBucket });
+        var engine = Engine(db, UnitExecutionOptions.TimeSeriesExecution().Value with
+        {
+            MaximumRollupBuckets = OneBucket
+        });
         Apply(engine, db.Partition, SampleRollupWholeFlow.Refresh(0)).Get<CommitReceipt>();
         var raw = SampleRollupWholeFlow.Raw(db);
         var rollups = SampleRollupWholeFlow.Rollups(db);
         var request = SampleRollupWholeFlow.Refresh(0) with
-        { From = SampleRollupWholeFlow.End, UntilExclusive = SampleRollupWholeFlow.End.AddMinutes(1) };
+        {
+            From = SampleRollupWholeFlow.End,
+            UntilExclusive = SampleRollupWholeFlow.End.AddMinutes(1)
+        };
         var failure = Apply(engine, db.Partition, request);
         await Assert.That(failure.Error).IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(failure.SafeDetail).IsEqualTo(SampleRollupProtocol.BucketBudget);

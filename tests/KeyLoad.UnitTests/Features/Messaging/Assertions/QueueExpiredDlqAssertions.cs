@@ -27,7 +27,9 @@ internal static class QueueExpiredDlqAssertions
             new(QueueLifecycleTestProtocol.Pending, MessageState.PendingDeadLetter, 1, 3L, 2L, null, state.Expiry,
                 LeaseVersion: 1L, SafeFailureCode: Exhausted));
         if (!parkedCancelled)
-        { await BodyAsync(database.Store, operations, QueueLifecycleTestProtocol.Parked, state.Expiry, state.ParkedBody); }
+        {
+            await BodyAsync(database.Store, operations, QueueLifecycleTestProtocol.Parked, state.Expiry, state.ParkedBody);
+        }
         await BodyAsync(database.Store, operations, QueueLifecycleTestProtocol.Pending, state.Expiry, state.PendingBody);
         await CountersAsync(database.Store, operations, parkedCancelled
             ? new(1L, state.PendingBody.LongLength, 0L, 0L, 2L, 0L, 0L, 1L)
@@ -39,7 +41,10 @@ internal static class QueueExpiredDlqAssertions
         DateTimeOffset expiry, byte[] original)
     {
         await Assert.That(ReadBody(store, state, id)).IsEquivalentTo(original, CollectionOrdering.Matching);
-        var literal = QueueLifecycleHealthy.Enqueue(id) with { ExpiresAt = expiry };
+        var literal = QueueLifecycleHealthy.Enqueue(id) with
+        {
+            ExpiresAt = expiry
+        };
         var expected = new MessageBody(id, literal.PayloadJson, literal.HeadersJson, literal.OrderingKey, JsonData.Fingerprint(literal));
         await Assert.That(store.Read(view => view.GetRecord<MessageBody>(KeySpace.Partition(
             QueueLifecycleTestProtocol.BodySpace, state.Partition, state.Lane.Queue, id)))).IsEqualTo(expected);
@@ -67,7 +72,9 @@ internal static class QueueExpiredDlqAssertions
         var actual = state.Batch(database, mutation);
         await Assert.That(actual.Error).IsEqualTo(code);
         if (code == ErrorCode.Validation)
-        { await Assert.That(actual.SafeDetail).IsEqualTo(ExpiredDetail); }
+        {
+            await Assert.That(actual.SafeDetail).IsEqualTo(ExpiredDetail);
+        }
         await Assert.That(actual.NativeValue).IsNull();
         await QueueLifecycleImage.SameAsync(store, state.Lane, image);
     }

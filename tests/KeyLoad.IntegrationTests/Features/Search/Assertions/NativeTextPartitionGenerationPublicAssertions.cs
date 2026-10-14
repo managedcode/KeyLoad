@@ -60,7 +60,10 @@ internal static class NativeTextPartitionGenerationPublicAssertions
         NativeTextPartitionGenerationPublicState current, NativeTextPartitionGenerationPublicState foreign,
         NativeTextPartitionGenerationPublicState[] states, CancellationToken token)
     {
-        var wrong = Request(current, true) with { TextIndex = new(foreign.Build.Consumer, foreign.Build.IndexGeneration) };
+        var wrong = Request(current, true) with
+        {
+            TextIndex = new(foreign.Build.Consumer, foreign.Build.IndexGeneration)
+        };
         var sdk = await caller.Sdk.SearchAsync(wrong, token);
         await Assert.That(sdk.IsFailed).IsTrue();
         await Assert.That(sdk.Value).IsNull();

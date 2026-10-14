@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.UnitTests.Features.Search;
 
@@ -14,10 +14,18 @@ internal static class NativeTextIncrementalExpiryHealthy
             new ReleaseProjectionConsumerRequest(releaseId, original.Consumer, original.IndexGeneration), releaseId, token);
         await NativeTextIncrementalIntentOwner.RunAsync(database, async runtime =>
         {
-            _ = await runtime.PhaseAsync(database, original with { CommandId = Guid.NewGuid(), Mode = TextIndexMaintenanceMode.Release },
+            _ = await runtime.PhaseAsync(database, original with
+            {
+                CommandId = Guid.NewGuid(),
+                Mode = TextIndexMaintenanceMode.Release
+            },
                 TextMaintenanceCapabilityKind.Release, token: token);
         });
-        var fresh = original with { CommandId = Guid.NewGuid(), Consumer = new(original.Consumer.Partition, FreshConsumer) };
+        var fresh = original with
+        {
+            CommandId = Guid.NewGuid(),
+            Consumer = new(original.Consumer.Partition, FreshConsumer)
+        };
         var configureId = Guid.NewGuid();
         _ = await NativeTextMaintenanceCommit.ExecuteAsync<ProjectionConsumerInfo>(database, OperationKind.ConfigureProjectionConsumer,
             new ConfigureProjectionConsumerRequest(configureId, fresh.Consumer,

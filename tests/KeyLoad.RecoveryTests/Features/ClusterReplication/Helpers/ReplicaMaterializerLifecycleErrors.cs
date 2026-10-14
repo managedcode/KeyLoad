@@ -7,17 +7,25 @@ internal static class ReplicaMaterializerLifecycleErrors
     internal static async Task AttemptAsync(Func<Task> action, List<Exception> failures)
     {
         try
-        { await RunOrWrapAsync(action); }
+        {
+            await RunOrWrapAsync(action);
+        }
         catch (AggregateException wrapper)
-        { AddWrapped(wrapper, failures); }
+        {
+            AddWrapped(wrapper, failures);
+        }
     }
 
     internal static void Attempt(Action action, List<Exception> failures)
     {
         try
-        { RunOrWrap(action); }
+        {
+            RunOrWrap(action);
+        }
         catch (AggregateException wrapper)
-        { AddWrapped(wrapper, failures); }
+        {
+            AddWrapped(wrapper, failures);
+        }
     }
 
     internal static void AddWrapped(AggregateException wrapper, List<Exception> failures)
@@ -51,16 +59,24 @@ internal static class ReplicaMaterializerLifecycleErrors
     private static async Task RunOrWrapAsync(Func<Task> action)
     {
         try
-        { await action(); }
+        {
+            await action();
+        }
         catch (Exception original)
-        { throw new AggregateException(original); }
+        {
+            throw new AggregateException(original);
+        }
     }
 
     private static void RunOrWrap(Action action)
     {
         try
-        { action(); }
+        {
+            action();
+        }
         catch (Exception original)
-        { throw new AggregateException(original); }
+        {
+            throw new AggregateException(original);
+        }
     }
 }

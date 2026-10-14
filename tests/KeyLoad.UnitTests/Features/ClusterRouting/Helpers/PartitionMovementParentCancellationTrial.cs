@@ -45,7 +45,10 @@ internal static class PartitionMovementParentCancellationTrial
         var pending = fixture.Read(request, phaseId);
         await Assert.That(pending.Control).IsNull();
         await Assert.That(pending.Pending!.OriginalResult).IsNull();
-        var abort = request with { Mode = PartitionMoveMode.Abort };
+        var abort = request with
+        {
+            Mode = PartitionMoveMode.Abort
+        };
         var body = new PartitionMoveCheckpointBody(PartitionMoveProtocol.Version,
             PartitionMoveCheckpointAction.CancelUnprepared, PhysicalShardCatalogFixture.RootPrincipalId,
             abort, pending.Header!.Generation, phaseId, prepare, null, null, null, null, OriginalExpiresAt: expiry);
@@ -53,7 +56,10 @@ internal static class PartitionMovementParentCancellationTrial
         var sourceImage = ControlledPartitionMovementRawImage.Bytes(source.Store);
         var targetImage = ControlledPartitionMovementRawImage.Bytes(target.Store);
         var rejected = await Assert.ThrowsAsync<KeyLoadException>(() => fixture.CheckpointAsync(pending,
-            body with { OriginalExpiresAt = expiry.AddTicks(1) }, prepare));
+            body with
+            {
+                OriginalExpiresAt = expiry.AddTicks(1)
+            }, prepare));
         await Assert.That(rejected!.Code).IsEqualTo(ErrorCode.OwnershipLost);
         await Assert.That(source.Store.Position).IsEqualTo(before);
         await Assert.That(ControlledPartitionMovementRawImage.Bytes(source.Store).SequenceEqual(sourceImage)).IsTrue();
@@ -62,7 +68,9 @@ internal static class PartitionMovementParentCancellationTrial
         await Assert.That(cancelled.Error).IsNull();
         var ownReceipt = cancelled.Get<PartitionMovePhaseResult>().Journal;
         if (restorePolicy)
-        { await PartitionMovementParentPolicyRestoreTrial.ExecuteAsync(source, target, fixture, abort, phaseId); }
+        {
+            await PartitionMovementParentPolicyRestoreTrial.ExecuteAsync(source, target, fixture, abort, phaseId);
+        }
         var cold = await RequireColdCancellationAsync(source, target, fixture, abort, phaseId, prepare, ownReceipt);
         before = source.Store.Position;
         sourceImage = ControlledPartitionMovementRawImage.Bytes(source.Store);
@@ -87,7 +95,10 @@ internal static class PartitionMovementParentCancellationTrial
     {
         source.Reopen();
         target.Reopen();
-        var terminal = fixture.Read(request with { Mode = PartitionMoveMode.Abort }, phaseId);
+        var terminal = fixture.Read(request with
+        {
+            Mode = PartitionMoveMode.Abort
+        }, phaseId);
         await Assert.That(terminal.Header!.TerminalResult!.Phase).IsEqualTo(PartitionMovePhase.Aborted);
         await Assert.That(terminal.Pending).IsNull();
         await Assert.That(terminal.Interrupted!.OriginalResult).IsNull();
@@ -96,7 +107,10 @@ internal static class PartitionMovementParentCancellationTrial
         await Assert.That(source.Store.Read(view => PartitionMoveParentStorage.Counter(view,
             PartitionMoveParentKeys.DatabaseActive(request.Partition)))).IsEqualTo(0L);
         await Assert.That(ControlledPartitionMovementRawImage.Bytes(target.Store).SequenceEqual(targetImage)).IsTrue();
-        await HealthyPrepareAsync(fixture, request with { MoveId = Guid.NewGuid() });
+        await HealthyPrepareAsync(fixture, request with
+        {
+            MoveId = Guid.NewGuid()
+        });
     }
 
     private static async Task<PartitionMoveParentState> RequireColdCancellationAsync(ControlledPartitionMovementNode source,

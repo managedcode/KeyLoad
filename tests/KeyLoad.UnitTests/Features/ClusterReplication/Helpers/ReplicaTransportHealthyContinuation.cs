@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Replication;
 using KeyLoad.UnitTests.Features.Messaging;
 using Microsoft.Extensions.DependencyInjection;

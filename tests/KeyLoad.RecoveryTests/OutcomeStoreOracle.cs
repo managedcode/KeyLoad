@@ -78,7 +78,9 @@ internal static class OutcomeStoreOracle
                 _ => null
             };
             if (Valid(partition))
-            { return (partition, false); }
+            {
+                return (partition, false);
+            }
             var global = operation.Kind switch
             {
                 OperationKind.ConfigureResource => IsNonNull<ConfigureResourceRequest>(operation),

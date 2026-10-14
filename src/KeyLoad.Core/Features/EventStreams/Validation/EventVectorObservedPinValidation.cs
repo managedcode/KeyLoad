@@ -27,13 +27,17 @@ internal static class EventVectorObservedPinValidation
             || result.Token.AtomicPartitionId != phase.Source.Partition.AtomicPartitionId
             || result.Token.OwnershipEpoch != phase.SourceOwner.PlacementEpoch
             || result.Token.Position <= InitialPosition || !Enum.IsDefined(result.Durability))
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidResult); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidResult);
+        }
         if (phase.Role == EventVectorSourcePhaseRole.Pin)
         {
             if (pin.OriginalPinCommandId != phase.PhaseCommandId || pin.OriginalPinExpiresAt != phase.FirstExpiresAt
                 || !CryptographicOperations.FixedTimeEquals(pin.OriginalPinBodyDigest.Span,
                     phase.OriginalBodyDigest.Span))
-            { throw Errors.Fail(ErrorCode.Corruption, InvalidResult); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, InvalidResult);
+            }
         }
         else
         {

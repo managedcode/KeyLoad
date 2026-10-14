@@ -19,10 +19,15 @@ internal static class TenantCapacityPlacementRf3Provisioning
     internal static async Task<State> CreateAsync(PartitionMovementPublicParentRf3Seed seed,
         CancellationToken token)
     {
-        var control = seed.Partition with { PartitionKey = "capacity-control-original" };
+        var control = seed.Partition with
+        {
+            PartitionKey = "capacity-control-original"
+        };
         var command = seed.Models.Command(new PutDocument(RelationalSqlRf3Tokens.Documents,
             "capacity-control", "{\"original\":true}")) with
-        { Partition = control };
+        {
+            Partition = control
+        };
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await seed.Source.CommitAsync(command, token));
         await Assert.That(receipt.CommandId).IsEqualTo(command.CommandId);
         await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
@@ -39,9 +44,16 @@ internal static class TenantCapacityPlacementRf3Provisioning
         await SqlRf3Protocol.EqualAsync(unavailable, original);
         await SqlRf3Protocol.EqualAsync(original, (await McpCallerAssertions.SuccessAsync<TenantPlacementPolicyV1>(
             await seed.Official.CallAsync(TenantPlacementPublicProtocol.ConfigureTool,
-                new { commandId = id, request = configure }, token))).Value);
+                new
+                {
+                    commandId = id,
+                    request = configure
+                }, token))).Value);
         return new(control, command, receipt, id, configure, unavailable with
-        { Revision = Version + Version, MinimumFreeBytes = MinimumFreeBytes });
+        {
+            Revision = Version + Version,
+            MinimumFreeBytes = MinimumFreeBytes
+        });
     }
 
     internal sealed record State(PartitionRef Control, CommandRequest ControlCommand,

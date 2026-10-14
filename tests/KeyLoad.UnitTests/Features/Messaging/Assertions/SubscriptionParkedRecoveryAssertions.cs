@@ -10,7 +10,10 @@ internal static class SubscriptionParkedRecoveryAssertions
     internal static async Task StatusAsync(DatabaseEngine db, SubscriptionRef group, SubscriptionPolicy policy,
         long generation, long checkpoint, long issued, long tail, bool paused, string? failure)
     {
-        var expected = new SubscriptionInfo(group, new("root") { Policy = policy },
+        var expected = new SubscriptionInfo(group, new("root")
+        {
+            Policy = policy
+        },
             generation, generation, checkpoint, issued, tail, paused, failure);
         await Assert.That(JsonSerializer.Serialize(db.GetSubscription("root", group), JsonDefaults.Options))
             .IsEqualTo(JsonSerializer.Serialize(expected, JsonDefaults.Options));
@@ -59,11 +62,17 @@ internal static class SubscriptionParkedRecoveryAssertions
             await Assert.That(replay.NativeValue).IsNull();
         }
         else if (original.NativeValue is CommitReceipt)
-        { await NativeReplayResultAssertions.Same<CommitReceipt>(replay, original); }
+        {
+            await NativeReplayResultAssertions.Same<CommitReceipt>(replay, original);
+        }
         else if (original.NativeValue is SubscriptionInfo)
-        { await NativeReplayResultAssertions.Same<SubscriptionInfo>(replay, original); }
+        {
+            await NativeReplayResultAssertions.Same<SubscriptionInfo>(replay, original);
+        }
         else
-        { await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(replay, original); }
+        {
+            await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(replay, original);
+        }
         await Assert.That(SubscriptionProcessingAtomicAssertions.OutcomeBytes(store, group, operation.Id)
             .AsSpan().SequenceEqual(saved)).IsTrue();
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, cut, position, identity);

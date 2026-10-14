@@ -54,7 +54,9 @@ internal static class DueFaultRf3Run
         {
             lifecycle.RecordFirstFailureIfAny(failures);
             if (root is not null && failures.Count == 0)
-            { ServerFailureObserver.Observe(() => Directory.Delete(root, recursive: true), failures); }
+            {
+                ServerFailureObserver.Observe(() => Directory.Delete(root, recursive: true), failures);
+            }
         }
         lifecycle.RecordTerminal();
         lifecycle.ThrowWithContext(failures);
@@ -88,7 +90,9 @@ internal static class DueFaultRf3Run
         var status = await NodeEpochRf3StatusOracle.CaptureAsync(app, profile, cancellationToken).ConfigureAwait(false);
         await NodeEpochRf3StatusOracle.AssertSamePhysicalTopologyAsync(prior.Status, status).ConfigureAwait(false);
         foreach (var node in status)
-        { await Assert.That(node.Status.Applied).IsGreaterThanOrEqualTo(prior.Status.Single(item => item.Name == node.Name).Status.Applied); }
+        {
+            await Assert.That(node.Status.Applied).IsGreaterThanOrEqualTo(prior.Status.Single(item => item.Name == node.Name).Status.Applied);
+        }
         lifecycle.SetStage(RequestCqrsLifecycleStage.DueDiscovery);
         var discovery = await RequestCqrsRf3DiscoveryOracle.CaptureCurrentAsync(app, profile, cancellationToken)
             .ConfigureAwait(false);
@@ -134,7 +138,9 @@ internal static class DueFaultRf3Run
         var root = Path.Combine(parent, "due-fault-rf3-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(root);
         if (!OperatingSystem.IsWindows())
-        { File.SetUnixFileMode(root, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute); }
+        {
+            File.SetUnixFileMode(root, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+        }
         return root;
     }
 

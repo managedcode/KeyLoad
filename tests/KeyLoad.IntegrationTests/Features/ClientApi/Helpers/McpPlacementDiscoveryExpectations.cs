@@ -15,7 +15,10 @@ internal static class McpPlacementDiscoveryExpectations
         "version", "intentId", "principalId", "policyEpoch", "plan", "revision", "completedMoves", "status",
         "receipts", "originalApplyCommandId", "claim", "controlOwner", "originalApplyRequest"
     ];
-    internal static ImmutableArray<McpToolExpectation> Entries { get; } =
+    internal static ImmutableArray<McpToolExpectation> Entries
+    {
+        get;
+    } =
     [
         new("keyload_admin_placement_policy_configure", false, true, true, McpExpectedBody.Object, true,
             ["expectedRevision", "policy", "controlPartition"],

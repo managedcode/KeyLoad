@@ -15,7 +15,9 @@ internal sealed class SqlTypedInsertRf3WholeFlowTests
             {
                 await fixture.InitializeAsync();
                 try
-                { await SqlTypedInsertRf3OwnedFlow.RunAsync(fixture, selection); }
+                {
+                    await SqlTypedInsertRf3OwnedFlow.RunAsync(fixture, selection);
+                }
                 catch (Exception) { selection.RetainEvidence(); throw; }
             }, failures);
         }, failures);

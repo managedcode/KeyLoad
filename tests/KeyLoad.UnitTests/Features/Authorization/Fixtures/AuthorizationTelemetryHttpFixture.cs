@@ -1,6 +1,6 @@
 using System.Net;
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 using KeyLoad.ServiceDefaults;
 using Microsoft.AspNetCore.Builder;
@@ -24,7 +24,10 @@ internal sealed class AuthorizationTelemetryHttpFixture : IDisposable, IAsyncDis
     private bool disposed;
     private readonly bool useServerErrorMiddleware;
     private WebApplication? app;
-    internal AuthorizationUnsafeSpanState UnsafeState { get; set; }
+    internal AuthorizationUnsafeSpanState UnsafeState
+    {
+        get; set;
+    }
     private HttpClient? client;
     private readonly SemaphoreSlim completedRequests = new(AuthorizationTelemetryTestProtocol.IndexCount);
     internal AuthorizationTelemetryHttpFixture(bool useServerErrorMiddleware = false)
@@ -32,17 +35,31 @@ internal sealed class AuthorizationTelemetryHttpFixture : IDisposable, IAsyncDis
         this.useServerErrorMiddleware = useServerErrorMiddleware;
         var policy = new AuthorizationTelemetryCaptureOptions();
         if (!policy.IsValid())
-        { throw new InvalidOperationException(AuthorizationTelemetryTestProtocol.CaptureFailure); }
+        {
+            throw new InvalidOperationException(AuthorizationTelemetryTestProtocol.CaptureFailure);
+        }
         options = Options.Create(policy);
         Spans = new(options);
         Logs = new(options);
         Metrics = new(options);
         NativeSpans = new(options);
     }
-    internal AuthorizationNativeSpanObservation NativeSpans { get; }
-    internal AuthorizationSpanExporter Spans { get; }
-    internal AuthorizationLogExporter Logs { get; }
-    internal AuthorizationMetricExporter Metrics { get; }
+    internal AuthorizationNativeSpanObservation NativeSpans
+    {
+        get;
+    }
+    internal AuthorizationSpanExporter Spans
+    {
+        get;
+    }
+    internal AuthorizationLogExporter Logs
+    {
+        get;
+    }
+    internal AuthorizationMetricExporter Metrics
+    {
+        get;
+    }
     internal AdminHttpMetrics Observations { get; } = new(UnitAdminObservationOptions.Execution());
     internal TestDatabase Database { get; } = new();
     internal HttpClient Client => client ?? throw new InvalidOperationException(nameof(Client));
@@ -71,13 +88,19 @@ internal sealed class AuthorizationTelemetryHttpFixture : IDisposable, IAsyncDis
         NativeSpans.Privacy = app.Services.GetRequiredService<IOptions<KeyLoad.ServiceDefaults.Features.Authorization.Configuration.HttpTelemetryPrivacyOptions>>().Value;
         app.UseMiddleware<AdminHttpMetricsMiddleware>();
         if (useServerErrorMiddleware)
-        { app.UseMiddleware<global::KeyLoad.Server.ServerErrorMiddleware>(); }
+        {
+            app.UseMiddleware<global::KeyLoad.Server.ServerErrorMiddleware>();
+        }
         var endpoint = new AuthorizationTelemetryEndpoint(Database, clock, () => UnsafeState, () => completedRequests.Release());
         app.MapPost(AuthorizationTelemetryTestProtocol.Route, endpoint.ExecuteAsync);
         using var deadline = Deadline();
         await app.StartAsync(deadline.Token);
         var addresses = app.Services.GetRequiredService<IServer>().Features.Get<IServerAddressesFeature>()!;
-        client = new() { BaseAddress = new Uri(addresses.Addresses.Single()), Timeout = Timeout.InfiniteTimeSpan };
+        client = new()
+        {
+            BaseAddress = new Uri(addresses.Addresses.Single()),
+            Timeout = Timeout.InfiniteTimeSpan
+        };
     }
     private void Seed()
     {
@@ -89,7 +112,9 @@ internal sealed class AuthorizationTelemetryHttpFixture : IDisposable, IAsyncDis
             AuthorizationTelemetryTestProtocol.Member, AuthorizationTelemetryTestProtocol.Member,
             AuthorizationTelemetryTestProtocol.MemberKey))).Get<bool>();
         if (!configured)
-        { throw new InvalidOperationException(AuthorizationTelemetryTestProtocol.CaptureFailure); }
+        {
+            throw new InvalidOperationException(AuthorizationTelemetryTestProtocol.CaptureFailure);
+        }
     }
     internal async Task JoinForColdAsync(CancellationToken cancellationToken)
     {
@@ -102,7 +127,9 @@ internal sealed class AuthorizationTelemetryHttpFixture : IDisposable, IAsyncDis
     internal void Flush()
     {
         if (app is null)
-        { return; }
+        {
+            return;
+        }
         var tracing = app.Services.GetRequiredService<TracerProvider>();
         var metrics = app.Services.GetRequiredService<MeterProvider>();
         var logging = app.Services.GetRequiredService<LoggerProvider>();
@@ -115,7 +142,9 @@ internal sealed class AuthorizationTelemetryHttpFixture : IDisposable, IAsyncDis
     internal async Task JoinProducersAsync(CancellationToken cancellationToken)
     {
         for (var index = AuthorizationTelemetryTestProtocol.IndexCount; index < AuthorizationTelemetryTestProtocol.RequestCount; index++)
-        { await completedRequests.WaitAsync(cancellationToken); }
+        {
+            await completedRequests.WaitAsync(cancellationToken);
+        }
     }
     internal async Task AwaitExportsAsync(AuthorizationUnsafeSpanState state, CancellationToken cancellationToken)
     {
@@ -133,7 +162,9 @@ internal sealed class AuthorizationTelemetryHttpFixture : IDisposable, IAsyncDis
     private static void FlushProvider(bool success)
     {
         if (!success)
-        { throw new InvalidOperationException(AuthorizationTelemetryTestProtocol.FlushFailure); }
+        {
+            throw new InvalidOperationException(AuthorizationTelemetryTestProtocol.FlushFailure);
+        }
     }
     internal async Task RunAsync(Func<AuthorizationTelemetryHttpFixture, Task> flow)
     {
@@ -149,7 +180,9 @@ internal sealed class AuthorizationTelemetryHttpFixture : IDisposable, IAsyncDis
     public async ValueTask DisposeAsync()
     {
         if (disposed)
-        { return; }
+        {
+            return;
+        }
         var failures = new List<Exception>();
         ServerFailureObserver.Observe(Flush, failures);
         if (app is { } owned)
@@ -163,26 +196,16 @@ internal sealed class AuthorizationTelemetryHttpFixture : IDisposable, IAsyncDis
     public void Dispose()
     {
         if (disposed)
-        { return; }
+        {
+            return;
+        }
         disposed = true;
-        var failures = new List<Exception>();
-        try
-        { client?.Dispose(); }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        try
-        { ((IDisposable?)app)?.Dispose(); }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        try
-        { completedRequests.Dispose(); }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        try
-        { Database.Dispose(); }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        ServerFailureObserver.ThrowIfAny(failures);
+        AuthorizationTelemetryOwnedDisposal.Run([
+            () => client?.Dispose(),
+            () => ((IDisposable?)app)?.Dispose(),
+            () => completedRequests.Dispose(),
+            () => Database.Dispose()
+        ]);
     }
 }
 internal sealed record AuthorizationTelemetryFailure(ErrorCode Code, string? Detail);

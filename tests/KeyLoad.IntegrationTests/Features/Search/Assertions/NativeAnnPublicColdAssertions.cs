@@ -43,7 +43,11 @@ internal static class NativeAnnPublicColdAssertions
     internal static async Task RefuseWrongOwnerAsync(RequestCqrsRf3Callers caller, NativeAnnPublicColdSeed seed,
         AnnMaintenanceRequest original, CancellationToken token)
     {
-        var wrong = original with { CommandId = Guid.NewGuid(), NodeId = Guid.NewGuid() };
+        var wrong = original with
+        {
+            CommandId = Guid.NewGuid(),
+            NodeId = Guid.NewGuid()
+        };
         var denied = await global::KeyLoad.Client.AnnMaintenanceClient.MaintainAnnIndexAsync(caller.Sdk, wrong, token);
         await Assert.That(denied.IsSuccess).IsFalse();
         await Assert.That(denied.Value).IsNull();
@@ -63,7 +67,10 @@ internal static class NativeAnnPublicColdAssertions
         await ExactAsync(seed.Pin.Placement, restore.Placement);
         var sdk = await McpCallerAssertions.SdkSuccessAsync(await global::KeyLoad.Client.AnnMaintenanceClient.MaintainAnnIndexAsync(caller.Sdk, restore, token));
         await NativeAnnMaintenanceRf3Assertions.ResultAsync(sdk, restore);
-        var again = restore with { CommandId = Guid.NewGuid() };
+        var again = restore with
+        {
+            CommandId = Guid.NewGuid()
+        };
         var official = (await McpCallerAssertions.SuccessAsync<AnnMaintenanceResult>(await caller.Mcp.CallAsync(
             NativeAnnMaintenanceRf3Scenario.Tool, again, token))).Value;
         await NativeAnnMaintenanceRf3Assertions.ResultAsync(official, again);

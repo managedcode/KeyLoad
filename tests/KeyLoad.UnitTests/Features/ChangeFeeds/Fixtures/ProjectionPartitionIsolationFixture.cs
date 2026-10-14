@@ -19,8 +19,14 @@ internal static class ProjectionPartitionIsolationFixture
     internal static async Task<ProjectionConsumerIdentityState> SiblingAsync(TestDatabase database,
         ProjectionConsumerIdentityState first, CancellationToken token)
     {
-        var partition = first.Partition with { PartitionKey = Sibling };
-        var consumer = first.Consumer with { Partition = partition };
+        var partition = first.Partition with
+        {
+            PartitionKey = Sibling
+        };
+        var consumer = first.Consumer with
+        {
+            Partition = partition
+        };
         var id = Guid.NewGuid();
         var configure = ProjectionConsumerIdentityFixture.Operation(OperationKind.ConfigureProjectionConsumer, id,
             new ConfigureProjectionConsumerRequest(id, consumer, first.Definition));
@@ -31,7 +37,9 @@ internal static class ProjectionPartitionIsolationFixture
         var seed = ProjectionConsumerIdentityFixture.Operation(OperationKind.Batch, seedId,
             new CommandRequest(seedId, partition, [new PutDocument(ProjectionConsumerIdentityFixture.Source, "a", "{\"n\":1}", 0L),
                 new PutDocument(ProjectionConsumerIdentityFixture.Source, "b", "{\"n\":2}", 0L)])) with
-        { EvaluatedAt = first.Time };
+        {
+            EvaluatedAt = first.Time
+        };
         token.ThrowIfCancellationRequested();
         var seeded = database.Database.Apply(seed);
         var receipt = seeded.Get<CommitReceipt>();

@@ -91,7 +91,9 @@ internal static class OpenLoopCohortReceiptAssertions
             var cell = row.GetProperty(OpenLoopCohortReceiptFields.Cell);
             var id = cell.GetProperty(OpenLoopCohortReceiptFields.Id).GetString();
             if (id != expected[index++])
-            { throw new InvalidDataException("The receipt cell order changed."); }
+            {
+                throw new InvalidDataException("The receipt cell order changed.");
+            }
             if (row.GetProperty(OpenLoopCohortReceiptFields.Disposition).GetString() != FailedDisposition
                 || row.GetProperty(OpenLoopCohortReceiptFields.Reason).GetString() != FailureReason
                 || row.GetProperty(OpenLoopCohortReceiptFields.Artifacts).GetArrayLength() != 0)

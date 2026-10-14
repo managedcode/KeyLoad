@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
@@ -17,16 +17,26 @@ internal sealed class AdminNodeObserver(PartitionHost partition, CommandAdmissio
     {
         cancellationToken.ThrowIfCancellationRequested();
         if (Interlocked.CompareExchange(ref scanning, ActiveObservation, IdleObservation) != IdleObservation)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, Busy); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, Busy);
+        }
         try
         {
             var node = await services.GetRequiredService<INodeAdministration>().StatusAsync(cancellationToken).ConfigureAwait(false);
             var storage = await Task.Run(() => AdminStorageObserver.Read(directory: partition.DirectoryPath, cancellationToken: cancellationToken,
                 options: observationOptions, clock: clock), cancellationToken).ConfigureAwait(false);
-            return new(clock.GetUtcNow(), node, new(commands.Limits, commands.Snapshot()) { Http = http.Status() }, storage, metrics.Snapshot())
-            { LocalVoter = partition.Configuration.LocalId, Voters = partition.Configuration.VoterIds };
+            return new(clock.GetUtcNow(), node, new(commands.Limits, commands.Snapshot())
+            {
+                Http = http.Status()
+            }, storage, metrics.Snapshot())
+            {
+                LocalVoter = partition.Configuration.LocalId,
+                Voters = partition.Configuration.VoterIds
+            };
         }
         finally
-        { Volatile.Write(ref scanning, IdleObservation); }
+        {
+            Volatile.Write(ref scanning, IdleObservation);
+        }
     }
 }

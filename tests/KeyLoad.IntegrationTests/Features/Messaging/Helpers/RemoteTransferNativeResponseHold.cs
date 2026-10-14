@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.IntegrationTests.Features.Messaging;
@@ -31,7 +31,9 @@ internal sealed class RemoteTransferNativeResponseHold
         {
             await waiting.CancelAsync().ConfigureAwait(false);
             try
-            { _ = await observed.ConfigureAwait(false); }
+            {
+                _ = await observed.ConfigureAwait(false);
+            }
             catch (OperationCanceledException) when (waiting.IsCancellationRequested) { }
             await original.ConfigureAwait(false);
             throw new InvalidOperationException(RemoteTransferDistinctProtocol.Missing);
@@ -50,7 +52,9 @@ internal sealed class RemoteTransferNativeResponseHold
             || marker.CommandId != commandId || witness.ConnectionId == Guid.Empty
             || witness.Phase != marker.Phase || witness.Voter != marker.Voter
             || witness.SiloAddress != marker.SiloAddress)
-        { throw new InvalidOperationException(RemoteTransferDistinctProtocol.Missing); }
+        {
+            throw new InvalidOperationException(RemoteTransferDistinctProtocol.Missing);
+        }
         return witness;
     }
 
@@ -66,7 +70,9 @@ internal sealed class RemoteTransferNativeResponseHold
     internal async Task JoinAsync(IReadOnlyList<ReplicaSiloDiscovery> sourceDiscovery, CancellationToken token)
     {
         if (held is not null)
-        { await fixture.WaitForSettlementAsync(armId, sourceDiscovery, token).ConfigureAwait(false); }
+        {
+            await fixture.WaitForSettlementAsync(armId, sourceDiscovery, token).ConfigureAwait(false);
+        }
         await fixture.RetireArmAsync(armId, token).ConfigureAwait(false);
     }
 }

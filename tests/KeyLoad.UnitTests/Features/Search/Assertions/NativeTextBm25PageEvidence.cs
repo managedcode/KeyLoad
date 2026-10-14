@@ -40,7 +40,9 @@ internal static class NativeTextBm25PageEvidence
         var firstByte = 0;
         while (firstByte < Math.Min(expectedBytes.Length, actualBytes.Length)
             && expectedBytes[firstByte] == actualBytes[firstByte])
-        { firstByte++; }
+        {
+            firstByte++;
+        }
         return $"BM25 page count expected={expected.Length} actual={actual.Length}; "
             + $"bytes expected={expectedBytes.Length} actual={actualBytes.Length} firstDifference={firstByte}; "
             + $"reference={references} revision={revisions} json={json} redacted={redacted} "
@@ -66,7 +68,9 @@ internal static class NativeTextBm25PageEvidence
             for (var previous = 0; previous < index; previous++)
             {
                 if (ReferenceEquals(left[index], left[previous]) != ReferenceEquals(right[index], right[previous]))
-                { return false; }
+                {
+                    return false;
+                }
             }
         }
         return true;

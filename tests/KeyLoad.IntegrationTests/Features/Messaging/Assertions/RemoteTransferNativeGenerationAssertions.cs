@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.DocumentStorage;
 
 namespace KeyLoad.IntegrationTests.Features.Messaging;
@@ -17,7 +17,9 @@ internal static class RemoteTransferNativeGenerationAssertions
             || destination.SiloAddress != original.DestinationSiloAddress
             || caller.ClusterId != destination.ClusterId
             || caller.SiloAddress == destination.SiloAddress)
-        { throw new InvalidOperationException(RemoteTransferDistinctProtocol.Missing); }
+        {
+            throw new InvalidOperationException(RemoteTransferDistinctProtocol.Missing);
+        }
     }
 
     private static void RequireGroup(PhysicalShardRecord owner, IReadOnlyList<ReplicaSiloDiscovery> signed)
@@ -29,6 +31,8 @@ internal static class RemoteTransferNativeGenerationAssertions
             || signed.Any(value => !value.TransportReady || value.Incarnation != owner.Incarnation
                 || !owner.VoterIds.Contains(value.VoterId, StringComparer.Ordinal)
                 || SiloAddress.FromParsableString(value.SiloAddress).ToParsableString() != value.SiloAddress))
-        { throw new InvalidOperationException(RemoteTransferDistinctProtocol.Missing); }
+        {
+            throw new InvalidOperationException(RemoteTransferDistinctProtocol.Missing);
+        }
     }
 }

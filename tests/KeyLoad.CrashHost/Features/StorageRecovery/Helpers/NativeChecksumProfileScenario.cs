@@ -14,9 +14,13 @@ internal static class NativeChecksumProfileScenario
     internal static async Task<bool> TryRunAsync(string[] args)
     {
         if (args.Length == NativeChecksumProfileProtocol.Success || args[NativeChecksumProfileProtocol.ModeIndex] != NativeChecksumProfileProtocol.Mode)
-        { return false; }
+        {
+            return false;
+        }
         if (args.Length != NativeChecksumProfileProtocol.ArgumentCount)
-        { throw new InvalidOperationException(NativeChecksumProfileProtocol.Invalid); }
+        {
+            throw new InvalidOperationException(NativeChecksumProfileProtocol.Invalid);
+        }
         var phase = args[NativeChecksumProfileProtocol.PhaseIndex];
         RequireHardwareEligibility();
         var root = args[NativeChecksumProfileProtocol.RootIndex];
@@ -52,7 +56,9 @@ internal static class NativeChecksumProfileScenario
     private static void RequireHardwareEligibility()
     {
         if (!(Vector.IsHardwareAccelerated && (Sse2.IsSupported || AdvSimd.IsSupported)))
-        { throw new InvalidOperationException(NativeChecksumProfileProtocol.Invalid); }
+        {
+            throw new InvalidOperationException(NativeChecksumProfileProtocol.Invalid);
+        }
     }
 
     private static async Task SeedAsync(string root, ZoneTreeStore store)
@@ -97,7 +103,9 @@ internal static class NativeChecksumProfileScenario
     {
         await NativeChecksumProfileOperations.RequireOriginalAsync(root, database, store, appends, replay);
         for (var append = NativeChecksumProfileProtocol.OneAppend; append <= appends; append++)
-        { await NativeChecksumProfileOperations.RequireAppendAsync(root, database, store, append); }
+        {
+            await NativeChecksumProfileOperations.RequireAppendAsync(root, database, store, append);
+        }
     }
 
     private static DatabaseEngine Open(ZoneTreeStore store) => new(store, new AuthorizationPolicy(), CrashExecutionOptions.DatabaseLimits(),

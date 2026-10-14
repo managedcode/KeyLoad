@@ -11,8 +11,12 @@ internal static class RemoteGraphNativeMac
         var configured = PartitionMovementNativeDiscoveryIdentity.Secret(options, partition.Configuration, owner);
         var key = Convert.FromBase64String(configured);
         try
-        { return new(key, partition.Database.Limits.MaxBatchBytes); }
+        {
+            return new(key, partition.Database.Limits.MaxBatchBytes);
+        }
         finally
-        { CryptographicOperations.ZeroMemory(key); }
+        {
+            CryptographicOperations.ZeroMemory(key);
+        }
     }
 }

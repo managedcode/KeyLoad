@@ -12,11 +12,15 @@ internal static class ScriptDomTableColumnConstraints
         {
             context.Check();
             if (constraint.ConstraintIdentifier is not null)
-            { throw ScriptDomOperationErrors.Unsupported(); }
+            {
+                throw ScriptDomOperationErrors.Unsupported();
+            }
             if (constraint is Dom.NullableConstraintDefinition nullability)
             {
                 if (nullable.HasValue)
-                { throw ScriptDomOperationErrors.Invalid(); }
+                {
+                    throw ScriptDomOperationErrors.Invalid();
+                }
                 nullable = nullability.Nullable;
             }
             else if (constraint is Dom.UniqueConstraintDefinition unique && unique.IsPrimaryKey)
@@ -25,21 +29,29 @@ internal static class ScriptDomTableColumnConstraints
                 primary = true;
             }
             else
-            { throw ScriptDomOperationErrors.Unsupported(); }
+            {
+                throw ScriptDomOperationErrors.Unsupported();
+            }
         }
         if (nullable is null && !primary || nullable == true && primary)
-        { throw ScriptDomOperationErrors.Invalid(); }
+        {
+            throw ScriptDomOperationErrors.Invalid();
+        }
         return (nullable ?? false, primary);
     }
     private static void RequirePrimaryShape(Dom.UniqueConstraintDefinition unique, bool primary)
     {
         if (primary)
-        { throw ScriptDomOperationErrors.Invalid(); }
+        {
+            throw ScriptDomOperationErrors.Invalid();
+        }
         if (unique.Clustered is not null || unique.Columns.Count != EmptyCount
             || unique.FileStreamOn is not null || unique.IndexOptions.Count != EmptyCount
             || unique.IndexType?.IndexTypeKind is not null || unique.IsEnforced == false
             || unique.OnFileGroupOrPartitionScheme is not null)
-        { throw ScriptDomOperationErrors.Unsupported(); }
+        {
+            throw ScriptDomOperationErrors.Unsupported();
+        }
     }
 
 }

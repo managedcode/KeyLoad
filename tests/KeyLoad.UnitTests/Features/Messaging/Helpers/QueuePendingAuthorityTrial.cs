@@ -23,7 +23,10 @@ internal static class QueuePendingAuthorityTrial
             await QueuePendingAuthorityHistory.SameAsync(cold, damaged);
             await QueuePendingAuthorityHistory.RefuseAsync(owner, cold, state, damaged);
             QueuePendingAuthorityOperations.Repair(cold, state);
-            await QueuePendingAuthorityHistory.SameAsync(cold, original with { Position = original.Position + 2 });
+            await QueuePendingAuthorityHistory.SameAsync(cold, original with
+            {
+                Position = original.Position + 2
+            });
             await QueuePendingAuthorityImage.RequireAsync(owner, cold, state, QueuePendingAuthorityPhase.Pending);
             await QueuePendingAuthorityOperations.ParkAsync(owner, cold, state);
             await QueuePendingAuthorityImage.RequireAsync(owner, cold, state, QueuePendingAuthorityPhase.Parked);

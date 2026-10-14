@@ -33,7 +33,10 @@ internal sealed class RemoteTransferDatabase : IDisposable
     internal PartitionRef DestinationPartition { get; } = new(TenantId, DatabaseId, Domain, DestinationPartitionId);
     internal QueueLaneRef SourceQueue => new(SourcePartition, SourceQueueName);
     internal QueueLaneRef DestinationQueue => new(DestinationPartition, DestinationQueueName);
-    internal DatabaseEngine Database { get; private set; }
+    internal DatabaseEngine Database
+    {
+        get; private set;
+    }
     internal IAtomicStore Store => store;
 
     internal RemoteTransferDatabase(DatabaseLimits? databaseLimits = null,
@@ -46,7 +49,10 @@ internal sealed class RemoteTransferDatabase : IDisposable
         directory = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
         store = new(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         Database = new(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance, timeProvider: timeProvider);
-        Database.Bootstrap(new(RootPrincipal, TenantId, [new("*", "*", Capability.All)], ["*"]) { ClusterAdministrator = true },
+        Database.Bootstrap(new(RootPrincipal, TenantId, [new("*", "*", Capability.All)], ["*"])
+        {
+            ClusterAdministrator = true
+        },
             DatabaseEngine.Credential(RootPrincipal, RootPrincipal, RootCredential));
         PhysicalShardTestBootstrap.Bootstrap(Database, RootPrincipal);
         Configure(SourceQueue, sourceFields, sourceHeaders);

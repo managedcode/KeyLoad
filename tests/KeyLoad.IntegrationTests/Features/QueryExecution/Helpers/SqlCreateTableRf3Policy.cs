@@ -20,12 +20,19 @@ internal static class SqlCreateTableRf3Policy
                 await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
                 {
                     var image = await SqlCreateTableRf3Images.ReadAsync(administrator, token);
-                    var denied = state.Identity.Principal with { ClusterAdministrator = false, PolicyEpoch = DeniedEpoch };
+                    var denied = state.Identity.Principal with
+                    {
+                        ClusterAdministrator = false,
+                        PolicyEpoch = DeniedEpoch
+                    };
                     await ConfigureAsync(administrator, denied, token);
                     await FenceAsync(caller, wire, state.CreatedId, token);
                     await FenceAsync(caller, wire, state.FailedId, token);
                     await SqlCreateTableRf3Images.RequireAsync(administrator, image, token);
-                    var repaired = state.Identity.Principal with { PolicyEpoch = RepairedEpoch };
+                    var repaired = state.Identity.Principal with
+                    {
+                        PolicyEpoch = RepairedEpoch
+                    };
                     await ConfigureAsync(administrator, repaired, token);
                     await FenceAsync(caller, wire, state.CreatedId, token);
                     await FenceAsync(caller, wire, state.FailedId, token);
@@ -44,7 +51,13 @@ internal static class SqlCreateTableRf3Policy
             {
                 EpochFenced = true,
                 RepairId = repairId,
-                Identity = state.Identity with { Principal = state.Identity.Principal with { PolicyEpoch = RepairedEpoch } }
+                Identity = state.Identity with
+                {
+                    Principal = state.Identity.Principal with
+                    {
+                        PolicyEpoch = RepairedEpoch
+                    }
+                }
             };
         }, token);
     private static async Task ConfigureAsync(KeyLoadClient administrator, PrincipalRecord expected, CancellationToken token)

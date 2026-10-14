@@ -18,7 +18,9 @@ internal sealed class RemoteTransferReceiptTests
         using var fixture = new RemoteTransferDatabase();
         fixture.AddPrincipal(new(Principal, RemoteTransferDatabase.TenantId,
             [new("database", RemoteTransferDatabase.SourceQueueName, Capability.QueuePublish)], [])
-        { ClusterAdministrator = true });
+        {
+            ClusterAdministrator = true
+        });
         var transferId = Guid.NewGuid();
         fixture.Commit(fixture.SourcePartition, new CreateQueueTransfer(fixture.SourceQueue, transferId,
             fixture.DestinationQueue, new(fixture.DestinationQueue.Queue, "message-1", Payload)));

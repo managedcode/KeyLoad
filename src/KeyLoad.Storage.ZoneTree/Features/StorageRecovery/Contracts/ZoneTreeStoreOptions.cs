@@ -50,11 +50,20 @@ public sealed record ZoneTreeStoreOptions(string Directory)
     private int? maximumIdentityFileBytes;
     private IOptions<ZoneTreeStorageExecutionOptions>? maintenanceExecution;
     /// <summary>Optional stable node incarnation required when reopening an existing store.</summary>
-    public Guid? Incarnation { get; init; }
+    public Guid? Incarnation
+    {
+        get; init;
+    }
     /// <summary>Optional private signing key; caller bytes are copied before becoming store identity.</summary>
-    public ReadOnlyMemory<byte>? SigningKey { get; init; }
+    public ReadOnlyMemory<byte>? SigningKey
+    {
+        get; init;
+    }
     /// <summary>Optional observer invoked at named durable state transitions.</summary>
-    public Action<CommitStage, long, int>? FaultObserver { get; init; }
+    public Action<CommitStage, long, int>? FaultObserver
+    {
+        get; init;
+    }
     /// <summary>Maximum serialized journal frame size.</summary>
     public int MaxFrameBytes
     {
@@ -69,7 +78,10 @@ public sealed record ZoneTreeStoreOptions(string Directory)
     }
     /// <summary>Explicit embedded-only cache opt-in with an externally owned shared node budget.</summary>
     /// <remarks>RF3 server composition stays cold until authenticated Orleans coordination is enabled.</remarks>
-    public ZoneTreePointCacheOptions? EmbeddedPointCache { get; init; }
+    public ZoneTreePointCacheOptions? EmbeddedPointCache
+    {
+        get; init;
+    }
 
     internal int CheckpointBatchBytes => checkpointBatchBytes ?? throw UnresolvedExecution();
     internal int CheckpointBatchRecords => checkpointBatchRecords ?? throw UnresolvedExecution();
@@ -111,7 +123,9 @@ public sealed record ZoneTreeStoreOptions(string Directory)
             MaxSnapshotBytes = maxSnapshotBytesOverride ?? configured.MaxSnapshotBytes
         };
         effective.Validate();
-        var resolved = this with { };
+        var resolved = this with
+        {
+        };
         resolved.effectiveMaxFrameBytes = effective.MaxFrameBytes;
         resolved.effectiveMaxSnapshotBytes = effective.MaxSnapshotBytes;
         resolved.checkpointBatchBytes = effective.CheckpointBatchBytes;

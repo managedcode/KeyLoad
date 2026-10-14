@@ -11,7 +11,9 @@ internal static class SqlTypedInsertParameterParity
         var cut = fixture.Store.Position;
         var limits = UnitExecutionOptions.DatabaseLimits();
         var values = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
-        { [CanonicalSlot] = JsonSerializer.SerializeToElement(true) };
+        {
+            [CanonicalSlot] = JsonSerializer.SerializeToElement(true)
+        };
         var request = new SqlOperationRequest(fixture.Partition, WireSql, values,
             CommandId: state.Created.Command.CommandId);
         var wire = SqlOperationCompiler.CompileNativeSession(request, limits, limits.Value.MaxBatchBytes,
@@ -24,9 +26,15 @@ internal static class SqlTypedInsertParameterParity
             SqlTypedInsertAssertions.OutcomeBytes(fixture.Store, fixture.Partition, wire.CommandId));
         await RefuseAsync(() => SqlOperationCompiler.Compile(request, limits, limits.Value.MaxBatchBytes,
             UnitExecutionOptions.QueryExecution(), token), ErrorCode.UnsupportedCapability);
-        await RefuseAsync(() => SqlOperationCompiler.CompileNativeSession(request with { Sql = InvalidSlot },
+        await RefuseAsync(() => SqlOperationCompiler.CompileNativeSession(request with
+        {
+            Sql = InvalidSlot
+        },
             limits, limits.Value.MaxBatchBytes, UnitExecutionOptions.QueryExecution(), SlotCount, token), ErrorCode.Validation);
-        await RefuseAsync(() => SqlOperationCompiler.CompileNativeSession(request with { Sql = SqlTypedInsertLiteral.Sql },
+        await RefuseAsync(() => SqlOperationCompiler.CompileNativeSession(request with
+        {
+            Sql = SqlTypedInsertLiteral.Sql
+        },
             limits, limits.Value.MaxBatchBytes, UnitExecutionOptions.QueryExecution(), SlotCount, token), ErrorCode.Validation);
         await SqlTypedInsertAssertions.UnchangedAsync(fixture.Store, image, cut);
         await SqlTypedInsertHot.ReplayAsync(fixture, state.Created);
@@ -35,7 +43,10 @@ internal static class SqlTypedInsertParameterParity
     private static async Task RefuseAsync(Action action, ErrorCode expected)
     {
         var error = await Assert.ThrowsAsync<KeyLoadException>(() =>
-        { action(); return Task.CompletedTask; })
+        {
+            action();
+            return Task.CompletedTask;
+        })
             ?? throw new InvalidOperationException(MissingFailure);
         await Assert.That(error.Code).IsEqualTo(expected);
     }

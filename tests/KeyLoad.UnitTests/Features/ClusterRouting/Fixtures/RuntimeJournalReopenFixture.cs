@@ -25,7 +25,9 @@ internal sealed class RuntimeJournalReopenFixture : IDisposable
     {
         Open();
         Database.Bootstrap(new PrincipalRecord(RootId, "system", [new(Wildcard, Wildcard, Capability.All)], [Wildcard])
-        { ClusterAdministrator = true }, DatabaseEngine.Credential(RootKeyId, RootId, RootSecret));
+        {
+            ClusterAdministrator = true
+        }, DatabaseEngine.Credential(RootKeyId, RootId, RootSecret));
         ClusterPrincipalPolicy.Initialize(Database);
         Database.ConfigureRuntimeJournal(Options.Create(options));
         Submit(new(RuntimeJournalAction.BootstrapIdentity, string.Empty, Guid.Empty, 0, 0, null,

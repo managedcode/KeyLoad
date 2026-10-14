@@ -17,7 +17,9 @@ internal static class QueryCursorRequestIdentityR47Current
         var listed = await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.ListResourcesAsync(
             new(state.Partition.TenantId, state.Partition.DatabaseId), token));
         foreach (var expected in state.Definitions)
-        { await SqlRf3Protocol.EqualAsync(expected, listed.Items.Single(item => item.Name == expected.Name)); }
+        {
+            await SqlRf3Protocol.EqualAsync(expected, listed.Items.Single(item => item.Name == expected.Name));
+        }
         await SqlRf3Protocol.EqualAsync(state.Outbox, await OutboxAsync(root, state.Partition, token));
     }
 

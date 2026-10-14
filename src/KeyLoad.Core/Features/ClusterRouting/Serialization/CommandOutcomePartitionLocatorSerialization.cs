@@ -28,7 +28,9 @@ internal static class CommandOutcomePartitionLocatorSerialization
     internal static byte[]? ReadScopedValue(IKeyValueView view, byte[] key, StorageReadObserver? observer)
     {
         if (observer is null)
-        { return view.ReadOwnedValue(key); }
+        {
+            return view.ReadOwnedValue(key);
+        }
         byte[]? value = null;
         view.ReadValue(key, borrowed => value = borrowed.ToArray(), observer);
         return value;

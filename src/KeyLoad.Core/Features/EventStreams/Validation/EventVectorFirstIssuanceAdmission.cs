@@ -33,11 +33,15 @@ internal static class EventVectorFirstIssuanceAdmission
         var active = EventVectorRowStorage.Read<EventVectorFirstIssuance>(view, activeKey, admission);
         var terminal = EventVectorRowStorage.Read<EventVectorFirstIssuance>(view, terminalKey, admission);
         if (active is not null && terminal is not null)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         if (phase.Action == EventVectorControlAction.AdmitFirstIntent && !originalOutcome)
         {
             if (active is not null || terminal is not null)
-            { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+            }
             return;
         }
         if (phase.Action == EventVectorControlAction.AdmitFirstIntent && originalOutcome)
@@ -47,25 +51,24 @@ internal static class EventVectorFirstIssuanceAdmission
             if (admitted.Outcome.Result.Error is not null)
             {
                 if (active is not null || terminal is not null)
-                { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+                {
+                    throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+                }
                 return;
             }
         }
         if (active is null)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         var row = EventVectorFirstIssuanceValidation.Read(view, request.ControlPartition,
             principal.Id, request.CommandId, terminal: false, admission);
         EventVectorParentScopes.Authorize(authorization, principal, row.OriginalAuthorizedSourceScopes, admission);
-        _ = EventVectorFirstIssuanceValidation.RequireRequest(row, request, admission);
-        if (row.OriginalParentExpiresAt != phase.OriginalParentExpiresAt
-            || !row.OriginalCoverageWitnessBytes.Span.SequenceEqual(phase.OriginalCoverageWitness.Span)
-            || !CryptographicOperations.FixedTimeEquals(row.OriginalPublicRequestDigest.Span,
-                EventVectorControlBodyProjection.RequestDigest(request, admission).Span))
-        { throw Errors.Fail(ErrorCode.Conflict, Invalid); }
-        EventVectorParentScopes.RequireExact(row.OriginalAuthorizedSourceScopes,
-            EventVectorParentScopes.Derive(phase, null, admission));
+        RequireActiveRequest(phase, admission, request, row);
         if (originalOutcome)
-        { return; }
+        {
+            return;
+        }
         var stateMatches = phase.Action switch
         {
             EventVectorControlAction.CaptureFirstPhase => row.State == EventVectorFirstIssuanceState.Admitted,
@@ -73,7 +76,24 @@ internal static class EventVectorFirstIssuanceAdmission
             _ => false
         };
         if (!stateMatches)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
     }
+    private static void RequireActiveRequest(EventVectorControlPhase phase, EventVectorAdmissionPolicy admission,
+        EventFeedControlRequest request, EventVectorFirstIssuance row)
+    {
+        _ = EventVectorFirstIssuanceValidation.RequireRequest(row, request, admission);
+        if (row.OriginalParentExpiresAt != phase.OriginalParentExpiresAt
+            || !row.OriginalCoverageWitnessBytes.Span.SequenceEqual(phase.OriginalCoverageWitness.Span)
+            || !CryptographicOperations.FixedTimeEquals(row.OriginalPublicRequestDigest.Span,
+                EventVectorControlBodyProjection.RequestDigest(request, admission).Span))
+        {
+            throw Errors.Fail(ErrorCode.Conflict, Invalid);
+        }
+        EventVectorParentScopes.RequireExact(row.OriginalAuthorizedSourceScopes,
+            EventVectorParentScopes.Derive(phase, null, admission));
+    }
+
 }
 

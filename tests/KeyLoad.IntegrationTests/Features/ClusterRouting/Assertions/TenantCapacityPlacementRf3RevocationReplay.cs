@@ -23,14 +23,21 @@ internal static class TenantCapacityPlacementRf3RevocationReplay
             await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.PersistPlacementIntentAsync(persistId, persist, token)));
         await SqlRf3Protocol.EqualAsync(pending, (await McpCallerAssertions.SuccessAsync<PlacementIntentV1>(
             await caller.Official.CallAsync(TenantPlacementPublicProtocol.PersistTool,
-                new { commandId = persistId, request = persist }, token))).Value);
+                new
+                {
+                    commandId = persistId,
+                    request = persist
+                }, token))).Value);
         await Assert.That(oldIntent.PolicyEpoch).IsEqualTo(OriginalOutcomeEpoch);
         await OldPersistDeniedAsync(caller, oldPersistId, oldPersist, token);
         await TenantCapacityPlacementRf3RevocationAssertions.RefuseAsync(caller, oldId, oldRequest,
             ErrorCode.TokenInvalidated, TenantPlacementPolicyProtocol.ScopeMismatch,
             TenantCapacityPlacementRf3RevocationAssertions.McpEpochInvalidated, token);
         await TenantCapacityPlacementRf3Assertions.RefusalAsync(await caller.Sdk.ApplyPlacementIntentAsync(
-            id, request with { ExpectedRevision = completed.Revision }, token), ErrorCode.Conflict);
+            id, request with
+            {
+                ExpectedRevision = completed.Revision
+            }, token), ErrorCode.Conflict);
         await TenantCapacityPlacementRf3RevocationAssertions.ReplayAsync(caller, completed, id, request, token);
         await TenantCapacityPlacementRf3Assertions.RequireOriginalModelsAsync(seed, state, token);
     }
@@ -42,7 +49,11 @@ internal static class TenantCapacityPlacementRf3RevocationReplay
         await TenantCapacityPlacementRf3Assertions.RefusalAsync(sdk, ErrorCode.PermissionDenied);
         await SqlRf3Protocol.EqualAsync(Errors.Problem(ErrorCode.PermissionDenied, EpochChanged), sdk.Problem!);
         var official = await caller.Official.CallAsync(TenantPlacementPublicProtocol.PersistTool,
-            new { commandId = id, request }, token);
+            new
+            {
+                commandId = id,
+                request
+            }, token);
         await McpCallerAssertions.ErrorAsync(official, ErrorCode.PermissionDenied, dispatched: true);
         await Assert.That(official.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
             .GetProperty(McpCallerProtocol.ProblemDetail).GetString())

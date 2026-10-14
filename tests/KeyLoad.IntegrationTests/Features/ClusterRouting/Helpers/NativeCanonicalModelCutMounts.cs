@@ -21,7 +21,9 @@ internal static class NativeCanonicalModelCutMounts
             .Where(resource => TwoRf3MembershipProtocol.Nodes.Contains(resource.Name, StringComparer.Ordinal)).ToArray();
         if (nodes.Length != TwoRf3MembershipProtocol.NodeCount
             || TwoRf3MembershipProtocol.Nodes.Any(node => nodes.Count(resource => resource.Name == node) != SingleResource))
-        { throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState); }
+        {
+            throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState);
+        }
         foreach (var node in NativeCanonicalModelCutFiles.Nodes)
         {
             var resource = nodes.Single(value => value.Name == node);

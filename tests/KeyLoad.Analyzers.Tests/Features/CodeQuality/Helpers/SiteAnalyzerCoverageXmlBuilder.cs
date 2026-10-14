@@ -53,7 +53,9 @@ internal static class SiteAnalyzerCoverageXmlBuilder
             xml.Append(SiteAnalyzerCoverageTokens.SourceToPackage);
         }
         else
-        { xml.Append(SiteAnalyzerCoverageTokens.CoveragePackagePrefix); }
+        {
+            xml.Append(SiteAnalyzerCoverageTokens.CoveragePackagePrefix);
+        }
     }
 
     private static void AppendClasses(
@@ -84,7 +86,9 @@ internal static class SiteAnalyzerCoverageXmlBuilder
             }
 
             if (sourceHasBranches)
-            { branchSourceCount--; }
+            {
+                branchSourceCount--;
+            }
         }
     }
 
@@ -122,7 +126,9 @@ internal static class SiteAnalyzerCoverageXmlBuilder
     {
         xml.Append(SiteAnalyzerCoverageTokens.ClassOpen).Append(className).Append(SiteAnalyzerCoverageTokens.ClassFileSeparator).Append(source).Append(SiteAnalyzerCoverageTokens.ClassMiddle);
         if (includeMethods)
-        { xml.Append(SiteAnalyzerCoverageTokens.MethodsBlock); }
+        {
+            xml.Append(SiteAnalyzerCoverageTokens.MethodsBlock);
+        }
         xml.Append(SiteAnalyzerCoverageTokens.LinesOpen);
         for (var lineNumber = SiteAnalyzerCoverageTokens.FirstLineNumber; lineNumber <= linesPerSource; lineNumber++)
         {

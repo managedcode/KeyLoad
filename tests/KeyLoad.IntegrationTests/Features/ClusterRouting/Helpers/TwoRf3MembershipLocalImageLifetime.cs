@@ -11,20 +11,28 @@ internal static class TwoRf3MembershipLocalImageLifetime
         var selection = preparation?.Selection ?? LocalRf3ImageSelection.Read();
         var wave = new TwoRf3MembershipWave(selection, register: true, remote: true, query: true,
             probe: true, protectedDocument: true)
-        { localImagePreparation = preparation };
+        {
+            localImagePreparation = preparation
+        };
         return await TwoRf3MembershipWave.StartOwnedAsync(wave, token).ConfigureAwait(false);
     }
 
     internal static async Task JoinAsync(TwoRf3MembershipWave wave, List<Exception> failures)
     {
         if (wave.localImagePreparation is not { } preparation)
-        { return; }
+        {
+            return;
+        }
         if (wave.startAttempted && (!wave.applicationDisposed || !wave.nodeLocksReleased))
-        { return; }
+        {
+            return;
+        }
         var before = failures.Count;
         await ServerFailureObserver.ObserveAsync(
             () => preparation.DisposeAsync(removeImage: failures.Count == 0).AsTask(), failures).ConfigureAwait(false);
         if (failures.Count == before)
-        { wave.localImagePreparation = null; }
+        {
+            wave.localImagePreparation = null;
+        }
     }
 }

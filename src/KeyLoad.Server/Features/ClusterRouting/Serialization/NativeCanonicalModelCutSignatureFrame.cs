@@ -10,7 +10,9 @@ internal static class NativeCanonicalModelCutSignatureFrame
     internal static byte[] Create(ReadOnlySpan<byte> payload)
     {
         if (payload.Length is <= EmptyPayloadBytes or > NativeCanonicalModelCutCodec.MaximumRecordBytes)
-        { throw NativeCanonicalModelCutCodec.Exhausted(); }
+        {
+            throw NativeCanonicalModelCutCodec.Exhausted();
+        }
         var purpose = PurposeBytes.AsSpan();
         var frame = new byte[checked(purpose.Length + payload.Length)];
         purpose.CopyTo(frame);

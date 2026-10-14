@@ -32,7 +32,10 @@ internal sealed class RemoteDocumentNativeOwnerTests
             await Assert.That(fixture.Source.Store.Position).IsEqualTo(failedPosition);
             await Assert.That(RemoteDocumentNativeAssertions.Image(fixture.Destination).SequenceEqual(destinationBefore)).IsTrue();
             await Assert.That(fixture.Destination.Store.Position).IsEqualTo(destinationPosition);
-            var local = RemoteDocumentNativeFixture.Partition with { PartitionKey = LocalPartitionKey };
+            var local = RemoteDocumentNativeFixture.Partition with
+            {
+                PartitionKey = LocalPartitionKey
+            };
             var healthyId = Guid.NewGuid();
             var healthy = fixture.Source.Database.Apply(RemoteDocumentNativeFixture.Operation(fixture.Source,
                 OperationKind.Batch, healthyId, new CommandRequest(healthyId, local,
@@ -59,7 +62,9 @@ internal sealed class RemoteDocumentNativeOwnerTests
             fixture.Source.AddPrincipal(new(RemoteDocumentNativeFixture.Reader, RemoteDocumentNativeFixture.Tenant,
                 [new(RemoteDocumentNativeFixture.Partition.DatabaseId, RemoteDocumentNativeFixture.Collection,
                     Capability.DocumentsRead)], [RemoteDocumentNativeFixture.Title])
-            { PolicyEpoch = RemoteDocumentNativeFixture.Second });
+            {
+                PolicyEpoch = RemoteDocumentNativeFixture.Second
+            });
             var sourceBefore = RemoteDocumentNativeAssertions.Image(fixture.Source);
             var sourcePosition = fixture.Source.Store.Position;
             var destinationBefore = RemoteDocumentNativeAssertions.Image(fixture.Destination);

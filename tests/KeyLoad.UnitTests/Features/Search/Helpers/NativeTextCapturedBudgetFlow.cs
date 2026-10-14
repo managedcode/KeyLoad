@@ -14,7 +14,10 @@ internal static class NativeTextCapturedBudgetFlow
         var request = new OnlineTextIndexMaintenanceRequest(Guid.NewGuid(), seed.Pin.Consumer,
             seed.Pin.Collection, seed.Pin.Field, seed.Pin.Generation, seed.Pin.NodeId, seed.Pin.Placement);
         var original = await NativeTextOnlineWholeFlow.RunAsync(fixture, runtime, request, token);
-        var policy = UnitExecutionOptions.DatabaseLimits(fixture.Database.Limits with { MaxQueryReadBytes = sizeof(byte) });
+        var policy = UnitExecutionOptions.DatabaseLimits(fixture.Database.Limits with
+        {
+            MaxQueryReadBytes = sizeof(byte)
+        });
         var budget = new ReadExecutionBudget(policy, fixture.Database.EvaluationClock, token);
         ICapturedTextRead? admitted = null;
         var failures = new List<Exception>();
@@ -24,11 +27,15 @@ internal static class NativeTextCapturedBudgetFlow
             _ = admitted.CompleteSource();
         }, failures);
         if (admitted is not null)
-        { ServerFailureObserver.Observe(admitted.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(admitted.Dispose, failures);
+        }
         await Assert.That(failures).IsNotEmpty();
         await Assert.That(failures.SelectMany(Flatten).Any(error => error is KeyLoadException { Code: ErrorCode.BudgetExceeded })).IsTrue();
         if (failures.SelectMany(Flatten).Any(error => error is not KeyLoadException { Code: ErrorCode.BudgetExceeded }))
-        { ServerFailureObserver.ThrowIfAny(failures); }
+        {
+            ServerFailureObserver.ThrowIfAny(failures);
+        }
         await NativeTextCapturedPublicFlow.CancelledCallerThenJoinedAsync(runtime, fixture, token);
         await NativeTextBilingualAudit.VerifyAsync(runtime.Search, fixture.Partition, token);
         var replay = await NativeTextOnlineWholeFlow.RunAsync(fixture, runtime, request, token);

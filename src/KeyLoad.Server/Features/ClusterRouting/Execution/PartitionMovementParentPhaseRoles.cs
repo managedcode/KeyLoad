@@ -38,7 +38,9 @@ internal static class PartitionMovementParentPhaseRoles
             ? last.CleanupGeneration : PartitionMoveProtocol.EmptyCount;
         if (PartitionMovementParentPhaseIds.For(header.OriginalTransferRequest,
             header.OperatorPrincipalId, role, last.PageOrdinal, cleanup) != last.OriginalPhaseCommandId)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+        }
         return role;
     }
 

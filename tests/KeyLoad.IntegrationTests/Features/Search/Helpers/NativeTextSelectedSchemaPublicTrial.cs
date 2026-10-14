@@ -12,7 +12,10 @@ internal static class NativeTextSelectedSchemaPublicTrial
             fixture.AdminKey, async caller =>
             {
                 var state = await NativeTextSelectedSchemaPublicSeed.CreateAsync(caller, token);
-                var schema = state.Resource with { SchemaVersion = 2L };
+                var schema = state.Resource with
+                {
+                    SchemaVersion = 2L
+                };
                 await SqlRf3Protocol.EqualAsync(schema, await McpCallerAssertions.SdkSuccessAsync(
                     await caller.Sdk.ConfigureResourceAsync(Guid.NewGuid(), new(state.Scenario.Partition.TenantId,
                         state.Scenario.Partition.DatabaseId, schema), token)));

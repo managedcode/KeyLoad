@@ -1,9 +1,9 @@
 using System.Security.Cryptography;
 using System.Text;
 using KeyLoad.Client;
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
 
@@ -26,7 +26,11 @@ internal sealed class ProtectedDocumentUncertaintyScenario(TwoRf3MembershipWave 
         return new(http, secret, IntegrationClientOptions.Execution());
     }
 
-    internal Task<T> Own<T>(Task<T> task) { producers.Add(task); return task; }
+    internal Task<T> Own<T>(Task<T> task)
+    {
+        producers.Add(task);
+        return task;
+    }
     internal Guid Arm(string principal, Guid command, RequestCqrsProbePhase phase, RequestCqrsProbeAction action)
     {
         var arm = wave.QueryControls.WriteArm(principal, command, null, phase, action);
@@ -83,7 +87,10 @@ internal sealed class ProtectedDocumentUncertaintyScenario(TwoRf3MembershipWave 
         var key = "uncertain-key-" + Guid.NewGuid().ToString("N");
         var secret = key + "." + Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(32));
         _ = await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigurePrincipalAsync(Guid.NewGuid(),
-            new(id, "protected-tenant", [], []) { ClusterAdministrator = true }, token));
+            new(id, "protected-tenant", [], [])
+            {
+                ClusterAdministrator = true
+            }, token));
         _ = await McpCallerAssertions.SdkStatusAsync(await administrator.ConfigureApiKeyAsync(Guid.NewGuid(),
             new(key, id, Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(secret)))), token));
         return (id, secret);
@@ -94,18 +101,30 @@ internal sealed class ProtectedDocumentUncertaintyScenario(TwoRf3MembershipWave 
         var failures = new List<Exception>();
         using var cleanup = new CancellationTokenSource(TwoRf3MembershipProtocol.CleanupDeadline, TimeProvider.System);
         if (caller is not null)
-        { await ServerFailureObserver.ObserveAsync(caller.CancelAsync, failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(caller.CancelAsync, failures).ConfigureAwait(false);
+        }
         wave.QueryControls.StopAdmission();
         if (discovery.Length == 3)
-        { await ServerFailureObserver.ObserveAsync(() => wave.QueryControls.ReleaseOpenArmsAsync(discovery, cleanup.Token), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => wave.QueryControls.ReleaseOpenArmsAsync(discovery, cleanup.Token), failures);
+        }
         foreach (var producer in producers)
-        { await ServerFailureObserver.ObserveAsync(() => producer, failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => producer, failures).ConfigureAwait(false);
+        }
         foreach (var arm in arms)
-        { await JoinArmAsync(arm, failures, cleanup.Token).ConfigureAwait(false); }
+        {
+            await JoinArmAsync(arm, failures, cleanup.Token).ConfigureAwait(false);
+        }
         if (official is not null)
-        { await ServerFailureObserver.ObserveAsync(() => official.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => official.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         foreach (var connection in connections)
-        { ServerFailureObserver.Observe(connection.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(connection.Dispose, failures);
+        }
         caller?.Dispose();
         ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -114,7 +133,9 @@ internal sealed class ProtectedDocumentUncertaintyScenario(TwoRf3MembershipWave 
     {
         var state = wave.QueryControls.ArmFor(arm);
         if (state.RequestId is null || state.ProducerDisposedSeen)
-        { return; }
+        {
+            return;
+        }
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             _ = await wave.QueryControls.WaitForMarkerAsync(arm, RequestCqrsProbePhase.ProducerDisposed,

@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 using KeyLoad.Query.Features.Search;
 
 namespace KeyLoad.Server.Features.Search;
@@ -49,11 +49,17 @@ internal static class NativeTextHostSearch
         {
             var failures = new List<Exception> { primary };
             try
-            { explicitOwner.DisposeAsync().AsTask().GetAwaiter().GetResult(); }
+            {
+                explicitOwner.DisposeAsync().AsTask().GetAwaiter().GetResult();
+            }
             catch (Exception cleanup) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
-            { RetainCleanup(cleanup, failures); }
+            {
+                RetainCleanup(cleanup, failures);
+            }
             catch (Exception cleanup) when (!NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
-            { RetainCleanup(cleanup, failures); }
+            {
+                RetainCleanup(cleanup, failures);
+            }
             ServerFailureObserver.ThrowIfAny(failures);
             throw;
         }
@@ -78,11 +84,17 @@ internal static class NativeTextHostSearch
         {
             var failures = new List<Exception> { primary };
             try
-            { online.DisposeAsync().AsTask().GetAwaiter().GetResult(); }
+            {
+                online.DisposeAsync().AsTask().GetAwaiter().GetResult();
+            }
             catch (Exception cleanup) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
-            { RetainCleanup(cleanup, failures); }
+            {
+                RetainCleanup(cleanup, failures);
+            }
             catch (Exception cleanup) when (!NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
-            { RetainCleanup(cleanup, failures); }
+            {
+                RetainCleanup(cleanup, failures);
+            }
             ServerFailureObserver.ThrowIfAny(failures);
             throw;
         }
@@ -91,6 +103,8 @@ internal static class NativeTextHostSearch
     private static void RetainCleanup(Exception cleanup, List<Exception> failures)
     {
         if (!failures.Any(originalFailure => ReferenceEquals(originalFailure, cleanup)))
-        { failures.Add(cleanup); }
+        {
+            failures.Add(cleanup);
+        }
     }
 }

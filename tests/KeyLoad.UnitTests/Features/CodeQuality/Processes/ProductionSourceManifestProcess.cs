@@ -95,7 +95,10 @@ internal static class ProductionSourceManifestProcess
         global::KeyLoad.UnitTests.Features.CodeQuality.NativeCoverageImageNodeSettlement.ThrowFailures(failures);
         return result is null
             ? throw new InvalidOperationException(Failure)
-            : result with { ProcessDisposed = disposed };
+            : result with
+            {
+                ProcessDisposed = disposed
+            };
     }
 
     private static async Task<ProductionSourceManifestProcessResult?> RunStartedAsync(

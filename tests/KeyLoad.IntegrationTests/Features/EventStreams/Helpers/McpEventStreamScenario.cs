@@ -9,7 +9,10 @@ namespace KeyLoad.IntegrationTests.Features.EventStreams;
 internal sealed record McpEventStreamScenario(PartitionRef Partition)
 {
     /// <summary>Gets the immutable producer events with deliberately unsorted payload and header JSON.</summary>
-    internal static ImmutableArray<EventData> InputEvents { get; } =
+    internal static ImmutableArray<EventData> InputEvents
+    {
+        get;
+    } =
     [
         new(McpEventStreamTokens.EventIdCreated, McpEventStreamTokens.EventType,
             McpEventStreamTokens.InitialPayload, McpEventStreamTokens.InitialHeaders,
@@ -29,7 +32,10 @@ internal sealed record McpEventStreamScenario(PartitionRef Partition)
     ];
 
     /// <summary>Gets the independent handcrafted canonical persisted event oracle.</summary>
-    internal static ImmutableArray<EventData> ExpectedEvents { get; } =
+    internal static ImmutableArray<EventData> ExpectedEvents
+    {
+        get;
+    } =
     [
         InputEvents[0] with { PayloadJson = McpEventStreamTokens.CanonicalInitialPayload,
             HeadersJson = McpEventStreamTokens.CanonicalInitialHeaders },
@@ -76,5 +82,8 @@ internal sealed record McpEventStreamScenario(PartitionRef Partition)
     /// <returns>The canonical SDK/MCP request.</returns>
     internal ReadStreamRequest ReadRequest(long afterRevision, int limit,
         long generation = McpEventStreamTokens.StreamGeneration)
-        => new(Stream with { Generation = generation }, afterRevision, limit);
+        => new(Stream with
+        {
+            Generation = generation
+        }, afterRevision, limit);
 }

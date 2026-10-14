@@ -21,9 +21,13 @@ internal sealed class PostgresSessionCatalog(global::Microsoft.Extensions.Option
     {
         statements.TryGetValue(name, out var previous);
         if (previous is not null && name.Length != PostgresProtocol.AllRows)
-        { throw Errors.Fail(ErrorCode.Validation, PostgresProtocol.Duplicate); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, PostgresProtocol.Duplicate);
+        }
         if (previous is null && statements.Count >= Options.MaximumStatements)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, Capacity); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, Capacity);
+        }
         ReplaceStatement(name, previous, value);
     }
 
@@ -31,9 +35,13 @@ internal sealed class PostgresSessionCatalog(global::Microsoft.Extensions.Option
     {
         portals.TryGetValue(name, out var previous);
         if (previous is not null && name.Length != PostgresProtocol.AllRows)
-        { throw Errors.Fail(ErrorCode.Validation, PostgresProtocol.Duplicate); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, PostgresProtocol.Duplicate);
+        }
         if (previous is null && portals.Count >= Options.MaximumPortals)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, Capacity); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, Capacity);
+        }
         Resize(previous?.RetainedBytes ?? PostgresProtocol.EmptyBytes, value.RetainedBytes);
         portals[name] = value;
     }
@@ -41,7 +49,9 @@ internal sealed class PostgresSessionCatalog(global::Microsoft.Extensions.Option
     internal void CloseStatement(string name)
     {
         if (statements.TryGetValue(name, out var value))
-        { ReplaceStatement(name, value, null); }
+        {
+            ReplaceStatement(name, value, null);
+        }
     }
 
     private void ReplaceStatement(string name, PostgresPreparedStatement? previous, PostgresPreparedStatement? next)
@@ -50,15 +60,23 @@ internal sealed class PostgresSessionCatalog(global::Microsoft.Extensions.Option
             .Select(pair => pair.Key).ToArray();
         var released = previous?.RetainedBytes ?? PostgresProtocol.EmptyBytes;
         foreach (var key in dependent)
-        { released = checked(released + portals[key].RetainedBytes); }
+        {
+            released = checked(released + portals[key].RetainedBytes);
+        }
         // Admit the complete replacement before changing any catalog ownership.
         Resize(released, next?.RetainedBytes ?? PostgresProtocol.EmptyBytes);
         foreach (var key in dependent)
-        { portals.Remove(key); }
+        {
+            portals.Remove(key);
+        }
         if (next is null)
-        { statements.Remove(name); }
+        {
+            statements.Remove(name);
+        }
         else
-        { statements[name] = next; }
+        {
+            statements[name] = next;
+        }
     }
 
     internal void BeginSimpleQuery()
@@ -70,13 +88,17 @@ internal sealed class PostgresSessionCatalog(global::Microsoft.Extensions.Option
     internal void ClosePortal(string name)
     {
         if (portals.Remove(name, out var value))
-        { Resize(value.RetainedBytes, PostgresProtocol.EmptyBytes); }
+        {
+            Resize(value.RetainedBytes, PostgresProtocol.EmptyBytes);
+        }
     }
 
     internal void Sync()
     {
         foreach (var value in portals.Values)
-        { Resize(value.RetainedBytes, PostgresProtocol.EmptyBytes); }
+        {
+            Resize(value.RetainedBytes, PostgresProtocol.EmptyBytes);
+        }
         portals.Clear();
     }
 
@@ -88,7 +110,9 @@ internal sealed class PostgresSessionCatalog(global::Microsoft.Extensions.Option
             throw ScriptDomOperationErrors.Invalid();
         }
         if (identity == Guid.Empty)
-        { throw ScriptDomOperationErrors.Invalid(); }
+        {
+            throw ScriptDomOperationErrors.Invalid();
+        }
         Resize(PostgresProtocol.EmptyBytes, MutationIdentityBytes);
         mutationIdentity = identity;
     }
@@ -113,7 +137,9 @@ internal sealed class PostgresSessionCatalog(global::Microsoft.Extensions.Option
     {
         var replacement = checked(retained - previous + next);
         if (replacement > Options.MaximumRetainedBytes)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, Capacity); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, Capacity);
+        }
         admission.Resize(retained, replacement);
         retained = replacement;
     }

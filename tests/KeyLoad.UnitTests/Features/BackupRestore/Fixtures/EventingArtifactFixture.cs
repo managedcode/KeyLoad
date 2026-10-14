@@ -26,7 +26,10 @@ internal sealed class EventingArtifactFixture
     internal const string Json = "{\"retained\":true}";
     internal string Root { get; } = Path.Combine(Path.GetTempPath(), Prefix + Guid.NewGuid().ToString("N"));
     internal TestDatabase Source { get; private set; } = null!;
-    internal ZoneTreeStore? Target { get; private set; }
+    internal ZoneTreeStore? Target
+    {
+        get; private set;
+    }
     internal DatabaseEngine Database { get; private set; } = null!;
     private TestDatabaseReplicaAdmission? targetAdmission;
     private bool nativeAdmission;
@@ -35,7 +38,10 @@ internal sealed class EventingArtifactFixture
     internal SubscriptionRef Group => new(Events, ProcessedGroup);
     internal SubscriptionRef Other => new(Events, UnreadGroup);
     internal QueueLaneRef Lane => new(Source.Partition, Queue);
-    internal DateTimeOffset Time { get; private set; }
+    internal DateTimeOffset Time
+    {
+        get; private set;
+    }
     internal ReceiveSubscriptionResult Received { get; set; } = null!;
     internal ReceiveResult QueueClaim { get; set; } = null!;
     internal SubscriptionProcessingResult Processed { get; set; } = null!;
@@ -44,7 +50,10 @@ internal sealed class EventingArtifactFixture
     internal static Mutation[] Effects => [new PutDocument(Documents, DocumentId, Json, 0), new EnqueueMessage(Queue, MessageId, Json)];
 
     internal static Task RunAsync(Func<EventingArtifactFixture, Task> operation, bool nativeAdmission = false)
-        => EventingArtifactFixtureLifetime.RunAsync(new() { nativeAdmission = nativeAdmission }, operation);
+        => EventingArtifactFixtureLifetime.RunAsync(new()
+        {
+            nativeAdmission = nativeAdmission
+        }, operation);
 
     internal void InitializeSource()
     {
@@ -74,15 +83,23 @@ internal sealed class EventingArtifactFixture
             ?? throw new InvalidOperationException(OriginalEngineRequired);
 
     internal void ReopenTarget(string path)
-    { JoinTarget(); Target = null; OpenTarget(path); }
+    {
+        JoinTarget();
+        Target = null;
+        OpenTarget(path);
+    }
     internal void JoinTarget()
     {
         var original = targetAdmission;
         targetAdmission = null;
         if (Target is { } target)
-        { TestDatabaseJoinedLifetime.DisposeInOrder(original, target); }
+        {
+            TestDatabaseJoinedLifetime.DisposeInOrder(original, target);
+        }
         else
-        { original?.Dispose(); }
+        {
+            original?.Dispose();
+        }
     }
     internal ReplicatedOperation Operation<T>(OperationKind kind, T value, Guid id, string principal = Principal)
         => new(id, kind, principal, nativeAdmission && Target is not null

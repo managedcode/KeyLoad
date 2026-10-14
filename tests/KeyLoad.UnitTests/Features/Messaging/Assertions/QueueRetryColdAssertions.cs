@@ -42,7 +42,9 @@ internal static class QueueRetryColdAssertions
             command.Action == DeliveryAction.Ack ? QueueRetryColdProtocol.Healthy : QueueRetryColdProtocol.Retry, version)];
         await Assert.That(JsonDefaults.Serialize(actual.Mutations).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
         foreach (var mutation in actual.Mutations)
-        { await Assert.That(mutation.CompositionReferences).IsEmpty(); }
+        {
+            await Assert.That(mutation.CompositionReferences).IsEmpty();
+        }
     }
 
     internal static async Task PendingAsync(DatabaseEngine database, QueueRetryColdState state, MessageMetadata expected)

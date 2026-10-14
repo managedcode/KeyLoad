@@ -1,6 +1,6 @@
 using KeyLoad.Client;
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
 
@@ -36,7 +36,9 @@ internal static class PartitionMovementFinalInstallFrameRf3Producer
                 var early = await call.ConfigureAwait(false);
                 if (early.IsFailed && Enum.TryParse<ErrorCode>(early.Problem?.ErrorCode, out var actualCode)
                     && Enum.IsDefined(actualCode))
-                { throw Errors.Fail(actualCode, early.Problem?.Detail ?? MissingPreflight); }
+                {
+                    throw Errors.Fail(actualCode, early.Problem?.Detail ?? MissingPreflight);
+                }
                 throw new InvalidOperationException(MissingPreflight);
             }
             var marker = await observed.ConfigureAwait(false);
@@ -78,7 +80,10 @@ internal static class PartitionMovementFinalInstallFrameRf3Producer
         using var caller = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         var markerTask = wave.QueryControls.WaitForMarkerAsync(arm, RequestCqrsProbePhase.ParentFinalInstallPreflight,
             RequestCqrsProbeOutcome.Observed, signed, caller.Token);
-        var call = seed.Source.MovePartitionAsync(seed.FirstRequest with { Mode = PartitionMoveMode.Resume }, caller.Token);
+        var call = seed.Source.MovePartitionAsync(seed.FirstRequest with
+        {
+            Mode = PartitionMoveMode.Resume
+        }, caller.Token);
         var failures = new List<Exception>();
         PartitionMoveResult? terminal = null;
         await ServerFailureObserver.ObserveAsync(async () =>
@@ -97,17 +102,23 @@ internal static class PartitionMovementFinalInstallFrameRf3Producer
                 RequestCqrsProbeOutcome.Released, signed, cancellationToken).ConfigureAwait(false);
             await Assert.That(released.RequestId).IsEqualTo(marker.RequestId);
             if (expectedError is not null && wave.frameObservation is { RequiresEvidence: true } frameObservation)
-            { await MovementFrameObservationRf3Producer.RequireAsync(frameObservation, call, caller.Token).ConfigureAwait(false); }
+            {
+                await MovementFrameObservationRf3Producer.RequireAsync(frameObservation, call, caller.Token).ConfigureAwait(false);
+            }
             var actual = await call.ConfigureAwait(false);
             if (expectedError is { } error)
             {
                 await Assert.That(actual.IsFailed).IsTrue();
                 await Assert.That(actual.Problem?.ErrorCode).IsEqualTo(error.ToString());
                 if (expectedDetail is not null)
-                { await Assert.That(actual.Problem?.Detail).IsEqualTo(expectedDetail); }
+                {
+                    await Assert.That(actual.Problem?.Detail).IsEqualTo(expectedDetail);
+                }
             }
             else
-            { terminal = await McpCallerAssertions.SdkSuccessAsync(actual); }
+            {
+                terminal = await McpCallerAssertions.SdkSuccessAsync(actual);
+            }
             await RequestCqrsPhaseFaultAssertions.VerifySettledAsync(wave.QueryControls, arm, marker.RequestId,
                 seed.FirstRequest.MoveId, signed, cancellationToken).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
@@ -124,7 +135,9 @@ internal static class PartitionMovementFinalInstallFrameRf3Producer
     private static async Task JoinObservationAsync(Task<RequestCqrsProbeMarkerRecord> observed, CancellationToken ownedWait)
     {
         try
-        { _ = await observed.ConfigureAwait(false); }
+        {
+            _ = await observed.ConfigureAwait(false);
+        }
         catch (OperationCanceledException) when (ownedWait.IsCancellationRequested) { }
     }
 

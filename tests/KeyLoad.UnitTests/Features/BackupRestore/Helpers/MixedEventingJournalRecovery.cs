@@ -111,7 +111,9 @@ internal static class MixedEventingJournalRecovery
         var changed = new CommandRequest(original.Id, state.Partition, [new ParkPendingQueueMessage(state.Lane.Queue,
             QueueLifecycleTestProtocol.Pending, QueueLifecycleTestProtocol.Two, QueueLifecycleTestProtocol.One)]);
         var refused = source.SubmitIssued(original with
-        { PayloadJson = JsonSerializer.Serialize(changed, JsonDefaults.Options) });
+        {
+            PayloadJson = JsonSerializer.Serialize(changed, JsonDefaults.Options)
+        });
         await Assert.That(refused.Error).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(refused.Json).IsNull();
         await Assert.That(refused.NativeValue).IsNull();

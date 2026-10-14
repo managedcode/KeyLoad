@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
@@ -17,26 +17,34 @@ internal static class RequestCqrsSampleChunkProbePair
         IReadOnlyList<RequestCqrsProbeLoadedArm> all)
     {
         if (adjunct.Phase != RequestCqrsProbePhase.AuthorizationReload || adjunct.SourceArmId is null)
-        { return; }
+        {
+            return;
+        }
         var source = all.FirstOrDefault(arm => arm.Record.ArmId == adjunct.SourceArmId)?.Record;
         if (!ValidAdjunct(adjunct) || all.Count(arm => arm.Record.ArmId == adjunct.SourceArmId) != OneAdjunct
             || source is not { } original || !SameOriginal(original, adjunct)
             || all.Count(arm => arm.Record.SourceArmId == original.ArmId
                 && arm.Record.Phase == RequestCqrsProbePhase.AuthorizationReload) != OneAdjunct)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
     }
 
     internal static RequestCqrsProbeLoadedArm Select(RequestCqrsProbeLoadedArm[] matches, GrainRequestPhase phase)
     {
         if (matches.Length != PairCount)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         var primary = matches.FirstOrDefault(arm => arm.Record.Phase == RequestCqrsProbePhase.SampleChunkNativeJobReturned);
         var adjunct = matches.FirstOrDefault(arm => arm.Record.Phase == RequestCqrsProbePhase.AuthorizationReload);
         if (matches.Count(arm => arm.Record.Phase == RequestCqrsProbePhase.SampleChunkNativeJobReturned) != OneAdjunct
             || matches.Count(arm => arm.Record.Phase == RequestCqrsProbePhase.AuthorizationReload) != OneAdjunct
             || primary is null || adjunct is null || !ValidAdjunct(adjunct.Record)
             || !SameOriginal(primary.Record, adjunct.Record))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         return phase switch
         {
             GrainRequestPhase.SampleChunkAdmissionPersisted or GrainRequestPhase.SampleChunkNativeJobReturned

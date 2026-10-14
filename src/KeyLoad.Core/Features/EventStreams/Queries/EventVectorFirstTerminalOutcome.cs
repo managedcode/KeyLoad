@@ -17,24 +17,33 @@ internal static class EventVectorFirstTerminalOutcome
         admission.RequireEncodedBytes(row.LastCleanupNativePayloadBytes.Length);
         var encoded = new ReplicatedOperation(row.LastCleanupNativeCommandId, OperationKind.EventFeedControl,
             principal.Id, default, string.Empty)
-        { NativePayload = row.LastCleanupNativePayloadBytes };
+        {
+            NativePayload = row.LastCleanupNativePayloadBytes
+        };
         var phase = NativeCommandPayload.Read<EventVectorControlPhase>(encoded);
         EventVectorControlFields.Require(phase, admission);
         var identity = EventVectorControlOperationIdentity.Create(phase, principal.Id, admission);
-        var operation = encoded with { PayloadJson = identity.Metadata };
+        var operation = encoded with
+        {
+            PayloadJson = identity.Metadata
+        };
         if (phase.Action != EventVectorControlAction.CleanupAbandonedIssuance
             || identity.CommandId != row.LastCleanupNativeCommandId
             || phase.OriginalFirstIssuancePublicCommandId != row.OriginalPublicCommandId
             || phase.OriginalRequest.MapId != row.MapId
             || phase.OriginalRequest.ControlPartition != row.ControlPartition
             || row.LastCleanupNativeFingerprint != NativeOperationFingerprint.Compute(operation))
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         var selected = CommandOutcomeKeyResolver.Select(view, principal.Id, identity.CommandId,
             new CommandOutcomePartitionScope(CommandOutcomeScopeKind.Partition, row.ControlPartition));
         var outcome = selected.Outcome ?? throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
         if (outcome.Incarnation != incarnation || outcome.PolicyEpoch != principal.PolicyEpoch
             || outcome.Fingerprint != row.LastCleanupNativeFingerprint || outcome.Result.Error is not null)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         var result = outcome.Result.Get<EventVectorFirstIssuanceResult>();
         if (result.Version != Version || result.NativeCommandId != identity.CommandId
             || result.Issuance is null || result.Receipt is null
@@ -55,6 +64,8 @@ internal static class EventVectorFirstTerminalOutcome
             || result.Receipt.CommandId != identity.CommandId || result.Receipt.Token.Incarnation != incarnation
             || result.Receipt.Token.AtomicPartitionId != row.ControlPartition.AtomicPartitionId
             || result.Receipt.Token.Position < FirstPosition)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
     }
 }

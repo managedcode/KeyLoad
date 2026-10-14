@@ -17,7 +17,9 @@ internal static class BlobLaterPartAssertions
         await RangeAsync(operations, seed, 65_553, 0);
         await RecordsAsync(owner, seed, retired: false);
         foreach (var command in seed.Commands)
-        { await BlobPriorPublicationImage.ReplayAsync(owner, command); }
+        {
+            await BlobPriorPublicationImage.ReplayAsync(owner, command);
+        }
     }
 
     internal static async Task RetiredAsync(DatabaseEngine owner, BlobRetiredPartState seed)
@@ -25,7 +27,9 @@ internal static class BlobLaterPartAssertions
         await BlobRetiredPartAssertions.TombstoneAsync(owner, seed);
         await RecordsAsync(owner, seed.Publication, retired: true);
         foreach (var command in seed.Publication.Commands)
-        { await BlobPriorPublicationImage.ReplayAsync(owner, command); }
+        {
+            await BlobPriorPublicationImage.ReplayAsync(owner, command);
+        }
         await BlobPriorPublicationImage.ReplayAsync(owner, seed.Deletion);
     }
 
@@ -36,7 +40,10 @@ internal static class BlobLaterPartAssertions
     private static async Task RecordsAsync(DatabaseEngine owner, BlobPriorPublicationState seed, bool retired)
     {
         await BlobPriorPublicationImage.ExactAsync(owner.Store.Read(view => view.GetRecord<BlobState>(
-            BlobPriorPublicationOracle.Key("blob-state-v1", seed))), seed.State with { Retired = retired });
+            BlobPriorPublicationOracle.Key("blob-state-v1", seed))), seed.State with
+            {
+                Retired = retired
+            });
         await BlobPriorPublicationImage.ExactAsync(new BlobStorageOperations(owner).UploadInfo("root", new(seed.Blob, seed.Upload)),
             new BlobUploadInfo(seed.Blob, seed.Upload, 65_553, 0, 2, 65_553,
                 seed.State.ExpiresAt, BlobUploadStatus.Complete, seed.Metadata.IntegrityHash!));

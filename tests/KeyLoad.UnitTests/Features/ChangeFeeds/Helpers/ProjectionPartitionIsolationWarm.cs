@@ -29,7 +29,9 @@ internal static class ProjectionPartitionIsolationWarm
         await ProjectionPartitionIsolationAssertions.OriginalBytesAsync(database.Store, keys, before);
         await ProjectionConsumerIdentityAssertions.OriginalBatchAsync(database.Database, second);
         foreach (var item in outcomes)
-        { await ProjectionConsumerIdentityAssertions.ReplayAsync(database.Database, database.Store, item.Operation, item.Result, token); }
+        {
+            await ProjectionConsumerIdentityAssertions.ReplayAsync(database.Database, database.Store, item.Operation, item.Result, token);
+        }
         await ProjectionPartitionIsolationSettlement.RunAsync(database.Database, second, outcomes, token);
         var result = new ProjectionPartitionIsolationState(first, second, [.. outcomes],
             ProjectionConsumerIdentityAssertions.Image(database.Store), database.Store.Position);

@@ -41,7 +41,9 @@ internal static class PostgresCompositionRf3Models
             await SourceAsync(actual.Target!, TargetId);
         }
         else
-        { await Assert.That(actual.Target).IsNull(); }
+        {
+            await Assert.That(actual.Target).IsNull();
+        }
     }
 
     private static async Task SourceAsync(MessageInspection message, string id)

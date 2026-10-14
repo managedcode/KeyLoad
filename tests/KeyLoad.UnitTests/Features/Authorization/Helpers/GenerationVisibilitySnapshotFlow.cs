@@ -25,7 +25,9 @@ internal static class GenerationVisibilitySnapshotFlow
             token.ThrowIfCancellationRequested();
             original = GenerationVisibilityAssertions.Hold(db, cache);
             if (File.Exists(path))
-            { throw new InvalidOperationException(SnapshotCollision); }
+            {
+                throw new InvalidOperationException(SnapshotCollision);
+            }
             snapshotOwned = true;
             await InstallAsync(db, path);
             unexpected = AcquireCurrentGeneration(db, cache);
@@ -37,9 +39,13 @@ internal static class GenerationVisibilitySnapshotFlow
             await ContentsAsync(current);
         }
         catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is null)
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is not null)
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         finally { Close(original, unexpected, current, snapshotOwned, path, failures); }
         RowVisibilityFailureLedger.Throw(failures);
     }
@@ -77,12 +83,20 @@ internal static class GenerationVisibilitySnapshotFlow
         RowVisibilityLease? current, bool snapshotOwned, string path, List<Exception> failures)
     {
         if (current is not null)
-        { RowVisibilityFailureLedger.Capture(current.Dispose, failures); }
+        {
+            RowVisibilityFailureLedger.Capture(current.Dispose, failures);
+        }
         if (unexpected is not null)
-        { RowVisibilityFailureLedger.Capture(unexpected.Dispose, failures); }
+        {
+            RowVisibilityFailureLedger.Capture(unexpected.Dispose, failures);
+        }
         if (original is not null)
-        { RowVisibilityFailureLedger.Capture(original.Dispose, failures); }
+        {
+            RowVisibilityFailureLedger.Capture(original.Dispose, failures);
+        }
         if (snapshotOwned)
-        { RowVisibilityFailureLedger.Capture(() => File.Delete(path), failures); }
+        {
+            RowVisibilityFailureLedger.Capture(() => File.Delete(path), failures);
+        }
     }
 }

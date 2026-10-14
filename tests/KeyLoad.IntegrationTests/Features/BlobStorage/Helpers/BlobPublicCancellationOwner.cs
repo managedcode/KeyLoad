@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
 using KeyLoad.IntegrationTests.Features.ClusterRouting.Helpers;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.BlobStorage;
@@ -51,19 +51,25 @@ internal sealed class BlobPublicCancellationOwner
     {
         var cleanupStart = failures.Count;
         foreach (var cancellation in CallCancellations)
-        { await ServerFailureObserver.ObserveAsync(cancellation.CancelAsync, failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(cancellation.CancelAsync, failures);
+        }
         await RequestCqrsPhaseFaultCleanup.RunAsync(Root, RootOwned && LocalImageSession is null, Controls, Wave, WaveStartupAttempted,
             Caller, Administrator, Discovery.Count == 0 ? null : Discovery, null, ScenarioDeadline, SdkCall, McpCall,
             Arms.FirstOrDefault(), failures, Arms.Skip(1).ToArray());
         foreach (var cancellation in CallCancellations)
-        { ServerFailureObserver.Observe(cancellation.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(cancellation.Dispose, failures);
+        }
         await JoinImageAsync(cleanupStart, failures);
     }
 
     private async Task JoinImageAsync(int cleanupStart, List<Exception> failures)
     {
         if (LocalImageSession is null)
-        { return; }
+        {
+            return;
+        }
         var cleanup = failures.Skip(cleanupStart).ToList();
         var prior = cleanup.Count;
         var stopped = (Wave is not null && cleanup.Count == 0) || !WaveStartupAttempted;
@@ -71,6 +77,8 @@ internal sealed class BlobPublicCancellationOwner
             .JoinAsync(LocalImageSession, ImageDataRoot, stopped, !WaveStartupAttempted, cleanup);
         failures.AddRange(cleanup.Skip(prior));
         if (RootOwned && stopped && cleanup.Count == 0)
-        { ServerFailureObserver.Observe(() => Directory.Delete(Root, recursive: true), failures); }
+        {
+            ServerFailureObserver.Observe(() => Directory.Delete(Root, recursive: true), failures);
+        }
     }
 }

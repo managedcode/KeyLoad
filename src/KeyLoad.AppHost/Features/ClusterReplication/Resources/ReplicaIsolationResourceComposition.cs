@@ -39,19 +39,27 @@ internal static class ReplicaIsolationResourceComposition
             || baseImage[(baseImage.IndexOf(DigestMarker, StringComparison.Ordinal) + DigestMarker.Length)..].Length != DigestLength
             || !baseImage[(baseImage.IndexOf(DigestMarker, StringComparison.Ordinal) + DigestMarker.Length)..]
                 .All(character => character is >= DecimalDigitFirst and <= DecimalDigitLast or >= LowerHexDigitFirst and <= LowerHexDigitLast))
-        { throw new InvalidOperationException(ImmutableBaseRequired); }
+        {
+            throw new InvalidOperationException(ImmutableBaseRequired);
+        }
         var admitted = RuntimeContainerImage.Read(builder, RuntimeContainerImage.ServerConfiguration);
         if (admitted.Reference != baseImage)
-        { throw new InvalidOperationException(OriginalBaseMismatch); }
+        {
+            throw new InvalidOperationException(OriginalBaseMismatch);
+        }
         var nativeBaseImage = admitted.Image + DigestMarker + admitted.Digest;
         var nodes = builder.Resources.OfType<ContainerResource>().ToArray();
         if (nodes.Length != expectedNames.Count || !nodes.Select(node => node.Name).Order(StringComparer.Ordinal).SequenceEqual(expectedNames.Order(StringComparer.Ordinal)))
-        { throw new InvalidOperationException(ExactVotersRequired); }
+        {
+            throw new InvalidOperationException(ExactVotersRequired);
+        }
         var dockerfile = Path.Combine(repository, Dockerfile);
         var context = Path.GetDirectoryName(dockerfile) ?? throw new InvalidOperationException(MissingContext);
         var contextFiles = Directory.EnumerateFiles(context, ContextFilePattern, SearchOption.AllDirectories).ToArray();
         if (contextFiles.Length != SingleContextFile || contextFiles[FirstContextFile] != dockerfile)
-        { throw new InvalidOperationException(ExactContextRequired); }
+        {
+            throw new InvalidOperationException(ExactContextRequired);
+        }
         var source = await File.ReadAllBytesAsync(dockerfile, cancellationToken).ConfigureAwait(false);
         var digest = Convert.ToHexStringLower(SHA256.HashData(source));
         var targets = new List<ReplicaIsolationBuildTarget>();
@@ -65,7 +73,9 @@ internal static class ReplicaIsolationResourceComposition
                 || !node.TryGetContainerImageName(useBuiltImage: false, out var originalImage)
                 || !string.Equals(originalImage, nativeBaseImage, StringComparison.Ordinal)
                 || string.Equals(builtImage, baseImage, StringComparison.Ordinal))
-            { throw new InvalidOperationException(BuildTargetMismatch); }
+            {
+                throw new InvalidOperationException(BuildTargetMismatch);
+            }
             targets.Add(new(node.Name, builtImage, serviceUser));
         }
         return new(baseImage, nativeBaseImage, digest, context, incarnation, targets.ToArray());

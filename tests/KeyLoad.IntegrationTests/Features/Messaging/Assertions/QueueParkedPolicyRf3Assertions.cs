@@ -13,7 +13,9 @@ internal static class QueueParkedPolicyRf3Assertions
         CancellationToken token)
     {
         foreach (var row in state.Messages)
-        { await MessageAsync(worker, state.Lane, row.Key, row.Value, token); }
+        {
+            await MessageAsync(worker, state.Lane, row.Key, row.Value, token);
+        }
         await DocumentAsync(worker, state, QueueParkedPolicyRf3Protocol.Missing, null, token);
     }
 

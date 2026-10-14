@@ -17,11 +17,15 @@ internal static class QueueDeadlineRecoveryAssertions
         var outcome = OutcomeStoreOracle.Read(store, operation);
         var committed = outcome is not null;
         if (stage >= CommitStage.JournalFlushed)
-        { await Assert.That(committed).IsTrue(); }
+        {
+            await Assert.That(committed).IsTrue();
+        }
         await QueueDeadlineRecoveryImage.RequireAsync(database, committed, condition.ExpectedDeadline);
         var receipt = database.Apply(operation).Get<CommitReceipt>();
         if (committed)
-        { await MessagingRecoveryReceiptAssertions.AssertSameNativeValueAsync(outcome!.Get<CommitReceipt>(), receipt); }
+        {
+            await MessagingRecoveryReceiptAssertions.AssertSameNativeValueAsync(outcome!.Get<CommitReceipt>(), receipt);
+        }
         await QueueDeadlineRecoveryImage.RequireAsync(database, true, condition.ExpectedDeadline);
         var expectedReceipt = new MutationReceipt(QueueDeadlineCrashProtocol.ReceiptKind,
             QueueDeadlineCrashProtocol.Queue, QueueDeadlineCrashProtocol.Message, QueueDeadlineCrashProtocol.Second);

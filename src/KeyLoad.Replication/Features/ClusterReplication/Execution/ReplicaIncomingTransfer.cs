@@ -27,14 +27,18 @@ internal sealed class ReplicaIncomingTransfer
     {
         ReplicaSnapshot? pending;
         try
-        { pending = Descriptor; }
+        {
+            pending = Descriptor;
+        }
         catch (KeyLoadException error) when (error.Code is ErrorCode.Corruption or ErrorCode.Validation)
         {
             files.ClearIncoming();
             return;
         }
         if (pending is null)
-        { return; }
+        {
+            return;
+        }
         if (pending.Index < ReplicaPersistence.AppliedPosition(canonical) || pending.Index < (published?.Index ?? BeforeFirstLogPosition))
         {
             files.DiscardIncoming(pending, published);
@@ -43,7 +47,9 @@ internal sealed class ReplicaIncomingTransfer
         try
         {
             if (Length(pending) < pending.Length)
-            { return; }
+            {
+                return;
+            }
             ReplicaPersistence.VerifyImage(canonical, files.TransferImage(pending), pending);
         }
         catch (KeyLoadException error) when (error.Code is ErrorCode.Corruption or ErrorCode.FormatUnsupported or ErrorCode.Validation)
@@ -62,7 +68,9 @@ internal sealed class ReplicaIncomingTransfer
         if (pending is not null)
         {
             if (pending != snapshot)
-            { throw Errors.Fail(ErrorCode.Conflict, ReplicaProtocol.SnapshotUnavailable); }
+            {
+                throw Errors.Fail(ErrorCode.Conflict, ReplicaProtocol.SnapshotUnavailable);
+            }
             var path = files.TransferImage(snapshot);
             if (File.Exists(path))
             {
@@ -87,10 +95,14 @@ internal sealed class ReplicaIncomingTransfer
     {
         var path = files.TransferImage(snapshot);
         if (!File.Exists(path))
-        { return BeforeFirstTransferByte; }
+        {
+            return BeforeFirstTransferByte;
+        }
         var length = new FileInfo(path).Length;
         if (length > snapshot.Length)
-        { throw Errors.Fail(ErrorCode.Corruption, ReplicaProtocol.InvalidSnapshot); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, ReplicaProtocol.InvalidSnapshot);
+        }
         return length;
     }
 
@@ -104,7 +116,9 @@ internal sealed class ReplicaIncomingTransfer
         }
         using var image = files.OpenPrivate(files.IncomingPath, FileMode.OpenOrCreate);
         if (offset > image.Length)
-        { throw Errors.Fail(ErrorCode.Conflict, ReplicaProtocol.SnapshotUnavailable); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, ReplicaProtocol.SnapshotUnavailable);
+        }
         if (offset < image.Length)
         {
             VerifyReplay(image, offset, bytes);

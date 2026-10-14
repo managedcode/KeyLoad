@@ -50,7 +50,9 @@ internal static class BlobRestoreFence
             throw Errors.Fail(ErrorCode.RecoveryRequired, BlobErrors.Fenced);
         }
         if (view.VisitRange(Accounts, MaxRecordsSingleItemCount, static (_, _) => false).Records != EmptyRecords)
-        { throw BlobErrors.Corruption(); }
+        {
+            throw BlobErrors.Corruption();
+        }
     }
 
     internal static void Validate(BlobRestoreMarker marker)
@@ -68,12 +70,16 @@ internal static class BlobRestoreFence
             || marker.ObjectKeys is < ObjectKeysEmptyCount or > BlobLimits.StoreMaxObjectKeys
             || marker.Versions is < VersionsEmptyCount or > BlobLimits.StoreMaxVersions
             || marker.ActiveUploads is < ActiveUploadsEmptyCount or > BlobLimits.StoreMaxUploads || marker.Resources < ResourcesValidationBoundary)
-        { throw BlobErrors.Corruption(); }
+        {
+            throw BlobErrors.Corruption();
+        }
         if (marker.ExclusiveCursor is { } cursor)
         {
             if (marker.Phase == BlobRestorePhase.Complete
                 || !cursor.Span.StartsWith(KeyCodec.Encode(Space(marker.Phase))))
-            { throw BlobErrors.Corruption(); }
+            {
+                throw BlobErrors.Corruption();
+            }
             _ = KeyCodec.Decode(cursor.Span);
         }
     }
@@ -99,7 +105,9 @@ internal static class BlobRestoreFence
         if (parts.Length != QuotaComponents || parts[PrefixComponentIndex] is not string prefix || prefix != space
             || parts[TenantComponentIndex] is not string tenant || parts[DatabaseComponentIndex] is not string database
             || parts[DomainComponentIndex] is not string domain || parts[ResourceComponentIndex] is not string resource)
-        { throw BlobErrors.Corruption(); }
+        {
+            throw BlobErrors.Corruption();
+        }
         var blob = new BlobRef(new(tenant, database, domain, BlobListAccumulator.ScopeId), resource, BlobListAccumulator.ScopeId);
         BlobKeys.Validate(blob);
         return blob;

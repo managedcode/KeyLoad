@@ -11,7 +11,10 @@ internal static class Neo4jHarnessStoredWrites
         var expected = ExpectedWriteDocuments(dataset);
         using var response = await client.SendAsync(
             $"MATCH (n:{label}) WHERE n.id IN $ids RETURN n.id,n.json ORDER BY n.id",
-            new { ids = expected.Select(document => document.Id).ToArray() }, cancellationToken);
+            new
+            {
+                ids = expected.Select(document => document.Id).ToArray()
+            }, cancellationToken);
         RequireAccepted(response);
         Neo4jQueryResponse.ValidateErrors(response.Document.RootElement);
         var actual = ReadDocuments(response.Document.RootElement);
@@ -26,7 +29,10 @@ internal static class Neo4jHarnessStoredWrites
     {
         await Assert.That(await CountLabelAsync(client, label, cancellationToken) == 0).IsTrue();
         using var response = await client.SendAsync(Neo4jHarnessStatements.FindConstraint(),
-            new { name = constraintName }, cancellationToken);
+            new
+            {
+                name = constraintName
+            }, cancellationToken);
         RequireAccepted(response);
         Neo4jQueryResponse.ValidateErrors(response.Document.RootElement);
         await Assert.That(response.Document.RootElement.GetProperty(Neo4jHarnessConstants.DataProperty)

@@ -40,10 +40,14 @@ internal static class ControlledPartitionMovementCaptureRequest
         var grant = actualAuthorization.Grant
             ?? throw new InvalidOperationException("The actual logged A Capture grant is required.");
         if (grant.GrantId != GrantId || grant.PhaseCommandId != CaptureCommandId)
-        { throw new InvalidOperationException("The actual original Capture grant identity does not match."); }
+        {
+            throw new InvalidOperationException("The actual original Capture grant identity does not match.");
+        }
         var envelope = Envelope(actualAcceptedFence, corpus, PartitionMovePeerStage.Capture, originalExpiry,
             Body(source, runtime, actualAcceptedFence)) with
-        { Grant = grant };
+        {
+            Grant = grant
+        };
         return new(CaptureCommandId, envelope, actualAuthorization.Journal,
             corpus.Control.Owner.VoterIds.First(), originalCallerAddress, PartitionMovementTransportAction.Capture,
             Guid.Empty, InitialOrdinal);
@@ -60,12 +64,16 @@ internal static class ControlledPartitionMovementCaptureRequest
             + (long)PartitionRecordFamilies.All.Length * RecordOverhead + PageFrames * resourceBytes + SessionOverhead);
         var available = checked(memory.MaxRetainedBytes - overhead);
         if (available <= 0)
-        { throw new InvalidOperationException("The configured movement capture ceiling is insufficient."); }
+        {
+            throw new InvalidOperationException("The configured movement capture ceiling is insufficient.");
+        }
         var imageBytes = Math.Min(Math.Min(source.Limits.MaxBatchBytes, source.Limits.MaxQueryReadBytes),
             available / PageFrames);
         var pageBytes = checked((int)(imageBytes / PageFrames));
         if (imageBytes <= 0 || pageBytes <= 0)
-        { throw new InvalidOperationException("The configured movement capture page ceiling is insufficient."); }
+        {
+            throw new InvalidOperationException("The configured movement capture page ceiling is insufficient.");
+        }
         return NativeSerialization.Serialize(new PartitionMoveCaptureRequest(
             PhysicalShardCatalogFixture.RootPrincipalId, fence, pageBytes, imageBytes, records));
     }

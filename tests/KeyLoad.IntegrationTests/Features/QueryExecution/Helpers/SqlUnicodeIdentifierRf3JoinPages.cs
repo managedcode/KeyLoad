@@ -7,7 +7,10 @@ internal static class SqlUnicodeIdentifierRf3JoinPages
         PostgresRf3Caller wire, CancellationToken token)
     {
         var sql = state.Dialect == PostgresRf3Protocol.JoinDialect ? JoinSql : ScalarSql;
-        var request = state.Query with { Sql = sql };
+        var request = state.Query with
+        {
+            Sql = sql
+        };
         await PostgresRf3Assertions.PageAsync(state,
             await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.QueryAsync(request, token)));
         await PostgresRf3Assertions.PageAsync(state,
@@ -17,11 +20,19 @@ internal static class SqlUnicodeIdentifierRf3JoinPages
             Ast(state.Dialect), AllowFullScan: true, AstVersion: state.Dialect);
         await AstAsync(state, caller, ast, token);
         foreach (var prepared in new[] { false, true })
-        { await PostgresRf3Assertions.PageAsync(state, await wire.ExecuteAsync<global::KeyLoad.QueryPage>(sql, [], prepared, token)); }
+        {
+            await PostgresRf3Assertions.PageAsync(state, await wire.ExecuteAsync<global::KeyLoad.QueryPage>(sql, [], prepared, token));
+        }
         var parameters = new Dictionary<string, global::System.Text.Json.JsonElement>
-        { [Argument] = global::System.Text.Json.JsonSerializer.SerializeToElement(UnitValue) };
+        {
+            [Argument] = global::System.Text.Json.JsonSerializer.SerializeToElement(UnitValue)
+        };
         var parameterSql = sql.Replace(OrderBy, NamedFilter + OrderBy, StringComparison.Ordinal);
-        request = request with { Sql = parameterSql, Parameters = parameters };
+        request = request with
+        {
+            Sql = parameterSql,
+            Parameters = parameters
+        };
         await PostgresRf3Assertions.PageAsync(state,
             await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.QueryAsync(request, token)));
         await PostgresRf3Assertions.PageAsync(state,
@@ -30,12 +41,18 @@ internal static class SqlUnicodeIdentifierRf3JoinPages
         var predicate = new global::KeyLoad.Query.Comparison(global::KeyLoad.Query.ValueOperand.Create(UnitValue), EqualityOperator,
             new global::KeyLoad.Query.ParameterOperand(Argument));
         var parameterAst = new global::KeyLoad.Query.AstQueryRequest(PostgresRf3State.Partition,
-            Ast(state.Dialect) with { Filter = predicate }, parameters, AllowFullScan: true, AstVersion: state.Dialect);
+            Ast(state.Dialect) with
+            {
+                Filter = predicate
+            }, parameters, AllowFullScan: true, AstVersion: state.Dialect);
         await AstAsync(state, caller, parameterAst, token);
         foreach (var prepared in new[] { false, true })
         {
             var parameter = new global::Npgsql.NpgsqlParameter
-            { NpgsqlDbType = global::NpgsqlTypes.NpgsqlDbType.Numeric, Value = UnitValue };
+            {
+                NpgsqlDbType = global::NpgsqlTypes.NpgsqlDbType.Numeric,
+                Value = UnitValue
+            };
             await PostgresRf3Assertions.PageAsync(state, await wire.ExecuteAsync<global::KeyLoad.QueryPage>(
                 sql.Replace(OrderBy, PositionalFilter + OrderBy, StringComparison.Ordinal), [parameter], prepared, token));
         }

@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Replication;
 
 namespace KeyLoad.UnitTests;
@@ -18,10 +18,17 @@ internal sealed class ReplicaReadProbeHeaderTests
     [Arguments(NativeReadProbeFault.NegativeCommittedIndex)]
     public async Task StrictHeaderDenialDoesNotConsumeReadOrControlCapacity(NativeReadProbeFault fault)
     {
-        using var fixture = new ReplicaSecurityFixture(new() { CriticalPerVoter = 1, ReadBarrierPerVoter = 1 });
+        using var fixture = new ReplicaSecurityFixture(new()
+        {
+            CriticalPerVoter = 1,
+            ReadBarrierPerVoter = 1
+        });
         var value = new AppendRequest(ReplicaSecurityFixture.VoterA, 1, 0, 0, 0, []);
         var request = fixture.Request(ReplicaRpc.ReadProbe, value);
-        request = fixture.Resign(request with { Payload = NativeReadProbeProducer.Encode(value, fault) });
+        request = fixture.Resign(request with
+        {
+            Payload = NativeReadProbeProducer.Encode(value, fault)
+        });
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => fixture.Receiver.VerifyRequest(request)).Code)
             .IsEqualTo(ErrorCode.Validation);
         fixture.Receiver.VerifyRequest(fixture.Read());
@@ -32,7 +39,11 @@ internal sealed class ReplicaReadProbeHeaderTests
     [Test]
     public async Task NativeReadProbeValidTwinRetainsAllFieldsAndIndependentControlCapacity()
     {
-        using var fixture = new ReplicaSecurityFixture(new() { CriticalPerVoter = 1, ReadBarrierPerVoter = 1 });
+        using var fixture = new ReplicaSecurityFixture(new()
+        {
+            CriticalPerVoter = 1,
+            ReadBarrierPerVoter = 1
+        });
         var value = new AppendRequest(ReplicaSecurityFixture.VoterA, 2, 1, 1, 1, []);
         var payload = NativeReadProbeProducer.Encode(value, NativeReadProbeFault.None);
         var restored = ReplicaProtocolCodec.DeserializeStored<AppendRequest>(payload, fixture.Configuration.MaxAppendEntries);
@@ -43,7 +54,10 @@ internal sealed class ReplicaReadProbeHeaderTests
         await Assert.That(restored.CommittedIndex).IsEqualTo(value.CommittedIndex);
         await Assert.That(restored.Entries.IsDefault).IsFalse();
         await Assert.That(restored.Entries).IsEmpty();
-        var request = fixture.Resign(fixture.Request(ReplicaRpc.ReadProbe, value) with { Payload = payload });
+        var request = fixture.Resign(fixture.Request(ReplicaRpc.ReadProbe, value) with
+        {
+            Payload = payload
+        });
         fixture.Receiver.VerifyRequest(request);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => fixture.Receiver.VerifyRequest(fixture.Read())).Code)
             .IsEqualTo(ErrorCode.ResourceExhausted);
@@ -56,7 +70,11 @@ internal sealed class ReplicaReadProbeHeaderTests
     [Test]
     public async Task MaximumPreviousIndexFailsBeforeReplayAdmission()
     {
-        using var fixture = new ReplicaSecurityFixture(new() { CriticalPerVoter = 1, ReadBarrierPerVoter = 1 });
+        using var fixture = new ReplicaSecurityFixture(new()
+        {
+            CriticalPerVoter = 1,
+            ReadBarrierPerVoter = 1
+        });
         var request = fixture.Request(ReplicaRpc.ReadProbe,
             new AppendRequest(ReplicaSecurityFixture.VoterA, 1, long.MaxValue, 1, 0, []));
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => fixture.Receiver.VerifyRequest(request)).Code)
@@ -69,10 +87,17 @@ internal sealed class ReplicaReadProbeHeaderTests
     [Test]
     public async Task OversizedProbeCannotClaimAnyPool()
     {
-        using var fixture = new ReplicaSecurityFixture(new() { CriticalPerVoter = 1, ReadBarrierPerVoter = 1 });
+        using var fixture = new ReplicaSecurityFixture(new()
+        {
+            CriticalPerVoter = 1,
+            ReadBarrierPerVoter = 1
+        });
         var request = fixture.Request(ReplicaRpc.ReadProbe,
             new AppendRequest(ReplicaSecurityFixture.VoterA, 1, 0, 0, 0, []));
-        request = fixture.Resign(request with { Payload = new byte[fixture.Receiver.MaximumPayloadBytes + 1] });
+        request = fixture.Resign(request with
+        {
+            Payload = new byte[fixture.Receiver.MaximumPayloadBytes + 1]
+        });
         var error = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Receiver.VerifyRequest(request));
         await Assert.That(error.Code).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(error.Message).IsEqualTo(ReplicaTransportProtocol.PayloadExceeded);

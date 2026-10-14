@@ -36,9 +36,13 @@ internal static class PartitionMovementParentOperationalCapacityRf3Boundary
             cancellationToken.ThrowIfCancellationRequested();
             var middle = lower + (upper - lower) / MidpointDivisor;
             if (Accepts(actual, observed, cluster, middle))
-            { upper = middle; }
+            {
+                upper = middle;
+            }
             else
-            { lower = checked(middle + BoundaryStep); }
+            {
+                lower = checked(middle + BoundaryStep);
+            }
         }
         await RequireRetainedPageBoundsAsync(captured, page, lower);
         Require(actual, observed, cluster, lower);
@@ -70,7 +74,10 @@ internal static class PartitionMovementParentOperationalCapacityRf3Boundary
         string cluster, long maximum)
     {
         try
-        { Require(state, observed, cluster, maximum); return true; }
+        {
+            Require(state, observed, cluster, maximum);
+            return true;
+        }
         catch (KeyLoadException error) when (error.Code == ErrorCode.BudgetExceeded) { return false; }
     }
 }

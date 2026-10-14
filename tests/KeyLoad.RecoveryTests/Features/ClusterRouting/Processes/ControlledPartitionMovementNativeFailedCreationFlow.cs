@@ -53,7 +53,10 @@ internal static class ControlledPartitionMovementNativeFailedCreationFlow
             await RecoveryFileInventory.AssertUnchangedAsync(acquired.Root, before, cancellationToken);
         }, checks);
         if (checks.Count != NoFailures)
-        { checks.InsertRange(NoFailures, original); ServerFailureObserver.ThrowIfAny(checks); }
+        {
+            checks.InsertRange(NoFailures, original);
+            ServerFailureObserver.ThrowIfAny(checks);
+        }
     }
 
     internal static bool HasOriginalCancellation(Exception original, CancellationToken selected)

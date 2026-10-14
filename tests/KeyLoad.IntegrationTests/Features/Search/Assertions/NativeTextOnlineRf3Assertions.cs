@@ -50,13 +50,21 @@ internal static class NativeTextOnlineRf3Assertions
         {
             var actual = await NativeTextSelectedRf3Call.ExecuteAsync(sdk, mcp, request, path, token);
             await Assert.That(JsonDefaults.Serialize(actual).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
-            var english = await NativeTextSelectedRf3Call.ExecuteAsync(sdk, mcp, request with { Text = "hello" }, path, token);
+            var english = await NativeTextSelectedRf3Call.ExecuteAsync(sdk, mcp, request with
+            {
+                Text = "hello"
+            }, path, token);
             RankedDocument[] expectedEnglish = changed ? [] : [new(new(new(scenario.Partition,
                 NativeTextMaintenanceRf3Scenario.Collection, NativeTextMaintenanceRf3Scenario.English), 1,
                 NativeTextMaintenanceRf3Scenario.EnglishJson, false, []), 1d / 61d)];
             await Assert.That(JsonDefaults.Serialize(english).SequenceEqual(JsonDefaults.Serialize(expectedEnglish))).IsTrue();
             if (changed)
-            { await Assert.That(await NativeTextSelectedRf3Call.ExecuteAsync(sdk, mcp, request with { Text = "ПРИВІТ" }, path, token)).IsEmpty(); }
+            {
+                await Assert.That(await NativeTextSelectedRf3Call.ExecuteAsync(sdk, mcp, request with
+                {
+                    Text = "ПРИВІТ"
+                }, path, token)).IsEmpty();
+            }
         }
     }
 }

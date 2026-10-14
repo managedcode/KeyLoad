@@ -24,10 +24,14 @@ internal sealed class LargeStreamCleanupPermissionTrial
     private async Task RunOwnedAsync(bool retain, CancellationToken token)
     {
         if (!OperatingSystem.IsLinux())
-        { throw new PlatformNotSupportedException("This actual permission-fault control requires Linux."); }
+        {
+            throw new PlatformNotSupportedException("This actual permission-fault control requires Linux.");
+        }
         var failures = new List<Exception>();
         try
-        { await ServerFailureObserver.ObserveAsync(() => BodyAsync(retain, token), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => BodyAsync(retain, token), failures).ConfigureAwait(false);
+        }
         finally
         {
             if (root is not null && Directory.Exists(root))
@@ -52,18 +56,29 @@ internal sealed class LargeStreamCleanupPermissionTrial
                 File.SetUnixFileMode(root, RefusalMode);
                 faultArmed = true;
                 if (retain)
-                { DenyWrite(root); }
+                {
+                    DenyWrite(root);
+                }
             }
             catch (Exception)
-            { directory.RetainFailureEvidence(); throw; }
+            {
+                directory.RetainFailureEvidence();
+                throw;
+            }
         }
         catch (UnauthorizedAccessException error) when (faultArmed)
-        { surfaced = error; }
+        {
+            surfaced = error;
+        }
         await Assert.That(surfaced).IsNotNull();
         if (retain)
-        { await Assert.That(ReferenceEquals(initiating, surfaced)).IsTrue(); }
+        {
+            await Assert.That(ReferenceEquals(initiating, surfaced)).IsTrue();
+        }
         else
-        { await Assert.That(initiating).IsNull(); }
+        {
+            await Assert.That(initiating).IsNull();
+        }
         await Assert.That(root is not null && Directory.Exists(root)).IsTrue();
         await Assert.That(File.GetUnixFileMode(root!)).IsEqualTo(RefusalMode);
         Assert.ThrowsExactly<UnauthorizedAccessException>(() => Directory.Delete(root!, recursive: true));
@@ -93,9 +108,14 @@ internal sealed class LargeStreamCleanupPermissionTrial
     private void DenyWrite(string root)
     {
         try
-        { using var denied = File.Open(Path.Combine(root, HealthyCapture), FileMode.Open, FileAccess.Write); }
+        {
+            using var denied = File.Open(Path.Combine(root, HealthyCapture), FileMode.Open, FileAccess.Write);
+        }
         catch (UnauthorizedAccessException error)
-        { initiating = error; throw; }
+        {
+            initiating = error;
+            throw;
+        }
         throw new InvalidOperationException("The native sealed-file permission refusal was not observed.");
     }
 
@@ -105,7 +125,9 @@ internal sealed class LargeStreamCleanupPermissionTrial
             .Select(Path.GetFileName).ToArray();
         if (entries.Length != OriginalFiles.Length || !entries.Order(StringComparer.Ordinal)
             .SequenceEqual(OriginalFiles.Order(StringComparer.Ordinal), StringComparer.Ordinal))
-        { throw new InvalidOperationException("The original native stream fixture inventory changed."); }
+        {
+            throw new InvalidOperationException("The original native stream fixture inventory changed.");
+        }
         var files = new Dictionary<string, (byte[] Bytes, UnixFileMode Mode)>(StringComparer.Ordinal);
         foreach (var name in OriginalFiles)
         {
@@ -113,7 +135,9 @@ internal sealed class LargeStreamCleanupPermissionTrial
             var file = Path.Combine(root, name);
             if ((File.GetAttributes(file) & (FileAttributes.ReparsePoint | FileAttributes.Directory)) != 0
                 || new FileInfo(file).LinkTarget is not null)
-            { throw new InvalidOperationException("The original native capture is not a regular owned file."); }
+            {
+                throw new InvalidOperationException("The original native capture is not a regular owned file.");
+            }
             files.Add(name, (await File.ReadAllBytesAsync(file, token).ConfigureAwait(false), File.GetUnixFileMode(file)));
         }
         return files;

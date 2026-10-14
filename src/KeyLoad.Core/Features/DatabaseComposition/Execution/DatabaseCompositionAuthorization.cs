@@ -88,7 +88,10 @@ public sealed partial class DatabaseEngine
         }
         foreach (var policy in target.HeaderPolicies)
         {
-            Authorization.RequireFieldWrite(principal, target with { FieldPolicies = target.HeaderPolicies }, policy.Path);
+            Authorization.RequireFieldWrite(principal, target with
+            {
+                FieldPolicies = target.HeaderPolicies
+            }, policy.Path);
         }
     }
 

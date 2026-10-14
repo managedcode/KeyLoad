@@ -21,7 +21,10 @@ internal static class CurrentSnapshotAuthorityAssertions
         StoreIdentity original, StorageSnapshot snapshot)
     {
         await RequireSnapshotAsync(snapshot, original);
-        await RequireIdentityAsync(original with { ReadGeneration = original.ReadGeneration + NextGeneration }, store.Identity);
+        await RequireIdentityAsync(original with
+        {
+            ReadGeneration = original.ReadGeneration + NextGeneration
+        }, store.Identity);
         await Assert.That(store.Position).IsEqualTo(OriginalPosition);
         await RequireRowsAsync(store, fixture, restored: false, healthy: false);
     }

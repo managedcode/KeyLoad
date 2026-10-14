@@ -42,7 +42,9 @@ internal static class NativeTextBm25EligibilityTrial
                 new CommandRequest(id, owner.Source.Partition, [mutation])));
         var result = owner.Submit(operation);
         if (result.Error is not null)
-        { throw new InvalidOperationException("The genuine canonical mutation was not admitted."); }
+        {
+            throw new InvalidOperationException("The genuine canonical mutation was not admitted.");
+        }
         return (operation, result, NativeSerialization.Serialize(owner.Entry(id)));
     }
 }

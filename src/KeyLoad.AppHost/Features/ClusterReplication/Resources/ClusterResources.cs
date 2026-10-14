@@ -67,7 +67,9 @@ internal static class ClusterResources
             localImage, images, probes, identity);
         var tables = KeyLoad.AppHost.Features.ClusterRouting.NativeClusteringResources.Add(builder);
         foreach (var node in nodes)
-        { KeyLoad.AppHost.Features.ClusterRouting.NativeClusteringResources.Apply(node, tables); }
+        {
+            KeyLoad.AppHost.Features.ClusterRouting.NativeClusteringResources.Apply(node, tables);
+        }
         return nodes;
     }
 

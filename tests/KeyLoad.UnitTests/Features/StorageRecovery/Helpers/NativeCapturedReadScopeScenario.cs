@@ -57,7 +57,9 @@ internal static class NativeCapturedReadScopeScenario
             bytes = checked(bytes + nextBytes);
             records = checked(records + nextRecords);
             if (bytes > MaximumBytes || records > MaximumRecords)
-            { throw Errors.Fail(ErrorCode.BudgetExceeded, AdmissionExceeded); }
+            {
+                throw Errors.Fail(ErrorCode.BudgetExceeded, AdmissionExceeded);
+            }
         });
         try
         {
@@ -67,7 +69,9 @@ internal static class NativeCapturedReadScopeScenario
             return builder.Transfer();
         }
         finally
-        { builder.ClearUntransferred(); }
+        {
+            builder.ClearUntransferred();
+        }
     }
 
     internal static void CommitHealthy(ZoneTreeStore store)
@@ -97,7 +101,9 @@ internal static class NativeCapturedReadScopeScenario
             ? new[] { Row(First, NewFirst), Row(Added, NewAdded), Row(Missing, HealthyValue), Row(Point, NewPoint) }
             : new[] { Row(First, OldFirst), Row(Second, OldSecond), Row(Point, OldPoint) };
         if (healthy)
-        { expected = [.. expected, Row(Healthy, HealthyValue)]; }
+        {
+            expected = [.. expected, Row(Healthy, HealthyValue)];
+        }
         Array.Sort(expected, StringComparer.Ordinal);
         var actual = store.Read(ReadRows);
         await Assert.That(actual).IsEquivalentTo(expected, TUnit.Assertions.Enums.CollectionOrdering.Matching);
@@ -110,14 +116,20 @@ internal static class NativeCapturedReadScopeScenario
         await Assert.That(frozen.ReadOwnedValue(NativeReadCutFixture.Key(Missing))).IsNull();
         var rows = new List<string>();
         var forward = frozen.VisitRange(NativeReadCutFixture.Key(Group), MaximumRecords, (key, value) =>
-        { rows.Add(Encoding.UTF8.GetString(key) + RecordSeparator + Encoding.UTF8.GetString(value)); return true; });
+        {
+            rows.Add(Encoding.UTF8.GetString(key) + RecordSeparator + Encoding.UTF8.GetString(value));
+            return true;
+        });
         await Assert.That(rows).IsEquivalentTo(new[] { Row(First, OldFirst), Row(Second, OldSecond) },
             TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await Assert.That(forward.Records).IsEqualTo(rows.Count);
         await Assert.That(forward.HasMore).IsFalse();
         rows.Clear();
         var reverse = frozen.VisitReverseRange(NativeReadCutFixture.Key(Group), MaximumRecords, (key, value) =>
-        { rows.Add(Encoding.UTF8.GetString(key) + RecordSeparator + Encoding.UTF8.GetString(value)); return true; });
+        {
+            rows.Add(Encoding.UTF8.GetString(key) + RecordSeparator + Encoding.UTF8.GetString(value));
+            return true;
+        });
         await Assert.That(rows).IsEquivalentTo(new[] { Row(Second, OldSecond), Row(First, OldFirst) },
             TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await Assert.That(reverse.Records).IsEqualTo(rows.Count);
@@ -128,9 +140,14 @@ internal static class NativeCapturedReadScopeScenario
     {
         var rows = new List<string>();
         var result = view.VisitRange([], MaximumRecords, (key, value) =>
-        { rows.Add(Encoding.UTF8.GetString(key) + RecordSeparator + Encoding.UTF8.GetString(value)); return true; });
+        {
+            rows.Add(Encoding.UTF8.GetString(key) + RecordSeparator + Encoding.UTF8.GetString(value));
+            return true;
+        });
         if (result.HasMore)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, AdmissionExceeded); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, AdmissionExceeded);
+        }
         return [.. rows];
     }
 

@@ -1,7 +1,7 @@
 using System.Text.Json.Serialization;
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Diagnostics.Features.ResourceExecution;
-using KeyLoad.Orleans;
 using KeyLoad.Security;
 using KeyLoad.Server.Features.BlobStorage;
 using KeyLoad.Server.Features.ClusterRouting;
@@ -41,11 +41,17 @@ internal static class ServerConfiguration
         Register(builder.Services, blobWireObserver, localhostClustering);
         PostgresNativeComposition.Register(builder.Services, builder.Configuration);
         if (sealedObserver is not null)
-        { builder.Services.AddSingleton(sealedObserver); }
+        {
+            builder.Services.AddSingleton(sealedObserver);
+        }
         if (authenticationExecutionObserver is not null)
-        { builder.Services.AddSingleton(authenticationExecutionObserver); }
+        {
+            builder.Services.AddSingleton(authenticationExecutionObserver);
+        }
         if (partitionMovementNativeObserver is not null)
-        { builder.Services.AddSingleton(partitionMovementNativeObserver); }
+        {
+            builder.Services.AddSingleton(partitionMovementNativeObserver);
+        }
         DatabaseAuthenticationComposition.Register(builder.Services);
         McpServerComposition.Register(builder);
         var app = builder.Build();
@@ -120,7 +126,9 @@ internal static class ServerConfiguration
         NativeLocalhostClusteringOptions? localhostClustering)
     {
         if (localhostClustering is not null)
-        { services.AddSingleton(localhostClustering); }
+        {
+            services.AddSingleton(localhostClustering);
+        }
         services.AddSingleton(TimeProvider.System);
         services.AddSingleton<ServerConnectionRegistry>();
         services.AddSingleton<AdminHttpMetrics>();

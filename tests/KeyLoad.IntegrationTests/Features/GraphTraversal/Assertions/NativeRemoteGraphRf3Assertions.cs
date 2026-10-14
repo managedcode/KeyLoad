@@ -21,7 +21,9 @@ internal static class NativeRemoteGraphRf3Assertions
             value => value.Owner.PhysicalShardId != seed.Directory.ControlOwner.PhysicalShardId).Owner.Incarnation);
         await Assert.That(delivery.CompletionReceipt.Token.AtomicPartitionId).IsEqualTo(seed.SourcePartition.AtomicPartitionId);
         foreach (var receipt in new[] { actual.SourceReceipt, delivery.TargetReceipt, delivery.CompletionReceipt })
-        { await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable); }
+        {
+            await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        }
     }
 
     internal static async Task IncomingAsync(RequestCqrsRf3Callers caller, NativeRemoteGraphRf3Seed seed,
@@ -39,7 +41,9 @@ internal static class NativeRemoteGraphRf3Assertions
             await Assert.That(page.TargetCut.NodeId).IsNotEqualTo(Guid.Empty);
             await Assert.That(page.TargetCut.PolicyEpoch).IsEqualTo(3L);
             if (!present)
-            { continue; }
+            {
+                continue;
+            }
             var row = page.Rows.Single();
             await SqlRf3Protocol.EqualAsync(new EdgeRecord(seed.Upsert.Edge.EdgeId, seed.Upsert.Edge.From,
                 seed.Upsert.Edge.To, seed.Upsert.Edge.Label, seed.Upsert.Edge.AttributesJson, 1), row.Edge);

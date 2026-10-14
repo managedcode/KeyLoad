@@ -24,7 +24,9 @@ internal static class StreamRecordKeyAuthorityFlow
             await operation(fixture);
         }, failures);
         if (fixture is not null)
-        { ServerFailureObserver.Observe(fixture.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(fixture.Dispose, failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
@@ -46,12 +48,21 @@ internal static class StreamRecordKeyAuthorityFlow
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             fixture.Database.Store.Commit((tx, _) =>
-            { tx.Put(key, NativeSerialization.Serialize(record with { Revision = revision })); return true; });
+            {
+                tx.Put(key, NativeSerialization.Serialize(record with
+                {
+                    Revision = revision
+                }));
+                return true;
+            });
             await StreamRecordKeyAuthorityAssertions.RefusalsAsync(fixture, forward, backward, token);
             await EventAppendSequenceAuthorityAssertions.ReplayAsync(fixture.Database.Database, fixture.Database.Store, seed, seedResult, fixture.Now);
         }, failures);
         ServerFailureObserver.Observe(() => fixture.Database.Store.Commit((tx, _) =>
-        { tx.Put(key, original); return true; }), failures);
+        {
+            tx.Put(key, original);
+            return true;
+        }), failures);
         ServerFailureObserver.ThrowIfAny(failures);
         await Assert.That(fixture.Database.Store.Read(view => view.ReadOwnedValue(key)))
             .IsEquivalentTo(original, TUnit.Assertions.Enums.CollectionOrdering.Matching);

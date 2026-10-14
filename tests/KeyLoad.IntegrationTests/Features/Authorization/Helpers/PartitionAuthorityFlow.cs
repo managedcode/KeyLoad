@@ -22,12 +22,22 @@ internal static class PartitionAuthorityFlow
             await PartitionAuthorityRefusals.ReadAsync(sdk, session, state, ErrorCode.PermissionDenied, token);
             await originalHealthy();
             await SqlRf3Protocol.EqualAsync(image, await PartitionAuthorityImage.CaptureAsync(root, state, token));
-            await PersistAsync(root, Guid.NewGuid(), restored with { PolicyEpoch = PartitionAuthorityProtocol.RepairEpoch }, token);
+            await PersistAsync(root, Guid.NewGuid(), restored with
+            {
+                PolicyEpoch = PartitionAuthorityProtocol.RepairEpoch
+            }, token);
             await PartitionAuthorityResults.HealthyAsync(sdk, session, state, PartitionAuthorityProtocol.RepairEpoch, token);
-            await PersistAsync(root, Guid.NewGuid(), identity.Principal with { PolicyEpoch = PartitionAuthorityProtocol.ReducedEpoch }, token);
+            await PersistAsync(root, Guid.NewGuid(), identity.Principal with
+            {
+                PolicyEpoch = PartitionAuthorityProtocol.ReducedEpoch
+            }, token);
             await PartitionAuthorityRefusals.ReadAsync(sdk, session, state, ErrorCode.PermissionDenied, token);
             await SqlRf3Protocol.EqualAsync(image, await PartitionAuthorityImage.CaptureAsync(root, state, token));
-            await PersistAsync(root, Guid.NewGuid(), restored with { Revoked = true, PolicyEpoch = PartitionAuthorityProtocol.RevokedEpoch }, token);
+            await PersistAsync(root, Guid.NewGuid(), restored with
+            {
+                Revoked = true,
+                PolicyEpoch = PartitionAuthorityProtocol.RevokedEpoch
+            }, token);
             await PartitionAuthorityRefusals.ReadAsync(sdk, session, state, ErrorCode.Unauthenticated, token);
             await McpUnauthorizedProbe.VerifyAsync(fixture, McpCallerProtocol.Node2, identity.Secret, token);
             await SqlRf3Protocol.EqualAsync(image, await PartitionAuthorityImage.CaptureAsync(root, state, token));

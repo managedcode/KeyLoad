@@ -31,7 +31,9 @@ internal static class SqlCreateTableRf3Pages
                 await using var wire = await PostgresRf3Caller.ConnectAsync(fixture.App, McpCallerProtocol.Node3,
                     state.Identity.Principal.Id, state.Identity.Secret, PostgresRf3Certificate.RootPath(fixture), token);
                 await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
-                { await PageAsync(state, await wire.ExecuteAsync<QueryPage>(SqlCreateTableRf3Literal.ReadSql, [], prepared: false, token)); }, failures);
+                {
+                    await PageAsync(state, await wire.ExecuteAsync<QueryPage>(SqlCreateTableRf3Literal.ReadSql, [], prepared: false, token));
+                }, failures);
             }, failures);
             global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
             await SqlCreateTableRf3Images.RequireAsync(caller.Sdk, image, token);

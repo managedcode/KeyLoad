@@ -14,10 +14,14 @@ internal static class ReplicaCheckpointReclamation
         var cut = database.LastApplied;
         var current = snapshots.Current;
         if (cut >= FirstLogPosition && cut > (current?.Index ?? BeforeFirstLogPosition))
-        { current = snapshots.Create(cut, log.TermAt(cut)); }
+        {
+            current = snapshots.Create(cut, log.TermAt(cut));
+        }
         cancellationToken.ThrowIfCancellationRequested();
         if (current is not null)
-        { _ = snapshots.ReclaimCheckpointPrefix(cancellationToken); }
+        {
+            _ = snapshots.ReclaimCheckpointPrefix(cancellationToken);
+        }
         return current;
     }
 }

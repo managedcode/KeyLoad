@@ -13,13 +13,17 @@ internal static class PartitionControlCommandTransitions
     {
         PartitionControlCommandValidation.Require(proposed, proposed.Identity);
         if (proposed.Phase != PartitionControlCommandPhase.Admitted)
-        { throw Errors.Fail(ErrorCode.Validation, PartitionMoveProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, PartitionMoveProtocol.Invalid);
+        }
         var previous = PartitionControlCommandStorage.Read(transaction, proposed.Identity, maximumBytes);
         if (previous is not null)
         {
             if (previous.Fingerprint != proposed.Fingerprint
                 || !PhysicalOwnerEntryValidation.SameOwner(previous.ControlOwner, proposed.ControlOwner))
-            { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict); }
+            {
+                throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict);
+            }
             return previous;
         }
         PartitionControlCommandStorage.Write(transaction, proposed, maximumBytes);
@@ -33,12 +37,16 @@ internal static class PartitionControlCommandTransitions
         var previous = RequireRetained(transaction, identity, effectId, maximumBytes);
         var payload = new PartitionControlEffectPayload(receipt, originalResult);
         if (NativeSerialization.Measure(payload) > maximumBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
+        }
         var digest = Convert.ToHexStringLower(SHA256.HashData(NativeSerialization.Serialize(payload)));
         if (previous.Phase != PartitionControlCommandPhase.Admitted)
         {
             if (previous.TargetEffectDigest != digest)
-            { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict); }
+            {
+                throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict);
+            }
             return previous;
         }
         var acknowledged = previous with
@@ -58,7 +66,9 @@ internal static class PartitionControlCommandTransitions
         var previous = PartitionControlCommandStorage.Read(view, identity, maximumBytes)
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
         if (previous.EffectId != effectId)
-        { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict);
+        }
         return previous;
     }
 }

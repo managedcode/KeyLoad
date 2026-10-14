@@ -23,7 +23,10 @@ internal static class AtomicProducerRf3Boundary
              new EnqueueMessage(seed.Lane.Queue, QueueProducerRf3Protocol.Refused, QueueProducerRf3Protocol.HealthyPayload)]
         };
         await RefusedAsync(sdk, mcp, foreign, ErrorCode.Conflict, token);
-        var partition = seed.Lane.Partition with { TransactionDomainId = QueueProducerRf3Protocol.ForeignDomain };
+        var partition = seed.Lane.Partition with
+        {
+            TransactionDomainId = QueueProducerRf3Protocol.ForeignDomain
+        };
         var page = await McpCallerAssertions.SdkSuccessAsync(await sdk.ReadStreamAsync(new(new(partition,
             QueueProducerRf3Protocol.ForeignStreamSet, QueueProducerRf3Protocol.Refused)), token));
         await Assert.That(page.Stream).IsEqualTo(new StreamRef(partition, QueueProducerRf3Protocol.ForeignStreamSet, QueueProducerRf3Protocol.Refused));

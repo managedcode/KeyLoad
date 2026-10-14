@@ -32,7 +32,11 @@ internal static class ComparisonMutationValidation
                 }
                 catch (Exception error) when (!cancellationToken.IsCancellationRequested)
                 {
-                    samples[operation] = samples[operation] with { Success = false, Error = ComparisonErrors.Safe(error) };
+                    samples[operation] = samples[operation] with
+                    {
+                        Success = false,
+                        Error = ComparisonErrors.Safe(error)
+                    };
                 }
             }
         }));
@@ -58,7 +62,11 @@ internal static class ComparisonMutationValidation
             {
                 if (samples[operation].Success)
                 {
-                    samples[operation] = samples[operation] with { Success = false, Error = ComparisonErrors.Safe(error) };
+                    samples[operation] = samples[operation] with
+                    {
+                        Success = false,
+                        Error = ComparisonErrors.Safe(error)
+                    };
                 }
             }
         }

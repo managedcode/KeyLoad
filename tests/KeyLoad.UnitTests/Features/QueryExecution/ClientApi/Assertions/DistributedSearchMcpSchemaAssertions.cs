@@ -1,5 +1,5 @@
 using System.Text.Json;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 using KeyLoad.UnitTests.Features.ClientApi;
 
@@ -10,7 +10,9 @@ internal static class DistributedSearchMcpSchemaAssertions
     internal static async Task RequireAsync()
     {
         if (!McpOperationCatalog.TryGetTool(DistributedSearchMcpProtocol.Tool, out var descriptor))
-        { throw new InvalidOperationException(DistributedSearchMcpProtocol.Missing); }
+        {
+            throw new InvalidOperationException(DistributedSearchMcpProtocol.Missing);
+        }
         await Assert.That(descriptor!.Route).IsEqualTo(DistributedSearchMcpProtocol.Route);
         await Assert.That(descriptor.ReadKind).IsEqualTo(GrainReadKind.DistributedSearch);
         await Assert.That(descriptor.CommandKind).IsNull();
@@ -41,9 +43,13 @@ internal static class DistributedSearchMcpSchemaAssertions
         await PartitionAsync(root, searchFields.GetProperty(DistributedSearchMcpProtocol.Partition));
         await PrimitiveAsync(root, searchFields.GetProperty(DistributedSearchMcpProtocol.Collection), McpSchemaInspector.String);
         foreach (var field in DistributedSearchMcpProtocol.NullableStrings)
-        { await PrimitiveAsync(root, searchFields.GetProperty(field), McpSchemaInspector.String); }
+        {
+            await PrimitiveAsync(root, searchFields.GetProperty(field), McpSchemaInspector.String);
+        }
         foreach (var field in DistributedSearchMcpProtocol.Weights)
-        { await PrimitiveAsync(root, searchFields.GetProperty(field), DistributedSearchMcpProtocol.Number); }
+        {
+            await PrimitiveAsync(root, searchFields.GetProperty(field), DistributedSearchMcpProtocol.Number);
+        }
         await PrimitiveAsync(root, searchFields.GetProperty(DistributedSearchMcpProtocol.Fusion), McpSchemaInspector.Integer);
         await PrimitiveAsync(root, searchFields.GetProperty(DistributedSearchMcpProtocol.Explain), DistributedSearchMcpProtocol.Boolean);
         await ArrayAsync(root, searchFields.GetProperty(DistributedSearchMcpProtocol.Vector), DistributedSearchMcpProtocol.Number);
@@ -147,9 +153,13 @@ internal static class DistributedSearchMcpSchemaAssertions
     private static JsonElement Shape(JsonElement root, JsonElement schema)
     {
         if (schema.TryGetProperty(McpSchemaInspector.Ref, out var reference))
-        { return Shape(root, McpSchemaInspector.Resolve(root, reference.GetString()!)); }
+        {
+            return Shape(root, McpSchemaInspector.Resolve(root, reference.GetString()!));
+        }
         if (schema.TryGetProperty(McpSchemaInspector.AnyOf, out var branches))
-        { return Shape(root, branches.EnumerateArray().First(item => !McpSchemaInspector.HasType(item, McpSchemaInspector.Null))); }
+        {
+            return Shape(root, branches.EnumerateArray().First(item => !McpSchemaInspector.HasType(item, McpSchemaInspector.Null)));
+        }
         return schema;
     }
 }

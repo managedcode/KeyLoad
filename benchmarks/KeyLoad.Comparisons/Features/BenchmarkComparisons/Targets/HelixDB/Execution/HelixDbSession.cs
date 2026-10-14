@@ -95,7 +95,10 @@ internal sealed class HelixDbSession(HttpClient http, string label, int count, i
             _ => throw new NotSupportedException()
         };
         using var response = await HelixDbProtocol.QueryAsync(http,
-            HelixDbProtocol.Batch(HelixDbProtocol.Node(HelixDbNativeTokens.TokenCount, new() { [HelixDbNativeTokens.TokenInput] = mutation }), true),
+            HelixDbProtocol.Batch(HelixDbProtocol.Node(HelixDbNativeTokens.TokenCount, new()
+            {
+                [HelixDbNativeTokens.TokenInput] = mutation
+            }), true),
             true, Policy, token: token, create: scenario == Scenario.DocumentWrite, timeProvider: timeProvider).ConfigureAwait(false);
         RequireOne(response.RootElement.GetProperty(HelixDbNativeTokens.TokenRows), scenario);
     }

@@ -41,10 +41,16 @@ internal sealed class RawStorageCorpus
     }
 
     /// <summary>Gets the number of records seeded by a fixture.</summary>
-    public int RecordCount { get; }
+    public int RecordCount
+    {
+        get;
+    }
 
     /// <summary>Gets the byte length of each value.</summary>
-    public int ValueBytes { get; }
+    public int ValueBytes
+    {
+        get;
+    }
 
     /// <summary>Returns the stable pinned key for a seeded or reserved index.</summary>
     public Memory<byte> Key(int index) => keys[ValidateIndex(index)];

@@ -17,7 +17,10 @@ internal static class SqlTypedInsertRetiredPolicy
             () => SqlTypedInsertRetiredAssertions.FencedAsync(source, state, SqlTypedInsertLiteral.ScopeDenied, token),
             () => state.Authority.RemainsControlOwnedAsync(source, target),
             () => state.FailedAuthority.RemainsControlOwnedAsync(source, target));
-        var repaired = state.Principal with { PolicyEpoch = RepairedEpoch };
+        var repaired = state.Principal with
+        {
+            PolicyEpoch = RepairedEpoch
+        };
         await ConfigureAsync(source, target, repaired, token);
         await SqlTypedInsertRetiredImage.ObserveAsync(source, target,
             () => SqlTypedInsertRetiredAssertions.FencedAsync(source, state, SqlTypedInsertLiteral.EpochChanged, token),
@@ -36,7 +39,13 @@ internal static class SqlTypedInsertRetiredPolicy
             [new(SqlTypedInsertRetiredLiteral.PutKind, SqlTypedInsertRetiredLiteral.Table, SqlTypedInsertRetiredLiteral.Two,
                 SqlTypedInsertRetiredLiteral.Revision)], DurabilityProfile.ProcessDurable);
         await SqlTypedInsertAssertions.SameAsync(expected, target.Journal.Submit(original, token).Get<CommitReceipt>());
-        return state with { Principal = repaired, EpochFenced = true, Healthy = original, HealthyReceipt = expected };
+        return state with
+        {
+            Principal = repaired,
+            EpochFenced = true,
+            Healthy = original,
+            HealthyReceipt = expected
+        };
     }
     private static async Task ConfigureAsync(ControlledPartitionMovementNode source, ControlledPartitionMovementNode target,
         PrincipalRecord expected, CancellationToken token)

@@ -57,9 +57,15 @@ internal sealed class CanonicalJsonTests
         var fingerprintDuplicate = Assert.ThrowsExactly<KeyLoadException>(() => JsonData.Fingerprint(duplicateDocument.RootElement));
         var decimalRange = Assert.ThrowsExactly<KeyLoadException>(() => JsonData.Validate("1e1000", new(), false));
         var depth = Assert.ThrowsExactly<KeyLoadException>(() => JsonData.Validate("{\"a\":{\"b\":{\"c\":1}}}",
-            new() { MaxJsonDepth = 2 }));
+            new()
+            {
+                MaxJsonDepth = 2
+            }));
         var inputBytes = Assert.ThrowsExactly<KeyLoadException>(() => JsonData.Validate("{} ",
-            new() { MaxDocumentBytes = 2 }));
+            new()
+            {
+                MaxDocumentBytes = 2
+            }));
         var requiredObject = Assert.ThrowsExactly<KeyLoadException>(() => JsonData.Validate("null", new()));
 
         await Assert.That(duplicate.Code).IsEqualTo(ErrorCode.Validation);
@@ -68,7 +74,10 @@ internal sealed class CanonicalJsonTests
         await Assert.That(depth.Code).IsEqualTo(ErrorCode.Validation);
         await Assert.That(inputBytes.Code).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(requiredObject.Code).IsEqualTo(ErrorCode.Validation);
-        await Assert.That(JsonData.Validate("{}", new() { MaxDocumentBytes = 2 })).IsEqualTo("{}");
+        await Assert.That(JsonData.Validate("{}", new()
+        {
+            MaxDocumentBytes = 2
+        })).IsEqualTo("{}");
     }
 
     [Test]
@@ -95,7 +104,9 @@ internal sealed class CanonicalJsonTests
         var retry = db.Submit(OperationKind.Batch, command, id: id).Get<CommitReceipt>();
         var retryPosition = db.Store.Position;
         var changed = db.Submit(OperationKind.Batch, command with
-        { Mutations = [new PutDocument("orders", "two", "{\"a\":1,\"z\":null}")] }, id: id);
+        {
+            Mutations = [new PutDocument("orders", "two", "{\"a\":1,\"z\":null}")]
+        }, id: id);
 
         await Assert.That(retry.Token).IsEqualTo(first.Token);
         await Assert.That(retryPosition).IsEqualTo(position);

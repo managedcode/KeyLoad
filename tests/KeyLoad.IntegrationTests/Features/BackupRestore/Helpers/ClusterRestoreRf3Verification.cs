@@ -33,7 +33,9 @@ internal static class ClusterRestoreRf3Verification
         await ClusterRestoreRf3CanonicalCut.RequireOriginalAsync(target, originals, repairedArchives,
             cancellationToken).ConfigureAwait(false);
         if (mixed is not null)
-        { ClusterRestoreMixedRetentionRf3NativeCut.RequireRetained(target, mixed, cancellationToken); }
+        {
+            ClusterRestoreMixedRetentionRf3NativeCut.RequireRetained(target, mixed, cancellationToken);
+        }
         await target.RequireOperatorReceiptAsync(nativeNodes).ConfigureAwait(false);
         await Assert.That(target.OriginalOperatorExits).IsEquivalentTo(new[] { ClusterRestoreRf3Protocol.FailedExit, ClusterRestoreRf3Protocol.FailedExit,
             ClusterRestoreRf3Protocol.FailedExit, ClusterRestoreRf3Protocol.SuccessfulExit },
@@ -92,7 +94,9 @@ internal static class ClusterRestoreRf3Verification
             }
             await target.StopAsync().ConfigureAwait(false);
             if (mixed is not null)
-            { ClusterRestoreMixedRetentionRf3NativeCut.RequireRetained(target, mixed, cancellationToken); }
+            {
+                ClusterRestoreMixedRetentionRf3NativeCut.RequireRetained(target, mixed, cancellationToken);
+            }
             await ClusterRestoreRf3CanonicalCut.RequireColdAsync(target, originals, finalCut, cancellationToken).ConfigureAwait(false);
         }
     }

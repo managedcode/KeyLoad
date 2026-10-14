@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.Server.Features.EventStreams;
 
@@ -22,12 +22,16 @@ internal static class EventVectorFirstAdmitPreparation
         if (envelope.Purpose != EventVectorRequestScope.ParentPurpose
             || envelope.CommandKind != OperationKind.EventFeedControl || envelope.ReadKind is not null
             || envelope.RequestId == Guid.Empty || envelope.ExpiresAt <= clock.GetUtcNow())
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, EventVectorRemoteProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, EventVectorRemoteProtocol.Invalid);
+        }
         var database = partition.Database;
         var principal = GrainRequestAuthority.ReloadForRequest(database, envelope, clock);
         var original = GrainNativePayload.ReadCommand<EventFeedControlRequest>(parent.Payload);
         if (original.Action != EventFeedControlAction.Open || envelope.CommandId != original.CommandId)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, EventVectorRemoteProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, EventVectorRemoteProtocol.Invalid);
+        }
         var directory = database.ReadEventVectorConfiguredOwners(principal.Id, original,
             work, originalCancellationToken);
         var entries = EventVectorFirstCaptureSet.Read(directory, original, principal.Id,

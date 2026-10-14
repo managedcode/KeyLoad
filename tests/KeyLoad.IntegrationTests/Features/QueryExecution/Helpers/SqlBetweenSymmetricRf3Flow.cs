@@ -44,7 +44,9 @@ internal static class SqlBetweenSymmetricRf3Flow
             await SqlNullOrderingRf3Pages.ReplayAsync(fixture, state.Seed, deadline.Token);
             await global::TUnit.Assertions.Assert.That(await SqlBetweenSymmetricRf3Image.ReadAsync(root, state, deadline.Token)).IsEqualTo(before);
             if (!faults)
-            { return state; }
+            {
+                return state;
+            }
             await SqlBetweenSymmetricRf3Refusals.InvalidAsync(fixture, state, root, deadline.Token);
             await SqlBetweenSymmetricRf3Cancellation.RunAsync(fixture, state, root, deadline.Token);
             await SqlBetweenSymmetricRf3Policy.RunAsync(fixture, state, root, deadline.Token);

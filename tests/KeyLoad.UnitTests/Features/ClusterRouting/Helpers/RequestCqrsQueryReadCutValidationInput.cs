@@ -11,8 +11,14 @@ internal sealed class RequestCqrsQueryReadCutValidationInput
     private const string FixturePartitionKey = "partition";
 
     internal RequestProbeExecutionOptions Settings { get; } = new();
-    internal RequestCqrsProbeJson Json { get; }
-    internal RequestCqrsQueryReadCutWitness Value { get; } = new(
+    internal RequestCqrsProbeJson Json
+    {
+        get;
+    }
+    internal RequestCqrsQueryReadCutWitness Value
+    {
+        get;
+    } = new(
         RequestCqrsProbeProtocol.Version, RequestCqrsQueryReadCutInventory.Kind, Guid.NewGuid().ToString("N"),
         Guid.NewGuid(), Guid.NewGuid(), Guid.Empty, Guid.NewGuid(), "c1-probe-parser-input",
         "n1", "127.0.0.1:11111@1", new('a', 64), ActivationId.NewId().ToParsableString(),
@@ -20,7 +26,9 @@ internal sealed class RequestCqrsQueryReadCutValidationInput
         new("tenant", "database", "domain", FixturePartitionKey), "bounded-full-scan");
 
     internal RequestCqrsQueryReadCutValidationInput()
-    { Json = new(Options.Create(Settings)); }
+    {
+        Json = new(Options.Create(Settings));
+    }
 
     internal byte[] Write() => JsonSerializer.SerializeToUtf8Bytes(Value, Json.QueryCutTypeInfo);
 

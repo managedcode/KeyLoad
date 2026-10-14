@@ -19,7 +19,10 @@ internal static class NativeAnnCompletedPublication
         {
             var manifest = NativeAnnCanonicalSource.Manifest(request, seed, leaf, policy.Value)
                 with
-            { CheckpointIntent = intent, ReplayAfter = checkpointAfter ?? seed.ProjectionCheckpoint ?? seed.Cut.OutboxTail };
+            {
+                CheckpointIntent = intent,
+                ReplayAfter = checkpointAfter ?? seed.ProjectionCheckpoint ?? seed.Cut.OutboxTail
+            };
             var saved = NativeAnnGenerationFiles.Save(root.Root, root.Receipt, manifest, index, stageStorage, options, budget);
             budget.Check();
             var key = new NativeAnnOwnedKey(request.Consumer, request.IndexGeneration);
@@ -27,9 +30,13 @@ internal static class NativeAnnCompletedPublication
             root.Publish(key, saved.Pointer, options);
             published = true;
             if (pending is not null)
-            { root.Remove(pending.Pointer.GenerationLeaf, options); }
+            {
+                root.Remove(pending.Pointer.GenerationLeaf, options);
+            }
             foreach (var slot in slots.Where(item => !item.Retired && NativeAnnSlotRetention.SameKey(item.Manifest, key)))
-            { slot.Retire(); }
+            {
+                slot.Retire();
+            }
             slots.Add(new(owner, saved.Manifest, index));
             NativeAnnSlotRetention.RetireUnpinned(root, slots, options);
             return saved.Manifest;
@@ -39,7 +46,9 @@ internal static class NativeAnnCompletedPublication
             if (!published)
             {
                 try
-                { root.Remove(leaf, options); }
+                {
+                    root.Remove(leaf, options);
+                }
                 catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
             }
             throw;

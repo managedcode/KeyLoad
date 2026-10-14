@@ -15,7 +15,10 @@ internal static class TenantCapacityPlacementRf3CompletedPolicyReplay
         var scope = new TenantPlacementScope(seed.Partition.TenantId, seed.Partition.DatabaseId, state.Control);
         var query = new TenantPlacementPlanRequest(scope.TenantId, scope.DatabaseId, [seed.Partition], state.Control);
         var disabled = state.HealthyPolicy with
-        { Revision = checked(state.HealthyPolicy.Revision + RevisionStep), Enabled = false };
+        {
+            Revision = checked(state.HealthyPolicy.Revision + RevisionStep),
+            Enabled = false
+        };
         var id = Guid.NewGuid();
         var request = new ConfigurePlacementPolicyRequest(state.HealthyPolicy.Revision, disabled, state.Control);
         await TenantCapacityPlacementRf3CompletedPolicyAssertions.ConfigureAsync(caller, id, request, disabled, token);
@@ -23,10 +26,17 @@ internal static class TenantCapacityPlacementRf3CompletedPolicyReplay
         await TenantCapacityPlacementRf3ReadAuthorityAssertions.CurrentAsync(caller, scope, disabled, original.Completed, token);
         await TenantCapacityPlacementRf3ReadAuthorityAssertions.EpochFenceAsync(caller, scope, disabled, original.OldIntent, token);
         await TenantCapacityPlacementRf3CompletedPolicyAssertions.DisabledPlanAsync(caller, query, token);
-        await ColdAsync(wave, seed, state with { HealthyPolicy = disabled }, caller, original, token);
+        await ColdAsync(wave, seed, state with
+        {
+            HealthyPolicy = disabled
+        }, caller, original, token);
         await TenantCapacityPlacementRf3CompletedPolicyAssertions.DisabledPlanAsync(caller, query, token);
         await TenantCapacityPlacementRf3CompletedPolicyAssertions.ReplayAsync(caller, original, token);
-        var repaired = disabled with { Revision = checked(disabled.Revision + RevisionStep), Enabled = true };
+        var repaired = disabled with
+        {
+            Revision = checked(disabled.Revision + RevisionStep),
+            Enabled = true
+        };
         await TenantCapacityPlacementRf3CompletedPolicyAssertions.ConfigureAsync(caller, Guid.NewGuid(),
             new(disabled.Revision, repaired, state.Control), repaired, token);
         await TenantCapacityPlacementRf3CompletedPolicyAssertions.FreshPlanAsync(wave, caller, query, repaired,
@@ -34,7 +44,10 @@ internal static class TenantCapacityPlacementRf3CompletedPolicyReplay
         await TenantCapacityPlacementRf3CompletedPolicyAssertions.ConfigureAsync(caller, id, request, disabled, token);
         await TenantCapacityPlacementRf3ReadAuthorityAssertions.CurrentAsync(caller, scope, repaired, original.Completed, token);
         await TenantCapacityPlacementRf3CompletedPolicyAssertions.ReplayAsync(caller, original, token);
-        await ColdAsync(wave, seed, state with { HealthyPolicy = repaired }, caller, original, token);
+        await ColdAsync(wave, seed, state with
+        {
+            HealthyPolicy = repaired
+        }, caller, original, token);
         await TenantCapacityPlacementRf3ReadAuthorityAssertions.CurrentAsync(caller, scope, repaired, original.Completed, token);
         await TenantCapacityPlacementRf3CompletedPolicyAssertions.FreshPlanAsync(wave, caller, query, repaired,
             token);

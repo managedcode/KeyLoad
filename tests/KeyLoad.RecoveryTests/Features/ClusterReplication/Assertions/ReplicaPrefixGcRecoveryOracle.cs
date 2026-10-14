@@ -25,7 +25,9 @@ internal static class ReplicaPrefixGcRecoveryOracle
             var remaining = PrefixCount(node);
             await Assert.That(remaining == NoPrefix || remaining == ReplicaPrefixGcCrashContract.SnapshotCut).IsTrue();
             if (stage is not (CommitStage.HeaderWritten or CommitStage.PayloadWritten))
-            { await Assert.That(remaining).IsEqualTo(NoPrefix); }
+            {
+                await Assert.That(remaining).IsEqualTo(NoPrefix);
+            }
             var canonical = CanonicalBytes(node);
             var hardstate = ReplicaProtocolCodec.Serialize(node.Log.State);
             await ReplicaPrefixGcReceiptAssertions.DocumentAsync(node, ReplicaPrefixGcCrashContract.TailCut);
@@ -62,7 +64,9 @@ internal static class ReplicaPrefixGcRecoveryOracle
         const int NativeFixtureRecordLimit = 512;
         var page = node.Canonical.Read(view => view.Scan([], NativeFixtureRecordLimit));
         if (page.HasMore)
-        { throw new InvalidOperationException("The actual canonical GC fixture exceeded its complete native inventory cap."); }
+        {
+            throw new InvalidOperationException("The actual canonical GC fixture exceeded its complete native inventory cap.");
+        }
         return page.Records.Select(record => Convert.ToHexString(record.Key.Span) + ":" +
             Convert.ToHexString(record.Value.Span)).ToArray();
     }

@@ -19,7 +19,10 @@ internal static class SubscriptionPausedDrainAssertions
     }
 
     internal static Task StatusAsync(DatabaseEngine db, SubscriptionRef group, long checkpoint, long tail, bool paused)
-        => SubscriptionParkedRecoveryAssertions.StatusAsync(db, group, new() { MaxWindow = 3 },
+        => SubscriptionParkedRecoveryAssertions.StatusAsync(db, group, new()
+        {
+            MaxWindow = 3
+        },
             1, checkpoint, tail, tail, paused, null);
 
     internal static async Task RefuseAsync(DatabaseEngine db, ZoneTreeStore store, SubscriptionRef group, ReplicatedOperation operation,
@@ -50,9 +53,13 @@ internal static class SubscriptionPausedDrainAssertions
                     .IsEqualTo(JsonSerializer.Serialize(entry.Result, JsonDefaults.Options));
             }
             else if (entry.Result.NativeValue is SubscriptionInfo)
-            { await NativeReplayResultAssertions.Same<SubscriptionInfo>(replay, entry.Result); }
+            {
+                await NativeReplayResultAssertions.Same<SubscriptionInfo>(replay, entry.Result);
+            }
             else
-            { await NativeReplayResultAssertions.Same<CommitReceipt>(replay, entry.Result); }
+            {
+                await NativeReplayResultAssertions.Same<CommitReceipt>(replay, entry.Result);
+            }
             var saved = SubscriptionProcessingAtomicAssertions.OutcomeBytes(store, group, entry.Operation.Id);
             await Assert.That(saved.AsSpan().SequenceEqual(entry.Saved)).IsTrue();
             await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, bytes, position, identity);

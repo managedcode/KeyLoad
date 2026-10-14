@@ -16,7 +16,9 @@ internal static class NativeTextMaintenanceRf3Flow
             scenario.RequestAsync(sdk, mcp, token));
         if (!await observation.MeasureAsync(NativeTextMaintenanceFlowPhase.DeniedOwner, () =>
             NativeTextMaintenanceRf3Denied.OwnerAsync(sdk, mcp, scenario, request, failures, token)))
-        { return; }
+        {
+            return;
+        }
         var built = await observation.MeasureAsync(NativeTextMaintenanceFlowPhase.Build, async () =>
         {
             var value = await NativeTextMaintenanceRf3Call.ExecuteAsync(sdk, mcp, request, path, token);
@@ -34,7 +36,11 @@ internal static class NativeTextMaintenanceRf3Flow
             NativeTextSelectedRf3Assertions.StaleAsync(sdk, mcp, scenario, request, path, token));
         await observation.MeasureAsync(NativeTextMaintenanceFlowPhase.OriginalPrefix, () =>
             NativeTextMaintenanceRf3OriginalPrefix.VerifyAsync(sdk, mcp, request, built, scenario, path, token));
-        var restore = request with { CommandId = Guid.NewGuid(), Mode = TextIndexMaintenanceMode.Restore };
+        var restore = request with
+        {
+            CommandId = Guid.NewGuid(),
+            Mode = TextIndexMaintenanceMode.Restore
+        };
         var updated = await observation.MeasureAsync(NativeTextMaintenanceFlowPhase.Restore, async () =>
         {
             var value = await NativeTextMaintenanceRf3Call.ExecuteAsync(sdk, mcp, restore, path, token);

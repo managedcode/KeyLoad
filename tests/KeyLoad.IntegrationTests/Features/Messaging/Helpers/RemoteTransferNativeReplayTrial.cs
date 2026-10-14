@@ -18,7 +18,10 @@ internal sealed class RemoteTransferNativeReplayTrial : IAsyncDisposable
     private Task? disposal;
 
     private RemoteTransferNativeReplayTrial(List<Exception> failures, RemoteModelNativeReplayVariation mode)
-    { this.failures = failures; this.mode = mode; }
+    {
+        this.failures = failures;
+        this.mode = mode;
+    }
 
     internal static async Task RunAsync(RemoteModelNativeReplayVariation mode, CancellationToken token)
     {
@@ -62,7 +65,10 @@ internal sealed class RemoteTransferNativeReplayTrial : IAsyncDisposable
         await Assert.That(intent.State).IsEqualTo(QueueTransferState.OutputPending);
         await Assert.That(intent.ReceiptToken).IsNull();
         await RemoteTransferNativeStateAssertions.StateAsync(calls, setup.Seed, intent, null, null, token);
-        var accept = setup.Seed.Accept(intent) with { CommandId = Guid.NewGuid() };
+        var accept = setup.Seed.Accept(intent) with
+        {
+            CommandId = Guid.NewGuid()
+        };
         var hold = new RemoteTransferNativeReplayHold(wave.QueryControls, setup.Seed.Identity.Principal.Id, accept, mode);
         armId = hold.ArmId;
         var held = await RemoteTransferNativeReplayOperation.ExecuteAsync(wave, calls, setup.Seed, accept, hold, mode, token);
@@ -87,17 +93,27 @@ internal sealed class RemoteTransferNativeReplayTrial : IAsyncDisposable
     {
         var cleanup = new List<Exception>();
         if (producer is { } original)
-        { await ServerFailureObserver.ObserveAsync(() => original, cleanup); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => original, cleanup);
+        }
         if (calls is { } logical)
-        { await ServerFailureObserver.ObserveAsync(() => logical.DisposeAsync().AsTask(), cleanup); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => logical.DisposeAsync().AsTask(), cleanup);
+        }
         if (administrator is not null)
         {
             try
-            { await administrator.DisposeAsync().ConfigureAwait(false); }
-            catch (Exception failure) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(failure))
-            { cleanup.Add(failure); }
-            catch (Exception failure) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(failure))
-            { cleanup.Add(failure); }
+            {
+                await administrator.DisposeAsync().ConfigureAwait(false);
+            }
+            catch (Exception failure) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+            {
+                cleanup.Add(failure);
+            }
+            catch (Exception failure) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+            {
+                cleanup.Add(failure);
+            }
         }
         if (wave is { } actual)
         {
@@ -107,7 +123,9 @@ internal sealed class RemoteTransferNativeReplayTrial : IAsyncDisposable
                 await ServerFailureObserver.ObserveAsync(() => actual.QueryControls.RetireArmAsync(arm, deadline.Token), cleanup);
             }
             if (failures.Count != 0 || cleanup.Count != 0)
-            { actual.RetainRoots(); }
+            {
+                actual.RetainRoots();
+            }
             await ServerFailureObserver.ObserveAsync(() => actual.DisposeAsync().AsTask(), cleanup);
         }
         failures.AddRange(cleanup);

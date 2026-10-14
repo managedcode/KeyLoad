@@ -41,7 +41,7 @@ internal static class TenantCapacityPlacementRf3Revocation
         await TenantCapacityPlacementRf3ReadAuthorityAssertions.DeniedAsync(caller,
             new(seed.Partition.TenantId, seed.Partition.DatabaseId, state.Control), original, token);
         await TenantCapacityPlacementRf3RevocationAssertions.RefuseAsync(caller, id, request,
-            ErrorCode.PermissionDenied, KeyLoad.Orleans.GrainRoutingProtocol.AdministrationRequired,
+            ErrorCode.PermissionDenied, KeyLoad.Clustering.GrainRoutingProtocol.AdministrationRequired,
             TenantCapacityPlacementRf3RevocationAssertions.McpPermissionDenied, token);
         await TenantCapacityPlacementRf3Assertions.RequireOriginalModelsAsync(seed, state, token);
         bytes = await TenantCapacityPlacementRf3RevocationCold.PendingAsync(wave, seed, caller, original, persistId, bytes, token);

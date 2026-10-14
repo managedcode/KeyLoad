@@ -13,7 +13,9 @@ internal static class ReplicaReadinessEndpoints
         IOptions<ServerExecutionOptions> options, TimeProvider clock, CancellationToken cancellationToken)
     {
         if (!node.DatabaseReady)
-        { return Results.StatusCode(StatusCodes.Status503ServiceUnavailable); }
+        {
+            return Results.StatusCode(StatusCodes.Status503ServiceUnavailable);
+        }
         var readyTimeout = options.Value.ReadyTimeout;
         using var timeout = new CancellationTokenSource(readyTimeout, clock);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeout.Token);

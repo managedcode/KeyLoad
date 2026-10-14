@@ -22,7 +22,11 @@ internal static class LivePolicyEpochContinuation
         string previous, PrincipalRecord principal)
     {
         var engine = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
-        await PersistAsync(db, principal with { PolicyEpoch = RevokedEpoch, Revoked = true });
+        await PersistAsync(db, principal with
+        {
+            PolicyEpoch = RevokedEpoch,
+            Revoked = true
+        });
         await RefusedAsync(db.Store, engine, query, previous, ErrorCode.Unauthenticated);
         await RefusedAsync(db.Store, engine, query, null, ErrorCode.Unauthenticated);
         var repairId = Guid.NewGuid();
@@ -31,7 +35,10 @@ internal static class LivePolicyEpochContinuation
             [new PutDocument(Collection, Id, OpenBody, OriginalRevision, new(Owner), true)]);
         var repaired = db.Submit(OperationKind.Batch, repair, id: repairId, time: repairTime).Get<CommitReceipt>();
         await ReceiptAsync(repaired, repairId, VisibleRevision);
-        await PersistAsync(db, principal with { PolicyEpoch = RepairedEpoch });
+        await PersistAsync(db, principal with
+        {
+            PolicyEpoch = RepairedEpoch
+        });
         await RefusedAsync(db.Store, engine, query, original, ErrorCode.TokenInvalidated);
         await RefusedAsync(db.Store, engine, query, previous, ErrorCode.TokenInvalidated);
         var snapshotImage = QueueWholeFlowStorage.Bytes(db.Store);

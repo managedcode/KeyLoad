@@ -20,14 +20,19 @@ internal static class CatalogRestoreCancellationCold
         var key = KeyCodec.Encode(HealthyNamespace, HealthyKey);
         var value = NativeSerialization.Serialize(HealthyValue);
         store.Commit((transaction, _) =>
-        { transaction.PutRecord(key, HealthyValue); return true; });
+        {
+            transaction.PutRecord(key, HealthyValue);
+            return true;
+        });
         var expected = before.Append(Convert.ToHexString(key) + ":" + Convert.ToHexString(value))
             .Order(StringComparer.Ordinal).ToArray();
         for (var cold = 0; cold <= ColdOwners; cold++)
         {
             token.ThrowIfCancellationRequested();
             if (cold != 0)
-            { fixture.ReopenTarget(target); }
+            {
+                fixture.ReopenTarget(target);
+            }
             var current = fixture.Target!;
             await Assert.That(current.Position).IsEqualTo(restoredPosition + 1L);
             await Assert.That(JsonSerializer.Serialize(current.Identity, JsonDefaults.Options)).IsEqualTo(identity);

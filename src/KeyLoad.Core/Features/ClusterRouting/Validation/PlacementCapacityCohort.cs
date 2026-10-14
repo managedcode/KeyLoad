@@ -29,10 +29,14 @@ internal static class PlacementCapacityCohort
                 || item.StorePosition < NoCapacity || item.AppliedPosition < NoCapacity
                 || item.NativeReadBytes < NoCapacity || item.NativeExaminedRecords < NoCapacity
                 || item.CompleteRoster.IsDefault))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, TenantPlacementPolicyProtocol.ScopeMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, TenantPlacementPolicyProtocol.ScopeMismatch);
+        }
         var groups = snapshots.GroupBy(item => item.Owner.PhysicalShardId).ToArray();
         if (groups.Length != PhysicalOwnerGroups || groups.Any(group => group.Count() != OwnerVoters))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, TenantPlacementPolicyProtocol.ScopeMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, TenantPlacementPolicyProtocol.ScopeMismatch);
+        }
         foreach (var group in groups)
         {
             var first = group.First();
@@ -43,7 +47,9 @@ internal static class PlacementCapacityCohort
                     || next.AppliedPosition != first.AppliedPosition
                     || !Roster(first).SequenceEqual(Roster(next))
                     || !Bytes(first).SequenceEqual(Bytes(next)))
-                { throw Errors.Fail(ErrorCode.OwnershipLost, TenantPlacementPolicyProtocol.ScopeMismatch); }
+                {
+                    throw Errors.Fail(ErrorCode.OwnershipLost, TenantPlacementPolicyProtocol.ScopeMismatch);
+                }
             }
         }
         return snapshots;

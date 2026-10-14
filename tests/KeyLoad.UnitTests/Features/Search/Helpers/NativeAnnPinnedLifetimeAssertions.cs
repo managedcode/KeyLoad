@@ -37,7 +37,9 @@ internal static class NativeAnnPinnedLifetimeAssertions
         finally
         {
             if (lease is not null)
-            { ServerFailureObserver.Observe(() => lease.Dispose(), failures); }
+            {
+                ServerFailureObserver.Observe(() => lease.Dispose(), failures);
+            }
             await ServerFailureObserver.ObserveAsync(() => disposal ?? owner.DisposeAsync().AsTask(), failures);
         }
         ServerFailureObserver.ThrowIfAny(failures);
@@ -48,7 +50,9 @@ internal static class NativeAnnPinnedLifetimeAssertions
         var result = actual.Index.Search(Query, Count, null, PackedAnnIndexTestSupport.Budget(database));
         await Assert.That(result.Candidates.Select(row => row.DocumentId).ToArray()).IsEquivalentTo(LiteralIds, CollectionOrdering.Matching);
         for (var index = 0; index < Count; index++)
-        { await Assert.That(result.Candidates[index].Score).IsEqualTo(SearchEngine.Similarity(Query, LiteralVectors[index], DistanceMetric.Cosine)); }
+        {
+            await Assert.That(result.Candidates[index].Score).IsEqualTo(SearchEngine.Similarity(Query, LiteralVectors[index], DistanceMetric.Cosine));
+        }
         await Assert.That(result.Candidates.Select(row => row.DocumentRevision).ToArray()).IsEquivalentTo(LiteralRevisions, CollectionOrdering.Matching);
     }
     private static void AcquireUnexpected(NativeAnnGenerationOwner owner, AnnMaintenanceRequest request, AnnSeed seed)

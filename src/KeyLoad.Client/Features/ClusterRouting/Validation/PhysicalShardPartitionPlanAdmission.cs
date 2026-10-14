@@ -13,7 +13,9 @@ internal static class PhysicalShardPartitionPlanAdmission
         ArgumentNullException.ThrowIfNull(requests);
         var count = requests.Count;
         if (count is < MinimumPartitions or > MaximumPartitions)
-        { throw new ArgumentOutOfRangeException(nameof(requests), InvalidPlan); }
+        {
+            throw new ArgumentOutOfRangeException(nameof(requests), InvalidPlan);
+        }
         var original = new PartitionMoveRequest[count];
         var movements = new HashSet<Guid>();
         var partitions = new HashSet<PartitionRef>();
@@ -29,7 +31,9 @@ internal static class PhysicalShardPartitionPlanAdmission
                 || string.IsNullOrEmpty(partition.TransactionDomainId) || string.IsNullOrEmpty(partition.PartitionKey)
                 || !movements.Add(request.MoveId) || !partitions.Add(partition)
                 || destination is { } previous && previous != request.DestinationPhysicalShardId)
-            { throw new ArgumentException(InvalidPlan, nameof(requests)); }
+            {
+                throw new ArgumentException(InvalidPlan, nameof(requests));
+            }
             destination = request.DestinationPhysicalShardId;
             original[index] = request;
         }

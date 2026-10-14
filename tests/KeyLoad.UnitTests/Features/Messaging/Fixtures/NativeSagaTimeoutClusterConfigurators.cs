@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 using ManagedCode.Communication.Orleans.Converters;
 using ManagedCode.Communication.Orleans.Extensions;
@@ -14,7 +14,9 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 
 internal sealed class NativeSagaTimeoutSiloConfigurator : ISiloConfigurator
 {
-    public NativeSagaTimeoutSiloConfigurator() { }
+    public NativeSagaTimeoutSiloConfigurator()
+    {
+    }
 
     public void Configure(ISiloBuilder siloBuilder)
     {
@@ -48,7 +50,9 @@ internal sealed class NativeSagaTimeoutSiloConfigurator : ISiloConfigurator
 
 internal sealed class NativeSagaTimeoutClientConfigurator : IClientBuilderConfigurator
 {
-    public NativeSagaTimeoutClientConfigurator() { }
+    public NativeSagaTimeoutClientConfigurator()
+    {
+    }
 
     public void Configure(IConfiguration configuration, IClientBuilder clientBuilder)
     {

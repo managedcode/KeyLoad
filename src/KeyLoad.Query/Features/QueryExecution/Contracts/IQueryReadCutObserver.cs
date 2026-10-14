@@ -11,5 +11,7 @@ public interface IQueryReadCutObserver
     /// <summary>Observes a completed text-index wait after its original native read gate is released.</summary>
     /// <param name="observation">Capture-time owner, persisted authority and native applied horizon.</param>
     /// <param name="cancellationToken">The original wait cancellation.</param>
-    void Observe(WaitForIndexReadCutObservation observation, CancellationToken cancellationToken) { }
+    void Observe(WaitForIndexReadCutObservation observation, CancellationToken cancellationToken)
+    {
+    }
 }

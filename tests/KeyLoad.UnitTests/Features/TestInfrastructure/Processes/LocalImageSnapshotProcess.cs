@@ -2,7 +2,7 @@ using System.Diagnostics;
 using System.Text;
 using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.AppHost.Hosting;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 using KeyLoad.UnitTests.Features.CodeQuality;
 using Microsoft.Extensions.Configuration;
@@ -46,7 +46,9 @@ internal static class LocalImageSnapshotProcess
         {
             ServerFailureObserver.Observe(() => started = process.Start(), failures);
             if (!started && failures.Count == 0)
-            { failures.Add(new InvalidOperationException(StartFailure)); }
+            {
+                failures.Add(new InvalidOperationException(StartFailure));
+            }
             if (started)
             {
                 result = await RunStartedAsync(process, options, timeProvider, failures, cancellationToken)
@@ -58,7 +60,9 @@ internal static class LocalImageSnapshotProcess
         finally
         {
             try
-            { process.Dispose(); }
+            {
+                process.Dispose();
+            }
             catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
             catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         }
@@ -84,7 +88,9 @@ internal static class LocalImageSnapshotProcess
         await ServerFailureObserver.ObserveAsync(() => outputWatch, failures).ConfigureAwait(false);
         await ServerFailureObserver.ObserveAsync(() => errorWatch, failures).ConfigureAwait(false);
         if (failures.Count != 0 || !original.IsCompletedSuccessfully)
-        { return null; }
+        {
+            return null;
+        }
         return new(process.ExitCode, await output.ConfigureAwait(false), await error.ConfigureAwait(false));
     }
 
@@ -116,7 +122,9 @@ internal static class LocalImageSnapshotProcess
     private static async Task<string> StopOnReaderFailureAsync(Task<string> reader, Process process)
     {
         try
-        { return await reader.ConfigureAwait(false); }
+        {
+            return await reader.ConfigureAwait(false);
+        }
         catch (Exception primary)
         {
             var failures = new List<Exception> { primary };
@@ -131,7 +139,9 @@ internal static class LocalImageSnapshotProcess
         try
         {
             if (!process.HasExited)
-            { process.Kill(entireProcessTree: true); }
+            {
+                process.Kill(entireProcessTree: true);
+            }
         }
         catch (InvalidOperationException) when (process.HasExited) { }
     }
@@ -145,10 +155,14 @@ internal static class LocalImageSnapshotProcess
         {
             var count = await reader.ReadAsync(buffer.AsMemory()).ConfigureAwait(false);
             if (count == 0)
-            { return builder.ToString(); }
+            {
+                return builder.ToString();
+            }
             bytes += Encoding.UTF8.GetByteCount(buffer.AsSpan(0, count));
             if (bytes > MaximumStreamBytes)
-            { throw new InvalidDataException(OutputFailure); }
+            {
+                throw new InvalidDataException(OutputFailure);
+            }
             builder.Append(buffer, 0, count);
         }
     }

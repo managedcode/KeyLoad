@@ -1,3 +1,6 @@
 namespace KeyLoad.Replication;
 
-internal enum ReplicaReadRoundPurpose { Application, Control }
+internal enum ReplicaReadRoundPurpose
+{
+    Application, Control
+}

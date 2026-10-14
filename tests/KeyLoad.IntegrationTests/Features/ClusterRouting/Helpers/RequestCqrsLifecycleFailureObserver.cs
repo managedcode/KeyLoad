@@ -18,7 +18,9 @@ internal static class RequestCqrsLifecycleFailureObserver
         var previous = failures.Count;
         ServerFailureObserver.Observe(operation, failures);
         if (failures.Count > previous)
-        { Notify(failures, observer, stage); }
+        {
+            Notify(failures, observer, stage);
+        }
     }
 
     internal static async Task ObserveAsync(Func<Task> operation, List<Exception> failures,
@@ -27,14 +29,18 @@ internal static class RequestCqrsLifecycleFailureObserver
         var previous = failures.Count;
         await ServerFailureObserver.ObserveAsync(operation, failures).ConfigureAwait(false);
         if (failures.Count > previous)
-        { Notify(failures, observer, stage); }
+        {
+            Notify(failures, observer, stage);
+        }
     }
 
     private static void Notify(List<Exception> failures, Action<RequestCqrsLifecycleStage>? observer,
         RequestCqrsLifecycleStage stage)
     {
         if (observer is null)
-        { return; }
+        {
+            return;
+        }
         ServerFailureObserver.Observe(() => observer(stage), failures);
     }
 }

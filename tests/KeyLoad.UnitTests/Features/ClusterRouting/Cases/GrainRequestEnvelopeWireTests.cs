@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.UnitTests;
 
@@ -72,7 +72,9 @@ internal sealed class GrainRequestEnvelopeWireTests
         var requestId = Guid.NewGuid();
         var token = codec.CreateRead(requestId, Principal, GrainReadKind.QueryCapabilities, NativeSerialization.Serialize(NoDtoMarker));
         var envelope = fixture.Database.Verify<GrainRequestEnvelope>(token) with
-        { Payload = missing ? default : ReadOnlyMemory<byte>.Empty };
+        {
+            Payload = missing ? default : ReadOnlyMemory<byte>.Empty
+        };
         var invalid = fixture.Database.Sign(envelope);
         await Assert.That(fixture.Database.Verify<GrainRequestEnvelope>(invalid).Payload.IsEmpty).IsTrue();
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => codec.VerifyRead(invalid, requestId)).Code)
@@ -86,7 +88,10 @@ internal sealed class GrainRequestEnvelopeWireTests
         var codec = new GrainRequestCodec(fixture.Database, TimeProvider.System, UnitRoutingOptions.Routing());
         var requestId = Guid.NewGuid();
         var token = codec.CreateRead(requestId, Principal, GrainReadKind.QueryCapabilities, NativeSerialization.Serialize(NoDtoMarker));
-        var envelope = fixture.Database.Verify<GrainRequestEnvelope>(token) with { Purpose = UnsupportedPurpose };
+        var envelope = fixture.Database.Verify<GrainRequestEnvelope>(token) with
+        {
+            Purpose = UnsupportedPurpose
+        };
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => codec.VerifyRead(fixture.Database.Sign(envelope), requestId)).Code)
             .IsEqualTo(ErrorCode.TokenInvalidated);
     }

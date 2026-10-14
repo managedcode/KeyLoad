@@ -23,7 +23,9 @@ internal static class ControlledPartitionMovementProcessOwnership
                 return;
             }
             catch (IOException) when (clock.GetElapsedTime(started) < readiness.Value.OwnershipTimeout)
-            { await Task.Delay(readiness.Value.OwnershipPollInterval, clock, cancellationToken); }
+            {
+                await Task.Delay(readiness.Value.OwnershipPollInterval, clock, cancellationToken);
+            }
         }
     }
 
@@ -33,7 +35,9 @@ internal static class ControlledPartitionMovementProcessOwnership
         {
             var directory = Path.Combine(root, name);
             if (!Directory.Exists(directory))
-            { throw new DirectoryNotFoundException(Missing); }
+            {
+                throw new DirectoryNotFoundException(Missing);
+            }
             KilledProcessFileReadiness.EnsureFilesUnlocked(directory);
         }
     }

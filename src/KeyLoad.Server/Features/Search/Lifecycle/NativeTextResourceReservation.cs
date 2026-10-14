@@ -10,7 +10,9 @@ internal sealed class NativeTextResourceReservation(NativeTextResourceOwnership 
         lock (gate)
         {
             if (completed || !ReferenceEquals(owner, expectedOwner) || generation != Path.GetFullPath(path))
-            { throw NativeTextErrors.Ownership(); }
+            {
+                throw NativeTextErrors.Ownership();
+            }
         }
     }
 
@@ -20,7 +22,9 @@ internal sealed class NativeTextResourceReservation(NativeTextResourceOwnership 
         lock (gate)
         {
             if (completed)
-            { throw NativeTextErrors.Ownership(); }
+            {
+                throw NativeTextErrors.Ownership();
+            }
             owner.Release(generation);
             completed = true;
         }

@@ -9,7 +9,9 @@ internal sealed class C1SubmissionJournalInspectionReadBudget(CancellationToken 
         cancellationToken.ThrowIfCancellationRequested();
         if (bytes < NoBytes || bytes > C1SubmissionJournalInspectionProtocol.MaximumNativeRecordBytes
             || bytes > C1SubmissionJournalInspectionProtocol.MaximumReadBytes - examined)
-        { throw C1SubmissionJournalInspectionValidation.Invalid(); }
+        {
+            throw C1SubmissionJournalInspectionValidation.Invalid();
+        }
         examined += bytes;
     }
 }

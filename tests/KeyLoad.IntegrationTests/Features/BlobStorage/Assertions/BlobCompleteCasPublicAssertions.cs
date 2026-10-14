@@ -29,7 +29,11 @@ internal static class BlobCompleteCasPublicAssertions
             var expected = new BlobReadResult(published.Value, 0L, head.Bytes);
             await SqlRf3Protocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.ReadBlobRangeAsync(read, token)));
             await SqlRf3Protocol.EqualAsync(expected, (await McpCallerAssertions.SuccessAsync<BlobReadResult>(await callers.Mcp.CallAsync("keyload_blobs_read_range", read, token))).Value);
-            var end = read with { Offset = head.Bytes.Length, Count = 0 };
+            var end = read with
+            {
+                Offset = head.Bytes.Length,
+                Count = 0
+            };
             var eof = new BlobReadResult(published.Value, head.Bytes.Length, Array.Empty<byte>());
             await SqlRf3Protocol.EqualAsync(eof, await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.ReadBlobRangeAsync(end, token)));
             await SqlRf3Protocol.EqualAsync(eof, (await McpCallerAssertions.SuccessAsync<BlobReadResult>(await callers.Mcp.CallAsync("keyload_blobs_read_range", end, token))).Value);

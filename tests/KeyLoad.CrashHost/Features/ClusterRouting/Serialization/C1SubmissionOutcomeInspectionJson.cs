@@ -35,7 +35,9 @@ internal static class C1SubmissionOutcomeInspectionJson
         C1OutcomeInspectionJson.ValidateShape(bytes, RequestFields,
             C1SubmissionOutcomeInspectionProtocol.MaximumRequestBytes, C1SubmissionOutcomeInspectionValidation.Invalid);
         try
-        { return C1SubmissionOutcomeInspectionValidation.Request(JsonSerializer.Deserialize(bytes, Context.C1SubmissionOutcomeInspectionRequest)); }
+        {
+            return C1SubmissionOutcomeInspectionValidation.Request(JsonSerializer.Deserialize(bytes, Context.C1SubmissionOutcomeInspectionRequest));
+        }
         catch (JsonException) { throw C1SubmissionOutcomeInspectionValidation.Invalid(); }
     }
 
@@ -44,7 +46,9 @@ internal static class C1SubmissionOutcomeInspectionJson
         _ = C1SubmissionOutcomeInspectionValidation.Request(request);
         var bytes = JsonSerializer.SerializeToUtf8Bytes(request, Context.C1SubmissionOutcomeInspectionRequest);
         if (bytes.Length > C1SubmissionOutcomeInspectionProtocol.MaximumRequestBytes)
-        { throw C1SubmissionOutcomeInspectionValidation.Invalid(); }
+        {
+            throw C1SubmissionOutcomeInspectionValidation.Invalid();
+        }
         return bytes;
     }
 
@@ -53,7 +57,9 @@ internal static class C1SubmissionOutcomeInspectionJson
         C1OutcomeInspectionJson.ValidateShape(bytes, ReceiptFields,
             C1SubmissionOutcomeInspectionProtocol.MaximumReceiptBytes, C1SubmissionOutcomeInspectionValidation.Invalid);
         try
-        { return C1SubmissionOutcomeInspectionValidation.Receipt(JsonSerializer.Deserialize(bytes, Context.C1SubmissionOutcomeInspectionReceipt)); }
+        {
+            return C1SubmissionOutcomeInspectionValidation.Receipt(JsonSerializer.Deserialize(bytes, Context.C1SubmissionOutcomeInspectionReceipt));
+        }
         catch (JsonException) { throw C1SubmissionOutcomeInspectionValidation.Invalid(); }
     }
 
@@ -63,10 +69,14 @@ internal static class C1SubmissionOutcomeInspectionJson
         var ceiling = checked(EncodedBytes(receipt.OutcomeKey.Length) + EncodedBytes(receipt.NativeStoredOutcome.Length)
             + C1SubmissionOutcomeInspectionProtocol.MaximumMetadataBytes + LineFeedBytes);
         if (ceiling > C1SubmissionOutcomeInspectionProtocol.MaximumReceiptBytes)
-        { throw C1SubmissionOutcomeInspectionValidation.Invalid(); }
+        {
+            throw C1SubmissionOutcomeInspectionValidation.Invalid();
+        }
         var json = JsonSerializer.SerializeToUtf8Bytes(receipt, Context.C1SubmissionOutcomeInspectionReceipt);
         if (json.Length + LineFeedBytes > C1SubmissionOutcomeInspectionProtocol.MaximumReceiptBytes)
-        { throw C1SubmissionOutcomeInspectionValidation.Invalid(); }
+        {
+            throw C1SubmissionOutcomeInspectionValidation.Invalid();
+        }
         var line = new byte[json.Length + LineFeedBytes];
         json.CopyTo(line, JsonStartOffset);
         line[^LineFeedBytes] = LineFeed;

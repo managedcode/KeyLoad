@@ -18,7 +18,11 @@ internal static class SqlNullDistinctRf3Image
             documents.Add(actual);
         }
         var outbox = await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.SdkSuccessAsync(await root.Sdk.OutboxStatusAsync(PostgresRf3State.Partition, token));
-        return global::System.Text.Json.JsonSerializer.Serialize(new { Documents = documents, Outbox = outbox }, JsonDefaults.Options);
+        return global::System.Text.Json.JsonSerializer.Serialize(new
+        {
+            Documents = documents,
+            Outbox = outbox
+        }, JsonDefaults.Options);
     }
 
     internal static async Task PageAsync(QueryPage actual, SqlNullDistinctRf3Case item, long lowRevision)

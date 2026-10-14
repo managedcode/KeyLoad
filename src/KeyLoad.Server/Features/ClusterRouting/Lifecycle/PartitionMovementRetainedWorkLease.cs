@@ -1,5 +1,5 @@
 using System.Runtime.ExceptionServices;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.Server;
@@ -18,15 +18,24 @@ internal sealed class PartitionMovementRetainedWorkLease(NativeRequestWorkLease 
             if (attempted)
             {
                 if (failure is not null)
-                { ExceptionDispatchInfo.Capture(failure).Throw(); }
+                {
+                    ExceptionDispatchInfo.Capture(failure).Throw();
+                }
                 return;
             }
             attempted = true;
             var failures = new List<Exception>();
             ServerFailureObserver.Observe(work.Dispose, failures);
-            failure = failures.Count switch { PartitionMovementProtocol.NoFailures => null, PartitionMovementProtocol.SingleFailure => failures[PartitionMovementProtocol.FirstFailureIndex], _ => new AggregateException(failures) };
+            failure = failures.Count switch
+            {
+                PartitionMovementProtocol.NoFailures => null,
+                PartitionMovementProtocol.SingleFailure => failures[PartitionMovementProtocol.FirstFailureIndex],
+                _ => new AggregateException(failures)
+            };
             if (failure is not null)
-            { ExceptionDispatchInfo.Capture(failure).Throw(); }
+            {
+                ExceptionDispatchInfo.Capture(failure).Throw();
+            }
         }
     }
 }

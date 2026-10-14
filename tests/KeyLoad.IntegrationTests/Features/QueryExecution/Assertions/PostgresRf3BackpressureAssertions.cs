@@ -29,7 +29,11 @@ internal static class PostgresRf3BackpressureAssertions
                 PostgresRf3BackpressureSeed.Json(index), false, []), actual);
             rows.Add(actual);
         }
-        return JsonSerializer.Serialize(new { Original = originals, Rows = rows }, JsonDefaults.Options);
+        return JsonSerializer.Serialize(new
+        {
+            Original = originals,
+            Rows = rows
+        }, JsonDefaults.Options);
     }
 
     internal static async Task ReceiptAsync(PostgresRf3BackpressureState state, CommitReceipt actual)

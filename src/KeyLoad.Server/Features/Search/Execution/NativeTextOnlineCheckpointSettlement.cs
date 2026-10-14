@@ -18,7 +18,10 @@ internal static class NativeTextOnlineCheckpointSettlement
                 NativeTextOnlinePagePreparation.RequireOwner(session).Path, intent,
                 session.Manifest ?? throw NativeTextErrors.Ownership(), original, fresh, budget,
                 options.NativeText, resources: resources);
-            session.Manifest = session.Manifest with { AppliedPosition = fresh.AppliedPosition };
+            session.Manifest = session.Manifest with
+            {
+                AppliedPosition = fresh.AppliedPosition
+            };
             NativeTextIncrementalMetadata.Publish(NativeTextOnlinePagePreparation.RequireOwner(session).Path,
                 session.Manifest, options.NativeText.Value.MaximumDiskBytes, budget, options.NativeText, resources);
             session.Current = fresh;

@@ -27,11 +27,15 @@ internal static class ZoneTreeRestoreSlotSource
         var identity = ZoneTreeIdentityFile.Read(bytes.Span);
         if (identity.NodeId != context.SourceNodeId || identity.Incarnation != context.SourceIncarnation
             || manifest.Position != context.SourcePosition)
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
         ZoneTreeCatalogBackupMetadataFile.ReadVerified(backup, identity, manifest.Position, policy);
         var envelope = DescribeFile(backup, ZoneTreeCatalogBackupMetadataFile.FileName, policy, ct);
         if (!string.Equals(envelope.Checksum, context.SourceEnvelopeDigest, StringComparison.Ordinal))
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
         return identity;
     }
 
@@ -39,7 +43,9 @@ internal static class ZoneTreeRestoreSlotSource
         ZoneTreeBackupRestoreManifestFile[] current)
     {
         if (!original.SequenceEqual(current))
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
     }
 
     private static ZoneTreeBackupRestoreManifestFile DescribeFile(string backup, string name,
@@ -47,17 +53,24 @@ internal static class ZoneTreeRestoreSlotSource
     {
         var path = Path.Combine(backup, name);
         if ((File.GetAttributes(path) & (FileAttributes.Directory | FileAttributes.ReparsePoint)) != NoBytes)
-        { throw Errors.Fail(ErrorCode.Corruption, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Invalid);
+        }
         using var file = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, policy.StreamBufferBytes);
         // Journal bytes use the existing verified manifest length and bounded streaming; no new snapshot-sized journal cap.
         var bound = name == IdentityFileName ? policy.MaximumIdentityFileBytes : policy.MaximumBackupManifestBytes;
         if (file.Length <= NoBytes || name != JournalFileName && file.Length > bound)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, Invalid);
+        }
         using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         var buffer = new byte[policy.FileBufferBytes];
         int length;
         while ((length = file.Read(buffer)) > NoBytes)
-        { ct.ThrowIfCancellationRequested(); hash.AppendData(buffer, First, length); }
+        {
+            ct.ThrowIfCancellationRequested();
+            hash.AppendData(buffer, First, length);
+        }
         ct.ThrowIfCancellationRequested();
         return new(name, file.Length, Convert.ToHexStringLower(hash.GetHashAndReset()));
     }

@@ -1,5 +1,5 @@
 using System.Collections.Immutable;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
 
@@ -11,7 +11,10 @@ internal static class McpAdminDashboardCatalogEntries
     private const string ResourcesListRoute = "/v1/admin/dashboard/resources";
     private const string QueueBrowseName = "keyload_admin_queue_browse";
     private const string QueueBrowseRoute = "/v1/admin/dashboard/queue";
-    internal static ImmutableArray<(string Name, string Route, GrainReadKind? ReadKind, OperationKind? CommandKind)> All { get; } =
+    internal static ImmutableArray<(string Name, string Route, GrainReadKind? ReadKind, OperationKind? CommandKind)> All
+    {
+        get;
+    } =
     [
         (DashboardName, DashboardRoute, GrainReadKind.AdminDashboard, null),
         (ResourcesListName, ResourcesListRoute, GrainReadKind.AdminResources, null),

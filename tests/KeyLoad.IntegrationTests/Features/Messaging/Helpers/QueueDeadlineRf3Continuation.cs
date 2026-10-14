@@ -19,7 +19,11 @@ internal static class QueueDeadlineRf3Continuation
             return true;
         }, token);
         await QueueDeadlineRf3Pause.RefusedAsync(fixture, lane, identity, scheduled, token);
-        var revoked = identity.Principal with { Revoked = true, PolicyEpoch = QueueDeadlineRf3Protocol.Second };
+        var revoked = identity.Principal with
+        {
+            Revoked = true,
+            PolicyEpoch = QueueDeadlineRf3Protocol.Second
+        };
         await MessagingRf3Identity.UpdateAsync(fixture, revoked, token);
         await QueueDeadlineRf3Pause.SetAsync(fixture, lane, false, token);
         await QueueDeadlineRf3Callers.UseAsync(fixture, McpCallerProtocol.Node1, fixture.AdminKey, async admin =>
@@ -28,7 +32,11 @@ internal static class QueueDeadlineRf3Continuation
             await QueueDeadlineRf3Assertions.RequireAsync(admin, lane, future, token);
             return true;
         }, token);
-        var restored = revoked with { Revoked = false, PolicyEpoch = QueueDeadlineRf3Protocol.Third };
+        var restored = revoked with
+        {
+            Revoked = false,
+            PolicyEpoch = QueueDeadlineRf3Protocol.Third
+        };
         await MessagingRf3Identity.UpdateAsync(fixture, restored, token);
         var ready = scheduled with
         {

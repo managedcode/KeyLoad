@@ -73,7 +73,10 @@ internal static class PostgresRf3Commands
             _ => throw new InvalidOperationException(InvalidCommand)
         };
 
-    private enum PlanSlot { First, Second, Third, Fourth, Fifth, Sixth, Seventh, Eighth }
+    private enum PlanSlot
+    {
+        First, Second, Third, Fourth, Fifth, Sixth, Seventh, Eighth
+    }
     private const string First = " /* native-plan-0 */";
     private const string Second = " /* native-plan-1 */";
     private const string Third = " /* native-plan-2 */";

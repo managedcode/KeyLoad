@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.Storage.ZoneTree;
@@ -44,7 +44,9 @@ internal static class RemoteTransferNativeColdCuts
     {
         ArgumentNullException.ThrowIfNull(original);
         if (original.Count != TwoRf3MembershipProtocol.NodeCount)
-        { throw new InvalidOperationException(InvalidOwners); }
+        {
+            throw new InvalidOperationException(InvalidOwners);
+        }
         var voters = new HashSet<string>(StringComparer.Ordinal);
         var addresses = new HashSet<string>(StringComparer.Ordinal);
         var owned = new Dictionary<string, ReplicaSiloDiscovery>(StringComparer.Ordinal);
@@ -58,11 +60,15 @@ internal static class RemoteTransferNativeColdCuts
                 || !addresses.Add(owner.SiloAddress)
                 || global::Orleans.Runtime.SiloAddress.FromParsableString(owner.SiloAddress).ToParsableString()
                     != owner.SiloAddress)
-            { throw new InvalidOperationException(InvalidOwners); }
+            {
+                throw new InvalidOperationException(InvalidOwners);
+            }
             owned.Add(node, owner);
         }
         if (owned.Values.Select(owner => owner.ClusterId).Distinct(StringComparer.Ordinal).Count() != 1)
-        { throw new InvalidOperationException(InvalidOwners); }
+        {
+            throw new InvalidOperationException(InvalidOwners);
+        }
         return owned;
     }
 
@@ -98,18 +104,24 @@ internal static class RemoteTransferNativeColdCuts
             token.ThrowIfCancellationRequested();
             var directory = Path.Combine(root, node, DatabaseDirectory);
             if (!Directory.Exists(directory))
-            { throw new InvalidOperationException(MissingCut); }
+            {
+                throw new InvalidOperationException(MissingCut);
+            }
             var configured = wave.movementMaxFrameBytes is { } maximum
                 ? new ZoneTreeStorageExecutionOptions { MaxFrameBytes = maximum } : null;
             store = ZoneTreeExistingStore.Open(new ZoneTreeStoreOptions(directory)
-            { Incarnation = retainedSignedOwner.Incarnation }, originalNodeId,
+            {
+                Incarnation = retainedSignedOwner.Incarnation
+            }, originalNodeId,
                 IntegrationExecutionOptions.StorageExecution(configured));
             cut = store.Read(view => new NativeCanonicalModelCutReader(IntegrationExecutionOptions.DatabaseLimits(limits), token)
                 .Read(view, request, retainedSignedOwner, store.Position));
             NativeCanonicalModelCutCodec.RequireEnvelope(cut, token);
         }, failures);
         if (store is { } owned)
-        { ServerFailureObserver.Observe(owned.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(owned.Dispose, failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
         return cut ?? throw new InvalidOperationException(MissingCut);
     }

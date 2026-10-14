@@ -4,12 +4,33 @@ namespace KeyLoad.Server.Features.ClusterRouting;
 [ConfigurationOptions]
 internal sealed record PhysicalGroupTrustOptions
 {
-    public PhysicalGroupTrustRole Role { get; init; }
-    public bool RemotePartitionQueries { get; init; }
-    public bool RemoteDocumentReads { get; init; }
-    public bool RegisterPhysicalOwners { get; init; }
-    public Guid ForeignPhysicalShardId { get; init; }
-    public Guid ForeignIncarnation { get; init; }
+    public PhysicalGroupTrustRole Role
+    {
+        get; init;
+    }
+    public bool RemotePartitionQueries
+    {
+        get; init;
+    }
+    public bool RemoteDocumentReads
+    {
+        get; init;
+    }
+    public bool RegisterPhysicalOwners
+    {
+        get; init;
+    }
+    public Guid ForeignPhysicalShardId
+    {
+        get; init;
+    }
+    public Guid ForeignIncarnation
+    {
+        get; init;
+    }
     public string[] ForeignVoterIds { get; init; } = [];
-    public string? ForeignPeerSecret { get; init; }
+    public string? ForeignPeerSecret
+    {
+        get; init;
+    }
 }

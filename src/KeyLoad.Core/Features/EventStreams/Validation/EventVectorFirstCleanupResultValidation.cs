@@ -28,7 +28,9 @@ internal static class EventVectorFirstCleanupResultValidation
             || result.Receipt.Token.AtomicPartitionId != row.ControlPartition.AtomicPartitionId
             || result.Receipt.Token.Position <= EmptyPosition || result.Receipt.Mutations.IsDefault
             || result.OriginalPublicResultBytes.IsEmpty)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         var value = NativeSerialization.Deserialize<EventFeedControlResult>(result.OriginalPublicResultBytes.Span);
         if (value is null || value.Version != Version || value.PublicCommandId != phase.OriginalRequest.CommandId
             || value.MapId != row.MapId || value.Revision != EmptyPosition || value.CoverageGeneration != EmptyPosition
@@ -37,7 +39,9 @@ internal static class EventVectorFirstCleanupResultValidation
             || value.Receipt is null || value.Receipt.CommandId != result.NativeCommandId
             || value.Receipt.Token != result.Receipt.Token || value.Receipt.Durability != result.Receipt.Durability
             || value.Receipt.Mutations.IsDefault || !value.Receipt.Mutations.SequenceEqual(result.Receipt.Mutations))
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         return value;
     }
 }

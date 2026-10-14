@@ -32,10 +32,14 @@ internal static class ServerConnectionTransportComposition
         {
             var execution = configured.Value;
             if (!execution.EnableHttp2)
-            { return; }
+            {
+                return;
+            }
             var endpoints = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
             if (!configuration.GetSection(KestrelSection).GetSection(EndpointsSection).GetChildren().Any())
-            { PreserveOriginalListeners(configuration, endpoints); }
+            {
+                PreserveOriginalListeners(configuration, endpoints);
+            }
             endpoints[EndpointKey(Http2Endpoint, UrlSetting)] = string.Format(CultureInfo.InvariantCulture,
                 Http2Address, execution.Http2Port);
             endpoints[EndpointKey(Http2Endpoint, ProtocolsSetting)] = HttpProtocols.Http2.ToString();
@@ -70,9 +74,13 @@ internal static class ServerConnectionTransportComposition
     private static void AddPorts(List<string> listeners, string? configuredPorts, System.Text.CompositeFormat format)
     {
         if (string.IsNullOrWhiteSpace(configuredPorts))
-        { return; }
+        {
+            return;
+        }
         foreach (var port in configuredPorts.Split(UrlSeparator, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
-        { listeners.Add(string.Format(CultureInfo.InvariantCulture, format, port)); }
+        {
+            listeners.Add(string.Format(CultureInfo.InvariantCulture, format, port));
+        }
     }
 
     private static string EndpointKey(string name, string setting)

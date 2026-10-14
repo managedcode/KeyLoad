@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.Search;
@@ -37,7 +37,9 @@ internal sealed class AnnPublicMaintenanceReservationTests
                     catch (KeyLoadException error) { rejected = error; }
                 });
             try
-            { _ = await runtime.PhaseAsync(database, pin, AnnMaintenanceCapabilityKind.Verify, token: token); }
+            {
+                _ = await runtime.PhaseAsync(database, pin, AnnMaintenanceCapabilityKind.Verify, token: token);
+            }
             finally { clock.Disarm(); }
             await Assert.That(clock.Triggered).IsTrue();
             await Assert.That(database.Store.GetReadDiagnostics().RangeExaminedBytes).IsGreaterThan(before);

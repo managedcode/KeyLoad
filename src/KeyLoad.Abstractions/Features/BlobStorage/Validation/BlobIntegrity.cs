@@ -37,7 +37,9 @@ public static class BlobIntegrity
         ArgumentNullException.ThrowIfNull(blob);
         ArgumentNullException.ThrowIfNull(blob.Partition);
         if (incarnation == Guid.Empty || uploadId == Guid.Empty || length is < MinimumBlobBytes or > BlobLimits.MaximumBlobBytes)
-        { throw Errors.Fail(ErrorCode.Validation, InvalidIntegrity); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, InvalidIntegrity);
+        }
         var partition = blob.Partition;
         var preimage = KeyCodec.Encode(ChainDomain, incarnation.ToString(GuidFormat),
             partition.TenantId, partition.DatabaseId, partition.TransactionDomainId, partition.PartitionKey,
@@ -60,7 +62,9 @@ public static class BlobIntegrity
     {
         if (ordinal < FirstPartOrdinal || ordinal >= BlobLimits.MaximumBlobBytes / BlobLimits.RawPartBytes
             || length is < MinimumPartBytes or > BlobLimits.RawPartBytes)
-        { throw Errors.Fail(ErrorCode.Validation, InvalidIntegrity); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, InvalidIntegrity);
+        }
         Span<byte> preimage = stackalloc byte[ChainBytes];
         Decode(previousHash).AsSpan().CopyTo(preimage);
         BinaryPrimitives.WriteInt32BigEndian(preimage.Slice(DigestBytes, OrdinalBytes), ordinal);
@@ -79,11 +83,15 @@ public static class BlobIntegrity
     private static byte[] Decode(string hash)
     {
         if (hash is null || hash.Length != DigestHexCharacters)
-        { throw Errors.Fail(ErrorCode.Validation, InvalidIntegrity); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, InvalidIntegrity);
+        }
         foreach (var character in hash)
         {
             if (character is not (>= FirstDecimalDigit and <= LastDecimalDigit or >= FirstHexLetter and <= LastHexLetter))
-            { throw Errors.Fail(ErrorCode.Validation, InvalidIntegrity); }
+            {
+                throw Errors.Fail(ErrorCode.Validation, InvalidIntegrity);
+            }
         }
         return Convert.FromHexString(hash);
     }

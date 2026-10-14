@@ -1,6 +1,6 @@
 using System.Globalization;
+using KeyLoad.Clustering;
 using KeyLoad.Core.Features.Messaging;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
 

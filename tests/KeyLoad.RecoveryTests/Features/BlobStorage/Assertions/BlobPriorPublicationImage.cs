@@ -9,7 +9,9 @@ internal static class BlobPriorPublicationImage
     {
         var page = view.Scan([], 4096);
         if (page.HasMore)
-        { throw new InvalidOperationException("The prior publication process image exceeded its original row bound."); }
+        {
+            throw new InvalidOperationException("The prior publication process image exceeded its original row bound.");
+        }
         return page.Records.Select(row => Convert.ToHexString(row.Key.Span) + ":" + Convert.ToHexString(row.Value.Span)).ToArray();
     });
 

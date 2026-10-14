@@ -7,10 +7,16 @@ internal static class SqlNumericSeparatorRf3JoinParameters
         PostgresRf3Caller wire, CancellationToken token)
     {
         var parameters = new Dictionary<string, global::System.Text.Json.JsonElement>
-        { [Argument] = global::System.Text.Json.JsonSerializer.SerializeToElement(UnitValue) };
+        {
+            [Argument] = global::System.Text.Json.JsonSerializer.SerializeToElement(UnitValue)
+        };
         var sql = state.Sql.Replace(OrderBy, " WHERE 1_0e-1 = @argument" + OrderBy, StringComparison.Ordinal);
         await global::TUnit.Assertions.Assert.That(sql).IsNotEqualTo(state.Sql);
-        var request = state.Query with { Sql = sql, Parameters = parameters };
+        var request = state.Query with
+        {
+            Sql = sql,
+            Parameters = parameters
+        };
         await PostgresRf3Assertions.PageAsync(state,
             await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.SdkSuccessAsync(await reader.Sdk.QueryAsync(request, token)));
         await PostgresRf3Assertions.PageAsync(state,
@@ -20,7 +26,10 @@ internal static class SqlNumericSeparatorRf3JoinParameters
         foreach (var prepared in new[] { false, true })
         {
             var argument = new global::Npgsql.NpgsqlParameter
-            { NpgsqlDbType = global::NpgsqlTypes.NpgsqlDbType.Numeric, Value = UnitValue };
+            {
+                NpgsqlDbType = global::NpgsqlTypes.NpgsqlDbType.Numeric,
+                Value = UnitValue
+            };
             await PostgresRf3Assertions.PageAsync(state,
                 await wire.ExecuteAsync<global::KeyLoad.QueryPage>(wireSql, [argument], prepared, token));
         }

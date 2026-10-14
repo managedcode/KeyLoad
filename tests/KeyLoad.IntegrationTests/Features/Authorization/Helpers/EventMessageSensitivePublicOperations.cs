@@ -37,9 +37,17 @@ internal static class EventMessageSensitivePublicOperations
     {
         var policy = new SensitiveFieldPolicy(EventMessageSensitivePublicProtocol.Path,
             EventMessageSensitivePublicProtocol.Classification, EventMessageSensitivePublicProtocol.GrantAfter, RequiredForProcessing: required);
-        var definition = state.Header ? state.Resource with { HeaderPolicies = [policy] } : state.Resource with { FieldPolicies = [policy] };
+        var definition = state.Header ? state.Resource with
+        {
+            HeaderPolicies = [policy]
+        } : state.Resource with
+        {
+            FieldPolicies = [policy]
+        };
         var request = new ConfigureResourceRequest(state.Partition.TenantId, state.Partition.DatabaseId, definition)
-        { ExpectedSchemaVersion = state.Resource.SchemaVersion };
+        {
+            ExpectedSchemaVersion = state.Resource.SchemaVersion
+        };
         state.Resource = await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.ConfigureResourceAsync(Guid.NewGuid(), request, token));
     }
 

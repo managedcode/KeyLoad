@@ -14,9 +14,13 @@ public sealed partial class DatabaseEngine
         cancellationToken.ThrowIfCancellationRequested();
         Authorization.Require(principal, reference.Partition, reference.Collection, Capability.DocumentsRead);
         if (AtomicPartitionPlacementSerialization.ReadRow(view, reference.Partition) is not null)
-        { _ = ReadPlacementWitness(view, reference.Partition); }
+        {
+            _ = ReadPlacementWitness(view, reference.Partition);
+        }
         if (minimumToken is not null)
-        { ValidateDocumentSessionToken(view, reference.Partition, minimumToken); }
+        {
+            ValidateDocumentSessionToken(view, reference.Partition, minimumToken);
+        }
         var resource = Resource(view, reference.Partition, reference.Collection, ResourceKind.Collection);
         var record = view.GetRecord<DocumentRecord>(DocumentKey(reference.Partition, reference.Collection, reference.Id));
         var result = record is null || record.Deleted || !Authorization.CanReadRow(principal, record.Access)
@@ -39,20 +43,26 @@ public sealed partial class DatabaseEngine
             cancellationToken.ThrowIfCancellationRequested();
             var principal = Principal(view, principalId, Clock.GetUtcNow());
             if (!string.Equals(principal.TenantId, tenant, StringComparison.Ordinal))
-            { throw Errors.Fail(ErrorCode.PermissionDenied, DocumentIdentityTenantMismatch); }
+            {
+                throw Errors.Fail(ErrorCode.PermissionDenied, DocumentIdentityTenantMismatch);
+            }
             Authorization.Require(principal, request.Reference.Partition, request.Reference.Collection, Capability.DocumentsRead);
             var placement = ReadPlacementWitness(view, request.Reference.Partition);
             if (placement.PhysicalShardId != expectedOwner.PhysicalShardId
                 || placement.Incarnation != expectedOwner.Incarnation
                 || placement.PlacementEpoch != expectedOwner.PlacementEpoch
                 || !placement.VoterIds.SequenceEqual(expectedOwner.VoterIds, StringComparer.Ordinal))
-            { throw Errors.Fail(ErrorCode.OwnershipLost, DocumentOwnerNodeMismatch); }
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, DocumentOwnerNodeMismatch);
+            }
             var document = ReadDocumentAtCut(view, principal, request.Reference, request.MinimumToken, cancellationToken);
             var appliedBytes = view.ReadOwnedValue(KeySpace.AppliedBytes)
                 ?? throw Errors.Fail(ErrorCode.Corruption, DocumentTokenCorruptPosition);
             var applied = NativeSerialization.Deserialize<long>(appliedBytes);
             if (applied < DocumentTokenInitialPosition)
-            { throw Errors.Fail(ErrorCode.Corruption, DocumentTokenCorruptPosition); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, DocumentTokenCorruptPosition);
+            }
             var identity = Store.Identity;
             cancellationToken.ThrowIfCancellationRequested();
             return new(document, identity.NodeId, identity.Incarnation, identity.ReadGeneration,

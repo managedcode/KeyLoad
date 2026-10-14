@@ -37,7 +37,12 @@ internal static class TeamRowPolicyFlow
             [new(DatabaseScope, Collection, Capability.DocumentsRead | Capability.DocumentsWrite | Capability.Query),
                 new(DatabaseScope, TeamGraphVisibilityAssertions.Collection, Capability.DocumentsRead),
                 new(DatabaseScope, TeamGraphVisibilityAssertions.Graph, Capability.GraphRead)], [])
-        { OwnerId = Reader, RestrictRows = true, Teams = [Team], PolicyEpoch = OriginalEpoch };
+        {
+            OwnerId = Reader,
+            RestrictRows = true,
+            Teams = [Team],
+            PolicyEpoch = OriginalEpoch
+        };
         await ConfigureAsync(db, principal);
         await TeamRowPolicyAssertions.InvalidMembershipAsync(db, principal);
         var queries = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
@@ -49,14 +54,25 @@ internal static class TeamRowPolicyFlow
         await TeamRowPolicyAssertions.ReceiptAsync(db.Store, original, receipt, CurrentRevision, OriginalEpoch);
         var outcome = Outcome(db.Store, original);
         await ReplayAsync(db.Database, db.Store, original, receipt, outcome, token);
-        await ConfigureAsync(db, principal with { Teams = [], PolicyEpoch = RemovedEpoch });
+        await ConfigureAsync(db, principal with
+        {
+            Teams = [],
+            PolicyEpoch = RemovedEpoch
+        });
         await TeamRowPolicyAssertions.HiddenAsync(db, db.Database, queries, db.Store, token);
         await TeamGraphVisibilityAssertions.ReadAsync(db.Database, db.Store, db.Partition, false, token);
         await TeamRowPolicyAssertions.OldRefusedAsync(db.Database, db.Store, original, outcome, ErrorCode.PermissionDenied, token);
-        await ConfigureAsync(db, principal with { Revoked = true, PolicyEpoch = RevokedEpoch });
+        await ConfigureAsync(db, principal with
+        {
+            Revoked = true,
+            PolicyEpoch = RevokedEpoch
+        });
         await TeamRowPolicyAssertions.RevokedAsync(db, queries, db.Store, token);
         await TeamGraphVisibilityAssertions.RevokedAsync(db.Database, db.Store, db.Partition, token);
-        await ConfigureAsync(db, principal with { PolicyEpoch = RepairedEpoch });
+        await ConfigureAsync(db, principal with
+        {
+            PolicyEpoch = RepairedEpoch
+        });
         await TeamRowPolicyAssertions.VisibleAsync(db, db.Database, queries, db.Store, CurrentRevision, CurrentJson, token);
         await TeamGraphVisibilityAssertions.ReadAsync(db.Database, db.Store, db.Partition, true, token);
         await TeamRowPolicyAssertions.OldRefusedAsync(db.Database, db.Store, original, outcome, ErrorCode.PermissionDenied, token);

@@ -26,7 +26,9 @@ public sealed partial class DatabaseEngine
                 || request.Action != EventFeedControlAction.Refresh
                 || request.OriginalFirstIssuancePublicCommandId != Guid.Empty
                 || originalRequestId == Guid.Empty || originalExpiry <= EvaluationClock.GetUtcNow())
-            { throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidEventVectorRefreshPreparation); }
+            {
+                throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidEventVectorRefreshPreparation);
+            }
             Authorization.Require(principal, request.ControlPartition, request.Scope.Resource, Capability.SubscriptionsManage);
             _ = StreamTraversalPlacement(bounded, request.ControlPartition, controlOwner);
             var admission = new EventVectorAdmissionPolicy(OperationLimitsOptions);
@@ -53,12 +55,16 @@ public sealed partial class DatabaseEngine
             || map.PrincipalId != principal.Id || map.ControlPolicyEpoch != principal.PolicyEpoch
             || map.ControlIncarnation != Store.Identity.Incarnation || map.Revision != request.ExpectedRevision
             || map.CoverageGeneration != request.ExpectedCoverageGeneration)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidEventVectorRefreshPreparation); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidEventVectorRefreshPreparation);
+        }
         EventVectorParentInventoryAuthorization.Require(Authorization, principal, inventory, admission);
         EventVectorInventoryValidation.Require(map, inventory.PayloadRows, admission);
         if (inventory.PayloadRows.Any(row => row.Key.Span.SequenceEqual(
                 EventVectorKeys.Offer(map.ControlPartition, map.MapId))))
-        { throw Errors.Fail(ErrorCode.Conflict, InvalidEventVectorRefreshPreparation); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, InvalidEventVectorRefreshPreparation);
+        }
         var phase = new EventVectorControlPhase(EventVectorRefreshVersion, request, EventVectorControlAction.PublishRefresh,
             map.Revision, map.CoverageGeneration, map.CleanupGeneration, null, null, null,
             ReadOnlyMemory<byte>.Empty, ReadOnlyMemory<byte>.Empty)
@@ -95,7 +101,9 @@ public sealed partial class DatabaseEngine
         {
             encodedWitness = EventVectorOfferOwnedEncoding.Encode(witness, admission, work);
             foreach (var pin in pins)
-            { encodedPins.Add(EventVectorOfferOwnedEncoding.Encode(pin, admission, work)); }
+            {
+                encodedPins.Add(EventVectorOfferOwnedEncoding.Encode(pin, admission, work));
+            }
             work.Check();
             var result = new EventVectorPreparedRefresh(request, map, controlOwner, prior, encodedWitness, encodedPins.ToImmutable(),
                 candidates, encoded.Bytes, encoded.Digest);
@@ -110,7 +118,9 @@ public sealed partial class DatabaseEngine
                 EventVectorSettlementTargetEncoding.Clear(encoded.Digest);
                 EventVectorSettlementTargetEncoding.Clear(encodedWitness);
                 foreach (var pin in encodedPins)
-                { EventVectorSettlementTargetEncoding.Clear(pin); }
+                {
+                    EventVectorSettlementTargetEncoding.Clear(pin);
+                }
             }
         }
     }

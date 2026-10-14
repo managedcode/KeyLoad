@@ -169,8 +169,14 @@ internal static class ModelEventQueryRows
     private sealed class EventScanState(long revision)
     {
         internal long Revision { get; private set; } = revision;
-        internal long Count { get; set; }
-        internal bool Exhausted { get; private set; }
+        internal long Count
+        {
+            get; set;
+        }
+        internal bool Exhausted
+        {
+            get; private set;
+        }
 
         internal void Advance()
         {

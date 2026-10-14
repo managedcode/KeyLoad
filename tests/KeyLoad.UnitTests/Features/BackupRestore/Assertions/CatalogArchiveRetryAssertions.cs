@@ -31,7 +31,9 @@ internal static class CatalogArchiveRetryAssertions
         var document = fixture.Source.Database.GetDocument(EventingArtifactFixture.Principal, reference);
         await Assert.That(document).IsNotNull();
         if (document is null)
-        { throw new InvalidOperationException("The admitted later document was not retained."); }
+        {
+            throw new InvalidOperationException("The admitted later document was not retained.");
+        }
         await Assert.That(document.Reference).IsEqualTo(reference);
         await Assert.That(document.Revision).IsEqualTo(1L);
         await Assert.That(document.Json).IsEqualTo(LaterJson);
@@ -65,7 +67,10 @@ internal static class CatalogArchiveRetryAssertions
         var bytes = await File.ReadAllBytesAsync(path, token).ConfigureAwait(false);
         var manifest = await MetadataTestFiles.ReadManifestAsync(backup).ConfigureAwait(false);
         await MetadataTestFiles.WriteManifestAsync(backup,
-            manifest with { Version = MetadataTestContract.UnsupportedManifestVersion }).ConfigureAwait(false);
+            manifest with
+            {
+                Version = MetadataTestContract.UnsupportedManifestVersion
+            }).ConfigureAwait(false);
         var archive = await FilesAsync(backup, token);
         var source = EventingArtifactState.FullBytes(fixture.Source.Store);
         var position = fixture.Source.Store.Position;

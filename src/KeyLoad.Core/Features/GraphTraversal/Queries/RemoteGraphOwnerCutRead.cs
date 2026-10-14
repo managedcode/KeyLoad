@@ -15,12 +15,16 @@ public sealed partial class DatabaseEngine
             ?? throw Errors.Fail(ErrorCode.OwnershipLost, RemoteGraphProtocol.MissingAuthority);
         PhysicalShardCatalogValidation.ValidateCatalog(catalog);
         if (!PhysicalOwnerEntryValidation.SameOwner(catalog.DefaultShard, expectedOwner))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, RemoteGraphProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, RemoteGraphProtocol.MissingAuthority);
+        }
         var placement = ReadPlacementWitness(view, partition);
         long? applied = null;
         view.ReadValue(KeySpace.AppliedBytes, bytes => applied = NativeSerialization.Deserialize<long>(bytes));
         if (applied is null)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, RemoteGraphProtocol.MissingApplied); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, RemoteGraphProtocol.MissingApplied);
+        }
         var identity = Store.Identity;
         return new(catalog.DefaultShard, placement, identity.NodeId, identity.Incarnation,
             identity.ReadGeneration, Store.Position, applied.Value, principal.PolicyEpoch, schemaVersion);

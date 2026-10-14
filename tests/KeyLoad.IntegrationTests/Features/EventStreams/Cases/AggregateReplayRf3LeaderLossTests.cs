@@ -65,14 +65,18 @@ internal sealed class AggregateReplayRf3LeaderLossTests(ClusterFixture fixture)
             await fixture.RestartContainerAsync(stoppedNode, cancellationToken);
             restarted = true;
             if (accepted is not null)
-            { await AcceptedRestartCancellationAssertions.SameReplacementAsync(accepted, cancellationToken); }
+            {
+                await AcceptedRestartCancellationAssertions.SameReplacementAsync(accepted, cancellationToken);
+            }
             await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(stoppedNode,
                 WaitBehavior.WaitOnResourceUnavailable, cancellationToken);
             await WaitForClusterReadyAsync(nodes, administrators, cancellationToken);
             await Assert.That(Directory.Exists(Path.Combine(fixture.Root, stoppedNode))).IsTrue();
             await VerifyAllNodeParityAsync(scenario, nodes, clients, cancellationToken);
             if (interruptAcceptedRestart)
-            { await NativeRestartReadinessEvidenceAssertions.HealthyAsync(fixture, cancellationToken); }
+            {
+                await NativeRestartReadinessEvidenceAssertions.HealthyAsync(fixture, cancellationToken);
+            }
         }
         catch (Exception failure) when (ClusterReplicationTestSupport.IsNonFatalCleanupFailure(failure))
         {

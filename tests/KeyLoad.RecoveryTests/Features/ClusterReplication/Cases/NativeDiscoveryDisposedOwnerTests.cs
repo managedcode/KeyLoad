@@ -65,7 +65,9 @@ internal sealed class NativeDiscoveryDisposedOwnerTests(PeerDiscoveryNativeClust
             {
                 await begin.Task;
                 try
-                { return fixture.Sender.SignDiscovery(original.Payload.Span, nonce); }
+                {
+                    return fixture.Sender.SignDiscovery(original.Payload.Span, nonce);
+                }
                 catch (ObjectDisposedException) { return null; }
             }, PeerDiscoveryFixture.Cancellation)).ToArray();
             var close = Task.Run(async () =>

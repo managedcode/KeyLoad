@@ -64,7 +64,9 @@ internal static class DueFaultRf3IdentityWriter
         return new PrincipalRecord(DueFaultRf3Protocol.PrincipalPrefix + Guid.NewGuid().ToString("N"),
             partition.TenantId, grants,
             [DueFaultRf3Protocol.ReadGrant, DueFaultRf3Protocol.UseGrant, DueFaultRf3Protocol.WriteGrant])
-        { ClusterAdministrator = false };
+        {
+            ClusterAdministrator = false
+        };
     }
 
     private static ScopeGrant Scope(PartitionRef partition, QueueLaneRef lane, Capability capabilities)

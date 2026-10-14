@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
-using KeyLoad.Orleans;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
@@ -30,7 +30,9 @@ internal sealed class PhysicalOwnerProbeReceiver(OrleansNode node, PartitionHost
         trace.Stage = PhysicalOwnerProbeStage.StatusGuard;
         if (trace.Refused(PhysicalOwnerProbePredicate.StatusIncarnation, status.Incarnation != partition.Configuration.Incarnation)
             || trace.Refused(PhysicalOwnerProbePredicate.StatusVoters, status.Voters != PhysicalOwnerDirectoryProtocol.VoterCount) || trace.Refused(PhysicalOwnerProbePredicate.StatusRoutingReady, !status.RoutingReady))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalOwnerProbeProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalOwnerProbeProtocol.Unavailable);
+        }
         trace.Stage = PhysicalOwnerProbeStage.ReadBarrier;
         await partition.Coordinator.ReadBarrierAsync(cancellationToken).ConfigureAwait(false);
         trace.Stage = PhysicalOwnerProbeStage.CallValidation;
@@ -50,7 +52,9 @@ internal sealed class PhysicalOwnerProbeReceiver(OrleansNode node, PartitionHost
             || trace.Refused(PhysicalOwnerProbePredicate.LocalVoter, discovery.VoterId != partition.Configuration.LocalId)
             || trace.Refused(PhysicalOwnerProbePredicate.DiscoveryIncarnation, discovery.Incarnation != partition.Configuration.Incarnation)
             || trace.Refused(PhysicalOwnerProbePredicate.AppliedPosition, local.MaterializedPosition < EmptyApplied))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalOwnerProbeProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalOwnerProbeProtocol.Unavailable);
+        }
         trace.Stage = PhysicalOwnerProbeStage.CurrentAdministrator;
         partition.Database.Store.Read(view =>
         {
@@ -70,7 +74,9 @@ internal sealed class PhysicalOwnerProbeReceiver(OrleansNode node, PartitionHost
         {
             Validate(call, token);
             if (await node.MembershipReadyAsync(token).ConfigureAwait(false) is { } ready)
-            { return ready; }
+            {
+                return ready;
+            }
             await Task.Delay(partition.Configuration.HeartbeatInterval, clock, token).ConfigureAwait(false);
         }
     }
@@ -92,6 +98,8 @@ internal sealed class PhysicalOwnerProbeReceiver(OrleansNode node, PartitionHost
             || call.ExpiresAt - call.IssuedAt > routingOptions.Value.ExecutionLifetime
             || !PhysicalOwnerEntryValidation.Same(call.Control, PhysicalOwnerConfiguredTuples.Control(options, partition))
             || !PhysicalOwnerEntryValidation.Same(call.Destination, PhysicalOwnerConfiguredTuples.Local(options, partition)))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PhysicalOwnerProbeProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, PhysicalOwnerProbeProtocol.InvalidProof);
+        }
     }
 }

@@ -41,14 +41,21 @@ public sealed partial class DatabaseEngine
             throw Errors.Fail(ErrorCode.ResourceExhausted, InvalidCommandBudgetMessage);
         }
         if (operation.Kind == OperationKind.PartitionMovementPhase)
-        { RequireConfiguredMovementOwner(); }
+        {
+            RequireConfiguredMovementOwner();
+        }
         operation = NormalizeOperation(operation);
         return Store.Commit((transaction, position) =>
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var admitted = selectEmbeddedClock ? operation with { EvaluatedAt = EvaluationClock.GetUtcNow() } : operation;
+            var admitted = selectEmbeddedClock ? operation with
+            {
+                EvaluatedAt = EvaluationClock.GetUtcNow()
+            } : operation;
             if (selectEmbeddedClock)
-            { admitted = PrepareQueueRetryInView(transaction, admitted); }
+            {
+                admitted = PrepareQueueRetryInView(transaction, admitted);
+            }
             return ApplyCommittedCommand(transaction, admitted, position, replicationIndex);
         });
     }
@@ -149,7 +156,9 @@ public sealed partial class DatabaseEngine
             RemoteTransferAuthority = result.Error is null ? remoteTransferAuthority : null
         };
         if (persistOutcome)
-        { EventVectorFailedParentLocator.Write(transaction, eventVectorEligibility, actualOutcome, OperationLimitsOptions); }
+        {
+            EventVectorFailedParentLocator.Write(transaction, eventVectorEligibility, actualOutcome, OperationLimitsOptions);
+        }
         return actualOutcome;
     }
 
@@ -251,9 +260,17 @@ public sealed partial class DatabaseEngine
             transaction.Reset();
             var failure = new OperationResult(null, exception.Code, exception.Message);
             var actualFailure = outcome with
-            { Result = failure, BlobAuthority = null, CompositionAuthority = null, RemoteTransferFailureAuthority = null, RemoteTransferAuthority = null };
+            {
+                Result = failure,
+                BlobAuthority = null,
+                CompositionAuthority = null,
+                RemoteTransferFailureAuthority = null,
+                RemoteTransferAuthority = null
+            };
             if (persistOutcome)
-            { EventVectorFailedParentLocator.Write(transaction, eventVectorEligibility, actualFailure, operationLimitsOptions); }
+            {
+                EventVectorFailedParentLocator.Write(transaction, eventVectorEligibility, actualFailure, operationLimitsOptions);
+            }
             PersistCommandOutcome(transaction, operation, resultKey, actualFailure, replicationIndex, persistOutcome);
             transaction.PersistCandidates(currentIncarnation);
             transaction.ValidateCommit();

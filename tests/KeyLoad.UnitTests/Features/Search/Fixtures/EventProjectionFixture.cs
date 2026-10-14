@@ -27,14 +27,23 @@ internal sealed class EventProjectionFixture : IDisposable
     internal const string ReaderId = "projection-reader";
     internal const string WorkerId = "projection-worker";
     internal const string Secret = "private source payload";
-    internal static VectorSpace Space { get; } = new("projection-space", 2, DistanceMetric.Cosine,
+    internal static VectorSpace Space
+    {
+        get;
+    } = new("projection-space", 2, DistanceMetric.Cosine,
         "projection-model", "projection-v1");
 
-    internal EventProjectionHarness Harness { get; }
+    internal EventProjectionHarness Harness
+    {
+        get;
+    }
     internal DatabaseEngine Database => Harness.Database;
     internal PartitionRef Partition => Harness.Partition;
     internal StreamRef Stream => new(Partition, StreamSet, StreamId, 1);
-    internal string TargetCollection { get; }
+    internal string TargetCollection
+    {
+        get;
+    }
 
     internal EventProjectionFixture(string? targetClassification = SourceClass, RowAccess? sourceAccess = null,
         bool separateTarget = false, string? sourceClassification = SourceClass, RowAccess? targetAccess = null)
@@ -84,7 +93,9 @@ internal sealed class EventProjectionFixture : IDisposable
         };
         Harness.Submit(OperationKind.ConfigureResource, new ConfigureResourceRequest(Partition.TenantId,
             Partition.DatabaseId, replacement)
-        { ExpectedSchemaVersion = current.SchemaVersion }).Get<ResourceDefinition>();
+        {
+            ExpectedSchemaVersion = current.SchemaVersion
+        }).Get<ResourceDefinition>();
     }
 
     internal void ConfigureWorker(bool revoked = false, string[]? additionalStreams = null, string[]? grants = null)
@@ -186,7 +197,10 @@ internal sealed class EventProjectionHarness : IDisposable
     private const string PartitionKey = "customer-1";
     private readonly bool bootstrapped;
 
-    internal string DirectoryPath { get; }
+    internal string DirectoryPath
+    {
+        get;
+    }
     internal ZoneTreeStore Store { get; private set; } = null!;
     internal DatabaseEngine Database { get; private set; } = null!;
     internal PartitionRef Partition { get; } = new("tenant", "database", "orders", PartitionKey);
@@ -196,7 +210,9 @@ internal sealed class EventProjectionHarness : IDisposable
         DirectoryPath = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString("N"));
         Open();
         Database.Bootstrap(new(RootId, SystemTenant, [new(Wildcard, Wildcard, Capability.All)], [Wildcard])
-        { ClusterAdministrator = true }, DatabaseEngine.Credential(RootId, RootId, RootCredential));
+        {
+            ClusterAdministrator = true
+        }, DatabaseEngine.Credential(RootId, RootId, RootCredential));
         PhysicalShardTestBootstrap.Bootstrap(Database, RootId);
         bootstrapped = true;
     }

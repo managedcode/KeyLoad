@@ -29,7 +29,10 @@ internal static class StreamRecordGapAuthorityFlow
             await EventAppendSequenceAuthorityAssertions.ReplayAsync(fixture.Database.Database, fixture.Database.Store, seed, seedResult, fixture.Now);
         }, failures);
         ServerFailureObserver.Observe(() => fixture.Database.Store.Commit((tx, _) =>
-        { tx.Put(key, original); return true; }), failures);
+        {
+            tx.Put(key, original);
+            return true;
+        }), failures);
         ServerFailureObserver.ThrowIfAny(failures);
         await Assert.That(fixture.Database.Store.Read(view => view.ReadOwnedValue(key)))
             .IsEquivalentTo(original, TUnit.Assertions.Enums.CollectionOrdering.Matching);

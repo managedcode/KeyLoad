@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.DocumentStorage;
 using Microsoft.Extensions.Options;
 
@@ -38,9 +38,13 @@ internal static class EventVectorRefreshParent
         finally
         {
             if (prepared is not null)
-            { ServerFailureObserver.Observe(prepared.Dispose, failures); }
+            {
+                ServerFailureObserver.Observe(prepared.Dispose, failures);
+            }
             if (fresh is not null)
-            { ServerFailureObserver.Observe(fresh.Dispose, failures); }
+            {
+                ServerFailureObserver.Observe(fresh.Dispose, failures);
+            }
         }
         ServerFailureObserver.ThrowIfAny(failures);
         return result ?? throw Errors.Fail(ErrorCode.UnknownWriteOutcome, EventVectorRemoteProtocol.Unavailable);

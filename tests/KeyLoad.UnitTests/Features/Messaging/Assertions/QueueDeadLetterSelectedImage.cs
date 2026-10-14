@@ -20,7 +20,9 @@ internal static class QueueDeadLetterSelectedImage
             var terminal = settled && id == state.Target;
             var expected = QueueDeadLetterSelectedSetup.Parked(id, sequence);
             if (terminal)
-            { expected = Terminal(expected, state.Kind); }
+            {
+                expected = Terminal(expected, state.Kind);
+            }
             await MessageAsync(database, store, state.Lane, expected, terminal ? null : body);
         }
         var retained = state.Target == QueueDeadLetterSelectedProtocol.Original ? state.SecondBody : state.FirstBody;
@@ -84,7 +86,9 @@ internal static class QueueDeadLetterSelectedImage
     {
         foreach (var space in new[] { QueueDeadLetterSelectedProtocol.Ready, QueueDeadLetterSelectedProtocol.Scheduled,
             QueueDeadLetterSelectedProtocol.Lease, QueueDeadLetterSelectedProtocol.Pending })
-        { await PageAsync(store, state.Lane, space, []); }
+        {
+            await PageAsync(store, state.Lane, space, []);
+        }
         var dead = new List<string>();
         var parked = new List<string>();
         foreach (var (id, sequence) in new[]
@@ -94,7 +98,9 @@ internal static class QueueDeadLetterSelectedImage
         })
         {
             if (settled && id == state.Target)
-            { continue; }
+            {
+                continue;
+            }
             dead.Add(Row(QueueDeadLetterSelectedSetup.Key(state.Lane, QueueDeadLetterSelectedProtocol.DeadLetter, id), id));
             parked.Add(Row(QueueDeadLetterSelectedSetup.Key(state.Lane, QueueDeadLetterSelectedProtocol.Parked, sequence, id),
                 new QueueDeadLetterReference(id, sequence, QueueDeadLetterSelectedProtocol.One, QueueDeadLetterSelectedProtocol.Exhausted)));

@@ -12,8 +12,8 @@ internal static class SampleChunkPartialRetentionFlow
             using var fixture = new SampleChunkPartialRetentionFixture();
             await KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => RunOwnedAsync(fixture), failures);
         }
-        catch (Exception failure) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
-        catch (Exception failure) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
+        catch (Exception failure) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
+        catch (Exception failure) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
         KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }
 
@@ -63,7 +63,9 @@ internal static class SampleChunkPartialRetentionFlow
         await SampleChunkPartialRetentionAssertions.Healthy(fixture, merged: true);
         var changed = SampleChunkCanonicalFixture.Initial[SampleChunkCanonicalFixture.FirstIndex]
             with
-        { Value = SampleChunkPartialRetentionFixture.FreshValue };
+        {
+            Value = SampleChunkPartialRetentionFixture.FreshValue
+        };
         var failure = fixture.Apply(fixture.Operation(new AppendSamples(SampleChunkCanonicalFixture.Set,
             SampleChunkCanonicalFixture.Series, [changed], SampleChunkCanonicalFixture.Tags)));
         await Assert.That(failure.Error).IsEqualTo(ErrorCode.Conflict);

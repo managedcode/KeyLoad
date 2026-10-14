@@ -23,7 +23,9 @@ public sealed partial class DatabaseEngine
             || input.Requests.Length != input.OriginalPins.Length || input.Requests.Length > Limits.MaxResults
             || input.Requests.Any(static request => request is null || request.Source is null)
             || input.Requests.Select(static request => request.Source).Distinct().Count() != input.Requests.Length)
-        { throw Errors.Fail(ErrorCode.Validation, InvalidEventVectorPinnedRead); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, InvalidEventVectorPinnedRead);
+        }
         var admission = new EventVectorAdmissionPolicy(OperationLimitsOptions);
         admission.RequireEncodedBytes(NativeSerialization.Measure(input));
         return Store.Read(view =>
@@ -62,7 +64,9 @@ public sealed partial class DatabaseEngine
                 || mutation.LogicalPlacementRevision != placement.Revision
                 || mutation.DirectoryFence != placement.DirectoryRevision
                 || SourceResource(bounded, request.Source).SchemaVersion != mutation.SourceSchemaVersion)
-            { throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidEventVectorPinnedRead); }
+            {
+                throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidEventVectorPinnedRead);
+            }
             _ = EventVectorStoredSourceHead(bounded, request.Source);
         }
     }

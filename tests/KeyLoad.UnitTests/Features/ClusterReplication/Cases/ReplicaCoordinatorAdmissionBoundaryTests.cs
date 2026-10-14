@@ -15,7 +15,9 @@ internal sealed class ReplicaCoordinatorAdmissionBoundaryTests
     {
         await using var fixture = new ReplicaLifecycleFixture();
         fixture.Database.Bootstrap(new(Principal, "system", [new("*", "*", Capability.All)], ["*"])
-        { ClusterAdministrator = true }, DatabaseEngine.Credential(Principal, Principal, Credential));
+        {
+            ClusterAdministrator = true
+        }, DatabaseEngine.Credential(Principal, Principal, Credential));
         var governor = new CommandAdmissionGovernor(UnitAdmissionOptions.Command());
         await using var coordinator = new ClusterCoordinator(fixture.Consensus, fixture.Database, governor,
             TimeProvider.System, ReplicaExecutionTestOptions.Execution(), UnitAdmissionOptions.Inbox());

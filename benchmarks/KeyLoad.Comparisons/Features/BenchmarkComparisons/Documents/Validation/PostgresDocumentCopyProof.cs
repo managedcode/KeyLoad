@@ -26,6 +26,12 @@ internal static class PostgresDocumentCopyProof
 
         var observations = current.Observations.Select(value => value.Replace(InitialCorpusLabel, FinalCorpusLabel, StringComparison.Ordinal))
             .Append(string.Format(System.Globalization.CultureInfo.InvariantCulture, FinalStateObservationFormat, schedule.Final, DocumentComparisonOracle.Digest(schedule.FinalDocuments()))).ToImmutableArray();
-        return observed with { Cluster = current with { Observations = observations } };
+        return observed with
+        {
+            Cluster = current with
+            {
+                Observations = observations
+            }
+        };
     }
 }

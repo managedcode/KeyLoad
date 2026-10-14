@@ -32,10 +32,16 @@ public sealed record QueryExecutionOptions
     private static readonly TimeSpan MaximumCursorLifetime = TimeSpan.FromDays(MaximumCursorLifetimeDays);
 
     /// <summary>Explicitly enables the qualified provisioned vector-only native ANN read surface.</summary>
-    public bool EnableApproximateSearch { get; init; }
+    public bool EnableApproximateSearch
+    {
+        get; init;
+    }
 
     /// <summary>Gets an additional complete query/read result byte ceiling; null retains the native batch ceiling.</summary>
-    public int? MaximumResultBytes { get; init; }
+    public int? MaximumResultBytes
+    {
+        get; init;
+    }
 
     /// <summary>Gets the maximum age of a newly issued authorized query continuation.</summary>
     public TimeSpan CursorLifetime { get; init; } = TimeSpan.FromMinutes(DefaultCursorLifetimeMinutes);

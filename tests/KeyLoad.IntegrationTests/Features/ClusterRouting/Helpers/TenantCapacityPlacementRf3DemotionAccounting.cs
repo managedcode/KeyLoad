@@ -33,7 +33,9 @@ internal static class TenantCapacityPlacementRf3DemotionAccounting
         var bytes = Count(copies.First().Rows, seed.Partition);
         await Assert.That(bytes).IsGreaterThan(EmptyBytes);
         foreach (var copy in copies)
-        { await Assert.That(Count(copy.Rows, seed.Partition)).IsEqualTo(bytes); }
+        {
+            await Assert.That(Count(copy.Rows, seed.Partition)).IsEqualTo(bytes);
+        }
         await TenantCapacityPlacementRf3Cold.ReopenAsync(wave, seed, token);
         return (current, bytes);
     }
@@ -46,10 +48,14 @@ internal static class TenantCapacityPlacementRf3DemotionAccounting
         {
             var fields = row.Split(RowSeparator);
             if (fields.Length != RowFieldCount)
-            { throw new InvalidDataException(TwoRf3MembershipProtocol.MissingState); }
+            {
+                throw new InvalidDataException(TwoRf3MembershipProtocol.MissingState);
+            }
             var key = Convert.FromHexString(fields[KeyField]);
             if (prefixes.Any(prefix => key.AsSpan().StartsWith(prefix)))
-            { total = checked(total + key.Length + Convert.FromHexString(fields[ValueField]).Length); }
+            {
+                total = checked(total + key.Length + Convert.FromHexString(fields[ValueField]).Length);
+            }
         }
         return total;
     }

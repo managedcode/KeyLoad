@@ -21,7 +21,9 @@ internal static class NativeBlobWholeRows
                 return true;
             }, observer: budget.Charge, cancellationToken: token);
             if (scan.HasMore || scan.StoppedByVisitor)
-            { throw new InvalidOperationException("The complete original Blob native cut exceeds its record budget."); }
+            {
+                throw new InvalidOperationException("The complete original Blob native cut exceeds its record budget.");
+            }
             return (store.Position, rows.ToArray());
         });
     }

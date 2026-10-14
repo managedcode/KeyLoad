@@ -35,7 +35,9 @@ internal sealed class DocumentOwnedSession(IComparisonSession session, Guid clie
     private async Task DisposeClientAsync()
     {
         try
-        { await disposeClient().ConfigureAwait(false); }
+        {
+            await disposeClient().ConfigureAwait(false);
+        }
         finally { nativeClient?.Dispose(); }
     }
 }

@@ -30,7 +30,9 @@ internal static class NativeTextIncrementalValidation
             || manifest.HashVersion != TextProjectionProtocol.HashVersion
             || !NativeTextIncrementalDigest.IsCanonical(manifest.ResourceSha256) || manifest.Files is null
             || manifest.Files.Length == EmptyFiles || manifest.Files.Length > executionOptions.Value.MaximumFiles)
-        { throw NativeTextErrors.Corrupt(); }
+        {
+            throw NativeTextErrors.Corrupt();
+        }
         NativeTextValidation.ValidateScope(scope, scope.NodeId);
         SettledRequest(manifest.LastSettledCheckpointRequest, consumer, budget);
         Records(manifest.Records, manifest.NextRecord, scope, maximumRecords, budget);
@@ -43,7 +45,9 @@ internal static class NativeTextIncrementalValidation
     {
         if (records is null || records.Length > maximumRecords
             || nextRecord < NativeTextIncrementalProtocol.InitialRecord)
-        { throw NativeTextErrors.Corrupt(); }
+        {
+            throw NativeTextErrors.Corrupt();
+        }
         var references = new HashSet<EntityRef>();
         var previousId = EmptyRecordId;
         foreach (var record in records)
@@ -53,7 +57,9 @@ internal static class NativeTextIncrementalValidation
                 || record.Reference is null || record.Reference.Partition != scope.Partition || record.Reference.Collection != scope.Collection
                 || record.Revision <= InitialRevisionBoundary || !references.Add(record.Reference)
                 || record.CanonicalSha256 is null || record.CanonicalSha256.Length != SHA256.HashSizeInBytes)
-            { throw NativeTextErrors.Corrupt(); }
+            {
+                throw NativeTextErrors.Corrupt();
+            }
             JsonData.Identifier(record.Reference.Id);
             previousId = record.Id;
         }
@@ -64,12 +70,16 @@ internal static class NativeTextIncrementalValidation
         ProjectionConsumerRef consumer, ReadExecutionBudget budget)
     {
         if (original is null)
-        { return; }
+        {
+            return;
+        }
         budget.Check();
         budget.ChargeBytes(NativeSerialization.Measure(original));
         if (original.CommandId == Guid.Empty || original.Consumer != consumer
             || string.IsNullOrEmpty(original.Token) || original.Effects.IsDefault || !original.Effects.IsEmpty)
-        { throw NativeTextErrors.Corrupt(); }
+        {
+            throw NativeTextErrors.Corrupt();
+        }
         budget.Check();
     }
 

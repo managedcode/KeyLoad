@@ -10,13 +10,17 @@ internal static class NativeDiscoveryOmissionOptionsReader
         var section = configuration.GetSection(NativeDiscoveryOmissionProtocol.Section);
         var fields = section.GetChildren().Take(NativeDiscoveryOmissionProtocol.SettingsCount + NativeDiscoveryOmissionProtocol.ExcessEntry).ToArray();
         if (section.Value is null && fields.Length == NativeDiscoveryOmissionProtocol.EmptyCount)
-        { return NativeDiscoveryOmissionOptions.Disabled; }
+        {
+            return NativeDiscoveryOmissionOptions.Disabled;
+        }
         if (section.Value is not null || fields.Length > NativeDiscoveryOmissionProtocol.SettingsCount
             || fields.Any(field => field.Key is not (NativeDiscoveryOmissionProtocol.Enabled
                 or NativeDiscoveryOmissionProtocol.Root or NativeDiscoveryOmissionProtocol.SessionId)
                 || field.Value is null || field.GetChildren().Take(NativeDiscoveryOmissionProtocol.ExcessEntry).Any())
             || !bool.TryParse(section[NativeDiscoveryOmissionProtocol.Enabled], out var enabled))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         var result = new NativeDiscoveryOmissionOptions(enabled, section[NativeDiscoveryOmissionProtocol.Root],
             section[NativeDiscoveryOmissionProtocol.SessionId] ?? string.Empty);
         Validate(result, node);
@@ -28,7 +32,9 @@ internal static class NativeDiscoveryOmissionOptionsReader
         if (!options.Enabled)
         {
             if (options.Root is not null || options.SessionId.Length != NativeDiscoveryOmissionProtocol.EmptyCount)
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             return;
         }
         if (options.Root != NativeDiscoveryOmissionProtocol.FixedRoot
@@ -36,7 +42,9 @@ internal static class NativeDiscoveryOmissionOptionsReader
             || !node.RequestCqrsProbe.Enabled || !node.AllowPrivateNetworkHttp
             || !node.PhysicalGroupTrust.RemoteDocumentReads || !node.PhysicalGroupTrust.RemotePartitionQueries
             || node.PhysicalGroupTrust.Role != global::KeyLoad.Server.Features.ClusterRouting.PhysicalGroupTrustRole.Control)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
     }
     private static InvalidOperationException Invalid() => new(NativeDiscoveryOmissionProtocol.Invalid);
 }

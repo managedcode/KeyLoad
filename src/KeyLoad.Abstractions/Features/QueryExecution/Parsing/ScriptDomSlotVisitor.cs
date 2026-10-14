@@ -12,19 +12,25 @@ internal sealed class ScriptDomSlotVisitor(ScriptDomCheckedTokens bounds, int? p
         cancellationToken.ThrowIfCancellationRequested();
         checkBudget();
         if (++nodes > bounds.MaximumNodes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, ScriptDomErrors.NodesDetail); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, ScriptDomErrors.NodesDetail);
+        }
     }
     public override void ExplicitVisit(Dom.MoneyLiteral literal)
     {
         Visit((Dom.TSqlFragment)literal);
         if (positionalCount is { } count && !ScriptDomNativeSlots.TryGet(literal, count, out _))
-        { throw ScriptDomErrors.Invalid(); }
+        {
+            throw ScriptDomErrors.Invalid();
+        }
     }
     public override void ExplicitVisit(Dom.VariableReference variable)
     {
         Visit((Dom.TSqlFragment)variable);
         if (positionalCount.HasValue)
-        { throw ScriptDomErrors.Invalid(); }
+        {
+            throw ScriptDomErrors.Invalid();
+        }
     }
     public override void ExplicitVisit(Dom.BooleanBinaryExpression fragment) => Nested(() => base.ExplicitVisit(fragment));
     public override void ExplicitVisit(Dom.BooleanNotExpression fragment) => Nested(() => base.ExplicitVisit(fragment));
@@ -39,9 +45,13 @@ internal sealed class ScriptDomSlotVisitor(ScriptDomCheckedTokens bounds, int? p
         cancellationToken.ThrowIfCancellationRequested();
         checkBudget();
         if (++depth > bounds.MaximumDepth)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, ScriptDomErrors.DepthDetail); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, ScriptDomErrors.DepthDetail);
+        }
         try
-        { visit(); }
+        {
+            visit();
+        }
         finally { depth--; }
     }
 }

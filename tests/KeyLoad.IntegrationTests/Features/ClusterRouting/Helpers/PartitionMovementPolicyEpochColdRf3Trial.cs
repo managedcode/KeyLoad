@@ -18,9 +18,13 @@ internal static class PartitionMovementPolicyEpochColdRf3Trial
             await ExecuteAsync(wave, seed, caller.Token).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
         if (seed is { } clients)
-        { await ServerFailureObserver.ObserveAsync(() => clients.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => clients.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         if (wave is { } resources)
-        { await ServerFailureObserver.ObserveAsync(() => resources.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => resources.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
@@ -81,7 +85,10 @@ internal static class PartitionMovementPolicyEpochColdRf3Trial
         foreach (var mode in new[] { PartitionMoveMode.Resume, PartitionMoveMode.Abort })
         {
             await PartitionMovementPublicCallerReplay.RequireDeniedSubjectAsync(seed.Source, seed.Official,
-                seed.FirstRequest with { Mode = mode }, cancellationToken).ConfigureAwait(false);
+                seed.FirstRequest with
+                {
+                    Mode = mode
+                }, cancellationToken).ConfigureAwait(false);
         }
         await PartitionMovementBlobPolicyEpochRf3Replays.RequireDeniedAsync(seed, cancellationToken).ConfigureAwait(false);
         await PartitionMovementControlledBlobLifecycleRf3Assertions.RequireCallsAsync(seed, lifecycle, ErrorCode.PermissionDenied, cancellationToken).ConfigureAwait(false);

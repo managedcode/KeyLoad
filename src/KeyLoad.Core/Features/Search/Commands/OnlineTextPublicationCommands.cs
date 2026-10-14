@@ -14,7 +14,9 @@ public sealed partial class DatabaseEngine
         var key = OnlineTextPublicationKeys.Current(command.Request);
         var previous = transaction.GetRecord<OnlineTextCurrentPublication>(key);
         if (previous?.CommandId != command.ExpectedCurrentCommandId)
-        { throw Errors.Fail(ErrorCode.Conflict, OnlineTextPublicationProtocol.InvalidPublication); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, OnlineTextPublicationProtocol.InvalidPublication);
+        }
         var authority = OnlineTextPublicationValidation.Authority(principal.Id, command);
         transaction.PutRecord(key, new OnlineTextCurrentPublication(OnlineTextPublicationProtocol.CurrentFormat,
             principal.Id, command.Request.CommandId, authority.ParentFingerprint, command.Request.Consumer,

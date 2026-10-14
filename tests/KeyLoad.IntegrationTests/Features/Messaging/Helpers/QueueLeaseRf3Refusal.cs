@@ -19,7 +19,10 @@ internal static class QueueLeaseRf3Refusal
             {
                 var command = new DeliveryCommand(Guid.NewGuid(), seed.Lane, delivery.Token, action);
                 await QueueLeaseRf3Assertions.DeniedAsync(await foreign.CompleteAsync(command, token), ErrorCode.TokenInvalidated);
-                var other = command with { CommandId = Guid.NewGuid() };
+                var other = command with
+                {
+                    CommandId = Guid.NewGuid()
+                };
                 await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.MessagesComplete, other, token),
                     ErrorCode.TokenInvalidated, dispatched: true);
                 await QueueLeaseRf3Assertions.EqualAsync(await QueueLeaseRf3Assertions.InspectAsync(owner, seed.Lane, token), unchanged);
@@ -34,7 +37,10 @@ internal static class QueueLeaseRf3Refusal
         {
             var command = new DeliveryCommand(Guid.NewGuid(), original.Seed.Lane, original.Delivery.Token, action);
             await QueueLeaseRf3Assertions.DeniedAsync(await sdk.CompleteAsync(command, token), ErrorCode.StaleLease);
-            var other = command with { CommandId = Guid.NewGuid() };
+            var other = command with
+            {
+                CommandId = Guid.NewGuid()
+            };
             await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.MessagesComplete, other, token),
                 ErrorCode.StaleLease, dispatched: true);
             await QueueLeaseRf3Assertions.EqualAsync(await QueueLeaseRf3Assertions.InspectAsync(sdk, original.Seed.Lane, token), unchanged);

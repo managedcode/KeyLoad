@@ -10,7 +10,9 @@ internal static class IsolatedNativeOriginalTaskSettlement
         var initiation = StartAsync(start);
         Task original;
         try
-        { original = await initiation; }
+        {
+            original = await initiation;
+        }
         catch (Exception failure) when (initiation.IsFaulted || initiation.IsCanceled)
         {
             Record(initiation, failure, stage, failures);
@@ -54,7 +56,9 @@ internal static class IsolatedNativeOriginalTaskSettlement
         IsolatedNativeTeardownFailures failures)
     {
         try
-        { await original; }
+        {
+            await original;
+        }
         catch (Exception failure) when (original.IsFaulted || original.IsCanceled)
         {
             Record(original, failure, stage, failures);
@@ -68,7 +72,9 @@ internal static class IsolatedNativeOriginalTaskSettlement
         if (original.Exception is { } aggregate)
         {
             foreach (var failure in aggregate.InnerExceptions)
-            { failures.Record(stage, failure); }
+            {
+                failures.Record(stage, failure);
+            }
         }
     }
 }

@@ -17,7 +17,11 @@ internal static class TenantCapacityPlacementRf3FailureDomainsAuthority
             await seed.Source.ConfigurePlacementPolicyAsync(id, request, token)));
         await SqlRf3Protocol.EqualAsync(policy, (await McpCallerAssertions.SuccessAsync<TenantPlacementPolicyV1>(
             await seed.Official.CallAsync(TenantPlacementPublicProtocol.ConfigureTool,
-                new { commandId = id, request }, token))).Value);
+                new
+                {
+                    commandId = id,
+                    request
+                }, token))).Value);
         return new(id, request);
     }
 
@@ -29,7 +33,11 @@ internal static class TenantCapacityPlacementRf3FailureDomainsAuthority
         await SqlRf3Protocol.EqualAsync(original.Request.Policy,
             (await McpCallerAssertions.SuccessAsync<TenantPlacementPolicyV1>(
                 await seed.Official.CallAsync(TenantPlacementPublicProtocol.ConfigureTool,
-                    new { commandId = original.Id, request = original.Request }, token))).Value);
+                    new
+                    {
+                        commandId = original.Id,
+                        request = original.Request
+                    }, token))).Value);
     }
 
     internal static async Task PersistReplayAsync(PartitionMovementPublicParentRf3Seed seed,
@@ -39,7 +47,11 @@ internal static class TenantCapacityPlacementRf3FailureDomainsAuthority
             await seed.Source.PersistPlacementIntentAsync(id, request, token)));
         await SqlRf3Protocol.EqualAsync(pending, (await McpCallerAssertions.SuccessAsync<PlacementIntentV1>(
             await seed.Official.CallAsync(TenantPlacementPublicProtocol.PersistTool,
-                new { commandId = id, request }, token))).Value);
+                new
+                {
+                    commandId = id,
+                    request
+                }, token))).Value);
     }
 
     internal static async Task<TenantPlacementPlanResultV1> PlanAsync(PartitionMovementPublicParentRf3Seed seed,
@@ -48,7 +60,10 @@ internal static class TenantCapacityPlacementRf3FailureDomainsAuthority
         var query = new TenantPlacementPlanRequest(seed.Partition.TenantId,
             seed.Partition.DatabaseId, [seed.Partition], state.Control);
         var official = (await McpCallerAssertions.SuccessAsync<TenantPlacementPlanResultV1>(
-            await seed.Official.CallAsync(TenantPlacementPublicProtocol.PlanTool, new { request = query }, token))).Value;
+            await seed.Official.CallAsync(TenantPlacementPublicProtocol.PlanTool, new
+            {
+                request = query
+            }, token))).Value;
         var sdk = await McpCallerAssertions.SdkSuccessAsync(await seed.Source.PlanTenantPlacementAsync(query, token));
         foreach (var current in new[] { official, sdk })
         {

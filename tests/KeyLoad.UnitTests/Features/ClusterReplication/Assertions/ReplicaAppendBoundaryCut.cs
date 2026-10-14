@@ -13,7 +13,9 @@ internal sealed record ReplicaAppendBoundaryCut(long CanonicalPosition, long Rep
     {
         var page = view.Scan([], MaximumFixtureRows, null);
         if (page.HasMore)
-        { throw new InvalidOperationException("The complete native log fixture cut exceeded its bounded inventory."); }
+        {
+            throw new InvalidOperationException("The complete native log fixture cut exceeded its bounded inventory.");
+        }
         return NativeSerialization.Serialize(page);
     });
 

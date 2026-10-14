@@ -30,9 +30,13 @@ internal static class NativeSixSiloMembershipReadinessAssertions
         await caller.CancelAsync().ConfigureAwait(false);
         OperationCanceledException? observed = null;
         try
-        { read(caller.Token); }
+        {
+            read(caller.Token);
+        }
         catch (OperationCanceledException error)
-        { observed = error; }
+        {
+            observed = error;
+        }
         await Assert.That(observed is not null).IsTrue();
         await Assert.That(observed!.CancellationToken).IsEqualTo(caller.Token);
     }

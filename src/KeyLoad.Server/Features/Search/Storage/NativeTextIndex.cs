@@ -35,7 +35,12 @@ internal static class NativeTextIndex
     }
 
     internal static CompositeKeyOfTokenRecordPrevious<ulong, ulong> LowerBound(ulong token)
-        => new() { Token = token, Record = LowerBoundRecordEmptyCount, PreviousToken = LowerBoundPreviousTokenEmptyCount };
+        => new()
+        {
+            Token = token,
+            Record = LowerBoundRecordEmptyCount,
+            PreviousToken = LowerBoundPreviousTokenEmptyCount
+        };
 
     internal static void ValidatePath(string directory)
     {

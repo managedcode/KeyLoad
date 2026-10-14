@@ -52,7 +52,9 @@ internal static class McpDiscoveryAssertions
         await Assert.That(schema.GetProperty(McpDiscoveryProtocol.Properties).EnumerateObject().Select(property => property.Name)
             .ToHashSet(StringComparer.Ordinal).SetEquals(outer)).IsTrue();
         if (expected.Body == McpExpectedBody.None)
-        { return; }
+        {
+            return;
+        }
         var body = schema.GetProperty(McpDiscoveryProtocol.Definitions).GetProperty(McpCallerProtocol.Request);
         if (expected.Body == McpExpectedBody.Boolean)
         {

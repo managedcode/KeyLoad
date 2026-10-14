@@ -14,13 +14,19 @@ internal static class NativeTextIncrementalMetadata
         var current = Path.Combine(generationPath, NativeTextIncrementalProtocol.IntentFile);
         var pending = Path.Combine(generationPath, NativeTextIncrementalProtocol.PendingIntentFile);
         if (File.Exists(current) || File.Exists(pending))
-        { throw NativeTextErrors.Ownership(); }
+        {
+            throw NativeTextErrors.Ownership();
+        }
         budget.ChargeBytes(NativeSerialization.Measure(intent));
         NativeTextFileIO.WriteEnvelope(pending, intent, maximumBytes, executionOptions, resources);
         if (resources is null)
-        { File.Move(pending, current); }
+        {
+            File.Move(pending, current);
+        }
         else
-        { resources.MutatePhysical(() => File.Move(pending, current), budget); }
+        {
+            resources.MutatePhysical(() => File.Move(pending, current), budget);
+        }
         budget.Check();
     }
 
@@ -45,15 +51,23 @@ internal static class NativeTextIncrementalMetadata
         var current = Path.Combine(generationPath, NativeTextIncrementalProtocol.ManifestFile);
         var pending = Path.Combine(generationPath, NativeTextIncrementalProtocol.PendingManifestFile);
         if (File.Exists(pending))
-        { throw NativeTextErrors.Ownership(); }
+        {
+            throw NativeTextErrors.Ownership();
+        }
         if (File.Exists(current))
-        { NativeTextFileIO.VerifyRegularFile(current); }
+        {
+            NativeTextFileIO.VerifyRegularFile(current);
+        }
         budget.ChargeBytes(NativeSerialization.Measure(manifest));
         NativeTextFileIO.WriteEnvelope(pending, manifest, maximumBytes, executionOptions, resources);
         if (resources is null)
-        { File.Move(pending, current, overwrite: true); }
+        {
+            File.Move(pending, current, overwrite: true);
+        }
         else
-        { resources.MutatePhysical(() => File.Move(pending, current, overwrite: true), budget); }
+        {
+            resources.MutatePhysical(() => File.Move(pending, current, overwrite: true), budget);
+        }
         budget.Check();
     }
 

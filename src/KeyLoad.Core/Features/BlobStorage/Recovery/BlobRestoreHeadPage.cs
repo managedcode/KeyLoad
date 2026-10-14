@@ -24,10 +24,18 @@ internal sealed class BlobRestoreHeadPage(DatabaseEngine database, BlobRestoreMa
             ValidateCurrent(head.Metadata, state);
         }
         if (verify)
-        { return marker; }
+        {
+            return marker;
+        }
         accounting.Add(tx, blob, BytesEmptyCount, KeysSingleItemCount, VersionsEmptyCount, UploadsEmptyCount);
-        BlobMetadataRules.Put(tx, record.Key.ToArray(), head with { Incarnation = marker.TargetIncarnation });
-        return marker with { ObjectKeys = checked(marker.ObjectKeys + ObjectKeysStep) };
+        BlobMetadataRules.Put(tx, record.Key.ToArray(), head with
+        {
+            Incarnation = marker.TargetIncarnation
+        });
+        return marker with
+        {
+            ObjectKeys = checked(marker.ObjectKeys + ObjectKeysStep)
+        };
     }
 
     private static void ValidateCurrent(BlobMetadata metadata, BlobState state)
@@ -39,6 +47,8 @@ internal sealed class BlobRestoreHeadPage(DatabaseEngine database, BlobRestoreMa
             || state.DeclaredLength != metadata.Length || state.NextOrdinal != metadata.PartCount
             || state.IntegrityHash != metadata.IntegrityHash || state.Access != metadata.Access
             || state.ExpectedRevision != metadata.Revision - RevisionStep)
-        { throw BlobErrors.Corruption(); }
+        {
+            throw BlobErrors.Corruption();
+        }
     }
 }

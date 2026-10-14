@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 using KeyLoad.UnitTests.Features.QueryExecution;
 using TUnit.Assertions.Enums;
@@ -31,13 +31,16 @@ internal sealed class NativeAnnObservedWorkBudgetTests
                 built = await VerifyFailureAndHealthyAsync(database, actual, request, clock, cancel);
             }, failures);
         }
-        catch (Exception cleanup) when (KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
-        catch (Exception cleanup) when (!KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
+        catch (Exception cleanup) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
+        catch (Exception cleanup) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
         ServerFailureObserver.ThrowIfAny(failures);
         if (!cancel)
         {
             await RestoreHealthyWithFreshParentAsync(database, request with
-            { CommandId = Guid.NewGuid(), Mode = AnnMaintenanceMode.Restore }, clock,
+            {
+                CommandId = Guid.NewGuid(),
+                Mode = AnnMaintenanceMode.Restore
+            }, clock,
                 built ?? throw new InvalidOperationException("The original native ANN generation was not retained."));
         }
     }
@@ -92,7 +95,9 @@ internal sealed class NativeAnnObservedWorkBudgetTests
                 var began = await NativeAnnMaintenancePhaseAssertions.UnchangedPhaseAsync(database, runtime,
                     request, AnnMaintenanceCapabilityKind.Begin);
                 if (began.OriginalCheckpointIntent is { } intent)
-                { _ = await NativeAnnMaintenancePhaseAssertions.CommitReplayAsync(database, intent); }
+                {
+                    _ = await NativeAnnMaintenancePhaseAssertions.CommitReplayAsync(database, intent);
+                }
                 _ = await NativeAnnMaintenancePhaseAssertions.UnchangedPhaseAsync(database, runtime, request, AnnMaintenanceCapabilityKind.Load);
                 _ = await NativeAnnMaintenancePhaseAssertions.UnchangedPhaseAsync(database, runtime, request, AnnMaintenanceCapabilityKind.Verify);
                 var healthy = await NativeAnnMaintenancePhaseAssertions.UnchangedPhaseAsync(database, runtime, request, AnnMaintenanceCapabilityKind.Publish);

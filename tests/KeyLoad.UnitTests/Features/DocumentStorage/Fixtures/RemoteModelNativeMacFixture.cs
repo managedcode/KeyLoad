@@ -7,13 +7,21 @@ namespace KeyLoad.UnitTests.Features.DocumentStorage;
 internal sealed class RemoteModelNativeMacFixture : IDisposable
 {
     internal byte[] Credential { get; } = RandomNumberGenerator.GetBytes(RemoteDocumentProtocol.SecretBytes);
-    internal RemoteDocumentMac Mac { get; }
+    internal RemoteDocumentMac Mac
+    {
+        get;
+    }
     internal RemoteModelNativeMacFixture()
     {
         try
-        { Mac = new(Credential); }
+        {
+            Mac = new(Credential);
+        }
         catch (Exception)
-        { CryptographicOperations.ZeroMemory(Credential); throw; }
+        {
+            CryptographicOperations.ZeroMemory(Credential);
+            throw;
+        }
     }
 
     internal RemoteModelNativeRequest Request()
@@ -43,15 +51,17 @@ internal sealed class RemoteModelNativeMacFixture : IDisposable
             using var fixture = new RemoteModelNativeMacFixture();
             await ServerFailureObserver.ObserveAsync(() => scenario(fixture), failures);
         }
-        catch (Exception failure) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
-        catch (Exception failure) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
+        catch (Exception failure) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
+        catch (Exception failure) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
     public void Dispose()
     {
         try
-        { Mac.Dispose(); }
+        {
+            Mac.Dispose();
+        }
         finally { CryptographicOperations.ZeroMemory(Credential); }
     }
 }

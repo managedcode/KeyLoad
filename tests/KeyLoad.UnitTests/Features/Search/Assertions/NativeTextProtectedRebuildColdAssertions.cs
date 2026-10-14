@@ -42,9 +42,13 @@ internal static class NativeTextProtectedRebuildColdAssertions
                 Request(owner, "оновлено"), token);
         }
         catch (KeyLoadException error)
-        { refusal = error; }
+        {
+            refusal = error;
+        }
         if (refusal is null)
-        { throw new InvalidOperationException("The genuine protected query did not refuse."); }
+        {
+            throw new InvalidOperationException("The genuine protected query did not refuse.");
+        }
         await Assert.That(refusal.Code).IsEqualTo(ErrorCode.PermissionDenied);
         await UnchangedAsync(owner, before, cut);
     }

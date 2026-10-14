@@ -63,7 +63,9 @@ internal static class PartitionMovementFinalOutcomeCapacityRf3Stages
         var frames = await PartitionMovementFinalInstallFrameRf3Trial.ReadFinalFramesAsync(wave, seed, precut,
             failed, checked(exact - PartitionMovementFinalOutcomeCapacityRf3Boundary.OneByte), cancellationToken);
         foreach (var frame in frames)
-        { await Assert.That(frame.EncodedFrameLimitRejected).IsTrue(); }
+        {
+            await Assert.That(frame.EncodedFrameLimitRejected).IsTrue();
+        }
         foreach (var cut in failed)
         {
             if (cut.Header is not null)

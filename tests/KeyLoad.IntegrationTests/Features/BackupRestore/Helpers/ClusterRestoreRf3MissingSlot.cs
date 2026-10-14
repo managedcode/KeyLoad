@@ -16,7 +16,9 @@ internal static class ClusterRestoreRf3MissingSlot
         var retained = Path.Combine(ClusterRestoreRf3RetainedCut.OperationRoot(target), RetainedDirectory);
         if (!Directory.Exists(original) || Directory.Exists(retained) || File.Exists(retained)
             || (File.GetAttributes(original) & FileAttributes.ReparsePoint) != default)
-        { throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid); }
+        {
+            throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid);
+        }
         NodeEpochRf3OfflineFiles.AssertExclusive(Path.Combine(original, NativeOwner));
         NodeEpochRf3OfflineFiles.AssertExclusive(Path.Combine(original, ClusterRestoreRf3ResumeProtocol.SlotOwner));
         var failures = new List<Exception>();
@@ -33,7 +35,9 @@ internal static class ClusterRestoreRf3MissingSlot
             await Assert.That(Directory.Exists(original)).IsFalse();
         }, failures).ConfigureAwait(false);
         if (moved)
-        { ServerFailureObserver.Observe(() => Directory.Move(retained, original), failures); }
+        {
+            ServerFailureObserver.Observe(() => Directory.Move(retained, original), failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

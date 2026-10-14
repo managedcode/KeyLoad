@@ -21,7 +21,10 @@ internal static class BlobReservationQuotaPublicTrial
                 var abort = new AbortBlobUploadRequest(Guid.NewGuid(), reserved.First.Blob, reserved.First.UploadId);
                 var aborted = (await McpCallerAssertions.SuccessAsync<BlobCommitResult<BlobUploadInfo>>(
                     await callers.Mcp.CallAsync("keyload_blobs_abort_upload", abort, token))).Value;
-                var expected = reserved.Begun.Value with { Status = BlobUploadStatus.Aborted };
+                var expected = reserved.Begun.Value with
+                {
+                    Status = BlobUploadStatus.Aborted
+                };
                 await SqlRf3Protocol.EqualAsync(expected, aborted.Value);
                 await BlobReservationQuotaPublicAssertions.RefusedAsync(callers, reserved.Refused, token);
                 await BlobReservationQuotaPublicAssertions.ReservedAsync(callers, reserved, expected, token);

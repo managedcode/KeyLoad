@@ -14,13 +14,34 @@ internal sealed class TimeSeriesIntensiveRunJsonValidationTests
     public async Task AcTj009003InvalidScenarioFrequencyAndSlotCountLeaveOutputUnchanged()
     {
         var original = TimeSeriesIntensiveRunJsonTestData.Create();
-        Reject(original with { Scenario = (TimeSeriesIntensiveScenario)int.MaxValue });
-        Reject(original with { TimestampFrequency = 0 });
-        Reject(original with { TimestampFrequency = -1 });
-        Reject(original with { Attempts = original.Attempts[..49999] });
-        Reject(original with { Attempts = new TimeSeriesIntensiveAttempt[50001] });
-        Reject(original with { Repetitions = default });
-        Reject(original with { Repetitions = [null!] });
+        Reject(original with
+        {
+            Scenario = (TimeSeriesIntensiveScenario)int.MaxValue
+        });
+        Reject(original with
+        {
+            TimestampFrequency = 0
+        });
+        Reject(original with
+        {
+            TimestampFrequency = -1
+        });
+        Reject(original with
+        {
+            Attempts = original.Attempts[..49999]
+        });
+        Reject(original with
+        {
+            Attempts = new TimeSeriesIntensiveAttempt[50001]
+        });
+        Reject(original with
+        {
+            Repetitions = default
+        });
+        Reject(original with
+        {
+            Repetitions = [null!]
+        });
         await Assert.That(original.Attempts.Length).IsEqualTo(50000);
     }
 
@@ -36,7 +57,10 @@ internal sealed class TimeSeriesIntensiveRunJsonValidationTests
             planned with { Outcome = TimeSeriesIntensiveOutcome.Cancelled, ValidationTicks = -1 } })
         {
             storage[49999] = invalid;
-            Reject(original with { Attempts = storage });
+            Reject(original with
+            {
+                Attempts = storage
+            });
         }
 
         storage[49999] = planned;
@@ -54,8 +78,14 @@ internal sealed class TimeSeriesIntensiveRunJsonValidationTests
         foreach (var invalid in new[] { valid with { Stage = (TimeSeriesIntensiveRunStage)int.MaxValue },
             valid with { Outcome = (TimeSeriesIntensiveOutcome)int.MaxValue }, valid with { Failure = badOrigin }, valid with { Failure = badCode } })
         {
-            Reject(original with { Failure = invalid });
-            Reject(original with { Repetitions = [new(0, default, default, false, invalid)] });
+            Reject(original with
+            {
+                Failure = invalid
+            });
+            Reject(original with
+            {
+                Repetitions = [new(0, default, default, false, invalid)]
+            });
         }
 
         foreach (var failure in new[] { badOrigin, badCode })
@@ -79,8 +109,14 @@ internal sealed class TimeSeriesIntensiveRunJsonValidationTests
                 finite with { P95Milliseconds = value }, finite with { P99Milliseconds = value } })
             {
                 var phase = new TimeSeriesIntensivePhaseResult(false, false, 0, 0, 0, 0, invalid);
-                Reject(original with { Repetitions = [new(0, phase, default, false, null)] });
-                Reject(original with { Repetitions = [new(0, default, phase, false, null)] });
+                Reject(original with
+                {
+                    Repetitions = [new(0, phase, default, false, null)]
+                });
+                Reject(original with
+                {
+                    Repetitions = [new(0, default, phase, false, null)]
+                });
             }
         }
 
@@ -91,11 +127,19 @@ internal sealed class TimeSeriesIntensiveRunJsonValidationTests
     public async Task AcTj009002UnobservedFactsAreAbsentAndFailureNullableFactsRemainNull()
     {
         var storage = TimeSeriesIntensiveAttemptLedger.CreateMeasuredStorage();
-        storage[49999] = storage[49999] with { LatencyTicks = -1, ValidationTicks = -1, ResultCount = long.MaxValue };
+        storage[49999] = storage[49999] with
+        {
+            LatencyTicks = -1,
+            ValidationTicks = -1,
+            ResultCount = long.MaxValue
+        };
         var ledger = new TimeSeriesIntensiveAttemptLedger(storage, 0, 10000, 0);
         ledger.Publish(new(0, 3, 3, 7, 0, TimeSeriesIntensiveOutcome.TransportFailure, null, default, 0,
             new(TimeSeriesIntensiveFailureOrigin.HttpTransport, null, 502, null)));
-        var original = TimeSeriesIntensiveRunJsonTestData.Create() with { Attempts = storage };
+        var original = TimeSeriesIntensiveRunJsonTestData.Create() with
+        {
+            Attempts = storage
+        };
         using var document = TimeSeriesIntensiveRunJsonTestData.Serialize(original);
         var attempt = document.RootElement.GetProperty(TestKeys.Attempts)[3];
         await Assert.That(attempt.GetProperty(TestKeys.ResultCount).ValueKind).IsEqualTo(JsonValueKind.Null);
@@ -115,7 +159,10 @@ internal sealed class TimeSeriesIntensiveRunJsonValidationTests
             Failure = cleanup ? default : failure,
             CleanupFailure = cleanup ? failure : default
         };
-        Reject(result with { Attempts = storage });
+        Reject(result with
+        {
+            Attempts = storage
+        });
     }
 
     private static void Reject(TimeSeriesIntensiveRunResult result)

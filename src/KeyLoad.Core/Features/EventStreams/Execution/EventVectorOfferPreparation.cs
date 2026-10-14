@@ -23,7 +23,9 @@ public sealed partial class DatabaseEngine
             var bounded = work.CreateView(view);
             var principal = Principal(bounded, principalId, EvaluationClock.GetUtcNow());
             if (request.ControlPartition is null || request.Scope is null)
-            { throw Errors.Fail(ErrorCode.Validation, InvalidEventVectorOfferPreparation); }
+            {
+                throw Errors.Fail(ErrorCode.Validation, InvalidEventVectorOfferPreparation);
+            }
             Authorization.Require(principal, request.ControlPartition, request.Scope.Resource, Capability.SubscriptionsManage);
             _ = StreamTraversalPlacement(bounded, request.ControlPartition, controlOwner);
             var admission = new EventVectorAdmissionPolicy(OperationLimitsOptions);
@@ -32,7 +34,9 @@ public sealed partial class DatabaseEngine
             var inventory = EventVectorMapInventory.Read(bounded, request.ControlPartition, request.MapId,
                 OperationLimitsOptions, cancellationToken);
             try
-            { return PrepareEventVectorOfferOwned(bounded, principal, request, inventory, freshSourceWitness, admission, work); }
+            {
+                return PrepareEventVectorOfferOwned(bounded, principal, request, inventory, freshSourceWitness, admission, work);
+            }
             finally { ClearEventVectorOfferInventory(inventory); }
         });
     }
@@ -48,13 +52,17 @@ public sealed partial class DatabaseEngine
             || map.ControlIncarnation != Store.Identity.Incarnation
             || map.Revision != request.ExpectedRevision || map.CoverageGeneration != request.ExpectedCoverageGeneration
             || map.ExpiresAt <= EvaluationClock.GetUtcNow() || request.Cursor is null)
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidEventVectorOfferPreparation); }
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidEventVectorOfferPreparation);
+        }
         RequireEventVectorToken(map, Verify<EventVectorToken>(request.Cursor), EventVectorMapTokenPurpose, map.SourceManifestDigest);
         EventVectorParentInventoryAuthorization.Require(Authorization, principal, inventory, admission);
         EventVectorInventoryValidation.Require(map, inventory.PayloadRows, admission);
         var offerKey = EventVectorKeys.Offer(map.ControlPartition, map.MapId);
         if (inventory.PayloadRows.Any(row => row.Key.Span.SequenceEqual(offerKey)))
-        { throw Errors.Fail(ErrorCode.Conflict, InvalidEventVectorOfferPreparation); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, InvalidEventVectorOfferPreparation);
+        }
         var proof = EventVectorControlPublication.Proof(inventory, admission);
         var witness = new EventVectorCoverageWitness
         {
@@ -78,8 +86,12 @@ public sealed partial class DatabaseEngine
     private static void ClearEventVectorOfferInventory(EventVectorOwnedInventory inventory)
     {
         if (inventory.HeaderRow is { } header)
-        { CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(header.Value).Span); }
+        {
+            CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(header.Value).Span);
+        }
         foreach (var row in inventory.PayloadRows)
-        { CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(row.Value).Span); }
+        {
+            CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(row.Value).Span);
+        }
     }
 }

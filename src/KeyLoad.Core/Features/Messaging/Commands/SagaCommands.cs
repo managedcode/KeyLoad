@@ -60,7 +60,11 @@ public sealed partial class DatabaseEngine
         RequireScheduleWriteAuthority(principal, timeout.Queue, destination);
         var message = SagaTimeoutMessage(record, timeout, deadline);
         _ = Enqueue(tx, principal, partition, message, now);
-        var next = record with { Revision = checked(record.Revision + SagaCommandsAdjacentElementOffset), Phase = SagaPhase.TimedOut };
+        var next = record with
+        {
+            Revision = checked(record.Revision + SagaCommandsAdjacentElementOffset),
+            Phase = SagaPhase.TimedOut
+        };
         var capacity = RecurringSagaStorage.RequireCapacity(tx, request.Lane);
         var updatedCapacity = RecurringSagaStorage.Replace(capacity, RecurringSagaStorage.SerializedBytes(record),
             RecurringSagaStorage.SerializedBytes(next), Limits);
@@ -102,7 +106,10 @@ public sealed partial class DatabaseEngine
             {
                 throw Errors.Fail(ErrorCode.Validation, RecurringSagaProtocol.InvalidRequest);
             }
-            return request with { StateJson = stateJson };
+            return request with
+            {
+                StateJson = stateJson
+            };
         }
         if ((request.Deadline is null) != (request.Timeout is null))
         {
@@ -115,7 +122,10 @@ public sealed partial class DatabaseEngine
         }
         if (request.Timeout is not { } timeout)
         {
-            return request with { StateJson = stateJson };
+            return request with
+            {
+                StateJson = stateJson
+            };
         }
         ValidateTimeoutDefinition(timeout, request.Lane, partition, deadline!.Value);
         return request with
@@ -134,7 +144,11 @@ public sealed partial class DatabaseEngine
         {
             JsonData.Identifier(timeout.OrderingKey);
         }
-        return timeout with { PayloadJson = payload, HeadersJson = headers };
+        return timeout with
+        {
+            PayloadJson = payload,
+            HeadersJson = headers
+        };
     }
 
     private static void ValidateTimeoutDefinition(SagaTimeoutDefinition timeout, QueueLaneRef source,

@@ -40,7 +40,10 @@ internal sealed class IndexedReferenceWholeFlowTests
         await Assert.That(expired.Code).IsEqualTo(ErrorCode.CursorExpired);
         await Assert.That(expired.Message).IsEqualTo("The query cursor no longer has a valid authorized read cut.");
         await Assert.That(partial).IsNull();
-        var healthy = engine.Execute("root", indexed with { Cursor = token }, clock);
+        var healthy = engine.Execute("root", indexed with
+        {
+            Cursor = token
+        }, clock);
         await Assert.That(healthy.AccessPath).IsEqualTo("index:status");
         await Assert.That(healthy.CutPosition).IsEqualTo(position);
         await Assert.That(IndexedReferenceWholeFlowFixture.Projection(healthy.Rows))

@@ -21,7 +21,10 @@ internal static class SubscriptionFilterRf3Update
         await SubscriptionFilterRf3Assertions.HistoryAsync(manager, mcp, seed.Group.Source, original.History, token);
         await SubscriptionFilterRf3Refusals.RunAsync(manager, mcp, seed, token);
         await SubscriptionFilterRf3Policy.RunAsync(fixture, original, manager, mcp, token);
-        var request = seed.Replacement with { CommandId = Guid.NewGuid() };
+        var request = seed.Replacement with
+        {
+            CommandId = Guid.NewGuid()
+        };
         var updated = (await McpCallerAssertions.SuccessAsync<SubscriptionInfo>(await mcp.CallAsync(McpCallerTools.SubscriptionsConfigure, request, token))).Value;
         await Assert.That(updated.IssuedPosition).IsEqualTo(SubscriptionFilterRf3Protocol.Gap);
         await SubscriptionFilterRf3Assertions.EqualAsync(updated.Definition, request.Definition);

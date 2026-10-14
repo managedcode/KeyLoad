@@ -74,7 +74,10 @@ internal static class AnnSeedCollector
         return new(captured.Scope, captured.Cut, captured.Records, digest,
             captured.OwnedBytes, captured.PeakBytes,
             checked(readBudget.ReadBytes - startingReadBytes), captured.Work.Units)
-        { DependencySha256 = captured.DependencySha256, ProjectionCheckpoint = captured.ProjectionCheckpoint };
+        {
+            DependencySha256 = captured.DependencySha256,
+            ProjectionCheckpoint = captured.ProjectionCheckpoint
+        };
     }
 
     private static AnnSeedBuffer CaptureCut(DatabaseEngine database, IKeyValueView view,

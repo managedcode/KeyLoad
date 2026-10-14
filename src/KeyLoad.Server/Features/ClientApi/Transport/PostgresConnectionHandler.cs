@@ -12,19 +12,26 @@ internal sealed class PostgresConnectionHandler(IServiceProvider services, IOpti
         var options = configured.Value;
         if (context.Features.Get<ITlsHandshakeFeature>() is null
             || context.Features.Get<ServerConnectionFeature>() is null)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, ServerProtocol.MissingCredential); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, ServerProtocol.MissingCredential);
+        }
         try
         {
             var request = await ReadStartupAsync(context, options).ConfigureAwait(false);
             if (request is null)
-            { return; }
+            {
+                return;
+            }
             if (request.Cancel is { } cancel)
-            { await cancellations.CancelAsync(cancel.Id, cancel.Secret).ConfigureAwait(false); return; }
+            {
+                await cancellations.CancelAsync(cancel.Id, cancel.Secret).ConfigureAwait(false);
+                return;
+            }
             await new PostgresProtocolSession(services, configured, admission, cancellations)
                 .RunAsync(context, request.Startup ?? throw Errors.Fail(ErrorCode.Validation, PostgresProtocol.Invalid))
                 .ConfigureAwait(false);
         }
-        catch (Exception error) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error) && !context.ConnectionClosed.IsCancellationRequested
+        catch (Exception error) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error) && !context.ConnectionClosed.IsCancellationRequested
             && (PostgresAdmissionLifetime.Require(context).Completed || !PostgresAdmissionLifetime.Require(context).Token.IsCancellationRequested))
         {
             var failures = new List<Exception> { error };
@@ -71,7 +78,9 @@ internal sealed class PostgresConnectionHandler(IServiceProvider services, IOpti
     {
         var reader = new PostgresPayloadReader(payload);
         if (reader.Int32() != PostgresProtocol.CancelRequest)
-        { return null; }
+        {
+            return null;
+        }
         var id = reader.Int32();
         var secret = reader.Int32();
         reader.Complete();

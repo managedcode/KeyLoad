@@ -19,9 +19,15 @@ public interface IReplicaTransport
 public interface IDurableReplicaLog : IDisposable
 {
     /// <summary>Gets the borrowed node-owned gate shared by protocol planning and checkpoint publication; only the drained log owner disposes it.</summary>
-    SemaphoreSlim ProtocolGate { get; }
+    SemaphoreSlim ProtocolGate
+    {
+        get;
+    }
     /// <summary>Gets the current verified durable metadata.</summary>
-    ReplicaHardState State { get; }
+    ReplicaHardState State
+    {
+        get;
+    }
     /// <summary>Reads one retained entry without exposing the private storage buffer.</summary>
     /// <param name="index">Requested replica position.</param>
     /// <returns>The owned decoded entry, or null outside the retained suffix.</returns>
@@ -55,7 +61,10 @@ public interface IDurableReplicaLog : IDisposable
     /// <param name="snapshot">Verified canonical image and its exact committed cut.</param>
     void PublishSnapshot(ReplicaSnapshot snapshot);
     /// <summary>Gets whether actual stored keys remain at or below the published checkpoint.</summary>
-    bool HasCheckpointPrefix { get; }
+    bool HasCheckpointPrefix
+    {
+        get;
+    }
     /// <summary>Deletes one bounded eligible prefix and rewrites the replica journal under protocol ownership.</summary>
     /// <param name="verifiedSnapshot">Exact current complete image verified by its snapshot owner.</param>
     /// <param name="cancellationToken">Original owner cancellation checked before durable deletion.</param>

@@ -24,7 +24,9 @@ internal static class RequestCqrsProbeLiveValidation
                 && value.ChallengeSha256 is not { Length: EmptyDigestLength }
             || value.Kind == RequestCqrsProbeLiveProtocol.AckKind && !Digest(value.ChallengeSha256)
             || value.Step == RequestCqrsProbeLiveProtocol.AfterReplacement && !Digest(value.PredecessorSha256))
-        { throw new InvalidOperationException(RequestCqrsProbeProtocol.InvalidRecord); }
+        {
+            throw new InvalidOperationException(RequestCqrsProbeProtocol.InvalidRecord);
+        }
     }
 
     internal static string Name(RequestCqrsProbeLiveRecord value)
@@ -40,7 +42,9 @@ internal static class RequestCqrsProbeLiveValidation
             ? RequestCqrsProbeLiveProtocol.ChallengePrefix : RequestCqrsProbeLiveProtocol.AckPrefix;
         if (!name.StartsWith(prefix, StringComparison.Ordinal)
             || !name.EndsWith(RequestCqrsProbeProtocol.JsonFileSuffix, StringComparison.Ordinal))
-        { return false; }
+        {
+            return false;
+        }
         var parts = name[prefix.Length..^RequestCqrsProbeProtocol.JsonFileSuffix.Length].Split(RequestCqrsProbeActivationProtocol.Separator);
         return parts.Length == RequestCqrsProbeLiveProtocol.NameParts
             && Guid.TryParseExact(parts[RequestCqrsProbeActivationProtocol.FirstPart], RequestCqrsProbeProtocol.SessionIdFormat, out var arm)

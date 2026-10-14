@@ -26,14 +26,18 @@ internal static class CompositePhysicalIndexObservation
         var prefix = KeySpace.Partition(space, partition, CompositeIndexCrashContract.Collection, index);
         var page = view.Scan(prefix, MaximumRecords);
         if (page.HasMore)
-        { throw new InvalidOperationException(Truncated); }
+        {
+            throw new InvalidOperationException(Truncated);
+        }
         var after = Array.Empty<string>();
         if (index == CompositeIndexCrashContract.RankIndex)
         {
             var bound = KeySpace.Partition(space, partition, CompositeIndexCrashContract.Collection, index, ExclusiveRankBound, AfterId);
             var range = view.Scan(prefix, MaximumRecords, bound);
             if (range.HasMore)
-            { throw new InvalidOperationException(Truncated); }
+            {
+                throw new InvalidOperationException(Truncated);
+            }
             after = range.Records.Select(row => NativeSerialization.Deserialize<string>(row.Value.Span)).ToArray();
         }
         return new(partition.PartitionKey, space, index,

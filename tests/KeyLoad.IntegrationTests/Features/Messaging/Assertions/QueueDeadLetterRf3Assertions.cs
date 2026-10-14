@@ -75,7 +75,9 @@ internal static class QueueDeadLetterRf3Assertions
             await McpCallerAssertions.DoesNotDiscloseAsync(reply, identity.Secret, QueueDeadLetterRf3Protocol.Headers);
         }, failures);
         if (denied is not null)
-        { await KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => denied.DisposeAsync().AsTask(), failures); }
+        {
+            await KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => denied.DisposeAsync().AsTask(), failures);
+        }
         KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }
 

@@ -1,5 +1,5 @@
 using System.Runtime.CompilerServices;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using ManagedCode.Communication;
 using ManagedCode.Communication.CQRS;
 
@@ -48,18 +48,26 @@ internal static class RequestCqrsAnnProducer
             if (fault == RequestCqrsAnnFault.FrameBudget)
             {
                 for (var index = FirstOffset; index <= maximumFrames; index++)
-                { await AnnMaintenanceProgress.WriteAsync(writer, id, AnnMaintenancePhase.Replay); }
+                {
+                    await AnnMaintenanceProgress.WriteAsync(writer, id, AnnMaintenancePhase.Replay);
+                }
             }
             for (var index = FirstOffset; index < replayCount; index++)
-            { await AnnMaintenanceProgress.WriteAsync(writer, id, AnnMaintenancePhase.Replay); }
+            {
+                await AnnMaintenanceProgress.WriteAsync(writer, id, AnnMaintenancePhase.Replay);
+            }
             await AnnMaintenanceProgress.WriteAsync(writer, id, AnnMaintenancePhase.Verify);
             await AnnMaintenanceProgress.WriteAsync(writer, id, AnnMaintenancePhase.NativeIndex);
             await AnnMaintenanceProgress.WriteAsync(writer, id, AnnMaintenancePhase.Publish);
             await AnnMaintenanceProgress.WriteAsync(writer, id, AnnMaintenancePhase.Checkpoint);
             if (fault != RequestCqrsAnnFault.MissingCompleted)
-            { await AnnMaintenanceProgress.WriteAsync(writer, id, AnnMaintenancePhase.Completed); }
+            {
+                await AnnMaintenanceProgress.WriteAsync(writer, id, AnnMaintenancePhase.Completed);
+            }
             if (fault == RequestCqrsAnnFault.ExtraCompleted)
-            { await AnnMaintenanceProgress.WriteAsync(writer, id, AnnMaintenancePhase.Completed); }
+            {
+                await AnnMaintenanceProgress.WriteAsync(writer, id, AnnMaintenancePhase.Completed);
+            }
             return Result<GrainOperationReply>.Succeed(reply);
         }
         finally { observed.MarkProducerSettled(writer.CancellationToken.IsCancellationRequested); }
@@ -76,7 +84,11 @@ internal static class RequestCqrsAnnProducer
             MovePhase = fault == RequestCqrsAnnFault.MixedMove ? PartitionMovePhase.Prepared : null,
             OnlineTextPhase = fault == RequestCqrsAnnFault.MixedOnline ? OnlineTextPhase.Captured : null,
             EventFeedTail = fault == RequestCqrsAnnFault.MixedTail
-                ? new(RequestCqrsAnnTestData.Version, new() { Version = RequestCqrsAnnTestData.Version, Receipt = checkpoint.Receipt }) : null
+                ? new(RequestCqrsAnnTestData.Version, new()
+                {
+                    Version = RequestCqrsAnnTestData.Version,
+                    Receipt = checkpoint.Receipt
+                }) : null
         };
         return writer.ProgressAsync(progress, AnnMaintenanceProgress.PhaseCompleted);
     }

@@ -13,6 +13,8 @@ internal static class AuthorizationMalformedHttpExportAssertions
         using var expected = JsonDocument.Parse(AuthorizationMalformedHttpExportProtocol.ExpectedProblem);
         await Assert.That(JsonElement.DeepEquals(actual.RootElement, expected.RootElement)).IsTrue();
         foreach (var canary in AuthorizationTelemetryTestProtocol.Canaries)
-        { await Assert.That(body.Contains(canary, StringComparison.Ordinal)).IsFalse(); }
+        {
+            await Assert.That(body.Contains(canary, StringComparison.Ordinal)).IsFalse();
+        }
     }
 }

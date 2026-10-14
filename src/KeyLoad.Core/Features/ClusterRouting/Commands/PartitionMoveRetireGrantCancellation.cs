@@ -18,9 +18,14 @@ public sealed partial class DatabaseEngine
         if (grant.RetireCancellationDisposition is not null || grant.Settlement is not null || grant.AbortDisposition is not null
             || retained.RetireCancellationDisposition is not null
             || !NativeSerialization.Serialize(grant).AsSpan().SequenceEqual(NativeSerialization.Serialize(retained)))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.MissingAuthority);
+        }
         var disposition = CreateRetireGrantCancellationDisposition(original, witness);
-        PartitionMoveGrantStorage.Write(transaction, grant with { RetireCancellationDisposition = disposition }, Limits.MaxBatchBytes);
+        PartitionMoveGrantStorage.Write(transaction, grant with
+        {
+            RetireCancellationDisposition = disposition
+        }, Limits.MaxBatchBytes);
         PartitionMoveGrantStorage.ChangeOutstanding(transaction,
             PartitionMoveGrantStorage.MoveCountKey(grant.Partition, grant.MoveId), false, Limits.MaxBatchMutations);
         PartitionMoveGrantStorage.ChangeOutstanding(transaction, grant.OperatorPrincipalId, false, Limits.MaxBatchMutations);
@@ -47,7 +52,9 @@ public sealed partial class DatabaseEngine
             disposition.OriginalPhaseCommandId, Limits.MaxBatchBytes)
             ?? throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority);
         if (grant.Partition != control.Partition || grant.MoveId != control.MoveId)
-        { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority);
+        }
         var cancellation = RequireRetireGrantCancellationRecord(grant, original, disposition);
         RequireRetireGrantCancellationBody(original, grant, disposition, cancellation);
     }
@@ -86,7 +93,10 @@ public sealed partial class DatabaseEngine
             || authorization.CommandId != grant.GrantId || authorization.AppliedPosition != grant.AdmissionPosition
             || authorization.ControlIntentDigest != grant.ControlIntentDigest
             || !PhysicalOwnerEntryValidation.SameOwner(authorization.PhysicalOwner, grant.ControlOwner)
-            || !NativeSerialization.Serialize(grant with { RetireCancellationDisposition = null }).AsSpan()
+            || !NativeSerialization.Serialize(grant with
+            {
+                RetireCancellationDisposition = null
+            }).AsSpan()
                 .SequenceEqual(NativeSerialization.Serialize(retained))
             || !NativeSerialization.Serialize(disposition.CancellationReceipt).AsSpan()
                 .SequenceEqual(NativeSerialization.Serialize(cancellation.CancellationReceipt))
@@ -94,7 +104,9 @@ public sealed partial class DatabaseEngine
             || disposition.CancellationReceipt.AppliedPosition <= PartitionMoveProtocol.EmptyCount
             || disposition.CancellationReceipt.ControlIntentDigest != grant.ControlIntentDigest
             || !PhysicalOwnerEntryValidation.SameOwner(disposition.CancellationReceipt.PhysicalOwner, original.OriginalReceiverOwner))
-        { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority);
+        }
         return cancellation;
     }
 
@@ -109,7 +121,9 @@ public sealed partial class DatabaseEngine
             || cancellation.CancellationPhase.Stage != PartitionMovePeerStage.RetireCancel
             || cancellation.CancellationPhase.Partition != grant.Partition || cancellation.CancellationPhase.MoveId != grant.MoveId
             || cancellation.CancellationPhase.ControlIntentDigest != grant.ControlIntentDigest)
-        { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority);
+        }
         var body = NativeSerialization.Deserialize<PartitionMoveRetireCancellationBody>(cancellation.CancellationPhase.Body.Span);
         if (body.Version != PartitionMoveProtocol.Version || body.OriginalPhaseCommandId != original.OriginalPhaseCommandId
             || body.CancellationCommandId != disposition.CancellationCommandId || body.CleanupGeneration != disposition.CleanupGeneration
@@ -124,6 +138,8 @@ public sealed partial class DatabaseEngine
             || body.CancellationExpiresAt != attempt.CancellationExpiresAt
             || !NativeSerialization.Serialize(body.OriginalEnvelope.Grant).AsSpan().SequenceEqual(NativeSerialization.Serialize(retained))
             || !NativeSerialization.Serialize(body.OriginalAuthorization).AsSpan().SequenceEqual(NativeSerialization.Serialize(authorization)))
-        { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority);
+        }
     }
 }

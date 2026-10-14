@@ -13,17 +13,29 @@ internal static class OwnerCapacityMac
 
     internal static string SignCapacityRequest(PartitionMovementMac mac, OwnerCapacityNativeRequest request)
         => Convert.ToHexStringLower(mac.DigestNative(
-            NativeSerialization.Serialize(request with { Signature = string.Empty }), CapacityRequestDomain));
+            NativeSerialization.Serialize(request with
+            {
+                Signature = string.Empty
+            }), CapacityRequestDomain));
 
     internal static bool VerifyCapacityRequest(PartitionMovementMac mac, OwnerCapacityNativeRequest request)
-        => mac.VerifyNative(NativeSerialization.Serialize(request with { Signature = string.Empty }),
+        => mac.VerifyNative(NativeSerialization.Serialize(request with
+        {
+            Signature = string.Empty
+        }),
             request.Signature, CapacityRequestDomain);
 
     internal static string SignCapacityReply(PartitionMovementMac mac, OwnerCapacityNativeReply reply)
         => Convert.ToHexStringLower(mac.DigestNative(
-            NativeSerialization.Serialize(reply with { Signature = string.Empty }), CapacityReplyDomain));
+            NativeSerialization.Serialize(reply with
+            {
+                Signature = string.Empty
+            }), CapacityReplyDomain));
 
     internal static bool VerifyCapacityReply(PartitionMovementMac mac, OwnerCapacityNativeReply reply)
-        => mac.VerifyNative(NativeSerialization.Serialize(reply with { Signature = string.Empty }),
+        => mac.VerifyNative(NativeSerialization.Serialize(reply with
+        {
+            Signature = string.Empty
+        }),
             reply.Signature, CapacityReplyDomain);
 }

@@ -10,11 +10,17 @@ internal static class SubscriptionFilterRf3Cold
     {
         var failures = new List<Exception>();
         foreach (var node in SubscriptionFilterRf3Protocol.Nodes)
-        { await ServerFailureObserver.ObserveAsync(() => fixture.KillContainerAsync(node, SubscriptionFilterRf3Protocol.ColdScenario, token), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => fixture.KillContainerAsync(node, SubscriptionFilterRf3Protocol.ColdScenario, token), failures).ConfigureAwait(false);
+        }
         foreach (var node in SubscriptionFilterRf3Protocol.Nodes)
-        { await ServerFailureObserver.ObserveAsync(() => fixture.BeginContainerRestartAsync(node, token), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => fixture.BeginContainerRestartAsync(node, token), failures).ConfigureAwait(false);
+        }
         foreach (var node in SubscriptionFilterRf3Protocol.Nodes)
-        { await ServerFailureObserver.ObserveAsync(() => fixture.RestartContainerAsync(node, token), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => fixture.RestartContainerAsync(node, token), failures).ConfigureAwait(false);
+        }
         foreach (var node in SubscriptionFilterRf3Protocol.Nodes)
         {
             await ServerFailureObserver.ObserveAsync(async () => await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(node,

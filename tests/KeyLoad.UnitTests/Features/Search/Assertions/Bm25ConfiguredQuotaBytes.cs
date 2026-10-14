@@ -9,7 +9,9 @@ internal static class Bm25ConfiguredQuotaBytes
         {
             var page = view.Scan(Bm25CorpusKeys.Prefix(database.Partition), database.Database.Limits.MaxScanRecords, null);
             if (page.HasMore)
-            { throw new InvalidOperationException("The complete actual corpus family exceeded its original bound."); }
+            {
+                throw new InvalidOperationException("The complete actual corpus family exceeded its original bound.");
+            }
             return page.Records.Sum(row => checked((long)row.Key.Length + row.Value.Length));
         });
 

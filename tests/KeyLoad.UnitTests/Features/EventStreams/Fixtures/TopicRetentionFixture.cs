@@ -12,17 +12,50 @@ internal sealed class TopicRetentionFixture : IDisposable
     internal const string Queue = "work";
     internal const string Documents = "orders";
     internal const string Payload = "{\"n\":1}";
-    internal TestDatabase Owner { get; }
-    internal ZoneTreeStore Store { get; private set; }
-    internal DatabaseEngine Database { get; private set; }
-    internal EventSourceRef Source { get; }
-    internal CommandRequest Publication { get; }
-    internal CommitReceipt PublicationReceipt { get; }
-    internal DateTimeOffset PublicationAt { get; }
-    internal SubscriptionRef First { get; }
-    internal SubscriptionRef Second { get; }
-    internal ReceiveSubscriptionResult Claims { get; }
-    internal string OriginalCursor { get; }
+    internal TestDatabase Owner
+    {
+        get;
+    }
+    internal ZoneTreeStore Store
+    {
+        get; private set;
+    }
+    internal DatabaseEngine Database
+    {
+        get; private set;
+    }
+    internal EventSourceRef Source
+    {
+        get;
+    }
+    internal CommandRequest Publication
+    {
+        get;
+    }
+    internal CommitReceipt PublicationReceipt
+    {
+        get;
+    }
+    internal DateTimeOffset PublicationAt
+    {
+        get;
+    }
+    internal SubscriptionRef First
+    {
+        get;
+    }
+    internal SubscriptionRef Second
+    {
+        get;
+    }
+    internal ReceiveSubscriptionResult Claims
+    {
+        get;
+    }
+    internal string OriginalCursor
+    {
+        get;
+    }
 
     internal TopicRetentionFixture(DatabaseLimits? limits = null)
     {
@@ -52,7 +85,9 @@ internal sealed class TopicRetentionFixture : IDisposable
         catch (Exception primary)
         {
             try
-            { Owner.Dispose(); }
+            {
+                Owner.Dispose();
+            }
             catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
             throw;
         }

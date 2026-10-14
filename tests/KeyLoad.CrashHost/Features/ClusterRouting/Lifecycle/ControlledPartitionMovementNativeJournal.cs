@@ -37,14 +37,19 @@ internal sealed class ControlledPartitionMovementNativeJournal : IDisposable
         PhysicalShardRecord physical, string directory, long maximumFixtureEntries = SupportingHistoryEntries)
     {
         if (maximumFixtureEntries != SupportingHistoryEntries && maximumFixtureEntries != TerminalHistoryEntries)
-        { throw new ArgumentOutOfRangeException(nameof(maximumFixtureEntries)); }
+        {
+            throw new ArgumentOutOfRangeException(nameof(maximumFixtureEntries));
+        }
         this.maximumFixtureEntries = maximumFixtureEntries;
         this.database = database;
         voter = physical.VoterIds.First();
         configuration = CrashExecutionOptions.Configuration(voter, physical.VoterIds.ToArray(), directory, physical.Incarnation);
         execution = CrashExecutionOptions.Replica();
         replica = new(new(directory)
-        { Incarnation = physical.Incarnation, SigningKey = database.Store.Identity.SigningKey },
+        {
+            Incarnation = physical.Incarnation,
+            SigningKey = database.Store.Identity.SigningKey
+        },
             CrashExecutionOptions.StorageExecution(), CrashExecutionOptions.PointCacheExecution());
         try
         {
@@ -58,9 +63,11 @@ internal sealed class ControlledPartitionMovementNativeJournal : IDisposable
             {
                 var failures = new List<Exception> { primary };
                 try
-                { Log.Dispose(); }
-                catch (Exception cleanup) when (KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
-                catch (Exception cleanup) when (!KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
+                {
+                    Log.Dispose();
+                }
+                catch (Exception cleanup) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
+                catch (Exception cleanup) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
                 ServerFailureObserver.ThrowIfAny(failures);
                 throw;
             }
@@ -69,9 +76,11 @@ internal sealed class ControlledPartitionMovementNativeJournal : IDisposable
         {
             var failures = new List<Exception> { primary };
             try
-            { replica.Dispose(); }
-            catch (Exception cleanup) when (KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
-            catch (Exception cleanup) when (!KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
+            {
+                replica.Dispose();
+            }
+            catch (Exception cleanup) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
+            catch (Exception cleanup) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
             ServerFailureObserver.ThrowIfAny(failures);
             throw;
         }
@@ -80,7 +89,10 @@ internal sealed class ControlledPartitionMovementNativeJournal : IDisposable
     /// <summary>The actual validated configuration of the original replica store.</summary>
     public ReplicaConfiguration Configuration => configuration.Value;
     /// <summary>The original native log, borrowed for verified control-grant evidence.</summary>
-    public DurableReplicaLog Log { get; }
+    public DurableReplicaLog Log
+    {
+        get;
+    }
 
     /// <summary>Appends an unseen scoped command or resolves its original joined native entry.</summary>
     /// <param name="operation">The original native local-signed operation.</param>
@@ -99,14 +111,20 @@ internal sealed class ControlledPartitionMovementNativeJournal : IDisposable
             if (index is null)
             {
                 if (Log.State.Term < FirstTerm)
-                { Log.SaveTermAndVote(FirstTerm, voter); }
+                {
+                    Log.SaveTermAndVote(FirstTerm, voter);
+                }
                 index = checked(Log.State.LastIndex + IndexStep);
                 if (index > maximumFixtureEntries)
-                { throw new InvalidOperationException(MissingEntry); }
+                {
+                    throw new InvalidOperationException(MissingEntry);
+                }
                 Log.Append([new(index.Value, Log.State.Term, actual)]);
             }
             if (index > Log.State.CommittedIndex)
-            { materializer.Commit(index.Value); }
+            {
+                materializer.Commit(index.Value);
+            }
             materializer.WaitForApplyAsync(index.Value, original.Token).GetAwaiter().GetResult();
             return database.ResolveOutcome(actual);
         }
@@ -116,7 +134,9 @@ internal sealed class ControlledPartitionMovementNativeJournal : IDisposable
     {
         var lastIndex = Log.State.LastIndex;
         if (lastIndex > maximumFixtureEntries)
-        { throw new InvalidOperationException(MissingEntry); }
+        {
+            throw new InvalidOperationException(MissingEntry);
+        }
         var scope = CommandOutcomePartitionIdentity.Resolve(actual);
         var firstIndex = FirstEntry;
         while (firstIndex <= lastIndex)
@@ -125,16 +145,22 @@ internal sealed class ControlledPartitionMovementNativeJournal : IDisposable
             var page = Log.Read(firstIndex, configuration.Value.MaxAppendEntries,
                 configuration.Value.MaxAppendBytes);
             if (page.IsDefaultOrEmpty)
-            { throw new InvalidOperationException(MissingEntry); }
+            {
+                throw new InvalidOperationException(MissingEntry);
+            }
             foreach (var entry in page)
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 if (entry.Index != firstIndex || entry.Index > lastIndex)
-                { throw new InvalidOperationException(MissingEntry); }
+                {
+                    throw new InvalidOperationException(MissingEntry);
+                }
                 if (entry.Operation is { } previous && previous.Id == actual.Id
                     && previous.PrincipalId == actual.PrincipalId
                     && CommandOutcomePartitionIdentity.Resolve(previous) == scope)
-                { return entry.Index; }
+                {
+                    return entry.Index;
+                }
                 firstIndex = checked(entry.Index + IndexStep);
             }
         }
@@ -147,21 +173,29 @@ internal sealed class ControlledPartitionMovementNativeJournal : IDisposable
         lock (gate)
         {
             if (closed)
-            { return; }
+            {
+                return;
+            }
             closed = true;
             var failures = new List<Exception>();
             try
-            { materializer.DisposeAsync().AsTask().GetAwaiter().GetResult(); }
-            catch (Exception error) when (KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-            catch (Exception error) when (!KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
+            {
+                materializer.DisposeAsync().AsTask().GetAwaiter().GetResult();
+            }
+            catch (Exception error) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
+            catch (Exception error) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
             try
-            { Log.Dispose(); }
-            catch (Exception error) when (KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-            catch (Exception error) when (!KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
+            {
+                Log.Dispose();
+            }
+            catch (Exception error) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
+            catch (Exception error) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
             try
-            { replica.Dispose(); }
-            catch (Exception error) when (KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-            catch (Exception error) when (!KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
+            {
+                replica.Dispose();
+            }
+            catch (Exception error) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
+            catch (Exception error) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
             ServerFailureObserver.ThrowIfAny(failures);
         }
     }

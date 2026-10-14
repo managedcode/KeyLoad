@@ -68,7 +68,10 @@ internal static class GlobalBranchValidation
             {
                 throw Errors.Fail(ErrorCode.Corruption, InvalidWindow);
             }
-            bytes.Accept(NativeSerialization.Measure(window with { Candidates = [] }));
+            bytes.Accept(NativeSerialization.Measure(window with
+            {
+                Candidates = []
+            }));
         }
     }
 

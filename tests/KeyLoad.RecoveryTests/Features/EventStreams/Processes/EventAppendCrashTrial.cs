@@ -50,21 +50,33 @@ internal static class EventAppendCrashTrial
         var failures = new List<Exception>();
         await CommandIdempotencyProcess.SettleActiveAsync(child, failures, cleanup.Token);
         if (!child.IsSettled)
-        { failures.Add(new IOException(UnsettledChild)); }
+        {
+            failures.Add(new IOException(UnsettledChild));
+        }
         if (primary is null && failures.Count == 0)
-        { await CommandIdempotencyProcess.CleanTrialAsync(root, failures, cleanup.Token); }
+        {
+            await CommandIdempotencyProcess.CleanTrialAsync(root, failures, cleanup.Token);
+        }
         foreach (var failure in failures)
-        { failure.Data[RetainedRootKey] = root; }
+        {
+            failure.Data[RetainedRootKey] = root;
+        }
         CommandIdempotencyProcess.ThrowFailures(primary, failures);
     }
 
     private static ProcessStartInfo CreateStart(string root, CommitStage stage, int index)
     {
         var start = new ProcessStartInfo(Dotnet)
-        { RedirectStandardOutput = true, RedirectStandardError = true, UseShellExecute = false };
+        {
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false
+        };
         foreach (var argument in new[] { typeof(CrashHostMarker).Assembly.Location, root, stage.ToString(),
             index.ToString(CultureInfo.InvariantCulture), EventAppendCrashContract.Mode })
-        { start.ArgumentList.Add(argument); }
+        {
+            start.ArgumentList.Add(argument);
+        }
         return start;
     }
 }

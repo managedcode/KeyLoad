@@ -25,7 +25,10 @@ internal static class ProjectionPublicWarm
         await ProjectionPublicAssertions.LiteralBatchAsync(batch, consumer, definition, sourceReceipt);
         var mcpBatch = (await McpCallerAssertions.SuccessAsync<ProjectionBatch>(
             await caller.Mcp.CallAsync(McpCallerTools.ProjectionsRead, read, token))).Value;
-        await ProjectionPublicAssertions.ExactAsync(batch with { Token = mcpBatch.Token }, mcpBatch);
+        await ProjectionPublicAssertions.ExactAsync(batch with
+        {
+            Token = mcpBatch.Token
+        }, mcpBatch);
         var complete = new CommitProjectionBatchRequest(Guid.NewGuid(), consumer, batch.Token,
             [new PutDocument(ProjectionPublicProtocol.Target, "effect", ProjectionPublicProtocol.EffectJson, 0L)]);
         var completed = await ProjectionPublicOperations.CommitBothAsync(caller, complete, token);
@@ -33,7 +36,10 @@ internal static class ProjectionPublicWarm
             new MutationReceipt(ProjectionPublicProtocol.PutKind, ProjectionPublicProtocol.Target, "effect", 1L));
         await ProjectionPublicAssertions.ExactAsync(new ProjectionBatchResult(completed.Receipt, false, 1L), completed);
         var next = await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.ReadProjectionAsync(read, token));
-        await ProjectionPublicAssertions.ExactAsync(new ProjectionBatch(configured with { Checkpoint = 1L }, [], 2L, next.Token, false), next);
+        await ProjectionPublicAssertions.ExactAsync(new ProjectionBatch(configured with
+        {
+            Checkpoint = 1L
+        }, [], 2L, next.Token, false), next);
         var filtered = new CommitProjectionBatchRequest(Guid.NewGuid(), consumer, next.Token, []);
         var advanced = await ProjectionPublicOperations.CommitBothAsync(caller, filtered, token);
         await ProjectionPublicAssertions.LiteralReceiptAsync(filtered.CommandId, advanced.Receipt);

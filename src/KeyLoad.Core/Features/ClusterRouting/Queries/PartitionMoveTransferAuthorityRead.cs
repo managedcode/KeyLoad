@@ -18,15 +18,21 @@ public sealed partial class DatabaseEngine
             var charged = work.CreateView(view, grant);
             var principal = Principal(charged, principalId, EvaluationClock.GetUtcNow());
             if (!principal.ClusterAdministrator)
-            { throw Errors.Fail(ErrorCode.PermissionDenied, ClusterAdministrationRequiredMessage); }
+            {
+                throw Errors.Fail(ErrorCode.PermissionDenied, ClusterAdministrationRequiredMessage);
+            }
             var header = PartitionMoveParentStorage.Header(charged, request.Partition, request.MoveId, Limits.MaxBatchBytes)
                 ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
             PartitionMoveParentValidation.RequireReplayScope(header, principal.Id, request);
             if (!PhysicalOwnerEntryValidation.SameOwner(header.ControlOwner, RequireMoveDirectory(charged).ControlOwner))
-            { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+            }
             if (header.OriginalCapturePhaseCommandId is not { } originalCaptureId
                 || originalCaptureId != capturePhaseId)
-            { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
+            {
+                throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+            }
             var capture = PartitionMoveParentStorage.Phase(charged, request.Partition, request.MoveId,
                 capturePhaseId, Limits.MaxBatchBytes)
                 ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);

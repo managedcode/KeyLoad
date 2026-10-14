@@ -17,7 +17,9 @@ public sealed partial class DatabaseEngine
         source.CaptureExact(PartitionMovePublishedPlacementStorage.Key(partition));
         var key = Bm25CorpusKeys.Current(partition, collection, field, tokenizer, principal.Id);
         if (!source.ReadCapturedValue(key, static _ => { }))
-        { return; }
+        {
+            return;
+        }
         source.CaptureExact(KeySpace.Partition(OutboxHeadSpace, partition));
     }
 }

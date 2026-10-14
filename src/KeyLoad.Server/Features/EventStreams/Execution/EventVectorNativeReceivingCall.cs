@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.Server.Features.EventStreams;
 
@@ -24,7 +24,9 @@ internal sealed class EventVectorNativeReceivingCall(OrleansNode node, Partition
             cancellationToken: originalCancellationToken).ConfigureAwait(false);
         authority.Require(originalCall, originalCancellationToken);
         if (reply.Error is { } failure)
-        { throw Errors.Fail(failure, EventVectorRemoteProtocol.Unavailable); }
+        {
+            throw Errors.Fail(failure, EventVectorRemoteProtocol.Unavailable);
+        }
         work.ChargeBytes(reply.Payload.Length);
         return GrainNativePayload.Read<GrainValue>(reply.Payload).Value is T result ? result
             : throw Errors.Fail(ErrorCode.Corruption, EventVectorRemoteProtocol.Invalid);
@@ -51,6 +53,8 @@ internal sealed class EventVectorNativeReceivingCall(OrleansNode node, Partition
             cancellationToken: originalCancellationToken).ConfigureAwait(false);
         authority.Require(originalCall, originalCancellationToken);
         if (reply.Error is { } failure)
-        { throw Errors.Fail(failure, EventVectorRemoteProtocol.Unavailable); }
+        {
+            throw Errors.Fail(failure, EventVectorRemoteProtocol.Unavailable);
+        }
     }
 }

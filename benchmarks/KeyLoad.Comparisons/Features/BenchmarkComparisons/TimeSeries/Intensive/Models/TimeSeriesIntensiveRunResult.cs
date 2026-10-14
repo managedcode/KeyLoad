@@ -23,14 +23,21 @@ internal sealed record TimeSeriesIntensiveRepetitionResult(int Repetition, TimeS
     internal bool Succeeded => Warmup.Succeeded && Measured.Succeeded && FinalVerified && Failure is null;
 
     internal TimeSeriesIntensiveRepetitionResult WithVerificationFailure(TimeSeriesIntensiveRunFailure failure) =>
-        this with { FinalVerified = false, Failure = Failure ?? failure };
+        this with
+        {
+            FinalVerified = false,
+            Failure = Failure ?? failure
+        };
 }
 
 internal sealed record TimeSeriesIntensiveRunResult(TimeSeriesIntensiveScenario Scenario, long TimestampFrequency,
     ReadOnlyMemory<TimeSeriesIntensiveAttempt> Attempts, ImmutableArray<TimeSeriesIntensiveRepetitionResult> Repetitions,
     bool SeedVerified, TimeSeriesIntensiveRunFailure? Failure)
 {
-    internal ReadOnlyMemory<TimeSeriesIntensiveAttempt> WarmupAttempts { get; init; }
+    internal ReadOnlyMemory<TimeSeriesIntensiveAttempt> WarmupAttempts
+    {
+        get; init;
+    }
 
     internal bool Succeeded => SeedVerified && Failure is null && Repetitions.Length == TimeSeriesIntensiveProfile.RepetitionCount
         && Repetitions.All(repetition => repetition.Succeeded);

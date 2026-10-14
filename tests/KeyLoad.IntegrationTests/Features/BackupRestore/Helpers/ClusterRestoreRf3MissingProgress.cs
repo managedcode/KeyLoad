@@ -13,7 +13,9 @@ internal static class ClusterRestoreRf3MissingProgress
         if (!file.Exists || file.Length < MinimumProgressBytes
             || file.Length > IntegrationExecutionOptions.StorageExecution().Value.MaximumBackupManifestBytes
             || (file.Attributes & FileAttributes.ReparsePoint) != default)
-        { throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid); }
+        {
+            throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid);
+        }
         var original = await File.ReadAllBytesAsync(path, cancellationToken).ConfigureAwait(false);
         var originalOperation = ClusterRestoreRf3RetainedCut.Operation(target);
         var targetCut = published ? ClusterRestoreRf3RetainedCut.Target(target) : null;
@@ -36,14 +38,18 @@ internal static class ClusterRestoreRf3MissingProgress
             finally
             {
                 if (removed)
-                { Restore(path, original); }
+                {
+                    Restore(path, original);
+                }
                 cleanupCompleted = true;
             }
         }
         catch (Exception terminal)
         {
             if (primary is not null && !cleanupCompleted)
-            { throw new AggregateException(primary, terminal); }
+            {
+                throw new AggregateException(primary, terminal);
+            }
             throw;
         }
         await Assert.That(ClusterRestoreRf3RetainedCut.Operation(target).SequenceEqual(originalOperation)).IsTrue();
@@ -53,7 +59,9 @@ internal static class ClusterRestoreRf3MissingProgress
     private static async Task RequireTargetAsync(ClusterRestoreRf3Fixture target, byte[]? targetCut)
     {
         if (targetCut is not null)
-        { await Assert.That(ClusterRestoreRf3RetainedCut.Target(target).SequenceEqual(targetCut)).IsTrue(); }
+        {
+            await Assert.That(ClusterRestoreRf3RetainedCut.Target(target).SequenceEqual(targetCut)).IsTrue();
+        }
         else
         {
             await Assert.That(Directory.Exists(target.DataRoot)).IsFalse();

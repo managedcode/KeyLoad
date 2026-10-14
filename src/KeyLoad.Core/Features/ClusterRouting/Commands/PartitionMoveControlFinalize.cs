@@ -21,16 +21,26 @@ public sealed partial class DatabaseEngine
             || JsonData.Fingerprint(body.Control) != JsonData.Fingerprint(current)
             || phase.ControlIntentDigest != PartitionMoveIntentIdentity.Digest(current)
             || current.Phase != PartitionMovePhase.Installed || current.InstalledReceipt is null)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
         var owners = RequireMoveDirectory(transaction);
         if (!PhysicalOwnerEntryValidation.SameOwner(owners.ControlOwner, phase.ControlOwner))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
         var placement = ResolveRegisteredPlacement(transaction, phase.Partition, owners.ControlOwner);
         if (!PartitionMoveControlValidation.SameSource(placement, current.SourcePlacement))
-        { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict);
+        }
         var journal = MoveJournalReceipt(transaction, commandId, position, phase.ControlIntentDigest);
         var row = PublishMovePlacement(transaction, current, journal);
-        var published = current with { Phase = PartitionMovePhase.Published, PublishedPlacement = row };
+        var published = current with
+        {
+            Phase = PartitionMovePhase.Published,
+            PublishedPlacement = row
+        };
         PartitionMoveControlStorage.Write(transaction, published, Limits.MaxBatchBytes);
         return new(phase.MoveId, phase.Stage, journal, published, null, null, row);
     }
@@ -40,12 +50,16 @@ public sealed partial class DatabaseEngine
     {
         var directory = AtomicPartitionPlacementSerialization.ReadDirectory(transaction);
         if (directory is not null)
-        { AtomicPartitionPlacementValidation.ValidateDirectory(directory); }
+        {
+            AtomicPartitionPlacementValidation.ValidateDirectory(directory);
+        }
         var revision = checked((directory?.Revision ?? PartitionMoveProtocol.EmptyCount) + PartitionMoveProtocol.SequenceStep);
         var count = checked((directory?.ExplicitAssignmentCount ?? PartitionMoveProtocol.EmptyCount)
             + (current.SourcePlacement.IsFallback ? PartitionMoveProtocol.SequenceStep : PartitionMoveProtocol.EmptyCount));
         if (count > AtomicPartitionPlacementProtocol.MaximumExplicitAssignments)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity);
+        }
         var epoch = checked(Math.Max(current.SourcePlacement.PlacementEpoch,
             current.DestinationOwner.PlacementEpoch) + PartitionMoveProtocol.SequenceStep);
         var row = new AtomicPartitionPlacementV1(AtomicPartitionPlacementProtocol.CurrentVersion,

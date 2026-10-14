@@ -50,12 +50,16 @@ public static class ClusterBackupNativeCutVerification
             || cut.Directory != AtomicPartitionPlacementSerialization.ReadDirectory(admitted)
             || !ClusterBackupMetadataEquality.Registered(cut.RegisteredOwners,
                 PhysicalOwnerDirectorySerialization.Read(admitted)))
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidCut); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidCut);
+        }
         var entries = ClusterBackupRosterCapture.Read(admitted, identity.Incarnation, position, applied, limits.Value);
         var census = ClusterBackupCanonicalCensus.Require(admitted, entries, limits.Value, work.Cancellation);
         RequirePartitions(admitted, cut, entries, census, work);
         if (!string.Equals(cut.CanonicalDigest, census.Digest, StringComparison.Ordinal))
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidCut); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidCut);
+        }
         work.Check();
         return cut;
     }
@@ -65,7 +69,9 @@ public static class ClusterBackupNativeCutVerification
         ClusterBackupCanonicalCensus.Census census, ReadExecutionBudget work)
     {
         if (cut.Partitions.IsDefault || cut.Partitions.Length != entries.Count)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidCut); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidCut);
+        }
         var seen = new HashSet<PartitionRef>();
         foreach (var partition in cut.Partitions)
         {
@@ -81,7 +87,9 @@ public static class ClusterBackupNativeCutVerification
                 || partition.Roster != actual.Entry || !string.Equals(partition.RosterDigest, actual.Digest, StringComparison.Ordinal)
                 || !ClusterBackupMetadataEquality.Placement(partition.Placement,
                     DatabaseEngine.ReadClusterBackupPlacement(view, partition.Roster.Partition, cut.Owner)))
-            { throw Errors.Fail(ErrorCode.Corruption, InvalidCut); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, InvalidCut);
+            }
         }
     }
 }

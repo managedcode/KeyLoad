@@ -37,7 +37,9 @@ internal static class IsolatedKeyLoadPublicRegressionProtocol
         => new(partition, CallPrefix + operation + CallSuffix, new()
         {
             [Argument] = JsonSerializer.SerializeToElement(new Dictionary<string, JsonElement>(StringComparer.Ordinal)
-            { [Request] = JsonSerializer.SerializeToElement(request, JsonDefaults.Options) }, JsonDefaults.Options)
+            {
+                [Request] = JsonSerializer.SerializeToElement(request, JsonDefaults.Options)
+            }, JsonDefaults.Options)
         });
 
     internal static async Task<T> SqlAsync<T>(KeyLoadClient sdk, SqlOperationRequest request, CancellationToken token)

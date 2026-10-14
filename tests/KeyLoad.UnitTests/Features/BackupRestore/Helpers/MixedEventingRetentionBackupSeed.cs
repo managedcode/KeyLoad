@@ -11,7 +11,9 @@ internal static class MixedEventingRetentionBackupSeed
         var state = new MixedEventingRetentionBackupState
         {
             Queue = new(fixture.Source.Partition, QueueWholeFlowStorage.Clock(fixture.Source.Store))
-            { NativeSubmit = fixture.Source.SubmitIssued }
+            {
+                NativeSubmit = fixture.Source.SubmitIssued
+            }
         };
         await QueueLifecycleInitialPhase.RunAsync(fixture.Source.Database, fixture.Source.Store, state.Queue, token);
         var originalFailures = new List<Exception>();

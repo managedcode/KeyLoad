@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core.Features.Search;
-using KeyLoad.Orleans;
 using KeyLoad.Query.Features.Search;
 
 namespace KeyLoad.Server.Features.Search;
@@ -21,10 +21,22 @@ internal sealed class NativeAnnMaintenanceSession(Guid id, AnnMaintenanceRequest
     internal AnnSeed Upper { get; } = upper;
     internal NativeAnnMaintenanceMemoryLease Memory { get; } = memory;
     internal NativeAnnManifest? Manifest { get; set; } = original;
-    internal PackedAnnIndex? LoadedIndex { get; set; }
-    internal NativeAnnReplay? Replay { get; set; }
-    internal AnnSeed? Verified { get; set; }
-    internal ProjectionBatch? LastPage { get; set; }
+    internal PackedAnnIndex? LoadedIndex
+    {
+        get; set;
+    }
+    internal NativeAnnReplay? Replay
+    {
+        get; set;
+    }
+    internal AnnSeed? Verified
+    {
+        get; set;
+    }
+    internal ProjectionBatch? LastPage
+    {
+        get; set;
+    }
     internal bool ExplicitBuild { get; set; } = request.Mode == AnnMaintenanceMode.Build;
     internal long RetainedBytes => checked(Upper.OwnedBytesUpperBound
         + (Replay?.RetainedBytes ?? EmptyBytes) + (Verified?.OwnedBytesUpperBound ?? EmptyBytes)
@@ -34,7 +46,9 @@ internal sealed class NativeAnnMaintenanceSession(Guid id, AnnMaintenanceRequest
     {
         if (id != Id || principal != PrincipalId
             || !NativeSerialization.Serialize(request).AsSpan().SequenceEqual(NativeSerialization.Serialize(Request)))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, NativeAnnProtocol.Ownership); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, NativeAnnProtocol.Ownership);
+        }
     }
 
     internal void RequireUpper(AnnSeed current)
@@ -43,6 +57,8 @@ internal sealed class NativeAnnMaintenanceSession(Guid id, AnnMaintenanceRequest
         if (current.DependencySha256 != Upper.DependencySha256 || current.Cut.OutboxTail != Upper.Cut.OutboxTail
             || current.CorpusSha256 != Upper.CorpusSha256 || current.Scope.SchemaVersion != Upper.Scope.SchemaVersion
             || current.Scope.PolicyEpoch != Upper.Scope.PolicyEpoch)
-        { throw Errors.Fail(ErrorCode.HistoryUnavailable, NativeAnnProtocol.MissingDependencyHistory); }
+        {
+            throw Errors.Fail(ErrorCode.HistoryUnavailable, NativeAnnProtocol.MissingDependencyHistory);
+        }
     }
 }

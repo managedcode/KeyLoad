@@ -19,17 +19,25 @@ internal static class PartitionQueryParallelBatch
     {
         var tasks = new Task<TResult>[count];
         for (var index = FirstTaskIndex; index < count; index++)
-        { tasks[index] = RunLeafAsync(leaves[offset + index], execution, run); }
+        {
+            tasks[index] = RunLeafAsync(leaves[offset + index], execution, run);
+        }
         try
-        { return await Task.WhenAll(tasks).ConfigureAwait(false); }
+        {
+            return await Task.WhenAll(tasks).ConfigureAwait(false);
+        }
         catch (Exception primary)
         {
             var failures = tasks.Where(task => task.IsFaulted)
                 .SelectMany(task => task.Exception!.InnerExceptions).ToArray();
             if (failures.Length > SingleFailure)
-            { throw new AggregateException(failures); }
+            {
+                throw new AggregateException(failures);
+            }
             if (failures.Length == SingleFailure)
-            { ExceptionDispatchInfo.Capture(failures[FirstTaskIndex]).Throw(); }
+            {
+                ExceptionDispatchInfo.Capture(failures[FirstTaskIndex]).Throw();
+            }
             ExceptionDispatchInfo.Capture(primary).Throw();
             throw;
         }
@@ -46,7 +54,9 @@ internal static class PartitionQueryParallelBatch
         catch (Exception primary)
         {
             try
-            { await execution.CancelAsync().ConfigureAwait(false); }
+            {
+                await execution.CancelAsync().ConfigureAwait(false);
+            }
             catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
             throw;
         }

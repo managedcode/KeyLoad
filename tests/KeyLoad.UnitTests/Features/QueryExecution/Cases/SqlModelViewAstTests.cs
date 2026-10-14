@@ -22,7 +22,10 @@ internal sealed class SqlModelViewAstTests
                 SqlModelViewTestSupport.Queue)
             }, AllowFullScan: true)));
         var mismatchedQueue = Assert.ThrowsExactly<KeyLoadException>(() => engine.ExecuteAst("root",
-            new(database.Partition, query with { ModelSource = new(ModelQuerySourceKind.QueueMessages, "other") },
+            new(database.Partition, query with
+            {
+                ModelSource = new(ModelQuerySourceKind.QueueMessages, "other")
+            },
                 AllowFullScan: true)));
 
         await Assert.That(noConsent.Code).IsEqualTo(ErrorCode.UnsupportedCapability);

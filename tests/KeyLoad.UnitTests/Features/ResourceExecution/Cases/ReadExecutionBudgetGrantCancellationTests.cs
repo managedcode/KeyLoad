@@ -40,7 +40,10 @@ internal sealed class ReadExecutionBudgetGrantCancellationTests
         var visited = 0;
         var error = Assert.ThrowsExactly<KeyLoadException>(() => database.Store.Read(view =>
         {
-            var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new() { QueryDeadlineSeconds = QueryDeadlineSeconds }), clock);
+            var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new()
+            {
+                QueryDeadlineSeconds = QueryDeadlineSeconds
+            }), clock);
             var grant = budget.CreateReadGrant(64, 2);
             return grant.VisitRange(view, ReadExecutionBudgetGrantSeed.Prefix, 2, (_, _) =>
             {

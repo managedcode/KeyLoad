@@ -29,7 +29,9 @@ internal static class EventFeedTailRf3PairJoin
         {
             await ServerFailureObserver.ObserveAsync(owned.CancelAsync, failures).ConfigureAwait(false);
             await ServerFailureObserver.ObserveAsync(async () =>
-            { terminal = await decode(await originalOperation.ConfigureAwait(false)).ConfigureAwait(false); }, failures).ConfigureAwait(false);
+            {
+                terminal = await decode(await originalOperation.ConfigureAwait(false)).ConfigureAwait(false);
+            }, failures).ConfigureAwait(false);
         }
         ServerFailureObserver.ThrowIfAny(failures);
         var pair = expected ?? throw new InvalidOperationException(Missing);

@@ -110,7 +110,13 @@ internal sealed class AggregateReplayTests
         {
             var key = badEvent.EventKey(1);
             var record = transaction.GetRecord<EventRecord>(key) ?? throw new InvalidOperationException();
-            transaction.PutRecord(key, record with { Data = record.Data with { SchemaVersion = 0 } });
+            transaction.PutRecord(key, record with
+            {
+                Data = record.Data with
+                {
+                    SchemaVersion = 0
+                }
+            });
             return true;
         });
         var eventError = Assert.ThrowsExactly<KeyLoadException>(() => badEvent.Read(maximumEvents: 1));
@@ -122,7 +128,11 @@ internal sealed class AggregateReplayTests
     [Test]
     public async Task AcEvent010CompleteTailAndSharedLimitsRejectWholeRequests()
     {
-        using var fixture = new AggregateReplayFixture(new() { MaxResults = 2, MaxScanRecords = 2 });
+        using var fixture = new AggregateReplayFixture(new()
+        {
+            MaxResults = 2,
+            MaxScanRecords = 2
+        });
         fixture.Append(Event(FirstEventId, 1), Event(SecondEventId, 2), Event(ThirdEventId, 3));
 
         var tooLarge = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Read(maximumEvents: 3));
@@ -141,13 +151,19 @@ internal sealed class AggregateReplayTests
     {
         using var rawBudget = new AggregateReplayFixture();
         rawBudget.Append(Event(FirstEventId, 1));
-        rawBudget.Reopen(new() { MaxQueryReadBytes = 32 });
+        rawBudget.Reopen(new()
+        {
+            MaxQueryReadBytes = 32
+        });
         var rawError = Assert.ThrowsExactly<KeyLoadException>(() => rawBudget.Read(maximumEvents: 1));
 
         using var resultBudget = new AggregateReplayFixture();
         resultBudget.Append(new EventData(FirstEventId, AggregateReplayFixture.EventType,
             "{\"" + ValueField + "\":\"" + new string('x', 512) + "\"}"));
-        resultBudget.Reopen(new() { MaxBatchBytes = 256 });
+        resultBudget.Reopen(new()
+        {
+            MaxBatchBytes = 256
+        });
         var resultError = Assert.ThrowsExactly<KeyLoadException>(() => resultBudget.Read(maximumEvents: 1));
 
         await Assert.That(rawError.Code).IsEqualTo(ErrorCode.BudgetExceeded);
@@ -157,7 +173,10 @@ internal sealed class AggregateReplayTests
     [Test]
     public async Task AcEvent010ReadDeadlineRejectsTheWholeReplay()
     {
-        using var fixture = new AggregateReplayFixture(new() { QueryDeadlineSeconds = 1 },
+        using var fixture = new AggregateReplayFixture(new()
+        {
+            QueryDeadlineSeconds = 1
+        },
             timeProvider: new ExpiredReplayClock());
         fixture.Append(Event(FirstEventId, 1), Event(SecondEventId, 2));
         fixture.StoreSnapshot(1);

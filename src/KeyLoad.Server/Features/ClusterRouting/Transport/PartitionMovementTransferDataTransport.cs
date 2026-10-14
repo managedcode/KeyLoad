@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
+using KeyLoad.Clustering;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
-using KeyLoad.Orleans;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
@@ -37,7 +37,9 @@ internal sealed class PartitionMovementTransferDataTransport(PartitionMovementTr
     {
         if (response.Payload.IsEmpty || response.Payload.Length > context.Partition.Database.Limits.MaxBatchBytes
             || string.IsNullOrEmpty(response.Signature))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof);
+        }
         var body = response.Payload.ToArray();
         var key = Convert.FromBase64String(PartitionMovementNativeDiscoveryIdentity.Secret(
             context.Options, context.Partition.Configuration, source));
@@ -45,7 +47,9 @@ internal sealed class PartitionMovementTransferDataTransport(PartitionMovementTr
         {
             using var mac = new PartitionMovementMac(key, context.Partition.Database.Limits.MaxBatchBytes);
             if (!mac.VerifyTransferData(body, response.Signature, reply: true))
-            { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof); }
+            {
+                throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof);
+            }
         }
         finally { CryptographicOperations.ZeroMemory(key); }
         return NativeSerialization.Deserialize<PartitionMovementTransferDataReply>(body);
@@ -67,7 +71,9 @@ internal sealed class PartitionMovementTransferDataTransport(PartitionMovementTr
             || discovery.RuntimeJournalReaderContract != StoreReaderContract.RuntimeJournal
             || discovery.SiloAddress != target.ToParsableString()
             || !PhysicalGroupAddress.CanonicalAddress(discovery.SiloAddress, context.Membership))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof);
+        }
         PartitionMovementTransportReplyValidation.RequireValue(reply.Reply);
     }
 }

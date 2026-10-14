@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
 using ManagedCode.Communication;
@@ -26,12 +26,18 @@ internal static class NativeActivationMigrationRf3Attempt
             await Assert.That(witness.ActivationId).IsEqualTo(established.ActivationId);
             var request = NativeActivationMigrationRf3Control.Write(wave.QueryControls, witness, target, foreign);
             if (cancel)
-            { await lifetime.CancelAsync().ConfigureAwait(false); }
+            {
+                await lifetime.CancelAsync().ConfigureAwait(false);
+            }
             else
-            { held.Release(); }
+            {
+                held.Release();
+            }
             var result = await held.Producer.ConfigureAwait(false);
             if (cancel)
-            { await RequestCqrsFaultOutcome.AssertSdkUnknownWriteAsync(result).ConfigureAwait(false); }
+            {
+                await RequestCqrsFaultOutcome.AssertSdkUnknownWriteAsync(result).ConfigureAwait(false);
+            }
             else if (foreign)
             {
                 await Assert.That(result.IsFailed).IsTrue();
@@ -40,7 +46,9 @@ internal static class NativeActivationMigrationRf3Attempt
                 await Assert.That(result.Problem?.Detail).IsEqualTo(GrainRoutingProtocol.InvalidRequest);
             }
             else
-            { await SqlRf3Protocol.EqualAsync(receipt, await McpCallerAssertions.SdkSuccessAsync(result)); }
+            {
+                await SqlRf3Protocol.EqualAsync(receipt, await McpCallerAssertions.SdkSuccessAsync(result));
+            }
             await NativeActivationMigrationRf3Control.RequireRequestedAsync(wave.QueryControls, request,
                 expected: !cancel && !foreign, cancellationToken).ConfigureAwait(false);
             await RequestCqrsPhaseFaultAssertions.VerifySettledAsync(wave.QueryControls, held.Arm, witness.RequestId,

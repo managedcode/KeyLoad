@@ -42,7 +42,9 @@ internal static class PostgresDecimalRf3Frames
         BinaryPrimitives.WriteUInt16BigEndian(bytes.AsSpan(sizeof(short) * 2), sign);
         BinaryPrimitives.WriteInt16BigEndian(bytes.AsSpan(sizeof(short) * 3), scale);
         for (var index = 0; index < digits.Length; index++)
-        { BinaryPrimitives.WriteInt16BigEndian(bytes.AsSpan(PostgresDecimalRf3Protocol.HeaderBytes + index * sizeof(short)), digits[index]); }
+        {
+            BinaryPrimitives.WriteInt16BigEndian(bytes.AsSpan(PostgresDecimalRf3Protocol.HeaderBytes + index * sizeof(short)), digits[index]);
+        }
         return bytes;
     }
 }

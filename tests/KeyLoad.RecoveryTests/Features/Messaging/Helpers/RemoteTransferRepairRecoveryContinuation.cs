@@ -28,12 +28,18 @@ internal static class RemoteTransferRepairRecoveryContinuation
             await Assert.That(proof.TargetCommit).IsEqualTo(accepted.Token);
         }
         if (proof is null)
-        { throw new InvalidOperationException(RemoteTransferRepairCrashProtocol.Missing); }
+        {
+            throw new InvalidOperationException(RemoteTransferRepairCrashProtocol.Missing);
+        }
         var complete = new CommandRequest(RemoteTransferRepairIdentity.CommandId(hint, QueueTransferRepairStage.Complete),
             source.Partition, [new CompleteQueueTransfer(source, mutation.TransferId, proof.ReceiptToken)]);
         var completed = database.ApplyEmbedded(CrashDatabase.Operation(OperationKind.Batch, complete, complete.CommandId), token).Get<CommitReceipt>();
         var delivered = database.InspectQueueTransfer(CrashFixtureValues.Principal, source, mutation.TransferId, token)!;
-        await EqualAsync(delivered, intent with { State = QueueTransferState.Delivered, ReceiptToken = proof.ReceiptToken });
+        await EqualAsync(delivered, intent with
+        {
+            State = QueueTransferState.Delivered,
+            ReceiptToken = proof.ReceiptToken
+        });
         var message = database.InspectMessage(CrashFixtureValues.Principal, target, RemoteTransferAttemptCrashProtocol.OriginalMessage)!;
         await EqualAsync(message, new MessageInspection(new(RemoteTransferAttemptCrashProtocol.OriginalMessage, MessageState.Ready,
             RemoteTransferAttemptCrashProtocol.InitialAttempts, RemoteTransferRepairCrashProtocol.InitialGeneration,

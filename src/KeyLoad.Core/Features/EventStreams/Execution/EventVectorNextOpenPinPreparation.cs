@@ -20,7 +20,9 @@ public sealed partial class DatabaseEngine
             var principal = Principal(bounded, principalId, EvaluationClock.GetUtcNow());
             var actual = RequireEventVectorControlView(bounded, principal, originalOpen);
             if (originalOpen.OriginalParentExpiresAt <= EvaluationClock.GetUtcNow())
-            { throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidNextEventVectorPin); }
+            {
+                throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidNextEventVectorPin);
+            }
             var admission = new EventVectorAdmissionPolicy(OperationLimitsOptions);
             var inventory = EventVectorMapInventory.Read(bounded, originalOpen.OriginalRequest.ControlPartition,
                 originalOpen.OriginalRequest.MapId, OperationLimitsOptions, cancellationToken);

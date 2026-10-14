@@ -26,7 +26,10 @@ internal static class PostgresPureReadRf3Provisioning
             ]
         };
         var actual = await PersistAsync(root, expected, token);
-        return new(identity with { Principal = actual }, actual, image);
+        return new(identity with
+        {
+            Principal = actual
+        }, actual, image);
     }
 
     internal static Task<PrincipalRecord> GraphPolicyAsync(KeyLoadClient root, PrincipalRecord current,

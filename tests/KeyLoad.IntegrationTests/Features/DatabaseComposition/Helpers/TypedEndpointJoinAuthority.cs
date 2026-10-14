@@ -23,9 +23,15 @@ internal static class TypedEndpointJoinAuthority
         var originalProblem = await DeniedAsync(callers, denied, token);
         await SqlRf3Protocol.EqualAsync(seed.Models, await TypedEndpointJoinAssertions.CaptureAsync(admin, seed.Partition, token));
         var repaired = await PolicyAsync(admin, seed.Partition, seed.ToDefinition, TypedEndpointJoinProtocol.UseGrant, token);
-        var repairedSeed = seed with { ToDefinition = repaired };
+        var repairedSeed = seed with
+        {
+            ToDefinition = repaired
+        };
         await SqlRf3Protocol.EqualAsync(emptyProblem, await DeniedAsync(callers, emptyDenied, token));
-        var emptyHealthy = emptyDenied with { CommandId = Guid.NewGuid() };
+        var emptyHealthy = emptyDenied with
+        {
+            CommandId = Guid.NewGuid()
+        };
         var emptyReceipt = await SqlRf3Protocol.SdkAsync<CommitReceipt>(callers.Sdk, TypedEndpointJoinProtocol.Sql(emptyHealthy), token);
         await Assert.That(emptyReceipt.CommandId).IsEqualTo(emptyHealthy.CommandId);
         await Assert.That(emptyReceipt.Mutations.Length).IsEqualTo(TypedEndpointJoinProtocol.NoEffects);

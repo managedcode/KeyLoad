@@ -30,7 +30,10 @@ internal sealed class GraphTraversalDeadlineTests
     public async Task ElapsedCapDuringNativeAdjacencyWorkRejectsWithoutPartialPageAndHealthyTraversalFollows(int examinedEdges)
     {
         var clock = new GraphTraversalDeadlineClock();
-        using var database = new TestDatabase(new() { QueryDeadlineSeconds = DeadlineSeconds }, timeProvider: clock);
+        using var database = new TestDatabase(new()
+        {
+            QueryDeadlineSeconds = DeadlineSeconds
+        }, timeProvider: clock);
         database.Configure(Orders, ResourceKind.Collection);
         database.Configure(Links, ResourceKind.Graph);
         EntityRef Vertex(string id) => new(database.Partition, Orders, id);

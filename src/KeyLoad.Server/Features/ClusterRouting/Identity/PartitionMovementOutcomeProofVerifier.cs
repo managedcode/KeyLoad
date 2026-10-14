@@ -1,8 +1,8 @@
 using System.Security.Cryptography;
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
@@ -18,15 +18,21 @@ internal static class PartitionMovementOutcomeProofVerifier
             || body.OriginalCaptureReleaseNonce != original.OriginalCaptureReleaseNonce
             || witness.OriginalReplyBytes.IsEmpty || witness.OriginalReplyBytes.Length > database.Limits.MaxBatchBytes
             || string.IsNullOrWhiteSpace(witness.OriginalReplySignature))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof);
+        }
         var expectedNonce = original.Stage == PartitionMovePeerStage.Capture
             ? original.OriginalCaptureReleaseNonce : original.OriginalRequestNonce;
         if (witness.Purpose == PartitionMoveOutcomeProofPurpose.EffectReply && witness.ReplyNonce != expectedNonce)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof);
+        }
         if (witness.Purpose == PartitionMoveOutcomeProofPurpose.OutcomeReadReply
             && (witness.ReplyNonce == original.OriginalRequestNonce
                 || witness.ReplyNonce == original.OriginalCaptureReleaseNonce))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof);
+        }
         VerifyOutcomeMac(database, original, witness, options);
         work.Check();
         var reply = NativeSerialization.Deserialize<PartitionMovementTransportReply>(witness.OriginalReplyBytes.Span);
@@ -36,14 +42,18 @@ internal static class PartitionMovementOutcomeProofVerifier
             || !original.OriginalReceiverOwner.VoterIds.Contains(reply.Discovery.VoterId)
             || reply.Discovery.Incarnation != original.OriginalReceiverOwner.Incarnation
             || reply.Discovery.ClusterId != options.ClusterId || reply.Reply.Error is not null)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof);
+        }
         var value = GrainNativePayload.Read<GrainValue>(reply.Reply.Payload).Value;
         var actual = witness.Purpose == PartitionMoveOutcomeProofPurpose.OutcomeReadReply
             ? (value as PartitionMovementOutcomeWitness)?.Result
             : value is PartitionMovePhaseResult phase ? new OperationResult(null) { NativeValue = phase } : null;
         if (actual is null || body.ObservedOriginalResult is null
             || !NativeSerialization.Serialize(actual).AsSpan().SequenceEqual(NativeSerialization.Serialize(body.ObservedOriginalResult)))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof);
+        }
         work.CheckResult(actual);
     }
 
@@ -51,7 +61,9 @@ internal static class PartitionMovementOutcomeProofVerifier
         PartitionMoveAuthenticatedOutcomeWitness witness, NodeOptions options)
     {
         if (original.OriginalGrant is null)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMovementProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMovementProtocol.InvalidProof);
+        }
         var key = Convert.FromBase64String(original.OriginalReceiverOwner.PhysicalShardId == options.PhysicalShardId
             && original.OriginalReceiverOwner.Incarnation == database.Store.Identity.Incarnation
             ? options.PeerSecret : options.PhysicalGroupTrust.ForeignPeerSecret
@@ -63,7 +75,9 @@ internal static class PartitionMovementOutcomeProofVerifier
                 ? mac.VerifyOutcome(witness.OriginalReplyBytes.Span, witness.OriginalReplySignature, reply: true)
                 : mac.Verify(witness.OriginalReplyBytes.Span, witness.OriginalReplySignature, reply: true);
             if (!verified)
-            { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof); }
+            {
+                throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof);
+            }
         }
         finally { CryptographicOperations.ZeroMemory(key); }
     }

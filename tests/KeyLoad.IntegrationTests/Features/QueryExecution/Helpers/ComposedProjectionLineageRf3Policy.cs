@@ -25,7 +25,9 @@ internal static class ComposedProjectionLineageRf3Policy
         };
         var persisted = await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.ConfigureResourceAsync(Guid.NewGuid(),
             new ConfigureResourceRequest(state.Partition.TenantId, state.Partition.DatabaseId, resource)
-            { ExpectedSchemaVersion = current.SchemaVersion }, token));
+            {
+                ExpectedSchemaVersion = current.SchemaVersion
+            }, token));
         await SqlRf3Protocol.EqualAsync(resource, persisted);
         var after = await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.ListResourcesAsync(
             new(state.Partition.TenantId, state.Partition.DatabaseId), token));
@@ -37,13 +39,22 @@ internal static class ComposedProjectionLineageRf3Policy
     {
         var fields = new List<string>();
         if (scoreRead)
-        { fields.Add(ScoreRead); }
+        {
+            fields.Add(ScoreRead);
+        }
         if (referenceUse)
-        { fields.Add(QueueReferenceSelectProtocol.RefUse); }
+        {
+            fields.Add(QueueReferenceSelectProtocol.RefUse);
+        }
         if (scoreUse)
-        { fields.Add(ScoreUse); }
+        {
+            fields.Add(ScoreUse);
+        }
         if (reads)
-        { fields.Add(QueueReferenceSelectProtocol.RefRead); fields.Add(QueueReferenceSelectProtocol.NameRead); }
+        {
+            fields.Add(QueueReferenceSelectProtocol.RefRead);
+            fields.Add(QueueReferenceSelectProtocol.NameRead);
+        }
         var principal = state.Identity.Principal with
         {
             PolicyEpoch = epoch,

@@ -50,7 +50,11 @@ internal static class PhysicalShardCatalogPolicyOutcomeFlow
     private static async Task GrantAndReplayAsync(PhysicalShardCatalogFixture fixture,
         PrincipalRecord principal, ReplicatedOperation denied, byte[] originalOutcome)
     {
-        var granted = principal with { ClusterAdministrator = true, PolicyEpoch = GrantedPolicyEpoch };
+        var granted = principal with
+        {
+            ClusterAdministrator = true,
+            PolicyEpoch = GrantedPolicyEpoch
+        };
         var result = fixture.Database.Apply(new(Guid.NewGuid(), OperationKind.ConfigurePrincipal,
             PhysicalShardCatalogFixture.RootPrincipalId, fixture.Database.EvaluationClock.GetUtcNow(),
             JsonSerializer.Serialize(new ConfigurePrincipalRequest(granted), JsonDefaults.Options)));
@@ -84,7 +88,10 @@ internal static class PhysicalShardCatalogPolicyOutcomeFlow
         fixture.Reopen();
         await PhysicalShardCatalogPolicyOutcomeAssertions.UnchangedAsync(fixture, image, cut);
         await PhysicalShardCatalogPolicyOutcomeAssertions.HealthyAsync(fixture, authorized, receipt);
-        var changed = Operation(fixture, AuthorizedId, Request() with { Incarnation = Guid.NewGuid() });
+        var changed = Operation(fixture, AuthorizedId, Request() with
+        {
+            Incarnation = Guid.NewGuid()
+        });
         await Assert.That(fixture.Database.Apply(changed).Error).IsEqualTo(ErrorCode.Conflict);
         await PhysicalShardCatalogPolicyOutcomeAssertions.UnchangedAsync(fixture, image, cut);
         var continuation = fixture.Database.Apply(Operation(fixture, ContinuationId, Request()));

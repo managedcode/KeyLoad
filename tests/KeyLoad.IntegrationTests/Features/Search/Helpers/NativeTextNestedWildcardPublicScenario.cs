@@ -37,7 +37,10 @@ internal sealed record NativeTextNestedWildcardPublicScenario(PartitionRef Parti
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.CommitAsync(original, token));
         var principal = new PrincipalRecord("nested-reader-" + Guid.NewGuid().ToString("N"), partition.TenantId,
             [new(partition.DatabaseId, Collection, Capability.Query | Capability.DocumentsRead)], [Use])
-        { RestrictRows = true, OwnerId = "owner-a" };
+        {
+            RestrictRows = true,
+            OwnerId = "owner-a"
+        };
         var identity = await NativeTextRf3Scenario.ConfigureIdentityAsync(fixture, principal, token);
         await Assert.That(identity.Principal.PolicyEpoch).IsEqualTo(1L);
         await SqlRf3Protocol.EqualAsync(new[] { new MutationReceipt("putDocument", Collection, "a", 1L) },

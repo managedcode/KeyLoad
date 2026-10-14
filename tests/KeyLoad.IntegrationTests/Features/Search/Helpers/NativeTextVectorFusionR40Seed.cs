@@ -44,7 +44,10 @@ internal static class NativeTextVectorFusionR40Seed
         var principal = new PrincipalRecord("native-text-vector-reader-" + Guid.NewGuid().ToString("N"), partition.TenantId,
             [new(partition.DatabaseId, resource.Name, Capability.Query | Capability.DocumentsRead | Capability.VectorSearch)],
             [RawReadGrant, NativeTextRf3Scenario.SecretReadGrant, NativeTextRf3Scenario.TextUseGrant, NativeTextRf3Scenario.VectorUseGrant])
-        { PolicyEpoch = 1L, OwnerId = NativeTextRf3Scenario.OwnerA };
+        {
+            PolicyEpoch = 1L,
+            OwnerId = NativeTextRf3Scenario.OwnerA
+        };
         var reader = await NativeTextRf3Scenario.ConfigureIdentityAsync(fixture, principal, token);
         await SqlRf3Protocol.EqualAsync(principal, reader.Principal);
         var outbox = await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.OutboxStatusAsync(partition, token));

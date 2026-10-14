@@ -49,7 +49,9 @@ internal static class AdminBackupArchiveVerifier
         var restoreDirectory = Path.GetFullPath(Path.Combine(fixture.Root, string.Concat(RestoreDirectoryPrefix,
             Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat))));
         if (Directory.Exists(restoreDirectory) || File.Exists(restoreDirectory))
-        { throw new IOException(OccupiedRestoreDirectory); }
+        {
+            throw new IOException(OccupiedRestoreDirectory);
+        }
 
         var failures = new List<Exception>();
         ZoneTreeStore? restoredStore = null;
@@ -80,7 +82,9 @@ internal static class AdminBackupArchiveVerifier
         }, failures).ConfigureAwait(false);
 
         if (restoredStore is not null)
-        { ServerFailureObserver.Observe(restoredStore.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(restoredStore.Dispose, failures);
+        }
         ServerFailureObserver.Observe(() => DeleteOwnedRestoreDirectory(restoreDirectory), failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -109,7 +113,9 @@ internal static class AdminBackupArchiveVerifier
             var manifests = snapshot.Storage.Files.Where(file => file.Category == BackupCategory
                 && string.Equals(file.Path, expectedManifest, StringComparison.Ordinal)).ToArray();
             if (manifests.Length == EmptyInventoryCount)
-            { continue; }
+            {
+                continue;
+            }
             await Assert.That(manifests.Length).IsEqualTo(SingleMatchingManifestCount);
             var manifest = manifests.Single();
             await Assert.That(manifest.Bytes).IsGreaterThan(EmptyInventoryCount);
@@ -143,7 +149,9 @@ internal static class AdminBackupArchiveVerifier
             var path = ResolveFixtureOwnedPath(fixtureRoot, Path.Combine(voterDirectory, relativePath));
             var file = new FileInfo(path);
             if (!file.Exists)
-            { throw new InvalidDataException(ObservedArchiveFileMissing); }
+            {
+                throw new InvalidDataException(ObservedArchiveFileMissing);
+            }
             await Assert.That(file.Length).IsEqualTo(observed.Bytes);
         }
     }
@@ -153,7 +161,9 @@ internal static class AdminBackupArchiveVerifier
         var path = Path.Combine(voterDirectory, BackupDirectoryName, receiptId);
         var directory = ResolveFixtureOwnedPath(fixtureRoot, path);
         if (!Directory.Exists(directory))
-        { throw new DirectoryNotFoundException(ArchiveDirectoryMissing); }
+        {
+            throw new DirectoryNotFoundException(ArchiveDirectoryMissing);
+        }
         return directory;
     }
 
@@ -166,7 +176,9 @@ internal static class AdminBackupArchiveVerifier
             ? root
             : string.Concat(root, Path.DirectorySeparatorChar);
         if (!fullPath.StartsWith(rootPrefix, comparison))
-        { throw new InvalidDataException(ArchivePathOutsideFixture); }
+        {
+            throw new InvalidDataException(ArchivePathOutsideFixture);
+        }
         return fullPath;
     }
 
@@ -175,7 +187,9 @@ internal static class AdminBackupArchiveVerifier
         if (!Uri.TryCreate(voter, UriKind.Absolute, out var origin) || origin.Scheme != Uri.UriSchemeHttp
             || !Nodes.Contains(origin.Host, StringComparer.Ordinal) || origin.UserInfo.Length != EmptyInventoryCount
             || origin.GetLeftPart(UriPartial.Authority) != voter)
-        { throw new InvalidDataException(VoterDirectoryOutsideFixture); }
+        {
+            throw new InvalidDataException(VoterDirectoryOutsideFixture);
+        }
         var resource = fixture.App.Services.GetRequiredService<DistributedApplicationModel>().Resources
             .OfType<ContainerResource>().Single(item => item.Name == origin.Host);
         var endpoint = resource.Annotations.OfType<EndpointAnnotation>()
@@ -184,13 +198,17 @@ internal static class AdminBackupArchiveVerifier
             .Single(item => item.Target == DataMountTarget);
         if (origin.Port != endpoint.TargetPort || mount.Type != ContainerMountType.BindMount || mount.IsReadOnly
             || mount.Source is not { } source)
-        { throw new InvalidDataException(VoterDirectoryOutsideFixture); }
+        {
+            throw new InvalidDataException(VoterDirectoryOutsideFixture);
+        }
         return ResolveFixtureOwnedPath(fixture.Root, source);
     }
 
     private static void DeleteOwnedRestoreDirectory(string directory)
     {
         if (Directory.Exists(directory))
-        { Directory.Delete(directory, recursive: true); }
+        {
+            Directory.Delete(directory, recursive: true);
+        }
     }
 }

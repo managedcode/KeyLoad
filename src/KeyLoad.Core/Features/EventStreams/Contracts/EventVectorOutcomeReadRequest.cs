@@ -8,22 +8,37 @@ internal sealed record EventVectorOutcomeReadRequest(
 {
     internal const int TailObservationField = 6;
     [Orleans.Id(TailObservationField)]
-    public bool TailObservation { get; init; }
+    public bool TailObservation
+    {
+        get; init;
+    }
 
     internal const int FreshSourceAuthorizationField = 5;
     [Orleans.Id(FreshSourceAuthorizationField)]
-    public ReadOnlyMemory<byte> FreshSourceAuthorizationWitness { get; init; }
+    public ReadOnlyMemory<byte> FreshSourceAuthorizationWitness
+    {
+        get; init;
+    }
 
     internal const int FirstIssuanceField = 4;
     [Orleans.Id(FirstIssuanceField)]
-    public EventVectorFirstIssuanceReadRequest? OriginalFirstIssuanceRequest { get; init; }
+    public EventVectorFirstIssuanceReadRequest? OriginalFirstIssuanceRequest
+    {
+        get; init;
+    }
 
     internal const int ControlRequestField = 2;
     internal const int ControlOwnerField = 3;
     [Orleans.Id(ControlRequestField)]
-    public EventFeedControlRequest? OriginalControlRequest { get; init; }
+    public EventFeedControlRequest? OriginalControlRequest
+    {
+        get; init;
+    }
     [Orleans.Id(ControlOwnerField)]
-    public PhysicalShardRecord? ControlOwner { get; init; }
+    public PhysicalShardRecord? ControlOwner
+    {
+        get; init;
+    }
 
     internal const string SerializerAlias = "keyload.core.event-vector-outcome-read-request.v1";
 }

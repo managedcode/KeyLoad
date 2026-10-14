@@ -27,7 +27,9 @@ internal static class CompositionSqlColdAssertions
         await SqlRf3Protocol.EqualAsync(state.Graph, (await McpCallerAssertions.SuccessAsync<global::KeyLoad.GraphTraversal>(
             await callers.Mcp.CallAsync(McpCallerTools.GraphTraverse, traversal, token))).Value);
         foreach (var (command, receipt) in new[] { (state.Forward, state.ForwardReceipt), (state.Reverse, state.ReverseReceipt) })
-        { await ReplayAsync(callers, command, receipt, token); }
+        {
+            await ReplayAsync(callers, command, receipt, token);
+        }
     }
 
     internal static async Task ReplayAsync(RequestCqrsRf3Callers callers, CommandRequest command, CommitReceipt receipt, CancellationToken token)

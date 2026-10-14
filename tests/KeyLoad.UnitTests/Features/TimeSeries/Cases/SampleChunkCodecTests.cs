@@ -74,15 +74,31 @@ internal sealed class SampleChunkCodecTests
     {
         var valid = SampleChunkTestData.FixedRecords();
         var mixedSeries = valid.ToArray();
-        mixedSeries[1] = mixedSeries[1] with { SeriesId = SampleChunkTestData.OtherSeries };
+        mixedSeries[1] = mixedSeries[1] with
+        {
+            SeriesId = SampleChunkTestData.OtherSeries
+        };
         var duplicateId = valid.ToArray();
         duplicateId[1] = duplicateId[1] with
-        { Sample = duplicateId[1].Sample with { EventId = duplicateId[0].Sample.EventId } };
+        {
+            Sample = duplicateId[1].Sample with
+            {
+                EventId = duplicateId[0].Sample.EventId
+            }
+        };
         var invalidSequence = valid.ToArray();
-        invalidSequence[0] = invalidSequence[0] with { Sequence = 0 };
+        invalidSequence[0] = invalidSequence[0] with
+        {
+            Sequence = 0
+        };
         var nonfiniteValue = valid.ToArray();
         nonfiniteValue[0] = nonfiniteValue[0] with
-        { Sample = nonfiniteValue[0].Sample with { Value = double.PositiveInfinity } };
+        {
+            Sample = nonfiniteValue[0].Sample with
+            {
+                Value = double.PositiveInfinity
+            }
+        };
         var outOfOrder = valid.Reverse().ToArray();
 
         await Assert.That(EncodeFailure(mixedSeries, SampleChunkTestData.MaximumBytes).Code)

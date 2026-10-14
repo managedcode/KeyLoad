@@ -17,7 +17,13 @@ internal static class ModelJoinAliasAdmissionFlow
         var identity = global::KeyLoad.JsonDefaults.Serialize(store.Identity);
         foreach (var alias in new[] { EmptyAlias, ControlAlias })
         {
-            var invalid = healthy with { Query = healthy.Query with { Alias = alias } };
+            var invalid = healthy with
+            {
+                Query = healthy.Query with
+                {
+                    Alias = alias
+                }
+            };
             foreach (var request in new[] { Q2CapabilityFixtures.JsonRoundTrip(invalid), Q2CapabilityFixtures.NativeRoundTrip(invalid) })
             {
                 var native = store.GetReadDiagnostics();

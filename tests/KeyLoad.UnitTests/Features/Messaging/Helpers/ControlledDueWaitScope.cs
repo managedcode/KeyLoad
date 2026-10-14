@@ -8,7 +8,11 @@ internal sealed class ControlledDueWaitScope(CancellationToken cancellationToken
     private readonly List<Task> waits = [];
     private readonly CancellationTokenSource lifetime = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
     internal CancellationToken Token => lifetime.Token;
-    internal Task Track(Task wait) { waits.Add(wait); return wait; }
+    internal Task Track(Task wait)
+    {
+        waits.Add(wait);
+        return wait;
+    }
 
     internal async Task RunAsync(Func<Task> operation)
     {
@@ -26,7 +30,9 @@ internal sealed class ControlledDueWaitScope(CancellationToken cancellationToken
     private async Task JoinAsync(Task wait)
     {
         try
-        { await wait; }
+        {
+            await wait;
+        }
         catch (OperationCanceledException) when (lifetime.IsCancellationRequested) { }
     }
 }

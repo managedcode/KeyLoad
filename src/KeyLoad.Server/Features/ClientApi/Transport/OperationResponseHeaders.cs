@@ -11,7 +11,9 @@ internal static class OperationResponseHeaders
     {
         ArgumentNullException.ThrowIfNull(context);
         if (context.Items.ContainsKey(ServerProtocol.ExecutionRequestItem))
-        { throw new InvalidOperationException(InvalidPublication); }
+        {
+            throw new InvalidOperationException(InvalidPublication);
+        }
         var state = new HeaderState(context.Response);
         context.Items[ServerProtocol.ExecutionRequestItem] = state;
         context.Response.OnStarting(static value => ((HeaderState)value).StartAsync(), state);
@@ -24,7 +26,9 @@ internal static class OperationResponseHeaders
     {
         ArgumentNullException.ThrowIfNull(context);
         if (requestId == Guid.Empty || context.Items[ServerProtocol.ExecutionRequestItem] is not HeaderState state)
-        { throw new InvalidOperationException(InvalidPublication); }
+        {
+            throw new InvalidOperationException(InvalidPublication);
+        }
         state.Publish(requestId);
     }
 
@@ -46,14 +50,18 @@ internal static class OperationResponseHeaders
         internal void Publish(Guid requestId)
         {
             if (Interlocked.CompareExchange(ref identity, new Identity(requestId), null) is not null)
-            { throw new InvalidOperationException(InvalidPublication); }
+            {
+                throw new InvalidOperationException(InvalidPublication);
+            }
         }
 
         internal Task StartAsync()
         {
             var published = Volatile.Read(ref identity);
             if (published is not null)
-            { response.Headers[ServerProtocol.RequestHeader] = published.Value.ToString(OrleansNodeProtocol.GuidFormat); }
+            {
+                response.Headers[ServerProtocol.RequestHeader] = published.Value.ToString(OrleansNodeProtocol.GuidFormat);
+            }
             return Task.CompletedTask;
         }
     }

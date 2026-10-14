@@ -17,7 +17,9 @@ internal static class ZoneTreeJournalFrameReader
         long position, int maxFrameBytes, int identityVersion)
     {
         if (journal.Length - journal.Position < HeaderLength)
-        { return null; }
+        {
+            return null;
+        }
         journal.ReadExactly(header);
         return ZoneTreeJournalRecovery.ValidateHeader(header, position, maxFrameBytes, identityVersion);
     }
@@ -26,12 +28,16 @@ internal static class ZoneTreeJournalFrameReader
         byte[] header, int length, long sequence)
     {
         if (journal.Length - journal.Position < length)
-        { return null; }
+        {
+            return null;
+        }
         var payload = new byte[length];
         journal.ReadExactly(payload);
         var checksum = SHA256.HashData(payload);
         if (!CryptographicOperations.FixedTimeEquals(checksum, header.AsSpan(ChecksumOffset, ChecksumLength)))
-        { throw Errors.Fail(ErrorCode.Corruption, JournalChecksumInvalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, JournalChecksumInvalid);
+        }
         return (payload, sequence, checksum);
     }
 }

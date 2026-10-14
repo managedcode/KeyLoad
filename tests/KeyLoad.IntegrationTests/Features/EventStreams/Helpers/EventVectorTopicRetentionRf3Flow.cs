@@ -74,7 +74,10 @@ internal static class EventVectorTopicRetentionRf3Flow
         var successful = new List<(EventVectorTopicRetentionRf3Seed Seed, CommandRequest Request, CommitReceipt Receipt)>();
         foreach (var seed in seeds)
         {
-            var purge = seed.Refused with { CommandId = Guid.NewGuid() };
+            var purge = seed.Refused with
+            {
+                CommandId = Guid.NewGuid()
+            };
             var receipt = await EventVectorTopicRetentionRf3Routes.CommitAsync(wave, credential, seed, purge, token);
             await SqlRf3Protocol.EqualAsync(new MutationReceipt("purgeTopic", EventVectorTopicRetentionRf3Seed.Topic, "2", 2), receipt.Mutations.Single());
             successful.Add((seed, purge, receipt));

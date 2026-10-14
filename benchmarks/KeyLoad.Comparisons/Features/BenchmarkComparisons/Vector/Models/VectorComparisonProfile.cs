@@ -42,13 +42,25 @@ public sealed record VectorComparisonProfile
     }
 
     /// <summary>Gets the exact accepted profile identifier.</summary>
-    public string Id { get; }
+    public string Id
+    {
+        get;
+    }
     /// <summary>Gets the number of native corpus records.</summary>
-    public int RecordCount { get; }
+    public int RecordCount
+    {
+        get;
+    }
     /// <summary>Gets the native vector index method selected by this profile.</summary>
-    public VectorIndexKind IndexKind { get; }
+    public VectorIndexKind IndexKind
+    {
+        get;
+    }
     /// <summary>Gets the query and mutation mode.</summary>
-    public VectorQueryMode QueryMode { get; }
+    public VectorQueryMode QueryMode
+    {
+        get;
+    }
     /// <summary>Gets the fixed float32 vector dimension.</summary>
     public int Dimensions => VectorComparisonProfileValues.VectorDimensions;
     /// <summary>Gets the vector metric used by native search and the oracle.</summary>
@@ -90,7 +102,12 @@ public sealed record VectorComparisonProfile
             throw new ArgumentOutOfRangeException(nameof(id), VectorComparisonProfileValues.UnknownVectorComparisonProfile);
         }
 
-        var count = parts[VectorComparisonProfileValues.ScalePartIndex] switch { VectorProfileTokens.Scale100k => VectorComparisonProfileValues.Scale100kCount, VectorProfileTokens.Scale1m => VectorComparisonProfileValues.Scale1mCount, _ => VectorComparisonProfileValues.EmptyCount };
+        var count = parts[VectorComparisonProfileValues.ScalePartIndex] switch
+        {
+            VectorProfileTokens.Scale100k => VectorComparisonProfileValues.Scale100kCount,
+            VectorProfileTokens.Scale1m => VectorComparisonProfileValues.Scale1mCount,
+            _ => VectorComparisonProfileValues.EmptyCount
+        };
         var kind = parts[VectorComparisonProfileValues.MethodPartIndex] switch
         {
             VectorProfileTokens.ExactMethod => VectorIndexKind.Exact,
@@ -115,7 +132,10 @@ public sealed record VectorComparisonProfile
     }
 
     /// <summary>Gets all 24 active profile IDs in stable scale, index, and mode order.</summary>
-    public static IReadOnlyList<string> AllIds { get; } =
+    public static IReadOnlyList<string> AllIds
+    {
+        get;
+    } =
         (from scale in new[] { VectorProfileTokens.Scale100k, VectorProfileTokens.Scale1m }
          from method in new[] { VectorProfileTokens.ExactMethod, VectorProfileTokens.HnswMethod, VectorProfileTokens.IvfFlatMethod, VectorProfileTokens.NativeMethod }
          from mode in new[] { VectorProfileTokens.PlainMode, VectorProfileTokens.FilteredMode, VectorProfileTokens.MixedMode }

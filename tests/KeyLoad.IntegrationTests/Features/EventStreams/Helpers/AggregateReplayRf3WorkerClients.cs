@@ -5,8 +5,14 @@ namespace KeyLoad.IntegrationTests.Features.EventStreams;
 
 internal sealed class AggregateReplayRf3WorkerClients : IDisposable
 {
-    internal KeyLoadClient[] Items { get; }
-    internal KeyLoadClient[] AdminItems { get; }
+    internal KeyLoadClient[] Items
+    {
+        get;
+    }
+    internal KeyLoadClient[] AdminItems
+    {
+        get;
+    }
     private readonly HttpClient[] clients;
     private readonly HttpClient[] adminClients;
 

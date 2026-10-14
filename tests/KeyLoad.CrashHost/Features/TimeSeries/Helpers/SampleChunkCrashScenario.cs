@@ -16,17 +16,27 @@ internal static class SampleChunkCrashScenario
     internal static async Task<bool> TryRunAsync(string[] args)
     {
         if (await ChunkMultiblockCrashScenario.TryRunAsync(args).ConfigureAwait(false))
-        { return true; }
+        {
+            return true;
+        }
         if (args.Length == Arguments && SampleChunkEarlyCrashProtocol.IsMode(args[ModeArgument]))
-        { await SampleChunkEarlyCrashScenario.RunAsync(args).ConfigureAwait(false); return true; }
+        {
+            await SampleChunkEarlyCrashScenario.RunAsync(args).ConfigureAwait(false);
+            return true;
+        }
         if (args.Length != Arguments || !SampleChunkCrashContract.IsMode(args[ModeArgument]))
-        { return false; }
+        {
+            return false;
+        }
         _ = SerializationExecutionRegistration.Process.Value;
         var mode = args[ModeArgument];
         var root = args[DirectoryArgument];
         var boundary = new CanonicalCrashBoundary(Enum.Parse<CommitStage>(args[StageArgument]),
             int.Parse(args[MutationArgument], CultureInfo.InvariantCulture), false);
-        using var store = new ZoneTreeStore(new(root) { FaultObserver = boundary.Observe },
+        using var store = new ZoneTreeStore(new(root)
+        {
+            FaultObserver = boundary.Observe
+        },
             CrashExecutionOptions.StorageExecution(), CrashExecutionOptions.PointCacheExecution());
         var prepare = mode is SampleChunkCrashContract.PrepareSeal or SampleChunkCrashContract.PrepareMerge;
         var database = prepare ? CrashDatabase.Create(store) : OpenExisting(store);
@@ -40,11 +50,17 @@ internal static class SampleChunkCrashScenario
             await CrashHostPause.WaitForKillAsync();
         }
         else if (mode is SampleChunkCrashContract.FaultSeal or SampleChunkCrashContract.FaultMerge)
-        { await FaultAsync(root, database, boundary, mode == SampleChunkCrashContract.FaultMerge).ConfigureAwait(false); }
+        {
+            await FaultAsync(root, database, boundary, mode == SampleChunkCrashContract.FaultMerge).ConfigureAwait(false);
+        }
         else if (mode == SampleChunkCrashContract.Verify)
-        { await SampleChunkCrashRecovery.VerifyAsync(root, database).ConfigureAwait(false); }
+        {
+            await SampleChunkCrashRecovery.VerifyAsync(root, database).ConfigureAwait(false);
+        }
         else
-        { await SampleChunkCrashRecovery.RecoverAsync(root, database, mode == SampleChunkCrashContract.RecoverMerge).ConfigureAwait(false); }
+        {
+            await SampleChunkCrashRecovery.RecoverAsync(root, database, mode == SampleChunkCrashContract.RecoverMerge).ConfigureAwait(false);
+        }
         return true;
     }
 

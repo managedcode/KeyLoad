@@ -13,8 +13,13 @@ internal static class NativeBlobWireArmsFactory
         var original = seed.Metadata.Blob;
         if (commands.Begin.Blob != original || commands.Write.Blob != original || commands.Complete.Blob != original
             || commands.Begin.UploadId != commands.Write.UploadId || commands.Begin.UploadId != commands.Complete.UploadId)
-        { throw new InvalidOperationException(NativeBlobWireProbeProtocol.InvalidEvidence); }
-        var secondary = original with { Id = "wire-secondary" };
+        {
+            throw new InvalidOperationException(NativeBlobWireProbeProtocol.InvalidEvidence);
+        }
+        var secondary = original with
+        {
+            Id = "wire-secondary"
+        };
         var arms = new NativeBlobWireArm[]
         {
             Outcome(NativeBlobWireIdentity.BeginUpload, OperationKind.BeginBlobUpload, commands.Begin.CommandId, original, commands.Begin.UploadId),

@@ -25,7 +25,10 @@ internal static class PostgresStreamPublicRegression
         await session.ExecuteAsync(Scenario.StreamAppend, appended, cancellationToken);
         await AssertEventAsync(await session.ReadEventAsync(appended, cancellationToken), appended);
 
-        var conflicting = appended with { Json = ConflictingJson };
+        var conflicting = appended with
+        {
+            Json = ConflictingJson
+        };
         var duplicateFailure = await CapturePostgresFailureAsync(() => session.ExecuteAsync(
             Scenario.StreamAppend, conflicting, cancellationToken));
         await Assert.That(duplicateFailure).IsTypeOf<PostgresException>();

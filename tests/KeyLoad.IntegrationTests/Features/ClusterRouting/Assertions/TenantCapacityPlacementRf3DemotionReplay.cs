@@ -18,7 +18,11 @@ internal static class TenantCapacityPlacementRf3DemotionReplay
             await McpCallerAssertions.SdkSuccessAsync(await seed.Source.PersistPlacementIntentAsync(persistId, persist, token)));
         await SqlRf3Protocol.EqualAsync(pending, (await McpCallerAssertions.SuccessAsync<PlacementIntentV1>(
             await seed.Official.CallAsync(TenantPlacementPublicProtocol.PersistTool,
-                new { commandId = persistId, request = persist }, token))).Value);
+                new
+                {
+                    commandId = persistId,
+                    request = persist
+                }, token))).Value);
         await TenantCapacityPlacementRf3DemotionAssertions.EmptyRefusalAsync(seed, refusedId, refused, token);
         await TenantCapacityPlacementRf3Assertions.RequireOriginalModelsAsync(seed, state, token);
     }

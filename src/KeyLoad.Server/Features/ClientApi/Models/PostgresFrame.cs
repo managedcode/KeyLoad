@@ -11,7 +11,9 @@ internal sealed class PostgresFrame(byte type, byte[] payload, PostgresRetainedA
     public void Dispose()
     {
         if (Interlocked.Exchange(ref disposed, sizeof(byte)) != PostgresProtocol.AllRows)
-        { return; }
+        {
+            return;
+        }
         CryptographicOperations.ZeroMemory(Payload);
         admission.Resize(Payload.Length, PostgresProtocol.AllRows);
     }

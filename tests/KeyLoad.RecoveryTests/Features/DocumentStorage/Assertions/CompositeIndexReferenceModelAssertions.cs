@@ -27,10 +27,14 @@ internal static class CompositeIndexReferenceModelAssertions
         var info = new FileInfo(path);
         if (!info.Exists || (info.Attributes & FileAttributes.ReparsePoint) != 0 ||
             info.Length < EvidenceMinimum || info.Length > CommandIdempotencyCrashContract.EvidenceMaximumBytes)
-        { throw new InvalidOperationException(Invalid); }
+        {
+            throw new InvalidOperationException(Invalid);
+        }
         var actual = JsonSerializer.Deserialize<CompositeIndexCrashSnapshot>(await File.ReadAllBytesAsync(path), JsonDefaults.Options);
         if (!JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected)))
-        { throw new InvalidOperationException(Invalid); }
+        {
+            throw new InvalidOperationException(Invalid);
+        }
     }
 
     private static CompositeIndexCrashSnapshot Create((string Id, string Label, decimal Rank, long Revision)[] live,
@@ -48,7 +52,9 @@ internal static class CompositeIndexReferenceModelAssertions
                 documents.Add(Document(partition, id, rows, tombstone));
             }
             foreach (var label in new[] { "alpha", "beta", "gamma", "delta", "epsilon", "rollback", "zeta", "theta", "healthy" })
-            { memberships.Add(new(partition.PartitionKey, label, rows.Where(row => row.Label == label).Select(row => row.Id).Order(StringComparer.Ordinal).ToArray())); }
+            {
+                memberships.Add(new(partition.PartitionKey, label, rows.Where(row => row.Label == label).Select(row => row.Id).Order(StringComparer.Ordinal).ToArray()));
+            }
             images.Add(Image(partition, IndexSpace, CompositeIndexCrashContract.IndexName, rows));
             images.Add(Image(partition, UniqueSpace, CompositeIndexCrashContract.IndexName, rows));
             images.Add(Image(partition, IndexSpace, CompositeIndexCrashContract.RankIndex, rows));
@@ -62,7 +68,11 @@ internal static class CompositeIndexReferenceModelAssertions
         var row = rows.SingleOrDefault(item => item.Id == id);
         var deleted = partition == CompositeIndexCrashContract.Partition && tombstone && id == "index-c";
         var json = row.Id is null ? deleted ? "{}" : null :
-            JsonSerializer.Serialize(new { label = row.Label, rank = row.Rank }, JsonDefaults.Options);
+            JsonSerializer.Serialize(new
+            {
+                label = row.Label,
+                rank = row.Rank
+            }, JsonDefaults.Options);
         return new(partition.TenantId, partition.DatabaseId, partition.TransactionDomainId,
             partition.PartitionKey, CompositeIndexCrashContract.Collection, id, json,
             row.Id is null ? deleted ? 2L : MissingRevision : row.Revision, deleted);

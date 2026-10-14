@@ -9,7 +9,11 @@ internal static class ProjectionPublicPolicy
         RequestCqrsRf3Callers caller, ProjectionPublicState state, CancellationToken token)
     {
         var before = await ProjectionPublicOperations.ImageAsync(root, state, 2L, false, false, token);
-        var denied = state.Identity.Principal with { ClusterAdministrator = false, PolicyEpoch = 2L };
+        var denied = state.Identity.Principal with
+        {
+            ClusterAdministrator = false,
+            PolicyEpoch = 2L
+        };
         await ProjectionPublicOperations.PolicyAsync(root, denied, token);
         await ProjectionPublicAssertions.ErrorAsync(caller, state.Complete, ErrorCode.PermissionDenied, token);
         var deniedRead = await caller.Sdk.ReadProjectionAsync(new(state.Consumer), token);
@@ -19,12 +23,19 @@ internal static class ProjectionPublicPolicy
             new ReadProjectionBatchRequest(state.Consumer), token), ErrorCode.PermissionDenied, dispatched: true);
         await ProjectionPublicAssertions.ExactAsync(before,
             await ProjectionPublicOperations.ImageAsync(root, state, 2L, false, false, token));
-        var current = denied with { ClusterAdministrator = true, PolicyEpoch = 3L };
+        var current = denied with
+        {
+            ClusterAdministrator = true,
+            PolicyEpoch = 3L
+        };
         await ProjectionPublicOperations.PolicyAsync(root, current, token);
         await ProjectionPublicAssertions.ErrorAsync(caller, state.Complete, ErrorCode.PermissionDenied, token);
         await ProjectionPublicAssertions.ExactAsync(before,
             await ProjectionPublicOperations.ImageAsync(root, state, 2L, false, false, token));
-        var fresh = state.Complete with { CommandId = Guid.NewGuid() };
+        var fresh = state.Complete with
+        {
+            CommandId = Guid.NewGuid()
+        };
         var duplicate = await ProjectionPublicOperations.CommitBothAsync(caller, fresh, token);
         await ProjectionPublicAssertions.ExactAsync(new ProjectionBatchResult(state.Completed.Receipt, true, 1L), duplicate);
         await ProjectionPublicAssertions.ExactAsync(before,

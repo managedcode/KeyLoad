@@ -1,5 +1,5 @@
 using System.Collections.Immutable;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.CrashHost.Features.ClusterRouting;
 
@@ -28,7 +28,9 @@ internal static class ControlledPartitionMovementNativeProcessSeed
                 PrincipalId, NativeSerialization.Serialize(request), cancellationToken).ConfigureAwait(false);
             outcomes.Add(reply);
             if (reply.Error is not null)
-            { return outcomes.ToImmutable(); }
+            {
+                return outcomes.ToImmutable();
+            }
         }
         outcomes.Add(await source.SubmitAsync(OperationKind.Batch,
             ControlledPartitionMovementProcessCorpus.SeedId, PrincipalId,

@@ -66,7 +66,9 @@ internal static class GuideLifecyclePublicValues
         RequestCqrsRf3Callers reader, GuideLifecyclePublicState state, CancellationToken token)
     {
         if (state.RepairOutcome is not { IsSuccess: true, Problem: null } original)
-        { throw new InvalidOperationException("Original acknowledged credential repair is absent."); }
+        {
+            throw new InvalidOperationException("Original acknowledged credential repair is absent.");
+        }
         await SqlRf3Protocol.EqualAsync(original, await McpCallerAssertions.SdkStatusAsync(
             await administrator.Sdk.ConfigureApiKeyAsync(state.RepairCommandId, state.Identity.Credential, token)));
         await CurrentAsync(administrator, state, token);

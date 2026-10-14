@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
+using KeyLoad.Clustering.Features.Search;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
-using KeyLoad.Orleans.Features.Search;
 
 namespace KeyLoad.Server.Features.Search;
 
@@ -29,7 +29,9 @@ internal sealed partial class NativeTextOnlineMaintenanceService : INativeOnline
         this.resources = resources;
         sessions = new(options.NativeText.Value.MaximumActiveLeases);
         try
-        { root = new(directory, nodeId, options.NativeText, resources); }
+        {
+            root = new(directory, nodeId, options.NativeText, resources);
+        }
         catch (Exception primary)
         {
             var failures = new List<Exception> { primary };
@@ -52,12 +54,16 @@ internal sealed partial class NativeTextOnlineMaintenanceService : INativeOnline
         await catalog.ObserveCompletedRetirementsAsync().ConfigureAwait(false);
         if (!principal.ClusterAdministrator || request.SessionId == Guid.Empty
             || request.Request.NodeId != database.Store.Identity.NodeId)
-        { throw NativeTextErrors.Ownership(); }
+        {
+            throw NativeTextErrors.Ownership();
+        }
         if (request.Kind == OnlineTextCapabilityKind.ResolveOriginal)
         {
             var resolved = await ResolveCommittedOriginalAsync(principal, request, expiry, token).ConfigureAwait(false);
             if (resolved is not null)
-            { return resolved; }
+            {
+                return resolved;
+            }
         }
         var session = RequireSession(principal, request, expiry);
         using var stage = session.Budget.EnterStageCancellation(token);
@@ -68,11 +74,15 @@ internal sealed partial class NativeTextOnlineMaintenanceService : INativeOnline
                 request.Acknowledged ?? throw NativeTextErrors.Corrupt(), resources, options).ConfigureAwait(false);
         }
         else if (request.Kind == OnlineTextCapabilityKind.ReconcileCommitted)
-        { await catalog.ReconcileCommittedAsync(session).ConfigureAwait(false); }
+        {
+            await catalog.ReconcileCommittedAsync(session).ConfigureAwait(false);
+        }
         else
         {
             lock (session.Gate)
-            { return NativeTextOnlineStageExecutor.Execute(database, root, resources, options, clock, RequireCurrentAuthority, principal, session, request); }
+            {
+                return NativeTextOnlineStageExecutor.Execute(database, root, resources, options, clock, RequireCurrentAuthority, principal, session, request);
+            }
         }
         return NativeTextOnlineCapabilityResult.Create(session);
     }
@@ -81,11 +91,15 @@ internal sealed partial class NativeTextOnlineMaintenanceService : INativeOnline
         OnlineTextCapabilityRequest request, DateTimeOffset expiry)
     {
         if (request.Kind != OnlineTextCapabilityKind.ResolveOriginal)
-        { return sessions.Require(request.SessionId); }
+        {
+            return sessions.Require(request.SessionId);
+        }
         var session = new NativeTextOnlineSession(request.SessionId, request.Request, principal.Id,
             expiry, options, clock, shutdown.Token);
         try
-        { sessions.Add(session); }
+        {
+            sessions.Add(session);
+        }
         catch (Exception primary)
         {
             var failures = new List<Exception> { primary };
@@ -122,7 +136,10 @@ internal sealed partial class NativeTextOnlineMaintenanceService : INativeOnline
     public ValueTask DisposeAsync()
     {
         lock (disposalGate)
-        { disposal ??= DisposeCoreAsync(); return new(disposal); }
+        {
+            disposal ??= DisposeCoreAsync();
+            return new(disposal);
+        }
     }
 
     internal Task[] CaptureOriginalRetirements() => catalog.CaptureOriginalRetirements();

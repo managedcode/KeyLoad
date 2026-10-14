@@ -68,11 +68,17 @@ internal static class BlobMaintenancePolicyPublicTrial
         string[] nodes = [McpCallerProtocol.Node1, McpCallerProtocol.Node2, McpCallerProtocol.Node3];
         var failures = new List<Exception>();
         foreach (var node in nodes)
-        { await ServerFailureObserver.ObserveAsync(() => fixture.KillContainerAsync(node, "blob-maintenance-policy-public", token), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => fixture.KillContainerAsync(node, "blob-maintenance-policy-public", token), failures);
+        }
         foreach (var node in nodes)
-        { await ServerFailureObserver.ObserveAsync(async () => await fixture.BeginContainerRestartAsync(node, token), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(async () => await fixture.BeginContainerRestartAsync(node, token), failures);
+        }
         foreach (var node in nodes)
-        { await ServerFailureObserver.ObserveAsync(() => fixture.RestartContainerAsync(node, token), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => fixture.RestartContainerAsync(node, token), failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

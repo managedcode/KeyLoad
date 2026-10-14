@@ -21,7 +21,9 @@ public sealed class RuntimeJournalOperations
     {
         ArgumentNullException.ThrowIfNull(database);
         ArgumentNullException.ThrowIfNull(configured);
-        options = configured.Value with { };
+        options = configured.Value with
+        {
+        };
         if (!options.IsValid())
         {
             throw new ArgumentException(RuntimeJournalOptions.ValidationMessage, nameof(configured));

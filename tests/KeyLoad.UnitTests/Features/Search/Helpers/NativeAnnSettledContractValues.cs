@@ -25,7 +25,9 @@ internal sealed record NativeAnnSettledContractValues(AnnMaintenanceRequest Requ
             MutationDiscriminatorNames.DeleteDocument, MutationDiscriminatorNames.PutVector,
             MutationDiscriminatorNames.ApplyVectorProjection];
         var definition = new ProjectionConsumerDefinition(Generation, resources, kinds)
-        { AnnMaintenance = profile };
+        {
+            AnnMaintenance = profile
+        };
         var configure = database.Submit(OperationKind.ConfigureProjectionConsumer,
             new ConfigureProjectionConsumerRequest(configureId, consumer, definition, StartAfter),
             AnnProjectionPinTestSupport.Principal, configureId).Get<ProjectionConsumerInfo>();
@@ -35,7 +37,9 @@ internal sealed record NativeAnnSettledContractValues(AnnMaintenanceRequest Requ
             AnnSeedTestSupport.Field, AnnSeedTestSupport.Space(), Generation, database.Store.Identity.NodeId,
             new(placement.PhysicalShardId, placement.Incarnation, placement.VoterIds, placement.PlacementEpoch),
             AnnMaintenanceMode.Build)
-        { MaintenanceProfile = profile };
+        {
+            MaintenanceProfile = profile
+        };
         var captured = global::KeyLoad.Core.Features.Search.AnnSeedCollector.CapturePinned(database.Database,
             AnnProjectionPinTestSupport.Principal, request, UnitAnnSeedOptions.Execution(),
             new global::KeyLoad.Core.ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits)));

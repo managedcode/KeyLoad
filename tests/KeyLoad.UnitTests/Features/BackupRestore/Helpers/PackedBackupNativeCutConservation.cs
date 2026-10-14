@@ -13,6 +13,8 @@ internal static class PackedBackupNativeCutConservation
         await NativeBackupJournalRepairAssertions.SameArchiveAsync(files, selected, token);
         await NativeBackupJournalRepairAssertions.SameArchiveAsync(donorFiles, donor, token);
         if (artifact is not null && artifactBytes is not null)
-        { await Assert.That((await File.ReadAllBytesAsync(artifact, token)).AsSpan().SequenceEqual(artifactBytes)).IsTrue(); }
+        {
+            await Assert.That((await File.ReadAllBytesAsync(artifact, token)).AsSpan().SequenceEqual(artifactBytes)).IsTrue();
+        }
     }
 }

@@ -30,7 +30,9 @@ internal sealed class ClusterRestoreRf3StageObservation
         {
             await reader.ConfigureAwait(false);
             if (!observed.Task.IsCompletedSuccessfully)
-            { throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid); }
+            {
+                throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid);
+            }
         }
         return await observed.Task.WaitAsync(cancellationToken).ConfigureAwait(false);
     }
@@ -46,7 +48,9 @@ internal sealed class ClusterRestoreRf3StageObservation
             while (await owned.MoveNextAsync().ConfigureAwait(false))
             {
                 foreach (var line in owned.Current)
-                { Observe(line); }
+                {
+                    Observe(line);
+                }
             }
         }, failures).ConfigureAwait(false);
         await ServerFailureObserver.ObserveAsync(() => owned.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
@@ -56,11 +60,15 @@ internal sealed class ClusterRestoreRf3StageObservation
     private void Observe(LogLine line)
     {
         if (line.Content.Length > maximumCharacters - characters)
-        { throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid); }
+        {
+            throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid);
+        }
         characters += line.Content.Length;
         if (!line.Content.StartsWith(ClusterRestoreRf3ResumeProtocol.Marker + ClusterRestoreRf3ResumeProtocol.Separator,
             StringComparison.Ordinal))
-        { return; }
+        {
+            return;
+        }
         var fields = line.Content.Split(ClusterRestoreRf3ResumeProtocol.Separator);
         if (line.IsErrorMessage || fields.Length != ClusterRestoreRf3ResumeProtocol.MarkerFields
             || !string.Equals(fields[ClusterRestoreRf3ResumeProtocol.StageField], stage.ToString(), StringComparison.Ordinal)
@@ -68,6 +76,8 @@ internal sealed class ClusterRestoreRf3StageObservation
             || !int.TryParse(fields[ClusterRestoreRf3ResumeProtocol.ProcessField], NumberStyles.None,
                 CultureInfo.InvariantCulture, out var pid) || pid < ClusterRestoreRf3ResumeProtocol.MinimumPid
             || !observed.TrySetResult(pid))
-        { throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid); }
+        {
+            throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid);
+        }
     }
 }

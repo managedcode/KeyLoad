@@ -30,7 +30,9 @@ internal static class PostgresDecimalRf3Cancellation
                     await global::TUnit.Assertions.Assert.That(mcp?.CancellationToken).IsEqualTo(cancelled.Token);
                     var parameter = new global::Npgsql.NpgsqlParameter(PostgresDecimalRf3Protocol.Parameter,
                         global::NpgsqlTypes.NpgsqlDbType.Numeric)
-                    { Value = PostgresDecimalRf3Protocol.BetweenScores };
+                    {
+                        Value = PostgresDecimalRf3Protocol.BetweenScores
+                    };
                     var driver = await global::TUnit.Assertions.Assert.ThrowsAsync<OperationCanceledException>(
                         () => wire.ExecuteAsync<QueryPage>(PostgresDecimalRf3Protocol.DriverSql,
                             [parameter], prepared: true, cancelled.Token));

@@ -24,9 +24,13 @@ internal static class CompositeUniqueRf3Flow
             await DenyRestoreAsync(admin, observer, sdk, mcp, scenario, cut, deadline.Token);
         }, failures);
         if (observer is not null)
-        { await ServerFailureObserver.ObserveAsync(() => observer.DisposeAsync().AsTask(), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => observer.DisposeAsync().AsTask(), failures);
+        }
         if (mcp is not null)
-        { await ServerFailureObserver.ObserveAsync(() => mcp.DisposeAsync().AsTask(), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => mcp.DisposeAsync().AsTask(), failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 

@@ -17,9 +17,13 @@ internal static class ZoneTreeRestoreSlotOrigins
             AtomicPartitionRosterRestoreOriginSerialization.IdentityKey());
         if (priorIdentity is not null && !AtomicPartitionRosterRestoreOriginSerialization.MatchesIdentity(
             priorIdentity, context.SourceIncarnation))
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidOrigin); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidOrigin);
+        }
         if (context.SourceIncarnation == context.TargetIncarnation || originalAppliedIndex < NoAppliedIndex)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidOrigin); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidOrigin);
+        }
         var hasOrigins = false;
         byte[]? after = null;
         var prefix = AtomicPartitionRosterRestoreOriginSerialization.EntryPrefix();
@@ -28,11 +32,15 @@ internal static class ZoneTreeRestoreSlotOrigins
             cancellationToken.ThrowIfCancellationRequested();
             var page = transaction.Scan(prefix, SingleRow, after);
             if (page.Records.IsEmpty)
-            { break; }
+            {
+                break;
+            }
             var row = page.Records[FirstRecord];
             var entry = NativeSerialization.Deserialize<AtomicPartitionCatalogEntryV1>(row.Value.Span);
             if (entry is null || entry.Partition is null)
-            { throw Errors.Fail(ErrorCode.Corruption, InvalidOrigin); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, InvalidOrigin);
+            }
             var origin = transaction.GetRecord<AtomicPartitionRosterRestoreOrigin>(
                 AtomicPartitionRosterRestoreOriginSerialization.OriginKey(entry.Partition));
             ZoneTreeBackupRestoreRoster.RequireEntry(row, entry, origin, priorIdentity,
@@ -48,12 +56,16 @@ internal static class ZoneTreeRestoreSlotOrigins
             }
             after = row.Key.ToArray();
             if (!page.HasMore)
-            { break; }
+            {
+                break;
+            }
         }
         var actualOrigins = ZoneTreeBackupRestoreRoster.RequireEveryOriginBound(transaction,
             context.SourceIncarnation, context.TargetIncarnation);
         if (actualOrigins != hasOrigins || priorIdentity is not null && !actualOrigins)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidOrigin); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidOrigin);
+        }
         if (actualOrigins)
         {
             transaction.PutRecord(AtomicPartitionRosterRestoreOriginSerialization.IdentityKey(),

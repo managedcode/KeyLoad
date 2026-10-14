@@ -13,6 +13,8 @@ public sealed partial class DatabaseEngine
         if (partition.TenantId != tenantId || partition.DatabaseId != databaseId
             || current.PhysicalShardId != control.PhysicalShardId || current.Incarnation != control.Incarnation
             || !current.VoterIds.SequenceEqual(control.VoterIds, StringComparer.Ordinal))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, TenantPlacementPolicyProtocol.ScopeMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, TenantPlacementPolicyProtocol.ScopeMismatch);
+        }
     }
 }

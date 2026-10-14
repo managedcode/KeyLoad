@@ -11,7 +11,9 @@ internal static class RemoteTransferPendingCursorSelection
     {
         if (supplied is null || supplied.Incarnation != identity.Incarnation
             || supplied.ReadGeneration != identity.ReadGeneration || !IsValid(supplied))
-        { return new(identity.Incarnation, identity.ReadGeneration, null, null); }
+        {
+            return new(identity.Incarnation, identity.ReadGeneration, null, null);
+        }
         return new(identity.Incarnation, identity.ReadGeneration, supplied.UpperKey?.ToArray(), supplied.LastKey?.ToArray());
     }
 

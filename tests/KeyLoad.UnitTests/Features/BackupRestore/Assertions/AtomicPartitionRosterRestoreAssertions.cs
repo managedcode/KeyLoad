@@ -17,7 +17,9 @@ internal static class AtomicPartitionRosterRestoreAssertions
         {
             var page = view.Scan([], OneRecord, after);
             if (page.Records.IsEmpty)
-            { return Convert.ToHexString(digest.GetHashAndReset()); }
+            {
+                return Convert.ToHexString(digest.GetHashAndReset());
+            }
             var row = page.Records[FirstRecord];
             digest.AppendData(BitConverter.GetBytes(row.Key.Length));
             digest.AppendData(row.Key.Span);
@@ -25,7 +27,9 @@ internal static class AtomicPartitionRosterRestoreAssertions
             digest.AppendData(row.Value.Span);
             after = row.Key.ToArray();
             if (!page.HasMore)
-            { return Convert.ToHexString(digest.GetHashAndReset()); }
+            {
+                return Convert.ToHexString(digest.GetHashAndReset());
+            }
         }
     });
 

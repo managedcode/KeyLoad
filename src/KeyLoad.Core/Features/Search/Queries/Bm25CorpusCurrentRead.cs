@@ -22,19 +22,27 @@ public sealed partial class DatabaseEngine
                 current = Bm25CorpusShape.RequireRecord(key, bytes, partition, Limits);
             }
             catch (KeyLoadException invalid) when (invalid.Code is ErrorCode.Corruption or ErrorCode.FormatUnsupported)
-            { current = null; }
+            {
+                current = null;
+            }
         });
         if (current is null)
-        { return null; }
+        {
+            return null;
+        }
         Bm25CorpusShape.Require(current, Limits);
         if (current.Partition != partition || current.Collection != collection || current.Field != field
             || current.TokenizerVersion != tokenizer || current.PrincipalId != principal.Id)
-        { throw Errors.Fail(ErrorCode.Corruption, Bm25CorpusProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, Bm25CorpusProtocol.Invalid);
+        }
         var placement = ReadPlacementWitness(bounded, partition);
         if (!current.Statistics.Terms.SequenceEqual(terms, StringComparer.Ordinal)
             || !Bm25CorpusDependencies.Matches(this, bounded, principal, resource, current,
                 placement, work.MaximumResultBytes, work))
-        { return null; }
+        {
+            return null;
+        }
         work.ChargeBytes(NativeSerialization.Measure(current.Statistics));
         return current.Statistics;
     }

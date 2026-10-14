@@ -14,17 +14,33 @@ internal static class QueueDispatchStateUpdates
     internal static ResourceDefinition Apply(ResourceDefinition? current, long expectedSchemaVersion, bool paused)
     {
         if (expectedSchemaVersion < MinimumSchemaVersion)
-        { throw Errors.Fail(ErrorCode.Validation, InvalidExpectedVersion); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, InvalidExpectedVersion);
+        }
         if (current is null)
-        { throw Errors.Fail(ErrorCode.RevisionConflict, MissingResource); }
+        {
+            throw Errors.Fail(ErrorCode.RevisionConflict, MissingResource);
+        }
         if (current.Kind != ResourceKind.WorkQueue)
-        { throw Errors.Fail(ErrorCode.Validation, WrongKind); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, WrongKind);
+        }
         if (current.SchemaVersion != expectedSchemaVersion)
-        { throw Errors.Fail(ErrorCode.RevisionConflict, StaleVersion); }
+        {
+            throw Errors.Fail(ErrorCode.RevisionConflict, StaleVersion);
+        }
         if (current.Paused == paused)
-        { throw Errors.Fail(ErrorCode.Validation, NoChange); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, NoChange);
+        }
         if (current.SchemaVersion == long.MaxValue)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, VersionExhausted); }
-        return current with { Paused = paused, SchemaVersion = current.SchemaVersion + SchemaVersionStep };
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, VersionExhausted);
+        }
+        return current with
+        {
+            Paused = paused,
+            SchemaVersion = current.SchemaVersion + SchemaVersionStep
+        };
     }
 }

@@ -17,7 +17,11 @@ internal static class RetiredOutcomeMetadataAuthorizationTrial
         var deniedOperation = source.Database.CreateNativeOperation(OperationKind.Batch, request.CommandId, denied.Id,
             source.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request));
         await DeniedFaultAsync(source, target, original, deniedOperation, ErrorCode.PermissionDenied, authority, token);
-        Configure(source, denied with { Revoked = true, PolicyEpoch = RevokedEpoch }, token);
+        Configure(source, denied with
+        {
+            Revoked = true,
+            PolicyEpoch = RevokedEpoch
+        }, token);
         await DeniedFaultAsync(source, target, original, deniedOperation, ErrorCode.Unauthenticated, authority, token);
         await AuthorizedFaultAsync(source, target, original, corruptOutcome: true, token);
         await AuthorizedFaultAsync(source, target, original, corruptOutcome: false, token);
@@ -45,6 +49,8 @@ internal static class RetiredOutcomeMetadataAuthorizationTrial
             NativeSerialization.Serialize(new ConfigurePrincipalRequest(principal)));
         var result = source.Journal.Submit(operation, token);
         if (result.Error is { } code)
-        { throw Errors.Fail(code, result.SafeDetail!); }
+        {
+            throw Errors.Fail(code, result.SafeDetail!);
+        }
     }
 }

@@ -11,6 +11,9 @@ internal static class PhysicalShardCatalogUnsupportedEnvelopeFixture
     {
         var context = NativeSerializerProviders.Get(typeof(PhysicalShardCatalog));
         return context.Serializer.SerializeToArray(new NativePayload
-        { Version = UnsupportedVersion, Value = catalog });
+        {
+            Version = UnsupportedVersion,
+            Value = catalog
+        });
     }
 }

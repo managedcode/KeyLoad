@@ -21,7 +21,9 @@ internal static class CatalogRestoreCancellationFlow
             var capture = MixedEventingCatalogRestore.Capture(fixture.Source, backup, token);
             var archive = await ArchiveAsync(backup, token);
             if (existingEmpty)
-            { Directory.CreateDirectory(target); }
+            {
+                Directory.CreateDirectory(target);
+            }
             var failures = new List<Exception>();
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {
@@ -79,7 +81,9 @@ internal static class CatalogRestoreCancellationFlow
     {
         var result = new Dictionary<string, byte[]>(StringComparer.Ordinal);
         foreach (var file in Directory.EnumerateFiles(backup, "*", SearchOption.AllDirectories))
-        { result.Add(Path.GetRelativePath(backup, file), await File.ReadAllBytesAsync(file, token)); }
+        {
+            result.Add(Path.GetRelativePath(backup, file), await File.ReadAllBytesAsync(file, token));
+        }
         return result;
     }
 }

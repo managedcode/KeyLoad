@@ -28,8 +28,14 @@ internal sealed class TimescaleSchemaConnectionOwner : IAsyncDisposable
         Connection = dataSource is null ? new NpgsqlConnection(connectionString) : dataSource.CreateConnection();
     }
 
-    internal NpgsqlConnection Connection { get; }
-    internal ExceptionDispatchInfo? Primary { get; set; }
+    internal NpgsqlConnection Connection
+    {
+        get;
+    }
+    internal ExceptionDispatchInfo? Primary
+    {
+        get; set;
+    }
 
     public async ValueTask DisposeAsync()
     {

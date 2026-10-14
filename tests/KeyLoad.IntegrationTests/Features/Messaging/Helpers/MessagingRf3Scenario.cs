@@ -54,7 +54,12 @@ internal sealed record MessagingRf3Scenario(PartitionRef SourcePartition, Partit
             HeaderPolicies = [policy]
         };
         if (queuePolicy is not null)
-        { resource = resource with { QueuePolicy = queuePolicy }; }
+        {
+            resource = resource with
+            {
+                QueuePolicy = queuePolicy
+            };
+        }
         var request = new ConfigureResourceRequest(lane.Partition.TenantId, lane.Partition.DatabaseId, resource);
         return CompleteConfigurationAsync(administrator, request, cancellationToken);
     }

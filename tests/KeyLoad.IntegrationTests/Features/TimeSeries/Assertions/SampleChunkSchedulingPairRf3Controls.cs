@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.IntegrationTests.Features.TimeSeries;
@@ -15,9 +15,27 @@ internal static class SampleChunkSchedulingPairRf3Controls
         var originalPrimary = Convert.ToHexString(primary.ExactBytes);
         var originalAdjunct = Convert.ToHexString(adjunct.ExactBytes);
         var missing = new[] { adjunct };
-        var foreign = adjunct with { Record = adjunct.Record with { SourceArmId = Guid.NewGuid() } };
-        var wrongPrincipal = adjunct with { Record = adjunct.Record with { PrincipalId = primary.Record.PrincipalId + SampleChunkJobRevocationProtocol.Separator } };
-        var duplicate = adjunct with { Record = adjunct.Record with { ArmId = Guid.NewGuid() } };
+        var foreign = adjunct with
+        {
+            Record = adjunct.Record with
+            {
+                SourceArmId = Guid.NewGuid()
+            }
+        };
+        var wrongPrincipal = adjunct with
+        {
+            Record = adjunct.Record with
+            {
+                PrincipalId = primary.Record.PrincipalId + SampleChunkJobRevocationProtocol.Separator
+            }
+        };
+        var duplicate = adjunct with
+        {
+            Record = adjunct.Record with
+            {
+                ArmId = Guid.NewGuid()
+            }
+        };
         await Assert.That(() => Require(missing, adjunct.Record)).Throws<InvalidOperationException>();
         await Assert.That(() => Require([primary, foreign], foreign.Record)).Throws<InvalidOperationException>();
         await Assert.That(() => Require([primary, wrongPrincipal], wrongPrincipal.Record)).Throws<InvalidOperationException>();

@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
@@ -19,9 +19,21 @@ internal sealed partial class PartitionMovementRuntime : IPartitionMovementDispa
     private Task? shutdown;
     private bool closed;
     private bool joined;
-    internal bool IsJoined { get { lock (gate) { return joined; } } }
+    internal bool IsJoined
+    {
+        get
+        {
+            lock (gate)
+            {
+                return joined;
+            }
+        }
+    }
     internal INativePartitionMovementCapture Source => source ?? throw new InvalidOperationException();
-    internal PartitionMovementNativeReceiver? NativeReceiver { get; private set; }
+    internal PartitionMovementNativeReceiver? NativeReceiver
+    {
+        get; private set;
+    }
 
     internal PartitionMovementRuntime(NativeRequestWorkOwner work)
         => execution = new(gate, stopping, active, work, () => closed);

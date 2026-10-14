@@ -53,9 +53,14 @@ internal static class CredentialVerifierR53Refusals
         if (failures.Count == CredentialVerifierR53Protocol.ExpectedUnauthorizedErrors
             && failures[CredentialVerifierR53Protocol.FirstError] is HttpRequestException
             { StatusCode: HttpStatusCode.Unauthorized } unauthorized)
-        { await PrivateAsync(unauthorized.Message, state, verifier); return; }
+        {
+            await PrivateAsync(unauthorized.Message, state, verifier);
+            return;
+        }
         if (failures.Count == CredentialVerifierR53Protocol.FirstError)
-        { failures.Add(new InvalidOperationException(CredentialVerifierR53Protocol.UnexpectedAdmission)); }
+        {
+            failures.Add(new InvalidOperationException(CredentialVerifierR53Protocol.UnexpectedAdmission));
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 

@@ -24,9 +24,13 @@ internal static class TenantPlacementByteAccounting
                 (key, value) => { total = checked(total + key.Length + value.Length); return true; },
                 cancellationToken: token);
             if (page.ReadBytes != grant.ReadBytes - readBefore || page.Records != grant.ExaminedRecords - recordsBefore)
-            { throw Errors.Fail(ErrorCode.Corruption, TenantPlacementCapacityProtocol.Incomplete); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, TenantPlacementCapacityProtocol.Incomplete);
+            }
             if (page.HasMore || page.StoppedByVisitor)
-            { throw Errors.Fail(ErrorCode.BudgetExceeded, ReadExecutionBudget.ReadBytesExceeded); }
+            {
+                throw Errors.Fail(ErrorCode.BudgetExceeded, ReadExecutionBudget.ReadBytesExceeded);
+            }
         }
         return total;
     }

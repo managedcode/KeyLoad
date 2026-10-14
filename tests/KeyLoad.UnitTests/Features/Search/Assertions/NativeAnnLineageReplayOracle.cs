@@ -7,7 +7,10 @@ namespace KeyLoad.UnitTests.Features.Search;
 
 internal static class NativeAnnLineageReplayOracle
 {
-    internal enum Stage { Initial, Hidden, Reprojected }
+    internal enum Stage
+    {
+        Initial, Hidden, Reprojected
+    }
     private const string Field = "/embedding";
     private const int Count = 3;
     private const long Revision = 1;

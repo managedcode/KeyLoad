@@ -39,7 +39,10 @@ internal static class NativeAnnWaitRf3Assertions
         long indexed, CancellationToken token)
     {
         var direct = await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.WaitForAnnIndexAsync(request, token));
-        await Assert.That(direct.IndexedToken).IsEqualTo(request.MinimumToken with { Position = indexed });
+        await Assert.That(direct.IndexedToken).IsEqualTo(request.MinimumToken with
+        {
+            Position = indexed
+        });
         await Assert.That(direct.IndexedToken.Position).IsGreaterThanOrEqualTo(request.MinimumToken.Position);
         await Assert.That(direct.IndexGeneration).IsEqualTo(request.IndexGeneration);
         await Assert.That(direct.SchemaVersion).IsEqualTo(CurrentVersion);
@@ -58,7 +61,11 @@ internal static class NativeAnnWaitRf3Assertions
             ? [Row(scenario, NativeTextRf3Scenario.FirstId, FirstJson, FirstDenominator), Row(scenario, NativeTextRf3Scenario.SecondId, SecondJson, SecondDenominator)]
             : [Row(scenario, NativeTextRf3Scenario.FirstId, FirstJson, FirstDenominator), Row(scenario, NativeTextRf3Scenario.SecondId, SecondJson, SecondDenominator),
                 Row(scenario, NativeTextRf3Scenario.ThirdId, ThirdJson, ThirdDenominator)];
-        var request = new ApproximateSearchRequest(PageVersion, scenario.Hybrid() with { TextField = null, Text = null }, pin.Consumer, pin.IndexGeneration);
+        var request = new ApproximateSearchRequest(PageVersion, scenario.Hybrid() with
+        {
+            TextField = null,
+            Text = null
+        }, pin.Consumer, pin.IndexGeneration);
         var actual = await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.ApproximateSearchAsync(request, token));
         var expected = new AnnSearchPage(PageVersion, [.. rows], actual.Position, AnnPageMode.Exact, true, pin.IndexGeneration, AnnPageMode.Approximate);
         await SqlRf3Protocol.EqualAsync(expected, actual);

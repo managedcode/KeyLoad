@@ -9,10 +9,16 @@ namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 internal sealed class PostgresRf3Caller : IAsyncDisposable
 {
     private readonly NpgsqlDataSource source;
-    internal NpgsqlConnection Connection { get; }
+    internal NpgsqlConnection Connection
+    {
+        get;
+    }
 
     private PostgresRf3Caller(NpgsqlDataSource source, NpgsqlConnection connection)
-    { this.source = source; Connection = connection; }
+    {
+        this.source = source;
+        Connection = connection;
+    }
 
     internal static async Task<PostgresRf3Caller> ConnectAsync(DistributedApplication app, string node,
         string subject, string credential, string rootCertificate, CancellationToken token,
@@ -37,7 +43,9 @@ internal sealed class PostgresRf3Caller : IAsyncDisposable
         builder.EnableParameterLogging(false);
         var source = builder.Build();
         try
-        { return new(source, await source.OpenConnectionAsync(token).ConfigureAwait(false)); }
+        {
+            return new(source, await source.OpenConnectionAsync(token).ConfigureAwait(false));
+        }
         catch (Exception primary)
         {
             var failures = new List<Exception> { primary };
@@ -58,9 +66,13 @@ internal sealed class PostgresRf3Caller : IAsyncDisposable
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {
                 foreach (var parameter in parameters)
-                { command.Parameters.Add(parameter); }
+                {
+                    command.Parameters.Add(parameter);
+                }
                 if (prepared)
-                { await command.PrepareAsync(token).ConfigureAwait(false); }
+                {
+                    await command.PrepareAsync(token).ConfigureAwait(false);
+                }
                 await using var reader = await command.ExecuteReaderAsync(token).ConfigureAwait(false);
                 await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
                 {
@@ -90,7 +102,9 @@ internal sealed class PostgresRf3Caller : IAsyncDisposable
         NpgsqlDbType parameterType = NpgsqlDbType.Jsonb)
     {
         var envelope = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
-        { [PostgresRf3Protocol.Request] = JsonSerializer.SerializeToElement(command, JsonDefaults.Options) };
+        {
+            [PostgresRf3Protocol.Request] = JsonSerializer.SerializeToElement(command, JsonDefaults.Options)
+        };
         var argument = new NpgsqlParameter
         {
             NpgsqlDbType = parameterType,

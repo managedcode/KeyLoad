@@ -7,7 +7,10 @@ namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries;
 internal static class TimescaleSchemaInstallation
 {
     private const string OwnerMarkerMismatch = "TimescaleOwnerMarkerMismatch";
-    private enum Statement { CreateSchema, CreateExtension, CreateMarker, LockMarker, DropSchema }
+    private enum Statement
+    {
+        CreateSchema, CreateExtension, CreateMarker, LockMarker, DropSchema
+    }
 
     internal static async Task<bool> InitializeAsync(NpgsqlConnection connection, string schemaName, Guid ownerId,
         Func<NpgsqlConnection, NpgsqlTransaction, CancellationToken, Task> installer, CancellationToken token)

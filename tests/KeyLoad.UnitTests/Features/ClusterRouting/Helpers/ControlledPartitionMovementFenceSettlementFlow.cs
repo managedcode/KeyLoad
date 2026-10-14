@@ -26,7 +26,10 @@ internal static class ControlledPartitionMovementFenceSettlementFlow
         var expectedAck = new PartitionMovePhaseResult(ControlledPartitionMovementPrepareRequest.MoveId,
             PartitionMovePeerStage.ControlAcknowledge, new(ControlledPartitionMovementFenceSettlementRequest.AcknowledgeId,
                 corpus.Control.Owner, AcknowledgeReplicaIndex, prepared.Journal.ControlIntentDigest),
-            null, null, null, null, grant with { Settlement = fence.Journal });
+            null, null, null, null, grant with
+            {
+                Settlement = fence.Journal
+            });
         await Assert.That(JsonDefaults.Serialize(acknowledgedOutcome.Get<PartitionMovePhaseResult>())
             .SequenceEqual(JsonDefaults.Serialize(expectedAck))).IsTrue();
         var acceptedOutcome = await ControlledPartitionMovementVerifiedSubmit.SubmitAsync(source, runtime,
@@ -37,7 +40,11 @@ internal static class ControlledPartitionMovementFenceSettlementFlow
         var expectedAccepted = new PartitionMovePhaseResult(ControlledPartitionMovementPrepareRequest.MoveId,
             PartitionMovePeerStage.ControlAcceptFence, new(ControlledPartitionMovementFenceSettlementRequest.AcceptFenceId,
                 corpus.Control.Owner, AcceptedFenceReplicaIndex, prepared.Journal.ControlIntentDigest),
-            control with { Phase = PartitionMovePhase.Fenced, SourceCut = SourceFenceReplicaIndex },
+            control with
+            {
+                Phase = PartitionMovePhase.Fenced,
+                SourceCut = SourceFenceReplicaIndex
+            },
             fence.Fence, null, null);
         var accepted = acceptedOutcome.Get<PartitionMovePhaseResult>();
         await Assert.That(JsonDefaults.Serialize(accepted).SequenceEqual(JsonDefaults.Serialize(expectedAccepted))).IsTrue();

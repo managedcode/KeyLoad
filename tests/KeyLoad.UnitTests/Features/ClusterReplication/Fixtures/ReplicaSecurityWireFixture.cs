@@ -56,7 +56,9 @@ internal sealed class ReplicaSecurityOperationCodec(string shape) : IFieldCodec<
         [AllowNull] ReplicatedOperation value) where TWriter : IBufferWriter<byte>
     {
         if (ReferenceCodec.TryWriteReferenceField(ref writer, delta, expectedType, value))
-        { return; }
+        {
+            return;
+        }
         writer.WriteFieldHeader(delta, expectedType, typeof(ReplicatedOperation), WireType.TagDelimited);
         writer.WriteEndBase();
         if (shape == ReplicaSecurityFixture.MissingOperationFields)
@@ -68,16 +70,24 @@ internal sealed class ReplicaSecurityOperationCodec(string shape) : IFieldCodec<
         ReplicaSecurityWireFixture.Write(ref writer, 0, value.Id);
         ReplicaSecurityWireFixture.Write(ref writer, 1, shape == ReplicaSecurityFixture.UnknownKind ? (OperationKind)int.MaxValue : value.Kind);
         if (shape == ReplicaSecurityFixture.DuplicateKind)
-        { ReplicaSecurityWireFixture.Write(ref writer, 0, value.Kind); }
+        {
+            ReplicaSecurityWireFixture.Write(ref writer, 0, value.Kind);
+        }
         ReplicaSecurityWireFixture.Write(ref writer, 1, value.PrincipalId);
         ReplicaSecurityWireFixture.Write(ref writer, 1, value.EvaluatedAt);
         if (shape == ReplicaSecurityFixture.InvalidPayload)
-        { ReplicaSecurityWireFixture.Write(ref writer, 1, false); }
+        {
+            ReplicaSecurityWireFixture.Write(ref writer, 1, false);
+        }
         else
-        { ReplicaSecurityWireFixture.Write(ref writer, 1, value.PayloadJson); }
+        {
+            ReplicaSecurityWireFixture.Write(ref writer, 1, value.PayloadJson);
+        }
         ReplicaSecurityWireFixture.Write(ref writer, 1, value.NativePayload);
         if (shape == ReplicaSecurityFixture.UnknownField)
-        { ReplicaSecurityWireFixture.Write(ref writer, 1, true); }
+        {
+            ReplicaSecurityWireFixture.Write(ref writer, 1, true);
+        }
         writer.WriteEndObject();
     }
 }
@@ -90,7 +100,9 @@ internal sealed class ReplicaSecurityAppendCodec(bool duplicateOperation) : IFie
         [AllowNull] AppendRequest value) where TWriter : IBufferWriter<byte>
     {
         if (ReferenceCodec.TryWriteReferenceField(ref writer, delta, expectedType, value))
-        { return; }
+        {
+            return;
+        }
         writer.WriteFieldHeader(delta, expectedType, typeof(AppendRequest), WireType.TagDelimited);
         writer.WriteEndBase();
         ReplicaSecurityWireFixture.Write(ref writer, 0, value.LeaderId);
@@ -100,7 +112,9 @@ internal sealed class ReplicaSecurityAppendCodec(bool duplicateOperation) : IFie
         ReplicaSecurityWireFixture.Write(ref writer, 1, value.CommittedIndex);
         ReplicaSecurityWireFixture.Write(ref writer, 1, value.Entries);
         if (!duplicateOperation)
-        { ReplicaSecurityWireFixture.Write(ref writer, 0, value.Entries); }
+        {
+            ReplicaSecurityWireFixture.Write(ref writer, 0, value.Entries);
+        }
         writer.WriteEndObject();
     }
 }
@@ -113,7 +127,9 @@ internal sealed class ReplicaSecurityEntryCodec : IFieldCodec<ReplicaEntry>
         [AllowNull] ReplicaEntry value) where TWriter : IBufferWriter<byte>
     {
         if (ReferenceCodec.TryWriteReferenceField(ref writer, delta, expectedType, value))
-        { return; }
+        {
+            return;
+        }
         writer.WriteFieldHeader(delta, expectedType, typeof(ReplicaEntry), WireType.TagDelimited);
         writer.WriteEndBase();
         ReplicaSecurityWireFixture.Write(ref writer, 0, value.Index);

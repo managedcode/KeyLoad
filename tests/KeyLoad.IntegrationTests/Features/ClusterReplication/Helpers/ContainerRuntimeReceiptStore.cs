@@ -20,19 +20,28 @@ internal static class ContainerRuntimeReceiptStore
     {
         var local = await LocalRf3ImageIdentity.ReadVerifiedAsync(repositoryRoot, selection, cancellationToken);
         if (local is null)
-        { return new(await ReadSourceShaAsync(repositoryRoot, cancellationToken), null, null, null); }
+        {
+            return new(await ReadSourceShaAsync(repositoryRoot, cancellationToken), null, null, null);
+        }
         if (!string.Equals(before.ConfigImage, local.Reference, StringComparison.Ordinal)
             || !string.Equals(after.ConfigImage, local.Reference, StringComparison.Ordinal)
             || !string.Equals(before.ImageId, local.ImageConfigId, StringComparison.Ordinal)
             || !string.Equals(after.ImageId, local.ImageConfigId, StringComparison.Ordinal))
-        { throw new InvalidOperationException(LocalImageMismatch); }
+        {
+            throw new InvalidOperationException(LocalImageMismatch);
+        }
         return new(null, local.InputDigest, local.InvocationId, local.ImageConfigId);
     }
 
     internal static async Task<string> ReadSourceShaAsync(string repositoryRoot, CancellationToken cancellationToken)
     {
         var startInfo = new ProcessStartInfo(ContainerRuntimeProtocol.GitExecutable)
-        { RedirectStandardOutput = true, RedirectStandardError = true, UseShellExecute = false, WorkingDirectory = repositoryRoot };
+        {
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            WorkingDirectory = repositoryRoot
+        };
         startInfo.ArgumentList.Add(ContainerRuntimeProtocol.GitRevisionCommand);
         startInfo.ArgumentList.Add(ContainerRuntimeProtocol.GitHeadArgument);
         using var process = Process.Start(startInfo) ?? throw new InvalidOperationException(ContainerRuntimeProtocol.GitStartFailure);
@@ -56,7 +65,9 @@ internal static class ContainerRuntimeReceiptStore
         await Assert.That(receipt.KillCompletedAtUtc < DateTimeOffset.Parse(receipt.AfterStartedAt, CultureInfo.InvariantCulture)).IsTrue();
         var json = JsonSerializer.Serialize(receipt, JsonOptions);
         if (await ContainerRuntimeOwnedReceipt.TryWriteAsync(receipt, json, cancellationToken))
-        { return; }
+        {
+            return;
+        }
         var outputDirectory = Path.Combine(receipt.RepositoryRoot, ContainerRuntimeProtocol.ArtifactsDirectory,
             ContainerRuntimeProtocol.QualificationDirectory);
         Directory.CreateDirectory(outputDirectory);

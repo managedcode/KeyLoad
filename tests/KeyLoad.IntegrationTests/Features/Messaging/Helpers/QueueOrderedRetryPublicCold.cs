@@ -16,7 +16,9 @@ internal static class QueueOrderedRetryPublicCold
             () => fixture.RestartContainerAsync(node, token))));
         ServerFailureObserver.ThrowIfAny([.. killed.SelectMany(row => row), .. restarted.SelectMany(row => row)]);
         foreach (var node in QueueLifecyclePublicProtocol.Nodes)
-        { await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(node, WaitBehavior.WaitOnResourceUnavailable, token); }
+        {
+            await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(node, WaitBehavior.WaitOnResourceUnavailable, token);
+        }
         var failures = new List<Exception>();
         RequestCqrsRf3Callers? callers = null;
         NodeStatus? after = null;
@@ -42,7 +44,9 @@ internal static class QueueOrderedRetryPublicCold
             after = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.StatusAsync(token));
         }, failures);
         if (callers is not null)
-        { await ServerFailureObserver.ObserveAsync(() => callers.DisposeAsync().AsTask(), failures); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => callers.DisposeAsync().AsTask(), failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
         return after!;
     }

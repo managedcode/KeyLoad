@@ -18,9 +18,13 @@ internal static class TwoRf3MembershipWaveStartup
         await ServerFailureObserver.ObserveAsync(() => StartCoreAsync(wave, cancellationToken, observe), failures)
             .ConfigureAwait(false);
         if (failures.Count == 0)
-        { return wave; }
+        {
+            return wave;
+        }
         if (wave.startupCallbacks is { } capture)
-        { ServerFailureObserver.Observe(() => capture.Failed(failures[0], cancellationToken.IsCancellationRequested), failures); }
+        {
+            ServerFailureObserver.Observe(() => capture.Failed(failures[0], cancellationToken.IsCancellationRequested), failures);
+        }
         await ServerFailureObserver.ObserveAsync(() => wave.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny(failures);
         throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState);
@@ -31,7 +35,10 @@ internal static class TwoRf3MembershipWaveStartup
         var firstStart = wave.dataRoot is null;
         var root = wave.dataRoot ?? wave.CreateOwnedRoot();
         if (firstStart)
-        { observe?.Invoke("ProfileCreate"); wave.Profile = (await NodeEpochRf3Profile.CreatePriorAsync(root, cancellationToken).ConfigureAwait(false)).Profile; }
+        {
+            observe?.Invoke("ProfileCreate");
+            wave.Profile = (await NodeEpochRf3Profile.CreatePriorAsync(root, cancellationToken).ConfigureAwait(false)).Profile;
+        }
         var repository = ClusterFixtureDiagnostics.FindRepositoryRoot().FullName;
         var githubReference = await TwoRf3MembershipImageAdmission.ReadReferenceAsync(wave, repository,
             observe, cancellationToken).ConfigureAwait(false);
@@ -80,7 +87,10 @@ internal static class TwoRf3MembershipWaveStartup
             .Where(resource => TwoRf3MembershipProtocol.Nodes.Contains(resource.Name, StringComparer.Ordinal)).ToArray());
         await StartAndVerifyReadyAsync(wave, wave.application, containerNames, cancellationToken, observe).ConfigureAwait(false);
         if (wave.startupCallbacks is { } capture)
-        { observe?.Invoke("StartupReady"); await capture.Ready().ConfigureAwait(false); }
+        {
+            observe?.Invoke("StartupReady");
+            await capture.Ready().ConfigureAwait(false);
+        }
     }
 
     private static async Task VerifyBeforeStartAsync(TwoRf3MembershipWave wave,
@@ -88,7 +98,9 @@ internal static class TwoRf3MembershipWaveStartup
         CancellationToken cancellationToken)
     {
         if (wave.IsolationOwner is { } isolation)
-        { await isolation.VerifyBeforeStartAsync(application, cancellationToken).ConfigureAwait(false); }
+        {
+            await isolation.VerifyBeforeStartAsync(application, cancellationToken).ConfigureAwait(false);
+        }
         else if (wave.localImageSelection is null)
         {
             await TwoRf3MembershipImageAssertions.VerifyAsync(application,
@@ -112,7 +124,9 @@ internal static class TwoRf3MembershipWaveStartup
         observe?.Invoke("SixHealthy");
         await wave.WaitForSixHealthyAsync(cancellationToken).ConfigureAwait(false);
         if (wave.IsolationOwner is { } startedIsolation)
-        { await startedIsolation.VerifyStartedAsync(application, cancellationToken).ConfigureAwait(false); }
+        {
+            await startedIsolation.VerifyStartedAsync(application, cancellationToken).ConfigureAwait(false);
+        }
         wave.capacity.CaptureOriginalEndpoints(wave);
         if (wave.remoteDocumentReads)
         {

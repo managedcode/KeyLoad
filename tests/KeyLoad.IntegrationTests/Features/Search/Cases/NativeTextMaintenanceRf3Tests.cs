@@ -39,13 +39,21 @@ internal sealed class NativeTextMaintenanceRf3Tests(ClusterFixture fixture)
         finally
         {
             if (failures.Count != 0 && observation is not null)
-            { ServerFailureObserver.Observe(observation.Save, failures); }
+            {
+                ServerFailureObserver.Observe(observation.Save, failures);
+            }
             if (mcp is not null)
-            { await ServerFailureObserver.ObserveAsync(() => mcp.DisposeAsync().AsTask(), failures); }
+            {
+                await ServerFailureObserver.ObserveAsync(() => mcp.DisposeAsync().AsTask(), failures);
+            }
             if (http is not null)
-            { ServerFailureObserver.Observe(http.Dispose, failures); }
+            {
+                ServerFailureObserver.Observe(http.Dispose, failures);
+            }
             if (deadline is not null)
-            { ServerFailureObserver.Observe(deadline.Dispose, failures); }
+            {
+                ServerFailureObserver.Observe(deadline.Dispose, failures);
+            }
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }

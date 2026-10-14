@@ -35,14 +35,18 @@ internal static class EmptyReplicaSnapshotStorage
                 NodeEpochRf3OfflineFiles.AssertExclusive(Path.Combine(path, Journal));
                 var metadata = Path.Combine(path, Metadata);
                 if (File.Exists(metadata))
-                { NodeEpochRf3OfflineFiles.AssertExclusive(metadata); }
+                {
+                    NodeEpochRf3OfflineFiles.AssertExclusive(metadata);
+                }
             }
         }
         foreach (var directory in ErasedDirectories)
         {
             Directory.Delete(Path.Combine(root, directory), recursive: true);
             if (Directory.Exists(Path.Combine(root, directory)))
-            { throw new InvalidOperationException("The stopped follower storage was not erased."); }
+            {
+                throw new InvalidOperationException("The stopped follower storage was not erased.");
+            }
         }
     }
 
@@ -103,21 +107,29 @@ internal static class EmptyReplicaSnapshotStorage
     {
         var expected = snapshot.TransferId.ToString(ClusterFixtureProtocol.GuidFormat) + ReplicaProtocol.SnapshotExtension;
         if (snapshot.FileName != expected)
-        { throw new InvalidOperationException("The native snapshot filename does not match its transfer identity."); }
+        {
+            throw new InvalidOperationException("The native snapshot filename does not match its transfer identity.");
+        }
         using var image = NodeEpochRf3OfflineFiles.OpenRead(Path.Combine(RequireRoot(fixture, node),
             ReplicaProtocol.SnapshotDirectory, expected));
         if (image.Length != snapshot.Length || Convert.ToHexStringLower(SHA256.HashData(image)) != snapshot.Sha256)
-        { throw new InvalidOperationException("The installed native snapshot image does not match its complete checksum."); }
+        {
+            throw new InvalidOperationException("The installed native snapshot image does not match its complete checksum.");
+        }
     }
 
     private static string RequireRoot(ClusterFixture fixture, string node)
     {
         if (!ClusterFixtureProtocol.IsNodeName(node))
-        { throw new ArgumentOutOfRangeException(nameof(node)); }
+        {
+            throw new ArgumentOutOfRangeException(nameof(node));
+        }
         var parent = Path.GetFullPath(fixture.Root);
         var root = Path.GetFullPath(Path.Combine(parent, node));
         if (Path.GetDirectoryName(root) != parent || !Directory.Exists(root))
-        { throw new InvalidOperationException("The actual fixture-owned follower root is absent."); }
+        {
+            throw new InvalidOperationException("The actual fixture-owned follower root is absent.");
+        }
         RequireDirectory(parent);
         RequireDirectory(root);
         return root;
@@ -129,18 +141,27 @@ internal static class EmptyReplicaSnapshotStorage
         foreach (var entry in Directory.EnumerateFileSystemEntries(path))
         {
             if ((File.GetAttributes(entry) & FileAttributes.ReparsePoint) != 0)
-            { throw new InvalidOperationException("The owned follower storage contains a link."); }
+            {
+                throw new InvalidOperationException("The owned follower storage contains a link.");
+            }
             if (Directory.Exists(entry))
-            { RequireTree(entry); }
+            {
+                RequireTree(entry);
+            }
             else
-            { NodeEpochRf3OfflineFiles.RequireRegular(entry); NodeEpochRf3OfflineFiles.AssertExclusive(entry); }
+            {
+                NodeEpochRf3OfflineFiles.RequireRegular(entry);
+                NodeEpochRf3OfflineFiles.AssertExclusive(entry);
+            }
         }
     }
 
     private static void RequireDirectory(string path)
     {
         if (!Directory.Exists(path) || (File.GetAttributes(path) & FileAttributes.ReparsePoint) != 0)
-        { throw new InvalidOperationException("The owned follower storage is not a regular directory."); }
+        {
+            throw new InvalidOperationException("The owned follower storage is not a regular directory.");
+        }
     }
 }
 

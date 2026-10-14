@@ -45,16 +45,24 @@ internal static class NativeCoberturaBranchPairAssertions
             var line = (XmlElement)node;
             var branch = line.GetAttribute(BranchAttribute);
             if (branch.Length == 0 || string.Equals(branch, "false", StringComparison.OrdinalIgnoreCase))
-            { continue; }
+            {
+                continue;
+            }
             if (!string.Equals(branch, "true", StringComparison.OrdinalIgnoreCase))
-            { throw new InvalidDataException(InvalidReport); }
+            {
+                throw new InvalidDataException(InvalidReport);
+            }
             var match = Regex.Match(line.GetAttribute(ConditionCoverageAttribute), BranchCoveragePattern);
             if (!match.Success)
-            { throw new InvalidDataException(InvalidReport); }
+            {
+                throw new InvalidDataException(InvalidReport);
+            }
             var lineCovered = ParseCount(match.Groups[1].Value);
             var lineValid = ParseCount(match.Groups[2].Value);
             if (lineValid == 0 || lineCovered > lineValid)
-            { throw new InvalidDataException(InvalidReport); }
+            {
+                throw new InvalidDataException(InvalidReport);
+            }
             valid = checked(valid + lineValid);
             covered = checked(covered + lineCovered);
         }
@@ -85,7 +93,9 @@ internal static class NativeCoberturaBranchPairAssertions
     private static long ParseCount(string? value)
     {
         if (!long.TryParse(value, NumberStyles.None, CultureInfo.InvariantCulture, out var result) || result < 0)
-        { throw new InvalidDataException(InvalidReport); }
+        {
+            throw new InvalidDataException(InvalidReport);
+        }
         return result;
     }
 

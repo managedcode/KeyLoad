@@ -9,7 +9,9 @@ internal static class NativeTextOnlinePublication
         ServerRuntimeOptions options, TimeProvider clock)
     {
         if (session.Issued is not null)
-        { throw NativeTextErrors.Mismatch(); }
+        {
+            throw NativeTextErrors.Mismatch();
+        }
         NativeTextOnlineValidation.Execute(database, session, options);
         NativeTextOnlineStagingFiles.Require(NativeTextOnlinePagePreparation.RequireOwner(session).Path,
             session, options.NativeText);

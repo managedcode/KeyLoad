@@ -17,7 +17,10 @@ public sealed record DatabasePhaseExecutionOptions
     private const int DefaultMaximumCasAttempts = 4;
 
     /// <summary>Whether this physical process records optional phase counters.</summary>
-    public bool Enabled { get; init; }
+    public bool Enabled
+    {
+        get; init;
+    }
     /// <summary>The bounded power-of-two reservation selected before allocation.</summary>
     public int StripeCount { get; init; } = DefaultStripeCount;
     /// <summary>The maximum compare-exchange attempts for each recorded counter.</summary>

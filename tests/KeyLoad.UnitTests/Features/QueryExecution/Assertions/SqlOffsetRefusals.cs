@@ -25,7 +25,10 @@ internal static class SqlOffsetRefusals
             ("LIMIT 1 OFFSET 1", ErrorCode.Validation)
         })
         {
-            var bad = request with { Sql = request.Sql.Replace("OFFSET 1 ROWS FETCH NEXT 1 ROW ONLY", tail, StringComparison.Ordinal) };
+            var bad = request with
+            {
+                Sql = request.Sql.Replace("OFFSET 1 ROWS FETCH NEXT 1 ROW ONLY", tail, StringComparison.Ordinal)
+            };
             await ErrorAsync(() => engine.Execute(SqlOffsetProtocol.Root, bad), code);
             await UnchangedAsync(database.Store, before, position, identity);
         }
@@ -33,13 +36,25 @@ internal static class SqlOffsetRefusals
         foreach (var offset in new[] { -1, SqlOffsetProtocol.WindowBound, int.MaxValue })
         {
             await ErrorAsync(() => engine.ExecuteAst(SqlOffsetProtocol.Root,
-                ast with { Query = ast.Query with { Offset = offset } }), ErrorCode.BudgetExceeded);
+                ast with
+                {
+                    Query = ast.Query with
+                    {
+                        Offset = offset
+                    }
+                }), ErrorCode.BudgetExceeded);
             await UnchangedAsync(database.Store, before, position, identity);
         }
         var first = engine.Execute(SqlOffsetProtocol.Root, SqlOffsetProtocol.ScalarRequest(database.Partition));
         var different = SqlOffsetProtocol.Scalar(database.Partition);
         await ErrorAsync(() => engine.ExecuteAst(SqlOffsetProtocol.Root, different with
-        { Cursor = first.Cursor, Query = different.Query with { Offset = default } }), ErrorCode.CursorExpired);
+        {
+            Cursor = first.Cursor,
+            Query = different.Query with
+            {
+                Offset = default
+            }
+        }), ErrorCode.CursorExpired);
         using var cancelled = new CancellationTokenSource();
         await cancelled.CancelAsync();
         var failure = Assert.ThrowsExactly<OperationCanceledException>(() => engine.ExecuteAst(SqlOffsetProtocol.Root,
@@ -59,7 +74,9 @@ internal static class SqlOffsetRefusals
         await ErrorAsync(() => engine.Execute(SqlOffsetProtocol.Reader, SqlOffsetProtocol.JoinRequest(database.Partition)), ErrorCode.PermissionDenied);
         var plain = SqlOffsetProtocol.JoinRequest(database.Partition);
         await ErrorAsync(() => engine.Execute(SqlOffsetProtocol.Reader, plain with
-        { Sql = plain.Sql.Replace(" INNER JOIN ", " JOIN ", StringComparison.Ordinal) }), ErrorCode.PermissionDenied);
+        {
+            Sql = plain.Sql.Replace(" INNER JOIN ", " JOIN ", StringComparison.Ordinal)
+        }), ErrorCode.PermissionDenied);
         await ErrorAsync(() => engine.ExecuteAst(SqlOffsetProtocol.Reader, SqlOffsetProtocol.Join(database.Partition)), ErrorCode.PermissionDenied);
         await ErrorAsync(() => engine.Execute(SqlOffsetProtocol.Reader, SqlOffsetProtocol.ScalarRequest(database.Partition)), ErrorCode.PermissionDenied);
         await ErrorAsync(() => engine.ExecuteAst(SqlOffsetProtocol.Reader, SqlOffsetProtocol.Scalar(database.Partition)), ErrorCode.PermissionDenied);

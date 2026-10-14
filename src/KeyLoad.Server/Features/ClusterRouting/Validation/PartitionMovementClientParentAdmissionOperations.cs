@@ -1,7 +1,7 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
@@ -18,7 +18,9 @@ internal static class PartitionMovementClientParentAdmissionOperations
             grant.OperatorPrincipalId, owner.clock.GetUtcNow()));
         GrainRequestAuthority.RequireAdministrator(principal);
         if (principal.PolicyEpoch != grant.OperatorPolicyEpoch || !grant.RequireReceiverIssuance)
-        { throw Errors.Fail(ErrorCode.PermissionDenied, PartitionMovementProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.PermissionDenied, PartitionMovementProtocol.InvalidProof);
+        }
         var envelope = PartitionMovementParentCheckpointOwner.OriginalEnvelope(original, release: false);
         var authorization = original.OriginalAuthorization
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMovementProtocol.InvalidProof);
@@ -50,7 +52,9 @@ internal static class PartitionMovementClientParentAdmissionOperations
             || current.Pending.ReceiverIssuanceCheckpointReceipt is null
             || !NativeSerialization.Serialize(current.Pending).AsSpan().SequenceEqual(NativeSerialization.Serialize(signed.Pending))
             || !NativeSerialization.Serialize(current.Pending).AsSpan().SequenceEqual(NativeSerialization.Serialize(original)))
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMovementProtocol.InvalidProof); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMovementProtocol.InvalidProof);
+        }
         work.Check();
     }
 }

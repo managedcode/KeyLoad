@@ -29,7 +29,10 @@ internal static class TypedEndpointJoinRefusals
             [TypedEndpointJoinProtocol.Mutation() with { ToCollection = MissingCollection }]);
         await RefusedAsync(admin, undeclared, ErrorCode.NotFound, sql: true, token);
         await UnchangedAsync(admin, state, token);
-        var changed = state.Healthy with { Mutations = [TypedEndpointJoinProtocol.Mutation(ChangedPrefix)] };
+        var changed = state.Healthy with
+        {
+            Mutations = [TypedEndpointJoinProtocol.Mutation(ChangedPrefix)]
+        };
         await RefusedAsync(callers, changed, ErrorCode.Conflict, sql: true, token);
         await UnchangedAsync(admin, state, token);
         await TypedEndpointJoinAssertions.ReplayAsync(callers, state.Healthy, state.Receipt, token);

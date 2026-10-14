@@ -12,7 +12,9 @@ internal static class SampleChunkManifestReader
         SampleChunkEncodedDigest.Require(envelope.Encoded.Span, envelope.Digest.Span, work, options.Value.HashChunkBytes);
         var manifest = NativeSerialization.Deserialize<SampleChunkManifest>(envelope.Encoded.Span);
         if (manifest.Version != SampleChunkLifecycleProtocol.Version)
-        { throw Errors.Fail(ErrorCode.FormatUnsupported, SampleChunkLifecycleProtocol.Unsupported); }
+        {
+            throw Errors.Fail(ErrorCode.FormatUnsupported, SampleChunkLifecycleProtocol.Unsupported);
+        }
         if (manifest.WindowId != window.WindowId || manifest.Generation != window.Generation
             || manifest.FromUtcTicks != window.FromUtcTicks || manifest.UntilUtcTicks != window.UntilUtcTicks
             || manifest.RecordCount < SampleChunkLifecycleProtocol.First || manifest.RecordCount > maximumRecords
@@ -21,7 +23,9 @@ internal static class SampleChunkManifestReader
             || manifest.BlockDigests.Length != (manifest.RecordCount + SampleChunkWire.MaximumRecords
                 - SampleChunkLifecycleProtocol.First) / SampleChunkWire.MaximumRecords
             || manifest.BlockDigests.Any(digest => digest.Length != System.Security.Cryptography.SHA256.HashSizeInBytes))
-        { throw Errors.Fail(ErrorCode.Corruption, SampleChunkLifecycleProtocol.Corrupt); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, SampleChunkLifecycleProtocol.Corrupt);
+        }
         return manifest;
     }
 }

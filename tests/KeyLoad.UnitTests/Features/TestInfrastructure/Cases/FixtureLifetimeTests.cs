@@ -26,7 +26,10 @@ internal sealed class FixtureLifetimeTests
         {
             var failure = Assert.ThrowsExactly<InvalidOperationException>(() =>
             {
-                using var unexpected = new TestDatabase(new() { MaxConcurrentQueries = concurrency }, directory);
+                using var unexpected = new TestDatabase(new()
+                {
+                    MaxConcurrentQueries = concurrency
+                }, directory);
             });
             await Assert.That(failure.Message).IsEqualTo(DatabaseLimits.ValidationMessage);
             await Assert.That(Directory.Exists(directory)).IsFalse();
@@ -96,7 +99,10 @@ internal sealed class FixtureLifetimeTests
             });
             var error = Assert.ThrowsExactly<ArgumentException>(() =>
             {
-                using var unexpected = new TestDatabase(new() { MaxConcurrentQueries = ZeroConcurrency }, directory);
+                using var unexpected = new TestDatabase(new()
+                {
+                    MaxConcurrentQueries = ZeroConcurrency
+                }, directory);
             });
             await Assert.That(error.ParamName).IsEqualTo(DirectoryParameter);
             await Assert.That(await File.ReadAllTextAsync(sentinel)).IsEqualTo(SentinelContent);

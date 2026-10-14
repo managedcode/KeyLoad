@@ -14,11 +14,15 @@ internal static class EventVectorOfferPageProjection
     {
         ArgumentNullException.ThrowIfNull(admission);
         if (acknowledged.IsDefault || actualPages.IsDefault || acknowledged.Length != actualPages.Length)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidPage); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidPage);
+        }
         admission.RequireEntryCount(acknowledged.Length);
         var result = ImmutableArray.CreateBuilder<EventVectorEntry>(acknowledged.Length);
         for (var ordinal = FirstOrdinal; ordinal < acknowledged.Length; ordinal++)
-        { result.Add(Create(acknowledged[ordinal], actualPages[ordinal])); }
+        {
+            result.Add(Create(acknowledged[ordinal], actualPages[ordinal]));
+        }
         return result.MoveToImmutable();
     }
 
@@ -28,15 +32,21 @@ internal static class EventVectorOfferPageProjection
             || page.Events.IsDefault || string.IsNullOrEmpty(page.Cursor) || page.CutPosition < InitialCut || page.CutPosition < original.CapturedCut
             || page.Head.Generation != original.Source.Generation
             || page.Head.TailPosition < original.Position)
-        { throw Errors.Fail(ErrorCode.Corruption, InvalidPage); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidPage);
+        }
         if (page.Head.FirstAvailablePosition > checked(original.Position + BeforeFinalEvent))
-        { throw Errors.Fail(ErrorCode.HistoryUnavailable, InvalidPage); }
+        {
+            throw Errors.Fail(ErrorCode.HistoryUnavailable, InvalidPage);
+        }
         var position = original.Position;
         foreach (var value in page.Events)
         {
             if (value is null || value.Data is null || value.Source != original.Source || value.Position <= position
                 || value.Position > page.Head.TailPosition || value.EventSequence < original.EventSequence)
-            { throw Errors.Fail(ErrorCode.Corruption, InvalidPage); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, InvalidPage);
+            }
             position = value.Position;
         }
         var final = page.Events.IsEmpty ? null : page.Events[page.Events.Length - BeforeFinalEvent];

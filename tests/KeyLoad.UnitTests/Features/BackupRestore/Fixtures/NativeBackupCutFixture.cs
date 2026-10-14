@@ -15,8 +15,14 @@ internal sealed class NativeBackupCutFixture : IDisposable
     internal string Backup => Path.Combine(root, MetadataTestContract.BackupDirectoryName);
     internal string Destination => Path.Combine(root, MetadataTestContract.RestoredDirectoryName);
     internal string Journal => Path.Combine(Backup, MetadataTestContract.JournalFileName);
-    internal StoreIdentity Identity { get; }
-    internal long Position { get; }
+    internal StoreIdentity Identity
+    {
+        get;
+    }
+    internal long Position
+    {
+        get;
+    }
 
     internal NativeBackupCutFixture(bool checkpoint = false, bool empty = false)
     {

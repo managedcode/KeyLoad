@@ -92,7 +92,9 @@ internal static class CliBackupOwnerExclusionTrial
             token.ThrowIfCancellationRequested();
             var page = view.Scan([], MaximumFixtureRows);
             if (page.HasMore)
-            { throw new InvalidOperationException("The original held-owner fixture exceeded its complete-row bound."); }
+            {
+                throw new InvalidOperationException("The original held-owner fixture exceeded its complete-row bound.");
+            }
             return (owner.Identity, owner.Position, page.Records.Select(row =>
                 Convert.ToHexString(row.Key.Span) + ":" + Convert.ToHexString(row.Value.Span)).ToArray());
         });

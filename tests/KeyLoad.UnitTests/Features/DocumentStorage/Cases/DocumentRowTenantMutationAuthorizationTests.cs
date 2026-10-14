@@ -44,7 +44,10 @@ internal sealed class DocumentRowTenantMutationAuthorizationTests
         await Assert.That(DocumentCrudFixture.ReadRecord(database,
             new(database.Partition, Collection, "forged-owner"))).IsNull();
 
-        var foreignPartition = database.Partition with { TenantId = ForeignTenant };
+        var foreignPartition = database.Partition with
+        {
+            TenantId = ForeignTenant
+        };
         var foreignWrite = DocumentCrudFixture.SubmitAt(database, OwnerPrincipal, foreignPartition,
             new PutDocument(Collection, "forged-tenant", EmptyObject, 0));
         await Assert.That(foreignWrite.Error).IsEqualTo(ErrorCode.PermissionDenied);

@@ -15,7 +15,11 @@ internal static class TenantCapacityPlacementRf3IntentCollisionAssertions
         await TenantCapacityPlacementRf3Assertions.RefusalAsync(sdk, ErrorCode.Conflict);
         await SqlRf3Protocol.EqualAsync(Errors.Problem(ErrorCode.Conflict, TenantPlacementPolicyProtocol.Stale), sdk.Problem!);
         var mcp = await seed.Official.CallAsync(TenantPlacementPublicProtocol.PersistTool,
-            new { commandId = original.CollisionId, request = original.CollisionRequest }, token);
+            new
+            {
+                commandId = original.CollisionId,
+                request = original.CollisionRequest
+            }, token);
         await McpCallerAssertions.ErrorAsync(mcp, ErrorCode.Conflict, dispatched: true);
         await Assert.That(mcp.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
             .GetProperty(McpCallerProtocol.ProblemDetail).GetString()).IsEqualTo(McpStaleDetail);
@@ -30,11 +34,18 @@ internal static class TenantCapacityPlacementRf3IntentCollisionAssertions
         await SqlRf3Protocol.EqualAsync(original.Pending,
             await McpCallerAssertions.SdkSuccessAsync(await seed.Source.ReadPlacementIntentAsync(request, token)));
         await SqlRf3Protocol.EqualAsync(original.Pending, (await McpCallerAssertions.SuccessAsync<PlacementIntentV1>(
-            await seed.Official.CallAsync(TenantPlacementPublicProtocol.IntentTool, new { request }, token))).Value);
+            await seed.Official.CallAsync(TenantPlacementPublicProtocol.IntentTool, new
+            {
+                request
+            }, token))).Value);
         await SqlRf3Protocol.EqualAsync(original.Pending, await McpCallerAssertions.SdkSuccessAsync(
             await seed.Source.PersistPlacementIntentAsync(original.PersistId, original.Request, token)));
         await SqlRf3Protocol.EqualAsync(original.Pending, (await McpCallerAssertions.SuccessAsync<PlacementIntentV1>(
             await seed.Official.CallAsync(TenantPlacementPublicProtocol.PersistTool,
-                new { commandId = original.PersistId, request = original.Request }, token))).Value);
+                new
+                {
+                    commandId = original.PersistId,
+                    request = original.Request
+                }, token))).Value);
     }
 }

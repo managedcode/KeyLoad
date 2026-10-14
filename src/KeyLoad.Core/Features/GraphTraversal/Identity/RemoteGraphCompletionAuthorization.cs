@@ -13,14 +13,18 @@ public sealed partial class DatabaseEngine
         var command = Payload<RemoteGraphCompletionMutationV1>(operation);
         if (command.Version != RemoteGraphProtocol.Version || command.CommandId != operation.Id
             || string.IsNullOrEmpty(command.VerifiedToken))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteGraphProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, RemoteGraphProtocol.Invalid);
+        }
         var placement = RequireRemoteGraphCompletion(view, principal, command.Receipt);
         var claims = Verify<RemoteGraphCompletionClaimsV1>(command.VerifiedToken);
         if (claims.Purpose != RemoteGraphProtocol.CompletionPurpose || claims.SourcePrincipalId != principal.Id
             || claims.SourcePolicyEpoch != principal.PolicyEpoch
             || !NativeSerialization.Serialize(claims.Receipt).AsSpan().SequenceEqual(
                 NativeSerialization.Serialize(command.Receipt)))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteGraphProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Unauthenticated, RemoteGraphProtocol.Invalid);
+        }
         return placement;
     }
 

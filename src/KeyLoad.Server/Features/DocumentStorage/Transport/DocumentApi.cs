@@ -13,8 +13,8 @@ internal static class DocumentApi
         app.MapPost(CommandPath, (CommandRequest request, HttpContext context) =>
             ApiGrainDispatch.SubmitAsync(context, OperationKind.Batch, request.CommandId, request));
         app.MapPost(FollowerPath, (ReadFollowerDocumentRequestV1 request, HttpContext context) =>
-            ApiGrainDispatch.ReadAsync(context, KeyLoad.Orleans.GrainReadKind.FollowerDocument, request));
+            ApiGrainDispatch.ReadAsync(context, KeyLoad.Clustering.GrainReadKind.FollowerDocument, request));
         app.MapPost(GetPath, (GetDocumentRequest request, HttpContext context) =>
-            ApiGrainDispatch.ReadAsync(context, KeyLoad.Orleans.GrainReadKind.Document, request));
+            ApiGrainDispatch.ReadAsync(context, KeyLoad.Clustering.GrainReadKind.Document, request));
     }
 }

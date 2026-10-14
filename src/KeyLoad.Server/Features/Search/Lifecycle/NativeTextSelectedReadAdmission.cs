@@ -17,12 +17,18 @@ internal sealed class NativeTextSelectedReadAdmission(int maximumReaders, Native
         {
             ObjectDisposedException.ThrowIf(closed, this);
             if (retainedFailure is not null)
-            { throw new AggregateException(retainedFailure); }
+            {
+                throw new AggregateException(retainedFailure);
+            }
             if (writer || readers >= maximumReaders)
-            { throw NativeTextErrors.BoundExceeded(); }
+            {
+                throw NativeTextErrors.BoundExceeded();
+            }
             var reservation = resources?.ReserveLease();
             if (readers == Empty)
-            { quiet = new(TaskCreationOptions.RunContinuationsAsynchronously); }
+            {
+                quiet = new(TaskCreationOptions.RunContinuationsAsynchronously);
+            }
             readers++;
             return new(this, reservation);
         }
@@ -35,9 +41,13 @@ internal sealed class NativeTextSelectedReadAdmission(int maximumReaders, Native
         {
             ObjectDisposedException.ThrowIf(closed, this);
             if (retainedFailure is not null)
-            { throw new AggregateException(retainedFailure); }
+            {
+                throw new AggregateException(retainedFailure);
+            }
             if (writer)
-            { throw NativeTextErrors.Ownership(); }
+            {
+                throw NativeTextErrors.Ownership();
+            }
             writer = true;
             originalReaders = quiet?.Task ?? Task.CompletedTask;
         }
@@ -68,7 +78,9 @@ internal sealed class NativeTextSelectedReadAdmission(int maximumReaders, Native
         lock (gate)
         {
             if (retainedFailure is not null)
-            { throw new AggregateException(retainedFailure); }
+            {
+                throw new AggregateException(retainedFailure);
+            }
         }
     }
 
@@ -86,12 +98,18 @@ internal sealed class NativeTextSelectedReadAdmission(int maximumReaders, Native
         lock (gate)
         {
             if (readers <= Empty)
-            { throw NativeTextErrors.Corrupt(); }
+            {
+                throw NativeTextErrors.Corrupt();
+            }
             readers--;
             if (retainedFailure is null)
-            { reservation?.CompleteAfterJoinedCleanup(); }
+            {
+                reservation?.CompleteAfterJoinedCleanup();
+            }
             if (readers == Empty)
-            { quiet!.TrySetResult(); }
+            {
+                quiet!.TrySetResult();
+            }
         }
     }
 
@@ -100,7 +118,9 @@ internal sealed class NativeTextSelectedReadAdmission(int maximumReaders, Native
         lock (gate)
         {
             if (!writer)
-            { throw NativeTextErrors.Corrupt(); }
+            {
+                throw NativeTextErrors.Corrupt();
+            }
             writer = false;
         }
     }

@@ -89,13 +89,20 @@ internal sealed record AggregateReplayRf3Scenario(PartitionRef Partition, Princi
     internal ReadAggregateReplayRequest ReadRequest(int maximumEvents = AggregateReplayRf3Tokens.TailCount,
         string reducer = AggregateReplayRf3Tokens.Reducer, int schemaVersion = AggregateReplayRf3Tokens.StateSchema,
         long generation = AggregateReplayRf3Tokens.Generation)
-        => new(Stream with { Generation = generation }, reducer, schemaVersion, MaximumEvents: maximumEvents);
+        => new(Stream with
+        {
+            Generation = generation
+        }, reducer, schemaVersion, MaximumEvents: maximumEvents);
 
     internal async Task RevokeAsync(ClusterFixture fixture, CancellationToken cancellationToken)
     {
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
         var administrator = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
-        var revoked = Worker with { Revoked = true, PolicyEpoch = Worker.PolicyEpoch + 1 };
+        var revoked = Worker with
+        {
+            Revoked = true,
+            PolicyEpoch = Worker.PolicyEpoch + 1
+        };
         await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigurePrincipalAsync(Guid.NewGuid(),
             revoked, cancellationToken));
     }
@@ -104,7 +111,11 @@ internal sealed record AggregateReplayRf3Scenario(PartitionRef Partition, Princi
     {
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
         var administrator = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
-        var repaired = Worker with { Revoked = false, PolicyEpoch = Worker.PolicyEpoch + RepairEpochAdvance };
+        var repaired = Worker with
+        {
+            Revoked = false,
+            PolicyEpoch = Worker.PolicyEpoch + RepairEpochAdvance
+        };
         await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigurePrincipalAsync(Guid.NewGuid(),
             repaired, cancellationToken));
     }

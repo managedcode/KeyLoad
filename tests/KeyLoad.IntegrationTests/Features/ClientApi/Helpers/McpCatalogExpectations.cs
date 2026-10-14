@@ -33,7 +33,10 @@ internal static class McpCatalogExpectations
     private const string DashboardName = "keyload_admin_dashboard";
     private const string ResourcesListName = "keyload_admin_resources_list";
     private const string QueueBrowseName = "keyload_admin_queue_browse";
-    internal static ImmutableArray<McpToolExpectation> Entries { get; } =
+    internal static ImmutableArray<McpToolExpectation> Entries
+    {
+        get;
+    } =
     [
         .. McpBlobCatalogExpectations.Entries,
         .. McpEventFeedDiscoveryExpectations.Entries,

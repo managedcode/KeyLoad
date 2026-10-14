@@ -10,7 +10,9 @@ internal static class C1SubmissionOutcomeInspectionValidation
         if (request is null || request.Version != C1SubmissionOutcomeInspectionProtocol.Version
             || request.PrincipalId is null
             || !request.PrincipalId.StartsWith(C1SubmissionOutcomeInspectionProtocol.PrincipalPrefix, StringComparison.Ordinal))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         _ = C1OutcomeInspectionRequestValidation.Validate(new(C1OutcomeInspectionProtocol.Version,
             request.Directory, request.ExpectedNodeId, request.Incarnation, request.PrincipalId,
             request.CommandId, request.Partition));
@@ -24,7 +26,9 @@ internal static class C1SubmissionOutcomeInspectionValidation
             || receipt.Position < MinimumPosition || receipt.OutcomeKey is null || receipt.NativeStoredOutcome is null
             || receipt.OutcomeKey.Length is <= EmptyBufferBytes or > C1SubmissionOutcomeInspectionProtocol.MaximumNativeRecordBytes
             || receipt.NativeStoredOutcome.Length is <= EmptyBufferBytes or > C1SubmissionOutcomeInspectionProtocol.MaximumNativeRecordBytes)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         return receipt;
     }
 

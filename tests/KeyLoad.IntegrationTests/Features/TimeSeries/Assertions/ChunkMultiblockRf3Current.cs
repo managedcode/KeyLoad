@@ -56,7 +56,9 @@ internal static class ChunkMultiblockRf3Current
             state.MaintenanceOutboxAdvanced = true;
         }
         else
-        { await SampleChunkRetentionRf3ReadOracle.EqualAsync(actual, expected); }
+        {
+            await SampleChunkRetentionRf3ReadOracle.EqualAsync(actual, expected);
+        }
     }
 
     private static async Task BothAsync<T>(RequestCqrsRf3Callers caller, string tool, object request,

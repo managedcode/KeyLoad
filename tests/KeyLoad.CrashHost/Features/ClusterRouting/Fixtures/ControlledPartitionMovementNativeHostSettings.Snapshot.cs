@@ -21,11 +21,15 @@ internal sealed partial class ControlledPartitionMovementNativeHostSettings
         Control = Owner(ControlId, ControlIncarnation, FirstSource);
         Destination = Owner(DestinationId, DestinationIncarnation, FirstDestination);
         if (!Same(input.Control, Control) || !Same(input.Destination, Destination))
-        { throw ControlledPartitionMovementNativeHostInputValidation.Invalid(); }
+        {
+            throw ControlledPartitionMovementNativeHostInputValidation.Invalid();
+        }
         for (var index = FirstSource; index < input.Arguments.Length; index++)
         {
             if (!Arguments(index).SequenceEqual(input.Arguments[index], StringComparer.Ordinal))
-            { throw ControlledPartitionMovementNativeHostInputValidation.Invalid(); }
+            {
+                throw ControlledPartitionMovementNativeHostInputValidation.Invalid();
+            }
         }
     }
 

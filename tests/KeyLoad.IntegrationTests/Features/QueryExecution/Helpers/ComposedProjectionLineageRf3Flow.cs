@@ -17,7 +17,10 @@ internal static class ComposedProjectionLineageRf3Flow
         await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, state.Identity.Secret, async callers =>
         {
             var request = QueueReferenceSelectProtocol.Operation(state.Partition);
-            request = request with { Sql = request.Sql.Replace(OriginalSelection, ExpandedSelection, StringComparison.Ordinal) };
+            request = request with
+            {
+                Sql = request.Sql.Replace(OriginalSelection, ExpandedSelection, StringComparison.Ordinal)
+            };
             if (denied)
             {
                 await FailureAsync(callers, request, ErrorCode.PermissionDenied, token);
@@ -29,7 +32,10 @@ internal static class ComposedProjectionLineageRf3Flow
                 await ComposedProjectionLineageRf3Assertions.PageAsync(sdk, masked, state.Repair is not null, scoreMasked);
                 await ComposedProjectionLineageRf3Assertions.PageAsync(mcp, masked, state.Repair is not null, scoreMasked);
                 await Assert.That(mcp.CutPosition).IsGreaterThanOrEqualTo(sdk.CutPosition);
-                await SqlRf3Protocol.EqualAsync(sdk with { CutPosition = mcp.CutPosition }, mcp);
+                await SqlRf3Protocol.EqualAsync(sdk with
+                {
+                    CutPosition = mcp.CutPosition
+                }, mcp);
                 await FailureAsync(callers, request with
                 {
                     Sql = request.Sql.Replace(LeftPredicate, RightPredicate,

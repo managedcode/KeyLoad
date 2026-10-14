@@ -13,7 +13,9 @@ public sealed partial class DatabaseEngine
             || receipt.Intent.Version != RemoteGraphProtocol.Version
             || !PhysicalOwnerEntryValidation.Valid(receipt.Intent.DestinationOwner)
             || receipt.TargetReceipt?.Token is null || receipt.TargetReceipt.CommandId == Guid.Empty)
-        { throw Errors.Fail(failure, RemoteGraphProtocol.Invalid); }
+        {
+            throw Errors.Fail(failure, RemoteGraphProtocol.Invalid);
+        }
         var intent = receipt.Intent;
         var content = intent.Content;
         GraphCrossPartitionValidation.ValidateIntent(content, content.SourcePartition, content.Graph,
@@ -23,10 +25,14 @@ public sealed partial class DatabaseEngine
             || token.AtomicPartitionId != content.Destination.Partition.AtomicPartitionId
             || token.Position < RemoteGraphFirstGeneration || token.OwnershipEpoch < RemoteGraphFirstGeneration
             || receipt.TargetReceipt.Mutations.IsDefault || receipt.TargetReceipt.Mutations.Length != RemoteGraphSinglePreparation)
-        { throw Errors.Fail(failure, RemoteGraphProtocol.Invalid); }
+        {
+            throw Errors.Fail(failure, RemoteGraphProtocol.Invalid);
+        }
         var mutation = receipt.TargetReceipt.Mutations[RemoteGraphFirstPreparation];
         if (mutation is null || mutation.Kind != MutationDiscriminatorNames.ApplyCrossPartitionReverseEdge
             || mutation.Resource != content.Graph || mutation.Id != content.EdgeId || mutation.Revision != content.Revision)
-        { throw Errors.Fail(failure, RemoteGraphProtocol.Invalid); }
+        {
+            throw Errors.Fail(failure, RemoteGraphProtocol.Invalid);
+        }
     }
 }

@@ -10,21 +10,31 @@ internal sealed partial class NativeTextCapturedRead
     {
         ObjectDisposedException.ThrowIf(disposed, this);
         if (captured is not null)
-        { throw new InvalidOperationException(AlreadySettled); }
+        {
+            throw new InvalidOperationException(AlreadySettled);
+        }
         var failures = new List<Exception>();
         ServerFailureObserver.Observe(() => NativeSearchLookupClosure.Capture(database, builder, Principal,
             request.Partition, request.Collection, request.VectorField, request.TextField, TextProjectionProtocol.TokenizerVersion, budget), failures);
         if (failures.Count == NoFailures)
-        { ServerFailureObserver.Observe(JoinNative, failures); }
+        {
+            ServerFailureObserver.Observe(JoinNative, failures);
+        }
         if (failures.Count == NoFailures)
-        { ServerFailureObserver.Observe(() => captured = builder.Transfer(), failures); }
+        {
+            ServerFailureObserver.Observe(() => captured = builder.Transfer(), failures);
+        }
         if (failures.Count != NoFailures)
-        { ServerFailureObserver.Observe(Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(Dispose, failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
         budget.Check();
         var callback = NativeTextPostingObservation.Capture();
         if (callback is not null && OriginalProjection is IOriginalTextPostingObservation observed)
-        { observed.ObserveOriginalPosting(callback); }
+        {
+            observed.ObserveOriginalPosting(callback);
+        }
         return captured!;
     }
 
@@ -32,7 +42,9 @@ internal sealed partial class NativeTextCapturedRead
     {
         ObjectDisposedException.ThrowIf(disposed, this);
         if (!nativeJoined || captured is null)
-        { throw new InvalidOperationException(NotSettled); }
+        {
+            throw new InvalidOperationException(NotSettled);
+        }
         NativeSearchTerminalPrivacy.Verify(database, Principal.Id, request.Partition, request.Collection,
             request.TextField!, request.VectorField, authority, captured, selected, budget);
     }
@@ -40,7 +52,9 @@ internal sealed partial class NativeTextCapturedRead
     private void JoinNative()
     {
         if (nativeJoined)
-        { return; }
+        {
+            return;
+        }
         native.Dispose();
         budget.CompleteSettledReadGrant(grant);
         nativeJoined = true;

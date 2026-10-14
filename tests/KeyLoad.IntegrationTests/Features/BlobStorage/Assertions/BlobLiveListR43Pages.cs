@@ -65,8 +65,15 @@ internal static class BlobLiveListR43Pages
     }
     internal static async Task AllBytesAsync(RequestCqrsRf3Callers callers, BlobLiveListR43State state, CancellationToken token)
     {
-        int[] indices = state.Phase switch { 0 => [0, 1], 1 => [0, 1, 2], _ => [0, 1, 2, 3] };
+        int[] indices = state.Phase switch
+        {
+            0 => [0, 1],
+            1 => [0, 1, 2],
+            _ => [0, 1, 2, 3]
+        };
         foreach (var index in indices)
-        { await BytesAsync(callers, state, index, token); }
+        {
+            await BytesAsync(callers, state, index, token);
+        }
     }
 }

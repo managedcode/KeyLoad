@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
@@ -9,10 +9,14 @@ internal static class PartitionMovementRuntimeFactory
         ServerRuntimeOptions options, NativeRequestWorkOwner work, TimeProvider clock)
     {
         if (!options.PartitionMovement.Value.Enabled)
-        { return null; }
+        {
+            return null;
+        }
         if (!options.Node.Value.PhysicalGroupTrust.RegisterPhysicalOwners
             || !options.Node.Value.PhysicalGroupTrust.RemoteDocumentReads)
-        { throw Errors.Fail(ErrorCode.UnsupportedCapability, PartitionMovementProtocol.Unavailable); }
+        {
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, PartitionMovementProtocol.Unavailable);
+        }
         var runtime = new PartitionMovementRuntime(work);
         try
         {

@@ -22,7 +22,9 @@ internal sealed class ConfiguredVectorProfileNullArrayTests
         using var database = new TestDatabase();
         var definition = new ResourceDefinition(ConfiguredVectorProfileFlow.Collection, ResourceKind.Collection,
             database.Partition.TransactionDomainId)
-        { VectorProfiles = [new(ConfiguredVectorProfileFlow.Field, ConfiguredVectorProfileFlow.Space)] };
+        {
+            VectorProfiles = [new(ConfiguredVectorProfileFlow.Field, ConfiguredVectorProfileFlow.Space)]
+        };
         var healthy = new ConfigureResourceRequest(database.Partition.TenantId, database.Partition.DatabaseId, definition);
         var malformed = JsonNode.Parse(JsonSerializer.Serialize(healthy, JsonDefaults.Options))!;
         malformed[Definition]![Profiles] = null;

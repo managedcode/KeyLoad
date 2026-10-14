@@ -36,7 +36,9 @@ internal static class AuthorizationTelemetryNativeAssertions
             }
         }
         if (state == AuthorizationUnsafeSpanState.ClientRemoteLink)
-        { await RemoteLinkAsync(nativeSpans, suppressedTrace); }
+        {
+            await RemoteLinkAsync(nativeSpans, suppressedTrace);
+        }
         if (state == AuthorizationUnsafeSpanState.ClientTraceStateLink)
         {
             var unsafeClient = nativeSpans.Single(item => item.Source == AuthorizationTelemetryTestProtocol.HttpClientSource && item.TraceId == suppressedTrace && HasUnsafeClientState(item, state));

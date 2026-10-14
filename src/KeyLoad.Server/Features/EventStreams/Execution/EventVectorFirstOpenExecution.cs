@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 using KeyLoad.Replication;
 using KeyLoad.Server.Features.DocumentStorage;
 using Microsoft.Extensions.Options;
@@ -31,7 +31,9 @@ internal static class EventVectorFirstOpenExecution
         if (originalOpen.Action != EventVectorControlAction.Open
             || !originalOpen.OriginalCapturedFirstOpenPhaseBytes.IsEmpty
             || originalOpen.OriginalFirstIssuancePublicCommandId != Guid.Empty)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         var measuredBytes = NativeSerialization.Measure(originalOpen);
         admission.RequireEncodedBytes(measuredBytes);
         work.ChargeBytes(measuredBytes);
@@ -60,7 +62,9 @@ internal static class EventVectorFirstOpenExecution
                 parent, originalOpen, work, originalCancellationToken).ConfigureAwait(false);
             work.Check();
             if (result is not EventVectorControlResult actual)
-            { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+            }
             return await EventVectorFirstOpenPins.CompleteAsync(runtime, node, partition, options.Value, clock,
                 parent, originalOpen, actual, admission, new EventVectorRemoteEncoding(limits),
                 work, originalCancellationToken).ConfigureAwait(false);
@@ -84,7 +88,9 @@ internal static class EventVectorFirstOpenExecution
             || originalAdmit.OriginalRequest != GrainNativePayload.ReadCommand<EventFeedControlRequest>(parent.Payload)
             || originalAdmit.OriginalParentRequestId != parent.Envelope.RequestId
             || originalAdmit.OriginalParentExpiresAt != parent.Envelope.ExpiresAt)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, Invalid);
+        }
         EventVectorControlFields.Require(originalAdmit, admission);
         return EventVectorFirstAppendValidation.Require(actualAppend, originalAdmit, admission);
     }

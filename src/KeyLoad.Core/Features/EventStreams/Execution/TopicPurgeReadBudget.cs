@@ -21,7 +21,9 @@ internal sealed class TopicPurgeReadBudget
     {
         // Native observers run once before each owned decode, including range lookahead.
         if (++records > limits.MaxScanRecords || count > limits.MaxBatchBytes - bytes)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, Exhausted); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, Exhausted);
+        }
         bytes += count;
     }
 }

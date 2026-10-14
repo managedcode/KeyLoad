@@ -17,10 +17,16 @@ internal sealed class CacheMemoryReservation : ICacheMemoryReservation
     }
 
     /// <inheritdoc />
-    public long Bytes { get; }
+    public long Bytes
+    {
+        get;
+    }
 
     /// <inheritdoc />
-    public int Entries { get; }
+    public int Entries
+    {
+        get;
+    }
 
     /// <inheritdoc />
     public void Dispose()

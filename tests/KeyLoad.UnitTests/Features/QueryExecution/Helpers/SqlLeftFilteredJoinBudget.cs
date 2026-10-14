@@ -31,7 +31,10 @@ internal static class SqlLeftFilteredJoinBudget
 
     private static QueryEngine Engine(TestDatabase database)
     {
-        var limits = database.Database.Limits with { MaxScanRecords = TwoLeftRowsOnly };
+        var limits = database.Database.Limits with
+        {
+            MaxScanRecords = TwoLeftRowsOnly
+        };
         var owner = new DatabaseEngine(database.Store, database.Database.Authorization,
             UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(),
             UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(),

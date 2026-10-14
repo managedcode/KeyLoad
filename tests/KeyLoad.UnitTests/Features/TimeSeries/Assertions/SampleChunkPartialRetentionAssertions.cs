@@ -50,7 +50,9 @@ internal static class SampleChunkPartialRetentionAssertions
         await Assert.That(aggregate).IsEqualTo(fresh ? new SampleAggregate(2, 8, -0d, 8, 4) : new(1, 0, -0d, -0d, 0));
         await SampleRawIntegrityAssertions.UnchangedAsync(fixture.Store, cut);
         if (merged)
-        { await Representation(fixture, expected.Generation, fresh ? [.. SampleChunkCanonicalFixture.Expected(), late, newer] : [.. SampleChunkCanonicalFixture.Expected(), late]); }
+        {
+            await Representation(fixture, expected.Generation, fresh ? [.. SampleChunkCanonicalFixture.Expected(), late, newer] : [.. SampleChunkCanonicalFixture.Expected(), late]);
+        }
     }
 
     private static async Task Representation(SampleChunkPartialRetentionFixture fixture, long generation,

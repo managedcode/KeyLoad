@@ -17,14 +17,20 @@ internal static class ReplicaIsolationRuntimeUser
         var arguments = new List<object>();
         var context = new ContainerRuntimeArgsCallbackContext(arguments, cancellationToken);
         foreach (var annotation in resource.Annotations.OfType<ContainerRuntimeArgsCallbackAnnotation>())
-        { await annotation.Callback(context).ConfigureAwait(false); }
+        {
+            await annotation.Callback(context).ConfigureAwait(false);
+        }
         if (arguments.Count != ArgumentCount || arguments[OptionIndex] is not string option
             || !string.Equals(option, UserArgument, StringComparison.Ordinal) || arguments[UserIndex] is not string user)
-        { throw new InvalidOperationException(OriginalUserArgumentsRequired); }
+        {
+            throw new InvalidOperationException(OriginalUserArgumentsRequired);
+        }
         var parts = user.Split(Separator);
         if (parts.Length != ArgumentCount || !uint.TryParse(parts[OptionIndex], out var uid) || uid == RootUser
             || !uint.TryParse(parts[UserIndex], out _))
-        { throw new InvalidOperationException(NonRootUserRequired); }
+        {
+            throw new InvalidOperationException(NonRootUserRequired);
+        }
         return user;
     }
 }

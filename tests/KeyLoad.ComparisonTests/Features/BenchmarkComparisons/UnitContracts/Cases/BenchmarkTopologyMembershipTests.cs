@@ -75,9 +75,15 @@ internal sealed class BenchmarkTopologyMembershipTests
             using var log = new DurableReplicaLog(store, UnitExecutionOptions.ReplicaConfiguration(original));
         }
         using var reopened = fixture.Open();
-        using var same = new DurableReplicaLog(reopened, UnitExecutionOptions.ReplicaConfiguration(original with { BenchmarkTopology = false }));
+        using var same = new DurableReplicaLog(reopened, UnitExecutionOptions.ReplicaConfiguration(original with
+        {
+            BenchmarkTopology = false
+        }));
         var position = reopened.Position;
-        var reordered = original with { VoterIds = original.VoterIds.Reverse().ToImmutableArray() };
+        var reordered = original with
+        {
+            VoterIds = original.VoterIds.Reverse().ToImmutableArray()
+        };
         var reduced = fixture.Configuration(1);
         var enlargedProduction = fixture.Configuration(5, benchmark: false);
         foreach (var changed in new[] { reordered, reduced, enlargedProduction })

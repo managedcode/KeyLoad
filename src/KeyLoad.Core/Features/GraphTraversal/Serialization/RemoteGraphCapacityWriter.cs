@@ -20,17 +20,25 @@ internal static class RemoteGraphCapacityWriter
             if (current.Version != RemoteGraphProtocol.Version || current.Direction != direction
                 || current.RecordCount < Empty || current.EncodedBytes < Empty
                 || current.RecordCount > limits.MaxScanRecords || current.EncodedBytes > limits.MaxBatchBytes)
-            { throw Errors.Fail(ErrorCode.Corruption, RemoteGraphProtocol.Invalid); }
+            {
+                throw Errors.Fail(ErrorCode.Corruption, RemoteGraphProtocol.Invalid);
+            }
         }
         else if (tx.VisitRange(prefix, ExistenceProbe, static (_, _) => false).Records != Empty)
-        { throw Errors.Fail(ErrorCode.Corruption, RemoteGraphProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, RemoteGraphProtocol.Invalid);
+        }
         var next = Measure(tx, writes, current, limits);
         foreach (var write in writes)
         {
             if (write.Value is null)
-            { tx.Delete(write.Key); }
+            {
+                tx.Delete(write.Key);
+            }
             else
-            { tx.Put(write.Key, write.Value); }
+            {
+                tx.Put(write.Key, write.Value);
+            }
         }
         tx.PutRecord(key, new RemoteGraphCapacityV1(RemoteGraphProtocol.Version, direction,
             next.Count, next.Bytes));
@@ -48,18 +56,26 @@ internal static class RemoteGraphCapacityWriter
             foreach (var write in writes)
             {
                 if (!keys.Add(Convert.ToHexString(write.Key)))
-                { throw Errors.Fail(ErrorCode.Corruption, RemoteGraphProtocol.Invalid); }
+                {
+                    throw Errors.Fail(ErrorCode.Corruption, RemoteGraphProtocol.Invalid);
+                }
                 var delta = MeasureWrite(tx, write, limits);
                 count = checked(count + delta.Count);
                 bytes = checked(bytes + delta.Bytes);
             }
         }
         catch (OverflowException)
-        { throw Errors.Fail(ErrorCode.Corruption, RemoteGraphProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, RemoteGraphProtocol.Invalid);
+        }
         if (count < Empty || bytes < Empty)
-        { throw Errors.Fail(ErrorCode.Corruption, RemoteGraphProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Corruption, RemoteGraphProtocol.Invalid);
+        }
         if (count > limits.MaxScanRecords || bytes > limits.MaxBatchBytes)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, RemoteGraphProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, RemoteGraphProtocol.Invalid);
+        }
         return (count, bytes);
     }
 
@@ -69,7 +85,9 @@ internal static class RemoteGraphCapacityWriter
         int? oldLength = null;
         tx.ReadValue(write.Key, value => oldLength = value.Length);
         if (write.Value is { Length: var length } && length > limits.MaxBatchBytes)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, RemoteGraphProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, RemoteGraphProtocol.Invalid);
+        }
         var count = oldLength.HasValue ? write.Value is null ? Removed : Empty
             : write.Value is null ? Empty : Added;
         var bytes = checked((write.Value?.LongLength ?? Empty) - oldLength.GetValueOrDefault());

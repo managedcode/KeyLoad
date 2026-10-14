@@ -38,6 +38,8 @@ internal sealed record TopicRetentionRf3Scenario(PartitionRef Partition, EventSo
             [new PublishTopic("topic", [new("event4", "Created", "{\"n\":4}")])]);
         return new(Partition, "CALL keyload_documents_commit(@arguments)",
             new Dictionary<string, JsonElement>(StringComparer.Ordinal)
-            { [ArgumentsKey] = JsonSerializer.SerializeToElement(new { request = command }, JsonDefaults.Options) });
+            {
+                [ArgumentsKey] = JsonSerializer.SerializeToElement(new { request = command }, JsonDefaults.Options)
+            });
     }
 }

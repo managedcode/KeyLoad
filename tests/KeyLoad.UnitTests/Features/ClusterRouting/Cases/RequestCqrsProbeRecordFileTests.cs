@@ -15,7 +15,9 @@ internal sealed class RequestCqrsProbeRecordFileTests
     public async Task AcCrs004ReadsOwned0600RegularRecordBytesExactly()
     {
         if (OperatingSystem.IsWindows())
-        { throw new PlatformNotSupportedException("Private file mode tests require a Unix host."); }
+        {
+            throw new PlatformNotSupportedException("Private file mode tests require a Unix host.");
+        }
         using var directory = RequestCqrsProbeRecordFileFixture.Create();
         var path = directory.CreateRegular(RequestCqrsProbeRecordFileFixture.RecordName, [0x00, 0x71, 0xFF, 0x18]);
         var identity = OfflineRegularFile.Inspect(path);
@@ -82,7 +84,9 @@ internal sealed class RequestCqrsProbeRecordFileTests
             if (read is not null)
             {
                 if (!read.IsCompleted)
-                { ServerFailureObserver.Observe(() => OpenAndCloseWriter(fifo), failures); }
+                {
+                    ServerFailureObserver.Observe(() => OpenAndCloseWriter(fifo), failures);
+                }
                 await ServerFailureObserver.ObserveAsync(() => JoinReadAsync(read), failures);
             }
         }
@@ -92,7 +96,9 @@ internal sealed class RequestCqrsProbeRecordFileTests
     private static async Task AssertFifoFailureAsync(Task<byte[]> read, string fifo, bool completedWithoutWriter)
     {
         if (!completedWithoutWriter)
-        { OpenAndCloseWriter(fifo); }
+        {
+            OpenAndCloseWriter(fifo);
+        }
         var failure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() => read))!;
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.FormatUnsupported);
         await Assert.That(failure.Message).IsEqualTo(SafeRegularFailure);

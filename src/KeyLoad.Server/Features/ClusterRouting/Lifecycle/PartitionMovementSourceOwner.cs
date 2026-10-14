@@ -1,6 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Orleans;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
@@ -56,7 +56,9 @@ internal sealed partial class PartitionMovementSourceOwner : INativePartitionMov
             if (captures.TryGetValue(commandId, out var pending))
             {
                 if (pending is not PartitionMovementPendingCapture originalCapture)
-                { throw Errors.Fail(ErrorCode.Conflict, ClosedDetail); }
+                {
+                    throw Errors.Fail(ErrorCode.Conflict, ClosedDetail);
+                }
                 retained = originalCapture.Completion.Task;
             }
             else
@@ -98,20 +100,32 @@ internal sealed partial class PartitionMovementSourceOwner : INativePartitionMov
                 }
             }, stopping.Token, cancellationToken);
         try
-        { producer.Dispose(); }
+        {
+            producer.Dispose();
+        }
         catch (Exception cleanup) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
-        { failure = failure is null ? cleanup : new AggregateException(failure, cleanup); }
+        {
+            failure = failure is null ? cleanup : new AggregateException(failure, cleanup);
+        }
         catch (Exception cleanup) when (!NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
-        { failure = failure is null ? cleanup : new AggregateException(failure, cleanup); }
+        {
+            failure = failure is null ? cleanup : new AggregateException(failure, cleanup);
+        }
         lock (gate)
         {
             var completion = producer.Completion;
             if (failure is not null)
-            { completion.TrySetException(failure); }
+            {
+                completion.TrySetException(failure);
+            }
             else if (completed is not null)
-            { completion.TrySetResult(completed); }
+            {
+                completion.TrySetResult(completed);
+            }
             else
-            { completion.TrySetException(Errors.Fail(ErrorCode.Corruption, ClosedDetail)); }
+            {
+                completion.TrySetException(Errors.Fail(ErrorCode.Corruption, ClosedDetail));
+            }
             captures.Remove(RequireGrant(verified));
         }
     }
@@ -130,12 +144,16 @@ internal sealed partial class PartitionMovementSourceOwner : INativePartitionMov
     {
         RequireOpen();
         if (closedMoves.ContainsKey(new(partition, moveId)))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, ClosedDetail); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, ClosedDetail);
+        }
     }
 
     private void RequireOpen()
     {
         if (closing)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, ClosedDetail); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, ClosedDetail);
+        }
     }
 }

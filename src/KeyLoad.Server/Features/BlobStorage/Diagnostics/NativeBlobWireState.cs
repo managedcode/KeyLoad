@@ -33,19 +33,25 @@ internal sealed class NativeBlobWireState
         {
             var bytes = files.Read(NativeBlobWireProbeProtocol.OwnerFile);
             if (NativeBlobWireCodec.Digest(bytes) != ownerDigest)
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             var owner = codec.Read<NativeBlobWireOwner>(bytes);
             RequireOwner(owner);
             if (!files.Exists(NativeBlobWireProbeProtocol.ArmsFile))
             {
                 if (armsDigest is not null)
-                { throw Invalid(); }
+                {
+                    throw Invalid();
+                }
                 return new(owner, ownerDigest, null, null);
             }
             var armed = files.Read(NativeBlobWireProbeProtocol.ArmsFile);
             var digest = NativeBlobWireCodec.Digest(armed);
             if (armsDigest is not null && armsDigest != digest)
-            { throw Invalid(); }
+            {
+                throw Invalid();
+            }
             var arms = codec.Read<NativeBlobWireArms>(armed);
             shape.RequireArms(owner, ownerDigest, arms);
             armsDigest = digest;
@@ -61,7 +67,9 @@ internal sealed class NativeBlobWireState
             || !NativeBlobWireShape.Same(owner.SourceOwner, PhysicalOwnerConfiguredTuples.Local(options, partition).Owner)
             || !NativeBlobWireShape.Same(owner.ControlOwner, PhysicalOwnerConfiguredTuples.Control(options, partition).Owner)
             || !NativeBlobWireShape.Same(owner.DestinationOwner, PhysicalOwnerConfiguredTuples.Destination(options, partition).Owner))
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
     }
     private static InvalidOperationException Invalid() => new(NativeBlobWireProbeProtocol.InvalidOwner);
 }

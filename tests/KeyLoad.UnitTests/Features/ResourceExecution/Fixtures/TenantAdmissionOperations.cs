@@ -11,7 +11,10 @@ internal static class TenantAdmissionOperations
     internal const string Body = "{\"fair\":true}";
 
     internal static PartitionRef PartitionB(TestDatabase fixture)
-        => fixture.Partition with { TenantId = OtherTenant };
+        => fixture.Partition with
+        {
+            TenantId = OtherTenant
+        };
 
     internal static void Provision(TestDatabase fixture)
     {

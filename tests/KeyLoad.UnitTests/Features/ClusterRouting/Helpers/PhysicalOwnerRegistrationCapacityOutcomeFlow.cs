@@ -35,7 +35,10 @@ internal static class PhysicalOwnerRegistrationCapacityOutcomeFlow
             Destination = request.Destination with
             {
                 Owner = request.Destination.Owner with
-                { PhysicalShardId = UnregisteredPhysicalShardId, Incarnation = ForeignIncarnation }
+                {
+                    PhysicalShardId = UnregisteredPhysicalShardId,
+                    Incarnation = ForeignIncarnation
+                }
             }
         };
         var refused = Operation(fixture, changed, RefusedId);

@@ -55,7 +55,10 @@ internal sealed class AnnSeedMalformedStateTests
     {
         using var database = AnnSeedTestSupport.Create(1);
         var document = new DocumentRecord(
-            new(database.Partition with { TenantId = "different-persisted-tenant" },
+            new(database.Partition with
+            {
+                TenantId = "different-persisted-tenant"
+            },
                 AnnSeedTestSupport.Collection, AnnSeedTestSupport.Id(0)),
             1, "{}", new(AnnSeedTestSupport.Owner), DateTimeOffset.UnixEpoch);
         database.Store.Commit((transaction, _) =>
@@ -125,7 +128,10 @@ internal sealed class AnnSeedMalformedStateTests
         });
 
         var failure = AnnSeedTestSupport.CaptureFailure(database, AnnSeedTestSupport.Principal,
-            options: new() { MaxWorkUnits = accepted.WorkUnits });
+            options: new()
+            {
+                MaxWorkUnits = accepted.WorkUnits
+            });
 
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
 

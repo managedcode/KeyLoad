@@ -17,7 +17,10 @@ internal static class ChunkSelectedBlockIntegrityTrial
         await ChunkSelectedBlockIntegrityAssertions.OnlyOwnedRowChanged(fixture, originalCut, damaged, fault);
         await ChunkSelectedIntegrityDamage.Refuse(fixture);
         ChunkSelectedBlockIntegrityDamage.Repair(fixture, original);
-        await SampleRawIntegrityAssertions.UnchangedAsync(fixture.Store, originalCut with { Position = originalCut.Position + 2 });
+        await SampleRawIntegrityAssertions.UnchangedAsync(fixture.Store, originalCut with
+        {
+            Position = originalCut.Position + 2
+        });
         await ChunkSelectedIntegrityAssertions.Healthy(fixture, final: false);
         await ChunkSelectedIntegrityAssertions.Replay(fixture);
         fixture.Apply(fixture.Merge);

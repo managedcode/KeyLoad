@@ -13,19 +13,29 @@ internal sealed class ContainerRestartOwnership
     private const string ReplacedFailure = "The accepted native restart replacement identity changed before settlement.";
     private bool attempted;
     private ContainerRuntimeInspection? replacement;
-    internal bool StartAccepted { get; private set; }
-    internal string? StartMessage { get; private set; }
+    internal bool StartAccepted
+    {
+        get; private set;
+    }
+    internal string? StartMessage
+    {
+        get; private set;
+    }
 
     internal async Task<ContainerRuntimeInspection> AcceptAsync(DistributedApplication app,
         ContainerRuntimeKillReceipt receipt, ContainerRestartFailureCapture capture,
         CancellationToken cancellationToken)
     {
         if (StartAccepted)
-        { capture.StartRetained(); }
+        {
+            capture.StartRetained();
+        }
         if (!StartAccepted)
         {
             if (attempted)
-            { throw new InvalidOperationException(UnknownStartFailure); }
+            {
+                throw new InvalidOperationException(UnknownStartFailure);
+            }
             cancellationToken.ThrowIfCancellationRequested();
             var commands = app.Services.GetRequiredService<ResourceCommandService>();
             attempted = true;
@@ -42,12 +52,16 @@ internal sealed class ContainerRestartOwnership
             capture.StartSucceeded();
         }
         if (replacement is not null)
-        { return replacement; }
+        {
+            return replacement;
+        }
         var observed = await ContainerRuntimeDocker.InspectRunningAsync(receipt.ContainerName,
             receipt.ResourceName, cancellationToken);
         if (observed.StartedAt == receipt.Before.StartedAt
             || observed.ImageId != receipt.Before.ImageId || observed.ConfigImage != receipt.Before.ConfigImage)
-        { throw new InvalidOperationException(ReplacedFailure); }
+        {
+            throw new InvalidOperationException(ReplacedFailure);
+        }
         replacement = observed;
         RequireSameReplacement(observed);
         return observed;
@@ -56,6 +70,8 @@ internal sealed class ContainerRestartOwnership
     internal void RequireSameReplacement(ContainerRuntimeInspection observed)
     {
         if (replacement is null || replacement != observed)
-        { throw new InvalidOperationException(ReplacedFailure); }
+        {
+            throw new InvalidOperationException(ReplacedFailure);
+        }
     }
 }

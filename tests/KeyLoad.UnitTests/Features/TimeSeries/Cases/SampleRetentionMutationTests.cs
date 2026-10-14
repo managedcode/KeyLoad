@@ -61,7 +61,10 @@ internal sealed class SampleRetentionMutationTests
 
         var accepted = db.Submit(OperationKind.Batch, manager, principal: "series-manager", id: manager.CommandId);
         var readerCommandId = Guid.NewGuid();
-        var forbidden = db.Submit(OperationKind.Batch, manager with { CommandId = readerCommandId },
+        var forbidden = db.Submit(OperationKind.Batch, manager with
+        {
+            CommandId = readerCommandId
+        },
             principal: "series-reader", id: readerCommandId);
         var status = db.Database.ReadSampleRetention("series-reader",
             new(db.Partition, SampleAggregateTestData.Set, SampleAggregateTestData.Series));

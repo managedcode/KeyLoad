@@ -27,7 +27,9 @@ internal static class PartitionMoveTransferAuthorityValidation
             || !PartitionMoveControlValidation.SameSource(control.SourcePlacement, header.SourcePlacement)
             || !PhysicalOwnerEntryValidation.SameOwner(control.DestinationOwner, header.DestinationOwner)
             || !PhysicalOwnerEntryValidation.SameOwner(capture.OriginalReceiverOwner, header.OriginalSourceOwner!))
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+        }
         RequireOriginalImage(authority, limits);
     }
 
@@ -48,6 +50,8 @@ internal static class PartitionMoveTransferAuthorityValidation
             || fence.ControlIntentDigest != PartitionMoveIntentIdentity.Digest(authority.CurrentControl)
             || !PhysicalOwnerEntryValidation.SameOwner(fence.ControlOwner, authority.Header.ControlOwner)
             || !PhysicalOwnerEntryValidation.SameOwner(fence.DestinationOwner, authority.Header.DestinationOwner))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
     }
 }

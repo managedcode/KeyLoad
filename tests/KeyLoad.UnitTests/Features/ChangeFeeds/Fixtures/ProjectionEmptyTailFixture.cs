@@ -32,7 +32,9 @@ internal static class ProjectionEmptyTailFixture
         var mutation = new PutDocument(ProjectionEmptyTailAssertions.Source, "input", "{\"n\":1}", 0L);
         var source = Operation(OperationKind.Batch, sourceId, new CommandRequest(sourceId, database.Partition, [mutation]))
             with
-        { EvaluatedAt = FeedAuthorityClock.Epoch };
+        {
+            EvaluatedAt = FeedAuthorityClock.Epoch
+        };
         token.ThrowIfCancellationRequested();
         var sourceResult = database.Database.Apply(source);
         var sourceReceipt = sourceResult.Get<CommitReceipt>();

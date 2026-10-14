@@ -44,7 +44,9 @@ internal sealed record NativeTextCapturedFileRoster(string Path, NativeTextIncre
         });
         var root = System.IO.Path.Combine(fixture.Directory, NativeTextOnlineRoot.DirectoryName);
         if (publication.CommandId != request.CommandId || System.IO.Path.Combine(root, publication.Authority.Leaf) != Path)
-        { throw new InvalidOperationException("The actual successor canonical online publication changed."); }
+        {
+            throw new InvalidOperationException("The actual successor canonical online publication changed.");
+        }
         RequireOriginal(fixture, runtime, token);
     }
 
@@ -53,7 +55,9 @@ internal sealed record NativeTextCapturedFileRoster(string Path, NativeTextIncre
         var budget = new ReadExecutionBudget(runtime.Options.Core.DatabaseLimits, fixture.Database.EvaluationClock, token);
         var actual = NativeTextIncrementalMetadata.ReadManifest(Path, runtime.Options.NativeText.Value.MaximumDiskBytes, budget);
         if (!NativeSerialization.Serialize(actual).AsSpan().SequenceEqual(NativeSerialization.Serialize(Manifest)))
-        { throw new InvalidOperationException("The original retained native reader manifest changed."); }
+        {
+            throw new InvalidOperationException("The original retained native reader manifest changed.");
+        }
         RequireLiveInventory(Path, OwnedPaths, Manifest, runtime, budget);
     }
 
@@ -65,7 +69,9 @@ internal sealed record NativeTextCapturedFileRoster(string Path, NativeTextIncre
         var actual = Directory.EnumerateFiles(nativePath, "*", SearchOption.AllDirectories)
             .Select(path => NativeTextPath.RelativePath(generationPath, path)).Order(StringComparer.Ordinal).ToArray();
         if (!actual.SequenceEqual(manifest.Files.Select(file => file.RelativePath)))
-        { throw new InvalidOperationException("The complete retained native file roster changed."); }
+        {
+            throw new InvalidOperationException("The complete retained native file roster changed.");
+        }
         long bytes = 0;
         foreach (var file in manifest.Files)
         {
@@ -80,7 +86,9 @@ internal sealed record NativeTextCapturedFileRoster(string Path, NativeTextIncre
                 runtime.Options.NativeText.Value.MaximumDiskBytes - bytes, budget,
                 executionOptions: runtime.Options.NativeText);
             if (input.Length != length || length != file.Length || !digest.AsSpan().SequenceEqual(file.Sha256))
-            { throw new InvalidOperationException("The complete retained native file bytes changed."); }
+            {
+                throw new InvalidOperationException("The complete retained native file bytes changed.");
+            }
             bytes += length;
         }
     }

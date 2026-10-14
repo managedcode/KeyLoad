@@ -19,7 +19,10 @@ internal static class SqlLexicalAdmissionFlow
             var native = store.GetReadDiagnostics();
             global::KeyLoad.QueryPage? page = null;
             var error = Assert.ThrowsExactly<global::KeyLoad.KeyLoadException>(() =>
-                page = engine.Execute(SqlJoinSourceBindingFixture.Root, healthy with { Sql = fault.Sql }));
+                page = engine.Execute(SqlJoinSourceBindingFixture.Root, healthy with
+                {
+                    Sql = fault.Sql
+                }));
             await Assert.That(page).IsNull();
             await Assert.That(error.Code).IsEqualTo(fault.Code);
             await Assert.That(error.Message).IsEqualTo(fault.Code == global::KeyLoad.ErrorCode.Validation ? Invalid : Unsupported);

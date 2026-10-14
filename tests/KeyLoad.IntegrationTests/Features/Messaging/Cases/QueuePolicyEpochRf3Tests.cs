@@ -29,7 +29,9 @@ internal sealed class QueuePolicyEpochRf3Tests
         {
             var initial = failures.Count;
             if (wave is not null)
-            { await ServerFailureObserver.ObserveAsync(() => wave.DisposeAsync().AsTask(), failures); }
+            {
+                await ServerFailureObserver.ObserveAsync(() => wave.DisposeAsync().AsTask(), failures);
+            }
             if (image is not null)
             {
                 await ServerFailureObserver.ObserveAsync(() => image.DisposeAsync(removeImage: wave is not null

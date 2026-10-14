@@ -1,5 +1,5 @@
 using System.Security.Cryptography;
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
@@ -12,10 +12,22 @@ internal sealed class PartitionMovementTransportContext : IDisposable
     private const int Closed = 1;
     private readonly OrleansNode node;
     private int closed;
-    internal PartitionHost Partition { get; }
-    internal IOptions<OrleansMembershipOptions> Membership { get; }
-    internal TimeProvider Clock { get; }
-    internal NodeOptions Options { get; }
+    internal PartitionHost Partition
+    {
+        get;
+    }
+    internal IOptions<OrleansMembershipOptions> Membership
+    {
+        get;
+    }
+    internal TimeProvider Clock
+    {
+        get;
+    }
+    internal NodeOptions Options
+    {
+        get;
+    }
 
     internal PartitionMovementTransportContext(IOptions<NodeOptions> options, OrleansNode node,
         PartitionHost partition, IOptions<OrleansMembershipOptions> membership, TimeProvider clock)
@@ -40,9 +52,13 @@ internal sealed class PartitionMovementTransportContext : IDisposable
         bool readOnly, CancellationToken token)
     {
         try
-        { return await Native.ResolveAsync(receiver, index, token).ConfigureAwait(false); }
+        {
+            return await Native.ResolveAsync(receiver, index, token).ConfigureAwait(false);
+        }
         catch (PartitionMovementNativeRouteUnavailableException failure) when (readOnly)
-        { throw new PartitionMovementOutcomeNetworkException(failure); }
+        {
+            throw new PartitionMovementOutcomeNetworkException(failure);
+        }
     }
 
     internal async Task<PartitionMovementGrainServiceReply> ExchangeAsync(SiloAddress address,
@@ -52,9 +68,13 @@ internal sealed class PartitionMovementTransportContext : IDisposable
         var client = Native;
         var request = client.CreateRequest(channel, query, body, signature, voter, address);
         try
-        { return await client.ExchangeAsync(address, request, token).ConfigureAwait(false); }
+        {
+            return await client.ExchangeAsync(address, request, token).ConfigureAwait(false);
+        }
         catch (Exception failure) when (readOnly && (failure is OrleansException or TimeoutException))
-        { throw new PartitionMovementOutcomeNetworkException(failure); }
+        {
+            throw new PartitionMovementOutcomeNetworkException(failure);
+        }
     }
 
     internal string Sign(byte[] body, PartitionMovementTransportReplyVerifier.ReceiverReplyPurpose purpose)

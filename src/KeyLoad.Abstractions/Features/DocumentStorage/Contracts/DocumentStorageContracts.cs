@@ -93,28 +93,43 @@ public sealed record ResourceDefinition([property: Orleans.Id(0)] string Name, [
     public EventRetentionPolicy EventRetention { get; init; } = new();
     /// <summary>Gets the canonical state authority.</summary>
     [Orleans.Id(8)]
-    public DocumentAuthority Authority { get; init; }
+    public DocumentAuthority Authority
+    {
+        get; init;
+    }
     /// <summary>Gets the resource schema version.</summary>
     [Orleans.Id(9)]
     public long SchemaVersion { get; init; } = InitialSchemaVersion;
     /// <summary>Gets whether dispatch is paused.</summary>
     [Orleans.Id(10)]
-    public bool Paused { get; init; }
+    public bool Paused
+    {
+        get; init;
+    }
     /// <summary>Gets optional version-one binary limits; null selects immutable blob defaults.</summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     [Orleans.Id(11)]
-    public BlobPolicy? BlobPolicy { get; init; }
+    public BlobPolicy? BlobPolicy
+    {
+        get; init;
+    }
     /// <summary>Gets an optional closed typed-row schema for a document-authority collection.</summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     [Orleans.Id(12)]
-    public RelationalSchema? RelationalSchema { get; init; }
+    public RelationalSchema? RelationalSchema
+    {
+        get; init;
+    }
     /// <summary>Gets immutable authoritative vector profiles for configured collection fields.</summary>
     [Orleans.Id(13)]
     public ImmutableArray<VectorFieldProfile> VectorProfiles { get; init; } = [];
     /// <summary>Gets explicit retained target-inbox sublimits; null disables target processing.</summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     [Orleans.Id(14)]
-    public InboxPolicy? InboxPolicy { get; init; }
+    public InboxPolicy? InboxPolicy
+    {
+        get; init;
+    }
 }
 
 /// <summary>Describes row ownership and project metadata used by row-level access policy.</summary>
@@ -205,5 +220,8 @@ public sealed record ConfigureResourceRequest([property: Orleans.Id(0)] string T
     /// <summary>Gets the existing resource version required for a policy-only replacement.</summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     [Orleans.Id(3)]
-    public long? ExpectedSchemaVersion { get; init; }
+    public long? ExpectedSchemaVersion
+    {
+        get; init;
+    }
 }

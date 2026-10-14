@@ -16,12 +16,30 @@ internal readonly struct ReplicaTermObservation
         NodeId = nodeId;
     }
 
-    internal long Index { get; }
-    internal long Term { get; }
-    internal long Position { get; }
-    internal long ReadGeneration { get; }
-    internal Guid Incarnation { get; }
-    internal Guid NodeId { get; }
+    internal long Index
+    {
+        get;
+    }
+    internal long Term
+    {
+        get;
+    }
+    internal long Position
+    {
+        get;
+    }
+    internal long ReadGeneration
+    {
+        get;
+    }
+    internal Guid Incarnation
+    {
+        get;
+    }
+    internal Guid NodeId
+    {
+        get;
+    }
 }
 
 internal readonly struct ReplicaTermObservationRead(long term, ReplicaTermObservation observation)

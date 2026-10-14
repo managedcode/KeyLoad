@@ -29,7 +29,9 @@ internal sealed class PostgresWireWriter(PipeWriter output, int maximumFrameByte
     {
         var length = checked(payload.Length + sizeof(int));
         if (length > maximumFrameBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidReply); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidReply);
+        }
         var buffer = output.GetSpan(checked(payload.Length + TypeAndLengthBytes));
         buffer[PostgresProtocol.FirstField] = type;
         BinaryPrimitives.WriteInt32BigEndian(buffer.Slice(sizeof(byte), sizeof(int)), length);
@@ -41,7 +43,9 @@ internal sealed class PostgresWireWriter(PipeWriter output, int maximumFrameByte
     {
         var length = checked(payloadBytes + sizeof(int));
         if (length > maximumFrameBytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidReply); }
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidReply);
+        }
         var bytes = output.GetSpan(TypeAndLengthBytes);
         bytes[PostgresProtocol.FirstField] = type;
         BinaryPrimitives.WriteInt32BigEndian(bytes.Slice(sizeof(byte), sizeof(int)), length);
@@ -104,6 +108,8 @@ internal sealed class PostgresWireWriter(PipeWriter output, int maximumFrameByte
             throw Errors.Fail(ErrorCode.Cancelled, PostgresProtocol.Invalid);
         }
         if (result.IsCompleted)
-        { throw new EndOfStreamException(); }
+        {
+            throw new EndOfStreamException();
+        }
     }
 }

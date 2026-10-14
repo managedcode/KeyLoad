@@ -14,7 +14,9 @@ internal static class Bm25PortableFamilyBytes
         {
             var page = work.Scan(view, [], limits.Value.MaxScanRecords);
             if (page.HasMore)
-            { throw new InvalidOperationException("The complete native BM25 supporting image exceeded its original bound."); }
+            {
+                throw new InvalidOperationException("The complete native BM25 supporting image exceeded its original bound.");
+            }
             return page.Records.Select(row => Convert.ToHexString(row.Key.Span) + ":"
                 + Convert.ToHexString(row.Value.Span)).ToArray();
         });

@@ -54,12 +54,24 @@ internal sealed class AtomicPartitionPlacementCorruptionTests
             return true;
         });
 
-        await AssertCorruptOwnerTuple(fixture, partition, row with { PhysicalShardId = Guid.NewGuid() });
-        await AssertCorruptOwnerTuple(fixture, partition, row with { Incarnation = Guid.NewGuid() });
+        await AssertCorruptOwnerTuple(fixture, partition, row with
+        {
+            PhysicalShardId = Guid.NewGuid()
+        });
+        await AssertCorruptOwnerTuple(fixture, partition, row with
+        {
+            Incarnation = Guid.NewGuid()
+        });
         await AssertCorruptOwnerTuple(fixture, partition,
-            row with { VoterIds = owner.VoterIds.Reverse().ToImmutableArray() });
+            row with
+            {
+                VoterIds = owner.VoterIds.Reverse().ToImmutableArray()
+            });
         await AssertCorruptOwnerTuple(fixture, partition,
-            row with { PlacementEpoch = checked(owner.PlacementEpoch + 1) });
+            row with
+            {
+                PlacementEpoch = checked(owner.PlacementEpoch + 1)
+            });
     }
 
     private static async Task AssertCorruptOwnerTuple(PhysicalShardCatalogFixture fixture,

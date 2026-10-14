@@ -16,7 +16,9 @@ public sealed partial class DatabaseEngine
         if (request.OriginalCommandId == Guid.Empty || request.PrincipalId != principalId
             || request.Destination is null || request.SourcePartition is null
             || request.SourceOwner is null || !PhysicalOwnerEntryValidation.Valid(request.DestinationOwner))
-        { throw Errors.Fail(ErrorCode.Validation, RemoteGraphProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, RemoteGraphProtocol.Invalid);
+        }
         ValidatePartition(request.SourcePartition);
         ValidatePartition(request.Destination.Partition);
         JsonData.Identifier(request.Graph);
@@ -24,7 +26,9 @@ public sealed partial class DatabaseEngine
         JsonData.Identifier(request.Destination.Id);
         if (request.SourcePartition == request.Destination.Partition
             || PhysicalOwnerEntryValidation.SameOwner(request.SourceOwner, request.DestinationOwner.Owner))
-        { throw Errors.Fail(ErrorCode.Validation, RemoteGraphProtocol.Invalid); }
+        {
+            throw Errors.Fail(ErrorCode.Validation, RemoteGraphProtocol.Invalid);
+        }
         var result = Store.Read(view => CaptureRemoteGraphTarget(work.CreateView(view), principalId, request, work));
         work.CheckResult(result);
         return result;
@@ -42,7 +46,9 @@ public sealed partial class DatabaseEngine
         var collection = Resource(view, request.Destination.Partition, request.Destination.Collection,
             ResourceKind.Collection);
         if (!request.Deleted)
-        { documentRevision = VisibleVertex(view, principal, request.Destination, work).Revision; }
+        {
+            documentRevision = VisibleVertex(view, principal, request.Destination, work).Revision;
+        }
         work.Check();
         return new(RemoteGraphProtocol.Version, request, cut, collection.SchemaVersion, documentRevision);
     }

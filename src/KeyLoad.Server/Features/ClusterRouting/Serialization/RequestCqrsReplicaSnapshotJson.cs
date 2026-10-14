@@ -28,7 +28,9 @@ internal static class RequestCqrsReplicaSnapshotJson
             || value.SnapshotIndex < NoPosition || value.MaterializedPosition < NoPosition
             || value.CommittedIndex < value.SnapshotIndex || value.LastIndex < value.CommittedIndex
             || value.HasCheckpointPrefix || value.CheckpointPending)
-        { throw Invalid(); }
+        {
+            throw Invalid();
+        }
         return value;
     }
 
@@ -47,7 +49,9 @@ internal static class RequestCqrsReplicaSnapshotJson
     {
         if (!name.StartsWith(Prefix, StringComparison.Ordinal)
             || !name.EndsWith(RequestCqrsProbeProtocol.JsonFileSuffix, StringComparison.Ordinal))
-        { return false; }
+        {
+            return false;
+        }
         var parts = name[Prefix.Length..^RequestCqrsProbeProtocol.JsonFileSuffix.Length].Split(Separator);
         return parts.Length == IdentityParts
             && Guid.TryParseExact(parts[ArmPart], RequestCqrsProbeProtocol.SessionIdFormat, out var arm)

@@ -117,15 +117,36 @@ internal static class IsolatedKurrentOwnershipRegression
     {
         private readonly string prefix = KurrentConstants.StreamPrefix + Guid.NewGuid().ToString(KurrentConstants.GuidFormat) + KurrentConstants.StreamSeparator;
         internal List<KurrentDBClient> Clients { get; } = [];
-        internal KurrentStreamOwnership Ownership { get; } = new(NativeExecutionPolicyFixture.Workload(new ComparisonOptions
-        { Documents = 1, TopK = 1, Operations = 1, Warmup = 0, Repetitions = 1 }));
-        internal KurrentDBClient? Writer { get; set; }
-        internal bool ForeignOwned { get; set; }
-        internal bool PrivateDeletionStarted { get; set; }
+        internal KurrentStreamOwnership Ownership
+        {
+            get;
+        } = new(NativeExecutionPolicyFixture.Workload(new ComparisonOptions
+        {
+            Documents = 1,
+            TopK = 1,
+            Operations = 1,
+            Warmup = 0,
+            Repetitions = 1
+        }));
+        internal KurrentDBClient? Writer
+        {
+            get; set;
+        }
+        internal bool ForeignOwned
+        {
+            get; set;
+        }
+        internal bool PrivateDeletionStarted
+        {
+            get; set;
+        }
         internal string Foreign => prefix + IsolatedKurrentOwnershipRegressionNative.ForeignSuffix;
         internal string Private => prefix + IsolatedKurrentOwnershipRegressionNative.PrivateSuffix;
         internal KurrentEventData Expected { get; } = IsolatedKurrentOwnershipRegressionNative.CreateEvent();
-        internal IsolatedKurrentOwnershipRegressionNative.Snapshot? Before { get; set; }
+        internal IsolatedKurrentOwnershipRegressionNative.Snapshot? Before
+        {
+            get; set;
+        }
 
         internal KurrentDBClient CreateClient()
         {

@@ -49,7 +49,9 @@ internal static class SqlTypedInsertLiteral
     internal static McpDecodedOperation Compile(PartitionRef partition, Guid id, string sql, CancellationToken token)
     {
         var parameters = sql == Sql ? new Dictionary<string, global::System.Text.Json.JsonElement>(StringComparer.Ordinal)
-        { [ActiveColumn] = global::System.Text.Json.JsonSerializer.SerializeToElement(true) } : null;
+        {
+            [ActiveColumn] = global::System.Text.Json.JsonSerializer.SerializeToElement(true)
+        } : null;
         var limits = UnitExecutionOptions.DatabaseLimits();
         return SqlOperationCompiler.Compile(new(partition, sql, parameters, CommandId: id), limits,
             limits.Value.MaxBatchBytes, UnitExecutionOptions.QueryExecution(), token);

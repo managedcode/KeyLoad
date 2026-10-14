@@ -1,7 +1,7 @@
 using KeyLoad.Client;
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
 using ManagedCode.Communication;
@@ -28,9 +28,13 @@ internal static class ProtectedDocumentRf3Cancellation
         Task<Result<DocumentReadResult>>? sdk = null;
         Task<RequestCqrsFaultMcpObservation>? mcp = null;
         if (useMcp)
-        { mcp = CallAsync(official, seed, caller.Token); }
+        {
+            mcp = CallAsync(official, seed, caller.Token);
+        }
         else
-        { sdk = reader.GetAsync(seed.Reference, caller.Token); }
+        {
+            sdk = reader.GetAsync(seed.Reference, caller.Token);
+        }
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             var marker = await controls.WaitForMarkerAsync(arm, RequestCqrsProbePhase.AuthorizationReload,
@@ -60,11 +64,17 @@ internal static class ProtectedDocumentRf3Cancellation
         using var cleanup = new CancellationTokenSource(TwoRf3MembershipProtocol.CleanupDeadline, TimeProvider.System);
         await ServerFailureObserver.ObserveAsync(caller.CancelAsync, failures).ConfigureAwait(false);
         if (!controls.ArmFor(arm).Retired)
-        { await ServerFailureObserver.ObserveAsync(() => controls.ReleaseOpenArmsAsync(discovery, cleanup.Token), failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(() => controls.ReleaseOpenArmsAsync(discovery, cleanup.Token), failures).ConfigureAwait(false);
+        }
         if (sdk is { } sdkTask)
-        { await ServerFailureObserver.ObserveAsync(async () => { _ = await sdkTask.ConfigureAwait(false); }, failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(async () => { _ = await sdkTask.ConfigureAwait(false); }, failures).ConfigureAwait(false);
+        }
         if (mcp is { } mcpTask)
-        { await ServerFailureObserver.ObserveAsync(async () => { _ = await mcpTask.ConfigureAwait(false); }, failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(async () => { _ = await mcpTask.ConfigureAwait(false); }, failures).ConfigureAwait(false);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
@@ -72,7 +82,9 @@ internal static class ProtectedDocumentRf3Cancellation
         ProtectedDocumentRf3Seed seed, CancellationToken token)
     {
         try
-        { return new(await official.CallAsync("keyload_documents_get", new GetDocumentRequest(seed.Reference), token).ConfigureAwait(false), null); }
+        {
+            return new(await official.CallAsync("keyload_documents_get", new GetDocumentRequest(seed.Reference), token).ConfigureAwait(false), null);
+        }
         catch (OperationCanceledException error) { return new(null, error); }
         catch (HttpRequestException error) { return new(null, error); }
         catch (IOException error) { return new(null, error); }

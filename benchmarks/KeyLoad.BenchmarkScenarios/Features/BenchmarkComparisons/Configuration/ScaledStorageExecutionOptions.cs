@@ -55,6 +55,8 @@ public sealed class ScaledStorageExecutionOptions
     public void Validate()
     {
         if (!IsValid())
-        { throw new OptionsValidationException(SectionName, typeof(ScaledStorageExecutionOptions), [ValidationMessage]); }
+        {
+            throw new OptionsValidationException(SectionName, typeof(ScaledStorageExecutionOptions), [ValidationMessage]);
+        }
     }
 }

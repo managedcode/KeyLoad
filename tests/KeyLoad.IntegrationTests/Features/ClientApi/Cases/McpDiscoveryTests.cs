@@ -32,7 +32,9 @@ internal sealed class McpDiscoveryTests(ClusterFixture fixture)
             var tool = await session.Client.DiscoverKeyLoadToolAsync(expected.Name, deadline.Token);
             await Assert.That(discovered.Add(tool.Name)).IsTrue();
             if (tool.Name == McpCallerProtocol.GraphShortestPath)
-            { await NativeMcpSchemaEvidence.RetainGraphShortestPathAsync(tool, deadline.Token); }
+            {
+                await NativeMcpSchemaEvidence.RetainGraphShortestPathAsync(tool, deadline.Token);
+            }
             await McpDiscoveryAssertions.VerifyAsync(tool);
         }
         await McpDiscoveryAssertions.VerifyInventoryAsync(discovered);
@@ -81,7 +83,9 @@ internal sealed class McpDiscoveryTests(ClusterFixture fixture)
             McpCallerProtocol.UnsupportedProtocolVersion, deadline.Token));
         await Assert.That(rejected).IsNotNull();
         if (rejected is null)
-        { throw new InvalidOperationException(McpCallerProtocol.MissingClient); }
+        {
+            throw new InvalidOperationException(McpCallerProtocol.MissingClient);
+        }
         await Assert.That(rejected.StatusCode).IsEqualTo(HttpStatusCode.BadRequest);
         await using var callers = await RequestCqrsRf3Callers.ConnectAsync(fixture.App, McpCallerProtocol.Node2,
             fixture.AdminKey, deadline.Token);

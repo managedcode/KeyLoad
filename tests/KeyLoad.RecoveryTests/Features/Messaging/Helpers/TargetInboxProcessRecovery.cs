@@ -24,7 +24,10 @@ internal static class TargetInboxProcessRecovery
                 original = database.ApplyEmbedded(operation, token).Get<CommitInboxResult>();
                 await Assert.That(original.AlreadyProcessed).IsFalse();
                 await TargetInboxRecoveryCut.AssertAsync(store, database, request, CommitStage.ApplyCompleted);
-                var duplicate = request with { CommandId = Guid.NewGuid() };
+                var duplicate = request with
+                {
+                    CommandId = Guid.NewGuid()
+                };
                 var replay = database.ApplyEmbedded(new(duplicate.CommandId, OperationKind.CommitInbox, CrashFixtureValues.Principal,
                     default, JsonSerializer.Serialize(duplicate, JsonDefaults.Options)), token).Get<CommitInboxResult>();
                 await Assert.That(replay.AlreadyProcessed).IsTrue();

@@ -47,7 +47,10 @@ public sealed partial class RedisTarget(string connectionString, string runId, s
     private int corpusCount;
 
     /// <summary>Gets the observed version, direct-replica topology, fsync acknowledgement, read, transport, and authorization profile.</summary>
-    public TargetProfile Profile { get; private set; } = new(TargetName, InitialVersion, InitialTopology,
+    public TargetProfile Profile
+    {
+        get; private set;
+    } = new(TargetName, InitialVersion, InitialTopology,
         AofAcknowledgement, InitialReadContract, TcpTransport, Authorization, null);
     /// <summary>Reports support for primary point reads and document writes.</summary>
     /// <param name="scenario">The comparison scenario to check.</param>
@@ -70,7 +73,10 @@ public sealed partial class RedisTarget(string connectionString, string runId, s
         corpusCount = dataset.Documents.Count;
         if ((dataset.Settings is ScaledComparisonProfile || dataset is DocumentComparisonCorpus))
         {
-            Profile = Profile with { ReadContract = PrimaryKeyReadsS1SeedsDocumentKeysOnlyToken };
+            Profile = Profile with
+            {
+                ReadContract = PrimaryKeyReadsS1SeedsDocumentKeysOnlyToken
+            };
         }
         var settings = RedisReplicaProof.CreateOptions(connectionSettings);
         if (settings.EndPoints.Count != SingleItemCount)
@@ -78,7 +84,10 @@ public sealed partial class RedisTarget(string connectionString, string runId, s
             throw new ComparisonFailureException(RedisNativeProtocol.PrimaryEndpointError);
         }
 
-        Profile = Profile with { Transport = settings.Ssl ? TlsTransport : TcpTransport };
+        Profile = Profile with
+        {
+            Transport = settings.Ssl ? TlsTransport : TcpTransport
+        };
         connection = await ConnectionMultiplexer.ConnectAsync(settings).WaitAsync(cancellationToken);
         var primaryEndpoint = RedisNativeProtocol.RequirePrimaryEndpoint(connection);
         var primaryIdentity = await RedisReplicaProof.ReadIdentityAsync(connection, primaryEndpoint, cancellationToken);
@@ -131,7 +140,9 @@ public sealed partial class RedisTarget(string connectionString, string runId, s
 
         var workerConnection = await ConnectionMultiplexer.ConnectAsync(settings).WaitAsync(cancellationToken);
         try
-        { await RedisReplicaProof.VerifyWorkerPrimaryAsync(workerConnection, configuredTopology, cancellationToken); }
+        {
+            await RedisReplicaProof.VerifyWorkerPrimaryAsync(workerConnection, configuredTopology, cancellationToken);
+        }
         catch (Exception) { await workerConnection.DisposeAsync(); throw; }
         return new RedisComparisonSession(workerConnection, prefix, configuredTopology, corpusCount, lifecycleOptions, executionOptions);
     }
@@ -141,11 +152,16 @@ public sealed partial class RedisTarget(string connectionString, string runId, s
     public async ValueTask DisposeAsync()
     {
         try
-        { await CleanupDocumentNamespaceAsync().ConfigureAwait(false); }
+        {
+            await CleanupDocumentNamespaceAsync().ConfigureAwait(false);
+        }
         finally
         {
             if (connection is not null)
-            { await connection.CloseAsync().ConfigureAwait(false); connection.Dispose(); }
+            {
+                await connection.CloseAsync().ConfigureAwait(false);
+                connection.Dispose();
+            }
         }
     }
 

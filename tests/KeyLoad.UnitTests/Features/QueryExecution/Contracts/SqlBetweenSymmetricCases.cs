@@ -14,7 +14,10 @@ internal static class SqlBetweenSymmetricCases
     private static readonly FieldOperand Label = new("/label");
     private static readonly Predicate Both = Range(ValueOperand.Create(1), ValueOperand.Create(2));
     private static readonly Predicate Reverse = Range(ValueOperand.Create(2), ValueOperand.Create(1));
-    internal static IReadOnlyList<SqlBetweenSymmetricCase> All { get; } =
+    internal static IReadOnlyList<SqlBetweenSymmetricCase> All
+    {
+        get;
+    } =
     [
         new("(score BETWEEN 2 AND 1 OR score BETWEEN 1 AND 2)", Both, ["high", "low"]),
         new("(score BETWEEN 1 AND 2 OR score BETWEEN 2 AND 1)", Both, ["high", "low"]),

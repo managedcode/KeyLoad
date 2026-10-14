@@ -33,7 +33,9 @@ internal sealed class RequestCqrsRf3DiagnosticsScopeStreamOwner(ResourceLoggerSe
         foreach (var resource in resources)
         {
             if (completedResourceNames.Contains(resource.Name))
-            { continue; }
+            {
+                continue;
+            }
             CompleteResource(resource, RequestCqrsScopeCompletionOwner.Batch, failures);
         }
     }
@@ -56,7 +58,9 @@ internal sealed class RequestCqrsRf3DiagnosticsScopeStreamOwner(ResourceLoggerSe
                 : RequestCqrsCompletionCallState.Failed, CaptureStatus(resource.Name)),
             failures, lifecycle.RecordOwnerFailure, stage);
         if (returned)
-        { completedResourceNames.Add(resource.Name); }
+        {
+            completedResourceNames.Add(resource.Name);
+        }
     }
 
     private TaskStatus? CaptureStatus(string node)
@@ -85,7 +89,9 @@ internal sealed class RequestCqrsRf3DiagnosticsScopeStreamOwner(ResourceLoggerSe
         var first = capture.DisposeAsync().AsTask();
         var repeated = capture.DisposeAsync().AsTask();
         if (!ReferenceEquals(first, repeated))
-        { throw new InvalidOperationException("Repeated diagnostics disposal did not share one completion task."); }
+        {
+            throw new InvalidOperationException("Repeated diagnostics disposal did not share one completion task.");
+        }
         await first.ConfigureAwait(false);
     }
 }

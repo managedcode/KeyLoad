@@ -22,7 +22,10 @@ internal sealed class SearchReadBudgetTests
     [Test]
     public async Task VectorDocumentDereferencesConsumeTheReadByteBudget()
     {
-        using var database = new TestDatabase(new() { MaxQueryReadBytes = ReadByteLimit });
+        using var database = new TestDatabase(new()
+        {
+            MaxQueryReadBytes = ReadByteLimit
+        });
         database.Configure(Orders, ResourceKind.Collection);
         database.Commit(new PutDocument(Orders, "a", "{\"padding\":\"" + new string('x', PaddingLength) + "\"}"),
             new PutVector(Orders, "a", EmbeddingPath, [1, 0], Space, VectorVersion));
@@ -43,7 +46,10 @@ internal sealed class SearchReadBudgetTests
     [Test]
     public async Task TextTokenLimitAppliesToTheWholeVisibleCorpus()
     {
-        using var database = new TestDatabase(new() { MaxSearchTextTokens = MaximumVisibleTextTokens });
+        using var database = new TestDatabase(new()
+        {
+            MaxSearchTextTokens = MaximumVisibleTextTokens
+        });
         database.Configure(Orders, ResourceKind.Collection);
         database.Commit(new PutDocument(Orders, "a", "{\"text\":\"alpha beta gamma\"}"),
             new PutDocument(Orders, "b", "{\"text\":\"alpha beta gamma\"}"));

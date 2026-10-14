@@ -64,7 +64,9 @@ internal static class FeedVertexAuthorityFixture
                     After = after with
                     {
                         Reference = after.Reference with
-                        { Partition = new("foreign-tenant", "foreign-database", "orders", ForeignHistoryOwner) }
+                        {
+                            Partition = new("foreign-tenant", "foreign-database", "orders", ForeignHistoryOwner)
+                        }
                     }
                 },
                 1 => entry with { After = after with { Reference = after.Reference with { Collection = ForeignCollection } } },
@@ -72,7 +74,12 @@ internal static class FeedVertexAuthorityFixture
                 3 => entry with
                 {
                     Before = (entry.Before ?? throw new InvalidOperationException(MissingRow)) with
-                    { Reference = after.Reference with { Id = ForeignId } }
+                    {
+                        Reference = after.Reference with
+                        {
+                            Id = ForeignId
+                        }
+                    }
                 },
                 4 => entry with { Before = (entry.Before ?? throw new InvalidOperationException(MissingRow)) with { Revision = 0L } },
                 5 => entry with { Before = (entry.Before ?? throw new InvalidOperationException(MissingRow)) with { Revision = 2L } },
@@ -86,7 +93,13 @@ internal static class FeedVertexAuthorityFixture
         var row = NativeSerialization.Deserialize<DocumentRecord>(state.Original) ?? throw new InvalidOperationException(MissingRow);
         database.Store.Commit((transaction, _) =>
         {
-            transaction.PutRecord(state.Key, row with { Reference = row.Reference with { Id = ForeignId } });
+            transaction.PutRecord(state.Key, row with
+            {
+                Reference = row.Reference with
+                {
+                    Id = ForeignId
+                }
+            });
             return true;
         });
     }

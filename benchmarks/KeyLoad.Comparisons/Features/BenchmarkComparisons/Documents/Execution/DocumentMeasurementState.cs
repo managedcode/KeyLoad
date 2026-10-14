@@ -15,8 +15,31 @@ internal sealed class DocumentMeasurementState(int planned)
     internal long Failed => failed;
     internal long Canceled => canceled;
     internal DocumentLatencyRecorder Latency { get; } = new();
-    internal Exception? Fatal { get { lock (gate) { return fatal; } } }
-    internal void RecordFailure(Exception error) { lock (gate) { fatal ??= ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error); if (errorCategories.Count < DocumentMeasurementValues.MaximumFailureCategories) { errorCategories.Add(ComparisonErrors.Safe(error)); } else { errorCategories.Add(DocumentProtocolText.DocumentAdditionalFailureCategories); } } }
+    internal Exception? Fatal
+    {
+        get
+        {
+            lock (gate)
+            {
+                return fatal;
+            }
+        }
+    }
+    internal void RecordFailure(Exception error)
+    {
+        lock (gate)
+        {
+            fatal ??= ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error);
+            if (errorCategories.Count < DocumentMeasurementValues.MaximumFailureCategories)
+            {
+                errorCategories.Add(ComparisonErrors.Safe(error));
+            }
+            else
+            {
+                errorCategories.Add(DocumentProtocolText.DocumentAdditionalFailureCategories);
+            }
+        }
+    }
     internal string[] FailureCategories()
     {
         lock (gate)

@@ -22,6 +22,9 @@ internal static class QueueLeaseRf3Protocol
     internal const int NextClaim = 1;
     internal const Capability WorkerCapabilities = Capability.QueueConsume | Capability.QueueAck
         | Capability.QueueRenew | Capability.QueueInspect;
-    internal static IReadOnlyList<string> Nodes { get; } = Array.AsReadOnly(new[]
+    internal static IReadOnlyList<string> Nodes
+    {
+        get;
+    } = Array.AsReadOnly(new[]
         { McpCallerProtocol.Node1, McpCallerProtocol.Node2, McpCallerProtocol.Node3 });
 }

@@ -1,5 +1,5 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.Server.Features.GraphTraversal;
 
@@ -23,7 +23,9 @@ internal sealed class RemoteGraphLifetimeParent(IRemoteGraphParent original, Nat
             work.Check();
         }
         catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure))
-        { throw Errors.Fail(ErrorCode.UnknownWriteOutcome, RemoteGraphNativeProtocol.Unavailable, failure); }
+        {
+            throw Errors.Fail(ErrorCode.UnknownWriteOutcome, RemoteGraphNativeProtocol.Unavailable, failure);
+        }
         return result;
     }
 

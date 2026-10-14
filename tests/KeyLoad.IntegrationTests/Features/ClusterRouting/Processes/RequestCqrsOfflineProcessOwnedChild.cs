@@ -1,8 +1,8 @@
 using System.Diagnostics;
 using System.Globalization;
 using System.Text;
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.StorageRecovery;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
@@ -29,9 +29,13 @@ internal sealed class RequestCqrsOfflineProcessOwnedChild : IAsyncDisposable
     internal async Task<NodeEpochRf3OfflineResult> ObserveResultAsync()
     {
         try
-        { return await operation.ConfigureAwait(false); }
+        {
+            return await operation.ConfigureAwait(false);
+        }
         finally
-        { observed = true; }
+        {
+            observed = true;
+        }
     }
 
     internal Task CancelAsync() => cancellation.CancelAsync();
@@ -53,15 +57,21 @@ internal sealed class RequestCqrsOfflineProcessOwnedChild : IAsyncDisposable
         using var deadlineTimeout = new CancellationTokenSource(RequestCqrsOfflineProcessProtocol.MarkerDeadline, TimeProvider.System);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellation.Token, deadlineTimeout.Token);
         while (!File.Exists(marker))
-        { await Task.Delay(TimeSpan.FromMilliseconds(20), TimeProvider.System, deadline.Token).ConfigureAwait(false); }
+        {
+            await Task.Delay(TimeSpan.FromMilliseconds(20), TimeProvider.System, deadline.Token).ConfigureAwait(false);
+        }
         var contents = await ReadMarkerAsync(marker, deadline.Token).ConfigureAwait(false);
         var values = contents.Split(':', StringSplitOptions.None);
         if (values.Length != 2 || values[1] != nonce
             || !int.TryParse(values[0], NumberStyles.None, CultureInfo.InvariantCulture, out var pid) || pid <= 0)
-        { throw new InvalidDataException(RequestCqrsOfflineProcessProtocol.InvalidMarker); }
+        {
+            throw new InvalidDataException(RequestCqrsOfflineProcessProtocol.InvalidMarker);
+        }
         process = Process.GetProcessById(pid);
         if (process.HasExited || process.ProcessName != RequestCqrsOfflineProcessProtocol.Executable)
-        { throw new InvalidDataException(RequestCqrsOfflineProcessProtocol.InvalidMarker); }
+        {
+            throw new InvalidDataException(RequestCqrsOfflineProcessProtocol.InvalidMarker);
+        }
         return process;
     }
 
@@ -73,7 +83,9 @@ internal sealed class RequestCqrsOfflineProcessOwnedChild : IAsyncDisposable
             return failure ?? throw new InvalidOperationException(RequestCqrsOfflineProcessProtocol.MissingFailure);
         }
         finally
-        { observed = true; }
+        {
+            observed = true;
+        }
     }
 
     internal async Task<InvalidOperationException> ExpectOutputLimitAsync()
@@ -84,7 +96,9 @@ internal sealed class RequestCqrsOfflineProcessOwnedChild : IAsyncDisposable
             return failure ?? throw new InvalidOperationException(RequestCqrsOfflineProcessProtocol.MissingFailure);
         }
         finally
-        { observed = true; }
+        {
+            observed = true;
+        }
     }
 
     internal RequestCqrsOfflineProcessChildView Borrow() => new(this);
@@ -102,7 +116,9 @@ internal sealed class RequestCqrsOfflineProcessOwnedChild : IAsyncDisposable
     {
         var failures = new List<Exception>();
         if (!operation.IsCompleted)
-        { await ServerFailureObserver.ObserveAsync(cancellation.CancelAsync, failures).ConfigureAwait(false); }
+        {
+            await ServerFailureObserver.ObserveAsync(cancellation.CancelAsync, failures).ConfigureAwait(false);
+        }
         try
         {
             if (!observed)
@@ -110,7 +126,9 @@ internal sealed class RequestCqrsOfflineProcessOwnedChild : IAsyncDisposable
                 var operationFailures = new List<Exception>();
                 await ServerFailureObserver.ObserveAsync(() => operation, operationFailures).ConfigureAwait(false);
                 if (operation.IsCanceled && cancellation.IsCancellationRequested)
-                { operationFailures.RemoveAll(failure => failure is OperationCanceledException); }
+                {
+                    operationFailures.RemoveAll(failure => failure is OperationCanceledException);
+                }
                 failures.AddRange(operationFailures);
             }
         }
@@ -123,40 +141,58 @@ internal sealed class RequestCqrsOfflineProcessOwnedChild : IAsyncDisposable
             }
         }
         if (!operation.IsCompleted)
-        { throw new InvalidOperationException(RequestCqrsOfflineProcessProtocol.MarkerTimeout); }
+        {
+            throw new InvalidOperationException(RequestCqrsOfflineProcessProtocol.MarkerTimeout);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
     private void DisposeProcess(List<Exception> failures)
     {
         try
-        { process?.Dispose(); }
+        {
+            process?.Dispose();
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
     }
 
     private void DisposeCancellation(List<Exception> failures)
     {
         try
-        { cancellation.Dispose(); }
+        {
+            cancellation.Dispose();
+        }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
+        {
+            failures.Add(error);
+        }
     }
 
     private static async Task<string> ReadMarkerAsync(string path, CancellationToken cancellationToken)
     {
         await using var input = NodeEpochRf3OfflineFiles.OpenRead(path);
         if (input.Length is < 1 or > RequestCqrsOfflineProcessProtocol.MarkerBytes)
-        { throw new InvalidDataException(RequestCqrsOfflineProcessProtocol.InvalidMarker); }
+        {
+            throw new InvalidDataException(RequestCqrsOfflineProcessProtocol.InvalidMarker);
+        }
         var count = checked((int)input.Length);
         var bytes = new byte[RequestCqrsOfflineProcessProtocol.MarkerBytes];
         await input.ReadExactlyAsync(bytes.AsMemory(0, count), cancellationToken).ConfigureAwait(false);
         if (input.ReadByte() != -1)
-        { throw new InvalidDataException(RequestCqrsOfflineProcessProtocol.InvalidMarker); }
+        {
+            throw new InvalidDataException(RequestCqrsOfflineProcessProtocol.InvalidMarker);
+        }
         return Encoding.ASCII.GetString(bytes, 0, count);
     }
 

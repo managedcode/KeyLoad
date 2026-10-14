@@ -17,19 +17,40 @@ internal sealed class PhysicalShardCatalogConflictTests
         var request = PhysicalShardCatalogBootstrapTests.Request(ShardId, Incarnation, Voters);
         await Assert.That(fixture.Bootstrap(request).Error).IsNull();
         var before = fixture.ReadCatalogBytes();
-        var differentShard = request with { PhysicalShardId = Guid.NewGuid() };
-        var differentIncarnation = request with { Incarnation = Guid.NewGuid() };
-        var reorderedVoters = request with { VoterIds = [Voters[1], Voters[0], Voters[2]] };
-        var emptyVoters = request with { VoterIds = ImmutableArray<string>.Empty };
-        var duplicateVoters = request with { VoterIds = [Voters[0], Voters[0], Voters[2]] };
+        var differentShard = request with
+        {
+            PhysicalShardId = Guid.NewGuid()
+        };
+        var differentIncarnation = request with
+        {
+            Incarnation = Guid.NewGuid()
+        };
+        var reorderedVoters = request with
+        {
+            VoterIds = [Voters[1], Voters[0], Voters[2]]
+        };
+        var emptyVoters = request with
+        {
+            VoterIds = ImmutableArray<string>.Empty
+        };
+        var duplicateVoters = request with
+        {
+            VoterIds = [Voters[0], Voters[0], Voters[2]]
+        };
         await Assert.That(fixture.Bootstrap(differentShard).Error).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(fixture.Bootstrap(differentIncarnation).Error).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(fixture.Bootstrap(reorderedVoters).Error).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(fixture.Bootstrap(emptyVoters, Guid.NewGuid()).Error).IsEqualTo(ErrorCode.Validation);
         await Assert.That(fixture.Bootstrap(duplicateVoters, Guid.NewGuid()).Error).IsEqualTo(ErrorCode.Validation);
-        var stale = request with { ExpectedRevision = 1 };
+        var stale = request with
+        {
+            ExpectedRevision = 1
+        };
         await Assert.That(fixture.Bootstrap(stale, Guid.NewGuid()).Error).IsEqualTo(ErrorCode.Conflict);
-        await Assert.That(fixture.Bootstrap(request with { ExpectedRevision = -1 }, Guid.NewGuid()).Error)
+        await Assert.That(fixture.Bootstrap(request with
+        {
+            ExpectedRevision = -1
+        }, Guid.NewGuid()).Error)
             .IsEqualTo(ErrorCode.Conflict);
         var stored = fixture.Store.Read(view => view.GetRecord<PhysicalShardCatalog>(PhysicalShardCatalogRecordSerialization.CatalogKey()));
         await Assert.That(stored!.DefaultShard.PhysicalShardId).IsEqualTo(ShardId);
@@ -44,7 +65,10 @@ internal sealed class PhysicalShardCatalogConflictTests
         var commandId = PhysicalShardCatalogIdentity.CreateBootstrapCommandId(ShardId);
         var original = PhysicalShardCatalogBootstrapTests.Request(ShardId, Incarnation, Voters);
         await Assert.That(fixture.Bootstrap(original, commandId).Error).IsNull();
-        var changed = original with { Incarnation = Guid.NewGuid() };
+        var changed = original with
+        {
+            Incarnation = Guid.NewGuid()
+        };
         await Assert.That(fixture.Bootstrap(changed, commandId).Error).IsEqualTo(ErrorCode.Conflict);
         var stored = fixture.Store.Read(view => view.GetRecord<PhysicalShardCatalog>(PhysicalShardCatalogRecordSerialization.CatalogKey()));
         await Assert.That(stored!.DefaultShard.Incarnation).IsEqualTo(Incarnation);

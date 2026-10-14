@@ -11,6 +11,8 @@ internal static class PlacementCapacityPartitionSet
             .Where(part => part.TenantId == plan.TenantId && part.DatabaseId == plan.DatabaseId
                 && part != plan.ControlPartition).Distinct().ToArray();
         if (actual.Length != plan.OriginalPartitions.Length || actual.Except(plan.OriginalPartitions).Any())
-        { throw Errors.Fail(ErrorCode.OwnershipLost, TenantPlacementPolicyProtocol.ScopeMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, TenantPlacementPolicyProtocol.ScopeMismatch);
+        }
     }
 }

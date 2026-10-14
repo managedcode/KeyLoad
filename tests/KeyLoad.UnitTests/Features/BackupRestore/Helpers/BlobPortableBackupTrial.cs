@@ -97,7 +97,9 @@ internal static class BlobPortableBackupTrial
         for (var index = 0; index < left.Length; index++)
         {
             for (var other = 0; other < left.Length; other++)
-            { aliases &= ReferenceEquals(left[index], left[other]) == ReferenceEquals(right[index], right[other]); }
+            {
+                aliases &= ReferenceEquals(left[index], left[other]) == ReferenceEquals(right[index], right[other]);
+            }
         }
         var types = expected.GetType() == actual.GetType()
             && expected.Blob.GetType() == actual.Blob.GetType()
@@ -105,7 +107,9 @@ internal static class BlobPortableBackupTrial
         var offset = 0;
         while (offset < Math.Min(expectedBytes.Length, actualBytes.Length)
             && expectedBytes[offset] == actualBytes[offset])
-        { offset++; }
+        {
+            offset++;
+        }
         return $"BlobUploadInfo blob={expected.Blob == actual.Blob} upload={expected.UploadId == actual.UploadId} "
             + $"declaredLength={expected.DeclaredLength == actual.DeclaredLength} revision={expected.ExpectedRevision == actual.ExpectedRevision} "
             + $"ordinal={expected.NextOrdinal == actual.NextOrdinal} storedBytes={expected.StoredBytes == actual.StoredBytes} "

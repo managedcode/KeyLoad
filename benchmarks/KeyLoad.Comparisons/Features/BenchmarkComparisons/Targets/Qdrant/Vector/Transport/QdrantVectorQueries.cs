@@ -28,7 +28,11 @@ internal static class QdrantVectorQueries
     }
 
     internal static object Evidence(VectorIndexKind kind, VectorQueryMode mode)
-        => new { @params = Parameters(kind, mode), filter = Filter(mode) };
+        => new
+        {
+            @params = Parameters(kind, mode),
+            filter = Filter(mode)
+        };
 
     private static object? Filter(VectorQueryMode mode) => mode switch
     {
@@ -39,5 +43,8 @@ internal static class QdrantVectorQueries
     };
 
     private static object Match(string key)
-        => new { must = new[] { new { key, match = new { value = true } } } };
+        => new
+        {
+            must = new[] { new { key, match = new { value = true } } }
+        };
 }

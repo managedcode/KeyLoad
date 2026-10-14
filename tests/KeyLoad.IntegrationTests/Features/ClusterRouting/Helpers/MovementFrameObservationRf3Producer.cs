@@ -21,7 +21,9 @@ internal static class MovementFrameObservationRf3Producer
                 var missing = new InvalidOperationException(MovementFrameObservationFixtureProtocol.Invalid);
                 if (early.IsFailed && Enum.TryParse<ErrorCode>(early.Problem?.ErrorCode, out var code)
                     && Enum.IsDefined(code))
-                { throw new AggregateException(Errors.Fail(code, early.Problem?.Detail ?? MovementFrameObservationFixtureProtocol.Invalid), missing); }
+                {
+                    throw new AggregateException(Errors.Fail(code, early.Problem?.Detail ?? MovementFrameObservationFixtureProtocol.Invalid), missing);
+                }
                 throw missing;
             }
             _ = await observed.ConfigureAwait(false);
@@ -34,7 +36,9 @@ internal static class MovementFrameObservationRf3Producer
     private static async Task JoinAsync(Task observed, CancellationToken originalWait)
     {
         try
-        { await observed.ConfigureAwait(false); }
+        {
+            await observed.ConfigureAwait(false);
+        }
         catch (OperationCanceledException) when (originalWait.IsCancellationRequested) { }
     }
 }

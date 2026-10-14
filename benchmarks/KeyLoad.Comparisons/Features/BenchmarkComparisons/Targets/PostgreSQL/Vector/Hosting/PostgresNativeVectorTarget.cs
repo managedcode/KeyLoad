@@ -60,7 +60,10 @@ public sealed class PostgresNativeVectorTarget : IVectorComparisonTarget
     /// <inheritdoc />
     public string Name => PostgresNativeVectorTargetValues.PostgreSQLPgvector;
     /// <inheritdoc />
-    public TargetProfile Profile { get; private set; }
+    public TargetProfile Profile
+    {
+        get; private set;
+    }
 
     /// <inheritdoc />
     public bool Supports(VectorIndexKind indexKind, VectorQueryMode queryMode)
@@ -85,7 +88,10 @@ public sealed class PostgresNativeVectorTarget : IVectorComparisonTarget
         var receipt = await PostgresNativeVectorIndex.BuildAsync(source, selected, Policy, cancellationToken: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
         var parameters = new Dictionary<string, string>(receipt.Parameters, StringComparer.Ordinal);
         serialization.RecordEvidence(parameters);
-        return receipt with { Parameters = parameters };
+        return receipt with
+        {
+            Parameters = parameters
+        };
     }
 
     /// <inheritdoc />

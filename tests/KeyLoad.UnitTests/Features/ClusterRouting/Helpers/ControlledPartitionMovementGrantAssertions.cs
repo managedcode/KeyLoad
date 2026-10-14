@@ -35,7 +35,9 @@ internal static class ControlledPartitionMovementGrantAssertions
         await Assert.That(JsonDefaults.Serialize(actual with
         {
             Grant = grant with
-            { Resources = grant.Resources.OrderBy(resource => resource.Name, StringComparer.Ordinal).ToImmutableArray() }
+            {
+                Resources = grant.Resources.OrderBy(resource => resource.Name, StringComparer.Ordinal).ToImmutableArray()
+            }
         })
             .SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
         return actual;

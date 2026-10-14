@@ -18,10 +18,14 @@ public sealed partial class DatabaseEngine
         RequireInstallStage(stage, body, phase);
         var totalPages = body.Descriptor.Families.Sum(value => value.PageCount);
         if (phase.PageOrdinal == totalPages)
-        { return CompleteMoveInstall(transaction, commandId, phase, position, body, stage, totalPages); }
+        {
+            return CompleteMoveInstall(transaction, commandId, phase, position, body, stage, totalPages);
+        }
         if (phase.PageOrdinal != stage.InstalledPages || stage.Installed || stage.Published
             || phase.PageOrdinal >= stage.AcceptedPages)
-        { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict);
+        }
         var page = PartitionMoveTargetStorage.Read<PartitionMoveImagePage>(transaction,
             PartitionMoveTargetStorage.PageKey(phase.Partition, phase.MoveId, phase.PageOrdinal),
             Limits.MaxBatchBytes)
@@ -29,7 +33,10 @@ public sealed partial class DatabaseEngine
         PartitionMovePageAdmission.Require(page, body.Fence, Limits, Limits.MaxBatchBytes);
         InstallMoveRecords(transaction, page, body.Descriptor, body.Fence.SourcePlacement.Incarnation);
         PartitionMoveTargetStorage.Write(transaction, PartitionMoveTargetStorage.Key(phase.Partition),
-            stage with { InstalledPages = checked(stage.InstalledPages + PartitionMoveProtocol.SequenceStep) },
+            stage with
+            {
+                InstalledPages = checked(stage.InstalledPages + PartitionMoveProtocol.SequenceStep)
+            },
             Limits.MaxBatchBytes);
         return new(phase.MoveId, phase.Stage, MoveJournalReceipt(transaction, commandId, position,
             phase.ControlIntentDigest), body.Control, body.Fence, null, null);
@@ -41,7 +48,9 @@ public sealed partial class DatabaseEngine
         foreach (var record in page.Records)
         {
             if (transaction.ReadOwnedValue(record.Key.ToArray()) is not null)
-            { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict); }
+            {
+                throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict);
+            }
             PartitionMoveBlobImport.Charge(transaction, page, record, descriptor, Store.Identity.Incarnation, Limits);
             transaction.Put(record.Key.ToArray(), PartitionMoveBlobImport.Value(page, record,
                 sourceIncarnation, Store.Identity.Incarnation));
@@ -57,6 +66,8 @@ public sealed partial class DatabaseEngine
             || !PartitionMoveControlValidation.SameSource(stage.Fence.SourcePlacement, body.Fence.SourcePlacement)
             || !PhysicalOwnerEntryValidation.SameOwner(stage.Fence.ControlOwner, body.Fence.ControlOwner)
             || !PhysicalOwnerEntryValidation.SameOwner(stage.Fence.DestinationOwner, body.Fence.DestinationOwner))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
     }
 }

@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
@@ -39,7 +39,8 @@ internal static class ConnectionNativeAssertions
             await Assert.That(reply.Error is ErrorCode.Cancelled or ErrorCode.UnknownWriteOutcome).IsTrue();
         }
         catch (OperationCanceledException)
-        { }
+        {
+        }
     }
 
     internal static async Task MissingOutcomeAsync(ConnectionNativeScenario scenario, PrincipalRecord principal,

@@ -26,7 +26,10 @@ internal static class PartitionMovementParentCapacityRf3Snapshot
         {
             store = new(new(Path.Combine(wave.OwnedDataRoot, node, "database")),
                 IntegrationExecutionOptions.StorageExecution(), IntegrationExecutionOptions.PointCacheExecution());
-            var limits = IntegrationExecutionOptions.DatabaseLimits(new() { MaxBatchBytes = actualLimit });
+            var limits = IntegrationExecutionOptions.DatabaseLimits(new()
+            {
+                MaxBatchBytes = actualLimit
+            });
             var database = new DatabaseEngine(store, new AuthorizationPolicy(), limits, IntegrationExecutionOptions.DueWork(),
                 IntegrationExecutionOptions.EventSource(), IntegrationExecutionOptions.Messaging(), IntegrationExecutionOptions.GraphExecution(),
                 IntegrationExecutionOptions.ChangeFeedExecution(), IntegrationExecutionOptions.BlobExecution(),
@@ -40,7 +43,9 @@ internal static class PartitionMovementParentCapacityRf3Snapshot
                 header.OriginalCapturePhaseCommandId ?? Guid.Empty, work, grant);
         }, failures);
         if (store is { } owned)
-        { ServerFailureObserver.Observe(owned.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(owned.Dispose, failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
         return state ?? throw new InvalidOperationException(PartitionMoveProtocol.MissingAuthority);
     }
@@ -58,7 +63,9 @@ internal static class PartitionMovementParentCapacityRf3Snapshot
             grant = store.Read(view => PartitionMoveGrantStorage.Read(view, request.Partition, actualGrantId, actualLimit));
         }, failures);
         if (store is { } owned)
-        { ServerFailureObserver.Observe(owned.Dispose, failures); }
+        {
+            ServerFailureObserver.Observe(owned.Dispose, failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
         return grant;
     }
@@ -79,9 +86,13 @@ internal static class PartitionMovementParentCapacityRf3Snapshot
             cancellationToken.ThrowIfCancellationRequested();
             var middle = lower + (upper - lower) / MidpointDivisor;
             if (Accepts(middle))
-            { upper = middle; }
+            {
+                upper = middle;
+            }
             else
-            { lower = checked(middle + BoundaryStep); }
+            {
+                lower = checked(middle + BoundaryStep);
+            }
         }
         PartitionMovementParentCaptureLimits.RequirePlannedStageCapacity(actual, issued.Phase,
             issued.ReceiverOwner, resources, actualClusterId, lower);

@@ -15,11 +15,15 @@ internal static class ClassificationLineageCorruptionFlow
     {
         var fixture = new EventProjectionFixture();
         try
-        { await RunOwnedAsync(fixture); }
+        {
+            await RunOwnedAsync(fixture);
+        }
         catch (Exception primary)
         {
             try
-            { fixture.Dispose(); }
+            {
+                fixture.Dispose();
+            }
             catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
             throw;
         }
@@ -37,7 +41,10 @@ internal static class ClassificationLineageCorruptionFlow
             ?? throw new InvalidOperationException("The original lineage is absent.");
         var vector = fixture.VectorBytes() ?? throw new InvalidOperationException("The original vector is absent.");
         var lineage = fixture.Lineage() ?? throw new InvalidOperationException("The original lineage cannot be read.");
-        var damaged = NativeSerialization.Serialize(lineage with { SourceEventRevision = InvalidEventRevision });
+        var damaged = NativeSerialization.Serialize(lineage with
+        {
+            SourceEventRevision = InvalidEventRevision
+        });
         var before = QueueWholeFlowStorage.Bytes(fixture.Harness.Store);
         var position = fixture.Harness.Store.Position;
         WriteOwnedRow(fixture, key, damaged);
@@ -66,7 +73,9 @@ internal static class ClassificationLineageCorruptionFlow
         var expectedOriginal = prefix + Convert.ToHexString(original);
         var actualOriginal = before.Single(row => row.StartsWith(prefix, StringComparison.Ordinal));
         if (!string.Equals(actualOriginal, expectedOriginal, StringComparison.Ordinal))
-        { throw new InvalidOperationException("The original lineage row does not match its captured bytes."); }
+        {
+            throw new InvalidOperationException("The original lineage row does not match its captured bytes.");
+        }
         return before.Select(row => string.Equals(row, expectedOriginal, StringComparison.Ordinal)
             ? prefix + Convert.ToHexString(damaged) : row).ToArray();
     }
@@ -80,11 +89,15 @@ internal static class ClassificationLineageCorruptionFlow
             UnitExecutionOptions.DatabaseLimits(fixture.Database.Limits), fixture.Harness.Store.Identity.NodeId,
             UnitNativeTextOptions.Execution());
         try
-        { await ClassificationLineageWholeAssertions.HealthyAsync(fixture, projection); }
+        {
+            await ClassificationLineageWholeAssertions.HealthyAsync(fixture, projection);
+        }
         catch (Exception primary)
         {
             try
-            { projection.Dispose(); }
+            {
+                projection.Dispose();
+            }
             catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
             throw;
         }

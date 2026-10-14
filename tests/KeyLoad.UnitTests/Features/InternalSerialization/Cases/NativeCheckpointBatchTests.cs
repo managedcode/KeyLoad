@@ -46,6 +46,8 @@ internal sealed class NativeCheckpointBatchTests
             await Assert.That(applied).IsEqualTo(0);
         }
         finally
-        { File.Delete(path); }
+        {
+            File.Delete(path);
+        }
     }
 }

@@ -8,9 +8,18 @@ internal sealed class RowVisibilityEntry(
     private bool disposed;
     private Exception? releaseFailure;
     internal RowVisibilityScope Scope { get; } = scope;
-    internal RowVisibilityEntry? Next { get; set; }
-    internal int Pins { get; set; }
-    internal bool Retired { get; set; }
+    internal RowVisibilityEntry? Next
+    {
+        get; set;
+    }
+    internal int Pins
+    {
+        get; set;
+    }
+    internal bool Retired
+    {
+        get; set;
+    }
 
     internal bool Contains(string id)
     {
@@ -26,30 +35,48 @@ internal sealed class RowVisibilityEntry(
             try
             {
                 if (!budget.TryReserve(RowVisibilityMemoryModel.IdBytes(id), RowVisibilityMemoryModel.SingleEntry, out acquired))
-                { return false; }
+                {
+                    return false;
+                }
                 ids = new(id, acquired!, ids);
                 acquired = null;
                 index.Add(id);
             }
             catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
-            { primary = error; throw; }
+            {
+                primary = error;
+                throw;
+            }
             catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null)
-            { primary = error; throw; }
+            {
+                primary = error;
+                throw;
+            }
             finally { acquired?.Dispose(); }
         }
         catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
-        { RowVisibilityFailureLedger.ThrowJoined(primary, error); throw; }
+        {
+            RowVisibilityFailureLedger.ThrowJoined(primary, error);
+            throw;
+        }
         catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null)
-        { RowVisibilityFailureLedger.ThrowJoined(primary, error); throw; }
+        {
+            RowVisibilityFailureLedger.ThrowJoined(primary, error);
+            throw;
+        }
         return true;
     }
 
     public void Dispose()
     {
         if (disposed)
-        { return; }
+        {
+            return;
+        }
         if (releaseFailure is not null)
-        { RowVisibilityFailureLedger.Throw([releaseFailure]); }
+        {
+            RowVisibilityFailureLedger.Throw([releaseFailure]);
+        }
         index.Clear();
         var failures = new List<Exception>();
         IdNode? previous = null;
@@ -61,12 +88,18 @@ internal sealed class RowVisibilityEntry(
             if (failures.Count == before)
             {
                 if (previous is null)
-                { ids = next; }
+                {
+                    ids = next;
+                }
                 else
-                { previous.Next = next; }
+                {
+                    previous.Next = next;
+                }
             }
             else
-            { previous = node; }
+            {
+                previous = node;
+            }
             node = next;
         }
         if (ids is null)
@@ -75,7 +108,9 @@ internal sealed class RowVisibilityEntry(
             disposed = failures.Count == RowVisibilityMemoryModel.MetadataOnly;
         }
         if (failures.Count > RowVisibilityMemoryModel.MetadataOnly)
-        { releaseFailure = failures.Count == RowVisibilityMemoryModel.SingleEntry ? failures[RowVisibilityMemoryModel.MetadataOnly] : new AggregateException(failures); }
+        {
+            releaseFailure = failures.Count == RowVisibilityMemoryModel.SingleEntry ? failures[RowVisibilityMemoryModel.MetadataOnly] : new AggregateException(failures);
+        }
         RowVisibilityFailureLedger.Throw(failures);
     }
 

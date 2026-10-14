@@ -19,7 +19,9 @@ internal static class TargetInboxRf3CommitOwner
                     TargetInboxRf3Protocol.Tool, request, token))).Value;
                 await Assert.That(observed.AlreadyProcessed).IsFalse();
                 if (returned is not null)
-                { await TargetInboxRf3Assertions.EqualAsync(returned, observed); }
+                {
+                    await TargetInboxRf3Assertions.EqualAsync(returned, observed);
+                }
             }, failures).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny(failures);

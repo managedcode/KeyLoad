@@ -55,13 +55,22 @@ internal static class EventAppendRf3Flow
     private static async Task<CommandRequest> RejectBoundariesAsync(KeyLoadClient sdk, McpOfficialClient official,
         McpEventStreamScenario scenario, CommandRequest original, string credential, CancellationToken token)
     {
-        var changed = McpEventStreamScenario.InputEvents[EventAppendRf3Protocol.FirstEventIndex] with { PayloadJson = EventAppendRf3Protocol.ChangedPayload };
-        var changedCommand = Command(scenario, [changed], ExpectedStreamRevision.Any) with { CommandId = original.CommandId };
+        var changed = McpEventStreamScenario.InputEvents[EventAppendRf3Protocol.FirstEventIndex] with
+        {
+            PayloadJson = EventAppendRf3Protocol.ChangedPayload
+        };
+        var changedCommand = Command(scenario, [changed], ExpectedStreamRevision.Any) with
+        {
+            CommandId = original.CommandId
+        };
         await EventAppendRf3Assertions.RejectedAsync(sdk, official, changedCommand, ErrorCode.Conflict,
             EventAppendRf3Protocol.CommandDetail, credential, token);
         await EventAppendRf3Assertions.RejectedAsync(sdk, official, Command(scenario, [changed], ExpectedStreamRevision.Any),
             ErrorCode.Conflict, EventAppendRf3Protocol.EventDetail, credential, token);
-        var partial = McpEventStreamScenario.InputEvents[EventAppendRf3Protocol.FirstEventIndex] with { EventId = EventAppendRf3Protocol.PartialEventId };
+        var partial = McpEventStreamScenario.InputEvents[EventAppendRf3Protocol.FirstEventIndex] with
+        {
+            EventId = EventAppendRf3Protocol.PartialEventId
+        };
         var partialCommand = Command(scenario,
             [partial, McpEventStreamScenario.InputEvents[EventAppendRf3Protocol.SecondEventIndex]], ExpectedStreamRevision.Any);
         await EventAppendRf3Assertions.RejectedAsync(sdk, official, partialCommand,

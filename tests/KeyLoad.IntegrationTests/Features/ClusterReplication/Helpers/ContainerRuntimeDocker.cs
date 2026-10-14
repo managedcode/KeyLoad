@@ -70,7 +70,11 @@ internal static class ContainerRuntimeDocker
     internal static async Task<ContainerRuntimeProcessResult> RunAsync(IReadOnlyList<string> arguments, CancellationToken cancellationToken)
     {
         var startInfo = new ProcessStartInfo(ContainerRuntimeProtocol.DockerExecutable)
-        { RedirectStandardOutput = true, RedirectStandardError = true, UseShellExecute = false };
+        {
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false
+        };
         foreach (var argument in arguments)
         {
             startInfo.ArgumentList.Add(argument);
@@ -95,7 +99,9 @@ internal static class ContainerRuntimeDocker
                 var cleanup = LocalImageOwnedProcessLifetime.TerminateAndJoinAsync(process, exit, output, error, failures);
                 var cleanupFailure = await OwnedProcessFailureObserver.CaptureAsync(cleanup).ConfigureAwait(false);
                 if (cleanupFailure is not null)
-                { failures.Add(cleanupFailure); }
+                {
+                    failures.Add(cleanupFailure);
+                }
             }
         }
         finally
@@ -103,9 +109,13 @@ internal static class ContainerRuntimeDocker
             OwnedProcessFailureObserver.Observe(process.Dispose, failures);
         }
         if (failures.Count == 1)
-        { ExceptionDispatchInfo.Capture(failures[0]).Throw(); }
+        {
+            ExceptionDispatchInfo.Capture(failures[0]).Throw();
+        }
         if (failures.Count > 1)
-        { throw new AggregateException("Docker CLI execution and owned process settlement failed.", failures); }
+        {
+            throw new AggregateException("Docker CLI execution and owned process settlement failed.", failures);
+        }
         return await original.ConfigureAwait(false);
 
         async Task<ContainerRuntimeProcessResult> RunProcessAsync()

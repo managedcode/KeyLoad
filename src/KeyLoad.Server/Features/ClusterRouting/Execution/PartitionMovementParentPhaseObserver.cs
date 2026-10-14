@@ -1,7 +1,7 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
-using KeyLoad.Orleans;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
@@ -16,7 +16,9 @@ internal sealed class PartitionMovementParentPhaseObserver(PartitionMovementRece
         PartitionMoveParentState state, ReadExecutionBudget work, CancellationToken cancellationToken)
     {
         if (state.Pending?.Stage is PartitionMovePeerStage.Capture or PartitionMovePeerStage.ControlAuthorize)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+        }
         return await ObserveCoreAsync(principalId, request, state, state.Pending, work, cancellationToken).ConfigureAwait(false);
     }
 
@@ -24,7 +26,9 @@ internal sealed class PartitionMovementParentPhaseObserver(PartitionMovementRece
         PartitionMoveParentState state, ReadExecutionBudget work, CancellationToken cancellationToken)
     {
         if (state.Pending is not { Stage: PartitionMovePeerStage.ControlAuthorize, OriginalPhase: not null })
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+        }
         return ObserveCoreAsync(principalId, request, state, state.Pending, work, cancellationToken);
     }
 
@@ -37,7 +41,9 @@ internal sealed class PartitionMovementParentPhaseObserver(PartitionMovementRece
                 CaptureProofCheckpointReceipt: not null, OriginalCaptureWitness: not null,
                 OriginalDescriptor: not null, OriginalFence: not null
             })
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+        }
         return ObserveCoreAsync(principalId, request, state, state.Pending, work, cancellationToken);
     }
 
@@ -50,7 +56,9 @@ internal sealed class PartitionMovementParentPhaseObserver(PartitionMovementRece
             || original.OriginalResult is not null || original.OriginalPhase is null
             || original.Stage == PartitionMovePeerStage.Capture && (original.CaptureProofCheckpointReceipt is null
                 || original.OriginalCaptureWitness is null || original.OriginalDescriptor is null || original.OriginalFence is null))
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+        }
         return ObserveCoreAsync(principalId, request, state, original, work, cancellationToken);
     }
 
@@ -64,7 +72,9 @@ internal sealed class PartitionMovementParentPhaseObserver(PartitionMovementRece
         var header = state.Header
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
         if (original.OriginalResult is not null)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+        }
         var envelope = PartitionMovementParentCheckpointOwner.OriginalEnvelope(original, release: false);
         var expiry = PartitionMovementParentDeadline.Expiry(work, clock, routing);
         OperationResult actual;

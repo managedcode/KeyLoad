@@ -7,13 +7,17 @@ internal static class ScriptDomGraphWalks
     internal static GraphScope? Scope(Dom.ScalarExpression expression, ScriptDomGraphContext context, int depth)
     {
         if (ScriptDomGraphShape.IsNull(expression, context, depth))
-        { return null; }
+        {
+            return null;
+        }
         return new(Walk(ScriptDomGraphShape.Call(expression, ScopeFunction, context, depth, WalkArity), context, depth));
     }
     internal static GraphRetriever? Retriever(Dom.ScalarExpression expression, ScriptDomGraphContext context, int depth)
     {
         if (ScriptDomGraphShape.IsNull(expression, context, depth))
-        { return null; }
+        {
+            return null;
+        }
         var arguments = ScriptDomGraphShape.Call(expression, RetrieverFunction, context, depth, RetrieverArity);
         return new(Walk(arguments, context, depth),
             ScriptDomGraphScalar.Weight(arguments[WeightIndex], context, depth + ChildDepth));
@@ -21,7 +25,9 @@ internal static class ScriptDomGraphWalks
     internal static GraphExpansion? Expansion(Dom.ScalarExpression expression, ScriptDomGraphContext context, int depth)
     {
         if (ScriptDomGraphShape.IsNull(expression, context, depth))
-        { return null; }
+        {
+            return null;
+        }
         var arguments = ScriptDomGraphShape.Call(expression, ExpansionFunction, context, depth, ExpansionArity);
         return new(ScriptDomGraphScalar.String(arguments[GraphIndex], context, depth + ChildDepth),
             ScriptDomGraphScalar.Integer(arguments[ExpansionDepthIndex], context, depth + ChildDepth),

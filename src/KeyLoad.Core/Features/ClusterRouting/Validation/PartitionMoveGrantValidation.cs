@@ -21,7 +21,9 @@ internal static class PartitionMoveGrantValidation
             || !PhysicalOwnerEntryValidation.SameOwner(grant.ControlOwner, envelope.ControlOwner)
             || !PhysicalOwnerEntryValidation.SameOwner(grant.ReceiverOwner, receiver)
             || grant.BodyDigest != Convert.ToHexStringLower(SHA256.HashData(envelope.Body.Span)))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
     }
 
     internal static bool IsLocalControl(PartitionMovePeerStage stage)

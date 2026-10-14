@@ -46,7 +46,9 @@ internal sealed class McpBoundedWriteStream : Stream
     public override Task FlushAsync(CancellationToken cancellationToken)
     {
         if (cancellationToken.IsCancellationRequested)
-        { return Task.FromCanceled(cancellationToken); }
+        {
+            return Task.FromCanceled(cancellationToken);
+        }
         Flush();
         return Task.CompletedTask;
     }
@@ -101,7 +103,9 @@ internal sealed class McpBoundedWriteStream : Stream
     public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = default)
     {
         if (cancellationToken.IsCancellationRequested)
-        { return ValueTask.FromCanceled(cancellationToken); }
+        {
+            return ValueTask.FromCanceled(cancellationToken);
+        }
         Write(buffer.Span);
         return ValueTask.CompletedTask;
     }
@@ -119,7 +123,11 @@ internal sealed class McpBoundedWriteStream : Stream
     /// <summary>Gets the actual written range without allocating a returned copy of the private buffer.</summary>
     internal int WrittenBytes
     {
-        get { ThrowIfDisposed(); return checked((int)buffer.Length); }
+        get
+        {
+            ThrowIfDisposed();
+            return checked((int)buffer.Length);
+        }
     }
 
     /// <summary>Copies only the accepted bytes into an independent owner.</summary>
@@ -146,7 +154,9 @@ internal sealed class McpBoundedWriteStream : Stream
     {
         ThrowIfDisposed();
         if (count > maximumBytes - buffer.Length)
-        { throw Errors.Fail(ErrorCode.ResourceExhausted, McpFramingProtocol.CanonicalPayloadExceeded); }
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, McpFramingProtocol.CanonicalPayloadExceeded);
+        }
     }
 
     private void ThrowIfDisposed() => ObjectDisposedException.ThrowIf(disposed, this);

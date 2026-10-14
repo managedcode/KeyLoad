@@ -16,7 +16,10 @@ internal sealed class FollowerDocumentReadTests
         var captured = fixture.Capture(request);
         var fresh = fixture.Put(FollowerDocumentFixture.FreshJson, FollowerDocumentFixture.FirstRevision);
         var currentPosition = fixture.Position;
-        var actual = fixture.Complete(request with { MinimumToken = captured.Token }, captured);
+        var actual = fixture.Complete(request with
+        {
+            MinimumToken = captured.Token
+        }, captured);
         await FollowerDocumentAssertions.FullAsync(fixture, actual, dataPosition, currentPosition,
             FollowerDocumentFixture.FirstRevision, FollowerDocumentFixture.OriginalJson, fixture.Principal);
         await FollowerDocumentAssertions.CurrentAsync(fixture, FollowerDocumentFixture.SecondRevision,
@@ -46,7 +49,9 @@ internal sealed class FollowerDocumentReadTests
         var captured = fixture.Capture(request);
         var originalBytes = fixture.CredentialBytes();
         if (change == "deleted")
-        { fixture.Db.Store.Commit((tx, _) => { tx.Delete(KeySpace.ApiKey(FollowerDocumentFixture.KeyId)); return true; }); }
+        {
+            fixture.Db.Store.Commit((tx, _) => { tx.Delete(KeySpace.ApiKey(FollowerDocumentFixture.KeyId)); return true; });
+        }
         else
         {
             var replacement = change switch
@@ -63,9 +68,13 @@ internal sealed class FollowerDocumentReadTests
         await FollowerDocumentAssertions.FailureUnchangedAsync(fixture, () => fixture.Complete(request, captured),
             ErrorCode.Unauthenticated, MissingCredential);
         if (change == "deleted")
-        { fixture.Db.Store.Commit((tx, _) => { tx.Put(KeySpace.ApiKey(FollowerDocumentFixture.KeyId), originalBytes); return true; }); }
+        {
+            fixture.Db.Store.Commit((tx, _) => { tx.Put(KeySpace.ApiKey(FollowerDocumentFixture.KeyId), originalBytes); return true; });
+        }
         else
-        { fixture.Apply(OperationKind.ConfigureApiKey, new ConfigureApiKeyRequest(fixture.Credential)).Get<bool>(); }
+        {
+            fixture.Apply(OperationKind.ConfigureApiKey, new ConfigureApiKeyRequest(fixture.Credential)).Get<bool>();
+        }
         fixture.Put(FollowerDocumentFixture.FreshJson, FollowerDocumentFixture.FirstRevision);
         var renewed = fixture.Capture(request);
         await FollowerDocumentAssertions.FullAsync(fixture, fixture.Complete(request, renewed), fixture.Position,
@@ -81,18 +90,29 @@ internal sealed class FollowerDocumentReadTests
         var request = fixture.Request();
         var dataPosition = fixture.Position;
         var captured = fixture.Capture(request);
-        var revoked = fixture.Principal with { Grants = [], PolicyEpoch = fixture.Principal.PolicyEpoch + 1 };
+        var revoked = fixture.Principal with
+        {
+            Grants = [],
+            PolicyEpoch = fixture.Principal.PolicyEpoch + 1
+        };
         fixture.Apply(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(revoked)).Get<PrincipalRecord>();
         await FollowerDocumentAssertions.FailureUnchangedAsync(fixture, () => fixture.Complete(request, captured),
             ErrorCode.PermissionDenied);
-        var restored = fixture.Principal with { PolicyEpoch = revoked.PolicyEpoch + 1 };
+        var restored = fixture.Principal with
+        {
+            PolicyEpoch = revoked.PolicyEpoch + 1
+        };
         fixture.Apply(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(restored)).Get<PrincipalRecord>();
         fixture.ChangePolicy();
         fixture.Put(FollowerDocumentFixture.FreshJson, FollowerDocumentFixture.FirstRevision);
         await FollowerDocumentAssertions.FullAsync(fixture, fixture.Complete(request, captured), dataPosition,
             fixture.Position, FollowerDocumentFixture.FirstRevision, FollowerDocumentFixture.RedactedOriginalJson,
             restored, redacted: true);
-        var granted = restored with { FieldGrants = ["secret.read"], PolicyEpoch = restored.PolicyEpoch + 1 };
+        var granted = restored with
+        {
+            FieldGrants = ["secret.read"],
+            PolicyEpoch = restored.PolicyEpoch + 1
+        };
         fixture.Apply(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(granted)).Get<PrincipalRecord>();
         var renewed = fixture.Capture(request);
         await FollowerDocumentAssertions.FullAsync(fixture, fixture.Complete(request, renewed), fixture.Position,
@@ -127,7 +147,10 @@ internal sealed class FollowerDocumentReadTests
         }
         await FollowerDocumentAssertions.FullAsync(fixture, fixture.Complete(request, captured), dataPosition,
             fixture.Position, FollowerDocumentFixture.FirstRevision, null, principal);
-        var restored = fixture.Principal with { PolicyEpoch = principal.PolicyEpoch + 1 };
+        var restored = fixture.Principal with
+        {
+            PolicyEpoch = principal.PolicyEpoch + 1
+        };
         fixture.Apply(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(restored)).Get<PrincipalRecord>();
         fixture.Put(FollowerDocumentFixture.FreshJson, FollowerDocumentFixture.SecondRevision);
         var renewed = fixture.Capture(request);

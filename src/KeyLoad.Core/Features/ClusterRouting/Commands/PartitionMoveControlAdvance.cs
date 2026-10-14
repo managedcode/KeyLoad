@@ -23,7 +23,9 @@ public sealed partial class DatabaseEngine
             || !PartitionMoveControlValidation.SameSource(body.Fence.SourcePlacement, current.SourcePlacement)
             || !PhysicalOwnerEntryValidation.SameOwner(body.Fence.ControlOwner, phase.ControlOwner)
             || !PhysicalOwnerEntryValidation.SameOwner(body.Fence.DestinationOwner, current.DestinationOwner))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
         var updated = body.InstalledReceipt is null
             ? AdvanceCapturedMove(transaction, current, body) : AdvanceInstalledMove(transaction, current, body);
         PartitionMoveControlStorage.Write(transaction, updated, Limits.MaxBatchBytes);
@@ -36,7 +38,9 @@ public sealed partial class DatabaseEngine
     {
         if (body.SourceCaptureGrantId is not { } grantId
             || current.Phase is not (PartitionMovePhase.Fenced or PartitionMovePhase.Captured))
-        { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict); }
+        {
+            throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict);
+        }
         var grant = PartitionMoveGrantStorage.Read(view, current.Partition, grantId, Limits.MaxBatchBytes)
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
         if (grant.Stage != PartitionMovePeerStage.Capture || grant.Settlement is null
@@ -48,8 +52,14 @@ public sealed partial class DatabaseEngine
             || grant.Settlement.AppliedPosition <= body.Fence.SourceCut
             || JsonData.Fingerprint(grant.Resources) != JsonData.Fingerprint(body.Descriptor.Resources)
             || current.ImageDigest is { } digest && digest != body.Descriptor.Digest)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
-        return current with { Phase = PartitionMovePhase.Captured, ImageDigest = body.Descriptor.Digest };
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
+        return current with
+        {
+            Phase = PartitionMovePhase.Captured,
+            ImageDigest = body.Descriptor.Digest
+        };
     }
 
     private PartitionMoveControlRecord AdvanceInstalledMove(IKeyValueView view, PartitionMoveControlRecord current,
@@ -58,7 +68,9 @@ public sealed partial class DatabaseEngine
         var receipt = body.InstalledReceipt
             ?? throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority);
         if (body.TargetInstallGrantId is not { } grantId)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+        }
         var grant = PartitionMoveGrantStorage.Read(view, current.Partition, grantId, Limits.MaxBatchBytes)
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
         if (grant.MoveId != current.MoveId || grant.Stage != PartitionMovePeerStage.Install
@@ -72,7 +84,9 @@ public sealed partial class DatabaseEngine
             || grant.ControlIntentDigest != body.Fence.ControlIntentDigest
             || JsonData.Fingerprint(grant.Resources) != JsonData.Fingerprint(body.Descriptor.Resources)
             || receipt.Mutations.IsDefault || !receipt.Mutations.IsEmpty)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
         if (current.Phase is not (PartitionMovePhase.Captured or PartitionMovePhase.Installed)
             || current.ImageDigest != body.Descriptor.Digest || receipt.CommandId == Guid.Empty
             || receipt.Token.Incarnation != current.DestinationOwner.Incarnation
@@ -80,7 +94,13 @@ public sealed partial class DatabaseEngine
             || receipt.Token.OwnershipEpoch != current.DestinationOwner.PlacementEpoch
             || receipt.Token.Position <= PartitionMoveProtocol.EmptyCount
             || current.InstalledReceipt is { } previous && previous != receipt.Token)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
-        return current with { Phase = PartitionMovePhase.Installed, InstalledReceipt = receipt.Token };
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch);
+        }
+        return current with
+        {
+            Phase = PartitionMovePhase.Installed,
+            InstalledReceipt = receipt.Token
+        };
     }
 }

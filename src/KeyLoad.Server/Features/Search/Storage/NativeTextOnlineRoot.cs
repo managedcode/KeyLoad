@@ -29,14 +29,19 @@ internal sealed class NativeTextOnlineRoot
             budget?.Check();
             NativeTextFileIO.VerifyDirectory(root);
             if (initialized)
-            { NativeTextRootFiles.VerifyReceipt(root, node, options); }
+            {
+                NativeTextRootFiles.VerifyReceipt(root, node, options);
+            }
         });
         NativeTextRootFiles.InitializeReceipt(root, node, options, resources);
         initialized = true;
         Directory = root;
     }
 
-    internal string Directory { get; }
+    internal string Directory
+    {
+        get;
+    }
 
     internal void CreateGeneration(string leaf, TextProjectionScope scope,
         NativeTextResourceReservation reservation, ReadExecutionBudget budget)
@@ -68,9 +73,14 @@ internal sealed class NativeTextOnlineRoot
             var leaf = Path.GetFileName(entry);
             if (leaf is NativeTextProtocol.RootReceiptFile or NativeTextOnlineCatalogFiles.CurrentFile
                 or NativeTextOnlineCatalogFiles.PendingFile)
-            { NativeTextFileIO.VerifyRegularFile(entry); continue; }
+            {
+                NativeTextFileIO.VerifyRegularFile(entry);
+                continue;
+            }
             if (!NativeTextValidation.IsGenerationLeaf(leaf))
-            { throw NativeTextErrors.Ownership(); }
+            {
+                throw NativeTextErrors.Ownership();
+            }
             NativeTextFileIO.VerifyDirectory(entry);
             VerifyGenerationEntries(entry, leaf, budget);
             var owner = NativeTextOwnerFiles.ReadOwner(Path.Combine(entry, NativeTextProtocol.OwnerFile),
@@ -88,28 +98,39 @@ internal sealed class NativeTextOnlineRoot
             budget?.Check();
             var name = Path.GetFileName(entry);
             if (name == NativeTextProtocol.NativeDirectory)
-            { NativeTextFileIO.VerifyDirectory(entry); continue; }
+            {
+                NativeTextFileIO.VerifyDirectory(entry);
+                continue;
+            }
             if (name is not (NativeTextProtocol.OwnerFile or NativeTextProtocol.OwnerPendingFile
                 or NativeTextIncrementalProtocol.ManifestFile or NativeTextIncrementalProtocol.PendingManifestFile
                 or NativeTextIncrementalProtocol.IntentFile or NativeTextIncrementalProtocol.PendingIntentFile
                 or NativeTextOnlineStagingFiles.FileName))
-            { throw NativeTextErrors.Ownership(); }
+            {
+                throw NativeTextErrors.Ownership();
+            }
             NativeTextFileIO.VerifyRegularFile(entry);
         }
         var receipt = Path.Combine(path, NativeTextOnlineStagingFiles.FileName);
         if (!File.Exists(receipt))
-        { return; } // Partial owner creation is retained; never a publication proof.
+        {
+            return;
+        } // Partial owner creation is retained; never a publication proof.
         budget?.ChargeBytes(new FileInfo(receipt).Length);
         var staging = NativeTextFileIO.ReadEnvelope<NativeTextOnlineStaging>(receipt,
             options.Value.MaximumOwnerReceiptBytes);
         if (staging.FormatVersion != NativeTextProtocol.FormatVersion || staging.NodeId != node
             || staging.Leaf != leaf || staging.Request.NodeId != node || staging.Request.CommandId == Guid.Empty
             || staging.CapturedCut.NodeId != node || !NativeTextIncrementalDigest.IsCanonical(staging.ParentFingerprint))
-        { throw NativeTextErrors.Corrupt(); }
+        {
+            throw NativeTextErrors.Corrupt();
+        }
         budget?.ChargeBytes(NativeSerialization.Measure(staging.Request));
         var actual = KeyLoad.Core.Features.Search.OnlineTextParentIdentity.Fingerprint(staging.PrincipalId, staging.Request);
         if (actual != staging.ParentFingerprint)
-        { throw NativeTextErrors.Mismatch(); }
+        {
+            throw NativeTextErrors.Mismatch();
+        }
     }
 
     internal void DeleteAfterJoinedOwnership(string leaf, TextProjectionScope scope)
@@ -117,12 +138,16 @@ internal sealed class NativeTextOnlineRoot
         NativeTextValidation.ValidateScope(scope, node);
         var path = Path.Combine(Directory, leaf);
         if (!NativeTextValidation.IsGenerationLeaf(leaf))
-        { throw NativeTextErrors.Ownership(); }
+        {
+            throw NativeTextErrors.Ownership();
+        }
         VerifyGenerationEntries(path, leaf, null);
         var owner = NativeTextOwnerFiles.ReadOwner(Path.Combine(path, NativeTextProtocol.OwnerFile),
             Directory, leaf, node, options);
         if (owner.Scope != scope)
-        { throw NativeTextErrors.Mismatch(); }
+        {
+            throw NativeTextErrors.Mismatch();
+        }
         NativeTextOwnedInventory.ValidateTrackedLayout(path, owner.OwnedPaths, null,
             allowMissingNative: true, executionOptions: options);
         resources.DeleteOwnedDirectory(path, () => System.IO.Directory.Delete(path, recursive: true));

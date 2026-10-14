@@ -1,4 +1,4 @@
-using KeyLoad.Orleans;
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 
 namespace KeyLoad.UnitTests.Features.Search;
@@ -72,7 +72,9 @@ internal static class NativeAnnPublicProfileFlow
         var pin = new AnnMaintenanceRequest(Guid.NewGuid(), consumer, AnnSeedTestSupport.Collection,
             AnnSeedTestSupport.Field, AnnSeedTestSupport.Space(), Generation, database.Store.Identity.NodeId,
             placement, AnnMaintenanceMode.Build)
-        { MaintenanceProfile = profile };
+        {
+            MaintenanceProfile = profile
+        };
         return (pin, configured);
     }
 
@@ -94,7 +96,13 @@ internal static class NativeAnnPublicProfileFlow
     {
         var original = AnnProjectionPinTestSupport.StoredConsumer(database, pin.Consumer);
         var profile = pin.MaintenanceProfile ?? throw new InvalidOperationException("The actual configured profile is absent.");
-        var changed = profile with { Space = profile.Space with { Version = "v2" } };
+        var changed = profile with
+        {
+            Space = profile.Space with
+            {
+                Version = "v2"
+            }
+        };
         var definition = new ProjectionConsumerDefinition(Generation, [], [.. Kinds]) { AnnMaintenance = changed };
         var id = Guid.NewGuid();
         var error = Assert.ThrowsExactly<KeyLoadException>(() => database.Submit(OperationKind.ConfigureProjectionConsumer,

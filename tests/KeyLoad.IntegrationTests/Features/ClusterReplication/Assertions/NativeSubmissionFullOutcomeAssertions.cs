@@ -26,7 +26,10 @@ internal static class NativeSubmissionFullOutcomeAssertions
         var expected = new StoredOutcome(fingerprint, incarnation,
             RequestCqrsPhaseFaultProvisioning.InitialPolicyEpoch,
             new OperationResult(null) { NativeValue = retry.SdkReceipt })
-        { ScopeKind = CommandOutcomeScopeKind.Partition, Partition = command.Partition };
+        {
+            ScopeKind = CommandOutcomeScopeKind.Partition,
+            Partition = command.Partition
+        };
         var outcome = NativeSerialization.Deserialize<StoredOutcome>(receipt.NativeStoredOutcome);
         await Assert.That(outcome.Fingerprint).IsEqualTo(fingerprint);
         await Assert.That(outcome.Incarnation).IsEqualTo(incarnation);

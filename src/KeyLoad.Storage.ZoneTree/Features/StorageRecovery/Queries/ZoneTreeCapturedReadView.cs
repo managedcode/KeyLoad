@@ -107,15 +107,21 @@ internal sealed class ZoneTreeCapturedReadView : IKeyValueView, IDisposable
             if (!record.Key.Span.StartsWith(prefix)
                 || afterKey is not null && record.Key.Span.SequenceCompareTo(afterKey) <= EqualKeyComparison
                 || untilKey is not null && record.Key.Span.SequenceCompareTo(untilKey) >= EqualKeyComparison)
-            { continue; }
+            {
+                continue;
+            }
             var bytes = checked((long)record.Key.Length + record.Value.Length);
             observer?.Invoke(bytes);
             examined = checked(examined + bytes);
             if (delivered == maxRecords)
-            { return new(delivered, true, false, examined); }
+            {
+                return new(delivered, true, false, examined);
+            }
             delivered++;
             if (!visitor(record.Key.Span, record.Value.Span))
-            { return new(delivered, false, true, examined); }
+            {
+                return new(delivered, false, true, examined);
+            }
         }
         cancellationToken.ThrowIfCancellationRequested();
         return new(delivered, false, false, examined);
@@ -125,9 +131,16 @@ internal sealed class ZoneTreeCapturedReadView : IKeyValueView, IDisposable
     {
         ObjectDisposedException.ThrowIf(disposed, this);
         foreach (var prefix in prefixes)
-        { if (key.AsSpan().StartsWith(prefix)) { return; } }
+        {
+            if (key.AsSpan().StartsWith(prefix))
+            {
+                return;
+            }
+        }
         if (exactKeys.BinarySearch(key, BinaryKeyComparer.Instance) >= EqualKeyComparison)
-        { return; }
+        {
+            return;
+        }
         throw Errors.Fail(ErrorCode.HistoryUnavailable, Uncaptured);
     }
 
@@ -135,14 +148,21 @@ internal sealed class ZoneTreeCapturedReadView : IKeyValueView, IDisposable
     {
         ObjectDisposedException.ThrowIf(disposed, this);
         foreach (var admitted in prefixes)
-        { if (prefix.AsSpan().StartsWith(admitted)) { return; } }
+        {
+            if (prefix.AsSpan().StartsWith(admitted))
+            {
+                return;
+            }
+        }
         throw Errors.Fail(ErrorCode.HistoryUnavailable, Uncaptured);
     }
 
     public void Dispose()
     {
         if (disposed)
-        { return; }
+        {
+            return;
+        }
         disposed = true;
         records.Clear();
         prefixes.Clear();
