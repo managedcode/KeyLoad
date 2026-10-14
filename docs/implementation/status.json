@@ -7,8 +7,8 @@
       "total": 104
     },
     "additionalTask": "KL-105",
-    "qualification": "R53 is an owner-requested complete working-tree code checkpoint, not qualified acceptance. Clustering rename and multiline style are implemented; final integrated Release build, canonical formatter verification and runtime gates remain open. Earlier R52 results qualify only that immutable earlier source.",
-    "coverage": "R53 current functional product coverage is UNMEASURED; historical partial reports do not qualify this source, and load/comparison cases are excluded.",
+    "qualification": "R54 full analyzer-enabled Release0errors0warnings and canonical formatter verification pass. Native focused Unit126/121PASS5FAIL0SKIP, genuine process Recovery6/6PASS with unchanged source/DLL/PDB. Original104 acceptance remains20done84inprogress; full Linux/RF3/coverage/fault/endurance/performance gates open.",
+    "coverage": "R54 current functional product coverage is UNMEASURED; focused functional results are not complete coverage, and load/comparison cases are excluded.",
     "currentStageR43": {
       "status": "local_development_executed_with_six_failures_linux_acceptance_pending",
       "newCSharpFiles": 138,
@@ -2759,6 +2759,115 @@
         "Run combined canonical formatter verification and analyzer-enabled Release solution build",
         "Execute source/image-bound focused native TUnit whole-operation tests with50ordinary slots and joined resources",
         "Complete required exact-source Linux Unit/Recovery/Docker-Aspire RF3/SDK/MCP, coverage, fault/endurance and performance gates"
+      ]
+    },
+    "currentStageR54": {
+      "status": "code_checkpoint_with_focused_runtime_failures",
+      "originalPlan": {
+        "done": 20,
+        "inProgress": 84,
+        "total": 104
+      },
+      "additionalTask": "KL-105",
+      "scope": "Completed multiline bounded responsibility extractions across27projects; original query cursor/indexed200x50 parity, chunk interruption and RF3 extrema operation flows",
+      "sourceFiles": 11634,
+      "fullRelease": {
+        "errors": 0,
+        "warnings": 0
+      },
+      "checks": {
+        "format": {
+          "exitCode": 0,
+          "elapsedSeconds": 147.02779104199726,
+          "processJoined": true,
+          "bothReadersJoined": true,
+          "sourceDriftCount": 46,
+          "receipt": "TestResults/stage61-native-join/stage64-r54-coherent-all-owner-canonical-format-permitted.completion.original.json",
+          "receiptSha256": "8d88e5b59181df98b3f32f9fd7f85b384a84234e15cd8d936461aa440ac60390",
+          "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "build": {
+          "exitCode": 0,
+          "elapsedSeconds": 265.1739759159973,
+          "processJoined": true,
+          "bothReadersJoined": true,
+          "sourceDriftCount": 0,
+          "receipt": "TestResults/stage61-native-join/stage64-r54-coherent-all-owner-full-release.completion.original.json",
+          "receiptSha256": "6b6cab109fdc6c9c03452d67b0c539f152e1e66782e39bbc2a5ffe33411c3c6f",
+          "stdoutSha256": "0cdbccb433b33d5058994ed56978115c89bbe08a78f564fc00fff23f4932e746",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "verify": {
+          "exitCode": 0,
+          "elapsedSeconds": 151.31320729095023,
+          "processJoined": true,
+          "bothReadersJoined": true,
+          "sourceDriftCount": 0,
+          "receipt": "TestResults/stage61-native-join/stage64-r54-coherent-all-owner-canonical-verify.completion.original.json",
+          "receiptSha256": "41709054fb545f9a4e9fa9683f3a644c110278812ffc40dca886e63638f03a8c",
+          "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "unit": {
+          "exitCode": 2,
+          "elapsedSeconds": 124.61974854196887,
+          "processJoined": true,
+          "bothReadersJoined": true,
+          "sourceDriftCount": 0,
+          "receipt": "TestResults/stage61-native-join/stage64-r54-focused-unit.completion.original.json",
+          "receiptSha256": "02ad138f04e2a8063cafb8625b82c063bf3141b34cb11e644ee62ff6de9b967f",
+          "stdoutSha256": "84978196f8c8ecf3c252332da459ae4febe425c55f56daa8c56ecee2c87016a6",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "compiledDriftCount": 0
+        },
+        "recovery": {
+          "exitCode": 0,
+          "elapsedSeconds": 10.169387833098881,
+          "processJoined": true,
+          "bothReadersJoined": true,
+          "sourceDriftCount": 0,
+          "receipt": "TestResults/stage61-native-join/stage64-r54-focused-recovery.completion.original.json",
+          "receiptSha256": "112d8e532c175655ceeb9e53db7898d7870e8e2110464ce5f000e5976129ccda",
+          "stdoutSha256": "b33f6d77c6d8c483dccb5b23a51c38d0559a2a34b601fe5dff7e68563438a7ec",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "compiledDriftCount": 0
+        }
+      },
+      "unit": {
+        "total": 126,
+        "passed": 121,
+        "failed": 5,
+        "skipped": 0,
+        "nativeDurationSeconds": 121.349,
+        "nativeSlots": 50,
+        "originalTrxPeakOverlappingIntervals": 39,
+        "peakMeaning": "TRX start/end overlap, not exact CPU concurrency",
+        "failureLedger": "TestResults/stage61-native-join/root-r54-original-focused-failure-ledger-and-native-overlap.original.json",
+        "failureLedgerSha256": "d3bd110ee32bc9bf48ef3099922cfa3de26093255c45d4a87a1ed51c8d3468de",
+        "nativeTrxSha256": "dc467f88f5e9ddde7c0e757048d182e74ad36ba863efc2462e6ef644a1d10d98",
+        "failedCases": [
+          "AcCq045CanceledChildAndOutputOverflowSettleBeforeHealthyOperation",
+          "OriginalNativeRetireCallerCancellationAndHostStopRetainAuthorityThenResumeReplayMixedModelsAndTwoColdOwners",
+          "ActualServerPublicationMovesExactNativeHeadAndStrictValidatorsRefuseWithoutEffects",
+          "ActualNativePrepareRefusesInvalidProofThenRetainsMixedReceiptConflictAndTwoColdOwners",
+          "OriginalTypedInsertSurvivesRealRetirementCurrentPermissionFencesAndTwoColdOwners"
+        ]
+      },
+      "recovery": {
+        "total": 6,
+        "passed": 6,
+        "failed": 0,
+        "skipped": 0,
+        "nativeDurationSeconds": 8.651,
+        "boundary": "Real process-kill/reopen only; no power-loss qualification"
+      },
+      "coverage": "UNMEASURED",
+      "profiling": "Actual post-run owned Unit PID observation found none; no R54 captures or performance claim",
+      "remaining": [
+        "Five original focused failures remain: SourceManifest executed-module allowlist, three native movement/cold flows, retired typed INSERT resource evidence",
+        "Exact-source full Linux Unit/Recovery/Docker-Aspire RF3 SDK/MCP, complete coverage, fault/endurance and performance qualification remain open",
+        "No new original104-task acceptance follows from these focused results"
       ]
     }
   },

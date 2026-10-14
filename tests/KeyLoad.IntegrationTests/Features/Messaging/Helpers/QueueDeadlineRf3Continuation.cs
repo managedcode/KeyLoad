@@ -12,12 +12,7 @@ internal static class QueueDeadlineRf3Continuation
         await Assert.That(TimeProvider.System.GetUtcNow() < scheduled.Metadata.NotBefore).IsTrue();
         await QueueLeaseRf3Cold.RestartAsync(fixture, token);
         await DueRecurringRf3Assertions.WaitForDueTimeAsync(scheduled.Metadata.NotBefore!.Value, token);
-        await QueueDeadlineRf3Callers.UseAsync(fixture, McpCallerProtocol.Node2, fixture.AdminKey, async admin =>
-        {
-            await QueueDeadlineRf3Assertions.RequireAsync(admin, lane, scheduled, token);
-            await QueueDeadlineRf3Assertions.RequireAsync(admin, lane, future, token);
-            return true;
-        }, token);
+        await RequirePreservedAsync(fixture, McpCallerProtocol.Node2, lane, scheduled, future, token);
         await QueueDeadlineRf3Pause.RefusedAsync(fixture, lane, identity, scheduled, token);
         var revoked = identity.Principal with
         {
@@ -26,12 +21,7 @@ internal static class QueueDeadlineRf3Continuation
         };
         await MessagingRf3Identity.UpdateAsync(fixture, revoked, token);
         await QueueDeadlineRf3Pause.SetAsync(fixture, lane, false, token);
-        await QueueDeadlineRf3Callers.UseAsync(fixture, McpCallerProtocol.Node1, fixture.AdminKey, async admin =>
-        {
-            await QueueDeadlineRf3Assertions.RequireAsync(admin, lane, scheduled, token);
-            await QueueDeadlineRf3Assertions.RequireAsync(admin, lane, future, token);
-            return true;
-        }, token);
+        await RequirePreservedAsync(fixture, McpCallerProtocol.Node1, lane, scheduled, future, token);
         var restored = revoked with
         {
             Revoked = false,
@@ -71,4 +61,13 @@ internal static class QueueDeadlineRf3Continuation
         }, token);
         await QueueDeadlineRf3Healthy.RunAsync(fixture, lane, identity, future, token);
     }
+
+    private static Task<bool> RequirePreservedAsync(ClusterFixture fixture, string node, QueueLaneRef lane,
+        MessageInspection scheduled, MessageInspection future, CancellationToken token)
+        => QueueDeadlineRf3Callers.UseAsync(fixture, node, fixture.AdminKey, async admin =>
+        {
+            await QueueDeadlineRf3Assertions.RequireAsync(admin, lane, scheduled, token);
+            await QueueDeadlineRf3Assertions.RequireAsync(admin, lane, future, token);
+            return true;
+        }, token);
 }

@@ -67,15 +67,22 @@ internal static class EventVectorTailObservation
             admission.RequireEncodedBytes(reply.OriginalNativeReply.Length);
             work.ChargeBytes(reply.OriginalNativeReply.Length);
             var observed = NativeSerialization.Deserialize<EventVectorParentObservation>(reply.OriginalNativeReply.Span);
-            try
-            {
-                result = Resolve(observed, partition, request, principalId, directory.ControlOwner, admission, work);
-            }
-            finally
-            {
-                CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(observed.OriginalNativeControlPhaseBytes).Span);
-                CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(observed.OriginalNativeOutcomeBytes).Span);
-            }
+            ResolveAndClear(observed, partition, request, principalId, directory.ControlOwner, admission, work, ref result);
+        }
+    }
+
+    private static void ResolveAndClear(EventVectorParentObservation observed, PartitionHost partition,
+        EventFeedControlRequest request, string principalId, PhysicalShardRecord actualControl,
+        EventVectorAdmissionPolicy admission, ReadExecutionBudget work, ref EventFeedControlResult? result)
+    {
+        try
+        {
+            result = Resolve(observed, partition, request, principalId, actualControl, admission, work);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(observed.OriginalNativeControlPhaseBytes).Span);
+            CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(observed.OriginalNativeOutcomeBytes).Span);
         }
     }
 

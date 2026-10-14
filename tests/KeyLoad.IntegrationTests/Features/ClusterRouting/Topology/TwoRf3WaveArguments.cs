@@ -56,6 +56,12 @@ internal static class TwoRf3WaveArguments
         {
             args.Add(RemoteQueryArgument);
         }
+        AddObservationArguments(selection, controls, frameObservation, nativeDiscoveryOmission, eventVectorReservedProbe, nativeMembershipControls, args);
+        return [.. args];
+    }
+
+    private static void AddObservationArguments(LocalRf3ImageSelection.Selection? selection, RequestCqrsProbeFixture? controls, MovementFrameObservationFixture? frameObservation, StorageRecovery.NativeCapabilityOmissionRf3Fixture? nativeDiscoveryOmission, bool eventVectorReservedProbe, NativeMembershipDiagnosticFixture? nativeMembershipControls, List<string> args)
+    {
         if (controls is not null)
         {
             args.Add(ProbeEnabled);
@@ -88,7 +94,5 @@ internal static class TwoRf3WaveArguments
         {
             args.AddRange(selection.CreateWaveArguments());
         }
-        return [.. args];
     }
-
 }

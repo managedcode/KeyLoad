@@ -1,5 +1,4 @@
 using System.Net;
-using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Server;
 using KeyLoad.ServiceDefaults;
@@ -200,12 +199,7 @@ internal sealed class AuthorizationTelemetryHttpFixture : IDisposable, IAsyncDis
             return;
         }
         disposed = true;
-        AuthorizationTelemetryOwnedDisposal.Run([
-            () => client?.Dispose(),
-            () => ((IDisposable?)app)?.Dispose(),
-            () => completedRequests.Dispose(),
-            () => Database.Dispose()
-        ]);
+        AuthorizationTelemetryOwnedDisposal.Run(client, app, completedRequests, Database);
     }
 }
 internal sealed record AuthorizationTelemetryFailure(ErrorCode Code, string? Detail);

@@ -189,58 +189,22 @@ internal sealed class RemoteModelNativeRuntime : IAsyncDisposable
             return;
         }
         var failures = new List<Exception>();
-        DisposeAdmission(failures);
-        DisposeReplay(failures);
-        DisposeStopping(failures);
+        RemoteModelNativeResourceDisposal.Capture(() =>
+        {
+            var owned = admission;
+            owned.Dispose();
+        }, failures);
+        RemoteModelNativeResourceDisposal.Capture(() =>
+        {
+            var owned = replay;
+            owned.Dispose();
+        }, failures);
+        RemoteModelNativeResourceDisposal.Capture(() =>
+        {
+            var owned = stopping;
+            owned.Dispose();
+        }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
-    }
-
-    private void DisposeAdmission(List<Exception> failures)
-    {
-        try
-        {
-            admission.Dispose();
-        }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        {
-            failures.Add(error);
-        }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        {
-            failures.Add(error);
-        }
-    }
-
-    private void DisposeReplay(List<Exception> failures)
-    {
-        try
-        {
-            replay.Dispose();
-        }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        {
-            failures.Add(error);
-        }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        {
-            failures.Add(error);
-        }
-    }
-
-    private void DisposeStopping(List<Exception> failures)
-    {
-        try
-        {
-            stopping.Dispose();
-        }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        {
-            failures.Add(error);
-        }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        {
-            failures.Add(error);
-        }
     }
 
 }

@@ -160,9 +160,6 @@ internal sealed partial class NativeTextFileStreamProvider(string root, string l
         return pathAccess.Resolve(combined);
     }
 
-    private static bool CreatesOrOpens(FileMode mode)
-        => mode is FileMode.Create or FileMode.CreateNew or FileMode.OpenOrCreate or FileMode.Append;
-
     private static int ReadFileBufferBytes(IOptions<NativeTextExecutionOptions> executionOptions)
     {
         ArgumentNullException.ThrowIfNull(executionOptions);

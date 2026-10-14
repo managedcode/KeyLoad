@@ -46,6 +46,16 @@ internal static class PartitionMovementNativeBlobMutationAssertions
                 }
             },
             NativeControlledBlobFaultVariation.PrincipalPolicyEpoch => ChangePrincipalPolicyEpoch(original, frame),
+            _ => ChangeRequestFrame(original, variation, frame, changed)
+        };
+    }
+
+    private static RemoteControlledBlobCall ChangeRequestFrame(RemoteControlledBlobCall original,
+        NativeControlledBlobFaultVariation variation,
+        ControlledBlobReadFrame frame, ControlledBlobReadFrame changed)
+    {
+        return variation switch
+        {
             NativeControlledBlobFaultVariation.QueryId => original with
             {
                 Request = original.Request with
@@ -90,6 +100,16 @@ internal static class PartitionMovementNativeBlobMutationAssertions
                     }
                 }
             },
+            _ => ChangeReplayFrame(original, variation, frame, changed)
+        };
+    }
+
+    private static RemoteControlledBlobCall ChangeReplayFrame(RemoteControlledBlobCall original,
+        NativeControlledBlobFaultVariation variation,
+        ControlledBlobReadFrame frame, ControlledBlobReadFrame changed)
+    {
+        return variation switch
+        {
             NativeControlledBlobFaultVariation.NativeRequest => original with
             {
                 Request = original.Request with

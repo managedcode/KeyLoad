@@ -50,31 +50,7 @@ internal static class LocalProcessingLateR53Warm
             await LocalProcessingLateR53Current.RunAsync(state, sdk, mcp, admin, official, token);
             await LocalProcessingLateR53Failures.McpAsync(await mcp.CallAsync(McpCallerTools.MessagesProcess, state.Failed, token), ErrorCode.RevisionConflict);
             await LocalProcessingLateR53Current.RunAsync(state, sdk, mcp, admin, official, token);
-            state.Success = state.Failed with
-            {
-                CommandId = Guid.NewGuid(),
-                Effects = [state.Failed.Effects[0], state.Failed.Effects[1]]
-            };
-            state.Receipt = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitProcessingAsync(state.Success, token));
-            await LocalProcessingLateR53Current.ReceiptAsync(state, state.Receipt, state.Success.CommandId,
-                [new(LocalProcessingLateR53Protocol.PutKind, InboxProcessingRf3Protocol.Collection, LocalProcessingLateR53Protocol.Document, 1L),
-                 new(LocalProcessingLateR53Protocol.EnqueueKind, InboxProcessingRf3Protocol.Output, LocalProcessingLateR53Protocol.Message, 1L),
-                 new(LocalProcessingLateR53Protocol.AckKind, lane.Queue, LocalProcessingLateR53Protocol.Message, 3L)]);
-            state.Input = new(state.Input.Metadata with
-            {
-                State = MessageState.Acked,
-                StateVersion = 3,
-                LeaseOwner = null,
-                LeaseUntil = null
-            }, null, null);
-            state.OutputImage = new(new(LocalProcessingLateR53Protocol.Message, MessageState.Ready, 0, 1, 2, null, null), InboxProcessingRf3Protocol.Payload, "{}");
-            state.DocumentImage = new(state.Document, 1, InboxProcessingRf3Protocol.Payload, false, []);
-            await LocalProcessingLateR53Current.OutboxAsync(state, admin, official, token);
-            await LocalProcessingLateR53Current.RunAsync(state, sdk, mcp, admin, official, token);
-            await InboxProcessingRf3Assertions.EqualAsync((await McpCallerAssertions.SuccessAsync<CommitReceipt>(
-                await mcp.CallAsync(McpCallerTools.MessagesProcess, state.Success, token))).Value, state.Receipt);
-            await LocalProcessingLateR53Current.RunAsync(state, sdk, mcp, admin, official, token);
-            await LocalProcessingLateR53Replay.RunAsync(state, sdk, mcp, admin, official, token);
+            await SucceedAsync(state, lane, sdk, mcp, admin, official, token);
         }, token);
         return state;
     }
@@ -89,5 +65,35 @@ internal static class LocalProcessingLateR53Warm
         await Assert.That(delivery.LeaseVersion).IsEqualTo(1L);
         await Assert.That(delivery.DeliveryGeneration).IsEqualTo(1L);
         return delivery;
+    }
+
+    private static async Task SucceedAsync(LocalProcessingLateR53State state, QueueLaneRef lane,
+        KeyLoadClient sdk, McpOfficialClient mcp, KeyLoadClient admin, McpOfficialClient official, CancellationToken token)
+    {
+        state.Success = state.Failed with
+        {
+            CommandId = Guid.NewGuid(),
+            Effects = [state.Failed.Effects[0], state.Failed.Effects[1]]
+        };
+        state.Receipt = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitProcessingAsync(state.Success, token));
+        await LocalProcessingLateR53Current.ReceiptAsync(state, state.Receipt, state.Success.CommandId,
+            [new(LocalProcessingLateR53Protocol.PutKind, InboxProcessingRf3Protocol.Collection, LocalProcessingLateR53Protocol.Document, 1L),
+             new(LocalProcessingLateR53Protocol.EnqueueKind, InboxProcessingRf3Protocol.Output, LocalProcessingLateR53Protocol.Message, 1L),
+             new(LocalProcessingLateR53Protocol.AckKind, lane.Queue, LocalProcessingLateR53Protocol.Message, 3L)]);
+        state.Input = new(state.Input.Metadata with
+        {
+            State = MessageState.Acked,
+            StateVersion = 3,
+            LeaseOwner = null,
+            LeaseUntil = null
+        }, null, null);
+        state.OutputImage = new(new(LocalProcessingLateR53Protocol.Message, MessageState.Ready, 0, 1, 2, null, null), InboxProcessingRf3Protocol.Payload, "{}");
+        state.DocumentImage = new(state.Document, 1, InboxProcessingRf3Protocol.Payload, false, []);
+        await LocalProcessingLateR53Current.OutboxAsync(state, admin, official, token);
+        await LocalProcessingLateR53Current.RunAsync(state, sdk, mcp, admin, official, token);
+        await InboxProcessingRf3Assertions.EqualAsync((await McpCallerAssertions.SuccessAsync<CommitReceipt>(
+            await mcp.CallAsync(McpCallerTools.MessagesProcess, state.Success, token))).Value, state.Receipt);
+        await LocalProcessingLateR53Current.RunAsync(state, sdk, mcp, admin, official, token);
+        await LocalProcessingLateR53Replay.RunAsync(state, sdk, mcp, admin, official, token);
     }
 }

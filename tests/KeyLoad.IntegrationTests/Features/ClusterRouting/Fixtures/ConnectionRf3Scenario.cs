@@ -178,15 +178,7 @@ internal sealed class ConnectionRf3Scenario : IAsyncDisposable
         }
         catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
         catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
-        if (localImage is not null)
-        {
-            try
-            {
-                await localImage.DisposeAsync(removeImage: failures.Count == 0).ConfigureAwait(false);
-            }
-            catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
-            catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
-        }
+        await DisposeLocalImageAsync(failures).ConfigureAwait(false);
         if (controls is not null)
         {
             if (failures.Count > 0)
@@ -200,6 +192,19 @@ internal sealed class ConnectionRf3Scenario : IAsyncDisposable
             ServerFailureObserver.Observe(() => Directory.Delete(root, recursive: true), failures);
         }
         ServerFailureObserver.ThrowIfAny(failures);
+    }
+
+    private async Task DisposeLocalImageAsync(List<Exception> failures)
+    {
+        if (localImage is not null)
+        {
+            try
+            {
+                await localImage.DisposeAsync(removeImage: failures.Count == 0).ConfigureAwait(false);
+            }
+            catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
+            catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
+        }
     }
 
     private static InvalidOperationException Missing() => new(ConnectionRf3Protocol.MissingOwner);

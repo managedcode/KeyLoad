@@ -9,7 +9,7 @@ namespace KeyLoad.IntegrationTests.Features.Messaging;
 
 internal static class DueFaultRf3Leadership
 {
-    private const string LeaderMissing = "The healthy RF3 statuses did not identify one physical leader.";
+    private const string LeaderMissing = DueFaultRf3LeaderIdentity.LeaderMissing;
 
     internal static async Task<DueFaultRf3LeaderCut> ExerciseLeaderLossAsync(DistributedApplication app,
         RequestCqrsRf3Wave wave, NodeEpochRf3Profile profile, DueFaultRf3Seed seed,
@@ -99,21 +99,7 @@ internal static class DueFaultRf3Leadership
 
     private static bool HasReplacementLeader(ManagedCode.Communication.Result<NodeStatus> first,
         ManagedCode.Communication.Result<NodeStatus> second, DueFaultRf3LeaderCut cut, out string leader)
-    {
-        leader = string.Empty;
-        if (!first.IsSuccess || !second.IsSuccess || first.Value is not { RoutingReady: true, Voters: 3 } a
-            || second.Value is not { RoutingReady: true, Voters: 3 } b || a.Leader is null
-            || a.Leader != b.Leader || a.Leader == VoterOrigin(cut.LeaderNode))
-        {
-            return false;
-        }
-        if (!cut.Survivors.Any(name => VoterOrigin(name) == a.Leader))
-        {
-            return false;
-        }
-        leader = a.Leader;
-        return true;
-    }
+        => DueFaultRf3LeaderIdentity.HasReplacementLeader(first, second, cut, out leader);
 
     private static async Task AssertSnapshotMatchesAsync(NodeEpochRf3Callers callers, string nodeName,
         NodeStatus status, CancellationToken cancellationToken)
@@ -198,29 +184,11 @@ internal static class DueFaultRf3Leadership
     }
 
     private static NodeEpochRf3NodeObservation FindLeader(IReadOnlyList<NodeEpochRf3NodeObservation> nodes)
-    {
-        var leaders = nodes.Select(value => value.Status.Leader).Where(value => value is not null)
-            .Distinct(StringComparer.Ordinal).ToArray();
-        if (leaders.Length != 1)
-        {
-            throw new InvalidOperationException(LeaderMissing);
-        }
-        if (nodes.Any(node => node.Status.Leader != leaders[0]))
-        {
-            throw new InvalidOperationException(LeaderMissing);
-        }
-        return nodes.Single(value => value.Admin.LocalVoter == leaders[0]);
-    }
+        => DueFaultRf3LeaderIdentity.FindLeader(nodes);
 
     private static string OriginalAddress(IReadOnlyList<ReplicaSiloDiscovery> values, string? voter)
         => values.Single(value => value.VoterId == voter).SiloAddress;
 
-    private static string VoterOrigin(string node) => node switch
-    {
-        RequestCqrsRf3Protocol.Node1 => "http://node1:8080",
-        RequestCqrsRf3Protocol.Node2 => "http://node2:8080",
-        RequestCqrsRf3Protocol.Node3 => "http://node3:8080",
-        _ => throw new ArgumentOutOfRangeException(nameof(node))
-    };
+    private static string VoterOrigin(string node) => DueFaultRf3LeaderIdentity.VoterOrigin(node);
 
 }

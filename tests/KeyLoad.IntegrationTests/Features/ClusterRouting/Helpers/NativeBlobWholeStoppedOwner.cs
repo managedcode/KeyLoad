@@ -55,25 +55,7 @@ internal static class NativeBlobWholeStoppedOwner
             {
                 throw Errors.Fail(ErrorCode.TokenInvalidated, "The stopped original Blob journal authority does not match its canonical owner.");
             }
-            var budget = new C1SubmissionJournalInspectionReadBudget(token);
-            var limits = new DatabaseLimits();
-            limits.Validate();
-            var rows = NativeBlobWholeRows.Read(openedCanonical, limits.MaxScanRecords, budget, token);
-            var journalRows = NativeBlobWholeRows.Read(openedReplica, limits.MaxScanRecords, budget, token);
-            var catalog = NativeSerialization.Deserialize<PhysicalShardCatalog>(NativeBlobWholeRows.Required(rows.Rows,
-                PhysicalShardCatalogRecordSerialization.CatalogKey(), budget));
-            if (!NativeBlobWireShape.Same(tuple, catalog.DefaultShard))
-            {
-                throw Errors.Fail(ErrorCode.TokenInvalidated, "The stopped native Blob catalog is not the original configured physical owner.");
-            }
-            var applied = NativeSerialization.Deserialize<long>(NativeBlobWholeRows.Required(rows.Rows, KeySpace.AppliedBytes, budget));
-            using var inspection = C1SubmissionJournalInspectionDatabase.Open(openedCanonical, budget, token);
-            var database = inspection.Database;
-            var configuration = new ReplicaConfiguration(owner.VoterId, [.. voters], resolved.Directory, owner.Incarnation);
-            configuration.Validate();
-            var journal = NativeBlobWholeJournal.Read(journalRows.Rows, configuration, database, applied, budget, token);
-            result = new(owner, originalCanonicalNodeId, actualReplica.NodeId, rows.Position,
-                journalRows.Position, rows.Rows, journalRows.Rows, applied, journal.State, journal.Entries);
+            result = ReadStoppedCut(owner, originalCanonicalNodeId, tuple, voters, openedCanonical, resolved, openedReplica, actualReplica, token);
         }, failures);
         if (replica is { } journalOwner)
         {
@@ -85,5 +67,30 @@ internal static class NativeBlobWholeStoppedOwner
         }
         ServerFailureObserver.ThrowIfAny(failures);
         return result ?? throw new InvalidOperationException("The complete stopped original Blob cut is absent.");
+    }
+
+    private static NativeBlobWholeOwnerCut ReadStoppedCut(ReplicaSiloDiscovery owner, Guid originalCanonicalNodeId, NativeBlobWireOwnerTuple tuple, string[] voters, ZoneTreeStore openedCanonical, ZoneTreeStoreOptions resolved, ZoneTreeStore openedReplica, Storage.StoreIdentity actualReplica, CancellationToken token)
+    {
+        NativeBlobWholeOwnerCut result;
+        var budget = new C1SubmissionJournalInspectionReadBudget(token);
+        var limits = new DatabaseLimits();
+        limits.Validate();
+        var rows = NativeBlobWholeRows.Read(openedCanonical, limits.MaxScanRecords, budget, token);
+        var journalRows = NativeBlobWholeRows.Read(openedReplica, limits.MaxScanRecords, budget, token);
+        var catalog = NativeSerialization.Deserialize<PhysicalShardCatalog>(NativeBlobWholeRows.Required(rows.Rows,
+            PhysicalShardCatalogRecordSerialization.CatalogKey(), budget));
+        if (!NativeBlobWireShape.Same(tuple, catalog.DefaultShard))
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, "The stopped native Blob catalog is not the original configured physical owner.");
+        }
+        var applied = NativeSerialization.Deserialize<long>(NativeBlobWholeRows.Required(rows.Rows, KeySpace.AppliedBytes, budget));
+        using var inspection = C1SubmissionJournalInspectionDatabase.Open(openedCanonical, budget, token);
+        var database = inspection.Database;
+        var configuration = new ReplicaConfiguration(owner.VoterId, [.. voters], resolved.Directory, owner.Incarnation);
+        configuration.Validate();
+        var journal = NativeBlobWholeJournal.Read(journalRows.Rows, configuration, database, applied, budget, token);
+        result = new(owner, originalCanonicalNodeId, actualReplica.NodeId, rows.Position,
+            journalRows.Position, rows.Rows, journalRows.Rows, applied, journal.State, journal.Entries);
+        return result;
     }
 }

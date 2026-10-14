@@ -19,14 +19,12 @@ internal sealed record ProductionSourceManifestProcessResult(
 
 internal static class ProductionSourceManifestProcess
 {
-    private const string PowerShellCommand = "pwsh";
-    private const string ScriptRelativePath = "scripts/Features/CodeQuality/functional-coverage.production-source-manifest.ps1";
-    private const string Failure = "The native source-manifest producer process failed.";
+    internal const string Failure = "The native source-manifest producer process failed.";
     private const string DeadlineFailure = "The native source-manifest producer exceeded its operation deadline.";
     private const int FirstCapturedStreamIndex = 0;
     private const int SecondCapturedStreamIndex = 1;
 
-    internal static string RepositoryRoot => FindRepositoryRoot();
+    internal static string RepositoryRoot => ProductionSourceManifestProcessStart.RepositoryRoot;
 
     internal static IOptions<TestExecutionOptions> CaptureExecutionOptions()
     {
@@ -49,7 +47,7 @@ internal static class ProductionSourceManifestProcess
         ArgumentNullException.ThrowIfNull(evidenceRoot);
         ArgumentNullException.ThrowIfNull(timeProvider);
         cancellationToken.ThrowIfCancellationRequested();
-        return RunAsync(executionOptions, CreateStartInfo(mode, evidenceRoot), timeProvider, cancellationToken);
+        return RunAsync(executionOptions, ProductionSourceManifestProcessStart.CreateStartInfo(mode, evidenceRoot), timeProvider, cancellationToken);
     }
 
     internal static Task<ProductionSourceManifestProcessResult> RunAsync(
@@ -165,31 +163,6 @@ internal static class ProductionSourceManifestProcess
         }
     }
 
-    private static ProcessStartInfo CreateStartInfo(string mode, string evidenceRoot)
-    {
-        var root = RepositoryRoot;
-        var start = new ProcessStartInfo(PowerShellCommand)
-        {
-            WorkingDirectory = root,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            UseShellExecute = false,
-            CreateNoWindow = true
-        };
-        start.ArgumentList.Add("-NoLogo");
-        start.ArgumentList.Add("-NoProfile");
-        start.ArgumentList.Add("-NonInteractive");
-        start.ArgumentList.Add("-File");
-        start.ArgumentList.Add(Path.Combine(root, ScriptRelativePath));
-        start.ArgumentList.Add("-Mode");
-        start.ArgumentList.Add(mode);
-        start.ArgumentList.Add("-Root");
-        start.ArgumentList.Add(root);
-        start.ArgumentList.Add("-EvidenceRoot");
-        start.ArgumentList.Add(evidenceRoot);
-        return start;
-    }
-
     private static async Task<string> ReadBoundedAsync(StreamReader reader, int maximumCharacters)
     {
         var output = new StringBuilder();
@@ -217,16 +190,4 @@ internal static class ProductionSourceManifestProcess
         }
     }
 
-    private static string FindRepositoryRoot()
-    {
-        for (var directory = new DirectoryInfo(AppContext.BaseDirectory); directory is not null; directory = directory.Parent)
-        {
-            if (File.Exists(Path.Combine(directory.FullName, "KeyLoad.slnx")) &&
-                File.Exists(Path.Combine(directory.FullName, ScriptRelativePath)))
-            {
-                return directory.FullName;
-            }
-        }
-        throw new DirectoryNotFoundException(Failure);
-    }
 }

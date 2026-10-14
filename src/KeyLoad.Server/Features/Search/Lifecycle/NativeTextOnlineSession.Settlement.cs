@@ -26,38 +26,10 @@ internal sealed partial class NativeTextOnlineSession
 
     internal async Task CloseCommandAdmissionAndJoinAsync()
     {
-        var originalPublication = Publication.CloseAdmissionAndCaptureOriginal();
-        var checkpoint = CheckpointWork;
-        var originalCheckpoint = checkpoint?.Work.CloseAdmissionAndCaptureOriginal();
-        var failures = new List<Exception>();
-        if (originalCheckpoint is not null)
-        {
-            await ServerFailureObserver.ObserveAsync(async () =>
-            {
-                var actual = await originalCheckpoint.ConfigureAwait(false);
-                _ = checkpoint!.RequireReceipt(actual);
-            }, failures).ConfigureAwait(false);
-        }
-        if (originalPublication is not null)
-        {
-            await ServerFailureObserver.ObserveAsync(async () =>
-            {
-                var actual = await originalPublication.ConfigureAwait(false);
-                RequirePublicationReceipt(actual);
-            }, failures).ConfigureAwait(false);
-        }
-        ServerFailureObserver.ThrowIfAny(failures);
+        await NativeTextOnlineSessionWork.JoinAsync(this, RequirePublicationReceipt).ConfigureAwait(false);
         commandsJoined = true;
     }
 
     private void RequirePublicationReceipt(OperationResult original)
-    {
-        var actual = original.Get<OnlineTextIndexMaintenanceResult>();
-        if (expectedPublication is null || actual.CommandId != Request.CommandId
-            || !expectedPublication.AsSpan().SequenceEqual(NativeSerialization.Serialize(actual)))
-        {
-            throw NativeTextErrors.Corrupt();
-        }
-        JoinedPublicationReceipt = actual;
-    }
+        => JoinedPublicationReceipt = NativeTextOnlineSessionWork.RequireReceipt(original, ref expectedPublication, Request.CommandId);
 }

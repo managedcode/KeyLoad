@@ -184,35 +184,13 @@ internal sealed class SampleChunkCoordinatorGrain(IDurableStateManager state,
         throw Errors.Fail(result.Error ?? ErrorCode.RecoveryRequired, SampleChunkJobProtocol.Unresolved);
     }
 
-    private async Task RetireSettledAsync(CancellationToken token)
-    {
-        foreach (var entry in admissions.ToDictionary())
-        {
-            SampleChunkWorkHint? current;
-            try
-            {
-                current = SampleChunkWorkRead.Current(database, entry.Value.Hint, token);
-            }
-            catch (KeyLoadException failure) when (failure.Code is ErrorCode.Unauthenticated or ErrorCode.PermissionDenied)
-            {
-                continue;
-            }
-            if (current is null || current.Revision != entry.Value.Hint.Revision
-                || entry.Value.BlockedPolicyEpoch is { } epoch && current.CreatorPolicyEpoch != epoch)
-            {
-                await RemoveAsync(entry.Key, token).ConfigureAwait(true);
-            }
-        }
-    }
+    private Task RetireSettledAsync(CancellationToken token)
+        => SampleChunkAdmissionTransitions.RetireSettledAsync(database, () => admissions.ToDictionary(),
+            RemoveAsync, token);
 
     private Task BlockAsync(SampleChunkJobAdmission original, string jobId, ErrorCode code, CancellationToken token)
     {
-        admissions[original.Hint.CommandId] = original with
-        {
-            JobId = jobId,
-            BlockedPolicyEpoch = original.Hint.CreatorPolicyEpoch,
-            SettledError = code
-        };
+        admissions[original.Hint.CommandId] = SampleChunkAdmissionTransitions.Blocked(original, jobId, code);
         return PersistAsync(token);
     }
 

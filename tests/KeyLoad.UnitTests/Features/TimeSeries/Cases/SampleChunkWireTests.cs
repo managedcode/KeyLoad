@@ -1,4 +1,3 @@
-using KeyLoad.Core.Features.TimeSeries;
 using KeyLoad.Features.InternalSerialization;
 using KeyLoad.UnitTests.Features.InternalSerialization;
 
@@ -11,10 +10,10 @@ internal sealed class SampleChunkWireTests
     [Test]
     public async Task AcChunk004ChecksumMismatchAndUnsupportedChunkVersionHaveExactErrors()
     {
-        var payload = SampleChunkTestData.Payload(Encoded(SampleChunkTestData.FixedRecords()));
+        var payload = SampleChunkTestData.Payload(SampleChunkWireCodecAssertions.Encoded(SampleChunkTestData.FixedRecords()));
         var badChecksum = payload.Checksum.ToArray();
         badChecksum[0] ^= 1;
-        var checksumFailure = DecodeFailure(SampleChunkTestData.Serialize(payload with
+        var checksumFailure = SampleChunkWireCodecAssertions.DecodeFailure(SampleChunkTestData.Serialize(payload with
         {
             Checksum = badChecksum
         }));
@@ -22,7 +21,7 @@ internal sealed class SampleChunkWireTests
         {
             FormatVersion = payload.FormatVersion + 1
         };
-        var versionFailure = DecodeFailure(SampleChunkTestData.Rechecksum(unknownPayload));
+        var versionFailure = SampleChunkWireCodecAssertions.DecodeFailure(SampleChunkTestData.Rechecksum(unknownPayload));
 
         await Assert.That(checksumFailure.Code).IsEqualTo(ErrorCode.Corruption);
         await Assert.That(versionFailure.Code).IsEqualTo(ErrorCode.FormatUnsupported);
@@ -32,15 +31,15 @@ internal sealed class SampleChunkWireTests
     [Test]
     public async Task AcChunk004NativeEnvelopeTruncationTrailingBytesAndUnknownVersionFailClosed()
     {
-        var encoded = Encoded(SampleChunkTestData.FixedRecords());
+        var encoded = SampleChunkWireCodecAssertions.Encoded(SampleChunkTestData.FixedRecords());
         var truncated = encoded[..^1];
         var trailing = encoded.Append((byte)0).ToArray();
         using var serializer = new NativeSerializerFixture();
         var payload = SampleChunkTestData.Payload(encoded);
         var unknownVersion = serializer.Encode(payload, NativePayloadVersion.Current + 1);
-        var truncatedFailure = DecodeFailure(truncated);
-        var trailingFailure = DecodeFailure(trailing);
-        var versionFailure = DecodeFailure(unknownVersion);
+        var truncatedFailure = SampleChunkWireCodecAssertions.DecodeFailure(truncated);
+        var trailingFailure = SampleChunkWireCodecAssertions.DecodeFailure(trailing);
+        var versionFailure = SampleChunkWireCodecAssertions.DecodeFailure(unknownVersion);
 
         await Assert.That(truncatedFailure.Code).IsEqualTo(ErrorCode.Corruption);
         await Assert.That(trailingFailure.Code).IsEqualTo(ErrorCode.Corruption);
@@ -51,7 +50,7 @@ internal sealed class SampleChunkWireTests
     public async Task AcChunk004InvalidTimestampOffsetSequenceAndValueRejectWithValidChecksum()
     {
         var single = SampleChunkTestData.Row("wire-one", DateTimeOffset.UnixEpoch, 1, 1d, "{}");
-        var onePayload = SampleChunkTestData.Payload(Encoded([single]));
+        var onePayload = SampleChunkTestData.Payload(SampleChunkWireCodecAssertions.Encoded([single]));
         var badOffset = onePayload with
         {
             Offsets = SampleChunkWireData.Memory([0x49, 0x03])
@@ -65,22 +64,22 @@ internal sealed class SampleChunkWireTests
         {
             UtcTicks = beyondUtcRange
         };
-        var offsetFailure = DecodeFailure(SampleChunkTestData.Rechecksum(badOffset));
-        var offsetShapeFailure = DecodeFailure(SampleChunkTestData.Rechecksum(badOffsetShape));
-        var timestampFailure = DecodeFailure(SampleChunkTestData.Rechecksum(badTimestamp));
+        var offsetFailure = SampleChunkWireCodecAssertions.DecodeFailure(SampleChunkTestData.Rechecksum(badOffset));
+        var offsetShapeFailure = SampleChunkWireCodecAssertions.DecodeFailure(SampleChunkTestData.Rechecksum(badOffsetShape));
+        var timestampFailure = SampleChunkWireCodecAssertions.DecodeFailure(SampleChunkTestData.Rechecksum(badTimestamp));
 
         var pair = SampleChunkTestData.SeededRecords(2);
-        var pairPayload = SampleChunkTestData.Payload(Encoded(pair));
+        var pairPayload = SampleChunkTestData.Payload(SampleChunkWireCodecAssertions.Encoded(pair));
         var overflowSequences = new byte[10];
         Array.Fill(overflowSequences, byte.MaxValue, 0, 8);
         overflowSequences[8] = 0x7F;
         overflowSequences[9] = 0x02;
-        var sequenceFailure = DecodeFailure(SampleChunkTestData.Rechecksum(pairPayload with
+        var sequenceFailure = SampleChunkWireCodecAssertions.DecodeFailure(SampleChunkTestData.Rechecksum(pairPayload with
         {
             Sequences = overflowSequences
         }));
         var infinity = SampleChunkWireData.Uleb(0x7FF0_0000_0000_0000UL);
-        var valueFailure = DecodeFailure(SampleChunkTestData.Rechecksum(onePayload with
+        var valueFailure = SampleChunkWireCodecAssertions.DecodeFailure(SampleChunkTestData.Rechecksum(onePayload with
         {
             Values = infinity
         }));
@@ -96,25 +95,25 @@ internal sealed class SampleChunkWireTests
     public async Task AcChunk004NonMinimalVarintAndTupleOrderRejectWithValidChecksum()
     {
         var single = SampleChunkTestData.Row("wire-varint", DateTimeOffset.UnixEpoch, 1, 1d, "{}");
-        var payload = SampleChunkTestData.Payload(Encoded([single]));
+        var payload = SampleChunkTestData.Payload(SampleChunkWireCodecAssertions.Encoded([single]));
         var nonminimal = payload with
         {
             UtcTicks = SampleChunkWireData.Memory(SampleChunkWireData.MakeNonMinimal(payload.UtcTicks.Span))
         };
-        var nonminimalFailure = DecodeFailure(SampleChunkTestData.Rechecksum(nonminimal));
+        var nonminimalFailure = SampleChunkWireCodecAssertions.DecodeFailure(SampleChunkTestData.Rechecksum(nonminimal));
 
         var decreasing = new[]
         {
             SampleChunkTestData.Row("wire-first", DateTimeOffset.UnixEpoch, 2, 1d, "{}"),
             SampleChunkTestData.Row("wire-second", DateTimeOffset.UnixEpoch.AddTicks(1), 1, 2d, "{}")
         };
-        var orderedPayload = SampleChunkTestData.Payload(Encoded(decreasing));
+        var orderedPayload = SampleChunkTestData.Payload(SampleChunkWireCodecAssertions.Encoded(decreasing));
         var equalTicks = SampleChunkWireData.Uleb((ulong)DateTimeOffset.UnixEpoch.UtcTicks).Append((byte)0).ToArray();
         var equalTimestamps = orderedPayload with
         {
             UtcTicks = SampleChunkWireData.Memory(equalTicks)
         };
-        var orderFailure = DecodeFailure(SampleChunkTestData.Rechecksum(equalTimestamps));
+        var orderFailure = SampleChunkWireCodecAssertions.DecodeFailure(SampleChunkTestData.Rechecksum(equalTimestamps));
 
         await Assert.That(nonminimalFailure.Code).IsEqualTo(ErrorCode.Corruption);
         await Assert.That(orderFailure.Code).IsEqualTo(ErrorCode.Corruption);
@@ -123,7 +122,7 @@ internal sealed class SampleChunkWireTests
     [Test]
     public async Task AcChunk004InvalidUtf8AndUnneededUtf16FallbackRejectWithValidChecksum()
     {
-        var payload = SampleChunkTestData.Payload(Encoded(
+        var payload = SampleChunkTestData.Payload(SampleChunkWireCodecAssertions.Encoded(
             [SampleChunkTestData.Row("wire-text", DateTimeOffset.UnixEpoch, 1, 1d, "{}")]));
         var invalidUtf8 = payload with
         {
@@ -133,8 +132,8 @@ internal sealed class SampleChunkWireTests
         {
             Series = SampleChunkWireData.Memory([0x05, 0x61, 0x62])
         };
-        var invalidFailure = DecodeFailure(SampleChunkTestData.Rechecksum(invalidUtf8));
-        var fallbackFailure = DecodeFailure(SampleChunkTestData.Rechecksum(unnecessaryUtf16));
+        var invalidFailure = SampleChunkWireCodecAssertions.DecodeFailure(SampleChunkTestData.Rechecksum(invalidUtf8));
+        var fallbackFailure = SampleChunkWireCodecAssertions.DecodeFailure(SampleChunkTestData.Rechecksum(unnecessaryUtf16));
 
         await Assert.That(invalidFailure.Code).IsEqualTo(ErrorCode.Corruption);
         await Assert.That(fallbackFailure.Code).IsEqualTo(ErrorCode.Corruption);
@@ -144,7 +143,7 @@ internal sealed class SampleChunkWireTests
     public async Task AcChunk004EmptySeriesEventAndTagTextRejectWithValidChecksum()
     {
         var row = SampleChunkTestData.Row("wire-empty", DateTimeOffset.UnixEpoch, 1, 1d, "{}");
-        var payload = SampleChunkTestData.Payload(Encoded([row]));
+        var payload = SampleChunkTestData.Payload(SampleChunkWireCodecAssertions.Encoded([row]));
         var emptySeries = payload with
         {
             Series = SampleChunkWireData.Memory([0])
@@ -157,9 +156,9 @@ internal sealed class SampleChunkWireTests
         {
             Tags = SampleChunkWireData.Memory([1, 0, 0])
         };
-        var seriesFailure = DecodeFailure(SampleChunkTestData.Rechecksum(emptySeries));
-        var eventFailure = DecodeFailure(SampleChunkTestData.Rechecksum(emptyEvent));
-        var tagFailure = DecodeFailure(SampleChunkTestData.Rechecksum(emptyTag));
+        var seriesFailure = SampleChunkWireCodecAssertions.DecodeFailure(SampleChunkTestData.Rechecksum(emptySeries));
+        var eventFailure = SampleChunkWireCodecAssertions.DecodeFailure(SampleChunkTestData.Rechecksum(emptyEvent));
+        var tagFailure = SampleChunkWireCodecAssertions.DecodeFailure(SampleChunkTestData.Rechecksum(emptyTag));
 
         await Assert.That(seriesFailure.Code).IsEqualTo(ErrorCode.Corruption);
         await Assert.That(eventFailure.Code).IsEqualTo(ErrorCode.Corruption);
@@ -171,7 +170,7 @@ internal sealed class SampleChunkWireTests
     {
         var unreferencedTags = SampleChunkWireData.TagDictionaryWithUnreferencedEntry();
         var pair = SampleChunkTestData.SeededRecords(2);
-        var pairPayload = SampleChunkTestData.Payload(Encoded(pair));
+        var pairPayload = SampleChunkTestData.Payload(SampleChunkWireCodecAssertions.Encoded(pair));
         var badDictionary = pairPayload with
         {
             Tags = unreferencedTags
@@ -202,13 +201,13 @@ internal sealed class SampleChunkWireTests
         {
             RecordCount = pairPayload.RecordCount - 1
         };
-        var dictionaryFailure = DecodeFailure(SampleChunkTestData.Rechecksum(badDictionary));
-        var duplicateFailure = DecodeFailure(SampleChunkTestData.Rechecksum(duplicateDictionary));
-        var dictionaryOrderFailure = DecodeFailure(SampleChunkTestData.Rechecksum(outOfOrderDictionary));
-        var trailingFailure = DecodeFailure(SampleChunkTestData.Rechecksum(extraSeriesByte));
-        var truncatedFailure = DecodeFailure(SampleChunkTestData.Rechecksum(truncatedSeries));
-        var indexFailure = DecodeFailure(SampleChunkTestData.Rechecksum(invalidIndex));
-        var countFailure = DecodeFailure(SampleChunkTestData.Rechecksum(badCount));
+        var dictionaryFailure = SampleChunkWireCodecAssertions.DecodeFailure(SampleChunkTestData.Rechecksum(badDictionary));
+        var duplicateFailure = SampleChunkWireCodecAssertions.DecodeFailure(SampleChunkTestData.Rechecksum(duplicateDictionary));
+        var dictionaryOrderFailure = SampleChunkWireCodecAssertions.DecodeFailure(SampleChunkTestData.Rechecksum(outOfOrderDictionary));
+        var trailingFailure = SampleChunkWireCodecAssertions.DecodeFailure(SampleChunkTestData.Rechecksum(extraSeriesByte));
+        var truncatedFailure = SampleChunkWireCodecAssertions.DecodeFailure(SampleChunkTestData.Rechecksum(truncatedSeries));
+        var indexFailure = SampleChunkWireCodecAssertions.DecodeFailure(SampleChunkTestData.Rechecksum(invalidIndex));
+        var countFailure = SampleChunkWireCodecAssertions.DecodeFailure(SampleChunkTestData.Rechecksum(badCount));
 
         await Assert.That(dictionaryFailure.Code).IsEqualTo(ErrorCode.Corruption);
         await Assert.That(duplicateFailure.Code).IsEqualTo(ErrorCode.Corruption);
@@ -218,12 +217,5 @@ internal sealed class SampleChunkWireTests
         await Assert.That(indexFailure.Code).IsEqualTo(ErrorCode.Corruption);
         await Assert.That(countFailure.Code).IsEqualTo(ErrorCode.Corruption);
     }
-
-    private static byte[] Encoded(SampleRecord[] records)
-        => SampleChunkCodec.Encode(records, SampleChunkTestData.Budget(), UnitExecutionOptions.TimeSeriesExecution());
-
-    private static KeyLoadException DecodeFailure(byte[] bytes)
-        => Assert.ThrowsExactly<KeyLoadException>(() => SampleChunkCodec.Decode(bytes,
-            SampleChunkTestData.ChargedDecodeBudget(bytes), UnitExecutionOptions.TimeSeriesExecution()));
 
 }

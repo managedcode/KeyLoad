@@ -52,12 +52,7 @@ internal sealed class ReplicaDiscoveryExchange(IOptions<ReplicaConfiguration> co
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaTransportProtocol.InvalidDiscovery);
         }
-        if (probe?.Received is { } transform)
-        {
-            received = transform(request, received, token)
-            ?? throw Errors.Fail(ErrorCode.Unauthenticated, ReplicaTransportProtocol.InvalidDiscovery);
-        }
-        token.ThrowIfCancellationRequested();
+        received = TransformReceivedReply(request, received, token);
         var reply = authentication.VerifyNativeDiscoveryReply(request, received);
         if (!membership.IsCurrent(voterId, address))
         {
@@ -81,6 +76,17 @@ internal sealed class ReplicaDiscoveryExchange(IOptions<ReplicaConfiguration> co
             throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaTransportProtocol.InvalidDiscovery);
         }
         return observation;
+    }
+
+    private ReplicaNativeDiscoveryReply TransformReceivedReply(ReplicaNativeDiscoveryRequest request, ReplicaNativeDiscoveryReply received, CancellationToken token)
+    {
+        if (probe?.Received is { } transform)
+        {
+            received = transform(request, received, token)
+            ?? throw Errors.Fail(ErrorCode.Unauthenticated, ReplicaTransportProtocol.InvalidDiscovery);
+        }
+        token.ThrowIfCancellationRequested();
+        return received;
     }
 
     public void Dispose() => Volatile.Write(ref disposed, Closed);

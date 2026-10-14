@@ -52,7 +52,10 @@ internal sealed class NativeTextOnlineGeneration(string root, OnlineTextCurrentP
                 }
                 throw;
             }
-            finally { retained?.Dispose(); }
+            finally
+            {
+                retained?.Dispose();
+            }
         }
         catch (Exception cleanup)
         {
@@ -133,7 +136,11 @@ internal sealed class NativeTextOnlineGeneration(string root, OnlineTextCurrentP
                     readers[reader] = (original.Pin, original.Grant, true);
                 }
             }
-            catch (Exception primary) { RetainReaderFailure(primary); throw; }
+            catch (Exception primary)
+            {
+                RetainReaderFailure(primary);
+                throw;
+            }
             CompleteReader(reader);
         }
     }
@@ -152,13 +159,7 @@ internal sealed class NativeTextOnlineGeneration(string root, OnlineTextCurrentP
     {
         lock (gate)
         {
-            budget.Check();
-            if (retiring || retired)
-            {
-                throw NativeTextErrors.Ownership();
-            }
-            pins++;
-            return new(this);
+            return NativeTextGenerationRetirement.Pin(this, budget, ref retiring, ref retired, ref pins);
         }
     }
 
@@ -177,15 +178,7 @@ internal sealed class NativeTextOnlineGeneration(string root, OnlineTextCurrentP
     {
         lock (gate)
         {
-            if (pins <= NoReaderPins)
-            {
-                throw NativeTextErrors.Ownership();
-            }
-            pins--;
-            if (pins == NoReaderPins)
-            {
-                quiet?.TrySetResult();
-            }
+            NativeTextGenerationRetirement.ReleasePin(ref pins, ref quiet);
         }
     }
 
@@ -193,11 +186,7 @@ internal sealed class NativeTextOnlineGeneration(string root, OnlineTextCurrentP
     {
         lock (gate)
         {
-            if (reservation is not null || retiring || retired)
-            {
-                throw NativeTextErrors.Ownership();
-            }
-            reservation = originalReservation;
+            NativeTextGenerationRetirement.Adopt(originalReservation, retiring, retired, ref reservation);
         }
     }
 
@@ -205,12 +194,7 @@ internal sealed class NativeTextOnlineGeneration(string root, OnlineTextCurrentP
     {
         lock (gate)
         {
-            if (!retired || pins != NoReaderPins)
-            {
-                throw NativeTextErrors.Ownership();
-            }
-            reservation?.CompleteAfterJoinedCleanup();
-            reservation = null;
+            NativeTextGenerationRetirement.Release(retired, pins, ref reservation);
         }
     }
 
@@ -218,17 +202,7 @@ internal sealed class NativeTextOnlineGeneration(string root, OnlineTextCurrentP
     {
         lock (gate)
         {
-            retiring = true;
-            if (readerFailure is not null)
-            {
-                return Task.FromException(readerFailure);
-            }
-            if (pins == NoReaderPins)
-            {
-                return Task.CompletedTask;
-            }
-            quiet ??= new(TaskCreationOptions.RunContinuationsAsynchronously);
-            return quiet.Task;
+            return NativeTextGenerationRetirement.Mark(readerFailure, pins, ref retiring, ref quiet);
         }
     }
 
@@ -236,21 +210,7 @@ internal sealed class NativeTextOnlineGeneration(string root, OnlineTextCurrentP
     {
         lock (gate)
         {
-            if (retired)
-            {
-                return;
-            }
-            if (readerFailure is not null)
-            {
-                throw new AggregateException(readerFailure);
-            }
-            if (!retiring || pins != NoReaderPins || (readers?.Count ?? NoReaderPins) != NoReaderPins)
-            {
-                throw NativeTextErrors.Ownership();
-            }
-            index.RequireSettled();
-            index.Dispose();
-            retired = true;
+            NativeTextGenerationRetirement.Dispose(index, readerFailure, retiring, pins, readers?.Count ?? NoReaderPins, ref retired);
         }
     }
 

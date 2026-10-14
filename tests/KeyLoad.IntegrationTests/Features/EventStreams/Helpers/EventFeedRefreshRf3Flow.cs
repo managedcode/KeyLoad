@@ -24,11 +24,7 @@ internal static class EventFeedRefreshRf3Flow
             Cursor = empty.Cursor
         };
         var refreshed = await EventFeedRefreshRf3Operations.RoutesAsync(wave, credential, refresh, token).ConfigureAwait(false);
-        await EventFeedSettlementRf3Assertions.ResultAsync(refresh with
-        {
-            ExpectedCoverageGeneration = checked(empty.CoverageGeneration + Step)
-        }, refreshed,
-            checked(empty.Revision + Step), released: false).ConfigureAwait(false);
+        await RequireRefreshedAsync(refresh, refreshed, empty).ConfigureAwait(false);
         var offered = await EventFeedOfferRf3Flow.RunAsync(wave, credential, opened, refreshed,
             opened.ControlPartition, remote, First, Second, token).ConfigureAwait(false);
         await EventFeedRefreshRf3Operations.RefusedAsync(wave, credential, refresh with
@@ -56,11 +52,7 @@ internal static class EventFeedRefreshRf3Flow
             Cursor = acknowledged.Cursor
         };
         var current = await EventFeedRefreshRf3Operations.RoutesAsync(wave, credential, next, token).ConfigureAwait(false);
-        await EventFeedSettlementRf3Assertions.ResultAsync(next with
-        {
-            ExpectedCoverageGeneration = checked(acknowledged.CoverageGeneration + Step)
-        }, current,
-            checked(acknowledged.Revision + Step), released: false).ConfigureAwait(false);
+        await RequireRefreshedAsync(next, current, acknowledged).ConfigureAwait(false);
         await EventFeedTailRf3Refusal.RunAsync(wave, credential, offered.Request, offered.Result,
             ErrorCode.TokenInvalidated, token).ConfigureAwait(false);
         var finalAcknowledged = await EventFeedRefreshRf3Operations.RequireAcknowledgedAsync(wave, credential, opened, current,
@@ -106,4 +98,11 @@ internal static class EventFeedRefreshRf3Flow
             remote, Topic, Second, token).ConfigureAwait(false);
         return (opened, empty);
     }
+
+    private static Task RequireRefreshedAsync(EventFeedControlRequest request,
+        EventFeedControlResult actual, EventFeedControlResult previous)
+        => EventFeedSettlementRf3Assertions.ResultAsync(request with
+        {
+            ExpectedCoverageGeneration = checked(previous.CoverageGeneration + Step)
+        }, actual, checked(previous.Revision + Step), released: false);
 }

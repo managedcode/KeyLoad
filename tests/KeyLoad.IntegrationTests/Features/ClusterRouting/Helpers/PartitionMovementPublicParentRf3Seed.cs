@@ -47,9 +47,6 @@ internal sealed class PartitionMovementPublicParentRf3Seed : IAsyncDisposable
     internal IReadOnlyList<(CommandRequest Command, CommitReceipt Receipt)> Originals => originals;
     internal PartitionMovementPublicParentRf3ModelCut OriginalModels { get; private set; } = null!;
     internal BlobMetadata Blob { get; private set; } = null!;
-    private const int OriginalPartCount = 2;
-    private const int OriginalFirstPart = 0;
-    private const int OriginalTailPart = 1;
 
     internal PartitionMovementPublicParentRf3BlobOriginals BlobOriginals { get; private set; } = null!;
     internal static byte[] BlobRange => [0x41, 0x41, 0x42, 0x42];
@@ -157,45 +154,9 @@ internal sealed class PartitionMovementPublicParentRf3Seed : IAsyncDisposable
 
     private async Task BlobAsync(CancellationToken cancellationToken)
     {
-        var blob = new BlobRef(Partition, RelationalSqlRf3Tokens.Blobs, "parent-native-parts");
-        var upload = Guid.NewGuid();
-        var begin = new BeginBlobUploadRequest(Guid.NewGuid(), blob, upload, BlobLimits.RawPartBytes + BlobRange.Length, 0);
-        var begun = await McpCallerAssertions.SdkSuccessAsync(await Source.BeginBlobUploadAsync(begin, cancellationToken));
-        blobReplays.Add(async token =>
-        {
-            await SqlRf3Protocol.EqualAsync(begun, await McpCallerAssertions.SdkSuccessAsync(await Source.BeginBlobUploadAsync(begin, token)));
-            await SqlRf3Protocol.EqualAsync(begun, (await McpCallerAssertions.SuccessAsync<BlobCommitResult<BlobUploadInfo>>(
-                await Official.CallAsync("keyload_blobs_begin_upload", begin, token))).Value);
-        });
-        var firstBytes = new byte[BlobLimits.RawPartBytes];
-        Array.Fill(firstBytes, (byte)0x41);
-        var first = new WriteBlobPartRequest(Guid.NewGuid(), blob, upload, 0, firstBytes, BlobIntegrity.PartHash(firstBytes));
-        var tailBytes = new byte[] { 0x42, 0x42, 0x42, 0x42 };
-        var tail = new WriteBlobPartRequest(Guid.NewGuid(), blob, upload, 1, tailBytes, BlobIntegrity.PartHash(tailBytes));
-        var partReceipts = new List<BlobCommitResult<BlobUploadInfo>>(OriginalPartCount);
-        foreach (var request in new[] { first, tail })
-        {
-            var receipt = await McpCallerAssertions.SdkSuccessAsync(await Source.WriteBlobPartAsync(request, cancellationToken));
-            partReceipts.Add(receipt);
-            blobReplays.Add(async token =>
-            {
-                await SqlRf3Protocol.EqualAsync(receipt, await McpCallerAssertions.SdkSuccessAsync(await Source.WriteBlobPartAsync(request, token)));
-                await SqlRf3Protocol.EqualAsync(receipt, (await McpCallerAssertions.SuccessAsync<BlobCommitResult<BlobUploadInfo>>(
-                    await Official.CallAsync("keyload_blobs_write_part", request, token))).Value);
-            });
-        }
-        var hash = BlobIntegrity.NextHash(begun.Value.IntegrityHash, first.Ordinal, first.Bytes.Length, first.Sha256);
-        hash = BlobIntegrity.NextHash(hash, tail.Ordinal, tail.Bytes.Length, tail.Sha256);
-        var complete = new CompleteBlobUploadRequest(Guid.NewGuid(), blob, upload, hash);
-        var completed = await McpCallerAssertions.SdkSuccessAsync(await Source.CompleteBlobUploadAsync(complete, cancellationToken));
-        Blob = completed.Value;
-        BlobOriginals = new(begin, begun, first, partReceipts[OriginalFirstPart], tail, partReceipts[OriginalTailPart], complete, completed);
-        blobReplays.Add(async token =>
-        {
-            await SqlRf3Protocol.EqualAsync(completed, await McpCallerAssertions.SdkSuccessAsync(await Source.CompleteBlobUploadAsync(complete, token)));
-            await SqlRf3Protocol.EqualAsync(completed, (await McpCallerAssertions.SuccessAsync<BlobCommitResult<BlobMetadata>>(
-                await Official.CallAsync("keyload_blobs_complete_upload", complete, token))).Value);
-        });
+        await PartitionMovementPublicParentRf3BlobSeed.CreateAsync(this, blobReplays,
+            metadata => Blob = metadata, originals => BlobOriginals = originals,
+            cancellationToken).ConfigureAwait(false);
     }
 
     public async ValueTask DisposeAsync()

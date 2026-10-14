@@ -8,23 +8,7 @@ internal static class ComposedProjectionLineagePolicy
 
     internal static async Task<(CommandRequest Command, CommitReceipt Receipt)> RunAsync(TestDatabase database, CancellationToken token)
     {
-        var originalResource = database.Store.Read(view => database.Database.Resource(view, database.Partition,
-            SqlQueueReferenceJoinFixture.Queue, ResourceKind.WorkQueue));
-        var resource = originalResource with
-        {
-            SchemaVersion = checked(originalResource.SchemaVersion + SchemaVersionStep),
-            FieldPolicies = [new("/to", "reference", RawReadGrant: SqlQueueReferenceJoinFixture.RefRead,
-                RawUseGrant: SqlQueueReferenceJoinFixture.RefUse), new("/score", "predicate",
-                RawReadGrant: ScoreRead, RawUseGrant: ScoreUse)]
-        };
-        var persistedResource = database.Submit(OperationKind.ConfigureResource,
-            new ConfigureResourceRequest(database.Partition.TenantId, database.Partition.DatabaseId, resource)
-            {
-                ExpectedSchemaVersion = originalResource.SchemaVersion
-            }).Get<ResourceDefinition>();
-        await Assert.That(JsonDefaults.Serialize(persistedResource).AsSpan().SequenceEqual(JsonDefaults.Serialize(resource))).IsTrue();
-        await Assert.That(JsonDefaults.Serialize(database.Store.Read(view => database.Database.Resource(view,
-            database.Partition, SqlQueueReferenceJoinFixture.Queue, ResourceKind.WorkQueue))).AsSpan().SequenceEqual(JsonDefaults.Serialize(resource))).IsTrue();
+        await ConfigureResourceAsync(database);
         var principal = new PrincipalRecord(ComposedProjectionLineageFlow.Reader, database.Partition.TenantId,
             [new(database.Partition.DatabaseId, SqlQueueReferenceJoinFixture.Queue, Capability.Query | Capability.QueueInspect),
                 new(database.Partition.DatabaseId, SqlQueueReferenceJoinFixture.Target, Capability.Query | Capability.DocumentsRead)],
@@ -83,5 +67,26 @@ internal static class ComposedProjectionLineagePolicy
             view, global::KeyLoad.Core.KeySpace.Principal(expected.Id)));
         await Assert.That(JsonDefaults.Serialize(stored).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
         return persisted;
+    }
+
+    private static async Task ConfigureResourceAsync(TestDatabase database)
+    {
+        var originalResource = database.Store.Read(view => database.Database.Resource(view, database.Partition,
+            SqlQueueReferenceJoinFixture.Queue, ResourceKind.WorkQueue));
+        var resource = originalResource with
+        {
+            SchemaVersion = checked(originalResource.SchemaVersion + SchemaVersionStep),
+            FieldPolicies = [new("/to", "reference", RawReadGrant: SqlQueueReferenceJoinFixture.RefRead,
+                RawUseGrant: SqlQueueReferenceJoinFixture.RefUse), new("/score", "predicate",
+                RawReadGrant: ScoreRead, RawUseGrant: ScoreUse)]
+        };
+        var persistedResource = database.Submit(OperationKind.ConfigureResource,
+            new ConfigureResourceRequest(database.Partition.TenantId, database.Partition.DatabaseId, resource)
+            {
+                ExpectedSchemaVersion = originalResource.SchemaVersion
+            }).Get<ResourceDefinition>();
+        await Assert.That(JsonDefaults.Serialize(persistedResource).AsSpan().SequenceEqual(JsonDefaults.Serialize(resource))).IsTrue();
+        await Assert.That(JsonDefaults.Serialize(database.Store.Read(view => database.Database.Resource(view,
+            database.Partition, SqlQueueReferenceJoinFixture.Queue, ResourceKind.WorkQueue))).AsSpan().SequenceEqual(JsonDefaults.Serialize(resource))).IsTrue();
     }
 }

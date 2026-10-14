@@ -41,7 +41,10 @@ internal sealed class ProtectedDocumentRf3SetupPeer(TwoRf3MembershipWave wave,
             using var mac = new PartitionMovementMac(sourceKey, MaximumBytes);
             request.Headers.Add(PartitionMovementProtocol.SignatureHeader, mac.Sign(body, reply: false));
         }
-        finally { CryptographicOperations.ZeroMemory(sourceKey); }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(sourceKey);
+        }
         using var response = await http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, token).ConfigureAwait(false);
         await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
         if (response.Content.Headers.ContentType?.ToString() != PartitionMovementProtocol.ContentType
@@ -52,18 +55,7 @@ internal sealed class ProtectedDocumentRf3SetupPeer(TwoRf3MembershipWave wave,
         var bytes = new byte[checked((int)response.Content.Headers.ContentLength.Value)];
         await using var stream = await response.Content.ReadAsStreamAsync(token).ConfigureAwait(false);
         await stream.ReadExactlyAsync(bytes, token).ConfigureAwait(false);
-        var signatures = response.Headers.GetValues(PartitionMovementProtocol.SignatureHeader).Take(2).ToArray();
-        var replyKey = Convert.FromBase64String(target ? wave.MovementTargetPeerKey
-            ?? throw new InvalidOperationException(PartitionMovementProtocol.InvalidProof) : wave.Profile.PeerSecret);
-        try
-        {
-            using var mac = new PartitionMovementMac(replyKey, MaximumBytes);
-            if (signatures.Length != 1 || !mac.Verify(bytes, signatures[0], reply: true))
-            {
-                throw new InvalidDataException(PartitionMovementProtocol.InvalidProof);
-            }
-        }
-        finally { CryptographicOperations.ZeroMemory(replyKey); }
+        VerifyReplyMac(response, bytes, target, outcome: false);
         var reply = NativeSerialization.Deserialize<PartitionMovementTransportReply>(bytes);
         if (reply.CommandId != proposal.CommandId || reply.Nonce != proposal.Envelope.Nonce
             || !PhysicalOwnerEntryValidation.SameOwner(reply.Receiver, receiver)
@@ -117,7 +109,10 @@ internal sealed class ProtectedDocumentRf3SetupPeer(TwoRf3MembershipWave wave,
             using var mac = new PartitionMovementMac(key, MaximumBytes);
             request.Headers.Add(PartitionMovementProtocol.SignatureHeader, mac.SignOutcome(body, reply: false));
         }
-        finally { CryptographicOperations.ZeroMemory(key); }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(key);
+        }
         using var response = await http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, token).ConfigureAwait(false);
         await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
         if (response.Content.Headers.ContentType?.ToString() != PartitionMovementProtocol.ContentType
@@ -128,19 +123,40 @@ internal sealed class ProtectedDocumentRf3SetupPeer(TwoRf3MembershipWave wave,
         var bytes = new byte[checked((int)response.Content.Headers.ContentLength.Value)];
         await using var stream = await response.Content.ReadAsStreamAsync(token).ConfigureAwait(false);
         await stream.ReadExactlyAsync(bytes, token).ConfigureAwait(false);
+        VerifyReplyMac(response, bytes, target, outcome: true);
+        var reply = NativeSerialization.Deserialize<PartitionMovementTransportReply>(bytes);
+        await RequireOutcomeReplyAsync(reply, original, query, receiver).ConfigureAwait(false);
+    }
+
+    internal PartitionMovementTransportRequest Proposal(Guid id, PartitionMovePeerEnvelope envelope,
+        PartitionMoveJournalReceipt? authorization = null, PartitionMovementTransportAction action = PartitionMovementTransportAction.Apply,
+        Guid handle = default, int ordinal = 0)
+        => new(id, envelope, authorization, Source.VoterIds[0], callerAddress, action, handle, ordinal);
+
+    private void VerifyReplyMac(HttpResponseMessage response, byte[] bytes, bool target, bool outcome)
+    {
         var signatures = response.Headers.GetValues(PartitionMovementProtocol.SignatureHeader).Take(2).ToArray();
         var replyKey = Convert.FromBase64String(target ? wave.MovementTargetPeerKey
             ?? throw new InvalidOperationException(PartitionMovementProtocol.InvalidProof) : wave.Profile.PeerSecret);
         try
         {
             using var mac = new PartitionMovementMac(replyKey, MaximumBytes);
-            if (signatures.Length != 1 || !mac.VerifyOutcome(bytes, signatures[0], reply: true))
+            if (signatures.Length != 1 || !(outcome ? mac.VerifyOutcome(bytes, signatures[0], reply: true)
+                : mac.Verify(bytes, signatures[0], reply: true)))
             {
                 throw new InvalidDataException(PartitionMovementProtocol.InvalidProof);
             }
         }
-        finally { CryptographicOperations.ZeroMemory(replyKey); }
-        var reply = NativeSerialization.Deserialize<PartitionMovementTransportReply>(bytes);
+        finally
+        {
+            CryptographicOperations.ZeroMemory(replyKey);
+        }
+    }
+
+    private static async Task RequireOutcomeReplyAsync(PartitionMovementTransportReply reply,
+        (PartitionMovementTransportRequest Proposal, byte[] Outcome) original,
+        PartitionMovementOutcomeTransportRequest query, PhysicalShardRecord receiver)
+    {
         if (reply.CommandId != original.Proposal.CommandId || reply.Nonce != query.Nonce
             || !PhysicalOwnerEntryValidation.SameOwner(reply.Receiver, receiver)
             || reply.Discovery.VoterId != receiver.VoterIds[0]
@@ -160,9 +176,4 @@ internal sealed class ProtectedDocumentRf3SetupPeer(TwoRf3MembershipWave wave,
         await Assert.That(witness.ReadBytes > 0 && witness.ReadBytes <= query.MaximumReadBytes).IsTrue();
         await Assert.That(witness.ExaminedRecords > 0 && witness.ExaminedRecords <= query.MaximumExaminedRecords).IsTrue();
     }
-
-    internal PartitionMovementTransportRequest Proposal(Guid id, PartitionMovePeerEnvelope envelope,
-        PartitionMoveJournalReceipt? authorization = null, PartitionMovementTransportAction action = PartitionMovementTransportAction.Apply,
-        Guid handle = default, int ordinal = 0)
-        => new(id, envelope, authorization, Source.VoterIds[0], callerAddress, action, handle, ordinal);
 }

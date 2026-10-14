@@ -23,17 +23,7 @@ internal static class RemoteAnnPublicationRf3Round
             state, epoch, token);
         var original = await McpCallerAssertions.SdkSuccessAsync(await owner.MaintainAnnIndexAsync(state.Original, token));
         await RemoteAnnPublicationRf3Assertions.EqualAsync(state.Completed, original);
-        var cancelBefore = await McpCallerAssertions.SdkSuccessAsync(await owner.OutboxStatusAsync(state.Scenario.Partition, token));
-        using (var cancelled = CancellationTokenSource.CreateLinkedTokenSource(token))
-        {
-            await cancelled.CancelAsync();
-            var cancellation = await source.ApproximateSearchAsync(state.Approximate(), cancelled.Token);
-            await Assert.That(cancellation.IsSuccess).IsFalse();
-            await Assert.That(cancellation.Value).IsNull();
-            await Assert.That(cancellation.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.Cancelled));
-        }
-        await RemoteAnnPublicationRf3Assertions.EqualAsync(cancelBefore,
-            await McpCallerAssertions.SdkSuccessAsync(await owner.OutboxStatusAsync(state.Scenario.Partition, token)));
+        await RequireCancelledAsync(owner, source, state, token);
         if (!repairPolicy)
         {
             return;
@@ -90,5 +80,21 @@ internal static class RemoteAnnPublicationRf3Round
         await Assert.That(restored.Source!.CorpusSha256).IsEqualTo(state.Completed.Source!.CorpusSha256);
         await RemoteAnnPublicationRf3Assertions.EqualAsync(state.Completed,
             await McpCallerAssertions.SdkSuccessAsync(await sdk.MaintainAnnIndexAsync(state.Original, token)));
+    }
+
+    private static async Task RequireCancelledAsync(KeyLoadClient owner, KeyLoadClient source,
+        RemoteAnnPublicationRf3State state, CancellationToken token)
+    {
+        var cancelBefore = await McpCallerAssertions.SdkSuccessAsync(await owner.OutboxStatusAsync(state.Scenario.Partition, token));
+        using (var cancelled = CancellationTokenSource.CreateLinkedTokenSource(token))
+        {
+            await cancelled.CancelAsync();
+            var cancellation = await source.ApproximateSearchAsync(state.Approximate(), cancelled.Token);
+            await Assert.That(cancellation.IsSuccess).IsFalse();
+            await Assert.That(cancellation.Value).IsNull();
+            await Assert.That(cancellation.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.Cancelled));
+        }
+        await RemoteAnnPublicationRf3Assertions.EqualAsync(cancelBefore,
+            await McpCallerAssertions.SdkSuccessAsync(await owner.OutboxStatusAsync(state.Scenario.Partition, token)));
     }
 }

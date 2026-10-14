@@ -1,4 +1,3 @@
-using System.Security.Cryptography;
 using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Search;
@@ -8,7 +7,6 @@ namespace KeyLoad.Server.Features.Search;
 
 internal sealed partial class NativeTextOnlineSession
 {
-    private const int SuccessfulCleanupFailureCount = 0;
     private readonly byte[] immutableRequest;
     private readonly CancellationTokenSource deadline;
     private readonly CancellationTokenSource lifetime;
@@ -20,44 +18,7 @@ internal sealed partial class NativeTextOnlineSession
         string principalId, DateTimeOffset originalExpiry, ServerRuntimeOptions options,
         TimeProvider clock, CancellationToken shutdown)
     {
-        var remaining = originalExpiry - clock.GetUtcNow();
-        if (id == Guid.Empty || request.CommandId == Guid.Empty || remaining <= TimeSpan.Zero)
-        {
-            throw NativeTextErrors.Ownership();
-        }
-        CancellationTokenSource? openedDeadline = null;
-        CancellationTokenSource? openedLifetime = null;
-        ReadExecutionBudget admitted;
-        byte[] fingerprint;
-        try
-        {
-            var originalBound = TimeSpan.FromSeconds(options.Core.DatabaseLimits.Value.QueryDeadlineSeconds);
-            openedDeadline = new(remaining < originalBound ? remaining : originalBound, clock);
-            openedLifetime = CancellationTokenSource.CreateLinkedTokenSource(shutdown, openedDeadline.Token);
-            admitted = new(options.Core.DatabaseLimits, clock, openedLifetime.Token);
-            admitted.ConstrainLifetime(originalExpiry);
-            admitted.ChargeBytes(NativeSerialization.Measure(request));
-            admitted.ChargeBytes(SHA256.HashSizeInBytes);
-            fingerprint = SHA256.HashData(NativeSerialization.Serialize(request));
-        }
-        catch (Exception primary)
-        {
-            var failures = new List<Exception> { primary };
-            if (openedLifetime is not null)
-            {
-                ServerFailureObserver.Observe(openedLifetime.Dispose, failures);
-            }
-            if (openedDeadline is not null)
-            {
-                ServerFailureObserver.Observe(openedDeadline.Dispose, failures);
-            }
-            ServerFailureObserver.ThrowIfAny(failures);
-            throw;
-        }
-        deadline = openedDeadline;
-        lifetime = openedLifetime;
-        Budget = admitted;
-        immutableRequest = fingerprint;
+        (deadline, lifetime, Budget, immutableRequest) = NativeTextOnlineSessionWork.Open(id, request, originalExpiry, options, clock, shutdown);
         Id = id;
         Request = request;
         PrincipalId = principalId;
@@ -167,35 +128,8 @@ internal sealed partial class NativeTextOnlineSession
         get; private set;
     }
 
-    internal void Require(Guid id, OnlineTextIndexMaintenanceRequest request, string principalId,
-        DateTimeOffset expiry)
-    {
-        ObjectDisposedException.ThrowIf(disposed, this);
-        Budget.Check();
-        if (id != Id || principalId != PrincipalId || expiry != OriginalExpiry)
-        {
-            throw NativeTextErrors.Mismatch();
-        }
-        ChargeRetainedBytes(NativeSerialization.Measure(request));
-        ChargeRetainedBytes(SHA256.HashSizeInBytes);
-        if (!CryptographicOperations.FixedTimeEquals(immutableRequest,
-            SHA256.HashData(NativeSerialization.Serialize(request))))
-        {
-            throw NativeTextErrors.Mismatch();
-        }
-    }
-
-    private void ChargeRetainedBytes(long bytes)
-    {
-        if (SourcePin is { } original)
-        {
-            original.AdmitRetainedBytes(bytes);
-        }
-        else
-        {
-            Budget.ChargeBytes(bytes);
-        }
-    }
+    internal void Require(Guid id, OnlineTextIndexMaintenanceRequest request, string principalId, DateTimeOffset expiry)
+        => NativeTextOnlineSessionWork.Require(this, disposed, immutableRequest, id, request, principalId, expiry);
 
     internal void DisposeAfterJoinedNativeOwners() => DisposeWithJoinedNativeCleanup(null);
 
@@ -209,29 +143,7 @@ internal sealed partial class NativeTextOnlineSession
         {
             throw NativeTextErrors.Ownership();
         }
-        var failures = new List<Exception>();
-        if (SourcePin is { } pin)
-        {
-            ServerFailureObserver.Observe(pin.Dispose, failures);
-        }
-        if (NativeOwner is { } native)
-        {
-            ServerFailureObserver.Observe(native.Dispose, failures);
-        }
-        if (failures.Count == SuccessfulCleanupFailureCount && cleanup is not null)
-        {
-            ServerFailureObserver.Observe(cleanup, failures);
-        }
-        if (failures.Count == SuccessfulCleanupFailureCount)
-        {
-            ServerFailureObserver.Observe(lifetime.Dispose, failures);
-            ServerFailureObserver.Observe(deadline.Dispose, failures);
-        }
-        if (failures.Count == SuccessfulCleanupFailureCount)
-        {
-            ServerFailureObserver.Observe(() => OperationReservation?.CompleteAfterJoinedCleanup(), failures);
-        }
-        ServerFailureObserver.ThrowIfAny(failures);
+        NativeTextOnlineSessionWork.Cleanup(this, lifetime, deadline, cleanup);
         disposed = true;
     }
 }

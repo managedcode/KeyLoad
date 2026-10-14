@@ -48,14 +48,7 @@ internal static class PostgresRf3Cancellation
                         RequestCqrsProbeOutcome.Cancelled, discovery, token);
                     var disposed = await controls.WaitForMarkerAsync(arm, RequestCqrsProbePhase.ProducerDisposed,
                         RequestCqrsProbeOutcome.Observed, discovery, token);
-                    await SqlRf3Protocol.EqualAsync(held with
-                    {
-                        Outcome = cancelled.Outcome
-                    }, cancelled);
-                    await SqlRf3Protocol.EqualAsync(held with
-                    {
-                        Phase = RequestCqrsProbePhase.ProducerDisposed
-                    }, disposed);
+                    await RequireSettledMarkersAsync(held, cancelled, disposed);
                     await controls.RetireArmAsync(arm, token);
                     await global::TUnit.Assertions.Assert.That(await PostgresRf3Assertions.ImageAsync(root, token)).IsEqualTo(before);
                     await PostgresRf3Assertions.PageAsync(state,
@@ -99,7 +92,9 @@ internal static class PostgresRf3Cancellation
                         await original;
                     }
                 }
-                catch (OperationCanceledException error) when (error.CancellationToken == originalCancellation.Token) { }
+                catch (OperationCanceledException error) when (error.CancellationToken == originalCancellation.Token)
+                {
+                }
             }, operationFailures);
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {
@@ -115,4 +110,19 @@ internal static class PostgresRf3Cancellation
     }
 
     private static readonly string[] Nodes = [McpCallerProtocol.Node1, McpCallerProtocol.Node2, McpCallerProtocol.Node3];
+
+    private static async Task RequireSettledMarkersAsync(
+        global::KeyLoad.Server.Features.ClusterRouting.RequestCqrsProbeMarkerRecord held,
+        global::KeyLoad.Server.Features.ClusterRouting.RequestCqrsProbeMarkerRecord cancelled,
+        global::KeyLoad.Server.Features.ClusterRouting.RequestCqrsProbeMarkerRecord disposed)
+    {
+        await SqlRf3Protocol.EqualAsync(held with
+        {
+            Outcome = cancelled.Outcome
+        }, cancelled);
+        await SqlRf3Protocol.EqualAsync(held with
+        {
+            Phase = RequestCqrsProbePhase.ProducerDisposed
+        }, disposed);
+    }
 }

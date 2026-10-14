@@ -34,4 +34,22 @@ internal static class PartitionDatabaseComposition
         database.ConfigureRuntimeJournal(core.RuntimeJournal);
         return (database, database.ConfigureRowVisibility(memory));
     }
+
+    internal static void BootstrapFreshNode(PartitionStores stores, DatabaseEngine database, NodeOptions options)
+    {
+        const int EmptyPosition = 0;
+
+        if (stores.Canonical.Position == EmptyPosition)
+        {
+            database.Bootstrap(new(PartitionStoreProtocol.AdministratorId, PartitionStoreProtocol.AdministratorTenant,
+                [new(PartitionStoreProtocol.Wildcard, PartitionStoreProtocol.Wildcard, Capability.All)],
+                [PartitionStoreProtocol.Wildcard])
+            {
+                ClusterAdministrator = true
+            },
+                DatabaseEngine.Credential(PartitionStoreProtocol.AdministratorId, PartitionStoreProtocol.AdministratorId,
+                    options.AdminKey));
+        }
+        ClusterPrincipalPolicy.Initialize(database);
+    }
 }

@@ -101,17 +101,8 @@ internal sealed class RequestCqrsRf3DiagnosticsSubscriberObserver : IAsyncDispos
 
     private bool ObserveAdmission(LogSubscriber subscriber, bool expected, string? actualResourceId,
         string? canonicalNode)
-    {
-        if (actualResourceId is null)
-        {
-            return transitionObservation.RecordAdmission(subscriber.Name, expected && subscriber.AnySubscribers);
-        }
-        if (!string.Equals(subscriber.Name, actualResourceId, StringComparison.Ordinal) || !subscriber.AnySubscribers)
-        {
-            return false;
-        }
-        return transitionObservation.RecordAdmission(canonicalNode!, true);
-    }
+        => RequestCqrsRf3SubscriberOwnership.ObserveAdmission(transitionObservation, subscriber, expected,
+            actualResourceId, canonicalNode);
 
     internal void BeginCompletionObservation() => transitionObservation.BeginCompletionObservation();
 
@@ -228,27 +219,6 @@ internal sealed class RequestCqrsRf3DiagnosticsSubscriberObserver : IAsyncDispos
     }
 
     private void CloseLifetime(List<Exception> failures, Action<RequestCqrsLifecycleStage>? observer = null)
-    {
-        var active = lifetime;
-        if (active is null)
-        {
-            return;
-        }
-        try
-        {
-            active.Dispose();
-            lifetime = null;
-        }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        {
-            RequestCqrsLifecycleFailureObserver.Append(failures, error, observer ?? failureObserver,
-            RequestCqrsLifecycleStage.ObserverLifetimeDispose);
-        }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        {
-            RequestCqrsLifecycleFailureObserver.Append(failures, error, observer ?? failureObserver,
-            RequestCqrsLifecycleStage.ObserverLifetimeDispose);
-        }
-    }
+        => RequestCqrsRf3SubscriberOwnership.CloseLifetime(ref lifetime, failures, observer, ref failureObserver);
 
 }

@@ -19,6 +19,7 @@ internal sealed class ReplicaIsolationOwner
     private IReplicaIsolationRulePlan? rules;
     private readonly ReplicaIsolationNodeReader reader;
     private readonly bool six;
+    private readonly ReplicaIsolationRetirementLifecycle retirement;
     private string? isolated;
     private bool restored;
     private const string SourceRevision = "GITHUB_SHA";
@@ -35,6 +36,7 @@ internal sealed class ReplicaIsolationOwner
         this.names = names;
         reader = new(plan, names, root, wave);
         six = wave is not null;
+        retirement = new(plan, root, names, nodes, execution);
     }
 
     internal static async Task<ReplicaIsolationOwner> PrepareAsync(IDistributedApplicationBuilder builder,
@@ -158,30 +160,8 @@ internal sealed class ReplicaIsolationOwner
         restored = true;
     }
 
-    internal async Task SettleAfterStopAsync(bool stopped, CancellationToken cancellationToken)
-    {
-        if (!stopped)
-        {
-            throw new InvalidOperationException("The actual fault topology did not settle; its root and images remain owned.");
-        }
-        var evidence = new List<ReplicaIsolationRetirementObservation>();
-        var failures = new List<Exception>();
-        await ServerFailureObserver.ObserveAsync(() => ReplicaIsolationRetirement.VerifyNodesStoppedAsync(
-            names, nodes.Values.ToArray(), evidence, cancellationToken), failures);
-        if (failures.Count == ReplicaIsolationFlowProtocol.Zero)
-        {
-            ServerFailureObserver.Observe(() => ReplicaIsolationRetirement.AssertNamedLocks(root, plan.Targets.Select(target => target.ResourceName), evidence), failures);
-        }
-        if (failures.Count == ReplicaIsolationFlowProtocol.Zero)
-        {
-            await ServerFailureObserver.ObserveAsync(() => ReplicaIsolationRetirement.RemoveImagesAsync(plan, evidence, cancellationToken), failures);
-        }
-        await ServerFailureObserver.ObserveAsync(() => ReplicaIsolationEvidence.WriteRetirementAsync(root, evidence,
-            failures.Count, CancellationToken.None), failures);
-        await ServerFailureObserver.ObserveAsync(() => ReplicaIsolationEvidence.WriteMutationsAsync(root, execution.Mutations,
-            failures, CancellationToken.None), failures);
-        ServerFailureObserver.ThrowIfAny(failures);
-    }
+    internal Task SettleAfterStopAsync(bool stopped, CancellationToken cancellationToken)
+        => retirement.SettleAfterStopAsync(stopped, cancellationToken);
 
     private async Task MutateAsync(string resource, string[] rule, CancellationToken cancellationToken)
     {

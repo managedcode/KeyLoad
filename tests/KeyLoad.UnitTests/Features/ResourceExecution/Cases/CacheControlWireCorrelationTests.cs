@@ -30,19 +30,19 @@ internal sealed class CacheControlWireCorrelationTests
 
         await Assert.That(created).IsTrue();
         await Assert.That(correlation).IsNotNull();
-        await Assert.That(TryDigest(changedOuter)).IsNotEqualTo(correlation!.SignedRequestDigest);
+        await Assert.That(CacheControlWireCorrelationAssertions.TryDigest(changedOuter)).IsNotEqualTo(correlation!.SignedRequestDigest);
         foreach (var changedProof in changedProofs)
         {
-            await Assert.That(TryDigest(changedProof)).IsNotEqualTo(correlation.SignedRequestDigest);
+            await Assert.That(CacheControlWireCorrelationAssertions.TryDigest(changedProof)).IsNotEqualTo(correlation.SignedRequestDigest);
         }
-        await Assert.That(TryDigest(changedHeader)).IsNotEqualTo(correlation.SignedRequestDigest);
+        await Assert.That(CacheControlWireCorrelationAssertions.TryDigest(changedHeader)).IsNotEqualTo(correlation.SignedRequestDigest);
     }
 
     [Test]
     public async Task AcCache014RequestReplyHeaderAndDigestMustMatch()
     {
         var prepare = CacheControlWireTestData.PrepareRequest();
-        var prepareCorrelation = Correlation(prepare);
+        var prepareCorrelation = CacheControlWireCorrelationAssertions.Correlation(prepare);
         var readyProof = CacheControlWireTestData.Proof(CacheVoterSlot.Slot0, CacheVoterSlot.Slot1);
         var prepareReply = new CachePrepareReply(prepareCorrelation, CacheControlStatus.Ready,
             readyProof, CacheControlWireTestData.NondefaultMac);
@@ -73,7 +73,7 @@ internal sealed class CacheControlWireCorrelationTests
     public async Task AcCache014AcceptedTargetBindingAndTargetSequenceMustMatch()
     {
         var grant = CacheControlWireTestData.GrantRequest();
-        var grantCorrelation = Correlation(grant);
+        var grantCorrelation = CacheControlWireCorrelationAssertions.Correlation(grant);
         var accepted = new CacheGrantReply(grantCorrelation, CacheControlStatus.AcceptedActive,
             CacheControlWireTestData.GrantId, grant.TargetBinding, grant.Slot2Proof.ChallengeSequence,
             CacheControlWireTestData.NondefaultMac);
@@ -113,10 +113,10 @@ internal sealed class CacheControlWireCorrelationTests
     public async Task AcCache014AllOperationsRequireTheirExactCorrelatedReplyTypes()
     {
         var revoke = CacheControlWireTestData.RevokeRequest();
-        var revokeReply = new CacheRevokeReply(Correlation(revoke), CacheControlStatus.Revoked,
+        var revokeReply = new CacheRevokeReply(CacheControlWireCorrelationAssertions.Correlation(revoke), CacheControlStatus.Revoked,
             CacheControlWireTestData.GrantId, CacheRevokeEffect.Both, CacheControlWireTestData.NondefaultMac);
         var refresh = CacheControlWireTestData.RefreshHint();
-        var refreshCorrelation = Correlation(refresh);
+        var refreshCorrelation = CacheControlWireCorrelationAssertions.Correlation(refresh);
         var refreshReply = new CacheRefreshReceipt(refreshCorrelation, CacheControlStatus.HintAcknowledged,
             CacheControlWireTestData.SessionId, CacheControlWireTestData.RoundNonce,
             CacheControlWireTestData.Address(CacheVoterSlot.Slot0), CacheControlWireTestData.NondefaultMac);
@@ -170,7 +170,7 @@ internal sealed class CacheControlWireCorrelationTests
     public async Task AcCache014CorrelationRejectsMissingReplyHeaderWithoutOutputMatch()
     {
         var request = CacheControlWireTestData.PrepareRequest();
-        var reply = new CachePrepareReply(Correlation(request), CacheControlStatus.Busy, null,
+        var reply = new CachePrepareReply(CacheControlWireCorrelationAssertions.Correlation(request), CacheControlStatus.Busy, null,
             CacheControlWireTestData.NondefaultMac);
         var malformed = reply with
         {
@@ -197,27 +197,4 @@ internal sealed class CacheControlWireCorrelationTests
         await Assert.That(CacheControlCorrelation.TryMatch(request, defaultDigest)).IsFalse();
     }
 
-    private static CacheReplyCorrelation Correlation(ICacheControlRequest request)
-    {
-        var created = CacheControlCorrelation.TryCreate(request, out var correlation);
-        if (!created || correlation is null)
-        {
-            throw new InvalidOperationException(CorrelationFailureMessage);
-        }
-
-        return correlation;
-    }
-
-    private static CacheControlDigest TryDigest(ICacheControlRequest request)
-    {
-        var created = CacheControlCorrelation.TryCreate(request, out var correlation);
-        if (!created || correlation is null)
-        {
-            throw new InvalidOperationException(CorrelationFailureMessage);
-        }
-
-        return correlation.SignedRequestDigest;
-    }
-
-    private const string CorrelationFailureMessage = "The valid request did not produce its exact correlation digest.";
 }

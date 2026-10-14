@@ -1,11 +1,9 @@
-using System.Runtime.ExceptionServices;
 using System.Text.Json;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using KeyLoad.AppHost.Features.BenchmarkComparisons;
 using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.Comparisons;
-using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
@@ -72,32 +70,7 @@ internal static class ScaleServerCancellationProbe
     }
 
     private static void ThrowFailures(List<Exception> failures)
-    {
-        if (failures.Count == 0)
-        {
-            return;
-        }
-        var fatal = failures.Select(CqrsRuntimeFailures.FindFatal).FirstOrDefault(item => item is not null);
-        var ordered = new List<Exception>();
-        if (fatal is not null)
-        {
-            ordered.Add(fatal);
-        }
-
-        foreach (var failure in failures)
-        {
-            if (!ordered.Any(existing => ReferenceEquals(existing, failure)))
-            {
-                ordered.Add(failure);
-            }
-        }
-        if (ordered.Count == 1)
-        {
-            ExceptionDispatchInfo.Capture(ordered[0]).Throw();
-        }
-
-        throw new AggregateException(ordered);
-    }
+        => ScaleServerProbeFailureOrder.Throw(failures);
 
     private static async Task StartObservationAsync(DistributedApplication app, ContainerResource[] containers,
         ScaleServerResourceEvidenceCollector collector, CancellationTokenSource caller)
@@ -207,7 +180,10 @@ internal static class ScaleServerCancellationProbe
         {
             await original;
         }
-        catch (OperationCanceledException failure) { return failure; }
+        catch (OperationCanceledException failure)
+        {
+            return failure;
+        }
         throw new InvalidOperationException("The actual Aspire resource wait did not observe caller cancellation.");
     }
 
@@ -218,7 +194,10 @@ internal static class ScaleServerCancellationProbe
         {
             await SettleFailureAsync(primary, caller, collector, observation);
         }
-        catch (AggregateException failure) { return failure; }
+        catch (AggregateException failure)
+        {
+            return failure;
+        }
         throw new InvalidOperationException("Cancellation and native sidecar writer failures were not retained together.");
     }
 
@@ -228,8 +207,14 @@ internal static class ScaleServerCancellationProbe
         {
             await completion;
         }
-        catch (IOException failure) { return failure; }
-        catch (UnauthorizedAccessException failure) { return failure; }
+        catch (IOException failure)
+        {
+            return failure;
+        }
+        catch (UnauthorizedAccessException failure)
+        {
+            return failure;
+        }
         throw new InvalidOperationException("The native resource-evidence writer accepted a directory as its sidecar.");
     }
 }

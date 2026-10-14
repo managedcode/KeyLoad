@@ -60,6 +60,11 @@ internal static class PostgresOperationExecutor
             }
             portal.Completed = true;
         }, failures).ConfigureAwait(false);
+        CompleteFailure(catalog, result, failures);
+        return result ?? throw Errors.Fail(ErrorCode.Corruption, PostgresProtocol.Invalid);
+    }
+    private static void CompleteFailure(PostgresSessionCatalog catalog, PostgresEncodedReply? result, List<Exception> failures)
+    {
         if (failures.Count != PostgresProtocol.AllRows)
         {
             ServerFailureObserver.Observe(catalog.ClearMutationIdentity, failures);
@@ -69,8 +74,8 @@ internal static class PostgresOperationExecutor
             }
             ServerFailureObserver.ThrowIfAny(failures);
         }
-        return result ?? throw Errors.Fail(ErrorCode.Corruption, PostgresProtocol.Invalid);
     }
+
     private static bool TryCompleteControl(SqlNativeSessionCompilation compilation, PostgresSessionCatalog catalog,
         PostgresEncodedReply reply, int maximumJsonBytes, PostgresBoundPortal portal, CancellationToken token)
     {

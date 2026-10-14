@@ -14,10 +14,7 @@ internal static class RemoteTransferNativeReplayOperation
         RemoteTransferNativeCallers calls, RemoteTransferColdSeed seed, CommandRequest accept,
         RemoteTransferNativeReplayHold hold, RemoteModelNativeReplayVariation mode, CancellationToken token)
     {
-        if (mode is not (RemoteModelNativeReplayVariation.Original2 or RemoteModelNativeReplayVariation.AllWireFaults6))
-        {
-            throw Missing();
-        }
+        RequireMode(mode);
         using var membership = await RemoteTransferNativeMembership.ReadAsync(wave, token);
         var scope = Scope(wave, seed, accept, hold.ArmId);
         var before = await ReadAsync(wave, membership, scope, token);
@@ -63,12 +60,7 @@ internal static class RemoteTransferNativeReplayOperation
             }
             committed ??= RemoteTransferNativeCommittedCut.Read(released[TwoRf3MembershipProtocol.Nodes[3]], seed, accept, captured);
             await RemoteTransferNativeCutLifecycle.RequireTargetAsync(released, seed, accept, captured, committed);
-            if (foregroundReceipt is { } actualReceipt)
-            {
-                await SqlRf3Protocol.EqualAsync(committed.OriginalReceipt, actualReceipt);
-            }
-            await RemoteTransferColdAssertions.ReceiptLiteralAsync(committed.OriginalReceipt, accept,
-                seed.Scenario.DestinationQueue, seed.TransferId, RemoteTransferColdProtocol.AcceptKind, committed.OriginalReceipt.Token.Position);
+            await RequireReceiptAsync(committed, foregroundReceipt, accept, seed);
         }, failures);
         await JoinAsync(wave, membership, hold, original, operation, failures);
         if (failures.Count != 0)
@@ -128,7 +120,10 @@ internal static class RemoteTransferNativeReplayOperation
         {
             ServerFailureObserver.Observe(operation.Cancel, failures);
         }
-        await ServerFailureObserver.ObserveAsync(async () => { await original; }, failures);
+        await ServerFailureObserver.ObserveAsync(async () =>
+        {
+            await original;
+        }, failures);
         using var cleanup = new CancellationTokenSource(RequestCqrsRf3Protocol.CleanupDeadline, TimeProvider.System);
         await ServerFailureObserver.ObserveAsync(() => wave.QueryControls.WaitForSettlementAsync(
             hold.ArmId, membership.Source, cleanup.Token), failures);
@@ -154,4 +149,23 @@ internal static class RemoteTransferNativeReplayOperation
         => NativeCanonicalModelCutClient.ReadSixAsync(wave, wave.Profile.AdminKey, scope, membership.Owners, membership.Secrets, token);
 
     private static InvalidOperationException Missing() => new(RemoteTransferDistinctProtocol.Missing);
+
+    private static void RequireMode(RemoteModelNativeReplayVariation mode)
+    {
+        if (mode is not (RemoteModelNativeReplayVariation.Original2 or RemoteModelNativeReplayVariation.AllWireFaults6))
+        {
+            throw Missing();
+        }
+    }
+
+    private static async Task RequireReceiptAsync(RemoteTransferPostAwaitNativeCut committed,
+        CommitReceipt? foregroundReceipt, CommandRequest accept, RemoteTransferColdSeed seed)
+    {
+        if (foregroundReceipt is { } actualReceipt)
+        {
+            await SqlRf3Protocol.EqualAsync(committed.OriginalReceipt, actualReceipt);
+        }
+        await RemoteTransferColdAssertions.ReceiptLiteralAsync(committed.OriginalReceipt, accept,
+            seed.Scenario.DestinationQueue, seed.TransferId, RemoteTransferColdProtocol.AcceptKind, committed.OriginalReceipt.Token.Position);
+    }
 }

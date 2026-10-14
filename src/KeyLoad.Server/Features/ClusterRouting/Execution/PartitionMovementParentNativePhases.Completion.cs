@@ -98,7 +98,4 @@ internal static partial class PartitionMovementParentNativePhases
         return Frame(header, control, stage, NativeSerialization.Serialize(body), ordinal);
     }
 
-
-
-
 }

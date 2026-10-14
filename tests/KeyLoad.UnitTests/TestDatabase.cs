@@ -206,8 +206,7 @@ internal sealed class TestDatabase : IDisposable
     }
 
     private void DisposeNative()
-        => TestDatabaseNativeDisposal.Run(() => replicaAdmission?.Dispose(),
-            () => Store.Dispose(), DeleteOwnedDirectory);
+        => TestDatabaseNativeDisposal.Run(replicaAdmission, Store.Dispose, DeleteOwnedDirectory);
 
     private void DeleteOwnedDirectory()
     {

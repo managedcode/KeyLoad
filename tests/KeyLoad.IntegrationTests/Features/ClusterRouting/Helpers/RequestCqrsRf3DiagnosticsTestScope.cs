@@ -9,11 +9,11 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting.Helpers;
 
 internal sealed class RequestCqrsRf3DiagnosticsTestScope(Guid waveId, RequestCqrsLifecycleEvidence lifecycle) : IAsyncDisposable
 {
-    private DistributedApplication? application;
+    internal DistributedApplication? application;
     private RequestCqrsRf3Diagnostics? diagnostics;
     private RequestCqrsRf3DiagnosticsScopeStreamOwner? streamOwner;
     private RequestCqrsRf3DiagnosticsIndependentConsumer? independentConsumer;
-    private ContainerResource[] resources = [];
+    internal ContainerResource[] resources = [];
     private readonly RequestCqrsRf3DiagnosticsSubscriberObserver subscriberObserver = new();
     private string? dataRoot;
     private string? artifactPath;
@@ -82,25 +82,10 @@ internal sealed class RequestCqrsRf3DiagnosticsTestScope(Guid waveId, RequestCqr
     }
 
     internal void EmitMalformedThenOneValidPerNode()
-    {
-        lifecycle.SetStage(RequestCqrsLifecycleStage.Scenario);
-        foreach (var resource in resources)
-        {
-            var logger = application!.Services.GetRequiredService<ResourceLoggerService>().GetLogger(resource);
-            RequestCqrsRf3DiagnosticsTestPublisher.EmitMalformed(logger);
-            RequestCqrsRf3DiagnosticsTestPublisher.EmitValid(logger);
-        }
-    }
+        => RequestCqrsRf3DiagnosticsScenarioPublisher.EmitMalformedThenOneValidPerNode(this, lifecycle);
 
     internal void EmitFortyValidLinesPerNode()
-    {
-        lifecycle.SetStage(RequestCqrsLifecycleStage.Scenario);
-        foreach (var resource in resources)
-        {
-            var logger = application!.Services.GetRequiredService<ResourceLoggerService>().GetLogger(resource);
-            RequestCqrsRf3DiagnosticsTestPublisher.EmitFortyValid(logger);
-        }
-    }
+        => RequestCqrsRf3DiagnosticsScenarioPublisher.EmitFortyValidLinesPerNode(this, lifecycle);
 
     internal async Task<byte[]> CompleteAndReadArtifactAsync(CancellationToken cancellationToken)
     {

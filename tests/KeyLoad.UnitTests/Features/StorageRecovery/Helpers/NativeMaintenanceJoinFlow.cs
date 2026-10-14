@@ -61,27 +61,7 @@ internal static class NativeMaintenanceJoinFlow
         }
         finally
         {
-            barrier.Release();
-            if (disposal is not null)
-            {
-                await ServerFailureObserver.ObserveAsync(async () => await disposal, failures);
-            }
-            if (store is not null)
-            {
-                ServerFailureObserver.Observe(store.Dispose, failures);
-            }
-            if (barrier.Failure is { } failure && !failures.Contains(failure))
-            {
-                failures.Add(failure);
-            }
-            if (failures.Count == 0)
-            {
-                ServerFailureObserver.Observe(() => Directory.Delete(root, recursive: true), failures);
-            }
-            foreach (var retainedFailure in failures)
-            {
-                retainedFailure.Data[RetainedRoot] = root;
-            }
+            await SettleOwnerAsync(barrier, disposal, store, root, failures);
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -167,4 +147,30 @@ internal static class NativeMaintenanceJoinFlow
     }
 
     private static ZoneTreeStore Open(string root) => new(new(root), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+
+    private static async Task SettleOwnerAsync(NativeMaintenanceBarrier barrier, Task? disposal,
+        ZoneTreeStore? store, string root, List<Exception> failures)
+    {
+        barrier.Release();
+        if (disposal is not null)
+        {
+            await ServerFailureObserver.ObserveAsync(async () => await disposal, failures);
+        }
+        if (store is not null)
+        {
+            ServerFailureObserver.Observe(store.Dispose, failures);
+        }
+        if (barrier.Failure is { } failure && !failures.Contains(failure))
+        {
+            failures.Add(failure);
+        }
+        if (failures.Count == 0)
+        {
+            ServerFailureObserver.Observe(() => Directory.Delete(root, recursive: true), failures);
+        }
+        foreach (var retainedFailure in failures)
+        {
+            retainedFailure.Data[RetainedRoot] = root;
+        }
+    }
 }

@@ -5,7 +5,6 @@ using KeyLoad.Core;
 using KeyLoad.Query;
 using KeyLoad.Replication;
 using KeyLoad.Server.Features.ClusterRouting;
-using KeyLoad.Server.Features.DocumentStorage;
 using ManagedCode.Communication.Orleans.Converters;
 using ManagedCode.Orleans.Identity.Core.Serializations;
 using Microsoft.Extensions.Options;
@@ -110,10 +109,6 @@ internal static class OrleansSiloConfiguration
         services.AddSingleton<ReplicaGrainServiceClient>();
         services.AddSingleton<ILifecycleParticipant<ISiloLifecycle>, ReplicaTransportLifecycle>();
     }
-
-
-
-
 
     private static void Configure(ISiloBuilder silo, NodeOptions options, ReplicaConfiguration replica, IPAddress address,
         OrleansMembershipOptions membershipOptions, IOptions<RuntimeJournalOptions> journal,

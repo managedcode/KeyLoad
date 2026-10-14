@@ -127,7 +127,10 @@ internal sealed class ReportFileTests
             {
                 await writing;
             }
-            catch (OperationCanceledException) { stopped = true; }
+            catch (OperationCanceledException)
+            {
+                stopped = true;
+            }
             await Assert.That(stopped).IsTrue();
             var rawErrorBytes = (long)samples.Length * error.Length;
             await Assert.That(new FileInfo(jsonPath).Length < rawErrorBytes / 4).IsTrue();
@@ -150,83 +153,10 @@ internal sealed class ReportFileTests
         }
     }
 
-    private static async Task AwaitCanceledOrCompletedAsync(Task? operation)
-    {
-        if (operation is null)
-        {
-            return;
-        }
-
-        try
-        {
-            await operation;
-        }
-        catch (OperationCanceledException) { }
-    }
-
-    private static async Task CleanupReportWriteAsync(RealFileGrowthObserver? observer, Task? growth, Task? writing,
+    private static Task CleanupReportWriteAsync(RealFileGrowthObserver? observer, Task? growth, Task? writing,
         CancellationTokenSource observation, CancellationTokenSource cancellation, string directory)
-    {
-        var failures = new List<Exception>();
-        await ObserveCleanupTasksAsync(
-            [InvokeCleanupAsync(observation.CancelAsync), InvokeCleanupAsync(cancellation.CancelAsync)], failures);
-        if (observer is not null)
-        {
-            await ObserveCleanupTasksAsync([InvokeCleanupAsync(async () => await observer.DisposeAsync())], failures);
-        }
-        await ObserveCleanupTasksAsync(
-            [InvokeCleanupAsync(() => AwaitCanceledOrCompletedAsync(growth)),
-                InvokeCleanupAsync(() => AwaitCanceledOrCompletedAsync(writing))], failures);
-        await ObserveCleanupTasksAsync(
-            [InvokeCleanupAsync(() =>
-            {
-                if (Directory.Exists(directory))
-                {
-                    Directory.Delete(directory, true);
-                }
-
-                return Task.CompletedTask;
-            })], failures);
-        if (failures.Count > 0)
-        {
-            throw new AggregateException("Report cancellation cleanup failed.", failures);
-        }
-    }
-
-    private static async Task ObserveCleanupTasksAsync(IReadOnlyCollection<Task> cleanupTasks, List<Exception> failures)
-    {
-        await Task.WhenAll(cleanupTasks).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
-        foreach (var cleanupTask in cleanupTasks)
-        {
-            if (cleanupTask.IsFaulted)
-            {
-                failures.AddRange(cleanupTask.Exception!.InnerExceptions);
-            }
-            else if (cleanupTask.IsCanceled)
-            {
-                failures.Add(new TaskCanceledException(cleanupTask));
-            }
-        }
-    }
-
-    private static async Task InvokeCleanupAsync(Func<Task> cleanup)
-        => await cleanup().ConfigureAwait(false);
+        => ReportFileWriteSettlement.CleanupAsync(observer, growth, writing, observation, cancellation, directory);
 
     private static ComparisonReport Report()
-    {
-        var queue = new QueueTimings(1.25, 2.5, 3.75);
-        var cases = new[]
-        {
-            new ComparisonCase("node,\"β\"", Scenario.QueueCycle, 1, "failed", "one timeout", null,
-            [
-                new OperationSample(0, 2, 1, 2, true, null, 12, "id-α", new(1, 2, 3)),
-                new OperationSample(1, 2, 2, 4.5, false, "timeout\n\"Δ\"", 7, "msg,\"β\"", queue)
-            ]),
-            new ComparisonCase("other", Scenario.PointRead, 0, "failed", "unavailable", null,
-            [new OperationSample(2, 0, 4, 5, false, "unavailable", 0, null, null)])
-        };
-        return new ComparisonReport(3, Guid.Parse("be464719-904b-4ca8-8c14-fb48886f116b"),
-            new DateTimeOffset(2026, 10, 2, 0, 0, 0, TimeSpan.Zero), new ComparisonOptions(), "sha", "closed", "linux",
-            "x64", 4, ".NET 10", "disk", "revision", ImmutableArray<TargetProfile>.Empty, ImmutableArray.CreateRange(cases));
-    }
+        => ReportFileLiteralCorpus.Create();
 }

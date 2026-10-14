@@ -2,15 +2,9 @@ namespace KeyLoad.Server.Features.Search;
 
 internal sealed partial class NativeTextResourceOwnership
 {
-    private const int NoPhysicalFailures = 0;
 
     internal NativeTextOpenFileGroup OpenFile(string path, ZoneTree.AbstractFileStream.IFileStream stream)
-    {
-        lock (gate)
-        {
-            return openFiles.Open(Path.GetFullPath(path), stream);
-        }
-    }
+        => NativeTextOwnedFileMutation.Open(gate, openFiles, path, stream);
 
     internal void BeginCloseFile(NativeTextOpenFileGroup group, ZoneTree.AbstractFileStream.IFileStream stream)
     {
@@ -50,35 +44,9 @@ internal sealed partial class NativeTextResourceOwnership
     }
 
     internal void DeleteOwnedFile(string path, Action mutation)
-    {
-        lock (gate)
-        {
-            Check(null);
-            var failures = new List<Exception>();
-            ServerFailureObserver.Observe(() => { mutation(); openFiles.Detach(path); }, failures);
-            if (failures.Count != NoPhysicalFailures)
-            {
-                ServerFailureObserver.Observe(() => openFiles.MarkAmbiguous(path), failures);
-            }
-            ServerFailureObserver.Observe(() => Check(null), failures);
-            ServerFailureObserver.ThrowIfAny(failures);
-        }
-    }
+        => NativeTextOwnedFileMutation.DeleteOwnedFile(gate, openFiles, () => Check(null), path, mutation);
 
     internal void ReplaceOwnedFiles(string source, string destination, string? backup, Action mutation)
-    {
-        lock (gate)
-        {
-            Check(null);
-            var failures = new List<Exception>();
-            ServerFailureObserver.Observe(() => { mutation(); openFiles.Replace(source, destination, backup); }, failures);
-            if (failures.Count != NoPhysicalFailures)
-            {
-                ServerFailureObserver.Observe(() => openFiles.MarkAmbiguous(source, destination, backup), failures);
-            }
-            ServerFailureObserver.Observe(() => Check(null), failures);
-            ServerFailureObserver.ThrowIfAny(failures);
-        }
-    }
+        => NativeTextOwnedFileMutation.ReplaceOwnedFiles(gate, openFiles, () => Check(null), source, destination, backup, mutation);
 
 }

@@ -39,8 +39,15 @@ internal sealed partial class NativeTextOnlineCatalogOwner
                 actual = new NativeTextSelectedProjectionLease(OnlineReadAdmission,
                     () => (generation, generation.Manifest), budget, options.Core.DatabaseLimits);
             }
-            catch (Exception error) { primary = error; throw; }
-            finally { proof.Dispose(); }
+            catch (Exception error)
+            {
+                primary = error;
+                throw;
+            }
+            finally
+            {
+                proof.Dispose();
+            }
             return actual;
         }
         catch (Exception cleanup)

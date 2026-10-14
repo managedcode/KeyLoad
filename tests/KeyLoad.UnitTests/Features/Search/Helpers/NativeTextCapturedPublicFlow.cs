@@ -75,31 +75,8 @@ internal static class NativeTextCapturedPublicFlow
         }
         finally
         {
-            try
-            {
-                firstRelease.TrySetResult();
-                release.TrySetResult();
-                if (!first.IsCompleted)
-                {
-                    await ServerFailureObserver.ObserveAsync(firstCancellation.CancelAsync, failures);
-                }
-                await JoinOriginalAsync(original, originalCancellation, cancelOriginal, failures);
-            }
-            finally
-            {
-                try
-                {
-                    _ = await first;
-                }
-                catch (Exception error) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
-                {
-                    RetainFailure(error, failures);
-                }
-                catch (Exception error) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
-                {
-                    RetainFailure(error, failures);
-                }
-            }
+            await NativeTextCapturedOriginalSettlement.JoinAsync(first, original, firstRelease, release,
+                firstCancellation, originalCancellation, cancelOriginal, failures);
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -140,51 +117,19 @@ internal static class NativeTextCapturedPublicFlow
             {
                 _ = await original;
             }
-            catch (OperationCanceledException) { }
+            catch (OperationCanceledException)
+            {
+            }
             catch (Exception error) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
             {
-                RetainFailure(error, failures);
+                NativeTextCapturedOriginalSettlement.RetainFailure(error, failures);
             }
             catch (Exception error) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
             {
-                RetainFailure(error, failures);
+                NativeTextCapturedOriginalSettlement.RetainFailure(error, failures);
             }
         }
         ServerFailureObserver.ThrowIfAny(failures);
-    }
-
-    private static async Task JoinOriginalAsync(Task<RankedDocument[]>? original,
-        CancellationTokenSource caller, bool cancelOriginal, List<Exception> failures)
-    {
-        if (original is null)
-        {
-            return;
-        }
-        if (!original.IsCompleted)
-        {
-            await ServerFailureObserver.ObserveAsync(caller.CancelAsync, failures);
-        }
-        try
-        {
-            _ = await original;
-        }
-        catch (OperationCanceledException) when (cancelOriginal && failures.Count == 0) { }
-        catch (Exception error) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
-        {
-            RetainFailure(error, failures);
-        }
-        catch (Exception error) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
-        {
-            RetainFailure(error, failures);
-        }
-    }
-
-    private static void RetainFailure(Exception error, List<Exception> failures)
-    {
-        if (!failures.Any(original => ReferenceEquals(original, error)))
-        {
-            failures.Add(error);
-        }
     }
 
     private static Task<RankedDocument[]> StartOriginal(NativeTextOnlineTestRuntime runtime, TestDatabase fixture,

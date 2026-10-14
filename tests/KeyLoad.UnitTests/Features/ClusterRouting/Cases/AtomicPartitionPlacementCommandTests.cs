@@ -171,23 +171,7 @@ internal sealed class AtomicPartitionPlacementCommandTests
                 await Assert.That(NativeSerialization.Serialize(witnessAfter)
                     .SequenceEqual(NativeSerialization.Serialize(witnessBefore))).IsTrue();
 
-                var healthy = Apply(fixture, request, commandId);
-                await Assert.That(healthy.Error).IsNull();
-                var expected = witnessBefore with
-                {
-                    DirectoryRevision = 1,
-                    Revision = 1,
-                    IsFallback = false
-                };
-                var bound = fixture.Database.ReadAtomicPartitionPlacement(PhysicalShardCatalogFixture.RootPrincipalId,
-                    AtomicPartitionPlacementTestSupport.Read(Partition));
-                await Assert.That(NativeSerialization.Serialize(bound)
-                    .SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
-                fixture.Reopen();
-                var reopened = fixture.Database.ReadAtomicPartitionPlacement(PhysicalShardCatalogFixture.RootPrincipalId,
-                    AtomicPartitionPlacementTestSupport.Read(Partition));
-                await Assert.That(NativeSerialization.Serialize(reopened)
-                    .SequenceEqual(NativeSerialization.Serialize(bound))).IsTrue();
+                await AtomicPartitionPlacementHealthyReopen.RequireAsync(fixture, request, commandId, witnessBefore, Partition, Apply);
             }, failures);
         }
         finally

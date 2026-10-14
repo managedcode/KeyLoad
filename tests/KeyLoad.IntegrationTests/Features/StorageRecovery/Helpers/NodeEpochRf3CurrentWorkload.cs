@@ -194,25 +194,9 @@ internal static class NodeEpochRf3CurrentWorkload
             command, cancellationToken).ConfigureAwait(false), ErrorCode.HistoryUnavailable, dispatched: true).ConfigureAwait(false);
     }
 
-    private static async Task<CommitReceipt> RetryRecognizedAmbiguousWriteAsync(KeyLoad.Client.KeyLoadClient writer,
+    private static Task<CommitReceipt> RetryRecognizedAmbiguousWriteAsync(KeyLoad.Client.KeyLoadClient writer,
         CommandRequest command, CancellationToken cancellationToken)
-    {
-        for (var attempt = 0; attempt < 8; attempt++)
-        {
-            var result = await writer.CommitAsync(command, cancellationToken).ConfigureAwait(false);
-            if (result.IsSuccess)
-            {
-                return result.Value!;
-            }
-            var code = result.Problem?.ErrorCode;
-            if (code is not (nameof(ErrorCode.UnknownWriteOutcome) or nameof(ErrorCode.OwnershipLost)))
-            {
-                throw new InvalidOperationException("The RF3 follower-loss write returned an unrecognized result code.");
-            }
-            await Task.Delay(TimeSpan.FromMilliseconds(250), TimeProvider.System, cancellationToken).ConfigureAwait(false);
-        }
-        throw new TimeoutException("The same-ID RF3 follower-loss command did not reconcile before its bound.");
-    }
+        => NodeEpochRf3WriteReconciliation.RetryRecognizedAmbiguousWriteAsync(writer, command, cancellationToken);
 
     private static SampleData CurrentSample(int index) => new(CurrentPrefix
         + index.ToString("D2", System.Globalization.CultureInfo.InvariantCulture),

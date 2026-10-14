@@ -24,14 +24,7 @@ internal sealed class QueueLostResponseWholeFlowTests
         var originalResult = QueueWholeFlowStorage.Apply(fixture.Database, OperationKind.Receive, claim, claimId, time);
         var original = originalResult.Get<ReceiveResult>();
         var delivery = await Assert.That(original.Deliveries).HasSingleItem();
-        await Assert.That(delivery.Id).IsEqualTo("input");
-        await Assert.That(delivery.PayloadJson).IsEqualTo("{\"work\":1}");
-        await Assert.That(delivery.HeadersJson).IsEqualTo("{\"kind\":\"job\"}");
-        await Assert.That(delivery.Attempt).IsEqualTo(1);
-        await Assert.That(original.RequestId).IsEqualTo(claimId);
-        await Assert.That(delivery.LeaseVersion).IsEqualTo(1L);
-        await Assert.That(delivery.LeaseUntil).IsEqualTo(time.AddSeconds(30));
-        await Assert.That(delivery.DeliveryGeneration).IsEqualTo(1L);
+        await OriginalDeliveryAsync(original, delivery, claimId, time);
         var leased = QueueWholeFlowStorage.Bytes(fixture.Store);
         var leasedPosition = fixture.Store.Position;
         var identity = NativeSerialization.Serialize(fixture.Store.Identity);
@@ -128,5 +121,18 @@ internal sealed class QueueLostResponseWholeFlowTests
             new MessageInspection(new("input", MessageState.Acked, 1, 3, 1, null, null, LeaseVersion: 1), null, null));
         await Assert.That(database.InspectMessage("root", lane, "healthy")).IsEqualTo(
             new MessageInspection(new("healthy", MessageState.Acked, 1, 3, 2, null, null, LeaseVersion: 1), null, null));
+    }
+
+    private static async Task OriginalDeliveryAsync(ReceiveResult original, Delivery delivery,
+        Guid claimId, DateTimeOffset time)
+    {
+        await Assert.That(delivery.Id).IsEqualTo("input");
+        await Assert.That(delivery.PayloadJson).IsEqualTo("{\"work\":1}");
+        await Assert.That(delivery.HeadersJson).IsEqualTo("{\"kind\":\"job\"}");
+        await Assert.That(delivery.Attempt).IsEqualTo(1);
+        await Assert.That(original.RequestId).IsEqualTo(claimId);
+        await Assert.That(delivery.LeaseVersion).IsEqualTo(1L);
+        await Assert.That(delivery.LeaseUntil).IsEqualTo(time.AddSeconds(30));
+        await Assert.That(delivery.DeliveryGeneration).IsEqualTo(1L);
     }
 }

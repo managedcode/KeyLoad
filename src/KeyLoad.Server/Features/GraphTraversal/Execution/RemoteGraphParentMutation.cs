@@ -15,30 +15,7 @@ internal static class RemoteGraphParentMutation
     {
         if (kind == OperationKind.DeliverRemoteGraphEdge)
         {
-            var delivery = GrainNativePayload.ReadCommand<DeliverRemoteGraphEdgeRequestV1>(payload);
-            if (delivery.CommandId != trusted.CommandId)
-            {
-                throw Errors.Fail(ErrorCode.Validation, RemoteGraphNativeProtocol.InvalidProof);
-            }
-            var route = RemoteGraphParentRouting.Resolve(node, partition, principal, delivery.SourcePartition,
-                delivery.Destination, delivery.Graph, work);
-            var read = new RemoteGraphSourceReadRequestV1(Guid.Empty, delivery.SourcePartition,
-                delivery.Graph, delivery.EdgeId, route.Source.Owner, null, delivery);
-            var snapshot = await SnapshotAsync(node, partition, principal, trusted, read, work, token).ConfigureAwait(false);
-            var source = snapshot.OriginalOutcome?.Result.Get<RemoteGraphSourceResultV1>()
-                ?? throw Errors.Fail(ErrorCode.RecoveryRequired, RemoteGraphNativeProtocol.InvalidProof);
-            var selected = source.Intents.Where(value => value.Content.Destination == delivery.Destination
-                && value.Content.Revision == delivery.ExpectedRevision).ToImmutableArray();
-            if (selected.Length != RequiredDeliveryIntentCount)
-            {
-                throw Errors.Fail(ErrorCode.RecoveryRequired, RemoteGraphNativeProtocol.InvalidProof);
-            }
-            effects.Begin(token);
-            return await RemoteGraphParentDelivery.ExecuteAsync(node, partition, principal, trusted,
-                delivery.CommandId, snapshot.Cut, source with
-                {
-                    Intents = selected
-                }, effects, work, token).ConfigureAwait(false);
+            return await DeliverAsync(node, partition, principal, trusted, payload, effects, work, token).ConfigureAwait(false);
         }
         var original = Original(kind, payload);
         if (original.CommandId != trusted.CommandId)
@@ -76,6 +53,36 @@ internal static class RemoteGraphParentMutation
         }
         return await RemoteGraphParentDelivery.ExecuteAsync(node, partition, principal, trusted,
             original.CommandId, current.Cut, actual, effects, work, token).ConfigureAwait(false);
+    }
+
+    private static async Task<RemoteGraphEdgeResultV1> DeliverAsync(OrleansNode node, PartitionHost partition,
+        PrincipalRecord principal, GrainRequestEnvelope trusted, ReadOnlyMemory<byte> payload,
+        RemoteGraphEffectBoundary effects, ReadExecutionBudget work, CancellationToken token)
+    {
+        var delivery = GrainNativePayload.ReadCommand<DeliverRemoteGraphEdgeRequestV1>(payload);
+        if (delivery.CommandId != trusted.CommandId)
+        {
+            throw Errors.Fail(ErrorCode.Validation, RemoteGraphNativeProtocol.InvalidProof);
+        }
+        var route = RemoteGraphParentRouting.Resolve(node, partition, principal, delivery.SourcePartition,
+            delivery.Destination, delivery.Graph, work);
+        var read = new RemoteGraphSourceReadRequestV1(Guid.Empty, delivery.SourcePartition,
+            delivery.Graph, delivery.EdgeId, route.Source.Owner, null, delivery);
+        var snapshot = await SnapshotAsync(node, partition, principal, trusted, read, work, token).ConfigureAwait(false);
+        var source = snapshot.OriginalOutcome?.Result.Get<RemoteGraphSourceResultV1>()
+            ?? throw Errors.Fail(ErrorCode.RecoveryRequired, RemoteGraphNativeProtocol.InvalidProof);
+        var selected = source.Intents.Where(value => value.Content.Destination == delivery.Destination
+            && value.Content.Revision == delivery.ExpectedRevision).ToImmutableArray();
+        if (selected.Length != RequiredDeliveryIntentCount)
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, RemoteGraphNativeProtocol.InvalidProof);
+        }
+        effects.Begin(token);
+        return await RemoteGraphParentDelivery.ExecuteAsync(node, partition, principal, trusted,
+            delivery.CommandId, snapshot.Cut, source with
+            {
+                Intents = selected
+            }, effects, work, token).ConfigureAwait(false);
     }
 
     private static RemoteGraphSourceIdentityV1 Original(OperationKind kind, ReadOnlyMemory<byte> payload)

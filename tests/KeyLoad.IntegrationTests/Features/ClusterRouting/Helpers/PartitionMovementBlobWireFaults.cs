@@ -39,6 +39,19 @@ internal static class PartitionMovementBlobWireFaults
         });
         yield return new RemoteDocumentTransportEnvelope(null, null, null);
         var frame = original.Request.Frame;
+        foreach (var fault in CreateFrameIdentityFaults(original, frame))
+        {
+            yield return fault;
+        }
+        foreach (var fault in CreateFrameReplayFaults(original, frame))
+        {
+            yield return fault;
+        }
+    }
+
+    private static IEnumerable<RemoteDocumentTransportEnvelope> CreateFrameIdentityFaults(
+        RemoteControlledBlobCall original, ControlledBlobReadFrame frame)
+    {
         yield return Wrap(original with
         {
             Request = original.Request with
@@ -85,6 +98,11 @@ internal static class PartitionMovementBlobWireFaults
                 }
             }
         });
+    }
+
+    private static IEnumerable<RemoteDocumentTransportEnvelope> CreateFrameReplayFaults(
+        RemoteControlledBlobCall original, ControlledBlobReadFrame frame)
+    {
         yield return Wrap(original with
         {
             Request = original.Request with

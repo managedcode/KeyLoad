@@ -61,14 +61,7 @@ internal sealed class DeclarativeCompositionRf3Tests(ClusterFixture fixture)
                 await sdk.CommitAsync(reverse, deadline.Token)));
             state = await CompositionSqlColdCapture.CaptureAsync(sdk, scenario, link,
                 forward, projected, reverse, derivedReceipt, deadline.Token);
-            await Assert.That(state.First.Json).IsEqualTo(RelationalSqlRf3Tokens.FirstRow);
-            await Assert.That(state.Second.Json).IsEqualTo(RelationalSqlRf3Tokens.SecondRow);
-            await Assert.That(state.Graph.Edges).HasSingleItem();
-            await Assert.That(state.Graph.Edges[0].Label).IsEqualTo(RelationalSqlRf3Tokens.EdgeLabel);
-            await Assert.That(state.Derived.Metadata.State).IsEqualTo(MessageState.Ready);
-            await Assert.That(state.Derived.Metadata.Attempts).IsEqualTo(RelationalSqlRf3Tokens.NoResults);
-            await Assert.That(state.Derived.Metadata.LeaseOwner).IsNull();
-            await Assert.That(JsonSerializer.Deserialize<QueueGraphLink>(state.Derived.PayloadJson!, JsonDefaults.Options)).IsEqualTo(link);
+            await RequireDerivedStateAsync(state, link);
 
             var changed = DeclarativeCompositionSql.Forward(forward, forwardMutation with
             {
@@ -137,4 +130,15 @@ internal sealed class DeclarativeCompositionRf3Tests(ClusterFixture fixture)
         await Assert.That(JsonSerializer.Deserialize<QueueGraphLink>(source.PayloadJson!, JsonDefaults.Options)).IsEqualTo(link);
     }
 
+    private static async Task RequireDerivedStateAsync(CompositionSqlColdState state, QueueGraphLink link)
+    {
+        await Assert.That(state.First.Json).IsEqualTo(RelationalSqlRf3Tokens.FirstRow);
+        await Assert.That(state.Second.Json).IsEqualTo(RelationalSqlRf3Tokens.SecondRow);
+        await Assert.That(state.Graph.Edges).HasSingleItem();
+        await Assert.That(state.Graph.Edges[0].Label).IsEqualTo(RelationalSqlRf3Tokens.EdgeLabel);
+        await Assert.That(state.Derived.Metadata.State).IsEqualTo(MessageState.Ready);
+        await Assert.That(state.Derived.Metadata.Attempts).IsEqualTo(RelationalSqlRf3Tokens.NoResults);
+        await Assert.That(state.Derived.Metadata.LeaseOwner).IsNull();
+        await Assert.That(JsonSerializer.Deserialize<QueueGraphLink>(state.Derived.PayloadJson!, JsonDefaults.Options)).IsEqualTo(link);
+    }
 }

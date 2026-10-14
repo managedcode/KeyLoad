@@ -50,18 +50,7 @@ internal static class NativeTextWaitObservationTrial
             }
             var image = QueueWholeFlowStorage.Bytes(database.Store);
             var position = database.Store.Position;
-            var invalid = future is null ? request : request with
-            {
-                MinimumToken = future.Value
-                ? receipt.Token with
-                {
-                    Position = checked(receipt.Token.Position + 1L)
-                }
-                : receipt.Token with
-                {
-                    Incarnation = Guid.NewGuid()
-                }
-            };
+            var invalid = InvalidRequest(future, request, receipt.Token);
             var failure = await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
                 search.WaitForIndexAsync(principal, invalid, token)) ?? throw new InvalidOperationException();
             await Assert.That(failure.Code).IsEqualTo(future is null ? ErrorCode.PermissionDenied : ErrorCode.TokenInvalidated);
@@ -93,5 +82,22 @@ internal static class NativeTextWaitObservationTrial
         {
             ServerFailureObserver.Observe(projection.Dispose, failures);
         }
+    }
+
+    private static WaitForIndexRequest InvalidRequest(bool? future, WaitForIndexRequest request, CommitToken original)
+    {
+        var invalid = future is null ? request : request with
+        {
+            MinimumToken = future.Value
+            ? original with
+            {
+                Position = checked(original.Position + 1L)
+            }
+            : original with
+            {
+                Incarnation = Guid.NewGuid()
+            }
+        };
+        return invalid;
     }
 }

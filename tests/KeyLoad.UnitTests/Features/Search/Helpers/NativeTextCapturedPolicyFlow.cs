@@ -16,13 +16,7 @@ internal static class NativeTextCapturedPolicyFlow
             seed.Pin.Collection, seed.Pin.Field, seed.Pin.Generation, seed.Pin.NodeId, seed.Pin.Placement);
         _ = await NativeTextOnlineWholeFlow.RunAsync(fixture, runtime, request, token);
         var originalBytes = StoredBytes(fixture, request);
-        var principal = fixture.Store.Read(view => fixture.Database.Principal(view,
-            NativeTextMaintenanceTestValues.Principal, fixture.Database.EvaluationClock.GetUtcNow()));
-        var repair = principal with
-        {
-            Id = "online-text-reader-policy-repair"
-        };
-        _ = fixture.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(repair)).Get<PrincipalRecord>();
+        var (principal, repair) = ConfigureRepairPrincipal(fixture);
         using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(token);
         var entered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -66,15 +60,7 @@ internal static class NativeTextCapturedPolicyFlow
             }, token);
             await NativeTextCapturedPublicContinuation.HealthyAsync(runtime, fixture.Partition, token);
         }, failures);
-        release.TrySetResult();
-        if (!original.IsCompleted)
-        {
-            await ServerFailureObserver.ObserveAsync(cancellation.CancelAsync, failures);
-        }
-        if (!observed)
-        {
-            await ServerFailureObserver.ObserveAsync(async () => { _ = await original; }, failures);
-        }
+        await SettleOriginalAsync(original, cancellation, release, observed, failures);
         ServerFailureObserver.ThrowIfAny(failures);
         await runtime.DisposeAsync();
         await using var cold = new NativeTextOnlineTestRuntime(fixture);
@@ -87,4 +73,30 @@ internal static class NativeTextCapturedPolicyFlow
             NativeTextMaintenanceTestValues.Principal, request.CommandId,
             new CommandOutcomePartitionScope(CommandOutcomeScopeKind.Partition, request.Consumer.Partition)).Outcome
                 ?? throw new InvalidOperationException("The original native publication outcome is absent.")));
+
+    private static async Task SettleOriginalAsync(Task<RankedDocument[]> original, CancellationTokenSource cancellation,
+        TaskCompletionSource release, bool observed, List<Exception> failures)
+    {
+        release.TrySetResult();
+        if (!original.IsCompleted)
+        {
+            await ServerFailureObserver.ObserveAsync(cancellation.CancelAsync, failures);
+        }
+        if (!observed)
+        {
+            await ServerFailureObserver.ObserveAsync(async () => { _ = await original; }, failures);
+        }
+    }
+
+    private static (PrincipalRecord Principal, PrincipalRecord Repair) ConfigureRepairPrincipal(TestDatabase fixture)
+    {
+        var principal = fixture.Store.Read(view => fixture.Database.Principal(view,
+            NativeTextMaintenanceTestValues.Principal, fixture.Database.EvaluationClock.GetUtcNow()));
+        var repair = principal with
+        {
+            Id = "online-text-reader-policy-repair"
+        };
+        _ = fixture.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(repair)).Get<PrincipalRecord>();
+        return (principal, repair);
+    }
 }

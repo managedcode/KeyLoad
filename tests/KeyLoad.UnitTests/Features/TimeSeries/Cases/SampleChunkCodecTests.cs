@@ -8,10 +8,10 @@ internal sealed class SampleChunkCodecTests
     public async Task AcChunk001FixedAndSeededRowsRoundTripEveryPersistedFieldExactly()
     {
         var fixedRows = SampleChunkTestData.FixedRecords();
-        await RoundTripExact(fixedRows);
+        await SampleChunkCodecRoundTripAssertions.RoundTripExact(fixedRows);
         for (var count = 1; count <= SampleChunkTestData.MaximumRecords; count++)
         {
-            await RoundTripExact(SampleChunkTestData.SeededRecords(count));
+            await SampleChunkCodecRoundTripAssertions.RoundTripExact(SampleChunkTestData.SeededRecords(count));
         }
     }
 
@@ -23,7 +23,7 @@ internal sealed class SampleChunkCodecTests
         var actual = SampleChunkCodec.Decode(encoded, SampleChunkTestData.ChargedDecodeBudget(encoded), UnitExecutionOptions.TimeSeriesExecution());
 
         await SampleChunkTestData.AssertRecordsExact(expected, actual);
-        await AssertRawFoldSame(expected, actual);
+        await SampleChunkCodecRoundTripAssertions.AssertRawFoldSame(expected, actual);
     }
 
     [Test]
@@ -191,40 +191,6 @@ internal sealed class SampleChunkCodecTests
         await Assert.That(decodeCancelled.CancellationToken).IsEqualTo(cancellation.Token);
         await Assert.That(encodeDeadline.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(decodeDeadline.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-    }
-
-    private static async Task RoundTripExact(SampleRecord[] expected)
-    {
-        var encoded = SampleChunkCodec.Encode(expected, SampleChunkTestData.Budget(), UnitExecutionOptions.TimeSeriesExecution());
-        var actual = SampleChunkCodec.Decode(encoded, SampleChunkTestData.ChargedDecodeBudget(encoded), UnitExecutionOptions.TimeSeriesExecution());
-        await SampleChunkTestData.AssertRecordsExact(expected, actual);
-    }
-
-    private static async Task AssertRawFoldSame(SampleRecord[] expected, SampleRecord[] actual)
-    {
-        var expectedFold = RawFold(expected);
-        var actualFold = RawFold(actual);
-        await Assert.That(actualFold.Count).IsEqualTo(expectedFold.Count);
-        await Assert.That(BitConverter.DoubleToInt64Bits(actualFold.Sum))
-            .IsEqualTo(BitConverter.DoubleToInt64Bits(expectedFold.Sum));
-        await Assert.That(actualFold.Minimum).IsEqualTo(expectedFold.Minimum);
-        await Assert.That(actualFold.Maximum).IsEqualTo(expectedFold.Maximum);
-    }
-
-    private static (long Count, double Sum, double? Minimum, double? Maximum) RawFold(SampleRecord[] records)
-    {
-        long count = 0;
-        var sum = 0d;
-        double? minimum = null;
-        double? maximum = null;
-        foreach (var record in records)
-        {
-            count++;
-            sum += record.Sample.Value;
-            minimum = minimum is null ? record.Sample.Value : Math.Min(minimum.Value, record.Sample.Value);
-            maximum = maximum is null ? record.Sample.Value : Math.Max(maximum.Value, record.Sample.Value);
-        }
-        return (count, sum, minimum, maximum);
     }
 
     private static KeyLoadException EncodeFailure(SampleRecord[] records, int maximumBytes)

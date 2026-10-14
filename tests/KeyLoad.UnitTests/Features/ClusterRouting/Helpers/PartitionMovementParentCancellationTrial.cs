@@ -72,8 +72,17 @@ internal static class PartitionMovementParentCancellationTrial
             await PartitionMovementParentPolicyRestoreTrial.ExecuteAsync(source, target, fixture, abort, phaseId);
         }
         var cold = await RequireColdCancellationAsync(source, target, fixture, abort, phaseId, prepare, ownReceipt);
-        before = source.Store.Position;
-        sourceImage = ControlledPartitionMovementRawImage.Bytes(source.Store);
+        await RequireLatePrepareDeniedAndSettleAsync(source, target, restorePolicy, fixture, request,
+            prepare, phaseId, expiry, body, targetImage, ownReceipt, cold);
+    }
+
+    private static async Task RequireLatePrepareDeniedAndSettleAsync(ControlledPartitionMovementNode source,
+        ControlledPartitionMovementNode target, bool restorePolicy, PartitionMovementParentNativeFixture fixture,
+        PartitionMoveRequest request, PartitionMovePhaseCommand prepare, Guid phaseId, DateTimeOffset expiry,
+        PartitionMoveCheckpointBody body, string[] targetImage, PartitionMoveJournalReceipt ownReceipt, PartitionMoveParentState cold)
+    {
+        var before = source.Store.Position;
+        var sourceImage = ControlledPartitionMovementRawImage.Bytes(source.Store);
         var late = await Assert.ThrowsAsync<KeyLoadException>(() => fixture.OriginalAsync(phaseId, prepare, expiry));
         await Assert.That(late!.Code).IsEqualTo(restorePolicy ? ErrorCode.OwnershipLost : ErrorCode.Conflict);
         await Assert.That(source.Store.Position).IsEqualTo(before);

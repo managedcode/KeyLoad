@@ -163,22 +163,7 @@ internal sealed partial class RequestCqrsClusterFixture : IAsyncInitializer, IAs
     }
 
     private Task GetDisposalTask()
-    {
-        TaskCompletionSource registered;
-        Task task;
-        lock (disposalGate)
-        {
-            if (disposal is not null)
-            {
-                return disposal;
-            }
-            registered = new(TaskCreationOptions.RunContinuationsAsynchronously);
-            task = DisposeCoreAsync(registered.Task);
-            disposal = task;
-        }
-        registered.TrySetResult();
-        return task;
-    }
+        => RequestCqrsFixtureDisposalRegistration.Get(disposalGate, ref disposal, DisposeCoreAsync);
 
     private async Task DisposeCoreAsync(Task registered)
     {

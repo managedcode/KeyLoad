@@ -4,8 +4,6 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 internal static class RequestCqrsProbeFileValidation
 {
     internal const string TemporaryPrefix = "tmp-";
-    private const string TemporarySuffix = ".tmp";
-    private const string JsonSuffix = ".json";
     internal const UnixFileMode PrivateDirectoryMode = UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute;
     internal const UnixFileMode PrivateFileMode = UnixFileMode.UserRead | UnixFileMode.UserWrite;
 
@@ -71,84 +69,10 @@ internal static class RequestCqrsProbeFileValidation
     }
 
     internal static bool IsAllowedFileName(string name)
-    {
-        if (KeyLoad.Server.Features.ClusterRouting.RequestCqrsMovementJournalInventory.IsName(name))
-        {
-            return true;
-        }
-        if (KeyLoad.Server.Features.ClusterRouting.RequestCqrsWaitForIndexReadCutInventory.IsName(name))
-        {
-            return true;
-        }
-        if (KeyLoad.Server.Features.ClusterRouting.RequestCqrsQueryReadCutInventory.IsName(name))
-        {
-            return true;
-        }
-        if (KeyLoad.Server.Features.ClusterRouting.RequestCqrsNativeReplayInventory.IsPlanName(name)
-            || KeyLoad.Server.Features.ClusterRouting.RequestCqrsNativeReplayInventory.IsWitnessName(name))
-        {
-            return true;
-        }
-        if (KeyLoad.Server.Features.ClusterRouting.RequestCqrsNativeModelInventory.IsName(name))
-        {
-            return true;
-        }
-        if (KeyLoad.Server.Features.ClusterRouting.RequestCqrsEventVectorExpiryJson.IsName(name))
-        {
-            return true;
-        }
-        if (KeyLoad.Server.Features.ClusterRouting.RequestCqrsReplicaSnapshotJson.IsName(name))
-        {
-            return true;
-        }
-        if (KeyLoad.Server.Features.ClusterRouting.ConnectionProbeInventory.IsName(name))
-        {
-            return true;
-        }
-        if (KeyLoad.Server.Features.ClusterRouting.RequestCqrsProbeMigrationValidation.IsName(name))
-        {
-            return true;
-        }
-        if (KeyLoad.Server.Features.ClusterRouting.RequestCqrsProbeActivationValidation.IsName(name))
-        {
-            return true;
-        }
-        if (KeyLoad.Server.Features.ClusterRouting.RequestCqrsProbeLiveValidation.IsName(name))
-        {
-            return true;
-        }
-        if (name == RequestCqrsProbeFixtureProtocol.OwnerFileName)
-        {
-            return true;
-        }
-        if (IsTemporaryName(name))
-        {
-            return true;
-        }
-        if (HasGuidFile(name, RequestCqrsProbeFixtureProtocol.ArmFilePrefix, 1))
-        {
-            return true;
-        }
-        if (HasGuidFile(name, RequestCqrsProbeFixtureProtocol.ReleaseFilePrefix, 2))
-        {
-            return true;
-        }
-        return name.StartsWith(RequestCqrsProbeFixtureProtocol.MarkerFilePrefix, StringComparison.Ordinal)
-            && name.EndsWith(JsonSuffix, StringComparison.Ordinal)
-            && RequestCqrsProbeFileNames.IsMarkerName(name);
-    }
+        => RequestCqrsProbeNameValidation.IsAllowedFileName(name);
 
     internal static bool IsTemporaryName(string name)
-    {
-        if (!name.StartsWith(TemporaryPrefix, StringComparison.Ordinal)
-            || !name.EndsWith(TemporarySuffix, StringComparison.Ordinal))
-        {
-            return false;
-        }
-        var id = name.AsSpan(TemporaryPrefix.Length, name.Length - TemporaryPrefix.Length - TemporarySuffix.Length);
-        return Guid.TryParseExact(id, "N", out var temporaryId)
-            && temporaryId.ToString("N").AsSpan().SequenceEqual(id);
-    }
+        => RequestCqrsProbeNameValidation.IsTemporaryName(name);
 
     private static bool TryValidateLength(FileInfo info, bool temporary, out long length)
     {
@@ -181,53 +105,12 @@ internal static class RequestCqrsProbeFileValidation
         }
     }
 
-    private static bool HasGuidFile(string name, string prefix, int guidCount)
-    {
-        if (!name.StartsWith(prefix, StringComparison.Ordinal) || !name.EndsWith(JsonSuffix, StringComparison.Ordinal))
-        {
-            return false;
-        }
-        var parts = name[prefix.Length..^JsonSuffix.Length].Split('-');
-        if (parts.Length != guidCount)
-        {
-            return false;
-        }
-        foreach (var part in parts)
-        {
-            if (!Guid.TryParseExact(part, "N", out var value) || value.ToString("N") != part)
-            {
-                return false;
-            }
-        }
-        return true;
-    }
-
     internal static void ValidateDirectory(string path)
-    {
-        if (OperatingSystem.IsWindows())
-        {
-            throw new PlatformNotSupportedException(RequestCqrsProbeFixtureProtocol.PrivatePermissionsUnsupported);
-        }
-        var attributes = File.GetAttributes(path);
-        if ((attributes & FileAttributes.Directory) == 0 || (attributes & FileAttributes.ReparsePoint) != 0
-            || File.GetUnixFileMode(path) != PrivateDirectoryMode)
-        {
-            throw new IOException(RequestCqrsProbeFixtureProtocol.InvalidControlEntry);
-        }
-    }
+        => RequestCqrsProbeDirectoryValidation.ValidateDirectory(path);
 
     internal static void EnsureUnixPermissions()
-    {
-        if (OperatingSystem.IsWindows())
-        {
-            throw new PlatformNotSupportedException(RequestCqrsProbeFixtureProtocol.PrivatePermissionsUnsupported);
-        }
-    }
+        => RequestCqrsProbeDirectoryValidation.EnsureUnixPermissions();
 
     internal static bool IsWithin(string candidate, string root)
-    {
-        var relative = Path.GetRelativePath(root, candidate);
-        return relative == "." || (!Path.IsPathRooted(relative)
-            && relative != ".." && !relative.StartsWith(".." + Path.DirectorySeparatorChar, StringComparison.Ordinal));
-    }
+        => RequestCqrsProbeDirectoryValidation.IsWithin(candidate, root);
 }

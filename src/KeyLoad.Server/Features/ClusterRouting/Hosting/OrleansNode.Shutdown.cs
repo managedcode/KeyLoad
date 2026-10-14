@@ -25,16 +25,7 @@ internal sealed partial class OrleansNode
             ServerFailureObserver.ThrowIfAny(failures);
             throw Errors.Fail(ErrorCode.OwnershipLost, OrleansNodeProtocol.RequestWorkNotJoined);
         }
-        if (stopping is not null)
-        {
-            await StopHostAsync(stopping, failures).ConfigureAwait(false);
-        }
-        else
-        {
-            await ServerFailureObserver.ObserveAsync(requestWork.DrainAsync, failures).ConfigureAwait(false);
-        }
-        await ServerFailureObserver.ObserveAsync(() => requestWork.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
-        ServerFailureObserver.ThrowIfAny(failures);
+        await OrleansNodeWorkCompletion.JoinAsync(stopping, requestWork, StopHostAsync, failures).ConfigureAwait(false);
     }
 
     private Task StopHostAsync(IHost stopping, List<Exception> failures)

@@ -193,19 +193,8 @@ internal sealed class RequestCqrsAuthorityFaultScenario(bool useMcp, RequestCqrs
         await VerifyRevokedCallerRejectedAsync(cancellationToken).ConfigureAwait(false);
     }
 
-    private async Task VerifyRevokedCallerRejectedAsync(CancellationToken cancellationToken)
-    {
-        var activeIdentity = identity ?? throw new InvalidOperationException(MissingOwner);
-        var reference = new EntityRef(activeIdentity.Partition, RequestCqrsRf3Protocol.AdminCollection,
-            RequestCqrsRf3Protocol.DocumentId);
-        var result = await (caller ?? throw new InvalidOperationException(MissingOwner)).Sdk.GetAsync(reference,
-            cancellationToken).ConfigureAwait(false);
-        await Assert.That(result.IsFailed).IsTrue();
-        await Assert.That(result.Problem?.ErrorCode).IsEqualTo(ErrorCode.Unauthenticated.ToString());
-        await RequestCqrsAuthorityFaultAssertions.VerifyMcpCredentialRejectedAsync(
-            caller.Mcp, activeIdentity.Secret,
-            reference, cancellationToken).ConfigureAwait(false);
-    }
+    private Task VerifyRevokedCallerRejectedAsync(CancellationToken cancellationToken)
+        => RequestCqrsAuthorityRevokedCallerAssertions.RequireAsync(identity, () => caller, cancellationToken);
 
     private async Task VerifyNoEffectAsync(CancellationToken cancellationToken)
     {

@@ -7,37 +7,11 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 
 internal sealed class LiveQueryTests
 {
-    private sealed record LiveQueryOrder(decimal Number, string Status);
-    private sealed record LiveQueryExpectation(bool Changed, LiveQueryChangeKind Kind, CommitReceipt Receipt);
+    internal sealed record LiveQueryOrder(decimal Number, string Status);
+    internal sealed record LiveQueryExpectation(bool Changed, LiveQueryChangeKind Kind, CommitReceipt Receipt);
 
     private static AstQueryRequest Query(TestDatabase db) => KeyLoadQuery.From<LiveQueryOrder>(db.Partition, "orders", UnitClientOptions.Translation())
         .Where(order => order.Status == "open").Take(100).ToRequest(true);
-    private static LiveQueryExpectation CommitScheduledMutation(TestDatabase db, int index, int trial, int round,
-        long[] revisions, bool[] deleted)
-    {
-        var id = "order-" + index.ToString(CultureInfo.InvariantCulture);
-        CommitReceipt receipt;
-        if (round == LiveQueryTestSchedule.DeleteRound)
-        {
-            receipt = db.Commit(new DeleteDocument("orders", id, revisions[index]));
-            deleted[index] = true;
-        }
-        else
-        {
-            var status = round is LiveQueryTestSchedule.LeaveRound or LiveQueryTestSchedule.NonmatchingUpdateRound or LiveQueryTestSchedule.NonmatchingInsertRound
-                ? "closed"
-                : "open";
-            var json = JsonSerializer.Serialize(new LiveQueryOrder(trial, status), JsonDefaults.Options);
-            receipt = db.Commit(new PutDocument("orders", id, json, revisions[index], ExplicitReplacement: true));
-            deleted[index] = false;
-        }
-
-        revisions[index]++;
-        return new(round is not LiveQueryTestSchedule.NonmatchingUpdateRound and not LiveQueryTestSchedule.NonmatchingInsertRound,
-            round is LiveQueryTestSchedule.LeaveRound or LiveQueryTestSchedule.DeleteRound
-                ? LiveQueryChangeKind.Remove
-                : LiveQueryChangeKind.Upsert, receipt);
-    }
 
     [Test]
     public async Task ScalarLiveDeltasMatchTheSharedQueryOracleAcrossSeededMutationsAndReplay()
@@ -63,7 +37,7 @@ internal sealed class LiveQueryTests
             var round = trial / LiveQueryTestSchedule.IdentityCount;
             LiveQueryPermutationOracle.Visit(identityVisits, index, round);
             await Assert.That(deleted[index]).IsEqualTo(round is LiveQueryTestSchedule.InsertRound or LiveQueryTestSchedule.NonmatchingInsertRound);
-            var expected = CommitScheduledMutation(db, index, trial, round, revisions, deleted);
+            var expected = LiveQueryScheduledMutation.Apply(db, index, trial, round, revisions, deleted);
             literal.Capture();
             var page = engine.ReadLiveQuery("root", new(query, cursor, Limit: 3));
             var replay = engine.ReadLiveQuery("root", new(query, cursor, Limit: 3));

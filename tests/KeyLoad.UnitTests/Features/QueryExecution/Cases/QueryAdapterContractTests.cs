@@ -8,25 +8,8 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 internal sealed class QueryAdapterContractTests
 {
     [Test]
-    public async Task CursorContinuesAcrossEquivalentSqlJsonAndCSharpForms()
-    {
-        using var db = new TestDatabase();
-        db.Configure("orders", ResourceKind.Collection);
-        db.Commit(new PutDocument("orders", "a", "{\"number\":2}"), new PutDocument("orders", "b", "{\"number\":3}"), new PutDocument("orders", "c", "{\"number\":4}"));
-        var engine = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
-        const string sql = "SELECT TOP (1) d.id, d.number FROM orders d WHERE d.number >= 2.00 ORDER BY d.id";
-        var first = engine.Execute("root", new(db.Partition, sql, AllowFullScan: true));
-        await Assert.That(System.Linq.Enumerable.Single(first.Rows).EntityId).IsEqualTo("a");
-        var json = QueryAdapterTestSupport.RoundTrip(new(db.Partition, new SqlParser(sql.Replace("2.00", "2", StringComparison.Ordinal), UnitExecutionOptions.DatabaseLimits(new()), UnitExecutionOptions.QueryExecution()).Parse(),
-            new(), true, first.Cursor));
-        var second = engine.ExecuteAst("root", json);
-        await Assert.That(System.Linq.Enumerable.Single(second.Rows).EntityId).IsEqualTo("b");
-        var builder = KeyLoadQuery.From<QueryAdapterOrder>(db.Partition, "orders", UnitClientOptions.Translation()).Where(row => row.Number >= 2m)
-            .OrderBy(row => QueryFunctions.DocumentId(row)).Select(row => new { Id = QueryFunctions.DocumentId(row), row.Number }).Take(1);
-        var third = engine.ExecuteAst("root", QueryAdapterTestSupport.RoundTrip(builder.ToRequest(true, second.Cursor)));
-        await Assert.That(System.Linq.Enumerable.Single(third.Rows).EntityId).IsEqualTo("c");
-        await Assert.That(third.Cursor).IsNull();
-    }
+    public Task CursorContinuesAcrossEquivalentSqlJsonAndCSharpForms()
+        => QueryAdapterCursorFlow.RunAsync();
 
     [Test]
     public async Task EveryAdapterChecksSensitivePredicateAndOrderingAndProjectsTheSameOmission()

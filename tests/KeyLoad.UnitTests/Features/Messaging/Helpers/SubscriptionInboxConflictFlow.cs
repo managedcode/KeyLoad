@@ -43,18 +43,7 @@ internal static class SubscriptionInboxConflictFlow
         { (claim, originalClaim, SubscriptionProcessingAtomicAssertions.OutcomeBytes(fixture.Store, group, claim.Id)) };
         var inbox = SubscriptionInboxConflictAssertions.InboxBytes(fixture.Store, group);
         await SubscriptionInboxConflictAssertions.ReplayAsync(fixture.Database, fixture.Store, group, history[0]);
-        var seek = new SeekSubscriptionRequest(Guid.NewGuid(), group, 1, SubscriptionStart.FromBeginning);
-        Add(fixture.Database, fixture.Store, group, Create(OperationKind.SeekSubscription, seek, seek.CommandId, time.AddSeconds(2)), history);
-        await SubscriptionParkedRecoveryAssertions.StatusAsync(fixture.Database, group, new()
-        {
-            MaxWindow = 3
-        }, 2, 0, 0, 3, true, null);
-        var resume = new SetSubscriptionPausedRequest(Guid.NewGuid(), group, 2, false);
-        Add(fixture.Database, fixture.Store, group, Create(OperationKind.SetSubscriptionPaused, resume, resume.CommandId, time.AddSeconds(2)), history);
-        await SubscriptionParkedRecoveryAssertions.StatusAsync(fixture.Database, group, new()
-        {
-            MaxWindow = 3
-        }, 2, 0, 0, 3, false, null);
+        await SeekAndResumeAsync(fixture.Database, fixture.Store, group, time, history);
         var current = new ReceiveSubscriptionRequest(Guid.NewGuid(), group, MaxEvents: 3);
         var currentOperation = Create(OperationKind.ReceiveSubscription, current, current.RequestId, time.AddSeconds(3));
         var currentResult = fixture.Database.Apply(currentOperation);
@@ -194,5 +183,23 @@ internal static class SubscriptionInboxConflictFlow
 
     private static ReplicatedOperation Create<T>(OperationKind kind, T payload, Guid id, DateTimeOffset time)
         => new(id, kind, "root", time, JsonSerializer.Serialize(payload, JsonDefaults.Options));
+
+    private static async Task SeekAndResumeAsync(DatabaseEngine database, ZoneTreeStore store,
+        SubscriptionRef group, DateTimeOffset time,
+        List<(ReplicatedOperation Operation, OperationResult Result, byte[] Saved)> history)
+    {
+        var seek = new SeekSubscriptionRequest(Guid.NewGuid(), group, 1, SubscriptionStart.FromBeginning);
+        Add(database, store, group, Create(OperationKind.SeekSubscription, seek, seek.CommandId, time.AddSeconds(2)), history);
+        await SubscriptionParkedRecoveryAssertions.StatusAsync(database, group, new()
+        {
+            MaxWindow = 3
+        }, 2, 0, 0, 3, true, null);
+        var resume = new SetSubscriptionPausedRequest(Guid.NewGuid(), group, 2, false);
+        Add(database, store, group, Create(OperationKind.SetSubscriptionPaused, resume, resume.CommandId, time.AddSeconds(2)), history);
+        await SubscriptionParkedRecoveryAssertions.StatusAsync(database, group, new()
+        {
+            MaxWindow = 3
+        }, 2, 0, 0, 3, false, null);
+    }
 }
 

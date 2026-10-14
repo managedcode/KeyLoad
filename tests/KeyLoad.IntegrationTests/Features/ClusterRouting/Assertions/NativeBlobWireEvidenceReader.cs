@@ -35,42 +35,48 @@ internal static class NativeBlobWireEvidenceReader
                     throw Invalid();
                 }
             }
-            byte[]? originalBytes = null;
-            for (var ordinal = 1; ordinal <= expected; ordinal++)
-            {
-                var bytes = fixture.Read(NativeBlobWireNames.Result(arm.Identity, ordinal));
-                var result = fixture.Codec.Read<NativeBlobWireResult>(bytes);
-                var entry = complete.Results[ordinal - 1];
-                if (result.Version != NativeBlobWireProbeProtocol.Version || result.SessionId != fixture.SessionId
-                    || result.ClaimDigest != digest || result.Identity != arm.Identity || result.Ordinal != ordinal
-                    || (int)result.Variation != ordinal - 1 || entry.Ordinal != ordinal
-                    || entry.Variation != result.Variation || entry.RecordDigest != NativeBlobWireCodec.Digest(bytes))
-                {
-                    throw Invalid();
-                }
-                originalBytes ??= result.OriginalNativeRequest;
-                if (!originalBytes.AsSpan().SequenceEqual(result.OriginalNativeRequest))
-                {
-                    throw Invalid();
-                }
-                var original = NativeSerialization.Deserialize<RemoteModelNativeRequest>(result.OriginalNativeRequest);
-                var request = NativeSerialization.Deserialize<RemoteModelNativeRequest>(result.NativeRequest);
-                var reply = NativeSerialization.Deserialize<RemoteModelNativeReply>(result.NativeReply);
-                var call = NativeSerialization.Deserialize<RemoteDocumentTransportEnvelope>(original.Payload.Span).ControlledBlob
-                    ?? throw Invalid();
-                if (NativeBlobWireScope.Match(fixture.Owner, fixture.Arms, call)?.ArmId != arm.ArmId
-                    || claim.OriginalCallDigest != NativeBlobWireCodec.Digest(NativeSerialization.Serialize(call))
-                    || claim.CallerVoter != call.CallerVoter || claim.CallerSiloAddress != call.CallerSiloAddress
-                    || claim.RequestId != call.RequestId || claim.QueryId != call.Request.Frame.QueryId
-                    || claim.Nonce != call.Nonce || claim.ExpiresAt != call.Request.Frame.ExpiresAt)
-                {
-                    throw Invalid();
-                }
-                await PartitionMovementNativeBlobFaultAssertions.RequireAsync(original,
-                    new(result.Variation, request.Payload, original.Signature), request, reply,
-                    actualSourceAtCapture, actualDestinationAtCapture, sourceSecret, destinationSecret, token).ConfigureAwait(false);
-            }
+            await RequireResultsAsync(fixture, actualSourceAtCapture, actualDestinationAtCapture, sourceSecret, destinationSecret, arm, claim, digest, complete, expected, token).ConfigureAwait(false);
         }
     }
+
+    private static async Task RequireResultsAsync(NativeBlobWireProbeFixture fixture, IReadOnlyList<ReplicaSiloDiscovery> actualSourceAtCapture, IReadOnlyList<ReplicaSiloDiscovery> actualDestinationAtCapture, string sourceSecret, string destinationSecret, NativeBlobWireArm arm, NativeBlobWireClaim claim, string digest, NativeBlobWireCompletion complete, int expected, CancellationToken token)
+    {
+        byte[]? originalBytes = null;
+        for (var ordinal = 1; ordinal <= expected; ordinal++)
+        {
+            var bytes = fixture.Read(NativeBlobWireNames.Result(arm.Identity, ordinal));
+            var result = fixture.Codec.Read<NativeBlobWireResult>(bytes);
+            var entry = complete.Results[ordinal - 1];
+            if (result.Version != NativeBlobWireProbeProtocol.Version || result.SessionId != fixture.SessionId
+                || result.ClaimDigest != digest || result.Identity != arm.Identity || result.Ordinal != ordinal
+                || (int)result.Variation != ordinal - 1 || entry.Ordinal != ordinal
+                || entry.Variation != result.Variation || entry.RecordDigest != NativeBlobWireCodec.Digest(bytes))
+            {
+                throw Invalid();
+            }
+            originalBytes ??= result.OriginalNativeRequest;
+            if (!originalBytes.AsSpan().SequenceEqual(result.OriginalNativeRequest))
+            {
+                throw Invalid();
+            }
+            var original = NativeSerialization.Deserialize<RemoteModelNativeRequest>(result.OriginalNativeRequest);
+            var request = NativeSerialization.Deserialize<RemoteModelNativeRequest>(result.NativeRequest);
+            var reply = NativeSerialization.Deserialize<RemoteModelNativeReply>(result.NativeReply);
+            var call = NativeSerialization.Deserialize<RemoteDocumentTransportEnvelope>(original.Payload.Span).ControlledBlob
+                ?? throw Invalid();
+            if (NativeBlobWireScope.Match(fixture.Owner, fixture.Arms, call)?.ArmId != arm.ArmId
+                || claim.OriginalCallDigest != NativeBlobWireCodec.Digest(NativeSerialization.Serialize(call))
+                || claim.CallerVoter != call.CallerVoter || claim.CallerSiloAddress != call.CallerSiloAddress
+                || claim.RequestId != call.RequestId || claim.QueryId != call.Request.Frame.QueryId
+                || claim.Nonce != call.Nonce || claim.ExpiresAt != call.Request.Frame.ExpiresAt)
+            {
+                throw Invalid();
+            }
+            await PartitionMovementNativeBlobFaultAssertions.RequireAsync(original,
+                new(result.Variation, request.Payload, original.Signature), request, reply,
+                actualSourceAtCapture, actualDestinationAtCapture, sourceSecret, destinationSecret, token).ConfigureAwait(false);
+        }
+    }
+
     private static InvalidOperationException Invalid() => new(NativeBlobWireProbeProtocol.InvalidEvidence);
 }

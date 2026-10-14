@@ -7,9 +7,6 @@ namespace KeyLoad.IntegrationTests.Features.ClientApi;
 internal static class McpGraphPathInputSchemaAssertions
 {
     private const string DirectTool = McpCallerProtocol.GraphShortestPath;
-    private const string ReferenceKeyword = "$ref";
-    private const int MaximumReferenceDepth = 8;
-    private const string InvalidSchemaType = "The accepted path schema type is missing.";
     private static readonly ImmutableArray<string> DirectProperties =
     [McpDiscoveryProtocol.Version, McpDiscoveryProtocol.Partition, McpDiscoveryProtocol.Graph,
         McpDiscoveryProtocol.FromEntity, McpDiscoveryProtocol.To, McpDiscoveryProtocol.MaxDepth,
@@ -153,83 +150,14 @@ internal static class McpGraphPathInputSchemaAssertions
     }
 
     private static bool ContainsType(JsonElement schema, string expected, JsonElement root)
-    {
-        schema = Resolve(root, schema);
-        if (schema.TryGetProperty(McpDiscoveryProtocol.Type, out var type)
-            && ((type.ValueKind == JsonValueKind.String && type.GetString() == expected)
-                || (type.ValueKind == JsonValueKind.Array && type.EnumerateArray().Any(item => item.GetString() == expected))))
-        {
-            return true;
-        }
-        foreach (var keyword in new[] { McpDiscoveryProtocol.AnyOf, McpDiscoveryProtocol.OneOf })
-        {
-            if (schema.TryGetProperty(keyword, out var variants) && variants.ValueKind == JsonValueKind.Array
-                && variants.EnumerateArray().Any(variant => ContainsType(variant, expected, root)))
-            {
-                return true;
-            }
-        }
-        return false;
-    }
+        => McpGraphPathSchemaTypes.ContainsType(schema, expected, root);
 
     private static JsonElement FindType(JsonElement schema, string expected, JsonElement root)
-    {
-        schema = Resolve(root, schema);
-        if (schema.TryGetProperty(McpDiscoveryProtocol.Type, out var type)
-            && ((type.ValueKind == JsonValueKind.String && type.GetString() == expected)
-                || (type.ValueKind == JsonValueKind.Array && type.EnumerateArray()
-                    .Any(item => item.ValueKind == JsonValueKind.String && item.GetString() == expected))))
-        {
-            return schema;
-        }
-        foreach (var keyword in new[] { McpDiscoveryProtocol.AnyOf, McpDiscoveryProtocol.OneOf })
-        {
-            if (!schema.TryGetProperty(keyword, out var variants) || variants.ValueKind != JsonValueKind.Array)
-            {
-                continue;
-            }
-            foreach (var variant in variants.EnumerateArray())
-            {
-                if (ContainsType(variant, expected, root))
-                {
-                    return FindType(variant, expected, root);
-                }
-            }
-        }
-        throw new InvalidOperationException(InvalidSchemaType);
-    }
+        => McpGraphPathSchemaTypes.FindType(schema, expected, root);
 
-    private static async Task VerifyExactTypeSetAsync(JsonElement schema, JsonElement root, string first, string second)
-    {
-        schema = Resolve(root, schema);
-        var type = schema.GetProperty(McpDiscoveryProtocol.Type);
-        await Assert.That(type.ValueKind).IsEqualTo(JsonValueKind.Array);
-        var types = type.EnumerateArray().ToArray();
-        await Assert.That(types.Length).IsEqualTo(2);
-        await Assert.That(types.All(item => item.ValueKind == JsonValueKind.String)).IsTrue();
-        await Assert.That(types.Count(item => item.GetString() == first)).IsEqualTo(1);
-        await Assert.That(types.Count(item => item.GetString() == second)).IsEqualTo(1);
-    }
+    private static Task VerifyExactTypeSetAsync(JsonElement schema, JsonElement root, string first, string second)
+        => McpGraphPathSchemaTypes.VerifyExactTypeSetAsync(schema, root, first, second);
 
     private static JsonElement Resolve(JsonElement root, JsonElement schema)
-    {
-        for (var depth = 0; depth < MaximumReferenceDepth && schema.TryGetProperty(ReferenceKeyword, out var reference); depth++)
-        {
-            var pointer = reference.GetString();
-            if (pointer is null || !pointer.StartsWith("#/", StringComparison.Ordinal))
-            {
-                throw new InvalidOperationException("The path schema reference is not local.");
-            }
-            schema = root;
-            foreach (var segment in pointer[2..].Split('/'))
-            {
-                schema = schema.GetProperty(segment.Replace("~1", "/", StringComparison.Ordinal).Replace("~0", "~", StringComparison.Ordinal));
-            }
-        }
-        if (schema.TryGetProperty(ReferenceKeyword, out _))
-        {
-            throw new InvalidOperationException("The path schema reference is too deep.");
-        }
-        return schema;
-    }
+        => McpGraphPathSchemaTypes.Resolve(root, schema);
 }

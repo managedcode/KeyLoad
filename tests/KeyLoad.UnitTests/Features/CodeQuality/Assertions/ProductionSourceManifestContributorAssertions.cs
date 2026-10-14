@@ -77,7 +77,7 @@ internal static class ProductionSourceManifestContributorAssertions
 
     private static async Task AssertRegistryShapeAsync(JsonElement registry)
     {
-        await AssertFieldsAsync(registry, [SchemaVersionProperty, ContributorsProperty]);
+        await ProductionSourceManifestValueAssertions.FieldsAsync(registry, [SchemaVersionProperty, ContributorsProperty]);
         await Assert.That(registry.GetProperty(SchemaVersionProperty).GetInt32()).IsEqualTo(RegistrySchemaVersion);
         await Assert.That(registry.GetProperty(ContributorsProperty).ValueKind).IsEqualTo(JsonValueKind.Array);
     }
@@ -88,11 +88,11 @@ internal static class ProductionSourceManifestContributorAssertions
         var expected = expectedRows.EnumerateArray().ToArray();
         for (var index = 0; index < expected.Length; index++)
         {
-            await AssertFieldsAsync(actual[index], FieldNames);
-            await AssertFieldsAsync(expected[index], FieldNames);
+            await ProductionSourceManifestValueAssertions.FieldsAsync(actual[index], FieldNames);
+            await ProductionSourceManifestValueAssertions.FieldsAsync(expected[index], FieldNames);
             foreach (var field in FieldNames)
             {
-                await AssertJsonValueEqualAsync(expected[index].GetProperty(field), actual[index].GetProperty(field));
+                await ProductionSourceManifestValueAssertions.EqualAsync(expected[index].GetProperty(field), actual[index].GetProperty(field));
             }
         }
     }
@@ -149,7 +149,7 @@ internal static class ProductionSourceManifestContributorAssertions
                 await Assert.That(actual.GetProperty(SuiteProperty).GetString()).IsEqualTo(suite);
                 foreach (var field in FieldNames.Where(name => name != SuiteProperty && name != OperationProperty))
                 {
-                    await AssertJsonValueEqualAsync(sourceCase.GetProperty(field), actual.GetProperty(field));
+                    await ProductionSourceManifestValueAssertions.EqualAsync(sourceCase.GetProperty(field), actual.GetProperty(field));
                 }
                 var methodName = sourceCase.GetProperty(MethodNameProperty).GetString()!;
                 if (StrengthenedQueryOperations.TryGetValue(methodName, out var operation))
@@ -158,7 +158,7 @@ internal static class ProductionSourceManifestContributorAssertions
                 }
                 else
                 {
-                    await AssertJsonValueEqualAsync(sourceCase.GetProperty(OperationProperty), actual.GetProperty(OperationProperty));
+                    await ProductionSourceManifestValueAssertions.EqualAsync(sourceCase.GetProperty(OperationProperty), actual.GetProperty(OperationProperty));
                 }
             }
         }
@@ -197,23 +197,4 @@ internal static class ProductionSourceManifestContributorAssertions
         => string.Concat(suite.Length, ":", suite, className.Length, ":", className,
             methodName.Length, ":", methodName, instanceName.Length, ":", instanceName);
 
-    private static async Task AssertJsonValueEqualAsync(JsonElement expected, JsonElement actual)
-    {
-        await Assert.That(actual.ValueKind).IsEqualTo(expected.ValueKind);
-        if (expected.ValueKind == JsonValueKind.String)
-        {
-            await Assert.That(actual.GetString()).IsEqualTo(expected.GetString());
-            return;
-        }
-        var expectedItems = expected.EnumerateArray().Select(item => item.GetString()).ToArray();
-        var actualItems = actual.EnumerateArray().Select(item => item.GetString()).ToArray();
-        await Assert.That(actualItems).IsEquivalentTo(expectedItems, TUnit.Assertions.Enums.CollectionOrdering.Matching);
-    }
-
-    private static async Task AssertFieldsAsync(JsonElement element, string[] expected)
-    {
-        var actual = element.EnumerateObject().Select(property => property.Name).Order(StringComparer.Ordinal);
-        await Assert.That(actual).IsEquivalentTo(expected.Order(StringComparer.Ordinal),
-            TUnit.Assertions.Enums.CollectionOrdering.Matching);
-    }
 }

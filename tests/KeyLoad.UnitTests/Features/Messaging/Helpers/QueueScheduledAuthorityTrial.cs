@@ -28,16 +28,7 @@ internal static class QueueScheduledAuthorityTrial
         var state = new QueueScheduledAuthorityState(flow, due, key, exact, receive);
         await QueueScheduledAuthorityImage.ScheduledAsync(fixture.Database, fixture.Store, state);
         var original = QueuePendingAuthorityHistory.Capture(fixture.Store);
-        var malformed = NativeSerialization.Serialize(NativeSerialization.Deserialize<MessageMetadata>(exact)
-            with
-        {
-            NotBefore = due.AddTicks(1)
-        });
-        Put(fixture.Store, key, malformed);
-        var damaged = QueuePendingAuthorityHistory.Capture(fixture.Store);
-        await QueueScheduledAuthorityHistory.OneRowAsync(original, damaged, key, malformed);
-        await QueueScheduledAuthorityHistory.RefuseAsync(fixture.Database, fixture.Store, state, damaged);
-        await QueueScheduledAuthorityHistory.RefuseAsync(fixture.Database, fixture.Store, state, damaged);
+        var damaged = await DamageAndRefuseAsync(fixture, state, original, exact, due, key);
         fixture.Store.Dispose();
         QueuePendingAuthorityCut terminal;
         using (var cold = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution, UnitExecutionOptions.PointCacheExecution()))
@@ -76,4 +67,21 @@ internal static class QueueScheduledAuthorityTrial
 
     private static void Put(ZoneTreeStore store, byte[] key, byte[] value)
         => store.Commit((tx, _) => { tx.Put(key, value); return true; });
+
+    private static async Task<QueuePendingAuthorityCut> DamageAndRefuseAsync(TestDatabase fixture,
+        QueueScheduledAuthorityState state, QueuePendingAuthorityCut original, byte[] exact,
+        DateTimeOffset due, byte[] key)
+    {
+        var malformed = NativeSerialization.Serialize(NativeSerialization.Deserialize<MessageMetadata>(exact)
+            with
+        {
+            NotBefore = due.AddTicks(1)
+        });
+        Put(fixture.Store, key, malformed);
+        var damaged = QueuePendingAuthorityHistory.Capture(fixture.Store);
+        await QueueScheduledAuthorityHistory.OneRowAsync(original, damaged, key, malformed);
+        await QueueScheduledAuthorityHistory.RefuseAsync(fixture.Database, fixture.Store, state, damaged);
+        await QueueScheduledAuthorityHistory.RefuseAsync(fixture.Database, fixture.Store, state, damaged);
+        return damaged;
+    }
 }

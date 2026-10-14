@@ -91,12 +91,12 @@ internal static class NativeCoverageProductEvidenceFiles
         string temporaryRoot, IReadOnlyDictionary<string, OriginalFile> originals,
         NativeCoverageExecutionOptions limits)
     {
-        var descriptorBytes = ReadBoundedBytes(descriptorPath, limits.MaximumDescriptorBytes, limits.ReadBufferBytes);
+        var descriptorBytes = NativeCoverageEvidenceInputReader.ReadBoundedBytes(descriptorPath, limits.MaximumDescriptorBytes, limits.ReadBufferBytes);
         var descriptor = JsonNode.Parse(descriptorBytes)
             ?? throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure);
         var sourceReference = GetUnitGroupTrxReference(descriptor);
-        var sourceTrx = ResolveEvidenceReference(evidenceRoot, (string?)sourceReference[NativeCoverageProductFields.Path]);
-        var rejectedTrx = ChangeOneOutcomeToFailure(ReadBoundedBytes(sourceTrx,
+        var sourceTrx = NativeCoverageEvidenceInputReader.ResolveEvidenceReference(evidenceRoot, (string?)sourceReference[NativeCoverageProductFields.Path]);
+        var rejectedTrx = ChangeOneOutcomeToFailure(NativeCoverageEvidenceInputReader.ReadBoundedBytes(sourceTrx,
             limits.MaximumReportBytes, limits.ReadBufferBytes));
         var rejectedDescriptor = JsonNode.Parse(descriptorBytes)
             ?? throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure);
@@ -156,49 +156,6 @@ internal static class NativeCoverageProductEvidenceFiles
         document.Save(output);
         return output.ToArray();
     }
-    private static string ResolveEvidenceReference(string evidenceRoot, string? relativePath)
-    {
-        if (string.IsNullOrWhiteSpace(relativePath) || Path.IsPathRooted(relativePath))
-        {
-            throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure);
-        }
-        var root = Path.TrimEndingDirectorySeparator(Path.GetFullPath(evidenceRoot));
-        var path = Path.GetFullPath(Path.Combine(root, relativePath.Replace('/', Path.DirectorySeparatorChar)));
-        if (!path.StartsWith(root + Path.DirectorySeparatorChar, PathComparison))
-        {
-            throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure);
-        }
-        return path;
-    }
-    private static byte[] ReadBoundedBytes(string path, long maximumBytes, int readBufferBytes)
-    {
-        var info = new FileInfo(path);
-        if (!info.Exists || info.Length <= 0 || info.Length > maximumBytes || IsReparsePoint(info))
-        {
-            throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure);
-        }
-        var beforeLength = info.Length;
-        var beforeWrite = info.LastWriteTimeUtc;
-        using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
-        using var output = new MemoryStream();
-        var buffer = new byte[readBufferBytes];
-        int read;
-        while ((read = stream.Read(buffer, 0, buffer.Length)) > 0)
-        {
-            if (output.Length > maximumBytes - read)
-            {
-                throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure);
-            }
-            output.Write(buffer, 0, read);
-        }
-        info.Refresh();
-        if (output.Length != beforeLength || info.Length != beforeLength || info.LastWriteTimeUtc != beforeWrite
-            || IsReparsePoint(info))
-        {
-            throw new InvalidDataException(NativeCoverageMergeProcess.OutputFailure);
-        }
-        return output.ToArray();
-    }
     private static OriginalFile CaptureFile(string path, NativeCoverageExecutionOptions limits)
     {
         var before = new FileInfo(path);
@@ -243,8 +200,6 @@ internal static class NativeCoverageProductEvidenceFiles
         stream.Write(contents, 0, contents.Length);
         stream.Flush(flushToDisk: true);
     }
-    private static bool IsReparsePoint(FileSystemInfo info) => info.LinkTarget is not null
+    internal static bool IsReparsePoint(FileSystemInfo info) => info.LinkTarget is not null
         || (info.Attributes & FileAttributes.ReparsePoint) != 0;
-    private static StringComparison PathComparison => OperatingSystem.IsWindows()
-        ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
 }

@@ -25,19 +25,7 @@ internal static class ServerConfiguration
         builder.AddServiceDefaults();
         builder.Services.AddRuntimeOptions(builder.Configuration);
         ServerConnectionTransportComposition.Configure(builder);
-        builder.Services.AddOptions<KestrelServerOptions>().Configure<IOptions<ServerExecutionOptions>>(
-            (server, configured) => server.Limits.MaxRequestBodySize = configured.Value.MaximumBodyBytes);
-        builder.Services.AddOptions<KestrelServerOptions>().Configure<ServerConnectionRegistry>(
-            (server, connections) => server.ConfigureEndpointDefaults(listen =>
-            {
-                listen.Use(next => connection => connections.RunAsync(connection, () => next(connection)));
-                ((Microsoft.AspNetCore.Connections.IMultiplexedConnectionBuilder)listen).Use(
-                    next => connection => connections.RunAsync(connection, () => next(connection)));
-            }));
-        builder.Services.Configure<Microsoft.AspNetCore.Routing.RouteHandlerOptions>(options => options.ThrowOnBadRequest = true);
-        builder.Services.AddOptions<Microsoft.AspNetCore.Http.Json.JsonOptions>()
-            .Configure<IOptions<ServerExecutionOptions>>((options, configured) =>
-                ConfigureJson(options.SerializerOptions, configured.Value.MaximumJsonDepth));
+        ConfigureTransportOptions(builder);
         Register(builder.Services, blobWireObserver, localhostClustering);
         PostgresNativeComposition.Register(builder.Services, builder.Configuration);
         if (sealedObserver is not null)
@@ -107,6 +95,23 @@ internal static class ServerConfiguration
         var configured = new OptionsManager<ZoneTreeStorageExecutionOptions>(factory);
         _ = configured.Value;
         return configured;
+    }
+
+    private static void ConfigureTransportOptions(WebApplicationBuilder builder)
+    {
+        builder.Services.AddOptions<KestrelServerOptions>().Configure<IOptions<ServerExecutionOptions>>(
+            (server, configured) => server.Limits.MaxRequestBodySize = configured.Value.MaximumBodyBytes);
+        builder.Services.AddOptions<KestrelServerOptions>().Configure<ServerConnectionRegistry>(
+            (server, connections) => server.ConfigureEndpointDefaults(listen =>
+            {
+                listen.Use(next => connection => connections.RunAsync(connection, () => next(connection)));
+                ((Microsoft.AspNetCore.Connections.IMultiplexedConnectionBuilder)listen).Use(
+                    next => connection => connections.RunAsync(connection, () => next(connection)));
+            }));
+        builder.Services.Configure<Microsoft.AspNetCore.Routing.RouteHandlerOptions>(options => options.ThrowOnBadRequest = true);
+        builder.Services.AddOptions<Microsoft.AspNetCore.Http.Json.JsonOptions>()
+            .Configure<IOptions<ServerExecutionOptions>>((options, configured) =>
+                ConfigureJson(options.SerializerOptions, configured.Value.MaximumJsonDepth));
     }
 
     private static void ConfigureJson(System.Text.Json.JsonSerializerOptions options, int maximumDepth)

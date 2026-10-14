@@ -47,31 +47,13 @@ internal sealed class NativeAnnGenerationOwner : IAsyncDisposable
     }
 
     internal Task<T> RunAsync<T>(Func<NativeAnnStageStore, T> operation)
-    {
-        lock (gate)
-        {
-            ObjectDisposedException.ThrowIf(closed, this);
-            return worker.RunAsync(() => operation(stages));
-        }
-    }
+        => NativeAnnOwnerAdmission.RunAsync(this, gate, ref closed, worker, stages, operation);
 
     internal NativeAnnReadReservation ReserveRead(long desiredBytes)
-    {
-        lock (gate)
-        {
-            ObjectDisposedException.ThrowIf(closed, this);
-            return NativeAnnPublicReadAdmission.Reserve(slots, options, publicReads, desiredBytes, MaintenanceMemory.Bytes);
-        }
-    }
+        => NativeAnnOwnerAdmission.ReserveRead(this, gate, ref closed, slots, options, publicReads, MaintenanceMemory, desiredBytes);
 
     internal NativeAnnManifest DescribePublished(NativeAnnOwnedKey key)
-    {
-        lock (gate)
-        {
-            ObjectDisposedException.ThrowIf(closed, this);
-            return NativeAnnPublicReadAdmission.Describe(slots, key);
-        }
-    }
+        => NativeAnnOwnerAdmission.DescribePublished(this, gate, ref closed, slots, key);
 
     internal Task<NativeAnnManifest> BuildAndPublishAsync(AnnMaintenanceRequest request, AnnSeed seed,
         CommitProjectionBatchRequest? intent, AnnWorkBudget budget)
@@ -135,18 +117,7 @@ internal sealed class NativeAnnGenerationOwner : IAsyncDisposable
     }
 
     internal void ReleaseGeneration(NativeAnnOwnedKey key)
-    {
-        lock (gate)
-        {
-            ObjectDisposedException.ThrowIf(closed, this);
-            stages.Release(key);
-            foreach (var slot in slots.Where(item => NativeAnnSlotRetention.SameKey(item.Manifest, key)))
-            {
-                slot.Retire();
-            }
-            NativeAnnSlotRetention.RetireUnpinned(root, slots, options);
-        }
-    }
+        => NativeAnnOwnerAdmission.ReleaseGeneration(this, gate, ref closed, stages, slots, options, root, key);
 
     internal NativeAnnIndexLease Acquire(AnnMaintenanceRequest request, AnnSeed current)
     {
@@ -219,15 +190,14 @@ internal sealed class NativeAnnGenerationOwner : IAsyncDisposable
         {
             await worker.DisposeAsync().ConfigureAwait(false);
         }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        await ServerFailureObserver.ObserveAsync(() => originalReaders, failures).ConfigureAwait(false);
-        lock (gate)
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
-            MaintenanceMemory.Close();
-            slots.Clear();
-            ServerFailureObserver.Observe(root.Dispose, failures);
+            failures.Add(error);
         }
-        ServerFailureObserver.ThrowIfAny(failures);
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
+        await NativeAnnGenerationShutdown.CompleteAsync(originalReaders, gate, MaintenanceMemory, slots, root, failures).ConfigureAwait(false);
     }
 }

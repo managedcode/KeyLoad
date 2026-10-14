@@ -43,21 +43,7 @@ internal static class SqlNullDistinctRf3Refusals
                     {
                         await SqlNullDistinctRf3Pages.CaseAsync(caller, wire,
                             SqlNullDistinctRf3Cases.All[SqlNullDistinctRf3State.First], state.LowRevision, token);
-                        foreach (var item in SqlNullDistinctRf3Cases.All.Where(item => item.Clause == SqlNullDistinctRf3Cases.NullClause
-                            || item.Clause == SqlNullDistinctRf3Cases.NotNullClause
-                            || item.Clause == SqlNullDistinctRf3Cases.PositiveClause
-                            || item.Clause == SqlNullDistinctRf3Cases.LeadingClause
-                            || item.Clause == SqlNullDistinctRf3Cases.HexClause
-                            || item.Clause == SqlNullDistinctRf3Cases.EscapeClause
-                            || item.Clause == SqlNullDistinctRf3Cases.ContinuationClause
-                            || item.Clause == SqlNullDistinctRf3Cases.UnicodeClause
-                            || item.Clause == SqlNullDistinctRf3Cases.UnicodeCustomClause
-                            || item.Clause == SqlNullDistinctRf3Cases.NumericSeparatorClause
-                            || item.Clause == SqlNullDistinctRf3Cases.NumericRadixSeparatorClause
-                            || item.Clause == SqlNullDistinctRf3Cases.NumericOctalSeparatorClause
-                            || item.Clause == SqlNullDistinctRf3Cases.DollarClause
-                            || item.Clause == SqlNullDistinctRf3Cases.BinaryClause
-                            || item.Clause == SqlNullDistinctRf3Cases.OctalClause || SqlUnicodeIdentifierRf3Controls.IsSelected(item)))
+                        foreach (var item in SqlNullDistinctRf3Cases.All.Where(IsHealthyClause))
                         {
                             await SqlNullDistinctRf3Pages.CaseAsync(caller, wire, item, state.LowRevision, token);
                         }
@@ -110,4 +96,21 @@ internal static class SqlNullDistinctRf3Refusals
         }
         await SqlNullDistinctRf3Pages.HealthyAsync(fixture, state, token);
     }
+
+    private static bool IsHealthyClause(SqlNullDistinctRf3Case item)
+        => item.Clause == SqlNullDistinctRf3Cases.NullClause
+            || item.Clause == SqlNullDistinctRf3Cases.NotNullClause
+            || item.Clause == SqlNullDistinctRf3Cases.PositiveClause
+            || item.Clause == SqlNullDistinctRf3Cases.LeadingClause
+            || item.Clause == SqlNullDistinctRf3Cases.HexClause
+            || item.Clause == SqlNullDistinctRf3Cases.EscapeClause
+            || item.Clause == SqlNullDistinctRf3Cases.ContinuationClause
+            || item.Clause == SqlNullDistinctRf3Cases.UnicodeClause
+            || item.Clause == SqlNullDistinctRf3Cases.UnicodeCustomClause
+            || item.Clause == SqlNullDistinctRf3Cases.NumericSeparatorClause
+            || item.Clause == SqlNullDistinctRf3Cases.NumericRadixSeparatorClause
+            || item.Clause == SqlNullDistinctRf3Cases.NumericOctalSeparatorClause
+            || item.Clause == SqlNullDistinctRf3Cases.DollarClause
+            || item.Clause == SqlNullDistinctRf3Cases.BinaryClause
+            || item.Clause == SqlNullDistinctRf3Cases.OctalClause || SqlUnicodeIdentifierRf3Controls.IsSelected(item);
 }

@@ -2,12 +2,12 @@ namespace KeyLoad.UnitTests;
 
 internal static class TestDatabaseNativeDisposal
 {
-    internal static void Run(Action disposeReplica, Action disposeStore, Action deleteDirectory)
+    internal static void Run(IDisposable? disposeReplica, Action disposeStore, Action deleteDirectory)
     {
         var failures = new List<Exception>();
         try
         {
-            disposeReplica();
+            disposeReplica?.Dispose();
         }
         catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
         {

@@ -144,12 +144,7 @@ internal sealed class ReplicaMaterializerLifecycleFixture : IAsyncDisposable, ID
         {
             ownersClosed = true;
             ReplicaMaterializerLifecycleErrors.Attempt(Log.Dispose, failures);
-            try
-            {
-                storeOwners.Dispose();
-            }
-            catch (AggregateException error) { ReplicaMaterializerLifecycleErrors.Add(error, failures); }
-            catch (IOException error) { ReplicaMaterializerLifecycleErrors.Add(error, failures); }
+            ReplicaMaterializerLifecycleObservations.CloseStores(storeOwners, failures);
         }
         ReplicaMaterializerLifecycleErrors.Attempt(DeleteDirectory, failures);
         cleanupCompleted = true;
@@ -163,25 +158,12 @@ internal sealed class ReplicaMaterializerLifecycleFixture : IAsyncDisposable, ID
         }
         var failures = scenarioFailures ??= [];
         Release();
-        try
-        {
-            DisposeMaterializerAsync().GetAwaiter().GetResult();
-        }
-        catch (IOException error) { ReplicaMaterializerLifecycleErrors.Add(error, failures); }
-        catch (InvalidOperationException error) { ReplicaMaterializerLifecycleErrors.Add(error, failures); }
-        catch (OperationCanceledException error) { ReplicaMaterializerLifecycleErrors.Add(error, failures); }
-        catch (TimeoutException error) { ReplicaMaterializerLifecycleErrors.Add(error, failures); }
-        catch (KeyLoadException error) { ReplicaMaterializerLifecycleErrors.Add(error, failures); }
+        ReplicaMaterializerLifecycleObservations.JoinSynchronously(DisposeMaterializerAsync, failures);
         if (!ownersClosed)
         {
             ownersClosed = true;
             ReplicaMaterializerLifecycleErrors.Attempt(Log.Dispose, failures);
-            try
-            {
-                storeOwners.Dispose();
-            }
-            catch (AggregateException error) { ReplicaMaterializerLifecycleErrors.Add(error, failures); }
-            catch (IOException error) { ReplicaMaterializerLifecycleErrors.Add(error, failures); }
+            ReplicaMaterializerLifecycleObservations.CloseStores(storeOwners, failures);
         }
         ReplicaMaterializerLifecycleErrors.Attempt(DeleteDirectory, failures);
         cleanupCompleted = true;
@@ -216,29 +198,9 @@ internal sealed class ReplicaMaterializerLifecycleFixture : IAsyncDisposable, ID
 
     private ZoneTreeStore OpenReplicaStore() => new(new(ReplicaPath) { Incarnation = Configuration.Incarnation }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
 
-    internal async Task AssertReopenedAsync(long cut)
-    {
-        var identity = storeOwners.Canonical.Identity;
-        var failures = new List<Exception>();
-        CloseOwners(failures);
-        ReplicaMaterializerLifecycleErrors.Throw(failures);
-        using var reopenedCanonical = new ZoneTreeStore(new(CanonicalPath)
-        {
-            Incarnation = Configuration.Incarnation
-        }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
-        using var reopenedReplica = new ZoneTreeStore(new(ReplicaPath)
-        {
-            Incarnation = Configuration.Incarnation
-        }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
-        using var reopenedLog = new DurableReplicaLog(reopenedReplica, RecoveryExecutionOptions.Configuration(Configuration));
-        var database = new DatabaseEngine(reopenedCanonical, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource(), RecoveryExecutionOptions.Messaging(), RecoveryExecutionOptions.GraphExecution(), RecoveryExecutionOptions.ChangeFeedExecution(), RecoveryExecutionOptions.BlobExecution(), RecoveryExecutionOptions.NativeClaimsExecution(), RecoveryExecutionOptions.TimeSeriesExecution(), RecoveryExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
-        await Assert.That(database.LastApplied).IsEqualTo(cut);
-        await Assert.That(reopenedLog.State.CommittedIndex).IsEqualTo(cut);
-        await Assert.That(reopenedLog.State.LastIndex).IsEqualTo(cut);
-        await Assert.That(reopenedCanonical.Identity.NodeId).IsEqualTo(identity.NodeId);
-        await Assert.That(reopenedCanonical.Identity.Incarnation).IsEqualTo(identity.Incarnation);
-        await Assert.That(reopenedCanonical.Identity.ReadGeneration).IsEqualTo(identity.ReadGeneration);
-    }
+    internal Task AssertReopenedAsync(long cut)
+        => ReplicaMaterializerLifecycleObservations.AssertReopenedAsync(storeOwners, Configuration, directory,
+            CloseOwners, cut);
 
     private void CloseOwners(List<Exception> failures)
     {

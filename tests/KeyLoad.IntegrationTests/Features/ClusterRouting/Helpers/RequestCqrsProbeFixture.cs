@@ -57,35 +57,9 @@ internal sealed class RequestCqrsProbeFixture
     {
         lock (sync)
         {
-            if (admissionStopped || cleaned)
-            {
-                throw new InvalidOperationException(AdmissionStopped);
-            }
-            RequestCqrsProbeArmValidator.Validate(principalId, commandId, readKind, phase, action);
-            if (arms.Count >= MaximumArms)
-            {
-                throw new IOException(FileLimitExceeded);
-            }
-            var armId = Guid.NewGuid();
-            while (arms.ContainsKey(armId))
-            {
-                armId = Guid.NewGuid();
-            }
-            var bytes = RequestCqrsProbeJsonWriter.Arm(SessionId, armId, principalId, commandId, readKind, phase, action, partition, sourceRequestId, targetVoter, sourceArmId);
-            var decoded = Json.ReadArm(bytes);
-            RequestCqrsProbeArmValidator.ValidateDecoded(decoded, armId, principalId, commandId, readKind, phase, action);
-            if (decoded.Partition?.ToPartition() != partition || decoded.SourceRequestId != sourceRequestId || decoded.TargetVoter != targetVoter || decoded.SourceArmId != sourceArmId)
-            {
-                throw new InvalidOperationException(InvalidArm);
-            }
-            RequestCqrsProbeBroadcast.WriteIdentical(Nodes, nodeDirectories, ownerRecords,
-                RequestCqrsProbeFileNames.Arm(armId), bytes);
-            var state = new RequestCqrsProbeArmState(principalId, commandId, readKind, phase, action, bytes)
-            {
-                ArmId = armId
-            };
-            arms.Add(armId, state);
-            return armId;
+            return RequestCqrsProbeArmAdmission.WriteArm(admissionStopped, cleaned, arms, SessionId, Json, Nodes,
+                nodeDirectories, ownerRecords, principalId, commandId, readKind, phase, action,
+                partition, sourceRequestId, targetVoter, sourceArmId);
         }
     }
 
@@ -93,17 +67,8 @@ internal sealed class RequestCqrsProbeFixture
     {
         lock (sync)
         {
-            if (admissionStopped || cleaned || !arms.TryGetValue(armId, out var arm) || arm.Retired
-                || arm.RequestId is not null || arm.Phase != RequestCqrsProbePhase.NativeModelReplayBeforeDispatch)
-            {
-                throw new InvalidOperationException(InvalidArm);
-            }
-            var plan = new RequestCqrsNativeReplayPlan(RequestCqrsProbeProtocol.Version,
-                RequestCqrsNativeReplayInventory.PlanKind, SessionId, armId, arm.CommandId, arm.PrincipalId, mode);
-            RequestCqrsNativeReplayInventory.RequireArm(plan, Json.ReadArm(arm.Bytes));
-            var bytes = RequestCqrsNativeReplayInventory.WritePlan(plan);
-            RequestCqrsProbeBroadcast.WriteIdentical(Nodes, nodeDirectories, ownerRecords,
-                RequestCqrsNativeReplayInventory.PlanName(armId), bytes);
+            RequestCqrsProbeArmAdmission.WriteReplayPlan(admissionStopped, cleaned, arms, SessionId, Json, Nodes,
+                nodeDirectories, ownerRecords, armId, mode);
         }
     }
 
@@ -111,21 +76,8 @@ internal sealed class RequestCqrsProbeFixture
     {
         lock (sync)
         {
-            if (!arms.TryGetValue(armId, out var arm) || arm.Action != RequestCqrsProbeAction.Hold
-                || arm.Retired || arm.Settled || arm.DisposedGateJoined || arm.ProcessOwnerJoined || requestId == Guid.Empty
-                || arm.RequestId != requestId || arm.ReleaseWritten)
-            {
-                throw new InvalidOperationException(InvalidRelease);
-            }
-            var bytes = RequestCqrsProbeJsonWriter.Release(SessionId, armId, requestId);
-            var decoded = Json.ReadRelease(bytes);
-            if (decoded.SessionId != SessionId || decoded.ArmId != armId || decoded.RequestId != requestId)
-            {
-                throw new InvalidOperationException(InvalidRelease);
-            }
-            RequestCqrsProbeBroadcast.WriteIdentical(Nodes, nodeDirectories, ownerRecords,
-                RequestCqrsProbeFileNames.Release(armId, requestId), bytes);
-            arm.ReleaseWritten = true;
+            RequestCqrsProbeArmAdmission.WriteRelease(arms, SessionId, Json, Nodes, nodeDirectories,
+                ownerRecords, armId, requestId);
         }
     }
 
@@ -163,23 +115,11 @@ internal sealed class RequestCqrsProbeFixture
         }
     }
 
-    internal async Task<RequestCqrsProbeMarkerRecord> WaitForMarkerAsync(Guid armId,
+    internal Task<RequestCqrsProbeMarkerRecord> WaitForMarkerAsync(Guid armId,
         RequestCqrsProbePhase phase, RequestCqrsProbeOutcome outcome,
         IReadOnlyList<ReplicaSiloDiscovery> signedDiscovery, CancellationToken cancellationToken)
-    {
-        var marker = await RequestCqrsProbeMarkerReader.WaitForMarkerAsync(this, armId, phase, outcome,
-            signedDiscovery, cancellationToken).ConfigureAwait(false);
-        lock (sync)
-        {
-            var arm = arms[armId];
-            arm.RequestId ??= marker.RequestId;
-            if (arm.RequestId != marker.RequestId)
-            {
-                throw new InvalidOperationException(MarkerMismatch);
-            }
-        }
-        return marker;
-    }
+        => RequestCqrsProbeArmAdmission.WaitForMarkerAsync(this, sync, arms, armId, phase, outcome,
+            signedDiscovery, cancellationToken);
 
     internal Task WaitForSettlementAsync(Guid armId, IReadOnlyList<ReplicaSiloDiscovery> signedDiscovery,
         CancellationToken cancellationToken)
@@ -270,12 +210,8 @@ internal sealed class RequestCqrsProbeFixture
     {
         lock (sync)
         {
-            if (!arms.TryGetValue(marker.ArmId, out var arm))
-            {
-                throw new InvalidOperationException(MarkerMismatch);
-            }
-            RequestCqrsProbeMarkerState.Record(SessionId, arm, marker, node, expectedPhase, expectedOutcome,
-                signedDiscovery, activeGates, Json);
+            RequestCqrsProbeArmAdmission.RecordMarker(arms, SessionId, Json, activeGates, marker, node,
+                expectedPhase, expectedOutcome, signedDiscovery);
         }
     }
 

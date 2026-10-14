@@ -150,17 +150,7 @@ public sealed class ReplicaNativeDiscoveryRuntime : IAsyncDisposable
             using var timeout = new CancellationTokenSource(bound, clock);
             using var bounded = CancellationTokenSource.CreateLinkedTokenSource(caller, operation.ShutdownToken, timeout.Token);
             bounded.Token.ThrowIfCancellationRequested();
-            var state = discovery.Read();
-            if (!state.TransportReady)
-            {
-                throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaTransportProtocol.InvalidDiscovery);
-            }
-            ReadOnlyMemory<byte> payload = NativeSerialization.Serialize(state);
-            ReplicaEnvelopeValidation.Discovery(payload.Span, request.Nonce);
-            if (observer is not null)
-            {
-                payload = await observer.TransformNativeDiscoveryAsync(request, state, payload, bounded.Token).ConfigureAwait(false);
-            }
+            var payload = await ReadNativePayloadAsync(request, bounded).ConfigureAwait(false);
             bounded.Token.ThrowIfCancellationRequested();
             RequireCurrent(request);
             if (clock.GetUtcNow() >= request.ExpiresAt || !discovery.Read().TransportReady)
@@ -190,6 +180,23 @@ public sealed class ReplicaNativeDiscoveryRuntime : IAsyncDisposable
                 admission.Release();
             }
         }
+    }
+
+    private async Task<ReadOnlyMemory<byte>> ReadNativePayloadAsync(ReplicaNativeDiscoveryRequest request, CancellationTokenSource bounded)
+    {
+        var state = discovery.Read();
+        if (!state.TransportReady)
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaTransportProtocol.InvalidDiscovery);
+        }
+        ReadOnlyMemory<byte> payload = NativeSerialization.Serialize(state);
+        ReplicaEnvelopeValidation.Discovery(payload.Span, request.Nonce);
+        if (observer is not null)
+        {
+            payload = await observer.TransformNativeDiscoveryAsync(request, state, payload, bounded.Token).ConfigureAwait(false);
+        }
+
+        return payload;
     }
 
     private void RequireCurrent(ReplicaNativeDiscoveryRequest request)

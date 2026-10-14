@@ -71,7 +71,7 @@ internal sealed class PartitionHost : IAsyncDisposable
             var snapshots = new ReplicaSnapshotStore(stores.Canonical, log, replicaOptions, executionOptions);
             snapshots.Recover();
             new BlobStorageOperations(Database).NormalizeRestoredStore();
-            BootstrapFreshNode(options);
+            PartitionDatabaseComposition.BootstrapFreshNode(stores, Database, options);
             if (options.MovementFrameObservation.Enabled)
             {
                 ApplyProbe.AttachFrameObservation(new(runtimeOptions.Node, runtimeOptions.ReplicaConfiguration, Database, runtimeOptions.RequestProbeExecution));
@@ -105,59 +105,9 @@ internal sealed class PartitionHost : IAsyncDisposable
         NativeTextIncrementalMaintenanceService? openedTextMaintenance, NativeAnnMaintenanceService? openedAnnMaintenance,
         ClusterCoordinator? openedCoordinator, ReplicaConsensus? openedConsensus, ReplicaMaterializer? applying,
         ITextProjection? openedText, DurableReplicaLog? openedLog, CacheMemoryBudget? openedCacheMemory)
-    {
-        const int FailuresCountValidationBoundary = 1;
-        var failures = new List<Exception> { error };
-        if (openedOnlineText is not null)
-        {
-            ServerFailureObserver.Observe(() => openedOnlineText.DisposeAsync().AsTask().GetAwaiter().GetResult(), failures);
-        }
-        if (openedTextMaintenance is not null)
-        {
-            ServerFailureObserver.Observe(() => openedTextMaintenance.DisposeAsync().AsTask().GetAwaiter().GetResult(), failures);
-        }
-        if (openedAnnMaintenance is not null)
-        {
-            ServerFailureObserver.Observe(() => openedAnnMaintenance.DisposeAsync().AsTask().GetAwaiter().GetResult(), failures);
-        }
-        if (openedCoordinator is not null)
-        {
-            ServerFailureObserver.Observe(() => openedCoordinator.DisposeAsync().AsTask().GetAwaiter().GetResult(), failures);
-        }
-        if (openedConsensus is not null)
-        {
-            ServerFailureObserver.Observe(() => openedConsensus.DisposeAsync().AsTask().GetAwaiter().GetResult(), failures);
-        }
-        Task? joiningMaterializer = null;
-        if (applying is not null)
-        {
-            joiningMaterializer = applying.DisposeAsync().AsTask();
-            ServerFailureObserver.Observe(() => joiningMaterializer.GetAwaiter().GetResult(), failures);
-        }
-        if (TransferVerification is not null && (joiningMaterializer is null || joiningMaterializer.IsCompletedSuccessfully))
-        {
-            ServerFailureObserver.Observe(TransferVerification.Dispose, failures);
-        }
-        ServerFailureObserver.Observe(ApplyProbe.CloseFrameObservation, failures);
-        if (openedText is not null)
-        {
-            ServerFailureObserver.Observe(openedText.Dispose, failures);
-        }
-        if (openedLog is not null)
-        {
-            ServerFailureObserver.Observe(openedLog.Dispose, failures);
-        }
-        DisposeRowVisibility(failures);
-        if (openedCacheMemory is not null)
-        {
-            ServerFailureObserver.Observe(openedCacheMemory.Dispose, failures);
-        }
-        ServerFailureObserver.Observe(() => { RequireTransferVerifierClosed(); stores.Dispose(); }, failures);
-        if (failures.Count > FailuresCountValidationBoundary)
-        {
-            throw new AggregateException(failures);
-        }
-    }
+        => PartitionHostConstructionCleanup.Run(error, openedOnlineText, openedTextMaintenance, openedAnnMaintenance,
+            openedCoordinator, openedConsensus, applying, openedText, openedLog, openedCacheMemory,
+            TransferVerification, ApplyProbe, rowVisibility, stores, RequireTransferVerifierClosed);
 
     /// <summary>Private physical node directory; it is not an atomic partition identity.</summary>
     public string DirectoryPath
@@ -218,38 +168,7 @@ internal sealed class PartitionHost : IAsyncDisposable
     }
 
     private void DisposeRowVisibility(List<Exception> failures)
-    {
-        try
-        {
-            rowVisibility?.Dispose();
-        }
-        catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
-        {
-            failures.Add(error);
-        }
-        catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null)
-        {
-            failures.Add(error);
-        }
-    }
-
-    private void BootstrapFreshNode(NodeOptions options)
-    {
-        const int EmptyPosition = 0;
-
-        if (stores.Canonical.Position == EmptyPosition)
-        {
-            Database.Bootstrap(new(PartitionStoreProtocol.AdministratorId, PartitionStoreProtocol.AdministratorTenant,
-                [new(PartitionStoreProtocol.Wildcard, PartitionStoreProtocol.Wildcard, Capability.All)],
-                [PartitionStoreProtocol.Wildcard])
-            {
-                ClusterAdministrator = true
-            },
-                DatabaseEngine.Credential(PartitionStoreProtocol.AdministratorId, PartitionStoreProtocol.AdministratorId,
-                    options.AdminKey));
-        }
-        ClusterPrincipalPolicy.Initialize(Database);
-    }
+        => PartitionHostConstructionCleanup.DisposeRowVisibility(rowVisibility, failures);
 
     /// <summary>Drains protocol and apply before releasing either physical store, once.</summary>
     public ValueTask DisposeAsync()

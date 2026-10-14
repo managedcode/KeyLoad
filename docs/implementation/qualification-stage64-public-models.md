@@ -180,3 +180,14 @@ The complete visible working tree is committed on the current main at the owner'
 This checkpoint is not a passed build or task acceptance. Earlier formatter applications completed, but the final integrated formatter verification and analyzer-enabled Release build have not passed. The latest full Release attempt reported seven Query/Replication numeric errors before later repairs; the130-row native whole-solution inventory predates concurrent repairs and must not be presented as the current residual count. No R53 runtime or coverage result is claimed.
 
 The original plan remains20/104accepted and84inprogress; KL105 is additional and open. Functional coverage is UNMEASURED. Complete exact-source Linux, Unit, process recovery, genuine Docker/Aspire RF3 through SDK/MCP, fault/endurance and matched performance gates remain mandatory.
+
+
+## R54 — complete bounded roles and original whole-operation flows
+
+All parallel responsibility extractions are integrated under the unchanged64/200/400/nesting3 rules. The original cursor flow and200-record/50-query indexed correctness oracle retain complete pages, refusal/healthy followup, replay and two cold owners. Chunk cancellation/deadline and original RF3 extrema call bodies are implemented; their source existence alone receives no RF3 acceptance. Native aliases, signed identities, field IDs and storage formats remain unchanged.
+
+Canonical formatter application passed147.027791s with46intended source changes; analyzer-enabled full Release passed0warnings/0errors in265.173976s; canonical verify passed151.313207s without changes. Governance passes27projects/4modules. Native focused Unit ran126cases:121PASS,5FAIL,0SKIP (121.349s native/124.619749s joined wrapper). Genuine multi-block process recovery ran6cases, allPASS (8.651s native/10.169388s wrapper). Both original reports prove source/DLL/PDB unchanged; native50ordinary slots produced39overlapping original TRX intervals, which does not prove exact CPU concurrency.
+
+The full SQL null/distinct/type/policy/replay/two-cold operation now passes. Five failures remain: SourceManifest contributor executed-module allowlist, original native Prepare/Retire/Publication flows and retired typed INSERT resource evidence. They retain their original errors and UIDs; no oracle or timeout is weakened. The original source-bound failure ledger and completion/report hashes are recorded in status.json currentStageR54.
+
+The original plan remains20/104accepted and84inprogress; KL105 remains additional/open. Functional coverage is UNMEASURED. Actual post-run Unit PID observation found no live owned host, so no new profiling capture is claimed. Full exact-source Linux, genuine Docker/Aspire SDK/MCP RF3, complete coverage, fault/endurance/power-loss and matched performance remain open.

@@ -104,7 +104,11 @@ internal sealed class NativeTextIncrementalMaintenanceService : INativeTextMaint
             ServerFailureObserver.Observe(() =>
             {
                 using var exclusive = new NativeTextSelectedWriteLease(selectedAdmission, CancellationToken.None);
-                ServerFailureObserver.Observe(() => { RequireSelectedSettled(); sessions.Retire(sessionId); }, failures);
+                ServerFailureObserver.Observe(() =>
+                {
+                    RequireSelectedSettled();
+                    sessions.Retire(sessionId);
+                }, failures);
             }, failures);
             ServerFailureObserver.ThrowIfAny(failures);
             return sessionId;
@@ -134,31 +138,8 @@ internal sealed class NativeTextIncrementalMaintenanceService : INativeTextMaint
         }
     }
 
-    private async Task DisposeCoreAsync()
-    {
-        sessions.CloseAdmission();
-        var originalReaders = selectedAdmission.CloseAndJoinReaders();
-        var failures = new List<Exception>();
-        try
-        {
-            await worker.DisposeAsync().ConfigureAwait(false);
-        }
-        catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null) { failures.Add(error); }
-        catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null) { failures.Add(error); }
-        await ServerFailureObserver.ObserveAsync(() => originalReaders, failures).ConfigureAwait(false);
-        ServerFailureObserver.Observe(selectedAdmission.ThrowRetained, failures);
-        NativeTextSelectedIndexSlot[] originals;
-        lock (selectedGate)
-        {
-            originals = selectedSlots.Values.ToArray();
-        }
-        foreach (var original in originals)
-        {
-            ServerFailureObserver.Observe(original.Dispose, failures);
-        }
-        ServerFailureObserver.Observe(sessions.DisposeAfterWorkerJoin, failures);
-        ServerFailureObserver.ThrowIfAny(failures);
-    }
+    private Task DisposeCoreAsync()
+        => NativeTextIncrementalOwnerShutdown.RunAsync(sessions, selectedAdmission, worker, selectedGate, selectedSlots);
 
     public ITextProjectionLease AcquireSelected(IKeyValueView view, PrincipalRecord principal,
         ResourceDefinition resource, SearchRequest request, ReadExecutionBudget budget)

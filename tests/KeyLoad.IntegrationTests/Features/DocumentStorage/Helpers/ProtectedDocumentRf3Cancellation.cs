@@ -45,20 +45,7 @@ internal static class ProtectedDocumentRf3Cancellation
             await caller.CancelAsync().ConfigureAwait(false);
             await RequestCqrsPhaseFaultAssertions.VerifySettledAsync(controls, arm, marker.RequestId,
                 Guid.Empty, discovery, token).ConfigureAwait(false);
-            if (useMcp)
-            {
-                var result = await mcp!.ConfigureAwait(false);
-                await Assert.That(result.ToolResult).IsNull();
-                await Assert.That(result.TransportFailure is OperationCanceledException or IOException
-                    or HttpRequestException { StatusCode: null }).IsTrue();
-            }
-            else
-            {
-                var result = await sdk!.ConfigureAwait(false);
-                await Assert.That(result.IsSuccess).IsFalse();
-                await Assert.That(result.Value).IsNull();
-                await Assert.That(result.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.Cancelled));
-            }
+            await RequireCancelledAsync(useMcp, sdk, mcp).ConfigureAwait(false);
             await controls.RetireArmAsync(arm, token).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
         using var cleanup = new CancellationTokenSource(TwoRf3MembershipProtocol.CleanupDeadline, TimeProvider.System);
@@ -69,11 +56,17 @@ internal static class ProtectedDocumentRf3Cancellation
         }
         if (sdk is { } sdkTask)
         {
-            await ServerFailureObserver.ObserveAsync(async () => { _ = await sdkTask.ConfigureAwait(false); }, failures).ConfigureAwait(false);
+            await ServerFailureObserver.ObserveAsync(async () =>
+            {
+                _ = await sdkTask.ConfigureAwait(false);
+            }, failures).ConfigureAwait(false);
         }
         if (mcp is { } mcpTask)
         {
-            await ServerFailureObserver.ObserveAsync(async () => { _ = await mcpTask.ConfigureAwait(false); }, failures).ConfigureAwait(false);
+            await ServerFailureObserver.ObserveAsync(async () =>
+            {
+                _ = await mcpTask.ConfigureAwait(false);
+            }, failures).ConfigureAwait(false);
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -85,8 +78,36 @@ internal static class ProtectedDocumentRf3Cancellation
         {
             return new(await official.CallAsync("keyload_documents_get", new GetDocumentRequest(seed.Reference), token).ConfigureAwait(false), null);
         }
-        catch (OperationCanceledException error) { return new(null, error); }
-        catch (HttpRequestException error) { return new(null, error); }
-        catch (IOException error) { return new(null, error); }
+        catch (OperationCanceledException error)
+        {
+            return new(null, error);
+        }
+        catch (HttpRequestException error)
+        {
+            return new(null, error);
+        }
+        catch (IOException error)
+        {
+            return new(null, error);
+        }
+    }
+
+    private static async Task RequireCancelledAsync(bool useMcp, Task<Result<DocumentReadResult>>? sdk,
+        Task<RequestCqrsFaultMcpObservation>? mcp)
+    {
+        if (useMcp)
+        {
+            var result = await mcp!.ConfigureAwait(false);
+            await Assert.That(result.ToolResult).IsNull();
+            await Assert.That(result.TransportFailure is OperationCanceledException or IOException
+                or HttpRequestException { StatusCode: null }).IsTrue();
+        }
+        else
+        {
+            var result = await sdk!.ConfigureAwait(false);
+            await Assert.That(result.IsSuccess).IsFalse();
+            await Assert.That(result.Value).IsNull();
+            await Assert.That(result.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.Cancelled));
+        }
     }
 }

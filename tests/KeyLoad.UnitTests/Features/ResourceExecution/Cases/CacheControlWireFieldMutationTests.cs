@@ -9,7 +9,7 @@ internal sealed class CacheControlWireFieldMutationTests
     public async Task AcCache014PrepareTranscriptBindsEveryHeaderAndAddressField()
     {
         var request = CacheControlWireTestData.PrepareRequest();
-        var original = Canonical(request);
+        var original = CacheControlWireMutationAssertions.Canonical(request);
         ICacheControlMessage[] changed =
         [
             request with { Header = request.Header with { ScopeHash = CacheControlWireTestData.Digest(0x81) } },
@@ -26,7 +26,7 @@ internal sealed class CacheControlWireFieldMutationTests
 
         foreach (var message in changed)
         {
-            await AssertCanonicalChangedAsync(original, message);
+            await CacheControlWireMutationAssertions.AssertCanonicalChangedAsync(original, message);
         }
     }
 
@@ -34,8 +34,8 @@ internal sealed class CacheControlWireFieldMutationTests
     public async Task AcCache014ReadyProofAndBindingTranscriptBindsEveryNonMacField()
     {
         var proof = CacheControlWireTestData.Proof(CacheVoterSlot.Slot0, CacheVoterSlot.Slot0);
-        var canonical = Canonical(proof);
-        var signing = Signing(proof);
+        var canonical = CacheControlWireMutationAssertions.Canonical(proof);
+        var signing = CacheControlWireMutationAssertions.Signing(proof);
         ICacheControlMessage[] changed =
         [
             proof with { ScopeHash = CacheControlWireTestData.Digest(0x91) },
@@ -55,16 +55,16 @@ internal sealed class CacheControlWireFieldMutationTests
 
         foreach (var mutation in changed)
         {
-            await AssertCanonicalChangedAsync(canonical, mutation);
-            await AssertSigningChangedAsync(signing, mutation);
+            await CacheControlWireMutationAssertions.AssertCanonicalChangedAsync(canonical, mutation);
+            await CacheControlWireMutationAssertions.AssertSigningChangedAsync(signing, mutation);
         }
 
         var macMutation = proof with
         {
             Mac = CacheControlWireTestData.Digest(0xA2)
         };
-        await AssertCanonicalChangedAsync(canonical, macMutation);
-        await AssertSigningUnchangedAsync(signing, macMutation);
+        await CacheControlWireMutationAssertions.AssertCanonicalChangedAsync(canonical, macMutation);
+        await CacheControlWireMutationAssertions.AssertSigningUnchangedAsync(signing, macMutation);
     }
 
     [Test]
@@ -142,10 +142,10 @@ internal sealed class CacheControlWireFieldMutationTests
             }
         };
 
-        await Assert.That(Encode(minimum)).IsTrue();
-        await Assert.That(Encode(maximum)).IsTrue();
-        await Assert.That(Encode(below)).IsFalse();
-        await Assert.That(Encode(above)).IsFalse();
+        await Assert.That(CacheControlWireMutationAssertions.Encode(minimum)).IsTrue();
+        await Assert.That(CacheControlWireMutationAssertions.Encode(maximum)).IsTrue();
+        await Assert.That(CacheControlWireMutationAssertions.Encode(below)).IsFalse();
+        await Assert.That(CacheControlWireMutationAssertions.Encode(above)).IsFalse();
     }
 
     [Test]
@@ -168,53 +168,12 @@ internal sealed class CacheControlWireFieldMutationTests
             request with { ExpectedTargetSiloAddress = OverflowGenerationAddress }
         };
 
-        await Assert.That(Encode(zero)).IsTrue();
-        await Assert.That(Encode(upper)).IsTrue();
+        await Assert.That(CacheControlWireMutationAssertions.Encode(zero)).IsTrue();
+        await Assert.That(CacheControlWireMutationAssertions.Encode(upper)).IsTrue();
         foreach (var invalid in noncanonicalAndOverflow)
         {
-            await Assert.That(Encode(invalid)).IsFalse();
+            await Assert.That(CacheControlWireMutationAssertions.Encode(invalid)).IsFalse();
         }
-    }
-
-    private static async Task AssertCanonicalChangedAsync(byte[] original, ICacheControlMessage changed)
-    {
-        var mutated = Canonical(changed);
-        await Assert.That(mutated.AsSpan().SequenceEqual(original)).IsFalse();
-    }
-
-    private static async Task AssertSigningChangedAsync(byte[] original, ICacheControlMessage changed)
-    {
-        var mutated = Signing(changed);
-        await Assert.That(mutated.AsSpan().SequenceEqual(original)).IsFalse();
-    }
-
-    private static async Task AssertSigningUnchangedAsync(byte[] original, ICacheControlMessage changed)
-    {
-        var mutated = Signing(changed);
-        await Assert.That(mutated.AsSpan().SequenceEqual(original)).IsTrue();
-    }
-
-    private static byte[] Canonical(ICacheControlMessage message)
-    {
-        var encoded = CacheControlWire.TryEncodeSigned(message, out var bytes);
-        return encoded ? bytes : throw new InvalidOperationException(InvalidTranscriptMessage);
-    }
-
-    private static byte[] Signing(ICacheControlMessage message)
-    {
-        var encoded = CacheControlWire.TryEncodeForSigning(message, out var bytes);
-        return encoded ? bytes : throw new InvalidOperationException(InvalidTranscriptMessage);
-    }
-
-    private static bool Encode(ICacheControlMessage message)
-    {
-        var encoded = CacheControlWire.TryEncodeSigned(message, out var bytes);
-        if (!encoded && bytes.Length != 0)
-        {
-            throw new InvalidOperationException(PartialOutputMessage);
-        }
-
-        return encoded;
     }
 
     private const int MaximumAddressCharacters = 256;
@@ -232,6 +191,4 @@ internal sealed class CacheControlWireFieldMutationTests
     private static readonly Guid ChangedNodeId = Guid.Parse("00000000-0000-0000-0000-000000000405");
     private static readonly Guid ChangedIncarnationId = Guid.Parse("00000000-0000-0000-0000-000000000406");
     private static readonly Guid ChangedRuntimeId = Guid.Parse("00000000-0000-0000-0000-000000000407");
-    private const string InvalidTranscriptMessage = "The valid mutation source did not encode.";
-    private const string PartialOutputMessage = "Invalid input must leave the output byte array empty.";
 }

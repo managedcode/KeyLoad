@@ -1,4 +1,3 @@
-using System.Globalization;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.DocumentStorage;
 using KeyLoad.Query;
@@ -13,7 +12,6 @@ internal sealed class NativeTextProjectionBoundsTests
     private const string Collection = "native-text-bounds";
     private const string TextPath = "/text";
     private const string Query = "needle";
-    private const string BoundFilePrefix = "bound-file-";
     private const string ExactDiskFile = "bound-disk.bin";
     private const long ExactPostingBytes = 75;
 
@@ -30,13 +28,13 @@ internal sealed class NativeTextProjectionBoundsTests
         var inventory = NativeTextFileIO.MeasureRegularFiles(generation, executionOptions.Value.MaximumFiles,
             executionOptions.Value.MaximumDiskBytes, executionOptions);
         await Assert.That(inventory.Files).IsLessThan(executionOptions.Value.MaximumFiles);
-        var addedFiles = await AddFilesAsync(native, inventory.Files, executionOptions.Value.MaximumFiles,
+        var addedFiles = await NativeTextBoundedFilePreparation.AddFilesAsync(native, inventory.Files, executionOptions.Value.MaximumFiles,
             TestContext.Current!.Execution.CancellationToken);
 
         NativeTextFiles.CheckGenerationBound(generation, executionOptions);
         var manifestPath = Path.Combine(generation, NativeTextProtocol.ManifestFile);
         var manifestBefore = await File.ReadAllBytesAsync(manifestPath, TestContext.Current!.Execution.CancellationToken);
-        var excess = Path.Combine(native, BoundFilePrefix + "excess");
+        var excess = Path.Combine(native, NativeTextBoundedFilePreparation.BoundFilePrefix + "excess");
         await File.WriteAllBytesAsync(excess, [], TestContext.Current!.Execution.CancellationToken);
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => NativeTextFiles.CheckGenerationBound(generation, executionOptions));
 
@@ -63,12 +61,12 @@ internal sealed class NativeTextProjectionBoundsTests
         var remainingBytes = executionOptions.Value.MaximumDiskBytes - inventory.Bytes;
         await Assert.That(remainingBytes > 0).IsTrue();
         var sparseFile = Path.Combine(native, ExactDiskFile);
-        SetSparseLength(sparseFile, remainingBytes);
+        NativeTextBoundedFilePreparation.SetSparseLength(sparseFile, remainingBytes);
 
         NativeTextFiles.CheckGenerationBound(generation, executionOptions);
         var manifestPath = Path.Combine(generation, NativeTextProtocol.ManifestFile);
         var manifestBefore = await File.ReadAllBytesAsync(manifestPath, TestContext.Current!.Execution.CancellationToken);
-        SetSparseLength(sparseFile, remainingBytes + 1);
+        NativeTextBoundedFilePreparation.SetSparseLength(sparseFile, remainingBytes + 1);
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => NativeTextFiles.CheckGenerationBound(generation, executionOptions));
 
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
@@ -172,25 +170,6 @@ internal sealed class NativeTextProjectionBoundsTests
     private static string FindGeneration(string root)
         => Directory.EnumerateDirectories(root).Single(path => Path.GetFileName(path)
             .StartsWith(NativeTextProtocol.GenerationPrefix, StringComparison.Ordinal));
-
-    private static async Task<string[]> AddFilesAsync(string directory, int existingCount, int totalCount,
-        CancellationToken cancellationToken)
-    {
-        var added = new string[totalCount - existingCount];
-        for (var index = existingCount; index < totalCount; index++)
-        {
-            var path = Path.Combine(directory, BoundFilePrefix + index.ToString("D3", CultureInfo.InvariantCulture));
-            await File.WriteAllBytesAsync(path, [], cancellationToken);
-            added[index - existingCount] = path;
-        }
-        return added;
-    }
-
-    private static void SetSparseLength(string path, long length)
-    {
-        using var file = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None);
-        file.SetLength(length);
-    }
 
     private static TextProjectionScope CaptureScope(TestDatabase database)
     {

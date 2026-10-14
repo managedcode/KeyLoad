@@ -56,6 +56,19 @@ internal static class NativeTextCapturedSnapshotFlow
             await Assert.That(NativeSerialization.Serialize(replay).SequenceEqual(NativeSerialization.Serialize(receipt))).IsTrue();
             await NativeTextBilingualAudit.VerifyAsync(runtime.Search, fixture.Partition, token);
         }, failures);
+        await SettleOriginalAsync(original, cancellation, release, observed, failures, root, ownedRoot);
+        ServerFailureObserver.ThrowIfAny(failures);
+        await runtime.DisposeAsync();
+        await using var cold = new NativeTextOnlineTestRuntime(fixture);
+        await NativeTextBilingualAudit.VerifyAsync(cold.Search, fixture.Partition, token);
+        var coldReplay = await NativeTextOnlineWholeFlow.RunAsync(fixture, cold, request, token);
+        await Assert.That(NativeSerialization.Serialize(coldReplay).SequenceEqual(NativeSerialization.Serialize(receipt))).IsTrue();
+        await NativeTextBilingualAudit.VerifyAsync(cold.Search, fixture.Partition, token);
+    }
+
+    private static async Task SettleOriginalAsync(Task<RankedDocument[]> original, CancellationTokenSource cancellation,
+        TaskCompletionSource release, bool observed, List<Exception> failures, string root, bool ownedRoot)
+    {
         release.TrySetResult();
         if (!original.IsCompleted)
         {
@@ -69,12 +82,5 @@ internal static class NativeTextCapturedSnapshotFlow
         {
             ServerFailureObserver.Observe(() => Directory.Delete(root, recursive: true), failures);
         }
-        ServerFailureObserver.ThrowIfAny(failures);
-        await runtime.DisposeAsync();
-        await using var cold = new NativeTextOnlineTestRuntime(fixture);
-        await NativeTextBilingualAudit.VerifyAsync(cold.Search, fixture.Partition, token);
-        var coldReplay = await NativeTextOnlineWholeFlow.RunAsync(fixture, cold, request, token);
-        await Assert.That(NativeSerialization.Serialize(coldReplay).SequenceEqual(NativeSerialization.Serialize(receipt))).IsTrue();
-        await NativeTextBilingualAudit.VerifyAsync(cold.Search, fixture.Partition, token);
     }
 }

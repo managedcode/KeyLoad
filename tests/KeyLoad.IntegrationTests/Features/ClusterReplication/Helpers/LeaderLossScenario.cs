@@ -75,20 +75,9 @@ internal static class LeaderLossScenario
         return (projectionConsumer, subscription);
     }
 
-    private static async Task<InitialCommand> CommitInitialBatchAsync(KeyLoadClient[] clients, PartitionRef partition,
-        CancellationToken cancellationToken)
-    {
-        var command = new CommandRequest(Guid.NewGuid(), partition,
-        [
-            new PutDocument(Collection, "o1", "{\"number\":1}", 0),
-            new AppendEvents(Events, "o1", [new("e1", "Created", "{}")], ExpectedStreamRevision.NoStream),
-            new EnqueueMessage(Jobs, "m1", "{}"),
-            new PublishTopic(Activity, [new("t1", "Created", "{}"), new("t2", "Updated", "{}"), new("t3", "Updated", "{}")])
-        ]);
-        var committed = Success(await clients[2].CommitAsync(command, cancellationToken));
-        await Assert.That(committed.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
-        return new(command, committed);
-    }
+    private static Task<LeaderLossInitialCommand> CommitInitialBatchAsync(KeyLoadClient[] clients,
+        PartitionRef partition, CancellationToken cancellationToken)
+        => LeaderLossInitialBatch.CommitAsync(clients, partition, Success, cancellationToken);
 
     private static async Task VerifyInitialReplicasAsync(KeyLoadClient[] clients, PartitionRef partition,
         SubscriptionRef subscription, CancellationToken cancellationToken)
@@ -227,5 +216,4 @@ internal static class LeaderLossScenario
         return projectionBatch.ThroughSequence;
     }
 
-    private sealed record InitialCommand(CommandRequest Command, CommitReceipt Receipt);
 }

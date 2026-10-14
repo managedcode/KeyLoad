@@ -23,18 +23,7 @@ internal static class QueuePositiveInspectionAuthorityTrial
         {
             Id = QueueLeaseAuthorityProtocol.Foreign
         });
-        fixture.Store.Commit((tx, _) =>
-        {
-            if (missingBody)
-            {
-                tx.Delete(key);
-            }
-            else
-            {
-                tx.Put(key, foreign);
-            }
-            return true;
-        });
+        Damage(fixture.Store, key, foreign, missingBody);
         var damaged = QueuePendingAuthorityHistory.Capture(fixture.Store);
         await QueueLiveInspectionAuthorityAssertions.OneRowAsync(original, damaged, key, missingBody ? null : foreign);
         await QueueLiveInspectionAuthorityAssertions.PositiveRefuseAsync(fixture.Database, fixture.Store, state, positive, target, damaged);
@@ -73,5 +62,21 @@ internal static class QueuePositiveInspectionAuthorityTrial
         await QueueLiveInspectionAuthorityAssertions.ReplayAsync(reopened, second, state, processed);
         await QueueLeaseAuthorityHealthy.ReplayAsync(reopened, second, state, healthy);
         await QueuePendingAuthorityHistory.SameAsync(second, terminal);
+    }
+
+    private static void Damage(ZoneTreeStore store, byte[] key, byte[] foreign, bool missingBody)
+    {
+        store.Commit((tx, _) =>
+        {
+            if (missingBody)
+            {
+                tx.Delete(key);
+            }
+            else
+            {
+                tx.Put(key, foreign);
+            }
+            return true;
+        });
     }
 }

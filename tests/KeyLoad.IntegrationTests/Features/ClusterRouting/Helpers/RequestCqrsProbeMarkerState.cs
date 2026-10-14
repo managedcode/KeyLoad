@@ -10,37 +10,7 @@ internal static class RequestCqrsProbeMarkerState
         RequestCqrsProbeMarkerRecord marker, string node, string expectedPhase, string expectedOutcome,
         IReadOnlyList<ReplicaSiloDiscovery> signedDiscovery, IDictionary<string, int> activeGates, RequestCqrsProbeJson json)
     {
-        if (marker.Version != RequestCqrsProbeFixtureProtocol.Version
-            || marker.Kind != RequestCqrsProbeFixtureProtocol.MarkerKind || marker.SessionId != sessionId
-            || marker.RequestId == Guid.Empty || marker.CommandId != arm.CommandId
-            || !RequestCqrsCanonicalMarkerValidation.Valid(marker)
-            || marker.Phase.ToString() != expectedPhase || marker.Outcome.ToString() != expectedOutcome
-            || (arm.Retired && marker.Phase != RequestCqrsProbePhase.ProducerDisposed)
-            || (marker.Phase != arm.Phase && marker.Phase != RequestCqrsProbePhase.ProducerDisposed
-                && !(arm.Phase == RequestCqrsProbePhase.CanonicalJournalFlushed
-                    && marker.Phase is RequestCqrsProbePhase.CanonicalOutboundObserved or RequestCqrsProbePhase.CanonicalIndependentAppendCompleted or RequestCqrsProbePhase.CanonicalOwnerDisposed)
-                && !(arm.Phase == RequestCqrsProbePhase.ReplicaEntryAcknowledged
-                    && marker.Phase == RequestCqrsProbePhase.ReplicaEntryObserverDisposed))
-            || (arm.Phase == RequestCqrsProbePhase.ReplicaEntryAcknowledged
-                && ((marker.Phase == RequestCqrsProbePhase.ReplicaEntryAcknowledged
-                        && marker.Outcome != RequestCqrsProbeOutcome.FaultRequested)
-                    || (marker.Phase == RequestCqrsProbePhase.ReplicaEntryObserverDisposed
-                        && marker.Outcome != RequestCqrsProbeOutcome.Observed)
-                    || marker.Phase == RequestCqrsProbePhase.ProducerDisposed))
-            || ((marker.Outcome is RequestCqrsProbeOutcome.Released or RequestCqrsProbeOutcome.Cancelled)
-                && arm.Action != RequestCqrsProbeAction.Hold)
-            || (marker.Outcome == RequestCqrsProbeOutcome.FaultRequested
-                && arm.Action != RequestCqrsProbeAction.ThrowOrdinary)
-            || (marker.Phase == RequestCqrsProbePhase.ProducerDisposed
-                && marker.Outcome != RequestCqrsProbeOutcome.Observed)
-            || marker.Voter != RequestCqrsProbeFileNames.OriginForNode(node))
-        {
-            throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch);
-        }
-        if (arm.RequestId is { } claimed && claimed != marker.RequestId)
-        {
-            throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch);
-        }
+        ValidateMarkerIdentity(sessionId, arm, marker, node, expectedPhase, expectedOutcome);
         if (arm.Phase is RequestCqrsProbePhase.CanonicalJournalFlushed or RequestCqrsProbePhase.ReplicaEntryAcknowledged)
         {
             var canonical = json.ReadArm(arm.Bytes);
@@ -79,6 +49,41 @@ internal static class RequestCqrsProbeMarkerState
         if (arm.Action == RequestCqrsProbeAction.Hold && marker.Phase == arm.Phase)
         {
             ApplyGateOutcome(arm, marker, node, activeGates);
+        }
+    }
+
+    private static void ValidateMarkerIdentity(string sessionId, RequestCqrsProbeArmState arm, RequestCqrsProbeMarkerRecord marker, string node, string expectedPhase, string expectedOutcome)
+    {
+        if (marker.Version != RequestCqrsProbeFixtureProtocol.Version
+                    || marker.Kind != RequestCqrsProbeFixtureProtocol.MarkerKind || marker.SessionId != sessionId
+                    || marker.RequestId == Guid.Empty || marker.CommandId != arm.CommandId
+                    || !RequestCqrsCanonicalMarkerValidation.Valid(marker)
+                    || marker.Phase.ToString() != expectedPhase || marker.Outcome.ToString() != expectedOutcome
+                    || (arm.Retired && marker.Phase != RequestCqrsProbePhase.ProducerDisposed)
+                    || (marker.Phase != arm.Phase && marker.Phase != RequestCqrsProbePhase.ProducerDisposed
+                        && !(arm.Phase == RequestCqrsProbePhase.CanonicalJournalFlushed
+                            && marker.Phase is RequestCqrsProbePhase.CanonicalOutboundObserved or RequestCqrsProbePhase.CanonicalIndependentAppendCompleted or RequestCqrsProbePhase.CanonicalOwnerDisposed)
+                        && !(arm.Phase == RequestCqrsProbePhase.ReplicaEntryAcknowledged
+                            && marker.Phase == RequestCqrsProbePhase.ReplicaEntryObserverDisposed))
+                    || (arm.Phase == RequestCqrsProbePhase.ReplicaEntryAcknowledged
+                        && ((marker.Phase == RequestCqrsProbePhase.ReplicaEntryAcknowledged
+                                && marker.Outcome != RequestCqrsProbeOutcome.FaultRequested)
+                            || (marker.Phase == RequestCqrsProbePhase.ReplicaEntryObserverDisposed
+                                && marker.Outcome != RequestCqrsProbeOutcome.Observed)
+                            || marker.Phase == RequestCqrsProbePhase.ProducerDisposed))
+                    || ((marker.Outcome is RequestCqrsProbeOutcome.Released or RequestCqrsProbeOutcome.Cancelled)
+                        && arm.Action != RequestCqrsProbeAction.Hold)
+                    || (marker.Outcome == RequestCqrsProbeOutcome.FaultRequested
+                        && arm.Action != RequestCqrsProbeAction.ThrowOrdinary)
+                    || (marker.Phase == RequestCqrsProbePhase.ProducerDisposed
+                        && marker.Outcome != RequestCqrsProbeOutcome.Observed)
+                    || marker.Voter != RequestCqrsProbeFileNames.OriginForNode(node))
+        {
+            throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch);
+        }
+        if (arm.RequestId is { } claimed && claimed != marker.RequestId)
+        {
+            throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch);
         }
     }
 

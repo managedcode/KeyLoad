@@ -21,44 +21,20 @@ internal sealed partial class PartitionMovementRuntime
         {
             await ServerFailureObserver.ObserveAsync(() => original, failures).ConfigureAwait(false);
         }
-        if (source is not null)
-        {
-            Task? sourceShutdown = null;
-            try
-            {
-                sourceShutdown = source.DisposeAsync().AsTask();
-            }
-            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-            if (sourceShutdown is not null)
-            {
-                await ServerFailureObserver.ObserveAsync(() => sourceShutdown, failures).ConfigureAwait(false);
-            }
-        }
-        if (client is not null)
-        {
-            try
-            {
-                client.Dispose();
-            }
-            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        }
-        if (admission is not null)
-        {
-            try
-            {
-                admission.Dispose();
-            }
-            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        }
+        await PartitionMovementResourceShutdown.JoinAsync(() => source, () => client,
+            () => admission, failures).ConfigureAwait(false);
         try
         {
             stopping.Dispose();
         }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
         parent = null;
         parentDatabase = null;
         parentClock = null;

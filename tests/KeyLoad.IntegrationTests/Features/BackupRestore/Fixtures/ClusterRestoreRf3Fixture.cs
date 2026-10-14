@@ -1,9 +1,7 @@
 using System.Collections.Immutable;
-using System.Security.Cryptography;
 using System.Text.Json;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
-using KeyLoad.AppHost.Features.ClusterReplication;
 using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.IntegrationTests.Features.ClusterReplication;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
@@ -16,15 +14,13 @@ namespace KeyLoad.IntegrationTests.Features.BackupRestore;
 /// <summary>The original native two-RF3 graph gates all servers on one owning offline CLI publication.</summary>
 internal sealed class ClusterRestoreRf3Fixture : IAsyncDisposable
 {
-    private const string ProfileRootName = "target-profile";
-    private const string DataRootName = "target-data";
-    private const int SecretBytes = 32;
     private const int FirstMapping = 0;
-    private readonly string profileRoot;
     internal Guid OperationId { get; } = Guid.NewGuid();
-    private readonly NodeEpochRf3Profile profile;
-    private readonly string peer;
     private readonly string credential;
+    private readonly ClusterRestoreRf3TargetIdentity targetIdentity;
+    private string profileRoot => targetIdentity.ProfileRoot;
+    private NodeEpochRf3Profile profile => targetIdentity.Profile;
+    private string peer => targetIdentity.Peer;
     private readonly ImmutableArray<ClusterBackupOwnerReceipt> receipts;
     private readonly ImmutableArray<string> archives;
     private DistributedApplication? application;
@@ -50,43 +46,19 @@ internal sealed class ClusterRestoreRf3Fixture : IAsyncDisposable
         this.credential = credential;
         this.receipts = receipts;
         this.archives = archives;
-        profileRoot = Path.Combine(ownedRoot, ProfileRootName);
-        DataRoot = Path.Combine(ownedRoot, DataRootName);
-        Mappings = [.. receipts.Select(receipt => new ClusterRestoreOwnerMapping(
-            ClusterRestoreRf3Protocol.CurrentVersion, receipt.Cut.Owner,
-            new(Guid.NewGuid(), Guid.NewGuid(), receipt.Cut.Owner.VoterIds,
-                ClusterRestoreRf3Protocol.InitialOwnerEpoch),
-            [.. receipt.Cut.Owner.VoterIds.Select(voter => voter + "/")]))];
-        var first = Mappings.First().Target;
-        profile = new(new LocalProfile(ClusterProfileStore.CurrentVersion, first.PhysicalShardId, first.Incarnation,
-            Secret(), Secret(), credential));
-        peer = Secret();
+        targetIdentity = new(ownedRoot, credential, receipts);
     }
 
     private const string IncorrectDigest = "0000000000000000000000000000000000000000000000000000000000000000";
-    private readonly List<int> originalOperatorExits = [];
-    private readonly List<ClusterRestoreRf3OperatorObservation> originalOperatorObservations = [];
+    private readonly ClusterRestoreRf3OperatorHistory operatorHistory = new();
 
-    internal IReadOnlyList<int> OriginalOperatorExits => originalOperatorExits;
-    internal int? OriginalOperatorExitCode
-    {
-        get; private set;
-    }
-    internal void RecordOperatorExit(int value)
-    {
-        OriginalOperatorExitCode = value;
-        originalOperatorExits.Add(value);
-    }
+    internal IReadOnlyList<int> OriginalOperatorExits => operatorHistory.Exits;
+    internal int? OriginalOperatorExitCode => operatorHistory.LastExit;
+    internal void RecordOperatorExit(int value) => operatorHistory.RecordExit(value);
     internal void AdmitServers(bool value) => ServersAdmitted = value;
-    internal string DataRoot
-    {
-        get;
-    }
+    internal string DataRoot => targetIdentity.DataRoot;
     internal string ExpectedSignerFingerprint => ClusterRestoreRf3SignerIdentity.Fingerprint(profile.SigningKey);
-    internal ImmutableArray<ClusterRestoreOwnerMapping> Mappings
-    {
-        get;
-    }
+    internal ImmutableArray<ClusterRestoreOwnerMapping> Mappings => targetIdentity.Mappings;
     internal ImmutableArray<ClusterRestoreRf3OperatorNode> OriginalTargetNodes { get; set; } = [];
     internal DistributedApplication Application => application
         ?? throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid);
@@ -107,7 +79,10 @@ internal sealed class ClusterRestoreRf3Fixture : IAsyncDisposable
         {
             await StartCoreAsync(restore: true, null, null, wrongDigest: false, null, null, cut, cancellationToken).ConfigureAwait(false);
         }
-        finally { operatorOnly = false; }
+        finally
+        {
+            operatorOnly = false;
+        }
     }
 
     internal Task StartRejectedTerminalAsync(CancellationToken cancellationToken)
@@ -145,7 +120,12 @@ internal sealed class ClusterRestoreRf3Fixture : IAsyncDisposable
             await StartCoreAsync(restore: true, invocation.Expected, invocation.Credential, wrongDigest: false, null,
                 invocation.Detail, null, cancellationToken).ConfigureAwait(false);
         }
-        finally { changedSigner = null; changedMappings = null; retainPublishedTarget = false; }
+        finally
+        {
+            changedSigner = null;
+            changedMappings = null;
+            retainPublishedTarget = false;
+        }
     }
 
     internal Task StartRejectedAsync(ErrorCode expected, CancellationToken cancellationToken)
@@ -206,7 +186,7 @@ internal sealed class ClusterRestoreRf3Fixture : IAsyncDisposable
             operatorObservation = new(application.Services.GetRequiredService<ResourceLoggerService>(),
                 application.Services.GetRequiredService<IOptions<TestExecutionOptions>>().Value.CleanupOutputCharacters,
                 cancellationToken);
-            originalOperatorObservations.Add(operatorObservation);
+            operatorHistory.Observations.Add(operatorObservation);
             if (cut is { } selected)
             {
                 HeldObservation = new(application.Services.GetRequiredService<ResourceLoggerService>(), OperationId,
@@ -255,13 +235,6 @@ internal sealed class ClusterRestoreRf3Fixture : IAsyncDisposable
         => (operatorObservation ?? throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid)).RequireReplayAsync(original);
 
     public ValueTask DisposeAsync() => new(StopAsync());
-    private static string Secret()
-    {
-        var bytes = RandomNumberGenerator.GetBytes(SecretBytes);
-        try
-        {
-            return Convert.ToBase64String(bytes);
-        }
-        finally { CryptographicOperations.ZeroMemory(bytes); }
-    }
+    private static string Secret() => ClusterRestoreRf3TargetIdentity.Secret();
+
 }

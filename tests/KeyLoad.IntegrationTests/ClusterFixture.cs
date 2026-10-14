@@ -44,9 +44,6 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
     /// <summary>Receives the native keyed data-source identity before initialization.</summary>
     public string Key { get; set; } = string.Empty;
 
-    private const string RuntimeControllerUnavailable = "The Aspire container runtime controller is not initialized.";
-    private const string DiagnosticsUnavailable = "The Aspire diagnostic capture is not initialized.";
-
     /// <summary>Creates the standard RF3 fixture for the shared TUnit class data source.</summary>
     public ClusterFixture()
     {
@@ -72,10 +69,7 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
     /// <summary>Creates an RF3 fixture with explicit HTTP admission bounds.</summary>
     /// <param name="httpAdmission">The HTTP body and control-body limits for each node.</param>
     internal ClusterFixture(HttpAdmissionLimits httpAdmission)
-    {
-        ArgumentNullException.ThrowIfNull(httpAdmission);
-        this.httpAdmission = httpAdmission;
-    }
+        => this.httpAdmission = ClusterFixtureRuntimeInvocation.RequireAdmission(httpAdmission);
 
     /// <summary>Creates an RF3 fixture with the server's typed database execution limits.</summary>
     /// <param name="databaseLimits">The validated limits applied to every Aspire RF3 node.</param>
@@ -206,21 +200,14 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
     /// <param name="cancellationToken">The bounded test operation cancellation.</param>
     /// <returns>The completed real Docker kill operation.</returns>
     public Task KillContainerAsync(string resourceName, string scenario, CancellationToken cancellationToken)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(resourceName);
-        ArgumentException.ThrowIfNullOrWhiteSpace(scenario);
-        return RequireContainerRuntime().KillAsync(resourceName, scenario, cancellationToken);
-    }
+        => ClusterFixtureRuntimeInvocation.KillAsync(RequireContainerRuntime, resourceName, scenario, cancellationToken);
 
     /// <summary>Restarts a previously killed Aspire-managed container and records its actual new generation.</summary>
     /// <param name="resourceName">The Aspire resource name to restart.</param>
     /// <param name="cancellationToken">The bounded test operation cancellation.</param>
     /// <returns>The completed native Aspire resource start operation.</returns>
     public Task RestartContainerAsync(string resourceName, CancellationToken cancellationToken)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(resourceName);
-        return RequireContainerRuntime().RestartAsync(resourceName, cancellationToken);
-    }
+        => ClusterFixtureRuntimeInvocation.RestartAsync(RequireContainerRuntime, resourceName, cancellationToken);
 
     /// <summary>Saves diagnostics, drains observers and disposes the actual Aspire application.</summary>
     /// <returns>A task that completes after the owned test resources are disposed.</returns>
@@ -269,19 +256,8 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
         localImageCleanupIncomplete = await nativeSql.JoinAndReleaseRootAsync(SnapshotReadiness, appStopped,
             localImageCleanupIncomplete, isolationCleanupIncomplete, failures,
             () => DeleteOwnedRootAsync(coverage, Root, deadline, failures)).ConfigureAwait(false);
-        if (coverage is not null && appStopped && failures.Count == 0 && stoppedNodes is not null)
-        {
-            await deadline!.CollectAsync(() => coverage.PublishReceiptAsync(stoppedNodes, token), failures)
-                .ConfigureAwait(false);
-        }
-        if (failures.Count == 1 && coverage is not null)
-        {
-            Rethrow(failures[0]);
-        }
-        if (failures.Count > 0)
-        {
-            throw new AggregateException("Cluster fixture cleanup failed.", failures);
-        }
+        await new ClusterFixtureCleanupCompletion(() => coverage, Rethrow)
+            .CompleteAsync(appStopped, stoppedNodes, deadline, failures, token).ConfigureAwait(false);
     }
 
     internal Task<KeyLoad.Clustering.ReplicaSiloDiscovery> ReadSnapshotDiscoveryAsync(string node, CancellationToken token)
@@ -294,11 +270,11 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
         RequireDiagnostics().SaveAsync(peerSecret, AdminKey, diagnosticIncarnation, cancellationToken);
 
     private ClusterFixtureDiagnostics RequireDiagnostics() => diagnostics
-        ?? throw new InvalidOperationException(DiagnosticsUnavailable);
+        ?? throw new InvalidOperationException(ClusterFixtureRuntimeInvocation.DiagnosticsUnavailable);
 
     internal ContainerRuntimeControl RequireContainerRuntime() => containerRuntime
-        ?? throw new InvalidOperationException(RuntimeControllerUnavailable);
+        ?? throw new InvalidOperationException(ClusterFixtureRuntimeInvocation.RuntimeControllerUnavailable);
 
     private DistributedApplication RequireApp() => App
-        ?? throw new InvalidOperationException(RuntimeControllerUnavailable);
+        ?? throw new InvalidOperationException(ClusterFixtureRuntimeInvocation.RuntimeControllerUnavailable);
 }

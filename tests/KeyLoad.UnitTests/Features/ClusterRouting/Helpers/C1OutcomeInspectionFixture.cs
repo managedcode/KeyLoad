@@ -1,4 +1,3 @@
-using System.Text;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.CrashHost.Features.ClusterRouting;
@@ -14,10 +13,6 @@ internal sealed class C1OutcomeInspectionFixture : IDisposable
     private const string GuidFormat = "N";
     private const string StoreDirectoryName = "database";
     private const string OuterOwnerName = "node.owner.lock";
-    private const string StoreOwnerName = "owner.lock";
-    private const int MaximumPhaseLineBytes = 512;
-    private const int MaximumPhaseLines = 32;
-    private const string PhaseBudgetMessage = "The outcome inspection phase observation exceeded its fixed bound.";
     private const string AdminId = "inspection-admin";
     private const string AdminSecret = "inspection.admin-secret-32-characters";
     private const string TenantId = "inspection-tenant";
@@ -36,9 +31,7 @@ internal sealed class C1OutcomeInspectionFixture : IDisposable
     }
     private bool rootOwned;
     private bool storeClosed;
-    private int phaseLineCount;
-    private bool phaseBudgetReported;
-    private readonly List<Exception> phaseFailures = [];
+    private readonly C1OutcomeInspectionPhaseRecorder phaseRecorder = new();
 
     private C1OutcomeInspectionFixture()
     {
@@ -173,22 +166,7 @@ internal sealed class C1OutcomeInspectionFixture : IDisposable
 
     internal void RecordPosition(long position) => Position = position;
 
-    internal void RecordOwnerPhase(string line)
-    {
-        var writer = Console.Error;
-        if (phaseLineCount >= MaximumPhaseLines
-            || Encoding.UTF8.GetByteCount(line) + Encoding.UTF8.GetByteCount(writer.NewLine) > MaximumPhaseLineBytes)
-        {
-            if (!phaseBudgetReported)
-            {
-                phaseBudgetReported = true;
-                phaseFailures.Add(new InvalidOperationException(PhaseBudgetMessage));
-            }
-            return;
-        }
-        phaseLineCount++;
-        ServerFailureObserver.Observe(() => writer.WriteLine(line), phaseFailures);
-    }
+    internal void RecordOwnerPhase(string line) => phaseRecorder.Record(line);
 
     internal void CloseStore()
     {
@@ -224,7 +202,7 @@ internal sealed class C1OutcomeInspectionFixture : IDisposable
         {
             ServerFailureObserver.Observe(DeleteOwnedRoot, cleanupFailures);
         }
-        cleanupFailures.AddRange(phaseFailures);
+        cleanupFailures.AddRange(phaseRecorder.Failures);
         ServerFailureObserver.ThrowIfAny(cleanupFailures);
     }
 
@@ -240,18 +218,5 @@ internal sealed class C1OutcomeInspectionFixture : IDisposable
         rootOwned = false;
     }
 
-    private void VerifyOwnedLocksReleased()
-    {
-        if (File.Exists(OuterOwnerLockPath))
-        {
-            using var outer = C1OutcomeInspectionOwnerPhase.Acquire(this,
-                C1OutcomeInspectionOwnerRole.FinalOuter, OuterOwnerLockPath);
-        }
-        var storeOwnerPath = Path.Combine(DirectoryPath, StoreOwnerName);
-        if (File.Exists(storeOwnerPath))
-        {
-            using var inner = C1OutcomeInspectionOwnerPhase.Acquire(this,
-                C1OutcomeInspectionOwnerRole.FinalDatabase, storeOwnerPath);
-        }
-    }
+    private void VerifyOwnedLocksReleased() => C1OutcomeInspectionLockRelease.Verify(this);
 }

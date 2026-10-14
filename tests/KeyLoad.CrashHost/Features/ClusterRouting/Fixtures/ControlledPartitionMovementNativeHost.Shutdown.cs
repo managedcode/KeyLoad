@@ -81,36 +81,12 @@ internal sealed partial class ControlledPartitionMovementNativeHost
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private async Task JoinObservedAsync(Task original, List<Exception> failures,
+    private Task JoinObservedAsync(Task original, List<Exception> failures,
         ControlledNativeColdShutdownEvidence.Stage stage, CancellationToken token)
-    {
-        var observation = new List<Exception>();
-        await ControlledNativeColdShutdownEvidence.ObserveAsync(() => original, observation,
-            Volatile.Read(ref coldShutdownNode), stage, true, token, CancellationToken.None).ConfigureAwait(false);
-        failures.AddRange(observation);
-        if (observation.Count == NoCommandFailures)
-        {
-            return;
-        }
-        if (stage == ControlledNativeColdShutdownEvidence.Stage.NodeStopObservation)
-        {
-            await ServerFailureObserver.ObserveAsync(() =>
-                ControlledNativeColdShutdownEvidence.CaptureNodeStopOwnerStateAsync(
-                    Volatile.Read(ref coldShutdownNode), original, Silo.HasJoinedRequestWork,
-                    Silo.Discovery is not null), failures).ConfigureAwait(false);
-        }
-        var completion = new List<Exception>();
-        await ControlledNativeColdShutdownEvidence.ObserveAsync(() => original, completion,
-            Volatile.Read(ref coldShutdownNode), (ControlledNativeColdShutdownEvidence.Stage)((int)stage + OriginalJoinStageOffset), false, token, CancellationToken.None).ConfigureAwait(false);
-        foreach (var error in completion)
-        {
-            if (!observation.Any(observed => ReferenceEquals(observed, error)))
-            {
-                failures.Add(error);
-            }
-        }
-        await ControlledNativeColdShutdownEvidence.AfterJoinAsync(observation, original, failures,
-            Volatile.Read(ref coldShutdownNode), stage).ConfigureAwait(false);
-    }
+        => ControlledPartitionMovementNativeTaskJoin.JoinObservedAsync(original, failures,
+            () => Volatile.Read(ref coldShutdownNode), stage, OriginalJoinStageOffset,
+            () => ControlledNativeColdShutdownEvidence.CaptureNodeStopOwnerStateAsync(
+                Volatile.Read(ref coldShutdownNode), original, Silo.HasJoinedRequestWork,
+                Silo.Discovery is not null), token);
 
 }

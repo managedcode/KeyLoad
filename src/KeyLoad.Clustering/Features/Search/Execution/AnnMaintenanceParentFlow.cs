@@ -24,16 +24,7 @@ internal static class AnnMaintenanceParentFlow
         {
             return await ReleaseAsync(children, request, token).ConfigureAwait(true);
         }
-        var initial = await AnnMaintenanceInitialEnrollment.ReadAsync(children, request, token).ConfigureAwait(true);
-        var configureId = AnnMaintenanceChildIdentity.Create(request.CommandId, AnnMaintenancePhase.Configure, EmptySequence);
-        var configured = await children.CommandAsync<ConfigureProjectionConsumerRequest, ProjectionConsumerInfo>(OperationKind.ConfigureProjectionConsumer,
-            new(configureId, request.Consumer, new(request.IndexGeneration, [], [.. MutationKinds])
-            {
-                AnnMaintenance = request.MaintenanceProfile
-            })
-            {
-                InitialAnnMaintenance = initial
-            }, configureId, token).ConfigureAwait(true);
+        var configured = await ConfigureOriginalAsync(children, request, token);
         var originalState = await children.CapabilityAsync(request, AnnMaintenanceCapabilityKind.AdmitOriginal,
             token, originalConfigure: configured).ConfigureAwait(true);
         if (originalState.OriginalResult is { } retained)
@@ -76,6 +67,21 @@ internal static class AnnMaintenanceParentFlow
         var result = new AnnMaintenanceResult(request.CommandId, request.Consumer, request.IndexGeneration,
             AnnMaintenancePhase.Completed, state.Source, state.Count, state.IndexSha256, checkpoint);
         return await CompleteAsync(children, request, configured, result, writer).ConfigureAwait(true);
+    }
+
+    private static async Task<ProjectionConsumerInfo> ConfigureOriginalAsync(AnnMaintenanceChildCalls children, AnnMaintenanceRequest request, CancellationToken token)
+    {
+        var initial = await AnnMaintenanceInitialEnrollment.ReadAsync(children, request, token).ConfigureAwait(true);
+        var configureId = AnnMaintenanceChildIdentity.Create(request.CommandId, AnnMaintenancePhase.Configure, EmptySequence);
+        var configured = await children.CommandAsync<ConfigureProjectionConsumerRequest, ProjectionConsumerInfo>(OperationKind.ConfigureProjectionConsumer,
+            new(configureId, request.Consumer, new(request.IndexGeneration, [], [.. MutationKinds])
+            {
+                AnnMaintenance = request.MaintenanceProfile
+            })
+            {
+                InitialAnnMaintenance = initial
+            }, configureId, token).ConfigureAwait(true);
+        return configured;
     }
 
     private static async Task<AnnMaintenanceResult> ReplayOriginalAsync(AnnMaintenanceChildCalls children,

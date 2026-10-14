@@ -8,12 +8,11 @@ namespace KeyLoad.Server.Features.DocumentStorage;
 
 internal sealed class RemoteDocumentRuntime : IAsyncDisposable
 {
-    private const string AttachedReceiverFailure = "The original native model receiver is already attached.";
     private readonly RemoteDocumentWorkOwner work;
     private RemoteDocumentClient? client;
     private RemoteModelNativeRuntime? nativeReceiver;
 
-    private RemoteDocumentRuntime(ServerRuntimeOptions options)
+    internal RemoteDocumentRuntime(ServerRuntimeOptions options)
         => work = new(options.GrainRouting, options.Node, options.RemoteDocuments);
 
     private readonly Lock gate = new();
@@ -60,37 +59,12 @@ internal sealed class RemoteDocumentRuntime : IAsyncDisposable
         get; private set;
     }
 
-    internal static async Task<RemoteDocumentRuntime?> CreateAsync(OrleansNode node,
+    internal static Task<RemoteDocumentRuntime?> CreateAsync(OrleansNode node,
         PartitionHost partition, ServerRuntimeOptions options, TimeProvider clock,
         IControlledBlobWireBorrowObserver? wireObserver = null)
-    {
-        var settings = options.Node.Value.PhysicalGroupTrust;
-        if (!settings.RemoteDocumentReads)
-        {
-            return null;
-        }
-        var runtime = new RemoteDocumentRuntime(options);
-        try
-        {
-            partition.TransferVerification?.AttachRuntime(runtime);
-            runtime.Initialize(node, partition, options, clock, wireObserver);
-            return runtime;
-        }
-        catch (Exception primary)
-        {
-            var failures = new List<Exception> { primary };
-            try
-            {
-                await runtime.DisposeAsync().ConfigureAwait(false);
-            }
-            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-            ServerFailureObserver.ThrowIfAny(failures);
-            throw;
-        }
-    }
+        => RemoteDocumentRuntimeCreation.CreateAsync(node, partition, options, clock, wireObserver);
 
-    private void Initialize(OrleansNode node, PartitionHost partition,
+    internal void Initialize(OrleansNode node, PartitionHost partition,
         ServerRuntimeOptions options, TimeProvider clock, IControlledBlobWireBorrowObserver? wireObserver)
     {
         var settings = options.Node.Value.PhysicalGroupTrust;
@@ -139,14 +113,7 @@ internal sealed class RemoteDocumentRuntime : IAsyncDisposable
     }
 
     internal void AttachNativeReceiver(RemoteModelNativeRuntime receiver)
-    {
-        ArgumentNullException.ThrowIfNull(receiver);
-        if (Interlocked.CompareExchange(ref nativeReceiver, receiver, null) is not null)
-        {
-            throw new InvalidOperationException(AttachedReceiverFailure);
-        }
-        receiver.Attach(this);
-    }
+        => RemoteDocumentRuntimeLifecycle.Attach(this, ref nativeReceiver, receiver);
 
     internal Task<global::KeyLoad.Server.Features.EventStreams.EventVectorAuthenticatedExchange> SendLocalEventVectorAsync(
         global::KeyLoad.Server.Features.EventStreams.EventVectorRemoteCall originalCall, KeyLoad.Core.ReadExecutionBudget originalWork,
@@ -204,15 +171,27 @@ internal sealed class RemoteDocumentRuntime : IAsyncDisposable
             {
                 await Endpoint.DisposeAsync().ConfigureAwait(false);
             }
-            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
+            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+            {
+                failures.Add(error);
+            }
+            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+            {
+                failures.Add(error);
+            }
         }
         try
         {
             await work.DisposeAsync().ConfigureAwait(false);
         }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
     private async Task DisposeClientAsync(List<Exception> failures)
@@ -232,15 +211,7 @@ internal sealed class RemoteDocumentRuntime : IAsyncDisposable
             failures.Add(error);
             return;
         }
-        await terminal.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
-        if (terminal.Exception is { } terminalFailure)
-        {
-            failures.AddRange(terminalFailure.InnerExceptions);
-        }
-        else if (terminal.IsCanceled)
-        {
-            failures.Add(new TaskCanceledException(terminal));
-        }
+        await RemoteDocumentRuntimeLifecycle.SettleClientAsync(terminal, failures).ConfigureAwait(false);
     }
 
     private async Task DisposeClientCoreAsync()

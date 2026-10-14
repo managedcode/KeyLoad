@@ -72,13 +72,11 @@ internal static class AuthorizationTelemetryFlow
     private static async Task DeniedAsync(AuthorizationTelemetryHttpFixture fixture,
         AdminResourcesRequest request, CancellationToken cancellationToken)
     {
-        using (var denied = await SendAsync(fixture, AuthorizationTelemetryTestProtocol.MemberKey, request, cancellationToken))
-        {
-            await Assert.That(denied.StatusCode).IsEqualTo(HttpStatusCode.Forbidden);
-            var error = await denied.Content.ReadFromJsonAsync<AuthorizationTelemetryFailure>(JsonDefaults.Options, cancellationToken);
-            await Assert.That(error!.Code).IsEqualTo(ErrorCode.PermissionDenied);
-            await Assert.That(error.Detail).IsEqualTo(AuthorizationTelemetryTestProtocol.ScopeDenial);
-        }
+        using var denied = await SendAsync(fixture, AuthorizationTelemetryTestProtocol.MemberKey, request, cancellationToken);
+        await Assert.That(denied.StatusCode).IsEqualTo(HttpStatusCode.Forbidden);
+        var error = await denied.Content.ReadFromJsonAsync<AuthorizationTelemetryFailure>(JsonDefaults.Options, cancellationToken);
+        await Assert.That(error!.Code).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(error.Detail).IsEqualTo(AuthorizationTelemetryTestProtocol.ScopeDenial);
     }
 
     private static Task<HttpResponseMessage> SendAsync(AuthorizationTelemetryHttpFixture fixture, string secret,

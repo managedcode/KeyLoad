@@ -77,31 +77,7 @@ internal sealed class RequestCqrsProbeTamperTests
             owner with { VoterIds = [ReplicaSecurityFixture.VoterA, ReplicaSecurityFixture.VoterB, ReplicaSecurityFixture.UnknownVoter] },
             owner with { PlacementEpoch = owner.PlacementEpoch + 1 }
         };
-        foreach (var changed in changedOwners)
-        {
-            await Assert.That(mac.VerifyProbeRequest(request with
-            {
-                CallerOwner = changed
-            })).IsFalse();
-            await Assert.That(mac.VerifyProbeRequest(request with
-            {
-                DestinationOwner = changed
-            })).IsFalse();
-            await Assert.That(mac.VerifyProbeRequest(request with
-            {
-                Claim = request.Claim! with
-                {
-                    Owner = changed
-                }
-            })).IsFalse();
-            await Assert.That(mac.VerifyProbeReply(reply with
-            {
-                Claim = reply.Claim! with
-                {
-                    Owner = changed
-                }
-            })).IsFalse();
-        }
+        await RequireChangedOwnerProofsRejectedAsync(mac, request, reply, changedOwners);
         var mutations = new[]
         {
             request with { Version = request.Version + 1 },
@@ -158,4 +134,35 @@ internal sealed class RequestCqrsProbeTamperTests
             })).IsFalse();
         }
     }
+
+    private static async Task RequireChangedOwnerProofsRejectedAsync(PartitionMovementMac mac,
+        RequestCqrsProbeNativeRequest request, RequestCqrsProbeNativeReply reply, PhysicalShardRecord[] changedOwners)
+    {
+        foreach (var changed in changedOwners)
+        {
+            await Assert.That(mac.VerifyProbeRequest(request with
+            {
+                CallerOwner = changed
+            })).IsFalse();
+            await Assert.That(mac.VerifyProbeRequest(request with
+            {
+                DestinationOwner = changed
+            })).IsFalse();
+            await Assert.That(mac.VerifyProbeRequest(request with
+            {
+                Claim = request.Claim! with
+                {
+                    Owner = changed
+                }
+            })).IsFalse();
+            await Assert.That(mac.VerifyProbeReply(reply with
+            {
+                Claim = reply.Claim! with
+                {
+                    Owner = changed
+                }
+            })).IsFalse();
+        }
+    }
+
 }

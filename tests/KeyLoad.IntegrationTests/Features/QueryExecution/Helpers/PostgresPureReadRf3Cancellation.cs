@@ -45,14 +45,7 @@ internal static class PostgresPureReadRf3Cancellation
                         RequestCqrsProbeOutcome.Cancelled, discovery, token);
                     var disposed = await controls.WaitForMarkerAsync(arm, RequestCqrsProbePhase.ProducerDisposed,
                         RequestCqrsProbeOutcome.Observed, discovery, token);
-                    await SqlRf3Protocol.EqualAsync(held with
-                    {
-                        Outcome = cancelled.Outcome
-                    }, cancelled);
-                    await SqlRf3Protocol.EqualAsync(held with
-                    {
-                        Phase = RequestCqrsProbePhase.ProducerDisposed
-                    }, disposed);
+                    await RequireSettledMarkersAsync(held, cancelled, disposed);
                     await controls.RetireArmAsync(arm, token);
                     await SqlRf3Protocol.EqualAsync(before, await PostgresCompositionRf3Models.ReadAsync(root, token));
                     await SqlRf3Protocol.EqualAsync(new DocumentReadResult(state.Image.Left),
@@ -76,4 +69,19 @@ internal static class PostgresPureReadRf3Cancellation
     }
 
     private static readonly string[] Nodes = [McpCallerProtocol.Node1, McpCallerProtocol.Node2, McpCallerProtocol.Node3];
+
+    private static async Task RequireSettledMarkersAsync(
+        global::KeyLoad.Server.Features.ClusterRouting.RequestCqrsProbeMarkerRecord held,
+        global::KeyLoad.Server.Features.ClusterRouting.RequestCqrsProbeMarkerRecord cancelled,
+        global::KeyLoad.Server.Features.ClusterRouting.RequestCqrsProbeMarkerRecord disposed)
+    {
+        await SqlRf3Protocol.EqualAsync(held with
+        {
+            Outcome = cancelled.Outcome
+        }, cancelled);
+        await SqlRf3Protocol.EqualAsync(held with
+        {
+            Phase = RequestCqrsProbePhase.ProducerDisposed
+        }, disposed);
+    }
 }
