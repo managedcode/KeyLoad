@@ -95,6 +95,7 @@ public sealed partial class DatabaseEngine
         ArgumentNullException.ThrowIfNull(request.SourceDocument);
         ArgumentNullException.ThrowIfNull(request.Target);
         ArgumentNullException.ThrowIfNull(request.Target.Space);
+        ValidateMutationStructure(request.Target);
         ValidatePartition(partition);
         ArgumentNullException.ThrowIfNull(request.SourceStream.Partition);
         ArgumentNullException.ThrowIfNull(request.SourceDocument.Partition);
@@ -222,6 +223,7 @@ public sealed partial class DatabaseEngine
             throw Errors.Fail(ErrorCode.Conflict, ProjectionEffectConflictMessage);
         }
         ValidateEffectReceipt(previous.Receipt, request.Target);
+        RequireCanonicalProjectionEffect(transaction, partition, request.Target, previous);
         var lineageKey = VectorProjectionKeys.Lineage(partition, request.Target.Collection,
             request.Target.Field, request.Target.Id);
         var lineage = transaction.GetRecord<VectorProjectionLineage>(lineageKey)
@@ -279,6 +281,20 @@ public sealed partial class DatabaseEngine
             && lineage.ReducerId == request.ReducerId
             && lineage.ReducerVersion == request.ReducerVersion
             && lineage.ReducerGeneration == request.ReducerGeneration;
+
+    private static void RequireCanonicalProjectionEffect(IKeyValueView view, PartitionRef partition,
+        PutVector target, VectorProjectionEffect effect)
+    {
+        var vector = view.GetRecord<VectorRecord>(KeySpace.Partition(VisibleVectorReads.VectorKeySpace,
+            partition, target.Collection, target.Field, target.Id));
+        if (vector is null || vector.DocumentId != target.Id || vector.Field != target.Field
+            || vector.Space != target.Space || vector.DocumentRevision != target.ExpectedDocumentRevision
+            || effect.Receipt.Revision != vector.DocumentRevision
+            || !VectorProjectionPolicy.MatchesCanonicalVector(effect.Fingerprint, target.Collection, vector))
+        {
+            throw Errors.Fail(ErrorCode.Corruption, ProjectionEffectCorruptMessage);
+        }
+    }
 
     private static void ValidateEffectReceipt(MutationReceipt receipt, PutVector target)
     {

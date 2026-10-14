@@ -35,7 +35,11 @@ public sealed record ReadSampleChunkWindowRequest([property: Orleans.Id(0)] Part
 {
     /// <summary>Optional acknowledged minimum in the same canonical physical placement and incarnation.</summary>
     [Orleans.Id(7)]
-    public CommitToken? MinimumToken { get; init; }
+    public CommitToken? MinimumToken
+    {
+        get;
+        init;
+    }
 }
 
 /// <summary>Complete native scope and watermark of one authorized chunk window read cut.</summary>

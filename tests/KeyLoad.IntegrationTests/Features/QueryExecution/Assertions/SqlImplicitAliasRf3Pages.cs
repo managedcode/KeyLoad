@@ -4,9 +4,9 @@ namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
 internal static class SqlImplicitAliasRf3Pages
 {
-    internal const string BasicSql = "SELECT score projected_score FROM null_ordering WHERE score IS NULL ORDER BY label ASC LIMIT 5";
-    private const string Prefix = "SELECT score ";
-    private const string Tail = " FROM null_ordering WHERE score IS NULL ORDER BY label ASC LIMIT 5";
+    internal const string BasicSql = "SELECT TOP (5) score projected_score FROM null_ordering WHERE score IS NULL ORDER BY label ASC";
+    private const string Prefix = "SELECT TOP (5) score ";
+    private const string Tail = " FROM null_ordering WHERE score IS NULL ORDER BY label ASC";
     private static readonly (string Label, string Name, string Json)[] Cases =
     [
         ("projected_score", "projected_score", "{\"projected_score\":null}"),

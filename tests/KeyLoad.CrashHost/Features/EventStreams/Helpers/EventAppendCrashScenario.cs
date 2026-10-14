@@ -42,6 +42,10 @@ internal static class EventAppendCrashScenario
         => CrashDatabase.Submit(database, OperationKind.ConfigureResource,
             new ConfigureResourceRequest(EventAppendCrashContract.Partition.TenantId,
                 EventAppendCrashContract.Partition.DatabaseId,
-                new(name, kind, EventAppendCrashContract.Partition.TransactionDomainId)), Guid.Parse(id))
+                new(name, kind, EventAppendCrashContract.Partition.TransactionDomainId)
+                {
+                    Indexes = kind == ResourceKind.Collection
+                        ? [new(EventAppendCrashContract.DocumentIndex, [EventAppendCrashContract.DocumentIndexPath])] : []
+                }), Guid.Parse(id))
             .Get<ResourceDefinition>();
 }

@@ -31,7 +31,8 @@ internal static class SampleChunkSignedMinimumFlow
         var retained = SampleChunkSignedMinimumEnvelope.Create(scenario.Fixture.Codec, state.Reader, retainedId, state.Request);
         owner.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(state.Reader with
         {
-            Grants = [], PolicyEpoch = RevokedEpoch
+            Grants = [],
+            PolicyEpoch = RevokedEpoch
         })).Get<PrincipalRecord>();
         await SampleChunkSignedMinimumAssertions.ObserveAsync(owner.Store,
             () => SampleChunkSignedMinimumAssertions.RefusedAsync(scenario, state, retainedId, retained, mac: false, token));

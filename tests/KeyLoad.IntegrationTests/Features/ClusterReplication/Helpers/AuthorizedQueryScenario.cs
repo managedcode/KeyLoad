@@ -76,7 +76,7 @@ internal static class AuthorizedQueryScenario
         await Assert.That(manifest.AstVersion).IsEqualTo(1);
         await Assert.That(manifest.ReadOnly).IsTrue();
         await Assert.That(manifest.Adapters).Contains("JSON");
-        const string sql = "SELECT * FROM \"query-adapters\" q WHERE q.status = 'open' ORDER BY q.number LIMIT 1";
+        const string sql = "SELECT TOP (1) * FROM \"query-adapters\" q WHERE q.status = 'open' ORDER BY q.number";
         var first = Success(await client.QueryAsync(new QueryRequest(partition, sql), cancellationToken));
         await Assert.That(first.Rows.Single().EntityId).IsEqualTo("a");
         await Assert.That(first.Rows[0].Json).DoesNotContain(Canary);

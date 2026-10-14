@@ -94,6 +94,8 @@ public sealed class HttpAdmissionGovernor
            || path.Equals(TimeSeriesReadProtocol.LatestRoute, StringComparison.OrdinalIgnoreCase)
            || path.Equals(TimeSeriesReadProtocol.AggregateRoute, StringComparison.OrdinalIgnoreCase)
            || path.Equals(TimeSeriesReadProtocol.WindowsRoute, StringComparison.OrdinalIgnoreCase)
+           || path.Equals(SampleChunkProtocol.ReadRoute, StringComparison.OrdinalIgnoreCase)
+           || path.Equals(SampleRollupProtocol.ReadRoute, StringComparison.OrdinalIgnoreCase)
            || path.Equals(StreamReadPath, StringComparison.OrdinalIgnoreCase)
            || path.Equals(EventReadPath, StringComparison.OrdinalIgnoreCase)
            || path.Equals(ChangeReadPath, StringComparison.OrdinalIgnoreCase)

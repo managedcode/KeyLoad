@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -104,7 +103,7 @@ public static class JsonData
             {
                 current = child;
             }
-            else if (current.ValueKind == JsonValueKind.Array && int.TryParse(part, NumberStyles.None, CultureInfo.InvariantCulture, out var index)
+            else if (current.ValueKind == JsonValueKind.Array && TryArrayIndex(part, out var index)
                 && index < current.GetArrayLength())
             {
                 current = current[index];
@@ -129,6 +128,12 @@ public static class JsonData
     /// <param name="pathText">RFC 6901 pointer, or empty text for the root.</param>
     /// <returns>Decoded path segments in traversal order.</returns>
     public static string[] PathSegments(string pathText) => JsonPointerPaths.Parse(pathText);
+
+    /// <summary>Recognizes a concrete RFC 6901 array index without normalizing object keys.</summary>
+    /// <param name="segment">A decoded pointer segment, tested only when traversing an array.</param>
+    /// <param name="index">The representable nonnegative index when recognized.</param>
+    /// <returns>Whether the segment uses ASCII digits with no leading zero except zero itself.</returns>
+    public static bool TryArrayIndex(string segment, out int index) => JsonPointerPaths.TryArrayIndex(segment, out index);
 
     /// <summary>Encodes concrete path segments with the existing JSON pointer escaping.</summary>
     /// <param name="segments">Owned unescaped path segments.</param>

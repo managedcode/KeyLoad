@@ -28,9 +28,18 @@ internal static class SampleChunkExplicitMinimumUnitFlow
             fixture.Owner.Submit(OperationKind.ConfigurePrincipal,
                 Reader(fixture.Owner, RevokedEpoch, permitted: false)).Get<PrincipalRecord>();
             await SampleChunkExplicitMinimumUnitReads.PermissionAsync(fixture.Owner.Database, fixture.Owner.Store,
-                fixture.Request with { MinimumToken = minimum with { Incarnation = Guid.Empty } }, ReaderId, token);
+                fixture.Request with
+                {
+                    MinimumToken = minimum with
+                    {
+                        Incarnation = Guid.Empty
+                    }
+                }, ReaderId, token);
             fixture.Owner.Submit(OperationKind.ConfigurePrincipal,
-                reader with { PolicyEpoch = RepairedEpoch }).Get<PrincipalRecord>();
+                reader with
+                {
+                    PolicyEpoch = RepairedEpoch
+                }).Get<PrincipalRecord>();
             await SampleChunkExplicitMinimumUnitReads.RunAsync(fixture.Owner.Database, fixture.Owner.Store,
                 fixture.Request, minimum, ReaderId, token);
             await ReplayAsync(fixture.Owner.Database, fixture.Owner.Store, fixture, commands, token);

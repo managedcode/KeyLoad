@@ -1,0 +1,7 @@
+# R58 fixture disposal status and signed minimum lexical intent
+
+CodeQuality maximum aggregate type200 and explicit ordinal comparison apply without changing execution limits or runtime contracts. Extract only the existing RequestCqrsClusterFixture.IsDisposalJoined status responsibility into its existing RequestCqrsFixtureDisposalRegistration lifecycle owner. Pass disposal by explicit readonly reference; the current same field value remains read INSIDE the original same lock, never snapshotted before acquiring it. Get registration/registered TCS/original disposal Task identity and every original stop/drain/dispose/observer/deadline/token/error path remain unchanged. The property remains one consecutive observation, not first-cause or atomic shutdown proof.
+
+SampleChunkSignedMinimumEnvelope preserves its exact original delimiter/frame/offset/payload/signature behavior. Use the analyzer-selected existing IndexOf(char,StringComparison.Ordinal) overload only. The last separator search and all native generated envelope bytes, unknown read-kind handling and existing source failure ownership remain unchanged. No new helper type, partial-type rename, suppression, compressed braces, increased64/200/400 threshold, or new outcome/alias/Id is introduced.
+
+These are source-only current compiler corrections. Root native preview/adoption, canonical formatter, full build and original functional/cancellation/recovery/RF3/Linux gates remain distinct; no acceptance or startup-cause claim follows.

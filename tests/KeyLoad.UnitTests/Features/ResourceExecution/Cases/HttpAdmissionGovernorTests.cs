@@ -44,12 +44,32 @@ internal sealed class HttpAdmissionGovernorTests
         }));
         var query = Begin(governor, "/V1/QUERY/AST/");
         await Assert.That(governor.Status().Node.RetainedBytes).IsEqualTo(20_480);
-        foreach (var path in new[] { "/v1/search", "/v1/graph/traverse", "/v1/changes/read" })
+        var paths = new[] { "/v1/search", "/v1/graph/traverse", "/v1/changes/read",
+            SampleChunkProtocol.ReadRoute, SampleRollupProtocol.ReadRoute,
+            "/V1/SERIES/CHUNKS/WINDOW/", "/V1/SERIES/ROLLUPS/READ/" };
+        foreach (var path in paths)
         {
             await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => Begin(governor, path)).Code).IsEqualTo(ErrorCode.ResourceExhausted);
         }
 
         query.Dispose();
+        foreach (var path in paths)
+        {
+            var admitted = Begin(governor, path);
+            Bind(admitted, Principal());
+            await Assert.That(governor.Status().Node)
+                .IsEqualTo(new CommandAdmissionSnapshot(1, 20_480, 0, 0, 1, 1));
+            await Assert.That(governor.Status().VerifiedScopes)
+                .IsEqualTo(new CommandAdmissionSnapshot(1, 4_096, 0, 0, 1, 1));
+            await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => Begin(governor, "/v1/query/ast")).Code)
+                .IsEqualTo(ErrorCode.ResourceExhausted);
+            admitted.Dispose();
+            admitted.Dispose();
+            await Assert.That(governor.Status().Node)
+                .IsEqualTo(new CommandAdmissionSnapshot(0, 0, 0, 0, 0, 0));
+            await Assert.That(governor.Status().VerifiedScopes)
+                .IsEqualTo(new CommandAdmissionSnapshot(0, 0, 0, 0, 0, 0));
+        }
         using var search = Begin(governor, "/v1/search");
         await Assert.That(governor.Status().Node.RetainedBytes).IsEqualTo(20_480);
     }

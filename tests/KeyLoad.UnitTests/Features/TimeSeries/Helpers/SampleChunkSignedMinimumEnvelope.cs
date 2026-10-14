@@ -21,17 +21,23 @@ internal static class SampleChunkSignedMinimumEnvelope
     {
         var verified = codec.VerifyRead(original, requestId);
         var before = GrainNativePayload.Read<ReadSampleChunkWindowRequest>(verified.Payload);
-        var replacement = before with { MinimumToken = minimum };
+        var replacement = before with
+        {
+            MinimumToken = minimum
+        };
         var payload = NativeSerialization.Serialize(replacement);
         if (verified.Payload.Span.SequenceEqual(payload))
         {
             throw new InvalidOperationException("The generated native payload omitted the changed minimum.");
         }
-        var envelope = verified.Envelope with { Payload = payload };
+        var envelope = verified.Envelope with
+        {
+            Payload = payload
+        };
         var changed = NativeSerialization.Serialize(envelope);
         var encoded = Convert.ToBase64String(changed).TrimEnd(Padding)
             .Replace(StandardPlus, UrlMinus).Replace(StandardSlash, UrlUnderscore);
-        return original[..(original.IndexOf(Separator) + NextCharacter)] + encoded
+        return original[..(original.IndexOf(Separator, StringComparison.Ordinal) + NextCharacter)] + encoded
             + original[original.LastIndexOf(Separator)..];
     }
 

@@ -17,6 +17,7 @@ internal static class EventAppendStateAssertions
         bool committed, bool healthy)
     {
         await EventAppendQueueAssertions.VerifyAsync(database.Store, committed, healthy);
+        await EventAppendIndexAssertions.VerifyAsync(database.Store, committed, healthy);
         var page = database.ReadStream(EventAppendCrashContract.Principal, EventAppendCrashContract.Stream);
         var ids = new List<string> { EventAppendCrashContract.SeedId };
         if (committed)

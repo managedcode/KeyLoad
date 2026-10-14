@@ -35,7 +35,10 @@ internal static class SampleChunkExplicitMinimumUnitReads
             await ObserveAsync(database, store, request, principal, () =>
             {
                 var failed = Assert.ThrowsExactly<KeyLoadException>(() => database.ReadSampleChunkWindow(
-                    principal, request with { MinimumToken = trial.Token }, token));
+                    principal, request with
+                    {
+                        MinimumToken = trial.Token
+                    }, token));
                 RequireBytes(Errors.Problem(ErrorCode.TokenInvalidated, trial.Detail), failed.ToProblem());
             }, token);
         }
@@ -44,7 +47,10 @@ internal static class SampleChunkExplicitMinimumUnitReads
         await ObserveAsync(database, store, request, principal, () =>
         {
             var error = Assert.ThrowsExactly<OperationCanceledException>(() => database.ReadSampleChunkWindow(
-                principal, request with { MinimumToken = minimum }, canceled.Token));
+                principal, request with
+                {
+                    MinimumToken = minimum
+                }, canceled.Token));
             if (error.CancellationToken != canceled.Token)
             {
                 throw new InvalidOperationException("The chunk refusal lost the original cancellation token.");
@@ -55,7 +61,10 @@ internal static class SampleChunkExplicitMinimumUnitReads
     internal static async Task PermissionAsync(DatabaseEngine database, ZoneTreeStore store,
         ReadSampleChunkWindowRequest request, string principal, CancellationToken token)
     {
-        await ObserveAsync(database, store, request with { MinimumToken = null }, SampleChunkCanonicalFixture.Principal, () =>
+        await ObserveAsync(database, store, request with
+        {
+            MinimumToken = null
+        }, SampleChunkCanonicalFixture.Principal, () =>
         {
             var failed = Assert.ThrowsExactly<KeyLoadException>(() => database.ReadSampleChunkWindow(principal, request, token));
             RequireBytes(Errors.Problem(ErrorCode.PermissionDenied, ScopeDenied), failed.ToProblem());

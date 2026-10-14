@@ -7,8 +7,8 @@
       "total": 104
     },
     "additionalTask": "KL-105",
-    "qualification": "R57 whole-task source integrated and awaiting fresh build/discovery/runtime. Last verified R56 selected cohort passed256/256Unit and63/63real process recovery with unchanged source/DLL/PDB; it does not qualify later R57 code. Original104 acceptance stays20done84inprogress; full Linux/RF3/formatter/coverage/fault/endurance/performance gates remain open.",
-    "coverage": "Current R57 functional product coverage is unmeasured. Historical R56 selected functional-only collector reports12926/106456 lines and6724/67424 branches in10modules; no full product coverage or load/comparison credit.",
+    "qualification": "R58 coherent source batches integrated; prior R57 complete Release failed17diagnostics at unchanged source, all assigned036 compiler repairs integrated. Fresh full build/native discovery/runtime still pending. R56 selected256Unit/63process passes do not qualify this later source. Original104 acceptance remains20done84inprogress; all full Linux/RF3/formatter/coverage/fault/endurance/performance gates open.",
+    "coverage": "Current R58 complete functional product coverage is unmeasured. Historical R56 selected collector12926/106456lines and6724/67424branches in10modules is not full product coverage; load/comparison excluded.",
     "currentStageR43": {
       "status": "local_development_executed_with_six_failures_linux_acceptance_pending",
       "newCSharpFiles": 138,
@@ -3110,6 +3110,263 @@
         "Complete mapped Unit/recovery and original remaining movement/typed-INSERT operations, then genuine Linux Aspire RF3 SDK/MCP.",
         "All required formatter/full product coverage/fault/endurance/measured performance gates."
       ]
+    },
+    "currentStageR58": {
+      "status": "coherent_source_joined_fresh_compiler_runtime_pending",
+      "actualExecutorCapacity": {
+        "chats": 3,
+        "executorsPerChatIncludingRoot": 4,
+        "total": 12,
+        "model": "GPT-6.1 Sol medium"
+      },
+      "continuousOwnership": "Distinct whole tasks, next unowned task immediately when code ready/qualification pending; original acceptance/failure owner retained. All source/DLL/PDB writers frozen only for active integrated verification; independent code continues.",
+      "sourceTasks": [
+        "KL-036",
+        "KL-066",
+        "KL-069",
+        "KL-070",
+        "KL-076",
+        "KL-078",
+        "KL-087",
+        "KL-091"
+      ],
+      "previousFullBuild": {
+        "exitCode": 1,
+        "errors": 17,
+        "warnings": 0,
+        "elapsedSeconds": 268.83816629089415,
+        "sourceDrift": 0,
+        "stdoutSha256": "dc42f03224a1beb11d380d791ed8e4f563f620756c59e874b864e005bf01b8da",
+        "scope": "036 cold owner diagnostics only; all17 fixed in one reviewed3path source batch, no new pass inferred"
+      },
+      "freshNativeCounts": null,
+      "freshRuntimePasses": null,
+      "freshCoverage": null,
+      "linuxQualified": false,
+      "wholeAcceptancePromoted": false,
+      "record": "docs/implementation/qualification-stage64-public-models.md"
+    },
+    "currentStageR59": {
+      "status": "eleven_whole_task_source_batches_integrated_current_full_release_pending",
+      "sourceTasks": [
+        "KL-036",
+        "KL-051",
+        "KL-062",
+        "KL-066",
+        "KL-067",
+        "KL-069",
+        "KL-070",
+        "KL-076",
+        "KL-078",
+        "KL-087",
+        "KL-091"
+      ],
+      "sourceAdoption": {
+        "path": "TestResults/stage61-native-join/root-r59-kl051-kl062-kl067-combined-source-adoption.original.json",
+        "sha256": "14375d706c09c4aeeb7d48eaff3ee71aee89ab37b6db964286903d3985b4dbaa"
+      },
+      "actualContinuousTasks": [
+        "KL-036",
+        "KL-045",
+        "KL-046",
+        "KL-068",
+        "KL-069",
+        "KL-070",
+        "KL-071",
+        "KL-076",
+        "KL-087",
+        "KL-089",
+        "KL-092",
+        "KL-093"
+      ],
+      "priorRelatedRecovery": {
+        "taskAcceptance": false,
+        "sourceImageDrift": 0,
+        "localDevelopmentOnly": true,
+        "elapsedSeconds": 166.4080190839013,
+        "trx": "TestResults/stage61-native-join/root-r58-current-recovery-functional-native/KeyLoad.RecoveryTests_net10.0_arm64.trx",
+        "trxSha256": "343d4c8d065862e1d240b80030a81442f4049faf1f856a1fceef45fa7bc6fc9a",
+        "counters": {
+          "total": "71",
+          "executed": "71",
+          "passed": "70",
+          "failed": "1",
+          "error": "0",
+          "timeout": "0",
+          "aborted": "0",
+          "inconclusive": "0",
+          "passedButRunAborted": "0",
+          "notRunnable": "0",
+          "notExecuted": "0",
+          "disconnected": "0",
+          "warning": "0",
+          "completed": "0",
+          "inProgress": "0",
+          "pending": "0"
+        },
+        "failureNames": [
+          "CanceledOriginalStopJoinsAllSixOwnersThenOriginalColdOutcomeAndHealthyReplayRemainExact"
+        ]
+      },
+      "priorFullRelease": {
+        "exitCode": 1,
+        "errors": 54,
+        "warnings": 0,
+        "elapsedSeconds": 525.449511416,
+        "sourceDrift": 0,
+        "stdoutSha256": "539e39b6b0ab26f5803244330cc64e5818b25ce79d64a2b8bda44abcab911a1e",
+        "repair": "All unverified CSharp since4964 plus current source reviewed, including earlier committed bc99 TimeSeries source omitted by prior dirty-only scope. All51 layout and078 ordinal/aggregate/066 namespace source corrections integrated; no new passing build inferred."
+      },
+      "format": {
+        "nativeExit": 0,
+        "filesInScope": 128,
+        "reviewedActualDeltas": 2,
+        "imageDrift": 0,
+        "scope": "Current included source only, full canonical verify still pending"
+      },
+      "freshUnitOrRf3Counts": null,
+      "freshUnitOrRf3Passes": null,
+      "freshCoverage": null,
+      "linuxQualified": false,
+      "wholeAcceptancePromoted": false
+    },
+    "currentStageR60": {
+      "status": "current_unit_compiled_and_related_whole_flows_executed_with_retained_failures",
+      "fullRelease": {
+        "exitCode": 1,
+        "errors": 2,
+        "warnings": 0,
+        "elapsedSeconds": 296.3494135829387,
+        "sourceDrift": 0,
+        "stdoutSha256": "feacee7f7cdc804c14dde6c4ad0dced5a5d45b015e0311acc2d18e36c47caf78",
+        "remaining": [
+          "PolicyEpochAuthorityOutage.RestoreAsync CA1068 cancellation token last",
+          "PolicyEpochAuthorityRefusals KLD0033 nesting4, maximum3"
+        ],
+        "currentUnitAndRecoveryAndProductProjectsCompiled": true
+      },
+      "fullCanonicalFormat": {
+        "exitCode": 2,
+        "elapsedSeconds": 260.37547383399215,
+        "stderrSha256": "bcefd606ce8ce1472015b525b0268ccd874b8b2aae5a9e6083f8a8a19ffcc15c",
+        "remaining": [
+          "TimeSeriesResourceTagPolicyRf3Assertions native imports ordering",
+          "PolicyEpochAuthorityRefusals original nesting4"
+        ]
+      },
+      "nativeUnit": {
+        "census": {
+          "actualCases": 429,
+          "selectedWholeClasses": 105,
+          "stdoutSha256": "991e954a97ae0883c08529a4e753960a410bd9f82617097356a12f81ea2fd0db"
+        },
+        "counters": {
+          "total": "429",
+          "executed": "429",
+          "passed": "416",
+          "failed": "13",
+          "error": "0",
+          "timeout": "0",
+          "aborted": "0",
+          "inconclusive": "0",
+          "passedButRunAborted": "0",
+          "notRunnable": "0",
+          "notExecuted": "0",
+          "disconnected": "0",
+          "warning": "0",
+          "completed": "0",
+          "inProgress": "0",
+          "pending": "0"
+        },
+        "elapsedSeconds": 217.0306426670868,
+        "configuredParallelTests": 50,
+        "sourceDrift": 0,
+        "compiledDrift": 0,
+        "originalTrx": "TestResults/stage61-native-join/root-r59-eleven-task-unit-functional-native/KeyLoad.UnitTests_net10.0_arm64.trx",
+        "trxSha256": "209e212210765eb606dda0000177ccbe8f349245e54e49ce2f9f7a9cb41b2353",
+        "failedWholeOperations": [
+          {
+            "class": "KeyLoad.UnitTests.Features.ResourceExecution.AtomicTriadOutboxTests",
+            "name": "LateOutboxRefusalRollsBackEveryMixedModelThenOriginalFailureAndFreshWholeReceiptSurviveTwoColdOwners(1)"
+          },
+          {
+            "class": "KeyLoad.UnitTests.Features.ResourceExecution.AtomicTriadOutboxTests",
+            "name": "LateOutboxRefusalRollsBackEveryMixedModelThenOriginalFailureAndFreshWholeReceiptSurviveTwoColdOwners(0)"
+          },
+          {
+            "class": "KeyLoad.UnitTests.Features.ResourceExecution.AtomicTriadOutboxTests",
+            "name": "LateOutboxRefusalRollsBackEveryMixedModelThenOriginalFailureAndFreshWholeReceiptSurviveTwoColdOwners(2)"
+          },
+          {
+            "class": "KeyLoad.UnitTests.Features.Search.ProjectionDigestWholeFlowTests",
+            "name": "RealVectorOrEffectDigestCorruptionRefusesSearchAndAnnThenRepairReplayReclassificationAndColdRemainHealthy(True)"
+          },
+          {
+            "class": "KeyLoad.UnitTests.Features.Search.ProjectionDigestWholeFlowTests",
+            "name": "RealVectorOrEffectDigestCorruptionRefusesSearchAndAnnThenRepairReplayReclassificationAndColdRemainHealthy(False)"
+          },
+          {
+            "class": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkCanonicalLifecycleTests",
+            "name": "AcChunk007008009ExactOpenSealLateCorrectionMergeAndReceiptReplay"
+          },
+          {
+            "class": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkExplicitMinimumWholeFlowTests",
+            "name": "OriginalMinimumScopeRefusalFreshPermissionRepairReceiptsAndTwoColdOwners"
+          },
+          {
+            "class": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkSignedMinimumWholeFlowTests",
+            "name": "NativeMinimumPayloadMacRefusalFreshGrantRepairOriginalReceiptsAndTwoColdOwners"
+          },
+          {
+            "class": "KeyLoad.UnitTests.Features.Search.Bm25PortableMovementTests",
+            "name": "ActualServerPublicationMovesExactNativeHeadAndStrictValidatorsRefuseWithoutEffects"
+          },
+          {
+            "class": "KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementNativeRetireTests",
+            "name": "OriginalNativeRetireCallerCancellationAndHostStopRetainAuthorityThenResumeReplayMixedModelsAndTwoColdOwners"
+          },
+          {
+            "class": "KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementNativePrepareTests",
+            "name": "ActualNativePrepareRefusesInvalidProofThenRetainsMixedReceiptConflictAndTwoColdOwners"
+          },
+          {
+            "class": "KeyLoad.UnitTests.Features.RelationalStorage.SqlTypedInsertOwnershipEpochWholeFlowTests",
+            "name": "ExplicitCallerFenceRetainsOriginalSqlAndInsertsAtPublishedOwnerAcrossTwoColdStores"
+          },
+          {
+            "class": "KeyLoad.UnitTests.Features.RelationalStorage.SqlTypedInsertRetiredOutcomeWholeFlowTests",
+            "name": "OriginalTypedInsertSurvivesRealRetirementCurrentPermissionFencesAndTwoColdOwners"
+          }
+        ]
+      },
+      "selectedFunctionalCoverage": {
+        "sourceReport": "TestResults/stage61-native-join/root-r59-eleven-task-unit-functional-native/functional.cobertura.xml",
+        "sha256": "e55521f191f5ef4eba6bda0ce11c343c31e2b05ab673b1b8a2edd41316209e76",
+        "collectorAttributes": {
+          "line-rate": "0.26793727159180275",
+          "branch-rate": "0.2089237086979948",
+          "complexity": "71364",
+          "version": "1.9",
+          "timestamp": "1792021267",
+          "lines-covered": "28960",
+          "lines-valid": "108085",
+          "branches-covered": "14347",
+          "branches-valid": "68671"
+        },
+        "fullProductCoverageQualified": false,
+        "benchmarkOrLoadCredit": false,
+        "testFailures": 13
+      },
+      "nativePreparedNumericPreflight": {
+        "files": 81,
+        "sourceAndAnalyzersBound": true,
+        "original": "TestResults/stage61-native-join/root-r60-next-ready-native-quality.original.json",
+        "sha256": "778065fe14d05ddb40b23eeb0e185c203eefa5e344d7bb42b76f4f588abb1f23",
+        "semanticAndPartialAggregationQualified": false,
+        "fullBuildOrAcceptanceCredit": false
+      },
+      "linuxQualified": false,
+      "fullTaskPromotion": false
     }
   },
   "STAGE63-NATIVE-COMPOSITION-001": {
@@ -60540,8 +60797,15 @@
       "src/KeyLoad.Query/Features/QueryExecution/Validation/QueryValidation.cs",
       "src/KeyLoad.Client/Features/QueryExecution/Queries/KeyLoadQuery.cs",
       "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/QueryAdapterTests.cs",
-      "tests/KeyLoad.IntegrationTests/Features/ClusterReplication/Cases/ClusterTests.cs"
-    ]
+      "tests/KeyLoad.IntegrationTests/Features/ClusterReplication/Cases/ClusterTests.cs",
+      "docs/Features/QueryExecution/AdapterNullEquivalence.md"
+    ],
+    "currentStageR59Source": {
+      "integrated": true,
+      "record": "docs/Features/QueryExecution/AdapterNullEquivalence.md",
+      "compilerAndRuntimeQualified": false,
+      "wholeTaskAccepted": false
+    }
   },
   "KL-052": {
     "title": "Ранній admission control",
@@ -60724,8 +60988,15 @@
       "src/KeyLoad.Security/Features/Authorization/Execution/AuthorizationPolicy.cs",
       "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/SecurityAndQueryTests.cs",
       "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
-      "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaTransportSecurityTests.cs"
-    ]
+      "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaTransportSecurityTests.cs",
+      "docs/Features/Authorization/CatalogArrayPaths.md"
+    ],
+    "currentStageR59Source": {
+      "integrated": true,
+      "record": "docs/Features/Authorization/CatalogArrayPaths.md",
+      "compilerAndRuntimeQualified": false,
+      "wholeTaskAccepted": false
+    }
   },
   "KL-063": {
     "title": "Sensitive expression usage enforcement",
@@ -60856,7 +61127,11 @@
       "src/KeyLoad.Security/Features/Authorization/Execution/AuthorizationPolicy.cs",
       "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/SecurityAndQueryTests.cs",
       "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
-      "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaTransportSecurityTests.cs"
+      "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaTransportSecurityTests.cs",
+      "src/KeyLoad.Query/Features/QueryExecution/Execution/QueryCursorExecution.cs",
+      "tests/KeyLoad.UnitTests/Features/Authorization/Cases/CursorExpiryBoundaryTests.cs",
+      "docs/Features/Authorization/CursorAuthorityUnavailable.md",
+      "docs/Features/Authorization/CursorExpiryBoundary.md"
     ]
   },
   "KL-067": {
@@ -60867,8 +61142,15 @@
       "src/KeyLoad.Core/Features/Search/Policies/VectorProjectionPolicy.cs",
       "src/KeyLoad.Core/Features/Search/Execution/AnnSeedCollector.cs",
       "tests/KeyLoad.UnitTests/Features/Search/Cases/AnnSeedVisibilityTests.cs",
-      "tests/KeyLoad.UnitTests/Features/Search/Cases/AnnSeedCutTests.cs"
-    ]
+      "tests/KeyLoad.UnitTests/Features/Search/Cases/AnnSeedCutTests.cs",
+      "docs/Features/Search/ProjectionDigestIntegrity.md"
+    ],
+    "currentStageR59Source": {
+      "integrated": true,
+      "record": "docs/Features/Search/ProjectionDigestIntegrity.md",
+      "compilerAndRuntimeQualified": false,
+      "wholeTaskAccepted": false
+    }
   },
   "KL-068": {
     "title": "Security adversarial matrix",
@@ -60885,7 +61167,9 @@
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Abstractions/Contracts.cs",
-      "docs/implementation/durability-audit.md"
+      "docs/implementation/durability-audit.md",
+      "tests/KeyLoad.UnitTests/Features/ClusterRouting/Helpers/AtomicPartitionScopeLifecycleTrial.cs",
+      "docs/Features/ClusterRouting/LogicalAtomicScopeLifecycle.md"
     ]
   },
   "KL-070": {
@@ -60896,7 +61180,9 @@
       "src/KeyLoad.Orleans/Features/ClusterRouting/Topology/ReplicaMembershipStore.cs",
       "src/KeyLoad.Orleans/Features/ClusterRouting/Grains/RequestGrain.cs",
       "src/KeyLoad.Orleans/Features/ClusterRouting/Grains/CommandPartitionGrain.cs",
-      "src/KeyLoad.Orleans/Features/ClusterRouting/Topology/GrainPartitionResolver.cs"
+      "src/KeyLoad.Orleans/Features/ClusterRouting/Topology/GrainPartitionResolver.cs",
+      "src/KeyLoad.Core/Features/ClusterRouting/Execution/PlacementRendezvousChoice.cs",
+      "docs/Features/ClusterRouting/ConfiguredPlacementOwners.md"
     ]
   },
   "KL-071": {
@@ -61024,9 +61310,12 @@
     "title": "Multi-tenant resource governor",
     "status": "in_progress",
     "evidence": [
-      "src/KeyLoad.Abstractions/Contracts.cs",
       "src/KeyLoad.Core/Features/Messaging/Execution/Messaging.cs",
-      "Historical intermediate report removed from repository; no current qualification inferred"
+      "Historical intermediate report removed from repository; no current qualification inferred",
+      "src/KeyLoad.Core/Features/ResourceExecution/Admission/HttpAdmissionGovernor.cs",
+      "src/KeyLoad.Core/Features/ResourceExecution/Commands/CommandTenantLane.cs",
+      "tests/KeyLoad.UnitTests/Features/ResourceExecution/Cases/HttpAdmissionGovernorTests.cs",
+      "docs/Features/ResourceExecution/TimeSeriesHttpReadAdmission.md"
     ]
   },
   "KL-077": {
@@ -61781,7 +62070,10 @@
     "status": "in_progress",
     "evidence": [
       "tests/KeyLoad.UnitTests/Features/ResourceExecution/Cases/TransactionTests.cs",
-      "tests/KeyLoad.IntegrationTests/Features/ClusterReplication/Cases/ClusterTests.cs"
+      "tests/KeyLoad.IntegrationTests/Features/ClusterReplication/Cases/ClusterTests.cs",
+      "tests/KeyLoad.UnitTests/Features/ResourceExecution/Cases/AtomicTriadOutboxTests.cs",
+      "tests/KeyLoad.RecoveryTests/Features/EventStreams/Assertions/EventAppendIndexAssertions.cs",
+      "tests/KeyLoad.IntegrationTests/Features/Messaging/Assertions/AtomicProducerRf3Index.cs"
     ]
   },
   "KL-092": {

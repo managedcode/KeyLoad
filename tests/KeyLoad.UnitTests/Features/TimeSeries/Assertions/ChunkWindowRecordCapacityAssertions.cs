@@ -58,7 +58,11 @@ internal static class ChunkWindowRecordCapacityAssertions
                 fresh ? FreshSequence : ChunkMultiblockBoundaryData.InitialCount,
                 expired ? SampleChunkCanonicalFixture.Until.UtcTicks : null, [.. rows], position);
             var actual = database.ReadSampleChunkWindow(SampleChunkCanonicalFixture.Principal,
-                fixture.Request with { WindowId = windowId, Limit = ReadLimit });
+                fixture.Request with
+                {
+                    WindowId = windowId,
+                    Limit = ReadLimit
+                });
             await Assert.That(JsonDefaults.Serialize(actual).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
         }, failures);
         await ServerFailureObserver.ObserveAsync(async () =>
@@ -135,7 +139,10 @@ internal static class ChunkWindowRecordCapacityAssertions
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             var failure = Assert.ThrowsExactly<KeyLoadException>(() => database.ReadSampleChunkWindow(
-                SampleChunkCanonicalFixture.Principal, fixture.Request with { Limit = ReadLimit }));
+                SampleChunkCanonicalFixture.Principal, fixture.Request with
+                {
+                    Limit = ReadLimit
+                }));
             await Assert.That(failure.Code).IsEqualTo(ErrorCode.HistoryUnavailable);
             await Assert.That(failure.Message).IsEqualTo(Missing);
         }, failures);

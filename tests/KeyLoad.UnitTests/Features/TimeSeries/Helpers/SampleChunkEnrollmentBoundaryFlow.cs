@@ -30,13 +30,20 @@ internal static class SampleChunkEnrollmentBoundaryFlow
             fixture.WindowId, SampleChunkCanonicalFixture.Start, SampleChunkCanonicalFixture.Until);
         await RefuseAsync(fixture, occupied, originals, () => SampleChunkEnrollmentBoundaryRows.RawAsync(
             fixture.Owner.Database, fixture.Owner.Store, fixture, populated: false));
-        var enrolled = occupied with { WindowId = Guid.NewGuid(), From = occupied.Until, Until = SampleChunkEnrollmentBoundaryRows.Until };
+        var enrolled = occupied with
+        {
+            WindowId = Guid.NewGuid(),
+            From = occupied.Until,
+            Until = SampleChunkEnrollmentBoundaryRows.Until
+        };
         await CommitAsync(fixture, enrolled, "openSampleChunkWindow", SampleChunkCanonicalFixture.FirstRevision, originals);
         await SampleChunkEnrollmentBoundaryRows.CurrentAsync(fixture.Owner.Database, fixture.Owner.Store,
             fixture, enrolled.WindowId, populated: false, sealedWindow: false);
         var overlap = enrolled with
         {
-            WindowId = Guid.NewGuid(), From = enrolled.From.AddMinutes(OverlapMinutes), Until = enrolled.Until.AddMinutes(OverlapMinutes)
+            WindowId = Guid.NewGuid(),
+            From = enrolled.From.AddMinutes(OverlapMinutes),
+            Until = enrolled.Until.AddMinutes(OverlapMinutes)
         };
         await RefuseAsync(fixture, overlap, originals, () => SampleChunkEnrollmentBoundaryRows.CurrentAsync(
             fixture.Owner.Database, fixture.Owner.Store, fixture, enrolled.WindowId, populated: false, sealedWindow: false));
@@ -50,7 +57,9 @@ internal static class SampleChunkEnrollmentBoundaryFlow
             SampleChunkEnrollmentBoundaryRows.SealedRevision, originals);
         var adjacentOccupied = enrolled with
         {
-            WindowId = Guid.NewGuid(), From = enrolled.Until, Until = SampleChunkEnrollmentBoundaryRows.RawUntil
+            WindowId = Guid.NewGuid(),
+            From = enrolled.Until,
+            Until = SampleChunkEnrollmentBoundaryRows.RawUntil
         };
         await RefuseAsync(fixture, adjacentOccupied, originals, () => SampleChunkEnrollmentBoundaryRows.CurrentAsync(
             fixture.Owner.Database, fixture.Owner.Store, fixture, enrolled.WindowId, populated: true, sealedWindow: true));

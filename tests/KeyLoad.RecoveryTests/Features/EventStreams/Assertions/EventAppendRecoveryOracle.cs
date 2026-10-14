@@ -43,7 +43,7 @@ internal static class EventAppendRecoveryOracle
         {
             await EventAppendReceiptAssertions.SameResultAsync(recovered, applied);
         }
-        await EventAppendReceiptAssertions.VerifyOutboxAsync(store, applied.Get<CommitReceipt>(), seedTail);
+        await EventAppendReceiptAssertions.VerifyOutboxAsync(store, applied.Get<CommitReceipt>(), seedTail, original.EvaluatedAt);
         var stablePosition = store.Position;
         var stable = EventAppendStateAssertions.Bytes(store);
         await EventAppendReceiptAssertions.SameResultAsync(applied, database.Apply(original));
@@ -73,7 +73,7 @@ internal static class EventAppendRecoveryOracle
             PayloadJson = JsonSerializer.Serialize(healthy, JsonDefaults.Options)
         });
         await EventAppendReceiptAssertions.VerifyHealthyAsync(store, result.Get<CommitReceipt>());
-        await EventAppendReceiptAssertions.VerifyOutboxAsync(store, result.Get<CommitReceipt>(), seedTail + 3);
+        await EventAppendReceiptAssertions.VerifyOutboxAsync(store, result.Get<CommitReceipt>(), seedTail + 3, original.EvaluatedAt);
         await EventAppendStateAssertions.VerifyAsync(database, original.EvaluatedAt, seedTail, committed: true, healthy: true);
     }
 

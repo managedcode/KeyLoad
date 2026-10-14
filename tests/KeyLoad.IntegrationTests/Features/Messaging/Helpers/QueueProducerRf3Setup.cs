@@ -21,7 +21,10 @@ internal static class QueueProducerRf3Setup
             }), token));
         await McpCallerAssertions.SdkSuccessAsync(await root.ConfigureResourceAsync(Guid.NewGuid(),
             new(tenant, partition.DatabaseId, new ResourceDefinition(QueueProducerRf3Protocol.Collection,
-                ResourceKind.Collection, partition.TransactionDomainId)), token));
+                ResourceKind.Collection, partition.TransactionDomainId)
+            {
+                Indexes = [new(AtomicProducerRf3Index.Name, [AtomicProducerRf3Index.Field], true)]
+            }), token));
         foreach (var resource in new[]
         { new ResourceDefinition(QueueProducerRf3Protocol.StreamSet, ResourceKind.StreamSet, partition.TransactionDomainId),
           new ResourceDefinition(QueueProducerRf3Protocol.ForeignStreamSet, ResourceKind.StreamSet, QueueProducerRf3Protocol.ForeignDomain) })

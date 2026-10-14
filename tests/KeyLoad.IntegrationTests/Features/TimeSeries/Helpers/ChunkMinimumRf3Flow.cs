@@ -1,4 +1,3 @@
-using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
@@ -21,7 +20,10 @@ internal static class ChunkMinimumRf3Flow
                         {
                             foreach (var official in new[] { false, true })
                             {
-                                var request = window.Request(state.Partition) with { MinimumToken = window.Minimum };
+                                var request = window.Request(state.Partition) with
+                                {
+                                    MinimumToken = window.Minimum
+                                };
                                 var current = window.Minimum.Incarnation == state.Owner.Incarnation
                                     && window.Minimum.OwnershipEpoch == state.Owner.PlacementEpoch;
                                 await ChunkMinimumRf3Pages.ObserveAsync(() => current

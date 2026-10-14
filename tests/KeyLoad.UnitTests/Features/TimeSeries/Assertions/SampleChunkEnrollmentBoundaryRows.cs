@@ -36,7 +36,10 @@ internal static class SampleChunkEnrollmentBoundaryRows
                 sealedWindow ? RightSequence : populated ? LeftSequence : SampleChunkCanonicalFixture.InitialSequence,
                 null, [.. rows], position);
             var actual = database.ReadSampleChunkWindow(SampleChunkCanonicalFixture.Principal,
-                fixture.Request with { WindowId = window });
+                fixture.Request with
+                {
+                    WindowId = window
+                });
             await EqualAsync(expected, actual);
         }, failures);
         await ServerFailureObserver.ObserveAsync(() => RawAsync(database, store, fixture, populated), failures);

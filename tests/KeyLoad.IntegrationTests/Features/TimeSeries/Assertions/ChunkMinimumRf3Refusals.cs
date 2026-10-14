@@ -36,7 +36,10 @@ internal static class ChunkMinimumRf3Refusals
         {
             foreach (var official in new[] { false, true })
             {
-                var request = window.Request(state.Partition) with { MinimumToken = trial.Token };
+                var request = window.Request(state.Partition) with
+                {
+                    MinimumToken = trial.Token
+                };
                 await ChunkMinimumRf3Pages.ObserveAsync(() => FailureAsync(reader, request,
                     ErrorCode.TokenInvalidated, trial.Detail, official, token), administrator, state, token);
             }
@@ -45,7 +48,10 @@ internal static class ChunkMinimumRf3Refusals
         {
             var invalid = window.Request(state.Partition) with
             {
-                MinimumToken = window.Minimum with { Position = long.MaxValue },
+                MinimumToken = window.Minimum with
+                {
+                    Position = long.MaxValue
+                },
                 Limit = checked((int)InvalidEpoch)
             };
             await ChunkMinimumRf3Pages.ObserveAsync(() => FailureAsync(reader, invalid,

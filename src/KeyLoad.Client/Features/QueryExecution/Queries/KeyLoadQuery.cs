@@ -227,6 +227,7 @@ internal sealed class QueryExpressions(IOptions<QueryTranslationOptions> options
             }
 
             if (member.Expression.Type == typeof(string) || member.Expression.Type.IsPrimitive || member.Expression.Type == typeof(decimal)
+                || typeof(System.Collections.IEnumerable).IsAssignableFrom(member.Expression.Type)
                 || member.Member.GetCustomAttribute<JsonIgnoreAttribute>() is { Condition: JsonIgnoreCondition.Always }
                 || member.Member is not PropertyInfo && member.Member.GetCustomAttribute<JsonIncludeAttribute>() is null)
             {

@@ -10,7 +10,7 @@ internal static class EventAppendDedupAssertions
     private const string DuplicateDetail = "The event ID is already retained in this source generation.";
     private const string ConflictDetail = "The event ID was reused with different content.";
     private const string ChangedEventJson = "{\"event\":false}";
-    private static readonly string[] DomainFamilies = ["document", "document-epoch", "stream-head", "event", "event-id",
+    private static readonly string[] DomainFamilies = ["document", "document-epoch", "index", "unique", "stream-head", "event", "event-id",
         "event-feed", "event-sequence", "message-body", "message-meta", "queue-counters", "ready", "outbox", "outbox-head"];
     private const string ByteSeparator = ":";
     private const int MaximumFixtureRecords = 4_096;

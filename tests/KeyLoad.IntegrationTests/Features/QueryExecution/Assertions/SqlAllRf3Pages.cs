@@ -6,7 +6,7 @@ internal static class SqlAllRf3Pages
 {
     internal const string Keyword = "SELECT ALL ";
     internal const string DefaultKeyword = "SELECT ";
-    internal const string DuplicateSql = "SELECT ALL score AS score FROM null_ordering WHERE score IS NULL ORDER BY label ASC LIMIT 5";
+    internal const string DuplicateSql = "SELECT ALL TOP (5) score AS score FROM null_ordering WHERE score IS NULL ORDER BY label ASC";
     internal static string Explicit(string sql) => Keyword + sql[DefaultKeyword.Length..];
 
     internal static async Task DuplicatesAsync(global::KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsRf3Callers caller,

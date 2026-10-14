@@ -7,10 +7,6 @@ namespace KeyLoad.Core.Features.Search;
 /// <summary>Revalidates the current source authority for a derived vector inside its read cut.</summary>
 internal static class VectorProjectionEligibility
 {
-    private const char HexNineDigit = '9';
-    private const char HexLowerADigit = 'a';
-    private const char HexLowerFDigit = 'f';
-
     private const int HasInvalidSourceLineageGenerationValidationBoundary = 1;
     private const int HasInvalidSourceLineageSourceEventRevisionValidationBoundary = 1;
     private const int HasInvalidSourceLineageSourceDocumentRevisionValidationBoundary = 1;
@@ -20,7 +16,6 @@ internal static class VectorProjectionEligibility
     private const int HasInvalidSourceLineageReducerGenerationValidationBoundary = 1;
 
     private const string LineageCorrupt = "The stored vector projection lineage is corrupt.";
-    private const string EffectCorrupt = "The stored vector projection effect is corrupt.";
 
     internal static bool IsEligible(DatabaseEngine database, IKeyValueView view, PrincipalRecord principal,
         PartitionRef partition, string collection, DocumentRecord targetDocument, VectorRecord vector,
@@ -38,7 +33,7 @@ internal static class VectorProjectionEligibility
         }
 
         ValidateLineage(lineage, partition, targetDocument, vector);
-        ValidateEffect(budget.ReadRecord<VectorProjectionEffect>(view,
+        VectorProjectionPolicy.ValidateEffect(budget.ReadRecord<VectorProjectionEffect>(view,
             VectorProjectionKeys.Effect(partition, lineage)), lineage, vector);
         var sourceResource = budget.ReadRecord<ResourceDefinition>(view,
             KeySpace.Resource(partition.TenantId, partition.DatabaseId, lineage.SourceDocument.Collection));
@@ -212,19 +207,4 @@ internal static class VectorProjectionEligibility
         }
     }
 
-    private static void ValidateEffect(VectorProjectionEffect? effect, VectorProjectionLineage lineage,
-        VectorRecord vector)
-    {
-        const int Sha256HexDigestCharacters = 64;
-        const char HexZeroDigit = '0';
-
-        if (effect is null || effect.Fingerprint is null || effect.Fingerprint.Length != Sha256HexDigestCharacters
-            || effect.Fingerprint.Any(character => character is not (>= HexZeroDigit and <= HexNineDigit or >= HexLowerADigit and <= HexLowerFDigit))
-            || effect.Receipt is null || effect.Receipt.Kind != MutationDiscriminatorNames.ApplyVectorProjection
-            || effect.Receipt.Resource != lineage.TargetCollection || effect.Receipt.Id != lineage.TargetId
-            || effect.Receipt.Revision != vector.DocumentRevision)
-        {
-            throw Errors.Fail(ErrorCode.Corruption, EffectCorrupt);
-        }
-    }
 }

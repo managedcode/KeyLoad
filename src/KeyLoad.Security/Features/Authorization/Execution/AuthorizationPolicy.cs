@@ -166,7 +166,7 @@ public sealed class AuthorizationPolicy : IAuthorizationPolicy
 
         if (path[position] != AuthorizationWildcard)
         {
-            if (int.TryParse(path[position], out var index) && index >= FirstElementIndex && index < array.Count)
+            if (JsonData.TryArrayIndex(path[position], out var index) && index < array.Count)
             {
                 RemoveArrayEntry(array, index, path, position);
             }

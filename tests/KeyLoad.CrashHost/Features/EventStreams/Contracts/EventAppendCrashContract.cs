@@ -7,6 +7,8 @@ internal static class EventAppendCrashContract
     internal const string SeedPositionFile = "event-append-seed-position.bin";
     internal const string SeedTailFile = "event-append-seed-tail.bin";
     internal const string Documents = "append-documents";
+    internal const string DocumentIndex = "producer";
+    internal const string DocumentIndexPath = "/producer";
     internal const string Streams = "append-events";
     internal const string Queue = "append-jobs";
     internal const string StreamId = "seeded-stream";

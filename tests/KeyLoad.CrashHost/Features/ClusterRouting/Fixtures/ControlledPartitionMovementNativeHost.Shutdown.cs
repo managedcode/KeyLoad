@@ -6,7 +6,6 @@ namespace KeyLoad.CrashHost.Features.ClusterRouting;
 internal sealed partial class ControlledPartitionMovementNativeHost
 {
     private const int UnknownColdShutdownNode = -1;
-    private const int OriginalJoinStageOffset = 1;
     private int coldShutdownNode = UnknownColdShutdownNode;
 
     internal void BindColdShutdownEvidence(int nodeIndex) => Volatile.Write(ref coldShutdownNode, nodeIndex);
@@ -86,16 +85,7 @@ internal sealed partial class ControlledPartitionMovementNativeHost
     private Task JoinObservedAsync(Task original, List<Exception> failures,
         ControlledNativeColdShutdownEvidence.Stage stage, ControlledNativeColdOwnerBudget budget,
         List<Exception> budgetFailures, CancellationToken token)
-    {
-        long? observationStarted = null;
-        ServerFailureObserver.Observe(() => observationStarted = budget.Clock.GetTimestamp(), budgetFailures);
-        return ControlledPartitionMovementNativeTaskJoin.JoinObservedAsync(original, failures,
-            () => Volatile.Read(ref coldShutdownNode), stage, OriginalJoinStageOffset,
-            () => ControlledNativeColdShutdownEvidence.CaptureNodeStopOwnerStateAsync(
-                Volatile.Read(ref coldShutdownNode), original, Silo.HasJoinedRequestWork,
-                Silo.Discovery is not null),
-            () => budget.CaptureReport(Volatile.Read(ref coldShutdownNode), stage, original, observationStarted),
-            budgetFailures, token);
-    }
+        => ControlledPartitionMovementNativeTaskJoin.JoinBudgetedAsync(original, failures,
+            () => Volatile.Read(ref coldShutdownNode), stage, budget, budgetFailures, Silo, token);
 
 }

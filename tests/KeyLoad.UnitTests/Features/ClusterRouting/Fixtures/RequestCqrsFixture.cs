@@ -96,7 +96,10 @@ internal sealed partial class RequestCqrsClusterFixture : IAsyncInitializer, IAs
     {
         get;
     }
-    internal bool UsesNativeAdmission { get; }
+    internal bool UsesNativeAdmission
+    {
+        get;
+    }
     internal Guid ConnectionId { get; } = Guid.NewGuid();
     internal NativeRuntimeTestOptions Timing { get; } = new();
     internal GrainRequestCodec Codec
@@ -148,15 +151,7 @@ internal sealed partial class RequestCqrsClusterFixture : IAsyncInitializer, IAs
     }
 
     internal bool IsDisposalJoined
-    {
-        get
-        {
-            lock (disposalGate)
-            {
-                return disposal is { IsCompletedSuccessfully: true };
-            }
-        }
-    }
+        => RequestCqrsFixtureDisposalRegistration.IsJoined(disposalGate, in disposal);
 
     public ValueTask DisposeAsync()
     {

@@ -9,6 +9,7 @@ internal static class TenantCapacityPlacementRf3PolicyWeightsOperation
     private const int AboveMaximumWeight = 17;
     private const int AcceptedMaximumWeight = 16;
     private const long NextPolicyRevision = 3;
+    private const long RepairedPolicyRevision = 4;
     internal sealed record Refused(Guid Id, ConfigurePlacementPolicyRequest Request);
     internal static async Task RunAsync(TwoRf3MembershipWave wave, PartitionMovementPublicParentRf3Seed seed,
         TenantCapacityPlacementRf3Provisioning.State state, CancellationToken token)
@@ -34,13 +35,21 @@ internal static class TenantCapacityPlacementRf3PolicyWeightsOperation
             refused.Add(new(Guid.NewGuid(), new(state.HealthyPolicy.Revision, candidate, state.Control)));
         }
         await TenantCapacityPlacementRf3PolicyWeightsAssertions.RefuseAsync(seed, refused, token);
+        var restricted = await TenantCapacityPlacementRf3ConfiguredOwners.ConfigureAsync(seed, state, token);
+        await TenantCapacityPlacementRf3ConfiguredOwners.RefuseAsync(seed, state, restricted.Request.Policy, token);
         var rows = await TenantCapacityPlacementRf3PolicyWeightsCold.RequireAsync(wave, seed, state,
-            state.HealthyPolicy, refused, null, plan.Plan.Moves.Single(), absentMovement: true, token);
+            restricted.Request.Policy, refused, null, plan.Plan.Moves.Single(), absentMovement: true, token);
+        await TenantCapacityPlacementRf3ConfiguredOwners.ReplayAsync(seed, state, restricted,
+            restricted.Request.Policy, token);
+        await TenantCapacityPlacementRf3ConfiguredOwners.RefuseAsync(seed, state, restricted.Request.Policy, token);
         rows = await TenantCapacityPlacementRf3PolicyWeightsCold.RequireAsync(wave, seed, state,
-            state.HealthyPolicy, refused, rows, plan.Plan.Moves.Single(), absentMovement: true, token);
+            restricted.Request.Policy, refused, rows, plan.Plan.Moves.Single(), absentMovement: true, token);
+        await TenantCapacityPlacementRf3ConfiguredOwners.ReplayAsync(seed, state, restricted,
+            restricted.Request.Policy, token);
+        await TenantCapacityPlacementRf3ConfiguredOwners.RefuseAsync(seed, state, restricted.Request.Policy, token);
         var repaired = state.HealthyPolicy with
         {
-            Revision = NextPolicyRevision,
+            Revision = RepairedPolicyRevision,
             OwnerWeights = state.HealthyPolicy.OwnerWeights.Select(owner =>
                 owner.PhysicalShardId == seed.FirstRequest.DestinationPhysicalShardId
                     ? owner with
@@ -51,6 +60,6 @@ internal static class TenantCapacityPlacementRf3PolicyWeightsOperation
         var accepted = await TenantCapacityPlacementRf3PolicyWeightsAuthority.ConfigureAsync(seed, state.Control, repaired, token);
         await TenantCapacityPlacementRf3PolicyWeightsAssertions.RefuseAsync(seed, refused, token);
         await TenantCapacityPlacementRf3PolicyWeightsHealthy.RunAsync(
-            wave, seed, state, repaired, refused, rows, accepted, token);
+            wave, seed, state, repaired, refused, rows, accepted, restricted, token);
     }
 }

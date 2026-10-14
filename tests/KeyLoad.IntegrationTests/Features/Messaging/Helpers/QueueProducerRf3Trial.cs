@@ -19,23 +19,37 @@ internal static class QueueProducerRf3Trial
                 var original = await QueueProducerRf3OriginalFlow.ExecuteAsync(fixture, seed, cancelAfterResponse, failures, deadline.Token);
                 ServerFailureObserver.ThrowIfAny(failures);
                 ArgumentNullException.ThrowIfNull(original);
+                var outbox = await AtomicProducerRf3Outbox.ReadAsync(fixture, seed, deadline.Token);
+                await AtomicProducerRf3Outbox.LiteralAsync(outbox, seed.Original.Mutations.Length);
+                await AtomicProducerRf3Index.RequireAsync(fixture, seed, false, deadline.Token);
                 await QueueProducerRf3Refusals.ExecuteAsync(fixture, original, failures, deadline.Token);
                 ServerFailureObserver.ThrowIfAny(failures);
                 var documentRefusal = AtomicProducerRf3DocumentRefusal.Create(seed);
                 var refusalProblem = await AtomicProducerRf3DocumentRefusal.ExecuteAsync(fixture, original,
                     documentRefusal, null, failures, deadline.Token);
+                await AtomicProducerRf3Outbox.SameAsync(fixture, seed, outbox, deadline.Token);
+                await AtomicProducerRf3Index.RequireAsync(fixture, seed, false, deadline.Token);
                 await QueueProducerRf3Cold.RestartAsync(fixture, deadline.Token);
                 _ = await AtomicProducerRf3DocumentRefusal.ExecuteAsync(fixture, original,
                     documentRefusal, refusalProblem, failures, deadline.Token);
                 await QueueProducerRf3Replay.ExecuteAsync(fixture, original, failures, deadline.Token);
                 ServerFailureObserver.ThrowIfAny(failures);
+                await AtomicProducerRf3Outbox.SameAsync(fixture, seed, outbox, deadline.Token);
+                await AtomicProducerRf3Index.RequireAsync(fixture, seed, false, deadline.Token);
                 await QueueProducerRf3Policy.RestoreAsync(fixture, original, failures, deadline.Token);
                 ServerFailureObserver.ThrowIfAny(failures);
                 var healthy = await QueueProducerRf3HealthyFlow.ExecuteAsync(fixture, original, failures, deadline.Token);
                 ServerFailureObserver.ThrowIfAny(failures);
                 ArgumentNullException.ThrowIfNull(healthy);
+                var finalOutbox = await AtomicProducerRf3Outbox.ReadAsync(fixture, seed, deadline.Token);
+                await AtomicProducerRf3Outbox.LiteralAsync(finalOutbox,
+                    seed.Original.Mutations.Length + healthy.Command.Mutations.Length);
+                await Assert.That(finalOutbox.Head.StoredBytes > outbox.Head.StoredBytes).IsTrue();
+                await AtomicProducerRf3Index.RequireAsync(fixture, seed, true, deadline.Token);
                 await QueueProducerRf3Cold.RestartAsync(fixture, deadline.Token);
                 await QueueProducerRf3Continuation.ExecuteAsync(fixture, healthy, failures, deadline.Token);
+                await AtomicProducerRf3Outbox.SameAsync(fixture, seed, finalOutbox, deadline.Token);
+                await AtomicProducerRf3Index.RequireAsync(fixture, seed, true, deadline.Token);
                 ServerFailureObserver.ThrowIfAny(failures);
             }, failures).ConfigureAwait(false);
             ServerFailureObserver.ThrowIfAny(failures);

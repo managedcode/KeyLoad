@@ -18,8 +18,11 @@ internal static class PlacementRendezvousChoice
         var bestWeight = default(int);
         foreach (var owner in eligible.OrderBy(item => item.ToString(OwnerIdentityFormat), StringComparer.Ordinal))
         {
-            var configured = policy.OwnerWeights.SingleOrDefault(item => item.PhysicalShardId == owner)
-                ?? throw Errors.Fail(ErrorCode.Validation, Contracts.TenantPlacementPolicyProtocol.Invalid);
+            var configured = policy.OwnerWeights.SingleOrDefault(item => item.PhysicalShardId == owner);
+            if (configured is null)
+            {
+                continue;
+            }
             var bytes = SHA256.HashData(KeyCodec.Encode(Contracts.TenantPlacementPolicyProtocol.Version,
                 policy.TenantId, policy.DatabaseId, owner));
             var score = BinaryPrimitives.ReadUInt64BigEndian(bytes.AsSpan(ScoreOffset, ScoreBytes));

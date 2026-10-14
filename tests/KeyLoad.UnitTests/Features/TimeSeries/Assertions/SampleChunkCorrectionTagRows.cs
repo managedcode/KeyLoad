@@ -46,7 +46,8 @@ internal static class SampleChunkCorrectionTagRows
             var rows = tag is null ? All() : tag == TaggedScalar ? All()[^SelectedLimit..] : [];
             var request = fixture.Request with
             {
-                TagPointer = tag is null ? null : Pointer, TagValue = tag,
+                TagPointer = tag is null ? null : Pointer,
+                TagValue = tag,
                 Limit = tag is null ? SampleChunkCanonicalFixture.OutputLimit : SelectedLimit
             };
             var expected = new SampleChunkWindowResult(fixture.WindowId, SampleChunkCanonicalFixture.Start,
@@ -61,7 +62,10 @@ internal static class SampleChunkCorrectionTagRows
         await ObserveAsync(store, async () =>
         {
             var failure = Assert.ThrowsExactly<KeyLoadException>(() => database.ReadSampleChunkWindow(
-                SampleChunkCanonicalFixture.Principal, fixture.Request with { Limit = SelectedLimit }));
+                SampleChunkCanonicalFixture.Principal, fixture.Request with
+                {
+                    Limit = SelectedLimit
+                }));
             await EqualAsync(Errors.Problem(ErrorCode.BudgetExceeded, Exhausted), failure.ToProblem());
         });
         await ObserveAsync(store, () => RawAsync(database, store, fixture));

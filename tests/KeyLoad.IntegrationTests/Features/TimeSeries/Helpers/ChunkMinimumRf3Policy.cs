@@ -1,4 +1,3 @@
-using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
@@ -67,7 +66,10 @@ internal static class ChunkMinimumRf3Policy
             {
                 var invalid = window.Request(state.Partition) with
                 {
-                    MinimumToken = window.Minimum with { Incarnation = Guid.Empty },
+                    MinimumToken = window.Minimum with
+                    {
+                        Incarnation = Guid.Empty
+                    },
                     TagPointer = privateField ? TimeSeriesRf3Scenario.SecretField : null,
                     TagValue = privateField ? PrivateValue : null
                 };

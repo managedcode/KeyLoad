@@ -48,6 +48,7 @@ internal static class PolicyEpochPublicContinuation
         await PolicyEpochPublicRefusals.AllAsync(fixture, reader, root, state, ErrorCode.CursorExpired, token);
         await PolicyEpochPublicAssertions.PagesAsync(reader, root, scenario, false, token);
         await PolicyEpochPublicPolicy.ReplayAsync(root, state, token);
+        await PolicyEpochAuthorityOutage.RunAsync(fixture, reader, root, state, token);
         return state;
     }
 }

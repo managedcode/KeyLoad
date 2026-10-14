@@ -28,7 +28,7 @@ internal static class EventAppendReceiptAssertions
             .IsEquivalentTo(expected.Select(value => Convert.ToHexString(NativeSerialization.Serialize(value))), CollectionOrdering.Matching);
     }
 
-    internal static async Task VerifyOutboxAsync(IAtomicStore store, CommitReceipt receipt, long seedTail)
+    internal static async Task VerifyOutboxAsync(IAtomicStore store, CommitReceipt receipt, long seedTail, DateTimeOffset time)
     {
         for (var index = 0; index < receipt.Mutations.Length; index++)
         {
@@ -36,12 +36,27 @@ internal static class EventAppendReceiptAssertions
                 EventAppendCrashContract.Partition, seedTail + index + 1L)));
             await Assert.That(entry).IsNotNull();
             await Assert.That(entry!.Commit).IsEqualTo(receipt.Token);
+            await Assert.That(entry.Sequence).IsEqualTo(seedTail + index + 1L);
+            await Assert.That(entry.Ordinal).IsEqualTo(index);
+            await Assert.That(entry.CommittedAt).IsEqualTo(time);
+            await Assert.That(entry.Before).IsNull();
             await Assert.That(Convert.ToHexString(NativeSerialization.Serialize(entry.Receipt)))
                 .IsEqualTo(Convert.ToHexString(NativeSerialization.Serialize(receipt.Mutations[index])));
             var producer = receipt.CommandId == EventAppendCrashContract.CommandId ? EventAppendCrashContract.Producer : EventAppendCrashContract.Healthy;
             var request = EventAppendCrashContract.ProducerCommand(receipt.CommandId, producer, producer == EventAppendCrashContract.Producer ? 1 : 2);
             await Assert.That(JsonSerializer.Serialize(entry.Mutation, JsonDefaults.Options))
                 .IsEqualTo(JsonSerializer.Serialize(request.Mutations[index], JsonDefaults.Options));
+            if (index == 0)
+            {
+                var image = new DocumentRecord(new(EventAppendCrashContract.Partition,
+                    EventAppendCrashContract.Documents, producer), 1L, EventAppendCrashContract.DocumentJson, new(), time);
+                await Assert.That(Convert.ToHexString(NativeSerialization.Serialize(entry.After)))
+                    .IsEqualTo(Convert.ToHexString(NativeSerialization.Serialize(image)));
+            }
+            else
+            {
+                await Assert.That(entry.After).IsNull();
+            }
         }
     }
 
