@@ -6,12 +6,13 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 
 internal sealed class SqlGraphSearchRejectionTests
 {
-    private const string SearchPrefix = "SEARCH FROM \"graph-search-documents\"";
-    private const string GraphTail = " RETRIEVE GRAPH \"graph-search-links\" "
-        + "SEEDS ((\"graph-search-projects\",'root-node')) DEPTH 4 VERTICES 20 EDGES 40";
-    private const string GraphOnly = SearchPrefix + GraphTail;
-    private const string DuplicateRetriever = GraphOnly + " RETRIEVE GRAPH \"graph-search-links\" "
-        + "SEEDS ((\"graph-search-projects\",'root-node')) DEPTH 4 VERTICES 20 EDGES 40";
+    private const string SearchPrefix = "SELECT * FROM GRAPH_SEARCH('graph-search-documents', ";
+    private const string Retriever = "GRAPH_RETRIEVER('graph-search-links', "
+        + "GRAPH_SEEDS(ENTITY('graph-search-projects','root-node')),4,20,40,NULL,1)";
+    private const string GraphTail = ", NULL, " + Retriever + ", NULL, NULL, 10, 60)";
+    private const string GraphOnly = SearchPrefix + "NULL, NULL, NULL, " + Retriever + ", NULL, NULL, 10, 60)";
+    private const string DuplicateRetriever = SearchPrefix + "NULL, NULL, NULL, "
+        + Retriever + ", " + Retriever + ", NULL, NULL, 10, 60)";
     private const string TextParameter = "text";
     private const string VectorParameter = "vector";
 
@@ -34,10 +35,11 @@ internal sealed class SqlGraphSearchRejectionTests
 
         await AssertRejected(engine, SqlGraphSearchTestSupport.Request(database.Partition, DuplicateRetriever));
         await AssertRejected(engine, SqlGraphSearchTestSupport.Request(database.Partition,
-            "SEARCH FROM \"graph-search-documents\" RETRIEVE GRAPH \"graph-search-links\" SEEDS "
-            + "((\"graph-search-projects\",'root-node')) DEPTH 4 VERTICES 20 EDGES 40 TEXT text MATCH 'x'"));
-        await AssertRejected(engine, SqlGraphSearchTestSupport.Request(database.Partition, "SEARCH FROM \"graph-search-documents\" LIMIT 10"));
-        await AssertRejected(engine, SqlGraphSearchTestSupport.Request(database.Partition, GraphOnly + " CACHE"));
+            SearchPrefix + "NULL, NULL, " + Retriever + ", NULL, NULL, NULL, 10, 60)"), ErrorCode.UnsupportedCapability);
+        await AssertRejected(engine, SqlGraphSearchTestSupport.Request(database.Partition,
+            SearchPrefix + "NULL, NULL, NULL, NULL, NULL, NULL, 10, 60)"));
+        await AssertRejected(engine, SqlGraphSearchTestSupport.Request(database.Partition,
+            SearchPrefix + "NULL, NULL, NULL, GRAPH_UNKNOWN(), NULL, NULL, 10, 60)"), ErrorCode.UnsupportedCapability);
     }
 
     [Test]
@@ -45,10 +47,9 @@ internal sealed class SqlGraphSearchRejectionTests
     {
         using var database = new TestDatabase();
         var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
-        const string textSql = SearchPrefix + " TEXT text MATCH @text " + GraphTail;
-        const string vectorSql = SearchPrefix + " VECTOR embedding MATCH @vector "
-            + "SPACE (\"graph-sql-space\",2,Cosine,\"graph-sql-model\",\"graphsqlversion\") "
-            + GraphTail;
+        const string textSql = SearchPrefix + "TEXT_MATCH('/text',@text,1), NULL" + GraphTail;
+        const string vectorSql = SearchPrefix + "NULL, VECTOR_MATCH('/embedding',@vector,"
+            + "VECTOR_SPACE('graph-sql-space',2,'Cosine','graph-sql-model','graphsqlversion'),1)" + GraphTail;
 
         await AssertRejected(engine, SqlGraphSearchTestSupport.Request(database.Partition, textSql,
             SqlGraphSearchTestSupport.Parameters((TextParameter, new[] { "not", "a string" }))));
@@ -68,10 +69,9 @@ internal sealed class SqlGraphSearchRejectionTests
         GraphSearchTestSupport.Configure(database, protectLabels: true);
         GraphSearchTestSupport.AddPath(database);
         GraphSearchTestSupport.PersistReader(database);
-        const string sql = "SEARCH FROM \"graph-search-documents\" SCOPE GRAPH \"graph-search-links\" "
-            + "SEEDS ((\"graph-search-projects\",'root-node')) DEPTH 4 VERTICES 20 EDGES 40 LABELS () "
-            + "RETRIEVE GRAPH \"graph-search-links\" SEEDS ((\"graph-search-projects\",'root-node')) "
-            + "DEPTH 4 VERTICES 20 EDGES 40";
+        const string sql = SearchPrefix + "NULL, NULL, GRAPH_SCOPE('graph-search-links', "
+            + "GRAPH_SEEDS(ENTITY('graph-search-projects','root-node')),4,20,40,GRAPH_LABELS()), "
+            + Retriever + ", NULL, NULL, 10, 60)";
 
         var failure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() => new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution()).SearchSqlAsync(
             GraphSearchTestSupport.Reader, SqlGraphSearchTestSupport.Request(database.Partition, sql),
@@ -87,7 +87,7 @@ internal sealed class SqlGraphSearchRejectionTests
         var engine = new QueryEngine(new KeyLoad.Core.DatabaseEngine(database.Store, new KeyLoad.Security.AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(new() { MaxQueryBytes = 512 }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance), UnitExecutionOptions.QueryExecution());
         var excessiveParameters = Enumerable.Range(0, 257)
             .ToDictionary(index => $"p{index}", index => System.Text.Json.JsonSerializer.SerializeToElement(index));
-        const string textSql = SearchPrefix + " TEXT text MATCH @text " + GraphTail;
+        const string textSql = SearchPrefix + "TEXT_MATCH('/text',@text,1), NULL" + GraphTail;
 
         var parameterFailure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() => engine.SearchSqlAsync("root",
             SqlGraphSearchTestSupport.Request(database.Partition, GraphOnly, excessiveParameters))))!;
@@ -121,10 +121,11 @@ internal sealed class SqlGraphSearchRejectionTests
         await Assert.That(healthy.Hits.Length).IsEqualTo(2);
     }
 
-    private static async Task AssertRejected(QueryEngine engine, SqlGraphSearchRequest request)
+    private static async Task AssertRejected(QueryEngine engine, SqlGraphSearchRequest request,
+        ErrorCode expectedCode = ErrorCode.Validation)
     {
         var failure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() => engine.SearchSqlAsync("root", request,
             TestContext.Current!.Execution.CancellationToken)))!;
-        await Assert.That(failure.Code).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(failure.Code).IsEqualTo(expectedCode);
     }
 }

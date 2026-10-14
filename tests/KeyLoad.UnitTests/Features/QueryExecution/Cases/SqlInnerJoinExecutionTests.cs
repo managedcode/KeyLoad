@@ -17,9 +17,9 @@ internal sealed class SqlInnerJoinExecutionTests
     private const string LeftAlias = "l";
     private const string RightAlias = "r";
     private const string AccessPath = "bounded-primary-key-inner-join";
-    private const string JoinSql = "SELECT l.order_id AS order_id, r.name AS customer_name, l.total AS total "
+    private const string JoinSql = "SELECT TOP (10) l.order_id AS order_id, r.name AS customer_name, l.total AS total "
         + "FROM orders AS l INNER JOIN customers AS r ON l.customer_id = r.id "
-        + "ORDER BY l.order_id ASC LIMIT 10";
+        + "ORDER BY l.order_id ASC";
     private const string FirstLeft = "{\"order_id\":\"a\",\"customer_id\":\"c1\",\"total\":1}";
     private const string LastLeft = "{\"order_id\":\"z\",\"customer_id\":\"c2\",\"total\":2}";
     private const string NullLeft = "{\"order_id\":\"m\",\"customer_id\":null,\"total\":3}";
@@ -81,13 +81,13 @@ internal sealed class SqlInnerJoinExecutionTests
         var beforeUnsupported = database.Store.Position;
         var badDialect = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute("root",
             new(database.Partition, JoinSql, AllowFullScan: true, QueryDialectVersion: 3)));
-        var explain = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute("root",
-            new(database.Partition, "EXPLAIN " + JoinSql, AllowFullScan: true, QueryDialectVersion: QueryDialectVersion)));
         var ast = new AstQueryRequest(database.Partition,
             new SelectQuery(LeftCollection, LeftAlias,
                 [new("/order_id", "order_id", LeftAlias), new("/name", "name", RightAlias)], null,
                 [new("/order_id", false)], 10, InnerJoin: new(RightCollection, RightAlias, "/" + LeftForeignKey, "/" + RightPrimaryKey)),
             AllowFullScan: true, AstVersion: 3);
+        var explain = Assert.ThrowsExactly<KeyLoadException>(() => engine.ExecuteAst("root",
+            ast with { AstVersion = QueryDialectVersion, Query = ast.Query with { Explain = true } }));
         var badAst = Assert.ThrowsExactly<KeyLoadException>(() => engine.ExecuteAst("root", ast));
 
         await Assert.That(q1.Code).IsEqualTo(ErrorCode.UnsupportedCapability);
@@ -110,7 +110,7 @@ internal sealed class SqlInnerJoinExecutionTests
             new PutDocument(RightCollection, "c1", FirstRight));
         var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var q1 = engine.Execute("root", new(database.Partition,
-            "SELECT inner.order_id AS order_id FROM orders inner LIMIT 10", AllowFullScan: true));
+            "SELECT TOP (10) [inner].order_id AS order_id FROM orders AS [inner]", AllowFullScan: true));
 
         await Assert.That(q1.Rows.Select(row => row.EntityId)).IsEquivalentTo(["a"], CollectionOrdering.Matching);
         var beforeUnsupportedJoin = database.Store.Position;

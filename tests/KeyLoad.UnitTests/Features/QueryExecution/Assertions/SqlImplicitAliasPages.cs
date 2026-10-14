@@ -4,14 +4,15 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 
 internal static class SqlImplicitAliasPages
 {
-    internal const string BasicSql = "SELECT score projected_score FROM null_ordering WHERE score IS NULL ORDER BY label ASC LIMIT 5";
-    private const string Prefix = "SELECT score ";
-    private const string Tail = " FROM null_ordering WHERE score IS NULL ORDER BY label ASC LIMIT 5";
+    internal const string BasicSql = "SELECT TOP (5) score projected_score FROM null_ordering WHERE score IS NULL ORDER BY label ASC";
+    private const string Prefix = "SELECT TOP (5) score ";
+    private const string Tail = " FROM null_ordering WHERE score IS NULL ORDER BY label ASC";
     private static readonly (string Label, string Name, string Json)[] Cases =
     [
         ("projected_score", "projected_score", "{\"projected_score\":null}"),
         ("\"ORDER\"", "ORDER", "{\"ORDER\":null}"),
-        ("\"FROM\"", "FROM", "{\"FROM\":null}")
+        ("\"FROM\"", "FROM", "{\"FROM\":null}"),
+        ("'copied'", "copied", "{\"copied\":null}")
     ];
 
     internal static async Task HealthyAsync(QueryEngine engine, PartitionRef partition, string principal, long cut)
@@ -39,8 +40,8 @@ internal static class SqlImplicitAliasPages
         var image = SqlInnerJoinRetainedIdentityFlow.Image(database.Store);
         var cut = database.Store.Position;
         var identity = JsonDefaults.Serialize(database.Store.Identity);
-        foreach (var sql in new[] { "SELECT score copied,label copied FROM null_ordering LIMIT 5",
-            "SELECT score ORDER FROM null_ordering LIMIT 5", "SELECT score 'copied' FROM null_ordering LIMIT 5" })
+        foreach (var sql in new[] { "SELECT TOP (5) score copied,label copied FROM null_ordering",
+            "SELECT TOP (5) score ORDER FROM null_ordering", "SELECT TOP (5) score AS FROM null_ordering" })
         {
             await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute(SqlNullOrderingProtocol.Root,
                 new(database.Partition, sql, AllowFullScan: true))).Code).IsEqualTo(ErrorCode.Validation);

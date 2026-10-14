@@ -7,12 +7,12 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 /// <summary>AC-AISQL-005/006: SQL lowers to the actual canonical operation decoder without execution.</summary>
 internal sealed class SqlOperationCompilerTests
 {
-    private const string SpacedCall = " \tcall\r\nkeyload_query_capabilities ( @arguments ) ; \n";
+    private const string SpacedCall = " \texec\r\nkeyload_query_capabilities @arguments ; \n";
 
     [Test]
     public async Task AcAiSql005SelectAndExplainPreserveExactQ1InputWithoutParsingTwice()
     {
-        foreach (var sql in new[] { SqlOperationTestData.Select, SqlOperationTestData.Explain,
+        foreach (var sql in new[] { SqlOperationTestData.Select, SqlOperationTestData.Top,
                      SqlOperationTestData.InvalidSelect })
         {
             var parameters = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
@@ -27,6 +27,8 @@ internal sealed class SqlOperationCompilerTests
                 });
             await SqlOperationTestData.Same(SqlOperationTestData.Compile(request), expected);
         }
+        await SqlOperationTestData.Reject(SqlOperationTestData.Call(McpCatalogExpectations.QueryCapabilities) with
+        { Sql = "EXPLAIN SELECT * FROM orders" }, ErrorCode.Validation);
     }
 
     [Test]

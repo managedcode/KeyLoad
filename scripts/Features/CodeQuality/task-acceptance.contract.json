@@ -5319,6 +5319,26 @@
               "parameterTypeFullNames": [
                 "System.Boolean"
               ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+              "methodName": "UnsafeNativeBackupDestinationRefusesBeforeCopyThenSamePathRepairRestoresAcrossTwoCold",
+              "instanceName": "UnsafeNativeBackupDestinationRefusesBeforeCopyThenSamePathRepairRestoresAcrossTwoCold(False)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/NativeBackupCutTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+              "methodName": "UnsafeNativeBackupDestinationRefusesBeforeCopyThenSamePathRepairRestoresAcrossTwoCold",
+              "instanceName": "UnsafeNativeBackupDestinationRefusesBeforeCopyThenSamePathRepairRestoresAcrossTwoCold(True)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/NativeBackupCutTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
             }
           ]
         },

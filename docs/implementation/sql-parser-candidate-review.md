@@ -1,5 +1,8 @@
 # SQL parser candidate source review
 
+Current syntax authority: [ADR-130](../ADR/ADR-130-microsoft-scriptdom-tsql.md), [Microsoft ScriptDOM requirements](../Features/QueryExecution/ScriptDom.md) and [active T-SQL inventory](sql-client-conformance.json). PostgreSQL grammar/parser candidate selections and CALL/lexical implementation plans in this prior record are historical and inactive. Preserve exact original source/results and generic full-operation acceptance; they do not qualify T-SQL. Genuine PostgreSQL wire/Npgsql interoperability and benchmark workloads remain current independent contracts. No new parser, fallback or package adoption is authorized here.
+
+
 TASK-SQLC-R12 / REQ-SQLC-001/006/009 under Accepted ADR-065.
 Read-only primary-source research, 2026-10-03. Parser selection, package
 installation, syntax execution and native client qualification remain pending.

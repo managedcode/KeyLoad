@@ -22,9 +22,9 @@ internal sealed class SqlInnerJoinLifecycleTests
     private const int FirstCommittedGeneration = InitialGeneration + 1;
     private const int FinalGeneration = 33;
     private const int ReadOperationCount = 32;
-    private const string Sql = "SELECT l.order_id AS order_id, r.name AS name, l.total AS generation "
+    private const string Sql = "SELECT TOP (10) l.order_id AS order_id, r.name AS name, l.total AS generation "
         + "FROM orders AS l INNER JOIN customers AS r ON l.customer_id = r.id "
-        + "ORDER BY l.order_id ASC LIMIT 10";
+        + "ORDER BY l.order_id ASC";
 
     [Test]
     public async Task AcJoinKeepsAtomicPairGenerationsConsistentAcrossConcurrentCommits()

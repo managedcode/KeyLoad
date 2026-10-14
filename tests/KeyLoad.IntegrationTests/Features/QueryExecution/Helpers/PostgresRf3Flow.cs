@@ -18,6 +18,7 @@ internal static class PostgresRf3Flow
                 try
                 {
                     var state = await SeedAsync(fixture, dialect);
+                    PostgresNativeExtendedRf3State? extended = null;
                     using (var receiptDeadline = McpCallerDeadline.Create())
                     { await PostgresRf3Assertions.MinimumTokenAsync(fixture, state, receiptDeadline.Token); }
                     await PostgresRf3StalledBootstrap.RunAsync(fixture, state);
@@ -41,6 +42,7 @@ internal static class PostgresRf3Flow
                             await PostgresRf3Policy.RunAsync(fixture, state, root.Sdk, deadline.Token);
                             await PostgresRf3Cancellation.RunAsync(fixture, selection, state, root.Sdk, deadline.Token);
                             await PostgresRf3Cancellation.RunAsync(fixture, selection, state, root.Sdk, SqlTableRf3Pages.TableSql, deadline.Token);
+                            extended = await PostgresNativeExtendedRf3Flow.WarmAsync(fixture, selection, root.Sdk, state, deadline.Token);
                             return true;
                         }, deadline.Token);
                     }
@@ -53,6 +55,8 @@ internal static class PostgresRf3Flow
                         await PostgresRf3Parity.RunAsync(fixture, state, deadline.Token);
                         await PostgresRf3Receipts.RunAsync(fixture, state, deadline.Token);
                         await PostgresRf3BackpressureFlow.HealthyAsync(fixture, backpressure, deadline.Token);
+                        await PostgresNativeExtendedRf3Flow.ColdAsync(fixture, extended
+                            ?? throw new InvalidOperationException(PostgresRf3Protocol.InvalidResult), deadline.Token);
                     }
                 }
                 catch (Exception) { selection.RetainEvidence(); throw; }

@@ -103,7 +103,7 @@ Native remote graph operations, ASP.NET authentication, Event JOIN and composed-
 | **Graphs** | Store relationships and traverse agent knowledge | ✓ Accepted | [Cross-partition graphs](docs/Features/GraphTraversal.md) |
 | **Time series** | Samples, ranges and aggregates track history | ✓ Accepted | [Chunk and scale checks](docs/Features/TimeSeries.md) |
 | **Search** | Exact vectors, hybrid ranking and Explain retrieve context | ✓ Accepted | [ANN, rebuilds and freshness](docs/Features/Search.md) |
-| **SQL & tables** | `SELECT`, `CALL` and bounded INNER JOIN share one language | ◐ In source | [Full SQL, foreign keys and client protocol](docs/Features/QueryExecution.md) |
+| **SQL & tables** | Selected T-SQL `SELECT`, canonical `EXEC` and closed model `INSERT` lower to shared typed plans | ◐ In source | [Full SQL, foreign keys and client protocol](docs/Features/QueryExecution.md) |
 | **Queues & events** | Leases, history and queue ↔ graph flows drive agent work | ◐ In source | [Failure, security and recovery checks](docs/Features/Messaging.md) |
 | **SDK & MCP** | SDK, tool discovery, CLI and admin connect callers | ◐ In source | [Gateway and official MCP RF3 checks](docs/Features/ClientApi/ToolDiscovery.md) |
 | **Authorization** | ASP.NET Core authentication and persisted row/field policies protect context | ◐ In source | [Adversarial and revocation checks](docs/Features/Authorization.md) |
@@ -135,7 +135,7 @@ Implementation is progressing across SQL and the connected data models. Complete
 | **Files & blobs** | Chunked uploads and byte-range reads | Separate upload/publication |
 | **Change feeds** | Resumable feeds and projections | Record document changes |
 
-Atomic batches share one partition. SQL `SELECT` reads documents, typed rows and model views; `CALL` reaches the shared operation catalog. MCP discovers those operations on demand. [SQL syntax](docs/Features/QueryExecution.md) · [API and tool catalog](docs/Features/ClientApi.md).
+Atomic batches share one partition. T-SQL `SELECT` reads supported documents, typed rows and model views; `EXEC` reaches the shared operation catalog. MCP discovers those operations on demand. [SQL syntax](docs/Features/QueryExecution.md) · [API and tool catalog](docs/Features/ClientApi.md).
 
 ### Models that work together
 
@@ -151,7 +151,7 @@ flowchart LR
     G -->|"GraphToQueueMutation"| A[["Queue: actions"]]
 ```
 
-The current composition API uses .NET `CommitAsync`, SQL `CALL keyload_documents_commit(@arguments)` or the official MCP server.
+The current composition API uses .NET `CommitAsync`, SQL `EXEC keyload_documents_commit @arguments` or the official MCP server.
 
 | Boundary | Current contract |
 |---|---|
@@ -273,30 +273,29 @@ order.ThrowIfFail();
 
 ### With SQL
 
-Use SQL to read data and to call any database operation:
+Use the selected T-SQL syntax for supported reads and canonical operations through Microsoft ScriptDOM. Successful parsing does not grant execution of an unsupported AST family:
 
 ```csharp
 using System.Text.Json;
 
 var rows = await client.ExecuteSqlAsync(new SqlOperationRequest(partition,
-    "SELECT * FROM orders WHERE status = @status LIMIT 20",
+    "SELECT TOP (20) * FROM orders WHERE status = @status",
     new() { ["status"] = JsonSerializer.SerializeToElement("new") },
     AllowFullScan: true));
 rows.ThrowIfFail();
 Console.WriteLine(rows.Value);
 ```
 
-Here's what works today:
+Source-integrated selected-language examples (current Linux operation qualification remains open):
 
 ```sql
 SELECT * FROM orders WHERE number BETWEEN 1 AND 9 ORDER BY id
 SELECT * FROM QUEUE_MESSAGES('jobs')
 SELECT e.eventType FROM EVENTS('events', 'stream-a', 3) AS e
-EXPLAIN SELECT * FROM orders
-CALL keyload_documents_commit(@arguments)
+EXEC keyload_documents_commit @arguments
 ```
 
-Model views (`QUEUE_MESSAGES`, `EVENTS`) and unindexed filters require `AllowFullScan: true`, and model views don't support cursors. Bounded same-partition INNER JOIN is in source. Full SQL, foreign keys and the native SQL-client protocol remain in progress. The [query guide](docs/Features/QueryExecution.md) lists the supported syntax, and the [compatibility inventory](docs/implementation/sql-client-conformance.json) tracks the rest.
+Model views (`QUEUE_MESSAGES`, `EVENTS`) and unindexed filters require `AllowFullScan: true`, and model views don't support cursors. Closed same-partition INNER JOIN and queue/graph INSERT profiles are in source. Complete T-SQL execution, foreign keys and native-client qualification remain open. The bounded PostgreSQL wire/Npgsql session is a separate transport contract; it does not promise PostgreSQL grammar or SQL Server TDS compatibility. The [query guide](docs/Features/QueryExecution.md) lists the supported syntax, and the [compatibility inventory](docs/implementation/sql-client-conformance.json) tracks the rest.
 
 ### From an AI agent (MCP)
 

@@ -8,6 +8,6 @@ internal sealed class BlobRejectedContentPublicTests(ClusterFixture fixture)
     public async Task InvalidHashChangedDuplicateAndWrongChainRefuseThroughSdkAndOfficialMcpThenOriginalFailuresRemainAfterPublication()
     {
         await BlobRejectedContentPublicTrial.RunAsync(fixture, TestContext.Current!.Execution.CancellationToken);
-        await BlobPartIdentityR40Trial.RunAsync(fixture, TestContext.Current!.Execution.CancellationToken);
+        await BlobUnderfilledR47Trial.RunAsync(fixture, TestContext.Current!.Execution.CancellationToken);
     }
 }

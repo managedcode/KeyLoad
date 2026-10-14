@@ -1,6 +1,5 @@
 using System.Globalization;
 using System.Text.Json;
-using KeyLoad.Query;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
@@ -8,11 +7,11 @@ namespace KeyLoad.Server;
 internal static class PostgresPreparedDecoder
 {
     internal static (string Name, PostgresPreparedStatement Statement) Parse(ReadOnlySpan<byte> payload,
-        PostgresSessionOptions options, DatabaseLimits limits, IOptions<QueryExecutionOptions> queryOptions, CancellationToken token)
+        PostgresSessionOptions options, IOptions<DatabaseLimits> limitsOptions, CancellationToken token)
     {
         var reader = new PostgresPayloadReader(payload);
         var name = reader.Text(options.MaximumRetainedBytes);
-        var sql = reader.Text(Math.Min(options.MaximumRetainedBytes, limits.MaxQueryBytes));
+        var sql = reader.Text(Math.Min(options.MaximumRetainedBytes, limitsOptions.Value.MaxQueryBytes));
         var count = reader.Int16();
         if (count < PostgresProtocol.AllRows || count > PostgresProtocol.MaximumParameters)
         { throw Errors.Fail(ErrorCode.ResourceExhausted, PostgresProtocol.Invalid); }
@@ -24,17 +23,31 @@ internal static class PostgresPreparedDecoder
             RequireOid(oids[index]);
         }
         reader.Complete();
-        var translated = PostgresParameterNames.Translate(sql, count, limits.MaxQueryDepth, queryOptions.Value.SqlBudgetCheckInterval, token);
-        var syntax = new SqlOperationSyntaxReader(translated, limits.MaxQueryTokens, limits.MaxQueryDepth, queryOptions, token);
-        var kind = syntax.Identifier();
-        var rows = kind.Equals(SqlOperationSyntax.Select, StringComparison.OrdinalIgnoreCase)
-            || kind.Equals(SqlOperationSyntax.Table, StringComparison.OrdinalIgnoreCase);
-        if (!rows && !kind.Equals(SqlOperationSyntax.Explain, StringComparison.OrdinalIgnoreCase)
-            && !kind.Equals(SqlOperationSyntax.Call, StringComparison.OrdinalIgnoreCase)
-            && !kind.Equals(SqlCompositionInsert.Statement, StringComparison.OrdinalIgnoreCase))
+        var inspection = Inspect(sql, count, limitsOptions, token);
+        var bytes = checked((name.Length + sql.Length) * sizeof(char) + oids.Length * sizeof(int));
+        return (name, new(sql, oids, inspection.Rows, bytes, inspection.UsesProfileDialect));
+    }
+
+    internal static (bool Rows, bool UsesProfileDialect) Inspect(string sql, int positionalParameterCount,
+        IOptions<DatabaseLimits> limitsOptions, CancellationToken token)
+    {
+        var syntax = global::KeyLoad.Features.QueryExecution.ScriptDomSyntax.Parse(sql, limitsOptions,
+            token.ThrowIfCancellationRequested, token);
+        global::KeyLoad.Features.QueryExecution.ScriptDomSyntax.ValidateNativeSessionSlots(syntax,
+            positionalParameterCount, token.ThrowIfCancellationRequested, token);
+        var rows = global::KeyLoad.Features.QueryExecution.ScriptDomSyntax.HasQueryRows(syntax);
+        if (!rows && syntax is not (global::Microsoft.SqlServer.TransactSql.ScriptDom.ExecuteStatement
+            or global::Microsoft.SqlServer.TransactSql.ScriptDom.InsertStatement))
         { throw Errors.Fail(ErrorCode.UnsupportedCapability, PostgresProtocol.Unsupported); }
-        var bytes = checked((name.Length + translated.Length) * sizeof(char) + oids.Length * sizeof(int));
-        return (name, new(translated, oids, rows || kind.Equals(SqlOperationSyntax.Explain, StringComparison.OrdinalIgnoreCase), bytes));
+        var joinedInsert = syntax is global::Microsoft.SqlServer.TransactSql.ScriptDom.InsertStatement
+        {
+            InsertSpecification.InsertSource: global::Microsoft.SqlServer.TransactSql.ScriptDom.SelectInsertSource
+            {
+                Select: global::Microsoft.SqlServer.TransactSql.ScriptDom.QuerySpecification
+                { FromClause.TableReferences: [global::Microsoft.SqlServer.TransactSql.ScriptDom.QualifiedJoin] }
+            }
+        };
+        return (rows, joinedInsert);
     }
 
     internal static (string Name, PostgresBoundPortal Portal) Bind(ReadOnlySpan<byte> payload,

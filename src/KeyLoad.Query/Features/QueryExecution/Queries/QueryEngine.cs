@@ -13,8 +13,6 @@ namespace KeyLoad.Query;
 public sealed partial class QueryEngine
 {
     private const int InitialSequence = 0;
-    private const int DefaultDialectVersion = 1;
-    private const int JoinDialectVersion = 2;
     private const long NoRetainedBytesLong = 0L;
 
     internal const string ExplainId = "explain";
@@ -46,9 +44,9 @@ public sealed partial class QueryEngine
     /// <returns>A bounded page with authorized continuation metadata.</returns>
     public QueryPage Execute(string principalId, QueryRequest request, TimeProvider? timeProvider = null,
         CancellationToken cancellationToken = default)
-        => Execute(principalId, budget => new(request.Partition,
-            new SqlParser(request.Sql, database.OperationLimitsOptions, executionOptions, budget, request.QueryDialectVersion).Parse(), request.Parameters,
-            request.AllowFullScan, request.Cursor, AstVersion: request.QueryDialectVersion == JoinDialectVersion ? JoinDialectVersion : DefaultDialectVersion), timeProvider, cancellationToken);
+        => Execute(principalId, budget => global::KeyLoad.Query.Features.QueryExecution.ScriptDomQueryAdapter.Lower(
+            global::KeyLoad.Features.QueryExecution.ScriptDomSyntax.Parse(request.Sql, database.OperationLimitsOptions, budget.Check, cancellationToken),
+            request, database.OperationLimitsOptions, executionOptions, budget, cancellationToken), timeProvider, cancellationToken);
 
     /// <summary>Executes a bounded Q1.Search.v1 statement through the canonical graph-search engine.</summary>
     /// <param name="principalId">Persisted database principal identifier.</param>

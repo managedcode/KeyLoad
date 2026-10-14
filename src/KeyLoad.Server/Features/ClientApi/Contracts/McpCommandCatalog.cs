@@ -21,6 +21,8 @@ internal static class McpCommandCatalog
         McpOperationFactory.Command<DeliveryCommand, CommitReceipt>(McpToolNames.MessagesComplete, McpToolRoutes.MessagesComplete, OperationKind.Delivery, static request => request.CommandId),
         McpOperationFactory.Command<CommitInboxRequest, CommitInboxResult>(McpToolNames.InboxCommit, McpToolRoutes.InboxCommit, OperationKind.CommitInbox, static request => request.CommandId),
         McpOperationFactory.Command<ProcessingRequest, CommitReceipt>(McpToolNames.MessagesProcess, McpToolRoutes.MessagesProcess, OperationKind.Processing, static request => request.CommandId),
+        McpOperationFactory.HeaderCommand<QueueDispatchControlRequest, ResourceDefinition>(
+            QueueDispatchControlProtocol.Tool, QueueDispatchControlProtocol.Route, OperationKind.SetQueueDispatch),
         McpOperationFactory.HeaderCommand<ConfigureResourceRequest, ResourceDefinition>(McpToolNames.ResourcesConfigure, McpToolRoutes.ResourcesConfigure, OperationKind.ConfigureResource),
         McpOperationFactory.HeaderCommand<ConfigurePrincipalRequest, PrincipalRecord>(McpToolNames.PrincipalsConfigure, McpToolRoutes.PrincipalsConfigure, OperationKind.ConfigurePrincipal),
         McpOperationFactory.HeaderStatusCommand<ConfigureApiKeyRequest>(McpToolNames.CredentialsConfigure, McpToolRoutes.CredentialsConfigure, OperationKind.ConfigureApiKey),

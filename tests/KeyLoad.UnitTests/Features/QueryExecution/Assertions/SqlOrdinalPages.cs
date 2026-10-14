@@ -12,7 +12,7 @@ internal static class SqlOrdinalPages
         foreach (var descending in new[] { false, true })
         {
             var expected = descending ? Reverse : Forward;
-            foreach (var ordinal in new[] { "2", "0_2" })
+            foreach (var ordinal in new[] { "2", "02" })
             {
                 var sql = new QueryRequest(partition, Sql(descending, ordinal), AllowFullScan: true);
                 var ast = Ast(partition, descending);
@@ -31,7 +31,7 @@ internal static class SqlOrdinalPages
     }
     internal static string Sql(bool descending, string ordinal = "2")
         => "SELECT title, order_id FROM offsetleft ORDER BY " + ordinal + (descending ? " DESC" : " ASC")
-            + " LIMIT 1 OFFSET 1";
+            + " OFFSET 1 ROWS FETCH NEXT 1 ROW ONLY";
     internal static global::KeyLoad.Query.AstQueryRequest Ast(PartitionRef partition, bool descending)
         => new(partition, new(SqlOffsetProtocol.Left, null,
             [new("/title", "title"), new(SqlOffsetProtocol.OrderPath, "order_id")], null,

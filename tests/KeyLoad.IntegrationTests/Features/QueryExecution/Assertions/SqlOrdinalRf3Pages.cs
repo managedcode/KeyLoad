@@ -43,7 +43,7 @@ internal static class SqlOrdinalRf3Pages
         bool descending, int transport, string? cursor, CancellationToken token)
     {
         var sql = "SELECT title, order_id FROM offsetleft ORDER BY 2" + (descending ? " DESC" : " ASC")
-            + " LIMIT 1 OFFSET 1";
+            + " OFFSET 1 ROWS FETCH NEXT 1 ROWS ONLY";
         var query = new QueryRequest(state.Partition, sql, AllowFullScan: true, Cursor: cursor);
         var ast = new global::KeyLoad.Query.AstQueryRequest(state.Partition,
             new(SqlOffsetRf3Protocol.Left, null, [new("/title", "title"), new("/order_id", "order_id")],
@@ -63,7 +63,7 @@ internal static class SqlOrdinalRf3Pages
         (string Id, string Json, bool Final)[] rows, CancellationToken token)
     {
         var sql = "SELECT title, order_id FROM offsetleft ORDER BY 2" + (descending ? " DESC" : " ASC")
-            + " LIMIT 3 OFFSET 1";
+            + " OFFSET 1 ROWS FETCH NEXT 3 ROWS ONLY";
         foreach (var prepared in new[] { false, true })
         {
             var actual = await wire.ExecuteAsync<QueryPage>(sql, [], prepared, token);

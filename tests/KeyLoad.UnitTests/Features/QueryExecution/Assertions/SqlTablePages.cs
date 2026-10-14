@@ -44,9 +44,9 @@ internal static class SqlTablePages
             page.Cursor, cut, FullScan));
     }
 
-    internal const string TableSql = "TABLE offsetleft ORDER BY order_id LIMIT 1 OFFSET 1";
-    internal const string FetchSql = "TABLE offsetleft ORDER BY order_id OFFSET 1 ROWS FETCH NEXT 1 ROW ONLY";
-    internal const string SelectSql = "SELECT * FROM offsetleft ORDER BY order_id LIMIT 1 OFFSET 1";
+    internal const string TableSql = "SELECT * FROM offsetleft ORDER BY order_id OFFSET 1 ROWS FETCH FIRST 1 ROW ONLY";
+    internal const string FetchSql = "SELECT * FROM offsetleft ORDER BY order_id OFFSET 1 ROWS FETCH NEXT 1 ROW ONLY";
+    internal const string SelectSql = "SELECT ALL * FROM offsetleft ORDER BY order_id OFFSET 1 ROWS FETCH NEXT 1 ROW ONLY";
     private const string Star = "*";
     private const string FullScan = "bounded-full-scan";
     private const string SecondId = "b";

@@ -1,8 +1,6 @@
 using System.Globalization;
 using KeyLoad.Client;
-using KeyLoad.Features.QueryExecution;
 using KeyLoad.Query;
-using KeyLoad.Query.Features.QueryExecution;
 using KeyLoad.Server;
 using KeyLoad.UnitTests.Features.ClientApi;
 using Microsoft.AspNetCore.Http;
@@ -18,14 +16,14 @@ internal sealed class SqlTriviaExecutionPolicyTests
     private const string Trivia = " \r\n-- ignored ; CALL\r\n/* outer /* inner */ tail */";
     private const string SelectKeyword = "SELECT";
     private const string Select = "SELECT * FROM orders";
-    private const string Explain = "EXPLAIN SELECT * FROM orders";
+    private const string Explain = "/* xx */SELECT * FROM orders";
     private const string Unclosed = "/* unfinished";
     private const string Deep = "/* /* */ */SELECT";
     private const string SuccessReply = "{}";
     private const string ApiKey = "sql-inspection-policy-test-key";
     private const int OriginalInterval = 256;
-    private const int PairWidth = 2;
     private const int Depth = 2;
+    private const int TokenLimit = 16;
 
     [Test]
     public async Task OmittedNativeSettingsRetainTheIndependentOriginalDefault()
@@ -47,17 +45,18 @@ internal sealed class SqlTriviaExecutionPolicyTests
     [Arguments(OriginalInterval)]
     public async Task GrammarAtomsRetainPositiveBoundedProgressAndOriginalOffsets(int interval)
     {
-        var nested = await DrainAsync(Trivia + SelectKeyword, Depth, interval);
-        await Assert.That(nested.Status).IsEqualTo(SqlTriviaStatus.Complete);
-        await Assert.That(nested.Offset).IsEqualTo(Trivia.Length);
+        var nested = Parse(Trivia + Select, Depth, TestContext.Current!.Execution.CancellationToken);
+        await Assert.That(nested is global::Microsoft.SqlServer.TransactSql.ScriptDom.SelectStatement).IsTrue();
+        await Assert.That(nested.ScriptTokenStream[nested.FirstTokenIndex].Offset).IsEqualTo(Trivia.Length);
         var boundary = new string(' ', interval - 1) + "/* nested /* x */ tail */";
-        var edge = await DrainAsync(boundary + SelectKeyword, Depth, interval);
-        await Assert.That(edge.Status).IsEqualTo(SqlTriviaStatus.Complete);
-        await Assert.That(edge.Offset).IsEqualTo(boundary.Length);
-        var unclosed = await DrainAsync(Unclosed, Depth, interval);
-        await Assert.That(unclosed.Status).IsEqualTo(SqlTriviaStatus.UnterminatedComment);
-        await Assert.That(unclosed.Offset).IsEqualTo(Unclosed.Length);
-        await Assert.That((await DrainAsync(Deep, 1, interval)).Status).IsEqualTo(SqlTriviaStatus.DepthLimitExceeded);
+        var edge = Parse(boundary + Select, Depth, TestContext.Current!.Execution.CancellationToken);
+        await Assert.That(edge.ScriptTokenStream[edge.FirstTokenIndex].Offset).IsEqualTo(boundary.Length);
+        var unclosed = Assert.ThrowsExactly<KeyLoadException>(
+            () => Parse(Unclosed, Depth, TestContext.Current!.Execution.CancellationToken));
+        await Assert.That(unclosed.Code).IsEqualTo(ErrorCode.Validation);
+        var deep = Assert.ThrowsExactly<KeyLoadException>(
+            () => Parse(Deep, 1, TestContext.Current!.Execution.CancellationToken));
+        await Assert.That(deep.Code).IsEqualTo(ErrorCode.BudgetExceeded);
     }
 
     [Test]
@@ -73,10 +72,15 @@ internal sealed class SqlTriviaExecutionPolicyTests
         provider.GetRequiredService<IStartupValidator>().Validate();
         var options = provider.GetRequiredService<IOptions<QueryExecutionOptions>>();
         await Assert.That(options.Value.SqlBudgetCheckInterval).IsEqualTo(interval);
-        var tokens = SqlTokenizer.Lex(Trivia + Select, 16, Depth, options.Value.SqlBudgetCheckInterval);
-        SqlToken[] expected = [new(SqlTokenKind.Identifier, SelectKeyword), new(SqlTokenKind.Symbol, "*"),
-            new(SqlTokenKind.Identifier, "FROM"), new(SqlTokenKind.Identifier, "orders"), new(SqlTokenKind.End, string.Empty)];
-        await Assert.That(tokens.SequenceEqual(expected)).IsTrue();
+        var syntax = Parse(Trivia + Select, Depth, TestContext.Current!.Execution.CancellationToken);
+        var tokens = syntax.ScriptTokenStream.Where(token => token.TokenType is not
+            (global::Microsoft.SqlServer.TransactSql.ScriptDom.TSqlTokenType.WhiteSpace
+            or global::Microsoft.SqlServer.TransactSql.ScriptDom.TSqlTokenType.SingleLineComment
+            or global::Microsoft.SqlServer.TransactSql.ScriptDom.TSqlTokenType.MultilineComment
+            or global::Microsoft.SqlServer.TransactSql.ScriptDom.TSqlTokenType.EndOfFile)).ToArray();
+        string[] expected = [SelectKeyword, "*", "FROM", "orders"];
+        await Assert.That(tokens.Select(token => token.Text).SequenceEqual(expected)).IsTrue();
+        await Assert.That(tokens[0].Offset).IsEqualTo(Trivia.Length);
         var request = SqlOperationCommentTestData.Request(Trivia + SqlOperationCommentTestData.PlainCall);
         var operation = SqlOperationCompiler.Compile(request, UnitExecutionOptions.DatabaseLimits(),
             SqlOperationTestData.MaximumPayloadBytes, options);
@@ -94,25 +98,46 @@ internal sealed class SqlTriviaExecutionPolicyTests
     [Arguments(8, " SELECT * FROM orders", ErrorCode.Cancelled)]
     public async Task NativeSdkUsesTheSameBoundPrefixAndKeywordBoundary(int interval, string sql, ErrorCode expected)
     {
-        var configuration = Configuration(interval);
-        using var configurationLifetime = configuration as IDisposable;
-        using var provider = Provider(configuration);
-        provider.GetRequiredService<IStartupValidator>().Validate();
-        var options = provider.GetRequiredService<IOptions<KeyLoadClientExecutionOptions>>();
-        await Assert.That(options.Value.SqlBudgetCheckInterval).IsEqualTo(interval);
-        var calls = 0;
-        await using var server = await KeyLoadClientKestrelServer.StartAsync(context =>
+        var failures = new List<Exception>();
+        await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
         {
-            Interlocked.Increment(ref calls);
-            return context.Response.WriteAsync(SuccessReply, context.RequestAborted);
-        });
-        using var cancellation = new CancellationTokenSource();
-        await cancellation.CancelAsync();
-        var request = new SqlOperationRequest(McpCanonicalTestData.Partition, sql);
-        var result = await new KeyLoadClient(server.Client, ApiKey, options).ExecuteSqlAsync(request, cancellation.Token);
-        await Assert.That(result.IsFailed).IsTrue();
-        await Assert.That(result.Problem!.ErrorCode).IsEqualTo(expected.ToString());
-        await Assert.That(calls).IsEqualTo(0);
+            var configuration = Configuration(interval);
+            using var configurationLifetime = configuration as IDisposable;
+            using var provider = Provider(configuration);
+            provider.GetRequiredService<IStartupValidator>().Validate();
+            var options = provider.GetRequiredService<IOptions<KeyLoadClientExecutionOptions>>();
+            await Assert.That(options.Value.SqlBudgetCheckInterval).IsEqualTo(interval);
+            var calls = 0;
+            SqlOperationRequest? received = null;
+            await using var server = await KeyLoadClientKestrelServer.StartAsync(async context =>
+            {
+                Interlocked.Increment(ref calls);
+                received = await global::System.Text.Json.JsonSerializer.DeserializeAsync<SqlOperationRequest>(
+                    context.Request.Body, JsonDefaults.Options, context.RequestAborted);
+                await context.Response.WriteAsync(SuccessReply, context.RequestAborted);
+            });
+            using var cancellation = new CancellationTokenSource();
+            await cancellation.CancelAsync();
+            await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
+            {
+                var request = new SqlOperationRequest(McpCanonicalTestData.Partition, sql);
+                var result = await new KeyLoadClient(server.Client, ApiKey, options).ExecuteSqlAsync(request, cancellation.Token);
+                await Assert.That(result.IsFailed).IsTrue();
+                await Assert.That(result.Problem!.ErrorCode).IsEqualTo(expected.ToString());
+                await Assert.That(calls).IsEqualTo(0);
+                var healthyRequest = SqlOperationCommentTestData.Request(Trivia + SqlOperationCommentTestData.PlainCall);
+                var healthy = await new KeyLoadClient(server.Client, ApiKey, options)
+                    .ExecuteSqlAsync(healthyRequest, TestContext.Current!.Execution.CancellationToken);
+                await Assert.That(healthy.IsSuccess).IsTrue();
+                await Assert.That(healthy.Value.GetRawText()).IsEqualTo(SuccessReply);
+                await Assert.That(calls).IsEqualTo(1);
+                await Assert.That(JsonDefaults.Serialize(received).SequenceEqual(JsonDefaults.Serialize(healthyRequest))).IsTrue();
+                var operation = SqlOperationCompiler.Compile(healthyRequest, UnitExecutionOptions.DatabaseLimits(),
+                    SqlOperationTestData.MaximumPayloadBytes, provider.GetRequiredService<IOptions<QueryExecutionOptions>>());
+                await SqlOperationTestData.Same(operation, SqlOperationTestData.Find(McpCatalogExpectations.QueryCapabilities).Decode(null));
+            }, failures);
+        }, failures);
+        global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }
 
     [Test]
@@ -128,20 +153,12 @@ internal sealed class SqlTriviaExecutionPolicyTests
         await Assert.That(failure.Failures.Single()).IsEqualTo(KeyLoadClientExecutionOptions.ValidationMessage);
     }
 
-    private static async Task<(SqlTriviaStatus Status, int Offset)> DrainAsync(string sql, int depth, int interval)
+    private static global::Microsoft.SqlServer.TransactSql.ScriptDom.TSqlStatement Parse(
+        string sql, int depth, CancellationToken token)
     {
-        var state = new SqlTriviaState();
-        var offset = 0;
-        SqlTriviaStatus status;
-        do
-        {
-            var before = offset;
-            status = SqlTriviaReader.Read(sql, ref offset, ref state, depth, interval);
-            await Assert.That(offset - before).IsLessThanOrEqualTo(Math.Max(interval, PairWidth));
-            if (status == SqlTriviaStatus.More)
-            { await Assert.That(offset).IsGreaterThan(before); }
-        } while (status == SqlTriviaStatus.More);
-        return (status, offset);
+        var limits = UnitExecutionOptions.DatabaseLimits(new DatabaseLimits { MaxQueryDepth = depth, MaxQueryTokens = TokenLimit });
+        var budget = new global::KeyLoad.Core.ReadExecutionBudget(limits, cancellationToken: token);
+        return global::KeyLoad.Features.QueryExecution.ScriptDomSyntax.Parse(sql, limits, budget.Check, token);
     }
 
     private static IConfigurationRoot Configuration(int? interval, bool includeQuery = true)

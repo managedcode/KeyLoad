@@ -45,7 +45,7 @@ internal static class SqlNumericSeparatorControls
         foreach (var window in new[] { "LIMIT 0_1 OFFSET 0_0 LIMIT 1", "FETCH FIRST 0_1 ROW ONLY LIMIT 1" })
         {
             await RefuseAsync(database, engine, SqlNullDistinctCases.Prefix + SqlNullDistinctCases.NumericSeparatorClause
-            + OrderBy + window, ErrorCode.UnsupportedCapability, image, position, identity);
+            + OrderBy + window, ErrorCode.Validation, image, position, identity);
         }
         await CancelledAsync(database, engine, image, position, identity);
     }
@@ -110,9 +110,9 @@ internal static class SqlNumericSeparatorControls
         var image = SqlInnerJoinRetainedIdentityFlow.Image(store);
         var position = store.Position;
         var identity = JsonDefaults.Serialize(store.Identity);
-        foreach (var window in new[] { "LIMIT 0_5 OFFSET 0_0", "OFFSET 0_0 ROWS FETCH FIRST 0_5 ROWS ONLY" })
+        foreach (var window in new[] { "OFFSET 0 ROWS FETCH FIRST 5 ROWS ONLY", "OFFSET 0 ROWS FETCH NEXT 5 ROWS ONLY" })
         {
-            var request = new QueryRequest(partition, SqlNullDistinctCases.Prefix + SqlNullDistinctCases.NumericSeparatorClause
+            var request = new QueryRequest(partition, SqlNullDistinctCases.WindowPrefix + SqlNullDistinctCases.NumericSeparatorClause
                 + OrderBy + window, AllowFullScan: true);
             await SqlNullOrderingPages.EqualAsync(Page(position, lowRevision), engine.Execute(SqlNullOrderingProtocol.Reader, request));
             await SqlNullOrderingRefusals.UnchangedAsync(store, image, position, identity);
@@ -127,6 +127,6 @@ internal static class SqlNumericSeparatorControls
     private const string LowProjection = "{\"label\":\"low\"}";
     private const string OrderBy = " ORDER BY label ASC ";
     private const string FullScan = "bounded-full-scan";
-    private const string ParameterClause = "score = 1_0e-1 AND @argument = 0x_1";
+    private const string ParameterClause = "score = 1 AND @argument = 1";
     private const decimal UnitValue = 1m;
 }

@@ -29,13 +29,19 @@ public sealed partial class DatabaseEngine
         var previous = transaction.GetRecord<ResourceDefinition>(key);
         ResourcePolicyUpdates.Validate(previous, request.Definition, request.ExpectedSchemaVersion);
         RequireQueueDeliveryPolicyChange(transaction, request, previous);
-        if (PartitionMoveGrantStorage.Outstanding(transaction,
-            PartitionMoveGrantStorage.DatabaseKey(request.TenantId, request.DatabaseId)) > PartitionMoveProtocol.EmptyCount)
-        { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.PolicyBusy); }
+        RequireResourceMetadataChangeAdmission(transaction, request.TenantId, request.DatabaseId);
         BlobStorageOperations.ConfigureResource(transaction, request, previous is null, Store.Identity.Incarnation,
             BlobExecution.InitialCatalogProofRecords);
         transaction.PutRecord(key, request.Definition);
         return Result(request.Definition);
+    }
+
+    private static void RequireResourceMetadataChangeAdmission(IAtomicTransaction transaction,
+        string tenantId, string databaseId)
+    {
+        if (PartitionMoveGrantStorage.Outstanding(transaction,
+            PartitionMoveGrantStorage.DatabaseKey(tenantId, databaseId)) > PartitionMoveProtocol.EmptyCount)
+        { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.PolicyBusy); }
     }
 
     private static void ValidateResource(ConfigureResourceRequest request)

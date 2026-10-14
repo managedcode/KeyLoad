@@ -99,7 +99,7 @@ internal sealed class DeclarativeCompositionRf3Tests(ClusterFixture fixture)
             await sdk.InspectAsync(scenario.Inspect(Message), cancellationToken)));
         var budgetState = await DeclarativeCompositionBudgetFlow.RunAsync(sdk, mcp, scenario, link, cancellationToken);
 
-        var invalid = forwardSql with { Sql = forwardSql.Sql + "; SELECT unsupported" };
+        var invalid = forwardSql with { Sql = forwardSql.Sql + "; SELECT" };
         var rejected = await sdk.ExecuteSqlAsync(invalid, cancellationToken);
         await Assert.That(rejected.IsFailed).IsTrue();
         await Assert.That(rejected.Problem!.ErrorCode).IsEqualTo(nameof(ErrorCode.Validation));

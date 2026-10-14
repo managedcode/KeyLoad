@@ -52,7 +52,7 @@ function Invoke-TaskChild([string] $Directory, [string] $Name, [string] $Executa
     Write-TaskOriginal (Join-Path $Directory ($Name + '.process.json')) ([ordered]@{
         executable = $Executable; arguments = $Arguments; timeoutSeconds = $Timeout
         environment = [ordered]@{ DOTNET_EnableHWIntrinsic = [Environment]::GetEnvironmentVariable('DOTNET_EnableHWIntrinsic') }
-        settlementSeconds = 30; nativeResult = $result })
+        settlementSeconds = 30; nativeResult = (ConvertTo-FcCoverageProcessEvidence $result) })
     $result
 }
 function Assert-TaskSettled([object] $Result) {

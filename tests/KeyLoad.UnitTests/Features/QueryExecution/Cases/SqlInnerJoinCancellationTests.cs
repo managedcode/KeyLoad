@@ -8,9 +8,9 @@ internal sealed class SqlInnerJoinCancellationTests
 {
     private const string Left = "orders";
     private const string Right = "customers";
-    private const string QueryText = "SELECT l.order_id AS order_id, r.name AS name "
+    private const string QueryText = "SELECT TOP (10) l.order_id AS order_id, r.name AS name "
         + "FROM orders AS l INNER JOIN customers AS r ON l.customer_id = r.id "
-        + "ORDER BY l.order_id ASC LIMIT 10";
+        + "ORDER BY l.order_id ASC";
     private const int Dialect = 2;
     private const int SeedRows = 512;
     private const int WriteBatchSize = 256;

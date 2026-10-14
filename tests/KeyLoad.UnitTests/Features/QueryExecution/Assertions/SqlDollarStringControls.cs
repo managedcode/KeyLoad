@@ -11,7 +11,7 @@ internal static class SqlDollarStringControls
             "label = $$lo\0w$$", "label = $tag-low$low$tag-low$" })
         { await RefuseAsync(database, engine, clause, ErrorCode.Validation, before, position, identity); }
         foreach (var clause in new[] { "label = $$lo$$\n$$w$$", "label = $a$low$a$ $a$other$a$" })
-        { await RefuseAsync(database, engine, clause, ErrorCode.UnsupportedCapability, before, position, identity); }
+        { await RefuseAsync(database, engine, clause, ErrorCode.Validation, before, position, identity); }
         await CancelledAsync(database, engine, before, position, identity);
     }
 

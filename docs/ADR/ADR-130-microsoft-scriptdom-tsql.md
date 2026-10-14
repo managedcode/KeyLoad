@@ -2,6 +2,8 @@
 
 Status: Accepted implementation contract. Date: 2026-10-13. Owner: KeyLoad root integration agent. Implementation and qualification remain open.
 
+Current integration: package180.140.0 is centrally referenced and restored across all27 projects. Native syntax, SELECT, EXEC and closed same-partition queue/graph INSERT lowering are now in the working source. The first complete semantic/analyzer check found87 errors; coordinated repairs, remaining old-parser retirement, the Release solution build and actual current-source operation tests are not yet complete. No new acceptance, coverage or performance gate is claimed from these source changes.
+
 ## Decision
 
 The owner explicitly selected T-SQL with Microsoft ScriptDOM on 2026-10-13. This supersedes ADR-065's integration-owner PostgreSQL18 working dialect. Use centrally pinned `Microsoft.SqlServer.TransactSql.ScriptDom` **180.140.0**, published on NuGet on 2026-10-12, under its original MIT license. The package includes a .NET8 asset usable by .NET10 and declares no runtime dependencies. Verify the actual restored package identity and API before compiling the adapter. SQL Server's standalone T-SQL grammar is the selected syntax target; other engine profiles are not selected.

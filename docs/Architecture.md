@@ -76,9 +76,7 @@ Owner clarification2026-10-03 requires full SQL and a client connection protocol
 [ADR-065](ADR/ADR-065-full-sql-client-compatibility.md) extends the existing stages
 with explicit typed execution/native-client gates and
 [versioned conformance inventory](implementation/sql-client-conformance.json).
-The first lexical repair shares an internal bounded trivia reader between Query,
-Server and SDK; quoted content, authority, envelope1 and storage remain exact.
-Full PostgreSQL-compatible execution and native transport are pending. The selected text index is ZoneTree.FullTextSearch, using its centrally pinned
+[ADR-130](ADR/ADR-130-microsoft-scriptdom-tsql.md) selects Microsoft ScriptDOM T-SQL native parsing and closed typed lowering. Previous handwritten lexical plans are retired; original authority, typed identity, envelope1 and storage contracts remain. Complete T-SQL execution and client qualification are pending. The existing PostgreSQL wire/Npgsql session is a separately qualified transport, not a PostgreSQL grammar or SQL Server TDS promise. The selected text index is ZoneTree.FullTextSearch, using its centrally pinned
 native APIs under node-local ownership. [NativeFullTextProjection](Features/Search/NativeFullTextProjection.md)
 defines the integration, correctness, recovery, resource and performance gates.
 Provider selection is fixed; acceleration requires comparable measurements.

@@ -11,5 +11,6 @@ internal sealed class SqlOffsetRf3WholeFlowTests(ClusterFixture fixture)
     {
         using var deadline = McpCallerDeadline.Create();
         await SqlOffsetRf3Flow.RunAsync(fixture, deadline.Token);
+        await QueryCursorRequestIdentityR47Flow.RunAsync(fixture, deadline.Token);
     }
 }

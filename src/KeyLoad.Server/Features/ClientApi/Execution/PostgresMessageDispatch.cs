@@ -1,4 +1,3 @@
-using KeyLoad.Query;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
@@ -13,8 +12,7 @@ internal sealed class PostgresMessageDispatch(IServiceProvider services, global:
         {
             case PostgresMessageProtocol.Parse:
                 var parsed = PostgresPreparedDecoder.Parse(frame.Payload, Options,
-                    services.GetRequiredService<IOptions<DatabaseLimits>>().Value,
-                    services.GetRequiredService<IOptions<QueryExecutionOptions>>(), token);
+                    services.GetRequiredService<IOptions<DatabaseLimits>>(), token);
                 catalog.PutStatement(parsed.Name, parsed.Statement);
                 writer.Empty(PostgresWireWriter.ParseComplete);
                 break;

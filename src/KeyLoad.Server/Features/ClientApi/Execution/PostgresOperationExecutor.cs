@@ -25,10 +25,14 @@ internal static class PostgresOperationExecutor
                 admission, out var maximumJsonBytes);
             var request = new SqlOperationRequest(partition, portal.Statement.Sql, portal.Parameters,
                 AllowFullScan: portal.Statement.Rows && profile.AllowFullScan,
-                QueryDialectVersion: portal.Statement.Rows ? profile.QueryDialectVersion : SqlOperationProtocol.DefaultQueryDialectVersion);
-            var operation = SqlOperationCompiler.Compile(request, services.GetRequiredService<IOptions<DatabaseLimits>>(),
-                options.MaximumCanonicalPayloadBytes, services.GetRequiredService<IOptions<QueryExecutionOptions>>(), token);
-            if (operation.ReadKind != GrainReadKind.Query && operation.CommandKind != OperationKind.Batch)
+                QueryDialectVersion: portal.Statement.Rows || portal.Statement.UsesProfileDialect
+                    ? profile.QueryDialectVersion : SqlOperationProtocol.DefaultQueryDialectVersion);
+            var operation = SqlOperationCompiler.CompileNativeSession(request, services.GetRequiredService<IOptions<DatabaseLimits>>(),
+                options.MaximumCanonicalPayloadBytes, services.GetRequiredService<IOptions<QueryExecutionOptions>>(),
+                portal.Statement.ParameterOids.Length, token);
+            if (operation.ReadKind is not (GrainReadKind.Query or GrainReadKind.AstQuery
+                or GrainReadKind.Document or GrainReadKind.Message or GrainReadKind.Traverse)
+                && operation.CommandKind != OperationKind.Batch)
             { throw Errors.Fail(ErrorCode.UnsupportedCapability, PostgresProtocol.Unsupported); }
             result.PossibleWrite = operation.CommandKind == OperationKind.Batch;
             var value = await CanonicalConnectionDispatch.ExecuteAsync(services, owner, principal, operation, token).ConfigureAwait(false);

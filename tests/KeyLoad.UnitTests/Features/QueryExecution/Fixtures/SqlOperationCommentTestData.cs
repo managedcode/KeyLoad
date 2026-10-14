@@ -7,14 +7,14 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 internal static class SqlOperationCommentTestData
 {
     internal const string Block = "/* outer /* nested */ body */";
-    internal const string CallStart = "/* lead */ CALL /* root */ ";
-    internal const string CallEnd = " /* target */ ( /* open */ @ /* prefix */ arguments /* parameter */ ) /* close */ ; /* end */";
+    internal const string CallStart = "/* lead */ EXEC /* root */ ";
+    internal const string CallEnd = " /* target */ @arguments /* parameter */ ; /* end */";
     internal const string EndOfFileLine = " -- trailing private-input-canary";
     internal const string LineBreak = "\r\n";
-    internal const string CrLfCall = "-- leading\r\nCALL-- root\r\nkeyload_query_capabilities-- target\r\n(-- open\r\n@-- prefix\r\narguments-- parameter\r\n)-- close\r\n;-- end";
+    internal const string CrLfCall = "-- leading\r\nEXEC-- root\r\nkeyload_query_capabilities-- target\r\n@arguments-- parameter\r\n;-- end";
     internal const string UnicodeBlock = "/* é 漢 🙂 */ ";
     internal const string Select = "/* lead /* nested */ */ SELECT '-- literal /* intact */' FROM orders WHERE status = @status";
-    internal const string Explain = "-- leading\r\nEXPLAIN /* root */ SELECT * FROM orders WHERE status = @status";
+    internal const string Top = "-- leading\r\nSELECT /* root */ TOP (1) * FROM orders WHERE status = @status";
     internal const string Document = "{\"text\":\"/* document */ -- intact\"}";
     internal const string OpenBlock = "/*";
     internal const string CloseBlock = "*/";
@@ -26,7 +26,7 @@ internal static class SqlOperationCommentTestData
     internal const int ChunkCharacters = 256;
     internal const int PairCharacters = 2;
     internal const int BoundaryStep = 1;
-    internal const int CallTokens = 6;
+    internal const int CallTokens = 3;
     internal const int ShallowDepth = 2;
     internal const int ExcessDepth = ShallowDepth + BoundaryStep;
     internal const int LongCommentChunks = 8;

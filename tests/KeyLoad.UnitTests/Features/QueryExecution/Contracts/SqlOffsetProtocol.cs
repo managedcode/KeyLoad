@@ -30,8 +30,8 @@ internal static class SqlOffsetProtocol
     internal const long DenyEpoch = 2;
     internal const long RepairEpoch = 3;
     internal const int ColdCuts = 2;
-    internal const string ScalarSql = "SELECT title FROM offsetleft ORDER BY order_id LIMIT 1 OFFSET 1";
-    internal const string JoinSql = "SELECT l.title AS title,r.name AS name FROM offsetleft AS l INNER JOIN offsetright AS r ON l.customer_id=r.id ORDER BY l.order_id LIMIT 1 OFFSET 1";
+    internal const string ScalarSql = "SELECT title FROM offsetleft ORDER BY order_id OFFSET 1 ROWS FETCH NEXT 1 ROW ONLY";
+    internal const string JoinSql = "SELECT l.title AS title,r.name AS name FROM offsetleft AS l INNER JOIN offsetright AS r ON l.customer_id=r.id ORDER BY l.order_id OFFSET 1 ROWS FETCH NEXT 1 ROW ONLY";
     internal static AstQueryRequest Scalar(PartitionRef p) => new(p,
         new(Left, null, [new(TitlePath, Title)], null, [new(OrderPath, false)], PageSize, Offset: InitialOffset),
         AllowFullScan: true, AstVersion: Q1);

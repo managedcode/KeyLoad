@@ -8,8 +8,8 @@ namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 internal static class SqlRf3Protocol
 {
     internal const string Argument = "args";
-    internal const string CallPrefix = "CALL ";
-    internal const string CallSuffix = "(@args)";
+    internal const string CallPrefix = "EXEC ";
+    internal const string CallSuffix = " @args";
     internal const string BlobMetadataTool = "keyload_blobs_metadata";
     internal const string BlobListTool = "keyload_blobs_list";
     internal const string TableSelect = "SELECT * FROM agentrows WHERE 'alpha' = title ORDER BY id";

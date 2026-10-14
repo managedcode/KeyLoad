@@ -39,7 +39,7 @@ internal sealed class SecurityAndQueryTests
         db.Configure("orders", ResourceKind.Collection);
         db.Commit(new PutDocument("orders", "a", "{}"), new PutDocument("orders", "b", "{}"));
         Reader(db);
-        var request = new QueryRequest(db.Partition, "SELECT * FROM orders LIMIT 1", AllowFullScan: true);
+        var request = new QueryRequest(db.Partition, "SELECT TOP (1) * FROM orders", AllowFullScan: true);
         var engine = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
         var first = engine.Execute("reader", request);
         await Assert.That(first.Cursor).IsNotNull();
@@ -71,7 +71,7 @@ internal sealed class SecurityAndQueryTests
         db.Configure("orders", ResourceKind.Collection);
         db.Commit(new PutDocument("orders", "a", "{}"), new PutDocument("orders", "b", "{}"));
         var engine = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
-        var request = new QueryRequest(db.Partition, "SELECT * FROM orders LIMIT 1", AllowFullScan: true);
+        var request = new QueryRequest(db.Partition, "SELECT TOP (1) * FROM orders", AllowFullScan: true);
         var first = engine.Execute("root", request);
         await Assert.That(first.Cursor).IsNotNull();
         var path = Path.Combine(db.Directory, "replica.snapshot");
@@ -95,7 +95,11 @@ internal sealed class SecurityAndQueryTests
         await Assert.That(System.Linq.Enumerable.Single(rows.Rows).EntityId).IsEqualTo("a");
         await Assert.That(rows.AccessPath).IsEqualTo("index:status");
         await Assert.That(System.Linq.Enumerable.Single(engine.Execute("root", new(db.Partition, "SELECT * FROM orders WHERE status = 'open' AND n IS NULL")).Rows).EntityId).IsEqualTo("b");
-        await Assert.That(System.Linq.Enumerable.Single(engine.Execute("root", new(db.Partition, "SELECT * FROM orders WHERE n IS MISSING", AllowFullScan: true)).Rows).EntityId).IsEqualTo("c");
+        var missing = new AstQueryRequest(db.Partition, new("orders", null, [new("*", "*")],
+            new NullTest(new FieldOperand("/n"), false, true), [], 100), AllowFullScan: true);
+        await Assert.That(System.Linq.Enumerable.Single(engine.ExecuteAst("root", missing).Rows).EntityId).IsEqualTo("c");
+        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute("root",
+            new(db.Partition, "SELECT * FROM orders WHERE n IS MISSING", AllowFullScan: true))).Code).IsEqualTo(ErrorCode.Validation);
         await Assert.That(engine.Execute("root", new(db.Partition, "SELECT * FROM orders WHERE status = 'open' AND status = 'closed'")).Rows).IsEmpty();
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute("root", new(db.Partition, "SELECT * FROM orders"))).Code).IsEqualTo(ErrorCode.UnsupportedCapability);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => new SqlParser("SELECT * FROM orders; DELETE FROM orders", UnitExecutionOptions.DatabaseLimits(new()), UnitExecutionOptions.QueryExecution()).Parse()).Code).IsEqualTo(ErrorCode.UnsupportedCapability);

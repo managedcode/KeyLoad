@@ -1,6 +1,9 @@
 # QueryExecution
 
-The owner selected T-SQL through Microsoft ScriptDOM on 2026-10-13. [Current replacement requirements](QueryExecution/ScriptDom.md) and [ADR-130](../ADR/ADR-130-microsoft-scriptdom-tsql.md) supersede the prior working PostgreSQL dialect. Package integration and replacement qualification remain pending; existing source/test evidence does not qualify this new language selection.
+The owner selected T-SQL through Microsoft ScriptDOM on 2026-10-13. [Current replacement requirements](QueryExecution/ScriptDom.md) and [ADR-130](../ADR/ADR-130-microsoft-scriptdom-tsql.md) supersede the prior working PostgreSQL dialect. The centrally pinned package has restored successfully and the native parser, SELECT adapter, EXEC catalog lowering and bounded queue/graph INSERT replacement are integrated in the working source. Complete semantic/analyzer repairs, obsolete-source retirement, the solution build and real operation qualification remain open; historical source/test evidence does not qualify this new language selection.
+
+Active grammar/execution planning is exclusively the [T-SQL requirements](QueryExecution/ScriptDom.md) and [current conformance inventory](../implementation/sql-client-conformance.json). PostgreSQL-specific lexical/TABLE/CALL source recipes and NEXT parser plans later in this accumulated record are superseded historical language stages, not active syntax promises. Their generic model/authorization/receipt/bounds/recovery requirements remain mandatory and must map to selected-language whole operations; original source/CI results are preserved with their original identities. The genuine PostgreSQL wire/Npgsql transport and benchmark competitor remain separate current workstreams. No complete SQL, TDS or production qualification is claimed.
+
 
 TASK-QUERY-FACTORY-WHOLE-OPERATION replaces the two shape-only
 `KeyLoadQueryFactoryTests` cases under REQ/AC-ROC-005 and the existing bounded
@@ -84,7 +87,7 @@ Q1/SELECT/CALL is a stage; full SQL and native protocol remain pending.
 
 | Requirement | Acceptance | Task/test/evidence |
 |---|---|---|
-| REQ-SQLC-001/006: full versioned typed SQL | AC-SQLC-001/006 | TASK-SQLC-R7/FULL; [183-command index](../implementation/sql-client-commands-postgresql18.json), explicit semantic stages and real differential fixtures pending |
+| REQ-SQLC-001/006: full versioned typed SQL | AC-SQLC-001/006 | TASK-SQLC-R7/FULL; [active T-SQL family inventory](../implementation/sql-client-conformance.json), explicit semantic stages and real differential fixtures pending; previous183-command PostgreSQL index is historical only |
 | REQ-SQLC-002/003/004: bounded comments preserve canonical results/authority | AC-SQLC-002–004 | TASK-SQLC-I1/Q1/S1/I2; first-authored shared/parser/compiler real-store and RF3 SDK/official MCP comment cases; source/qualification pending |
 | REQ-SQLC-005: conservative SQL transport outcomes | AC-SQLC-005 | TASK-SQLC-C1; exact commented/unknown-root write outcomes over genuine Kestrel, pending |
 | REQ-SQLC-009/010: honest native performance and search choice | AC-SQLC-009/010 | TASK-SQLC-R4/FULL; pinned ZoneTree.FullTextSearch review then genuine correctness/fault/isolated workloads, pending |

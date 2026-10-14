@@ -29,10 +29,10 @@ internal static class PostgresRf3Parity
                         await PageAsync(state, await wire.ExecuteAsync<QueryPage>(state.Sql, [], prepared: true, token));
                         await SyntaxVariantsAsync(state, wire, token);
                         await LiteralVariantsAsync(state, reader, wire, token);
-                        await SqlUnicodeIdentifierRf3JoinPages.RequireAsync(state, reader, wire, token);
+                        await NamedAndNativeSlotsAsync(state, reader, wire, token);
                         await SqlTableRf3Pages.RequireAsync(state, reader, wire, token);
                         await SqlTableRf3Refusals.RequireAsync(state, reader, wire, root.Sdk, token);
-                        await SqlNumericSeparatorRf3JoinParameters.RequireAsync(state, reader, wire, token);
+                        await QuotedIdentifiersAsync(state, wire, token);
                         if (state.Dialect == PostgresRf3Protocol.JoinDialect)
                         {
                             var plain = state.Sql.Replace(" INNER JOIN ", " JOIN ", StringComparison.Ordinal);
@@ -55,16 +55,10 @@ internal static class PostgresRf3Parity
     private static async Task LiteralVariantsAsync(PostgresRf3State state,
         RequestCqrsRf3Callers reader, PostgresRf3Caller wire, CancellationToken token)
     {
-        foreach (var predicate in new[] { "1_0e-1 = 1", "0x_1 = 1 AND 0b_1 = 1 AND 0o_1 = 1",
-            "0x_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF = 79_228_162_514_264_337_593_543_950_335", "0x1 = 1", "-0x1 < 0",
-            "0xFFFFFFFFFFFFFFFFFFFFFFFF = 79228162514264337593543950335",
-            "U&'\\+01F600' = '😀'", "U&'g!0075ard' UESCAPE '!' = 'guard'",
-            "$$guard$$ = 'guard'", "$tag$😀$tag$ = '😀'",
-            "0b1 = 1 AND 0o1 = 1",
-            "0b111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111 = 79228162514264337593543950335",
-            "0o77777777777777777777777777777777 = 79228162514264337593543950335",
-            "-0b111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111 = -79228162514264337593543950335",
-            "-0o77777777777777777777777777777777 = -79228162514264337593543950335" })
+        foreach (var predicate in new[] { "10e-1 = 1", "1 = 1", "-1 < 0",
+            "79228162514264337593543950335 = 79228162514264337593543950335",
+            "-79228162514264337593543950335 = -79228162514264337593543950335",
+            "N'😀' = N'😀'", "N'guard' = N'guard'", "N'$9' = N'$9' /* $9 */" })
         {
             var sql = state.Sql.Replace(" ORDER BY ", " WHERE " + predicate + " ORDER BY ", StringComparison.Ordinal);
             await global::TUnit.Assertions.Assert.That(sql).IsNotEqualTo(state.Sql);
@@ -86,4 +80,41 @@ internal static class PostgresRf3Parity
             await PageAsync(state, await wire.ExecuteAsync<QueryPage>(sql, [], prepared: true, token));
         }
     }
+    private static async Task NamedAndNativeSlotsAsync(PostgresRf3State state,
+        RequestCqrsRf3Callers reader, PostgresRf3Caller wire, CancellationToken token)
+    {
+        foreach (var named in new[] { " WHERE 1 = @p1 ORDER BY ", " WHERE @p1 = @p1 ORDER BY " })
+        {
+            var operation = state.Operation with
+            {
+                Sql = state.Sql.Replace(" ORDER BY ", named, StringComparison.Ordinal),
+                Parameters = new(StringComparer.Ordinal)
+                { [ParameterName] = global::System.Text.Json.JsonSerializer.SerializeToElement(ParameterValue, JsonDefaults.Options) }
+            };
+            await PageAsync(state, await SqlRf3Protocol.SdkAsync<QueryPage>(reader.Sdk, operation, token));
+            await PageAsync(state, await SqlRf3Protocol.McpAsync<QueryPage>(reader.Mcp, operation, token));
+            var predicate = named == " WHERE 1 = @p1 ORDER BY "
+                ? " WHERE 1 = $1 ORDER BY " : " WHERE $1 = $1 ORDER BY ";
+            var sql = state.Sql.Replace(" ORDER BY ", predicate, StringComparison.Ordinal);
+            foreach (var prepared in new[] { false, true })
+            {
+                var parameter = new global::Npgsql.NpgsqlParameter
+                { NpgsqlDbType = global::NpgsqlTypes.NpgsqlDbType.Integer, Value = ParameterValue };
+                await PageAsync(state, await wire.ExecuteAsync<QueryPage>(sql, [parameter], prepared, token));
+            }
+        }
+    }
+
+    private static async Task QuotedIdentifiersAsync(PostgresRf3State state,
+        PostgresRf3Caller wire, CancellationToken token)
+    {
+        var sql = state.Sql.Replace("budgetorders", "[budgetorders]", StringComparison.Ordinal)
+            .Replace("budgetcustomers", "[budgetcustomers]", StringComparison.Ordinal);
+        foreach (var prepared in new[] { false, true })
+        { await PageAsync(state, await wire.ExecuteAsync<QueryPage>(sql, [], prepared, token)); }
+    }
+
+    private const string ParameterName = "p1";
+    private const int ParameterValue = 1;
+
 }

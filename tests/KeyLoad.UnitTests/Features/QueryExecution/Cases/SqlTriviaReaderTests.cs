@@ -1,5 +1,3 @@
-using KeyLoad.Features.QueryExecution;
-
 namespace KeyLoad.UnitTests.Features.QueryExecution;
 
 /// <summary>AC-SQLC-002/004: trivia boundaries and bounded scalar progress.</summary>
@@ -24,66 +22,161 @@ internal sealed class SqlTriviaReaderTests
     [Test]
     public async Task AC_SQLC_002_CommentsStopAtTheOriginalFirstToken()
     {
-        var (status, offset) = Drain(Nested, DepthLimit);
-        await Assert.That(status).IsEqualTo(SqlTriviaStatus.Complete);
-        await Assert.That(Nested[offset..]).IsEqualTo(Select);
-        var (_, quotedOffset) = Drain(Quoted, DepthLimit);
-        var (_, identifierOffset) = Drain(Gap, DepthLimit);
-        await Assert.That(quotedOffset).IsEqualTo(0);
-        await Assert.That(identifierOffset).IsEqualTo(0);
+        await OwnedAsync(async database =>
+        {
+            await SeedAsync(database);
+            var prefix = Nested[..^Select.Length];
+            var tokens = Tokens(prefix + ScriptDomSelectPages.WindowSql, DepthLimit);
+            await Assert.That(tokens.First(token => token.Text == Select).Offset).IsEqualTo(prefix.Length);
+            var quoted = Tokens(Quoted, DepthLimit);
+            await Assert.That(quoted[0].Offset).IsEqualTo(0);
+            await Assert.That(quoted[0].Text).IsEqualTo(Quoted);
+            var gap = Tokens(Gap, DepthLimit);
+            await Assert.That(gap[0].Offset).IsEqualTo(0);
+            await Assert.That(gap[0].Text).IsEqualTo("SEL");
+            await HealthyAsync(database, prefix + ScriptDomSelectPages.WindowSql);
+            await QuotedAsync(database);
+            await RefuseAsync(database, Gap + " * FROM offsetleft", ErrorCode.Validation);
+        });
     }
 
     [Test]
     public async Task AC_SQLC_002_UnclosedBlocksAndNestedDepthAreDistinct()
     {
-        await Assert.That(Drain(Unclosed, DepthLimit).Status).IsEqualTo(SqlTriviaStatus.UnterminatedComment);
-        await Assert.That(Drain(LineAtEnd, DepthLimit).Status).IsEqualTo(SqlTriviaStatus.Complete);
-        await Assert.That(Drain(Deep, ShallowDepth).Status).IsEqualTo(SqlTriviaStatus.DepthLimitExceeded);
-        var (status, offset) = Drain(Deep, DepthLimit);
-        await Assert.That(status).IsEqualTo(SqlTriviaStatus.Complete);
-        await Assert.That(Deep[offset..]).IsEqualTo(Select);
+        await OwnedAsync(async database =>
+        {
+            await SeedAsync(database);
+            await RefuseAsync(database, Unclosed + ScriptDomSelectPages.WindowSql, ErrorCode.Validation);
+            await HealthyAsync(database, ScriptDomSelectPages.WindowSql + " " + LineAtEnd);
+            var deep = Deep[..^Select.Length] + ScriptDomSelectPages.WindowSql;
+            var image = SqlInnerJoinRetainedIdentityFlow.Image(database.Store);
+            var position = database.Store.Position;
+            var identity = JsonDefaults.Serialize(database.Store.Identity);
+            var failure = Assert.ThrowsExactly<KeyLoadException>(() => Tokens(deep, ShallowDepth));
+            await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
+            await SqlNullOrderingRefusals.UnchangedAsync(database.Store, image, position, identity);
+            var tokens = Tokens(deep, DepthLimit);
+            await Assert.That(tokens.First(token => token.Text == Select).Offset).IsEqualTo(Deep.Length - Select.Length);
+            await HealthyAsync(database, deep);
+        });
     }
 
     [Test]
     public async Task AC_SQLC_004_EveryChunkHasBoundedPositiveProgress()
     {
-        var sql = OpenComment + new string(CommentCharacter, LongCommentLength) + CloseComment + Select;
-        var state = new SqlTriviaState();
-        var offset = 0;
-        SqlTriviaStatus status;
-        do
+        await OwnedAsync(async database =>
         {
-            var before = offset;
-            status = SqlTriviaReader.Read(sql, ref offset, ref state, DepthLimit, OriginalChunkCharacters);
-            await Assert.That(offset - before).IsLessThanOrEqualTo(OriginalChunkCharacters);
-            if (status == SqlTriviaStatus.More)
-            {
-                await Assert.That(offset).IsGreaterThan(before);
-            }
-        } while (status == SqlTriviaStatus.More);
-        await Assert.That(status).IsEqualTo(SqlTriviaStatus.Complete);
-        await Assert.That(sql[offset..]).IsEqualTo(Select);
+            await SeedAsync(database);
+            var sql = OpenComment + new string(CommentCharacter, LongCommentLength) + CloseComment + ScriptDomSelectPages.WindowSql;
+            await CopyAsync(sql);
+            var tokens = Tokens(sql, DepthLimit);
+            await Assert.That(tokens.First(token => token.Text == Select).Offset)
+                .IsEqualTo(OpenComment.Length + LongCommentLength + CloseComment.Length);
+            await HealthyAsync(database, sql);
+        });
     }
 
     [Test]
     public async Task AC_SQLC_004_CommentDelimitersAcrossChunkBoundariesRemainTrivia()
     {
-        var prefix = new string(Whitespace, OriginalChunkCharacters - 1);
-        var sql = prefix + OpenComment + new string(CommentCharacter, LongCommentLength) + CloseComment + Select;
-        var (status, offset) = Drain(sql, DepthLimit);
-        await Assert.That(status).IsEqualTo(SqlTriviaStatus.Complete);
-        await Assert.That(sql[offset..]).IsEqualTo(Select);
+        await OwnedAsync(async database =>
+        {
+            await SeedAsync(database);
+            var prefix = new string(Whitespace, OriginalChunkCharacters - 1);
+            var sql = prefix + OpenComment + new string(CommentCharacter, LongCommentLength) + CloseComment + ScriptDomSelectPages.WindowSql;
+            await CopyAsync(sql);
+            var tokens = Tokens(sql, DepthLimit);
+            await Assert.That(tokens.First(token => token.Text == Select).Offset)
+                .IsEqualTo(prefix.Length + OpenComment.Length + LongCommentLength + CloseComment.Length);
+            await HealthyAsync(database, sql);
+        });
     }
 
-    private static (SqlTriviaStatus Status, int Offset) Drain(string sql, int maximumDepth)
+    private static async Task OwnedAsync(Func<TestDatabase, Task> operation)
     {
-        var state = new SqlTriviaState();
-        var offset = 0;
-        SqlTriviaStatus status;
-        do
+        var failures = new List<Exception>();
+        await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
         {
-            status = SqlTriviaReader.Read(sql, ref offset, ref state, maximumDepth, OriginalChunkCharacters);
-        } while (status == SqlTriviaStatus.More);
-        return (status, offset);
+            using var database = new TestDatabase();
+            await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => operation(database), failures);
+        }, failures);
+        global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
+    }
+
+    private static async Task SeedAsync(TestDatabase database)
+    {
+        SqlOffsetFixture.Seed(database);
+        await SqlOffsetFixture.PolicyAsync(database, SqlOffsetProtocol.GrantEpoch, true);
+    }
+
+    private static IList<global::Microsoft.SqlServer.TransactSql.ScriptDom.TSqlParserToken> Tokens(string sql, int depth)
+    {
+        var options = UnitExecutionOptions.DatabaseLimits(new DatabaseLimits { MaxQueryDepth = depth });
+        var budget = new global::KeyLoad.Core.ReadExecutionBudget(options);
+        using var reader = new global::KeyLoad.Features.QueryExecution.ScriptDomBoundedReader(sql, budget.Check);
+        var parser = new global::Microsoft.SqlServer.TransactSql.ScriptDom.TSql180Parser(true,
+            global::Microsoft.SqlServer.TransactSql.ScriptDom.SqlEngineType.Standalone);
+        var tokens = parser.GetTokenStream(reader, out var errors);
+        if (errors.Count != 0)
+        { throw new InvalidOperationException("The native token fixture is malformed."); }
+        global::KeyLoad.Features.QueryExecution.ScriptDomTokenBounds.Require(tokens, options.Value, budget.Check);
+        return tokens;
+    }
+
+    private static async Task CopyAsync(string sql)
+    {
+        var budget = new global::KeyLoad.Core.ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits());
+        using var reader = new global::KeyLoad.Features.QueryExecution.ScriptDomBoundedReader(sql, budget.Check);
+        var copied = new global::System.Text.StringBuilder();
+        var buffer = new char[OriginalChunkCharacters];
+        while (await reader.ReadAsync(buffer.AsMemory(), TestContext.Current!.Execution.CancellationToken) is var count && count > 0)
+        {
+            await Assert.That(count).IsGreaterThan(0);
+            await Assert.That(count).IsLessThanOrEqualTo(OriginalChunkCharacters);
+            copied.Append(buffer, 0, count);
+        }
+        await Assert.That(copied.ToString()).IsEqualTo(sql);
+    }
+
+    private static async Task HealthyAsync(TestDatabase database, string sql)
+    {
+        var image = SqlInnerJoinRetainedIdentityFlow.Image(database.Store);
+        var position = database.Store.Position;
+        var identity = JsonDefaults.Serialize(database.Store.Identity);
+        var engine = new global::KeyLoad.Query.QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
+        var page = engine.Execute(SqlOffsetProtocol.Reader, new(database.Partition, sql, AllowFullScan: true));
+        await ScriptDomSelectPages.PageAsync(page, "b", "{\"title\":\"second\",\"order_id\":\"b\"}", position, false);
+        await SqlNullOrderingRefusals.UnchangedAsync(database.Store, image, position, identity);
+        await ScriptDomSelectPages.HealthyAsync(database.Database, database.Store, database.Partition);
+        await SqlNullOrderingRefusals.UnchangedAsync(database.Store, image, position, identity);
+    }
+
+    private static async Task QuotedAsync(TestDatabase database)
+    {
+        var image = SqlInnerJoinRetainedIdentityFlow.Image(database.Store);
+        var position = database.Store.Position;
+        var identity = JsonDefaults.Serialize(database.Store.Identity);
+        var engine = new global::KeyLoad.Query.QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
+        var sql = "SELECT title, order_id FROM offsetleft WHERE title = " + Quoted + " ORDER BY order_id";
+        var actual = engine.Execute(SqlOffsetProtocol.Reader, new(database.Partition, sql, AllowFullScan: true));
+        var expected = new QueryPage([], null, position, ScriptDomSelectPages.FullScan);
+        await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
+        await SqlNullOrderingRefusals.UnchangedAsync(database.Store, image, position, identity);
+        await ScriptDomSelectPages.HealthyAsync(database.Database, database.Store, database.Partition);
+        await SqlNullOrderingRefusals.UnchangedAsync(database.Store, image, position, identity);
+    }
+
+    private static async Task RefuseAsync(TestDatabase database, string sql, ErrorCode code)
+    {
+        var image = SqlInnerJoinRetainedIdentityFlow.Image(database.Store);
+        var position = database.Store.Position;
+        var identity = JsonDefaults.Serialize(database.Store.Identity);
+        var engine = new global::KeyLoad.Query.QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
+        var failure = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute(SqlOffsetProtocol.Reader,
+            new(database.Partition, sql, AllowFullScan: true)));
+        await Assert.That(failure.Code).IsEqualTo(code);
+        await SqlNullOrderingRefusals.UnchangedAsync(database.Store, image, position, identity);
+        await ScriptDomSelectPages.HealthyAsync(database.Database, database.Store, database.Partition);
+        await SqlNullOrderingRefusals.UnchangedAsync(database.Store, image, position, identity);
     }
 }

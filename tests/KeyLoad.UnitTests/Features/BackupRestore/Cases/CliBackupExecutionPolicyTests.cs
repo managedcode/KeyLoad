@@ -48,6 +48,7 @@ internal sealed class CliBackupExecutionPolicyTests
                 UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
             var value = reopened.Read(view => NativeSerialization.Deserialize<string>(view.ReadOwnedValue(key)!));
             await Assert.That(value).IsEqualTo(payload);
+            await BackupPieceBoundaryFlow.RunAsync(options, fixture, files, key, payload, PieceBytesEnvironment, token);
         }, token);
         await Assert.That(Directory.Exists(root)).IsFalse();
     }

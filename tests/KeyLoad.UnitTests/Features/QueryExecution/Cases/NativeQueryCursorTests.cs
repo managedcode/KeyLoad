@@ -16,8 +16,8 @@ internal sealed class NativeQueryCursorTests
     private const string Second = "b";
     private const string FirstJson = "{\"status\":\"open\",\"n\":1.2300e+02,\"large\":9007199254740993}";
     private const string SecondJson = "{\"status\":\"open\",\"text\":\"Україна\"}";
-    private const string PageSql = "SELECT * FROM orders WHERE status = 'open' ORDER BY id LIMIT 1";
-    private const string LiveSql = "SELECT * FROM orders WHERE status = 'open' LIMIT 100";
+    private const string PageSql = "SELECT TOP (1) * FROM orders WHERE status = 'open' ORDER BY id";
+    private const string LiveSql = "SELECT TOP (100) * FROM orders WHERE status = 'open'";
     private const string FullScanSql = "SELECT * FROM orders ORDER BY id";
     private const string IndexPath = "index:status";
     private const string NativePrefix = "KLT2.";

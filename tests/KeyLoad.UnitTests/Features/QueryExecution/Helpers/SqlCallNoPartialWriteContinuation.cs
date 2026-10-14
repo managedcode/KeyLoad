@@ -14,10 +14,10 @@ internal static class SqlCallNoPartialWriteContinuation
     internal const string FirstBody = "{\"é.漢\":\"🙂 quoted \\\"value\\\"\",\"number\":1}";
     internal const string SecondBody = "{\"value\":\"/* not SQL */ ; CALL remains content\"}";
     internal const string HealthyBody = "{\"number\":2}";
-    private const string PlainCall = "CALL keyload_documents_commit(@arguments)";
-    private const string CommentedCall = "/* é 漢 🙂 */ CALL keyload_documents_commit(@arguments); -- end";
-    private const string MultipleCall = PlainCall + "; CALL keyload_documents_commit(@arguments)";
-    private const string UnsupportedCall = "CALL keyload_missing(@arguments)";
+    private const string PlainCall = "EXEC keyload_documents_commit @arguments";
+    private const string CommentedCall = "/* é 漢 🙂 */ EXEC keyload_documents_commit @arguments; -- end";
+    private const string MultipleCall = PlainCall + "; EXEC keyload_documents_commit @arguments";
+    private const string UnsupportedCall = "EXEC keyload_missing @arguments";
     private const string UnknownKey = "extra";
     private const string RequestKey = "request";
     private const long AbsentRevision = 0;
@@ -36,7 +36,7 @@ internal static class SqlCallNoPartialWriteContinuation
                     new PutDocument(SqlBetweenTestData.Collection, FirstId, FirstBody, AbsentRevision),
                     new PutDocument(SqlBetweenTestData.Collection, SecondId, SecondBody, AbsentRevision)]);
                 var request = Request(original);
-                await RefusedAsync(db, request with { Sql = MultipleCall }, ErrorCode.Validation);
+                await RefusedAsync(db, request with { Sql = MultipleCall }, ErrorCode.UnsupportedCapability);
                 await RefusedAsync(db, request with { Sql = UnsupportedCall }, ErrorCode.UnsupportedCapability);
                 var extra = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
                 {

@@ -6,7 +6,7 @@ internal static class SqlAllPages
 {
     internal const string Keyword = "SELECT ALL ";
     internal const string DefaultKeyword = "SELECT ";
-    internal const string DuplicateSql = "SELECT ALL score AS score FROM null_ordering WHERE score IS NULL ORDER BY label ASC LIMIT 5";
+    internal const string DuplicateSql = "SELECT ALL TOP (5) score AS score FROM null_ordering WHERE score IS NULL ORDER BY label ASC";
     internal static string Explicit(string sql) => Keyword + sql[DefaultKeyword.Length..];
 
     internal static async Task DuplicatesAsync(QueryEngine engine, PartitionRef partition, string principal, long cut)
@@ -32,8 +32,8 @@ internal static class SqlAllPages
         var image = SqlInnerJoinRetainedIdentityFlow.Image(database.Store);
         var cut = database.Store.Position;
         var identity = JsonDefaults.Serialize(database.Store.Identity);
-        foreach (var sql in new[] { "SELECT ALL FROM null_ordering LIMIT 5",
-            "SELECT ALL ALL label FROM null_ordering LIMIT 5" })
+        foreach (var sql in new[] { "SELECT ALL TOP (5) FROM null_ordering",
+            "SELECT ALL ALL TOP (5) label FROM null_ordering" })
         {
             await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute(SqlNullOrderingProtocol.Root,
                 new(database.Partition, sql, AllowFullScan: true))).Code).IsEqualTo(ErrorCode.Validation);

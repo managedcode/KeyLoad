@@ -16,10 +16,10 @@ internal static class SqlOrdinalRf3Controls
             await SqlOrdinalRf3Pages.HealthyAsync(callers, state, wire, token);
             await SqlOrdinalRf3Owned.SourcesAsync(fixture, state, token);
         }
-        await RejectAsync(callers, state, wire, "SELECT * FROM offsetleft ORDER BY 1 LIMIT 1",
+        await RejectAsync(callers, state, wire, "SELECT TOP (1) * FROM offsetleft ORDER BY 1",
             ErrorCode.UnsupportedCapability, Unsupported, SqlOffsetRf3Protocol.Q1, token);
         await SqlOrdinalRf3Owned.SourcesAsync(fixture, state, token);
-        var joined = SqlOffsetRf3Protocol.JoinSql.Replace("ORDER BY l.order_id", "ORDER BY 2", StringComparison.Ordinal);
+        var joined = JoinedOrdinal;
         await RejectAsync(callers, state, wire, joined, ErrorCode.Validation, InvalidParameter, SqlOffsetRf3Protocol.Q2, token);
         await SqlOrdinalRf3Owned.SourcesAsync(fixture, state, token);
         await SqlOrdinalRf3Pages.HealthyAsync(callers, state, wire, token);
@@ -78,7 +78,8 @@ internal static class SqlOrdinalRf3Controls
         await SqlOrdinalRf3Pages.HealthyAsync(callers, state, wire, token);
         await SqlOrdinalRf3Owned.SourcesAsync(fixture, state, token);
     }
+    private const string JoinedOrdinal = "SELECT l.title AS title,r.name AS name FROM offsetleft AS l INNER JOIN offsetright AS r ON l.customer_id=r.id ORDER BY 2 OFFSET 1 ROWS FETCH NEXT 1 ROWS ONLY";
     private const string Prefix = "SELECT title, order_id FROM offsetleft ORDER BY ";
-    private const string Tail = " LIMIT 1 OFFSET 1";
+    private const string Tail = " OFFSET 1 ROWS FETCH NEXT 1 ROWS ONLY";
     private const string InvalidParameter = "22023", Unsupported = "0A000", InsufficientPrivilege = "42501";
 }

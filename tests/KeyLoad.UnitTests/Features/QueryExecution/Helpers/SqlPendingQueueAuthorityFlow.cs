@@ -15,7 +15,7 @@ internal static class SqlPendingQueueAuthorityFlow
             [new(state.Partition.DatabaseId, state.Lane.Queue, Capability.Query | Capability.QueueInspect)], ["*"]);
         Save(database, state, principal);
         var request = new QueryRequest(state.Partition,
-            $"SELECT * FROM QUEUE_MESSAGES('{state.Lane.Queue}') ORDER BY id LIMIT {QueueLifecycleTestProtocol.Three}", AllowFullScan: true);
+            $"SELECT TOP ({QueueLifecycleTestProtocol.Three}) * FROM QUEUE_MESSAGES('{state.Lane.Queue}') ORDER BY id", AllowFullScan: true);
         var engine = new QueryEngine(database, UnitExecutionOptions.QueryExecution());
         await DeniedAsync(database, store, state, engine, request, token);
         principal = principal with

@@ -25,7 +25,7 @@ internal static class PostgresRf3Cancellation
             {
                 using var originalCancellation = CancellationTokenSource.CreateLinkedTokenSource(token);
                 var before = await PostgresRf3Assertions.ImageAsync(root, token);
-                var arm = controls.WriteArm(state.Reader.Principal.Id, Guid.Empty, GrainReadKind.Query,
+                var arm = controls.WriteArm(state.Reader.Principal.Id, Guid.Empty, GrainReadKind.AstQuery,
                     RequestCqrsProbePhase.AuthorizationReload, RequestCqrsProbeAction.Hold);
                 var original = wire.ExecuteAsync<QueryPage>(sql ?? state.Sql, [], prepared: false, originalCancellation.Token);
                 var operationFailures = new List<Exception>();
@@ -72,7 +72,7 @@ internal static class PostgresRf3Cancellation
         global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private static async Task CleanupAsync(RequestCqrsProbeFixture controls, Guid arm,
+    internal static async Task CleanupAsync(RequestCqrsProbeFixture controls, Guid arm,
         ReplicaSiloDiscovery[] discovery, CancellationTokenSource originalCancellation,
         Task original, bool originalJoined, List<Exception> operationFailures)
     {

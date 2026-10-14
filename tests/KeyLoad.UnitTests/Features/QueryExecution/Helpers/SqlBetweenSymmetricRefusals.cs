@@ -10,8 +10,8 @@ internal static class SqlBetweenSymmetricRefusals
         var before = SqlInnerJoinRetainedIdentityFlow.Image(database.Store);
         var position = database.Store.Position;
         var identity = JsonDefaults.Serialize(database.Store.Identity);
-        foreach (var clause in new[] { "score BETWEEN SYMMETRIC 2 1", "score BETWEEN SYMMETRIC 2 OR 1",
-            "score BETWEEN SYMMETRIC (2) AND 1", "score NOT BETWEEN SYMMETRIC 2 1",
+        foreach (var clause in new[] { "score BETWEEN 2", "score BETWEEN 2 OR 1", "score BETWEEN SYMMETRIC 2 1", "score BETWEEN SYMMETRIC 2 OR 1",
+            "score NOT BETWEEN SYMMETRIC 2 1",
             "score BETWEEN ASYMMETRIC 2 1", "score NOT BETWEEN ASYMMETRIC 2 OR 1",
             "score BETWEEN ASYMMETRIC ASYMMETRIC 1 AND 2",
             "score BETWEEN SYMMETRIC ASYMMETRIC 1 AND 2" })
@@ -22,6 +22,15 @@ internal static class SqlBetweenSymmetricRefusals
             await SqlNullOrderingRefusals.UnchangedAsync(database.Store, before, position, identity);
             await SqlBetweenSymmetricPages.HealthyAsync(database.Database, database.Store, database.Partition, InitialRevision);
         }
+        foreach (var clause in new[] { "score BETWEEN SYMMETRIC (2) AND 1", "score BETWEEN ABS(2) AND 1" })
+        {
+            await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute(SqlNullOrderingProtocol.Reader,
+                new(database.Partition, SqlBetweenSymmetricCases.Prefix + clause + SqlBetweenSymmetricCases.Tail,
+                    AllowFullScan: true))).Code).IsEqualTo(ErrorCode.UnsupportedCapability);
+            await SqlNullOrderingRefusals.UnchangedAsync(database.Store, before, position, identity);
+            await SqlBetweenSymmetricPages.HealthyAsync(database.Database, database.Store, database.Partition, InitialRevision);
+            await SqlNullOrderingRefusals.UnchangedAsync(database.Store, before, position, identity);
+        }
         using var cancelled = new CancellationTokenSource();
         await cancelled.CancelAsync();
         foreach (var clause in new[] { SqlBetweenSymmetricCases.All[First].Clause, SqlBetweenSymmetricCases.AsymmetricHealthy })
@@ -31,6 +40,16 @@ internal static class SqlBetweenSymmetricRefusals
             var error = Assert.ThrowsExactly<OperationCanceledException>(() => engine.Execute(SqlNullOrderingProtocol.Reader,
                 request, cancellationToken: cancelled.Token));
             await Assert.That(error.CancellationToken).IsEqualTo(cancelled.Token);
+            await SqlNullOrderingRefusals.UnchangedAsync(database.Store, before, position, identity);
+            using var healthy = new CancellationTokenSource();
+            await Assert.That(healthy.Token.IsCancellationRequested).IsFalse();
+            var expected = new global::KeyLoad.QueryPage([
+                new("high", InitialRevision, "{\"label\":\"high\"}", RedactedFields: []),
+                new(Low, InitialRevision, "{\"label\":\"low\"}", RedactedFields: [])],
+                null, position, "bounded-full-scan");
+            await SqlNullOrderingPages.EqualAsync(expected, engine.Execute(SqlNullOrderingProtocol.Reader,
+                request, cancellationToken: healthy.Token));
+            await SqlBetweenSymmetricPages.HealthyAsync(database.Database, database.Store, database.Partition, InitialRevision);
             await SqlNullOrderingRefusals.UnchangedAsync(database.Store, before, position, identity);
         }
     }

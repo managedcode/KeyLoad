@@ -14,7 +14,7 @@ internal sealed class QueryAdapterContractTests
         db.Configure("orders", ResourceKind.Collection);
         db.Commit(new PutDocument("orders", "a", "{\"number\":2}"), new PutDocument("orders", "b", "{\"number\":3}"), new PutDocument("orders", "c", "{\"number\":4}"));
         var engine = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
-        const string sql = "SELECT d.id, d.number FROM orders d WHERE d.number >= 2.00 ORDER BY d.id LIMIT 1";
+        const string sql = "SELECT TOP (1) d.id, d.number FROM orders d WHERE d.number >= 2.00 ORDER BY d.id";
         var first = engine.Execute("root", new(db.Partition, sql, AllowFullScan: true));
         await Assert.That(System.Linq.Enumerable.Single(first.Rows).EntityId).IsEqualTo("a");
         var json = QueryAdapterTestSupport.RoundTrip(new(db.Partition, new SqlParser(sql.Replace("2.00", "2", StringComparison.Ordinal), UnitExecutionOptions.DatabaseLimits(new()), UnitExecutionOptions.QueryExecution()).Parse(),
@@ -62,8 +62,18 @@ internal sealed class QueryAdapterContractTests
             && (QueryFunctions.IsMissing(row.Optional) || QueryFunctions.IsNull(row.Optional));
         var query = KeyLoadQuery.From<QueryAdapterOrder>(db.Partition, "orders", UnitClientOptions.Translation()).Where(filter).OrderBy(row => QueryFunctions.DocumentId(row));
         var actual = engine.ExecuteAst("root", QueryAdapterTestSupport.RoundTrip(query.ToRequest(true)));
-        var sql = engine.Execute("root", new(db.Partition, "SELECT * FROM orders WHERE status IN ('open','hold') AND (n IS MISSING OR n IS NULL) ORDER BY id", AllowFullScan: true));
-        await QueryAdapterTestSupport.SameRows(sql, actual);
+        var before = SqlInnerJoinRetainedIdentityFlow.Image(db.Store);
+        var position = db.Store.Position;
+        var identity = JsonDefaults.Serialize(db.Store.Identity);
+        var sql = engine.Execute("root", new(db.Partition, "SELECT * FROM orders WHERE status IN ('open','hold') AND n IS NULL ORDER BY id", AllowFullScan: true));
+        var expected = new QueryPage([new("null", 1, "{\"n\":null,\"status\":\"open\"}", false, [])],
+            null, position, "bounded-full-scan");
+        await SqlOffsetPages.ExactAsync(sql, expected);
+        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute("root",
+            new(db.Partition, "SELECT * FROM orders WHERE n IS MISSING", AllowFullScan: true))).Code).IsEqualTo(ErrorCode.Validation);
+        await SqlOffsetPages.ExactAsync(engine.Execute("root", new(db.Partition,
+            "SELECT * FROM orders WHERE n IS NULL", AllowFullScan: true)), expected);
+        await SqlOffsetRefusals.UnchangedAsync(db.Store, before, position, identity);
         await Assert.That(actual.Rows.Select(row => row.EntityId)).IsEquivalentTo(new[] { "missing", "null" }, CollectionOrdering.Matching);
     }
 

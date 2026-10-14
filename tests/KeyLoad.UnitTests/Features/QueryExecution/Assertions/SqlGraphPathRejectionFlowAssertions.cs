@@ -7,13 +7,20 @@ internal static class SqlGraphPathRejectionFlowAssertions
     private const string ExpectedAttributesJson = "{}";
     private const string Principal = SqlGraphPathTestSupport.Principal;
 
-    internal static async Task AssertRejectThenRetryAsync(TestDatabase database, QueryEngine engine,
+    internal static Task AssertRejectThenRetryAsync(TestDatabase database, QueryEngine engine,
         SqlGraphPathRequest invalidRequest, CancellationToken cancellationToken)
+        => AssertRejectThenRetryAsync(database, engine, invalidRequest, ErrorCode.Validation, null, cancellationToken);
+
+    internal static async Task AssertRejectThenRetryAsync(TestDatabase database, QueryEngine engine,
+        SqlGraphPathRequest invalidRequest, ErrorCode expectedCode, string? expectedDetail,
+        CancellationToken cancellationToken)
     {
         var committedPosition = database.Store.Position;
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => engine.ShortestPathSql(Principal,
             invalidRequest, cancellationToken: cancellationToken));
-        await Assert.That(failure.Code).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(failure.Code).IsEqualTo(expectedCode);
+        if (expectedDetail is not null)
+        { await Assert.That(failure.Message).IsEqualTo(expectedDetail); }
         await Assert.That(database.Store.Position).IsEqualTo(committedPosition);
 
         var healthy = engine.ShortestPathSql(Principal,

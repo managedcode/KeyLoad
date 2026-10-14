@@ -20,21 +20,22 @@ internal static class SqlCommentTestData
         + "WHERE d.status = 'open' ORDER BY d.id";
     internal const string EndOfInputLineCommentSelect = "SELECT d.id FROM orders d WHERE d.status = 'open' ORDER BY d.id"
         + "-- ignored through EOF";
-    internal const string PlainExplain = "EXPLAIN SELECT * FROM orders WHERE status = 'open'";
-    internal const string CommentedExplain = "EXPLAIN/* explain */ SELECT/* select */ * FROM orders "
+    internal const string PlainExplain = "SELECT * FROM orders WHERE status = 'open'";
+    internal const string CommentedExplain = "/* explain AST */ SELECT/* select */ * FROM orders "
         + "WHERE/* predicate */ status = 'open'";
     internal const string QuotedField = "note/*field*/";
     internal const string QuotedValue = "value -- text/* still value */";
     internal const string QuotedSql = "SELECT \"note/*field*/\" FROM orders WHERE note = 'value -- text/* still value */'";
     internal const string UnclosedComment = "SELECT * FROM orders /* unfinished";
     internal const string DeepComment = "SELECT/* outer /* middle /* inner */ */ */ * FROM orders";
+    internal const string DeepPredicate = "SELECT * FROM orders WHERE (((number = 3)))";
     internal const string IdentifierSplice = "SEL/* gap */ECT * FROM orders";
     internal const string OperatorSplice = "SELECT * FROM orders WHERE n >/* gap */= 1";
     internal const string SecondStatement = "SELECT * FROM orders;/* hidden */ SELECT * FROM orders";
     internal const string ExactBoundedQuery = "SELECT/*å*/ * FROM orders";
     internal const string LongCommentPrefix = "/*";
     internal const string LongCommentSuffix = "*/";
-    internal const string NumericLineCommentSql = "SELECT * FROM orders WHERE number = 3-- trailing\r\nLIMIT 1";
+    internal const string NumericLineCommentSql = "SELECT TOP (1) * FROM orders WHERE number = 3-- trailing\r\n";
     internal const string NumericArithmeticLikeSql = "SELECT * FROM orders WHERE number = 3-4";
     internal const string NumberField = "number";
     internal const string NumberPath = "/number";

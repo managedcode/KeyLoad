@@ -49,13 +49,14 @@ internal static class ControlledPartitionMovementNativeFailedCreationFlow
                 }
             }
             await Assert.That(opened).IsEqualTo(OwnedLockCount);
+            await CreatedSiloShutdownOperation.RunAsync(acquired.Root, cancellationToken);
             await RecoveryFileInventory.AssertUnchangedAsync(acquired.Root, before, cancellationToken);
         }, checks);
         if (checks.Count != NoFailures)
         { checks.InsertRange(NoFailures, original); ServerFailureObserver.ThrowIfAny(checks); }
     }
 
-    private static bool HasOriginalCancellation(Exception original, CancellationToken selected)
+    internal static bool HasOriginalCancellation(Exception original, CancellationToken selected)
         => original is OperationCanceledException canceled && canceled.CancellationToken == selected
             || original is AggregateException aggregate && aggregate.InnerExceptions.Any(child => HasOriginalCancellation(child, selected))
             || original.InnerException is { } inner && HasOriginalCancellation(inner, selected);

@@ -4,7 +4,7 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 
 internal sealed class SqlGraphPathOperationFlowTests
 {
-    private const string ExtraStatement = "; SELECT * FROM path-orders";
+    private const string ExtraStatement = "; SELECT * FROM [path-orders]";
 
     [Test]
     public async Task ExtraStatementsRejectWithoutReadsAndHealthySqlRetryMatchesDirectPath()
@@ -18,7 +18,8 @@ internal sealed class SqlGraphPathOperationFlowTests
             SqlGraphPathTestSupport.Principal, invalid,
             cancellationToken: TestContext.Current!.Execution.CancellationToken));
 
-        await Assert.That(failure.Code).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(failure.Code).IsEqualTo(ErrorCode.UnsupportedCapability);
+        await Assert.That(failure.Message).IsEqualTo("The SQL statement or execution clause is unsupported.");
         await Assert.That(database.Store.Position).IsEqualTo(originalPosition);
 
         var healthy = engine.ShortestPathSql(SqlGraphPathTestSupport.Principal,

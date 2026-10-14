@@ -14,10 +14,11 @@ internal static class SqlNullDistinctRefusals
         await SqlLiteralFormsControls.InvalidAsync(database, engine);
         foreach (var clause in new[] { "score IS DISTINCT NULL", "score IS DISTINCT FROM", "score IS 'DISTINCT' FROM NULL",
             "score IS NOT DISTINCT FROM @absent", "score IS ISNULL", "score IS NOT NOTNULL",
-            "score 'ISNULL'", "score NOT ISNULL", "score = ++1", "score = +",
-            "score = +true", "score = +@absent", "score = + 1", "score = +79228162514264337593543950336",
+            "score 'ISNULL'", "score NOT ISNULL", "score = +",
+             "score = +79228162514264337593543950336",
+            "score = 0x1.0", "score = 0x1_0.0", "score = 0b1.0", "score = 0o1.0",
             "score = .e1", "score = ..5", "score = .5e+", "score = .5.0", "score = +.x", "score = -.x",
-            "score = 0x", "score = 0xG", "score = 0x1000000000000000000000000", "score = -0x1000000000000000000000000",
+            "score = 0xG",
             "label = E'\\u123'", "label = E'\\U00110000'", "label = E'\\uD800'",
             "label = E'\\uDC00'", "label = E'\\000'", "label = E'\\x00'", "label = E'\\xff'",
             "label = E'\\xc3'", "label = E'unterminated", "label = E'\\'" })
@@ -41,7 +42,8 @@ internal static class SqlNullDistinctRefusals
             await SqlNullDistinctPages.HealthyAsync(database.Database, database.Store, database.Partition, InitialRevision);
             await SqlNullOrderingRefusals.UnchangedAsync(database.Store, before, position, identity);
         }
-        foreach (var clause in new[] { "score = 0x1.0", "score = 0x1_0.0", "score = 0b1.0", "score = 0o1.0" })
+        foreach (var clause in new[] { "score = 0x", "score = 0x1000000000000000000000000", "score = -0x1000000000000000000000000",
+            "score = +true", "score = +@absent", "score = ++1" })
         {
             var request = new QueryRequest(database.Partition, SqlNullDistinctCases.Prefix + clause
                 + SqlNullDistinctCases.Tail, AllowFullScan: true);
@@ -51,6 +53,17 @@ internal static class SqlNullDistinctRefusals
             await SqlNullDistinctPages.HealthyAsync(database.Database, database.Store, database.Partition, InitialRevision);
             await SqlNullOrderingRefusals.UnchangedAsync(database.Store, before, position, identity);
         }
+        await HealthyAndCancelledAsync(database, engine, before, position, identity);
+    }
+
+    private static async Task HealthyAndCancelledAsync(TestDatabase database, QueryEngine engine,
+        string[] before, long position, byte[] identity)
+    {
+        var spacedPositive = new global::KeyLoad.QueryPage([new(Low, InitialRevision, LowProjection, RedactedFields: [])],
+            null, position, FullScan);
+        await SqlNullOrderingPages.EqualAsync(spacedPositive, engine.Execute(SqlNullOrderingProtocol.Reader,
+            new(database.Partition, SqlNullDistinctCases.Prefix + "score = + 1" + SqlNullDistinctCases.Tail, AllowFullScan: true)));
+        await SqlNullOrderingRefusals.UnchangedAsync(database.Store, before, position, identity);
         using var cancelled = new CancellationTokenSource();
         await cancelled.CancelAsync();
         foreach (var clause in new[] { SqlNullDistinctCases.All[First].Clause, SqlNullDistinctCases.NullClause,
@@ -121,6 +134,8 @@ internal static class SqlNullDistinctRefusals
     internal const long InitialRevision = 1;
     internal const long RepairedRevision = 3;
     private const string Low = "low";
+    private const string LowProjection = "{\"label\":\"low\"}";
+    private const string FullScan = "bounded-full-scan";
     private const string PutKind = "putDocument";
     private const string FaultJson = "{\"label\":\"low\",\"score\":true}";
     private const string HealthyJson = "{\"label\":\"low\",\"score\":1}";

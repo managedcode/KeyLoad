@@ -14,18 +14,18 @@ internal static class SqlOffsetRefusals
         await SqlDefaultJoinControls.InvalidAsync(database, engine);
         foreach (var (tail, code) in new[]
         {
-            ("LIMIT 1 OFFSET -1", ErrorCode.Validation),
-            ("LIMIT 1 OFFSET 2147483647", ErrorCode.Validation),
-            ("LIMIT 1 OFFSET 1 OFFSET 1", ErrorCode.UnsupportedCapability),
-            ("LIMIT 1 OFFSET @skip", ErrorCode.Validation),
-            ("OFFSET -1 ROWS FETCH FIRST ROW ONLY", ErrorCode.Validation),
-            ("OFFSET 2147483647 ROWS FETCH NEXT ROW ONLY", ErrorCode.Validation),
+            ("OFFSET -1 ROWS FETCH NEXT 1 ROW ONLY", ErrorCode.Validation),
+            ("OFFSET 2147483647 ROWS FETCH NEXT 1 ROW ONLY", ErrorCode.Validation),
+            ("OFFSET 1 ROWS FETCH NEXT 1 ROW ONLY OFFSET 1 ROWS", ErrorCode.Validation),
+            ("OFFSET @skip ROWS FETCH NEXT 1 ROW ONLY", ErrorCode.Validation),
+            ("OFFSET 2147483648 ROWS FETCH NEXT 1 ROW ONLY", ErrorCode.Validation),
             ("OFFSET 1 ROWS FETCH NEXT 0 ROWS ONLY", ErrorCode.Validation),
-            ("OFFSET 1 ROWS FETCH FIRST ROW ONLY FETCH NEXT ROW ONLY", ErrorCode.UnsupportedCapability),
-            ("OFFSET 1 ROWS FETCH NEXT ROW WITH TIES", ErrorCode.UnsupportedCapability)
+            ("OFFSET 1 ROWS FETCH FIRST 1 ROW ONLY FETCH NEXT 1 ROW ONLY", ErrorCode.Validation),
+            ("OFFSET 1 ROWS FETCH NEXT 1 ROW WITH TIES", ErrorCode.Validation),
+            ("LIMIT 1 OFFSET 1", ErrorCode.Validation)
         })
         {
-            var bad = request with { Sql = request.Sql.Replace("LIMIT 1 OFFSET 1", tail, StringComparison.Ordinal) };
+            var bad = request with { Sql = request.Sql.Replace("OFFSET 1 ROWS FETCH NEXT 1 ROW ONLY", tail, StringComparison.Ordinal) };
             await ErrorAsync(() => engine.Execute(SqlOffsetProtocol.Root, bad), code);
             await UnchangedAsync(database.Store, before, position, identity);
         }

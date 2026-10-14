@@ -19,6 +19,7 @@ internal static class ApiEndpoints
         BlobApi.Map(app);
         EventStreamApi.Map(app);
         MessagingApi.Map(app);
+        QueueDispatchApi.Map(app);
         GraphApi.Map(app);
         TimeSeriesApi.Map(app);
         QueryApi.Map(app);

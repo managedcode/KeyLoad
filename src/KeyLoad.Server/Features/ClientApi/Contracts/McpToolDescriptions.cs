@@ -115,6 +115,7 @@ internal static class McpToolDescriptions
             McpToolNames.PrincipalsConfigure => PrincipalsConfigure,
             McpToolNames.CredentialsConfigure => CredentialsConfigure,
             McpToolNames.AdminDispatch => AdminDispatch,
+            QueueDispatchControlProtocol.Tool => QueueDispatchControlProtocol.Description,
             McpToolNames.SubscriptionsConfigure => SubscriptionsConfigure,
             McpToolNames.SubscriptionsSeek => SubscriptionsSeek,
             McpToolNames.SubscriptionsReceive => SubscriptionsReceive,

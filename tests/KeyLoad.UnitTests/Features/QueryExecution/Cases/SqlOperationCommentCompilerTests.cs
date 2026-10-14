@@ -56,7 +56,7 @@ internal sealed class SqlOperationCommentCompilerTests
     [Test]
     public async Task AcSqlc003SelectAndExplainRetainRawSqlAndOriginalQueryOptions()
     {
-        foreach (var sql in new[] { SqlOperationCommentTestData.Select, SqlOperationCommentTestData.Explain })
+        foreach (var sql in new[] { SqlOperationCommentTestData.Select, SqlOperationCommentTestData.Top })
         {
             var parameters = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
             { [SqlOperationTestData.Status] = JsonSerializer.SerializeToElement(SqlOperationTestData.Open) };

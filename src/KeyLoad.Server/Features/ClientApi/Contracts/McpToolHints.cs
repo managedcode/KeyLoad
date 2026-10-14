@@ -73,6 +73,7 @@ internal readonly record struct McpToolHints(bool ReadOnly, bool Idempotent, boo
         OperationKind.ConfigurePrincipal => new(false, true, true),
         OperationKind.ConfigureApiKey => new(false, true, true),
         OperationKind.SetDispatch => new(false, true, true),
+        OperationKind.SetQueueDispatch => new(false, true, true),
         OperationKind.ConfigureSubscription => new(false, true, true),
         OperationKind.SeekSubscription => new(false, true, true),
         OperationKind.ReceiveSubscription => new(false, true, true),

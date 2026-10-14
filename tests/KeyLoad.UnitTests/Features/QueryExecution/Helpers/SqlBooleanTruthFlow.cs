@@ -25,7 +25,7 @@ internal static class SqlBooleanTruthFlow
                 foreach (var item in SqlBooleanTruthCases.All)
                 {
                     await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute(SqlNullOrderingProtocol.Reader,
-                        new(database.Partition, SqlBooleanTruthCases.Prefix + item.Clause + SqlBooleanTruthCases.Tail,
+                        new(database.Partition, SqlBooleanTruthCases.Prefix + item.Clause + SqlBooleanTruthCases.Tail, SqlBooleanTruthCases.Parameters(),
                             AllowFullScan: true))).Code).IsEqualTo(ErrorCode.PermissionDenied);
                     await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.ExecuteAst(SqlNullOrderingProtocol.Reader,
                         SqlBooleanTruthCases.Ast(database.Partition, item))).Code).IsEqualTo(ErrorCode.PermissionDenied);

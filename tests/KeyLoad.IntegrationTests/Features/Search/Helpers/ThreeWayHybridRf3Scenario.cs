@@ -68,34 +68,17 @@ internal sealed record ThreeWayHybridRf3Scenario(PartitionRef Partition)
 
     internal SqlGraphSearchRequest SqlRequest(bool restricted = false, bool expansion = true, bool allZero = false, bool labeled = false)
     {
-        var statement = "SEARCH FROM \"three-way-documents\" TEXT body MATCH 'signal' WEIGHT "
-            + (allZero ? "0" : "2") + " VECTOR embedding MATCH @vector SPACE "
-            + "(\"three-way-space\",2,Cosine,\"three-way-model\",\"1\") WEIGHT " + (allZero ? "0" : "1") + " ";
-        if (restricted)
-        {
-            statement += "SCOPE GRAPH \"three-way-graph\" SEEDS ((\"three-way-projects\",'scope-root')) "
-                + "DEPTH 2 VERTICES 30 EDGES 60 ";
-        }
-        statement += "RETRIEVE GRAPH \"three-way-graph\" SEEDS ((\"three-way-projects\",'retrieve-root')) "
-            + "DEPTH 4 VERTICES 30 EDGES 60 ";
-        if (labeled)
-        {
-            statement += "LABELS ('related') ";
-        }
-        statement += "WEIGHT " + (allZero ? "0" : SqlGraphWeight) + " ";
-        if (expansion)
-        {
-            statement += "EXPAND GRAPH \"three-way-expansion-graph\" DEPTH 1 VERTICES 20 EDGES 40 ";
-        }
-        if (restricted)
-        {
-            statement += "ALLOW IDS ('b','c','d') ";
-        }
-        else if (allZero)
-        {
-            statement += "ALLOW IDS () ";
-        }
-        statement += "LIMIT 10 FUSION 10";
+        var scope = restricted
+            ? "GRAPH_SCOPE('three-way-graph',GRAPH_SEEDS(ENTITY('three-way-projects','scope-root')),2,30,60,NULL)" : "NULL";
+        var labels = labeled ? "GRAPH_LABELS('related')" : "NULL";
+        var expanded = expansion ? "GRAPH_EXPANSION('three-way-expansion-graph',1,20,40,NULL)" : "NULL";
+        var allowed = restricted ? "GRAPH_IDS('b','c','d')" : allZero ? "GRAPH_IDS()" : "NULL";
+        var statement = "SELECT * FROM GRAPH_SEARCH('three-way-documents', TEXT_MATCH('/body','signal',"
+            + (allZero ? "0" : "2") + "), VECTOR_MATCH('/embedding',@vector,"
+            + "VECTOR_SPACE('three-way-space',2,'Cosine','three-way-model','1')," + (allZero ? "0" : "1") + "), "
+            + scope + ", GRAPH_RETRIEVER('three-way-graph',GRAPH_SEEDS(ENTITY('three-way-projects','retrieve-root')),"
+            + "4,30,60," + labels + "," + (allZero ? "0" : SqlGraphWeight) + "), "
+            + expanded + ", " + allowed + ", 10, 10)";
         var parameters = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
         {
             [VectorParameter] = JsonSerializer.SerializeToElement(new[] { 1f, 0f })

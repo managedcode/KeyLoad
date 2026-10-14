@@ -7,18 +7,19 @@ internal static class SqlUnicodeIdentifierControls
         var image = SqlInnerJoinRetainedIdentityFlow.Image(database.Store);
         var position = database.Store.Position;
         var identity = JsonDefaults.Serialize(database.Store.Identity);
-        foreach (var clause in new[] { "U&\"score\\D800\" = 1",
-            "U&\"score\\DC00\" = 1",
-            "U&\"score\\0000\" = 1",
-            "U&\"score\\+110000\" = 1",
-            "U&\"score\\zzzz\" = 1",
-            "U&\"score",
-            "U&\"score\" UESCAPE '0' = 1",
-            "U&\"score\" UESCAPE '!!' = 1",
-            "U&\"score\" UESCAPE '\u00e9' = 1" })
+        foreach (var (clause, code) in new[]
+        { ("U&\"score\\D800\" = 1", ErrorCode.UnsupportedCapability),
+            ("U&\"score\\DC00\" = 1", ErrorCode.UnsupportedCapability),
+            ("U&\"score\\0000\" = 1", ErrorCode.UnsupportedCapability),
+            ("U&\"score\\+110000\" = 1", ErrorCode.UnsupportedCapability),
+            ("U&\"score\\zzzz\" = 1", ErrorCode.UnsupportedCapability),
+            ("U&\"score", ErrorCode.Validation),
+            ("U&\"score\" UESCAPE '0' = 1", ErrorCode.Validation),
+            ("U&\"score\" UESCAPE '!!' = 1", ErrorCode.Validation),
+            ("U&\"score\" UESCAPE 'é' = 1", ErrorCode.Validation) })
         {
             await RefuseAsync(database, engine, SqlNullDistinctCases.Prefix + clause + SqlNullDistinctCases.Tail,
-            ErrorCode.Validation, image, position, identity);
+            code, image, position, identity);
         }
         foreach (var window in new[] { "LIMIT U&\"1\"", "OFFSET U&\"1\" LIMIT 1", "FETCH FIRST U&\"1\" ROW ONLY" })
         {
@@ -65,9 +66,9 @@ internal static class SqlUnicodeIdentifierControls
         var image = SqlInnerJoinRetainedIdentityFlow.Image(store);
         var position = store.Position;
         var identity = JsonDefaults.Serialize(store.Identity);
-        foreach (var window in new[] { "LIMIT 5 OFFSET 0", "OFFSET 0 ROWS FETCH FIRST 5 ROWS ONLY" })
+        foreach (var window in new[] { "OFFSET 0 ROWS FETCH FIRST 5 ROWS ONLY", "OFFSET 0 ROWS FETCH NEXT 5 ROWS ONLY" })
         {
-            var request = new QueryRequest(partition, SqlNullDistinctCases.Prefix + SqlUnicodeIdentifierCases.Clause
+            var request = new QueryRequest(partition, SqlNullDistinctCases.WindowPrefix + SqlUnicodeIdentifierCases.Clause
                 + OrderBy + window, AllowFullScan: true);
             await SqlNullOrderingPages.EqualAsync(Page(position, lowRevision), engine.Execute(SqlNullOrderingProtocol.Reader, request));
             await SqlNullOrderingRefusals.UnchangedAsync(store, image, position, identity);
@@ -77,12 +78,12 @@ internal static class SqlUnicodeIdentifierControls
     private static global::KeyLoad.QueryPage Page(long position, long revision)
         => new([new global::KeyLoad.QueryRow(Low, revision, LowProjection, RedactedFields: [])], null, position, FullScan);
 
-    private const string ProjectionPrefix = "SELECT U&\"la\\0062el\" AS U&\"la\\0062el\" FROM U&\"null_\\006frdering\" WHERE ";
+    private const string ProjectionPrefix = "SELECT TOP (5) \"label\" AS \"label\" FROM \"null_ordering\" WHERE ";
     private const string Argument = "argument";
     private const string Low = "low";
     private const string LowProjection = "{\"label\":\"low\"}";
     private const string OrderBy = " ORDER BY label ASC ";
     private const string FullScan = "bounded-full-scan";
-    private const string ParameterClause = "U&\"sc\\006fre\" = 1 AND @argument = 1";
+    private const string ParameterClause = "\"score\" = 1 AND @argument = 1";
     private const decimal UnitValue = 1m;
 }

@@ -20,13 +20,14 @@ internal static class SqlNullOrderingRefusals
             await UnchangedAsync(database.Store, image, position, identity);
             await SqlNullOrderingPages.HealthyAsync(database.Database, database.Store, database.Partition, SqlNullOrderingProtocol.Root);
         }
-        var first = engine.Execute(SqlNullOrderingProtocol.Root, good with { Sql = good.Sql.Replace("LIMIT 5", "LIMIT 2", StringComparison.Ordinal) });
+        var first = engine.ExecuteAst(SqlNullOrderingProtocol.Root, SqlNullOrderingProtocol.Ast(database.Partition, false, true, 2));
         await Assert.That(first.Cursor).IsNotNull();
         var changed = SqlNullOrderingProtocol.Ast(database.Partition, false, false, 2) with { Cursor = first.Cursor };
         await ErrorAsync(() => engine.ExecuteAst(SqlNullOrderingProtocol.Root, changed), ErrorCode.CursorExpired);
         using var cancelled = new CancellationTokenSource();
         await cancelled.CancelAsync();
-        foreach (var request in new[] { good, SqlNullOrderingProtocol.Using(database.Partition, false, true) })
+        foreach (var request in new[] { SqlNullOrderingProtocol.Native(database.Partition, false),
+            SqlNullOrderingProtocol.Native(database.Partition, true) })
         {
             var error = Assert.ThrowsExactly<OperationCanceledException>(() => engine.Execute(SqlNullOrderingProtocol.Root, request,
                 cancellationToken: cancelled.Token));
@@ -43,9 +44,9 @@ internal static class SqlNullOrderingRefusals
         var identity = JsonDefaults.Serialize(database.Store.Identity);
         var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
         await ErrorAsync(() => engine.Execute(SqlNullOrderingProtocol.Reader,
-            SqlNullOrderingProtocol.Sql(database.Partition, false, true)), ErrorCode.PermissionDenied);
+            SqlNullOrderingProtocol.Native(database.Partition, false)), ErrorCode.PermissionDenied);
         await ErrorAsync(() => engine.Execute(SqlNullOrderingProtocol.Reader,
-            SqlNullOrderingProtocol.Using(database.Partition, false, true)), ErrorCode.PermissionDenied);
+            SqlNullOrderingProtocol.Native(database.Partition, true)), ErrorCode.PermissionDenied);
         await ErrorAsync(() => engine.Execute(SqlNullOrderingProtocol.Reader,
             new(database.Partition, SqlAllPages.DuplicateSql, AllowFullScan: true)), ErrorCode.PermissionDenied);
         await ErrorAsync(() => engine.Execute(SqlNullOrderingProtocol.Reader,
@@ -69,20 +70,20 @@ internal static class SqlNullOrderingRefusals
         var image = SqlInnerJoinRetainedIdentityFlow.Image(database.Store);
         var cut = database.Store.Position;
         var identity = JsonDefaults.Serialize(database.Store.Identity);
-        var good = SqlNullOrderingProtocol.Sql(database.Partition, false, true);
+        var good = SqlNullOrderingProtocol.Native(database.Partition, false);
         foreach (var (direction, code) in new[]
         {
             (" USING ", ErrorCode.Validation), (" USING '>' ", ErrorCode.Validation),
-            (" USING @direction ", ErrorCode.Validation), (" USING = ", ErrorCode.UnsupportedCapability),
-            (" USING <= ", ErrorCode.UnsupportedCapability), (" ASC USING < ", ErrorCode.UnsupportedCapability),
-            (" USING < DESC ", ErrorCode.UnsupportedCapability)
+            (" USING @direction ", ErrorCode.Validation), (" USING = ", ErrorCode.Validation),
+            (" USING <= ", ErrorCode.Validation), (" ASC USING < ", ErrorCode.Validation),
+            (" USING < DESC ", ErrorCode.Validation)
         })
         {
             await ErrorAsync(() => engine.Execute(SqlNullOrderingProtocol.Root,
-                good with { Sql = good.Sql.Replace(SqlNullOrderingProtocol.Ascending, direction, StringComparison.Ordinal) }), code);
+                good with { Sql = good.Sql.Replace(SqlNullOrderingProtocol.NativeAscending, direction, StringComparison.Ordinal) }), code);
             await UnchangedAsync(database.Store, image, cut, identity);
-            await SqlNullOrderingPages.EqualAsync(SqlNullOrderingPages.Expected(false, true, cut),
-                engine.Execute(SqlNullOrderingProtocol.Root, SqlNullOrderingProtocol.Using(database.Partition, false, true)));
+            await SqlNullOrderingPages.HealthyAsync(database.Database, database.Store,
+                database.Partition, SqlNullOrderingProtocol.Root);
             await UnchangedAsync(database.Store, image, cut, identity);
         }
     }

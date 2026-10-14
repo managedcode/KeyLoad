@@ -7,25 +7,26 @@ internal static class SqlUnicodeStringControls
         var image = SqlInnerJoinRetainedIdentityFlow.Image(database.Store);
         var position = database.Store.Position;
         var identity = JsonDefaults.Serialize(database.Store.Identity);
-        foreach (var clause in new[] { "label = U&'\\123'",
-            "label = U&'\\+110000'",
-            "label = U&'\\D800'",
-            "label = U&'\\DC00'",
-            "label = U&'\\D800x\\DC00'",
-            "label = U&'\\0000'",
-            "label = U&'\\+000000'",
-            "label = U&'\\g000'",
-            "label = U&'unterminated",
-            "label = U&'low' UESCAPE",
-            "label = U&'low' UESCAPE ''",
-            "label = U&'low' UESCAPE '!!'",
-            "label = U&'low' UESCAPE '+'",
-            "label = U&'low' UESCAPE 'a'",
-            "label = U&'low' UESCAPE ' '",
-            "label = U&'low' UESCAPE 'é'" })
+        foreach (var (clause, code) in new[]
+        { ("label = U&'\\123'", ErrorCode.UnsupportedCapability),
+            ("label = U&'\\+110000'", ErrorCode.UnsupportedCapability),
+            ("label = U&'\\D800'", ErrorCode.UnsupportedCapability),
+            ("label = U&'\\DC00'", ErrorCode.UnsupportedCapability),
+            ("label = U&'\\D800x\\DC00'", ErrorCode.UnsupportedCapability),
+            ("label = U&'\\0000'", ErrorCode.UnsupportedCapability),
+            ("label = U&'\\+000000'", ErrorCode.UnsupportedCapability),
+            ("label = U&'\\g000'", ErrorCode.UnsupportedCapability),
+            ("label = U&'unterminated", ErrorCode.Validation),
+            ("label = U&'low' UESCAPE", ErrorCode.Validation),
+            ("label = U&'low' UESCAPE ''", ErrorCode.Validation),
+            ("label = U&'low' UESCAPE '!!'", ErrorCode.Validation),
+            ("label = U&'low' UESCAPE '+'", ErrorCode.Validation),
+            ("label = U&'low' UESCAPE 'a'", ErrorCode.Validation),
+            ("label = U&'low' UESCAPE ' '", ErrorCode.Validation),
+            ("label = U&'low' UESCAPE 'é'", ErrorCode.Validation) })
         {
             await RefuseAsync(database, engine, SqlNullDistinctCases.Prefix + clause + SqlNullDistinctCases.Tail,
-            ErrorCode.Validation, image, position, identity);
+            code, image, position, identity);
         }
         await TokenBoundAsync(database, engine, image, position, identity);
         await CancelledAsync(database, engine, image, position, identity);

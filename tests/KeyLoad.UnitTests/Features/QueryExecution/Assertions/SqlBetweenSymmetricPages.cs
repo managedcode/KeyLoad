@@ -8,7 +8,7 @@ internal static class SqlBetweenSymmetricPages
         global::KeyLoad.Storage.ZoneTree.ZoneTreeStore store, PartitionRef partition, long lowRevision)
     {
         var engine = new QueryEngine(owner, UnitExecutionOptions.QueryExecution());
-        await Assert.That(engine.Capabilities.ReadProfiles.Contains(SqlBetweenSymmetricCases.Profile)).IsTrue();
+        await Assert.That(engine.Capabilities.ReadProfiles.Contains(SqlBetweenSymmetricCases.Profile)).IsFalse();
         var image = SqlInnerJoinRetainedIdentityFlow.Image(store);
         var position = store.Position;
         var identity = JsonDefaults.Serialize(store.Identity);

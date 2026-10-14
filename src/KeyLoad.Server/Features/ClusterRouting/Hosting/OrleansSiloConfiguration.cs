@@ -76,6 +76,7 @@ internal static class OrleansSiloConfiguration
         { builder.Services.AddSingleton(remoteAnnReads); }
         builder.UseOrleans(silo => Configure(silo, options, partition.Configuration, address, runtimeOptions.Membership.Value,
             runtimeOptions.Core.RuntimeJournal, runtimeOptions.DurableJobs, runtimeOptions.GrainRouting, runtimeOptions.Core.DatabaseLimits, localhostClustering));
+        global::KeyLoad.Server.Features.ClusterRouting.OrleansNativeHostedServiceRegistration.Guard(builder.Services);
         return builder.Build();
     }
 

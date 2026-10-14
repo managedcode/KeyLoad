@@ -8,7 +8,7 @@ internal sealed record PostgresRf3State(McpPersistedIdentity Writer, McpPersiste
 {
     internal static PartitionRef Partition => PostgresRf3Protocol.Partition;
     internal string Sql => Dialect == PostgresRf3Protocol.JoinDialect
-        ? RelationalSqlRf3JoinBudgetData.Sql : ScalarSql;
+        ? JoinSql : ScalarSql;
     internal QueryRequest Query => new(Partition, Sql, AllowFullScan: true, QueryDialectVersion: Dialect);
     internal SqlOperationRequest Operation => new(Partition, Sql, AllowFullScan: true, QueryDialectVersion: Dialect);
     internal static readonly EntityRef Left = new(Partition, RelationalSqlRf3JoinBudgetData.LeftCollection, OrderId);
@@ -17,6 +17,9 @@ internal sealed record PostgresRf3State(McpPersistedIdentity Writer, McpPersiste
     internal const string CustomerId = "customer-native";
     internal const string LeftJson = "{\"customer_id\":\"customer-native\",\"detail\":\"small\",\"order_id\":\"order-native\"}";
     internal const string RightJson = "{\"id\":\"customer-native\",\"name\":\"Ada\"}";
-    internal const string ScalarSql = "SELECT * FROM budgetorders ORDER BY order_id ASC LIMIT 10";
+    internal const string ScalarSql = "SELECT TOP (10) * FROM budgetorders ORDER BY order_id ASC";
+    private const string JoinSql = "SELECT TOP (10) l.order_id AS order_id, l.detail AS left_detail, "
+        + "r.name AS right_name, r.id AS customer_id FROM budgetorders AS l "
+        + "INNER JOIN budgetcustomers AS r ON l.customer_id = r.id ORDER BY l.order_id ASC";
     internal const string JoinedJson = "{\"order_id\":\"order-native\",\"left_detail\":\"small\",\"right_name\":\"Ada\",\"customer_id\":\"customer-native\"}";
 }

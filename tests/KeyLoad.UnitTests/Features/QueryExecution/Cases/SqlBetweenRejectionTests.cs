@@ -29,7 +29,9 @@ internal sealed class SqlBetweenRejectionTests
         await RejectValidation(MissingUpper);
         await RejectValidation(RepeatedNot);
         await RejectValidation(MissingSymmetricUpper);
-        await RejectValidation(Arithmetic);
+        var arithmetic = Assert.ThrowsExactly<KeyLoadException>(() =>
+            new SqlParser(Arithmetic, UnitExecutionOptions.DatabaseLimits(new()), UnitExecutionOptions.QueryExecution()).Parse());
+        await Assert.That(arithmetic.Code).IsEqualTo(ErrorCode.UnsupportedCapability);
         var second = Assert.ThrowsExactly<KeyLoadException>(() => new SqlParser(SecondStatement, UnitExecutionOptions.DatabaseLimits(new()), UnitExecutionOptions.QueryExecution()).Parse());
         await Assert.That(second.Code).IsEqualTo(ErrorCode.UnsupportedCapability);
     }

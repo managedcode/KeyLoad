@@ -15,6 +15,8 @@ internal sealed class SqlGraphPathRejectionTests
     private const string SelectId = "SELECT id";
     private const string SqlGraphWithNestedComment = "/* outer /* nested */ outer */ ";
     private const string ExistingCollection = "orders";
+    private const string UnsupportedDetail = "The SQL statement or execution clause is unsupported.";
+    private const string ParameterDetail = "A named SQL graph-path parameter is missing or has the wrong scalar type.";
 
     [Test]
     public async Task UnsupportedVersionRejectsWithoutReadThenRetriesOnSameEngine()
@@ -59,9 +61,9 @@ internal sealed class SqlGraphPathRejectionTests
         var alternate = SqlGraphPathTestSupport.LiteralSql.Replace(SelectAll, SelectId, StringComparison.Ordinal);
 
         await SqlGraphPathRejectionFlowAssertions.AssertRejectThenRetryAsync(database, engine,
-            SqlGraphPathTestSupport.Request(database, extra), token);
+            SqlGraphPathTestSupport.Request(database, extra), ErrorCode.UnsupportedCapability, UnsupportedDetail, token);
         await SqlGraphPathRejectionFlowAssertions.AssertRejectThenRetryAsync(database, engine,
-            SqlGraphPathTestSupport.Request(database, alternate), token);
+            SqlGraphPathTestSupport.Request(database, alternate), ErrorCode.UnsupportedCapability, UnsupportedDetail, token);
     }
 
     [Test]
@@ -80,11 +82,11 @@ internal sealed class SqlGraphPathRejectionTests
             ("edges", SqlGraphPathTestSupport.MaximumEdges), ("label", SqlGraphPathTestSupport.Label));
 
         await SqlGraphPathRejectionFlowAssertions.AssertRejectThenRetryAsync(database, engine,
-            SqlGraphPathTestSupport.Request(database, ValidSql, missing), token);
+            SqlGraphPathTestSupport.Request(database, ValidSql, missing), ErrorCode.Validation, ParameterDetail, token);
         await SqlGraphPathRejectionFlowAssertions.AssertRejectThenRetryAsync(database, engine,
-            SqlGraphPathTestSupport.Request(database, ValidSql, wrongString), token);
+            SqlGraphPathTestSupport.Request(database, ValidSql, wrongString), ErrorCode.Validation, ParameterDetail, token);
         await SqlGraphPathRejectionFlowAssertions.AssertRejectThenRetryAsync(database, engine,
-            SqlGraphPathTestSupport.Request(database, ValidSql, wrongInteger), token);
+            SqlGraphPathTestSupport.Request(database, ValidSql, wrongInteger), ErrorCode.Validation, ParameterDetail, token);
     }
 
     [Test]

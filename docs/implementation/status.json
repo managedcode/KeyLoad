@@ -2019,6 +2019,38 @@
         "reason": "Two actual local-image allowlists do not admit the expanded cohort; current exact-source Linux CI remains mandatory."
       },
       "remaining": "Fix the actual logger/cold identity oracles and native startup/SQL failures as a coherent batch while independent models continue; integrate selected ScriptDOM replacement and retire replaced grammar. Required exact-source Linux full suites/RF3, meaningful functional coverage, fault/endurance/performance remain mandatory."
+    },
+    "currentStageR46": {
+      "status": "source-integrated; local build/format passed; focused operation qualification failed; no new task completion",
+      "nativeCompilerAnalyzer": {
+        "errors": 0,
+        "warnings": 0,
+        "original": "TestResults/stage61-native-join/stage64-r46-current-tsql-native-repaired-intake.root-r47-formatted-full-replacement-and-native-host-ownership-final-quality.original.json"
+      },
+      "releaseSolutionBuild": {
+        "projects": 27,
+        "errors": 0,
+        "warnings": 0,
+        "scope": "local development",
+        "sandboxFailures": "MSBuild child IPC SocketException Permission denied; required local IPC execution succeeded"
+      },
+      "formatterVerification": "dotnet format KeyLoad.slnx --verify-no-changes --no-restore: exit0",
+      "freshUnitDiscovery": {
+        "nativeCases": 3874,
+        "original": "TestResults/stage61-native-join/stage64-r46-unit-full-native-census.original.json"
+      },
+      "focusedUnit": {
+        "total": 395,
+        "passed": 330,
+        "failed": 65,
+        "skipped": 0,
+        "duration": "2m57s850ms",
+        "configuredNativeSlots": 50,
+        "originalTrx": "TestResults/stage61-native-join/stage64-r46-focused-unit-runtime/KeyLoad.UnitTests_net10.0_arm64.trx",
+        "failures": "TestResults/stage61-native-join/stage64-r46-focused-unit-native-failures.original.json",
+        "fullSuiteCoverageOrLinuxQualification": false
+      },
+      "remaining": "Repair grouped scalar SQL/graph-vector/native cluster failures; run exact-source recovery and Aspire RF3 SDK/MCP/Linux gates. No full SQL, readiness, coverage or performance claim."
     }
   },
   "STAGE63-NATIVE-COMPOSITION-001": {
@@ -50315,7 +50347,7 @@
       "registryRepair": "delivered_separately_in_86e58128a3c6e9b246c19425d1e7093b9657a5ba_not_new_runtime_proof"
     },
     "remaining": [
-      "Complete PostgreSQL18 command-by-command syntax and typed execution",
+      "Complete owner-selected T-SQL/ScriptDOM grammar-to-typed execution conformance; PostgreSQL wire/Npgsql interoperability remains a separate gate",
       "Relational DDL/DML joins expressions aggregates windows transactions and every model",
       "Accepted native authentication session transaction gateway and numeric bounds contracts",
       "Real Npgsql psql DBeaver client interoperability on RF3",

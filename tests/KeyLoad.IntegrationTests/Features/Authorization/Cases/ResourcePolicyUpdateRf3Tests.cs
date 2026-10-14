@@ -14,6 +14,7 @@ internal sealed class ResourcePolicyUpdateRf3Tests(ClusterFixture fixture)
         using var deadline = McpCallerDeadline.Create();
         var state = await WarmAsync(deadline.Token);
         await PolicyEpochPublicCold.RunAsync(fixture, state, deadline.Token);
+        await QueryOnlyEpochR46Flow.RunAsync(fixture, state, deadline.Token);
     }
 
     private async Task<PolicyEpochPublicState> WarmAsync(CancellationToken token)

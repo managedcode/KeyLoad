@@ -16,7 +16,10 @@ internal static class AdapterVectorWholeFlow
     internal const string Collection = "vectors";
     internal const string FirstJson = """{"value":"first"}""";
     internal const string SecondJson = """{"value":"second"}""";
-    internal const string Sql = "SEARCH FROM vectors VECTOR embedding MATCH @vector SPACE (\"equivalence\",2,Cosine,\"model\",\"version\") WEIGHT 1 SCOPE GRAPH \"vector-scope\" SEEDS ((vectors,'a'),(vectors,'b')) DEPTH 0 VERTICES 2 EDGES 1 LIMIT 10 FUSION 60";
+    internal const string Sql = "SELECT * FROM GRAPH_SEARCH('vectors', NULL, "
+        + "VECTOR_MATCH('/embedding',@vector,VECTOR_SPACE('equivalence',2,'Cosine','model','version'),1), "
+        + "GRAPH_SCOPE('vector-scope',GRAPH_SEEDS(ENTITY('vectors','a'),ENTITY('vectors','b')),0,2,1,NULL), "
+        + "NULL, NULL, NULL, 10, 60)";
     internal static VectorSpace Space() => new("equivalence", 2, DistanceMetric.Cosine, "model", "version");
     internal static GraphSearchRequest Typed(TestDatabase database, bool invalid = false)
         => new(1, new(database.Partition, Collection, VectorField: "/embedding", Vector: invalid ? [1] : [1, 0], Space: Space()), Scope: new(new(ScopeGraph,

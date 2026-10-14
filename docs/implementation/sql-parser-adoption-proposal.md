@@ -1,5 +1,8 @@
 # SQL parser adoption proposal — KL-045 / KL-047
 
+Current syntax authority: [ADR-130](../ADR/ADR-130-microsoft-scriptdom-tsql.md), [Microsoft ScriptDOM requirements](../Features/QueryExecution/ScriptDom.md) and [active T-SQL inventory](sql-client-conformance.json). PostgreSQL grammar/parser candidate selections and CALL/lexical implementation plans in this prior record are historical and inactive. Preserve exact original source/results and generic full-operation acceptance; they do not qualify T-SQL. Genuine PostgreSQL wire/Npgsql interoperability and benchmark workloads remain current independent contracts. No new parser, fallback or package adoption is authorized here.
+
+
 Status: proposal N only. No dependency is selected or installed. Owner approval is required for every new library adoption; Microsoft libraries are preferred when they fit the required contract.
 
 ## Concrete comparison

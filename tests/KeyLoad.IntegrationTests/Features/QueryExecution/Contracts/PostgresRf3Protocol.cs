@@ -8,7 +8,7 @@ internal static class PostgresRf3Protocol
     internal const string ResultColumn = "keyload_result";
     internal const string JsonbType = "jsonb";
     internal const string Request = "request";
-    internal const string CommitSql = "CALL keyload_documents_commit($1)";
+    internal const string CommitSql = "EXEC keyload_documents_commit $1";
     internal const string InvalidResult = "The native SQL result is incomplete.";
     internal const int OneColumn = 1;
     internal const int FirstColumn = 0;

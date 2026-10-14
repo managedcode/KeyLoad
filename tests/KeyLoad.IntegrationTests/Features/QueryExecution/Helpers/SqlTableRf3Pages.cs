@@ -36,9 +36,9 @@ internal static class SqlTableRf3Pages
             [new(PostgresRf3State.OrderId, PostgresRf3Protocol.SeedRevision, PostgresRf3State.LeftJson,
                 RedactedFields: [])], null, actual.CutPosition, FullScan), actual);
 
-    internal const string TableSql = "TABLE budgetorders ORDER BY order_id LIMIT 10";
-    internal const string FetchSql = "TABLE budgetorders ORDER BY order_id OFFSET 0 ROWS FETCH FIRST 10 ROWS ONLY";
-    internal const string SelectSql = "SELECT * FROM budgetorders ORDER BY order_id LIMIT 10";
+    internal const string TableSql = "SELECT TOP (10) * FROM budgetorders ORDER BY order_id";
+    internal const string FetchSql = "SELECT * FROM budgetorders ORDER BY order_id OFFSET 0 ROWS FETCH NEXT 10 ROWS ONLY";
+    internal const string SelectSql = "SELECT ALL TOP (10) * FROM budgetorders ORDER BY order_id";
     private const string Collection = "budgetorders";
     private const string Star = "*";
     private const string OrderPath = "/order_id";

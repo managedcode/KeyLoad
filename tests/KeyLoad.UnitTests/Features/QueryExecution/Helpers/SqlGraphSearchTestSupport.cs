@@ -30,17 +30,11 @@ internal static class SqlGraphSearchTestSupport
     internal static string RetrieverSql(string graph = Graph, string collection = Collection,
         string? weight = null, string? allowedIds = null)
     {
-        var sql = $"SEARCH FROM \"{collection}\" RETRIEVE GRAPH \"{graph}\" SEEDS ((\"{Projects}\",'{Root}')) "
-            + $"DEPTH {Depth} VERTICES {Vertices} EDGES {Edges}";
-        if (weight is not null)
-        {
-            sql += $" WEIGHT {weight}";
-        }
-        if (allowedIds is not null)
-        {
-            sql += $" ALLOW IDS ({allowedIds})";
-        }
-        return sql + $" LIMIT {Limit} FUSION {Fusion}";
+        var graphWeight = weight ?? "1";
+        var allowed = allowedIds is null ? "NULL" : $"GRAPH_IDS({allowedIds})";
+        return $"SELECT * FROM GRAPH_SEARCH('{collection}', NULL, NULL, NULL, "
+            + $"GRAPH_RETRIEVER('{graph}', GRAPH_SEEDS(ENTITY('{Projects}','{Root}')), "
+            + $"{Depth}, {Vertices}, {Edges}, NULL, {graphWeight}), NULL, {allowed}, {Limit}, {Fusion})";
     }
 
     internal static VectorSpace Space()

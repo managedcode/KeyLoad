@@ -4,11 +4,11 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 
 internal static class SqlInnerJoinRejectionFixture
 {
-    internal const string HealthySql = "SELECT l.order_id AS order_id, r.name AS customer_name, l.total AS total "
-        + "FROM orders AS l INNER JOIN customers AS r ON l.customer_id = r.id ORDER BY l.order_id ASC LIMIT 10";
-    internal const string SelectFrom = "SELECT l.order_id AS order_id FROM orders AS l ";
+    internal const string HealthySql = "SELECT TOP (10) l.order_id AS order_id, r.name AS customer_name, l.total AS total "
+        + "FROM orders AS l INNER JOIN customers AS r ON l.customer_id = r.id ORDER BY l.order_id ASC";
+    internal const string SelectFrom = "SELECT TOP (10) l.order_id AS order_id FROM orders AS l ";
     internal const string Join = "INNER JOIN customers AS r ON l.customer_id = r.id ";
-    internal const string Order = "ORDER BY l.order_id ASC LIMIT 10";
+    internal const string Order = "ORDER BY l.order_id ASC";
     internal const string Root = "root";
     internal const string LeftJson = "{\"order_id\":\"order\",\"customer_id\":\"customer\",\"total\":7,\"quantity\":1}";
     internal const string RightJson = "{\"id\":\"customer\",\"name\":\"Ada\",\"alternate\":\"customer\",\"quantity\":1}";

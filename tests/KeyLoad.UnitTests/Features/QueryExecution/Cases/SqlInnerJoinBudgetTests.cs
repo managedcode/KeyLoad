@@ -9,18 +9,18 @@ internal sealed class SqlInnerJoinBudgetTests
     private const string Left = "orders";
     private const string Right = "customers";
     private const string HealthyLeft = "healthyorders";
-    private const string Sql = "SELECT l.order_id AS order_id, r.name AS name "
+    private const string Sql = "SELECT TOP (10) l.order_id AS order_id, r.name AS name "
         + "FROM orders AS l INNER JOIN customers AS r ON l.customer_id = r.id "
-        + "ORDER BY l.order_id ASC LIMIT 10";
-    private const string TwoRowSql = "SELECT l.order_id AS order_id, r.name AS name "
+        + "ORDER BY l.order_id ASC";
+    private const string TwoRowSql = "SELECT TOP (2) l.order_id AS order_id, r.name AS name "
         + "FROM orders AS l INNER JOIN customers AS r ON l.customer_id = r.id "
-        + "ORDER BY l.order_id ASC LIMIT 2";
-    private const string ThreeRowSql = "SELECT l.order_id AS order_id, r.name AS name "
+        + "ORDER BY l.order_id ASC";
+    private const string ThreeRowSql = "SELECT TOP (3) l.order_id AS order_id, r.name AS name "
         + "FROM orders AS l INNER JOIN customers AS r ON l.customer_id = r.id "
-        + "ORDER BY l.order_id ASC LIMIT 3";
-    private const string HealthySql = "SELECT l.order_id AS order_id, r.name AS name "
+        + "ORDER BY l.order_id ASC";
+    private const string HealthySql = "SELECT TOP (10) l.order_id AS order_id, r.name AS name "
         + "FROM healthyorders AS l INNER JOIN customers AS r ON l.customer_id = r.id "
-        + "ORDER BY l.order_id ASC LIMIT 10";
+        + "ORDER BY l.order_id ASC";
     private const int Dialect = 2;
     private const int ExactWork = 5;
     private const int ExpectedLeftRows = 3;

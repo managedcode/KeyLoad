@@ -7,9 +7,8 @@ internal static class SqlOffsetPages
     internal static async Task HealthyAsync(global::KeyLoad.Core.DatabaseEngine owner,
         global::KeyLoad.Storage.ZoneTree.ZoneTreeStore store, PartitionRef partition, string principal)
     {
-        foreach (var window in new[] { "LIMIT 1 OFFSET 1", "OFFSET 1 ROW FETCH FIRST ROW ONLY",
-            "OFFSET 1 ROWS FETCH NEXT 1 ROW ONLY", "OFFSET 1 FETCH FIRST 1 ROWS ONLY", "LIMIT 0_1 OFFSET 0_1",
-            "OFFSET 0_1 ROWS FETCH NEXT 0_1 ROW ONLY" })
+        foreach (var window in new[] { "OFFSET 1 ROW FETCH FIRST 1 ROW ONLY",
+            "OFFSET 1 ROWS FETCH NEXT 1 ROW ONLY" })
         { await WindowAsync(owner, store, partition, principal, window); }
         await SqlTablePages.HealthyAsync(owner, store, partition, principal);
         await SqlOrdinalPages.HealthyAsync(owner, store, partition, principal);
@@ -20,7 +19,7 @@ internal static class SqlOffsetPages
         var engine = new QueryEngine(owner, UnitExecutionOptions.QueryExecution());
         await ManifestAsync(engine, owner.Limits);
         var sql = SqlOffsetProtocol.ScalarRequest(partition) with
-        { Sql = SqlOffsetProtocol.ScalarSql.Replace("LIMIT 1 OFFSET 1", window, StringComparison.Ordinal) };
+        { Sql = SqlOffsetProtocol.ScalarSql.Replace("OFFSET 1 ROWS FETCH NEXT 1 ROW ONLY", window, StringComparison.Ordinal) };
         var ast = SqlOffsetProtocol.Scalar(partition);
         var sqlPage = engine.Execute(principal, sql);
         var astPage = engine.ExecuteAst(principal, ast);
@@ -38,16 +37,14 @@ internal static class SqlOffsetPages
         await ScalarAsync(astPage, "d", """{"title":"fourth"}""", store.Position, final: true);
         var expected = JoinPage(store.Position);
         var joined = SqlOffsetProtocol.JoinRequest(partition) with
-        { Sql = SqlOffsetProtocol.JoinSql.Replace("LIMIT 1 OFFSET 1", window, StringComparison.Ordinal) };
+        { Sql = SqlOffsetProtocol.JoinSql.Replace("OFFSET 1 ROWS FETCH NEXT 1 ROW ONLY", window, StringComparison.Ordinal) };
         await ExactAsync(engine.Execute(principal, joined), expected);
         await ExactAsync(engine.Execute(principal, joined with
         { Sql = joined.Sql.Replace(" INNER JOIN ", " JOIN ", StringComparison.Ordinal) }), expected);
         await ExactAsync(engine.Execute(principal, joined with
         { Sql = joined.Sql.Replace(" AS ", " ", StringComparison.Ordinal) }), expected);
         await ExactAsync(engine.ExecuteAst(principal, SqlOffsetProtocol.Join(partition)), expected);
-        var alternate = SqlOffsetProtocol.JoinRequest(partition) with
-        { Sql = SqlOffsetProtocol.JoinSql.Replace("LIMIT 1 OFFSET 1", "OFFSET 1 ROWS LIMIT 1", StringComparison.Ordinal) };
-        await ExactAsync(engine.Execute(principal, alternate), expected);
+
     }
     internal static QueryPage JoinPage(long cut) => new(
         [new("b", SqlOffsetProtocol.InitialRevision, """{"title":"second","name":"Bee"}""", false, [],
@@ -68,14 +65,10 @@ internal static class SqlOffsetPages
         => await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
     private static async Task ManifestAsync(QueryEngine engine, DatabaseLimits limits)
     {
-        var expected = new QueryCapabilityManifest(1, 1, "Q1", "atomicPartition", "decimal", "distinctFromNull",
-            ["SQL", "JSON", "C#"], ["comparison", "AND", "OR", "NOT", "IN", "BETWEEN", "NOT BETWEEN", "IS NULL", "IS MISSING",
-                "IS DISTINCT FROM", "IS NOT DISTINCT FROM", "IS TRUE", "IS FALSE", "IS UNKNOWN",
-                "IS NOT TRUE", "IS NOT FALSE", "IS NOT UNKNOWN", "BETWEEN SYMMETRIC", "NOT BETWEEN SYMMETRIC", "BETWEEN ASYMMETRIC", "NOT BETWEEN ASYMMETRIC", "ISNULL", "NOTNULL"],
+        var expected = new QueryCapabilityManifest(1, 1, "TSQL.ScriptDOM180.v1", "atomicPartition", "decimal", "distinctFromNull",
+            ["SQL", "JSON", "C#"], ["comparison", "AND", "OR", "NOT", "IN", "NOT IN", "BETWEEN", "NOT BETWEEN", "IS NULL", "IS NOT NULL", "IS DISTINCT FROM", "IS NOT DISTINCT FROM", "AST.IS MISSING"],
             limits.MaxResults, limits.MaxScanRecords, limits.MaxQueryBytes, limits.MaxQueryDepth, true, true,
-            limits.MaxQueryReadBytes, ["Q1", "documentChangeFeed", "scalarLiveQuery", "modelViewsV1", "graph-search-v1", "graph-path-v1",
-                "Q2.InnerJoin.v1", "Q2.InnerJoin.LeftPredicate.v1", "Q2.QueueEntityRefJoin.v1", "Q2.EventEntityRefJoin.v1",
-                "Q1.Offset.v1", "Q2.InnerJoin.Offset.v1", "Q1.NullOrdering.v1", "SQL.FetchCount.v1", "SQL.NullDistinct.v1", "SQL.BooleanTruth.v1", "SQL.BetweenSymmetric.v1", "SQL.SelectAll.v1", "SQL.ImplicitProjectionAlias.v1", "SQL.DefaultInnerJoin.v1", "SQL.BetweenAsymmetric.v1", "SQL.OrderUsing.v1", "SQL.NullPredicateSynonyms.v1", "SQL.PositiveNumericLiteral.v1", "SQL.LeadingDecimalLiteral.v1", "SQL.HexadecimalIntegerLiteral.v1", "SQL.EscapeStringLiteral.v1", "SQL.StringContinuation.v1", "SQL.DollarQuotedString.v1", "SQL.BinaryOctalIntegerLiteral.v1", "SQL.UnicodeStringLiteral.v1", "SQL.BooleanPredicate.v1", "SQL.NumericDigitSeparators.v1", "SQL.UnicodeIdentifier.v1", "SQL.TableShorthand.v1", "SQL.OrdinalOrder.v1"], [1, 2], [1, 2]);
+            limits.MaxQueryReadBytes, ["Q1", "documentChangeFeed", "scalarLiveQuery", "modelViewsV1", "Q2.InnerJoin.v1", "Q2.InnerJoin.LeftPredicate.v1", "Q2.QueueEntityRefJoin.v1", "Q2.EventEntityRefJoin.v1", "Q1.Offset.v1", "Q2.InnerJoin.Offset.v1", "Q1.NullOrdering.v1", "TSQL.ScriptDOM180.v1", "TSQL.Top.v1", "TSQL.OffsetFetch.v1", "TSQL.NullDistinct.v1", "TSQL.SelectAll.v1", "TSQL.ImplicitProjectionAlias.v1", "TSQL.DefaultInnerJoin.v1", "TSQL.OrdinalOrder.v1", "TSQL.NamedParameters.v1", "TSQL.NativeSessionSlots.v1", "TSQL.DecimalScalar.v1", "TSQL.NationalStringLiteral.v1"], [1, 2], [1, 2]);
         await Assert.That(JsonDefaults.Serialize(engine.Capabilities).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
     }
     internal static async Task ReplayAsync(global::KeyLoad.Core.DatabaseEngine owner, CommandRequest seed, CommitReceipt receipt)

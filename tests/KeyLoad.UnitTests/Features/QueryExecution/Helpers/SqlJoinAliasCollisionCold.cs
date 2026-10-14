@@ -207,12 +207,12 @@ internal static class SqlInnerJoinRetainedIdentityPages
     private const int SingleCandidate = 1;
     private const int FalseThreshold = 100;
     private const long InitialRevision = 1;
-    private const string Sql = "SELECT l.order_id AS order_id, r.name AS name, l.total AS generation "
+    private const string Sql = "SELECT TOP (10) l.order_id AS order_id, r.name AS name, l.total AS generation "
         + "FROM orders AS l INNER JOIN customers AS r ON l.customer_id = r.id "
-        + "ORDER BY l.order_id ASC LIMIT 10";
-    private const string FalseSql = "SELECT l.order_id AS order_id, r.name AS name, l.total AS generation "
+        + "ORDER BY l.order_id ASC";
+    private const string FalseSql = "SELECT TOP (10) l.order_id AS order_id, r.name AS name, l.total AS generation "
         + "FROM orders AS l INNER JOIN customers AS r ON l.customer_id = r.id "
-        + "WHERE l.total > 100 ORDER BY l.order_id ASC LIMIT 10";
+        + "WHERE l.total > 100 ORDER BY l.order_id ASC";
 
     private static QueryRequest Request(PartitionRef partition)
         => new(partition, Sql, AllowFullScan: true, QueryDialectVersion: Dialect);
@@ -242,7 +242,7 @@ internal static class SqlInnerJoinRetainedIdentityPages
         var operations = new List<Action>
         {
             () => engine.Execute(Root, sql),
-            () => engine.Execute(Root, sql with { Sql = sql.Sql.Replace("LIMIT 10", "LIMIT 1", StringComparison.Ordinal) }),
+            () => engine.Execute(Root, sql with { Sql = sql.Sql.Replace("TOP (10)", "TOP (1)", StringComparison.Ordinal) }),
             () => engine.ExecuteAst(Root, ast),
             () => engine.ExecuteAst(Root, ast with { Query = ast.Query with { Limit = SingleCandidate } })
         };

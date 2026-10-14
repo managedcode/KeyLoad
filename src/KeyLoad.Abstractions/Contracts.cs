@@ -328,7 +328,9 @@ public enum OperationKind
     /// <summary>Applies an intent through its immutable original native Move requests.</summary>
     ApplyPlacementIntent = 48,
     /// <summary>Commits one private freshly authenticated placement phase.</summary>
-    PlacementIntentPhase = 49
+    PlacementIntentPhase = 49,
+    /// <summary>Changes one existing queue pause state through an explicit schema-version CAS.</summary>
+    SetQueueDispatch = 50
 }
 
 /// <summary>Carries a trusted operation and its evaluated principal and time.</summary>

@@ -30,6 +30,9 @@ internal static class McpCanonicalTestData
     private const string Verifier = "persisted-verifier";
     private const string Sql = "SELECT * FROM mcp-records";
     private const string GraphPathSql = "SELECT * FROM GRAPH_SHORTEST_PATH('mcp-records', 'mcp-records', 'mcp-entity', 'mcp-records', 'mcp-entity', 16, 1000, 5000);";
+    private const string GraphSearchSql = "SELECT * FROM GRAPH_SEARCH('mcp-records', NULL, NULL, NULL, "
+        + "GRAPH_RETRIEVER('mcp-records',GRAPH_SEEDS(ENTITY('mcp-records','mcp-entity')),1,2,3,NULL,1), "
+        + "NULL, NULL, 10, 60)";
     private const int ContractVersion = 1;
     private const string PlacementShardIdText = "79214e37-a89c-431f-b4e2-202d5d967883";
     private const long Generation = 1;
@@ -108,7 +111,7 @@ internal static class McpCanonicalTestData
             new AtomicPartitionPlacementReadRequest(ContractVersion, Partition)),
         Read(McpCatalogExpectations.SeriesRead, new ReadSamplesRequest(Partition, Resource, Entity, DateTimeOffset.UnixEpoch, DateTimeOffset.UnixEpoch)),
         Read(McpCatalogExpectations.QueryExecute, new QueryRequest(Partition, Sql)),
-        Read(McpCatalogExpectations.QuerySearch, new SqlGraphSearchRequest(1, new(Partition, Sql))),
+        Read(McpCatalogExpectations.QuerySearch, new SqlGraphSearchRequest(1, new(Partition, GraphSearchSql, AllowFullScan: true))),
         Read(McpCatalogExpectations.QueryPartitions, PartitionQuery()),
         Read(McpCatalogExpectations.QueryDistributedSearch,
             new DistributedSearchRequestV1(ContractVersion, [Partition], new SearchRequest(Partition, Resource))),

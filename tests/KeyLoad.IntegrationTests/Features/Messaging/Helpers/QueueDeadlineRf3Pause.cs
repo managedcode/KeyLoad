@@ -9,10 +9,11 @@ internal static class QueueDeadlineRf3Pause
     {
         await QueueDeadlineRf3Callers.UseAsync(fixture, McpCallerProtocol.Node1, fixture.AdminKey, async admin =>
         {
-            await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.ConfigureResourceAsync(Guid.NewGuid(),
-                new(lane.Partition.TenantId, lane.Partition.DatabaseId, new ResourceDefinition(lane.Queue,
-                    ResourceKind.WorkQueue, lane.Partition.TransactionDomainId)
-                { Paused = paused }), token));
+            var page = await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.ListResourcesAsync(
+                new(lane.Partition.TenantId, lane.Partition.DatabaseId), token));
+            var current = page.Items.Single(item => string.Equals(item.Name, lane.Queue, StringComparison.Ordinal));
+            await McpCallerAssertions.SdkSuccessAsync(await global::KeyLoad.Client.QueueDispatchClient.SetQueueDispatchAsync(admin.Sdk, Guid.NewGuid(),
+                new(lane.Partition.TenantId, lane.Partition.DatabaseId, lane.Queue, current.SchemaVersion, paused), token));
             return true;
         }, token);
     }

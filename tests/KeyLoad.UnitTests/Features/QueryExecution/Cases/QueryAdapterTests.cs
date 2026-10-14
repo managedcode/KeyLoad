@@ -47,7 +47,7 @@ internal sealed class QueryAdapterTests
             queriedStatuses[statusIndex] = true;
             var status = statuses[statusIndex];
             var minimumText = minimum.ToString(CultureInfo.InvariantCulture);
-            var sql = $"SELECT d.id, d.number, d.status FROM orders d WHERE d.status = '{status}' AND d.number >= {minimumText} ORDER BY d.number DESC, d.id LIMIT {PageLimit}";
+            var sql = $"SELECT TOP ({PageLimit}) d.id, d.number, d.status FROM orders d WHERE d.status = '{status}' AND d.number >= {minimumText} ORDER BY d.number DESC, d.id";
             var expected = engine.Execute("root", new(db.Partition, sql));
             var json = engine.ExecuteAst("root", QueryAdapterTestSupport.RoundTrip(new(db.Partition, new SqlParser(sql, UnitExecutionOptions.DatabaseLimits(new()), UnitExecutionOptions.QueryExecution()).Parse())));
             var csharp = KeyLoadQuery.From<QueryAdapterOrder>(db.Partition, "orders", UnitClientOptions.Translation()).Where(row => row.Status == status && row.Number >= minimum)

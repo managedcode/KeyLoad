@@ -24,10 +24,23 @@ internal static class SqlLeftFilteredJoinOperation
         var combination = request with
         {
             Sql = SqlLeftFilteredJoinFixture.Prefix
-            + "WHERE (l.total IN (7, @minimum) AND l.total BETWEEN 7 AND 8) OR l.total IS MISSING "
+            + "WHERE (l.total IN (7, @minimum) AND l.total BETWEEN 7 AND 8) "
             + SqlLeftFilteredJoinFixture.Order
         };
         await SqlLeftFilteredJoinAssertions.PageAsync(engine.Execute("root", combination), position);
+        var original = SqlLeftFilteredJoinFixture.Ast(database.Partition);
+        var operand = new FieldOperand("/total");
+        var missingCombination = original with
+        {
+            Query = original.Query with
+            {
+                Filter = new Logical(new Logical(
+                    new InPredicate(operand, [ValueOperand.Create(7), new ParameterOperand(MinimumParameter)], false), "AND",
+                    new Logical(new Comparison(operand, ">=", ValueOperand.Create(7)), "AND",
+                        new Comparison(operand, "<=", ValueOperand.Create(8)))), "OR", new NullTest(operand, false, true))
+            }
+        };
+        await SqlLeftFilteredJoinAssertions.PageAsync(engine.ExecuteAst("root", missingCombination), position);
         await Assert.That(QueueWholeFlowStorage.Bytes(database.Store)).IsEquivalentTo(before, CollectionOrdering.Matching);
         await Assert.That(database.Store.Position).IsEqualTo(position);
     }

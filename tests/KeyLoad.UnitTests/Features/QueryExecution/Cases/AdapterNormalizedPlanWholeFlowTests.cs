@@ -7,6 +7,8 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 
 internal sealed class AdapterNormalizedPlanWholeFlowTests
 {
+    private const int CanonicalPlanSurfaces = 2;
+    private const int ReadSurfaces = 3;
     private const string AccessPathProperty = "accessPath";
     private const string AtomicPartitionProperty = "atomicPartition";
     private const string ScanBudgetProperty = "scanBudget";
@@ -24,6 +26,12 @@ internal sealed class AdapterNormalizedPlanWholeFlowTests
         var position = database.Store.Position;
         var image = QueueWholeFlowStorage.Bytes(database.Store);
         var plans = AdapterPlanWholeFlowFixture.Execute(database, engine, "root", explain: true);
+        await Assert.That(plans.Length).IsEqualTo(CanonicalPlanSurfaces);
+        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute("root",
+            new(database.Partition, "EXPLAIN " + AdapterPlanWholeFlowFixture.Sql,
+                AdapterPlanWholeFlowFixture.Parameters()))).Code).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(database.Store.Position).IsEqualTo(position);
+        await Assert.That(QueueWholeFlowStorage.Bytes(database.Store)).IsEquivalentTo(image, CollectionOrdering.Matching);
         foreach (var plan in plans)
         {
             await Assert.That(JsonDefaults.Serialize(plan).AsSpan().SequenceEqual(JsonDefaults.Serialize(plans[0]))).IsTrue();
@@ -48,6 +56,7 @@ internal sealed class AdapterNormalizedPlanWholeFlowTests
             await Assert.That(failure.Message).IsEqualTo("The principal cannot perform this operation in this scope.");
         }
         var pages = AdapterPlanWholeFlowFixture.Execute(database, engine, "root", explain: false);
+        await Assert.That(pages.Length).IsEqualTo(ReadSurfaces);
         foreach (var page in pages)
         {
             await Assert.That(page.Rows).HasSingleItem();

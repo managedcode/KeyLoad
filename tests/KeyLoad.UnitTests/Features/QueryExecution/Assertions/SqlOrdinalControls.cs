@@ -7,7 +7,14 @@ internal static class SqlOrdinalControls
         var image = SqlInnerJoinRetainedIdentityFlow.Image(database.Store);
         var position = database.Store.Position;
         var identity = JsonDefaults.Serialize(database.Store.Identity);
-        foreach (var ordinal in new[] { "0", "3", "2147483648", "-1", "1.0", "1e0" })
+        foreach (var ordinal in new[] { "0", "3", "2147483648" })
+        {
+            await ErrorAsync(() => engine.Execute(SqlOffsetProtocol.Reader,
+                new(database.Partition, SqlOrdinalPages.Sql(false, ordinal), AllowFullScan: true)), ErrorCode.Validation);
+            await SqlNullOrderingRefusals.UnchangedAsync(database.Store, image, position, identity);
+            await SqlOrdinalPages.HealthyAsync(database.Database, database.Store, database.Partition, SqlOffsetProtocol.Reader);
+        }
+        foreach (var ordinal in new[] { "-1", "1.0", "1e0" })
         {
             await ErrorAsync(() => engine.Execute(SqlOffsetProtocol.Reader,
                 new(database.Partition, SqlOrdinalPages.Sql(false, ordinal), AllowFullScan: true)), ErrorCode.Validation);
@@ -15,7 +22,7 @@ internal static class SqlOrdinalControls
             await SqlOrdinalPages.HealthyAsync(database.Database, database.Store, database.Partition, SqlOffsetProtocol.Reader);
         }
         await ErrorAsync(() => engine.Execute(SqlOffsetProtocol.Reader,
-            new(database.Partition, "SELECT * FROM offsetleft ORDER BY 1 LIMIT 1", AllowFullScan: true)),
+            new(database.Partition, "SELECT TOP (1) * FROM offsetleft ORDER BY 1", AllowFullScan: true)),
             ErrorCode.UnsupportedCapability);
         await SqlNullOrderingRefusals.UnchangedAsync(database.Store, image, position, identity);
     }

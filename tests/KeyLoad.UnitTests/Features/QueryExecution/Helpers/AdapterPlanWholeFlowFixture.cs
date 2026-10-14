@@ -8,13 +8,14 @@ internal static class AdapterPlanWholeFlowFixture
 {
     private const string StatusParameter = "status";
     private const string MinimumParameter = "minimum";
-    internal const string Sql = "SELECT d.id, d.number, d.status FROM orders d WHERE d.status = @status AND d.number >= @minimum ORDER BY d.id LIMIT 10";
+    internal const string Sql = "SELECT TOP (10) d.id, d.number, d.status FROM orders d WHERE d.status = @status AND d.number >= @minimum ORDER BY d.id";
     internal static Dictionary<string, JsonElement> Parameters() => new(StringComparer.Ordinal)
     { [StatusParameter] = JsonSerializer.SerializeToElement("open"), [MinimumParameter] = JsonSerializer.SerializeToElement(2m) };
     internal static AstQueryRequest Ast(TestDatabase database, bool explain)
     {
-        var query = new SqlParser((explain ? "EXPLAIN " : "") + Sql,
-            UnitExecutionOptions.DatabaseLimits(new()), UnitExecutionOptions.QueryExecution()).Parse();
+        var query = new SqlParser(Sql,
+            UnitExecutionOptions.DatabaseLimits(new()), UnitExecutionOptions.QueryExecution()).Parse() with
+        { Explain = explain };
         return QueryAdapterTestSupport.RoundTrip(new(database.Partition, query, Parameters()));
     }
     internal static AstQueryRequest CSharp(TestDatabase database, bool explain)
@@ -32,6 +33,8 @@ internal static class AdapterPlanWholeFlowFixture
             new PutDocument("orders", "c", "{\"number\":3,\"status\":\"hold\"}"));
     }
     internal static QueryPage[] Execute(TestDatabase database, QueryEngine engine, string principal, bool explain)
-        => [engine.Execute(principal, new(database.Partition, (explain ? "EXPLAIN " : "") + Sql, Parameters())),
-            engine.ExecuteAst(principal, Ast(database, explain)), engine.ExecuteAst(principal, CSharp(database, explain))];
+        => explain
+            ? [engine.ExecuteAst(principal, Ast(database, true)), engine.ExecuteAst(principal, CSharp(database, true))]
+            : [engine.Execute(principal, new(database.Partition, Sql, Parameters())),
+               engine.ExecuteAst(principal, Ast(database, false)), engine.ExecuteAst(principal, CSharp(database, false))];
 }

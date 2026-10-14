@@ -27,7 +27,7 @@ internal static class SqlRadixIntegerControls
             "score = 0o128" })
         {
             await RefuseAsync(database, engine, SqlNullDistinctCases.Prefix + clause + SqlNullDistinctCases.Tail,
-            ErrorCode.UnsupportedCapability, image, position, identity);
+            ErrorCode.Validation, image, position, identity);
         }
         foreach (var window in new[] { "LIMIT 0b1",
             "LIMIT 0o1",

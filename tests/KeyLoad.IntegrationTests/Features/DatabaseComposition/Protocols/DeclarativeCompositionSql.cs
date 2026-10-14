@@ -4,8 +4,8 @@ namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
 
 internal static class DeclarativeCompositionSql
 {
-    private const string ForwardText = "INSERT INTO GRAPH_EDGES(@graph, @prefix) SELECT LINKS FROM QUEUE_MESSAGES(@queue) LIMIT @limit WITH COMMAND @command";
-    private const string ReverseText = "INSERT INTO QUEUE_MESSAGES(@queue, @prefix) SELECT LINKS FROM GRAPH_TRAVERSE(@graph, @start, @depth, @vertices, @edges) WITH COMMAND @command";
+    private const string ForwardText = "INSERT INTO GRAPH_EDGES (command_id, graph, edge_prefix, max_messages) SELECT @command, @graph, @prefix, @limit FROM QUEUE_MESSAGES(@queue)";
+    private const string ReverseText = "INSERT INTO QUEUE_MESSAGES (command_id, queue, message_prefix) SELECT @command, @queue, @prefix FROM GRAPH_TRAVERSE(@graph, @start, @depth, @vertices, @edges)";
 
     internal static SqlOperationRequest Forward(CommandRequest command, QueueToGraph mutation)
         => new(command.Partition, ForwardText, Values(

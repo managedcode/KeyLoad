@@ -8,8 +8,8 @@ internal sealed class SqlModelViewParserTests
     [Test]
     public async Task AcSqlView001EventAndQueueSourcesLowerToBoundedTypedAst()
     {
-        var events = new SqlParser("SELECT e.eventType FROM EVENTS('events', 'stream-a', 3) AS e " +
-            "WHERE e.payload.visible = @visible ORDER BY e.revision DESC LIMIT 4", UnitExecutionOptions.DatabaseLimits(new()), UnitExecutionOptions.QueryExecution()).Parse();
+        var events = new SqlParser("SELECT TOP (4) e.eventType FROM EVENTS('events', 'stream-a', 3) AS e " +
+            "WHERE e.payload.visible = @visible ORDER BY e.revision DESC", UnitExecutionOptions.DatabaseLimits(new()), UnitExecutionOptions.QueryExecution()).Parse();
         var queue = new SqlParser("SELECT q.id, q.state FROM QUEUE_MESSAGES('jobs') q ORDER BY q.id", UnitExecutionOptions.DatabaseLimits(new()), UnitExecutionOptions.QueryExecution()).Parse();
 
         await Assert.That(events.Collection).IsEqualTo(SqlModelViewTestSupport.StreamSet);

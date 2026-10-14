@@ -12,17 +12,17 @@ internal static class SqlBooleanTruthRefusals
         var identity = JsonDefaults.Serialize(database.Store.Identity);
         await SqlBooleanOperandControls.InvalidAsync(database, engine, before, position, identity);
         foreach (var clause in new[] { "score IS", "score IS NOT", "score IS 'TRUE'",
-            "score IS @absent" })
+            "score IS @absent", "score IS TRUE", "score IS FALSE", "score IS UNKNOWN" })
         {
             var actual = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute(SqlNullOrderingProtocol.Reader,
-                new(database.Partition, SqlBooleanTruthCases.Prefix + clause + SqlBooleanTruthCases.Tail, AllowFullScan: true)));
+                new(database.Partition, SqlBooleanTruthCases.Prefix + clause + SqlBooleanTruthCases.Tail, SqlBooleanTruthCases.Parameters(), AllowFullScan: true)));
             await Assert.That(actual.Code).IsEqualTo(ErrorCode.Validation);
             await SqlNullOrderingRefusals.UnchangedAsync(database.Store, before, position, identity);
         }
         using var cancelled = new CancellationTokenSource();
         await cancelled.CancelAsync();
         var request = new QueryRequest(database.Partition, SqlBooleanTruthCases.Prefix
-            + SqlBooleanTruthCases.All[First].Clause + SqlBooleanTruthCases.Tail, AllowFullScan: true);
+            + SqlBooleanTruthCases.All[First].Clause + SqlBooleanTruthCases.Tail, SqlBooleanTruthCases.Parameters(), AllowFullScan: true);
         var error = Assert.ThrowsExactly<OperationCanceledException>(() => engine.Execute(SqlNullOrderingProtocol.Reader,
             request, cancellationToken: cancelled.Token));
         await Assert.That(error.CancellationToken).IsEqualTo(cancelled.Token);
@@ -40,7 +40,7 @@ internal static class SqlBooleanTruthRefusals
         var identity = JsonDefaults.Serialize(database.Store.Identity);
         var item = SqlBooleanTruthCases.All[AgainstOne];
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute(SqlNullOrderingProtocol.Reader,
-            new(database.Partition, SqlBooleanTruthCases.Prefix + item.Clause + SqlBooleanTruthCases.Tail,
+            new(database.Partition, SqlBooleanTruthCases.Prefix + item.Clause + SqlBooleanTruthCases.Tail, SqlBooleanTruthCases.Parameters(),
                 AllowFullScan: true))).Code).IsEqualTo(ErrorCode.Validation);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.ExecuteAst(SqlNullOrderingProtocol.Reader,
             SqlBooleanTruthCases.Ast(database.Partition, item))).Code).IsEqualTo(ErrorCode.Validation);

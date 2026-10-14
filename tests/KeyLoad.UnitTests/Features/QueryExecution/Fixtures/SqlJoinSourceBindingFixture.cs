@@ -26,8 +26,8 @@ internal static class SqlJoinSourceBindingFixture
     private const string RightAlias = "r";
     private const string NamePath = "/name";
     private const string NameOutput = "customer_name";
-    private const string Sql = "SELECT r.name AS customer_name FROM orders AS l INNER JOIN customers AS r ON l.customer_id = r.id ORDER BY l.order_id ASC LIMIT 10";
-    private const string ModelSelect = "SELECT d.name AS customer_name FROM ";
+    private const string Sql = "SELECT TOP (10) r.name AS customer_name FROM orders AS l INNER JOIN customers AS r ON l.customer_id = r.id ORDER BY l.order_id ASC";
+    private const string ModelSelect = "SELECT TOP (10) d.name AS customer_name FROM ";
     private const int Dialect = 2;
     private const int Limit = 10;
 

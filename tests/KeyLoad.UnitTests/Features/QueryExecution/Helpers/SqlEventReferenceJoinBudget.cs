@@ -21,7 +21,7 @@ internal static class SqlEventReferenceJoinBudget
         await SqlEventReferenceJoinAssertions.RejectAsync(database,
             () => engine.Execute("root", falseFilter), ErrorCode.BudgetExceeded);
         await SqlEventReferenceJoinAssertions.RejectAsync(database,
-            () => engine.Execute("root", request with { Sql = request.Sql.Replace("LIMIT 10", "LIMIT 1", StringComparison.Ordinal) }),
+            () => engine.Execute("root", request with { Sql = request.Sql.Replace("TOP (10)", "TOP (1)", StringComparison.Ordinal) }),
             ErrorCode.BudgetExceeded);
         await BytesAsync(database);
         await SqlEventReferenceJoinOperation.VerifyAsync(database);

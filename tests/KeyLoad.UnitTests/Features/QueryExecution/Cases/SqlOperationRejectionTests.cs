@@ -7,11 +7,11 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 /// <summary>AC-AISQL-005/006: malformed input never reaches a database operation.</summary>
 internal sealed class SqlOperationRejectionTests
 {
-    private const string QuotedCall = "CALL \"keyload_query_capabilities\"(@arguments)";
-    private const string LiteralCall = "CALL keyload_query_capabilities('{}')";
-    private const string MissingParenthesis = "CALL keyload_query_capabilities(@arguments";
-    private const string MultipleStatements = "CALL keyload_query_capabilities(@arguments); SELECT * FROM orders";
-    private const string MultipleArguments = "CALL keyload_query_capabilities(@arguments,@extra)";
+    private const string QuotedCall = "EXEC \"keyload_query_capabilities\" @arguments";
+    private const string LiteralCall = "EXEC keyload_query_capabilities '{}'";
+    private const string MissingParenthesis = "EXEC keyload_query_capabilities";
+    private const string MultipleStatements = "EXEC keyload_query_capabilities @arguments; SELECT * FROM orders";
+    private const string MultipleArguments = "EXEC keyload_query_capabilities @arguments,@extra";
     private const string QuotedSelect = "\"SELECT\" * FROM orders";
     private const string MutationSql = "UPDATE internal_queue SET state = 'Completed'";
     private const string EmptySql = " \t\r\n";
@@ -26,7 +26,7 @@ internal sealed class SqlOperationRejectionTests
         await SqlOperationTestData.Reject(request with { Version = SqlOperationProtocol.Version + 1 },
             ErrorCode.UnsupportedCapability);
         foreach (var sql in new[] { SqlOperationTestData.UnknownCall, SqlOperationTestData.WrongCaseCall,
-                     SqlOperationTestData.RecursiveCall, QuotedSelect, MutationSql })
+                     SqlOperationTestData.RecursiveCall, LiteralCall, MultipleStatements, MutationSql })
         {
             await SqlOperationTestData.Reject(request with { Sql = sql }, ErrorCode.UnsupportedCapability);
         }
@@ -36,11 +36,12 @@ internal sealed class SqlOperationRejectionTests
     public async Task AcAiSql005RejectsMalformedCallQuotedNamesLiteralArgumentsAndTrailingStatements()
     {
         var request = SqlOperationTestData.Call(McpCatalogExpectations.QueryCapabilities);
-        foreach (var sql in new[] { QuotedCall, LiteralCall, MissingParenthesis, MultipleStatements,
-                     MultipleArguments, EmptySql })
+        foreach (var sql in new[] { MissingParenthesis, MultipleArguments, QuotedSelect, EmptySql })
         {
             await SqlOperationTestData.Reject(request with { Sql = sql }, ErrorCode.Validation);
         }
+        await SqlOperationTestData.Same(SqlOperationTestData.Compile(request with { Sql = QuotedCall }),
+            SqlOperationTestData.Find(McpCatalogExpectations.QueryCapabilities).Decode(null));
         await SqlOperationTestData.Reject(request with { Cursor = SqlOperationTestData.Cursor }, ErrorCode.Validation);
         await SqlOperationTestData.Reject(request with { AllowFullScan = true }, ErrorCode.Validation);
         await SqlCallNoPartialWriteContinuation.RunAsync();

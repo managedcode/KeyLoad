@@ -130,8 +130,8 @@ internal sealed class OrleansRpcFailureTests
     public async Task AcCrs006TranslatorRejectsFatalRuntimeFailuresWithoutConversionOrLogging()
     {
         Type[] fatalTypes = [typeof(OutOfMemoryException), typeof(StackOverflowException), typeof(AccessViolationException)];
-        using var capture = new EventSourceLogCapture();
         using var factory = LoggerFactory.Create(builder => builder.AddEventSourceLogger());
+        using var capture = new EventSourceLogCapture();
         var logger = factory.CreateLogger(nameof(GrainFailureDiagnosticsTests));
         foreach (var fatalType in fatalTypes)
         {
@@ -158,14 +158,11 @@ internal sealed class OrleansRpcFailureTests
     private static (KeyLoadException Failure, string Output) TranslateAndCapture(Exception error, bool command, Guid requestId,
         OrleansRpcFailureOperation? operation = null, CancellationToken cancellationToken = default)
     {
+        using var factory = LoggerFactory.Create(builder => builder.AddEventSourceLogger());
         using var capture = new EventSourceLogCapture();
-        KeyLoadException failure;
-        using (var factory = LoggerFactory.Create(builder => builder.AddEventSourceLogger()))
-        {
-            var logger = factory.CreateLogger(nameof(GrainFailureDiagnosticsTests));
-            failure = OrleansRpcFailure.Translate(error, command, requestId, logger,
-                OrleansRpcFailureStage.Unobserved, operation, cancellationToken);
-        }
+        var logger = factory.CreateLogger(nameof(GrainFailureDiagnosticsTests));
+        var failure = OrleansRpcFailure.Translate(error, command, requestId, logger,
+            OrleansRpcFailureStage.Unobserved, operation, cancellationToken);
         return (failure, capture.Text);
     }
 }

@@ -41,9 +41,9 @@ internal sealed class SqlGraphSearchParityTests
                 FusionConstant: SqlGraphSearchTestSupport.Fusion),
             Retriever: new(new(SqlGraphSearchTestSupport.Graph, [.. seeds], SqlGraphSearchTestSupport.Depth,
                 SqlGraphSearchTestSupport.Vertices, SqlGraphSearchTestSupport.Edges)));
-        const string sql = "SEARCH FROM \"graph-search-documents\" RETRIEVE GRAPH \"graph-search-links\" "
-            + "SEEDS ((\"graph-search-projects\",'root-node'),(\"graph-search-projects\",'middle-node')) "
-            + "DEPTH 4 VERTICES 20 EDGES 40 LIMIT 10 FUSION 60";
+        const string sql = "SELECT * FROM GRAPH_SEARCH('graph-search-documents', NULL, NULL, NULL, "
+            + "GRAPH_RETRIEVER('graph-search-links', GRAPH_SEEDS(ENTITY('graph-search-projects','root-node'), "
+            + "ENTITY('graph-search-projects','middle-node')), 4, 20, 40, NULL, 1), NULL, NULL, 10, 60)";
         var cancellationToken = TestContext.Current!.Execution.CancellationToken;
 
         var expected = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution()).GraphSearchAsync("root", direct, cancellationToken);
@@ -70,10 +70,9 @@ internal sealed class SqlGraphSearchParityTests
                 "needle", Limit: SqlGraphSearchTestSupport.Limit),
             Scope: new(walk), Expansion: new(SqlGraphSearchTestSupport.Graph, SqlGraphSearchTestSupport.Depth,
                 SqlGraphSearchTestSupport.Vertices, SqlGraphSearchTestSupport.Edges, [GraphSearchTestSupport.Label]));
-        const string sql = "SEARCH FROM \"graph-search-documents\" TEXT text MATCH 'needle' "
-            + "SCOPE GRAPH \"graph-search-links\" SEEDS ((\"graph-search-projects\",'root-node')) "
-            + "DEPTH 4 VERTICES 20 EDGES 40 EXPAND GRAPH \"graph-search-links\" DEPTH 4 "
-            + "VERTICES 20 EDGES 40 LABELS ('related') LIMIT 10 FUSION 60";
+        const string sql = "SELECT * FROM GRAPH_SEARCH('graph-search-documents', TEXT_MATCH('/text','needle',1), NULL, "
+            + "GRAPH_SCOPE('graph-search-links', GRAPH_SEEDS(ENTITY('graph-search-projects','root-node')),4,20,40,NULL), "
+            + "NULL, GRAPH_EXPANSION('graph-search-links',4,20,40,GRAPH_LABELS('related')), NULL, 10, 60)";
         var cancellationToken = TestContext.Current!.Execution.CancellationToken;
 
         var expected = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution()).GraphSearchAsync("root", direct, cancellationToken);
@@ -127,12 +126,11 @@ internal sealed class SqlGraphSearchParityTests
             Expansion: new(SqlGraphSearchTestSupport.Graph, SqlGraphSearchTestSupport.Depth,
                 SqlGraphSearchTestSupport.Vertices, SqlGraphSearchTestSupport.Edges,
                 System.Collections.Immutable.ImmutableArray<string>.Empty));
-        const string sql = "SEARCH FROM \"graph-search-documents\" TEXT text MATCH @text WEIGHT 1 "
-            + "VECTOR embedding MATCH @vector SPACE (\"graph-sql-space\",2,Cosine,\"graph-sql-model\",\"graphsqlversion\") WEIGHT 1 "
-            + "SCOPE GRAPH \"graph-search-links\" SEEDS ((\"graph-search-projects\",@root)) DEPTH 4 VERTICES 20 EDGES 40 LABELS (@label) "
-            + "RETRIEVE GRAPH \"graph-search-links\" SEEDS ((\"graph-search-projects\",@root)) DEPTH 4 VERTICES 20 EDGES 40 WEIGHT 0.5 "
-            + "EXPAND GRAPH \"graph-search-links\" DEPTH 4 VERTICES 20 EDGES 40 LABELS () "
-            + "ALLOW IDS (@hit) LIMIT 10 FUSION 60";
+        const string sql = "SELECT * FROM GRAPH_SEARCH('graph-search-documents', TEXT_MATCH('/text',@text,1), "
+            + "VECTOR_MATCH('/embedding',@vector,VECTOR_SPACE('graph-sql-space',2,'Cosine','graph-sql-model','graphsqlversion'),1), "
+            + "GRAPH_SCOPE('graph-search-links',GRAPH_SEEDS(ENTITY('graph-search-projects',@root)),4,20,40,GRAPH_LABELS(@label)), "
+            + "GRAPH_RETRIEVER('graph-search-links',GRAPH_SEEDS(ENTITY('graph-search-projects',@root)),4,20,40,NULL,0.5), "
+            + "GRAPH_EXPANSION('graph-search-links',4,20,40,GRAPH_LABELS()), GRAPH_IDS(@hit), 10, 60)";
         var parameters = SqlGraphSearchTestSupport.Parameters(
             ("text", "needle"), ("vector", new[] { 1f, 0f }), ("root", SqlGraphSearchTestSupport.Root),
             ("label", GraphSearchTestSupport.Label),
@@ -153,7 +151,7 @@ internal sealed class SqlGraphSearchParityTests
 
         var manifest = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution()).Capabilities;
 
-        await Assert.That(manifest.SqlDialect).IsEqualTo("Q1");
+        await Assert.That(manifest.SqlDialect).IsEqualTo("TSQL.ScriptDOM180.v1");
         await Assert.That(manifest.AstVersion).IsEqualTo(1);
         await Assert.That(manifest.SupportedAstVersions).IsEquivalentTo([1, 2]);
         await Assert.That(manifest.SupportedQueryDialectVersions).IsEquivalentTo([1, 2]);

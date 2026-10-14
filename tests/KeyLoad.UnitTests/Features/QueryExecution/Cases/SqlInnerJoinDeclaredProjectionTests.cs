@@ -5,13 +5,13 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 
 internal sealed class SqlInnerJoinDeclaredProjectionTests
 {
-    private const string AcceptedSql = "SELECT l.order_id AS order_id, r.id AS customer_id, l.total AS total "
+    private const string AcceptedSql = "SELECT TOP (100) l.order_id AS order_id, r.id AS customer_id, l.total AS total "
         + "FROM orders AS l INNER JOIN customers AS r ON l.customer_id = r.id "
-        + "ORDER BY l.order_id ASC LIMIT 100";
-    private const string DeclaredSql = "SELECT r.id AS declared_id, l.source_revision AS declared_revision, l.order_id AS order_id "
+        + "ORDER BY l.order_id ASC";
+    private const string DeclaredSql = "SELECT TOP (100) r.id AS declared_id, l.source_revision AS declared_revision, l.order_id AS order_id "
         + "FROM orders AS l INNER JOIN customers AS r ON l.customer_id = r.id "
-        + "ORDER BY l.order_id ASC LIMIT 100";
-    private const string ScalarSql = "SELECT l.id AS metadata_id, l.revision AS metadata_revision FROM orders AS l LIMIT 100";
+        + "ORDER BY l.order_id ASC";
+    private const string ScalarSql = "SELECT TOP (100) l.id AS metadata_id, l.revision AS metadata_revision FROM orders AS l";
     private const string Orders = "orders";
     private const string Customers = "customers";
     private const string OrderId = "order_id";

@@ -5,8 +5,8 @@ namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 internal static class PostgresInt16Rf3Protocol
 {
     internal const string Parameter = "p1";
-    internal const string Sql = "SELECT label AS label FROM null_ordering WHERE score >= @p1 ORDER BY label ASC LIMIT 5";
-    internal const string DriverSql = "SELECT label AS label FROM null_ordering WHERE score >= $1 ORDER BY label ASC LIMIT 5";
+    internal const string Sql = "SELECT TOP (5) label AS label FROM null_ordering WHERE score >= @p1 ORDER BY label ASC";
+    internal const string DriverSql = "SELECT TOP (5) label AS label FROM null_ordering WHERE score >= $1 ORDER BY label ASC";
     internal const string Statement = "int16_statement";
     internal const string Portal = "int16_portal";
     internal const string Terminator = "\0";

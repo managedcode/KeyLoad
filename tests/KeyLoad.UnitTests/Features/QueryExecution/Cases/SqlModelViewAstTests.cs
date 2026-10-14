@@ -37,15 +37,22 @@ internal sealed class SqlModelViewAstTests
         using var database = SqlModelViewTestSupport.Create();
         SqlModelViewTestSupport.Seed(database);
         var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
-        var queue = engine.Execute("root", SqlModelViewTestSupport.Request(database,
-            "EXPLAIN SELECT * FROM QUEUE_MESSAGES('jobs')"));
-        var events = engine.Execute("root", SqlModelViewTestSupport.Request(database,
-            "EXPLAIN SELECT * FROM EVENTS('events', 'stream-a')"));
+        var before = global::KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(database.Store);
+        var position = database.Store.Position;
+        var queue = engine.ExecuteAst("root", new(database.Partition,
+            new SelectQuery(SqlModelViewTestSupport.Queue, null, [new("*", "*")], null, [], 10, Explain: true,
+                ModelSource: new(ModelQuerySourceKind.QueueMessages, SqlModelViewTestSupport.Queue)), AllowFullScan: true));
+        var events = engine.ExecuteAst("root", new(database.Partition,
+            new SelectQuery(SqlModelViewTestSupport.StreamSet, null, [new("*", "*")], null, [], 10, Explain: true,
+                ModelSource: new(ModelQuerySourceKind.Events, SqlModelViewTestSupport.StreamId)), AllowFullScan: true));
 
         await Assert.That(queue.AccessPath).IsEqualTo("model-scan:queue-messages");
         await Assert.That(events.AccessPath).IsEqualTo("model-scan:events");
         await Assert.That(queue.Rows.Single().Json).DoesNotContain(SqlModelViewTestSupport.Secret);
         await Assert.That(queue.Rows.Single().Json).DoesNotContain("lease");
         await Assert.That(events.Rows.Single().Json).DoesNotContain(SqlModelViewTestSupport.Secret);
+        await Assert.That(database.Store.Position).IsEqualTo(position);
+        await Assert.That(global::KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(database.Store)
+            .SequenceEqual(before)).IsTrue();
     }
 }

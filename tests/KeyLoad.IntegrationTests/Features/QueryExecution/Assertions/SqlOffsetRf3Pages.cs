@@ -7,8 +7,8 @@ internal static class SqlOffsetRf3Pages
 {
     internal static async Task HealthyAsync(RequestCqrsRf3Callers callers, SqlOffsetRf3State state, CancellationToken token)
     {
-        foreach (var window in new[] { "LIMIT 1 OFFSET 1", "OFFSET 1 ROW FETCH FIRST ROW ONLY",
-            "OFFSET 1 ROWS FETCH NEXT 1 ROW ONLY", "OFFSET 1 FETCH FIRST 1 ROWS ONLY" })
+        foreach (var window in new[] { "OFFSET 1 ROW FETCH FIRST 1 ROW ONLY",
+            "OFFSET 1 ROWS FETCH NEXT 1 ROW ONLY", "OFFSET 1 ROWS FETCH FIRST 1 ROWS ONLY" })
         { await WindowAsync(callers, state, window, token); }
     }
     private static async Task WindowAsync(RequestCqrsRf3Callers callers, SqlOffsetRf3State state,
@@ -24,7 +24,7 @@ internal static class SqlOffsetRf3Pages
                 : await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.QueryAstAsync(join, token));
             await JoinAsync(page);
             var sql = SqlOffsetRf3Protocol.JoinRequest(state.Partition) with
-            { Sql = SqlOffsetRf3Protocol.JoinSql.Replace("LIMIT 1 OFFSET 1", window, StringComparison.Ordinal) };
+            { Sql = SqlOffsetRf3Protocol.JoinSql.Replace("OFFSET 1 ROWS FETCH NEXT 1 ROWS ONLY", window, StringComparison.Ordinal) };
             page = official
                 ? (await McpCallerAssertions.SuccessAsync<QueryPage>(await callers.Mcp.CallAsync(McpCallerTools.QueryExecute, sql, token))).Value
                 : await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.QueryAsync(sql, token));
@@ -55,7 +55,7 @@ internal static class SqlOffsetRf3Pages
         { ("b", """{"title":"second"}""", false), ("c", """{"title":"third"}""", false), ("d", """{"title":"fourth"}""", true) })
         {
             var sql = SqlOffsetRf3Protocol.ScalarRequest(state.Partition) with
-            { Cursor = cursor, Sql = SqlOffsetRf3Protocol.ScalarSql.Replace("LIMIT 1 OFFSET 1", window, StringComparison.Ordinal) };
+            { Cursor = cursor, Sql = SqlOffsetRf3Protocol.ScalarSql.Replace("OFFSET 1 ROWS FETCH NEXT 1 ROWS ONLY", window, StringComparison.Ordinal) };
             var request = SqlOffsetRf3Protocol.Scalar(state.Partition) with { Cursor = cursor };
             var page = ast
                 ? official

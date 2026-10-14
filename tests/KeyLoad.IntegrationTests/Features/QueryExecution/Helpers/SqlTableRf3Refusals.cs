@@ -7,17 +7,24 @@ internal static class SqlTableRf3Refusals
         PostgresRf3Caller wire, global::KeyLoad.Client.KeyLoadClient root, CancellationToken token)
     {
         var image = await PostgresRf3Assertions.ImageAsync(root, token);
-        foreach (var sql in new[] { "TABLE", "TABLE budgetorders LIMIT 0", "TABLE budgetorders OFFSET -1 LIMIT 1",
-            "TABLE budgetorders LIMIT 2147483648", "TABLE budgetorders FETCH FIRST '1' ROWS ONLY" })
+        foreach (var sql in new[] { "SELECT TOP (1) FROM budgetorders",
+            "SELECT TOP (0) * FROM budgetorders ORDER BY order_id",
+            "SELECT * FROM budgetorders ORDER BY order_id OFFSET -1 ROWS FETCH NEXT 1 ROWS ONLY",
+            "SELECT TOP (2147483648) * FROM budgetorders ORDER BY order_id",
+            "SELECT * FROM budgetorders ORDER BY order_id OFFSET 0 ROWS FETCH NEXT ROWS ONLY" })
         {
             await RejectAsync(state, reader, wire, sql, ErrorCode.Validation, ValidationState, token);
             await global::TUnit.Assertions.Assert.That(await PostgresRf3Assertions.ImageAsync(root, token)).IsEqualTo(image);
             await SqlTableRf3Pages.RequireAsync(state, reader, wire, token);
             await global::TUnit.Assertions.Assert.That(await PostgresRf3Assertions.ImageAsync(root, token)).IsEqualTo(image);
         }
-        foreach (var sql in new[] { "TABLE budgetorders WHERE order_id = 'order-native'", "TABLE budgetorders AS l",
-            "TABLE budgetorders JOIN budgetcustomers ON customer_id = id", "TABLE budgetorders UNION TABLE budgetcustomers",
-            "TABLE budgetorders, budgetcustomers", "TABLE budgetorders FOR UPDATE", "TABLE budgetorders GROUP BY order_id" })
+        foreach (var sql in new[] { "SELECT DISTINCT * FROM budgetorders",
+            "SELECT * FROM budgetorders WITH (NOLOCK)",
+            "SELECT l.order_id FROM budgetorders AS l LEFT JOIN budgetcustomers AS r ON l.customer_id = r.id",
+            "SELECT * FROM budgetorders UNION SELECT * FROM budgetcustomers",
+            "SELECT * FROM budgetorders, budgetcustomers",
+            "SELECT * INTO copied FROM budgetorders",
+            "SELECT order_id FROM budgetorders GROUP BY order_id" })
         {
             await RejectAsync(state, reader, wire, sql, ErrorCode.UnsupportedCapability,
                 PostgresRf3Protocol.UnsupportedSqlState, token);

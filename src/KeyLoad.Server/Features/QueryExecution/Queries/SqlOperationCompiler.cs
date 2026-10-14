@@ -7,96 +7,75 @@ namespace KeyLoad.Server;
 /// <summary>Compiles one admitted SQL envelope to the sole canonical operation decoder, without execution.</summary>
 internal static class SqlOperationCompiler
 {
-    /// <summary>Preserves the selected operation's authority boundary, payload and stable caller identity.</summary>
     internal static McpDecodedOperation Compile(SqlOperationRequest request, IOptions<DatabaseLimits> limitsOptions,
         int maximumPayloadBytes, IOptions<QueryExecutionOptions> queryOptions, CancellationToken cancellationToken = default)
+        => CompileCore(request, limitsOptions, maximumPayloadBytes, queryOptions, null, cancellationToken);
+
+    internal static McpDecodedOperation CompileNativeSession(SqlOperationRequest request, IOptions<DatabaseLimits> limitsOptions,
+        int maximumPayloadBytes, IOptions<QueryExecutionOptions> queryOptions, int positionalParameterCount,
+        CancellationToken cancellationToken = default)
+        => CompileCore(request, limitsOptions, maximumPayloadBytes, queryOptions, positionalParameterCount, cancellationToken);
+
+    private static McpDecodedOperation CompileCore(SqlOperationRequest request, IOptions<DatabaseLimits> limitsOptions,
+        int maximumPayloadBytes, IOptions<QueryExecutionOptions> queryOptions, int? positionalParameterCount, CancellationToken token)
     {
-        SqlOperationBounds.Validate(request, limitsOptions, maximumPayloadBytes, queryOptions, cancellationToken);
-        var limits = limitsOptions.Value;
-        var reader = new SqlOperationSyntaxReader(request.Sql, limits.MaxQueryTokens, limits.MaxQueryDepth, queryOptions, cancellationToken);
-        var statement = ReadStatement(reader);
-        if (statement.Equals(SqlOperationSyntax.Select, StringComparison.OrdinalIgnoreCase)
-            || statement.Equals(SqlOperationSyntax.Explain, StringComparison.OrdinalIgnoreCase)
-            || statement.Equals(SqlOperationSyntax.Table, StringComparison.OrdinalIgnoreCase))
-        { return Select(request, maximumPayloadBytes, cancellationToken); }
-        if (statement.Equals(SqlCompositionInsert.Statement, StringComparison.OrdinalIgnoreCase))
-        { return Composition(request, reader, maximumPayloadBytes, cancellationToken); }
-        if (!statement.Equals(SqlOperationSyntax.Call, StringComparison.OrdinalIgnoreCase))
-        { throw SqlOperationSyntax.UnsupportedInput(); }
-        if (request.AllowFullScan || request.Cursor is not null)
-        { throw SqlOperationSyntax.InvalidInput(); }
-        if (request.QueryDialectVersion != SqlOperationProtocol.DefaultQueryDialectVersion)
-        { throw SqlOperationSyntax.UnsupportedInput(); }
-        var name = reader.Identifier();
-        reader.Need(SqlOperationSyntax.OpenParenthesis);
-        reader.Need(SqlOperationSyntax.ParameterPrefix);
-        var parameter = reader.Identifier();
-        reader.Need(SqlOperationSyntax.CloseParenthesis);
-        reader.Complete();
-        var descriptor = Target(name);
-        var arguments = BindArguments(request.Parameters, parameter);
-        cancellationToken.ThrowIfCancellationRequested();
-        var operation = descriptor.Decode(arguments, maximumPayloadBytes);
-        cancellationToken.ThrowIfCancellationRequested();
-        return operation;
+        SqlOperationBounds.Validate(request, limitsOptions, maximumPayloadBytes, queryOptions, token);
+        if (positionalParameterCount is < MinimumNativeParameterCount || positionalParameterCount > queryOptions.Value.MaximumParameters)
+        { throw ScriptDomOperationErrors.Invalid(); }
+        var budget = new global::KeyLoad.Core.ReadExecutionBudget(limitsOptions, cancellationToken: token);
+        var statement = global::KeyLoad.Features.QueryExecution.ScriptDomSyntax.Parse(request.Sql, limitsOptions, budget.Check, token);
+        if (positionalParameterCount is { } count)
+        { global::KeyLoad.Features.QueryExecution.ScriptDomSyntax.ValidateNativeSessionSlots(statement, count, budget.Check, token); }
+        return statement switch
+        {
+            global::Microsoft.SqlServer.TransactSql.ScriptDom.SelectStatement { Into: null } => Select(request, statement,
+                maximumPayloadBytes, limitsOptions, queryOptions, budget, positionalParameterCount, token),
+            global::Microsoft.SqlServer.TransactSql.ScriptDom.ExecuteStatement execute => ScriptDomExecOperation.Compile(request,
+                execute, maximumPayloadBytes, positionalParameterCount, budget.Check, token),
+            global::Microsoft.SqlServer.TransactSql.ScriptDom.InsertStatement insert => Composition(request, insert,
+                maximumPayloadBytes, positionalParameterCount, budget.Check, token),
+            _ => throw ScriptDomOperationErrors.Unsupported()
+        };
     }
 
-    private static McpDecodedOperation Composition(SqlOperationRequest request, SqlOperationSyntaxReader reader,
-        int maximumPayloadBytes, CancellationToken cancellationToken)
-    {
-        var command = SqlCompositionInsert.Compile(request, reader);
-        cancellationToken.ThrowIfCancellationRequested();
-        var arguments = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
-        { [McpCatalogProtocol.Request] = JsonSerializer.SerializeToElement(command, JsonDefaults.Options) };
-        var operation = Target(McpToolNames.DocumentsCommit).Decode(arguments, maximumPayloadBytes);
-        cancellationToken.ThrowIfCancellationRequested();
-        return operation;
-    }
-
-    private static string ReadStatement(SqlOperationSyntaxReader reader)
-    {
-        reader.SkipTrivia();
-        try
-        { return reader.Identifier(); }
-        catch (KeyLoadException error) when (error.Code == ErrorCode.Validation)
-        { throw SqlOperationSyntax.UnsupportedInput(); }
-    }
-
-    private static McpDecodedOperation Select(SqlOperationRequest request, int maximumPayloadBytes,
-        CancellationToken cancellationToken)
+    private static McpDecodedOperation Select(SqlOperationRequest request,
+        global::Microsoft.SqlServer.TransactSql.ScriptDom.TSqlStatement statement, int maximumPayloadBytes,
+        IOptions<DatabaseLimits> limitsOptions, IOptions<QueryExecutionOptions> queryOptions,
+        global::KeyLoad.Core.ReadExecutionBudget budget, int? positionalParameterCount, CancellationToken token)
     {
         if (request.Partition is null)
-        { throw SqlOperationSyntax.InvalidInput(); }
-        var query = new QueryRequest(request.Partition, request.Sql, request.Parameters, request.AllowFullScan, request.Cursor, request.QueryDialectVersion);
+        { throw ScriptDomOperationErrors.Invalid(); }
+        var query = new QueryRequest(request.Partition, request.Sql, request.Parameters,
+            request.AllowFullScan, request.Cursor, request.QueryDialectVersion);
+        if (positionalParameterCount is null)
+        { return Decode(McpToolNames.QueryExecute, query, maximumPayloadBytes, budget.Check, token); }
+        var ast = global::KeyLoad.Query.Features.QueryExecution.ScriptDomQueryAdapter.Lower(statement, query,
+            limitsOptions, queryOptions, budget, positionalParameterCount, token);
+        return Decode(McpToolNames.QueryAst, ast, maximumPayloadBytes, budget.Check, token);
+    }
+
+    private static McpDecodedOperation Composition(SqlOperationRequest request,
+        global::Microsoft.SqlServer.TransactSql.ScriptDom.InsertStatement statement, int maximumPayloadBytes,
+        int? positionalParameterCount, Action checkBudget, CancellationToken token)
+    {
+        var command = SqlCompositionInsert.Compile(request, statement, positionalParameterCount, checkBudget, token);
+        return Decode(McpToolNames.DocumentsCommit, command, maximumPayloadBytes, checkBudget, token);
+    }
+
+    private static McpDecodedOperation Decode<T>(string name, T request, int maximumPayloadBytes,
+        Action checkBudget, CancellationToken token)
+    {
+        checkBudget();
+        token.ThrowIfCancellationRequested();
+        if (!McpOperationCatalog.TryGet(name, out var descriptor)
+            || descriptor.ReadKind.HasValue == descriptor.CommandKind.HasValue)
+        { throw ScriptDomOperationErrors.Unsupported(); }
         var arguments = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
-        { [McpCatalogProtocol.Request] = JsonSerializer.SerializeToElement(query, JsonDefaults.Options) };
-        cancellationToken.ThrowIfCancellationRequested();
-        var operation = Target(McpToolNames.QueryExecute).Decode(arguments, maximumPayloadBytes);
-        cancellationToken.ThrowIfCancellationRequested();
+        { [McpCatalogProtocol.Request] = JsonSerializer.SerializeToElement(request, JsonDefaults.Options) };
+        var operation = descriptor.Decode(arguments, maximumPayloadBytes);
+        checkBudget();
+        token.ThrowIfCancellationRequested();
         return operation;
     }
-
-    private static McpOperationDescriptor Target(string name)
-    {
-        if (name == SqlOperationProtocol.ToolName || !McpOperationCatalog.TryGet(name, out var descriptor)
-            || descriptor.ReadKind.HasValue == descriptor.CommandKind.HasValue)
-        { throw SqlOperationSyntax.UnsupportedInput(); }
-        return descriptor;
-    }
-
-    private static Dictionary<string, JsonElement> BindArguments(Dictionary<string, JsonElement>? parameters,
-        string parameter)
-    {
-        if (parameters is not { Count: SqlOperationSyntax.CallParameterCount }
-            || !parameters.TryGetValue(parameter, out var envelope) || envelope.ValueKind != JsonValueKind.Object
-            || parameters.Keys.Any(name => !StringComparer.Ordinal.Equals(name, parameter)))
-        { throw SqlOperationSyntax.InvalidInput(); }
-        var arguments = new Dictionary<string, JsonElement>(StringComparer.Ordinal);
-        foreach (var property in envelope.EnumerateObject())
-        {
-            if (!arguments.TryAdd(property.Name, property.Value))
-            { throw SqlOperationSyntax.InvalidInput(); }
-        }
-        return arguments;
-    }
+    private const int MinimumNativeParameterCount = 0;
 }

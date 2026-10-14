@@ -14,9 +14,9 @@ internal static class SqlLeftFilteredJoinFixture
     internal const string UseGrant = "filter.use";
     internal const string FilterReadGrant = "filter.read";
     internal const string ReadGrant = "name.read";
-    internal const string Prefix = "SELECT l.order_id AS order_id, r.name AS customer_name, l.total AS total "
+    internal const string Prefix = "SELECT TOP (10) l.order_id AS order_id, r.name AS customer_name, l.total AS total "
         + "FROM filteredorders AS l INNER JOIN filteredcustomers AS r ON l.customer_id = r.id ";
-    internal const string Order = "ORDER BY l.order_id ASC LIMIT 10";
+    internal const string Order = "ORDER BY l.order_id ASC";
     internal const string ParameterSql = Prefix + "WHERE l.total >= @minimum AND NOT (l.total IS NULL) " + Order;
     internal const string LiteralSql = Prefix + "WHERE l.total = 7 " + Order;
     internal const string FirstJson = "{\"order_id\":\"a\",\"customer_id\":\"c1\",\"total\":7}";

@@ -1,6 +1,6 @@
 # ADR-065: Full SQL syntax and client protocol
 
-Current owner selection 2026-10-13: T-SQL through Microsoft ScriptDOM, governed by [ADR-130](ADR-130-microsoft-scriptdom-tsql.md). This replaces the prior integration-owner PostgreSQL18 working dialect described below. The replacement is not yet implemented or qualified; the complete superseded grammar and planning cleanup belongs to that same replacement batch. PostgreSQL wire framing remains a separately qualified transport, not the chosen SQL grammar.
+Current owner selection 2026-10-13: T-SQL through Microsoft ScriptDOM, governed by [ADR-130](ADR-130-microsoft-scriptdom-tsql.md). This replaces the prior integration-owner PostgreSQL18 working dialect described below. Selected native parsing and closed lowering are source-integrated; complete execution and current Linux qualification remain open. PostgreSQL wire framing remains a separately qualified transport, not the chosen SQL grammar.
 
 Owner clarification 2026-10-03 requires full SQL for one composable database,
 not merely independent per-model calls. [DatabaseComposition](../Features/DatabaseComposition.md)
@@ -54,18 +54,11 @@ flowchart LR
     Typed --> Writers[Same instance array and stream parity]
 ```
 
-## Decision and conformance target
+## Current decision and conformance target
 
-The owner requires full SQL syntax and a client connection protocol. Root selects
-PostgreSQL18 as the working target after an optional unanswered dialect question;
-this records a planning choice, not explicit owner selection or delivered support.
-Maintain separate syntax, semantic execution and native client gates in
-[conformance inventory](../implementation/sql-client-conformance.json). No parser
-or package alone satisfies the requirement. Every required PostgreSQL18 grammar/
-command family needs typed execution and real differential tests; any pending
-family keeps the full SQL gate false. PostgreSQL wire3.0 is the first native
-client target, with explicit3.2 negotiation fixtures before advertising that
-version. Current HTTP/JSON plus official MCP remain their actual transports.
+The owner-selected syntax is T-SQL through Microsoft ScriptDOM under [ADR-130](ADR-130-microsoft-scriptdom-tsql.md), with [ScriptDOM requirements](../Features/QueryExecution/ScriptDom.md) and the [active conformance inventory](../implementation/sql-client-conformance.json). Preserve REQ/AC-SQLC-001–011. Native grammar acceptance, closed authorized execution and actual client interoperability remain separate gates. General SQL remains required and OPEN; a parser or finite SELECT/EXEC/INSERT adapter does not complete it.
+
+PostgreSQL wire3.0 and genuine Npgsql are independent bounded authenticated transport contracts. PostgreSQL wire3.0 is the first native client target; explicit real protocol3.2 negotiation fixtures are mandatory BEFORE advertising protocol3.2 support. They may carry selected T-SQL text; neither PostgreSQL grammar nor SQL Server TDS compatibility follows. PostgreSQL remains a native benchmark competitor.
 
 Owner correction 2026-10-09 and [ADR-125](ADR-125-connection-owned-execution.md)
 select one grain per actual connection, admitting bounded parallel independent
@@ -80,27 +73,7 @@ owns REQ/AC-ORL-013 and TASK-ORL-REQUEST-LIFETIME. Native SQL protocol work must
 reuse this boundary while retaining its separately defined connection protocol
 requirements. Runtime and matched Linux performance qualification remain open.
 
-[Command inventory](../implementation/sql-client-commands-postgresql18.json)
-enumerates all183 entries from the official version18 command index. Family
-mapping is research inference;75 entries need explicit named coverage beyond
-the ADMIN catch-all. All command semantic contracts and qualification remain
-pending. This layer does not replace separate expression/type/function/operator/
-clause/catalog/protocol inventories or authorize provider/session choices.
-
-TASK-SQLC-R12 [pinned parser research](../implementation/sql-parser-candidate-review.md)
-compares managed SqlParserCS and native PostgreSQL parser bindings. Tagged
-libpg_query18.0.0 is the strongest inspected PG18 syntax reference, a planning
-inference; existing wrapper/package PG18 provenance remains unverified. No parser
-is selected or installed. Syntax structures do not provide catalog/type binding,
-authorized execution or client sessions. Freeze native ABI/RIDs, ownership,
-resource/cancellation/drain and typed-plan contracts before implementation; every
-advertised family still requires real differential execution and RF3 proof.
-
-Official targets: [PostgreSQL18 SQL](https://www.postgresql.org/docs/18/sql.html),
-[syntax](https://www.postgresql.org/docs/18/sql-syntax.html),
-[protocol](https://www.postgresql.org/docs/18/protocol.html),
-[flow](https://www.postgresql.org/docs/18/protocol-flow.html),
-[Npgsql types](https://www.npgsql.org/doc/types/basic.html).
+Previous [183 PostgreSQL command names](../implementation/sql-client-commands-postgresql18.json), [previous conformance bytes](../implementation/sql-client-conformance-postgresql18.historical.json) and parser-candidate research remain historical, inactive planning records. They authorize no old grammar, package or fallback. Microsoft [ScriptDOM](https://github.com/microsoft/SqlScriptDOM) is the syntax owner; [PostgreSQL protocol](https://www.postgresql.org/docs/18/protocol.html) and [Npgsql](https://www.npgsql.org/doc/types/basic.html) remain transport references.
 
 ```mermaid
 flowchart LR
@@ -112,7 +85,11 @@ flowchart LR
     Host --> Models[Linked relational and other models]
 ```
 
-## Ordered implementation contract
+## Superseded language implementation record
+
+The PostgreSQL-specific grammar/parser tasks and CALL/lexical expansions below are historical, inactive implementation plans after ADR-130. Preserve their original evidence and mandatory typed-state, authorization, cancellation, receipt, recovery and interoperability acceptance; implement those criteria through selected T-SQL. Do not interpret later historical NEXT wording as current parser adoption.
+
+### Original ordered implementation contract
 
 1. TASK-SQLC-R1/R2/R3/R4: actual grammar/executor/security/client baseline and
    pinned FullTextSearch review. Root joins source hashes and real GitHub reports.

@@ -18,8 +18,8 @@ internal static class SqlStringContinuationControls
         var identity = JsonDefaults.Serialize(database.Store.Identity);
         foreach (var (clause, code) in new[]
         {
-            (SameLine, ErrorCode.UnsupportedCapability), (BlockSeparator, ErrorCode.UnsupportedCapability),
-            (PrefixedNext, ErrorCode.UnsupportedCapability), (OpenContinuation, ErrorCode.Validation),
+            (SameLine, ErrorCode.Validation), (BlockSeparator, ErrorCode.Validation),
+            (PrefixedNext, ErrorCode.Validation), (OpenContinuation, ErrorCode.Validation),
             (InvalidBytes, ErrorCode.Validation)
         })
         {

@@ -2,6 +2,10 @@
 
 Status: Accepted; dialect implementation and GitHub qualification pending. Product decision source: [sections 13, 23, 35, and 43](../design/architecture-v0.3.uk.md); current query feature: [QueryExecution](../Features/QueryExecution.md).
 
+## Current selection
+
+[ADR-130](ADR-130-microsoft-scriptdom-tsql.md) selects Microsoft ScriptDOM T-SQL. The versioned bounded lowering below is an execution stage within the mandatory full-SQL product target, not a replacement for that target. Use the [active conformance inventory](../implementation/sql-client-conformance.json); no PostgreSQL grammar or fallback is selected. Existing wire/Npgsql contracts stay independent.
+
 ## Context and decision
 
 SQL is a public query syntax and must have a bounded, versioned subset rather than an accidental promise of full vendor compatibility. The product design names a KeyLoad SQL subset with explicit capability/version reporting, typed parameters, deterministic ordering, bounded operators, and stable unsupported-expression diagnostics. SQL remains read-only unless an explicit mutation statement is separately specified and compiled to the same authorized commands.

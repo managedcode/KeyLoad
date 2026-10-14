@@ -8,6 +8,7 @@ internal static class SearchReadBudgetCold
         Func<ZoneTreeStore, Task> operation, List<Exception> failures)
     {
         var identity = fixture.Store.Identity;
+        var originalIdentity = System.Text.Json.JsonSerializer.Serialize(identity, JsonDefaults.Options);
         fixture.Store.Dispose();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
@@ -17,8 +18,9 @@ internal static class SearchReadBudgetCold
             {
                 await Assert.That(cold.Identity.NodeId).IsEqualTo(identity.NodeId);
                 await Assert.That(cold.Identity.Incarnation).IsEqualTo(identity.Incarnation);
-                await Assert.That(cold.Identity.ReadGeneration).IsNotEqualTo(identity.ReadGeneration);
+                await Assert.That(cold.Identity.ReadGeneration).IsEqualTo(identity.ReadGeneration);
                 var coldIdentity = System.Text.Json.JsonSerializer.Serialize(cold.Identity, JsonDefaults.Options);
+                await Assert.That(coldIdentity.AsSpan().SequenceEqual(originalIdentity)).IsTrue();
                 await SearchReadBudgetAssertions.UnchangedAsync(cold, image, position, coldIdentity);
                 await operation(cold);
                 await SearchReadBudgetAssertions.UnchangedAsync(cold, image, position, coldIdentity);

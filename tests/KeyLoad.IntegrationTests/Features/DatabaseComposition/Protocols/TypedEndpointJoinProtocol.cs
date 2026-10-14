@@ -46,9 +46,10 @@ internal static class TypedEndpointJoinProtocol
     internal static SqlOperationRequest Sql(CommandRequest command)
     {
         var mutation = (QueueToGraph)command.Mutations[0];
-        const string text = "INSERT INTO GRAPH_EDGES(@graph, @prefix) SELECT LINKS FROM QUEUE_MESSAGES(@queue) AS q "
-            + "INNER JOIN COLLECTION(@from) AS f ON q.from = f.entity_ref "
-            + "INNER JOIN COLLECTION(@to) AS t ON q.to = t.entity_ref LIMIT @limit WITH COMMAND @command";
+        const string text = "INSERT INTO GRAPH_EDGES (command_id, graph, edge_prefix, max_messages) "
+            + "SELECT @command, @graph, @prefix, @limit FROM QUEUE_MESSAGES(@queue) AS q "
+            + "INNER JOIN DOCUMENTS(@from) AS f ON q.from_entity_ref = f.entity_ref "
+            + "INNER JOIN DOCUMENTS(@to) AS t ON q.to_entity_ref = t.entity_ref";
         return new(command.Partition, text, new(StringComparer.Ordinal)
         {
             [GraphFieldKey] = JsonSerializer.SerializeToElement(mutation.Graph, JsonDefaults.Options),

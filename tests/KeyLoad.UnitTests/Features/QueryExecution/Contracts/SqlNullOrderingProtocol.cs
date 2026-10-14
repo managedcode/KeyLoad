@@ -37,4 +37,17 @@ internal static class SqlNullOrderingProtocol
             descending ? UsingDescending : UsingAscending, StringComparison.Ordinal)
         };
     }
+    internal static QueryRequest Native(PartitionRef partition, bool descending, int limit = NativeRows)
+        => new(partition, "SELECT TOP (" + limit.ToString(global::System.Globalization.CultureInfo.InvariantCulture)
+            + ") label AS label FROM null_ordering WHERE id IN ('low','high') ORDER BY score "
+            + (descending ? "DESC" : "ASC"), AllowFullScan: true);
+    internal static AstQueryRequest NativeAst(PartitionRef partition, bool descending, int limit = NativeRows)
+        => new(partition, new(Collection, null, [new(Label, LabelName)],
+            new InPredicate(new FieldOperand("/@id"),
+                [new ValueOperand(global::System.Text.Json.JsonSerializer.SerializeToElement("low")),
+                 new ValueOperand(global::System.Text.Json.JsonSerializer.SerializeToElement("high"))], false),
+            [new(Score, descending)], limit), AllowFullScan: true);
+    internal const int NativeRows = 2;
+    internal const string NativeAscending = " ASC";
+
 }

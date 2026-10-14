@@ -1,6 +1,3 @@
-using KeyLoad.Core;
-using KeyLoad.Features.QueryExecution;
-
 namespace KeyLoad.UnitTests.Features.QueryExecution;
 
 internal sealed class SqlCommentBudgetTests
@@ -8,21 +5,21 @@ internal sealed class SqlCommentBudgetTests
     [Test]
     public async Task AcSqlc004_CancellationIsObservedBeforeTheNextTriviaChunk()
     {
-        using var cancellation = new CancellationTokenSource();
-        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new()), cancellationToken: cancellation.Token);
-        var sql = SqlCommentTestData.LongCommentPrefix
-            + new string(SqlCommentTestData.LongCommentCharacter, SqlCommentTestData.LongCommentSize)
-            + SqlCommentTestData.LongCommentSuffix;
-        var offset = 0;
-        var state = default(SqlTriviaState);
-        var chunkCharacters = UnitExecutionOptions.QueryExecution().Value.SqlBudgetCheckInterval;
-
-        var status = SqlTriviaReader.Read(sql, ref offset, ref state, SqlCommentTestData.MaximumCommentDepth, chunkCharacters);
-        await Assert.That(status).IsEqualTo(SqlTriviaStatus.More);
-        await Assert.That(offset).IsGreaterThan(0);
-        await Assert.That(offset).IsLessThanOrEqualTo(chunkCharacters);
-        await cancellation.CancelAsync();
-        var error = Assert.ThrowsExactly<OperationCanceledException>(budget.Check);
-        await Assert.That(error.CancellationToken).IsEqualTo(cancellation.Token);
+        var failures = new List<Exception>();
+        await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
+        {
+            using var database = new TestDatabase();
+            await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
+            {
+                SqlOffsetFixture.Seed(database);
+                await SqlOffsetFixture.PolicyAsync(database, SqlOffsetProtocol.GrantEpoch, true);
+                var sql = SqlCommentTestData.LongCommentPrefix
+                    + new string(SqlCommentTestData.LongCommentCharacter, SqlCommentTestData.LongCommentSize)
+                    + SqlCommentTestData.LongCommentSuffix + ScriptDomSelectPages.WindowSql;
+                var engine = new global::KeyLoad.Query.QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
+                await ScriptDomNativeParsingCancellation.RequireAsync(database, engine, sql);
+            }, failures);
+        }, failures);
+        global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }
 }

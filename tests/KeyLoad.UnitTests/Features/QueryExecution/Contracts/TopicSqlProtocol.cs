@@ -20,7 +20,7 @@ internal static class TopicSqlProtocol
     internal const string HeaderSecret = "TOPIC_HEADER_CANARY";
     internal const string Sql = "SELECT * FROM TOPIC_EVENTS('topic-events') ORDER BY position";
     internal const string EmptySql = "SELECT * FROM TOPIC_EVENTS('empty-topic')";
-    internal const string Predicate = "SELECT t.payload.score AS score FROM TOPIC_EVENTS('topic-events') AS t WHERE t.payload.score > 1 ORDER BY t.position DESC LIMIT 1";
+    internal const string Predicate = "SELECT TOP (1) t.payload.score AS score FROM TOPIC_EVENTS('topic-events') AS t WHERE t.payload.score > 1 ORDER BY t.position DESC";
     internal const string PrivatePredicate = "SELECT * FROM TOPIC_EVENTS('topic-events') WHERE payload.secret = 'TOPIC_PAYLOAD_CANARY'";
     internal const string PrivateOrder = "SELECT * FROM TOPIC_EVENTS('topic-events') ORDER BY headers.privateHeader";
     internal const string InvalidGenerationSql = "SELECT * FROM TOPIC_EVENTS('topic-events', 0)";
@@ -31,7 +31,7 @@ internal static class TopicSqlProtocol
     internal const string EmptyJson = "{}";
     internal const string InvalidCursor = "not-a-topic-cursor";
     internal const string StaleSql = "SELECT * FROM TOPIC_EVENTS('topic-events', 2)";
-    internal const string LimitedSql = "SELECT * FROM TOPIC_EVENTS('topic-events') LIMIT 1";
+    internal const string LimitedSql = "SELECT TOP (1) * FROM TOPIC_EVENTS('topic-events')";
     internal const string ScoreRow = "{\"score\":2}";
     internal const string PayloadField = "payload";
     internal const string HeadersField = "headers";

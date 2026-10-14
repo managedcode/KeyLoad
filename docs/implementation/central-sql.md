@@ -1,5 +1,8 @@
 # One AI database: SQL, linked models and relational delivery
 
+Current syntax authority: [ADR-130](../ADR/ADR-130-microsoft-scriptdom-tsql.md), [Microsoft ScriptDOM requirements](../Features/QueryExecution/ScriptDom.md) and [active T-SQL inventory](sql-client-conformance.json). PostgreSQL grammar/parser candidate selections and CALL/lexical implementation plans in this prior record are historical and inactive. Preserve exact original source/results and generic full-operation acceptance; they do not qualify T-SQL. Genuine PostgreSQL wire/Npgsql interoperability and benchmark workloads remain current independent contracts. No new parser, fallback or package adoption is authorized here.
+
+
 Owner clarification 2026-10-03: the central purpose is cross-model composition in
 one database for AI agents. [DatabaseComposition](../Features/DatabaseComposition.md)
 and [ADR-067](../ADR/ADR-067-composable-agent-database.md) add bounded server-derived

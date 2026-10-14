@@ -32,6 +32,24 @@ public sealed class KeyLoadClientExecutionOptions
         && MaximumSqlInspectionDepth is >= MinimumProblemBodyBytes and <= DefaultSqlInspectionDepth
         && SqlBudgetCheckInterval is >= MinimumProblemBodyBytes and <= DefaultSqlBudgetCheckInterval;
 
+    /// <summary>Maps the validated SDK snapshot to the selected parser's local inspection policy.</summary>
+    /// <param name="configured">The original centrally snapshotted SDK execution bounds.</param>
+    /// <returns>Validated native parser limits with the unchanged client byte and nesting ceilings.</returns>
+    [ConfigurationBinding]
+    internal static IOptions<DatabaseLimits> SqlInspection(KeyLoadClientExecutionOptions configured)
+    {
+        ArgumentNullException.ThrowIfNull(configured);
+        configured.Validate();
+        var limits = new DatabaseLimits
+        {
+            MaxQueryBytes = configured.MaximumSqlInspectionBytes,
+            MaxQueryDepth = configured.MaximumSqlInspectionDepth,
+            MaxQueryTokens = configured.MaximumSqlInspectionBytes
+        };
+        limits.Validate();
+        return Options.Create(limits);
+    }
+
     /// <summary>Captures and validates the caller's execution values for one client lifetime.</summary>
     [ConfigurationBinding]
     internal static IOptions<KeyLoadClientExecutionOptions> Snapshot(IOptions<KeyLoadClientExecutionOptions> configured)

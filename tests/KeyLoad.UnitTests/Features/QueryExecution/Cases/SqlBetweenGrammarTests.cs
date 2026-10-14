@@ -6,7 +6,7 @@ internal sealed class SqlBetweenGrammarTests
 {
     private const string BetweenSql = "SELECT * FROM orders WHERE number BETWEEN 1 AND 9";
     private const string NotBetweenSql = "SELECT * FROM orders WHERE number NOT BETWEEN 1 AND 9";
-    private const string MixedPrecedenceSql = "SELECT * FROM orders WHERE number BETWEEN 1 AND 5 OR flag = TRUE AND label = 'moss'";
+    private const string MixedPrecedenceSql = "SELECT * FROM orders WHERE number BETWEEN 1 AND 5 OR flag = @flag AND label = 'moss'";
     private const string AliasedQuotedSql = "SELECT * FROM orders AS o WHERE o.\"odd.name\" /* field */ BETWEEN /* bounds */ @lower AND @upper";
 
     [Test]
@@ -67,7 +67,7 @@ internal sealed class SqlBetweenGrammarTests
     public async Task AcSqlc006APrefixNotAndImmediateOuterAndKeepPredicateGrouping()
     {
         var prefixNot = new SqlParser("SELECT * FROM orders WHERE NOT number BETWEEN 1 AND 9", UnitExecutionOptions.DatabaseLimits(new()), UnitExecutionOptions.QueryExecution()).Parse().Filter;
-        var immediateAnd = (Logical)new SqlParser("SELECT * FROM orders WHERE number BETWEEN 1 AND 5 AND flag = TRUE", UnitExecutionOptions.DatabaseLimits(new()), UnitExecutionOptions.QueryExecution()).Parse().Filter!;
+        var immediateAnd = (Logical)new SqlParser("SELECT * FROM orders WHERE number BETWEEN 1 AND 5 AND flag = @flag", UnitExecutionOptions.DatabaseLimits(new()), UnitExecutionOptions.QueryExecution()).Parse().Filter!;
         var range = Range(new FieldOperand(SqlBetweenTestData.NumberPath), ValueOperand.Create(1m), ValueOperand.Create(9m));
         var immediateRange = Range(new FieldOperand(SqlBetweenTestData.NumberPath), ValueOperand.Create(1m), ValueOperand.Create(5m));
 

@@ -7,18 +7,18 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 /// <summary>AC-SQLC-002/003: trivia cannot splice tokens, hide statements or relax bound arguments.</summary>
 internal sealed class SqlOperationCommentRejectionTests
 {
-    private const string UnclosedLeading = "/* private-input-canary CALL keyload_query_capabilities(@arguments)";
-    private const string UnclosedRoot = "CALL /* private-input-canary";
-    private const string UnclosedArgument = "CALL keyload_query_capabilities(@ /* private-input-canary";
-    private const string UnclosedTrailing = "CALL keyload_query_capabilities(@arguments); /* private-input-canary";
-    private const string SplitRoot = "CA/* private-input-canary */LL keyload_query_capabilities(@arguments)";
-    private const string SplitName = "CALL keyload_query_/* private-input-canary */capabilities(@arguments)";
-    private const string SplitParameter = "CALL keyload_query_capabilities(@arg/* private-input-canary */uments)";
-    private const string SplitLineName = "CALL keyload_-- private-input-canary\r\nquery_capabilities(@arguments)";
-    private const string SplitDelimiter = "CALL / /* private-input-canary */ * keyload_query_capabilities(@arguments)";
-    private const string SecondStatement = "CALL keyload_query_capabilities(@arguments); /* hidden */ SELECT * FROM orders";
-    private const string SecondCall = "CALL keyload_query_capabilities(@arguments) -- hidden\r\nCALL keyload_admin_status(@arguments)";
-    private const string ExtraTerminator = "CALL keyload_query_capabilities(@arguments); /* hidden */ ;";
+    private const string UnclosedLeading = "/* private-input-canary EXEC keyload_query_capabilities @arguments";
+    private const string UnclosedRoot = "EXEC /* private-input-canary";
+    private const string UnclosedArgument = "EXEC keyload_query_capabilities @arguments /* private-input-canary";
+    private const string UnclosedTrailing = "EXEC keyload_query_capabilities @arguments; /* private-input-canary";
+    private const string SplitRoot = "EX/* private-input-canary */EC keyload_query_capabilities @arguments";
+    private const string SplitName = "EXEC keyload_query_/* private-input-canary */capabilities @arguments";
+    private const string SplitParameter = "EXEC keyload_query_capabilities @arg/* private-input-canary */uments";
+    private const string SplitLineName = "EXEC keyload_-- private-input-canary\r\nquery_capabilities @arguments";
+    private const string SplitDelimiter = "EXEC / /* private-input-canary */ * keyload_query_capabilities @arguments";
+    private const string SecondStatement = "EXEC keyload_query_capabilities @arguments; /* hidden */ SELECT * FROM orders";
+    private const string SecondCall = "EXEC keyload_query_capabilities @arguments -- hidden\r\nEXEC keyload_admin_status @arguments";
+    private const string ExtraTerminator = "EXEC keyload_query_capabilities @arguments; /* hidden */ ;";
 
     [Test]
     public async Task AcSqlc002UnclosedBlocksAtEveryCallBoundaryReturnSafeValidation()
@@ -35,19 +35,28 @@ internal sealed class SqlOperationCommentRejectionTests
         var limits = SqlOperationTestData.Limits with { MaxQueryDepth = SqlOperationCommentTestData.ShallowDepth };
         var accepted = SqlOperationCommentTestData.Request(
             SqlOperationCommentTestData.Nested(SqlOperationCommentTestData.ShallowDepth) + SqlOperationCommentTestData.PlainCall);
-        await SqlOperationTestData.Same(SqlOperationTestData.Compile(accepted, limits),
+        var budget = new global::KeyLoad.Core.ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(SqlOperationTestData.Limits));
+        using var reader = new global::KeyLoad.Features.QueryExecution.ScriptDomBoundedReader(accepted.Sql, budget.Check);
+        var parser = new global::Microsoft.SqlServer.TransactSql.ScriptDom.TSql180Parser(true,
+            global::Microsoft.SqlServer.TransactSql.ScriptDom.SqlEngineType.Standalone);
+        var tokens = parser.GetTokenStream(reader, out var errors);
+        await Assert.That(errors.Count).IsEqualTo(0);
+        global::KeyLoad.Features.QueryExecution.ScriptDomTokenBounds.Require(tokens, limits, budget.Check);
+        await SqlOperationTestData.Same(SqlOperationTestData.Compile(accepted),
             SqlOperationTestData.Find(McpCatalogExpectations.QueryCapabilities).Decode(null));
         var rejected = accepted with
         {
             Sql = SqlOperationCommentTestData.Nested(SqlOperationCommentTestData.ExcessDepth) + SqlOperationCommentTestData.PlainCall
         };
         await SqlOperationTestData.Reject(rejected, ErrorCode.BudgetExceeded, limits);
+        await SqlOperationTestData.Same(SqlOperationTestData.Compile(accepted),
+            SqlOperationTestData.Find(McpCatalogExpectations.QueryCapabilities).Decode(null));
     }
 
     [Test]
     public async Task AcSqlc002CommentsCannotConcatenateIdentifiersOrDelimiterCharacters()
     {
-        await SqlOperationTestData.Reject(SqlOperationCommentTestData.Request(SplitRoot), ErrorCode.UnsupportedCapability);
+        await SqlOperationTestData.Reject(SqlOperationCommentTestData.Request(SplitRoot), ErrorCode.Validation);
         foreach (var sql in new[] { SplitName, SplitParameter, SplitLineName, SplitDelimiter })
         {
             await SqlOperationTestData.Reject(SqlOperationCommentTestData.Request(sql), ErrorCode.Validation);
@@ -59,7 +68,7 @@ internal sealed class SqlOperationCommentRejectionTests
     {
         foreach (var sql in new[] { SecondStatement, SecondCall, ExtraTerminator })
         {
-            await SqlOperationTestData.Reject(SqlOperationCommentTestData.Request(sql), ErrorCode.Validation);
+            await SqlOperationTestData.Reject(SqlOperationCommentTestData.Request(sql), ErrorCode.UnsupportedCapability);
         }
     }
 

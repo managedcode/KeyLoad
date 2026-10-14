@@ -9,16 +9,16 @@ internal static class SqlNullDistinctPages
     {
         var engine = new QueryEngine(owner, UnitExecutionOptions.QueryExecution());
         await Assert.That(engine.Capabilities.ReadProfiles.Contains(SqlNullDistinctCases.Profile)).IsTrue();
-        await Assert.That(engine.Capabilities.ReadProfiles.Contains(SqlNullDistinctCases.NullSynonymProfile)).IsTrue();
-        await Assert.That(engine.Capabilities.ReadProfiles.Contains(SqlNullDistinctCases.PositiveProfile)).IsTrue();
-        await Assert.That(engine.Capabilities.ReadProfiles.Contains(SqlNullDistinctCases.LeadingProfile)).IsTrue();
-        await Assert.That(engine.Capabilities.ReadProfiles.Contains(SqlNullDistinctCases.HexProfile)).IsTrue();
-        await Assert.That(engine.Capabilities.ReadProfiles.Contains(SqlNullDistinctCases.EscapeProfile)).IsTrue();
-        await Assert.That(engine.Capabilities.ReadProfiles.Contains(SqlNullDistinctCases.DollarProfile)).IsTrue();
-        await Assert.That(engine.Capabilities.ReadProfiles.Contains(SqlNullDistinctCases.BinaryOctalProfile)).IsTrue();
-        await Assert.That(engine.Capabilities.ReadProfiles.Contains(SqlNullDistinctCases.UnicodeProfile)).IsTrue();
-        await Assert.That(engine.Capabilities.ReadProfiles.Contains(SqlNullDistinctCases.NumericSeparatorProfile)).IsTrue();
-        await Assert.That(engine.Capabilities.ReadProfiles.Contains(SqlUnicodeIdentifierCases.Profile)).IsTrue();
+        await Assert.That(engine.Capabilities.ReadProfiles.Contains(SqlNullDistinctCases.NullSynonymProfile)).IsFalse();
+        await Assert.That(engine.Capabilities.ReadProfiles.Contains(SqlNullDistinctCases.PositiveProfile)).IsFalse();
+        await Assert.That(engine.Capabilities.ReadProfiles.Contains(SqlNullDistinctCases.LeadingProfile)).IsFalse();
+        await Assert.That(engine.Capabilities.ReadProfiles.Contains(SqlNullDistinctCases.HexProfile)).IsFalse();
+        await Assert.That(engine.Capabilities.ReadProfiles.Contains(SqlNullDistinctCases.EscapeProfile)).IsFalse();
+        await Assert.That(engine.Capabilities.ReadProfiles.Contains(SqlNullDistinctCases.DollarProfile)).IsFalse();
+        await Assert.That(engine.Capabilities.ReadProfiles.Contains(SqlNullDistinctCases.BinaryOctalProfile)).IsFalse();
+        await Assert.That(engine.Capabilities.ReadProfiles.Contains(SqlNullDistinctCases.UnicodeProfile)).IsFalse();
+        await Assert.That(engine.Capabilities.ReadProfiles.Contains(SqlNullDistinctCases.NumericSeparatorProfile)).IsFalse();
+        await Assert.That(engine.Capabilities.ReadProfiles.Contains(SqlUnicodeIdentifierCases.Profile)).IsFalse();
         var image = SqlInnerJoinRetainedIdentityFlow.Image(store);
         var position = store.Position;
         var identity = JsonDefaults.Serialize(store.Identity);

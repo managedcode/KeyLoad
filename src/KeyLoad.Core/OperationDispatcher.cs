@@ -46,6 +46,7 @@ public sealed partial class DatabaseEngine
             OperationKind.ReleaseProjectionConsumer => ExecuteReleaseProjection(transaction, operation),
             OperationKind.PurgeOutbox => ExecutePurgeOutbox(transaction, operation),
             OperationKind.ConfigureResource => ExecuteConfigureResource(transaction, operation),
+            OperationKind.SetQueueDispatch => ExecuteQueueDispatchControl(transaction, operation),
             OperationKind.BootstrapPhysicalShardCatalog => ExecuteBootstrapPhysicalShardCatalog(transaction, operation),
             OperationKind.RegisterPhysicalOwner => ExecuteRegisterPhysicalOwner(transaction, principal, Payload<RegisterPhysicalOwnerV1>(operation)),
             OperationKind.BindAtomicPartitionPlacement => ExecuteBindAtomicPartitionPlacement(transaction, principal,

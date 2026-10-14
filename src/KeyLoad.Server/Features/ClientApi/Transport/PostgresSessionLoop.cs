@@ -1,5 +1,4 @@
 using System.Text.Json;
-using KeyLoad.Query;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
@@ -90,25 +89,14 @@ internal sealed class PostgresSessionLoop(IServiceProvider services, global::Mic
         var sql = SimpleSql(payload);
         if (string.IsNullOrWhiteSpace(sql))
         { writer.Empty(PostgresWireWriter.EmptyQueryResponse); return; }
-        var statement = new PostgresPreparedStatement(PostgresParameterNames.Translate(sql,
-            PostgresProtocol.AllRows, services.GetRequiredService<IOptions<DatabaseLimits>>().Value.MaxQueryDepth,
-            services.GetRequiredService<IOptions<QueryExecutionOptions>>().Value.SqlBudgetCheckInterval, closed), [], IsQuery(sql, closed),
-            checked(sql.Length * sizeof(char)));
+        var inspection = PostgresPreparedDecoder.Inspect(sql, PostgresProtocol.AllRows,
+            services.GetRequiredService<IOptions<DatabaseLimits>>(), closed);
+        var statement = new PostgresPreparedStatement(sql, [], inspection.Rows,
+            checked(sql.Length * sizeof(char)), inspection.UsesProfileDialect);
         var portal = new PostgresBoundPortal(statement, new Dictionary<string, JsonElement>(StringComparer.Ordinal),
             PostgresProtocol.TextFormat, statement.RetainedBytes);
         await PostgresOperationDelivery.ExecuteAsync(services, writer, owner, identity, partition,
             portal, PostgresProtocol.AllRows, cancellation, Options, admission, describe: true, closed).ConfigureAwait(false);
-    }
-
-    private bool IsQuery(string sql, CancellationToken token)
-    {
-        var limits = services.GetRequiredService<IOptions<DatabaseLimits>>().Value;
-        var reader = new SqlOperationSyntaxReader(sql, limits.MaxQueryTokens, limits.MaxQueryDepth,
-            services.GetRequiredService<IOptions<QueryExecutionOptions>>(), token);
-        var kind = reader.Identifier();
-        return kind.Equals(SqlOperationSyntax.Select, StringComparison.OrdinalIgnoreCase)
-            || kind.Equals(SqlOperationSyntax.Explain, StringComparison.OrdinalIgnoreCase)
-            || kind.Equals(SqlOperationSyntax.Table, StringComparison.OrdinalIgnoreCase);
     }
 
     private string SimpleSql(ReadOnlySpan<byte> bytes)
