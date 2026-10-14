@@ -11,15 +11,15 @@ internal static class SqlModelViewRf3AuthorizationAssertions
     internal static QueryRequest EventPrivateProjection(SqlModelViewRf3Scenario scenario)
         => scenario.EventSql() with
         {
-            Sql = $"SELECT payload.secret AS secret FROM EVENTS('{SqlModelViewRf3Scenario.StreamSet}',"
-                + $"'{SqlModelViewRf3Scenario.StreamId}') WHERE id = '{SqlModelViewRf3Scenario.FirstEventId}' LIMIT 1"
+            Sql = $"SELECT TOP (1) payload.secret AS secret FROM EVENTS('{SqlModelViewRf3Scenario.StreamSet}',"
+                + $"'{SqlModelViewRf3Scenario.StreamId}') WHERE id = '{SqlModelViewRf3Scenario.FirstEventId}'"
         };
 
     internal static QueryRequest QueuePrivateProjection(SqlModelViewRf3Scenario scenario)
         => scenario.QueueSql() with
         {
-            Sql = $"SELECT payload.secret AS secret FROM QUEUE_MESSAGES('{SqlModelViewRf3Scenario.Queue}') "
-                + $"WHERE id = '{SqlModelViewRf3Scenario.FirstMessageId}' LIMIT 1"
+            Sql = $"SELECT TOP (1) payload.secret AS secret FROM QUEUE_MESSAGES('{SqlModelViewRf3Scenario.Queue}') "
+                + $"WHERE id = '{SqlModelViewRf3Scenario.FirstMessageId}'"
         };
 
     internal static async Task<McpPersistedIdentity> GrantSensitiveReadAsync(KeyLoadClient administrator,
@@ -52,12 +52,12 @@ internal static class SqlModelViewRf3AuthorizationAssertions
         var request = scenario.QueueSql();
         var predicates = new[]
         {
-            request with { Sql = $"SELECT * FROM QUEUE_MESSAGES('{SqlModelViewRf3Scenario.Queue}') "
+            request with { Sql = $"SELECT TOP ({SqlModelViewRf3Scenario.RowLimit}) * FROM QUEUE_MESSAGES('{SqlModelViewRf3Scenario.Queue}') "
                 + $"WHERE payload.secret = '{SqlModelViewRf3Scenario.QueueCanary}' "
-                + $"ORDER BY id LIMIT {SqlModelViewRf3Scenario.RowLimit}" },
-            request with { Sql = $"SELECT * FROM QUEUE_MESSAGES('{SqlModelViewRf3Scenario.Queue}') "
+                + $"ORDER BY id" },
+            request with { Sql = $"SELECT TOP ({SqlModelViewRf3Scenario.RowLimit}) * FROM QUEUE_MESSAGES('{SqlModelViewRf3Scenario.Queue}') "
                 + $"WHERE headers.privateHeader = '{SqlModelViewRf3Scenario.QueueHeaderCanary}' "
-                + $"ORDER BY id LIMIT {SqlModelViewRf3Scenario.RowLimit}" }
+                + $"ORDER BY id" }
         };
         for (var transition = 0; transition < 2; transition++)
         {
@@ -121,12 +121,12 @@ internal static class SqlModelViewRf3AuthorizationAssertions
         var requests = new[]
         {
             request,
-            request with { Sql = $"SELECT * FROM EVENTS('{SqlModelViewRf3Scenario.StreamSet}',"
+            request with { Sql = $"SELECT TOP ({SqlModelViewRf3Scenario.RowLimit}) * FROM EVENTS('{SqlModelViewRf3Scenario.StreamSet}',"
                 + $"'{SqlModelViewRf3Scenario.StreamId}') WHERE payload.secret = '{SqlModelViewRf3Scenario.EventCanary}' "
-                + $"ORDER BY revision LIMIT {SqlModelViewRf3Scenario.RowLimit}" },
-            request with { Sql = $"SELECT * FROM EVENTS('{SqlModelViewRf3Scenario.StreamSet}',"
+                + $"ORDER BY revision" },
+            request with { Sql = $"SELECT TOP ({SqlModelViewRf3Scenario.RowLimit}) * FROM EVENTS('{SqlModelViewRf3Scenario.StreamSet}',"
                 + $"'{SqlModelViewRf3Scenario.StreamId}') WHERE headers.privateHeader = '{SqlModelViewRf3Scenario.EventHeaderCanary}' "
-                + $"ORDER BY revision LIMIT {SqlModelViewRf3Scenario.RowLimit}" }
+                + $"ORDER BY revision" }
         };
         foreach (var query in requests)
         {

@@ -18,13 +18,13 @@ internal static class ControlledPartitionMovementGrantFlow
         var authorizedOutcome = await ControlledPartitionMovementVerifiedSubmit.SubmitAsync(source, runtime,
             admission, authorizationRequest, cancellationToken);
         var authorization = await ControlledPartitionMovementGrantAssertions.AuthorizedAsync(authorizedOutcome,
-            actualPrepared, corpus, originalExpiry);
+            actualPrepared, corpus, originalExpiry, source.AdditionalSeedEntries, source.AdditionalSeedResources);
         var fenceRequest = ControlledPartitionMovementFenceRequest.Fence(actualPrepared, authorization,
             corpus, callerAddress, originalExpiry);
         var fencedOutcome = await ControlledPartitionMovementVerifiedSubmit.SubmitAsync(source, runtime,
             admission, fenceRequest, cancellationToken);
         var fence = await ControlledPartitionMovementGrantAssertions.FencedAsync(fencedOutcome,
-            actualPrepared, corpus);
+            actualPrepared, corpus, source.AdditionalSeedEntries);
         var originalReceipt = NativeSerialization.Serialize(fencedOutcome);
         var originalImage = ControlledPartitionMovementRawImage.Bytes(source.Store);
         var position = source.Store.Position;

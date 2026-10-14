@@ -9,6 +9,10 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
 {
     internal readonly TwoRf3MembershipCapacity capacity = new();
     internal DistributedApplication? application;
+    internal KeyLoad.IntegrationTests.Features.RelationalStorage.SqlTypedInsertMovementTls? SqlInsertTls
+    {
+        get; init;
+    }
     internal KeyLoad.IntegrationTests.Features.Messaging.RemoteTransferStartupCallbacks? startupCallbacks;
     internal ContainerRuntimeControl? RemoteRuntimeOwner
     {
@@ -137,11 +141,8 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
     internal static Task<TwoRf3MembershipWave> StartOwnedAsync(TwoRf3MembershipWave wave, CancellationToken cancellationToken)
         => TwoRf3MembershipWaveStartup.StartOwnedAsync(wave, cancellationToken);
 
-    internal async Task WaitForSixHealthyAsync(CancellationToken cancellationToken)
-    {
-        await global::KeyLoad.AppHost.Features.TestInfrastructure.AspireStartupReadiness.WaitForHealthyAsync(
-            Application, TwoRf3MembershipProtocol.Nodes, cancellationToken).ConfigureAwait(false);
-    }
+    internal Task WaitForSixHealthyAsync(CancellationToken cancellationToken)
+        => TwoRf3MembershipWaveStartup.WaitForSixHealthyAsync(this, cancellationToken);
 
     public async ValueTask DisposeAsync()
     {

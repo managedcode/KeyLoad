@@ -35,8 +35,8 @@ internal sealed class SqlModelViewRf3QueueAuthorityTests(ClusterFixture fixture)
 
         var deniedUse = request with
         {
-            Sql = $"SELECT * FROM QUEUE_MESSAGES('{SqlModelViewRf3Scenario.Queue}') "
-                + $"WHERE payload.secret = '{SqlModelViewRf3Scenario.QueueCanary}' LIMIT {SqlModelViewRf3Scenario.RowLimit}"
+            Sql = $"SELECT TOP ({SqlModelViewRf3Scenario.RowLimit}) * FROM QUEUE_MESSAGES('{SqlModelViewRf3Scenario.Queue}') "
+                + $"WHERE payload.secret = '{SqlModelViewRf3Scenario.QueueCanary}'"
         };
         var denied = await reader.QueryAsync(deniedUse, deadline.Token);
         await SqlModelViewRf3DenialAssertions.SdkAsync(denied, identity.Secret);

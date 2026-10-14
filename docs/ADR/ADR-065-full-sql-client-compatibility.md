@@ -5,7 +5,7 @@ Current owner selection 2026-10-13: T-SQL through Microsoft ScriptDOM, governed 
 Owner clarification 2026-10-03 requires full SQL for one composable database,
 not merely independent per-model calls. [DatabaseComposition](../Features/DatabaseComposition.md)
 and [ADR-067](ADR-067-composable-agent-database.md) define the first bounded atomic
-queue-to-entity-to-graph and graph-to-queue derivation stage through existing CALL.
+queue-to-entity-to-graph and graph-to-queue derivation stage through the selected canonical operation compiler; historical CALL spelling is retired.
 This is a prerequisite building block; full declarative sources, joins and
 data-modifying statements across the models remain this ADR's required outcome.
 
@@ -13,7 +13,7 @@ Status: Accepted staged implementation contract; full execution/native protocol
 and exact-source qualification pending. Date2026-10-03. Integration owner: KeyLoad
 root planning agent. Related QueryExecution/ClientApi/RelationalStorage/Search;
 REQ-SQLC-001–011 and AC-SQLC-001–011 in the root sql-client-compatibility acceptance.
-This extends ADR-012/054; the existing Q1/CALL implementation is a bounded initial
+This extends ADR-012/054; the selected finite T-SQL SELECT/EXEC/INSERT/CREATE TABLE adapter is a bounded initial
 stage, not the full product. Existing SQL envelope1 and generated DTO IDs remain unchanged.
 
 ## Accepted public/native test-oracle stage

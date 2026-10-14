@@ -866,3 +866,48 @@ flowchart TD
 ```
 
 Source joined; the R31 exact-image build and native companion group passed 17/17, including this principal cold replay flow. Linux/RF3, endurance, coverage and public-client qualification remain OPEN. Fixture defect is distinct from canonical product outcome scope.
+
+
+## Original composite-unique RF3 query uses current T-SQL
+
+TASK-KL011-COMPOSITE-QUERY-CURRENT-TSQL-001 / REQ-DSTORE-002 /
+AC-DSTORE-002 and AC-DSTORE-COMPOSITE-RF3-001 preserves the original
+Kl011CompositeUniqueDeltasRollbackScopeAndPersistedGrantRestorationMatchBothClients
+whole flow. Its single shared query changes retired LIMIT10 to SELECT TOP (10),
+keeping the quoted composite-unique collection, optional exact tuple predicate,
+ORDER BY id ASC and original AllowFullScan condition. The bound remains ten.
+
+Actual native SelectLowering enables document metadata for an ordinary source
+without model or join. ProjectionLowering accepts its one unqualified star.
+OrderingLowering retains ascending order and delegates the single id name to
+Names.Path with document metadata enabled; that owner preserves the existing
+SqlSyntax metadata mapping. WindowLowering accepts a native integer TOP, refuses
+percent/ties/approximate/offset combinations and enforces the original MaxResults
+limit. No compiler, metadata mapping, index/provider or bounds are changed here.
+
+All original SDK/official MCP full rows/revisions/redaction/cursor/index-path/cut
+checks remain exact, together with initial/replaced/patched/deleted/reused tuple
+memberships, empty obsolete and rollback tuple memberships, two-mutation Conflict
+rollback, exact original safe failure replay and private-canary exclusion.
+Distinct atomic-partition tuple independence, persisted grant removal/restore,
+full authorized state and fresh healthy successful receipt replay are unchanged.
+The original Case, arguments, mutation IDs, deadlines, scoped caller ownership
+and joined cleanup remain; no new Case or cold cycle is added.
+
+Original source319c/run38578269537 attempt1 KL011 failed the first positive
+RowsAsync19 after the actual original seed, reporting SDK Validation. Exact
+native fixture source uses retired LIMIT10 in the common query. This is a fixture
+syntax correction; product uniqueness/rollback/authorization and storage are not
+modified or claimed faulty. Final formatted-source guard rebase, fresh native
+checkOnly, compiler and exact-source Linux whole RF3 qualification remain OPEN.
+
+```mermaid
+flowchart LR
+    A[Valid bounded composite query] --> B[Complete mutation and tuple memberships]
+    B --> C[Atomic unique-conflict rollback and original replay]
+    C --> D[Independent partition scope and persisted deny restore]
+    D --> E[Full original healthy receipt and rows]
+```
+
+Canonical slice DocumentStorage, ADR002/011. Frontend/new API/package/storage
+format changes: N/A. SQL compiler/typed INSERT work stays with its existing owner.

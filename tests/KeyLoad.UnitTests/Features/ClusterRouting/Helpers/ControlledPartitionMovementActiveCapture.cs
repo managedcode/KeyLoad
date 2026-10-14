@@ -35,11 +35,11 @@ internal static class ControlledPartitionMovementActiveCapture
                 var handle = await owner.Source.CaptureAsync(
                     ControlledPartitionMovementCaptureFlow.Principal(source, verified), verified.Envelope,
                     cancellationToken);
-                await ControlledPartitionMovementResourceAssertions.CaptureAsync(handle.Descriptor);
+                await ControlledPartitionMovementResourceAssertions.CaptureAsync(handle.Descriptor, source.AdditionalSeedResources);
                 await Assert.That(handle.ExpiresAt).IsEqualTo(expiry);
                 var pages = await ControlledPartitionMovementCapturedPageReader.ReadAsync(source, owner.Source,
                     runtime, admission, handle, request, cancellationToken);
-                await ControlledPartitionMovementCapturedPages.AssertAsync(original, handle, pages);
+                await ControlledPartitionMovementCapturedPages.AssertAsync(original, handle, pages, source.AdditionalSeedResources);
                 await Assert.That(ControlledPartitionMovementRawImage.Bytes(source.Store)
                     .SequenceEqual(original, StringComparer.Ordinal)).IsTrue();
                 await Assert.That(source.Store.Position).IsEqualTo(position);

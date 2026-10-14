@@ -11,8 +11,8 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting;
 internal static class ControlledPartitionMovementDescriptorDigest
 {
     private const int LengthBytes = sizeof(long);
-
-    internal static string Of(IEnumerable<PartitionMoveImageFamily> expectedFamilies)
+    internal static string Of(IEnumerable<PartitionMoveImageFamily> expectedFamilies,
+        ImmutableArray<ResourceDefinition> additionalResources = default)
     {
         byte[] familyDigest;
         using (var families = IncrementalHash.CreateHash(HashAlgorithmName.SHA256))
@@ -29,18 +29,16 @@ internal static class ControlledPartitionMovementDescriptorDigest
         }
         using var image = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         Bytes(image, familyDigest);
-        var literalResources = ControlledPartitionMovementResourceAssertions.Expected()
+        var literalResources = ControlledPartitionMovementResourceAssertions.Expected(additionalResources)
             .OrderBy(resource => resource.Name, StringComparer.Ordinal).ToImmutableArray();
         Bytes(image, Encoding.UTF8.GetBytes(JsonData.Fingerprint(literalResources)));
         return Convert.ToHexStringLower(image.GetHashAndReset());
     }
-
     private static void Bytes(IncrementalHash hash, byte[] bytes)
     {
         Number(hash, bytes.LongLength);
         hash.AppendData(bytes);
     }
-
     private static void Number(IncrementalHash hash, long value)
     {
         Span<byte> number = stackalloc byte[LengthBytes];
@@ -48,3 +46,4 @@ internal static class ControlledPartitionMovementDescriptorDigest
         hash.AppendData(number);
     }
 }
+

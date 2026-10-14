@@ -10,6 +10,8 @@ internal sealed class ConnectionNativeScenario : IAsyncDisposable
     private readonly ConnectionNativeCalls calls = new();
     private bool closed;
     private bool initialized;
+    private Guid lastClosedOwnerId;
+    private const string ActivationWitness = "ConnectionNativeActivationCount";
     internal RequestCqrsClusterFixture Fixture
     {
         get;
@@ -40,8 +42,14 @@ internal sealed class ConnectionNativeScenario : IAsyncDisposable
                     () => scenario.WriteTrace(ConnectionNativeProtocol.BodyFailure), failures);
             }
         }
-        catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
-        catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
+        catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            failures.Add(failure);
+        }
+        catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            failures.Add(failure);
+        }
         if (owner is not null && failures.Count > ConnectionNativeProtocol.EmptyFailures)
         {
             KeyLoad.Server.ServerFailureObserver.Observe(
@@ -118,11 +126,24 @@ internal sealed class ConnectionNativeScenario : IAsyncDisposable
         var management = Fixture.Cluster.Client.GetGrain<IManagementGrain>(0);
         var actual = await management.GetActiveGrains(GrainType.Create(GrainRoutingProtocol.RequestAlias),
             cancellationToken);
-        await Assert.That(actual.Count).IsEqualTo(expected);
-        if (expected == ConnectionNativeProtocol.OneConnection)
+        var failures = new List<Exception>();
+        await KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
         {
-            await Assert.That(actual.Contains(((GrainReference)Connection).GrainId)).IsTrue();
+            await Assert.That(actual.Count).IsEqualTo(expected);
+            if (expected == ConnectionNativeProtocol.OneConnection)
+            {
+                await Assert.That(actual.Contains(((GrainReference)Connection).GrainId)).IsTrue();
+            }
+        }, failures);
+        if (failures.Count > ConnectionNativeProtocol.EmptyFailures)
+        {
+            KeyLoad.Server.ServerFailureObserver.Observe(() => ConnectionNativeActivationCountWitness.Write(
+                ActivationWitness, expected, actual.Count, actual.Contains(((GrainReference)Connection).GrainId),
+                lastClosedOwnerId != Guid.Empty && actual.Contains(((GrainReference)
+                    Fixture.Cluster.Client.GetGrain<IConnectionGrain>(lastClosedOwnerId)).GrainId),
+                lastClosedOwnerId == Fixture.ConnectionId, closed), failures);
         }
+        KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }
 
     internal async Task CloseAsync(CancellationToken cancellationToken)
@@ -137,10 +158,17 @@ internal sealed class ConnectionNativeScenario : IAsyncDisposable
         await CloseOwnerAsync(cancellationToken);
     }
 
-    internal async Task CloseOwnerAsync(CancellationToken cancellationToken)
+    internal Task CloseOwnerAsync(CancellationToken cancellationToken)
+        => CloseOwnerAsync(Connection, Fixture.ConnectionId, cancellationToken);
+
+    internal async Task CloseOwnerAsync(IConnectionGrain owner, Guid ownerId, CancellationToken cancellationToken)
     {
-        await Connection.CloseAsync(Fixture.Codec.CreateConnectionClose(Fixture.ConnectionId), cancellationToken);
-        closed = true;
+        await owner.CloseAsync(Fixture.Codec.CreateConnectionClose(ownerId), cancellationToken);
+        lastClosedOwnerId = ownerId;
+        if (ownerId == Fixture.ConnectionId)
+        {
+            closed = true;
+        }
         var management = Fixture.Cluster.Client.GetGrain<IManagementGrain>(0);
         while ((await management.GetActiveGrains(GrainType.Create(GrainRoutingProtocol.RequestAlias),
             cancellationToken)).Count != ConnectionNativeProtocol.AbsentActivations)
@@ -168,8 +196,14 @@ internal sealed class ConnectionNativeScenario : IAsyncDisposable
         {
             calls.Dispose();
         }
-        catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
-        catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
+        catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            failures.Add(failure);
+        }
+        catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            failures.Add(failure);
+        }
         if (failures.Count > ConnectionNativeProtocol.EmptyFailures)
         {
             KeyLoad.Server.ServerFailureObserver.Observe(

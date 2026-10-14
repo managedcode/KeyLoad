@@ -15,7 +15,6 @@ internal sealed class ControlledPartitionMovementNode : IDisposable
     private ControlledPartitionMovementNativeNode native;
     private bool closed;
     private IPartitionMovementCheckpointVerifier checkpointVerifier = UnavailablePartitionMovementCheckpointVerifier.Instance;
-
     internal ControlledPartitionMovementNode(PhysicalShardRecord owner,
         long maximumFixtureEntries = ControlledPartitionMovementNativeJournal.SupportingHistoryEntries)
     {
@@ -23,7 +22,6 @@ internal sealed class ControlledPartitionMovementNode : IDisposable
         MaximumFixtureEntries = maximumFixtureEntries;
         native = new(root, owner, maximumFixtureEntries: maximumFixtureEntries);
     }
-
     internal DatabaseEngine Database => native.Database;
     internal ZoneTreeStore Store => native.Store;
     internal ControlledPartitionMovementNativeJournal Journal => native.Journal;
@@ -45,18 +43,18 @@ internal sealed class ControlledPartitionMovementNode : IDisposable
         get; set;
     }
 
+    
+    internal global::System.Collections.Immutable.ImmutableArray<ResourceDefinition> AdditionalSeedResources { get; set; } = [];
     internal void JoinForChild()
     {
         ObjectDisposedException.ThrowIf(closed, this);
         native.Dispose();
     }
-
     internal void OpenAfterChild()
     {
         ObjectDisposedException.ThrowIf(closed, this);
         native = new(root, PhysicalOwner, checkpointVerifier, maximumFixtureEntries: MaximumFixtureEntries);
     }
-
     internal void ReopenWithCheckpointVerifier(IPartitionMovementCheckpointVerifier verifier)
     {
         ArgumentNullException.ThrowIfNull(verifier);
@@ -65,14 +63,12 @@ internal sealed class ControlledPartitionMovementNode : IDisposable
         checkpointVerifier = verifier;
         native = new(root, PhysicalOwner, checkpointVerifier, maximumFixtureEntries: MaximumFixtureEntries);
     }
-
     internal void Reopen()
     {
         ObjectDisposedException.ThrowIf(closed, this);
         native.Dispose();
         native = new(root, PhysicalOwner, checkpointVerifier, maximumFixtureEntries: MaximumFixtureEntries);
     }
-
     internal KeyLoadException ReopenAfterExpectedCorruptApply()
     {
         ObjectDisposedException.ThrowIf(closed, this);
@@ -93,7 +89,6 @@ internal sealed class ControlledPartitionMovementNode : IDisposable
         native = new(root, PhysicalOwner, checkpointVerifier, maximumFixtureEntries: MaximumFixtureEntries);
         return original;
     }
-
     public void Dispose()
     {
         if (closed)
@@ -106,17 +101,30 @@ internal sealed class ControlledPartitionMovementNode : IDisposable
         {
             native.Dispose();
         }
-        catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
-        catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
+        catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            failures.Add(failure);
+        }
+        catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            failures.Add(failure);
+        }
         if (!RetainRoot && failures.Count == 0 && Directory.Exists(root))
         {
             try
             {
                 Directory.Delete(root, recursive: true);
             }
-            catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
-            catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
+            catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure))
+            {
+                failures.Add(failure);
+            }
+            catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure))
+            {
+                failures.Add(failure);
+            }
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }
+

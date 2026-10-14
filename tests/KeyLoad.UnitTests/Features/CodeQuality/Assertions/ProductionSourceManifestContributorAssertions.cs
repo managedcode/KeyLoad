@@ -41,7 +41,7 @@ internal static class ProductionSourceManifestContributorAssertions
     private static readonly string[] ProductionModules =
     [
         "KeyLoad.Abstractions", "KeyLoad.Artifacts", "KeyLoad.Cli", "KeyLoad.Client", "KeyLoad.Core",
-        "KeyLoad.Diagnostics", "KeyLoad.Orleans", "KeyLoad.Query", "KeyLoad.Replication", "KeyLoad.Security",
+        "KeyLoad.Diagnostics", "KeyLoad.Clustering", "KeyLoad.Query", "KeyLoad.Replication", "KeyLoad.Security",
         "KeyLoad.Server", "KeyLoad.ServiceDefaults", "KeyLoad.Storage.IO", "KeyLoad.Storage.ZoneTree"
     ];
     private static readonly HashSet<string> ProductionModuleSet = new(ProductionModules, StringComparer.Ordinal);

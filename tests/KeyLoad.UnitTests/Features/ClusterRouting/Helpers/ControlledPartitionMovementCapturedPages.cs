@@ -13,7 +13,7 @@ internal static class ControlledPartitionMovementCapturedPages
     private const int NoPages = 0;
     private const int OnePage = 1;
     internal static async Task AssertAsync(string[] sourceReference, PartitionMovementCaptureHandle handle,
-        PartitionMovementPageResult[] results)
+        PartitionMovementPageResult[] results, global::System.Collections.Immutable.ImmutableArray<ResourceDefinition> additionalResources = default)
     {
         var pages = results.Select(result => NativeSerialization.Deserialize<PartitionMoveImagePage>(result.NativePage.Span))
             .ToArray();
@@ -63,6 +63,7 @@ internal static class ControlledPartitionMovementCapturedPages
         }
         await Assert.That(pages.Sum(page => page.Records.Length)).IsEqualTo(eligible.Count);
         await Assert.That(handle.Descriptor.Digest)
-            .IsEqualTo(ControlledPartitionMovementDescriptorDigest.Of(expectedFamilies));
+            .IsEqualTo(ControlledPartitionMovementDescriptorDigest.Of(expectedFamilies, additionalResources));
     }
 }
+

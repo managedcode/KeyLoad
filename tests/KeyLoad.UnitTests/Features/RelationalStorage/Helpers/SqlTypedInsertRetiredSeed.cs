@@ -34,6 +34,7 @@ internal static class SqlTypedInsertRetiredSeed
             source.Database.GetDocument(writer.Id, new(partition, SqlTypedInsertRetiredLiteral.Table, SqlTypedInsertRetiredLiteral.One), cancellationToken: token));
         await Assert.That(source.Journal.Log.State.LastIndex).IsEqualTo(checked(sourceIndex + SqlTypedInsertRetiredLiteral.SourceSeedEntries));
         await Assert.That(target.Journal.Log.State.LastIndex).IsEqualTo(checked(targetIndex + SqlTypedInsertRetiredLiteral.TargetSeedEntries));
+        source.AdditionalSeedResources = [definition];
         source.AdditionalSeedEntries = SqlTypedInsertRetiredLiteral.SourceSeedEntries;
         target.AdditionalSeedEntries = SqlTypedInsertRetiredLiteral.TargetSeedEntries;
         return new(writer, original, failed, expected, new(source, original), new(source, failed));
@@ -54,3 +55,4 @@ internal static class SqlTypedInsertRetiredSeed
     }
     private const long NextEntry = 1;
 }
+

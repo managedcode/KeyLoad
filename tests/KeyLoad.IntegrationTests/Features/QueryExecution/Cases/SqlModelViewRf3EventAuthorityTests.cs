@@ -35,8 +35,8 @@ internal sealed class SqlModelViewRf3EventAuthorityTests(ClusterFixture fixture)
 
         var deniedUse = request with
         {
-            Sql = $"SELECT * FROM EVENTS('{SqlModelViewRf3Scenario.StreamSet}','{SqlModelViewRf3Scenario.StreamId}') "
-                + $"WHERE payload.secret = '{SqlModelViewRf3Scenario.EventCanary}' LIMIT {SqlModelViewRf3Scenario.RowLimit}"
+            Sql = $"SELECT TOP ({SqlModelViewRf3Scenario.RowLimit}) * FROM EVENTS('{SqlModelViewRf3Scenario.StreamSet}','{SqlModelViewRf3Scenario.StreamId}') "
+                + $"WHERE payload.secret = '{SqlModelViewRf3Scenario.EventCanary}'"
         };
         var denied = await reader.QueryAsync(deniedUse, deadline.Token);
         await SqlModelViewRf3DenialAssertions.SdkAsync(denied, identity.Secret);

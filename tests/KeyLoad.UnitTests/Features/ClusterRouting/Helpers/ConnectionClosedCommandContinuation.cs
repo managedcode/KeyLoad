@@ -51,12 +51,18 @@ internal static class ConnectionClosedCommandContinuation
             await Assert.That(QueueWholeFlowStorage.Bytes(scenario.Fixture.Database.Store).SequenceEqual(image)).IsTrue();
             await Assert.That(scenario.Fixture.Database.Store.Position).IsEqualTo(cut);
         }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
         finally
         {
             await KeyLoad.Server.ServerFailureObserver.ObserveAsync(
-                () => owner.CloseAsync(scenario.Fixture.Codec.CreateConnectionClose(ownerId), token), failures);
+                () => scenario.CloseOwnerAsync(owner, ownerId, token), failures);
         }
         KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
         await scenario.AssertActivationCountAsync(ConnectionNativeProtocol.AbsentActivations, token);

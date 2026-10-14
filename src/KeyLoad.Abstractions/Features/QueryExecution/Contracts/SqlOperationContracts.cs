@@ -26,10 +26,12 @@ public static class SqlOperationProtocol
 /// <param name="Version">Unified SQL envelope version.</param>
 /// <param name="QueryDialectVersion">The explicit query-language selector; 1 preserves Q1.</param>
 /// <param name="CommandId">Optional original caller-owned mutation identity; omitted for reads.</param>
+/// <param name="OwnershipEpoch">Optional positive expected owner epoch for ordinary VALUES INSERT; omitted uses initial epoch one.</param>
 [Orleans.GenerateSerializer]
 [Orleans.Alias(NativeContractAliases.SqlOperationRequest)]
 public sealed record SqlOperationRequest([property: Orleans.Id(0)] PartitionRef Partition, [property: Orleans.Id(1)] string Sql,
     [property: Orleans.Id(2)] Dictionary<string, JsonElement>? Parameters = null, [property: Orleans.Id(3)] bool AllowFullScan = false,
     [property: Orleans.Id(4)] string? Cursor = null, [property: Orleans.Id(5)] int Version = SqlOperationProtocol.Version,
     [property: Orleans.Id(6)] int QueryDialectVersion = SqlOperationProtocol.DefaultQueryDialectVersion,
-    [property: Orleans.Id(SqlMutationIdentityFields.CommandId)] Guid? CommandId = null);
+    [property: Orleans.Id(SqlMutationIdentityFields.CommandId)] Guid? CommandId = null,
+    [property: Orleans.Id(SqlMutationIdentityFields.OwnershipEpoch)] long? OwnershipEpoch = null);

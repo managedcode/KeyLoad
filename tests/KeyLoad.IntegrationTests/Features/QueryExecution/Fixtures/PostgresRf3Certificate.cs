@@ -15,8 +15,10 @@ internal sealed record PostgresRf3Certificate(string Directory, string RootCerti
     private const string ServerSubject = "CN=localhost";
     private const string ServerAuthentication = "1.3.6.1.5.5.7.3.1";
     private const int SerialBytes = 16;
-
     internal static PostgresRf3Certificate Create(string root)
+        => Create(root, Enumerable.Range(ClusterFixtureProtocol.FirstNodeNumber, ClusterFixtureProtocol.NodeCount)
+            .Select(ClusterFixtureProtocol.NodeName));
+    internal static PostgresRf3Certificate Create(string root, IEnumerable<string> nodes)
     {
         var directory = Path.Combine(root, DirectoryName);
         System.IO.Directory.CreateDirectory(directory);
@@ -45,9 +47,9 @@ internal sealed record PostgresRf3Certificate(string Directory, string RootCerti
                         names.AddDnsName("localhost");
                         names.AddIpAddress(IPAddress.Loopback);
                         names.AddIpAddress(IPAddress.IPv6Loopback);
-                        foreach (var number in Enumerable.Range(ClusterFixtureProtocol.FirstNodeNumber, ClusterFixtureProtocol.NodeCount))
+                        foreach (var node in nodes)
                         {
-                            names.AddDnsName(ClusterFixtureProtocol.NodeName(number));
+                            names.AddDnsName(node);
                         }
                         server.CertificateExtensions.Add(names.Build());
                         using var issued = server.Create(authority, now.AddMinutes(-1), now.AddDays(1),
@@ -63,7 +65,10 @@ internal sealed record PostgresRf3Certificate(string Directory, string RootCerti
                                 {
                                     File.WriteAllBytes(Path.Combine(directory, ServerName), encoded);
                                 }
-                                finally { CryptographicOperations.ZeroMemory(encoded); }
+                                finally
+                                {
+                                    CryptographicOperations.ZeroMemory(encoded);
+                                }
                             }, failures);
                         }, failures);
                     }, failures);
@@ -73,7 +78,7 @@ internal sealed record PostgresRf3Certificate(string Directory, string RootCerti
         global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
         return new(directory, rootPath);
     }
-
     internal static string RootPath(ClusterFixture fixture)
         => Path.Combine(fixture.Root, DirectoryName, RootName);
 }
+

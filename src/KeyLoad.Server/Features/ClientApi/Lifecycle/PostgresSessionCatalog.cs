@@ -9,14 +9,13 @@ internal sealed class PostgresSessionCatalog(global::Microsoft.Extensions.Option
     private readonly Dictionary<string, PostgresBoundPortal> portals = new(StringComparer.Ordinal);
     private int retained;
     private Guid? mutationIdentity;
+    private  long? mutationOwnershipEpoch;
     private const int MutationIdentityBytes = 16;
-
+    private const int MutationOwnershipEpochBytes = sizeof(long);
     internal PostgresPreparedStatement Statement(string name)
         => statements.TryGetValue(name, out var value) ? value : throw Errors.Fail(ErrorCode.Validation, Missing);
-
     internal PostgresBoundPortal Portal(string name)
         => portals.TryGetValue(name, out var value) ? value : throw Errors.Fail(ErrorCode.Validation, Missing);
-
     internal void PutStatement(string name, PostgresPreparedStatement value)
     {
         statements.TryGetValue(name, out var previous);
@@ -30,7 +29,6 @@ internal sealed class PostgresSessionCatalog(global::Microsoft.Extensions.Option
         }
         ReplaceStatement(name, previous, value);
     }
-
     internal void PutPortal(string name, PostgresBoundPortal value)
     {
         portals.TryGetValue(name, out var previous);
@@ -45,7 +43,6 @@ internal sealed class PostgresSessionCatalog(global::Microsoft.Extensions.Option
         Resize(previous?.RetainedBytes ?? PostgresProtocol.EmptyBytes, value.RetainedBytes);
         portals[name] = value;
     }
-
     internal void CloseStatement(string name)
     {
         if (statements.TryGetValue(name, out var value))
@@ -78,13 +75,11 @@ internal sealed class PostgresSessionCatalog(global::Microsoft.Extensions.Option
             statements[name] = next;
         }
     }
-
     internal void BeginSimpleQuery()
     {
         Sync();
         CloseStatement(string.Empty);
     }
-
     internal void ClosePortal(string name)
     {
         if (portals.Remove(name, out var value))
@@ -101,35 +96,42 @@ internal sealed class PostgresSessionCatalog(global::Microsoft.Extensions.Option
         }
         portals.Clear();
     }
-
     internal void ArmMutationIdentity(Guid identity)
+    
+        => ArmMutationIdentity(identity, null);
+    internal void ArmMutationIdentity(Guid identity, long? ownershipEpoch)
     {
         if (mutationIdentity.HasValue)
         {
             ClearMutationIdentity();
             throw ScriptDomOperationErrors.Invalid();
         }
-        if (identity == Guid.Empty)
+        if (identity == Guid.Empty || ownershipEpoch < SqlMutationIdentityFields.InitialOwnershipEpoch)
         {
             throw ScriptDomOperationErrors.Invalid();
         }
-        Resize(PostgresProtocol.EmptyBytes, MutationIdentityBytes);
+        Resize(PostgresProtocol.EmptyBytes,  checked(MutationIdentityBytes
+            + (ownershipEpoch.HasValue ? MutationOwnershipEpochBytes : PostgresProtocol.EmptyBytes)));
         mutationIdentity = identity;
+        mutationOwnershipEpoch = ownershipEpoch;
     }
-
     internal Guid? TakeMutationIdentity()
+     => TakeMutationIdentity(out _);
+    internal Guid? TakeMutationIdentity(out long? ownershipEpoch)
     {
         var value = mutationIdentity;
+        ownershipEpoch = mutationOwnershipEpoch;
         ClearMutationIdentity();
         return value;
     }
-
     internal void ClearMutationIdentity()
     {
         if (mutationIdentity.HasValue)
         {
-            Resize(MutationIdentityBytes, PostgresProtocol.EmptyBytes);
-            mutationIdentity = null;
+            Resize(checked(MutationIdentityBytes
+                + (mutationOwnershipEpoch.HasValue ? MutationOwnershipEpochBytes : PostgresProtocol.EmptyBytes)), PostgresProtocol.EmptyBytes);
+            mutationIdentity  = null;
+            mutationOwnershipEpoch = null;
         }
     }
 
@@ -143,13 +145,14 @@ internal sealed class PostgresSessionCatalog(global::Microsoft.Extensions.Option
         admission.Resize(retained, replacement);
         retained = replacement;
     }
-
     public void Dispose()
     {
         admission.Resize(retained, PostgresProtocol.EmptyBytes);
         retained = PostgresProtocol.EmptyBytes;
         mutationIdentity = null;
+        mutationOwnershipEpoch = null;
         statements.Clear();
         portals.Clear();
     }
 }
+

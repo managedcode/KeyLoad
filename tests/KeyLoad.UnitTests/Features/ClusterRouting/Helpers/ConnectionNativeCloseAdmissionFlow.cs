@@ -124,7 +124,7 @@ internal static class ConnectionNativeCloseAdmissionFlow
         finally
         {
             await KeyLoad.Server.ServerFailureObserver.ObserveAsync(
-                () => owner.CloseAsync(scenario.Fixture.Codec.CreateConnectionClose(ownerId), token), failures);
+                () => scenario.CloseOwnerAsync(owner, ownerId, token), failures);
         }
         KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
         await scenario.AssertActivationCountAsync(ConnectionNativeProtocol.AbsentActivations, token);

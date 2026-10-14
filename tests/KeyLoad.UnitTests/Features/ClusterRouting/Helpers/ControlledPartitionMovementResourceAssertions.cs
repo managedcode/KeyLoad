@@ -7,7 +7,7 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting;
 /// <summary>Checks the actual native capture's complete policy/catalog snapshot against literal seeded definitions.</summary>
 internal static class ControlledPartitionMovementResourceAssertions
 {
-    internal static ImmutableArray<ResourceDefinition> Expected() =>
+    internal static ImmutableArray<ResourceDefinition> Expected(ImmutableArray<ResourceDefinition> additionalResources = default) =>
     [
         new(ControlledPartitionMovementCorpus.Collection, ResourceKind.Collection,
             ControlledPartitionMovementCorpus.Partition.TransactionDomainId),
@@ -17,11 +17,12 @@ internal static class ControlledPartitionMovementResourceAssertions
             ControlledPartitionMovementCorpus.Partition.TransactionDomainId),
         new(ControlledPartitionMovementBlobSeed.Resource, ResourceKind.BlobStore,
             ControlledPartitionMovementCorpus.Partition.TransactionDomainId),
+        .. (additionalResources.IsDefault ? ImmutableArray<ResourceDefinition>.Empty : additionalResources),
     ];
-
-    internal static async Task CaptureAsync(PartitionMoveImageDescriptor actual)
+    internal static async Task CaptureAsync(PartitionMoveImageDescriptor actual,
+        ImmutableArray<ResourceDefinition> additionalResources = default)
     {
-        var expected = Expected();
+        var expected = Expected(additionalResources);
         await Assert.That(actual.Resources.Length).IsEqualTo(expected.Length);
         var original = actual.Resources.OrderBy(resource => resource.Name, StringComparer.Ordinal).ToArray();
         var literal = expected.OrderBy(resource => resource.Name, StringComparer.Ordinal).ToArray();
@@ -30,3 +31,4 @@ internal static class ControlledPartitionMovementResourceAssertions
         await Assert.That(actual.Partition).IsEqualTo(ControlledPartitionMovementCorpus.Partition);
     }
 }
+

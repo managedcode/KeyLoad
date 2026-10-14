@@ -10,25 +10,25 @@ internal static class SqlOperationCompiler
     internal static McpDecodedOperation Compile(SqlOperationRequest request, IOptions<DatabaseLimits> limitsOptions,
         int maximumPayloadBytes, IOptions<QueryExecutionOptions> queryOptions, CancellationToken cancellationToken = default)
         => RequireOperation(CompileCore(request, limitsOptions, maximumPayloadBytes, queryOptions, null, false, cancellationToken));
-
     internal static McpDecodedOperation CompileNativeSession(SqlOperationRequest request, IOptions<DatabaseLimits> limitsOptions,
         int maximumPayloadBytes, IOptions<QueryExecutionOptions> queryOptions, int positionalParameterCount,
         CancellationToken cancellationToken = default)
         => RequireOperation(CompileCore(request, limitsOptions, maximumPayloadBytes, queryOptions, positionalParameterCount, false, cancellationToken));
-
     internal static SqlNativeSessionCompilation CompileNativeSessionPlan(SqlOperationRequest request,
         IOptions<DatabaseLimits> limitsOptions, int maximumPayloadBytes, IOptions<QueryExecutionOptions> queryOptions,
         int positionalParameterCount, CancellationToken cancellationToken)
         => CompileCore(request, limitsOptions, maximumPayloadBytes, queryOptions, positionalParameterCount, true, cancellationToken);
-
     private static McpDecodedOperation RequireOperation(SqlNativeSessionCompilation compilation)
         => compilation.Operation ?? throw ScriptDomOperationErrors.Unsupported();
-
     private static SqlNativeSessionCompilation CompileCore(SqlOperationRequest request, IOptions<DatabaseLimits> limitsOptions,
         int maximumPayloadBytes, IOptions<QueryExecutionOptions> queryOptions, int? positionalParameterCount, bool nativeIdentityControl, CancellationToken token)
     {
         SqlOperationBounds.Validate(request, limitsOptions, maximumPayloadBytes, queryOptions, token);
         SqlOriginalMutationIdentity.ValidateDeclared(request.CommandId);
+        if (request.OwnershipEpoch < SqlMutationIdentityFields.InitialOwnershipEpoch)
+        {
+            throw ScriptDomOperationErrors.Invalid();
+        }
         if (positionalParameterCount is < MinimumNativeParameterCount || positionalParameterCount > queryOptions.Value.MaximumParameters)
         {
             throw ScriptDomOperationErrors.Invalid();
@@ -41,13 +41,19 @@ internal static class SqlOperationCompiler
         }
         if (nativeIdentityControl && statement is global::Microsoft.SqlServer.TransactSql.ScriptDom.SetCommandStatement control)
         {
-            if (request.CommandId.HasValue || request.AllowFullScan || request.Cursor is not null
+            if (request.CommandId.HasValue || request.OwnershipEpoch.HasValue || request.AllowFullScan || request.Cursor is not null
                 || request.Parameters is { Count: > MinimumNativeParameterCount }
                 || positionalParameterCount != MinimumNativeParameterCount)
             {
                 throw ScriptDomOperationErrors.Invalid();
             }
-            return new(null, ScriptDomContextIdentity.Read(control, budget.Check, token));
+            var controlIdentity = ScriptDomContextIdentity.ReadControl(control, budget.Check, token);
+            return new(null, controlIdentity.Identity, controlIdentity.OwnershipEpoch);
+        }
+        if (request.OwnershipEpoch.HasValue && statement is not global::Microsoft.SqlServer.TransactSql.ScriptDom.InsertStatement
+            { InsertSpecification.InsertSource: global::Microsoft.SqlServer.TransactSql.ScriptDom.ValuesInsertSource })
+        {
+            throw ScriptDomOperationErrors.Invalid();
         }
         var operation = statement switch
         {
@@ -63,7 +69,6 @@ internal static class SqlOperationCompiler
         };
         return new(SqlOriginalMutationIdentity.Require(request.CommandId, operation), null);
     }
-
     private static McpDecodedOperation Select(SqlOperationRequest request,
         global::Microsoft.SqlServer.TransactSql.ScriptDom.TSqlStatement statement, int maximumPayloadBytes,
         IOptions<DatabaseLimits> limitsOptions, IOptions<QueryExecutionOptions> queryOptions,
@@ -83,7 +88,6 @@ internal static class SqlOperationCompiler
             limitsOptions, queryOptions, budget, positionalParameterCount, token);
         return Decode(McpToolNames.QueryAst, ast, maximumPayloadBytes, budget.Check, token);
     }
-
     private static McpDecodedOperation Composition(SqlOperationRequest request,
         global::Microsoft.SqlServer.TransactSql.ScriptDom.InsertStatement statement, int maximumPayloadBytes,
         IOptions<DatabaseLimits> limitsOptions, int? positionalParameterCount, Action checkBudget, CancellationToken token)
@@ -93,7 +97,6 @@ internal static class SqlOperationCompiler
             : SqlCompositionInsert.Compile(request, statement, positionalParameterCount, checkBudget, token);
         return Decode(McpToolNames.DocumentsCommit, command, maximumPayloadBytes, checkBudget, token);
     }
-
     private static McpDecodedOperation Decode<T>(string name, T request, int maximumPayloadBytes,
         Action checkBudget, CancellationToken token)
     {
@@ -115,3 +118,4 @@ internal static class SqlOperationCompiler
     }
     private const int MinimumNativeParameterCount = 0;
 }
+

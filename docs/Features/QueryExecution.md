@@ -1133,6 +1133,50 @@ Translate only those three window requests to current OFFSET/FETCH using the exi
 ### Independent C# query-context whole-operation control
 The original BuilderBranchesHaveIndependentQueryContexts declaration retains its immutable builder assertions and exercises the same branches against genuine ZoneTree data, independent full SQL/AST page literals, pre-cancelled refusal and unsupported-expression conservation, original seed receipt replay, and two same-directory native cold reopens. This Unit control does not qualify SDK/MCP RF3, concurrency performance or Linux delivery until their original gates execute.
 
+
+## Original event and queue authority fixtures use current T-SQL
+
+TASK-SQLVIEW-CURRENT-TSQL-AUTHORITY-001 / REQ/AC-SQLVIEW-002/003/005 and
+REQ/AC-AUTH-005/006/009 under ADR072/014/022 preserves the original
+SqlModelViewRf3EventAuthorityTests and SqlModelViewRf3QueueAuthorityTests.
+The shared administrator foreign-source positive query and all later own-scope
+redaction, field/header-use denials and authorized private projections must use
+valid current T-SQL before they qualify their persisted-policy predicates.
+Change only the ten fixture SQL statements: eight original LIMIT RowLimit3
+queries become SELECT TOP (3), and two original LIMIT1 private projections
+become SELECT TOP (1). Original EVENTS/QUEUE_MESSAGES arguments, event generation,
+id/revision ordering, payload/header paths, string canaries, aliases, explicit
+AllowFullScan and cursors remain unchanged. The independent typed AST requests
+and all complete native event/queue literals remain unchanged.
+
+Preserve the exact original SDK and official MCP result/row/redaction parity,
+no partial denied page or protected canary, PermissionDenied/safe-detail checks,
+foreign scope, read-without-use then use repair, persisted revocation and all
+original positive-cut/current stream/queue/no-effect assertions. Original Cases,
+arguments, fixture ownership, deadline and joined caller lifetime are unchanged.
+This fixture correction grants no rights and changes no product parser, policy
+owner, dispatcher, quota or typed INSERT contract. It does not add or advertise
+new SQL product capability or additional cold cycles.
+
+Original source319c/run38578269537 attempt1 fails both Cases in the shared
+ForeignTenantFlow19 administrator positive query with Validation before their
+scope-denial phase. The actual current Scenario.EventSql/QueueSql include retired
+LIMIT syntax; the later six authorization SQL producers and two Case field-use
+requests have the same stale syntax and are corrected in this one fixture batch.
+Compiler, focused original whole-flow runs and exact-source Linux RF3
+qualification remain pending authentic results.
+
+```mermaid
+flowchart LR
+    A[Administrator bounded foreign event and queue query] --> B[Exact current scope denial]
+    B --> C[Independent redacted pages and forbidden field use]
+    C --> D[Persisted read/use repair and full private projection]
+    D --> E[Original revocation and complete no-effect state]
+```
+
+Canonical slice QueryExecution; additional frontend, provider, storage-format or
+new test declarations: N/A.
+
 ### KL-054 original cross-adapter cursor whole-operation oracle
 The original CursorContinuesAcrossEquivalentSqlJsonAndCSharpForms declaration retains its three rows and original SQL/JSON/C# continuation checks, with independent complete projected row/revision/metadata, captured native cut and literal access-path assertions for every page. Native decimal canonicalization and quoted/parenthesized syntax use the original signed opaque handle; changed query identity must refuse exact CursorExpired before effects and preserve healthy original continuation. Full state/identity/receipt conservation and two genuine native cold reopens remain required. This Unit control does not qualify public SDK/MCP RF3, cold reuse of old-generation cursors, logical commutation canonicalization, or performance.
 

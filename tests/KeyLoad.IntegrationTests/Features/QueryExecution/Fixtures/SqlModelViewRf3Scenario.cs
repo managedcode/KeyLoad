@@ -77,11 +77,11 @@ internal sealed record SqlModelViewRf3Scenario(PartitionRef Partition)
     }
 
     internal QueryRequest EventSql(long generation = EventGeneration, string? cursor = null)
-        => new(Partition, $"SELECT * FROM EVENTS('{StreamSet}','{StreamId}', {generation}) ORDER BY revision LIMIT {RowLimit}",
+        => new(Partition, $"SELECT TOP ({RowLimit}) * FROM EVENTS('{StreamSet}','{StreamId}', {generation}) ORDER BY revision",
             AllowFullScan: true, Cursor: cursor);
 
     internal QueryRequest QueueSql(string? cursor = null)
-        => new(Partition, $"SELECT * FROM QUEUE_MESSAGES('{Queue}') ORDER BY id LIMIT {RowLimit}",
+        => new(Partition, $"SELECT TOP ({RowLimit}) * FROM QUEUE_MESSAGES('{Queue}') ORDER BY id",
             AllowFullScan: true, Cursor: cursor);
 
     internal AstQueryRequest EventAst(long generation = EventGeneration, string? cursor = null)

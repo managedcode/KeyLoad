@@ -60,7 +60,7 @@
       "historicalNumericAndStringEvidence": "Original positional/prepared parameter source and qualification receipts remain in the historical inventory; current T-SQL binding requires its own exact-source proof."
     }
   },
-  "inventoryStatus": "Selected T-SQL grammar; finite source execution inventory; all whole-product qualification gates OPEN",
+  "inventoryStatus": "Selected T-SQL grammar; finite source execution inventory; retired PostgreSQL TABLE/LIMIT/CALL and handwritten NEXT lexical proposals are historical only; all whole-product qualification gates OPEN",
   "families": [
     {
       "id": "SQLC-LEX",

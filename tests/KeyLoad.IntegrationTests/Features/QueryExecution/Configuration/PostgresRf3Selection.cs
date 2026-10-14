@@ -15,7 +15,6 @@ internal sealed record PostgresRf3Selection(int QueryDialect, bool ObserveCancel
     private const string MountedDirectory = "/native-sql";
     private const string Tcp = "tcp";
     private const string True = "true";
-
     internal RequestCqrsProbeFixture? Controls
     {
         get; private set;
@@ -35,7 +34,6 @@ internal sealed record PostgresRf3Selection(int QueryDialect, bool ObserveCancel
         Controls?.RetainEvidence();
         ErrorDelivery?.RetainEvidence();
     }
-
     internal string[] Prepare(string root, string[] arguments)
     {
         if (ObserveErrorDelivery && !ObserveCancellation)
@@ -53,7 +51,6 @@ internal sealed record PostgresRf3Selection(int QueryDialect, bool ObserveCancel
         }
         return [.. arguments, ProbeEnabled, ProbeRoot + Controls.Root, ProbeSession + Controls.SessionId];
     }
-
     internal async Task JoinAfterResourcesAsync(bool resourcesJoined, List<Exception> failures)
     {
         if (Controls is null && ErrorDelivery is null)
@@ -81,14 +78,18 @@ internal sealed record PostgresRf3Selection(int QueryDialect, bool ObserveCancel
     private const string ProbeEnabled = "--KeyLoadTests:RequestCqrsProbe:Enabled=true";
     private const string ProbeRoot = "--KeyLoadTests:RequestCqrsProbe:Root=";
     private const string ProbeSession = "--KeyLoadTests:RequestCqrsProbe:SessionId=";
-
     internal void Configure(IDistributedApplicationTestingBuilder builder, string root)
     {
-        var certificates = PostgresRf3Certificate.Create(root);
-        foreach (var number in Enumerable.Range(ClusterFixtureProtocol.FirstNodeNumber, ClusterFixtureProtocol.NodeCount))
+        Configure(builder, PostgresRf3Certificate.Create(root), PostgresRf3Protocol.Partition, Enumerable.Range(ClusterFixtureProtocol.FirstNodeNumber, ClusterFixtureProtocol.NodeCount)
+                .Select(ClusterFixtureProtocol.NodeName));
+    }
+    internal void Configure(IDistributedApplicationTestingBuilder builder, PostgresRf3Certificate certificates,
+        PartitionRef partition, IEnumerable<string> nodes)
+    {
+        foreach (var name in nodes)
         {
             var node = builder.CreateResourceBuilder(builder.Resources.OfType<ContainerResource>()
-                .Single(resource => resource.Name == ClusterFixtureProtocol.NodeName(number)));
+                .Single(resource => resource.Name == name));
             node.WithBindMount(certificates.Directory, MountedDirectory, isReadOnly: true)
                 .WithEndpoint(targetPort: PostgresRf3Protocol.Port, name: PostgresRf3Protocol.Endpoint,
                     scheme: Tcp, isProxied: false)
@@ -96,13 +97,13 @@ internal sealed record PostgresRf3Selection(int QueryDialect, bool ObserveCancel
                 .WithEnvironment(Prefix + CertificatePath, MountedCertificate)
                 .WithEnvironment(Prefix + Dialect, QueryDialect.ToString(CultureInfo.InvariantCulture))
                 .WithEnvironment(Prefix + FullScan, True)
-                .WithEnvironment(Prefix + DatabasePrefix + Tenant, PostgresRf3Protocol.Partition.TenantId)
-                .WithEnvironment(Prefix + DatabasePrefix + Database, PostgresRf3Protocol.Partition.DatabaseId)
-                .WithEnvironment(Prefix + DatabasePrefix + Domain, PostgresRf3Protocol.Partition.TransactionDomainId)
-                .WithEnvironment(Prefix + DatabasePrefix + Partition, PostgresRf3Protocol.Partition.PartitionKey);
+                .WithEnvironment(Prefix + DatabasePrefix + Tenant, partition.TenantId)
+                .WithEnvironment(Prefix + DatabasePrefix + Database, partition.DatabaseId)
+                .WithEnvironment(Prefix + DatabasePrefix + Domain, partition.TransactionDomainId)
+                .WithEnvironment(Prefix + DatabasePrefix + Partition, partition.PartitionKey);
             if (ErrorDelivery is not null)
             {
-                node.WithBindMount(ErrorDelivery.NodeDirectory(ClusterFixtureProtocol.NodeName(number)),
+                node.WithBindMount(ErrorDelivery.NodeDirectory(name),
                     global::KeyLoad.Server.PostgresErrorDeliveryProtocol.Root, isReadOnly: false)
                     .WithEnvironment(PostgresErrorReceiverProtocol.Configuration,
                         ErrorDelivery.Session.ToString(global::KeyLoad.Server.PostgresErrorDeliveryProtocol.IdentityFormat));
@@ -120,3 +121,4 @@ internal sealed record PostgresRf3Selection(int QueryDialect, bool ObserveCancel
     private const string Domain = "TransactionDomainId";
     private const string Partition = "PartitionKey";
 }
+

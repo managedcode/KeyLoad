@@ -29,7 +29,6 @@ internal static class TwoRf3MembershipWaveStartup
         ServerFailureObserver.ThrowIfAny(failures);
         throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState);
     }
-
     internal static async Task StartCoreAsync(TwoRf3MembershipWave wave, CancellationToken cancellationToken, Action<string>? observe = null)
     {
         var firstStart = wave.dataRoot is null;
@@ -54,6 +53,7 @@ internal static class TwoRf3MembershipWaveStartup
         await wave.capacity.RequireOriginalParametersAsync(builder.Resources.OfType<ParameterResource>(), cancellationToken).ConfigureAwait(false);
         await NativeBlobWireWaveLifecycle.PublishOwnerAsync(wave, builder.Resources.OfType<ParameterResource>(), cancellationToken).ConfigureAwait(false);
         wave.capacity.RestoreOriginalEndpoints(builder.Resources.OfType<ContainerResource>());
+        wave.SqlInsertTls?.Configure(builder, root);
         wave.canonicalCutControls?.Configure(builder);
         KeyLoad.IntegrationTests.Features.Search.RemoteAnnPublicationRf3Enrollment.Configure(builder, wave.AnnReadExecution);
         KeyLoad.IntegrationTests.Features.Messaging.RemoteTransferRf3Enrollment.Configure(builder,
@@ -92,7 +92,6 @@ internal static class TwoRf3MembershipWaveStartup
             await capture.Ready().ConfigureAwait(false);
         }
     }
-
     private static async Task VerifyBeforeStartAsync(TwoRf3MembershipWave wave,
         DistributedApplication application, string repository, string? githubReference,
         CancellationToken cancellationToken)
@@ -142,4 +141,10 @@ internal static class TwoRf3MembershipWaveStartup
                 TwoRf3MembershipProtocol.Nodes, cancellationToken).ConfigureAwait(false);
         }
     }
+    internal static async Task WaitForSixHealthyAsync(TwoRf3MembershipWave wave, CancellationToken cancellationToken)
+    {
+        await global::KeyLoad.AppHost.Features.TestInfrastructure.AspireStartupReadiness.WaitForHealthyAsync(
+            wave.Application, TwoRf3MembershipProtocol.Nodes, cancellationToken).ConfigureAwait(false);
+    }
+
 }

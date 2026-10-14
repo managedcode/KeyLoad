@@ -37,11 +37,11 @@ internal static class ControlledPartitionMovementCaptureFlow
                 var sourceIndex = source.Journal.Log.State.LastIndex;
                 handle = await owner.Source.CaptureAsync(Principal(source, verified), verified.Envelope,
                     cancellationToken);
-                await ControlledPartitionMovementResourceAssertions.CaptureAsync(handle.Descriptor);
+                await ControlledPartitionMovementResourceAssertions.CaptureAsync(handle.Descriptor, source.AdditionalSeedResources);
                 await Assert.That(handle.ExpiresAt).IsEqualTo(originalExpiry);
                 pages = await ControlledPartitionMovementCapturedPageReader.ReadAsync(source, owner.Source,
                     runtime, admission, handle, request, cancellationToken);
-                await ControlledPartitionMovementCapturedPages.AssertAsync(sourceBeforeCapture, handle, pages);
+                await ControlledPartitionMovementCapturedPages.AssertAsync(sourceBeforeCapture, handle, pages, source.AdditionalSeedResources);
                 await Assert.That(ControlledPartitionMovementRawImage.Bytes(source.Store)
                     .SequenceEqual(sourceBeforeCapture, StringComparer.Ordinal)).IsTrue();
                 await Assert.That(source.Store.Position).IsEqualTo(sourcePosition);
@@ -65,7 +65,6 @@ internal static class ControlledPartitionMovementCaptureFlow
             pages ?? throw new InvalidOperationException("No actual native pages returned."),
             settlement ?? throw new InvalidOperationException("No actual release settlement returned."));
     }
-
     internal static PrincipalRecord Principal(ControlledPartitionMovementNode source,
         PartitionMovementTransportRequest verified)
     {

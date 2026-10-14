@@ -7,7 +7,7 @@ namespace KeyLoad.IntegrationTests.Features.Search;
 internal static class NativeTextMaintenanceRf3Call
 {
     private const string Arguments = "arguments";
-    private const string Sql = "CALL keyload_search_text_maintain(@arguments)";
+    private const string Sql = "EXEC keyload_search_text_maintain @arguments";
 
     internal static async Task<TextIndexMaintenanceResult> ExecuteAsync(KeyLoadClient sdk, McpOfficialClient mcp,
         TextIndexMaintenanceRequest request, NativeTextMaintenancePath path, CancellationToken token)

@@ -9,8 +9,8 @@ namespace KeyLoad.IntegrationTests.Features.DocumentStorage;
 internal static class CompositeUniqueRf3Assertions
 {
     internal static QueryRequest Query(PartitionRef partition, string? predicate = null)
-        => new(partition, "SELECT * FROM \"composite-unique\""
-            + (predicate is null ? "" : " WHERE " + predicate) + " ORDER BY id ASC LIMIT 10", AllowFullScan: predicate is null);
+        => new(partition, "SELECT TOP (10) * FROM \"composite-unique\""
+            + (predicate is null ? "" : " WHERE " + predicate) + " ORDER BY id ASC", AllowFullScan: predicate is null);
 
     internal static async Task RowsAsync(KeyLoadClient sdk, McpOfficialClient mcp, PartitionRef partition,
         string? predicate, long minimumCut, QueryRow[] expected, CancellationToken token)

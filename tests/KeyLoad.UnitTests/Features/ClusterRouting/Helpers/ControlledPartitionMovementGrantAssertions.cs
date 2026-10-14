@@ -11,25 +11,27 @@ internal static class ControlledPartitionMovementGrantAssertions
     private const long InitialPolicyEpoch = 1;
     private const long GrantReplicaIndex = 12;
     private const long FenceReplicaIndex = 13;
-
+    private const long DefaultAdditionalSeedEntries = 0;
     internal static async Task<PartitionMovePhaseResult> AuthorizedAsync(OperationResult outcome,
         PartitionMovePhaseResult prepared, ControlledPartitionMovementLoopbackCorpus corpus,
-        DateTimeOffset originalExpiry)
+        DateTimeOffset originalExpiry, long additionalSeedEntries = DefaultAdditionalSeedEntries,
+        ImmutableArray<ResourceDefinition> additionalResources = default)
     {
         await Assert.That(outcome.Error).IsNull();
         var actual = outcome.Get<PartitionMovePhaseResult>();
         var control = prepared.Control ?? throw new InvalidOperationException("The actual prepared control is absent.");
         var digest = Convert.ToHexStringLower(SHA256.HashData(ControlledPartitionMovementBodies.Control(control)));
-        var resources = ControlledPartitionMovementResourceAssertions.Expected()
+        var resources = ControlledPartitionMovementResourceAssertions.Expected(additionalResources)
             .OrderBy(resource => resource.Name, StringComparer.Ordinal).ToImmutableArray();
+        var grantPosition = checked(GrantReplicaIndex + additionalSeedEntries);
         var expectedGrant = new PartitionMovePhaseGrant(Version, ControlledPartitionMovementFenceRequest.GrantId,
             ControlledPartitionMovementFenceRequest.FenceCommandId, ControlledPartitionMovementPrepareRequest.MoveId,
             ControlledPartitionMovementCorpus.Partition, corpus.Control.Owner, corpus.Control.Owner,
             PhysicalShardCatalogFixture.RootPrincipalId, InitialPolicyEpoch, PartitionMovePeerStage.Fence,
-            prepared.Journal.ControlIntentDigest, digest, originalExpiry, GrantReplicaIndex, null, resources);
+            prepared.Journal.ControlIntentDigest, digest, originalExpiry, grantPosition, null, resources);
         var expected = new PartitionMovePhaseResult(ControlledPartitionMovementPrepareRequest.MoveId,
             PartitionMovePeerStage.ControlAuthorize, new(ControlledPartitionMovementFenceRequest.GrantId,
-                corpus.Control.Owner, GrantReplicaIndex, prepared.Journal.ControlIntentDigest),
+                corpus.Control.Owner, grantPosition, prepared.Journal.ControlIntentDigest),
             control, null, null, null, expectedGrant);
         var grant = actual.Grant ?? throw new InvalidOperationException("The actual logged A grant is absent.");
         await Assert.That(JsonDefaults.Serialize(actual with
@@ -42,21 +44,23 @@ internal static class ControlledPartitionMovementGrantAssertions
             .SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
         return actual;
     }
-
     internal static async Task<PartitionMovePhaseResult> FencedAsync(OperationResult outcome,
-        PartitionMovePhaseResult prepared, ControlledPartitionMovementLoopbackCorpus corpus)
+        PartitionMovePhaseResult prepared, ControlledPartitionMovementLoopbackCorpus corpus,
+        long additionalSeedEntries = DefaultAdditionalSeedEntries)
     {
         await Assert.That(outcome.Error).IsNull();
         var control = prepared.Control ?? throw new InvalidOperationException("The actual prepared control is absent.");
+        var fencePosition = checked(FenceReplicaIndex + additionalSeedEntries);
         var fence = new PartitionMoveSourceFenceRecord(Version, ControlledPartitionMovementPrepareRequest.MoveId,
             ControlledPartitionMovementCorpus.Partition, corpus.Control.Owner, control.SourcePlacement,
-            corpus.Destination.Owner, FenceReplicaIndex, prepared.Journal.ControlIntentDigest);
+            corpus.Destination.Owner, fencePosition, prepared.Journal.ControlIntentDigest);
         var expected = new PartitionMovePhaseResult(ControlledPartitionMovementPrepareRequest.MoveId,
             PartitionMovePeerStage.Fence, new(ControlledPartitionMovementFenceRequest.FenceCommandId,
-                corpus.Control.Owner, FenceReplicaIndex, prepared.Journal.ControlIntentDigest),
+                corpus.Control.Owner, fencePosition, prepared.Journal.ControlIntentDigest),
             control, fence, null, null);
         var actual = outcome.Get<PartitionMovePhaseResult>();
         await Assert.That(JsonDefaults.Serialize(actual).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
         return actual;
     }
 }
+

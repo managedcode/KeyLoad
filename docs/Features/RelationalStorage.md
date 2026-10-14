@@ -178,3 +178,41 @@ AC-REL-004-JOIN-005/006 and AC-QUERY-007-JOIN-001 retain all four original SDK/o
 The public SQL route uses `SqlOperationCompiler.Compile` with null positional parameter count. Its accepted SELECT is decoded through QueryExecute, whose canonical descriptor retains GrainReadKind.Query; both HTTP SDK and MCP forward that kind through the canonical signed request construction. Explicit public AST still uses AstQuery. The original conditional hold arm therefore remains `ast ? AstQuery : Query`. Native-session SELECT has its separately frozen AstQuery lowering and must not be substituted for this public route.
 
 Original actual AuthorizationReload observation, uncompleted original caller, full no-effects source/outbox checks, original-token cancellation, Cancelled marker, ProducerDisposed marker, original task join, arm retirement and healthy continuation at the original cut are unchanged. Preserve all existing primary/cleanup failures, fixed deadlines and fixture ownership. This caller correction does not prove a current runtime initiating cause or qualification. Actual source adoption, compiler, all four original RF3 variants and exact-source Linux evidence remain required. No cold or physical-memory acceptance is newly claimed by this literal change.
+
+
+## Original JOIN authorization control uses current bounded T-SQL
+
+TASK-REL-JOIN-AUTH-CURRENT-TSQL-001 under REQ-REL-004,
+AC-REL-004-JOIN-002/003/006 and REQ/AC-AUTH-005/006 preserves the original
+RightResourceAndJoinFieldUseDenialsHaveNoEffectsAndHealthyCallersStillRead Case.
+Its single administrator/limited-reader shared QueryText must use
+SELECT TOP (10) instead of retired LIMIT10 before it can qualify authorization.
+The same complete projection (order_key/customer_name/customer_id), source
+collections/aliases, INNER JOIN l.title = r.id, ascending l.key ordering,
+QueryDialectVersion2, AllowFullScan and ten-row bound remain unchanged.
+
+The direct SDK query, unified SDK SQL and both official MCP paths retain their
+complete source/reference/revision/JSON checks; both separately persisted
+limited-right-resource and missing-field-use identities still require exact
+PermissionDenied. Complete left/right document equality, before/after joined
+pages, private-customer exclusion, native request IDs, caller ownership and
+original deadline remain unchanged. This changes only one fixture query,
+not product authorization, epoch/cursor handling, parser, typed INSERT or grants.
+
+Original source319c/run38578269537 attempt1 KL065 fails administrator SDK
+QueryAsync at ReadAdministratorPagesAsync144 before the denied requests.
+The actual current QueryText contains retired LIMIT10. The source correction
+retains the same original Case/arguments and is not a passing RF3/runtime claim.
+Fresh native admission, compiler and exact-source Linux original whole-flow
+qualification remain pending authentic results. No new Case or cold cycle
+is added; all original lifecycle and complete public observation checks remain.
+
+```mermaid
+flowchart LR
+    A[Valid bounded joined query] --> B[Complete administrator page on four routes]
+    B --> C[Exact right-resource and field-use denials]
+    C --> D[Unchanged left/right state and complete healthy pages]
+```
+
+Canonical slice RelationalStorage; ADR118 bounded relational join applies.
+Frontend, package and storage-format changes: N/A.

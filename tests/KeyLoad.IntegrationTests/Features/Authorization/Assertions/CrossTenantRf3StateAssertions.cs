@@ -6,8 +6,8 @@ namespace KeyLoad.IntegrationTests.Features.Authorization;
 
 internal static class CrossTenantRf3StateAssertions
 {
-    private const string Scan = "SELECT * FROM \"mcp-documents\" ORDER BY id ASC LIMIT 10";
-    private const string Indexed = "SELECT * FROM \"mcp-documents\" WHERE secret = 'mcp-private-value-canary' ORDER BY id ASC LIMIT 10";
+    private const string Scan = "SELECT TOP (10) * FROM \"mcp-documents\" ORDER BY id ASC";
+    private const string Indexed = "SELECT TOP (10) * FROM \"mcp-documents\" WHERE secret = 'mcp-private-value-canary' ORDER BY id ASC";
     internal static QueryRequest Query(PartitionRef partition, bool indexed)
         => new(partition, indexed ? Indexed : Scan, AllowFullScan: true);
     internal static async Task StateAsync(KeyLoadClient admin, McpDocumentScenario scenario, string json,

@@ -12,11 +12,12 @@ internal sealed record RelationalSqlRf3Scenario(PartitionRef Partition, Resource
     internal StreamRef Stream => new(Partition, RelationalSqlRf3Tokens.Streams, RelationalSqlRf3Tokens.StreamId);
     private static VectorSpace Space => new(RelationalSqlRf3Tokens.VectorSpace, RelationalSqlRf3Tokens.Dimension,
         DistanceMetric.DotProduct, RelationalSqlRf3Tokens.VectorModel, RelationalSqlRf3Tokens.VectorVersion);
-
     internal static async Task<RelationalSqlRf3Scenario> CreateAsync(KeyLoadClient administrator, CancellationToken cancellationToken)
+     = > await CreateAsync(administrator, new PartitionRef(RelationalSqlRf3Tokens.TenantPrefix + Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat),
+            RelationalSqlRf3Tokens.Database, RelationalSqlRf3Tokens.Domain, Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat)), cancellationToken);
+    internal static async Task<RelationalSqlRf3Scenario> CreateAsync(KeyLoadClient administrator,
+        PartitionRef partition, CancellationToken cancellationToken)
     {
-        var partition = new PartitionRef(RelationalSqlRf3Tokens.TenantPrefix + Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat),
-            RelationalSqlRf3Tokens.Database, RelationalSqlRf3Tokens.Domain, Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat));
         var table = new ResourceDefinition(RelationalSqlRf3Tokens.Table, ResourceKind.Collection, partition.TransactionDomainId)
         {
             RelationalSchema = new(RelationalSqlRf3Tokens.Key, RelationalSqlRf3Tokens.Columns),
@@ -37,10 +38,8 @@ internal sealed record RelationalSqlRf3Scenario(PartitionRef Partition, Resource
         }
         return new(partition, persisted);
     }
-
     internal CommandRequest Command(params Mutation[] effects)
         => new(Guid.NewGuid(), Partition, [.. effects]);
-
     internal CommandRequest LinkedModelsCommand() => Command(
         new PutDocument(RelationalSqlRf3Tokens.Table, RelationalSqlRf3Tokens.FirstId, RelationalSqlRf3Tokens.FirstRow),
         new PutDocument(RelationalSqlRf3Tokens.Table, RelationalSqlRf3Tokens.SecondId, RelationalSqlRf3Tokens.SecondRow),
@@ -53,25 +52,22 @@ internal sealed record RelationalSqlRf3Scenario(PartitionRef Partition, Resource
         new EnqueueMessage(RelationalSqlRf3Tokens.Queue, RelationalSqlRf3Tokens.MessageId, RelationalSqlRf3Tokens.EmptyJson),
         new AppendSamples(RelationalSqlRf3Tokens.SeriesSet, RelationalSqlRf3Tokens.SeriesId,
             [new(RelationalSqlRf3Tokens.SampleId, RelationalSqlRf3Tokens.SampleAt, RelationalSqlRf3Tokens.SampleValue)]));
-
     internal SearchRequest Search() => new(Partition, RelationalSqlRf3Tokens.Table, VectorField: RelationalSqlRf3Tokens.VectorField,
         Vector: [RelationalSqlRf3Tokens.UnitVector, RelationalSqlRf3Tokens.ZeroVector], Space: Space);
-
     internal InspectMessageRequest Inspect(string id = RelationalSqlRf3Tokens.MessageId)
         => new(new(Partition, RelationalSqlRf3Tokens.Queue), id);
-
     internal ReadStreamRequest ReadStream(string id = RelationalSqlRf3Tokens.StreamId)
         => new(Stream with
         {
             StreamId = id
         });
-
     private static Task<ResourceDefinition> ConfigureAsync(KeyLoadClient administrator, PartitionRef partition,
         ResourceDefinition definition, CancellationToken cancellationToken)
         => SqlRf3Protocol.SdkAsync<ResourceDefinition>(administrator, SqlRf3Protocol.Call(partition,
             McpCallerTools.ResourcesConfigure, new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId, definition),
             Guid.NewGuid()), cancellationToken);
 }
+
 
 internal sealed record RelationalQ2AdmissionSeed(RelationalSqlRf3Scenario Scenario,
     McpPersistedIdentity Identity, CommandRequest Command, CommitReceipt Receipt)

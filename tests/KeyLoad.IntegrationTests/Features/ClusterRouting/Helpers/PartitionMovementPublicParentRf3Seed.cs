@@ -88,7 +88,9 @@ internal sealed class PartitionMovementPublicParentRf3Seed : IAsyncDisposable
         {
             seed.official = await McpOfficialClient.ConnectAsync(wave.Application, TwoRf3MembershipProtocol.Node1,
                 credential, cancellationToken).ConfigureAwait(false);
-            seed.Models = existingModels ?? await RelationalSqlRf3Scenario.CreateAsync(seed.Source, cancellationToken).ConfigureAwait(false);
+            seed.Models = existingModels ?? await (wave.SqlInsertTls is { } sql
+                ? RelationalSqlRf3Scenario.CreateAsync(seed.Source, sql.Partition, cancellationToken)
+                : RelationalSqlRf3Scenario.CreateAsync(seed.Source, cancellationToken)).ConfigureAwait(false);
             seed.Directory = await PhysicalOwnerDirectoryRf3Assertions.ExpectedAsync(wave.Application,
                 wave.Profile, cancellationToken).ConfigureAwait(false);
             seed.OriginalPlacement = await McpCallerAssertions.SdkSuccessAsync(await seed.Source
@@ -110,7 +112,10 @@ internal sealed class PartitionMovementPublicParentRf3Seed : IAsyncDisposable
             {
                 await seed.DisposeAsync().ConfigureAwait(false);
             }
-            catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
+            catch (Exception cleanup)
+            {
+                throw new AggregateException(primary, cleanup);
+            }
             throw;
         }
     }

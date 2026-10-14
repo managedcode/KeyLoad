@@ -588,3 +588,38 @@ REQ/AC-AUTH-ASPNET-001/003 gain a narrowly borrowed passive native execution/tic
 ## Selected T-SQL callers retain original team/generation authority
 
 REQ/AC-AUTH-005/006/007 retain the complete original GenerationVisibilityTests and TeamRowPolicyTests declarations, literal visible/hidden row sets, point-read results, scoped cut, revoked/forged membership denials, complete canonical bytes, replay, healthy repair and original cold owners. The authenticated Linux source45e855f8 failures reached the second, historical EXPLAIN-prefixed call after the ordinary SELECT had passed. ADR130 does not admit EXPLAIN grammar. Preserve the same independent full plan rows, access path, scan grant, scope, cut and null cursor through the already-existing typed SelectQuery.Explain contract, keeping the original collection, native star projection, original metadata id order (/@id), native default window100, fresh persisted principal and exact caller token. No new parser, authority, options, quota or error normalization is introduced. Original failures remain evidence; native/compiler/runtime/Linux gates are open until new originals.
+
+
+## Original cross-tenant SQL denial uses current T-SQL
+
+TASK-CROSS-TENANT-CURRENT-TSQL-001 / REQ/AC-AUTH-005 and REQ/AC-CLIENT-006
+preserves the original
+CrossTenantRf3WholeFlowTests.Kl015ForeignWritesScansAndIndexesAreDeniedAndAuthorizedReceiptRemainsStable
+whole RF3 flow. Its foreign full scan and indexed secret predicate must be valid
+current T-SQL requests: SELECT TOP (10), with the same quoted collection,
+predicate, ascending id ordering and AllowFullScan. Retired LIMIT syntax can fail
+validation before the intended scope denial and does not qualify authorization.
+The independent SDK and official MCP PermissionDenied code/detail, null value,
+complete canary exclusion, original foreign and owned state, strict index path,
+original receipt replay and changed-content conflict all remain exact.
+The shared administrator positive scan/index controls use those same current
+requests and retain every row/reference/revision/JSON/redaction/cursor/opaque
+positive-cut oracle. The bound remains ten rows; persisted grants, product
+authorization, parser and decoder are unchanged. No test Case, topology, owned
+client lifetime or deadline change.
+
+Original source319c/run38578269537 attempt1 failed the same Case in KL015 and
+KL065 at CrossTenantRf3ErrorAssertions16, expected PermissionDenied but received
+Validation, from the first SDK foreign scan. This is a source-confirmed stale
+fixture request correction; authentic compiler and whole-flow Linux RF3 results
+remain pending. It does not independently claim a product authorization repair.
+
+```mermaid
+flowchart LR
+    A[Valid bounded T-SQL scan and indexed predicate] --> B[Current persisted tenant scope]
+    B --> C[Exact SDK and official MCP denial]
+    C --> D[Complete original state and authorized receipt replay]
+```
+
+Canonical slice Authorization; ADR014 persisted scopes and ADR125 signed
+connection operations apply. Additional frontend or storage-format changes: N/A.
