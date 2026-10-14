@@ -85,6 +85,10 @@ public sealed partial class DatabaseEngine
         ReadOnlySpan<byte> key, byte[] bodyKey, byte[] metadataKey,
         MessageMetadata metadata, long bodyBytes, ReadyClaimState state)
     {
+        if (metadata.StateVersion == long.MaxValue)
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, QueueClaimVersionExhausted);
+        }
         var orderKey = policy.OrderingProfile == QueueOrderingProfile.StrictPerKey
             ? RequireQueueOrderReference(view, lane, RequireQueueOrderingKey(body), metadata) : null;
         var expired = metadata with

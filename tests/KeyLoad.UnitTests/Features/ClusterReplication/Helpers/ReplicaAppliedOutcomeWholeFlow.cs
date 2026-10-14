@@ -122,8 +122,11 @@ internal static class ReplicaAppliedOutcomeWholeFlow
             {
                 ExpectedIntegrityHash = new string('0', 64)
             }, complete.CommandId);
-        var refused = Assert.ThrowsExactly<KeyLoadException>(() => owner.Database.Database.ResolveAppliedSubmissionOutcome(changed));
-        await Assert.That(refused.Code).IsEqualTo(ErrorCode.Conflict);
+        var refused = owner.Database.Database.ResolveAppliedSubmissionOutcome(changed);
+        await Assert.That(refused.Error).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(refused.SafeDetail).IsEqualTo("The command ID was already used with different content.");
+        await Assert.That(refused.Json).IsNull();
+        await Assert.That(refused.NativeValue).IsNull();
         await state.RequireAsync(ReplicaSubmissionOutcomeState.Read(owner.Database));
     }
 }

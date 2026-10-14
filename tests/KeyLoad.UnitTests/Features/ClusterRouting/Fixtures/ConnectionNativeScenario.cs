@@ -22,18 +22,20 @@ internal sealed class ConnectionNativeScenario : IAsyncDisposable
 
     internal ConnectionNativeScenario(GrainRoutingOptions? routing = null,
         IGrainRequestPurposeObserver? purposeObserver = null,
-        Func<ConnectionOperationObservation, IGrainRequestPhaseObserver>? phaseObserver = null)
-        => Fixture = new(routing: routing, observer: phaseObserver?.Invoke(Observation) ?? Observation, purposeObserver: purposeObserver);
+        Func<ConnectionOperationObservation, IGrainRequestPhaseObserver>? phaseObserver = null,
+        bool nativeReplicaAdmission = false)
+        => Fixture = new(routing: routing, observer: phaseObserver?.Invoke(Observation) ?? Observation, purposeObserver: purposeObserver, nativeReplicaAdmission: nativeReplicaAdmission);
 
     internal static async Task RunAsync(Func<ConnectionNativeScenario, Task> execute,
         GrainRoutingOptions? routing = null, IGrainRequestPurposeObserver? purposeObserver = null,
-        Func<ConnectionOperationObservation, IGrainRequestPhaseObserver>? phaseObserver = null)
+        Func<ConnectionOperationObservation, IGrainRequestPhaseObserver>? phaseObserver = null,
+        bool nativeReplicaAdmission = false)
     {
         var failures = new List<Exception>();
         RequestCqrsClusterFixture? owner = null;
         try
         {
-            await using var scenario = new ConnectionNativeScenario(routing, purposeObserver, phaseObserver);
+            await using var scenario = new ConnectionNativeScenario(routing, purposeObserver, phaseObserver, nativeReplicaAdmission);
             owner = scenario.Fixture;
             await KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => execute(scenario), failures);
             if (failures.Count > ConnectionNativeProtocol.EmptyFailures)

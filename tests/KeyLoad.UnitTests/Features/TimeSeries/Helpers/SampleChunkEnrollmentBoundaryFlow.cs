@@ -1,0 +1,93 @@
+using System.Text.Json;
+using KeyLoad.Core.Features.TimeSeries;
+using KeyLoad.Server;
+
+namespace KeyLoad.UnitTests.Features.TimeSeries;
+
+internal static class SampleChunkEnrollmentBoundaryFlow
+{
+    private const int OverlapMinutes = 30;
+    private const string ConflictDetail = "The native series chunk window overlaps retained data or an enrolled identity.";
+
+    internal static async Task RunAsync()
+    {
+        var failures = new List<Exception>();
+        await ServerFailureObserver.ObserveAsync(async () =>
+        {
+            using var fixture = new SampleChunkCanonicalFixture();
+            await ServerFailureObserver.ObserveAsync(() => CompleteAsync(fixture), failures);
+        }, failures);
+        ServerFailureObserver.ThrowIfAny(failures);
+    }
+
+    private static async Task CompleteAsync(SampleChunkCanonicalFixture fixture)
+    {
+        var originals = new List<(ReplicatedOperation Operation, OperationResult Result)>();
+        await CommitAsync(fixture, new AppendSamples(SampleChunkCanonicalFixture.Set,
+            SampleChunkCanonicalFixture.Series, SampleChunkCanonicalFixture.Initial, SampleChunkCanonicalFixture.Tags),
+            "appendSamples", SampleChunkCanonicalFixture.InitialSequence, originals);
+        var occupied = new OpenSampleChunkWindow(SampleChunkCanonicalFixture.Set, SampleChunkCanonicalFixture.Series,
+            fixture.WindowId, SampleChunkCanonicalFixture.Start, SampleChunkCanonicalFixture.Until);
+        await RefuseAsync(fixture, occupied, originals, () => SampleChunkEnrollmentBoundaryRows.RawAsync(
+            fixture.Owner.Database, fixture.Owner.Store, fixture, populated: false));
+        var enrolled = occupied with { WindowId = Guid.NewGuid(), From = occupied.Until, Until = SampleChunkEnrollmentBoundaryRows.Until };
+        await CommitAsync(fixture, enrolled, "openSampleChunkWindow", SampleChunkCanonicalFixture.FirstRevision, originals);
+        await SampleChunkEnrollmentBoundaryRows.CurrentAsync(fixture.Owner.Database, fixture.Owner.Store,
+            fixture, enrolled.WindowId, populated: false, sealedWindow: false);
+        var overlap = enrolled with
+        {
+            WindowId = Guid.NewGuid(), From = enrolled.From.AddMinutes(OverlapMinutes), Until = enrolled.Until.AddMinutes(OverlapMinutes)
+        };
+        await RefuseAsync(fixture, overlap, originals, () => SampleChunkEnrollmentBoundaryRows.CurrentAsync(
+            fixture.Owner.Database, fixture.Owner.Store, fixture, enrolled.WindowId, populated: false, sealedWindow: false));
+        await CommitAsync(fixture, new AppendSamples(SampleChunkCanonicalFixture.Set, SampleChunkCanonicalFixture.Series,
+            [SampleChunkEnrollmentBoundaryRows.Left, SampleChunkEnrollmentBoundaryRows.Right], SampleChunkCanonicalFixture.Tags),
+            "appendSamples", SampleChunkEnrollmentBoundaryRows.RightSequence, originals);
+        await SampleChunkEnrollmentBoundaryRows.CurrentAsync(fixture.Owner.Database, fixture.Owner.Store,
+            fixture, enrolled.WindowId, populated: true, sealedWindow: false);
+        await CommitAsync(fixture, new SealSampleChunkWindow(SampleChunkCanonicalFixture.Set,
+            SampleChunkCanonicalFixture.Series, enrolled.WindowId, SampleChunkEnrollmentBoundaryRows.AppendedRevision), "sealSampleChunkWindow",
+            SampleChunkEnrollmentBoundaryRows.SealedRevision, originals);
+        var adjacentOccupied = enrolled with
+        {
+            WindowId = Guid.NewGuid(), From = enrolled.Until, Until = SampleChunkEnrollmentBoundaryRows.RawUntil
+        };
+        await RefuseAsync(fixture, adjacentOccupied, originals, () => SampleChunkEnrollmentBoundaryRows.CurrentAsync(
+            fixture.Owner.Database, fixture.Owner.Store, fixture, enrolled.WindowId, populated: true, sealedWindow: true));
+        await SampleChunkEnrollmentBoundaryCold.RunAsync(fixture, enrolled.WindowId, originals);
+    }
+
+    private static Task CommitAsync(SampleChunkCanonicalFixture fixture, Mutation mutation, string kind, long revision,
+        List<(ReplicatedOperation Operation, OperationResult Result)> originals)
+        => SampleChunkCorrectionBoundReceipts.CommitAsync(fixture, mutation, kind, revision, originals);
+
+    private static async Task RefuseAsync(SampleChunkCanonicalFixture fixture, OpenSampleChunkWindow mutation,
+        List<(ReplicatedOperation Operation, OperationResult Result)> originals, Func<Task> current)
+    {
+        var request = new CommandRequest(Guid.NewGuid(), fixture.Owner.Partition, [mutation]);
+        var operation = new ReplicatedOperation(request.CommandId, OperationKind.Batch,
+            SampleChunkCanonicalFixture.Principal, default, JsonSerializer.Serialize(request, JsonDefaults.Options));
+        var failures = new List<Exception>();
+        var raw = fixture.Raw();
+        OperationResult? original = null;
+        await ServerFailureObserver.ObserveAsync(async () =>
+        {
+            original = fixture.Owner.Database.ApplyEmbedded(operation, cancellationToken: default);
+            originals.Add((operation, original));
+            await Assert.That(SampleRollupWholeFlow.Outcome(original)).IsEqualTo(
+                SampleRollupWholeFlow.Outcome(new OperationResult(null, ErrorCode.Conflict, ConflictDetail)));
+            await Assert.That(original.Json).IsNull();
+        }, failures);
+        await ServerFailureObserver.ObserveAsync(async () => await Assert.That(fixture.Raw()).IsEqualTo(raw), failures);
+        await ServerFailureObserver.ObserveAsync(current, failures);
+        await ServerFailureObserver.ObserveAsync(async () => await Assert.That(fixture.Owner.Store.Read(view =>
+            view.ReadOwnedValue(SampleChunkKeys.Window(fixture.Owner.Partition, mutation.SeriesSet,
+                mutation.SeriesId, mutation.WindowId)))).IsNull(), failures);
+        if (original is not null)
+        {
+            await ServerFailureObserver.ObserveAsync(() => SampleChunkCorrectionBoundColdAssertions.ReplayAsync(
+                fixture.Owner.Database, fixture.Owner.Store, operation, original), failures);
+        }
+        ServerFailureObserver.ThrowIfAny(failures);
+    }
+}

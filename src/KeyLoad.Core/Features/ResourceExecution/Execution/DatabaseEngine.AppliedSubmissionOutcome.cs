@@ -17,9 +17,9 @@ public sealed partial class DatabaseEngine
             var selection = CommandOutcomeKeyResolver.Select(view, normalized.PrincipalId, normalized.Id, scope);
             var outcome = selection.Outcome
                 ?? throw Errors.Fail(ErrorCode.RecoveryRequired, MissingDurableOutcomeMessage);
-            ValidateStoredSubmissionIdentity(view, normalized, selection, outcome);
             try
             {
+                ValidateStoredSubmissionIdentity(view, normalized, selection, outcome);
                 return ReadValidatedSubmissionOutcome(view, normalized,
                     allowStoredDocumentDenial: true, verifiedSelection: selection);
             }

@@ -82,7 +82,10 @@ internal static class McpCatalogExpectations
             McpDiscoveryProtocol.SeriesId]),
         Read("keyload_series_chunk_window", ["partition", "set", "seriesId", "windowId", "tagPointer", "tagValue", "limit"],
             ["windowId", "from", "until", "generation", "revision", "sourceSequence",
-                "retentionBeforeUtcTicks", "records", "cutPosition"]),
+                "retentionBeforeUtcTicks", "records", "cutPosition"]) with
+        {
+            BodyPropertyFields = ["partition", "set", "seriesId", "windowId", "tagPointer", "tagValue", "limit", "minimumToken"]
+        },
         Read(McpCallerTools.QueryExecute, [McpDiscoveryProtocol.Partition, McpDiscoveryProtocol.Sql]),
         Read(McpCallerTools.QuerySearch, [McpDiscoveryProtocol.Version, McpDiscoveryProtocol.Query]),
         Read(McpCallerTools.QueryGraphPath, [McpDiscoveryProtocol.Version, McpDiscoveryProtocol.Query],

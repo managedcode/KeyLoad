@@ -49,8 +49,18 @@ internal static class ReplicaAppliedOutcomeAuthorityFault
     private static async Task RefusedAsync(ReplicaSubmissionOutcomeFlow owner, ReplicatedOperation operation, ErrorCode expected)
     {
         var state = ReplicaSubmissionOutcomeState.Read(owner.Database);
-        var actual = Assert.ThrowsExactly<KeyLoadException>(() => owner.Database.Database.ResolveAppliedSubmissionOutcome(operation));
-        await Assert.That(actual.Code).IsEqualTo(expected);
+        if (expected is ErrorCode.Corruption or ErrorCode.RecoveryRequired)
+        {
+            var actual = Assert.ThrowsExactly<KeyLoadException>(() => owner.Database.Database.ResolveAppliedSubmissionOutcome(operation));
+            await Assert.That(actual.Code).IsEqualTo(expected);
+        }
+        else
+        {
+            var actual = owner.Database.Database.ResolveAppliedSubmissionOutcome(operation);
+            await Assert.That(actual.Error).IsEqualTo(expected);
+            await Assert.That(actual.Json).IsNull();
+            await Assert.That(actual.NativeValue).IsNull();
+        }
         await state.RequireAsync(ReplicaSubmissionOutcomeState.Read(owner.Database));
     }
 

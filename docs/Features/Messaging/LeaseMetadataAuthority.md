@@ -112,3 +112,43 @@ These three authored settlement arguments join the three claim ceiling arguments
 and twenty-one minimum-metadata arguments without replacing any original case.
 All representational ceiling fixes form one coherent batch before source join and
 qualification. No claim follows from this source-only contract.
+
+
+## Expired Ready version space
+
+REQ/AC-MSG-001 and actual Receive require monotonic expiry as well as claim.
+CaptureReadyItem validates current Ready authority and chooses expired input before
+AddLeaseReadyInput; the nonexpired claim guard cannot protect that branch. The
+expired Ready path rejects StateVersion long.MaxValue with ResourceExhausted and
+the existing static queue-claim detail before order/transition/body/counter staging.
+Attempts and LeaseVersion are not incremented on expiry and their positive ceilings
+remain permitted. No blanket claim guard is borrowed for this branch.
+
+`QueueExpiredReadyVersionExhaustionTests.ExpiredReadyRequiresOnlyStateVersionSpaceAndRetainsOriginalOutcomeAcrossColdRepairAndHealthyWork`
+maps three genuine native variants: exhausted StateVersion and successful
+nonincremented Attempts/LeaseVersion ceiling controls. Recorded native enqueue time
+and ExpiresAt precede the recorded original Receive time; no clock provider is
+replaced, worker timer used or sleep/race assertion invented. Max-state failure
+persists its legitimate single failure/clock outcome while complete literal
+expired-due Ready body/metadata/counters/ready reference and full queue-domain bytes
+remain unchanged. Exact failure Apply/Resolve, retained outcome and full bytes/
+position survive joined cold. Restore the exact original fixture metadata row;
+that old stable ID stays failed. A NEW Receive is empty and persists literal
+Expired version2 with original expiry, no body, zero usage and complete empty
+ready/lease/scheduled references. Positive max Attempts/LeaseVersion controls
+expire directly without rewriting those historical fields.
+
+Before each actual producer, empty Receive, healthy claim and ACK, the fixture
+reads actual native ReadAtomicPartitionPlacement and independently calculates the
+next physical commit position. Complete literal ProcessDurable producer/ACK
+receipts and ReceiveResult pages must match that full expected CommitToken,
+including incarnation and ownership epoch; no returned token supplies its own
+expected authority. The healthy delivery additionally verifies its original
+server-signed claims against literal lane/message/principal/version/generation.
+
+Fresh healthy enqueue/claim/ACK uses independent full payload, headers, metadata,
+counters and references. Original failed/empty outcomes and healthy producer/ACK
+receipts replay exactly after same-root cold; consumed healthy claim refuses
+StaleLease while its original stored result is unchanged. Compilation, native
+UIDs, runtime, process/RF3/Linux and acceptance remain separate OPEN gates until
+actual original evidence exists. This source contract does not claim qualification.

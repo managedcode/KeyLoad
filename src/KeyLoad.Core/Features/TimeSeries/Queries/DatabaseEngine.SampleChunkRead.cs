@@ -14,8 +14,15 @@ public sealed partial class DatabaseEngine
         {
             var grant = budget.CreateReadGrant(Limits.MaxQueryReadBytes, Limits.MaxScanRecords);
             var view = budget.CreateView(original, grant);
-            return Features.TimeSeries.SampleChunkWindowReader.Read(this, view, principalId, request,
+            var result = Features.TimeSeries.SampleChunkWindowReader.Read(this, view, principalId, request,
                 budget, TimeSeriesOptions, Store.Position);
+            if (request.MinimumToken is { } minimum)
+            {
+                budget.Check();
+                ValidateDocumentSessionToken(view, request.Partition, minimum);
+                budget.Check();
+            }
+            return result;
         });
     }
 }

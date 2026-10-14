@@ -57,13 +57,15 @@ internal sealed partial class RequestCqrsClusterFixture : IAsyncInitializer, IAs
         IGrainRequestPhaseObserver? observer = null,
         Func<TestDatabase, KeyLoad.UnitTests.Features.Search.NativeTextMaintenanceTestRuntime>? nativeMaintenance = null,
         IGrainRequestPurposeObserver? purposeObserver = null,
-        Func<TestDatabase, KeyLoad.UnitTests.Features.Search.NativeAnnMaintenanceTestRuntime>? nativeAnnMaintenance = null)
+        Func<TestDatabase, KeyLoad.UnitTests.Features.Search.NativeAnnMaintenanceTestRuntime>? nativeAnnMaintenance = null,
+        bool nativeReplicaAdmission = false)
     {
         nativeFactory = nativeMaintenance;
         nativeAnnFactory = nativeAnnMaintenance;
+        UsesNativeAdmission = nativeReplicaAdmission || nativeFactory is not null || nativeAnnFactory is not null;
         Clock = clock ?? TimeProvider.System;
         RoutingOptions = UnitRoutingOptions.Routing(routing);
-        Database = new TestDatabase(timeProvider: Clock, nativeReplicaAdmission: nativeFactory is not null || nativeAnnFactory is not null);
+        Database = new TestDatabase(timeProvider: Clock, nativeReplicaAdmission: UsesNativeAdmission);
         try
         {
             RequestCqrsFixtureOwners.Register(ownerId, this);
@@ -94,6 +96,7 @@ internal sealed partial class RequestCqrsClusterFixture : IAsyncInitializer, IAs
     {
         get;
     }
+    internal bool UsesNativeAdmission { get; }
     internal Guid ConnectionId { get; } = Guid.NewGuid();
     internal NativeRuntimeTestOptions Timing { get; } = new();
     internal GrainRequestCodec Codec
@@ -243,7 +246,7 @@ internal sealed class RequestCqrsSiloConfigurator : ISiloConfigurator
             .AddAssembly(typeof(CqrsStreamChunkSurrogateConverter<GrainRequestProgress, GrainOperationReply>).Assembly)
             .AddAssembly(typeof(ClaimsPrincipalSurrogateConverter).Assembly));
         siloBuilder.Services.AddSingleton(fixture.Database.Database);
-        siloBuilder.Services.AddSingleton<ICommitCoordinator>(fixture.NativeMaintenance is not null || fixture.NativeAnnMaintenance is not null
+        siloBuilder.Services.AddSingleton<ICommitCoordinator>(fixture.UsesNativeAdmission
             ? new RequestCqrsNativeCommitCoordinator(fixture.Database)
             : new EmbeddedCoordinator(fixture.Database.Database));
         siloBuilder.Services.AddSingleton(fixture.Clock);

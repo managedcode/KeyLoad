@@ -7,8 +7,8 @@
       "total": 104
     },
     "additionalTask": "KL-105",
-    "qualification": "R56 complete source checkpoint c1e6bbd2 pushed; current scoped Unit/Integration compiler0errors0warnings. Selected native Unit256/256 and genuine process Recovery63/63 PASS,0failed0skipped, source/DLL/PDB unchanged. Latest full solution attempt failed before repaired imports; fresh full Linux/RF3/formatter/coverage/fault/endurance/performance gates remain open. Original104 acceptance stays20done84inprogress.",
-    "coverage": "R56 selected functional-only cohort reports12926/106456 lines and6724/67424 branches in10 modules. This is partial coverage, not a complete product coverage gate; load and comparison work receive no credit.",
+    "qualification": "R57 whole-task source integrated and awaiting fresh build/discovery/runtime. Last verified R56 selected cohort passed256/256Unit and63/63real process recovery with unchanged source/DLL/PDB; it does not qualify later R57 code. Original104 acceptance stays20done84inprogress; full Linux/RF3/formatter/coverage/fault/endurance/performance gates remain open.",
+    "coverage": "Current R57 functional product coverage is unmeasured. Historical R56 selected functional-only collector reports12926/106456 lines and6724/67424 branches in10modules; no full product coverage or load/comparison credit.",
     "currentStageR43": {
       "status": "local_development_executed_with_six_failures_linux_acceptance_pending",
       "newCSharpFiles": 138,
@@ -3073,6 +3073,43 @@
         "Prior native movement/connection/typed-INSERT failed flows outside this selected cohort are not silently closed."
       ],
       "fullTaskPromotion": false
+    },
+    "currentStageR57": {
+      "status": "whole_task_source_integrated_qualification_not_run",
+      "scope": {
+        "KL-078": "Explicit optional minimum bound through SDK/MCP, canonical owner/prefix and generated signed payload; real permission/tamper/healthy/two-cold flows; native257record quota and original half-open enrollment/correction-only tag lifecycle continuations.",
+        "KL-087": "Expired Ready StateVersion ceiling before staging; original immutable definitive Conflict/TokenInvalidated classification through existing applied-outcome path; full related Blob/native/queue/cold/fatal controls.",
+        "KL-036": "Original cold-owner cancellation budget diagnostics preserve original tasks, deadlines and joins; no root-cause or completed movement claim."
+      },
+      "sourceAdmissions": [
+        {
+          "path": "TestResults/stage61-native-join/kl087-whole-followup-sourceY.receipt.json",
+          "sha256": "cc6e133ab5c4ceced6cc904604eb62ddb12553e43c61ec4bda1aa3c261938bd9"
+        },
+        {
+          "path": "TestResults/stage61-native-join/ts-r56-explicit-and-signed-minimum-28-path-actual-physical-source-Y.original.json",
+          "sha256": "963cdbea0962d6d14ac6538f324bd2cc95f73fca72391169dcbf20c67d0fb036"
+        },
+        {
+          "path": "TestResults/stage61-native-join/ts-r56-minimum-mcp-existing-catalog-optional-property-actual-source-Y.original.json",
+          "sha256": "b4d1d8810c51568493078c99698db86859ac41c4e5963a364c76e7bd1336d724"
+        },
+        {
+          "path": "TestResults/stage61-native-join/unit-r56-three-core-and-minimum-parent-fourteen-path-actual-source-Y-postmanifest.original.json",
+          "sha256": "90763e46db6c389dce0b46e75aaa9a04dbba0543a1054259f648401b45ea5973"
+        }
+      ],
+      "roslynk": "Actual native tool invocation failures retained; reviewed exact pre/post guarded Codex/file patches used under owner repair autonomy. No Roslynk appliedY or clean-workspace claim.",
+      "compiled": false,
+      "nativeCensusBound": false,
+      "runtimeExecuted": false,
+      "fullTaskPromotion": false,
+      "requiredNext": [
+        "One coherent analyzer-enabled full Release build.",
+        "Fresh exact native078/087 case inventories including newly added classes and related schema/dependency regressions.",
+        "Complete mapped Unit/recovery and original remaining movement/typed-INSERT operations, then genuine Linux Aspire RF3 SDK/MCP.",
+        "All required formatter/full product coverage/fault/endurance/measured performance gates."
+      ]
     }
   },
   "STAGE63-NATIVE-COMPOSITION-001": {
@@ -59660,6 +59697,11 @@
       "allAcceptanceClosed": false,
       "normalSimdOnly": true,
       "scope": "Independent extra-seed movement ACK accounting, complete official MCP model/error observations and actual native persisted membership rows; other17 CI selections preserved."
+    },
+    "currentStageR57SourceDevelopment": {
+      "sourceIntegrated": true,
+      "qualification": "No current build/native runtime/LINUX acceptance; last R56 results do not qualify these later changes.",
+      "allAcceptanceClosed": false
     }
   },
   "KL-037": {
@@ -61142,6 +61184,11 @@
       "allAcceptanceClosed": false,
       "normalSimdOnly": true,
       "scope": "Retained window identity, pending/enrollment quota, full late atomic rollback and persisted resource/tag policy SDK/MCP flows; original identities and cold owners preserved."
+    },
+    "currentStageR57SourceDevelopment": {
+      "sourceIntegrated": true,
+      "qualification": "No current build/native runtime/LINUX acceptance; last R56 results do not qualify these later changes.",
+      "allAcceptanceClosed": false
     }
   },
   "KL-079": {
@@ -61691,6 +61738,11 @@
       "allAcceptanceClosed": false,
       "normalSimdOnly": true,
       "scope": "Impossible lease/version guards, pre-staging delivery counters, genuine Receive/ACK five-cut recovery, joined shared crash children and public ACK response-loss flows."
+    },
+    "currentStageR57SourceDevelopment": {
+      "sourceIntegrated": true,
+      "qualification": "No current build/native runtime/LINUX acceptance; last R56 results do not qualify these later changes.",
+      "allAcceptanceClosed": false
     }
   },
   "KL-088": {

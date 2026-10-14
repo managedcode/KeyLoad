@@ -8,19 +8,28 @@ internal static class ControlledPartitionMovementNativeTaskJoin
 
     internal static async Task JoinObservedAsync(Task original, List<Exception> failures,
         Func<int> readNode, ControlledNativeColdShutdownEvidence.Stage stage, int originalJoinStageOffset,
-        Func<Task> ownerState, CancellationToken token)
+        Func<Task> ownerState, Func<Func<Task>> captureBudgetReport,
+        List<Exception> budgetFailures, CancellationToken token)
     {
         var observation = new List<Exception>();
         await ControlledNativeColdShutdownEvidence.ObserveAsync(() => original, observation,
             readNode(), stage, true, token, CancellationToken.None).ConfigureAwait(false);
         failures.AddRange(observation);
+        failures.AddRange(budgetFailures);
+        budgetFailures.Clear();
         if (observation.Count == NoObservationFailures)
         {
             return;
         }
+        Func<Task>? budgetReport = null;
+        ServerFailureObserver.Observe(() => budgetReport = captureBudgetReport(), failures);
         if (stage == ControlledNativeColdShutdownEvidence.Stage.NodeStopObservation)
         {
             await ServerFailureObserver.ObserveAsync(ownerState, failures).ConfigureAwait(false);
+        }
+        if (budgetReport is not null)
+        {
+            await ServerFailureObserver.ObserveAsync(budgetReport, failures).ConfigureAwait(false);
         }
         var completion = new List<Exception>();
         await ControlledNativeColdShutdownEvidence.ObserveAsync(() => original, completion,

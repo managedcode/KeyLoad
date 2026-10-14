@@ -65,7 +65,7 @@ internal static class QueueAckResponseLossRf3Assertions
         await ImagesAsync(administrator, request, committed, ready, token);
         var changed = ack with
         {
-            Action = DeliveryAction.Renew
+            Action = DeliveryAction.Nack
         };
         var denied = await caller.Sdk.CompleteAsync(changed, token).ConfigureAwait(false);
         await Assert.That(denied.IsSuccess).IsFalse();
