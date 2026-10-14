@@ -28,7 +28,7 @@ internal sealed class SqlOperationCompilerTests
             await SqlOperationTestData.Same(SqlOperationTestData.Compile(request), expected);
         }
         await SqlOperationTestData.Reject(SqlOperationTestData.Call(McpCatalogExpectations.QueryCapabilities) with
-        { Sql = "EXPLAIN SELECT * FROM orders" }, ErrorCode.Validation);
+        { Sql = "SELECT TOP () * FROM orders" }, ErrorCode.Validation);
     }
 
     [Test]

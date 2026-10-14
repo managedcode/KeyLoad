@@ -38,8 +38,8 @@ internal static class ScriptDomGraphScalar
         if (expression is Dom.UnaryExpression
             {
                 UnaryExpressionType: Dom.UnaryExpressionType.Negative,
-                Expression: Dom.IntegerLiteral signed
-            } unary)
+                Expression: Dom.Literal signed
+            } unary && signed is Dom.IntegerLiteral or Dom.NumericLiteral)
         {
             context.Check(unary.Expression, depth + ChildDepth);
             if (long.TryParse(signed.Value, NumberStyles.None, CultureInfo.InvariantCulture, out var absolute)

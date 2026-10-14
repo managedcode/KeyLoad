@@ -13,7 +13,6 @@ internal static class RowVisibilityEqualityContinuation
     private const long OriginalOwnershipEpoch = 1;
     private const string MissingOutcome = "The acknowledged original owner-swap outcome is absent.";
     private const string PutKind = "putDocument";
-    private const string ExplainPrefix = "EXPLAIN ";
     private const string ExplainId = "explain";
     private const long ExplainRevision = 0;
 
@@ -65,7 +64,11 @@ internal static class RowVisibilityEqualityContinuation
             var page = engine.Execute(owner, request);
             await Assert.That(JsonDefaults.Serialize(page.Rows).AsSpan().SequenceEqual(JsonDefaults.Serialize(rows))).IsTrue();
             await PageAsync(page, cut, path);
-            var explain = engine.Execute(owner, request with { Sql = ExplainPrefix + request.Sql });
+            var explain = engine.ExecuteAst(owner, new AstQueryRequest(request.Partition,
+                new SqlParser(request.Sql, UnitExecutionOptions.DatabaseLimits(db.Database.Limits),
+                    UnitExecutionOptions.QueryExecution()).Parse() with
+                { Explain = true },
+                request.Parameters, AllowFullScan: request.AllowFullScan));
             var plan = JsonSerializer.Serialize(new
             {
                 AccessPath = path,

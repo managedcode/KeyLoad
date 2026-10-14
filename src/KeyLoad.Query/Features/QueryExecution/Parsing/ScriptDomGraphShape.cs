@@ -9,7 +9,7 @@ internal static class ScriptDomGraphShape
     internal static IList<Dom.ScalarExpression> Read(string sql, IOptions<DatabaseLimits> limitsOptions,
         ScriptDomGraphContext context, string function)
     {
-        var statement = ScriptDomSyntax.Parse(sql, limitsOptions, context.Budget.Check, context.Budget.Cancellation);
+        var statement = ScriptDomSyntax.Parse(sql, limitsOptions, context.Budget.Check, RequireTerminalSemicolon, context.Budget.Cancellation);
         context.Check(statement, RootDepth);
         if (statement is not Dom.SelectStatement select || select.QueryExpression is not Dom.QuerySpecification query
             || select.WithCtesAndXmlNamespaces is not null || select.Into is not null || select.On is not null
@@ -36,8 +36,8 @@ internal static class ScriptDomGraphShape
         if (expression is not Dom.FunctionCall call || call.CallTarget is not null
             || !string.Equals(call.FunctionName.Value, function, StringComparison.OrdinalIgnoreCase)
             || call.UniqueRowFilter != default || call.OverClause is not null || call.WithinGroupClause is not null
-            || call.IgnoreRespectNulls != default || call.AbsentOrNullOnNull != default
-            || call.TrimOptions is not null || call.ReturnType is not null || call.WithArrayWrapper
+            || call.IgnoreRespectNulls.Count != EmptyCount || call.AbsentOrNullOnNull.Count != EmptyCount
+            || call.TrimOptions is not null || call.ReturnType is { Count: > EmptyCount } || call.WithArrayWrapper
             || call.JsonOrderByClause is not null || call.JsonParameters.Count != EmptyCount)
         { throw ScriptDomErrors.Unsupported(); }
         if (arity is { } count && call.Parameters.Count != count)
@@ -50,6 +50,27 @@ internal static class ScriptDomGraphShape
         { return false; }
         context.Check(expression, depth);
         return true;
+    }
+    private static void RequireTerminalSemicolon(IList<Dom.TSqlParserToken> tokens, Action check)
+    {
+        var terminators = EmptyCount;
+        var nonTerminal = false;
+        var batchSeparator = false;
+        foreach (var token in tokens)
+        {
+            check();
+            if (token.TokenType is Dom.TSqlTokenType.WhiteSpace or Dom.TSqlTokenType.SingleLineComment
+                or Dom.TSqlTokenType.MultilineComment or Dom.TSqlTokenType.EndOfFile)
+            { continue; }
+            if (token.TokenType == Dom.TSqlTokenType.Go)
+            { batchSeparator = true; }
+            if (token.TokenType == Dom.TSqlTokenType.Semicolon)
+            { terminators++; }
+            else if (terminators != EmptyCount)
+            { nonTerminal = true; }
+        }
+        if (!batchSeparator && !nonTerminal && terminators > SingleElement)
+        { throw ScriptDomErrors.Invalid(); }
     }
     private const int EmptyCount = 0;
     private const int SingleElement = 1;

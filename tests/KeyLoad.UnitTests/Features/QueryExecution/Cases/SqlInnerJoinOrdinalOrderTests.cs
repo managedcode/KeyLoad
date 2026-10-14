@@ -15,9 +15,9 @@ internal sealed class SqlInnerJoinOrdinalOrderTests
     private const string CustomerIdColumn = "customer_id";
     private const string CustomerPrimaryKeyColumn = "id";
     private const string CustomerNameColumn = "name";
-    private const string Sql = "SELECT l.order_id AS order_id, r.name AS name "
+    private const string Sql = "SELECT TOP (10) l.order_id AS order_id, r.name AS name "
         + "FROM orders AS l INNER JOIN customers AS r ON l.customer_id = r.id "
-        + "ORDER BY l.order_id ASC LIMIT 10";
+        + "ORDER BY l.order_id ASC";
 
     [Test]
     public async Task AcJoinUsesOrdinalSqlOrderWhenCanonicalKeyBytesHaveTheOppositeOrder()

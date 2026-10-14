@@ -7,8 +7,8 @@
       "total": 104
     },
     "additionalTask": "KL-105",
-    "qualification": "R45 coherent full Release, canonical formatter and whole-solution format verification passed with zero compiler/analyzer errors and warnings. Focused native50 local macOS arm64 execution passed321of332 whole-operation cases:Unit288of297 andRecovery33of35,11failed,0skipped. All289 R44 selected identities retained,43additional current instances observed (40PASS/3FAIL). Current exact-source Linux full suites/RF3/functional coverage/fault/endurance/performance remain open; original plan20of104done84in progress.",
-    "coverage": "UNMEASURED_FOR_CURRENT_R45. Historical R38 partial functional observation remains history; current load/control cases receive no functional coverage credit.",
+    "qualification": "R48 complete Release solution build, native compiler/analyzer diagnostics, canonical formatter and format verification passed with zero errors and warnings. Focused native50 local macOS arm64 whole-class execution passed379of399 in101.261seconds:20failed,0skipped. All395 prior selected UIDs retained,47of65 prior failing cases now pass,18remain; new packed native-cut2pass and genuine mixed-cut2fail during original source conservation after the second acknowledged seed commit. Source/DLL/PDB remained unchanged across build/runtime. Original plan20of104done84in_progress; KL105 additional and all required exact-source Linux/full-suite/Aspire RF3/coverage/fault/endurance/performance acceptance remain open.",
+    "coverage": "UNMEASURED_FOR_CURRENT_R48. Historical R38 partial functional observation remains history; no load/control/performance contribution is admitted.",
     "currentStageR43": {
       "status": "local_development_executed_with_six_failures_linux_acceptance_pending",
       "newCSharpFiles": 138,
@@ -606,12 +606,7 @@
         }
       }
     },
-    "remaining": [
-      "Repair the six retained R42 failures using their original native diagnostics; preserve cancellation, authoritative raw state, original GUIDs and resource cleanup.",
-      "Integrate independent reviewed SQL literal, capacity, backup, Graph, ChangeFeeds/EventStreams, Blob and TimeSeries complete operation flows in one coherent next source cut.",
-      "Gateway published 0.4.24 is consumed; no further dependency repair/release is selected for this batch. Its current official SDK interoperability still requires full Linux RF3 qualification.",
-      "Complete full delivered-source Linux functional coverage, recovery, RF3, fault/endurance/power-loss and KL105 actual matched profiling/performance gates; close tasks only on complete acceptance."
-    ],
+    "remaining": "Current R48 focused runtime20failures are retained and assigned to their task owners. No task is accepted from source/build/discovery or focused local execution; full mapped exact-source Linux, coverage, RF3, recovery, fault/endurance/performance acceptance remains required.",
     "runtimePreparation": {
       "nativeMaximumParallelTests": 50,
       "unitCensusRequired": true,
@@ -2051,6 +2046,57 @@
         "fullSuiteCoverageOrLinuxQualification": false
       },
       "remaining": "Repair grouped scalar SQL/graph-vector/native cluster failures; run exact-source recovery and Aspire RF3 SDK/MCP/Linux gates. No full SQL, readiness, coverage or performance claim."
+    },
+    "currentStageR48": {
+      "status": "coherent_source_build_passed_focused_runtime_failed_required_acceptance_open",
+      "scope": "Native T-SQL scalar/graph AST and bounded operation binding, original client failure/precancellation flows, malformed Parse/Bind publication flow, exact subnormal public aggregate oracle, genuine ordinary/packed mixed backup cuts, original native cold shutdown task/fault attribution.",
+      "build": {
+        "exitCode": 0,
+        "errors": 0,
+        "warnings": 0,
+        "elapsedSeconds": 262.07553254207596,
+        "original": "TestResults/stage61-native-join/stage64-r48-full-release-coherent.completion.original.json"
+      },
+      "nativeDiagnostics": {
+        "errors": 0,
+        "warnings": 0,
+        "includeAnalyzers": true,
+        "original": "TestResults/stage61-native-join/stage64-r46-current-tsql-native-repaired-intake.root-r48-original-task-current-quality-and-exact-type-namespace.original.json",
+        "sha256": "3e5b03ae0ba1d86c1993e23940842fd21ae7c69877c8f0158f784f29178ebe62"
+      },
+      "format": {
+        "appliedExitCode": 0,
+        "verifyExitCode": 0,
+        "verifyElapsedSeconds": 147.13512200000696,
+        "original": "TestResults/stage61-native-join/stage64-r48-canonical-format-verify.original.json"
+      },
+      "repositoryGovernance": "PASS27projects4modules; git diff --check PASS",
+      "focusedRuntime": {
+        "total": 399,
+        "passed": 379,
+        "failed": 20,
+        "skipped": 0,
+        "configuredMaximumParallelTests": 50,
+        "actualConcurrentTests": "not measured by this report",
+        "elapsedSeconds": 101.26085008308291,
+        "original395UidsRetained": true,
+        "priorFailuresResolved": 47,
+        "priorFailuresRemaining": 18,
+        "newPackedCutPassed": 2,
+        "newMixedCutFailed": 2,
+        "completeOriginalFailures": "TestResults/stage61-native-join/stage64-r48-focused-unit-complete-native-failures.original.json",
+        "completeOriginalFailuresSha256": "3fcd72fe43b761751d3c623f12cb24b3a08490a01daff6c37ae09bd14034d7e5",
+        "trx": "TestResults/stage61-native-join/stage64-r48-focused-unit-runtime/KeyLoad.UnitTests_net10.0_arm64.trx",
+        "trxSha256": "ee24d5171336e894be1df3867a8207d3c4a5fbd64fcda4ae7ba7a1574fd4ba04",
+        "processExitJoined": true,
+        "stdoutAndStderrJoined": true,
+        "sourceDrift": false,
+        "dllPdbDrift": false,
+        "fullSuiteCoverageLinuxQualification": false,
+        "completeOriginalCaseOutputs": "TestResults/stage61-native-join/stage64-r48-failed-case-original-stdout-stderr-complete.json",
+        "completeOriginalCaseOutputsSha256": "6e7f9571df38b997b3db1b8e215d17dfcfa8d60eae69cc6e2af24fae05da608a"
+      },
+      "remaining": "15 SQL semantic/caller cases, two genuine mixed-cut original source-conservation cases and three native cluster cases remain. Mixed-cut healthy restore/cold continuation is not reached; an added acknowledged seed commit must be accounted for independently. Original native cancellation and translated unknown-write outcomes remain causal investigations. Independent CREATE/SQL identity, auth/composition callers, changefeed and catalog packets continue; required final gates remain open."
     }
   },
   "STAGE63-NATIVE-COMPOSITION-001": {

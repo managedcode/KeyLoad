@@ -20,33 +20,38 @@ internal static class ControlledPartitionMovementNativeGroupShutdown
     {
         var failures = new List<Exception>();
         var dependents = await Task.WhenAll(nodes.Skip(FirstDependent)
-            .Select(node => JoinNodeAsync(node, start, caller))).ConfigureAwait(false);
+            .Select((node, index) => JoinNodeAsync(node, start, index + FirstDependent, caller))).ConfigureAwait(false);
         foreach (var original in dependents)
         { failures.AddRange(original); }
         if (nodes.Count > NativePrimary)
-        { failures.AddRange(await JoinNodeAsync(nodes[NativePrimary], start, caller).ConfigureAwait(false)); }
+        { failures.AddRange(await JoinNodeAsync(nodes[NativePrimary], start, NativePrimary, caller).ConfigureAwait(false)); }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
     private static async Task<List<Exception>> JoinNodeAsync(ControlledPartitionMovementNativeHost node,
-        Func<ControlledPartitionMovementNativeHost, Task> start, CancellationToken caller)
+        Func<ControlledPartitionMovementNativeHost, Task> start, int nodeIndex, CancellationToken caller)
     {
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
+            node.BindColdShutdownEvidence(nodeIndex);
             var original = start(node);
             var observation = new List<Exception>();
-            await ServerFailureObserver.ObserveAsync(() => original.WaitAsync(caller), observation).ConfigureAwait(false);
+            await ControlledNativeColdShutdownEvidence.ObserveAsync(() => original, observation, nodeIndex,
+                ControlledNativeColdShutdownEvidence.Stage.GroupObservation, true, caller, caller).ConfigureAwait(false);
             failures.AddRange(observation);
             if (observation.Count == NoFailures)
             { return; }
             var completion = new List<Exception>();
-            await ServerFailureObserver.ObserveAsync(() => original, completion).ConfigureAwait(false);
+            await ControlledNativeColdShutdownEvidence.ObserveAsync(() => original, completion, nodeIndex,
+                ControlledNativeColdShutdownEvidence.Stage.GroupOriginalJoin, false, caller, caller).ConfigureAwait(false);
             foreach (var failure in completion)
             {
                 if (!observation.Any(observed => ReferenceEquals(observed, failure)))
                 { failures.Add(failure); }
             }
+            await ControlledNativeColdShutdownEvidence.AfterJoinAsync(observation, original, failures, nodeIndex,
+                ControlledNativeColdShutdownEvidence.Stage.GroupObservation).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
         return failures;
     }

@@ -76,7 +76,8 @@ internal static class SqlNullOrderingPages
     private const int PageRows = 2;
 
     internal static async Task EqualAsync(QueryPage expected, QueryPage actual)
-        => await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
+        => await Assert.That(JsonDefaults.Serialize(actual)).IsEquivalentTo(JsonDefaults.Serialize(expected),
+            global::TUnit.Assertions.Enums.CollectionOrdering.Matching);
 
     internal static async Task ReplayAsync(global::KeyLoad.Core.DatabaseEngine database, CommandRequest seed, CommitReceipt receipt)
     {

@@ -2,8 +2,8 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 
 internal static class SqlLexicalAdmissionFlow
 {
-    private const string Invalid = "The SQL statement is invalid for the supported Q1 dialect.";
-    private const string Unsupported = "The SQL statement contains unsupported syntax.";
+    private const string Invalid = "The SQL syntax or query arguments are invalid.";
+    private const string Unsupported = "The SQL statement or execution clause is unsupported.";
 
     internal static async Task RunAsync(global::KeyLoad.Core.DatabaseEngine owner, global::KeyLoad.Storage.ZoneTree.ZoneTreeStore store,
         global::KeyLoad.PartitionRef partition, global::KeyLoad.CommandRequest command, global::KeyLoad.CommitReceipt receipt)

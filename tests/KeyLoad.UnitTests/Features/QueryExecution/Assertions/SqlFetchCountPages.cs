@@ -25,12 +25,12 @@ internal static class SqlFetchCountPages
             await SqlFetchCountRefusals.UnchangedAsync(store, image, position, identity);
         }
         var unordered = engine.Execute(principal, new QueryRequest(partition,
-            "SELECT label AS label FROM fetch_count FETCH FIRST ROW ONLY", AllowFullScan: true));
+            "SELECT TOP (1) label AS label FROM fetch_count", AllowFullScan: true));
         await CursorAsync(unordered, 1);
         await EqualAsync(Expected(1, unordered.Cursor, position), unordered);
         await SqlFetchCountRefusals.UnchangedAsync(store, image, position, identity);
         var request = SqlFetchCountProtocol.Ast(partition, PageRows);
-        var first = engine.Execute(principal, SqlFetchCountProtocol.Sql(partition, "FETCH FIRST 2 ROWS ONLY"));
+        var first = engine.Execute(principal, SqlFetchCountProtocol.Sql(partition, "OFFSET 0 ROWS FETCH FIRST 2 ROWS ONLY"));
         await CursorAsync(first, PageRows);
         var final = engine.ExecuteAst(principal, request with { Cursor = first.Cursor });
         var expected = new QueryPage([new("c", Revision, """{"label":"c"}""", RedactedFields: [])], null, position, AccessPath);
@@ -51,7 +51,8 @@ internal static class SqlFetchCountPages
         { await Assert.That(page.Cursor).IsNull(); }
     }
     internal static async Task EqualAsync(QueryPage expected, QueryPage actual)
-        => await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
+        => await Assert.That(JsonDefaults.Serialize(actual)).IsEquivalentTo(JsonDefaults.Serialize(expected),
+            global::TUnit.Assertions.Enums.CollectionOrdering.Matching);
     internal static async Task ReplayAsync(global::KeyLoad.Core.DatabaseEngine database, CommandRequest seed, CommitReceipt receipt)
     {
         var operation = new ReplicatedOperation(seed.CommandId, OperationKind.Batch, SqlFetchCountProtocol.Root,

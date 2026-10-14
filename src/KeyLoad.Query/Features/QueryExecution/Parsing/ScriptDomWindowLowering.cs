@@ -37,6 +37,9 @@ internal static class ScriptDomWindowLowering
         { context.Observe(RootDepth); expression = grouped.Expression; }
         if (expression is Dom.VariableReference or Dom.MoneyLiteral)
         { return ScriptDomParameterLowering.Count(expression, context); }
+        if (expression is Dom.Literal and not Dom.IntegerLiteral
+            || expression is Dom.UnaryExpression { Expression: Dom.Literal and not Dom.IntegerLiteral })
+        { throw ScriptDomErrors.Invalid(); }
         if (expression is Dom.UnaryExpression unary && unary.Expression is Dom.IntegerLiteral)
         {
             if (unary.UnaryExpressionType == Dom.UnaryExpressionType.Negative)

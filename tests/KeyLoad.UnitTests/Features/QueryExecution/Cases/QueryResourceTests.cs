@@ -5,10 +5,10 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 internal sealed class QueryResourceTests
 {
     private const string Collection = "orders";
-    private const string OrderedSql = "SELECT * FROM orders ORDER BY score DESC LIMIT 2";
-    private const string FullSql = "SELECT * FROM orders ORDER BY score DESC LIMIT 10";
-    private const string BudgetSql = "SELECT * FROM orders LIMIT 1";
-    private const string ExplainSql = "EXPLAIN SELECT * FROM orders ORDER BY score";
+    private const string OrderedSql = "SELECT TOP (2) * FROM orders ORDER BY score DESC";
+    private const string FullSql = "SELECT TOP (10) * FROM orders ORDER BY score DESC";
+    private const string BudgetSql = "SELECT TOP (1) * FROM orders";
+    private const string ExplainSql = "SELECT * FROM orders ORDER BY score";
     private const string ExpectedOrder = "s,a,z,b,n,m";
 
     [Test]
@@ -56,7 +56,10 @@ internal sealed class QueryResourceTests
         db.Configure(Collection, ResourceKind.Collection);
         db.Commit(new PutDocument(Collection, "a", "{\"score\":{\"nested\":1}}"));
         var engine = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
-        var explain = engine.Execute("root", new(db.Partition, ExplainSql, AllowFullScan: true));
+        var explain = engine.ExecuteAst("root", new(db.Partition,
+            new SqlParser(ExplainSql, UnitExecutionOptions.DatabaseLimits(db.Database.Limits),
+                UnitExecutionOptions.QueryExecution()).Parse() with
+            { Explain = true }, AllowFullScan: true));
         await Assert.That(explain.AccessPath).IsEqualTo("bounded-full-scan");
         db.Commit(new PutDocument(Collection, "b", "{\"score\":2}"));
         var error = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute("root",

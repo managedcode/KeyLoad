@@ -73,6 +73,7 @@ internal static class ScriptDomExecOperation
         string binding, Action checkBudget, CancellationToken token)
     {
         if (parameters is not { Count: SingleArgument }
+            || !parameters.Keys.Contains(binding, StringComparer.Ordinal)
             || !parameters.TryGetValue(binding, out var envelope) || envelope.ValueKind != global::System.Text.Json.JsonValueKind.Object)
         { throw ScriptDomOperationErrors.Invalid(); }
         var arguments = new Dictionary<string, global::System.Text.Json.JsonElement>(StringComparer.Ordinal);

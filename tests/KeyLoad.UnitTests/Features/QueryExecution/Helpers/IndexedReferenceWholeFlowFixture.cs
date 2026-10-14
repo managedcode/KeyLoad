@@ -19,10 +19,9 @@ internal static class IndexedReferenceWholeFlowFixture
     }
 
     internal static QueryRequest Request(TestDatabase db, bool indexed, bool descending, int limit)
-        => new(db.Partition, "SELECT id, status, number FROM orders WHERE " +
+        => new(db.Partition, "SELECT TOP (" + limit.ToString(System.Globalization.CultureInfo.InvariantCulture) + ") id, status, number FROM orders WHERE " +
             (indexed ? "status = 'open'" : "status = 'open' OR number = -1") +
-            " ORDER BY number " + (descending ? "DESC" : "ASC") + ", id ASC LIMIT " +
-            limit.ToString(System.Globalization.CultureInfo.InvariantCulture), AllowFullScan: true);
+            " ORDER BY number " + (descending ? "DESC" : "ASC") + ", id ASC", AllowFullScan: true);
 
     internal static string[] Bytes(TestDatabase db) => db.Store.Read(view =>
     {

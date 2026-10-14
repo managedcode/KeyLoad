@@ -28,7 +28,7 @@ internal sealed class AdapterNormalizedPlanWholeFlowTests
         var plans = AdapterPlanWholeFlowFixture.Execute(database, engine, "root", explain: true);
         await Assert.That(plans.Length).IsEqualTo(CanonicalPlanSurfaces);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute("root",
-            new(database.Partition, "EXPLAIN " + AdapterPlanWholeFlowFixture.Sql,
+            new(database.Partition, "SELECT TOP () * FROM orders",
                 AdapterPlanWholeFlowFixture.Parameters()))).Code).IsEqualTo(ErrorCode.Validation);
         await Assert.That(database.Store.Position).IsEqualTo(position);
         await Assert.That(QueueWholeFlowStorage.Bytes(database.Store)).IsEquivalentTo(image, CollectionOrdering.Matching);

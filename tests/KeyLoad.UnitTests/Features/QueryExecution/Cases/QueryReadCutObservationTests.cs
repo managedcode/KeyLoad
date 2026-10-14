@@ -46,7 +46,7 @@ internal sealed class QueryReadCutObservationTests
             QueryReadCutObservationCapture.Reader(db, 1);
             var capture = new QueryReadCutObservationCapture();
             var engine = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution(), searchEngine: null, readCutObserver: capture);
-            var request = new QueryRequest(db.Partition, "SELECT * FROM orders ORDER BY id LIMIT 1", AllowFullScan: true);
+            var request = new QueryRequest(db.Partition, "SELECT TOP (1) * FROM orders ORDER BY id", AllowFullScan: true);
             var first = engine.Execute("reader", request);
             await Assert.That(first.Cursor).IsNotNull();
             db.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(new("other", "tenant", [], [])))

@@ -5,12 +5,21 @@ namespace KeyLoad.Features.QueryExecution;
 internal static class ScriptDomTokenBounds
 {
     internal static void Require(IList<Dom.TSqlParserToken> tokens, DatabaseLimits limits, Action check)
+        => Require(tokens, limits, check, null);
+
+    internal static void Require(IList<Dom.TSqlParserToken> tokens, DatabaseLimits limits, Action check,
+        Action<IList<Dom.TSqlParserToken>, Action>? validateTokens)
     {
         var meaningful = EmptyCount;
         var depth = EmptyCount;
+        var terminators = EmptyCount;
+        var unsupportedStructure = false;
         foreach (var token in tokens)
         {
             check();
+            if (token.TokenType == Dom.TSqlTokenType.Go
+                || token.TokenType == Dom.TSqlTokenType.Semicolon && ++terminators > SingleTerminator)
+            { unsupportedStructure = true; }
             if (token.TokenType == Dom.TSqlTokenType.MultilineComment)
             { RequireCommentDepth(token.Text, limits.MaxQueryDepth, check); }
             if (token.TokenType is Dom.TSqlTokenType.WhiteSpace or Dom.TSqlTokenType.SingleLineComment
@@ -23,6 +32,9 @@ internal static class ScriptDomTokenBounds
             if (token.Text == CloseParenthesis)
             { depth--; }
         }
+        validateTokens?.Invoke(tokens, check);
+        if (unsupportedStructure)
+        { throw ScriptDomErrors.Unsupported(); }
     }
 
     private static void RequireCommentDepth(string text, int maximumDepth, Action check)
@@ -49,4 +61,5 @@ internal static class ScriptDomTokenBounds
     private const int NextCharacter = 1;
 
     private const int EmptyCount = 0;
+    private const int SingleTerminator = 1;
 }

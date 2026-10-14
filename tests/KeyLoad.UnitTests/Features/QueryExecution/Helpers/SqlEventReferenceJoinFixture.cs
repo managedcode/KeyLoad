@@ -20,7 +20,7 @@ internal static class SqlEventReferenceJoinFixture
     internal const string HiddenJson = "{\"id\":\"c2\",\"name\":\"Lin\"}";
     internal const string RepairedJson = "{\"id\":\"m\",\"name\":\"Max\"}";
     internal const string Prefix = "SELECT TOP (10) e.eventId AS event_id, d.name AS customer_name, e.payload.score AS score FROM ";
-    internal const string Suffix = " AS e INNER JOIN eventcustomers AS d ON e.payload.to = d.entity_ref "
+    internal const string Suffix = " AS e INNER JOIN eventcustomers AS d ON e.payload.[to] = d.entity_ref "
         + "WHERE e.payload.score >= @minimum ORDER BY e.revision ASC";
 
     internal static string Sql(string streamSet = StreamSet, long generation = 1)

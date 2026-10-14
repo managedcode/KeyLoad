@@ -19,15 +19,15 @@ internal sealed class SqlClientOutcomeTests
     private const string SuccessProperty = "ok";
     private const string Select = "SELECT * FROM orders";
     private const string CommentedSelect = "-- client\r\n/* outer /* inner */ */SELECT/* fields */ * FROM orders";
-    private const string Explain = "/* client */EXPLAIN-- plan\nSELECT * FROM orders";
-    private const string Call = "CALL keyload_query_capabilities(@arguments)";
-    private const string CommentedCall = "-- client\n/* nested /* inner */ */CALL keyload_documents_put(@arguments)";
+    private const string PlanCommentedSelect = "/* client */SELECT-- plan\n* FROM orders";
+    private const string Execute = "EXEC keyload_query_capabilities @arguments";
+    private const string CommentedExecute = "-- client\n/* nested /* inner */ */EXEC keyload_documents_commit @arguments";
     private const string Unknown = "INSERT INTO orders VALUES (@arguments)";
-    private const string With = "WITH modified AS (DELETE FROM orders RETURNING *) SELECT * FROM modified";
+    private const string CteWrite = "WITH modified AS (SELECT * FROM orders) DELETE FROM modified";
     private const string Prefix = "SELECTED internal_data";
-    private const string ExplainWrite = "EXPLAIN ANALYZE DELETE FROM orders";
+    private const string SelectInto = "SELECT * INTO archived_orders FROM orders";
     private const string QuotedRoot = "\"SELECT\" * FROM orders";
-    private const string Unclosed = "/* unclosed CALL keyload_documents_put(@arguments)";
+    private const string Unclosed = "/* unclosed EXEC keyload_documents_commit @arguments";
     private const string Empty = "-- only a comment";
     private const string OpenComment = "/*";
     private const string CloseComment = "*/";
@@ -40,13 +40,13 @@ internal sealed class SqlClientOutcomeTests
     [Test]
     [Arguments(Select, ErrorCode.OwnershipLost)]
     [Arguments(CommentedSelect, ErrorCode.OwnershipLost)]
-    [Arguments(Explain, ErrorCode.OwnershipLost)]
-    [Arguments(Call, ErrorCode.UnknownWriteOutcome)]
-    [Arguments(CommentedCall, ErrorCode.UnknownWriteOutcome)]
+    [Arguments(PlanCommentedSelect, ErrorCode.OwnershipLost)]
+    [Arguments(Execute, ErrorCode.UnknownWriteOutcome)]
+    [Arguments(CommentedExecute, ErrorCode.UnknownWriteOutcome)]
     [Arguments(Unknown, ErrorCode.UnknownWriteOutcome)]
-    [Arguments(With, ErrorCode.UnknownWriteOutcome)]
+    [Arguments(CteWrite, ErrorCode.UnknownWriteOutcome)]
     [Arguments(Prefix, ErrorCode.UnknownWriteOutcome)]
-    [Arguments(ExplainWrite, ErrorCode.UnknownWriteOutcome)]
+    [Arguments(SelectInto, ErrorCode.UnknownWriteOutcome)]
     [Arguments(QuotedRoot, ErrorCode.UnknownWriteOutcome)]
     [Arguments(Unclosed, ErrorCode.UnknownWriteOutcome)]
     [Arguments(Empty, ErrorCode.UnknownWriteOutcome)]
@@ -68,8 +68,8 @@ internal sealed class SqlClientOutcomeTests
 
     [Test]
     [Arguments(CommentedSelect, ErrorCode.OwnershipLost)]
-    [Arguments(CommentedCall, ErrorCode.UnknownWriteOutcome)]
-    [Arguments(With, ErrorCode.UnknownWriteOutcome)]
+    [Arguments(CommentedExecute, ErrorCode.UnknownWriteOutcome)]
+    [Arguments(CteWrite, ErrorCode.UnknownWriteOutcome)]
     public async Task AC_SQLC_005_ActualSocketAbortPreservesWriteOutcomes(string sql, ErrorCode expected)
         => await VerifyOutcomeAsync(sql, expected, abort: true);
 

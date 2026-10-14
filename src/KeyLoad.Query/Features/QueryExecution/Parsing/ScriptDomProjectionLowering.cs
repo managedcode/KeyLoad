@@ -22,7 +22,8 @@ internal static class ScriptDomProjectionLowering
                 continue;
             }
             if (element is not Dom.SelectScalarExpression scalar
-                || scalar.Expression is not Dom.ColumnReferenceExpression column)
+                || scalar.Expression is not Dom.ColumnReferenceExpression column
+                || scalar.Expression is Dom.PrimaryExpression { Collation: not null })
             { throw ScriptDomErrors.Unsupported(); }
             var parts = ScriptDomNames.Column(column);
             var output = scalar.ColumnName?.Identifier?.Value

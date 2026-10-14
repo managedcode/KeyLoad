@@ -9,26 +9,34 @@ internal static class SqlFetchCountRefusals
         var position = database.Store.Position;
         var identity = JsonDefaults.Serialize(database.Store.Identity);
         var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
-        foreach (var tail in new[] { "FETCH FIRST 0 ROWS ONLY", "FETCH FIRST -1 ROWS ONLY",
-            "FETCH FIRST 2147483648 ROWS ONLY", "FETCH FIRST 1.5 ROWS ONLY",
-            "FETCH FIRST '2' ROWS ONLY", "FETCH FIRST @count ROWS ONLY", "FETCH FIRST 2 ONLY", "FETCH FIRST 2 ROWS" })
+        foreach (var tail in new[] { "OFFSET 0 ROWS FETCH FIRST 0 ROWS ONLY", "OFFSET 0 ROWS FETCH FIRST -1 ROWS ONLY",
+            "OFFSET 0 ROWS FETCH FIRST 2147483648 ROWS ONLY", "OFFSET 0 ROWS FETCH FIRST 1.5 ROWS ONLY",
+            "OFFSET 0 ROWS FETCH FIRST '2' ROWS ONLY", "OFFSET 0 ROWS FETCH FIRST @count ROWS ONLY", "OFFSET 0 ROWS FETCH FIRST 2 ONLY", "OFFSET 0 ROWS FETCH FIRST 2 ROWS" })
         {
             await ErrorAsync(() => engine.Execute(SqlFetchCountProtocol.Root,
                 SqlFetchCountProtocol.Sql(database.Partition, tail)), ErrorCode.Validation);
             await UnchangedAsync(database.Store, image, position, identity);
             await SqlFetchCountPages.HealthyAsync(database.Database, database.Store, database.Partition, SqlFetchCountProtocol.Root);
         }
-        foreach (var tail in new[] { "FETCH FIRST 2 ROWS WITH TIES", "LIMIT 2 FETCH FIRST ROW ONLY",
-            "FETCH FIRST ROW ONLY LIMIT 2", "FETCH FIRST ROW ONLY FETCH NEXT ROW ONLY" })
+        foreach (var sql in new[] { "SELECT TOP (2) WITH TIES label AS label FROM fetch_count ORDER BY label ASC",
+            "SELECT TOP (2) label AS label FROM fetch_count ORDER BY label ASC OFFSET 0 ROWS FETCH FIRST 1 ROW ONLY" })
         {
             await ErrorAsync(() => engine.Execute(SqlFetchCountProtocol.Root,
-                SqlFetchCountProtocol.Sql(database.Partition, tail)), ErrorCode.UnsupportedCapability);
+                new QueryRequest(database.Partition, sql, AllowFullScan: true)), ErrorCode.UnsupportedCapability);
             await UnchangedAsync(database.Store, image, position, identity);
+        }
+        foreach (var tail in new[] { "LIMIT 2 FETCH FIRST ROW ONLY", "FETCH FIRST ROW ONLY LIMIT 2",
+            "OFFSET 0 ROWS FETCH FIRST 1 ROW ONLY FETCH NEXT 1 ROW ONLY" })
+        {
+            await ErrorAsync(() => engine.Execute(SqlFetchCountProtocol.Root,
+                SqlFetchCountProtocol.Sql(database.Partition, tail)), ErrorCode.Validation);
+            await UnchangedAsync(database.Store, image, position, identity);
+            await SqlFetchCountPages.HealthyAsync(database.Database, database.Store, database.Partition, SqlFetchCountProtocol.Root);
         }
         using var cancelled = new CancellationTokenSource();
         await cancelled.CancelAsync();
         var error = Assert.ThrowsExactly<OperationCanceledException>(() => engine.Execute(SqlFetchCountProtocol.Root,
-            SqlFetchCountProtocol.Sql(database.Partition, "FETCH FIRST ROW ONLY"), cancellationToken: cancelled.Token));
+            SqlFetchCountProtocol.Sql(database.Partition, "OFFSET 0 ROWS FETCH FIRST 1 ROW ONLY"), cancellationToken: cancelled.Token));
         await Assert.That(error.CancellationToken).IsEqualTo(cancelled.Token);
         await UnchangedAsync(database.Store, image, position, identity);
         await SqlFetchCountPages.HealthyAsync(database.Database, database.Store, database.Partition, SqlFetchCountProtocol.Root);
@@ -40,7 +48,7 @@ internal static class SqlFetchCountRefusals
         var identity = JsonDefaults.Serialize(database.Store.Identity);
         var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
         await ErrorAsync(() => engine.Execute(SqlFetchCountProtocol.Reader,
-            SqlFetchCountProtocol.Sql(database.Partition, "FETCH FIRST ROW ONLY")), ErrorCode.PermissionDenied);
+            SqlFetchCountProtocol.Sql(database.Partition, "OFFSET 0 ROWS FETCH FIRST 1 ROW ONLY")), ErrorCode.PermissionDenied);
         await ErrorAsync(() => engine.ExecuteAst(SqlFetchCountProtocol.Reader,
             SqlFetchCountProtocol.Ast(database.Partition, SqlFetchCountProtocol.ResultCount)), ErrorCode.PermissionDenied);
         await UnchangedAsync(database.Store, image, position, identity);

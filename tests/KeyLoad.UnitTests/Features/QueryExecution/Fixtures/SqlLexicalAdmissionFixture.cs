@@ -7,7 +7,7 @@ internal static class SqlLexicalAdmissionFixture
     private const string From = "FROM";
     private const string Semicolon = ";";
     private const string Where = "WHERE l.total = 7 AND l.quantity = 1 ";
-    private const string Order = "ORDER BY l.order_id ASC LIMIT 10";
+    private const string Order = "ORDER BY l.order_id ASC";
     private const string Comparison = "WHERE l.total '=' 7 ";
     private const string Identifier = "/order_id";
     private const string OrderId = "order";
@@ -31,9 +31,9 @@ internal static class SqlLexicalAdmissionFixture
         yield return (healthy.Sql.Replace(From, QuotedFrom, StringComparison.Ordinal), global::KeyLoad.ErrorCode.Validation);
         yield return (healthy.Sql.Replace(Order, Comparison + Order, StringComparison.Ordinal), global::KeyLoad.ErrorCode.Validation);
         var predicate = healthy.Sql.Replace(Order, Where + Order, StringComparison.Ordinal);
-        yield return (predicate.Replace(AndToken, QuotedAnd, StringComparison.Ordinal), global::KeyLoad.ErrorCode.UnsupportedCapability);
-        yield return (predicate.Replace(AndToken, ParameterAnd, StringComparison.Ordinal), global::KeyLoad.ErrorCode.UnsupportedCapability);
-        yield return (healthy.Sql + Quote + Semicolon + Quote, global::KeyLoad.ErrorCode.UnsupportedCapability);
+        yield return (predicate.Replace(AndToken, QuotedAnd, StringComparison.Ordinal), global::KeyLoad.ErrorCode.Validation);
+        yield return (predicate.Replace(AndToken, ParameterAnd, StringComparison.Ordinal), global::KeyLoad.ErrorCode.Validation);
+        yield return (healthy.Sql + Quote + Semicolon + Quote, global::KeyLoad.ErrorCode.Validation);
     }
 
     internal static global::KeyLoad.QueryRequest LiteralSql(global::KeyLoad.QueryRequest healthy)

@@ -12,6 +12,10 @@ internal static class ScriptDomSyntax
     /// <param name="cancellationToken">Original caller token.</param>
     /// <returns>The native statement; successful parsing does not authorize its execution.</returns>
     internal static Dom.TSqlStatement Parse(string sql, global::Microsoft.Extensions.Options.IOptions<DatabaseLimits> limitsOptions, Action checkBudget, CancellationToken cancellationToken)
+        => Parse(sql, limitsOptions, checkBudget, null, cancellationToken);
+
+    internal static Dom.TSqlStatement Parse(string sql, global::Microsoft.Extensions.Options.IOptions<DatabaseLimits> limitsOptions,
+        Action checkBudget, Action<IList<Dom.TSqlParserToken>, Action>? validateTokens, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(sql);
         ArgumentNullException.ThrowIfNull(limitsOptions);
@@ -29,7 +33,7 @@ internal static class ScriptDomSyntax
         Check();
         if (lexicalErrors.Count != EmptyCount)
         { throw ScriptDomErrors.Invalid(); }
-        ScriptDomTokenBounds.Require(tokens, limits, Check);
+        ScriptDomTokenBounds.Require(tokens, limits, Check, validateTokens);
         var fragment = parser.Parse(new ScriptDomCheckedTokens(tokens, limitsOptions, Check), out var errors);
         Check();
         if (errors.Count != EmptyCount)

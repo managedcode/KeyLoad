@@ -30,7 +30,7 @@ internal static class SqlCommentTestData
     internal const string DeepComment = "SELECT/* outer /* middle /* inner */ */ */ * FROM orders";
     internal const string DeepPredicate = "SELECT * FROM orders WHERE (((number = 3)))";
     internal const string IdentifierSplice = "SEL/* gap */ECT * FROM orders";
-    internal const string OperatorSplice = "SELECT * FROM orders WHERE n >/* gap */= 1";
+    internal const string OperatorSplice = "SELECT * FROM orders WHERE n >/* gap */== 1";
     internal const string SecondStatement = "SELECT * FROM orders;/* hidden */ SELECT * FROM orders";
     internal const string ExactBoundedQuery = "SELECT/*å*/ * FROM orders";
     internal const string LongCommentPrefix = "/*";

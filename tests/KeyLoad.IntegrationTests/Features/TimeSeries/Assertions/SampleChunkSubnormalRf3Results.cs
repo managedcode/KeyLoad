@@ -23,8 +23,15 @@ internal static class SampleChunkSubnormalRf3Results
     {
         var window = new SampleChunkWindowResult(scenario.WindowId, scenario.From, scenario.Until,
             generation, revision, sequence, null, [.. expected], minimum.Token.Position);
-        await SampleChunkRetentionRf3ReadOracle.WindowAsync(sdk, mcp, scenario.Request, window, minimum, token);
-        await SampleChunkRetentionRf3ReadOracle.RawAsync(sdk, mcp, Raw(scenario, TimeSeriesRf3Scenario.Series), expected, token);
+        async Task CurrentRowsAsync()
+        {
+            await SampleChunkRetentionRf3ReadOracle.WindowAsync(sdk, mcp, scenario.Request, window, minimum, token);
+            await SampleChunkRetentionRf3ReadOracle.RawAsync(sdk, mcp, Raw(scenario, TimeSeriesRf3Scenario.Series), expected, token);
+        }
+        await CurrentRowsAsync();
+        var count = generation == SampleChunkRf3Protocol.SealedGeneration
+            ? SubnormalWholeAggregateRf3Oracle.SealedCount : SubnormalWholeAggregateRf3Oracle.CorrectedCount;
+        await SubnormalWholeAggregateRf3Oracle.PairAsync(scenario, sdk, mcp, count, CurrentRowsAsync, token);
     }
 
     internal static ReadSamplesRequest Raw(SampleChunkRf3Scenario scenario, string series)
@@ -35,8 +42,10 @@ internal static class SampleChunkSubnormalRf3Results
         KeyLoadClient sdk, McpOfficialClient mcp, CommitReceipt minimum, CancellationToken token)
     {
         await CurrentAsync(original, sdk, mcp, minimum, token);
-        await SampleChunkRetentionRf3ReadOracle.RawAsync(sdk, mcp,
+        Task HealthyRowsAsync() => SampleChunkRetentionRf3ReadOracle.RawAsync(sdk, mcp,
             Raw(original.Scenario, TimeSeriesRf3Scenario.EmptySeries),
             SampleChunkSubnormalRf3Corpus.HealthyRecords(original.Scenario), token);
+        await HealthyRowsAsync();
+        await SubnormalWholeAggregateRf3Oracle.HealthyAsync(original.Scenario, sdk, mcp, HealthyRowsAsync, token);
     }
 }

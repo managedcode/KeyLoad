@@ -32,7 +32,7 @@ internal static class ComposedProjectionLineageFlow
         sql = sql with
         {
             Sql = sql.Sql.Replace("d.name AS customer_name",
-            "q.payload.to.id AS reference_id, d.name AS customer_name", StringComparison.Ordinal)
+            "q.payload.[to].id AS reference_id, d.name AS customer_name", StringComparison.Ordinal)
         };
         var sqlPage = engine.Execute(Reader, sql, cancellationToken: token);
         var astPage = engine.ExecuteAst(Reader, ast, cancellationToken: token);

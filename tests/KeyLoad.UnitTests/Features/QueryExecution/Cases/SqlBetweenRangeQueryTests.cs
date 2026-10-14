@@ -9,7 +9,9 @@ internal sealed class SqlBetweenRangeQueryTests
     private const string ParameterSql = "SELECT * FROM orders WHERE number BETWEEN @lower AND @upper ORDER BY id";
     private const string MalformedDelimiterSql = "SELECT * FROM orders WHERE number BETWEEN 1 9 ORDER BY id";
     private const string StringSql = "SELECT * FROM orders WHERE label BETWEEN 'amber' AND 'moss' ORDER BY id";
-    private const string BooleanSql = "SELECT * FROM orders WHERE flag BETWEEN FALSE AND TRUE ORDER BY id";
+    private const string LowerFlagParameter = "lowerFlag";
+    private const string UpperFlagParameter = "upperFlag";
+    private const string BooleanSql = "SELECT * FROM orders WHERE flag BETWEEN @lowerFlag AND @upperFlag ORDER BY id";
     private const string FieldBoundSql = "SELECT * FROM orders WHERE number BETWEEN lowerBound AND upperBound ORDER BY id";
     private const string QuotedFieldSql = "SELECT * FROM orders o WHERE o.\"odd.name\" /* before */ BETWEEN /* bounds */ 1 AND 9 ORDER BY id";
 
@@ -68,7 +70,9 @@ internal sealed class SqlBetweenRangeQueryTests
                 [new(SqlBetweenTestData.IdPath, false)], 100), AllowFullScan: true);
         var astPage = engine.ExecuteAst(SqlBetweenTestData.Root, expectedAst);
         var stringPage = engine.Execute(SqlBetweenTestData.Root, SqlBetweenTestData.Request(database, StringSql));
-        var booleanPage = engine.Execute(SqlBetweenTestData.Root, SqlBetweenTestData.Request(database, BooleanSql));
+        var booleanPage = engine.Execute(SqlBetweenTestData.Root, SqlBetweenTestData.Request(database, BooleanSql,
+            new Dictionary<string, global::System.Text.Json.JsonElement>(StringComparer.Ordinal)
+            { [LowerFlagParameter] = global::System.Text.Json.JsonSerializer.SerializeToElement(false), [UpperFlagParameter] = global::System.Text.Json.JsonSerializer.SerializeToElement(true) }));
 
         await Assert.That(SqlBetweenTestData.Ids(parameterPage)).IsEqualTo("high,low,middle");
         await SqlBetweenTestData.SameRows(astPage, parameterPage);
@@ -117,9 +121,9 @@ internal sealed class SqlBetweenRangeQueryTests
         using var database = SqlBetweenTestData.Create();
         var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var sql = engine.Execute(SqlBetweenTestData.Root,
-            SqlBetweenTestData.Request(database, "SELECT * FROM orders WHERE number BETWEEN 1 AND 9 ORDER BY id LIMIT 2"));
+            SqlBetweenTestData.Request(database, "SELECT TOP (2) * FROM orders WHERE number BETWEEN 1 AND 9 ORDER BY id"));
         var sqlNext = engine.Execute(SqlBetweenTestData.Root, SqlBetweenTestData.Request(database,
-            "SELECT * FROM orders WHERE number BETWEEN 1 AND 9 ORDER BY id LIMIT 2") with
+            "SELECT TOP (2) * FROM orders WHERE number BETWEEN 1 AND 9 ORDER BY id") with
         { Cursor = sql.Cursor });
         var astRequest = new AstQueryRequest(database.Partition,
             new(SqlBetweenTestData.Collection, null, [new("*", "*")], Range(new FieldOperand(SqlBetweenTestData.NumberPath),
@@ -127,7 +131,7 @@ internal sealed class SqlBetweenRangeQueryTests
         var ast = engine.ExecuteAst(SqlBetweenTestData.Root, astRequest);
         var sqlCursorInAst = engine.ExecuteAst(SqlBetweenTestData.Root, astRequest with { Cursor = sql.Cursor });
         var astCursorInSql = engine.Execute(SqlBetweenTestData.Root, SqlBetweenTestData.Request(database,
-            "SELECT * FROM orders WHERE number BETWEEN 1 AND 9 ORDER BY id LIMIT 2") with
+            "SELECT TOP (2) * FROM orders WHERE number BETWEEN 1 AND 9 ORDER BY id") with
         { Cursor = ast.Cursor });
 
         await SqlBetweenTestData.SameRows(ast, sql);
@@ -138,8 +142,10 @@ internal sealed class SqlBetweenRangeQueryTests
         await Assert.That(sql.Cursor).IsNotNull();
         await Assert.That(sqlNext.Cursor).IsNull();
 
-        var sqlExplain = engine.Execute(SqlBetweenTestData.Root, SqlBetweenTestData.Request(database,
-            "EXPLAIN SELECT * FROM orders WHERE number BETWEEN 1 AND 9 ORDER BY id LIMIT 2"));
+        var sqlExplain = engine.ExecuteAst(SqlBetweenTestData.Root, new AstQueryRequest(database.Partition,
+            new SqlParser("SELECT TOP (2) * FROM orders WHERE number BETWEEN 1 AND 9 ORDER BY id",
+                UnitExecutionOptions.DatabaseLimits(database.Database.Limits), UnitExecutionOptions.QueryExecution()).Parse() with
+            { Explain = true }, AllowFullScan: true));
         var astExplain = engine.ExecuteAst(SqlBetweenTestData.Root, new AstQueryRequest(database.Partition,
             new(SqlBetweenTestData.Collection, null, [new("*", "*")], Range(new FieldOperand(SqlBetweenTestData.NumberPath),
                 ValueOperand.Create(1m), ValueOperand.Create(9m)), [new(SqlBetweenTestData.IdPath, false)], 2, Explain: true),

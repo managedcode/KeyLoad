@@ -9,7 +9,6 @@ internal static class ProjectRowAuthorityAssertions
 {
     private const string Reader = "alice";
     private const string Sql = "SELECT * FROM orders ORDER BY id";
-    private const string ExplainPrefix = "EXPLAIN ";
     private const string ScanPath = "bounded-full-scan";
     private const string Mine = "mine";
     private const string Hidden = "hidden";
@@ -36,7 +35,11 @@ internal static class ProjectRowAuthorityAssertions
             AtomicPartition = db.Partition.AtomicPartitionId,
             ScanBudget = UnitExecutionOptions.DatabaseLimits().Value.MaxScanRecords
         }, JsonDefaults.Options);
-        var explain = engine.Execute(Reader, request with { Sql = ExplainPrefix + Sql }, cancellationToken: token);
+        var explain = engine.ExecuteAst(Reader, new AstQueryRequest(db.Partition,
+            new SqlParser(Sql, UnitExecutionOptions.DatabaseLimits(db.Database.Limits), UnitExecutionOptions.QueryExecution(),
+                new global::KeyLoad.Core.ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(db.Database.Limits),
+                    cancellationToken: token)).Parse() with
+            { Explain = true }, AllowFullScan: true), cancellationToken: token);
         QueryRow[] explanation = [new(ExplainId, ExplainRevision, plan)];
         await Assert.That(JsonDefaults.Serialize(explain.Rows).AsSpan().SequenceEqual(JsonDefaults.Serialize(explanation))).IsTrue();
         await PageAsync(explain, cut);
@@ -49,10 +52,18 @@ internal static class ProjectRowAuthorityAssertions
     {
         var image = GraphShortestPathFullStoreImage.Bytes(store);
         var cut = store.Position;
-        foreach (var sql in new[] { Sql, ExplainPrefix + Sql })
+        foreach (var explain in new[] { false, true })
         {
-            var failure = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute(Reader,
-                new(db.Partition, sql, AllowFullScan: true), cancellationToken: token));
+            var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
+            {
+                _ = explain
+                ? engine.ExecuteAst(Reader, new AstQueryRequest(db.Partition,
+                    new SqlParser(Sql, UnitExecutionOptions.DatabaseLimits(db.Database.Limits), UnitExecutionOptions.QueryExecution(),
+                new global::KeyLoad.Core.ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(db.Database.Limits),
+                    cancellationToken: token)).Parse() with
+                    { Explain = true }, AllowFullScan: true), cancellationToken: token)
+                : engine.Execute(Reader, new(db.Partition, Sql, AllowFullScan: true), cancellationToken: token);
+            });
             await Assert.That(failure.Code).IsEqualTo(ErrorCode.Unauthenticated);
         }
         await Assert.That(GraphShortestPathFullStoreImage.Bytes(store).SequenceEqual(image, StringComparer.Ordinal)).IsTrue();
