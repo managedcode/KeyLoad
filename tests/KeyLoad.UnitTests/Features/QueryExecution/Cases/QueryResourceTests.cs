@@ -62,8 +62,11 @@ internal sealed class QueryResourceTests
             { Explain = true }, AllowFullScan: true));
         await Assert.That(explain.AccessPath).IsEqualTo("bounded-full-scan");
         db.Commit(new PutDocument(Collection, "b", "{\"score\":2}"));
-        var error = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute("root",
-            new(db.Partition, ExplainSql, AllowFullScan: true)));
+        var error = Assert.ThrowsExactly<KeyLoadException>(() => engine.ExecuteAst("root",
+            new(db.Partition, new SqlParser(ExplainSql,
+                UnitExecutionOptions.DatabaseLimits(db.Database.Limits),
+                UnitExecutionOptions.QueryExecution()).Parse() with
+            { Explain = true }, AllowFullScan: true)));
         await Assert.That(error.Code).IsEqualTo(ErrorCode.BudgetExceeded);
     }
 

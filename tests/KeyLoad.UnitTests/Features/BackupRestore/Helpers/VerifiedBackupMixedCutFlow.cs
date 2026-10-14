@@ -53,7 +53,7 @@ internal static class VerifiedBackupMixedCutFlow
             await Assert.That(fixture.Target!.Position).IsEqualTo(authority.ExpectedPosition);
             await Assert.That(EventingArtifactState.Bytes(fixture.Target, fixture.Source.Partition))
                 .IsEquivalentTo(selected.PartitionRows, CollectionOrdering.Matching);
-            await EventingArtifactState.AssertSeedAsync(fixture, fixture.Database);
+            await VerifiedBackupMixedCutState.StateAsync(fixture, fixture.Database, selected.SecondOperation is not null);
             await VerifiedBackupMixedCutCold.RunAsync(fixture, selected, target, authority.ExpectedPosition, token);
         }, failures);
         await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(() =>

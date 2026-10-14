@@ -9,6 +9,7 @@ internal sealed class ScriptDomLoweringContext(global::Microsoft.Extensions.Opti
     int? positionalParameterCount = null)
 {
     private int nodes;
+    internal bool UseDocumentMetadata { get; set; } = true;
     internal Dictionary<string, global::System.Text.Json.JsonElement>? Parameters => parameters;
     internal int? PositionalParameterCount => positionalParameterCount;
     internal DatabaseLimits Limits => limitsOptions.Value;

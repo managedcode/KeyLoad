@@ -92,7 +92,7 @@ flowchart LR
 
 [KL-105](docs/Features/BenchmarkComparisons/DotnetProfiling.md) adds .NET profiling with `dotnet-diagnostics-mcp`, measured bottleneck repairs and matched verification; its acceptance remains open.
 
-Native remote graph operations, ASP.NET authentication, Event JOIN and composed-projection lineage are implemented and undergoing qualification. SIMD is enabled throughout the current execution path. Full Release builds pass; complete Linux/RF3 acceptance and product functional coverage remain open. The [current qualification record](docs/implementation/qualification-stage64-public-models.md) and [implementation status](docs/implementation/status.json) show the actual results and remaining acceptance gates.
+Native remote graph operations, ASP.NET authentication, Event JOIN and composed-projection lineage are implemented and undergoing qualification. SIMD is enabled throughout the current execution path. Full Release builds pass; the current focused local TUnit batch passes 424 of 431 cases. Complete Linux/RF3 acceptance and current product functional coverage remain open. The [current qualification record](docs/implementation/qualification-stage64-public-models.md) and [implementation status](docs/implementation/status.json) show the actual results and remaining acceptance gates.
 
 
 | Workstream | What it does and why | State | Remaining work |

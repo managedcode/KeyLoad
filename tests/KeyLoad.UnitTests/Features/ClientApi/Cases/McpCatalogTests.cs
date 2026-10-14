@@ -46,6 +46,7 @@ internal sealed class McpCatalogTests
             await Assert.That(actual.InputSchema.GetProperty(AdditionalPropertiesKey).ValueKind).IsEqualTo(JsonValueKind.False);
             await Assert.That(actual.OutputSchema.GetProperty(TypeKey).GetString()).IsEqualTo(ObjectType);
         }
+        await QueueDispatchMcpCatalogAssertions.RequireAsync();
         await McpMovementCatalogSchema.RequireAsync(Find(McpMovementCatalogProtocol.Name));
         await McpRemoteGraphCatalogExpectations.RequireAsync();
         await McpMovementCatalogDecode.RequireAsync(Find(McpMovementCatalogProtocol.Name));

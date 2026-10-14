@@ -6,8 +6,8 @@ internal static class VerifiedBackupCutPair
 {
     private const string Earlier = "verified-earlier-cut";
     private const string Later = "verified-later-cut";
-    private const string DocumentId = "second-original-cut";
-    private const string DocumentJson = "{\"cut\":\"second\",\"verified\":true}";
+    internal const string DocumentId = "second-original-cut";
+    internal const string DocumentJson = "{\"cut\":\"second\",\"verified\":true}";
     private const long MissingVersion = 0;
 
     internal static async Task<(VerifiedBackupCutSnapshot Earlier, VerifiedBackupCutSnapshot Later)> CaptureAsync(
@@ -18,9 +18,20 @@ internal static class VerifiedBackupCutPair
         var command = new CommandRequest(id, fixture.Source.Partition,
             [new PutDocument(EventingArtifactFixture.Documents, DocumentId, DocumentJson, MissingVersion)]);
         var issued = fixture.Operation(OperationKind.Batch, command, id);
-        fixture.SubmitIssued(fixture.Source.Database, issued, explicitTime: false, cancellationToken: token)
-            .Get<CommitReceipt>();
-        var later = await CaptureAsync(fixture, Later, token);
+        var result = fixture.SubmitIssued(fixture.Source.Database, issued, explicitTime: false, cancellationToken: token);
+        var receipt = result.Get<CommitReceipt>();
+        await Assert.That(receipt.CommandId).IsEqualTo(id);
+        await Assert.That(receipt.Mutations).IsEquivalentTo(new MutationReceipt[]
+            { new("putDocument", EventingArtifactFixture.Documents, DocumentId, 1L) },
+            TUnit.Assertions.Enums.CollectionOrdering.Matching);
+        var position = fixture.Source.Store.Position;
+        var bytes = EventingArtifactState.FullBytes(fixture.Source.Store);
+        await EventingArtifactState.SameResultAsync(result,
+            fixture.SubmitIssued(fixture.Source.Database, issued, explicitTime: false, cancellationToken: token));
+        await Assert.That(fixture.Source.Store.Position).IsEqualTo(position);
+        await Assert.That(EventingArtifactState.FullBytes(fixture.Source.Store))
+            .IsEquivalentTo(bytes, TUnit.Assertions.Enums.CollectionOrdering.Matching);
+        var later = (await CaptureAsync(fixture, Later, token)) with { SecondOperation = issued, SecondResult = result };
         await Assert.That(later.Capture.Position > earlier.Capture.Position).IsTrue();
         await Assert.That(later.PartitionRows.Length > earlier.PartitionRows.Length).IsTrue();
         return (earlier, later);

@@ -15,11 +15,14 @@ internal static class ScriptDomNames
         { global::KeyLoad.Core.JsonData.Identifier(part); }
         return parts;
     }
-    internal static string Path(List<string> parts, string? alias)
+    internal static string Path(List<string> parts, string? alias, bool documentMetadata)
     {
         if (alias is not null && parts.Count > SingleElement && parts[FirstIndex] == alias)
         { parts.RemoveAt(FirstIndex); }
-        return parts.Count == SingleElement && parts[FirstIndex] is SqlSyntax.MetadataId or SqlSyntax.MetadataRevision ? SqlSyntax.MetadataPrefix + parts[FirstIndex] : global::KeyLoad.Core.JsonData.Path(parts.ToArray());
+        if (documentMetadata && parts.Count == SingleElement
+            && parts[FirstIndex] is SqlSyntax.MetadataId or SqlSyntax.MetadataRevision)
+        { return SqlSyntax.MetadataPrefix + parts[FirstIndex]; }
+        return global::KeyLoad.Core.JsonData.Path(parts.ToArray());
     }
     internal static string Object(Dom.SchemaObjectName name)
     {

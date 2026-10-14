@@ -14,7 +14,7 @@ internal static class ScriptDomOperandLowering
         { throw ScriptDomErrors.Unsupported(); }
         return expression switch
         {
-            Dom.ColumnReferenceExpression column => Field(column, alias, rightAlias),
+            Dom.ColumnReferenceExpression column => Field(column, alias, rightAlias, context.UseDocumentMetadata),
             Dom.StringLiteral value => ValueOperand.Create(value.Value),
             Dom.NullLiteral => ValueOperand.Create(null),
             Dom.IntegerLiteral value => Number(value.Value),
@@ -41,12 +41,12 @@ internal static class ScriptDomOperandLowering
         { throw ScriptDomErrors.Unsupported(); }
         return Number((expression.UnaryExpressionType == Dom.UnaryExpressionType.Negative ? NegativePrefix : PositivePrefix) + literal.Value);
     }
-    private static FieldOperand Field(Dom.ColumnReferenceExpression column, string? alias, string? rightAlias)
+    private static FieldOperand Field(Dom.ColumnReferenceExpression column, string? alias, string? rightAlias, bool documentMetadata)
     {
         var parts = ScriptDomNames.Column(column);
         if (rightAlias is not null && parts.Count > SingleElement && parts[FirstIndex] == rightAlias)
         { throw ScriptDomErrors.Unsupported(); }
-        return new FieldOperand(ScriptDomNames.Path(parts, alias));
+        return new FieldOperand(ScriptDomNames.Path(parts, alias, documentMetadata));
     }
 
     private const string NegativePrefix = "-";

@@ -19,5 +19,6 @@ internal sealed class FeedLiveRf3Tests(ClusterFixture fixture)
     {
         using var deadline = McpCallerDeadline.Create();
         await LiveTailRf3Trial.RunAsync(fixture, deadline.Token);
+        await LiveReadCancellationR49Owner.RunAsync(deadline.Token);
     }
 }

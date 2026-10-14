@@ -7,8 +7,8 @@
       "total": 104
     },
     "additionalTask": "KL-105",
-    "qualification": "R48 complete Release solution build, native compiler/analyzer diagnostics, canonical formatter and format verification passed with zero errors and warnings. Focused native50 local macOS arm64 whole-class execution passed379of399 in101.261seconds:20failed,0skipped. All395 prior selected UIDs retained,47of65 prior failing cases now pass,18remain; new packed native-cut2pass and genuine mixed-cut2fail during original source conservation after the second acknowledged seed commit. Source/DLL/PDB remained unchanged across build/runtime. Original plan20of104done84in_progress; KL105 additional and all required exact-source Linux/full-suite/Aspire RF3/coverage/fault/endurance/performance acceptance remain open.",
-    "coverage": "UNMEASURED_FOR_CURRENT_R48. Historical R38 partial functional observation remains history; no load/control/performance contribution is admitted.",
+    "qualification": "R49 complete Release/native compiler+analyzers/format verification/governance passed0errors0warnings. One clean nativeTUnit50 whole119-class local batch executed431:424PASS7FAIL0SKIP in93.641s; all399priorUIDs retained,16of20priorfails nowPASS,4remain,1previous parser-only metadata oracle pass regressed,30of32added casesPASS and2added GenerationVisibility callers remain unsupported. New current-prefix2/current-journal-signature2/mixed-backup2 wholeflowsPASS. Complete11305-file source and DLL/PDB stayed unchanged. Separate native3-case diagnostic run3FAIL/70.859s cannot be compared with clean timing and had zero collector captures after the live PID window was missed. Original20/104done84in_progress,KL105additional; current full Linux/RF3/recovery/coverage/fault/endurance/performance qualification remains open.",
+    "coverage": "R49 functional product coverage is unmeasured. Historical R38 failed-run25.73%line19.63%branch is partial/stale and does not qualify current source; load/comparison cases excluded.",
     "currentStageR43": {
       "status": "local_development_executed_with_six_failures_linux_acceptance_pending",
       "newCSharpFiles": 138,
@@ -2097,6 +2097,131 @@
         "completeOriginalCaseOutputsSha256": "6e7f9571df38b997b3db1b8e215d17dfcfa8d60eae69cc6e2af24fae05da608a"
       },
       "remaining": "15 SQL semantic/caller cases, two genuine mixed-cut original source-conservation cases and three native cluster cases remain. Mixed-cut healthy restore/cold continuation is not reached; an added acknowledged seed commit must be accounted for independently. Original native cancellation and translated unknown-write outcomes remain causal investigations. Independent CREATE/SQL identity, auth/composition callers, changefeed and catalog packets continue; required final gates remain open."
+    },
+    "currentStageR49": {
+      "classification": "current completed local development checkpoint; full task/whole Linux/RF3/coverage/endurance/performance remain open",
+      "nativeQuality": {
+        "errors": 0,
+        "warnings": 0,
+        "infos": 52348,
+        "hidden": 7898
+      },
+      "fullRelease": {
+        "errors": 0,
+        "warnings": 0,
+        "seconds": 260.2880929580424,
+        "exitCode": 0
+      },
+      "canonicalFormat": {
+        "applyExitCode": 0,
+        "applySeconds": 141.3141558340285,
+        "verifyExitCode": 0,
+        "verifySeconds": 157.94086391595192
+      },
+      "governance": "PASS27projects4modules",
+      "nativeCensus": {
+        "unit": 3882,
+        "classification": "discovery only"
+      },
+      "cleanNativeWholeClasses": {
+        "classes": 119,
+        "selected": 431,
+        "executed": 431,
+        "passed": 424,
+        "failed": 7,
+        "skipped": 0,
+        "seconds": 93.64109220798127,
+        "nativeSlots": 50,
+        "actualPeakConcurrency": "unmeasured",
+        "allPrior399UidsRetained": true,
+        "previous20FailuresResolved": 16,
+        "previous20FailuresRetained": 4,
+        "previousPassRegression": 1,
+        "newSelectedCases": 32,
+        "newSelectedPassed": 30,
+        "newSelectedFailed": 2
+      },
+      "newStorageWholeFlows": {
+        "partialNativeLayout": {
+          "passed": 2,
+          "total": 2
+        },
+        "currentJournalSignatureRepair": {
+          "passed": 2,
+          "total": 2
+        },
+        "mixedBackupCut": {
+          "passed": 2,
+          "total": 2
+        }
+      },
+      "remainingCaseOwners": {
+        "nativePrepareRetireBm25": 3,
+        "distinctNullMissing": 1,
+        "generationVisibilityRetiredExplainCallers": 2,
+        "modelViewParserDocumentMetadataOracle": 1
+      },
+      "sourceClosure": {
+        "gitVisibleFiles": 11305,
+        "changes": 0,
+        "newMissingPaths": 0,
+        "unitDllPdbUnchanged": true,
+        "sourceManifestSha256": "a287148ebf31b5cc6ada402884baa6e02f7e6643918914f9cb1180d3adee3d6e",
+        "unitDllSha256": "50c62f23a2047eeff9711c220cb802ab18d611a9f5c6767266c511bd07d55de0",
+        "unitPdbSha256": "8ad9b1aa0e733953e812a254b9bb2b9517d3a6378048721b4616d5ed798c1646"
+      },
+      "separateDiagnosticNativeCohort": {
+        "cases": 3,
+        "passed": 0,
+        "failed": 3,
+        "seconds": 70.85857062495779,
+        "ownedInternalPid": 23522,
+        "classification": "separate development diagnostic cohort; different workload, not comparable clean timing or a benchmark",
+        "profilerCaptures": "0 actual collector captures: authenticated coordinator receipt confirms missed live PID window; no stale attachment, hotspot, overhead or speed claim",
+        "missedWindowReceipt": {
+          "path": "TestResults/stage61-native-join/r52-root-kl105-23522-missed-live-window.receipt.json",
+          "sha256": "feb6f0bee7cf16049352d4a936a053ff1556d651d97012b57b4eb9f3b16bc197"
+        }
+      },
+      "functionalCoverage": "unmeasured for R49; historical R38 observation is stale and partial",
+      "artifacts": [
+        {
+          "path": "TestResults/stage61-native-join/stage64-r49-full-release-coherent.completion.original.json",
+          "sha256": "65b692cc43539dbdf92d53339960d739538153ba7ff3c346ccd7683c6857e6a0"
+        },
+        {
+          "path": "TestResults/stage61-native-join/stage64-r49-canonical-format-verify.completion.original.json",
+          "sha256": "f6d86e6cee0cb8f9103d307a4a156b34baa069ee7ce48ed8bd84bfb77a03c232"
+        },
+        {
+          "path": "TestResults/stage61-native-join/stage64-r46-current-tsql-native-repaired-intake.root-r49-post-repair-post-format-quality-full-current.original.json",
+          "sha256": "4c2522c17dccb42167676105205e18de8179acbb6ad3b342879839a086c4a465"
+        },
+        {
+          "path": "TestResults/stage61-native-join/stage64-r49-focused-unit-complete-native-failures.original.json",
+          "sha256": "074420d67af2ce5ee4b2d90674e73b8d26d126629ecb9a1a2e1988287d1eec67"
+        },
+        {
+          "path": "TestResults/stage61-native-join/stage64-r49-previous-failure-complete-native-uid-transition.original.json",
+          "sha256": "a64a02c45647804bc295f2f5dc38d7d9ba6962011895ba6b544c936a98a8ddd2"
+        },
+        {
+          "path": "TestResults/stage61-native-join/stage64-r49-full-source-clean-test-closure.original.json",
+          "sha256": "832e8fa623289c6aba6361d6ab616a31cf53828115540bb020c5e4c18eef6b45"
+        },
+        {
+          "path": "TestResults/stage61-native-join/stage64-r49-native-movement-diagnostic-process.completion.original.json",
+          "sha256": "39182fe34a024ae43f6d0bfddc3ad8d44a458813955e0e2211bed9be32f96451"
+        }
+      ],
+      "acceptancePromotions": 0,
+      "requiredOpen": [
+        "current complete exact-source Linux acceptance",
+        "genuine official SDK/MCP Aspire Docker RF3",
+        "current process recovery",
+        "complete functional coverage excluding load tests",
+        "fault/endurance/power-loss and matched native1/3-node performance"
+      ]
     }
   },
   "STAGE63-NATIVE-COMPOSITION-001": {

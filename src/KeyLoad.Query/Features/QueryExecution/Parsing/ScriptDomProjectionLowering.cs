@@ -30,7 +30,7 @@ internal static class ScriptDomProjectionLowering
                 ?? (scalar.ColumnName?.ValueExpression is Dom.StringLiteral text ? text.Value : parts[^LastSegment]);
             global::KeyLoad.Core.JsonData.Identifier(output);
             if (join is null)
-            { selected.Add(new(ScriptDomNames.Path(parts, leftAlias), output)); }
+            { selected.Add(new(ScriptDomNames.Path(parts, leftAlias, context.UseDocumentMetadata), output)); }
             else
             {
                 if (parts.Count < QualifiedSegments || parts[FirstIndex] != leftAlias && parts[FirstIndex] != join.Alias)

@@ -7,6 +7,7 @@ namespace KeyLoad.IntegrationTests.Features.ClientApi;
 /// <summary>The accepted ADR-039 public schema and effect oracle, independent of server implementation objects.</summary>
 internal static class McpCatalogExpectations
 {
+    private const string QueueDispatchName = "keyload_queue_dispatch_control";
     private const string TextMaintainName = "keyload_search_text_maintain";
     private static readonly string[] TextRequiredFields = ["commandId", "consumer", "collection", "field", "indexGeneration", "nodeId", "placement", "mode"];
     private const string AnnReadName = "keyload_search_ann_read";
@@ -126,6 +127,12 @@ internal static class McpCatalogExpectations
         Write(McpCallerTools.MessagesReceive, [McpCallerProtocol.RequestId, McpDiscoveryProtocol.Lane]),
         Write(McpCallerTools.MessagesComplete, [McpCallerProtocol.CommandId, McpDiscoveryProtocol.Lane, McpDiscoveryProtocol.Token, McpDiscoveryProtocol.Action]),
         Write(McpCallerTools.MessagesProcess, [McpCallerProtocol.CommandId, McpDiscoveryProtocol.Lane, McpDiscoveryProtocol.Token, McpDiscoveryProtocol.HandlerScope, McpDiscoveryProtocol.ExecutionGeneration, McpDiscoveryProtocol.Effects]),
+        new(QueueDispatchName, false, true, true, McpExpectedBody.Object, true,
+            ["tenantId", "databaseId", "queue", "expectedSchemaVersion", "paused"],
+            ["name", "kind", "transactionDomainId", "indexes", "fieldPolicies", "headerPolicies",
+                "queuePolicy", "eventRetention", "authority", "schemaVersion", "paused", "blobPolicy",
+                "relationalSchema", "vectorProfiles", "inboxPolicy"],
+            BodyPropertyFields: ["tenantId", "databaseId", "queue", "expectedSchemaVersion", "paused"]),
         new(McpCallerTools.ResourcesConfigure, false, true, false, McpExpectedBody.Object, true,
             [McpDiscoveryProtocol.TenantId, McpDiscoveryProtocol.DatabaseId, McpDiscoveryProtocol.Definition]),
         Header(McpCallerTools.PrincipalsConfigure, [McpDiscoveryProtocol.Principal]),

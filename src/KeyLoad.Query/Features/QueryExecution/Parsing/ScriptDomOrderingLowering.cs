@@ -19,13 +19,13 @@ internal static class ScriptDomOrderingLowering
         foreach (var element in clause.OrderByElements)
         {
             context.Observe(RootDepth);
-            var selected = Resolve(element.Expression, projection, leftAlias, join);
+            var selected = Resolve(element.Expression, projection, leftAlias, join, context.UseDocumentMetadata);
             ordering.Add(new(selected, element.SortOrder == Dom.SortOrder.Descending));
         }
         return ordering;
     }
     private static string Resolve(Dom.ScalarExpression expression, List<Selection> projection,
-        string? leftAlias, InnerJoinClause? join)
+        string? leftAlias, InnerJoinClause? join, bool documentMetadata)
     {
         if (expression is Dom.IntegerLiteral ordinal)
         {
@@ -57,7 +57,7 @@ internal static class ScriptDomOrderingLowering
         }
         if (join is not null && (parts.Count != QualifiedSegments || parts[FirstIndex] != leftAlias))
         { throw ScriptDomErrors.Invalid(); }
-        return ScriptDomNames.Path(parts, leftAlias);
+        return ScriptDomNames.Path(parts, leftAlias, documentMetadata);
     }
     private const int FirstOrdinal = 1;
     private const int QualifiedSegments = 2;

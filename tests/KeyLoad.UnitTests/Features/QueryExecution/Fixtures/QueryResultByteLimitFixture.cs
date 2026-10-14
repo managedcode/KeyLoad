@@ -40,7 +40,7 @@ internal static class QueryResultByteLimitFixture
 
     internal static QueryRequest Sql(TestDatabase database, bool join, bool compact)
     {
-        var columns = compact ? (join ? "l.id AS key" : "id AS key")
+        var columns = compact ? (join ? "l.id AS [key]" : "id AS [key]")
             : (join ? "l.payload AS payload, r.payload AS right_payload" : "payload AS payload");
         var from = join ? Left + " AS l INNER JOIN " + Right + " AS r ON l.customer_id = r.id" : Left;
         return new(database.Partition, "SELECT TOP (2) " + columns + " FROM " + from + " ORDER BY "

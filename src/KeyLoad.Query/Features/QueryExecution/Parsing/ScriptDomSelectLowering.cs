@@ -17,6 +17,7 @@ internal static class ScriptDomSelectLowering
             || query.FromClause is null)
         { throw ScriptDomErrors.Unsupported(); }
         var source = ScriptDomJoinLowering.Read(query.FromClause, dialectVersion, context);
+        context.UseDocumentMetadata = source.Model is null && source.Join is null;
         var projection = ScriptDomProjectionLowering.Read(query.SelectElements, source.Alias, source.Join, context);
         var filter = query.WhereClause is null ? null
             : ScriptDomPredicateLowering.Read(query.WhereClause.SearchCondition, source.Alias, source.Join?.Alias, context);

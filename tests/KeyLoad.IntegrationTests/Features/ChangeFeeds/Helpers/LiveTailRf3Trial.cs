@@ -25,6 +25,7 @@ internal static class LiveTailRf3Trial
         var deletedCut = await LiveQueryCutRf3Assertions.CreateAsync(administrator, reader, scenario, deletion,
             [], () => LiveTailRf3Assertions.QueryAsync(reader, scenario, token), token);
         var deletionBefore = await deletedCut();
+        await LiveReadBackpressureR49.RequireAsync(administrator, reader, scenario, deletedRequest, deletion, token);
         var deleted = await McpCallerAssertions.SdkSuccessAsync(await reader.Sdk.ReadLiveQueryAsync(deletedRequest, token));
         await LiveQueryCutRf3Assertions.BoundsAsync(deletionBefore, deleted.CutPosition, await deletedCut());
         await SqlRf3Protocol.EqualAsync(new[] { new LiveQueryChange(FeedLiveRf3Protocol.DeletedSequence,

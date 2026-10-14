@@ -13,7 +13,6 @@ internal static class TeamRowPolicyAssertions
 {
     private const string Sql = "SELECT * FROM \"team-rows\" ORDER BY id";
     private const string Scan = "bounded-full-scan";
-    private const string Explain = "EXPLAIN ";
     private const string ForeignTenant = "foreign-tenant";
     private const string ForgedId = "forged-team";
     private const string InvalidTeam = " ";
@@ -55,7 +54,11 @@ internal static class TeamRowPolicyAssertions
             ScanBudget = UnitExecutionOptions.DatabaseLimits().Value.MaxScanRecords
         }, JsonDefaults.Options);
         QueryRow[] explanation = [new("explain", AbsentRevision, plan)];
-        var explain = queries.Execute(TeamRowPolicyFlow.Reader, request with { Sql = Explain + Sql }, cancellationToken: token);
+        var explanationRequest = new AstQueryRequest(db.Partition,
+            new(TeamRowPolicyFlow.Collection, null, [new(global::KeyLoad.Query.Features.QueryExecution.SqlSyntax.Star,
+                global::KeyLoad.Query.Features.QueryExecution.SqlSyntax.Star)], null,
+                [new(global::KeyLoad.Query.Features.QueryExecution.SqlSyntax.MetadataIdPath, false)], global::KeyLoad.Query.Features.QueryExecution.SqlSyntax.DefaultLimit, Explain: true), AllowFullScan: true);
+        var explain = queries.ExecuteAst(TeamRowPolicyFlow.Reader, explanationRequest, cancellationToken: token);
         await Assert.That(JsonDefaults.Serialize(explain.Rows).AsSpan().SequenceEqual(JsonDefaults.Serialize(explanation))).IsTrue();
         await Assert.That(explain.CutPosition).IsEqualTo(cut);
         await Assert.That(explain.Cursor).IsNull();

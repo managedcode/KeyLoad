@@ -50,7 +50,7 @@ internal static class FeedLiveRf3Assertions
         await Assert.That(page.ThroughSequence).IsEqualTo(sequence);
         await Assert.That(page.FirstAvailable).IsEqualTo(FeedLiveRf3Protocol.FirstSequence);
         await Assert.That(page.Tail).IsGreaterThanOrEqualTo(sequence);
-        await Assert.That(page.CutPosition).IsGreaterThanOrEqualTo(commit.Position);
+        await FeedLiveReadCoordinatesR49.RequireAsync(page.CutPosition, commit);
         await Assert.That(string.IsNullOrEmpty(page.Cursor)).IsFalse();
     }
 

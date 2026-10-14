@@ -17,6 +17,28 @@ internal static class ControlledPartitionMovementNativeProcessColdAssertions
     internal static async Task ExactAsync(ImmutableArray<ControlledPartitionMovementNativeProcessSnapshot> before,
         ImmutableArray<ControlledPartitionMovementNativeProcessSnapshot> after)
     {
+        var failures = new List<Exception>();
+        await KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => ExactOriginalAsync(before, after), failures);
+        if (failures.Count > FirstOwner)
+        {
+            await KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
+            {
+                for (var index = FirstOwner; index < Math.Min(Owners, Math.Min(before.Length, after.Length)); index++)
+                {
+                    var selected = index;
+                    if (before[selected].State.LastIndex != after[selected].State.LastIndex)
+                    {
+                        await TailWitnessAsync(selected, before[selected], after[selected], failures);
+                    }
+                }
+            }, failures);
+        }
+        KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
+    }
+
+    private static async Task ExactOriginalAsync(ImmutableArray<ControlledPartitionMovementNativeProcessSnapshot> before,
+        ImmutableArray<ControlledPartitionMovementNativeProcessSnapshot> after)
+    {
         await Assert.That(before.Length).IsEqualTo(Owners);
         await Assert.That(after.Length).IsEqualTo(Owners);
         for (var index = FirstOwner; index < Owners; index++)
@@ -33,6 +55,45 @@ internal static class ControlledPartitionMovementNativeProcessColdAssertions
             await Assert.That(after[index].Position).IsEqualTo(before[index].Position);
             await Assert.That(after[index].Rows.SequenceEqual(before[index].Rows)).IsTrue();
             await EqualAsync(before[index].Entries, after[index].Entries);
+        }
+    }
+
+    private const string TailPrefix = "KEYLOAD_NATIVE_EXACT_TAIL";
+    private const string OwnerField = " owner=";
+    private const string BeforeField = " before=";
+    private const string AfterField = " after=";
+    private const string TermBeforeField = " termBefore=";
+    private const string TermAfterField = " termAfter=";
+    private const string PositionBeforeField = " positionBefore=";
+    private const string PositionAfterField = " positionAfter=";
+    private const string EntryField = " entry=";
+    private const string HasOperationField = " hasOperation=";
+    private const string KindField = " kind=";
+    private const string PriorAuthorityField = " priorAuthority=";
+    private const string PayloadField = " payloadEqual=";
+    private const string OperationField = " operationEqual=";
+    private const int MissingOperationKind = -1;
+
+    private static async Task TailWitnessAsync(int owner,
+        ControlledPartitionMovementNativeProcessSnapshot before,
+        ControlledPartitionMovementNativeProcessSnapshot after, List<Exception> failures)
+    {
+        await KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => Console.Error.WriteLineAsync(FormattableString.Invariant($"{TailPrefix}{OwnerField}{owner}{BeforeField}{before.State.LastIndex}{AfterField}{after.State.LastIndex}{TermBeforeField}{before.State.Term}{TermAfterField}{after.State.Term}{PositionBeforeField}{before.Position}{PositionAfterField}{after.Position}")), failures);
+        foreach (var entry in after.Entries.Where(entry => entry.Index > before.State.LastIndex))
+        {
+            await KeyLoad.Server.ServerFailureObserver.ObserveAsync(() =>
+            {
+                var replay = entry.Operation;
+                var original = replay is null ? null : before.Entries.Select(item => item.Operation)
+                    .FirstOrDefault(item => item is not null && item.Id == replay.Id);
+                var payloadEqual = original is not null && replay is not null
+                    && original.NativePayload.Span.SequenceEqual(replay.NativePayload.Span);
+                var operationEqual = original is not null && replay is not null
+                    && JsonDefaults.Serialize(original).AsSpan().SequenceEqual(
+                        JsonDefaults.Serialize(replay with { EvaluatedAt = original.EvaluatedAt }));
+                var kind = replay is null ? MissingOperationKind : (int)replay.Kind;
+                return Console.Error.WriteLineAsync(FormattableString.Invariant($"{TailPrefix}{OwnerField}{owner}{EntryField}{entry.Index}{HasOperationField}{replay is not null}{KindField}{kind}{PriorAuthorityField}{original is not null}{PayloadField}{payloadEqual}{OperationField}{operationEqual}"));
+            }, failures);
         }
     }
 

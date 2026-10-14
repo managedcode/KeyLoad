@@ -5,6 +5,10 @@ namespace KeyLoad.IntegrationTests.Features.BlobStorage;
 internal sealed class BlobReservationQuotaPublicTests(ClusterFixture fixture)
 {
     [Test]
-    public Task ExactReservationQuotaRefusesThenAbortReleasesAndFreshPublicationPreservesOriginalFailureReplay()
-        => BlobReservationQuotaPublicTrial.RunAsync(fixture, TestContext.Current!.Execution.CancellationToken);
+    public async Task ExactReservationQuotaRefusesThenAbortReleasesAndFreshPublicationPreservesOriginalFailureReplay()
+    {
+        var token = TestContext.Current!.Execution.CancellationToken;
+        await BlobReservationQuotaPublicTrial.RunAsync(fixture, token);
+        await BlobGlobalQuotaR49Trial.RunAsync(fixture, token);
+    }
 }

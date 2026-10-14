@@ -107,7 +107,7 @@ internal static class QueueGraphIdentityFlow
     {
         var arguments = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
         { [global::KeyLoad.Server.McpCatalogProtocol.Request] = JsonSerializer.SerializeToElement(command, JsonDefaults.Options) };
-        var request = new SqlOperationRequest(command.Partition, "CALL keyload_documents_commit(@arguments)",
+        var request = new SqlOperationRequest(command.Partition, "EXEC keyload_documents_commit @arguments",
             new Dictionary<string, JsonElement>(StringComparer.Ordinal)
             { [global::KeyLoad.UnitTests.Features.QueryExecution.SqlOperationTestData.Parameter] = JsonSerializer.SerializeToElement(arguments, JsonDefaults.Options) });
         var compiled = SqlOperationTestData.Compile(request);

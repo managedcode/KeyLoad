@@ -40,7 +40,7 @@ internal static class VerifiedBackupMixedCutCold
                 fixture.Source.Partition, EventingArtifactFixture.Principal, fixture.Original.Id).AsSpan()
                 .SequenceEqual(BackupIndexedDocumentDedupFixture.ReadOutcomeBytes(fixture.Source.Store,
                     fixture.Source.Partition, EventingArtifactFixture.Principal, fixture.Original.Id))).IsTrue();
-            await EventingArtifactState.AssertSeedAsync(fixture, fixture.Database);
+            await VerifiedBackupMixedCutState.StateAsync(fixture, fixture.Database, selected.SecondOperation is not null);
         }
     }
 }
