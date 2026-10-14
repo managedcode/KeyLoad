@@ -7,8 +7,8 @@
       "total": 104
     },
     "additionalTask": "KL-105",
-    "qualification": "R54 full analyzer-enabled Release0errors0warnings and canonical formatter verification pass. Native focused Unit126/121PASS5FAIL0SKIP, genuine process Recovery6/6PASS with unchanged source/DLL/PDB. Original104 acceptance remains20done84inprogress; full Linux/RF3/coverage/fault/endurance/performance gates open.",
-    "coverage": "R54 current functional product coverage is UNMEASURED; focused functional results are not complete coverage, and load/comparison cases are excluded.",
+    "qualification": "R56 complete source checkpoint c1e6bbd2 pushed; current scoped Unit/Integration compiler0errors0warnings. Selected native Unit256/256 and genuine process Recovery63/63 PASS,0failed0skipped, source/DLL/PDB unchanged. Latest full solution attempt failed before repaired imports; fresh full Linux/RF3/formatter/coverage/fault/endurance/performance gates remain open. Original104 acceptance stays20done84inprogress.",
+    "coverage": "R56 selected functional-only cohort reports12926/106456 lines and6724/67424 branches in10 modules. This is partial coverage, not a complete product coverage gate; load and comparison work receive no credit.",
     "currentStageR43": {
       "status": "local_development_executed_with_six_failures_linux_acceptance_pending",
       "newCSharpFiles": 138,
@@ -2869,6 +2869,210 @@
         "Exact-source full Linux Unit/Recovery/Docker-Aspire RF3 SDK/MCP, complete coverage, fault/endurance and performance qualification remain open",
         "No new original104-task acceptance follows from these focused results"
       ]
+    },
+    "currentStageR56": {
+      "status": "selected_local_development_passed_linux_and_complete_acceptance_open",
+      "sourceCheckpoint": "c1e6bbd2c31fdd02f0fcac5f2ebd4ab95f74bf06",
+      "sourceCheckpointFiles": 105,
+      "independentWholeTasks": {
+        "root": "KL-078",
+        "companionMovement": "KL-036",
+        "companionMessaging": "KL-087"
+      },
+      "scopedCompilers": {
+        "unit": {
+          "path": "TestResults/stage61-native-join/stage64-r56-unit-generated-global-imports-complete-compile.completion.original.json",
+          "sha256": "6c23fbe7294fb667f5a06d4c6fffe9847173ae4192fdc145215c157502b1ba55"
+        },
+        "integration": {
+          "path": "TestResults/stage61-native-join/stage64-r56-integration-coherent-scoped-compile.completion.original.json",
+          "sha256": "5dec1362cafca9f68c1b3ee2226bc9b379ee93b672b6e6c9d6a77e42655c1e80"
+        },
+        "qualification": "Both actual compiler exit0/errors0/warnings0. Integration wrapper records three declared Unit-only import edits during its independent compilation; Integration/product inputs did not change. These are scoped assembly checks, not a current full solution pass."
+      },
+      "originalFullSolutionFailure": {
+        "path": "TestResults/stage61-native-join/stage64-r56-three-whole-task-coherent-release.completion.original.json",
+        "sha256": "e790076f50fc8dde3aa5f450e0ca0164761c7cfcfc92ee0bf00cc187814cd0a3"
+      },
+      "originalCompilerFailureLedger": {
+        "path": "TestResults/stage61-native-join/root-r56-original-six-compiler-errors.original.json",
+        "sha256": "d94aaddd344592f7fd0e6324a82360e4e83357eb03f22f32ffe7c6cddb43a65d"
+      },
+      "focusedExecution": {
+        "unit": {
+          "trx": "TestResults/stage61-native-join/root-r56-three-distinct-task-unit-functional-native/KeyLoad.UnitTests_net10.0_arm64.trx",
+          "trxSha256": "e41744f034e9240c53947248bc5e45655d6bf6b8f26c39310328e1b6dbfd137d",
+          "completion": "TestResults/stage61-native-join/root-r56-three-distinct-task-unit-functional.completion.original.json",
+          "completionSha256": "49d7d4a8cd82045f7854e80db8da69eaf17fc2755d809346cf63d83ef1aa6701",
+          "outcomes": {
+            "Passed": 256
+          },
+          "total": 256,
+          "configuredNativeSlots": 50,
+          "actualTrxIntervalPeak": 51,
+          "caseLifetimeOverlapIsNotCpuConcurrency": true,
+          "longest": [
+            {
+              "name": "NativeImagesProduceClosedManifestAndRejectTamperingWithoutReplacingEvidence",
+              "seconds": 382.932479,
+              "outcome": "Passed"
+            },
+            {
+              "name": "ActualSixNativeSilosRefuseWrongNamesAndCancellationThenRepairAndFenceRestartedGeneration",
+              "seconds": 37.906008,
+              "outcome": "Passed"
+            },
+            {
+              "name": "TwelveConcurrentNativeResolutionCallsObserveOneCurrentFullAddress",
+              "seconds": 34.340395,
+              "outcome": "Passed"
+            }
+          ]
+        },
+        "recovery": {
+          "trx": "TestResults/stage61-native-join/root-r56-three-distinct-task-recovery-functional-native/KeyLoad.RecoveryTests_net10.0_arm64.trx",
+          "trxSha256": "9bae4e042ef1d4ea921cf3842db6ea6fd495912fa8f34349e3198a8a3aec333d",
+          "completion": "TestResults/stage61-native-join/root-r56-three-distinct-task-recovery-functional.completion.original.json",
+          "completionSha256": "b09bf9f74ffe4c5670c804bc5520ac49171020162c64490c6ed93b2ed98026b7",
+          "outcomes": {
+            "Passed": 63
+          },
+          "total": 63,
+          "configuredNativeSlots": 50,
+          "actualTrxIntervalPeak": 50,
+          "caseLifetimeOverlapIsNotCpuConcurrency": true,
+          "longest": [
+            {
+              "name": "ExpiredReadyDeadlineProcessCutRecoversWholeBodyCountersReceiptThenSameRootHealthy(PayloadWritten)",
+              "seconds": 90.502937,
+              "outcome": "Passed"
+            },
+            {
+              "name": "AcJobs003ProcessKillRecoversOneSagaTimeoutAndStableEnqueueRetry(JournalFlushed)",
+              "seconds": 80.852509,
+              "outcome": "Passed"
+            },
+            {
+              "name": "OriginalSourceRepairCasCrashRetainsExactDeniedOutcomeAtomicHistoryAndColdHealthy(ApplyCompleted, Accept)",
+              "seconds": 78.622129,
+              "outcome": "Passed"
+            }
+          ]
+        },
+        "selectedFunctionalCoverage": {
+          "report": "TestResults/stage61-native-join/root-r56-three-distinct-task-unit-functional-native/functional.cobertura.xml",
+          "sha256": "a530b4b1d2c6b7e694e35eb03087d2ed00e7372bc471b34d540c9e7448dcb597",
+          "linesCovered": 12926,
+          "linesValid": 106456,
+          "branchesCovered": 6724,
+          "branchesValid": 67424,
+          "reportedModules": 10,
+          "fullProductCoverageQualified": false,
+          "benchmarkOrLoadCredit": false
+        }
+      },
+      "sourceImageClosure": {
+        "original": {
+          "path": "TestResults/stage61-native-join/root-r56-three-distinct-task-native-functional.cohort-after.original.json",
+          "sha256": "3538a58463d893bc0ae68cd47908e15c05f675b6a54843f4fd87e7253db7abc7"
+        },
+        "sourceFiles": 11711,
+        "sourceDrift": 0,
+        "compiledDrift": 0,
+        "processesJoined": true
+      },
+      "nativeTaskDiscovery": [
+        {
+          "task": "KL-078",
+          "suite": "unit",
+          "original": "TestResults/stage61-native-join/peer-r56-kl-078-unit-current-native-discovery.stdout.original.txt",
+          "sha256": "596b1f523994487fdc936846a4f771e8d84a55ea1abedecffe685add5df1b330",
+          "actualInstances": 70,
+          "actualClasses": 29,
+          "qualification": "Discovery only; Root source/DLL/PDB/process manifest must accompany original"
+        },
+        {
+          "task": "KL-078",
+          "suite": "recovery",
+          "original": "TestResults/stage61-native-join/peer-r56-kl-078-recovery-current-native-discovery.stdout.original.txt",
+          "sha256": "6a3b13a86afad3d531bad7fe4ce44ecedce8988ecca1a80443e9e96f2768028d",
+          "actualInstances": 9,
+          "actualClasses": 3,
+          "qualification": "Discovery only; Root source/DLL/PDB/process manifest must accompany original"
+        },
+        {
+          "task": "KL-078",
+          "suite": "rf3",
+          "original": "TestResults/stage61-native-join/peer-r56-kl-078-rf3-current-native-discovery.stdout.original.txt",
+          "sha256": "6fc0e0493815a1a8924b03005c5809f4b2fc86b27e471d38a6f7605b0aadf2d9",
+          "actualInstances": 11,
+          "actualClasses": 8,
+          "qualification": "Discovery only; Root source/DLL/PDB/process manifest must accompany original"
+        },
+        {
+          "task": "KL-087",
+          "suite": "unit",
+          "original": "TestResults/stage61-native-join/peer-r56-kl-087-unit-current-native-discovery-r2.stdout.original.txt",
+          "sha256": "de6bdb6aa5ae6aa1bbac0b088947f2f7c01ad1b62fa20ed96b657acfdb4c34f3",
+          "actualInstances": 118,
+          "actualClasses": 15,
+          "qualification": "Discovery only; Root source/DLL/PDB/process manifest must accompany original"
+        },
+        {
+          "task": "KL-087",
+          "suite": "recovery",
+          "original": "TestResults/stage61-native-join/peer-r56-kl-087-recovery-current-native-discovery-r2.stdout.original.txt",
+          "sha256": "eca4cd2f6dc7c386adefb286a5b8911f6ddf11de5bf85773ad579853275509a0",
+          "actualInstances": 22,
+          "actualClasses": 4,
+          "qualification": "Discovery only; Root source/DLL/PDB/process manifest must accompany original"
+        },
+        {
+          "task": "KL-087",
+          "suite": "rf3",
+          "original": "TestResults/stage61-native-join/peer-r56-kl-087-rf3-current-native-discovery-r2.stdout.original.txt",
+          "sha256": "6bc45703964e9981fd583be16b22ad236e1f3bd8d9a3cd4387becbd4cfb9fc5b",
+          "actualInstances": 19,
+          "actualClasses": 5,
+          "qualification": "Discovery only; Root source/DLL/PDB/process manifest must accompany original"
+        },
+        {
+          "task": "KL-036",
+          "suite": "unit",
+          "original": "TestResults/stage61-native-join/peer-r56-kl-036-unit-current-native-discovery-r2.stdout.original.txt",
+          "sha256": "3b61867c04635cf898a35050bfae93dbc61f9f4a81cbef4e1090030ce74a560f",
+          "actualInstances": 4,
+          "actualClasses": 2,
+          "qualification": "Discovery only; Root source/DLL/PDB/process manifest must accompany original"
+        }
+      ],
+      "linuxTaskBinding": {
+        "tasks": [
+          "KL-078",
+          "KL-087",
+          "KL-036"
+        ],
+        "normalSimdOnly": true,
+        "configuredNativeSlots": 50,
+        "original": {
+          "path": "TestResults/stage61-native-join/root-r56-three-independent-task-linux-binding-actual-source-Y.original.json",
+          "sha256": "db00286fd3d41772ad43a9d271e8c869d7e17abbc003f9b0928a3f2ba08b13f8"
+        },
+        "functionalRuntimeLinuxQualified": false
+      },
+      "iterationDurationFinding": {
+        "case": "NativeImagesProduceClosedManifestAndRejectTamperingWithoutReplacingEvidence",
+        "originalTrxSeconds": 382.932479,
+        "meaning": "Original source/image evidence audit dominates this selected Unit run; it passed and is not a database latency measurement."
+      },
+      "remaining": [
+        "Current exact-source full Linux solution build and formatter verification.",
+        "Genuine Aspire Docker RF3 SDK/official MCP execution of complete mapped078/087/036 flows.",
+        "Complete functional product coverage and required fault/endurance/power-loss/measured performance gates.",
+        "Prepared next chunk minimum, record-cap and complete caller flows and queue expiry/definitive-refusal repairs need integration and new source-bound checks; their source drafts have no runtime credit.",
+        "Prior native movement/connection/typed-INSERT failed flows outside this selected cohort are not silently closed."
+      ],
+      "fullTaskPromotion": false
     }
   },
   "STAGE63-NATIVE-COMPOSITION-001": {
@@ -59449,6 +59653,13 @@
       },
       "remaining": "Delivered-source Linux whole movement operations and original process/RF3/full required suites, coverage/endurance/performance remain open.",
       "wholeTaskAccepted": false
+    },
+    "currentStageR56WholeTaskDevelopment": {
+      "sourceJoined": true,
+      "developmentRuntime": "Selected original Unit256/256 and recovery63/63 passed; exact task subset identities are in STAGE64-PUBLIC-MODELS-001.currentStageR56. Full Linux/RF3 acceptance remains open.",
+      "allAcceptanceClosed": false,
+      "normalSimdOnly": true,
+      "scope": "Independent extra-seed movement ACK accounting, complete official MCP model/error observations and actual native persisted membership rows; other17 CI selections preserved."
     }
   },
   "KL-037": {
@@ -60924,6 +61135,13 @@
           "qualificationClaim": false
         }
       }
+    },
+    "currentStageR56WholeTaskDevelopment": {
+      "sourceJoined": true,
+      "developmentRuntime": "Selected original Unit256/256 and recovery63/63 passed; exact task subset identities are in STAGE64-PUBLIC-MODELS-001.currentStageR56. Full Linux/RF3 acceptance remains open.",
+      "allAcceptanceClosed": false,
+      "normalSimdOnly": true,
+      "scope": "Retained window identity, pending/enrollment quota, full late atomic rollback and persisted resource/tag policy SDK/MCP flows; original identities and cold owners preserved."
     }
   },
   "KL-079": {
@@ -61463,10 +61681,17 @@
       "src/KeyLoad.Core/Features/Messaging/Execution/Messaging.cs",
       "tests/KeyLoad.UnitTests/Features/Messaging/Cases/MessagingTests.cs",
       "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/SecurityAndQueryTests.cs",
-      "src/KeyLoad.Orleans/Features/Messaging/Execution/MultiLaneReceiveExecution.cs",
+      "src/KeyLoad.Clustering/Features/Messaging/Execution/MultiLaneReceiveExecution.cs",
       "tests/KeyLoad.UnitTests/Features/Messaging/Cases/MultiLaneReceiveWholeFlowTests.cs",
       "tests/KeyLoad.IntegrationTests/Features/Messaging/Cases/MultiLaneReceiveCancellationRf3Tests.cs"
-    ]
+    ],
+    "currentStageR56WholeTaskDevelopment": {
+      "sourceJoined": true,
+      "developmentRuntime": "Selected original Unit256/256 and recovery63/63 passed; exact task subset identities are in STAGE64-PUBLIC-MODELS-001.currentStageR56. Full Linux/RF3 acceptance remains open.",
+      "allAcceptanceClosed": false,
+      "normalSimdOnly": true,
+      "scope": "Impossible lease/version guards, pre-staging delivery counters, genuine Receive/ACK five-cut recovery, joined shared crash children and public ACK response-loss flows."
+    }
   },
   "KL-088": {
     "title": "Retry, DLQ, cancellation та expiry",

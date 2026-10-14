@@ -2,7 +2,7 @@
 param(
     [Parameter(Mandatory)][string] $Repository,
     [Parameter(Mandatory)][string] $EvidenceRoot,
-    [Parameter(Mandatory)][ValidateSet('KL-008','KL-011','KL-014','KL-015','KL-021','KL-027','KL-036','KL-033','KL-035','KL-029','KL-034','KL-042','KL-079','KL-065')][string] $Task,
+    [Parameter(Mandatory)][ValidateSet('KL-008','KL-011','KL-014','KL-015','KL-021','KL-027','KL-036','KL-033','KL-035','KL-029','KL-034','KL-042','KL-079','KL-065','KL-078','KL-087')][string] $Task,
     [Parameter(Mandatory)][ValidateSet('normal')][string] $Profile
 )
 Set-StrictMode -Version Latest
@@ -51,7 +51,11 @@ function Invoke-TaskChild([string] $Directory, [string] $Name, [string] $Executa
     Write-TaskOriginal (Join-Path $Directory ($Name + '.stderr.txt')) $result.stderr $false
     Write-TaskOriginal (Join-Path $Directory ($Name + '.process.json')) ([ordered]@{
         executable = $Executable; arguments = $Arguments; timeoutSeconds = $Timeout
-        environment = [ordered]@{ DOTNET_EnableHWIntrinsic = [Environment]::GetEnvironmentVariable('DOTNET_EnableHWIntrinsic') }
+        environment = [ordered]@{
+            DOTNET_EnableHWIntrinsic = [Environment]::GetEnvironmentVariable('DOTNET_EnableHWIntrinsic')
+            COMPlus_EnableHWIntrinsic = [Environment]::GetEnvironmentVariable('COMPlus_EnableHWIntrinsic')
+            DOTNET_EnableSIMD = [Environment]::GetEnvironmentVariable('DOTNET_EnableSIMD')
+            COMPlus_EnableSIMD = [Environment]::GetEnvironmentVariable('COMPlus_EnableSIMD') }
         settlementSeconds = 30; nativeResult = (ConvertTo-FcCoverageProcessEvidence $result) })
     $result
 }
@@ -250,6 +254,23 @@ $manifest = [ordered]@{ schemaVersion = 1; task = $Task; profile = $Profile
     sourceVerificationStderrPath = Join-Path $taskRoot 'source-verify.stderr.txt'
     sourceVerificationExitCode = $null; sourceVerificationProcessPath = Join-Path $taskRoot 'source-verify.process.json'
     selections = @() }
+if ($Task -ceq 'KL-078') {
+    if (-not [Runtime.InteropServices.RuntimeInformation]::IsOSPlatform([Runtime.InteropServices.OSPlatform]::Linux) -or
+        -not [Numerics.Vector]::IsHardwareAccelerated -or
+        [Runtime.InteropServices.RuntimeInformation]::ProcessArchitecture.ToString() -cnotin @('X64','Arm64')) {
+        throw 'KL-078 qualification requires a Linux caller with actual supported vector hardware.'
+    }
+    foreach ($name in @('DOTNET_EnableHWIntrinsic','COMPlus_EnableHWIntrinsic','DOTNET_EnableSIMD','COMPlus_EnableSIMD')) {
+        $value = [Environment]::GetEnvironmentVariable($name)
+        if ($null -ne $value -and $value -cne '1') { throw 'KL-078 cannot disable or reinterpret native SIMD.' }
+    }
+    $manifest.hardwareQualification = [ordered]@{
+        operatingSystem = [Runtime.InteropServices.RuntimeInformation]::OSDescription
+        processArchitecture = [Runtime.InteropServices.RuntimeInformation]::ProcessArchitecture.ToString()
+        runtime = [Runtime.InteropServices.RuntimeInformation]::FrameworkDescription
+        vectorHardwareAccelerated = [Numerics.Vector]::IsHardwareAccelerated
+        evidenceScope = 'Actual Linux task caller; native child image and original operations are separately verified' }
+}
 $inherited = [Environment]::GetEnvironmentVariable('DOTNET_EnableHWIntrinsic')
 $location = Get-Location
 try {

@@ -2721,16 +2721,40 @@
           ]
         },
         {
-          "selectionId": "unit-signed-heartbeat-support",
+          "selectionId": "unit-native-membership-support",
           "suite": "unit",
-          "filter": "/*/*/ReplicaMembershipAuthorityHeartbeatFlowTests/NativeSignedHeartbeatPreservesFullRowRejectsWrongCallerThenHealthyContinuation",
+          "filter": "/*/*/(NativeSixSiloMembershipReadinessTests)|(ReplicaMembershipAddressPinTests)/(ActualSixNativeSilosRefuseWrongNamesAndCancellationThenRepairAndFenceRestartedGeneration)|(NativeCallerAddressMatchesConfiguredVoterAndRejectsAnotherActualSilo)|(PreCancelledAdmissionLeavesNativeMembershipUnchangedThenIndependentResolutionSucceeds)|(TwelveConcurrentNativeResolutionCallsObserveOneCurrentFullAddress)",
           "cases": [
             {
-              "className": "KeyLoad.UnitTests.Features.ClusterRouting.ReplicaMembershipAuthorityHeartbeatFlowTests",
-              "nativeReportClassName": "KeyLoad.UnitTests.Features.ClusterRouting.ReplicaMembershipAuthorityHeartbeatFlowTests",
-              "methodName": "NativeSignedHeartbeatPreservesFullRowRejectsWrongCallerThenHealthyContinuation",
-              "instanceName": "NativeSignedHeartbeatPreservesFullRowRejectsWrongCallerThenHealthyContinuation",
-              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/ReplicaMembershipAuthorityHeartbeatFlowTests.cs",
+              "className": "KeyLoad.UnitTests.Features.ClusterRouting.NativeSixSiloMembershipReadinessTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.ClusterRouting.NativeSixSiloMembershipReadinessTests",
+              "methodName": "ActualSixNativeSilosRefuseWrongNamesAndCancellationThenRepairAndFenceRestartedGeneration",
+              "instanceName": "ActualSixNativeSilosRefuseWrongNamesAndCancellationThenRepairAndFenceRestartedGeneration",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/NativeSixSiloMembershipReadinessTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.ClusterRouting.ReplicaMembershipAddressPinTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.ClusterRouting.ReplicaMembershipAddressPinTests",
+              "methodName": "NativeCallerAddressMatchesConfiguredVoterAndRejectsAnotherActualSilo",
+              "instanceName": "NativeCallerAddressMatchesConfiguredVoterAndRejectsAnotherActualSilo",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/ReplicaMembershipAddressPinTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.ClusterRouting.ReplicaMembershipAddressPinTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.ClusterRouting.ReplicaMembershipAddressPinTests",
+              "methodName": "PreCancelledAdmissionLeavesNativeMembershipUnchangedThenIndependentResolutionSucceeds",
+              "instanceName": "PreCancelledAdmissionLeavesNativeMembershipUnchangedThenIndependentResolutionSucceeds",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/ReplicaMembershipAddressPinTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.ClusterRouting.ReplicaMembershipAddressPinTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.ClusterRouting.ReplicaMembershipAddressPinTests",
+              "methodName": "TwelveConcurrentNativeResolutionCallsObserveOneCurrentFullAddress",
+              "instanceName": "TwelveConcurrentNativeResolutionCallsObserveOneCurrentFullAddress",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/ReplicaMembershipAddressPinTests.cs",
               "parameterTypeFullNames": []
             }
           ]
@@ -3445,7 +3469,7 @@
               "className": "KeyLoad.RecoveryTests.ReplicaPersistenceTests",
               "nativeReportClassName": "KeyLoad.RecoveryTests.ReplicaPersistenceTests",
               "methodName": "SerializedReadBudgetAcceptsMaximumCommandAndRejectsAnOversizeSingleEntry",
-              "instanceName": "SerializedReadBudgetAcceptsMaximumCommandAndRejectsAnOversizeSingleEntry(Ж)",
+              "instanceName": "SerializedReadBudgetAcceptsMaximumCommandAndRejectsAnOversizeSingleEntry(\u0416)",
               "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaPersistenceTests.cs",
               "parameterTypeFullNames": [
                 "System.String"
@@ -6889,6 +6913,2487 @@
               "instanceName": "SharedAdmissionAndCancelledCallerPreserveCanonicalRowsThenHealthyReplayAndCold",
               "sourcePath": "tests/KeyLoad.UnitTests/Features/Authorization/Cases/GenerationVisibilityTests.cs",
               "parameterTypeFullNames": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "taskId": "KL-078",
+      "selections": [
+        {
+          "selectionId": "unit-complete-chunk-operations",
+          "suite": "unit",
+          "filter": "/*/*/(ChunkCorrectionIdentityTests)|(ChunkGenerationBoundTests)|(ChunkManifestCardinalityTests)|(ChunkManifestTagInventoryTests)|(ChunkMultiblockBoundaryWholeFlowTests)|(ChunkMultiblockPagedRetentionWholeFlowTests)|(ChunkMultiblockReadBudgetWholeFlowTests)|(ChunkSelectedBlockIntegrityTests)|(ChunkSelectedIntegrityTests)|(ChunkWatermarkGapTests)|(SampleChunkAutomaticSealTests)|(SampleChunkCanonicalLifecycleTests)|(SampleChunkCanonicalRollbackTests)|(SampleChunkCodecTests)|(SampleChunkCorrectionBoundTests)|(SampleChunkEnrolledCorruptionTests)|(SampleChunkExecutionPolicyTests)|(SampleChunkGoldenTests)|(SampleChunkMixedAtomicTests)|(SampleChunkOrderedCodecTests)|(SampleChunkPartialRetentionTests)|(SampleChunkPayloadContractTests)|(SampleChunkPendingBoundTests)|(SampleChunkRetentionWholeFlowTests)|(SampleChunkSnapshotArtifactTests)|(SampleChunkStoreFailureTests)|(SampleChunkStoreOracleTests)|(SampleChunkStoreReopenTests)|(SampleChunkWireTests)/*",
+          "cases": [
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.ChunkCorrectionIdentityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.ChunkCorrectionIdentityTests",
+              "methodName": "AcChunk008010011012SelectedCorrectionCannotDuplicateSealedBaseEventIdentity",
+              "instanceName": "AcChunk008010011012SelectedCorrectionCannotDuplicateSealedBaseEventIdentity",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/ChunkCorrectionIdentityTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.ChunkGenerationBoundTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.ChunkGenerationBoundTests",
+              "methodName": "AcChunk008010011SelectedGenerationCannotContainBaseSamplesNewerThanItsSourceWatermark",
+              "instanceName": "AcChunk008010011SelectedGenerationCannotContainBaseSamplesNewerThanItsSourceWatermark",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/ChunkGenerationBoundTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.ChunkManifestCardinalityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.ChunkManifestCardinalityTests",
+              "methodName": "AcChunk008010011012SelectedManifestCountMustEqualActualDecodedImmutableBaseRows",
+              "instanceName": "AcChunk008010011012SelectedManifestCountMustEqualActualDecodedImmutableBaseRows",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/ChunkManifestCardinalityTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.ChunkManifestTagInventoryTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.ChunkManifestTagInventoryTests",
+              "methodName": "AcChunk008010011012SelectedManifestMustDeclareActualImmutableBaseTagInventory",
+              "instanceName": "AcChunk008010011012SelectedManifestMustDeclareActualImmutableBaseTagInventory",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/ChunkManifestTagInventoryTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.ChunkMultiblockBoundaryWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.ChunkMultiblockBoundaryWholeFlowTests",
+              "methodName": "Actual257RecordGenerationRefusesSecondBlockThenExactRepairReplayAndTwoCold",
+              "instanceName": "Actual257RecordGenerationRefusesSecondBlockThenExactRepairReplayAndTwoCold(False)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/ChunkMultiblockBoundaryWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.ChunkMultiblockBoundaryWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.ChunkMultiblockBoundaryWholeFlowTests",
+              "methodName": "Actual257RecordGenerationRefusesSecondBlockThenExactRepairReplayAndTwoCold",
+              "instanceName": "Actual257RecordGenerationRefusesSecondBlockThenExactRepairReplayAndTwoCold(True)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/ChunkMultiblockBoundaryWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.ChunkMultiblockPagedRetentionWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.ChunkMultiblockPagedRetentionWholeFlowTests",
+              "methodName": "BoundedExpiryPagesHideFirstBlockPreserveSecondBlockThenRepairReplayAndTwoColdOwners",
+              "instanceName": "BoundedExpiryPagesHideFirstBlockPreserveSecondBlockThenRepairReplayAndTwoColdOwners",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/ChunkMultiblockPagedRetentionWholeFlowTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.ChunkMultiblockReadBudgetWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.ChunkMultiblockReadBudgetWholeFlowTests",
+              "methodName": "SelectedSecondBlockCumulativeBytesRefuseThenExactRepairReplayAndTwoColdOwners",
+              "instanceName": "SelectedSecondBlockCumulativeBytesRefuseThenExactRepairReplayAndTwoColdOwners",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/ChunkMultiblockReadBudgetWholeFlowTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.ChunkSelectedBlockIntegrityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.ChunkSelectedBlockIntegrityTests",
+              "methodName": "AcChunk008010011012SelectedImmutableBlockRefusesThenExactRepairReplayAndTwoColdCuts",
+              "instanceName": "AcChunk008010011012SelectedImmutableBlockRefusesThenExactRepairReplayAndTwoColdCuts(BlockDigest)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/ChunkSelectedBlockIntegrityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkCorruptionCut"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.ChunkSelectedBlockIntegrityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.ChunkSelectedBlockIntegrityTests",
+              "methodName": "AcChunk008010011012SelectedImmutableBlockRefusesThenExactRepairReplayAndTwoColdCuts",
+              "instanceName": "AcChunk008010011012SelectedImmutableBlockRefusesThenExactRepairReplayAndTwoColdCuts(MissingBlock)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/ChunkSelectedBlockIntegrityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkCorruptionCut"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.ChunkSelectedIntegrityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.ChunkSelectedIntegrityTests",
+              "methodName": "AcChunk010012SelectedManifestContradictionRefusesColdThenExactRepairReplayAndHealthyGenerationPersist",
+              "instanceName": "AcChunk010012SelectedManifestContradictionRefusesColdThenExactRepairReplayAndHealthyGenerationPersist(SourceSequence)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/ChunkSelectedIntegrityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.TimeSeries.ChunkSelectedIntegrityFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.ChunkSelectedIntegrityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.ChunkSelectedIntegrityTests",
+              "methodName": "AcChunk010012SelectedManifestContradictionRefusesColdThenExactRepairReplayAndHealthyGenerationPersist",
+              "instanceName": "AcChunk010012SelectedManifestContradictionRefusesColdThenExactRepairReplayAndHealthyGenerationPersist(WindowIdentity)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/ChunkSelectedIntegrityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.TimeSeries.ChunkSelectedIntegrityFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.ChunkSelectedIntegrityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.ChunkSelectedIntegrityTests",
+              "methodName": "AcChunk010012SelectedManifestContradictionRefusesColdThenExactRepairReplayAndHealthyGenerationPersist",
+              "instanceName": "AcChunk010012SelectedManifestContradictionRefusesColdThenExactRepairReplayAndHealthyGenerationPersist(WindowStart)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/ChunkSelectedIntegrityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.TimeSeries.ChunkSelectedIntegrityFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.ChunkWatermarkGapTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.ChunkWatermarkGapTests",
+              "methodName": "AcChunk007008010011OutsideWindowSourceGapsRemainHealthyAcrossMergeReplayAndTwoColdCuts",
+              "instanceName": "AcChunk007008010011OutsideWindowSourceGapsRemainHealthyAcrossMergeReplayAndTwoColdCuts",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/ChunkWatermarkGapTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkAutomaticSealTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkAutomaticSealTests",
+              "methodName": "AcChunk007009FullNativeBlockAutomaticallySealsThenCorrectionMergesWithoutRawRewrite",
+              "instanceName": "AcChunk007009FullNativeBlockAutomaticallySealsThenCorrectionMergesWithoutRawRewrite",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkAutomaticSealTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkCanonicalLifecycleTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkCanonicalLifecycleTests",
+              "methodName": "AcChunk007008009ExactOpenSealLateCorrectionMergeAndReceiptReplay",
+              "instanceName": "AcChunk007008009ExactOpenSealLateCorrectionMergeAndReceiptReplay",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkCanonicalLifecycleTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkCanonicalLifecycleTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkCanonicalLifecycleTests",
+              "methodName": "AcChunk010OriginalCancellationPreservesFullCutThenHealthyExactWindow",
+              "instanceName": "AcChunk010OriginalCancellationPreservesFullCutThenHealthyExactWindow",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkCanonicalLifecycleTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkCanonicalRollbackTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkCanonicalRollbackTests",
+              "methodName": "AcChunk007EnrollmentRejectsExistingRawRangeAndRetainsAllRowsBeforeHealthyEmptyWindow",
+              "instanceName": "AcChunk007EnrollmentRejectsExistingRawRangeAndRetainsAllRowsBeforeHealthyEmptyWindow",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkCanonicalRollbackTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkCanonicalRollbackTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkCanonicalRollbackTests",
+              "methodName": "AcChunk008012FailedWholeAtomicAppendAndSealRetainsOriginalOutcomeThenHealthy",
+              "instanceName": "AcChunk008012FailedWholeAtomicAppendAndSealRetainsOriginalOutcomeThenHealthy",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkCanonicalRollbackTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkCodecTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkCodecTests",
+              "methodName": "AcChunk001FixedAndSeededRowsRoundTripEveryPersistedFieldExactly",
+              "instanceName": "AcChunk001FixedAndSeededRowsRoundTripEveryPersistedFieldExactly",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkCodecTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkCodecTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkCodecTests",
+              "methodName": "AcChunk002TextOffsetsNegativeZeroAndRawFoldRemainExact",
+              "instanceName": "AcChunk002TextOffsetsNegativeZeroAndRawFoldRemainExact",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkCodecTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkCodecTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkCodecTests",
+              "methodName": "AcChunk002UnpairedSurrogateTagsUseExactUtf16Fallback",
+              "instanceName": "AcChunk002UnpairedSurrogateTagsUseExactUtf16Fallback",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkCodecTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkCodecTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkCodecTests",
+              "methodName": "AcChunk003CallerReadBudgetRejectsBeforeDecodeAndFollowingBudgetCanSucceed",
+              "instanceName": "AcChunk003CallerReadBudgetRejectsBeforeDecodeAndFollowingBudgetCanSucceed",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkCodecTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkCodecTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkCodecTests",
+              "methodName": "AcChunk003CancellationAndElapsedDeadlineFailWholeOperation",
+              "instanceName": "AcChunk003CancellationAndElapsedDeadlineFailWholeOperation",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkCodecTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkCodecTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkCodecTests",
+              "methodName": "AcChunk003EmptyAndExcessRecordCountsUseFrozenErrors",
+              "instanceName": "AcChunk003EmptyAndExcessRecordCountsUseFrozenErrors",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkCodecTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkCodecTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkCodecTests",
+              "methodName": "AcChunk003EmptyAndNullTextFieldsRejectAsValidation",
+              "instanceName": "AcChunk003EmptyAndNullTextFieldsRejectAsValidation",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkCodecTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkCodecTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkCodecTests",
+              "methodName": "AcChunk003InvalidInputRowsRejectAsValidation",
+              "instanceName": "AcChunk003InvalidInputRowsRejectAsValidation",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkCodecTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkCodecTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkCodecTests",
+              "methodName": "AcChunk003MaximumByteArgumentIsValidatedBeforeCodecWork",
+              "instanceName": "AcChunk003MaximumByteArgumentIsValidatedBeforeCodecWork",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkCodecTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkCodecTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkCodecTests",
+              "methodName": "AcChunk003NativeEnvelopeHonorsExactAndOneByteShortAdmission",
+              "instanceName": "AcChunk003NativeEnvelopeHonorsExactAndOneByteShortAdmission",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkCodecTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkCorrectionBoundTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkCorrectionBoundTests",
+              "methodName": "AcChunk008012ExactCorrectionCapRejectsOneOverThenActualMergeFreesCapacity",
+              "instanceName": "AcChunk008012ExactCorrectionCapRejectsOneOverThenActualMergeFreesCapacity",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkCorrectionBoundTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkEnrolledCorruptionTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkEnrolledCorruptionTests",
+              "methodName": "AcChunk010012EnrolledNativeCorruptionRefusesWholeReadThenExactRepairReceiptAndMergeAreHealthy",
+              "instanceName": "AcChunk010012EnrolledNativeCorruptionRefusesWholeReadThenExactRepairReceiptAndMergeAreHealthy(BlockDigest)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkEnrolledCorruptionTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkCorruptionCut"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkEnrolledCorruptionTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkEnrolledCorruptionTests",
+              "methodName": "AcChunk010012EnrolledNativeCorruptionRefusesWholeReadThenExactRepairReceiptAndMergeAreHealthy",
+              "instanceName": "AcChunk010012EnrolledNativeCorruptionRefusesWholeReadThenExactRepairReceiptAndMergeAreHealthy(CorrectionSequence)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkEnrolledCorruptionTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkCorruptionCut"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkEnrolledCorruptionTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkEnrolledCorruptionTests",
+              "methodName": "AcChunk010012EnrolledNativeCorruptionRefusesWholeReadThenExactRepairReceiptAndMergeAreHealthy",
+              "instanceName": "AcChunk010012EnrolledNativeCorruptionRefusesWholeReadThenExactRepairReceiptAndMergeAreHealthy(ManifestDigest)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkEnrolledCorruptionTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkCorruptionCut"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkEnrolledCorruptionTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkEnrolledCorruptionTests",
+              "methodName": "AcChunk010012EnrolledNativeCorruptionRefusesWholeReadThenExactRepairReceiptAndMergeAreHealthy",
+              "instanceName": "AcChunk010012EnrolledNativeCorruptionRefusesWholeReadThenExactRepairReceiptAndMergeAreHealthy(ManifestGeneration)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkEnrolledCorruptionTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkCorruptionCut"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkEnrolledCorruptionTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkEnrolledCorruptionTests",
+              "methodName": "AcChunk010012EnrolledNativeCorruptionRefusesWholeReadThenExactRepairReceiptAndMergeAreHealthy",
+              "instanceName": "AcChunk010012EnrolledNativeCorruptionRefusesWholeReadThenExactRepairReceiptAndMergeAreHealthy(ManifestVersion)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkEnrolledCorruptionTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkCorruptionCut"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkEnrolledCorruptionTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkEnrolledCorruptionTests",
+              "methodName": "AcChunk010012EnrolledNativeCorruptionRefusesWholeReadThenExactRepairReceiptAndMergeAreHealthy",
+              "instanceName": "AcChunk010012EnrolledNativeCorruptionRefusesWholeReadThenExactRepairReceiptAndMergeAreHealthy(MissingBlock)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkEnrolledCorruptionTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkCorruptionCut"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkEnrolledCorruptionTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkEnrolledCorruptionTests",
+              "methodName": "AcChunk010012EnrolledNativeCorruptionRefusesWholeReadThenExactRepairReceiptAndMergeAreHealthy",
+              "instanceName": "AcChunk010012EnrolledNativeCorruptionRefusesWholeReadThenExactRepairReceiptAndMergeAreHealthy(MissingCorrection)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkEnrolledCorruptionTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkCorruptionCut"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkEnrolledCorruptionTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkEnrolledCorruptionTests",
+              "methodName": "AcChunk010012EnrolledNativeCorruptionRefusesWholeReadThenExactRepairReceiptAndMergeAreHealthy",
+              "instanceName": "AcChunk010012EnrolledNativeCorruptionRefusesWholeReadThenExactRepairReceiptAndMergeAreHealthy(MissingManifest)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkEnrolledCorruptionTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkCorruptionCut"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkExecutionPolicyTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkExecutionPolicyTests",
+              "methodName": "ConfiguredSingleByteSlicesRetainCallerCancellationAndFollowingWholeRoundtripAsync",
+              "instanceName": "ConfiguredSingleByteSlicesRetainCallerCancellationAndFollowingWholeRoundtripAsync",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkExecutionPolicyTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkExecutionPolicyTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkExecutionPolicyTests",
+              "methodName": "ConfiguredSlicesPreserveNativeEnvelopeChecksumAndEveryDecodedFieldAsync",
+              "instanceName": "ConfiguredSlicesPreserveNativeEnvelopeChecksumAndEveryDecodedFieldAsync(1, 1)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkExecutionPolicyTests.cs",
+              "parameterTypeFullNames": [
+                "System.Int32",
+                "System.Int32"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkExecutionPolicyTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkExecutionPolicyTests",
+              "methodName": "ConfiguredSlicesPreserveNativeEnvelopeChecksumAndEveryDecodedFieldAsync",
+              "instanceName": "ConfiguredSlicesPreserveNativeEnvelopeChecksumAndEveryDecodedFieldAsync(1024, 1024)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkExecutionPolicyTests.cs",
+              "parameterTypeFullNames": [
+                "System.Int32",
+                "System.Int32"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkExecutionPolicyTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkExecutionPolicyTests",
+              "methodName": "ConfiguredSlicesPreserveNativeEnvelopeChecksumAndEveryDecodedFieldAsync",
+              "instanceName": "ConfiguredSlicesPreserveNativeEnvelopeChecksumAndEveryDecodedFieldAsync(3, 2)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkExecutionPolicyTests.cs",
+              "parameterTypeFullNames": [
+                "System.Int32",
+                "System.Int32"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkExecutionPolicyTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkExecutionPolicyTests",
+              "methodName": "ConfiguredSlicesPreserveNativeEnvelopeChecksumAndEveryDecodedFieldAsync",
+              "instanceName": "ConfiguredSlicesPreserveNativeEnvelopeChecksumAndEveryDecodedFieldAsync(65536, 16383)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkExecutionPolicyTests.cs",
+              "parameterTypeFullNames": [
+                "System.Int32",
+                "System.Int32"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkExecutionPolicyTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkExecutionPolicyTests",
+              "methodName": "InvalidSliceRejectsBeforeMalformedCodecInputAndPreservesBudgetAsync",
+              "instanceName": "InvalidSliceRejectsBeforeMalformedCodecInputAndPreservesBudgetAsync(-1, 16383)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkExecutionPolicyTests.cs",
+              "parameterTypeFullNames": [
+                "System.Int32",
+                "System.Int32"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkExecutionPolicyTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkExecutionPolicyTests",
+              "methodName": "InvalidSliceRejectsBeforeMalformedCodecInputAndPreservesBudgetAsync",
+              "instanceName": "InvalidSliceRejectsBeforeMalformedCodecInputAndPreservesBudgetAsync(0, 16383)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkExecutionPolicyTests.cs",
+              "parameterTypeFullNames": [
+                "System.Int32",
+                "System.Int32"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkExecutionPolicyTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkExecutionPolicyTests",
+              "methodName": "InvalidSliceRejectsBeforeMalformedCodecInputAndPreservesBudgetAsync",
+              "instanceName": "InvalidSliceRejectsBeforeMalformedCodecInputAndPreservesBudgetAsync(65536, -1)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkExecutionPolicyTests.cs",
+              "parameterTypeFullNames": [
+                "System.Int32",
+                "System.Int32"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkExecutionPolicyTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkExecutionPolicyTests",
+              "methodName": "InvalidSliceRejectsBeforeMalformedCodecInputAndPreservesBudgetAsync",
+              "instanceName": "InvalidSliceRejectsBeforeMalformedCodecInputAndPreservesBudgetAsync(65536, 0)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkExecutionPolicyTests.cs",
+              "parameterTypeFullNames": [
+                "System.Int32",
+                "System.Int32"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkExecutionPolicyTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkExecutionPolicyTests",
+              "methodName": "InvalidSliceRejectsBeforeMalformedCodecInputAndPreservesBudgetAsync",
+              "instanceName": "InvalidSliceRejectsBeforeMalformedCodecInputAndPreservesBudgetAsync(65536, 16384)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkExecutionPolicyTests.cs",
+              "parameterTypeFullNames": [
+                "System.Int32",
+                "System.Int32"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkExecutionPolicyTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkExecutionPolicyTests",
+              "methodName": "InvalidSliceRejectsBeforeMalformedCodecInputAndPreservesBudgetAsync",
+              "instanceName": "InvalidSliceRejectsBeforeMalformedCodecInputAndPreservesBudgetAsync(65537, 16383)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkExecutionPolicyTests.cs",
+              "parameterTypeFullNames": [
+                "System.Int32",
+                "System.Int32"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkGoldenTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkGoldenTests",
+              "methodName": "AcChunk004FrozenColumnsAndChecksumMatchIndependentOneRowFixture",
+              "instanceName": "AcChunk004FrozenColumnsAndChecksumMatchIndependentOneRowFixture",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkGoldenTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkMixedAtomicTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkMixedAtomicTests",
+              "methodName": "AcChunk008012DocumentAndChunkEffectsRollbackTogetherBeforeHealthyAtomicSeal",
+              "instanceName": "AcChunk008012DocumentAndChunkEffectsRollbackTogetherBeforeHealthyAtomicSeal",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkMixedAtomicTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkOrderedCodecTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkOrderedCodecTests",
+              "methodName": "AcChunk001010OrderedApplyAndObservedReaderPreserveOriginalNativeWireAndAllValueBits",
+              "instanceName": "AcChunk001010OrderedApplyAndObservedReaderPreserveOriginalNativeWireAndAllValueBits",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkOrderedCodecTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkPartialRetentionTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkPartialRetentionTests",
+              "methodName": "AcChunk008011012PartialFloorMergePreservesEncodedHistoryAndExactReplayAcrossTwoColdOwners",
+              "instanceName": "AcChunk008011012PartialFloorMergePreservesEncodedHistoryAndExactReplayAcrossTwoColdOwners",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkPartialRetentionTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkPayloadContractTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkPayloadContractTests",
+              "methodName": "AcChunk004PayloadAliasAndFieldIdsRemainFrozen",
+              "instanceName": "AcChunk004PayloadAliasAndFieldIdsRemainFrozen",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkPayloadContractTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkPendingBoundTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkPendingBoundTests",
+              "methodName": "AcChunk008009012SameSeriesPendingRefusalReplaysThenActualMergeFreesHealthyCorrection",
+              "instanceName": "AcChunk008009012SameSeriesPendingRefusalReplaysThenActualMergeFreesHealthyCorrection",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkPendingBoundTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkRetentionWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkRetentionWholeFlowTests",
+              "methodName": "AcChunk011012ActualRetentionFloorDropAndOriginalReceiptRemainFencedBeforeFreshWindow",
+              "instanceName": "AcChunk011012ActualRetentionFloorDropAndOriginalReceiptRemainFencedBeforeFreshWindow",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkRetentionWholeFlowTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkSnapshotArtifactTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkSnapshotArtifactTests",
+              "methodName": "AcChunk012OversizeArtifactRefusesBeforePublicationThenFullSnapshotAndCanonicalMergeRemainHealthy",
+              "instanceName": "AcChunk012OversizeArtifactRefusesBeforePublicationThenFullSnapshotAndCanonicalMergeRemainHealthy",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkSnapshotArtifactTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkStoreFailureTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkStoreFailureTests",
+              "methodName": "AcChunk003CancellationRejectsWholeCandidateWithoutChangingCanonicalState",
+              "instanceName": "AcChunk003CancellationRejectsWholeCandidateWithoutChangingCanonicalState",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkStoreFailureTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkStoreFailureTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkStoreFailureTests",
+              "methodName": "AcChunk003ExpiredWorkDeadlineRejectsWholeCandidateWithoutChangingCanonicalState",
+              "instanceName": "AcChunk003ExpiredWorkDeadlineRejectsWholeCandidateWithoutChangingCanonicalState",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkStoreFailureTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkStoreFailureTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkStoreFailureTests",
+              "methodName": "AcChunk003SmallerEncodedByteCeilingRejectsWholeCandidateWithoutChangingCanonicalState",
+              "instanceName": "AcChunk003SmallerEncodedByteCeilingRejectsWholeCandidateWithoutChangingCanonicalState",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkStoreFailureTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkStoreOracleTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkStoreOracleTests",
+              "methodName": "AcChunk002ChangedEventContentConflictsWithoutChangingSeriesAuthority",
+              "instanceName": "AcChunk002ChangedEventContentConflictsWithoutChangingSeriesAuthority",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkStoreOracleTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkStoreOracleTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkStoreOracleTests",
+              "methodName": "AcChunk002CodecRoundTripMatchesPersistedCutAndAllFourRawReaders",
+              "instanceName": "AcChunk002CodecRoundTripMatchesPersistedCutAndAllFourRawReaders",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkStoreOracleTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkStoreReopenTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkStoreReopenTests",
+              "methodName": "AcChunk005TransientCandidatePreservesPersistedAuthorityAndReadersAcrossReopen",
+              "instanceName": "AcChunk005TransientCandidatePreservesPersistedAuthorityAndReadersAcrossReopen",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkStoreReopenTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkWireTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkWireTests",
+              "methodName": "AcChunk004ChecksumMismatchAndUnsupportedChunkVersionHaveExactErrors",
+              "instanceName": "AcChunk004ChecksumMismatchAndUnsupportedChunkVersionHaveExactErrors",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkWireTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkWireTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkWireTests",
+              "methodName": "AcChunk004EmptySeriesEventAndTagTextRejectWithValidChecksum",
+              "instanceName": "AcChunk004EmptySeriesEventAndTagTextRejectWithValidChecksum",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkWireTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkWireTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkWireTests",
+              "methodName": "AcChunk004InvalidTimestampOffsetSequenceAndValueRejectWithValidChecksum",
+              "instanceName": "AcChunk004InvalidTimestampOffsetSequenceAndValueRejectWithValidChecksum",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkWireTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkWireTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkWireTests",
+              "methodName": "AcChunk004InvalidUtf8AndUnneededUtf16FallbackRejectWithValidChecksum",
+              "instanceName": "AcChunk004InvalidUtf8AndUnneededUtf16FallbackRejectWithValidChecksum",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkWireTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkWireTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkWireTests",
+              "methodName": "AcChunk004NativeEnvelopeTruncationTrailingBytesAndUnknownVersionFailClosed",
+              "instanceName": "AcChunk004NativeEnvelopeTruncationTrailingBytesAndUnknownVersionFailClosed",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkWireTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkWireTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkWireTests",
+              "methodName": "AcChunk004NonMinimalVarintAndTupleOrderRejectWithValidChecksum",
+              "instanceName": "AcChunk004NonMinimalVarintAndTupleOrderRejectWithValidChecksum",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkWireTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkWireTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkWireTests",
+              "methodName": "AcChunk004UnreferencedTagDictionaryEntryAndColumnTrailingBytesReject",
+              "instanceName": "AcChunk004UnreferencedTagDictionaryEntryAndColumnTrailingBytesReject",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleChunkWireTests.cs",
+              "parameterTypeFullNames": []
+            }
+          ]
+        },
+        {
+          "selectionId": "recovery-complete-chunk-operations",
+          "suite": "recovery",
+          "filter": "/*/*/(ChunkMultiblockProcessRecoveryTests)|(SampleChunkEarlyProcessRecoveryTests)|(SampleChunkProcessRecoveryTests)/*",
+          "cases": [
+            {
+              "className": "KeyLoad.RecoveryTests.Features.TimeSeries.ChunkMultiblockProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.TimeSeries.ChunkMultiblockProcessRecoveryTests",
+              "methodName": "TwoBlocksRecoverOriginalInterruptedSealOrMergeThenHealthyAndTwoColdOwners",
+              "instanceName": "TwoBlocksRecoverOriginalInterruptedSealOrMergeThenHealthyAndTwoColdOwners(False, JournalFlushed)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/TimeSeries/Cases/ChunkMultiblockProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean",
+                "KeyLoad.Storage.ZoneTree.CommitStage"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.TimeSeries.ChunkMultiblockProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.TimeSeries.ChunkMultiblockProcessRecoveryTests",
+              "methodName": "TwoBlocksRecoverOriginalInterruptedSealOrMergeThenHealthyAndTwoColdOwners",
+              "instanceName": "TwoBlocksRecoverOriginalInterruptedSealOrMergeThenHealthyAndTwoColdOwners(False, MutationApplied)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/TimeSeries/Cases/ChunkMultiblockProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean",
+                "KeyLoad.Storage.ZoneTree.CommitStage"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.TimeSeries.ChunkMultiblockProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.TimeSeries.ChunkMultiblockProcessRecoveryTests",
+              "methodName": "TwoBlocksRecoverOriginalInterruptedSealOrMergeThenHealthyAndTwoColdOwners",
+              "instanceName": "TwoBlocksRecoverOriginalInterruptedSealOrMergeThenHealthyAndTwoColdOwners(True, JournalFlushed)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/TimeSeries/Cases/ChunkMultiblockProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean",
+                "KeyLoad.Storage.ZoneTree.CommitStage"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.TimeSeries.ChunkMultiblockProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.TimeSeries.ChunkMultiblockProcessRecoveryTests",
+              "methodName": "TwoBlocksRecoverOriginalInterruptedSealOrMergeThenHealthyAndTwoColdOwners",
+              "instanceName": "TwoBlocksRecoverOriginalInterruptedSealOrMergeThenHealthyAndTwoColdOwners(True, MutationApplied)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/TimeSeries/Cases/ChunkMultiblockProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean",
+                "KeyLoad.Storage.ZoneTree.CommitStage"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.TimeSeries.SampleChunkEarlyProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.TimeSeries.SampleChunkEarlyProcessRecoveryTests",
+              "methodName": "AcChunk012JournalFlushedOpenAppendAndCorrectionRecoverCompleteLiteralThenColdHealthy",
+              "instanceName": "AcChunk012JournalFlushedOpenAppendAndCorrectionRecoverCompleteLiteralThenColdHealthy(Append)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/TimeSeries/Cases/SampleChunkEarlyProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.CrashHost.SampleChunkEarlyCut"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.TimeSeries.SampleChunkEarlyProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.TimeSeries.SampleChunkEarlyProcessRecoveryTests",
+              "methodName": "AcChunk012JournalFlushedOpenAppendAndCorrectionRecoverCompleteLiteralThenColdHealthy",
+              "instanceName": "AcChunk012JournalFlushedOpenAppendAndCorrectionRecoverCompleteLiteralThenColdHealthy(Correction)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/TimeSeries/Cases/SampleChunkEarlyProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.CrashHost.SampleChunkEarlyCut"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.TimeSeries.SampleChunkEarlyProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.TimeSeries.SampleChunkEarlyProcessRecoveryTests",
+              "methodName": "AcChunk012JournalFlushedOpenAppendAndCorrectionRecoverCompleteLiteralThenColdHealthy",
+              "instanceName": "AcChunk012JournalFlushedOpenAppendAndCorrectionRecoverCompleteLiteralThenColdHealthy(Open)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/TimeSeries/Cases/SampleChunkEarlyProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.CrashHost.SampleChunkEarlyCut"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.TimeSeries.SampleChunkProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.TimeSeries.SampleChunkProcessRecoveryTests",
+              "methodName": "AcChunk012JournalFlushedSealAndMergeRecoverFullGenerationThenColdHealthy",
+              "instanceName": "AcChunk012JournalFlushedSealAndMergeRecoverFullGenerationThenColdHealthy(False)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/TimeSeries/Cases/SampleChunkProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.TimeSeries.SampleChunkProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.TimeSeries.SampleChunkProcessRecoveryTests",
+              "methodName": "AcChunk012JournalFlushedSealAndMergeRecoverFullGenerationThenColdHealthy",
+              "instanceName": "AcChunk012JournalFlushedSealAndMergeRecoverFullGenerationThenColdHealthy(True)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/TimeSeries/Cases/SampleChunkProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
+            }
+          ]
+        },
+        {
+          "selectionId": "rf3-complete-chunk-operations",
+          "suite": "rf3",
+          "filter": "/*/*/(ChunkMultiblockPublicRf3Tests)|(SampleChunkJobRevocationRf3Tests)|(SampleChunkLifecycleRf3Tests)|(SampleChunkRetentionRollupRf3Tests)|(SampleChunkSchedulingRf3Tests)|(SampleChunkSubnormalRf3Tests)|(TimeSeriesRf3ReadTests)|(TimeSeriesResourceTagPolicyRf3Tests)/*",
+          "cases": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.TimeSeries.ChunkMultiblockPublicRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.TimeSeries.ChunkMultiblockPublicRf3Tests(ClusterFixture)",
+              "methodName": "IndependentlyAuthored257RowsCrossNativeBlocksThenPagedExpiryPolicyRepairReplayAndTwoCold",
+              "instanceName": "IndependentlyAuthored257RowsCrossNativeBlocksThenPagedExpiryPolicyRepairReplayAndTwoCold",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/TimeSeries/Cases/ChunkMultiblockPublicRf3Tests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.TimeSeries.SampleChunkJobRevocationRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.TimeSeries.SampleChunkJobRevocationRf3Tests",
+              "methodName": "AcChunk009012HeldNativeBackgroundCreatorRevocationThenFreshEpochMergeAndColdReplay",
+              "instanceName": "AcChunk009012HeldNativeBackgroundCreatorRevocationThenFreshEpochMergeAndColdReplay",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/TimeSeries/Cases/SampleChunkJobRevocationRf3Tests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.TimeSeries.SampleChunkLifecycleRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.TimeSeries.SampleChunkLifecycleRf3Tests(ClusterFixture)",
+              "methodName": "AcChunk007009011NativeBackgroundMergePreservesLiteralRowsReceiptsAndCurrentPolicy",
+              "instanceName": "AcChunk007009011NativeBackgroundMergePreservesLiteralRowsReceiptsAndCurrentPolicy",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/TimeSeries/Cases/SampleChunkLifecycleRf3Tests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.TimeSeries.SampleChunkRetentionRollupRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.TimeSeries.SampleChunkRetentionRollupRf3Tests(ClusterFixture)",
+              "methodName": "AcChunk011012EnrolledChunkRetentionRollupWatermarksRefusalsAndReceiptsRemainExactAfterCold",
+              "instanceName": "AcChunk011012EnrolledChunkRetentionRollupWatermarksRefusalsAndReceiptsRemainExactAfterCold",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/TimeSeries/Cases/SampleChunkRetentionRollupRf3Tests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.TimeSeries.SampleChunkSchedulingRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.TimeSeries.SampleChunkSchedulingRf3Tests",
+              "methodName": "AcChunk009012ActualProviderReturnedBeforeAdmissionAcknowledgementJoinsColdAndOriginalMerge",
+              "instanceName": "AcChunk009012ActualProviderReturnedBeforeAdmissionAcknowledgementJoinsColdAndOriginalMerge",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/TimeSeries/Cases/SampleChunkSchedulingRf3Tests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.TimeSeries.SampleChunkSchedulingRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.TimeSeries.SampleChunkSchedulingRf3Tests",
+              "methodName": "AcChunk009012ActualThirtyTwoChargedAdmissionsColdRefusalManualSettlementThenFreshHealthy",
+              "instanceName": "AcChunk009012ActualThirtyTwoChargedAdmissionsColdRefusalManualSettlementThenFreshHealthy",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/TimeSeries/Cases/SampleChunkSchedulingRf3Tests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.TimeSeries.SampleChunkSchedulingRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.TimeSeries.SampleChunkSchedulingRf3Tests",
+              "methodName": "AcChunk009012OriginalReturnedProviderAllSixSigkillNativeJobIdentityColdAndFreshHealthy",
+              "instanceName": "AcChunk009012OriginalReturnedProviderAllSixSigkillNativeJobIdentityColdAndFreshHealthy",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/TimeSeries/Cases/SampleChunkSchedulingRf3Tests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.TimeSeries.SampleChunkSubnormalRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.TimeSeries.SampleChunkSubnormalRf3Tests(ClusterFixture)",
+              "methodName": "AcSeriesPublicSubnormal001004SealMergeReplayAndTwoColdKeepExactPublicSamples",
+              "instanceName": "AcSeriesPublicSubnormal001004SealMergeReplayAndTwoColdKeepExactPublicSamples",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/TimeSeries/Cases/SampleChunkSubnormalRf3Tests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.TimeSeries.TimeSeriesResourceTagPolicyRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.TimeSeries.TimeSeriesResourceTagPolicyRf3Tests(ClusterFixture)",
+              "methodName": "CurrentResourceTagPolicyChangesProjectAndRestoreSameReaderAcrossReplayAndTwoColdCycles",
+              "instanceName": "CurrentResourceTagPolicyChangesProjectAndRestoreSameReaderAcrossReplayAndTwoColdCycles",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/TimeSeries/Cases/TimeSeriesResourceTagPolicyRf3Tests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.TimeSeries.TimeSeriesRf3ReadTests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.TimeSeries.TimeSeriesRf3ReadTests(ClusterFixture)",
+              "methodName": "AcSeries008LatestUsesTimestampThenSequenceAndReturnsTypedAbsence",
+              "instanceName": "AcSeries008LatestUsesTimestampThenSequenceAndReturnsTypedAbsence",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/TimeSeries/Cases/TimeSeriesRf3ReadTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.TimeSeries.TimeSeriesRf3ReadTests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.TimeSeries.TimeSeriesRf3ReadTests(ClusterFixture)",
+              "methodName": "AcSeries009AggregateMatchesIndependentRawOracleForOffsetsLateSamplesAndDeduplication",
+              "instanceName": "AcSeries009AggregateMatchesIndependentRawOracleForOffsetsLateSamplesAndDeduplication",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/TimeSeries/Cases/TimeSeriesRf3ReadTests.cs",
+              "parameterTypeFullNames": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "taskId": "KL-087",
+      "selections": [
+        {
+          "suite": "unit",
+          "selectionId": "claim-ack-unit",
+          "filter": "/*/*/(QueueLostResponseWholeFlowTests)|(QueueLeaseAuthorityWholeFlowTests)|(QueueLeaseReuseTests)|(QueueReadyAuthorityTests)|(QueueInvalidDeliveryActionTests)|(ReadyQueueRangeTests)|(QueueBodyAccountingTests)|(QueueAdmissionCancellationWholeFlowTests)|(QueueRetryLeaseRaceWholeTests)|(MultiLaneReceiveWholeFlowTests)|(MultiLaneReceiveBoundaryWholeFlowTests)|(MultiLaneConnectionOwnerWholeFlowTests)|(MessagingTests)|(QueueClaimVersionExhaustionTests)|(QueueDeliveryVersionExhaustionTests)/*",
+          "cases": [
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.MessagingTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.MessagingTests",
+              "methodName": "ExpiredWorkerCannotAckAfterReclaimAndAttemptsReachDeadLetter",
+              "instanceName": "ExpiredWorkerCannotAckAfterReclaimAndAttemptsReachDeadLetter",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/MessagingTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.MessagingTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.MessagingTests",
+              "methodName": "InboxEffectsAndAckAreAtomicAndReplayCannotApplyDifferentEffects",
+              "instanceName": "InboxEffectsAndAckAreAtomicAndReplayCannotApplyDifferentEffects",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/MessagingTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.MessagingTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.MessagingTests",
+              "methodName": "ProcessingReleasesInputQuotaAtomicallyAndFailureRestoresItsLease",
+              "instanceName": "ProcessingReleasesInputQuotaAtomicallyAndFailureRestoresItsLease",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/MessagingTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.MessagingTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.MessagingTests",
+              "methodName": "QueueQuotaFailureRollsBackProducerDocument",
+              "instanceName": "QueueQuotaFailureRollsBackProducerDocument",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/MessagingTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.MultiLaneConnectionOwnerWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.MultiLaneConnectionOwnerWholeFlowTests",
+              "methodName": "ParentAndSignedLeavesShareNativeOwnerReplayExactClaimsThenAckAndClose",
+              "instanceName": "ParentAndSignedLeavesShareNativeOwnerReplayExactClaimsThenAckAndClose",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/MultiLaneConnectionOwnerWholeFlowTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.MultiLaneReceiveBoundaryWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.MultiLaneReceiveBoundaryWholeFlowTests",
+              "methodName": "OriginalParentExpiryRetainsCommittedLaneAndUndispatchedSuffixWithHealthyFollowup",
+              "instanceName": "OriginalParentExpiryRetainsCommittedLaneAndUndispatchedSuffixWithHealthyFollowup",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/MultiLaneReceiveBoundaryWholeFlowTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.MultiLaneReceiveBoundaryWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.MultiLaneReceiveBoundaryWholeFlowTests",
+              "methodName": "SubmittedClaimReplyByteFailureIsUnknownAndNeverClaimsLaterLaneOrChangesOnReplay",
+              "instanceName": "SubmittedClaimReplyByteFailureIsUnknownAndNeverClaimsLaterLaneOrChangesOnReplay",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/MultiLaneReceiveBoundaryWholeFlowTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.MultiLaneReceiveWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.MultiLaneReceiveWholeFlowTests(RequestCqrsClusterFixture)",
+              "methodName": "DeniedMiddleLanePreservesItsMessageAndFollowingLaneCommitsWithExactRetry",
+              "instanceName": "DeniedMiddleLanePreservesItsMessageAndFollowingLaneCommitsWithExactRetry",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/MultiLaneReceiveWholeFlowTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.MultiLaneReceiveWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.MultiLaneReceiveWholeFlowTests(RequestCqrsClusterFixture)",
+              "methodName": "InvalidGroupFailsBeforeAnyClaimAndHealthyFollowingRequestSucceeds",
+              "instanceName": "InvalidGroupFailsBeforeAnyClaimAndHealthyFollowingRequestSucceeds(0)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/MultiLaneReceiveWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "System.Int32"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.MultiLaneReceiveWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.MultiLaneReceiveWholeFlowTests(RequestCqrsClusterFixture)",
+              "methodName": "InvalidGroupFailsBeforeAnyClaimAndHealthyFollowingRequestSucceeds",
+              "instanceName": "InvalidGroupFailsBeforeAnyClaimAndHealthyFollowingRequestSucceeds(1)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/MultiLaneReceiveWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "System.Int32"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.MultiLaneReceiveWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.MultiLaneReceiveWholeFlowTests(RequestCqrsClusterFixture)",
+              "methodName": "InvalidGroupFailsBeforeAnyClaimAndHealthyFollowingRequestSucceeds",
+              "instanceName": "InvalidGroupFailsBeforeAnyClaimAndHealthyFollowingRequestSucceeds(2)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/MultiLaneReceiveWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "System.Int32"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.MultiLaneReceiveWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.MultiLaneReceiveWholeFlowTests(RequestCqrsClusterFixture)",
+              "methodName": "InvalidGroupFailsBeforeAnyClaimAndHealthyFollowingRequestSucceeds",
+              "instanceName": "InvalidGroupFailsBeforeAnyClaimAndHealthyFollowingRequestSucceeds(3)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/MultiLaneReceiveWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "System.Int32"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.MultiLaneReceiveWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.MultiLaneReceiveWholeFlowTests(RequestCqrsClusterFixture)",
+              "methodName": "InvalidGroupFailsBeforeAnyClaimAndHealthyFollowingRequestSucceeds",
+              "instanceName": "InvalidGroupFailsBeforeAnyClaimAndHealthyFollowingRequestSucceeds(4)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/MultiLaneReceiveWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "System.Int32"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.MultiLaneReceiveWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.MultiLaneReceiveWholeFlowTests(RequestCqrsClusterFixture)",
+              "methodName": "InvalidGroupFailsBeforeAnyClaimAndHealthyFollowingRequestSucceeds",
+              "instanceName": "InvalidGroupFailsBeforeAnyClaimAndHealthyFollowingRequestSucceeds(5)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/MultiLaneReceiveWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "System.Int32"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.MultiLaneReceiveWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.MultiLaneReceiveWholeFlowTests(RequestCqrsClusterFixture)",
+              "methodName": "InvalidGroupFailsBeforeAnyClaimAndHealthyFollowingRequestSucceeds",
+              "instanceName": "InvalidGroupFailsBeforeAnyClaimAndHealthyFollowingRequestSucceeds(6)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/MultiLaneReceiveWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "System.Int32"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.MultiLaneReceiveWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.MultiLaneReceiveWholeFlowTests(RequestCqrsClusterFixture)",
+              "methodName": "InvalidGroupFailsBeforeAnyClaimAndHealthyFollowingRequestSucceeds",
+              "instanceName": "InvalidGroupFailsBeforeAnyClaimAndHealthyFollowingRequestSucceeds(7)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/MultiLaneReceiveWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "System.Int32"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.MultiLaneReceiveWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.MultiLaneReceiveWholeFlowTests(RequestCqrsClusterFixture)",
+              "methodName": "InvalidGroupFailsBeforeAnyClaimAndHealthyFollowingRequestSucceeds",
+              "instanceName": "InvalidGroupFailsBeforeAnyClaimAndHealthyFollowingRequestSucceeds(8)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/MultiLaneReceiveWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "System.Int32"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.MultiLaneReceiveWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.MultiLaneReceiveWholeFlowTests(RequestCqrsClusterFixture)",
+              "methodName": "PrecancelledGroupPreservesFullCanonicalStateAndHealthyFollowup",
+              "instanceName": "PrecancelledGroupPreservesFullCanonicalStateAndHealthyFollowup",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/MultiLaneReceiveWholeFlowTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.MultiLaneReceiveWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.MultiLaneReceiveWholeFlowTests(RequestCqrsClusterFixture)",
+              "methodName": "TwoCommittedLanesReplayExactlyWithoutNewEffectsAndAckHealthy",
+              "instanceName": "TwoCommittedLanesReplayExactlyWithoutNewEffectsAndAckHealthy",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/MultiLaneReceiveWholeFlowTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueAdmissionCancellationWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueAdmissionCancellationWholeFlowTests",
+              "methodName": "AcMsg001And002CancelledAdmissionHasNoPersistedEffectsAndSameIdIsHealthy",
+              "instanceName": "AcMsg001And002CancelledAdmissionHasNoPersistedEffectsAndSameIdIsHealthy(Processing)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueAdmissionCancellationWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.OperationKind"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueAdmissionCancellationWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueAdmissionCancellationWholeFlowTests",
+              "methodName": "AcMsg001And002CancelledAdmissionHasNoPersistedEffectsAndSameIdIsHealthy",
+              "instanceName": "AcMsg001And002CancelledAdmissionHasNoPersistedEffectsAndSameIdIsHealthy(Receive)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueAdmissionCancellationWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.OperationKind"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueBodyAccountingTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueBodyAccountingTests",
+              "methodName": "AcMp006_MissingAndMalformedStoredBodiesStillRejectThenRecover",
+              "instanceName": "AcMp006_MissingAndMalformedStoredBodiesStillRejectThenRecover(False)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueBodyAccountingTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueBodyAccountingTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueBodyAccountingTests",
+              "methodName": "AcMp006_MissingAndMalformedStoredBodiesStillRejectThenRecover",
+              "instanceName": "AcMp006_MissingAndMalformedStoredBodiesStillRejectThenRecover(True)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueBodyAccountingTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueBodyAccountingTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueBodyAccountingTests",
+              "methodName": "AcMp006_ScheduledExpiryAndMultipleClaimsKeepExactCountersAndFifo",
+              "instanceName": "AcMp006_ScheduledExpiryAndMultipleClaimsKeepExactCountersAndFifo",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueBodyAccountingTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueBodyAccountingTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueBodyAccountingTests",
+              "methodName": "AcMp006_StoredBytesDriveExactStoredAndInFlightQuotas",
+              "instanceName": "AcMp006_StoredBytesDriveExactStoredAndInFlightQuotas",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueBodyAccountingTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueClaimVersionExhaustionTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueClaimVersionExhaustionTests",
+              "methodName": "ExhaustedClaimRetainsOneBoundedFailureAndNoLeaseThenColdExactRowRepairRequiresNewIdentityAndHealthyWork",
+              "instanceName": "ExhaustedClaimRetainsOneBoundedFailureAndNoLeaseThenColdExactRowRepairRequiresNewIdentityAndHealthyWork(Attempts)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueClaimVersionExhaustionTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueClaimVersionExhaustion"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueClaimVersionExhaustionTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueClaimVersionExhaustionTests",
+              "methodName": "ExhaustedClaimRetainsOneBoundedFailureAndNoLeaseThenColdExactRowRepairRequiresNewIdentityAndHealthyWork",
+              "instanceName": "ExhaustedClaimRetainsOneBoundedFailureAndNoLeaseThenColdExactRowRepairRequiresNewIdentityAndHealthyWork(LeaseVersion)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueClaimVersionExhaustionTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueClaimVersionExhaustion"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueClaimVersionExhaustionTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueClaimVersionExhaustionTests",
+              "methodName": "ExhaustedClaimRetainsOneBoundedFailureAndNoLeaseThenColdExactRowRepairRequiresNewIdentityAndHealthyWork",
+              "instanceName": "ExhaustedClaimRetainsOneBoundedFailureAndNoLeaseThenColdExactRowRepairRequiresNewIdentityAndHealthyWork(StateVersion)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueClaimVersionExhaustionTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueClaimVersionExhaustion"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueDeliveryVersionExhaustionTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueDeliveryVersionExhaustionTests",
+              "methodName": "ValidMaximumLeaseRefusesSettlementWithoutWrappingThenColdFixtureRepairPreservesFailedIdentityAndFreshHealthyWork",
+              "instanceName": "ValidMaximumLeaseRefusesSettlementWithoutWrappingThenColdFixtureRepairPreservesFailedIdentityAndFreshHealthyWork(Ack)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueDeliveryVersionExhaustionTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.DeliveryAction"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueDeliveryVersionExhaustionTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueDeliveryVersionExhaustionTests",
+              "methodName": "ValidMaximumLeaseRefusesSettlementWithoutWrappingThenColdFixtureRepairPreservesFailedIdentityAndFreshHealthyWork",
+              "instanceName": "ValidMaximumLeaseRefusesSettlementWithoutWrappingThenColdFixtureRepairPreservesFailedIdentityAndFreshHealthyWork(Nack)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueDeliveryVersionExhaustionTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.DeliveryAction"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueDeliveryVersionExhaustionTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueDeliveryVersionExhaustionTests",
+              "methodName": "ValidMaximumLeaseRefusesSettlementWithoutWrappingThenColdFixtureRepairPreservesFailedIdentityAndFreshHealthyWork",
+              "instanceName": "ValidMaximumLeaseRefusesSettlementWithoutWrappingThenColdFixtureRepairPreservesFailedIdentityAndFreshHealthyWork(Renew)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueDeliveryVersionExhaustionTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.DeliveryAction"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueInvalidDeliveryActionTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueInvalidDeliveryActionTests",
+              "methodName": "UnsupportedNativeActionPreservesCurrentLeaseThenProcessingCommitsExactlyOnce",
+              "instanceName": "UnsupportedNativeActionPreservesCurrentLeaseThenProcessingCommitsExactlyOnce(Full, -1)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueInvalidDeliveryActionTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.QueueRetryJitter",
+                "System.Int32"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueInvalidDeliveryActionTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueInvalidDeliveryActionTests",
+              "methodName": "UnsupportedNativeActionPreservesCurrentLeaseThenProcessingCommitsExactlyOnce",
+              "instanceName": "UnsupportedNativeActionPreservesCurrentLeaseThenProcessingCommitsExactlyOnce(Full, 99)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueInvalidDeliveryActionTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.QueueRetryJitter",
+                "System.Int32"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueInvalidDeliveryActionTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueInvalidDeliveryActionTests",
+              "methodName": "UnsupportedNativeActionPreservesCurrentLeaseThenProcessingCommitsExactlyOnce",
+              "instanceName": "UnsupportedNativeActionPreservesCurrentLeaseThenProcessingCommitsExactlyOnce(None, -1)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueInvalidDeliveryActionTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.QueueRetryJitter",
+                "System.Int32"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueInvalidDeliveryActionTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueInvalidDeliveryActionTests",
+              "methodName": "UnsupportedNativeActionPreservesCurrentLeaseThenProcessingCommitsExactlyOnce",
+              "instanceName": "UnsupportedNativeActionPreservesCurrentLeaseThenProcessingCommitsExactlyOnce(None, 99)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueInvalidDeliveryActionTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.QueueRetryJitter",
+                "System.Int32"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "methodName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement",
+              "instanceName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement(Ack, ForeignBodyIdentity)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueLeaseAuthorityWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityOperation",
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "methodName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement",
+              "instanceName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement(Ack, ForeignMetadataIdentity)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueLeaseAuthorityWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityOperation",
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "methodName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement",
+              "instanceName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement(Ack, ForeignReference)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueLeaseAuthorityWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityOperation",
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "methodName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement",
+              "instanceName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement(Ack, MissingMetadataDeadline)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueLeaseAuthorityWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityOperation",
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "methodName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement",
+              "instanceName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement(Ack, MissingReference)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueLeaseAuthorityWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityOperation",
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "methodName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement",
+              "instanceName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement(Ack, NegativeAttempts)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueLeaseAuthorityWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityOperation",
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "methodName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement",
+              "instanceName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement(Ack, NegativeReadySequence)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueLeaseAuthorityWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityOperation",
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "methodName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement",
+              "instanceName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement(Ack, NegativeStateVersion)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueLeaseAuthorityWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityOperation",
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "methodName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement",
+              "instanceName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement(Ack, UnclaimedStateVersion)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueLeaseAuthorityWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityOperation",
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "methodName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement",
+              "instanceName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement(Ack, ZeroAttempts)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueLeaseAuthorityWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityOperation",
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "methodName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement",
+              "instanceName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement(Ack, ZeroReadySequence)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueLeaseAuthorityWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityOperation",
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "methodName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement",
+              "instanceName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement(Ack, ZeroStateVersion)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueLeaseAuthorityWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityOperation",
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "methodName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement",
+              "instanceName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement(Nack, ForeignBodyIdentity)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueLeaseAuthorityWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityOperation",
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "methodName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement",
+              "instanceName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement(Nack, ForeignMetadataIdentity)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueLeaseAuthorityWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityOperation",
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "methodName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement",
+              "instanceName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement(Nack, ForeignReference)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueLeaseAuthorityWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityOperation",
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "methodName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement",
+              "instanceName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement(Nack, MissingMetadataDeadline)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueLeaseAuthorityWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityOperation",
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "methodName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement",
+              "instanceName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement(Nack, MissingReference)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueLeaseAuthorityWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityOperation",
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "methodName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement",
+              "instanceName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement(Nack, NegativeAttempts)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueLeaseAuthorityWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityOperation",
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "methodName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement",
+              "instanceName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement(Nack, NegativeReadySequence)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueLeaseAuthorityWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityOperation",
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "methodName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement",
+              "instanceName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement(Nack, NegativeStateVersion)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueLeaseAuthorityWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityOperation",
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "methodName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement",
+              "instanceName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement(Nack, UnclaimedStateVersion)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueLeaseAuthorityWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityOperation",
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "methodName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement",
+              "instanceName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement(Nack, ZeroAttempts)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueLeaseAuthorityWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityOperation",
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "methodName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement",
+              "instanceName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement(Nack, ZeroReadySequence)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueLeaseAuthorityWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityOperation",
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "methodName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement",
+              "instanceName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement(Nack, ZeroStateVersion)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueLeaseAuthorityWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityOperation",
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "methodName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement",
+              "instanceName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement(Processing, ForeignBodyIdentity)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueLeaseAuthorityWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityOperation",
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "methodName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement",
+              "instanceName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement(Processing, ForeignMetadataIdentity)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueLeaseAuthorityWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityOperation",
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "methodName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement",
+              "instanceName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement(Processing, ForeignReference)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueLeaseAuthorityWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityOperation",
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "methodName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement",
+              "instanceName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement(Processing, MissingMetadataDeadline)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueLeaseAuthorityWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityOperation",
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "methodName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement",
+              "instanceName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement(Processing, MissingReference)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueLeaseAuthorityWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityOperation",
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "methodName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement",
+              "instanceName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement(Renew, ForeignBodyIdentity)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueLeaseAuthorityWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityOperation",
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "methodName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement",
+              "instanceName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement(Renew, ForeignMetadataIdentity)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueLeaseAuthorityWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityOperation",
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "methodName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement",
+              "instanceName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement(Renew, ForeignReference)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueLeaseAuthorityWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityOperation",
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "methodName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement",
+              "instanceName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement(Renew, MissingMetadataDeadline)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueLeaseAuthorityWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityOperation",
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "methodName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement",
+              "instanceName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement(Renew, MissingReference)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueLeaseAuthorityWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityOperation",
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "methodName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement",
+              "instanceName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement(Renew, NegativeAttempts)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueLeaseAuthorityWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityOperation",
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "methodName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement",
+              "instanceName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement(Renew, NegativeReadySequence)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueLeaseAuthorityWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityOperation",
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "methodName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement",
+              "instanceName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement(Renew, NegativeStateVersion)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueLeaseAuthorityWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityOperation",
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "methodName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement",
+              "instanceName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement(Renew, UnclaimedStateVersion)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueLeaseAuthorityWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityOperation",
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "methodName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement",
+              "instanceName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement(Renew, ZeroAttempts)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueLeaseAuthorityWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityOperation",
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "methodName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement",
+              "instanceName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement(Renew, ZeroReadySequence)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueLeaseAuthorityWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityOperation",
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityWholeFlowTests",
+              "methodName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement",
+              "instanceName": "CurrentLeaseRequiresExactRetainedAuthorityAcrossColdRepairOriginalAndHealthySettlement(Renew, ZeroStateVersion)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueLeaseAuthorityWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityOperation",
+                "KeyLoad.UnitTests.Features.Messaging.QueueLeaseAuthorityFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseReuseTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseReuseTests",
+              "methodName": "AcMp006_DirectResourceAndProcessingTokenErrorsKeepTheirOrder",
+              "instanceName": "AcMp006_DirectResourceAndProcessingTokenErrorsKeepTheirOrder",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueLeaseReuseTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseReuseTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseReuseTests",
+              "methodName": "AcMp006_ProcessingReusesLeaseAndReleasesQuotaBeforeEffects",
+              "instanceName": "AcMp006_ProcessingReusesLeaseAndReleasesQuotaBeforeEffects",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueLeaseReuseTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseReuseTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseReuseTests",
+              "methodName": "AcMp006_RenewForeignExpiredAndStaleTokensPreserveLeaseFencing",
+              "instanceName": "AcMp006_RenewForeignExpiredAndStaleTokensPreserveLeaseFencing",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueLeaseReuseTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueLostResponseWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueLostResponseWholeFlowTests",
+              "methodName": "AcMsg001ClaimAndAckResponsesReplayExactlyAcrossRealStoreReopen",
+              "instanceName": "AcMsg001ClaimAndAckResponsesReplayExactlyAcrossRealStoreReopen",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueLostResponseWholeFlowTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueLostResponseWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueLostResponseWholeFlowTests",
+              "methodName": "ExactLeaseExpiryRefusesAckAndRenewBeforeSweepThenColdReclaimFencesOldTokensAndHealthyReceiptReplays",
+              "instanceName": "ExactLeaseExpiryRefusesAckAndRenewBeforeSweepThenColdReclaimFencesOldTokensAndHealthyReceiptReplays",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueLostResponseWholeFlowTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "methodName": "NativeCounterAuthorityRefusesOriginalReceiveThenExactRepairTwoColdOwnersAndHealthyAck",
+              "instanceName": "NativeCounterAuthorityRefusesOriginalReceiveThenExactRepairTwoColdOwnersAndHealthyAck(ExcessInFlightBytes, False)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueReadyAuthorityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityFault",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "methodName": "NativeCounterAuthorityRefusesOriginalReceiveThenExactRepairTwoColdOwnersAndHealthyAck",
+              "instanceName": "NativeCounterAuthorityRefusesOriginalReceiveThenExactRepairTwoColdOwnersAndHealthyAck(ExcessInFlightBytes, True)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueReadyAuthorityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityFault",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "methodName": "NativeCounterAuthorityRefusesOriginalReceiveThenExactRepairTwoColdOwnersAndHealthyAck",
+              "instanceName": "NativeCounterAuthorityRefusesOriginalReceiveThenExactRepairTwoColdOwnersAndHealthyAck(ExcessInFlightMessages, False)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueReadyAuthorityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityFault",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "methodName": "NativeCounterAuthorityRefusesOriginalReceiveThenExactRepairTwoColdOwnersAndHealthyAck",
+              "instanceName": "NativeCounterAuthorityRefusesOriginalReceiveThenExactRepairTwoColdOwnersAndHealthyAck(ExcessInFlightMessages, True)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueReadyAuthorityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityFault",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "methodName": "NativeCounterAuthorityRefusesOriginalReceiveThenExactRepairTwoColdOwnersAndHealthyAck",
+              "instanceName": "NativeCounterAuthorityRefusesOriginalReceiveThenExactRepairTwoColdOwnersAndHealthyAck(InFlightBytesWithoutCount, False)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueReadyAuthorityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityFault",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "methodName": "NativeCounterAuthorityRefusesOriginalReceiveThenExactRepairTwoColdOwnersAndHealthyAck",
+              "instanceName": "NativeCounterAuthorityRefusesOriginalReceiveThenExactRepairTwoColdOwnersAndHealthyAck(InFlightBytesWithoutCount, True)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueReadyAuthorityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityFault",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "methodName": "NativeCounterAuthorityRefusesOriginalReceiveThenExactRepairTwoColdOwnersAndHealthyAck",
+              "instanceName": "NativeCounterAuthorityRefusesOriginalReceiveThenExactRepairTwoColdOwnersAndHealthyAck(InFlightCountWithoutBytes, False)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueReadyAuthorityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityFault",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "methodName": "NativeCounterAuthorityRefusesOriginalReceiveThenExactRepairTwoColdOwnersAndHealthyAck",
+              "instanceName": "NativeCounterAuthorityRefusesOriginalReceiveThenExactRepairTwoColdOwnersAndHealthyAck(InFlightCountWithoutBytes, True)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueReadyAuthorityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityFault",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "methodName": "NativeCounterAuthorityRefusesOriginalReceiveThenExactRepairTwoColdOwnersAndHealthyAck",
+              "instanceName": "NativeCounterAuthorityRefusesOriginalReceiveThenExactRepairTwoColdOwnersAndHealthyAck(NegativeInFlightBytes, False)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueReadyAuthorityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityFault",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "methodName": "NativeCounterAuthorityRefusesOriginalReceiveThenExactRepairTwoColdOwnersAndHealthyAck",
+              "instanceName": "NativeCounterAuthorityRefusesOriginalReceiveThenExactRepairTwoColdOwnersAndHealthyAck(NegativeInFlightBytes, True)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueReadyAuthorityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityFault",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "methodName": "NativeCounterAuthorityRefusesOriginalReceiveThenExactRepairTwoColdOwnersAndHealthyAck",
+              "instanceName": "NativeCounterAuthorityRefusesOriginalReceiveThenExactRepairTwoColdOwnersAndHealthyAck(NegativeInFlightMessages, False)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueReadyAuthorityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityFault",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "methodName": "NativeCounterAuthorityRefusesOriginalReceiveThenExactRepairTwoColdOwnersAndHealthyAck",
+              "instanceName": "NativeCounterAuthorityRefusesOriginalReceiveThenExactRepairTwoColdOwnersAndHealthyAck(NegativeInFlightMessages, True)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueReadyAuthorityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityFault",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "methodName": "NativeCounterAuthorityRefusesOriginalReceiveThenExactRepairTwoColdOwnersAndHealthyAck",
+              "instanceName": "NativeCounterAuthorityRefusesOriginalReceiveThenExactRepairTwoColdOwnersAndHealthyAck(NegativeOrderSequence, False)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueReadyAuthorityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityFault",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "methodName": "NativeCounterAuthorityRefusesOriginalReceiveThenExactRepairTwoColdOwnersAndHealthyAck",
+              "instanceName": "NativeCounterAuthorityRefusesOriginalReceiveThenExactRepairTwoColdOwnersAndHealthyAck(NegativeOrderSequence, True)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueReadyAuthorityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityFault",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "methodName": "NativeCounterAuthorityRefusesOriginalReceiveThenExactRepairTwoColdOwnersAndHealthyAck",
+              "instanceName": "NativeCounterAuthorityRefusesOriginalReceiveThenExactRepairTwoColdOwnersAndHealthyAck(NegativeReadySequence, False)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueReadyAuthorityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityFault",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "methodName": "NativeCounterAuthorityRefusesOriginalReceiveThenExactRepairTwoColdOwnersAndHealthyAck",
+              "instanceName": "NativeCounterAuthorityRefusesOriginalReceiveThenExactRepairTwoColdOwnersAndHealthyAck(NegativeReadySequence, True)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueReadyAuthorityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityFault",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "methodName": "NativeReadyAuthorityFaultPreservesOriginalCommittedEntryThenRecoversClaimOrExpiryAndHealthyProcessing",
+              "instanceName": "NativeReadyAuthorityFaultPreservesOriginalCommittedEntryThenRecoversClaimOrExpiryAndHealthyProcessing(BodyIdentity, False)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueReadyAuthorityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityFault",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "methodName": "NativeReadyAuthorityFaultPreservesOriginalCommittedEntryThenRecoversClaimOrExpiryAndHealthyProcessing",
+              "instanceName": "NativeReadyAuthorityFaultPreservesOriginalCommittedEntryThenRecoversClaimOrExpiryAndHealthyProcessing(BodyIdentity, True)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueReadyAuthorityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityFault",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "methodName": "NativeReadyAuthorityFaultPreservesOriginalCommittedEntryThenRecoversClaimOrExpiryAndHealthyProcessing",
+              "instanceName": "NativeReadyAuthorityFaultPreservesOriginalCommittedEntryThenRecoversClaimOrExpiryAndHealthyProcessing(MetadataIdentity, False)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueReadyAuthorityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityFault",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "methodName": "NativeReadyAuthorityFaultPreservesOriginalCommittedEntryThenRecoversClaimOrExpiryAndHealthyProcessing",
+              "instanceName": "NativeReadyAuthorityFaultPreservesOriginalCommittedEntryThenRecoversClaimOrExpiryAndHealthyProcessing(MetadataIdentity, True)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueReadyAuthorityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityFault",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "methodName": "NativeReadyAuthorityFaultPreservesOriginalCommittedEntryThenRecoversClaimOrExpiryAndHealthyProcessing",
+              "instanceName": "NativeReadyAuthorityFaultPreservesOriginalCommittedEntryThenRecoversClaimOrExpiryAndHealthyProcessing(ReadySequence, False)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueReadyAuthorityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityFault",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "methodName": "NativeReadyAuthorityFaultPreservesOriginalCommittedEntryThenRecoversClaimOrExpiryAndHealthyProcessing",
+              "instanceName": "NativeReadyAuthorityFaultPreservesOriginalCommittedEntryThenRecoversClaimOrExpiryAndHealthyProcessing(ReadySequence, True)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueReadyAuthorityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityFault",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "methodName": "NativeReadyAuthorityFaultPreservesOriginalCommittedEntryThenRecoversClaimOrExpiryAndHealthyProcessing",
+              "instanceName": "NativeReadyAuthorityFaultPreservesOriginalCommittedEntryThenRecoversClaimOrExpiryAndHealthyProcessing(ScheduledState, False)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueReadyAuthorityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityFault",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "methodName": "NativeReadyAuthorityFaultPreservesOriginalCommittedEntryThenRecoversClaimOrExpiryAndHealthyProcessing",
+              "instanceName": "NativeReadyAuthorityFaultPreservesOriginalCommittedEntryThenRecoversClaimOrExpiryAndHealthyProcessing(ScheduledState, True)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueReadyAuthorityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityFault",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "methodName": "NativeReadyNumericAuthorityRefusesOriginalClaimOrExpiryThenExactRepairTwoColdOwnersAndHealthyAck",
+              "instanceName": "NativeReadyNumericAuthorityRefusesOriginalClaimOrExpiryThenExactRepairTwoColdOwnersAndHealthyAck(NegativeAttempts, False)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueReadyAuthorityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityFault",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "methodName": "NativeReadyNumericAuthorityRefusesOriginalClaimOrExpiryThenExactRepairTwoColdOwnersAndHealthyAck",
+              "instanceName": "NativeReadyNumericAuthorityRefusesOriginalClaimOrExpiryThenExactRepairTwoColdOwnersAndHealthyAck(NegativeAttempts, True)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueReadyAuthorityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityFault",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "methodName": "NativeReadyNumericAuthorityRefusesOriginalClaimOrExpiryThenExactRepairTwoColdOwnersAndHealthyAck",
+              "instanceName": "NativeReadyNumericAuthorityRefusesOriginalClaimOrExpiryThenExactRepairTwoColdOwnersAndHealthyAck(NegativeLeaseVersion, False)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueReadyAuthorityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityFault",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "methodName": "NativeReadyNumericAuthorityRefusesOriginalClaimOrExpiryThenExactRepairTwoColdOwnersAndHealthyAck",
+              "instanceName": "NativeReadyNumericAuthorityRefusesOriginalClaimOrExpiryThenExactRepairTwoColdOwnersAndHealthyAck(NegativeLeaseVersion, True)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueReadyAuthorityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityFault",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "methodName": "NativeReadyNumericAuthorityRefusesOriginalClaimOrExpiryThenExactRepairTwoColdOwnersAndHealthyAck",
+              "instanceName": "NativeReadyNumericAuthorityRefusesOriginalClaimOrExpiryThenExactRepairTwoColdOwnersAndHealthyAck(NonPositiveDeliveryGeneration, False)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueReadyAuthorityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityFault",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "methodName": "NativeReadyNumericAuthorityRefusesOriginalClaimOrExpiryThenExactRepairTwoColdOwnersAndHealthyAck",
+              "instanceName": "NativeReadyNumericAuthorityRefusesOriginalClaimOrExpiryThenExactRepairTwoColdOwnersAndHealthyAck(NonPositiveDeliveryGeneration, True)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueReadyAuthorityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityFault",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "methodName": "NativeReadyNumericAuthorityRefusesOriginalClaimOrExpiryThenExactRepairTwoColdOwnersAndHealthyAck",
+              "instanceName": "NativeReadyNumericAuthorityRefusesOriginalClaimOrExpiryThenExactRepairTwoColdOwnersAndHealthyAck(NonPositiveStateVersion, False)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueReadyAuthorityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityFault",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityTests",
+              "methodName": "NativeReadyNumericAuthorityRefusesOriginalClaimOrExpiryThenExactRepairTwoColdOwnersAndHealthyAck",
+              "instanceName": "NativeReadyNumericAuthorityRefusesOriginalClaimOrExpiryThenExactRepairTwoColdOwnersAndHealthyAck(NonPositiveStateVersion, True)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueReadyAuthorityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Messaging.QueueReadyAuthorityFault",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueRetryLeaseRaceWholeTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueRetryLeaseRaceWholeTests",
+              "methodName": "RenewBeforeExpiryOrReclaimBeforeRenewRetainsFullStateAndColdContinuation",
+              "instanceName": "RenewBeforeExpiryOrReclaimBeforeRenewRetainsFullStateAndColdContinuation(False)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueRetryLeaseRaceWholeTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.QueueRetryLeaseRaceWholeTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueRetryLeaseRaceWholeTests",
+              "methodName": "RenewBeforeExpiryOrReclaimBeforeRenewRetainsFullStateAndColdContinuation",
+              "instanceName": "RenewBeforeExpiryOrReclaimBeforeRenewRetainsFullStateAndColdContinuation(True)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueRetryLeaseRaceWholeTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.ReadyQueueRangeTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.ReadyQueueRangeTests",
+              "methodName": "AcMp006ExpiredReadyScanHonorsTheFixed256ExaminedEntryCeiling",
+              "instanceName": "AcMp006ExpiredReadyScanHonorsTheFixed256ExaminedEntryCeiling",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/ReadyQueueRangeTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.ReadyQueueRangeTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.ReadyQueueRangeTests",
+              "methodName": "AcMp006SingleMessageReceiveStopsAtFirstReadyRecordAndKeepsFifo",
+              "instanceName": "AcMp006SingleMessageReceiveStopsAtFirstReadyRecordAndKeepsFifo",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/ReadyQueueRangeTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Messaging.ReadyQueueRangeTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.ReadyQueueRangeTests",
+              "methodName": "AcMp006SingleReceiveSkipsExpiredReadyRecordBeforeFirstLiveDelivery",
+              "instanceName": "AcMp006SingleReceiveSkipsExpiredReadyRecordBeforeFirstLiveDelivery",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/ReadyQueueRangeTests.cs",
+              "parameterTypeFullNames": []
+            }
+          ]
+        },
+        {
+          "suite": "recovery",
+          "selectionId": "claim-ack-recovery",
+          "filter": "/*/*/(QueueClaimAckProcessRecoveryTests)|(QueueLeaseAuthorityProcessRecoveryTests)|(QueueOrderedRetryProcessRecoveryTests)|(QueueLifecycleProcessRecoveryTests)/*",
+          "cases": [
+            {
+              "className": "KeyLoad.RecoveryTests.Features.Messaging.QueueClaimAckProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.Messaging.QueueClaimAckProcessRecoveryTests",
+              "methodName": "ClaimAndAckProcessKillRecoversOneCompleteCutThenOriginalOutcomeReplayAndHealthyColdWork",
+              "instanceName": "ClaimAndAckProcessKillRecoversOneCompleteCutThenOriginalOutcomeReplayAndHealthyColdWork(False, ApplyCompleted)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/Messaging/Cases/QueueClaimAckProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean",
+                "KeyLoad.Storage.ZoneTree.CommitStage"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.Messaging.QueueClaimAckProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.Messaging.QueueClaimAckProcessRecoveryTests",
+              "methodName": "ClaimAndAckProcessKillRecoversOneCompleteCutThenOriginalOutcomeReplayAndHealthyColdWork",
+              "instanceName": "ClaimAndAckProcessKillRecoversOneCompleteCutThenOriginalOutcomeReplayAndHealthyColdWork(False, HeaderWritten)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/Messaging/Cases/QueueClaimAckProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean",
+                "KeyLoad.Storage.ZoneTree.CommitStage"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.Messaging.QueueClaimAckProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.Messaging.QueueClaimAckProcessRecoveryTests",
+              "methodName": "ClaimAndAckProcessKillRecoversOneCompleteCutThenOriginalOutcomeReplayAndHealthyColdWork",
+              "instanceName": "ClaimAndAckProcessKillRecoversOneCompleteCutThenOriginalOutcomeReplayAndHealthyColdWork(False, JournalFlushed)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/Messaging/Cases/QueueClaimAckProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean",
+                "KeyLoad.Storage.ZoneTree.CommitStage"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.Messaging.QueueClaimAckProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.Messaging.QueueClaimAckProcessRecoveryTests",
+              "methodName": "ClaimAndAckProcessKillRecoversOneCompleteCutThenOriginalOutcomeReplayAndHealthyColdWork",
+              "instanceName": "ClaimAndAckProcessKillRecoversOneCompleteCutThenOriginalOutcomeReplayAndHealthyColdWork(False, MutationApplied)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/Messaging/Cases/QueueClaimAckProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean",
+                "KeyLoad.Storage.ZoneTree.CommitStage"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.Messaging.QueueClaimAckProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.Messaging.QueueClaimAckProcessRecoveryTests",
+              "methodName": "ClaimAndAckProcessKillRecoversOneCompleteCutThenOriginalOutcomeReplayAndHealthyColdWork",
+              "instanceName": "ClaimAndAckProcessKillRecoversOneCompleteCutThenOriginalOutcomeReplayAndHealthyColdWork(False, PayloadWritten)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/Messaging/Cases/QueueClaimAckProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean",
+                "KeyLoad.Storage.ZoneTree.CommitStage"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.Messaging.QueueClaimAckProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.Messaging.QueueClaimAckProcessRecoveryTests",
+              "methodName": "ClaimAndAckProcessKillRecoversOneCompleteCutThenOriginalOutcomeReplayAndHealthyColdWork",
+              "instanceName": "ClaimAndAckProcessKillRecoversOneCompleteCutThenOriginalOutcomeReplayAndHealthyColdWork(True, ApplyCompleted)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/Messaging/Cases/QueueClaimAckProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean",
+                "KeyLoad.Storage.ZoneTree.CommitStage"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.Messaging.QueueClaimAckProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.Messaging.QueueClaimAckProcessRecoveryTests",
+              "methodName": "ClaimAndAckProcessKillRecoversOneCompleteCutThenOriginalOutcomeReplayAndHealthyColdWork",
+              "instanceName": "ClaimAndAckProcessKillRecoversOneCompleteCutThenOriginalOutcomeReplayAndHealthyColdWork(True, HeaderWritten)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/Messaging/Cases/QueueClaimAckProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean",
+                "KeyLoad.Storage.ZoneTree.CommitStage"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.Messaging.QueueClaimAckProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.Messaging.QueueClaimAckProcessRecoveryTests",
+              "methodName": "ClaimAndAckProcessKillRecoversOneCompleteCutThenOriginalOutcomeReplayAndHealthyColdWork",
+              "instanceName": "ClaimAndAckProcessKillRecoversOneCompleteCutThenOriginalOutcomeReplayAndHealthyColdWork(True, JournalFlushed)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/Messaging/Cases/QueueClaimAckProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean",
+                "KeyLoad.Storage.ZoneTree.CommitStage"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.Messaging.QueueClaimAckProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.Messaging.QueueClaimAckProcessRecoveryTests",
+              "methodName": "ClaimAndAckProcessKillRecoversOneCompleteCutThenOriginalOutcomeReplayAndHealthyColdWork",
+              "instanceName": "ClaimAndAckProcessKillRecoversOneCompleteCutThenOriginalOutcomeReplayAndHealthyColdWork(True, MutationApplied)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/Messaging/Cases/QueueClaimAckProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean",
+                "KeyLoad.Storage.ZoneTree.CommitStage"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.Messaging.QueueClaimAckProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.Messaging.QueueClaimAckProcessRecoveryTests",
+              "methodName": "ClaimAndAckProcessKillRecoversOneCompleteCutThenOriginalOutcomeReplayAndHealthyColdWork",
+              "instanceName": "ClaimAndAckProcessKillRecoversOneCompleteCutThenOriginalOutcomeReplayAndHealthyColdWork(True, PayloadWritten)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/Messaging/Cases/QueueClaimAckProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean",
+                "KeyLoad.Storage.ZoneTree.CommitStage"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.Messaging.QueueLeaseAuthorityProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.Messaging.QueueLeaseAuthorityProcessRecoveryTests",
+              "methodName": "StoppedProcessOriginalNackRefusesSelectedLeaseFaultThenColdRepairReplayAndHealthyWork",
+              "instanceName": "StoppedProcessOriginalNackRefusesSelectedLeaseFaultThenColdRepairReplayAndHealthyWork(False)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/Messaging/Cases/QueueLeaseAuthorityProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.Messaging.QueueLeaseAuthorityProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.Messaging.QueueLeaseAuthorityProcessRecoveryTests",
+              "methodName": "StoppedProcessOriginalNackRefusesSelectedLeaseFaultThenColdRepairReplayAndHealthyWork",
+              "instanceName": "StoppedProcessOriginalNackRefusesSelectedLeaseFaultThenColdRepairReplayAndHealthyWork(True)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/Messaging/Cases/QueueLeaseAuthorityProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.Messaging.QueueLifecycleProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.Messaging.QueueLifecycleProcessRecoveryTests",
+              "methodName": "CancelParkRedriveProcessKillHasOneCompleteNativeCutAndSameIdHealthyContinuation",
+              "instanceName": "CancelParkRedriveProcessKillHasOneCompleteNativeCutAndSameIdHealthyContinuation(ApplyCompleted)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/Messaging/Cases/QueueLifecycleProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Storage.ZoneTree.CommitStage"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.Messaging.QueueLifecycleProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.Messaging.QueueLifecycleProcessRecoveryTests",
+              "methodName": "CancelParkRedriveProcessKillHasOneCompleteNativeCutAndSameIdHealthyContinuation",
+              "instanceName": "CancelParkRedriveProcessKillHasOneCompleteNativeCutAndSameIdHealthyContinuation(HeaderWritten)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/Messaging/Cases/QueueLifecycleProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Storage.ZoneTree.CommitStage"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.Messaging.QueueLifecycleProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.Messaging.QueueLifecycleProcessRecoveryTests",
+              "methodName": "CancelParkRedriveProcessKillHasOneCompleteNativeCutAndSameIdHealthyContinuation",
+              "instanceName": "CancelParkRedriveProcessKillHasOneCompleteNativeCutAndSameIdHealthyContinuation(JournalFlushed)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/Messaging/Cases/QueueLifecycleProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Storage.ZoneTree.CommitStage"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.Messaging.QueueLifecycleProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.Messaging.QueueLifecycleProcessRecoveryTests",
+              "methodName": "CancelParkRedriveProcessKillHasOneCompleteNativeCutAndSameIdHealthyContinuation",
+              "instanceName": "CancelParkRedriveProcessKillHasOneCompleteNativeCutAndSameIdHealthyContinuation(MutationApplied)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/Messaging/Cases/QueueLifecycleProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Storage.ZoneTree.CommitStage"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.Messaging.QueueLifecycleProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.Messaging.QueueLifecycleProcessRecoveryTests",
+              "methodName": "CancelParkRedriveProcessKillHasOneCompleteNativeCutAndSameIdHealthyContinuation",
+              "instanceName": "CancelParkRedriveProcessKillHasOneCompleteNativeCutAndSameIdHealthyContinuation(PayloadWritten)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/Messaging/Cases/QueueLifecycleProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Storage.ZoneTree.CommitStage"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.Messaging.QueueOrderedRetryProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.Messaging.QueueOrderedRetryProcessRecoveryTests",
+              "methodName": "StrictHeadSignedRetryProcessKillRetainsOneCompleteCutAndOriginalReceiptThroughHealthyColdContinuation",
+              "instanceName": "StrictHeadSignedRetryProcessKillRetainsOneCompleteCutAndOriginalReceiptThroughHealthyColdContinuation(ApplyCompleted)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/Messaging/Cases/QueueOrderedRetryProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Storage.ZoneTree.CommitStage"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.Messaging.QueueOrderedRetryProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.Messaging.QueueOrderedRetryProcessRecoveryTests",
+              "methodName": "StrictHeadSignedRetryProcessKillRetainsOneCompleteCutAndOriginalReceiptThroughHealthyColdContinuation",
+              "instanceName": "StrictHeadSignedRetryProcessKillRetainsOneCompleteCutAndOriginalReceiptThroughHealthyColdContinuation(HeaderWritten)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/Messaging/Cases/QueueOrderedRetryProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Storage.ZoneTree.CommitStage"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.Messaging.QueueOrderedRetryProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.Messaging.QueueOrderedRetryProcessRecoveryTests",
+              "methodName": "StrictHeadSignedRetryProcessKillRetainsOneCompleteCutAndOriginalReceiptThroughHealthyColdContinuation",
+              "instanceName": "StrictHeadSignedRetryProcessKillRetainsOneCompleteCutAndOriginalReceiptThroughHealthyColdContinuation(JournalFlushed)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/Messaging/Cases/QueueOrderedRetryProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Storage.ZoneTree.CommitStage"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.Messaging.QueueOrderedRetryProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.Messaging.QueueOrderedRetryProcessRecoveryTests",
+              "methodName": "StrictHeadSignedRetryProcessKillRetainsOneCompleteCutAndOriginalReceiptThroughHealthyColdContinuation",
+              "instanceName": "StrictHeadSignedRetryProcessKillRetainsOneCompleteCutAndOriginalReceiptThroughHealthyColdContinuation(MutationApplied)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/Messaging/Cases/QueueOrderedRetryProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Storage.ZoneTree.CommitStage"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.Messaging.QueueOrderedRetryProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.Messaging.QueueOrderedRetryProcessRecoveryTests",
+              "methodName": "StrictHeadSignedRetryProcessKillRetainsOneCompleteCutAndOriginalReceiptThroughHealthyColdContinuation",
+              "instanceName": "StrictHeadSignedRetryProcessKillRetainsOneCompleteCutAndOriginalReceiptThroughHealthyColdContinuation(PayloadWritten)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/Messaging/Cases/QueueOrderedRetryProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Storage.ZoneTree.CommitStage"
+              ]
+            }
+          ]
+        },
+        {
+          "suite": "rf3",
+          "selectionId": "claim-ack-rf3",
+          "filter": "/*/*/(QueueAckResponseLossRf3Tests)|(QueueLeaseFencingRf3Tests)|(MultiLaneReceiveRf3Tests)|(MultiLaneReceiveCancellationRf3Tests)|(QueueLifecyclePublicRf3Tests)/*",
+          "cases": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.Messaging.MultiLaneReceiveCancellationRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.Messaging.MultiLaneReceiveCancellationRf3Tests",
+              "methodName": "OfficialMcpCancellationAfterFirstCommittedClaimReconcilesOriginalLaneIds",
+              "instanceName": "OfficialMcpCancellationAfterFirstCommittedClaimReconcilesOriginalLaneIds",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/Messaging/Cases/MultiLaneReceiveCancellationRf3Tests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.Messaging.MultiLaneReceiveCancellationRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.Messaging.MultiLaneReceiveCancellationRf3Tests",
+              "methodName": "SdkCancellationAfterFirstCommittedClaimReconcilesOriginalLaneIds",
+              "instanceName": "SdkCancellationAfterFirstCommittedClaimReconcilesOriginalLaneIds",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/Messaging/Cases/MultiLaneReceiveCancellationRf3Tests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.Messaging.MultiLaneReceiveRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.Messaging.MultiLaneReceiveRf3Tests(ClusterFixture)",
+              "methodName": "ThreeLanesExposeExactPartialOutcomesOnFourPublicPathsAndHealthyAck",
+              "instanceName": "ThreeLanesExposeExactPartialOutcomesOnFourPublicPathsAndHealthyAck",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/Messaging/Cases/MultiLaneReceiveRf3Tests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.Messaging.QueueAckResponseLossRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.Messaging.QueueAckResponseLossRf3Tests",
+              "methodName": "CommittedAckCallerInterruptionReconcilesOriginalReceiptWithoutSecondEffectThenHealthyDelivery",
+              "instanceName": "CommittedAckCallerInterruptionReconcilesOriginalReceiptWithoutSecondEffectThenHealthyDelivery(False)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/Messaging/Cases/QueueAckResponseLossRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.Messaging.QueueAckResponseLossRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.Messaging.QueueAckResponseLossRf3Tests",
+              "methodName": "CommittedAckCallerInterruptionReconcilesOriginalReceiptWithoutSecondEffectThenHealthyDelivery",
+              "instanceName": "CommittedAckCallerInterruptionReconcilesOriginalReceiptWithoutSecondEffectThenHealthyDelivery(True)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/Messaging/Cases/QueueAckResponseLossRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.Messaging.QueueLeaseFencingRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.Messaging.QueueLeaseFencingRf3Tests",
+              "methodName": "ActualRenewAndNackReceiptsSurviveColdReclaimStaleTokensThenAcknowledgedHealthyWork",
+              "instanceName": "ActualRenewAndNackReceiptsSurviveColdReclaimStaleTokensThenAcknowledgedHealthyWork",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/Messaging/Cases/QueueLeaseFencingRf3Tests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.Messaging.QueueLeaseFencingRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.Messaging.QueueLeaseFencingRf3Tests",
+              "methodName": "OriginalDeadlineCasCannotExpireRenewedLeaseAcrossBothColdCutsThenCurrentTokenAckAndHealthyWork",
+              "instanceName": "OriginalDeadlineCasCannotExpireRenewedLeaseAcrossBothColdCutsThenCurrentTokenAckAndHealthyWork",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/Messaging/Cases/QueueLeaseFencingRf3Tests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.Messaging.QueueLifecyclePublicRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.Messaging.QueueLifecyclePublicRf3Tests(ClusterFixture)",
+              "methodName": "ByteOnlyDeadLetterSublimitRetainsPendingThroughAtomicRefusalTwoColdRedriveAndSameLaneHealthy",
+              "instanceName": "ByteOnlyDeadLetterSublimitRetainsPendingThroughAtomicRefusalTwoColdRedriveAndSameLaneHealthy(False)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/Messaging/Cases/QueueLifecyclePublicRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.Messaging.QueueLifecyclePublicRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.Messaging.QueueLifecyclePublicRf3Tests(ClusterFixture)",
+              "methodName": "ByteOnlyDeadLetterSublimitRetainsPendingThroughAtomicRefusalTwoColdRedriveAndSameLaneHealthy",
+              "instanceName": "ByteOnlyDeadLetterSublimitRetainsPendingThroughAtomicRefusalTwoColdRedriveAndSameLaneHealthy(True)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/Messaging/Cases/QueueLifecyclePublicRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.Messaging.QueueLifecyclePublicRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.Messaging.QueueLifecyclePublicRf3Tests(ClusterFixture)",
+              "methodName": "CurrentLeasedCancellationRollsBackLateFailureThenFencesOldTokensTwoColdAndSameLaneHealthy",
+              "instanceName": "CurrentLeasedCancellationRollsBackLateFailureThenFencesOldTokensTwoColdAndSameLaneHealthy(False)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/Messaging/Cases/QueueLifecyclePublicRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.Messaging.QueueLifecyclePublicRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.Messaging.QueueLifecyclePublicRf3Tests(ClusterFixture)",
+              "methodName": "CurrentLeasedCancellationRollsBackLateFailureThenFencesOldTokensTwoColdAndSameLaneHealthy",
+              "instanceName": "CurrentLeasedCancellationRollsBackLateFailureThenFencesOldTokensTwoColdAndSameLaneHealthy(True)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/Messaging/Cases/QueueLifecyclePublicRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.Messaging.QueueLifecyclePublicRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.Messaging.QueueLifecyclePublicRf3Tests(ClusterFixture)",
+              "methodName": "HistoricalEmptyReceiveCannotClaimLaterReadyWorkChangedSameIdRefusesAcrossBothColdCutsAndHealthyWork",
+              "instanceName": "HistoricalEmptyReceiveCannotClaimLaterReadyWorkChangedSameIdRefusesAcrossBothColdCutsAndHealthyWork(False)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/Messaging/Cases/QueueLifecyclePublicRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.Messaging.QueueLifecyclePublicRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.Messaging.QueueLifecyclePublicRf3Tests(ClusterFixture)",
+              "methodName": "HistoricalEmptyReceiveCannotClaimLaterReadyWorkChangedSameIdRefusesAcrossBothColdCutsAndHealthyWork",
+              "instanceName": "HistoricalEmptyReceiveCannotClaimLaterReadyWorkChangedSameIdRefusesAcrossBothColdCutsAndHealthyWork(True)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/Messaging/Cases/QueueLifecyclePublicRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.Messaging.QueueLifecyclePublicRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.Messaging.QueueLifecyclePublicRf3Tests(ClusterFixture)",
+              "methodName": "ParkedPendingAtomicRefusalCancelRedriveFreshLeaseFourRoutesAndSameOwnerCold",
+              "instanceName": "ParkedPendingAtomicRefusalCancelRedriveFreshLeaseFourRoutesAndSameOwnerCold(0)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/Messaging/Cases/QueueLifecyclePublicRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "System.Int32"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.Messaging.QueueLifecyclePublicRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.Messaging.QueueLifecyclePublicRf3Tests(ClusterFixture)",
+              "methodName": "ParkedPendingAtomicRefusalCancelRedriveFreshLeaseFourRoutesAndSameOwnerCold",
+              "instanceName": "ParkedPendingAtomicRefusalCancelRedriveFreshLeaseFourRoutesAndSameOwnerCold(1)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/Messaging/Cases/QueueLifecyclePublicRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "System.Int32"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.Messaging.QueueLifecyclePublicRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.Messaging.QueueLifecyclePublicRf3Tests(ClusterFixture)",
+              "methodName": "ParkedPendingAtomicRefusalCancelRedriveFreshLeaseFourRoutesAndSameOwnerCold",
+              "instanceName": "ParkedPendingAtomicRefusalCancelRedriveFreshLeaseFourRoutesAndSameOwnerCold(2)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/Messaging/Cases/QueueLifecyclePublicRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "System.Int32"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.Messaging.QueueLifecyclePublicRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.Messaging.QueueLifecyclePublicRf3Tests(ClusterFixture)",
+              "methodName": "ParkedPendingAtomicRefusalCancelRedriveFreshLeaseFourRoutesAndSameOwnerCold",
+              "instanceName": "ParkedPendingAtomicRefusalCancelRedriveFreshLeaseFourRoutesAndSameOwnerCold(3)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/Messaging/Cases/QueueLifecyclePublicRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "System.Int32"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.Messaging.QueueLifecyclePublicRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.Messaging.QueueLifecyclePublicRf3Tests(ClusterFixture)",
+              "methodName": "ScheduledCancellationRollsBackLateFailureThenRejectsOriginalDeadlineCasAcrossBothColdCutsAndHealthyWork",
+              "instanceName": "ScheduledCancellationRollsBackLateFailureThenRejectsOriginalDeadlineCasAcrossBothColdCutsAndHealthyWork(False)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/Messaging/Cases/QueueLifecyclePublicRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.Messaging.QueueLifecyclePublicRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.Messaging.QueueLifecyclePublicRf3Tests(ClusterFixture)",
+              "methodName": "ScheduledCancellationRollsBackLateFailureThenRejectsOriginalDeadlineCasAcrossBothColdCutsAndHealthyWork",
+              "instanceName": "ScheduledCancellationRollsBackLateFailureThenRejectsOriginalDeadlineCasAcrossBothColdCutsAndHealthyWork(True)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/Messaging/Cases/QueueLifecyclePublicRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
             }
           ]
         }

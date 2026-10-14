@@ -2,7 +2,7 @@
 param(
     [Parameter(Mandatory)][string] $Repository,
     [Parameter(Mandatory)][string] $EvidenceRoot,
-    [Parameter(Mandatory)][ValidateSet('KL-008','KL-011','KL-014','KL-015','KL-021','KL-027','KL-036','KL-033','KL-035','KL-029','KL-034','KL-042','KL-079','KL-065')][string] $Task,
+    [Parameter(Mandatory)][ValidateSet('KL-008','KL-011','KL-014','KL-015','KL-021','KL-027','KL-036','KL-033','KL-035','KL-029','KL-034','KL-042','KL-079','KL-065','KL-078','KL-087')][string] $Task,
     [Parameter(Mandatory)][ValidateSet('normal')][string] $Profile,
     [Parameter(Mandatory)][string] $ContractPath,
     [Parameter(Mandatory)][string] $ExecutionManifestPath
@@ -85,9 +85,15 @@ function Assert-AcProcess([string] $Path, [string] $Stdout, [string] $Stderr, [o
             [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData([byte[]]$actual)) -cne
             [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData([byte[]]$expected))) { throw $invalid }
     }
-    Assert-FcNativeExactKeys $process.environment @('DOTNET_EnableHWIntrinsic')
+    Assert-FcNativeExactKeys $process.environment @('DOTNET_EnableHWIntrinsic','COMPlus_EnableHWIntrinsic','DOTNET_EnableSIMD','COMPlus_EnableSIMD')
     $intrinsics = $null
     if ($process.environment.DOTNET_EnableHWIntrinsic -cne $intrinsics) { throw $invalid }
+    if ($Task -ceq 'KL-078') {
+        foreach ($name in @('COMPlus_EnableHWIntrinsic','DOTNET_EnableSIMD','COMPlus_EnableSIMD')) {
+            $value = $process.environment[$name]
+            if ($null -ne $value -and $value -cne '1') { throw $invalid }
+        }
+    }
     $process
 }
 
@@ -98,6 +104,20 @@ if ($contract.maximumParallelTests -ne 50 -or $contract.schemaVersion -ne 1 -or 
     $manifest.schemaVersion -ne 1 -or $manifest.task -cne $Task -or $manifest.profile -cne $Profile -or
     $manifest.qualifiedScope -cne $scope -or $manifest.contractPath -cne $ContractPath -or
     $manifest.contractSha256 -cne $originals[[IO.Path]::GetFullPath($ContractPath)].sha256) { throw $invalid }
+if ($Task -ceq 'KL-078') {
+    $hardware = $manifest.hardwareQualification
+    Assert-FcNativeExactKeys $hardware @('operatingSystem','processArchitecture','runtime','vectorHardwareAccelerated','evidenceScope')
+    if (-not [Runtime.InteropServices.RuntimeInformation]::IsOSPlatform([Runtime.InteropServices.OSPlatform]::Linux) -or
+        -not [Numerics.Vector]::IsHardwareAccelerated -or $hardware.vectorHardwareAccelerated -isnot [bool] -or
+        -not $hardware.vectorHardwareAccelerated -or
+        $hardware.operatingSystem -cne [Runtime.InteropServices.RuntimeInformation]::OSDescription -or
+        $hardware.processArchitecture -cne [Runtime.InteropServices.RuntimeInformation]::ProcessArchitecture.ToString() -or
+        $hardware.processArchitecture -cnotin @('X64','Arm64') -or
+        $hardware.runtime -cne [Runtime.InteropServices.RuntimeInformation]::FrameworkDescription -or
+        $hardware.evidenceScope -cne 'Actual Linux task caller; native child image and original operations are separately verified') {
+        throw $invalid
+    }
+}
 $declared = @($contract.tasks | Where-Object { $_.taskId -ceq $Task })
 if ($declared.Count -ne 1 -or $declared[0].selections -isnot [array] -or
     $declared[0].selections.Count -eq 0 -or $declared[0].selections.Count -gt 32 -or
