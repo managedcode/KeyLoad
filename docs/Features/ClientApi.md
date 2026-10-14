@@ -1634,3 +1634,11 @@ AC-SQLC-005 retains distinct local read OwnershipLost/Cancelled and conservative
 ## TASK-KL046-CREATE-ONLY-IDENTITY-001
 
 REQ-SQLC-006 / AC-SQLC-006, REQ-REL-001/003 and AC-TSQL-003/006 use the [canonical bounded CREATE TABLE contract](RelationalStorage/CreateTable.md) and [ADR-132](../ADR/ADR-132-native-create-table-command-identity.md). They define supported schemas, caller-stable command identity, atomic create-only outcomes, the bounded one-shot native session bridge and complete real-store/public RF3 test flows. Full DDL, ordinary SQL row INSERT and complete SQL/client qualification remain open; native source admission does not satisfy those gates.
+
+## TASK-KL046-ORDINARY-TYPED-INSERT-001
+
+REQ-SQLC-006 / AC-SQLC-006, REQ-REL-001/003 and AC-TSQL-003/006 use the [canonical ordinary typed INSERT contract](RelationalStorage/OrdinarySqlInsert.md). It defines bounded VALUES/parameter lowering, original command identity, current atomic create-only authority and complete native/public cold operation gates. General DML/full SQL and Linux/client qualification remain open.
+
+## Selected T-SQL native backpressure caller
+
+REQ/AC-SQLC-005/007/008 and ADR065/125/130 preserve the original bounded TLS RF3 interrupted-row/backpressure operation, its four independently authored full rows, original signed write receipt/replay, backend Cancel request, same-owner healthy SDK/official MCP/prepared-wire continuation, original deadline, stream/readers/disposal joins and existing cold continuation. The caller uses selected `SELECT TOP (4) * ... ORDER BY id ASC`, with no retired LIMIT spelling. The native session SELECT is the existing `AstQuery` operation, so its real AuthorizationReload hold must target that precise read kind; this adds no whitelist, protocol, product scheduling or trusted roles. Source correction is not runtime, retained-memory saturation, Linux/native interoperability or full SQL qualification.

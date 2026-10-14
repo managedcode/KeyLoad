@@ -16,6 +16,7 @@ internal static class ClusterRestoreMixedRetentionRf3Cold
                 await ClusterRestoreMixedRetentionRf3Literal.TopicsAsync(callers, state, token);
                 await ClusterRestoreMixedRetentionRf3Literal.InboxAsync(callers, state, token);
                 await ReplayAsync(callers, state, token);
+                await global::KeyLoad.IntegrationTests.Features.EventStreams.RetentionAckArchiveR53Restored.ColdAsync(callers, state, token);
                 return true;
             }, token);
         await ClusterRestoreMixedRetentionRf3Privacy.InspectorAsync(target, state, token);

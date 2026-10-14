@@ -8,8 +8,7 @@ internal static class NativeAnnOriginalResults
     private const int DigestCharacters = 64;
 
     internal static bool SameRequest(AnnMaintenanceRequest first, AnnMaintenanceRequest second)
-        => global::KeyLoad.NativeSerialization.Serialize(first).AsSpan()
-            .SequenceEqual(global::KeyLoad.NativeSerialization.Serialize(second));
+        => global::KeyLoad.AnnMaintenanceRequestIdentity.Same(first, second);
 
     internal static void Require(NativeAnnOriginalOperation entry)
     {

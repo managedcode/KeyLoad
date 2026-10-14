@@ -3,7 +3,7 @@ namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 internal static class PostgresRf3BackpressureProtocol
 {
     internal const string Collection = "wirebackpressure";
-    internal const string Sql = "SELECT * FROM wirebackpressure ORDER BY id ASC LIMIT 4";
+    internal const string Sql = "SELECT TOP (4) * FROM wirebackpressure ORDER BY id ASC";
     internal const string Identity = "delivery-";
     internal const int Rows = 4;
     internal const int PayloadCharacters = 524288;

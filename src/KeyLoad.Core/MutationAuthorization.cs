@@ -60,6 +60,7 @@ public sealed partial class DatabaseEngine
         var resource = Resource(view, partition, effect.Resource);
         var documentId = effect switch
         {
+            InsertTypedRow insert => Features.RelationalStorage.RelationalRowValidation.InsertIdentity(resource, insert.Json, OperationLimitsOptions),
             PutDocument put => put.Id,
             PatchDocument patch => patch.Id,
             DeleteDocument delete => delete.Id,
@@ -79,6 +80,8 @@ public sealed partial class DatabaseEngine
                 Authorization.RequireReplacement(principal, resource, replacement.ExplicitReplacement);
             }
         }
+        if (effect is InsertTypedRow)
+        { Authorization.RequireWriteRow(principal, document?.Access ?? new RowAccess()); }
         ReauthorizeEffectFields(principal, resource, effect);
         ReauthorizeEffectHeaders(principal, resource, effect);
         ReauthorizeEffectIndexes(principal, resource, effect);
@@ -101,7 +104,7 @@ public sealed partial class DatabaseEngine
             Authorization.RequireFieldWrite(principal, resource, vectorField.Field);
             return;
         }
-        if (effect is PutDocument or AppendEvents or PublishTopic or EnqueueMessage or UpsertEdge or AppendSamples)
+        if (effect is InsertTypedRow or PutDocument or AppendEvents or PublishTopic or EnqueueMessage or UpsertEdge or AppendSamples)
         {
             foreach (var policy in resource.FieldPolicies)
             {
@@ -123,7 +126,7 @@ public sealed partial class DatabaseEngine
 
     private void ReauthorizeEffectIndexes(PrincipalRecord principal, ResourceDefinition resource, Mutation effect)
     {
-        if (effect is PutDocument or PatchDocument or DeleteDocument)
+        if (effect is InsertTypedRow or PutDocument or PatchDocument or DeleteDocument)
         {
             foreach (var index in resource.Indexes)
             {

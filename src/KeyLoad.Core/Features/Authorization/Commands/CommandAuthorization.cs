@@ -139,6 +139,11 @@ public sealed partial class DatabaseEngine
 
     private void AuthorizeExtendedMutation(IKeyValueView view, PrincipalRecord principal, PartitionRef partition, Mutation mutation)
     {
+        if (mutation is InsertTypedRow insert)
+        {
+            RequireTypedInsertPermissions(principal, partition, Resource(view, partition, insert.Collection, ResourceKind.Collection));
+            return;
+        }
         if (mutation is AdvanceQueueDeadline deadline)
         {
             AuthorizeQueueDeadline(view, principal, partition, deadline);

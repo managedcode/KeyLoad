@@ -16,6 +16,13 @@ internal sealed class GrainFailureDiagnosticsTests
     private const string ArgumentCanary = "private-argument-identity-canary";
     private const string MetadataCanary = "private-invalid-stage-canary";
     private const string UnavailableDetail = "The database request could not complete. Retry the same command ID for writes.";
+    private const string ObservedEqualLength = "route=1 comparisonObserved=True phaseEqual=False canonicalLength=2 originalLength=2 firstDifference=1";
+    private const string ObservedDifferentLength = "route=1 comparisonObserved=True phaseEqual=False canonicalLength=1 originalLength=2 firstDifference=1";
+    private const string PropagatedOperands = "route=2 comparisonObserved=False phaseEqual=False canonicalLength=-1 originalLength=-1 firstDifference=-1";
+    private const string UnobservedOperands = "unobserved";
+    private const byte FirstOperandByte = 17;
+    private const byte OriginalOperandByte = 34;
+    private const byte ChangedOperandByte = 35;
 
     /// <summary>Malformed JSON and argument failures keep the public validation reply and omit private text.</summary>
     [Test]
@@ -79,6 +86,46 @@ internal sealed class GrainFailureDiagnosticsTests
         await Assert.That(output).Contains(nameof(ErrorCode.OwnershipLost));
         await Assert.That(output).DoesNotContain(MetadataCanary);
         await Assert.That(output).DoesNotContain(nameof(InvalidOperationException));
+        await ParentOperandsAsync();
+    }
+
+    private static async Task ParentOperandsAsync()
+    {
+        foreach (var (canonical, original, expected) in new (byte[] Canonical, byte[] Original, string Expected)[]
+        {
+            ([FirstOperandByte, OriginalOperandByte], [FirstOperandByte, ChangedOperandByte], ObservedEqualLength),
+            ([FirstOperandByte], [FirstOperandByte, OriginalOperandByte], ObservedDifferentLength)
+        })
+        {
+            var error = Errors.Fail(ErrorCode.OwnershipLost, UnavailableDetail);
+            var same = global::KeyLoad.Core.PartitionMoveParentReadDiagnostic.PhaseMismatch(error, canonical, original);
+            await Assert.That(ReferenceEquals(same, error)).IsTrue();
+            var (reply, output) = RejectAndCapture(same, Guid.NewGuid(), GrainFailureStage.PartitionResolution);
+            await Assert.That(reply.Error).IsEqualTo(ErrorCode.OwnershipLost);
+            await Assert.That(reply.SafeDetail).IsEqualTo(UnavailableDetail);
+            await Assert.That(output).Contains(expected);
+            await Assert.That(output).DoesNotContain(MetadataCanary);
+        }
+        var propagated = Errors.Fail(ErrorCode.OwnershipLost, UnavailableDetail);
+        await Assert.That(ReferenceEquals(propagated,
+            global::KeyLoad.Core.PartitionMoveParentReadDiagnostic.Propagated(propagated))).IsTrue();
+        var (propagatedReply, propagatedOutput) = RejectAndCapture(propagated, Guid.NewGuid(), GrainFailureStage.PartitionResolution);
+        await Assert.That(propagatedReply.Error).IsEqualTo(ErrorCode.OwnershipLost);
+        await Assert.That(propagatedReply.SafeDetail).IsEqualTo(UnavailableDetail);
+        await Assert.That(propagatedOutput).Contains(PropagatedOperands);
+        var invalid = Errors.Fail(ErrorCode.OwnershipLost, UnavailableDetail);
+        invalid.Data[global::KeyLoad.Core.PartitionMoveParentReadDiagnostic.MetadataKey] = MetadataCanary;
+        var (_, invalidOutput) = RejectAndCapture(invalid, Guid.NewGuid(), GrainFailureStage.PartitionResolution);
+        await Assert.That(invalidOutput).Contains(UnobservedOperands);
+        await Assert.That(invalidOutput).DoesNotContain(MetadataCanary);
+        var equal = Errors.Fail(ErrorCode.OwnershipLost, UnavailableDetail);
+        global::KeyLoad.Core.PartitionMoveParentReadDiagnostic.PhaseMismatch(equal,
+            [FirstOperandByte], [FirstOperandByte]);
+        await Assert.That(global::KeyLoad.Core.PartitionMoveParentReadDiagnostic.ReadText(equal)).IsEqualTo(UnobservedOperands);
+        var unrelated = Errors.Fail(ErrorCode.Validation, GrainRoutingProtocol.InvalidRequest);
+        await Assert.That(ReferenceEquals(unrelated,
+            global::KeyLoad.Core.PartitionMoveParentReadDiagnostic.Propagated(unrelated))).IsTrue();
+        await Assert.That(global::KeyLoad.Core.PartitionMoveParentReadDiagnostic.ReadText(unrelated)).IsEqualTo(UnobservedOperands);
     }
 
     private static (GrainOperationReply Reply, string Output) RejectAndCapture(Exception error, Guid requestId, GrainFailureStage stage)

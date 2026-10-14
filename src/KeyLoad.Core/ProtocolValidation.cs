@@ -79,6 +79,7 @@ public sealed partial class DatabaseEngine
     private static string CanonicalMutationOwner(Mutation mutation)
         => mutation switch
         {
+            InsertTypedRow insert => insert.Collection,
             PutDocument put => put.Collection,
             PatchDocument patch => patch.Collection,
             DeleteDocument delete => delete.Collection,

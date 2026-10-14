@@ -21,10 +21,14 @@ internal static class InboxProcessingRf3Trial
                 using var workerHttp = McpCallerHttp.Create(fixture, McpCallerProtocol.Node2);
                 var worker = new KeyLoadClient(workerHttp, seed.Identity.Secret, IntegrationClientOptions.Execution());
                 var state = await InboxProcessingRf3Original.ExecuteAsync(worker, seed.Lane, seed.Identity, deadline.Token);
+                var late = await LocalProcessingLateR53Warm.RunAsync(fixture, seed.Lane, seed.Identity, deadline.Token);
                 await InboxProcessingRf3Cold.RestartAsync(fixture, deadline.Token);
+                await LocalProcessingLateR53Flow.FirstColdAsync(fixture, late, deadline.Token);
                 await ReconcileAndRestoreAsync(fixture, worker, state, deadline.Token);
+                await LocalProcessingLateR53Flow.RestoredAsync(fixture, late, deadline.Token);
                 await InboxProcessingRf3Cold.RestartAsync(fixture, deadline.Token);
                 await CompleteAsync(fixture, worker, state, deadline.Token);
+                await LocalProcessingLateR53Flow.FinishAsync(fixture, late, deadline.Token);
             }, failures).ConfigureAwait(false);
             ServerFailureObserver.ThrowIfAny(failures);
         }, failures).ConfigureAwait(false);

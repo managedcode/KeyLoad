@@ -21,10 +21,13 @@ internal static class SqlUnicodeIdentifierControls
             await RefuseAsync(database, engine, SqlNullDistinctCases.Prefix + clause + SqlNullDistinctCases.Tail,
             code, image, position, identity);
         }
-        foreach (var window in new[] { "LIMIT U&\"1\"", "OFFSET U&\"1\" LIMIT 1", "FETCH FIRST U&\"1\" ROW ONLY" })
+        foreach (var (window, code) in new[]
+        { ("LIMIT U&\"1\"", ErrorCode.UnsupportedCapability),
+            ("OFFSET U&\"1\" LIMIT 1", ErrorCode.UnsupportedCapability),
+            ("FETCH FIRST U&\"1\" ROW ONLY", ErrorCode.Validation) })
         {
             await RefuseAsync(database, engine, SqlNullDistinctCases.Prefix + SqlUnicodeIdentifierCases.Clause
-            + OrderBy + window, ErrorCode.Validation, image, position, identity);
+            + OrderBy + window, code, image, position, identity);
         }
 
     }

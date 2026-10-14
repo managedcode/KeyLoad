@@ -13,7 +13,7 @@ internal static class CredentialSubjectReplacementClients
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             await using var session = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node2,
-                state.First.Identity.Secret, token);
+                state.CurrentSecret, token);
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 await session.Client.ListToolsAsync(cancellationToken: token);
@@ -33,13 +33,20 @@ internal static class CredentialSubjectReplacementClients
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 var root = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
-                var reader = new KeyLoadClient(http, state.First.Identity.Secret, IntegrationClientOptions.Execution());
+                var reader = new KeyLoadClient(http, state.CurrentSecret, IntegrationClientOptions.Execution());
                 StandardAspNetAuthorityTrial.AddHeaders(http);
                 session.AddUntrustedIdentityHeaders();
                 if (warm)
-                { await CredentialSubjectReplacementFlow.WarmAsync(root, reader, session, state, token); }
+                {
+                    await CredentialSubjectReplacementFlow.WarmAsync(root, reader, session, state, token);
+                    await CredentialVerifierR53Flow.WarmAsync(fixture, root, reader, session, state, token);
+                }
                 else
-                { await CredentialSubjectReplacementFlow.ReplayedAsync(root, reader, session, state, token); }
+                {
+                    await CredentialSubjectReplacementFlow.ReplayedAsync(root, reader, session, state, token);
+                    if (state.Verifier is { Active: true })
+                    { await CredentialVerifierR53Flow.ContextAsync(fixture, root, reader, session, state, token); }
+                }
             }, failures);
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);

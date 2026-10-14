@@ -19,7 +19,7 @@ internal static class PostgresRf3BackpressureTrial
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {
                 var backend = await PostgresRf3WireAuthentication.AuthenticateAsync(wire, state.Identity, token);
-                var arm = controls.WriteArm(state.Identity.Principal.Id, Guid.Empty, GrainReadKind.Query,
+                var arm = controls.WriteArm(state.Identity.Principal.Id, Guid.Empty, GrainReadKind.AstQuery,
                     RequestCqrsProbePhase.AuthorizationReload, RequestCqrsProbeAction.Hold);
                 var header = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
                 var resume = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);

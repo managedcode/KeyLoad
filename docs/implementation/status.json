@@ -7,8 +7,8 @@
       "total": 104
     },
     "additionalTask": "KL-105",
-    "qualification": "R49 complete Release/native compiler+analyzers/format verification/governance passed0errors0warnings. One clean nativeTUnit50 whole119-class local batch executed431:424PASS7FAIL0SKIP in93.641s; all399priorUIDs retained,16of20priorfails nowPASS,4remain,1previous parser-only metadata oracle pass regressed,30of32added casesPASS and2added GenerationVisibility callers remain unsupported. New current-prefix2/current-journal-signature2/mixed-backup2 wholeflowsPASS. Complete11305-file source and DLL/PDB stayed unchanged. Separate native3-case diagnostic run3FAIL/70.859s cannot be compared with clean timing and had zero collector captures after the live PID window was missed. Original20/104done84in_progress,KL105additional; current full Linux/RF3/recovery/coverage/fault/endurance/performance qualification remains open.",
-    "coverage": "R49 functional product coverage is unmeasured. Historical R38 failed-run25.73%line19.63%branch is partial/stale and does not qualify current source; load/comparison cases excluded.",
+    "qualification": "R51 full Release, native compiler/analyzers, canonical formatting and governance passed0errors0warnings. Focused native TUnit50 executed184 Unit:173PASS11FAIL0SKIP (140.461s), and genuine process Recovery6:4PASS2FAIL0SKIP (8.385s), with source/DLL/PDB unchanged. New cumulative-byte and paged-retention whole flows passed; ModelView repaired. Current public RF3/full Linux/functional coverage/fault/endurance/performance gates remain open. Original plan20/104 done84in_progress, KL105 additional; no new acceptance closed.",
+    "coverage": "R51 current functional product coverage is UNMEASURED. Historical R38 failed-run25.73%line19.63%branch is partial/stale; no full threshold pass; load/comparison cases excluded.",
     "currentStageR43": {
       "status": "local_development_executed_with_six_failures_linux_acceptance_pending",
       "newCSharpFiles": 138,
@@ -2434,6 +2434,162 @@
         "fault/endurance/power-loss and equivalent native1/3-node performance"
       ],
       "governance": "PASS: preserved root prefix,27projects,4modules,required governance/local policies; original native verification exit0"
+    },
+    "currentStageR51": {
+      "classification": "Completed current local source-matched development checkpoint with failures; full Linux/RF3/coverage/endurance/performance acceptance remains open",
+      "implemented": [
+        "Ordinary selected T-SQL typed INSERT VALUES and native parameters, create-only PK/schema/unique validation in the existing authorized atomic batch path; full replay/policy/rollback/cold unit and SDK/MCP/Npgsql RF3 cases authored",
+        "Semantic ANN request identity over all existing fields, independent original reservation byte proof, and full signed settlement without changing the receiver or native serialization format",
+        "Genuine 257/258-record two-block cumulative-byte and paged-retention whole flows, plus four real interrupted seal/merge process variants",
+        "Independent subscription ACK checkpoints; local inbox late-failure rollback; same-key expired credential verifier replacement; ACK-pinned native archive/restore public RF3 flows authored",
+        "Private-safe native parent-outcome diagnostic witness, original T-SQL backpressure caller correction, ModelView policy epoch fixture correction and exact published TimeSeries version metadata fixture correction"
+      ],
+      "nativeQuality": {
+        "errors": 0,
+        "warnings": 0,
+        "scope": "Complete actual native compiler/analyzer diagnostics after canonical formatting"
+      },
+      "fullRelease": {
+        "exitCode": 0,
+        "errors": 0,
+        "warnings": 0,
+        "seconds": 484.12546866596676,
+        "gitVisibleFiles": 11467,
+        "sourceDrift": []
+      },
+      "canonicalFormat": {
+        "applyExitCode": 0,
+        "verifyExitCode": 0,
+        "verifySeconds": 210.58242683392018,
+        "sourceDrift": []
+      },
+      "governance": {
+        "exitCode": 0,
+        "projects": 27,
+        "modules": 4
+      },
+      "nativeDiscovery": {
+        "unitEntries": 3888,
+        "dataGenerationPlaceholders": 7,
+        "focusedClasses": 68,
+        "selectedEntries": 178,
+        "selectedPlaceholders": 7,
+        "validFullExecutableUniverseProven": false
+      },
+      "focusedUnit": {
+        "total": 184,
+        "passed": 173,
+        "failed": 11,
+        "skipped": 0,
+        "nativeSeconds": 140.461,
+        "wrapperSeconds": 145.19518783304375,
+        "maximumParallelTests": 50,
+        "peakTrxIntervals": 50,
+        "sourceDrift": [],
+        "compiledDrift": [],
+        "trxSha256": "d77ad4000f95c78a0bfe101aab8416c571f24bda16ea6a727edafa429a58a447"
+      },
+      "focusedRecovery": {
+        "total": 6,
+        "passed": 4,
+        "failed": 2,
+        "skipped": 0,
+        "nativeSeconds": 8.385,
+        "wrapperSeconds": 11.716592708020471,
+        "maximumParallelTests": 50,
+        "sourceDrift": [],
+        "compiledDrift": [],
+        "trxSha256": "34d1f966d58b867ca11e0decbc06f9c89d223db8590b11b17c04bbc04f98a5f7"
+      },
+      "passedChangedWholeFlows": [
+        "ModelView original parser operation",
+        "Two-block cumulative read-byte budget",
+        "Two-block bounded paged retention",
+        "Original 257/258 boundary cases",
+        "New merge process recovery at JournalFlushed and MutationApplied",
+        "Original seal/merge process recovery"
+      ],
+      "remainingCaseOwners": {
+        "sqlInsert": "First revoked DocsWrite full safeDetail oracle mismatch; verified retired original-outcome ownership path separately under audit",
+        "sqlNull": "Precise foreign Unicode control expected UnsupportedCapability, actual Validation; original whole flow not passed",
+        "annOriginal": "Original reservation Conflict cleared, full settlement passed; two deeper complete checkpoint receipt expectations failed",
+        "annNewlySelected": "Four unchanged native maintenance whole flows reached actual read deadlines; no prior-pass regression or bottleneck cause claimed",
+        "movement": "Three existing native prepare/retire/BM25 failures remain with current diagnostic witness",
+        "multiblockSealRecovery": "Two new seal cases fail the complete prepared-window image before original fault/kill; generation0/revision258 versus generation1/revision259. Current source oracle expects an open window even though appending257 records crosses the native automatic256-record seal boundary."
+      },
+      "publicRf3": "New and extended SDK/MCP/Npgsql whole flows compiled; current source runtime and Linux qualification remain pending; no stale local Docker image or selector bypass used",
+      "sourceClosure": {
+        "gitVisibleFiles": 11467,
+        "sourceManifestSha256": "ffa2abfd3d8fc5ac68e98d25b9af924f4178df7fe9f8f4e11ce29b8f5734fd4a",
+        "compiledIdentities": {
+          "tests/KeyLoad.CrashHost/bin/Release/net10.0/KeyLoad.CrashHost.dll": "3d9f2550d01a2d5b81b037c40786832864679b19146a746046c342643b91560d",
+          "tests/KeyLoad.CrashHost/bin/Release/net10.0/KeyLoad.CrashHost.pdb": "e05a38348092b20bb880e1fabc9b17fd38e4bb301a34b975ddc2fa6e4339e680",
+          "tests/KeyLoad.RecoveryTests/bin/Release/net10.0/KeyLoad.CrashHost.dll": "3d9f2550d01a2d5b81b037c40786832864679b19146a746046c342643b91560d",
+          "tests/KeyLoad.RecoveryTests/bin/Release/net10.0/KeyLoad.CrashHost.pdb": "e05a38348092b20bb880e1fabc9b17fd38e4bb301a34b975ddc2fa6e4339e680",
+          "tests/KeyLoad.RecoveryTests/bin/Release/net10.0/KeyLoad.RecoveryTests.dll": "313add8ac7ee0c6337c7f040a317fdffc251d42a9b0d78ace53a746b03e93d7c",
+          "tests/KeyLoad.RecoveryTests/bin/Release/net10.0/KeyLoad.RecoveryTests.pdb": "e389fa5cde598d270bbd5ee310624622f85814cbae5da3197b054d4adb212989",
+          "tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.CrashHost.dll": "3d9f2550d01a2d5b81b037c40786832864679b19146a746046c342643b91560d",
+          "tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.CrashHost.pdb": "e05a38348092b20bb880e1fabc9b17fd38e4bb301a34b975ddc2fa6e4339e680",
+          "tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.UnitTests.dll": "c659cfe198edc8542adf55e90e9ba943814ea9ced719d7b840e833e93f72d3f9",
+          "tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.UnitTests.pdb": "70e21c5842e8d69b8bc7271cc030f16cfd06a93a9759069fd2c470167daefea3"
+        },
+        "metadataWrittenOnlyAfterBothRuntimeProcessesAndReadersJoined": true
+      },
+      "lastDeliveredLinux": {
+        "sha": "fa680dfe8e26d8045fd1ce2fe6bfe466b7c1b3d7",
+        "runId": 38556178283,
+        "providerStatusAtObservation": "in_progress",
+        "unitTrx": {
+          "total": 1162,
+          "passed": 1064,
+          "failed": 98
+        },
+        "unitConsole": {
+          "total": 1163,
+          "failed": 99
+        },
+        "unitTestHostCrashPid": 5292,
+        "recovery": {
+          "total": 351,
+          "passed": 349,
+          "failed": 2
+        },
+        "rf3": {
+          "jobId": 115825769763,
+          "conclusion": "failure",
+          "testStep": "cancelled",
+          "completeCensusAvailable": false
+        },
+        "classification": "Separate preceding delivered cohort; Unit count discrepancy/crash and original failures preserved; no current R51 acceptance"
+      },
+      "functionalCoverage": "UNMEASURED for current product source; previous R38 failed partial coverage is stale and does not qualify this source; load/comparison tests remain excluded",
+      "profiling": "KL105 remains open; no new current matched profile, CPU hotspot, overhead or acceleration claim",
+      "artifacts": [
+        {
+          "path": "TestResults/stage61-native-join/stage64-r51-full-release-coherent.completion.original.json",
+          "sha256": "a4c4c03f268cbd1dbab3e17f1cdd1d6b88ac51dc7ca532fd404e6e8d5be74c69"
+        },
+        {
+          "path": "TestResults/stage61-native-join/stage64-r51-canonical-format-verify.completion.original.json",
+          "sha256": "61e2fec4654961f7f2b8806d0d1b6828206784d6bce7e22a48f79225293cc61d"
+        },
+        {
+          "path": "TestResults/stage61-native-join/stage64-r51-focused-unit.completion.original.json",
+          "sha256": "2606591e86d315fbe576b5e2b897c3f052e9fbc88f467ebbf36c354e0d1ef39b"
+        },
+        {
+          "path": "TestResults/stage61-native-join/stage64-r51-focused-unit-complete-native-failures.original.json",
+          "sha256": "cfbaa7965b8fd05e4da872e8eacdcae283f8cc9fce1632816eda3eb030e0438a"
+        },
+        {
+          "path": "TestResults/stage61-native-join/stage64-r51-focused-recovery.completion.original.json",
+          "sha256": "e7b18a3c2eb775e13fff653b5c02516e23b9dfe5ff9e9c7bf7b571f344c41ce4"
+        },
+        {
+          "path": "TestResults/stage61-native-join/stage64-r51-focused-recovery-complete-native-failures.original.json",
+          "sha256": "62406b560a50c90a527e027703517833120a2ed8920420816f61f0a0756d00f6"
+        }
+      ]
     }
   },
   "STAGE63-NATIVE-COMPOSITION-001": {

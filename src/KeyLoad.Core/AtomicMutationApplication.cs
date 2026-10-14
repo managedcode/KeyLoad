@@ -48,7 +48,7 @@ public sealed partial class DatabaseEngine
                 AdvanceVisibilityEpoch(tx, partition, mutation.Resource);
             }
         }
-        foreach (var collection in mutations.Where(mutation => mutation is PutDocument or PatchDocument or DeleteDocument)
+        foreach (var collection in mutations.Where(mutation => mutation is InsertTypedRow or PutDocument or PatchDocument or DeleteDocument)
             .Select(mutation => mutation.Resource).Distinct(StringComparer.Ordinal))
         {
             tx.PutRecord(KeySpace.Partition(DocumentEpochSpace, partition, collection), checked(DocumentEpoch(tx, partition, collection) + AtomicMutationApplicationAdjacentElementOffset));
@@ -64,6 +64,12 @@ public sealed partial class DatabaseEngine
         ReadExecutionBudget? budget = null;
         foreach (var requested in mutations)
         {
+            if (requested is InsertTypedRow insert)
+            {
+                AcceptExpandedMutation(ref count);
+                yield return (ExpandTypedRowInsert(tx, principal, partition, insert), false);
+                continue;
+            }
             if (requested is not (QueueToGraph or GraphToQueueMutation))
             {
                 AcceptExpandedMutation(ref count);

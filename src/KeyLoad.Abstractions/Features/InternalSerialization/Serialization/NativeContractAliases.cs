@@ -3,6 +3,7 @@ namespace KeyLoad;
 // Persisted aliases are immutable format identifiers, independent of CLR renames.
 internal static class NativeContractAliases
 {
+    internal const string InsertTypedRow = "keyload.contract.insert-typed-row.v1";
     internal const string StoreAggregateSnapshot = "keyload.contract.store-aggregate-snapshot.v1";
     internal const string AggregateSnapshotState = "keyload.contract.aggregate-snapshot-state.v1";
     internal const string ReadAggregateReplayRequest = "keyload.contract.read-aggregate-replay-request.v1";

@@ -15,6 +15,7 @@ internal static class ClusterRestoreMixedRetentionRf3Restore
                 state.CurrentSourceOwner = target.Mappings.Single(mapping => mapping.Source.PhysicalShardId == state.SourceOwner.PhysicalShardId).Target;
                 state.CurrentTargetOwner = target.Mappings.Single(mapping => mapping.Source.PhysicalShardId == state.TargetOwner.PhysicalShardId).Target;
                 await ClusterRestoreMixedRetentionRf3Literal.OriginalAsync(callers, state, token);
+                await global::KeyLoad.IntegrationTests.Features.EventStreams.RetentionAckArchiveR53Restored.PausedAsync(callers, state, token);
                 foreach (var original in state.OriginalQueue.Commands)
                 {
                     await RefusedAsync(callers, state, McpCallerTools.DocumentsCommit, original.Command,
@@ -52,6 +53,7 @@ internal static class ClusterRestoreMixedRetentionRf3Restore
                         await ClusterRestoreMixedRetentionRf3Literal.TopicsAsync(callers, state, token);
                         await ClusterRestoreMixedRetentionRf3Literal.InboxAsync(callers, state, token);
                         await ClusterRestoreMixedRetentionRf3Cold.ReplayAsync(callers, state, token);
+                        await global::KeyLoad.IntegrationTests.Features.EventStreams.RetentionAckArchiveR53Restored.ContinuedAsync(callers, state, token);
                         return true;
                     }, token);
                 return true;

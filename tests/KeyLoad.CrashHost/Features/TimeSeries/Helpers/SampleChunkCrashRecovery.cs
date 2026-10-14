@@ -35,6 +35,9 @@ internal static class SampleChunkCrashRecovery
             .ConfigureAwait(false);
     }
 
+    internal static Task<string> ReplayOriginalForMultiblockAsync(string root, DatabaseEngine database)
+        => ReplayOriginalAsync(root, database);
+
     private static async Task<string> ReplayOriginalAsync(string root, DatabaseEngine database)
     {
         var path = Path.Combine(root, SampleChunkCrashContract.OriginalOperationFile);

@@ -50,7 +50,7 @@ internal static class SqlOperationCompiler
             global::Microsoft.SqlServer.TransactSql.ScriptDom.ExecuteStatement execute => ScriptDomExecOperation.Compile(request,
                 execute, maximumPayloadBytes, positionalParameterCount, budget.Check, token),
             global::Microsoft.SqlServer.TransactSql.ScriptDom.InsertStatement insert => Composition(request, insert,
-                maximumPayloadBytes, positionalParameterCount, budget.Check, token),
+                maximumPayloadBytes, limitsOptions, positionalParameterCount, budget.Check, token),
             global::Microsoft.SqlServer.TransactSql.ScriptDom.CreateTableStatement table => ScriptDomCreateTableOperation.Compile(
                 request, table, limitsOptions, maximumPayloadBytes, budget.Check, token),
             _ => throw ScriptDomOperationErrors.Unsupported()
@@ -76,9 +76,11 @@ internal static class SqlOperationCompiler
 
     private static McpDecodedOperation Composition(SqlOperationRequest request,
         global::Microsoft.SqlServer.TransactSql.ScriptDom.InsertStatement statement, int maximumPayloadBytes,
-        int? positionalParameterCount, Action checkBudget, CancellationToken token)
+        IOptions<DatabaseLimits> limitsOptions, int? positionalParameterCount, Action checkBudget, CancellationToken token)
     {
-        var command = SqlCompositionInsert.Compile(request, statement, positionalParameterCount, checkBudget, token);
+        var command = statement.InsertSpecification.InsertSource is global::Microsoft.SqlServer.TransactSql.ScriptDom.ValuesInsertSource
+            ? ScriptDomValuesInsertOperation.Compile(request, statement, limitsOptions, maximumPayloadBytes, positionalParameterCount, checkBudget, token)
+            : SqlCompositionInsert.Compile(request, statement, positionalParameterCount, checkBudget, token);
         return Decode(McpToolNames.DocumentsCommit, command, maximumPayloadBytes, checkBudget, token);
     }
 

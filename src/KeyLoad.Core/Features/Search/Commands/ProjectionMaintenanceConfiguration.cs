@@ -60,7 +60,7 @@ public sealed partial class DatabaseEngine
         if (configure.InitialAnnMaintenance is not { } supplied)
         { return; }
         if (previous.InitialAnnMaintenance is not { } original
-            || !NativeSerialization.Serialize(original).AsSpan().SequenceEqual(NativeSerialization.Serialize(supplied)))
+            || !global::KeyLoad.AnnMaintenanceRequestIdentity.Same(original, supplied))
         { throw Errors.Fail(ErrorCode.Conflict, InvalidMaintenanceProfile); }
     }
 

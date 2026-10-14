@@ -15,14 +15,18 @@ internal static class SampleChunkProcessRecovery
 
     internal static Task RunAsync(string root, bool merge, CancellationToken callerToken)
         => RunOwnedAsync(root, SampleChunkCrashContract.Modes(merge),
-            (mode, token) => SampleChunkProcessAssertions.VerifyAsync(root, mode, merge, token), callerToken);
+            (mode, token) => SampleChunkProcessAssertions.VerifyAsync(root, mode, merge, token), CommitStage.JournalFlushed, callerToken);
 
     internal static Task RunEarlyAsync(string root, SampleChunkEarlyCut cut, CancellationToken callerToken)
         => RunOwnedAsync(root, SampleChunkEarlyCrashProtocol.Modes(cut),
-            (mode, token) => SampleChunkEarlyProcessAssertions.VerifyAsync(root, mode, cut, token), callerToken);
+            (mode, token) => SampleChunkEarlyProcessAssertions.VerifyAsync(root, mode, cut, token), CommitStage.JournalFlushed, callerToken);
+
+    internal static Task RunMultiblockAsync(string root, bool merge, CommitStage stage, CancellationToken callerToken)
+        => RunOwnedAsync(root, ChunkMultiblockCrashProtocol.Modes(merge),
+            (mode, token) => ChunkMultiblockProcessAssertions.VerifyAsync(root, mode, merge, token), stage, callerToken);
 
     private static async Task RunOwnedAsync(string root, string[] modes,
-        Func<string, CancellationToken, Task> verify, CancellationToken callerToken)
+        Func<string, CancellationToken, Task> verify, CommitStage stage, CancellationToken callerToken)
     {
         using var limit = new CancellationTokenSource(TimeSpan.FromSeconds(
             CommandIdempotencyProcessRecoveryTests.RunTimeoutSeconds), TimeProvider.System);
@@ -34,13 +38,13 @@ internal static class SampleChunkProcessRecovery
             foreach (var mode in modes)
             {
                 var prepare = mode is SampleChunkCrashContract.PrepareSeal or SampleChunkCrashContract.PrepareMerge
-                    || SampleChunkEarlyCrashProtocol.IsPrepare(mode);
+                    || SampleChunkEarlyCrashProtocol.IsPrepare(mode) || ChunkMultiblockCrashProtocol.IsPrepare(mode);
                 var killed = prepare || mode is SampleChunkCrashContract.FaultSeal or SampleChunkCrashContract.FaultMerge
-                    || SampleChunkEarlyCrashProtocol.IsFault(mode);
+                    || SampleChunkEarlyCrashProtocol.IsFault(mode) || ChunkMultiblockCrashProtocol.IsFault(mode);
                 var marker = prepare ? CrashFixtureValues.Acknowledgement : CrashFixtureValues.CrashMarker;
                 active = killed ? CommandIdempotencyProcessChild.Create(CommandIdempotencyProcess.OutputLimitCharacters, marker)
                     : CommandIdempotencyProcessChild.Create(CommandIdempotencyProcess.OutputLimitCharacters, expectAcknowledgement: false);
-                active.Start(CreateStart(root, mode));
+                active.Start(CreateStart(root, mode, stage));
                 active.ThrowStartupFailure();
                 await SettleAsync(active, root, killed, run.Token).ConfigureAwait(false);
                 active = null;
@@ -73,12 +77,12 @@ internal static class SampleChunkProcessRecovery
         child.CloseNativeProcessAfterJoin();
     }
 
-    private static ProcessStartInfo CreateStart(string root, string mode)
+    private static ProcessStartInfo CreateStart(string root, string mode, CommitStage stage)
     {
         var start = new ProcessStartInfo(DotnetHost)
         { RedirectStandardOutput = true, RedirectStandardError = true, UseShellExecute = false };
         foreach (var argument in new[] { typeof(CrashHostMarker).Assembly.Location, root,
-            CommitStage.JournalFlushed.ToString(), SampleChunkCrashContract.MutationIndex.ToString(CultureInfo.InvariantCulture), mode })
+            stage.ToString(), SampleChunkCrashContract.MutationIndex.ToString(CultureInfo.InvariantCulture), mode })
         { start.ArgumentList.Add(argument); }
         return start;
     }

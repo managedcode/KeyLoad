@@ -17,10 +17,13 @@ internal static class SubscriptionFilterRf3Trial
                 using var deadline = McpCallerDeadline.Create();
                 var seed = await SubscriptionFilterRf3Setup.CreateAsync(fixture, deadline.Token);
                 var original = await SubscriptionFilterRf3OriginalFlow.RunAsync(fixture, seed, deadline.Token);
+                var independent = await SubscriptionIndependentCheckpointR52Flow.StartAsync(fixture, seed, deadline.Token);
                 await SubscriptionFilterRf3Cold.RestartAsync(fixture, deadline.Token);
                 var updated = await SubscriptionFilterRf3Update.RunAsync(fixture, original, deadline.Token);
+                await SubscriptionIndependentCheckpointR52Flow.FirstColdAsync(fixture, independent, deadline.Token);
                 await SubscriptionFilterRf3Cold.RestartAsync(fixture, deadline.Token);
                 await SubscriptionFilterRf3Healthy.RunAsync(fixture, updated, deadline.Token);
+                await SubscriptionIndependentCheckpointR52Flow.SecondColdAsync(fixture, independent, deadline.Token);
             }, failures).ConfigureAwait(false);
             ServerFailureObserver.ThrowIfAny(failures);
         }, failures).ConfigureAwait(false);

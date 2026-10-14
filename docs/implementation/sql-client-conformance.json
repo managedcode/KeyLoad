@@ -111,10 +111,30 @@
       "id": "SQLC-DML",
       "name": "INSERT, UPDATE, DELETE, MERGE and OUTPUT execution",
       "grammarOwner": "Microsoft ScriptDOM T-SQL AST",
-      "execution": "Source: closed queue-to-graph INSERT composition only; general INSERT/UPDATE/DELETE/MERGE/OUTPUT execution is not claimed.",
+      "execution": "SOURCE CANDIDATE: existing closed graph/queue composition plus bounded ordinary typed INSERT VALUES/parameters; general INSERT SELECT/UPDATE/DELETE/MERGE/OUTPUT remain OPEN.",
       "qualified": false,
       "requirement": "REQ-SQLC-006 / AC-SQLC-006",
-      "acceptance": "Complete independently literal success/refusal→healthy operation, current authority, original receipts, bounds/cancellation, recovery and RF3 evidence required; unsupported AST cannot be ignored."
+      "acceptance": "Complete independently literal success/refusal→healthy operation, current authority, original receipts, bounds/cancellation, recovery and RF3 evidence required; unsupported AST cannot be ignored.",
+      "ordinaryInsertCandidate": {
+        "profile": "TSQL.InsertValues.v1",
+        "contract": "docs/Features/RelationalStorage/OrdinarySqlInsert.md",
+        "identity": "Original SqlOperationRequest.CommandId / unchanged one-shot native connection arm",
+        "atomicity": "Current persisted schema, Text PK, DocsWrite/field/index/row authorization and create-only absence inside original Batch apply gate; complete multirow rollback and original outcomes",
+        "tests": [
+          "SqlTypedInsertWholeFlowTests",
+          "SqlTypedInsertRf3WholeFlowTests"
+        ],
+        "qualified": false,
+        "unsupported": [
+          "INSERT SELECT",
+          "DEFAULT VALUES",
+          "OUTPUT",
+          "schema-qualified targets",
+          "identity/default/computed fields",
+          "foreign keys",
+          "general UPDATE/DELETE/MERGE"
+        ]
+      }
     },
     {
       "id": "SQLC-DDL",
@@ -150,7 +170,7 @@
           "computed/generated/identity columns",
           "storage/index/view/type/sequence/database DDL"
         ],
-        "ordinaryRowSqlInsert": "OPEN; genuine existing typed SDK/MCP/EXEC row operations retain current contracts"
+        "ordinaryRowSqlInsert": "SOURCE CANDIDATE TSQL.InsertValues.v1; owning canonical ordinary typed INSERT contract, whole runtime/Linux qualification OPEN"
       }
     },
     {

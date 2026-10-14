@@ -8,14 +8,15 @@ internal static class RequestCqrsAnnWholeFlow
     {
         var token = TestContext.Current!.Execution.CancellationToken;
         var request = await RequestCqrsAnnTestData.SeedAsync(fixture, token);
-        await RequestCqrsAnnEnrollmentFlow.ReserveAsync(fixture, request, token);
+        var originalReservationBytes = await RequestCqrsAnnEnrollmentFlow.ReserveAsync(fixture, request, token);
         var before = fixture.Database.Store.Position;
         var beforeJournal = fixture.Database.ReadJournalCut().LastIndex;
         var built = await RequestCqrsAnnInvocation.RunAsync(fixture, request, token);
-        await RequestCqrsAnnEnrollmentFlow.RequireSettledAsync(fixture, request, built.Result);
+        await RequestCqrsAnnEnrollmentFlow.RequireSettledAsync(fixture, request, built.Result, originalReservationBytes);
         await RequestCqrsAnnResultAssertions.RequireAsync(fixture, request, built.Result, before, changed: false, token);
         await RequestCqrsAnnCheckpointAssertions.RequireAsync(fixture, request, built.Result, beforeJournal);
         await RequestCqrsAnnCheckpointReplay.RunAsync(fixture, request, built.Result, token);
+        await RequestCqrsAnnGraphIdentityReplay.RequireAsync(fixture, request, built.Result, token);
         await RequestCqrsAnnOriginalReplay.RequireAsync(fixture, request, built.Result, token);
         await RequestCqrsAnnOriginalReplay.RefuseChangedAsync(fixture, request, token);
         await RequestCqrsAnnOriginalReplay.RequireAsync(fixture, request, built.Result, token);

@@ -15,7 +15,7 @@ internal static class AnnMaintenanceInitialEnrollment
         if (configured is null)
         { return request; }
         var initial = configured.InitialAnnMaintenance is { } original
-            && NativeSerialization.Serialize(original).AsSpan().SequenceEqual(NativeSerialization.Serialize(request))
+            && global::KeyLoad.AnnMaintenanceRequestIdentity.Same(original, request)
             ? original : null;
         var configureId = AnnMaintenanceChildIdentity.Create(request.CommandId,
             AnnMaintenancePhase.Configure, InitialSequence);

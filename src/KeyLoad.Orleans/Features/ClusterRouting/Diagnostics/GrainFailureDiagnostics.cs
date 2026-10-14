@@ -22,13 +22,13 @@ internal enum GrainFailureCategory
 internal static class GrainFailureDiagnostics
 {
     private const int FailureEventId = 3;
-    private const string FailureMessage = "Orleans request rejected: {RequestId} at {Stage} ({Category}) with {ErrorCode}; movement guard {MovementOwnerGuard}.";
+    private const string FailureMessage = "Orleans request rejected: {RequestId} at {Stage} ({Category}) with {ErrorCode}; movement guard {MovementOwnerGuard}; parent operands {ParentReadOperands}.";
     private const string StageMetadataKeyValue = "KeyLoad.Orleans.ClusterRouting.GrainFailureStage";
-    private static readonly Action<ILogger, Guid, GrainFailureStage, GrainFailureCategory, ErrorCode, global::KeyLoad.Core.PartitionMoveOwnerGuard, Exception?> LogRejected =
-        LoggerMessage.Define<Guid, GrainFailureStage, GrainFailureCategory, ErrorCode, global::KeyLoad.Core.PartitionMoveOwnerGuard>(LogLevel.Warning,
+    private static readonly Action<ILogger, Guid, GrainFailureStage, GrainFailureCategory, ErrorCode, global::KeyLoad.Core.PartitionMoveOwnerGuard, string, Exception?> LogRejected =
+        LoggerMessage.Define<Guid, GrainFailureStage, GrainFailureCategory, ErrorCode, global::KeyLoad.Core.PartitionMoveOwnerGuard, string>(LogLevel.Warning,
             new EventId(FailureEventId), FailureMessage);
-    private static readonly Action<ILogger, Guid, GrainFailureStage, GrainFailureCategory, ErrorCode, global::KeyLoad.Core.PartitionMoveOwnerGuard, Exception?> LogUnexpected =
-        LoggerMessage.Define<Guid, GrainFailureStage, GrainFailureCategory, ErrorCode, global::KeyLoad.Core.PartitionMoveOwnerGuard>(LogLevel.Error,
+    private static readonly Action<ILogger, Guid, GrainFailureStage, GrainFailureCategory, ErrorCode, global::KeyLoad.Core.PartitionMoveOwnerGuard, string, Exception?> LogUnexpected =
+        LoggerMessage.Define<Guid, GrainFailureStage, GrainFailureCategory, ErrorCode, global::KeyLoad.Core.PartitionMoveOwnerGuard, string>(LogLevel.Error,
             new EventId(FailureEventId), FailureMessage);
 
     /// <summary>Names the private exception data entry used for an optional closed stage marker.</summary>
@@ -78,7 +78,8 @@ internal static class GrainFailureDiagnostics
         var category = Category(error, stage);
         var safeCode = Enum.IsDefined(code) ? code : ErrorCode.OwnershipLost;
         var write = category == GrainFailureCategory.Unexpected ? LogUnexpected : LogRejected;
-        write(logger, requestId, stage, category, safeCode, global::KeyLoad.Core.PartitionMoveOwnerDiagnostic.Read(error), null);
+        write(logger, requestId, stage, category, safeCode, global::KeyLoad.Core.PartitionMoveOwnerDiagnostic.Read(error),
+            global::KeyLoad.Core.PartitionMoveParentReadDiagnostic.ReadText(error), null);
         ReplicaReadFailureLog.Observe(logger, error, requestId);
     }
 

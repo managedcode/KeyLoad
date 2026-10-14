@@ -11,7 +11,7 @@ internal static class RequestCqrsAnnEnrollmentFlow
     private const long InitialCheckpoint = 0;
     private const string ProjectionBatchPurpose = "projection-batch";
 
-    internal static async Task ReserveAsync(RequestCqrsClusterFixture fixture,
+    internal static async Task<byte[]> ReserveAsync(RequestCqrsClusterFixture fixture,
         AnnMaintenanceRequest original, CancellationToken token)
     {
         var configureId = AnnMaintenanceChildIdentity.Create(original.CommandId,
@@ -36,11 +36,14 @@ internal static class RequestCqrsAnnEnrollmentFlow
             InitialAnnMaintenanceSettled = false
         }, configured);
         await RequestCqrsAnnOriginalReplay.RefuseUnsettledAsync(fixture, original, token);
-        await RequestCqrsAnnAssertions.EqualAsync(configured, Current(fixture, original));
+        var persisted = Current(fixture, original);
+        await RequestCqrsAnnAssertions.EqualAsync(configured, persisted);
+        return NativeSerialization.Serialize(persisted.InitialAnnMaintenance
+            ?? throw new InvalidOperationException());
     }
 
     internal static async Task RequireSettledAsync(RequestCqrsClusterFixture fixture,
-        AnnMaintenanceRequest original, AnnMaintenanceResult result)
+        AnnMaintenanceRequest original, AnnMaintenanceResult result, byte[] originalReservationBytes)
     {
         var current = Current(fixture, original);
         var authority = current.MaintenanceAuthority ?? throw new InvalidOperationException();
@@ -72,7 +75,7 @@ internal static class RequestCqrsAnnEnrollmentFlow
             RequestCqrsAnnTestData.Principal, authority.PolicyEpoch,
             AnnMaintenanceChildIdentity.Create(original.CommandId, AnnMaintenancePhase.Configure, InitialCheckpoint),
             original.Consumer, original.IndexGeneration, original.CommandId,
-            SHA256.HashData(NativeSerialization.Serialize(original)), SHA256.HashData(NativeSerialization.Serialize(result)),
+            SHA256.HashData(originalReservationBytes), SHA256.HashData(NativeSerialization.Serialize(result)),
             RequestCqrsAnnTestData.OriginalTail, original.NodeId, original.Placement, page.ExpiresAt, child), claims);
         await RequestCqrsAnnAssertions.EqualAsync(new ProjectionBatchClaims(ProjectionBatchPurpose,
             fixture.Database.Store.Identity.Incarnation, original.Consumer, original.IndexGeneration,

@@ -16,8 +16,13 @@ internal sealed class PartitionMovementReceiverReads(PartitionMovementReceiverCo
             expiry, work, cancellationToken).ConfigureAwait(false);
         var canonical = state.Selected
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMovementProtocol.InvalidProof);
-        if (!NativeSerialization.Serialize(canonical).AsSpan().SequenceEqual(NativeSerialization.Serialize(original)))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMovementProtocol.InvalidProof); }
+        var canonicalBytes = NativeSerialization.Serialize(canonical);
+        var originalBytes = NativeSerialization.Serialize(original);
+        if (!canonicalBytes.AsSpan().SequenceEqual(originalBytes))
+        {
+            throw global::KeyLoad.Core.PartitionMoveParentReadDiagnostic.PhaseMismatch(
+            Errors.Fail(ErrorCode.OwnershipLost, PartitionMovementProtocol.InvalidProof), canonicalBytes, originalBytes);
+        }
         return state.SelectedOriginalOutcome
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMovementProtocol.Unavailable);
     }
@@ -36,7 +41,10 @@ internal sealed class PartitionMovementReceiverReads(PartitionMovementReceiverCo
         var reply = await context.ExecuteSignedAsync(principal, requestId, Guid.Empty, signed, command: false,
             cancellationToken).ConfigureAwait(false);
         if (reply.Error is { } code)
-        { throw Errors.Fail(code, reply.SafeDetail ?? PartitionMovementProtocol.Unavailable); }
+        {
+            throw global::KeyLoad.Core.PartitionMoveParentReadDiagnostic.Propagated(
+            Errors.Fail(code, reply.SafeDetail ?? PartitionMovementProtocol.Unavailable));
+        }
         var value = GrainNativePayload.Read<GrainValue>(reply.Payload).Value as PartitionMovementParentStateResult
             ?? throw Errors.Fail(ErrorCode.Corruption, PartitionMovementProtocol.InvalidProof);
         work.ImportReadGrant(grant, value.ReadBytes, value.ExaminedRecords);

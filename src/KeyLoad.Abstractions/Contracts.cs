@@ -171,6 +171,7 @@ public sealed record CommandOutcome([property: Orleans.Id(0)] string Fingerprint
 /// <summary>Defines one resource mutation included in a command.</summary>
 /// <param name="Resource">Identifies the resource scope or mutation target.</param>
 [JsonPolymorphic(TypeDiscriminatorPropertyName = MutationDiscriminatorNames.Property)]
+[JsonDerivedType(typeof(InsertTypedRow), RelationalInsertProtocol.MutationKind)]
 [JsonDerivedType(typeof(PutDocument), MutationDiscriminatorNames.PutDocument)]
 [JsonDerivedType(typeof(PatchDocument), MutationDiscriminatorNames.PatchDocument)]
 [JsonDerivedType(typeof(DeleteDocument), MutationDiscriminatorNames.DeleteDocument)]

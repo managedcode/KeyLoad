@@ -15,7 +15,7 @@ public sealed partial class DatabaseEngine
         { throw Errors.Fail(ErrorCode.Validation, PartitionMoveProtocol.Invalid); }
         foreach (var mutation in command.Mutations)
         {
-            if (mutation is not (PutDocument or PatchDocument or DeleteDocument))
+            if (mutation is not (InsertTypedRow or PutDocument or PatchDocument or DeleteDocument))
             { throw Errors.Fail(ErrorCode.UnsupportedCapability, UnsupportedMutationMessage); }
             ValidateMutationStructure(mutation);
         }

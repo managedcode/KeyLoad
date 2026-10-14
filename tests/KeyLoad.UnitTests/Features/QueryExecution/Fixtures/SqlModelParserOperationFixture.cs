@@ -9,6 +9,8 @@ internal sealed class SqlModelParserOperationFixture : IDisposable
 {
     private readonly TestDatabase original = new();
     private (ReplicatedOperation Operation, CommitReceipt Receipt)? seed;
+    private const long DeniedPolicyEpoch = 1;
+    private const long RepairedPolicyEpoch = 2;
     private const string SeedRequired = "The original acknowledged model seed is required.";
     private const string HeaderPath = "/privateHeader";
     private const string PrivateTag = "private";
@@ -55,7 +57,8 @@ internal sealed class SqlModelParserOperationFixture : IDisposable
     {
         var record = new PrincipalRecord(SqlModelParserOperationData.Reader, Partition.TenantId,
             [new(Partition.DatabaseId, SqlModelViewTestSupport.StreamSet, Capability.Query | (repaired ? Capability.EventsRead : Capability.None)),
-             new(Partition.DatabaseId, SqlModelViewTestSupport.Queue, Capability.Query | (repaired ? Capability.QueueInspect : Capability.None))], [SecretRead, SecretUse, HeaderRead, HeaderUse]);
+             new(Partition.DatabaseId, SqlModelViewTestSupport.Queue, Capability.Query | (repaired ? Capability.QueueInspect : Capability.None))], [SecretRead, SecretUse, HeaderRead, HeaderUse])
+        { PolicyEpoch = repaired ? RepairedPolicyEpoch : DeniedPolicyEpoch };
         return Owner.Apply(Operation(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(record), Guid.NewGuid()))
             .Get<PrincipalRecord>();
     }

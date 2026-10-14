@@ -26,7 +26,7 @@ public sealed partial class DatabaseEngine
         var initial = Store.Read(view => ProjectionConsumer(view, original.Consumer));
         if (initial.InitialAnnMaintenance is not { } reserved)
         { return null; }
-        if (!NativeSerialization.Serialize(reserved).AsSpan().SequenceEqual(NativeSerialization.Serialize(original)))
+        if (!global::KeyLoad.AnnMaintenanceRequestIdentity.Same(reserved, original))
         {
             if (!initial.InitialAnnMaintenanceSettled)
             { throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidAnnSettlement); }
@@ -49,7 +49,7 @@ public sealed partial class DatabaseEngine
             if (state.Released || state.Checkpoint != checkpoint
                 || state.Definition.IndexGeneration != original.IndexGeneration
                 || state.InitialAnnMaintenance is not { } exact
-                || !NativeSerialization.Serialize(exact).AsSpan().SequenceEqual(NativeSerialization.Serialize(original))
+                || !global::KeyLoad.AnnMaintenanceRequestIdentity.Same(exact, original)
                 || childCommandId == Guid.Empty || result.CommandId != original.CommandId
                 || result.Consumer != original.Consumer || result.IndexGeneration != original.IndexGeneration)
             { throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidAnnSettlement); }
@@ -59,7 +59,7 @@ public sealed partial class DatabaseEngine
             var proof = new AnnProjectionSettlementClaims(AnnProjectionSettlementClaims.SettlementPurpose,
                 Store.Identity.Incarnation, fresh.Id, fresh.PolicyEpoch, authority.ConfigureCommandId,
                 original.Consumer, original.IndexGeneration, original.CommandId,
-                System.Security.Cryptography.SHA256.HashData(NativeSerialization.Serialize(original)),
+                System.Security.Cryptography.SHA256.HashData(NativeSerialization.Serialize(exact)),
                 System.Security.Cryptography.SHA256.HashData(NativeSerialization.Serialize(result)),
                 checkpoint, original.NodeId, original.Placement, batch.ExpiresAt, childCommandId);
             if (CoreNativeClaims.MeasureCharacters(proof) > ClaimsExecution.MaximumTokenCharacters)

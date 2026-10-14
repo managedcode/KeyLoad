@@ -110,7 +110,7 @@ public sealed partial class DatabaseEngine
         { return null; }
         var command = Payload<CommandRequest>(operation);
         return !command.Mutations.IsDefaultOrEmpty
-            && command.Mutations.All(static mutation => mutation is PutDocument or PatchDocument or DeleteDocument)
+            && command.Mutations.All(static mutation => mutation is InsertTypedRow or PutDocument or PatchDocument or DeleteDocument)
                 ? command : null;
     }
 

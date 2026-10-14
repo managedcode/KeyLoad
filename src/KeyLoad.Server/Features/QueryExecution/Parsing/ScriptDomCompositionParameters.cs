@@ -32,6 +32,26 @@ internal sealed class ScriptDomCompositionParameters(Dictionary<string, global::
         if (parameters is null || parameters.Count != used.Count)
         { throw ScriptDomOperationErrors.Invalid(); }
     }
+    internal global::System.Text.Json.JsonElement ReadScalar(Dom.ScalarExpression expression)
+    {
+        checkBudget();
+        token.ThrowIfCancellationRequested();
+        var name = Name(expression);
+        if (parameters is null || !parameters.TryGetValue(name, out var value))
+        { throw ScriptDomOperationErrors.Invalid(); }
+        used.Add(name);
+        return value;
+    }
+
+    internal void CompleteOptional()
+    {
+        checkBudget();
+        token.ThrowIfCancellationRequested();
+        if ((parameters?.Count ?? EmptyCount) != used.Count)
+        { throw ScriptDomOperationErrors.Invalid(); }
+    }
+    private const int EmptyCount = 0;
+
     private string Name(Dom.ScalarExpression expression)
     {
         if (expression is Dom.PrimaryExpression { Collation: not null })

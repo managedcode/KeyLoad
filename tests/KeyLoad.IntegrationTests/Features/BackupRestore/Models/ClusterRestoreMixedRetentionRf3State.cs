@@ -6,6 +6,7 @@ namespace KeyLoad.IntegrationTests.Features.BackupRestore;
 internal sealed class ClusterRestoreMixedRetentionRf3State(QueueLifecyclePublicState queue,
     PrincipalRecord principal, PrincipalRecord inspector, PhysicalShardRecord sourceOwner, PhysicalShardRecord targetOwner)
 {
+    internal global::KeyLoad.IntegrationTests.Features.EventStreams.RetentionAckArchiveR53State? AcknowledgedRetention { get; set; }
     internal QueueLifecyclePublicState OriginalQueue { get; } = queue;
     internal QueueLifecyclePublicState CurrentQueue { get; } = new(queue.Partition, queue.OperatorKey, queue.DeniedKey, queue.Route);
     internal PrincipalRecord Principal { get; } = principal;
