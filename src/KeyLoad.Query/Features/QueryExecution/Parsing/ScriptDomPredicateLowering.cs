@@ -20,7 +20,7 @@ internal static class ScriptDomPredicateLowering
             Dom.DistinctPredicate distinct => SqlDistinctPredicate.Lower(Operand(distinct.FirstExpression),
                 Operand(distinct.SecondExpression), distinct.IsNot),
             Dom.BooleanComparisonExpression comparison => Compare(comparison, Operand),
-            Dom.BooleanIsNullExpression test => new NullTest(Operand(test.Expression), test.IsNot, false),
+            Dom.BooleanIsNullExpression test => ScriptDomNullPredicateLowering.Read(test, Operand(test.Expression), context, depth),
             Dom.BooleanTernaryExpression range => Range(range, Operand),
             Dom.InPredicate membership => Membership(membership, Operand, context),
             _ => throw ScriptDomErrors.Unsupported()

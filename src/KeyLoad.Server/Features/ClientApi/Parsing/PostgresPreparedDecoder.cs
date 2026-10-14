@@ -36,7 +36,19 @@ internal static class PostgresPreparedDecoder
         global::KeyLoad.Features.QueryExecution.ScriptDomSyntax.ValidateNativeSessionSlots(syntax,
             positionalParameterCount, token.ThrowIfCancellationRequested, token);
         var rows = global::KeyLoad.Features.QueryExecution.ScriptDomSyntax.HasQueryRows(syntax);
-        if (!rows && syntax is not (global::Microsoft.SqlServer.TransactSql.ScriptDom.ExecuteStatement
+        if (syntax is global::Microsoft.SqlServer.TransactSql.ScriptDom.CreateTableStatement table)
+        {
+            if (positionalParameterCount != PostgresProtocol.AllRows)
+            { throw Errors.Fail(ErrorCode.Validation, PostgresProtocol.Invalid); }
+            _ = ScriptDomCreateTableSyntax.Read(table, limitsOptions, token.ThrowIfCancellationRequested, token);
+        }
+        else if (syntax is global::Microsoft.SqlServer.TransactSql.ScriptDom.SetCommandStatement control)
+        {
+            if (positionalParameterCount != PostgresProtocol.AllRows)
+            { throw Errors.Fail(ErrorCode.Validation, PostgresProtocol.Invalid); }
+            _ = ScriptDomContextIdentity.Read(control, token.ThrowIfCancellationRequested, token);
+        }
+        else if (!rows && syntax is not (global::Microsoft.SqlServer.TransactSql.ScriptDom.ExecuteStatement
             or global::Microsoft.SqlServer.TransactSql.ScriptDom.InsertStatement))
         { throw Errors.Fail(ErrorCode.UnsupportedCapability, PostgresProtocol.Unsupported); }
         var joinedInsert = syntax is global::Microsoft.SqlServer.TransactSql.ScriptDom.InsertStatement

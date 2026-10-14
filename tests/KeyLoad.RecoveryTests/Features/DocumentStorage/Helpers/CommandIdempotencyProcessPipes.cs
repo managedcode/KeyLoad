@@ -11,6 +11,8 @@ internal sealed class CommandIdempotencyProcessPipes
     private readonly string? expectedSignal;
     private readonly TaskCompletionSource<Exception> pipeFailure = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private CommandIdempotencyProcessOutputReader? outputReader;
+    private CommandIdempotencyProcessOutputReader? errorReader;
+    private bool? nativeOutputWitnessHold;
     private Task? standardOutput;
     private Task? standardError;
     private Task? readersJoined;
@@ -27,6 +29,9 @@ internal sealed class CommandIdempotencyProcessPipes
         this.expectedSignal = expectedSignal;
     }
 
+    internal void EnableNativeOutputWitness(bool hold) => nativeOutputWitnessHold = hold;
+    internal Task ReportNativeOutputWitnessAsync(List<Exception> failures)
+        => CommandIdempotencyProcessOutputWitness.ReportAsync(nativeOutputWitnessHold, outputReader, standardOutput, errorReader, standardError, failures);
     internal Task<Exception> FailureTask => pipeFailure.Task;
     internal bool ReadersSettled => (standardOutput is null || standardOutput.IsCompleted)
         && (standardError is null || standardError.IsCompleted);
@@ -121,7 +126,7 @@ internal sealed class CommandIdempotencyProcessPipes
     {
         try
         {
-            var errorReader = new CommandIdempotencyProcessOutputReader(maximumCharacters,
+            errorReader = new CommandIdempotencyProcessOutputReader(maximumCharacters,
                 expectedSignal: null, pipeFailure);
             standardError = errorReader.ReadAsync(error);
         }

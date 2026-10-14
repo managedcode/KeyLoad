@@ -39,7 +39,7 @@ internal sealed class PostgresMessageDispatch(IServiceProvider services, global:
         var (name, rows) = Execution(frame.Payload);
         var portal = catalog.Portal(name);
         await PostgresOperationDelivery.ExecuteAsync(services, writer, owner, identity, partition,
-            portal, rows, cancellation, Options, admission, describe: false, closed).ConfigureAwait(false);
+            portal, rows, cancellation, Options, admission, catalog, describe: false, closed).ConfigureAwait(false);
     }
 
     private (string Name, int Rows) Execution(ReadOnlySpan<byte> payload)

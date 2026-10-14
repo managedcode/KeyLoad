@@ -17,11 +17,13 @@ internal sealed class SqlModelViewParserTests
         await Assert.That(events.ModelSource).IsEqualTo(new ModelQuerySource(ModelQuerySourceKind.Events,
             SqlModelViewTestSupport.StreamId, 3));
         await Assert.That(((FieldOperand)((Comparison)events.Filter!).Left).Path).IsEqualTo("/payload/visible");
-        await Assert.That(events.Order[0].Path).IsEqualTo("/@revision");
+        await Assert.That(events.Order[0].Path).IsEqualTo("/revision");
         await Assert.That(queue.Collection).IsEqualTo(SqlModelViewTestSupport.Queue);
         await Assert.That(queue.ModelSource).IsEqualTo(new ModelQuerySource(ModelQuerySourceKind.QueueMessages,
             SqlModelViewTestSupport.Queue));
         await Assert.That(queue.Alias).IsEqualTo("q");
+        await Assert.That(queue.Order[0].Path).IsEqualTo("/id");
+        await SqlModelParserOperationFlow.RunAsync();
     }
 
     [Test]

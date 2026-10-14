@@ -9,7 +9,9 @@ internal sealed class CommandIdempotencyProcessOutputReader
     private const string AcknowledgementFailure = "The original command process did not finish its pre-restart retries.";
     private const string ChildSignalFailure = "The original document recovery child did not emit its required boundary signal.";
     private const string OutputLimitFailure = "The document command CrashHost output exceeded its fixed bound.";
-    private readonly int maximumCharacters;
+    private const int WitnessUnreported = 0;
+    private const int WitnessReported = 1;
+    private int witnessReported;
     private readonly string? expectedSignal;
     private readonly TaskCompletionSource<Exception> pipeFailure;
     private readonly TaskCompletionSource<bool> acknowledgement = new(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -17,12 +19,18 @@ internal sealed class CommandIdempotencyProcessOutputReader
     internal CommandIdempotencyProcessOutputReader(int maximumCharacters, string? expectedSignal,
         TaskCompletionSource<Exception> pipeFailure)
     {
-        this.maximumCharacters = maximumCharacters;
+        WitnessLimit = maximumCharacters;
         this.expectedSignal = expectedSignal;
         this.pipeFailure = pipeFailure;
     }
 
     internal Task<bool> Acknowledgement => acknowledgement.Task;
+    internal int WitnessLimit { get; }
+    internal int WitnessTotal { get; private set; }
+    internal int WitnessFirstCrossing { get; private set; }
+    internal Exception? WitnessEarlyFailure { get; private set; }
+    internal Exception? WitnessTerminalFailure { get; private set; }
+    internal bool TryMarkWitnessReported() => Interlocked.Exchange(ref witnessReported, WitnessReported) == WitnessUnreported;
 
     internal async Task ReadAsync(StreamReader reader)
     {
@@ -64,6 +72,7 @@ internal sealed class CommandIdempotencyProcessOutputReader
         while ((read = await reader.ReadAsync(buffer.AsMemory(), CancellationToken.None)) != 0)
         {
             characters = checked(characters + read);
+            WitnessTotal = characters;
             if (!exceeded)
             {
                 exceeded = RecordOutputLimit(characters);
@@ -80,7 +89,9 @@ internal sealed class CommandIdempotencyProcessOutputReader
         }
         if (exceeded)
         {
-            throw new InvalidOperationException(OutputLimitFailure);
+            var failure = new InvalidOperationException(OutputLimitFailure);
+            WitnessTerminalFailure = failure;
+            throw failure;
         }
         if (invalidAcknowledgement)
         {
@@ -90,11 +101,13 @@ internal sealed class CommandIdempotencyProcessOutputReader
 
     private bool RecordOutputLimit(int characters)
     {
-        if (characters <= maximumCharacters)
+        if (characters <= WitnessLimit)
         {
             return false;
         }
         var failure = new InvalidOperationException(OutputLimitFailure);
+        WitnessEarlyFailure = failure;
+        WitnessFirstCrossing = characters;
         pipeFailure.TrySetResult(failure);
         FailAcknowledgement(failure);
         return true;

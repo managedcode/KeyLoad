@@ -28,8 +28,7 @@ internal sealed class PostgresSessionLoop(IServiceProvider services, global::Mic
                 switch (frame.Type)
                 {
                     case PostgresMessageProtocol.Sync:
-                        Empty(frame.Payload);
-                        catalog.Sync();
+                        Sync(frame.Payload, draining);
                         draining = false;
                         writer.Ready();
                         await PostgresControlFlush.RunAsync(services, writer, context.ConnectionClosed).ConfigureAwait(false);
@@ -62,10 +61,19 @@ internal sealed class PostgresSessionLoop(IServiceProvider services, global::Mic
         }
     }
 
+    private void Sync(byte[] payload, bool errorRecovery)
+    {
+        Empty(payload);
+        catalog.Sync();
+        if (errorRecovery)
+        { catalog.ClearMutationIdentity(); }
+    }
+
     private async Task FailureAsync(Exception original, bool simple, ServerConnectionFeature owner,
         PostgresSessionIdentity identity, CancellationToken closed)
     {
         var failures = new List<Exception>();
+        ServerFailureObserver.Observe(catalog.ClearMutationIdentity, failures);
         var probe = global::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetService<PostgresErrorDeliveryProbe>(services);
         await ServerFailureObserver.ObserveAsync(async () =>
         {
@@ -96,7 +104,7 @@ internal sealed class PostgresSessionLoop(IServiceProvider services, global::Mic
         var portal = new PostgresBoundPortal(statement, new Dictionary<string, JsonElement>(StringComparer.Ordinal),
             PostgresProtocol.TextFormat, statement.RetainedBytes);
         await PostgresOperationDelivery.ExecuteAsync(services, writer, owner, identity, partition,
-            portal, PostgresProtocol.AllRows, cancellation, Options, admission, describe: true, closed).ConfigureAwait(false);
+            portal, PostgresProtocol.AllRows, cancellation, Options, admission, catalog, describe: true, closed).ConfigureAwait(false);
     }
 
     private string SimpleSql(ReadOnlySpan<byte> bytes)

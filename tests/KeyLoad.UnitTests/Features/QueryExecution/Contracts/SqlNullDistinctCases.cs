@@ -182,6 +182,7 @@ internal static class SqlNullDistinctCases
         new("score = 79228162514264337593543950335 /* retained literal 105 */", new Comparison(Score, "=", ValueOperand.Create(decimal.MaxValue)), []),
         new("score = 79228162514264337593543950335 /* retained literal 106 */", new Comparison(Score, "=", ValueOperand.Create(decimal.MaxValue)), []),
         .. SqlUnicodeIdentifierCases.All,
+        .. SqlNullDistinctNativeNullCases.All,
     ];
     internal static Logical And(Predicate left, Predicate right) => new(left, "AND", right);
     internal static Logical Or(Predicate left, Predicate right) => new(left, "OR", right);

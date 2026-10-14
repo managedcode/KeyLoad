@@ -45,8 +45,8 @@ delta retention/catalog cutover and actual multi-shard fan-out remain required.
 
 ```mermaid
 flowchart LR
-    Caller[Agent SQL SDK MCP] --> Request[One authorized Orleans request]
-    Request --> Tx[Same partition ordered RF3 ZoneTree transaction]
+    Caller[Agent SQL SDK MCP] --> Connection[Server owned Orleans connection grain]
+    Connection --> Tx[Authorized same partition ordered RF3 ZoneTree transaction]
     Tx --> Source[Ready queue links or visible graph traversal]
     Source --> Refs[Canonical document and typed row references]
     Refs --> Effects[Graph edges or queued actions]
@@ -81,6 +81,12 @@ native APIs under node-local ownership. [NativeFullTextProjection](Features/Sear
 defines the integration, correctness, recovery, resource and performance gates.
 Provider selection is fixed; acceleration requires comparable measurements.
 
+[ADR-132](ADR/ADR-132-native-create-table-command-identity.md) defines the
+[bounded CREATE TABLE operation](Features/RelationalStorage/CreateTable.md),
+caller-stable SQL command identity and the existing connection-owned execution
+path. Canonical typed resources remain in ZoneTree behind the ordered RF3 apply
+gate. Complete DDL and SQL/client qualification remain open.
+
 [ADR-068](ADR/ADR-068-native-benchmark-gate-repair.md) preserves isolated benchmark
 startup authority: original bounded job discovery joins authenticated metadata for
 the same job ID before native allocation. Still-queued metadata has three bounded
@@ -89,18 +95,20 @@ and complete native cohort/site qualification remain open.
 
 ```mermaid
 classDiagram
-    SqlParser --> SqlTriviaReader : bounded token trivia
-    SqlOperationSyntaxReader --> SqlTriviaReader : canonical CALL trivia
-    SqlWriteClassifier --> SqlTriviaReader : conservative SDK outcomes
-    SqlOperationCompiler --> CanonicalOperationGateway : unchanged authority
+    ScriptDomSyntax --> TSqlParser : bounded native grammar
+    SqlOperationCompiler --> ScriptDomSyntax : selected syntax
+    SqlOperationCompiler --> SqlOriginalMutationIdentity : original command identity
+    SqlOperationCompiler --> McpDecodedOperation : canonical typed plan
+    ScriptDomCreateTableOperation --> ScriptDomCreateTableSyntax : closed schema
+    CanonicalConnectionDispatch --> McpDecodedOperation : authorized execution
 ```
 
 ```mermaid
 flowchart LR
     Agent[AI agent SQL SDK MCP] --> Server[One server API]
-    Server --> SQL[Versioned SELECT and CALL compiler]
+    Server --> SQL[Versioned TSQL SELECT and EXEC compiler]
     SQL --> Gateway[Existing signed Orleans gateway]
-    Gateway --> Host[Node local PartitionHost RF3]
+    Gateway --> Host[Connection routed node local PartitionHost RF3]
     Host --> Entity[Canonical documents and typed rows]
     Host --> Models[Graph search events queues series blobs]
     Entity --> Models

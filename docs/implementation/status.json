@@ -2099,7 +2099,7 @@
       "remaining": "15 SQL semantic/caller cases, two genuine mixed-cut original source-conservation cases and three native cluster cases remain. Mixed-cut healthy restore/cold continuation is not reached; an added acknowledged seed commit must be accounted for independently. Original native cancellation and translated unknown-write outcomes remain causal investigations. Independent CREATE/SQL identity, auth/composition callers, changefeed and catalog packets continue; required final gates remain open."
     },
     "currentStageR49": {
-      "classification": "current completed local development checkpoint; full task/whole Linux/RF3/coverage/endurance/performance remain open",
+      "classification": "Preceding completed local development checkpoint; immutable original results retained",
       "nativeQuality": {
         "errors": 0,
         "warnings": 0,
@@ -2121,7 +2121,15 @@
       "governance": "PASS27projects4modules",
       "nativeCensus": {
         "unit": 3882,
-        "classification": "discovery only"
+        "classification": "Discovery returned3882entries including7fixture DataGenerationError placeholders; this is not a complete executable case universe or coverage qualification.",
+        "unitEntries": 3882,
+        "fixtureDataGenerationErrorPlaceholders": 7,
+        "otherNativeEntries": 3875,
+        "validExecutableUniverseProven": false,
+        "subsequentAudit": {
+          "path": "TestResults/stage61-native-join/root-r50-r49-native-census-fixture-placeholder-audit.original.json",
+          "sha256": "b000ce9e02dc883f31859827a5ea6da8c78c8834e72f1104ca3a4280519f3996"
+        }
       },
       "cleanNativeWholeClasses": {
         "classes": 119,
@@ -2222,6 +2230,210 @@
         "complete functional coverage excluding load tests",
         "fault/endurance/power-loss and matched native1/3-node performance"
       ]
+    },
+    "currentStageR50": {
+      "classification": "Current completed source-matched instrumented local development checkpoint; full task/Linux/RF3/recovery/functional coverage/endurance/performance remain open",
+      "implemented": [
+        "native T-SQL CREATE TABLE with original caller command identity, signed connection admission and atomic create-only schema outcomes; ADR132",
+        "native token-origin NULL-distinct lowering without changing ordinary NULL/Missing truth",
+        "KL066 six actual SDK/MCP SQL/AST policy routes and two RF3 cold waves authored, public runtime pending",
+        "KL078 independently authored257/258 two-block corruption/repair/replay/two-cold whole flows",
+        "original ModelView parser case expanded to native whole operation; discovered policy epoch test defect remains open",
+        "original movement child output/reader provenance and KL096 safe absent-path delivery public whole flows authored, public runtime pending"
+      ],
+      "nativeQuality": {
+        "errors": 0,
+        "warnings": 0,
+        "scope": "Actual native complete quality pass before the solely canonical whitespace correction; full ordinary Release separately confirms0/0"
+      },
+      "fullRelease": {
+        "errors": 0,
+        "warnings": 0,
+        "exitCode": 0,
+        "seconds": 568.6861323339399,
+        "originalPriorFailedBuildRetained": true
+      },
+      "canonicalFormat": {
+        "applyExitCode": 0,
+        "verifyExitCode": 0,
+        "verifySeconds": 156.91756133397575,
+        "originalOneWhitespaceFailedVerificationRetained": true
+      },
+      "nativeCensus": {
+        "unitEntries": 3885,
+        "fixtureDataGenerationErrorPlaceholders": 7,
+        "validExecutableUniverseProven": false,
+        "classification": "Direct discovery placeholders are not case enrollment or constructor-failure proof; actual runner constructed all13 original variants in these four classes"
+      },
+      "instrumentedNativeWholeClasses": {
+        "classes": 125,
+        "discoverySelectedEntries": 441,
+        "discoveryPlaceholders": 7,
+        "executed": 447,
+        "passed": 440,
+        "failed": 7,
+        "skipped": 0,
+        "seconds": 111.46033029200044,
+        "nativeMaximumParallelTests": 50,
+        "peakRecordedTrxIntervals": 50,
+        "allPrior431TestIdsRetained": true,
+        "priorFailuresNowPassed": 2,
+        "priorFailuresRetained": 5,
+        "previousPassRegressions": 0,
+        "additionalActualResults": 16,
+        "additionalPassed": 14,
+        "additionalFailed": 2,
+        "fourOriginalRequestCqrsFixtures": {
+          "originalVariantsConstructed": 13,
+          "passed": 11,
+          "failed": 2
+        },
+        "timingQualification": "Instrumented whole active cohort; no comparable clean latency, simultaneous CPU execution or speed claim"
+      },
+      "newStorageWholeFlows": {
+        "sqlCreateTable": {
+          "passed": 1,
+          "total": 1
+        },
+        "chunkMultiblockBoundary": {
+          "passed": 2,
+          "total": 2
+        },
+        "generationVisibilityOriginalCases": {
+          "passed": 2,
+          "total": 2
+        }
+      },
+      "remainingCaseOwners": {
+        "nativePrepareRetireBm25": 3,
+        "nullWholeFlowForeignDialectWindowDiagnosticOracle": 1,
+        "modelViewPolicyEpochTestSetup": 1,
+        "nativeAnnOriginalConfigureConflict": 2
+      },
+      "sourceClosure": {
+        "gitVisibleFiles": 11371,
+        "allSourceBytesRetained": true,
+        "allDllPdbBytesRetained": true,
+        "sourceManifestSha256": "1de65cbc2683621cc5b539c8e177fabb1590d15632402939243def94692f921c",
+        "unitDllSha256": "fd7f6f3bb34c30c12f02ce6e4861a597498872d51a302894a850c027175f555b",
+        "unitPdbSha256": "29398294632e333b9c836ee33790deaee7c6a277b861e34ee98525486b6b223c",
+        "metadataWrittenAfterRuntimeJoin": true
+      },
+      "profiling": {
+        "actualOwnedInternalPid": 1170,
+        "actualCollectors": [
+          "counters",
+          "gc",
+          "threadpool",
+          "contention"
+        ],
+        "windowSeconds": 10,
+        "cpuSamplingStarted": false,
+        "cpuLimitation": "Native tool canSampleCpu=false because SampleProfiler emitted no events; tool NativeAot label not independently proved and JIT counters nonzero",
+        "gcObservedCollections": 2,
+        "gcDroppedIntervals": 0,
+        "threadpoolAbsenceInference": "inconclusive",
+        "counterAndContentionLoss": "unknown",
+        "diagnosticOverhead": "unknown",
+        "matchedBeforeAfter": false,
+        "hotspotOrSpeedClaim": false,
+        "qualification": "macOS arm64 instrumented development cohort, not Docker database/Linux performance qualification"
+      },
+      "lastDeliveredLinux": {
+        "sha": "bdbc37740beec67903cabdcc2dcd35b8c643d7ea",
+        "runId": 38528187451,
+        "attempt": 1,
+        "conclusion": "failure",
+        "unitStdout": {
+          "total": 1183,
+          "passed": 1080,
+          "failed": 103
+        },
+        "unitTrx": {
+          "total": 1182,
+          "passed": 1080,
+          "failed": 102
+        },
+        "stdoutOnlyFailure": "ActualSixNativeSilosRefuseWrongNamesAndCancellationThenRepairAndFenceRestartedGeneration; original Aspire CreateRenderedResourcesAsync cancellation, nativeUID unavailable",
+        "recovery": {
+          "total": 351,
+          "passed": 349,
+          "failed": 2
+        },
+        "classification": "Both unmodified original Unit counts preserved; this is the preceding delivered source, not R50 Linux acceptance"
+      },
+      "functionalCoverage": "UNMEASURED for current source; canonical enrollment requires a valid full native census; stale R38 failed partial coverage is not current product coverage",
+      "artifacts": [
+        {
+          "path": "TestResults/stage61-native-join/stage64-r50-full-release-coherent.completion.original.json",
+          "sha256": "f4065df6b501bfb14a775324db5cd113b44d96a471ca5f22ac44633fd3888518"
+        },
+        {
+          "path": "TestResults/stage61-native-join/stage64-r50-full-release-after-constraint.completion.original.json",
+          "sha256": "e009009438321c3efe9c4b781b58136fd215e63ac00c4737e21965c6cef6f552"
+        },
+        {
+          "path": "TestResults/stage61-native-join/stage64-r50-canonical-format-apply.completion.original.json",
+          "sha256": "911c10ca6950e2aef8b0b091b969fa5909e689203bff8bbdd540916177128bcf"
+        },
+        {
+          "path": "TestResults/stage61-native-join/stage64-r50-canonical-format-verify.completion.original.json",
+          "sha256": "fc07beb81310b08d22a30d20e2f0ead3a920c0bdf6bcd69452988f2bef9a9ea1"
+        },
+        {
+          "path": "TestResults/stage61-native-join/stage64-r50-canonical-format-verify-after-whitespace.completion.original.json",
+          "sha256": "e112127f7546fac28550ea241df6356b0c2a3335f764bc76ceaa39acead5528c"
+        },
+        {
+          "path": "TestResults/stage61-native-join/stage64-r50-formatted-native-final.root-r50-sole-constraint-repair-current-full-quality.original.json",
+          "sha256": "47b992c8a8986165a7033ef3ff45c86a7e6c2ef61a798f03ede09427add3c210"
+        },
+        {
+          "path": "TestResults/stage61-native-join/stage64-r50-unit-full-native-census-process.original.json",
+          "sha256": "54444fe62ab8392c157637d9293dc723025e7f97c63825b37daf6b51525f0805"
+        },
+        {
+          "path": "TestResults/stage61-native-join/stage64-r50-focused-unit-complete-native-failures.original.json",
+          "sha256": "3b0c6df2cc9858e93e0cb40e68600ab149c1c783f421e19539a4b9eeb2ebda0a"
+        },
+        {
+          "path": "TestResults/stage61-native-join/stage64-r50-focused-unit-postrun-source-compiled-closure.original.json",
+          "sha256": "311b75b6e3df19dfdb2c8996319e1dd2f3b300b054c0bee01918acb0f81fb24d"
+        },
+        {
+          "path": "TestResults/stage61-native-join/stage64-r50-previous-native-result-identity-transition.original.json",
+          "sha256": "e728535b50484ca497dd7fef75f08fcd09f01690bcbcd44455dadb614f76fdf2"
+        },
+        {
+          "path": "TestResults/stage61-native-join/stage64-r50-trx-recorded-overlap.original.json",
+          "sha256": "2055f8886cae2a7fc947f666429deeba34cbf084bd8baf46a24ae1849013b51f"
+        },
+        {
+          "path": "TestResults/stage61-native-join/stage64-r50-discovery-ci-original-provenance-and-causal-findings.original.json",
+          "sha256": "fc116a6eacee40db13bd18ed5b608f30b1ee9b33d2d944250df70961d16f7bb7"
+        },
+        {
+          "path": "TestResults/stage61-native-join/stage64-r51-bdbc-ci-full-unit-recovery-failure-owners.derivation.json",
+          "sha256": "777733d276aa34b26b9374d06ef88ca62d0187a9d0554b5bf261191e4aa7a91e"
+        },
+        {
+          "path": "TestResults/stage61-native-join/stage64-r51-bdbc-ci-stdout-only-six-membership-original-failure.derivation.json",
+          "sha256": "dc80b7e2d8424a00ba234fb707a3c7cd2b901719c9880f1dd44b5561bcb169fa"
+        },
+        {
+          "path": "TestResults/stage61-native-join/r53-root-kl105-r50-pid1170-actual-source-bound-capture-and-quality.report.json",
+          "sha256": "603cf4f67bf15ca142277014f81e0fa219feb621a92b8e1f5eda2089082292fe"
+        }
+      ],
+      "acceptancePromotions": 0,
+      "requiredOpen": [
+        "current complete exact-source Linux acceptance",
+        "genuine SDK/MCP/Npgsql Aspire Docker RF3",
+        "current process recovery",
+        "complete functional coverage excluding load tests",
+        "fault/endurance/power-loss and equivalent native1/3-node performance"
+      ],
+      "governance": "PASS: preserved root prefix,27projects,4modules,required governance/local policies; original native verification exit0"
     }
   },
   "STAGE63-NATIVE-COMPOSITION-001": {
@@ -62920,6 +63132,31 @@
       "scope": "R45 native source diagnostics are clean; profiling observations from older cohorts do not qualify this source.",
       "accepted": false,
       "matchedBeforeAfter": false
+    },
+    "currentStageR50Diagnostics": {
+      "actualOwnedInternalPid": 1170,
+      "actualCollectors": [
+        "counters",
+        "gc",
+        "threadpool",
+        "contention"
+      ],
+      "windowSeconds": 10,
+      "cpuSamplingStarted": false,
+      "cpuLimitation": "Native tool canSampleCpu=false because SampleProfiler emitted no events; tool NativeAot label not independently proved and JIT counters nonzero",
+      "gcObservedCollections": 2,
+      "gcDroppedIntervals": 0,
+      "threadpoolAbsenceInference": "inconclusive",
+      "counterAndContentionLoss": "unknown",
+      "diagnosticOverhead": "unknown",
+      "matchedBeforeAfter": false,
+      "hotspotOrSpeedClaim": false,
+      "qualification": "macOS arm64 instrumented development cohort, not Docker database/Linux performance qualification",
+      "originalReport": {
+        "path": "TestResults/stage61-native-join/r53-root-kl105-r50-pid1170-actual-source-bound-capture-and-quality.report.json",
+        "sha256": "603cf4f67bf15ca142277014f81e0fa219feb621a92b8e1f5eda2089082292fe"
+      },
+      "acceptanceClosed": false
     }
   },
   "AdminDashboard": {

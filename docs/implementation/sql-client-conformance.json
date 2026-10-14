@@ -69,7 +69,7 @@
       "execution": "OPEN: no complete family execution claim",
       "qualified": false,
       "requirement": "REQ-SQLC-006 / AC-SQLC-006",
-      "acceptance": "Complete independently literal success/refusal\u2192healthy operation, current authority, original receipts, bounds/cancellation, recovery and RF3 evidence required; unsupported AST cannot be ignored."
+      "acceptance": "Complete independently literal success/refusal→healthy operation, current authority, original receipts, bounds/cancellation, recovery and RF3 evidence required; unsupported AST cannot be ignored."
     },
     {
       "id": "SQLC-READ",
@@ -78,7 +78,7 @@
       "execution": "Source: bounded SELECT lowering to existing typed plans; exact selected nodes only.",
       "qualified": false,
       "requirement": "REQ-SQLC-006 / AC-SQLC-006",
-      "acceptance": "Complete independently literal success/refusal\u2192healthy operation, current authority, original receipts, bounds/cancellation, recovery and RF3 evidence required; unsupported AST cannot be ignored."
+      "acceptance": "Complete independently literal success/refusal→healthy operation, current authority, original receipts, bounds/cancellation, recovery and RF3 evidence required; unsupported AST cannot be ignored."
     },
     {
       "id": "SQLC-JOIN",
@@ -87,7 +87,7 @@
       "execution": "Source: closed same-partition typed/model-source graph/reference profiles; arbitrary joins remain unsupported.",
       "qualified": false,
       "requirement": "REQ-SQLC-006 / AC-SQLC-006",
-      "acceptance": "Complete independently literal success/refusal\u2192healthy operation, current authority, original receipts, bounds/cancellation, recovery and RF3 evidence required; unsupported AST cannot be ignored."
+      "acceptance": "Complete independently literal success/refusal→healthy operation, current authority, original receipts, bounds/cancellation, recovery and RF3 evidence required; unsupported AST cannot be ignored."
     },
     {
       "id": "SQLC-GROUP",
@@ -96,7 +96,7 @@
       "execution": "OPEN: no complete family execution claim",
       "qualified": false,
       "requirement": "REQ-SQLC-006 / AC-SQLC-006",
-      "acceptance": "Complete independently literal success/refusal\u2192healthy operation, current authority, original receipts, bounds/cancellation, recovery and RF3 evidence required; unsupported AST cannot be ignored."
+      "acceptance": "Complete independently literal success/refusal→healthy operation, current authority, original receipts, bounds/cancellation, recovery and RF3 evidence required; unsupported AST cannot be ignored."
     },
     {
       "id": "SQLC-SET",
@@ -105,7 +105,7 @@
       "execution": "Source: bounded ordering/TOP/ordered OFFSET-FETCH lowering; general set execution is not qualified.",
       "qualified": false,
       "requirement": "REQ-SQLC-006 / AC-SQLC-006",
-      "acceptance": "Complete independently literal success/refusal\u2192healthy operation, current authority, original receipts, bounds/cancellation, recovery and RF3 evidence required; unsupported AST cannot be ignored."
+      "acceptance": "Complete independently literal success/refusal→healthy operation, current authority, original receipts, bounds/cancellation, recovery and RF3 evidence required; unsupported AST cannot be ignored."
     },
     {
       "id": "SQLC-DML",
@@ -114,16 +114,44 @@
       "execution": "Source: closed queue-to-graph INSERT composition only; general INSERT/UPDATE/DELETE/MERGE/OUTPUT execution is not claimed.",
       "qualified": false,
       "requirement": "REQ-SQLC-006 / AC-SQLC-006",
-      "acceptance": "Complete independently literal success/refusal\u2192healthy operation, current authority, original receipts, bounds/cancellation, recovery and RF3 evidence required; unsupported AST cannot be ignored."
+      "acceptance": "Complete independently literal success/refusal→healthy operation, current authority, original receipts, bounds/cancellation, recovery and RF3 evidence required; unsupported AST cannot be ignored."
     },
     {
       "id": "SQLC-DDL",
       "name": "database, schema, table, type, index, view and sequence DDL",
       "grammarOwner": "Microsoft ScriptDOM T-SQL AST",
-      "execution": "OPEN: no complete family execution claim",
+      "execution": "SOURCE CANDIDATE: bounded canonical CREATE TABLE only; full DDL family remains OPEN",
       "qualified": false,
       "requirement": "REQ-SQLC-006 / AC-SQLC-006",
-      "acceptance": "Complete independently literal success/refusal\u2192healthy operation, current authority, original receipts, bounds/cancellation, recovery and RF3 evidence required; unsupported AST cannot be ignored."
+      "acceptance": "Complete independently literal success/refusal→healthy operation, current authority, original receipts, bounds/cancellation, recovery and RF3 evidence required; unsupported AST cannot be ignored.",
+      "createTableCandidate": {
+        "profile": "TSQL.CreateTable.v1",
+        "types": [
+          "NVARCHAR(MAX)",
+          "BIT",
+          "BIGINT"
+        ],
+        "identity": "Explicit original SqlOperationRequest.CommandId; restricted native SET CONTEXT_INFO arm; original EXEC identity must agree",
+        "atomicity": "Create-only inside existing node-local command transaction, original successful/failed outcome replay and current policy fencing",
+        "tests": [
+          "SqlCreateTableWholeFlowTests",
+          "SqlCreateTableRf3WholeFlowTests"
+        ],
+        "qualified": false,
+        "unsupported": [
+          "temporary tables",
+          "schema-qualified names",
+          "ALTER TABLE",
+          "DROP TABLE",
+          "defaults",
+          "foreign keys",
+          "checks",
+          "secondary uniqueness",
+          "computed/generated/identity columns",
+          "storage/index/view/type/sequence/database DDL"
+        ],
+        "ordinaryRowSqlInsert": "OPEN; genuine existing typed SDK/MCP/EXEC row operations retain current contracts"
+      }
     },
     {
       "id": "SQLC-INTEGRITY",
@@ -132,7 +160,7 @@
       "execution": "OPEN: no complete family execution claim",
       "qualified": false,
       "requirement": "REQ-SQLC-006 / AC-SQLC-006",
-      "acceptance": "Complete independently literal success/refusal\u2192healthy operation, current authority, original receipts, bounds/cancellation, recovery and RF3 evidence required; unsupported AST cannot be ignored."
+      "acceptance": "Complete independently literal success/refusal→healthy operation, current authority, original receipts, bounds/cancellation, recovery and RF3 evidence required; unsupported AST cannot be ignored."
     },
     {
       "id": "SQLC-TXN",
@@ -141,7 +169,7 @@
       "execution": "OPEN: no complete family execution claim",
       "qualified": false,
       "requirement": "REQ-SQLC-006 / AC-SQLC-006",
-      "acceptance": "Complete independently literal success/refusal\u2192healthy operation, current authority, original receipts, bounds/cancellation, recovery and RF3 evidence required; unsupported AST cannot be ignored."
+      "acceptance": "Complete independently literal success/refusal→healthy operation, current authority, original receipts, bounds/cancellation, recovery and RF3 evidence required; unsupported AST cannot be ignored."
     },
     {
       "id": "SQLC-ROUTINE",
@@ -150,7 +178,7 @@
       "execution": "Source: EXEC of the canonical operation catalog with typed verified arguments; dynamic execution/general stored routines are unsupported.",
       "qualified": false,
       "requirement": "REQ-SQLC-006 / AC-SQLC-006",
-      "acceptance": "Complete independently literal success/refusal\u2192healthy operation, current authority, original receipts, bounds/cancellation, recovery and RF3 evidence required; unsupported AST cannot be ignored."
+      "acceptance": "Complete independently literal success/refusal→healthy operation, current authority, original receipts, bounds/cancellation, recovery and RF3 evidence required; unsupported AST cannot be ignored."
     },
     {
       "id": "SQLC-SESSION",
@@ -159,7 +187,7 @@
       "execution": "OPEN: no complete family execution claim",
       "qualified": false,
       "requirement": "REQ-SQLC-006 / AC-SQLC-006",
-      "acceptance": "Complete independently literal success/refusal\u2192healthy operation, current authority, original receipts, bounds/cancellation, recovery and RF3 evidence required; unsupported AST cannot be ignored."
+      "acceptance": "Complete independently literal success/refusal→healthy operation, current authority, original receipts, bounds/cancellation, recovery and RF3 evidence required; unsupported AST cannot be ignored."
     },
     {
       "id": "SQLC-AUTH",
@@ -168,7 +196,7 @@
       "execution": "OPEN: no complete family execution claim",
       "qualified": false,
       "requirement": "REQ-SQLC-006 / AC-SQLC-006",
-      "acceptance": "Complete independently literal success/refusal\u2192healthy operation, current authority, original receipts, bounds/cancellation, recovery and RF3 evidence required; unsupported AST cannot be ignored."
+      "acceptance": "Complete independently literal success/refusal→healthy operation, current authority, original receipts, bounds/cancellation, recovery and RF3 evidence required; unsupported AST cannot be ignored."
     },
     {
       "id": "SQLC-META",
@@ -177,7 +205,7 @@
       "execution": "OPEN: no complete family execution claim",
       "qualified": false,
       "requirement": "REQ-SQLC-006 / AC-SQLC-006",
-      "acceptance": "Complete independently literal success/refusal\u2192healthy operation, current authority, original receipts, bounds/cancellation, recovery and RF3 evidence required; unsupported AST cannot be ignored."
+      "acceptance": "Complete independently literal success/refusal→healthy operation, current authority, original receipts, bounds/cancellation, recovery and RF3 evidence required; unsupported AST cannot be ignored."
     },
     {
       "id": "SQLC-ADMIN",
@@ -186,7 +214,7 @@
       "execution": "OPEN: no complete family execution claim",
       "qualified": false,
       "requirement": "REQ-SQLC-006 / AC-SQLC-006",
-      "acceptance": "Complete independently literal success/refusal\u2192healthy operation, current authority, original receipts, bounds/cancellation, recovery and RF3 evidence required; unsupported AST cannot be ignored."
+      "acceptance": "Complete independently literal success/refusal→healthy operation, current authority, original receipts, bounds/cancellation, recovery and RF3 evidence required; unsupported AST cannot be ignored."
     },
     {
       "id": "SQLC-MODELS",
@@ -195,7 +223,7 @@
       "execution": "Source: existing typed model plans and closed declared graph/model sources; parsing broader syntax does not enable a new model plan.",
       "qualified": false,
       "requirement": "REQ-SQLC-006 / AC-SQLC-006",
-      "acceptance": "Complete independently literal success/refusal\u2192healthy operation, current authority, original receipts, bounds/cancellation, recovery and RF3 evidence required; unsupported AST cannot be ignored."
+      "acceptance": "Complete independently literal success/refusal→healthy operation, current authority, original receipts, bounds/cancellation, recovery and RF3 evidence required; unsupported AST cannot be ignored."
     }
   ],
   "qualification": {

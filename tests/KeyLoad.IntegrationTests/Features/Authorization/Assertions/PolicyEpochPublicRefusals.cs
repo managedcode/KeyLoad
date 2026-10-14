@@ -17,6 +17,7 @@ internal static class PolicyEpochPublicRefusals
         {
             var request = PolicyEpochPublicProtocol.Request(state.Scenario.Partition, state.OriginalCursors[route]);
             await RouteAsync(fixture, reader, request, route, code, state.CurrentReader.Secret, token);
+            await PolicyEpochPublicAssertions.ImageAsync(root, state.Scenario, token);
         }
         await PolicyEpochPublicAssertions.ImageAsync(root, state.Scenario, token);
         await PolicyEpochPublicPolicy.ReplayAsync(root, state, token);
@@ -28,6 +29,12 @@ internal static class PolicyEpochPublicRefusals
         var sql = SqlRf3Protocol.Call(request.Partition, McpCallerTools.QueryExecute, request);
         if (route == PolicyEpochPublicProtocol.Sdk)
         { await SdkAsync(await reader.Sdk.QueryAsync(request, token), code, credential); return; }
+        if (route == PolicyEpochPublicProtocol.SdkAst)
+        {
+            await SdkAsync(await reader.Sdk.QueryAstAsync(PolicyEpochPublicProtocol.Ast(
+            request.Partition, request.Cursor), token), code, credential);
+            return;
+        }
         if (route == PolicyEpochPublicProtocol.Q1Sdk)
         { await SdkAsync(await reader.Sdk.ExecuteSqlAsync(sql, token), code, credential); return; }
         if (code == ErrorCode.Unauthenticated)
@@ -35,9 +42,12 @@ internal static class PolicyEpochPublicRefusals
             await RefuseMcpAsync(fixture, reader, request, sql, route, credential, token);
             return;
         }
-        var reply = route == PolicyEpochPublicProtocol.Mcp
-            ? await reader.Mcp.CallAsync(McpCallerTools.QueryExecute, request, token)
-            : await reader.Mcp.CallAsync(SqlOperationProtocol.ToolName, sql, token);
+        var reply = route == PolicyEpochPublicProtocol.McpAst
+            ? await reader.Mcp.CallAsync(McpCallerTools.QueryAst,
+                PolicyEpochPublicProtocol.Ast(request.Partition, request.Cursor), token)
+            : route == PolicyEpochPublicProtocol.Mcp
+                ? await reader.Mcp.CallAsync(McpCallerTools.QueryExecute, request, token)
+                : await reader.Mcp.CallAsync(SqlOperationProtocol.ToolName, sql, token);
         await McpCallerAssertions.ErrorAsync(reply, code, dispatched: true);
         await McpCallerAssertions.DoesNotDiscloseAsync(reply, credential, ResourcePolicyUpdateRf3Protocol.SecretValue);
     }
@@ -46,9 +56,12 @@ internal static class PolicyEpochPublicRefusals
         QueryRequest request, SqlOperationRequest sql, int route, string credential, CancellationToken token)
     {
         var error = await Assert.ThrowsAsync<global::System.Net.Http.HttpRequestException>(
-            () => route == PolicyEpochPublicProtocol.Mcp
-                ? reader.Mcp.CallAsync(McpCallerTools.QueryExecute, request, token)
-                : reader.Mcp.CallAsync(SqlOperationProtocol.ToolName, sql, token));
+            () => route == PolicyEpochPublicProtocol.McpAst
+                ? reader.Mcp.CallAsync(McpCallerTools.QueryAst,
+                    PolicyEpochPublicProtocol.Ast(request.Partition, request.Cursor), token)
+                : route == PolicyEpochPublicProtocol.Mcp
+                    ? reader.Mcp.CallAsync(McpCallerTools.QueryExecute, request, token)
+                    : reader.Mcp.CallAsync(SqlOperationProtocol.ToolName, sql, token));
         await Assert.That(error).IsNotNull();
         await Assert.That(error!.StatusCode).IsEqualTo(global::System.Net.HttpStatusCode.Unauthorized);
         await Assert.That(error.Message.Contains(credential, StringComparison.Ordinal)).IsFalse();

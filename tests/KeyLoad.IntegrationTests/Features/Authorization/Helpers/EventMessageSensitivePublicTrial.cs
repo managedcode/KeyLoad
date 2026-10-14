@@ -10,17 +10,31 @@ internal static class EventMessageSensitivePublicTrial
     internal static async Task RunAsync(ClusterFixture fixture, bool subscription, bool dataAuthority, bool header)
     {
         using var deadline = McpCallerDeadline.Create();
-        var state = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
+        var states = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
             async root =>
             {
                 var seeded = await EventMessageSensitivePublicSeed.RunAsync(root, subscription, dataAuthority, header, deadline.Token);
                 await RunReadersAsync(fixture, root, seeded, false, deadline.Token);
                 seeded.Before = await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.StatusAsync(deadline.Token));
-                return seeded;
+                var safe = await EventMessageSensitiveSafeR52Seed.RunAsync(root, subscription, dataAuthority, header, deadline.Token);
+                await EventMessageSensitiveSafeR52Flow.WarmAsync(fixture, root, safe, deadline.Token);
+                return (Original: seeded, Safe: safe);
             }, deadline.Token);
         await FeedLiveRf3Cold.RestartAsync(fixture, deadline.Token);
         await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
-            async root => { await RunReadersAsync(fixture, root, state, true, deadline.Token); return true; }, deadline.Token);
+            async root =>
+            {
+                await RunReadersAsync(fixture, root, states.Original, true, deadline.Token);
+                await EventMessageSensitiveSafeR52Flow.AfterFirstColdAsync(fixture, root, states.Safe, deadline.Token);
+                return true;
+            }, deadline.Token);
+        await FeedLiveRf3Cold.RestartAsync(fixture, deadline.Token);
+        await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
+            async root =>
+            {
+                await EventMessageSensitiveSafeR52Flow.AfterSecondColdAsync(fixture, root, states.Safe, deadline.Token);
+                return true;
+            }, deadline.Token);
     }
 
     private static Task<bool> RunReadersAsync(ClusterFixture fixture, RequestCqrsRf3Callers root,

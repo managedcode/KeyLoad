@@ -159,3 +159,6 @@ flowchart LR
 | [ADR-122: Native comparable benchmark methodology](ADR-122-native-benchmark-methodology.md) | Accepted |
 | [ADR-125: Connection-owned parallel execution](ADR-125-connection-owned-execution.md) | Accepted |
 | [ADR-126: Current native ZoneTree checksum profile](ADR-126-current-native-zonetree-checksums.md) | Accepted; qualification pending |
+| [ADR-130: Microsoft ScriptDOM owns T-SQL syntax](ADR-130-microsoft-scriptdom-tsql.md) | Accepted; qualification pending |
+| [ADR-131: Native queue dispatch-state CAS](ADR-131-queue-dispatch-state-cas.md) | Accepted; qualification pending |
+| [ADR-132: Native CREATE TABLE and caller-stable SQL command identity](ADR-132-native-create-table-command-identity.md) | Accepted; qualification pending |

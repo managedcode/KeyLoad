@@ -31,6 +31,7 @@ internal static class ControlledPartitionMovementNativeProcessTrial
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
+            child.EnableNativeOutputWitness(hold);
             child.Start(start);
             child.ThrowStartupFailure();
             if (hold)
@@ -50,6 +51,7 @@ internal static class ControlledPartitionMovementNativeProcessTrial
         await CommandIdempotencyProcess.SettleActiveAsync(child, failures, cleanup.Token);
         if (!child.IsSettled)
         { failures.Add(new IOException(Failed)); }
+        await ServerFailureObserver.ObserveAsync(() => child.ReportNativeOutputWitnessAsync(failures), failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

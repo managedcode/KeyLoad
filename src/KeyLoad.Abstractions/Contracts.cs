@@ -330,7 +330,9 @@ public enum OperationKind
     /// <summary>Commits one private freshly authenticated placement phase.</summary>
     PlacementIntentPhase = 49,
     /// <summary>Changes one existing queue pause state through an explicit schema-version CAS.</summary>
-    SetQueueDispatch = 50
+    SetQueueDispatch = 50,
+    /// <summary>Atomically creates one absent canonical typed table with an original caller identity.</summary>
+    CreateTable = 51
 }
 
 /// <summary>Carries a trusted operation and its evaluated principal and time.</summary>

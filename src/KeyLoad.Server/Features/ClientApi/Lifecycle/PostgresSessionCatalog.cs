@@ -8,6 +8,8 @@ internal sealed class PostgresSessionCatalog(global::Microsoft.Extensions.Option
     private readonly Dictionary<string, PostgresPreparedStatement> statements = new(configured.Value.MaximumStatements, StringComparer.Ordinal);
     private readonly Dictionary<string, PostgresBoundPortal> portals = new(StringComparer.Ordinal);
     private int retained;
+    private Guid? mutationIdentity;
+    private const int MutationIdentityBytes = 16;
 
     internal PostgresPreparedStatement Statement(string name)
         => statements.TryGetValue(name, out var value) ? value : throw Errors.Fail(ErrorCode.Validation, Missing);
@@ -78,6 +80,35 @@ internal sealed class PostgresSessionCatalog(global::Microsoft.Extensions.Option
         portals.Clear();
     }
 
+    internal void ArmMutationIdentity(Guid identity)
+    {
+        if (mutationIdentity.HasValue)
+        {
+            ClearMutationIdentity();
+            throw ScriptDomOperationErrors.Invalid();
+        }
+        if (identity == Guid.Empty)
+        { throw ScriptDomOperationErrors.Invalid(); }
+        Resize(PostgresProtocol.EmptyBytes, MutationIdentityBytes);
+        mutationIdentity = identity;
+    }
+
+    internal Guid? TakeMutationIdentity()
+    {
+        var value = mutationIdentity;
+        ClearMutationIdentity();
+        return value;
+    }
+
+    internal void ClearMutationIdentity()
+    {
+        if (mutationIdentity.HasValue)
+        {
+            Resize(MutationIdentityBytes, PostgresProtocol.EmptyBytes);
+            mutationIdentity = null;
+        }
+    }
+
     private void Resize(int previous, int next)
     {
         var replacement = checked(retained - previous + next);
@@ -91,6 +122,7 @@ internal sealed class PostgresSessionCatalog(global::Microsoft.Extensions.Option
     {
         admission.Resize(retained, PostgresProtocol.EmptyBytes);
         retained = PostgresProtocol.EmptyBytes;
+        mutationIdentity = null;
         statements.Clear();
         portals.Clear();
     }

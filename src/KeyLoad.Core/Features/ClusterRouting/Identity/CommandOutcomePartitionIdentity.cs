@@ -52,7 +52,7 @@ internal static class CommandOutcomePartitionIdentity
             OperationKind.BeginBlobUpload or OperationKind.WriteBlobPart or OperationKind.CompleteBlobUpload
                 or OperationKind.AbortBlobUpload or OperationKind.DeleteBlob or OperationKind.ReclaimBlob
                 => ResolveBlob(kind, payload),
-            OperationKind.ConfigureResource or OperationKind.ConfigurePrincipal or OperationKind.ConfigureApiKey
+            OperationKind.CreateTable or OperationKind.ConfigureResource or OperationKind.ConfigurePrincipal or OperationKind.ConfigureApiKey
                 or OperationKind.SetQueueDispatch or OperationKind.SetDispatch or OperationKind.Membership or OperationKind.BootstrapPhysicalShardCatalog
                 or OperationKind.BindAtomicPartitionPlacement or OperationKind.RegisterPhysicalOwner => CommandOutcomePartitionScope.Global,
             _ => CommandOutcomePartitionScope.Unknown

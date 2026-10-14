@@ -8,6 +8,7 @@ internal sealed class CommandIdempotencyProcessChild
 {
     private readonly int outputLimitCharacters;
     private readonly string? expectedSignal;
+    private bool? nativeOutputWitnessHold;
     private Process? process;
     private Task? processExit;
     private CommandIdempotencyProcessPipes? pipes;
@@ -21,6 +22,9 @@ internal sealed class CommandIdempotencyProcessChild
         this.expectedSignal = expectedSignal;
     }
 
+    internal void EnableNativeOutputWitness(bool hold) => nativeOutputWitnessHold = hold;
+    internal Task ReportNativeOutputWitnessAsync(List<Exception> failures)
+        => pipes is null ? Task.CompletedTask : pipes.ReportNativeOutputWitnessAsync(failures);
     internal int ExitCode => RequireProcess().ExitCode;
     internal static CommandIdempotencyProcessChild Create(int outputLimitCharacters, bool expectAcknowledgement)
         => Create(outputLimitCharacters, expectAcknowledgement ? CrashFixtureValues.Acknowledgement : null);
@@ -63,6 +67,8 @@ internal sealed class CommandIdempotencyProcessChild
         {
             pipes = CommandIdempotencyProcessPipes.Create(startedProcess, outputLimitCharacters,
                 expectedSignal);
+            if (nativeOutputWitnessHold is { } hold)
+            { pipes.EnableNativeOutputWitness(hold); }
             pipes.StartReaders();
             startupFailure = CommandIdempotencyProcessFailureHandling.PreserveStartupFailure(
                 startupFailure, pipes.StartupFailure);

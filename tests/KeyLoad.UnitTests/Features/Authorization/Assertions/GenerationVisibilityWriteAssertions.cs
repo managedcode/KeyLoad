@@ -10,7 +10,6 @@ namespace KeyLoad.UnitTests.Features.Authorization;
 internal static class GenerationVisibilityWriteAssertions
 {
     private const string Scan = "bounded-full-scan";
-    private const string ExplainPrefix = "EXPLAIN ";
     private const string ExplainId = "explain";
     private const long NoRevision = 0;
     private const long OriginalRootEpoch = 1;
@@ -43,7 +42,12 @@ internal static class GenerationVisibilityWriteAssertions
             AtomicPartition = partition.AtomicPartitionId,
             ScanBudget = UnitExecutionOptions.DatabaseLimits().Value.MaxScanRecords
         }, JsonDefaults.Options);
-        await PageAsync(queries.Execute(TeamRowPolicyFlow.Reader, request with { Sql = ExplainPrefix + request.Sql },
+        var explanation = new global::KeyLoad.Query.AstQueryRequest(partition,
+            new(TeamRowPolicyFlow.Collection, null, [new(global::KeyLoad.Query.Features.QueryExecution.SqlSyntax.Star,
+                global::KeyLoad.Query.Features.QueryExecution.SqlSyntax.Star)], null,
+                [new(global::KeyLoad.Query.Features.QueryExecution.SqlSyntax.MetadataIdPath, false)],
+                global::KeyLoad.Query.Features.QueryExecution.SqlSyntax.DefaultLimit, Explain: true), AllowFullScan: true);
+        await PageAsync(queries.ExecuteAst(TeamRowPolicyFlow.Reader, explanation,
             cancellationToken: token), [new(ExplainId, NoRevision, plan)], cut);
         var reference = new EntityRef(partition, TeamRowPolicyFlow.Collection, TeamRowPolicyFlow.ForeignTeam);
         DocumentResult? expectedPoint = visible ? new(reference, GenerationVisibilityWriteFlow.VisibleRevision,

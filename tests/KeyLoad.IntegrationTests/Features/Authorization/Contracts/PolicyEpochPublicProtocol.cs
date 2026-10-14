@@ -1,12 +1,18 @@
+using KeyLoad.Query;
+
 namespace KeyLoad.IntegrationTests.Features.Authorization;
 
 internal static class PolicyEpochPublicProtocol
 {
     internal const string PutKind = "putDocument";
-    internal const int RouteCount = 4;
+    private const string AstStar = "*";
+    private const string AstMetadataIdPath = "/@id";
+    internal const int RouteCount = 6;
     internal const int Sdk = 0;
     internal const int Mcp = 1;
     internal const int Q1Sdk = 2;
+    internal const int SdkAst = 4;
+    internal const int McpAst = 5;
     internal const int QueryLimit = 1;
     internal const int CompleteLimit = 2;
     internal const long SeedRevision = 1;
@@ -19,9 +25,15 @@ internal static class PolicyEpochPublicProtocol
     internal static readonly string[] Nodes = [ClientApi.McpCallerProtocol.Node1,
         ClientApi.McpCallerProtocol.Node2, ClientApi.McpCallerProtocol.Node3];
     internal static QueryRequest Request(PartitionRef partition, string? cursor = null)
-        => new(partition, "SELECT * FROM \"" + ResourcePolicyUpdateRf3Protocol.Collection + "\"" + " ORDER BY id LIMIT 1",
+        => new(partition, "SELECT TOP (1) * FROM \"" + ResourcePolicyUpdateRf3Protocol.Collection + "\"" + " ORDER BY id",
             AllowFullScan: true, Cursor: cursor);
     internal static QueryRequest Complete(PartitionRef partition)
-        => new(partition, "SELECT * FROM \"" + ResourcePolicyUpdateRf3Protocol.Collection + "\"" + " ORDER BY id LIMIT 2",
+        => new(partition, "SELECT TOP (2) * FROM \"" + ResourcePolicyUpdateRf3Protocol.Collection + "\"" + " ORDER BY id",
             AllowFullScan: true);
+    internal static AstQueryRequest Ast(PartitionRef partition, string? cursor = null)
+        => new(partition, new SelectQuery(ResourcePolicyUpdateRf3Protocol.Collection, null,
+            [new(AstStar,
+                AstStar)], null,
+            [new(AstMetadataIdPath, false)], QueryLimit),
+            AllowFullScan: true, Cursor: cursor);
 }

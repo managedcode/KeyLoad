@@ -39,7 +39,7 @@ internal static class GrainPartitionResolver
         OperationKind.AbortBlobUpload => Route<AbortBlobUploadRequest>(request, value => (value.CommandId, value.Blob.Partition)),
         OperationKind.DeleteBlob => Route<DeleteBlobRequest>(request, value => (value.CommandId, value.Blob.Partition)),
         OperationKind.ReclaimBlob => Route<ReclaimBlobRequest>(request, value => (value.CommandId, value.Blob.Partition)),
-        OperationKind.ConfigureResource or OperationKind.SetDispatch or OperationKind.BootstrapPhysicalShardCatalog
+        OperationKind.ConfigureResource or OperationKind.CreateTable or OperationKind.SetDispatch or OperationKind.BootstrapPhysicalShardCatalog
             or OperationKind.RegisterPhysicalOwner or OperationKind.BindAtomicPartitionPlacement or OperationKind.RuntimeJournal
             => GrainRoutingProtocol.CatalogPartition,
         OperationKind.ConfigurePrincipal or OperationKind.ConfigureApiKey => GrainRoutingProtocol.AuthorizationPartition,

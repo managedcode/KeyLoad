@@ -69,7 +69,7 @@ internal readonly record struct McpToolHints(bool ReadOnly, bool Idempotent, boo
         OperationKind.Delivery => new(false, true, true),
         OperationKind.CommitInbox => new(false, true, true),
         OperationKind.Processing => new(false, true, true),
-        OperationKind.ConfigureResource => new(false, true, false),
+        OperationKind.ConfigureResource or OperationKind.CreateTable => new(false, true, false),
         OperationKind.ConfigurePrincipal => new(false, true, true),
         OperationKind.ConfigureApiKey => new(false, true, true),
         OperationKind.SetDispatch => new(false, true, true),

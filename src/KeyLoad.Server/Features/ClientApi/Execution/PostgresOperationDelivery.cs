@@ -7,7 +7,7 @@ internal static class PostgresOperationDelivery
     internal static async Task ExecuteAsync(IServiceProvider services, PostgresWireWriter writer,
         ServerConnectionFeature owner, PostgresSessionIdentity identity, PartitionRef partition,
         PostgresBoundPortal portal, int rows, PostgresCancellationSession cancellation,
-        PostgresSessionOptions options, PostgresRetainedAdmission admission, bool describe, CancellationToken closed)
+        PostgresSessionOptions options, PostgresRetainedAdmission admission, PostgresSessionCatalog catalog, bool describe, CancellationToken closed)
     {
         var original = cancellation.Begin(closed);
         var failures = new List<Exception>();
@@ -20,7 +20,7 @@ internal static class PostgresOperationDelivery
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 var reply = await PostgresOperationExecutor.ExecuteAsync(services, owner, identity,
-                    partition, portal, rows, admission, deadline.Token).ConfigureAwait(false);
+                    partition, portal, rows, admission, catalog, deadline.Token).ConfigureAwait(false);
                 delivering = true;
                 await PostgresSessionReplies.ResultAsync(writer, reply, portal.ResultFormat, options,
                     services.GetRequiredService<IOptions<McpExecutionOptions>>().Value.IngressScratchBytes,
@@ -28,8 +28,12 @@ internal static class PostgresOperationDelivery
             }, failures).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
         if (delivering && failures.Count != PostgresProtocol.AllRows)
-        { ServerFailureObserver.Observe(owner.RequestClose, failures); }
+        {
+            ServerFailureObserver.Observe(owner.RequestClose, failures);
+        }
         await ServerFailureObserver.ObserveAsync(cancellation.EndAsync, failures).ConfigureAwait(false);
+        if (failures.Count != PostgresProtocol.AllRows)
+        { ServerFailureObserver.Observe(catalog.ClearMutationIdentity, failures); }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }
