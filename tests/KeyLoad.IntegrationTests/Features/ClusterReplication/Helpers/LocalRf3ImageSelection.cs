@@ -61,6 +61,11 @@ internal static class LocalRf3ImageSelection
     private const string CurrentCombinedFilterArgument = "--KeyLoadTests:Filter=/*/*/(SafeProjectorOperationRf3Tests|SqlParserAdmissionRf3WholeFlowTests|GraphSearchLineageRf3Tests|AtomicTriadStagedRf3Tests|CompetingInboxPublicTests|QueueViewLeaseIsolationTests)/*";
     private const string NativeMigrationFilterArgument = "--KeyLoadTests:Filter=/*/*/NativeDatabaseMigrationRf3Tests/*";
     private const string FoundationCombinedFilterArgument = "--KeyLoadTests:Filter=/*/*/(SafeProjectorOperationRf3Tests|SqlParserAdmissionRf3WholeFlowTests|GraphSearchLineageRf3Tests|AtomicTriadStagedRf3Tests|CompetingInboxPublicTests|QueueViewLeaseIsolationTests|NativeDatabaseMigrationRf3Tests)/*";
+    private const string SlowBodyReturnFilterArgument = "--KeyLoadTests:Filter=/*/*/SlowBodyAdmissionReturnTests/*";
+    private const string RowRevisionAdmissionFilterArgument = "--KeyLoadTests:Filter=/*/*/RowRevisionInferenceRf3Tests/*";
+    private const string FoundationAdmissionRepairFilterArgument = "--KeyLoadTests:Filter=/*/*/(NativeDatabaseMigrationRf3Tests|SlowBodyAdmissionReturnTests|RowRevisionInferenceRf3Tests)/*";
+    private const string CatalogBootstrapAuthorityFilterArgument = "--KeyLoadTests:Filter=/*/*/CatalogBootstrapAuthorityRf3Tests/*";
+    private const string FoundationAdmissionAuthorityFilterArgument = "--KeyLoadTests:Filter=/*/*/(SlowBodyAdmissionReturnTests|RowRevisionInferenceRf3Tests|CatalogBootstrapAuthorityRf3Tests)/*";
     private const string EnabledArgument = "--KeyLoadTests:LocalRf3Image:Enabled=true";
     private const string EnabledValue = "true";
     private const int MaximumNativeArgumentCharacters = 4096;
@@ -109,7 +114,10 @@ internal static class LocalRf3ImageSelection
                 or ProjectionReplayFilterArgument or ProjectionPolicyFilterArgument or ProjectionColdFilterArgument or RemoteAnnPublicationFilterArgument or GraphEventLineageAuthenticationFilterArgument or OriginalRefusalCompositionFilterArgument or PublicModelFlowFilterArgument or ExpandedPublicModelFlowFilterArgument or SuccessorPublicModelFlowFilterArgument or TenantCapacityPlacementFilterArgument or PublicCohortFilterArgument or SuccessorPublicCohortFilterArgument or FinalPublicCohortFilterArgument
                 or ReleaseDistributedQueryAuthorityRf3FilterArgument or ReleaseEarlyAdmissionQualificationFilterArgument or ReleaseMetadataBootstrapRf3FilterArgument or ReleaseQueryRuleOptimizationRf3FilterArgument or ReleaseStrongReadSessionAbsenceRf3FilterArgument or ReleaseTimeSeriesChunkQualificationRf3FilterArgument or ReleaseCombinedFilterArgument
                 or CurrentSafeProjectorFilterArgument or CurrentSqlParserAdmissionFilterArgument or CurrentGraphSearchLineageFilterArgument or CurrentAtomicTriadFilterArgument or CurrentCompetingInboxFilterArgument or CurrentQueueViewLeaseFilterArgument or CurrentCombinedFilterArgument
-                or NativeMigrationFilterArgument or FoundationCombinedFilterArgument, EnabledArgument]
+                or NativeMigrationFilterArgument or FoundationCombinedFilterArgument
+                or SlowBodyReturnFilterArgument or RowRevisionAdmissionFilterArgument
+                or FoundationAdmissionRepairFilterArgument or CatalogBootstrapAuthorityFilterArgument
+                or FoundationAdmissionAuthorityFilterArgument, EnabledArgument]
             || Environment.GetEnvironmentVariable(NativeCoverageArgumentsEnvironment) is not null
             || HasAmbientGithubIdentity()
             || Environment.GetEnvironmentVariable(ProvenanceEnvironment) is not null

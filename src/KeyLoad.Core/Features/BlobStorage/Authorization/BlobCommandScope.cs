@@ -42,7 +42,7 @@ internal sealed class BlobAuthority(DatabaseEngine database)
     {
         BlobKeys.Validate(blob);
         BlobRestoreFence.RequireOpen(view);
-        ClusterPrincipalPolicy.RequireOperation(principal, OperationKind.BeginBlobUpload);
+        global::KeyLoad.Core.Features.ClusterRouting.Identity.RuntimeJournalIdentity.RequireOperation(principal, OperationKind.BeginBlobUpload);
         database.Authorization.Require(principal, blob.Partition, blob.Resource, capability);
         var resource = database.Resource(view, blob.Partition, blob.Resource, ResourceKind.BlobStore);
         BlobQuotaOperations.ValidatePolicy(resource);

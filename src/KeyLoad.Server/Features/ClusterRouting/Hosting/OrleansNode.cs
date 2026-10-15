@@ -148,8 +148,8 @@ internal sealed partial class OrleansNode(PartitionHost partition, IOptions<Node
             built.Services.GetRequiredService<TimeProvider>(), runtimeOptions.GrainRouting, runtimeOptions.McpExecution,
             loggerFactory.CreateLogger<PhysicalShardCatalogStartup>());
         Volatile.Write(ref physicalShardCatalog, catalog);
-        var administrator = await catalog.InitializeAsync(cancellationToken).ConfigureAwait(false);
-        await RuntimeJournalStartup.InitializeConfiguredAsync(built.Services, partition, administrator, Options,
+        await catalog.InitializeAsync(cancellationToken).ConfigureAwait(false);
+        await RuntimeJournalStartup.InitializeConfiguredAsync(built.Services, partition, catalog.AuthenticateBootstrapAdministratorAsync, Options,
             runtimeOptions, cancellationToken).ConfigureAwait(false);
         PhysicalOwnerRegistrationRuntime.Attach(ref ownerRegistration, this, partition,
             runtimeOptions, built.Services, runtimeClock);
@@ -193,10 +193,10 @@ internal sealed partial class OrleansNode(PartitionHost partition, IOptions<Node
     internal Task EnsureCatalogAdmissionAsync(CancellationToken cancellationToken)
         => PhysicalShardCatalogFence.EnsureAdmissionAsync(Volatile.Read(ref physicalShardCatalog), cancellationToken);
 
-    internal void OpenCatalogAdmission(PhysicalShardCatalogStartup catalog, string principalId,
+    internal void OpenCatalogAdmission(PhysicalShardCatalogStartup catalog,
         CancellationToken cancellationToken)
         => OrleansNodeCatalogAdmission.Open(lifecycle, ref shutdown, ref physicalShardCatalog,
-            catalog, principalId, cancellationToken);
+            catalog, cancellationToken);
 
     /// <inheritdoc />
     public async ValueTask DisposeAsync()

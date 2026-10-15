@@ -49,7 +49,6 @@ public sealed partial class DatabaseEngine
             OperationKind.ConfigurePrincipal => Identity<ConfigurePrincipalRequest>(payload),
             OperationKind.ConfigureApiKey => Identity<ConfigureApiKeyRequest>(payload),
             OperationKind.SetDispatch => Identity<bool>(payload),
-            OperationKind.Membership => Identity<MembershipMutation>(payload),
             OperationKind.RuntimeJournal => Identity<RuntimeJournalMutation>(payload),
             OperationKind.ConfigureSubscription => Identity<ConfigureSubscriptionRequest>(payload),
             OperationKind.SeekSubscription => Identity<SeekSubscriptionRequest>(payload),

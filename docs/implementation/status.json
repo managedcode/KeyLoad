@@ -1,4 +1,45 @@
 {
+  "STAGE87-NATIVE-FOUNDATION-SOURCE-001": {
+    "status": "in_progress",
+    "acceptedOriginalTasks": 20,
+    "originalTasks": 104,
+    "additionalRequiredTask": "KL-105 open",
+    "totalRequiredTasks": 105,
+    "fullTaskPromotion": false,
+    "record": "docs/implementation/qualification-stage87-foundation.md",
+    "foundationPlan": "docs/implementation/foundation-dependencies.json",
+    "parentCommit": "cb95d73e23d00bcf5a5de671b339517583d7591f",
+    "verification": {
+      "fullSolutionRelease": {
+        "exitCode": 0,
+        "warnings": 0,
+        "errors": 0,
+        "elapsedSeconds": 331.9840756668709,
+        "sourceDrift": 0,
+        "stdoutSha256": "7f0b672c90bf0e296b4da5b46f05a89b40e0fd4a25680b61a459adab19c9c510"
+      },
+      "focusedStyleApply": {
+        "exitCode": 0,
+        "includedChangedCSharpFiles": 158,
+        "changedFiles": 19
+      },
+      "currentNativeTests": "OPEN; prior stage results retain their own source identity",
+      "currentCanonicalFormatter": "OPEN"
+    },
+    "analytics": {
+      "decision": "docs/ADR/ADR-134-node-owned-derived-analytics.md",
+      "requirements": "docs/Features/ResourceExecution/OperationalAnalytics.md",
+      "sourceCommit": "71c260e96908e52450fce1e70b1ec7bdb8fed5dd",
+      "packagePublication": "expected_external_prerequisite_not_confirmed_defect",
+      "packagePinned": false,
+      "runtimeIntegrated": false
+    },
+    "remaining": [
+      "Execute current focused Unit/process recovery and public SDK/official MCP Aspire RF3 whole-operation flows.",
+      "Exact-source Linux complete mandatory suites and task criteria remain open.",
+      "Adopt actual published Analytics package and qualify native lifecycle/privacy/resources before claiming delivered integration."
+    ]
+  },
   "STAGE86-FOUNDATION-EXECUTION-001": {
     "status": "in_progress",
     "acceptedOriginalTasks": 20,

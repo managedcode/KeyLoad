@@ -28,10 +28,10 @@ internal static class ZoneTreeJournalPublication
             runtime.SetPosition(nextPosition);
             runtime.Options.FaultObserver?.Invoke(CommitStage.ApplyCompleted, nextPosition, changes.Length);
         }
-        catch (Exception)
+        catch (Exception original)
         {
             runtime.Poisoned = true;
-            throw Errors.Fail(ErrorCode.UnknownWriteOutcome, UnknownWriteOutcome);
+            throw Errors.Fail(ErrorCode.UnknownWriteOutcome, UnknownWriteOutcome, original);
         }
     }
 

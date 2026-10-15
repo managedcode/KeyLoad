@@ -30,8 +30,8 @@ public sealed partial class DatabaseEngine
         string principalId, ReplicatedOperation original, DateTimeOffset expiry, Guid queryId)
     {
         var principal = Principal(view, principalId, EvaluationClock.GetUtcNow());
-        ClusterPrincipalPolicy.RequireOperation(principal, original.Kind);
-        ClusterPrincipalPolicy.RequireOperation(principal, OperationKind.BeginBlobUpload);
+        global::KeyLoad.Core.Features.ClusterRouting.Identity.RuntimeJournalIdentity.RequireOperation(principal, original.Kind);
+        global::KeyLoad.Core.Features.ClusterRouting.Identity.RuntimeJournalIdentity.RequireOperation(principal, OperationKind.BeginBlobUpload);
         var blob = BlobCommandScope.From(original).Blob;
         BlobKeys.Validate(blob);
         Authorization.Require(principal, blob.Partition, blob.Resource, BlobCommandScope.RequiredCapability(original.Kind));

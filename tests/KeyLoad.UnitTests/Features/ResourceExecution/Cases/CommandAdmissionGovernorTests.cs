@@ -58,7 +58,7 @@ internal sealed class CommandAdmissionGovernorTests
         }));
         using var data = Reserve(governor, OperationKind.Batch, Principal(), 0, 0);
         using var acknowledgement = Reserve(governor, OperationKind.Delivery, Principal(), 16, 16);
-        using var membership = Reserve(governor, OperationKind.Membership, Principal("root"), 0, 0);
+        using var catalog = Reserve(governor, OperationKind.BootstrapPhysicalShardCatalog, Principal("root"), 0, 0);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() =>
             Reserve(governor, OperationKind.SubscriptionDelivery, Principal(), 0, 0)).Code).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() =>

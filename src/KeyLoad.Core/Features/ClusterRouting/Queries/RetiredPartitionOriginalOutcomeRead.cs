@@ -22,7 +22,7 @@ public sealed partial class DatabaseEngine
             return null;
         }
         var command = Payload<CommandRequest>(operation);
-        ClusterPrincipalPolicy.RequireOperation(principal, operation.Kind);
+        global::KeyLoad.Core.Features.ClusterRouting.Identity.RuntimeJournalIdentity.RequireOperation(principal, operation.Kind);
         RequireBatchMutationCapabilities(principal, command);
         var fence = PartitionMoveSourceFenceStorage.Read(view, command.Partition, Limits.MaxBatchBytes);
         if (fence is null)

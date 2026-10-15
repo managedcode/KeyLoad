@@ -43,7 +43,6 @@ internal static class GrainPartitionResolver
             or OperationKind.RegisterPhysicalOwner or OperationKind.BindAtomicPartitionPlacement or OperationKind.RuntimeJournal
             => GrainRoutingProtocol.CatalogPartition,
         OperationKind.ConfigurePrincipal or OperationKind.ConfigureApiKey => GrainRoutingProtocol.AuthorizationPartition,
-        OperationKind.Membership => throw Errors.Fail(ErrorCode.PermissionDenied, GrainRoutingProtocol.AdministrationRequired),
         _ => throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest)
     };
 

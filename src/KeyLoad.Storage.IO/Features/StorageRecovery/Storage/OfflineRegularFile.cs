@@ -67,6 +67,7 @@ internal static class OfflineRegularFile
         FileAccess access, FileShare share, int bufferSize)
     {
         ValidateArguments(path, access, share, bufferSize);
+        path = Path.GetFullPath(path);
 
         using var lease = OpenNative(path, access);
         try
@@ -74,7 +75,7 @@ internal static class OfflineRegularFile
             VerifyDescriptor(lease.Handle, expected);
             lease.AcquireLock(share);
             VerifyPath(path, expected);
-            return lease.TransferToStream(access, bufferSize);
+            return lease.TransferToStream(path, access, bufferSize);
         }
         catch (Exception error)
         {

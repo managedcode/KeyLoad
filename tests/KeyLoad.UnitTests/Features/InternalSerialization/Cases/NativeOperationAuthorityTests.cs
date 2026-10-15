@@ -26,7 +26,7 @@ internal sealed class NativeOperationAuthorityTests
             3 => NativeAuthorityFixture.Wrap(operation, payload with { Signature = new byte[NativeAuthorityContract.DigestBytes] }),
             4 => operation with { PayloadJson = bool.FalseString },
             5 => operation with { Id = Guid.NewGuid() },
-            6 => operation with { Kind = OperationKind.Membership },
+            6 => operation with { Kind = (OperationKind)8 },
             7 => operation with { PrincipalId = NativeAuthorityFixture.OtherPrincipal },
             _ => throw new ArgumentOutOfRangeException(nameof(mutation))
         };

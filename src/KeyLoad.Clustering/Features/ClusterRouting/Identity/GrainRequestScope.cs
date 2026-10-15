@@ -35,11 +35,6 @@ internal static class GrainRequestScope
             RuntimeJournalRequestScope.Validate(request);
         }
 
-        if (request.CommandKind == OperationKind.Membership || request.PrincipalId == ClusterPrincipalPolicy.InternalPrincipalId)
-        {
-            throw Errors.Fail(ErrorCode.PermissionDenied, GrainRoutingProtocol.AdministrationRequired);
-        }
-
         if (request.ReadKind == GrainReadKind.Authenticate)
         {
             if (request.PrincipalId is not null)

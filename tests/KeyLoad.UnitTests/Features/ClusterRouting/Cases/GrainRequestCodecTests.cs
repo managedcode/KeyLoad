@@ -118,14 +118,14 @@ internal sealed class GrainRequestCodecTests
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => codec.VerifyRead(tampered, id)).Code).IsEqualTo(ErrorCode.TokenInvalidated);
     }
 
-    /// <summary>AC-ROUTE-001: protected Membership cannot be issued through public write actors.</summary>
+    /// <summary>AC-ROUTE-001: undefined operation discriminator cannot be issued through public write actors.</summary>
     [Test]
-    public async Task MembershipAndForgedAuthenticationShapeAreDenied()
+    public async Task ReservedDiscriminatorAndForgedAuthenticationShapeAreDenied()
     {
         using var fixture = new TestDatabase();
         var codec = new GrainRequestCodec(fixture.Database, TimeProvider.System, UnitRoutingOptions.Routing());
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => codec.CreateCommand(Guid.NewGuid(), Principal,
-            OperationKind.Membership, Guid.NewGuid(), NativeSerialization.Serialize(NoDtoMarker))).Code).IsEqualTo(ErrorCode.PermissionDenied);
+            (OperationKind)8, Guid.NewGuid(), NativeSerialization.Serialize(NoDtoMarker))).Code).IsEqualTo(ErrorCode.TokenInvalidated);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => codec.CreateRead(Guid.NewGuid(), Principal,
             GrainReadKind.Authenticate, NativeSerialization.Serialize(new PrincipalRecord(Principal, Principal, [], []) { ClusterAdministrator = true }))).Code).IsEqualTo(ErrorCode.TokenInvalidated);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => GrainNativePayload.Read<string>(

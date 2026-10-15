@@ -1,22 +1,23 @@
 using KeyLoad.Core;
+using KeyLoad.Core.Features.ClusterRouting.Identity;
 using KeyLoad.Replication;
 using KeyLoad.Storage;
 
 namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
-/// <summary>AC-REP-004/AUTH-002: recover verified images before validating the final protected catalog.</summary>
+/// <summary>AC-REP-004/AUTH-002: recover verified images before native journal bootstrap/readiness authority validation.</summary>
 internal sealed class PartitionHostRecoveryTests
 {
     private const int RecoveryAttempts = 2;
 
-    /// <summary>A complete valid image with a missing protected principal fails closed after installation, without leaked locks.</summary>
+    /// <summary>A complete valid image with a missing protected principal denies native bootstrap after installation, without leaked locks.</summary>
     [Test]
-    public async Task MissingProtectedPrincipalInVerifiedPendingImageRejectsHostAndSafeRetry()
+    public async Task MissingNativeJournalPrincipalInVerifiedPendingImageRejectsBootstrapAndSafeRetry()
         => await AssertRejectedAsync(PendingPrincipal.Missing);
 
-    /// <summary>Changing a protected principal inside an otherwise valid image cannot bypass startup authorization validation.</summary>
+    /// <summary>Changing a protected principal inside an otherwise valid image cannot pass native bootstrap/readiness authorization validation.</summary>
     [Test]
-    public async Task ModifiedProtectedPrincipalInVerifiedPendingImageRejectsHostAndSafeRetry()
+    public async Task ModifiedNativeJournalPrincipalInVerifiedPendingImageRejectsBootstrapAndSafeRetry()
         => await AssertRejectedAsync(PendingPrincipal.Modified);
 
     /// <summary>A valid protected principal survives pending-image installation and subsequent physical host reopening.</summary>
@@ -36,10 +37,13 @@ internal sealed class PartitionHostRecoveryTests
                 await Assert.That(host.Database.Store.Identity.NodeId).IsEqualTo(fixture.TargetNodeId);
                 await Assert.That(host.Database.Store.Identity.ReadGeneration).IsEqualTo(fixture.TargetGeneration + 1);
                 var principal = host.Database.Store.Read(view => view.GetRecord<PrincipalRecord>(
-                    KeySpace.Principal(ClusterPrincipalPolicy.InternalPrincipalId)));
+                    KeySpace.Principal(RuntimeJournalIdentity.ProtectedPrincipalId)));
                 await Assert.That(principal!.Revoked).IsFalse();
-                await Assert.That(principal.ClusterAdministrator).IsTrue();
+                await Assert.That(principal.ClusterAdministrator).IsFalse();
                 await Assert.That(principal.PolicyEpoch).IsEqualTo(1);
+                var bootstrap = PartitionHostRecoveryFixture.VerifyAuthority(host.Database);
+                await Assert.That(bootstrap.Applied).IsFalse();
+                await Assert.That(host.Database.ReadRuntimeJournalCatalog(RuntimeJournalIdentity.ProtectedPrincipalId).Journals).IsEmpty();
             }
             await AssertInstalledAsync(fixture, PendingPrincipal.Valid);
         }
@@ -52,8 +56,7 @@ internal sealed class PartitionHostRecoveryTests
         await AssertPendingAsync(fixture);
         for (var attempt = 0; attempt < RecoveryAttempts; attempt++)
         {
-            var rejection = await Assert.ThrowsExactlyAsync<KeyLoadException>(fixture.OpenAndDisposeHostAsync);
-            await Assert.That(rejection!.Code).IsEqualTo(ErrorCode.RecoveryRequired);
+            await fixture.VerifyRecoveredAuthorityAsync();
             await AssertInstalledAsync(fixture, principal);
         }
     }
@@ -86,7 +89,7 @@ internal sealed class PartitionHostRecoveryTests
         await Assert.That(image.AppliedPosition).IsEqualTo(PartitionHostRecoveryFixture.SnapshotCut);
         await Assert.That(File.Exists(Path.Combine(path, ReplicaProtocol.IncomingImage))).IsFalse();
         await Assert.That(File.Exists(Path.Combine(path, ReplicaProtocol.IncomingManifest))).IsFalse();
-        var principal = stores.Canonical.Read(view => view.GetRecord<PrincipalRecord>(KeySpace.Principal(ClusterPrincipalPolicy.InternalPrincipalId)));
+        var principal = stores.Canonical.Read(view => view.GetRecord<PrincipalRecord>(KeySpace.Principal(RuntimeJournalIdentity.ProtectedPrincipalId)));
         if (expected == PendingPrincipal.Missing)
         {
             await Assert.That(principal).IsNull();

@@ -186,11 +186,12 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView, INativeCatalogB
         try
         {
             runtime.Check();
-            runtime.Identity = runtime.Identity with
+            var nextIdentity = runtime.Identity with
             {
                 DispatchPaused = paused
             };
-            ZoneTreeIdentityFile.Write(Path.Combine(runtime.Options.Directory, IdentityFileName), runtime.Identity, runtime.Options.IdentityBufferBytes);
+            ZoneTreeIdentityFile.Write(Path.Combine(runtime.Options.Directory, IdentityFileName), nextIdentity, runtime.Options.IdentityBufferBytes);
+            runtime.Identity = nextIdentity;
         }
         finally
         {

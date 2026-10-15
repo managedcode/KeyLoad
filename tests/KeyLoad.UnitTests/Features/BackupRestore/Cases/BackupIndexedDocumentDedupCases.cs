@@ -122,8 +122,11 @@ internal sealed class BackupIndexedDocumentDedupCases
         await Assert.That(fixture.TargetStore.Position).IsEqualTo(sourceCut + AuthorityResetCommits);
         await Assert.That(ReadSystem(fixture.TargetStore, ZoneTreePersistenceFormat.LastAppliedKey)).IsNull();
         await Assert.That(ReadSystem(fixture.TargetStore, ZoneTreePersistenceFormat.ClockKey)).IsNull();
-        await Assert.That(fixture.TargetStore.Read(view => view.ReadOwnedValue(KeyCodec.Encode(
-            ZoneTreePersistenceFormat.MembershipNamespace, ZoneTreePersistenceFormat.OrleansMembershipKey)))).IsNull();
+        var metadata = fixture.TargetStore.Read(view => view.GetRecord<ResourceDefinition>(KeySpace.Resource(
+            fixture.Partition.TenantId, fixture.Partition.DatabaseId, BackupIndexedDocumentDedupFixture.AuthorityResource)));
+        await Assert.That(System.Text.Json.JsonSerializer.Serialize(metadata, JsonDefaults.Options)).IsEqualTo(
+            System.Text.Json.JsonSerializer.Serialize(new ResourceDefinition(BackupIndexedDocumentDedupFixture.AuthorityResource,
+                ResourceKind.Collection, fixture.Partition.TransactionDomainId), JsonDefaults.Options));
         var paused = ReadSystem(fixture.TargetStore, DispatchPausedKey);
         await Assert.That(paused).IsNotNull();
         await Assert.That(NativeSerialization.Deserialize<bool>(paused!)).IsTrue();

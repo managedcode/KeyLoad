@@ -50,6 +50,5 @@ internal static class PartitionDatabaseComposition
                 DatabaseEngine.Credential(PartitionStoreProtocol.AdministratorId, PartitionStoreProtocol.AdministratorId,
                     options.AdminKey));
         }
-        ClusterPrincipalPolicy.Initialize(database);
     }
 }

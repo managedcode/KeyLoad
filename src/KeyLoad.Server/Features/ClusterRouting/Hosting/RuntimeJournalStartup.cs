@@ -12,19 +12,19 @@ internal static class RuntimeJournalStartup
     private const string BootstrapCommandDomain = "keyload-runtime-journal-bootstrap-v1\0";
     private static readonly byte[] BootstrapDomain = Encoding.ASCII.GetBytes(BootstrapCommandDomain);
     internal static Task InitializeConfiguredAsync(IServiceProvider services, PartitionHost partition,
-        PrincipalRecord administrator, NodeOptions options, ServerRuntimeOptions runtime,
+        Func<CancellationToken, Task<PrincipalRecord>> authenticateAdministrator, NodeOptions options, ServerRuntimeOptions runtime,
         CancellationToken cancellationToken)
     {
         if (options.PhysicalGroupTrust.Role == PhysicalGroupTrustRole.Disabled
             || options.PhysicalGroupTrust.RemoteDocumentReads)
         {
-            return InitializeAsync(services, partition, administrator, options, runtime, cancellationToken);
+            return InitializeAsync(services, partition, authenticateAdministrator, options, runtime, cancellationToken);
         }
         return Task.CompletedTask;
     }
 
     internal static async Task InitializeAsync(IServiceProvider services, PartitionHost partition,
-        PrincipalRecord administrator, NodeOptions options, ServerRuntimeOptions runtime,
+        Func<CancellationToken, Task<PrincipalRecord>> authenticateAdministrator, NodeOptions options, ServerRuntimeOptions runtime,
         CancellationToken cancellationToken)
     {
         var clock = services.GetRequiredService<TimeProvider>();
@@ -36,13 +36,13 @@ internal static class RuntimeJournalStartup
             services, clock, runtime.GrainRouting);
         var discovery = services.GetRequiredService<ReplicaSiloDiscoveryClient>();
         var commandId = BootstrapCommandId(options.PhysicalShardId, partition.Configuration.Incarnation);
-        await InitializeAuthorityAsync(requests, discovery, administrator, commandId, runtime, clock, token)
+        await InitializeAuthorityAsync(requests, discovery, authenticateAdministrator, commandId, runtime, clock, token)
             .ConfigureAwait(false);
         services.GetRequiredService<RuntimeJournalAdmission>().Open(token);
     }
 
     private static async Task InitializeAuthorityAsync(RuntimeJournalStartupRequests requests,
-        ReplicaSiloDiscoveryClient discovery, PrincipalRecord administrator, Guid commandId,
+        ReplicaSiloDiscoveryClient discovery, Func<CancellationToken, Task<PrincipalRecord>> authenticateAdministrator, Guid commandId,
         ServerRuntimeOptions runtime, TimeProvider clock, CancellationToken token)
     {
         while (true)
@@ -60,6 +60,7 @@ internal static class RuntimeJournalStartup
                     await Task.Delay(runtime.DurableJobs.Value.BootstrapPollInterval, clock, token)
                         .ConfigureAwait(false);
                 }
+                var administrator = await authenticateAdministrator(token).ConfigureAwait(false);
                 await requests.BootstrapAsync(administrator, commandId, token).ConfigureAwait(false);
                 return;
             }

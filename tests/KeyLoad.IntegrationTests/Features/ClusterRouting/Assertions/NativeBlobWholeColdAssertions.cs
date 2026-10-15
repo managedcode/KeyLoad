@@ -73,7 +73,7 @@ internal static class NativeBlobWholeColdAssertions
         {
             token.ThrowIfCancellationRequested();
             await Assert.That(entry.Index <= right.HardState.CommittedIndex).IsTrue();
-            await Assert.That(entry.Operation is null || entry.Operation.Kind == OperationKind.Membership).IsTrue();
+            await Assert.That(entry.Operation is null).IsTrue();
             allowed.Add(Convert.ToHexString(ReplicaProtocol.EntryStorageKey(entry.Index)));
         }
         return allowed;
@@ -93,7 +93,7 @@ internal static class NativeBlobWholeColdAssertions
             }
             if (!left.TryGetValue(key, out var original) || !right.TryGetValue(key, out var actual) || original != actual)
             {
-                throw new InvalidOperationException("The complete original Blob journal changed outside native membership authority.");
+                throw new InvalidOperationException("The complete original Blob journal changed outside native election state.");
             }
         }
     }

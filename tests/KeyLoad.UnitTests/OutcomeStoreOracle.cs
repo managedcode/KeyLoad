@@ -101,7 +101,6 @@ internal static class OutcomeStoreOracle
             OperationKind.ConfigureApiKey => IsNonNull<ConfigureApiKeyRequest>(operation),
             OperationKind.BootstrapPhysicalShardCatalog => IsNonNull<BootstrapPhysicalShardCatalogRequest>(operation),
             OperationKind.BindAtomicPartitionPlacement => IsNonNull<BindAtomicPartitionPlacementRequest>(operation),
-            OperationKind.Membership => IsNonNull<MembershipMutation>(operation),
             OperationKind.SetDispatch => IsBoolean(operation.PayloadJson),
             _ => false
         };

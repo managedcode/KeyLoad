@@ -26,10 +26,13 @@ public sealed partial class DatabaseEngine
         var resource = Resource(tx, partition, put.Collection, ResourceKind.Collection);
         RequireDocumentAuthority(resource);
         var previous = context.Before;
-        CheckRevision(previous?.Revision ?? ActualEmptyCount, put.ExpectedRevision);
         if (previous is { Deleted: false })
         {
             Authorization.RequireWriteRow(principal, previous.Access);
+        }
+        CheckRevision(previous?.Revision ?? ActualEmptyCount, put.ExpectedRevision);
+        if (previous is { Deleted: false })
+        {
             Authorization.RequireReplacement(principal, resource, put.ExplicitReplacement);
         }
 
@@ -72,8 +75,8 @@ public sealed partial class DatabaseEngine
             throw Errors.Fail(ErrorCode.NotFound, UnavailableDocumentMutationMessage);
         }
 
-        CheckRevision(previous.Revision, patch.ExpectedRevision);
         Authorization.RequireWriteRow(principal, previous.Access);
+        CheckRevision(previous.Revision, patch.ExpectedRevision);
         foreach (var field in patch.Patches)
         {
             Authorization.RequireFieldWrite(principal, resource, field.Path);
@@ -105,8 +108,8 @@ public sealed partial class DatabaseEngine
             throw Errors.Fail(ErrorCode.NotFound, UnavailableDocumentMutationMessage);
         }
 
-        CheckRevision(previous.Revision, delete.ExpectedRevision);
         Authorization.RequireWriteRow(principal, previous.Access);
+        CheckRevision(previous.Revision, delete.ExpectedRevision);
         UpdateIndexes(tx, principal, resource, previous, null);
         var tombstone = previous with
         {

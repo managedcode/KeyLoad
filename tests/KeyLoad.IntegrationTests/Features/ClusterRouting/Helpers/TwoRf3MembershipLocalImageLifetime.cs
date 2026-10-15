@@ -12,6 +12,7 @@ internal static class TwoRf3MembershipLocalImageLifetime
         var wave = new TwoRf3MembershipWave(selection, register: true, remote: true, query: true,
             probe: true, protectedDocument: true)
         {
+            ProtectedMovementProbe = selection is not null,
             localImagePreparation = preparation
         };
         return await TwoRf3MembershipWave.StartOwnedAsync(wave, token).ConfigureAwait(false);

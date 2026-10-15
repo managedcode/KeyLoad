@@ -14,7 +14,6 @@ public sealed partial class DatabaseEngine
 
     private AtomicPartitionPlacementResolution? AuthorizeOperation(IKeyValueView view, PrincipalRecord principal, ReplicatedOperation operation)
     {
-        ClusterPrincipalPolicy.RequireOperation(principal, operation.Kind);
         RuntimeJournalIdentity.RequireOperation(principal, operation.Kind,
             operation.Kind == OperationKind.RuntimeJournal ? Payload<RuntimeJournalMutation>(operation) : null);
         if (operation.Kind == OperationKind.RuntimeJournal)

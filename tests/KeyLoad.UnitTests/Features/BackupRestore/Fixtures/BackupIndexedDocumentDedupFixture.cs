@@ -11,10 +11,9 @@ internal sealed class BackupIndexedDocumentDedupFixture : IDisposable
     private const string DirectoryPrefix = "keyload-backup-indexed-dedup-";
     private const string GuidFormat = "N";
     private const string RootPrincipal = "root";
-    private const string MembershipContents = "{}";
+    internal const string AuthorityResource = "backup-authority-metadata";
     private const long InitialAppliedIndex = 1;
     private const string SystemNamespace = ZoneTreePersistenceFormat.SystemNamespace;
-    private const string MembershipNamespace = ZoneTreePersistenceFormat.MembershipNamespace;
     private const string LastAppliedKey = ZoneTreePersistenceFormat.LastAppliedKey;
     private const string ClockKey = ZoneTreePersistenceFormat.ClockKey;
     private readonly string root = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
@@ -43,11 +42,10 @@ internal sealed class BackupIndexedDocumentDedupFixture : IDisposable
     internal const string ReplacedJson = "{\"label\":\"violet\",\"rank\":1}";
     internal const string RestoredJson = "{\"label\":\"amber\",\"rank\":4}";
     internal const string HealthyJson = "{\"label\":\"gold\",\"rank\":5}";
-    internal const string MembershipKey = ZoneTreePersistenceFormat.OrleansMembershipKey;
     internal const long FirstRevision = 1;
     internal const long SecondRevision = 2;
     internal const long NoPriorRevision = 0;
-    internal static readonly Guid MembershipCommandId = Guid.Parse("c21ccfc6-6aac-4539-bd0f-c2d4e4fd9c1c");
+    internal static readonly Guid MetadataCommandId = Guid.Parse("c21ccfc6-6aac-4539-bd0f-c2d4e4fd9c1c");
 
     internal string BackupDirectory
     {
@@ -80,12 +78,11 @@ internal sealed class BackupIndexedDocumentDedupFixture : IDisposable
 
     internal OperationResult SeedReplicaAuthority()
     {
-        ClusterPrincipalPolicy.Initialize(Source.Database);
-        var membership = new MembershipMutation(MembershipKey, NoPriorRevision,
-            NativeSerialization.Serialize(MembershipContents));
-        var operation = new ReplicatedOperation(MembershipCommandId,
-            OperationKind.Membership, ClusterPrincipalPolicy.InternalPrincipalId,
-            Source.Database.EvaluationClock.GetUtcNow(), JsonSerializer.Serialize(membership, JsonDefaults.Options));
+        var metadata = new ConfigureResourceRequest(Partition.TenantId, Partition.DatabaseId,
+            new ResourceDefinition(AuthorityResource, ResourceKind.Collection, Partition.TransactionDomainId));
+        var operation = new ReplicatedOperation(MetadataCommandId,
+            OperationKind.ConfigureResource, RootPrincipal,
+            Source.Database.EvaluationClock.GetUtcNow(), JsonSerializer.Serialize(metadata, JsonDefaults.Options));
         return Source.Database.Apply(operation, InitialAppliedIndex);
     }
 
@@ -111,11 +108,11 @@ internal sealed class BackupIndexedDocumentDedupFixture : IDisposable
     {
         var applied = Source.Store.Read(view => view.ReadOwnedValue(KeyCodec.Encode(SystemNamespace, LastAppliedKey)));
         var clock = Source.Store.Read(view => view.ReadOwnedValue(KeyCodec.Encode(SystemNamespace, ClockKey)));
-        var membership = Source.Store.Read(view => view.GetRecord<MembershipRecord>(KeyCodec.Encode(
-            MembershipNamespace, MembershipKey)));
+        var metadata = Source.Store.Read(view => view.GetRecord<ResourceDefinition>(KeySpace.Resource(
+            Partition.TenantId, Partition.DatabaseId, AuthorityResource)));
         if (applied is null || NativeSerialization.Deserialize<long>(applied) != InitialAppliedIndex
-            || clock is null || membership is null || membership.Version != FirstRevision
-            || NativeSerialization.Deserialize<string>(membership.Payload.Span) != MembershipContents)
+            || clock is null || JsonSerializer.Serialize(metadata, JsonDefaults.Options) != JsonSerializer.Serialize(
+                new ResourceDefinition(AuthorityResource, ResourceKind.Collection, Partition.TransactionDomainId), JsonDefaults.Options))
         {
             throw new InvalidOperationException("The source backup did not contain the exercised replica authority fields.");
         }

@@ -4,26 +4,29 @@ namespace KeyLoad.Storage.IO;
 
 internal sealed class OfflineLockedFileStream : FileStream
 {
+    private readonly string fileName;
     private readonly SafeFileHandle originalHandle;
     private readonly SafeFileHandle borrowedHandle;
     private readonly Lock disposalGate = new();
     private readonly AsyncLocal<bool> disposingBaseView = new();
     private Task? disposalCompletion;
 
-    private OfflineLockedFileStream(SafeFileHandle original, SafeFileHandle borrowed, FileAccess access, int bufferSize)
+    private OfflineLockedFileStream(SafeFileHandle original, SafeFileHandle borrowed, string path, FileAccess access, int bufferSize)
         : base(borrowed, access, bufferSize, isAsync: false)
     {
+        fileName = path;
         originalHandle = original;
         borrowedHandle = borrowed;
     }
 
-    internal static FileStream Create(SafeFileHandle original, FileAccess access, int bufferSize)
+    internal static FileStream Create(SafeFileHandle original, string path, FileAccess access, int bufferSize)
     {
+        var absolutePath = Path.GetFullPath(path);
         SafeFileHandle? borrowed = new(original.DangerousGetHandle(), ownsHandle: false);
         Exception? primaryFailure = null;
         try
         {
-            var stream = new OfflineLockedFileStream(original, borrowed, access, bufferSize);
+            var stream = new OfflineLockedFileStream(original, borrowed, absolutePath, access, bufferSize);
             borrowed = null;
             return stream;
         }
@@ -37,6 +40,8 @@ internal sealed class OfflineLockedFileStream : FileStream
             OfflineNativeHandleLease.DisposeUntransferred(ref borrowed, primaryFailure);
         }
     }
+
+    public override string Name => fileName;
 
     public override SafeFileHandle SafeFileHandle
     {

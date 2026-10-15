@@ -246,10 +246,9 @@ public enum OperationKind
     ConfigureApiKey,
     /// <summary>The set dispatch value.</summary>
     SetDispatch,
-    /// <summary>The membership value.</summary>
-    Membership,
+    // Discriminator 8 is permanently reserved and must never be reused.
     /// <summary>The configure subscription value.</summary>
-    ConfigureSubscription,
+    ConfigureSubscription = 9,
     /// <summary>The seek subscription value.</summary>
     SeekSubscription,
     /// <summary>The receive subscription value.</summary>

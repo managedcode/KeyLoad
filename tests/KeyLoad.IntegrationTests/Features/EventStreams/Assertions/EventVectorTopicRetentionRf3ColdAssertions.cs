@@ -21,12 +21,12 @@ internal static class EventVectorTopicRetentionRf3ColdAssertions
             var right = after[node];
             await IdentityAsync(left, right);
             var allowed = new HashSet<string>(StringComparer.Ordinal);
-            var membership = new PartitionMovementNativeMembershipRf3Cut(left.OriginalCut.Rows, right.OriginalCut.Rows, allowed);
+            var clock = new PartitionMovementNativeColdClockRf3Cut(left.OriginalCut.Rows, right.OriginalCut.Rows, allowed);
             for (var index = left.Applied + 1; index <= right.Applied; index++)
             {
                 token.ThrowIfCancellationRequested();
                 var entry = right.Entries.Single(value => value.Index == index);
-                if (entry.Operation is not { } operation || await membership.TryApplyAsync(operation))
+                if (entry.Operation is not { } operation)
                 {
                     continue;
                 }
@@ -36,7 +36,7 @@ internal static class EventVectorTopicRetentionRf3ColdAssertions
             {
                 allowed.Add(Convert.ToHexString(KeySpace.AppliedBytes));
             }
-            await membership.RequireCompleteAsync();
+            await clock.RequireCompleteAsync();
             ExactRows(left.CanonicalRows, right.CanonicalRows, allowed, token);
             await Assert.That(right.CanonicalPosition - left.CanonicalPosition).IsEqualTo(right.Applied - left.Applied);
             var journal = new HashSet<string>(StringComparer.Ordinal) { Convert.ToHexString(ReplicaProtocol.StateStorageKey) };
@@ -44,7 +44,7 @@ internal static class EventVectorTopicRetentionRf3ColdAssertions
             {
                 token.ThrowIfCancellationRequested();
                 await Assert.That(entry.Index <= right.HardState.CommittedIndex).IsTrue();
-                if (entry.Operation is { } operation && operation.Kind != OperationKind.Membership)
+                if (entry.Operation is { } operation)
                 {
                     await EventVectorTopicRetentionRf3ReplayProof.RequireAsync(left, operation, seeds, successes, token);
                 }

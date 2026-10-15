@@ -33,7 +33,7 @@ internal static class NativeRemoteGraphRf3ColdAssertions
         ReplicaEntry[] delta, NativeRemoteGraphRf3Seed seed, NativeRemoteGraphRf3Operations originals, CancellationToken token)
     {
         var allowed = new HashSet<string>(StringComparer.Ordinal);
-        var membership = new PartitionMovementNativeMembershipRf3Cut(left.OriginalCut.Rows, right.OriginalCut.Rows, allowed);
+        var clock = new PartitionMovementNativeColdClockRf3Cut(left.OriginalCut.Rows, right.OriginalCut.Rows, allowed);
         await Assert.That((long)delta.Length).IsEqualTo(right.Applied - left.Applied);
         for (var index = left.Applied + 1; index <= right.Applied; index++)
         {
@@ -43,17 +43,13 @@ internal static class NativeRemoteGraphRf3ColdAssertions
             {
                 continue;
             }
-            if (await membership.TryApplyAsync(operation))
-            {
-                continue;
-            }
             await NativeRemoteGraphRf3ReplayProof.RequireAsync(left, operation, seed, originals, token);
         }
         if (delta.Length != 0)
         {
             allowed.Add(Convert.ToHexString(KeySpace.AppliedBytes));
         }
-        await membership.RequireCompleteAsync();
+        await clock.RequireCompleteAsync();
         var before = Rows(left.CanonicalRows);
         var after = Rows(right.CanonicalRows);
         await Assert.That(before.Keys.Concat(after.Keys).Distinct(StringComparer.Ordinal).Where(key => !allowed.Contains(key))
@@ -107,7 +103,7 @@ internal static class NativeRemoteGraphRf3ColdAssertions
         {
             token.ThrowIfCancellationRequested();
             await Assert.That(entry.Index <= right.HardState.CommittedIndex).IsTrue();
-            if (entry.Operation is { } operation && operation.Kind != OperationKind.Membership)
+            if (entry.Operation is { } operation)
             {
                 await NativeRemoteGraphRf3ReplayProof.RequireAsync(left, operation, seed, originals, token);
             }

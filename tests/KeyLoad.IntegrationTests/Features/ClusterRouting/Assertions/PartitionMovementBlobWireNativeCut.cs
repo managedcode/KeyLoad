@@ -45,16 +45,13 @@ internal sealed record PartitionMovementBlobWireNativeCut(PartitionMovementPubli
         PartitionMovementBlobWireNativeCut after, ReplicaEntry[] entries)
     {
         var allowed = new HashSet<string>(StringComparer.Ordinal);
-        var membership = new PartitionMovementNativeMembershipRf3Cut(before.Rows, after.Rows, allowed);
+        var clock = new PartitionMovementNativeColdClockRf3Cut(before.Rows, after.Rows, allowed);
         var count = EmptyCounter;
         for (var index = before.Applied + NextEntry; index <= after.Applied; index++)
         {
             var entry = entries.Single(value => value.Index == index);
             await Assert.That(entry.Index).IsEqualTo(index);
-            if (entry.Operation is { } operation)
-            {
-                await Assert.That(await membership.TryApplyAsync(operation)).IsTrue();
-            }
+            await Assert.That(entry.Operation).IsNull();
             count++;
         }
         await Assert.That(entries.Length).IsEqualTo(count);
@@ -62,7 +59,7 @@ internal sealed record PartitionMovementBlobWireNativeCut(PartitionMovementPubli
         {
             allowed.Add(Convert.ToHexString(KeySpace.AppliedBytes));
         }
-        await membership.RequireCompleteAsync();
+        await clock.RequireCompleteAsync();
         var left = PartitionMovementCapturePointerRf3Fault.Rows(before.Rows);
         var right = PartitionMovementCapturePointerRf3Fault.Rows(after.Rows);
         await Assert.That(left.Keys.Concat(right.Keys).Distinct(StringComparer.Ordinal)

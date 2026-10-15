@@ -120,7 +120,7 @@ internal sealed class ReplicaSecurityFixture : IDisposable
     internal ReplicaPeerEnvelope Resign(ReplicaPeerEnvelope request) => request with { Signature = mac.Request(request) };
     internal ReplicaPeerEnvelope InvalidControl(string scenario)
     {
-        var operation = Operation(OperationKind.Membership);
+        var operation = Operation(OperationKind.BootstrapPhysicalShardCatalog);
         var request = Request(ReplicaRpc.Forward, operation);
         return Resign(request with
         {
@@ -129,7 +129,7 @@ internal sealed class ReplicaSecurityFixture : IDisposable
     }
     internal ReplicaPeerEnvelope DuplicateAppend(bool operation)
     {
-        var value = new AppendRequest(VoterA, 1, 0, 0, 0, [new(1, 1, Operation(OperationKind.Membership))]);
+        var value = new AppendRequest(VoterA, 1, 0, 0, 0, [new(1, 1, Operation(OperationKind.BootstrapPhysicalShardCatalog))]);
         var request = Request(ReplicaRpc.Append, value);
         return Resign(request with
         {

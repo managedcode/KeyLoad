@@ -20,6 +20,10 @@ internal static class TwoRf3QueryProbe
         {
             return RequestCqrsProbeProfile.ReadDiagnosticSix(builder, root, image, local);
         }
+        if (local is not null && image is null && control.ProtectedMovementProbe)
+        {
+            return RequestCqrsProbeProfile.ReadDiagnosticSix(builder, root, image, local);
+        }
         if (local is not null && image is null && control.EventVectorReservedProbe)
         {
             return RequestCqrsProbeProfile.ReadDiagnosticSix(builder, root, image, local);

@@ -36,6 +36,7 @@ internal static class ClusterResourceSettings
 
     internal static void Apply(IDistributedApplicationBuilder builder, IResourceBuilder<ContainerResource> resource, string? containerUser)
     {
+        KeyLoad.AppHost.Features.ClusterRouting.ClusterTelemetryResources.Apply(resource);
         var options = AppHostOptionsRegistration.Get(builder);
         resource.WithEnvironment(SnapshotEnvironment, options.Cluster.Value.SnapshotThreshold.ToString(CultureInfo.InvariantCulture))
             .WithEnvironment(LogEnvironment, options.Cluster.Value.LoggingLevel);

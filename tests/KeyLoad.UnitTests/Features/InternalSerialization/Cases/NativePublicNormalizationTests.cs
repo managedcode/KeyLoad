@@ -111,9 +111,9 @@ internal sealed class NativePublicNormalizationTests
     {
         using var database = new TestDatabase();
         var operation = NativePublicNormalizationFixture.Create(database, NativePublicShape.NullGrant,
-            targetPrincipal: KeyLoad.Core.ClusterPrincipalPolicy.InternalPrincipalId);
+            targetPrincipal: KeyLoad.Core.Features.ClusterRouting.Identity.RuntimeJournalIdentity.ProtectedPrincipalId);
         await NativePublicNormalizationChecks.DurableFailureAsync(database, operation, ErrorCode.PermissionDenied,
-            "The internal cluster principal is protected from public configuration.");
+            "The runtime journal request is invalid.");
     }
 
     [Test]

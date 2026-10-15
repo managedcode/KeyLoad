@@ -1,10 +1,12 @@
 using System.Security.Cryptography;
 using KeyLoad.Core;
+using KeyLoad.Core.Features.ClusterRouting.Identity;
 using KeyLoad.Replication;
 using KeyLoad.Security;
 using KeyLoad.Server;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
+using KeyLoad.UnitTests.Features.Authorization;
 using Microsoft.Extensions.Logging;
 
 namespace KeyLoad.UnitTests.Features.StorageRecovery;
@@ -38,7 +40,10 @@ internal sealed class PartitionHostRecoveryFixture : IDisposable
     private const string VoterB = "https://127.0.0.1:5502";
     private const string VoterC = "https://127.0.0.1:5503";
     private const int SecretBytes = 32;
+    private const string CaptureImageExceeded = "The complete recovery fixture image exceeded its record bound.";
+    private const string CaptureRowSeparator = ":";
     private readonly string directory;
+    private readonly RecoveryImageCaptureOptions capture = UnitExecutionOptions.RecoveryImageCapture().Value;
     private readonly ILoggerFactory logging = LoggerFactory.Create(_ => { });
 
     internal PartitionHostRecoveryFixture()
@@ -82,10 +87,15 @@ internal sealed class PartitionHostRecoveryFixture : IDisposable
         using var target = OpenStores();
         TargetNodeId = target.Canonical.Identity.NodeId;
         TargetGeneration = target.Canonical.Identity.ReadGeneration;
-        ClusterPrincipalPolicy.Initialize(source.Database);
+        source.Database.Bootstrap(new(PartitionStoreProtocol.AdministratorId, PartitionStoreProtocol.AdministratorTenant,
+            [new(PartitionStoreProtocol.Wildcard, PartitionStoreProtocol.Wildcard, Capability.All)], [PartitionStoreProtocol.Wildcard])
+        {
+            ClusterAdministrator = true
+        }, DatabaseEngine.Credential(PartitionStoreProtocol.AdministratorId, PartitionStoreProtocol.AdministratorId, Options.AdminKey));
+        NativeJournalAuthorityTestBootstrap.Initialize(source.Database);
         source.Canonical.Commit((transaction, _) =>
         {
-            var key = KeySpace.Principal(ClusterPrincipalPolicy.InternalPrincipalId);
+            var key = KeySpace.Principal(RuntimeJournalIdentity.ProtectedPrincipalId);
             if (principal == PendingPrincipal.Missing)
             {
                 transaction.Delete(key);
@@ -127,6 +137,30 @@ internal sealed class PartitionHostRecoveryFixture : IDisposable
     {
         await using var host = OpenHost();
     }
+
+    internal async Task VerifyRecoveredAuthorityAsync()
+    {
+        await using var host = OpenHost();
+        var position = host.Database.Store.Position;
+        var before = Capture(host.Database.Store);
+        var failure = Assert.ThrowsExactly<KeyLoadException>(() => VerifyAuthority(host.Database));
+        await Assert.That(failure.Code).IsEqualTo(ErrorCode.RecoveryRequired);
+        await Assert.That(host.Database.Store.Position).IsEqualTo(position);
+        await Assert.That(Capture(host.Database.Store).SequenceEqual(before, StringComparer.Ordinal)).IsTrue();
+    }
+
+    internal static RuntimeJournalMutationResult VerifyAuthority(DatabaseEngine database)
+        => NativeJournalAuthorityTestBootstrap.Verify(database);
+
+    private string[] Capture(IAtomicStore store) => store.Read(view =>
+    {
+        var page = view.Scan([], capture.MaximumRecords);
+        if (page.HasMore)
+        {
+            throw new InvalidOperationException(CaptureImageExceeded);
+        }
+        return page.Records.Select(row => Convert.ToHexString(row.Key.Span) + CaptureRowSeparator + Convert.ToHexString(row.Value.Span)).ToArray();
+    });
 
     internal HostReplicaStores OpenStores() => new(Options);
 

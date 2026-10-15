@@ -11,8 +11,8 @@ public sealed partial class DatabaseEngine
 {
     private void RequireControlledBlobInitialPolicy(PrincipalRecord principal, ReplicatedOperation original)
     {
-        ClusterPrincipalPolicy.RequireOperation(principal, original.Kind);
-        ClusterPrincipalPolicy.RequireOperation(principal, OperationKind.BeginBlobUpload);
+        global::KeyLoad.Core.Features.ClusterRouting.Identity.RuntimeJournalIdentity.RequireOperation(principal, original.Kind);
+        global::KeyLoad.Core.Features.ClusterRouting.Identity.RuntimeJournalIdentity.RequireOperation(principal, OperationKind.BeginBlobUpload);
         var scope = BlobCommandScope.From(original);
         BlobKeys.Validate(scope.Blob);
         Authorization.Require(principal, scope.Blob.Partition, scope.Blob.Resource,

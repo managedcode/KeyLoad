@@ -2,6 +2,7 @@ using System.Security.Cryptography;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using KeyLoad.AppHost.Features.ClusterReplication;
+using KeyLoad.AppHost.Features.ClusterRouting;
 using KeyLoad.Server;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
@@ -68,6 +69,50 @@ internal sealed class ClusterTelemetryResourceTests
                 Directory.Delete(root, recursive: true);
             }
             return Task.CompletedTask;
+        }, failures);
+        ServerFailureObserver.ThrowIfAny(failures);
+    }
+
+    [Test]
+    [Arguments(Development, false)]
+    [Arguments(Production, false)]
+    [Arguments(Development, true)]
+    [Arguments(Production, true)]
+    public async Task ActualTwoRf3ModelKeepsNativeOptionalRoutingAndPrivacyAfterAllCallbacks(
+        string environmentName, bool configuredReceiver)
+    {
+        var builder = DistributedApplication.CreateBuilder(new DistributedApplicationOptions
+        {
+            DisableDashboard = true,
+            Args = []
+        });
+        builder.Environment.EnvironmentName = environmentName;
+        builder.Configuration[ReceiverConfiguration] = configuredReceiver ? ModelReceiver : null;
+        builder.Configuration[LegacyReceiverConfiguration] = null;
+        builder.Configuration[ContainerImageOptions.ServerKey] = Image;
+        builder.Configuration[ContainerUserKey] = ContainerUser;
+        builder.Configuration[TwoRf3ProfileProtocol.EphemeralSetting] = TwoRf3ProfileProtocol.Enabled;
+        builder.Configuration[TwoRf3ProfileProtocol.Setting] = TwoRf3ProfileProtocol.Profile;
+        var root = Path.Combine(Path.GetTempPath(), RootPrefix + Guid.NewGuid().ToString(GuidFormat));
+        var failures = new List<Exception>();
+        await ServerFailureObserver.ObserveAsync(async () =>
+        {
+            var profile = new LocalProfile(ClusterProfileStore.CurrentVersion, Guid.NewGuid(), Guid.NewGuid(),
+                Secret(), Secret(), RootCredentialPrefix + Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(SecretBytes)));
+            var nodes = TwoRf3ClusterResources.Add(builder, profile, root);
+            await Assert.That(nodes.Select(node => node.Resource.Name).Order(StringComparer.Ordinal).ToArray())
+                .IsEquivalentTo(new[] { "node1", "node2", "node3", "node4", "node5", "node6" });
+            foreach (var node in nodes)
+            {
+                await VerifyNodeAsync(builder, node, root, configuredReceiver);
+            }
+        }, failures);
+        ServerFailureObserver.Observe(() =>
+        {
+            if (Directory.Exists(root))
+            {
+                Directory.Delete(root, recursive: true);
+            }
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }

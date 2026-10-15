@@ -15,7 +15,7 @@ internal static class RequestCqrsProbeNativeWireValues
         var owner = new PhysicalShardRecord(Guid.NewGuid(), fixture.Configuration.Incarnation,
             fixture.Configuration.VoterIds, 1);
         var identity = new RequestCqrsProbeNativeIdentity(Guid.NewGuid(), Guid.NewGuid(), "wire-only-principal",
-            null, OperationKind.Membership, Now.AddMinutes(1), Guid.NewGuid());
+            null, OperationKind.BootstrapPhysicalShardCatalog, Now.AddMinutes(1), Guid.NewGuid());
         var claim = new RequestCqrsProbeNativeClaim("wire-only-session", Guid.NewGuid(), identity,
             owner, ReplicaSecurityFixture.VoterB, fixture.Discovery.RuntimeAddress,
             Convert.ToHexStringLower(SHA256.HashData(NativeSerialization.Serialize(identity))));

@@ -38,6 +38,10 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
     internal bool nativeCanonicalCutsSelected;
     internal NativeCanonicalModelCutFixture? canonicalCutControls;
     internal readonly bool protectedDocuments;
+    internal bool ProtectedMovementProbe
+    {
+        get; init;
+    }
     internal bool TenantCapacityPlacement
     {
         get; init;
@@ -175,11 +179,7 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
         {
             return;
         }
-        var before = failures.Count;
-        using var deadline = new CancellationTokenSource(TwoRf3MembershipProtocol.CleanupDeadline, TimeProvider.System);
-        await ServerFailureObserver.ObserveAsync(() => owned.StopAsync(deadline.Token), failures).ConfigureAwait(false);
-        await ServerFailureObserver.ObserveAsync(() => owned.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
-        if (failures.Count == before)
+        if (await TwoRf3ApplicationShutdown.JoinAsync(owned, failures).ConfigureAwait(false))
         {
             application = null;
             applicationDisposed = true;

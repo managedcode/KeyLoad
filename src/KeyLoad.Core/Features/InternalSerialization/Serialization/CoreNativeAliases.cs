@@ -19,8 +19,6 @@ internal static class CoreNativeAliases
     internal const string GroupDelivery = "keyload.core.v1.GroupDelivery";
     internal const string GroupState = "keyload.core.v1.GroupState";
     internal const string InboxRecord = "keyload.core.v1.InboxRecord";
-    internal const string MembershipMutation = "keyload.core.v1.MembershipMutation";
-    internal const string MembershipRecord = "keyload.core.v1.MembershipRecord";
     internal const string ProjectionBatchClaims = "keyload.core.v1.ProjectionBatchClaims";
     internal const string ProjectionReceipt = "keyload.core.v1.ProjectionReceipt";
     internal const string ReadyClaimInput = "keyload.core.v1.ReadyClaimInput";

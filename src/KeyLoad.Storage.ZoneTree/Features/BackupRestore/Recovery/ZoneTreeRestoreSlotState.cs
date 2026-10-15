@@ -47,7 +47,6 @@ internal static class ZoneTreeRestoreSlotState
         ZoneTreeRestoreSlotOrigins.Stage(transaction, context, reconciled.OriginalCut.AppliedIndex, ct);
         transaction.Delete(KeyCodec.Encode(SystemNamespace, LastAppliedKey));
         transaction.Delete(KeyCodec.Encode(SystemNamespace, ClockKey));
-        transaction.Delete(KeyCodec.Encode(MembershipNamespace, OrleansMembershipKey));
         transaction.PutRecord(KeyCodec.Encode(SystemNamespace, DispatchPausedKey), true);
         transaction.PutRecord(ClusterRestoreSlotKeys.AuthorityReset(), reconciled with
         {

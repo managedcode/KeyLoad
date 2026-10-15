@@ -1,5 +1,3 @@
-using static KeyLoad.Storage.ZoneTree.ZoneTreePersistenceFormat;
-
 namespace KeyLoad.Storage.ZoneTree;
 
 internal static class ZoneTreeStoreInitializer
@@ -9,8 +7,7 @@ internal static class ZoneTreeStoreInitializer
         EnsureStoreDirectory(runtime.Options.Directory);
         try
         {
-            runtime.Ownership = new FileStream(Path.Combine(runtime.Options.Directory, OwnerLockFileName),
-                FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
+            runtime.Ownership = ZoneTreeOwnerLock.Open(runtime.Options, requireExisting: false);
             runtime.Identity = ZoneTreeIdentityFile.Open(runtime.Options, runtime.Ownership);
             runtime.Journal = ZoneTreeStoreFiles.OpenJournal(runtime.Options);
             ZoneTreeJournalPreflight.Validate(runtime.Journal, runtime.Options, runtime.Identity.FormatVersion);
@@ -28,8 +25,7 @@ internal static class ZoneTreeStoreInitializer
 
     internal static void OpenExisting(ZoneTreeStoreRuntime runtime, Guid expectedNodeId)
     {
-        runtime.Ownership = new FileStream(Path.Combine(runtime.Options.Directory, OwnerLockFileName),
-            FileMode.Open, FileAccess.ReadWrite, FileShare.None);
+        runtime.Ownership = ZoneTreeOwnerLock.Open(runtime.Options, requireExisting: true);
         runtime.Identity = ZoneTreeIdentityFile.OpenExisting(runtime.Options, expectedNodeId);
         runtime.Journal = ZoneTreeStoreFiles.OpenJournal(runtime.Options, FileMode.Open);
         ZoneTreeJournalPreflight.Validate(runtime.Journal, runtime.Options, runtime.Identity.FormatVersion);

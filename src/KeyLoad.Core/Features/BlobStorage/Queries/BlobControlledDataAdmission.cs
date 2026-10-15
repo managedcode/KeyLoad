@@ -23,7 +23,7 @@ public sealed partial class DatabaseEngine
         ControlledBlobReadPurpose purpose, ReadOnlyMemory<byte> nativeRequest, DateTimeOffset expiry, Guid queryId)
     {
         var principal = Principal(view, principalId, EvaluationClock.GetUtcNow());
-        ClusterPrincipalPolicy.RequireOperation(principal, OperationKind.BeginBlobUpload);
+        global::KeyLoad.Core.Features.ClusterRouting.Identity.RuntimeJournalIdentity.RequireOperation(principal, OperationKind.BeginBlobUpload);
         var blob = BlobControlledReadScope.Require(purpose, null, null, nativeRequest);
         Authorization.Require(principal, blob.Partition, blob.Resource, BlobControlledReadScope.Capability(purpose));
         var publication = PartitionMovePublishedPlacementStorage.Read(view, blob.Partition);

@@ -8,8 +8,8 @@ public sealed partial class DatabaseEngine
     private BlobCommandScope RequireControlledBlobPolicies(PrincipalRecord principal, ReplicatedOperation original,
         ImmutableArray<ResourceDefinition> resources)
     {
-        ClusterPrincipalPolicy.RequireOperation(principal, original.Kind);
-        ClusterPrincipalPolicy.RequireOperation(principal, OperationKind.BeginBlobUpload);
+        global::KeyLoad.Core.Features.ClusterRouting.Identity.RuntimeJournalIdentity.RequireOperation(principal, original.Kind);
+        global::KeyLoad.Core.Features.ClusterRouting.Identity.RuntimeJournalIdentity.RequireOperation(principal, OperationKind.BeginBlobUpload);
         var scope = BlobCommandScope.From(original);
         BlobKeys.Validate(scope.Blob);
         if (scope.CommandId != original.Id || scope.UploadId == Guid.Empty)

@@ -9,7 +9,7 @@ internal static class GrainRequestAuthority
     {
         try
         {
-            ClusterPrincipalPolicy.RequirePublicCredential(principalId);
+            RuntimeJournalIdentity.RequirePublicCredential(principalId);
             return database.Store.Read(view => database.Principal(view, principalId, clock.GetUtcNow()));
         }
         catch (Exception error) when (GrainBoundaryErrors.Handles(error))

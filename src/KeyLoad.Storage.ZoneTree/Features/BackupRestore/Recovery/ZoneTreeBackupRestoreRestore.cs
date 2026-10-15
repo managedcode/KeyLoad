@@ -114,7 +114,6 @@ internal static class ZoneTreeBackupRestoreRestore
             {
                 tx.Delete(KeyCodec.Encode(SystemNamespace, LastAppliedKey));
                 tx.Delete(KeyCodec.Encode(SystemNamespace, ClockKey));
-                tx.Delete(KeyCodec.Encode(MembershipNamespace, OrleansMembershipKey));
                 tx.PutRecord(KeyCodec.Encode(SystemNamespace, DispatchPausedKey), true);
                 if (hasHistoricalOrigins)
                 {

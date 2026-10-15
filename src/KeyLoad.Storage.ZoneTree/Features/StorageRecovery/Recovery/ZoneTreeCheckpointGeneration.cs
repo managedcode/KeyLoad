@@ -16,10 +16,10 @@ internal static class ZoneTreeCheckpointGeneration
             retiredTree = Prepare(runtime, replaceTree);
             Swap(runtime, temporary, cut, replaceTree);
         }
-        catch (Exception)
+        catch (Exception original)
         {
             runtime.Poisoned = true;
-            throw Errors.Fail(ErrorCode.RecoveryRequired, SnapshotInstallInterrupted);
+            throw Errors.Fail(ErrorCode.RecoveryRequired, SnapshotInstallInterrupted, original);
         }
 
         if (retiredTree is not null)

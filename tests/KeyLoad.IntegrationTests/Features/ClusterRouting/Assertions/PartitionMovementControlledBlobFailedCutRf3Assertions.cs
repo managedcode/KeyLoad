@@ -43,7 +43,7 @@ internal static class PartitionMovementControlledBlobFailedCutRf3Assertions
         var expected = PartitionMovementControlledBlobFailedCutRf3Phases.Expected(command, source);
         var seen = new HashSet<Guid>();
         var allowed = new HashSet<string>(StringComparer.Ordinal);
-        var membership = new PartitionMovementNativeMembershipRf3Cut(before, after, allowed);
+        var clock = new PartitionMovementNativeColdClockRf3Cut(before, after, allowed);
         foreach (var entry in entries)
         {
             allowed.Add(Convert.ToHexString(KeySpace.AppliedBytes));
@@ -51,11 +51,7 @@ internal static class PartitionMovementControlledBlobFailedCutRf3Assertions
             {
                 continue;
             }
-            if (await membership.TryApplyAsync(operation).ConfigureAwait(false))
-            {
-                continue;
-            }
-            membership.ObserveClock(operation);
+            clock.ObserveClock(operation);
             await Assert.That(operation.Kind).IsEqualTo(OperationKind.PartitionMovementPhase);
             await Assert.That(operation.PrincipalId).IsEqualTo(source ? grant.OperatorPrincipalId : PartitionStoreProtocol.AdministratorId);
             await Assert.That(expected.ContainsKey(operation.Id)).IsTrue();
@@ -70,7 +66,7 @@ internal static class PartitionMovementControlledBlobFailedCutRf3Assertions
             allowed.Add(Convert.ToHexString(CommandOutcomePartitionLocatorSerialization.ScopedKey(seed.Partition, operation.PrincipalId, operation.Id)));
         }
         await Assert.That(seen.SetEquals(expected.Keys)).IsTrue();
-        await membership.RequireCompleteAsync().ConfigureAwait(false);
+        await clock.RequireCompleteAsync().ConfigureAwait(false);
         if (source)
         {
             AddSourceKeys(allowed, seed, identity, grant);

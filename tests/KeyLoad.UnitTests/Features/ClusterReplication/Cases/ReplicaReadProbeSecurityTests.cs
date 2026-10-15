@@ -27,7 +27,7 @@ internal sealed class ReplicaReadProbeSecurityTests
     /// <summary>Nonempty data, control and noop appends are never admitted as probes.</summary>
     [Test]
     [Arguments(OperationKind.Batch)]
-    [Arguments(OperationKind.Membership)]
+    [Arguments(OperationKind.BootstrapPhysicalShardCatalog)]
     [Arguments(null)]
     public async Task NonemptyProbeFailsBeforeEitherPoolIsConsumed(OperationKind? kind)
     {

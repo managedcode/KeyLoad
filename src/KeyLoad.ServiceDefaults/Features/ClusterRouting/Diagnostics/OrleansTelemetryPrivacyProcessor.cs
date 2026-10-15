@@ -27,7 +27,7 @@ internal sealed class OrleansTelemetryPrivacyProcessor(IOptions<OrleansTelemetry
         }
 
         data.TraceStateString = null;
-        if (ClearBoundedBaggage(data))
+        if (!OrleansTelemetryAncestry.IsWithinLimit(data, Options.MaximumParentLinks) || ClearBoundedBaggage(data))
         {
             Suppress(data, OrleansTelemetryPolicy.SuppressionBaggageLimit);
         }
@@ -46,7 +46,7 @@ internal sealed class OrleansTelemetryPrivacyProcessor(IOptions<OrleansTelemetry
         }
 
         data.TraceStateString = null;
-        if (ClearBoundedBaggage(data))
+        if (!OrleansTelemetryAncestry.IsWithinLimit(data, Options.MaximumParentLinks) || ClearBoundedBaggage(data))
         {
             Suppress(data, OrleansTelemetryPolicy.SuppressionBaggageLimit);
             return;

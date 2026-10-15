@@ -21,9 +21,9 @@ internal sealed class OfflineNativeHandleLease(SafeFileHandle handle) : IDisposa
         lockAcquired = true;
     }
 
-    internal FileStream TransferToStream(FileAccess access, int bufferSize)
+    internal FileStream TransferToStream(string path, FileAccess access, int bufferSize)
     {
-        var stream = OfflineLockedFileStream.Create(Handle, access, bufferSize);
+        var stream = OfflineLockedFileStream.Create(Handle, path, access, bufferSize);
         ownershipTransferred = true;
         lockAcquired = false;
         return stream;

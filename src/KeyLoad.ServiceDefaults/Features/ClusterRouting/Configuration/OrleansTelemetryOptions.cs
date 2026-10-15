@@ -11,13 +11,16 @@ public sealed class OrleansTelemetryOptions
     public const string ValidationMessage = "Orleans telemetry bounds must remain within the reviewed privacy limits.";
 
     private const int DefaultMaximumTags = 32;
+    private const int DefaultMaximumParentLinks = 32;
     private const int DefaultMaximumEvents = 24;
     private const int DefaultMaximumBaggageItems = 8;
     private const int DefaultMaximumTagValueCharacters = 256;
     private const int MinimumMaximumTags = 1;
+    private const int MinimumMaximumParentLinks = 0;
     private const int MinimumMaximumEvents = 1;
     private const int MinimumMaximumBaggageItems = 0;
     private const int AbsoluteMaximumTags = 32;
+    private const int AbsoluteMaximumParentLinks = 32;
     private const int AbsoluteMaximumEvents = 24;
     private const int AbsoluteMaximumBaggageItems = 8;
     private const int MinimumMaximumTagValueCharacters = 1;
@@ -25,6 +28,13 @@ public sealed class OrleansTelemetryOptions
 
     /// <summary>Gets or sets the maximum tags inspected on one activity.</summary>
     public int MaximumTags { get; set; } = DefaultMaximumTags;
+
+    /// <summary>Gets or sets the maximum local parent links examined before inherited baggage access.</summary>
+    public int MaximumParentLinks
+    {
+        get;
+        set;
+    } = DefaultMaximumParentLinks;
 
     /// <summary>Gets or sets the maximum events inspected on one activity.</summary>
     public int MaximumEvents { get; set; } = DefaultMaximumEvents;
@@ -39,6 +49,8 @@ public sealed class OrleansTelemetryOptions
     /// <returns>Whether every configured limit is within its safe range.</returns>
     public bool IsValid()
         => MaximumTags >= MinimumMaximumTags && MaximumTags <= AbsoluteMaximumTags
+            && MaximumParentLinks >= MinimumMaximumParentLinks
+            && MaximumParentLinks <= AbsoluteMaximumParentLinks
             && MaximumEvents >= MinimumMaximumEvents && MaximumEvents <= AbsoluteMaximumEvents
             && MaximumBaggageItems >= MinimumMaximumBaggageItems
             && MaximumBaggageItems <= AbsoluteMaximumBaggageItems

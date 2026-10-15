@@ -27,6 +27,10 @@ internal sealed class AppHostControlOptions
     {
         get; set;
     }
+    internal bool ProtectedMovementProbe
+    {
+        get; set;
+    }
     internal bool EventVectorReservedProbe
     {
         get; set;

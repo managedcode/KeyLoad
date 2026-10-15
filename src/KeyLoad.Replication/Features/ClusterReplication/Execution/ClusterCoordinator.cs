@@ -1,4 +1,3 @@
-using System.Text;
 using KeyLoad.Core;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
@@ -8,9 +7,6 @@ namespace KeyLoad.Replication;
 /// <summary>Bounded node admission and stable-ID outcomes over the Orleans replica protocol.</summary>
 public sealed class ClusterCoordinator : ICommitCoordinator, IHostedService, IAsyncDisposable
 {
-    private const int DisposalClaimed = 1;
-    private const int DisposalUnclaimed = 0;
-
     private readonly ReplicaConsensus consensus;
     private readonly DatabaseEngine database;
     private readonly TimeProvider clock;
@@ -20,7 +16,7 @@ public sealed class ClusterCoordinator : ICommitCoordinator, IHostedService, IAs
     private readonly Lock lifecycle = new();
     private Task? worker;
     private Task? shutdown;
-    private int disposed;
+    private Task? disposal;
 
     /// <summary>Creates admission without starting transport or waiting for membership.</summary>
     /// <param name="consensus">Physical node protocol whose wire transport is supplied by Orleans.</param>
@@ -106,25 +102,7 @@ public sealed class ClusterCoordinator : ICommitCoordinator, IHostedService, IAs
     }
 
     private AdmittedCommand Enqueue(ReplicatedOperation operation, CancellationToken cancellationToken)
-    {
-        ArgumentNullException.ThrowIfNull(operation.PrincipalId);
-        cancellationToken.ThrowIfCancellationRequested();
-        if (worker is null || worker.IsCompleted)
-        {
-            throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaProtocol.NoLeader);
-        }
-        var bytes = Math.Max(Encoding.UTF8.GetByteCount(operation.PayloadJson), operation.NativePayload.Length);
-        if (operation.Id == Guid.Empty || bytes > database.Limits.MaxBatchBytes)
-        {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, ReplicaProtocol.InvalidAppend);
-        }
-        var evaluated = operation with
-        {
-            EvaluatedAt = clock.GetUtcNow()
-        };
-        var principal = database.Store.Read(view => database.Principal(view, evaluated.PrincipalId, evaluated.EvaluatedAt));
-        return commands.Enqueue(evaluated, principal, bytes, cancellationToken);
-    }
+        => ClusterCoordinatorCommandAdmission.Enqueue(database, clock, commands, worker, operation, cancellationToken);
 
     /// <summary>Admits an authenticated forwarded operation only on a ready current leader.</summary>
     /// <param name="operation">Stable-ID operation forwarded by an authenticated replica.</param>
@@ -218,31 +196,48 @@ public sealed class ClusterCoordinator : ICommitCoordinator, IHostedService, IAs
         }
     }
 
-    private async Task StopCoreAsync()
+    private Task StopCoreAsync()
+        => ReplicaCoordinatorShutdown.DrainAsync(commands, lifetime, worker ?? Task.CompletedTask);
+
+    private async Task DisposeCoreAsync()
     {
-        commands.Stop();
-        await lifetime.CancelAsync().ConfigureAwait(false);
-        if (worker is not null)
+        var failures = await ReplicaCoordinatorShutdown.JoinDisposalAsync(StopAsync(CancellationToken.None)).ConfigureAwait(false);
+        try
         {
-            await worker.ConfigureAwait(false);
+            await ReplicaShutdownStage.ObserveAsync(commands.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         }
+        catch (Exception failure)
+        {
+            failures.Add(failure);
+            DisposeLifetime(failures);
+            throw;
+        }
+        DisposeLifetime(failures);
+    }
+
+    private void DisposeLifetime(List<Exception> failures)
+    {
+        try
+        {
+            lifetime.Dispose();
+        }
+        catch (Exception failure)
+        {
+            failures.Add(failure);
+            ReplicaCoordinatorShutdown.ThrowIfAny(failures);
+            throw;
+        }
+        ReplicaCoordinatorShutdown.ThrowIfAny(failures);
     }
 
     /// <summary>Drains the queue once; DI aliases do not dispose its lifetime source twice.</summary>
     /// <returns>Completion after shared shutdown and admission resource disposal.</returns>
-    public async ValueTask DisposeAsync()
+    public ValueTask DisposeAsync()
     {
-        try
+        lock (lifecycle)
         {
-            await StopAsync(CancellationToken.None).ConfigureAwait(false);
-        }
-        finally
-        {
-            await commands.DisposeAsync().ConfigureAwait(false);
-            if (Interlocked.Exchange(ref disposed, DisposalClaimed) == DisposalUnclaimed)
-            {
-                lifetime.Dispose();
-            }
+            disposal ??= DisposeCoreAsync();
+            return new(disposal);
         }
     }
 }

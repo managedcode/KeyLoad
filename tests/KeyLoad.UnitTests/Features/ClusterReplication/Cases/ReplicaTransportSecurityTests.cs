@@ -125,11 +125,11 @@ internal sealed class ReplicaReplayCapacityTests
                 }))).Code).IsEqualTo(ErrorCode.ResourceExhausted);
         }
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => fixture.Receiver.VerifyRequest(
-            fixture.Append(OperationKind.Membership, OperationKind.Batch))).Code).IsEqualTo(ErrorCode.ResourceExhausted);
+            fixture.Append(OperationKind.BootstrapPhysicalShardCatalog, OperationKind.Batch))).Code).IsEqualTo(ErrorCode.ResourceExhausted);
         fixture.Receiver.VerifyRequest(fixture.Vote());
         fixture.Receiver.VerifyRequest(fixture.Append());
         fixture.Receiver.VerifyRequest(fixture.Append((OperationKind?)null));
-        foreach (var kind in new[] { OperationKind.Delivery, OperationKind.SubscriptionDelivery, OperationKind.Membership, OperationKind.SetDispatch })
+        foreach (var kind in new[] { OperationKind.Delivery, OperationKind.SubscriptionDelivery, OperationKind.BootstrapPhysicalShardCatalog, OperationKind.SetDispatch })
         {
             fixture.Receiver.VerifyRequest(fixture.Forward(kind));
             fixture.Receiver.VerifyRequest(fixture.Append(kind));
@@ -249,7 +249,7 @@ internal sealed class ReplicaReplayCapacityTests
     public async Task ValidOwnedNativeBytesRetainControlClassificationAndCurrentOperationContent()
     {
         using var fixture = new ReplicaSecurityFixture();
-        var request = fixture.Forward(OperationKind.Membership);
+        var request = fixture.Forward(OperationKind.BootstrapPhysicalShardCatalog);
         var operation = ReplicaProtocolCodec.Deserialize<ReplicatedOperation>(request.Payload.Span);
         request = fixture.Resign(request with
         {

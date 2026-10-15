@@ -1,11 +1,12 @@
 using System.Text.Json;
 using KeyLoad.Core;
+using KeyLoad.Core.Features.ClusterRouting.Identity;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.UnitTests.Features.Authorization;
 
-internal sealed class ClusterPrincipalPolicyTests
+internal sealed class NativeJournalPrincipalPolicyTests
 {
     private const string ApiKeyStorageSpace = "api-key";
     private const string RootPrincipalId = "root";
@@ -20,14 +21,15 @@ internal sealed class ClusterPrincipalPolicyTests
     public async Task AcAuth002InitializationSeedsAnIdempotentProtectedPrincipalAndSnapshotCopiesIt()
     {
         using var database = new TestDatabase();
-        ClusterPrincipalPolicy.Initialize(database.Database);
-        ClusterPrincipalPolicy.Initialize(database.Database);
+        NativeJournalAuthorityTestBootstrap.Initialize(database.Database);
+        var repeated = NativeJournalAuthorityTestBootstrap.Verify(database.Database);
+        await Assert.That(repeated.Applied).IsFalse();
 
         var principal = ReadPrincipal(database);
         await Assert.That(principal).IsNotNull();
-        await Assert.That(principal!.Id).IsEqualTo(ClusterPrincipalPolicy.InternalPrincipalId);
+        await Assert.That(principal!.Id).IsEqualTo(RuntimeJournalIdentity.ProtectedPrincipalId);
         await Assert.That(principal.TenantId).IsEqualTo(SystemTenantId);
-        await Assert.That(principal.ClusterAdministrator).IsTrue();
+        await Assert.That(principal.ClusterAdministrator).IsFalse();
         await Assert.That(principal.Grants).IsEmpty();
         await Assert.That(principal.FieldGrants).IsEmpty();
         await Assert.That(principal.PolicyEpoch).IsEqualTo(1L);
@@ -41,7 +43,7 @@ internal sealed class ClusterPrincipalPolicyTests
             .Scan(KeyCodec.Encode(ApiKeyStorageSpace), 100)
             .Records
             .Select(record => NativeSerialization.Deserialize<ApiKeyRecord>(record.Value.Span))
-            .Where(credential => credential.PrincipalId == ClusterPrincipalPolicy.InternalPrincipalId)
+            .Where(credential => credential.PrincipalId == RuntimeJournalIdentity.ProtectedPrincipalId)
             .ToArray());
         await Assert.That(storedCredentials).IsEmpty();
 
@@ -55,9 +57,9 @@ internal sealed class ClusterPrincipalPolicyTests
         }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         replica.InstallSnapshot(snapshotPath, expectedAppliedPosition: 0);
         var replicatedPrincipal = replica.Read(view => view.GetRecord<PrincipalRecord>(
-            KeySpace.Principal(ClusterPrincipalPolicy.InternalPrincipalId)));
+            KeySpace.Principal(RuntimeJournalIdentity.ProtectedPrincipalId)));
         await Assert.That(replicatedPrincipal).IsNotNull();
-        await Assert.That(replicatedPrincipal!.ClusterAdministrator).IsTrue();
+        await Assert.That(replicatedPrincipal!.ClusterAdministrator).IsFalse();
         await Assert.That(replicatedPrincipal.Grants).IsEmpty();
         await Assert.That(replicatedPrincipal.PolicyEpoch).IsEqualTo(1L);
     }
@@ -66,7 +68,7 @@ internal sealed class ClusterPrincipalPolicyTests
     public async Task AcAuth002PublicConfigurationCannotEditProtectedPrincipalOrIssueItsCredential()
     {
         using var database = new TestDatabase();
-        ClusterPrincipalPolicy.Initialize(database.Database);
+        NativeJournalAuthorityTestBootstrap.Initialize(database.Database);
         var before = ReadPrincipal(database)!;
         var attemptedPrincipal = before with
         {
@@ -90,7 +92,7 @@ internal sealed class ClusterPrincipalPolicyTests
         await Assert.That(after.TenantId).IsEqualTo(before.TenantId);
         await Assert.That(after.Grants).IsEmpty();
         await Assert.That(after.FieldGrants).IsEmpty();
-        await Assert.That(after.ClusterAdministrator).IsTrue();
+        await Assert.That(after.ClusterAdministrator).IsFalse();
         await Assert.That(after.OwnerId).IsNull();
         await Assert.That(after.Projects).IsEmpty();
         await Assert.That(after.RestrictRows).IsFalse();
@@ -100,7 +102,7 @@ internal sealed class ClusterPrincipalPolicyTests
 
         var keyResult = Apply(database.Database, OperationKind.ConfigureApiKey,
             new ConfigureApiKeyRequest(new ApiKeyRecord(ForbiddenCredentialId,
-                ClusterPrincipalPolicy.InternalPrincipalId, ValidVerifier)), RootPrincipalId);
+                RuntimeJournalIdentity.ProtectedPrincipalId, ValidVerifier)), RootPrincipalId);
         await Assert.That(keyResult.Error).IsEqualTo(ErrorCode.PermissionDenied);
         var credential = database.Database.Store.Read(view => view.GetRecord<ApiKeyRecord>(KeySpace.ApiKey(ForbiddenCredentialId)));
         await Assert.That(credential).IsNull();
@@ -108,7 +110,7 @@ internal sealed class ClusterPrincipalPolicyTests
 
     private static PrincipalRecord? ReadPrincipal(TestDatabase database)
         => database.Database.Store.Read(view => view.GetRecord<PrincipalRecord>(
-            KeySpace.Principal(ClusterPrincipalPolicy.InternalPrincipalId)));
+            KeySpace.Principal(RuntimeJournalIdentity.ProtectedPrincipalId)));
 
     private static OperationResult Apply(DatabaseEngine database, OperationKind kind, object payload, string principalId,
         long replicationIndex = 0)
@@ -116,10 +118,8 @@ internal sealed class ClusterPrincipalPolicyTests
             JsonSerializer.Serialize(payload, payload.GetType(), JsonDefaults.Options)), replicationIndex);
 }
 
-internal sealed class ClusterPrincipalAuthorizationTests
+internal sealed class NativeJournalPrincipalAuthorizationTests
 {
-    private const string MembershipKey = "authorization-membership";
-    private const string MembershipStorageSpace = "membership";
     private const string RootPrincipalId = "root";
     private const string OrdinaryPrincipalId = "ordinary-principal";
     private const string EmptyJson = "{}";
@@ -131,31 +131,30 @@ internal sealed class ClusterPrincipalAuthorizationTests
     private static readonly DateTimeOffset OperationTime = new(2026, 10, 1, 0, 0, 0, TimeSpan.Zero);
 
     [Test]
-    public async Task AcAuth003OrdinaryClusterAdministratorCannotApplyMembership()
+    public async Task AcAuth003OrdinaryAndClusterAdministratorCannotMutatePrivateJournal()
     {
         using var database = new TestDatabase();
-        ClusterPrincipalPolicy.Initialize(database.Database);
+        NativeJournalAuthorityTestBootstrap.Initialize(database.Database);
         var ordinary = new PrincipalRecord(OrdinaryPrincipalId, database.Partition.TenantId, [], []);
         Apply(database.Database, OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(ordinary), RootPrincipalId)
             .Get<PrincipalRecord>();
 
-        var ordinaryResult = Apply(database.Database, OperationKind.Membership,
-            new MembershipMutation(MembershipKey, 0, NativeSerialization.Serialize(EmptyJson)), OrdinaryPrincipalId);
-        var administratorResult = Apply(database.Database, OperationKind.Membership,
-            new MembershipMutation(MembershipKey, 0, NativeSerialization.Serialize(EmptyJson)), RootPrincipalId);
+        var ordinaryResult = Apply(database.Database, OperationKind.RuntimeJournal,
+            NativeJournalAuthorityTestBootstrap.CreateMutation(), OrdinaryPrincipalId);
+        var administratorResult = Apply(database.Database, OperationKind.RuntimeJournal,
+            NativeJournalAuthorityTestBootstrap.CreateMutation(), RootPrincipalId);
 
         await Assert.That(ordinaryResult.Error).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(administratorResult.Error).IsEqualTo(ErrorCode.PermissionDenied);
-        var membership = database.Database.Store.Read(view => view.GetRecord<MembershipRecord>(
-            KeyCodec.Encode(MembershipStorageSpace, MembershipKey)));
-        await Assert.That(membership).IsNull();
+        var catalog = database.Database.ReadRuntimeJournalCatalog(RuntimeJournalIdentity.ProtectedPrincipalId);
+        await Assert.That(catalog.Journals).IsEmpty();
     }
 
     [Test]
     public async Task AcAuth003InternalPrincipalCannotApplyDataOrPublicSecurityOperations()
     {
         using var database = new TestDatabase();
-        ClusterPrincipalPolicy.Initialize(database.Database);
+        NativeJournalAuthorityTestBootstrap.Initialize(database.Database);
         var resource = new ResourceDefinition(CollectionName, ResourceKind.Collection, database.Partition.TransactionDomainId);
         Apply(database.Database, OperationKind.ConfigureResource,
             new ConfigureResourceRequest(database.Partition.TenantId, database.Partition.DatabaseId, resource), RootPrincipalId)
@@ -167,17 +166,17 @@ internal sealed class ClusterPrincipalAuthorizationTests
         var commandId = Guid.NewGuid();
         var batchResult = Apply(database.Database, OperationKind.Batch,
             new CommandRequest(commandId, database.Partition, [new PutDocument(CollectionName, ProtectedDocumentId, EmptyJson, 0)]),
-            ClusterPrincipalPolicy.InternalPrincipalId);
+            RuntimeJournalIdentity.ProtectedPrincipalId);
         var principalResult = Apply(database.Database, OperationKind.ConfigurePrincipal,
             new ConfigurePrincipalRequest(ordinary with
             {
                 Revoked = true,
                 PolicyEpoch = ordinary.PolicyEpoch + 1
             }),
-            ClusterPrincipalPolicy.InternalPrincipalId);
+            RuntimeJournalIdentity.ProtectedPrincipalId);
         var credentialResult = Apply(database.Database, OperationKind.ConfigureApiKey,
             new ConfigureApiKeyRequest(new ApiKeyRecord(ForbiddenCredentialId, RootPrincipalId, ValidVerifier)),
-            ClusterPrincipalPolicy.InternalPrincipalId);
+            RuntimeJournalIdentity.ProtectedPrincipalId);
 
         await Assert.That(batchResult.Error).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(principalResult.Error).IsEqualTo(ErrorCode.PermissionDenied);
@@ -194,10 +193,10 @@ internal sealed class ClusterPrincipalAuthorizationTests
     }
 
     [Test]
-    public async Task AcAuth003InternalMembershipWorksAfterPublicRootRevocation()
+    public async Task AcAuth003NativeJournalWorksAfterPublicRootRevocation()
     {
         using var database = new TestDatabase();
-        ClusterPrincipalPolicy.Initialize(database.Database);
+        NativeJournalAuthorityTestBootstrap.Initialize(database.Database);
         var root = database.Database.Store.Read(view => view.GetRecord<PrincipalRecord>(KeySpace.Principal(RootPrincipalId)))!;
         var revokeResult = Apply(database.Database, OperationKind.ConfigurePrincipal,
             new ConfigurePrincipalRequest(root with
@@ -207,16 +206,16 @@ internal sealed class ClusterPrincipalAuthorizationTests
             }), RootPrincipalId, 1);
         await Assert.That(revokeResult.Error).IsNull();
 
-        var membershipResult = Apply(database.Database, OperationKind.Membership,
-            new MembershipMutation(MembershipKey, 0, NativeSerialization.Serialize(EmptyJson)), ClusterPrincipalPolicy.InternalPrincipalId, 2);
-        await Assert.That(membershipResult.Error).IsNull();
-        await Assert.That(membershipResult.Get<bool>()).IsTrue();
+        var journalResult = Apply(database.Database, OperationKind.RuntimeJournal,
+            NativeJournalAuthorityTestBootstrap.CreateMutation(), RuntimeJournalIdentity.ProtectedPrincipalId, 2);
+        await Assert.That(journalResult.Error).IsNull();
+        await Assert.That(journalResult.Get<RuntimeJournalMutationResult>().Applied).IsTrue();
 
-        var membership = database.Database.Store.Read(view => view.GetRecord<MembershipRecord>(
-            KeyCodec.Encode(MembershipStorageSpace, MembershipKey)));
-        await Assert.That(membership).IsNotNull();
-        await Assert.That(membership!.Version).IsEqualTo(1L);
-        await Assert.That(NativeSerialization.Deserialize<string>(membership.Payload.Span)).IsEqualTo(EmptyJson);
+        var catalog = database.Database.ReadRuntimeJournalCatalog(RuntimeJournalIdentity.ProtectedPrincipalId);
+        await Assert.That(catalog.Journals.Length).IsEqualTo(1);
+        await Assert.That(catalog.Journals[0].JournalName).IsEqualTo("authorization-journal");
+        await Assert.That(catalog.Journals[0].ContentRevision).IsEqualTo(0);
+        await Assert.That(catalog.Journals[0].Length).IsEqualTo(0);
         var revokedRoot = database.Database.Store.Read(view => view.GetRecord<PrincipalRecord>(KeySpace.Principal(RootPrincipalId)));
         await Assert.That(revokedRoot!.Revoked).IsTrue();
     }
@@ -227,7 +226,7 @@ internal sealed class ClusterPrincipalAuthorizationTests
             JsonSerializer.Serialize(payload, payload.GetType(), JsonDefaults.Options)), replicationIndex);
 }
 
-internal sealed class ClusterPrincipalInitializationIntegrityTests
+internal sealed class NativeJournalPrincipalIntegrityTests
 {
     private const string RootPrincipalId = "root";
     private const string AppliedCutResourceName = "authorization-cut";
@@ -238,15 +237,15 @@ internal sealed class ClusterPrincipalInitializationIntegrityTests
     public async Task AcAuth002MissingProtectedPrincipalAtExistingCutRequiresRecovery()
     {
         using var database = new TestDatabase();
-        ClusterPrincipalPolicy.Initialize(database.Database);
+        NativeJournalAuthorityTestBootstrap.Initialize(database.Database);
         AdvanceAppliedCut(database);
         database.Store.Commit((transaction, _) =>
         {
-            transaction.Delete(KeySpace.Principal(ClusterPrincipalPolicy.InternalPrincipalId));
+            transaction.Delete(KeySpace.Principal(RuntimeJournalIdentity.ProtectedPrincipalId));
             return true;
         });
 
-        var exception = Assert.ThrowsExactly<KeyLoadException>(() => ClusterPrincipalPolicy.Initialize(database.Database));
+        var exception = Assert.ThrowsExactly<KeyLoadException>(() => NativeJournalAuthorityTestBootstrap.Verify(database.Database));
         await Assert.That(exception.Code).IsEqualTo(ErrorCode.RecoveryRequired);
         await Assert.That(ReadPrincipal(database)).IsNull();
     }
@@ -255,11 +254,11 @@ internal sealed class ClusterPrincipalInitializationIntegrityTests
     public async Task AcAuth002ModifiedProtectedPrincipalAtExistingCutRequiresRecovery()
     {
         using var database = new TestDatabase();
-        ClusterPrincipalPolicy.Initialize(database.Database);
+        NativeJournalAuthorityTestBootstrap.Initialize(database.Database);
         AdvanceAppliedCut(database);
         database.Store.Commit((transaction, _) =>
         {
-            var key = KeySpace.Principal(ClusterPrincipalPolicy.InternalPrincipalId);
+            var key = KeySpace.Principal(RuntimeJournalIdentity.ProtectedPrincipalId);
             var principal = transaction.GetRecord<PrincipalRecord>(key)!;
             transaction.PutRecord(key, principal with
             {
@@ -268,7 +267,7 @@ internal sealed class ClusterPrincipalInitializationIntegrityTests
             return true;
         });
 
-        var exception = Assert.ThrowsExactly<KeyLoadException>(() => ClusterPrincipalPolicy.Initialize(database.Database));
+        var exception = Assert.ThrowsExactly<KeyLoadException>(() => NativeJournalAuthorityTestBootstrap.Verify(database.Database));
         await Assert.That(exception.Code).IsEqualTo(ErrorCode.RecoveryRequired);
         await Assert.That(ReadPrincipal(database)!.PolicyEpoch).IsEqualTo(2L);
     }
@@ -277,21 +276,21 @@ internal sealed class ClusterPrincipalInitializationIntegrityTests
     public async Task AcAuth002CorruptProtectedPrincipalAtExistingCutRequiresRecovery()
     {
         using var database = new TestDatabase();
-        ClusterPrincipalPolicy.Initialize(database.Database);
+        NativeJournalAuthorityTestBootstrap.Initialize(database.Database);
         AdvanceAppliedCut(database);
         database.Store.Commit((transaction, _) =>
         {
-            transaction.Put(KeySpace.Principal(ClusterPrincipalPolicy.InternalPrincipalId), InvalidPrincipalBytes);
+            transaction.Put(KeySpace.Principal(RuntimeJournalIdentity.ProtectedPrincipalId), InvalidPrincipalBytes);
             return true;
         });
 
-        var exception = Assert.ThrowsExactly<KeyLoadException>(() => ClusterPrincipalPolicy.Initialize(database.Database));
+        var exception = Assert.ThrowsExactly<KeyLoadException>(() => NativeJournalAuthorityTestBootstrap.Verify(database.Database));
         await Assert.That(exception.Code).IsEqualTo(ErrorCode.RecoveryRequired);
     }
 
     private static PrincipalRecord? ReadPrincipal(TestDatabase database)
         => database.Database.Store.Read(view => view.GetRecord<PrincipalRecord>(
-            KeySpace.Principal(ClusterPrincipalPolicy.InternalPrincipalId)));
+            KeySpace.Principal(RuntimeJournalIdentity.ProtectedPrincipalId)));
 
     private static void AdvanceAppliedCut(TestDatabase database)
     {

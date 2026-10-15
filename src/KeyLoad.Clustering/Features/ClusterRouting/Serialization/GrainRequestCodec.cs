@@ -55,7 +55,7 @@ public sealed partial class GrainRequestCodec
     /// <summary>Signs one independently keyed request without changing the write's durable deduplication ID.</summary>
     /// <param name="requestId">Fresh request actor identity, independent from a stable write retry.</param>
     /// <param name="principalId">Current persisted principal identifier.</param>
-    /// <param name="kind">Public operation kind; Membership is forbidden.</param>
+    /// <param name="kind">Defined public operation kind; private native operations require their dedicated scope.</param>
     /// <param name="commandId">Stable nonempty command ID reused when resolving an uncertain write.</param>
     /// <param name="payload">Exact bounded native bytes for the typed operation contract.</param>
     /// <returns>A bounded signed request for canonical partition routing.</returns>

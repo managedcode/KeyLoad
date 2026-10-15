@@ -4,7 +4,7 @@ internal static class OrleansNodeCatalogAdmission
 {
     internal static void Open(Lock lifecycle, ref Task? shutdown,
         ref PhysicalShardCatalogStartup? current, PhysicalShardCatalogStartup catalog,
-        string principalId, CancellationToken cancellationToken)
+        CancellationToken cancellationToken)
     {
         lock (lifecycle)
         {
@@ -13,7 +13,7 @@ internal static class OrleansNodeCatalogAdmission
             {
                 throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalShardCatalogFence.NotReady);
             }
-            catalog.OpenAdmission(principalId);
+            catalog.OpenAdmission();
         }
     }
 }

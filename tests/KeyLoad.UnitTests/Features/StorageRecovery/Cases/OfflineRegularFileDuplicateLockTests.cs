@@ -79,7 +79,7 @@ internal sealed class OfflineRegularFileDuplicateLockTests
                 AssertLiveOwnerExcludesIndependentOpen(path, bufferBytes);
                 var failure = Assert.ThrowsExactly<ArgumentOutOfRangeException>(() =>
                 {
-                    using var unexpected = lease.TransferToStream((FileAccess)0, bufferBytes);
+                    using var unexpected = lease.TransferToStream(path, (FileAccess)0, bufferBytes);
                     _ = unexpected.ReadByte();
                 });
                 lease.RecordPrimary(failure);

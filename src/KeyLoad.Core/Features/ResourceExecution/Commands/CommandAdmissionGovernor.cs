@@ -86,7 +86,7 @@ public sealed class CommandAdmissionGovernor
     /// <summary>Returns whether an operation uses the reserved control lane.</summary>
     /// <param name="kind">The operation kind to classify.</param>
     public static bool IsControl(OperationKind kind)
-        => kind is OperationKind.Delivery or OperationKind.SubscriptionDelivery or OperationKind.Membership or OperationKind.SetDispatch
+        => kind is OperationKind.Delivery or OperationKind.SubscriptionDelivery or OperationKind.SetDispatch
             or OperationKind.AbortBlobUpload or OperationKind.ReclaimBlob or OperationKind.BootstrapPhysicalShardCatalog
             or OperationKind.RegisterPhysicalOwner;
 

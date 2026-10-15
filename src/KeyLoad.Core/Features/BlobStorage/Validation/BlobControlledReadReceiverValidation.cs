@@ -57,7 +57,7 @@ public sealed partial class DatabaseEngine
     {
         if (frame.Purpose != ControlledBlobReadPurpose.Outcome)
         {
-            ClusterPrincipalPolicy.RequireOperation(frame.Principal, OperationKind.BeginBlobUpload);
+            global::KeyLoad.Core.Features.ClusterRouting.Identity.RuntimeJournalIdentity.RequireOperation(frame.Principal, OperationKind.BeginBlobUpload);
             Authorization.Require(frame.Principal, blob.Partition, blob.Resource,
                 BlobControlledReadScope.Capability(frame.Purpose));
             return;

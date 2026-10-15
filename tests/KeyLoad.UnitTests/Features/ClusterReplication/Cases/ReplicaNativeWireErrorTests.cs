@@ -17,7 +17,7 @@ internal sealed class ReplicaNativeWireErrorTests
     public async Task InvalidNativeWireDoesNotConsumeItsNonce(ReplicaRpc method, bool unsupported)
     {
         using var fixture = new ReplicaSecurityFixture();
-        var valid = method == ReplicaRpc.RequestVote ? fixture.Vote() : fixture.Forward(OperationKind.Membership);
+        var valid = method == ReplicaRpc.RequestVote ? fixture.Vote() : fixture.Forward(OperationKind.BootstrapPhysicalShardCatalog);
         var invalid = fixture.Resign(valid with
         {
             Payload = InvalidBytes(valid.Payload, unsupported)

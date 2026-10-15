@@ -31,7 +31,6 @@ public sealed partial class DatabaseEngine
             OperationKind.ConfigurePrincipal => NormalizePayload<ConfigurePrincipalRequest>(operation.PayloadJson),
             OperationKind.ConfigureApiKey => NormalizePayload<ConfigureApiKeyRequest>(operation.PayloadJson),
             OperationKind.SetDispatch => NormalizePayload<bool>(operation.PayloadJson),
-            OperationKind.Membership => NormalizePayload<MembershipMutation>(operation.PayloadJson),
             OperationKind.RuntimeJournal => NormalizePayload<RuntimeJournalMutation>(operation.PayloadJson),
             OperationKind.ConfigureSubscription => NormalizePayload<ConfigureSubscriptionRequest>(operation.PayloadJson),
             OperationKind.SeekSubscription => NormalizePayload<SeekSubscriptionRequest>(operation.PayloadJson),

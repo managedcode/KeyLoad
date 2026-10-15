@@ -6,12 +6,9 @@ namespace KeyLoad.Core;
 public sealed partial class DatabaseEngine
 {
     private const string OperationDispatcherBatchPlacementWitnessDoesNotMatchItsTransactionDetail = "The Batch placement witness does not match its transaction.";
-    private const int OperationDispatcherInitialSequence = 0;
-    private const int OperationDispatcherVersionOne = 1;
 
     private const string UnsupportedOperationMessage = "The operation is unsupported.";
     private const string BatchEnvelopeMismatchMessage = "The envelope and command IDs differ.";
-    private const string MembershipSpaceName = "membership";
     private const string DispatchSystemSpaceName = "system";
     private const string DispatchPausedStateName = "dispatch-paused";
 
@@ -54,7 +51,6 @@ public sealed partial class DatabaseEngine
                 Payload<BindAtomicPartitionPlacementRequest>(operation)),
             OperationKind.ConfigurePrincipal => ExecuteConfigurePrincipal(transaction, operation),
             OperationKind.ConfigureApiKey => ExecuteConfigureApiKey(transaction, operation),
-            OperationKind.Membership => ExecuteMembership(transaction, operation),
             OperationKind.RuntimeJournal => Result(RuntimeJournal.Execute(transaction, principal, Payload<RuntimeJournalMutation>(operation))),
             OperationKind.SetDispatch => ExecuteDispatchState(transaction, operation),
             _ when BlobStorageOperations.Handles(operation.Kind)
@@ -79,19 +75,6 @@ public sealed partial class DatabaseEngine
         return Result(new CommitReceipt(batch.CommandId, token,
             ApplyMutations(transaction, principal, batch.Partition, batch.Mutations, operation.EvaluatedAt, position,
                 commitToken: token, operation: operation), Durability));
-    }
-
-    private static OperationResult ExecuteMembership(IAtomicTransaction transaction, ReplicatedOperation operation)
-    {
-        var membership = Payload<MembershipMutation>(operation);
-        var key = KeyCodec.Encode(MembershipSpaceName, membership.Key);
-        var row = transaction.GetRecord<MembershipRecord>(key);
-        if (membership.ExpectedVersion != (row?.Version ?? OperationDispatcherInitialSequence))
-        {
-            return Result(false);
-        }
-        transaction.PutRecord(key, new MembershipRecord((row?.Version ?? OperationDispatcherInitialSequence) + OperationDispatcherVersionOne, membership.Payload));
-        return Result(true);
     }
 
     private static OperationResult ExecuteDispatchState(IAtomicTransaction transaction, ReplicatedOperation operation)

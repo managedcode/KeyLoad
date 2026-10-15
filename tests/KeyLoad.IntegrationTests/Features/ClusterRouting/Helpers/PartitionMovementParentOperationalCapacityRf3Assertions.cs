@@ -5,7 +5,7 @@ using KeyLoad.IntegrationTests.Features.QueryExecution;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
-/// <summary>Model effects and quota stay exact; real native membership CAS and election no-ops are separately accounted.</summary>
+/// <summary>Model effects and quota stay exact; native election no-ops are separately accounted.</summary>
 internal static class PartitionMovementParentOperationalCapacityRf3Assertions
 {
     internal static async Task RequireRestoredAsync(TwoRf3MembershipWave wave,
@@ -44,15 +44,12 @@ internal static class PartitionMovementParentOperationalCapacityRf3Assertions
             var actual = after.Single(cut => cut.Node == original.Node);
             var entries = PartitionMovementCapturePointerRf3Fault.AppliedEntries(wave, original, actual);
             var allowed = new HashSet<string>(StringComparer.Ordinal);
-            var membership = new PartitionMovementNativeMembershipRf3Cut(original, actual, allowed);
+            var clock = new PartitionMovementNativeColdClockRf3Cut(original, actual, allowed);
             foreach (var entry in entries)
             {
-                if (entry.Operation is { } operation)
-                {
-                    await Assert.That(await membership.TryApplyAsync(operation).ConfigureAwait(false)).IsTrue();
-                }
+                await Assert.That(entry.Operation).IsNull();
             }
-            await membership.RequireCompleteAsync().ConfigureAwait(false);
+            await clock.RequireCompleteAsync().ConfigureAwait(false);
             if (entries.Length != PartitionMoveProtocol.EmptyCount)
             {
                 allowed.Add(Convert.ToHexString(KeySpace.AppliedBytes));

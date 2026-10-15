@@ -1,5 +1,12 @@
 # ResourceExecution
 
+Owner-selected ZoneTree.Analytics adoption is specified in
+[OperationalAnalytics](ResourceExecution/OperationalAnalytics.md) and
+[ADR-134](../ADR/ADR-134-node-owned-derived-analytics.md). It provides proposed
+node-owned disposable operational history alongside OpenTelemetry. Actual
+published-package integration and all execution gates remain open; the owner
+expects NuGet publication, so the current unpublished state is not a defect.
+
 Actual database phase diagnostics are specified in
 [DatabasePhaseProfiling](ResourceExecution/DatabasePhaseProfiling.md) under
 [ADR-063](../ADR/ADR-063-bounded-database-phase-profiling.md),

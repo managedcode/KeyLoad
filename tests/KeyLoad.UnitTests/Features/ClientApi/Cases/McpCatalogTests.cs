@@ -62,7 +62,7 @@ internal sealed class McpCatalogTests
     {
         await Assert.That(McpOperationCatalog.TryGet(McpCatalogExpectations.DocumentsGet.ToUpperInvariant(), out _)).IsFalse();
         await Assert.That(McpOperationCatalog.Entries.Any(entry => entry.ReadKind == GrainReadKind.Authenticate)).IsFalse();
-        await Assert.That(McpOperationCatalog.Entries.Any(entry => entry.CommandKind == OperationKind.Membership)).IsFalse();
+        await Assert.That(McpOperationCatalog.Entries.Any(entry => entry.CommandKind == (OperationKind)8)).IsFalse();
     }
 
     /// <summary>Distinguishes physical backup retries from deduplicated destructive delivery completion.</summary>

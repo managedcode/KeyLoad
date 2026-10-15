@@ -62,6 +62,7 @@ internal static class AppHostControlOptionsRegistration
                 value.NativeDiscoveryOmission = NativeDiscoveryOmissionProfile.ReadSettings(configuration, value);
                 value.EventVectorReservedProbe = EventVectorReservedProbeProfile.Read(configuration, value);
                 value.NativeBlobWireProbe = ReadNativeBlobWireProbe(configuration, value);
+                value.ProtectedMovementProbe = ProtectedMovementProbeProfile.Read(configuration, value);
             })], [], []));
         _ = options.Value;
         return options;

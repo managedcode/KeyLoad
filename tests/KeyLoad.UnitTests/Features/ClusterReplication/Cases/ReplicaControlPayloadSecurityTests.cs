@@ -1,7 +1,6 @@
 using System.Text;
 using System.Text.Json;
 using KeyLoad.Clustering;
-using KeyLoad.Core;
 using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Replication;
 
@@ -10,7 +9,7 @@ namespace KeyLoad.UnitTests;
 /// <summary>AC-REP-006: genuine authenticated control requests respect the configured command payload bound before nonce admission.</summary>
 internal sealed class ReplicaControlPayloadSecurityTests
 {
-    private const string MembershipKey = "native-control-boundary";
+    private static readonly Guid ControlShardId = Guid.Parse("3ac9bf1a-055c-4ae4-a022-880d12387c0e");
     private const int ReservedCapacity = 1;
     private const int ExcessPayloadBytes = 1;
 
@@ -20,11 +19,11 @@ internal sealed class ReplicaControlPayloadSecurityTests
     [Test]
     [Arguments(ReplicaRpc.Forward, OperationKind.Delivery)]
     [Arguments(ReplicaRpc.Forward, OperationKind.SubscriptionDelivery)]
-    [Arguments(ReplicaRpc.Forward, OperationKind.Membership)]
+    [Arguments(ReplicaRpc.Forward, OperationKind.BootstrapPhysicalShardCatalog)]
     [Arguments(ReplicaRpc.Forward, OperationKind.SetDispatch)]
     [Arguments(ReplicaRpc.Append, OperationKind.Delivery)]
     [Arguments(ReplicaRpc.Append, OperationKind.SubscriptionDelivery)]
-    [Arguments(ReplicaRpc.Append, OperationKind.Membership)]
+    [Arguments(ReplicaRpc.Append, OperationKind.BootstrapPhysicalShardCatalog)]
     [Arguments(ReplicaRpc.Append, OperationKind.SetDispatch)]
     public async Task OversizedControlRequestReturnsSignedFailureWithoutConsumingCriticalCapacity(ReplicaRpc method, OperationKind kind)
     {
@@ -55,8 +54,8 @@ internal sealed class ReplicaControlPayloadSecurityTests
     public async Task ExactDecodedControlPayloadBoundaryAndDataPoolRemainIndependent()
     {
         using var fixture = new ReplicaSecurityFixture();
-        var value = new MembershipMutation(MembershipKey, 0, NativeSerialization.Serialize(0));
-        var operation = fixture.Database.NormalizeOperation(new(Guid.NewGuid(), OperationKind.Membership,
+        var value = new BootstrapPhysicalShardCatalogRequest(1, 0, ControlShardId, fixture.Configuration.Incarnation, fixture.Configuration.VoterIds);
+        var operation = fixture.Database.NormalizeOperation(new(Guid.NewGuid(), OperationKind.BootstrapPhysicalShardCatalog,
             ReplicaSecurityFixture.VoterA, TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(value, JsonDefaults.Options)));
         var body = NativeSerialization.Deserialize<NativeCommandPayload>(operation.NativePayload.Span);
         await Assert.That(body.Error).IsNull();

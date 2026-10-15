@@ -14,7 +14,7 @@ internal static class TwoRf3WaveArguments
     internal static string[] Create(string root, LocalRf3ImageSelection.Selection? selection,
         bool registerPhysicalOwners, bool remoteDocumentReads, bool remotePartitionQueries,
         RequestCqrsProbeFixture? controls = null, bool protectedDocuments = false, int? movementMaxBatchBytes = null, int? movementMaxFrameBytes = null, MovementFrameObservationFixture? frameObservation = null,
-        KeyLoad.IntegrationTests.Features.StorageRecovery.NativeCapabilityOmissionRf3Fixture? nativeDiscoveryOmission = null, bool eventVectorReservedProbe = false, NativeMembershipDiagnosticFixture? nativeMembershipControls = null, bool tenantCapacityPlacement = false)
+        KeyLoad.IntegrationTests.Features.StorageRecovery.NativeCapabilityOmissionRf3Fixture? nativeDiscoveryOmission = null, bool eventVectorReservedProbe = false, NativeMembershipDiagnosticFixture? nativeMembershipControls = null, bool tenantCapacityPlacement = false, bool protectedMovementProbe = false)
     {
         NativeMembershipDiagnosticWaveArguments.RequireSelection(nativeMembershipControls, controls,
             remoteDocumentReads, remotePartitionQueries, protectedDocuments, nativeDiscoveryOmission, eventVectorReservedProbe);
@@ -56,6 +56,8 @@ internal static class TwoRf3WaveArguments
         {
             args.Add(RemoteQueryArgument);
         }
+        ProtectedMovementWaveArguments.Add(protectedMovementProbe, selection, controls, protectedDocuments,
+            nativeDiscoveryOmission, eventVectorReservedProbe, nativeMembershipControls, args);
         AddObservationArguments(selection, controls, frameObservation, nativeDiscoveryOmission, eventVectorReservedProbe, nativeMembershipControls, args);
         return [.. args];
     }

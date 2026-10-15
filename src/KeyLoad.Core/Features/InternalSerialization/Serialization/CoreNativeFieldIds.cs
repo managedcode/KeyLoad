@@ -155,19 +155,6 @@ internal static class InboxRecordFields
     internal const uint Receipt = 1;
 }
 
-internal static class MembershipMutationFields
-{
-    internal const uint Key = 0;
-    internal const uint ExpectedVersion = 1;
-    internal const uint Payload = 2;
-}
-
-internal static class MembershipRecordFields
-{
-    internal const uint Version = 0;
-    internal const uint Payload = 1;
-}
-
 internal static class ProjectionBatchClaimsFields
 {
     internal const uint Purpose = 0;

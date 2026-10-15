@@ -46,7 +46,7 @@ internal sealed class AdmittedCommandInboxTests
             MaximumControlBurst = maximumControlBurst
         }));
         var data = Enumerable.Range(0, 2).Select(_ => Enqueue(queue, Operation(), Principal(), 2)).ToArray();
-        var control = Enumerable.Range(0, 10).Select(_ => Enqueue(queue, Operation(OperationKind.Membership), Principal(), 2)).ToArray();
+        var control = Enumerable.Range(0, 10).Select(_ => Enqueue(queue, Operation(OperationKind.BootstrapPhysicalShardCatalog), Principal(), 2)).ToArray();
         AdmittedCommand[] expected = maximumControlBurst switch
         {
             1 => [control[0], data[0], control[1], data[1], .. control[2..]],

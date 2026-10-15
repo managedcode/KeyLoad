@@ -12,40 +12,36 @@ internal sealed class PhysicalShardCatalogStartup(OrleansNode node, PartitionHos
     private const int AdmissionClosed = 0;
     private const int AdmissionReady = 1;
     private readonly NodeOptions options = nodeOptions.Value;
-    private string? administratorId;
     private int ready;
 
     internal bool IsReady => Volatile.Read(ref ready) == AdmissionReady;
 
-    internal async Task<PrincipalRecord> InitializeAsync(CancellationToken cancellationToken)
+    internal async Task InitializeAsync(CancellationToken cancellationToken)
     {
         var executionLifetime = routingOptions.Value.ExecutionLifetime;
         using var deadline = new CancellationTokenSource(executionLifetime, clock);
         using var operation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadline.Token);
         var token = operation.Token;
         await AwaitNativeReplicaPrerequisiteAsync(token).ConfigureAwait(false);
-        var administrator = await AuthenticateAdministratorAsync(token).ConfigureAwait(false);
-        await SettleBootstrapAsync(administrator, token).ConfigureAwait(false);
-        node.OpenCatalogAdmission(this, administrator.Id, token);
-        return administrator;
+        if (!await TryVerifyCurrentCatalogAsync(token).ConfigureAwait(false))
+        {
+            var administrator = await AuthenticateBootstrapAdministratorAsync(token).ConfigureAwait(false);
+            await SettleBootstrapAsync(administrator, token).ConfigureAwait(false);
+        }
+        node.OpenCatalogAdmission(this, token);
     }
 
     internal async Task EnsureAdmissionAsync(CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        var principalId = Volatile.Read(ref administratorId);
-        if (!IsReady || principalId is null)
+        if (!IsReady)
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalShardCatalogFence.NotReady);
         }
-        await VerifyCatalogAsync(principalId, cancellationToken).ConfigureAwait(false);
+        await VerifyCatalogAsync(cancellationToken).ConfigureAwait(false);
     }
 
-    internal void OpenAdmission(string principalId)
-    {
-        Volatile.Write(ref administratorId, principalId);
-        Volatile.Write(ref ready, AdmissionReady);
-    }
+    internal void OpenAdmission() => Volatile.Write(ref ready, AdmissionReady);
 
     internal void CloseAdmission() => Volatile.Write(ref ready, AdmissionClosed);
 
@@ -72,7 +68,7 @@ internal sealed class PhysicalShardCatalogStartup(OrleansNode node, PartitionHos
         CancellationToken cancellationToken)
         => NativeReplicaStartupPrerequisite.WaitAsync(node, partition, clock, observation, cancellationToken);
 
-    private async Task<PrincipalRecord> AuthenticateAdministratorAsync(CancellationToken cancellationToken)
+    internal async Task<PrincipalRecord> AuthenticateBootstrapAdministratorAsync(CancellationToken cancellationToken)
     {
         var requestId = Guid.NewGuid();
         var codec = node.CatalogRequestCodec();
@@ -122,7 +118,7 @@ internal sealed class PhysicalShardCatalogStartup(OrleansNode node, PartitionHos
             try
             {
                 await SubmitBootstrapAsync(administrator, commandId, payload, cancellationToken).ConfigureAwait(false);
-                await VerifyCatalogAsync(administrator.Id, cancellationToken).ConfigureAwait(false);
+                await VerifyCatalogAsync(cancellationToken).ConfigureAwait(false);
                 return;
             }
             catch (KeyLoadException error) when ((error.Code == ErrorCode.UnknownWriteOutcome
@@ -135,16 +131,27 @@ internal sealed class PhysicalShardCatalogStartup(OrleansNode node, PartitionHos
         }
     }
 
-    private async Task VerifyCatalogAsync(string principalId, CancellationToken cancellationToken)
+    private async Task VerifyCatalogAsync(CancellationToken cancellationToken)
     {
-        await partition.Coordinator.ReadBarrierAsync(cancellationToken).ConfigureAwait(false);
-        cancellationToken.ThrowIfCancellationRequested();
-        var catalog = partition.Database.ReadPhysicalShardCatalog(principalId);
+        if (!await TryVerifyCurrentCatalogAsync(cancellationToken).ConfigureAwait(false))
+        {
+            throw Errors.Fail(ErrorCode.NotFound, PhysicalShardCatalogLocalRead.CatalogMissing);
+        }
+    }
+
+    private async Task<bool> TryVerifyCurrentCatalogAsync(CancellationToken cancellationToken)
+    {
+        var catalog = await PhysicalShardCatalogLocalRead.ReadAsync(partition, cancellationToken).ConfigureAwait(false);
+        if (catalog is null)
+        {
+            return false;
+        }
         if (!PhysicalShardCatalogFence.Matches(catalog, options.PhysicalShardId,
                 partition.Configuration.Incarnation, partition.Configuration.VoterIds))
         {
             CloseAdmission();
             throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalShardCatalogFence.Mismatch);
         }
+        return true;
     }
 }

@@ -32,8 +32,6 @@ internal static class ZoneTreePersistenceFormat
     internal const string SystemNamespace = "system";
     internal const string LastAppliedKey = "last-applied";
     internal const string ClockKey = "clock";
-    internal const string MembershipNamespace = "membership";
-    internal const string OrleansMembershipKey = "orleans-membership";
     internal const string DispatchPausedKey = "dispatch-paused";
     internal const string IdentityChecksumInvalid = "The database identity checksum is invalid.";
     internal const string IdentityFormatUnsupported = "The database identity format is unsupported.";

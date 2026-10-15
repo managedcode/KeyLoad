@@ -55,6 +55,11 @@ localImageFilters.add("/*/*/QueueViewLeaseIsolationTests/*");
 localImageFilters.add("/*/*/(SafeProjectorOperationRf3Tests|SqlParserAdmissionRf3WholeFlowTests|GraphSearchLineageRf3Tests|AtomicTriadStagedRf3Tests|CompetingInboxPublicTests|QueueViewLeaseIsolationTests)/*");
 localImageFilters.add('/*/*/NativeDatabaseMigrationRf3Tests/*');
 localImageFilters.add('/*/*/(SafeProjectorOperationRf3Tests|SqlParserAdmissionRf3WholeFlowTests|GraphSearchLineageRf3Tests|AtomicTriadStagedRf3Tests|CompetingInboxPublicTests|QueueViewLeaseIsolationTests|NativeDatabaseMigrationRf3Tests)/*');
+localImageFilters.add("/*/*/SlowBodyAdmissionReturnTests/*");
+localImageFilters.add("/*/*/RowRevisionInferenceRf3Tests/*");
+localImageFilters.add("/*/*/(NativeDatabaseMigrationRf3Tests|SlowBodyAdmissionReturnTests|RowRevisionInferenceRf3Tests)/*");
+localImageFilters.add("/*/*/CatalogBootstrapAuthorityRf3Tests/*");
+localImageFilters.add("/*/*/(SlowBodyAdmissionReturnTests|RowRevisionInferenceRf3Tests|CatalogBootstrapAuthorityRf3Tests)/*");
 const nativeTextPreparedFilter = '/*/*/(NativeTextAsyncRf3Tests)|(NativeTextMaintenanceRf3Tests)|(NativeTextRf3LeaderLossTests)|(NativeTextRf3Tests)|(NativeTextWaitRf3Tests)/*';
 const localImageGithubIdentity = ['KEYLOAD_IMAGE_RECEIPT', 'GITHUB_SHA', 'GITHUB_ACTIONS'];
 const localImageInheritedIdentity = ['KEYLOAD_IMAGE_PROVENANCE', 'KEYLOAD_LOCAL_IMAGE_RECEIPT',
