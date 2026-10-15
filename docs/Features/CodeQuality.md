@@ -2395,3 +2395,28 @@ AC-CQ-MULTILINE-BLOCKS-001/002/003 retain the 64-code-line method ceiling after 
 ## Stage53 Core multiline responsibility extraction
 
 REQ-CQ-009 and AC-CQ-MULTILINE-BLOCKS-001/002 retain the existing64-method,200-type and400-file bounds after canonical multiline formatting. ChangeFeeds settlement intent validation remains inside the original Store.Read gate; EventStreams cleanup-scope derivation and original issuance identity checks retain their original order and admission; Search remote ANN resource/field authorization retains the same bounded read view, and seed-value copying retains every per-value work charge, finite-value refusal, modeled memory reservation and immutable result. Feature-local private helpers and one Search execution copy helper supply cohesive responsibilities, without compacting braces, changing limits, persistence, signed identities, cancellation or SIMD paths. Current source/image-bound original operation tests, canonical formatter verification and analyzer-enabled Release build remain qualification gates; Source N is not execution evidence.
+
+
+### Stable functional compilation identity inputs
+
+The Release identity producer still hashes every owned project compile source,
+all six central inputs and its own source on every invocation, and checks the
+same inventory again after compilation. Its source inventory is project scoped;
+IntegrationTests does not reference the UnitTests implementation assembly.
+
+`WriteCodeFragment` writes a non-compiled candidate. SHA-256 comparison copies
+its exact bytes into the canonical generated compile input only when content
+changes or that input is absent. Unchanged identity content therefore retains
+its original modification time without removing attributes, source checks,
+analyzers, TUnit generated discovery, reference assemblies or required suites.
+The candidate and canonical files remain normal MSBuild cleanup outputs.
+
+Source inspection found that the prior unconditional canonical write could
+invalidate otherwise unchanged compilations. R231/R233 original cohorts differ
+in one Unit helper source; the Integration implementation DLL is byte identical.
+This explains a rebuild trigger, not the measured compiler duration or a speed
+claim. Matched strict builds remain required: initial build, unchanged repeat,
+private Unit helper change, and an actual Integration source change. Preserve
+original build diagnostics, source/binary identities, test discovery and the
+before/after source-drift refusal. Full product and Linux qualification gates
+remain unchanged and open until their own original evidence exists.

@@ -1,4 +1,58 @@
 {
+  "STAGE89-NATIVE-OPERATIONS-001": {
+    "status": "in_progress",
+    "acceptedOriginalTasks": 20,
+    "inProgressRequiredTasks": 85,
+    "totalRequiredTasks": 105,
+    "fullTaskPromotion": false,
+    "record": "docs/implementation/qualification-stage89-foundation.md",
+    "foundationPlan": "docs/implementation/foundation-dependencies.json",
+    "localVerification": {
+      "release": {
+        "lane": "R292",
+        "result": "passed",
+        "warnings": 0,
+        "errors": 0
+      },
+      "functionalUnit": {
+        "lane": "R288",
+        "passed": 66,
+        "failed": 0,
+        "actualPeakNativeIntervals": 50
+      },
+      "processRecovery": {
+        "lane": "R289",
+        "passed": 7,
+        "failed": 0
+      },
+      "sdkMcpAspireRf3": {
+        "lane": "R290",
+        "passed": 3,
+        "failed": 0,
+        "scope": "RowRevisionInferenceRf3Tests only"
+      },
+      "canonicalFormatter": {
+        "lane": "R293",
+        "result": "passed"
+      }
+    },
+    "selectedFunctionalCoverage": {
+      "linesCovered": 11894,
+      "linesValid": 109062,
+      "branchesCovered": 5397,
+      "branchesValid": 68979,
+      "loadContributors": 0,
+      "fullProductCoverage": false,
+      "coberturaSha256": "ff3df7c092eea830fdae75303b6d72c3276b2c6ef0173a26e80550f1eb519433"
+    },
+    "analytics": {
+      "publishedVersion": "1.0.0",
+      "localNativeWholeOperationCasesPassed": 3,
+      "productionActivation": "held: native kernel/resource/scheduler boundary",
+      "upstreamCapabilityRequest": "https://github.com/ZoneTree/ZoneTree.Analytics/issues/1"
+    },
+    "remaining": "Native migration R272 still failed before migration at obsolete fixture HTTP setup; SourceN replacement pending. Full exact-source Linux mandatory suites, coverage, clock/provider, telemetry, resource/fault/endurance and remaining acceptance gates open."
+  },
   "STAGE88-NATIVE-FOUNDATION-INTAKE-001": {
     "status": "in_progress",
     "acceptedOriginalTasks": 20,

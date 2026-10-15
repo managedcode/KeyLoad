@@ -1,3 +1,4 @@
+using System.Text;
 using KeyLoad.Clustering;
 using KeyLoad.UnitTests.Features.ClusterRouting;
 using KeyLoad.UnitTests.Features.Messaging;
@@ -37,8 +38,10 @@ internal static class StartedReadPolicyAssertions
         await Assert.That(observation.Frames.Count).IsGreaterThanOrEqualTo(P.StartedFrames);
         var started = observation.Frames[P.EmptyFrames];
         var expectedStarted = CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>.Started(
-            Result<GrainRequestProgress>.Succeed(new GrainRequestProgress(requestId)), sequence: P.StartedSequence);
-        await EqualAsync(expectedStarted, started);
+            Result<GrainRequestProgress>.Succeed(new GrainRequestProgress(requestId)),
+            eventType: P.StartedEventType, sequence: P.StartedSequence);
+        await Assert.That(Encoding.UTF8.GetString(JsonDefaults.Serialize(started)))
+            .IsEqualTo(Encoding.UTF8.GetString(JsonDefaults.Serialize(expectedStarted)));
         await Assert.That(observation.Frames.Any(frame => frame.Kind is CqrsStreamChunkKind.Progress or CqrsStreamChunkKind.Completed)).IsFalse();
         if (observation.OriginalCancellation is not null)
         {

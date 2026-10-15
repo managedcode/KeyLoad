@@ -124,8 +124,11 @@ internal sealed class KeyLoadClientTransport
                 return problem ?? Errors.Problem(write ? ErrorCode.UnknownWriteOutcome : ErrorCode.OwnershipLost,
                     ClientTransportMessages.ServerResponseUnavailable);
             }
+            var maximumBytes = execution.Value.MaximumResponseBodyBytes;
+            BoundedResponseStream.RequireLength(response.Content, maximumBytes);
             await using var body = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
-            var value = await JsonSerializer.DeserializeAsync<T>(body, JsonDefaults.Options, cancellationToken).ConfigureAwait(false);
+            using var admitted = new BoundedResponseStream(body, maximumBytes);
+            var value = await JsonSerializer.DeserializeAsync<T>(admitted, JsonDefaults.Options, cancellationToken).ConfigureAwait(false);
             if (value is null)
             {
                 return Errors.Problem(write ? ErrorCode.UnknownWriteOutcome : ErrorCode.OwnershipLost,

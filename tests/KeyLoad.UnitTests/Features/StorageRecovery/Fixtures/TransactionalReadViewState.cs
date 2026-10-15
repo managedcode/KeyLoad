@@ -1,3 +1,4 @@
+using System.Runtime.ExceptionServices;
 using KeyLoad.Core;
 using KeyLoad.Server;
 using KeyLoad.Storage;
@@ -11,9 +12,17 @@ internal sealed class TransactionalReadViewState : IDisposable
     internal const long MaximumBytes = 524_288;
     internal static readonly TimeSpan Deadline = TimeSpan.FromSeconds(10);
     internal TestDatabase Harness { get; } = new();
-    private readonly List<ZoneTreeStore> coldStores = [];
-    internal ZoneTreeStore Store => coldStores.Count == 0 ? Harness.Store : coldStores[^1];
-    internal DatabaseEngine Database => coldStores.Count == 0 ? Harness.Database : DocumentIndexCommittedScanOperations.CreateEngine(Store);
+    private ZoneTreeStore? coldStore;
+    private bool disposed;
+    private bool acquisitionPending;
+    private bool closeAttempted;
+    private bool closeReturned;
+    private ExceptionDispatchInfo? originalAcquisitionFailure;
+    private ExceptionDispatchInfo? originalCloseFailure;
+    private const string AcquisitionNotJoined = "The cold read-view owner acquisition is unknown; retain its root.";
+    private const string CloseNotJoined = "The original read-view owner close is unknown; retain its root.";
+    internal ZoneTreeStore Store => coldStore is null ? Harness.Store : coldStore;
+    internal DatabaseEngine Database => coldStore is null ? Harness.Database : DocumentIndexCommittedScanOperations.CreateEngine(Store);
     internal string[] OldImage { get; set; } = [];
     internal string[] FinalImage { get; set; } = [];
     internal StoreIdentity Identity { get; set; } = null!;
@@ -35,21 +44,103 @@ internal sealed class TransactionalReadViewState : IDisposable
         => Store.Read(view => Store.CaptureNativeReadCut(view, new(MaximumRows, MaximumBytes, TimeSpan.FromMinutes(1)), token));
     internal void Reopen()
     {
-        Store.Dispose();
-        coldStores.Add(new(new(Harness.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()));
+        ObjectDisposedException.ThrowIf(disposed, this);
+        CloseCurrent();
+        var options = new ZoneTreeStoreOptions(Harness.Directory);
+        var execution = UnitExecutionOptions.StorageExecution();
+        var cache = UnitExecutionOptions.PointCacheExecution();
+        acquisitionPending = true;
+        try
+        {
+            coldStore = new(options, execution, cache);
+        }
+        catch (Exception failure) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            originalAcquisitionFailure = ExceptionDispatchInfo.Capture(failure);
+            throw;
+        }
+        catch (Exception failure) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            originalAcquisitionFailure = ExceptionDispatchInfo.Capture(failure);
+            throw;
+        }
+        acquisitionPending = false;
+        closeAttempted = false;
+        closeReturned = false;
     }
+
     public void Dispose()
     {
+        disposed = true;
         var failures = new List<Exception>();
-        foreach (var store in coldStores)
+        try
         {
-            ServerFailureObserver.Observe(store.Dispose, failures);
+            CloseCurrent();
         }
-        ServerFailureObserver.Observe(Harness.Store.Dispose, failures);
+        catch (Exception failure) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            failures.Add(failure);
+        }
+        catch (Exception failure) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            failures.Add(failure);
+        }
         if (failures.Count == 0)
         {
-            ServerFailureObserver.Observe(Harness.Dispose, failures);
+            try
+            {
+                Harness.Dispose();
+            }
+            catch (Exception failure) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+            {
+                failures.Add(failure);
+            }
+            catch (Exception failure) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+            {
+                failures.Add(failure);
+            }
         }
         ServerFailureObserver.ThrowIfAny(failures);
+    }
+
+    private void CloseCurrent()
+    {
+        if (acquisitionPending)
+        {
+            originalAcquisitionFailure?.Throw();
+            throw new InvalidOperationException(AcquisitionNotJoined);
+        }
+        if (closeAttempted)
+        {
+            originalCloseFailure?.Throw();
+            if (!closeReturned)
+            {
+                throw new InvalidOperationException(CloseNotJoined);
+            }
+            return;
+        }
+        closeAttempted = true;
+        try
+        {
+            if (coldStore is null)
+            {
+                Harness.JoinOwnedResources();
+            }
+            else
+            {
+                coldStore.Dispose();
+            }
+            closeReturned = true;
+        }
+        catch (Exception failure) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            originalCloseFailure = ExceptionDispatchInfo.Capture(failure);
+            throw;
+        }
+        catch (Exception failure) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            originalCloseFailure = ExceptionDispatchInfo.Capture(failure);
+            throw;
+        }
     }
 }

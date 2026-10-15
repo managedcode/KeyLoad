@@ -7,6 +7,21 @@ namespace KeyLoad.UnitTests;
 
 internal static class TestDatabaseEngineFactory
 {
+    private const string SystemTenantId = "system";
+    private const string Wildcard = "*";
+
+    internal static void Bootstrap(DatabaseEngine database, string rootPrincipal, string rootCredential, bool physicalCatalog)
+    {
+        database.Bootstrap(new(rootPrincipal, SystemTenantId, [new(Wildcard, Wildcard, Capability.All)], [Wildcard])
+        {
+            ClusterAdministrator = true
+        }, DatabaseEngine.Credential(rootPrincipal, rootPrincipal, rootCredential));
+        if (physicalCatalog)
+        {
+            Features.ClusterRouting.PhysicalShardTestBootstrap.Bootstrap(database, rootPrincipal);
+        }
+    }
+
     internal static Func<ZoneTreeStore, PhysicalShardRecord?, DatabaseEngine> Capture(IOptions<DatabaseLimits> databaseLimits,
         IOptions<BlobExecutionOptions> blob, IOptions<NativeClaimsExecutionOptions> claims,
         TimeSeriesExecutionOptions? series, IOptions<PartitionMovementCheckpointOptions> movement, TimeProvider clock)

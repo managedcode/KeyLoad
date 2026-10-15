@@ -1,3 +1,4 @@
+using System.Runtime.ExceptionServices;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Serialization;
@@ -19,6 +20,12 @@ internal sealed class PhysicalShardCatalogFixture : IDisposable
     private readonly Guid? incarnation;
     private readonly PhysicalShardRecord? physicalOwner;
     private ZoneTreeStore? store;
+    private bool nativeAcquisitionPending;
+    private bool nativeCloseAttempted;
+    private ExceptionDispatchInfo? originalAcquisitionFailure;
+    private ExceptionDispatchInfo? originalCloseFailure;
+    private const string AcquisitionNotJoined = "The native catalog owner acquisition is unknown; retain its root.";
+    private const string CloseNotJoined = "The original native catalog owner close is unknown; retain its root.";
 
     internal PhysicalShardCatalogFixture(Guid? incarnation = null, PhysicalShardRecord? physicalOwner = null)
     {
@@ -77,8 +84,8 @@ internal sealed class PhysicalShardCatalogFixture : IDisposable
 
     internal void Reopen()
     {
-        Store.Dispose();
-        store = null;
+        ObjectDisposedException.ThrowIf(store is null && !nativeAcquisitionPending, this);
+        CloseOriginalStore();
         OpenExisting();
     }
 
@@ -95,11 +102,33 @@ internal sealed class PhysicalShardCatalogFixture : IDisposable
 
     private void OpenExisting()
     {
-        var opened = new ZoneTreeStore(new(directory)
+        var options = new ZoneTreeStoreOptions(directory)
         {
             Incarnation = incarnation
-        }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
-        store = opened;
+        };
+        var execution = UnitExecutionOptions.StorageExecution();
+        var cache = UnitExecutionOptions.PointCacheExecution();
+        nativeAcquisitionPending = true;
+        ZoneTreeStore opened;
+        try
+        {
+            opened = new ZoneTreeStore(options, execution, cache);
+            store = opened;
+        }
+        catch (Exception failure) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            originalAcquisitionFailure = ExceptionDispatchInfo.Capture(failure);
+            throw;
+        }
+        catch (Exception failure) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            originalAcquisitionFailure = ExceptionDispatchInfo.Capture(failure);
+            throw;
+        }
+        nativeAcquisitionPending = false;
+        nativeCloseAttempted = false;
+        originalAcquisitionFailure = null;
+        originalCloseFailure = null;
         Database = new(opened, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance, physicalOwner: physicalOwner);
     }
 
@@ -110,31 +139,72 @@ internal sealed class PhysicalShardCatalogFixture : IDisposable
         KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }
 
+    private void CloseOriginalStore()
+    {
+        if (nativeAcquisitionPending)
+        {
+            originalAcquisitionFailure?.Throw();
+            throw new InvalidOperationException(AcquisitionNotJoined);
+        }
+        if (nativeCloseAttempted)
+        {
+            originalCloseFailure?.Throw();
+            if (store is not null)
+            {
+                throw new InvalidOperationException(CloseNotJoined);
+            }
+            return;
+        }
+        if (store is null)
+        {
+            return;
+        }
+        nativeCloseAttempted = true;
+        try
+        {
+            store.Dispose();
+            store = null;
+        }
+        catch (Exception failure) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            originalCloseFailure = ExceptionDispatchInfo.Capture(failure);
+            throw;
+        }
+        catch (Exception failure) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            originalCloseFailure = ExceptionDispatchInfo.Capture(failure);
+            throw;
+        }
+    }
+
     private void Cleanup(List<Exception> failures)
     {
-        if (store is not null)
+        try
         {
-            try
-            {
-                store.Dispose();
-                store = null;
-            }
-            catch (Exception failure) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
-            {
-                failures.Add(failure);
-                return;
-            }
-            catch (Exception failure) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
-            {
-                failures.Add(failure);
-                return;
-            }
+            CloseOriginalStore();
         }
-
+        catch (Exception failure) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            RetainFailure(failures, failure);
+            return;
+        }
+        catch (Exception failure) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            RetainFailure(failures, failure);
+            return;
+        }
         if (Directory.Exists(directory))
         {
             KeyLoad.Server.ServerFailureObserver.Observe(
                 () => Directory.Delete(directory, recursive: true), failures);
+        }
+    }
+
+    private static void RetainFailure(List<Exception> failures, Exception original)
+    {
+        if (!failures.Any(existing => ReferenceEquals(existing, original)))
+        {
+            failures.Add(original);
         }
     }
 }

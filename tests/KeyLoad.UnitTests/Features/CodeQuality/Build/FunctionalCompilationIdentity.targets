@@ -14,6 +14,7 @@
     </ItemGroup>
     <PropertyGroup>
       <_KeyLoadCompileIdentityGeneratedFile>$(IntermediateOutputPath)KeyLoad.FunctionalCompilationIdentity.g.cs</_KeyLoadCompileIdentityGeneratedFile>
+      <_KeyLoadCompileIdentityCandidateFile>$(IntermediateOutputPath)KeyLoad.FunctionalCompilationIdentity.candidate</_KeyLoadCompileIdentityCandidateFile>
       <_KeyLoadCompileIdentityTUnitPackageVersion>@(_KeyLoadCompileIdentityTUnitVersion->'%(Version)')</_KeyLoadCompileIdentityTUnitPackageVersion>
       <_KeyLoadCompileIdentityTUnitDirectory>$([System.IO.Path]::GetFullPath($([System.IO.Path]::Combine('$(NuGetPackageRoot)', 'tunit.core/$(_KeyLoadCompileIdentityTUnitPackageVersion)/buildTransitive/$(TargetFramework)/'))))</_KeyLoadCompileIdentityTUnitDirectory>
       <_KeyLoadCompileIdentityTUnitProps>$([System.IO.Path]::GetFullPath($([System.IO.Path]::Combine('$(_KeyLoadCompileIdentityTUnitDirectory)', 'TUnit.Core.props'))))</_KeyLoadCompileIdentityTUnitProps>
@@ -99,12 +100,21 @@
       </_KeyLoadCompileIdentityAttribute>
     </ItemGroup>
 
-    <WriteCodeFragment Language="C#" AssemblyAttributes="@(_KeyLoadCompileIdentityAttribute)" OutputFile="$(_KeyLoadCompileIdentityGeneratedFile)">
-      <Output TaskParameter="OutputFile" ItemName="_KeyLoadCompileIdentityGenerated" />
-    </WriteCodeFragment>
+    <!-- WriteCodeFragment always overwrites its output. Keep that candidate out of
+         Compile and update the canonical input only when its exact bytes change. -->
+    <WriteCodeFragment Language="C#" AssemblyAttributes="@(_KeyLoadCompileIdentityAttribute)" OutputFile="$(_KeyLoadCompileIdentityCandidateFile)" />
+    <GetFileHash Files="$(_KeyLoadCompileIdentityCandidateFile)" Algorithm="SHA256">
+      <Output TaskParameter="Items" ItemName="_KeyLoadCompileIdentityCandidateHash" />
+    </GetFileHash>
+    <GetFileHash Files="$(_KeyLoadCompileIdentityGeneratedFile)" Algorithm="SHA256"
+                 Condition="Exists('$(_KeyLoadCompileIdentityGeneratedFile)')">
+      <Output TaskParameter="Items" ItemName="_KeyLoadCompileIdentityCurrentHash" />
+    </GetFileHash>
+    <Copy SourceFiles="$(_KeyLoadCompileIdentityCandidateFile)" DestinationFiles="$(_KeyLoadCompileIdentityGeneratedFile)"
+          Condition="'@(_KeyLoadCompileIdentityCandidateHash->'%(FileHash)')' != '@(_KeyLoadCompileIdentityCurrentHash->'%(FileHash)')'" />
     <ItemGroup>
-      <Compile Include="@(_KeyLoadCompileIdentityGenerated)" AutoGen="true" DesignTime="true" Visible="false" />
-      <FileWrites Include="$(_KeyLoadCompileIdentityGeneratedFile)" />
+      <Compile Include="$(_KeyLoadCompileIdentityGeneratedFile)" AutoGen="true" DesignTime="true" Visible="false" />
+      <FileWrites Include="$(_KeyLoadCompileIdentityGeneratedFile);$(_KeyLoadCompileIdentityCandidateFile)" />
     </ItemGroup>
   </Target>
 

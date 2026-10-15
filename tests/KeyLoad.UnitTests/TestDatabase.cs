@@ -4,7 +4,6 @@ using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Serialization;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.UnitTests.Features.ClusterRouting;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests;
@@ -19,8 +18,6 @@ internal sealed class TestDatabase : IDisposable
     private const string TransactionDomainId = "orders";
     private const string PartitionKey = "customer-1";
     private const string RootPrincipalId = "root";
-    private const string SystemTenantId = "system";
-    private const string Wildcard = "*";
     private const string RootCredential = "root.unit-test-credential-32-characters";
 
     private const string NativeOperationRequired = "This operation requires the fixture-owned native ordered apply path.";
@@ -30,6 +27,7 @@ internal sealed class TestDatabase : IDisposable
     private const string OriginalOwnerRequired = "The original native owner is required.";
 
     private readonly TestDatabaseReplicaAdmission? replicaAdmission;
+    private readonly TestDatabaseCloseState closeState = new();
     private readonly Func<ZoneTreeStore, PhysicalShardRecord?, DatabaseEngine> createDatabase;
     private readonly IOptions<DatabaseLimits> limits;
     public string Directory
@@ -63,6 +61,7 @@ internal sealed class TestDatabase : IDisposable
             throw new ArgumentException(UnexpectedReplicaDirectory, nameof(nativeReplicaDirectory));
         }
         ZoneTreeStore? acquired = null;
+        var nativeAcquisitionStarted = false;
         var blobOptions = UnitExecutionOptions.BlobExecution(blobExecution);
         var claimsOptions = UnitExecutionOptions.NativeClaimsExecution(claimsExecution);
         try
@@ -73,31 +72,17 @@ internal sealed class TestDatabase : IDisposable
             createDatabase = TestDatabaseEngineFactory.Capture(this.limits, blobOptions, claimsOptions,
                 timeSeriesExecution, MovementCheckpoints, clock);
             Database = createDatabase(Store, null);
-            Database.Bootstrap(new(RootPrincipalId, SystemTenantId, [new(Wildcard, Wildcard, Capability.All)], [Wildcard])
-            {
-                ClusterAdministrator = true
-            },
-                DatabaseEngine.Credential(RootPrincipalId, RootPrincipalId, RootCredential));
-            if (bootstrapPhysicalShardCatalog)
-            {
-                PhysicalShardTestBootstrap.Bootstrap(Database, RootPrincipalId);
-            }
+            TestDatabaseEngineFactory.Bootstrap(Database, RootPrincipalId, RootCredential, bootstrapPhysicalShardCatalog);
             if (nativeReplicaAdmission)
             {
                 Database = CreateConfiguredDatabase(Store);
+                nativeAcquisitionStarted = true;
                 replicaAdmission = new(this, nativeReplicaDirectory);
             }
         }
-        catch (Exception)
+        catch (Exception primary)
         {
-            try
-            {
-                DisposeAcquiredStore(acquired);
-            }
-            finally
-            {
-                DeleteOwnedDirectory();
-            }
+            TestDatabaseNativeDisposal.Rollback(primary, acquired, nativeAcquisitionStarted, DeleteOwnedDirectory);
             throw;
         }
     }
@@ -150,7 +135,16 @@ internal sealed class TestDatabase : IDisposable
         string directory, string replicaDirectory, Guid? originalNodeId) => new(targetDatabase, target, directory,
             replicaAdmission?.ExecutionOptions ?? throw new InvalidOperationException(OriginalOwnerRequired), replicaDirectory, originalNodeId);
 
-    internal void JoinOwnedResources() => TestDatabaseJoinedLifetime.DisposeInOrder(replicaAdmission, Store);
+    internal void JoinOwnedResources()
+    {
+        lock (closeState.Gate)
+        {
+            if (closeState.TryBeginJoin())
+            {
+                JoinCore();
+            }
+        }
+    }
 
     internal (long LastIndex, long CommittedIndex, long Term) ReadJournalCut()
         => replicaAdmission is { } native ? native.ReadJournalCut()
@@ -171,18 +165,9 @@ internal sealed class TestDatabase : IDisposable
             ? native.RecoverFaultOwnedRow(original, restoreFaultOwnedRow, failures, cancellationToken, expectedApplyError)
             : throw new InvalidOperationException(NativeOperationRequired);
 
-    private static void DisposeAcquiredStore(ZoneTreeStore? store) => store?.Dispose();
     public ResourceDefinition Configure(string name, ResourceKind kind, string? domain = null, IndexDefinition[]? indexes = null,
         SensitiveFieldPolicy[]? fields = null, QueuePolicy? queuePolicy = null)
-    {
-        var resource = new ResourceDefinition(name, kind, domain ?? Partition.TransactionDomainId)
-        {
-            Indexes = [.. indexes ?? []],
-            FieldPolicies = [.. fields ?? []],
-            QueuePolicy = queuePolicy ?? new()
-        };
-        return Submit(OperationKind.ConfigureResource, new ConfigureResourceRequest(Partition.TenantId, Partition.DatabaseId, resource)).Get<ResourceDefinition>();
-    }
+        => TestDatabaseResourceConfiguration.Apply(this, name, kind, domain, indexes, fields, queuePolicy);
     public CommitReceipt Commit(params Mutation[] mutations)
     {
         var id = Guid.NewGuid();
@@ -190,23 +175,39 @@ internal sealed class TestDatabase : IDisposable
     }
     public void Dispose()
     {
-        if (replicaAdmission is not null)
+        JoinOwnedResources();
+        closeState.Delete(DeleteOwnedDirectory);
+    }
+
+    private void JoinCore()
+    {
+        var failures = new List<Exception>();
+        try
         {
-            DisposeNative();
-            return;
+            replicaAdmission?.Dispose();
+        }
+        catch (Exception failure) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(failure) is null)
+        {
+            failures.Add(failure);
+        }
+        catch (Exception failure) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(failure) is not null)
+        {
+            failures.Add(failure);
         }
         try
         {
             Store.Dispose();
         }
-        finally
+        catch (Exception failure) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(failure) is null)
         {
-            DeleteOwnedDirectory();
+            failures.Add(failure);
         }
+        catch (Exception failure) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(failure) is not null)
+        {
+            failures.Add(failure);
+        }
+        closeState.CompleteJoin(failures);
     }
-
-    private void DisposeNative()
-        => TestDatabaseNativeDisposal.Run(replicaAdmission, Store.Dispose, DeleteOwnedDirectory);
 
     private void DeleteOwnedDirectory()
     {

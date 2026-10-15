@@ -2,7 +2,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Client;
 
-/// <summary>Bounds retained HTTP problem bodies in the native SDK transport.</summary>
+/// <summary>Bounds successful HTTP JSON input and retained HTTP problem bodies in the native SDK transport.</summary>
 [ConfigurationOptions]
 public sealed class KeyLoadClientExecutionOptions
 {
@@ -11,6 +11,9 @@ public sealed class KeyLoadClientExecutionOptions
     /// <summary>The rejection for an invalid retained response budget.</summary>
     public const string ValidationMessage = "The SDK problem body budget must be positive and at most 64 KiB.";
     private const int DefaultProblemBodyBytes = 65_536;
+    private const int MaximumResponseBodyByteCeiling = 16_777_216;
+    /// <summary>The rejection for an invalid successful-response budget.</summary>
+    public const string ResponseValidationMessage = "The SDK response body budget must be positive and at most 16 MiB.";
     private const int MinimumProblemBodyBytes = 1;
     private const int DefaultSqlInspectionBytes = 65_536;
     private const int DefaultSqlInspectionDepth = 32;
@@ -18,6 +21,8 @@ public sealed class KeyLoadClientExecutionOptions
 
     /// <summary>The maximum UTF-8 bytes retained when decoding one HTTP problem.</summary>
     public int MaximumProblemBodyBytes { get; set; } = DefaultProblemBodyBytes;
+    /// <summary>The inclusive byte ceiling presented to the JSON decoder for one successful response.</summary>
+    public int MaximumResponseBodyBytes { get; set; } = MaximumResponseBodyByteCeiling;
     /// <summary>The byte ceiling for conservative local SQL write classification.</summary>
     public int MaximumSqlInspectionBytes { get; set; } = DefaultSqlInspectionBytes;
     /// <summary>The nesting ceiling for conservative local SQL trivia inspection.</summary>
@@ -28,6 +33,7 @@ public sealed class KeyLoadClientExecutionOptions
     /// <summary>Checks the positive budget against its existing protocol ceiling.</summary>
     /// <returns>Whether the SDK can consume this budget.</returns>
     public bool IsValid() => MaximumProblemBodyBytes is >= MinimumProblemBodyBytes and <= DefaultProblemBodyBytes
+        && MaximumResponseBodyBytes is >= MinimumProblemBodyBytes and <= MaximumResponseBodyByteCeiling
         && MaximumSqlInspectionBytes is >= MinimumProblemBodyBytes and <= DefaultSqlInspectionBytes
         && MaximumSqlInspectionDepth is >= MinimumProblemBodyBytes and <= DefaultSqlInspectionDepth
         && SqlBudgetCheckInterval is >= MinimumProblemBodyBytes and <= DefaultSqlBudgetCheckInterval;
@@ -59,6 +65,7 @@ public sealed class KeyLoadClientExecutionOptions
         var copy = new KeyLoadClientExecutionOptions
         {
             MaximumProblemBodyBytes = value.MaximumProblemBodyBytes,
+            MaximumResponseBodyBytes = value.MaximumResponseBodyBytes,
             MaximumSqlInspectionBytes = value.MaximumSqlInspectionBytes,
             MaximumSqlInspectionDepth = value.MaximumSqlInspectionDepth,
             SqlBudgetCheckInterval = value.SqlBudgetCheckInterval
@@ -72,7 +79,9 @@ public sealed class KeyLoadClientExecutionOptions
     {
         if (!IsValid())
         {
-            throw new OptionsValidationException(SectionName, typeof(KeyLoadClientExecutionOptions), [ValidationMessage]);
+            var detail = MaximumResponseBodyBytes is < MinimumProblemBodyBytes or > MaximumResponseBodyByteCeiling
+                ? ResponseValidationMessage : ValidationMessage;
+            throw new OptionsValidationException(SectionName, typeof(KeyLoadClientExecutionOptions), [detail]);
         }
     }
 }

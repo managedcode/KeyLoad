@@ -2,6 +2,7 @@ namespace KeyLoad.UnitTests.Features.Authorization;
 
 internal static class StartedReadPolicyProtocol
 {
+    internal const string StartedEventType = "cqrs-started";
     internal const string Revoked = "revoked";
     internal const string Expired = "expired";
     internal const string Cancelled = "cancelled";

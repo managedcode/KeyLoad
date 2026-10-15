@@ -1,4 +1,5 @@
 using KeyLoad.Client;
+using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
@@ -41,6 +42,26 @@ internal static class NativeActivationMigrationRf3Ownership
             await Assert.That(current[index].NodeId).IsEqualTo(original[index].NodeId);
             await Assert.That(current[index].Incarnation).IsEqualTo(original[index].Incarnation);
             await Assert.That(current[index].Voters).IsEqualTo(original[index].Voters);
+        }
+    }
+
+    internal static async Task RequireRunningOwnersAsync(TwoRf3MembershipWave wave, NodeStatus[] original,
+        NodeStatus[] current, IReadOnlyList<ReplicaSiloDiscovery> discovery, CancellationToken cancellationToken)
+    {
+        await Assert.That(discovery.Count).IsEqualTo(TwoRf3MembershipProtocol.MembersPerGroup);
+        await Assert.That(current.Length).IsEqualTo(original.Length);
+        for (var index = NativeActivationMigrationRf3Protocol.FirstNode; index < original.Length; index++)
+        {
+            await Assert.That(original[index].ProcessId).IsGreaterThan(0);
+            await Assert.That(current[index].ProcessId).IsEqualTo(original[index].ProcessId);
+            await Assert.That(current[index].ReadGeneration).IsEqualTo(original[index].ReadGeneration);
+        }
+        foreach (var expected in discovery)
+        {
+            var node = new Uri(expected.VoterId).Host;
+            var actual = await RequestCqrsRf3SignedDiscovery.ReadForProfileAsync(wave.Application, node,
+                wave.Profile, cancellationToken);
+            await Assert.That(JsonDefaults.Serialize(actual).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
         }
     }
 }

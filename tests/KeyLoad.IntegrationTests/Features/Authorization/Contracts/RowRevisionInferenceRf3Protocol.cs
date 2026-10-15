@@ -8,7 +8,7 @@ internal static class RowRevisionInferenceRf3Protocol
     internal const string Domain = "revision-domain";
     internal const string SafeDenied = "The authenticated principal is not permitted to perform this operation.";
     internal const string SafeOther = "The database operation could not be completed.";
-    internal const string PatchedJson = "{\"value\":2,\"secret\":\"ROW-REVISION-PRIVATE-CANARY\"}";
+    internal const string PatchedJson = "{\"secret\":\"ROW-REVISION-PRIVATE-CANARY\",\"value\":2}";
     internal const string Canary = "ROW-REVISION-PRIVATE-CANARY";
     internal const string HiddenJson = "{\"value\":1,\"secret\":\"ROW-REVISION-PRIVATE-CANARY\"}";
     internal const int InitialRecords = 2;

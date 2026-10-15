@@ -22,7 +22,7 @@ concurrency:
 jobs:
   repository-checks:
     name: Check repository rules
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
       - name: Download source code
@@ -32,7 +32,7 @@ jobs:
   analyzer-rules:
     name: Test code analyzers
     if: ${{ github.event_name != 'workflow_dispatch' || inputs.task == 'all' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - name: Download source code
@@ -111,7 +111,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-24.04]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 120
     steps:
@@ -219,7 +219,7 @@ jobs:
           if-no-files-found: error
   task-acceptance:
     name: Qualify ${{ matrix.task }} (${{ matrix.profile }} caller)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 180
     strategy:
       fail-fast: false
@@ -299,7 +299,7 @@ jobs:
   docker-rf3:
     name: Test three-node database
     if: ${{ github.event_name != 'workflow_dispatch' || inputs.task == 'all' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 180
     steps:
       - name: Download source code

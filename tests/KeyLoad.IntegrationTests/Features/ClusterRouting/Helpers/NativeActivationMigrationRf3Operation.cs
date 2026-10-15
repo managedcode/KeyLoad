@@ -41,11 +41,11 @@ internal static class NativeActivationMigrationRf3Operation
         var target = discovery.First(item => item.VoterId != established.Voter);
         _ = await NativeActivationMigrationRf3Attempt.RunAsync(wave, callers, identity, command, established, receipt,
             discovery, target, cancel: false, foreign: true, failures, cancellationToken);
-        await RequireStateAsync(wave, administrator, callers, identity, placement, physical, cancellationToken);
+        await RequireRunningStateAsync(wave, administrator, callers, identity, placement, physical, discovery, cancellationToken);
         await NativeActivationOriginalSessionFlow.ReadIfSelectedAsync(administrator, callers, session, cancellationToken);
         _ = await NativeActivationMigrationRf3Attempt.RunAsync(wave, callers, identity, command, established, receipt,
             discovery, target, cancel: true, foreign: false, failures, cancellationToken);
-        await RequireStateAsync(wave, administrator, callers, identity, placement, physical, cancellationToken);
+        await RequireRunningStateAsync(wave, administrator, callers, identity, placement, physical, discovery, cancellationToken);
         await NativeActivationOriginalSessionFlow.ReadIfSelectedAsync(administrator, callers, session, cancellationToken);
         var before = await NativeActivationMigrationRf3Attempt.RunAsync(wave, callers, identity, command, established,
             receipt, discovery, target, cancel: false, foreign: false, failures, cancellationToken);
@@ -55,7 +55,7 @@ internal static class NativeActivationMigrationRf3Operation
         await Assert.That(after.Witness.Voter).IsEqualTo(target.VoterId);
         await Assert.That(after.Witness.SiloAddress).IsEqualTo(target.SiloAddress);
         await SqlRf3Protocol.EqualAsync(receipt, after.Receipt);
-        await RequireStateAsync(wave, administrator, callers, identity, placement, physical, cancellationToken);
+        await RequireRunningStateAsync(wave, administrator, callers, identity, placement, physical, discovery, cancellationToken);
         await NativeActivationOriginalSessionFlow.ReadIfSelectedAsync(administrator, callers, session, cancellationToken);
         if (failures.Count != EmptyFailureCount)
         {
@@ -79,14 +79,23 @@ internal static class NativeActivationMigrationRf3Operation
         }
     }
 
-    private static async Task RequireStateAsync(TwoRf3MembershipWave wave, RequestCqrsRf3Callers administrator,
+    private static async Task RequireRunningStateAsync(TwoRf3MembershipWave wave, RequestCqrsRf3Callers administrator,
+        RequestCqrsRf3Callers callers, RequestCqrsPhaseFaultIdentity identity, AtomicPartitionPlacementResolution placement,
+        NodeStatus[] physical, IReadOnlyList<ReplicaSiloDiscovery> discovery, CancellationToken cancellationToken)
+    {
+        var current = await RequireStateAsync(wave, administrator, callers, identity, placement, physical, cancellationToken);
+        await NativeActivationMigrationRf3Ownership.RequireRunningOwnersAsync(wave, physical, current, discovery, cancellationToken);
+    }
+
+    private static async Task<NodeStatus[]> RequireStateAsync(TwoRf3MembershipWave wave, RequestCqrsRf3Callers administrator,
         RequestCqrsRf3Callers callers, RequestCqrsPhaseFaultIdentity identity, AtomicPartitionPlacementResolution placement,
         NodeStatus[] physical, CancellationToken cancellationToken)
     {
         await RequestCqrsPhaseFaultAssertions.VerifyDocumentAsync(callers, identity,
             RequestCqrsRf3Protocol.ChangedDocumentJson, NativeActivationRf3Protocol.CommittedRevision, cancellationToken);
         await NativeActivationMigrationRf3Ownership.RequirePlacementAsync(administrator, identity.Partition, placement, cancellationToken);
-        await NativeActivationMigrationRf3Ownership.RequirePhysicalAsync(physical,
-            await NativeActivationMigrationRf3Ownership.CaptureAsync(wave, cancellationToken));
+        var current = await NativeActivationMigrationRf3Ownership.CaptureAsync(wave, cancellationToken);
+        await NativeActivationMigrationRf3Ownership.RequirePhysicalAsync(physical, current);
+        return current;
     }
 }

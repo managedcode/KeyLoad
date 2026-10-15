@@ -2,12 +2,15 @@ namespace KeyLoad.UnitTests;
 
 internal static class TestDatabaseNativeDisposal
 {
-    internal static void Run(IDisposable? disposeReplica, Action disposeStore, Action deleteDirectory)
+    internal static void Rollback(Exception primary, IDisposable? acquired, bool nativeAcquisitionStarted,
+        Action deleteDirectory)
     {
-        var failures = new List<Exception>();
+        var failures = new List<Exception> { primary };
+        var closed = false;
         try
         {
-            disposeReplica?.Dispose();
+            acquired?.Dispose();
+            closed = acquired is not null;
         }
         catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
         {
@@ -17,8 +20,11 @@ internal static class TestDatabaseNativeDisposal
         {
             failures.Add(error);
         }
-        KeyLoad.Server.ServerFailureObserver.Observe(disposeStore, failures);
-        KeyLoad.Server.ServerFailureObserver.Observe(deleteDirectory, failures);
+        // A failed nested native constructor cannot publish a proven joined owner to this fixture.
+        if (closed && !nativeAcquisitionStarted)
+        {
+            KeyLoad.Server.ServerFailureObserver.Observe(deleteDirectory, failures);
+        }
         KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }
 }
