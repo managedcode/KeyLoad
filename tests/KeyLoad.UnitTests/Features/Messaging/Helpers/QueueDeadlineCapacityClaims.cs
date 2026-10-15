@@ -15,7 +15,7 @@ internal static class QueueDeadlineCapacityClaims
         }
         var claims = new DeliveryClaims(lane, metadata.Id, Root, metadata.LeaseVersion + LeaseVersionStep,
             metadata.DeliveryGeneration, commit.Incarnation);
-        return new(requestId, [new(metadata.Id, Json, Json, database.Sign(claims), claims.LeaseVersion,
+        return new(requestId, [new(metadata.Id, QueueDeadlineCapacityProtocol.Json, QueueDeadlineCapacityProtocol.Json, database.Sign(claims), claims.LeaseVersion,
             time.AddSeconds(LeaseSeconds), metadata.Attempts + AttemptStep, metadata.DeliveryGeneration)], commit);
     }
 

@@ -1,3 +1,4 @@
+using KeyLoad.Client;
 using KeyLoad.Core;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;

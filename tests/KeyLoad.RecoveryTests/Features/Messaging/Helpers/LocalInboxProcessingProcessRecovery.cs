@@ -9,6 +9,8 @@ namespace KeyLoad.RecoveryTests.Features.Messaging;
 
 internal static class LocalInboxProcessingProcessRecovery
 {
+    private const string MissingOriginalRoot = "The original recovery store root must be canonical, existing and nonempty.";
+
     internal static async Task VerifyAsync(string root, CommitStage stage, CancellationToken token)
     {
         var original = await CommandIdempotencyCrashData.ReadEvidenceAsync<ReplicatedOperation>(root, LocalInboxProcessingCrashContract.OperationFile, token);
@@ -22,6 +24,7 @@ internal static class LocalInboxProcessingProcessRecovery
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
+            RequireOriginalRoot(root);
             using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
             await ServerFailureObserver.ObserveAsync(async () =>
             {
@@ -50,11 +53,12 @@ internal static class LocalInboxProcessingProcessRecovery
         ArgumentNullException.ThrowIfNull(identity);
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            using var store = ZoneTreeExistingStore.Open(new(root)
+            RequireOriginalRoot(root);
+            using var store = new ZoneTreeStore(new(root)
             {
-                Incarnation = identity.Incarnation
-            },
-                identity.NodeId, RecoveryExecutionOptions.StorageExecution());
+                Incarnation = identity.Incarnation,
+                SigningKey = identity.SigningKey
+            }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 await LocalInboxProcessingRecoveryImage.ExactAsync(store.Identity, identity);
@@ -71,4 +75,15 @@ internal static class LocalInboxProcessingProcessRecovery
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
+    private static void RequireOriginalRoot(string root)
+    {
+        if (!Path.IsPathFullyQualified(root)
+            || !string.Equals(Path.GetFullPath(root), root, StringComparison.Ordinal)
+            || !System.IO.Directory.Exists(root)
+            || !System.IO.Directory.EnumerateFileSystemEntries(root).Any())
+        {
+            throw new InvalidOperationException(MissingOriginalRoot);
+        }
+    }
+
 }

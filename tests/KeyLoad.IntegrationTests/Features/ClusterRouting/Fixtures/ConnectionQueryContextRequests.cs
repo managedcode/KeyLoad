@@ -15,11 +15,10 @@ internal static class ConnectionQueryContextRequests
         => new(partition, new(RequestCqrsRf3Protocol.AdminCollection, null, [new("*", "*")], null,
             [new("/@id", false)], 1), AllowFullScan: true, Cursor: cursor);
     internal static AstQueryRequest CSharp(PartitionRef partition, string? cursor = null)
-        => KeyLoadQuery.From<ContextDocument>(partition, RequestCqrsRf3Protocol.AdminCollection,
+        => KeyLoadQuery.From<System.Text.Json.JsonElement>(partition, RequestCqrsRf3Protocol.AdminCollection,
             IntegrationClientOptions.Translation()).OrderBy(row => QueryFunctions.DocumentId(row)).Take(1)
             .ToRequest(true, cursor);
     internal static QueryRow[] Rows(ConnectionQueryContextSeed seed, bool first)
         => first ? [new(AddedId, 1L, seed.AddedJson, false, [])]
             : [new(RequestCqrsRf3Protocol.DocumentId, 1L, RequestCqrsRf3Protocol.DocumentJson, false, [])];
-    private sealed record ContextDocument(string Cohort, decimal Value);
 }

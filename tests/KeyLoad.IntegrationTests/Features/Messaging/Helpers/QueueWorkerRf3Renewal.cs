@@ -31,9 +31,11 @@ internal static class QueueWorkerRf3Renewal
         await Assert.That(result.Unacknowledged).HasSingleItem();
         await Assert.That(result.Operations.Any(row => row.Command?.Action == DeliveryAction.Ack)).IsFalse();
         var refused = await Assert.That(result.Operations.Where(row => row.Stage == QueueWorkerOperationStage.Returned
-            && row.Command?.Action == DeliveryAction.Renew && row.Completion!.IsFailed)).HasSingleItem();
+            && row.Command?.Action == DeliveryAction.Renew && row.Completion is { IsFailed: true })).HasSingleItem();
+        var completion = QueueWorkerRf3Completion.Require(refused);
+        await Assert.That(completion.Value).IsNull();
         await Assert.That(refused.Command!.CommandId).IsEqualTo(held.FirstRenewalId);
-        await Assert.That(refused.Completion!.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
+        await Assert.That(completion.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
         await QueueWorkerRf3Assertions.LeasedAsync(sdk, mcp, seed, held, QueueWorkerRf3Protocol.FirstReadySequence, token);
         await QueueWorkerRf3Assertions.ReadyAsync(sdk, mcp, seed, QueueWorkerRf3Protocol.Second, QueueWorkerRf3Protocol.SecondReadySequence, token);
         await QueueWorkerRf3Assertions.ReadyAsync(sdk, mcp, seed, QueueWorkerRf3Protocol.Third, QueueWorkerRf3Protocol.ThirdReadySequence, token);

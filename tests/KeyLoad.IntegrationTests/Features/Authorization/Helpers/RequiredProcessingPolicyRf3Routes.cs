@@ -18,7 +18,7 @@ internal static class RequiredProcessingPolicyRf3Routes
         await Assert.That(actual.Deliveries.Length).IsEqualTo(1);
         var delivery = actual.Deliveries[0];
         await Assert.That(delivery.Token).IsNotEmpty();
-        await Assert.That(delivery.LeaseUntil).IsGreaterThan(DateTimeOffset.UtcNow);
+        await Assert.That(delivery.LeaseUntil).IsGreaterThan(TimeProvider.System.GetUtcNow());
         await SqlRf3Protocol.EqualAsync(new Delivery(id, state.Payload, state.Headers, delivery.Token, 1L, delivery.LeaseUntil, 1, 1L), delivery);
         await Assert.That(actual.RequestId).IsEqualTo(request.RequestId);
         await Assert.That(actual.Token.Incarnation).IsEqualTo(state.Producers[0].Receipt.Token.Incarnation);

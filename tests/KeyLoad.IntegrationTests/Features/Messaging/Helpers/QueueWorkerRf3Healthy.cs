@@ -38,19 +38,20 @@ internal static class QueueWorkerRf3Healthy
         await QueueWorkerRf3Assertions.EqualAsync(context.Delivery, new Delivery(QueueWorkerRf3Protocol.Healthy,
             QueueWorkerRf3Protocol.Payload, QueueWorkerRf3Protocol.Headers, context.Delivery.Token,
             QueueWorkerRf3Protocol.InitialLeaseVersion, context.Delivery.LeaseUntil, QueueWorkerRf3Protocol.ClaimAttempt, QueueWorkerRf3Protocol.InitialDeliveryGeneration));
-        await QueueWorkerRf3Assertions.ReceiptAsync(original.Completion!.Value!, context.AcknowledgementId, seed,
+        var ackReceipt = await QueueWorkerRf3Completion.SuccessAsync(original);
+        await QueueWorkerRf3Assertions.ReceiptAsync(ackReceipt, context.AcknowledgementId, seed,
             [new(nameof(DeliveryAction.Ack), seed.Lane.Queue, QueueWorkerRf3Protocol.Healthy, QueueWorkerRf3Protocol.AckStateVersion)]);
         await QueueWorkerRf3HealthyImages.RetainedAsync(sdk, mcp, seed, retained, token);
         await QueueWorkerRf3Assertions.AckedAsync(sdk, mcp, seed, QueueWorkerRf3Protocol.Healthy,
             QueueWorkerRf3Protocol.HealthyReadySequence, token);
-        await QueueWorkerRf3Assertions.EqualAsync((await sdk.ReconcileQueueWorkerOperationAsync(original, token)).Completion!.Value,
-            original.Completion.Value);
+        await QueueWorkerRf3Assertions.EqualAsync(await QueueWorkerRf3Completion.SuccessAsync(await sdk.ReconcileQueueWorkerOperationAsync(original, token)),
+            ackReceipt);
         await QueueWorkerRf3HealthyImages.RetainedAsync(sdk, mcp, seed, retained, token);
         await QueueWorkerRf3Assertions.AckedAsync(sdk, mcp, seed, QueueWorkerRf3Protocol.Healthy,
             QueueWorkerRf3Protocol.HealthyReadySequence, token);
         var official = await McpCallerAssertions.SuccessAsync<CommitReceipt>(await mcp.CallAsync(
             McpCallerTools.MessagesComplete, original.Command!, token));
-        await QueueWorkerRf3Assertions.EqualAsync(official.Value, original.Completion.Value);
+        await QueueWorkerRf3Assertions.EqualAsync(official.Value, ackReceipt);
         await QueueWorkerRf3HealthyImages.RetainedAsync(sdk, mcp, seed, retained, token);
         await QueueWorkerRf3Assertions.AckedAsync(sdk, mcp, seed, QueueWorkerRf3Protocol.Healthy,
             QueueWorkerRf3Protocol.HealthyReadySequence, token);

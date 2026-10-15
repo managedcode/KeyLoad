@@ -37,7 +37,7 @@ internal static class RequiredProcessingPolicyRf3Refusals
     internal static async Task CancelledAsync(RequestCqrsRf3Callers reader, RequiredProcessingPolicyRf3State state, CancellationToken token)
     {
         using var cancelled = CancellationTokenSource.CreateLinkedTokenSource(token);
-        cancelled.Cancel();
+        await cancelled.CancelAsync();
         const string detail = "The write response is unavailable. Retry the same command ID.";
         await SdkAsync(await reader.Sdk.CommitProcessingAsync(state.Healthy, cancelled.Token), ErrorCode.UnknownWriteOutcome, detail);
         var sql = SqlRf3Protocol.Call(state.Partition, RequiredProcessingPolicyRf3State.Tool, state.Healthy);

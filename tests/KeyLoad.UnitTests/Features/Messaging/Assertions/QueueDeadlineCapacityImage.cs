@@ -22,10 +22,10 @@ internal static class QueueDeadlineCapacityImage
             Add(expected[Metadata], KeySpace.Partition(Metadata, lane.Partition, lane.Queue, metadata.Id), metadata);
             var retained = metadata.State is not (MessageState.Acked or MessageState.Expired);
             await Assert.That(database.InspectMessage(Root, lane, metadata.Id)).IsEqualTo(
-                new MessageInspection(metadata, retained ? Json : null, retained ? Json : null));
+                new MessageInspection(metadata, retained ? QueueDeadlineCapacityProtocol.Json : null, retained ? QueueDeadlineCapacityProtocol.Json : null));
             if (retained)
             {
-                var body = new MessageBody(metadata.Id, Json, new string(Json.AsSpan()), input.OrderingKey, JsonData.Fingerprint(input));
+                var body = new MessageBody(metadata.Id, QueueDeadlineCapacityProtocol.Json, new string(QueueDeadlineCapacityProtocol.Json.AsSpan()), input.OrderingKey, JsonData.Fingerprint(input));
                 Add(expected[Body], KeySpace.Partition(Body, lane.Partition, lane.Queue, metadata.Id), body);
                 var bytes = NativeSerialization.Serialize(body).LongLength;
                 storedBytes += bytes;

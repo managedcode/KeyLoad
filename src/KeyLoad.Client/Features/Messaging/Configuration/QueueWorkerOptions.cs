@@ -57,7 +57,7 @@ public sealed record QueueWorkerOptions
         && MaximumReceiveBytes <= MaximumInFlightBytes
         && LeaseSeconds is > PositiveBudgetBoundary and <= LeaseCeilingSeconds
         && RenewalInterval > TimeSpan.Zero && RenewalInterval < TimeSpan.FromSeconds(LeaseSeconds)
-        && EmptyPollDelay > TimeSpan.Zero && EmptyPollDelay <= TimeSpan.FromSeconds(MaximumPollSeconds)
+        && EmptyPollDelay > TimeSpan.Zero && EmptyPollDelay.TotalSeconds <= MaximumPollSeconds
         && UncertaintyRetries is >= NoUncertaintyRetries and <= MaximumUncertaintyRetries;
 
     /// <summary>Rejects invalid invocation configuration before native IO.</summary>

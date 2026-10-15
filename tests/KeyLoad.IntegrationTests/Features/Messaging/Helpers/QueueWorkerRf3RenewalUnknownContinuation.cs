@@ -22,7 +22,7 @@ internal static class QueueWorkerRf3RenewalUnknownContinuation
         MessageInspection leased, MessageInspection ready, CancellationToken token)
     {
         var recovered = await caller.Sdk.ReconcileQueueWorkerOperationAsync(original, token);
-        var receipt = await McpCallerAssertions.SdkSuccessAsync(recovered.Completion!);
+        var receipt = await QueueWorkerRf3Completion.SuccessAsync(recovered);
         await ReceiptAsync(administrator.Sdk, receipt, original.Command!, QueueWorkerRf3Protocol.RenewedStateVersion, token);
         await QueueAckResponseLossRf3Assertions.ImagesAsync(administrator, requests, leased, ready, token);
         await QueueWorkerRf3Assertions.EqualAsync((await McpCallerAssertions.SuccessAsync<CommitReceipt>(await caller.Mcp.CallAsync(

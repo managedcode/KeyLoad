@@ -168,9 +168,10 @@ internal sealed class QueueWorkerRf3RenewalUnknown
         await Assert.That(result.Operations.Any(row => row.Command?.Action == DeliveryAction.Ack)).IsFalse();
         var original = await Assert.That(result.Operations.Where(row => row.Stage == QueueWorkerOperationStage.Returned
             && row.Command?.CommandId == renewal!.CommandId)).HasSingleItem();
-        await Assert.That(original.Completion!.IsFailed).IsTrue();
-        await Assert.That(original.Completion.Value).IsNull();
-        await Assert.That(original.Completion.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.UnknownWriteOutcome));
+        var completion = QueueWorkerRf3Completion.Require(original);
+        await Assert.That(completion.IsFailed).IsTrue();
+        await Assert.That(completion.Value).IsNull();
+        await Assert.That(completion.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.UnknownWriteOutcome));
         await controls!.RetireArmAsync(armId, token).ConfigureAwait(false);
         await QueueWorkerRf3RenewalUnknownContinuation.ReconcileAsync(administrator!, caller!, request!, original,
             parentAck!, committedFirst!, beforeSecond!, token).ConfigureAwait(false);

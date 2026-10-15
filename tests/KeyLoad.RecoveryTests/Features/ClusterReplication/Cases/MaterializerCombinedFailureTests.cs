@@ -6,31 +6,42 @@ namespace KeyLoad.RecoveryTests;
 
 internal sealed class MaterializerCombinedFailureTests
 {
+    private const string MissingExpectedFailure = "The actual native failure assertion returned no exception.";
     [Test]
     public async Task ActualCancellationCallbackAndJournalFilesystemWorkerFailuresBothSurviveJoinedShutdownAndOriginalRootRecovery()
     {
         using var deadline = new CancellationTokenSource(MaterializerCombinedFailureProtocol.Bound, TimeProvider.System);
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token, TestContext.Current!.Execution.CancellationToken);
         var token = linked.Token;
-        var fixture = new MaterializerCombinedFailureFixture();
         List<Exception> failures = [];
         try
         {
-            await RunAsync(fixture, token);
+            await using var fixture = new MaterializerCombinedFailureFixture();
+            try
+            {
+                await RunAsync(fixture, token);
+            }
+            catch (Exception primary) when (CqrsRuntimeFailures.FindFatal(primary) is null)
+            {
+                ReplicaMaterializerLifecycleErrors.Add(primary, failures);
+            }
+            catch (Exception primary) when (CqrsRuntimeFailures.FindFatal(primary) is not null)
+            {
+                ReplicaMaterializerLifecycleErrors.Add(primary, failures);
+            }
+            if (failures.Count != MaterializerCombinedFailureProtocol.NoFailures)
+            {
+                fixture.RetainOnFailure();
+            }
         }
-        catch (Exception primary) when (CqrsRuntimeFailures.FindFatal(primary) is null)
+        catch (Exception failure) when (CqrsRuntimeFailures.FindFatal(failure) is null)
         {
-            ReplicaMaterializerLifecycleErrors.Add(primary, failures);
+            ReplicaMaterializerLifecycleErrors.Add(failure, failures);
         }
-        catch (Exception primary) when (CqrsRuntimeFailures.FindFatal(primary) is not null)
+        catch (Exception failure) when (CqrsRuntimeFailures.FindFatal(failure) is not null)
         {
-            ReplicaMaterializerLifecycleErrors.Add(primary, failures);
+            ReplicaMaterializerLifecycleErrors.Add(failure, failures);
         }
-        if (failures.Count != MaterializerCombinedFailureProtocol.NoFailures)
-        {
-            fixture.RetainOnFailure();
-        }
-        await ReplicaMaterializerLifecycleErrors.AttemptAsync(() => fixture.DisposeAsync().AsTask(), failures);
         ReplicaMaterializerLifecycleErrors.Throw(failures);
     }
 
@@ -56,7 +67,8 @@ internal sealed class MaterializerCombinedFailureTests
         {
             fixture.Release();
         }
-        var combined = await Assert.ThrowsExactlyAsync<AggregateException>(() => original.WaitAsync(token));
+        var combined = await Assert.ThrowsExactlyAsync<AggregateException>(() => original.WaitAsync(token))
+            ?? throw new InvalidOperationException(MissingExpectedFailure);
         var failures = combined.Flatten().InnerExceptions;
         await Assert.That(failures.Count).IsEqualTo(MaterializerCombinedFailureProtocol.OriginalFailures);
         await Assert.That(failures.Any(error => ReferenceEquals(error, fixture.CancellationFailure))).IsTrue();
@@ -64,7 +76,8 @@ internal sealed class MaterializerCombinedFailureTests
         await Assert.That(worker.Code).IsEqualTo(ErrorCode.UnknownWriteOutcome);
         await Assert.That(worker.Message).IsEqualTo(MaterializerCombinedFailureProtocol.WorkerDetail);
         await Assert.That(fixture.PhysicalFailure).IsNotNull();
-        var terminal = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => waiter.WaitAsync(token));
+        var terminal = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => waiter.WaitAsync(token))
+            ?? throw new InvalidOperationException(MissingExpectedFailure);
         await Assert.That(terminal.Code).IsEqualTo(ErrorCode.RecoveryRequired);
         await Assert.ThrowsExactlyAsync<ObjectDisposedException>(() => fixture.Materializer.CreateCheckpointAsync(token));
         Assert.ThrowsExactly<ObjectDisposedException>(() => _ = lifetime.Token);

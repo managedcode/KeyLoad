@@ -6,7 +6,7 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
 internal static class ConnectionQueryContextCold
 {
-    internal static async Task<ConnectionQueryContextColdResult> RunAsync(RequestCqrsRf3Wave wave,
+    internal static async Task<ReplicaSiloDiscovery[]> RunAsync(RequestCqrsRf3Wave wave,
         RequestCqrsProbeFixture controls, ConnectionRf3OperationJoin operations, List<ConnectionRf3Caller> callers,
         RequestCqrsRf3Callers administrator, NodeEpochRf3Profile profile, ReplicaSiloDiscovery[] prior,
         ConnectionQueryContextColdEvidence evidence, long ordinal, CancellationToken token)
@@ -21,8 +21,7 @@ internal static class ConnectionQueryContextCold
         await evidence.CaptureAsync(scenario, token);
         var current = await RequestCqrsRf3DiscoveryOracle.CaptureCurrentAsync(wave.App, profile, token);
         await RequestCqrsRf3DiscoveryOracle.AssertReplacementAsync(prior, current);
-        var root = await RequestCqrsRf3Callers.ConnectAsync(wave.App, RequestCqrsRf3Protocol.Node1, profile.AdminKey, token);
-        return new(root, current);
+        return current;
     }
     private static async Task JoinAsync(RequestCqrsProbeFixture controls, ConnectionRf3OperationJoin operations,
         List<ConnectionRf3Caller> callers, RequestCqrsRf3Callers administrator,

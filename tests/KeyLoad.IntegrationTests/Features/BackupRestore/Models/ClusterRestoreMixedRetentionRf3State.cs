@@ -10,6 +10,10 @@ internal sealed class ClusterRestoreMixedRetentionRf3State(QueueLifecyclePublicS
     {
         get; set;
     }
+    internal global::KeyLoad.IntegrationTests.Features.EventStreams.UnacknowledgedArchiveState? UnackedRetention
+    {
+        get; set;
+    }
     internal QueueLifecyclePublicState OriginalQueue { get; } = queue;
     internal QueueLifecyclePublicState CurrentQueue { get; } = new(queue.Partition, queue.OperatorKey, queue.DeniedKey, queue.Route);
     internal PrincipalRecord Principal { get; } = principal;

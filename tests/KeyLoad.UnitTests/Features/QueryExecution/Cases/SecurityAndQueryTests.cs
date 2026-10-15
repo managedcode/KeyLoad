@@ -127,5 +127,7 @@ internal sealed class SecurityAndQueryTests
         var lane = new QueueLaneRef(db.Partition, "jobs");
         await Assert.That(db.Submit(OperationKind.Receive, new ReceiveRequest(id, lane), "worker", id).Error).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(db.Database.InspectMessage("root", lane, "m1")!.Metadata.State).IsEqualTo(MessageState.Ready);
+        await KeyLoad.UnitTests.Features.Authorization.EventingRequiredClaimFlow.RunAllAsync(
+            TestContext.Current!.Execution.CancellationToken);
     }
 }

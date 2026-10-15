@@ -1,3 +1,4 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.CrashHost;
 using KeyLoad.Replication;
@@ -22,6 +23,7 @@ internal sealed class MaterializerCombinedFailureFixture : IAsyncDisposable
         get; private set;
     }
     private bool originalJoined;
+    private bool storeClosureStarted;
     private bool retainOnFailure;
     private FileNotFoundException? physicalFailure;
     private Task? terminal;
@@ -139,9 +141,13 @@ internal sealed class MaterializerCombinedFailureFixture : IAsyncDisposable
             throw new InvalidOperationException(MaterializerCombinedFailureProtocol.JoinNotProven);
         }
         List<Exception> failures = [];
-        ReplicaMaterializerLifecycleErrors.Attempt(canonical.Dispose, failures);
-        ReplicaMaterializerLifecycleErrors.Attempt(Log.Dispose, failures);
-        ReplicaMaterializerLifecycleErrors.Attempt(replica.Dispose, failures);
+        if (!storeClosureStarted)
+        {
+            storeClosureStarted = true;
+            ReplicaMaterializerLifecycleErrors.Attempt(canonical.Dispose, failures);
+            ReplicaMaterializerLifecycleErrors.Attempt(Log.Dispose, failures);
+            ReplicaMaterializerLifecycleErrors.Attempt(replica.Dispose, failures);
+        }
         ReplicaMaterializerLifecycleErrors.Throw(failures);
     }
 
@@ -160,9 +166,35 @@ internal sealed class MaterializerCombinedFailureFixture : IAsyncDisposable
         {
             await ReplicaMaterializerLifecycleErrors.AttemptAsync(BeginShutdown, failures);
         }
-        ReplicaMaterializerLifecycleErrors.Attempt(canonical.Dispose, failures);
-        ReplicaMaterializerLifecycleErrors.Attempt(Log.Dispose, failures);
-        ReplicaMaterializerLifecycleErrors.Attempt(replica.Dispose, failures);
+        if (!storeClosureStarted)
+        {
+            storeClosureStarted = true;
+            try
+            {
+                canonical.Dispose();
+            }
+            catch (Exception cleanup) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
+            {
+                ReplicaMaterializerLifecycleErrors.Add(cleanup, failures);
+            }
+            catch (Exception cleanup) when (!NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
+            {
+                ReplicaMaterializerLifecycleErrors.Add(cleanup, failures);
+            }
+            ReplicaMaterializerLifecycleErrors.Attempt(Log.Dispose, failures);
+            try
+            {
+                replica.Dispose();
+            }
+            catch (Exception cleanup) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
+            {
+                ReplicaMaterializerLifecycleErrors.Add(cleanup, failures);
+            }
+            catch (Exception cleanup) when (!NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
+            {
+                ReplicaMaterializerLifecycleErrors.Add(cleanup, failures);
+            }
+        }
         if (!retainOnFailure && failures.Count == MaterializerCombinedFailureProtocol.NoFailures)
         {
             ReplicaMaterializerLifecycleErrors.Attempt(() => System.IO.Directory.Delete(Directory, true), failures);

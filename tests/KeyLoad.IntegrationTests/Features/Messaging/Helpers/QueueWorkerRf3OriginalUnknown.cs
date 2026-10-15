@@ -161,14 +161,15 @@ internal sealed class QueueWorkerRf3OriginalUnknown
         await Assert.That(result.Acknowledged).IsEqualTo(QueueWorkerRf3Protocol.NoAcknowledgements);
         var original = await Assert.That(result.Operations.Where(row => row.Stage == QueueWorkerOperationStage.Returned
             && row.Command?.CommandId == ack!.CommandId)).HasSingleItem();
-        await Assert.That(original.Completion!.IsFailed).IsTrue();
-        await Assert.That(original.Completion.Value).IsNull();
-        await Assert.That(original.Completion.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.UnknownWriteOutcome));
+        var completion = QueueWorkerRf3Completion.Require(original);
+        await Assert.That(completion.IsFailed).IsTrue();
+        await Assert.That(completion.Value).IsNull();
+        await Assert.That(completion.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.UnknownWriteOutcome));
         await Assert.That(result.Operations.Any(row => row.Stage == QueueWorkerOperationStage.Prepared
             && row.Command == ack)).IsTrue();
         await controls!.RetireArmAsync(armId, token).ConfigureAwait(false);
         var reconciled = await caller!.Sdk.ReconcileQueueWorkerOperationAsync(original, token).ConfigureAwait(false);
-        await Assert.That(reconciled.Completion!.IsSuccess).IsTrue();
+        await Assert.That(QueueWorkerRf3Completion.Require(reconciled).IsSuccess).IsTrue();
         await Assert.That(reconciled.Command).IsEqualTo(ack);
         await Assert.That(callbacks).IsEqualTo(QueueWorkerRf3Protocol.SingleDelivery);
         await MultiLaneReceiveCancellationAssertions.EqualAsync(await InspectAsync(QueueWorkerRf3Protocol.FirstLaneIndex, token).ConfigureAwait(false), committedFirst!);

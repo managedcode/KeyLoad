@@ -40,14 +40,15 @@ internal static class QueueWorkerRf3RenewalContinuation
             await QueueWorkerRf3Assertions.AckedAsync(sdk, mcp, seed, id, sequence, token);
             var ack = await Assert.That(healthy.Operations.Where(row => row.Stage == QueueWorkerOperationStage.Returned
                 && row.Command?.CommandId == contexts[id].AcknowledgementId)).HasSingleItem();
-            await QueueWorkerRf3Assertions.ReceiptAsync(ack.Completion!.Value!, contexts[id].AcknowledgementId, seed,
+            var receipt = await QueueWorkerRf3Completion.SuccessAsync(ack);
+            await QueueWorkerRf3Assertions.ReceiptAsync(receipt, contexts[id].AcknowledgementId, seed,
                 [new(nameof(DeliveryAction.Ack), seed.Lane.Queue, id, QueueWorkerRf3Protocol.AckStateVersion)]);
-            await QueueWorkerRf3Assertions.EqualAsync((await sdk.ReconcileQueueWorkerOperationAsync(ack, token)).Completion!.Value,
-                ack.Completion.Value);
+            await QueueWorkerRf3Assertions.EqualAsync(await QueueWorkerRf3Completion.SuccessAsync(await sdk.ReconcileQueueWorkerOperationAsync(ack, token)),
+                receipt);
             await QueueWorkerRf3Assertions.AckedAsync(sdk, mcp, seed, id, sequence, token);
             var official = await McpCallerAssertions.SuccessAsync<CommitReceipt>(await mcp.CallAsync(
                 McpCallerTools.MessagesComplete, ack.Command!, token));
-            await QueueWorkerRf3Assertions.EqualAsync(official.Value, ack.Completion.Value);
+            await QueueWorkerRf3Assertions.EqualAsync(official.Value, receipt);
             await QueueWorkerRf3Assertions.AckedAsync(sdk, mcp, seed, id, sequence, token);
         }
     }

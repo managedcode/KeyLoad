@@ -10,6 +10,12 @@ internal static class QueueWorkerExecution
         TimeProvider clock, CancellationToken token)
     {
         using var session = new QueueWorkerSession(configured, token);
+        return await RunSessionAsync(client, lane, firstReceive, handler, session, clock).ConfigureAwait(false);
+    }
+
+    private static async Task<QueueWorkerResult> RunSessionAsync(KeyLoadClient client, QueueLaneRef lane, Guid firstReceive,
+        Func<QueueWorkerDeliveryContext, CancellationToken, Task> handler, QueueWorkerSession session, TimeProvider clock)
+    {
         var renewal = QueueWorkerRenewal.RunAsync(client, session, clock);
         var fallback = QueueWorkerStopReason.Cancelled;
         try

@@ -35,7 +35,7 @@ internal static class DocumentLiveProfileRf3Calls
     internal static async Task CancelledAsync(RequestCqrsRf3Callers reader, DocumentLiveProfileRf3State state, CancellationToken token)
     {
         using var cancelled = CancellationTokenSource.CreateLinkedTokenSource(token);
-        cancelled.Cancel();
+        await cancelled.CancelAsync();
         const string detail = "The read response is unavailable.";
         var start = new StartLiveQueryRequest(state.Query);
         var read = new ReadLiveQueryRequest(state.Query, state.OriginalCursor);

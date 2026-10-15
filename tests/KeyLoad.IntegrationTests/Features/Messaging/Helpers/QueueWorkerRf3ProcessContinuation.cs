@@ -34,15 +34,16 @@ internal static class QueueWorkerRf3ProcessContinuation
         foreach (var ack in fresh.Operations.Where(row => row.Stage == QueueWorkerOperationStage.Returned
             && row.Command?.Action == DeliveryAction.Ack))
         {
-            var mutation = await Assert.That(ack.Completion!.Value!.Mutations).HasSingleItem();
+            var receipt = await QueueWorkerRf3Completion.SuccessAsync(ack);
+            var mutation = await Assert.That(receipt.Mutations).HasSingleItem();
             await Assert.That(mutation.Id).IsNotEqualTo(QueueWorkerRf3Protocol.First);
-            await QueueWorkerRf3Assertions.ReceiptAsync(ack.Completion.Value, ack.Command!.CommandId, seed,
+            await QueueWorkerRf3Assertions.ReceiptAsync(receipt, ack.Command!.CommandId, seed,
                 [new(nameof(DeliveryAction.Ack), seed.Lane.Queue, mutation.Id, QueueWorkerRf3Protocol.AckStateVersion)]);
-            await QueueWorkerRf3Assertions.EqualAsync((await sdk.ReconcileQueueWorkerOperationAsync(ack, token)).Completion!.Value,
-                ack.Completion.Value);
+            await QueueWorkerRf3Assertions.EqualAsync(await QueueWorkerRf3Completion.SuccessAsync(await sdk.ReconcileQueueWorkerOperationAsync(ack, token)),
+                receipt);
             await ImagesAsync(sdk, mcp, seed, token);
             await QueueWorkerRf3Assertions.EqualAsync((await McpCallerAssertions.SuccessAsync<CommitReceipt>(await mcp.CallAsync(
-                McpCallerTools.MessagesComplete, ack.Command, token))).Value, ack.Completion.Value);
+                McpCallerTools.MessagesComplete, ack.Command, token))).Value, receipt);
             await ImagesAsync(sdk, mcp, seed, token);
         }
     }

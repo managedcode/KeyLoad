@@ -1,4 +1,96 @@
 {
+  "STAGE81-CURRENT-COMPILER-AND-RUNTIME-001": {
+    "status": "in_progress",
+    "acceptedOriginalTasks": 20,
+    "originalTasks": 104,
+    "additionalPerformanceTask": "KL-105 open",
+    "cohort": "main coherent implementation/compiler batch after 4d6b1277e4c4239b41211a937331c7e6b961beaa; ready unintegrated SourceN packets excluded",
+    "verification": {
+      "r80FullSolutionRelease": {
+        "nativeExitCode": 0,
+        "errors": 0,
+        "warnings": 0,
+        "elapsedSeconds": 256.603,
+        "sourceDriftCount": 0,
+        "stdoutSha256": "e091b1d53791e00bab14011eff057facd300ee6daabf7e6e696796fb5717d616",
+        "compiledImageChanges": "16 Clustering DLL/PDB output copies; R79 runtime used the previous Clustering image and does not qualify R80 images"
+      },
+      "r81CanonicalFormatterVerify": {
+        "nativeExitCode": 0,
+        "elapsedSeconds": 168.621,
+        "sourceDriftCount": 0,
+        "compiledImageDriftCount": 0,
+        "command": "dotnet format KeyLoad.slnx --no-restore --verify-no-changes --verbosity minimal"
+      },
+      "r78NativeRelatedCensus": {
+        "unit": 128,
+        "recovery": 23,
+        "uniqueCaseUids": true,
+        "scope": "36 complete Unit classes and5 complete Recovery classes; related selection, not full suite"
+      },
+      "r79SelectedRuntime": {
+        "unit": {
+          "passed": 124,
+          "failed": 4,
+          "skipped": 0,
+          "measuredNativeConcurrentPeak": 50
+        },
+        "recovery": {
+          "passed": 15,
+          "failed": 8,
+          "skipped": 0,
+          "measuredNativeConcurrentPeak": 23
+        },
+        "originalLedgerSha256": "f1c01e9c8dfaa305df41866b38bb7067b7a68b550b39a062bf30163659ca113d",
+        "sourceDriftCount": 0,
+        "imageBoundary": "Unit protected outputs unchanged; independent Integration build changed36 excluded output images. Recovery original strict cohort remains failed:28 Unit/bin instrumentation copies changed; supplemental native deps audit proves no Recovery/product/CrashHost image drift but does not retroactively qualify the strict cohort."
+      },
+      "r79SelectedFunctionalCoverage": {
+        "coveredLines": 12470,
+        "totalLines": 108282,
+        "coveredBranches": 6474,
+        "totalBranches": 68625,
+        "linePercent": 11.516226,
+        "branchPercent": 9.43388,
+        "selection": "128 selected Unit operations including4 failures; load and benchmarks excluded; not full product coverage"
+      },
+      "r79FailuresRetained": [
+        "3 authorization canonical message fixture oracles; original full JSON remains required",
+        "1 old-cut restore caller/physical catalog and native receipt-domain oracle",
+        "7 local-inbox recovery original native bytes versus independently encoded graph oracle",
+        "1 native follower fixture missing canonical database authority"
+      ],
+      "earlierFailuresRetained": "Five earlier movement/typed-INSERT cases and original RecoveryHostLifetime failure remain open and were not rerun unchanged",
+      "linuxCi": "At last inspection, pushed main Build and Tests38665156397 queued and Benchmarks38665156366 pending; no delivered-source Linux success or runner-cause claim"
+    },
+    "open": [
+      "adopt reviewed runtime repairs, then compile and run their affected complete operations",
+      "actual Aspire RF3 SDK/official MCP, full functional coverage and complete native suites",
+      "exact delivered-source Linux CI, all feature acceptance, endurance/fault and matched performance gates"
+    ],
+    "sourceDoesNotCountAsAcceptance": true,
+    "productionQualified": false
+  },
+  "STAGE75-COMPLETE-SOLUTION-COMPILER-001": {
+    "status": "in_progress",
+    "acceptedOriginalTasks": 20,
+    "originalTasks": 104,
+    "additionalPerformanceTask": "KL-105 remains open",
+    "cohort": "main current coherent implementation/semantic batch after 4d6b1277e4c4239b41211a937331c7e6b961beaa; no other ready SourceN packets mixed into this verification",
+    "verification": {
+      "r74CanonicalFormatter": "native exit0; all26 complete changes independently reviewed, every non-import native Roslyn token identical; three unfixable analyzer IDs carried into real compiler",
+      "r75FullSolutionRelease": "native exit1 after339.700s, process joined, zero source drift; all product projects built, Unit/Recovery/Integration test projects blocked by8 unique actual diagnostics (2CS8752,1CA1849,2CA1307,3CA2000), original stdout SHA256 5bf5ed2893aa9ec5ff9c743b0013d1102a3e1ca270f69a03a1938271016132cd",
+      "sourceRepair": "all8 affected existing files repaired with native APIs and existing owner responsibilities, exact pre/post guards; unused intermediate cold caller handoff record removed; no suppression or weakened test/timeout. Compiler/runtime verification still pending"
+    },
+    "open": [
+      "fresh full solution Release compiler/analyzers",
+      "canonical formatter verify-no-changes",
+      "fresh TUnit native full census and related operation classes at50 default slots",
+      "real process recovery and Aspire RF3 SDK/officialMCP",
+      "delivered-source Linux CI and all feature acceptance/performance/endurance/fault gates"
+    ],
+    "sourceDoesNotCountAsAcceptance": true
+  },
   "STAGE69-WHOLE-TASK-BATCH-001": {
     "title": "Whole-task parallel implementation batch after observed TUnit50 run",
     "status": "in_progress",
@@ -66614,5 +66706,72 @@
       }
     },
     "verificationStage": "Linuxc8_complete388_analyzers_and_source_bound_54file_native_80_70_90_coverage_pass_full_build_formatter_pass_RF3_native_PDB_mapping_prerequisite_repair_in_progress_remaining_complete_runtime_product_coverage_gates_open"
+  },
+  "STAGE72-COMPLETE-SEMANTIC-JOIN-001": {
+    "title": "Complete owned compiler repair and eventing operation batches",
+    "status": "in_progress",
+    "updatedAt": "2026-10-15T01:52:02.000614+00:00",
+    "originalAcceptedTasks": 20,
+    "originalTasks": 104,
+    "fullTaskPromotion": false,
+    "fullSolutionBuildAt4d6b": {
+      "exitCode": 1,
+      "elapsedSeconds": 70.85471595916897,
+      "uniqueReportedErrors": 2,
+      "scope": "Client CA2025 joined lifetime and KLD0037 polling bound; downstream test projects not yet qualified",
+      "stdoutSha256": "21daf948279a0cc028507f7c6084cf73fd9fc3ab964d339ade5700620764a7d7"
+    },
+    "allProjectSemanticReview": {
+      "readyProjects": 27,
+      "errors": 164,
+      "warnings": 0,
+      "canonicalFormatterFindings": 60,
+      "nonFormattingFindings": 104,
+      "source": "4d6b1277 plus first49 integrated paths; later coherent repairs not yet requalified",
+      "evidence": "TestResults/stage61-native-join/root-r72-complete164-native-semantic-error-ledger.original.json"
+    },
+    "integratedWholeOperationScopes": [
+      "KL-094 retained transfer capacity consistency and full native fault/repair/replay/cold flows",
+      "KL-098 retained unacknowledged eventing state across actual public archive restore",
+      "KL-102 old-cut subscription restore and competing inbox atomic triads with complete native value/raw byte oracles",
+      "KL-103 before-claim sensitive worker controls through native/SDK/official MCP and cold owners",
+      "Combined existing-API/import/numeric-policy/disposal/Result-value compiler repair across all three test assemblies and CrashHost"
+    ],
+    "sourceReceipts": [
+      "root-r72-three-whole-task46-actual-adoption.original.json",
+      "root-r72-four-whole-packets31-actual-adoption.original.json",
+      "root-r72-seven-source-native-compiler-repair-actual.original.json",
+      "root-r72-complete36-compiler-actual-adoption.original.json"
+    ],
+    "runtimeQualified": false,
+    "canonicalFormat": {
+      "firstAttempt": "nativepipePermissionDeniedBeforeEdits",
+      "nativeExit": 1,
+      "elapsedSeconds": 60.80265754181892,
+      "sourceDrift": 0,
+      "imageDrift": 0,
+      "stderrSha256": "b779e1d794f38de35a97a1e6a712061266111b033fdd1b8e0f02f7557a50de3b",
+      "retry": "Pending correctnativepipe permissions; no formatterpassclaimed"
+    },
+    "releaseBuild": "Pending current combined batch",
+    "lastFreshSelectedRuntime": "8bc5fea5:Unit79/97,Recovery7/15,observedUnit50; all later source remains unqualified",
+    "openOriginalFailures": [
+      "Original typed-INSERT published-owner boundaries",
+      "Original movement and RecoveryHostLifetime gates",
+      "Recorded follower native Poison original cause, capture only until actual changed-source execution"
+    ],
+    "linuxGitHub": {
+      "sourceCommit": "4d6b1277e4c4239b41211a937331c7e6b961beaa",
+      "buildRunId": 38665156397,
+      "status": "queued",
+      "jobs": 19,
+      "assignedRunners": 0,
+      "benchmarksRunId": 38665156366,
+      "benchmarksStatus": "pending",
+      "observedAt": "2026-10-15T01:52:02.000614+00:00",
+      "reason": "Queue cause not established; no successful result inferred"
+    },
+    "parallelOwnership": "12 distinct primaries assigned across3 authorized chats; completed source packets retain original acceptance/failure owner while freed executor immediately takes the next distinct task",
+    "qualification": "No original task promotion, full coverage, RF3, Linux, endurance, power-loss, release or performance claim from source/formatter/compiler alone."
   }
 }

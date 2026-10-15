@@ -1,3 +1,4 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using static KeyLoad.RecoveryTests.Features.Messaging.RecordedQueueFollowerProtocol;
 
@@ -12,8 +13,33 @@ internal static class RecordedQueueFollowerFlow
         var token = linked.Token;
         var clocks = PeerDiscoveryNativeCluster.Voters.ToDictionary(voter => voter, _ => new RecordedQueueFollowerClockFault());
         using var profile = new PeerDiscoveryNativeClockProfile(clocks.ToDictionary(pair => pair.Key, pair => (TimeProvider)pair.Value));
-        var cluster = new PeerDiscoveryNativeCluster(profile);
-        await RecordedQueueFollowerFailureLifetime.RunAsync(cluster, () => RunOwnedAsync(cluster, clocks, token));
+        List<Exception> failures = [];
+        try
+        {
+            await using var cluster = new PeerDiscoveryNativeCluster(profile);
+            try
+            {
+                await RunOwnedAsync(cluster, clocks, token);
+            }
+            catch (Exception primary) when (NativeCqrsBoundaryErrors.IsNonFatal(primary))
+            {
+                ReplicaMaterializerLifecycleErrors.Add(primary, failures);
+            }
+            catch (Exception primary) when (!NativeCqrsBoundaryErrors.IsNonFatal(primary))
+            {
+                ReplicaMaterializerLifecycleErrors.Add(primary, failures);
+            }
+            ReplicaMaterializerLifecycleErrors.Attempt(() => RecordedQueueFollowerFailureLifetime.Capture(cluster, failures), failures);
+        }
+        catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            ReplicaMaterializerLifecycleErrors.Add(failure, failures);
+        }
+        catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            ReplicaMaterializerLifecycleErrors.Add(failure, failures);
+        }
+        ReplicaMaterializerLifecycleErrors.Throw(failures);
     }
 
     private static async Task RunOwnedAsync(PeerDiscoveryNativeCluster cluster,

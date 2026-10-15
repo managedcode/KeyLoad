@@ -1,0 +1,86 @@
+using KeyLoad.Core;
+using KeyLoad.Storage.ZoneTree;
+using KeyLoad.UnitTests.Features.ResourceExecution;
+using KeyLoad.UnitTests.Features.StorageRecovery.Assertions;
+
+namespace KeyLoad.UnitTests.Features.Messaging;
+
+internal static class CompetingInboxAssertions
+{
+    internal static async Task ResultsAsync(DatabaseEngine database, ZoneTreeStore store, CompetingInboxState state)
+    {
+        await SubscriptionOldCutAssertions.ReceiptAsync(state.Receipt, state.Competitors[state.Winner].Id,
+            store, state.Partition, state.EffectPosition,
+            new("putDocument", CompetingInboxState.Documents, "effect", 1),
+            new("appendEvents", CompetingInboxState.Streams, "effect", 1),
+            new("enqueue", CompetingInboxState.Output, "effect", 1), new("Ack", CompetingInboxState.Queue, "input", 3));
+        for (var index = 0; index < state.Results.Length; index++)
+        {
+            var actual = state.Results[index];
+            if (state.Equivalent || index == state.Winner)
+            {
+                await SubscriptionOldCutAssertions.SameAsync(actual.Get<CommitReceipt>(), state.Receipt);
+                foreach (var mutation in actual.Get<CommitReceipt>().Mutations)
+                {
+                    await Assert.That(mutation.CompositionReferences).IsEmpty();
+                }
+            }
+            else
+            {
+                await Assert.That(actual.Error).IsEqualTo(ErrorCode.Conflict);
+                await Assert.That(actual.SafeDetail).IsEqualTo("The inbox input was already completed with different effects.");
+                await Assert.That(actual.Json).IsNull();
+                await Assert.That(actual.NativeValue).IsNull();
+            }
+        }
+        await ModelAsync(database, state);
+    }
+    internal static async Task ModelAsync(DatabaseEngine database, CompetingInboxState state)
+    {
+        var json = state.Json(state.Winner);
+        await SubscriptionOldCutAssertions.SameAsync(database.GetDocument("root", new(state.Partition,
+            CompetingInboxState.Documents, "effect")), new DocumentResult(
+                new(state.Partition, CompetingInboxState.Documents, "effect"), 1, json, false, []));
+        var stream = database.ReadStream("root", new ReadStreamRequest(new(state.Partition, CompetingInboxState.Streams, "effect")));
+        await Assert.That(stream.Stream).IsEqualTo(new StreamRef(state.Partition, CompetingInboxState.Streams, "effect"));
+        await Assert.That(stream.Head).IsEqualTo(new StreamHead(1, 1, 1));
+        await Assert.That(stream.HasMore).IsFalse();
+        await Assert.That(stream.Cursor).IsNull();
+        await Assert.That(stream.CutPosition > 0).IsTrue();
+        await Assert.That(stream.SnapshotCutPosition).IsEqualTo(stream.CutPosition);
+        var record = await Assert.That(stream.Events).HasSingleItem();
+        await Assert.That(record).IsEqualTo(new EventRecord(new(state.Partition, CompetingInboxState.Streams, "effect"), 1, 1, new("effect", "Completed", json), state.Time));
+        await SubscriptionOldCutAssertions.SameAsync(database.InspectMessage("root", state.Lane, "input"),
+            new MessageInspection(new("input", MessageState.Acked, 1, 3, 1, null, null, LeaseVersion: 1), null, null));
+        await SubscriptionOldCutAssertions.SameAsync(database.InspectMessage("root", new(state.Partition, CompetingInboxState.Output), "effect"),
+            new MessageInspection(new("effect", MessageState.Ready, 0, 1, 1, null, null), json, "{}"));
+        await CompetingInboxOutbox.RequireAsync(database, state);
+    }
+    internal static async Task ReplayAsync(DatabaseEngine database, ZoneTreeStore store, CompetingInboxState state)
+    {
+        var bytes = QueueWholeFlowStorage.Bytes(store);
+        var position = store.Position;
+        var identity = NativeReadCutStoreStateAssertions.SnapshotIdentity(store);
+        for (var index = 0; index < state.Competitors.Length; index++)
+        {
+            var operation = state.Competitors[index];
+            var original = state.Results[index];
+            var raw = store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(state.Partition, "root", operation.Id)))!;
+            var replay = database.Apply(operation);
+            if (original.Error is null)
+            {
+                await NativeReplayResultAssertions.Same<CommitReceipt>(replay, original);
+            }
+            else
+            {
+                await SubscriptionOldCutAssertions.SameAsync(replay, original);
+                await Assert.That(replay.NativeValue).IsNull();
+                await Assert.That(original.NativeValue).IsNull();
+            }
+            await Assert.That(store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(state.Partition,
+                "root", operation.Id)))!.AsSpan().SequenceEqual(raw)).IsTrue();
+            await SubscriptionOldCutAssertions.ConservedAsync(store, bytes, position, identity);
+        }
+        await ModelAsync(database, state);
+    }
+}

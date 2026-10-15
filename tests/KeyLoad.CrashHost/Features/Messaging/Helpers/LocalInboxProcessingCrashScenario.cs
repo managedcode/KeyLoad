@@ -6,6 +6,9 @@ namespace KeyLoad.CrashHost.Features.Messaging;
 
 internal static class LocalInboxProcessingCrashScenario
 {
+    private const long MissingDocumentRevision = 0L;
+    private const string ProcessedEventType = "Processed";
+
     internal static async Task RunAsync(string directory, ZoneTreeStore store, CanonicalCrashBoundary boundary)
     {
         var database = CrashDatabase.Create(store);
@@ -20,9 +23,9 @@ internal static class LocalInboxProcessingCrashScenario
             LocalInboxProcessingCrashContract.InputLane, delivery.Token, LocalInboxProcessingCrashContract.Handler,
             LocalInboxProcessingCrashContract.Generation,
             [new PutDocument(LocalInboxProcessingCrashContract.Documents, LocalInboxProcessingCrashContract.Effect,
-                LocalInboxProcessingCrashContract.Payload, 0L),
+                LocalInboxProcessingCrashContract.Payload, MissingDocumentRevision),
              new AppendEvents(LocalInboxProcessingCrashContract.Events, LocalInboxProcessingCrashContract.Effect,
-                [new(LocalInboxProcessingCrashContract.Effect, "Processed", LocalInboxProcessingCrashContract.Payload)], ExpectedStreamRevision.NoStream),
+                [new(LocalInboxProcessingCrashContract.Effect, ProcessedEventType, LocalInboxProcessingCrashContract.Payload)], ExpectedStreamRevision.NoStream),
              new EnqueueMessage(LocalInboxProcessingCrashContract.Output, LocalInboxProcessingCrashContract.Message,
                 LocalInboxProcessingCrashContract.Payload)]);
         var operation = CrashDatabase.Operation(OperationKind.Processing, request, request.CommandId);

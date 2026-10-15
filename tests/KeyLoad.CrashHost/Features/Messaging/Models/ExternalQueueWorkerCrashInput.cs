@@ -5,5 +5,7 @@ internal sealed record ExternalQueueWorkerCrashInput([property: Orleans.Id(0)] s
     [property: Orleans.Id(1)] string Credential, [property: Orleans.Id(2)] QueueLaneRef Lane,
     [property: Orleans.Id(3)] Guid ReceiveId, [property: Orleans.Id(4)] string PrincipalId)
 {
-    public override string ToString() => "ExternalQueueWorkerCrashInput(<private>)";
+    private const string RedactedDisplay = "ExternalQueueWorkerCrashInput(<private>)";
+
+    public override string ToString() => RedactedDisplay;
 }

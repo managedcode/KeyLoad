@@ -28,12 +28,13 @@ internal static class QueueWorkerRf3RenewalBudgetContinuation
     {
         await QueueWorkerRf3Assertions.EqualAsync(await QueueWorkerRf3Assertions.ImageAsync(sdk, mcp, seed.Lane,
             QueueWorkerRf3Protocol.First, token), leased);
-        await QueueWorkerRf3Assertions.EqualAsync((await sdk.ReconcileQueueWorkerOperationAsync(original, token)).Completion!.Value,
-            original.Completion!.Value);
+        var receipt = await QueueWorkerRf3Completion.SuccessAsync(original);
+        await QueueWorkerRf3Assertions.EqualAsync(await QueueWorkerRf3Completion.SuccessAsync(
+            await sdk.ReconcileQueueWorkerOperationAsync(original, token)), receipt);
         await QueueWorkerRf3Assertions.EqualAsync(await QueueWorkerRf3Assertions.ImageAsync(sdk, mcp, seed.Lane,
             QueueWorkerRf3Protocol.First, token), leased);
         await QueueWorkerRf3Assertions.EqualAsync((await McpCallerAssertions.SuccessAsync<CommitReceipt>(await mcp.CallAsync(
-            McpCallerTools.MessagesComplete, original.Command!, token))).Value, original.Completion.Value);
+            McpCallerTools.MessagesComplete, original.Command!, token))).Value, receipt);
         await QueueWorkerRf3Assertions.EqualAsync(await QueueWorkerRf3Assertions.ImageAsync(sdk, mcp, seed.Lane,
             QueueWorkerRf3Protocol.First, token), leased);
     }

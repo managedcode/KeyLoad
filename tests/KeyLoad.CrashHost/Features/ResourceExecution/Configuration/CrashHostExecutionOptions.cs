@@ -9,6 +9,7 @@ internal sealed record CrashHostExecutionOptions
     internal const string SectionName = "KeyLoad:CrashHostExecution";
     internal const string ValidationMessage = "Crash-helper execution policy is outside its supported bounds.";
     private const int PositiveMinimum = 1;
+    private const int ExternalWorkerRenewalSeconds = 299;
     private const int FifoTimeoutSeconds = 5;
     private const int InspectionExecutionSeconds = 30;
     private const int InspectionCleanupSeconds = 15;
@@ -21,6 +22,7 @@ internal sealed record CrashHostExecutionOptions
     private const int SupportedProfileReadCharacters = 256;
     private const int SupportedInspectionInputBytes = 1024;
 
+    public TimeSpan ExternalWorkerRenewalInterval { get; init; } = TimeSpan.FromSeconds(ExternalWorkerRenewalSeconds);
     public TimeSpan FifoExecutionTimeout { get; init; } = TimeSpan.FromSeconds(FifoTimeoutSeconds);
     public TimeSpan FifoCleanupTimeout { get; init; } = TimeSpan.FromSeconds(FifoTimeoutSeconds);
     public TimeSpan InspectionExecutionTimeout { get; init; } = TimeSpan.FromSeconds(InspectionExecutionSeconds);
@@ -35,7 +37,8 @@ internal sealed record CrashHostExecutionOptions
     public int AuthorityReadBufferBytes { get; init; } = SupportedAuthorityReadBytes;
 
     internal bool IsValid()
-        => Positive(FifoExecutionTimeout, FifoTimeoutSeconds) && Positive(FifoCleanupTimeout, FifoTimeoutSeconds)
+        => Positive(ExternalWorkerRenewalInterval, ExternalWorkerRenewalSeconds)
+            && Positive(FifoExecutionTimeout, FifoTimeoutSeconds) && Positive(FifoCleanupTimeout, FifoTimeoutSeconds)
             && Positive(InspectionExecutionTimeout, InspectionExecutionSeconds)
             && Positive(InspectionCleanupTimeout, InspectionCleanupSeconds) && Positive(EpochApplyTimeout, EpochApplySeconds)
             && FifoMaximumOutputCharacters is >= PositiveMinimum and <= SupportedOutputCharacters

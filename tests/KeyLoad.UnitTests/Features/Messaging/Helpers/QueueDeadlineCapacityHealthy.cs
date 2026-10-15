@@ -22,7 +22,7 @@ internal static class QueueDeadlineCapacityHealthy
         }
         await QueueDeadlineCapacityImage.RequireAsync(database, state.Lane, [(state.Input, original)], sequence,
             QueueDeadlineCapacityOperations.ParkedSequence(state, original));
-        var input = new EnqueueMessage(Queue, HealthyMessage, Json, Json);
+        var input = new EnqueueMessage(Queue, HealthyMessage, QueueDeadlineCapacityProtocol.Json, QueueDeadlineCapacityProtocol.Json);
         var request = new CommandRequest(Guid.NewGuid(), state.Lane.Partition, [input]);
         var operation = QueueDeadlinePoisonPrefixClaims.Operation(database, OperationKind.Batch, request.CommandId,
             request, Root, time);

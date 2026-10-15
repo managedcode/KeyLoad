@@ -56,7 +56,7 @@ internal static class DocumentLiveProfileReads
         => ObserveAsync(store, async () =>
         {
             using var cancellation = new CancellationTokenSource();
-            cancellation.Cancel();
+            await cancellation.CancelAsync();
             object? result = null;
             var start = Assert.ThrowsExactly<OperationCanceledException>(() => result = queries.StartLiveQuery(
                 DocumentLiveProfileFixture.Reader, new(fixture.Query), cancellationToken: cancellation.Token));

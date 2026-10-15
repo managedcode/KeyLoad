@@ -127,11 +127,14 @@ internal sealed class ConnectionRf3Scenario : IAsyncDisposable
 
     internal async Task RestartQueryContextsColdAsync(long ordinal, CancellationToken cancellationToken)
     {
-        var current = await ConnectionQueryContextCold.RunAsync(wave ?? throw Missing(), controls ?? throw Missing(),
-            operations, callers, administrator ?? throw Missing(), queryColdProfile ?? throw Missing(),
+        var currentWave = wave ?? throw Missing();
+        var profile = queryColdProfile ?? throw Missing();
+        var current = await ConnectionQueryContextCold.RunAsync(currentWave, controls ?? throw Missing(),
+            operations, callers, administrator ?? throw Missing(), profile,
             Discovery, queryColdEvidence, ordinal, cancellationToken).ConfigureAwait(false);
-        administrator = current.Administrator;
-        Discovery = current.Discovery;
+        administrator = await RequestCqrsRf3Callers.ConnectAsync(currentWave.App,
+            RequestCqrsRf3Protocol.Node1, profile.AdminKey, cancellationToken).ConfigureAwait(false);
+        Discovery = current;
     }
 
     internal Task RequireQueryColdReceiptsAsync(CancellationToken token) => queryColdEvidence.RequireAsync(token);

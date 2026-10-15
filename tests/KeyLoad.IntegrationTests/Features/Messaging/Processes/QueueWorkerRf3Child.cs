@@ -102,7 +102,7 @@ internal sealed class QueueWorkerRf3Child : IAsyncDisposable
                 throw new InvalidOperationException(ExternalQueueWorkerCrashProtocol.InvalidInput);
             }
             var text = frame.ToString();
-            var end = text.IndexOf(NewLine);
+            var end = text.IndexOf(NewLine, StringComparison.Ordinal);
             if (!published && end >= ExternalQueueWorkerCrashProtocol.BufferStart)
             {
                 var line = text[..end].TrimEnd();

@@ -31,7 +31,7 @@ internal static class WholeAtomicMoveInputBoundary
         }
     }
 
-    private static IReadOnlyDictionary<string, object?> Arguments(PartitionMoveRequest original, bool nested)
+    private static Dictionary<string, object?> Arguments(PartitionMoveRequest original, bool nested)
     {
         var request = Properties(JsonSerializer.SerializeToElement(original, JsonDefaults.Options));
         var partition = (JsonElement)request[PartitionField]!;

@@ -1,5 +1,4 @@
 using KeyLoad.Client;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.CrashHost.Features.Messaging;
 
@@ -15,17 +14,11 @@ internal static class ExternalQueueWorkerCrashScenario
         var frame = await ReadFrameAsync().ConfigureAwait(false);
         var input = NativeSerialization.Deserialize<ExternalQueueWorkerCrashInput>(Convert.FromBase64String(frame));
         using var http = new HttpClient { BaseAddress = new Uri(input.Endpoint), Timeout = Timeout.InfiniteTimeSpan };
-        var sdk = new KeyLoadClient(http, input.Credential, Options.Create(new KeyLoadClientExecutionOptions()));
-        var policy = new QueueWorkerOptions
-        {
-            MaximumConcurrentHandlers = ExternalQueueWorkerCrashProtocol.HandlerLimit,
-            MaximumDeliveries = ExternalQueueWorkerCrashProtocol.DeliveryLimit,
-            LeaseSeconds = ExternalQueueWorkerCrashProtocol.LeaseSeconds,
-            RenewalInterval = TimeSpan.FromSeconds(ExternalQueueWorkerCrashProtocol.RenewalSeconds)
-        };
+        var sdk = new KeyLoadClient(http, input.Credential, CrashExecutionOptions.ClientExecution());
+        var policy = CrashExecutionOptions.ExternalQueueWorker();
         _ = await sdk.RunQueueAckWorkerAsync(input.Lane, input.ReceiveId,
             (context, token) => PublishThenHoldAsync(sdk, input, context, token),
-            Options.Create(policy), TimeProvider.System).ConfigureAwait(false);
+            policy, TimeProvider.System).ConfigureAwait(false);
         return true;
     }
 

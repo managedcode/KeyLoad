@@ -88,7 +88,7 @@ internal static class HeavyRouteRf3Held
     {
         using var control = new HttpRequestMessage(HttpMethod.Post, "/v1/admin/dispatch?paused=false");
         control.Headers.Authorization = new AuthenticationHeaderValue("Bearer", key);
-        control.Headers.Add("X-KeyLoad-Command-Id", Guid.NewGuid().ToString());
+        control.Headers.Add(ServerProtocol.CommandHeader, Guid.NewGuid().ToString());
         using var response = await http.SendAsync(control, token);
         response.EnsureSuccessStatusCode();
         await Assert.That(await response.Content.ReadFromJsonAsync<bool>(JsonDefaults.Options, token)).IsTrue();

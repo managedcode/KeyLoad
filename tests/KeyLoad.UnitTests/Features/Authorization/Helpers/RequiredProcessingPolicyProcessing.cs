@@ -39,7 +39,7 @@ internal static class RequiredProcessingPolicyProcessing
         => RequiredProcessingPolicyAssertions.ObserveAsync(fixture.Harness.Store, async () =>
         {
             using var cancellation = new CancellationTokenSource();
-            cancellation.Cancel();
+            await cancellation.CancelAsync();
             OperationResult? result = null;
             var failure = Assert.ThrowsExactly<OperationCanceledException>(() => result = fixture.Apply(OperationKind.Processing,
                 request, request.CommandId, token: cancellation.Token));

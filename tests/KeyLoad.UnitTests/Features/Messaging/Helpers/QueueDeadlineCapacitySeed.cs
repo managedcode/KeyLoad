@@ -21,7 +21,7 @@ internal static class QueueDeadlineCapacitySeed
         var lane = new QueueLaneRef(fixture.Partition, Queue);
         var start = QueueWholeFlowStorage.Clock(fixture.Store);
         var due = start.AddSeconds(LeaseSeconds);
-        var input = new EnqueueMessage(Queue, Message, Json, Json,
+        var input = new EnqueueMessage(Queue, Message, QueueDeadlineCapacityProtocol.Json, QueueDeadlineCapacityProtocol.Json,
             NotBefore: kind == QueueDeadlineKind.PromoteScheduled ? due : null,
             ExpiresAt: kind == QueueDeadlineKind.ExpireMessage || fault == QueueDeadlineCapacityFault.ExpiryBeforeDeadLetterMaxPark ? due : null);
         var command = new CommandRequest(Guid.NewGuid(), lane.Partition, [input]);
@@ -54,7 +54,7 @@ internal static class QueueDeadlineCapacitySeed
                 LeaseUntil = due
             };
         }
-        var body = new MessageBody(Message, Json, new string(Json.AsSpan()), null, JsonData.Fingerprint(input));
+        var body = new MessageBody(Message, QueueDeadlineCapacityProtocol.Json, new string(QueueDeadlineCapacityProtocol.Json.AsSpan()), null, JsonData.Fingerprint(input));
         var bytes = NativeSerialization.Serialize(body).LongLength;
         var counters = new QueueCounters(SingleMessageCount, bytes, kind == QueueDeadlineKind.ExpireLease ? SingleMessageCount : NoUsage,
             kind == QueueDeadlineKind.ExpireLease ? bytes : NoUsage, metadata.ReadySequence);

@@ -1,4 +1,6 @@
+using KeyLoad.Client;
 using KeyLoad.Core;
+using KeyLoad.CrashHost.Features.Messaging;
 using KeyLoad.Query;
 using KeyLoad.Replication;
 using KeyLoad.Server;
@@ -14,6 +16,27 @@ namespace KeyLoad.CrashHost;
 [ConfigurationBinding]
 internal static class CrashExecutionOptions
 {
+    internal static IOptions<KeyLoadClientExecutionOptions> ClientExecution()
+    {
+        var settings = new KeyLoadClientExecutionOptions();
+        settings.Validate();
+        return Compose(settings, static value => value.Validate());
+    }
+
+    internal static IOptions<QueueWorkerOptions> ExternalQueueWorker()
+    {
+        var configured = Child().Value;
+        var settings = new QueueWorkerOptions
+        {
+            MaximumConcurrentHandlers = ExternalQueueWorkerCrashProtocol.HandlerLimit,
+            MaximumDeliveries = ExternalQueueWorkerCrashProtocol.DeliveryLimit,
+            LeaseSeconds = ExternalQueueWorkerCrashProtocol.LeaseSeconds,
+            RenewalInterval = configured.ExternalWorkerRenewalInterval
+        };
+        settings.Validate();
+        return Compose(settings, static value => value.Validate());
+    }
+
     internal static IOptions<NativeTextExecutionOptions> NativeText()
     {
         var settings = new NativeTextExecutionOptions();

@@ -7,6 +7,8 @@ internal static class RemoteTransferStorage
 {
     private const int InitialSequence = 0;
     private const int NoRetainedBytes = 0;
+    private const int NoRetainedRecords = 0;
+    private const int CapacityWitnessRecords = 1;
     private const int AdjacentElementOffset = 1;
     private const string RetainedQueueTransferCapacityIsExhaustedDetail = "The retained queue transfer capacity is exhausted.";
 
@@ -31,16 +33,20 @@ internal static class RemoteTransferStorage
         => KeySpace.Partition(RemoteTransferProtocol.TargetCapacitySpace, destination.Partition, destination.Queue);
 
     internal static RemoteTransferCapacity SourceCapacity(IKeyValueView view, QueueLaneRef source)
-        => view.GetRecord<RemoteTransferCapacity>(SourceCapacityKey(source)) ?? new(InitialSequence, InitialSequence);
+        => ReadCapacity(view, SourceCapacityKey(source),
+            KeySpace.Partition(RemoteTransferProtocol.IntentSpace, source.Partition, source.Queue), required: false);
 
     internal static RemoteTransferCapacity TargetCapacity(IKeyValueView view, QueueLaneRef destination)
-        => view.GetRecord<RemoteTransferCapacity>(TargetCapacityKey(destination)) ?? new(InitialSequence, InitialSequence);
+        => ReadCapacity(view, TargetCapacityKey(destination),
+            KeySpace.Partition(RemoteTransferProtocol.TargetReceiptSpace, destination.Partition, destination.Queue), required: false);
 
     internal static RemoteTransferCapacity RequireSourceCounter(IKeyValueView view, QueueLaneRef source)
-        => RequireCounter(view.GetRecord<RemoteTransferCapacity>(SourceCapacityKey(source)));
+        => ReadCapacity(view, SourceCapacityKey(source),
+            KeySpace.Partition(RemoteTransferProtocol.IntentSpace, source.Partition, source.Queue), required: true);
 
     internal static RemoteTransferCapacity RequireTargetCounter(IKeyValueView view, QueueLaneRef destination)
-        => RequireCounter(view.GetRecord<RemoteTransferCapacity>(TargetCapacityKey(destination)));
+        => ReadCapacity(view, TargetCapacityKey(destination),
+            KeySpace.Partition(RemoteTransferProtocol.TargetReceiptSpace, destination.Partition, destination.Queue), required: true);
 
     internal static long SourceAccountedBytes(RemoteTransferIntentRecord record)
     {
@@ -61,16 +67,16 @@ internal static class RemoteTransferStorage
         DatabaseLimits limits)
     {
         RequireCounter(current);
-        if (oldBytes > current.StoredBytes)
+        if (oldBytes < NoRetainedBytes || newBytes < NoRetainedBytes || oldBytes > current.StoredBytes)
         {
             throw Errors.Fail(ErrorCode.Corruption, CorruptCapacityMessage);
         }
-        var bytes = checked(current.StoredBytes - oldBytes + newBytes);
-        if (bytes > limits.MaxBatchBytes)
+        var retainedBytes = current.StoredBytes - oldBytes;
+        if (newBytes > limits.MaxBatchBytes - retainedBytes)
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, RetainedQueueTransferCapacityIsExhaustedDetail);
         }
-        return new(current.StoredRecords, bytes);
+        return new(current.StoredRecords, checked(retainedBytes + newBytes));
     }
 
     internal static void RequireCapacity(RemoteTransferCapacity current, long additionalBytes, DatabaseLimits limits)
@@ -83,9 +89,29 @@ internal static class RemoteTransferStorage
         }
     }
 
+    private static RemoteTransferCapacity ReadCapacity(IKeyValueView view, byte[] key, byte[] prefix, bool required)
+    {
+        var retained = view.GetRecord<RemoteTransferCapacity>(key);
+        var current = RequireCounter(retained ?? (required ? null : new(NoRetainedRecords, NoRetainedBytes)));
+        long firstBytes = NoRetainedBytes;
+        var witness = view.VisitRange(prefix, CapacityWitnessRecords, (_, value) =>
+        {
+            firstBytes = value.Length;
+            return true;
+        });
+        if ((witness.Records == NoRetainedRecords) != (current.StoredRecords == NoRetainedRecords)
+            || current.StoredBytes < firstBytes
+            || witness.HasMore && current.StoredRecords <= CapacityWitnessRecords)
+        {
+            throw Errors.Fail(ErrorCode.Corruption, CorruptCapacityMessage);
+        }
+        return current;
+    }
+
     private static RemoteTransferCapacity RequireCounter(RemoteTransferCapacity? capacity)
     {
-        if (capacity is null || capacity.StoredRecords < InitialSequence || capacity.StoredBytes < NoRetainedBytes)
+        if (capacity is null || capacity.StoredRecords < InitialSequence || capacity.StoredBytes < NoRetainedBytes
+            || (capacity.StoredRecords == NoRetainedRecords) != (capacity.StoredBytes == NoRetainedBytes))
         {
             throw Errors.Fail(ErrorCode.Corruption, CorruptCapacityMessage);
         }

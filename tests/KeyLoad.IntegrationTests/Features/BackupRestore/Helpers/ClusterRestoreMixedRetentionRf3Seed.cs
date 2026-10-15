@@ -23,6 +23,7 @@ internal static class ClusterRestoreMixedRetentionRf3Seed
                         await ClusterRestoreMixedRetentionRf3PurgeTopic.SeedAsync(callers, state, token).ConfigureAwait(false);
                         await ClusterRestoreMixedRetentionRf3Inbox.SeedAsync(callers, state, token).ConfigureAwait(false);
                         await ClusterRestoreMixedRetentionRf3Literal.OriginalAsync(callers, state, token).ConfigureAwait(false);
+                        await global::KeyLoad.IntegrationTests.Features.EventStreams.UnacknowledgedArchiveSeed.RunAsync(callers, state, token);
                         return true;
                     }, token).ConfigureAwait(false);
                 return state;

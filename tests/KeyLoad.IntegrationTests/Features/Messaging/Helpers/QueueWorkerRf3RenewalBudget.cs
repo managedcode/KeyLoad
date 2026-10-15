@@ -39,7 +39,8 @@ internal static class QueueWorkerRf3RenewalBudget
         await Assert.That(result.Operations.Any(row => row.Command?.Action == DeliveryAction.Ack)).IsFalse();
         var renewed = await Assert.That(result.Operations.Where(row => row.Stage == QueueWorkerOperationStage.Returned
             && row.Command?.Action == DeliveryAction.Renew)).HasSingleItem();
-        await QueueWorkerRf3Assertions.ReceiptAsync(renewed.Completion!.Value!, context.FirstRenewalId, seed,
+        var receipt = await QueueWorkerRf3Completion.SuccessAsync(renewed);
+        await QueueWorkerRf3Assertions.ReceiptAsync(receipt, context.FirstRenewalId, seed,
             [new(nameof(DeliveryAction.Renew), seed.Lane.Queue, QueueWorkerRf3Protocol.First, QueueWorkerRf3Protocol.RenewedStateVersion)]);
         var currentImage = await QueueWorkerRf3Assertions.ImageAsync(sdk, mcp, seed.Lane, QueueWorkerRf3Protocol.First, token);
         ArgumentNullException.ThrowIfNull(currentImage);

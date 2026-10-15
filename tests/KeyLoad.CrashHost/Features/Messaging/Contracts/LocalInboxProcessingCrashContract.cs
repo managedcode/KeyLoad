@@ -19,7 +19,8 @@ internal static class LocalInboxProcessingCrashContract
     internal const long Generation = 1L;
     internal const long FinalVersion = 3L;
     internal const int MutationCount = 3;
-    internal static Guid CommandId { get; } = Guid.Parse("352d5cb7-9af5-47c1-94f8-bdb98a532581");
+    private const string OriginalProcessingCommandIdentity = "352d5cb7-9af5-47c1-94f8-bdb98a532581";
+    internal static Guid CommandId { get; } = Guid.Parse(OriginalProcessingCommandIdentity);
     internal static PartitionRef Partition
     {
         get;

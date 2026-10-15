@@ -7,6 +7,9 @@ namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
 internal static class MetamorphicPublicRequests
 {
+    private const string WantedParameter = "wanted";
+    private const string MinimumParameter = "minimum";
+    private const string TagParameter = "tag";
     internal static QueryRequest Sql(PartitionRef partition, int shape, bool descending, int offset)
         => new(partition, "SELECT * FROM " + MetamorphicPublicData.Collection + " WHERE " + SqlPredicate(shape)
             + " ORDER BY bucket " + (descending ? "DESC" : "ASC") + ", id ASC OFFSET " + offset.ToString(System.Globalization.CultureInfo.InvariantCulture)
@@ -20,9 +23,9 @@ internal static class MetamorphicPublicRequests
     };
     internal static Dictionary<string, JsonElement> Parameters() => new(StringComparer.Ordinal)
     {
-        ["wanted"] = JsonSerializer.SerializeToElement(MetamorphicPublicData.Wanted, JsonDefaults.Options),
-        ["minimum"] = JsonSerializer.SerializeToElement(MetamorphicPublicData.Minimum, JsonDefaults.Options),
-        ["tag"] = JsonSerializer.SerializeToElement(MetamorphicPublicData.Tag, JsonDefaults.Options)
+        [WantedParameter] = JsonSerializer.SerializeToElement(MetamorphicPublicData.Wanted, JsonDefaults.Options),
+        [MinimumParameter] = JsonSerializer.SerializeToElement(MetamorphicPublicData.Minimum, JsonDefaults.Options),
+        [TagParameter] = JsonSerializer.SerializeToElement(MetamorphicPublicData.Tag, JsonDefaults.Options)
     };
     internal static AstQueryRequest Json(PartitionRef partition, int shape, bool descending, int offset)
     {

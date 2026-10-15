@@ -8,6 +8,11 @@ internal sealed record MetamorphicPublicRow(string Id, string Status, decimal? S
 
 internal static class MetamorphicPublicData
 {
+    private const string StatusProperty = "status";
+    private const string BucketProperty = "bucket";
+    private const string TagProperty = "tag";
+    private const string TitleProperty = "title";
+    private const string ScoreProperty = "score";
     internal const string Collection = "metamorphic_rows";
     internal const string Index = "by-status";
     internal const string Wanted = "відкрито";
@@ -30,14 +35,14 @@ internal static class MetamorphicPublicData
             var score = Score(value);
             var body = new JsonObject
             {
-                ["status"] = status,
-                ["bucket"] = value % 4,
-                ["tag"] = tags[value % 4],
-                ["title"] = "PRIVATE-54 O'Brien /~ " + id
+                [StatusProperty] = status,
+                [BucketProperty] = value % 4,
+                [TagProperty] = tags[value % 4],
+                [TitleProperty] = "PRIVATE-54 O'Brien /~ " + id
             };
             if (!missing)
             {
-                body["score"] = score is null ? null : JsonValue.Create(score.Value);
+                body[ScoreProperty] = score is null ? null : JsonValue.Create(score.Value);
             }
             result.Add(new(id, status, score, missing, value % 4, tags[value % 4], body.ToJsonString()));
         }
@@ -59,10 +64,10 @@ internal static class MetamorphicPublicData
     }
     internal static QueryRow Expected(MetamorphicPublicRow row)
     {
-        var body = new JsonObject { ["status"] = row.Status, ["bucket"] = row.Bucket, ["tag"] = row.Tag };
+        var body = new JsonObject { [StatusProperty] = row.Status, [BucketProperty] = row.Bucket, [TagProperty] = row.Tag };
         if (!row.Missing)
         {
-            body["score"] = row.Score is null ? null : JsonValue.Create(row.Score.Value);
+            body[ScoreProperty] = row.Score is null ? null : JsonValue.Create(row.Score.Value);
         }
         return new(row.Id, 1L, body.ToJsonString(), true, ["/title"]);
     }

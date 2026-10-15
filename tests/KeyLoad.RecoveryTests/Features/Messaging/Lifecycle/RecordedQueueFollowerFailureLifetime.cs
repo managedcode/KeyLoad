@@ -16,10 +16,8 @@ internal static class RecordedQueueFollowerFailureLifetime
     private const int NoFailures = 0;
     private const BindingFlags PrivateInstance = BindingFlags.Instance | BindingFlags.NonPublic;
 
-    internal static async Task RunAsync(PeerDiscoveryNativeCluster cluster, Func<Task> scenario)
+    internal static void Capture(PeerDiscoveryNativeCluster cluster, List<Exception> failures)
     {
-        List<Exception> failures = [];
-        await ReplicaMaterializerLifecycleErrors.AttemptAsync(scenario, failures);
         if (failures.Count != NoFailures)
         {
             foreach (var node in cluster.Nodes)
@@ -35,8 +33,6 @@ internal static class RecordedQueueFollowerFailureLifetime
                 Console.Error.WriteLine(RetainedRoots + roots);
             }, failures);
         }
-        await ReplicaMaterializerLifecycleErrors.AttemptAsync(() => cluster.DisposeAsync().AsTask(), failures);
-        ReplicaMaterializerLifecycleErrors.Throw(failures);
     }
 
     private static void Capture(PeerDiscoveryNativeNode node, List<Exception> failures)
