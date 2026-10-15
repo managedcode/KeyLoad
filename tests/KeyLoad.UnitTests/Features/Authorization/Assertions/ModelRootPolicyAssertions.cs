@@ -48,15 +48,15 @@ internal static class ModelRootPolicyAssertions
         await PageAsync(store, () => queries.ExecuteAst(ModelRootPolicyFixture.Reader, ModelRootPolicyRequests.Ast(fixture), cancellationToken: token),
             ModelRootPolicyGolden.Page(fixture, store.Position, read));
         await PageAsync(store, () => queries.Execute(ModelRootPolicyFixture.Reader, ModelRootPolicyRequests.Sql(fixture, explicitValue: true), cancellationToken: token),
-            ModelRootPolicyGolden.Page(fixture, store.Position, read, ModelRootPolicyGolden.Value(fixture, read)));
+            ModelRootPolicyGolden.Page(fixture, store.Position, read, ModelRootPolicyGolden.Value(fixture, read), selectedFields: ModelRootPolicyGolden.ProtectedOmitted(fixture, read)));
         await PageAsync(store, () => queries.ExecuteAst(ModelRootPolicyFixture.Reader, ModelRootPolicyRequests.Ast(fixture, explicitValue: true), cancellationToken: token),
-            ModelRootPolicyGolden.Page(fixture, store.Position, read, ModelRootPolicyGolden.Value(fixture, read)));
+            ModelRootPolicyGolden.Page(fixture, store.Position, read, ModelRootPolicyGolden.Value(fixture, read), selectedFields: ModelRootPolicyGolden.ProtectedOmitted(fixture, read)));
         var value = System.Text.Json.JsonSerializer.Serialize(new
         {
             value = fixture.HeaderRoot ? "payload-public" : "header-public"
         }, JsonDefaults.Options);
         await PageAsync(store, () => queries.ExecuteAst(ModelRootPolicyFixture.Reader, ModelRootPolicyRequests.LiteralPublic(fixture), cancellationToken: token),
-            ModelRootPolicyGolden.Page(fixture, store.Position, read, value));
+            ModelRootPolicyGolden.Page(fixture, store.Position, read, value, selectedFields: []));
         foreach (var order in new[] { false, true })
         {
             await UsageAsync(store, () => queries.Execute(ModelRootPolicyFixture.Reader,
@@ -68,7 +68,7 @@ internal static class ModelRootPolicyAssertions
         }
         await UsageAsync(store, () => queries.ExecuteAst(ModelRootPolicyFixture.Reader,
             ModelRootPolicyRequests.Join(fixture), cancellationToken: token), use,
-            ModelRootPolicyGolden.Page(fixture, store.Position, read, ModelRootPolicyGolden.Value(fixture, read, true), true));
+            ModelRootPolicyGolden.Page(fixture, store.Position, read, ModelRootPolicyGolden.Value(fixture, read, true), true, ModelRootPolicyGolden.ProtectedOmitted(fixture, read)));
     }
 
     private static Task UsageAsync(ZoneTreeStore store, Func<QueryPage> operation, bool use, QueryPage expected)

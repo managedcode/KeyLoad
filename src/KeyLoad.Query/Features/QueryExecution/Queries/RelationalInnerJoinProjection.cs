@@ -2,6 +2,7 @@ using System.Collections.Immutable;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using KeyLoad.Core;
+using KeyLoad.Query.Features.QueryExecution;
 
 namespace KeyLoad.Query;
 
@@ -33,9 +34,11 @@ internal static class RelationalInnerJoinProjection
                 json[selection.Alias] = null;
             }
         }
-        var redacted = leftSafe.Redacted || rightSafe.Redacted;
-        var fields = leftSafe.RedactedFields.Select(field => FieldPath(leftAlias, field))
-            .Concat(rightSafe.RedactedFields.Select(field => FieldPath(rightAlias, field))).ToImmutableArray();
+        var leftFields = QueryProjectionRedactions.Selected(database, leftResource, leftSafe, selections, leftAlias);
+        var rightFields = QueryProjectionRedactions.Selected(database, rightResource, rightSafe, selections, rightAlias);
+        var fields = leftFields.Select(field => FieldPath(leftAlias, field))
+            .Concat(rightFields.Select(field => FieldPath(rightAlias, field))).ToImmutableArray();
+        var redacted = !fields.IsEmpty;
         var sources = ImmutableArray.Create(new QueryRowSource(leftAlias, left.Reference.Id, left.Revision),
             new QueryRowSource(rightAlias, right.Reference.Id, right.Revision));
         return new(left.Reference.Id, left.Revision, json.ToJsonString(), redacted, fields, sources);

@@ -28,6 +28,7 @@ internal static class QueryRowProjection
             var value = PredicateEvaluator.FieldValue(selection.Path, document, json.RootElement, paths);
             result[selection.Alias] = value is MissingValue ? null : JsonSerializer.SerializeToNode(value, JsonDefaults.Options);
         }
-        return new(document.Reference.Id, document.Revision, result.ToJsonString(), safe.Redacted, safe.RedactedFields);
+        var fields = QueryProjectionRedactions.Selected(database, resource, safe, selections);
+        return new(document.Reference.Id, document.Revision, result.ToJsonString(), !fields.IsEmpty, fields);
     }
 }

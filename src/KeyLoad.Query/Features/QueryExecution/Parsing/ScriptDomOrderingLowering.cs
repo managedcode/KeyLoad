@@ -35,6 +35,10 @@ internal static class ScriptDomOrderingLowering
     {
         if (expression is Dom.IntegerLiteral ordinal)
         {
+            if (ordinal.Collation is not null)
+            {
+                throw ScriptDomErrors.Unsupported();
+            }
             if (!int.TryParse(ordinal.Value, NumberStyles.None, CultureInfo.InvariantCulture, out var position)
                 || position < FirstOrdinal || position > projection.Count)
             {

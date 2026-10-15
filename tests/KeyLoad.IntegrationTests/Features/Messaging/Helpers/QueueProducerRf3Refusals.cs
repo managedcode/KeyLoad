@@ -33,8 +33,8 @@ internal static class QueueProducerRf3Refusals
             await QueueProducerRf3LiteralAssertions.UnchangedAsync(publisher, seed, original.Image, token);
             await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit, duplicate, token), ErrorCode.Conflict, true);
             await QueueProducerRf3LiteralAssertions.UnchangedAsync(publisher, seed, original.Image, token);
-            await Assert.That(await McpCallerAssertions.SdkSuccessAsync(await publisher.GetAsync(
-                QueueProducerRf3Assertions.Document(seed, QueueProducerRf3Protocol.Refused), token))).IsNull();
+            await QueueProducerRf3Assertions.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(await publisher.GetAsync(
+                QueueProducerRf3Assertions.Document(seed, QueueProducerRf3Protocol.Refused), token)), new DocumentReadResult(null));
             await QueueProducerRf3Assertions.EqualAsync(await QueueProducerRf3Assertions.ImageAsync(publisher, seed,
                 QueueProducerRf3Protocol.Original, token), original.Image);
             await AtomicProducerRf3EventAssertions.AbsentAsync(publisher, seed, QueueProducerRf3Protocol.Refused, token);

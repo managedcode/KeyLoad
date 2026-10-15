@@ -16,9 +16,6 @@ internal sealed class GraphSearchReachabilityReader(
     private const string OutDirection = "out";
     private const string MissingEdge = "A graph adjacency record has no edge.";
     private const string MismatchedEdge = "A graph adjacency record does not match its canonical edge.";
-    private const string MissingGraph = "The graph resource is unavailable.";
-    private const string InvalidGraphResource = "The graph resource is invalid for this partition.";
-    private const string LabelField = "/label";
     private const string EdgeLimit = "The graph edge visit budget was exhausted.";
     private const string VertexLimit = "The graph vertex visit budget was exhausted.";
     private const string RetainedLimit = "The graph reachability byte budget was exhausted.";
@@ -31,18 +28,7 @@ internal sealed class GraphSearchReachabilityReader(
 
     internal GraphSearchReachability[] Read()
     {
-        database.Authorization.Require(principal, partition, walk.Graph, Capability.GraphRead);
-        var graph = budget.ReadRecord<ResourceDefinition>(view,
-            KeySpace.Resource(partition.TenantId, partition.DatabaseId, walk.Graph))
-            ?? throw Errors.Fail(ErrorCode.NotFound, MissingGraph);
-        if (graph.Kind != ResourceKind.Graph || graph.TransactionDomainId != partition.TransactionDomainId)
-        {
-            throw Errors.Fail(ErrorCode.Conflict, InvalidGraphResource);
-        }
-        if (walk.Labels is not null)
-        {
-            database.Authorization.RequireFieldUse(principal, graph, LabelField);
-        }
+        GraphSearchFieldAuthority.Require(database, view, principal, partition, walk.Graph, walk.Labels is not null, budget);
         AddSeeds();
         while (pending.TryDequeue(out var entry))
         {

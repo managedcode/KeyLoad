@@ -33,6 +33,21 @@ internal static class GraphSearchExecutor
         QueryExecutionOptions execution)
     {
         AuthorizeBranches(database, principal, resource, request.Search, similarity);
+        if (request.Scope is { } scope)
+        {
+            GraphSearchFieldAuthority.Require(database, view, principal, request.Search.Partition,
+                scope.Walk.Graph, scope.Walk.Labels is not null, budget);
+        }
+        if (request.Retriever is { } retriever)
+        {
+            GraphSearchFieldAuthority.Require(database, view, principal, request.Search.Partition,
+                retriever.Walk.Graph, retriever.Walk.Labels is not null, budget);
+        }
+        if (request.Expansion is { } expansionAuthority)
+        {
+            GraphSearchFieldAuthority.Require(database, view, principal, request.Search.Partition,
+                expansionAuthority.Graph, expansionAuthority.Labels is not null, budget);
+        }
         var scoped = request.Scope is null ? null : ReadWalk(database, view, principal, request.Search.Partition,
             request.Scope.Walk, budget);
         var fusion = new SearchRankFusion(request.Search.FusionConstant, request.Search.Limit, budget, request.Search.Explain);

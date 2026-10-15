@@ -39,6 +39,10 @@ internal static class ScriptDomOperandLowering
     private static ValueOperand Unary(Dom.UnaryExpression expression, ScriptDomLoweringContext context, int depth)
     {
         context.Check(depth + NextDepth);
+        if (expression.Expression is Dom.PrimaryExpression { Collation: not null })
+        {
+            throw ScriptDomErrors.Unsupported();
+        }
         if (expression.Expression is not (Dom.IntegerLiteral or Dom.NumericLiteral or Dom.RealLiteral)
             || expression.Expression is not Dom.Literal literal
             || expression.UnaryExpressionType is not (Dom.UnaryExpressionType.Positive or Dom.UnaryExpressionType.Negative))

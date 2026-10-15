@@ -1,0 +1,9 @@
+namespace KeyLoad.IntegrationTests.Features.QueryExecution;
+
+[NotInParallel]
+internal sealed class QueueViewLeaseIsolationTests
+{
+    [Test]
+    public Task ActiveLeaseViewsPreserveClaimsDuringSqlAstCurrentPolicyRepairThenOriginalTokenRenewAckAndTwoColdCuts()
+        => QueueViewLeaseIsolationFlow.RunAsync();
+}

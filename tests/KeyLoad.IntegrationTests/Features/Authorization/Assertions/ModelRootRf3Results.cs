@@ -24,7 +24,11 @@ internal static class ModelRootRf3Results
         var expectedJson = explicitValue ? new JsonObject { [ModelRootRf3State.SecretField] = read ? "ROOT-CANARY" : null } : json;
         ImmutableArray<string> omitted = read ? ["/" + literalComponent + "/"]
             : state.HeaderRoot ? ["/payload/", "/headers"] : ["/payload", "/headers/"];
-        var expected = new QueryRow(ModelRootRf3State.Item, 1L, expectedJson.ToJsonString(), true, omitted);
+        if (explicitValue)
+        {
+            omitted = read ? [] : [state.HeaderRoot ? "/headers" : "/payload"];
+        }
+        var expected = new QueryRow(ModelRootRf3State.Item, 1L, expectedJson.ToJsonString(), !omitted.IsEmpty, omitted);
         var actual = page.Rows.Single();
         using var actualJson = JsonDocument.Parse(actual.Json);
         using var goldenJson = JsonDocument.Parse(expected.Json);

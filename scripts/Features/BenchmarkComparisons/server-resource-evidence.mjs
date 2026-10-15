@@ -160,6 +160,7 @@ export function validateServerResourceEvidence(value, sidecarSha256, workerSha25
         && (!configured || item.sampleCount <= value.observationPolicy.maxSamples
           && item.writableMounts.length <= value.observationPolicy.maxMounts))
       && new Set(value.containers.map(item => item.resource)).size === value.containers.length
+      && new Set(value.containers.map(item => item.containerId)).size === value.containers.length
       && value.containers.length <= maximumContainers);
   } else {
     requireGitHub(value.containers.length === 0 && value.qualified === false

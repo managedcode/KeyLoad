@@ -6,7 +6,6 @@ using KeyLoad.IntegrationTests.Features.ClusterReplication;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
 using KeyLoad.IntegrationTests.Features.CodeQuality;
 using KeyLoad.IntegrationTests.Features.Messaging;
-using KeyLoad.IntegrationTests.Features.TestInfrastructure;
 using KeyLoad.Query;
 using Microsoft.Extensions.DependencyInjection;
 using TUnit.Core.Interfaces;
@@ -169,7 +168,7 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
         }
         catch (Exception startupFailure)
         {
-            await ClusterFixtureStartupFailure.DisposeAndThrowAsync(this, startupFailure).ConfigureAwait(false);
+            await ClusterFixtureFailureRootRetention.For(this).StartupFailureAsync(this, startupFailure).ConfigureAwait(false);
             throw;
         }
     }
@@ -255,9 +254,11 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
         localImageCleanupIncomplete |= ownedLocalImage && failures.Count > 0;
         localImageCleanupIncomplete = await nativeSql.JoinAndReleaseRootAsync(SnapshotReadiness, appStopped,
             localImageCleanupIncomplete, isolationCleanupIncomplete, failures,
-            () => DeleteOwnedRootAsync(coverage, Root, deadline, failures)).ConfigureAwait(false);
-        await new ClusterFixtureCleanupCompletion(() => coverage, Rethrow)
-            .CompleteAsync(appStopped, stoppedNodes, deadline, failures, token).ConfigureAwait(false);
+            () => ClusterFixtureFailureRootRetention.For(this).ReleaseAsync(
+                () => DeleteOwnedRootAsync(coverage, Root, deadline, failures))).ConfigureAwait(false);
+        await ClusterFixtureFailureRootRetention.For(this).CompleteAsync(Root,
+            () => new ClusterFixtureCleanupCompletion(() => coverage, Rethrow)
+                .CompleteAsync(appStopped, stoppedNodes, deadline, failures, token), failures).ConfigureAwait(false);
     }
 
     internal Task<KeyLoad.Clustering.ReplicaSiloDiscovery> ReadSnapshotDiscoveryAsync(string node, CancellationToken token)

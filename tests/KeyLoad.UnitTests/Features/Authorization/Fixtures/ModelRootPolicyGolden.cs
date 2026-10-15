@@ -47,18 +47,22 @@ internal static class ModelRootPolicyGolden
         return model.ToJsonString();
     }
 
-    internal static QueryPage Page(ModelRootPolicyFixture fixture, long cut, bool read, string? json = null, bool join = false)
+    internal static QueryPage Page(ModelRootPolicyFixture fixture, long cut, bool read, string? json = null, bool join = false,
+        ImmutableArray<string>? selectedFields = null)
     {
-        var fields = Omitted(fixture, read);
+        var fields = selectedFields ?? Omitted(fixture, read);
         var sources = join ? ImmutableArray.Create(new QueryRowSource("e", fixture.Id, 1L),
             new QueryRowSource("d", ModelRootPolicyFixture.TargetId, 1L)) : (ImmutableArray<QueryRowSource>?)null;
         if (join)
         {
             fields = [.. fields.Select(field => "e." + field.TrimStart(LeadingPathSeparator))];
         }
-        return new([new(fixture.Id, 1L, json ?? ModelJson(fixture, read), true, fields, sources)], null, cut,
+        return new([new(fixture.Id, 1L, json ?? ModelJson(fixture, read), !fields.IsEmpty, fields, sources)], null, cut,
             join ? fixture.Queue ? "bounded-queue-entity-reference-inner-join" : "bounded-event-entity-reference-inner-join" : fixture.AccessPath);
     }
+
+    internal static ImmutableArray<string> ProtectedOmitted(ModelRootPolicyFixture fixture, bool read)
+        => read ? [] : [fixture.HeaderRoot ? "/headers" : "/payload"];
 
     internal static string Value(ModelRootPolicyFixture fixture, bool read, bool join = false)
         => JsonSerializer.Serialize(join ? new

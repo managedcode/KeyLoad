@@ -52,6 +52,10 @@ internal static class ScriptDomInsertScalar
     }
     private static void Unary(Utf8JsonWriter writer, Dom.UnaryExpression unary)
     {
+        if (unary.Expression is Dom.PrimaryExpression { Collation: not null })
+        {
+            throw ScriptDomOperationErrors.Unsupported();
+        }
         if (unary.Expression is not (Dom.IntegerLiteral or Dom.NumericLiteral or Dom.RealLiteral)
             || unary.Expression is not Dom.Literal number
             || unary.UnaryExpressionType is not (Dom.UnaryExpressionType.Positive or Dom.UnaryExpressionType.Negative))

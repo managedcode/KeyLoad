@@ -196,7 +196,9 @@ internal sealed class ScaleServerResourceEvidenceCollector(
         const int EmptyValue = 0;
         var records = _samplers.Select(sampler => sampler.ToRecord()).Where(record => record is not null)
             .Select(record => record!).ToArray();
-        if (records.Length != selection.NodeCount || _samplers.Any(sampler => sampler.Invalidated)
+        if (records.Length != selection.NodeCount
+            || records.Select(record => record.ContainerId).Distinct(StringComparer.Ordinal).Count() != records.Length
+            || _samplers.Any(sampler => sampler.Invalidated)
             || records.Any(record => record.SampleCount < ScaleServerResourceBounds.MinimumSamples))
         {
             _missing.Add(ScaleServerResourceBounds.SamplingMissing);

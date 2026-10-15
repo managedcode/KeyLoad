@@ -1,4 +1,95 @@
 {
+  "STAGE85-AUTHORIZED-MODEL-OPERATIONS-001": {
+    "status": "in_progress",
+    "acceptedOriginalTasks": 20,
+    "originalTasks": 104,
+    "additionalPerformanceTask": "KL-105 open",
+    "fullTaskPromotion": false,
+    "record": "docs/implementation/qualification-stage85-authorized-model-operations.md",
+    "parentCommit": "9942ca467b5e45337a886428a8302bfd117799db",
+    "actualJoinedTaskScopes": [
+      "KL-064",
+      "KL-095",
+      "KL-047",
+      "KL-080",
+      "KL-075",
+      "KL-063",
+      "KL-091",
+      "KL-090"
+    ],
+    "adoptedPaths": 211,
+    "verificationSourceDigest": "7860e68341d7bb168d24df9f455997cfe9f03bb49d551f4347912b16f7f1db26",
+    "verificationImageDigest": "d53b286bf9e29236d2295d09d50b145af7f22f336b84aeecad26f548c1aefcd0",
+    "sourceInputs": 12968,
+    "compiledDllPdbInputs": 318,
+    "verification": {
+      "fullSolutionRelease": {
+        "exitCode": 0,
+        "errors": 0,
+        "warnings": 0,
+        "elapsedSeconds": 1184.2187398751266,
+        "stdoutSha256": "d2e38b49e0f0cbcb0f4c0ca3d03e0e6e9482650c8be9f443ee2cfad128bb3a88"
+      },
+      "canonicalFormatterVerify": {
+        "exitCode": 0,
+        "elapsedSeconds": 1165.8411335831042
+      },
+      "nativeSemantic": {
+        "readyProjects": 27,
+        "errors": 0,
+        "warnings": 0,
+        "informational": 58025,
+        "hidden": 8315
+      },
+      "originalSelectedUnit": {
+        "passed": 43,
+        "failed": 2,
+        "skipped": 0,
+        "total": 45,
+        "elapsedSeconds": 18.3266447,
+        "configuredLimit": 50,
+        "actualTRXPeak": 45,
+        "trxSha256": "9228955b6fb6c26e64f9723bd82d488eb2de9a265df876dff6dff6ada575dda0"
+      },
+      "originalFailedWholeCaseRerun": {
+        "passed": 2,
+        "failed": 0,
+        "skipped": 0,
+        "elapsedSeconds": 10.75126316701062,
+        "actualTRXPeak": 2,
+        "trxSha256": "0581e88eb77b777e09d1817f464d57e421a80319abe71250bb1b04d4a1ad2cc2"
+      },
+      "nativeFixtureControls": {
+        "passed": 14,
+        "failed": 0,
+        "skipped": 0,
+        "databaseResourcesStarted": false
+      },
+      "sourceDrift": 0,
+      "finalRuntimeImageDrift": 0
+    },
+    "functionalCoverage": {
+      "scope": "Original selected45 functional cases including2 failures; repaired2 report separate; not full product",
+      "linesCovered": 8829,
+      "linesValid": 106910,
+      "branchesCovered": 5030,
+      "branchesValid": 67793,
+      "loadBenchmarkContribution": false,
+      "qualifiedFullThreshold": false
+    },
+    "rf3": {
+      "actualMetadataCases": 10,
+      "wholeClasses": 6,
+      "currentStartup": "not_run_at_checkpoint",
+      "coverageContributorCatalog": "unchanged_closed11",
+      "qualified": false
+    },
+    "remaining": [
+      "Actual TUnit-owned Aspire image preparation and current10-case RF3 SDK/officialMCP execution with joined cleanup",
+      "Complete Unit/process-recovery/full functional coverage and exact delivered-source Linux qualification",
+      "Fault/endurance, authentic isolated native comparison workloads and complete task acceptance"
+    ]
+  },
   "STAGE84-EIGHT-TASK-OPERATIONS-001": {
     "status": "in_progress",
     "acceptedOriginalTasks": 20,
@@ -61333,8 +61424,16 @@
       "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryAst.cs",
       "src/KeyLoad.Query/Features/QueryExecution/Execution/SqlParser.cs",
       "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryEngine.cs",
-      "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/SecurityAndQueryTests.cs"
-    ]
+      "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/SecurityAndQueryTests.cs",
+      "docs/implementation/qualification-stage85-authorized-model-operations.md"
+    ],
+    "stage85Development": {
+      "record": "docs/implementation/qualification-stage85-authorized-model-operations.md",
+      "sourceJoined": true,
+      "fullTaskPromotion": false,
+      "rf3": "current10case_census_only_startup_and_runtime_open",
+      "remaining": "Full task and Linux/coverage/fault/endurance qualification remain mandatory"
+    }
   },
   "KL-048": {
     "title": "Binder і field lineage",
@@ -61606,8 +61705,16 @@
       "src/KeyLoad.Security/Features/Authorization/Execution/AuthorizationPolicy.cs",
       "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/SecurityAndQueryTests.cs",
       "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
-      "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaTransportSecurityTests.cs"
-    ]
+      "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaTransportSecurityTests.cs",
+      "docs/implementation/qualification-stage85-authorized-model-operations.md"
+    ],
+    "stage85Development": {
+      "record": "docs/implementation/qualification-stage85-authorized-model-operations.md",
+      "sourceJoined": true,
+      "fullTaskPromotion": false,
+      "rf3": "current10case_census_only_startup_and_runtime_open",
+      "remaining": "Full task and Linux/coverage/fault/endurance qualification remain mandatory"
+    }
   },
   "KL-064": {
     "title": "Єдиний safe projector",
@@ -61616,8 +61723,16 @@
       "src/KeyLoad.Security/Features/Authorization/Execution/AuthorizationPolicy.cs",
       "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/SecurityAndQueryTests.cs",
       "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
-      "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaTransportSecurityTests.cs"
-    ]
+      "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaTransportSecurityTests.cs",
+      "docs/implementation/qualification-stage85-authorized-model-operations.md"
+    ],
+    "stage85Development": {
+      "record": "docs/implementation/qualification-stage85-authorized-model-operations.md",
+      "sourceJoined": true,
+      "fullTaskPromotion": false,
+      "rf3": "current10case_census_only_startup_and_runtime_open",
+      "remaining": "Full task and Linux/coverage/fault/endurance qualification remain mandatory"
+    }
   },
   "KL-065": {
     "title": "Row ACL planner і graph enforcement",
@@ -61862,7 +61977,8 @@
       "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Execution/ScaledComparisonRunner.cs",
       "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/Helpers/IsolatedNativeTeardown.cs",
       "https://github.com/managedcode/KeyLoad/actions/runs/37384353741",
-      "Historical intermediate report removed from repository; no current qualification inferred"
+      "Historical intermediate report removed from repository; no current qualification inferred",
+      "docs/implementation/qualification-stage85-authorized-model-operations.md"
     ],
     "sourceStage": "canonical792_measurements_six_proofs_native_open_loop_matrix_terminalization_and_authenticated_GitHub_intake_joined_actual_Linux_workflow_cohort_pending",
     "qualification": {
@@ -61905,6 +62021,13 @@
         "qualification": "source_implementation_joined; whole_operation_regressions_and_actual_authenticated_Linux_cohort_pending",
         "runtimeQualified": false
       }
+    },
+    "stage85Development": {
+      "record": "docs/implementation/qualification-stage85-authorized-model-operations.md",
+      "sourceJoined": true,
+      "fullTaskPromotion": false,
+      "rf3": "N/A for Comparison-owned evidence regression; exact Linux Comparison execution remains required",
+      "remaining": "Full task and Linux/coverage/fault/endurance qualification remain mandatory"
     }
   },
   "KL-076": {
@@ -62342,7 +62465,8 @@
       "Historical intermediate report removed from repository; no current qualification inferred",
       "Historical intermediate report removed from repository; no current qualification inferred",
       "https://github.com/managedcode/KeyLoad/actions/runs/37349838022",
-      "https://github.com/managedcode/KeyLoad/actions/runs/37364493890"
+      "https://github.com/managedcode/KeyLoad/actions/runs/37364493890",
+      "docs/implementation/qualification-stage85-authorized-model-operations.md"
     ],
     "decision": "docs/ADR/ADR-074-aspire-owned-test-entry.md",
     "sourceStage": "unified_Aspire_entry_5_local_development_cases_passed_original_TRX;complete_release_gates_pending",
@@ -62426,6 +62550,13 @@
       ],
       "qualificationComplete": false,
       "limit": "Analyzer and repository-rule jobs succeeded; RF3, website and solution jobs were cancelled without acquired-job steps. Required suites did not complete."
+    },
+    "stage85Development": {
+      "record": "docs/implementation/qualification-stage85-authorized-model-operations.md",
+      "sourceJoined": true,
+      "fullTaskPromotion": false,
+      "rf3": "current10case_census_only_startup_and_runtime_open",
+      "remaining": "Full task and Linux/coverage/fault/endurance qualification remain mandatory"
     }
   },
   "KL-081": {
@@ -62671,8 +62802,16 @@
       "src/KeyLoad.Core/MutationAuthorization.cs",
       "tests/KeyLoad.UnitTests/Features/Messaging/Cases/MessagingTests.cs",
       "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/SecurityAndQueryTests.cs",
-      "tests/KeyLoad.RecoveryTests/Features/ChangeFeeds/Cases/SubscriptionRecoveryTests.cs"
-    ]
+      "tests/KeyLoad.RecoveryTests/Features/ChangeFeeds/Cases/SubscriptionRecoveryTests.cs",
+      "docs/implementation/qualification-stage85-authorized-model-operations.md"
+    ],
+    "stage85Development": {
+      "record": "docs/implementation/qualification-stage85-authorized-model-operations.md",
+      "sourceJoined": true,
+      "fullTaskPromotion": false,
+      "rf3": "current10case_census_only_startup_and_runtime_open",
+      "remaining": "Full task and Linux/coverage/fault/endurance qualification remain mandatory"
+    }
   },
   "KL-091": {
     "title": "Document + event + queue atomic batch",
@@ -62682,8 +62821,16 @@
       "tests/KeyLoad.IntegrationTests/Features/ClusterReplication/Cases/ClusterTests.cs",
       "tests/KeyLoad.UnitTests/Features/ResourceExecution/Cases/AtomicTriadOutboxTests.cs",
       "tests/KeyLoad.RecoveryTests/Features/EventStreams/Assertions/EventAppendIndexAssertions.cs",
-      "tests/KeyLoad.IntegrationTests/Features/Messaging/Assertions/AtomicProducerRf3Index.cs"
-    ]
+      "tests/KeyLoad.IntegrationTests/Features/Messaging/Assertions/AtomicProducerRf3Index.cs",
+      "docs/implementation/qualification-stage85-authorized-model-operations.md"
+    ],
+    "stage85Development": {
+      "record": "docs/implementation/qualification-stage85-authorized-model-operations.md",
+      "sourceJoined": true,
+      "fullTaskPromotion": false,
+      "rf3": "current10case_census_only_startup_and_runtime_open",
+      "remaining": "Full task and Linux/coverage/fault/endurance qualification remain mandatory"
+    }
   },
   "KL-092": {
     "title": "Persisted scheduler і clock contract",
@@ -62864,7 +63011,8 @@
     "status": "in_progress",
     "evidence": [
       "docs/ADR/ADR-072-authorized-sql-model-views.md",
-      "src/KeyLoad.Abstractions/Features/QueryExecution/Contracts/ModelQuerySource.cs"
+      "src/KeyLoad.Abstractions/Features/QueryExecution/Contracts/ModelQuerySource.cs",
+      "docs/implementation/qualification-stage85-authorized-model-operations.md"
     ],
     "decision": "docs/ADR/ADR-072-authorized-sql-model-views.md",
     "sourceStage": "bounded_authorized_event_queue_SQL_sources_in_implementation_unqualified",
@@ -62872,7 +63020,14 @@
     "remaining": [
       "source_review_Aspire_unit_and_SDK_official_MCP_RF3",
       "full_event_queue_SQL_composition_and_defined_client_protocol"
-    ]
+    ],
+    "stage85Development": {
+      "record": "docs/implementation/qualification-stage85-authorized-model-operations.md",
+      "sourceJoined": true,
+      "fullTaskPromotion": false,
+      "rf3": "current10case_census_only_startup_and_runtime_open",
+      "remaining": "Full task and Linux/coverage/fault/endurance qualification remain mandatory"
+    }
   },
   "KL-096": {
     "title": "Event/message RBAC і sensitive schemas",

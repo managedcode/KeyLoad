@@ -47,6 +47,10 @@ internal static class ScriptDomWindowLowering
         {
             context.Observe(RootDepth);
             expression = grouped.Expression;
+            if (expression is Dom.PrimaryExpression { Collation: not null })
+            {
+                throw ScriptDomErrors.Unsupported();
+            }
         }
         if (expression is Dom.VariableReference or Dom.MoneyLiteral)
         {
@@ -68,6 +72,10 @@ internal static class ScriptDomWindowLowering
                 throw ScriptDomErrors.Unsupported();
             }
             expression = unary.Expression;
+            if (expression is Dom.PrimaryExpression { Collation: not null })
+            {
+                throw ScriptDomErrors.Unsupported();
+            }
         }
         if (expression is not Dom.IntegerLiteral literal)
         {

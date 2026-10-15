@@ -97,6 +97,7 @@ internal static class ScriptDomSourceLowering
         long generation;
         if (values[index] is Dom.UnaryExpression unary && unary.Expression is Dom.IntegerLiteral signed)
         {
+            RequirePlainArgument(signed);
             if (unary.UnaryExpressionType is not (Dom.UnaryExpressionType.Positive or Dom.UnaryExpressionType.Negative))
             {
                 throw ScriptDomErrors.Unsupported();

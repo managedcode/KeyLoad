@@ -27,11 +27,13 @@ internal static class QueueEntityRefJoinProjection
             var value = JsonData.Scalar(root, selection.Path);
             json[selection.Alias] = value is MissingValue ? null : JsonSerializer.SerializeToNode(value, JsonDefaults.Options);
         }
-        var fields = leftSafe.RedactedFields.Select(field => Field(query.Alias!, field))
-            .Concat(rightSafe.RedactedFields.Select(field => Field(query.InnerJoin!.Alias, field))).ToImmutableArray();
+        var leftFields = QueryProjectionRedactions.Selected(database, queue, leftSafe, query.Projection, query.Alias);
+        var rightFields = QueryProjectionRedactions.Selected(database, target, rightSafe, query.Projection, query.InnerJoin?.Alias);
+        var fields = leftFields.Select(field => Field(query.Alias!, field))
+            .Concat(rightFields.Select(field => Field(query.InnerJoin!.Alias, field))).ToImmutableArray();
         var sources = ImmutableArray.Create(new QueryRowSource(query.Alias!, left.Reference.Id, left.Revision),
             new QueryRowSource(query.InnerJoin!.Alias, right.Reference.Id, right.Revision));
-        return new(left.Reference.Id, left.Revision, json.ToJsonString(), leftSafe.Redacted || rightSafe.Redacted, fields, sources);
+        return new(left.Reference.Id, left.Revision, json.ToJsonString(), !fields.IsEmpty, fields, sources);
     }
 
     private static string Field(string alias, string field) => alias + SourceSeparator + field.TrimStart(LeadingSeparator);
