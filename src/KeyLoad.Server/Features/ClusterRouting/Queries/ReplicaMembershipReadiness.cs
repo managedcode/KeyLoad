@@ -10,17 +10,17 @@ internal static class ReplicaMembershipReadiness
     private const int SnapshotVersion = 1;
     private static readonly UTF8Encoding StrictUtf8 = new(false, true);
 
-    internal static async Task<MembershipReadinessSnapshot?> ReadNodeAsync(bool siloJoined, IHost? host,
+    internal static async Task<MembershipReadinessSnapshot?> ReadNodeAsync(bool siloJoined, IServiceProvider? services,
         IOptions<NodeOptions> nodeOptions, IOptions<OrleansMembershipOptions> membershipOptions, CancellationToken token)
     {
-        if (!siloJoined || host is null)
+        if (!siloJoined || services is null)
         {
             return null;
         }
         try
         {
-            return await ReadAsync(host.Services.GetRequiredService<ReplicaNativeDiscoveryRuntime>(), nodeOptions,
-                host.Services.GetRequiredService<ILocalSiloDetails>().SiloAddress, membershipOptions, token).ConfigureAwait(false);
+            return await ReadAsync(services.GetRequiredService<ReplicaNativeDiscoveryRuntime>(), nodeOptions,
+                services.GetRequiredService<ILocalSiloDetails>().SiloAddress, membershipOptions, token).ConfigureAwait(false);
         }
         catch (OperationCanceledException) when (token.IsCancellationRequested)
         {

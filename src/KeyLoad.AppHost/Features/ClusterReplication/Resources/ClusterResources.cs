@@ -138,6 +138,7 @@ internal static class ClusterResources
         KeyLoad.AppHost.Features.ClientApi.ClusterConnectionEndpointResources.Apply(resource);
         ClusterResourceSettings.Apply(builder, resource, containerUser);
         probes?.Apply(resource, name);
+        ContainerKillCommand.Apply(builder, resource, ephemeral, benchmarkNodeCount);
         ApplyPeers(resource, nodeNames, benchmarkNodeCount.HasValue);
         return resource;
     }

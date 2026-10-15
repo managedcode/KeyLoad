@@ -8,20 +8,21 @@ namespace KeyLoad.Clustering;
 /// <param name="id">The Orleans grain-service identity for this silo instance.</param>
 /// <param name="silo">The hosting Orleans silo.</param>
 /// <param name="loggerFactory">Factory used by the Orleans grain-service base type.</param>
-/// <param name="endpoint">Node-owned replica operations and transport readiness.</param>
-/// <param name="discovery">Local runtime-generation discovery state.</param>
-/// <param name="authentication">Peer-envelope authentication and bounded replay admission.</param>
-/// <param name="nativeDiscovery">Silo-owned bounded native metadata callback and joined shutdown.</param>
+/// <param name="services">The actual silo provider; storage-backed services resolve only during native initialization.</param>
 /// <param name="diagnostics">Operational logging for unexpected endpoint failures.</param>
-/// <param name="observation">Optional construction-owned observation of actual authenticated exchanges.</param>
 public sealed class PartitionReplicaGrainService(GrainId id, Silo silo, ILoggerFactory loggerFactory,
-    IReplicaEndpoint endpoint, ReplicaSiloDiscoveryState discovery, ReplicaEnvelopeAuthenticator authentication,
-    ReplicaNativeDiscoveryRuntime nativeDiscovery, ILogger<PartitionReplicaGrainService> diagnostics, IReplicaTransportObservation? observation = null)
+    IServiceProvider services, ILogger<PartitionReplicaGrainService> diagnostics)
     : GrainService(id, silo, loggerFactory), IPartitionReplicaGrainService
 {
     private const int FailureEventId = 3;
     private static readonly Action<ILogger, ReplicaRpc?, Exception?> LogFailure = LoggerMessage.Define<ReplicaRpc?>(LogLevel.Error,
         new EventId(FailureEventId), ReplicaTransportProtocol.EndpointFailureLog);
+
+    private IReplicaEndpoint endpoint = null!;
+    private ReplicaSiloDiscoveryState discovery = null!;
+    private ReplicaEnvelopeAuthenticator authentication = null!;
+    private ReplicaNativeDiscoveryRuntime nativeDiscovery = null!;
+    private IReplicaTransportObservation? observation;
 
     /// <summary>Attaches transport during RuntimeGrainServices without waiting for consensus membership.</summary>
     /// <param name="serviceProvider">The active silo service provider.</param>
@@ -29,7 +30,14 @@ public sealed class PartitionReplicaGrainService(GrainId id, Silo silo, ILoggerF
     public override async Task Init(IServiceProvider serviceProvider)
     {
         await base.Init(serviceProvider).ConfigureAwait(true);
-        endpoint.AttachTransport(serviceProvider.GetRequiredService<ReplicaGrainServiceClient>());
+        var lifecycle = services.GetRequiredService<ReplicaTransportLifecycle>();
+        endpoint = services.GetRequiredService<Func<IReplicaEndpoint>>()();
+        discovery = services.GetRequiredService<ReplicaSiloDiscoveryState>();
+        authentication = services.GetRequiredService<Func<ReplicaEnvelopeAuthenticator>>()();
+        nativeDiscovery = services.GetRequiredService<ReplicaNativeDiscoveryRuntime>();
+        lifecycle.Attach(endpoint, discovery, nativeDiscovery);
+        observation = services.GetService<IReplicaTransportObservation>();
+        endpoint.AttachTransport(services.GetRequiredService<ReplicaGrainServiceClient>());
         discovery.MarkTransportReady();
     }
 

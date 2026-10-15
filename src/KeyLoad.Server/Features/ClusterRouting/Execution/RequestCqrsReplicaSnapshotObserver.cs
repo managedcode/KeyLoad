@@ -16,7 +16,8 @@ internal sealed class RequestCqrsReplicaSnapshotObserver(RequestCqrsProbeFiles f
     private const long NoSnapshot = 0;
 
     internal static RequestCqrsReplicaSnapshotObserver? Find(IServiceProvider? services)
-        => (services?.GetService<IGrainRequestPhaseObserver>() as RequestCqrsProbeObserver)?.ReplicaSnapshot;
+        => ((services?.GetService<Func<IGrainRequestPhaseObserver>>()?.Invoke()
+            ?? services?.GetService<IGrainRequestPhaseObserver>()) as RequestCqrsProbeObserver)?.ReplicaSnapshot;
 
     internal async Task<ReplicaNodeState> ObserveAsync(ReplicaNodeState state,
         Func<CancellationToken, Task<ReplicaNodeState>> read, CancellationToken token)

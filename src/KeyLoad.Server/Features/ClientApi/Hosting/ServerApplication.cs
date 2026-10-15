@@ -1,28 +1,22 @@
-using KeyLoad.Clustering;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 
 internal static class ServerApplication
 {
+    private const string PhysicalOwnerUnjoined = "The original physical owner has not joined; retain its application and root.";
     internal static async Task RunAsync(string[] args)
     {
         global::KeyLoad.SimdRuntime.RequireHardwareSupport();
         _ = SerializationExecutionRegistration.Process.Value;
-        var app = ServerConfiguration.Build(args);
+        var app = await ServerConfiguration.BuildAsync(args).ConfigureAwait(false);
         var failures = new List<Exception>();
-        PartitionHost? partition = null;
         OrleansNode? silo = null;
-        INodeAdministration? administration = null;
         async Task RunLifetimeAsync()
         {
             try
             {
-                await PartitionHostApplicationOpening.OpenAsync(app.Services).ConfigureAwait(false);
-                partition = app.Services.GetRequiredService<PartitionHost>();
-                administration = app.Services.GetRequiredService<INodeAdministration>();
                 silo = app.Services.GetRequiredService<OrleansNode>();
-                await partition.Coordinator.StartAsync(app.Lifetime.ApplicationStopping).ConfigureAwait(false);
                 await app.StartAsync(app.Lifetime.ApplicationStopping).ConfigureAwait(false);
                 await silo.StartAsync(app.Lifetime.ApplicationStopping).ConfigureAwait(false);
                 await silo.WaitForPhysicalOwnerRegistrationAsync(app.Lifetime.ApplicationStopping).ConfigureAwait(false);
@@ -33,7 +27,7 @@ internal static class ServerApplication
             }
         }
         await ServerFailureObserver.ObserveAsync(RunLifetimeAsync, failures).ConfigureAwait(false);
-        await ShutdownAsync(app, silo, administration, partition, failures).ConfigureAwait(false);
+        await ShutdownAsync(app, silo, failures).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
@@ -44,8 +38,8 @@ internal static class ServerApplication
         await signal.Task.ConfigureAwait(false);
     }
 
-    private static async Task ShutdownAsync(WebApplication app, OrleansNode? silo, INodeAdministration? administration,
-        PartitionHost? partition, List<Exception> failures)
+    private static async Task ShutdownAsync(WebApplication app, OrleansNode? silo,
+        List<Exception> failures)
     {
         var settings = app.Services.GetRequiredService<IOptions<ServerExecutionOptions>>().Value;
         using var deadline = new CancellationTokenSource(settings.ShutdownTimeout, app.Services.GetRequiredService<TimeProvider>());
@@ -62,14 +56,14 @@ internal static class ServerApplication
             }
         }
         await ServerFailureObserver.ObserveAsync(() => app.StopAsync(deadline.Token), failures).ConfigureAwait(false);
-        if (administration is IAsyncDisposable borrowed)
+        var physical = app.Services.GetRequiredService<PartitionStorageLifecycle>();
+        await ServerFailureObserver.ObserveAsync(() => physical.StopAsync(CancellationToken.None), failures).ConfigureAwait(false);
+        var owner = app.Services.GetRequiredService<PartitionHostApplicationOwner>();
+        if (owner.Closing is not { IsCompleted: true } || !owner.CanReleaseRoot)
         {
-            await ServerFailureObserver.ObserveAsync(() => borrowed.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+            failures.Add(new InvalidOperationException(PhysicalOwnerUnjoined));
+            return;
         }
         await ServerFailureObserver.ObserveAsync(() => app.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
-        if (partition is not null)
-        {
-            await ServerFailureObserver.ObserveAsync(() => partition.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
-        }
     }
 }

@@ -1,13 +1,17 @@
 using System.Diagnostics;
 using KeyLoad.CrashHost;
 using KeyLoad.CrashHost.Features.BlobStorage;
+using KeyLoad.RecoveryTests.Features.DocumentStorage;
 using KeyLoad.RecoveryTests.Features.StorageRecovery;
+using KeyLoad.Server;
 
 namespace KeyLoad.RecoveryTests.Features.BlobStorage;
 
 internal static class BlobCommitCutProcess
 {
-    private const string PipeCleanupDiagnosticKey = "BlobCommitCutPipeCleanup";
+    private const string UnsettledReaders = "The original blob process readers did not settle; process and root were retained.";
+    private const string OriginalReadersKey = "BlobCommitCutOriginalReaders";
+    private const string OriginalProcessKey = "BlobCommitCutOriginalProcess";
     internal static async Task RunAsync(OperationKind kind, BlobCommitCutKind cut,
         Func<string, BlobCommitCutKind, CancellationToken, Task> verify, CancellationToken callerToken)
     {
@@ -41,11 +45,12 @@ internal static class BlobCommitCutProcess
         finally
         {
             using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(30), TimeProvider.System);
-            try
+            var failures = new List<Exception>();
+            if (activeFailure is not null)
             {
-                await SettleDrainsAsync(process, errorDrain, outputDrain, activeFailure, cleanup.Token);
+                await ServerFailureObserver.ObserveAsync(linked.CancelAsync, failures);
             }
-            finally { await RecoveryProcessCleanup.SettleAsync(process, root, root, activeFailure, cleanup.Token); }
+            await CleanupAsync(process, root, errorDrain, outputDrain, activeFailure, failures, cleanup.Token);
         }
     }
 
@@ -110,34 +115,57 @@ internal static class BlobCommitCutProcess
         throw new InvalidOperationException("The owned blob child exceeded its bounded pipe output.");
     }
 
-    private static async Task SettleDrainsAsync(Process? process, Task<string>? error, Task<string>? output,
-        Exception? activeFailure, CancellationToken cancellationToken)
+    private static async Task CleanupAsync(Process? process, string root, Task<string>? error, Task<string>? output,
+        Exception? primary, List<Exception> failures, CancellationToken token)
     {
-        if (process is null)
+        var originals = new[] { error, output }.OfType<Task<string>>().ToArray();
+        var joined = await SettleDrainsAsync(process, originals, failures, token);
+        if (joined)
         {
-            return;
+            var retention = primary ?? failures.FirstOrDefault();
+            await ServerFailureObserver.ObserveAsync(() => RecoveryProcessCleanup.SettleAsync(
+                process, root, root, retention, token), failures);
         }
-        try
+        else
         {
-            if (!process.HasExited)
-            {
-                process.Kill(entireProcessTree: true);
-                await process.WaitForExitAsync(cancellationToken);
-            }
-            var pending = new List<Task<string>>();
-            if (error is not null)
-            {
-                pending.Add(error);
-            }
-            if (output is not null)
-            {
-                pending.Add(output);
-            }
-            _ = await Task.WhenAll(pending).WaitAsync(cancellationToken);
+            var unknown = new IOException(UnsettledReaders);
+            unknown.Data[OriginalReadersKey] = originals;
+            unknown.Data[OriginalProcessKey] = process;
+            failures.Add(unknown);
         }
-        catch (Exception failure) when (activeFailure is not null)
+        CommandIdempotencyProcess.ThrowFailures(primary, failures);
+    }
+
+    private static async Task<bool> SettleDrainsAsync(Process? process, Task<string>[] originals,
+        List<Exception> failures, CancellationToken token)
+    {
+        if (process is not null)
         {
-            activeFailure.Data[PipeCleanupDiagnosticKey] = failure;
+            await ServerFailureObserver.ObserveAsync(async () =>
+            {
+                if (!process.HasExited)
+                {
+                    process.Kill(entireProcessTree: true);
+                    await process.WaitForExitAsync(token);
+                }
+            }, failures);
         }
+        var joined = Task.WhenAll(originals);
+        await ServerFailureObserver.ObserveAsync(() => joined.WaitAsync(token), failures);
+        foreach (var original in originals)
+        {
+            if (original.Exception is { } fault)
+            {
+                foreach (var failure in fault.InnerExceptions)
+                {
+                    CommandIdempotencyProcessFailureHandling.AddDistinct(failures, failure);
+                }
+            }
+            else if (original.IsCanceled)
+            {
+                await ServerFailureObserver.ObserveAsync(() => original, failures);
+            }
+        }
+        return originals.All(original => original.IsCompleted);
     }
 }

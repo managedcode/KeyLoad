@@ -90,7 +90,7 @@ internal sealed class ConnectionReadExecution(GrainRequestCodec codec, DatabaseE
         if (request.Envelope.ReadKind == GrainReadKind.FollowerDocument)
         {
             var execution = new FollowerDocumentReadExecution(localDatabase, coordinator,
-                services.GetRequiredService<KeyLoad.Replication.ReplicaConsensus>(),
+                services.GetRequiredService<Func<KeyLoad.Replication.ReplicaConsensus>>()(),
                 services.GetRequiredService<PhysicalShardRecord>(), codec);
             var follower = await execution.ExecuteAsync(request, context, work)
                 .ConfigureAwait(true);

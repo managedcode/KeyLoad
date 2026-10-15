@@ -14,7 +14,7 @@ internal static class PartitionMovementLateNativeColdOracle
         PartitionMovementLateNativeCaptured captured, CancellationToken cancellationToken)
     {
         var targetBefore = await ReadOtherOwnersAsync(owners, captured, cancellationToken);
-        var source = await owners.OpenStoppedAsync(captured.OwnerIndex).ConfigureAwait(false);
+        var source = await owners.OpenStoppedAsync(captured.OwnerIndex, cancellationToken).ConfigureAwait(false);
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
@@ -64,7 +64,7 @@ internal static class PartitionMovementLateNativeColdOracle
     internal static async Task RequirePersistedAsync(PartitionMovementLateNativeOwners owners,
         PartitionMovementLateNativeCaptured captured, CancellationToken cancellationToken)
     {
-        var source = await owners.OpenStoppedAsync(captured.OwnerIndex).ConfigureAwait(false);
+        var source = await owners.OpenStoppedAsync(captured.OwnerIndex, cancellationToken).ConfigureAwait(false);
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
@@ -89,7 +89,7 @@ internal static class PartitionMovementLateNativeColdOracle
             {
                 continue;
             }
-            var node = await owners.OpenStoppedAsync(index).ConfigureAwait(false);
+            var node = await owners.OpenStoppedAsync(index, cancellationToken).ConfigureAwait(false);
             var failures = new List<Exception>();
             ServerFailureObserver.Observe(() => rows.Add(PartitionMovementLateNativeCut.Read(node, captured.Operation).Rows
                 .OrderBy(pair => pair.Key, StringComparer.Ordinal).Select(pair => pair.Key + ":" + pair.Value).ToArray()), failures);

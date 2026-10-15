@@ -15,35 +15,43 @@ internal static class NativeRuntimeJournalRegistration
     internal const string ProviderName = "keyload-rf3-runtime-journal-v1";
     private const string BinaryFormat = "orleans-binary";
 
-    internal static void Register(ISiloBuilder silo, IOptions<RuntimeJournalOptions> journal,
-        IOptions<NativeDurableJobOptions> jobs)
+    internal static void Register(ISiloBuilder silo)
     {
-        if (!journal.Value.IsValid() || !jobs.Value.IsValid())
-        {
-            throw new InvalidOperationException(NativeDurableJobOptions.ValidationMessage);
-        }
         var services = silo.Services;
         services.AddSingleton<RuntimeJournalAdmission>();
-        services.AddSingleton(provider => new RuntimeJournalClient(provider.GetRequiredService<IGrainFactory>(),
-            provider.GetRequiredService<GrainRequestCodec>(), provider.GetRequiredService<DatabaseEngine>(),
-            provider.GetRequiredService<ICommitCoordinator>(), provider, provider.GetRequiredService<TimeProvider>(),
-            provider.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
-            provider.GetRequiredService<IOptions<GrainRoutingOptions>>(), journal,
-            provider.GetRequiredService<RuntimeJournalAdmission>()));
+        services.AddSingleton<RuntimeJournalClient>(CreateClient);
         silo.AddJournalStorage(ProviderName, provider => new RuntimeJournalStorageProvider(
-            provider.GetRequiredService<RuntimeJournalClient>(), journal,
+            provider.GetRequiredService<RuntimeJournalClient>(), provider.GetRequiredService<IOptions<RuntimeJournalOptions>>(),
             provider.GetRequiredService<IOptions<GrainRoutingOptions>>(),
             provider.GetRequiredService<IOptions<JournaledStateManagerOptions>>()));
         silo.Configure<JournaledStateManagerOptions>(options => options.JournalFormatKey = BinaryFormat);
-        var existing = services.Where(NativeJobLifecycleRegistration.IsLifecycle).ToArray();
-        services.AddOptions<DurableJobsOptions>().Configure<TimeProvider>((options, clock) => Configure(options, jobs.Value, clock));
+        services.AddOptions<DurableJobsOptions>().Configure<IOptions<NativeDurableJobOptions>, TimeProvider>(
+            (options, settings, clock) => Configure(options, settings.Value, clock));
         silo.UseJournaledDurableJobs();
-        NativeJobLifecycleRegistration.Decorate(services, existing);
+        NativeRequestDrainRegistration.Register(services);
         NativeJobGraphRegistration.Extend(services);
+    }
+
+    private static RuntimeJournalClient CreateClient(IServiceProvider provider)
+    {
+        var codec = new Lazy<GrainRequestCodec>(provider.GetRequiredService<GrainRequestCodec>);
+        var database = new Lazy<DatabaseEngine>(provider.GetRequiredService<DatabaseEngine>);
+        var coordinator = new Lazy<Func<ICommitCoordinator>>(provider.GetRequiredService<Func<ICommitCoordinator>>);
+        return new RuntimeJournalClient(provider.GetRequiredService<IGrainFactory>(),
+            () => codec.Value, () => database.Value, () => coordinator.Value(), provider,
+            provider.GetRequiredService<TimeProvider>(),
+            provider.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
+            provider.GetRequiredService<IOptions<GrainRoutingOptions>>(),
+            provider.GetRequiredService<IOptions<RuntimeJournalOptions>>(),
+            provider.GetRequiredService<RuntimeJournalAdmission>());
     }
 
     private static void Configure(DurableJobsOptions native, NativeDurableJobOptions settings, TimeProvider clock)
     {
+        if (!settings.IsValid())
+        {
+            throw new InvalidOperationException(NativeDurableJobOptions.ValidationMessage);
+        }
         native.ActiveProviderName = ProviderName;
         native.ShardDuration = settings.ShardDuration;
         native.ShardActivationBufferPeriod = TimeSpan.Zero;

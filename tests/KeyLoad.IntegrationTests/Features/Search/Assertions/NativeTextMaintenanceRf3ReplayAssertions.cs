@@ -12,7 +12,7 @@ internal static class NativeTextMaintenanceRf3ReplayAssertions
     private const int QueryLimit = 2;
     private const long ChangedRevision = 2;
     private const string Star = "*";
-    private const string Sql = "CALL keyload_search_text_maintain(@arguments)";
+    private const string Sql = "EXEC keyload_search_text_maintain @arguments";
 
     internal static async Task<TextIndexSourceCut> CurrentAsync(KeyLoadClient sdk, McpOfficialClient mcp,
         NativeTextMaintenanceRf3Scenario scenario, TextIndexMaintenanceRequest current, byte[] retained,

@@ -9,7 +9,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 
-/// <summary>Shares the server's validated options with the borrowed native silo container.</summary>
+/// <summary>Validates the server's canonical options before physical ownership.</summary>
 internal sealed record ServerRuntimeOptions(
     IOptions<NodeOptions> Node,
     IOptions<ReplicaConfiguration> ReplicaConfiguration,
@@ -70,34 +70,4 @@ internal sealed record ServerRuntimeOptions(
         Core.ValidateBeforePhysicalOwnership();
     }
 
-    internal void RegisterBorrowed(IServiceCollection services)
-    {
-        services.AddSingleton(Node);
-        services.AddSingleton(ReplicaConfiguration);
-        services.AddSingleton(DueCoordination);
-        services.AddSingleton(DurableJobs);
-        services.AddSingleton(ReplicaExecution);
-        services.AddSingleton(ReplicaTransport);
-        services.AddSingleton(Peer);
-        services.AddSingleton(Replay);
-        services.AddSingleton(CommandAdmission);
-        services.AddSingleton(HttpAdmission);
-        services.AddSingleton(McpMemory);
-        services.AddSingleton(McpExecution);
-        services.AddSingleton(StorageExecution);
-        services.AddSingleton(PointCache);
-        services.AddSingleton(RequestProbeExecution);
-        services.AddSingleton(Membership);
-        services.AddSingleton(GrainRouting);
-        services.AddSingleton(PhysicalOwners);
-        services.AddSingleton(PartitionMovement);
-        services.AddSingleton(TenantPlacement);
-        services.AddSingleton(RemoteDocuments);
-        services.AddSingleton(AdminObservation);
-        services.AddSingleton(NativeText);
-        services.AddSingleton(NativeAnn);
-        services.AddSingleton(ServerExecution);
-        services.AddSingleton(DatabasePhaseExecution);
-        Core.RegisterBorrowed(services);
-    }
 }

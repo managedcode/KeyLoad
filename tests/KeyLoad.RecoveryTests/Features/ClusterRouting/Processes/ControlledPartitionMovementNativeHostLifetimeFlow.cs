@@ -10,6 +10,8 @@ internal static class ControlledPartitionMovementNativeHostLifetimeFlow
 {
     private const int FirstOwner = 0;
     private const int Owners = 6;
+    private const int OwnedLockCount = 18;
+    private const string StoreOwnerLock = "owner.lock";
     private const string NodePrefix = "node";
     private const string RetainedRoot = "KeyLoad.ControlledMovement.NativeRetainedRoot";
 
@@ -24,7 +26,7 @@ internal static class ControlledPartitionMovementNativeHostLifetimeFlow
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            await ControlledPartitionMovementNativeFailedCreationFlow.RunAsync(readiness, clock, token.Token);
+            await ControlledPartitionMovementNativeFailedCreationFlow.RunAsync(token.Token);
             hosts = await ControlledPartitionMovementNativeHosts.CreateAsync(token.Token);
             var prepared = await ControlledPartitionMovementNativeProcessOperation.WarmAsync(hosts, token.Token);
             hosts.RetainRoots();
@@ -110,12 +112,19 @@ internal static class ControlledPartitionMovementNativeHostLifetimeFlow
     private static async Task LocksAsync(string root, IOptions<NativeProcessReadinessOptions> readiness,
         TimeProvider clock, CancellationToken cancellationToken)
     {
+        var opened = FirstOwner;
         for (var index = FirstOwner; index < Owners; index++)
         {
             var node = Path.Combine(root, NodePrefix + index.ToString(System.Globalization.CultureInfo.InvariantCulture));
             await ControlledPartitionMovementProcessOwnership.RequireAsync(node, readiness, clock, cancellationToken);
-            using var ownership = new FileStream(Path.Combine(node, PartitionStoreProtocol.OwnershipFile),
-                FileMode.Open, FileAccess.ReadWrite, FileShare.None);
+            foreach (var path in new[] { Path.Combine(node, PartitionStoreProtocol.OwnershipFile),
+                Path.Combine(node, PartitionStoreProtocol.CanonicalDirectory, StoreOwnerLock),
+                Path.Combine(node, global::KeyLoad.Replication.ReplicaProtocol.ReplicaDirectory, StoreOwnerLock) })
+            {
+                using var ownership = File.Open(path, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
+                opened++;
+            }
         }
+        await Assert.That(opened).IsEqualTo(OwnedLockCount);
     }
 }

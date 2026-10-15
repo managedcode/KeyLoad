@@ -5,6 +5,7 @@ namespace KeyLoad.Storage.ZoneTree;
 
 internal static class ZoneTreeIdentityFile
 {
+    private const long MinimumReadGeneration = 0;
     private const int NoFileAttributes = 0;
 
     internal static StoreIdentity Open(ZoneTreeStoreOptions options, FileStream ownership)
@@ -126,7 +127,8 @@ internal static class ZoneTreeIdentityFile
             throw Errors.Fail(ErrorCode.FormatUnsupported, IdentityFormatUnsupported);
         }
 
-        if (identity.SigningKey.Length != SigningKeyBytes || identity.NodeId == Guid.Empty || identity.Incarnation == Guid.Empty)
+        if (identity.SigningKey.Length != SigningKeyBytes || identity.NodeId == Guid.Empty || identity.Incarnation == Guid.Empty
+            || identity.ReadGeneration < MinimumReadGeneration || !Enum.IsDefined(identity.Durability))
         {
             throw Errors.Fail(ErrorCode.Corruption, IdentityChecksumInvalid);
         }

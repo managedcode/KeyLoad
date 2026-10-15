@@ -225,7 +225,8 @@ internal sealed class RequestCqrsSiloConfigurator : ISiloConfigurator
                     .GetSection(TextIndexMaintenanceOptions.SectionName))
                 .Validate(options => options.IsValid(), TextIndexMaintenanceOptions.ValidationMessage)
                 .ValidateOnStart();
-            siloBuilder.Services.AddSingleton<INativeTextMaintenance>(native.Owner);
+            INativeTextMaintenance textMaintenance = native.Owner;
+            siloBuilder.Services.AddSingleton<Func<INativeTextMaintenance>>(() => textMaintenance);
         }
         if (fixture.NativeAnnMaintenance is { } ann)
         {
@@ -234,20 +235,23 @@ internal sealed class RequestCqrsSiloConfigurator : ISiloConfigurator
                     .GetSection(AnnMaintenanceOptions.SectionName))
                 .Validate(options => options.IsValid(), AnnMaintenanceOptions.ValidationMessage)
                 .ValidateOnStart();
-            siloBuilder.Services.AddSingleton<INativeAnnMaintenance>(ann.Owner);
+            INativeAnnMaintenance annMaintenance = ann.Owner;
+            siloBuilder.Services.AddSingleton<Func<INativeAnnMaintenance>>(() => annMaintenance);
         }
         siloBuilder.Services.AddSerializer(serialization => serialization
             .AddAssembly(typeof(GrainRequestContextState).Assembly)
             .AddAssembly(typeof(CqrsStreamChunkSurrogateConverter<GrainRequestProgress, GrainOperationReply>).Assembly)
             .AddAssembly(typeof(ClaimsPrincipalSurrogateConverter).Assembly));
         siloBuilder.Services.AddSingleton(fixture.Database.Database);
-        siloBuilder.Services.AddSingleton<ICommitCoordinator>(fixture.UsesNativeAdmission
+        ICommitCoordinator coordinator = fixture.UsesNativeAdmission
             ? new RequestCqrsNativeCommitCoordinator(fixture.Database)
-            : new EmbeddedCoordinator(fixture.Database.Database));
+            : new EmbeddedCoordinator(fixture.Database.Database);
+        siloBuilder.Services.AddSingleton<Func<ICommitCoordinator>>(() => coordinator);
         siloBuilder.Services.AddSingleton(fixture.Clock);
         siloBuilder.Services.AddSingleton(fixture.RoutingOptions);
         siloBuilder.Services.AddSingleton(UnitExecutionOptions.Messaging());
-        siloBuilder.Services.AddSingleton(_ => fixture.RequestWork);
+        var requestWork = fixture.RequestWork;
+        siloBuilder.Services.AddSingleton<Func<NativeRequestWorkOwner>>(() => requestWork);
         siloBuilder.Services.AddSingleton(fixture.Codec);
         siloBuilder.Services.AddSingleton<NativeConnectionOwnerIdentity>();
         siloBuilder.Services.Configure<global::Orleans.Configuration.GrainCollectionOptions>(

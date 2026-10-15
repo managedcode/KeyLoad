@@ -7,6 +7,8 @@ internal sealed class NativeCqrsStreamPurpose(Func<DecodedGrainRequest>? resolve
     private bool textCandidate;
     private bool annCandidate;
     private bool tailCandidate;
+    private bool onlineCandidate;
+    private bool placementCandidate;
     private DecodedGrainRequest? original;
     internal bool IsTextMaintenance
     {
@@ -21,7 +23,20 @@ internal sealed class NativeCqrsStreamPurpose(Func<DecodedGrainRequest>? resolve
         get; private set;
     }
     internal bool IsEventFeedTail => TailRequest is not null;
-    internal bool HasLongProfile => IsTextMaintenance || IsAnnMaintenance || IsEventFeedTail;
+    internal bool IsOnlineTextMaintenance
+    {
+        get; private set;
+    }
+    internal ApplyPlacementIntentRequest? PlacementRequest
+    {
+        get; private set;
+    }
+    internal bool IsPartitionMovement
+    {
+        get; private set;
+    }
+    internal bool HasLongProfile => IsTextMaintenance || IsAnnMaintenance || IsEventFeedTail || IsPartitionMovement
+        || IsOnlineTextMaintenance || PlacementRequest is not null;
 
     internal void Bind(DecodedGrainRequest request)
     {
@@ -29,11 +44,14 @@ internal sealed class NativeCqrsStreamPurpose(Func<DecodedGrainRequest>? resolve
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
         }
+        IsPartitionMovement = request.Envelope.CommandKind == OperationKind.MovePartition;
         textCandidate = request.Envelope.CommandKind == OperationKind.MaintainTextIndex;
         annCandidate = request.Envelope.CommandKind == OperationKind.MaintainAnnIndex;
         tailCandidate = request.Envelope.CommandKind == OperationKind.EventFeedControl
             && request.Envelope.Purpose == EventVectorRequestScope.ParentPurpose;
-        if (((textCandidate || annCandidate) && resolve is not null) || tailCandidate)
+        onlineCandidate = request.Envelope.CommandKind == OperationKind.MaintainOnlineTextIndex;
+        placementCandidate = request.Envelope.CommandKind == OperationKind.ApplyPlacementIntent;
+        if (((textCandidate || annCandidate) && resolve is not null) || tailCandidate || onlineCandidate || placementCandidate)
         {
             original = request;
         }
@@ -65,6 +83,17 @@ internal sealed class NativeCqrsStreamPurpose(Func<DecodedGrainRequest>? resolve
             return;
         }
         original = null;
+        if (onlineCandidate)
+        {
+            _ = GrainNativePayload.ReadCommand<OnlineTextIndexMaintenanceRequest>(request.Payload);
+            IsOnlineTextMaintenance = true;
+            return;
+        }
+        if (placementCandidate)
+        {
+            PlacementRequest = GrainNativePayload.ReadCommand<ApplyPlacementIntentRequest>(request.Payload);
+            return;
+        }
         if (tailCandidate)
         {
             var tail = GrainNativePayload.ReadCommand<EventFeedControlRequest>(request.Payload);

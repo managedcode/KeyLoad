@@ -1,6 +1,7 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Messaging;
 using KeyLoad.Replication;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Clustering;
@@ -9,35 +10,65 @@ namespace KeyLoad.Clustering;
 /// <param name="id">The Orleans grain-service identity for this silo instance.</param>
 /// <param name="silo">The hosting Orleans silo.</param>
 /// <param name="loggerFactory">The factory used by the grain-service base class.</param>
-/// <param name="database">The node-local database and canonical read owner.</param>
-/// <param name="consensus">The local replicated-partition leadership and read-barrier service.</param>
-/// <param name="grainFactory">The Orleans factory for partition coordinator activations.</param>
-/// <param name="clock">The shared UTC clock used for due discovery and bounded polling.</param>
+/// <param name="services">The actual silo provider; storage-backed dependencies resolve in native sequential Init.</param>
 /// <param name="diagnostics">Safe operational diagnostics for rejected pages and dispatch outcomes.</param>
-/// <param name="options">The centrally validated dispatch and discovery scheduling settings.</param>
-/// <param name="journalAdmission">The native scheduling admission and early shutdown token.</param>
 public sealed class RecurringDueGrainService(GrainId id, Silo silo,
     Microsoft.Extensions.Logging.ILoggerFactory loggerFactory,
-    DatabaseEngine database, ReplicaConsensus consensus, IGrainFactory grainFactory, TimeProvider clock,
-    Microsoft.Extensions.Logging.ILogger<RecurringDueGrainService> diagnostics,
-    IOptions<DueCoordinationOptions> options, RuntimeJournalAdmission journalAdmission)
+    IServiceProvider services,
+    Microsoft.Extensions.Logging.ILogger<RecurringDueGrainService> diagnostics)
     : GrainService(id, silo, loggerFactory), IRecurringDueGrainService
 {
     private const int NoRejectedDueHints = 0;
+    private DatabaseEngine database = null!;
+    private ReplicaConsensus consensus = null!;
+    private IGrainFactory grainFactory = null!;
+    private TimeProvider clock = null!;
+    private IOptions<DueCoordinationOptions> options = null!;
+    private RuntimeJournalAdmission journalAdmission = null!;
+
+    private readonly Lock producerLifecycle = new();
+    private bool producerClosed;
     private Task? loop;
 
     /// <summary>Completes native per-silo grain-service initialization.</summary>
     /// <param name="serviceProvider">The active silo service provider.</param>
-    /// <returns>The base grain-service initialization task.</returns>
-    public override Task Init(IServiceProvider serviceProvider) => base.Init(serviceProvider);
+    /// <returns>The native initialization task with deferred physical dependency resolution.</returns>
+    public override async Task Init(IServiceProvider serviceProvider)
+    {
+        await base.Init(serviceProvider).ConfigureAwait(true);
+        database = services.GetRequiredService<DatabaseEngine>();
+        consensus = services.GetRequiredService<Func<ReplicaConsensus>>()();
+        grainFactory = services.GetRequiredService<IGrainFactory>();
+        clock = services.GetRequiredService<TimeProvider>();
+        options = services.GetRequiredService<IOptions<DueCoordinationOptions>>();
+        journalAdmission = services.GetRequiredService<RuntimeJournalAdmission>();
+    }
 
     /// <summary>Starts the joined due-discovery loop after native grain-service startup.</summary>
     /// <returns>The base grain-service startup task.</returns>
     protected override Task StartInBackground()
     {
-        var started = base.StartInBackground();
-        loop = RunAsync(StoppedCancellationTokenSource.Token);
-        return started;
+        lock (producerLifecycle)
+        {
+            if (producerClosed)
+            {
+                return loop ?? Task.CompletedTask;
+            }
+            var started = base.StartInBackground();
+            loop = RunAsync(StoppedCancellationTokenSource.Token);
+            return started;
+        }
+    }
+
+    /// <summary>Closes local producer admission and borrows its same original terminal task.</summary>
+    /// <returns>The original producer, or completion when no producer started before the closed fence.</returns>
+    public Task JoinStorageProducerAsync()
+    {
+        lock (producerLifecycle)
+        {
+            producerClosed = true;
+            return loop ?? Task.CompletedTask;
+        }
     }
 
     /// <summary>Stops admission, cancels discovery and joins the active loop.</summary>

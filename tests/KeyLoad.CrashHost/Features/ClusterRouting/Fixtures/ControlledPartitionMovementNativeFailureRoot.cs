@@ -10,12 +10,23 @@ internal sealed class ControlledPartitionMovementNativeFailureRoot
     {
         Root = root;
         Nodes = nodes;
+        EntriesBeforeAcquisition = Directory.GetFileSystemEntries(root).ToImmutableArray();
+        ModeBeforeAcquisition = OperatingSystem.IsLinux() || OperatingSystem.IsMacOS() ? File.GetUnixFileMode(root) : null;
     }
     internal string Root
     {
         get;
     }
     internal ImmutableArray<string> Nodes
+    {
+        get;
+    }
+
+    internal ImmutableArray<string> EntriesBeforeAcquisition
+    {
+        get;
+    }
+    internal UnixFileMode? ModeBeforeAcquisition
     {
         get;
     }

@@ -8,14 +8,6 @@ namespace KeyLoad.Server;
 internal static class NativeJobGraphRegistration
 {
     private const string ExistingPolicyRequired = "The native jobs graph requires the existing default-deny policy instance.";
-    internal static Type ManagerType(IServiceCollection services)
-        => services.Where(static descriptor => !descriptor.IsKeyedService)
-            .Select(static descriptor => descriptor.ServiceType)
-            .Where(static type => !type.IsInterface && !type.IsAbstract
-                && typeof(ILocalDurableJobManager).IsAssignableFrom(type)
-                && type.Assembly == typeof(ILocalDurableJobManager).Assembly)
-            .Distinct().Single();
-
     internal static void Extend(IServiceCollection services)
     {
         var descriptor = services.Single(static value => !value.IsKeyedService

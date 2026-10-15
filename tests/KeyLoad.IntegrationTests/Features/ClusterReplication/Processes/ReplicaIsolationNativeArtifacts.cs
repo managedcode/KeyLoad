@@ -11,7 +11,7 @@ internal static class ReplicaIsolationNativeArtifacts
     private const string ApplicationDirectory = "/app/";
     private const string Dll = ".dll";
     private const string Pdb = ".pdb";
-    private static readonly string[] Modules = ["KeyLoad.Abstractions", "KeyLoad.Core", "KeyLoad.Orleans",
+    private static readonly string[] Modules = ["KeyLoad.Abstractions", "KeyLoad.Core", "KeyLoad.Clustering",
         "KeyLoad.Replication", "KeyLoad.Security", "KeyLoad.Query", "KeyLoad.Storage.ZoneTree", "KeyLoad.Storage.IO",
         "KeyLoad.Server", "KeyLoad.Diagnostics", "KeyLoad.ServiceDefaults"];
 

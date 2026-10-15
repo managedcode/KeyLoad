@@ -8,9 +8,10 @@ internal sealed partial class OrleansNode
         => OrleansNodeRequestExecutor.CloseAsync(Grains ?? throw Errors.Fail(ErrorCode.OwnershipLost, OrleansNodeProtocol.RoutingUnavailable),
             RuntimeServices, connectionId, cancellationToken);
     internal RequestCqrsProbeObserver? CanonicalCutObserver
-        => Grains is null ? null : Volatile.Read(ref host)?.Services.GetService<KeyLoad.Clustering.IGrainRequestPhaseObserver>() as RequestCqrsProbeObserver;
+        => Grains is null ? null : (applicationServices.GetService<Func<KeyLoad.Clustering.IGrainRequestPhaseObserver>>()?.Invoke()
+            ?? applicationServices.GetService<KeyLoad.Clustering.IGrainRequestPhaseObserver>()) as RequestCqrsProbeObserver;
     internal RequestCqrsReplicaSnapshotObserver? ReplicaSnapshotObserver
-        => Grains is null ? null : RequestCqrsReplicaSnapshotObserver.Find(Volatile.Read(ref host)?.Services);
+        => Grains is null ? null : RequestCqrsReplicaSnapshotObserver.Find(applicationServices);
     internal Task WaitForNativeStartupAsync(CancellationToken cancellationToken)
         => OrleansNodeStartupWait.WaitAsync(lifecycle, ref startup, cancellationToken);
 }

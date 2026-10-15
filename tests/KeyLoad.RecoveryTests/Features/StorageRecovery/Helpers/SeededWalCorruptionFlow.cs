@@ -6,6 +6,9 @@ namespace KeyLoad.RecoveryTests.Features.StorageRecovery;
 
 internal static class SeededWalCorruptionFlow
 {
+    private const int NoFailures = 0;
+    private const int SingleFailure = 1;
+    private const int FirstFailure = 0;
     internal static async Task RunAsync(int seed, CancellationToken callerToken)
     {
         var trial = new SeededWalCorruptionTrial(seed);
@@ -35,8 +38,35 @@ internal static class SeededWalCorruptionFlow
         await ServerFailureObserver.ObserveAsync(() => SeededWalCorruptionFiles.RequireHistoryAsync(owner), failures);
         using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(CommandIdempotencyProcessRecoveryTests.CleanupTimeoutSeconds), TimeProvider.System);
         await ServerFailureObserver.ObserveAsync(async () => await SeededWalCorruptionEvidence.SaveAsync(trial, owner, failures, cleanup.Token), failures);
-        await ServerFailureObserver.ObserveAsync(() => CommandIdempotencyProcessCleanup.CleanupActiveTrialAsync(trial.Root, owner.Active, null), failures);
-        ServerFailureObserver.ThrowIfAny(failures);
+        await CleanupAsync(trial, owner, failures);
+        CommandIdempotencyProcessFailureHandling.ThrowFailures(failures);
+    }
+    internal static async Task CleanupAsync(SeededWalCorruptionTrial trial,
+        SeededWalCorruptionProcessOwner owner, List<Exception> failures)
+    {
+        var primary = failures.Count switch
+        {
+            NoFailures => null,
+            SingleFailure => failures[FirstFailure],
+            _ => new AggregateException(failures)
+        };
+        var observed = new List<Exception>();
+        await ServerFailureObserver.ObserveAsync(() => CommandIdempotencyProcessCleanup.CleanupActiveTrialAsync(
+            trial.Root, owner.Active, primary), observed);
+        foreach (var failure in observed.Where(failure => !ReferenceEquals(failure, primary)))
+        {
+            if (failure is AggregateException aggregate && aggregate.InnerExceptions.Any(item => ReferenceEquals(item, primary)))
+            {
+                foreach (var additional in aggregate.InnerExceptions.Where(item => !ReferenceEquals(item, primary)))
+                {
+                    CommandIdempotencyProcessFailureHandling.AddDistinct(failures, additional);
+                }
+            }
+            else
+            {
+                CommandIdempotencyProcessFailureHandling.AddDistinct(failures, failure);
+            }
+        }
     }
     private static async Task RepairAsync(SeededWalCorruptionTrial trial, List<Exception> failures)
     {

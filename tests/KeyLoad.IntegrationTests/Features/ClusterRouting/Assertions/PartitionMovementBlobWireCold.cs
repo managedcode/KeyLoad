@@ -16,7 +16,7 @@ internal sealed record PartitionMovementBlobWireCold(PartitionMovementBlobWireNa
         for (var index = FirstOwner; index < owners.Nodes.Count; index++)
         {
             token.ThrowIfCancellationRequested();
-            var node = await owners.OpenStoppedAsync(index).ConfigureAwait(false);
+            var node = await owners.OpenStoppedAsync(index, token).ConfigureAwait(false);
             var failures = new List<Exception>();
             ServerFailureObserver.Observe(() =>
             {

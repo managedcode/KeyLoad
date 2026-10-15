@@ -11,21 +11,30 @@ namespace KeyLoad.CrashHost.Features.ClusterRouting;
 
 internal sealed partial class ControlledPartitionMovementNativeHost : IAsyncDisposable
 {
-    private readonly WebApplication application;
     private readonly Lock lifecycle = new();
+    private Task? startup;
     private Task? shutdown;
     private Task? applicationDisposal;
-    private Task? partitionDisposal;
+    private Task? storageStop;
+    private readonly ServerConnectionRegistry connections;
+    private readonly PartitionStorageLifecycle storageLifecycle;
+    private readonly Func<PartitionHostApplicationOwner> storageOwner;
+    private Func<PartitionHost>? partition;
+    private readonly Func<OrleansNode> silo;
     private bool joined;
 
-    private ControlledPartitionMovementNativeHost(WebApplication application, ControlledPartitionMovementNativeObservationWitness nativeObservation)
+    internal ControlledPartitionMovementNativeHost(WebApplication application, ControlledPartitionMovementNativeObservationWitness nativeObservation)
     {
-        this.application = application;
+        Application = application;
         NativeObservation = nativeObservation;
         Runtime = application.Services.GetRequiredService<ServerRuntimeOptions>();
         Clock = application.Services.GetRequiredService<TimeProvider>();
-        Partition = application.Services.GetRequiredService<PartitionHost>();
-        Silo = application.Services.GetRequiredService<OrleansNode>();
+        connections = application.Services.GetRequiredService<ServerConnectionRegistry>();
+        var originalSilo = application.Services.GetRequiredService<OrleansNode>();
+        silo = () => originalSilo;
+        storageLifecycle = application.Services.GetRequiredService<PartitionStorageLifecycle>();
+        var originalStorageOwner = application.Services.GetRequiredService<PartitionHostApplicationOwner>();
+        storageOwner = () => originalStorageOwner;
     }
 
     internal ControlledPartitionMovementNativeObservationWitness NativeObservation
@@ -33,28 +42,19 @@ internal sealed partial class ControlledPartitionMovementNativeHost : IAsyncDisp
         get;
     }
 
-    internal static async Task<ControlledPartitionMovementNativeHost> CreateAsync(string[] arguments,
+    internal static Task<ControlledPartitionMovementNativeHost> CreateAsync(string[] arguments,
         NativeLocalhostClusteringOptions localhostClustering,
         IGrainPartitionMovementSealedOperationObserver? sealedObserver = null,
-        IDatabaseAuthenticationExecutionObserver? authenticationObserver = null)
-    {
-        var nativeObservation = new ControlledPartitionMovementNativeObservationWitness();
-        var application = ServerConfiguration.Build(arguments, sealedObserver: sealedObserver, localhostClustering: localhostClustering,
-            authenticationExecutionObserver: authenticationObserver, partitionMovementNativeObserver: nativeObservation);
-        try
-        {
-            await PartitionHostApplicationOpening.OpenAsync(application.Services).ConfigureAwait(false);
-            return new(application, nativeObservation);
-        }
-        catch (Exception primary)
-        {
-            var failures = new List<Exception> { primary };
-            await ServerFailureObserver.ObserveAsync(() => application.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
-            ServerFailureObserver.ThrowIfAny(failures);
-            throw;
-        }
-    }
+        IDatabaseAuthenticationExecutionObserver? authenticationObserver = null,
+        Func<IServiceProvider, ILifecycleParticipant<ISiloLifecycle>>? lifecycleParticipantFactory = null,
+        CancellationToken startupCancellation = default)
+        => ControlledPartitionMovementNativeApplicationFactory.CreateAsync(arguments, localhostClustering,
+            sealedObserver, authenticationObserver, lifecycleParticipantFactory, startupCancellation);
 
+    internal WebApplication Application
+    {
+        get;
+    }
     internal ServerRuntimeOptions Runtime
     {
         get;
@@ -63,14 +63,9 @@ internal sealed partial class ControlledPartitionMovementNativeHost : IAsyncDisp
     {
         get;
     }
-    internal PartitionHost Partition
-    {
-        get;
-    }
-    internal OrleansNode Silo
-    {
-        get;
-    }
+    internal PartitionHost Partition => partition?.Invoke() ?? throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMovementProtocol.Unavailable);
+    internal OrleansNode Silo => partition is not null
+        ? silo() : throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMovementProtocol.Unavailable);
     internal DatabaseEngine Database => Partition.Database;
     internal IAtomicStore Store => Database.Store;
     internal IDurableReplicaLog Log => Partition.Materializer.Log;
@@ -82,14 +77,26 @@ internal sealed partial class ControlledPartitionMovementNativeHost : IAsyncDisp
     internal PartitionMovementTransportOwner BorrowTransport()
         => new(Runtime.Node, Silo, Partition, Runtime.Membership, Clock);
 
-    internal async Task StartAsync(CancellationToken cancellationToken)
+    internal Task StartAsync(CancellationToken cancellationToken)
     {
-        await Partition.Coordinator.StartAsync(cancellationToken).ConfigureAwait(false);
-        await application.StartAsync(cancellationToken).ConfigureAwait(false);
-        await Silo.StartAsync(cancellationToken).ConfigureAwait(false);
-        await Silo.WaitForPhysicalOwnerRegistrationAsync(cancellationToken).ConfigureAwait(false);
+        lock (lifecycle)
+        {
+            ObjectDisposedException.ThrowIf(shutdown is not null, this);
+            return startup ??= StartCoreAsync(cancellationToken);
+        }
+    }
+
+    private async Task StartCoreAsync(CancellationToken cancellationToken)
+    {
+        await Application.StartAsync(cancellationToken).ConfigureAwait(false);
+        var opened = storageOwner().Borrow();
+        var native = silo();
+        ControlledPartitionMovementNativePublication.RequireActive(Application, opened, native);
+        partition = () => opened;
+        await native.StartAsync(cancellationToken).ConfigureAwait(false);
+        await native.WaitForPhysicalOwnerRegistrationAsync(cancellationToken).ConfigureAwait(false);
         cancellationToken.ThrowIfCancellationRequested();
-        if (!Silo.DatabaseReady)
+        if (!native.DatabaseReady)
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalShardCatalogFence.NotReady);
         }

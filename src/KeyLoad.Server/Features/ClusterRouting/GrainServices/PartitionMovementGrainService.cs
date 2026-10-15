@@ -6,10 +6,7 @@ namespace KeyLoad.Server.Features.ClusterRouting;
 /// <param name="id">Native per-silo service identity.</param>
 /// <param name="silo">Actual hosting silo.</param>
 /// <param name="loggerFactory">Borrowed native diagnostic owner.</param>
-/// <param name="discovery">Actual local native generation and reader capability.</param>
-/// <param name="authentication">Existing local discovery signature owner.</param>
-internal sealed partial class PartitionMovementGrainService(GrainId id, Silo silo, ILoggerFactory loggerFactory,
-    ReplicaSiloDiscoveryState discovery, ReplicaEnvelopeAuthenticator authentication)
+internal sealed partial class PartitionMovementGrainService(GrainId id, Silo silo, ILoggerFactory loggerFactory)
     : GrainService(id, silo, loggerFactory), IPartitionMovementGrainService
 {
     private const int FailureEventId = 3;
@@ -17,6 +14,12 @@ internal sealed partial class PartitionMovementGrainService(GrainId id, Silo sil
     private static readonly Action<ILogger, Exception?> LogFailure = LoggerMessage.Define(LogLevel.Error,
         new EventId(FailureEventId), PartitionMovementProtocol.Unavailable);
     private readonly ILogger diagnostics = loggerFactory.CreateLogger<PartitionMovementGrainService>();
+    private ReplicaSiloDiscoveryState? discoveryState;
+    private ReplicaEnvelopeAuthenticator? authenticator;
+    private ReplicaSiloDiscoveryState discovery => discoveryState
+        ?? throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMovementProtocol.Unavailable);
+    private ReplicaEnvelopeAuthenticator authentication => authenticator
+        ?? throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMovementProtocol.Unavailable);
     private PartitionMovementNativeReceiver? receiver;
     private PhysicalOwnerProbeNativeRuntime? physicalProbe;
 
@@ -24,9 +27,14 @@ internal sealed partial class PartitionMovementGrainService(GrainId id, Silo sil
     public override async Task Init(IServiceProvider serviceProvider)
     {
         await base.Init(serviceProvider).ConfigureAwait(true);
+        var token = StoppedCancellationTokenSource.Token;
+        await serviceProvider.GetRequiredService<Func<IPartitionStoragePublication>>()().WaitForOpenAsync(token).ConfigureAwait(true);
+        await serviceProvider.GetRequiredService<OrleansNode>().InitializeLocalRuntimeAsync(token).ConfigureAwait(true);
+        discoveryState = serviceProvider.GetRequiredService<ReplicaSiloDiscoveryState>();
+        authenticator = serviceProvider.GetRequiredService<ReplicaEnvelopeAuthenticator>();
         receiver = serviceProvider.GetService<PartitionMovementNativeReceiver>();
         physicalProbe = serviceProvider.GetService<PhysicalOwnerProbeNativeRuntime>();
-        capacity = serviceProvider.GetService<OwnerCapacityNativeLifetime>();
+        capacity = serviceProvider.GetService<Func<OwnerCapacityNativeLifetime>>()?.Invoke();
     }
 
     /// <inheritdoc />

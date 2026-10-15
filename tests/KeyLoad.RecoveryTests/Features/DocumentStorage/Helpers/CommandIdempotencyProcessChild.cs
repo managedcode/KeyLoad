@@ -131,6 +131,12 @@ internal sealed class CommandIdempotencyProcessChild
         await JoinReadersAsync(cancellationToken);
     }
 
+    internal async Task WaitForOriginalExitAndReadersAsync(CancellationToken cancellationToken)
+    {
+        await RequireExitTask().WaitAsync(cancellationToken);
+        await JoinReadersAsync(cancellationToken);
+    }
+
     internal async Task StopAndJoinAsync(CancellationToken cancellationToken)
     {
         var failures = new List<Exception>();

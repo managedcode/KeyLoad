@@ -3,10 +3,15 @@ using KeyLoad.Clustering;
 namespace KeyLoad.Server.Features.ClusterRouting;
 
 /// <summary>Fixture-enabled native endpoint for original producer disposal facts; never a database execution endpoint.</summary>
-internal sealed class RequestCqrsProbeGrainService(GrainId id, Silo silo, ILoggerFactory loggerFactory,
-    RequestCqrsProbeNativeRelay relay, RequestCqrsProbeObserver observer)
+internal sealed class RequestCqrsProbeGrainService(GrainId id, Silo silo, ILoggerFactory loggerFactory)
     : GrainService(id, silo, loggerFactory), IRequestCqrsProbeGrainService
 {
+    private RequestCqrsProbeNativeRelay? nativeRelay;
+    private RequestCqrsProbeObserver? nativeObserver;
+    private RequestCqrsProbeNativeRelay relay => nativeRelay
+        ?? throw Errors.Fail(ErrorCode.OwnershipLost, RequestCqrsProbeNativeProtocol.Unavailable);
+    private RequestCqrsProbeObserver observer => nativeObserver
+        ?? throw Errors.Fail(ErrorCode.OwnershipLost, RequestCqrsProbeNativeProtocol.Unavailable);
     private const int FailureEventId = 1;
     private static readonly Action<ILogger, Exception?> LogFailure = LoggerMessage.Define(LogLevel.Error,
         new EventId(FailureEventId), RequestCqrsProbeNativeProtocol.Unavailable);
@@ -15,6 +20,11 @@ internal sealed class RequestCqrsProbeGrainService(GrainId id, Silo silo, ILogge
     public override async Task Init(IServiceProvider serviceProvider)
     {
         await base.Init(serviceProvider).ConfigureAwait(true);
+        var token = StoppedCancellationTokenSource.Token;
+        await serviceProvider.GetRequiredService<Func<IPartitionStoragePublication>>()().WaitForOpenAsync(token).ConfigureAwait(true);
+        await serviceProvider.GetRequiredService<OrleansNode>().InitializeLocalRuntimeAsync(token).ConfigureAwait(true);
+        nativeRelay = serviceProvider.GetRequiredService<RequestCqrsProbeNativeRelay>();
+        nativeObserver = serviceProvider.GetRequiredService<RequestCqrsProbeObserver>();
         observer.AttachProducerDisposalRelay(relay);
     }
 
@@ -46,7 +56,10 @@ internal sealed class RequestCqrsProbeGrainService(GrainId id, Silo silo, ILogge
     public override async Task Stop()
     {
         var failures = new List<Exception>();
-        await ServerFailureObserver.ObserveAsync(relay.StopAsync, failures).ConfigureAwait(true);
+        if (nativeRelay is { } original)
+        {
+            await ServerFailureObserver.ObserveAsync(original.StopAsync, failures).ConfigureAwait(true);
+        }
         await ServerFailureObserver.ObserveAsync(base.Stop, failures).ConfigureAwait(true);
         ServerFailureObserver.ThrowIfAny(failures);
     }

@@ -1,4 +1,5 @@
 using KeyLoad.AppHost.Features.BlobStorage;
+using KeyLoad.AppHost.Features.ClusterReplication;
 using KeyLoad.AppHost.Features.ClusterRouting;
 using KeyLoad.AppHost.Features.CodeQuality;
 using KeyLoad.AppHost.Features.TestInfrastructure;
@@ -13,6 +14,7 @@ namespace KeyLoad.AppHost.Hosting;
 [ConfigurationBinding]
 internal static class AppHostControlOptionsRegistration
 {
+    internal const string InvalidContainerFaultSelection = "Container fault commands require an explicit ephemeral RF3 test profile.";
     private const string ProtocolSection = "KeyLoadTests:ProtocolCohort";
     private const string BenchmarkEnabled = "Benchmarks:Enabled";
     private const string BenchmarkScale = "Benchmarks:ScaleProfile";
@@ -57,6 +59,7 @@ internal static class AppHostControlOptionsRegistration
                     || HasValue(configuration, ComparisonWorkerSelection.TargetSetting) || HasValue(configuration, BenchmarkNodes)
                     || HasValue(configuration, BenchmarkScenario) || HasValue(configuration, BenchmarkProfile) || HasValue(configuration, BenchmarkScale);
                 value.ScaleSelected = configuration[ComparisonWorkerSelection.ScaleProfileSetting] is not null;
+                value.ContainerFaults = ReadContainerFaults(configuration, value);
                 value.LoggerModelControl = ReadLoggerModelControl(configuration, value);
                 value.MovementFrameObservation = MovementFrameObservationSettingsReader.Read(configuration, value);
                 value.NativeDiscoveryOmission = NativeDiscoveryOmissionProfile.ReadSettings(configuration, value);
@@ -67,6 +70,17 @@ internal static class AppHostControlOptionsRegistration
         _ = options.Value;
         return options;
     }
+    private static bool ReadContainerFaults(IConfiguration configuration, AppHostControlOptions options)
+    {
+        var enabled = configuration.GetValue<bool>(ContainerFaultCommandProtocol.EnabledSetting);
+        if (enabled && (!options.Ephemeral || options.BenchmarksEnabled || options.TargetSelected
+            || options.ComparisonSelectorsPresent || options.ScaleSelected))
+        {
+            throw new InvalidOperationException(InvalidContainerFaultSelection);
+        }
+        return enabled;
+    }
+
     private static RequestCqrsProbeProfileSettings? ReadNativeBlobWireProbe(IConfiguration configuration,
         AppHostControlOptions options)
     {

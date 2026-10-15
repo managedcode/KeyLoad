@@ -9,21 +9,21 @@ namespace KeyLoad.Clustering;
 /// <summary>Serializes one atomic partition's routing while the physical replica host owns commit and storage.</summary>
 /// <param name="codec">Verifier for the original server-issued exact-byte request.</param>
 /// <param name="database">Borrowed canonical database used to reload persisted authority.</param>
-/// <param name="coordinator">Node-owned admission and quorum commit boundary.</param>
+/// <param name="borrowCoordinator">Borrows the original node-owned admission and quorum commit boundary.</param>
 /// <param name="clock">Runtime system clock for persisted principal expiry.</param>
-/// <param name="workOwner">Silo-local admission and cancellation owner for verified commands.</param>
+/// <param name="borrowWorkOwner">Borrows the silo-local admission and cancellation owner for verified commands.</param>
 /// <param name="diagnostics">Logs unexpected node failures without serializing exceptions.</param>
 /// <param name="services">Native silo services for opt-in physical command routing.</param>
 /// <param name="options">The centrally validated signed request lifetime settings.</param>
 [Orleans.Placement.Immovable(Orleans.Placement.ImmovableKind.Any)]
 [Orleans.GrainType(GrainRoutingProtocol.CommandAlias), Orleans.Placement.PreferLocalPlacement]
-public sealed class CommandPartitionGrain(GrainRequestCodec codec, DatabaseEngine database, ICommitCoordinator coordinator,
-    TimeProvider clock, NativeRequestWorkOwner workOwner, ILogger<CommandPartitionGrain> diagnostics,
+public sealed class CommandPartitionGrain(GrainRequestCodec codec, DatabaseEngine database, Func<ICommitCoordinator> borrowCoordinator,
+    TimeProvider clock, Func<NativeRequestWorkOwner> borrowWorkOwner, ILogger<CommandPartitionGrain> diagnostics,
     IOptions<GrainRoutingOptions> options, IServiceProvider services)
     : Grain, ICommandPartitionGrain
 {
-    private readonly GrainCommandExecutor commands = new(database, coordinator, clock, options, codec, workOwner, services.GetService<IPhysicalRequestPlacement>(),
-        services.GetService<IGrainPartitionMovementSealedOperationObserver>(), services.GetService<INativeOnlineTextMaintenance>(), services.GetService<IPlacementIntentPersistence>());
+    private readonly GrainCommandExecutor commands = new(database, borrowCoordinator(), clock, options, codec, borrowWorkOwner(), services.GetService<IPhysicalRequestPlacement>(),
+        services.GetService<IGrainPartitionMovementSealedOperationObserver>(), services.GetService<Func<INativeOnlineTextMaintenance>>()?.Invoke(), services.GetService<IPlacementIntentPersistence>());
 
     /// <inheritdoc />
     /// <param name="signedRequest">The signed request whose partition key must match this actor.</param>

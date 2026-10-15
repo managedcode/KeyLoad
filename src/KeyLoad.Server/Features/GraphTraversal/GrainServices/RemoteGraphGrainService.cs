@@ -1,3 +1,5 @@
+using KeyLoad.Clustering;
+
 namespace KeyLoad.Server.Features.GraphTraversal;
 
 internal sealed class RemoteGraphGrainService(GrainId id, Silo silo, ILoggerFactory loggerFactory)
@@ -8,6 +10,9 @@ internal sealed class RemoteGraphGrainService(GrainId id, Silo silo, ILoggerFact
     public override async Task Init(IServiceProvider serviceProvider)
     {
         await base.Init(serviceProvider).ConfigureAwait(true);
+        var token = StoppedCancellationTokenSource.Token;
+        await serviceProvider.GetRequiredService<Func<IPartitionStoragePublication>>()().WaitForOpenAsync(token).ConfigureAwait(true);
+        await serviceProvider.GetRequiredService<OrleansNode>().InitializeLocalRuntimeAsync(token).ConfigureAwait(true);
         receiver = serviceProvider.GetRequiredService<RemoteGraphNativeRuntime>();
     }
 

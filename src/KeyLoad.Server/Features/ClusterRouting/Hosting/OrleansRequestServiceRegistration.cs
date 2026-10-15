@@ -1,4 +1,5 @@
 using KeyLoad.Clustering;
+using KeyLoad.Core;
 using KeyLoad.Query;
 using KeyLoad.Replication;
 using KeyLoad.Server.Features.ClusterRouting;
@@ -8,28 +9,37 @@ namespace KeyLoad.Server;
 
 internal static class OrleansRequestServiceRegistration
 {
-    internal static void Register(IServiceCollection services, PartitionHost partition, NodeOptions options)
+    internal static void Register(IServiceCollection services, NodeOptions options)
     {
         if (options.RequestCqrsProbe.Enabled)
         {
             services.AddSingleton<IReplicaTransportObservation>(provider =>
             {
                 _ = provider.GetRequiredService<RequestCqrsProbeObserver>();
-                return partition.ApplyProbe;
+                return provider.GetRequiredService<PartitionHostApplicationOwner>().Borrow().ApplyProbe;
             });
-            services.AddSingleton(provider => AttachApplyObserver(partition, RequestCqrsProbeObserverFactory.Create(
-                options.RequestCqrsProbe, provider.GetRequiredService<IOptions<ReplicaConfiguration>>(), options.AllowPrivateNetworkHttp,
-                provider.GetRequiredService<ILocalSiloDetails>(), provider.GetRequiredService<IHostApplicationLifetime>(),
-                provider.GetRequiredService<IOptions<RequestProbeExecutionOptions>>(), provider.GetRequiredService<TimeProvider>())
-                ?? throw new InvalidOperationException(RequestCqrsProbeProtocol.InvalidOptions)));
-            services.AddSingleton<IGrainRequestPhaseObserver>(provider => provider.GetRequiredService<RequestCqrsProbeObserver>());
-            services.AddSingleton<IQueryReadCutObserver>(provider =>
-                provider.GetRequiredService<RequestCqrsProbeObserver>().QueryCuts);
-            services.AddSingleton<global::KeyLoad.Server.Features.DocumentStorage.IRemoteModelNativeFaultObserver>(
-                provider => provider.GetRequiredService<RequestCqrsProbeObserver>());
-            services.AddSingleton<global::KeyLoad.Server.Features.DocumentStorage.IRemoteModelNativeReplayObserver>(
-                provider => provider.GetRequiredService<RequestCqrsProbeObserver>());
-            services.AddSingleton<IGrainRequestProducerDisposedObserver>(provider => provider.GetRequiredService<RequestCqrsProbeObserver>());
+            services.AddSingleton(provider => AttachApplyObserver(provider.GetRequiredService<PartitionHostApplicationOwner>().Borrow(),
+                RequestCqrsProbeObserverFactory.Create(options.RequestCqrsProbe,
+                    provider.GetRequiredService<IOptions<ReplicaConfiguration>>(), options.AllowPrivateNetworkHttp,
+                    provider.GetRequiredService<ILocalSiloDetails>(), provider.GetRequiredService<IHostApplicationLifetime>(),
+                    provider.GetRequiredService<IOptions<RequestProbeExecutionOptions>>(), provider.GetRequiredService<TimeProvider>())
+                    ?? throw new InvalidOperationException(RequestCqrsProbeProtocol.InvalidOptions)));
+            services.AddSingleton<Func<IGrainRequestPhaseObserver>>(provider =>
+            {
+                var borrowed = provider.GetRequiredService<RequestCqrsProbeObserver>();
+                return () => borrowed;
+            });
+            services.AddSingleton<IQueryReadCutObserver>(provider => provider.GetRequiredService<RequestCqrsProbeObserver>().QueryCuts);
+            services.AddSingleton<Func<global::KeyLoad.Server.Features.DocumentStorage.IRemoteModelNativeFaultObserver>>(provider =>
+            {
+                var borrowed = provider.GetRequiredService<RequestCqrsProbeObserver>();
+                return () => borrowed;
+            });
+            services.AddSingleton<Func<global::KeyLoad.Server.Features.DocumentStorage.IRemoteModelNativeReplayObserver>>(provider =>
+            {
+                var borrowed = provider.GetRequiredService<RequestCqrsProbeObserver>();
+                return () => borrowed;
+            });
             services.AddSingleton(provider => new RequestCqrsProbeNativeRelay(provider,
                 provider.GetRequiredService<IOptions<NodeOptions>>(), provider.GetRequiredService<IOptions<ReplicaConfiguration>>(),
                 provider.GetRequiredService<ILocalSiloDetails>(), provider.GetRequiredService<ISiloStatusOracle>(),
@@ -38,11 +48,13 @@ internal static class OrleansRequestServiceRegistration
             services.AddSingleton<IGrainActivationMigrationObserver>(provider => provider.GetRequiredService<RequestCqrsProbeObserver>()
                 .CreateMigration(provider.GetRequiredService<ReplicaSiloDiscoveryClient>()));
         }
-        services.AddSingleton(provider => new GrainRequestCodec(partition.Database, provider.GetRequiredService<TimeProvider>(),
-            provider.GetRequiredService<IOptions<GrainRoutingOptions>>())
+        services.AddSingleton(provider => new GrainRequestCodec(provider.GetRequiredService<DatabaseEngine>(),
+            provider.GetRequiredService<TimeProvider>(), provider.GetRequiredService<IOptions<GrainRoutingOptions>>())
         {
-            PhaseObserver = provider.GetService<IGrainRequestPhaseObserver>(),
-            PurposeObserver = provider.GetService<IGrainRequestPurposeObserver>()
+            PhaseObserver = provider.GetService<Func<IGrainRequestPhaseObserver>>()?.Invoke()
+                ?? provider.GetService<IGrainRequestPhaseObserver>(),
+            PurposeObserver = provider.GetRequiredService<OrleansNode>().DiscoveryOmission?.PurposeObserver
+                ?? provider.GetService<IGrainRequestPurposeObserver>()
         });
     }
 

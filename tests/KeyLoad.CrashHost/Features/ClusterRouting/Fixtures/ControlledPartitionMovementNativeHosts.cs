@@ -58,7 +58,7 @@ internal sealed partial class ControlledPartitionMovementNativeHosts : IAsyncDis
 
     internal void RetainCreationFailure(Exception original) => creationFailure = original;
 
-    internal async Task CreateNodesAsync()
+    internal async Task CreateNodesAsync(CancellationToken startupCancellation)
     {
         if (observerFactory is not null && sealedObservers is null)
         {
@@ -79,7 +79,7 @@ internal sealed partial class ControlledPartitionMovementNativeHosts : IAsyncDis
         for (var index = SourceIndex; index < ControlledPartitionMovementNativeHostEndpoints.OwnerCount; index++)
         {
             nodes.Add(await ControlledPartitionMovementNativeHost.CreateAsync(settings.Arguments(index), localhost,
-            sealedObservers?[index], authenticationObservers?[index]).ConfigureAwait(false));
+            sealedObservers?[index], authenticationObservers?[index], startupCancellation: startupCancellation).ConfigureAwait(false));
         }
     }
 

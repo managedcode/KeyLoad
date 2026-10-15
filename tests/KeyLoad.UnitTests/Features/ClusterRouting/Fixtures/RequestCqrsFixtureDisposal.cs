@@ -9,37 +9,24 @@ internal sealed partial class RequestCqrsClusterFixture
         {
             await KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => requestWork.DisposeAsync().AsTask(), failures);
         }
+        if (!clusterStopped || requestWork is { IsJoined: false })
+        {
+            return;
+        }
         if (NativeMaintenance is not null)
         {
-            if (!clusterStopped)
-            {
-                return;
-            }
-            var before = failures.Count;
             await KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => NativeMaintenance.DisposeAsync().AsTask(), failures);
-            if (failures.Count != before)
-            {
-                return;
-            }
         }
         if (NativeAnnMaintenance is not null)
         {
-            if (!clusterStopped)
-            {
-                return;
-            }
-            var before = failures.Count;
             await KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => NativeAnnMaintenance.DisposeAsync().AsTask(), failures);
-            if (failures.Count != before)
-            {
-                return;
-            }
         }
-        try
+        if (failures.Count != 0)
         {
-            KeyLoad.Server.ServerFailureObserver.Observe(Database.Dispose, failures);
+            return;
         }
-        finally
+        KeyLoad.Server.ServerFailureObserver.Observe(Database.Dispose, failures);
+        if (failures.Count == 0)
         {
             RequestCqrsFixtureOwners.Release(ownerId);
         }

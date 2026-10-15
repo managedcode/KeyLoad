@@ -29,8 +29,16 @@ internal sealed class NativeMetadataFormatTests
     [Arguments(IdentityDefect.Truncated)]
     [Arguments(IdentityDefect.UnsupportedVersion)]
     [Arguments(IdentityDefect.UnsupportedCodec)]
+    [Arguments(IdentityDefect.NegativeReadGeneration)]
+    [Arguments(IdentityDefect.UndefinedDurability)]
     public async Task AcIs002NativeIdentityDefectsRejectActualBackupBeforeDestinationAndOriginalRestores(IdentityDefect defect)
     {
+        if (defect is IdentityDefect.NegativeReadGeneration or IdentityDefect.UndefinedDurability)
+        {
+            await NativeIdentityDomainRepairFlow.RunAsync(defect == IdentityDefect.NegativeReadGeneration,
+                TestContext.Current!.Execution.CancellationToken);
+            return;
+        }
         using var fixture = new MetadataBackupFixture();
         var path = Path.Combine(fixture.BackupDirectory, MetadataTestContract.IdentityFileName);
         var original = await File.ReadAllBytesAsync(path);
@@ -187,7 +195,7 @@ internal sealed class NativeMetadataFormatTests
 
     internal enum IdentityDefect
     {
-        WrongType, NullRoot, NullPayload, NullChecksum, ChecksumMismatch, EmptyNode, EmptyIncarnation, EmptySigningKey, PayloadTrailing, FileTrailing, Truncated, UnsupportedVersion, UnsupportedCodec
+        WrongType, NullRoot, NullPayload, NullChecksum, ChecksumMismatch, EmptyNode, EmptyIncarnation, EmptySigningKey, PayloadTrailing, FileTrailing, Truncated, UnsupportedVersion, UnsupportedCodec, NegativeReadGeneration, UndefinedDurability
     }
     internal enum ManifestDefect
     {

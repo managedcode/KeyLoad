@@ -56,7 +56,7 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
         if (kind == GrainReadKind.PartitionMovementCapture)
         {
             return await PartitionMovementCaptureExecution.ExecuteAsync(
-                services.GetRequiredService<INativePartitionMovementCapture>(), principal,
+                services.GetRequiredService<Func<INativePartitionMovementCapture>>()(), principal,
                 GrainNativePayload.Read<PartitionMovementCaptureCapability>(request.Payload),
                 cancellationToken).ConfigureAwait(true);
         }

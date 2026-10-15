@@ -16,6 +16,9 @@ internal sealed class NativeCqrsStreamAdmission(
     private EventFeedTailStreamShape? tail;
     private readonly TextMaintenanceStreamShape text = new(requestId);
     private AnnMaintenanceStreamShape? ann;
+    private PartitionMovementStreamShape? movement;
+    private OnlineTextMaintenanceStreamShape? online;
+    private PlacementIntentStreamShape? placement;
 
     internal void Admit(CqrsStreamChunk<GrainRequestProgress, GrainOperationReply> chunk,
         CancellationToken cancellationToken)
@@ -37,7 +40,6 @@ internal sealed class NativeCqrsStreamAdmission(
             throw Errors.Fail(ErrorCode.BudgetExceeded, GrainRoutingProtocol.ReplyBudgetExceeded);
         }
 
-        ValidateShape(chunk, nextCount);
         var maximumBytes = chunk.Kind switch
         {
             CqrsStreamChunkKind.Progress when purpose?.IsEventFeedTail == true => options.Value.MaximumCompletedBytes,
@@ -53,6 +55,7 @@ internal sealed class NativeCqrsStreamAdmission(
             throw Errors.Fail(ErrorCode.BudgetExceeded, GrainRoutingProtocol.ReplyBudgetExceeded);
         }
 
+        ValidateShape(chunk, nextCount);
         count = nextCount;
         aggregateBytes = nextAggregate;
         terminal = chunk.IsTerminal;
@@ -79,6 +82,10 @@ internal sealed class NativeCqrsStreamAdmission(
             return;
         }
 
+        if (chunk.Kind == CqrsStreamChunkKind.Progress && chunk.ProgressResult is { IsSuccess: true, Value: not null } progress)
+        {
+            NativeCqrsProgressPayloadShape.RequireSingle(progress.Value);
+        }
         if (chunk.Kind == CqrsStreamChunkKind.Progress && purpose?.IsTextMaintenance == true && count > EmptyCount)
         {
             text.Admit(chunk, nextCount);
@@ -94,6 +101,21 @@ internal sealed class NativeCqrsStreamAdmission(
             (tail ??= new EventFeedTailStreamShape(requestId, request)).Admit(chunk, nextCount);
             return;
         }
+        if (chunk.Kind == CqrsStreamChunkKind.Progress && purpose?.IsPartitionMovement == true && count > EmptyCount)
+        {
+            (movement ??= new PartitionMovementStreamShape(requestId)).Admit(chunk, nextCount);
+            return;
+        }
+        if (chunk.Kind == CqrsStreamChunkKind.Progress && purpose?.IsOnlineTextMaintenance == true && count > EmptyCount)
+        {
+            (online ??= new OnlineTextMaintenanceStreamShape(requestId)).Admit(chunk, nextCount);
+            return;
+        }
+        if (chunk.Kind == CqrsStreamChunkKind.Progress && purpose?.PlacementRequest is { } placementRequest && count > EmptyCount)
+        {
+            (placement ??= new PlacementIntentStreamShape(requestId, placementRequest.IntentId, placementRequest.ExpectedRevision)).Admit(chunk, nextCount);
+            return;
+        }
         ValidateFinalShape(chunk, nextCount);
     }
 
@@ -106,7 +128,7 @@ internal sealed class NativeCqrsStreamAdmission(
         if (nextCount != EmptyNextCount || chunk.Sequence != EmptySequence || chunk.ProgressResult is not { IsSuccess: true, Value: not null }
             || chunk.ProgressResult.Value.Problem is not null
             || chunk.ProgressResult.Value.Value.RequestId != requestId
-            || chunk.ProgressResult.Value.Value is { AnnPhase: not null } or { TextPhase: not null } or { MovePhase: not null } or { OnlineTextPhase: not null } or { EventFeedTail: not null }
+            || chunk.ProgressResult.Value.Value is { AnnPhase: not null } or { TextPhase: not null } or { MovePhase: not null } or { OnlineTextPhase: not null } or { EventFeedTail: not null } or { PlacementIntent: not null }
             || chunk.Final is not null
             || chunk.Message is not null || chunk.EventId is not null
             || chunk.EventType != CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>.ResolveEventType(chunk.Kind))
@@ -128,7 +150,9 @@ internal sealed class NativeCqrsStreamAdmission(
             || chunk.EventType != CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>.ResolveEventType(chunk.Kind)
             || (chunk.Kind == CqrsStreamChunkKind.Completed && purpose?.IsTextMaintenance == true && !text.Completed)
             || (chunk.Kind == CqrsStreamChunkKind.Completed && purpose?.IsAnnMaintenance == true && ann?.Completed != true)
-            || (chunk.Kind == CqrsStreamChunkKind.Completed && purpose?.IsEventFeedTail == true && tail?.HasDelivery != true))
+            || (chunk.Kind == CqrsStreamChunkKind.Completed && purpose?.IsEventFeedTail == true && tail?.HasDelivery != true)
+            || (chunk.Kind == CqrsStreamChunkKind.Completed && purpose?.IsOnlineTextMaintenance == true && online?.Completed == false)
+            || (chunk.Kind == CqrsStreamChunkKind.Completed && purpose?.PlacementRequest is not null && placement?.Completed == false))
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
         }

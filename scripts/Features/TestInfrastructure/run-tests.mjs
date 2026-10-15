@@ -48,6 +48,12 @@ localImageFilters.add("/*/*/TimeSeriesChunkQualificationRf3Tests/*");
 localImageFilters.add("/*/*/(DistributedQueryAuthorityRf3Tests|EarlyAdmissionQualificationTests|MetadataBootstrapRf3Tests|QueryRuleOptimizationRf3Tests|StrongReadSessionAbsenceRf3Tests|TimeSeriesChunkQualificationRf3Tests)/*");
 localImageFilters.add("/*/*/SafeProjectorOperationRf3Tests/*");
 localImageFilters.add("/*/*/SqlParserAdmissionRf3WholeFlowTests/*");
+localImageFilters.add("/*/*/GraphSearchPathPolicyRf3Tests/*");
+localImageFilters.add("/*/*/SampleChunkCorrectionPredicateRf3Tests/*");
+localImageFilters.add("/*/*/(SqlParserAdmissionRf3WholeFlowTests|GraphSearchPathPolicyRf3Tests)/*");
+localImageFilters.add("/*/*/(SqlParserAdmissionRf3WholeFlowTests|GraphSearchPathPolicyRf3Tests|SampleChunkCorrectionPredicateRf3Tests)/*");
+localImageFilters.add("/*/*/(GraphSearchPathPolicyRf3Tests|SampleChunkCorrectionPredicateRf3Tests)/*");
+localImageFilters.add("/*/*/(NativeDatabaseMigrationRf3Tests|SqlParserAdmissionRf3WholeFlowTests|GraphSearchPathPolicyRf3Tests|RequestCqrsPhaseFaultTests|RequestCqrsAuthorityFaultTests|RequestCqrsRf3FollowerRestartTests|SagaDueRf3Tests|SagaTimeoutRf3Tests|SampleChunkCorrectionPredicateRf3Tests|ConnectionRf3AuthorizationTests|DocumentSessionReadRf3Tests|MetadataBootstrapRf3Tests|PartitionMovementPublicParentFlowTests|PhysicalOwnerRegistrationRf3Tests|ProtectedDocumentRf3Tests|QueryContextSessionRf3Tests|StrongReadSessionAbsenceRf3Tests)/*");
 localImageFilters.add("/*/*/GraphSearchLineageRf3Tests/*");
 localImageFilters.add("/*/*/AtomicTriadStagedRf3Tests/*");
 localImageFilters.add("/*/*/CompetingInboxPublicTests/*");
@@ -61,6 +67,8 @@ localImageFilters.add("/*/*/(NativeDatabaseMigrationRf3Tests|SlowBodyAdmissionRe
 localImageFilters.add("/*/*/CatalogBootstrapAuthorityRf3Tests/*");
 localImageFilters.add("/*/*/(SlowBodyAdmissionReturnTests|RowRevisionInferenceRf3Tests|CatalogBootstrapAuthorityRf3Tests)/*");
 localImageFilters.add("/*/*/FoundationOtlpRf3Tests/NativeDashboardReceivesActualRf3SdkMcpPolicyRepairTracesAndPrivateFreeRejectionLogs");
+localImageFilters.add("/*/*/AspireContainerFaultCommandTests/WrongStaleAndForeignIdsRefuseWithoutEffectsBeforeHealthySdkMcpRestart");
+localImageFilters.add("/*/*/AggregateReplayRf3LeaderLossTests/AcEvent008AcceptedRestartCancellationResumesSameReplacementAndPreservesReplay");
 const nativeTextPreparedFilter = '/*/*/(NativeTextAsyncRf3Tests)|(NativeTextMaintenanceRf3Tests)|(NativeTextRf3LeaderLossTests)|(NativeTextRf3Tests)|(NativeTextWaitRf3Tests)/*';
 const localImageGithubIdentity = ['KEYLOAD_IMAGE_RECEIPT', 'GITHUB_SHA', 'GITHUB_ACTIONS'];
 const localImageInheritedIdentity = ['KEYLOAD_IMAGE_PROVENANCE', 'KEYLOAD_LOCAL_IMAGE_RECEIPT',

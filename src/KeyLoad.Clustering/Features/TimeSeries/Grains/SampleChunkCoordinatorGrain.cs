@@ -13,12 +13,13 @@ namespace KeyLoad.Clustering;
 [Orleans.Placement.Immovable(Orleans.Placement.ImmovableKind.Any)]
 [GrainType(SampleChunkJobProtocol.GrainAlias), global::Orleans.Placement.PreferLocalPlacement]
 internal sealed class SampleChunkCoordinatorGrain(IDurableStateManager state,
-    ILocalDurableJobManager jobs, DatabaseEngine database, ICommitCoordinator coordinator,
+    ILocalDurableJobManager jobs, DatabaseEngine database, Func<ICommitCoordinator> borrowCoordinator,
     RuntimeJournalAdmission runtime, GrainRequestCodec codec, IServiceProvider services, TimeProvider clock,
     Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
     IOptions<GrainRoutingOptions> routing, IOptions<DueCoordinationOptions> execution)
     : Grain, ISampleChunkCoordinatorGrain, IDurableJobHandler
 {
+    private readonly ICommitCoordinator coordinator = borrowCoordinator();
     private readonly IDurableDictionary<Guid, SampleChunkJobAdmission> admissions =
         state.GetOrAddDictionary<Guid, SampleChunkJobAdmission>(SampleChunkJobProtocol.Admissions);
     private readonly SampleChunkJobDispatch dispatch = new(database, codec, services, clock, serializer, routing);

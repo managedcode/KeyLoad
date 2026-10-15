@@ -17,53 +17,182 @@
     ],
     "localVerification": {
       "release": {
-        "lane": "R359",
+        "lane": "Root R406",
         "result": "passed",
         "errors": 0,
         "warnings": 0,
-        "elapsedSeconds": 124.5706314,
+        "elapsedSeconds": 310.5240791251417,
         "sourceDrift": 0,
-        "stdoutSha256": "dbe10bf315cfffccf1f0cc35430d4a858f85982b510a9c2bd2060671601ed13f"
+        "stdoutSha256": "4cf3d5d662a68378f50bb3905ae9ee875a73de6038837d0166f722aa8c42ecca"
       },
-      "functionalUnit": {
-        "lane": "R348 within joined R360 cohort",
-        "passed": 105,
-        "failed": 0,
-        "skipped": 0,
-        "elapsedSeconds": 20.6114639,
+      "focusedUnit": {
+        "lane": "Root R405",
+        "result": "passed",
+        "counts": {
+          "total": 82,
+          "passed": 82,
+          "failed": 0,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        },
+        "elapsedSeconds": 13.09837825014256,
+        "processJoined": true,
+        "stdoutSha256": "45fdaa05d955aebbc369aa18236cf49bb9645e7817390ab3dae3ac6d212c4697",
+        "originalReport": "TestResults/stage61-native-join/root-r405-current-native-unit/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+        "reportSha256": "6755bbc35828effdc77278bf2f61135b4fa7968f297c4b17c4009761451ac14b",
         "configuredNativeParallelLimit": 50,
         "actualPeakNativeIntervals": 50,
-        "stdoutSha256": "4536628de661fd5d68b9c9eda5fa7f87a8a2d573e338f087a71d1d41bc89b97c",
-        "boundary": "Selected twenty whole-operation class groups; 105 tests, not 105 accepted tasks or a full Unit assembly pass."
+        "boundary": "82 selected whole-operation cases, not a full Unit assembly. Original direct-host BM25 producer remains to be rerun separately; CQRS protocol controls do not replace its complete operation."
+      },
+      "focusedProcessRecovery": {
+        "lane": "Root R405",
+        "result": "passed",
+        "counts": {
+          "total": 2,
+          "passed": 2,
+          "failed": 0,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        },
+        "elapsedSeconds": 10.884277084143832,
+        "processJoined": true,
+        "stdoutSha256": "2f176bb51d9bf3ba074225d1f9f174c7bd4297327ee29716f5dd58db8dcb1861",
+        "originalReport": "TestResults/stage61-native-join/root-r405-original-process-recovery/KeyLoad.RecoveryTests-macos-net10.0.tunit-report.json",
+        "reportSha256": "0c6a17205df75cf740a31a55e3137e992bbfc294d4312771bb5df05d7888ea09",
+        "boundary": "Two genuine process-recovery operations; not power-loss proof or the complete recovery assembly."
       },
       "sdkOfficialMcpAspireRf3": {
-        "lane": "R361",
-        "passed": 1,
-        "failed": 0,
-        "skipped": 0,
-        "elapsedSeconds": 276.0642623750027,
-        "selector": "SqlParserAdmissionRf3WholeFlowTests complete original operation",
-        "stdoutSha256": "54870ac6f55c97996676d60319507f2c3db5ed4a00ac693e822d310c00e10d0f",
-        "boundary": "Actual test-owned Aspire/Docker RF3, SDK and official MCP, named reads/typed writes/refusals/full receipt replay/two cold owners. Public graph and correction-predicate RF3 operations remain unexecuted."
+        "lane": "Root R405",
+        "result": "passed",
+        "counts": {
+          "total": 1,
+          "passed": 1,
+          "failed": 0,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        },
+        "elapsedSeconds": 355.44851604197174,
+        "processJoined": true,
+        "stdoutSha256": "6b66e0ff1ade8819288ba37df325d997893dcaaafc120d8226a88b26acc316ef",
+        "originalReport": "TestResults/stage61-native-join/root-r405-current-onehost-sql-sdk-mcp-aspire/KeyLoad.IntegrationTests-macos-net10.0.tunit-report.json",
+        "reportSha256": "4b9acc85dab4aff260fb7c1efdc62461303c4dddc3050e318191afbd7d3cbb77",
+        "boundary": "One actual current-image test-owned Aspire RF3 operation through real SDK and official MCP; named T-SQL reads/typed writes/refusals/full receipts and two all-three-node cold cycles use AppHost-owned SIGKILL and native Start, with joined original fixture shutdown. Local development, not complete Linux/task qualification."
       },
       "formatter": {
-        "lane": "R349 within joined R360 cohort",
+        "lane": "Root R407",
         "result": "passed",
-        "elapsedSeconds": 169.8689137,
+        "nativeExitCode": 0,
+        "elapsedSeconds": 199.33848474989645,
         "sourceDrift": 0,
-        "compiledDrift": 0
+        "compiledDrift": 0,
+        "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
-      "testCohortSourceAndCompiledDrift": 0,
+      "focusedCoverage": {
+        "lane": "Root R405",
+        "original": "TestResults/stage61-native-join/root-r405-current-native-unit/functional.cobertura.xml",
+        "sha256": "9dbe46f2e6136343700c49202a356bb2be0c92a673f6279a823e9782d2e0e631",
+        "linesCovered": 7017,
+        "linesValid": 108295,
+        "branchesCovered": 3805,
+        "branchesValid": 68605,
+        "loadContributors": 0,
+        "boundary": "Selected82-case functional Unit coverage only, not full-product coverage or a trend against different selections."
+      },
+      "sourceDrift": 0,
+      "compiledDrift": 0,
       "developmentOnly": true,
-      "originalCompilerFailuresRetained": [
-        "R347: eight test-helper compiler/analyzer diagnostics",
-        "R355: sole remaining CA2000 test fixture ownership diagnostic; fixed by lexical using, before successful R359"
-      ]
+      "boundary": "Current strict Root R406 and full formatter Root R407 passed. Root R405 Unit82/recovery2/AspireRF3SQL1 remain exact original local cohorts. Later Root R407 storage11 had7passed/4failed and hostile AppHostfault/restart1failed at final readiness-evidence assertion, all original processes joined and source/DLL/PDB0drift. Failures retained, independent repairs in progress; no full task or Linux acceptance promotion.",
+      "priorRelease": {
+        "lane": "Root R404",
+        "result": "passed",
+        "errors": 0,
+        "warnings": 0,
+        "elapsedSeconds": 139.39474595803767,
+        "sourceDrift": 0,
+        "stdoutSha256": "ac1b3ee2b57877106a5b8d07bad2257c6ece2e6dfc3735267bd03414f56fca77"
+      },
+      "nativeStorageAndSiloLifecycle": {
+        "lane": "Root R407",
+        "result": "failed",
+        "counts": {
+          "total": 11,
+          "passed": 7,
+          "failed": 4,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        },
+        "elapsedSeconds": 61.09180958382785,
+        "processJoined": true,
+        "stdoutSha256": "54d8b8f74b19342f17b1360c2f96f45f23edd7bd77826b433749519d52da71cf",
+        "originalReport": "TestResults/stage61-native-join/root-r407-original-storage-silo-lifecycle/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+        "reportSha256": "b7a5bc1f3170f66007b37fab9057ab30276aede95abd90d2d7d8197846a9c829",
+        "failedCases": [
+          {
+            "className": "PartitionStorageNativeTests",
+            "methodName": "ActualNativeStoragePublicationThenLockFailureJoinsAndSameRootsRetainSignedReceiptThroughTwoColdStarts",
+            "exceptionType": "System.AggregateException",
+            "message": "One or more errors occurred. (One or more errors occurred. (The configured physical owner is unavailable.) (The configured physical owner is unavailable.) (The configured physical owner is unavailable.)) (One or more errors occurred. (One or more errors occurred. (One or more errors occurred. (One or more errors occurred. (The configured physical owner is unavailable.) (The partition movement receiver is unavailable.)) (One or more errors occurred. (The configured physical owner is unavailable.) (The partition movement receiver is unavailable.)) (One or more errors occurred. (The configured physical owner is unavailable.) (The partition movement receiver is unavailable.)))) (The partition movement receiver is unavailable.))"
+          },
+          {
+            "className": "PartitionStorageNativePreStartDisposeTests",
+            "methodName": "ProductionApplicationDisposedBeforeStartNeverOpensPhysicalStorageThenSameRootsSupportSignedReplayAndTwoCold",
+            "exceptionType": "System.AggregateException",
+            "message": "One or more errors occurred. (One or more errors occurred. (The configured physical owner is unavailable.) (The configured physical owner is unavailable.) (The configured physical owner is unavailable.)) (One or more errors occurred. (One or more errors occurred. (One or more errors occurred. (One or more errors occurred. (The configured physical owner is unavailable.) (The partition movement receiver is unavailable.)) (One or more errors occurred. (The configured physical owner is unavailable.) (The partition movement receiver is unavailable.)) (One or more errors occurred. (The configured physical owner is unavailable.) (The partition movement receiver is unavailable.)))) (The partition movement receiver is unavailable.))"
+          },
+          {
+            "className": "PartitionStorageNativeProducerDisposeTests",
+            "methodName": "ActualActiveNativeApplicationDisposeJoinsThreeOriginalStorageProducersBeforeSameRootsHealthyTwoCold",
+            "exceptionType": "System.AggregateException",
+            "message": "One or more errors occurred. (One or more errors occurred. (A task was canceled.) (The original native storage borrowers have not joined; retain the physical owner.)) (Expected to be true\nbut found False\n\nat Assert.That(originalClose.IsCompletedSuccessfully).IsTrue())"
+          },
+          {
+            "className": "PartitionStorageNativeApplicationDisposeTests",
+            "methodName": "ActualGenericApplicationDisposeAfterNativePartialStartupRetainsOwnersThenSignedReceiptThroughTwoColdStarts",
+            "exceptionType": "System.InvalidOperationException",
+            "message": "The original movement command has multiple committed entries."
+          }
+        ]
+      },
+      "aspireFaultRefusalAndRestart": {
+        "lane": "Root R407",
+        "result": "failed",
+        "counts": {
+          "total": 1,
+          "passed": 0,
+          "failed": 1,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        },
+        "elapsedSeconds": 222.81598095805384,
+        "processJoined": true,
+        "stdoutSha256": "a1f3b88335b1a7e7eba8bf3ef5d599ea1598b91dc4295185356cbdf5f7da0b3f",
+        "originalReport": "TestResults/stage61-native-join/root-r407-aspire-fault-refusal-sdk-mcp/KeyLoad.IntegrationTests-macos-net10.0.tunit-report.json",
+        "reportSha256": "422363790344f8d19d33653021e7c7b66cdfc5231adf39980689c456a8eb69b6",
+        "failedCases": [
+          {
+            "className": "AspireContainerFaultCommandTests(ClusterFixture)",
+            "methodName": "WrongStaleAndForeignIdsRefuseWithoutEffectsBeforeHealthySdkMcpRestart",
+            "exceptionType": "TUnit.Assertions.Exceptions.AssertionException",
+            "message": "Expected to be true\nbut found False\n\nat Assert.That(lines.Contains(node + HealthyLine, StringComparer.Ordinal)).IsTrue()"
+          }
+        ]
+      }
     },
-    "implementationPending": "Complete coherent one-host/silo-local Grain Service/native journal/jobs contributions remain separately prepared, not integrated/runtime-qualified. Reviewed model/public43-file batch compiles with zero warnings/errors, selected105 Unit tests and full formatter pass; original SQL SDK/official MCP Aspire RF3 operation passes. Public graph-policy and sample correction-predicate RF3 operations still require their actual execution. No full acceptance promotion.",
+    "implementationPending": "Strict full Release and full formatter pass; actual current test-owned Aspire RF3 SQL SDK/MCP with two cold cycles passed, selected Unit82/recovery2 passed. Later native storage/lifecycle11 had4failures (startup publication, cancelled framework shutdown, replay-entry oracle) and AppHost fault/refusal full operation failed at stale readiness artifact assertion after live parity. Confirmed defects have separate repair owners. Current checkpoint preserves all failures; no task promotion. Comparison cleanup conversions and complete Linux/fault/endurance/coverage gates remain open.",
     "remaining": [
-      "Complete one-host physical-owner/native lifecycle integration and its original partial-start/shutdown/recovery/SDK-MCP RF3 operations",
-      "Qualify original public graph-policy and sample correction-predicate SDK/MCP Aspire RF3 operations; keep whole-feature Linux and remaining original acceptance gates open",
+      "Qualify the complete one-host lifecycle/storage/native movement foundation; rerun the original native BM25 producer and current AppHost fault/refusal/namespace cases, retaining original failure/cleanup gates",
+      "Qualify current public graph-policy, sample correction-predicate and composed-SQL whole operations; keep exact-source Linux and full feature gates open",
       "Complete original native migration operation, supported SQL parity, telemetry export/privacy and per-feature acceptance",
       "Complete exact-source Linux, full functional coverage, security/fault/endurance/resource gates; performance/profiling/comparisons and release remain downstream"
     ],
@@ -111,6 +240,154 @@
       "record": "TestResults/stage61-native-join/kl078-r249-final-original-unit-and-six-file-coverage.original.json",
       "sha256": "47d522f79db770d96d642a01879884c8af3015b0f79bef15bd49ee0bb2197a9c",
       "scope": "Actual selected functional Unit operation coverage for six changed product files; original Cobertura and exact source/DLL/PDB identities retained. No load tests, no full-product coverage or acceptance claim."
+    },
+    "currentSourceIntake": {
+      "oneHost": {
+        "paths": 161,
+        "new": 83,
+        "replaced": 75,
+        "deleted": 3,
+        "record": "TestResults/stage61-native-join/root-r377-foundation161-reviewed-intake.original.json",
+        "sourcePacketSha256": "a9b9c10926ac31c9885f8f9f3e2da18681d0c3ee4e3ef0fce96247b2f543546c",
+        "originalReadGuards": 323,
+        "boundary": "Actual guarded source adoption. Original native jobs lifecycle is reused; separate native request drain, storage-first Grain Service Init, same owner publication, joined original producers and physical-close permit. Compiler/runtime OPEN."
+      },
+      "currentModelPublicTestStage": {
+        "newOrChangedPaths": 20,
+        "boundary": "Graph-policy and sample correction-predicate public flows, exact local image admission and new whole-operation typed SQL composition. All original R364five imports and R371twelve new SQL test diagnostics have scoped source repairs integrated; combined strict rebuild remains OPEN."
+      },
+      "foundationImageAdmission": {
+        "paths": 4,
+        "scope": "One exact closed 17-class current-foundation selector in JS/C# and original native Node regression; first five current-public selectors and every provenance/SIMD/coverage/cleanup gate retained.",
+        "record": "TestResults/stage61-native-join/root-r378-foundation-admission4-reviewed-intake.original.json",
+        "runtimeQualified": false
+      },
+      "aspireFaultAndActualFailures": {
+        "paths": 17,
+        "record": "TestResults/stage61-native-join/root-r397-coherent-aspire-and-unit-repairs-intake.original.json",
+        "scope": "Explicit Aspire resource SIGKILL ownership, three original native drain fixture failures and SQL full typed/private receipt oracle; all original failure/resource/identity gates retained.",
+        "compiler": "Root R404 strict PASS",
+        "runtime": "Root R405 native drain3/3 and typed SQL composition1/1 passed; real SDK/MCP RF3 all-node cold uses actual AppHost fault path; dedicated hostile fault-id/namespace cases remain open",
+        "qualified": false
+      },
+      "aspireNamespaceAndConnection": {
+        "paths": 20,
+        "record": "TestResults/stage61-native-join/root-r398-aspire-lifecycle-and-connection20-intake.original.json",
+        "qualified": false
+      },
+      "recoveryAndFoundation": {
+        "paths": 24,
+        "record": "TestResults/stage61-native-join/root-r398-recovery-and-foundation24-intake.original.json",
+        "qualified": false
+      },
+      "nativeProgressAdmission": {
+        "paths": 22,
+        "record": "TestResults/stage61-native-join/root-r398-native-progress22-intake.original.json",
+        "qualified": false,
+        "runtime": "Root R405 original native progress classes44/44 passed; complete original BM25 move remains open"
+      }
+    },
+    "previousModelLocalVerification": {
+      "release": {
+        "lane": "R359",
+        "result": "passed",
+        "errors": 0,
+        "warnings": 0,
+        "elapsedSeconds": 124.5706314,
+        "sourceDrift": 0,
+        "stdoutSha256": "dbe10bf315cfffccf1f0cc35430d4a858f85982b510a9c2bd2060671601ed13f"
+      },
+      "functionalUnit": {
+        "lane": "R348 within joined R360 cohort",
+        "passed": 105,
+        "failed": 0,
+        "skipped": 0,
+        "elapsedSeconds": 20.6114639,
+        "configuredNativeParallelLimit": 50,
+        "actualPeakNativeIntervals": 50,
+        "stdoutSha256": "4536628de661fd5d68b9c9eda5fa7f87a8a2d573e338f087a71d1d41bc89b97c",
+        "boundary": "Selected twenty whole-operation class groups; 105 tests, not 105 accepted tasks or a full Unit assembly pass."
+      },
+      "sdkOfficialMcpAspireRf3": {
+        "lane": "R361",
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "elapsedSeconds": 276.0642623750027,
+        "selector": "SqlParserAdmissionRf3WholeFlowTests complete original operation",
+        "stdoutSha256": "54870ac6f55c97996676d60319507f2c3db5ed4a00ac693e822d310c00e10d0f",
+        "boundary": "Actual test-owned Aspire/Docker RF3, SDK and official MCP, named reads/typed writes/refusals/full receipt replay/two cold owners. Public graph and correction-predicate RF3 operations remain unexecuted."
+      },
+      "formatter": {
+        "lane": "R349 within joined R360 cohort",
+        "result": "passed",
+        "elapsedSeconds": 169.8689137,
+        "sourceDrift": 0,
+        "compiledDrift": 0
+      },
+      "testCohortSourceAndCompiledDrift": 0,
+      "developmentOnly": true,
+      "originalCompilerFailuresRetained": [
+        "R347: eight test-helper compiler/analyzer diagnostics",
+        "R355: sole remaining CA2000 test fixture ownership diagnostic; fixed by lexical using, before successful R359"
+      ],
+      "boundary": "Last verified model cohort before current unified-host replacement; R359/R348/R349/R361 results do not qualify the subsequently integrated one-host source or newly added tests."
+    },
+    "previousOneHostLocalVerification": {
+      "release": {
+        "lane": "R395",
+        "result": "passed",
+        "errors": 0,
+        "warnings": 0,
+        "elapsedSeconds": 215.434651,
+        "sourceDrift": 0,
+        "stdoutSha256": "c2b523802a5d38e7b562884a9ce5b4cdf57527dc4166b5eecedc45c217ce56c2"
+      },
+      "focusedUnit": {
+        "lane": "R396",
+        "passed": 37,
+        "failed": 5,
+        "skipped": 0,
+        "total": 42,
+        "elapsedSeconds": 187.218712,
+        "configuredNativeParallelLimit": 50,
+        "stdoutSha256": "94bee8b6e476e8b77b636c38632c8a1291dd33b550abf8cd69065983685aef04",
+        "boundary": "Selected whole-operation tests only; three NativeRequestDrain fixture authority failures, one SQL composition assertion failure, one direct-host movement stream failure. Direct-host result is not Aspire RF3 qualification."
+      },
+      "formatter": {
+        "lane": "R396",
+        "result": "passed",
+        "elapsedSeconds": 179.653986,
+        "sourceDrift": 0,
+        "compiledDrift": 0
+      },
+      "sdkOfficialMcpAspireRf3": {
+        "result": "OPEN",
+        "boundary": "Earlier R361 SQL RF3 belongs to the pre-one-host cohort; current one-host image is not yet exercised."
+      },
+      "developmentOnly": true,
+      "boundary": "R395/R396 actual one-host development evidence. Subsequent R397 Aspire fault and four failing-test repairs are integrated and await strict compilation and runtime.",
+      "stoppedBuild": {
+        "lane": "R397",
+        "result": "stopped before compiler output",
+        "elapsedSeconds": 499.5965055,
+        "processExitCode": 0,
+        "sourceDrift": 0,
+        "compiledDrift": 0,
+        "stdoutBytes": 0,
+        "stderrBytes": 0,
+        "boundary": "Root explicitly terminated the exact owned dotnet process after silent startup. Exit0 is not compilation proof; no current DLL changed. Cause not established; canonical retry runs outside sandbox."
+      },
+      "focusedCoverage": {
+        "lane": "R396",
+        "linesCovered": 19631,
+        "linesValid": 108496,
+        "branchesCovered": 8848,
+        "branchesValid": 68738,
+        "actualPeakNativeIntervals": 18,
+        "loadContributors": 0,
+        "boundary": "Failed focused42-case Unit cohort; partial selected functional coverage only, no full-product pass."
+      }
     }
   },
   "STAGE89-NATIVE-OPERATIONS-001": {

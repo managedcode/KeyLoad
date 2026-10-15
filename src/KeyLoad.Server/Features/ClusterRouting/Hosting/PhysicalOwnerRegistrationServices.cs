@@ -9,11 +9,12 @@ internal static class PhysicalOwnerRegistrationServices
     {
         services.AddSingleton<PhysicalOwnerProbeWorkOwner>();
         services.AddSingleton<PhysicalOwnerStartupRequests>();
-        services.AddSingleton<PhysicalOwnerProbeReceiver>();
+        services.AddSingleton(provider => ActivatorUtilities.CreateInstance<PhysicalOwnerProbeReceiver>(provider,
+            provider.GetRequiredService<PartitionHostApplicationOwner>().Borrow()));
         services.AddSingleton(static provider => new PhysicalOwnerProbeNativeRuntime(
             provider.GetRequiredService<IOptions<NodeOptions>>(),
             provider.GetRequiredService<OrleansNode>(),
-            provider.GetRequiredService<PartitionHost>(),
+            provider.GetRequiredService<PartitionHostApplicationOwner>().Borrow(),
             provider.GetRequiredService<PhysicalOwnerProbeReceiver>(),
             provider.GetRequiredService<PhysicalOwnerProbeWorkOwner>(),
             provider.GetRequiredService<IOptions<OrleansMembershipOptions>>(),

@@ -150,7 +150,7 @@ internal static class ServerRuntimeOptionsRegistration
         return services;
     }
 
-    private static void ConfigureNode(NodeOptions node, IConfiguration configuration)
+    internal static void ConfigureNode(NodeOptions node, IConfiguration configuration)
     {
         var section = configuration.GetSection(ServerProtocol.ConfigurationSection);
         PhysicalGroupTrustValidator.ValidateConfiguration(section, node.PhysicalGroupTrust);

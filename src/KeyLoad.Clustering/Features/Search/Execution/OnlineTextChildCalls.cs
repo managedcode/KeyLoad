@@ -13,6 +13,7 @@ internal sealed class OnlineTextChildCalls(DecodedGrainRequest parent, Func<stri
     Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
     IOptions<GrainRoutingOptions> routing, ILogger diagnostics, OnlineTextFrameAccounting frames, global::Orleans.Runtime.IGrainContext context)
 {
+    private readonly Func<INativeOnlineTextMaintenance> borrowNative = services.GetRequiredService<Func<INativeOnlineTextMaintenance>>();
     internal Guid ParentRequestId => parent.Envelope.RequestId;
     internal Guid SessionId { get; } = Guid.NewGuid();
     internal DatabaseEngine Database => services.GetRequiredService<DatabaseEngine>();
@@ -36,7 +37,7 @@ internal sealed class OnlineTextChildCalls(DecodedGrainRequest parent, Func<stri
         => DispatchAsync<OnlineTextIndexMaintenanceResult>((actor, _) => codec.CreateOnlineTextPublication(actor,
             original, parent.Envelope.ExpiresAt), original.Id, token);
 
-    internal Task AbortAsync() => services.GetRequiredService<INativeOnlineTextMaintenance>().AbortAsync(SessionId);
+    internal Task AbortAsync() => borrowNative().AbortAsync(SessionId);
 
     internal async Task ObserveCapturedAsync(CancellationToken token)
     {

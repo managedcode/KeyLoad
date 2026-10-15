@@ -8,7 +8,7 @@ namespace KeyLoad.IntegrationTests.Features.Search;
 internal static class NativeTextOnlineRf3Call
 {
     private const string Arguments = "arguments";
-    private const string Sql = "CALL keyload_search_text_online_maintain(@arguments)";
+    private const string Sql = "EXEC keyload_search_text_online_maintain @arguments";
     internal static SqlOperationRequest SqlRequest(OnlineTextIndexMaintenanceRequest request)
         => new(request.Consumer.Partition, Sql, new(StringComparer.Ordinal)
         {

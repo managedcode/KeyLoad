@@ -15,15 +15,21 @@ namespace KeyLoad.Server;
 [ConfigurationBinding]
 internal static class ServerConfiguration
 {
-    internal static WebApplication Build(string[] args, IGrainPartitionMovementSealedOperationObserver? sealedObserver = null,
+    internal static async Task<WebApplication> BuildAsync(string[] args, IGrainPartitionMovementSealedOperationObserver? sealedObserver = null,
         IControlledBlobWireBorrowObserver? blobWireObserver = null,
         NativeLocalhostClusteringOptions? localhostClustering = null,
         IDatabaseAuthenticationExecutionObserver? authenticationExecutionObserver = null,
-        IPartitionMovementNativeObserver? partitionMovementNativeObserver = null)
+        IPartitionMovementNativeObserver? partitionMovementNativeObserver = null,
+        Func<IServiceProvider, ILifecycleParticipant<ISiloLifecycle>>? lifecycleParticipantFactory = null,
+        CancellationToken startupCancellation = default)
     {
+        startupCancellation.ThrowIfCancellationRequested();
         var builder = WebApplication.CreateBuilder(args);
         builder.AddServiceDefaults();
         builder.Services.AddRuntimeOptions(builder.Configuration);
+        var node = ServerNodeOptionsComposition.Read(builder.Configuration);
+        var address = await OrleansNodeAddressResolver.ResolveAsync(node.Value, startupCancellation).ConfigureAwait(false);
+        builder.Services.AddSingleton<IOptions<NodeOptions>>(node);
         ServerConnectionTransportComposition.Configure(builder);
         ConfigureTransportOptions(builder);
         Register(builder.Services, blobWireObserver, localhostClustering);
@@ -40,14 +46,35 @@ internal static class ServerConfiguration
         {
             builder.Services.AddSingleton(partitionMovementNativeObserver);
         }
+        OrleansSiloConfiguration.Register(builder, node, address, localhostClustering);
+        if (lifecycleParticipantFactory is not null)
+        {
+            builder.Services.AddSingleton<ILifecycleParticipant<ISiloLifecycle>>(lifecycleParticipantFactory);
+        }
         DatabaseAuthenticationComposition.Register(builder.Services);
         McpServerComposition.Register(builder);
         var app = builder.Build();
-        var runtime = app.Services.GetRequiredService<ServerRuntimeOptions>();
-        runtime.ValidateBeforePhysicalOwnership();
-        var phases = runtime.DatabasePhaseExecution.Value;
-        DatabasePhaseTelemetry.Initialize(phases.Enabled, phases.StripeCount, phases.MaximumCasAttempts,
-            app.Services.GetRequiredService<TimeProvider>());
+        try
+        {
+            var runtime = app.Services.GetRequiredService<ServerRuntimeOptions>();
+            runtime.ValidateBeforePhysicalOwnership();
+            var phases = runtime.DatabasePhaseExecution.Value;
+            DatabasePhaseTelemetry.Initialize(phases.Enabled, phases.StripeCount, phases.MaximumCasAttempts,
+                app.Services.GetRequiredService<TimeProvider>());
+            ConfigureApplication(app);
+            return app;
+        }
+        catch (Exception primary)
+        {
+            var failures = new List<Exception> { primary };
+            await ServerFailureObserver.ObserveAsync(() => app.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+            ServerFailureObserver.ThrowIfAny(failures);
+            throw;
+        }
+    }
+
+    private static void ConfigureApplication(WebApplication app)
+    {
         app.UseMiddleware<AdminHttpMetricsMiddleware>();
         app.Use(next => new ServerErrorMiddleware(next,
             app.Services.GetRequiredService<ILogger<ServerErrorMiddleware>>(), app.Services.GetRequiredService<TimeProvider>()).InvokeAsync);
@@ -70,7 +97,6 @@ internal static class ServerConfiguration
         AdminStaticAssets.Map(app);
         app.MapKeyLoadApi();
         app.MapMcp(McpFramingProtocol.Path);
-        return app;
     }
 
     internal static ServerRuntimeOptions ReadOfflineRuntimeOptions(string destination)
@@ -139,23 +165,18 @@ internal static class ServerConfiguration
         services.AddSingleton(TimeProvider.System);
         services.AddSingleton<ServerConnectionRegistry>();
         services.AddSingleton<AdminHttpMetrics>();
-        services.AddSingleton<AdminNodeObserver>();
+        services.AddSingleton(provider => ActivatorUtilities.CreateInstance<AdminNodeObserver>(provider,
+            provider.GetRequiredService<PartitionHostApplicationOwner>().Borrow()));
         services.AddSingleton<IAuthorizationPolicy, AuthorizationPolicy>();
         services.AddSingleton(provider => new CommandAdmissionGovernor(
             provider.GetRequiredService<IOptions<CommandAdmissionLimits>>()));
         services.AddSingleton(provider => new HttpAdmissionGovernor(
             provider.GetRequiredService<IOptions<HttpAdmissionLimits>>()));
         services.AddSingleton<PartitionHostApplicationOwner>();
-        services.AddSingleton(provider => provider.GetRequiredService<PartitionHostApplicationOwner>().Borrow());
-        services.AddSingleton(provider => provider.GetRequiredService<PartitionHost>().Database);
-        services.AddSingleton<INodeAdministration, NodeAdministration>();
+        services.AddSingleton<INodeAdministration>(provider => ActivatorUtilities.CreateInstance<NodeAdministration>(provider,
+            provider.GetRequiredService<PartitionHostApplicationOwner>().Borrow()));
         PhysicalOwnerRegistrationServices.Add(services);
         services.AddSingleton(provider => NativeDiscoveryOmissionComposition.CreateNode(provider, blobWireObserver));
-        services.AddSingleton(provider => new GrainRequestCodec(provider.GetRequiredService<DatabaseEngine>(),
-            provider.GetRequiredService<TimeProvider>(), provider.GetRequiredService<IOptions<GrainRoutingOptions>>())
-        {
-            PurposeObserver = provider.GetRequiredService<OrleansNode>().DiscoveryOmission?.PurposeObserver
-        });
     }
 
 }

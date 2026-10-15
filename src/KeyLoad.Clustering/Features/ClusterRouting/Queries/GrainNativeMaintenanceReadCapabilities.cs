@@ -15,12 +15,12 @@ internal static class GrainNativeMaintenanceReadCapabilities
         GrainRequestAuthority.RequireAdministrator(principal);
         return kind switch
         {
-            GrainReadKind.OnlineTextMaintenance => await services.GetRequiredService<INativeOnlineTextMaintenance>().ExecuteAsync(principal,
+            GrainReadKind.OnlineTextMaintenance => await services.GetRequiredService<Func<INativeOnlineTextMaintenance>>()().ExecuteAsync(principal,
                 GrainNativePayload.Read<OnlineTextCapabilityRequest>(request.Payload), request.Envelope.ExpiresAt,
                 cancellationToken).ConfigureAwait(true),
-            GrainReadKind.TextMaintenance => await services.GetRequiredService<INativeTextMaintenance>().ExecuteAsync(principal,
+            GrainReadKind.TextMaintenance => await services.GetRequiredService<Func<INativeTextMaintenance>>()().ExecuteAsync(principal,
                 GrainNativePayload.Read<TextMaintenanceCapabilityRequest>(request.Payload), cancellationToken).ConfigureAwait(true),
-            GrainReadKind.AnnMaintenance => await services.GetRequiredService<INativeAnnMaintenance>().ExecuteAsync(principal,
+            GrainReadKind.AnnMaintenance => await services.GetRequiredService<Func<INativeAnnMaintenance>>()().ExecuteAsync(principal,
                 GrainNativePayload.Read<AnnMaintenanceCapabilityRequest>(request.Payload), cancellationToken).ConfigureAwait(true),
             _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, GrainRoutingProtocol.InvalidRequest)
         };

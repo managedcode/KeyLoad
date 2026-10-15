@@ -78,6 +78,8 @@ internal static class ReplicaIsolationResourceComposition
             }
             targets.Add(new(node.Name, builtImage, serviceUser));
         }
-        return new(baseImage, nativeBaseImage, digest, context, incarnation, targets.ToArray());
+        var plan = new ReplicaIsolationBuildPlan(baseImage, nativeBaseImage, digest, context, incarnation, targets.ToArray());
+        ReplicaIsolationCommand.Apply(builder, plan);
+        return plan;
     }
 }

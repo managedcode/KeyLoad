@@ -12,16 +12,17 @@ namespace KeyLoad.Clustering;
 [Orleans.Placement.Immovable(Orleans.Placement.ImmovableKind.Any)]
 [global::Orleans.GrainType(AnnProjectionJobProtocol.GrainAlias), global::Orleans.Placement.PreferLocalPlacement]
 internal sealed class AnnProjectionCoordinatorGrain(IDurableStateManager state, ILocalDurableJobManager jobs,
-    DatabaseEngine database, ICommitCoordinator coordinator, RuntimeJournalAdmission runtime,
+    DatabaseEngine database, Func<ICommitCoordinator> borrowCoordinator, RuntimeJournalAdmission runtime,
     PhysicalShardRecord physicalOwner,
-    INativeAnnMaintenance native, GrainRequestCodec codec, IServiceProvider services, TimeProvider clock,
+    Func<INativeAnnMaintenance> borrowNative, GrainRequestCodec codec, IServiceProvider services, TimeProvider clock,
     Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
     IOptions<GrainRoutingOptions> routing, IOptions<RuntimeJournalOptions> journal,
     IOptions<DatabaseLimits> limits)
     : global::Orleans.Grain, IAnnProjectionCoordinatorGrain, IDurableJobHandler
 {
+    private readonly ICommitCoordinator coordinator = borrowCoordinator();
     private readonly AnnProjectionJobStateOwner owner = new(state, journal, database.Limits.MaxBatchBytes);
-    private readonly AnnProjectionJobExecution execution = new(database, native, limits, clock,
+    private readonly AnnProjectionJobExecution execution = new(database, borrowNative(), limits, clock,
         new(codec, services, clock, serializer, routing));
 
     public async Task ScheduleAsync(ProjectionConsumerRef consumer, long generation, Guid nodeId, CancellationToken cancellationToken)

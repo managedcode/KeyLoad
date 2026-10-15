@@ -7,9 +7,6 @@ internal static class ContainerRuntimeProtocol
 {
     internal const string DockerExecutable = "docker";
     internal const string GitExecutable = "git";
-    internal const string KillCommand = "kill";
-    internal const string SignalArgument = "--signal";
-    internal const string KillSignal = "KILL";
     internal const string KillOperation = "SIGKILL";
     internal const string InspectCommand = "inspect";
     internal const string FormatArgument = "--format";

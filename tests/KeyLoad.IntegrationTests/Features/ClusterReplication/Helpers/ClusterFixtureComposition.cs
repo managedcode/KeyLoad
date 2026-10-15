@@ -23,6 +23,7 @@ internal static class ClusterFixtureComposition
         var arguments = coverage?.CreateArguments() ??
             [$"{ClusterFixtureProtocol.DataRootArgument}{root}", ClusterFixtureProtocol.EphemeralArgument,
                 ClusterFixtureProtocol.SnapshotThresholdArgument];
+        arguments = [.. arguments, KeyLoad.AppHost.Features.ClusterReplication.ContainerFaultCommandProtocol.EnabledArgument];
         if (coverage is not null)
         {
             root = coverage.Root;

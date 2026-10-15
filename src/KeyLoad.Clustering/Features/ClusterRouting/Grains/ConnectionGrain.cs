@@ -13,14 +13,14 @@ namespace KeyLoad.Clustering;
 /// <param name="diagnostics">Operational logging for unexpected failures, without exception objects on the wire.</param>
 /// <param name="chunkSerializer">The actual registered Orleans serializer for request chunks.</param>
 /// <param name="clock">Runtime clock for the finite execution deadline.</param>
-/// <param name="workOwner">Silo-local owner for active request stream work.</param>
+/// <param name="borrowWorkOwner">Borrows the silo-local owner for active request stream work.</param>
 /// <param name="options">The centrally validated request execution snapshot.</param>
 /// <param name="services">Borrowed native silo services for independent lane composition.</param>
 [Orleans.Placement.Immovable(Orleans.Placement.ImmovableKind.Any)]
 [Orleans.GrainType(GrainRoutingProtocol.RequestAlias), Orleans.Placement.PreferLocalPlacement]
 public sealed class ConnectionGrain(GrainRequestCodec codec, ILogger<ConnectionGrain> diagnostics,
     Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> chunkSerializer, TimeProvider clock,
-    NativeRequestWorkOwner workOwner, IOptions<GrainRoutingOptions> options, IServiceProvider services)
+    Func<NativeRequestWorkOwner> borrowWorkOwner, IOptions<GrainRoutingOptions> options, IServiceProvider services)
     : Grain, IConnectionGrain, IAsyncDisposable
 {
     private readonly NativeConnectionOperationOwner operations = new(options);
@@ -40,7 +40,7 @@ public sealed class ConnectionGrain(GrainRequestCodec codec, ILogger<ConnectionG
         return NativeConnectionOperationStream.Run(operations, requestId, executionToken => NativeCqrsStreamLifetime.RunWithAwaitedSettlement(
             createStream: token => CqrsStream.Create<GrainRequestProgress, GrainOperationReply>(
                 writer => ExecuteCapabilityAsync(signedRequest, requestId, writer, phaseSettlement, purpose), token),
-            serializer: chunkSerializer, requestId: requestId, clock: clock, settled: settled, cancellationToken: executionToken, options: options, owner: workOwner, purpose: purpose), cancellationToken);
+            serializer: chunkSerializer, requestId: requestId, clock: clock, settled: settled, cancellationToken: executionToken, options: options, owner: borrowWorkOwner(), purpose: purpose), cancellationToken);
     }
 
     /// <inheritdoc />
@@ -132,7 +132,7 @@ public sealed class ConnectionGrain(GrainRequestCodec codec, ILogger<ConnectionG
             {
                 stage = GrainFailureStage.CapabilityExecution;
                 var reader = new ConnectionReadExecution(codec, services.GetRequiredService<KeyLoad.Core.DatabaseEngine>(),
-                    services.GetRequiredService<KeyLoad.Core.ICommitCoordinator>(), services, clock, workOwner,
+                    services.GetRequiredService<Func<KeyLoad.Core.ICommitCoordinator>>()(), services, clock, borrowWorkOwner(),
                     diagnostics, ((IGrainBase)this).GrainContext);
                 reply = await reader.ExecuteAsync(request, writer.CancellationToken).ConfigureAwait(true);
             }

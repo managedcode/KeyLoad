@@ -9,7 +9,7 @@ internal static class ReplicaReadinessEndpoints
         app.MapGet(ServerProtocol.ReadyPath, ReadyAsync);
     }
 
-    private static async Task<IResult> ReadyAsync(PartitionHost partition, OrleansNode node,
+    private static async Task<IResult> ReadyAsync(PartitionHostApplicationOwner owner, OrleansNode node,
         IOptions<ServerExecutionOptions> options, TimeProvider clock, CancellationToken cancellationToken)
     {
         if (!node.DatabaseReady)
@@ -23,6 +23,7 @@ internal static class ReplicaReadinessEndpoints
         {
             await node.EnsureCompatibleCohortAsync(deadline.Token).ConfigureAwait(false);
             await node.EnsureCatalogAdmissionAsync(deadline.Token).ConfigureAwait(false);
+            var partition = owner.Borrow();
             return Results.Ok(new ReadyReply(ServerProtocol.ReadyStatus, partition.Configuration.VoterIds.Length));
         }
         catch (Exception error) when (error is KeyLoadException or OperationCanceledException)

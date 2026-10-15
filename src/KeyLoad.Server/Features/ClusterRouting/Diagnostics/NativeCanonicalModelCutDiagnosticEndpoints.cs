@@ -15,13 +15,14 @@ internal static class NativeCanonicalModelCutDiagnosticEndpoints
         app.MapPost(NativeCanonicalModelCutDiagnosticProtocol.Path, ReadAsync);
     }
 
-    private static async Task<IResult> ReadAsync(HttpContext context, PartitionHost partition, OrleansNode node, TimeProvider clock)
+    private static async Task<IResult> ReadAsync(HttpContext context, PartitionHostApplicationOwner owner, OrleansNode node, TimeProvider clock)
     {
         context.RequestAborted.ThrowIfCancellationRequested();
         if (context.Items[ServerProtocol.PrincipalItem] is not PrincipalRecord principal)
         {
             throw Errors.Fail(ErrorCode.Unauthenticated, ServerProtocol.MissingCredential);
         }
+        var partition = owner.Borrow();
         principal = GrainRequestAuthority.Reload(partition.Database, principal.Id, clock);
         GrainRequestAuthority.RequireAdministrator(principal);
         var observer = node.CanonicalCutObserver ?? throw NativeCanonicalModelCutDiagnosticRead.Unavailable();

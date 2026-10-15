@@ -2,11 +2,6 @@ using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.Server;
 
-internal sealed partial class OrleansNode
-{
-    private readonly TenantPlacementNodeOwner tenantPlacementOwner = new();
-}
-
 internal sealed class TenantPlacementNodeOwner : IAsyncDisposable
 {
     private TenantPlacementNativeRuntime? runtime;

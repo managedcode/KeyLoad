@@ -1,5 +1,6 @@
 using KeyLoad.Core;
 using KeyLoad.Replication;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -9,35 +10,65 @@ namespace KeyLoad.Clustering;
 /// <param name="id">The native grain-service identity.</param>
 /// <param name="silo">The owning Orleans silo.</param>
 /// <param name="loggerFactory">The native grain-service logger factory.</param>
-/// <param name="database">The canonical node-local database owner.</param>
-/// <param name="consensus">The physical replica consensus and apply barriers.</param>
-/// <param name="grains">The native grain factory for durable maintenance coordinators.</param>
-/// <param name="clock">The owning runtime time provider.</param>
+/// <param name="services">The actual silo provider; storage-backed dependencies resolve in native sequential Init.</param>
 /// <param name="diagnostics">The bounded maintenance failure observer.</param>
-/// <param name="cadence">The existing due-work cadence bounds.</param>
-/// <param name="runtime">The original runtime-journal scheduling admission.</param>
-/// <param name="limits">The centrally validated database read bounds.</param>
 public sealed class AnnProjectionGrainService(GrainId id, Silo silo, ILoggerFactory loggerFactory,
-    DatabaseEngine database, ReplicaConsensus consensus, global::Orleans.IGrainFactory grains,
-    TimeProvider clock, ILogger<AnnProjectionGrainService> diagnostics,
-    IOptions<DueCoordinationOptions> cadence, RuntimeJournalAdmission runtime,
-    IOptions<DatabaseLimits> limits)
+    IServiceProvider services,
+    ILogger<AnnProjectionGrainService> diagnostics)
     : GrainService(id, silo, loggerFactory), IAnnProjectionGrainService
 {
+    private DatabaseEngine database = null!;
+    private ReplicaConsensus consensus = null!;
+    private global::Orleans.IGrainFactory grains = null!;
+    private TimeProvider clock = null!;
+    private IOptions<DueCoordinationOptions> cadence = null!;
+    private RuntimeJournalAdmission runtime = null!;
+    private IOptions<DatabaseLimits> limits = null!;
+
+    private readonly Lock producerLifecycle = new();
+    private bool producerClosed;
     private Task? producer;
 
     /// <summary>Initializes the actual silo-owned discovery service.</summary>
     /// <param name="serviceProvider">The original silo provider.</param>
     /// <returns>The native initialization task.</returns>
-    public override Task Init(IServiceProvider serviceProvider) => base.Init(serviceProvider);
+    public override async Task Init(IServiceProvider serviceProvider)
+    {
+        await base.Init(serviceProvider).ConfigureAwait(true);
+        database = services.GetRequiredService<DatabaseEngine>();
+        consensus = services.GetRequiredService<Func<ReplicaConsensus>>()();
+        grains = services.GetRequiredService<global::Orleans.IGrainFactory>();
+        clock = services.GetRequiredService<TimeProvider>();
+        cadence = services.GetRequiredService<IOptions<DueCoordinationOptions>>();
+        runtime = services.GetRequiredService<RuntimeJournalAdmission>();
+        limits = services.GetRequiredService<IOptions<DatabaseLimits>>();
+    }
 
     /// <summary>Starts the joined canonical post-apply discovery producer.</summary>
     /// <returns>The original native service startup task.</returns>
     protected override Task StartInBackground()
     {
-        var started = base.StartInBackground();
-        producer = RunAsync(StoppedCancellationTokenSource.Token);
-        return started;
+        lock (producerLifecycle)
+        {
+            if (producerClosed)
+            {
+                return producer ?? Task.CompletedTask;
+            }
+            var started = base.StartInBackground();
+            producer = RunAsync(StoppedCancellationTokenSource.Token);
+            return started;
+        }
+    }
+
+    /// <summary>Closes local producer admission and borrows its same original terminal task.</summary>
+    /// <returns>The original producer, or completion when no producer started before the closed fence.</returns>
+    public Task JoinStorageProducerAsync()
+    {
+        lock (producerLifecycle)
+        {
+            producerClosed = true;
+            return producer ?? Task.CompletedTask;
+        }
     }
 
     /// <summary>Cancels scheduling and genuinely joins original discovery and base shutdown.</summary>

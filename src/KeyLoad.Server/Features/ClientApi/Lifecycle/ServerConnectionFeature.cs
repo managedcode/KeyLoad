@@ -14,6 +14,8 @@ internal sealed class ServerConnectionFeature : IAsyncDisposable
     private readonly TaskCompletionSource drained = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private readonly TaskCompletionSource closeSignal = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private readonly ITimer idle;
+    private readonly TimeProvider clock;
+    private long lastIdleTimestamp;
     private readonly CancellationTokenRegistration transportClosed;
     private Task? closeTask;
     private int active;
@@ -26,6 +28,8 @@ internal sealed class ServerConnectionFeature : IAsyncDisposable
         this.transport = transport;
         this.services = services;
         settings = options.Value;
+        this.clock = clock;
+        lastIdleTimestamp = clock.GetTimestamp();
         idle = clock.CreateTimer(static state => ((ServerConnectionFeature)state!).ExpireIdle(),
             this, settings.ConnectionIdleTimeout, Timeout.InfiniteTimeSpan);
         transportClosed = transport.ConnectionClosed.Register(static state =>
@@ -76,6 +80,7 @@ internal sealed class ServerConnectionFeature : IAsyncDisposable
             }
             else
             {
+                lastIdleTimestamp = clock.GetTimestamp();
                 idle.Change(settings.ConnectionIdleTimeout, Timeout.InfiniteTimeSpan);
             }
         }
@@ -105,6 +110,12 @@ internal sealed class ServerConnectionFeature : IAsyncDisposable
         {
             if (closing || active != ServerConnectionProtocol.NoOperations)
             {
+                return;
+            }
+            var remaining = settings.ConnectionIdleTimeout - clock.GetElapsedTime(lastIdleTimestamp);
+            if (remaining > TimeSpan.Zero)
+            {
+                idle.Change(remaining, Timeout.InfiniteTimeSpan);
                 return;
             }
             closing = true;

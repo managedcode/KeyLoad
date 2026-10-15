@@ -53,28 +53,4 @@ internal sealed record CoreRuntimeOptions(
         _ = CommandInbox.Value;
     }
 
-    internal void RegisterBorrowed(IServiceCollection services)
-    {
-        services.AddSingleton(Serialization);
-        services.AddSingleton(DatabaseLimits);
-        services.AddSingleton(DueWork);
-        services.AddSingleton(EventSource);
-        services.AddSingleton(Messaging);
-        services.AddSingleton(GraphExecution);
-        services.AddSingleton(ChangeFeedExecution);
-        services.AddSingleton(BlobExecution);
-        services.AddSingleton(NativeClaimsExecution);
-        services.AddSingleton(TimeSeriesExecution);
-        services.AddSingleton(MovementCheckpoints);
-        services.AddSingleton(PackedAnn);
-        services.AddSingleton(AnnSeed);
-        services.AddSingleton(PackedAnnStorage);
-        services.AddSingleton(AnnMaintenance);
-        services.AddSingleton(TextMaintenance);
-        services.AddSingleton(QueryExecution);
-        services.AddSingleton(CacheMemory);
-        services.AddSingleton(CacheReadPermit);
-        services.AddSingleton(RuntimeJournal);
-        services.AddSingleton(CommandInbox);
-    }
 }

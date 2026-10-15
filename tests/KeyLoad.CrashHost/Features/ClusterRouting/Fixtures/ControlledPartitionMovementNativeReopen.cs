@@ -26,7 +26,7 @@ internal static class ControlledPartitionMovementNativeReopen
         var retainedRoot = ControlledPartitionMovementNativeFailureRoot.Capture(settings);
         try
         {
-            await owner.CreateNodesAsync().ConfigureAwait(false);
+            await owner.CreateNodesAsync(cancellationToken).ConfigureAwait(false);
             await ControlledPartitionMovementNativeHosts.JoinOriginalAsync(Task.WhenAll(owner.Nodes.Select(
                 node => node.StartAsync(cancellationToken)))).ConfigureAwait(false);
             return owner;

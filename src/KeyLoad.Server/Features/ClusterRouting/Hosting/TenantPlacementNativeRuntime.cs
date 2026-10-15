@@ -45,17 +45,6 @@ internal sealed class TenantPlacementNativeRuntime : IAsyncDisposable
     internal OwnerCapacityNativeLifetime Capacity => capacity;
     internal void Start() => capacity.Start();
 
-    internal void RegisterBorrowed(IServiceCollection services)
-    {
-        services.AddSingleton(capacity);
-        if (IsControl)
-        {
-            services.AddSingleton(Planner);
-            services.AddSingleton(Executor);
-            services.AddSingleton(Persistence);
-        }
-    }
-
     internal async Task CloseAdmissionAsync()
     {
         var failures = new List<Exception>();

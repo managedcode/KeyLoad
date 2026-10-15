@@ -1,10 +1,12 @@
 using System.Diagnostics;
-using System.Runtime.ExceptionServices;
+using KeyLoad.RecoveryTests.Features.DocumentStorage;
+using KeyLoad.Server;
 
 namespace KeyLoad.RecoveryTests.Features.StorageRecovery;
 
 internal static class RecoveryProcessCleanup
 {
+    private const int NoCleanupFailures = 0;
     private const string CleanupFailureKey = "KeyLoad.RecoveryProcessCleanupFailure";
 
     internal static async Task SettleAsync(Process? process, string root, string source,
@@ -16,7 +18,7 @@ internal static class RecoveryProcessCleanup
     {
         try
         {
-            await CleanupAsync(process, root, source, cancellationToken);
+            await CleanupAsync(process, root, source, activeFailure is null, cancellationToken);
         }
         catch (Exception cleanupFailure)
         {
@@ -29,11 +31,10 @@ internal static class RecoveryProcessCleanup
     }
 
     private static async Task CleanupAsync(Process? process, string root, string source,
-        CancellationToken cancellationToken)
+        bool allowDelete, CancellationToken cancellationToken)
     {
         var failures = new List<Exception>();
         var processSettled = process is null;
-        var readinessPassed = true;
         if (process is not null)
         {
             await SettleProcessAsync(process, failures, cancellationToken);
@@ -49,23 +50,14 @@ internal static class RecoveryProcessCleanup
         }
         if (processSettled && Directory.Exists(source))
         {
-            var readinessFailureCount = failures.Count;
             await ObserveAsync(() => KilledProcessFileReadiness.WaitAsync(source, cancellationToken), failures);
-            readinessPassed = failures.Count == readinessFailureCount;
             Observe(() => RecoveryFileInventory.AssertNativeHandlesReleased(source), failures);
         }
-        if (processSettled && readinessPassed && Directory.Exists(root))
+        if (allowDelete && processSettled && failures.Count == NoCleanupFailures && Directory.Exists(root))
         {
             await ObserveAsync(() => StoragePublicationRecoveryTests.DeleteTrialAsync(root, cancellationToken), failures);
         }
-        if (failures.Count == 1)
-        {
-            ExceptionDispatchInfo.Capture(failures[0]).Throw();
-        }
-        if (failures.Count > 1)
-        {
-            throw new AggregateException(failures);
-        }
+        CommandIdempotencyProcessFailureHandling.ThrowFailures(failures);
     }
 
     private static async Task SettleProcessAsync(Process process, List<Exception> failures,
@@ -87,24 +79,8 @@ internal static class RecoveryProcessCleanup
     }
 
     private static void Observe(Action stage, List<Exception> failures)
-        => ObserveAsync(() =>
-        {
-            stage();
-            return Task.CompletedTask;
-        }, failures).GetAwaiter().GetResult();
+        => ServerFailureObserver.Observe(stage, failures);
 
-    private static async Task ObserveAsync(Func<Task> stage, List<Exception> failures)
-    {
-        async Task InvokeAsync() => await stage();
-        var operation = InvokeAsync();
-        await operation.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
-        if (operation.Exception is { } fault)
-        {
-            failures.AddRange(fault.InnerExceptions);
-        }
-        else if (operation.IsCanceled)
-        {
-            failures.Add(new TaskCanceledException(operation));
-        }
-    }
+    private static Task ObserveAsync(Func<Task> stage, List<Exception> failures)
+        => ServerFailureObserver.ObserveAsync(stage, failures);
 }

@@ -2,40 +2,129 @@ using KeyLoad.Replication;
 
 namespace KeyLoad.Clustering;
 
-/// <summary>Drains node maintenance after membership shutdown, while Orleans transport still exists.</summary>
-/// <param name="endpoint">The node-owned replica endpoint to stop after discovery is withdrawn.</param>
-/// <param name="discovery">The local runtime state to mark unavailable before draining.</param>
-/// <param name="nativeDiscovery">Native metadata callback owner joined before endpoint shutdown.</param>
-public sealed class ReplicaTransportLifecycle(IReplicaEndpoint endpoint, ReplicaSiloDiscoveryState discovery,
-    ReplicaNativeDiscoveryRuntime nativeDiscovery)
-    : ILifecycleParticipant<ISiloLifecycle>
+/// <summary>Drains only the original attached replica owners after membership shutdown.</summary>
+public sealed class ReplicaTransportLifecycle : ILifecycleParticipant<ISiloLifecycle>
 {
-    private const int MaximumShutdownStages = 2;
+    private const int MaximumShutdownStages = 3;
+    private const string AlreadyAttached = "The original replica transport owners are already attached or stopping.";
+    private readonly Lock gate = new();
+    private IReplicaEndpoint? endpoint;
+    private ReplicaSiloDiscoveryState? discovery;
+    private ReplicaNativeDiscoveryRuntime? nativeDiscovery;
+    private Task? shutdown;
 
-    /// <summary>Registers transport shutdown at RuntimeStorageServices, after membership teardown.</summary>
-    /// <param name="lifecycle">The Orleans silo lifecycle to subscribe to.</param>
+    /// <summary>Captures actual acquired owners before transport attachment, without resolving new services.</summary>
+    public void Attach(IReplicaEndpoint endpoint, ReplicaSiloDiscoveryState discovery,
+        ReplicaNativeDiscoveryRuntime nativeDiscovery)
+    {
+        ArgumentNullException.ThrowIfNull(endpoint);
+        ArgumentNullException.ThrowIfNull(discovery);
+        ArgumentNullException.ThrowIfNull(nativeDiscovery);
+        lock (gate)
+        {
+            if (this.endpoint is not null || shutdown is not null)
+            {
+                throw new InvalidOperationException(AlreadyAttached);
+            }
+            this.endpoint = endpoint;
+            this.discovery = discovery;
+            this.nativeDiscovery = nativeDiscovery;
+        }
+    }
+
+    /// <summary>Registers the original drain after membership teardown, while transport still exists.</summary>
     public void Participate(ISiloLifecycle lifecycle) => lifecycle.Subscribe(ReplicaTransportProtocol.LifecycleName,
         ServiceLifecycleStage.RuntimeStorageServices, _ => Task.CompletedTask, StopAsync);
 
-    private async Task StopAsync(CancellationToken cancellationToken)
+    /// <summary>Returns the same original captured-owner drain for native and later physical-close joins.</summary>
+    public Task StopAsync(CancellationToken cancellationToken)
     {
-        discovery.StopDiscovery();
+        lock (gate)
+        {
+            return shutdown ??= StopCoreAsync(endpoint, discovery, nativeDiscovery, cancellationToken);
+        }
+    }
+
+    private static async Task StopCoreAsync(IReplicaEndpoint? endpoint, ReplicaSiloDiscoveryState? discovery,
+        ReplicaNativeDiscoveryRuntime? nativeDiscovery, CancellationToken cancellationToken)
+    {
+        // Publish the one original task before any native cancellation callback can reenter.
+        await Task.Yield();
+        if (endpoint is null || discovery is null || nativeDiscovery is null)
+        {
+            return;
+        }
         var failures = new List<Exception>(MaximumShutdownStages);
+        ReplicaDiscoveryLifetime.ObserveCleanup(discovery.StopDiscovery, failures);
         await ObserveAsync(nativeDiscovery.StopAsync, failures).ConfigureAwait(false);
-        await ObserveAsync(() => endpoint.StopAsync(cancellationToken), failures).ConfigureAwait(false);
+        await StopEndpointAsync(endpoint, failures, cancellationToken).ConfigureAwait(false);
         ReplicaDiscoveryLifetime.ThrowIfAny(failures);
     }
-    private static async Task ObserveAsync(Func<Task> stop, List<Exception> failures)
+
+    private static async Task StopEndpointAsync(IReplicaEndpoint endpoint, List<Exception> failures,
+        CancellationToken cancellationToken)
     {
+        Task original;
         try
         {
-            await stop().ConfigureAwait(false);
+            original = endpoint.StopAsync(CancellationToken.None);
+        }
+        catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            failures.Add(failure);
+            return;
+        }
+        catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            failures.Add(failure);
+            return;
+        }
+        var wait = original.WaitAsync(cancellationToken);
+        try
+        {
+            await wait.ConfigureAwait(false);
+        }
+        catch (OperationCanceledException failure) when (cancellationToken.IsCancellationRequested
+            && failure.CancellationToken == cancellationToken && !ReferenceEquals(wait, original))
+        {
+            failures.Add(failure);
+            await ObserveAsync(() => original, failures).ConfigureAwait(false);
+        }
+        catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            await ObserveAsync(() => original, failures).ConfigureAwait(false);
+        }
+        catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            await ObserveAsync(() => original, failures).ConfigureAwait(false);
+        }
+    }
+
+    private static async Task ObserveAsync(Func<Task> stop, List<Exception> failures)
+    {
+        Task? original = null;
+        try
+        {
+            original = stop();
+            await original.ConfigureAwait(false);
         }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
-            failures.Add(error);
+            AddOriginal(original, error, failures);
         }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            AddOriginal(original, error, failures);
+        }
+    }
+
+    private static void AddOriginal(Task? original, Exception error, List<Exception> failures)
+    {
+        if (original?.Exception is { } terminal)
+        {
+            failures.AddRange(terminal.InnerExceptions);
+        }
+        else
         {
             failures.Add(error);
         }

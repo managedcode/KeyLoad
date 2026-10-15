@@ -21,7 +21,7 @@ internal static class ControlledPartitionMovementNativeHostFactory
         try
         {
             owner = new ControlledPartitionMovementNativeHosts(settings, new(endpoints.Primary), observerFactory, authenticationObserverFactory);
-            await owner.CreateNodesAsync().ConfigureAwait(false);
+            await owner.CreateNodesAsync(cancellationToken).ConfigureAwait(false);
             endpoints.Dispose();
             await ControlledPartitionMovementNativeHosts.JoinOriginalAsync(
                 Task.WhenAll(owner.Nodes.Select(node => node.StartAsync(cancellationToken)))).ConfigureAwait(false);

@@ -24,7 +24,8 @@ internal sealed class NativeSagaTimeoutFixture : IAsyncInitializer, IAsyncDispos
     private const string InvalidProfileDetail = "The native runtime test timing profile is invalid.";
     private readonly IOptions<NativeRuntimeTestOptions> profile = Options.Create(new NativeRuntimeTestOptions());
     private readonly NativeSagaTimeoutRuntimeLifecycle runtime;
-    private bool disposed;
+    private readonly Lock disposalGate = new();
+    private Task? disposal;
 
     internal NativeSagaTimeoutFixture()
     {
@@ -100,28 +101,19 @@ internal sealed class NativeSagaTimeoutFixture : IAsyncInitializer, IAsyncDispos
         }
     }
 
-    public async ValueTask DisposeAsync()
+    public ValueTask DisposeAsync()
     {
-        if (disposed)
+        lock (disposalGate)
         {
-            return;
+            return new(disposal ??= DisposeCoreAsync());
         }
-        disposed = true;
-        var failures = new List<Exception>();
-        try
-        {
-            await runtime.DisposeAsync();
-        }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        {
-            failures.Add(error);
-        }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        {
-            failures.Add(error);
-        }
+    }
+
+    private async Task DisposeCoreAsync()
+    {
+        await Task.Yield();
+        await runtime.DisposeAsync();
         Current = null;
-        NativeSagaTimeoutCleanup.ThrowFailures(failures);
     }
 
     internal Task<DueDispatchResult> DispatchAsync(DueWorkHint hint, CancellationToken cancellationToken)

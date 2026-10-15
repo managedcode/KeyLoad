@@ -24,7 +24,7 @@ internal static class NativeSiloDiscoveryDiagnosticEndpoints
         NativeCanonicalModelCutDiagnosticEndpoints.Map(app);
     }
 
-    private static IResult Read(HttpContext context, PartitionHost partition, OrleansNode node, TimeProvider clock)
+    private static IResult Read(HttpContext context, PartitionHostApplicationOwner owner, OrleansNode node, TimeProvider clock)
     {
         var token = context.RequestAborted;
         token.ThrowIfCancellationRequested();
@@ -33,6 +33,7 @@ internal static class NativeSiloDiscoveryDiagnosticEndpoints
         {
             throw Errors.Fail(ErrorCode.Unauthenticated, ServerProtocol.MissingCredential);
         }
+        var partition = owner.Borrow();
         var principal = GrainRequestAuthority.Reload(partition.Database, supplied.Id, clock);
         GrainRequestAuthority.RequireAdministrator(principal);
         var discovery = node.Discovery;

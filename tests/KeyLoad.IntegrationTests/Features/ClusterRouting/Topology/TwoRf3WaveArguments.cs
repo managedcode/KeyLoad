@@ -22,6 +22,7 @@ internal static class TwoRf3WaveArguments
         {
             TwoRf3MembershipProtocol.DataRootPrefix + root,
             TwoRf3MembershipProtocol.EphemeralArgument,
+            KeyLoad.AppHost.Features.ClusterReplication.ContainerFaultCommandProtocol.EnabledArgument,
             TwoRf3MembershipProtocol.ProfileArgument
         };
         if (tenantCapacityPlacement)

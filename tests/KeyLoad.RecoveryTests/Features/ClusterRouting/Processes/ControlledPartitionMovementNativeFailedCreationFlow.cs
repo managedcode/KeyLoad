@@ -1,7 +1,6 @@
 using KeyLoad.CrashHost.Features.ClusterRouting;
 using KeyLoad.RecoveryTests.Features.StorageRecovery;
 using KeyLoad.Server;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.RecoveryTests.Features.ClusterRouting;
 
@@ -9,11 +8,8 @@ internal static class ControlledPartitionMovementNativeFailedCreationFlow
 {
     private const int NoFailures = 0;
     private const int Owners = 6;
-    private const int OwnedLockCount = 18;
-    private const string StoreOwnerLock = "owner.lock";
 
-    internal static async Task RunAsync(IOptions<NativeProcessReadinessOptions> readiness,
-        TimeProvider clock, CancellationToken cancellationToken)
+    internal static async Task RunAsync(CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         using var selected = new CancellationTokenSource();
@@ -35,22 +31,18 @@ internal static class ControlledPartitionMovementNativeFailedCreationFlow
             var acquired = retained ?? throw new InvalidOperationException(nameof(ControlledPartitionMovementNativeFailureRoot));
             await Assert.That(Directory.Exists(acquired.Root)).IsTrue();
             await Assert.That(acquired.Nodes.Length).IsEqualTo(Owners);
-            var before = await RecoveryFileInventory.CaptureAsync(acquired.Root, cancellationToken);
-            var opened = NoFailures;
-            foreach (var node in acquired.Nodes)
+            await Assert.That(acquired.EntriesBeforeAcquisition).IsEmpty();
+            await Assert.That(Directory.GetFileSystemEntries(acquired.Root)).IsEquivalentTo(acquired.EntriesBeforeAcquisition);
+            await Assert.That(acquired.Nodes.All(node => !Directory.Exists(node))).IsTrue();
+            if ((OperatingSystem.IsLinux() || OperatingSystem.IsMacOS()) && acquired.ModeBeforeAcquisition is { } mode)
             {
-                await ControlledPartitionMovementProcessOwnership.RequireAsync(node, readiness, clock, cancellationToken);
-                foreach (var path in new[] { Path.Combine(node, PartitionStoreProtocol.OwnershipFile),
-                    Path.Combine(node, PartitionStoreProtocol.CanonicalDirectory, StoreOwnerLock),
-                    Path.Combine(node, global::KeyLoad.Replication.ReplicaProtocol.ReplicaDirectory, StoreOwnerLock) })
-                {
-                    using var ownership = File.Open(path, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
-                    opened++;
-                }
+                await Assert.That(File.GetUnixFileMode(acquired.Root)).IsEqualTo(mode);
             }
-            await Assert.That(opened).IsEqualTo(OwnedLockCount);
+            var before = await RecoveryFileInventory.CaptureAsync(acquired.Root, cancellationToken);
+            await Assert.That(before).IsEmpty();
             await CreatedSiloShutdownOperation.RunAsync(acquired.Root, cancellationToken);
             await RecoveryFileInventory.AssertUnchangedAsync(acquired.Root, before, cancellationToken);
+            await Assert.That(Directory.GetFileSystemEntries(acquired.Root)).IsEquivalentTo(acquired.EntriesBeforeAcquisition);
         }, checks);
         if (checks.Count != NoFailures)
         {

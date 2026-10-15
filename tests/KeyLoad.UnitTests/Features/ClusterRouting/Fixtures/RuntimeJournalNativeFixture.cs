@@ -32,7 +32,9 @@ internal sealed class RuntimeJournalNativeDataSourceAttribute : DataSourceGenera
 }
 internal sealed class RuntimeJournalNativeFixture : IAsyncInitializer, IAsyncDisposable
 {
-    private int disposed;
+    private const string Unjoined = "The original native journal borrowers have not joined; retain their database root.";
+    private readonly Lock disposalGate = new();
+    private Task? disposalTask;
     internal readonly TestDatabase Database = new();
     internal readonly IOptions<RuntimeJournalOptions> JournalOptions = Options.Create(new RuntimeJournalOptions());
     internal readonly IOptions<NativeRuntimeTestOptions> TimingOptions = Options.Create(new NativeRuntimeTestOptions());
@@ -117,43 +119,56 @@ internal sealed class RuntimeJournalNativeFixture : IAsyncInitializer, IAsyncDis
         }
     }
 
-    public async ValueTask DisposeAsync()
+    public ValueTask DisposeAsync()
     {
-        if (Interlocked.Exchange(ref disposed, 1) != 0)
+        lock (disposalGate)
         {
-            return;
+            return new(disposalTask ??= DisposeCoreAsync());
         }
+    }
 
+    private async Task DisposeCoreAsync()
+    {
+        // Publish the original task before native cancellation callbacks can reenter.
+        await Task.Yield();
         var failures = new List<Exception>();
         using (var deadline = new CancellationTokenSource(TimingOptions.Value.ShutdownTimeout, TimeProvider.System))
         {
-            await ObserveAsync(() => Cluster.StopAllSilosAsync(deadline.Token), failures);
+            await ServerFailureObserver.ObserveAsync(() => Cluster.StopAllSilosAsync(deadline.Token), failures);
         }
         if (requestWork is not null)
         {
-            await ObserveAsync(requestWork.DrainAsync, failures);
+            await ServerFailureObserver.ObserveAsync(requestWork.DrainAsync, failures);
         }
-        await ObserveAsync(() => Cluster.DisposeAsync().AsTask(), failures);
+        await ServerFailureObserver.ObserveAsync(() => Cluster.DisposeAsync().AsTask(), failures);
         if (requestWork is not null)
         {
-            await ObserveAsync(() => requestWork.DisposeAsync().AsTask(), failures);
+            await ServerFailureObserver.ObserveAsync(() => requestWork.DisposeAsync().AsTask(), failures);
         }
-        try
+        if (requestWork is { IsJoined: false } && failures.Count == 0)
         {
-            Database.Dispose();
+            failures.Add(new InvalidOperationException(Unjoined));
         }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        Current = null;
-        if (failures.Count == 1)
+        if (failures.Count == 0)
         {
-            throw failures[0];
+            try
+            {
+                Database.Dispose();
+            }
+            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+            {
+                failures.Add(error);
+            }
+            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+            {
+                failures.Add(error);
+            }
         }
-
-        if (failures.Count > 1)
+        if (failures.Count == 0)
         {
-            throw new AggregateException(failures);
+            Current = null;
         }
+        ServerFailureObserver.ThrowIfAny(failures);
     }
 
     private async Task BootstrapAsync(CancellationToken cancellationToken)
@@ -161,19 +176,9 @@ internal sealed class RuntimeJournalNativeFixture : IAsyncInitializer, IAsyncDis
         var principal = Database.Store.Read(view => Database.Database.Principal(view, "root", TimeProvider.System.GetUtcNow()));
         var services = SiloServices;
         var startup = new RuntimeJournalStartupRequests(services.GetRequiredService<IGrainFactory>(), Codec,
-            Database.Database, services.GetRequiredService<ICommitCoordinator>(), services, TimeProvider.System,
+            Database.Database, services.GetRequiredService<Func<ICommitCoordinator>>()(), services, TimeProvider.System,
             UnitRoutingOptions.Routing());
         await startup.BootstrapAsync(principal, Guid.NewGuid(), cancellationToken).ConfigureAwait(false);
-    }
-
-    private static async Task ObserveAsync(Func<Task> operation, List<Exception> failures)
-    {
-        try
-        {
-            await operation().ConfigureAwait(false);
-        }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
     }
 }
 
@@ -193,9 +198,11 @@ internal sealed class RuntimeJournalNativeSiloConfigurator : ISiloConfigurator
             .AddAssembly(typeof(CqrsStreamChunkSurrogateConverter<GrainRequestProgress, GrainOperationReply>).Assembly)
             .AddAssembly(typeof(ClaimsPrincipalSurrogateConverter).Assembly));
         siloBuilder.Services.AddSingleton(fixture.Database.Database);
-        siloBuilder.Services.AddSingleton<ICommitCoordinator>(new EmbeddedCoordinator(fixture.Database.Database));
+        var coordinator = new EmbeddedCoordinator(fixture.Database.Database);
+        siloBuilder.Services.AddSingleton<Func<ICommitCoordinator>>(() => coordinator);
         siloBuilder.Services.AddSingleton(TimeProvider.System);
-        siloBuilder.Services.AddSingleton(_ => fixture.RequestWork);
+        var requestWork = fixture.RequestWork;
+        siloBuilder.Services.AddSingleton<Func<NativeRequestWorkOwner>>(() => requestWork);
         siloBuilder.Services.AddSingleton(fixture.Codec);
         siloBuilder.Services.AddSingleton<NativeConnectionOwnerIdentity>();
         siloBuilder.Services.AddSingleton(routing);
@@ -204,8 +211,8 @@ internal sealed class RuntimeJournalNativeSiloConfigurator : ISiloConfigurator
             .Validate(options => options.IsValid(), "The native runtime test timing profile is invalid.")
             .ValidateOnStart();
         siloBuilder.Services.AddSingleton(services => new RuntimeJournalClient(
-            services.GetRequiredService<IGrainFactory>(), fixture.Codec, fixture.Database.Database,
-            services.GetRequiredService<ICommitCoordinator>(), services,
+            services.GetRequiredService<IGrainFactory>(), () => fixture.Codec, () => fixture.Database.Database,
+            services.GetRequiredService<Func<ICommitCoordinator>>(), services,
             services.GetRequiredService<TimeProvider>(),
             services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
             services.GetRequiredService<IOptions<GrainRoutingOptions>>(), fixture.JournalOptions,

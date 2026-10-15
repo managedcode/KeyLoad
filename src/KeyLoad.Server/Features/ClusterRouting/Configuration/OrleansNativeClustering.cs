@@ -9,7 +9,7 @@ namespace KeyLoad.Server;
 internal static class OrleansNativeClustering
 {
     [ConfigurationBinding]
-    internal static void RegisterHostingOptions(global::Microsoft.Extensions.Hosting.HostApplicationBuilder builder)
+    internal static void RegisterHostingOptions(WebApplicationBuilder builder)
     {
         builder.Services.AddOptions<OrleansHostingOptions>()
             .Configure(hosting => hosting.ConnectionString = global::Microsoft.Extensions.Configuration.ConfigurationExtensions

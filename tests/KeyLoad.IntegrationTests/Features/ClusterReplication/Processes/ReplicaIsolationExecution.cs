@@ -1,3 +1,5 @@
+using Aspire.Hosting;
+
 namespace KeyLoad.IntegrationTests.Features.ClusterReplication;
 
 /// <summary>Retains every original foreground process/reader result and distinguishes lost remote completion evidence.</summary>
@@ -7,14 +9,15 @@ internal sealed class ReplicaIsolationExecution
     internal IReadOnlyList<ReplicaIsolationMutation> Mutations => mutations;
     internal bool RequiresStoppedNamespace => mutations.Any(item => item.RemoteCompletionUnobserved);
 
-    internal async Task ExecuteAsync(string containerId, string[] rule, CancellationToken cancellationToken)
+    internal async Task ExecuteAsync(DistributedApplication app, string resource, string containerName,
+        string containerId, string[] rule, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         var intent = new ReplicaIsolationMutation(containerId, rule.ToArray());
         mutations.Add(intent);
         try
         {
-            var original = ContainerRuntimeDocker.RunAsync(ReplicaIsolationRules.NativeArguments(containerId, rule), cancellationToken);
+            var original = AspireReplicaIsolationCommand.ExecuteAsync(app, resource, containerName, containerId, rule, cancellationToken);
             intent.Result = await original.ConfigureAwait(false);
             ContainerRuntimeDocker.EnsureSuccessful(intent.Result, ReplicaIsolationProtocol.Iptables, containerId);
         }

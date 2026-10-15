@@ -6,51 +6,48 @@ namespace KeyLoad.Server;
 
 internal static class OrleansMovementServiceRegistration
 {
-    internal static void Register(HostApplicationBuilder builder, NodeOptions options,
-        IRemoteDocumentReadRouter? remoteDocuments, IRemoteBlobReadRouter? remoteBlobs,
-        IRemotePartitionQueryRouter? remoteQueries, IRemoteDistributedSearchRouter? distributedSearch,
-        IControlledDocumentCommandRouter? controlledDocuments, INativePartitionMovementCapture? movementCapture,
-        IPartitionMovementDispatcher? movementDispatcher)
+    internal static void Register(IServiceCollection services, NodeOptions options)
     {
         if (options.PhysicalGroupTrust.RemoteDocumentReads)
         {
-            builder.Services.AddSingleton<IPhysicalRequestPlacement, PhysicalDocumentRequestPlacement>();
-            if (remoteDocuments is not null)
-            {
-                builder.Services.AddSingleton(remoteDocuments);
-            }
-            if (remoteBlobs is not null)
-            {
-                builder.Services.AddSingleton(remoteBlobs);
-            }
-            if (remoteQueries is not null)
-            {
-                builder.Services.AddSingleton(remoteQueries);
-            }
-            if (distributedSearch is not null)
-            {
-                builder.Services.AddSingleton(distributedSearch);
-            }
+            services.AddSingleton<IPhysicalRequestPlacement, PhysicalDocumentRequestPlacement>();
+            services.AddSingleton<IRemoteDocumentReadRouter>(provider => Node(provider).RemoteDocuments?.Router!);
+            services.AddSingleton<IRemoteBlobReadRouter>(provider => Node(provider).RemoteDocuments?.BlobRouter!);
+            services.AddSingleton<IRemotePartitionQueryRouter>(provider => Node(provider).RemoteDocuments?.QueryRouter!);
+            services.AddSingleton<IRemoteDistributedSearchRouter>(provider => Node(provider).RemoteDocuments?.DistributedSearchRouter!);
+            services.AddSingleton<IControlledDocumentCommandRouter>(provider => Node(provider).RemoteDocuments?.CommandRouter!);
+            services.AddSingleton<IRemoteAnnReadRouter>(provider => Node(provider).RemoteDocuments?.AnnReadRouter!);
+            services.AddSingleton<IEventVectorParent>(provider => Node(provider).RemoteDocuments?.EventVectorParent!);
         }
-        if (controlledDocuments is not null)
+        services.AddSingleton<Func<INativePartitionMovementCapture>>(provider =>
         {
-            builder.Services.AddSingleton(controlledDocuments);
-        }
-        if (movementCapture is not null)
+            var borrowed = Node(provider).Movement?.Source!;
+            return () => borrowed;
+        });
+        services.AddSingleton<Func<IPartitionMovementParent>>(provider =>
         {
-            builder.Services.AddSingleton(movementCapture);
-        }
-        if (movementCapture is PartitionMovementSourceOwner sourceOwner)
+            var borrowed = Node(provider).Movement!;
+            return () => borrowed;
+        });
+        services.AddSingleton(provider => Node(provider).Movement?.NativeReceiver!);
+        services.AddSingleton(provider => (Node(provider).Movement?.Source as PartitionMovementSourceOwner)?.TransferReads!);
+        services.AddSingleton<Func<OwnerCapacityNativeLifetime>>(provider =>
         {
-            builder.Services.AddSingleton(sourceOwner.TransferReads);
-        }
-        if (movementDispatcher is not null)
+            var borrowed = Node(provider).TenantPlacementRuntime?.Capacity!;
+            return () => borrowed;
+        });
+        if (options.PhysicalGroupTrust.Role == PhysicalGroupTrustRole.Control)
         {
-            builder.Services.AddSingleton(movementDispatcher);
+            services.AddSingleton<ITenantPlacementPlanner>(provider => Node(provider).TenantPlacementRuntime?.Planner!);
+            services.AddSingleton<IPlacementIntentExecutor>(provider => Node(provider).TenantPlacementRuntime?.Executor!);
+            services.AddSingleton<IPlacementIntentPersistence>(provider => Node(provider).TenantPlacementRuntime?.Persistence!);
         }
-        if (movementDispatcher is PartitionMovementRuntime { NativeReceiver: { } nativeMovement })
-        {
-            builder.Services.AddSingleton(nativeMovement);
-        }
+    }
+
+    private static OrleansNode Node(IServiceProvider services)
+    {
+        var node = services.GetRequiredService<OrleansNode>();
+        node.RequireLocalRuntimePublished();
+        return node;
     }
 }

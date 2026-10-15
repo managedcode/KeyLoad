@@ -11,12 +11,13 @@ namespace KeyLoad.Clustering;
 [Orleans.Placement.Immovable(Orleans.Placement.ImmovableKind.Any)]
 [global::Orleans.GrainType(DueCoordinatorAliases.Coordinator), global::Orleans.Placement.PreferLocalPlacement]
 internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, DatabaseEngine database,
-    ICommitCoordinator coordinator, IServiceProvider services, TimeProvider clock,
+    Func<ICommitCoordinator> borrowCoordinator, IServiceProvider services, TimeProvider clock,
     Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> chunkSerializer,
     IOptions<DueCoordinationOptions> options, IOptions<GrainRoutingOptions> routingOptions,
     ILocalDurableJobManager durableJobs, RuntimeJournalAdmission runtimeJournalAdmission)
     : Grain, IRecurringDueCoordinatorGrain, IDurableJobHandler
 {
+    private readonly ICommitCoordinator coordinator = borrowCoordinator();
     public async Task<DueDispatchResult> ProcessDueAsync(DueWorkHint hint, CancellationToken cancellationToken)
     {
         using var admission = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken,

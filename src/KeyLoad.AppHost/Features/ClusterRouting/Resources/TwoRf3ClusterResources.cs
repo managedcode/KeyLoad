@@ -142,6 +142,7 @@ internal static class TwoRf3ClusterResources
                 firstPeer, secondPeer, firstGroup, secondGroup);
             KeyLoad.AppHost.Features.ClientApi.ClusterConnectionEndpointResources.Apply(resource);
             ClusterResourceSettings.Apply(builder, resource, containerUser);
+            KeyLoad.AppHost.Features.ClusterReplication.ContainerKillCommand.Apply(builder, resource, ephemeral: true);
             resources[index] = resource;
         }
         return resources;

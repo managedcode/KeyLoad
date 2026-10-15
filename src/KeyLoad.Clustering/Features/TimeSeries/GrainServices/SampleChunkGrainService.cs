@@ -1,6 +1,7 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.TimeSeries;
 using KeyLoad.Replication;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -8,24 +9,59 @@ namespace KeyLoad.Clustering;
 
 /// <summary>Discovers bounded canonical chunk work on the current RF3 leader and joins original scheduling.</summary>
 public sealed class SampleChunkGrainService(GrainId id, Silo silo, ILoggerFactory loggerFactory,
-    DatabaseEngine database, ReplicaConsensus consensus, IGrainFactory grains, TimeProvider clock,
-    ILogger<SampleChunkGrainService> diagnostics, IOptions<DueCoordinationOptions> execution,
-    RuntimeJournalAdmission runtime) : GrainService(id, silo, loggerFactory), ISampleChunkGrainService
+    IServiceProvider services,
+    ILogger<SampleChunkGrainService> diagnostics) : GrainService(id, silo, loggerFactory), ISampleChunkGrainService
 {
+    private DatabaseEngine database = null!;
+    private ReplicaConsensus consensus = null!;
+    private IGrainFactory grains = null!;
+    private TimeProvider clock = null!;
+    private IOptions<DueCoordinationOptions> execution = null!;
+    private RuntimeJournalAdmission runtime = null!;
+
+    private readonly Lock producerLifecycle = new();
+    private bool producerClosed;
     private Task? loop;
 
     /// <summary>Completes native service initialization.</summary>
     /// <param name="serviceProvider">The original silo provider.</param>
     /// <returns>The native initialization task.</returns>
-    public override Task Init(IServiceProvider serviceProvider) => base.Init(serviceProvider);
+    public override async Task Init(IServiceProvider serviceProvider)
+    {
+        await base.Init(serviceProvider).ConfigureAwait(true);
+        database = services.GetRequiredService<DatabaseEngine>();
+        consensus = services.GetRequiredService<Func<ReplicaConsensus>>()();
+        grains = services.GetRequiredService<IGrainFactory>();
+        clock = services.GetRequiredService<TimeProvider>();
+        execution = services.GetRequiredService<IOptions<DueCoordinationOptions>>();
+        runtime = services.GetRequiredService<RuntimeJournalAdmission>();
+    }
 
     /// <summary>Starts one joined discovery producer after native lifecycle admission.</summary>
     /// <returns>Original native startup task.</returns>
     protected override Task StartInBackground()
     {
-        var started = base.StartInBackground();
-        loop = RunAsync(StoppedCancellationTokenSource.Token);
-        return started;
+        lock (producerLifecycle)
+        {
+            if (producerClosed)
+            {
+                return loop ?? Task.CompletedTask;
+            }
+            var started = base.StartInBackground();
+            loop = RunAsync(StoppedCancellationTokenSource.Token);
+            return started;
+        }
+    }
+
+    /// <summary>Closes local producer admission and borrows its same original terminal task.</summary>
+    /// <returns>The original producer, or completion when no producer started before the closed fence.</returns>
+    public Task JoinStorageProducerAsync()
+    {
+        lock (producerLifecycle)
+        {
+            producerClosed = true;
+            return loop ?? Task.CompletedTask;
+        }
     }
 
     /// <summary>Cancels admission and joins the original producer and native base shutdown.</summary>

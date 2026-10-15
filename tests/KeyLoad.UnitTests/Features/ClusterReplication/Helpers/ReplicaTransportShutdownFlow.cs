@@ -76,7 +76,9 @@ internal static class ReplicaTransportShutdownFlow
         var image = QueueWholeFlowStorage.Bytes(db.Store);
         var cut = db.Store.Position;
         var lifecycle = new ReplicaTransportObservedLifecycle(runtime.LocalServices.GetRequiredService<ILogger<SiloLifecycleSubject>>());
-        new ReplicaTransportLifecycle(endpoint.Consensus, state, native).Participate(lifecycle);
+        var transport = new ReplicaTransportLifecycle();
+        transport.Attach(endpoint.Consensus, state, native);
+        transport.Participate(lifecycle);
         await lifecycle.StartAsync(token);
         observed.FrameworkStop = lifecycle.StopAsync(CancellationToken.None);
         await discoveryGate.Cancelled.Task.WaitAsync(token);

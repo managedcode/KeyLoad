@@ -1,0 +1,12 @@
+# Selected-text search and retained maintenance SQL callers
+
+Status: narrow caller correction; native compiler and original Aspire RF3 operation gates OPEN.
+
+ADR-130 selects the actual Microsoft ScriptDOM ExecuteStatement path. Two existing Search test helpers retain retired CALL syntax: NativeTextSelectedRf3Call builds selected-generation search requests; NativeTextMaintenanceRf3ReplayAssertions builds old-generation maintenance refusals. A syntax refusal would prevent the original selected-index results or HistoryUnavailable oracle from being exercised. This is a confirmed source mismatch, not a reported runtime result.
+
+- REQ-SEARCH-NATIVE-CALLERS-001: change only `CALL keyload_search_execute(@arguments)` to `EXEC keyload_search_execute @arguments` in the selected-search helper. Preserve the original partition and exact arguments object, all four SDK/MCP/SDK-SQL/MCP-SQL adapters, selected IndexGeneration, ranking/result literals, read cuts and fresh persisted authorization.
+- REQ-SEARCH-NATIVE-CALLERS-002: change only `CALL keyload_search_text_maintain(@arguments)` to `EXEC keyload_search_text_maintain @arguments` in the retained-generation replay assertions. Preserve original command IDs, all four adapter paths, HistoryUnavailable and null/undefined response checks, unchanged outbox state, canonical rows, current selected generation, warm replay, restore/no-op and real cold continuation.
+- AC-SEARCH-NATIVE-CALLERS-001: independently review both full before/after images against ScriptDomExecOperation, SqlOriginalMutationIdentity and the actual search/text catalog decoders. Executable changes are exactly two SQL literals; no legacy fallback, parser, compatibility path, selector removal or weakened result is permitted.
+- AC-SEARCH-NATIVE-CALLERS-002: run the original selected-generation and text-maintenance whole operations through test-owned Aspire RF3 and the real SDK and official MCP callers, including original four paths, all old/current/no-op checks and cold recovery. Native SQL syntax, storage semantics, protocol and performance remain separate qualification levels.
+
+This finite follow-up is independent of the single online-maintenance caller correction in OnlineTextNativeSqlCaller.md. It preserves that packet rather than overwriting it, and it does not change the coherent native CQRS three-profile product repair. Source-only review cannot qualify execution.

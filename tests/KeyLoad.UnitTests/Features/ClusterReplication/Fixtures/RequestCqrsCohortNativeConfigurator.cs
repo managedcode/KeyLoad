@@ -15,6 +15,9 @@ internal sealed class RequestCqrsCohortNativeConfigurator : ISiloConfigurator
         var fixture = RequestCqrsCohortOwners.Resolve(silo.Configuration);
         var services = silo.Services;
         services.AddSingleton(TimeProvider.System);
+        services.AddSingleton<ReplicaTransportLifecycle>();
+        services.AddSingleton<ILifecycleParticipant<ISiloLifecycle>>(provider =>
+            provider.GetRequiredService<ReplicaTransportLifecycle>());
         services.AddSingleton(provider => fixture.CreateNode(
             provider.GetRequiredService<IOptions<SiloOptions>>().Value.SiloName,
             provider.GetRequiredService<ILocalSiloDetails>()));
@@ -26,8 +29,16 @@ internal sealed class RequestCqrsCohortNativeConfigurator : ISiloConfigurator
         services.AddSingleton(UnitRoutingOptions.Membership());
         services.AddSingleton(UnitRoutingOptions.Transport());
         services.AddSingleton(provider => provider.GetRequiredService<RequestCqrsCohortNativeNode>().Discovery);
-        services.AddSingleton(provider => provider.GetRequiredService<RequestCqrsCohortNativeNode>().Authentication);
-        services.AddSingleton<IReplicaEndpoint>(provider => provider.GetRequiredService<RequestCqrsCohortNativeNode>().Journal.Consensus);
+        services.AddSingleton<Func<ReplicaEnvelopeAuthenticator>>(provider =>
+        {
+            var authentication = provider.GetRequiredService<RequestCqrsCohortNativeNode>().Authentication;
+            return () => authentication;
+        });
+        services.AddSingleton<Func<IReplicaEndpoint>>(provider =>
+        {
+            var endpoint = provider.GetRequiredService<RequestCqrsCohortNativeNode>().Journal.Consensus;
+            return () => endpoint;
+        });
         services.AddSingleton<ReplicaNativeDiscoveryRuntime>(provider =>
         {
             var node = provider.GetRequiredService<RequestCqrsCohortNativeNode>();
@@ -37,8 +48,15 @@ internal sealed class RequestCqrsCohortNativeConfigurator : ISiloConfigurator
             node.Observation.Runtime = node.Runtime;
             return node.Runtime!;
         });
-        services.AddSingleton<ReplicaSiloDiscoveryClient>();
-        services.AddSingleton<ReplicaGrainServiceClient>();
+        services.AddSingleton(provider => new ReplicaSiloDiscoveryClient(
+            provider.GetRequiredService<IOptions<ReplicaConfiguration>>(), provider.GetRequiredService<IOptions<ReplicaPeerOptions>>(),
+            provider.GetRequiredService<ReplicaSiloDiscoveryState>(), provider.GetRequiredService<Func<ReplicaEnvelopeAuthenticator>>()(),
+            provider.GetRequiredService<TimeProvider>(), provider, provider.GetRequiredService<ISiloStatusOracle>(),
+            provider.GetRequiredService<IOptions<OrleansMembershipOptions>>()));
+        services.AddSingleton(provider => new ReplicaGrainServiceClient(provider,
+            provider.GetRequiredService<IOptions<ReplicaConfiguration>>(), provider.GetRequiredService<ReplicaSiloDiscoveryClient>(),
+            provider.GetRequiredService<Func<ReplicaEnvelopeAuthenticator>>()(),
+            provider.GetRequiredService<IOptions<ReplicaTransportOptions>>(), provider.GetRequiredService<TimeProvider>()));
         services.AddSerializer(builder => builder.AddAssembly(typeof(ReplicaPeerEnvelope).Assembly));
         silo.AddGrainService<PartitionReplicaGrainService>();
     }

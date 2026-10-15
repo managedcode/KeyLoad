@@ -54,6 +54,12 @@ internal static class LocalRf3ImageSelection
     private const string ReleaseCombinedFilterArgument = "--KeyLoadTests:Filter=/*/*/(DistributedQueryAuthorityRf3Tests|EarlyAdmissionQualificationTests|MetadataBootstrapRf3Tests|QueryRuleOptimizationRf3Tests|StrongReadSessionAbsenceRf3Tests|TimeSeriesChunkQualificationRf3Tests)/*";
     private const string CurrentSafeProjectorFilterArgument = "--KeyLoadTests:Filter=/*/*/SafeProjectorOperationRf3Tests/*";
     private const string CurrentSqlParserAdmissionFilterArgument = "--KeyLoadTests:Filter=/*/*/SqlParserAdmissionRf3WholeFlowTests/*";
+    private const string CurrentGraphSearchPathPolicyFilterArgument = "--KeyLoadTests:Filter=/*/*/GraphSearchPathPolicyRf3Tests/*";
+    private const string CurrentSampleChunkCorrectionFilterArgument = "--KeyLoadTests:Filter=/*/*/SampleChunkCorrectionPredicateRf3Tests/*";
+    private const string CurrentSqlGraphPublicFilterArgument = "--KeyLoadTests:Filter=/*/*/(SqlParserAdmissionRf3WholeFlowTests|GraphSearchPathPolicyRf3Tests)/*";
+    private const string CurrentSqlGraphSamplePublicFilterArgument = "--KeyLoadTests:Filter=/*/*/(SqlParserAdmissionRf3WholeFlowTests|GraphSearchPathPolicyRf3Tests|SampleChunkCorrectionPredicateRf3Tests)/*";
+    private const string CurrentGraphSamplePublicFilterArgument = "--KeyLoadTests:Filter=/*/*/(GraphSearchPathPolicyRf3Tests|SampleChunkCorrectionPredicateRf3Tests)/*";
+    private const string CurrentFoundationRf3FilterArgument = "--KeyLoadTests:Filter=/*/*/(NativeDatabaseMigrationRf3Tests|SqlParserAdmissionRf3WholeFlowTests|GraphSearchPathPolicyRf3Tests|RequestCqrsPhaseFaultTests|RequestCqrsAuthorityFaultTests|RequestCqrsRf3FollowerRestartTests|SagaDueRf3Tests|SagaTimeoutRf3Tests|SampleChunkCorrectionPredicateRf3Tests|ConnectionRf3AuthorizationTests|DocumentSessionReadRf3Tests|MetadataBootstrapRf3Tests|PartitionMovementPublicParentFlowTests|PhysicalOwnerRegistrationRf3Tests|ProtectedDocumentRf3Tests|QueryContextSessionRf3Tests|StrongReadSessionAbsenceRf3Tests)/*";
     private const string CurrentGraphSearchLineageFilterArgument = "--KeyLoadTests:Filter=/*/*/GraphSearchLineageRf3Tests/*";
     private const string CurrentAtomicTriadFilterArgument = "--KeyLoadTests:Filter=/*/*/AtomicTriadStagedRf3Tests/*";
     private const string CurrentCompetingInboxFilterArgument = "--KeyLoadTests:Filter=/*/*/CompetingInboxPublicTests/*";
@@ -67,6 +73,8 @@ internal static class LocalRf3ImageSelection
     private const string CatalogBootstrapAuthorityFilterArgument = "--KeyLoadTests:Filter=/*/*/CatalogBootstrapAuthorityRf3Tests/*";
     private const string FoundationAdmissionAuthorityFilterArgument = "--KeyLoadTests:Filter=/*/*/(SlowBodyAdmissionReturnTests|RowRevisionInferenceRf3Tests|CatalogBootstrapAuthorityRf3Tests)/*";
     private const string FoundationTelemetryFilterArgument = "--KeyLoadTests:Filter=/*/*/FoundationOtlpRf3Tests/NativeDashboardReceivesActualRf3SdkMcpPolicyRepairTracesAndPrivateFreeRejectionLogs";
+    private const string AspireFaultFilterArgument = "--KeyLoadTests:Filter=/*/*/AspireContainerFaultCommandTests/WrongStaleAndForeignIdsRefuseWithoutEffectsBeforeHealthySdkMcpRestart";
+    private const string AcceptedRestartCancellationFilterArgument = "--KeyLoadTests:Filter=/*/*/AggregateReplayRf3LeaderLossTests/AcEvent008AcceptedRestartCancellationResumesSameReplacementAndPreservesReplay";
     private const string EnabledArgument = "--KeyLoadTests:LocalRf3Image:Enabled=true";
     private const string EnabledValue = "true";
     private const int MaximumNativeArgumentCharacters = 4096;
@@ -118,7 +126,9 @@ internal static class LocalRf3ImageSelection
                 or NativeMigrationFilterArgument or FoundationCombinedFilterArgument
                 or SlowBodyReturnFilterArgument or RowRevisionAdmissionFilterArgument
                 or FoundationAdmissionRepairFilterArgument or CatalogBootstrapAuthorityFilterArgument
-                or FoundationAdmissionAuthorityFilterArgument or FoundationTelemetryFilterArgument, EnabledArgument]
+                or FoundationAdmissionAuthorityFilterArgument or FoundationTelemetryFilterArgument
+                or AspireFaultFilterArgument or AcceptedRestartCancellationFilterArgument
+                or CurrentGraphSearchPathPolicyFilterArgument or CurrentSampleChunkCorrectionFilterArgument or CurrentSqlGraphPublicFilterArgument or CurrentSqlGraphSamplePublicFilterArgument or CurrentGraphSamplePublicFilterArgument or CurrentFoundationRf3FilterArgument, EnabledArgument]
             || Environment.GetEnvironmentVariable(NativeCoverageArgumentsEnvironment) is not null
             || HasAmbientGithubIdentity()
             || Environment.GetEnvironmentVariable(ProvenanceEnvironment) is not null

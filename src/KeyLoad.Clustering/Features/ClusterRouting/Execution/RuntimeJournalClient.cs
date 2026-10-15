@@ -10,9 +10,9 @@ namespace KeyLoad.Clustering;
 /// <summary>Routes every journal operation through a fresh protected native request.</summary>
 internal sealed class RuntimeJournalClient(
     IGrainFactory grains,
-    GrainRequestCodec codec,
-    DatabaseEngine database,
-    ICommitCoordinator coordinator,
+    Func<GrainRequestCodec> codecFactory,
+    Func<DatabaseEngine> databaseFactory,
+    Func<ICommitCoordinator> coordinatorFactory,
     IServiceProvider services,
     TimeProvider clock,
     Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> chunkSerializer,
@@ -20,8 +20,7 @@ internal sealed class RuntimeJournalClient(
     IOptions<RuntimeJournalOptions> configuredJournalOptions,
     RuntimeJournalAdmission admission)
 {
-    private readonly IOptions<RuntimeJournalOptions> journalOptions = ValidateOptions(configuredJournalOptions,
-        database.Limits.MaxBatchBytes);
+    private readonly IOptions<RuntimeJournalOptions> journalOptions = ValidateOptions(configuredJournalOptions);
 
     internal static string CallerIdentity => typeof(RuntimeJournalClient).FullName!;
     internal const string ReadCoreCallerMethod = nameof(ReadCoreAsync);
@@ -78,9 +77,10 @@ internal sealed class RuntimeJournalClient(
         using var timeout = new CancellationTokenSource(routingOptions.Value.ExecutionLifetime, clock);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeout.Token);
         var token = deadline.Token;
-        var principal = await PrepareAsync(token).ConfigureAwait(false);
+        var prepared = await PrepareAsync(token).ConfigureAwait(false);
+        var principal = prepared.Principal;
         var requestId = Guid.NewGuid();
-        var signed = codec.CreateRuntimeJournalRead(requestId, kind, payload);
+        var signed = prepared.Codec.CreateRuntimeJournalRead(requestId, kind, payload);
         var connectionId = NativeConnectionExecutionIdentity.Resolve(services);
         using var identity = new GrainRequestIdentityScope(services, principal, requestId,
             Guid.Empty, token, connectionId: connectionId);
@@ -98,9 +98,10 @@ internal sealed class RuntimeJournalClient(
         using var timeout = new CancellationTokenSource(routingOptions.Value.ExecutionLifetime, clock);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeout.Token);
         var token = deadline.Token;
-        var principal = await PrepareAsync(token).ConfigureAwait(false);
+        var prepared = await PrepareAsync(token).ConfigureAwait(false);
+        var principal = prepared.Principal;
         var requestId = Guid.NewGuid();
-        var signed = codec.CreateRuntimeJournalCommand(requestId, principal.Id, commandId, payload);
+        var signed = prepared.Codec.CreateRuntimeJournalCommand(requestId, principal.Id, commandId, payload);
         var connectionId = NativeConnectionExecutionIdentity.Resolve(services);
         using var identity = new GrainRequestIdentityScope(services, principal, requestId, commandId, token, connectionId: connectionId);
         var actor = grains.GetGrain<IConnectionGrain>(connectionId);
@@ -120,16 +121,19 @@ internal sealed class RuntimeJournalClient(
         return result;
     }
 
-    private async Task<PrincipalRecord> PrepareAsync(CancellationToken cancellationToken)
+    private async Task<(PrincipalRecord Principal, GrainRequestCodec Codec)> PrepareAsync(CancellationToken cancellationToken)
     {
         await admission.WaitAsync(cancellationToken).ConfigureAwait(false);
         cancellationToken.ThrowIfCancellationRequested();
-        await coordinator.ReadBarrierAsync(cancellationToken).ConfigureAwait(false);
+        var database = databaseFactory();
+        ValidateDatabaseLimits(database);
+        await coordinatorFactory().ReadBarrierAsync(cancellationToken).ConfigureAwait(false);
         cancellationToken.ThrowIfCancellationRequested();
-        return ReadProtectedPrincipal();
+        var principal = ReadProtectedPrincipal(database);
+        return (principal, codecFactory());
     }
 
-    private PrincipalRecord ReadProtectedPrincipal()
+    private PrincipalRecord ReadProtectedPrincipal(DatabaseEngine database)
     {
         var principal = database.Store.Read(view =>
             database.Principal(view, RuntimeJournalIdentity.ProtectedPrincipalId, clock.GetUtcNow()));
@@ -153,12 +157,18 @@ internal sealed class RuntimeJournalClient(
         return value as T ?? throw Errors.Fail(ErrorCode.Corruption, RuntimeJournalStoragePolicy.InvalidReply);
     }
 
-    private static IOptions<RuntimeJournalOptions> ValidateOptions(IOptions<RuntimeJournalOptions> configuredOptions,
-        int maximumBatchBytes)
+    private void ValidateDatabaseLimits(DatabaseEngine database)
+    {
+        if (journalOptions.Value.MaximumJournalBytes > database.Limits.MaxBatchBytes - GrainRoutingProtocol.EnvelopeMetadataBytes)
+        {
+            throw new InvalidOperationException(RuntimeJournalStoragePolicy.InvalidLimits);
+        }
+    }
+
+    private static IOptions<RuntimeJournalOptions> ValidateOptions(IOptions<RuntimeJournalOptions> configuredOptions)
     {
         var options = configuredOptions.Value;
-        if (!options.IsValid()
-            || options.MaximumJournalBytes > maximumBatchBytes - GrainRoutingProtocol.EnvelopeMetadataBytes)
+        if (!options.IsValid())
         {
             throw new InvalidOperationException(RuntimeJournalStoragePolicy.InvalidLimits);
         }

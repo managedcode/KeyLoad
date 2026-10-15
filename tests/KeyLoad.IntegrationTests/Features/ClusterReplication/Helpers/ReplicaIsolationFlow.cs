@@ -44,6 +44,8 @@ internal static class ReplicaIsolationFlow
             originalStatus.ConsensusTerm);
         var reference = new EntityRef(partition, Collection, DocumentId);
         await DocumentSessionReadRf3Assertions.HealthyAsync(oldSdk, oldMcp, reference, receipt.Token, FirstJson, First, cancellationToken);
+        await ReplicaIsolationCommandAssertions.RefusedAsync(fixture.App, owner.Resources, cancellationToken);
+        await DocumentSessionReadRf3Assertions.HealthyAsync(oldSdk, oldMcp, reference, receipt.Token, FirstJson, First, cancellationToken);
         await owner.IsolateAsync(isolated, cancellationToken);
         var authority = await ReplicaIsolationAuthorityReadiness.ObserveAsync(fixture, isolated,
             originalStatus.ConsensusTerm, owner, cancellationToken);

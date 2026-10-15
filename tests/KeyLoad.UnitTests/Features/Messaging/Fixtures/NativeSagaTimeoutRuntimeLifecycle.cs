@@ -1,5 +1,6 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
+using KeyLoad.Server;
 using Microsoft.Extensions.DependencyInjection;
 using Orleans.TestingHost;
 
@@ -7,87 +8,226 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 
 internal sealed class NativeSagaTimeoutRuntimeLifecycle(NativeSagaTimeoutFixture fixture) : IAsyncDisposable
 {
-    private const int NativeSiloCount = 1;
-    private TestCluster? cluster;
-    private NativeRequestWorkOwner? requestWork;
-    private bool deployed;
+    private const string Unavailable = "The original native saga runtime is unavailable or closing.";
+    private readonly Lock gate = new();
+    private NativeSagaTimeoutRuntimeGeneration? generation;
+    private Task? restarting;
+    private Task? disposal;
 
-    internal TestCluster Cluster => cluster ?? throw new InvalidOperationException(
-        "The native saga timeout runtime is unavailable before startup.");
+    internal TestCluster Cluster => Current.Cluster;
+    internal NativeRequestWorkOwner RequestWork => Current.RequestWork;
+    private NativeSagaTimeoutRuntimeGeneration Current => generation ?? throw new InvalidOperationException(Unavailable);
 
-    internal NativeRequestWorkOwner RequestWork => requestWork ?? throw new InvalidOperationException(
-        "The native saga timeout request owner is unavailable before startup.");
-
-    internal async Task StartAsync(CancellationToken cancellationToken)
+    internal Task StartAsync(CancellationToken cancellationToken)
     {
-        using var deadlineTimeout = new CancellationTokenSource(fixture.TestProfile.StartupTimeout, TimeProvider.System);
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadlineTimeout.Token);
-        try
+        lock (gate)
         {
-            await StartRuntimeAsync(deadline.Token);
-        }
-        catch (Exception startupFailure) when (NativeCqrsBoundaryErrors.IsNonFatal(startupFailure))
-        {
-            await CleanupFailedStartAsync(startupFailure);
-            throw;
-        }
-        catch (Exception startupFailure) when (!NativeCqrsBoundaryErrors.IsNonFatal(startupFailure))
-        {
-            await CleanupFailedStartAsync(startupFailure);
-            throw;
+            if (disposal is not null || generation is not null)
+            {
+                throw new InvalidOperationException(Unavailable);
+            }
+            generation = new(fixture);
+            return StartOwnedAsync(generation, cancellationToken);
         }
     }
 
-    private async Task StartRuntimeAsync(CancellationToken cancellationToken)
+    private static async Task StartOwnedAsync(NativeSagaTimeoutRuntimeGeneration current, CancellationToken token)
     {
+        var failures = new List<Exception>();
+        await ServerFailureObserver.ObserveAsync(() => current.StartAsync(token), failures);
+        if (failures.Count != 0)
+        {
+            await ServerFailureObserver.ObserveAsync(current.StopAsync, failures);
+        }
+        ServerFailureObserver.ThrowIfAny(failures);
+    }
+
+    internal Task RestartAsync(CancellationToken cancellationToken)
+    {
+        lock (gate)
+        {
+            if (disposal is not null)
+            {
+                throw new InvalidOperationException(Unavailable);
+            }
+            if (restarting is not null && !restarting.IsCompletedSuccessfully)
+            {
+                return restarting;
+            }
+            return restarting = RestartCoreAsync(Current, cancellationToken);
+        }
+    }
+
+    private async Task RestartCoreAsync(NativeSagaTimeoutRuntimeGeneration previous, CancellationToken token)
+    {
+        await Task.Yield();
+        await previous.StopAsync();
+        token.ThrowIfCancellationRequested();
+        Task starting;
+        lock (gate)
+        {
+            if (disposal is not null)
+            {
+                throw new InvalidOperationException(Unavailable);
+            }
+            generation = new(fixture);
+            starting = StartOwnedAsync(generation, token);
+        }
+        await starting;
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        lock (gate)
+        {
+            return new(disposal ??= DisposeCoreAsync(restarting));
+        }
+    }
+
+    private async Task DisposeCoreAsync(Task? originalRestart)
+    {
+        await Task.Yield();
+        var failures = new List<Exception>();
+        if (originalRestart is not null)
+        {
+            await ServerFailureObserver.ObserveAsync(() => originalRestart, failures);
+        }
+        if (generation is not null)
+        {
+            Task? originalDisposal = null;
+            try
+            {
+                originalDisposal = generation.DisposeAsync().AsTask();
+                await originalDisposal;
+            }
+            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+            {
+                failures.AddRange(originalDisposal?.Exception is { } fault ? fault.InnerExceptions : [error]);
+            }
+            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+            {
+                failures.AddRange(originalDisposal?.Exception is { } fault ? fault.InnerExceptions : [error]);
+            }
+        }
+        if (failures.Count == 0)
+        {
+            ServerFailureObserver.Observe(fixture.Database.Dispose, failures);
+        }
+        ServerFailureObserver.ThrowIfAny(failures);
+    }
+}
+
+/// <summary>Retains one original native generation and its terminal startup/cleanup evidence.</summary>
+internal sealed class NativeSagaTimeoutRuntimeGeneration(NativeSagaTimeoutFixture fixture) : IAsyncDisposable
+{
+    private const int NativeSiloCount = 1;
+    private const string Unavailable = "The native saga timeout generation is unavailable or closing.";
+    private const string Unjoined = "The original native saga timeout work has not joined.";
+    private readonly Lock gate = new();
+    private TestCluster? cluster;
+    private NativeRequestWorkOwner? requestWork;
+    private Task? starting;
+    private Task? stopping;
+    private bool deployed;
+
+    internal TestCluster Cluster => cluster ?? throw new InvalidOperationException(Unavailable);
+    internal NativeRequestWorkOwner RequestWork => requestWork ?? throw new InvalidOperationException(Unavailable);
+
+    internal Task StartAsync(CancellationToken token)
+    {
+        lock (gate)
+        {
+            if (starting is not null || stopping is not null)
+            {
+                throw new InvalidOperationException(Unavailable);
+            }
+            return starting = StartCoreAsync(token);
+        }
+    }
+
+    private async Task StartCoreAsync(CancellationToken cancellationToken)
+    {
+        using var deadlineTimeout = new CancellationTokenSource(fixture.TestProfile.StartupTimeout, TimeProvider.System);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadlineTimeout.Token);
+        await Task.Yield();
         requestWork = new NativeRequestWorkOwner(fixture.Routing);
         var coordinator = new EmbeddedCoordinator(fixture.Database.Database);
         var builder = CreateBuilder();
         cluster = builder.Build();
         fixture.SetRuntimeDependencies(
             new GrainRequestCodec(fixture.Database.Database, TimeProvider.System, fixture.Routing), coordinator);
-        await DeployAndOpenAsync(cancellationToken);
+        await DeployAndOpenAsync(deadline.Token);
     }
 
-    private async Task CleanupFailedStartAsync(Exception startupFailure)
+    internal Task StopAsync()
     {
-        var failures = new List<Exception>();
-        await StopAsync(failures, disposeDatabase: false);
-        if (failures.Count > 0)
+        lock (gate)
         {
-            throw new AggregateException(startupFailure, new AggregateException(failures));
+            return stopping ??= StopCoreAsync(starting);
         }
-
-        System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(startupFailure).Throw();
     }
 
-    internal async Task RestartAsync(CancellationToken cancellationToken)
-    {
-        var failures = new List<Exception>();
-        await StopAsync(failures, disposeDatabase: false);
-        NativeSagaTimeoutCleanup.ThrowFailures(failures);
-        await StartAsync(cancellationToken);
-    }
+    public ValueTask DisposeAsync() => new(StopAsync());
 
-    internal async Task StopAsync(ICollection<Exception> failures, bool disposeDatabase)
+    private async Task StopCoreAsync(Task? originalStart)
     {
         using var deadline = new CancellationTokenSource(fixture.TestProfile.ShutdownTimeout, TimeProvider.System);
-        await CloseSchedulingAsync(failures);
-        await StopSilosAsync(failures, deadline.Token);
-        await DrainRequestWorkAsync(failures);
-        await DisposeClusterAsync(failures);
-        await DisposeRequestWorkAsync(failures);
-        if (disposeDatabase)
-        {
-            DisposeDatabase(failures);
-        }
-    }
-
-    public async ValueTask DisposeAsync()
-    {
+        await Task.Yield();
         var failures = new List<Exception>();
-        await StopAsync(failures, disposeDatabase: true);
-        NativeSagaTimeoutCleanup.ThrowFailures(failures);
+        if (originalStart is not null)
+        {
+            await ServerFailureObserver.ObserveAsync(() => originalStart, failures);
+        }
+        if (cluster is { } originalCluster)
+        {
+            if (deployed)
+            {
+                ServerFailureObserver.Observe(() => originalCluster.GetSiloServiceProvider()
+                    .GetRequiredService<RuntimeJournalAdmission>().CloseScheduling(), failures);
+            }
+            await ServerFailureObserver.ObserveAsync(() => originalCluster.StopAllSilosAsync(deadline.Token), failures);
+        }
+        if (requestWork is { } originalWork)
+        {
+            await ServerFailureObserver.ObserveAsync(originalWork.DrainAsync, failures);
+        }
+        if (cluster is not null)
+        {
+            Task? originalDisposal = null;
+            try
+            {
+                originalDisposal = cluster.DisposeAsync().AsTask();
+                await originalDisposal;
+            }
+            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+            {
+                failures.AddRange(originalDisposal?.Exception is { } fault ? fault.InnerExceptions : [error]);
+            }
+            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+            {
+                failures.AddRange(originalDisposal?.Exception is { } fault ? fault.InnerExceptions : [error]);
+            }
+        }
+        if (requestWork is not null)
+        {
+            try
+            {
+                await requestWork.DisposeAsync();
+            }
+            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+            {
+                failures.Add(error);
+            }
+            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+            {
+                failures.Add(error);
+            }
+            if (!requestWork.IsJoined)
+            {
+                failures.Add(new InvalidOperationException(Unjoined));
+            }
+        }
+        ServerFailureObserver.ThrowIfAny(failures);
     }
 
     private static TestClusterBuilder CreateBuilder()
@@ -110,101 +250,6 @@ internal sealed class NativeSagaTimeoutRuntimeLifecycle(NativeSagaTimeoutFixture
         await startup.BootstrapAsync(principal, Guid.NewGuid(), cancellationToken);
         services.GetRequiredService<RuntimeJournalAdmission>().Open(cancellationToken);
         fixture.SetJobHarness(new NativeSagaTimeoutJobHarness(Cluster.Client, services, fixture.TestProfile));
-    }
-
-    private async Task CloseSchedulingAsync(ICollection<Exception> failures)
-    {
-        if (cluster is null || !deployed)
-        {
-            return;
-        }
-
-        await NativeSagaTimeoutCleanup.ObserveAsync(() =>
-        {
-            Cluster.GetSiloServiceProvider().GetRequiredService<RuntimeJournalAdmission>().CloseScheduling();
-            return Task.CompletedTask;
-        }, failures);
-    }
-
-    private async Task StopSilosAsync(ICollection<Exception> failures, CancellationToken cancellationToken)
-    {
-        if (cluster is null)
-        {
-            return;
-        }
-
-        await NativeSagaTimeoutCleanup.ObserveAsync(() => Cluster.StopAllSilosAsync(cancellationToken), failures);
-        deployed = false;
-    }
-
-    private async Task DrainRequestWorkAsync(ICollection<Exception> failures)
-    {
-        if (requestWork is not null)
-        {
-            await NativeSagaTimeoutCleanup.ObserveAsync(requestWork.DrainAsync, failures);
-        }
-    }
-
-    private async Task DisposeClusterAsync(ICollection<Exception> failures)
-    {
-        if (cluster is not null)
-        {
-            try
-            {
-                await cluster.DisposeAsync();
-            }
-            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-            {
-                failures.Add(error);
-            }
-            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-            {
-                failures.Add(error);
-            }
-            finally
-            {
-                cluster = null;
-            }
-        }
-    }
-
-    private async Task DisposeRequestWorkAsync(ICollection<Exception> failures)
-    {
-        if (requestWork is not null)
-        {
-            try
-            {
-                await requestWork.DisposeAsync();
-            }
-            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-            {
-                failures.Add(error);
-            }
-            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-            {
-                failures.Add(error);
-            }
-            finally
-            {
-                requestWork = null;
-            }
-        }
-    }
-
-    private void DisposeDatabase(ICollection<Exception> failures)
-    {
-        try
-        {
-            fixture.Database.Dispose();
-        }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        {
-            failures.Add(error);
-        }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        {
-            failures.Add(error);
-        }
     }
 
 }

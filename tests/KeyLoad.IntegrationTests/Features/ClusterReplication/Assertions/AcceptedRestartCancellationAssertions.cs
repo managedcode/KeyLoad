@@ -25,8 +25,8 @@ internal static class AcceptedRestartCancellationAssertions
     internal static async Task SameReplacementAsync(ContainerRuntimeInspection accepted,
         CancellationToken cancellationToken)
     {
-        var actual = await ContainerRuntimeDocker.InspectRunningAsync(accepted.Id,
-            accepted.Id, cancellationToken);
+        var actual = await ContainerRuntimeDocker.InspectAsync(accepted.Id, cancellationToken);
+        await Assert.That(actual.State).IsEqualTo(ContainerRuntimeProtocol.RunningState);
         await Assert.That(actual).IsEqualTo(accepted);
     }
 }

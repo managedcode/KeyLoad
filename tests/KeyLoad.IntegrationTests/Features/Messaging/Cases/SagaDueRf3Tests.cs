@@ -30,6 +30,7 @@ internal sealed class SagaDueRf3Tests(ClusterFixture fixture)
         var created = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(command, deadline.Token));
         await Assert.That(created.Mutations).HasSingleItem();
         await Assert.That(created.Mutations[0].Revision).IsEqualTo(1L);
+        await NativeRuntimeConstructorCycleRf3Receipt.CreatedAsync(fixture, sdk, mcp, command, created, deadline.Token);
         await DueSagaRf3Assertions.AssertSagaAsync(sdk, mcp, scenario, sagaId,
             SagaPhase.Waiting, 1, dueAt, identity.Secret, deadline.Token);
         await DueSagaRf3Assertions.AssertTimeoutAbsentAsync(sdk, mcp, scenario, sagaId, deadline.Token);
@@ -40,8 +41,11 @@ internal sealed class SagaDueRf3Tests(ClusterFixture fixture)
             SagaPhase.TimedOut, 2, dueAt, identity.Secret, deadline.Token);
         await DueSagaRf3Assertions.AssertTimeoutAsync(sdk, mcp, scenario, sagaId, dueAt, identity.Secret,
             deadline.Token);
+        await NativeRuntimeConstructorCycleRf3Refusal.RunAsync(fixture, sdk, mcp, scenario, sagaId, dueAt,
+            command, created, deadline.Token);
         await DueSagaRf3Assertions.ConsumeAndAcknowledgeExactlyOneAsync(sdk, mcp, scenario, sagaId, identity.Secret,
             deadline.Token);
+        await NativeRuntimeConstructorCycleRf3Receipt.ReplayAsync(sdk, mcp, command, created, deadline.Token);
         await DueSagaRf3Assertions.AssertSagaAsync(sdk, mcp, scenario, sagaId,
             SagaPhase.TimedOut, 2, dueAt, identity.Secret, deadline.Token);
     }

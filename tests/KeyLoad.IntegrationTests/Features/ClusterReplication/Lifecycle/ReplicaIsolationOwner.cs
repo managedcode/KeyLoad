@@ -167,7 +167,8 @@ internal sealed class ReplicaIsolationOwner
     {
         await VerifyAllAsync(cancellationToken);
         var failures = new List<Exception>();
-        await ServerFailureObserver.ObserveAsync(() => execution.ExecuteAsync(nodes[resource].Container.Id, rule, cancellationToken), failures);
+        await ServerFailureObserver.ObserveAsync(() => execution.ExecuteAsync(application ?? throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState),
+            resource, names[resource], nodes[resource].Container.Id, rule, cancellationToken), failures);
         await ServerFailureObserver.ObserveAsync(() => ReplicaIsolationEvidence.WriteMutationsAsync(root, execution.Mutations,
             failures, CancellationToken.None), failures);
         ServerFailureObserver.ThrowIfAny(failures);

@@ -2,6 +2,7 @@ namespace KeyLoad.RecoveryTests.Features.DocumentStorage;
 
 internal static class CommandIdempotencyProcessCleanup
 {
+    private const int NoCleanupFailures = 0;
     private const string UnsettledChildMessage = "The unsettled command child retained its native trial root.";
 
     internal static async Task CleanupActiveTrialAsync(string root, CommandIdempotencyProcessChild? active, Exception? primary)
@@ -13,13 +14,14 @@ internal static class CommandIdempotencyProcessCleanup
         {
             await CommandIdempotencyProcess.SettleActiveAsync(active, failures, cleanup.Token);
         }
-        if (active is null || active.IsSettled)
-        {
-            await CommandIdempotencyProcess.CleanTrialAsync(root, failures, cleanup.Token);
-        }
-        else
+        var childClosed = active is null || active.IsSettled && active.IsDisposed;
+        if (!childClosed)
         {
             failures.Add(new IOException(UnsettledChildMessage));
+        }
+        if (primary is null && childClosed && failures.Count == NoCleanupFailures)
+        {
+            await CommandIdempotencyProcess.CleanTrialAsync(root, failures, cleanup.Token);
         }
         CommandIdempotencyProcess.ThrowFailures(primary, failures);
     }

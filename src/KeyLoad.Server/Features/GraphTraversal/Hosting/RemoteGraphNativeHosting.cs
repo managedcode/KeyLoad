@@ -1,23 +1,27 @@
 using KeyLoad.Clustering;
 using KeyLoad.Server.Features.ClusterRouting;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.GraphTraversal;
 
 internal static class RemoteGraphNativeHosting
 {
-    internal static void Register(IServiceCollection services, PartitionHost partition, ServerRuntimeOptions options,
-        TimeProvider clock, RemoteGraphRuntime? runtime)
+    internal static void Register(IServiceCollection services)
     {
-        services.AddSingleton(provider => new RemoteGraphNativeRuntime(partition, options.Node, options.Membership,
-            options.GrainRouting, provider.GetRequiredService<global::Orleans.Runtime.ISiloStatusOracle>(),
-            provider.GetRequiredService<ReplicaSiloDiscoveryState>(), clock,
-            provider.GetRequiredService<Microsoft.Extensions.Logging.ILogger<RemoteGraphNativeRuntime>>()));
-        services.AddSingleton(provider => new RemoteGraphNativeClient(provider, partition, options.Node, options.Membership,
-            options.GrainRouting, provider.GetRequiredService<PartitionMovementGrainServiceClient>(),
-            provider.GetRequiredService<ReplicaSiloDiscoveryState>(), clock));
-        if (runtime is not null)
+        services.AddSingleton(provider => new RemoteGraphNativeRuntime(provider.GetRequiredService<PartitionHostApplicationOwner>().Borrow(),
+            provider.GetRequiredService<IOptions<NodeOptions>>(), provider.GetRequiredService<IOptions<OrleansMembershipOptions>>(),
+            provider.GetRequiredService<IOptions<GrainRoutingOptions>>(), provider.GetRequiredService<global::Orleans.Runtime.ISiloStatusOracle>(),
+            provider.GetRequiredService<ReplicaSiloDiscoveryState>(), provider.GetRequiredService<TimeProvider>(),
+            provider.GetRequiredService<ILogger<RemoteGraphNativeRuntime>>()));
+        services.AddSingleton(provider => new RemoteGraphNativeClient(provider, provider.GetRequiredService<PartitionHostApplicationOwner>().Borrow(),
+            provider.GetRequiredService<IOptions<NodeOptions>>(), provider.GetRequiredService<IOptions<OrleansMembershipOptions>>(),
+            provider.GetRequiredService<IOptions<GrainRoutingOptions>>(), provider.GetRequiredService<PartitionMovementGrainServiceClient>(),
+            provider.GetRequiredService<ReplicaSiloDiscoveryState>(), provider.GetRequiredService<TimeProvider>()));
+        services.AddSingleton<IRemoteGraphParent>(provider =>
         {
-            services.AddSingleton(runtime.Parent);
-        }
+            var node = provider.GetRequiredService<OrleansNode>();
+            node.RequireLocalRuntimePublished();
+            return node.GraphResources.Runtime?.Parent!;
+        });
     }
 }

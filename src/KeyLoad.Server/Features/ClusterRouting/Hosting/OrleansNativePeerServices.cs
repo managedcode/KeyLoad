@@ -7,38 +7,46 @@ namespace KeyLoad.Server;
 
 internal static class OrleansNativePeerServices
 {
-    internal static void RegisterSiloOwners(HostApplicationBuilder builder, ILoggerFactory loggerFactory,
-        NativeConnectionOwnerIdentity connectionOwner, NativeDiscoveryOmissionOwner? discoveryOmission,
-        IGrainPartitionMovementSealedOperationObserver? sealedObserver, NativeLocalhostClusteringOptions? localhostClustering)
+    internal static void RegisterSiloOwners(WebApplicationBuilder builder, NodeOptions options,
+        NativeLocalhostClusteringOptions? localhostClustering)
     {
-        builder.Services.AddSingleton(loggerFactory);
+        var services = builder.Services;
         if (localhostClustering is null)
         {
             OrleansNativeClustering.RegisterHostingOptions(builder);
         }
-        builder.Services.AddSingleton(connectionOwner);
-        if (discoveryOmission is not null)
+        services.AddSingleton(provider => provider.GetRequiredService<OrleansNode>().ConnectionOwner);
+        services.AddSingleton<Func<NativeRequestWorkOwner>>(provider =>
         {
-            builder.Services.AddSingleton<IReplicaNativeDiscoveryObserver>(discoveryOmission);
-            builder.Services.AddSingleton(discoveryOmission.CreateBorrowedProbe());
-            if (discoveryOmission.PurposeObserver is { } purposeObserver)
-            {
-                builder.Services.AddSingleton(purposeObserver);
-            }
+            var borrowed = provider.GetRequiredService<OrleansNode>().RequestWork;
+            return () => borrowed;
+        });
+        if (options.NativeDiscoveryOmission.Enabled)
+        {
+            services.AddSingleton<IReplicaNativeDiscoveryObserver>(provider =>
+                provider.GetRequiredService<OrleansNode>().DiscoveryOmission!);
+            services.AddSingleton(provider => provider.GetRequiredService<OrleansNode>().DiscoveryOmission!.CreateBorrowedProbe());
         }
-        if (sealedObserver is not null)
+        RegisterObservers(services, services.LastOrDefault(registration => registration.ServiceType
+            == typeof(IGrainPartitionMovementSealedOperationObserver))?.ImplementationInstance as IGrainPartitionMovementSealedOperationObserver);
+        services.AddSingleton<PhysicalOwnerProbeNativeClient>(provider => new(provider));
+    }
+
+    internal static void RegisterObservers(IServiceCollection services, IGrainPartitionMovementSealedOperationObserver? observer)
+    {
+        if (observer is null)
         {
-            builder.Services.AddSingleton(sealedObserver);
-            if (sealedObserver is IGrainRequestPurposeObserver purposeObservation
-                && !builder.Services.Any(registration => registration.ServiceType == typeof(IGrainRequestPurposeObserver)))
-            {
-                builder.Services.AddSingleton(purposeObservation);
-            }
-            if (sealedObserver is IGrainRequestPhaseObserver phaseObservation
-                && !builder.Services.Any(registration => registration.ServiceType == typeof(IGrainRequestPhaseObserver)))
-            {
-                builder.Services.AddSingleton(phaseObservation);
-            }
+            return;
+        }
+        if (observer is IGrainRequestPurposeObserver purpose
+            && !services.Any(registration => registration.ServiceType == typeof(IGrainRequestPurposeObserver)))
+        {
+            services.AddSingleton(purpose);
+        }
+        if (observer is IGrainRequestPhaseObserver phase
+            && !services.Any(registration => registration.ServiceType == typeof(IGrainRequestPhaseObserver)))
+        {
+            services.AddSingleton(phase);
         }
     }
 
@@ -50,8 +58,7 @@ internal static class OrleansNativePeerServices
             provider.GetRequiredService<ReplicaEnvelopeAuthenticator>(),
             provider.GetRequiredService<ISiloStatusOracle>(),
             provider.GetRequiredService<IOptions<OrleansMembershipOptions>>(),
-            provider.GetRequiredService<TimeProvider>(),
-            provider.GetService<IReplicaNativeDiscoveryObserver>()));
+            provider.GetRequiredService<TimeProvider>(), provider.GetService<IReplicaNativeDiscoveryObserver>()));
         services.AddSingleton<ReplicaSiloDiscoveryClient>(provider => new(
             provider.GetRequiredService<IOptions<ReplicaConfiguration>>(),
             provider.GetRequiredService<IOptions<ReplicaPeerOptions>>(),
@@ -59,16 +66,6 @@ internal static class OrleansNativePeerServices
             provider.GetRequiredService<ReplicaEnvelopeAuthenticator>(),
             provider.GetRequiredService<TimeProvider>(), provider,
             provider.GetRequiredService<ISiloStatusOracle>(),
-            provider.GetRequiredService<IOptions<OrleansMembershipOptions>>(),
-            provider.GetService<ReplicaDiscoveryProbe>()));
-    }
-
-    internal static void RegisterPhysicalProbe(IServiceCollection services, PhysicalOwnerProbeNativeRuntime? runtime)
-    {
-        if (runtime is not null)
-        {
-            services.AddSingleton(runtime);
-        }
-        services.AddSingleton<PhysicalOwnerProbeNativeClient>(provider => new(provider));
+            provider.GetRequiredService<IOptions<OrleansMembershipOptions>>(), provider.GetService<ReplicaDiscoveryProbe>()));
     }
 }

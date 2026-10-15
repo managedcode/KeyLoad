@@ -27,7 +27,7 @@ internal sealed class PartitionMovementLateNativeOwners : IAsyncDisposable
     private readonly List<Task> producers = [];
     private TimeSpan? shutdownTimeout;
     private TimeProvider? shutdownClock;
-    private readonly List<PartitionMovementLateNativeNode> coldNodes = [];
+    private readonly List<PartitionMovementLateNativeColdCohort> coldCohorts = [];
     private readonly IControlledBlobWireBorrowObserver? blobWireObserver;
     private readonly Action<int, List<string>>? configureArguments;
     private readonly Action<int, WebApplication>? configureApplication;
@@ -61,13 +61,16 @@ internal sealed class PartitionMovementLateNativeOwners : IAsyncDisposable
         stopped = false;
         for (var index = FirstOwner; index < PartitionMovementLateNativeSettings.OwnerCount; index++)
         {
-            nodes.Add(new(Arguments(index), index < PartitionMovementLateNativeSettings.GroupSize ? Borrow.ForOwner(index) : null,
-                index < PartitionMovementLateNativeSettings.GroupSize ? blobWireObserver : null, Settings.LocalhostClustering));
+            nodes.Add(await PartitionMovementLateNativeNode.CreateAsync(Arguments(index),
+                index < PartitionMovementLateNativeSettings.GroupSize ? Borrow.ForOwner(index) : null,
+                index < PartitionMovementLateNativeSettings.GroupSize ? blobWireObserver : null,
+                Settings.LocalhostClustering, cancellationToken).ConfigureAwait(false));
             configureApplication?.Invoke(index, nodes[index].Application);
         }
         shutdownTimeout = nodes.First().ShutdownTimeout;
         shutdownClock = nodes.First().Clock;
-        await Task.WhenAll(nodes.Select(node => node.StartAsync(cancellationToken))).ConfigureAwait(false);
+        await ControlledPartitionMovementNativeHosts.JoinOriginalAsync(
+            Task.WhenAll(nodes.Select(node => node.StartAsync(cancellationToken)))).ConfigureAwait(false);
         var services = nodes.First().Application.Services;
         var runtime = services.GetRequiredService<ServerRuntimeOptions>();
         var clock = services.GetRequiredService<TimeProvider>();
@@ -138,23 +141,22 @@ internal sealed class PartitionMovementLateNativeOwners : IAsyncDisposable
         stopped = true;
     }
 
-    internal async Task<PartitionMovementLateNativeNode> OpenStoppedAsync(int index)
+    internal async Task<PartitionMovementLateNativeNode> OpenStoppedAsync(int index, CancellationToken cancellationToken)
     {
-        if (!stopped)
+        if (!stopped || coldCohorts.Any(cohort => !cohort.IsDisposed))
         {
             throw new InvalidOperationException("Native locks remain owned by the live cohort.");
         }
-        var owned = new PartitionMovementLateNativeNode(Arguments(index), null, localhostClustering: Settings.LocalhostClustering);
-        coldNodes.Add(owned);
-        await owned.OpenAsync().ConfigureAwait(false);
-        return owned;
+        var cohort = new PartitionMovementLateNativeColdCohort(Arguments, Settings.LocalhostClustering);
+        coldCohorts.Add(cohort);
+        return await cohort.OpenAsync(index, cancellationToken).ConfigureAwait(false);
     }
 
     public async ValueTask DisposeAsync()
     {
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(StopAsync, failures).ConfigureAwait(false);
-        foreach (var cold in coldNodes)
+        foreach (var cold in coldCohorts)
         {
             await ServerFailureObserver.ObserveAsync(() => cold.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         }
@@ -170,12 +172,12 @@ internal sealed class PartitionMovementLateNativeOwners : IAsyncDisposable
         {
             failures.Add(error);
         }
-        if (retainRoots || !stopped || nodes.Any(node => !node.IsDisposed) || coldNodes.Any(node => !node.IsDisposed)
+        if (retainRoots || !stopped || nodes.Any(node => !node.IsDisposed) || coldCohorts.Any(cohort => !cohort.IsDisposed)
             || producers.Any(task => !task.IsCompleted))
         {
             failures.Add(new InvalidOperationException("Retain the native roots while any physical owner or original SDK producer is unjoined."));
         }
-        if (stopped && nodes.All(node => node.IsDisposed) && coldNodes.All(node => node.IsDisposed)
+        if (stopped && nodes.All(node => node.IsDisposed) && coldCohorts.All(cohort => cohort.IsDisposed)
             && producers.All(task => task.IsCompleted))
         {
             ServerFailureObserver.Observe(() => shutdownDeadline?.Dispose(), failures);

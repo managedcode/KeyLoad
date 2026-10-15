@@ -40,9 +40,8 @@ internal sealed class ContainerRuntimeControl(
         }
 
         var killStartedAtUtc = TimeProvider.System.GetUtcNow();
-        var kill = await ContainerRuntimeDocker.RunAsync(
-            [ContainerRuntimeProtocol.KillCommand, ContainerRuntimeProtocol.SignalArgument,
-                ContainerRuntimeProtocol.KillSignal, before.Id], cancellationToken);
+        var kill = await AspireContainerFaultCommand.KillAsync(app, resourceName, containerName,
+            before.Id, cancellationToken);
         ContainerRuntimeDocker.EnsureSuccessful(kill, ContainerRuntimeProtocol.KillOperation, resourceName);
         var killCompletedAtUtc = TimeProvider.System.GetUtcNow();
         var stopped = await ContainerRuntimeDocker.WaitForExitedAsync(containerName, resourceName, cancellationToken);

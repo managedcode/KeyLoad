@@ -36,11 +36,14 @@ internal sealed class RemoteModelNativeClient : GrainServiceClient<IRemoteModelG
         this.local = local;
         this.clock = clock;
         faultObserver = this.options.RequestCqrsProbe.Enabled
-            ? services.GetService(typeof(IRemoteModelNativeFaultObserver)) as IRemoteModelNativeFaultObserver : null;
+            ? services.GetService<Func<IRemoteModelNativeFaultObserver>>()?.Invoke()
+                ?? services.GetService(typeof(IRemoteModelNativeFaultObserver)) as IRemoteModelNativeFaultObserver : null;
         replayObserver = this.options.RequestCqrsProbe.Enabled
-            ? services.GetService(typeof(IRemoteModelNativeReplayObserver)) as IRemoteModelNativeReplayObserver : null;
+            ? services.GetService<Func<IRemoteModelNativeReplayObserver>>()?.Invoke()
+                ?? services.GetService(typeof(IRemoteModelNativeReplayObserver)) as IRemoteModelNativeReplayObserver : null;
         blobObserver = this.options.RequestCqrsProbe.Enabled
-            ? services.GetService(typeof(INativeControlledBlobBorrowObserver)) as INativeControlledBlobBorrowObserver : null;
+            ? services.GetService<Func<INativeControlledBlobBorrowObserver>>()?.Invoke()
+                ?? services.GetService(typeof(INativeControlledBlobBorrowObserver)) as INativeControlledBlobBorrowObserver : null;
         membership.Value.Validate();
         stopping = new();
         lifetime = new(stopping, DisposeOwnedResources);

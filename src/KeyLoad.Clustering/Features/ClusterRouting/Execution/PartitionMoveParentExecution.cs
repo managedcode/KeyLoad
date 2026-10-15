@@ -28,7 +28,7 @@ internal static class PartitionMoveParentExecution
             throw Errors.Fail(ErrorCode.Validation, GrainRoutingProtocol.InvalidRequest);
         }
         DatabaseEngine.ValidatePartition(request.Partition);
-        var parent = services.GetService<IPartitionMovementParent>()
+        var parent = services.GetService<Func<IPartitionMovementParent>>()?.Invoke()
             ?? throw Errors.Fail(ErrorCode.UnsupportedCapability, GrainRoutingProtocol.InvalidRequest);
         var work = new ReadExecutionBudget(services.GetRequiredService<IOptions<DatabaseLimits>>(), clock, token);
         var phaseObservation = codec.HasPhaseObserver ? CreatePhaseObservation(codec, original, context) : null;

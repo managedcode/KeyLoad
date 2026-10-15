@@ -113,7 +113,7 @@ Execution follows the [foundation-first plan for all105 tasks](docs/Features/Rep
 
 KL‑029 now satisfies its original projection rebuild, checkpoint recovery and stale-revision criteria on Linux at `7e94024c`: **58 Unit + 18 real process recovery + 9 Aspire RF3 cases passed, zero failed or skipped**. The [original acceptance audit](docs/implementation/kl-029-linux-acceptance-20261013.json) binds source, native UIDs, TRX, DLL/PDB, images and joined processes. Current shared changes still require fresh complete qualification.
 
-Full product functional coverage remains **unqualified**. The current selected43-case functional Unit cohort, including its three failures, measured **9.47% production lines /6.77% branches**. This selection does not establish full-product coverage or a trend against different selections. Load tests and benchmarks contribute no coverage. Public performance figures require original GitHub measurements; process-kill tests do not prove power-loss durability.
+Full product functional coverage remains **unqualified**. The selected82-case functional Unit cohort passed and measured **6.48% production lines /5.55% branches**. This focused selection does not establish full-product coverage or a trend against different selections. Load tests and benchmarks contribute no coverage. Public performance figures require original GitHub measurements; process-kill tests do not prove power-loss durability.
 
 Implementation is progressing across SQL and the connected data models. Complete Linux cluster, recovery, fault and coverage qualification remains open; see the [canonical implementation status](docs/implementation/status.json).
 

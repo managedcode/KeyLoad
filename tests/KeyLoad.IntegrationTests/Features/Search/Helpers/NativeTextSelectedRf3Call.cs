@@ -7,7 +7,7 @@ namespace KeyLoad.IntegrationTests.Features.Search;
 internal static class NativeTextSelectedRf3Call
 {
     private const string Arguments = "arguments";
-    private const string Sql = "CALL keyload_search_execute(@arguments)";
+    private const string Sql = "EXEC keyload_search_execute @arguments";
     internal static SqlOperationRequest SqlRequest(SearchRequest request)
         => new(request.Partition, Sql, new(StringComparer.Ordinal)
         {

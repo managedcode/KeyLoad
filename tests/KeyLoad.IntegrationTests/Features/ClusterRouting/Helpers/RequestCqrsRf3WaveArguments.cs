@@ -9,7 +9,8 @@ internal static class RequestCqrsRf3WaveArguments
         var args = new List<string>
         {
             RequestCqrsRf3Protocol.DataRootPrefix + dataRoot,
-            RequestCqrsRf3Protocol.Ephemeral
+            RequestCqrsRf3Protocol.Ephemeral,
+            KeyLoad.AppHost.Features.ClusterReplication.ContainerFaultCommandProtocol.EnabledArgument
         };
         if (snapshotThresholdArgument is not null)
         {

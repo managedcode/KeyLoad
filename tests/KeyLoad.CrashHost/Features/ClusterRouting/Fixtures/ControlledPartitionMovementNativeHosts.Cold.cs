@@ -33,7 +33,7 @@ internal sealed partial class ControlledPartitionMovementNativeHosts
             throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMovementProtocol.Unavailable);
         }
         nodes = [];
-        await CreateNodesAsync().ConfigureAwait(false);
+        await CreateNodesAsync(cancellationToken).ConfigureAwait(false);
         await JoinOriginalAsync(Task.WhenAll(nodes.Select(node => node.StartAsync(cancellationToken)))).ConfigureAwait(false);
     }
 
@@ -97,8 +97,7 @@ internal sealed partial class ControlledPartitionMovementNativeHosts
         await ServerFailureObserver.ObserveAsync(
             () => JoinOriginalAsync(ControlledPartitionMovementNativeGroupShutdown.DisposeAsync(nodes)),
             failures).ConfigureAwait(false);
-        if (nodes.Count != ControlledPartitionMovementNativeHostEndpoints.OwnerCount
-            || nodes.Any(node => !node.IsJoined))
+        if (nodes.Any(node => !node.IsJoined))
         {
             failures.Add(Errors.Fail(ErrorCode.OwnershipLost, PartitionMovementProtocol.Unavailable));
         }

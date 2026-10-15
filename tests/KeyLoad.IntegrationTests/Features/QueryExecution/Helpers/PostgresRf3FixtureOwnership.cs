@@ -5,6 +5,7 @@ namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
 internal sealed class PostgresRf3FixtureOwnership(PostgresRf3Selection? selection = null)
 {
+    private const int NoFailures = 0;
     private bool cleanupIncomplete;
 
     internal string[] Prepare(string root, string[] arguments)
@@ -27,7 +28,8 @@ internal sealed class PostgresRf3FixtureOwnership(PostgresRf3Selection? selectio
             await selection.JoinAfterResourcesAsync(appStopped, failures).ConfigureAwait(false);
             cleanupIncomplete |= selection.RetainRoot || failures.Count > PostgresRf3Protocol.FirstColumn || !appStopped;
         }
-        if (!localIncomplete && !isolationIncomplete && !cleanupIncomplete)
+        if (!localIncomplete && !isolationIncomplete && !cleanupIncomplete
+            && failures.Count == NoFailures)
         {
             await deleteOwnedRoot().ConfigureAwait(false);
         }

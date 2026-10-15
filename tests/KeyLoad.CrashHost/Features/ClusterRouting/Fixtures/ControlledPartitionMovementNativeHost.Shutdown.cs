@@ -28,42 +28,29 @@ internal sealed partial class ControlledPartitionMovementNativeHost
         using var deadline = new CancellationTokenSource(budget.Timeout, budget.Clock);
         var token = deadline.Token;
         var failures = new List<Exception>();
-        ServerFailureObserver.Observe(application.Lifetime.StopApplication, failures);
-        Task? nodeStop = null;
-        await ServerFailureObserver.ObserveAsync(async () =>
+        var owner = storageOwner();
+        if (startup is { } opening)
         {
-            nodeStop = Silo.StopAsync(CancellationToken.None);
-            await JoinObservedAsync(nodeStop, failures, ControlledNativeColdShutdownEvidence.Stage.NodeStopObservation, budget, budgetFailures, token).ConfigureAwait(false);
-        }, failures).ConfigureAwait(false);
-        var nativeHostReleased = false;
-        if (nodeStop is { IsCompleted: true } && Silo.HasJoinedRequestWork)
-        {
-            ServerFailureObserver.Observe(() => nativeHostReleased = Silo.Discovery is null, failures);
+            await opening.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
         }
-        if (nodeStop is not { IsCompleted: true } || !Silo.HasJoinedRequestWork || !nativeHostReleased)
+        ServerFailureObserver.Observe(Application.Lifetime.StopApplication, failures);
+        await ServerFailureObserver.ObserveAsync(() => connections.ShutdownAsync(CancellationToken.None), failures).ConfigureAwait(false);
+        var discovery = silo().Discovery;
+        if (!await JoinNativeWorkAsync(failures, budget, budgetFailures, token).ConfigureAwait(false))
         {
-            failures.Add(Errors.Fail(ErrorCode.OwnershipLost, PartitionMovementProtocol.Unavailable));
             ServerFailureObserver.ThrowIfAny(failures);
             return;
         }
-        await ControlledNativeColdShutdownEvidence.ObserveAsync(() => Silo.DisposeAsync().AsTask(), failures,
-            Volatile.Read(ref coldShutdownNode), ControlledNativeColdShutdownEvidence.Stage.NodeDisposal, false,
+        await ControlledNativeColdShutdownEvidence.ObserveAsync(() => Application.StopAsync(CancellationToken.None), failures,
+            Volatile.Read(ref coldShutdownNode), ControlledNativeColdShutdownEvidence.Stage.HttpStop, false,
             token, CancellationToken.None).ConfigureAwait(false);
-        Task? httpStop = null;
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            httpStop = application.StopAsync(token);
-            await ControlledNativeColdShutdownEvidence.ObserveAsync(() => httpStop, failures,
-                Volatile.Read(ref coldShutdownNode), ControlledNativeColdShutdownEvidence.Stage.HttpStop, false,
-                token, CancellationToken.None).ConfigureAwait(false);
+            storageStop ??= storageLifecycle.StopAsync(CancellationToken.None);
+            await JoinObservedAsync(storageStop, failures, ControlledNativeColdShutdownEvidence.Stage.PartitionDisposalObservation,
+                budget, budgetFailures, token).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
-        await ServerFailureObserver.ObserveAsync(async () =>
-        {
-            applicationDisposal ??= application.DisposeAsync().AsTask();
-            await JoinObservedAsync(applicationDisposal, failures, ControlledNativeColdShutdownEvidence.Stage.ApplicationDisposalObservation, budget, budgetFailures, token).ConfigureAwait(false);
-        }, failures).ConfigureAwait(false);
-        if (httpStop is not { IsCompletedSuccessfully: true }
-            && applicationDisposal is not { IsCompletedSuccessfully: true })
+        if (owner.Closing is not { IsCompleted: true } || !owner.CanReleaseRoot)
         {
             failures.Add(Errors.Fail(ErrorCode.OwnershipLost, PartitionMovementProtocol.Unavailable));
             ServerFailureObserver.ThrowIfAny(failures);
@@ -71,21 +58,44 @@ internal sealed partial class ControlledPartitionMovementNativeHost
         }
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            partitionDisposal ??= Partition.DisposeAsync().AsTask();
-            await JoinObservedAsync(partitionDisposal, failures, ControlledNativeColdShutdownEvidence.Stage.PartitionDisposalObservation, budget, budgetFailures, token).ConfigureAwait(false);
+            applicationDisposal ??= Application.DisposeAsync().AsTask();
+            await JoinObservedAsync(applicationDisposal, failures, ControlledNativeColdShutdownEvidence.Stage.ApplicationDisposalObservation,
+                budget, budgetFailures, token).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
-        if (partitionDisposal is { IsCompletedSuccessfully: true })
+        if (applicationDisposal is { IsCompletedSuccessfully: true })
         {
+            ServerFailureObserver.Observe(() => ControlledPartitionMovementNativePublication.RequireClosed(silo(), discovery), failures);
             ServerFailureObserver.Observe(NativeObservation.Dispose, failures);
-            Volatile.Write(ref joined, true);
+            Volatile.Write(ref joined, silo().HasJoinedRequestWork && discovery?.Read().TransportReady != true);
         }
         ServerFailureObserver.ThrowIfAny(failures);
+    }
+
+    private async Task<bool> JoinNativeWorkAsync(List<Exception> failures, ControlledNativeColdOwnerBudget budget,
+        List<Exception> budgetFailures, CancellationToken token)
+    {
+        var native = silo();
+        Task? original = null;
+        await ServerFailureObserver.ObserveAsync(async () =>
+        {
+            original = native.StopAsync(CancellationToken.None);
+            await JoinObservedAsync(original, failures, ControlledNativeColdShutdownEvidence.Stage.NodeStopObservation,
+                budget, budgetFailures, token).ConfigureAwait(false);
+        }, failures).ConfigureAwait(false);
+        if (original is not { IsCompleted: true } || !native.HasJoinedRequestWork)
+        {
+            failures.Add(Errors.Fail(ErrorCode.OwnershipLost, PartitionMovementProtocol.Unavailable));
+            return false;
+        }
+        await ControlledNativeColdShutdownEvidence.ObserveAsync(() => native.DisposeAsync().AsTask(), failures,
+            Volatile.Read(ref coldShutdownNode), ControlledNativeColdShutdownEvidence.Stage.NodeDisposal, false,
+            token, CancellationToken.None).ConfigureAwait(false);
+        return true;
     }
 
     private Task JoinObservedAsync(Task original, List<Exception> failures,
         ControlledNativeColdShutdownEvidence.Stage stage, ControlledNativeColdOwnerBudget budget,
         List<Exception> budgetFailures, CancellationToken token)
         => ControlledPartitionMovementNativeTaskJoin.JoinBudgetedAsync(original, failures,
-            () => Volatile.Read(ref coldShutdownNode), stage, budget, budgetFailures, Silo, token);
-
+            () => Volatile.Read(ref coldShutdownNode), stage, budget, budgetFailures, silo(), token);
 }

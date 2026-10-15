@@ -4,7 +4,7 @@ namespace KeyLoad.Clustering;
 
 internal static class OnlineTextProgress
 {
-    private const string PhaseCompleted = "The online text maintenance phase completed.";
+    internal const string PhaseCompleted = "The online text maintenance phase completed.";
     internal static async ValueTask WriteAsync(ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer,
         OnlineTextFrameAccounting frames, Guid parentRequestId, OnlineTextPhase phase)
     {

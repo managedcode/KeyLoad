@@ -12,6 +12,7 @@ internal sealed class TextMaintenanceChildCalls(DecodedGrainRequest parent, Func
     Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
     IOptions<GrainRoutingOptions> routing, ILogger diagnostics)
 {
+    private readonly Func<INativeTextMaintenance> borrowNative = services.GetRequiredService<Func<INativeTextMaintenance>>();
     internal Guid ParentRequestId => parent.Envelope.RequestId;
     internal Guid SessionId { get; } = Guid.NewGuid();
     internal DatabaseEngine Database => services.GetRequiredService<DatabaseEngine>();
@@ -34,7 +35,7 @@ internal sealed class TextMaintenanceChildCalls(DecodedGrainRequest parent, Func
         Guid commandId, CancellationToken token) where TResult : class
         => DispatchAsync<TResult>(NativeSerialization.Serialize(request), null, kind, commandId, token);
 
-    internal Task AbortAsync() => services.GetRequiredService<INativeTextMaintenance>().AbortAsync(SessionId);
+    internal Task AbortAsync() => borrowNative().AbortAsync(SessionId);
 
     private async Task<TResult> DispatchAsync<TResult>(byte[] payload, GrainReadKind? read,
         OperationKind? command, Guid commandId, CancellationToken token) where TResult : class

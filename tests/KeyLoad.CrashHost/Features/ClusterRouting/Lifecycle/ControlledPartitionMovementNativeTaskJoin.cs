@@ -10,14 +10,14 @@ internal static class ControlledPartitionMovementNativeTaskJoin
     internal static Task JoinBudgetedAsync(Task original, List<Exception> failures,
         Func<int> readNode, ControlledNativeColdShutdownEvidence.Stage stage,
         ControlledNativeColdOwnerBudget budget, List<Exception> budgetFailures,
-        OrleansNode silo, CancellationToken token)
+        OrleansNode? silo, CancellationToken token)
     {
         long? observationStarted = null;
         ServerFailureObserver.Observe(() => observationStarted = budget.Clock.GetTimestamp(), budgetFailures);
         return JoinObservedAsync(original, failures,
             readNode, stage, OriginalJoinStageOffset,
             () => ControlledNativeColdShutdownEvidence.CaptureNodeStopOwnerStateAsync(
-                readNode(), original, silo.HasJoinedRequestWork, silo.Discovery is not null),
+                readNode(), original, silo?.HasJoinedRequestWork ?? true, silo?.Discovery is not null),
             () => budget.CaptureReport(readNode(), stage, original, observationStarted),
             budgetFailures, token);
     }

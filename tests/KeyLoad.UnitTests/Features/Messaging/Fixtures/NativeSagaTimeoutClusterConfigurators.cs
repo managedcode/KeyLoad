@@ -21,15 +21,16 @@ internal sealed class NativeSagaTimeoutSiloConfigurator : ISiloConfigurator
     public void Configure(ISiloBuilder siloBuilder)
     {
         var fixture = NativeSagaTimeoutFixture.Current;
+        var coordinator = fixture.Coordinator;
+        var requestWork = fixture.RequestWork;
         siloBuilder.Services.AddSerializer(serialization => serialization
             .AddAssembly(typeof(GrainRequestContextState).Assembly)
             .AddAssembly(typeof(CqrsStreamChunkSurrogateConverter<GrainRequestProgress, GrainOperationReply>).Assembly)
             .AddAssembly(typeof(ClaimsPrincipalSurrogateConverter).Assembly));
         siloBuilder.Services.AddSingleton(fixture.Database.Database);
-        siloBuilder.Services.AddSingleton(fixture.Coordinator);
-        siloBuilder.Services.AddSingleton<ICommitCoordinator>(fixture.Coordinator);
+        siloBuilder.Services.AddSingleton<Func<ICommitCoordinator>>(() => coordinator);
         siloBuilder.Services.AddSingleton(TimeProvider.System);
-        siloBuilder.Services.AddSingleton(fixture.RequestWork);
+        siloBuilder.Services.AddSingleton<Func<NativeRequestWorkOwner>>(() => requestWork);
         siloBuilder.Services.AddSingleton(fixture.Codec);
         siloBuilder.Services.AddSingleton<NativeConnectionOwnerIdentity>();
         siloBuilder.Services.AddSingleton(fixture.Routing);
@@ -44,7 +45,7 @@ internal sealed class NativeSagaTimeoutSiloConfigurator : ISiloConfigurator
             .AddGrainTransition<IConnectionGrain, ICommandPartitionGrain>()
             .MethodByName(nameof(IConnectionGrain.ExecuteStreamAsync), nameof(ICommandPartitionGrain.ExecuteAsync)).And());
         siloBuilder.UseOrleansCommunication();
-        NativeRuntimeJournalRegistration.Register(siloBuilder, fixture.JournalOptions, fixture.DurableJobOptions);
+        NativeRuntimeJournalRegistration.Register(siloBuilder);
     }
 }
 
