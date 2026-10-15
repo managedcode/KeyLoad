@@ -16,6 +16,7 @@ namespace KeyLoad.Clustering;
 /// <param name="workOwner">Silo-local owner for active request stream work.</param>
 /// <param name="options">The centrally validated request execution snapshot.</param>
 /// <param name="services">Borrowed native silo services for independent lane composition.</param>
+[Orleans.Placement.Immovable(Orleans.Placement.ImmovableKind.Any)]
 [Orleans.GrainType(GrainRoutingProtocol.RequestAlias), Orleans.Placement.PreferLocalPlacement]
 public sealed class ConnectionGrain(GrainRequestCodec codec, ILogger<ConnectionGrain> diagnostics,
     Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> chunkSerializer, TimeProvider clock,

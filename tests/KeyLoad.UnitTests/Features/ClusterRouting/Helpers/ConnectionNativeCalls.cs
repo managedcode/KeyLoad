@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using KeyLoad.Clustering;
 using KeyLoad.Server;
 
@@ -7,27 +6,45 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting;
 internal sealed class ConnectionNativeCalls : IDisposable
 {
     private readonly CancellationTokenSource stopping = new();
-    private readonly ConcurrentDictionary<Guid, Task<GrainOperationReply>> originals = new();
+    private readonly Lock admission = new();
+    private readonly Dictionary<Guid, Task<GrainOperationReply>> originals = [];
+    private readonly HashSet<Guid> starting = [];
     private readonly HashSet<Task> unfinished = [];
 
     internal CancellationToken Token => stopping.Token;
 
-    internal Task<GrainOperationReply> Retain(Guid requestId, Task<GrainOperationReply> original)
+    internal Task<GrainOperationReply> Retain(Guid requestId, Func<Task<GrainOperationReply>> start)
     {
-        if (!originals.TryAdd(requestId, original))
+        ArgumentNullException.ThrowIfNull(start);
+        lock (admission)
         {
-            throw new InvalidOperationException(ConnectionNativeProtocol.DuplicateObservation);
+            if (originals.ContainsKey(requestId) || !starting.Add(requestId))
+            {
+                throw new InvalidOperationException(ConnectionNativeProtocol.DuplicateObservation);
+            }
+            try
+            {
+                var original = start();
+                originals.Add(requestId, original);
+                return original;
+            }
+            finally
+            {
+                starting.Remove(requestId);
+            }
         }
-        return original;
     }
 
     internal Task StopAsync()
     {
-        foreach (var original in originals.Values)
+        lock (admission)
         {
-            if (!original.IsCompleted)
+            foreach (var original in originals.Values)
             {
-                unfinished.Add(original);
+                if (!original.IsCompleted)
+                {
+                    unfinished.Add(original);
+                }
             }
         }
         return stopping.CancelAsync();
@@ -35,7 +52,7 @@ internal sealed class ConnectionNativeCalls : IDisposable
 
     internal async Task JoinAsync(List<Exception> failures, CancellationToken cancellationToken)
     {
-        foreach (var original in originals.OrderBy(static pair => pair.Key))
+        foreach (var original in Snapshot().OrderBy(static pair => pair.Key))
         {
             await ServerFailureObserver.ObserveAsync(
                 () => JoinOriginalAsync(original.Value, failures, cancellationToken), failures);
@@ -52,7 +69,7 @@ internal sealed class ConnectionNativeCalls : IDisposable
             await ServerFailureObserver.ObserveAsync(() => waiting, failures);
             return;
         }
-        if (unfinished.Contains(original) && original.Exception is { } terminalFailure)
+        if (WasUnfinished(original) && original.Exception is { } terminalFailure)
         {
             failures.AddRange(terminalFailure.InnerExceptions);
         }
@@ -60,10 +77,26 @@ internal sealed class ConnectionNativeCalls : IDisposable
 
     internal void WriteTrace(string phase)
     {
-        foreach (var original in originals.OrderBy(static pair => pair.Key))
+        foreach (var original in Snapshot().OrderBy(static pair => pair.Key))
         {
             Console.WriteLine(FormattableString.Invariant(
                 $"ConnectionNative phase={phase} request={original.Key:D} caller={original.Value.Status}"));
+        }
+    }
+
+    private KeyValuePair<Guid, Task<GrainOperationReply>>[] Snapshot()
+    {
+        lock (admission)
+        {
+            return originals.ToArray();
+        }
+    }
+
+    private bool WasUnfinished(Task original)
+    {
+        lock (admission)
+        {
+            return unfinished.Contains(original);
         }
     }
 

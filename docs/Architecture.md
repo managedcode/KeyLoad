@@ -7,6 +7,14 @@ bounded connections and native OpenTelemetry precede broad model expansion;
 comparative measurement, complete audits and release qualification follow it.
 Implementation milestones never replace whole-task acceptance.
 
+[ADR-136](ADR/ADR-136-native-orleans-partition-ownership.md) assigns physical
+ZoneTree opening and joined lifetime to a silo-local Grain Service under one
+native host. Logical partition grains route through Orleans to current physical
+owners; placement and permitted activation movement do not transfer files.
+Native membership, directory, services, streams and scheduling are reused by their
+actual contracts. Orleans transactional grain state and canonical ZoneTree/RF3
+database atomicity have separate provider and qualification requirements.
+
 [ResourceExecution TimeProvider](Features/ResourceExecution/TimeProvider.md) and
 [ADR-115](ADR/ADR-115-time-provider.md) require explicitly owned clocks for UTC
 timestamps, monotonic budgets, delays and timers. Composition selects the native
@@ -255,7 +263,7 @@ All KeyLoad-owned backend, clients, contracts, frontend, tests, infrastructure a
 | src/KeyLoad.Core | DatabaseEngine.cs, Features/DocumentStorage/Execution/Documents.cs, Features/EventStreams/Execution/Events.cs, Features/Messaging/Execution/Messaging.cs, Features/GraphTraversal/, Features/TimeSeries/, Features/Search/; Features/BackupRestore/Execution/AtomicPartitionRosterTransaction.cs | Node-local engine and atomic transactions; model effects and first-write logical partition registration share the ordered native commit. Complete current roster capture and cluster backup qualification remain required. |
 | src/KeyLoad.Diagnostics | Features/ResourceExecution/Models/DatabasePhaseKind.cs, Features/ResourceExecution/Models/DatabasePhaseSnapshot.cs and fixed bank | ResourceExecution; ADR-063 BCL-only callback-free scalar phase observations. No database state, public control endpoint or framework dependency; source integration and genuine native profiling pending. |
 | src/KeyLoad.Storage.ZoneTree | ZoneTreeStore.cs; Features/StorageRecovery/Execution/ZoneTreeStoreRuntime.cs and Features/StorageRecovery/Recovery/ZoneTreeCheckpointManager.cs | StorageRecovery and BackupRestore; file/WAL/checkpoint ownership stays node-local. |
-| src/KeyLoad.Storage.IO | Features/StorageRecovery/Storage/OfflineRegularFile.cs; planned Features/ResourceExecution/Interop/ under ADR-133 | StorageRecovery shared public-OS-ABI regular-file opening and narrowly read-only ResourceExecution kernel-clock observation contract. Clock implementation/verified Linux ABI and current binding remain pending. No engine, database state, authorization or replication dependency; ADR-011/116/133 and CurrentFormat. |
+| src/KeyLoad.Storage.IO | Features/StorageRecovery/Storage/OfflineRegularFile.cs | Shared documented public-OS-ABI regular-file opening only; no database state, authorization, routing or replication authority. ADR-011/116 and CurrentFormat define its scope. |
 | src/KeyLoad.Security | Features/Authorization/Execution/AuthorizationPolicy.cs | Authorization; trusted principal and row/field policy enforcement. |
 | src/KeyLoad.Query | Features/QueryExecution/Queries/QueryEngine.cs, Features/QueryExecution/Execution/SqlParser.cs, Features/Search/Queries/SearchEngine.cs; Features/ChangeFeeds/Queries/LiveQueryExecutor.cs behind Features/ChangeFeeds/Execution/LiveQueries.cs facade | QueryExecution, Search, ChangeFeeds; one authorized typed AST and bounded read cut. |
 | src/KeyLoad.Artifacts | Features/BackupRestore/Execution/ArtifactTransfer.cs, Features/BackupRestore/Execution/BackupArtifact.cs | BackupRestore; verified artifact transport and format ownership. |

@@ -92,7 +92,7 @@ flowchart LR
 
 [KL-105](docs/Features/BenchmarkComparisons/DotnetProfiling.md) adds .NET profiling with `dotnet-diagnostics-mcp`, measured bottleneck repairs and matched verification; its acceptance remains open.
 
-Execution follows the [foundation-first plan for all105 tasks](docs/Features/RepositoryGovernance/FoundationDelivery.md). The [Stage89 checkpoint](docs/implementation/qualification-stage89-foundation.md) passes the strict full Release build, canonical formatting, selected **66/66 functional Unit**, **7/7 real-process Recovery** and **3/3 SDK/official MCP Aspire RF3** operations. Native Unit concurrency actually reached50. ZoneTree.Analytics1.0.0 is published and its three real-engine operation flows pass locally; production activation remains held by the native resource/scheduler boundary. Complete exact-source Linux, coverage and remaining task acceptance gates stay open. Full-task status remains **20 accepted /85 in progress**.
+Execution follows the [foundation-first plan for all105 tasks](docs/Features/RepositoryGovernance/FoundationDelivery.md): native Orleans hosting and silo-local ZoneTree ownership, then protected RF3 operations and model composition. The [current acceptance status](docs/implementation/status.json) remains **20 accepted /85 in progress**. Complete Linux, recovery, security, coverage and performance qualification remains open.
 
 
 | Workstream | What it does and why | State | Remaining work |

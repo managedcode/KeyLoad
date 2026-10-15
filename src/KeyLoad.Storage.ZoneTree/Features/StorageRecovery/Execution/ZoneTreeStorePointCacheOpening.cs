@@ -10,15 +10,9 @@ internal static class ZoneTreeStorePointCacheOpening
         {
             return null;
         }
-
-        try
-        {
-            return ZoneTreePointCache.CreateResolved(options);
-        }
-        catch (Exception)
-        {
-            ZoneTreeStoreHandleDisposal.FailedOpen(runtime);
-            throw;
-        }
+        runtime.OwnershipSettlement.BeginNativeConstructor();
+        var cache = ZoneTreePointCache.CreateResolved(options);
+        runtime.OwnershipSettlement.NativeConstructorReturned();
+        return cache;
     }
 }

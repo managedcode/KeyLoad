@@ -1,12 +1,10 @@
-using KeyLoad.Server;
-
 namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
 internal static class PartitionPairedIdentityContinuation
 {
     internal static async Task RequireAsync(PartitionHostRecoveryFixture fixture, PartitionPairedIdentityCut original)
     {
-        await using (var recovered = fixture.OpenHost())
+        await fixture.RunHostAsync(async recovered =>
         {
             var store = recovered.Database.Store;
             await WalFileFixture.AssertPreservedIdentity(original.Canonical, store.Identity).ConfigureAwait(false);
@@ -22,20 +20,20 @@ internal static class PartitionPairedIdentityContinuation
                 return true;
             });
             await Assert.That(store.Position).IsEqualTo(original.CanonicalPosition + PartitionPairedIdentityProtocol.NextFrame);
-        }
-        await using (var cold = fixture.OpenHost())
+        }).ConfigureAwait(false);
+        await fixture.RunHostAsync(async cold =>
         {
             await WalFileFixture.AssertPreservedIdentity(original.Canonical, cold.Database.Store.Identity).ConfigureAwait(false);
             await Assert.That(cold.Database.Store.Position)
                 .IsEqualTo(original.CanonicalPosition + PartitionPairedIdentityProtocol.NextFrame);
             await RequireValuesAsync(cold.Database.Store, true).ConfigureAwait(false);
-        }
-        var runtime = ServerRuntimeTestOptions.Runtime(fixture.Options);
-        using var stores = new PartitionStores(runtime.Node, fixture.Options.DataDirectory,
-            runtime.StorageExecution, runtime.PointCache);
-        await WalFileFixture.AssertPreservedIdentity(original.Replica, stores.Replica.Identity).ConfigureAwait(false);
-        await Assert.That(stores.Replica.Identity.MinimumReaderContract).IsEqualTo(original.Replica.MinimumReaderContract);
-        await Assert.That(stores.Replica.Position).IsEqualTo(original.ReplicaPosition);
+        }).ConfigureAwait(false);
+        await fixture.RunStoresAsync(async stores =>
+        {
+            await WalFileFixture.AssertPreservedIdentity(original.Replica, stores.Replica.Identity).ConfigureAwait(false);
+            await Assert.That(stores.Replica.Identity.MinimumReaderContract).IsEqualTo(original.Replica.MinimumReaderContract);
+            await Assert.That(stores.Replica.Position).IsEqualTo(original.ReplicaPosition);
+        }).ConfigureAwait(false);
     }
 
     private static async Task RequireValuesAsync(KeyLoad.Storage.IAtomicStore store, bool healthy)

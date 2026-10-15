@@ -22,24 +22,17 @@ internal sealed class FixtureLifetimeTests
     public async Task AcTest006_FailedFixtureSetupReleasesStoreAndOwnedDirectory(int concurrency)
     {
         var directory = NewDirectory();
-        try
+        var failure = Assert.ThrowsExactly<InvalidOperationException>(() =>
         {
-            var failure = Assert.ThrowsExactly<InvalidOperationException>(() =>
+            using var unexpected = new TestDatabase(new()
             {
-                using var unexpected = new TestDatabase(new()
-                {
-                    MaxConcurrentQueries = concurrency
-                }, directory);
-            });
-            await Assert.That(failure.Message).IsEqualTo(DatabaseLimits.ValidationMessage);
-            await Assert.That(Directory.Exists(directory)).IsFalse();
-            using var reopened = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
-            await Assert.That(reopened.Position).IsEqualTo(0L);
-        }
-        finally
-        {
-            DeleteDirectory(directory);
-        }
+                MaxConcurrentQueries = concurrency
+            }, directory);
+        });
+        await Assert.That(failure.Message).IsEqualTo(DatabaseLimits.ValidationMessage);
+        await Assert.That(Directory.Exists(directory)).IsFalse();
+        await TestDatabaseConstructorRollbackContinuation.RunAsync(directory,
+            TestContext.Current!.Execution.CancellationToken);
     }
 
     [Test]

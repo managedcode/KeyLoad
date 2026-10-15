@@ -17,7 +17,7 @@ internal sealed class PartitionRootAdmissionTests
 
     [Test]
     public async Task UnknownDirectoryRejectsUnchangedThenCurrentWriteReopens()
-        => await AssertRejectedThenHealthyAsync(UnknownEntryName, CreateDirectory, VerifyDirectoryAsync,
+        => await AssertRejectedThenHealthyAsync(UnknownEntryName, PartitionRootDirectoryOperations.Create, PartitionRootDirectoryOperations.VerifyAsync,
             path => Directory.Delete(path, recursive: true));
 
     [Test]
@@ -27,33 +27,35 @@ internal sealed class PartitionRootAdmissionTests
     private static async Task AssertRejectedThenHealthyAsync(string entryName, Action<string, string> create,
         Func<string, string, Task> verify, Action<string> remove)
     {
-        using var fixture = new PartitionRootAdmissionFixture();
-        fixture.CreateExistingRoot();
-        var path = Path.Combine(fixture.Root, entryName);
-        var target = Path.Combine(Path.GetDirectoryName(fixture.Root)!, "current-layout-target");
-        create(path, target);
-        var entries = Directory.GetFileSystemEntries(fixture.Root);
-        UnixFileMode? mode = OperatingSystem.IsLinux() || OperatingSystem.IsMacOS()
-            ? File.GetUnixFileMode(fixture.Root)
-            : null;
-        var rejection = await Assert.ThrowsExactlyAsync<KeyLoadException>(fixture.OpenAndDisposeHostAsync);
-        await Assert.That(rejection!.Code).IsEqualTo(ErrorCode.FormatUnsupported);
-        await Assert.That(rejection.Message).IsEqualTo(UnsupportedLayoutDetail);
-        await Assert.That(Directory.GetFileSystemEntries(fixture.Root)).IsEquivalentTo(entries);
-        if ((OperatingSystem.IsLinux() || OperatingSystem.IsMacOS()) && mode is { } originalMode)
+        await PartitionRootAdmissionFixture.RunAsync(async fixture =>
         {
-            await Assert.That(File.GetUnixFileMode(fixture.Root)).IsEqualTo(originalMode);
-        }
-        await verify(path, target);
-        remove(path);
-        await fixture.AssertHealthyWriteReopenAsync();
+            fixture.CreateExistingRoot();
+            var path = Path.Combine(fixture.Root, entryName);
+            var target = Path.Combine(Path.GetDirectoryName(fixture.Root)!, "current-layout-target");
+            create(path, target);
+            var entries = Directory.GetFileSystemEntries(fixture.Root);
+            UnixFileMode? mode = OperatingSystem.IsLinux() || OperatingSystem.IsMacOS()
+                ? File.GetUnixFileMode(fixture.Root)
+                : null;
+            var rejection = await Assert.ThrowsExactlyAsync<KeyLoadException>(fixture.OpenAndDisposeHostAsync);
+            await Assert.That(rejection!.Code).IsEqualTo(ErrorCode.FormatUnsupported);
+            await Assert.That(rejection.Message).IsEqualTo(UnsupportedLayoutDetail);
+            await Assert.That(Directory.GetFileSystemEntries(fixture.Root)).IsEquivalentTo(entries);
+            if ((OperatingSystem.IsLinux() || OperatingSystem.IsMacOS()) && mode is { } originalMode)
+            {
+                await Assert.That(File.GetUnixFileMode(fixture.Root)).IsEqualTo(originalMode);
+            }
+            await verify(path, target);
+            remove(path);
+            await fixture.AssertHealthyWriteReopenAsync();
+        }).ConfigureAwait(false);
     }
 
     [Test]
     public async Task WrongKnownEntryKindsRejectBeforeMutation()
     {
         await AssertRejectedThenHealthyAsync(CanonicalDirectoryName, CreateFile, VerifyFileAsync, File.Delete);
-        await AssertRejectedThenHealthyAsync(OwnerLockName, CreateDirectory, VerifyDirectoryAsync,
+        await AssertRejectedThenHealthyAsync(OwnerLockName, PartitionRootDirectoryOperations.Create, PartitionRootDirectoryOperations.VerifyAsync,
             path => Directory.Delete(path, recursive: true));
         await AssertRejectedThenHealthyAsync(KeyLoad.Server.Features.Search.NativeTextOnlineRoot.DirectoryName,
             CreateFile, VerifyFileAsync, File.Delete);
@@ -68,81 +70,87 @@ internal sealed class PartitionRootAdmissionTests
     [Test]
     public async Task NonDirectoryNodeRootRejectsUnchangedThenFreshRootReopens()
     {
-        using var fixture = new PartitionRootAdmissionFixture();
-        Directory.CreateDirectory(Path.GetDirectoryName(fixture.Root)!);
-        await File.WriteAllBytesAsync(fixture.Root, [0x31, 0x00, 0x32]);
-        if (OperatingSystem.IsLinux() || OperatingSystem.IsMacOS())
+        await PartitionRootAdmissionFixture.RunAsync(async fixture =>
         {
-            File.SetUnixFileMode(fixture.Root, UnixFileMode.UserRead | UnixFileMode.UserWrite);
-        }
-        UnixFileMode? mode = OperatingSystem.IsLinux() || OperatingSystem.IsMacOS()
-            ? File.GetUnixFileMode(fixture.Root)
-            : null;
-        var rejection = await Assert.ThrowsExactlyAsync<KeyLoadException>(fixture.OpenAndDisposeHostAsync);
-        await Assert.That(rejection!.Code).IsEqualTo(ErrorCode.FormatUnsupported);
-        await Assert.That(rejection.Message).IsEqualTo(UnsupportedLayoutDetail);
-        await Assert.That(await File.ReadAllBytesAsync(fixture.Root)).IsEquivalentTo(new byte[] { 0x31, 0x00, 0x32 });
-        if ((OperatingSystem.IsLinux() || OperatingSystem.IsMacOS()) && mode is { } originalMode)
-        {
-            await Assert.That(File.GetUnixFileMode(fixture.Root)).IsEqualTo(originalMode);
-        }
-        File.Delete(fixture.Root);
-        await fixture.AssertHealthyWriteReopenAsync();
+            Directory.CreateDirectory(Path.GetDirectoryName(fixture.Root)!);
+            await File.WriteAllBytesAsync(fixture.Root, [0x31, 0x00, 0x32]);
+            if (OperatingSystem.IsLinux() || OperatingSystem.IsMacOS())
+            {
+                File.SetUnixFileMode(fixture.Root, UnixFileMode.UserRead | UnixFileMode.UserWrite);
+            }
+            UnixFileMode? mode = OperatingSystem.IsLinux() || OperatingSystem.IsMacOS()
+                ? File.GetUnixFileMode(fixture.Root)
+                : null;
+            var rejection = await Assert.ThrowsExactlyAsync<KeyLoadException>(fixture.OpenAndDisposeHostAsync);
+            await Assert.That(rejection!.Code).IsEqualTo(ErrorCode.FormatUnsupported);
+            await Assert.That(rejection.Message).IsEqualTo(UnsupportedLayoutDetail);
+            await Assert.That(await File.ReadAllBytesAsync(fixture.Root)).IsEquivalentTo(new byte[] { 0x31, 0x00, 0x32 });
+            if ((OperatingSystem.IsLinux() || OperatingSystem.IsMacOS()) && mode is { } originalMode)
+            {
+                await Assert.That(File.GetUnixFileMode(fixture.Root)).IsEqualTo(originalMode);
+            }
+            File.Delete(fixture.Root);
+            await fixture.AssertHealthyWriteReopenAsync();
+        }).ConfigureAwait(false);
     }
 
     [Test]
     public async Task RootLinkRejectsWithoutTouchingTargetThenFreshRootReopens()
     {
-        using var fixture = new PartitionRootAdmissionFixture();
-        var parent = Path.GetDirectoryName(fixture.Root)!;
-        Directory.CreateDirectory(parent);
-        var target = Path.Combine(parent, "foreign-node-root");
-        Directory.CreateDirectory(target);
-        var targetFile = Path.Combine(target, "sentinel");
-        await File.WriteAllBytesAsync(targetFile, [0x71, 0x00, 0x72]);
-        if (OperatingSystem.IsLinux() || OperatingSystem.IsMacOS())
+        await PartitionRootAdmissionFixture.RunAsync(async fixture =>
         {
-            File.SetUnixFileMode(target, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
-            File.SetUnixFileMode(targetFile, UnixFileMode.UserRead | UnixFileMode.UserWrite);
-        }
-        Directory.CreateSymbolicLink(fixture.Root, target);
-        var rejection = await Assert.ThrowsExactlyAsync<KeyLoadException>(fixture.OpenAndDisposeHostAsync);
-        await Assert.That(rejection!.Code).IsEqualTo(ErrorCode.FormatUnsupported);
-        await Assert.That(rejection.Message).IsEqualTo(UnsupportedLayoutDetail);
-        await Assert.That(new DirectoryInfo(fixture.Root).LinkTarget).IsNotNull();
-        await Assert.That(await File.ReadAllBytesAsync(targetFile)).IsEquivalentTo(new byte[] { 0x71, 0x00, 0x72 });
-        await Assert.That(Directory.GetFileSystemEntries(target)).IsEquivalentTo([targetFile]);
-        if (OperatingSystem.IsLinux() || OperatingSystem.IsMacOS())
-        {
-            await Assert.That(File.GetUnixFileMode(target)).IsEqualTo(
-                UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
-            await Assert.That(File.GetUnixFileMode(targetFile)).IsEqualTo(
-                UnixFileMode.UserRead | UnixFileMode.UserWrite);
-        }
-        Directory.Delete(fixture.Root);
-        await fixture.AssertHealthyWriteReopenAsync();
+            var parent = Path.GetDirectoryName(fixture.Root)!;
+            Directory.CreateDirectory(parent);
+            var target = Path.Combine(parent, "foreign-node-root");
+            Directory.CreateDirectory(target);
+            var targetFile = Path.Combine(target, "sentinel");
+            await File.WriteAllBytesAsync(targetFile, [0x71, 0x00, 0x72]);
+            if (OperatingSystem.IsLinux() || OperatingSystem.IsMacOS())
+            {
+                File.SetUnixFileMode(target, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+                File.SetUnixFileMode(targetFile, UnixFileMode.UserRead | UnixFileMode.UserWrite);
+            }
+            Directory.CreateSymbolicLink(fixture.Root, target);
+            var rejection = await Assert.ThrowsExactlyAsync<KeyLoadException>(fixture.OpenAndDisposeHostAsync);
+            await Assert.That(rejection!.Code).IsEqualTo(ErrorCode.FormatUnsupported);
+            await Assert.That(rejection.Message).IsEqualTo(UnsupportedLayoutDetail);
+            await Assert.That(new DirectoryInfo(fixture.Root).LinkTarget).IsNotNull();
+            await Assert.That(await File.ReadAllBytesAsync(targetFile)).IsEquivalentTo(new byte[] { 0x71, 0x00, 0x72 });
+            await Assert.That(Directory.GetFileSystemEntries(target)).IsEquivalentTo([targetFile]);
+            if (OperatingSystem.IsLinux() || OperatingSystem.IsMacOS())
+            {
+                await Assert.That(File.GetUnixFileMode(target)).IsEqualTo(
+                    UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+                await Assert.That(File.GetUnixFileMode(targetFile)).IsEqualTo(
+                    UnixFileMode.UserRead | UnixFileMode.UserWrite);
+            }
+            Directory.Delete(fixture.Root);
+            await fixture.AssertHealthyWriteReopenAsync();
+        }).ConfigureAwait(false);
     }
 
     [Test]
     public async Task ExistingRegularOwnerLockStillExcludesSecondHost()
     {
-        using var fixture = new PartitionRootAdmissionFixture();
-        fixture.CreateExistingRoot();
-        var ownerPath = Path.Combine(fixture.Root, OwnerLockName);
+        await PartitionRootAdmissionFixture.RunAsync(async fixture =>
         {
-            using var owner = new FileStream(ownerPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
-            UnixFileMode? ownerMode = OperatingSystem.IsLinux() || OperatingSystem.IsMacOS()
-                ? File.GetUnixFileMode(ownerPath)
-                : null;
-            await Assert.ThrowsExactlyAsync<IOException>(fixture.OpenAndDisposeHostAsync);
-            await Assert.That(Directory.GetFileSystemEntries(fixture.Root)).IsEquivalentTo([ownerPath]);
-            await Assert.That(new FileInfo(ownerPath).Length).IsEqualTo(0L);
-            if ((OperatingSystem.IsLinux() || OperatingSystem.IsMacOS()) && ownerMode is { } originalMode)
+            fixture.CreateExistingRoot();
+            var ownerPath = Path.Combine(fixture.Root, OwnerLockName);
             {
-                await Assert.That(File.GetUnixFileMode(ownerPath)).IsEqualTo(originalMode);
+                using var owner = new FileStream(ownerPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
+                UnixFileMode? ownerMode = OperatingSystem.IsLinux() || OperatingSystem.IsMacOS()
+                    ? File.GetUnixFileMode(ownerPath)
+                    : null;
+                await Assert.ThrowsExactlyAsync<IOException>(fixture.OpenAndDisposeHostAsync);
+                await Assert.That(Directory.GetFileSystemEntries(fixture.Root)).IsEquivalentTo([ownerPath]);
+                await Assert.That(new FileInfo(ownerPath).Length).IsEqualTo(0L);
+                if ((OperatingSystem.IsLinux() || OperatingSystem.IsMacOS()) && ownerMode is { } originalMode)
+                {
+                    await Assert.That(File.GetUnixFileMode(ownerPath)).IsEqualTo(originalMode);
+                }
             }
-        }
-        await fixture.AssertHealthyWriteReopenAsync();
+            await fixture.AssertHealthyWriteReopenAsync();
+        }).ConfigureAwait(false);
     }
 
     private static void CreateFile(string path, string target)
@@ -152,18 +160,6 @@ internal sealed class PartitionRootAdmissionTests
         if (OperatingSystem.IsLinux() || OperatingSystem.IsMacOS())
         {
             File.SetUnixFileMode(path, UnixFileMode.UserRead | UnixFileMode.UserWrite);
-        }
-    }
-
-    private static void CreateDirectory(string path, string target)
-    {
-        _ = target;
-        Directory.CreateDirectory(path);
-        File.WriteAllBytes(Path.Combine(path, "sentinel"), [0x51, 0x00, 0x52]);
-        if (OperatingSystem.IsLinux() || OperatingSystem.IsMacOS())
-        {
-            File.SetUnixFileMode(path, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
-            File.SetUnixFileMode(Path.Combine(path, "sentinel"), UnixFileMode.UserRead | UnixFileMode.UserWrite);
         }
     }
 
@@ -184,20 +180,6 @@ internal sealed class PartitionRootAdmissionTests
         if (OperatingSystem.IsLinux() || OperatingSystem.IsMacOS())
         {
             await Assert.That(File.GetUnixFileMode(path)).IsEqualTo(UnixFileMode.UserRead | UnixFileMode.UserWrite);
-        }
-    }
-
-    private static async Task VerifyDirectoryAsync(string path, string target)
-    {
-        _ = target;
-        await Assert.That(await File.ReadAllBytesAsync(Path.Combine(path, "sentinel")))
-            .IsEquivalentTo(new byte[] { 0x51, 0x00, 0x52 });
-        if (OperatingSystem.IsLinux() || OperatingSystem.IsMacOS())
-        {
-            await Assert.That(File.GetUnixFileMode(path)).IsEqualTo(
-                UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
-            await Assert.That(File.GetUnixFileMode(Path.Combine(path, "sentinel")))
-                .IsEqualTo(UnixFileMode.UserRead | UnixFileMode.UserWrite);
         }
     }
 
@@ -224,7 +206,18 @@ internal sealed class PartitionRootAdmissionSpecialEntryTests
     {
         if (OperatingSystem.IsLinux() || OperatingSystem.IsMacOS())
         {
-            using var fixture = new PartitionRootAdmissionFixture();
+            await PartitionRootAdmissionFixture.RunAsync(VerifyUnixFifoAsync).ConfigureAwait(false);
+        }
+        else
+        {
+            TUnit.Core.Skip.Test("Native FIFO admission requires a Linux or macOS test host.");
+        }
+    }
+
+    private static async Task VerifyUnixFifoAsync(PartitionRootAdmissionFixture fixture)
+    {
+        if (OperatingSystem.IsLinux() || OperatingSystem.IsMacOS())
+        {
             fixture.CreateExistingRoot();
             var path = Path.Combine(fixture.Root, OwnerLockName);
             RequestCqrsProbeNativeFifo.Create(path);
@@ -243,7 +236,7 @@ internal sealed class PartitionRootAdmissionSpecialEntryTests
         }
         else
         {
-            TUnit.Core.Skip.Test("Native FIFO admission requires a Linux or macOS test host.");
+            throw new PlatformNotSupportedException();
         }
     }
 }

@@ -1,3 +1,4 @@
+using System.Runtime.ExceptionServices;
 using System.Text;
 using KeyLoad.Storage.ZoneTree;
 
@@ -7,8 +8,11 @@ internal sealed class NativeReadCutFixture : IDisposable
 {
     private const string DirectoryPrefix = "keyload-native-read-cut-";
     private const string Prefix = "doc/";
+    private const string AcquisitionUnjoined = "An original native read-cut owner acquisition is unknown; retain its root.";
     private readonly List<ZoneTreeStore> opened = [];
+    private readonly List<NativeStorageOwnerSettlement> attempts = [];
     private readonly TimeProvider clock;
+    private ExceptionDispatchInfo? originalAcquisitionFailure;
 
     internal string DirectoryPath { get; } = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString("N"));
     internal ZoneTreeStore Store
@@ -43,6 +47,10 @@ internal sealed class NativeReadCutFixture : IDisposable
         {
             KeyLoad.Server.ServerFailureObserver.Observe(store.Dispose, failures);
         }
+        if (failures.Count == 0 && attempts.Any(attempt => !attempt.IsReleased))
+        {
+            failures.Add(originalAcquisitionFailure?.SourceException ?? new InvalidOperationException(AcquisitionUnjoined));
+        }
         if (failures.Count == 0)
         {
             KeyLoad.Server.ServerFailureObserver.Observe(() => Directory.Delete(DirectoryPath, recursive: true), failures);
@@ -52,9 +60,52 @@ internal sealed class NativeReadCutFixture : IDisposable
 
     private ZoneTreeStore Open()
     {
-        var store = new ZoneTreeStore(new(DirectoryPath), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution(), clock);
-        opened.Add(store);
-        return store;
+        if (attempts.Any(attempt => !attempt.IsReleased))
+        {
+            originalAcquisitionFailure?.Throw();
+            throw new InvalidOperationException(AcquisitionUnjoined);
+        }
+        var options = new ZoneTreeStoreOptions(DirectoryPath);
+        var execution = UnitExecutionOptions.StorageExecution();
+        var cache = UnitExecutionOptions.PointCacheExecution();
+        var attempt = new NativeStorageOwnerSettlement();
+        attempts.Add(attempt);
+        try
+        {
+            return Publish(ZoneTreeStore.OpenOwned(options, execution, cache, attempt, clock));
+        }
+        catch (Exception failure)
+        {
+            originalAcquisitionFailure = ExceptionDispatchInfo.Capture(failure);
+            throw;
+        }
+    }
+
+    private ZoneTreeStore Publish(ZoneTreeStore store)
+    {
+        try
+        {
+            opened.Add(store);
+            return store;
+        }
+        catch (Exception primary)
+        {
+            var failures = new List<Exception> { primary };
+            try
+            {
+                store.Dispose();
+            }
+            catch (Exception failure) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+            {
+                failures.Add(failure);
+            }
+            catch (Exception failure) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+            {
+                failures.Add(failure);
+            }
+            KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
+            throw;
+        }
     }
 
 }

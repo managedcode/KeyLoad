@@ -3,27 +3,26 @@ namespace KeyLoad.Storage.ZoneTree;
 internal static class ZoneTreeStoreHandleDisposal
 {
     internal static void FailedOpen(ZoneTreeStoreRuntime runtime)
-    {
-        try
-        {
-            RetireMaintainer(runtime);
-        }
-        finally
-        {
-            DisposeJournalBeforeTree(runtime);
-        }
-    }
+        => Close(runtime, failedOpen: true);
 
     internal static void Normal(ZoneTreeStoreRuntime runtime)
+        => Close(runtime, failedOpen: false);
+
+    private static void Close(ZoneTreeStoreRuntime runtime, bool failedOpen)
     {
-        try
+        var failures = new List<Exception>();
+        ZoneTreeExistingStoreCleanup.Capture(() => RetireMaintainer(runtime), failures);
+        if (failedOpen)
         {
-            RetireMaintainer(runtime);
+            ZoneTreeExistingStoreCleanup.Capture(() => runtime.Journal?.Dispose(), failures);
         }
-        finally
+        ZoneTreeExistingStoreCleanup.Capture(() => RetireTree(runtime), failures);
+        if (!failedOpen)
         {
-            DisposeTreeBeforeJournal(runtime);
+            ZoneTreeExistingStoreCleanup.Capture(() => runtime.Journal?.Dispose(), failures);
         }
+        ZoneTreeExistingStoreCleanup.Capture(() => runtime.Ownership?.Dispose(), failures);
+        ZoneTreeExistingStoreCleanup.ThrowFailures(failures);
     }
 
     internal static void RetireMaintainer(ZoneTreeStoreRuntime runtime)
@@ -33,14 +32,8 @@ internal static class ZoneTreeStoreHandleDisposal
             return;
         }
 
-        try
-        {
-            maintenance.Dispose();
-        }
-        finally
-        {
-            runtime.Maintenance = null;
-        }
+        maintenance.Dispose();
+        runtime.Maintenance = null;
     }
 
     internal static void RetireTree(ZoneTreeStoreRuntime runtime)
@@ -54,41 +47,4 @@ internal static class ZoneTreeStoreHandleDisposal
         runtime.Tree = null!;
     }
 
-    private static void DisposeJournalBeforeTree(ZoneTreeStoreRuntime runtime)
-    {
-        try
-        {
-            runtime.Journal?.Dispose();
-        }
-        finally
-        {
-            try
-            {
-                RetireTree(runtime);
-            }
-            finally
-            {
-                runtime.Ownership?.Dispose();
-            }
-        }
-    }
-
-    private static void DisposeTreeBeforeJournal(ZoneTreeStoreRuntime runtime)
-    {
-        try
-        {
-            RetireTree(runtime);
-        }
-        finally
-        {
-            try
-            {
-                runtime.Journal?.Dispose();
-            }
-            finally
-            {
-                runtime.Ownership.Dispose();
-            }
-        }
-    }
 }

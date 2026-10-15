@@ -10,6 +10,7 @@ using Orleans.Serialization;
 namespace KeyLoad.Clustering;
 
 #pragma warning disable ORLEANSEXP005 // Centrally pinned native Orleans journaling required by ADR-124.
+[Orleans.Placement.Immovable(Orleans.Placement.ImmovableKind.Any)]
 [GrainType(SampleChunkJobProtocol.GrainAlias), global::Orleans.Placement.PreferLocalPlacement]
 internal sealed class SampleChunkCoordinatorGrain(IDurableStateManager state,
     ILocalDurableJobManager jobs, DatabaseEngine database, ICommitCoordinator coordinator,

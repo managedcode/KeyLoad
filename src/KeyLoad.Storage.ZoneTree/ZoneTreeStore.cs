@@ -49,27 +49,24 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView, INativeCatalogB
     /// <param name="timeProvider">Borrowed clock for native read-cut elapsed budgets; defaults to the system provider.</param>
     public ZoneTreeStore(ZoneTreeStoreOptions options, IOptions<ZoneTreeStorageExecutionOptions> executionOptions,
         IOptions<ZoneTreePointCacheExecutionOptions> cacheExecutionOptions, TimeProvider? timeProvider = null)
+        : this(options, executionOptions, cacheExecutionOptions, timeProvider, new NativeStorageOwnerSettlement())
     {
-        ArgumentNullException.ThrowIfNull(options);
-        ArgumentException.ThrowIfNullOrWhiteSpace(options.Directory);
-        options.EmbeddedPointCache?.Validate();
-        ArgumentNullException.ThrowIfNull(executionOptions);
-        executionPolicy = executionOptions.Value;
-        ArgumentNullException.ThrowIfNull(executionPolicy);
-        executionPolicy.Validate();
-        ArgumentNullException.ThrowIfNull(cacheExecutionOptions);
-        cacheExecutionPolicy = cacheExecutionOptions.Value;
-        ArgumentNullException.ThrowIfNull(cacheExecutionPolicy);
-        cacheExecutionPolicy.Validate();
-        var resolved = options.ResolveExecutionOptions(executionOptions);
-        if (resolved.EmbeddedPointCache is { } embedded)
-        {
-            resolved = resolved with
-            {
-                EmbeddedPointCache = embedded.WithExecutionSnapshot(cacheExecutionPolicy)
-            };
-        }
-        runtime = new(resolved, timeProvider: timeProvider);
+    }
+
+    internal static ZoneTreeStore OpenOwned(ZoneTreeStoreOptions options,
+        IOptions<ZoneTreeStorageExecutionOptions> executionOptions,
+        IOptions<ZoneTreePointCacheExecutionOptions> cacheExecutionOptions,
+        NativeStorageOwnerSettlement settlement, TimeProvider? timeProvider = null)
+        => new(options, executionOptions, cacheExecutionOptions, timeProvider, settlement);
+
+    private ZoneTreeStore(ZoneTreeStoreOptions options, IOptions<ZoneTreeStorageExecutionOptions> executionOptions,
+        IOptions<ZoneTreePointCacheExecutionOptions> cacheExecutionOptions, TimeProvider? timeProvider,
+        NativeStorageOwnerSettlement settlement)
+    {
+        var frozen = ZoneTreeStoreOpeningOptions.Freeze(options, executionOptions, cacheExecutionOptions);
+        executionPolicy = frozen.Execution.Value;
+        cacheExecutionPolicy = frozen.Cache.Value;
+        runtime = new(frozen.Options, timeProvider: timeProvider, ownershipSettlement: settlement);
     }
 
     internal ZoneTreeStore(ZoneTreeStoreRuntime runtime, Guid expectedNodeId)

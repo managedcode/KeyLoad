@@ -1,6 +1,5 @@
 using KeyLoad.Clustering;
 using Microsoft.Extensions.Options;
-using OpenTelemetry;
 
 namespace KeyLoad.Server;
 
@@ -19,7 +18,7 @@ internal static class ServerApplication
         {
             try
             {
-                app.Services.GetRequiredService<ITelemetryHostInitializer>().Initialize();
+                await PartitionHostApplicationOpening.OpenAsync(app.Services).ConfigureAwait(false);
                 partition = app.Services.GetRequiredService<PartitionHost>();
                 administration = app.Services.GetRequiredService<INodeAdministration>();
                 silo = app.Services.GetRequiredService<OrleansNode>();
@@ -29,7 +28,9 @@ internal static class ServerApplication
                 await silo.WaitForPhysicalOwnerRegistrationAsync(app.Lifetime.ApplicationStopping).ConfigureAwait(false);
                 await WaitForStopAsync(app.Lifetime.ApplicationStopping).ConfigureAwait(false);
             }
-            catch (OperationCanceledException) when (app.Lifetime.ApplicationStopping.IsCancellationRequested) { }
+            catch (OperationCanceledException) when (app.Lifetime.ApplicationStopping.IsCancellationRequested)
+            {
+            }
         }
         await ServerFailureObserver.ObserveAsync(RunLifetimeAsync, failures).ConfigureAwait(false);
         await ShutdownAsync(app, silo, administration, partition, failures).ConfigureAwait(false);

@@ -3,14 +3,9 @@
 Owner-selected ZoneTree.Analytics adoption is specified in
 [OperationalAnalytics](ResourceExecution/OperationalAnalytics.md) and
 [ADR-134](../ADR/ADR-134-node-owned-derived-analytics.md). It provides proposed
-node-owned disposable operational history alongside OpenTelemetry. Actual
-published-package integration and all execution gates remain open; the owner
-expects NuGet publication, so the current unpublished state is not a defect.
-
-Linux clock prerequisites are specified in
-[NativeClockPrerequisiteProducer](ResourceExecution/NativeClockPrerequisiteProducer.md).
-The manual CI producer records native ABI and read-only syscall evidence;
-runtime provider adoption and Linux qualification remain open.
+node-owned disposable operational history alongside OpenTelemetry. The published1.0.0 package is integrated privately; the actual whole native operations
+and remaining activation/resource gates are recorded in the linked feature contract.
+Orleans owns the hosting/lifecycle integration.
 
 Actual database phase diagnostics are specified in
 [DatabasePhaseProfiling](ResourceExecution/DatabasePhaseProfiling.md) under

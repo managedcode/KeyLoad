@@ -22,6 +22,15 @@ full exact-SHA RF3 qualification remains required.
 
 Status: implementation in progress. Owner: KeyLoad lead. Decision: [ADR-036](../ADR/ADR-036-orleans-foundation.md).
 
+Owner correction2026-10-15: [ADR-136](../ADR/ADR-136-native-orleans-partition-ownership.md)
+and [FoundationDelivery](RepositoryGovernance/FoundationDelivery.md) own the native
+host correction. A silo-local Grain Service opens and retains the physical ZoneTree
+owners; logical partition grains use native calls to the current physical replica.
+Per-grain placement/migration policy must preserve that boundary. Native Orleans
+Transactions is evaluated for participating grain state, with actual ZoneTree/RF3
+provider qualification before any database ACID claim. These are implementation
+contracts; the current nested-host path is not yet qualified as their replacement.
+
 Owner direction 2026-10-05 adds the native Orleans per-method selection contract
 in [ExecutionPrimitives](ClusterRouting/ExecutionPrimitives.md) under
 [ADR-110](../ADR/ADR-110-native-orleans-execution-primitives.md), REQ/AC-ORL-001..010.
@@ -1014,3 +1023,28 @@ Source-only: Root owns actual bootstrap merge and all build/test/RF3/Linux quali
 KL019 complete recovery-image observation uses the StorageRecovery-owned RecoveryImageCaptureOptions through the existing UnitExecutionOptions optional-configured/Validate/Options.Create convention. MaximumRecords is positive and at most1024, with the unchanged default1024; no timing or process-output option stands in for a record cap. Native Scan retains bounded lookahead: HasMore refuses the proof before any partial image can be compared. Both complete pre-denial and post-denial images use that same validated policy, and the native position is separately unchanged. An exhausted native storage scan also fails closed; this source contract does not claim an executed overflow or successful recovery/RF3 gate.
 
 KL019 scope boundary: AcAuth003NativeJournalWorksAfterPublicRootRevocation exercises only actual native journal mutation/catalog authority in its database fixture after public root revocation. It does not start the full server or qualify revoked-public-root cold readiness. Current PhysicalShardCatalogStartup.InitializeAsync first waits for the native RF3 prerequisite and verifies the actual persisted matching catalog behind its read barrier; configured AdminKey authentication and ClusterAdministrator are required only when the catalog is absent and authenticated bootstrap is needed. OrleansNode then awaits RuntimeJournalStartup, which first verifies the persisted protected journal principal and actual native signed catalog read; its deferred administrator authentication is invoked only for the absent-principal bootstrap path after the native cohort check. Invalid existing catalog or journal authority fails closed rather than being silently replaced. Valid existing catalog/private-journal verification therefore has no unconditional configured-public-administrator authentication step on every startup. Full-server restart after revoking/removing that public administrator remains an unexecuted whole-operation evidence gap, including correct refusal when authenticated bootstrap is genuinely required. This source observation is not a runtime failure or successful cold-readiness claim and introduces no new privileged identity, startup API or compatibility path.
+
+## Native per-grain automatic migration eligibility
+
+REQ-ROUTE-MIGRATION-001 / AC-ROUTE-MIGRATION-001 selects the actual pinned Orleans10.4 `Immovable(ImmovableKind.Any)` for the current five locality-sensitive logical classes: CommandPartitionGrain, ConnectionGrain, RecurringDueCoordinatorGrain, AnnProjectionCoordinatorGrain and SampleChunkCoordinatorGrain. This excludes automatic repartitioner and rebalancer migration for these classes, without removing global AddActivationRepartitioner or distributed directory. All existing aliases, field IDs, grain keys, PreferLocalPlacement and scheduling/reentrancy annotations stay unchanged. Physical ZoneTree owners remain the separate per-silo service/lifecycle responsibility in ADR-136; this attribute does not move or own files.
+
+REQ-ROUTE-MIGRATION-002 / AC-ROUTE-MIGRATION-002 retains only the existing opt-in same-RF3 diagnostic manual hook. Native Immovable explicitly permits user-initiated migration. CommandPartitionGrain invokes its existing migration observer only after a successful original command and only when the actual phase observer/context exists. Registration occurs only inside RequestCqrsProbe.Enabled. RequestCqrsProbeMigration requires the same original held claim and activation witness, active original arm, another voter in the SAME configured RF3 set, refreshed authenticated native discovery and exact target SiloAddress generation. Foreign voter and canceled original caller remain refusals. Discovery verifies configured incarnation/voter, current native generation and protocol before return. No ordinary manual-migration API is added. Removing/replacing discovery must preserve these domain identity/generation fences before this diagnostic hook can remain admissible; this does not preserve a redundant native-capability implementation as a new architecture requirement.
+
+The original whole operation remains `NativeDatabaseMigrationRf3Tests.ActualIdleMigrationRejectsForeignTargetAndCancelledCallerThenStableSdkMcpColdHealthyContinuation`. It must still obtain an actual new activation on the selected same-RF3 silo, retain original receipt/replay, canonical placement and physical NodeId/incarnation/voters, compare actual live process/read generation and signed discovery, then execute two true cold waves and healthy SDK/official-MCP continuation. Its declaration, body, foreign/cancel branches and complete oracles are unchanged. This is intentionally a manual diagnostic migration test; it does not qualify automatic placement or prove every arbitrary target is safe.
+
+REQ-ROUTE-MIGRATION-003 / AC-ROUTE-MIGRATION-003 preserves original connection operation/producer ownership, current persisted authority and all domain job admission/outcome state. Existing `ConnectionRf3OverlapTests`, `ConnectionRf3AuthorizationTests` and `ConnectionNativeProducerCleanupTests` retain their full native operations. Existing `RecurringDueRf3Tests`, `DueFaultRf3LeaderAndColdRestartTests`, `NativeAnnMaintenanceRf3Tests`, `SampleChunkSchedulingRf3Tests` and `SampleChunkJobRevocationRf3Tests` remain whole-operation selectors for affected model coordinators; the annotations are not replacement getter/source-text tests and do not grant executed coverage to them.
+
+Qualification remains OPEN: automatic opt-out must be observed against the actual native runtime, and all original affected operations must pass on the exact integrated source. PreferLocal is a soft initial preference; Immovable does not prevent activation loss/reactivation or cure wrong initial placement. General owner-resolved operation routing and initial placement/reactivation safety remain prerequisite work under ADR-136. This finite policy batch is not their completion and does not qualify cross-grain ACID, RF3 durability, performance or production readiness. No new grain, provider, flag, transport, package, timer or deadline is introduced.
+
+```mermaid
+flowchart TD
+    Native[Native directory and global repartitioner remain enabled] --> Policy[Five locality-sensitive grains native Immovable Any]
+    Policy --> Automatic[Exclude automatic repartitioner and rebalancer movement]
+    Policy --> Diagnostic[Existing opt-in same RF3 manual diagnostic only]
+    Diagnostic --> Proof[Original claim current voter incarnation and silo generation]
+    Proof --> Whole[Actual replacement full replay two cold and healthy SDK MCP]
+    Native --> Routing[Owner-resolved routing and initial reactivation safety OPEN]
+    Routing --> Storage[Nonmigrating per-silo physical owner]
+```
+
+Pinned API: [native placement attributes](https://github.com/dotnet/orleans/blob/d114d7522a53b8cce4c6b97d44293e5c7273d766/src/Orleans.Core.Abstractions/Placement/PlacementAttribute.cs#L124-L158), [PreferLocal director](https://github.com/dotnet/orleans/blob/d114d7522a53b8cce4c6b97d44293e5c7273d766/src/Orleans.Runtime/Placement/PreferLocalPlacementDirector.cs#L18-L31). Source review and cached syntax/numeric checks are distinct from compiler/analyzer and actual RF3 execution.

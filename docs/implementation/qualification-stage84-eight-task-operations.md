@@ -8,7 +8,7 @@ The coherent 132-path task batch joins distributed source authority037, metadata
 
 The original078 fixture explicitly sealed an already automatically sealed historical window. The repair separates the two initial samples into native appends while retaining the exact2001 corpus/window, five mutations/outbox count, independently fixed five receipts, generation2/revision6/source3, offsets/negative-zero bits, retention/drop, current grants, original replays and both cold owners. Product revision preconditions and clock are unchanged. Existing explicit-seal lifecycle suites remain mandatory.
 
-[ADR-133](../ADR/ADR-133-node-owned-kernel-clock-phase.md) and additive IO policy freeze the read-only observation/current-phase contract. This checkpoint joins **no native interop bodies or provider binding**. Executed matching Linux ABI, complete current callers and physical/scheduler qualification remain open.
+The proposed separate native-clock prerequisite was rejected by the owner on2026-10-15 and removed with its exclusive tooling, CI job and active requirements. It is not a readiness or scheduler gate. Current native Orleans ownership and ordinary TimeProvider contracts are defined by [ADR-136](../ADR/ADR-136-native-orleans-partition-ownership.md); the original verification results below remain historical and do not qualify its replacement.
 
 ## Original verification
 

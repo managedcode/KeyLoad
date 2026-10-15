@@ -9,6 +9,7 @@ using Orleans.Serialization;
 namespace KeyLoad.Clustering;
 
 #pragma warning disable ORLEANSEXP005 // ADR-110: native journal-backed ANN durable coordinator only.
+[Orleans.Placement.Immovable(Orleans.Placement.ImmovableKind.Any)]
 [global::Orleans.GrainType(AnnProjectionJobProtocol.GrainAlias), global::Orleans.Placement.PreferLocalPlacement]
 internal sealed class AnnProjectionCoordinatorGrain(IDurableStateManager state, ILocalDurableJobManager jobs,
     DatabaseEngine database, ICommitCoordinator coordinator, RuntimeJournalAdmission runtime,

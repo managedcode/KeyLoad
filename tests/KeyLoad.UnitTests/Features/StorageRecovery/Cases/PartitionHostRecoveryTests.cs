@@ -24,41 +24,45 @@ internal sealed class PartitionHostRecoveryTests
     [Test]
     public async Task ValidProtectedPrincipalInVerifiedPendingImageOpensAtRecoveredCut()
     {
-        using var fixture = new PartitionHostRecoveryFixture();
-        Assert.ThrowsExactly<VerifiedSnapshotInterruption>(() => fixture.StagePending(PendingPrincipal.Valid));
-        await AssertPendingAsync(fixture);
-        for (var attempt = 0; attempt < RecoveryAttempts; attempt++)
+        await PartitionHostRecoveryFixture.RunAsync(async fixture =>
         {
-            await using (var host = fixture.OpenHost())
+            Assert.ThrowsExactly<VerifiedSnapshotInterruption>(() => fixture.StagePending(PendingPrincipal.Valid));
+            await AssertPendingAsync(fixture);
+            for (var attempt = 0; attempt < RecoveryAttempts; attempt++)
             {
-                await Assert.That(host.Database.LastApplied).IsEqualTo(PartitionHostRecoveryFixture.SnapshotCut);
-                await Assert.That(host.Materializer.Log.State.CommittedIndex).IsEqualTo(PartitionHostRecoveryFixture.SnapshotCut);
-                await Assert.That(host.Materializer.Snapshots.Current).IsEqualTo(fixture.Pending);
-                await Assert.That(host.Database.Store.Identity.NodeId).IsEqualTo(fixture.TargetNodeId);
-                await Assert.That(host.Database.Store.Identity.ReadGeneration).IsEqualTo(fixture.TargetGeneration + 1);
-                var principal = host.Database.Store.Read(view => view.GetRecord<PrincipalRecord>(
-                    KeySpace.Principal(RuntimeJournalIdentity.ProtectedPrincipalId)));
-                await Assert.That(principal!.Revoked).IsFalse();
-                await Assert.That(principal.ClusterAdministrator).IsFalse();
-                await Assert.That(principal.PolicyEpoch).IsEqualTo(1);
-                var bootstrap = PartitionHostRecoveryFixture.VerifyAuthority(host.Database);
-                await Assert.That(bootstrap.Applied).IsFalse();
-                await Assert.That(host.Database.ReadRuntimeJournalCatalog(RuntimeJournalIdentity.ProtectedPrincipalId).Journals).IsEmpty();
+                await fixture.RunHostAsync(async host =>
+                {
+                    await Assert.That(host.Database.LastApplied).IsEqualTo(PartitionHostRecoveryFixture.SnapshotCut);
+                    await Assert.That(host.Materializer.Log.State.CommittedIndex).IsEqualTo(PartitionHostRecoveryFixture.SnapshotCut);
+                    await Assert.That(host.Materializer.Snapshots.Current).IsEqualTo(fixture.Pending);
+                    await Assert.That(host.Database.Store.Identity.NodeId).IsEqualTo(fixture.TargetNodeId);
+                    await Assert.That(host.Database.Store.Identity.ReadGeneration).IsEqualTo(fixture.TargetGeneration + 1);
+                    var principal = host.Database.Store.Read(view => view.GetRecord<PrincipalRecord>(
+                        KeySpace.Principal(RuntimeJournalIdentity.ProtectedPrincipalId)));
+                    await Assert.That(principal!.Revoked).IsFalse();
+                    await Assert.That(principal.ClusterAdministrator).IsFalse();
+                    await Assert.That(principal.PolicyEpoch).IsEqualTo(1);
+                    var bootstrap = PartitionHostRecoveryFixture.VerifyAuthority(host.Database);
+                    await Assert.That(bootstrap.Applied).IsFalse();
+                    await Assert.That(host.Database.ReadRuntimeJournalCatalog(RuntimeJournalIdentity.ProtectedPrincipalId).Journals).IsEmpty();
+                }).ConfigureAwait(false);
+                await AssertInstalledAsync(fixture, PendingPrincipal.Valid);
             }
-            await AssertInstalledAsync(fixture, PendingPrincipal.Valid);
-        }
+        }).ConfigureAwait(false);
     }
 
     private static async Task AssertRejectedAsync(PendingPrincipal principal)
     {
-        using var fixture = new PartitionHostRecoveryFixture();
-        Assert.ThrowsExactly<VerifiedSnapshotInterruption>(() => fixture.StagePending(principal));
-        await AssertPendingAsync(fixture);
-        for (var attempt = 0; attempt < RecoveryAttempts; attempt++)
+        await PartitionHostRecoveryFixture.RunAsync(async fixture =>
         {
-            await fixture.VerifyRecoveredAuthorityAsync();
-            await AssertInstalledAsync(fixture, principal);
-        }
+            Assert.ThrowsExactly<VerifiedSnapshotInterruption>(() => fixture.StagePending(principal));
+            await AssertPendingAsync(fixture);
+            for (var attempt = 0; attempt < RecoveryAttempts; attempt++)
+            {
+                await fixture.VerifyRecoveredAuthorityAsync();
+                await AssertInstalledAsync(fixture, principal);
+            }
+        }).ConfigureAwait(false);
     }
 
     private static async Task AssertPendingAsync(PartitionHostRecoveryFixture fixture)

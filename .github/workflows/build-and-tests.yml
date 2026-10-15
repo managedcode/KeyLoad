@@ -5,10 +5,6 @@ on:
   pull_request:
   workflow_dispatch:
     inputs:
-      native_clock_prerequisites:
-        description: 'Produce original Linux native clock ABI and read-only compatibility evidence'
-        type: boolean
-        default: false
       task:
         description: 'Acceptance task; all runs complete qualification and all task lanes'
         type: choice
@@ -488,31 +484,3 @@ jobs:
           name: code-quality-docker-rf3
           path: artifacts/code-quality/**
           if-no-files-found: error
-  native-clock-prerequisites:
-    name: Prove original Linux host and pinned runtime clock prerequisites
-    if: ${{ github.repository == 'managedcode/KeyLoad' && github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch' && inputs.native_clock_prerequisites }}
-    runs-on: ubuntu-24.04
-    timeout-minutes: 35
-    steps:
-      - name: Download exact original source
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: ${{ github.sha }}
-          persist-credentials: false
-      - name: Produce genuine host and pinned runtime C ABI receipts
-        run: node scripts/Features/ResourceExecution/kernel-clock-abi-produce.mjs
-      - name: Validate original receipts and generate the current candidate predicate
-        run: node scripts/Features/ResourceExecution/kernel-clock-abi-generate.mjs
-      - name: Verify bounded native read-only observation without added capabilities
-        run: node scripts/Features/ResourceExecution/kernel-clock-native-verify.mjs
-      - name: Save original ABI and native compatibility evidence
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: kernel-clock-native-${{ github.run_id }}-${{ github.run_attempt }}
-          path: |
-            TestResults/kernel-clock-abi/**
-            TestResults/kernel-clock-native/**
-            src/KeyLoad.Storage.IO/Features/ResourceExecution/Interop/KernelClockVerifiedAbi.Generated.cs
-          if-no-files-found: error
-          retention-days: 30

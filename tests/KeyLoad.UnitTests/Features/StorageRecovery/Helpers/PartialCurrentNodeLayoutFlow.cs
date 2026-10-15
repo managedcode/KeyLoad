@@ -32,9 +32,8 @@ internal static class PartialCurrentNodeLayoutFlow
         long position = 0;
         for (var cold = 0; cold <= 2; cold++)
         {
-            await ServerFailureObserver.ObserveAsync(async () =>
+            await ServerFailureObserver.ObserveAsync(() => fixture.RunHostAsync(async host =>
             {
-                await using var host = fixture.OpenHost();
                 await ServerFailureObserver.ObserveAsync(async () =>
                 {
                     var store = (ZoneTreeStore)host.Database.Store;
@@ -42,7 +41,11 @@ internal static class PartialCurrentNodeLayoutFlow
                     {
                         var before = PartialCurrentNodeLayoutState.Rows(store);
                         var start = store.Position;
-                        await Assert.That(store.Commit((transaction, _) => { transaction.Put(Key, Value); return true; })).IsTrue();
+                        await Assert.That(store.Commit((transaction, _) =>
+                        {
+                            transaction.Put(Key, Value);
+                            return true;
+                        })).IsTrue();
                         expected = before.Append(Convert.ToHexString(Key) + Separator + Convert.ToHexString(Value))
                             .Order(StringComparer.Ordinal).ToArray();
                         position = checked(start + 1);
@@ -56,7 +59,7 @@ internal static class PartialCurrentNodeLayoutFlow
                     await Assert.That(store.Position).IsEqualTo(position);
                     await Assert.That(PartialCurrentNodeLayoutState.Rows(store)).IsEquivalentTo(expected!, CollectionOrdering.Matching);
                 }, failures);
-            }, failures);
+            }), failures);
             ServerFailureObserver.ThrowIfAny(failures);
             await PartialCurrentNodeLayoutPrefix.RequireAsync(fixture, replicaPrefix, originalPrefix);
         }

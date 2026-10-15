@@ -9,9 +9,10 @@ namespace KeyLoad.IntegrationTests.Features.DocumentStorage;
 internal sealed record ProtectedDocumentRf3Seed(PartitionRef Partition, EntityRef Reference,
     string ReaderId, string ReaderSecret, string DeniedSecret, CommitReceipt Original)
 {
-    internal ProtectedDocumentRf3SetupPeer Peer { get; init; } = null!;
-    internal KeyLoad.Core.Features.ClusterRouting.Contracts.PartitionMoveControlRecord Control { get; init; } = null!;
-    internal string DeniedId { get; init; } = null!;
+    internal ProtectedDocumentRf3MovementState Move
+    {
+        get; init;
+    } = null!;
     internal const string Collection = "protected-documents";
     internal const string Entity = "one";
     internal const string Initial = "{\"title\":\"Київ original\",\"secret\":\"protected-private-canary\"}";
@@ -34,25 +35,11 @@ internal sealed record ProtectedDocumentRf3Seed(PartitionRef Partition, EntityRe
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await source.CommitAsync(command, token));
         var directory = await PhysicalOwnerDirectoryRf3Assertions.ExpectedAsync(wave.Application, wave.Profile, token).ConfigureAwait(false);
         var placement = await McpCallerAssertions.SdkSuccessAsync(await source.ReadAtomicPartitionPlacementAsync(new(1, partition), token));
-        var discovery = await RequestCqrsRf3SignedDiscovery.ReadForProfileAsync(wave.Application,
-            TwoRf3MembershipProtocol.Node1, wave.Profile, token).ConfigureAwait(false);
-        var peer = new ProtectedDocumentRf3SetupPeer(wave, directory, discovery.SiloAddress);
-        var retired = await new ProtectedDocumentRf3Setup(peer, partition, placement).ExecuteAsync(token).ConfigureAwait(false);
-        await Assert.That(retired.Control!.Phase).IsEqualTo(PartitionMovePhase.Retired);
-        using var targetHttp = McpCallerHttp.Create(wave.Application, TwoRf3MembershipProtocol.Node4);
-        var target = new KeyLoadClient(targetHttp, wave.Profile.AdminKey, IntegrationClientOptions.Execution());
-        var sourceBefore = await McpCallerAssertions.SdkSuccessAsync(await source.StatusAsync(token));
-        var targetBefore = await McpCallerAssertions.SdkSuccessAsync(await target.StatusAsync(token));
-        await peer.VerifyRetainedOutcomesAsync(token).ConfigureAwait(false);
-        var sourceAfter = await McpCallerAssertions.SdkSuccessAsync(await source.StatusAsync(token));
-        var targetAfter = await McpCallerAssertions.SdkSuccessAsync(await target.StatusAsync(token));
-        await Assert.That(sourceAfter.Applied).IsGreaterThanOrEqualTo(sourceBefore.Applied);
-        await Assert.That(targetAfter.Applied).IsGreaterThanOrEqualTo(targetBefore.Applied);
+        var moved = await ProtectedDocumentRf3MovementFlow.RunAsync(wave, source, command, receipt,
+            directory, placement, denied.Secret, token).ConfigureAwait(false);
         return new(partition, new(partition, Collection, Entity), reader.Id, reader.Secret, denied.Secret, receipt)
         {
-            Peer = peer,
-            Control = retired.Control!,
-            DeniedId = denied.Id
+            Move = moved
         };
     }
 

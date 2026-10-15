@@ -11,19 +11,20 @@ namespace KeyLoad.Server;
 /// <summary>Physical storage owner, independent of migrating Orleans request and database activations.</summary>
 internal sealed class PartitionHost : IAsyncDisposable
 {
-    private readonly PartitionStores stores;
+    private PartitionStores stores = null!;
+    private readonly PartitionHostOwnership ownership;
     internal Features.ClusterRouting.RequestCqrsCanonicalApplyBridge ApplyProbe
     {
-        get;
-    }
-    private readonly DurableReplicaLog log;
+        get; private set;
+    } = null!;
+    private DurableReplicaLog log = null!;
     private readonly Lock lifecycle = new();
     private Task? shutdown;
 
     internal Features.Messaging.RemoteTransferPeerVerificationOwner? TransferVerification
     {
-        get;
-    }
+        get; private set;
+    } = null!;
 
     private void RequireTransferVerifierClosed()
     {
@@ -33,92 +34,128 @@ internal sealed class PartitionHost : IAsyncDisposable
         }
     }
 
-    /// <summary>Opens the private node directory and recovers durable state before exposing the protocol.</summary>
-    /// <param name="runtimeOptions">Shared validated native options for physical ownership and execution.</param>
-    /// <param name="authorization">Domain authorization against persisted principals.</param>
-    /// <param name="admission">Node data and control admission budgets.</param>
-    /// <param name="clock">The system clock shared by protocol and domain evaluation.</param>
-    /// <param name="logger">Operational protocol diagnostics without secrets or payloads.</param>
-    public PartitionHost(ServerRuntimeOptions runtimeOptions, IAuthorizationPolicy authorization,
+    private PartitionHost(PartitionHostOwnership ownership) => this.ownership = ownership;
+
+    internal static async Task<PartitionHost> OpenAsync(ServerRuntimeOptions runtimeOptions,
+        IAuthorizationPolicy authorization, CommandAdmissionGovernor admission, TimeProvider clock,
+        ILogger<ReplicaConsensus> logger, PartitionHostOwnership? ownership = null)
+    {
+        var host = new PartitionHost(ownership ?? new());
+        await host.InitializeAsync(runtimeOptions, authorization, admission, clock, logger).ConfigureAwait(false);
+        return host;
+    }
+
+    private async Task InitializeAsync(ServerRuntimeOptions runtimeOptions, IAuthorizationPolicy authorization,
         CommandAdmissionGovernor admission, TimeProvider clock, ILogger<ReplicaConsensus> logger)
     {
         var options = runtimeOptions.Node.Value;
-        var replicaOptions = runtimeOptions.ReplicaConfiguration;
-        var executionOptions = runtimeOptions.ReplicaExecution;
         PartitionDatabaseComposition.ValidateHostInputs(options, authorization, admission, clock, logger);
         DirectoryPath = Path.GetFullPath(options.DataDirectory);
-        Configuration = replicaOptions.Value;
+        Configuration = runtimeOptions.ReplicaConfiguration.Value;
         ApplyProbe = new(Configuration.LocalId);
-        stores = new(runtimeOptions.Node, DirectoryPath, runtimeOptions.StorageExecution, runtimeOptions.PointCache, clock, options.RequestCqrsProbe.Enabled || options.MovementFrameObservation.Enabled ? ApplyProbe.StorageObserver : null);
-        ReplicaMaterializer? applying = null;
-        DurableReplicaLog? openedLog = null;
-        ITextProjection? openedText = null;
-        NativeTextIncrementalMaintenanceService? openedTextMaintenance = null;
-        NativeTextOnlineMaintenanceService? openedOnlineText = null;
-        NativeAnnMaintenanceService? openedAnnMaintenance = null;
-        ClusterCoordinator? openedCoordinator = null;
-        CacheMemoryBudget? openedCacheMemory = null;
-        ReplicaConsensus? openedConsensus = null;
+
         try
         {
-            CacheMemory = openedCacheMemory = new(runtimeOptions.Core.CacheMemory);
-            var openedDatabase = PartitionDatabaseComposition.Open(stores, Configuration, runtimeOptions, authorization, clock, CacheMemory);
-            Database = openedDatabase.Database;
-            rowVisibility = openedDatabase.Visibility;
-            TransferVerification = Features.Messaging.RemoteTransferPeerVerificationOwner.Create(Database, runtimeOptions);
-            log = openedLog = new(stores.Replica, replicaOptions,
-                faultObserver: options.RequestCqrsProbe.Enabled ? ObserveReplicaLog : null, canonicalDatabase: Database);
-            var snapshots = new ReplicaSnapshotStore(stores.Canonical, log, replicaOptions, executionOptions);
-            snapshots.Recover();
-            new BlobStorageOperations(Database).NormalizeRestoredStore();
-            PartitionDatabaseComposition.BootstrapFreshNode(stores, Database, options);
-            if (options.MovementFrameObservation.Enabled)
-            {
-                ApplyProbe.AttachFrameObservation(new(runtimeOptions.Node, runtimeOptions.ReplicaConfiguration, Database, runtimeOptions.RequestProbeExecution));
-            }
-            var search = NativeTextHostSearch.Open(Database, DirectoryPath, runtimeOptions, clock);
-            TextProjection = openedText = search.Projection;
-            TextMaintenance = openedTextMaintenance = search.Explicit;
-            OnlineTextMaintenance = openedOnlineText = search.Online;
-            Materializer = applying = new(Database, log, snapshots, executionOptions, options.RequestCqrsProbe.Enabled || options.MovementFrameObservation.Enabled ? ApplyProbe.Enter : null);
-            Consensus = openedConsensus = new(Materializer, replicaOptions, executionOptions, clock, logger);
-            Coordinator = openedCoordinator = new(Consensus, Database, admission, clock, executionOptions, runtimeOptions.Core.CommandInbox);
-            AnnMaintenance = openedAnnMaintenance = new(DirectoryPath, Database, runtimeOptions, clock);
+            OpenDatabase(runtimeOptions, authorization, clock);
+            var snapshots = OpenReplicationAndSearch(runtimeOptions, clock);
+            OpenExecutionOwners(runtimeOptions, admission, clock, logger, snapshots);
         }
         catch (Exception error)
         {
-            CleanupFailedConstruction(error, openedOnlineText, openedTextMaintenance, openedAnnMaintenance,
-                openedCoordinator, openedConsensus, applying, openedText, openedLog, openedCacheMemory);
+            await CleanupFailedConstructionAsync(error).ConfigureAwait(false);
             throw;
         }
     }
 
-    private void ObserveReplicaLog(ReplicaCrashBoundary boundary)
+    private void OpenDatabase(ServerRuntimeOptions runtimeOptions, IAuthorizationPolicy authorization, TimeProvider clock)
     {
-        if (boundary == ReplicaCrashBoundary.EntryAcknowledged && log.ReadEntry(log.State.LastIndex) is { } entry)
-        {
-            ApplyProbe.ObserveReplicaEntry(entry);
-        }
+        var options = runtimeOptions.Node.Value;
+        stores = new(runtimeOptions.Node, DirectoryPath, runtimeOptions.StorageExecution, runtimeOptions.PointCache,
+            clock, options.RequestCqrsProbe.Enabled || options.MovementFrameObservation.Enabled ? ApplyProbe.StorageObserver : null, ownership);
+        ownership.Host.BeginOpen();
+        ownership.Host.BeginNativeConstructor();
+        CacheMemory = new(runtimeOptions.Core.CacheMemory);
+        ownership.Host.NativeConstructorReturned();
+        ownership.Host.BeginNativeConstructor();
+        var opened = PartitionDatabaseComposition.Open(stores, Configuration, runtimeOptions, authorization, clock, CacheMemory);
+        ownership.Host.NativeConstructorReturned();
+        Database = opened.Database;
+        rowVisibility = opened.Visibility;
+        ownership.Host.BeginNativeConstructor();
+        TransferVerification = Features.Messaging.RemoteTransferPeerVerificationOwner.Create(Database, runtimeOptions);
+        ownership.Host.NativeConstructorReturned();
     }
 
-    private void CleanupFailedConstruction(Exception error, NativeTextOnlineMaintenanceService? openedOnlineText,
-        NativeTextIncrementalMaintenanceService? openedTextMaintenance, NativeAnnMaintenanceService? openedAnnMaintenance,
-        ClusterCoordinator? openedCoordinator, ReplicaConsensus? openedConsensus, ReplicaMaterializer? applying,
-        ITextProjection? openedText, DurableReplicaLog? openedLog, CacheMemoryBudget? openedCacheMemory)
-        => PartitionHostConstructionCleanup.Run(error, openedOnlineText, openedTextMaintenance, openedAnnMaintenance,
-            openedCoordinator, openedConsensus, applying, openedText, openedLog, openedCacheMemory,
-            TransferVerification, ApplyProbe, rowVisibility, stores, RequireTransferVerifierClosed);
+    private ReplicaSnapshotStore OpenReplicationAndSearch(ServerRuntimeOptions runtimeOptions, TimeProvider clock)
+    {
+        var options = runtimeOptions.Node.Value;
+        var replicaOptions = runtimeOptions.ReplicaConfiguration;
+        var executionOptions = runtimeOptions.ReplicaExecution;
+        ownership.Host.BeginNativeConstructor();
+        log = new(stores.Replica, replicaOptions,
+            faultObserver: options.RequestCqrsProbe.Enabled ? ObserveReplicaLog : null, canonicalDatabase: Database);
+        ownership.Host.NativeConstructorReturned();
+        var snapshots = new ReplicaSnapshotStore(stores.Canonical, log, replicaOptions, executionOptions);
+        snapshots.Recover();
+        new BlobStorageOperations(Database).NormalizeRestoredStore();
+        PartitionDatabaseComposition.BootstrapFreshNode(stores, Database, options);
+        if (options.MovementFrameObservation.Enabled)
+        {
+            ownership.Host.BeginNativeConstructor();
+            ApplyProbe.AttachFrameObservation(new(runtimeOptions.Node, runtimeOptions.ReplicaConfiguration, Database, runtimeOptions.RequestProbeExecution));
+            ownership.Host.NativeConstructorReturned();
+        }
+        ownership.Host.BeginNativeConstructor();
+        var search = NativeTextHostSearch.Open(Database, DirectoryPath, runtimeOptions, clock);
+        ownership.Host.NativeConstructorReturned();
+        TextProjection = search.Projection;
+        TextMaintenance = search.Explicit;
+        OnlineTextMaintenance = search.Online;
+        return snapshots;
+    }
+
+    private void OpenExecutionOwners(ServerRuntimeOptions runtimeOptions, CommandAdmissionGovernor admission,
+        TimeProvider clock, ILogger<ReplicaConsensus> logger, ReplicaSnapshotStore snapshots)
+    {
+        var options = runtimeOptions.Node.Value;
+        var replicaOptions = runtimeOptions.ReplicaConfiguration;
+        var executionOptions = runtimeOptions.ReplicaExecution;
+        ownership.Host.BeginNativeConstructor();
+        Materializer = new(Database, log, snapshots, executionOptions,
+            options.RequestCqrsProbe.Enabled || options.MovementFrameObservation.Enabled ? ApplyProbe.Enter : null);
+        ownership.Host.NativeConstructorReturned();
+        ownership.Host.BeginNativeConstructor();
+        Consensus = new(Materializer, replicaOptions, executionOptions, clock, logger);
+        ownership.Host.NativeConstructorReturned();
+        ownership.Host.BeginNativeConstructor();
+        Coordinator = new(Consensus, Database, admission, clock, executionOptions, runtimeOptions.Core.CommandInbox);
+        ownership.Host.NativeConstructorReturned();
+        ownership.Host.BeginNativeConstructor();
+        AnnMaintenance = new(DirectoryPath, Database, runtimeOptions, clock);
+        ownership.Host.NativeConstructorReturned();
+    }
+
+    private void ObserveReplicaLog(ReplicaCrashBoundary boundary)
+        => PartitionHostReplicaLogObservation.Observe(boundary, log, ApplyProbe);
+
+    private async Task CleanupFailedConstructionAsync(Exception error)
+    {
+        await PartitionHostConstructionCleanup.RunAsync(error, OnlineTextMaintenance, TextMaintenance, AnnMaintenance,
+            Coordinator, Consensus, Materializer, TextProjection, log, CacheMemory,
+            TransferVerification, ApplyProbe, rowVisibility, stores, RequireTransferVerifierClosed).ConfigureAwait(false);
+        ownership.Host.ReleaseReturned();
+    }
 
     /// <summary>Private physical node directory; it is not an atomic partition identity.</summary>
     public string DirectoryPath
     {
-        get;
-    }
+        get; private set;
+    } = null!;
     /// <summary>Fixed voter and incarnation scope of this replica group.</summary>
     public ReplicaConfiguration Configuration
     {
-        get;
-    }
+        get; private set;
+    } = null!;
     internal bool CurrentCapabilityValidated
         => stores.Canonical.Identity.MinimumReaderContract == KeyLoad.Storage.StoreReaderContract.RuntimeJournal
             && stores.Replica.Identity.MinimumReaderContract == KeyLoad.Storage.StoreReaderContract.RuntimeJournal;
@@ -126,46 +163,46 @@ internal sealed class PartitionHost : IAsyncDisposable
     /// <summary>Borrowed canonical engine; only this host disposes its underlying store.</summary>
     public DatabaseEngine Database
     {
-        get;
-    }
+        get; private set;
+    } = null!;
     /// <summary>Borrowed derived text projection; physical ownership remains in this host.</summary>
     public ITextProjection TextProjection
     {
-        get;
-    }
+        get; private set;
+    } = null!;
     /// <summary>Single node-owned retention ledger borrowed by derived cache families and movement images.</summary>
     internal CacheMemoryBudget CacheMemory
     {
-        get;
-    }
-    private readonly RowVisibilityCache? rowVisibility;
+        get; private set;
+    } = null!;
+    private RowVisibilityCache? rowVisibility;
     internal NativeAnnMaintenanceService AnnMaintenance
     {
-        get;
-    }
+        get; private set;
+    } = null!;
     internal NativeTextIncrementalMaintenanceService TextMaintenance
     {
-        get;
-    }
+        get; private set;
+    } = null!;
     internal NativeTextOnlineMaintenanceService OnlineTextMaintenance
     {
-        get;
-    }
+        get; private set;
+    } = null!;
     /// <summary>Node-owned ordered apply and checkpoint fencing.</summary>
     public ReplicaMaterializer Materializer
     {
-        get;
-    }
+        get; private set;
+    } = null!;
     /// <summary>Node-owned protocol endpoint attached by the Orleans Grain Service.</summary>
     public ReplicaConsensus Consensus
     {
-        get;
-    }
+        get; private set;
+    } = null!;
     /// <summary>Admission starts before silo membership and stops after membership shutdown.</summary>
     public ClusterCoordinator Coordinator
     {
-        get;
-    }
+        get; private set;
+    } = null!;
 
     private void DisposeRowVisibility(List<Exception> failures)
         => PartitionHostConstructionCleanup.DisposeRowVisibility(rowVisibility, failures);
@@ -182,32 +219,8 @@ internal sealed class PartitionHost : IAsyncDisposable
 
     private async Task DisposeCoreAsync()
     {
-        TransferVerification?.RequireJoined();
-        var failures = new List<Exception>();
-        await ServerFailureObserver.ObserveAsync(() => OnlineTextMaintenance.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
-        await ServerFailureObserver.ObserveAsync(() => TextMaintenance.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
-        await ServerFailureObserver.ObserveAsync(() => AnnMaintenance.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
-        await ServerFailureObserver.ObserveAsync(() => Coordinator.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
-        await ServerFailureObserver.ObserveAsync(() => Consensus.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
-        var applying = Materializer.DisposeAsync().AsTask();
-        await ServerFailureObserver.ObserveAsync(() => applying, failures).ConfigureAwait(false);
-        if (TransferVerification is not null)
-        {
-            await ServerFailureObserver.ObserveAsync(async () =>
-            {
-                await applying.ConfigureAwait(false);
-                TransferVerification.Dispose();
-            }, failures).ConfigureAwait(false);
-        }
-        ServerFailureObserver.Observe(ApplyProbe.CloseFrameObservation, failures);
-        var closingLog = CloseLogAsync(applying);
-        await ServerFailureObserver.ObserveAsync(() => closingLog, failures).ConfigureAwait(false);
-        ServerFailureObserver.Observe(TextProjection.Dispose, failures);
-        DisposeRowVisibility(failures);
-        ServerFailureObserver.Observe(CacheMemory.Dispose, failures);
-        var closingStores = CloseStoresAsync(closingLog);
-        await ServerFailureObserver.ObserveAsync(() => closingStores, failures).ConfigureAwait(false);
-        ServerFailureObserver.ThrowIfAny(failures);
+        await PartitionHostDisposal.RunAsync(this, CloseLogAsync, CloseStoresAsync, DisposeRowVisibility).ConfigureAwait(false);
+        ownership.Host.ReleaseReturned();
     }
 
     private async Task CloseLogAsync(Task applying)

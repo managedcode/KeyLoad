@@ -138,7 +138,7 @@ internal sealed class PartitionMovementLateNativeOwners : IAsyncDisposable
         stopped = true;
     }
 
-    internal PartitionMovementLateNativeNode OpenStopped(int index)
+    internal async Task<PartitionMovementLateNativeNode> OpenStoppedAsync(int index)
     {
         if (!stopped)
         {
@@ -146,6 +146,7 @@ internal sealed class PartitionMovementLateNativeOwners : IAsyncDisposable
         }
         var owned = new PartitionMovementLateNativeNode(Arguments(index), null, localhostClustering: Settings.LocalhostClustering);
         coldNodes.Add(owned);
+        await owned.OpenAsync().ConfigureAwait(false);
         return owned;
     }
 
@@ -161,8 +162,14 @@ internal sealed class PartitionMovementLateNativeOwners : IAsyncDisposable
         {
             listeners.Dispose();
         }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
         if (retainRoots || !stopped || nodes.Any(node => !node.IsDisposed) || coldNodes.Any(node => !node.IsDisposed)
             || producers.Any(task => !task.IsCompleted))
         {

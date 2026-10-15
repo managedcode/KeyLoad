@@ -102,7 +102,7 @@ internal sealed class ConnectionNativeScenario : IAsyncDisposable
 
     internal Task<GrainOperationReply> InvokeAsync(PrincipalRecord principal, Guid requestId,
         Guid commandId, string signed, CancellationToken cancellationToken)
-        => calls.Retain(requestId, InvokeCoreAsync(principal, requestId, commandId, signed, cancellationToken));
+        => calls.Retain(requestId, () => InvokeCoreAsync(principal, requestId, commandId, signed, cancellationToken));
 
     private async Task<GrainOperationReply> InvokeCoreAsync(PrincipalRecord principal, Guid requestId,
         Guid commandId, string signed, CancellationToken cancellationToken)

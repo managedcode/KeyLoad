@@ -1,11 +1,8 @@
 using System.Security.Cryptography;
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ClusterRouting.Identity;
 using KeyLoad.Replication;
-using KeyLoad.Security;
 using KeyLoad.Server;
 using KeyLoad.Storage;
-using KeyLoad.Storage.ZoneTree;
 using KeyLoad.UnitTests.Features.Authorization;
 using Microsoft.Extensions.Logging;
 
@@ -21,8 +18,12 @@ internal sealed class VerifiedSnapshotInterruption : Exception
     public VerifiedSnapshotInterruption()
     {
     }
-    public VerifiedSnapshotInterruption(string message) : base(message) { }
-    public VerifiedSnapshotInterruption(string message, Exception innerException) : base(message, innerException) { }
+    public VerifiedSnapshotInterruption(string message) : base(message)
+    {
+    }
+    public VerifiedSnapshotInterruption(string message, Exception innerException) : base(message, innerException)
+    {
+    }
 }
 
 internal sealed class PartitionHostRecoveryFixture : IDisposable
@@ -42,9 +43,13 @@ internal sealed class PartitionHostRecoveryFixture : IDisposable
     private const int SecretBytes = 32;
     private const string CaptureImageExceeded = "The complete recovery fixture image exceeded its record bound.";
     private const string CaptureRowSeparator = ":";
+    private const string UncertainPriorOwner = "A prior native owner attempt is uncertain; retain its root.";
+    private readonly List<PartitionHostRecoveryAttempt> attempts = [];
     private readonly string directory;
     private readonly RecoveryImageCaptureOptions capture = UnitExecutionOptions.RecoveryImageCapture().Value;
-    private readonly ILoggerFactory logging = LoggerFactory.Create(_ => { });
+    private readonly ILoggerFactory logging = LoggerFactory.Create(_ =>
+    {
+    });
 
     internal PartitionHostRecoveryFixture()
     {
@@ -77,77 +82,83 @@ internal sealed class PartitionHostRecoveryFixture : IDisposable
         get; private set;
     }
 
+    internal static async Task RunAsync(Func<PartitionHostRecoveryFixture, Task> body)
+    {
+        var failures = new List<Exception>();
+        await ServerFailureObserver.ObserveAsync(async () =>
+        {
+            using var fixture = new PartitionHostRecoveryFixture();
+            await ServerFailureObserver.ObserveAsync(() => body(fixture), failures).ConfigureAwait(false);
+        }, failures).ConfigureAwait(false);
+        ServerFailureObserver.ThrowIfAny(failures);
+    }
+
     internal void StagePending(PendingPrincipal principal)
     {
-        using var source = new HostReplicaStores(Options with
+        var failures = new List<Exception>();
+        ServerFailureObserver.Observe(() =>
         {
-            DataDirectory = Path.Combine(directory, SourceDirectory),
-            PublicEndpoint = VoterB
-        });
-        using var target = OpenStores();
+            using var source = OpenStores(Options with
+            {
+                DataDirectory = Path.Combine(directory, SourceDirectory),
+                PublicEndpoint = VoterB
+            });
+            ServerFailureObserver.Observe(() =>
+            {
+                using var target = OpenStores();
+                ServerFailureObserver.Observe(() => PartitionHostPendingSnapshotStaging.Run(this, source, target, principal), failures);
+            }, failures);
+        }, failures);
+        ServerFailureObserver.ThrowIfAny(failures);
+    }
+
+    internal void RecordTarget(HostReplicaStores target)
+    {
         TargetNodeId = target.Canonical.Identity.NodeId;
         TargetGeneration = target.Canonical.Identity.ReadGeneration;
-        source.Database.Bootstrap(new(PartitionStoreProtocol.AdministratorId, PartitionStoreProtocol.AdministratorTenant,
-            [new(PartitionStoreProtocol.Wildcard, PartitionStoreProtocol.Wildcard, Capability.All)], [PartitionStoreProtocol.Wildcard])
-        {
-            ClusterAdministrator = true
-        }, DatabaseEngine.Credential(PartitionStoreProtocol.AdministratorId, PartitionStoreProtocol.AdministratorId, Options.AdminKey));
-        NativeJournalAuthorityTestBootstrap.Initialize(source.Database);
-        source.Canonical.Commit((transaction, _) =>
-        {
-            var key = KeySpace.Principal(RuntimeJournalIdentity.ProtectedPrincipalId);
-            if (principal == PendingPrincipal.Missing)
-            {
-                transaction.Delete(key);
-            }
-            else if (principal == PendingPrincipal.Modified)
-            {
-                var original = transaction.GetRecord<PrincipalRecord>(key)!;
-                transaction.PutRecord(key, original with
-                {
-                    Revoked = true
-                });
-            }
-            transaction.PutRecord(KeySpace.Applied.ToArray(), SnapshotCut);
-            return true;
-        });
-        source.Log.SaveTermAndVote(SnapshotTerm, null);
-        source.Log.Append([new(1, SnapshotTerm, null), new(SnapshotCut, SnapshotTerm, null)]);
-        source.Log.Commit(SnapshotCut);
-        Pending = source.Snapshots.Create(SnapshotCut, SnapshotTerm);
-        var incoming = new ReplicaSnapshotStore(target.Canonical, target.Log, UnitExecutionOptions.ReplicaConfiguration(target.Configuration), UnitExecutionOptions.ReplicaExecution(), boundary =>
-        {
-            if (boundary == ReplicaCrashBoundary.SnapshotVerified)
-            {
-                throw new VerifiedSnapshotInterruption();
-            }
-        });
-        var offset = incoming.Begin(Pending);
-        while (offset < Pending.Length)
-        {
-            var bytes = source.Snapshots.ReadChunk(Pending.TransferId, offset, source.Configuration.SnapshotChunkBytes);
-            offset = incoming.Append(Pending.TransferId, offset, bytes);
-        }
-        incoming.Complete(Pending.TransferId);
     }
 
-    internal PartitionHost OpenHost() => new(ServerRuntimeTestOptions.Runtime(Options), new AuthorizationPolicy(), new CommandAdmissionGovernor(UnitAdmissionOptions.Command(Options.CommandAdmission)), TimeProvider.System, logging.CreateLogger<ReplicaConsensus>());
+    internal void RecordPending(ReplicaSnapshot snapshot) => Pending = snapshot;
 
-    internal async Task OpenAndDisposeHostAsync()
+    internal async Task RunHostAsync(Func<PartitionHost, Task> body)
     {
-        await using var host = OpenHost();
+        var attempt = CreateAttempt();
+        var failures = new List<Exception>();
+        await ServerFailureObserver.ObserveAsync(async () =>
+        {
+            await using var lease = new PartitionHostRecoveryLease(attempt);
+            await ServerFailureObserver.ObserveAsync(async () =>
+            {
+                await lease.OpenAsync(Options, logging.CreateLogger<ReplicaConsensus>()).ConfigureAwait(false);
+                await body(lease.Host).ConfigureAwait(false);
+            }, failures).ConfigureAwait(false);
+        }, failures).ConfigureAwait(false);
+        ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    internal async Task VerifyRecoveredAuthorityAsync()
+    internal async Task RunStoresAsync(Func<PartitionStores, Task> body)
     {
-        await using var host = OpenHost();
+        var attempt = CreateAttempt();
+        var failures = new List<Exception>();
+        await ServerFailureObserver.ObserveAsync(async () =>
+        {
+            using var lease = new PartitionHostRecoveryStoresLease(Options, attempt);
+            await ServerFailureObserver.ObserveAsync(() => body(lease.Stores), failures).ConfigureAwait(false);
+        }, failures).ConfigureAwait(false);
+        ServerFailureObserver.ThrowIfAny(failures);
+    }
+
+    internal Task OpenAndDisposeHostAsync() => RunHostAsync(_ => Task.CompletedTask);
+
+    internal Task VerifyRecoveredAuthorityAsync() => RunHostAsync(async host =>
+    {
         var position = host.Database.Store.Position;
         var before = Capture(host.Database.Store);
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => VerifyAuthority(host.Database));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.RecoveryRequired);
         await Assert.That(host.Database.Store.Position).IsEqualTo(position);
         await Assert.That(Capture(host.Database.Store).SequenceEqual(before, StringComparer.Ordinal)).IsTrue();
-    }
+    });
 
     internal static RuntimeJournalMutationResult VerifyAuthority(DatabaseEngine database)
         => NativeJournalAuthorityTestBootstrap.Verify(database);
@@ -162,7 +173,20 @@ internal sealed class PartitionHostRecoveryFixture : IDisposable
         return page.Records.Select(row => Convert.ToHexString(row.Key.Span) + CaptureRowSeparator + Convert.ToHexString(row.Value.Span)).ToArray();
     });
 
-    internal HostReplicaStores OpenStores() => new(Options);
+    internal HostReplicaStores OpenStores() => OpenStores(Options);
+
+    private HostReplicaStores OpenStores(NodeOptions options) => new(options, CreateAttempt());
+
+    private PartitionHostRecoveryAttempt CreateAttempt()
+    {
+        if (attempts.Any(attempt => attempt.IsUncertain))
+        {
+            throw new InvalidOperationException(UncertainPriorOwner);
+        }
+        var attempt = new PartitionHostRecoveryAttempt();
+        attempts.Add(attempt);
+        return attempt;
+    }
 
     internal FileStream AcquireHostOwnership() => new(Path.Combine(Options.DataDirectory, OwnershipFile),
         FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
@@ -179,76 +203,27 @@ internal sealed class PartitionHostRecoveryFixture : IDisposable
 
     public void Dispose()
     {
-        logging.Dispose();
-        if (Directory.Exists(directory))
+        var failures = new List<Exception>();
+        foreach (var attempt in attempts)
         {
-            Directory.Delete(directory, true);
+            ServerFailureObserver.Observe(attempt.RequireReleased, failures);
         }
-    }
-}
-
-internal sealed class HostReplicaStores : IDisposable
-{
-    private readonly ZoneTreeStore replica;
-
-    internal HostReplicaStores(NodeOptions options)
-    {
-        Configuration = options.CreateReplicaConfiguration(options.DataDirectory);
-        Canonical = Open(options, PartitionHostRecoveryFixture.CanonicalDirectory);
         try
         {
-            replica = Open(options, ReplicaProtocol.ReplicaDirectory);
-            try
-            {
-                Log = new(replica, UnitExecutionOptions.ReplicaConfiguration(Configuration));
-                Database = new(Canonical, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
-                Snapshots = new(Canonical, Log, UnitExecutionOptions.ReplicaConfiguration(Configuration), UnitExecutionOptions.ReplicaExecution());
-            }
-            catch (Exception) { replica.Dispose(); throw; }
+            logging.Dispose();
         }
-        catch (Exception) { Canonical.Dispose(); throw; }
-    }
-
-    internal ReplicaConfiguration Configuration
-    {
-        get;
-    }
-    internal ZoneTreeStore Canonical
-    {
-        get;
-    }
-    internal DurableReplicaLog Log
-    {
-        get;
-    }
-    internal DatabaseEngine Database
-    {
-        get;
-    }
-    internal ReplicaSnapshotStore Snapshots
-    {
-        get;
-    }
-
-    private static ZoneTreeStore Open(NodeOptions options, string suffix) => new(new(Path.Combine(options.DataDirectory, suffix))
-    {
-        Incarnation = options.Incarnation,
-        SigningKey = Convert.FromBase64String(options.SigningKey)
-    }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
-
-    public void Dispose()
-    {
-        try
+        catch (Exception failure) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
         {
-            Log.Dispose();
+            failures.Add(failure);
         }
-        finally
+        catch (Exception failure) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
         {
-            try
-            {
-                replica.Dispose();
-            }
-            finally { Canonical.Dispose(); }
+            failures.Add(failure);
         }
+        if (failures.Count == 0 && Directory.Exists(directory))
+        {
+            ServerFailureObserver.Observe(() => Directory.Delete(directory, true), failures);
+        }
+        ServerFailureObserver.ThrowIfAny(failures);
     }
 }

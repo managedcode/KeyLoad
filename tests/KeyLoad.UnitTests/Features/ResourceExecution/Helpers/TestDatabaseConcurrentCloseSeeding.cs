@@ -1,0 +1,37 @@
+namespace KeyLoad.UnitTests.Features.ResourceExecution;
+
+internal static class TestDatabaseConcurrentCloseSeeding
+{
+    internal static async Task<TestDatabaseConcurrentCloseSeed> RunAsync(TestDatabase fixture, Guid id)
+    {
+        fixture.Configure(TestDatabaseConcurrentCloseProtocol.Collection, ResourceKind.Collection);
+        var before = fixture.ReadJournalCut();
+        var command = new CommandRequest(id, fixture.Partition,
+            [new PutDocument(TestDatabaseConcurrentCloseProtocol.Collection, TestDatabaseConcurrentCloseProtocol.Document,
+                TestDatabaseConcurrentCloseProtocol.Body, TestDatabaseConcurrentCloseProtocol.MissingRevision)]);
+        var result = fixture.Submit(OperationKind.Batch, command, id: id);
+        var expectedIndex = checked(before.CommittedIndex + TestDatabaseConcurrentCloseProtocol.IndexStep);
+        var expected = new CommitReceipt(id,
+            new(fixture.Store.Identity.Incarnation, fixture.Partition.AtomicPartitionId, expectedIndex,
+                TestDatabaseConcurrentCloseProtocol.OwnershipEpoch),
+            [new(TestDatabaseConcurrentCloseProtocol.MutationKind, TestDatabaseConcurrentCloseProtocol.Collection,
+                TestDatabaseConcurrentCloseProtocol.Document, TestDatabaseConcurrentCloseProtocol.Revision)],
+            DurabilityProfile.ProcessDurable);
+        await TestDatabaseConcurrentCloseAssertions.ReceiptAsync(result, expected);
+        var cut = fixture.ReadJournalCut();
+        await Assert.That(cut.LastIndex).IsEqualTo(expectedIndex);
+        await Assert.That(cut.CommittedIndex).IsEqualTo(expectedIndex);
+        var original = fixture.ReadRetainedEntry(id).Operation ?? throw new InvalidOperationException();
+        await Assert.That(original.Id).IsEqualTo(id);
+        await Assert.That(original.Kind).IsEqualTo(OperationKind.Batch);
+        await Assert.That(original.PrincipalId).IsEqualTo(TestDatabaseConcurrentCloseProtocol.Principal);
+        var state = new TestDatabaseConcurrentCloseSeed(fixture.Partition, original, result, expected,
+            fixture.Store.Identity, fixture.Store.Position, TenantAdmissionAssertions.State(fixture.Store));
+        await TestDatabaseConcurrentCloseAssertions.CurrentAsync(fixture.Database, fixture.Store, state);
+        var replay = fixture.SubmitIssued(original);
+        await TestDatabaseConcurrentCloseAssertions.ReceiptAsync(replay, expected);
+        await NativeReplayResultAssertions.Same<CommitReceipt>(replay, result);
+        await TestDatabaseConcurrentCloseAssertions.CurrentAsync(fixture.Database, fixture.Store, state);
+        return state;
+    }
+}

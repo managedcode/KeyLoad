@@ -162,4 +162,4 @@ flowchart LR
 | [ADR-130: Microsoft ScriptDOM owns T-SQL syntax](ADR-130-microsoft-scriptdom-tsql.md) | Accepted; qualification pending |
 | [ADR-131: Native queue dispatch-state CAS](ADR-131-queue-dispatch-state-cas.md) | Accepted; qualification pending |
 | [ADR-132: Native CREATE TABLE and caller-stable SQL command identity](ADR-132-native-create-table-command-identity.md) | Accepted; qualification pending |
-| [ADR-133: Node-owned read-only kernel clock phases](ADR-133-node-owned-kernel-clock-phase.md) | Accepted; implementation and qualification pending |
+| [ADR-136: Orleans owns partition execution and silo-local storage lifetime](ADR-136-native-orleans-partition-ownership.md) | Accepted implementation contract; qualification pending |

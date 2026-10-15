@@ -1,3 +1,4 @@
+using System.Runtime.ExceptionServices;
 using KeyLoad.Replication;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
@@ -9,14 +10,18 @@ namespace KeyLoad.Server;
 internal sealed class PartitionStores : IDisposable
 {
     private readonly FileStream ownership;
-    private int disposed;
+    private readonly Lock disposalGate = new();
+    private bool closeAttempted;
+    private ExceptionDispatchInfo? originalCloseFailure;
+    private readonly PartitionHostOwnership settlement;
+    private const string OriginalCloseUnjoined = "The original partition stores close has not returned; retain its root.";
 
     internal PartitionStores(IOptions<NodeOptions> nodeOptions, string directory,
         IOptions<ZoneTreeStorageExecutionOptions> executionOptions, IOptions<ZoneTreePointCacheExecutionOptions> cacheOptions,
-        TimeProvider? clock = null, Action<CommitStage, long, int>? canonicalObserver = null)
+        TimeProvider? clock = null, Action<CommitStage, long, int>? canonicalObserver = null,
+        PartitionHostOwnership? ownershipSettlement = null)
     {
-        const int FailuresCountValidationBoundary = 1;
-
+        settlement = ownershipSettlement ?? new();
         var options = nodeOptions.Value;
         var rootExists = PartitionRootAdmission.InspectBeforeOwnership(directory);
         if (!rootExists)
@@ -26,7 +31,7 @@ internal sealed class PartitionStores : IDisposable
 
         ownership = new(Path.Combine(directory, PartitionStoreProtocol.OwnershipFile), FileMode.OpenOrCreate,
             FileAccess.ReadWrite, FileShare.None);
-        ZoneTreeStore? canonical = null;
+        settlement.NodeOwnershipAcquired();
         try
         {
             PartitionRootAdmission.InspectWhileOwned(directory);
@@ -38,21 +43,16 @@ internal sealed class PartitionStores : IDisposable
             {
                 File.SetUnixFileMode(directory, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
             }
-            Canonical = canonical = new(canonicalOptions, executionOptions, cacheOptions, clock);
-            Replica = new(replicaOptions, executionOptions, cacheOptions, clock);
+            Canonical = ZoneTreeStore.OpenOwned(canonicalOptions, executionOptions, cacheOptions, settlement.Canonical, clock);
+            Replica = ZoneTreeStore.OpenOwned(replicaOptions, executionOptions, cacheOptions, settlement.Replica, clock);
         }
         catch (Exception error)
         {
             var failures = new List<Exception> { error };
-            if (canonical is not null)
-            {
-                ServerFailureObserver.Observe(() => canonical.Dispose(), failures);
-            }
-            ServerFailureObserver.Observe(() => ownership.Dispose(), failures);
-            if (failures.Count > FailuresCountValidationBoundary)
-            {
-                throw new AggregateException(failures);
-            }
+            CloseReplica(failures);
+            CloseCanonical(failures);
+            CloseOwnership(failures);
+            ServerFailureObserver.ThrowIfAny(failures);
             throw;
         }
     }
@@ -76,31 +76,89 @@ internal sealed class PartitionStores : IDisposable
 
     public void Dispose()
     {
-        const int ValueSingleItemCount = 1;
-        const int EmptyExchange = 0;
+        lock (disposalGate)
+        {
+            if (closeAttempted)
+            {
+                originalCloseFailure?.Throw();
+                if (!settlement.Canonical.IsReleased || !settlement.Replica.IsReleased)
+                {
+                    throw new InvalidOperationException(OriginalCloseUnjoined);
+                }
+                return;
+            }
+            closeAttempted = true;
+            var failures = new List<Exception>();
+            CloseReplica(failures);
+            CloseCanonical(failures);
+            CloseOwnership(failures);
+            try
+            {
+                ServerFailureObserver.ThrowIfAny(failures);
+            }
+            catch (Exception failure)
+            {
+                originalCloseFailure = ExceptionDispatchInfo.Capture(failure);
+                throw;
+            }
+        }
+    }
 
-        if (Interlocked.Exchange(ref disposed, ValueSingleItemCount) != EmptyExchange)
+    private void CloseReplica(List<Exception> failures)
+    {
+        if (Replica is null)
         {
             return;
         }
-        var failures = new List<Exception>();
-        var closingStores = CloseStoresAsync(failures);
-        ServerFailureObserver.ObserveAsync(() => closingStores, failures).GetAwaiter().GetResult();
-        var releasingOwnership = ReleaseOwnershipAsync(closingStores);
-        ServerFailureObserver.ObserveAsync(() => releasingOwnership, failures).GetAwaiter().GetResult();
-        ServerFailureObserver.ThrowIfAny(failures);
+        try
+        {
+            Replica.Dispose();
+        }
+        catch (Exception failure) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            failures.Add(failure);
+        }
+        catch (Exception failure) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            failures.Add(failure);
+        }
     }
 
-    private async Task CloseStoresAsync(List<Exception> failures)
+    private void CloseCanonical(List<Exception> failures)
     {
-        await ServerFailureObserver.ObserveAsync(() => { Replica.Dispose(); return Task.CompletedTask; }, failures).ConfigureAwait(false);
-        await ServerFailureObserver.ObserveAsync(() => { Canonical.Dispose(); return Task.CompletedTask; }, failures).ConfigureAwait(false);
+        if (Canonical is null)
+        {
+            return;
+        }
+        try
+        {
+            Canonical.Dispose();
+        }
+        catch (Exception failure) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            failures.Add(failure);
+        }
+        catch (Exception failure) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            failures.Add(failure);
+        }
     }
 
-    private async Task ReleaseOwnershipAsync(Task closingStores)
+    private void CloseOwnership(List<Exception> failures)
     {
-        await closingStores.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
-        await ownership.DisposeAsync().ConfigureAwait(false);
+        try
+        {
+            ownership.Dispose();
+            settlement.NodeOwnershipReleased();
+        }
+        catch (Exception failure) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            failures.Add(failure);
+        }
+        catch (Exception failure) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            failures.Add(failure);
+        }
     }
 }
 

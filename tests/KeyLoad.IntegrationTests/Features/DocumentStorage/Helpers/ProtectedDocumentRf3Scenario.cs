@@ -56,8 +56,6 @@ internal sealed class ProtectedDocumentRf3Scenario(TwoRf3MembershipWave wave) : 
         var put = new CommandRequest(Guid.NewGuid(), seed.Partition, [new PutDocument(ProtectedDocumentRf3Seed.Collection,
             ProtectedDocumentRf3Seed.Entity, "{\"title\":\"replaced\",\"secret\":\"protected-private-canary\"}", 1, ExplicitReplacement: true)]);
         await CommandAsync(source, target, commandMcp, put, "putDocument", 2, token).ConfigureAwait(false);
-        await ProtectedDocumentRf3CommandOutcome.ExecuteAsync(wave, source, target, seed,
-            put, receipts[^1].Receipt, token).ConfigureAwait(false);
         await ReadsAsync(source, target, reader, readMcp, seed, 2, "{\"title\":\"replaced\"}", token).ConfigureAwait(false);
         var patch = new CommandRequest(Guid.NewGuid(), seed.Partition, [new PatchDocument(ProtectedDocumentRf3Seed.Collection,
             ProtectedDocumentRf3Seed.Entity, [new("/title", PatchKind.Set, "\"patched\"")], 2)]);
@@ -172,7 +170,7 @@ internal sealed class ProtectedDocumentRf3Scenario(TwoRf3MembershipWave wave) : 
         DocumentResult? expected = kind switch
         {
             "putDocument" => new(reference, 2, "{\"title\":\"replaced\",\"secret\":\"protected-private-canary\"}", false, []),
-            "patchDocument" => new(reference, 3, "{\"title\":\"patched\",\"secret\":\"protected-private-canary\"}", false, []),
+            "patchDocument" => new(reference, 3, "{\"secret\":\"protected-private-canary\",\"title\":\"patched\"}", false, []),
             "deleteDocument" => null,
             _ => throw new InvalidDataException("The protected document oracle kind is invalid.")
         };

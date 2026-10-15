@@ -8,11 +8,12 @@ internal static class ZoneTreePointCacheStoreGate
 
     internal static bool CanBeginDisposal(ZoneTreeStoreRuntime runtime, ZoneTreePointCacheLifecycle lifecycle)
     {
-        if (lifecycle.IsClosing)
-        {
-            return false;
-        }
+        RequireNotInOperation(runtime, lifecycle);
+        return !lifecycle.IsClosing;
+    }
 
+    internal static void RequireNotInOperation(ZoneTreeStoreRuntime runtime, ZoneTreePointCacheLifecycle lifecycle)
+    {
         try
         {
             var gate = runtime.Gate;
@@ -20,12 +21,9 @@ internal static class ZoneTreePointCacheStoreGate
             {
                 throw new LockRecursionException(DisposalInOperation);
             }
-
-            return true;
         }
         catch (ObjectDisposedException) when (lifecycle.IsClosing)
         {
-            return false;
         }
     }
 

@@ -4,10 +4,12 @@ namespace KeyLoad.UnitTests.Features.BackupRestore;
 
 internal static class ClusterBackupAdmissionWholeFlow
 {
-    internal static async Task RequireAsync(bool shutdown, CancellationToken ct)
+    internal static Task RequireAsync(bool shutdown, CancellationToken ct)
+        => ClusterBackupAdmissionNativeOperation.RunAsync((fixture, original) => RequireOpenedAsync(fixture, original, shutdown, ct));
+
+    private static async Task RequireOpenedAsync(ClusterBackupAdmissionNativeFixture fixture,
+        byte[] original, bool shutdown, CancellationToken ct)
     {
-        await using var fixture = new ClusterBackupAdmissionNativeFixture();
-        var original = fixture.ReadCompleteImage();
         var entered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         using var release = new ManualResetEventSlim();
         var nativeGate = Task.Run(() => fixture.Host.Database.Store.Commit((_, _) =>
@@ -66,7 +68,7 @@ internal static class ClusterBackupAdmissionWholeFlow
             ArgumentNullException.ThrowIfNull(failure);
             await Assert.That(failure.Code).IsEqualTo(ErrorCode.OwnershipLost);
         }
-        await Assert.That(fixture.ReadCompleteImage()).IsEquivalentTo(original);
+        await Assert.That(fixture.ReadCompleteImage().AsSpan().SequenceEqual(original)).IsTrue();
         if (stopping is null)
         {
             await fixture.RequireHealthyOrdinaryBackupAsync(original, ct);
@@ -84,7 +86,7 @@ internal static class ClusterBackupAdmissionWholeFlow
             await Assert.That(shutdownFailures.InnerExceptions.Count(error => ReferenceEquals(error, originalFailure)))
                 .IsEqualTo(accepted.Count(task => ReferenceEquals(task.Exception!.InnerExceptions.Single(), originalFailure)));
         }
-        await fixture.RequireUnchangedAndColdAsync(original);
+        await fixture.RequireNoClusterCaptureAsync();
     }
 
     private static async Task ObserveSettledOriginalAsync(Task producer, List<Exception> cleanup)

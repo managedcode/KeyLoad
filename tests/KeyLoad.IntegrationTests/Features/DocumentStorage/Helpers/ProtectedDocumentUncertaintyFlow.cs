@@ -33,7 +33,7 @@ internal static class ProtectedDocumentUncertaintyFlow
         await Assert.That(disposed.CommandId).IsEqualTo(command.CommandId);
         await controls.RetireArmAsync(fault, token).ConfigureAwait(false);
         var faultCut = await McpCallerAssertions.SdkSuccessAsync(await target.StatusAsync(token));
-        await Assert.That(faultCut.Incarnation).IsEqualTo(seed.Peer.Target.Incarnation);
+        await Assert.That(faultCut.Incarnation).IsEqualTo(seed.Move.Target.Incarnation);
         await Assert.That(faultCut.Applied).IsGreaterThan(before);
         await ProtectedDocumentUncertaintyOracle.DocumentAsync(source, seed, token).ConfigureAwait(false);
         await NegativesAsync(source, target, denied, seed, command, token).ConfigureAwait(false);
@@ -48,7 +48,7 @@ internal static class ProtectedDocumentUncertaintyFlow
         await Assert.That(returned.RequestId).IsNotEqualTo(marker.RequestId);
         await Assert.That(retry.IsCompleted).IsFalse();
         var observedCut = await McpCallerAssertions.SdkSuccessAsync(await target.StatusAsync(token));
-        await Assert.That(observedCut.Incarnation).IsEqualTo(seed.Peer.Target.Incarnation);
+        await Assert.That(observedCut.Incarnation).IsEqualTo(seed.Move.Target.Incarnation);
         await Assert.That(observedCut.Applied).IsGreaterThanOrEqualTo(faultCut.Applied);
         controls.WriteRelease(outcome, returned.RequestId);
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await retry.ConfigureAwait(false));
@@ -58,11 +58,11 @@ internal static class ProtectedDocumentUncertaintyFlow
         await Assert.That(receipt.Token.Position).IsGreaterThan(before);
         await Assert.That(receipt.Token.Position).IsLessThanOrEqualTo(faultCut.Applied);
         var expected = ProtectedDocumentUncertaintyOracle.Receipt(seed.Partition,
-            seed.Peer.Target.Incarnation, receipt.Token.Position);
+            seed.Move.Target.Incarnation, receipt.Token.Position);
         await SqlRf3Protocol.EqualAsync(expected, receipt);
         await ProtectedDocumentUncertaintyOracle.DocumentAsync(source, seed, token, expected.Token).ConfigureAwait(false);
         var completedCut = await McpCallerAssertions.SdkSuccessAsync(await target.StatusAsync(token));
-        await Assert.That(completedCut.Incarnation).IsEqualTo(seed.Peer.Target.Incarnation);
+        await Assert.That(completedCut.Incarnation).IsEqualTo(seed.Move.Target.Incarnation);
         await Assert.That(completedCut.Applied).IsGreaterThanOrEqualTo(observedCut.Applied);
         return expected;
     }
@@ -96,8 +96,8 @@ internal static class ProtectedDocumentUncertaintyFlow
         await ProtectedDocumentUncertaintyOracle.DocumentAsync(source, seed, token).ConfigureAwait(false);
         var afterA = await McpCallerAssertions.SdkSuccessAsync(await source.StatusAsync(token));
         var afterB = await McpCallerAssertions.SdkSuccessAsync(await target.StatusAsync(token));
-        await Assert.That(afterA.Incarnation).IsEqualTo(seed.Peer.Source.Incarnation);
-        await Assert.That(afterB.Incarnation).IsEqualTo(seed.Peer.Target.Incarnation);
+        await Assert.That(afterA.Incarnation).IsEqualTo(seed.Move.Source.Incarnation);
+        await Assert.That(afterB.Incarnation).IsEqualTo(seed.Move.Target.Incarnation);
         await Assert.That(afterA.Applied).IsGreaterThanOrEqualTo(a);
         await Assert.That(afterB.Applied).IsGreaterThanOrEqualTo(b);
     }

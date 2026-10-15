@@ -5,22 +5,16 @@ internal static class ZoneTreeStoreInitializer
     internal static void Open(ZoneTreeStoreRuntime runtime)
     {
         EnsureStoreDirectory(runtime.Options.Directory);
-        try
-        {
-            runtime.Ownership = ZoneTreeOwnerLock.Open(runtime.Options, requireExisting: false);
-            runtime.Identity = ZoneTreeIdentityFile.Open(runtime.Options, runtime.Ownership);
-            runtime.Journal = ZoneTreeStoreFiles.OpenJournal(runtime.Options);
-            ZoneTreeJournalPreflight.Validate(runtime.Journal, runtime.Options, runtime.Identity.FormatVersion);
-            runtime.Tree = ZoneTreeTreeFactory.Open(runtime.Options);
-            ZoneTreeJournalRecovery.Recover(runtime);
-            runtime.Maintenance = new(runtime.Tree, runtime.Options.MaintenanceExecution, TimeProvider.System);
-            ZoneTreeCheckpointReclaimer.Reclaim(runtime.Options.Directory);
-        }
-        catch (Exception)
-        {
-            ZoneTreeStoreHandleDisposal.FailedOpen(runtime);
-            throw;
-        }
+        runtime.Ownership = ZoneTreeOwnerLock.Open(runtime.Options, requireExisting: false);
+        runtime.Identity = ZoneTreeIdentityFile.Open(runtime.Options, runtime.Ownership);
+        runtime.Journal = ZoneTreeStoreFiles.OpenJournal(runtime.Options);
+        ZoneTreeJournalPreflight.Validate(runtime.Journal, runtime.Options, runtime.Identity.FormatVersion);
+        OpenTree(runtime, requireExisting: false);
+        ZoneTreeJournalRecovery.Recover(runtime);
+        runtime.OwnershipSettlement.BeginNativeConstructor();
+        runtime.Maintenance = new(runtime.Tree, runtime.Options.MaintenanceExecution, TimeProvider.System);
+        runtime.OwnershipSettlement.NativeConstructorReturned();
+        ZoneTreeCheckpointReclaimer.Reclaim(runtime.Options.Directory);
     }
 
     internal static void OpenExisting(ZoneTreeStoreRuntime runtime, Guid expectedNodeId)
@@ -29,8 +23,15 @@ internal static class ZoneTreeStoreInitializer
         runtime.Identity = ZoneTreeIdentityFile.OpenExisting(runtime.Options, expectedNodeId);
         runtime.Journal = ZoneTreeStoreFiles.OpenJournal(runtime.Options, FileMode.Open);
         ZoneTreeJournalPreflight.Validate(runtime.Journal, runtime.Options, runtime.Identity.FormatVersion);
-        runtime.Tree = ZoneTreeTreeFactory.Open(runtime.Options, requireExisting: true);
+        OpenTree(runtime, requireExisting: true);
         ZoneTreeJournalRecovery.Recover(runtime);
+    }
+
+    private static void OpenTree(ZoneTreeStoreRuntime runtime, bool requireExisting)
+    {
+        runtime.OwnershipSettlement.BeginNativeConstructor();
+        runtime.Tree = ZoneTreeTreeFactory.Open(runtime.Options, requireExisting);
+        runtime.OwnershipSettlement.NativeConstructorReturned();
     }
 
     private static void EnsureStoreDirectory(string directory)
@@ -41,7 +42,6 @@ internal static class ZoneTreeStoreInitializer
                 UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
             return;
         }
-
         Directory.CreateDirectory(directory);
     }
 }

@@ -37,7 +37,15 @@
         "wholeTaskGate": "Stage code readiness is not whole-task acceptance: preserve original required native TUnit/process recovery/Aspire RF3 SDK+official MCP/Linux/fault/resource gates; benchmarks/profiling/audits/releases execute last. No current status is changed."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F0"
+      "primaryPriorityBand": "F0",
+      "executionOwner": "RepositoryGovernance / approved manifests",
+      "nextDeliverable": "Verify existing selected pins, original licenses, Linux support and mandatory normal SIMD; audit later.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 483,
+        "heading": "KL-001 · Версії, ліцензії та platform matrix",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-002",
@@ -67,7 +75,15 @@
         "wholeTaskGate": "Stage code readiness is not whole-task acceptance: preserve original required native TUnit/process recovery/Aspire RF3 SDK+official MCP/Linux/fault/resource gates; benchmarks/profiling/audits/releases execute last. No current status is changed."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F0"
+      "primaryPriorityBand": "F0",
+      "executionOwner": "RepositoryGovernance / approved manifests",
+      "nextDeliverable": "Freeze canonical identities, bounded operation semantics, same-partition atomicity and explicit unsupported cross-partition cases.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 491,
+        "heading": "KL-002 · Формальні API та consistency contracts",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-003",
@@ -104,7 +120,15 @@
         "wholeTaskGate": "Stage code readiness is not whole-task acceptance: preserve original required native TUnit/process recovery/Aspire RF3 SDK+official MCP/Linux/fault/resource gates; benchmarks/profiling/audits/releases execute last. No current status is changed."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F1"
+      "primaryPriorityBand": "F1",
+      "executionOwner": "StorageRecovery / silo-local ZoneTree Grain Service",
+      "nextDeliverable": "Open actual ZoneTree with current WAL guarantees; recover original committed state after process failure.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 499,
+        "heading": "KL-003 · ZoneTree durability audit і crash harness",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-004",
@@ -139,7 +163,15 @@
         "wholeTaskGate": "Stage code readiness is not whole-task acceptance: preserve original required native TUnit/process recovery/Aspire RF3 SDK+official MCP/Linux/fault/resource gates; benchmarks/profiling/audits/releases execute last. No current status is changed."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F1"
+      "primaryPriorityBand": "F1",
+      "executionOwner": "StorageRecovery / silo-local ZoneTree Grain Service",
+      "nextDeliverable": "Reuse native snapshot/iterator APIs for bounded consistent reads with actual lifetime and disposal.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 507,
+        "heading": "KL-004 · Transactional read view spike",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-005",
@@ -178,7 +210,15 @@
         "wholeTaskGate": "Stage code readiness is not whole-task acceptance: preserve original required native TUnit/process recovery/Aspire RF3 SDK+official MCP/Linux/fault/resource gates; benchmarks/profiling/audits/releases execute last. No current status is changed."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F2"
+      "primaryPriorityBand": "F2",
+      "executionOwner": "StorageRecovery / silo-local ZoneTree Grain Service",
+      "nextDeliverable": "Capture and restore one actual current-format native backup with complete state and owner cleanup.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 515,
+        "heading": "KL-005 · Backup/restore spike",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-006",
@@ -212,7 +252,15 @@
         "wholeTaskGate": "Stage code readiness is not whole-task acceptance: preserve original required native TUnit/process recovery/Aspire RF3 SDK+official MCP/Linux/fault/resource gates; benchmarks/profiling/audits/releases execute last. No current status is changed."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F6"
+      "primaryPriorityBand": "F6",
+      "executionOwner": "Performance / original native profiles and Linux comparisons",
+      "nextDeliverable": "Only after native capabilities exist: isolated Linux jobs execute canonical100k/1M datasets and operation counts with original provenance/equivalent acknowledgement and complete oracles; no feature waits for benchmark success to be implemented.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 523,
+        "heading": "KL-006 · Benchmark harness і PostgreSQL methodology",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-007",
@@ -243,7 +291,15 @@
         "wholeTaskGate": "Stage code readiness is not whole-task acceptance: preserve original required native TUnit/process recovery/Aspire RF3 SDK+official MCP/Linux/fault/resource gates; benchmarks/profiling/audits/releases execute last. No current status is changed."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F1"
+      "primaryPriorityBand": "F1",
+      "executionOwner": "StorageRecovery / silo-local ZoneTree Grain Service",
+      "nextDeliverable": "Keep sortable canonical keys, native generated binary values and exact corruption/format refusal.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 531,
+        "heading": "KL-007 · KeyCodec і storage envelopes",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-008",
@@ -279,7 +335,15 @@
         "wholeTaskGate": "Stage code readiness is not whole-task acceptance: preserve original required native TUnit/process recovery/Aspire RF3 SDK+official MCP/Linux/fault/resource gates; benchmarks/profiling/audits/releases execute last. No current status is changed."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F1"
+      "primaryPriorityBand": "F1",
+      "executionOwner": "StorageRecovery / silo-local ZoneTree Grain Service",
+      "nextDeliverable": "Open and close the original physical partition through its silo-local Grain Service; preserve file exclusion and every original task.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 539,
+        "heading": "KL-008 · Storage adapter і lifetime",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-009",
@@ -315,7 +379,15 @@
         "wholeTaskGate": "Stage code readiness is not whole-task acceptance: preserve original required native TUnit/process recovery/Aspire RF3 SDK+official MCP/Linux/fault/resource gates; benchmarks/profiling/audits/releases execute last. No current status is changed."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F1"
+      "primaryPriorityBand": "F1",
+      "executionOwner": "DocumentStorage / canonical partition writer",
+      "nextDeliverable": "Retain one ordered atomic writer with original authority, byte limits, durable receipt and apply/recovery order.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 547,
+        "heading": "KL-009 · Partition writer і command envelope",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-010",
@@ -349,7 +421,15 @@
         "wholeTaskGate": "Stage code readiness is not whole-task acceptance: preserve original required native TUnit/process recovery/Aspire RF3 SDK+official MCP/Linux/fault/resource gates; benchmarks/profiling/audits/releases execute last. No current status is changed."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F2"
+      "primaryPriorityBand": "F2",
+      "executionOwner": "DocumentStorage / canonical partition writer",
+      "nextDeliverable": "SDK write/read/CAS/delete and healthy replay through the real RF3 public path.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 555,
+        "heading": "KL-010 · Document CRUD та CAS",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-011",
@@ -386,7 +466,15 @@
         "wholeTaskGate": "Stage code readiness is not whole-task acceptance: preserve original required native TUnit/process recovery/Aspire RF3 SDK+official MCP/Linux/fault/resource gates; benchmarks/profiling/audits/releases execute last. No current status is changed."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F2"
+      "primaryPriorityBand": "F2",
+      "executionOwner": "DocumentStorage / canonical partition writer",
+      "nextDeliverable": "Canonical index/unique changes commit with their document and refuse conflicts without effects.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 563,
+        "heading": "KL-011 · Strict indexes і unique scope",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-012",
@@ -426,7 +514,15 @@
         "wholeTaskGate": "Stage code readiness is not whole-task acceptance: preserve original required native TUnit/process recovery/Aspire RF3 SDK+official MCP/Linux/fault/resource gates; benchmarks/profiling/audits/releases execute last. No current status is changed."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F2"
+      "primaryPriorityBand": "F2",
+      "executionOwner": "DocumentStorage / canonical partition writer",
+      "nextDeliverable": "Persist stable command outcomes and same-partition atomic batches; evaluate native transactional grain state only with a participating provider.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 571,
+        "heading": "KL-012 · Batch і persisted idempotency",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-013",
@@ -468,11 +564,19 @@
         "wholeTaskGate": "Stage code readiness is not whole-task acceptance: preserve original required native TUnit/process recovery/Aspire RF3 SDK+official MCP/Linux/fault/resource gates; benchmarks/profiling/audits/releases execute last. No current status is changed."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F3"
+      "primaryPriorityBand": "F3",
+      "executionOwner": "QueryExecution / native bounded executor",
+      "nextDeliverable": "Bounded authorized AST execution, scan/index differential results, exact projections and cursor tamper/expiry/scope/current-policy refusal are implemented; supported dialect inventory remains honest.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 579,
+        "heading": "KL-013 · Query AST, planner і cursors",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-014",
-      "title": "Standalone server і C# SDK",
+      "title": "RF3 server and C# SDK",
       "statusAtReview": "done",
       "originalDefinition": {
         "source": "docs/design/architecture-v0.3.uk.md#kl-014",
@@ -499,7 +603,7 @@
       ],
       "review": {
         "id": "KL-014",
-        "finding": "Standalone/local Orleans/no external services is obsolete: first server is Aspire-owned real RF3 using native membership. Full query planner should not block minimal SDK host.",
+        "finding": "Replace nested application/silo hosting with one native host; physical ZoneTree opening belongs to the silo-local Grain Service. Deferred constructors and post-Active catalog bootstrap avoid the real startup dependency cycles.",
         "implementationScope": [
           "KL-001",
           "KL-002",
@@ -519,7 +623,15 @@
         "wholeTaskGate": "Stage code readiness is not whole-task acceptance: preserve original required native TUnit/process recovery/Aspire RF3 SDK+official MCP/Linux/fault/resource gates; benchmarks/profiling/audits/releases execute last. No current status is changed."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F2"
+      "primaryPriorityBand": "F2",
+      "executionOwner": "ClientApi / ASP.NET admission and Orleans connection",
+      "nextDeliverable": "Replace nested hosts with one native host and admit SDK/MCP only after the actual RF3 database is ready.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 587,
+        "heading": "KL-014 · Standalone server і C# SDK",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-015",
@@ -558,7 +670,15 @@
         "wholeTaskGate": "Stage code readiness is not whole-task acceptance: preserve original required native TUnit/process recovery/Aspire RF3 SDK+official MCP/Linux/fault/resource gates; benchmarks/profiling/audits/releases execute last. No current status is changed."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F0"
+      "primaryPriorityBand": "F0",
+      "executionOwner": "Authorization / committed ZoneTree policy",
+      "nextDeliverable": "Standard ASP.NET subject authentication, fresh persisted permissions and actual OpenTelemetry from the first host.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 595,
+        "heading": "KL-015 · Security і telemetry baseline",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-016",
@@ -593,7 +713,15 @@
         "wholeTaskGate": "Stage code readiness is not whole-task acceptance: preserve original required native TUnit/process recovery/Aspire RF3 SDK+official MCP/Linux/fault/resource gates; benchmarks/profiling/audits/releases execute last. No current status is changed."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F2"
+      "primaryPriorityBand": "F2",
+      "executionOwner": "DocumentStorage / canonical partition writer",
+      "nextDeliverable": "Persist projection outbox atomically with canonical changes, bounded catch-up and deterministic replay.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 603,
+        "heading": "KL-016 · Committed projection outbox",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-017",
@@ -635,11 +763,19 @@
         "wholeTaskGate": "Stage code readiness is not whole-task acceptance: preserve original required native TUnit/process recovery/Aspire RF3 SDK+official MCP/Linux/fault/resource gates; benchmarks/profiling/audits/releases execute last. No current status is changed."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F1"
+      "primaryPriorityBand": "F1",
+      "executionOwner": "ClusterReplication / native Orleans replica services",
+      "nextDeliverable": "Qualify existing database replication over native Orleans transport; no second membership or liveness runtime.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 611,
+        "heading": "KL-017 · Consensus provider qualification",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-018",
-      "title": "Metadata bootstrap",
+      "title": "Native host and persisted catalog bootstrap",
       "statusAtReview": "in_progress",
       "originalDefinition": {
         "source": "docs/design/architecture-v0.3.uk.md#kl-018",
@@ -660,7 +796,7 @@
       ],
       "review": {
         "id": "KL-018",
-        "finding": "Metadata-before-Orleans/direct internal transport wording causes native foundation inversion and potential bootstrap cycle. Split host membership boot from durable DB catalog publication.",
+        "finding": "Open local storage through the native Grain Service, then join native membership and publish the database catalog after RF3/native Active. Host membership is not a canonical database catalog.",
         "implementationScope": [
           "KL-001",
           "KL-002",
@@ -672,15 +808,23 @@
           "KL-020",
           "KL-021"
         ],
-        "stageDoneGate": "Native Orleans provider starts first; stable actual node/cluster identity and node-local DB owner bootstrap publish canonical metadata only under existing authority, with same-identity restart and leader-loss CAS proof.",
+        "stageDoneGate": "Same silo-local Grain Service opens/recover files once before borrowers use them; native membership reaches Active before quorum/catalog RPC; actual startup/partial failure/cold restart preserve original owner and authority.",
         "wholeTaskGate": "Stage code readiness is not whole-task acceptance: preserve original required native TUnit/process recovery/Aspire RF3 SDK+official MCP/Linux/fault/resource gates; benchmarks/profiling/audits/releases execute last. No current status is changed."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F1"
+      "primaryPriorityBand": "F1",
+      "executionOwner": "ClusterReplication / native Orleans replica services",
+      "nextDeliverable": "Native storage initialization before local use; native Active before RF3/catalog RPC; same original owner through failed startup.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 619,
+        "heading": "KL-018 · Metadata bootstrap",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-019",
-      "title": "Orleans membership і ownership adapter",
+      "title": "Native Orleans membership, placement and ownership",
       "statusAtReview": "in_progress",
       "originalDefinition": {
         "source": "docs/design/architecture-v0.3.uk.md#kl-019",
@@ -698,7 +842,7 @@
       ],
       "review": {
         "id": "KL-019",
-        "finding": "Custom membership CAS title/work is obsolete: Azure Orleans provider already owns silo rows; native membership boot and database partition ownership must be separate stages.",
+        "finding": "Reuse actual native provider/directory/placement/repartitioner. Storage owners never migrate; audit native Immovable and manual movement separately for locality-sensitive grains. Current signed DB voter/incarnation fences remain.",
         "implementationScope": [
           "KL-001",
           "KL-002",
@@ -711,11 +855,19 @@
           "KL-021",
           "KL-036"
         ],
-        "stageDoneGate": "Existing native Azure provider +distributed directory/repartitioner compose real cluster; retire orphan generic silo-row CAS; DB signed cohort, incarnation/voter and epoch/write/file ownership fences remain.",
+        "stageDoneGate": "Native provider/directory plus explicit per-grain placement and automatic/manual migration policy; correct actual physical owner before effects, no open handles move with activation, first three-voter boot and healthy cold continuation.",
         "wholeTaskGate": "Stage code readiness is not whole-task acceptance: preserve original required native TUnit/process recovery/Aspire RF3 SDK+official MCP/Linux/fault/resource gates; benchmarks/profiling/audits/releases execute last. No current status is changed."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F1"
+      "primaryPriorityBand": "F1",
+      "executionOwner": "ClusterReplication / native Orleans replica services",
+      "nextDeliverable": "Native membership/directory and per-grain placement/migration policy, with current physical authority checked separately.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 627,
+        "heading": "KL-019 · Orleans membership і ownership adapter",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-020",
@@ -761,7 +913,15 @@
         "wholeTaskGate": "Stage code readiness is not whole-task acceptance: preserve original required native TUnit/process recovery/Aspire RF3 SDK+official MCP/Linux/fault/resource gates; benchmarks/profiling/audits/releases execute last. No current status is changed."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F2"
+      "primaryPriorityBand": "F2",
+      "executionOwner": "ClusterReplication / native Orleans replica services",
+      "nextDeliverable": "Three real voter owners acknowledge/apply the same canonical command and recover the same receipt.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 635,
+        "heading": "KL-020 · Три-вузловий replicated apply",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-021",
@@ -800,7 +960,15 @@
         "wholeTaskGate": "Stage code readiness is not whole-task acceptance: preserve original required native TUnit/process recovery/Aspire RF3 SDK+official MCP/Linux/fault/resource gates; benchmarks/profiling/audits/releases execute last. No current status is changed."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F2"
+      "primaryPriorityBand": "F2",
+      "executionOwner": "ClusterReplication / native Orleans replica services",
+      "nextDeliverable": "Receipt/session cut reads, absent/tombstone cases, original unknown outcomes and healthy failover/replay.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 643,
+        "heading": "KL-021 · Strong read і session tokens",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-022",
@@ -839,7 +1007,15 @@
         "wholeTaskGate": "Stage code readiness is not whole-task acceptance: preserve original required native TUnit/process recovery/Aspire RF3 SDK+official MCP/Linux/fault/resource gates; benchmarks/profiling/audits/releases execute last. No current status is changed."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F3"
+      "primaryPriorityBand": "F3",
+      "executionOwner": "GraphTraversal / partition grains and ZoneTree",
+      "nextDeliverable": "Actual graph records plus both adjacency indexes match independent local mutation/reference model with bounded current authorization and stable original retry.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 651,
+        "heading": "KL-022 · Graph storage",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-023",
@@ -876,7 +1052,15 @@
         "wholeTaskGate": "Stage code readiness is not whole-task acceptance: preserve original required native TUnit/process recovery/Aspire RF3 SDK+official MCP/Linux/fault/resource gates; benchmarks/profiling/audits/releases execute last. No current status is changed."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F3"
+      "primaryPriorityBand": "F3",
+      "executionOwner": "GraphTraversal / partition grains and ZoneTree",
+      "nextDeliverable": "Real authorized traversal has independent exact shortest-path/cycle oracle and enforced depth/vertex/edge/work/deadline limits; no hidden intermediate traversal or partial success.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 659,
+        "heading": "KL-023 · Bounded graph traversal",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-024",
@@ -915,7 +1099,15 @@
         "wholeTaskGate": "Stage code readiness is not whole-task acceptance: preserve original required native TUnit/process recovery/Aspire RF3 SDK+official MCP/Linux/fault/resource gates; benchmarks/profiling/audits/releases execute last. No current status is changed."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F3"
+      "primaryPriorityBand": "F3",
+      "executionOwner": "TimeSeries / native series library and ZoneTree",
+      "nextDeliverable": "Native append batch stores exact UTC/order/equal-time/out-of-order samples, bounded dedup and original retry; raw/current-policy and replay/reopen state remain equal.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 667,
+        "heading": "KL-024 · Time-series core",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-025",
@@ -954,7 +1146,15 @@
         "wholeTaskGate": "Stage code readiness is not whole-task acceptance: preserve original required native TUnit/process recovery/Aspire RF3 SDK+official MCP/Linux/fault/resource gates; benchmarks/profiling/audits/releases execute last. No current status is changed."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F3"
+      "primaryPriorityBand": "F3",
+      "executionOwner": "TimeSeries / native series library and ZoneTree",
+      "nextDeliverable": "Independent complete range/latest/window and aggregate numerical oracles, raw scan/result bounds, cancellation and same native store healthy/replay/cold paths are implemented.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 675,
+        "heading": "KL-025 · Time-series range і aggregates",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-026",
@@ -996,7 +1196,15 @@
         "wholeTaskGate": "Stage code readiness is not whole-task acceptance: preserve original required native TUnit/process recovery/Aspire RF3 SDK+official MCP/Linux/fault/resource gates; benchmarks/profiling/audits/releases execute last. No current status is changed."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F3"
+      "primaryPriorityBand": "F3",
+      "executionOwner": "TimeSeries / native series library and ZoneTree",
+      "nextDeliverable": "Original logged expiration/rollup has replay-identical sample/model results; old reader leases fence real bucket deletion and avg preserves independent sum/count.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 683,
+        "heading": "KL-026 · Retention, expiry і rollups",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-027",
@@ -1038,7 +1246,15 @@
         "wholeTaskGate": "Stage code readiness is not whole-task acceptance: preserve original required native TUnit/process recovery/Aspire RF3 SDK+official MCP/Linux/fault/resource gates; benchmarks/profiling/audits/releases execute last. No current status is changed."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F3"
+      "primaryPriorityBand": "F3",
+      "executionOwner": "Search / native FTS and bounded Orleans work",
+      "nextDeliverable": "Typed canonical vector revision/dimension/model/finite validation and required intrinsics exact top-k match independent arithmetic; same-batch rollback, stale vectors, policy and replay/cold are covered.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 691,
+        "heading": "KL-027 · Canonical vectors і exact search",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-028",
@@ -1076,7 +1292,15 @@
         "wholeTaskGate": "Stage code readiness is not whole-task acceptance: preserve original required native TUnit/process recovery/Aspire RF3 SDK+official MCP/Linux/fault/resource gates; benchmarks/profiling/audits/releases execute last. No current status is changed."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F3"
+      "primaryPriorityBand": "F3",
+      "executionOwner": "Search / native FTS and bounded Orleans work",
+      "nextDeliverable": "Use selected actual native provider with explicit ranking/analyzer/delete/replay capability contract and original language corpus; missing capability is explicit, late audit/performance evidence remains separate.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 699,
+        "heading": "KL-028 · Text index provider audit",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-029",
@@ -1116,7 +1340,15 @@
         "wholeTaskGate": "Stage code readiness is not whole-task acceptance: preserve original required native TUnit/process recovery/Aspire RF3 SDK+official MCP/Linux/fault/resource gates; benchmarks/profiling/audits/releases execute last. No current status is changed."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F3"
+      "primaryPriorityBand": "F3",
+      "executionOwner": "Search / native FTS and bounded Orleans work",
+      "nextDeliverable": "Original canonical outbox rebuild/update/delete and checkpoint retain exact source revisions; lost projection rebuilt from real records, crash/duplicate replay cannot resurrect stale data.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 707,
+        "heading": "KL-029 · Text projection і rebuild",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-030",
@@ -1154,7 +1386,15 @@
         "wholeTaskGate": "Stage code readiness is not whole-task acceptance: preserve original required native TUnit/process recovery/Aspire RF3 SDK+official MCP/Linux/fault/resource gates; benchmarks/profiling/audits/releases execute last. No current status is changed."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F3"
+      "primaryPriorityBand": "F3",
+      "executionOwner": "Search / native FTS and bounded Orleans work",
+      "nextDeliverable": "Existing managed ANN API/lifetime/save/load/filter/delete bounds are defined and implemented against exact oracle; required Linux recall/concurrency/memory measurements remain explicit late gates.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 715,
+        "heading": "KL-030 · ANN provider qualification",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-031",
@@ -1195,7 +1435,15 @@
         "wholeTaskGate": "Stage code readiness is not whole-task acceptance: preserve original required native TUnit/process recovery/Aspire RF3 SDK+official MCP/Linux/fault/resource gates; benchmarks/profiling/audits/releases execute last. No current status is changed."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F3"
+      "primaryPriorityBand": "F3",
+      "executionOwner": "Search / native FTS and bounded Orleans work",
+      "nextDeliverable": "Native ANN current generation/outbox update/delete and persisted snapshot manifest recover atomically; duplicates and obsolete generation writes fail correctly with joined owner lifetime.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 723,
+        "heading": "KL-031 · ANN projection lifecycle",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-032",
@@ -1238,7 +1486,15 @@
         "wholeTaskGate": "Stage code readiness is not whole-task acceptance: preserve original required native TUnit/process recovery/Aspire RF3 SDK+official MCP/Linux/fault/resource gates; benchmarks/profiling/audits/releases execute last. No current status is changed."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F3"
+      "primaryPriorityBand": "F3",
+      "executionOwner": "Search / native FTS and bounded Orleans work",
+      "nextDeliverable": "Exact allowlist/final canonical row+field authorization is complete first; ANN variant then proves bounded refill/truthful completeness and approved recall without leaks or hidden fallback.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 731,
+        "heading": "KL-032 · Filtered vector planner",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-033",
@@ -1277,7 +1533,15 @@
         "wholeTaskGate": "Stage code readiness is not whole-task acceptance: preserve original required native TUnit/process recovery/Aspire RF3 SDK+official MCP/Linux/fault/resource gates; benchmarks/profiling/audits/releases execute last. No current status is changed."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F3"
+      "primaryPriorityBand": "F3",
+      "executionOwner": "Search / native FTS and bounded Orleans work",
+      "nextDeliverable": "Independent fixed branch ranks/weights/ties produce exact complete hit and Explain contributions; opt-in metadata obeys privacy and cumulative limits; later relevance-window measurements remain open.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 739,
+        "heading": "KL-033 · Hybrid rank і Explain",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-034",
@@ -1321,7 +1585,15 @@
         "wholeTaskGate": "Stage code readiness is not whole-task acceptance: preserve original required native TUnit/process recovery/Aspire RF3 SDK+official MCP/Linux/fault/resource gates; benchmarks/profiling/audits/releases execute last. No current status is changed."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F3"
+      "primaryPriorityBand": "F3",
+      "executionOwner": "Search / native FTS and bounded Orleans work",
+      "nextDeliverable": "Actual WaitForIndex covers requested committed prefix/current generation and retains pins; timeout/cancel/failed generation is explicit and stale deleted rows never escape.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 747,
+        "heading": "KL-034 · Search freshness contract",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-035",
@@ -1359,7 +1631,15 @@
         "wholeTaskGate": "Stage code readiness is not whole-task acceptance: preserve original required native TUnit/process recovery/Aspire RF3 SDK+official MCP/Linux/fault/resource gates; benchmarks/profiling/audits/releases execute last. No current status is changed."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F2"
+      "primaryPriorityBand": "F2",
+      "executionOwner": "StorageRecovery / silo-local ZoneTree Grain Service",
+      "nextDeliverable": "Install a real checkpoint and replay/catch up without replacing active or unclosed physical ownership.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 755,
+        "heading": "KL-035 · Replica snapshot і installation",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-036",
@@ -1398,7 +1678,15 @@
         "wholeTaskGate": "Stage code readiness is not whole-task acceptance: preserve original required native TUnit/process recovery/Aspire RF3 SDK+official MCP/Linux/fault/resource gates; benchmarks/profiling/audits/releases execute last. No current status is changed."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F4"
+      "primaryPriorityBand": "F4",
+      "executionOwner": "ClusterRouting / native placement and physical owners",
+      "nextDeliverable": "Move physical data through checkpoint/catch-up/authority cutover; activation migration never moves files.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 763,
+        "heading": "KL-036 · Controlled partition movement",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-037",
@@ -1443,7 +1731,15 @@
         "wholeTaskGate": "Stage code readiness is not whole-task acceptance: preserve original required native TUnit/process recovery/Aspire RF3 SDK+official MCP/Linux/fault/resource gates; benchmarks/profiling/audits/releases execute last. No current status is changed."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F4"
+      "primaryPriorityBand": "F4",
+      "executionOwner": "ClusterRouting / native placement and physical owners",
+      "nextDeliverable": "Static real multi-owner bounded query first matches centralized whole-page oracle and fresh policy; search/global-statistics/ANN and movement variants receive their own explicit acceptance without silent partials.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 771,
+        "heading": "KL-037 · Distributed query execution",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-038",
@@ -1487,7 +1783,15 @@
         "wholeTaskGate": "Stage code readiness is not whole-task acceptance: preserve original required native TUnit/process recovery/Aspire RF3 SDK+official MCP/Linux/fault/resource gates; benchmarks/profiling/audits/releases execute last. No current status is changed."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F4"
+      "primaryPriorityBand": "F4",
+      "executionOwner": "GraphTraversal / partition grains and ZoneTree",
+      "nextDeliverable": "Actual signed source/target/completion operations preserve canonical edge/tombstone/high-water/receipt authority; duplicate/reorder/contradiction/current-policy/cancel/repair/replay/two-cold flows retain full results.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 779,
+        "heading": "KL-038 · Cross-partition graph edges",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-039",
@@ -1533,7 +1837,15 @@
         "wholeTaskGate": "Stage code readiness is not whole-task acceptance: preserve original required native TUnit/process recovery/Aspire RF3 SDK+official MCP/Linux/fault/resource gates; benchmarks/profiling/audits/releases execute last. No current status is changed."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F4"
+      "primaryPriorityBand": "F4",
+      "executionOwner": "Search / native FTS and bounded Orleans work",
+      "nextDeliverable": "Original concurrent update/delete, failed capture, live reader pins and idempotent disposal preserve exact files/active generation; last native reader release removes retired directory and replay/cold stays correct.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 787,
+        "heading": "KL-039 · Online index generation swap",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-040",
@@ -1576,7 +1888,15 @@
         "wholeTaskGate": "Stage code readiness is not whole-task acceptance: preserve original required native TUnit/process recovery/Aspire RF3 SDK+official MCP/Linux/fault/resource gates; benchmarks/profiling/audits/releases execute last. No current status is changed."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F2"
+      "primaryPriorityBand": "F2",
+      "executionOwner": "ResourceExecution / bounded silo-local admission",
+      "nextDeliverable": "Keep bounded silo-local RAM/cache/admission and real ownership settlement; reuse native maintenance only if its join contract fits.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 795,
+        "heading": "KL-040 · Resource governor",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-041",
@@ -1619,7 +1939,15 @@
         "wholeTaskGate": "Stage code readiness is not whole-task acceptance: preserve original required native TUnit/process recovery/Aspire RF3 SDK+official MCP/Linux/fault/resource gates; benchmarks/profiling/audits/releases execute last. No current status is changed."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F5"
+      "primaryPriorityBand": "F5",
+      "executionOwner": "Qualification / actual native functional operations",
+      "nextDeliverable": "Original seeded faults and history/state oracle run for each admitted capability; full final corruption/network/stale-owner/movement/index matrix retains explicit recovery/fail-stop and authentic Linux artifacts.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 803,
+        "heading": "KL-041 · Chaos і corruption suite",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-042",
@@ -1659,7 +1987,15 @@
         "wholeTaskGate": "Stage code readiness is not whole-task acceptance: preserve original required native TUnit/process recovery/Aspire RF3 SDK+official MCP/Linux/fault/resource gates; benchmarks/profiling/audits/releases execute last. No current status is changed."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F5"
+      "primaryPriorityBand": "F5",
+      "executionOwner": "BackupRestore / actual native checkpoints",
+      "nextDeliverable": "Actual catalog/per-partition cuts and off-node manifest restore a clean native cluster; every included model/receipt/outbox/repair relationship matches independent expected data, with later RPO/RTO measurements.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 811,
+        "heading": "KL-042 · Cluster backup і restore drills",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-043",
@@ -1701,7 +2037,15 @@
         "wholeTaskGate": "Stage code readiness is not whole-task acceptance: preserve original required native TUnit/process recovery/Aspire RF3 SDK+official MCP/Linux/fault/resource gates; benchmarks/profiling/audits/releases execute last. No current status is changed."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F1"
+      "primaryPriorityBand": "F1",
+      "executionOwner": "StorageRecovery / silo-local ZoneTree Grain Service",
+      "nextDeliverable": "Reject unknown current-format data before effects and restore/replay supported current data; no legacy migration.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 819,
+        "heading": "KL-043 · Upgrade і format compatibility",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-044",
@@ -1752,7 +2096,15 @@
         "wholeTaskGate": "Stage code readiness is not whole-task acceptance: preserve original required native TUnit/process recovery/Aspire RF3 SDK+official MCP/Linux/fault/resource gates; benchmarks/profiling/audits/releases execute last. No current status is changed."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F7"
+      "primaryPriorityBand": "F7",
+      "executionOwner": "Delivery / final acceptance and runbooks",
+      "nextDeliverable": "Only authentic exact-source full required suites, native RF3 clients, endurance72h/full final correctness, bounded backlog, restoration and complete approved evidence permit a scoped release statement; no source-review closure.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 827,
+        "heading": "KL-044 · Release gate і operational handbook",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-045",
@@ -1780,11 +2132,19 @@
         "laterQualificationScope": "Per operator genuine SDK/MCP/SQL conformance, original unknown/unsupported refusal and whole release inventory"
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F3"
+      "primaryPriorityBand": "F3",
+      "executionOwner": "QueryExecution / native bounded executor",
+      "nextDeliverable": "Version supported operation identity and capability semantics across SQL/SDK/MCP.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 1746,
+        "heading": "KL-045 · Query capability manifest і AST version",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-046",
-      "title": "SQL dialect semantics",
+      "title": "T-SQL dialect semantics",
       "statusAtReview": "in_progress",
       "originalDefinition": {
         "source": "docs/design/architecture-v0.3.uk.md#kl-046",
@@ -1802,17 +2162,25 @@
       ],
       "review": {
         "id": "KL-046",
-        "finding": "Old acceptance references PostgreSQL; current choice is T-SQL ScriptDOM. Specify null versus missing, numeric overflow/promotion, collation/order/cursor for admitted operators; do not claim full SQL from a scalar profile.",
+        "finding": "Selected T-SQL semantics via ScriptDOM. Null/missing, numeric bounds, collation, ordering, cursors and supported operators are explicit; the minimum profile is separate from full SQL acceptance.",
         "dependencyCorrection": "KL045 contract is genuine; full PostgreSQL compatibility is neither selected language nor prerequisite.",
         "implementationScope": "KL045 versioned contract, exact canonical scalar semantics",
         "laterQualificationScope": "All current implemented T-SQL operators, bounds/security and native parity before full language claim"
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F3"
+      "primaryPriorityBand": "F3",
+      "executionOwner": "QueryExecution / native bounded executor",
+      "nextDeliverable": "Define current supported T-SQL semantics before lowering; keep full language and minimum profile distinct.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 1754,
+        "heading": "KL-046 · SQL dialect semantics",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-047",
-      "title": "SQL parser adapter і diagnostics",
+      "title": "Microsoft ScriptDOM parser adapter and diagnostics",
       "statusAtReview": "in_progress",
       "originalDefinition": {
         "source": "docs/design/architecture-v0.3.uk.md#kl-047",
@@ -1834,13 +2202,21 @@
       ],
       "review": {
         "id": "KL-047",
-        "finding": "Task asks to evaluate SqlParser-cs or own parser, which is superseded. Replace definition with complete current ScriptDOM adapter and bounded native syntax/semantic lowering; no handwritten fallback or active PG grammar.",
+        "finding": "Actual centrally pinned Microsoft ScriptDOM replaces handwritten parsing entirely. Complete bounded syntax/semantic lowering and precise unsupported errors; no PostgreSQL grammar fallback.",
         "dependencyCorrection": "Keep harness/contracts; parser-selection research is resolved, not a new dependency/re-evaluation.",
         "implementationScope": "KL001 trusted functional harness; KL045/046 current T-SQL contracts; selected pinned Microsoft.SqlServer.TransactSql.ScriptDom",
         "laterQualificationScope": "Actual malformed/deep/oversized parser-to-native operations, exact safe spans/errors and unsupported semantics; full Linux parser/native parity"
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F3"
+      "primaryPriorityBand": "F3",
+      "executionOwner": "QueryExecution / native bounded executor",
+      "nextDeliverable": "Use actual Microsoft ScriptDOM with bounded input and safe parse/lower/unsupported diagnostics.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 1762,
+        "heading": "KL-047 · SQL parser adapter і diagnostics",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-048",
@@ -1871,7 +2247,15 @@
         "laterQualificationScope": "Every declared expression/alias/operator full lineage denies before unsafe lookup; real native/RF3 requests"
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F3"
+      "primaryPriorityBand": "F3",
+      "executionOwner": "QueryExecution / native bounded executor",
+      "nextDeliverable": "KL047 native lowering; schema/type catalog; minimum persisted field-use policy from KL015/061/062",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 1770,
+        "heading": "KL-048 · Binder і field lineage",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-049",
@@ -1901,7 +2285,15 @@
         "laterQualificationScope": "Independent reference versus optimized plans plus policy order, limits, Explain and current authority"
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F3"
+      "primaryPriorityBand": "F3",
+      "executionOwner": "QueryExecution / native bounded executor",
+      "nextDeliverable": "KL048 validated expressions and existing KL013 bounded execution/index contracts",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 1778,
+        "heading": "KL-049 · Rule-based optimizer",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-050",
@@ -1931,7 +2323,15 @@
         "laterQualificationScope": "Actual lease/buffer join on success/failure/cancel, no partial transaction; matched allocation/queue evidence late"
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F3"
+      "primaryPriorityBand": "F3",
+      "executionOwner": "QueryExecution / native bounded executor",
+      "nextDeliverable": "KL004 consistent scoped reads + bounded cancellation/admission; normalized operation contract from KL048/049 subset",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 1786,
+        "heading": "KL-050 · Batch executor і secure operator boundaries",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-051",
@@ -1961,7 +2361,15 @@
         "laterQualificationScope": "Same normalized typed operations, independent complete results/errors/receipts through SDK/JSON/currentTSQL; no implicit client evaluation"
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F3"
+      "primaryPriorityBand": "F3",
+      "executionOwner": "QueryExecution / native bounded executor",
+      "nextDeliverable": "Show independently expected equivalent SDK, official MCP and supported T-SQL operation effects.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 1794,
+        "heading": "KL-051 · SQL/JSON/C# equivalence",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-052",
@@ -1991,11 +2399,19 @@
         "laterQualificationScope": "Genuine overload + selected cancel/disconnect + capacity return + healthy operation/RF3 control liveness; sustained RSS measurement late"
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F2"
+      "primaryPriorityBand": "F2",
+      "executionOwner": "ClientApi / ASP.NET admission and Orleans connection",
+      "nextDeliverable": "Refuse over-budget work before allocation/effects; cancellation releases actual original owners.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 1802,
+        "heading": "KL-052 · Ранній admission control",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-053",
-      "title": "Session facade та independent query contexts",
+      "title": "Connection-owned independent operation contexts",
       "statusAtReview": "in_progress",
       "originalDefinition": {
         "source": "docs/design/architecture-v0.3.uk.md#kl-053",
@@ -2015,13 +2431,21 @@
       ],
       "review": {
         "id": "KL-053",
-        "finding": "Optional SessionGrain and independent query activation wording is superseded by ADR125 one connection grain; operations remain separately signed and bounded without per-operation activation or completed history. Native retained handle and callback settlement remain distinct.",
+        "finding": "ADR-125 owns the native connection grain and separate signed bounded operations. Preserve original task/iterator settlement, context isolation, fresh persisted permissions and joined close; no second session dispatcher.",
         "dependencyCorrection": "Keep transport/admission; no new session layer or custom dispatcher, no full query-language completion prerequisite.",
         "implementationScope": "KL014 public transport ownership; KL052 admission; current ADR125 signed call-local execution",
         "laterQualificationScope": "Real overlapping independent operations on SAME server-owned connection, persisted-policy isolation, actual native iterator/cancel/release/cleanup and restart"
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F2"
+      "primaryPriorityBand": "F2",
+      "executionOwner": "ClientApi / ASP.NET admission and Orleans connection",
+      "nextDeliverable": "Keep one native connection owner with independent bounded operations and original stream/task settlement.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 1810,
+        "heading": "KL-053 · Session facade та independent query contexts",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-054",
@@ -2049,7 +2473,15 @@
         "laterQualificationScope": "Generated null/missing/Unicode/bounds transformations on real current operations, index/scan equality; external reference only inside defined shared semantics"
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F3"
+      "primaryPriorityBand": "F3",
+      "executionOwner": "QueryExecution / native bounded executor",
+      "nextDeliverable": "KL051 actual admitted language/API parity per operator",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 1818,
+        "heading": "KL-054 · SQL differential і metamorphic suite",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-055",
@@ -2079,7 +2511,15 @@
         "laterQualificationScope": "Exact shortest hops, cycles/dedup, hidden intermediates, endpoint-only filtering and bounded no-partial response through real clients"
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F3"
+      "primaryPriorityBand": "F3",
+      "executionOwner": "GraphTraversal / partition grains and ZoneTree",
+      "nextDeliverable": "KL023 canonical graph/visible vertex model; KL045 versioned operator contract; foundation same-view read/auth/bounds",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 1826,
+        "heading": "KL-055 · GraphScope / GraphRetriever / GraphExpansion",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-056",
@@ -2111,7 +2551,15 @@
         "laterQualificationScope": "Independent full EntityRef/revision/redaction/rank/contribution oracle, stale/deleted/refill, current denial/repair, nonfinite accumulation, cleanup/replay/two-cold"
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F3"
+      "primaryPriorityBand": "F3",
+      "executionOwner": "Search / native FTS and bounded Orleans work",
+      "nextDeliverable": "KL033 current text/vector fusion/explanation subset; KL055 graph operator; KL050 common authorized read lifetime",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 1834,
+        "heading": "KL-056 · Three-way hybrid retrieval",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-057",
@@ -2141,7 +2589,15 @@
         "laterQualificationScope": "Independent exact same-corpus results across declared shard layouts; native unavailable/incomplete shard fails rather than complete-success; quality/window limits explicit"
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F4"
+      "primaryPriorityBand": "F4",
+      "executionOwner": "Search / native FTS and bounded Orleans work",
+      "nextDeliverable": "KL037 actual bounded multi-owner query transport; KL056 branch identity/rank contract; explicit shared cut/authority/completeness",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 1842,
+        "heading": "KL-057 · Global branch ranking",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-058",
@@ -2172,7 +2628,15 @@
         "laterQualificationScope": "Same authorized corpus exact BM25 oracle; persisted epoch/reopen/deny/reclassification; strict cross-shard profile only after shared distribution"
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F3"
+      "primaryPriorityBand": "F3",
+      "executionOwner": "Search / native FTS and bounded Orleans work",
+      "nextDeliverable": "KL029 native full-text/canonical corpus, KL015/061 current security corpus; bounded publication/generation lifecycle",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 1850,
+        "heading": "KL-058 · BM25 corpus і statistics epochs",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-059",
@@ -2202,7 +2666,15 @@
         "laterQualificationScope": "Real update/delete/rebuild/publication/restart with native exact oracle and approved recall cohorts; final comparable RSS/allocations/competitor measurement"
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F3"
+      "primaryPriorityBand": "F3",
+      "executionOwner": "Search / native FTS and bounded Orleans work",
+      "nextDeliverable": "KL030 accepted current managed HNSW contract and KL027 canonical vector storage; native SIMD/hardware validation",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 1858,
+        "heading": "KL-059 · Managed ANN implementation qualification",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-060",
@@ -2232,7 +2704,15 @@
         "laterQualificationScope": "Independent exact eligible-set recall per declared filter/correlation, actual bounded fallback/error and unchanged current permissions before/after restart"
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F3"
+      "primaryPriorityBand": "F3",
+      "executionOwner": "Search / native FTS and bounded Orleans work",
+      "nextDeliverable": "KL032 current eligible-set and authorization semantics; KL059 actual ANN lifecycle; common bounds",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 1866,
+        "heading": "KL-060 · Adaptive filtered retrieval",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-061",
@@ -2259,7 +2739,15 @@
         "laterQualificationScope": "Actual stored verifiers/principals, forged roles/tenant denial, expiry/revocation after ACK, protected cluster authority, SDK/MCP failover and sanitized native OTel"
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F2"
+      "primaryPriorityBand": "F2",
+      "executionOwner": "Authorization / committed ZoneTree policy",
+      "nextDeliverable": "Persist principals/API keys/RBAC; refuse missing/revoked credentials and repair through a healthy administrator flow.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 1874,
+        "heading": "KL-061 · Principals, API keys і RBAC",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-062",
@@ -2288,7 +2776,15 @@
         "laterQualificationScope": "Actual256/257 catalog boundaries, canonical nested/escaped paths, write/use/output checks and current-authority invalidation; exact receipts/replay/cold"
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F2"
+      "primaryPriorityBand": "F2",
+      "executionOwner": "Authorization / committed ZoneTree policy",
+      "nextDeliverable": "Persist classification catalog and enforce read/use/write boundaries without leaking output or private inventory.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 1882,
+        "heading": "KL-062 · Sensitive field catalog",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-063",
@@ -2317,7 +2813,15 @@
         "laterQualificationScope": "Current field-use denial before unsafe storage, aliases/functions/wrappers cannot hide lineage, safe exact errors and repair/healthy operations"
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F2"
+      "primaryPriorityBand": "F2",
+      "executionOwner": "Authorization / committed ZoneTree policy",
+      "nextDeliverable": "Guard expressions at each newly exposed operator using current persisted classification.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 1890,
+        "heading": "KL-063 · Sensitive expression usage enforcement",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-064",
@@ -2346,7 +2850,15 @@
         "laterQualificationScope": "Canary-free real public output/metadata/errors/logs, authorized raw controls, protected replacement/patch, cancellation and current-policy repair"
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F2"
+      "primaryPriorityBand": "F2",
+      "executionOwner": "Authorization / committed ZoneTree policy",
+      "nextDeliverable": "Project point/query/error outputs safely at the actual current authorized read cut.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 1898,
+        "heading": "KL-064 · Єдиний safe projector",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-065",
@@ -2376,7 +2888,15 @@
         "laterQualificationScope": "Cross-tenant scope/cache isolation, stale grants denied by final current authorization, hidden intermediate graph cannot leak in result/Explain"
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F2"
+      "primaryPriorityBand": "F2",
+      "executionOwner": "Authorization / committed ZoneTree policy",
+      "nextDeliverable": "Apply current document/row/graph ACL before visible execution results.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 1906,
+        "heading": "KL-065 · Row ACL planner і graph enforcement",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-066",
@@ -2406,7 +2926,15 @@
         "laterQualificationScope": "After policy ACK next request/page uses current epoch; unavailable authority fails closed; original cursor reauthorizes or explicitly invalidates, including restart"
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F2"
+      "primaryPriorityBand": "F2",
+      "executionOwner": "Authorization / committed ZoneTree policy",
+      "nextDeliverable": "Reauthorize current policy and bound cursors; physical identity changes expire them without inventing activation epochs.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 1914,
+        "heading": "KL-066 · Revocation epochs і cursor reauthorization",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-067",
@@ -2438,7 +2966,15 @@
         "laterQualificationScope": "Current source-to-derived paths/reclassification, old unsafe generation stops serving, genuine purge/rebuild/refusal/repair; no unauthorized reranker input"
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F3"
+      "primaryPriorityBand": "F3",
+      "executionOwner": "Authorization / committed ZoneTree policy",
+      "nextDeliverable": "KL062 source classifications; KL029 native text projection and KL031 vector projection current generations",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 1922,
+        "heading": "KL-067 · Classification lineage у search projections",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-068",
@@ -2471,7 +3007,15 @@
         "laterQualificationScope": "Independent real SDK/MCP/SQL attack→denial/no forbidden output→healthy/replay/restart per supported threat model; explicit timing/statistical limits"
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F5"
+      "primaryPriorityBand": "F5",
+      "executionOwner": "Authorization / committed ZoneTree policy",
+      "nextDeliverable": "Each exposed capability actual field/row/epoch/projector contracts; later derived lineage067 only its cells",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 1930,
+        "heading": "KL-068 · Security adversarial matrix",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-069",
@@ -2499,7 +3043,15 @@
         "laterQualificationScope": "Full tuple stable across node/activation changes, explicit same-partition atomicity/unique scope, no fragment split/multi-owner implicit transaction"
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F0"
+      "primaryPriorityBand": "F0",
+      "executionOwner": "ClusterRouting / native placement and physical owners",
+      "nextDeliverable": "Keep logical atomic partition IDs distinct from physical replica placement and activation identity.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 1938,
+        "heading": "KL-069 · Atomic/physical partition contracts",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-070",
@@ -2528,7 +3080,15 @@
         "laterQualificationScope": "Declared physical anti-affinity/resource selection, hot-tenant bounded rejection, actual one-writer ownership across membership/restart"
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F4"
+      "primaryPriorityBand": "F4",
+      "executionOwner": "ClusterRouting / native placement and physical owners",
+      "nextDeliverable": "KL069 atomic/physical identity; KL036 actual whole-partition transfer/fences; native membership/readiness and persisted capacity authority",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 1946,
+        "heading": "KL-070 · Placement і tenant packing",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-071",
@@ -2557,7 +3117,15 @@
         "laterQualificationScope": "Crash/restart each actual copy/catchup/fence/cutover/retirement state, original receipt conservation and no dual writer; entire atomic partition preserved"
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F4"
+      "primaryPriorityBand": "F4",
+      "executionOwner": "ClusterRouting / native placement and physical owners",
+      "nextDeliverable": "KL070 placement contract +KL035 current snapshot/install; original RF3 transfer authority",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 1954,
+        "heading": "KL-071 · Physical shard split/merge",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-072",
@@ -2588,7 +3156,15 @@
         "laterQualificationScope": "Actual original token/cursor/index consumers either remain valid under declared same lineage or return exact supported invalidation after real current-owner transfer; no cross-log raw index comparison"
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F4"
+      "primaryPriorityBand": "F4",
+      "executionOwner": "ClusterRouting / native placement and physical owners",
+      "nextDeliverable": "KL021 strong/session authority; KL034 actual index wait/watermark; KL071 only physical layout-change acceptance",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 1962,
+        "heading": "KL-072 · Token migration lineage",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-073",
@@ -2617,7 +3193,15 @@
         "laterQualificationScope": "Linux isolated native1/3 jobs, true membership/ACK/durability/RLS/no plaintext, full records/results and raw source-bound reports; explicit unsupported cells"
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F6"
+      "primaryPriorityBand": "F6",
+      "executionOwner": "Performance / original native profiles and Linux comparisons",
+      "nextDeliverable": "KL006 canonical scenario/provenance methodology +KL001 native test infrastructure; native supported PG/pgvector config",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 1970,
+        "heading": "KL-073 · PostgreSQL baseline kit",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-074",
@@ -2651,7 +3235,15 @@
         "laterQualificationScope": "Predeclared quality target, exact eligible oracle, original qrels/recall/nDCG/error/freshness/timeouts and matched native resources/ACK; no winner without genuine Linux data"
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F6"
+      "primaryPriorityBand": "F6",
+      "executionOwner": "Performance / original native profiles and Linux comparisons",
+      "nextDeliverable": "KL073 genuine baseline; actual supported056/060/058 semantics, canonical fixed corpus/schedule",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 1978,
+        "heading": "KL-074 · Hybrid quality/performance benchmark",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-075",
@@ -2685,7 +3277,15 @@
         "laterQualificationScope": "Only active native1/3 node arms, matched effective resources/RF/ACK/durability/workload, real per-cell isolated runner and original complete artifacts"
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F6"
+      "primaryPriorityBand": "F6",
+      "executionOwner": "Performance / original native profiles and Linux comparisons",
+      "nextDeliverable": "KL073 native competitor kit; KL057 distributed query and071/072 actual current-owner movement/token behavior for relevant cells",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 1986,
+        "heading": "KL-075 · Scaling benchmark і fair deployment arms",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-076",
@@ -2716,7 +3316,15 @@
         "laterQualificationScope": "Genuine bounded queues/charges/cancel/join/healthy; control traffic stays live and disk pressure rejects before unsafe ACK. Sustained RSS/CPU/native/transitive resource envelope qualified late"
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F2"
+      "primaryPriorityBand": "F2",
+      "executionOwner": "ResourceExecution / bounded silo-local admission",
+      "nextDeliverable": "Extend the already required initial bounds to fair tenant admission and measured resource settlement.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 1994,
+        "heading": "KL-076 · Multi-tenant resource governor",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-077",
@@ -2748,7 +3356,15 @@
         "laterQualificationScope": "Independent arithmetic/tail oracle and no buffer race from first applicable release path; only after actual profiling105 matched Linux before/after latency/throughput/alloc/RSS"
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F6"
+      "primaryPriorityBand": "F6",
+      "executionOwner": "Performance / original native profiles and Linux comparisons",
+      "nextDeliverable": "Normal execution uses required native SIMD now; select further optimization from measured profiles and remeasure.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 2002,
+        "heading": "KL-077 · Hot-path allocation і SIMD оптимізація",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-078",
@@ -2777,7 +3393,15 @@
         "laterQualificationScope": "Lossless exact roundtrip/raw aggregate/date/correction oracle, native current-format corruption refusal/replay/recovery +real SDK/MCP; measured bytes/sample/rewrite late"
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F3"
+      "primaryPriorityBand": "F3",
+      "executionOwner": "TimeSeries / native series library and ZoneTree",
+      "nextDeliverable": "KL026 canonical series/retention/correction semantics and bounded current native storage; no legacy format conversion",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 2010,
+        "heading": "KL-078 · Time-series chunk qualification",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-079",
@@ -2811,7 +3435,15 @@
         "laterQualificationScope": "No committed retained gap on reconnect, explicit duplicates/history loss and signed cursor reauthorization, no stale revoked payload; cancellation/bounds/healthy and genuine cold clients"
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F3"
+      "primaryPriorityBand": "F3",
+      "executionOwner": "EventStreams / canonical ZoneTree and native Orleans Streams",
+      "nextDeliverable": "Resume actual committed feeds with fresh authorization, bounded cursors/backpressure and original cancellation settlement.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 2018,
+        "heading": "KL-079 · Resumable change feed і обмежені live queries",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-080",
@@ -2852,7 +3484,15 @@
         "laterQualificationScope": "Manifest/docs/native functional+process recovery+RF3+privacy/resources/correct benchmark cohorts agree, no mocked authority or unsupported promise; whole105 not inferred from source"
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F7"
+      "primaryPriorityBand": "F7",
+      "executionOwner": "Delivery / final acceptance and runbooks",
+      "nextDeliverable": "All advertised capability implementation plus original044/054/068/074/075/076/077 final qualification; honest exact native source/image evidence",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 2026,
+        "heading": "KL-080 · Integrated feature і performance release gate",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-081",
@@ -2881,7 +3521,15 @@
         "wholeTaskGate": "Original dependency completion plus real same-literal/different-domain routing, authorized producer/consumer and crash receipts."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F3"
+      "primaryPriorityBand": "F3",
+      "executionOwner": "EventStreams / canonical ZoneTree and native Orleans Streams",
+      "nextDeliverable": "Define one canonical transaction domain for documents, tables, graph references, events and queues.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 2554,
+        "heading": "KL-081 · Eventing contracts і shared TransactionDomain",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-082",
@@ -2912,7 +3560,15 @@
         "wholeTaskGate": "Original full dependencies; golden ordering/roundtrip plus real immutable payload/state and secondary-index rebuild/recovery operations."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F3"
+      "primaryPriorityBand": "F3",
+      "executionOwner": "EventStreams / canonical ZoneTree and native Orleans Streams",
+      "nextDeliverable": "081 contracts, native generated serialization and node-local canonical ordered commit/recovery.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 2562,
+        "heading": "KL-082 · Event/queue keyspace і state envelopes",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-083",
@@ -2943,7 +3599,15 @@
         "wholeTaskGate": "Original full dependencies; one concurrent Exact winner, real idempotent retry/conflict and seeded crash/cold head+events invariants."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F3"
+      "primaryPriorityBand": "F3",
+      "executionOwner": "EventStreams / canonical ZoneTree and native Orleans Streams",
+      "nextDeliverable": "082 envelopes, bounded admission, atomic commit/idempotency and current persisted permissions.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 2570,
+        "heading": "KL-083 · AppendEvents, expected revision та dedup",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-084",
@@ -2974,7 +3638,15 @@
         "wholeTaskGate": "Original dependencies plus distributed cursor/retention/movement prerequisites for those cases; lost-wakeup, restart and explicit gaps through real operations."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F3"
+      "primaryPriorityBand": "F3",
+      "executionOwner": "EventStreams / canonical ZoneTree and native Orleans Streams",
+      "nextDeliverable": "Committed local append, bounded scoped reads and current policy; stable local EventSequence before distributed cursor work.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 2578,
+        "heading": "KL-084 · ReadStream, feed cursors і catch-up",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-085",
@@ -3003,7 +3675,15 @@
         "wholeTaskGate": "Original dependencies; real snapshot+tail reference, before-callback incompatibility/required-input denial, bounded cancellation, missing history, unchanged original bytes and no default external outputs."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F3"
+      "primaryPriorityBand": "F3",
+      "executionOwner": "EventStreams / canonical ZoneTree and native Orleans Streams",
+      "nextDeliverable": "084 local history, exact current schema, 063 required-input usage and 064 safe projection contracts.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 2586,
+        "heading": "KL-085 · Aggregate snapshots, schemas та replay",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-086",
@@ -3032,7 +3712,15 @@
         "wholeTaskGate": "Original dependencies; one enqueue within horizon, conflicting payload refusal, whole-batch quota rollback, payload/state crash atomicity."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F3"
+      "primaryPriorityBand": "F3",
+      "executionOwner": "Messaging / partition grains and native Durable Jobs",
+      "nextDeliverable": "082 envelopes, atomic batch/quota/idempotency baseline and current producer grants; early logged-time contract for scheduling fields.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 2594,
+        "heading": "KL-086 · Durable enqueue і queue-lane state",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-087",
@@ -3054,7 +3742,6 @@
         "KL-003",
         "KL-086",
         "KL-096",
-        "KL-092.current-phase-contract",
         "FOUNDATION.operation-gate"
       ],
       "review": {
@@ -3064,7 +3751,15 @@
         "wholeTaskGate": "Original dependencies; real committed claims, lost-response outcome recovery, stale-token fencing and explicit multi-lane partial results, with RF3/cold qualification."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F3"
+      "primaryPriorityBand": "F3",
+      "executionOwner": "Messaging / partition grains and native Durable Jobs",
+      "nextDeliverable": "Use canonical claim/ACK/renew receipts and delivery fences; native timers/jobs trigger authorized work only.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 2602,
+        "heading": "KL-087 · Claim, ACK, renew і delivery fencing",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-088",
@@ -3091,7 +3786,15 @@
         "wholeTaskGate": "Original dependencies; every real transition/reference, full-DLQ payload preservation, renew/expiry races, bounded retry and documented ordering limits across restart."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F3"
+      "primaryPriorityBand": "F3",
+      "executionOwner": "Messaging / partition grains and native Durable Jobs",
+      "nextDeliverable": "087 and shared early clock/expiry contract, persisted bounded transition rules and current redrive grants.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 2610,
+        "heading": "KL-088 · Retry, DLQ, cancellation та expiry",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-089",
@@ -3120,7 +3823,15 @@
         "wholeTaskGate": "Original dependencies; ACK103 cannot pass pending102, bounded backpressure, reconnect/filter-generation/partition coverage and retained-history replay; distributed movement cases qualified later."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F3"
+      "primaryPriorityBand": "F3",
+      "executionOwner": "EventStreams / canonical ZoneTree and native Orleans Streams",
+      "nextDeliverable": "084 local event positions, 087 delivery fencing, current 096 policy and bounded gap/filter ownership contracts.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 2618,
+        "heading": "KL-089 · Durable groups і contiguous checkpoints",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-090",
@@ -3152,7 +3863,15 @@
         "wholeTaskGate": "Original dependencies plus 094 for actual cross-partition transfer integration; crash after commit, stale delivery, dedup/redrive and no external network call under transaction."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F3"
+      "primaryPriorityBand": "F3",
+      "executionOwner": "Messaging / partition grains and native Durable Jobs",
+      "nextDeliverable": "Commit inbox/outbox and business effects together with stable retry identity and explicit cross-partition contract.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 2626,
+        "heading": "KL-090 · Inbox і CommitProcessing",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-091",
@@ -3187,11 +3906,19 @@
         "wholeTaskGate": "Original dependencies; real all-or-none precondition/quota failure and cold recovery, unrelated-domain denial, separate ANN freshness; central cross-model SQL flow must have an explicit owner/gate."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F3"
+      "primaryPriorityBand": "F3",
+      "executionOwner": "Messaging / partition grains and native Durable Jobs",
+      "nextDeliverable": "Commit document/event/queue effects in one existing same-partition atomic batch.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 2634,
+        "heading": "KL-091 · Document + event + queue atomic batch",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-092",
-      "title": "Persisted scheduler і clock contract",
+      "title": "Native Orleans durable scheduling and persisted deadlines",
       "statusAtReview": "in_progress",
       "originalDefinition": {
         "source": "docs/design/architecture-v0.3.uk.md#kl-092",
@@ -3207,17 +3934,24 @@
       "implementationPrerequisites": [
         "KL-088",
         "KL-052",
-        "KL-092.current-phase-contract",
         "FOUNDATION.operation-gate"
       ],
       "review": {
         "id": "KL-092",
-        "finding": "Oversized foundation+feature+measurement ticket. Split work stages without weakening final gate. Existing conditional SourceN113 is incomplete; ABI evidence/provider generation/current-caller qualification remain OPEN; no fake Ready or empty table.",
-        "implementationScope": "Early immutable explicit policy/read-only timing contract and actual native provider/ABI evidence; scheduler implementation after 088/052.",
-        "wholeTaskGate": "Original dependencies; actual Linux runtime-specific ABI/provider evidence, coherent all-current caller release/expiry/budget integration, scheduler restart/follower decisions/renew races, measured lateness under declared load."
+        "finding": "Use native Orleans timers/reminders/Durable Jobs by actual delivery/lifetime contract, ordinary TimeProvider for budgets and committed timestamps for deterministic apply. Remove the rejected custom-clock prerequisite and duplicate job lifecycle runtime.",
+        "implementationScope": "After queue state and bounded admission: selected native job provider, canonical due/outbox/version state, idempotent authorized effects and commit-to-schedule recovery. No separate clock provider or ABI gate.",
+        "wholeTaskGate": "Actual RF3 SDK/MCP scheduled operations, late/retried/duplicate delivery, renew and cancellation races, worker/silo restart, canonical timestamp decisions, resource bounds and measured lateness under declared load. Alpha package maturity remains explicit."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F3"
+      "primaryPriorityBand": "F3",
+      "executionOwner": "Messaging / partition grains and native Durable Jobs",
+      "nextDeliverable": "Use native Durable Jobs/timers/reminders and canonical persisted deadlines; no custom clock or duplicate scheduler runtime.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 2642,
+        "heading": "KL-092 · Persisted scheduler і clock contract",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-093",
@@ -3250,7 +3984,15 @@
         "wholeTaskGate": "Original dependencies; actual SDK/official MCP across RF3, worker/silo restart, no session HOL/network IO under storage gate, bounded inflight and joined cleanup."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F3"
+      "primaryPriorityBand": "F3",
+      "executionOwner": "Messaging / partition grains and native Durable Jobs",
+      "nextDeliverable": "Native coordinators and worker SDK invoke separately authorized bounded connection operations.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 2650,
+        "heading": "KL-093 · Orleans coordinators і worker SDK",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-094",
@@ -3284,7 +4026,15 @@
         "wholeTaskGate": "Original dependencies; each actual source/target crash stage, idempotent target, OutputPending until definitive receipt, visible destination failure and aligned retention pins/horizons."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F4"
+      "primaryPriorityBand": "F4",
+      "executionOwner": "Messaging / partition grains and native Durable Jobs",
+      "nextDeliverable": "Foundation RF3/current authority/receipts, durable outbox, enqueue and local inbox; stable intent/dedup contract before joined transport.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 2658,
+        "heading": "KL-094 · Cross-partition transfer outbox",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-095",
@@ -3317,7 +4067,15 @@
         "wholeTaskGate": "Original dependencies; actual SQL/JSON/.NET SDK/official MCP equivalent authorization/results, SELECT has no claim effect, internal generic UPDATE denial, no lease-token leakage; wire conformance remains separate."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F3"
+      "primaryPriorityBand": "F3",
+      "executionOwner": "EventStreams / canonical ZoneTree and native Orleans Streams",
+      "nextDeliverable": "Actual centrally pinned ScriptDom, versioned canonical AST/binding/execution, 084 reads/087 mutations, current persisted grants and safe projection.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 2666,
+        "heading": "KL-095 · Event SQL, queue views та protocol",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-096",
@@ -3350,7 +4108,15 @@
         "wholeTaskGate": "Original dependencies; real inspection omission, explicit required-input denial, next-boundary reclassification/revoke, DLQ inherited policy and exporter/log privacy."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F3"
+      "primaryPriorityBand": "F3",
+      "executionOwner": "EventStreams / canonical ZoneTree and native Orleans Streams",
+      "nextDeliverable": "061/062/063/064 current principal/catalog/use/projection baseline and 081 resource scopes.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 2674,
+        "heading": "KL-096 · Event/message RBAC і sensitive schemas",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-097",
@@ -3383,7 +4149,15 @@
         "wholeTaskGate": "Original dependencies; actual upload→job→vector→query, stale result CAS refusal, replay no default effects, self-loop bounds, current PII lineage and original/cold continuation."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F4"
+      "primaryPriorityBand": "F4",
+      "executionOwner": "EventStreams / canonical ZoneTree and native Orleans Streams",
+      "nextDeliverable": "085 replay, actual projection/search lifecycle 029/031/067, event references and current required-input/derived-lineage policy.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 2682,
+        "heading": "KL-097 · Event-driven projections і search lineage",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-098",
@@ -3416,7 +4190,15 @@
         "wholeTaskGate": "Original dependencies; real raw backup restore with stable positions, explicit unavailable history, paused dispatch and group/inbox/queue invariants; 094 remote pin/transfer cases joined when implemented."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F3"
+      "primaryPriorityBand": "F3",
+      "executionOwner": "EventStreams / canonical ZoneTree and native Orleans Streams",
+      "nextDeliverable": "005 canonical backup and local implemented event/queue/group/inbox state; shared retention/dedup horizon contract.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 2690,
+        "heading": "KL-098 · Eventing retention, purge і backup state",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-099",
@@ -3451,7 +4233,15 @@
         "wholeTaskGate": "Original dependencies; actual owner transition/failover/cold receipts, old owner cannot claim, committed ACK retained, no comparing unrelated log positions, whole atomic domain resources move."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F4"
+      "primaryPriorityBand": "F4",
+      "executionOwner": "EventStreams / canonical ZoneTree and native Orleans Streams",
+      "nextDeliverable": "Qualified RF3 authority and physical movement 035/036, stable cursor semantics072, persisted leases/groups087/089.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 2698,
+        "heading": "KL-099 · Eventing replication і migration",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-100",
@@ -3482,7 +4272,15 @@
         "wholeTaskGate": "Original dependencies retained for whole ticket; real occurrence dedup, restart saga CAS, cancel/timeout races, timezone/misfire policy and declared processing contract."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F4"
+      "primaryPriorityBand": "F4",
+      "executionOwner": "Messaging / partition grains and native Durable Jobs",
+      "nextDeliverable": "Persist recurring occurrences and workflow progress with native jobs and idempotent effects; no new saga runtime.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 2706,
+        "heading": "KL-100 · Delayed jobs, recurring occurrences і saga state",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-101",
@@ -3513,7 +4311,15 @@
         "wholeTaskGate": "Original dependencies plus actual capability prerequisites; original isolated Linux 1/3-native-node cells, 100k/1M records and >=100k measured operations, matched corpus/ack/resources/privacy, actual correctness and receive/ACK/unique completion metrics."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F6"
+      "primaryPriorityBand": "F6",
+      "executionOwner": "Performance / original native profiles and Linux comparisons",
+      "nextDeliverable": "Retain scenario contracts now; run only after functional equivalent implemented capabilities, selected primary target and source-bound fair deployment inventory.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 2714,
+        "heading": "KL-101 · Eventing benchmark kit і .NET baselines",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-102",
@@ -3545,7 +4351,15 @@
         "wholeTaskGate": "Original full dependencies; original lost-response/expired worker/ACK/checkpoint/process-kill/partition/total-reset/old-cut evidence, no partial effects/duplicate protected effects/skipped input."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F5"
+      "primaryPriorityBand": "F5",
+      "executionOwner": "Qualification / actual native functional operations",
+      "nextDeliverable": "Local091/090/088 as each becomes executable; cluster099 only for its capability-specific cases.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 2722,
+        "heading": "KL-102 · Eventing failure і state-machine suite",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-103",
@@ -3575,7 +4389,15 @@
         "wholeTaskGate": "Original full dependencies; actual tenant/token/revoke/header/body/DLQ/replay/export/injection cases, PII canaries absent from denied outputs and explicit required-input failures."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F5"
+      "primaryPriorityBand": "F5",
+      "executionOwner": "Qualification / actual native functional operations",
+      "nextDeliverable": "Local095/096 current authority and actual clients;097 only for its search-lineage cases.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 2730,
+        "heading": "KL-103 · Eventing adversarial security suite",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-104",
@@ -3612,7 +4434,15 @@
         "wholeTaskGate": "Original dependencies plus100 for all105 goal and105 measured-profile/performance gate; each real-process contract, paused restore/redrive, endurance/fault/privacy/bounds/clean Linux measurements and honest limitations/runbooks."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F7"
+      "primaryPriorityBand": "F7",
+      "executionOwner": "Delivery / final acceptance and runbooks",
+      "nextDeliverable": "All declared capabilities plus user complete105 scope, dependency provenance, supported deployment contracts and current qualification identities.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 2738,
+        "heading": "KL-104 · All-in-one release manifest і runbooks",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     },
     {
       "id": "KL-105",
@@ -3640,7 +4470,15 @@
         "wholeTaskGate": "Original final obligations retained: real bounded native captures or explicit unavailable results, loss/overhead/source mapping, confirmed owning repair and regressions, matched reprofile, separate original isolated Linux clean benchmarks."
       },
       "qualification": "Complete current owner-selected feature/ADR AC with original exact-source evidence. Implementation milestone readiness does not close this task; historical status is not current cohort proof.",
-      "primaryPriorityBand": "F6"
+      "primaryPriorityBand": "F6",
+      "executionOwner": "Performance / original native profiles and Linux comparisons",
+      "nextDeliverable": "Profile actual processes only for measured bottlenecks; preserve source/workload identities and matched reprofile before speed claims.",
+      "definitionLocator": {
+        "path": "docs/design/architecture-v0.3.uk.md",
+        "line": 2746,
+        "heading": "KL-105 · Профілювання .NET і виправлення виміряних вузьких місць",
+        "note": "Current resolvable locator; originalDefinition.source and all original snapshots remain frozen historical review input."
+      }
     }
   ],
   "milestones": [
@@ -3658,7 +4496,7 @@
         "KL-064",
         "KL-066",
         "KL-043",
-        "KL-092.native-clock-admission"
+        "FOUNDATION.usable-database"
       ],
       "kind": "bounded-task-milestone-or-integrated-gate"
     },
@@ -3799,9 +4637,10 @@
         "KL-001",
         "KL-002",
         "KL-015",
-        "KL-092.native-clock-admission"
+        "KL-008.silo-local-owner"
       ],
-      "kind": "bounded-task-milestone-or-integrated-gate"
+      "kind": "bounded-task-milestone-or-integrated-gate",
+      "scope": "One WebApplication/native Orleans host, awaited silo-local storage Grain Service Init, deferred original borrowers, catalog after Active and public admission after RF3; no nested host or custom clock blocker."
     },
     {
       "id": "KL-015",
@@ -3861,7 +4700,8 @@
         "KL-014.host-composition",
         "KL-018.stable-host-identity"
       ],
-      "kind": "bounded-task-milestone-or-integrated-gate"
+      "kind": "bounded-task-milestone-or-integrated-gate",
+      "scope": "Actual selected native Azure provider, silo generation, distributed directory and audited per-grain placement/migration. This is runtime membership, not database voter/receipt authority."
     },
     {
       "id": "KL-020",
@@ -4577,7 +5417,6 @@
         "KL-003",
         "KL-086",
         "KL-096",
-        "KL-092.current-phase-contract",
         "FOUNDATION.operation-gate"
       ],
       "kind": "task-implementation"
@@ -4635,28 +5474,9 @@
       "prerequisites": [
         "KL-088",
         "KL-052",
-        "KL-092.current-phase-contract",
         "FOUNDATION.operation-gate"
       ],
       "kind": "task-implementation"
-    },
-    {
-      "id": "KL-092.current-phase-contract",
-      "prerequisites": [
-        "KL-001",
-        "KL-002"
-      ],
-      "kind": "bounded-task-milestone-or-integrated-gate"
-    },
-    {
-      "id": "KL-092.native-clock-admission",
-      "prerequisites": [
-        "KL-092.current-phase-contract",
-        "KL-001",
-        "KL-002"
-      ],
-      "kind": "bounded-task-milestone-or-integrated-gate",
-      "scope": "Actual selected native current-time provider/ABI/source/caller admission before coordinator, silo readiness and public exposure; contract freeze or sampled clock alone is insufficient. Full scheduler and incomplete113 packet are not prerequisites or accepted substitutes."
     },
     {
       "id": "KL-093",
@@ -4836,12 +5656,79 @@
       ],
       "kind": "bounded-task-milestone-or-integrated-gate",
       "scope": "Optional bounded actual-process diagnosis of a concrete active runtime symptom; does not start broad optimization/benchmark campaigns or satisfy KL105 acceptance."
+    },
+    {
+      "id": "KL-008.silo-local-owner",
+      "prerequisites": [
+        "KL-001",
+        "KL-002",
+        "KL-003",
+        "KL-004",
+        "KL-007"
+      ],
+      "kind": "bounded-task-milestone-or-integrated-gate",
+      "scope": "Silo-local storage Grain Service owns the one original async ZoneTree open/publication/late joined close; constructors do not borrow unpublished storage."
+    },
+    {
+      "id": "FOUNDATION.usable-core",
+      "prerequisites": [
+        "KL-014",
+        "KL-020",
+        "KL-021",
+        "KL-015",
+        "KL-052",
+        "KL-053.connection-owner",
+        "KL-061",
+        "KL-064",
+        "KL-066.local-epochs",
+        "KL-043.current-format"
+      ],
+      "kind": "bounded-task-milestone-or-integrated-gate",
+      "scope": "Actual test-owned three-voter Aspire: persisted bootstrap identity, SDK write, official MCP read, identical-command replay, fresh revoke/refuse/repair, cancellation/healthy continuation, joined same-root cold restart and exact receipt/state."
+    },
+    {
+      "id": "KL-046.minimum-tsql",
+      "prerequisites": [
+        "KL-045.capability-identity",
+        "FOUNDATION.usable-core"
+      ],
+      "kind": "bounded-task-milestone-or-integrated-gate",
+      "scope": "Versioned currently supported T-SQL SELECT/EXEC semantics only, explicit unsupported diagnostics and same canonical authorization/atomicity contract; not a full-language claim."
+    },
+    {
+      "id": "KL-047.minimum-scriptdom",
+      "prerequisites": [
+        "KL-001",
+        "KL-046.minimum-tsql"
+      ],
+      "kind": "bounded-task-milestone-or-integrated-gate",
+      "scope": "Actual pinned Microsoft ScriptDOM parses and lowers the supported minimum profile without handwritten fallback; malformed/unsupported syntax is bounded and rejected before effects."
+    },
+    {
+      "id": "KL-051.minimum-parity",
+      "prerequisites": [
+        "KL-047.minimum-scriptdom",
+        "KL-064",
+        "KL-053.connection-owner"
+      ],
+      "kind": "bounded-task-milestone-or-integrated-gate",
+      "scope": "SDK, official MCP and minimum T-SQL profile return independently expected same authorized values, receipts, replays and errors."
+    },
+    {
+      "id": "FOUNDATION.usable-database",
+      "prerequisites": [
+        "FOUNDATION.usable-core",
+        "KL-051.minimum-parity",
+        "KL-015"
+      ],
+      "kind": "bounded-task-milestone-or-integrated-gate",
+      "scope": "First usable database: three real silo-local ZoneTree owners, native membership/directory, SDK/MCP/minimum T-SQL, telemetry export/privacy, recovery and joined shutdown. Broad models/audits/benchmarks do not block this milestone."
     }
   ],
   "verification": {
     "uniqueTasks": 105,
-    "nodes": 129,
-    "edges": 415,
+    "nodes": 133,
+    "edges": 433,
     "missingReferences": [],
     "cycles": [],
     "topologicalLayers": [
@@ -4861,19 +5748,18 @@
         "KL-069",
         "KL-073",
         "KL-077.normal-simd",
-        "KL-092.current-phase-contract",
         "KL-105.runtime-symptom-diagnosis"
       ],
       [
         "KL-005",
         "KL-008",
+        "KL-008.silo-local-owner",
         "KL-018.stable-host-identity",
         "KL-036.owner-fence-contract",
         "KL-043.current-format",
         "KL-052.core-bounds",
         "KL-061",
-        "KL-061.bootstrap-identity",
-        "KL-092.native-clock-admission"
+        "KL-061.bootstrap-identity"
       ],
       [
         "KL-009",
@@ -4919,14 +5805,27 @@
         "KL-036"
       ],
       [
+        "FOUNDATION.usable-core",
         "KL-053",
         "KL-066",
         "KL-070"
       ],
       [
-        "FOUNDATION.operation-gate",
+        "KL-046.minimum-tsql",
         "KL-071",
         "KL-076"
+      ],
+      [
+        "KL-047.minimum-scriptdom"
+      ],
+      [
+        "KL-051.minimum-parity"
+      ],
+      [
+        "FOUNDATION.usable-database"
+      ],
+      [
+        "FOUNDATION.operation-gate"
       ],
       [
         "KL-013",
@@ -5031,7 +5930,9 @@
         "KL-104"
       ]
     ],
-    "priorityBandTaskCoverage": 105
+    "priorityBandTaskCoverage": 105,
+    "originalDefinitionsPreserved": true,
+    "taskMilestonePrerequisitesMirrored": true
   },
   "originalFormalGraph": {
     "requestedOriginalTasks": 104,
@@ -5157,7 +6058,7 @@
   },
   "preservedWork": "Prepared model, benchmark, profiling and audit contributions are retained; no unqualified implementation packet counts as acceptance. No original required task is omitted.",
   "qualificationGates": {
-    "foundation": "Actual Aspire DockerRF3/native membership+ordered ZoneTree, current auth+connection+admission+OTel, SDK+officialMCP command/stable replay/strong session read/minority or failover/current-root recovery and joined shutdown.",
+    "foundation": "Actual Aspire Docker RF3 native storage Grain Services/membership/directory/audited placement; current authorization/connection/admission/OTel; original SDK+official MCP writes, receipt/session reads, replay, failover/minority/recovery and joined shutdown.",
     "model": "Focused whole-operation positive/denied/error/replay/recovery checks per supported capability; full SQL+native client conformance and cross-model composition remain mandatory.",
     "final": "Full unit/recovery/RF3/security/fault/endurance/coverage/resource/restore/license/provenance gates, actual matched profiling and Linux comparative workloads, then release manifests/runbooks.",
     "performanceOrder": [
@@ -5168,7 +6069,8 @@
       "KL-105.final-acceptance",
       "KL-080",
       "KL-104"
-    ]
+    ],
+    "firstUsable": "FOUNDATION.usable-core then minimum ScriptDOM parity then FOUNDATION.usable-database: exact actual three-voter Aspire SDK/MCP/T-SQL/replay/revoke/cancel/cold/OTel flow; no broad model or benchmark prerequisite."
   },
   "priorityBands": {
     "F0": [
@@ -5292,5 +6194,25 @@
       "KL-080",
       "KL-104"
     ]
+  },
+  "nativeFoundation": {
+    "decision": "docs/ADR/ADR-136-native-orleans-partition-ownership.md",
+    "physicalOwner": "Silo-local Grain Service; same original PartitionHost open/publication/late close, immutable physical identity and native lifecycle joins.",
+    "logicalOwner": "Stable partition grain routes to the actual current physical owner through typed Orleans calls; no file handles in migrating grains.",
+    "placement": "PreferLocal is a soft initial preference. Audit native Immovable automatic opt-out and manual movement separately; keep repartitioner for eligible grains.",
+    "reuse": [
+      "native membership and failure detection",
+      "distributed grain directory",
+      "placement and eligible activation migration",
+      "Grain Services and silo lifecycle",
+      "native calls and response streams",
+      "selected Orleans Streams provider",
+      "activation timers and provider-backed reminders/jobs",
+      "ZoneTree native WAL/snapshots/local transactions/maintainer/backup within their actual contracts"
+    ],
+    "transactions": "Native ITransactionalState/ITransactionalStateStorage only enlist participating state; actual canonical ZoneTree/RF3-backed provider and recovery qualification precede cross-grain database ACID claims. Not a first same-partition write blocker.",
+    "maintenance": "Do not blindly replace a joined original worker with native fire-and-forget cleanup: pinned IMaintainer does not expose its periodic task join. Preserve known required ownership until native equivalence is proven.",
+    "firstUsableMilestone": "FOUNDATION.usable-database",
+    "acceptancePromotion": false
   }
 }

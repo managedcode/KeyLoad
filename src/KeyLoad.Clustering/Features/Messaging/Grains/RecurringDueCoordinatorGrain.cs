@@ -8,6 +8,7 @@ using Orleans.Serialization;
 
 namespace KeyLoad.Clustering;
 
+[Orleans.Placement.Immovable(Orleans.Placement.ImmovableKind.Any)]
 [global::Orleans.GrainType(DueCoordinatorAliases.Coordinator), global::Orleans.Placement.PreferLocalPlacement]
 internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, DatabaseEngine database,
     ICommitCoordinator coordinator, IServiceProvider services, TimeProvider clock,

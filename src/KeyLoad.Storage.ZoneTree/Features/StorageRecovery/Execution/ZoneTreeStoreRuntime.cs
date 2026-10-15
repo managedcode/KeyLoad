@@ -1,3 +1,4 @@
+using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using KeyLoad.Diagnostics.Features.ResourceExecution;
 using KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
@@ -11,44 +12,49 @@ internal sealed class ZoneTreeStoreRuntime : IDisposable
     private const int ValueMarkerOffset = 0;
 
     private bool disposed;
+    private readonly Lock disposalGate = new();
+    private bool closeAttempted;
+    private ExceptionDispatchInfo? originalCloseFailure;
+    private const string OriginalCloseUnjoined = "The original native store close has not returned; retain its root.";
+    internal NativeStorageOwnerSettlement OwnershipSettlement
+    {
+        get;
+    }
+    internal void MarkDisposed()
+    {
+        disposed = true;
+    }
     private long position;
     private readonly bool guarded;
 
-    internal ZoneTreeStoreRuntime(ZoneTreeStoreOptions options, Guid? expectedNodeId = null, TimeProvider? timeProvider = null)
+    internal ZoneTreeStoreRuntime(ZoneTreeStoreOptions options, Guid? expectedNodeId = null, TimeProvider? timeProvider = null,
+        NativeStorageOwnerSettlement? ownershipSettlement = null)
     {
         _ = options.MaximumReadCutElapsed;
         Options = options;
         Clock = timeProvider ?? TimeProvider.System;
         guarded = expectedNodeId.HasValue;
-        if (expectedNodeId is not { } nodeId)
-        {
-            CacheLifecycle = new(this);
-            try
-            {
-                View = new(this);
-                Checkpoints = new(this);
-                Backups = new(this);
-                ZoneTreeStoreInitializer.Open(this);
-                EmbeddedPointCache = ZoneTreeStorePointCacheOpening.Open(this);
-            }
-            catch (Exception)
-            {
-                Gate.Dispose();
-                throw;
-            }
-            return;
-        }
+        OwnershipSettlement = ownershipSettlement ?? new();
+        OwnershipSettlement.BeginOpen();
         try
         {
             CacheLifecycle = new(this);
             View = new(this);
             Checkpoints = new(this);
             Backups = new(this);
-            ZoneTreeStoreInitializer.OpenExisting(this, nodeId);
+            if (expectedNodeId is { } nodeId)
+            {
+                ZoneTreeStoreInitializer.OpenExisting(this, nodeId);
+            }
+            else
+            {
+                ZoneTreeStoreInitializer.Open(this);
+                EmbeddedPointCache = ZoneTreeStorePointCacheOpening.Open(this);
+            }
         }
         catch (Exception failure)
         {
-            ZoneTreeExistingStoreCleanup.FailedConstruction(this, failure);
+            ZoneTreeStoreConstructionCleanup.Run(this, failure, guarded);
             throw;
         }
     }
@@ -140,78 +146,39 @@ internal sealed class ZoneTreeStoreRuntime : IDisposable
         DatabasePhaseTelemetry.End(DatabasePhaseKind.NativeTreeMutation, DatabasePhaseOutcome.Completed, started);
     }
 
+    internal bool IsDisposed => disposed;
+
     public void Dispose()
     {
         NativeReadCuts.EnsureDisposalCanJoin();
-        if (!ZoneTreePointCacheStoreGate.CanBeginDisposal(this, CacheLifecycle))
+        ZoneTreePointCacheStoreGate.RequireNotInOperation(this, CacheLifecycle);
+        lock (disposalGate)
         {
-            return;
-        }
-        NativeReadCuts.CloseAndJoin();
-        if (guarded)
-        {
-            DisposeExisting();
-            return;
-        }
-        if (!CacheLifecycle.TryBeginClose(out var control))
-        {
-            return;
-        }
-
-        var failures = new List<Exception>();
-        ZoneTreePointCacheCleanup.Capture(() =>
-        {
-            if (control is not null)
+            if (closeAttempted)
             {
-                control.CloseAdmission();
-            }
-            else
-            {
-                EmbeddedPointCache?.Disable();
-            }
-        }, failures);
-        Gate.EnterWriteLock();
-        try
-        {
-            if (disposed)
-            {
+                originalCloseFailure?.Throw();
+                if (!OwnershipSettlement.IsReleased)
+                {
+                    throw new InvalidOperationException(OriginalCloseUnjoined);
+                }
                 return;
             }
-
-            disposed = true;
-            ZoneTreePointCacheCleanup.Capture(() => ZoneTreeStoreHandleDisposal.Normal(this), failures);
-            ZoneTreePointCacheCleanup.Capture(CacheLifecycle.DisposeCacheUnderWrite, failures);
+            NativeReadCuts.EnsureDisposalCanJoin();
+            if (!ZoneTreePointCacheStoreGate.CanBeginDisposal(this, CacheLifecycle))
+            {
+                throw new InvalidOperationException(OriginalCloseUnjoined);
+            }
+            closeAttempted = true;
+            try
+            {
+                ZoneTreeStoreRuntimeDisposal.Run(this, guarded);
+                OwnershipSettlement.ReleaseReturned();
+            }
+            catch (Exception failure)
+            {
+                originalCloseFailure = ExceptionDispatchInfo.Capture(failure);
+                throw;
+            }
         }
-        finally
-        {
-            ZoneTreePointCacheCleanup.Capture(Gate.ExitWriteLock, failures);
-            ZoneTreePointCacheCleanup.Capture(Gate.Dispose, failures);
-        }
-        ZoneTreePointCacheCleanup.ThrowFailures(failures);
-    }
-
-    private void DisposeExisting()
-    {
-        if (!CacheLifecycle.TryBeginClose(out var control))
-        {
-            return;
-        }
-        var failures = new List<Exception>();
-        ZoneTreeExistingStoreCleanup.Capture(() => control?.CloseAdmission(), failures);
-        var entered = false;
-        ZoneTreeExistingStoreCleanup.Capture(() =>
-        {
-            Gate.EnterWriteLock();
-            entered = true;
-            disposed = true;
-        }, failures);
-        ZoneTreeExistingStoreCleanup.CloseRegistered(this, failures);
-        ZoneTreeExistingStoreCleanup.Capture(CacheLifecycle.DisposeCacheUnderWrite, failures);
-        if (entered)
-        {
-            ZoneTreeExistingStoreCleanup.Capture(Gate.ExitWriteLock, failures);
-        }
-        ZoneTreeExistingStoreCleanup.Capture(Gate.Dispose, failures);
-        ZoneTreeExistingStoreCleanup.ThrowFailures(failures);
     }
 }

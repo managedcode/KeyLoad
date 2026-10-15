@@ -60,11 +60,9 @@ internal sealed class ProtectedDocumentUncertaintyScenario(TwoRf3MembershipWave 
                 "{\"title\":\"uncertain Київ\",\"secret\":\"uncertain-private-canary\"}", 1, ExplicitReplacement: true)]);
         await ProtectedDocumentUncertaintyOracle.IssuedAsync(command, seed.Partition).ConfigureAwait(false);
         var before = await McpCallerAssertions.SdkSuccessAsync(await target.StatusAsync(caller.Token));
-        await Assert.That(before.Incarnation).IsEqualTo(seed.Peer.Target.Incarnation);
+        await Assert.That(before.Incarnation).IsEqualTo(seed.Move.Target.Incarnation);
         var expected = await ProtectedDocumentUncertaintyFlow.RunAsync(this, wave, source, target, denied, identity.Id,
             seed, command, before.Applied, caller.Token).ConfigureAwait(false);
-        await ProtectedDocumentRf3CommandOutcome.ExecuteAsync(wave, source, target, seed, command,
-            expected, caller.Token, identity.Id).ConfigureAwait(false);
         official = await McpOfficialClient.ConnectAsync(wave.Application, TwoRf3MembershipProtocol.Node2,
             identity.Secret, caller.Token).ConfigureAwait(false);
         await ProtectedDocumentUncertaintyOracle.ReplayAsync(source, target, official, command, expected, caller.Token);

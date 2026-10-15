@@ -1,4 +1,3 @@
-using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.UnitTests.Features.StorageRecovery;
@@ -7,21 +6,25 @@ internal static class PartitionPairedIdentityPreparation
 {
     internal static async Task<PartitionPairedIdentityCut> SeedAsync(PartitionHostRecoveryFixture fixture)
     {
-        await using (var host = fixture.OpenHost())
+        await fixture.RunHostAsync(host =>
         {
             host.Database.Store.Commit((transaction, _) =>
             {
                 transaction.Put(PartitionPairedIdentityProtocol.OriginalKey, PartitionPairedIdentityProtocol.OriginalValue);
                 return true;
             });
-        }
-        var runtime = ServerRuntimeTestOptions.Runtime(fixture.Options);
-        using var stores = new PartitionStores(runtime.Node, fixture.Options.DataDirectory,
-            runtime.StorageExecution, runtime.PointCache);
-        var journalLength = new FileInfo(Path.Combine(fixture.Options.DataDirectory,
-            PartitionHostRecoveryFixture.CanonicalDirectory, PartitionPairedIdentityProtocol.JournalFile)).Length;
-        return new(stores.Canonical.Identity, stores.Replica.Identity,
-            stores.Canonical.Position, stores.Replica.Position, journalLength);
+            return Task.CompletedTask;
+        }).ConfigureAwait(false);
+        PartitionPairedIdentityCut cut = null!;
+        await fixture.RunStoresAsync(stores =>
+        {
+            var journalLength = new FileInfo(Path.Combine(fixture.Options.DataDirectory,
+                PartitionHostRecoveryFixture.CanonicalDirectory, PartitionPairedIdentityProtocol.JournalFile)).Length;
+            cut = new(stores.Canonical.Identity, stores.Replica.Identity,
+                stores.Canonical.Position, stores.Replica.Position, journalLength);
+            return Task.CompletedTask;
+        }).ConfigureAwait(false);
+        return cut;
     }
 
     internal static async Task AppendTornTailAsync(PartitionHostRecoveryFixture fixture, long originalPosition,

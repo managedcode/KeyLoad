@@ -20,13 +20,11 @@ internal sealed class PartitionRootAdmissionFixture : IDisposable
         }
     }
 
-    internal PartitionHost OpenHost() => hostFixture.OpenHost();
-
     internal Task OpenAndDisposeHostAsync() => hostFixture.OpenAndDisposeHostAsync();
 
     internal async Task AssertHealthyWriteReopenAsync()
     {
-        await using (var host = OpenHost())
+        await hostFixture.RunHostAsync(async host =>
         {
             host.Database.Store.Commit((transaction, _) =>
             {
@@ -34,9 +32,22 @@ internal sealed class PartitionRootAdmissionFixture : IDisposable
                 return true;
             });
             await Assert.That(host.Database.Store.Read(view => view.ReadOwnedValue(Key))).IsEquivalentTo(Value);
-        }
-        await using var reopened = OpenHost();
-        await Assert.That(reopened.Database.Store.Read(view => view.ReadOwnedValue(Key))).IsEquivalentTo(Value);
+        }).ConfigureAwait(false);
+        await hostFixture.RunHostAsync(async reopened =>
+        {
+            await Assert.That(reopened.Database.Store.Read(view => view.ReadOwnedValue(Key))).IsEquivalentTo(Value);
+        }).ConfigureAwait(false);
+    }
+
+    internal static async Task RunAsync(Func<PartitionRootAdmissionFixture, Task> body)
+    {
+        var failures = new List<Exception>();
+        await ServerFailureObserver.ObserveAsync(async () =>
+        {
+            using var fixture = new PartitionRootAdmissionFixture();
+            await ServerFailureObserver.ObserveAsync(() => body(fixture), failures).ConfigureAwait(false);
+        }, failures).ConfigureAwait(false);
+        ServerFailureObserver.ThrowIfAny(failures);
     }
 
     public void Dispose() => hostFixture.Dispose();

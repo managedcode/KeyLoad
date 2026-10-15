@@ -43,6 +43,7 @@ internal sealed partial class ControlledPartitionMovementNativeHost : IAsyncDisp
             authenticationExecutionObserver: authenticationObserver, partitionMovementNativeObserver: nativeObservation);
         try
         {
+            await PartitionHostApplicationOpening.OpenAsync(application.Services).ConfigureAwait(false);
             return new(application, nativeObservation);
         }
         catch (Exception primary)

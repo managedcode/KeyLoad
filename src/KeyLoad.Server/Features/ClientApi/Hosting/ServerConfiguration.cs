@@ -56,7 +56,9 @@ internal static class ServerConfiguration
             branch =>
             {
                 branch.UseRouting();
-                branch.UseEndpoints(_ => { });
+                branch.UseEndpoints(_ =>
+                {
+                });
             });
         app.Use(next => new DatabaseIdentityMiddleware(next).InvokeAsync);
         app.UseAuthentication();
@@ -143,7 +145,8 @@ internal static class ServerConfiguration
             provider.GetRequiredService<IOptions<CommandAdmissionLimits>>()));
         services.AddSingleton(provider => new HttpAdmissionGovernor(
             provider.GetRequiredService<IOptions<HttpAdmissionLimits>>()));
-        services.AddSingleton<PartitionHost>();
+        services.AddSingleton<PartitionHostApplicationOwner>();
+        services.AddSingleton(provider => provider.GetRequiredService<PartitionHostApplicationOwner>().Borrow());
         services.AddSingleton(provider => provider.GetRequiredService<PartitionHost>().Database);
         services.AddSingleton<INodeAdministration, NodeAdministration>();
         PhysicalOwnerRegistrationServices.Add(services);

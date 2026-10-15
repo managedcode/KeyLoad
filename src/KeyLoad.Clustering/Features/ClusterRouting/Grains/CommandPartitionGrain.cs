@@ -15,6 +15,7 @@ namespace KeyLoad.Clustering;
 /// <param name="diagnostics">Logs unexpected node failures without serializing exceptions.</param>
 /// <param name="services">Native silo services for opt-in physical command routing.</param>
 /// <param name="options">The centrally validated signed request lifetime settings.</param>
+[Orleans.Placement.Immovable(Orleans.Placement.ImmovableKind.Any)]
 [Orleans.GrainType(GrainRoutingProtocol.CommandAlias), Orleans.Placement.PreferLocalPlacement]
 public sealed class CommandPartitionGrain(GrainRequestCodec codec, DatabaseEngine database, ICommitCoordinator coordinator,
     TimeProvider clock, NativeRequestWorkOwner workOwner, ILogger<CommandPartitionGrain> diagnostics,

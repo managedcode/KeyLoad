@@ -7,6 +7,7 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 /// <summary>Actual fixed-control public parent moves linked native models A to B, then B to A after true cold replay.</summary>
 internal static class PartitionMovementPublicParentRf3Scenario
 {
+    private const long PublicationRevisionStep = 1;
     internal static async Task RunAsync(TwoRf3MembershipWave wave, PartitionMovementPublicParentRf3Seed seed,
         CancellationToken cancellationToken)
     {
@@ -54,22 +55,8 @@ internal static class PartitionMovementPublicParentRf3Scenario
         PartitionMoveRequest request, AtomicPartitionPlacementResolution original, PhysicalShardRecord source,
         PartitionMoveResult actual, CancellationToken cancellationToken)
     {
-        var target = seed.Directory.Owners.Single(entry => entry.Owner.PhysicalShardId
-            == request.DestinationPhysicalShardId).Owner;
-        var token = actual.InstalledReceipt ?? throw new InvalidOperationException("Actual installed native receipt is absent.");
-        await Assert.That(token.Position).IsGreaterThan(0L);
-        await Assert.That(token.Incarnation).IsEqualTo(target.Incarnation);
-        await Assert.That(token.AtomicPartitionId).IsEqualTo(seed.Partition.AtomicPartitionId);
-        await Assert.That(token.OwnershipEpoch).IsEqualTo(checked(original.PlacementEpoch + 1));
-        await Assert.That(actual.SourceCut).IsGreaterThan(0L);
-        var expectedPlacement = new AtomicPartitionPlacementV1(1, seed.Partition, target.PhysicalShardId,
-            checked(original.Revision + 1), target.Incarnation, target.VoterIds, checked(original.PlacementEpoch + 1));
-        await SqlRf3Protocol.EqualAsync(new PartitionMoveResult(request.MoveId, seed.Partition,
-            PartitionMovePhase.Retired, source, target, actual.SourceCut, token, expectedPlacement), actual);
-        var current = await McpCallerAssertions.SdkSuccessAsync(await seed.Source.ReadAtomicPartitionPlacementAsync(
-            new(1, seed.Partition), cancellationToken).ConfigureAwait(false));
-        await SqlRf3Protocol.EqualAsync(new AtomicPartitionPlacementResolution(1, seed.Partition,
-            target.PhysicalShardId, target.Incarnation, target.VoterIds, expectedPlacement.PlacementEpoch,
-            original.DirectoryRevision, expectedPlacement.Revision, false), current);
+        var publicationRevision = checked(original.DirectoryRevision + PublicationRevisionStep);
+        await PhysicalShardPartitionMovementRf3Placement.RequireAsync(seed, request, original, source, actual,
+            publicationRevision, publicationRevision, cancellationToken).ConfigureAwait(false);
     }
 }
