@@ -16,6 +16,8 @@ internal static class QueryCapabilityVersionRf3Flow
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 await fixture.InitializeAsync();
+                fixture.RegisterNativeCoverageCase<QueryCapabilityVersionRf3WholeFlowTests>(
+                    nameof(QueryCapabilityVersionRf3WholeFlowTests.ManifestVersionsAndBuilderSqlMcpPagesExplainPersistedReaderRepairAndTwoColdOwners));
                 QueryCapabilityVersionRf3State state;
                 using (var deadline = McpCallerDeadline.Create())
                 {

@@ -48,7 +48,8 @@ internal sealed class QueryCandidateReader(DatabaseEngine database, IKeyValueVie
     {
         foreach (var index in resource.Indexes.OrderByDescending(item => item.Fields.Length))
         {
-            var prefixFields = index.Fields.TakeWhile(equality.ContainsKey).ToArray();
+            var prefixFields = index.Fields.TakeWhile(field => equality.ContainsKey(field)
+                && field is not SqlSyntax.MetadataIdPath and not SqlSyntax.MetadataRevisionPath).ToArray();
             if (prefixFields.Length == EmptyElementCount
                 || prefixFields.Length < index.Fields.Length && (!index.IncludeNull || !index.IncludeMissing))
             {

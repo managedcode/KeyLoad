@@ -1,4 +1,119 @@
 {
+  "STAGE84-EIGHT-TASK-OPERATIONS-001": {
+    "status": "in_progress",
+    "acceptedOriginalTasks": 20,
+    "originalTasks": 104,
+    "additionalPerformanceTask": "KL-105 open",
+    "fullTaskPromotion": false,
+    "record": "docs/implementation/qualification-stage84-eight-task-operations.md",
+    "parentCommit": "1581732d4cf396276da95c613c07732e6839c333",
+    "actualJoinedTaskScopes": [
+      "KL-037",
+      "KL-018",
+      "KL-049",
+      "KL-078",
+      "KL-021",
+      "KL-052",
+      "KL-028",
+      "KL-030"
+    ],
+    "adoption": "132 actual task paths plus reviewed finite carry, native API/resource/cancellation repairs and canonical formatter; ignored SourceN backlog excluded",
+    "verificationSourceDigest": "1aebe3ba99d9d6ead51e9bd6f7f77e8ca131d08f4a07293afed2be7fdfd41ff5",
+    "verificationImageDigest": "3eac727d82f0701dcec1b971bef9df68b2834bbe25a00416c08d95180291d4dc",
+    "sourceInputs": 12775,
+    "compiledDllPdbInputs": 318,
+    "originalBuildFailure": {
+      "run": "R111",
+      "errors": 149,
+      "warnings": 0,
+      "preservedOriginalLedger": "TestResults/stage61-native-join/root-r111-complete-native-build-error-ledger.original.json"
+    },
+    "fullSolutionRelease": {
+      "run": "R118",
+      "nativeExitCode": 0,
+      "errors": 0,
+      "warnings": 0,
+      "elapsedSeconds": 394.4510449159425,
+      "stdoutSha256": "73e7895d11f24fd32561c5f68e7811bc4968397a512b97582f585e9df8dec4e4",
+      "sourceDriftCount": 0,
+      "changedCompiledImages": 20
+    },
+    "canonicalFormatterVerify": {
+      "run": "R119",
+      "nativeExitCode": 0,
+      "elapsedSeconds": 266.4430855831597,
+      "sourceAndCompiledImageDriftCount": 0,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "initialSelectedUnit": {
+      "run": "R116",
+      "total": 68,
+      "passed": 67,
+      "failed": 1,
+      "skipped": 0,
+      "elapsedSeconds": 32.593494874890894,
+      "configuredParallelTests": 50,
+      "actualConcurrentPeak": 50,
+      "originalTrxSha256": "ea81ccb30b75e0d484fcb6fa53d38d4e4c90bf7651521abca56515e980572d29"
+    },
+    "repairedOriginalUnit": {
+      "run": "R120",
+      "total": 1,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "elapsedSeconds": 10.175388959003612,
+      "actualConcurrentPeak": 1,
+      "originalTrxSha256": "9bdb76cce25caf52388cc95ef48498bc2265c45ad027a63ef3bf7fd1edfaec7e",
+      "sourceAndProtectedImagesDriftCount": 0,
+      "boundary": "Original67R116passes retained separately. Fixture correction and regenerated Clustering/test images mean this is not one current68case or fullsuite pass."
+    },
+    "selectedFunctionalCoverage": {
+      "run": "R116",
+      "coveredLines": 10804,
+      "totalLines": 108294,
+      "coveredBranches": 5464,
+      "totalBranches": 68667,
+      "lineRate": 0.09976545330304541,
+      "branchRate": 0.07957242926005213,
+      "coberturaSha256": "a1b68fb19b4c91757b507f48b3a7b58d299bb35f1664dcc87442ebf49551e437",
+      "selection": "Selected68 meaningful functional operations including one failed seed; no load/benchmark contribution, original generated entries retained, not fullproduct or comparable-to-R97 coverage",
+      "sourceOwnedGapLedger": "TestResults/stage61-native-join/root-r118-source-owned-functional-gap-priorities.original.json"
+    },
+    "kl092ContractOnly": {
+      "decision": "docs/ADR/ADR-133-node-owned-kernel-clock-phase.md",
+      "owningIoPolicyJoined": true,
+      "nativeBodiesJoined": false,
+      "providerOrAbiOrPhysicalQualification": false
+    },
+    "sourceNNotDelivered": [
+      "KL-050full89",
+      "KL-063full20",
+      "KL-064full63 with dependent KL-095full40",
+      "KL-075full5 independently source-reviewed",
+      "KL-080full12",
+      "KL-079hiddenprefixnew28",
+      "KL-091full20",
+      "KL-090full16",
+      "KL-068full23",
+      "KL-067full12",
+      "KL-098conditionalfull25"
+    ],
+    "parallelRotation": [
+      "075→080→047",
+      "050→079→076",
+      "092continues independently"
+    ],
+    "coordination": "Further outgoing companion messages rejected by automatic approval for missing destination-specific permission; explicit three-chat question pending. No retry or bypass; local code and incoming updates continue.",
+    "remaining": [
+      "Actual new RF3 selector/census/image and complete TUnit-owned Aspire Docker SDK/official MCP operations",
+      "Fresh exact-source Linux Build and Tests; parent38682414398 last observed queued19/no runner",
+      "Full Unit/recovery/functionalcoverage thresholds and every original acceptance",
+      "Fault/endurance/power-loss and Linux native100k/1m matched competitors",
+      "KL105 original matched diagnostics and measured bottleneck repair; previous CPU capture delivered0samples"
+    ]
+  },
   "STAGE83-COHERENT-WHOLE-OPERATIONS-001": {
     "status": "in_progress",
     "acceptedOriginalTasks": 20,
@@ -57718,7 +57833,15 @@
       "src/KeyLoad.Orleans/Features/ClusterRouting/Topology/ReplicaMembershipStore.cs",
       "src/KeyLoad.Server/Features/ClusterRouting/Hosting/OrleansSiloConfiguration.cs",
       "src/KeyLoad.Server/Program.cs"
-    ]
+    ],
+    "currentStage84WholeOperations": {
+      "sourceJoined": true,
+      "record": "docs/implementation/qualification-stage84-eight-task-operations.md",
+      "fullReleaseBuildPassed": true,
+      "fullFormatterVerifyPassed": true,
+      "runtimeScope": "See original selected per-case reports in the checkpoint; public RF3 execution and full original task acceptance remain OPEN",
+      "fullTaskAccepted": false
+    }
   },
   "KL-019": {
     "title": "Orleans membership і ownership adapter",
@@ -57910,6 +58033,14 @@
         "Authenticate fresh current-source SDK/MCP/Q1 initiating failures and all113 native cases in both profiles",
         "Complete source/PDB/image and joined resource evidence; do not infer thread starvation or session initialization cause from HTTP200/-32603 alone"
       ]
+    },
+    "currentStage84WholeOperations": {
+      "sourceJoined": true,
+      "record": "docs/implementation/qualification-stage84-eight-task-operations.md",
+      "fullReleaseBuildPassed": true,
+      "fullFormatterVerifyPassed": true,
+      "runtimeScope": "See original selected per-case reports in the checkpoint; public RF3 execution and full original task acceptance remain OPEN",
+      "fullTaskAccepted": false
     }
   },
   "KL-022": {
@@ -59173,7 +59304,15 @@
       "published_package_source_license_identity",
       "native_projection_generation_and_authorized_token_rank_oracles",
       "rebuild_replay_swap_fault_resource_RF3_qualification"
-    ]
+    ],
+    "currentStage84WholeOperations": {
+      "sourceJoined": true,
+      "record": "docs/implementation/qualification-stage84-eight-task-operations.md",
+      "fullReleaseBuildPassed": true,
+      "fullFormatterVerifyPassed": true,
+      "runtimeScope": "See original selected per-case reports in the checkpoint; public RF3 execution and full original task acceptance remain OPEN",
+      "fullTaskAccepted": false
+    }
   },
   "KL-029": {
     "title": "Text projection і rebuild",
@@ -59428,6 +59567,14 @@
       "performanceImprovementEstablished": false,
       "runtimeQualified": false,
       "allAcceptanceClosed": false
+    },
+    "currentStage84WholeOperations": {
+      "sourceJoined": true,
+      "record": "docs/implementation/qualification-stage84-eight-task-operations.md",
+      "fullReleaseBuildPassed": true,
+      "fullFormatterVerifyPassed": true,
+      "runtimeScope": "See original selected per-case reports in the checkpoint; public RF3 execution and full original task acceptance remain OPEN",
+      "fullTaskAccepted": false
     }
   },
   "KL-031": {
@@ -60468,6 +60615,14 @@
           "sha256": "e4099c6b684e79beca6d40643f65f0d241337a780d958dd030231d2a3edc3bf3"
         }
       ]
+    },
+    "currentStage84WholeOperations": {
+      "sourceJoined": true,
+      "record": "docs/implementation/qualification-stage84-eight-task-operations.md",
+      "fullReleaseBuildPassed": true,
+      "fullFormatterVerifyPassed": true,
+      "runtimeScope": "See original selected per-case reports in the checkpoint; public RF3 execution and full original task acceptance remain OPEN",
+      "fullTaskAccepted": false
     }
   },
   "KL-038": {
@@ -61207,7 +61362,15 @@
       "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/ComposedProjectionLineageTests.cs",
       "tests/KeyLoad.IntegrationTests/Features/QueryExecution/Cases/ComposedProjectionLineageRf3Tests.cs"
     ],
-    "sourceStage": "complete_composed_projection_lineage_unit_sdk_mcp_scenarios_joined_current_gates_open"
+    "sourceStage": "complete_composed_projection_lineage_unit_sdk_mcp_scenarios_joined_current_gates_open",
+    "currentStage84WholeOperations": {
+      "sourceJoined": true,
+      "record": "docs/implementation/qualification-stage84-eight-task-operations.md",
+      "fullReleaseBuildPassed": true,
+      "fullFormatterVerifyPassed": true,
+      "runtimeScope": "See original selected per-case reports in the checkpoint; public RF3 execution and full original task acceptance remain OPEN",
+      "fullTaskAccepted": false
+    }
   },
   "KL-050": {
     "title": "Batch executor і secure operator boundaries",
@@ -61250,7 +61413,15 @@
       "src/KeyLoad.Query/Features/QueryExecution/Execution/SqlParser.cs",
       "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryEngine.cs",
       "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/SecurityAndQueryTests.cs"
-    ]
+    ],
+    "currentStage84WholeOperations": {
+      "sourceJoined": true,
+      "record": "docs/implementation/qualification-stage84-eight-task-operations.md",
+      "fullReleaseBuildPassed": true,
+      "fullFormatterVerifyPassed": true,
+      "runtimeScope": "See original selected per-case reports in the checkpoint; public RF3 execution and full original task acceptance remain OPEN",
+      "fullTaskAccepted": false
+    }
   },
   "KL-053": {
     "title": "Session facade та independent query contexts",
@@ -61908,6 +62079,14 @@
       "sourceIntegrated": true,
       "qualification": "No current build/native runtime/LINUX acceptance; last R56 results do not qualify these later changes.",
       "allAcceptanceClosed": false
+    },
+    "currentStage84WholeOperations": {
+      "sourceJoined": true,
+      "record": "docs/implementation/qualification-stage84-eight-task-operations.md",
+      "fullReleaseBuildPassed": true,
+      "fullFormatterVerifyPassed": true,
+      "runtimeScope": "See original selected per-case reports in the checkpoint; public RF3 execution and full original task acceptance remain OPEN",
+      "fullTaskAccepted": false
     }
   },
   "KL-079": {

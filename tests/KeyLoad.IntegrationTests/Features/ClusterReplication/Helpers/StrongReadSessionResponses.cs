@@ -1,0 +1,41 @@
+using System.Text.Json;
+using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.Features.ClusterRouting;
+using KeyLoad.IntegrationTests.Features.QueryExecution;
+using static KeyLoad.IntegrationTests.Features.ClusterReplication.StrongReadSessionProtocol;
+
+namespace KeyLoad.IntegrationTests.Features.ClusterReplication;
+
+internal static class StrongReadSessionResponses
+{
+    internal static async Task ReadAsync(RequestCqrsRf3Callers reader, EntityRef reference, CommitToken minimum,
+        DocumentResult? expected, StrongReadSessionRoute route, CancellationToken token)
+    {
+        var request = new GetDocumentRequest(reference, minimum);
+        var call = SqlRf3Protocol.Call(reference.Partition, McpCallerTools.DocumentsGet, request);
+        if (route == StrongReadSessionRoute.SdkGet)
+        {
+            await ExactAsync(expected, await McpCallerAssertions.SdkSuccessAsync(await reader.Sdk.GetAsync(reference, minimum, token)));
+            return;
+        }
+        if (route == StrongReadSessionRoute.SdkCall)
+        {
+            await ExactAsync(expected, await SqlRf3Protocol.SdkAsync<DocumentReadResult>(reader.Sdk, call, token));
+            return;
+        }
+        var reply = route == StrongReadSessionRoute.McpGet
+            ? await reader.Mcp.CallAsync(McpCallerTools.DocumentsGet, request, token)
+            : await reader.Mcp.CallAsync(SqlOperationProtocol.ToolName, call, token);
+        var result = await McpCallerAssertions.SuccessAsync<DocumentReadResult>(reply);
+        await ExactAsync(expected, result.Value);
+        var body = reply.StructuredContent!.Value.GetProperty(McpCallerProtocol.Result);
+        await Assert.That(body.ValueKind).IsEqualTo(JsonValueKind.Object);
+        await Assert.That(body.EnumerateObject().Select(property => property.Name)).IsEquivalentTo(new[] { DocumentField });
+        await Assert.That(body.GetProperty(DocumentField).ValueKind == JsonValueKind.Null).IsEqualTo(expected is null);
+    }
+    private static async Task ExactAsync(DocumentResult? expected, DocumentReadResult actual)
+    {
+        await Assert.That(actual).IsNotNull();
+        await SqlRf3Protocol.EqualAsync(new DocumentReadResult(expected), actual);
+    }
+}

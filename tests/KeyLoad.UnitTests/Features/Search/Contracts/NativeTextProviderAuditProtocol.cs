@@ -1,0 +1,53 @@
+namespace KeyLoad.UnitTests.Features.Search;
+
+internal static class NativeTextProviderAuditProtocol
+{
+    internal const string Root = "root";
+    internal const string Collection = "native-provider-audit";
+    internal const string Field = "/text";
+    internal const string Ukrainian = "ukrainian";
+    internal const string English = "english";
+    internal const string Control = "control";
+    internal const string Healthy = "healthy";
+    internal const string UkrainianJson = "{\"text\":\"привіт\"}";
+    internal const string UpdatedJson = "{\"text\":\"оновлено\"}";
+    internal const string EnglishJson = "{\"text\":\"hello\"}";
+    internal const string ControlJson = "{\"text\":\"unchanged\"}";
+    internal const string HealthyJson = "{\"text\":\"healthy\"}";
+    internal const string UkrainianTerm = "ПРИВІТ";
+    internal const string UpdatedTerm = "ОНОВЛЕНО";
+    internal const string EnglishTerm = "HELLO";
+    internal const string ControlTerm = "UNCHANGED";
+    internal const string HealthyTerm = "HEALTHY";
+    internal const string PutKind = "putDocument";
+    internal const string DeleteKind = "deleteDocument";
+    internal const string WrongVersion = "invalid-audit-version";
+    internal const string ForeignDomain = "foreign-provider-audit";
+    internal const string ExpectedCorruptionRefusal = "The actual restarted native text owner did not report semantic corruption.";
+    internal const string MissingOriginal = "The original native provider audit row is missing.";
+    internal const string WrongRoot = "The original provider audit root must remain canonical, existing and nonempty.";
+    internal const string InventoryExceeded = "The original native provider inventory exceeds its fixed test bound.";
+    internal const string RowSeparator = ":";
+    internal const long MissingRevision = 0L;
+    internal const long InitialRevision = 1L;
+    internal const long ChangedRevision = 2L;
+    internal const int NextCommit = 1;
+    internal const int PlacementVersion = 1;
+    internal const int InitialPolicyEpoch = 1;
+    internal const int InitialSchemaVersion = 1;
+    internal const ulong FirstNativeRecordId = 1;
+    internal const ulong SecondNativeRecordId = 2;
+    internal const string DirectoryMarker = ":directory";
+    internal const int QueryLimit = 4;
+    internal const int NativeEntryBound = 256;
+    internal const long NativeByteBound = 16_777_216L;
+    internal const int FirstRecord = 0;
+    internal const int SecondRecord = 1;
+    internal const int FirstFile = 0;
+    internal const ulong NoncontiguousId = 2;
+    internal const int InvalidManifestFormat = 2;
+    internal const int ScopePositionStep = 1;
+    internal const byte DigestDifference = 0x80;
+    internal const int FirstDigestByte = 0;
+    internal const double SingleBranchScore = 1d / 61d;
+}

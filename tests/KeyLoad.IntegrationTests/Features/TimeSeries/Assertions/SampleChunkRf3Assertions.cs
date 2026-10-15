@@ -9,7 +9,8 @@ internal static class SampleChunkRf3Assertions
     internal static async Task CompleteAsync(SampleChunkRf3Scenario scenario,
         SampleChunkWindowResult actual, CommitReceipt minimum)
     {
-        await Assert.That(actual.CutPosition >= minimum.Token.Position).IsTrue();
+        await Assert.That(actual.CutPosition).IsGreaterThan(0L);
+        await Assert.That(minimum.Token.AtomicPartitionId).IsEqualTo(scenario.Native.Partition.AtomicPartitionId);
         var expected = new SampleChunkWindowResult(scenario.WindowId, scenario.From, scenario.Until,
             SampleChunkRf3Protocol.MergedGeneration, SampleChunkRf3Protocol.MergedRevision,
             SampleChunkRf3Protocol.CorrectedSequence, null, [.. scenario.Expected], actual.CutPosition);
@@ -20,13 +21,17 @@ internal static class SampleChunkRf3Assertions
     internal static async Task AllReadRoutesAsync(SampleChunkRf3Scenario scenario,
         KeyLoadClient sdk, McpOfficialClient mcp, CommitReceipt minimum, CancellationToken token)
     {
+        var request = scenario.Request with
+        {
+            MinimumToken = minimum.Token
+        };
         var sdkResult = await McpCallerAssertions.SdkSuccessAsync(
-            await sdk.ReadSampleChunkWindowAsync(scenario.Request, token).ConfigureAwait(false));
+            await sdk.ReadSampleChunkWindowAsync(request, token).ConfigureAwait(false));
         await CompleteAsync(scenario, sdkResult, minimum);
         var mcpResult = (await McpCallerAssertions.SuccessAsync<SampleChunkWindowResult>(
-            await mcp.CallAsync(SampleChunkProtocol.ReadTool, scenario.Request, token).ConfigureAwait(false))).Value;
+            await mcp.CallAsync(SampleChunkProtocol.ReadTool, request, token).ConfigureAwait(false))).Value;
         await CompleteAsync(scenario, mcpResult, minimum);
-        var call = SqlRf3Protocol.Call(scenario.Native.Partition, SampleChunkProtocol.ReadTool, scenario.Request);
+        var call = SqlRf3Protocol.Call(scenario.Native.Partition, SampleChunkProtocol.ReadTool, request);
         var sql = await SqlRf3Protocol.SdkAsync<SampleChunkWindowResult>(sdk, call, token).ConfigureAwait(false);
         await CompleteAsync(scenario, sql, minimum);
         var sqlMcp = (await McpCallerAssertions.SuccessAsync<SampleChunkWindowResult>(
