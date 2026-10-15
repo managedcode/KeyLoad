@@ -30,6 +30,7 @@ public sealed partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.RecoveryRequired, QueueLifecycleProtocol.InvalidCounter);
         }
+        RequireQueueStoredCapacityAuthority(view, lane, counters);
         // This witness detects pre-admission records; it never reconstructs or resets authoritative usage.
         var existing = view.Scan(QueueKey(DeadLetterQueueSpace, lane), QueueLifecycleProtocol.Increment);
         if (existing.Records.IsEmpty != (counters.DeadLetterMessages == QueueLifecycleProtocol.Initial))

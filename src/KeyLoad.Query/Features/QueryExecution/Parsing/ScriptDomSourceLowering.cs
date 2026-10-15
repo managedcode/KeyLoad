@@ -67,6 +67,7 @@ internal static class ScriptDomSourceLowering
     private static string Identifier(Dom.ScalarExpression expression, ScriptDomLoweringContext context)
     {
         context.Observe(RootDepth);
+        RequirePlainArgument(expression);
         var value = expression is Dom.StringLiteral text ? text.Value : StringParameter(expression, context);
         global::KeyLoad.Core.JsonData.Identifier(value);
         return value;
@@ -92,6 +93,7 @@ internal static class ScriptDomSourceLowering
             return FirstGeneration;
         }
         context.Observe(RootDepth);
+        RequirePlainArgument(values[index]);
         long generation;
         if (values[index] is Dom.UnaryExpression unary && unary.Expression is Dom.IntegerLiteral signed)
         {
@@ -126,6 +128,13 @@ internal static class ScriptDomSourceLowering
             throw ScriptDomErrors.Invalid();
         }
         return generation;
+    }
+    private static void RequirePlainArgument(Dom.ScalarExpression expression)
+    {
+        if (expression is Dom.PrimaryExpression { Collation: not null })
+        {
+            throw ScriptDomErrors.Unsupported();
+        }
     }
     private const long FirstGeneration = 1;
 

@@ -83,7 +83,7 @@ internal static class SampleChunkExplicitMinimumUnitFlow
             var expected = new CommitReceipt(request.CommandId,
                 new(fixture.Owner.Store.Identity.Incarnation, request.Partition.AtomicPartitionId, expectedPosition, FirstEpoch),
                 [new MutationReceipt(kinds[index], SampleChunkCanonicalFixture.Set,
-                    SampleChunkCanonicalFixture.Series, revisions[index])], DurabilityProfile.QuorumProcessDurable);
+                    SampleChunkCanonicalFixture.Series, revisions[index])], DurabilityProfile.ProcessDurable);
             await SampleChunkExplicitMinimumUnitReads.EqualAsync(expected, actual);
             commands.Add((request, expected));
         }

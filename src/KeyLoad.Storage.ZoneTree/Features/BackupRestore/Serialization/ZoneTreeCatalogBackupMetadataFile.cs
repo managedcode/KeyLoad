@@ -16,7 +16,7 @@ internal static class ZoneTreeCatalogBackupMetadataFile
     {
         ArgumentNullException.ThrowIfNull(executionOptions);
         cancellationToken.ThrowIfCancellationRequested();
-        var verified = ZoneTreeBackupVerification.Verify(backup, executionOptions);
+        var verified = ZoneTreeBackupVerification.Verify(backup, executionOptions, cancellationToken);
         cancellationToken.ThrowIfCancellationRequested();
         var metadata = ReadVerified(backup, verified.Identity, verified.Position, executionOptions.Value, out var completeDigest);
         cancellationToken.ThrowIfCancellationRequested();

@@ -6,7 +6,7 @@ using KeyLoad.Query;
 namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
 /// <summary>Seeds one real partition with fixed-history event and ready-queue model rows.</summary>
-internal sealed record SqlModelViewRf3Scenario(PartitionRef Partition)
+internal sealed record SqlModelViewRf3Scenario(PartitionRef Partition, CommandRequest Original, CommitReceipt Receipt)
 {
     internal const string StreamSet = "model-events";
     internal const string StreamId = "order-history";
@@ -72,8 +72,8 @@ internal sealed record SqlModelViewRf3Scenario(PartitionRef Partition)
                 "{\"secret\":\"private-queue-canary\",\"value\":\"paid\"}",
                 "{\"privateHeader\":\"private-queue-header-canary\",\"source\":\"billing\"}", NotBefore, null)
         ]);
-        await McpCallerAssertions.SdkSuccessAsync(await administrator.CommitAsync(command, cancellationToken));
-        return new(partition);
+        var receipt = await McpCallerAssertions.SdkSuccessAsync(await administrator.CommitAsync(command, cancellationToken));
+        return new(partition, command, receipt);
     }
 
     internal QueryRequest EventSql(long generation = EventGeneration, string? cursor = null)

@@ -13,13 +13,15 @@ internal static class ZoneTreeBackupJournalValidation
     private const string ManifestCutMismatch = "The backup journal does not match its manifest cut.";
 
     internal static void Verify(FileStream journal, StoreIdentity identity, long expectedPosition,
-        ZoneTreeStorageExecutionOptions policy)
+        ZoneTreeStorageExecutionOptions policy, CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         var options = new ZoneTreeStoreOptions(Path.GetDirectoryName(journal.Name)!).WithExecutionSnapshot(policy);
         var header = new byte[HeaderLength];
-        var position = ReadCheckpoint(journal, header, options);
+        var position = ReadCheckpoint(journal, header, options, cancellationToken);
         while (journal.Position < journal.Length)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             if (journal.Length - journal.Position < HeaderLength)
             {
                 throw Errors.Fail(ErrorCode.Corruption, JournalIncomplete);
@@ -41,13 +43,14 @@ internal static class ZoneTreeBackupJournalValidation
             ZoneTreeJournalCodec.Deserialize(payload);
             position = sequence;
         }
+        cancellationToken.ThrowIfCancellationRequested();
         if (position != expectedPosition)
         {
             throw Errors.Fail(ErrorCode.Corruption, ManifestCutMismatch);
         }
     }
 
-    private static long ReadCheckpoint(FileStream journal, byte[] header, ZoneTreeStoreOptions options)
+    private static long ReadCheckpoint(FileStream journal, byte[] header, ZoneTreeStoreOptions options, CancellationToken cancellationToken)
     {
         if (journal.Length < HeaderLength)
         {
@@ -60,9 +63,7 @@ internal static class ZoneTreeBackupJournalValidation
         // the standalone-snapshot whole-file size limit on the combined journal.
         var magic = BinaryPrimitives.ReadUInt64LittleEndian(header);
         return magic == CheckpointMagic
-            ? ZoneTreeCheckpointReader.Read(journal, options, ObserveValidatedMutation).Position
+            ? ZoneTreeCheckpointReader.Read(journal, options, _ => cancellationToken.ThrowIfCancellationRequested()).Position
             : InitialJournalPosition;
     }
-
-    private static void ObserveValidatedMutation(StorageMutation mutation) => _ = mutation;
 }

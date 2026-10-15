@@ -36,14 +36,17 @@ internal static class ProjectionDigestReclassification
             EventProjectionFixture.InputField, 3L, 1L, [Classification], fixture.TargetCollection,
             EventProjectionFixture.TargetId, EventProjectionFixture.VectorField, EventProjectionFixture.Space,
             3L, "projection-reducer", "v1", 1L, [Classification]);
-        await ProjectionDigestAssertions.EqualAsync(fixture.Lineage(), expected);
+        await LineageAsync(fixture.Lineage(), expected);
         await ProjectionDigestAssertions.HealthyAsync(fixture, schema: 3L);
         await ProjectionDigestWholeFlow.ReplayAsync(fixture, command, result);
         var image = QueueWholeFlowStorage.Bytes(fixture.Harness.Store);
         var cut = fixture.Harness.Store.Position;
         await ProjectionDigestImage.ColdAsync(fixture, image, cut);
-        await ProjectionDigestAssertions.EqualAsync(fixture.Lineage(), expected);
+        await LineageAsync(fixture.Lineage(), expected);
         await ProjectionDigestAssertions.HealthyAsync(fixture, schema: 3L);
         await ProjectionDigestWholeFlow.ReplayAsync(fixture, command, result);
     }
+    private static async Task LineageAsync(VectorProjectionLineage? actual, VectorProjectionLineage expected)
+        => await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
+
 }

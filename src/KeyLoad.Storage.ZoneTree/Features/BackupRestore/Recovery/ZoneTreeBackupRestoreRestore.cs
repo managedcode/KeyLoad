@@ -25,7 +25,7 @@ internal static class ZoneTreeBackupRestoreRestore
         try
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var originalIdentity = ZoneTreeBackupRestoreFiles.ReadAndVerify(backup, staging, policy, out var originalPosition);
+            var originalIdentity = ZoneTreeBackupRestoreFiles.ReadAndVerify(backup, staging, policy, out var originalPosition, cancellationToken);
             if (verifyCatalog is not null)
             {
                 ZoneTreeCatalogRestoreEntry.RequireFreshIdentity(originalIdentity, newIncarnation, newSigningKey);

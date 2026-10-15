@@ -1,3 +1,4 @@
+using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
@@ -17,15 +18,21 @@ internal static class SubscriptionLeaseAuthorityAssertions
             "root", claim.Id);
         var saved = store.Read(view => view.ReadOwnedValue(outcomeKey))
             ?? throw new InvalidOperationException("The genuine original claim history is absent.");
+        var subscription = original.Get<ReceiveSubscriptionResult>().Status.Subscription;
+        var receive = new ReceiveSubscriptionRequest(Guid.NewGuid(), subscription);
+        var freshClaim = new ReplicatedOperation(receive.RequestId, OperationKind.ReceiveSubscription,
+            "root", claim.EvaluatedAt, JsonSerializer.Serialize(receive, JsonDefaults.Options));
         for (var repeat = 0; repeat < 2; repeat++)
         {
-            foreach (var operation in new[] { claim, attempt })
+            foreach (var operation in new[] { claim, attempt, freshClaim })
             {
                 var failure = Assert.ThrowsExactly<KeyLoadException>(() => db.Apply(operation));
                 await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
                 await Assert.That(failure.Message).IsEqualTo("The subscription delivery window is inconsistent.");
                 await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, bytes, position, identity);
             }
+            await Assert.That(store.Read(view => view.GetRecord<StoredOutcome>(
+                KeySpace.PartitionOutcome(subscription.Source.Partition, "root", freshClaim.Id)))).IsNull();
             await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(
                 NativeSerialization.Deserialize<StoredOutcome>(saved).Result, original);
             await Assert.That(store.Read(view => view.ReadOwnedValue(outcomeKey))!.AsSpan().SequenceEqual(saved)).IsTrue();

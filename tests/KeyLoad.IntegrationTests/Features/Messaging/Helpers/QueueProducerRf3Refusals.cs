@@ -22,13 +22,17 @@ internal static class QueueProducerRf3Refusals
                 QueueProducerRf3Protocol.Original, QueueProducerRf3Protocol.HealthyPayload)]
             };
             await QueueProducerRf3Assertions.DeniedAsync(await publisher.CommitAsync(changed, token), ErrorCode.Conflict);
+            await QueueProducerRf3LiteralAssertions.UnchangedAsync(publisher, seed, original.Image, token);
             await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit, changed, token), ErrorCode.Conflict, true);
+            await QueueProducerRf3LiteralAssertions.UnchangedAsync(publisher, seed, original.Image, token);
             await QueueProducerRf3Assertions.EqualAsync(await QueueProducerRf3Assertions.ImageAsync(publisher, seed,
                 QueueProducerRf3Protocol.Original, token), original.Image);
             await AtomicProducerRf3Routes.RefusedAsync(publisher, mcp, changed, ErrorCode.Conflict, token);
             var duplicate = QueueProducerRf3Setup.Fresh(seed, QueueProducerRf3Protocol.Refused, QueueProducerRf3Protocol.Original);
             await QueueProducerRf3Assertions.DeniedAsync(await publisher.CommitAsync(duplicate, token), ErrorCode.Conflict);
+            await QueueProducerRf3LiteralAssertions.UnchangedAsync(publisher, seed, original.Image, token);
             await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit, duplicate, token), ErrorCode.Conflict, true);
+            await QueueProducerRf3LiteralAssertions.UnchangedAsync(publisher, seed, original.Image, token);
             await Assert.That(await McpCallerAssertions.SdkSuccessAsync(await publisher.GetAsync(
                 QueueProducerRf3Assertions.Document(seed, QueueProducerRf3Protocol.Refused), token))).IsNull();
             await QueueProducerRf3Assertions.EqualAsync(await QueueProducerRf3Assertions.ImageAsync(publisher, seed,
@@ -37,7 +41,9 @@ internal static class QueueProducerRf3Refusals
             await AtomicProducerRf3Routes.RefusedAsync(publisher, mcp, duplicate, ErrorCode.Conflict, token);
             var quota = QueueProducerRf3Setup.Fresh(seed, QueueProducerRf3Protocol.Refused, QueueProducerRf3Protocol.Refused);
             await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit, quota, token), ErrorCode.ResourceExhausted, true);
+            await QueueProducerRf3LiteralAssertions.UnchangedAsync(publisher, seed, original.Image, token);
             await QueueProducerRf3Assertions.DeniedAsync(await publisher.CommitAsync(quota, token), ErrorCode.ResourceExhausted);
+            await QueueProducerRf3LiteralAssertions.UnchangedAsync(publisher, seed, original.Image, token);
             await AtomicProducerRf3Routes.RefusedAsync(publisher, mcp, quota, ErrorCode.ResourceExhausted, token);
             await QueueProducerRf3Assertions.AbsentAsync(publisher, seed, QueueProducerRf3Protocol.Refused, QueueProducerRf3Protocol.Refused, token);
             await QueueProducerRf3Assertions.EqualAsync(await QueueProducerRf3Assertions.ImageAsync(publisher, seed,

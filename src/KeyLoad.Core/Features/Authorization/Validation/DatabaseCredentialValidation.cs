@@ -8,6 +8,8 @@ internal static class DatabaseCredentialValidation
     internal const string UnavailableCredentialDetail = "The credential is unavailable or expired.";
     private const string NativeCredentialVerifierInvalid = "A credential verifier is invalid.";
     private const int NativeCredentialDigestBytes = 32;
+    private const string CredentialIdentityInvalid = "The authenticated credential identity is inconsistent.";
+    private const string PrincipalIdentityInvalid = "The persisted principal identity is inconsistent.";
 
     internal static PrincipalRecord Require(IKeyValueView view, DatabaseCredentialWitness witness,
         string? expectedPrincipal, DateTimeOffset now)
@@ -28,6 +30,10 @@ internal static class DatabaseCredentialValidation
         {
             throw Errors.Fail(ErrorCode.Unauthenticated, UnavailableCredentialDetail);
         }
+        if (!string.Equals(key.Id, witness.CredentialId, StringComparison.Ordinal))
+        {
+            throw Errors.Fail(ErrorCode.Corruption, CredentialIdentityInvalid);
+        }
         return ReadPrincipal(view, key.PrincipalId, now);
     }
 
@@ -42,6 +48,10 @@ internal static class DatabaseCredentialValidation
             throw Errors.Fail(ErrorCode.Unauthenticated, PrincipalDetailText);
         }
 
+        if (!string.Equals(principal.Id, id, StringComparison.Ordinal))
+        {
+            throw Errors.Fail(ErrorCode.Corruption, PrincipalIdentityInvalid);
+        }
         return principal;
     }
 }

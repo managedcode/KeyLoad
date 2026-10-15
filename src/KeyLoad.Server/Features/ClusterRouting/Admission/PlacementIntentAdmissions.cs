@@ -9,6 +9,8 @@ internal sealed class PlacementIntentAdmissions : IAsyncDisposable
     private const int NoCalls = 0;
     private const string Bound = "The Control-owner placement apply admission is exhausted.";
     private readonly Lock gate = new();
+    private readonly Lock shutdownGate = new();
+    private Task? shutdown;
     private readonly ConcurrencyLimiter limiter;
     private readonly TaskCompletionSource joined = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private int calls;
@@ -92,7 +94,16 @@ internal sealed class PlacementIntentAdmissions : IAsyncDisposable
         }
     }
 
-    public async ValueTask DisposeAsync()
+    public ValueTask DisposeAsync()
+    {
+        lock (shutdownGate)
+        {
+            shutdown ??= StopAsync();
+            return new(shutdown);
+        }
+    }
+
+    private async Task StopAsync()
     {
         var failures = new List<Exception>();
         ServerFailureObserver.Observe(CloseAdmission, failures);

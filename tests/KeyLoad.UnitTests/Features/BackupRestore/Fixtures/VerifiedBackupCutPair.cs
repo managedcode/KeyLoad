@@ -46,7 +46,7 @@ internal static class VerifiedBackupCutPair
     {
         var path = System.IO.Path.Combine(fixture.Root, name);
         var capture = MixedEventingCatalogRestore.Capture(fixture.Source, path, token);
-        var verification = ZoneTreeBackupVerification.Verify(path, fixture.Source.StorageExecution);
+        var verification = ZoneTreeBackupVerification.Verify(path, fixture.Source.StorageExecution, token);
         await Assert.That(verification.Position).IsEqualTo(capture.Position);
         await Assert.That(verification.Identity.NodeId).IsEqualTo(fixture.Source.Store.Identity.NodeId);
         await Assert.That(verification.Identity.Incarnation).IsEqualTo(fixture.Source.Store.Identity.Incarnation);

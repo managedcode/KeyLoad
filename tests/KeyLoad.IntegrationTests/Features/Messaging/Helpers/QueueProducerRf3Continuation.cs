@@ -25,7 +25,8 @@ internal static class QueueProducerRf3Continuation
             await QueueProducerRf3Assertions.EqualAsync(await AtomicProducerRf3EventAssertions.ReadAsync(publisher, seed,
                 QueueProducerRf3Protocol.Original, token), healthy.Original.Image.Events);
             await QueueProducerRf3Assertions.PublicImageAsync(mcp, seed, QueueProducerRf3Protocol.Healthy, healthy.Image, token);
-            await QueueProducerRf3Assertions.ReplayAsync(publisher, mcp, healthy.Command, healthy.Receipt, token);
+            await QueueProducerRf3ObservedReplay.RunAsync(publisher, mcp, seed, healthy.Command, healthy.Receipt,
+                QueueProducerRf3Protocol.Healthy, healthy.Image, token);
             await QueueProducerRf3Assertions.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(await publisher.CompleteAsync(healthy.Ack, token)), healthy.AckReceipt);
             await QueueProducerRf3Assertions.EqualAsync((await McpCallerAssertions.SuccessAsync<CommitReceipt>(await mcp.CallAsync(
                 McpCallerTools.MessagesComplete, healthy.Ack, token))).Value, healthy.AckReceipt);

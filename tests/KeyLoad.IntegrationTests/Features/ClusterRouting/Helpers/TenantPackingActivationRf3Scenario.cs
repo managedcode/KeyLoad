@@ -35,6 +35,7 @@ internal static class TenantPackingActivationRf3Scenario
             var state = new TenantPackingActivationRf3State(firstIdentity, secondIdentity, firstSeed, secondSeed,
                 firstReceipt, secondReceipt, placements.First, placements.Second);
             await TenantPackingActivationRf3Flow.RunAsync(wave, administrator, first, second, state, token);
+            await TenantPackingActivationRf3ColdReplay.RunAsync(wave, state, token);
         }, failures);
         if (second is { } ownedSecond)
         {

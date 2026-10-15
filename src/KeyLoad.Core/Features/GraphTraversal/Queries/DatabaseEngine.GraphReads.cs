@@ -10,6 +10,7 @@ public sealed partial class DatabaseEngine
     private const int MinimumTraversalDepth = 0;
     private const int MinimumTraversalVertices = 1;
     private const int MinimumTraversalEdges = 1;
+    private const int EmptyTraversalLabels = 0;
     /// <summary>Traverses visible graph edges in breadth-first order within one committed read cut.</summary>
     /// <param name="principalId">Persisted caller identity.</param>
     /// <param name="partition">Atomic graph partition.</param>
@@ -39,6 +40,10 @@ public sealed partial class DatabaseEngine
             var principal = Principal(view, principalId, Clock.GetUtcNow());
             Authorization.Require(principal, partition, graph, Capability.GraphRead);
             var resource = Resource(view, partition, graph, ResourceKind.Graph);
+            if (labels is { Length: > EmptyTraversalLabels })
+            {
+                Authorization.RequireFieldUse(principal, resource, LabelField);
+            }
             return new GraphTraversalReader(this, view, principal, resource, partition, graph, start,
                 maxDepth, maxVertices, maxEdges, labels, budget).Read();
         });

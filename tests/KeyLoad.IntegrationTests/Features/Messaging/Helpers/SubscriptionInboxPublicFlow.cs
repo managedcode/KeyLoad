@@ -30,6 +30,8 @@ internal static class SubscriptionInboxPublicFlow
         var initial = await SubscriptionPhasePublicAssertions.ClaimAsync(sdk, mcp, first, source, [1L, 2L, 3L], token);
         var process = new SubscriptionProcessingRequest(Guid.NewGuid(), seed.Group, initial.Deliveries[0].Token,
             SubscriptionFilterRf3Protocol.Handler, 1L, SubscriptionInboxPublicAssertions.Effects);
+        var failedProcessing = await SubscriptionProcessingRollbackPublicAssertions.StartAsync(
+            sdk, mcp, process, first, initial, source, token);
         var processed = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitSubscriptionProcessingAsync(process, token));
         await SubscriptionFilterRf3Assertions.EqualAsync((await McpCallerAssertions.SuccessAsync<SubscriptionProcessingResult>(
             await mcp.CallAsync(McpCallerTools.SubscriptionsProcess, process, token))).Value, processed);
@@ -59,13 +61,17 @@ internal static class SubscriptionInboxPublicFlow
         var problem = await SubscriptionInboxPublicAssertions.ConflictAsync(sdk, mcp, conflict, token);
         await SubscriptionFilterRf3Assertions.StatusAsync(sdk, mcp, seed.Group, 2L, 0L, false, token);
         await SubscriptionFilterRf3Assertions.HistoryAsync(sdk, mcp, seed.Group.Source, source, token);
-        return new(first, initial, process, processed, current, claimed, conflict, problem, source);
+        return new(first, initial, process, processed, current, claimed, conflict, problem, source)
+        {
+            FailedProcessing = failedProcessing
+        };
     }
 
     private static async Task RepairAsync(KeyLoadClient sdk, McpOfficialClient mcp,
         SubscriptionInboxPublicState state, CancellationToken token)
     {
         var group = state.Current.Subscription;
+        await SubscriptionProcessingRollbackPublicAssertions.ReplayAsync(sdk, mcp, state, token);
         await SubscriptionInboxPublicAssertions.OriginalFencedAsync(sdk, mcp, state, token);
         await Assert.That(await SubscriptionInboxPublicAssertions.ConflictAsync(sdk, mcp, state.Conflict, token))
             .IsEqualTo(state.ConflictProblem);
@@ -98,6 +104,7 @@ internal static class SubscriptionInboxPublicFlow
         SubscriptionInboxPublicState state, CancellationToken token)
     {
         var group = state.Current.Subscription;
+        await SubscriptionProcessingRollbackPublicAssertions.ReplayAsync(sdk, mcp, state, token);
         await SubscriptionInboxPublicAssertions.OriginalFencedAsync(sdk, mcp, state, token);
         await Assert.That(await SubscriptionInboxPublicAssertions.ConflictAsync(sdk, mcp, state.Conflict, token))
             .IsEqualTo(state.ConflictProblem);

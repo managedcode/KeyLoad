@@ -15,7 +15,8 @@ internal static class QueueProducerRf3Replay
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3, seed.Identity.Secret, token);
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            await QueueProducerRf3Assertions.ReplayAsync(publisher, mcp, seed.Original, original.Receipt, token);
+            await QueueProducerRf3ObservedReplay.RunAsync(publisher, mcp, seed, seed.Original, original.Receipt,
+                QueueProducerRf3Protocol.Original, original.Image, token);
             await QueueProducerRf3Assertions.EqualAsync(await QueueProducerRf3Assertions.ImageAsync(publisher, seed,
                 QueueProducerRf3Protocol.Original, token), original.Image);
             await QueueProducerRf3Assertions.PublicImageAsync(mcp, seed, QueueProducerRf3Protocol.Original, original.Image, token);

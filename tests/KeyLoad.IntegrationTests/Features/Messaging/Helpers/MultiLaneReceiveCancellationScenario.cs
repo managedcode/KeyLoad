@@ -52,7 +52,7 @@ internal sealed class MultiLaneReceiveCancellationScenario(bool useMcp)
         await ObserveAndCancelAsync(deadline.Token).ConfigureAwait(false);
         await VerifyOriginalAsync(deadline.Token).ConfigureAwait(false);
         await MultiLaneReceiveCancellationAssertions.ReconcileAsync(administrator!, caller!, request!,
-            committedFirst!, beforeSecond!, deadline.Token).ConfigureAwait(false);
+            committedFirst!, beforeSecond!, identity!.PrincipalId, deadline.Token).ConfigureAwait(false);
     }
 
     private async Task PrepareAsync(CancellationToken token)

@@ -29,34 +29,13 @@ internal static class QueueProducerRf3OriginalFlow
             {
                 await QueueProducerRf3Assertions.EqualAsync(returned, receipt);
             }
-            await QueueProducerRf3Assertions.ReplayAsync(publisher, mcp, seed.Original, receipt, token);
             var image = await QueueProducerRf3Assertions.ImageAsync(publisher, seed, QueueProducerRf3Protocol.Original, token);
+            await QueueProducerRf3ObservedReplay.RunAsync(publisher, mcp, seed, seed.Original, receipt,
+                QueueProducerRf3Protocol.Original, image, token);
             await AtomicProducerRf3EventAssertions.LiteralAsync(image.Events, seed, QueueProducerRf3Protocol.Original,
                 QueueProducerRf3Protocol.Payload, QueueProducerRf3Protocol.OriginalEventSequence);
-            await Assert.That(image.Document.Json).IsEqualTo(QueueProducerRf3Protocol.Payload);
-            await Assert.That(image.Document.Revision).IsEqualTo(QueueProducerRf3Protocol.InitialRevision);
-            await Assert.That(image.Document.Reference).IsEqualTo(QueueProducerRf3Assertions.Document(seed, QueueProducerRf3Protocol.Original));
-            await Assert.That(image.Document.Redacted).IsFalse();
-            await Assert.That(image.Document.RedactedFields).IsEmpty();
-            await Assert.That(image.Ready.Metadata.Id).IsEqualTo(QueueProducerRf3Protocol.Original);
-            await Assert.That(image.Scheduled.Metadata.Id).IsEqualTo(QueueProducerRf3Protocol.Scheduled);
-            await Assert.That(image.Ready.Metadata.ReadySequence).IsEqualTo(QueueProducerRf3Protocol.InitialReadySequence);
-            await Assert.That(image.Scheduled.Metadata.ReadySequence).IsEqualTo(QueueProducerRf3Protocol.ScheduledReadySequence);
-            await Assert.That(image.Ready.Metadata.State).IsEqualTo(MessageState.Ready);
-            await Assert.That(image.Scheduled.Metadata.State).IsEqualTo(MessageState.Scheduled);
-            await Assert.That(image.Scheduled.Metadata.NotBefore).IsEqualTo(seed.Due);
-            await Assert.That(seed.Due > TimeProvider.System.GetUtcNow()).IsTrue();
-            foreach (var message in new[] { image.Ready, image.Scheduled })
-            {
-                await Assert.That(message.PayloadJson).IsEqualTo(QueueProducerRf3Protocol.Payload);
-                await Assert.That(message.HeadersJson).IsEqualTo(QueueProducerRf3Protocol.Headers);
-                await Assert.That(message.Metadata.LeaseOwner).IsNull();
-                await Assert.That(message.Metadata.LeaseUntil).IsNull();
-                await Assert.That(message.Metadata.ExpiresAt).IsNull();
-                await Assert.That(message.Metadata.Attempts).IsEqualTo(QueueProducerRf3Protocol.InitialAttempts);
-                await Assert.That(message.Metadata.LeaseVersion).IsEqualTo(QueueProducerRf3Protocol.UnclaimedLeaseVersion);
-                await Assert.That(message.Metadata.DeliveryGeneration).IsEqualTo(QueueProducerRf3Protocol.InitialGeneration);
-            }
+            await QueueProducerRf3LiteralAssertions.ProducerAsync(fixture, seed, seed.Original, receipt, image,
+                QueueProducerRf3Protocol.Original, QueueProducerRf3Protocol.Payload, QueueProducerRf3Protocol.InitialReadySequence, token);
             await QueueProducerRf3Assertions.PublicImageAsync(mcp, seed, QueueProducerRf3Protocol.Original, image, token);
             result = new(seed, receipt, image);
         }, failures).ConfigureAwait(false);

@@ -9,6 +9,7 @@ internal static class ModelQueryPolicies
     private const string HeadersModelField = "headers";
     private const char PathSeparator = '/';
     private const string RootFieldPath = "/";
+    private const int EmptyPathCharacters = 0;
 
     internal static ResourceDefinition Rebase(ResourceDefinition resource)
     {
@@ -23,5 +24,6 @@ internal static class ModelQueryPolicies
     }
 
     private static string Rebase(string root, string path)
-        => path.StartsWith(PathSeparator) ? RootFieldPath + root + path : RootFieldPath + root + RootFieldPath + path;
+        => path.Length == EmptyPathCharacters ? RootFieldPath + root
+            : path.StartsWith(PathSeparator) ? RootFieldPath + root + path : RootFieldPath + root + RootFieldPath + path;
 }

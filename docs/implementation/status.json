@@ -1,4 +1,89 @@
 {
+  "STAGE65-PARALLEL-QUALIFICATION-001": {
+    "title": "Parallel whole-task implementation and fresh assembly qualification",
+    "status": "in_progress",
+    "qualifiedOriginalTasks": 20,
+    "originalTaskCount": 104,
+    "additionalPerformanceTask": "KL-105 remains in_progress",
+    "fullTaskPromotion": false,
+    "sourceBatch": {
+      "scope": [
+        "KL-043 backup cancellation",
+        "KL-045 capability result bytes",
+        "KL-048 collation profile",
+        "KL-049 sparse composite prefix",
+        "KL-064 model root projection",
+        "KL-068 identity binding",
+        "KL-069/070/071 movement and placement",
+        "KL-086 queue capacity",
+        "KL-087 replay and lifetime",
+        "KL-089 subscription authority",
+        "KL-092 recorded follower clock"
+      ],
+      "receiptPaths": [
+        "TestResults/stage61-native-join/root-r61-eight-whole-task-and-runtime-correction-adoption.original.json",
+        "TestResults/stage61-native-join/root-r61-kl064-kl049-closed-peer-33-path-adoption.original.json",
+        "TestResults/stage61-native-join/root-r64-nine-recovery-diagnostic-and-real-cold-ownership-adoption.original.json"
+      ],
+      "runtimeProof": "Fresh runtime proof remains pending; source implementation and review are not acceptance."
+    },
+    "canonicalFormatter": {
+      "nativeExitCode": 0,
+      "elapsedSeconds": 293.8752718330361,
+      "changedSourcePaths": 61,
+      "nativeTokenReview": "TestResults/stage61-native-join/root-r61-formatter-native-token-review.original.json",
+      "currentCanonicalVerify": "Pending after subsequent compiler corrections; mutation exit zero is not full quality qualification."
+    },
+    "freshFullSolutionBuild": {
+      "nativeExitCode": 1,
+      "elapsedSeconds": 303.769097374985,
+      "testCompilerDiagnostics": 33,
+      "stdoutSha256": "cd91c35304b198ed9b35be3e33e8d757b78858372ba9ceed2fe3a1c7b1ca90d3",
+      "diagnosticsLedger": "TestResults/stage61-native-join/root-r63-complete-33-native-compiler-diagnostic-ledger.original.json",
+      "productCompilation": "Product projects compiled, test projects failed. Whole solution remains red."
+    },
+    "followupUnitBuild": {
+      "nativeExitCode": 1,
+      "elapsedSeconds": 347.8662424159702,
+      "testCompilerDiagnostics": 19,
+      "stdoutSha256": "051752210f4dcba8eadf55081dc507e1fde342946549fa06f121422afad290e4",
+      "sourceCorrections": "All nineteen corrected in source; fresh R65 Unit compilation pending."
+    },
+    "followupRecoveryBuild": {
+      "nativeExitCode": 1,
+      "elapsedSeconds": 70.28695691679604,
+      "remainingDiagnostics": 1,
+      "code": "CA2213",
+      "owner": "PeerDiscoveryNativeCluster.cluster",
+      "stdoutSha256": "de3b23409e75502570a447e3461413f671557daaf00e89e6caf97594a2142ab4",
+      "sourceOwner": "Companion root owns the remaining actual disposal repair."
+    },
+    "parallelism": {
+      "rootOnlySdkAndGit": true,
+      "distinctTestAssemblyCompilations": true,
+      "reusedProductReferences": "R65 /p:BuildProjectReferences=false reuses compiled product references, after verifying no product input changes; not a whole-solution build.",
+      "nativeTUnitMaximum": 50,
+      "runtimeSelection": "Changed whole-operation classes; fresh native discovery pending."
+    },
+    "unchangedOpenFailures": {
+      "unitMovementAndTypedInsert": 5,
+      "recoveryHostLifetime": 1,
+      "qualification": "Other earlier failures have source corrections only and remain unqualified until fresh original operations pass."
+    },
+    "publicCutDomainCorrection": "Query and stream local Store.Position cannot be numerically ordered against a logical RF3 receipt position. Public rows/events, original full receipt replay and before/after full-row/outbox witnesses remain; actual public owner/cut correlation is still open.",
+    "linuxQualified": false,
+    "productionQualified": false,
+    "unitAssemblyOnlyBuild": {
+      "nativeExitCode": 1,
+      "elapsedSeconds": 236.3239856250584,
+      "remainingDiagnostics": 1,
+      "code": "IDE0090",
+      "source": "ModelRootPolicyRequests.Predicate explicit new Comparison after concrete return-type correction",
+      "stdoutSha256": "0ce52d446f8c4130da32bc316e32e32445f2121f5360073d37f9805aa8ef776a",
+      "sourceCorrection": "Applied target-typed new; next fresh compiler gate pending.",
+      "protectedSourceDrift": 0
+    }
+  },
   "STAGE64-PUBLIC-MODELS-001": {
     "record": "docs/implementation/qualification-stage64-public-models.md",
     "originalPlan": {

@@ -8,16 +8,17 @@ internal static class ZoneTreeBackupVerification
     private const string GuidFormat = "N";
 
     internal static (StoreIdentity Identity, long Position) Verify(string directory,
-        IOptions<ZoneTreeStorageExecutionOptions> executionOptions)
+        IOptions<ZoneTreeStorageExecutionOptions> executionOptions, CancellationToken cancellationToken = default)
     {
         var policy = executionOptions.Value;
         policy.Validate();
+        cancellationToken.ThrowIfCancellationRequested();
         var staging = Path.Combine(Path.GetTempPath(), VerificationPrefix + Guid.NewGuid().ToString(GuidFormat));
         ZoneTreeStoreFiles.CreatePrivateDirectory(staging);
         (StoreIdentity Identity, long Position) result;
         try
         {
-            var identity = ZoneTreeBackupRestoreFiles.ReadAndVerify(directory, staging, policy, out var position);
+            var identity = ZoneTreeBackupRestoreFiles.ReadAndVerify(directory, staging, policy, out var position, cancellationToken);
             result = (identity, position);
         }
         catch (Exception failure)

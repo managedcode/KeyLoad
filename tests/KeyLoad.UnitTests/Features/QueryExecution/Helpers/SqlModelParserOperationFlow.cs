@@ -21,6 +21,7 @@ internal static class SqlModelParserOperationFlow
         _ = fixture.Principal(repaired: false);
         await SqlModelParserRefusals.DeniedAsync(fixture);
         _ = fixture.Principal(repaired: true);
+        await ModelSourceArgumentRefusals.RequireAsync(fixture);
         await SqlModelParserRefusals.StaleAsync(fixture);
         await SqlModelParserPages.RequireAsync(fixture);
         await SqlModelParserConservation.ReplayAsync(fixture);
@@ -31,6 +32,7 @@ internal static class SqlModelParserOperationFlow
             var after = SqlModelParserConservation.Capture(fixture);
             await Assert.That(after.Image).IsEqualTo(before.Image);
             await Assert.That(after.Position).IsEqualTo(before.Position);
+            await ModelSourceArgumentRefusals.RequireAsync(fixture);
             await SqlModelParserRefusals.StaleAsync(fixture);
             await SqlModelParserPages.RequireAsync(fixture);
             await SqlModelParserConservation.ReplayAsync(fixture);

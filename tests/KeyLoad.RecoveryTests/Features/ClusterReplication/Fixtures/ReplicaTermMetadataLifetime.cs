@@ -46,7 +46,8 @@ internal sealed class ReplicaTermMetadataLifetime : IDisposable
     }
 
     internal static ReplicaTermMetadataLifetime Open(string directory, Action<CommitStage, long, int>? observer,
-        ReplicaConfiguration? requested = null)
+        ReplicaConfiguration? requested = null, TimeProvider? canonicalClock = null,
+        ReadOnlyMemory<byte>? initialSigningKey = null, bool deleteDirectoryOnFailure = true)
     {
         ZoneTreeStore? replica = null;
         ZoneTreeStore? canonical = null;
@@ -63,9 +64,10 @@ internal sealed class ReplicaTermMetadataLifetime : IDisposable
             }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
             canonical = new(new(Path.Combine(directory, CanonicalDirectory))
             {
-                Incarnation = configuration.Incarnation
+                Incarnation = configuration.Incarnation,
+                SigningKey = initialSigningKey
             }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
-            var database = new DatabaseEngine(canonical, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource(), RecoveryExecutionOptions.Messaging(), RecoveryExecutionOptions.GraphExecution(), RecoveryExecutionOptions.ChangeFeedExecution(), RecoveryExecutionOptions.BlobExecution(), RecoveryExecutionOptions.NativeClaimsExecution(), RecoveryExecutionOptions.TimeSeriesExecution(), RecoveryExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
+            var database = new DatabaseEngine(canonical, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource(), RecoveryExecutionOptions.Messaging(), RecoveryExecutionOptions.GraphExecution(), RecoveryExecutionOptions.ChangeFeedExecution(), RecoveryExecutionOptions.BlobExecution(), RecoveryExecutionOptions.NativeClaimsExecution(), RecoveryExecutionOptions.TimeSeriesExecution(), RecoveryExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance, timeProvider: canonicalClock);
             log = new(replica, RecoveryExecutionOptions.Configuration(configuration), canonicalDatabase: database);
             return new(replica, canonical, database, log, configuration);
         }
@@ -75,7 +77,10 @@ internal sealed class ReplicaTermMetadataLifetime : IDisposable
             ReplicaMaterializerLifecycleErrors.Attempt(() => log?.Dispose(), failures);
             ReplicaMaterializerLifecycleErrors.Attempt(() => canonical?.Dispose(), failures);
             ReplicaMaterializerLifecycleErrors.Attempt(() => replica?.Dispose(), failures);
-            ReplicaMaterializerLifecycleErrors.Attempt(() => Directory.Delete(directory, true), failures);
+            if (deleteDirectoryOnFailure)
+            {
+                ReplicaMaterializerLifecycleErrors.Attempt(() => Directory.Delete(directory, true), failures);
+            }
             ReplicaMaterializerLifecycleErrors.Throw(failures);
             throw;
         }

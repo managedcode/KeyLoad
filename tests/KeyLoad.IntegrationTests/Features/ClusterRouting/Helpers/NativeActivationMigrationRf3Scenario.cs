@@ -56,6 +56,8 @@ internal static class NativeActivationMigrationRf3Scenario
             RequestCqrsRf3Protocol.ChangedDocumentJson, NativeActivationRf3Protocol.CommittedRevision, cancellationToken).ConfigureAwait(false);
         await NativeActivationMigrationRf3Operation.VerifyAsync(wave, administrator, callers, identity, command,
             first.Witness, first.Receipt, discovery, cancellationToken).ConfigureAwait(false);
+        await AtomicMembershipScopeTrial.RunAsync(wave, administrator, callers, identity,
+            cancellationToken).ConfigureAwait(false);
     }
 
     private static async Task<IReadOnlyList<ReplicaSiloDiscovery>> DiscoverAsync(TwoRf3MembershipWave wave,

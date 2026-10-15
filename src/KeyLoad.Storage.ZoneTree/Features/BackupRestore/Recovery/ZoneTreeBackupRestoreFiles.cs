@@ -16,7 +16,7 @@ internal static class ZoneTreeBackupRestoreFiles
 
     private static readonly string[] SourceFiles = [IdentityFileName, JournalFileName];
 
-    internal static long Create(ZoneTreeStoreRuntime runtime, string directory)
+    internal static long Create(ZoneTreeStoreRuntime runtime, string directory, CancellationToken cancellationToken = default)
     {
         if (Directory.Exists(directory) && Directory.EnumerateFileSystemEntries(directory).Any())
         {
@@ -24,14 +24,19 @@ internal static class ZoneTreeBackupRestoreFiles
         }
 
         ZoneTreeCatalogBackupPublication.RequirePath(directory);
+        cancellationToken.ThrowIfCancellationRequested();
         ZoneTreeStoreFiles.CreatePrivateDirectory(directory);
         runtime.Journal.Flush(true);
+        cancellationToken.ThrowIfCancellationRequested();
         var files = new ZoneTreeBackupRestoreManifestFile[SourceFiles.Length];
         for (var index = FirstSourceFileIndex; index < SourceFiles.Length; index++)
         {
-            files[index] = CopyAndDescribe(runtime.Options.Directory, directory, SourceFiles[index], runtime.Options.StreamBufferBytes);
+            cancellationToken.ThrowIfCancellationRequested();
+            files[index] = CopyAndDescribe(runtime.Options.Directory, directory, SourceFiles[index],
+                runtime.Options.FileBufferBytes, runtime.Options.StreamBufferBytes, cancellationToken);
         }
 
+        cancellationToken.ThrowIfCancellationRequested();
         WriteManifest(directory, new(BackupManifestVersion, runtime.Position, files), runtime.Options.StreamBufferBytes);
         return runtime.Position;
     }
@@ -40,20 +45,22 @@ internal static class ZoneTreeBackupRestoreFiles
         => ReadAndVerify(backup, staging, policy, out _);
 
     internal static StoreIdentity ReadAndVerify(string backup, string staging, ZoneTreeStorageExecutionOptions policy,
-        out long position)
+        out long position, CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         var manifest = ReadManifestDefinition(backup, policy);
 
         ReadOnlyMemory<byte> identityBytes = default;
         foreach (var item in manifest.Files)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             if (item.Name == IdentityFileName)
             {
                 identityBytes = ReadAndVerifyIdentityFile(backup, item, policy.MaximumIdentityFileBytes, policy.StreamBufferBytes);
             }
             else
             {
-                CopyAndVerifyJournal(backup, staging, item, policy.FileBufferBytes, policy.StreamBufferBytes);
+                CopyAndVerifyJournal(backup, staging, item, policy.FileBufferBytes, policy.StreamBufferBytes, cancellationToken);
             }
         }
 
@@ -61,7 +68,7 @@ internal static class ZoneTreeBackupRestoreFiles
         var identity = ZoneTreeIdentityFile.Read(identityBytes.Span);
         using var journal = new FileStream(Path.Combine(staging, JournalFileName), FileMode.Open, FileAccess.Read,
             FileShare.Read, policy.StreamBufferBytes);
-        ZoneTreeBackupJournalValidation.Verify(journal, identity, manifest.Position, policy);
+        ZoneTreeBackupJournalValidation.Verify(journal, identity, manifest.Position, policy, cancellationToken);
         return identity;
     }
 
@@ -96,15 +103,17 @@ internal static class ZoneTreeBackupRestoreFiles
     }
 
     private static ZoneTreeBackupRestoreManifestFile CopyAndDescribe(string sourceDirectory, string backupDirectory,
-        string name, int streamBufferBytes)
+        string name, int fileBufferBytes, int streamBufferBytes, CancellationToken cancellationToken)
     {
         var source = Path.Combine(sourceDirectory, name);
         var destination = Path.Combine(backupDirectory, name);
-        File.Copy(source, destination, false);
-        using var copied = new FileStream(destination, FileMode.Open, FileAccess.ReadWrite, FileShare.None, streamBufferBytes);
+        using var original = new FileStream(source, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, streamBufferBytes);
+        using var copied = new FileStream(destination, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None, streamBufferBytes);
+        var buffer = new byte[fileBufferBytes];
+        CopyExactBytes(original, copied, original.Length, buffer, cancellationToken);
         copied.Flush(true);
         copied.Position = FileStartPosition;
-        return new(name, copied.Length, Convert.ToHexStringLower(SHA256.HashData(copied)));
+        return new(name, copied.Length, ComputeChecksum(copied, buffer, cancellationToken));
     }
 
     private static void WriteManifest(string directory, ZoneTreeBackupRestoreManifest manifest, int streamBufferBytes)
@@ -116,8 +125,9 @@ internal static class ZoneTreeBackupRestoreFiles
     }
 
     private static void CopyAndVerifyJournal(string backup, string staging, ZoneTreeBackupRestoreManifestFile item,
-        int fileBufferBytes, int streamBufferBytes)
+        int fileBufferBytes, int streamBufferBytes, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         var source = Path.Combine(backup, item.Name);
         if ((File.GetAttributes(source) & FileAttributes.ReparsePoint) != NoFileAttributes)
         {
@@ -131,21 +141,22 @@ internal static class ZoneTreeBackupRestoreFiles
         }
         using var file = new FileStream(Path.Combine(staging, JournalFileName),
             FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None, streamBufferBytes);
-        CopyExactBytes(sourceFile, file, item.Length, fileBufferBytes);
+        var buffer = new byte[fileBufferBytes];
+        CopyExactBytes(sourceFile, file, item.Length, buffer, cancellationToken);
         file.Flush(true);
         file.Position = FileStartPosition;
         if (file.Length != item.Length
-            || !string.Equals(Convert.ToHexStringLower(SHA256.HashData(file)), item.Checksum, StringComparison.Ordinal))
+            || !string.Equals(ComputeChecksum(file, buffer, cancellationToken), item.Checksum, StringComparison.Ordinal))
         {
             throw Errors.Fail(ErrorCode.Corruption, BackupFileVerificationFailed);
         }
     }
 
-    private static void CopyExactBytes(FileStream source, FileStream destination, long remaining, int fileBufferBytes)
+    private static void CopyExactBytes(FileStream source, FileStream destination, long remaining, byte[] buffer, CancellationToken cancellationToken)
     {
-        var buffer = new byte[fileBufferBytes];
         while (remaining > NoRemainingBytes)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             var read = source.Read(buffer.AsSpan(FirstBufferByte, (int)Math.Min(remaining, buffer.Length)));
             if (read == NoReadBytes)
             {
@@ -154,9 +165,25 @@ internal static class ZoneTreeBackupRestoreFiles
             destination.Write(buffer.AsSpan(FirstBufferByte, read));
             remaining -= read;
         }
+        cancellationToken.ThrowIfCancellationRequested();
         if (source.ReadByte() != EndOfStream)
         {
             throw Errors.Fail(ErrorCode.Corruption, BackupFileVerificationFailed);
+        }
+    }
+
+    private static string ComputeChecksum(FileStream file, byte[] buffer, CancellationToken cancellationToken)
+    {
+        using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
+        while (true)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var count = file.Read(buffer);
+            if (count == NoReadBytes)
+            {
+                return Convert.ToHexStringLower(hash.GetHashAndReset());
+            }
+            hash.AppendData(buffer.AsSpan(FirstBufferByte, count));
         }
     }
 

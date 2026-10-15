@@ -30,7 +30,7 @@ internal static class PolicyEpochAuthorityOutage
             await PolicyEpochAuthorityRefusals.AllAsync(reader, state, cursors, token);
         }, failures);
         using var cleanup = new CancellationTokenSource(RequestCqrsRf3Protocol.CleanupDeadline, TimeProvider.System);
-        await RestoreAsync(fixture, stopped, cleanup.Token, failures);
+        await RestoreAsync(fixture, stopped, failures, cleanup.Token);
         ServerFailureObserver.ThrowIfAny(failures);
         var after = await PolicyEpochPublicAssertions.ImageAsync(root, state.Scenario, token);
         await SqlRf3Protocol.EqualAsync(before.Rows.ToArray(), after.Rows.ToArray());
@@ -45,7 +45,7 @@ internal static class PolicyEpochAuthorityOutage
     }
 
     private static async Task RestoreAsync(ClusterFixture fixture, HashSet<string> stopped,
-        CancellationToken token, List<Exception> failures)
+        List<Exception> failures, CancellationToken token)
     {
         foreach (var node in stopped)
         {

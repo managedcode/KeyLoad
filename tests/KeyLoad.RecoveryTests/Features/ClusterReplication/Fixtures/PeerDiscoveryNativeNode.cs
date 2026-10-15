@@ -1,7 +1,9 @@
 using KeyLoad.Clustering;
+using KeyLoad.Core;
 using KeyLoad.CrashHost;
 using KeyLoad.Replication;
 using KeyLoad.Storage;
+using KeyLoad.Storage.ZoneTree;
 using Microsoft.Extensions.Options;
 namespace KeyLoad.RecoveryTests;
 
@@ -12,6 +14,16 @@ internal sealed class PeerDiscoveryNativeNode : IAsyncDisposable
     private readonly ReplicaMaterializer materializer;
     private readonly Lock lifecycle = new();
     private Task? disposal;
+    private Task? warmClose;
+    private bool finalRequested;
+    private bool retainDirectory;
+    private ReplicaTermMetadataLifetime? coldJournal;
+    private ReplicaMaterializer? coldMaterializer;
+    private readonly PeerDiscoveryNativeClockProfile? clockProfile;
+    internal DatabaseEngine Database => coldJournal?.Database ?? journal.Database;
+    internal ZoneTreeStore ReplicaStore => coldJournal?.BorrowReplica() ?? journal.BorrowReplica();
+    internal DurableReplicaLog Log => coldJournal?.BorrowLog() ?? journal.BorrowLog();
+    internal ReplicaMaterializer Materializer => coldMaterializer ?? materializer;
     internal ReplicaConsensus Consensus
     {
         get;
@@ -34,9 +46,11 @@ internal sealed class PeerDiscoveryNativeNode : IAsyncDisposable
         get; set;
     }
 
-    internal PeerDiscoveryNativeNode(ReplicaConfiguration configuration, ILocalSiloDetails local, ReadOnlyMemory<byte> secret)
+    internal PeerDiscoveryNativeNode(ReplicaConfiguration configuration, ILocalSiloDetails local, ReadOnlyMemory<byte> secret,
+        PeerDiscoveryNativeClockProfile? profile = null)
     {
-        directory = ReplicaFixturePaths.NewDirectory("keyload-native-recovery-discovery-");
+        clockProfile = profile;
+        directory = ReplicaFixturePaths.NewDirectory(PeerDiscoveryNativeFixtureProtocol.DirectoryPrefix);
         ReplicaTermMetadataLifetime? openedJournal = null;
         ReplicaMaterializer? openedMaterializer = null;
         ReplicaConsensus? openedConsensus = null;
@@ -45,17 +59,18 @@ internal sealed class PeerDiscoveryNativeNode : IAsyncDisposable
             journal = openedJournal = ReplicaTermMetadataLifetime.Open(directory, null,
                 configuration with
                 {
-                    Directory = Path.Combine(directory, "replica")
-                });
+                    Directory = Path.Combine(directory, PeerDiscoveryNativeFixtureProtocol.ReplicaDirectory)
+                }, profile?.ClockFor(configuration.LocalId), profile?.InitialSigningKey);
+            profile?.Bootstrap(journal.Database, configuration.VoterIds);
             var execution = RecoveryExecutionOptions.Replica();
             openedMaterializer = new(journal.Database, journal.BorrowLog(), new ReplicaSnapshotStore(
                 journal.Database.Store, journal.BorrowLog(), RecoveryExecutionOptions.Configuration(Configuration), execution), execution);
             materializer = openedMaterializer;
             openedConsensus = new(materializer, RecoveryExecutionOptions.Configuration(Configuration), execution, TimeProvider.System);
             Consensus = openedConsensus;
-            Peers = new(new(StringComparer.Ordinal), secret, "recovery-native-discovery")
+            Peers = new(new(StringComparer.Ordinal), secret, PeerDiscoveryNativeFixtureProtocol.Cohort)
             {
-                ConnectTimeout = TimeSpan.FromMilliseconds(200)
+                ConnectTimeout = PeerDiscoveryNativeFixtureProtocol.ConnectTimeout
             };
             var configured = RecoveryExecutionOptions.Configuration(Configuration);
             var peers = Options.Create(Peers);
@@ -65,22 +80,41 @@ internal sealed class PeerDiscoveryNativeNode : IAsyncDisposable
         }
         catch (Exception primary)
         {
-            List<Exception> failures = [primary];
-            if (openedConsensus is not null)
-            {
-                ReplicaMaterializerLifecycleErrors.Attempt(() => openedConsensus.DisposeAsync().AsTask().GetAwaiter().GetResult(), failures);
-            }
-            if (openedMaterializer is not null)
-            {
-                ReplicaMaterializerLifecycleErrors.Attempt(() => openedMaterializer.DisposeAsync().AsTask().GetAwaiter().GetResult(), failures);
-            }
-            if (openedJournal is not null)
-            {
-                ReplicaMaterializerLifecycleErrors.Attempt(openedJournal.Dispose, failures);
-            }
-            ReplicaMaterializerLifecycleErrors.Attempt(() => Directory.Delete(directory, true), failures);
-            ReplicaMaterializerLifecycleErrors.Throw(failures);
+            PeerDiscoveryNativeColdShutdown.CloseFailedConstruction(primary, openedConsensus,
+                openedMaterializer, openedJournal, directory);
             throw;
+        }
+    }
+
+    internal void RetainDirectoryForCold() => retainDirectory = true;
+
+    internal void ReopenAfterJoinedCold()
+    {
+        if (!retainDirectory || finalRequested || warmClose is not { IsCompletedSuccessfully: true } || coldJournal is not null)
+        {
+            throw new InvalidOperationException(PeerDiscoveryNativeClockProfile.ColdBeforeJoined);
+        }
+        coldJournal = ReplicaTermMetadataLifetime.Open(directory, null, journal.Configuration,
+            clockProfile?.ClockFor(Configuration.LocalId), deleteDirectoryOnFailure: false);
+        var execution = RecoveryExecutionOptions.Replica();
+        coldMaterializer = new(coldJournal.Database, coldJournal.BorrowLog(), new ReplicaSnapshotStore(
+            coldJournal.Database.Store, coldJournal.BorrowLog(), RecoveryExecutionOptions.Configuration(Configuration), execution), execution);
+    }
+
+    internal Task CloseForColdAsync()
+    {
+        lock (lifecycle)
+        {
+            return warmClose ??= CloseWarmAsync();
+        }
+    }
+
+    internal Task DisposeColdAndDeleteAsync()
+    {
+        lock (lifecycle)
+        {
+            finalRequested = true;
+            return disposal ??= DisposeCoreAsync();
         }
     }
 
@@ -88,11 +122,16 @@ internal sealed class PeerDiscoveryNativeNode : IAsyncDisposable
     {
         lock (lifecycle)
         {
+            if (retainDirectory && coldJournal is null && !finalRequested)
+            {
+                return new(warmClose ??= CloseWarmAsync());
+            }
+            finalRequested = true;
             return new(disposal ??= DisposeCoreAsync());
         }
     }
 
-    private async Task DisposeCoreAsync()
+    private async Task CloseWarmAsync()
     {
         List<Exception> failures = [];
         if (Runtime is { } runtime)
@@ -104,16 +143,68 @@ internal sealed class PeerDiscoveryNativeNode : IAsyncDisposable
         {
             await materializer.DisposeAsync();
         }
-        catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
-        catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
+        catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            failures.Add(failure);
+        }
+        catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            failures.Add(failure);
+        }
         try
         {
             journal.Dispose();
         }
-        catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
-        catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
+        catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            failures.Add(failure);
+        }
+        catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            failures.Add(failure);
+        }
         ReplicaMaterializerLifecycleErrors.Attempt(Authentication.Dispose, failures);
-        ReplicaMaterializerLifecycleErrors.Attempt(() => Directory.Delete(directory, true), failures);
+        ReplicaMaterializerLifecycleErrors.Throw(failures);
+    }
+
+    private async Task DisposeCoreAsync()
+    {
+        List<Exception> failures = [];
+        await ReplicaMaterializerLifecycleErrors.AttemptAsync(CloseForColdAsync, failures);
+        if (coldMaterializer is not null)
+        {
+            try
+            {
+                await coldMaterializer.DisposeAsync();
+            }
+            catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure))
+            {
+                ReplicaMaterializerLifecycleErrors.Add(failure, failures);
+            }
+            catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure))
+            {
+                ReplicaMaterializerLifecycleErrors.Add(failure, failures);
+            }
+        }
+        if (coldJournal is not null)
+        {
+            try
+            {
+                coldJournal.Dispose();
+            }
+            catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure))
+            {
+                ReplicaMaterializerLifecycleErrors.Add(failure, failures);
+            }
+            catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure))
+            {
+                ReplicaMaterializerLifecycleErrors.Add(failure, failures);
+            }
+        }
+        if (failures.Count == PeerDiscoveryNativeFixtureProtocol.NoFailures && Directory.Exists(directory))
+        {
+            ReplicaMaterializerLifecycleErrors.Attempt(() => Directory.Delete(directory, true), failures);
+        }
         ReplicaMaterializerLifecycleErrors.Throw(failures);
     }
 }

@@ -36,6 +36,7 @@ internal sealed class SqlModelViewRf3ValidationTests(ClusterFixture fixture)
         var unaffected = await McpCallerAssertions.SdkSuccessAsync(await administrator.QueryAsync(
             scenario.QueueSql(), deadline.Token));
         await Assert.That(unaffected.Rows.Length).IsEqualTo(2);
+        await ModelSourceArgumentRf3Flow.RunAsync(fixture, administrator, scenario, deadline.Token);
     }
 
     private async Task AssertMissingAsync(SqlModelViewRf3Scenario scenario, Capability onlyCapability,

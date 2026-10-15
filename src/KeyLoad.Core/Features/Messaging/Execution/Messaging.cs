@@ -83,6 +83,16 @@ public sealed partial class DatabaseEngine
             throw Errors.Fail(ErrorCode.ResourceExhausted, StoredQuotaExhausted);
         }
         var scheduled = message.NotBefore > now;
+        if ((!scheduled && counters.NextReadySequence == long.MaxValue)
+            || (resource.QueuePolicy.OrderingProfile == QueueOrderingProfile.StrictPerKey
+                && counters.NextOrderSequence == long.MaxValue))
+        {
+            if (resource.QueuePolicy.OrderingProfile == QueueOrderingProfile.StrictPerKey)
+            {
+                RequireQueueOrderingKey(body);
+            }
+            throw Errors.Fail(ErrorCode.ResourceExhausted, QueueEnqueueProtocol.SequenceExhausted);
+        }
         var readySequence = scheduled ? MessagingInitialSequence : checked(counters.NextReadySequence + MessagingAdjacentElementOffset);
         var metadata = new MessageMetadata(message.MessageId, scheduled ? MessageState.Scheduled : MessageState.Ready,
             MessagingEmptyElementCount, MessagingSingleElementCount, readySequence, message.NotBefore, message.ExpiresAt);

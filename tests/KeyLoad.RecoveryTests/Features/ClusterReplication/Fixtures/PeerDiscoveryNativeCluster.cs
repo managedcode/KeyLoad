@@ -21,14 +21,18 @@ internal sealed class PeerDiscoveryNativeCluster : IAsyncInitializer, IAsyncDisp
     private readonly TestCluster cluster;
     private readonly Lock lifecycle = new();
     private Task? disposal;
+    private Task? coldClose;
+    private readonly PeerDiscoveryNativeClockProfile? clockProfile;
+    internal IReadOnlyCollection<PeerDiscoveryNativeNode> Nodes => nodes.Values.ToArray();
     private Guid Incarnation { get; } = Guid.NewGuid();
     internal IServiceProvider SenderServices { get; private set; } = null!;
     internal IServiceProvider ReceiverServices { get; private set; } = null!;
     internal PeerDiscoveryNativeNode Sender => nodes[SenderVoter];
     internal PeerDiscoveryNativeNode Receiver => nodes[ReceiverVoter];
 
-    internal PeerDiscoveryNativeCluster()
+    internal PeerDiscoveryNativeCluster(PeerDiscoveryNativeClockProfile? profile = null)
     {
+        clockProfile = profile;
         PeerDiscoveryNativeOwners.Register(id, this);
         try
         {
@@ -52,7 +56,7 @@ internal sealed class PeerDiscoveryNativeCluster : IAsyncInitializer, IAsyncDisp
         {
             throw new InvalidOperationException("The real silo name is outside the configured recovery cohort.");
         }
-        var node = new PeerDiscoveryNativeNode(new(voter, Voters, Path.GetTempPath(), Incarnation), local, secret);
+        var node = new PeerDiscoveryNativeNode(new(voter, Voters, Path.GetTempPath(), Incarnation), local, secret, clockProfile);
         if (nodes.TryAdd(voter, node))
         {
             return node;
@@ -86,13 +90,69 @@ internal sealed class PeerDiscoveryNativeCluster : IAsyncInitializer, IAsyncDisp
             {
                 await DisposeAsync();
             }
-            catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
+            catch (Exception cleanup)
+            {
+                throw new AggregateException(primary, cleanup);
+            }
             throw;
         }
     }
 
     private static IServiceProvider FindServices(IEnumerable<InProcessSiloHandle> silos, string voter)
         => silos.Single(silo => silo.ServiceProvider.GetRequiredService<ILocalSiloDetails>().Name == voter).ServiceProvider;
+
+    internal Task CloseForColdAsync()
+    {
+        lock (lifecycle)
+        {
+            if (disposal is not null)
+            {
+                throw new InvalidOperationException(PeerDiscoveryNativeClockProfile.ColdBeforeJoined);
+            }
+            return coldClose ??= CloseForColdCoreAsync();
+        }
+    }
+
+    private async Task CloseForColdCoreAsync()
+    {
+        foreach (var node in nodes.Values)
+        {
+            node.RetainDirectoryForCold();
+        }
+        using var deadline = new CancellationTokenSource(ShutdownBound, TimeProvider.System);
+        List<Exception> failures = [];
+        await PeerDiscoveryNativeColdShutdown.StopAllAsync(nodes.Values, failures, deadline.Token);
+        await ReplicaMaterializerLifecycleErrors.AttemptAsync(() => cluster.StopAllSilosAsync(deadline.Token), failures);
+        try
+        {
+            await cluster.DisposeAsync();
+        }
+        catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            ReplicaMaterializerLifecycleErrors.Add(failure, failures);
+        }
+        catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            ReplicaMaterializerLifecycleErrors.Add(failure, failures);
+        }
+        foreach (var node in nodes.Values)
+        {
+            await ReplicaMaterializerLifecycleErrors.AttemptAsync(node.CloseForColdAsync, failures);
+        }
+        ReplicaMaterializerLifecycleErrors.Throw(failures);
+    }
+
+    internal void ReopenAllAfterCold()
+    {
+        if (coldClose is not { IsCompletedSuccessfully: true })
+        {
+            throw new InvalidOperationException(PeerDiscoveryNativeClockProfile.ColdBeforeJoined);
+        }
+        foreach (var node in nodes.Values)
+        {
+            node.ReopenAfterJoinedCold();
+        }
+    }
 
     public ValueTask DisposeAsync()
     {
@@ -106,27 +166,34 @@ internal sealed class PeerDiscoveryNativeCluster : IAsyncInitializer, IAsyncDisp
     {
         using var deadline = new CancellationTokenSource(ShutdownBound, TimeProvider.System);
         List<Exception> failures = [];
-        foreach (var node in nodes.Values)
+        if (coldClose is not null)
         {
-            if (node.Runtime is { } runtime)
+            await ReplicaMaterializerLifecycleErrors.AttemptAsync(() => coldClose, failures);
+        }
+        else
+        {
+            await PeerDiscoveryNativeColdShutdown.StopAllAsync(nodes.Values, failures, deadline.Token);
+            await ReplicaMaterializerLifecycleErrors.AttemptAsync(() => cluster.StopAllSilosAsync(deadline.Token), failures);
+            try
             {
-                await ReplicaMaterializerLifecycleErrors.AttemptAsync(runtime.StopAsync, failures);
+                await cluster.DisposeAsync();
             }
-            await ReplicaMaterializerLifecycleErrors.AttemptAsync(() => node.Consensus.StopAsync(deadline.Token), failures);
+            catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure))
+            {
+                ReplicaMaterializerLifecycleErrors.Add(failure, failures);
+            }
+            catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure))
+            {
+                ReplicaMaterializerLifecycleErrors.Add(failure, failures);
+            }
         }
-        await ReplicaMaterializerLifecycleErrors.AttemptAsync(() => cluster.StopAllSilosAsync(deadline.Token), failures);
-        try
-        {
-            await cluster.DisposeAsync();
-        }
-        catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
-        catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
         foreach (var node in nodes.Values)
         {
-            await ReplicaMaterializerLifecycleErrors.AttemptAsync(() => node.DisposeAsync().AsTask(), failures);
+            await ReplicaMaterializerLifecycleErrors.AttemptAsync(node.DisposeColdAndDeleteAsync, failures);
         }
         PeerDiscoveryNativeOwners.Release(id);
         CryptographicOperations.ZeroMemory(secret);
+        clockProfile?.Dispose();
         ReplicaMaterializerLifecycleErrors.Throw(failures);
     }
 }

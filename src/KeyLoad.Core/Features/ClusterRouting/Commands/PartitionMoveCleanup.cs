@@ -94,7 +94,8 @@ public sealed partial class DatabaseEngine
             var prefix = family == PartitionMoveProtocol.TargetPageSpace
                 ? MoveCleanupPagePrefix(transaction, phase, state)
                 : KeySpace.Partition(family, phase.Partition);
-            var page = transaction.Scan(prefix, maximum);
+            var page = PartitionMoveCleanupPageReader.Read(transaction, prefix, maximum,
+                Limits.MaxBatchBytes, Limits.MaxQueryReadBytes);
             long bytes = PartitionMoveProtocol.EmptyCount;
             foreach (var record in page.Records)
             {

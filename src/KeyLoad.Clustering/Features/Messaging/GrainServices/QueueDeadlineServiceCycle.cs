@@ -37,8 +37,20 @@ internal static class QueueDeadlineServiceCycle
                 await DispatchAsync(factory, hint, clock, diagnostics, options, cancellationToken).ConfigureAwait(true);
             }
         }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { throw; }
-        catch (KeyLoadException failure) { RecurringDueDiagnostics.ServiceFault(diagnostics, failure.Code); }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (KeyLoadException failure) when (failure.Code == ErrorCode.Corruption
+            && failure.Message == DueWorkProtocol.KeyExceedsBound)
+        {
+            cursor = QueueDeadlineCursor.DeferNext(database.Store.Identity, cursor);
+            RecurringDueDiagnostics.PrefixRejected(diagnostics, failure.Code);
+        }
+        catch (KeyLoadException failure)
+        {
+            RecurringDueDiagnostics.ServiceFault(diagnostics, failure.Code);
+        }
         catch (Exception failure) when (GrainBoundaryErrors.Handles(failure))
         {
             RecurringDueDiagnostics.ServiceFault(diagnostics, ErrorCode.OwnershipLost);
@@ -62,7 +74,10 @@ internal static class QueueDeadlineServiceCycle
                 RecurringDueDiagnostics.DispatchFailed(diagnostics, code);
             }
         }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { throw; }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
         catch (OperationCanceledException) when (lifetime.IsCancellationRequested)
         {
             RecurringDueDiagnostics.DispatchDeadline(diagnostics);

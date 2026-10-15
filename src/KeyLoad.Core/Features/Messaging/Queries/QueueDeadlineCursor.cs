@@ -33,6 +33,12 @@ internal sealed record QueueDeadlineCursor(Guid Incarnation, long ReadGeneration
             : Match(identity, null);
     }
 
+    internal static QueueDeadlineCursor DeferNext(StoreIdentity identity, QueueDeadlineCursor? previous)
+    {
+        var cursor = Match(identity, previous);
+        return cursor.Advance(cursor.Bounds);
+    }
+
     internal DuePrefixCursor Bounds => Next switch
     {
         ScheduledIndex => Scheduled,

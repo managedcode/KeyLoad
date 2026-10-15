@@ -17,6 +17,8 @@ internal static class PlacementCapacityAdmissionFlow
                 await PlacementCapacityAdmissionQueue.CancelAndPromoteAsync(original);
                 var shutdown = original.Admission.DisposeAsync().AsTask();
                 original.Shutdown = shutdown;
+                await Assert.That(ReferenceEquals(shutdown,
+                    original.Admission.DisposeAsync().AsTask())).IsTrue();
                 await Assert.That(shutdown.IsCompleted).IsFalse();
                 await PlacementCapacityAdmissionQueue.JoinRefusedAsync(original);
                 await PlacementCapacityAdmissionAssertions.ClosedAsync(original.Admission);
@@ -26,10 +28,13 @@ internal static class PlacementCapacityAdmissionFlow
                     lease.Dispose();
                 }
                 await shutdown;
+                await Assert.That(ReferenceEquals(shutdown,
+                    original.Admission.DisposeAsync().AsTask())).IsTrue();
             }, failures);
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
         await HealthyAsync();
+        await PlacementCapacityAdmissionFairness.RunAsync();
     }
 
     private static async Task HealthyAsync()

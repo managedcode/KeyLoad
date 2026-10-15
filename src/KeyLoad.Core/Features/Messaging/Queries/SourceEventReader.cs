@@ -15,15 +15,17 @@ internal static class SourceEventReader
     /// <param name="view">The storage view valid for the current read or transaction action.</param>
     /// <param name="source">Expected source identity.</param>
     /// <param name="position">Expected one-based source position.</param>
+    /// <param name="observer">Optional native operation accounting before raw bytes are decoded.</param>
     /// <returns>The owned decoded event record.</returns>
     /// <exception cref="KeyLoadException">The record is unavailable or its persisted identity is corrupt.</exception>
-    public static SourceEventRecord Read(IKeyValueView view, EventSourceRef source, long position)
+    public static SourceEventRecord Read(IKeyValueView view, EventSourceRef source, long position,
+        StorageReadObserver? observer = null)
     {
         ArgumentNullException.ThrowIfNull(view);
         ArgumentNullException.ThrowIfNull(source);
         SourceEventRecord? result = null;
         var key = EventKey(source, position);
-        var found = view.ReadValue(key, bytes => result = Decode(bytes, source, position));
+        var found = view.ReadValue(key, bytes => result = Decode(bytes, source, position), observer);
         if (!found)
         {
             throw Errors.Fail(ErrorCode.HistoryUnavailable, EventUnavailableMessage);

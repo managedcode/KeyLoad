@@ -231,13 +231,15 @@ public sealed partial class DatabaseEngine
             throw Errors.Fail(ErrorCode.TokenInvalidated, EarlierSubscriptionGenerationMessage);
         }
 
+        var budget = new SubscriptionWindowAuthorityReadBudget(OperationLimitsOptions);
         foreach (var delivery in cached.Deliveries)
         {
-            var lease = SubscriptionLease(view, principal, subscription, delivery.Token, operation.EvaluatedAt);
+            var lease = ReadSubscriptionLease(view, principal, subscription, delivery.Token, operation.EvaluatedAt, budget);
             var resource = SourceResource(view, subscription.Source);
             var dataPrincipal = Principal(view, lease.State.Definition.DataPrincipalId, operation.EvaluatedAt);
             RequireCachedDeliveryProjection(dataPrincipal, resource, delivery.Event.Data.PayloadJson, delivery.Event.Data.HeadersJson);
             RequireCachedDeliveryProjection(principal, resource, delivery.Event.Data.PayloadJson, delivery.Event.Data.HeadersJson);
         }
+        ValidateSubscriptionGroupProgress(view, subscription, state, SourceHead(view, subscription.Source), budget);
     }
 }

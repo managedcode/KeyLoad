@@ -28,8 +28,10 @@ internal static class ZoneTreeCatalogArchiveView
             {
                 ct.ThrowIfCancellationRequested();
                 ZoneTreeStoreFiles.CreatePrivateDirectory(stage);
-                var identity = ZoneTreeBackupRestoreFiles.ReadAndVerify(backup, stage, policy, out var position);
+                var identity = ZoneTreeBackupRestoreFiles.ReadAndVerify(backup, stage, policy, out var position, ct);
+                ct.ThrowIfCancellationRequested();
                 var metadata = ZoneTreeCatalogBackupMetadataFile.ReadVerified(backup, identity, position, policy);
+                ct.ThrowIfCancellationRequested();
                 ZoneTreeIdentityFile.Write(Path.Combine(stage, IdentityFileName), identity, policy.IdentityBufferBytes);
                 runtime = new ZoneTreeStoreRuntime(new ZoneTreeStoreOptions(stage).ResolveExecutionOptions(executionOptions));
                 store = new(runtime, runtime.Identity.NodeId);

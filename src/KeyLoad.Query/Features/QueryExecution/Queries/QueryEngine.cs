@@ -65,7 +65,7 @@ public sealed partial class QueryEngine
     public QueryPage ExecuteAst(string principalId, AstQueryRequest request, TimeProvider? timeProvider = null,
         CancellationToken cancellationToken = default) => Execute(principalId, _ => request, timeProvider, cancellationToken);
     /// <summary>Describes the supported query language and configured budgets.</summary>
-    public QueryCapabilityManifest Capabilities => QueryCapabilityCatalog.Create(database.Limits);
+    public QueryCapabilityManifest Capabilities => QueryCapabilityCatalog.Create(database.Limits, execution);
     private QueryPage Execute(string principalId, Func<ReadExecutionBudget, AstQueryRequest> adapt, TimeProvider? timeProvider,
         CancellationToken cancellationToken)
     {

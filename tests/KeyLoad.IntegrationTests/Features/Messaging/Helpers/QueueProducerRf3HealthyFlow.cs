@@ -45,15 +45,13 @@ internal static class QueueProducerRf3HealthyFlow
             });
             var healthy = QueueProducerRf3Setup.Fresh(seed, QueueProducerRf3Protocol.Healthy, QueueProducerRf3Protocol.Healthy);
             var receipt = (await McpCallerAssertions.SuccessAsync<CommitReceipt>(await mcp.CallAsync(McpCallerTools.DocumentsCommit, healthy, token))).Value;
-            await QueueProducerRf3Assertions.ReplayAsync(publisher, mcp, healthy, receipt, token);
             var image = await QueueProducerRf3Assertions.ImageAsync(publisher, seed, QueueProducerRf3Protocol.Healthy, token);
+            await QueueProducerRf3ObservedReplay.RunAsync(publisher, mcp, seed, healthy, receipt,
+                QueueProducerRf3Protocol.Healthy, image, token);
             await AtomicProducerRf3EventAssertions.LiteralAsync(image.Events, seed, QueueProducerRf3Protocol.Healthy,
                 QueueProducerRf3Protocol.HealthyPayload, QueueProducerRf3Protocol.HealthyEventSequence);
-            await Assert.That(image.Document.Json).IsEqualTo(QueueProducerRf3Protocol.HealthyPayload);
-            await Assert.That(image.Ready.Metadata.ReadySequence).IsEqualTo(QueueProducerRf3Protocol.HealthyReadySequence);
-            await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
-            await Assert.That(image.Ready.PayloadJson).IsEqualTo(QueueProducerRf3Protocol.HealthyPayload);
-            await Assert.That(image.Ready.HeadersJson).IsEqualTo(QueueProducerRf3Protocol.Headers);
+            await QueueProducerRf3LiteralAssertions.ProducerAsync(fixture, seed, healthy, receipt, image,
+                QueueProducerRf3Protocol.Healthy, QueueProducerRf3Protocol.HealthyPayload, QueueProducerRf3Protocol.HealthyReadySequence, token);
             await QueueProducerRf3Assertions.EqualAsync(image.Scheduled, original.Image.Scheduled);
             await QueueProducerRf3Assertions.PublicImageAsync(mcp, seed, QueueProducerRf3Protocol.Healthy, image, token);
             result = new(original, healthy, receipt, ack, ackReceipt, acked, image);

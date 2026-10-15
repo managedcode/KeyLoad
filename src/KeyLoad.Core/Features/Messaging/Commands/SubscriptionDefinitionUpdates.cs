@@ -35,9 +35,11 @@ public sealed partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.Corruption, SubscriptionUpdateWindowDetail);
         }
+        var windowBudget = new SubscriptionWindowAuthorityReadBudget(OperationLimitsOptions);
+        ValidateSubscriptionGroupProgress(tx, request.Subscription, state, head, windowBudget);
         if (JsonData.Fingerprint(state.Definition) == JsonData.Fingerprint(definition))
         {
-            return GroupInfo(tx, request.Subscription, state);
+            return ValidatedGroupInfo(request.Subscription, state, head);
         }
         var next = state with
         {
@@ -48,41 +50,20 @@ public sealed partial class DatabaseEngine
             Paused = true,
             SafeFailureCode = null
         };
-        ClearSubscriptionDefinitionWindow(tx, request.Subscription, state);
+        ClearValidatedSubscriptionDefinitionWindow(tx, request.Subscription, state);
         tx.PutRecord(key, next);
-        return GroupInfo(tx, request.Subscription, next);
+        ValidateSubscriptionGroupProgress(tx, request.Subscription, next, head, windowBudget);
+        return ValidatedGroupInfo(request.Subscription, next, head);
     }
 
-    private static void ClearSubscriptionDefinitionWindow(IAtomicTransaction tx, SubscriptionRef subscription,
+    private static void ClearValidatedSubscriptionDefinitionWindow(IAtomicTransaction tx, SubscriptionRef subscription,
         GroupState state)
     {
-        if (state.Definition.Policy.MaxWindow is < SubscriptionGroupsMinimumPositiveCount or > SubscriptionGroupsMaximumSubscriptionWindow
-            || state.IssuedPosition < state.Checkpoint)
+        var count = checked((int)(state.IssuedPosition - state.Checkpoint));
+        for (var offset = SubscriptionGroupsAdjacentElementOffset; offset <= count; offset++)
         {
-            throw Errors.Fail(ErrorCode.Corruption, SubscriptionUpdateWindowDetail);
-        }
-        var page = tx.Scan(GroupKey(SubscriptionGroupsSubscriptionWindowKeySpace, subscription, state.Generation),
-            checked(state.Definition.Policy.MaxWindow + SubscriptionGroupsAdjacentElementOffset));
-        var rows = page.Records;
-        if (page.HasMore || rows.Length > state.Definition.Policy.MaxWindow)
-        {
-            throw Errors.Fail(ErrorCode.Corruption, SubscriptionUpdateWindowDetail);
-        }
-        foreach (var row in rows)
-        {
-            var delivery = NativeSerialization.Deserialize<GroupDelivery>(row.Value.Span)
-                ?? throw Errors.Fail(ErrorCode.Corruption, SubscriptionUpdateWindowDetail);
-            if (delivery.Position <= state.Checkpoint || delivery.Position > state.IssuedPosition
-                || !Enum.IsDefined(delivery.State)
-                || !row.Key.Span.SequenceEqual(GroupKey(SubscriptionGroupsSubscriptionWindowKeySpace,
-                    subscription, state.Generation, delivery.Position)))
-            {
-                throw Errors.Fail(ErrorCode.Corruption, SubscriptionUpdateWindowDetail);
-            }
-        }
-        foreach (var row in rows)
-        {
-            tx.Delete(row.Key.ToArray());
+            tx.Delete(GroupKey(SubscriptionGroupsSubscriptionWindowKeySpace, subscription, state.Generation,
+                checked(state.Checkpoint + offset)));
         }
     }
 }

@@ -8,7 +8,7 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 
 internal static class SubscriptionProcessingAtomicFlow
 {
-    internal static async Task RunAsync(CancellationToken token)
+    internal static async Task RunAsync(CancellationToken token, SubscriptionDeliveryAuthorityFault? fault = null)
     {
         using var fixture = new TestDatabase();
         fixture.Configure("topic", ResourceKind.Topic);
@@ -31,6 +31,10 @@ internal static class SubscriptionProcessingAtomicFlow
             [new PutDocument("orders", "first", "{\"n\":1}", 0),
              new PutDocument("orders", "second", "{\"n\":2}", 9)]);
         var failed = Create(OperationKind.SubscriptionProcessing, request, request.CommandId, time.AddSeconds(1));
+        if (fault is { } selected)
+        {
+            await CorruptSubscriptionProcessingAssertions.RefuseAndRestoreAsync(fixture, group, failed, selected);
+        }
         var before = SubscriptionProcessingAtomicAssertions.DomainImage(fixture.Store, group, failed.Id);
         var position = fixture.Store.Position;
         var failure = fixture.Database.Apply(failed);

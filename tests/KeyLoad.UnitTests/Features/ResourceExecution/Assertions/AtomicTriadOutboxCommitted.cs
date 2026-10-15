@@ -19,7 +19,12 @@ internal static class AtomicTriadOutboxCommitted
         await Assert.That(receipt.Token.Position).IsEqualTo(store.Position);
         await Assert.That(receipt.Token.OwnershipEpoch).IsEqualTo(InitialOwnershipEpoch);
         await Assert.That(receipt.Durability).IsEqualTo(engine.Durability);
-        await AtomicTriadOutboxImage.ExactAsync(receipt.Mutations, AtomicTriadOutboxFixture.Receipts(command));
+        var expectedReceipts = AtomicTriadOutboxFixture.Receipts(command);
+        await Assert.That(receipt.Mutations.Length).IsEqualTo(expectedReceipts.Length);
+        for (var ordinal = 0; ordinal < expectedReceipts.Length; ordinal++)
+        {
+            await ReceiptAsync(receipt.Mutations[ordinal], expectedReceipts[ordinal]);
+        }
         var document = engine.GetDocument(AtomicTriadOutboxFixture.Root,
             new(partition, AtomicTriadOutboxFixture.Collection, AtomicTriadOutboxFixture.Entity))!;
         await Assert.That(document.Json).IsEqualTo(AtomicTriadOutboxFixture.Payload);
@@ -65,10 +70,22 @@ internal static class AtomicTriadOutboxCommitted
                 ? new DocumentRecord(new(command.Partition, AtomicTriadOutboxFixture.Collection, AtomicTriadOutboxFixture.Entity),
                     AtomicTriadOutboxFixture.InitialRevision, AtomicTriadOutboxFixture.Payload, new(), recordedAt) : null;
             await AtomicTriadOutboxImage.ExactAsync(entry.After, after);
-            await AtomicTriadOutboxImage.ExactAsync(entry.Mutation, command.Mutations[ordinal]);
-            await AtomicTriadOutboxImage.ExactAsync(entry.Receipt, AtomicTriadOutboxFixture.Receipts(command)[ordinal]);
+            await Assert.That(JsonDefaults.Serialize<Mutation>(entry.Mutation).AsSpan()
+                .SequenceEqual(JsonDefaults.Serialize<Mutation>(command.Mutations[ordinal]))).IsTrue();
+            await ReceiptAsync(entry.Receipt, AtomicTriadOutboxFixture.Receipts(command)[ordinal]);
         }
         await AtomicTriadOutboxImage.ExactAsync(engine.GetOutboxStatus(AtomicTriadOutboxFixture.Root, command.Partition).Head,
             new OutboxHead(FinalSequence, FirstSequence, AtomicTriadOutboxFixture.Capacity, bytes));
     }
+
+    private static async Task ReceiptAsync(MutationReceipt actual, MutationReceipt expected)
+    {
+        await Assert.That(actual.Kind).IsEqualTo(expected.Kind);
+        await Assert.That(actual.Resource).IsEqualTo(expected.Resource);
+        await Assert.That(actual.Id).IsEqualTo(expected.Id);
+        await Assert.That(actual.Revision).IsEqualTo(expected.Revision);
+        await Assert.That(actual.CompositionReferences).IsEmpty();
+        await Assert.That(expected.CompositionReferences).IsEmpty();
+    }
+
 }

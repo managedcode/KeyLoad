@@ -68,8 +68,14 @@ public sealed partial class DatabaseEngine
         return resource;
     }
     private SubscriptionInfo GroupInfo(IKeyValueView view, SubscriptionRef subscription, GroupState state)
-        => new(subscription, state.Definition, state.Generation, state.OwnershipEpoch, state.Checkpoint, state.IssuedPosition,
-            SourceHead(view, subscription.Source).TailPosition, state.Paused, state.SafeFailureCode);
+    {
+        var head = SourceHead(view, subscription.Source);
+        ValidateSubscriptionGroupProgress(view, subscription, state, head);
+        return ValidatedGroupInfo(subscription, state, head);
+    }
+    private static SubscriptionInfo ValidatedGroupInfo(SubscriptionRef subscription, GroupState state, EventSourceHead head)
+        => new(subscription, state.Definition, state.Generation, state.OwnershipEpoch, state.Checkpoint,
+            state.IssuedPosition, head.TailPosition, state.Paused, state.SafeFailureCode);
     private long StartPosition(IKeyValueView view, PrincipalRecord principal, EventSourceRef source, SubscriptionStart start,
         string? cursor, DateTimeOffset now)
     {
@@ -120,8 +126,9 @@ public sealed partial class DatabaseEngine
         {
             return UpdateSubscriptionDefinition(tx, request, definition, key);
         }
-        if (tx.GetRecord<GroupState>(key) is { } existing)
+        if (tx.GetRecord<GroupState>(key) is not null)
         {
+            var existing = Group(tx, request.Subscription);
             if (JsonData.Fingerprint(existing.Definition) != JsonData.Fingerprint(definition))
             {
                 throw Errors.Fail(ErrorCode.Conflict, SubscriptionGroupsChangingASubscriptionDefinitionRequiresANewGroupIdentityDetail);
@@ -180,17 +187,15 @@ public sealed partial class DatabaseEngine
         tx.PutRecord(GroupKey(SubscriptionGroupsSubscriptionKeySpace, request.Subscription), state);
         return GroupInfo(tx, request.Subscription, state);
     }
-    private static GroupState AdvanceCheckpoint(IAtomicTransaction tx, SubscriptionRef subscription, GroupState state)
+    private static GroupState AdvanceCheckpoint(IAtomicTransaction tx, SubscriptionRef subscription, GroupState state,
+        SubscriptionWindowAuthorityReadBudget budget)
     {
         var checkpoint = state.Checkpoint;
         while (checkpoint < state.IssuedPosition)
         {
             var key = GroupKey(SubscriptionGroupsSubscriptionWindowKeySpace, subscription, state.Generation, checkpoint + SubscriptionGroupsAdjacentElementOffset);
-            var delivery = tx.GetRecord<GroupDelivery>(key);
-            if (delivery is not null && delivery.Position != checkpoint + SubscriptionGroupsAdjacentElementOffset)
-            {
-                throw Errors.Fail(ErrorCode.Corruption, SubscriptionGroupsSubscriptionDeliveryWindowIsInconsistentDetail);
-            }
+            var delivery = ReadSubscriptionWindowDelivery(tx, key, budget);
+            RequireSubscriptionWindowReference(delivery, state, checkpoint + SubscriptionGroupsAdjacentElementOffset);
             if (delivery?.State is not (GroupDeliveryState.Acked or GroupDeliveryState.Filtered))
             {
                 break;
@@ -224,16 +229,19 @@ public sealed partial class DatabaseEngine
             throw Errors.Fail(ErrorCode.DispatchPaused, SubscriptionGroupsSubscriptionDeliveryIsPausedDetail);
         }
 
+        ValidateSubscriptionGroupLowerBounds(state);
         if (state.Checkpoint < head.FirstAvailablePosition - SubscriptionGroupsAdjacentElementOffset)
         {
             throw Errors.Fail(ErrorCode.HistoryUnavailable, SubscriptionGroupsSubscriptionHistoryWasRetainedAwayDetail);
         }
 
+        var windowBudget = new SubscriptionWindowAuthorityReadBudget(OperationLimitsOptions);
+        ValidateSubscriptionGroupProgress(tx, subscription, state, head, windowBudget);
         var result = new List<SubscriptionDelivery>();
-        state = FillSubscriptionWindow(tx, principal, request, now, state, policy, resource, head, dataPrincipal, result);
-        state = AdvanceCheckpoint(tx, subscription, state);
+        state = FillSubscriptionWindow(tx, principal, request, now, state, policy, resource, head, dataPrincipal, result, windowBudget);
+        state = AdvanceCheckpoint(tx, subscription, state, windowBudget);
         tx.PutRecord(GroupKey(SubscriptionGroupsSubscriptionKeySpace, subscription), state);
-        return new(request.RequestId, result.ToImmutableArray(), GroupInfo(tx, subscription, state), Token(tx, subscription.Source.Partition, position));
+        return new(request.RequestId, result.ToImmutableArray(), ValidatedGroupInfo(subscription, state, head), Token(tx, subscription.Source.Partition, position));
     }
     private bool TryLeaseSubscriptionEvent(IAtomicTransaction tx, PrincipalRecord principal, ReceiveSubscriptionRequest request,
         DateTimeOffset now, GroupState state, ResourceDefinition resource, PrincipalRecord dataPrincipal,
@@ -250,6 +258,10 @@ public sealed partial class DatabaseEngine
         if (bytes + size > request.MaxBytes)
         {
             return false;
+        }
+        if (delivery.LeaseVersion == long.MaxValue)
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, SubscriptionGroupsDeliveryLeaseVersionExhaustedDetail);
         }
         bytes += size;
         delivery = delivery with
@@ -271,137 +283,6 @@ public sealed partial class DatabaseEngine
             sequence, delivery.LeaseVersion, principal.Id, principal.PolicyEpoch, dataPrincipal.PolicyEpoch));
         result.Add(new(projected, token, delivery.LeaseVersion, delivery.LeaseUntil.Value, delivery.Attempts));
         return true;
-    }
-    private GroupClaims ValidateGroupClaims(IKeyValueView view, PrincipalRecord principal, SubscriptionRef subscription, string token, DateTimeOffset now)
-    {
-        var claims = Verify<GroupClaims>(token);
-        var state = Group(view, subscription);
-        if (claims.Purpose != SubscriptionDeliveryTokenPurpose || claims.Incarnation != Store.Identity.Incarnation || claims.Subscription != subscription
-            || claims.PrincipalId != principal.Id || claims.Generation != state.Generation || claims.OwnershipEpoch != state.OwnershipEpoch || claims.Position < SubscriptionGroupsMinimumPositiveCount)
-        {
-            throw Errors.Fail(ErrorCode.TokenInvalidated, SubscriptionGroupsSubscriptionTokenScopeOrGenerationIsInvalidDetail);
-        }
-
-        var dataPrincipal = Principal(view, state.Definition.DataPrincipalId, now);
-        if (claims.PolicyEpoch != principal.PolicyEpoch || claims.DataPolicyEpoch != dataPrincipal.PolicyEpoch)
-        {
-            throw Errors.Fail(ErrorCode.PermissionDenied, SubscriptionGroupsSubscriptionPrincipalPolicyChangedAfterDeliveryDetail);
-        }
-
-        return claims;
-    }
-    private (GroupClaims Claims, GroupState State, GroupDelivery Delivery) SubscriptionLease(IKeyValueView view, PrincipalRecord principal,
-        SubscriptionRef subscription, string token, DateTimeOffset now)
-    {
-        var claims = ValidateGroupClaims(view, principal, subscription, token, now);
-        var state = Group(view, subscription);
-        var delivery = view.GetRecord<GroupDelivery>(GroupKey(SubscriptionGroupsSubscriptionWindowKeySpace, subscription, state.Generation, claims.Position));
-        if (delivery is not null && delivery.Position != claims.Position)
-        {
-            throw Errors.Fail(ErrorCode.Corruption, SubscriptionGroupsSubscriptionDeliveryWindowIsInconsistentDetail);
-        }
-        if (delivery is null || delivery.State != GroupDeliveryState.Leased || delivery.PrincipalId != principal.Id || delivery.LeaseVersion != claims.LeaseVersion)
-        {
-            throw Errors.Fail(ErrorCode.StaleLease, SubscriptionGroupsSubscriptionDeliveryLeaseIsStaleDetail);
-        }
-
-        if (delivery.LeaseUntil <= now)
-        {
-            throw Errors.Fail(ErrorCode.LeaseExpired, SubscriptionGroupsSubscriptionLeaseExpiredDetail);
-        }
-
-        return (claims, state, delivery);
-    }
-    private CommitReceipt CompleteSubscriptionDelivery(IAtomicTransaction tx, PrincipalRecord principal, SubscriptionDeliveryCommand request,
-        DateTimeOffset now, long position)
-    {
-        var (_, state, delivery) = SubscriptionLease(tx, principal, request.Subscription, request.Token, now);
-        var policy = state.Definition.Policy;
-        var key = GroupKey(SubscriptionGroupsSubscriptionWindowKeySpace, request.Subscription, state.Generation, delivery.Position);
-        switch (request.Action)
-        {
-            case DeliveryAction.Renew:
-                var seconds = request.LeaseSeconds ?? SubscriptionGroupsDefaultSubscriptionRenewalSeconds;
-                if (seconds < SubscriptionGroupsMinimumPositiveCount || seconds > policy.MaxLeaseSeconds)
-                {
-                    throw Errors.Fail(ErrorCode.Validation, SubscriptionGroupsSubscriptionRenewalLeaseIsInvalidDetail);
-                }
-
-                delivery = delivery with
-                {
-                    LeaseUntil = now.AddSeconds(seconds)
-                };
-                break;
-            case DeliveryAction.Ack:
-                delivery = delivery with
-                {
-                    State = GroupDeliveryState.Acked,
-                    LeaseUntil = null,
-                    PrincipalId = null
-                };
-                tx.PutRecord(GroupKey(SubscriptionGroupsSubscriptionCompletionKeySpace, request.Subscription, state.Generation, delivery.Position),
-                    new SubscriptionCompletion(state.Generation, delivery.Position, SubscriptionGroupsAckedCompletion, principal.PolicyEpoch));
-                break;
-            case DeliveryAction.Nack:
-                var delay = Math.Min(policy.RetryMaxMilliseconds, policy.RetryBaseMilliseconds * Math.Pow(SubscriptionGroupsSubscriptionRetryExponentialBase, Math.Min(delivery.Attempts - SubscriptionGroupsAdjacentElementOffset, messagingExecution.MaximumRetryExponent)));
-                delivery = delivery with
-                {
-                    State = GroupDeliveryState.Pending,
-                    AvailableAt = now.AddMilliseconds(delay),
-                    LeaseUntil = null,
-                    PrincipalId = null
-                };
-                break;
-            default:
-                throw Errors.Fail(ErrorCode.Validation, SubscriptionGroupsSubscriptionDeliveryActionIsInvalidDetail);
-        }
-        tx.PutRecord(key, delivery);
-        state = AdvanceCheckpoint(tx, request.Subscription, state);
-        tx.PutRecord(GroupKey(SubscriptionGroupsSubscriptionKeySpace, request.Subscription), state);
-        return new(request.CommandId, Token(tx, request.Subscription.Source.Partition, position),
-            [new(request.Action.ToString(), request.Subscription.Source.Resource, delivery.Position.ToString(System.Globalization.CultureInfo.InvariantCulture), delivery.LeaseVersion)], Durability);
-    }
-    private SubscriptionProcessingResult CompleteSubscriptionProcessing(IAtomicTransaction tx, PrincipalRecord principal,
-        SubscriptionProcessingRequest request, DateTimeOffset now, long position)
-    {
-        JsonData.Identifier(request.HandlerScope);
-        if (request.ExecutionGeneration < SubscriptionGroupsMinimumPositiveCount)
-        {
-            throw Errors.Fail(ErrorCode.Validation, SubscriptionGroupsSubscriptionHandlerGenerationIsInvalidDetail);
-        }
-
-        var claims = ValidateGroupClaims(tx, principal, request.Subscription, request.Token, now);
-        var inboxKey = GroupKey(SubscriptionGroupsSubscriptionInboxKeySpace, request.Subscription, claims.Position, request.HandlerScope, request.ExecutionGeneration);
-        var fingerprint = JsonData.Fingerprint(new
-        {
-            request.Subscription,
-            claims.Position,
-            request.HandlerScope,
-            request.ExecutionGeneration,
-            request.Effects
-        });
-        if (tx.GetRecord<InboxRecord>(inboxKey) is { } completed)
-        {
-            if (completed.Fingerprint != fingerprint)
-            {
-                throw Errors.Fail(ErrorCode.Conflict, SubscriptionGroupsSubscriptionInputWasCompletedWithDifferentEffectsDetail);
-            }
-
-            ReauthorizeEffects(tx, principal, request.Subscription.Source.Partition, request.Effects);
-            var delivery = tx.GetRecord<GroupDelivery>(GroupKey(SubscriptionGroupsSubscriptionWindowKeySpace, request.Subscription, claims.Generation, claims.Position));
-            var acknowledgement = delivery is { State: GroupDeliveryState.Leased } && delivery.LeaseVersion == claims.LeaseVersion
-                ? CompleteSubscriptionDelivery(tx, principal, new(request.CommandId, request.Subscription, request.Token, DeliveryAction.Ack), now, position)
-                : completed.Receipt;
-            return new(acknowledgement, true, completed.Receipt.Token);
-        }
-        var ack = CompleteSubscriptionDelivery(tx, principal, new(request.CommandId, request.Subscription, request.Token, DeliveryAction.Ack), now, position);
-        var effects = ApplyMutations(tx, principal, request.Subscription.Source.Partition, request.Effects, now, position);
-        var receipt = ack with
-        {
-            Mutations = effects.Concat(ack.Mutations).ToImmutableArray()
-        };
-        tx.PutRecord(inboxKey, new InboxRecord(fingerprint, receipt));
-        return new(receipt, false, receipt.Token);
     }
     /// <summary>Reads an authorized subscription and its current checkpoint state.</summary>
     /// <param name="principalId">Persisted principal identifier.</param>

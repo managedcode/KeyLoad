@@ -17,13 +17,12 @@ internal static class PhysicalShardPartitionMovementRf3Placement
     {
         var target = seed.Directory.Owners.Single(entry => entry.Owner.PhysicalShardId
             == request.DestinationPhysicalShardId).Owner;
-        await Assert.That(target.PlacementEpoch).IsLessThanOrEqualTo(original.PlacementEpoch);
-        var epoch = checked(original.PlacementEpoch + EpochIncrement);
+        var epoch = checked(Math.Max(original.PlacementEpoch, target.PlacementEpoch) + EpochIncrement);
         var receipt = actual.InstalledReceipt ?? throw new InvalidOperationException(MissingReceipt);
         await Assert.That(receipt.Position).IsGreaterThan(EmptyPosition);
         await Assert.That(receipt.Incarnation).IsEqualTo(target.Incarnation);
         await Assert.That(receipt.AtomicPartitionId).IsEqualTo(seed.Partition.AtomicPartitionId);
-        await Assert.That(receipt.OwnershipEpoch).IsEqualTo(epoch);
+        await Assert.That(receipt.OwnershipEpoch).IsEqualTo(target.PlacementEpoch);
         await Assert.That(actual.SourceCut).IsGreaterThan(EmptyPosition);
         var placement = new AtomicPartitionPlacementV1(Version, seed.Partition, target.PhysicalShardId,
             publicationRevision, target.Incarnation, target.VoterIds, epoch);

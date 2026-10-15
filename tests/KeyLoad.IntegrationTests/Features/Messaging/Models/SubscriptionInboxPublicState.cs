@@ -6,6 +6,10 @@ internal sealed record SubscriptionInboxPublicState(ReceiveSubscriptionRequest F
     ReceiveSubscriptionRequest Current, ReceiveSubscriptionResult CurrentResult,
     SubscriptionProcessingRequest Conflict, string ConflictProblem, EventSourcePage Source)
 {
+    internal SubscriptionProcessingRequest? FailedProcessing
+    {
+        get; init;
+    }
     internal List<(SubscriptionDeliveryCommand Request, CommitReceipt Receipt)> Acknowledgements { get; } = [];
     internal SubscriptionProcessingRequest? Repair
     {

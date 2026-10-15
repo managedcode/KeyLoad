@@ -53,11 +53,11 @@ internal static class QueryCapabilityCatalog
     private const string DecimalProfile = "TSQL.DecimalScalar.v1";
     private const string NationalStringProfile = "TSQL.NationalStringLiteral.v1";
     private static readonly ImmutableArray<int> SupportedVersions = [Q1Version, Q2Version];
-    internal static QueryCapabilityManifest Create(DatabaseLimits limits) => new(
+    internal static QueryCapabilityManifest Create(DatabaseLimits limits, QueryExecutionOptions execution) => new(
         ManifestVersion, ManifestVersion, NativeDialect, Scope, ScalarType, MissingSemantics,
         [SqlSurface, JsonSurface, CSharpSurface],
         [ComparisonCapability, AndCapability, OrCapability, NotCapability, InCapability, NotInCapability, BetweenCapability, NotBetweenCapability, NullCapability, NotNullCapability, DistinctCapability, NotDistinctCapability, AstMissingCapability],
-        limits.MaxResults, limits.MaxScanRecords, limits.MaxQueryBytes, limits.MaxQueryDepth, true, true,
+        limits.MaxResults, limits.MaxScanRecords, QueryResultBudgetPolicy.Resolve(limits, execution), limits.MaxQueryDepth, true, true,
         limits.MaxQueryReadBytes,
         [Q1Profile, FeedProfile, LiveProfile, ModelProfile, JoinProfile, LeftPredicateProfile, QueueJoinProfile, EventJoinProfile, Q1OffsetProfile, Q2OffsetProfile, AstNullOrderingProfile, NativeSyntaxProfile, TopProfile, OffsetFetchProfile, DistinctProfile, AllProfile, AliasProfile, DefaultJoinProfile, OrdinalProfile, NamedParameterProfile, WireSlotProfile, DecimalProfile, NationalStringProfile, GraphSearchProfile],
         SupportedVersions, SupportedVersions);

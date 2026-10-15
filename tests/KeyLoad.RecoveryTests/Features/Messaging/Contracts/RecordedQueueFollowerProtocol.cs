@@ -1,0 +1,51 @@
+namespace KeyLoad.RecoveryTests.Features.Messaging;
+
+internal static class RecordedQueueFollowerProtocol
+{
+    internal const string Queue = "recorded-clock-queue";
+    internal const string Message = "original-scheduled";
+    internal const string OriginalPartitionKey = "original";
+    internal const string HealthyMessage = "healthy";
+    internal const string Payload = "{\"work\":92}";
+    internal const string Headers = "{}";
+    internal const string CounterFamily = "queue-counters";
+    internal const string MetadataFamily = "message-meta";
+    internal const string BodyFamily = "message-body";
+    internal const string ReadyFamily = "ready";
+    internal const string ScheduledFamily = "scheduled";
+    internal const string LeasedFamily = "lease";
+    internal const string PendingFamily = "queue-pending-dead-letter";
+    internal const string ParkedFamily = "queue-dead-letter-order";
+    internal const string DeadLetterFamily = "dead-letter";
+    internal const string QueueOrderFamily = "queue-order";
+    internal const string InboxFamily = "inbox";
+    internal const string DeadlineMutation = "advanceQueueDeadline";
+    internal const string EnqueueMutation = "enqueue";
+    internal const int ImageRecords = 4_096;
+    internal const int NoUsage = 0;
+    internal const int PlacementVersion = 1;
+    internal const int NoAttempts = 0;
+    internal const long NoLeaseVersion = 0;
+    internal const long NoReadySequence = 0;
+    internal const long SingleMessageCount = 1;
+    internal const long InitialDeliveryGeneration = 1;
+    internal const long HealthyReadySequence = 2;
+    internal const long HealthyClaimedStateVersion = 2;
+    internal const long HealthyAckedStateVersion = 3;
+    internal const string StaleDeadlineDetail = "The queue deadline condition no longer matches.";
+    internal const long NextIndexStep = 1;
+    internal const long InitialStateVersion = 1;
+    internal const long PromotedStateVersion = 2;
+    internal const long ClaimedStateVersion = 3;
+    internal const long RenewedStateVersion = 4;
+    internal const long AckedStateVersion = 5;
+    internal const long InitialLeaseVersion = 1;
+    internal const long FirstReadySequence = 1;
+    internal const int FirstAttempt = 1;
+    internal const int LeaseSeconds = 30;
+    internal static readonly TimeSpan ScheduleLead = TimeSpan.FromSeconds(10);
+    internal static readonly TimeSpan ClockFault = TimeSpan.FromDays(1);
+    internal static readonly TimeSpan OperationBound = TimeSpan.FromSeconds(90);
+    internal static PartitionRef Partition { get; } = new("clock-tenant", "clock-db", "clock-domain", OriginalPartitionKey);
+    internal static QueueLaneRef Lane { get; } = new(Partition, Queue);
+}

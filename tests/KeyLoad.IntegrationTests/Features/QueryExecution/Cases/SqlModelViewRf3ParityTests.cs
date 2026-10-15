@@ -1,5 +1,7 @@
 using KeyLoad.Client;
+using KeyLoad.IntegrationTests.Features.Authorization;
 using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
@@ -15,11 +17,19 @@ internal sealed class SqlModelViewRf3ParityTests(ClusterFixture fixture)
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
         var sdk = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         var scenario = await SqlModelViewRf3Scenario.CreateAsync(sdk, deadline.Token);
-        await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3,
-            fixture.AdminKey, deadline.Token);
-
-        await AssertEventParityAsync(sdk, mcp, scenario, deadline.Token);
-        await AssertQueueParityWithoutEffectsAsync(sdk, mcp, scenario, deadline.Token);
+        var failures = new List<Exception>();
+        await ServerFailureObserver.ObserveAsync(async () =>
+        {
+            await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3,
+                fixture.AdminKey, deadline.Token);
+            await ServerFailureObserver.ObserveAsync(async () =>
+            {
+                await AssertEventParityAsync(sdk, mcp, scenario, deadline.Token);
+                await AssertQueueParityWithoutEffectsAsync(sdk, mcp, scenario, deadline.Token);
+            }, failures);
+        }, failures);
+        await ServerFailureObserver.ObserveAsync(() => ModelRootRf3Flow.RunAsync(fixture, scenario.Partition, deadline.Token), failures);
+        ServerFailureObserver.ThrowIfAny(failures);
     }
 
     private static async Task AssertEventParityAsync(KeyLoadClient sdk, McpOfficialClient mcp,
@@ -65,13 +75,17 @@ internal sealed class SqlModelViewRf3ParityTests(ClusterFixture fixture)
     private static async Task AssertExplainAsync(KeyLoadClient sdk, McpOfficialClient mcp,
         SqlModelViewRf3Scenario scenario, CancellationToken cancellationToken)
     {
-        var request = scenario.QueueSql() with
+        var original = scenario.QueueAst();
+        var request = original with
         {
-            Sql = "EXPLAIN " + scenario.QueueSql().Sql
+            Query = original.Query with
+            {
+                Explain = true
+            }
         };
-        var page = await McpCallerAssertions.SdkSuccessAsync(await sdk.QueryAsync(request, cancellationToken));
+        var page = await McpCallerAssertions.SdkSuccessAsync(await sdk.QueryAstAsync(request, cancellationToken));
         var mcpPage = await McpCallerAssertions.SuccessAsync<QueryPage>(await mcp.CallAsync(
-            McpCallerTools.QueryExecute, request, cancellationToken));
+            McpCallerTools.QueryAst, request, cancellationToken));
         await Assert.That(page.Rows.Length).IsEqualTo(1);
         await Assert.That(page.AccessPath).IsEqualTo("model-scan:queue-messages");
         await SqlRf3Protocol.EqualAsync(page.Rows, mcpPage.Value.Rows);

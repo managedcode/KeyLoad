@@ -92,6 +92,7 @@ internal static class CrashHostApplication
             SampleRetentionCrashScenario.Mode => SampleRetentionCrashScenario.RunAsync(directory, store, boundary),
             EventProjectionCrashScenario.Mode => EventProjectionCrashScenario.RunAsync(directory, store, boundary),
             QueueDeadlineCrashProtocol.Mode => QueueDeadlineCrashScenario.RunAsync(directory, store, boundary),
+            QueueEnqueueCrashProtocol.Mode => QueueEnqueueCrashScenario.RunAsync(directory, store, boundary),
             QueueOrderedRetryCrashProtocol.Mode => QueueOrderedRetryCrashScenario.RunAsync(directory, store, boundary),
             QueueClaimAckCrashProtocol.ClaimMode => QueueClaimAckCrashScenario.RunAsync(directory, store, boundary, false),
             QueueClaimAckCrashProtocol.AckMode => QueueClaimAckCrashScenario.RunAsync(directory, store, boundary, true),

@@ -1,8 +1,9 @@
 using KeyLoad.Client;
-using KeyLoad.Server;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
+using KeyLoad.Server;
+
 namespace KeyLoad.IntegrationTests.Features.TimeSeries;
 
 internal static class TimeSeriesResourceTagPolicyRf3Assertions

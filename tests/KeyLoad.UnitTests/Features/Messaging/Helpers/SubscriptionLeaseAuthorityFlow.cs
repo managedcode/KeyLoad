@@ -1,6 +1,5 @@
 using System.Text.Json;
 using KeyLoad.Core;
-using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.UnitTests.Features.ResourceExecution;
 using TUnit.Assertions.Enums;
@@ -8,7 +7,8 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 
 internal static class SubscriptionLeaseAuthorityFlow
 {
-    internal static async Task RunAsync(DeliveryAction action, CancellationToken token)
+    internal static async Task RunAsync(DeliveryAction action, CancellationToken token,
+        SubscriptionDeliveryAuthorityFault fault = SubscriptionDeliveryAuthorityFault.ForeignPosition)
     {
         using var fixture = new TestDatabase();
         fixture.Configure("topic", ResourceKind.Topic);
@@ -33,7 +33,11 @@ internal static class SubscriptionLeaseAuthorityFlow
         var row = NativeSerialization.Deserialize<GroupDelivery>(saved);
         var originalBytes = QueueWholeFlowStorage.Bytes(fixture.Store);
         var originalPosition = fixture.Store.Position;
-        fixture.Store.Commit((tx, _) => { tx.PutRecord(key, row with { Position = 99 }); return true; });
+        fixture.Store.Commit((tx, _) =>
+        {
+            SubscriptionDeliveryAuthorityFaults.Stage(tx, key, row, fault);
+            return true;
+        });
         await SubscriptionLeaseAuthorityAssertions.RefusalAsync(fixture.Database, fixture.Store, operation, original, attempt);
         var bytes = QueueWholeFlowStorage.Bytes(fixture.Store);
         var position = fixture.Store.Position;
@@ -46,7 +50,11 @@ internal static class SubscriptionLeaseAuthorityFlow
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(first, bytes, position, identity);
         await SubscriptionLeaseAuthorityAssertions.RefusalAsync(db, first, operation, original, attempt);
         await SubscriptionCheckpointAuthorityAssertions.SourceAsync(db, first, group.Source, source);
-        first.Commit((tx, _) => { tx.Put(key, saved); return true; });
+        first.Commit((tx, _) =>
+        {
+            tx.Put(key, saved);
+            return true;
+        });
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(first, originalBytes, originalPosition + 2, identity);
         await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(db.Apply(operation), original);
         await CompleteAsync(db, first, fixture.Directory, group, action, row, key, attempt,

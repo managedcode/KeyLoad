@@ -49,7 +49,8 @@ internal sealed class QueryCandidateReader(DatabaseEngine database, IKeyValueVie
         foreach (var index in resource.Indexes.OrderByDescending(item => item.Fields.Length))
         {
             var prefixFields = index.Fields.TakeWhile(equality.ContainsKey).ToArray();
-            if (prefixFields.Length == EmptyElementCount)
+            if (prefixFields.Length == EmptyElementCount
+                || prefixFields.Length < index.Fields.Length && (!index.IncludeNull || !index.IncludeMissing))
             {
                 continue;
             }

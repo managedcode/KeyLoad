@@ -23,7 +23,7 @@ internal static class ZoneTreeCatalogBackupPublication
         try
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var position = ZoneTreeBackupRestoreFiles.Create(runtime, staging);
+            var position = ZoneTreeBackupRestoreFiles.Create(runtime, staging, cancellationToken);
             var digest = ZoneTreeCatalogBackupMetadataFile.Write(runtime, staging, position, metadata);
             var result = new NativeCatalogBackupCapture(position, metadata, digest);
             requireCaptured?.Invoke(result);

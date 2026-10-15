@@ -27,6 +27,14 @@ internal sealed class TwoRf3MembershipCapacity
         await ReconfigureAsync(wave, () => wave.movementMaxFrameBytes = maxFrameBytes, cancellationToken).ConfigureAwait(false);
     }
 
+    internal async Task ReconfigureMovementTargetReadBudgetAsync(TwoRf3MembershipWave wave,
+        long maximumBytes, CancellationToken cancellationToken)
+    {
+        new DatabaseLimits { MaxQueryReadBytes = maximumBytes }.Validate();
+        await ReconfigureAsync(wave, () => wave.movementTargetReadBytes = maximumBytes,
+            cancellationToken).ConfigureAwait(false);
+    }
+
     internal Task RestartJoinedAsync(TwoRf3MembershipWave wave, CancellationToken cancellationToken)
         => ReconfigureAsync(wave, null, cancellationToken);
 

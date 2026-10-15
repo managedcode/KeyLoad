@@ -47,6 +47,7 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
     internal string? remoteTransferPrincipalId;
     internal int? movementMaxBatchBytes;
     internal int? movementMaxFrameBytes;
+    internal long? movementTargetReadBytes;
     internal RequestCqrsProbeFixture? queryControls;
     internal bool nativeBlobWireProbeSelected;
     internal NativeBlobWireProbeFixture? nativeBlobWireControls;
